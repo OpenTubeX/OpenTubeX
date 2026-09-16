@@ -17,6 +17,8 @@ Maximize: 最大化
 Restore: 还原
 Close Tab: 关闭标签页
 Close Confirmation:
+  Background Sync Warning: 退出将停止后台订阅刷新。
+  Hide Window: 隐藏窗口
   Title: 要退出 OpenTubeX 吗？
   Message: 确定要退出 OpenTubeX 吗？
   Quit: 退出

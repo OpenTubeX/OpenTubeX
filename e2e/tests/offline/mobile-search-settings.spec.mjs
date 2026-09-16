@@ -99,6 +99,9 @@ for (const uiScale of [100, 125]) {
       for (const listType of ['grid', 'list']) {
         await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateListType', value), listType)
         await expect(page.locator('.ft-list-item').first()).toHaveClass(new RegExp(listType))
+        if (listType === 'list') {
+          await expect(page.locator('.autoGrid > .list').first()).toHaveCSS('min-block-size', '131px')
+        }
         const titleBounds = await title.boundingBox()
         const channelBounds = await channel.boundingBox()
         expect(channelBounds.y).toBeGreaterThanOrEqual(titleBounds.y + titleBounds.height - 0.01)
@@ -106,6 +109,10 @@ for (const uiScale of [100, 125]) {
         expect(await page.locator('.ft-list-item .iconButton, .ft-list-item .deArrowToggleButton').evaluateAll(elements => elements.every(element => {
           const bounds = element.getBoundingClientRect()
           return bounds.width >= 47.99 && bounds.height >= 47.99
+        }))).toBe(true)
+        expect(await page.locator('.ft-list-item .title, .ft-list-item a.channelName').evaluateAll(elements => elements.every(element => {
+          const target = getComputedStyle(element, '::before')
+          return parseFloat(target.width) >= 47.99 && parseFloat(target.height) >= 47.99
         }))).toBe(true)
       }
       await page.locator('.deArrowToggleButton').click({ position: { x: 4, y: 24 } })
@@ -159,5 +166,58 @@ test.describe('mobile channel search metadata', () => {
     expect(mobileLayout.metadataGap).toBeLessThanOrEqual(desktopLayout.metadataGap + 1)
     expect(mobileLayout.handleCenterDifference).toBeLessThanOrEqual(1)
     expect(mobileLayout.subscriberCenterDifference).toBeLessThanOrEqual(1)
+  })
+
+  test('keeps mixed grid rows aligned without reserved empty card height', async ({ page }) => {
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const playlist = index => ({
+        type: 'playlist',
+        title: `Playlist ${index}`,
+        playlistId: `PL-mobile-${index}`,
+        playlistThumbnail: '',
+        author: 'Channel',
+        authorId: 'UCaaaaaaaaaaaaaaaaaaaaaa',
+        videoCount: index,
+        videos: []
+      })
+      store.commit('addToSessionSearchHistory', {
+        query: 'mixed',
+        data: [{
+          type: 'channel',
+          dataSource: 'local',
+          id: 'UCaaaaaaaaaaaaaaaaaaaaaa',
+          name: 'A deliberately long channel title that wraps onto several lines',
+          thumbnail: '',
+          handle: '@a-very-long-channel-handle-that-wraps',
+          subscribers: 1234567,
+          descriptionShort: ''
+        }, playlist(1), playlist(2), playlist(3)],
+        searchSettings: { prioritize: 'relevance', time: '', type: 'all', duration: '', features: [] },
+        nextPageRef: null,
+        hasMoreResults: false,
+        apiUsed: 'local'
+      })
+    })
+    await page.locator(sel.searchInput).fill('mixed')
+    await page.locator(sel.searchInput).press('Enter')
+    await page.setViewportSize({ width: 504, height: 900 })
+
+    const cards = page.locator('.autoGrid > .grid')
+    await expect(cards).toHaveCount(4)
+    const layout = await cards.evaluateAll(elements => {
+      return elements.map(element => {
+        const card = element.querySelector('.ft-list-item')
+        const content = [...card.children].map(child => child.getBoundingClientRect())
+        const bounds = element.getBoundingClientRect()
+        return {
+          left: bounds.left,
+          top: bounds.top,
+          reservedHeight: bounds.bottom - Math.max(...content.map(rect => rect.bottom))
+        }
+      })
+    })
+    expect(Math.abs(layout[2].top - layout[3].top)).toBeLessThanOrEqual(1)
+    expect(Math.max(layout[2].reservedHeight, layout[3].reservedHeight)).toBeLessThanOrEqual(22)
   })
 })

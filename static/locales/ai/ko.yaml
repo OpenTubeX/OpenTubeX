@@ -17,6 +17,8 @@ Maximize: 최대화
 Restore: 복원
 Close Tab: 탭 닫기
 Close Confirmation:
+  Background Sync Warning: 종료하면 백그라운드 구독 새로고침이 중지됩니다.
+  Hide Window: 창 숨기기
   Title: OpenTubeX를 종료하시겠습니까?
   Message: OpenTubeX를 종료하시겠습니까?
   Quit: 종료

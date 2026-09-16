@@ -17,6 +17,8 @@ Maximize: Teljes méret
 Restore: Visszaállítás
 Close Tab: Lap bezárása
 Close Confirmation:
+  Background Sync Warning: A kilépés leállítja a feliratkozások háttérben történő frissítését.
+  Hide Window: Ablak elrejtése
   Title: Kilép az OpenTubeX alkalmazásból?
   Message: Biztosan kilép az OpenTubeX alkalmazásból?
   Quit: Kilépés

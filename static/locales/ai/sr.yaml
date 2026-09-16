@@ -17,6 +17,8 @@ Maximize: Увећај
 Restore: Врати
 Close Tab: Затвори картицу
 Close Confirmation:
+  Background Sync Warning: Излазак ће зауставити освежавање претплата у позадини.
+  Hide Window: Сакриј прозор
   Title: Изаћи из програма OpenTubeX?
   Message: Желите ли заиста да изађете из програма OpenTubeX?
   Quit: Изађи

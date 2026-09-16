@@ -17,6 +17,8 @@ Maximize: Agrandir
 Restore: Restaurer
 Close Tab: Fermer l’onglet
 Close Confirmation:
+  Background Sync Warning: Quitter arrêtera l'actualisation des abonnements en arrière-plan.
+  Hide Window: Masquer la fenêtre
   Title: Quitter OpenTubeX ?
   Message: Voulez-vous vraiment quitter OpenTubeX ?
   Quit: Quitter

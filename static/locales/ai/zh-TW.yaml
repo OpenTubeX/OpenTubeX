@@ -17,6 +17,8 @@ Maximize: 最大化
 Restore: 還原
 Close Tab: 關閉分頁
 Close Confirmation:
+  Background Sync Warning: 結束程式將停止背景訂閱重新整理。
+  Hide Window: 隱藏視窗
   Title: 要結束 OpenTubeX 嗎？
   Message: 確定要結束 OpenTubeX 嗎？
   Quit: 結束

@@ -17,6 +17,8 @@ Maximize: Maximera
 Restore: Återställ
 Close Tab: Stäng flik
 Close Confirmation:
+  Background Sync Warning: Om du avslutar stoppas uppdateringen av prenumerationer i bakgrunden.
+  Hide Window: Dölj fönster
   Title: Avsluta OpenTubeX?
   Message: Vill du avsluta OpenTubeX?
   Quit: Avsluta

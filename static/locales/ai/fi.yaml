@@ -17,6 +17,8 @@ Maximize: Suurenna
 Restore: Palauta
 Close Tab: Sulje välilehti
 Close Confirmation:
+  Background Sync Warning: Lopettaminen pysäyttää tilausten päivittämisen taustalla.
+  Hide Window: Piilota ikkuna
   Title: Lopetetaanko OpenTubeX?
   Message: Haluatko varmasti lopettaa OpenTubeX-sovelluksen?
   Quit: Lopeta

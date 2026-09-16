@@ -24,7 +24,7 @@
 /* Equal-width digits keep the value stable as the slider moves. */
 .label {
   min-inline-size: 0;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
   font-variant-numeric: tabular-nums;
 }
 

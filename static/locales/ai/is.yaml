@@ -17,6 +17,8 @@ Maximize: Hámarka
 Restore: Endurheimta
 Close Tab: Loka flipa
 Close Confirmation:
+  Background Sync Warning: Ef þú hættir stöðvast uppfærsla áskrifta í bakgrunni.
+  Hide Window: Fela glugga
   Title: Hætta í OpenTubeX?
   Message: Viltu örugglega hætta í OpenTubeX?
   Quit: Hætta

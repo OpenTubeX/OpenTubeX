@@ -1785,3 +1785,6 @@ App Icon:
 Tray:
   Hide All Windows: "Скрыть все окна"
   Show All Windows: "Показать все окна"
+Close Confirmation:
+  Background Sync Warning: Выход из приложения остановит фоновое обновление подписок.
+  Hide Window: Скрыть окно

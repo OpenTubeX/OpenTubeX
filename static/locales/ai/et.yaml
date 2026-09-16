@@ -17,6 +17,8 @@ Maximize: Maksimeeri
 Restore: Taasta
 Close Tab: Sulge vahekaart
 Close Confirmation:
+  Background Sync Warning: Väljumisel peatub tellimuste taustal värskendamine.
+  Hide Window: Peida aken
   Title: Kas väljuda OpenTubeXist?
   Message: Kas soovite kindlasti OpenTubeXist väljuda?
   Quit: Välju

@@ -1,5 +1,26 @@
 import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
 
+const getMidWordLineBreaks = locator => locator.evaluateAll(elements => elements.flatMap(element => {
+  const characters = []
+  const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT)
+  let node
+  while ((node = walker.nextNode()) !== null) {
+    for (let index = 0; index < node.data.length; index++) {
+      const range = document.createRange()
+      range.setStart(node, index)
+      range.setEnd(node, index + 1)
+      characters.push({ character: node.data[index], top: range.getBoundingClientRect().top })
+    }
+  }
+  return characters.slice(1).flatMap((current, index) => {
+    const previous = characters[index]
+    return /\p{L}/u.test(previous.character) && /\p{L}/u.test(current.character) &&
+      Math.abs(previous.top - current.top) > 1
+      ? [`${element.textContent.trim().replaceAll(/\s+/g, ' ')}: ${previous.character}|${current.character}`]
+      : []
+  })
+}))
+
 for (const uiScale of [100, 125]) {
   test.describe(`mobile settings regressions at ${uiScale}%`, () => {
     test.use({ seed: { settings: { uiScale, useQuickPlaybackSpeedBar: true, defaultViewingMode: 'theater' } } })
@@ -111,9 +132,13 @@ test.describe('German playback settings on a narrow screen', () => {
       back.boundingBox(),
       breadcrumb.boundingBox()
     ])
+    const actionsBounds = await header.locator('.settingsHeaderActions').boundingBox()
 
     expect(Math.abs(
       backBounds.y + backBounds.height / 2 - breadcrumbBounds.y - breadcrumbBounds.height / 2
+    )).toBeLessThanOrEqual(1)
+    expect(Math.abs(
+      backBounds.y + backBounds.height / 2 - actionsBounds.y - actionsBounds.height / 2
     )).toBeLessThanOrEqual(1)
     await expect.poll(() => breadcrumb.evaluate(element => (
       element.scrollWidth <= element.clientWidth + 1
@@ -124,6 +149,14 @@ test.describe('German playback settings on a narrow screen', () => {
         getComputedStyle(element).textOverflow === 'ellipsis'
       ))
     ))).toBe(true)
+
+    await page.setViewportSize({ width: 375, height: 812 })
+    const [narrowBackBounds, narrowActionsBounds] = await Promise.all([
+      back.boundingBox(),
+      header.locator('.settingsHeaderActions').boundingBox()
+    ])
+    expect(narrowActionsBounds.y).toBeGreaterThanOrEqual(narrowBackBounds.y + narrowBackBounds.height - 1)
+    expect(narrowActionsBounds.x).toBeLessThanOrEqual(narrowBackBounds.x + 1)
   })
 
   test('keeps playback controls inside the content gutter', async ({ page }) => {
@@ -154,13 +187,76 @@ test.describe('German playback settings on a narrow screen', () => {
         horizontalScrollbarVisible: element.querySelector('.os-scrollbar-horizontal')
           ?.classList.contains('os-scrollbar-visible') ?? false,
         labelEndGutter: contentBounds.right - labelBounds.right,
-        buttonWidth: buttonBounds.width
+        buttonWidth: buttonBounds.width,
+        buttonHeight: buttonBounds.height
       }
     })
 
     expect(metrics.horizontalScrollRange).toBeLessThanOrEqual(0)
     expect(metrics.horizontalScrollbarVisible).toBe(false)
     expect(metrics.labelEndGutter).toBeGreaterThanOrEqual(14)
-    expect(metrics.buttonWidth).toBeLessThanOrEqual(300)
+    expect(metrics.buttonWidth).toBeLessThanOrEqual(380)
+    expect(metrics.buttonHeight).toBeLessThanOrEqual(72)
+    expect(await getMidWordLineBreaks(playback.locator('.pure-material-slider .label'))).toEqual([])
+    expect(await playback.locator('.switch-label-text').evaluateAll(elements => (
+      elements.every(element => getComputedStyle(element).hyphens === 'auto')
+    ))).toBe(true)
+    expect(await getMidWordLineBreaks(playback.locator('.quickPlaybackSpeedToggle .switch-label-text'))).toEqual([])
+    expect(await getMidWordLineBreaks(customize)).toEqual([])
+  })
+})
+
+test.describe('desktop switch layout', () => {
+  test.use({
+    seed: {
+      settings: {
+        syncServerEnabled: true,
+        syncServerAutoSync: false,
+        syncServerSyncSettings: true,
+        syncServerToken: 'e2e-sync-token'
+      }
+    }
+  })
+
+  test('keeps switch labels and their indicators content-sized', async ({ page }) => {
+    await page.setViewportSize({ width: 1042, height: 630 })
+    const focus = await goToSettingsSection(page, 'focus')
+    const toggle = focus.locator('.switch-ctn').filter({ hasText: 'Show Player Controls' }).first()
+    const sync = toggle.getByRole('button', { name: 'Stop syncing this setting' })
+    await expect(sync).toBeVisible()
+
+    const metrics = await toggle.evaluate(element => {
+      const textElement = element.querySelector('.switch-label-text')
+      const indicator = element.querySelector('.syncedSettingIndicator').getBoundingClientRect()
+      const range = document.createRange()
+      range.selectNodeContents(textElement)
+      const textRects = Array.from(range.getClientRects())
+      return {
+        lineCount: textRects.length,
+        indicatorGap: indicator.left - Math.max(...textRects.map(rect => rect.right)),
+        labelMaxInlineSize: getComputedStyle(element.querySelector('.switch-label')).maxInlineSize
+      }
+    })
+
+    expect(metrics.indicatorGap).toBeLessThanOrEqual(8)
+    expect(metrics.lineCount).toBe(1)
+    expect(metrics.labelMaxInlineSize).toBe('none')
+
+    const appearance = await goToSettingsSection(page, 'appearance')
+    const tooltipToggle = appearance.locator('.switch-ctn').filter({ hasText: 'Always Show Scrollbars' })
+    const tooltipGaps = await tooltipToggle.evaluate(element => {
+      const textElement = element.querySelector('.switch-label-text')
+      const tooltip = element.querySelector('.tooltip').getBoundingClientRect()
+      const indicator = element.querySelector('.syncedSettingIndicator').getBoundingClientRect()
+      const range = document.createRange()
+      range.selectNodeContents(textElement)
+      const textRight = Math.max(...Array.from(range.getClientRects(), rect => rect.right))
+      return {
+        textToTooltip: tooltip.left - textRight,
+        tooltipToSync: indicator.left - tooltip.right
+      }
+    })
+    expect(tooltipGaps.textToTooltip).toBeLessThanOrEqual(8)
+    expect(tooltipGaps.tooltipToSync).toBeLessThanOrEqual(8)
   })
 })

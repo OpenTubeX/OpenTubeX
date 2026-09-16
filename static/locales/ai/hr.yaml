@@ -17,6 +17,8 @@ Maximize: Maksimiziraj
 Restore: Vrati
 Close Tab: Zatvori karticu
 Close Confirmation:
+  Background Sync Warning: Izlaskom će se zaustaviti osvježavanje pretplata u pozadini.
+  Hide Window: Sakrij prozor
   Title: Zatvoriti OpenTubeX?
   Message: Jeste li sigurni da želite zatvoriti OpenTubeX?
   Quit: Zatvori

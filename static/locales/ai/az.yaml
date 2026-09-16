@@ -17,6 +17,8 @@ Maximize: Böyüt
 Restore: Bərpa et
 Close Tab: Vərəqi bağla
 Close Confirmation:
+  Background Sync Warning: Tətbiqdən çıxmaq abunəliklərin fonda yenilənməsini dayandıracaq.
+  Hide Window: Pəncərəni gizlət
   Title: OpenTubeX-dən çıxılsın?
   Message: OpenTubeX-dən çıxmaq istədiyinizə əminsiniz?
   Quit: Çıx

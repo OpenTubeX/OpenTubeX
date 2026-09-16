@@ -992,3 +992,6 @@ History:
 Tray:
   Hide All Windows: "Ukryj wszystkie okna"
   Show All Windows: "Pokaż wszystkie okna"
+Close Confirmation:
+  Background Sync Warning: Zamknięcie aplikacji zatrzyma odświeżanie subskrypcji w tle.
+  Hide Window: Ukryj okno

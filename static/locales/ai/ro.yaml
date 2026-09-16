@@ -17,6 +17,8 @@ Maximize: Maximizează
 Restore: Restaurează
 Close Tab: Închide fila
 Close Confirmation:
+  Background Sync Warning: Ieșirea va opri actualizarea abonamentelor în fundal.
+  Hide Window: Ascunde fereastra
   Title: Închideți OpenTubeX?
   Message: Sigur doriți să închideți OpenTubeX?
   Quit: Închide

@@ -17,6 +17,8 @@ Maximize: Maximizatu
 Restore: Leheneratu
 Close Tab: Itxi fitxa
 Close Confirmation:
+  Background Sync Warning: Irtetez gero, harpidetzen atzeko planoko eguneratzea geldituko da.
+  Hide Window: Ezkutatu leihoa
   Title: OpenTubeX aplikaziotik irten?
   Message: Ziur OpenTubeX aplikaziotik irten nahi duzula?
   Quit: Irten

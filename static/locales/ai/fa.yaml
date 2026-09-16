@@ -17,6 +17,8 @@ Maximize: بیشینه کردن
 Restore: بازگردانی
 Close Tab: بستن زبانه
 Close Confirmation:
+  Background Sync Warning: با خروج، به‌روزرسانی اشتراک‌ها در پس‌زمینه متوقف می‌شود.
+  Hide Window: پنهان کردن پنجره
   Title: از OpenTubeX خارج می‌شوید؟
   Message: مطمئنید می‌خواهید از OpenTubeX خارج شوید؟
   Quit: خروج

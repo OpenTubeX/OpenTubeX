@@ -17,6 +17,8 @@ Maximize: Maximalizovat
 Restore: Obnovit
 Close Tab: Zavřít kartu
 Close Confirmation:
+  Background Sync Warning: Ukončením aplikace se zastaví aktualizace odběrů na pozadí.
+  Hide Window: Skrýt okno
   Title: Ukončit OpenTubeX?
   Message: Opravdu chcete ukončit OpenTubeX?
   Quit: Ukončit

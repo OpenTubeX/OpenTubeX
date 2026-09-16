@@ -17,6 +17,8 @@ Maximize: Büyüt
 Restore: Geri Yükle
 Close Tab: Sekmeyi Kapat
 Close Confirmation:
+  Background Sync Warning: Çıkmak, arka plandaki abonelik yenilemelerini durdurur.
+  Hide Window: Pencereyi Gizle
   Title: OpenTubeX'ten çıkılsın mı?
   Message: OpenTubeX'ten çıkmak istediğinizden emin misiniz?
   Quit: Çık

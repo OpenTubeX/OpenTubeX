@@ -16,6 +16,8 @@ Maximize: Maximise
 Restore: Restore
 Close Tab: Close Tab
 Close Confirmation:
+  Background Sync Warning: Quitting will stop background subscription refreshes.
+  Hide Window: Hide Window
   Title: Quit OpenTubeX?
   Message: Are you sure you want to quit OpenTubeX?
   Quit: Quit

@@ -17,6 +17,8 @@ Maximize: Maximaliseren
 Restore: Herstellen
 Close Tab: Tabblad sluiten
 Close Confirmation:
+  Background Sync Warning: Als je afsluit, stopt het vernieuwen van abonnementen op de achtergrond.
+  Hide Window: Venster verbergen
   Title: OpenTubeX afsluiten?
   Message: Weet je zeker dat je OpenTubeX wilt afsluiten?
   Quit: Afsluiten

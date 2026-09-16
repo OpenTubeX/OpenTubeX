@@ -17,6 +17,8 @@ Maximize: 最大化
 Restore: 元に戻す
 Close Tab: タブを閉じる
 Close Confirmation:
+  Background Sync Warning: 終了すると、バックグラウンドでの登録チャンネルの更新が停止します。
+  Hide Window: ウィンドウを非表示
   Title: OpenTubeXを終了しますか？
   Message: OpenTubeXを終了してもよろしいですか？
   Quit: 終了

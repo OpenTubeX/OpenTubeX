@@ -17,6 +17,8 @@ Maximize: Розгорнути
 Restore: Відновити
 Close Tab: Закрити вкладку
 Close Confirmation:
+  Background Sync Warning: Вихід із програми зупинить фонове оновлення підписок.
+  Hide Window: Сховати вікно
   Title: Вийти з OpenTubeX?
   Message: Ви справді хочете вийти з OpenTubeX?
   Quit: Вийти

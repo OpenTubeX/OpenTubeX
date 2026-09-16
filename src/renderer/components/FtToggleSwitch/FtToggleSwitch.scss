@@ -1,15 +1,19 @@
 /* Thanks to Guus Lieben for the Material Design Switch */
 
 .switch-ctn {
-  box-sizing: border-box;
-  min-inline-size: 0;
-  max-inline-size: 100%;
   margin-block: 20px;
   margin-inline: 16px;
   position: relative;
 
   &.compact {
     margin: 0;
+  }
+
+  @media (width <= 680px) {
+    box-sizing: border-box;
+    min-inline-size: 0;
+    max-inline-size: 100%;
+    inline-size: calc(100% - 32px);
   }
 }
 
@@ -25,7 +29,6 @@
 
 .switch-label {
   align-items: center;
-  box-sizing: border-box;
   cursor: pointer;
   display: inline-flex;
   font-weight: 500;
@@ -33,8 +36,6 @@
   padding-block: 12px;
   padding-inline: 49px 0;
   position: relative;
-  min-inline-size: 0;
-  max-inline-size: 100%;
   text-align: start;
 
   &::before,
@@ -84,13 +85,19 @@
   }
 
   @media (width <= 680px) {
-    max-inline-size: 250px;
+    box-sizing: border-box;
+    min-inline-size: 0;
+    inline-size: 100%;
+    max-inline-size: 100%;
   }
 }
 
 .switch-label-text {
-  min-inline-size: 0;
-  overflow-wrap: anywhere;
+  @media (width <= 680px) {
+    min-inline-size: 0;
+    hyphens: auto;
+    overflow-wrap: break-word;
+  }
 }
 
 .containsTooltip .switch-label-text {

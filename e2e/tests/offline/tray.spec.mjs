@@ -87,6 +87,40 @@ test('close-to-tray preserves tabs and Quit exits hidden windows', async ({ app,
   await closed
 })
 
+test('closing the last window confirms quitting when close-to-tray is disabled', async ({ app, page }) => {
+  await page.locator('.newTabButton').click()
+  await setting(page, 'updateConfirmCloseApp', true)
+  await setting(page, 'updateConfirmCloseWindowWithMultipleTabs', true)
+  await setting(page, 'updateHideToTrayOnClose', false)
+  await setting(page, 'updateEnableClosedAppSubscriptionRefresh', true)
+  await app.electronApp.evaluate(({ dialog }) => {
+    globalThis.testClosePrompts = []
+    globalThis.testClosePromptResolvers = []
+    dialog.showMessageBox = (_window, options) => new Promise(resolve => {
+      globalThis.testClosePrompts.push({
+        message: options.message,
+        detail: options.detail,
+        buttons: options.buttons
+      })
+      globalThis.testClosePromptResolvers.push(response => resolve({ response }))
+    })
+  })
+
+  await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].close())
+
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.testClosePrompts)).toEqual([{
+    message: 'Are you sure you want to quit OpenTubeX?',
+    detail: 'Quitting will stop background subscription refreshes.\n\nYou can re-enable this confirmation in Settings → General → Confirm before…',
+    buttons: ['Quit', 'Hide Window', 'Cancel', 'Never ask again']
+  }])
+  await app.electronApp.evaluate(() => globalThis.testClosePromptResolvers[0](1))
+  await expect.poll(() => windowVisible(app)).toBe(false)
+
+  const closed = app.electronApp.waitForEvent('close')
+  await app.electronApp.evaluate(({ app }) => app.exit())
+  await closed
+})
+
 test('native minimize hides to tray and the tray restores the window', async ({ app, page }) => {
   await captureTray(app, page)
   await setting(page, 'updateHideToTrayOnMinimize', true)

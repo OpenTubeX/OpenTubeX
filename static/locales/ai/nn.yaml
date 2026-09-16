@@ -17,6 +17,8 @@ Maximize: Maksimer
 Restore: Gjenopprett
 Close Tab: Lukk fana
 Close Confirmation:
+  Background Sync Warning: Viss du avsluttar, stoppar oppdatering av abonnement i bakgrunnen.
+  Hide Window: Gøym vindauge
   Title: Vil du avslutte OpenTubeX?
   Message: Er du sikker på at du vil avslutte OpenTubeX?
   Quit: Avslutt

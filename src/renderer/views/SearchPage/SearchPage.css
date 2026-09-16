@@ -37,6 +37,12 @@
   .card {
     inline-size: 100%;
   }
+
+  .card :deep(.autoGrid > .grid),
+  .card :deep(.ft-list-item.grid) {
+    block-size: auto;
+    min-block-size: 0;
+  }
 }
 
 @media (any-pointer: coarse), (width <= 680px) {
@@ -44,7 +50,21 @@
   .card :deep(.info a.channelName),
   .card :deep(.info button.channelName),
   .card :deep(.info a.handle) {
+    position: relative;
     border-radius: calc(5px * var(--ui-roundness));
+  }
+
+  .card :deep(.info .title::before),
+  .card :deep(.info a.channelName::before),
+  .card :deep(.info button.channelName::before),
+  .card :deep(.info a.handle::before) {
+    content: '';
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    inline-size: max(48px, 100%);
+    block-size: 48px;
+    transform: translate(-50%, -50%);
   }
 
   .card :deep(.info .title:active),
