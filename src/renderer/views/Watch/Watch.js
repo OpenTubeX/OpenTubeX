@@ -48,6 +48,7 @@ import {
   buildVTTFileLocally,
   formatDurationAsTimestamp,
   formatNumber,
+  getCachedRelativeTimeFormat,
   getCachedOembedTitle,
   getOembedTitle,
   getShortThumbnailUrl,
@@ -3262,9 +3263,9 @@ export default defineComponent({
             if (upcomingTimeLeft < 1) {
               this.upcomingTimeLeft = this.t('Video.Published.In less than a minute').toLowerCase()
             } else {
-              const locales = getLocalesWithFallback(this.currentLocale)
               // TODO a I18n entry for time format might be needed here
-              this.upcomingTimeLeft = new Intl.RelativeTimeFormat(locales).format(upcomingTimeLeft, timeUnit)
+              this.upcomingTimeLeft = getCachedRelativeTimeFormat(this.currentLocale)
+                .format(upcomingTimeLeft, timeUnit)
             }
 
             this.scheduleLiveReminderStartInvalidation()
