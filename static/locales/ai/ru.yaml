@@ -1584,6 +1584,7 @@ External link opening has been disabled in Settings → Privacy: Открыти�
 Screenshot Clipboard Success: Снимок экрана сохранён в буфер обмена
 Screenshot Clipboard Error: Не удалось скопировать снимок экрана в буфер обмена
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Открыть последнее закрытое окно
   Edit Hint: Выберите сочетание, затем нажмите новую комбинацию клавиш. Чтобы удалить назначение, нажмите Backspace или Delete.
   Change Shortcut: Изменить сочетание для действия «{action}»
   Press Shortcut: Нажмите сочетание клавиш…

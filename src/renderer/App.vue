@@ -3384,6 +3384,12 @@ function handleKeyboardShortcuts(event) {
       return
     }
 
+    if (matchesKeyboardShortcut(event, shortcuts.RESTORE_CLOSED_WINDOW)) {
+      event.preventDefault()
+      window.ftElectron.reopenClosedWindow()
+      return
+    }
+
     // Ctrl+Shift+T: Restore closed tab
     if (matchesKeyboardShortcut(event, shortcuts.RESTORE_CLOSED_TAB)) {
       event.preventDefault()

@@ -1616,6 +1616,7 @@ External link opening has been disabled in Settings → Privacy: פתיחת קי
 Screenshot Clipboard Success: צילום המסך נשמר בלוח
 Screenshot Clipboard Error: העתקת צילום המסך ללוח נכשלה
 KeyboardShortcutPrompt:
+  Reopen Closed Window: פתיחה מחדש של החלון האחרון שנסגר
   Edit Hint: בחרו קיצור דרך ולחצו על צירוף מקשים חדש. לחצו על Backspace או Delete כדי לבטל את ההקצאה.
   Change Shortcut: שינוי קיצור הדרך עבור {action}
   Press Shortcut: לחצו על קיצור דרך…

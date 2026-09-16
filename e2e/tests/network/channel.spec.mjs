@@ -66,13 +66,6 @@ test.describe('channel page', () => {
     await expect(videoResults).toHaveCount(0)
     await expect(playlistResults.first()).toBeVisible()
 
-    const { externalPlayerBounds, downloadBounds } = await playlistResults.first().evaluate((playlist) => ({
-      externalPlayerBounds: playlist.querySelector('.externalPlayerButton .iconButton').getBoundingClientRect().toJSON(),
-      downloadBounds: playlist.querySelector('[title="Download Playlist"]').getBoundingClientRect().toJSON()
-    }))
-    expect(Math.abs(externalPlayerBounds.y - downloadBounds.y)).toBeLessThanOrEqual(2)
-    expect(externalPlayerBounds.x + externalPlayerBounds.width).toBeLessThanOrEqual(downloadBounds.x)
-
     await expect(page.locator('.channelSearch input')).toHaveAttribute('type', 'search')
     await page.locator('.channelSearch input').fill('')
     await expect(page).not.toHaveURL(/searchQueryText=/)

@@ -1619,6 +1619,7 @@ External link opening has been disabled in Settings → Privacy: அமைப்
 Screenshot Clipboard Success: திரைப்பிடிப்பு இடைநிலைப் பலகையில் சேமிக்கப்பட்டது
 Screenshot Clipboard Error: திரைப்பிடிப்பை இடைநிலைப் பலகைக்கு நகலெடுக்க முடியவில்லை
 KeyboardShortcutPrompt:
+  Reopen Closed Window: கடைசியாக மூடிய சாளரத்தை மீண்டும் திறக்கவும்
   Edit Hint: குறுக்குவழியைத் தேர்ந்தெடுத்து, புதிய விசைச் சேர்க்கையை அழுத்தவும். ஒதுக்கீட்டை நீக்க Backspace அல்லது Delete-ஐ அழுத்தவும்.
   Change Shortcut: '{action} செயலுக்கான குறுக்குவழியை மாற்று'
   Press Shortcut: குறுக்குவழியை அழுத்தவும்…

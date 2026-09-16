@@ -1592,6 +1592,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: Popis za reprodukciju je na početku. Omogućite ponavljanje za nastavak reprodukcije
 External link opening has been disabled in Settings → Privacy: Otvaranje vanjskih poveznica onemogućeno je u Postavke → Privatnost
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Ponovno otvori posljednji zatvoreni prozor
   Edit Hint: Odaberite prečac, a zatim pritisnite novu kombinaciju tipki. Pritisnite Backspace ili Delete da biste uklonili dodjelu.
   Change Shortcut: Promijeni prečac za {action}
   Press Shortcut: Pritisnite prečac…

@@ -1571,6 +1571,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: 播放列表已到开头。启用循环可继续播放
 External link opening has been disabled in Settings → Privacy: 已在“设置”→“隐私”中禁用打开外部链接
 KeyboardShortcutPrompt:
+  Reopen Closed Window: 重新打开最近关闭的窗口
   Edit Hint: 选择一个快捷键，然后按下新的组合键。按 Backspace 或 Delete 可取消分配。
   Change Shortcut: 更改“{action}”的快捷键
   Press Shortcut: 请按快捷键…

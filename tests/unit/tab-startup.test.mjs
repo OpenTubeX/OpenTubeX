@@ -16,7 +16,9 @@ const hooks = registerHooks({
         export const settings = { _findOne: async () => null };
         export const tabSession = {
           saved: null,
-          async save(id, data) { this.saved = structuredClone(data); }
+          cleared: [],
+          async save(id, data) { this.saved = structuredClone(data); },
+          async clear(id) { this.cleared.push(id); }
         };
       `) }
     }
@@ -28,7 +30,7 @@ const { tabSession } = await import('../../src/datastores/handlers/base.js')
 hooks.deregister()
 const { createTabAvatarFileName } = await import('../../src/main/tabs/tabPreviewCache.js')
 
-function createManager(t) {
+function createManager(t, sessionId) {
   const window = new EventEmitter()
   window.id = 1
   window.webContents = Object.assign(new EventEmitter(), {
@@ -38,10 +40,11 @@ function createManager(t) {
   })
   window.setTitle = () => {}
   window.getBounds = () => ({ x: 0, y: 0, width: 1200, height: 800 })
+  window.getNormalBounds = window.getBounds
   window.isDestroyed = () => false
   window.isMaximized = () => false
   window.isFullScreen = () => false
-  const manager = new TabManager(window, 'app://bundle/index.html')
+  const manager = new TabManager(window, 'app://bundle/index.html', undefined, sessionId)
   manager._tabPreviewsEnabled = false
   t.after(() => {
     window.isDestroyed = () => true
@@ -61,6 +64,51 @@ function session(count) {
     activeTabId: `tab-${count - 1}`
   }
 }
+
+test('closed window snapshots restore tab state and groups without a disk save', async t => {
+  const manager = createManager(t)
+  const saved = session(3)
+  saved.tabs[0].isPinned = true
+  saved.tabs[1].isUnloaded = true
+  saved.tabs[1].color = 'blue'
+  saved.tabs[1].skipSilence = true
+  saved.groups = [{ id: 'research', name: 'Research', color: 'blue' }]
+  saved.tabs[1].groupId = 'research'
+  await manager.restoreFromData(saved, { restoreTabLoadState: true })
+  const snapshot = structuredClone(manager.getSessionDataForWindowClose())
+  assert.equal(snapshot.sessionId, manager.sessionId)
+  assert.deepEqual(snapshot.bounds, { x: 0, y: 0, width: 1200, height: 800, maximized: false, fullScreen: false })
+  const reopened = createManager(t, snapshot.sessionId)
+  await reopened.restoreFromData(snapshot, { restoreTabLoadState: true })
+  const restored = reopened.getSessionData()
+  assert.deepEqual(restored.tabs, snapshot.tabs)
+  assert.deepEqual(restored.groups, snapshot.groups)
+  assert.equal(restored.activeTabId, snapshot.activeTabId)
+  assert.equal(reopened.sessionId, manager.sessionId)
+})
+
+for (const count of [1, 3]) {
+  test(`closing all ${count} tabs retains the complete window snapshot`, async t => {
+    const manager = createManager(t)
+    await manager.restoreFromData(session(count), { restoreTabLoadState: true })
+    const before = structuredClone(manager.getSessionDataForWindowClose())
+    await manager.closeTabs([...manager.tabs.keys()])
+    assert.equal(manager.tabs.size, 0)
+    assert.deepEqual(manager.getSessionDataForWindowClose(), before)
+  })
+}
+
+test('failed closed-window restoration cleans up without deleting its persisted session', async t => {
+  const manager = createManager(t, 'closed-window-session')
+  manager.createTab({ route: '/history' })
+  tabSession.cleared = []
+  await manager.clearSession({ preservePersistedSession: true })
+  assert.deepEqual(tabSession.cleared, [])
+
+  tabSession.saved = null
+  await manager._saveSession()
+  assert.equal(tabSession.saved, null)
+})
 
 test('foreground tabs become selected before their content mounts', async t => {
   const manager = createManager(t)

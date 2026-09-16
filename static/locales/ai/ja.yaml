@@ -1571,6 +1571,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: プレイリストの先頭です。続けて再生するにはループを有効にしてください
 External link opening has been disabled in Settings → Privacy: 「設定」→「プライバシー」で外部リンクを開く機能が無効になっています
 KeyboardShortcutPrompt:
+  Reopen Closed Window: 最後に閉じたウィンドウを開き直す
   Edit Hint: ショートカットを選択し、新しいキーの組み合わせを押してください。割り当てを解除するにはBackspaceまたはDeleteを押します。
   Change Shortcut: '{action}のショートカットを変更'
   Press Shortcut: ショートカットを押してください…

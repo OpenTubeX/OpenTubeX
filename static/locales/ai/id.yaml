@@ -1579,6 +1579,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: Daftar putar berada di awal. Aktifkan pengulangan untuk melanjutkan pemutaran
 External link opening has been disabled in Settings → Privacy: Pembukaan tautan eksternal telah dinonaktifkan di Pengaturan → Privasi
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Buka kembali jendela yang terakhir ditutup
   Edit Hint: Pilih pintasan, lalu tekan kombinasi tombol baru. Tekan Backspace atau Delete untuk menghapus penetapannya.
   Change Shortcut: Ubah pintasan untuk {action}
   Press Shortcut: Tekan pintasan…

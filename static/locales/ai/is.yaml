@@ -1594,6 +1594,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: Þú ert við upphaf spilunarlistans. Kveiktu á endurtekningu til að halda spilun áfram
 External link opening has been disabled in Settings → Privacy: Slökkt hefur verið á opnun ytri tengla undir Stillingar → Persónuvernd
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Opna aftur síðasta lokaða glugga
   Edit Hint: Veldu flýtilykil og ýttu síðan á nýja lyklasamsetningu. Ýttu á Backspace eða Delete til að fjarlægja úthlutunina.
   Change Shortcut: Breyta flýtilykli fyrir {action}
   Press Shortcut: Ýttu á flýtilykil…

@@ -1620,6 +1620,7 @@ External link opening has been disabled in Settings → Privacy: A abertura de h
 Screenshot Clipboard Success: Captura de ecrã guardada na área de transferência
 Screenshot Clipboard Error: Não foi possível copiar a captura de ecrã para a área de transferência
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Reabrir a última janela fechada
   Edit Hint: Selecione um atalho e prima uma nova combinação de teclas. Prima Backspace ou Delete para remover a atribuição.
   Change Shortcut: Alterar atalho de {action}
   Press Shortcut: Prima o atalho…

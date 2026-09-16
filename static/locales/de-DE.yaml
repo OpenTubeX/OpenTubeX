@@ -2489,6 +2489,7 @@ Description:
   Video Tags: Video-Tags
   Games: Spiele
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Das zuletzt geschlossene Fenster wieder öffnen
   Keyboard Shortcuts: Tastenkombinationen
   Edit Hint: Wähle einen Kurzbefehl aus und drücke dann eine neue Tastenkombination. Drücke die Rücktaste oder Entf, um die Zuweisung aufzuheben.
   Change Shortcut: 'Tastenkombination für {action} ändern'

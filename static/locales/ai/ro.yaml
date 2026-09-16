@@ -1616,6 +1616,7 @@ External link opening has been disabled in Settings → Privacy: Deschiderea lin
 Screenshot Clipboard Success: Captura de ecran a fost salvată în clipboard
 Screenshot Clipboard Error: Copierea capturii de ecran în clipboard a eșuat
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Redeschide ultima fereastră închisă
   Edit Hint: Selectați o comandă rapidă, apoi apăsați o nouă combinație de taste. Apăsați Backspace sau Delete pentru a elimina atribuirea.
   Change Shortcut: Schimbă comanda rapidă pentru {action}
   Press Shortcut: Apăsați comanda rapidă…

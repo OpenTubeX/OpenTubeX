@@ -2124,6 +2124,7 @@ Keys:
   arrowright: Puščica desno
   arrowup: Puščica gor
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Znova odpri nazadnje zaprto okno
   Keyboard Shortcuts: Bližnjice na tipkovnici
   Edit Hint: Izberite bližnjico in nato pritisnite novo kombinacijo tipk. Če jo želite odstraniti, pritisnite Backspace ali Delete.
   Change Shortcut: Spremeni bližnjico za {action}

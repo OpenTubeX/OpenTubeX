@@ -14,8 +14,9 @@ test.use({
   }
 })
 
-for (const windowAction of ['close', 'hide']) {
-  test(`refreshes while windows ${windowAction}, imports on return, and quits fully`, async ({ app, page }) => {
+for (const windowAction of ['destroy', 'hide']) {
+  const windowState = windowAction === 'destroy' ? 'have no renderers' : 'hide'
+  test(`refreshes while windows ${windowState}, imports on return, and quits fully`, async ({ app, page }) => {
     await app.electronApp.evaluate(({ net }, body) => {
       const originalFetch = net.fetch
       net.fetch = (url, options) => {
@@ -52,7 +53,7 @@ for (const windowAction of ['close', 'hide']) {
     expect(saved.payload.entries[0].isUpcoming).toBe(false)
 
     let nextPage = page
-    if (windowAction === 'close') {
+    if (windowAction === 'destroy') {
       const reopened = app.electronApp.waitForEvent('window')
       await app.electronApp.evaluate(({ app }) => app.emit('activate'))
       nextPage = await reopened
@@ -100,7 +101,7 @@ test('normalizes Local API responses with every renderer closed', async ({ app, 
     profiles: [{ id: 'allChannels', channels: { videos: [channelId] } }],
     requests: createBackgroundSubscriptionRequests({ backend: 'local', useRss: false, fallback: false })
   })
-  await app.electronApp.evaluate(({ BrowserWindow }) => { for (const window of BrowserWindow.getAllWindows()) window.close() })
+  await app.electronApp.evaluate(({ BrowserWindow }) => { for (const window of BrowserWindow.getAllWindows()) window.destroy() })
   await expect.poll(() => app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().length)).toBe(0)
   const directory = path.join(app.userDataDir, 'background-subscription-results')
   let saved

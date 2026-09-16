@@ -1642,6 +1642,7 @@ External link opening has been disabled in Settings → Privacy: Отварањ�
 Screenshot Clipboard Success: Снимак екрана је копиран у привремену меморију
 Screenshot Clipboard Error: Копирање снимка екрана у привремену меморију није успело
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Поново отвори последњи затворени прозор
   Edit Hint: Изаберите пречицу, па притисните нову комбинацију тастера. Притисните Backspace или Delete да бисте поништили њену доделу.
   Change Shortcut: Промени пречицу за {action}
   Press Shortcut: Притисните пречицу…
