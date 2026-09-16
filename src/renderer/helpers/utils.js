@@ -1063,6 +1063,7 @@ export function getRelativeTimeFromDate(date, hideSeconds = false, useThirtyDayM
     timeUnit = 'year'
   }
 
+  const locales = getLocalesWithFallback(i18n.global.locale.value)
   // Using `Math.ceil` so that -1.x days ago displayed as 1 day ago
   // Notice that the value is turned to negative to be displayed as "ago"
   return getCachedRelativeTimeFormat(i18n.global.locale.value).format(Math.ceil(-timeDiffFromNow), timeUnit)

@@ -165,8 +165,6 @@ Subscriptions:
   Show Combined View: Tampilkan tampilan gabungan
   Newest First: Terbaru dahulu
   Oldest First: Terlama dahulu
-  Posts:
-    RSS Message: 'YouTube tidak menyediakan umpan RSS untuk postingan. Nonaktifkan pengaturan "{rssSetting}" untuk melihat postingan atau aktifkan pengaturan "{hideSetting}" untuk menyembunyikan tab ini.'
 Trending:
   Load Error: Trending tidak dapat dimuat.
   Unsupported Backend: Trending memerlukan Local API. Pilih Local API atau aktifkan backend cadangan.
@@ -181,8 +179,6 @@ User Playlists:
   Remove Saved Playlist: "Hapus playlist tersimpan"
   Load More Playlists: Muat Daftar Putar Lainnya
   Save to: Simpan ke…
-  Move Video to the Top: Pindahkan Video ke Paling Atas
-  Move Video to the Bottom: Pindahkan Video ke Paling Bawah
   Quick Bookmark Icon: Ikon markah cepat
   Custom Emoji: Emoji khusus
   Choose Image: Pilih gambar
@@ -555,10 +551,6 @@ Settings:
         Outline: Garis Tepi
         Drop Shadow: Bayangan Jatuh
       Reset: Atur Ulang Tampilan Takarir
-    Default Viewing Mode:
-      Full Window (Always On): Jendela Penuh (Selalu Aktif)
-      Full Screen (Always On): Layar Penuh (Selalu Aktif)
-      Tooltip: Sebagian besar mode tampilan bawaan hanya diterapkan pada awal setiap sesi menonton. Perubahan selama sesi berlaku hingga sesi berakhir. Mode tampilan yang selalu aktif diterapkan setiap kali Anda beralih ke video baru, terlepas dari perubahan mode tampilan saat menonton video sebelumnya.
     Auto Picture in Picture:
       Auto Picture in Picture: Masuk ke Gambar-dalam-Gambar secara otomatis
       On Tab Change: Saat berganti tab
@@ -863,22 +855,11 @@ Settings:
     Show Video Title: Tampilkan Judul Video
     Show Bottom Right Actions Dock: Tampilkan Dok Tindakan Kanan Bawah
     Paused Interface Hide Delay: Jeda Sebelum Menyembunyikan Antarmuka yang Dijeda
-    Add: Tambah
-    Remove: Hapus
   Data Settings:
     Data And Storage: Data & Penyimpanan
     Profile Directory: Direktori profil
     Open Profile Directory: Buka direktori profil
-    Settings File: Berkas Pengaturan
-    Import Settings: Impor Pengaturan
-    Export Settings: Ekspor Pengaturan
-    Settings Tooltip: Pengaturan khusus OS/pengguna atau eksperimental tidak dapat diekspor maupun diimpor (misalnya proksi, pemutar eksternal, folder tangkapan layar...)
     Invalid JSON row, skipping item: JSON pada baris {row} tidak valid, melewati item
-    All settings have been successfully imported: Semua pengaturan berhasil diimpor
-    All settings have been successfully exported: Semua pengaturan berhasil diekspor
-    Setting object has insufficient data, skipping item: Objek pengaturan tidak memiliki cukup data, melewati item
-    Unknown setting key: 'Kunci pengaturan tidak dikenal: {key}'
-    Non-transferable setting key: 'Kunci pengaturan tidak dapat ditransfer: {key}'
     Import subscriptions formats: 'Format yang didukung: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), cadangan LibreTube, atau ekspor FreeTube (.json)'
     Import history formats: 'Format yang didukung: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), cadangan LibreTube (.json)'
     Import playlists formats: 'Format yang didukung: OpenTubeX / FreeTube (.db)'
@@ -1044,8 +1025,6 @@ Settings:
     Unlocking: Membuka kunci…
   Search Settings: Cari pengaturan
   No Settings Found: Pengaturan tidak ditemukan
-  Experimental Settings:
-    Disable Hardware Acceleration: Nonaktifkan Akselerasi Perangkat Keras
 Tutorial:
   Skip: Lewati
   Next: Berikutnya
@@ -1092,7 +1071,6 @@ Profile:
   Use Initial: Gunakan Inisial
   The selected image could not be loaded: Gambar yang dipilih tidak dapat dimuat
   Theme Color: Warna Tema
-  Go To Profile Manager: Buka pengelola profil
 Channel:
   Subscription settings: Pengaturan langganan
   Failed to save subscription settings: Gagal menyimpan pengaturan saluran
@@ -1105,7 +1083,6 @@ Channel:
   Channel Name Unavailable: Nama saluran tidak tersedia
   Search Result Types: Jenis hasil pencarian
   All Results: Semua
-  View All: Lihat Semua
 Video:
   Mark as fully seen: Tandai sebagai sudah ditonton sepenuhnya
   AI-generated video summary: "Ringkasan video buatan AI"
@@ -1353,7 +1330,6 @@ Playlist:
   Playlist Preload Complete: "Video yang dipramuat: {count}."
   Playlist Preload Partial: "Berhasil mempramuat {preloaded} dari {requested} video. {failed} gagal dipramuat."
   Playlist Preload Pagination Failed: "Daftar putar lengkap tidak dapat dimuat, sehingga pramuat dibatalkan."
-  Unavailable videos are hidden: Video yang tidak tersedia disembunyikan
 Change Format:
   Local Video File: Berkas video lokal
   Local Audio File: Berkas audio lokal
@@ -1495,7 +1471,6 @@ Comments:
   Getting comment replies, please wait: Mengambil balasan komentar, harap tunggu
   Reload Comments: Muat Ulang Komentar
   Reply Count: '{replyCount} balasan'
-  Comments are turned off: Komentar dinonaktifkan
   YouTube did not provide advertised replies: YouTube menunjukkan bahwa komentar ini memiliki balasan, tetapi tidak menyediakannya. Balasan mungkin telah dihapus atau disembunyikan, jadi tombol balasan dihilangkan.
   Pinned by you: Disematkan oleh Anda
   A reply is pinned: Balasan disematkan
@@ -1601,8 +1576,6 @@ Tooltips:
     Scroll Speed: Mengubah jarak gulir gestur roda tetikus dan panel sentuh.
     Use Fixed Tab Width: Memberi setiap tab pada bilah tab horizontal lebar yang sama, bukan menyesuaikan lebar dengan judulnya.
     Use Grid Player Menu: Menyusun menu pengaturan pemutar video sebagai kisi ubin, bukan daftar baris.
-  Experimental Settings:
-    Disable Hardware Acceleration: Menonaktifkan akselerasi perangkat keras GPU. Dapat memperbaiki masalah grafis, tetapi kemungkinan akan menurunkan kinerja.
 The playlist is at the beginning. Enable loop to continue playing: Daftar putar berada di awal. Aktifkan pengulangan untuk melanjutkan pemutaran
 External link opening has been disabled in Settings → Privacy: Pembukaan tautan eksternal telah dinonaktifkan di Pengaturan → Privasi
 KeyboardShortcutPrompt:
@@ -1779,9 +1752,6 @@ Downloads:
     Subtitles Format: Takarir - {format}
 Channels:
   Load More Channels: "Muat lebih banyak channel"
-Search Bar:
-  Open Search Container: Buka kolom pencarian
-  Search: Cari
 Theme Discovery:
   Discover Themes: "Jelajahi tema"
   Refresh: "Muat ulang"

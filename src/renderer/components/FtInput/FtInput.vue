@@ -380,6 +380,7 @@ async function handleActionIconChange() {
     switch (result.urlType) {
       case 'video':
       case 'playlist':
+      case 'show':
       case 'search':
       case 'channel':
       case 'hashtag':
@@ -388,6 +389,7 @@ async function handleActionIconChange() {
       case 'subscriptions':
       case 'history':
       case 'userplaylists':
+      case 'clip':
         isYoutubeLink = true
         break
 

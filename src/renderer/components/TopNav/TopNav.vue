@@ -906,6 +906,36 @@ function handleWindowResize() {
   }
 }
 
+async function getClip(clipId) {
+  if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
+    try {
+      return await getClipInvidious(clipId)
+    } catch (err) {
+      console.error(err)
+
+      if (process.env.SUPPORTS_LOCAL_API && backendFallback.value) {
+        console.error(
+          'Error resolving clip URL.  Falling back to Local API'
+        )
+        return await getLocalClip(clipId)
+      }
+    }
+  } else {
+    try {
+      return await getLocalClip(clipId)
+    } catch (err) {
+      console.error(err)
+
+      if (backendFallback.value) {
+        console.error(
+          'Error resolving clip URL.  Falling back to Invidious API'
+        )
+        return await getClipInvidious(clipId)
+      }
+    }
+  }
+}
+
 onMounted(() => {
   previousWindowWidth = window.innerWidth
   if (window.innerWidth <= MOBILE_WIDTH_THRESHOLD) {
