@@ -6207,6 +6207,11 @@ export default defineComponent({
         videoQuality: this.normalizeVideoQuality(payload?.videoQuality) ||
           this.normalizeVideoQuality(this.currentVideoQuality) || null,
         loopEnabled: payload?.loopEnabled === true,
+        abRepeat: {
+          start: Number.isFinite(payload?.abRepeat?.start) ? payload.abRepeat.start : null,
+          end: Number.isFinite(payload?.abRepeat?.end) ? payload.abRepeat.end : null,
+          enabled: payload?.abRepeat?.enabled === true
+        },
         repeatStats: payload?.repeatStats ?? null
       }
     },

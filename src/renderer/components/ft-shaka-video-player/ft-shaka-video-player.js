@@ -4051,6 +4051,10 @@ export default defineComponent({
       if (typeof props.sabrReloadState?.loopEnabled === 'boolean') {
         video.value.loop = props.sabrReloadState.loopEnabled
       }
+      const restoredAbRepeat = props.sabrReloadState?.abRepeat
+      abRepeatStart.value = Number.isFinite(restoredAbRepeat?.start) ? restoredAbRepeat.start : null
+      abRepeatEnd.value = Number.isFinite(restoredAbRepeat?.end) ? restoredAbRepeat.end : null
+      abRepeatEnabled.value = restoredAbRepeat?.enabled === true
       repeatStatsTracker = createRepeatStatsTracker(video.value, stats => Object.assign(repeatStats, stats))
       repeatStatsTracker.restore(props.sabrReloadState?.repeatStats)
       repeatStatsLoopObserver = new MutationObserver(syncRepeatStatsMode)
@@ -11314,6 +11318,11 @@ export default defineComponent({
         playbackRate: getCurrentPlaybackRate(),
         videoQuality: getActiveVariantQuality(),
         loopEnabled: video.value?.loop === true,
+        abRepeat: {
+          start: abRepeatStart.value,
+          end: abRepeatEnd.value,
+          enabled: abRepeatEnabled.value
+        },
         repeatStats: repeatStatsTracker?.getState() ?? null
       }
     }
