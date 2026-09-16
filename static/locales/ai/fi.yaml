@@ -1614,6 +1614,7 @@ External link opening has been disabled in Settings → Privacy: Ulkoisten linkk
 Screenshot Clipboard Success: Kuvakaappaus tallennettiin leikepöydälle
 Screenshot Clipboard Error: Kuvakaappauksen kopiointi leikepöydälle epäonnistui
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Avaa viimeksi suljettu ikkuna uudelleen
   Edit Hint: Valitse pikanäppäin ja paina sitten uutta näppäinyhdistelmää. Poista määritys painamalla Backspace- tai Delete-näppäintä.
   Change Shortcut: Vaihda toiminnon {action} pikanäppäin
   Press Shortcut: Paina pikanäppäintä…

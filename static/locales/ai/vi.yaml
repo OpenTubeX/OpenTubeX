@@ -1604,6 +1604,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: Danh sách phát đang ở đầu. Hãy bật lặp lại để tiếp tục phát
 External link opening has been disabled in Settings → Privacy: Tính năng mở liên kết bên ngoài đã bị tắt trong Cài đặt → Quyền riêng tư
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Mở lại cửa sổ vừa đóng
   Edit Hint: Chọn một phím tắt rồi nhấn tổ hợp phím mới. Nhấn Backspace hoặc Delete để bỏ gán.
   Change Shortcut: Đổi phím tắt cho {action}
   Press Shortcut: Nhấn phím tắt…

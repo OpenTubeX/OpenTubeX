@@ -1573,6 +1573,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: Oynatma listesinin başındasınız. Oynatmaya devam etmek için döngüyü etkinleştirin
 External link opening has been disabled in Settings → Privacy: Harici bağlantıları açma, Ayarlar → Gizlilik bölümünde devre dışı bırakıldı
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Son kapatılan pencereyi yeniden aç
   Edit Hint: Bir kısayol seçip yeni tuş birleşimine basın. Atamayı kaldırmak için Backspace veya Delete tuşuna basın.
   Change Shortcut: '{action} işleminin kısayolunu değiştir'
   Press Shortcut: Kısayola basın…

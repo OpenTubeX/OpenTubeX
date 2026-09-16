@@ -1573,6 +1573,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: A lejátszási lista elején jár. Kapcsolja be az ismétlést a lejátszás folytatásához
 External link opening has been disabled in Settings → Privacy: A külső hivatkozások megnyitása ki van kapcsolva a Beállítások → Adatvédelem menüben
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Az utoljára bezárt ablak újranyitása
   Edit Hint: Válasszon egy billentyűparancsot, majd nyomjon le egy új billentyűkombinációt. A hozzárendelés törléséhez nyomja meg a Backspace vagy a Delete billentyűt.
   Change Shortcut: A(z) {action} billentyűparancsának módosítása
   Press Shortcut: Nyomja le a billentyűparancsot…

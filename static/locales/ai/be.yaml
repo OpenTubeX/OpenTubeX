@@ -1660,6 +1660,7 @@ External link opening has been disabled in Settings → Privacy: Адкрыцц�
 Screenshot Clipboard Success: Здымак экрана захаваны ў буферы абмену
 Screenshot Clipboard Error: Не ўдалося скапіяваць здымак экрана ў буфер абмену
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Адкрыць апошняе закрытае акно
   Edit Hint: Выберыце спалучэнне клавіш, а потым націсніце новую камбінацыю. Каб выдаліць прызначэнне, націсніце Backspace або Delete.
   Change Shortcut: Змяніць спалучэнне клавіш для дзеяння «{action}»
   Press Shortcut: Націсніце спалучэнне клавіш…

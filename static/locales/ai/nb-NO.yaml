@@ -1588,6 +1588,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: Spillelisten er ved begynnelsen. Slå på gjentakelse for å fortsette avspillingen
 External link opening has been disabled in Settings → Privacy: Åpning av eksterne lenker er slått av under Innstillinger → Personvern
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Åpne det sist lukkede vinduet igjen
   Edit Hint: Velg en hurtigtast, og trykk deretter på en ny tastekombinasjon. Trykk på Backspace eller Delete for å fjerne tilordningen.
   Change Shortcut: Endre hurtigtasten for {action}
   Press Shortcut: Trykk på hurtigtasten…

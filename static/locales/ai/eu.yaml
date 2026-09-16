@@ -1597,6 +1597,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: Erreprodukzio-zerrenda hasieran dago. Gaitu begizta erreproduzitzen jarraitzeko
 External link opening has been disabled in Settings → Privacy: Kanpoko estekak irekitzea desgaitu da Ezarpenak → Pribatutasuna atalean
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Ireki berriro itxitako azken leihoa
   Edit Hint: Hautatu lasterbide bat eta sakatu tekla-konbinazio berria. Sakatu Atzera-tekla edo Ezabatu esleipena kentzeko.
   Change Shortcut: Aldatu {action} ekintzaren lasterbidea
   Press Shortcut: Sakatu lasterbidea…

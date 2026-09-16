@@ -1588,6 +1588,7 @@ Tooltips:
 The playlist is at the beginning. Enable loop to continue playing: Spellistan är vid början. Aktivera upprepning för att fortsätta spela
 External link opening has been disabled in Settings → Privacy: Öppning av externa länkar har inaktiverats under Inställningar → Integritet
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Öppna det senast stängda fönstret igen
   Edit Hint: Välj ett kortkommando och tryck sedan på en ny tangentkombination. Tryck på Backsteg eller Delete för att ta bort tilldelningen.
   Change Shortcut: Ändra kortkommando för {action}
   Press Shortcut: Tryck på kortkommando…

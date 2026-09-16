@@ -1649,6 +1649,7 @@ External link opening has been disabled in Settings → Privacy: Åbning af ekst
 Screenshot Clipboard Success: Skærmbilledet er gemt i udklipsholderen
 Screenshot Clipboard Error: Skærmbilledet kunne ikke kopieres til udklipsholderen
 KeyboardShortcutPrompt:
+  Reopen Closed Window: Genåbn det senest lukkede vindue
   Edit Hint: Vælg en genvej, og tryk derefter på en ny tastekombination. Tryk på Backspace eller Delete for at fjerne tildelingen.
   Change Shortcut: Skift genvej for {action}
   Press Shortcut: Tryk på genvejen…
