@@ -1,4 +1,6 @@
-dedupePeers: true
+# https://github.com/pnpm/pnpm/issues/11070
+# Disable until GitHub dependabot got pnpm >= 10.33.0 installed
+# dedupePeers: true
 
 # https://pnpm.io/next/settings#allowbuilds
 allowBuilds:

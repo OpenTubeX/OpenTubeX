@@ -33,7 +33,6 @@ on:
       - '.github/pull.yml'
       - '.github/workflows/autoMerge.yml'
       - '.github/workflows/codeql.yml'
-      - '.github/workflows/compress-images.yml'
       - '.github/workflows/conflicts.yml'
       - '.github/workflows/e2e.yml'
       - '.github/workflows/enableAutoMerge.yml'
@@ -149,7 +148,7 @@ jobs:
         key: ${{ format('node-cache-{0}-{1}-pnpm-{2}', runner.os, runner.arch, hashFiles('pnpm-lock.yaml')) }}
         path: ${{ steps.cache_dir.outputs.cache_dir }}
 
-    - run: pnpm install --frozen-lockfile
+    - run: pnpm run ci
       shell: bash
     - run: pnpm run lint
       shell: bash

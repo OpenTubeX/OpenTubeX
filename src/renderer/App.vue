@@ -669,12 +669,6 @@ const activeTabId = computed(() => store.getters.getActiveTabId)
 const presentedTabId = computed(() => store.getters.getPresentedTabId)
 const selectionRevision = computed(() => store.state.tabs.selectionRevision)
 
-/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
-const backendPreference = computed(() => store.getters.getBackendPreference)
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const backendFallback = computed(() => store.getters.getBackendFallback)
-
 /** @type {import('vue').ComputedRef<boolean>} */
 const isSideNavOpen = computed(() => store.getters.getIsSideNavOpen)
 
@@ -4329,7 +4323,6 @@ async function handleYoutubeLink(href, {
   }
 
   switch (result.urlType) {
-    case 'clip':
     case 'video': {
       const { videoId, timestamp, playlistId, commentId, isShort } = result
 
@@ -4735,37 +4728,6 @@ function handleDragStart(event) {
     event.stopPropagation()
   }
 }
-
-async function getClip(clipId) {
-  if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
-    try {
-      return await getClipInvidious(clipId)
-    } catch (err) {
-      console.error(err)
-
-      if (process.env.SUPPORTS_LOCAL_API && backendFallback.value) {
-        console.error(
-          'Error resolving clip URL.  Falling back to Local API'
-        )
-        return await getLocalClip(clipId)
-      }
-    }
-  } else {
-    try {
-      return await getLocalClip(clipId)
-    } catch (err) {
-      console.error(err)
-
-      if (backendFallback.value) {
-        console.error(
-          'Error resolving clip URL.  Falling back to Invidious API'
-        )
-        return await getClipInvidious(clipId)
-      }
-    }
-  }
-}
-
 </script>
 
 <style src="./themes.css" />

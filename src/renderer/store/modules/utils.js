@@ -520,9 +520,6 @@ const actions = {
     // If `urlType` is "channel"
     // - channelId [String]
     //
-    // If `urlType` is "clip"
-    // - clipId
-    //
     // If `urlType` is "unknown"
     // Nothing else
     //
@@ -559,19 +556,16 @@ const actions = {
       /^\/(?:(?:channel|user|c)\/)?(?<channelId>[^/]+)(?:\/(?<tab>join|featured|videos|shorts|live|streams|podcasts|releases|courses|playlists|about|community|channels))?\/?$/
 
     const hashtagPattern = /^\/hashtag\/(?<tag>[^#&/?]+)$/
-    const clipPattern = /^\/clip\/(?<clipId>.+)/
+
     const postPattern = /^\/post\/(?<postId>.+)/
-    const showPattern = /^\/show\/VL(?<playlistId>.+)/
     const feedPattern = /^\/feed\/(?<type>trending|subscriptions|history|playlists|you|library)/
     const typePatterns = new Map([
       ['playlist', /^(\/playlist\/?|\/embed(\/?videoseries)?)$/],
-      ['show', showPattern],
       ['search', /^\/results|search\/?$/],
       ['hashtag', hashtagPattern],
       ['post', postPattern],
       ['feed', feedPattern],
       ['channel', channelPattern],
-      ['clip', clipPattern]
     ])
 
     for (const [type, pattern] of typePatterns) {
@@ -600,14 +594,6 @@ const actions = {
           urlType: 'playlist',
           playlistId,
           query
-        }
-      }
-
-      case 'show': {
-        const match = url.pathname.match(showPattern)
-        return {
-          urlType: 'playlist',
-          playlistId: match.groups.playlistId
         }
       }
 
@@ -655,13 +641,6 @@ const actions = {
           urlType: 'hashtag',
           hashtag
         }
-      }
-
-      case 'clip': {
-        const match = url.pathname.match(clipPattern)
-        const clipId = match.groups.clipId
-
-        return { urlType: 'clip', clipId }
       }
 
       case 'post': {
