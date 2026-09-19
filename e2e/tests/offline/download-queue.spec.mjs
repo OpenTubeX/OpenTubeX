@@ -417,7 +417,7 @@ test('checks destination space before starting a download', async ({ app, page }
   await writeFile(path.join(app.userDataDir, 'release-hhhhhhhhhhh'), '')
 })
 
-test('passes configured cookies to downloads only when explicitly enabled', async ({ app, page }) => {
+test('honors the download cookie preference and Always override', async ({ app, page }) => {
   const executable = path.join(app.userDataDir, 'cookie-yt-dlp.sh')
   const argumentsFile = path.join(app.userDataDir, 'cookie-arguments.txt')
   const cookies = path.join(app.userDataDir, 'session.txt')
@@ -444,7 +444,7 @@ test('passes configured cookies to downloads only when explicitly enabled', asyn
   await configureQueue(page, { ytDlpPlaybackAuthMode: 'file', ytDlpDownloadUseCookies: false, ytDlpPlaybackAlwaysUseCookies: true })
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow', 'settings'))
   await page.locator('.settingsMenu [data-section="advanced"]').click()
-  const downloadCookies = page.getByRole('checkbox', { name: 'Use cookies for downloads', exact: true })
+  const downloadCookies = page.getByRole('checkbox', { name: /^Use cookies for downloads/ })
   await expect(downloadCookies).toBeChecked()
   await expect(downloadCookies).toBeDisabled()
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', false))
