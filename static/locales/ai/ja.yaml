@@ -674,6 +674,10 @@ Settings:
     Title Excludes: タイトルから除外
     Title Filter Hint: 複数のタイトル条件はコンマで区切ってください。含める条件のいずれかに一致し、除外条件には一つも一致しない動画が対象になります。
   External Software Settings:
+    Create YouTube session: "YouTube セッションを作成"
+    YouTube session hint: "必要に応じてログインし、セッションを保存してください。ダウンロード、再生、字幕のどれに使用するかは設定で選択できます。"
+    Use cookies for downloads: "ダウンロードに Cookie を使用"
+    YouTube session failed: "YouTube セッションを保存できませんでした。"
     Checking FFmpeg and FFprobe: FFmpeg/FFprobeを確認中…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobeはまだダウンロードされていません。下のボタンをクリックしてダウンロードしてください。
     External Software Settings: 外部ソフトウェア
@@ -719,7 +723,7 @@ Settings:
       Manual: 手動でのみ更新
     yt-dlp Executable Path: yt-dlp実行ファイルのパス
     FFmpeg Executable Path: FFmpeg実行ファイルのパス
-    Restricted Playback Authentication: yt-dlpの再生用Cookie
+    Restricted Playback Authentication: "yt-dlp の Cookie"
     Cookie Source: Cookieの取得元
     Cookie Sources:
       None: なし
@@ -1566,7 +1570,7 @@ Tooltips:
     Cookie File: 認証が必要な再生に使用するNetscape形式のCookieファイルを選択します。
     Browser for Cookies: 選択したyt-dlp実行ファイルからブラウザーの対応状況を取得します。認証が必要な再生を要求すると、OpenTubeXはyt-dlpにこのブラウザーのCookieを読み取るよう指示します。
     Browser Profile: ブラウザーのプロフィール名またはフォルダーを必要に応じて指定します。空欄にすると、最近使用したプロフィールを使います。
-    Always Use Cookies: "yt-dlpがストリームを抽出するたびに、設定したCookieを使用します。ストリーム抽出方式がyt-dlpに切り替わるわけではありません。yt-dlpを選択している場合は、アカウントに権限があればYouTube Premiumの高ビットレートなど、アカウント限定の形式を利用できる場合があります。 設定した Cookie を字幕と自動翻訳に使用します."
+    Always Use Cookies: "yt-dlpがストリームを抽出するたびに、設定したCookieを使用します。ストリーム抽出方式がyt-dlpに切り替わるわけではありません。yt-dlpを選択している場合は、アカウントに権限があればYouTube Premiumの高ビットレートなど、アカウント限定の形式を利用できる場合があります。 設定した Cookie を字幕と自動翻訳に使用します. ダウンロードに Cookie を使用."
     FFmpeg Executable Path: FFmpegは、分離された動画と音声ストリームの結合や音声変換に必要です。既定では、PATH環境変数からFFmpegが見つかるものとみなします。必要に応じて、ここでカスタムパスを指定できます。
     Use cookies for subtitles: "設定した Cookie を字幕と自動翻訳に使用します。「常に Cookie を使用」でも有効になります。"
   Distraction Free Settings:

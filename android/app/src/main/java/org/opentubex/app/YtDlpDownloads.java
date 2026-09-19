@@ -184,6 +184,13 @@ final class YtDlpDownloads {
             args.addAll(asList("--paths", root.getAbsolutePath(), "--paths", "temp:" + new File(root, "temp").getAbsolutePath(),
                 "--newline", "--progress", "--no-simulate", "--print", "after_move:__OPENTUBEX_FILE__:%(id)s\t%(duration)s\t%(width)s\t%(height)s\t%(filepath)s"));
             synchronized (this) {
+                if (configuration.optBoolean("useCookies")) {
+                    File cookies = new File(context.getNoBackupFilesDir(), "yt-dlp-cookies.txt");
+                    if (!cookies.getAbsolutePath().equals(configuration.optString("cookies")) || !cookies.isFile()) {
+                        throw new IOException("Cookie file is unavailable");
+                    }
+                    args.addAll(asList("--cookies", cookies.getAbsolutePath()));
+                }
                 if (bandwidth > 0) args.addAll(asList("--limit-rate", Math.max(1, bandwidth / concurrency) + "K"));
                 long estimate = record.getJSONObject("retryPayload").optLong("estimatedSizeBytes");
                 record.put("availableSpaceBytes", root.getUsableSpace());

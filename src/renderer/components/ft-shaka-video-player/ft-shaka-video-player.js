@@ -10307,6 +10307,7 @@ export default defineComponent({
     }
 
     function fullscreenChangeHandler() {
+      if (process.env.IS_CAPACITOR && !isNativeFullscreenActive() && document.querySelector('.nativeFullscreenTransition')) return
       const fullscreen = isNativeFullscreenActive()
       isFullscreen.value = fullscreen
       if (props.shortsPlayer) {
@@ -10455,6 +10456,7 @@ export default defineComponent({
             vrCanvas: vrCanvas.value,
             sabrData: props.sabrData,
             captions: props.captions,
+            videoDimensions: props.legacyFormats.find(format => format.width > 0 && format.height > 0),
             audioOnly: props.format === 'audio',
             skipSilence: skipSilence.value,
             continueInBackground: store.getters.getContinuePlaybackWhenScreenIsLocked,
@@ -11442,6 +11444,7 @@ export default defineComponent({
 
     expose({
       isNativePlayback: () => !!player?.nativePlayback,
+      isFullscreen,
       hasLoaded,
       hasPlaybackPosition,
 

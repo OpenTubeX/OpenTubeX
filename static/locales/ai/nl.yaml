@@ -687,6 +687,10 @@ Settings:
     Title Excludes: Titel bevat niet
     Title Filter Hint: Scheid meerdere titeltermen met komma's. Een video moet ten minste één opgenomen term bevatten en geen enkele uitgesloten term.
   External Software Settings:
+    Create YouTube session: "YouTube-sessie maken"
+    YouTube session hint: "Log indien nodig in en sla de sessie op. Kies in de instellingen of je deze voor downloads, afspelen of ondertitels wilt gebruiken."
+    Use cookies for downloads: "Cookies gebruiken voor downloads"
+    YouTube session failed: "De YouTube-sessie kon niet worden opgeslagen."
     Checking FFmpeg and FFprobe: FFmpeg/FFprobe controleren…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe zijn nog niet gedownload. Klik op de knop hieronder om ze te downloaden.
     External Software Settings: Externe software
@@ -732,7 +736,7 @@ Settings:
       Manual: Alleen handmatig bijwerken
     yt-dlp Executable Path: Pad naar uitvoerbaar bestand van yt-dlp
     FFmpeg Executable Path: Pad naar uitvoerbaar bestand van FFmpeg
-    Restricted Playback Authentication: yt-dlp-cookies voor afspelen
+    Restricted Playback Authentication: "yt-dlp-cookies"
     Cookie Source: Cookiebron
     Cookie Sources:
       None: Geen
@@ -1616,7 +1620,7 @@ Tooltips:
     Cookie File: Selecteer een cookiebestand in Netscape-indeling voor geverifieerd afspelen.
     Browser for Cookies: Browserondersteuning wordt uit het geselecteerde uitvoerbare bestand van yt-dlp gelezen. OpenTubeX vraagt yt-dlp om deze browser te lezen wanneer geverifieerd afspelen wordt aangevraagd.
     Browser Profile: Optionele naam of map van het browserprofiel. Laat dit leeg om het laatst gebruikte profiel te gebruiken.
-    Always Use Cookies: "Gebruik de ingestelde cookies wanneer yt-dlp streams extraheert. Dit wijzigt de methode voor stream-extractie niet in yt-dlp. Als yt-dlp is geselecteerd, kunnen indelingen die alleen voor accounts beschikbaar zijn worden aangeboden, waaronder de verbeterde bitsnelheid van YouTube Premium als het account daar toegang toe heeft. Gebruik de ingestelde cookies voor ondertitels en automatische vertalingen."
+    Always Use Cookies: "Gebruik de ingestelde cookies wanneer yt-dlp streams extraheert. Dit wijzigt de methode voor stream-extractie niet in yt-dlp. Als yt-dlp is geselecteerd, kunnen indelingen die alleen voor accounts beschikbaar zijn worden aangeboden, waaronder de verbeterde bitsnelheid van YouTube Premium als het account daar toegang toe heeft. Gebruik de ingestelde cookies voor ondertitels en automatische vertalingen. Cookies gebruiken voor downloads."
     FFmpeg Executable Path: FFmpeg is vereist om afzonderlijke video- en audiostreams samen te voegen en audio te converteren. OpenTubeX gaat er standaard van uit dat FFmpeg via de omgevingsvariabele PATH kan worden gevonden. Je kunt hier zo nodig een aangepast pad instellen.
     Use cookies for subtitles: "Gebruik de ingestelde cookies voor ondertitels en automatische vertalingen. Wordt ook ingeschakeld door \"Altijd cookies gebruiken\"."
   Distraction Free Settings:

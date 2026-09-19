@@ -115,6 +115,18 @@
         </div>
       </div>
       <div class="side profiles">
+        <span
+          v-if="syncing"
+          class="syncIndicator"
+          role="progressbar"
+          :aria-label="syncLabel"
+          :title="syncLabel"
+        >
+          <FtIcon
+            :icon="['fas', 'sync']"
+            aria-hidden="true"
+          />
+        </span>
         <button
           v-if="settingsWindowMinimized"
           type="button"
@@ -167,6 +179,7 @@
 </template>
 
 <script setup>
+import { syncProgressLabel } from '../../helpers/syncProgressLabel'
 import { FtIcon } from '@opentubex/icons'
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -189,6 +202,8 @@ import { getInvidiousSearchSuggestions } from '../../helpers/api/invidious'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 
 const { t } = useI18n()
+const syncing = computed(() => store.getters.getSyncServerStatus === 'syncing')
+const syncLabel = computed(() => syncProgressLabel(t, store.getters.getSyncServerProgress?.stage))
 const emit = defineEmits(['request-android-exit'])
 const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
   store.getters.getKeyboardShortcuts

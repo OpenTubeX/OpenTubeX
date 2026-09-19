@@ -37,6 +37,7 @@
     <input
       :id="id"
       v-model.number="currentValue"
+      v-touch-range
       class="input"
       :disabled="disabled"
       type="range"
@@ -50,6 +51,7 @@
 </template>
 
 <script setup>
+import { vTouchRange } from '../../helpers/touchRange'
 import { computed, ref, useId, watch } from 'vue'
 import { Translation as I18nT } from 'vue-i18n'
 

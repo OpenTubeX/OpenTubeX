@@ -10,6 +10,31 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 public class YtDlpRuntimeTest {
+    @Test public void packagedQuickJsRunsTheBundledEjsSolverWithoutNetwork() throws Exception {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        YtDlpRuntime.initialize(context);
+        File fixture = new File(context.getCacheDir(), "yt-dlp-ejs-smoke.py");
+        try {
+            try (InputStream input = InstrumentationRegistry.getInstrumentation().getContext().getAssets().open("yt-dlp-ejs-smoke.py")) {
+                YtDlpFiles.write(fixture, YtDlpFiles.read(input, 64 * 1024));
+            }
+            java.lang.reflect.Method command = YtDlpRuntime.class.getDeclaredMethod("command", Context.class, List.class);
+            command.setAccessible(true);
+            String nativeDir = context.getApplicationInfo().nativeLibraryDir;
+            ProcessBuilder builder = (ProcessBuilder) command.invoke(null, context, asList(
+                nativeDir + "/libpython.so", fixture.getPath(),
+                new File(context.getNoBackupFilesDir(), "youtubedl-android/yt-dlp/yt-dlp").getPath(),
+                nativeDir + "/libqjs.so"));
+            Process process = builder.redirectErrorStream(true).start();
+            try {
+                assertTrue("EJS smoke test timed out", process.waitFor(30, java.util.concurrent.TimeUnit.SECONDS));
+                String output = new String(YtDlpFiles.read(process.getInputStream(), 64 * 1024), java.nio.charset.StandardCharsets.UTF_8);
+                assertEquals(output, 0, process.exitValue());
+                assertTrue(output, output.contains("EJS_QUICKJS_OK"));
+            } finally { process.destroy(); }
+        } finally { fixture.delete(); }
+    }
+
     @Test public void bundledRuntimeDownloadsAndConvertsAudioWithoutNetwork() throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         Context testContext = InstrumentationRegistry.getInstrumentation().getContext();

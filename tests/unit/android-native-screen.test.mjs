@@ -51,7 +51,7 @@ async function fixture({ fullscreen = true, chrome = [], dialogs = [], previews 
   const element = Object.assign(new EventTarget(), {
     getBoundingClientRect: () => bounds, getAnimations: () => [],
   })
-  const document = Object.assign(new EventTarget(), { body: { append() {}, getBoundingClientRect: () => ({ height: 2000 }) }, createElement: () => ({ setAttribute() {}, remove() {}, style: { getPropertyValue() { return '' }, setProperty(name, value) { styleWrites.push({ name, value }) } } }), elementFromPoint: () => null, querySelectorAll: selector => selector.includes('.topNav') ? chrome : selector.includes('dialog[open]') ? dialogs : [], documentElement: { classList: { toggle() {} }, style: { getPropertyValue() { return '' }, setProperty(name, value) { styleWrites.push({ name, value }) }, removeProperty() {} } } })
+  const document = Object.assign(new EventTarget(), { body: { append() {}, getBoundingClientRect: () => ({ height: 2000 }) }, createElement: () => ({ setAttribute() {}, remove() {}, style: { getPropertyValue() { return '' }, setProperty(name, value) { styleWrites.push({ name, value }) } } }), elementFromPoint: () => null, querySelectorAll: selector => selector.includes('.topNav') ? chrome : selector.includes('dialog[open]') ? dialogs : [], querySelector: () => null, documentElement: { classList: { toggle() {} }, style: { getPropertyValue() { return '' }, setProperty(name, value) { styleWrites.push({ name, value }) }, removeProperty() {} } } })
   document.addEventListener('fullscreenchange', () => fullscreenEvents.push(presentations.length))
   class Observer {
     constructor(callback) { this.callback = callback; observers.push(this) }

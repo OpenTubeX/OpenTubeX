@@ -354,9 +354,9 @@ export function createAndroidNativeScreen({ element, container, getController, g
       fullscreenFromRotation = false
       clearAmbientClips()
     }
-    document.documentElement.classList.toggle('nativePlaybackScreen', open)
     if (open) releaseInlineBackground()
     container.toggleAttribute('data-native-player-screen', open)
+    document.documentElement.classList.toggle('nativePlaybackScreen', open || !!document.querySelector('.nativeFullscreenTransition'))
     lastLayout = ''
     if (!open) document.dispatchEvent(new Event('fullscreenchange'))
     scheduleLayout()

@@ -485,6 +485,10 @@ export function createAndroidPlayer(element, container, getOptions) {
     defaultTrickPlayRate = null
   }
   methods.nativePlayback = {
+    getVideoDimensions() {
+      const format = manifestData?.formats?.find(format => format.width > 0 && format.height > 0) ?? getOptions().videoDimensions
+      return { videoWidth: format?.width ?? 0, videoHeight: format?.height ?? 0 }
+    },
     createAudio() {
       const audio = new Audio()
       const track = { id: crypto.randomUUID(), source: '', element: audio, media: null }

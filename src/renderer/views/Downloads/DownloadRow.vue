@@ -174,6 +174,7 @@
 </template>
 
 <script setup>
+import { displayAndroidPath } from '../../helpers/androidStorage'
 import { ytDlp } from '../../helpers/ytDlp'
 import { FtIcon } from '@opentubex/icons'
 import { computed } from 'vue'
@@ -252,7 +253,7 @@ const allDestinations = computed(() => {
   }
   return props.download.destination ? [props.download.destination] : []
 })
-const destinations = computed(() => allDestinations.value.slice(0, MAX_VISIBLE_DESTINATIONS))
+const destinations = computed(() => allDestinations.value.slice(0, MAX_VISIBLE_DESTINATIONS).map(displayAndroidPath))
 const hiddenDestinationCount = computed(() => allDestinations.value.length - destinations.value.length)
 const availabilityText = computed(() => {
   if (props.download.status !== 'completed') return ''

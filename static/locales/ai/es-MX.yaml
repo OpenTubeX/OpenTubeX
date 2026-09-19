@@ -791,6 +791,10 @@ Settings:
     Title Excludes: El título excluye
     Title Filter Hint: Separa con comas los términos del título. Un video debe coincidir con al menos un término incluido y con ninguno de los excluidos.
   External Software Settings:
+    Create YouTube session: "Crear sesión de YouTube"
+    YouTube session hint: "Inicia sesión si es necesario y guárdala. Elige en los ajustes si usarla para descargas, reproducción o subtítulos."
+    Use cookies for downloads: "Usar cookies para las descargas"
+    YouTube session failed: "No se pudo guardar la sesión de YouTube."
     Checking FFmpeg and FFprobe: Comprobando FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe aún no se han descargado. Haz clic en el botón de abajo para descargarlos.
     External Software Settings: Software externo
@@ -836,7 +840,7 @@ Settings:
       Manual: Actualizar solo manualmente
     yt-dlp Executable Path: Ruta del ejecutable yt-dlp
     FFmpeg Executable Path: Ruta del ejecutable FFmpeg
-    Restricted Playback Authentication: Cookies de reproducción de yt-dlp
+    Restricted Playback Authentication: "Cookies de yt-dlp"
     Cookie Source: Fuente de las cookies
     Cookie Sources:
       None: Ninguna
@@ -1911,7 +1915,7 @@ Tooltips:
     Cookie File: Selecciona un archivo de cookies con formato Netscape para la reproducción autenticada.
     Browser for Cookies: La compatibilidad con navegadores se obtiene del ejecutable yt-dlp seleccionado. OpenTubeX pide a yt-dlp que lea este navegador cuando se solicita una reproducción autenticada.
     Browser Profile: Nombre o carpeta opcional del perfil del navegador. Déjalo en blanco para usar el perfil al que se accedió más recientemente.
-    Always Use Cookies: "Usa las cookies configuradas siempre que yt-dlp extraiga emisiones. Esto no cambia el método de extracción de emisiones a yt-dlp. Al seleccionar yt-dlp, pueden aparecer formatos exclusivos de la cuenta, incluida la tasa de bits mejorada de YouTube Premium cuando la cuenta tiene acceso. Usa las cookies configuradas para los subtítulos y las traducciones automáticas."
+    Always Use Cookies: "Usa las cookies configuradas siempre que yt-dlp extraiga emisiones. Esto no cambia el método de extracción de emisiones a yt-dlp. Al seleccionar yt-dlp, pueden aparecer formatos exclusivos de la cuenta, incluida la tasa de bits mejorada de YouTube Premium cuando la cuenta tiene acceso. Usa las cookies configuradas para los subtítulos y las traducciones automáticas. Usar cookies para las descargas."
     FFmpeg Executable Path: FFmpeg es necesario para combinar emisiones de video y audio separadas y para convertir audio. De forma predeterminada, OpenTubeX presupone que FFmpeg se puede encontrar mediante la variable de entorno PATH. Si hace falta, puedes definir aquí una ruta personalizada.
     Use cookies for subtitles: "Usa las cookies configuradas para los subtítulos y las traducciones automáticas. También se activa con «Usar siempre cookies»."
   Distraction Free Settings:

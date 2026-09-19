@@ -416,3 +416,38 @@ test('checks destination space before starting a download', async ({ app, page }
   await expect(page.locator('.downloadRow').filter({ hasText: 'Unknown size download' })).toContainText('Download size is unknown')
   await writeFile(path.join(app.userDataDir, 'release-hhhhhhhhhhh'), '')
 })
+
+test('passes configured cookies to downloads only when explicitly enabled', async ({ app, page }) => {
+  const executable = path.join(app.userDataDir, 'cookie-yt-dlp.sh')
+  const argumentsFile = path.join(app.userDataDir, 'cookie-arguments.txt')
+  const cookies = path.join(app.userDataDir, 'session.txt')
+  await writeFile(cookies, '# Netscape HTTP Cookie File\n')
+  await writeFile(executable, `#!/bin/sh\nprintf '%s\\n' "$@" > '${argumentsFile}'\n`)
+  await chmod(executable, 0o755)
+  await configureQueue(page, {
+    enableDownloads: true,
+    ytDlpSource: 'system',
+    ytDlpPath: executable,
+    ytDlpFfmpegSource: 'system',
+    ytDlpPlaybackAuthMode: 'file',
+    ytDlpPlaybackCookiesPath: cookies
+  })
+  for (const [enabled, always, mode] of [[false, false, 'file'], [false, true, 'file'], [false, false, 'file'], [true, false, 'file'], [true, true, 'none']]) {
+    await configureQueue(page, { ytDlpDownloadUseCookies: enabled, ytDlpPlaybackAlwaysUseCookies: always, ytDlpPlaybackAuthMode: mode })
+    await writeFile(argumentsFile, '')
+    await submitDownloads(page, [{ videoId: 'iiiiiiiiiii', title: 'Cookie download', mode: 'video' }])
+    await expect.poll(async () => (await readFile(argumentsFile, 'utf8')).includes('https://www.youtube.com/watch?v=iiiiiiiiiii')).toBe(true)
+    const args = (await readFile(argumentsFile, 'utf8')).trim().split('\n')
+    expect(args.includes('--cookies')).toBe((enabled || always) && mode === 'file')
+    if ((enabled || always) && mode === 'file') expect(args[args.indexOf('--cookies') + 1]).toBe(cookies)
+  }
+  await configureQueue(page, { ytDlpPlaybackAuthMode: 'file', ytDlpDownloadUseCookies: false, ytDlpPlaybackAlwaysUseCookies: true })
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow', 'settings'))
+  await page.locator('.settingsMenu [data-section="advanced"]').click()
+  const downloadCookies = page.getByRole('checkbox', { name: 'Use cookies for downloads', exact: true })
+  await expect(downloadCookies).toBeChecked()
+  await expect(downloadCookies).toBeDisabled()
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', false))
+  await expect(downloadCookies).not.toBeChecked()
+  await expect(downloadCookies).toBeEnabled()
+})

@@ -39,6 +39,8 @@ function configuration() {
   }
   return {
     rules,
+    useCookies: (store.getters.getYtDlpPlaybackAlwaysUseCookies || store.getters.getYtDlpDownloadUseCookies) && store.getters.getYtDlpPlaybackAuthMode === 'file',
+    cookies: store.getters.getYtDlpPlaybackAuthMode === 'file' ? store.getters.getYtDlpPlaybackCookiesPath : '',
     concurrency: store.getters.getYtDlpMaxConcurrentDownloads,
     bandwidth: store.getters.getYtDlpDownloadBandwidthLimit,
     folder: store.getters.getYtDlpDownloadFolderPath,
@@ -88,6 +90,7 @@ const android = {
   handleYtDlpDownloadsRemoved: callback => listen('downloadsRemoved', result => callback(result.ids)),
   ytDlpChooseDownloadFolder: chooseAndroidDirectory,
   ytDlpChooseCookies: () => native.chooseCookies().then(result => result.path),
+  ytDlpCreateSession: labels => native.createSession(labels).then(result => result.path),
   ytDlpGetInfo: () => native.info(),
   ytDlpCheckBinaryUpdate: binary => native.checkUpdate({ binary, channel: configuration().channel }),
   ytDlpDownloadBinary: binary => native.update({ binary, channel: configuration().channel }),

@@ -891,6 +891,10 @@ Settings:
     Title Excludes: Naslov ne vključuje
     Title Filter Hint: Več izrazov za naslov ločite z vejicami. Videoposnetek se mora ujemati z vsaj enim vključenim izrazom in z nobenim izključenim izrazom.
   External Software Settings:
+    Create YouTube session: "Ustvari sejo YouTube"
+    YouTube session hint: "Po potrebi se prijavite in shranite sejo. V nastavitvah izberite, ali naj se uporablja za prenose, predvajanje ali podnapise."
+    Use cookies for downloads: "Uporabi piškotke za prenose"
+    YouTube session failed: "Seje YouTube ni bilo mogoče shraniti."
     Checking FFmpeg and FFprobe: Preverjanje FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg in FFprobe še nista prenesena. Za prenos kliknite spodnji gumb.
     External Software Settings: Zunanja programska oprema
@@ -936,7 +940,7 @@ Settings:
       Manual: Posodobi samo ročno
     yt-dlp Executable Path: Pot do izvedljive datoteke yt-dlp
     FFmpeg Executable Path: Pot do izvedljive datoteke FFmpeg
-    Restricted Playback Authentication: Piškotki yt-dlp za predvajanje
+    Restricted Playback Authentication: "Piškotki yt-dlp"
     Cookie Source: Vir piškotkov
     Cookie Sources:
       None: Brez
@@ -2070,7 +2074,7 @@ Tooltips:
     Cookie File: Izberite datoteko s piškotki v obliki Netscape za overjeno predvajanje.
     Browser for Cookies: Podpora za brskalnike se prebere iz izbrane izvedljive datoteke yt-dlp. OpenTubeX ob zahtevanem overjenem predvajanju naroči yt-dlp, naj prebere podatke tega brskalnika.
     Browser Profile: Izbirno ime ali mapa profila brskalnika. Če želite uporabiti nazadnje uporabljeni profil, pustite prazno.
-    Always Use Cookies: "Uporabi nastavljene piškotke vsakič, ko yt-dlp pridobiva pretoke. S tem se način pridobivanja pretoka ne preklopi na yt-dlp. Ko je izbran yt-dlp, so lahko na voljo oblike, dostopne samo z računom, vključno z izboljšano bitno hitrostjo storitve YouTube Premium, če ima račun dostop. Uporabi nastavljene piškotke za podnapise in samodejne prevode."
+    Always Use Cookies: "Uporabi nastavljene piškotke vsakič, ko yt-dlp pridobiva pretoke. S tem se način pridobivanja pretoka ne preklopi na yt-dlp. Ko je izbran yt-dlp, so lahko na voljo oblike, dostopne samo z računom, vključno z izboljšano bitno hitrostjo storitve YouTube Premium, če ima račun dostop. Uporabi nastavljene piškotke za podnapise in samodejne prevode. Uporabi piškotke za prenose."
     FFmpeg Executable Path: FFmpeg je potreben za združevanje ločenih video- in zvočnih pretokov ter pretvarjanje zvoka. OpenTubeX privzeto predvideva, da je FFmpeg mogoče najti prek okoljske spremenljivke PATH. Po potrebi lahko tukaj nastavite pot po meri.
     Use cookies for subtitles: "Uporabi nastavljene piškotke za podnapise in samodejne prevode. To možnost omogoči tudi nastavitev »Vedno uporabi piškotke«."
   Distraction Free Settings:

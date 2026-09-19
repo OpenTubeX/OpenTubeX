@@ -682,6 +682,10 @@ Settings:
     Title Excludes: العنوان يستبعد
     Title Filter Hint: افصل بين مصطلحات العناوين المتعددة بفواصل. يجب أن يتطابق الفيديو مع مصطلح واحد مدرج على الأقل ولا يتطابق مع أي مصطلحات مستبعدة.
   External Software Settings:
+    Create YouTube session: "إنشاء جلسة YouTube"
+    YouTube session hint: "سجّل الدخول عند الحاجة، ثم احفظ الجلسة. اختر في الإعدادات استخدامها للتنزيلات أو التشغيل أو الترجمات."
+    Use cookies for downloads: "استخدام ملفات تعريف الارتباط للتنزيلات"
+    YouTube session failed: "تعذّر حفظ جلسة YouTube."
     Checking FFmpeg and FFprobe: جارٍ التحقق من FFmpeg/FFprobe...
     FFmpeg and FFprobe Managed Not Downloaded: لم يتم تنزيل FFmpeg/FFprobe بعد. انقر على الزر أدناه لتنزيلهما.
     External Software Settings: البرامج الخارجية
@@ -727,7 +731,7 @@ Settings:
       Manual: قم بالتحديث يدويًا فقط
     yt-dlp Executable Path: yt-dlp المسار القابل للتنفيذ
     FFmpeg Executable Path: المسار القابل للتنفيذ FFmpeg
-    Restricted Playback Authentication: ملفات تعريف الارتباط الخاصة بتشغيل yt-dlp
+    Restricted Playback Authentication: "ملفات تعريف ارتباط yt-dlp"
     Cookie Source: مصدر ملفات تعريف الارتباط
     Cookie Sources:
       None: لا شيء
@@ -1585,7 +1589,7 @@ Tooltips:
     Cookie File: حدد ملف تعريف الارتباط بتنسيق Netscape للتشغيل المعتمد.
     Browser for Cookies: تتم قراءة دعم المتصفح من الملف القابل للتنفيذ yt-dlp المحدد. يطلب OpenTubeX من yt-dlp قراءة هذا المتصفح عند طلب التشغيل المعتمد.
     Browser Profile: اسم أو مجلد ملف تعريف المتصفح الاختياري. اتركه فارغًا لاستخدام أحدث ملف تعريف تم الوصول إليه.
-    Always Use Cookies: "استخدم ملفات تعريف الارتباط التي تم تكوينها عندما يقوم yt-dlp باستخراج التدفقات. لا يؤدي هذا إلى تبديل طريقة استخراج الدفق إلى yt-dlp. عند تحديد yt-dlp، قد تصبح التنسيقات المخصصة للحساب فقط متاحة، بما في ذلك معدل البت المحسّن لـ YouTube Premium عندما يكون للحساب حق الوصول. استخدم ملفات تعريف الارتباط المُعدّة للترجمة والترجمة التلقائية."
+    Always Use Cookies: "استخدم ملفات تعريف الارتباط التي تم تكوينها عندما يقوم yt-dlp باستخراج التدفقات. لا يؤدي هذا إلى تبديل طريقة استخراج الدفق إلى yt-dlp. عند تحديد yt-dlp، قد تصبح التنسيقات المخصصة للحساب فقط متاحة، بما في ذلك معدل البت المحسّن لـ YouTube Premium عندما يكون للحساب حق الوصول. استخدم ملفات تعريف الارتباط المُعدّة للترجمة والترجمة التلقائية. استخدام ملفات تعريف الارتباط للتنزيلات."
     FFmpeg Executable Path: مطلوب FFmpeg لدمج تدفقات الفيديو والصوت المنفصلة ولتحويل الصوت. افتراضيًا، سيفترض OpenTubeX أنه يمكن العثور على FFmpeg عبر متغير البيئة PATH. إذا لزم الأمر، يمكن تعيين مسار مخصص هنا.
     Use cookies for subtitles: "استخدم ملفات تعريف الارتباط المُعدّة للترجمة والترجمة التلقائية. يُفعّل أيضًا عند تفعيل «استخدام ملفات تعريف الارتباط دائمًا»."
   Distraction Free Settings:

@@ -777,6 +777,10 @@ Settings:
     Title Excludes: Tittelen inneheld ikkje
     Title Filter Hint: Skil fleire tittelord med komma. Ein video må samsvare med minst eitt inkludert ord og ingen ekskluderte ord.
   External Software Settings:
+    Create YouTube session: "Opprett YouTube-økt"
+    YouTube session hint: "Logg inn om nødvendig, og lagra økta. Vel i innstillingane om ho skal brukast til nedlastingar, avspeling eller undertekstar."
+    Use cookies for downloads: "Bruk informasjonskapslar for nedlastingar"
+    YouTube session failed: "Klarte ikkje å lagra YouTube-økta."
     Checking FFmpeg and FFprobe: Ser etter FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe er ikkje lasta ned enno. Trykk på knappen nedanfor for å laste dei ned.
     External Software Settings: Ekstern programvare
@@ -822,7 +826,7 @@ Settings:
       Manual: Oppdater berre manuelt
     yt-dlp Executable Path: Stig til den køyrbare yt-dlp-fila
     FFmpeg Executable Path: Stig til den køyrbare FFmpeg-fila
-    Restricted Playback Authentication: Informasjonskapslar for avspeling med yt-dlp
+    Restricted Playback Authentication: "yt-dlp-informasjonskapslar"
     Cookie Source: Kjelde for informasjonskapslar
     Cookie Sources:
       None: Ingen
@@ -1871,7 +1875,7 @@ Tooltips:
     Cookie File: Vel ei infokapselfil i Netscape-format for autentisert avspeling.
     Browser for Cookies: Nettlesarstøtta vert lesen frå den valde yt-dlp-programfila. OpenTubeX ber yt-dlp om å lese frå denne nettlesaren ved autentisert avspeling.
     Browser Profile: Valfritt namn på eller mappe til ein nettlesarprofil. La feltet stå tomt for å bruke profilen som sist vart opna.
-    Always Use Cookies: "Bruk dei oppsette infokapslane kvar gong yt-dlp hentar ut straumar. Dette byter ikkje metoden for straumuthenting til yt-dlp. Når yt-dlp er valt, kan format som krev konto, verte tilgjengelege. Det omfattar den utvida bithastigheita til YouTube Premium når kontoen har tilgang. Bruk dei konfigurerte informasjonskapslane for undertekstar og automatiske omsetjingar."
+    Always Use Cookies: "Bruk dei oppsette infokapslane kvar gong yt-dlp hentar ut straumar. Dette byter ikkje metoden for straumuthenting til yt-dlp. Når yt-dlp er valt, kan format som krev konto, verte tilgjengelege. Det omfattar den utvida bithastigheita til YouTube Premium når kontoen har tilgang. Bruk dei konfigurerte informasjonskapslane for undertekstar og automatiske omsetjingar. Bruk informasjonskapslar for nedlastingar."
     FFmpeg Executable Path: FFmpeg trengst for å slå saman åtskilde video- og lydstraumar og for lydkonvertering. OpenTubeX går som standard ut frå at FFmpeg kan finnast gjennom miljøvariabelen PATH. Du kan velje ein eigen sti her dersom det trengst.
     Use cookies for subtitles: "Bruk dei konfigurerte informasjonskapslane for undertekstar og automatiske omsetjingar. Vert òg aktivert av «Bruk alltid informasjonskapslar»."
   Distraction Free Settings:

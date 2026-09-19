@@ -1412,7 +1412,7 @@ export async function handleYtDlpDownloadBinary(event, binary) {
 const PLAYBACK_INFO_MAX_BUFFER = 32 * 1024 * 1024
 const PLAYBACK_INFO_TIMEOUT = 60_000
 /**
- * Adds the cookie source selected specifically for restricted playback.
+ * Adds the configured cookie source only when the caller explicitly opts in.
  * @param {string[]} args
  * @returns {Promise<string | null>} an error message, or null when configured
  */
@@ -2070,6 +2070,13 @@ async function startYtDlpDownload(
   const downloadFolder = (await settings._findOne('ytDlpDownloadFolderPath'))?.value || app.getPath('downloads')
   const { args: downloadArgs, truncatesLongTitles } = buildYtDlpDownloadArguments(payload)
   args.push('--paths', downloadFolder, ...downloadArgs)
+
+  if (((await settings._findOne('ytDlpPlaybackAlwaysUseCookies'))?.value === true ||
+    (await settings._findOne('ytDlpDownloadUseCookies'))?.value === true) &&
+    (await settings._findOne('ytDlpPlaybackAuthMode'))?.value !== 'none') {
+    const authenticationError = await pushYtDlpPlaybackAuthenticationArguments(args)
+    if (authenticationError !== null) return { error: authenticationError }
+  }
 
   const { source, executable } = await resolveExecutable('ytDlpSource', 'ytDlpPath', 'yt-dlp')
 

@@ -59,6 +59,7 @@
         :type="inputType"
         :placeholder="placeholder"
         :disabled="disabled"
+        :readonly="readonly"
         :spellcheck="false"
         :aria-label="showLabel ? null : placeholder"
         @input="handleInput"
@@ -207,6 +208,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  readonly: {
+    type: Boolean,
+    default: false
+  },
   dataList: {
     type: Array,
     default: () => []
@@ -243,6 +248,18 @@ const id = useId()
 
 const inputRef = useTemplateRef('inputRef')
 const optionsList = useTemplateRef('optionsList')
+
+watch(optionsList, (list, previousList, onCleanup) => {
+  if (list === null) return
+  // The viewport can keep its height while responsive rows become shorter.
+  const observer = new ResizeObserver(() => {
+    clampOverlayScrollTop(list, list.querySelector(':scope > li:last-of-type'))
+  })
+  observer.observe(list)
+  const firstRow = list.querySelector('li')
+  if (firstRow) observer.observe(firstRow)
+  onCleanup(() => observer.disconnect())
+}, { flush: 'post' })
 
 const inputData = ref(props.value)
 const searchState = reactive({
