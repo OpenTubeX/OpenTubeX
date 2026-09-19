@@ -60,7 +60,7 @@ test('reserves Ctrl or Command+Shift+C for copying the current URL', async () =>
   const start = source.indexOf("label: 'Enter Inspect Element Mode'")
   const menuItem = source.slice(start, source.indexOf('\n          },', start))
 
-  assert.match(menuItem, /accelerator: 'CmdOrCtrl\+Alt\+C'/)
+  assert.match(menuItem, /accelerator: 'CmdOrCtrl\+Shift\+Alt\+C'/)
   assert.doesNotMatch(menuItem, /accelerator: 'CmdOrCtrl\+Shift\+C'/)
 })
 
