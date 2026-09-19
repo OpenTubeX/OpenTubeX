@@ -682,10 +682,6 @@ Settings:
     Title Excludes: العنوان يستبعد
     Title Filter Hint: افصل بين مصطلحات العناوين المتعددة بفواصل. يجب أن يتطابق الفيديو مع مصطلح واحد مدرج على الأقل ولا يتطابق مع أي مصطلحات مستبعدة.
   External Software Settings:
-    Create YouTube session: "إنشاء جلسة YouTube"
-    YouTube session hint: "سجّل الدخول عند الحاجة، ثم احفظ الجلسة. اختر في الإعدادات استخدامها للتنزيلات أو التشغيل أو الترجمات."
-    Use cookies for downloads: "استخدام ملفات تعريف الارتباط للتنزيلات"
-    YouTube session failed: "تعذّر حفظ جلسة YouTube."
     Checking FFmpeg and FFprobe: جارٍ التحقق من FFmpeg/FFprobe...
     FFmpeg and FFprobe Managed Not Downloaded: لم يتم تنزيل FFmpeg/FFprobe بعد. انقر على الزر أدناه لتنزيلهما.
     External Software Settings: البرامج الخارجية
@@ -731,7 +727,7 @@ Settings:
       Manual: قم بالتحديث يدويًا فقط
     yt-dlp Executable Path: yt-dlp المسار القابل للتنفيذ
     FFmpeg Executable Path: المسار القابل للتنفيذ FFmpeg
-    Restricted Playback Authentication: "ملفات تعريف ارتباط yt-dlp"
+    Restricted Playback Authentication: ملفات تعريف الارتباط الخاصة بتشغيل yt-dlp
     Cookie Source: مصدر ملفات تعريف الارتباط
     Cookie Sources:
       None: لا شيء
@@ -1176,7 +1172,7 @@ Video:
   Retry With Built-in Extraction: أعد المحاولة باستخدام الاستخراج المدمج
   Retry With yt-dlp Extraction: أعد المحاولة باستخدام استخراج yt-dlp
   Reloading video after streaming URL error: إعادة تحميل الفيديو بعد حدوث خطأ في عنوان URL
-  Configure Restricted Playback Cookies Hint: "قم بتكوين ملفات تعريف الارتباط في الإعدادات → البرامج الخارجية → ملفات تعريف ارتباط yt-dlp."
+  Configure Restricted Playback Cookies Hint: قم بتكوين ملفات تعريف الارتباط في الإعدادات → البرامج الخارجية → ملفات تعريف الارتباط الخاصة بتشغيل yt-dlp.
   Try With Configured Cookies: حاول باستخدام ملفات تعريف الارتباط التي تم تكوينها
   Restricted Playback Authentication Failed Template: 'تعذر على yt-dlp الوصول إلى هذا الفيديو باستخدام ملفات تعريف الارتباط التي تم تكوينها: {error}'
   Private: لا يمكن مشاهدة مقاطع الفيديو الخاصة في OpenTubeX لأنها تتطلب تسجيل الدخول إلى Google وملكية الفيديو.
@@ -1589,7 +1585,7 @@ Tooltips:
     Cookie File: حدد ملف تعريف الارتباط بتنسيق Netscape للتشغيل المعتمد.
     Browser for Cookies: تتم قراءة دعم المتصفح من الملف القابل للتنفيذ yt-dlp المحدد. يطلب OpenTubeX من yt-dlp قراءة هذا المتصفح عند طلب التشغيل المعتمد.
     Browser Profile: اسم أو مجلد ملف تعريف المتصفح الاختياري. اتركه فارغًا لاستخدام أحدث ملف تعريف تم الوصول إليه.
-    Always Use Cookies: "استخدم ملفات تعريف الارتباط المُعدّة للتنزيلات والترجمات وكلما استخرج yt-dlp البث. لا يؤدي هذا إلى تبديل طريقة استخراج الدفق إلى yt-dlp. عند تحديد yt-dlp، قد تصبح التنسيقات المخصصة للحساب فقط متاحة، بما في ذلك معدل البت المحسّن لـ YouTube Premium عندما يكون للحساب حق الوصول."
+    Always Use Cookies: "استخدم ملفات تعريف الارتباط التي تم تكوينها عندما يقوم yt-dlp باستخراج التدفقات. لا يؤدي هذا إلى تبديل طريقة استخراج الدفق إلى yt-dlp. عند تحديد yt-dlp، قد تصبح التنسيقات المخصصة للحساب فقط متاحة، بما في ذلك معدل البت المحسّن لـ YouTube Premium عندما يكون للحساب حق الوصول. استخدم ملفات تعريف الارتباط المُعدّة للترجمة والترجمة التلقائية."
     FFmpeg Executable Path: مطلوب FFmpeg لدمج تدفقات الفيديو والصوت المنفصلة ولتحويل الصوت. افتراضيًا، سيفترض OpenTubeX أنه يمكن العثور على FFmpeg عبر متغير البيئة PATH. إذا لزم الأمر، يمكن تعيين مسار مخصص هنا.
     Use cookies for subtitles: "استخدم ملفات تعريف الارتباط المُعدّة للترجمة والترجمة التلقائية. يُفعّل أيضًا عند تفعيل «استخدام ملفات تعريف الارتباط دائمًا»."
   Distraction Free Settings:

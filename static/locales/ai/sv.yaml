@@ -676,10 +676,6 @@ Settings:
     Title Excludes: Titeln innehåller inte
     Title Filter Hint: Avgränsa flera titelord med kommatecken. En video måste matcha minst ett inkluderat ord och får inte matcha något uteslutet ord.
   External Software Settings:
-    Create YouTube session: "Skapa YouTube-session"
-    YouTube session hint: "Logga in vid behov och spara sessionen. Välj i inställningarna om den ska användas för nedladdningar, uppspelning eller undertexter."
-    Use cookies for downloads: "Använd kakor för nedladdningar"
-    YouTube session failed: "Det gick inte att spara YouTube-sessionen."
     Checking FFmpeg and FFprobe: Söker efter FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe har inte laddats ned ännu. Klicka på knappen nedan för att ladda ned dem.
     External Software Settings: Extern programvara
@@ -725,7 +721,7 @@ Settings:
       Manual: Uppdatera endast manuellt
     yt-dlp Executable Path: Sökväg till yt-dlp-programfilen
     FFmpeg Executable Path: Sökväg till FFmpeg-programfilen
-    Restricted Playback Authentication: "yt-dlp-kakor"
+    Restricted Playback Authentication: Uppspelningskakor för yt-dlp
     Cookie Source: Källa för kakor
     Cookie Sources:
       None: Ingen
@@ -1156,7 +1152,7 @@ Video:
   Retry With Built-in Extraction: Försök igen med inbyggd utvinning
   Retry With yt-dlp Extraction: Försök igen med yt-dlp-utvinning
   Reloading video after streaming URL error: Läser in videon igen efter ett fel med strömnings-URL:en
-  Configure Restricted Playback Cookies Hint: "Konfigurera kakor under Inställningar → Extern programvara → yt-dlp-kakor."
+  Configure Restricted Playback Cookies Hint: Konfigurera kakor under Inställningar → Extern programvara → Uppspelningskakor för yt-dlp.
   Try With Configured Cookies: Försök med konfigurerade kakor
   Restricted Playback Authentication Failed Template: 'yt-dlp kunde inte komma åt videon med de konfigurerade kakorna: {error}'
   Collapse Playlist: Fäll ihop spellista
@@ -1585,7 +1581,7 @@ Tooltips:
     Cookie File: Välj en Netscape-formaterad kakfil för autentiserad uppspelning.
     Browser for Cookies: Stödet för webbläsare läses från den valda yt-dlp-programfilen. OpenTubeX ber yt-dlp att läsa webbläsaren när autentiserad uppspelning begärs.
     Browser Profile: Valfritt namn på eller mapp för webbläsarprofilen. Lämna tomt för att använda den senast öppnade profilen.
-    Always Use Cookies: "Använd de konfigurerade kakorna för nedladdningar, undertexter och varje gång yt-dlp hämtar strömmar. Detta byter inte metod för strömutvinning till yt-dlp. När yt-dlp är valt kan format som kräver konto bli tillgängliga, inklusive YouTube Premiums högre bithastighet om kontot har åtkomst."
+    Always Use Cookies: "Använd de konfigurerade kakorna varje gång yt-dlp utvinner strömmar. Detta byter inte metod för strömutvinning till yt-dlp. När yt-dlp är valt kan format som kräver konto bli tillgängliga, inklusive YouTube Premiums högre bithastighet om kontot har åtkomst. Använd de konfigurerade kakorna för undertexter och automatiska översättningar."
     FFmpeg Executable Path: FFmpeg krävs för att sammanfoga separata video- och ljudströmmar samt för ljudkonvertering. Som standard förutsätter OpenTubeX att FFmpeg kan hittas via miljövariabeln PATH. Vid behov kan du ange en egen sökväg här.
     Use cookies for subtitles: "Använd de konfigurerade kakorna för undertexter och automatiska översättningar. Aktiveras även av ”Använd alltid kakor”."
   Distraction Free Settings:

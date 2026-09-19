@@ -674,10 +674,6 @@ Settings:
     Title Excludes: 标题不包含
     Title Filter Hint: 多个标题关键词请用逗号分隔。视频必须至少匹配一个包含关键词，且不能匹配任何排除关键词。
   External Software Settings:
-    Create YouTube session: "创建 YouTube 会话"
-    YouTube session hint: "如有需要，请登录并保存会话。在设置中选择是否将其用于下载、播放或字幕。"
-    Use cookies for downloads: "下载时使用 Cookie"
-    YouTube session failed: "无法保存 YouTube 会话。"
     Checking FFmpeg and FFprobe: 正在检查 FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: 尚未下载 FFmpeg/FFprobe。点击下方按钮进行下载。
     External Software Settings: 外部软件
@@ -723,7 +719,7 @@ Settings:
       Manual: 仅手动更新
     yt-dlp Executable Path: yt-dlp 可执行文件路径
     FFmpeg Executable Path: FFmpeg 可执行文件路径
-    Restricted Playback Authentication: "yt-dlp Cookie"
+    Restricted Playback Authentication: yt-dlp 播放 Cookie
     Cookie Source: Cookie 来源
     Cookie Sources:
       None: 无
@@ -1149,7 +1145,7 @@ Video:
   Retry With Built-in Extraction: 使用内置提取功能重试
   Retry With yt-dlp Extraction: 使用 yt-dlp 提取功能重试
   Reloading video after streaming URL error: 视频流 URL 出错后正在重新加载视频
-  Configure Restricted Playback Cookies Hint: "请在“设置 → 外部软件 → yt-dlp Cookie”中配置 Cookie。"
+  Configure Restricted Playback Cookies Hint: 请在“设置 → 外部软件 → yt-dlp 播放 Cookie”中配置 Cookie。
   Try With Configured Cookies: 使用已配置的 Cookie 重试
   Restricted Playback Authentication Failed Template: 'yt-dlp 无法使用已配置的 Cookie 访问此视频：{error}'
   Unmark As Watched: 标记为未观看
@@ -1570,7 +1566,7 @@ Tooltips:
     Cookie File: 选择用于身份验证播放的 Netscape 格式 Cookie 文件。
     Browser for Cookies: 从所选的 yt-dlp 可执行文件中读取浏览器支持信息。请求身份验证播放时，OpenTubeX 会让 yt-dlp 从此浏览器读取 Cookie。
     Browser Profile: 可选的浏览器配置文件名称或文件夹。留空则使用最近访问的配置文件。
-    Always Use Cookies: "将配置的 Cookie 用于下载、字幕以及 yt-dlp 提取流的过程。这不会将流提取方式切换为 yt-dlp。选择 yt-dlp 后，可能会提供仅限账号使用的格式，包括账号有权使用时的 YouTube Premium 增强比特率。"
+    Always Use Cookies: "每当 yt-dlp 提取流时都使用已配置的 Cookie。这不会将流提取方式切换为 yt-dlp。选择 yt-dlp 后，可能会提供仅限账号使用的格式，包括账号有权使用时的 YouTube Premium 增强比特率。使用已配置的 Cookie 获取字幕和自动翻译。"
     FFmpeg Executable Path: 合并独立的视频流和音频流以及转换音频需要 FFmpeg。默认情况下，OpenTubeX 假定可通过 PATH 环境变量找到 FFmpeg。如有需要，可在此设置自定义路径。
     Use cookies for subtitles: "使用已配置的 Cookie 获取字幕和自动翻译。启用“始终使用 Cookie”也会开启此功能。"
   Distraction Free Settings:
