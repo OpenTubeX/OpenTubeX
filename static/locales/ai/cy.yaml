@@ -676,6 +676,10 @@ Settings:
     Title Excludes: Nid yw'r teitl yn cynnwys
     Title Filter Hint: Gwahanwch nifer o dermau teitl â choma. Rhaid i fideo gyfateb i o leiaf un term i'w gynnwys a dim un term i'w eithrio.
   External Software Settings:
+    Create YouTube session: "Creu sesiwn YouTube"
+    YouTube session hint: "Mewngofnodwch os oes angen, yna cadwch y sesiwn. Dewiswch yn y gosodiadau a ddylid ei defnyddio ar gyfer lawrlwythiadau, chwarae neu isdeitlau."
+    Use cookies for downloads: "Defnyddio cwcis ar gyfer lawrlwythiadau"
+    YouTube session failed: "Methu cadw'r sesiwn YouTube."
     Checking FFmpeg and FFprobe: Wrthi'n gwirio FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: Nid yw FFmpeg/FFprobe wedi'i lawrlwytho eto. Cliciwch y botwm isod i'w lawrlwytho.
     External Software Settings: Meddalwedd allanol
@@ -721,7 +725,7 @@ Settings:
       Manual: Diweddaru â llaw yn unig
     yt-dlp Executable Path: Llwybr gweithredadwy yt-dlp
     FFmpeg Executable Path: Llwybr gweithredadwy FFmpeg
-    Restricted Playback Authentication: Cwcis chwarae yt-dlp
+    Restricted Playback Authentication: "Cwcis yt-dlp"
     Cookie Source: Ffynhonnell cwcis
     Cookie Sources:
       None: Dim
@@ -1154,7 +1158,7 @@ Video:
   Retry With Built-in Extraction: Rhoi cynnig arall arni gydag echdynnu mewnol
   Retry With yt-dlp Extraction: Rhoi cynnig arall arni gydag echdynnu yt-dlp
   Reloading video after streaming URL error: Wrthi'n ail-lwytho'r fideo ar ôl gwall URL ffrydio
-  Configure Restricted Playback Cookies Hint: Ffurfweddwch gwcis yn Gosodiadau → Meddalwedd allanol → Cwcis chwarae yt-dlp.
+  Configure Restricted Playback Cookies Hint: "Ffurfweddwch gwcis yn Gosodiadau → Meddalwedd allanol → Cwcis yt-dlp."
   Try With Configured Cookies: Rhoi cynnig arni gyda'r cwcis sydd wedi'u ffurfweddu
   Restricted Playback Authentication Failed Template: 'Nid oedd yt-dlp yn gallu cyrchu''r fideo hwn gyda''r cwcis sydd wedi''u ffurfweddu: {error}'
   Unmark As Watched: Dadfarcio fel wedi'i wylio
@@ -1590,7 +1594,7 @@ Tooltips:
     Cookie File: Dewiswch ffeil cwcis wedi'i fformatio ar gyfer Netscape er mwyn chwarae wedi'i ddilysu.
     Browser for Cookies: Darllenir cynhaliaeth porwyr o'r ffeil weithredadwy yt-dlp a ddewiswyd. Mae OpenTubeX yn gofyn i yt-dlp ddarllen y porwr hwn pan ofynnir am chwarae wedi'i ddilysu.
     Browser Profile: Enw neu ffolder proffil porwr dewisol. Gadewch yn wag i ddefnyddio'r proffil y cyrchwyd ato ddiwethaf.
-    Always Use Cookies: "Defnyddio'r cwcis sydd wedi'u ffurfweddu pryd bynnag y bydd yt-dlp yn echdynnu ffrydiau. Nid yw hyn yn newid y dull echdynnu ffrydiau i yt-dlp. Pan fydd yt-dlp wedi'i ddewis, gall fformatau i gyfrifon yn unig ddod ar gael, gan gynnwys cyfradd didau well YouTube Premium pan fydd gan y cyfrif fynediad ati. Defnyddio’r cwcis wedi’u ffurfweddu ar gyfer isdeitlau a chyfieithiadau awtomatig."
+    Always Use Cookies: "Defnyddiwch y cwcis wedi'u ffurfweddu ar gyfer lawrlwythiadau, isdeitlau a phryd bynnag y mae yt-dlp yn echdynnu ffrydiau. Nid yw hyn yn newid y dull echdynnu ffrydiau i yt-dlp. Pan fydd yt-dlp wedi'i ddewis, gall fformatau i gyfrifon yn unig ddod ar gael, gan gynnwys cyfradd didau well YouTube Premium pan fydd gan y cyfrif fynediad ati. Defnyddio’r cwcis wedi’u ffurfweddu ar gyfer isdeitlau a chyfieithiadau awtomatig."
     FFmpeg Executable Path: Mae angen FFmpeg i uno ffrydiau fideo a sain ar wahân ac i drosi sain. Yn ddiofyn, bydd OpenTubeX yn tybio bod modd canfod FFmpeg drwy'r newidyn amgylchedd PATH. Os oes angen, gallwch osod llwybr personol yma.
     Use cookies for subtitles: "Defnyddio’r cwcis wedi’u ffurfweddu ar gyfer isdeitlau a chyfieithiadau awtomatig. Mae “Defnyddio cwcis bob amser” hefyd yn galluogi hyn."
   Distraction Free Settings:

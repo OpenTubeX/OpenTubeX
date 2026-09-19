@@ -687,6 +687,10 @@ Settings:
     Title Excludes: Ο τίτλος δεν περιλαμβάνει
     Title Filter Hint: Διαχωρίστε πολλούς όρους τίτλου με κόμματα. Ένα βίντεο πρέπει να αντιστοιχεί σε τουλάχιστον έναν όρο συμπερίληψης και σε κανέναν όρο αποκλεισμού.
   External Software Settings:
+    Create YouTube session: "Δημιουργία συνεδρίας YouTube"
+    YouTube session hint: "Συνδεθείτε αν χρειάζεται και αποθηκεύστε τη συνεδρία. Επιλέξτε στις ρυθμίσεις αν θα χρησιμοποιείται για λήψεις, αναπαραγωγή ή υπότιτλους."
+    Use cookies for downloads: "Χρήση cookies για λήψεις"
+    YouTube session failed: "Αδυναμία αποθήκευσης της συνεδρίας YouTube."
     Checking FFmpeg and FFprobe: Έλεγχος FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: Δεν έχει γίνει ακόμη λήψη του FFmpeg/FFprobe. Κάντε κλικ στο παρακάτω κουμπί για να το κατεβάσετε.
     External Software Settings: Εξωτερικό λογισμικό
@@ -732,7 +736,7 @@ Settings:
       Manual: Μόνο μη αυτόματη ενημέρωση
     yt-dlp Executable Path: Διαδρομή εκτελέσιμου yt-dlp
     FFmpeg Executable Path: Διαδρομή εκτελέσιμου FFmpeg
-    Restricted Playback Authentication: Cookie αναπαραγωγής yt-dlp
+    Restricted Playback Authentication: "Cookies του yt-dlp"
     Cookie Source: Προέλευση cookie
     Cookie Sources:
       None: Καμία
@@ -1177,7 +1181,7 @@ Video:
   Retry With Built-in Extraction: Νέα προσπάθεια με ενσωματωμένη εξαγωγή
   Retry With yt-dlp Extraction: Νέα προσπάθεια με εξαγωγή yt-dlp
   Reloading video after streaming URL error: Επαναφόρτωση βίντεο μετά από σφάλμα URL ροής
-  Configure Restricted Playback Cookies Hint: Ρυθμίστε τα cookie στις Ρυθμίσεις → Εξωτερικό λογισμικό → Cookie αναπαραγωγής yt-dlp.
+  Configure Restricted Playback Cookies Hint: "Ρυθμίστε τα cookie στις Ρυθμίσεις → Εξωτερικό λογισμικό → Cookies του yt-dlp."
   Try With Configured Cookies: Δοκιμή με τα ρυθμισμένα cookie
   Restricted Playback Authentication Failed Template: 'Το yt-dlp δεν μπόρεσε να αποκτήσει πρόσβαση σε αυτό το βίντεο με τα ρυθμισμένα cookie: {error}'
   Private: Τα ιδιωτικά βίντεο δεν μπορούν να προβληθούν στο OpenTubeX, επειδή απαιτούν σύνδεση στο Google και κυριότητα του βίντεο.
@@ -1605,7 +1609,7 @@ Tooltips:
     Cookie File: Επιλέξτε ένα αρχείο cookie σε μορφή Netscape για πιστοποιημένη αναπαραγωγή.
     Browser for Cookies: Η υποστήριξη προγραμμάτων περιήγησης διαβάζεται από το επιλεγμένο εκτελέσιμο yt-dlp. Το OpenTubeX ζητά από το yt-dlp να διαβάσει αυτό το πρόγραμμα περιήγησης όταν ζητείται πιστοποιημένη αναπαραγωγή.
     Browser Profile: Προαιρετικό όνομα ή φάκελος προφίλ προγράμματος περιήγησης. Αφήστε το κενό για να χρησιμοποιηθεί το προφίλ που προσπελάστηκε πιο πρόσφατα.
-    Always Use Cookies: "Χρησιμοποιεί τα ρυθμισμένα cookie κάθε φορά που το yt-dlp εξάγει ροές. Δεν αλλάζει τη μέθοδο εξαγωγής ροής σε yt-dlp. Με επιλεγμένο το yt-dlp, μπορεί να γίνουν διαθέσιμες μορφές μόνο για λογαριασμούς, όπως ο βελτιωμένος ρυθμός μετάδοσης bit του YouTube Premium, όταν ο λογαριασμός έχει πρόσβαση. Χρήση των ρυθμισμένων cookies για υπότιτλους και αυτόματες μεταφράσεις."
+    Always Use Cookies: "Χρησιμοποιήστε τα ρυθμισμένα cookies για λήψεις, υπότιτλους και όποτε το yt-dlp εξάγει ροές. Δεν αλλάζει τη μέθοδο εξαγωγής ροής σε yt-dlp. Με επιλεγμένο το yt-dlp, μπορεί να γίνουν διαθέσιμες μορφές μόνο για λογαριασμούς, όπως ο βελτιωμένος ρυθμός μετάδοσης bit του YouTube Premium, όταν ο λογαριασμός έχει πρόσβαση. Χρήση των ρυθμισμένων cookies για υπότιτλους και αυτόματες μεταφράσεις."
     FFmpeg Executable Path: Το FFmpeg απαιτείται για τη συγχώνευση ξεχωριστών ροών βίντεο και ήχου, καθώς και για τη μετατροπή ήχου. Από προεπιλογή, το OpenTubeX θεωρεί ότι το FFmpeg μπορεί να βρεθεί μέσω της μεταβλητής περιβάλλοντος PATH. Αν χρειάζεται, μπορείτε να ορίσετε εδώ μια προσαρμοσμένη διαδρομή.
     Use cookies for subtitles: "Χρήση των ρυθμισμένων cookies για υπότιτλους και αυτόματες μεταφράσεις. Ενεργοποιείται επίσης από το «Να χρησιμοποιούνται πάντα cookies»."
   Distraction Free Settings:

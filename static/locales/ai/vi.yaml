@@ -682,6 +682,10 @@ Settings:
     Title Excludes: Tiêu đề không chứa
     Title Filter Hint: Phân tách nhiều cụm từ trong tiêu đề bằng dấu phẩy. Video phải khớp ít nhất một cụm từ cần có và không khớp cụm từ loại trừ nào.
   External Software Settings:
+    Create YouTube session: "Tạo phiên YouTube"
+    YouTube session hint: "Đăng nhập nếu cần rồi lưu phiên. Chọn trong cài đặt để sử dụng phiên cho tải xuống, phát hoặc phụ đề."
+    Use cookies for downloads: "Sử dụng cookie để tải xuống"
+    YouTube session failed: "Không thể lưu phiên YouTube."
     Checking FFmpeg and FFprobe: Đang kiểm tra FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: Chưa tải FFmpeg/FFprobe. Nhấp vào nút bên dưới để tải.
     External Software Settings: Phần mềm bên ngoài
@@ -727,7 +731,7 @@ Settings:
       Manual: Chỉ cập nhật thủ công
     yt-dlp Executable Path: Đường dẫn tệp thực thi yt-dlp
     FFmpeg Executable Path: Đường dẫn tệp thực thi FFmpeg
-    Restricted Playback Authentication: Cookie phát cho yt-dlp
+    Restricted Playback Authentication: "Cookie yt-dlp"
     Cookie Source: Nguồn cookie
     Cookie Sources:
       None: Không có
@@ -1170,7 +1174,7 @@ Video:
   Retry With Built-in Extraction: Thử lại bằng trình trích xuất tích hợp
   Retry With yt-dlp Extraction: Thử lại bằng yt-dlp
   Reloading video after streaming URL error: Đang tải lại video sau lỗi URL luồng
-  Configure Restricted Playback Cookies Hint: Thiết lập cookie trong Cài đặt → Phần mềm bên ngoài → Cookie phát cho yt-dlp.
+  Configure Restricted Playback Cookies Hint: "Thiết lập cookie trong Cài đặt → Phần mềm bên ngoài → Cookie yt-dlp."
   Try With Configured Cookies: Thử bằng cookie đã thiết lập
   Restricted Playback Authentication Failed Template: 'yt-dlp không thể truy cập video này bằng cookie đã thiết lập: {error}'
   Unmark As Watched: Bỏ đánh dấu đã xem
@@ -1597,7 +1601,7 @@ Tooltips:
     Cookie File: Chọn tệp cookie định dạng Netscape để phát nội dung cần xác thực.
     Browser for Cookies: Khả năng hỗ trợ trình duyệt được đọc từ tệp thực thi yt-dlp đã chọn. OpenTubeX yêu cầu yt-dlp đọc trình duyệt này khi cần phát nội dung xác thực.
     Browser Profile: Tên hoặc thư mục hồ sơ trình duyệt không bắt buộc. Để trống để dùng hồ sơ được truy cập gần nhất.
-    Always Use Cookies: "Dùng cookie đã thiết lập mỗi khi yt-dlp trích xuất luồng. Tùy chọn này không chuyển phương thức trích xuất luồng sang yt-dlp. Khi chọn yt-dlp, các định dạng chỉ dành cho tài khoản có thể xuất hiện, gồm tốc độ bit nâng cao của YouTube Premium nếu tài khoản có quyền truy cập. Dùng cookie đã cấu hình cho phụ đề và bản dịch tự động."
+    Always Use Cookies: "Sử dụng cookie đã cấu hình cho tải xuống, phụ đề và mỗi khi yt-dlp trích xuất luồng. Tùy chọn này không chuyển phương thức trích xuất luồng sang yt-dlp. Khi chọn yt-dlp, các định dạng chỉ dành cho tài khoản có thể xuất hiện, gồm tốc độ bit nâng cao của YouTube Premium nếu tài khoản có quyền truy cập. Dùng cookie đã cấu hình cho phụ đề và bản dịch tự động."
     FFmpeg Executable Path: Cần FFmpeg để ghép luồng video và âm thanh riêng biệt cũng như chuyển đổi âm thanh. Theo mặc định, OpenTubeX giả định có thể tìm thấy FFmpeg qua biến môi trường PATH. Bạn có thể đặt đường dẫn tùy chỉnh tại đây nếu cần.
     Use cookies for subtitles: "Dùng cookie đã cấu hình cho phụ đề và bản dịch tự động. Cũng được bật bởi \"Luôn dùng cookie\"."
   Distraction Free Settings:

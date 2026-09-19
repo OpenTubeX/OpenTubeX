@@ -674,6 +674,10 @@ Settings:
     Title Excludes: Názov neobsahuje
     Title Filter Hint: Viaceré výrazy v názve oddeľte čiarkami. Video musí obsahovať aspoň jeden zahrnutý výraz a nesmie obsahovať žiadny vylúčený výraz.
   External Software Settings:
+    Create YouTube session: "Vytvoriť reláciu YouTube"
+    YouTube session hint: "V prípade potreby sa prihláste a uložte reláciu. V nastaveniach zvoľte, či ju používať na sťahovanie, prehrávanie alebo titulky."
+    Use cookies for downloads: "Používať cookies na sťahovanie"
+    YouTube session failed: "Reláciu YouTube sa nepodarilo uložiť."
     Checking FFmpeg and FFprobe: Kontrolujú sa FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe ešte neboli stiahnuté. Stiahnite ich tlačidlom nižšie.
     External Software Settings: Externý softvér
@@ -719,7 +723,7 @@ Settings:
       Manual: Aktualizovať len ručne
     yt-dlp Executable Path: Cesta k spustiteľnému súboru yt-dlp
     FFmpeg Executable Path: Cesta k spustiteľnému súboru FFmpeg
-    Restricted Playback Authentication: Súbory cookie prehrávania pre yt-dlp
+    Restricted Playback Authentication: "Cookies yt-dlp"
     Cookie Source: Zdroj súborov cookie
     Cookie Sources:
       None: Žiadny
@@ -1145,7 +1149,7 @@ Video:
   Retry With Built-in Extraction: Skúsiť znova so vstavaným získavaním
   Retry With yt-dlp Extraction: Skúsiť znova so získavaním cez yt-dlp
   Reloading video after streaming URL error: Video sa po chybe adresy URL streamu znova načítava
-  Configure Restricted Playback Cookies Hint: Nastavte súbory cookie v časti Nastavenia → Externý softvér → Súbory cookie prehrávania pre yt-dlp.
+  Configure Restricted Playback Cookies Hint: "Nastavte súbory cookie v časti Nastavenia → Externý softvér → Cookies yt-dlp."
   Try With Configured Cookies: Skúsiť s nastavenými súbormi cookie
   Restricted Playback Authentication Failed Template: 'yt-dlp nemohol získať prístup k tomuto videu s nastavenými súbormi cookie: {error}'
   Unmark As Watched: Zrušiť označenie ako pozreté
@@ -1566,7 +1570,7 @@ Tooltips:
     Cookie File: Vyberte súbor cookie vo formáte Netscape na overené prehrávanie.
     Browser for Cookies: Podpora prehliadačov sa načíta z vybraného spustiteľného súboru yt-dlp. Pri požiadavke na overené prehrávanie OpenTubeX požiada yt-dlp, aby načítal údaje z tohto prehliadača.
     Browser Profile: Voliteľný názov alebo priečinok profilu prehliadača. Ak chcete použiť naposledy otvorený profil, ponechajte pole prázdne.
-    Always Use Cookies: "Nastavené súbory cookie sa použijú pri každom získavaní streamov cez yt-dlp. Spôsob získavania streamov sa tým nezmení na yt-dlp. Ak je vybraný yt-dlp, môžu byť dostupné formáty len pre účet vrátane vyššieho dátového toku YouTube Premium, ak k nemu má účet prístup. Používať nastavené cookies pre titulky a automatické preklady."
+    Always Use Cookies: "Používajte nastavené cookies na sťahovanie, titulky a vždy, keď yt-dlp získava streamy. Spôsob získavania streamov sa tým nezmení na yt-dlp. Ak je vybraný yt-dlp, môžu byť dostupné formáty len pre účet vrátane vyššieho dátového toku YouTube Premium, ak k nemu má účet prístup. Používať nastavené cookies pre titulky a automatické preklady."
     FFmpeg Executable Path: FFmpeg je potrebný na spájanie samostatných obrazových a zvukových streamov a na prevod zvuku. OpenTubeX predvolene predpokladá, že FFmpeg možno nájsť cez premennú prostredia PATH. V prípade potreby tu môžete nastaviť vlastnú cestu.
     Use cookies for subtitles: "Používať nastavené cookies pre titulky a automatické preklady. Zapne sa aj voľbou „Vždy používať cookies“."
   Distraction Free Settings:

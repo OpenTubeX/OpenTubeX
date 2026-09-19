@@ -682,6 +682,10 @@ Settings:
     Title Excludes: Заголовок не містить
     Title Filter Hint: Розділяйте кілька фрагментів заголовка комами. Відео має містити принаймні один із доданих фрагментів і не містити жодного з виключених.
   External Software Settings:
+    Create YouTube session: "Створити сеанс YouTube"
+    YouTube session hint: "За потреби увійдіть в обліковий запис і збережіть сеанс. У налаштуваннях виберіть, чи використовувати його для завантажень, відтворення або субтитрів."
+    Use cookies for downloads: "Використовувати файли cookie для завантажень"
+    YouTube session failed: "Не вдалося зберегти сеанс YouTube."
     Checking FFmpeg and FFprobe: Перевірка FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe ще не завантажено. Натисніть кнопку нижче, щоб завантажити їх.
     External Software Settings: Зовнішнє програмне забезпечення
@@ -727,7 +731,7 @@ Settings:
       Manual: Оновлювати лише вручну
     yt-dlp Executable Path: Шлях до виконуваного файла yt-dlp
     FFmpeg Executable Path: Шлях до виконуваного файла FFmpeg
-    Restricted Playback Authentication: Файли cookie для відтворення через yt-dlp
+    Restricted Playback Authentication: "Файли cookie yt-dlp"
     Cookie Source: Джерело файлів cookie
     Cookie Sources:
       None: Немає
@@ -1170,7 +1174,7 @@ Video:
   Retry With Built-in Extraction: Повторити з вбудованим засобом видобування
   Retry With yt-dlp Extraction: Повторити з видобуванням через yt-dlp
   Reloading video after streaming URL error: Повторне завантаження відео після помилки URL-адреси потоку
-  Configure Restricted Playback Cookies Hint: Налаштуйте файли cookie в меню Налаштування → Зовнішнє ПЗ → Файли cookie для відтворення через yt-dlp.
+  Configure Restricted Playback Cookies Hint: "Налаштуйте файли cookie в меню Налаштування → Зовнішнє ПЗ → Файли cookie yt-dlp."
   Try With Configured Cookies: Спробувати з налаштованими файлами cookie
   Restricted Playback Authentication Failed Template: 'yt-dlp не вдалося отримати доступ до цього відео з налаштованими файлами cookie: {error}'
   Private: Приватні відео не можна переглядати в OpenTubeX, оскільки для цього потрібно ввійти в Google і бути власником відео.
@@ -1600,7 +1604,7 @@ Tooltips:
     Cookie File: Виберіть файл cookie у форматі Netscape для автентифікованого відтворення.
     Browser for Cookies: Підтримувані браузери визначаються вибраним виконуваним файлом yt-dlp. Під час запиту на автентифіковане відтворення OpenTubeX доручає yt-dlp читати файли cookie із цього браузера.
     Browser Profile: Необов'язкова назва або папка профілю браузера. Залиште поле порожнім, щоб використовувати профіль, до якого востаннє зверталися.
-    Always Use Cookies: "Використовує налаштовані файли cookie щоразу, коли yt-dlp видобуває потоки. Це не перемикає спосіб видобування потоків на yt-dlp. Якщо вибрано yt-dlp, можуть стати доступними формати лише для облікових записів, зокрема підвищений бітрейт YouTube Premium, якщо обліковий запис має до нього доступ. Також використовує налаштовані файли cookie для субтитрів і автоматичних перекладів."
+    Always Use Cookies: "Використовує налаштовані файли cookie для завантажень, субтитрів і щоразу, коли yt-dlp отримує потоки. Це не перемикає спосіб видобування потоків на yt-dlp. Якщо вибрано yt-dlp, можуть стати доступними формати лише для облікових записів, зокрема підвищений бітрейт YouTube Premium, якщо обліковий запис має до нього доступ. Також використовує налаштовані файли cookie для субтитрів і автоматичних перекладів."
     FFmpeg Executable Path: FFmpeg потрібен для об'єднання окремих потоків відео й аудіо та перетворення аудіо. Типово OpenTubeX шукатиме FFmpeg за допомогою змінної середовища PATH. За потреби тут можна вказати власний шлях.
     Use cookies for subtitles: "Використовувати налаштовані cookie для субтитрів і автоматичних перекладів. Також вмикається параметром «Завжди використовувати файли cookie»."
   Distraction Free Settings:

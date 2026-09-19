@@ -674,6 +674,10 @@ Settings:
     Title Excludes: Judul tidak memuat
     Title Filter Hint: Pisahkan beberapa istilah judul dengan koma. Video harus cocok dengan setidaknya satu istilah yang disertakan dan tidak boleh cocok dengan istilah yang dikecualikan.
   External Software Settings:
+    Create YouTube session: "Buat sesi YouTube"
+    YouTube session hint: "Masuk jika diperlukan, lalu simpan sesi. Pilih di pengaturan apakah sesi digunakan untuk unduhan, pemutaran, atau subtitel."
+    Use cookies for downloads: "Gunakan kuki untuk unduhan"
+    YouTube session failed: "Tidak dapat menyimpan sesi YouTube."
     Checking FFmpeg and FFprobe: Memeriksa FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe belum diunduh. Klik tombol di bawah untuk mengunduhnya.
     External Software Settings: Perangkat Lunak Eksternal
@@ -719,7 +723,7 @@ Settings:
       Manual: Hanya perbarui secara manual
     yt-dlp Executable Path: Jalur Program yt-dlp
     FFmpeg Executable Path: Jalur Program FFmpeg
-    Restricted Playback Authentication: Kuki Pemutaran yt-dlp
+    Restricted Playback Authentication: "Kuki yt-dlp"
     Cookie Source: Sumber Kuki
     Cookie Sources:
       None: Tidak Ada
@@ -1145,7 +1149,7 @@ Video:
   Retry With Built-in Extraction: Coba lagi dengan ekstraksi bawaan
   Retry With yt-dlp Extraction: Coba lagi dengan ekstraksi yt-dlp
   Reloading video after streaming URL error: Memuat ulang video setelah galat URL streaming
-  Configure Restricted Playback Cookies Hint: Atur kuki di Pengaturan → Perangkat Lunak Eksternal → Kuki Pemutaran yt-dlp.
+  Configure Restricted Playback Cookies Hint: "Atur kuki di Pengaturan → Perangkat Lunak Eksternal → Kuki yt-dlp."
   Try With Configured Cookies: Coba dengan kuki yang telah dikonfigurasi
   Restricted Playback Authentication Failed Template: 'yt-dlp tidak dapat mengakses video ini dengan kuki yang telah dikonfigurasi: {error}'
   Collapse Playlist: Ciutkan Daftar Putar
@@ -1574,7 +1578,7 @@ Tooltips:
     Cookie File: Pilih berkas kuki berformat Netscape untuk pemutaran terautentikasi.
     Browser for Cookies: Dukungan peramban dibaca dari program yt-dlp yang dipilih. OpenTubeX meminta yt-dlp membaca peramban ini saat pemutaran terautentikasi diminta.
     Browser Profile: Nama atau folder profil peramban opsional. Biarkan kosong untuk menggunakan profil yang terakhir diakses.
-    Always Use Cookies: "Gunakan kuki yang telah dikonfigurasi setiap kali yt-dlp mengekstrak stream. Opsi ini tidak mengubah metode ekstraksi stream menjadi yt-dlp. Jika yt-dlp dipilih, format khusus akun mungkin tersedia, termasuk laju bit lebih tinggi YouTube Premium jika akun memiliki akses. Gunakan kuki yang dikonfigurasi untuk takarir dan terjemahan otomatis."
+    Always Use Cookies: "Gunakan kuki yang dikonfigurasi untuk unduhan, subtitel, dan setiap kali yt-dlp mengekstrak aliran. Opsi ini tidak mengubah metode ekstraksi stream menjadi yt-dlp. Jika yt-dlp dipilih, format khusus akun mungkin tersedia, termasuk laju bit lebih tinggi YouTube Premium jika akun memiliki akses. Gunakan kuki yang dikonfigurasi untuk takarir dan terjemahan otomatis."
     FFmpeg Executable Path: FFmpeg diperlukan untuk menggabungkan stream video dan audio terpisah serta mengonversi audio. Secara bawaan, OpenTubeX menganggap FFmpeg dapat ditemukan melalui variabel lingkungan PATH. Jika perlu, tentukan jalur khusus di sini.
     Use cookies for subtitles: "Gunakan kuki yang dikonfigurasi untuk takarir dan terjemahan otomatis. Juga diaktifkan oleh \"Selalu Gunakan Kuki\"."
   Distraction Free Settings:

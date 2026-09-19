@@ -676,6 +676,10 @@ Settings:
     Title Excludes: Başlıqda olmayan sözlər
     Title Filter Hint: Başlıq üçün bir neçə ifadəni vergüllə ayırın. Video daxil edilən ifadələrdən ən azı birinə uyğun gəlməli və istisna edilən ifadələrin heç birini ehtiva etməməlidir.
   External Software Settings:
+    Create YouTube session: "YouTube sessiyası yarat"
+    YouTube session hint: "Lazım gələrsə daxil olun və sessiyanı yadda saxlayın. Ayarlarda sessiyanın endirmələr, oxutma və ya subtitrlər üçün istifadəsini seçin."
+    Use cookies for downloads: "Endirmələr üçün kukilərdən istifadə et"
+    YouTube session failed: "YouTube sessiyasını yadda saxlamaq mümkün olmadı."
     Checking FFmpeg and FFprobe: FFmpeg/FFprobe yoxlanılır…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe hələ endirilməyib. Endirmək üçün aşağıdakı düyməni klikləyin.
     External Software Settings: Xarici proqramlar
@@ -721,7 +725,7 @@ Settings:
       Manual: Yalnız əl ilə yenilə
     yt-dlp Executable Path: yt-dlp icra faylının yolu
     FFmpeg Executable Path: FFmpeg icra faylının yolu
-    Restricted Playback Authentication: yt-dlp oxutma kukiləri
+    Restricted Playback Authentication: "yt-dlp kukiləri"
     Cookie Source: Kuki mənbəyi
     Cookie Sources:
       None: Heç biri
@@ -1148,7 +1152,7 @@ Video:
   Retry With Built-in Extraction: Daxili əldəetmə üsulu ilə yenidən cəhd et
   Retry With yt-dlp Extraction: yt-dlp ilə əldəetməni yenidən sına
   Reloading video after streaming URL error: Yayım URL-i xətasından sonra video yenidən yüklənir
-  Configure Restricted Playback Cookies Hint: Kukiləri Tənzimləmələr → Xarici proqramlar → yt-dlp oxutma kukiləri bölməsində tənzimləyin.
+  Configure Restricted Playback Cookies Hint: "Kukiləri Tənzimləmələr → Xarici proqramlar → yt-dlp kukiləri bölməsində tənzimləyin."
   Try With Configured Cookies: Tənzimlənmiş kukilərlə sına
   Restricted Playback Authentication Failed Template: 'yt-dlp tənzimlənmiş kukilərlə bu videoya giriş əldə edə bilmədi: {error}'
   Unmark As Watched: Baxılmış işarəsini götür
@@ -1579,7 +1583,7 @@ Tooltips:
     Cookie File: Hesabla oynatma üçün Netscape formatında kuki faylı seçin.
     Browser for Cookies: Brauzer dəstəyi seçilmiş yt-dlp icra faylından oxunur. Hesabla oynatma tələb olunduqda OpenTubeX yt-dlp-dən bu brauzeri oxumağı istəyir.
     Browser Profile: İstəyə bağlı brauzer profilinin adı və ya qovluğu. Son istifadə olunmuş profili istifadə etmək üçün boş buraxın.
-    Always Use Cookies: Təyin edilmiş kukiləri titrlər üçün və yt-dlp axınları əldə edən hər dəfə istifadə et. Bu, axın əldə etmə üsulunu yt-dlp-yə dəyişmir. yt-dlp seçildikdə, hesabın giriş icazəsi varsa YouTube Premium-un artırılmış bitreytli formatı da daxil olmaqla yalnız hesablar üçün formatlar əlçatan ola bilər.
+    Always Use Cookies: "Təyin edilmiş kukiləri endirmələr, subtitrlər və yt-dlp axınları əldə edərkən istifadə edin. Bu, axın əldə etmə üsulunu yt-dlp-yə dəyişmir. yt-dlp seçildikdə, hesabın giriş icazəsi varsa YouTube Premium-un artırılmış bitreytli formatı da daxil olmaqla yalnız hesablar üçün formatlar əlçatan ola bilər."
     FFmpeg Executable Path: Ayrı video və səs axınlarını birləşdirmək və səs çevirməsi üçün FFmpeg tələb olunur. İlkin olaraq OpenTubeX FFmpeg-in PATH mühit dəyişəni vasitəsilə tapıla biləcəyini qəbul edir. Lazım gələrsə, burada xüsusi yol təyin etmək olar.
     Use cookies for subtitles: Titr və avtomatik tərcümələr üçün təyin edilmiş kukiləri istifadə et. "Həmişə kukilərdən istifadə et" seçimi də bunu aktivləşdirir.
   Distraction Free Settings:

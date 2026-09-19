@@ -674,6 +674,10 @@ Settings:
     Title Excludes: Le titre ne contient pas
     Title Filter Hint: Séparez les termes du titre par des virgules. Une vidéo doit correspondre à au moins un terme inclus et à aucun terme exclu.
   External Software Settings:
+    Create YouTube session: "Créer une session YouTube"
+    YouTube session hint: "Connectez-vous si nécessaire, puis enregistrez la session. Choisissez dans les paramètres de l’utiliser pour les téléchargements, la lecture ou les sous-titres."
+    Use cookies for downloads: "Utiliser les cookies pour les téléchargements"
+    YouTube session failed: "Impossible d’enregistrer la session YouTube."
     Checking FFmpeg and FFprobe: Vérification de FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe n’ont pas encore été téléchargés. Cliquez sur le bouton ci-dessous pour les télécharger.
     External Software Settings: Logiciels externes
@@ -719,7 +723,7 @@ Settings:
       Manual: Mettre à jour uniquement manuellement
     yt-dlp Executable Path: Chemin de l’exécutable yt-dlp
     FFmpeg Executable Path: Chemin de l’exécutable FFmpeg
-    Restricted Playback Authentication: Cookies de lecture yt-dlp
+    Restricted Playback Authentication: "Cookies de yt-dlp"
     Cookie Source: Source des cookies
     Cookie Sources:
       None: Aucune
@@ -1144,7 +1148,7 @@ Video:
   Retry With Built-in Extraction: Réessayer avec l’extraction intégrée
   Retry With yt-dlp Extraction: Réessayer avec l’extraction yt-dlp
   Reloading video after streaming URL error: Rechargement de la vidéo après une erreur d’URL de diffusion
-  Configure Restricted Playback Cookies Hint: Configurez les cookies dans Paramètres → Logiciels externes → Cookies de lecture yt-dlp.
+  Configure Restricted Playback Cookies Hint: "Configurez les cookies dans Paramètres → Logiciels externes → Cookies de yt-dlp."
   Try With Configured Cookies: Essayer avec les cookies configurés
   Restricted Playback Authentication Failed Template: 'yt-dlp n’a pas pu accéder à cette vidéo avec les cookies configurés : {error}'
   Unmark As Watched: Marquer comme non regardée
@@ -1565,7 +1569,7 @@ Tooltips:
     Cookie File: Sélectionnez un fichier de cookies au format Netscape pour la lecture authentifiée.
     Browser for Cookies: La compatibilité avec les navigateurs est déterminée par l’exécutable yt-dlp sélectionné. OpenTubeX demande à yt-dlp de lire les cookies de ce navigateur lorsque la lecture authentifiée est requise.
     Browser Profile: Nom ou dossier facultatif du profil du navigateur. Laissez ce champ vide pour utiliser le dernier profil consulté.
-    Always Use Cookies: "Utilise les cookies configurés chaque fois que yt-dlp extrait des flux. Cette option ne remplace pas la méthode d’extraction des flux par yt-dlp. Lorsque yt-dlp est sélectionné, des formats réservés aux comptes peuvent devenir disponibles, notamment le débit amélioré de YouTube Premium si le compte y a accès. Utiliser les cookies configurés pour les sous-titres et les traductions automatiques."
+    Always Use Cookies: "Utilisez les cookies configurés pour les téléchargements, les sous-titres et chaque fois que yt-dlp extrait des flux. Cette option ne remplace pas la méthode d’extraction des flux par yt-dlp. Lorsque yt-dlp est sélectionné, des formats réservés aux comptes peuvent devenir disponibles, notamment le débit amélioré de YouTube Premium si le compte y a accès. Utiliser les cookies configurés pour les sous-titres et les traductions automatiques."
     FFmpeg Executable Path: FFmpeg est nécessaire pour fusionner des flux vidéo et audio distincts, ainsi que pour convertir le son. Par défaut, OpenTubeX suppose que FFmpeg est accessible au moyen de la variable d’environnement PATH. Vous pouvez définir ici un chemin personnalisé si nécessaire.
     Use cookies for subtitles: "Utiliser les cookies configurés pour les sous-titres et les traductions automatiques. Également activé par « Toujours utiliser les cookies »."
   Distraction Free Settings:

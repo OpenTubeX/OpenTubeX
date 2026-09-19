@@ -678,6 +678,10 @@ Settings:
     Title Excludes: Titill inniheldur ekki
     Title Filter Hint: Aðgreindu fleiri en eitt leitarorð fyrir titil með kommum. Myndband verður að passa við minnst eitt leitarorð sem á að taka með en ekkert þeirra sem á að útiloka.
   External Software Settings:
+    Create YouTube session: "Búa til YouTube-setu"
+    YouTube session hint: "Skráðu þig inn ef þörf krefur og vistaðu setuna. Veldu í stillingum hvort nota eigi hana fyrir niðurhal, spilun eða skjátexta."
+    Use cookies for downloads: "Nota vafrakökur við niðurhal"
+    YouTube session failed: "Ekki tókst að vista YouTube-setuna."
     Checking FFmpeg and FFprobe: Athuga FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg og FFprobe hafa ekki verið hlaðin niður enn. Smelltu á hnappinn fyrir neðan til að hlaða þeim niður.
     External Software Settings: Utanaðkomandi hugbúnaður
@@ -723,7 +727,7 @@ Settings:
       Manual: Aðeins uppfæra handvirkt
     yt-dlp Executable Path: Slóð að keyrsluskrá yt-dlp
     FFmpeg Executable Path: Slóð að keyrsluskrá FFmpeg
-    Restricted Playback Authentication: Vafrakökur fyrir spilun með yt-dlp
+    Restricted Playback Authentication: "yt-dlp-vafrakökur"
     Cookie Source: Uppruni vafrakaka
     Cookie Sources:
       None: Engar
@@ -1154,7 +1158,7 @@ Video:
   Retry With Built-in Extraction: Reyna aftur með innbyggðri útdráttaraðferð
   Retry With yt-dlp Extraction: Reyna aftur með yt-dlp-útdrætti
   Reloading video after streaming URL error: Endurhleð myndband eftir villu í streymisslóð
-  Configure Restricted Playback Cookies Hint: Stilltu vefkökur í Stillingar → Ytri hugbúnaður → Spilunarvefkökur yt-dlp.
+  Configure Restricted Playback Cookies Hint: "Stilltu vafrakökur í Stillingar → Ytri hugbúnaður → yt-dlp-vafrakökur."
   Try With Configured Cookies: Reyna með stilltum vefkökum
   Restricted Playback Authentication Failed Template: 'yt-dlp gat ekki opnað myndbandið með stilltu vefkökunum: {error}'
   Unmark As Watched: Merkja sem óskoðað
@@ -1587,7 +1591,7 @@ Tooltips:
     Cookie File: Veldu vefkökuskrá á Netscape-sniði fyrir auðkennda spilun.
     Browser for Cookies: Valda yt-dlp-keyrsluskráin ræður hvaða vafrar eru studdir. OpenTubeX biður yt-dlp um að lesa vefkökur úr þessum vafra þegar beðið er um auðkennda spilun.
     Browser Profile: Valfrjálst heiti eða mappa vafrasniðs. Skildu reitinn eftir auðan til að nota síðast opnaða sniðið.
-    Always Use Cookies: "Notar stilltar vefkökur í hvert sinn sem yt-dlp dregur út streymi. Þetta skiptir ekki yfir í yt-dlp til að draga út streymi. Þegar yt-dlp er valið kunna snið sem krefjast reiknings að verða tiltæk, þar á meðal aukinn bitahraði YouTube Premium ef reikningurinn hefur aðgang að honum. Nota stilltar vafrakökur fyrir skjátexta og sjálfvirkar þýðingar."
+    Always Use Cookies: "Notar stilltar vafrakökur fyrir niðurhal, skjátexta og þegar yt-dlp sækir streymi. Þetta skiptir ekki yfir í yt-dlp til að draga út streymi. Þegar yt-dlp er valið kunna snið sem krefjast reiknings að verða tiltæk, þar á meðal aukinn bitahraði YouTube Premium ef reikningurinn hefur aðgang að honum. Nota stilltar vafrakökur fyrir skjátexta og sjálfvirkar þýðingar."
     FFmpeg Executable Path: FFmpeg er nauðsynlegt til að sameina aðskilið mynd- og hljóðstreymi og til að umbreyta hljóði. Sjálfgefið gerir OpenTubeX ráð fyrir að FFmpeg finnist með PATH-umhverfisbreytunni. Hér má velja sérsniðna slóð ef þess þarf.
     Use cookies for subtitles: "Nota stilltar vafrakökur fyrir skjátexta og sjálfvirkar þýðingar. Virkjast einnig með „Nota alltaf vafrakökur“."
   Distraction Free Settings:
