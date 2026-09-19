@@ -10,3 +10,16 @@
   position: absolute;
   box-shadow: 0 0 0 100vmax rgb(0 0 0 / 80%);
 }
+
+.lights-off-enter-active {
+  transition: opacity 300ms ease-out;
+}
+
+.lights-off-leave-active {
+  transition: opacity 200ms ease-in;
+}
+
+.lights-off-enter-from,
+.lights-off-leave-to {
+  opacity: 0;
+}

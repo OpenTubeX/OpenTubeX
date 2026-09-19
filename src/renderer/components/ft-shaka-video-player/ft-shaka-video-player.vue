@@ -7,10 +7,17 @@
       shortsPlayer
     }"
   >
-    <LightsOffOverlay
-      v-if="lightsOffVisible"
-      :player="container"
-    />
+    <Teleport to="body">
+      <Transition
+        name="lights-off"
+        appear
+      >
+        <LightsOffOverlay
+          v-if="lightsOffVisible"
+          :player="container"
+        />
+      </Transition>
+    </Teleport>
     <canvas
       v-show="ambientModeVisible"
       ref="ambientLayoutCanvas"
