@@ -52,6 +52,7 @@ import {
   getCachedOembedTitle,
   getOembedTitle,
   getShortThumbnailUrl,
+  getVideoThumbnailUrl,
   openInternalPath,
   showApiErrorToast,
   showToast,
@@ -6156,7 +6157,11 @@ export default defineComponent({
       if (process.env.IS_CAPACITOR && preserveFullscreen && player.isFullscreen) {
         this.finishNativeFullscreenTransition?.()
         this.fullscreenTransitionCancelled = false
-        this.finishNativeFullscreenTransition = beginAndroidFullscreenTransition(this.t('Video.Fetching Streams'), this.thumbnail, () => {
+        const nextVideoId = this.tabRoute.params.id
+        const thumbnail = nextVideoId === this.videoId
+          ? this.thumbnail
+          : getVideoThumbnailUrl(nextVideoId, this.backendPreference, this.currentInvidiousInstanceUrl, this.thumbnailPreference)
+        this.finishNativeFullscreenTransition = beginAndroidFullscreenTransition(this.t('Video.Fetching Streams'), thumbnail, () => {
           this.fullscreenTransitionCancelled = true
           this.startNextVideoInFullscreen = false
           this.$refs.player?.cancelPendingFullscreen()
