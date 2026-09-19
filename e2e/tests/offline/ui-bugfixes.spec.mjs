@@ -2377,6 +2377,7 @@ for (const zoom of [1, 0.95]) {
     await page.getByRole('menuitem', { name: 'Back', exact: true }).click()
     await page.getByRole('menuitem', { name: 'Select Tab', exact: true }).click()
     await expect(cards.first().getByRole('checkbox')).toBeChecked()
+    await expect(target).toBeFocused()
     await expect(cards.getByRole('checkbox')).toHaveCount(6)
     await expect(page.locator('.capacitorPhoneTabFab')).toBeHidden()
     await cards.nth(1).getByRole('checkbox').check()

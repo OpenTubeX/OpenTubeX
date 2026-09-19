@@ -81,6 +81,7 @@ public class MobileTabSelectionTest {
                                 await(view, "!!document.querySelector('.capacitorTabActions')");
                                 clickText(view, ".capacitorTabActions button", "Context Menu.Select Tab");
                                 await(view, "!!document.querySelector('" + row + " input[type=checkbox]')");
+                                await(view, "document.activeElement === document.querySelector('" + row + " [data-tab-id]')");
                                 evaluate(view, String.format("""
                                     document.querySelectorAll('%s input[type=checkbox]').forEach(input => {
                                         if (!input.checked) input.click();

@@ -200,6 +200,9 @@ const {
   toggleActionTabPinned,
 } = useCapacitorTabActions({
   tabs,
+  afterSelect: tabId => {
+    tabsViewportRef.value?.querySelector(`[data-tab-id="${CSS.escape(tabId)}"]`)?.focus({ preventScroll: true })
+  },
   requestExit: () => emit('request-exit'),
   stopContextMenuPropagation: true,
 })

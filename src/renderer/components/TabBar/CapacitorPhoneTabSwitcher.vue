@@ -514,6 +514,9 @@ const {
   toggleActionTabPinned,
 } = useCapacitorTabActions({
   tabs,
+  afterSelect: tabId => {
+    dialogRef.value?.querySelector(`[data-tab-id="${CSS.escape(tabId)}"]`)?.focus({ preventScroll: true })
+  },
   requestExit: () => {
     closeSwitcher()
     emit('request-exit')

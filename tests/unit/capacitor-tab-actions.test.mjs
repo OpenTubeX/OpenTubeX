@@ -8,7 +8,7 @@ const source = (await readFile(new URL('../../src/renderer/components/TabBar/use
   .replace(/^import .*\n/gm, '')
   .replace('export function', 'function')
 
-function setup(t) {
+function setup(t, options = {}) {
   const tabs = ref([
     { id: 'pinned', isPinned: true },
     { id: 'first' },
@@ -30,7 +30,7 @@ function setup(t) {
     async activateTab(id) { calls.push(['activate', id]) },
   }
   const context = vm.createContext({
-    computed, ref, watch,
+    computed, nextTick, ref, watch,
     useI18n: () => ({ t: key => key }),
     getCapacitorTabService: () => service,
   })
@@ -41,6 +41,7 @@ function setup(t) {
     tabs,
     requestExit: () => calls.push(['exit']),
     afterClose: () => calls.push(['afterClose']),
+    ...options,
   }))
   return { tabs, calls, actions, service }
 }
@@ -60,6 +61,23 @@ test('selecting the context tab reveals selection and tapping toggles without ac
   assert.equal(actions.selecting.value, false)
   await actions.activateTab('last')
   assert.deepEqual(calls, [['activate', 'last']])
+})
+
+test('selecting a context tab restores focus after selection has rendered', async t => {
+  let rendered = false
+  const focused = []
+  const { actions } = setup(t, {
+    afterSelect(id) {
+      assert.equal(rendered, true)
+      assert.equal(actions.actionTab.value, null)
+      focused.push(id)
+    },
+  })
+  const stop = watch(actions.selecting, () => { rendered = true }, { flush: 'post' })
+  t.after(stop)
+  actions.openTabActions('middle')
+  await actions.selectActionTab()
+  assert.deepEqual(focused, ['middle'])
 })
 
 for (const [position, expected] of [

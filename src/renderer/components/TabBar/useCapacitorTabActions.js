@@ -1,4 +1,4 @@
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { isShareableOpenTubeXRoute, transformOpenTubeXRouteUrl } from '../../helpers/share'
@@ -16,6 +16,7 @@ const noop = () => {}
  * @param {() => void} options.requestExit
  * @param {() => void | Promise<void>} [options.afterCreate]
  * @param {() => void | Promise<void>} [options.afterActivate]
+ * @param {(tabId: string) => void | Promise<void>} [options.afterSelect]
  * @param {() => void | Promise<void>} [options.afterClose]
  * @param {() => void | Promise<void>} [options.afterDuplicate]
  * @param {() => void} [options.beforeOpenActions]
@@ -27,6 +28,7 @@ export function useCapacitorTabActions({
   requestExit,
   afterCreate = noop,
   afterActivate = noop,
+  afterSelect = noop,
   afterClose = noop,
   afterDuplicate = noop,
   beforeOpenActions = noop,
@@ -82,11 +84,14 @@ export function useCapacitorTabActions({
     selectedTabIds.value = ids
   }
 
-  function selectActionTab() {
+  async function selectActionTab() {
     if (!actionTab.value) return
+    const tabId = actionTab.value.id
     selecting.value = true
-    selectedTabIds.value = new Set([...selectedTabIds.value, actionTab.value.id])
+    selectedTabIds.value = new Set([...selectedTabIds.value, tabId])
     closeTabActions()
+    await nextTick()
+    await afterSelect(tabId)
   }
 
   const relatedTabIds = computed(() => {
