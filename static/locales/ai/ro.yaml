@@ -191,7 +191,7 @@ User Playlists:
     More videos could not be loaded.: Nu au putut fi încărcate mai multe videoclipuri.
 History:
   Repair Description: "Folosește după importarea istoricului sau când lipsesc detalii despre videoclipuri ori eticheta LIVE este incorectă."
-  Repair Details: "Completează titlurile, canalele și datele publicării care lipsesc și verifică duratele și etichetele LIVE. Progresul și starea vizionării rămân neschimbate."
+  Repair Details: "Completează titlurile, canalele și datele publicării care lipsesc și verifică duratele și etichetele LIVE. Progresul de vizionare și marcajul de videoclip vizionat rămân neschimbate."
   Repair Notice: "Istoricul mare poate dura. Solicitările eșuate sunt reîncercate automat. Videoclipurile șterse sau private pot rămâne incomplete."
   Start Repair: "Începe repararea"
   Repair Checking: "Se verifică detaliile videoclipurilor"
