@@ -64,3 +64,15 @@ test('quick speed action switches between saving and removal as current and save
   bar.updateButtonStates_()
   assert.equal(bar.saveButton_.dataset.remove, 'false')
 })
+
+test('removal does not overwrite malformed collections or collections without the channel', () => {
+  for (const saved of ['{invalid', 'null', '[]', '{}', '{"other":1.5}']) {
+    const calls = []
+    const store = {
+      getters: { getChannelPlaybackSpeeds: saved },
+      dispatch: (...args) => calls.push(args)
+    }
+    preferenceApi.removeChannelPreference(store, 'current', 'playbackSpeed')
+    assert.deepEqual(calls, [], saved)
+  }
+})

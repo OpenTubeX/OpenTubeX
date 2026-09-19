@@ -67,6 +67,8 @@ export function removeChannelPreference(store, channelId, type) {
   const { valuesKey } = preference
   const suffix = valuesKey[0].toUpperCase() + valuesKey.slice(1)
   const values = parseChannelPreferences(store.getters[`get${suffix}`], valuesKey)
+  if (!Object.hasOwn(values, channelId)) return
+
   delete values[channelId]
   return store.dispatch(`update${suffix}`, JSON.stringify(values))
 }
