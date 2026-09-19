@@ -1352,6 +1352,10 @@ Share:
   Share failed: "Linki ei õnnestunud jagada"
   Timestamp Link Copied: Ajatempliga link kopeeriti lõikelauale
 Context Menu:
+  Select Tab: Vali vahekaart
+  Close Tabs Before: Sulge eelnevad vahekaardid
+  Close Tabs After: Sulge järgnevad vahekaardid
+  Close Other Tabs: Sulge teised vahekaardid
   Copy {service} link without playlist: "Kopeeri {service} link ilma esitusloendita"
   Context Menu: Kontekstimenüü
   Select All: Vali kõik

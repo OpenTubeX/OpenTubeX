@@ -1419,6 +1419,10 @@ Share:
   Share Post: Del opslag
   Timestamp Link Copied: Linket med tidsstempel er kopieret til udklipsholderen
 Context Menu:
+  Select Tab: Vælg fane
+  Close Tabs Before: Luk foregående faner
+  Close Tabs After: Luk efterfølgende faner
+  Close Other Tabs: Luk andre faner
   Copy {service} link without playlist: "Kopiér {service}-link uden afspilningsliste"
   Context Menu: Genvejsmenu
   Select All: Markér alt

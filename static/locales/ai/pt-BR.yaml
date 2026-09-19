@@ -1350,6 +1350,10 @@ Share:
   Share failed: "Não foi possível compartilhar o link"
   Timestamp Link Copied: Link com marca temporal copiada para a área de download
 Context Menu:
+  Select Tab: Selecionar guia
+  Close Tabs Before: Fechar guias anteriores
+  Close Tabs After: Fechar guias seguintes
+  Close Other Tabs: Fechar outras guias
   Copy {service} link without playlist: "Copiar link do {service} sem playlist"
   Context Menu: Menu de contexto
   Select All: Selecionar tudo

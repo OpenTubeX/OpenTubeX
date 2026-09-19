@@ -1350,6 +1350,10 @@ Share:
   Share failed: "Odkaz se nepodařilo sdílet"
   Timestamp Link Copied: Odkaz s časovým údajem byl zkopírován do schránky
 Context Menu:
+  Select Tab: Vybrat kartu
+  Close Tabs Before: Zavřít předchozí karty
+  Close Tabs After: Zavřít následující karty
+  Close Other Tabs: Zavřít ostatní karty
   Copy {service} link without playlist: "Kopírovat odkaz na {service} bez playlistu"
   Context Menu: Místní nabídka
   Select All: Vybrat vše

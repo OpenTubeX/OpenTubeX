@@ -1371,6 +1371,10 @@ Share:
   Share failed: "Ekki tókst að deila tenglinum"
   Timestamp Link Copied: Tengill með tímamerki afritaður á klippispjald
 Context Menu:
+  Select Tab: Velja flipa
+  Close Tabs Before: Loka fyrri flipum
+  Close Tabs After: Loka síðari flipum
+  Close Other Tabs: Loka öðrum flipum
   Copy {service} link without playlist: "Afrita {service}-tengil án spilunarlista"
   Context Menu: Samhengisvalmynd
   Select All: Velja allt

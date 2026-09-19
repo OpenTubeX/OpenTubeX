@@ -1388,6 +1388,10 @@ Share:
   Share failed: "Linkin jakaminen epäonnistui"
   Timestamp Link Copied: Aikaleiman sisältävä linkki kopioitiin leikepöydälle
 Context Menu:
+  Select Tab: Valitse välilehti
+  Close Tabs Before: Sulje edeltävät välilehdet
+  Close Tabs After: Sulje seuraavat välilehdet
+  Close Other Tabs: Sulje muut välilehdet
   Copy {service} link without playlist: "Kopioi {service}-linkki ilman soittolistaa"
   Context Menu: Pikavalikko
   Select All: Valitse kaikki

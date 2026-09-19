@@ -1711,6 +1711,10 @@ Share:
   Share Post: 게시물 공유
   Timestamp Link Copied: 타임스탬프 링크를 클립보드에 복사했습니다
 Context Menu:
+  Select Tab: 탭 선택
+  Close Tabs Before: 이전 탭 닫기
+  Close Tabs After: 이후 탭 닫기
+  Close Other Tabs: 다른 탭 닫기
   Copy {service} link without playlist: "재생목록 없이 {service} 링크 복사"
   Context Menu: 상황에 맞는 메뉴
   Select All: 모두 선택

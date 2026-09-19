@@ -551,3 +551,22 @@
 :global(:root[data-reduced-motion='reduce']) .capacitorPhoneTabRow {
   transition: none;
 }
+
+.capacitorPhoneTabSelection {
+  position: absolute;
+  inset-block-end: 4px;
+  inset-inline-end: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 48px;
+  min-block-size: 48px;
+  cursor: pointer;
+}
+
+.capacitorPhoneTabSelection input {
+  inline-size: 20px;
+  block-size: 20px;
+  accent-color: var(--primary-color);
+  cursor: pointer;
+}

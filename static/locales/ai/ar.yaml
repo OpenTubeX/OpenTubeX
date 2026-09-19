@@ -1383,6 +1383,10 @@ Share:
   Share failed: "تعذرت مشاركة الرابط"
   Timestamp Link Copied: تم نسخ رابط الطابع الزمني إلى الحافظة
 Context Menu:
+  Select Tab: تحديد علامة التبويب
+  Close Tabs Before: إغلاق علامات التبويب السابقة
+  Close Tabs After: إغلاق علامات التبويب التالية
+  Close Other Tabs: إغلاق علامات التبويب الأخرى
   Copy {service} link without playlist: "نسخ رابط {service} بدون قائمة التشغيل"
   Context Menu: قائمة السياق
   Select All: حدد الكل

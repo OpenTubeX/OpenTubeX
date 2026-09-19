@@ -1392,6 +1392,10 @@ Share:
   Share failed: "Non se puido compartir a ligazón"
   Timestamp Link Copied: Copiouse no portapapeis a ligazón coa marca de tempo
 Context Menu:
+  Select Tab: Seleccionar lapela
+  Close Tabs Before: Pechar as lapelas anteriores
+  Close Tabs After: Pechar as lapelas posteriores
+  Close Other Tabs: Pechar as outras lapelas
   Copy {service} link without playlist: "Copiar a ligazón de {service} sen a lista de reprodución"
   Context Menu: Menú contextual
   Select All: Seleccionar todo
