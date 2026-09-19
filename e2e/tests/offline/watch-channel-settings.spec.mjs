@@ -62,8 +62,13 @@ test('removes each saved channel override from the watch popover without changin
   await expect(trash).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
   await expect(trash).toHaveCSS('box-shadow', 'none')
   await expect(trash).toHaveCSS('font-size', '14px')
+  const saveVolume = rows.nth(3).locator('.channelSettingSave')
+  await saveVolume.hover()
+  await expect(saveVolume).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
   for (let index = 0; index < 4; index++) {
     await rows.nth(index).getByRole('button', { name: 'Forget this setting' }).click()
+    await expect(rows).toHaveCount(0)
+    await page.locator(`${activeTab} .watchVideoInfo`).getByRole('button', { name: 'Save channel setting…', exact: true }).click()
     await expect(rows.nth(index).getByRole('button', { name: 'Forget this setting' })).toBeDisabled()
     await expect.poll(async () => Object.keys((await savedValues(page))[index])).toEqual(['other'])
   }
@@ -78,9 +83,8 @@ test('removes each saved channel override from the watch popover without changin
   await expect(rows).toHaveCount(1)
   await rows.first().locator('.channelSettingSave').press('Enter')
   await expect.poll(async () => Object.keys((await savedValues(page))[0]).length).toBe(2)
-  if (!await rows.first().isVisible()) {
-    await page.locator(`${activeTab} .watchVideoInfo`).getByRole('button', { name: 'Save channel setting…', exact: true }).click()
-  }
+  await expect(rows).toHaveCount(0)
+  await page.locator(`${activeTab} .watchVideoInfo`).getByRole('button', { name: 'Save channel setting…', exact: true }).click()
   await expect(rows.first().getByRole('button', { name: 'Forget this setting' })).toBeVisible()
   await rows.first().getByRole('button', { name: 'Forget this setting' }).press('Enter')
   await expect.poll(async () => Object.keys((await savedValues(page))[0])).toEqual(['other'])

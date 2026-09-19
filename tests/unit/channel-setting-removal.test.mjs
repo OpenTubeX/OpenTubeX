@@ -65,14 +65,29 @@ test('quick speed action switches between saving and removal as current and save
   assert.equal(bar.saveButton_.dataset.remove, 'false')
 })
 
-test('removal does not overwrite malformed collections or collections without the channel', () => {
+test('removal does not overwrite malformed collections or collections without the channel', async () => {
   for (const saved of ['{invalid', 'null', '[]', '{}', '{"other":1.5}']) {
     const calls = []
     const store = {
       getters: { getChannelPlaybackSpeeds: saved },
       dispatch: (...args) => calls.push(args)
     }
-    preferenceApi.removeChannelPreference(store, 'current', 'playbackSpeed')
+    await preferenceApi.removeChannelPreference(store, 'current', 'playbackSpeed')
     assert.deepEqual(calls, [], saved)
   }
+})
+
+test('overlapping removals read the collection after the previous write completes', async () => {
+  const store = {
+    getters: { getChannelPlaybackSpeeds: '{"first":1,"second":1.5,"other":2}' },
+    async dispatch(action, value) {
+      await new Promise(resolve => setTimeout(resolve, 1))
+      this.getters.getChannelPlaybackSpeeds = value
+    }
+  }
+  await Promise.all([
+    preferenceApi.removeChannelPreference(store, 'first', 'playbackSpeed'),
+    preferenceApi.removeChannelPreference(store, 'second', 'playbackSpeed')
+  ])
+  assert.deepEqual(JSON.parse(store.getters.getChannelPlaybackSpeeds), { other: 2 })
 })

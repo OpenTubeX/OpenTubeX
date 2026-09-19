@@ -211,7 +211,7 @@
   }
 }
 
-:deep(.channelSettingsDropdown) {
+:global(.channelSettingsDropdown) {
   inline-size: max-content;
   max-inline-size: calc(100vw - 16px);
 }
@@ -243,5 +243,6 @@
 }
 
 .channelSettingSave:not(:disabled):hover {
-  background: var(--tertiary-color);
+  background: var(--side-nav-hover-color);
+  color: var(--side-nav-hover-text-color);
 }

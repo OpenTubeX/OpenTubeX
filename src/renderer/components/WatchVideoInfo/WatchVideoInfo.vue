@@ -203,6 +203,7 @@
           />
           <FtIconButton
             v-if="channelSettingSaveActions.length > 0"
+            ref="channelSettingsButton"
             :title="t('Video.Save Channel Setting')"
             :icon="['fas', 'floppy-disk']"
             :overlay-icon="channelSettingSaveActions.some(action => action.saved) ? ['fas', 'check'] : null"
@@ -235,7 +236,7 @@
                 theme="base-no-default"
                 :title="t('Settings.Channel Settings.Forget Value')"
                 :icon="['fas', 'trash']"
-                @click="removeChannelPreference(store, props.channelId, action.value)"
+                @click="removeChannelSetting(action.value)"
               />
             </div>
           </FtIconButton>
@@ -339,7 +340,7 @@ import FtRetryImage from '../FtRetryImage.vue'
 import { ytDlp } from '../../helpers/ytDlp'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtAddToPlaylistDropdown from '../FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
@@ -835,6 +836,8 @@ const showSaveChannelVolumeButton = computed(() => {
     !store.getters.getAutoUpdateChannelVolumes
 })
 
+const channelSettingsButton = useTemplateRef('channelSettingsButton')
+
 const savedChannelSettings = computed(() => ({
   playbackSpeed: parseChannelPreferences(
     store.getters.getChannelPlaybackSpeeds,
@@ -918,6 +921,7 @@ const channelSettingSaveActions = computed(() => [
  * @param {'playbackSpeed'|'videoQuality'|'subtitlesState'|'volume'} setting
  */
 function saveChannelSetting(setting) {
+  channelSettingsButton.value?.hideDropdown()
   switch (setting) {
     case 'playbackSpeed':
       emit('save-channel-playback-speed')
@@ -932,6 +936,14 @@ function saveChannelSetting(setting) {
       emit('save-channel-volume')
       break
   }
+}
+
+/**
+ * @param {'playbackSpeed'|'videoQuality'|'subtitlesState'|'volume'} setting
+ */
+async function removeChannelSetting(setting) {
+  await removeChannelPreference(store, props.channelId, setting)
+  channelSettingsButton.value?.hideDropdown()
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

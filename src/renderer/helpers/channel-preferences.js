@@ -53,24 +53,38 @@ export function parseChannelPreferences(value, settingKey) {
   }
 }
 
+// Tabs share a store. Read each collection only after earlier removals finish.
+const pendingChannelPreferenceRemovals = new WeakMap()
+
 /**
  * Remove one saved override without changing the current player state.
  * @param {import('vuex').Store} store
  * @param {string} channelId
  * @param {string} type
- * @returns {Promise<unknown> | undefined}
+ * @returns {Promise<unknown>}
  */
-export function removeChannelPreference(store, channelId, type) {
+export async function removeChannelPreference(store, channelId, type) {
   const preference = CHANNEL_PREFERENCE_TYPES.find(preference => preference.type === type)
   if (!channelId || !preference) return
 
-  const { valuesKey } = preference
-  const suffix = valuesKey[0].toUpperCase() + valuesKey.slice(1)
-  const values = parseChannelPreferences(store.getters[`get${suffix}`], valuesKey)
-  if (!Object.hasOwn(values, channelId)) return
+  const previous = pendingChannelPreferenceRemovals.get(store) ?? Promise.resolve()
+  const removal = previous.catch(() => {}).then(() => {
+    const { valuesKey } = preference
+    const suffix = valuesKey[0].toUpperCase() + valuesKey.slice(1)
+    const values = parseChannelPreferences(store.getters[`get${suffix}`], valuesKey)
+    if (!Object.hasOwn(values, channelId)) return
 
-  delete values[channelId]
-  return store.dispatch(`update${suffix}`, JSON.stringify(values))
+    delete values[channelId]
+    return store.dispatch(`update${suffix}`, JSON.stringify(values))
+  })
+  pendingChannelPreferenceRemovals.set(store, removal)
+  try {
+    return await removal
+  } finally {
+    if (pendingChannelPreferenceRemovals.get(store) === removal) {
+      pendingChannelPreferenceRemovals.delete(store)
+    }
+  }
 }
 
 /**
