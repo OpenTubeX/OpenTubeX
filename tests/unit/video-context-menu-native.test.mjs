@@ -146,7 +146,7 @@ for (const { capacitor, phone } of [
     const items = { value: [{ label: 'Play Next' }] }
     const context = {
       process: { env: { IS_CAPACITOR: capacitor } },
-      phoneLayout: { value: phone },
+      PHONE_LAYOUT_QUERY: '(max-width: 600px), (max-height: 600px)',
       cancelMenuHold () {},
       title: { value: 'Test video' },
       videoContextMenuItems: items,
@@ -156,7 +156,10 @@ for (const { capacitor, phone } of [
         getBoundingClientRect: () => ({ left: 10, right: 30, bottom: 40 })
       }) } } },
       document: { body: { dir: 'ltr' } },
-      window: { dispatchEvent: event => dispatched.push(event) },
+      window: {
+        dispatchEvent: event => dispatched.push(event),
+        matchMedia: () => ({ matches: phone })
+      },
       CustomEvent: class {
         constructor (type, options) { this.type = type; this.detail = options.detail }
       }

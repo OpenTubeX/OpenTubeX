@@ -397,7 +397,7 @@
 
 <script setup>
 import { useContextMenuHold } from '../../composables/useContextMenuHold'
-import { usePhoneLayout } from '../../composables/usePhoneLayout'
+import { PHONE_LAYOUT_QUERY } from '../../composables/usePhoneLayout'
 import FtRetryImage from '../FtRetryImage.vue'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
@@ -1272,11 +1272,10 @@ onBeforeUnmount(() => {
 const showVideoMenuButton = computed(() => store.getters.getShowVideoMenuButton)
 
 const videoMenuButton = useTemplateRef('videoMenuButton')
-const phoneLayout = usePhoneLayout()
 
 function openVideoOptionsMenu() {
   cancelMenuHold()
-  if (process.env.IS_CAPACITOR || phoneLayout.value) {
+  if (process.env.IS_CAPACITOR || window.matchMedia(PHONE_LAYOUT_QUERY).matches) {
     openMobileContextActions({ title: title.value, actions: videoContextMenuItems })
     return
   }
