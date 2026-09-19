@@ -302,7 +302,7 @@ const state = {
   ytDlpPlaybackCookiesBrowserProfile: '',
   ytDlpPlaybackAlwaysUseCookies: false,
   ytDlpSubtitleUseCookies: false,
-  ytDlpDownloadUseCookies: false,
+  ytDlpDownloadUseCookies: true,
   ytDlpPlaybackCacheMaxEntrySize: DEFAULT_YT_DLP_PLAYBACK_CACHE_MAX_ENTRY_SIZE_MB,
   ytDlpPreloadEnabled: false,
   ytDlpPreloadCount: DEFAULT_YT_DLP_PRELOAD_COUNT,

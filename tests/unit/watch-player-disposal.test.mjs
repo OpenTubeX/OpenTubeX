@@ -54,6 +54,7 @@ const thumbnailSource = utilsSource.slice(utilsSource.indexOf('export function g
 const getVideoThumbnailUrl = vm.runInNewContext(`${thumbnailSource}; getVideoThumbnailUrl`)
 for (const scenario of [
   { name: 'incoming video', id: 'incoming', expected: 'https://i.ytimg.com/vi/incoming/mqdefault.jpg' },
+  { name: 'route without a video', id: undefined, expected: 'previous.webp' },
   { name: 'same-video reload', id: 'previous', expected: 'previous.webp' },
   { name: 'Invidious frame preference', id: 'incoming', backend: 'invidious', preference: 'middle', expected: 'https://invidious.example/vi/incoming/mq2.jpg' },
   { name: 'hidden thumbnails', id: 'incoming', preference: 'hidden', expected: null },

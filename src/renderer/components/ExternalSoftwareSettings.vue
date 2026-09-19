@@ -324,8 +324,8 @@
       />
       <FtToggleSwitch
         :label="t('Settings.External Software Settings.Use cookies for downloads')"
-        :default-value="ytDlpPlaybackAlwaysUseCookies || (ytDlpPlaybackAuthMode !== 'none' && ytDlpDownloadUseCookies)"
-        :disabled="ytDlpPlaybackAlwaysUseCookies || ytDlpPlaybackAuthMode === 'none'"
+        :default-value="ytDlpPlaybackAlwaysUseCookies || ytDlpDownloadUseCookies"
+        :disabled="ytDlpPlaybackAlwaysUseCookies"
         setting-key="ytDlpDownloadUseCookies"
         compact
         @change="store.dispatch('updateYtDlpDownloadUseCookies', $event)"

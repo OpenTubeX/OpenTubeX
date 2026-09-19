@@ -1169,6 +1169,9 @@ export default defineComponent({
     }
   },
   watch: {
+    '$store.getters.getWatchQueueLength'(length) {
+      if (length === 0 && this.mobilePanel === 'queue') this.mobilePanel = null
+    },
     errorMessage(error) {
       if (error) this.finishNativeFullscreenTransition?.()
     },
@@ -6158,7 +6161,7 @@ export default defineComponent({
         this.finishNativeFullscreenTransition?.()
         this.fullscreenTransitionCancelled = false
         const nextVideoId = this.tabRoute.params.id
-        const thumbnail = nextVideoId === this.videoId
+        const thumbnail = !nextVideoId || nextVideoId === this.videoId
           ? this.thumbnail
           : getVideoThumbnailUrl(nextVideoId, this.backendPreference, this.currentInvidiousInstanceUrl, this.thumbnailPreference)
         this.finishNativeFullscreenTransition = beginAndroidFullscreenTransition(this.t('Video.Fetching Streams'), thumbnail, () => {
