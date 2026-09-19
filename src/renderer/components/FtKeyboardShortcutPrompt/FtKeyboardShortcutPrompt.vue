@@ -257,6 +257,7 @@ const searchAndPageAppShortcuts = computed(() => [
       'FIND_PREVIOUS',
       'FIND_PREVIOUS_ALT',
       'FIND_PREVIOUS_ALT_ENTER',
+      'COPY_CURRENT_URL',
     ]
   ),
   ...getLocalizedShortcutNamesAndValues(
@@ -365,6 +366,7 @@ const localizedShortcutNameToShortcutsMappings = computed(() => {
     [t('KeyboardShortcutPrompt.Find in Page'), ['FIND_IN_PAGE']],
     [t('KeyboardShortcutPrompt.Find Next Match'), ['FIND_NEXT', 'FIND_NEXT_ALT', 'FIND_NEXT_ALT_ENTER']],
     [t('KeyboardShortcutPrompt.Find Previous Match'), ['FIND_PREVIOUS', 'FIND_PREVIOUS_ALT', 'FIND_PREVIOUS_ALT_ENTER']],
+    [t('Share.Copy Link'), ['COPY_CURRENT_URL']],
 
     [t('KeyboardShortcutPrompt.Refresh'), ['REFRESH']],
 

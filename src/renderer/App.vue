@@ -549,6 +549,7 @@ import {
   resolveExternalLinkAction,
   resolveMobileContextLinkCopyUrl,
 } from './helpers/mobileLinkActions'
+import { transformOpenTubeXRouteUrl } from './helpers/share'
 import { startProgressBarOperation } from './helpers/progressBar'
 import { initializePlatformInfo, isLinuxWayland, supportsAutoPictureInPictureMinimize } from './helpers/platform'
 import { revealStartupSplash } from './helpers/startupSplash'
@@ -3302,6 +3303,17 @@ function handleKeyboardShortcuts(event) {
   }
 
   if (commandPaletteOpen.value || tabOrganizerOpen.value) return
+
+  if (matchesKeyboardShortcut(event, shortcuts.COPY_CURRENT_URL)) {
+    event.preventDefault()
+    const publicUrl = transformOpenTubeXRouteUrl(route.fullPath, true)
+    copyToClipboard(publicUrl ?? window.location.href, {
+      ...(publicUrl && {
+        messageOnSuccess: t('Share.YouTube URL copied to clipboard')
+      })
+    })
+    return
+  }
 
   if (matchesKeyboardShortcut(event, shortcuts.FIND_IN_PAGE)) {
     event.preventDefault()
