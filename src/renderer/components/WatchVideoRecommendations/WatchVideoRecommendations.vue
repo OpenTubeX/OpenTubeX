@@ -39,7 +39,7 @@ const props = defineProps({
 const visibleData = computed(() => props.data.filter(video => !isVideoHiddenByPreferences(video, {
   hiddenChannelNames: store.getters.getChannelsHiddenNames,
   forbiddenTitles: store.getters.getForbiddenTitlesParsed,
-  hideChannelsBasedOnText: store.getters.getHideChannelsBasedOnText,
+  hideChannelsBasedOnText: false,
 })))
 
 const emit = defineEmits(['pause-player'])
