@@ -851,7 +851,10 @@ Settings:
     Posts Auto Refresh Interval: Interval voor automatisch vernieuwen van berichten
     Refresh Subscriptions While App Is Closed: "Abonnementen vernieuwen terwijl de app gesloten is"
   Distraction Free Settings:
-    Hide AI Video Summaries: "AI-videosamenvattingen verbergen"
+    AI Video Summaries: AI-videosamenvattingen
+    Hide: Verbergen
+    Collapsed: Ingeklapt
+    Expanded: Uitgeklapt
     Playing Interface Hide Delay: Vertraging bij het verbergen van de interface tijdens het afspelen
     Hide Startup Splash: Opstartscherm verbergen
     Hide Repeat Stats: Herhaalstatistieken verbergen

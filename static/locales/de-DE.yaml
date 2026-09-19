@@ -1120,7 +1120,10 @@ Settings:
     Import search history formats: 'Unterstützte Formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Setting object has insufficient data, skipping item: Das Objekt enthält unzureichende Daten, Element wird übersprungen
   Distraction Free Settings:
-    Hide AI Video Summaries: "KI-Videozusammenfassungen ausblenden"
+    AI Video Summaries: KI-Videozusammenfassungen
+    Hide: Ausblenden
+    Collapsed: Eingeklappt
+    Expanded: Ausgeklappt
     Playing Interface Hide Delay: Verzögerung zum Ausblenden der Oberfläche bei Wiedergabe
     Hide Startup Splash: Startbildschirm ausblenden
     Hide Repeat Stats: Wiederholungsstatistik ausblenden

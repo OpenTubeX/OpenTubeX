@@ -3656,6 +3656,7 @@ test.describe('watch page', () => {
       view.videoDescription = 'Short description'
       view.videoSummary = ['Short summary']
       view.videoDescriptionHtml = ''
+      await view.$store.dispatch('updateAiVideoSummaryMode', 'collapsed')
       await view.$nextTick()
     })
     const target = page.locator('.shortsAuxPanelTarget')
@@ -3671,7 +3672,7 @@ test.describe('watch page', () => {
     for (const trigger of ['collapse', 'replace', 'hide']) {
       await component.evaluate(async component => {
         const view = component.proxy
-        await view.$store.dispatch('updateHideAiVideoSummaries', false)
+        await view.$store.dispatch('updateAiVideoSummaryMode', 'collapsed')
         view.videoSummary = Array(100).fill('A long summary paragraph for scrolling.')
         await view.$nextTick()
       })
@@ -3682,7 +3683,7 @@ test.describe('watch page', () => {
         await summary.evaluate(element => { element.open = false })
       } else {
         await component.evaluate(async (component, trigger) => {
-          if (trigger === 'hide') await component.proxy.$store.dispatch('updateHideAiVideoSummaries', true)
+          if (trigger === 'hide') await component.proxy.$store.dispatch('updateAiVideoSummaryMode', 'hide')
           else component.proxy.videoSummary = ['Short summary']
           await component.proxy.$nextTick()
         }, trigger)

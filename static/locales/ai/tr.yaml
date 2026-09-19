@@ -838,7 +838,10 @@ Settings:
     Posts Auto Refresh Interval: Gönderilerin Otomatik Yenileme Aralığı
     Refresh Subscriptions While App Is Closed: "Uygulama Kapalıyken Abonelikleri Yenile"
   Distraction Free Settings:
-    Hide AI Video Summaries: "Yapay zekâ video özetlerini gizle"
+    AI Video Summaries: Yapay zekâ video özetleri
+    Hide: Gizle
+    Collapsed: Daraltılmış
+    Expanded: Genişletilmiş
     Playing Interface Hide Delay: Oynatma sırasında arayüzü gizleme gecikmesi
     Hide Startup Splash: Başlangıç Ekranını Gizle
     Hide Repeat Stats: Tekrar istatistiklerini gizle

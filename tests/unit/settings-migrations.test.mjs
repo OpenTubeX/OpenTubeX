@@ -2,7 +2,10 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { DEFAULT_NAVIGATION_ITEMS } from '../../src/navigationItems.js'
-import { migrateLegacySettings } from '../../src/renderer/helpers/settings-migrations.js'
+import {
+  migrateLegacySettings,
+  migrateStoredAiVideoSummarySetting,
+} from '../../src/renderer/helpers/settings-migrations.js'
 
 test('migrates an enabled legacy subscription progress notification preference', () => {
   assert.deepEqual(migrateLegacySettings({ showSubscriptionRefreshToast: true }), {
@@ -73,6 +76,52 @@ test('prefers the current Downloads placement preference', () => {
   }), {
     moveDownloadsToAppHeader: false,
   })
+})
+
+test('migrates the legacy AI video summary visibility preference', () => {
+  assert.deepEqual(migrateLegacySettings({ hideAiVideoSummaries: true }), {
+    aiVideoSummaryMode: 'hide',
+  })
+  assert.deepEqual(migrateLegacySettings({ hideAiVideoSummaries: false }), {
+    aiVideoSummaryMode: 'collapsed',
+  })
+})
+
+test('prefers the current AI video summary mode', () => {
+  assert.deepEqual(migrateLegacySettings({
+    hideAiVideoSummaries: true,
+    aiVideoSummaryMode: 'expanded',
+  }), {
+    aiVideoSummaryMode: 'expanded',
+  })
+})
+
+test('keeps the stored legacy AI summary preference when replacement persistence fails', async () => {
+  let deletedLegacySetting = false
+
+  await assert.rejects(migrateStoredAiVideoSummarySetting({
+    legacyValue: false,
+    hasCurrentSetting: false,
+    saveCurrentSetting: async () => { throw new Error('write failed') },
+    deleteLegacySetting: async () => { deletedLegacySetting = true },
+  }), /write failed/)
+
+  assert.equal(deletedLegacySetting, false)
+})
+
+test('removes the stored legacy AI summary preference after replacement persistence', async () => {
+  let savedMode = null
+  let deletedLegacySetting = false
+
+  await migrateStoredAiVideoSummarySetting({
+    legacyValue: false,
+    hasCurrentSetting: false,
+    saveCurrentSetting: async mode => { savedMode = mode },
+    deleteLegacySetting: async () => { deletedLegacySetting = true },
+  })
+
+  assert.equal(savedMode, 'collapsed')
+  assert.equal(deletedLegacySetting, true)
 })
 
 test('migrates navigation visibility switches to an ordered list', () => {

@@ -838,7 +838,10 @@ Settings:
     Posts Auto Refresh Interval: Bejegyzések automatikus frissítésének időköze
     Refresh Subscriptions While App Is Closed: "Feliratkozások frissítése bezárt alkalmazásnál"
   Distraction Free Settings:
-    Hide AI Video Summaries: "MI-videóösszefoglalók elrejtése"
+    AI Video Summaries: MI-videóösszefoglalók
+    Hide: Elrejtés
+    Collapsed: Összecsukva
+    Expanded: Kibontva
     Playing Interface Hide Delay: Felület elrejtésének késleltetése lejátszás közben
     Hide Startup Splash: Indítóképernyő elrejtése
     Hide Repeat Stats: Ismétlési statisztikák elrejtése

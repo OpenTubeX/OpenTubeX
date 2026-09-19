@@ -838,7 +838,10 @@ Settings:
     Posts Auto Refresh Interval: Interval automatického obnovení příspěvků
     Refresh Subscriptions While App Is Closed: "Obnovovat odběry, když je aplikace zavřená"
   Distraction Free Settings:
-    Hide AI Video Summaries: "Skrýt shrnutí videí od AI"
+    AI Video Summaries: Shrnutí videí od AI
+    Hide: Skrýt
+    Collapsed: Sbalená
+    Expanded: Rozbalená
     Playing Interface Hide Delay: Prodleva skrytí rozhraní při přehrávání
     Hide Startup Splash: Skrýt úvodní obrazovku
     Hide Repeat Stats: Skrýt statistiky opakování

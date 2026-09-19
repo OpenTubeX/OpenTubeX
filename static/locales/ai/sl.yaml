@@ -1071,7 +1071,10 @@ Settings:
     To: Na
     Confirm Before Unsubscribing: Zahtevaj potrditev pred odjavo
   Distraction Free Settings:
-    Hide AI Video Summaries: "Skrij povzetke videoposnetkov z UI"
+    AI Video Summaries: Povzetki videoposnetkov z UI
+    Hide: Skrij
+    Collapsed: Strnjeni
+    Expanded: Razširjeni
     Playing Interface Hide Delay: Zakasnitev skrivanja vmesnika med predvajanjem
     Hide Startup Splash: Skrij začetni zaslon
     Hide Repeat Stats: Skrij statistiko ponavljanja

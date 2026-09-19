@@ -846,7 +846,10 @@ Settings:
     Posts Auto Refresh Interval: Intervalo de actualización automática das publicacións
     Refresh Subscriptions While App Is Closed: "Actualizar as subscricións coa aplicación pechada"
   Distraction Free Settings:
-    Hide AI Video Summaries: "Agochar os resumos de vídeos con IA"
+    AI Video Summaries: Resumos de vídeos con IA
+    Hide: Agochar
+    Collapsed: Contraídos
+    Expanded: Expandidos
     Playing Interface Hide Delay: Atraso para agochar a interface durante a reprodución
     Hide Startup Splash: Agochar a pantalla de inicio
     Hide Repeat Stats: Agochar as estatísticas de repetición

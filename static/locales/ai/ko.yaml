@@ -1031,7 +1031,10 @@ Settings:
     To: 다음으로
     Confirm Before Unsubscribing: 구독 취소 전 확인
   Distraction Free Settings:
-    Hide AI Video Summaries: "AI 동영상 요약 숨기기"
+    AI Video Summaries: AI 동영상 요약
+    Hide: 숨기기
+    Collapsed: 접힘
+    Expanded: 펼침
     Playing Interface Hide Delay: 재생 중 인터페이스 숨김 지연
     Hide Startup Splash: 시작 화면 숨기기
     Hide Repeat Stats: 반복 통계 숨기기

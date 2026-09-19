@@ -846,7 +846,10 @@ Settings:
     Posts Auto Refresh Interval: Інтервал автоматичного оновлення дописів
     Refresh Subscriptions While App Is Closed: "Оновлювати підписки, коли застосунок закрито"
   Distraction Free Settings:
-    Hide AI Video Summaries: "Приховувати підсумки відео від ШІ"
+    AI Video Summaries: Підсумки відео від ШІ
+    Hide: Приховувати
+    Collapsed: Згорнуті
+    Expanded: Розгорнуті
     Playing Interface Hide Delay: Затримка приховування інтерфейсу під час відтворення
     Hide Startup Splash: Приховати початковий екран
     Hide Repeat Stats: Приховати статистику повторів

@@ -1,6 +1,28 @@
 import { navigationItemsFromLegacySettings } from '../../navigationItems.js'
 
 /**
+ * Persists the replacement for the legacy AI summary visibility setting before
+ * removing the legacy value. This keeps the old preference recoverable when
+ * persistence fails.
+ * @param {object} options
+ * @param {boolean} options.legacyValue
+ * @param {boolean} options.hasCurrentSetting
+ * @param {(value: 'hide' | 'collapsed') => Promise<void>} options.saveCurrentSetting
+ * @param {() => Promise<void>} options.deleteLegacySetting
+ */
+export async function migrateStoredAiVideoSummarySetting({
+  legacyValue,
+  hasCurrentSetting,
+  saveCurrentSetting,
+  deleteLegacySetting,
+}) {
+  if (!hasCurrentSetting) {
+    await saveCurrentSetting(legacyValue === true ? 'hide' : 'collapsed')
+  }
+  await deleteLegacySetting()
+}
+
+/**
  * Replaces setting keys that were renamed between exported settings formats.
  * Current keys take precedence when an import contains both versions.
  * @param {Record<string, unknown>} settings
@@ -49,6 +71,15 @@ export function migrateLegacySettings(settings) {
       migratedSettings.moveDownloadsToAppHeader = migratedSettings.moveDownloadsToQuickSettings !== true
     }
     delete migratedSettings.moveDownloadsToQuickSettings
+  }
+
+  if (Object.hasOwn(migratedSettings, 'hideAiVideoSummaries')) {
+    if (!Object.hasOwn(migratedSettings, 'aiVideoSummaryMode')) {
+      migratedSettings.aiVideoSummaryMode = migratedSettings.hideAiVideoSummaries === true
+        ? 'hide'
+        : 'collapsed'
+    }
+    delete migratedSettings.hideAiVideoSummaries
   }
 
   return migratedSettings

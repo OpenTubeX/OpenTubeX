@@ -846,7 +846,10 @@ Settings:
     Posts Auto Refresh Interval: المشاركات الفاصل الزمني للتحديث التلقائي
     Refresh Subscriptions While App Is Closed: "تحديث الاشتراكات أثناء إغلاق التطبيق"
   Distraction Free Settings:
-    Hide AI Video Summaries: "إخفاء ملخصات الفيديو بالذكاء الاصطناعي"
+    AI Video Summaries: ملخصات الفيديو بالذكاء الاصطناعي
+    Hide: إخفاء
+    Collapsed: مطوية
+    Expanded: موسعة
     Playing Interface Hide Delay: مهلة إخفاء الواجهة أثناء التشغيل
     Hide Startup Splash: إخفاء شاشة بدء التشغيل
     Hide Repeat Stats: إخفاء إحصاءات التكرار

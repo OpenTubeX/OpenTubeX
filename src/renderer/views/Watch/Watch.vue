@@ -684,9 +684,10 @@
             @timestamp-event="changeTimestamp"
           />
           <WatchVideoSummary
-            v-if="shortsMetadataOpen && !isLoading && !hideAiVideoSummaries && videoSummary.length"
+            v-if="shortsMetadataOpen && !isLoading && aiVideoSummaryMode !== 'hide' && videoSummary.length"
             :key="videoId"
             :paragraphs="videoSummary"
+            :expanded="aiVideoSummaryMode === 'expanded'"
             class="watchVideo"
             @toggle="clampShortsAuxPanelScroll"
           />
@@ -882,9 +883,10 @@
           />
         </FtPhonePanel>
         <WatchVideoSummary
-          v-if="!isLoading && !hideAiVideoSummaries && videoSummary.length && (!customShortsPlayerActive || fullscreenMetadataOpen)"
+          v-if="!isLoading && aiVideoSummaryMode !== 'hide' && videoSummary.length && (!customShortsPlayerActive || fullscreenMetadataOpen)"
           :key="videoId"
           :paragraphs="videoSummary"
+          :expanded="aiVideoSummaryMode === 'expanded'"
           class="watchVideo"
         />
       </Teleport>

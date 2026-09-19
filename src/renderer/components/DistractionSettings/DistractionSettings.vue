@@ -334,12 +334,14 @@
           setting-key="hideEndScreenAnnotations"
           @change="updateHideEndScreenAnnotations"
         />
-        <FtToggleSwitch
-          :label="t('Settings.Distraction Free Settings.Hide AI Video Summaries')"
-          :compact="true"
-          :default-value="hideAiVideoSummaries"
-          setting-key="hideAiVideoSummaries"
-          @change="store.dispatch('updateHideAiVideoSummaries', $event)"
+        <FtSelect
+          :placeholder="t('Settings.Distraction Free Settings.AI Video Summaries')"
+          :value="aiVideoSummaryMode"
+          setting-key="aiVideoSummaryMode"
+          :select-names="aiVideoSummaryModeNames"
+          :select-values="AI_VIDEO_SUMMARY_MODES"
+          :show-icon="false"
+          @change="store.dispatch('updateAiVideoSummaryMode', $event)"
         />
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Video Description')"
@@ -412,6 +414,7 @@ import { useI18n } from 'vue-i18n'
 
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
+import FtSelect from '../FtSelect/FtSelect.vue'
 import FtSlider from '../FtSlider/FtSlider.vue'
 import FtInputTags from '../FtInputTags/FtInputTags.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
@@ -423,6 +426,7 @@ import { checkYoutubeChannelId, findChannelTagInfo } from '../../helpers/channel
 
 const { t } = useI18n()
 const isElectron = process.env.IS_ELECTRON
+const AI_VIDEO_SUMMARY_MODES = ['hide', 'collapsed', 'expanded']
 
 const channelHiderDisabled = ref(false)
 
@@ -548,8 +552,13 @@ function updateHideLiveChatReplay(value) {
   store.dispatch('updateHideLiveChatReplay', value)
 }
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const hideAiVideoSummaries = computed(() => store.getters.getHideAiVideoSummaries)
+/** @type {import('vue').ComputedRef<string>} */
+const aiVideoSummaryMode = computed(() => store.getters.getAiVideoSummaryMode)
+const aiVideoSummaryModeNames = computed(() => [
+  t('Settings.Distraction Free Settings.Hide'),
+  t('Settings.Distraction Free Settings.Collapsed'),
+  t('Settings.Distraction Free Settings.Expanded'),
+])
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideVideoDescription = computed(() => store.getters.getHideVideoDescription)

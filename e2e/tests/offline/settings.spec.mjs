@@ -860,6 +860,22 @@ test.describe('settings', () => {
     })).toBe(true)
   })
 
+  test('sets the default AI video summary display mode', async ({ page }) => {
+    const focus = await goToSettingsSection(page, 'focus')
+    const summaryMode = focus.getByRole('combobox', { name: 'AI video summaries' })
+
+    await expect(summaryMode).toHaveText('Hide')
+    await summaryMode.click()
+    await expect(page.getByRole('option', { name: 'Hide', exact: true })).toBeVisible()
+    await expect(page.getByRole('option', { name: 'Collapsed', exact: true })).toBeVisible()
+    await page.getByRole('option', { name: 'Expanded', exact: true }).click()
+    await expect(summaryMode).toHaveText('Expanded')
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getAiVideoSummaryMode
+    })).toBe('expanded')
+  })
+
   test('adds and removes languages that comment translation should ignore', async ({ page }) => {
     const general = await goToSettingsSection(page, 'general')
     const enableTranslations = general.getByRole('checkbox', {
