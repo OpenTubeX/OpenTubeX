@@ -53,6 +53,7 @@ import {
   navigationItemsFromLegacySettings,
   normalizeNavigationItems,
 } from '../../../navigationItems.js'
+import { migrateStoredAiVideoSummarySetting } from '../../helpers/settings-migrations.js'
 
 const CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING = 'channelSettingsSyncMigration'
 const TUTORIAL_STATE_SETTING_IDS = new Set([
@@ -1313,14 +1314,21 @@ const customActions = {
         await dispatch('updateHideLiveChatReplay', legacyHideLiveChatEntry.value === true)
       }
 
-      if (legacyHideAiVideoSummariesEntry && !hasAiVideoSummaryModeSetting) {
-        await dispatch(
-          'updateAiVideoSummaryMode',
-          legacyHideAiVideoSummariesEntry.value === true ? 'hide' : 'collapsed'
-        )
-      }
       if (legacyHideAiVideoSummariesEntry) {
-        await DBSettingHandlers.delete('hideAiVideoSummaries')
+        try {
+          await migrateStoredAiVideoSummarySetting({
+            legacyValue: legacyHideAiVideoSummariesEntry.value,
+            hasCurrentSetting: hasAiVideoSummaryModeSetting,
+            saveCurrentSetting: async (value) => {
+              await DBSettingHandlers.upsert('aiVideoSummaryMode', value)
+              await recordSettingSyncTimestamp(commit, state, 'aiVideoSummaryMode')
+              commit('setAiVideoSummaryMode', value)
+            },
+            deleteLegacySetting: () => DBSettingHandlers.delete('hideAiVideoSummaries'),
+          })
+        } catch (error) {
+          console.error('Failed to migrate AI video summary visibility', error)
+        }
       }
 
       // Migrate the legacy auto Picture-in-Picture setting to the combinable triggers array.
