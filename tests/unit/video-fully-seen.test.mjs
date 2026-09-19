@@ -90,3 +90,26 @@ test('thumbnail action setting pairs the fully seen label with its saved value',
     assert.equal(result.names[result.values.indexOf('markAsFullySeen')], 'Video.Mark as fully seen')
   }
 })
+
+test('subscription seen and unseen menu actions are exclusive', () => {
+  const seen = source.slice(source.indexOf('const showMarkAsSeen ='), source.indexOf('\n/**', source.indexOf('const showMarkAsSeen =')))
+  const menu = source.slice(source.indexOf('const videoMenuOptions ='), source.indexOf('\n  if (hideSubscriptionFeedTypeOption.value)')) + '\nreturn options\n})'
+  for (const state of [true, false, undefined]) {
+    for (const inSubscriptions of [true, false]) {
+      const context = {
+        computed: fn => ({ value: fn() }),
+        props: { data: { isNewInSubscriptionFeed: state, isInNewSubscriptionFeed: inSubscriptions } },
+        process: { env: {} },
+        t: key => key,
+        supportsYtDlp: false
+      }
+      for (const [key, value] of Object.entries({
+        inSubscriptions, showNewSubscriptionFeedIndicator: false,
+        canMarkAsWatched: false, canMarkAsFullySeen: false, historyEntryExists: false
+      })) context[key] = { value }
+      const actions = vm.runInNewContext(seen + '\n' + menu + '\nvideoMenuOptions.value.map(option => option.value)', context)
+      assert.equal(actions.includes('markAsSeen'), inSubscriptions && state === true)
+      assert.equal(actions.includes('markAsUnseen'), inSubscriptions && state === false)
+    }
+  }
+})
