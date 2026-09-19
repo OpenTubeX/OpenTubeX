@@ -85,6 +85,89 @@ async function expectSponsorBlockContentClamp(content, previousScrollTop) {
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
+async function observeUpNextHandoff(page) {
+  await page.evaluate((activeTabSelector) => {
+    window.__emptyUpNextRendered = false
+    window.__upNextObserver = new MutationObserver(() => {
+      const recommendations = document.querySelector(`${activeTabSelector} .watchVideoRecommendations`)
+      if (recommendations && !recommendations.querySelector('.ft-list-video')) {
+        window.__emptyUpNextRendered = true
+      }
+    })
+    window.__upNextObserver.observe(document.querySelector('#app'), {
+      childList: true,
+      subtree: true,
+    })
+  }, activeTab)
+}
+
+async function expectPopulatedUpNextHandoff(page) {
+  expect(await page.evaluate(() => {
+    window.__upNextObserver.disconnect()
+    return window.__emptyUpNextRendered
+  })).toBe(false)
+}
+
+test('keeps an allowed Up Next recommendation rendered through loading and filtering', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await observeUpNextHandoff(page)
+  await openMockedVideo(page)
+  await expect(page.locator(`${activeTab} .watchVideoRecommendations .ft-list-video`).first()).toBeVisible()
+  await expectPopulatedUpNextHandoff(page)
+
+  const watchView = await watchViewHandle(page)
+  const { allowedTitle, hiddenTitles } = await watchView.evaluate(async view => {
+    view.isLoading = true
+    await view.$nextTick()
+
+    const hiddenTitles = view.recommendedVideos.slice(0, 5).map(video => video.title)
+    const nextAllowedVideo = view.recommendedVideos.slice(5)
+      .find(video => !hiddenTitles.some(title => video.title.toLowerCase().includes(title.toLowerCase())))
+    return { allowedTitle: nextAllowedVideo.title, hiddenTitles }
+  })
+  await page.evaluate(() => {
+    window.__upNextIntersectionObserver = window.IntersectionObserver
+    window.IntersectionObserver = class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+      takeRecords() { return [] }
+    }
+  })
+
+  await observeUpNextHandoff(page)
+  await watchView.evaluate(async view => {
+    view.isLoading = false
+    await view.$nextTick()
+  })
+  await expect(page.locator(`${activeTab} .watchVideoRecommendations .ft-list-video`)).toHaveCount(5)
+  await expectPopulatedUpNextHandoff(page)
+
+  await observeUpNextHandoff(page)
+  await watchView.evaluate(async (view, titles) => {
+    await view.$store.dispatch('updateForbiddenTitles', JSON.stringify(titles))
+    await view.$nextTick()
+  }, hiddenTitles)
+  await expect(page.locator(`${activeTab} .watchVideoRecommendations .title`, { hasText: allowedTitle })).toBeVisible()
+  await expectPopulatedUpNextHandoff(page)
+
+  await watchView.evaluate(async view => {
+    view.isLoading = true
+    await view.$nextTick()
+  })
+  await observeUpNextHandoff(page)
+  await watchView.evaluate(async view => {
+    view.isLoading = false
+    await view.$nextTick()
+  })
+  await expect(page.locator(`${activeTab} .watchVideoRecommendations .title`, { hasText: allowedTitle })).toBeVisible()
+  await expectPopulatedUpNextHandoff(page)
+  await page.evaluate(() => {
+    window.IntersectionObserver = window.__upNextIntersectionObserver
+  })
+  await watchView.dispose()
+})
+
 async function swipeVertically(session, bounds, distance) {
   const x = bounds.x + bounds.width / 2
   const y = bounds.y + bounds.height / 2

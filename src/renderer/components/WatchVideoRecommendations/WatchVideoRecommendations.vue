@@ -7,12 +7,14 @@
         {{ $t("Up Next") }}
       </h3>
     </div>
+    <!-- Match the five loading rows so the card is populated when the skeleton disappears. -->
     <FtListVideoLazy
-      v-for="video in data"
+      v-for="(video, index) in visibleData"
       :key="video.videoId"
       :data="video"
       appearance="recommendation"
       force-list-type="list"
+      :initial-visible-state="index < 5"
       :use-channels-hidden-preference="true"
       @pause-player="pausePlayer"
     />
@@ -21,15 +23,24 @@
 
 <script setup>
 
+import { computed } from 'vue'
 import FtCard from '../ft-card/ft-card.vue'
 import FtListVideoLazy from '../FtListVideoLazy.vue'
+import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
+import store from '../../store'
 
-defineProps({
+const props = defineProps({
   data: {
     type: Array,
     required: true
   }
 })
+
+const visibleData = computed(() => props.data.filter(video => !isVideoHiddenByPreferences(video, {
+  hiddenChannelNames: store.getters.getChannelsHiddenNames,
+  forbiddenTitles: store.getters.getForbiddenTitlesParsed,
+  hideChannelsBasedOnText: false,
+})))
 
 const emit = defineEmits(['pause-player'])
 
