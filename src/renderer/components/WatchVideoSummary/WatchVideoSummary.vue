@@ -1,6 +1,7 @@
 <template>
   <details
     class="videoSummary"
+    :open="expanded"
   >
     <summary
       @keydown.enter.space.stop
@@ -31,7 +32,8 @@
 
 <script setup>
 defineProps({
-  paragraphs: { type: Array, required: true }
+  paragraphs: { type: Array, required: true },
+  expanded: { type: Boolean, default: false }
 })
 </script>
 

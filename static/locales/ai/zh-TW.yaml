@@ -838,7 +838,10 @@ Settings:
     Posts Auto Refresh Interval: 貼文自動重新整理間隔
     Refresh Subscriptions While App Is Closed: "應用程式關閉時重新整理訂閱"
   Distraction Free Settings:
-    Hide AI Video Summaries: "隱藏 AI 影片摘要"
+    AI Video Summaries: AI 影片摘要
+    Hide: 隱藏
+    Collapsed: 收合
+    Expanded: 展開
     Playing Interface Hide Delay: 播放時介面隱藏延遲
     Hide Startup Splash: 隱藏啟動畫面
     Hide Repeat Stats: 隱藏循環統計

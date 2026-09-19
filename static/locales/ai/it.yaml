@@ -838,7 +838,10 @@ Settings:
     Posts Auto Refresh Interval: Intervallo di aggiornamento automatico dei post
     Refresh Subscriptions While App Is Closed: "Aggiorna le iscrizioni quando l'app è chiusa"
   Distraction Free Settings:
-    Hide AI Video Summaries: "Nascondi i riepiloghi video dell'IA"
+    AI Video Summaries: Riepiloghi video dell'IA
+    Hide: Nascondi
+    Collapsed: Compressi
+    Expanded: Espansi
     Playing Interface Hide Delay: Ritardo per nascondere l’interfaccia durante la riproduzione
     Hide Startup Splash: Nascondi la schermata di avvio
     Hide Repeat Stats: Nascondi statistiche di ripetizione

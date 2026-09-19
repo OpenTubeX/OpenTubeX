@@ -1055,7 +1055,10 @@ Settings:
     To: Iki
     Confirm Before Unsubscribing: Klausti prieš atsisakant prenumeratos
   Distraction Free Settings:
-    Hide AI Video Summaries: "Slėpti DI vaizdo įrašų santraukas"
+    AI Video Summaries: DI vaizdo įrašų santraukos
+    Hide: Slėpti
+    Collapsed: Suskleistos
+    Expanded: Išskleistos
     Playing Interface Hide Delay: Sąsajos slėpimo delsa atkuriant
     Hide Startup Splash: Slėpti paleidimo ekraną
     Hide Repeat Stats: Slėpti kartojimo statistiką

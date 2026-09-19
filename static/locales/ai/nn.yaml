@@ -998,7 +998,10 @@ Settings:
     To: til
     Confirm Before Unsubscribing: Stadfest før du avsluttar abonnement
   Distraction Free Settings:
-    Hide AI Video Summaries: "Gøym KI-videosamandrag"
+    AI Video Summaries: KI-videosamandrag
+    Hide: Gøym
+    Collapsed: Samanfalda
+    Expanded: Utvida
     Playing Interface Hide Delay: Forseinking før grensesnittet vert skjult under avspeling
     Hide Startup Splash: Gøym oppstartsskjerm
     Hide Repeat Stats: Skjul gjentakingsstatistikk

@@ -850,7 +850,10 @@ Settings:
     Posts Auto Refresh Interval: இடுகைத் தானியக்கப் புதுப்பிப்பு இடைவெளி
     Refresh Subscriptions While App Is Closed: "செயலி மூடியிருக்கும்போது சந்தாக்களைப் புதுப்பி"
   Distraction Free Settings:
-    Hide AI Video Summaries: "AI காணொளிச் சுருக்கங்களை மறை"
+    AI Video Summaries: AI காணொளிச் சுருக்கங்கள்
+    Hide: மறை
+    Collapsed: சுருக்கப்பட்டது
+    Expanded: விரிவாக்கப்பட்டது
     Playing Interface Hide Delay: இயக்கத்தின்போது இடைமுகத்தை மறைப்பதற்கான தாமதம்
     Hide Startup Splash: தொடக்கத் திரையை மறை
     Hide Repeat Stats: மீளியக்கப் புள்ளிவிவரங்களை மறை

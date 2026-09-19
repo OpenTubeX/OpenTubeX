@@ -840,7 +840,10 @@ Settings:
     Posts Auto Refresh Interval: Интервал за автоматично опресняване на публикациите
     Refresh Subscriptions While App Is Closed: "Опресняване на абонаментите при затворено приложение"
   Distraction Free Settings:
-    Hide AI Video Summaries: "Скриване на резюметата на видеоклипове от ИИ"
+    AI Video Summaries: Резюмета на видеоклипове от ИИ
+    Hide: Скриване
+    Collapsed: Свити
+    Expanded: Разгънати
     Playing Interface Hide Delay: Забавяне на скриването на интерфейса при възпроизвеждане
     Hide Startup Splash: Скриване на началния екран
     Hide Repeat Stats: Скриване на статистиката на повторенията

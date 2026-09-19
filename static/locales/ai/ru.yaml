@@ -821,7 +821,10 @@ Settings:
     Posts Auto Refresh Interval: Интервал автообновления публикаций
     Refresh Subscriptions While App Is Closed: "Обновлять подписки, когда приложение закрыто"
   Distraction Free Settings:
-    Hide AI Video Summaries: "Скрывать сводки видео от ИИ"
+    AI Video Summaries: Сводки видео от ИИ
+    Hide: Скрывать
+    Collapsed: Свёрнутые
+    Expanded: Развёрнутые
     Playing Interface Hide Delay: Задержка скрытия интерфейса во время воспроизведения
     Hide Startup Splash: Скрыть стартовый экран
     Hide Repeat Stats: Скрыть статистику повторов
