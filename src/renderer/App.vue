@@ -3303,6 +3303,18 @@ function handleKeyboardShortcuts(event) {
 
   if (commandPaletteOpen.value || tabOrganizerOpen.value) return
 
+  if (matchesKeyboardShortcut(event, shortcuts.COPY_CURRENT_URL)) {
+    event.preventDefault()
+    const appUrl = window.location.href.split('#')[0]
+    const publicUrl = resolveMobileContextLinkCopyUrl(window.location.href, appUrl)
+    if (publicUrl) {
+      copyToClipboard(publicUrl, {
+        messageOnSuccess: t('Share.YouTube URL copied to clipboard')
+      })
+    }
+    return
+  }
+
   if (matchesKeyboardShortcut(event, shortcuts.FIND_IN_PAGE)) {
     event.preventDefault()
     store.dispatch('showOutlines')
