@@ -924,10 +924,6 @@ Settings:
     Title Excludes: El títol exclou
     Title Filter Hint: Separeu amb comes els diversos termes del títol. Un vídeo ha de coincidir amb almenys un terme inclòs i amb cap d'exclòs.
   External Software Settings:
-    Create YouTube session: "Crea una sessió de YouTube"
-    YouTube session hint: "Inicia la sessió si cal i desa-la. Tria a la configuració si vols utilitzar-la per a baixades, reproducció o subtítols."
-    Use cookies for downloads: "Utilitza galetes per a les baixades"
-    YouTube session failed: "No s'ha pogut desar la sessió de YouTube."
     Checking FFmpeg and FFprobe: S'estan comprovant FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: Encara no s'han baixat FFmpeg/FFprobe. Feu clic al botó de sota per baixar-los.
     External Software Settings: Programari extern
@@ -973,7 +969,7 @@ Settings:
       Manual: Actualitza només manualment
     yt-dlp Executable Path: Camí de l'executable yt-dlp
     FFmpeg Executable Path: Camí de l'executable FFmpeg
-    Restricted Playback Authentication: "Galetes de yt-dlp"
+    Restricted Playback Authentication: Galetes de reproducció de yt-dlp
     Cookie Source: Origen de les galetes
     Cookie Sources:
       None: Cap
@@ -1555,7 +1551,7 @@ Video:
   Reloading video after streaming URL error: S'està tornant a carregar el vídeo després d'un error de l'URL del flux
   MembersOnly: Aquest vídeo només per a membres requereix un compte de Google amb una subscripció activa al canal.
   AgeRestricted: Aquest vídeo amb restricció d'edat requereix un compte de Google amb l'edat verificada.
-  Configure Restricted Playback Cookies Hint: "Configureu les galetes a Configuració → Programari extern → Galetes de yt-dlp."
+  Configure Restricted Playback Cookies Hint: Configureu les galetes a Configuració → Programari extern → Galetes de reproducció de yt-dlp.
   Try With Configured Cookies: Prova-ho amb les galetes configurades
   Restricted Playback Authentication Failed Template: 'yt-dlp no ha pogut accedir a aquest vídeo amb les galetes configurades: {error}'
   DRMProtected: Els vídeos protegits amb DRM no es poden reproduir a l'OpenTubeX perquè requereixen components propietaris de codi tancat. Per mirar aquest vídeo, obriu el lloc web oficial de YouTube en un navegador amb DRM activat.
@@ -2114,7 +2110,7 @@ Tooltips:
     Cookie File: Seleccioneu un fitxer de galetes amb format de Netscape per a la reproducció autenticada.
     Browser for Cookies: La compatibilitat amb navegadors es consulta a l'executable yt-dlp seleccionat. L'OpenTubeX demana a yt-dlp que llegeixi aquest navegador quan se sol·licita una reproducció autenticada.
     Browser Profile: Nom o carpeta opcional del perfil del navegador. Deixeu-ho en blanc per utilitzar el perfil al qual s'ha accedit més recentment.
-    Always Use Cookies: "Utilitza les galetes configurades per a les baixades, els subtítols i sempre que yt-dlp extregui fluxos. Això no canvia a yt-dlp el mètode d'extracció dels fluxos. Amb yt-dlp seleccionat, poden estar disponibles formats exclusius del compte, inclosa la taxa de bits millorada de YouTube Premium quan el compte hi tingui accés. Utilitza les galetes configurades per als subtítols i les traduccions automàtiques."
+    Always Use Cookies: "Utilitza les galetes configurades sempre que yt-dlp extregui fluxos. Això no canvia a yt-dlp el mètode d'extracció dels fluxos. Amb yt-dlp seleccionat, poden estar disponibles formats exclusius del compte, inclosa la taxa de bits millorada de YouTube Premium quan el compte hi tingui accés. Utilitza les galetes configurades per als subtítols i les traduccions automàtiques."
     FFmpeg Executable Path: FFmpeg és necessari per combinar fluxos de vídeo i àudio separats i per convertir àudio. De manera predeterminada, l'OpenTubeX suposa que es pot trobar FFmpeg mitjançant la variable d'entorn PATH. Si cal, podeu definir aquí un camí personalitzat.
     Use cookies for subtitles: "Utilitza les galetes configurades per als subtítols i les traduccions automàtiques. També s’activa amb «Utilitza sempre galetes»."
   Distraction Free Settings:

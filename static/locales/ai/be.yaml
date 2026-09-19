@@ -703,10 +703,6 @@ Settings:
     Title Excludes: Загаловак не змяшчае
     Title Filter Hint: Раздзяляйце некалькі фрагментаў загалоўка коскамі. Відэа павінна змяшчаць прынамсі адзін дададзены фрагмент і не змяшчаць ніводнага выключанага.
   External Software Settings:
-    Create YouTube session: "Стварыць сеанс YouTube"
-    YouTube session hint: "Пры неабходнасці ўвайдзіце і захавайце сеанс. У наладах выберыце, ці выкарыстоўваць яго для спампоўванняў, прайгравання або субцітраў."
-    Use cookies for downloads: "Выкарыстоўваць файлы cookie для спампоўванняў"
-    YouTube session failed: "Не ўдалося захаваць сеанс YouTube."
     Checking FFmpeg and FFprobe: Праверка FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe яшчэ не спампаваныя. Каб спампаваць іх, націсніце кнопку ніжэй.
     External Software Settings: Вонкавае праграмнае забеспячэнне
@@ -752,7 +748,7 @@ Settings:
       Manual: Абнаўляць толькі ўручную
     yt-dlp Executable Path: Шлях да выканальнага файла yt-dlp
     FFmpeg Executable Path: Шлях да выканальнага файла FFmpeg
-    Restricted Playback Authentication: "Файлы cookie yt-dlp"
+    Restricted Playback Authentication: Файлы cookie для прайгравання праз yt-dlp
     Cookie Source: Крыніца файлаў cookie
     Cookie Sources:
       None: Няма
@@ -766,7 +762,7 @@ Settings:
     Always Use Cookies: Заўсёды выкарыстоўваць cookie
     Restricted Playback Authentication Hint: Прадвызначана OpenTubeX перадае гэтыя cookie у yt-dlp толькі пасля таго, як вы выбераце «Паспрабаваць з наладжанымі cookie» для відэа з абмежаваннем паводле ўзросту або толькі для ўдзельнікаў.
     Restricted Playback Authentication Warning: Выкарыстанне yt-dlp з уліковым запісам Google можа прывесці да часовых або пастаянных абмежаванняў уліковага запісу.
-    Use cookies for subtitles: "Выкарыстоўваць файлы cookie для субцітраў"
+    Use cookies for subtitles: "Выкарыстоўваць кукі для субцітраў"
   Privacy Settings:
     Internet Connectivity Checks: "Праверка інтэрнэт-злучэння"
     Internet Connectivity Checks Tooltip: "Адпраўляе невялікія запыты да сервера, размешчанага арганізацыяй GrapheneOS, для праверкі доступу да інтэрнэту."
@@ -1209,7 +1205,7 @@ Video:
   Retry With Built-in Extraction: Паўтарыць з убудаваным сродкам вымання
   Retry With yt-dlp Extraction: Паўтарыць з выманнем праз yt-dlp
   Reloading video after streaming URL error: Перазагрузка відэа пасля памылкі URL патоку
-  Configure Restricted Playback Cookies Hint: "Наладзьце файлы cookie ў раздзеле «Налады → Вонкавае праграмнае забеспячэнне → Файлы cookie yt-dlp»."
+  Configure Restricted Playback Cookies Hint: Наладзьце кукі ў раздзеле «Налады → Вонкавае праграмнае забеспячэнне → Кукі прайгравання yt-dlp».
   Try With Configured Cookies: Паспрабаваць з наладжанымі кукі
   Restricted Playback Authentication Failed Template: 'yt-dlp не змог атрымаць доступ да гэтага відэа з наладжанымі кукі: {error}'
   Private: Прыватныя відэа нельга глядзець у OpenTubeX, бо для гэтага трэба ўвайсці ў Google з уліковага запісу ўладальніка відэа.
@@ -1654,7 +1650,7 @@ Tooltips:
     Cookie File: Выберыце файл cookie ў фармаце Netscape для аўтэнтыфікаванага прайгравання.
     Browser for Cookies: Падтрымка браўзераў вызначаецца з выбранага выканальнага файла yt-dlp. Пры запыце аўтэнтыфікаванага прайгравання OpenTubeX загадвае yt-dlp прачытаць файлы cookie з гэтага браўзера.
     Browser Profile: Неабавязковая назва або папка профілю браўзера. Пакіньце поле пустым, каб выкарыстоўваць апошні адкрыты профіль.
-    Always Use Cookies: "Выкарыстоўвайце наладжаныя файлы cookie для спампоўванняў, субцітраў і кожны раз, калі yt-dlp атрымлівае патокі. Гэта не пераключае метад здабывання плыняў на yt-dlp. Калі выбраны yt-dlp, могуць стаць даступнымі фарматы толькі для ўліковага запісу, у тым ліку палепшаны бітрэйт YouTube Premium, калі ўліковы запіс мае да яго доступ. Выкарыстоўваць наладжаныя кукі для субцітраў і аўтаматычных перакладаў."
+    Always Use Cookies: "Выкарыстоўвае наладжаныя файлы cookie кожны раз, калі yt-dlp здабывае плыні. Гэта не пераключае метад здабывання плыняў на yt-dlp. Калі выбраны yt-dlp, могуць стаць даступнымі фарматы толькі для ўліковага запісу, у тым ліку палепшаны бітрэйт YouTube Premium, калі ўліковы запіс мае да яго доступ. Выкарыстоўваць наладжаныя кукі для субцітраў і аўтаматычных перакладаў."
     FFmpeg Executable Path: FFmpeg патрэбны для аб'яднання асобных плыняў відэа і аўдыя ды пераўтварэння аўдыя. Прадвызначана OpenTubeX мяркуе, што FFmpeg можна знайсці праз зменную асяроддзя PATH. Пры неабходнасці тут можна задаць іншы шлях.
     Use cookies for subtitles: "Выкарыстоўваць наладжаныя кукі для субцітраў і аўтаматычных перакладаў. Таксама ўключаецца праз «Заўсёды выкарыстоўваць кукі»."
   Distraction Free Settings:

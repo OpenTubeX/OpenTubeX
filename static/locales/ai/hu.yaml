@@ -674,10 +674,6 @@ Settings:
     Title Excludes: A cím nem tartalmazza
     Title Filter Hint: A cím több keresőkifejezését vesszővel válassza el. A videónak legalább egy megadott kifejezést tartalmaznia kell, a kizárt kifejezések egyikét sem tartalmazhatja.
   External Software Settings:
-    Create YouTube session: "YouTube-munkamenet létrehozása"
-    YouTube session hint: "Szükség esetén jelentkezz be, majd mentsd a munkamenetet. A beállításokban válaszd ki, hogy letöltésekhez, lejátszáshoz vagy feliratokhoz használod-e."
-    Use cookies for downloads: "Sütik használata letöltésekhez"
-    YouTube session failed: "Nem sikerült menteni a YouTube-munkamenetet."
     Checking FFmpeg and FFprobe: FFmpeg/FFprobe ellenőrzése…
     FFmpeg and FFprobe Managed Not Downloaded: Az FFmpeg/FFprobe még nincs letöltve. A letöltéshez kattintson az alábbi gombra.
     External Software Settings: Külső szoftverek
@@ -723,7 +719,7 @@ Settings:
       Manual: Csak kézi frissítés
     yt-dlp Executable Path: yt-dlp végrehajtható fájljának elérési útja
     FFmpeg Executable Path: FFmpeg végrehajtható fájljának elérési útja
-    Restricted Playback Authentication: "yt-dlp sütik"
+    Restricted Playback Authentication: yt-dlp lejátszási sütijei
     Cookie Source: Sütik forrása
     Cookie Sources:
       None: Nincs
@@ -1149,7 +1145,7 @@ Video:
   Retry With Built-in Extraction: Újrapróbálkozás a beépített kinyeréssel
   Retry With yt-dlp Extraction: Újrapróbálkozás yt-dlp-kinyeréssel
   Reloading video after streaming URL error: Videó újratöltése az adatfolyam URL-jének hibája után
-  Configure Restricted Playback Cookies Hint: "Állítsa be a sütiket a Beállítások → Külső szoftverek → yt-dlp sütik menüpontban."
+  Configure Restricted Playback Cookies Hint: Állítsa be a sütiket a Beállítások → Külső szoftverek → yt-dlp lejátszási sütik menüpontban.
   Try With Configured Cookies: Próbálkozás a beállított sütikkel
   Restricted Playback Authentication Failed Template: 'Az yt-dlp nem tudta elérni ezt a videót a beállított sütikkel: {error}'
   Unmark As Watched: Megjelölés nem látottként
@@ -1571,7 +1567,7 @@ Tooltips:
     Cookie File: Válasszon Netscape-formátumú cookie-fájlt a hitelesített lejátszáshoz.
     Browser for Cookies: A böngészőtámogatás adatait a kiválasztott yt-dlp végrehajtható fájlból olvassa be az alkalmazás. Hitelesített lejátszás kérésekor az OpenTubeX arra utasítja a yt-dlp-t, hogy ebből a böngészőből olvassa be a cookie-kat.
     Browser Profile: Nem kötelező böngészőprofilnév vagy -mappa. Hagyja üresen a legutóbb használt profil kiválasztásához.
-    Always Use Cookies: "Használd a beállított sütiket a letöltésekhez, feliratokhoz és amikor a yt-dlp adatfolyamokat nyer ki. Ez nem állítja át az adatfolyam-kinyerési módszert yt-dlp-re. A yt-dlp kiválasztásával csak fiókkal elérhető formátumok is megjelenhetnek, köztük a YouTube Premium nagyobb bitrátája, ha a fiók hozzáfér. A beállított sütik használata a feliratokhoz és az automatikus fordításokhoz."
+    Always Use Cookies: "A beállított cookie-k használata minden alkalommal, amikor a yt-dlp adatfolyamokat nyer ki. Ez nem állítja át az adatfolyam-kinyerési módszert yt-dlp-re. A yt-dlp kiválasztásával csak fiókkal elérhető formátumok is megjelenhetnek, köztük a YouTube Premium nagyobb bitrátája, ha a fiók hozzáfér. A beállított sütik használata a feliratokhoz és az automatikus fordításokhoz."
     FFmpeg Executable Path: Az FFmpeg szükséges a különálló videó- és hangadatfolyamok egyesítéséhez, valamint a hangkonvertáláshoz. Az OpenTubeX alapértelmezés szerint azt feltételezi, hogy az FFmpeg megtalálható a PATH környezeti változó alapján. Szükség esetén itt egyéni elérési út adható meg.
     Use cookies for subtitles: "A beállított sütik használata a feliratokhoz és az automatikus fordításokhoz. A „Sütik használata mindig” beállítás is engedélyezi."
   Distraction Free Settings:

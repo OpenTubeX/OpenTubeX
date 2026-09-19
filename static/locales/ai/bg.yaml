@@ -676,10 +676,6 @@ Settings:
     Title Excludes: Заглавието не съдържа
     Title Filter Hint: Разделете с запетаи отделните изрази за заглавие. Видеоклипът трябва да съответства на поне един от включените изрази и на нито един от изключените.
   External Software Settings:
-    Create YouTube session: "Създаване на сесия в YouTube"
-    YouTube session hint: "Влезте при нужда и запазете сесията. В настройките изберете дали да се използва за изтегляния, възпроизвеждане или субтитри."
-    Use cookies for downloads: "Използване на бисквитки за изтегляния"
-    YouTube session failed: "Сесията в YouTube не може да бъде запазена."
     Checking FFmpeg and FFprobe: Проверяват се FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe все още не са изтеглени. Натиснете бутона по-долу, за да ги изтеглите.
     External Software Settings: Външен софтуер
@@ -725,7 +721,7 @@ Settings:
       Manual: Само ръчно обновяване
     yt-dlp Executable Path: Път до изпълнимия файл на yt-dlp
     FFmpeg Executable Path: Път до изпълнимия файл на FFmpeg
-    Restricted Playback Authentication: "Бисквитки на yt-dlp"
+    Restricted Playback Authentication: Бисквитки на yt-dlp за възпроизвеждане
     Cookie Source: Източник на бисквитките
     Cookie Sources:
       None: Без
@@ -1158,7 +1154,7 @@ Video:
   Retry With Built-in Extraction: Нов опит с вграденото извличане
   Retry With yt-dlp Extraction: Нов опит с извличане чрез yt-dlp
   Reloading video after streaming URL error: Презареждане на видеоклипа след грешка в URL адреса на потока
-  Configure Restricted Playback Cookies Hint: "Настройте бисквитките в Настройки → Външен софтуер → Бисквитки на yt-dlp."
+  Configure Restricted Playback Cookies Hint: Настройте бисквитките в Настройки → Външен софтуер → Бисквитки за възпроизвеждане чрез yt-dlp.
   Try With Configured Cookies: Опит с настроените бисквитки
   Restricted Playback Authentication Failed Template: 'yt-dlp не можа да получи достъп до този видеоклип с настроените бисквитки: {error}'
   Unmark As Watched: Премахване на отметката „Гледан“
@@ -1585,7 +1581,7 @@ Tooltips:
     Cookie File: Изберете файл с бисквитки във формат Netscape за удостоверено възпроизвеждане.
     Browser for Cookies: Списъкът с поддържани браузъри се получава от избрания изпълним файл на yt-dlp. При заявка за удостоверено възпроизвеждане OpenTubeX кара yt-dlp да прочете бисквитките от този браузър.
     Browser Profile: Незадължително име или папка на браузърен профил. Оставете празно, за да използвате последния използван профил.
-    Always Use Cookies: "Използвайте настроените бисквитки за изтегляния, субтитри и когато yt-dlp извлича потоци. Това не превключва метода за извличане на потоци към yt-dlp. Когато е избран yt-dlp, може да станат достъпни формати само за потребители с профил, включително повишената побитова скорост на YouTube Premium, ако профилът има достъп. Използвайте настроените бисквитки за субтитри и автоматични преводи."
+    Always Use Cookies: "Използва настроените бисквитки при всяко извличане на потоци чрез yt-dlp. Това не превключва метода за извличане на потоци към yt-dlp. Когато е избран yt-dlp, може да станат достъпни формати само за потребители с профил, включително повишената побитова скорост на YouTube Premium, ако профилът има достъп. Използвайте настроените бисквитки за субтитри и автоматични преводи."
     FFmpeg Executable Path: FFmpeg е необходим за сливането на отделни потоци с видео и звук и за преобразуването на звук. По подразбиране OpenTubeX приема, че FFmpeg може да бъде намерен чрез променливата на средата PATH. При нужда тук може да зададете друг път.
     Use cookies for subtitles: "Използвайте настроените бисквитки за субтитри и автоматични преводи. Активира се и от „Винаги използвай бисквитки“."
   Distraction Free Settings:

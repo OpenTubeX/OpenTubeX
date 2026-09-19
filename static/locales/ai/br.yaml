@@ -674,10 +674,6 @@ Settings:
     Title Excludes: "An titl n'endalc'h ket"
     Title Filter Hint: "Dispartiit termenoù an titl gant skejoù. Ur video a rank klotañ gant un termen enkorfet da vihanañ ha gant termen ezkorfet ebet."
   External Software Settings:
-    Create YouTube session: "Krouiñ un estez YouTube"
-    YouTube session hint: "Kevreit ma vez ezhomm ha saveteit an estez. Dibabit en arventennoù he implijout evit ar pellgargañ, al lenn pe an istitloù."
-    Use cookies for downloads: "Implijout toupinoù evit ar pellgargañ"
-    YouTube session failed: "N'eus ket bet gallet saveteiñ an estez YouTube."
     Checking FFmpeg and FFprobe: O wiriañ FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: N'eo ket bet pellgarget FFmpeg/FFprobe c'hoazh. Klikit war ar bouton amañ dindan evit o fellgargañ.
     External Software Settings: "Meziantoù diavaez"
@@ -723,7 +719,7 @@ Settings:
       Manual: "Hizivaat gant an dorn hepken"
     yt-dlp Executable Path: "Hent erounezadus yt-dlp"
     FFmpeg Executable Path: "Hent erounezadus FFmpeg"
-    Restricted Playback Authentication: "Toupinoù yt-dlp"
+    Restricted Playback Authentication: "Toupinoù lenn yt-dlp"
     Cookie Source: "Tarzh an toupinoù"
     Cookie Sources:
       None: "Hini ebet"
@@ -1149,7 +1145,7 @@ Video:
   Retry With Built-in Extraction: "Klask en-dro gant an eztennañ enframmat"
   Retry With yt-dlp Extraction: "Klask en-dro gant eztennañ yt-dlp"
   Reloading video after streaming URL error: "Oc'h adkargañ ar video goude ur fazi URL gwazh"
-  Configure Restricted Playback Cookies Hint: "Kefluniit an toupinoù en Arventennoù → Meziantoù diavaez → Toupinoù yt-dlp."
+  Configure Restricted Playback Cookies Hint: "Kefluniit an toupinoù en Arventennoù → Meziantoù diavaez → Toupinoù lenn yt-dlp."
   Try With Configured Cookies: "Klask gant an toupinoù kefluniet"
   Restricted Playback Authentication Failed Template: "N'eus ket bet gallet da yt-dlp haeziñ ar video-mañ gant an toupinoù kefluniet: {error}"
   Unmark As Watched: "Tennañ ar merk sellet"
@@ -1580,7 +1576,7 @@ Tooltips:
     Cookie File: "Dibabit ur restr toupinoù er mentrezh Netscape evit al lenn dilesaet."
     Browser for Cookies: "Lennet e vez skor ar merdeer diwar erounezadus yt-dlp diuzet. OpenTubeX a c'houlenn digant yt-dlp lenn ar merdeer-mañ pa vez goulennet al lenn dilesaet."
     Browser Profile: "Anv pe deuliad profil merdeer diret. Laoskit goullo evit implijout ar profil haeziñ diwezhañ."
-    Always Use Cookies: "Implijit an toupinoù kefluniet evit ar pellgargañ, an istitloù ha bep tro ma tenn yt-dlp gwazhioù. Ne cheñch ket an dra-mañ an doare eztennañ gwazhioù da yt-dlp. Gant yt-dlp diuzet e c'hall mentrezhioù miret d'ar c'hontoù bezañ hegerz, en o zouez fonnder gwell YouTube Premium pa vez aotreet ar gont. Implijout an toupinoù kefluniet evit an istitloù hag an troidigezhioù emgefreek."
+    Always Use Cookies: "Implijout an toupinoù kefluniet bep tro ma eztenn yt-dlp gwazhioù. Ne cheñch ket an dra-mañ an doare eztennañ gwazhioù da yt-dlp. Gant yt-dlp diuzet e c'hall mentrezhioù miret d'ar c'hontoù bezañ hegerz, en o zouez fonnder gwell YouTube Premium pa vez aotreet ar gont. Implijout an toupinoù kefluniet evit an istitloù hag an troidigezhioù emgefreek."
     FFmpeg Executable Path: "Rekis eo FFmpeg evit kendeuziñ gwazhioù video ha son distag hag evit amdreiñ ar son. Dre ziouer e soñj OpenTubeX e c'haller kavout FFmpeg dre argemmenn endro PATH. Gallout a reer lakaat un hent personelaet amañ ma vez ezhomm."
     Use cookies for subtitles: "Implijout an toupinoù kefluniet evit an istitloù hag an troidigezhioù emgefreek. Gweredekaet ivez gant « Implijout toupinoù atav »."
   Distraction Free Settings:

@@ -262,10 +262,6 @@ Settings:
     Concurrent Downloads: Jednoczesne pobieranie
     Bandwidth Limit: Limit przepustowości (KiB/s, 0 oznacza brak limitu)
   External Software Settings:
-    Create YouTube session: "Utwórz sesję YouTube"
-    YouTube session hint: "Zaloguj się w razie potrzeby i zapisz sesję. W ustawieniach wybierz, czy używać jej do pobierania, odtwarzania lub napisów."
-    Use cookies for downloads: "Używaj plików cookie do pobierania"
-    YouTube session failed: "Nie udało się zapisać sesji YouTube."
     Checking FFmpeg and FFprobe: Sprawdzanie FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe nie zostały jeszcze pobrane. Kliknij przycisk poniżej, aby je pobrać.
     Detected FFmpeg and FFprobe Version Template: 'Wykryta wersja FFmpeg/FFprobe: {version}'
@@ -279,7 +275,7 @@ Settings:
       Automatic: Aktualizuj automatycznie
       Ask: Pytaj przed aktualizacją
       Manual: Aktualizuj tylko ręcznie
-    Restricted Playback Authentication: "Pliki cookie yt-dlp"
+    Restricted Playback Authentication: Ciasteczka odtwarzania dla yt-dlp
     Cookie Source: Źródło ciasteczek
     Cookie Sources:
       None: Brak
@@ -591,7 +587,7 @@ Video:
   Retry With Built-in Extraction: Spróbuj ponownie za pomocą wbudowanego mechanizmu
   Retry With yt-dlp Extraction: Spróbuj ponownie za pomocą yt-dlp
   Reloading video after streaming URL error: Ponowne wczytywanie filmu po błędzie adresu URL strumienia
-  Configure Restricted Playback Cookies Hint: "Skonfiguruj ciasteczka w sekcji Ustawienia → Oprogramowanie zewnętrzne → Pliki cookie yt-dlp."
+  Configure Restricted Playback Cookies Hint: Skonfiguruj ciasteczka w sekcji Ustawienia → Oprogramowanie zewnętrzne → Ciasteczka odtwarzania dla yt-dlp.
   Try With Configured Cookies: Spróbuj ze skonfigurowanymi ciasteczkami
   Restricted Playback Authentication Failed Template: 'yt-dlp nie uzyskał dostępu do tego filmu za pomocą skonfigurowanych ciasteczek: {error}'
   Save Channel Subtitles State: Zapisz ustawienie napisów dla kanału
@@ -816,7 +812,7 @@ Tooltips:
     Cookie File: Wybierz plik ciasteczek w formacie Netscape na potrzeby uwierzytelnionego odtwarzania.
     Browser for Cookies: Obsługiwane przeglądarki są odczytywane z wybranego pliku wykonywalnego yt-dlp. Gdy potrzebne jest uwierzytelnione odtwarzanie, OpenTubeX zleca yt-dlp odczytanie ciasteczek z tej przeglądarki.
     Browser Profile: Opcjonalna nazwa lub folder profilu przeglądarki. Pozostaw puste pole, aby użyć ostatnio otwieranego profilu.
-    Always Use Cookies: "Używaj skonfigurowanych plików cookie do pobierania, napisów i za każdym razem, gdy yt-dlp pobiera informacje o strumieniach. Nie zmienia to metody pobierania strumienia na yt-dlp. Po wybraniu yt-dlp mogą być dostępne formaty przeznaczone tylko dla kont, w tym wyższa szybkość transmisji bitów YouTube Premium, jeśli konto ma do niej dostęp. Używaj skonfigurowanych plików cookie do napisów i tłumaczeń automatycznych."
+    Always Use Cookies: "Używa skonfigurowanych ciasteczek przy każdym pobieraniu strumieni przez yt-dlp. Nie zmienia to metody pobierania strumienia na yt-dlp. Po wybraniu yt-dlp mogą być dostępne formaty przeznaczone tylko dla kont, w tym wyższa szybkość transmisji bitów YouTube Premium, jeśli konto ma do niej dostęp. Używaj skonfigurowanych plików cookie do napisów i tłumaczeń automatycznych."
     Use cookies for subtitles: "Używaj skonfigurowanych plików cookie do napisów i tłumaczeń automatycznych. Włącza się także przez „Zawsze używaj ciasteczek”."
   Distraction Free Settings:
     Shorten View Counts: Pokazuje liczbę wyświetleń, komentarzy i polubień komentarzy w skróconej postaci zaokrąglonej przez YouTube, na przykład 14 tys. zamiast 14 000. Dokładne wartości są zawsze wyświetlane w całości.

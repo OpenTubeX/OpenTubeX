@@ -687,10 +687,6 @@ Settings:
     Title Excludes: הכותרת אינה כוללת
     Title Filter Hint: הפרידו מונחי כותרת בפסיקים. סרטון חייב להתאים לפחות למונח אחד שנכלל ולא להתאים לאף מונח שהוחרג.
   External Software Settings:
-    Create YouTube session: "יצירת הפעלת YouTube"
-    YouTube session hint: "יש להתחבר במידת הצורך ולשמור את ההפעלה. בהגדרות אפשר לבחור אם להשתמש בה להורדות, לניגון או לכתוביות."
-    Use cookies for downloads: "שימוש בעוגיות להורדות"
-    YouTube session failed: "לא ניתן לשמור את הפעלת YouTube."
     Checking FFmpeg and FFprobe: FFmpeg/FFprobe נבדקים…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe עדיין לא הורדו. לחצו על הכפתור למטה כדי להוריד אותם.
     External Software Settings: תוכנות חיצוניות
@@ -736,7 +732,7 @@ Settings:
       Manual: עדכון ידני בלבד
     yt-dlp Executable Path: נתיב קובץ ההפעלה של yt-dlp
     FFmpeg Executable Path: נתיב קובץ ההפעלה של FFmpeg
-    Restricted Playback Authentication: "עוגיות yt-dlp"
+    Restricted Playback Authentication: עוגיות הפעלה של yt-dlp
     Cookie Source: מקור העוגיות
     Cookie Sources:
       None: ללא
@@ -1179,7 +1175,7 @@ Video:
   Retry With Built-in Extraction: ניסיון חוזר עם החילוץ המובנה
   Retry With yt-dlp Extraction: ניסיון חוזר עם חילוץ באמצעות yt-dlp
   Reloading video after streaming URL error: הסרטון נטען מחדש לאחר שגיאה בכתובת ההזרמה
-  Configure Restricted Playback Cookies Hint: "הגדירו עוגיות בהגדרות → תוכנות חיצוניות → עוגיות yt-dlp."
+  Configure Restricted Playback Cookies Hint: הגדירו קובצי Cookie בהגדרות → תוכנות חיצוניות → קובצי Cookie להפעלת yt-dlp.
   Try With Configured Cookies: ניסיון עם קובצי ה-Cookie שהוגדרו
   Restricted Playback Authentication Failed Template: 'ל-yt-dlp לא הייתה גישה לסרטון באמצעות קובצי ה-Cookie שהוגדרו: {error}'
   Private: אי אפשר לצפות בסרטונים פרטיים ב-OpenTubeX כי הם דורשים התחברות ל-Google ובעלות על הסרטון.
@@ -1611,7 +1607,7 @@ Tooltips:
     Cookie File: בחרו קובץ עוגיות בתבנית Netscape לצורך הפעלה מאומתת.
     Browser for Cookies: רשימת הדפדפנים הנתמכים מתקבלת מקובץ ההפעלה הנבחר של yt-dlp. כשנדרשת הפעלה מאומתת, OpenTubeX מורה ל-yt-dlp לקרוא את העוגיות מדפדפן זה.
     Browser Profile: שם או תיקייה אופציונליים של פרופיל דפדפן. השאירו ריק כדי להשתמש בפרופיל שנפתח לאחרונה.
-    Always Use Cookies: "יש להשתמש בעוגיות שהוגדרו להורדות, לכתוביות ובכל פעם ש־yt-dlp מחלץ זרמים. אפשרות זו אינה משנה את שיטת חילוץ הזרמים ל-yt-dlp. כש-yt-dlp נבחר, ייתכן שיופיעו פורמטים הזמינים לחשבון בלבד, כולל קצב הסיביות המשופר של YouTube Premium אם החשבון זכאי לכך. שימוש בעוגיות שהוגדרו עבור כתוביות ותרגומים אוטומטיים."
+    Always Use Cookies: "השתמשו בעוגיות שהוגדרו בכל פעם ש-yt-dlp מחלץ זרמים. אפשרות זו אינה משנה את שיטת חילוץ הזרמים ל-yt-dlp. כש-yt-dlp נבחר, ייתכן שיופיעו פורמטים הזמינים לחשבון בלבד, כולל קצב הסיביות המשופר של YouTube Premium אם החשבון זכאי לכך. שימוש בעוגיות שהוגדרו עבור כתוביות ותרגומים אוטומטיים."
     FFmpeg Executable Path: FFmpeg נדרש למיזוג זרמי וידאו ושמע נפרדים ולהמרת שמע. כברירת מחדל, OpenTubeX מניחה שאפשר למצוא את FFmpeg דרך משתנה הסביבה PATH. במידת הצורך אפשר להגדיר כאן נתיב מותאם אישית.
     Use cookies for subtitles: "שימוש בעוגיות שהוגדרו עבור כתוביות ותרגומים אוטומטיים. מופעל גם דרך „השתמש תמיד בעוגיות”."
   Distraction Free Settings:

@@ -687,10 +687,6 @@ Settings:
     Title Excludes: Otsikko ei sisällä
     Title Filter Hint: Erota otsikon hakusanat pilkuilla. Videon otsikossa on oltava vähintään yksi mukaan otettava hakusana, eikä siinä saa olla yhtäkään pois rajattavaa hakusanaa.
   External Software Settings:
-    Create YouTube session: "Luo YouTube-istunto"
-    YouTube session hint: "Kirjaudu tarvittaessa sisään ja tallenna istunto. Valitse asetuksista, käytetäänkö sitä latauksiin, toistoon vai tekstityksiin."
-    Use cookies for downloads: "Käytä evästeitä latauksissa"
-    YouTube session failed: "YouTube-istunnon tallentaminen epäonnistui."
     Checking FFmpeg and FFprobe: Tarkistetaan FFmpeg- ja FFprobe-ohjelmia…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg- ja FFprobe-ohjelmia ei ole vielä ladattu. Lataa ne napsauttamalla alla olevaa painiketta.
     External Software Settings: Ulkoiset ohjelmistot
@@ -736,7 +732,7 @@ Settings:
       Manual: Päivitä vain manuaalisesti
     yt-dlp Executable Path: yt-dlp:n suoritustiedoston polku
     FFmpeg Executable Path: FFmpeg-suoritustiedoston polku
-    Restricted Playback Authentication: "yt-dlp-evästeet"
+    Restricted Playback Authentication: yt-dlp:n toistoevästeet
     Cookie Source: Evästeiden lähde
     Cookie Sources:
       None: Ei mitään
@@ -1179,7 +1175,7 @@ Video:
   Retry With Built-in Extraction: Yritä uudelleen sisäisellä poiminnalla
   Retry With yt-dlp Extraction: Yritä uudelleen yt-dlp-poiminnalla
   Reloading video after streaming URL error: Video ladataan uudelleen suoratoisto-osoitteen virheen jälkeen
-  Configure Restricted Playback Cookies Hint: "Määritä evästeet kohdassa Asetukset → Ulkoiset ohjelmistot → yt-dlp-evästeet."
+  Configure Restricted Playback Cookies Hint: Määritä evästeet kohdassa Asetukset → Ulkoiset ohjelmistot → yt-dlp-toiston evästeet.
   Try With Configured Cookies: Yritä määritetyillä evästeillä
   Restricted Playback Authentication Failed Template: 'yt-dlp ei voinut avata tätä videota määritetyillä evästeillä: {error}'
   Private: Yksityisiä videoita ei voi katsoa OpenTubeXissä, koska ne edellyttävät Google-kirjautumista ja videon omistajuutta.
@@ -1609,7 +1605,7 @@ Tooltips:
     Cookie File: Valitse Netscape-muotoinen evästetiedosto tunnistautumista vaativaa toistoa varten.
     Browser for Cookies: Selaintuki luetaan valitusta yt-dlp-ohjelmatiedostosta. OpenTubeX pyytää yt-dlp:tä lukemaan tämän selaimen evästeet, kun tunnistautumista vaativaa toistoa pyydetään.
     Browser Profile: Valinnainen selainprofiilin nimi tai kansio. Jos kenttä jätetään tyhjäksi, käytetään viimeksi avattua profiilia.
-    Always Use Cookies: "Käytä määritettyjä evästeitä latauksiin, tekstityksiin ja aina, kun yt-dlp hakee suoratoistoja. Tämä ei vaihda suoratoistovirtojen hakumenetelmäksi yt-dlp:tä. Kun yt-dlp on valittu, vain tilille tarkoitetut muodot voivat tulla saataville. Niihin kuuluu YouTube Premiumin parannettu bittinopeus, jos tilillä on sen käyttöoikeus. Käytä määritettyjä evästeitä tekstityksiin ja automaattisiin käännöksiin."
+    Always Use Cookies: "Käytä määritettyjä evästeitä aina, kun yt-dlp hakee suoratoistovirtoja. Tämä ei vaihda suoratoistovirtojen hakumenetelmäksi yt-dlp:tä. Kun yt-dlp on valittu, vain tilille tarkoitetut muodot voivat tulla saataville. Niihin kuuluu YouTube Premiumin parannettu bittinopeus, jos tilillä on sen käyttöoikeus. Käytä määritettyjä evästeitä tekstityksiin ja automaattisiin käännöksiin."
     FFmpeg Executable Path: FFmpeg tarvitaan erillisten video- ja äänivirtojen yhdistämiseen sekä äänen muuntamiseen. OpenTubeX olettaa oletusarvoisesti, että FFmpeg löytyy PATH-ympäristömuuttujan avulla. Tarvittaessa voit määrittää oman polun tässä.
     Use cookies for subtitles: "Käytä määritettyjä evästeitä tekstityksiin ja automaattisiin käännöksiin. Myös ”Käytä aina evästeitä” ottaa tämän käyttöön."
   Distraction Free Settings:
