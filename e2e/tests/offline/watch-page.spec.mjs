@@ -108,7 +108,7 @@ async function expectPopulatedUpNextHandoff(page) {
   })).toBe(false)
 }
 
-test('renders an allowed Up Next recommendation when the loading skeleton disappears', async ({ app, page }) => {
+test('keeps an allowed Up Next recommendation rendered through loading and filtering', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await observeUpNextHandoff(page)
   await openMockedVideo(page)
@@ -116,15 +116,23 @@ test('renders an allowed Up Next recommendation when the loading skeleton disapp
   await expectPopulatedUpNextHandoff(page)
 
   const watchView = await watchViewHandle(page)
-  const allowedTitle = await watchView.evaluate(async view => {
+  const { allowedTitle, hiddenTitles } = await watchView.evaluate(async view => {
     view.isLoading = true
     await view.$nextTick()
 
     const hiddenTitles = view.recommendedVideos.slice(0, 5).map(video => video.title)
     const nextAllowedVideo = view.recommendedVideos.slice(5)
       .find(video => !hiddenTitles.some(title => video.title.toLowerCase().includes(title.toLowerCase())))
-    await view.$store.dispatch('updateForbiddenTitles', JSON.stringify(hiddenTitles))
-    return nextAllowedVideo.title
+    return { allowedTitle: nextAllowedVideo.title, hiddenTitles }
+  })
+  await page.evaluate(() => {
+    window.__upNextIntersectionObserver = window.IntersectionObserver
+    window.IntersectionObserver = class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+      takeRecords() { return [] }
+    }
   })
 
   await observeUpNextHandoff(page)
@@ -132,8 +140,31 @@ test('renders an allowed Up Next recommendation when the loading skeleton disapp
     view.isLoading = false
     await view.$nextTick()
   })
+  await expect(page.locator(`${activeTab} .watchVideoRecommendations .ft-list-video`)).toHaveCount(5)
+  await expectPopulatedUpNextHandoff(page)
+
+  await observeUpNextHandoff(page)
+  await watchView.evaluate(async (view, titles) => {
+    await view.$store.dispatch('updateForbiddenTitles', JSON.stringify(titles))
+    await view.$nextTick()
+  }, hiddenTitles)
   await expect(page.locator(`${activeTab} .watchVideoRecommendations .title`, { hasText: allowedTitle })).toBeVisible()
   await expectPopulatedUpNextHandoff(page)
+
+  await watchView.evaluate(async view => {
+    view.isLoading = true
+    await view.$nextTick()
+  })
+  await observeUpNextHandoff(page)
+  await watchView.evaluate(async view => {
+    view.isLoading = false
+    await view.$nextTick()
+  })
+  await expect(page.locator(`${activeTab} .watchVideoRecommendations .title`, { hasText: allowedTitle })).toBeVisible()
+  await expectPopulatedUpNextHandoff(page)
+  await page.evaluate(() => {
+    window.IntersectionObserver = window.__upNextIntersectionObserver
+  })
   await watchView.dispose()
 })
 

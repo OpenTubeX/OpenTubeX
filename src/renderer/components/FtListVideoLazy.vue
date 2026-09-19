@@ -33,7 +33,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 import FtListVideo from './FtListVideo/FtListVideo.vue'
 
@@ -131,20 +131,23 @@ const forbiddenTitles = computed(() => {
   return store.getters.getForbiddenTitlesParsed
 })
 
-const hideChannelsBasedOnText = computed(() => {
-  return store.getters.getHideChannelsBasedOnText
-})
-
 const shouldBeVisible = computed(() => {
   return !isVideoHiddenByPreferences(props.data, {
     hiddenChannelNames: channelsHiddenNames.value,
     forbiddenTitles: forbiddenTitles.value,
-    hideChannelsBasedOnText: hideChannelsBasedOnText.value,
+    hideChannelsBasedOnText: false,
   })
 })
 
 const visible = ref(props.initialVisibleState && shouldBeVisible.value)
 const display = ref(shouldBeVisible.value ? 'block' : 'none')
+
+watch(() => props.initialVisibleState, (initialVisibleState) => {
+  if (initialVisibleState && shouldBeVisible.value) {
+    visible.value = true
+    display.value = 'block'
+  }
+})
 
 /**
  * @param {boolean} isVisible
