@@ -4223,6 +4223,11 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   z-index: 12;
 }
 
+/* The restore preview scales the whole player from mini to inline size. */
+.ftVideoPlayer[data-inline-mini-drag] > .scrollMiniPlayerControls {
+  visibility: hidden;
+}
+
 .scrollMiniPointerLayer {
   position: absolute;
   inset: 0;
