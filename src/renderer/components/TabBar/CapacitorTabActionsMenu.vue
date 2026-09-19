@@ -18,6 +18,7 @@
             v-if="showCloseMenu"
             ref="submenuBack"
             type="button"
+            role="menuitem"
             @click="setCloseMenu(false)"
           >
             <FtIcon

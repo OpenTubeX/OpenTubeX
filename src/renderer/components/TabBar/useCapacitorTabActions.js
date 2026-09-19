@@ -112,7 +112,7 @@ export function useCapacitorTabActions({
       }
       for (const id of ids) {
         if (tabs.value.some(tab => tab.id === id)) {
-          if (!await getCapacitorTabService().closeTab(id)) break
+          if (!await getCapacitorTabService().closeTab(id)) return
         }
       }
       clearSelection()

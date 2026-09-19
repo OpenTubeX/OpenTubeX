@@ -118,6 +118,22 @@ test('removed tabs are pruned from selection', async t => {
   assert.equal(actions.selectedTabIds.value.size, 0)
 })
 
+test('a refused close keeps the remaining selection available for retry', async t => {
+  const { actions, service, tabs, calls } = setup(t)
+  actions.openTabActions('first')
+  actions.selectActionTab()
+  actions.toggleTabSelection('middle')
+  const close = service.closeTab
+  service.closeTab = async id => id === 'middle' ? false : close(id)
+  await actions.closeSelectedTabs()
+  await nextTick()
+  assert.deepEqual(tabs.value.map(tab => tab.id), ['pinned', 'middle', 'last'])
+  assert.equal(actions.selecting.value, true)
+  assert.deepEqual([...actions.selectedTabIds.value], ['middle'])
+  assert.equal(actions.closingTabs.value, false)
+  assert.deepEqual(calls, [['close', 'first']])
+})
+
 test('failed closure stops the batch and always releases the busy state', async t => {
   const { actions, service } = setup(t)
   service.closeTab = async () => { throw new Error('navigation failed') }

@@ -27,6 +27,11 @@ public class MobileTabSelectionTest {
             await(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || !!document.querySelector('.tutorialActions button')");
             evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
             await(view, "!document.querySelector('.tutorialOverlay')");
+            assertEquals("Run in a fresh temporary app profile", "true", evaluate(view, String.format("""
+                %s.getters.getTabs.length === 1 && !%s.getters.getTabs[0].isPinned &&
+                %s.getters.getTabs[0].route.path === '/' + %s.getters.getLandingPage &&
+                %s.getters.getClosedTabs.length === 0
+                """, STORE, STORE, STORE, STORE, STORE)));
             evaluate(view, String.format("""
                 window.mobileTabsSaved = {
                     scale: %s.getters.getUiScale,
@@ -74,7 +79,7 @@ public class MobileTabSelectionTest {
                             if (closeMode.equals("selected")) {
                                 evaluate(view, "document.querySelector('" + row + "').dispatchEvent(new MouseEvent('contextmenu', { bubbles: true }))");
                                 await(view, "!!document.querySelector('.capacitorTabActions')");
-                                clickText(view, ".capacitorTabActions button", "Select Tab");
+                                clickText(view, ".capacitorTabActions button", "Context Menu.Select Tab");
                                 await(view, "!!document.querySelector('" + row + " input[type=checkbox]')");
                                 evaluate(view, String.format("""
                                     document.querySelectorAll('%s input[type=checkbox]').forEach(input => {
@@ -94,10 +99,10 @@ public class MobileTabSelectionTest {
                                 evaluate(view, "[...document.querySelectorAll('" + row + "')]" + target +
                                     ".dispatchEvent(new MouseEvent('contextmenu', { bubbles: true }))");
                                 await(view, "!!document.querySelector('.capacitorTabActions')");
-                                clickText(view, ".capacitorTabActions button", "Close Tabs");
+                                clickText(view, ".capacitorTabActions button", "Context Menu.Close Tabs");
                                 await(view, "!!document.querySelector('.capacitorTabActionHeader button')");
                                 clickText(view, ".capacitorTabActions button", closeMode.equals("Other")
-                                    ? "Close Other Tabs" : "Close Tabs " + closeMode);
+                                    ? "Context Menu.Close Other Tabs" : "Context Menu.Close Tabs " + closeMode);
                             }
                             await(view, "document.querySelectorAll('" + row + "').length === 1");
                             await(view, "!document.querySelector('.capacitorTabSelectionControls')");
@@ -117,7 +122,7 @@ public class MobileTabSelectionTest {
                                 """, viewport, content, scrollbar, axis,
                                     dimension.toLowerCase(), dimension));
                             if (layout.equals("phone")) {
-                                evaluate(view, "document.querySelector('.capacitorPhoneTabHeader button[title=Close]').click()");
+                                evaluate(view, "[...document.querySelectorAll('.capacitorPhoneTabHeader button')].find(button => button.title === document.querySelector('#app').__vue_app__.config.globalProperties.$t('Close')).click()");
                                 await(view, "!document.querySelector('.capacitorPhoneTabDialog')");
                             }
                         }
@@ -137,7 +142,7 @@ public class MobileTabSelectionTest {
     }
 
     private static void clickText(WebView view, String selector, String text) throws Exception {
-        evaluate(view, "[...document.querySelectorAll('" + selector + "')].find(button => button.textContent.trim() === '" + text + "').click()");
+        evaluate(view, "[...document.querySelectorAll('" + selector + "')].find(button => button.textContent.trim() === document.querySelector('#app').__vue_app__.config.globalProperties.$t('" + text + "')).click()");
     }
 
     private static String evaluate(WebView view, String script) throws Exception {

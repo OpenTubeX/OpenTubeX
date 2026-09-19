@@ -303,7 +303,7 @@
               </div>
             </div>
             <button
-              v-if="activeView === 'open'"
+              v-if="activeView === 'open' && !selecting"
               type="button"
               class="capacitorPhoneTabFab"
               :aria-label="t('New Tab')"
