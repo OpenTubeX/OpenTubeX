@@ -190,6 +190,15 @@ User Playlists:
     This playlist could not be loaded.: Bu pleylisti yükləmək mümkün olmadı.
     More videos could not be loaded.: Daha çox video yükləmək mümkün olmadı.
 History:
+  Repair Description: "Tarixçəni idxal etdikdən sonra və ya videoların məlumatları çatışmadıqda, yaxud səhv LIVE işarəsi olduqda istifadə edin."
+  Repair Details: "Çatışmayan başlıqları, kanal məlumatlarını və yayım tarixlərini tamamlayır, müddətləri və LIVE işarələrini yoxlayır. Baxış irəliləyişiniz və izlənmə vəziyyəti dəyişmir."
+  Repair Notice: "Böyük tarixçələr vaxt apara bilər. Uğursuz sorğular avtomatik təkrarlanır. Silinmiş və ya şəxsi videoların məlumatları natamam qala bilər."
+  Start Repair: "Düzəltməyə başla"
+  Repair Checking: "Video məlumatları yoxlanılır"
+  Repair Waiting: "YouTube gözlənilir. Düzəltmə avtomatik davam edəcək."
+  Repair Retrying: "Uğursuz sorğular təkrarlanır"
+  Repair Finished: "Düzəltmə tamamlandı"
+  Repair Stopped: "Düzəltmə dayandırıldı"
   Repair: "Tarixçəni düzəlt"
   Repair Progress: "Yoxlanılıb {checked}/{total} · Düzəldilib {repaired} · Uğursuz {failed}"
   Mark All As Watched: Hamısını baxılmış kimi işarələ

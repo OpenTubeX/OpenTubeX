@@ -190,6 +190,15 @@ User Playlists:
     This playlist could not be loaded.: Spellistan kunde inte läsas in.
     More videos could not be loaded.: Fler videor kunde inte läsas in.
 History:
+  Repair Description: "Använd efter import av historik eller när videor saknar uppgifter eller har en felaktig LIVE-markering."
+  Repair Details: "Fyller i saknade titlar, kanaler och publiceringsdatum och kontrollerar längder och LIVE-markeringar. Din uppspelningsposition och status som sedd förblir oförändrade."
+  Repair Notice: "Stor historik kan ta tid. Misslyckade förfrågningar försöks automatiskt igen. Raderade eller privata videor kan förbli ofullständiga."
+  Start Repair: "Starta reparation"
+  Repair Checking: "Kontrollerar videouppgifter"
+  Repair Waiting: "Väntar på YouTube. Reparationen fortsätter automatiskt."
+  Repair Retrying: "Försöker misslyckade förfrågningar igen"
+  Repair Finished: "Reparation klar"
+  Repair Stopped: "Reparation stoppad"
   Repair: "Reparera historik"
   Repair Progress: "Kontrollerade {checked}/{total} · Reparerade {repaired} · Misslyckade {failed}"
   Mark All As Watched: Markera alla som sedda

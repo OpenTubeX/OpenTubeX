@@ -192,6 +192,15 @@ User Playlists:
     This playlist could not be loaded.: Deze afspeellijst kan niet worden geladen.
     More videos could not be loaded.: Er kunnen geen video's meer worden geladen.
 History:
+  Repair Description: "Gebruik dit na het importeren van de geschiedenis, of wanneer videogegevens ontbreken of video's onterecht als LIVE worden aangeduid."
+  Repair Details: "Vult ontbrekende titels, kanalen en publicatiedatums aan en controleert speelduur en LIVE-aanduidingen. Je kijkvoortgang en bekeken-status blijven ongewijzigd."
+  Repair Notice: "Een grote geschiedenis kan even duren. Mislukte verzoeken worden automatisch opnieuw geprobeerd. Verwijderde of privévideo's kunnen onvolledig blijven."
+  Start Repair: "Herstel starten"
+  Repair Checking: "Videogegevens controleren"
+  Repair Waiting: "Wachten op YouTube. Het herstel wordt automatisch hervat."
+  Repair Retrying: "Mislukte verzoeken opnieuw proberen"
+  Repair Finished: "Herstel voltooid"
+  Repair Stopped: "Herstel gestopt"
   Repair: "Geschiedenis herstellen"
   Repair Progress: "Gecontroleerd {checked}/{total} · Hersteld {repaired} · Mislukt {failed}"
   Mark All As Watched: Alles markeren als bekeken

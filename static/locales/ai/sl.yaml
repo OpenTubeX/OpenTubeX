@@ -306,6 +306,15 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: Seznam predvajanja {playlistName} je uspešno ustvarjen.
       There was an issue with creating the playlist.: Pri ustvarjanju seznama predvajanja je prišlo do težave.
 History:
+  Repair Description: "Uporabite po uvozu zgodovine ali ko videoposnetkom manjkajo podatki ali imajo napačno oznako LIVE."
+  Repair Details: "Dopolni manjkajoče naslove, kanale in datume objave ter preveri trajanje in oznake LIVE. Napredek in stanje ogleda ostaneta nespremenjena."
+  Repair Notice: "Velika zgodovina lahko zahteva čas. Neuspele zahteve se samodejno ponovijo. Izbrisani ali zasebni videoposnetki lahko ostanejo nepopolni."
+  Start Repair: "Začni popravljanje"
+  Repair Checking: "Preverjanje podatkov videoposnetkov"
+  Repair Waiting: "Čakanje na YouTube. Popravljanje se bo samodejno nadaljevalo."
+  Repair Retrying: "Ponavljanje neuspelih zahtev"
+  Repair Finished: "Popravljanje končano"
+  Repair Stopped: "Popravljanje ustavljeno"
   Repair: "Popravi zgodovino"
   Repair Progress: "Preverjeno {checked}/{total} · Popravljeno {repaired} · Neuspešno {failed}"
   Case Sensitive Search: Iskanje z razlikovanjem velikih in malih črk

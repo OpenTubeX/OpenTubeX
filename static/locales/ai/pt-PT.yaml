@@ -192,6 +192,15 @@ User Playlists:
     This playlist could not be loaded.: Não foi possível carregar esta lista de reprodução.
     More videos could not be loaded.: Não foi possível carregar mais vídeos.
 History:
+  Repair Description: "Utilize após importar o histórico ou quando faltarem dados dos vídeos ou tiverem uma etiqueta LIVE incorreta."
+  Repair Details: "Preenche os títulos, canais e datas de publicação em falta e verifica as durações e etiquetas LIVE. O progresso de reprodução e o estado de visualização não mudam."
+  Repair Notice: "Históricos grandes podem demorar. Os pedidos falhados são repetidos automaticamente. Vídeos eliminados ou privados podem continuar incompletos."
+  Start Repair: "Iniciar reparação"
+  Repair Checking: "A verificar dados dos vídeos"
+  Repair Waiting: "A aguardar pelo YouTube. A reparação continuará automaticamente."
+  Repair Retrying: "A repetir pedidos falhados"
+  Repair Finished: "Reparação concluída"
+  Repair Stopped: "Reparação interrompida"
   Repair: "Reparar histórico"
   Repair Progress: "Verificados {checked}/{total} · Reparados {repaired} · Falhas {failed}"
   Mark All As Watched: Marcar tudo como reproduzido

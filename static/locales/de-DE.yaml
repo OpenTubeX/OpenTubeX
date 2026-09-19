@@ -284,6 +284,15 @@ User Playlists:
   Choose Image: Bild auswählen
   Use Bookmark Icon: Lesezeichensymbol verwenden
 History:
+  Repair Description: "Nutze diese Funktion nach einem Verlaufsimport oder wenn Videodetails fehlen oder Videos fälschlich als LIVE angezeigt werden."
+  Repair Details: "Ergänzt fehlende Titel, Kanalangaben und Veröffentlichungsdaten und prüft die Dauer sowie LIVE-Markierungen. Dein Wiedergabefortschritt und Gesehen-Status bleiben erhalten."
+  Repair Notice: "Bei einem großen Verlauf kann das dauern. Fehlgeschlagene Anfragen werden automatisch wiederholt. Gelöschte oder private Videos bleiben möglicherweise unvollständig."
+  Start Repair: "Reparatur starten"
+  Repair Checking: "Videodetails werden geprüft"
+  Repair Waiting: "Warten auf YouTube. Die Reparatur wird automatisch fortgesetzt."
+  Repair Retrying: "Fehlgeschlagene Anfragen werden wiederholt"
+  Repair Finished: "Reparatur abgeschlossen"
+  Repair Stopped: "Reparatur gestoppt"
   Repair: "Verlauf reparieren"
   Repair Progress: "Geprüft {checked}/{total} · Repariert {repaired} · Fehlgeschlagen {failed}"
   # On History Page

@@ -190,6 +190,15 @@ User Playlists:
     This playlist could not be loaded.: Ovaj popis za reprodukciju nije moguće učitati.
     More videos could not be loaded.: Dodatne videozapise nije moguće učitati.
 History:
+  Repair Description: "Koristite nakon uvoza povijesti ili kada videozapisima nedostaju podaci ili imaju pogrešnu oznaku LIVE."
+  Repair Details: "Dopunjava naslove, kanale i datume objave koji nedostaju te provjerava trajanja i oznake LIVE. Napredak gledanja i status pogledanog ostaju nepromijenjeni."
+  Repair Notice: "Velika povijest može potrajati. Neuspješni zahtjevi automatski se ponavljaju. Izbrisani ili privatni videozapisi mogu ostati nepotpuni."
+  Start Repair: "Pokreni popravak"
+  Repair Checking: "Provjera podataka o videozapisima"
+  Repair Waiting: "Čekanje na YouTube. Popravak će se automatski nastaviti."
+  Repair Retrying: "Ponavljanje neuspješnih zahtjeva"
+  Repair Finished: "Popravak dovršen"
+  Repair Stopped: "Popravak zaustavljen"
   Repair: "Popravi povijest"
   Repair Progress: "Provjereno {checked}/{total} · Popravljeno {repaired} · Neuspjelo {failed}"
   Mark All As Watched: Označi sve kao pogledano

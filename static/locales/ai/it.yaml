@@ -188,6 +188,15 @@ User Playlists:
     This playlist could not be loaded.: Impossibile caricare questa playlist.
     More videos could not be loaded.: Impossibile caricare altri video.
 History:
+  Repair Description: "Usa questa funzione dopo aver importato la cronologia o quando mancano informazioni sui video o l'etichetta LIVE è errata."
+  Repair Details: "Completa titoli, canali e date di pubblicazione mancanti e verifica durate ed etichette LIVE. L'avanzamento di riproduzione e lo stato di visualizzazione restano invariati."
+  Repair Notice: "Le cronologie grandi possono richiedere tempo. Le richieste non riuscite vengono riprovate automaticamente. I video eliminati o privati potrebbero restare incompleti."
+  Start Repair: "Avvia riparazione"
+  Repair Checking: "Verifica delle informazioni video"
+  Repair Waiting: "In attesa di YouTube. La riparazione riprenderà automaticamente."
+  Repair Retrying: "Nuovo tentativo delle richieste non riuscite"
+  Repair Finished: "Riparazione completata"
+  Repair Stopped: "Riparazione interrotta"
   Repair: "Ripara cronologia"
   Repair Progress: "Controllati {checked}/{total} · Riparati {repaired} · Non riusciti {failed}"
   Mark All As Watched: Segna tutto come guardato

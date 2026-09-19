@@ -188,6 +188,15 @@ User Playlists:
     This playlist could not be loaded.: Tento playlist se nepodařilo načíst.
     More videos could not be loaded.: Další videa se nepodařilo načíst.
 History:
+  Repair Description: "Použijte po importu historie nebo když videím chybí údaje či mají nesprávný štítek LIVE."
+  Repair Details: "Doplní chybějící názvy, kanály a data zveřejnění a zkontroluje délku videí a štítky LIVE. Průběh sledování a stav zhlédnutí se nezmění."
+  Repair Notice: "Rozsáhlá historie může chvíli trvat. Neúspěšné požadavky se opakují automaticky. Smazaná nebo soukromá videa mohou zůstat neúplná."
+  Start Repair: "Spustit opravu"
+  Repair Checking: "Kontrola údajů o videích"
+  Repair Waiting: "Čekání na YouTube. Oprava bude automaticky pokračovat."
+  Repair Retrying: "Opakování neúspěšných požadavků"
+  Repair Finished: "Oprava dokončena"
+  Repair Stopped: "Oprava zastavena"
   Repair: "Opravit historii"
   Repair Progress: "Zkontrolováno {checked}/{total} · Opraveno {repaired} · Selhalo {failed}"
   Mark All As Watched: Označit vše jako zhlédnuté

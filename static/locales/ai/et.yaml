@@ -188,6 +188,15 @@ User Playlists:
     This playlist could not be loaded.: Seda esitusloendit ei saanud laadida.
     More videos could not be loaded.: Rohkem videoid ei saanud laadida.
 History:
+  Repair Description: "Kasuta pärast ajaloo importimist või kui videote andmed puuduvad või LIVE-märgis on vale."
+  Repair Details: "Täidab puuduvad pealkirjad, kanalid ja avaldamiskuupäevad ning kontrollib kestusi ja LIVE-märgiseid. Vaatamise edenemine ja vaadatuks märkimine ei muutu."
+  Repair Notice: "Suure ajaloo töötlemine võib võtta aega. Ebaõnnestunud päringuid korratakse automaatselt. Kustutatud või privaatsete videote andmed võivad jääda puudulikuks."
+  Start Repair: "Alusta parandamist"
+  Repair Checking: "Videoandmete kontrollimine"
+  Repair Waiting: "YouTube'i ootamine. Parandamine jätkub automaatselt."
+  Repair Retrying: "Ebaõnnestunud päringute kordamine"
+  Repair Finished: "Parandamine lõpetatud"
+  Repair Stopped: "Parandamine peatatud"
   Repair: "Paranda ajalugu"
   Repair Progress: "Kontrollitud {checked}/{total} · Parandatud {repaired} · Ebaõnnestunud {failed}"
   Mark All As Watched: Märgi kõik vaadatuks

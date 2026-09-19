@@ -188,6 +188,15 @@ User Playlists:
     This playlist could not be loaded.: Daftar putar ini tidak dapat dimuat.
     More videos could not be loaded.: Video lainnya tidak dapat dimuat.
 History:
+  Repair Description: "Gunakan setelah mengimpor riwayat, atau saat detail video tidak lengkap atau label LIVE tidak sesuai."
+  Repair Details: "Melengkapi judul, kanal, dan tanggal publikasi yang hilang, serta memeriksa durasi dan label LIVE. Progres dan status tontonan Anda tidak berubah."
+  Repair Notice: "Riwayat besar dapat memerlukan waktu. Permintaan yang gagal dicoba ulang otomatis. Video yang dihapus atau pribadi mungkin tetap tidak lengkap."
+  Start Repair: "Mulai perbaikan"
+  Repair Checking: "Memeriksa detail video"
+  Repair Waiting: "Menunggu YouTube. Perbaikan akan dilanjutkan otomatis."
+  Repair Retrying: "Mencoba ulang permintaan yang gagal"
+  Repair Finished: "Perbaikan selesai"
+  Repair Stopped: "Perbaikan dihentikan"
   Repair: "Perbaiki riwayat"
   Repair Progress: "Diperiksa {checked}/{total} · Diperbaiki {repaired} · Gagal {failed}"
   Mark All As Watched: Tandai Semua Sudah Ditonton

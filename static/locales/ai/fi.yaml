@@ -192,6 +192,15 @@ User Playlists:
     This playlist could not be loaded.: Tätä soittolistaa ei voitu ladata.
     More videos could not be loaded.: Lisää videoita ei voitu ladata.
 History:
+  Repair Description: "Käytä tätä historian tuonnin jälkeen tai kun videoista puuttuu tietoja tai niissä on virheellinen LIVE-merkintä."
+  Repair Details: "Täydentää puuttuvat otsikot, kanavat ja julkaisupäivät sekä tarkistaa kestot ja LIVE-merkinnät. Katselun edistyminen ja katsotuksi merkitseminen säilyvät ennallaan."
+  Repair Notice: "Suuren historian käsittely voi kestää. Epäonnistuneita pyyntöjä yritetään automaattisesti uudelleen. Poistettujen tai yksityisten videoiden tiedot voivat jäädä puutteellisiksi."
+  Start Repair: "Aloita korjaus"
+  Repair Checking: "Tarkistetaan videotietoja"
+  Repair Waiting: "Odotetaan YouTubea. Korjaus jatkuu automaattisesti."
+  Repair Retrying: "Yritetään epäonnistuneita pyyntöjä uudelleen"
+  Repair Finished: "Korjaus valmis"
+  Repair Stopped: "Korjaus pysäytetty"
   Repair: "Korjaa historia"
   Repair Progress: "Tarkistettu: {checked}/{total} · Korjattu: {repaired} · Epäonnistuneet: {failed}"
   Mark All As Watched: Merkitse kaikki katsotuiksi
