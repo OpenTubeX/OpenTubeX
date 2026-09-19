@@ -2375,9 +2375,34 @@ for (const uiScale of [100, 125]) {
       await expect(page.locator('.tabBar .tab')).toHaveCount(1)
       await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(time)
       await attachScreenshot('video continues while browsing subscriptions')
+      await player.evaluate(element => {
+        document.documentElement.dataset.reducedMotion = 'no-preference'
+        window.oversizedMiniControls = []
+        window.miniRestoreFrames = 0
+        const sample = () => {
+          if (!element.isConnected) return
+          if (element.hasAttribute('data-inline-mini-drag')) {
+            window.miniRestoreFrames++
+            for (const button of element.querySelectorAll('.scrollMiniPlayerControls button')) {
+              const style = getComputedStyle(button)
+              if (style.visibility === 'hidden' || style.display === 'none' || Number(style.opacity) === 0) continue
+              const scale = button.getBoundingClientRect().width / button.offsetWidth
+              if (scale > 1.1) window.oversizedMiniControls.push(scale)
+            }
+          }
+          window.miniRestoreSample = requestAnimationFrame(sample)
+        }
+        sample()
+      })
       await player.locator('.scrollMiniScrollTop').click()
       await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
       await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+      const samples = await page.evaluate(() => {
+        cancelAnimationFrame(window.miniRestoreSample)
+        return { frames: window.miniRestoreFrames, oversized: window.oversizedMiniControls }
+      })
+      expect(samples.frames).toBeGreaterThan(0)
+      expect(samples.oversized).toEqual([])
       expect(await video.evaluate((element, original) => element === original, originalVideo)).toBe(true)
       await expect(page.locator('.tabBar .tab')).toHaveText(title)
     })
