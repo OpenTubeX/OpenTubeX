@@ -3703,6 +3703,71 @@ test.describe('watch page', () => {
     await component.dispose()
   })
 
+  test('keeps short and empty descriptions collapsible when they have metadata', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    const card = page.locator(`${activeTab} .videoDescription`)
+
+    for (const scale of [1, 1.25]) {
+      await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+      for (const text of ['Short description', '']) {
+        await watchComponent.evaluate(async (component, text) => {
+          const view = component.proxy
+          view.isLoading = true
+          await view.$nextTick()
+          view.videoDescription = text
+          view.videoDescriptionHtml = ''
+          view.videoTags = ['first tag', 'second tag']
+          view.videoGames = [{ title: 'Grand Theft Auto VI', subtitle: '2026' }]
+          view.isLoading = false
+          await view.$nextTick()
+        }, text)
+
+        await expect(card).toHaveClass(/short/)
+        await expect(card.locator('.videoTags')).toHaveCount(0)
+        await expect(card.locator('.gameList')).toHaveCount(0)
+        await card.locator(':scope > .descriptionStatus').click()
+        await expect(card).not.toHaveClass(/short/)
+        await expect(card.locator('.videoTagLink')).toHaveText(['first tag', 'second tag'])
+        await expect(card.locator('.gameTitle')).toHaveText('Grand Theft Auto VI')
+        await card.locator('.descriptionScroll > .descriptionStatus').click()
+        await expect(card).toHaveClass(/short/)
+        await expect(card.locator('.videoTags')).toHaveCount(0)
+        await expect(card.locator('.gameList')).toHaveCount(0)
+      }
+    }
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1))
+    await watchComponent.dispose()
+  })
+
+  test('keeps license-only descriptions accessible and collapsible', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await watchComponent.evaluate(async component => {
+      const view = component.proxy
+      view.isLoading = true
+      await view.$nextTick()
+      view.videoDescription = ''
+      view.videoDescriptionHtml = ''
+      view.videoTags = []
+      view.videoGames = []
+      view.license = 'Creative Commons Attribution license (reuse allowed)'
+      view.isLoading = false
+      await view.$nextTick()
+    })
+
+    const card = page.locator(`${activeTab} .videoDescription`)
+    await expect(card).toHaveClass(/short/)
+    await card.locator(':scope > .descriptionStatus').click()
+    await expect(card.locator('.license')).toHaveText('Creative Commons Attribution license (reuse allowed)')
+    await card.locator('.descriptionScroll > .descriptionStatus').click()
+    await expect(card).toHaveClass(/short/)
+    await expect(card.locator('.license')).toHaveCount(0)
+    await watchComponent.dispose()
+  })
+
   test('handles videos without a description', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
@@ -3718,6 +3783,7 @@ test.describe('watch page', () => {
       watchView.videoDescriptionHtml = ''
       watchView.videoTags = []
       watchView.videoGames = []
+      watchView.license = null
       watchView.isLoading = false
       await watchView.$nextTick()
     })

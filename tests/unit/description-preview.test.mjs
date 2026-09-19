@@ -16,21 +16,22 @@ assert.ok(expandedDeclaration, 'isExpanded declaration must exist')
 assert.ok(measureDeclaration, 'measureDescription function must exist')
 const expandedExpression = script.slice(expandedDeclaration.init.start, expandedDeclaration.init.end)
 const measureFunction = script.slice(measureDeclaration.start, measureDeclaration.end)
+const shortDeclaration = statements.find(statement => statement.type === 'FunctionDeclaration' && statement.id.name === 'isShortDescription')
+const shortFunction = script.slice(shortDeclaration.start, shortDeclaration.end)
 
-function measure({ previewOnly = false, alwaysExpanded = false, short = true, description = 'Sie haben Post\nDer Klassiker von AOL' } = {}) {
+function measure({ previewOnly = false, alwaysExpanded = false, short = true, tags = [], games = [], license = null, description = 'Sie haben Post\nDer Klassiker von AOL' } = {}) {
   const context = vm.createContext({
-    props: { previewOnly, alwaysExpanded },
+    props: { previewOnly, alwaysExpanded, tags, games, license },
     computed: getter => getter(),
     shownDescription: description,
     showFullDescription: { value: false },
     showControls: { value: false },
     hasMeasured: false,
     descriptionContainer: { value: { $el: { clientHeight: 48, scrollHeight: short ? 48 : 240 } } },
-    isShortDescription: () => short,
     nextTick() {},
     updateDescriptionLayout() {},
   })
-  vm.runInContext(`${measureFunction}\nmeasureDescription()`, context)
+  vm.runInContext(`${shortFunction}\n${measureFunction}\nmeasureDescription()`, context)
   return {
     expanded: vm.runInContext(expandedExpression, context),
     measured: context.hasMeasured,
@@ -60,3 +61,13 @@ test('regular descriptions expand short content and keep long content collapsed'
   assert.equal(measure({ description: '' }).expanded, true)
   assert.equal(measure({ alwaysExpanded: true, short: false }).expanded, true)
 })
+
+for (const metadata of [{ tags: ['video tag'] }, { games: [{ title: 'Grand Theft Auto VI' }] }, { license: 'Creative Commons' }]) {
+  test(`description controls account for ${Object.keys(metadata)[0]} below short or empty text`, () => {
+    for (const description of ['Short description', '']) {
+      assert.deepEqual(measure({ ...metadata, description }), {
+        expanded: false, measured: true, showFullDescription: false, showControls: true,
+      })
+    }
+  })
+}

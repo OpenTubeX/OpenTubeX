@@ -1,6 +1,6 @@
 <template>
   <FtCard
-    v-if="shownDescription.length > 0 || tags.length > 0 || games.length > 0"
+    v-if="shownDescription.length > 0 || tags.length > 0 || games.length > 0 || license"
     ref="descriptionCard"
     :class="{
       videoDescription: true,
@@ -188,9 +188,7 @@ const showFullDescription = ref(false)
 const showControls = ref(false)
 const descriptionFadeTop = ref(false)
 const copyButtonOverlapsExpandControl = ref(false)
-// Outside preview mode, show games even when there is no description to expand.
-// `measureDescription` cannot expand empty content because it skips zero-height elements.
-const isExpanded = computed(() => !props.previewOnly && (props.alwaysExpanded || shownDescription === '' || showFullDescription.value))
+const isExpanded = computed(() => !props.previewOnly && (props.alwaysExpanded || showFullDescription.value))
 
 if (props.descriptionHtml !== '') {
   const parsed = parseDescriptionHtml(props.descriptionHtml)
@@ -283,6 +281,11 @@ let hasMeasured = false
  * Useful for hiding description expansion/contraction controls
  */
 function isShortDescription() {
+  // These sections are hidden while collapsed, so text dimensions cannot account for them.
+  if (props.tags.length > 0 || props.games.length > 0 || props.license) {
+    return false
+  }
+
   const descriptionElem = descriptionContainer.value?.$el
   return descriptionElem?.clientHeight >= descriptionElem?.scrollHeight
 }
