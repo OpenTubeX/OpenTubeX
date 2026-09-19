@@ -3741,6 +3741,33 @@ test.describe('watch page', () => {
     await watchComponent.dispose()
   })
 
+  test('keeps license-only descriptions accessible and collapsible', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await watchComponent.evaluate(async component => {
+      const view = component.proxy
+      view.isLoading = true
+      await view.$nextTick()
+      view.videoDescription = ''
+      view.videoDescriptionHtml = ''
+      view.videoTags = []
+      view.videoGames = []
+      view.license = 'Creative Commons Attribution license (reuse allowed)'
+      view.isLoading = false
+      await view.$nextTick()
+    })
+
+    const card = page.locator(`${activeTab} .videoDescription`)
+    await expect(card).toHaveClass(/short/)
+    await card.locator(':scope > .descriptionStatus').click()
+    await expect(card.locator('.license')).toHaveText('Creative Commons Attribution license (reuse allowed)')
+    await card.locator('.descriptionScroll > .descriptionStatus').click()
+    await expect(card).toHaveClass(/short/)
+    await expect(card.locator('.license')).toHaveCount(0)
+    await watchComponent.dispose()
+  })
+
   test('handles videos without a description', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
@@ -3756,6 +3783,7 @@ test.describe('watch page', () => {
       watchView.videoDescriptionHtml = ''
       watchView.videoTags = []
       watchView.videoGames = []
+      watchView.license = null
       watchView.isLoading = false
       await watchView.$nextTick()
     })

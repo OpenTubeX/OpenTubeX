@@ -1,6 +1,6 @@
 <template>
   <FtCard
-    v-if="shownDescription.length > 0 || tags.length > 0 || games.length > 0"
+    v-if="shownDescription.length > 0 || tags.length > 0 || games.length > 0 || license"
     ref="descriptionCard"
     :class="{
       videoDescription: true,
