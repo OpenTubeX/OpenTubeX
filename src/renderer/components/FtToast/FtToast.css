@@ -731,7 +731,12 @@ body:has(.app.capacitorTabletLayout) .progress-toast-holder.position-top-right {
 .connection-status-holder {
   position: fixed;
   z-index: 1002;
-  inset-inline: 0;
+
+  /* Tab positions refer to physical window edges, regardless of locale. */
+  /* stylelint-disable liberty/use-logical-spec */
+  left: var(--left-tab-bar-offset, 0);
+  right: var(--right-tab-bar-offset, 0);
+  /* stylelint-enable liberty/use-logical-spec */
   inset-block-end: calc(var(--connection-navigation-inset, 0px) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
   pointer-events: none;
 }
@@ -761,6 +766,10 @@ body:has(.app) :is(:fullscreen, [data-native-player-screen]) .toast-holder[data-
 
 body:has(.app) :is(:fullscreen, [data-native-player-screen]) .toast-holder[data-sonner-toaster]:is(.position-top-left, .position-top-center, .position-top-right) {
   inset-block: calc(var(--offset-top) + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))) auto;
+}
+
+body:has(.app) :is(:fullscreen, [data-native-player-screen]) .connection-status-holder {
+  inset-inline: 0;
 }
 
 body:has(.app) :is(:fullscreen, [data-native-player-screen]) .connection-status-holder,

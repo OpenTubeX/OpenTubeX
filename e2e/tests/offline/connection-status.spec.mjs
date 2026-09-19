@@ -30,6 +30,47 @@ test('internet probe works with browser web security enabled', async ({ app }) =
 })
 
 for (const scale of [1, 1.25]) {
+  test(`connection banner excludes vertical tabs at UI scale ${scale}`, async ({ page }) => {
+    await page.evaluate(scale => window.ftElectron.setZoomFactor(scale), scale)
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await page.evaluate(() => {
+      Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+      window.dispatchEvent(new Event('offline'))
+    })
+    const banner = page.locator('.connectionStatus')
+    await expect(banner).toBeVisible()
+    for (const direction of ['ltr', 'rtl']) {
+      await page.evaluate(direction => { document.documentElement.dir = direction }, direction)
+      for (const position of ['left', 'right', 'top', 'bottom']) {
+        for (const width of [220, 280]) {
+          await page.evaluate(({ position, width }) => {
+            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            store.commit('setTabBarPosition', position)
+            store.commit('setVerticalTabBarWidth', width)
+          }, { position, width })
+          await expect.poll(() => banner.evaluate((element, { position, width }) => {
+            const bounds = element.getBoundingClientRect()
+            return Math.max(
+              Math.abs(bounds.left - (position === 'left' ? width : 0)),
+              Math.abs(window.innerWidth - bounds.right - (position === 'right' ? width : 0))
+            )
+          }, { position, width })).toBeLessThan(1)
+        }
+      }
+    }
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setTabBarPosition', 'left')
+      document.querySelector('.app').requestFullscreen()
+    })
+    await expect(page.locator(':fullscreen .connectionStatus')).toBeVisible()
+    await expect.poll(() => banner.evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      return Math.max(Math.abs(bounds.left), Math.abs(window.innerWidth - bounds.right))
+    })).toBeLessThan(1)
+    await page.evaluate(() => document.exitFullscreen())
+  })
+
   test(`connection banner follows navbar coverage at UI scale ${scale}`, async ({ page }) => {
     await page.setViewportSize({ width: 480, height: 800 })
     await page.evaluate(scale => window.ftElectron.setZoomFactor(scale), scale)
