@@ -843,7 +843,7 @@ const extraThumbnailActionButton = computed(() => {
       return canMarkAsFullySeen.value
         ? {
             title: t('Video.Mark as fully seen'),
-            icon: ['fas', 'check']
+            icon: ['fas', 'flag-checkered']
           }
         : null
     case 'copyYoutube':
@@ -945,7 +945,7 @@ const videoMenuOptions = computed(() => {
           icon: ['fas', 'check']
         }]
       : [],
-    ...inSubscriptions.value && typeof props.data.isNewInSubscriptionFeed === 'boolean'
+    ...inSubscriptions.value && props.data.isNewInSubscriptionFeed === false
       ? [{
           label: t('Subscriptions.Mark as Unseen'),
           value: 'markAsUnseen',
@@ -965,7 +965,7 @@ const videoMenuOptions = computed(() => {
       ? [{
           label: t('Video.Mark as fully seen'),
           value: 'markAsFullySeen',
-          icon: ['fas', 'check']
+          icon: ['fas', 'flag-checkered']
         }]
       : [],
     ...historyEntryExists.value
