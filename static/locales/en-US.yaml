@@ -439,6 +439,15 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: Playlist {playlistName} has been successfully created.
       There was an issue with creating the playlist.: There was an issue with creating the playlist.
 History:
+  Repair Description: "Use this after importing history, or when videos have missing details or an incorrect LIVE label."
+  Repair Details: "Fills in missing titles, channels and publish dates, and checks durations and LIVE labels. Your watch progress and watched status stay unchanged."
+  Repair Notice: "Large histories can take a while. Failed requests are retried automatically. Deleted or private videos may stay incomplete."
+  Start Repair: "Start repair"
+  Repair Checking: "Checking video details"
+  Repair Waiting: "Waiting for YouTube. Repair will resume automatically."
+  Repair Retrying: "Retrying failed requests"
+  Repair Finished: "Repair finished"
+  Repair Stopped: "Repair stopped"
   Repair: "Repair History"
   Repair Progress: "Checked {checked}/{total} · Repaired {repaired} · Failed {failed}"
   # On History Page

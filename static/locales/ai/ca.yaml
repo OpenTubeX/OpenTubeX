@@ -314,6 +314,15 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: S'ha creat correctament la llista de reproducció {playlistName}.
       There was an issue with creating the playlist.: Hi ha hagut un problema en crear la llista de reproducció.
 History:
+  Repair Description: "Feu-ho servir després d'importar l'historial, o quan faltin dades dels vídeos o tinguin una etiqueta LIVE incorrecta."
+  Repair Details: "Completa els títols, canals i dates de publicació que falten, i comprova la durada i les etiquetes LIVE. El progrés de reproducció i l'estat de visualització es mantenen."
+  Repair Notice: "Els historials grans poden trigar. Les sol·licituds fallides es reintenten automàticament. Els vídeos suprimits o privats poden quedar incomplets."
+  Start Repair: "Inicia la reparació"
+  Repair Checking: "S'estan comprovant les dades dels vídeos"
+  Repair Waiting: "S'està esperant YouTube. La reparació es reprendrà automàticament."
+  Repair Retrying: "S'estan reintentant les sol·licituds fallides"
+  Repair Finished: "Reparació acabada"
+  Repair Stopped: "Reparació aturada"
   Repair: "Repara l’historial"
   Repair Progress: "Comprovats {checked}/{total} · Reparats {repaired} · Fallits {failed}"
   Case Sensitive Search: Cerca amb distinció entre majúscules i minúscules

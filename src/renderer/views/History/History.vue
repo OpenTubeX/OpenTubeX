@@ -16,18 +16,12 @@
           class="headingActions"
         >
           <FtButton
+            ref="repairAction"
             class="historyActionButton"
             :label="t('History.Repair')"
             :icon="['fas', 'sync']"
             :disabled="historyRepairState.running"
-            @click="startHistoryRepair"
-          />
-          <FtButton
-            v-if="historyRepairState.running"
-            class="historyActionButton"
-            :label="t('Cancel')"
-            :icon="['fas', 'xmark']"
-            @click="cancelHistoryRepair"
+            @click="showRepairPrompt = true"
           />
           <FtButton
             class="historyActionButton"
@@ -47,12 +41,51 @@
           />
         </div>
       </div>
-      <p
+      <section
         v-if="historyRepairState.started"
-        role="status"
+        class="repairStatus"
+        :aria-label="t('History.Repair')"
       >
-        {{ t('History.Repair Progress', historyRepairState) }}
-      </p>
+        <div class="repairStatusHeader">
+          <h3
+            class="repairStatusTitle"
+            aria-live="polite"
+          >
+            <FtIcon
+              :icon="['fas', 'sync']"
+              aria-hidden="true"
+            />
+            {{ repairPhaseLabel }}
+          </h3>
+          <FtButton
+            v-if="historyRepairState.running"
+            ref="repairCancel"
+            class="historyActionButton"
+            :label="t('Cancel')"
+            :icon="['fas', 'xmark']"
+            @click="cancelHistoryRepair"
+          />
+        </div>
+        <p
+          class="repairCounts"
+          role="status"
+        >
+          {{ t('History.Repair Progress', historyRepairState) }}
+        </p>
+        <progress
+          class="repairProgress"
+          :max="historyRepairState.total || 1"
+          :value="repairProgressValue"
+          :aria-label="t('History.Repair Progress', historyRepairState)"
+        />
+        <p
+          v-if="historyRepairState.error"
+          class="repairError"
+          role="alert"
+        >
+          {{ historyRepairState.error }}
+        </p>
+      </section>
       <FtInput
         v-show="fullData.length > 1"
         ref="searchBar"
@@ -124,6 +157,56 @@
           />
         </FtFlexBox>
       </FtAutoLoadNextPageWrapper>
+      <FtPrompt
+        v-if="showRepairPrompt"
+        card-class="historyRepairPrompt"
+        autosize
+        fixed-layout
+        @click="showRepairPrompt = false"
+      >
+        <template #label="{ labelId }">
+          <h2
+            :id="labelId"
+            class="repairPromptTitle"
+          >
+            <FtIcon
+              :icon="['fas', 'sync']"
+              class="headingIcon"
+              aria-hidden="true"
+            />
+            {{ t('History.Repair') }}
+          </h2>
+        </template>
+        <div class="repairPromptContent">
+          <p class="repairDescription">
+            {{ t('History.Repair Description') }}
+          </p>
+          <p class="repairDetails">
+            {{ t('History.Repair Details') }}
+          </p>
+          <p class="repairNotice">
+            {{ t('History.Repair Notice') }}
+          </p>
+        </div>
+        <template #footer>
+          <div class="repairPromptActions">
+            <FtButton
+              :label="t('Cancel')"
+              :icon="['fas', 'xmark']"
+              text-color="var(--primary-text-color)"
+              background-color="var(--secondary-card-bg-color)"
+              @click="showRepairPrompt = false"
+            />
+            <FtButton
+              :label="t('History.Start Repair')"
+              :icon="['fas', 'sync']"
+              background-color="var(--primary-color)"
+              text-color="var(--text-with-main-color)"
+              @click="beginHistoryRepair"
+            />
+          </div>
+        </template>
+      </FtPrompt>
       <FtPrompt
         v-if="showMarkAllPrompt"
         autosize
@@ -233,8 +316,37 @@ const historyContent = useTemplateRef('historyContent')
 const searchBar = useTemplateRef('searchBar')
 const historyCleanupPeriod = ref('30')
 const customHistoryCleanupDays = ref('')
+const showRepairPrompt = ref(false)
+const repairAction = useTemplateRef('repairAction')
+const repairCancel = useTemplateRef('repairCancel')
 const showMarkAllPrompt = ref(false)
 const showHistoryCleanupPrompt = ref(false)
+
+const repairPhaseLabel = computed(() => ({
+  checking: t('History.Repair Checking'),
+  waiting: t('History.Repair Waiting'),
+  retrying: t('History.Repair Retrying'),
+  finished: t('History.Repair Finished'),
+  stopped: t('History.Repair Stopped')
+})[historyRepairState.phase])
+
+const repairProgressValue = computed(() => historyRepairState.running && historyRepairState.phase !== 'checking'
+  ? undefined
+  : historyRepairState.checked)
+
+function beginHistoryRepair() {
+  showRepairPrompt.value = false
+  startHistoryRepair()
+  nextTick(() => repairCancel.value?.$el.focus({ preventScroll: true }))
+}
+
+watch(() => historyRepairState.running, running => {
+  if (!running && document.activeElement === repairCancel.value?.$el) {
+    nextTick(() => repairAction.value?.$el.focus({ preventScroll: true }))
+  }
+})
+
+watch(() => historyRepairState.phase, clampHistoryScroll)
 
 const MARK_ALL_PROMPT_VALUES = ['confirm', 'cancel']
 const markAllPromptNames = computed(() => [

@@ -192,6 +192,15 @@ User Playlists:
     This playlist could not be loaded.: לא ניתן לטעון את רשימת ההשמעה הזאת.
     More videos could not be loaded.: לא ניתן לטעון סרטונים נוספים.
 History:
+  Repair Description: "יש להשתמש לאחר ייבוא ההיסטוריה, או כאשר חסרים פרטים בסרטונים או שמופיעה בהם תווית LIVE שגויה."
+  Repair Details: "משלים כותרות, ערוצים ותאריכי פרסום חסרים, ובודק משכי סרטונים ותוויות LIVE. התקדמות הצפייה ומצב הצפייה נשארים ללא שינוי."
+  Repair Notice: "היסטוריה גדולה עשויה לדרוש זמן. בקשות שנכשלו נשלחות שוב אוטומטית. סרטונים שנמחקו או שהוגדרו כפרטיים עשויים להישאר עם פרטים חסרים."
+  Start Repair: "התחלת תיקון"
+  Repair Checking: "בדיקת פרטי סרטונים"
+  Repair Waiting: "בהמתנה ל־YouTube. התיקון יתחדש אוטומטית."
+  Repair Retrying: "ניסיון חוזר לבקשות שנכשלו"
+  Repair Finished: "התיקון הסתיים"
+  Repair Stopped: "התיקון נעצר"
   Repair: "תיקון ההיסטוריה"
   Repair Progress: "נבדקו {checked}/{total} · תוקנו {repaired} · נכשלו {failed}"
   Mark All As Watched: סימון הכול כנצפה

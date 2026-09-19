@@ -297,6 +297,15 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: Grojaraštis {playlistName} sėkmingai sukurtas.
       There was an issue with creating the playlist.: Kuriant grojaraštį kilo klaida.
 History:
+  Repair Description: "Naudokite importavę istoriją arba kai trūksta vaizdo įrašų duomenų ar neteisingai rodoma LIVE žyma."
+  Repair Details: "Papildo trūkstamus pavadinimus, kanalus ir paskelbimo datas, patikrina trukmę bei LIVE žymas. Peržiūros eiga ir peržiūrėjimo būsena nesikeičia."
+  Repair Notice: "Didelės istorijos tvarkymas gali užtrukti. Nepavykusios užklausos kartojamos automatiškai. Ištrintų ar privačių vaizdo įrašų duomenys gali likti nepilni."
+  Start Repair: "Pradėti taisymą"
+  Repair Checking: "Tikrinami vaizdo įrašų duomenys"
+  Repair Waiting: "Laukiama YouTube. Taisymas bus tęsiamas automatiškai."
+  Repair Retrying: "Kartojamos nepavykusios užklausos"
+  Repair Finished: "Taisymas baigtas"
+  Repair Stopped: "Taisymas sustabdytas"
   Repair: "Taisyti istoriją"
   Repair Progress: "Patikrinta {checked}/{total} · Pataisyta {repaired} · Nepavyko {failed}"
   Case Sensitive Search: Skirti didžiąsias ir mažąsias raides

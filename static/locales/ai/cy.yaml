@@ -190,6 +190,15 @@ User Playlists:
     This playlist could not be loaded.: Nid oedd modd llwytho'r rhestr chwarae hon.
     More videos could not be loaded.: Nid oedd modd llwytho rhagor o fideos.
 History:
+  Repair Description: "Defnyddiwch hyn ar ôl mewnforio hanes, neu pan fo manylion fideos ar goll neu label LIVE anghywir."
+  Repair Details: "Yn llenwi teitlau, sianeli a dyddiadau cyhoeddi coll, ac yn gwirio hyd fideos a labeli LIVE. Mae cynnydd gwylio a statws gwylio yn aros yr un fath."
+  Repair Notice: "Gall hanesion mawr gymryd amser. Rhoddir cynnig arall ar geisiadau aflwyddiannus yn awtomatig. Gall fideos preifat neu wedi'u dileu aros yn anghyflawn."
+  Start Repair: "Dechrau trwsio"
+  Repair Checking: "Gwirio manylion fideos"
+  Repair Waiting: "Aros am YouTube. Bydd y trwsio'n ailddechrau'n awtomatig."
+  Repair Retrying: "Ailgynnig ceisiadau aflwyddiannus"
+  Repair Finished: "Trwsio wedi gorffen"
+  Repair Stopped: "Trwsio wedi stopio"
   Repair: "Trwsio’r hanes"
   Repair Progress: "Gwiriwyd {checked}/{total} · Trwsiwyd {repaired} · Methwyd {failed}"
   Mark All As Watched: Marcio'r cyfan fel wedi'u gwylio

@@ -192,6 +192,15 @@ User Playlists:
     This playlist could not be loaded.: لا يمكن تحميل قائمة التشغيل هذه.
     More videos could not be loaded.: لا يمكن تحميل المزيد من مقاطع الفيديو.
 History:
+  Repair Description: "استخدم هذا بعد استيراد السجل، أو عندما تفتقد الفيديوهات بعض التفاصيل أو تحمل علامة LIVE بشكل غير صحيح."
+  Repair Details: "يكمل العناوين والقنوات وتواريخ النشر الناقصة ويتحقق من المدد وعلامات LIVE. يظل تقدم المشاهدة وحالة المشاهدة دون تغيير."
+  Repair Notice: "قد تستغرق السجلات الكبيرة وقتًا. تُعاد محاولة الطلبات الفاشلة تلقائيًا. قد تبقى الفيديوهات المحذوفة أو الخاصة غير مكتملة."
+  Start Repair: "بدء الإصلاح"
+  Repair Checking: "جارٍ التحقق من تفاصيل الفيديو"
+  Repair Waiting: "في انتظار YouTube. سيُستأنف الإصلاح تلقائيًا."
+  Repair Retrying: "جارٍ إعادة محاولة الطلبات الفاشلة"
+  Repair Finished: "اكتمل الإصلاح"
+  Repair Stopped: "توقف الإصلاح"
   Repair: "إصلاح السجل"
   Repair Progress: "تم فحص {checked}/{total} · تم إصلاح {repaired} · فشل {failed}"
   Mark All As Watched: وضع علامة على الكل كما تمت مشاهدته

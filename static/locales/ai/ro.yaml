@@ -190,6 +190,15 @@ User Playlists:
     This playlist could not be loaded.: Acest playlist nu a putut fi încărcat.
     More videos could not be loaded.: Nu au putut fi încărcate mai multe videoclipuri.
 History:
+  Repair Description: "Folosește după importarea istoricului sau când lipsesc detalii despre videoclipuri ori eticheta LIVE este incorectă."
+  Repair Details: "Completează titlurile, canalele și datele publicării care lipsesc și verifică duratele și etichetele LIVE. Progresul și starea vizionării rămân neschimbate."
+  Repair Notice: "Istoricul mare poate dura. Solicitările eșuate sunt reîncercate automat. Videoclipurile șterse sau private pot rămâne incomplete."
+  Start Repair: "Începe repararea"
+  Repair Checking: "Se verifică detaliile videoclipurilor"
+  Repair Waiting: "Se așteaptă YouTube. Repararea va continua automat."
+  Repair Retrying: "Se reîncearcă solicitările eșuate"
+  Repair Finished: "Reparare încheiată"
+  Repair Stopped: "Reparare oprită"
   Repair: "Repară istoricul"
   Repair Progress: "Verificate {checked}/{total} · Reparate {repaired} · Eșuate {failed}"
   Mark All As Watched: Marchează totul ca vizionat

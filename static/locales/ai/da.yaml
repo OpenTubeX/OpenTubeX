@@ -197,6 +197,15 @@ User Playlists:
     Toast:
       Video(s) added to {playlistCount} playlists: Videoen blev føjet til 1 playliste | Videoerne blev føjet til {playlistCount} playlister
 History:
+  Repair Description: "Brug dette efter import af historik, eller når videoer mangler oplysninger eller har en forkert LIVE-markering."
+  Repair Details: "Udfylder manglende titler, kanaler og udgivelsesdatoer og kontrollerer varigheder og LIVE-markeringer. Din afspilningsposition og status som set forbliver uændret."
+  Repair Notice: "Stor historik kan tage tid. Mislykkede anmodninger forsøges igen automatisk. Slettede eller private videoer kan forblive ufuldstændige."
+  Start Repair: "Start reparation"
+  Repair Checking: "Kontrollerer videooplysninger"
+  Repair Waiting: "Venter på YouTube. Reparationen fortsætter automatisk."
+  Repair Retrying: "Prøver mislykkede anmodninger igen"
+  Repair Finished: "Reparation afsluttet"
+  Repair Stopped: "Reparation stoppet"
   Repair: "Reparer historik"
   Repair Progress: "Kontrolleret: {checked}/{total} · Repareret: {repaired} · Mislykkede: {failed}"
   Mark All As Watched: Markér alle som set

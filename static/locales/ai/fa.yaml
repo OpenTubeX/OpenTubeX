@@ -205,6 +205,15 @@ User Playlists:
     Toast:
       Video(s) added to {playlistCount} playlists: ویدیو به 1 فهرست پخش افزوده شد | ویدیو به {playlistCount} فهرست پخش افزوده شد
 History:
+  Repair Description: "پس از وارد کردن سابقه، یا وقتی جزئیات ویدیوها ناقص است یا برچسب LIVE اشتباه دارند، از این گزینه استفاده کنید."
+  Repair Details: "عنوان‌ها، کانال‌ها و تاریخ‌های انتشار ناقص را تکمیل و مدت ویدیوها و برچسب‌های LIVE را بررسی می‌کند. پیشرفت تماشا و وضعیت دیده‌شدن شما تغییر نمی‌کند."
+  Repair Notice: "سابقه‌های بزرگ ممکن است زمان ببرند. درخواست‌های ناموفق خودکار تکرار می‌شوند. ویدیوهای حذف‌شده یا خصوصی ممکن است ناقص بمانند."
+  Start Repair: "شروع ترمیم"
+  Repair Checking: "در حال بررسی جزئیات ویدیوها"
+  Repair Waiting: "در انتظار YouTube. ترمیم خودکار ادامه می‌یابد."
+  Repair Retrying: "در حال تکرار درخواست‌های ناموفق"
+  Repair Finished: "ترمیم پایان یافت"
+  Repair Stopped: "ترمیم متوقف شد"
   Repair: "ترمیم تاریخچه"
   Repair Progress: "بررسی‌شده {checked}/{total} · ترمیم‌شده {repaired} · ناموفق {failed}"
   Mark All As Watched: علامت‌گذاری همه به‌عنوان تماشاشده

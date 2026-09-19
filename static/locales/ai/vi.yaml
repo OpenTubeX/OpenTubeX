@@ -192,6 +192,15 @@ User Playlists:
     This playlist could not be loaded.: Không thể tải danh sách phát này.
     More videos could not be loaded.: Không thể tải thêm video.
 History:
+  Repair Description: "Dùng sau khi nhập lịch sử, hoặc khi video thiếu thông tin hay có nhãn LIVE không chính xác."
+  Repair Details: "Bổ sung tiêu đề, kênh và ngày đăng còn thiếu, đồng thời kiểm tra thời lượng và nhãn LIVE. Tiến trình xem và trạng thái đã xem không thay đổi."
+  Repair Notice: "Lịch sử lớn có thể mất thời gian. Yêu cầu thất bại sẽ tự động được thử lại. Video đã xóa hoặc riêng tư có thể vẫn thiếu thông tin."
+  Start Repair: "Bắt đầu sửa"
+  Repair Checking: "Đang kiểm tra thông tin video"
+  Repair Waiting: "Đang chờ YouTube. Quá trình sửa sẽ tự động tiếp tục."
+  Repair Retrying: "Đang thử lại các yêu cầu thất bại"
+  Repair Finished: "Đã sửa xong"
+  Repair Stopped: "Đã dừng sửa"
   Repair: "Sửa lịch sử"
   Repair Progress: "Đã kiểm tra {checked}/{total} · Đã sửa {repaired} · Thất bại {failed}"
   Mark All As Watched: Đánh dấu tất cả là đã xem
