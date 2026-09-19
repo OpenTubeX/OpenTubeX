@@ -243,6 +243,10 @@
     "ri": "fire-line",
     "material": "local-fire-department-outline"
   },
+  "flag-checkered": {
+    "ri": "flag-2-line",
+    "material": "sports-score-rounded"
+  },
   "flask": {
     "ri": "flask-line",
     "material": "science-outline"
