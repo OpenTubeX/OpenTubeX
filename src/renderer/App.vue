@@ -549,7 +549,6 @@ import {
   resolveExternalLinkAction,
   resolveMobileContextLinkCopyUrl,
 } from './helpers/mobileLinkActions'
-import { isShareableOpenTubeXRoute, transformOpenTubeXRouteUrl } from './helpers/share'
 import { startProgressBarOperation } from './helpers/progressBar'
 import { initializePlatformInfo, isLinuxWayland, supportsAutoPictureInPictureMinimize } from './helpers/platform'
 import { revealStartupSplash } from './helpers/startupSplash'
@@ -3306,14 +3305,13 @@ function handleKeyboardShortcuts(event) {
 
   if (matchesKeyboardShortcut(event, shortcuts.COPY_CURRENT_URL)) {
     event.preventDefault()
-    const publicUrl = isShareableOpenTubeXRoute(route.fullPath)
-      ? transformOpenTubeXRouteUrl(route.fullPath, true)
-      : null
-    copyToClipboard(publicUrl ?? window.location.href, {
-      ...(publicUrl && {
+    const appUrl = window.location.href.split('#')[0]
+    const publicUrl = resolveMobileContextLinkCopyUrl(window.location.href, appUrl)
+    if (publicUrl) {
+      copyToClipboard(publicUrl, {
         messageOnSuccess: t('Share.YouTube URL copied to clipboard')
       })
-    })
+    }
     return
   }
 

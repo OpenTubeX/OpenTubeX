@@ -4,10 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 import { createAppShortcuts, getAppShortcutPath } from '../../src/renderer/helpers/appShortcuts.js'
-import {
-  isShareableOpenTubeXRoute,
-  transformOpenTubeXRouteUrl,
-} from '../../src/renderer/helpers/share.js'
+import { resolveMobileContextLinkCopyUrl } from '../../src/renderer/helpers/mobileLinkActions.js'
 
 const pages = ['subscriptions', 'userplaylists', 'history', 'downloads']
 
@@ -147,22 +144,23 @@ test('tab organizer shortcut opens and closes it again with its search focused',
   assert.equal(tabOrganizerOpen.value, false, 'holding the shortcut must not reopen the organizer')
 })
 
-test('copy-current-URL shortcut copies public and internal active-route URLs', async () => {
+test('copy-current-URL shortcut copies only portable active-route URLs', async () => {
   const copied = []
   let prevented = false
-  const route = { fullPath: '/watch/abcdefghijk?playlistId=PL123&timestamp=42' }
-  const appWindow = { location: { href: 'file:///opt/OpenTubeX/resources/app.asar/dist/index.html#/watch/abcdefghijk' } }
+  const appWindow = {
+    location: {
+      href: 'file:///opt/OpenTubeX/resources/app.asar/dist/index.html#/watch/abcdefghijk?playlistId=PL123&timestamp=42'
+    }
+  }
   const handler = await loadKeyboardShortcutHandler({
     showTutorial: { value: false },
     isElectron: false,
     commandPaletteOpen: { value: false },
     tabOrganizerOpen: { value: false },
-    route,
     window: appWindow,
     KeyboardShortcuts: { APP: { GENERAL: { COPY_CURRENT_URL: 'copy-url' } } },
     matchesKeyboardShortcut: (_event, shortcut) => shortcut === 'copy-url',
-    isShareableOpenTubeXRoute,
-    transformOpenTubeXRouteUrl,
+    resolveMobileContextLinkCopyUrl,
     copyToClipboard: async (url, options) => { copied.push({ url, options }) },
     t: key => key,
   })
@@ -175,18 +173,12 @@ test('copy-current-URL shortcut copies public and internal active-route URLs', a
   assert.equal(copied[0].url, 'https://youtu.be/abcdefghijk?list=PL123&t=42')
   assert.equal(copied[0].options.messageOnSuccess, 'Share.YouTube URL copied to clipboard')
 
-  route.fullPath = '/history'
   appWindow.location.href = 'file:///opt/OpenTubeX/resources/app.asar/dist/index.html#/history'
   handler({ preventDefault: () => {} })
-  assert.equal(copied.length, 2)
-  assert.equal(copied[1].url, 'file:///opt/OpenTubeX/resources/app.asar/dist/index.html#/history')
-  assert.deepEqual(Object.keys(copied[1].options), [])
+  assert.equal(copied.length, 1)
 
-  route.fullPath = '/playlist/PL_PRIVATE?playlistType=user'
   appWindow.location.href =
     'file:///opt/OpenTubeX/resources/app.asar/dist/index.html#/playlist/PL_PRIVATE?playlistType=user'
   handler({ preventDefault: () => {} })
-  assert.equal(copied.length, 3)
-  assert.equal(copied[2].url, appWindow.location.href)
-  assert.deepEqual(Object.keys(copied[2].options), [])
+  assert.equal(copied.length, 1)
 })
