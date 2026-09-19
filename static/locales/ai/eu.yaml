@@ -188,6 +188,15 @@ User Playlists:
     This playlist could not be loaded.: Ezin izan da erreprodukzio-zerrenda hau kargatu.
     More videos could not be loaded.: Ezin izan dira bideo gehiago kargatu.
 History:
+  Repair Description: "Erabili historia inportatu ondoren, edo bideoei xehetasunak falta zaizkienean edo LIVE etiketa okerra dutenean."
+  Repair Details: "Falta diren izenburuak, kanalak eta argitalpen-datak betetzen ditu, eta iraupenak eta LIVE etiketak egiaztatzen ditu. Ikustearen aurrerapena eta ikusitako egoera ez dira aldatzen."
+  Repair Notice: "Historia handiek denbora behar dezakete. Huts egindako eskaerak automatikoki errepikatzen dira. Ezabatutako edo bideo pribatuen datuak osatu gabe gera daitezke."
+  Start Repair: "Hasi konpontzen"
+  Repair Checking: "Bideo-xehetasunak egiaztatzen"
+  Repair Waiting: "YouTube-ren zain. Konponketa automatikoki jarraituko da."
+  Repair Retrying: "Huts egindako eskaerak errepikatzen"
+  Repair Finished: "Konponketa amaitu da"
+  Repair Stopped: "Konponketa gelditu da"
   Repair: "Konpondu historia"
   Repair Progress: "Egiaztatuak: {checked}/{total} · Konponduak: {repaired} · Huts egindakoak: {failed}"
   Mark All As Watched: Markatu guztiak ikusita

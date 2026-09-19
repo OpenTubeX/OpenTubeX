@@ -190,6 +190,15 @@ User Playlists:
     This playlist could not be loaded.: Ekki tókst að hlaða þessum spilunarlista.
     More videos could not be loaded.: Ekki tókst að hlaða fleiri myndböndum.
 History:
+  Repair Description: "Notaðu þetta eftir innflutning ferils eða þegar upplýsingar um myndskeið vantar eða þau eru ranglega merkt LIVE."
+  Repair Details: "Fyllir inn titla, rásir og birtingardagsetningar sem vantar og athugar lengd myndskeiða og LIVE-merkingar. Áhorfsframvinda og áhorfsstaða haldast óbreyttar."
+  Repair Notice: "Stór ferill getur tekið tíma. Misheppnaðar beiðnir eru endurteknar sjálfkrafa. Eydd eða einkarekin myndskeið geta enn haft ófullnægjandi upplýsingar."
+  Start Repair: "Hefja viðgerð"
+  Repair Checking: "Athuga upplýsingar um myndskeið"
+  Repair Waiting: "Bíð eftir YouTube. Viðgerð heldur áfram sjálfkrafa."
+  Repair Retrying: "Endurtek misheppnaðar beiðnir"
+  Repair Finished: "Viðgerð lokið"
+  Repair Stopped: "Viðgerð stöðvuð"
   Repair: "Laga feril"
   Repair Progress: "Athugað {checked}/{total} · Lagað {repaired} · Mistókst {failed}"
   Mark All As Watched: Merkja öll myndbönd sem skoðuð

@@ -188,6 +188,15 @@ User Playlists:
     This playlist could not be loaded.: Bu oynatma listesi yüklenemedi.
     More videos could not be loaded.: Daha fazla video yüklenemedi.
 History:
+  Repair Description: "Geçmişi içe aktardıktan sonra veya videoların bilgileri eksikse ya da LIVE etiketi yanlışsa kullanın."
+  Repair Details: "Eksik başlıkları, kanalları ve yayın tarihlerini tamamlar, süreleri ve LIVE etiketlerini kontrol eder. İzleme ilerlemeniz ve izlendi durumu değişmez."
+  Repair Notice: "Büyük geçmişler zaman alabilir. Başarısız istekler otomatik olarak yeniden denenir. Silinen veya gizli videoların bilgileri eksik kalabilir."
+  Start Repair: "Onarımı başlat"
+  Repair Checking: "Video bilgileri kontrol ediliyor"
+  Repair Waiting: "YouTube bekleniyor. Onarım otomatik olarak devam edecek."
+  Repair Retrying: "Başarısız istekler yeniden deneniyor"
+  Repair Finished: "Onarım tamamlandı"
+  Repair Stopped: "Onarım durduruldu"
   Repair: "Geçmişi onar"
   Repair Progress: "Kontrol edilen {checked}/{total} · Onarılan {repaired} · Başarısız {failed}"
   Mark All As Watched: Tümünü İzlenmiş Olarak İşaretle

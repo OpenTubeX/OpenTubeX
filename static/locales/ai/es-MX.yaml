@@ -214,6 +214,15 @@ User Playlists:
     Toast:
       Video(s) added to {playlistCount} playlists: Video(s) agregado(s) a 1 lista de reproducción | Video(s) agregado(s) a {playlistCount} listas de reproducción | Video(s) agregado(s) a {playlistCount} listas de reproducción
 History:
+  Repair Description: "Úsalo después de importar el historial o si faltan datos de los videos o tienen una etiqueta LIVE incorrecta."
+  Repair Details: "Completa los títulos, canales y fechas de publicación que faltan, y comprueba las duraciones y etiquetas LIVE. El progreso de reproducción y el estado de visto no cambian."
+  Repair Notice: "Los historiales grandes pueden tardar. Las solicitudes fallidas se reintentan automáticamente. Los videos eliminados o privados pueden quedar incompletos."
+  Start Repair: "Iniciar reparación"
+  Repair Checking: "Comprobando datos de los videos"
+  Repair Waiting: "Esperando a YouTube. La reparación se reanudará automáticamente."
+  Repair Retrying: "Reintentando solicitudes fallidas"
+  Repair Finished: "Reparación finalizada"
+  Repair Stopped: "Reparación detenida"
   Repair: "Reparar historial"
   Repair Progress: "Comprobados {checked}/{total} · Reparados {repaired} · Fallidos {failed}"
   Mark All As Watched: Marcar todo como visto

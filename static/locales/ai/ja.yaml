@@ -188,6 +188,15 @@ User Playlists:
     This playlist could not be loaded.: このプレイリストを読み込めませんでした。
     More videos could not be loaded.: 動画をさらに読み込めませんでした。
 History:
+  Repair Description: "履歴をインポートした後や、動画の情報が不足している場合、LIVEラベルが誤って表示されている場合に使用します。"
+  Repair Details: "不足しているタイトル、チャンネル、公開日を補完し、再生時間とLIVEラベルを確認します。視聴の進行状況と視聴済みの状態は変更されません。"
+  Repair Notice: "履歴が多い場合は時間がかかります。失敗したリクエストは自動で再試行されます。削除済みや非公開の動画は情報を補完できない場合があります。"
+  Start Repair: "修復を開始"
+  Repair Checking: "動画情報を確認中"
+  Repair Waiting: "YouTubeを待機中です。修復は自動で再開されます。"
+  Repair Retrying: "失敗したリクエストを再試行中"
+  Repair Finished: "修復が完了しました"
+  Repair Stopped: "修復が停止しました"
   Repair: "履歴を修復"
   Repair Progress: "確認済み {checked}/{total} · 修復済み {repaired} · 失敗 {failed}"
   Mark All As Watched: すべて視聴済みにする

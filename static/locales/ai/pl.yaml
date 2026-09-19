@@ -983,6 +983,15 @@ App Icon:
   Error: "Nie udało się wczytać lub zmienić ikony aplikacji"
 
 History:
+  Repair Description: "Użyj po zaimportowaniu historii lub gdy brakuje danych filmów albo mają nieprawidłową etykietę LIVE."
+  Repair Details: "Uzupełnia brakujące tytuły, kanały i daty publikacji oraz sprawdza długość filmów i etykiety LIVE. Postęp oglądania i oznaczenie jako obejrzane pozostają bez zmian."
+  Repair Notice: "Duża historia może wymagać czasu. Nieudane żądania są ponawiane automatycznie. Dane usuniętych lub prywatnych filmów mogą pozostać niepełne."
+  Start Repair: "Rozpocznij naprawę"
+  Repair Checking: "Sprawdzanie danych filmów"
+  Repair Waiting: "Oczekiwanie na YouTube. Naprawa zostanie wznowiona automatycznie."
+  Repair Retrying: "Ponawianie nieudanych żądań"
+  Repair Finished: "Naprawa zakończona"
+  Repair Stopped: "Naprawa zatrzymana"
   Repair: "Napraw historię"
   Repair Progress: "Sprawdzono {checked}/{total} · Naprawiono {repaired} · Błędy {failed}"
 

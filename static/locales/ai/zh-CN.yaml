@@ -188,6 +188,15 @@ User Playlists:
     This playlist could not be loaded.: 无法加载此播放列表。
     More videos could not be loaded.: 无法加载更多视频。
 History:
+  Repair Description: "在导入历史记录后，或视频信息缺失、被错误标记为 LIVE 时使用。"
+  Repair Details: "补全缺失的标题、频道和发布日期，并检查时长和 LIVE 标签。观看进度和已观看状态保持不变。"
+  Repair Notice: "历史记录较多时可能需要一些时间。失败的请求会自动重试。已删除或私密视频的信息可能仍不完整。"
+  Start Repair: "开始修复"
+  Repair Checking: "正在检查视频信息"
+  Repair Waiting: "正在等待 YouTube，修复将自动继续。"
+  Repair Retrying: "正在重试失败的请求"
+  Repair Finished: "修复完成"
+  Repair Stopped: "修复已停止"
   Repair: "修复历史记录"
   Repair Progress: "已检查 {checked}/{total} · 已修复 {repaired} · 失败 {failed}"
   Mark All As Watched: 全部标记为已观看

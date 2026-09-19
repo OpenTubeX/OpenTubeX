@@ -112,3 +112,125 @@
     inline-size: 100%;
   }
 }
+
+
+.repairPromptTitle,
+.repairStatusTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.repairPromptContent {
+  inline-size: min(480px, 100%);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.repairDescription {
+  margin-block: 0 20px;
+}
+
+.repairDetails {
+  padding: 16px;
+  border-inline-start: 3px solid var(--primary-color);
+  border-radius: calc(6px * var(--ui-roundness));
+  background: var(--secondary-card-bg-color);
+}
+
+.repairNotice {
+  margin-block-end: 0;
+  color: var(--secondary-text-color);
+  font-size: 0.9rem;
+}
+
+.repairPromptActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-block-start: 8px;
+}
+
+.repairPromptActions > .btn {
+  min-block-size: 44px;
+  margin: 0;
+}
+
+.repairStatus {
+  padding: 16px;
+  margin-block: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: calc(8px * var(--ui-roundness));
+  background: var(--secondary-card-bg-color);
+}
+
+.repairStatusHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.repairStatusTitle {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.repairCounts {
+  margin-block: 12px;
+  color: var(--secondary-text-color);
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.repairProgress {
+  display: block;
+  appearance: none;
+  inline-size: 100%;
+  block-size: 6px;
+  border: 0;
+  border-radius: 3px;
+  background: var(--border-color);
+  accent-color: var(--primary-color);
+}
+
+.repairProgress::-webkit-progress-bar {
+  border-radius: 3px;
+  background: var(--border-color);
+}
+
+.repairProgress::-webkit-progress-value {
+  border-radius: 3px;
+  background: var(--primary-color);
+}
+
+.repairProgress::-moz-progress-bar {
+  border-radius: 3px;
+  background: var(--primary-color);
+}
+
+.repairError {
+  margin-block: 12px 0;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+
+.repairStatusHeader > .btn {
+  flex: 0 0 auto;
+  min-block-size: 44px;
+}
+
+.repairPromptTitle :deep(svg),
+.repairStatusTitle :deep(svg) {
+  flex: 0 0 auto;
+}
+
+
+:global(.promptCard.fixedLayout.historyRepairPrompt) {
+  inline-size: min(520px, 100%);
+  block-size: auto;
+}
