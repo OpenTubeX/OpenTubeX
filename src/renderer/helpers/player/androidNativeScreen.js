@@ -382,6 +382,7 @@ export function createAndroidNativeScreen({ element, container, getController, g
       // frame. Waiting here presents portrait fullscreen before rotating it.
       document.dispatchEvent(new Event('fullscreenchange'))
       await attaching
+      if (presentationSequence === sequence && open) document.dispatchEvent(new Event('nativefullscreenready'))
     } catch (error) {
       if (presentationSequence === sequence) setOpen(false)
       throw error

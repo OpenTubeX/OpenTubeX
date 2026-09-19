@@ -1149,7 +1149,7 @@ Video:
   Retry With Built-in Extraction: Yerleşik çıkarmayla yeniden dene
   Retry With yt-dlp Extraction: yt-dlp çıkarmasıyla yeniden dene
   Reloading video after streaming URL error: Akış URL'si hatasından sonra video yeniden yükleniyor
-  Configure Restricted Playback Cookies Hint: Çerezleri Ayarlar → Harici Yazılım → yt-dlp Oynatma Çerezleri bölümünde yapılandırın.
+  Configure Restricted Playback Cookies Hint: "Çerezleri Ayarlar → Harici Yazılım → yt-dlp çerezleri bölümünde yapılandırın."
   Try With Configured Cookies: Yapılandırılmış çerezlerle dene
   Restricted Playback Authentication Failed Template: 'yt-dlp bu videoya yapılandırılmış çerezlerle erişemedi: {error}'
   Unmark As Watched: İzlenmiş İşaretini Kaldır
@@ -1571,7 +1571,7 @@ Tooltips:
     Cookie File: Kimlik doğrulamalı oynatma için Netscape biçiminde bir çerez dosyası seçin.
     Browser for Cookies: Tarayıcı desteği seçili yt-dlp yürütülebilir dosyasından okunur. Kimlik doğrulamalı oynatma istendiğinde OpenTubeX, yt-dlp'den bu tarayıcıyı okumasını ister.
     Browser Profile: İsteğe bağlı tarayıcı profili adı veya klasörü. Son erişilen profili kullanmak için boş bırakın.
-    Always Use Cookies: "yt-dlp akışları her çıkardığında yapılandırılmış çerezleri kullanır. Bu, akış çıkarma yöntemini yt-dlp olarak değiştirmez. yt-dlp seçiliyken ve hesabın erişimi varsa YouTube Premium'un gelişmiş bit hızı dâhil yalnızca hesaba özel biçimler kullanılabilir hâle gelebilir. Altyazılar ve otomatik çeviriler için yapılandırılmış çerezleri kullan. İndirmeler için çerezleri kullan."
+    Always Use Cookies: "İndirmeler, altyazılar ve yt-dlp akışları çıkardığında yapılandırılmış çerezleri kullanın. Bu, akış çıkarma yöntemini yt-dlp olarak değiştirmez. yt-dlp seçiliyken ve hesabın erişimi varsa YouTube Premium'un gelişmiş bit hızı dâhil yalnızca hesaba özel biçimler kullanılabilir hâle gelebilir. Altyazılar ve otomatik çeviriler için yapılandırılmış çerezleri kullan."
     FFmpeg Executable Path: Ayrı video ve ses akışlarını birleştirmek ve ses dönüştürmek için FFmpeg gereklidir. OpenTubeX varsayılan olarak FFmpeg'in PATH ortam değişkeni üzerinden bulunabildiğini varsayar. Gerekirse buradan özel bir yol ayarlayabilirsiniz.
     Use cookies for subtitles: "Altyazılar ve otomatik çeviriler için yapılandırılmış çerezleri kullan. \"Her zaman çerezleri kullan\" seçeneği de bunu etkinleştirir."
   Distraction Free Settings:

@@ -14,7 +14,7 @@ export function displayAndroidPath(path) {
     const separator = documentId.indexOf(':')
     if (separator < 0) return path
     const volume = documentId.slice(0, separator)
-    if (volume !== 'primary' && !/^[\da-f]+-[\da-f]+$/i.test(volume)) return path
+    if (volume !== 'primary' && !/^[\da-f]+(?:-[\da-f]+)+$/i.test(volume)) return path
     return `${volume === 'primary' ? '/sdcard' : `/storage/${volume}`}/${documentId.slice(separator + 1)}`
   } catch {
     return path

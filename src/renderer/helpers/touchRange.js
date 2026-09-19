@@ -38,6 +38,7 @@ export function attachTouchRange(input) {
     update(event)
   }
   function up(event) {
+    touch = false
     if (gesture?.id !== event.pointerId) return
     const value = gesture.value
     update(event)
@@ -46,6 +47,7 @@ export function attachTouchRange(input) {
     if (input.value !== value) input.dispatchEvent(new Event('change', { bubbles: true }))
   }
   function cancel() {
+    touch = false
     const changed = gesture?.dragging && input.value !== gesture.value
     gesture = null
     if (changed) input.dispatchEvent(new Event('change', { bubbles: true }))

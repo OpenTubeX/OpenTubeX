@@ -1154,7 +1154,7 @@ Video:
   Retry With Built-in Extraction: Prøv på nytt med innebygd uthenting
   Retry With yt-dlp Extraction: Prøv på nytt med uthenting via yt-dlp
   Reloading video after streaming URL error: Laster inn videoen på nytt etter en feil med strømmeadressen
-  Configure Restricted Playback Cookies Hint: Konfigurer informasjonskapsler under Innstillinger → Ekstern programvare → Informasjonskapsler for yt-dlp-avspilling.
+  Configure Restricted Playback Cookies Hint: "Konfigurer informasjonskapsler under Innstillinger → Ekstern programvare → yt-dlp-informasjonskapsler."
   Try With Configured Cookies: Prøv med de konfigurerte informasjonskapslene
   Restricted Playback Authentication Failed Template: 'yt-dlp fikk ikke tilgang til denne videoen med de konfigurerte informasjonskapslene: {error}'
   Unmark As Watched: Merk som ikke sett
@@ -1585,7 +1585,7 @@ Tooltips:
     Cookie File: Velg en informasjonskapselfil i Netscape-format for autentisert avspilling.
     Browser for Cookies: Nettleserstøtten leses fra den valgte kjørbare yt-dlp-filen. OpenTubeX ber yt-dlp lese informasjonskapsler fra denne nettleseren når autentisert avspilling etterspørres.
     Browser Profile: Valgfritt navn eller mappe for nettleserprofilen. La feltet stå tomt for å bruke profilen som ble åpnet sist.
-    Always Use Cookies: "Bruk de konfigurerte informasjonskapslene hver gang yt-dlp henter ut strømmer. Dette endrer ikke metoden for strømhenting til yt-dlp. Når yt-dlp er valgt, kan formater som krever konto, bli tilgjengelige, blant annet YouTube Premiums forbedrede bithastighet hvis kontoen har tilgang. Bruk de konfigurerte informasjonskapslene for undertekster og automatiske oversettelser. Bruk informasjonskapsler for nedlastinger."
+    Always Use Cookies: "Bruk de konfigurerte informasjonskapslene for nedlastinger, undertekster og hver gang yt-dlp henter strømmer. Dette endrer ikke metoden for strømhenting til yt-dlp. Når yt-dlp er valgt, kan formater som krever konto, bli tilgjengelige, blant annet YouTube Premiums forbedrede bithastighet hvis kontoen har tilgang. Bruk de konfigurerte informasjonskapslene for undertekster og automatiske oversettelser."
     FFmpeg Executable Path: FFmpeg kreves for å slå sammen separate video- og lydstrømmer og for lydkonvertering. OpenTubeX antar som standard at FFmpeg finnes via miljøvariabelen PATH. Du kan angi en egendefinert bane her ved behov.
     Use cookies for subtitles: "Bruk de konfigurerte informasjonskapslene for undertekster og automatiske oversettelser. Aktiveres også av «Bruk alltid informasjonskapsler»."
   Distraction Free Settings:

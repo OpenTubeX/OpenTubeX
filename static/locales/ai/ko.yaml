@@ -1445,7 +1445,7 @@ Video:
   Reloading video after streaming URL error: 스트리밍 URL 오류 후 동영상 다시 불러오는 중
   MembersOnly: 이 회원 전용 동영상을 보려면 이 채널의 멤버십이 활성화된 Google 계정이 필요합니다.
   AgeRestricted: 이 연령 제한 동영상을 보려면 연령 인증된 Google 계정이 필요합니다.
-  Configure Restricted Playback Cookies Hint: 설정 → 외부 소프트웨어 → yt-dlp 재생 쿠키에서 쿠키를 설정하세요.
+  Configure Restricted Playback Cookies Hint: "설정 → 외부 소프트웨어 → yt-dlp 쿠키에서 쿠키를 설정하세요."
   Try With Configured Cookies: 설정된 쿠키로 시도
   Restricted Playback Authentication Failed Template: 'yt-dlp에서 설정된 쿠키로 이 동영상에 접근할 수 없습니다: {error}'
   DRMProtected: DRM 보호 동영상에는 독점 비공개 소스 구성 요소가 필요하므로 OpenTubeX에서 재생할 수 없습니다. 이 동영상을 보려면 DRM을 지원하는 웹 브라우저에서 공식 YouTube 웹사이트를 이용하세요.
@@ -1943,7 +1943,7 @@ Tooltips:
     Cookie File: 인증된 재생에 사용할 Netscape 형식 쿠키 파일을 선택하세요.
     Browser for Cookies: 선택한 yt-dlp 실행 파일에서 지원하는 브라우저를 확인합니다. 인증된 재생을 요청하면 OpenTubeX가 yt-dlp에 이 브라우저의 쿠키를 읽도록 요청합니다.
     Browser Profile: 선택 사항인 브라우저 프로필 이름 또는 폴더입니다. 가장 최근에 사용한 프로필을 사용하려면 비워 두세요.
-    Always Use Cookies: "yt-dlp에서 스트림을 추출할 때마다 설정된 쿠키를 사용합니다. 스트림 추출 방법이 yt-dlp로 전환되지는 않습니다. yt-dlp를 선택하면 계정에 접근 권한이 있을 때 YouTube Premium의 향상된 비트 전송률을 포함한 계정 전용 형식을 사용할 수 있습니다. 설정된 쿠키를 자막과 자동 번역에 사용합니다. 다운로드에 쿠키 사용."
+    Always Use Cookies: "다운로드, 자막 및 yt-dlp가 스트림을 추출할 때 설정된 쿠키를 사용합니다. 스트림 추출 방법이 yt-dlp로 전환되지는 않습니다. yt-dlp를 선택하면 계정에 접근 권한이 있을 때 YouTube Premium의 향상된 비트 전송률을 포함한 계정 전용 형식을 사용할 수 있습니다. 설정된 쿠키를 자막과 자동 번역에 사용합니다."
     FFmpeg Executable Path: 별도의 동영상 및 오디오 스트림을 병합하고 오디오를 변환하려면 FFmpeg가 필요합니다. 기본적으로 OpenTubeX는 PATH 환경 변수에서 FFmpeg를 찾습니다. 필요하면 여기서 사용자 지정 경로를 설정할 수 있습니다.
     Use cookies for subtitles: "설정된 쿠키를 자막과 자동 번역에 사용합니다. \"항상 쿠키 사용\"으로도 활성화됩니다."
   Distraction Free Settings:

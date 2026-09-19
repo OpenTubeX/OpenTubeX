@@ -1149,7 +1149,7 @@ Video:
   Retry With Built-in Extraction: Zkusit znovu pomocí vestavěného získávání
   Retry With yt-dlp Extraction: Zkusit znovu pomocí yt-dlp
   Reloading video after streaming URL error: Opětovné načítání videa po chybě adresy URL streamu
-  Configure Restricted Playback Cookies Hint: Nastavte cookies v Nastavení → Externí software → Cookies pro přehrávání přes yt-dlp.
+  Configure Restricted Playback Cookies Hint: "Nastavte cookies v Nastavení → Externí software → Cookies yt-dlp."
   Try With Configured Cookies: Zkusit s nastavenými cookies
   Restricted Playback Authentication Failed Template: 'yt-dlp nemohl získat přístup k tomuto videu s nastavenými cookies: {error}'
   Unmark As Watched: Zrušit označení jako zhlédnuté
@@ -1570,7 +1570,7 @@ Tooltips:
     Cookie File: Vyberte soubor cookies ve formátu Netscape pro ověřené přehrávání.
     Browser for Cookies: Podpora prohlížečů se načítá z vybraného spustitelného souboru yt-dlp. Při požadavku na ověřené přehrávání OpenTubeX požádá yt-dlp o načtení tohoto prohlížeče.
     Browser Profile: Volitelný název nebo složka profilu prohlížeče. Chcete-li použít naposledy otevřený profil, ponechte pole prázdné.
-    Always Use Cookies: "Nastavené cookies použije při každém získávání streamů pomocí yt-dlp. Způsob získávání streamu se tím nepřepne na yt-dlp. Pokud je vybrán yt-dlp, mohou být dostupné formáty pouze pro účty, včetně vyšší přenosové rychlosti YouTube Premium, pokud k ní má účet přístup. Používat nastavené cookies pro titulky a automatické překlady. Používat cookies pro stahování."
+    Always Use Cookies: "Používejte nastavené cookies pro stahování, titulky a vždy, když yt-dlp získává streamy. Způsob získávání streamu se tím nepřepne na yt-dlp. Pokud je vybrán yt-dlp, mohou být dostupné formáty pouze pro účty, včetně vyšší přenosové rychlosti YouTube Premium, pokud k ní má účet přístup. Používat nastavené cookies pro titulky a automatické překlady."
     FFmpeg Executable Path: FFmpeg je nutný ke slučování samostatných streamů obrazu a zvuku a k převodu zvuku. OpenTubeX ve výchozím nastavení předpokládá, že nástroj FFmpeg lze najít pomocí proměnné prostředí PATH. V případě potřeby zde můžete nastavit vlastní cestu.
     Use cookies for subtitles: "Používat nastavené cookies pro titulky a automatické překlady. Zapne se také volbou „Vždy používat cookies“."
   Distraction Free Settings:

@@ -390,8 +390,12 @@
   font-size: 18px;
 }
 
-.syncIndicator > svg {
+.syncIndicator :deep(.ft-icon__glyph) {
   animation: sync-rotation 1.2s linear infinite;
+}
+
+.topNavBarColor .syncIndicator {
+  color: var(--text-with-main-color);
 }
 
 @keyframes sync-rotation {
@@ -399,7 +403,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .syncIndicator > svg {
+  .syncIndicator :deep(.ft-icon__glyph) {
     animation: none;
   }
 }

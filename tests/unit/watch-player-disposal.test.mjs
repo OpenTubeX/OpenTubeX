@@ -23,3 +23,28 @@ test('closing a watch tab releases its player even when saving progress finishes
   await pending
   assert.equal(released, true, 'native audio must stop after its tab is removed')
 })
+
+test('Back during fullscreen teardown cancels the captured restoration state', async () => {
+  let finishDestroy
+  let cancelTransition
+  let cancelCalls = 0
+  const player = {
+    isFullscreen: true,
+    destroyPlayer: () => new Promise(resolve => { finishDestroy = resolve }),
+    cancelPendingFullscreen() { cancelCalls++ },
+  }
+  const methods = vm.runInNewContext(`({${destroy}})`, {
+    process: { env: { IS_CAPACITOR: true } },
+    beginAndroidFullscreenTransition(label, thumbnail, onCancel) {
+      cancelTransition = onCancel
+      return () => {}
+    },
+  })
+  const watch = { ...methods, $refs: { player }, t: value => value }
+  const pending = watch.destroyPlayer()
+  cancelTransition()
+  finishDestroy({ startNextVideoInFullscreen: true })
+  await pending
+  assert.equal(cancelCalls, 1)
+  assert.equal(watch.startNextVideoInFullscreen, false)
+})

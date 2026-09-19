@@ -1,6 +1,11 @@
 """Exercise the packaged EJS provider without relying on YouTube or its rate limits."""
 import json
+import os
 import sys
+
+os.setsid()
+with open(sys.argv[3], 'w') as group:
+    group.write(str(os.getpid()))
 
 sys.path.insert(0, sys.argv[1])
 from yt_dlp import YoutubeDL

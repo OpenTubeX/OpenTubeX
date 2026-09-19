@@ -1149,7 +1149,7 @@ Video:
   Retry With Built-in Extraction: 使用內建擷取功能重試
   Retry With yt-dlp Extraction: 使用 yt-dlp 擷取功能重試
   Reloading video after streaming URL error: 串流網址發生錯誤，正在重新載入影片
-  Configure Restricted Playback Cookies Hint: 請前往「設定 → 外部軟體 → yt-dlp 播放 Cookie」設定 Cookie。
+  Configure Restricted Playback Cookies Hint: "請前往「設定 → 外部軟體 → yt-dlp Cookie」設定 Cookie。"
   Try With Configured Cookies: 使用已設定的 Cookie 重試
   Restricted Playback Authentication Failed Template: 'yt-dlp 無法使用已設定的 Cookie 存取此影片：{error}'
   Unmark As Watched: 標示為未觀看
@@ -1572,7 +1572,7 @@ Tooltips:
     Cookie File: 選擇 Netscape 格式的 Cookie 檔案，以進行驗證後播放。
     Browser for Cookies: 瀏覽器支援資訊是從所選的 yt-dlp 執行檔讀取。要求驗證後播放時，OpenTubeX 會要求 yt-dlp 讀取此瀏覽器。
     Browser Profile: 選填的瀏覽器設定檔名稱或資料夾。留白可使用最近存取的設定檔。
-    Always Use Cookies: "每當 yt-dlp 擷取串流時，都使用已設定的 Cookie。這不會將串流擷取方式切換為 yt-dlp。選用 yt-dlp 後，可能會提供僅限帳戶使用的格式，包括帳戶有權使用時的 YouTube Premium 增強型位元率。使用已設定的 Cookie 取得字幕和自動翻譯。 下載時使用 Cookie."
+    Always Use Cookies: "將設定的 Cookie 用於下載、字幕以及 yt-dlp 擷取串流的過程。這不會將串流擷取方式切換為 yt-dlp。選用 yt-dlp 後，可能會提供僅限帳戶使用的格式，包括帳戶有權使用時的 YouTube Premium 增強型位元率。使用已設定的 Cookie 取得字幕和自動翻譯。"
     FFmpeg Executable Path: 合併分開的影片與音訊串流及轉換音訊時需要 FFmpeg。OpenTubeX 預設會假設可透過 PATH 環境變數找到 FFmpeg。如有需要，可在此設定自訂路徑。
     Use cookies for subtitles: "使用已設定的 Cookie 取得字幕和自動翻譯。啟用「一律使用 Cookie」也會開啟此功能。"
   Distraction Free Settings:

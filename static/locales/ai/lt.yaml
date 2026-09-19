@@ -1468,7 +1468,7 @@ Video:
   Reloading video after streaming URL error: Vaizdo įrašas įkeliamas iš naujo po srauto URL klaidos
   MembersOnly: Šiam tik nariams skirtam vaizdo įrašui reikia Google paskyros su aktyvia šio kanalo naryste.
   AgeRestricted: Šiam pagal amžių ribojamam vaizdo įrašui reikia Google paskyros su patvirtintu amžiumi.
-  Configure Restricted Playback Cookies Hint: Nustatykite slapukus skiltyje Nustatymai → Išorinė programinė įranga → yt-dlp atkūrimo slapukai.
+  Configure Restricted Playback Cookies Hint: "Nustatykite slapukus skiltyje Nustatymai → Išorinė programinė įranga → yt-dlp slapukai."
   Try With Configured Cookies: Bandyti su nustatytais slapukais
   Restricted Playback Authentication Failed Template: 'yt-dlp nepavyko pasiekti šio vaizdo įrašo su nustatytais slapukais: {error}'
   DRMProtected: DRM apsaugotų vaizdo įrašų negalima leisti naudojant OpenTubeX, nes jiems reikia nuosavybinių uždarojo kodo komponentų. Jei norite peržiūrėti šį vaizdo įrašą, atverkite jį oficialioje YouTube svetainėje, DRM palaikančioje žiniatinklio naršyklėje.
@@ -1981,7 +1981,7 @@ Tooltips:
     Cookie File: Pasirinkite Netscape formato slapukų failą autentifikuotam atkūrimui.
     Browser for Cookies: Naršyklių palaikymo informacija gaunama iš pasirinkto yt-dlp vykdomojo failo. Paprašius autentifikuoto atkūrimo, OpenTubeX nurodo yt-dlp nuskaityti šią naršyklę.
     Browser Profile: Pasirinktinis naršyklės profilio pavadinimas arba aplankas. Palikite tuščią, jei norite naudoti paskutinį atvertą profilį.
-    Always Use Cookies: "Naudoti sukonfigūruotus slapukus kaskart, kai yt-dlp išgauna srautus. Tai nepakeičia srautų išgavimo būdo į yt-dlp. Pasirinkus yt-dlp gali tapti pasiekiami tik paskyrai skirti formatai, įskaitant didesnę YouTube Premium spartą, jei paskyra turi prieigą. Naudoti sukonfigūruotus slapukus subtitrams ir automatiniams vertimams. Naudoti slapukus atsisiuntimams."
+    Always Use Cookies: "Naudokite nustatytus slapukus atsisiuntimams, subtitrams ir kaskart, kai yt-dlp išgauna srautus. Tai nepakeičia srautų išgavimo būdo į yt-dlp. Pasirinkus yt-dlp gali tapti pasiekiami tik paskyrai skirti formatai, įskaitant didesnę YouTube Premium spartą, jei paskyra turi prieigą. Naudoti sukonfigūruotus slapukus subtitrams ir automatiniams vertimams."
     FFmpeg Executable Path: FFmpeg reikalingas atskiriems vaizdo ir garso srautams sujungti bei garsui konvertuoti. Pagal numatymą OpenTubeX laikys, kad FFmpeg galima rasti naudojant PATH aplinkos kintamąjį. Jei reikia, čia galima nurodyti pasirinktinį kelią.
     Use cookies for subtitles: "Naudoti sukonfigūruotus slapukus subtitrams ir automatiniams vertimams. Taip pat įjungiama pasirinkus „Visada naudoti slapukus“."
   Distraction Free Settings:

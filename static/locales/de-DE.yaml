@@ -1997,7 +1997,7 @@ Video:
   AI-generated content: KI-generierte Inhalte
   MembersOnly: Videos, die nur für Mitglieder bestimmt sind, können mit OpenTubeX nicht angesehen werden, da sie einen Google-Login und eine kostenpflichtige Kanalmitgliedschaft erfordern.
   AgeRestricted: Videos mit Altersbeschränkung können mit OpenTubeX nicht angesehen werden, da sie eine Google-Anmeldung und die Verwendung eines altersgeprüften YouTube-Kontos erfordern.
-  Configure Restricted Playback Cookies Hint: Konfiguriere Cookies unter Einstellungen → Erweitert → Externe Software → yt-dlp-Wiedergabe-Cookies.
+  Configure Restricted Playback Cookies Hint: "Konfiguriere Cookies unter Einstellungen → Erweitert → Externe Software → yt-dlp-Cookies."
   Try With Configured Cookies: Mit konfigurierten Cookies versuchen
   Restricted Playback Authentication Failed Template: 'yt-dlp konnte mit den konfigurierten Cookies nicht auf dieses Video zugreifen: {error}'
   DeArrow:

@@ -144,17 +144,21 @@ public class YtDlpDownloadsTest {
 
     @Test public void savedCookiesAreUsedOnlyWhenDownloadsOptInAndSurviveQueueRestart() throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        File cookies = new File(context.getNoBackupFilesDir(), "yt-dlp-cookies.txt");
+        org.junit.Assume.assumeFalse("Cookie regression requires a test profile without a saved session", cookies.exists());
         File state = new File(context.getCacheDir(), "yt-dlp-cookies-" + UUID.randomUUID());
         state.mkdirs();
-        File cookies = new File(context.getNoBackupFilesDir(), "yt-dlp-cookies.txt");
-        byte[] previous = cookies.exists() ? YtDlpFiles.readFile(cookies) : null;
         DocumentFile folder = tree(context).createDirectory(UUID.randomUUID().toString());
         assertNotNull(folder);
         String folderUri = DocumentsContract.buildTreeDocumentUri(InstrumentationRegistry.getInstrumentation().getContext().getPackageName() + ".documents", DocumentsContract.getDocumentId(folder.getUri())).toString();
         grant(context, Uri.parse(folderUri));
+        String fixtureCookie = "127.0.0.1\tFALSE\t/\tFALSE\t0\ttest_session\tfixture";
+        boolean fixtureCreated = false;
         try (FixtureServer server = new FixtureServer(InstrumentationRegistry.getInstrumentation().getContext())) {
             server.requireCookie = true;
-            YtDlpFiles.write(cookies, "# Netscape HTTP Cookie File\n127.0.0.1\tFALSE\t/\tFALSE\t0\ttest_session\tfixture\n".getBytes(StandardCharsets.UTF_8));
+            org.junit.Assume.assumeTrue("A session was saved before the fixture started", cookies.createNewFile());
+            fixtureCreated = true;
+            YtDlpFiles.write(cookies, ("# Netscape HTTP Cookie File\n" + fixtureCookie + "\n").getBytes(StandardCharsets.UTF_8));
             JSONObject config = new JSONObject().put("enabled", true).put("folder", folderUri)
                 .put("cookies", cookies.getAbsolutePath()).put("useCookies", false);
             JSONObject payload = new JSONObject().put("mode", "video").put("videoId", "___________");
@@ -171,7 +175,13 @@ public class YtDlpDownloadsTest {
             JSONObject result = restored.list().getJSONObject(1);
             assertEquals(result.toString(), "completed", result.getString("status"));
         } finally {
-            if (previous == null) cookies.delete(); else YtDlpFiles.write(cookies, previous);
+            // yt-dlp may rewrite its header. Never remove a newer session saved while testing.
+            if (fixtureCreated && cookies.isFile()) {
+                String current = new String(YtDlpFiles.readFile(cookies), StandardCharsets.UTF_8);
+                if (current.contains(fixtureCookie) && java.util.Arrays.stream(current.split("\n"))
+                    .filter(line -> !line.isBlank() && (!line.startsWith("#") || line.startsWith("#HttpOnly_")))
+                    .allMatch(fixtureCookie::equals)) cookies.delete();
+            }
             folder.delete();
             YtDlpFiles.deleteTree(state);
         }

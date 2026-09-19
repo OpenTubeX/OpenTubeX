@@ -17,6 +17,7 @@ async function fixture({ fullscreen = true, chrome = [], dialogs = [], previews 
   const completeTransitions = []
   const completeFullscreen = []
   const fullscreenEvents = []
+  const readyEvents = []
   const observers = []
   const styleWrites = []
   const window = Object.assign(new EventTarget(), { innerWidth: 1000, innerHeight: 700, scrollX: 0, scrollY: 0 })
@@ -52,6 +53,7 @@ async function fixture({ fullscreen = true, chrome = [], dialogs = [], previews 
     getBoundingClientRect: () => bounds, getAnimations: () => [],
   })
   const document = Object.assign(new EventTarget(), { body: { append() {}, getBoundingClientRect: () => ({ height: 2000 }) }, createElement: () => ({ setAttribute() {}, remove() {}, style: { getPropertyValue() { return '' }, setProperty(name, value) { styleWrites.push({ name, value }) } } }), elementFromPoint: () => null, querySelectorAll: selector => selector.includes('.topNav') ? chrome : selector.includes('dialog[open]') ? dialogs : [], querySelector: () => null, documentElement: { classList: { toggle() {} }, style: { getPropertyValue() { return '' }, setProperty(name, value) { styleWrites.push({ name, value }) }, removeProperty() {} } } })
+  document.addEventListener('nativefullscreenready', () => readyEvents.push(true))
   document.addEventListener('fullscreenchange', () => fullscreenEvents.push(presentations.length))
   class Observer {
     constructor(callback) { this.callback = callback; observers.push(this) }
@@ -85,7 +87,7 @@ async function fixture({ fullscreen = true, chrome = [], dialogs = [], previews 
   if (fullscreen) await screen.show()
   else await screen.attach()
   await flush()
-  return { snapshotInvalidations, snapshots, publishSnapshot, screen, container, layouts, presentations, completeTransitions, completeFullscreen, fullscreenEvents, bounds, observers, window, styleWrites, flush, change({ visible = shown, menuOpen = menu, panelOpen = panel, containerAnimating = animating, endedRecommendations = recommendations, playbackEnded = ended, loadingPoster = poster }) {
+  return { readyEvents, snapshotInvalidations, snapshots, publishSnapshot, screen, container, layouts, presentations, completeTransitions, completeFullscreen, fullscreenEvents, bounds, observers, window, styleWrites, flush, change({ visible = shown, menuOpen = menu, panelOpen = panel, containerAnimating = animating, endedRecommendations = recommendations, playbackEnded = ended, loadingPoster = poster }) {
     poster = loadingPoster
     shown = visible; menu = menuOpen; panel = panelOpen
     recommendations = endedRecommendations
@@ -340,6 +342,7 @@ for (const cancel of [false, true]) {
     await entering
     assert.equal(f.fullscreenEvents.length, cancel ? 2 : 1)
     assert.equal(f.screen.isOpen(), !cancel)
+    assert.equal(f.readyEvents.length, cancel ? 0 : 1)
     f.screen.destroy()
   })
 }
@@ -352,6 +355,7 @@ for (const teardown of ['reset', 'destroy']) {
     f.completeFullscreen[0]()
     await entering
     assert.equal(f.screen.hasSurface(), false)
+    assert.equal(f.readyEvents.length, 0)
     assert.equal(f.screen.isOpen(), false)
     assert.equal(f.fullscreenEvents.length, 2)
     f.screen.destroy()
@@ -563,5 +567,20 @@ test('a superseded fullscreen entry cannot close the replacement screen when it 
   await rejected
   assert.equal(f.screen.isOpen(), true)
   assert.equal(f.screen.hasSurface(), true)
+  f.screen.destroy()
+})
+
+test('fullscreen readiness waits for a successful native show', async () => {
+  const f = await fixture({ fullscreen: false, deferFullscreen: true })
+  const entering = f.screen.show()
+  assert.equal(f.readyEvents.length, 0)
+  f.completeFullscreen[0]()
+  await entering
+  assert.equal(f.readyEvents.length, 1)
+  await f.screen.hide()
+  const failed = f.screen.show()
+  f.completeFullscreen[1].reject(new Error('show failed'))
+  await assert.rejects(failed, /show failed/)
+  assert.equal(f.readyEvents.length, 1)
   f.screen.destroy()
 })

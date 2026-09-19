@@ -184,10 +184,11 @@ final class AndroidProxyRelay implements AutoCloseable {
     }
 
     private Socket connectTransport(String host, int port, long version, Socket client) throws IOException {
+        long deadline = System.nanoTime() + java.util.concurrent.TimeUnit.MILLISECONDS.toNanos(TIMEOUT);
         InetAddress[] addresses = resolver.resolve(host);
         IOException failure = new IOException("No reachable address");
-        long deadline = System.nanoTime() + java.util.concurrent.TimeUnit.MILLISECONDS.toNanos(TIMEOUT);
-        for (InetAddress address : addresses) {
+        for (int index = 0; index < addresses.length; index++) {
+            InetAddress address = addresses[index];
             long remaining = java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(deadline - System.nanoTime());
             if (remaining <= 0) break;
             Socket socket = new Socket(Proxy.NO_PROXY);
@@ -201,7 +202,7 @@ final class AndroidProxyRelay implements AutoCloseable {
             try {
                 // A broken address family must not prevent reaching another address.
                 // With a proxy enabled, only its endpoint is resolved locally.
-                socket.connect(new InetSocketAddress(address, port), (int) Math.min(remaining, addresses.length > 1 ? 3000 : TIMEOUT));
+                socket.connect(new InetSocketAddress(address, port), (int) Math.max(1, remaining / (addresses.length - index)));
                 return socket;
             } catch (IOException error) {
                 failure = error;

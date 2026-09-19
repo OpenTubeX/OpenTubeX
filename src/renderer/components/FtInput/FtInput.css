@@ -329,7 +329,7 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
   opacity: 1;
 }
 
-@media (pointer: coarse), (width <= 680px) {
+@media (any-pointer: coarse), (width <= 680px) {
   .search .list li {
     min-block-size: 48px;
   }

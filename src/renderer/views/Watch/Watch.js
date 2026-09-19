@@ -237,6 +237,7 @@ export default defineComponent({
       mobilePanel: null,
       startNextVideoInFullscreen: false,
       finishNativeFullscreenTransition: null,
+      fullscreenTransitionCancelled: false,
       startNextVideoInFullwindow: false,
       startNextVideoInPip: false,
       nextVideoAutoPictureInPictureState: null,
@@ -6154,12 +6155,17 @@ export default defineComponent({
     destroyPlayer: async function(player = this.$refs.player, preserveFullscreen = true) {
       if (process.env.IS_CAPACITOR && preserveFullscreen && player.isFullscreen) {
         this.finishNativeFullscreenTransition?.()
-        this.finishNativeFullscreenTransition = beginAndroidFullscreenTransition(this.t('Video.Fetching Streams'), this.thumbnail)
+        this.fullscreenTransitionCancelled = false
+        this.finishNativeFullscreenTransition = beginAndroidFullscreenTransition(this.t('Video.Fetching Streams'), this.thumbnail, () => {
+          this.fullscreenTransitionCancelled = true
+          this.startNextVideoInFullscreen = false
+          this.$refs.player?.cancelPendingFullscreen()
+        })
       }
       this.playerTeardownInProgress = true
       try {
         const uiState = await player.destroyPlayer()
-        this.startNextVideoInFullscreen = uiState.startNextVideoInFullscreen
+        this.startNextVideoInFullscreen = uiState.startNextVideoInFullscreen && !this.fullscreenTransitionCancelled
         this.startNextVideoInFullwindow = uiState.startNextVideoInFullwindow
         this.startNextVideoInPip = uiState.startNextVideoInPip
         this.nextVideoAutoPictureInPictureState = uiState.autoPictureInPictureState

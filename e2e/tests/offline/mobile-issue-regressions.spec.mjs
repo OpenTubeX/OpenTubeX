@@ -59,6 +59,26 @@ for (const scale of [1, 1.25]) {
     await expect.poll(gap).toBeCloseTo(66, 0)
     await page.locator('.sideNav').evaluate(element => element.classList.add('scrollHidden'))
     await expect.poll(gap).toBeCloseTo(6, 0)
+    // Overlay layouts must cancel the hidden-nav transform, including reduced motion.
+    for (const kind of ['sheet', 'settings', 'fullscreen']) {
+      await page.evaluate(kind => {
+        const overlay = document.createElement('div')
+        overlay.id = 'connection-overlay-test'
+        if (kind === 'sheet') { overlay.className = 'mobileSheet'; overlay.setAttribute('open', '') }
+        if (kind === 'settings') overlay.className = 'settingsWindow maximized'
+        if (kind === 'fullscreen') {
+          overlay.setAttribute('data-native-player-screen', '')
+          overlay.append(document.querySelector('.connection-status-holder'))
+        }
+        document.querySelector('.app').append(overlay)
+      }, kind)
+      await expect.poll(gap).toBeCloseTo(6, 0)
+      await expect(banner).toHaveCSS('transition-duration', '0s')
+      await page.evaluate(() => {
+        document.body.append(document.querySelector('.connection-status-holder'))
+        document.querySelector('#connection-overlay-test').remove()
+      })
+    }
     await page.locator('.sideNav').evaluate(element => element.classList.remove('scrollHidden'))
     await expect.poll(gap).toBeCloseTo(66, 0)
     await page.locator('.app > .progressBar').evaluate(element => element.remove())
@@ -78,6 +98,12 @@ test('header sync indicator follows active sync stages and disappears on complet
   await expect(indicator).toHaveAccessibleName('Syncing subscriptions…')
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setSyncServerProgress', { stage: 'history' }))
   await expect(indicator).toHaveAccessibleName('Syncing watch history…')
+  await expect.poll(() => indicator.locator('svg').evaluate(element => getComputedStyle(element).animationName)).toMatch(/^sync-rotation(?:-|$)/)
+  await page.locator('.topNav').evaluate(element => {
+    element.classList.add('topNavBarColor')
+    element.style.setProperty('--text-with-main-color', 'rgb(12, 34, 56)')
+  })
+  await expect(indicator).toHaveCSS('color', 'rgb(12, 34, 56)')
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await expect.poll(() => indicator.locator('svg').evaluate(element => getComputedStyle(element).animationName)).toBe('none')
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setSyncServerStatus', 'idle'))

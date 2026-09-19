@@ -13,6 +13,8 @@ public class YouTubeSessionCookiesTest {
     }
 
     @Test public void permitsYouTubeAndGoogleLoginButRejectsUntrustedTopLevelNavigation() {
+        assertTrue(YouTubeSessionCookies.isYouTube("https://youtube.com/"));
+        assertTrue(YouTubeSessionCookies.isYouTube("https://www.youtube.com/"));
         assertTrue(YouTubeSessionCookies.canNavigate("https://accounts.google.com/ServiceLogin"));
         assertTrue(YouTubeSessionCookies.canNavigate("https://consent.google.com/"));
         assertTrue(YouTubeSessionCookies.isYouTube("https://m.youtube.com/watch?v=example"));

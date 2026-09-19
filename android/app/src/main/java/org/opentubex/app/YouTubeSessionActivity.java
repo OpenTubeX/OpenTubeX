@@ -7,6 +7,8 @@ import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.webkit.CookieManager;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -22,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 
 /** A normal browser without Capacitor or any JavaScript-to-native interface. */
 public final class YouTubeSessionActivity extends AppCompatActivity {
+    private static final String EXPORT_URL = "https://www.youtube.com/robots.txt";
     private WebView browser;
     private MenuItem save;
     private androidx.appcompat.widget.AppCompatButton saveButton;
@@ -29,6 +32,7 @@ public final class YouTubeSessionActivity extends AppCompatActivity {
 
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
+        saving = state != null && state.getBoolean("saving");
         setTitle("youtube.com");
         LinearLayout content = new LinearLayout(this);
         content.setOrientation(LinearLayout.VERTICAL);
@@ -57,7 +61,9 @@ public final class YouTubeSessionActivity extends AppCompatActivity {
         CookieManager.getInstance().setAcceptThirdPartyCookies(browser, true);
         browser.setWebViewClient(new WebViewClient() {
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                return request.isForMainFrame() && !YouTubeSessionCookies.canNavigate(request.getUrl().toString());
+                boolean blocked = request.isForMainFrame() && !YouTubeSessionCookies.canNavigate(request.getUrl().toString());
+                if (blocked && saving) failSave();
+                return blocked;
             }
             @Override public void onPageStarted(WebView view, String url, android.graphics.Bitmap icon) {
                 setTitle(android.net.Uri.parse(url).getHost());
@@ -66,11 +72,18 @@ public final class YouTubeSessionActivity extends AppCompatActivity {
             @Override public void onPageFinished(WebView view, String url) {
                 if (!url.equals(view.getUrl())) return;
                 boolean youtube = YouTubeSessionCookies.isYouTube(url);
-                if (saving && youtube && url.equals("https://www.youtube.com/robots.txt")) {
-                    saveCookies();
+                if (saving) {
+                    if (youtube && "/robots.txt".equals(android.net.Uri.parse(url).getPath())) saveCookies();
+                    else failSave();
                 } else if (save != null) {
                     setSaveEnabled(youtube && CookieManager.getInstance().getCookie("https://www.youtube.com") != null);
                 }
+            }
+            @Override public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                if (saving && request.isForMainFrame()) failSave();
+            }
+            @Override public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse response) {
+                if (saving && request.isForMainFrame() && response.getStatusCode() >= 400) failSave();
             }
         });
         content.addView(browser, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
@@ -85,7 +98,8 @@ public final class YouTubeSessionActivity extends AppCompatActivity {
                 if (!saving && browser.canGoBack()) browser.goBack(); else finish();
             }
         });
-        if (state == null || browser.restoreState(state) == null) browser.loadUrl("https://www.youtube.com");
+        if (saving) browser.loadUrl(EXPORT_URL);
+        else if (state == null || browser.restoreState(state) == null) browser.loadUrl("https://www.youtube.com");
     }
 
     @Override public boolean onCreateOptionsMenu(Menu menu) {
@@ -106,14 +120,21 @@ public final class YouTubeSessionActivity extends AppCompatActivity {
             saving = true;
             setSaveEnabled(false);
             // Leave the signed-in page before exporting so its scripts stop rotating cookies.
-            browser.loadUrl("https://www.youtube.com/robots.txt");
+            browser.loadUrl(EXPORT_URL);
         });
         return true;
     }
 
     private void setSaveEnabled(boolean enabled) {
-        if (save != null) save.setEnabled(enabled);
-        if (saveButton != null) saveButton.setEnabled(enabled);
+        if (save != null) save.setEnabled(enabled && !saving);
+        if (saveButton != null) saveButton.setEnabled(enabled && !saving);
+    }
+
+    private void failSave() {
+        saving = false;
+        setSaveEnabled(YouTubeSessionCookies.isYouTube(browser.getUrl()) &&
+            CookieManager.getInstance().getCookie("https://www.youtube.com") != null);
+        Toast.makeText(this, getIntent().getStringExtra("errorLabel"), Toast.LENGTH_LONG).show();
     }
 
     private void saveCookies() {
@@ -123,17 +144,20 @@ public final class YouTubeSessionActivity extends AppCompatActivity {
             String cookies = YouTubeSessionCookies.serialize(manager.getCookie("https://www.youtube.com"));
             File file = new File(getNoBackupFilesDir(), "yt-dlp-cookies.txt");
             YtDlpFiles.write(file, cookies.getBytes(StandardCharsets.UTF_8));
+            saving = false;
             setResult(RESULT_OK, new Intent().putExtra("path", file.getAbsolutePath()));
             finish();
         } catch (Exception error) {
-            saving = false;
-            setSaveEnabled(true);
-            Toast.makeText(this, getIntent().getStringExtra("errorLabel"), Toast.LENGTH_LONG).show();
+            failSave();
         }
     }
 
     @Override public boolean onSupportNavigateUp() { finish(); return true; }
-    @Override protected void onSaveInstanceState(Bundle state) { browser.saveState(state); super.onSaveInstanceState(state); }
+    @Override protected void onSaveInstanceState(Bundle state) {
+        state.putBoolean("saving", saving);
+        browser.saveState(state);
+        super.onSaveInstanceState(state);
+    }
     @Override protected void onDestroy() {
         if (browser != null) {
             browser.stopLoading();
