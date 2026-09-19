@@ -4,7 +4,10 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 import { createAppShortcuts, getAppShortcutPath } from '../../src/renderer/helpers/appShortcuts.js'
-import { transformOpenTubeXRouteUrl } from '../../src/renderer/helpers/share.js'
+import {
+  isShareableOpenTubeXRoute,
+  transformOpenTubeXRouteUrl,
+} from '../../src/renderer/helpers/share.js'
 
 const pages = ['subscriptions', 'userplaylists', 'history', 'downloads']
 
@@ -158,6 +161,7 @@ test('copy-current-URL shortcut copies public and internal active-route URLs', a
     window: appWindow,
     KeyboardShortcuts: { APP: { GENERAL: { COPY_CURRENT_URL: 'copy-url' } } },
     matchesKeyboardShortcut: (_event, shortcut) => shortcut === 'copy-url',
+    isShareableOpenTubeXRoute,
     transformOpenTubeXRouteUrl,
     copyToClipboard: async (url, options) => { copied.push({ url, options }) },
     t: key => key,
@@ -177,4 +181,12 @@ test('copy-current-URL shortcut copies public and internal active-route URLs', a
   assert.equal(copied.length, 2)
   assert.equal(copied[1].url, 'file:///opt/OpenTubeX/resources/app.asar/dist/index.html#/history')
   assert.deepEqual(Object.keys(copied[1].options), [])
+
+  route.fullPath = '/playlist/PL_PRIVATE?playlistType=user'
+  appWindow.location.href =
+    'file:///opt/OpenTubeX/resources/app.asar/dist/index.html#/playlist/PL_PRIVATE?playlistType=user'
+  handler({ preventDefault: () => {} })
+  assert.equal(copied.length, 3)
+  assert.equal(copied[2].url, appWindow.location.href)
+  assert.deepEqual(Object.keys(copied[2].options), [])
 })
