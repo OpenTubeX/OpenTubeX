@@ -202,23 +202,40 @@
             @click="saveWatchedProgressManually"
           />
           <FtIconButton
-            v-if="channelSettingSaveActions.length === 1"
-            :title="channelSettingSaveActions[0].label"
-            :icon="channelSettingSaveActions[0].icon"
-            :overlay-icon="channelSettingSaveActions[0].saved ? ['fas', 'check'] : null"
-            :disabled="channelSettingSaveActions[0].disabled"
-            @click="saveChannelSetting(channelSettingSaveActions[0].value)"
-          />
-          <FtIconButton
-            v-else-if="channelSettingSaveActions.length > 1"
+            v-if="channelSettingSaveActions.length > 0"
             :title="t('Video.Save Channel Setting')"
             :icon="['fas', 'floppy-disk']"
             :overlay-icon="channelSettingSaveActions.some(action => action.saved) ? ['fas', 'check'] : null"
-            :dropdown-options="channelSettingSaveActions"
             :dropdown-portal="channelSettingDropdownPortal"
+            dropdown-class="channelSettingsDropdown"
             dropdown-position-x="left"
-            @click="saveChannelSetting"
-          />
+            force-dropdown
+          >
+            <div
+              v-for="action in channelSettingSaveActions"
+              :key="action.value"
+              class="channelSettingRow"
+            >
+              <button
+                type="button"
+                class="channelSettingSave"
+                :disabled="action.disabled"
+                @click="saveChannelSetting(action.value)"
+              >
+                <FtIcon
+                  :icon="action.icon"
+                  aria-hidden="true"
+                />
+                <span>{{ action.label }}</span>
+              </button>
+              <FtIconButton
+                v-if="action.saved"
+                :title="t('Settings.Channel Settings.Forget Value')"
+                :icon="['fas', 'trash']"
+                @click="removeChannelPreference(store, props.channelId, action.value)"
+              />
+            </div>
+          </FtIconButton>
           <FtIconButton
             v-if="useSponsorBlock && !isUpcoming && !hideFullscreenDockActions"
             :title="sponsorBlockInfoTitle"
@@ -339,7 +356,7 @@ import { vSaferHtml } from '../../directives/vSaferHtml'
 import { linkifyHashtagsAndHandles } from '../../helpers/descriptionLinks'
 import { escapeHTML, formatNumber, formatViewCount, getRelativeTimeFromDate, getVideoThumbnailUrl, openInternalPath, showToast } from '../../helpers/utils'
 import { translateSponsorBlockCategory } from '../../helpers/player/utils'
-import { parseChannelPreferences } from '../../helpers/channel-preferences'
+import { parseChannelPreferences, removeChannelPreference } from '../../helpers/channel-preferences'
 import { useTabContext } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'

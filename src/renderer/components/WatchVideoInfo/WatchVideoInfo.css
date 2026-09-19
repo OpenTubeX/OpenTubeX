@@ -210,3 +210,38 @@
     inset-inline: 0 auto;
   }
 }
+
+:deep(.channelSettingsDropdown) {
+  inline-size: max-content;
+  max-inline-size: calc(100vw - 16px);
+}
+
+.channelSettingRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.channelSettingSave {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 12px;
+  min-block-size: 44px;
+  padding: 10px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.channelSettingSave:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.channelSettingSave:not(:disabled):hover {
+  background: var(--tertiary-color);
+}

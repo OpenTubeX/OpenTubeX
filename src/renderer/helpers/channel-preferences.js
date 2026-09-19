@@ -54,6 +54,24 @@ export function parseChannelPreferences(value, settingKey) {
 }
 
 /**
+ * Remove one saved override without changing the current player state.
+ * @param {import('vuex').Store} store
+ * @param {string} channelId
+ * @param {string} type
+ * @returns {Promise<unknown> | undefined}
+ */
+export function removeChannelPreference(store, channelId, type) {
+  const preference = CHANNEL_PREFERENCE_TYPES.find(preference => preference.type === type)
+  if (!channelId || !preference) return
+
+  const { valuesKey } = preference
+  const suffix = valuesKey[0].toUpperCase() + valuesKey.slice(1)
+  const values = parseChannelPreferences(store.getters[`get${suffix}`], valuesKey)
+  delete values[channelId]
+  return store.dispatch(`update${suffix}`, JSON.stringify(values))
+}
+
+/**
  * @typedef {{ name: string, thumbnail: string }} ChannelInfo
  */
 

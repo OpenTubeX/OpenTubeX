@@ -97,7 +97,7 @@ import { AUTO_QUALITY_FALLBACK, streamsSupportAutoQuality } from '../../helpers/
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { prepareGoogleVideoRequest } from '../../helpers/player/playbackRequestPolicy'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
-import { parseChannelPreferences } from '../../helpers/channel-preferences'
+import { parseChannelPreferences, removeChannelPreference } from '../../helpers/channel-preferences'
 import { findLegacyFormatForQuality } from '../../helpers/player/legacyFormats'
 import { waitForYtDlpFormatAvailability } from '../../helpers/player/ytDlpFormatAvailability'
 import { getDashQualityFromDimensions } from '../../helpers/player/videoQuality'
@@ -8878,6 +8878,10 @@ export default defineComponent({
         queuePlaybackRateRestore(playbackRate)
         emit('playback-rate-updated', playbackRate)
         emit('playback-rate-user-set', playbackRate)
+      })
+
+      events.addEventListener('removeChannelPlaybackSpeed', () => {
+        removeChannelPreference(store, props.channelId, 'playbackSpeed')
       })
 
       events.addEventListener('saveChannelPlaybackSpeed', () => {
