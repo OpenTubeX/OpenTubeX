@@ -504,8 +504,6 @@ Settings:
     Unlocking: Odblokowywanie…
   Search Settings: Przeszukaj ustawienia
   No Settings Found: Nie znaleziono ustawień
-  Experimental Settings:
-    Disable Hardware Acceleration: Wyłącz przyspieszenie sprzętowe
 Tutorial:
   Skip: Pomiń
   Next: Dalej
@@ -666,8 +664,6 @@ Video:
       MuteActionType: Wycisz
       MutePrompt: Wyciszyć segment „{segmentCategory}”?
       SkipActionType: Pomiń
-  Playlist:
-    Unavailable videos are hidden: 1 niedostępny film jest ukryty | {count} niedostępne filmy są ukryte | {count} niedostępnych filmów jest ukrytych
 Change Format:
   Local Video File: Lokalny plik filmu
   Local Audio File: Lokalny plik dźwiękowy
@@ -821,8 +817,6 @@ Tooltips:
     Scroll Speed: Zmienia odległość przewijania gestami kółka myszy i panelu dotykowego.
     Use Fixed Tab Width: Nadaje wszystkim kartom na poziomym pasku jednakową szerokość zamiast dopasowywać ją do tytułu.
     Use Grid Player Menu: Układa menu ustawień odtwarzacza filmu w siatkę kafelków zamiast listy wierszy.
-  Experimental Settings:
-    Disable Hardware Acceleration: Wyłącza przyspieszenie sprzętowe GPU. Może rozwiązać problemy graficzne, ale prawdopodobnie obniży wydajność.
 The playlist is at the beginning. Enable loop to continue playing: Playlista jest na początku. Włącz zapętlanie, aby kontynuować odtwarzanie
 External link opening has been disabled in Settings → Privacy: Otwieranie zewnętrznych odnośników wyłączono w sekcji Ustawienia → Prywatność
 KeyboardShortcutPrompt:

@@ -8,6 +8,7 @@ on:
         required: false
         description: Release tag to publish on the download site, for example v0.25.5-beta
 
+cache-mode: none
 permissions: {}
 
 jobs:

@@ -165,8 +165,6 @@ Subscriptions:
   Show Combined View: Erakutsi ikuspegi bateratua
   Newest First: Berrienak lehenik
   Oldest First: Zaharrenak lehenik
-  Posts:
-    RSS Message: 'YouTube-k ez du RSS jariorik eskaintzen argitalpenetarako. Desgaitu "{rssSetting}" ezarpena argitalpenak ikusteko, edo gaitu "{hideSetting}" ezarpena fitxa hau ezkutatzeko.'
 Trending:
   Load Error: Ezin izan dira joerak kargatu.
   Unsupported Backend: Joerek API lokala behar dute. Hautatu API lokala edo gaitu ordezko motorra.
@@ -857,8 +855,6 @@ Settings:
     Show Video Title: Erakutsi bideoaren izenburua
     Show Bottom Right Actions Dock: Erakutsi ekintzen panela behean eskuinean
     Paused Interface Hide Delay: Pausatutako interfazea ezkutatzeko atzerapena
-    Add: Gehitu
-    Remove: Kendu
   Data Settings:
     Data And Storage: Datuak eta biltegiratzea
     Profile Directory: Profilaren direktorioa
@@ -1029,8 +1025,6 @@ Settings:
     Unlocking: Desblokeatzen…
   Search Settings: Bilaketa-ezarpenak
   No Settings Found: Ez da ezarpenik aurkitu
-  Experimental Settings:
-    Disable Hardware Acceleration: Desgaitu hardware-azelerazioa
 Tutorial:
   Skip: Saltatu
   Next: Hurrengoa
@@ -1077,7 +1071,6 @@ Profile:
   Use Initial: Erabili iniziala
   The selected image could not be loaded: Ezin izan da hautatutako irudia kargatu
   Theme Color: Gaiaren kolorea
-  Go To Profile Manager: Joan profil-kudeatzailera
 Channel:
   Subscription settings: Harpidetzaren ezarpenak
   Failed to save subscription settings: Ezin izan dira kanalaren ezarpenak gorde
@@ -1344,7 +1337,6 @@ Playlist:
   Playlist Preload Complete: "Aurrekargatutako bideoak: {count}."
   Playlist Preload Partial: "{requested} bideotatik {preloaded} aurrekargatu dira. {failed} ezin izan dira aurrekargatu."
   Playlist Preload Pagination Failed: "Ezin izan da erreprodukzio-zerrenda osoa kargatu; aurrekarga bertan behera utzi da."
-  Unavailable videos are hidden: Erabilgarri ez dauden bideoak ezkutatuta daude
 Change Format:
   Local Video File: Bideo-fitxategi lokala
   Local Audio File: Audio-fitxategi lokala
@@ -1486,7 +1478,6 @@ Comments:
   Getting comment replies, please wait: Iruzkinen erantzunak eskuratzen; itxaron
   Reload Comments: Kargatu berriro iruzkinak
   Reply Count: Erantzun 1 | {replyCount} erantzun
-  Comments are turned off: Iruzkinak desaktibatuta daude
   YouTube did not provide advertised replies: YouTube-k iruzkin honek erantzunak dituela adierazi du, baina ez ditu eman. Baliteke ezabatuta edo ezkutatuta egotea; beraz, erantzuteko botoia kendu da.
   Pinned by you: Zuk ainguratua
   A reply is pinned: Erantzun bat ainguratuta dago
@@ -1592,8 +1583,6 @@ Tooltips:
     Scroll Speed: Saguaren gurpileko eta ukipen-paneleko keinuek zenbat korritzen duten aldatzen du.
     Use Fixed Tab Width: Fitxa horizontalen barrako fitxa guztiei zabalera bera ematen die, izenburuaren arabera tamainatu beharrean.
     Use Grid Player Menu: Erreproduzigailuaren ezarpen-menua lauzaz osatutako sareta batean antolatzen du, errenkada-zerrenda baten ordez.
-  Experimental Settings:
-    Disable Hardware Acceleration: GPUaren hardware-azelerazioa desgaitzen du. Arazo grafikoak konpon ditzake, baina ziurrenik errendimendua murriztuko du.
 The playlist is at the beginning. Enable loop to continue playing: Erreprodukzio-zerrenda hasieran dago. Gaitu begizta erreproduzitzen jarraitzeko
 External link opening has been disabled in Settings → Privacy: Kanpoko estekak irekitzea desgaitu da Ezarpenak → Pribatutasuna atalean
 KeyboardShortcutPrompt:
@@ -1771,9 +1760,6 @@ Downloads:
     Subtitles Format: Azpitituluak - {format}
 Channels:
   Load More Channels: "Kargatu kanal gehiago"
-Search Bar:
-  Open Search Container: Ireki bilaketa-eremua
-  Search: Bilatu
 Theme Discovery:
   Discover Themes: "Aurkitu gaiak"
   Refresh: "Freskatu"

@@ -33,6 +33,7 @@ on:
       - '.github/pull.yml'
       - '.github/workflows/autoMerge.yml'
       - '.github/workflows/codeql.yml'
+      - '.github/workflows/compress-images.yml'
       - '.github/workflows/conflicts.yml'
       - '.github/workflows/e2e.yml'
       - '.github/workflows/enableAutoMerge.yml'
@@ -55,6 +56,7 @@ on:
         default: false
         type: boolean
 
+cache-mode: none
 permissions: {}
 
 concurrency:
@@ -71,6 +73,7 @@ jobs:
     # If a fork does need this workflow to run on every push to the default branch, they can change this condition in their fork to include their repository.
     if: github.repository == 'OpenTubeX/OpenTubeX' || github.event_name == 'workflow_dispatch'
 
+    cache-mode: write
     permissions:
       actions: write
       contents: read
@@ -148,7 +151,7 @@ jobs:
         key: ${{ format('node-cache-{0}-{1}-pnpm-{2}', runner.os, runner.arch, hashFiles('pnpm-lock.yaml')) }}
         path: ${{ steps.cache_dir.outputs.cache_dir }}
 
-    - run: pnpm run ci
+    - run: pnpm install --frozen-lockfile
       shell: bash
     - run: pnpm run lint
       shell: bash

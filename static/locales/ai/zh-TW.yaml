@@ -855,8 +855,6 @@ Settings:
     Show Video Title: 顯示影片標題
     Show Bottom Right Actions Dock: 顯示右下角操作列
     Paused Interface Hide Delay: 暫停介面的隱藏延遲
-    Add: 新增
-    Remove: 移除
   Data Settings:
     Data And Storage: 資料與儲存空間
     Profile Directory: 設定檔資料夾
@@ -1027,8 +1025,6 @@ Settings:
     Unlocking: 正在解鎖…
   Search Settings: 搜尋設定
   No Settings Found: 找不到設定
-  Experimental Settings:
-    Disable Hardware Acceleration: 停用硬體加速
 Tutorial:
   Skip: 略過
   Next: 下一步
@@ -1075,7 +1071,6 @@ Profile:
   Use Initial: 使用首字母
   The selected image could not be loaded: 無法載入選取的圖片
   Theme Color: 佈景主題色彩
-  Go To Profile Manager: 前往個人檔案管理員
 Channel:
   Subscription settings: 訂閱設定
   Failed to save subscription settings: 無法儲存頻道設定
@@ -1165,7 +1160,6 @@ Video:
   Notification unavailable: 無法使用系統通知
   Scheduled video starting: 排定的影片即將開始
   Live notification body: '{videoTitle} 現在開始'
-  Premiere: 首映
   AI: AI
   AI-generated content: AI 產生的內容
   Collaborators: 協作者
@@ -1321,9 +1315,6 @@ Video:
       UpvoteSegment: 投贊成票
       DownvoteSegment: 投反對票
       VoteFailed: 無法提交 SponsorBlock 投票。
-  Station: 電台
-  Playlist:
-    Unavailable videos are hidden: 已隱藏 {count} 部無法播放的影片
 Playlist:
   Playlist Already Preloaded: "播放清單中的所有影片均已預載"
   Playlist Preload Progress: "正在預載影片：{completed}/{requested}"
@@ -1333,7 +1324,6 @@ Playlist:
   Playlist Preload Complete: "已預先載入影片：{count}。"
   Playlist Preload Partial: "已預先載入 {requested} 部影片中的 {preloaded} 部，{failed} 部無法載入。"
   Playlist Preload Pagination Failed: "無法載入完整播放清單，已取消預先載入。"
-  Unavailable videos are hidden: 無法播放的影片已隱藏
 Change Format:
   Local Video File: 本機影片檔案
   Local Audio File: 本機音訊檔案
@@ -1475,7 +1465,6 @@ Comments:
   Getting comment replies, please wait: 正在取得留言回覆，請稍候
   Reload Comments: 重新載入留言
   Reply Count: '{replyCount} 則回覆'
-  Comments are turned off: 留言功能已關閉
   YouTube did not provide advertised replies: YouTube 顯示此留言有回覆，但未提供回覆內容。這些回覆可能已遭刪除或隱藏，因此已移除回覆按鈕。
   Pinned by you: 已由您置頂
   A reply is pinned: 有一則回覆已置頂
@@ -1581,8 +1570,6 @@ Tooltips:
     Scroll Speed: 變更滑鼠滾輪和觸控板滾輪手勢的捲動距離。
     Use Fixed Tab Width: 水平分頁列中的每個分頁使用相同寬度，而不依標題調整寬度。
     Use Grid Player Menu: 將影片播放器的設定選單排列成格狀方塊，而非逐列清單。
-  Experimental Settings:
-    Disable Hardware Acceleration: 停用 GPU 硬體加速。可能解決圖形問題，但可能會降低效能。
 The playlist is at the beginning. Enable loop to continue playing: 播放清單已在開頭。啟用循環播放即可繼續播放
 External link opening has been disabled in Settings → Privacy: 已在「設定」→「隱私權」中停用開啟外部連結
 KeyboardShortcutPrompt:
@@ -1760,9 +1747,6 @@ Downloads:
     Subtitles Format: 字幕 - {format}
 Channels:
   Load More Channels: "載入更多頻道"
-Search Bar:
-  Open Search Container: 開啟搜尋欄
-  Search: 搜尋
 Theme Discovery:
   Discover Themes: "探索佈景主題"
   Refresh: "重新整理"

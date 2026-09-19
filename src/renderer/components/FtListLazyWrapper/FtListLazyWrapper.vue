@@ -271,8 +271,8 @@ const showResult = computed(() => {
     const lowerCaseTitle = props.data.title?.toLowerCase()
     const lowerCaseChannelName = props.data.channelName?.toLowerCase()
 
-    if ((forbiddenTitles.value.some((text) => lowerCaseTitle.includes(text))) ||
-      (forbiddenTitles.value.some((text) => lowerCaseChannelName.includes(text)))) {
+    if ((lowerCaseTitle != null && forbiddenTitles.value.some((text) => lowerCaseTitle.includes(text))) ||
+      (lowerCaseChannelName != null && forbiddenTitles.value.some((text) => lowerCaseChannelName.includes(text)))) {
       return false
     }
 

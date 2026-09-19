@@ -42,9 +42,6 @@ Unload Multiple Tabs Confirmation:
   Title: Vil du laste ut fleire faner?
   Message: Dette lastar ut {count} faner.
   Unload Tabs: Last ut {count} faner
-Compact side navigation: Gjer sidenavigasjonen kompakt
-Expand side navigation: Utvid sidenavigasjonen
-Right-click or hold to see history: Høgreklikk eller hald inne for å sjå historikken
 Use Vertical Tabs: Bruk loddrette faner
 Use Horizontal Tabs: Bruk vassrette faner
 Resize Tab Bar: Endre storleik på fanelinja
@@ -61,9 +58,6 @@ Global:
   Ambient Mode: Omgjevnadsmodus
   Loading More: Lastar inn meir
   New: Ny
-  Counts:
-    Like Count: 1 likerklikk | {count} likerklikk
-    Watching Count: 1 ser på | {count} ser på
 Search Listing:
   Label:
     Members Only: Berre for medlemmer
@@ -155,8 +149,6 @@ Subscriptions:
   Refresh Errors: "Kanalar som ikkje kunne oppdaterast: {channels}. Klikk for å sjå detaljar."
   Refresh Error Channels More: "{channels} og {count} til | {channels} og {count} til"
   Never show {type} from this channel in feeds again: Vis aldri {type} frå denne kanalen i straumar igjen
-  Subscriptions Tabs: Abonnementsfaner
-  All Subscription Tabs Hidden: Alle abonnementsfanene er gøymde. Vis nokre faner i delen "{subsection}" under "{settingsSection}" for å sjå innhald her.
   Refreshing Subscription Videos: Oppdaterer abonnementsvideoar
   Refreshing Subscription Shorts: Oppdaterer Shorts frå abonnement
   Refreshing Subscription Live Streams: Oppdaterer direktesendingar frå abonnement
@@ -173,8 +165,6 @@ Subscriptions:
   Show Combined View: Vis samla
   Newest First: Nyaste først
   Oldest First: Eldste først
-  Posts:
-    RSS Message: YouTube tilbyr ikkje RSS-straumar for innlegg. Slå av innstillinga "{rssSetting}" for å sjå innlegg, eller slå på innstillinga "{hideSetting}" for å gøyme denne fana.
 Trending:
   Load Error: Klarte ikkje å laste inn populært innhald.
   Unsupported Backend: Populært innhald krev Local API. Vel Local API eller slå på ein reserveleverandør.
@@ -194,42 +184,12 @@ User Playlists:
   Choose Image: Vel bilete
   Use Bookmark Icon: Bruk bokmerkeikon
   Enable Quick Bookmark With This Playlist: Bruk denne spelelista som snøggbokmerke
-  Quick Bookmark Enabled: Snøggbokmerke er slått på
-  Export Playlist: Eksporter denne spelelista
-  Export list of URLs: Eksporter liste over nettadresser
-  The playlist has been successfully exported: Spelelista er eksportert
-  Cannot delete the quick bookmark target playlist.: Du kan ikkje slette spelelista som blir brukt som snøggbokmerke.
-  Are you sure you want to delete this playlist? This cannot be undone: Er du sikker på at du vil slette denne spelelista? Dette kan ikkje angrast.
   SinglePlaylistView:
     Retry: Prøv igjen
     This playlist could not be loaded.: Klarte ikkje å laste inn denne spelelista.
     More videos could not be loaded.: Klarte ikkje å laste inn fleire videoar.
-    Toast:
-      This playlist is already being used for quick bookmark.: Denne spelelista blir allereie brukt som snøggbokmerke.
-      This playlist is now used for quick bookmark: Denne spelelista blir no brukt som snøggbokmerke
-      This playlist is now used for quick bookmark instead of {oldPlaylistName}. Click here to undo: Denne spelelista blir no brukt som snøggbokmerke i staden for {oldPlaylistName}. Trykk her for å angre
-      Reverted to use {oldPlaylistName} for quick bookmark: '{oldPlaylistName} blir brukt som snøggbokmerke igjen'
-      Some videos in the playlist are not loaded yet. Click here to copy anyway.: Nokre videoar i spelelista er ikkje lasta inn enno. Trykk her for å kopiere likevel.
-      Playlist name cannot be empty. Please input a name.: Spelelista må ha eit namn. Skriv inn eit namn.
-      Playlist has been updated.: Spelelista er oppdatert.
-      There was an issue with updating this playlist.: Det oppstod eit problem under oppdateringa av spelelista.
-      '{videoCount} video(s) have been removed': 1 video er fjerna | {videoCount} videoar er fjerna
-      There were no videos to remove.: Det var ingen videoar å fjerne.
-      This playlist is protected and cannot be removed.: Denne spelelista er verna og kan ikkje fjernast.
-      Playlist {playlistName} has been deleted.: Spelelista {playlistName} er sletta.
-      This playlist does not exist: Denne spelelista finst ikkje
-      This playlist has a video with a duration error: Spelelista inneheld minst éin video utan oppgjeven lengd. Videoen blir sortert som om lengda er null.
   AddVideoPrompt:
-    Select a playlist to add your N videos to: Vel ei speleliste du vil leggje videoen din til | Vel ei speleliste du vil leggje dei {videoCount} videoane dine til
-    N playlists selected: '{playlistCount} valde'
-    Search in Playlists: Søk i spelelister
-    Allow Adding Duplicate Video(s): Tillat duplikatvideoar
-    Save: Lagre
-    Added {count} Times: Allereie lagd til | Lagd til {count} gonger
-    '{videoCount}/{totalVideoCount} Videos Will Be Added': '{videoCount}/{totalVideoCount} videoar blir lagde til'
-    '{videoCount}/{totalVideoCount} Videos Already Added': '{videoCount}/{totalVideoCount} videoar er allereie lagde til'
     Toast:
-      You haven't selected any playlist yet.: Du har ikkje valt noka speleliste enno.
       Video(s) added to {playlistCount} playlists: Video lagd til i 1 speleliste | Videoar lagde til i {playlistCount} spelelister
   CreatePlaylistPrompt:
     New Playlist Name: Namn på den nye spelelista
@@ -2173,9 +2133,6 @@ Downloads:
     Subtitles Format: Undertekstar - {format}
 Channels:
   Load More Channels: "Last inn fleire kanalar"
-Search Bar:
-  Open Search Container: Opne søkjefeltet
-  Search: Søk
 Theme Discovery:
   Discover Themes: "Finn tema"
   Refresh: "Last inn på nytt"

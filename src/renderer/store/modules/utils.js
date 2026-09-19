@@ -556,16 +556,17 @@ const actions = {
       /^\/(?:(?:channel|user|c)\/)?(?<channelId>[^/]+)(?:\/(?<tab>join|featured|videos|shorts|live|streams|podcasts|releases|courses|playlists|about|community|channels))?\/?$/
 
     const hashtagPattern = /^\/hashtag\/(?<tag>[^#&/?]+)$/
-
     const postPattern = /^\/post\/(?<postId>.+)/
+    const showPattern = /^\/show\/VL(?<playlistId>.+)/
     const feedPattern = /^\/feed\/(?<type>trending|subscriptions|history|playlists|you|library)/
     const typePatterns = new Map([
       ['playlist', /^(\/playlist\/?|\/embed(\/?videoseries)?)$/],
+      ['show', showPattern],
       ['search', /^\/results|search\/?$/],
       ['hashtag', hashtagPattern],
       ['post', postPattern],
       ['feed', feedPattern],
-      ['channel', channelPattern],
+      ['channel', channelPattern]
     ])
 
     for (const [type, pattern] of typePatterns) {
@@ -594,6 +595,14 @@ const actions = {
           urlType: 'playlist',
           playlistId,
           query
+        }
+      }
+
+      case 'show': {
+        const match = url.pathname.match(showPattern)
+        return {
+          urlType: 'playlist',
+          playlistId: match.groups.playlistId
         }
       }
 
