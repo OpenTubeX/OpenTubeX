@@ -31,7 +31,7 @@
             noTransition: suppressTransitions,
           }"
           :style="dragStyle(tab.id)"
-          @pointerdown="startDrag($event, tab.id)"
+          @pointerdown="!selecting && startDrag($event, tab.id)"
           @pointermove="moveDrag"
           @pointerup="finishDrag"
           @pointercancel="cancelDrag"
@@ -72,7 +72,20 @@
               dir="auto"
             >{{ tabTitle(tab) }}</span>
           </button>
+          <label
+            v-if="selecting"
+            class="capacitorTabletTabSelection"
+            @pointerdown.stop
+          >
+            <input
+              type="checkbox"
+              :checked="selectedTabIds.has(tab.id)"
+              :aria-label="t('Tab Organizer.Select Tab', { title: tabTitle(tab) })"
+              @change="toggleTabSelection(tab.id)"
+            >
+          </label>
           <button
+            v-else
             type="button"
             class="capacitorTabletTabClose"
             :aria-label="t('Tab Organizer.Close Tab', { title: tabTitle(tab) })"
@@ -87,7 +100,15 @@
         </div>
       </div>
     </div>
+    <CapacitorTabSelectionControls
+      v-if="selecting"
+      :count="selectedTabIds.size"
+      :busy="closingTabs"
+      @close="closeSelectedTabs"
+      @cancel="clearSelection"
+    />
     <button
+      v-if="!selecting"
       type="button"
       class="capacitorTabletNewTab"
       :aria-label="t('New Tab')"
@@ -101,11 +122,14 @@
     </button>
     <Teleport to="body">
       <CapacitorTabActionsMenu
+        :related-tab-ids="relatedTabIds"
         :tab="actionTab"
         :title="actionTab ? tabTitle(actionTab) : ''"
         :youtube-url="actionTabYoutubeUrl"
         :can-toggle-loaded="canToggleActionTabLoaded"
         mode="tablet"
+        @select="selectActionTab"
+        @close-related="closeRelatedTabs"
         @close="closeActionTab"
         @copy-youtube-link="copyActionTabYoutubeLink"
         @dismiss="closeTabActions"
@@ -129,6 +153,7 @@ import store from '../../store/index'
 import { getTabAvatarUrl, getTabPageIcon } from '../../tabs/tabPreview'
 import FtRetryImage from '../FtRetryImage.vue'
 import { lockBodyScroll, unlockBodyScroll } from '../FtPrompt/scrollLock'
+import CapacitorTabSelectionControls from './CapacitorTabSelectionControls.vue'
 import CapacitorTabActionsMenu from './CapacitorTabActionsMenu.vue'
 import { useCapacitorTabActions } from './useCapacitorTabActions'
 import { useTabletTabReorder } from './useTabletTabReorder'
@@ -147,6 +172,15 @@ const fixedTabWidthStyle = computed(() => store.getters.getUseFixedTabWidth
   ? { '--fixed-tab-width': `${normalizeFixedTabWidth(store.getters.getFixedTabWidth)}px` }
   : undefined)
 const {
+  selecting,
+  selectedTabIds,
+  closingTabs,
+  clearSelection,
+  toggleTabSelection,
+  selectActionTab,
+  relatedTabIds,
+  closeRelatedTabs,
+  closeSelectedTabs,
   actionTab,
   actionTabYoutubeUrl,
   activateTab,
@@ -186,7 +220,9 @@ function handleTabListKeydown(event) {
   if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
 
   const tabIds = tabs.value.map(tab => tab.id)
-  const currentIndex = Math.max(0, tabIds.indexOf(activeTabId.value))
+  const focusedTabId = event.target.closest('.capacitorTabletTab')
+    ?.querySelector('[data-tab-id]')?.dataset.tabId
+  const currentIndex = Math.max(0, tabIds.indexOf(selecting.value ? focusedTabId : activeTabId.value))
   let targetIndex
   if (event.key === 'Home') targetIndex = 0
   else if (event.key === 'End') targetIndex = tabIds.length - 1
@@ -196,6 +232,11 @@ function handleTabListKeydown(event) {
   if (!tabId) return
 
   event.preventDefault()
+  if (selecting.value) {
+    const targets = tabsViewportRef.value?.querySelectorAll('.capacitorTabletTabTarget')
+    Array.from(targets ?? []).find(target => target.dataset.tabId === tabId)?.focus()
+    return
+  }
   activateTab(tabId).then(() => focusActiveTab())
 }
 

@@ -1746,6 +1746,10 @@ Share:
   Share Post: Bendrinti įrašą
   Timestamp Link Copied: Nuoroda su laiko žyma nukopijuota į iškarpinę
 Context Menu:
+  Select Tab: Pasirinkti kortelę
+  Close Tabs Before: Užverti ankstesnes korteles
+  Close Tabs After: Užverti paskesnes korteles
+  Close Other Tabs: Užverti kitas korteles
   Copy {service} link without playlist: "Kopijuoti {service} nuorodą be grojaraščio"
   Context Menu: Kontekstinis meniu
   Select All: Pasirinkti viską

@@ -1430,6 +1430,10 @@ Share:
   Share Post: Абагуліць допіс
   Timestamp Link Copied: Спасылка на гэты момант скапіявана ў буфер абмену
 Context Menu:
+  Select Tab: Выбраць укладку
+  Close Tabs Before: Закрыць папярэднія ўкладкі
+  Close Tabs After: Закрыць наступныя ўкладкі
+  Close Other Tabs: Закрыць іншыя ўкладкі
   Copy {service} link without playlist: "Скапіяваць спасылку {service} без плэйліста"
   Context Menu: Кантэкстнае меню
   Select All: Выбраць усё

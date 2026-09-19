@@ -1368,6 +1368,10 @@ Share:
   Share failed: "Poveznicu nije moguće podijeliti"
   Timestamp Link Copied: Poveznica s vremenskom oznakom kopirana je u međuspremnik
 Context Menu:
+  Select Tab: Odaberi karticu
+  Close Tabs Before: Zatvori prethodne kartice
+  Close Tabs After: Zatvori sljedeće kartice
+  Close Other Tabs: Zatvori ostale kartice
   Copy {service} link without playlist: "Kopiraj poveznicu za {service} bez popisa za reprodukciju"
   Context Menu: Kontekstni izbornik
   Select All: Odaberi sve

@@ -1390,6 +1390,10 @@ Share:
   Share failed: "לא ניתן לשתף את הקישור"
   Timestamp Link Copied: הקישור לנקודת הזמן הועתק ללוח
 Context Menu:
+  Select Tab: בחירת לשונית
+  Close Tabs Before: סגירת הלשוניות הקודמות
+  Close Tabs After: סגירת הלשוניות הבאות
+  Close Other Tabs: סגירת הלשוניות האחרות
   Copy {service} link without playlist: "העתקת קישור {service} ללא רשימת השמעה"
   Context Menu: תפריט ההקשר
   Select All: בחירת הכול

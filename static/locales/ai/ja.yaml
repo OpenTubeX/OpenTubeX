@@ -1350,6 +1350,10 @@ Share:
   Share failed: "リンクを共有できませんでした"
   Timestamp Link Copied: 再生時刻付きリンクをクリップボードにコピーしました
 Context Menu:
+  Select Tab: タブを選択
+  Close Tabs Before: 前のタブを閉じる
+  Close Tabs After: 後のタブを閉じる
+  Close Other Tabs: 他のタブを閉じる
   Copy {service} link without playlist: "再生リストを含めずに{service}のリンクをコピー"
   Context Menu: コンテキストメニュー
   Select All: すべて選択

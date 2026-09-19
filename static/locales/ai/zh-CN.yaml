@@ -1350,6 +1350,10 @@ Share:
   Share failed: "无法分享链接"
   Timestamp Link Copied: 已将带时间戳的链接复制到剪贴板
 Context Menu:
+  Select Tab: 选择标签页
+  Close Tabs Before: 关闭之前的标签页
+  Close Tabs After: 关闭之后的标签页
+  Close Other Tabs: 关闭其他标签页
   Copy {service} link without playlist: "复制不含播放列表的 {service} 链接"
   Context Menu: 上下文菜单
   Select All: 全选

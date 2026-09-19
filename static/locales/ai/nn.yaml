@@ -1643,6 +1643,10 @@ Share:
   Share Post: Del innlegget
   Timestamp Link Copied: Lenkja med tidsstempel er kopiert til utklippstavla
 Context Menu:
+  Select Tab: Vel fane
+  Close Tabs Before: Lukk føregåande faner
+  Close Tabs After: Lukk etterfølgjande faner
+  Close Other Tabs: Lukk andre faner
   Copy {service} link without playlist: "Kopier {service}-lenkje utan speleliste"
   Context Menu: Samanhengsmeny
   Select All: Vel alt

@@ -1393,6 +1393,10 @@ Share:
   Share failed: "இணைப்பைப் பகிர முடியவில்லை"
   Timestamp Link Copied: நேரக் குறிப்பு இணைப்பு இடைநிலைப் பலகைக்கு நகலெடுக்கப்பட்டது
 Context Menu:
+  Select Tab: தாவலைத் தேர்ந்தெடு
+  Close Tabs Before: முந்தைய தாவல்களை மூடு
+  Close Tabs After: பின்வரும் தாவல்களை மூடு
+  Close Other Tabs: மற்ற தாவல்களை மூடு
   Copy {service} link without playlist: "இயக்கப்பட்டியல் இல்லாமல் {service} இணைப்பை நகலெடு"
   Context Menu: சூழல் மெனு
   Select All: அனைத்தையும் தேர்ந்தெடு
