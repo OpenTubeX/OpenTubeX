@@ -165,15 +165,25 @@ public class YtDlpDownloadsTest {
             JSONArray args = new JSONArray(asList("--output", "%(id)s.%(ext)s", "--retries", "0", server.url()));
             YtDlpDownloads queue = new YtDlpDownloads(context, state, () -> {});
             long anonymous = queue.add(payload, args, config, -1).getLong("id");
-            queue.claim();
-            queue.run(anonymous);
-            assertEquals("failed", queue.list().getJSONObject(0).getString("status"));
             long authenticated = queue.add(payload, args, config.put("useCookies", true), -1).getLong("id");
             YtDlpDownloads restored = new YtDlpDownloads(context, state, () -> {});
             restored.claim();
+            restored.run(anonymous);
+            assertEquals("Later cookie opt-in must not change a pending anonymous download", "failed", restored.list().getJSONObject(0).getString("status"));
+            restored.configure(config.put("useCookies", false).put("cookies", ""));
             restored.run(authenticated);
             JSONObject result = restored.list().getJSONObject(1);
             assertEquals(result.toString(), "completed", result.getString("status"));
+            config.put("useCookies", true).put("cookies", new File(state, "unapproved-cookies.txt").getAbsolutePath());
+            assertThrows(IOException.class, () -> restored.add(payload, args, config, -1));
+            config.put("cookies", cookies.getAbsolutePath());
+            long missingCookies = restored.add(payload, args, config, -1).getLong("id");
+            assertTrue(cookies.delete());
+            restored.claim();
+            restored.run(missingCookies);
+            JSONObject missing = restored.list().getJSONObject(2);
+            assertEquals("failed", missing.getString("status"));
+            assertTrue(missing.getString("errorMessage").contains("Cookie file is unavailable"));
         } finally {
             // yt-dlp may rewrite its header. Never remove a newer session saved while testing.
             if (fixtureCreated && cookies.isFile()) {

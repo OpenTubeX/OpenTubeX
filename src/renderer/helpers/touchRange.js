@@ -1,7 +1,7 @@
 /** Defer touch range changes until a tap or an intentional horizontal drag. */
 export function attachTouchRange(input) {
   let gesture = null
-  let touch = false
+  let touchPointerId = null
   let acceptedValue = input.value
   const previousTouchAction = input.style.touchAction
   input.style.touchAction = 'pan-y'
@@ -19,8 +19,8 @@ export function attachTouchRange(input) {
     if (input.value !== previous) input.dispatchEvent(new Event('input', { bubbles: true }))
   }
   function down(event) {
-    touch = event.pointerType === 'touch'
-    if (event.pointerType !== 'touch' || !event.isPrimary || input.disabled) return
+    if (event.pointerType !== 'touch' || !event.isPrimary || input.disabled || touchPointerId !== null) return
+    touchPointerId = event.pointerId
     acceptedValue = input.value
     event.preventDefault()
     gesture = { id: event.pointerId, x: event.clientX, y: event.clientY, value: input.value, dragging: false }
@@ -38,7 +38,8 @@ export function attachTouchRange(input) {
     update(event)
   }
   function up(event) {
-    touch = false
+    if (touchPointerId !== event.pointerId) return
+    touchPointerId = null
     if (gesture?.id !== event.pointerId) return
     const value = gesture.value
     update(event)
@@ -46,17 +47,18 @@ export function attachTouchRange(input) {
     input.focus({ preventScroll: true })
     if (input.value !== value) input.dispatchEvent(new Event('change', { bubbles: true }))
   }
-  function cancel() {
-    touch = false
+  function cancel(event) {
+    if (touchPointerId !== event.pointerId) return
+    touchPointerId = null
     const changed = gesture?.dragging && input.value !== gesture.value
     gesture = null
     if (changed) input.dispatchEvent(new Event('change', { bubbles: true }))
   }
-  function keyboard() { touch = false }
+  function keyboard() { touchPointerId = null; gesture = null }
   function nativeInput(event) {
     // WebView changes ranges on touch-down even when pointerdown is canceled.
     // Suppress those trusted events; update() emits the deliberate changes.
-    if (!touch || !event.isTrusted) return
+    if (touchPointerId === null || !event.isTrusted) return
     input.value = acceptedValue
     event.stopImmediatePropagation()
   }

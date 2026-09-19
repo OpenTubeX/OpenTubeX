@@ -34,3 +34,37 @@ for (const end of ['pointerup', 'pointercancel', 'lostpointercapture', 'scroll']
     cleanup()
   })
 }
+
+for (const [otherEvent, pointerType] of [
+  ['pointerdown', 'mouse'],
+  ['pointerdown', 'touch'],
+  ['pointerup', 'touch'],
+  ['pointercancel', 'touch'],
+  ['lostpointercapture', 'touch'],
+]) {
+  test(`another ${pointerType} pointer's ${otherEvent} cannot interrupt a touch drag`, () => {
+    const handlers = new Map()
+    const input = {
+      value: '50', min: '0', max: '100', style: {},
+      addEventListener: (name, callback) => handlers.set(name, callback),
+      removeEventListener: name => handlers.delete(name),
+      setPointerCapture() {}, focus() {}, dispatchEvent() {},
+      getBoundingClientRect: () => ({ left: 0, width: 100 }),
+    }
+    const attach = vm.runInNewContext(`${source}; attachTouchRange`, { Event, getComputedStyle: () => ({ direction: 'ltr' }) })
+    const cleanup = attach(input)
+    const pointer = { pointerType: 'touch', isPrimary: true, pointerId: 1, clientX: 50, clientY: 0, preventDefault() {} }
+    handlers.get('pointerdown')(pointer)
+    handlers.get(otherEvent)({ ...pointer, pointerType, isPrimary: false, pointerId: 2 })
+    input.value = '90'
+    let prevented = false
+    handlers.get('input')({ isTrusted: true, stopImmediatePropagation() { prevented = true } })
+    assert.equal(prevented, true, 'the tracked gesture still suppresses native changes')
+    assert.equal(input.value, '50')
+    handlers.get('pointermove')({ ...pointer, clientX: 70 })
+    assert.equal(input.value, '70', 'the original pointer can continue dragging')
+    handlers.get('pointerup')({ ...pointer, clientX: 80 })
+    assert.equal(input.value, '80')
+    cleanup()
+  })
+}
