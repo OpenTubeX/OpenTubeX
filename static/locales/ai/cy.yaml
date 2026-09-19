@@ -840,7 +840,10 @@ Settings:
     Posts Auto Refresh Interval: Cyfwng adnewyddu postiadau yn awtomatig
     Refresh Subscriptions While App Is Closed: "Adnewyddu tanysgrifiadau pan fydd yr ap ar gau"
   Distraction Free Settings:
-    Hide AI Video Summaries: "Cuddio crynodebau fideo AI"
+    AI Video Summaries: Crynodebau fideo AI
+    Hide: Cuddio
+    Collapsed: Wedi'u crebachu
+    Expanded: Wedi'u hehangu
     Playing Interface Hide Delay: Oedi cyn cuddio’r rhyngwyneb wrth chwarae
     Hide Startup Splash: Cuddio’r sgrin gychwyn
     Hide Repeat Stats: Cuddio ystadegau ailadrodd

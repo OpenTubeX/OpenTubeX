@@ -863,7 +863,10 @@ Settings:
     Refresh Subscriptions While App Is Closed: "Opdater abonnementer, mens appen er lukket"
     Limit the number of videos displayed for each channel: Begræns antallet af viste videoer for hver kanal
   Distraction Free Settings:
-    Hide AI Video Summaries: "Skjul AI-videoresuméer"
+    AI Video Summaries: AI-videoresuméer
+    Hide: Skjul
+    Collapsed: Sammenfoldet
+    Expanded: Udfoldet
     Playing Interface Hide Delay: Forsinkelse før grænsefladen skjules under afspilning
     Hide Startup Splash: Skjul opstartsskærm
     Hide Repeat Stats: Skjul gentagelsesstatistik

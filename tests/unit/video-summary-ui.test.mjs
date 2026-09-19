@@ -7,21 +7,21 @@ import { parse } from 'vue/compiler-sfc'
 
 const component = await readFile(new URL('../../src/renderer/components/WatchVideoSummary/WatchVideoSummary.vue', import.meta.url), 'utf8')
 const { descriptor } = parse(component)
-const summaryComponent = { props: ['paragraphs'], render: compile(descriptor.template.content) }
+const summaryComponent = { props: ['paragraphs', 'expanded'], render: compile(descriptor.template.content) }
 const watch = await readFile(new URL('../../src/renderer/views/Watch/Watch.vue', import.meta.url), 'utf8')
 const placements = [...watch.matchAll(/<WatchVideoSummary\s[\s\S]*?\/>/g)].map(([template]) => template)
 
 assert.equal(placements.length, 2, 'expected Shorts and general summary placements')
 
 for (const [index, template] of placements.entries()) {
-  for (const hidden of [false, true]) {
-    test(`summary placement ${index} respects the distraction setting ${hidden}`, async () => {
+  for (const mode of ['hide', 'collapsed', 'expanded']) {
+    test(`summary placement ${index} respects the distraction setting ${mode}`, async () => {
       const app = createSSRApp({
         render: compile(template),
         setup: () => ({
           clampShortsAuxPanelScroll() {},
           customShortsPlayerActive: false, fullscreenMetadataOpen: false,
-          shortsMetadataOpen: true, isLoading: false, hideAiVideoSummaries: hidden,
+          shortsMetadataOpen: true, isLoading: false, aiVideoSummaryMode: mode,
           videoSummary: ['<img src=x onerror=alert(1)>', 'Second paragraph'], videoId: 'video'
         })
       })
@@ -29,11 +29,11 @@ for (const [index, template] of placements.entries()) {
       app.component('ft-icon', { render: () => h('svg') })
       app.config.globalProperties.$t = key => key
       const html = await renderToString(app)
-      assert.equal(html.includes('<details'), !hidden)
-      assert.equal(html.includes('Second paragraph'), !hidden)
+      assert.equal(html.includes('<details'), mode !== 'hide')
+      assert.equal(html.includes('Second paragraph'), mode !== 'hide')
       assert.equal(html.includes('<img'), false)
-      if (!hidden) {
-        assert.doesNotMatch(html, /<details[^>]*\sopen(?:[\s=>])/)
+      if (mode !== 'hide') {
+        assert.equal(/<details[^>]*\sopen(?:[\s=>])/.test(html), mode === 'expanded')
         assert.ok(html.includes('&lt;img'))
         assert.ok(html.includes('<summary>'))
         assert.match(html, /<summary>[\s\S]*Quality and accuracy may vary[\s\S]*<\/summary>/)
@@ -48,7 +48,7 @@ for (const fullscreenMetadataOpen of [false, true]) {
     const app = createSSRApp({
       render: compile(placements[1]),
       setup: () => ({
-        isLoading: false, hideAiVideoSummaries: false,
+        isLoading: false, aiVideoSummaryMode: 'collapsed',
         customShortsPlayerActive: true, fullscreenMetadataOpen,
         videoSummary: ['Summary'], videoId: 'short'
       })

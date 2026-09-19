@@ -867,7 +867,10 @@ Settings:
     Posts Auto Refresh Interval: فاصلهٔ تازه‌سازی خودکار پست‌ها
     Refresh Subscriptions While App Is Closed: "تازه‌سازی اشتراک‌ها هنگام بسته بودن برنامه"
   Distraction Free Settings:
-    Hide AI Video Summaries: "پنهان کردن خلاصه‌های ویدیویی هوش مصنوعی"
+    AI Video Summaries: خلاصه‌های ویدیویی هوش مصنوعی
+    Hide: پنهان
+    Collapsed: جمع‌شده
+    Expanded: بازشده
     Playing Interface Hide Delay: تأخیر پنهان شدن رابط هنگام پخش
     Hide Startup Splash: پنهان کردن صفحهٔ آغازین
     Hide Repeat Stats: پنهان کردن آمار تکرار

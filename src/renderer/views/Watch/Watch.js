@@ -1020,8 +1020,8 @@ export default defineComponent({
     commentsAvailable: function () {
       return areCommentsAvailable(this)
     },
-    hideAiVideoSummaries: function () {
-      return this.$store.getters.getHideAiVideoSummaries
+    aiVideoSummaryMode: function () {
+      return this.$store.getters.getAiVideoSummaryMode
     },
     hideVideoDescription: function () {
       return this.$store.getters.getHideVideoDescription
@@ -1165,11 +1165,11 @@ export default defineComponent({
     }
   },
   watch: {
-    hideAiVideoSummaries(hidden) {
-      if (hidden && this.videoSummary.length > 0) this.clampShortsAuxPanelScroll()
+    aiVideoSummaryMode() {
+      if (this.videoSummary.length > 0) this.clampShortsAuxPanelScroll()
     },
     videoSummary(summary, previousSummary) {
-      if (previousSummary.length > 0 && !this.hideAiVideoSummaries) this.clampShortsAuxPanelScroll()
+      if (previousSummary.length > 0 && this.aiVideoSummaryMode !== 'hide') this.clampShortsAuxPanelScroll()
     },
     currentLocale: 'updateUpcomingTimestamp',
     dateFormatPreference: 'updateUpcomingTimestamp',

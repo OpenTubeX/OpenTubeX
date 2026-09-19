@@ -867,7 +867,10 @@ Settings:
     Posts Auto Refresh Interval: Інтэрвал аўтаматычнага абнаўлення допісаў
     Refresh Subscriptions While App Is Closed: "Абнаўляць падпіскі, калі праграма закрыта"
   Distraction Free Settings:
-    Hide AI Video Summaries: "Хаваць зводкі відэа ад ШІ"
+    AI Video Summaries: Зводкі відэа ад ШІ
+    Hide: Хаваць
+    Collapsed: Згорнутыя
+    Expanded: Разгорнутыя
     Playing Interface Hide Delay: Затрымка схавання інтэрфейсу падчас прайгравання
     Hide Startup Splash: Схаваць стартавы экран
     Hide Repeat Stats: Схаваць статыстыку паўтораў

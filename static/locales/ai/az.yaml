@@ -840,7 +840,10 @@ Settings:
     Posts Auto Refresh Interval: Paylaşımların avtomatik yenilənmə aralığı
     Refresh Subscriptions While App Is Closed: Tətbiq bağlı olarkən abunəlikləri yenilə
   Distraction Free Settings:
-    Hide AI Video Summaries: "Süni intellekt video xülasələrini gizlət"
+    AI Video Summaries: Süni intellekt video xülasələri
+    Hide: Gizlət
+    Collapsed: Yığılmış
+    Expanded: Genişləndirilmiş
     Playing Interface Hide Delay: Oxutma zamanı interfeysin gizlədilmə gecikməsi
     Hide Startup Splash: Başlanğıc ekranını gizlət
     Sections:

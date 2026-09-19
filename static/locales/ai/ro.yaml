@@ -842,7 +842,10 @@ Settings:
     Posts Auto Refresh Interval: Interval de reîmprospătare automată a postărilor
     Refresh Subscriptions While App Is Closed: "Reîmprospătează abonamentele când aplicația este închisă"
   Distraction Free Settings:
-    Hide AI Video Summaries: "Ascunde rezumatele video generate de IA"
+    AI Video Summaries: Rezumate video generate de IA
+    Hide: Ascunde
+    Collapsed: Restrânse
+    Expanded: Extinse
     Playing Interface Hide Delay: Întârziere la ascunderea interfeței în timpul redării
     Hide Startup Splash: Ascunde ecranul de pornire
     Hide Repeat Stats: Ascunde statisticile de repetare

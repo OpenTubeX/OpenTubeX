@@ -1367,7 +1367,10 @@ Settings:
     To: To
     Confirm Before Unsubscribing: Confirm Before Unsubscribing
   Distraction Free Settings:
-    Hide AI Video Summaries: "Hide AI video summaries"
+    AI Video Summaries: AI video summaries
+    Hide: Hide
+    Collapsed: Collapsed
+    Expanded: Expanded
     Playing Interface Hide Delay: Playing Interface Hide Delay
     Hide Startup Splash: Hide Startup Splash
     Hide Repeat Stats: Hide Repeat Stats

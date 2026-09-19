@@ -51,5 +51,14 @@ export function migrateLegacySettings(settings) {
     delete migratedSettings.moveDownloadsToQuickSettings
   }
 
+  if (Object.hasOwn(migratedSettings, 'hideAiVideoSummaries')) {
+    if (!Object.hasOwn(migratedSettings, 'aiVideoSummaryMode')) {
+      migratedSettings.aiVideoSummaryMode = migratedSettings.hideAiVideoSummaries === true
+        ? 'hide'
+        : 'collapsed'
+    }
+    delete migratedSettings.hideAiVideoSummaries
+  }
+
   return migratedSettings
 }

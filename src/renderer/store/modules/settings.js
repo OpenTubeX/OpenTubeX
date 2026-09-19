@@ -342,7 +342,7 @@ const state = {
   showAddedChannelsHidden: true,
   showAddedForbiddenTitles: true,
   hideVideoDescription: false,
-  hideAiVideoSummaries: false,
+  aiVideoSummaryMode: 'hide',
   hideLiveChat: false,
   hideLiveChatReplay: false,
   hideLiveStreams: false,
@@ -1266,6 +1266,12 @@ const customActions = {
       const hasProgressToastSetting = userSettings.some(entry => entry._id === 'showProgressBarToast')
       const legacyHideLiveChatEntry = userSettings.find(entry => entry._id === 'hideLiveChat')
       const hasHideLiveChatReplaySetting = userSettings.some(entry => entry._id === 'hideLiveChatReplay')
+      const legacyHideAiVideoSummariesEntry = userSettings.find(
+        entry => entry._id === 'hideAiVideoSummaries'
+      )
+      const hasAiVideoSummaryModeSetting = userSettings.some(
+        entry => entry._id === 'aiVideoSummaryMode'
+      )
       const legacyPlaybackSpeedSyncEntry = userSettings.find(
         entry => entry._id === 'syncServerSyncPlaybackSpeeds'
       )
@@ -1305,6 +1311,16 @@ const customActions = {
       // preference was split out. Preserve that choice for existing profiles.
       if (legacyHideLiveChatEntry && !hasHideLiveChatReplaySetting) {
         await dispatch('updateHideLiveChatReplay', legacyHideLiveChatEntry.value === true)
+      }
+
+      if (legacyHideAiVideoSummariesEntry && !hasAiVideoSummaryModeSetting) {
+        await dispatch(
+          'updateAiVideoSummaryMode',
+          legacyHideAiVideoSummariesEntry.value === true ? 'hide' : 'collapsed'
+        )
+      }
+      if (legacyHideAiVideoSummariesEntry) {
+        await DBSettingHandlers.delete('hideAiVideoSummaries')
       }
 
       // Migrate the legacy auto Picture-in-Picture setting to the combinable triggers array.

@@ -75,6 +75,24 @@ test('prefers the current Downloads placement preference', () => {
   })
 })
 
+test('migrates the legacy AI video summary visibility preference', () => {
+  assert.deepEqual(migrateLegacySettings({ hideAiVideoSummaries: true }), {
+    aiVideoSummaryMode: 'hide',
+  })
+  assert.deepEqual(migrateLegacySettings({ hideAiVideoSummaries: false }), {
+    aiVideoSummaryMode: 'collapsed',
+  })
+})
+
+test('prefers the current AI video summary mode', () => {
+  assert.deepEqual(migrateLegacySettings({
+    hideAiVideoSummaries: true,
+    aiVideoSummaryMode: 'expanded',
+  }), {
+    aiVideoSummaryMode: 'expanded',
+  })
+})
+
 test('migrates navigation visibility switches to an ordered list', () => {
   assert.deepEqual(migrateLegacySettings({
     hideHome: true,
