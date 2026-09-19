@@ -300,3 +300,26 @@ test.describe('German repair explanation', () => {
     }))).toEqual({ scrollTop: 0, hasVisibleScrollbar: false })
   })
 })
+
+for (const outcome of ['finish', 'cancel']) {
+  test(`restores focus to Repair History after ${outcome}`, async ({ page }) => {
+    let release
+    const pending = new Promise(resolve => { release = resolve })
+    await page.route('**/youtubei/v1/player*', async route => {
+      await pending
+      await route.fulfill({ json: { videoDetails: { videoId: original.videoId, lengthSeconds: '120' } } }).catch(() => {})
+    })
+    try {
+      await goTo(page, 'history')
+      await startRepair(page)
+      const cancel = page.getByRole('button', { name: 'Cancel', exact: true })
+      await expect(cancel).toBeFocused()
+      if (outcome === 'cancel') await cancel.click()
+      else release()
+      await expect(cancel).toHaveCount(0)
+      await expect(page.getByRole('button', { name: 'Repair History', exact: true })).toBeFocused()
+    } finally {
+      release()
+    }
+  })
+}
