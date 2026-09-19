@@ -1,4 +1,6 @@
 import shaka from 'shaka-player'
+import { Fragment, h, render } from 'vue'
+import { FtIcon } from '@opentubex/icons'
 
 import i18n from '../../../i18n/index'
 
@@ -61,7 +63,7 @@ export class QuickPlaybackRateBar extends shaka.ui.Element {
     this.parent.appendChild(this.root_)
 
     this.eventManager.listen(this.saveButton_, 'click', () => {
-      quickPlaybackRateBarContexts.get(this.controls)?.events.dispatchEvent(new CustomEvent('saveChannelPlaybackSpeed'))
+      quickPlaybackRateBarContexts.get(this.controls)?.events.dispatchEvent(new CustomEvent(this.saveButton_.dataset.remove === 'true' ? 'removeChannelPlaybackSpeed' : 'saveChannelPlaybackSpeed'))
     })
 
     this.eventManager.listen(this.player, 'ratechange', () => {
@@ -121,10 +123,6 @@ export class QuickPlaybackRateBar extends shaka.ui.Element {
 
   /** @private */
   updateLocalizedStrings_() {
-    this.saveButton_.textContent = i18n.global.t('Video.Player.Set Default')
-    this.saveButton_.title = i18n.global.t('Video.Save Channel Playback Speed')
-    this.saveButton_.ariaLabel = i18n.global.t('Video.Save Channel Playback Speed')
-
     const options = quickPlaybackRateBarContexts.get(this.controls)?.getPlaybackRateOptions() ?? []
 
     for (const [index, { speed, name }] of options.entries()) {
@@ -170,6 +168,16 @@ export class QuickPlaybackRateBar extends shaka.ui.Element {
     const savedRate = context?.getSavedChannelPlaybackRate() ?? null
     const canSave = context?.getCanSaveChannelPlaybackSpeed() ?? false
 
+    const remove = savedRate != null && this.isSameRate_(currentRate, savedRate)
+    this.saveButton_.dataset.remove = String(remove)
+    const label = remove ? i18n.global.t('Delete') : i18n.global.t('Video.Player.Set Default')
+    this.saveButton_.title = remove ? i18n.global.t('Settings.Channel Settings.Forget Value') : i18n.global.t('Video.Save Channel Playback Speed')
+    this.saveButton_.ariaLabel = this.saveButton_.title
+    render(h(Fragment, null, [
+      h(FtIcon, { icon: ['fas', remove ? 'trash' : 'floppy-disk'], 'aria-hidden': 'true' }),
+      h('span', label)
+    ]), this.saveButton_)
+
     if (canSave) {
       this.saveButton_.classList.remove('shaka-hidden')
     } else {
@@ -184,6 +192,11 @@ export class QuickPlaybackRateBar extends shaka.ui.Element {
       button.classList.toggle('is-channel-default-rate', isSavedRate)
       button.ariaPressed = String(isCurrentRate)
     }
+  }
+
+  release() {
+    render(null, this.saveButton_)
+    super.release()
   }
 
   /**
