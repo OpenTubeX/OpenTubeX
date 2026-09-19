@@ -1,6 +1,6 @@
 import { reactive } from 'vue'
 import store from '../store'
-import { parseHistoryRepairPlayer, repairHistory } from '../../historyRepair'
+import { HistoryRepairUnavailableError, parseHistoryRepairPlayer, repairHistory } from '../../historyRepair'
 import { getLocalHistoryMetadata } from './api/local'
 import { getInvidiousHistoryMetadata } from './api/invidious'
 
@@ -17,7 +17,7 @@ async function fetchMetadata(videoId, signal) {
   const timeoutSignal = AbortSignal.any([signal, AbortSignal.timeout(20_000)])
   if (!process.env.SUPPORTS_LOCAL_API || store.getters.getBackendPreference === 'invidious') {
     const info = await getInvidiousHistoryMetadata(videoId, timeoutSignal)
-    if (info.error || info.videoId !== videoId) throw new Error('Video metadata unavailable')
+    if (info?.error || info?.videoId !== videoId) throw new HistoryRepairUnavailableError('Video metadata unavailable')
     return {
       ...info,
       published: info.published * 1000,

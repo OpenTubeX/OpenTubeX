@@ -33,6 +33,15 @@ export function historyRepairPatch(record, metadata) {
 }
 
 class HistoryRepairRateLimitError extends Error {}
+export class HistoryRepairUnavailableError extends Error {}
+
+// Capture HTTP status before API clients turn it into an unstructured error.
+export function checkHistoryRepairResponse(response) {
+  if (!response.ok) {
+    throw Object.assign(new Error(`History metadata request failed with HTTP ${response.status}`), { status_code: response.status })
+  }
+  return response
+}
 
 export function parseHistoryRepairPlayer(response, videoId) {
   const details = response?.videoDetails
@@ -41,7 +50,7 @@ export function parseHistoryRepairPlayer(response, videoId) {
     if (status?.status === 'LOGIN_REQUIRED' && /bot/i.test(status.reason)) {
       throw new HistoryRepairRateLimitError(status.reason)
     }
-    throw new Error('Video metadata unavailable')
+    throw new HistoryRepairUnavailableError('Video metadata unavailable')
   }
   const microformat = response.microformat?.playerMicroformatRenderer
   return {
@@ -122,9 +131,11 @@ export async function repairHistory({ records, getRecord, fetchMetadata, saveMet
           if (!signal.aborted) {
             if (!target.failed) result.failed++
             target.failed = true
-            // youtubei.js includes the HTTP status in its transport errors.
-            if (error instanceof HistoryRepairRateLimitError || /status code 429\b/.test(error?.message)) {
+            if (error instanceof HistoryRepairRateLimitError || error?.status_code === 429) {
               rateLimitError = error
+            } else if (error instanceof HistoryRepairUnavailableError || error instanceof SyntaxError ||
+              (error?.status_code >= 400 && error.status_code < 500)) {
+              target.failures = passes.length
             } else {
               target.failures++
             }

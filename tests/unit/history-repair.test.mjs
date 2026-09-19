@@ -182,12 +182,12 @@ test('retries only failed requests after the first pass, with decreasing concurr
   assert.ok(progress.some(value => value.checked === 8 && value.failed === 7))
 })
 
-test('permanent request failures stop after three attempts and count once', async () => {
+test('persistent server failures stop after three attempts and count once', async () => {
   let attempts = 0
   const result = await repairHistory({
     records: [record], signal: new AbortController().signal, onProgress: () => {},
     getRecord: () => record,
-    fetchMetadata: async () => { attempts++; throw new Error('Unavailable') },
+    fetchMetadata: async () => { attempts++; throw Object.assign(new Error('Service unavailable'), { status_code: 503 }) },
     saveMetadata: () => assert.fail('Unavailable metadata must not be saved')
   })
   assert.equal(attempts, 3)
@@ -291,3 +291,29 @@ test('untouched entries retain their retries after both bot cooldowns', async ()
   assert.equal(attempts.get(rows[4].videoId), 3)
   assert.deepEqual(result, { total: 5, checked: 5, repaired: 5, failed: 0 })
 })
+
+
+for (const failure of ['unavailable', 'malformed', 400, 403, 404, 429, 503, 'network']) {
+  test(`classifies ${failure} metadata failures before retrying`, async () => {
+    let attempts = 0
+    const waits = []
+    const retryable = [429, 503, 'network'].includes(failure)
+    const result = await repairHistory({
+      records: [record], signal: new AbortController().signal, onProgress: () => {},
+      getRecord: () => record,
+      wait: async milliseconds => waits.push(milliseconds),
+      fetchMetadata: async () => {
+        attempts++
+        if (attempts > 1) return metadata
+        if (failure === 'unavailable') return parseHistoryRepairPlayer({ playabilityStatus: { status: 'ERROR', reason: 'Video unavailable' } }, record.videoId)
+        if (failure === 'malformed') throw new SyntaxError('Invalid JSON')
+        if (failure === 'network') throw new TypeError('Failed to fetch')
+        throw Object.assign(new Error('Request failed'), { status_code: failure })
+      },
+      saveMetadata: async patches => ({ repaired: patches.length, failed: 0 })
+    })
+    assert.equal(attempts, retryable ? 2 : 1)
+    assert.deepEqual(result, { total: 1, checked: 1, repaired: retryable ? 1 : 0, failed: retryable ? 0 : 1 })
+    if (failure === 429) assert.deepEqual(waits, [30000])
+  })
+}

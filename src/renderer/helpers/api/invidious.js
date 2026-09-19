@@ -1,5 +1,6 @@
 import { createInvidiousFeedParsers } from './invidious-feed-parsers'
 import store from '../../store/index'
+import { checkHistoryRepairResponse } from '../../../historyRepair'
 import { getRelativeTimeFromDate } from '../utils'
 import { isNullOrEmpty } from '../strings'
 import { enrichFallbackInvidiousPublicationDates } from './invidious-channel-videos'
@@ -910,11 +911,8 @@ export function mapInvidiousLegacyFormat(format) {
   }
 }
 
-export function getInvidiousHistoryMetadata(videoId, signal) {
-  return invidiousAPICall({
-    resource: 'videos',
-    id: videoId,
-    params: { fields: 'videoId,title,author,authorId,description,lengthSeconds,published,liveNow,isUpcoming' },
-    signal,
-  })
+export async function getInvidiousHistoryMetadata(videoId, signal) {
+  const params = new URLSearchParams({ fields: 'videoId,title,author,authorId,description,lengthSeconds,published,liveNow,isUpcoming' })
+  const response = checkHistoryRepairResponse(await invidiousFetch(`${getCurrentInstanceUrl()}/api/v1/videos/${videoId}?${params}`, signal))
+  return response.json()
 }

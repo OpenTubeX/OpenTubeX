@@ -143,13 +143,13 @@ test.describe('Invidious history repair', () => {
   })
 })
 
-for (const failure of ['HTTP', 'missing metadata']) {
+for (const failure of ['HTTP', 'network']) {
   test(`retries a temporary ${failure} failure without restarting repair`, async ({ page }) => {
     let requests = 0
     await page.route('**/youtubei/v1/player*', async route => {
       if (++requests === 1) {
         if (failure === 'HTTP') await route.fulfill({ status: 503, body: 'Service unavailable' })
-        else await route.fulfill({ json: { playabilityStatus: { status: 'ERROR' } } })
+        else await route.abort('failed')
         return
       }
       await route.fulfill({
@@ -320,6 +320,46 @@ for (const outcome of ['finish', 'cancel']) {
       await expect(page.getByRole('button', { name: 'Repair History', exact: true })).toBeFocused()
     } finally {
       release()
+    }
+  })
+}
+
+for (const backend of ['local', 'invidious']) {
+  test.describe(`${backend} repair failure classification`, () => {
+    test.use({ seed: { history: [original], settings: { backendPreference: backend, defaultInvidiousInstance: 'https://history-repair.test' } } })
+
+    for (const failure of [403, 404, 'unavailable', 'malformed', 429, 503]) {
+      test(`handles ${failure} without unnecessary retries`, async ({ page }) => {
+        let requests = 0
+        await page.clock.install()
+        await page.route(backend === 'local' ? '**/youtubei/v1/player*' : '**/api/v1/videos/*', async route => {
+          requests++
+          if (requests === 1) {
+            if (failure === 'unavailable') await route.fulfill({ json: backend === 'local' ? { playabilityStatus: { status: 'ERROR', reason: 'Video unavailable' } } : { error: 'Video unavailable' } })
+            else if (failure === 'malformed') await route.fulfill({ body: '{', contentType: 'application/json' })
+            else await route.fulfill({ status: failure, body: 'Request failed' })
+            return
+          }
+          const info = { videoId: original.videoId, title: original.title, author: 'Recovered channel', authorId: 'UCabcdefghijklmnopqrstuv', lengthSeconds: 120, published: 1, liveNow: false, isUpcoming: false }
+          await route.fulfill({ json: backend === 'local' ? { videoDetails: { ...info, channelId: info.authorId } } : info })
+        })
+        await goTo(page, 'history')
+        await startRepair(page)
+        if (failure === 429 || failure === 503) {
+          await expect(page.getByRole('heading', { name: failure === 429 ? 'Waiting for YouTube. Repair will resume automatically.' : 'Retrying failed requests', exact: true })).toBeVisible()
+          expect(requests).toBe(1)
+          await page.clock.fastForward(failure === 429 ? 30000 : 1000)
+          await expect(page.getByRole('status')).toContainText('Checked 1/1 · Repaired 1 · Failed 0')
+          expect(requests).toBe(2)
+        } else {
+          await expect(page.getByRole('heading', { name: 'Repair finished', exact: true })).toBeVisible()
+          await page.clock.fastForward(10000)
+          expect(requests).toBe(1)
+          await expect(page.getByRole('status')).toContainText('Checked 1/1 · Repaired 0 · Failed 1')
+          const saved = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById.abcdefghijk)
+          expect(saved).toMatchObject(original)
+        }
+      })
     }
   })
 }
