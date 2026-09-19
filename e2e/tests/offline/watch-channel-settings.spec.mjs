@@ -58,15 +58,17 @@ test('removes each saved channel override from the watch popover without changin
   await expect.poll(() => rows.first().locator('.channelSettingSave > span').last().evaluate(label => (
     label.getBoundingClientRect().height / Number.parseFloat(getComputedStyle(label).fontSize)
   ))).toBeLessThan(2)
+  const trash = rows.first().getByRole('button', { name: 'Forget this setting' })
+  await expect(trash).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+  await expect(trash).toHaveCSS('box-shadow', 'none')
+  await expect(trash).toHaveCSS('font-size', '14px')
   for (let index = 0; index < 4; index++) {
-    if (index > 0) {
-      await page.locator(`${activeTab} .watchVideoInfo`).getByRole('button', { name: 'Save channel setting…', exact: true }).click()
-    }
     await rows.nth(index).getByRole('button', { name: 'Forget this setting' }).click()
-    await expect(rows.nth(index).getByRole('button', { name: 'Forget this setting' })).toHaveCount(0)
+    await expect(rows.nth(index).getByRole('button', { name: 'Forget this setting' })).toBeDisabled()
     await expect.poll(async () => Object.keys((await savedValues(page))[index])).toEqual(['other'])
   }
   expect(await video.evaluate(video => ({ speed: video.playbackRate, volume: video.volume }))).toEqual(before)
+  await page.keyboard.press('Escape')
   await view.evaluate(async view => {
     for (const setting of ['VideoQuality', 'SubtitlesState', 'Volume']) {
       await view.$store.dispatch(`updateRemember${setting}PerChannel`, false)

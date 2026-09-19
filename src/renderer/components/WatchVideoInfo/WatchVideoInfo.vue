@@ -229,7 +229,10 @@
                 <span>{{ action.label }}</span>
               </button>
               <FtIconButton
-                v-if="action.saved"
+                :disabled="!action.saved"
+                :size="14"
+                :use-shadow="false"
+                theme="base-no-default"
                 :title="t('Settings.Channel Settings.Forget Value')"
                 :icon="['fas', 'trash']"
                 @click="removeChannelPreference(store, props.channelId, action.value)"
