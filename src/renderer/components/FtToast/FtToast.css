@@ -768,13 +768,10 @@ body:has(.app) :is(:fullscreen, [data-native-player-screen]) .toast-holder[data-
   inset-block: calc(var(--offset-top) + var(--safe-area-inset-top, env(safe-area-inset-top, 0px))) auto;
 }
 
-body:has(.app) :is(:fullscreen, [data-native-player-screen]) .connection-status-holder {
-  inset-inline: 0;
-}
-
 body:has(.app) :is(:fullscreen, [data-native-player-screen]) .connection-status-holder,
 body:has(.mobileSheet[open]) .connection-status-holder,
 body:has(.app .settingsWindow.maximized) .connection-status-holder {
+  inset-inline: 0;
   inset-block-end: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0));
 }
 

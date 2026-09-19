@@ -69,6 +69,15 @@ for (const scale of [1, 1.25]) {
       return Math.max(Math.abs(bounds.left), Math.abs(window.innerWidth - bounds.right))
     })).toBeLessThan(1)
     await page.evaluate(() => document.exitFullscreen())
+    await goTo(page, 'settings')
+    await page.getByRole('button', { name: 'Maximize', exact: true }).click()
+    await expect(page.locator('.settingsWindow')).toHaveClass(/maximized/)
+    await expect.poll(() => banner.evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      return Math.max(Math.abs(bounds.left), Math.abs(window.innerWidth - bounds.right))
+    })).toBeLessThan(1)
+    await page.locator('.settingsWindowHeader').getByRole('button', { name: 'Close', exact: true }).click()
+    await expect.poll(() => banner.evaluate(element => element.getBoundingClientRect().left)).toBeCloseTo(280, 0)
   })
 
   test(`connection banner follows navbar coverage at UI scale ${scale}`, async ({ page }) => {
