@@ -1601,7 +1601,7 @@ Tooltips:
     Cookie File: Chọn tệp cookie định dạng Netscape để phát nội dung cần xác thực.
     Browser for Cookies: Khả năng hỗ trợ trình duyệt được đọc từ tệp thực thi yt-dlp đã chọn. OpenTubeX yêu cầu yt-dlp đọc trình duyệt này khi cần phát nội dung xác thực.
     Browser Profile: Tên hoặc thư mục hồ sơ trình duyệt không bắt buộc. Để trống để dùng hồ sơ được truy cập gần nhất.
-    Always Use Cookies: "Sử dụng cookie đã cấu hình cho tải xuống, phụ đề và mỗi khi yt-dlp trích xuất luồng. Tùy chọn này không chuyển phương thức trích xuất luồng sang yt-dlp. Khi chọn yt-dlp, các định dạng chỉ dành cho tài khoản có thể xuất hiện, gồm tốc độ bit nâng cao của YouTube Premium nếu tài khoản có quyền truy cập. Dùng cookie đã cấu hình cho phụ đề và bản dịch tự động."
+    Always Use Cookies: "Sử dụng cookie đã cấu hình cho tải xuống, phụ đề và mỗi khi yt-dlp trích xuất luồng. Tùy chọn này không chuyển phương thức trích xuất luồng sang yt-dlp. Khi chọn yt-dlp, các định dạng chỉ dành cho tài khoản có thể xuất hiện, gồm tốc độ bit nâng cao của YouTube Premium nếu tài khoản có quyền truy cập."
     FFmpeg Executable Path: Cần FFmpeg để ghép luồng video và âm thanh riêng biệt cũng như chuyển đổi âm thanh. Theo mặc định, OpenTubeX giả định có thể tìm thấy FFmpeg qua biến môi trường PATH. Bạn có thể đặt đường dẫn tùy chỉnh tại đây nếu cần.
     Use cookies for subtitles: "Dùng cookie đã cấu hình cho phụ đề và bản dịch tự động. Cũng được bật bởi \"Luôn dùng cookie\"."
   Distraction Free Settings:

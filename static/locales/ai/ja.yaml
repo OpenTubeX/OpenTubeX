@@ -1570,7 +1570,7 @@ Tooltips:
     Cookie File: 認証が必要な再生に使用するNetscape形式のCookieファイルを選択します。
     Browser for Cookies: 選択したyt-dlp実行ファイルからブラウザーの対応状況を取得します。認証が必要な再生を要求すると、OpenTubeXはyt-dlpにこのブラウザーのCookieを読み取るよう指示します。
     Browser Profile: ブラウザーのプロフィール名またはフォルダーを必要に応じて指定します。空欄にすると、最近使用したプロフィールを使います。
-    Always Use Cookies: "ダウンロード、字幕、および yt-dlp によるストリーム抽出に、設定済みの Cookie を使用します。ストリーム抽出方式がyt-dlpに切り替わるわけではありません。yt-dlpを選択している場合は、アカウントに権限があればYouTube Premiumの高ビットレートなど、アカウント限定の形式を利用できる場合があります。設定した Cookie を字幕と自動翻訳に使用します。"
+    Always Use Cookies: "ダウンロード、字幕、および yt-dlp によるストリーム抽出に、設定済みの Cookie を使用します。ストリーム抽出方式がyt-dlpに切り替わるわけではありません。yt-dlpを選択している場合は、アカウントに権限があればYouTube Premiumの高ビットレートなど、アカウント限定の形式を利用できる場合があります。"
     FFmpeg Executable Path: FFmpegは、分離された動画と音声ストリームの結合や音声変換に必要です。既定では、PATH環境変数からFFmpegが見つかるものとみなします。必要に応じて、ここでカスタムパスを指定できます。
     Use cookies for subtitles: "設定した Cookie を字幕と自動翻訳に使用します。「常に Cookie を使用」でも有効になります。"
   Distraction Free Settings:

@@ -1552,7 +1552,7 @@ Tooltips:
     Cookie File: Select a Netscape-formatted cookie file for authenticated playback.
     Browser for Cookies: Browser support is read from the selected yt-dlp executable. OpenTubeX asks yt-dlp to read this browser when authenticated playback is requested.
     Browser Profile: Optional browser profile name or folder. Leave blank to use the most recently accessed profile.
-    Always Use Cookies: "Use the configured cookies for downloads, subtitles and whenever yt-dlp extracts streams. This does not switch the stream extraction method to yt-dlp. With yt-dlp selected, account-only formats may become available, including YouTube Premium's enhanced bitrate when the account has access. Use the configured cookies for subtitles and automatic translations."
+    Always Use Cookies: "Use the configured cookies for downloads, subtitles and whenever yt-dlp extracts streams. This does not switch the stream extraction method to yt-dlp. With yt-dlp selected, account-only formats may become available, including YouTube Premium's enhanced bitrate when the account has access."
     FFmpeg Executable Path: FFmpeg is required for merging separate video and audio streams and for audio conversion. By default, OpenTubeX will assume that FFmpeg can be found via the PATH environment variable. If needed, a custom path can be set here.
     Use cookies for subtitles: "Use the configured cookies for subtitles and automatic translations. Also enabled by \"Always Use Cookies\"."
   Distraction Free Settings:

@@ -1981,7 +1981,7 @@ Tooltips:
     Cookie File: Pasirinkite Netscape formato slapukų failą autentifikuotam atkūrimui.
     Browser for Cookies: Naršyklių palaikymo informacija gaunama iš pasirinkto yt-dlp vykdomojo failo. Paprašius autentifikuoto atkūrimo, OpenTubeX nurodo yt-dlp nuskaityti šią naršyklę.
     Browser Profile: Pasirinktinis naršyklės profilio pavadinimas arba aplankas. Palikite tuščią, jei norite naudoti paskutinį atvertą profilį.
-    Always Use Cookies: "Naudokite nustatytus slapukus atsisiuntimams, subtitrams ir kaskart, kai yt-dlp išgauna srautus. Tai nepakeičia srautų išgavimo būdo į yt-dlp. Pasirinkus yt-dlp gali tapti pasiekiami tik paskyrai skirti formatai, įskaitant didesnę YouTube Premium spartą, jei paskyra turi prieigą. Naudoti sukonfigūruotus slapukus subtitrams ir automatiniams vertimams."
+    Always Use Cookies: "Naudokite nustatytus slapukus atsisiuntimams, subtitrams ir kaskart, kai yt-dlp išgauna srautus. Tai nepakeičia srautų išgavimo būdo į yt-dlp. Pasirinkus yt-dlp gali tapti pasiekiami tik paskyrai skirti formatai, įskaitant didesnę YouTube Premium spartą, jei paskyra turi prieigą."
     FFmpeg Executable Path: FFmpeg reikalingas atskiriems vaizdo ir garso srautams sujungti bei garsui konvertuoti. Pagal numatymą OpenTubeX laikys, kad FFmpeg galima rasti naudojant PATH aplinkos kintamąjį. Jei reikia, čia galima nurodyti pasirinktinį kelią.
     Use cookies for subtitles: "Naudoti sukonfigūruotus slapukus subtitrams ir automatiniams vertimams. Taip pat įjungiama pasirinkus „Visada naudoti slapukus“."
   Distraction Free Settings:

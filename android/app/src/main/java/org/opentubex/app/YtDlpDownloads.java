@@ -118,7 +118,6 @@ final class YtDlpDownloads {
         DocumentFile target = DocumentFile.fromTreeUri(context, Uri.parse(folder));
         if (target == null || !target.canWrite()) return new JSONObject().put("error", "download-folder-unavailable");
         YtDlpArguments.validate(args);
-        File cookies = config.optBoolean("useCookies") ? cookieFile(config.optString("cookies")) : null;
         if (payload.optBoolean("automatic")) {
             for (JSONObject record : records.values()) {
                 if (record.optString("videoId").equals(payload.optString("videoId")) &&
@@ -136,7 +135,9 @@ final class YtDlpDownloads {
         for (String key : asList("videoId", "playlistId", "playlistKey", "title", "thumbnail", "mode", "template")) record.put(key, payload.optString(key));
         record.put("id", id).put("retryPayload", new JSONObject(payload.toString())).put("automatic", payload.optBoolean("automatic"));
         record.put("args", args).put("folder", folder).put("status", paused ? "paused" : "queued");
-        record.put("useCookies", cookies != null).put("cookies", cookies == null ? "" : cookies.getAbsolutePath());
+        // Validate at execution so missing sessions also leave a visible failed automatic download.
+        record.put("useCookies", config.optBoolean("useCookies"))
+            .put("cookies", config.optBoolean("useCookies") ? config.optString("cookies") : "");
         record.put("queuePosition", position).put("percent", 0).put("speed", JSONObject.NULL).put("eta", JSONObject.NULL);
         record.put("errorMessage", JSONObject.NULL).put("started", false);
         if (!record.has("destinations")) record.put("destinations", new JSONArray()).put("files", new JSONArray());

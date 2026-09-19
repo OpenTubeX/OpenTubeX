@@ -1585,7 +1585,7 @@ Tooltips:
     Cookie File: Välj en Netscape-formaterad kakfil för autentiserad uppspelning.
     Browser for Cookies: Stödet för webbläsare läses från den valda yt-dlp-programfilen. OpenTubeX ber yt-dlp att läsa webbläsaren när autentiserad uppspelning begärs.
     Browser Profile: Valfritt namn på eller mapp för webbläsarprofilen. Lämna tomt för att använda den senast öppnade profilen.
-    Always Use Cookies: "Använd de konfigurerade kakorna för nedladdningar, undertexter och varje gång yt-dlp hämtar strömmar. Detta byter inte metod för strömutvinning till yt-dlp. När yt-dlp är valt kan format som kräver konto bli tillgängliga, inklusive YouTube Premiums högre bithastighet om kontot har åtkomst. Använd de konfigurerade kakorna för undertexter och automatiska översättningar."
+    Always Use Cookies: "Använd de konfigurerade kakorna för nedladdningar, undertexter och varje gång yt-dlp hämtar strömmar. Detta byter inte metod för strömutvinning till yt-dlp. När yt-dlp är valt kan format som kräver konto bli tillgängliga, inklusive YouTube Premiums högre bithastighet om kontot har åtkomst."
     FFmpeg Executable Path: FFmpeg krävs för att sammanfoga separata video- och ljudströmmar samt för ljudkonvertering. Som standard förutsätter OpenTubeX att FFmpeg kan hittas via miljövariabeln PATH. Vid behov kan du ange en egen sökväg här.
     Use cookies for subtitles: "Använd de konfigurerade kakorna för undertexter och automatiska översättningar. Aktiveras även av ”Använd alltid kakor”."
   Distraction Free Settings:

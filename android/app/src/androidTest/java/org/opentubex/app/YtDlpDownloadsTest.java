@@ -175,26 +175,58 @@ public class YtDlpDownloadsTest {
             JSONObject result = restored.list().getJSONObject(1);
             assertEquals(result.toString(), "completed", result.getString("status"));
             config.put("useCookies", true).put("cookies", new File(state, "unapproved-cookies.txt").getAbsolutePath());
-            assertThrows(IOException.class, () -> restored.add(payload, args, config, -1));
+            long invalidCookies = restored.add(payload, args, config, -1).getLong("id");
+            restored.claim();
+            restored.run(invalidCookies);
+            JSONObject invalid = restored.list().getJSONObject(2);
+            assertEquals("failed", invalid.getString("status"));
+            assertTrue(invalid.getString("errorMessage").contains("Cookie file is unavailable"));
             config.put("cookies", cookies.getAbsolutePath());
             long missingCookies = restored.add(payload, args, config, -1).getLong("id");
             assertTrue(cookies.delete());
             restored.claim();
             restored.run(missingCookies);
-            JSONObject missing = restored.list().getJSONObject(2);
+            JSONObject missing = restored.list().getJSONObject(3);
             assertEquals("failed", missing.getString("status"));
             assertTrue(missing.getString("errorMessage").contains("Cookie file is unavailable"));
+            JSONObject automaticRule = new JSONObject().put("rule", new JSONObject().put("includeVideos", true).put("enabledAt", 1))
+                .put("payload", new JSONObject(payload.toString()).put("automatic", true)).put("args", args);
+            restored.configure(config.put("rules", new JSONObject().put("channel", automaticRule)));
+            restored.discover("channel", "videos", new JSONObject().put("videos", new JSONArray().put(new JSONObject()
+                .put("videoId", "__________2").put("published", System.currentTimeMillis() / 1000))));
+            JSONObject discovered = restored.list().getJSONObject(4);
+            assertEquals("queued", discovered.getString("status"));
+            restored.claim();
+            restored.run(discovered.getLong("id"));
+            JSONObject failedAutomatic = restored.list().getJSONObject(4);
+            assertEquals("failed", failedAutomatic.getString("status"));
+            assertTrue(failedAutomatic.getString("errorMessage").contains("Cookie file is unavailable"));
         } finally {
             // yt-dlp may rewrite its header. Never remove a newer session saved while testing.
-            if (fixtureCreated && cookies.isFile()) {
-                String current = new String(YtDlpFiles.readFile(cookies), StandardCharsets.UTF_8);
-                if (current.contains(fixtureCookie) && java.util.Arrays.stream(current.split("\n"))
-                    .filter(line -> !line.isBlank() && (!line.startsWith("#") || line.startsWith("#HttpOnly_")))
-                    .allMatch(fixtureCookie::equals)) cookies.delete();
-            }
+            if (fixtureCreated) removeFixtureCookies(cookies, fixtureCookie);
             folder.delete();
             YtDlpFiles.deleteTree(state);
         }
+    }
+
+    @Test public void cookieFixtureCleanupRemovesEmptyReservationButPreservesNewSession() throws Exception {
+        File cookies = File.createTempFile("cookie-cleanup-", ".txt", InstrumentationRegistry.getInstrumentation().getTargetContext().getCacheDir());
+        try {
+            removeFixtureCookies(cookies, "fixture");
+            assertFalse("A failed fixture write must not leave its empty reservation", cookies.exists());
+            byte[] session = "# Netscape HTTP Cookie File\n.youtube.com\tTRUE\t/\tTRUE\t0\tSID\tnew-session\n".getBytes(StandardCharsets.UTF_8);
+            YtDlpFiles.write(cookies, session);
+            removeFixtureCookies(cookies, "fixture");
+            assertArrayEquals(session, YtDlpFiles.readFile(cookies));
+        } finally { cookies.delete(); }
+    }
+
+    private static void removeFixtureCookies(File cookies, String fixtureCookie) throws IOException {
+        if (!cookies.isFile()) return;
+        String current = new String(YtDlpFiles.readFile(cookies), StandardCharsets.UTF_8);
+        if (current.isEmpty() || current.contains(fixtureCookie) && java.util.Arrays.stream(current.split("\n"))
+            .filter(line -> !line.isBlank() && (!line.startsWith("#") || line.startsWith("#HttpOnly_")))
+            .allMatch(fixtureCookie::equals)) cookies.delete();
     }
 
     private static DocumentFile tree(Context context) throws Exception {

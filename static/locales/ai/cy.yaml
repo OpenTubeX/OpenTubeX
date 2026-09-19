@@ -1594,7 +1594,7 @@ Tooltips:
     Cookie File: Dewiswch ffeil cwcis wedi'i fformatio ar gyfer Netscape er mwyn chwarae wedi'i ddilysu.
     Browser for Cookies: Darllenir cynhaliaeth porwyr o'r ffeil weithredadwy yt-dlp a ddewiswyd. Mae OpenTubeX yn gofyn i yt-dlp ddarllen y porwr hwn pan ofynnir am chwarae wedi'i ddilysu.
     Browser Profile: Enw neu ffolder proffil porwr dewisol. Gadewch yn wag i ddefnyddio'r proffil y cyrchwyd ato ddiwethaf.
-    Always Use Cookies: "Defnyddiwch y cwcis wedi'u ffurfweddu ar gyfer lawrlwythiadau, isdeitlau a phryd bynnag y mae yt-dlp yn echdynnu ffrydiau. Nid yw hyn yn newid y dull echdynnu ffrydiau i yt-dlp. Pan fydd yt-dlp wedi'i ddewis, gall fformatau i gyfrifon yn unig ddod ar gael, gan gynnwys cyfradd didau well YouTube Premium pan fydd gan y cyfrif fynediad ati. Defnyddio’r cwcis wedi’u ffurfweddu ar gyfer isdeitlau a chyfieithiadau awtomatig."
+    Always Use Cookies: "Defnyddiwch y cwcis wedi'u ffurfweddu ar gyfer lawrlwythiadau, isdeitlau a phryd bynnag y mae yt-dlp yn echdynnu ffrydiau. Nid yw hyn yn newid y dull echdynnu ffrydiau i yt-dlp. Pan fydd yt-dlp wedi'i ddewis, gall fformatau i gyfrifon yn unig ddod ar gael, gan gynnwys cyfradd didau well YouTube Premium pan fydd gan y cyfrif fynediad ati."
     FFmpeg Executable Path: Mae angen FFmpeg i uno ffrydiau fideo a sain ar wahân ac i drosi sain. Yn ddiofyn, bydd OpenTubeX yn tybio bod modd canfod FFmpeg drwy'r newidyn amgylchedd PATH. Os oes angen, gallwch osod llwybr personol yma.
     Use cookies for subtitles: "Defnyddio’r cwcis wedi’u ffurfweddu ar gyfer isdeitlau a chyfieithiadau awtomatig. Mae “Defnyddio cwcis bob amser” hefyd yn galluogi hyn."
   Distraction Free Settings:

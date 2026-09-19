@@ -1573,7 +1573,7 @@ Tooltips:
     Cookie File: Vali autentitud esitamiseks Netscape'i vormingus küpsisefail.
     Browser for Cookies: Brauseritugi tuvastatakse valitud yt-dlp täitmisfailist. Autenditud esituse taotlemisel käsib OpenTubeX yt-dlp-l sellest brauserist küpsiseid lugeda.
     Browser Profile: Valikuline brauseriprofiili nimi või kaust. Viimati kasutatud profiili valimiseks jäta väli tühjaks.
-    Always Use Cookies: "Kasuta seadistatud küpsiseid allalaadimiste, subtiitrite ja yt-dlp voogude hankimise jaoks. See ei muuda voo eraldamise meetodiks yt-dlp-d. Kui yt-dlp on valitud, võivad saada kättesaadavaks ainult kontoga kasutatavad vormingud, sealhulgas YouTube Premiumi täiustatud bitikiirus, kui kontol on sellele juurdepääs. Kasuta seadistatud küpsiseid subtiitrite ja automaattõlgete jaoks."
+    Always Use Cookies: "Kasuta seadistatud küpsiseid allalaadimiste, subtiitrite ja yt-dlp voogude hankimise jaoks. See ei muuda voo eraldamise meetodiks yt-dlp-d. Kui yt-dlp on valitud, võivad saada kättesaadavaks ainult kontoga kasutatavad vormingud, sealhulgas YouTube Premiumi täiustatud bitikiirus, kui kontol on sellele juurdepääs."
     FFmpeg Executable Path: FFmpeg on vajalik eraldi video- ja helivoogude ühendamiseks ning heli teisendamiseks. Vaikimisi eeldab OpenTubeX, et FFmpeg leitakse keskkonnamuutuja PATH kaudu. Vajaduse korral saab siin määrata kohandatud asukoha.
     Use cookies for subtitles: "Kasuta seadistatud küpsiseid subtiitrite ja automaattõlgete jaoks. Selle lubab ka „Kasuta alati küpsiseid“."
   Distraction Free Settings:

@@ -2074,7 +2074,7 @@ Tooltips:
     Cookie File: Izberite datoteko s piškotki v obliki Netscape za overjeno predvajanje.
     Browser for Cookies: Podpora za brskalnike se prebere iz izbrane izvedljive datoteke yt-dlp. OpenTubeX ob zahtevanem overjenem predvajanju naroči yt-dlp, naj prebere podatke tega brskalnika.
     Browser Profile: Izbirno ime ali mapa profila brskalnika. Če želite uporabiti nazadnje uporabljeni profil, pustite prazno.
-    Always Use Cookies: "Uporabite nastavljene piškotke za prenose, podnapise in kadar yt-dlp pridobiva tokove. S tem se način pridobivanja pretoka ne preklopi na yt-dlp. Ko je izbran yt-dlp, so lahko na voljo oblike, dostopne samo z računom, vključno z izboljšano bitno hitrostjo storitve YouTube Premium, če ima račun dostop. Uporabi nastavljene piškotke za podnapise in samodejne prevode."
+    Always Use Cookies: "Uporabite nastavljene piškotke za prenose, podnapise in kadar yt-dlp pridobiva tokove. S tem se način pridobivanja pretoka ne preklopi na yt-dlp. Ko je izbran yt-dlp, so lahko na voljo oblike, dostopne samo z računom, vključno z izboljšano bitno hitrostjo storitve YouTube Premium, če ima račun dostop."
     FFmpeg Executable Path: FFmpeg je potreben za združevanje ločenih video- in zvočnih pretokov ter pretvarjanje zvoka. OpenTubeX privzeto predvideva, da je FFmpeg mogoče najti prek okoljske spremenljivke PATH. Po potrebi lahko tukaj nastavite pot po meri.
     Use cookies for subtitles: "Uporabi nastavljene piškotke za podnapise in samodejne prevode. To možnost omogoči tudi nastavitev »Vedno uporabi piškotke«."
   Distraction Free Settings:

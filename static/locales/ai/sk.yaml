@@ -1570,7 +1570,7 @@ Tooltips:
     Cookie File: Vyberte súbor cookie vo formáte Netscape na overené prehrávanie.
     Browser for Cookies: Podpora prehliadačov sa načíta z vybraného spustiteľného súboru yt-dlp. Pri požiadavke na overené prehrávanie OpenTubeX požiada yt-dlp, aby načítal údaje z tohto prehliadača.
     Browser Profile: Voliteľný názov alebo priečinok profilu prehliadača. Ak chcete použiť naposledy otvorený profil, ponechajte pole prázdne.
-    Always Use Cookies: "Používajte nastavené cookies na sťahovanie, titulky a vždy, keď yt-dlp získava streamy. Spôsob získavania streamov sa tým nezmení na yt-dlp. Ak je vybraný yt-dlp, môžu byť dostupné formáty len pre účet vrátane vyššieho dátového toku YouTube Premium, ak k nemu má účet prístup. Používať nastavené cookies pre titulky a automatické preklady."
+    Always Use Cookies: "Používajte nastavené cookies na sťahovanie, titulky a vždy, keď yt-dlp získava streamy. Spôsob získavania streamov sa tým nezmení na yt-dlp. Ak je vybraný yt-dlp, môžu byť dostupné formáty len pre účet vrátane vyššieho dátového toku YouTube Premium, ak k nemu má účet prístup."
     FFmpeg Executable Path: FFmpeg je potrebný na spájanie samostatných obrazových a zvukových streamov a na prevod zvuku. OpenTubeX predvolene predpokladá, že FFmpeg možno nájsť cez premennú prostredia PATH. V prípade potreby tu môžete nastaviť vlastnú cestu.
     Use cookies for subtitles: "Používať nastavené cookies pre titulky a automatické preklady. Zapne sa aj voľbou „Vždy používať cookies“."
   Distraction Free Settings:

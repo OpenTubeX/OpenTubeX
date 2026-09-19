@@ -1643,7 +1643,7 @@ Tooltips:
     Cookie File: Vælg en cookiefil i Netscape-format til godkendt afspilning.
     Browser for Cookies: Browserunderstøttelse aflæses fra den valgte eksekverbare yt-dlp-fil. OpenTubeX beder yt-dlp om at læse denne browser, når der anmodes om godkendt afspilning.
     Browser Profile: Valgfrit browserprofilnavn eller mappe. Lad feltet stå tomt for at bruge den senest åbnede profil.
-    Always Use Cookies: "Brug de konfigurerede cookies til downloads, undertekster og hver gang yt-dlp henter streams. Dette ændrer ikke metoden til udtræk af streams til yt-dlp. Når yt-dlp er valgt, kan formater, der kræver en konto, blive tilgængelige, herunder YouTube Premiums forbedrede bithastighed, hvis kontoen har adgang. Brug de konfigurerede cookies til undertekster og automatiske oversættelser."
+    Always Use Cookies: "Brug de konfigurerede cookies til downloads, undertekster og hver gang yt-dlp henter streams. Dette ændrer ikke metoden til udtræk af streams til yt-dlp. Når yt-dlp er valgt, kan formater, der kræver en konto, blive tilgængelige, herunder YouTube Premiums forbedrede bithastighed, hvis kontoen har adgang."
     FFmpeg Executable Path: FFmpeg kræves for at flette separate video- og lydstreams og konvertere lyd. OpenTubeX antager som standard, at FFmpeg kan findes via miljøvariablen PATH. Du kan om nødvendigt angive en brugerdefineret sti her.
     Use cookies for subtitles: "Brug de konfigurerede cookies til undertekster og automatiske oversættelser. Aktiveres også af \"Brug altid cookies\"."
   Distraction Free Settings:

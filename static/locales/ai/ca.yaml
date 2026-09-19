@@ -2114,7 +2114,7 @@ Tooltips:
     Cookie File: Seleccioneu un fitxer de galetes amb format de Netscape per a la reproducció autenticada.
     Browser for Cookies: La compatibilitat amb navegadors es consulta a l'executable yt-dlp seleccionat. L'OpenTubeX demana a yt-dlp que llegeixi aquest navegador quan se sol·licita una reproducció autenticada.
     Browser Profile: Nom o carpeta opcional del perfil del navegador. Deixeu-ho en blanc per utilitzar el perfil al qual s'ha accedit més recentment.
-    Always Use Cookies: "Utilitza les galetes configurades per a les baixades, els subtítols i sempre que yt-dlp extregui fluxos. Això no canvia a yt-dlp el mètode d'extracció dels fluxos. Amb yt-dlp seleccionat, poden estar disponibles formats exclusius del compte, inclosa la taxa de bits millorada de YouTube Premium quan el compte hi tingui accés. Utilitza les galetes configurades per als subtítols i les traduccions automàtiques."
+    Always Use Cookies: "Utilitza les galetes configurades per a les baixades, els subtítols i sempre que yt-dlp extregui fluxos. Això no canvia a yt-dlp el mètode d'extracció dels fluxos. Amb yt-dlp seleccionat, poden estar disponibles formats exclusius del compte, inclosa la taxa de bits millorada de YouTube Premium quan el compte hi tingui accés."
     FFmpeg Executable Path: FFmpeg és necessari per combinar fluxos de vídeo i àudio separats i per convertir àudio. De manera predeterminada, l'OpenTubeX suposa que es pot trobar FFmpeg mitjançant la variable d'entorn PATH. Si cal, podeu definir aquí un camí personalitzat.
     Use cookies for subtitles: "Utilitza les galetes configurades per als subtítols i les traduccions automàtiques. També s’activa amb «Utilitza sempre galetes»."
   Distraction Free Settings:
