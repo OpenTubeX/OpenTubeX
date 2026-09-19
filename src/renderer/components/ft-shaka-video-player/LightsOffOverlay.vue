@@ -1,13 +1,11 @@
 <template>
-  <Teleport to="body">
-    <div
-      ref="overlay"
-      class="lightsOffOverlay"
-      aria-hidden="true"
-    >
-      <div :style="holeStyle" />
-    </div>
-  </Teleport>
+  <div
+    ref="overlay"
+    class="lightsOffOverlay"
+    aria-hidden="true"
+  >
+    <div :style="holeStyle" />
+  </div>
 </template>
 
 <script setup>

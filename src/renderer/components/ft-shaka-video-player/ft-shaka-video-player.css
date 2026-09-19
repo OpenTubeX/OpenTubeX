@@ -683,6 +683,17 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: clamp(6px, 1.5cqw, 16px);
   align-content: center;
+  animation: ended-recommendations-appear 300ms ease-out;
+}
+
+@keyframes ended-recommendations-appear {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .endedRecommendation {

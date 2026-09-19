@@ -243,3 +243,54 @@ test('hides the VR canvas behind the finished poster and restores it after seeki
   await expect(page.locator('.endedPoster')).toHaveCount(0)
   await expect(canvas).toBeVisible()
 })
+
+test('player fades respect the app motion preference over the system preference', async ({ app, page }) => {
+  const { video, watch } = await openVideo({ app, page })
+  await video.evaluate(element => element.pause())
+  await watch.evaluate(async component => {
+    await component.proxy.$store.dispatch('updateShowLightsOffToggle', true)
+    await component.proxy.$store.dispatch('updateHideRecommendedVideos', false)
+    component.proxy.recommendedVideos = [{
+      videoId: 'video000000',
+      title: 'Recommended video',
+      author: 'Example channel',
+      authorId: 'example-channel',
+      type: 'video',
+      lengthSeconds: 120,
+    }]
+  })
+
+  for (const [system, preference, animated] of [
+    ['reduce', 'off', true],
+    ['reduce', 'system', false],
+    ['no-preference', 'on', false],
+    ['no-preference', 'system', true],
+  ]) {
+    await page.emulateMedia({ reducedMotion: system })
+    await watch.evaluate((component, preference) => component.proxy.$store.dispatch('updateReducedMotion', preference), preference)
+    const enterDuration = await watch.evaluate(async component => {
+      const player = document.querySelector('.ftVideoPlayer')
+      component.proxy.$store.commit('setTabLightsOff', { tabId: player.dataset.tabId, value: true })
+      await component.proxy.$nextTick()
+      return getComputedStyle(document.querySelector('.lightsOffOverlay')).transitionDuration
+    })
+    expect(enterDuration).toBe(animated ? '0.3s' : '0s')
+    await expect(page.locator('.lightsOffOverlay')).toHaveCSS('opacity', '1')
+    // Finish entering before testing the separate exit transition.
+    await expect(page.locator('.lightsOffOverlay')).not.toHaveClass(/lights-off-enter-active/)
+    const leaveDuration = await watch.evaluate(async component => {
+      const player = document.querySelector('.ftVideoPlayer')
+      component.proxy.$store.commit('setTabLightsOff', { tabId: player.dataset.tabId, value: false })
+      await component.proxy.$nextTick()
+      const overlay = document.querySelector('.lightsOffOverlay')
+      return overlay ? getComputedStyle(overlay).transitionDuration : '0s'
+    })
+    expect(leaveDuration).toBe(animated ? '0.2s' : '0s')
+    await expect(page.locator('.lightsOffOverlay')).toHaveCount(0)
+
+    await endVideo(video)
+    await expect(page.locator('.endedRecommendations')).toHaveCSS('animation-name', animated ? /^ended-recommendations-appear(?:-|$)/ : 'none')
+    await video.evaluate(element => { element.currentTime = 1 })
+    await expect(page.locator('.endedRecommendations')).toHaveCount(0)
+  }
+})
