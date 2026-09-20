@@ -703,6 +703,10 @@ Settings:
     Title Excludes: عنوان شامل نباشد
     Title Filter Hint: عبارت‌های عنوان را با ویرگول جدا کنید. ویدیو باید دست‌کم با یکی از عبارت‌های شامل‌شده و با هیچ‌یک از عبارت‌های کنارگذاشته‌شده مطابقت داشته باشد.
   External Software Settings:
+    Create YouTube session: "ایجاد نشست YouTube"
+    YouTube session hint: "در صورت نیاز وارد شوید و نشست را ذخیره کنید. در تنظیمات انتخاب کنید که برای بارگیری، پخش یا زیرنویس استفاده شود."
+    Use cookies for downloads: "استفاده از کوکی‌ها برای بارگیری"
+    YouTube session failed: "ذخیرهٔ نشست YouTube ممکن نشد."
     Checking FFmpeg and FFprobe: در حال بررسی FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe هنوز بارگیری نشده است. برای بارگیری، روی دکمهٔ زیر کلیک کنید.
     External Software Settings: نرم‌افزار خارجی
@@ -748,7 +752,7 @@ Settings:
       Manual: فقط به‌روزرسانی دستی
     yt-dlp Executable Path: مسیر فایل اجرایی yt-dlp
     FFmpeg Executable Path: مسیر فایل اجرایی FFmpeg
-    Restricted Playback Authentication: کوکی‌های پخش yt-dlp
+    Restricted Playback Authentication: "کوکی‌های yt-dlp"
     Cookie Source: منبع کوکی
     Cookie Sources:
       None: هیچ‌کدام
@@ -1200,7 +1204,7 @@ Video:
   Retry With Built-in Extraction: تلاش دوباره با استخراج داخلی
   Retry With yt-dlp Extraction: تلاش دوباره با استخراج yt-dlp
   Reloading video after streaming URL error: در حال بارگیری دوبارهٔ ویدیو پس از خطای نشانی پخش
-  Configure Restricted Playback Cookies Hint: کوکی‌ها را در تنظیمات ← نرم‌افزار خارجی ← کوکی‌های پخش yt-dlp پیکربندی کنید.
+  Configure Restricted Playback Cookies Hint: "کوکی‌ها را در تنظیمات ← نرم‌افزار خارجی ← کوکی‌های yt-dlp پیکربندی کنید."
   Try With Configured Cookies: تلاش با کوکی‌های پیکربندی‌شده
   Restricted Playback Authentication Failed Template: 'yt-dlp با کوکی‌های پیکربندی‌شده نتوانست به این ویدیو دسترسی پیدا کند: {error}'
   Private: ویدیوهای خصوصی در OpenTubeX قابل تماشا نیستند، زیرا به ورود به Google و مالکیت ویدیو نیاز دارند.
@@ -1644,7 +1648,7 @@ Tooltips:
     Cookie File: یک فایل کوکی با قالب Netscape برای پخش با احراز هویت انتخاب کنید.
     Browser for Cookies: پشتیبانی از مرورگر از فایل اجرایی yt-dlp انتخاب‌شده خوانده می‌شود. هنگام درخواست پخش با احراز هویت، OpenTubeX از yt-dlp می‌خواهد کوکی‌های این مرورگر را بخواند.
     Browser Profile: نام یا پوشه نمایه مرورگر، اختیاری است. برای استفاده از آخرین نمایه‌ای که به آن دسترسی داشته‌اید، خالی بگذارید.
-    Always Use Cookies: "هر زمان yt-dlp جریان‌ها را استخراج می‌کند، از کوکی‌های پیکربندی‌شده استفاده شود. این گزینه روش استخراج جریان را به yt-dlp تغییر نمی‌دهد. با انتخاب yt-dlp، ممکن است قالب‌های ویژه حساب در دسترس قرار گیرند؛ از جمله نرخ بیت بهتر YouTube Premium، اگر حساب به آن دسترسی داشته باشد. از کوکی‌های پیکربندی‌شده برای زیرنویس‌ها و ترجمه‌های خودکار استفاده شود."
+    Always Use Cookies: "از کوکی‌های پیکربندی‌شده برای بارگیری‌ها، زیرنویس‌ها و هر بار که yt-dlp جریان‌ها را استخراج می‌کند استفاده کنید. این گزینه روش استخراج جریان را به yt-dlp تغییر نمی‌دهد. با انتخاب yt-dlp، ممکن است قالب‌های ویژه حساب در دسترس قرار گیرند؛ از جمله نرخ بیت بهتر YouTube Premium، اگر حساب به آن دسترسی داشته باشد."
     FFmpeg Executable Path: برای ادغام جریان‌های جداگانه ویدیو و صدا و نیز تبدیل صدا، FFmpeg لازم است. OpenTubeX به‌طور پیش‌فرض فرض می‌کند FFmpeg از طریق متغیر محیطی PATH پیدا می‌شود. در صورت نیاز می‌توانید اینجا مسیری سفارشی تعیین کنید.
     Use cookies for subtitles: "از کوکی‌های پیکربندی‌شده برای زیرنویس‌ها و ترجمه‌های خودکار استفاده شود. گزینهٔ «همیشه از کوکی‌ها استفاده شود» نیز این قابلیت را فعال می‌کند."
   Distraction Free Settings:

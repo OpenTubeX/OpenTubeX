@@ -674,6 +674,10 @@ Settings:
     Title Excludes: Pealkiri ei sisalda
     Title Filter Hint: Eralda pealkirja otsingusõnad komadega. Video pealkiri peab sisaldama vähemalt üht nõutud otsingusõna ega tohi sisaldada ühtki välistatud otsingusõna.
   External Software Settings:
+    Create YouTube session: "Loo YouTube’i seanss"
+    YouTube session hint: "Vajadusel logi sisse ja salvesta seanss. Vali seadetes, kas kasutada seda allalaadimiseks, esitamiseks või subtiitrite jaoks."
+    Use cookies for downloads: "Kasuta allalaadimisel küpsiseid"
+    YouTube session failed: "YouTube’i seansi salvestamine ebaõnnestus."
     Checking FFmpeg and FFprobe: FFmpegi ja FFprobe’i kontrollimine…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe pole veel alla laaditud. Allalaadimiseks klõpsa allolevat nuppu.
     External Software Settings: Väline tarkvara
@@ -719,7 +723,7 @@ Settings:
       Manual: Uuenda ainult käsitsi
     yt-dlp Executable Path: yt-dlp täitmisfaili asukoht
     FFmpeg Executable Path: FFmpegi täitmisfaili asukoht
-    Restricted Playback Authentication: yt-dlp esitusküpsised
+    Restricted Playback Authentication: "yt-dlp küpsised"
     Cookie Source: Küpsiste allikas
     Cookie Sources:
       None: Puudub
@@ -1145,7 +1149,7 @@ Video:
   Retry With Built-in Extraction: Proovi uuesti sisseehitatud meetodiga
   Retry With yt-dlp Extraction: Proovi uuesti yt-dlp abil
   Reloading video after streaming URL error: Video laaditakse voogedastuse URL-i vea tõttu uuesti
-  Configure Restricted Playback Cookies Hint: Seadista küpsised jaotises Seaded → Väline tarkvara → yt-dlp esitusküpsised.
+  Configure Restricted Playback Cookies Hint: "Seadista küpsised jaotises Seaded → Väline tarkvara → yt-dlp küpsised."
   Try With Configured Cookies: Proovi seadistatud küpsistega
   Restricted Playback Authentication Failed Template: 'yt-dlp ei pääsenud seadistatud küpsistega sellele videole juurde: {error}'
   Unmark As Watched: Eemalda vaadatuks märkimine
@@ -1569,7 +1573,7 @@ Tooltips:
     Cookie File: Vali autentitud esitamiseks Netscape'i vormingus küpsisefail.
     Browser for Cookies: Brauseritugi tuvastatakse valitud yt-dlp täitmisfailist. Autenditud esituse taotlemisel käsib OpenTubeX yt-dlp-l sellest brauserist küpsiseid lugeda.
     Browser Profile: Valikuline brauseriprofiili nimi või kaust. Viimati kasutatud profiili valimiseks jäta väli tühjaks.
-    Always Use Cookies: "Kasuta seadistatud küpsiseid alati, kui yt-dlp vooge eraldab. See ei muuda voo eraldamise meetodiks yt-dlp-d. Kui yt-dlp on valitud, võivad saada kättesaadavaks ainult kontoga kasutatavad vormingud, sealhulgas YouTube Premiumi täiustatud bitikiirus, kui kontol on sellele juurdepääs. Kasuta seadistatud küpsiseid subtiitrite ja automaattõlgete jaoks."
+    Always Use Cookies: "Kasuta seadistatud küpsiseid allalaadimiste, subtiitrite ja yt-dlp voogude hankimise jaoks. See ei muuda voo eraldamise meetodiks yt-dlp-d. Kui yt-dlp on valitud, võivad saada kättesaadavaks ainult kontoga kasutatavad vormingud, sealhulgas YouTube Premiumi täiustatud bitikiirus, kui kontol on sellele juurdepääs."
     FFmpeg Executable Path: FFmpeg on vajalik eraldi video- ja helivoogude ühendamiseks ning heli teisendamiseks. Vaikimisi eeldab OpenTubeX, et FFmpeg leitakse keskkonnamuutuja PATH kaudu. Vajaduse korral saab siin määrata kohandatud asukoha.
     Use cookies for subtitles: "Kasuta seadistatud küpsiseid subtiitrite ja automaattõlgete jaoks. Selle lubab ka „Kasuta alati küpsiseid“."
   Distraction Free Settings:
