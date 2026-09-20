@@ -398,6 +398,7 @@
 <script setup>
 import FtInlineMetadata from '../FtInlineMetadata/FtInlineMetadata.vue'
 import { useContextMenuHold } from '../../composables/useContextMenuHold'
+import { PHONE_LAYOUT_QUERY } from '../../composables/usePhoneLayout'
 import FtRetryImage from '../FtRetryImage.vue'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
@@ -1274,6 +1275,10 @@ const videoMenuButton = useTemplateRef('videoMenuButton')
 
 function openVideoOptionsMenu() {
   cancelMenuHold()
+  if (process.env.IS_CAPACITOR || window.matchMedia(PHONE_LAYOUT_QUERY).matches) {
+    openMobileContextActions({ title: title.value, actions: videoContextMenuItems })
+    return
+  }
   const button = videoMenuButton.value.$el.querySelector('button')
   button.focus({ preventScroll: true })
   const bounds = button.getBoundingClientRect()

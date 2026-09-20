@@ -131,3 +131,51 @@ test('playlist images and selected text retain the native menu on web', () => {
     assert.deepEqual(dispatched, [])
   }
 })
+
+for (const { capacitor, phone } of [
+  { capacitor: true, phone: true },
+  { capacitor: true, phone: false },
+  { capacitor: false, phone: true },
+  { capacitor: false, phone: false },
+]) {
+  test(`video menu button uses the appropriate menu for capacitor=${capacitor}, phone=${phone}`, () => {
+    const start = source.indexOf('function openVideoOptionsMenu() {')
+    const handler = source.slice(start, source.indexOf('\nfunction openVideoContextMenu', start))
+    const dispatched = []
+    const mobileMenus = []
+    const items = { value: [{ label: 'Play Next' }] }
+    const context = {
+      process: { env: { IS_CAPACITOR: capacitor } },
+      PHONE_LAYOUT_QUERY: '(max-width: 600px), (max-height: 600px)',
+      cancelMenuHold () {},
+      title: { value: 'Test video' },
+      videoContextMenuItems: items,
+      openMobileContextActions: menu => mobileMenus.push(menu),
+      videoMenuButton: { value: { $el: { querySelector: () => ({
+        focus () {},
+        getBoundingClientRect: () => ({ left: 10, right: 30, bottom: 40 })
+      }) } } },
+      document: { body: { dir: 'ltr' } },
+      window: {
+        dispatchEvent: event => dispatched.push(event),
+        matchMedia: () => ({ matches: phone })
+      },
+      CustomEvent: class {
+        constructor (type, options) { this.type = type; this.detail = options.detail }
+      }
+    }
+    vm.runInNewContext(handler + '\nopenVideoOptionsMenu()', context)
+    if (capacitor || phone) {
+      assert.equal(dispatched.length, 0, 'mobile taps must not open the desktop context menu')
+      assert.equal(mobileMenus.length, 1)
+      assert.equal(mobileMenus[0].title, 'Test video')
+      assert.equal(mobileMenus[0].actions, items)
+    } else {
+      assert.equal(mobileMenus.length, 0)
+      assert.equal(dispatched[0].type, 'opentubex:context-menu')
+      assert.equal(dispatched[0].detail.items, items)
+      assert.equal(dispatched[0].detail.x, 10)
+      assert.equal(dispatched[0].detail.y, 40)
+    }
+  })
+}
