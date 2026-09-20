@@ -375,10 +375,12 @@
   flex-shrink: 0;
   gap: 12px;
 
-  /* Stay within the viewport on narrow windows, accounting for the holder's
-     inline inset and this element's own margins */
-  max-inline-size: min(400px, calc(100vw - 60px));
-  inline-size: var(--toast-natural-width, max-content);
+  /* Include padding in the viewport limit, but let messages use the available
+     width before wrapping. Intrinsic sizing also follows message updates and
+     window resizing without depending on the clipped stack slot's width. */
+  box-sizing: border-box;
+  max-inline-size: calc(100vw - 60px - var(--left-tab-bar-offset, 0px) - var(--right-tab-bar-offset, 0px));
+  inline-size: max-content;
   padding-block: 12px;
   padding-inline: 18px;
   text-align: start;
@@ -393,6 +395,10 @@
 
   /* Let sonner own horizontal drag gestures instead of the browser */
   touch-action: pan-y;
+}
+
+.toast-holder .toast {
+  max-inline-size: calc(100vw - var(--offset-left) - var(--offset-right));
 }
 
 :is(.toast-holder, .progress-toast-holder) .toast.actionable {
@@ -794,17 +800,4 @@ body:has(.app .settingsWindow.maximized) .connection-status-holder {
   inset-inline: 0;
   inset-block-end: calc(var(--connection-progress-inset, 0px) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
   transform: none;
-}
-
-/* Use the available width in short landscape windows so wrapped messages
-   leave room for the navigation and connection banner below them. */
-@media (height <= 450px) and (orientation: landscape) {
-  .toast-holder .toast {
-    inline-size: max-content;
-    max-inline-size: calc(100vw - var(--offset-left) - var(--offset-right));
-  }
-
-  .progress-toast-holder .toast {
-    max-inline-size: calc(100vw - 60px - var(--left-tab-bar-offset, 0px) - var(--right-tab-bar-offset, 0px));
-  }
 }

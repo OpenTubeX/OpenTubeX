@@ -4,7 +4,6 @@
     class="toast-slot"
   >
     <div
-      ref="toastElement"
       class="toast"
       :class="{
         hasImage: toast.image,
@@ -112,7 +111,6 @@ let pointerMoved = false
 let row = null
 
 const slot = useTemplateRef('slot')
-const toastElement = useTemplateRef('toastElement')
 
 const showTimeoutIndicator = computed(() => {
   return store.getters.getShowToastTimeoutIndicator && Number.isFinite(props.toast.duration)
@@ -145,12 +143,6 @@ function onRowKeydown(event) {
 }
 
 onMounted(() => {
-  // The collapsed stack clips the slot around this card. Pinning the card's
-  // measured width keeps that constraint from shrinking its flex contents and
-  // rewrapping the message while toasts enter or leave the stack. Use the
-  // computed content-box size: offsetWidth also includes the inline padding,
-  // which content-box sizing would add a second time once assigned as a width.
-  toastElement.value.style.setProperty('--toast-natural-width', getComputedStyle(toastElement.value).inlineSize)
   row = slot.value?.parentElement ?? null
   row?.addEventListener('keydown', onRowKeydown)
 })
