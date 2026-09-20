@@ -3,6 +3,8 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { runInNewContext } from 'node:vm'
 
+import { isCollaborativeVideoAuthor } from '../../src/renderer/helpers/video-collaborators.js'
+
 import { getResultAuthorThumbnailUrl } from '../../src/renderer/helpers/result-channel-avatar.js'
 
 const card = await readFile(new URL('../../src/renderer/components/FtListVideo/FtListVideo.vue', import.meta.url), 'utf8')
@@ -20,7 +22,7 @@ function visible({ hidden = false, appearance = 'result' } = {}) {
   })
 }
 
-function resolve(data, lookup = async () => [{ thumbnail: '//images.test/creator.jpg' }]) {
+function resolve(data, lookup = async () => [{ thumbnail: '//images.test/creator.jpg' }], fetchChannel = async () => null) {
   let pending
   let refresh
   let unmount
@@ -34,7 +36,8 @@ function resolve(data, lookup = async () => [{ thumbnail: '//images.test/creator
     store: { getters: { getBackendPreference: 'local', getSubscribedChannelsById: new Map() } },
     getResultAuthorThumbnailUrl,
     getCachedChannelInfo: () => null,
-    fetchChannelInfo: async () => null,
+    fetchChannelInfo: fetchChannel,
+    isCollaborativeVideoAuthor,
     getLocalVideoChannels: async id => { calls.push(id); return lookup(id) },
     result,
     enabled
@@ -141,4 +144,27 @@ test('retains the available primary avatar when collaborator metadata omits its 
   await f.pending
   assert.deepEqual(Array.from(f.avatar.channelThumbnails.value), ['https://images.test/primary.jpg', 'https://images.test/second.jpg'])
   assert.equal(f.avatar.channelThumbnail.value, 'https://images.test/primary.jpg')
+})
+
+
+test('empty collaborator results retain the normal channel lookup fallback', async () => {
+  const f = resolve({ videoId: 'collab', hasCollaborators: true, authorId: 'UCknown' }, async () => [], async id => {
+    assert.equal(id, 'UCknown')
+    return { thumbnail: '//images.test/known.jpg' }
+  })
+  await f.pending
+  assert.deepEqual(Array.from(f.avatar.channelThumbnails.value), ['https://images.test/known.jpg'])
+})
+
+test('a supplied avatar on an unflagged ordinary result avoids a video lookup', async () => {
+  const f = resolve({ videoId: 'regular', author: 'Creator', authorThumbnailUrl: '//images.test/direct.jpg' })
+  await f.pending
+  assert.deepEqual(f.calls, [])
+  assert.equal(f.avatar.channelThumbnail.value, 'https://images.test/direct.jpg')
+})
+
+test('an unflagged collaboration byline still loads every avatar when a primary image is supplied', async () => {
+  const f = resolve({ videoId: 'collab', author: 'Creator One and Creator Two', authorThumbnailUrl: '//images.test/first.jpg' }, async () => collaborators)
+  await f.pending
+  assert.equal(f.avatar.channelThumbnails.value.length, 3)
 })

@@ -6,6 +6,7 @@ import { youtubeImageUrlToInvidious } from '../helpers/api/invidious'
 import { getLocalVideoChannels } from '../helpers/api/local'
 import { fetchChannelInfo, getCachedChannelInfo } from '../helpers/channel-preferences'
 import { getResultAuthorThumbnailUrl } from '../helpers/result-channel-avatar'
+import { isCollaborativeVideoAuthor } from '../helpers/video-collaborators'
 
 /**
  * Resolves the channel avatar for a video or playlist result.
@@ -52,21 +53,24 @@ export function useResultChannelAvatar(result, channelId, enabled) {
     channelThumbnails.value = [cachedThumbnail]
 
     if (result.value.hasCollaborators || result.value.collaborators?.length > 0 ||
-      (resolvingChannelId == null && result.value.videoId)) {
+      (resolvingChannelId == null && result.value.videoId &&
+        (cachedThumbnail === null || isCollaborativeVideoAuthor(result.value.author)))) {
       try {
         const collaborators = result.value.collaborators?.length > 0
           ? result.value.collaborators
           : result.value.videoId ? await getLocalVideoChannels(result.value.videoId) : []
-        if (generation === loadGeneration && collaborators.length > 0) {
+        if (generation !== loadGeneration) return
+        if (collaborators.length > 0) {
           channelThumbnails.value = collaborators.map((channel, index) =>
             normalizeThumbnail(channel.thumbnail) ?? (index === 0 ? cachedThumbnail : null)
           )
           channelThumbnail.value = channelThumbnails.value[0]
+          return
         }
       } catch {
         // Keep the available avatar when collaborator information is unavailable.
+        return
       }
-      return
     }
 
     if (cachedThumbnail !== null) {
