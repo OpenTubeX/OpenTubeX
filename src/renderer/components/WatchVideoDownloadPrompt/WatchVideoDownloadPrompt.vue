@@ -237,7 +237,7 @@
           >
             <div
               class="downloadProgressBarFill"
-              :class="{ indeterminate: activeDownload.status === 'processing' }"
+              :class="{ indeterminate: ['preparing', 'processing'].includes(activeDownload.status) }"
               :style="{ inlineSize: `${activeDownload.percent}%` }"
             />
           </div>

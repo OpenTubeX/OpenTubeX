@@ -117,3 +117,13 @@ test('storage history includes only terminal downloads that the backend can clea
   })
   assert.deepEqual(Array.from(result, record => record.status), ['completed', 'failed', 'cancelled', 'skipped'])
 })
+
+test('download prompt shows indeterminate progress while preparing and processing', () => {
+  const prompt = readFileSync(new URL('../../src/renderer/components/WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue', import.meta.url), 'utf8')
+  const binding = prompt.match(/class="downloadProgressBarFill"\s+:class="([^"]+)"/)?.[1]
+  assert.ok(binding, 'download prompt progress fill has a class binding')
+  for (const [status, expected] of [['preparing', true], ['processing', true], ['downloading', false], ['queued', false], ['paused', false], ['pausing', false]]) {
+    const classes = vm.runInNewContext(`(${binding})`, { activeDownload: { status, percent: 0 } })
+    assert.equal(classes.indeterminate, expected, status)
+  }
+})
