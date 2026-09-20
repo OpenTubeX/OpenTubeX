@@ -394,3 +394,50 @@ test('watch statistics settings are indexed under general rather than privacy', 
     assert.ok(!index.get('privacy').some(entry => entry.label === label), label)
   }
 })
+
+test('settings search retains the subpage containing each control', () => {
+  const values = createSettingsSearchIndex({
+    sections: [
+      { type: 'appearance', title: 'Appearance', description: '' },
+      { type: 'playback', title: 'Playback', description: '' }
+    ],
+    tm: path => getAtPath(locale, path),
+    store: { getters: { getUseQuickPlaybackSpeedBar: true } },
+    usingElectron: true,
+  })
+  for (const [section, label, subpage] of [
+    ['appearance', 'Show Active Subscriptions', 'navigation'],
+    ['appearance', 'Add item', 'navigation'],
+    ['playback', 'Add Playback Speed', 'quick-playback-speed'],
+    ['playback', 'Playback Speed', 'quick-playback-speed'],
+    ['appearance', 'Customize navigation', undefined],
+    ['playback', 'Default Playback Rate', undefined]
+  ]) {
+    const match = values.get(section).find(match => match.label === label)
+    assert.ok(match, label)
+    assert.equal(match.subpage, subpage, label)
+  }
+})
+
+test('settings search hides controls in the disabled playback speed subpage', () => {
+  const values = createSettingsSearchIndex({
+    sections: [{ type: 'playback', title: 'Playback', description: '' }],
+    tm: path => getAtPath(locale, path),
+    store: { getters: { getUseQuickPlaybackSpeedBar: false } },
+    usingElectron: true,
+  }).get('playback')
+  assert.ok(values.some(match => match.label === 'Use Quick Playback Speed Bar'))
+  assert.ok(!values.some(match => match.subpage === 'quick-playback-speed'))
+})
+
+test('settings search excludes playback speed fields only available while editing', () => {
+  const values = createSettingsSearchIndex({
+    sections: [{ type: 'playback', title: 'Playback', description: '' }],
+    tm: path => getAtPath(locale, path),
+    store: { getters: { getUseQuickPlaybackSpeedBar: true } },
+    usingElectron: true,
+  }).get('playback')
+  assert.ok(!values.some(match => match.label === 'Name'))
+  assert.ok(!values.some(match => match.label === 'Use automatic playback speed name'))
+  assert.ok(values.some(match => match.label === 'Edit playback speed name'))
+})

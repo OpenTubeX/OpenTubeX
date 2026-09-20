@@ -261,6 +261,31 @@ test.describe('date and time format preferences', () => {
 test.describe('settings search highlights', () => {
   test.use({ seed: { settings: { currentLocale: 'en-US' } } })
 
+  for (const uiScale of [100, 95]) {
+    test.describe(`subpage search at ${uiScale}% UI scale`, () => {
+      test.use({ seed: { settings: { currentLocale: 'en-US', uiScale, useQuickPlaybackSpeedBar: true } } })
+
+      for (const label of ['Show Active Subscriptions', 'Add item', 'Add Playback Speed', 'Playback Speed']) {
+        test(`opens and highlights ${label} inside its subpage`, async ({ page }) => {
+          await goTo(page, 'settings')
+          await page.getByRole('searchbox', { name: 'Search settings' }).fill(label)
+          await page.getByRole('button', { name: label, exact: true }).click()
+
+          const subpage = page.locator('.settingsSubpageScroll:visible')
+          const target = subpage.locator('.settingsSearchTarget')
+          await expect(subpage).toBeVisible()
+          await expect(target).toBeVisible()
+          await expect(target).toHaveCSS('animation-name', /settings-search-highlight/)
+          if (label === 'Playback Speed') {
+            await expect(target).toHaveAttribute('aria-label', label)
+          } else {
+            await expect(target).toContainText(label)
+          }
+        })
+      }
+    })
+  }
+
   test('does not draw a separate focus frame inside the search field', async ({ page }) => {
     await goTo(page, 'settings')
     const search = page.getByRole('searchbox', { name: 'Search settings' })

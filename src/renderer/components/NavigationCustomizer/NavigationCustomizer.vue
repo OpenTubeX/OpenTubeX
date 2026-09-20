@@ -1,6 +1,7 @@
 <template>
   <div class="settingButtonWithSync">
     <FtButton
+      data-settings-subpage="navigation"
       :label="t('Settings.General Settings.Navigation.Customize Navigation')"
       :icon="['fas', 'bars']"
       @click="open = true"

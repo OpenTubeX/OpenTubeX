@@ -406,6 +406,7 @@
       />
       <div class="settingButtonWithSync quickPlaybackSpeedCustomizeButton">
         <FtButton
+          data-settings-subpage="quick-playback-speed"
           :label="t('Settings.Player Settings.Customize Quick Playback Speed Bar')"
           :icon="['fas', 'sliders-h']"
           :disabled="!useQuickPlaybackSpeedBar"

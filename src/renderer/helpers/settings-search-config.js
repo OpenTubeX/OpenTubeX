@@ -73,6 +73,15 @@ const DATA_STORAGE_KEYS = new Set([
   'Open Profile Directory'
 ])
 
+const QUICK_PLAYBACK_SPEED_SUBPAGE_KEYS = new Set([
+  'Quick Playback Speed Bar Manager',
+  'Add Playback Speed',
+  'Reset Quick Playback Speed Bar',
+  'Edit Playback Speed Name',
+  'Reorder Playback Speed',
+  'Playback Speed'
+])
+
 export const SETTINGS_SEARCH_SOURCES = {
   general: [{
     type: 'general',
@@ -93,12 +102,27 @@ export const SETTINGS_SEARCH_SOURCES = {
   }, {
     type: 'general',
     key: 'Settings.General Settings',
-    include: GENERAL_APPEARANCE_KEYS
+    include: GENERAL_APPEARANCE_KEYS,
+    exclude: new Set(['Navigation'])
+  }, {
+    type: 'navigation',
+    key: 'Settings.General Settings.Navigation',
+    include: new Set(['Navigation', 'Customize Navigation'])
+  }, {
+    type: 'navigation',
+    key: 'Settings.General Settings.Navigation',
+    include: new Set(['Show Active Subscriptions', 'Add Item']),
+    subpage: 'navigation'
   }],
   playback: [{
     type: 'player',
     key: 'Settings.Player Settings',
-    exclude: new Set(['Proxy Videos Through Invidious', 'Voice-over Translation'])
+    exclude: new Set(['Proxy Videos Through Invidious', 'Voice-over Translation', ...QUICK_PLAYBACK_SPEED_SUBPAGE_KEYS])
+  }, {
+    type: 'player',
+    key: 'Settings.Player Settings',
+    include: QUICK_PLAYBACK_SPEED_SUBPAGE_KEYS,
+    subpage: 'quick-playback-speed'
   }, {
     type: 'caption-appearance',
     key: 'Settings.Player Settings.Caption Appearance'
@@ -295,7 +319,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
 export const SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS = {
   general: new Set(['System Default']),
   'context-menu-search': new Set(['Engine Name', 'Search URL']),
-  player: new Set(['Skip Silence']),
+  player: new Set(['Skip Silence', 'Playback Speed Name', 'Use Automatic Playback Speed Name']),
   'sponsor-block': new Set(['Generated SponsorBlock User ID Copy Button']),
   subscription: new Set(['Auto Refresh Interval']),
   'caption-appearance': new Set(['Application Language']),
