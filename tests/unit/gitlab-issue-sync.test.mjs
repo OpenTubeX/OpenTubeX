@@ -144,11 +144,52 @@ test('pagination reads beyond 100 items', async () => {
 
 test('rewrites GitLab uploads and escapes only GitHub-to-GitLab quick actions', () => {
   const body = content('![video](/uploads/hash/video.mp4)\n@person\n/close', true)
-  assert.match(body, /https:\/\/gitlab.com\/opentubex\/OpenTubeX\/uploads\/hash\/video.mp4/)
+  assert.match(body, /https:\/\/gitlab.com\/-\/project\/85121418\/uploads\/hash\/video.mp4/)
   assert.ok(body.includes('@person\n/close'))
   assert.equal(content('/close\n  /label ~bug'), '&#47;close\n  &#47;label ~bug')
   assert.equal(content('```sh\n/close\n```\n/close'), '```sh\n/close\n```\n&#47;close')
   assert.equal(content('~~~~\n/close\n~~~\n/close\n~~~~'), '~~~~\n/close\n~~~\n/close\n~~~~')
+})
+
+test('mirrors uploaded images from issue 1468 in descriptions and comments and repairs existing copies', async () => {
+  const { state, client } = fixture()
+  const file = 'c2cc7b30727ac87589b6cf25afb79c3a/Screenshot_2026-09-20_20-35-28.png'
+  const image = `![Screenshot](/uploads/${file}){width=900 height=507}`
+  const expected = `![Screenshot](https://gitlab.com/-/project/85121418/uploads/${file})`
+  state.sources[0].description = image
+  state.notes.push({ id: 10, body: image, author: { id: 1, username: 'reporter' } })
+  await sync(client)
+  assert.ok(state.targets[0].body.endsWith(expected))
+  assert.ok(state.comments[0].body.endsWith(expected))
+
+  for (const item of [state.targets[0], state.comments[0]]) {
+    item.body = item.body.replace(expected, image.replace('/uploads/', 'https://gitlab.com/opentubex/OpenTubeX/uploads/'))
+  }
+  await sync(client)
+  assert.equal(state.targets.length, 1)
+  assert.equal(state.comments.length, 1)
+  assert.ok(state.targets[0].body.endsWith(expected))
+  assert.ok(state.comments[0].body.endsWith(expected))
+  state.writes = []
+  await sync(client)
+  assert.deepEqual(state.writes, [])
+})
+
+test('converts upload links and image dimensions without changing unrelated links or attributes', () => {
+  const url = 'https://gitlab.com/-/project/85121418/uploads/hash/image.png'
+  for (const dimensions of ['{width=900 height=507}', '{width=100px}', '{height=50% width=75%}']) {
+    assert.equal(content(`![Screenshot](/uploads/hash/image.png)${dimensions}`, true), `![Screenshot](${url})`)
+    assert.equal(content(`![Screenshot](https://example.org/image.png "Title")${dimensions}`, true), '![Screenshot](https://example.org/image.png "Title")')
+  }
+  assert.equal(content('/uploads/hash/image.png', true), url)
+  assert.equal(content('[attachment](/uploads/hash/image.png)', true), `[attachment](${url})`)
+  assert.equal(content('[image]: </uploads/hash/image.png>', true), `[image]: <${url}>`)
+  assert.equal(content('<img src="/uploads/hash/image.png" width="900">', true), `<img src="${url}" width="900">`)
+  assert.equal(content('![image](/uploads/hash/image(1).png){width=100}', true), '![image](https://gitlab.com/-/project/85121418/uploads/hash/image(1).png)')
+  const unchanged = '[link](https://example.org){width=100}\n![image](https://example.org/image.png){custom=100}\nText {width=100}\n![image](https://example.org/image.png) [link](https://example.org){width=100}'
+  assert.equal(content(unchanged, true), unchanged)
+  const githubImage = '![image](https://github.com/user-attachments/assets/example){width=100}'
+  assert.equal(content(githubImage), githubImage)
 })
 
 test('a broken link does not starve later reports', async () => {

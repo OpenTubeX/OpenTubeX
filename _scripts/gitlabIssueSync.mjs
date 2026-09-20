@@ -3,7 +3,8 @@ import { pathToFileURL } from 'node:url'
 import { setTimeout } from 'node:timers/promises'
 
 const project = 'opentubex/OpenTubeX'
-const projectUrl = `https://gitlab.com/${project}`
+// GitLab serves uploads through the stable project ID, not the repository path.
+const uploadsUrl = 'https://gitlab.com/-/project/85121418/uploads/'
 const repository = 'OpenTubeX/OpenTubeX'
 const githubBot = 'github-actions[bot]'
 const prefix = 'opentubex-sync'
@@ -19,7 +20,9 @@ function markedId(body, kind) {
 export function content(body = '', fromGitlab = false) {
   let result = (body ?? '').replace(/<!-- opentubex-sync:[\s\S]*?-->/g, '')
   if (fromGitlab) {
-    result = result.replace(/([("'\s])\/uploads\//g, `$1${projectUrl}/uploads/`)
+    result = result.replace(/(^|[(<"'\s])\/uploads\//g, `$1${uploadsUrl}`)
+    // GitHub does not support GitLab's image dimension attributes.
+    result = result.replace(/(!\[[^\]\n]*\]\((?:[^()\n]|\([^()\n]*\))*\))\{[ \t]*(?:(?:width|height)=\d+(?:px|%)?[ \t]*)+\}/g, '$1')
   } else {
     let fence = null
     result = result.split('\n').map(line => {
