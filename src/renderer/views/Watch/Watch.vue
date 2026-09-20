@@ -146,6 +146,7 @@
           :delay-load-until-unix="adEndTimeUnixMs"
           :sponsor-block-auto-skip-disabled="sponsorBlockAutoSkipDisabled"
           :comments-available="commentsAvailable"
+          :offline="isOffline"
           :live-chat-available="liveChatAvailable"
           :quick-bookmark-enabled="isQuickBookmarkEnabled"
           :quick-bookmarked="isCurrentVideoQuickBookmarked"
@@ -620,6 +621,7 @@
             :published="videoPublished"
             :premiere-date="premiereDate"
             :subscription-count-text="channelSubscriptionCountText"
+            :offline="isOffline"
             :like-count="videoLikeCount"
             :dislike-count="videoDislikeCount"
             :category="videoCategory"
@@ -765,6 +767,7 @@
           :published="videoPublished"
           :premiere-date="premiereDate"
           :subscription-count-text="channelSubscriptionCountText"
+          :offline="isOffline"
           :like-count="videoLikeCount"
           :dislike-count="videoDislikeCount"
           :category="videoCategory"
@@ -1130,7 +1133,7 @@
         />
       </Teleport>
       <watch-video-recommendations
-        v-if="!isLoading && !hideRecommendedVideos && (!localFilePlayback || recommendedVideos.length > 0)"
+        v-if="!isLoading && !isOffline && !hideRecommendedVideos && (!localFilePlayback || recommendedVideos.length > 0)"
         :data="recommendedVideos"
         class="watchVideoSideBar watchVideoRecommendations"
         :class="{

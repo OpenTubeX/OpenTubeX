@@ -25,3 +25,7 @@ test('downloaded playback without online metadata does not mount a comments requ
   assert.equal(areCommentsAvailable({ isLive: false, hideComments: false, localFilePlayback: true, channelId: '' }), false)
   assert.equal(areCommentsAvailable({ isLive: false, hideComments: false, localFilePlayback: true, channelId: 'UCchannel' }), true)
 })
+
+test('offline playback hides comments even when download metadata includes a channel', () => {
+  assert.equal(areCommentsAvailable({ isLive: false, hideComments: false, localFilePlayback: true, channelId: 'UCchannel', isOffline: true }), false)
+})

@@ -308,6 +308,7 @@ export default defineComponent({
       /** @type {'dash' | 'legacy' | null} */
       androidBackgroundRestoreFormat: null,
       localFilePlayback: false,
+      isOffline: getConnectionState() === 'offline',
       thumbnail: '',
       videoId: '',
       videoTitle: '',
@@ -321,9 +322,9 @@ export default defineComponent({
       /** @type {import('../../helpers/video-games').LocalVideoGame[]} */
       videoGames: [],
       license: '',
-      videoViewCount: 0,
-      videoLikeCount: 0,
-      videoDislikeCount: 0,
+      videoViewCount: null,
+      videoLikeCount: null,
+      videoDislikeCount: null,
       videoLengthSeconds: 0,
       videoChapters: [],
       videoCurrentChapterIndex: 0,
@@ -703,7 +704,7 @@ export default defineComponent({
       return caption ? this.captions.indexOf(caption) : 0
     },
     transcriptAvailable: function () {
-      return this.captions.length > 0
+      return !this.isOffline && this.captions.length > 0
     },
     ambientModeActive: function () {
       return this.$store.getters.getAmbientMode &&
@@ -1005,6 +1006,7 @@ export default defineComponent({
       return this.$store.getters.getHideLiveChatReplay
     },
     liveChatAvailable: function () {
+      if (this.isOffline) return false
       return this.liveChatIsReplay
         ? !this.hideLiveChatReplay
         : !this.hideLiveChat && (this.isLive || this.isUpcoming)
@@ -1152,7 +1154,7 @@ export default defineComponent({
       return this.playerReady
     },
     useSponsorBlock: function () {
-      return this.$store.getters.getUseSponsorBlock
+      return !this.isOffline && this.$store.getters.getUseSponsorBlock
     },
     useReturnYouTubeDislikes: function () {
       return this.$store.getters.getUseReturnYouTubeDislikes
@@ -1296,6 +1298,7 @@ export default defineComponent({
   },
   mounted: function () {
     connectionEvents.addEventListener('change', this.handleDownloadConnectionChange)
+    this.isOffline = getConnectionState() === 'offline'
     document.addEventListener('keydown', this.handleShortsNavigationKeydown, true)
     document.addEventListener('visibilitychange', this.updateAndroidBackgroundPlaybackFormat)
     window.addEventListener('resize', this.updateShortsViewportHeight)
@@ -1356,6 +1359,13 @@ export default defineComponent({
       if (panel === 'chat') this.liveChatOpen = true
     },
     handleDownloadConnectionChange({ detail }) {
+      this.isOffline = detail === 'offline'
+      if (this.isOffline) {
+        this.showTranscript = false
+        this.liveChatOpen = false
+        this.showSidebarSponsorBlock = false
+        if (['comments', 'chat', 'transcript'].includes(this.mobilePanel)) this.mobilePanel = null
+      }
       if (detail !== 'offline' || !this.isLoading || this.localFilePlayback) return
       if (this.finishDownloadedPlaybackWithoutMetadata()) {
         // Ignore metadata responses that arrive after switching to the local file.
@@ -2091,9 +2101,9 @@ export default defineComponent({
       this.videoTags = []
       this.videoGames = []
       this.license = ''
-      this.videoViewCount = 0
-      this.videoLikeCount = 0
-      this.videoDislikeCount = 0
+      this.videoViewCount = null
+      this.videoLikeCount = null
+      this.videoDislikeCount = null
       this.videoLengthSeconds = 0
       this.videoChapters = []
       this.videoCurrentChapterIndex = 0
@@ -3055,7 +3065,7 @@ export default defineComponent({
           this.videoLikeCount = isNaN(likeCount) ? 0 : likeCount
 
           // YouTube doesn't return dislikes anymore
-          this.videoDislikeCount = 0
+          this.videoDislikeCount = null
 
           if (this.useReturnYouTubeDislikes) {
             this.fetchVideoDislikes()

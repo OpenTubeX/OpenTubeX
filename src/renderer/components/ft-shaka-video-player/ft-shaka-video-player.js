@@ -290,6 +290,10 @@ export default defineComponent({
       type: Number,
       default: 0
     },
+    offline: {
+      type: Boolean,
+      default: false
+    },
     localFilePlayback: {
       type: Boolean,
       default: false
@@ -1175,7 +1179,7 @@ export default defineComponent({
       return Number.isFinite(volume) ? Math.min(1, Math.max(0, volume)) : 0.1
     })
     const voiceOverTranslationAvailable = computed(() => {
-      return (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
+      return !props.offline && (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
         useVoiceOverTranslationSetting.value &&
         props.videoId !== '' &&
         !isLive.value
@@ -1804,7 +1808,7 @@ export default defineComponent({
 
     /** @type {import('vue').ComputedRef<boolean>} */
     const useSponsorBlock = computed(() => {
-      return store.getters.getUseSponsorBlock
+      return !props.offline && store.getters.getUseSponsorBlock
     })
 
     /** @type {import('vue').ComputedRef<boolean>} */

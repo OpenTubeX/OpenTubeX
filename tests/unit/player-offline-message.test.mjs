@@ -26,3 +26,16 @@ for (const format of ['legacy', 'audio']) {
     assert.equal(visible.value, false)
   })
 }
+
+test('voice-over translation is unavailable offline and returns after reconnecting', () => {
+  const start = source.indexOf('    const voiceOverTranslationAvailable = computed(')
+  const expression = source.slice(start, source.indexOf('    const voiceOverTranslationAutoPrepare', start))
+  const props = reactive({ offline: true, videoId: 'video' })
+  const available = vm.runInNewContext(`${expression}\nvoiceOverTranslationAvailable`, {
+    computed, props, process: { env: { IS_ELECTRON: true } },
+    useVoiceOverTranslationSetting: ref(true), isLive: ref(false),
+  })
+  assert.equal(available.value, false)
+  props.offline = false
+  assert.equal(available.value, true)
+})
