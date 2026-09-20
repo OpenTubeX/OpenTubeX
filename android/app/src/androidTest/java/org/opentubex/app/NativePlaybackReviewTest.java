@@ -13,6 +13,46 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class NativePlaybackReviewTest {
+    @Test public void returningFromBackgroundReconcilesStalePictureInPictureState() {
+        try (androidx.test.core.app.ActivityScenario<MainActivity> scenario =
+                androidx.test.core.app.ActivityScenario.launch(MainActivity.class)) {
+            scenario.onActivity(activity -> {
+                // Leave a stale PiP flag, as if the exit callback was missed while suspended.
+                activity.onPictureInPictureModeChanged(true, activity.getResources().getConfiguration());
+            });
+            scenario.moveToState(androidx.lifecycle.Lifecycle.State.CREATED);
+            scenario.moveToState(androidx.lifecycle.Lifecycle.State.RESUMED);
+            scenario.onActivity(activity -> {
+                AndroidPlaybackPlugin plugin = (AndroidPlaybackPlugin) activity.getBridge().getPlugin("AndroidPlayback").getInstance();
+                try {
+                    java.lang.reflect.Field pip = AndroidPlaybackPlugin.class.getDeclaredField("pictureInPicture");
+                    pip.setAccessible(true);
+                    assertFalse("Returning to the full Activity must restore the WebView overlay", pip.getBoolean(plugin));
+                } catch (ReflectiveOperationException error) { throw new AssertionError(error); }
+            });
+        }
+    }
+
+    @Test public void notificationChannelsUseAnExplicitGroupWherePlatformAllows() {
+        android.content.Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        android.app.NotificationManager manager = context.getSystemService(android.app.NotificationManager.class);
+        java.util.Map<String, android.app.NotificationChannel> previous = new java.util.HashMap<>();
+        for (OpenTubeXNotificationChannels.ChannelSpec spec : OpenTubeXNotificationChannels.specifications()) {
+            previous.put(spec.id, manager.getNotificationChannel(spec.id));
+        }
+        OpenTubeXNotificationChannels.createAll(context);
+        for (OpenTubeXNotificationChannels.ChannelSpec spec : OpenTubeXNotificationChannels.specifications()) {
+            android.app.NotificationChannel before = previous.get(spec.id);
+            android.app.NotificationChannel after = manager.getNotificationChannel(spec.id);
+            // Android 8.0 only updates the name/description of an existing
+            // channel. Do not reset users' notification choices to regroup it.
+            String expectedGroup = android.os.Build.VERSION.SDK_INT == 26 && before != null
+                ? before.getGroup() : "opentubex";
+            assertEquals(spec.id, expectedGroup, after.getGroup());
+            if (before != null) assertEquals(before.getImportance(), after.getImportance());
+        }
+    }
+
     @Test public void appThemeSurvivesSystemBarBackgroundResets() {
         try (androidx.test.core.app.ActivityScenario<MainActivity> scenario =
                 androidx.test.core.app.ActivityScenario.launch(MainActivity.class)) {

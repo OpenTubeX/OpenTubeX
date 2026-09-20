@@ -1,5 +1,6 @@
 <template>
   <FtCard
+    v-if="visibleData.length > 0"
     class="relative watchVideoRecommendations"
   >
     <div class="VideoRecommendationsTopBar">

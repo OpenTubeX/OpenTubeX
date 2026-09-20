@@ -2208,7 +2208,7 @@ export default defineComponent({
       this.thumbnail = download.thumbnail || this.thumbnail
       if (this.errorMessage) {
         const fileName = file.path.split(/[/\\]/).at(-1)?.replace(/\.[^.]+$/, '') ?? this.videoId
-        this.videoTitle = download.videoId === this.videoId ? download.title : fileName
+        this.videoTitle = file.title || (download.videoId === this.videoId ? download.title : '') || fileName
         this.hasResolvedVideoTitle = true
         this.errorMessage = null
         this.isLoading = false
@@ -2305,8 +2305,12 @@ export default defineComponent({
 
       const download = this.$store.getters.getYtDlpDownloads[this.localPlaybackDownloadId]
       const fileName = file.path.split(/[/\\]/).at(-1)?.replace(/\.[^.]+$/, '') ?? this.videoId
-      this.videoTitle = download.videoId === this.videoId ? download.title : fileName
+      this.videoTitle = file.title || (download.videoId === this.videoId ? download.title : '') || fileName
       this.hasResolvedVideoTitle = true
+      this.channelId = file.authorId || this.channelId || this.historyEntry?.authorId || ''
+      this.channelName = file.author || this.channelName || this.historyEntry?.author || ''
+      this.initializePlaybackRate()
+      this.initializeVideoQuality()
       this.thumbnail = download.thumbnail || this.thumbnail
       this.errorMessage = null
       this.isLoading = false

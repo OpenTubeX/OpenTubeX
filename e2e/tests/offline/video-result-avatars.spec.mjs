@@ -221,6 +221,25 @@ test.describe('Invidious search video avatars', () => {
         getComputedStyle(element).overflowX === 'clip' &&
         detailBounds.left + Number.parseFloat(separator.insetInlineStart) < lineBounds.left
     })).toBe(true)
+
+    // Force the metadata itself to wrap and check the outer clipping boundary.
+    for (const zoom of [1, 0.95, 1.25]) {
+      await infoLine.evaluate((element, zoom) => {
+        element.style.inlineSize = '110px'
+        element.style.zoom = zoom
+      }, zoom)
+      expect(await infoLine.evaluate(element => {
+        const view = element.querySelector('.viewCount').getBoundingClientRect()
+        const uploaded = element.querySelector('.uploadedTime')
+        const bounds = uploaded.getBoundingClientRect()
+        const dot = getComputedStyle(uploaded, '::before')
+        const line = getComputedStyle(element)
+        const zoom = Number.parseFloat(line.zoom)
+        const dotEnd = bounds.left + (Number.parseFloat(dot.insetInlineStart) + Number.parseFloat(dot.width)) * zoom
+        const clipStart = element.getBoundingClientRect().left - Number.parseFloat(line.overflowClipMargin) * zoom
+        return bounds.top > view.top && line.overflowX === 'clip' && dotEnd < clipStart
+      })).toBe(true)
+    }
   })
 
   test('hides video and playlist avatars without fetching channel data', async ({ page }) => {

@@ -43,6 +43,8 @@ for (const android of [false, true]) {
           isCurrentVideoLoad(generation) { return generation === this.videoLoadGeneration },
           cacheOnlinePlaybackSource() {},
           updateTitle() {},
+          initializePlaybackRate() {},
+          initializeVideoQuality() {},
           t: key => key,
         }
         await watch[`getVideoInformation${backend}`]()
@@ -99,5 +101,40 @@ for (const backend of ['Local', 'Invidious']) {
     assert.equal(localLoads, 1)
     watch.handleDownloadConnectionChange({ detail: 'offline' })
     assert.equal(localLoads, 1, 'connection updates do not restart an already playing file')
+  })
+}
+
+for (const entry of ['applyDownloadedPlaybackSource', 'finishDownloadedPlaybackWithoutMetadata']) {
+  test(`${entry} falls back to the filename when stored download titles are empty`, () => {
+    const methods = runInNewContext(`({
+      ${method('applyDownloadedPlaybackSource', 'cacheOnlinePlaybackSource')}
+      ${method('finishDownloadedPlaybackWithoutMetadata', 'onMountedDependOnLocalStateLoading()')}
+    })`, {
+      process: { env: { IS_CAPACITOR: false } },
+      DOWNLOADED_MEDIA_MIME_TYPES: { mp4: 'video/mp4' },
+    })
+    for (const [fileTitle, downloadTitle, expected] of [
+      ['', '', 'Saved video'],
+      [undefined, undefined, 'Saved video'],
+      ['', 'Download title', 'Download title'],
+      ['File title', 'Download title', 'File title'],
+    ]) {
+      const watch = {
+        ...methods,
+        videoId: 'downloaded1',
+        tabRoute: { query: { downloadId: '1' } },
+        $store: { getters: { getYtDlpDownloads: { 1: {
+          videoId: 'downloaded1', title: downloadTitle, status: 'completed', mode: 'video',
+          files: [{ videoId: 'downloaded1', title: fileTitle, path: '/downloads/Saved video.mp4' }],
+        } } } },
+        errorMessage: entry === 'applyDownloadedPlaybackSource' ? 'Metadata unavailable' : null,
+        playbackSourceKey: 0,
+        cacheOnlinePlaybackSource() {}, updateTitle() {},
+        initializePlaybackRate() {}, initializeVideoQuality() {},
+        t: key => key,
+      }
+      assert.ok(watch[entry]())
+      assert.equal(watch.videoTitle, expected)
+    }
   })
 }

@@ -15,10 +15,10 @@ public class OpenTubeXNotificationChannelsTest {
         OpenTubeXNotificationChannels.ChannelSpec[] channels =
             OpenTubeXNotificationChannels.specifications();
 
-        assertEquals(3, channels.length);
+        assertEquals(4, channels.length);
         assertArrayEquals(
-            new String[] { "media-playback", "subscription-refresh", "live-reminders" },
-            new String[] { channels[0].id, channels[1].id, channels[2].id }
+            new String[] { "media-playback", "subscription-refresh", "live-reminders", "yt-dlp-downloads" },
+            new String[] { channels[0].id, channels[1].id, channels[2].id, channels[3].id }
         );
         assertEquals(NotificationManager.IMPORTANCE_LOW, channels[0].importance);
         assertEquals(NotificationManager.IMPORTANCE_LOW, channels[1].importance);
@@ -41,5 +41,9 @@ public class OpenTubeXNotificationChannelsTest {
         assertFalse(channels[0].showBadge);
         assertFalse(channels[1].showBadge);
         assertTrue(channels[2].showBadge);
+        assertEquals(NotificationManager.IMPORTANCE_LOW, channels[3].importance);
+        assertEquals(R.string.notification_channel_downloads_name, channels[3].nameResource);
+        assertEquals(R.string.notification_channel_downloads_description, channels[3].descriptionResource);
+        assertFalse(channels[3].showBadge);
     }
 }

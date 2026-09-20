@@ -1,6 +1,7 @@
 package org.opentubex.app;
 
 import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Build;
@@ -9,8 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 final class OpenTubeXNotificationChannels {
+    static final String GROUP_ID = "opentubex";
     static final String MEDIA_PLAYBACK_ID = "media-playback";
     static final String SUBSCRIPTION_REFRESH_ID = "subscription-refresh";
+    static final String DOWNLOADS_ID = "yt-dlp-downloads";
     static final String LIVE_REMINDERS_ID = "live-reminders";
     private static final String OBSOLETE_LOCAL_NOTIFICATIONS_DEFAULT_ID = "default";
 
@@ -64,12 +67,21 @@ final class OpenTubeXNotificationChannels {
                 NotificationManager.IMPORTANCE_HIGH,
                 true
             ),
+            new ChannelSpec(
+                DOWNLOADS_ID,
+                R.string.notification_channel_downloads_name,
+                R.string.notification_channel_downloads_description,
+                NotificationManager.IMPORTANCE_LOW,
+                false
+            ),
         };
     }
 
     static void createAll(Context context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
 
+        NotificationManager manager = context.getSystemService(NotificationManager.class);
+        manager.createNotificationChannelGroup(new NotificationChannelGroup(GROUP_ID, context.getString(R.string.app_name)));
         List<NotificationChannel> channels = new ArrayList<>();
         for (ChannelSpec specification : specifications()) {
             NotificationChannel channel = new NotificationChannel(
@@ -77,11 +89,13 @@ final class OpenTubeXNotificationChannels {
                 context.getString(specification.nameResource),
                 specification.importance
             );
+            // API 26 keeps existing channels in their original group. Keep
+            // their IDs and user preferences; newer Android versions regroup them.
+            channel.setGroup(GROUP_ID);
             channel.setDescription(context.getString(specification.descriptionResource));
             channel.setShowBadge(specification.showBadge);
             channels.add(channel);
         }
-        NotificationManager manager = context.getSystemService(NotificationManager.class);
         manager.createNotificationChannels(channels);
         // Capacitor creates a generic fallback channel when its plugin loads.
         // Every notification in this app has a purpose-specific channel, and

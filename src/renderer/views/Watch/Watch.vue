@@ -822,25 +822,33 @@
           @toggle-sponsorblock-info="toggleSponsorBlockInfo"
           @toggle-transcript="toggleTranscript"
           @toggle-live-chat="toggleLiveChat"
+        />
+        <button
+          v-if="phonePanelsEnabled && $store.getters.getNextQueuedVideo && !isLoading"
+          type="button"
+          class="phonePanelButton phoneQueueButton watchVideo"
+          @click="openPhonePanel('queue')"
         >
-          <template
-            v-if="phonePanelsEnabled"
-            #phone-actions
-          >
-            <span class="phonePanelActions">
-              <FtIconButton
-                v-if="$store.getters.getWatchQueueLength"
-                :title="$t('Video.Queue')"
-                :icon="['fas', 'list']"
-                @click="openPhonePanel('queue')"
-              />
-            </span>
-          </template>
-        </watch-video-info>
+          <ft-icon
+            :icon="['fas', 'list']"
+            aria-hidden="true"
+          />
+          <span class="phoneCommentsLabel">
+            <span>{{ $t('Video.Queue') }}</span>
+            <span
+              class="phoneQueuePreview"
+              dir="auto"
+            >{{ $store.getters.getNextQueuedVideo.title }}</span>
+          </span>
+          <ft-icon
+            :icon="['fas', 'angle-down']"
+            aria-hidden="true"
+          />
+        </button>
         <button
           v-if="phonePanelsEnabled && commentsAvailable && !isLoading"
           type="button"
-          class="phoneCommentsButton watchVideo"
+          class="phonePanelButton phoneCommentsButton watchVideo"
           @click="openPhonePanel('comments')"
         >
           <ft-icon
@@ -1122,7 +1130,7 @@
         />
       </Teleport>
       <watch-video-recommendations
-        v-if="!isLoading && !hideRecommendedVideos"
+        v-if="!isLoading && !hideRecommendedVideos && (!localFilePlayback || recommendedVideos.length > 0)"
         :data="recommendedVideos"
         class="watchVideoSideBar watchVideoRecommendations"
         :class="{
