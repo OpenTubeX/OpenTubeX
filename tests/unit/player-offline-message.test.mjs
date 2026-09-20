@@ -103,6 +103,43 @@ for (const nextVideoId of ['first', 'second']) {
   })
 }
 
+for (const change of ['none', 'video', 'generation']) {
+  for (const hasSegments of [false, true]) {
+    test(`SponsorBlock refetch with ${hasSegments ? 'segments' : 'no segments'} handles ${change} change`, async () => {
+      const start = source.indexOf('    async function refetchSponsorBlockSegmentsWhenNotFound() {')
+      const end = source.indexOf('    async function setupSponsorBlock()', start)
+      let respond
+      const effects = []
+      const originalSegments = []
+      const info = ref(originalSegments)
+      const context = vm.createContext({
+        props: { videoId: 'first' }, sponsorBlockRequestGeneration: 1,
+        getSponsorBlockSegments: videoId => {
+          assert.equal(videoId, 'first')
+          return new Promise(resolve => { respond = resolve })
+        },
+        SPONSORBLOCK_INFO_CATEGORIES: [], SPONSORBLOCK_INFO_ACTION_TYPES: [],
+        SPONSORBLOCK_PLAYBACK_ACTION_TYPES: ['skip'], sponsorSkips: ref({ seekBar: ['sponsor'] }),
+        ui: {}, player: {}, sponsorBlockInfoSegments: info,
+        hasSponsorBlockMusicOfftopicSegment: ref(false),
+        refreshSponsorBlockMarkers: () => effects.push('markers'),
+        syncSponsorBlockPlaybackState: () => effects.push('sync'),
+        scheduleSponsorBlockNotFoundRefetch: () => effects.push('retry'),
+        emitSponsorBlockInfoState: () => effects.push('emit'),
+      })
+      const refetch = vm.runInContext(`${source.slice(start, end)}\nrefetchSponsorBlockSegmentsWhenNotFound`, context)
+      const pending = refetch()
+      if (change === 'video') context.props.videoId = 'second'
+      if (change === 'generation') context.sponsorBlockRequestGeneration++
+      const segments = hasSegments ? [{ category: 'sponsor', actionType: 'skip' }] : []
+      respond({ segments, averageDuration: 100 })
+      await pending
+      assert.deepEqual(effects, change === 'none' ? hasSegments ? ['markers', 'sync', 'emit'] : ['retry', 'emit'] : [])
+      assert.deepEqual(info.value, change === 'none' && hasSegments ? segments : originalSegments)
+    })
+  }
+}
+
 test('temporary offline cleanup preserves manual SponsorBlock mute decisions', () => {
   const start = source.indexOf('    function clearSponsorBlockMuteSegments(')
   const end = source.indexOf('\n    }', start) + '\n    }'.length

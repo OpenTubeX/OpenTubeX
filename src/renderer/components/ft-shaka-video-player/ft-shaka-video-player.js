@@ -2111,11 +2111,13 @@ export default defineComponent({
     }
 
     async function refetchSponsorBlockSegmentsWhenNotFound() {
+      const videoId = props.videoId
+      const generation = sponsorBlockRequestGeneration
       let segments, averageDuration
 
       try {
         ({ segments, averageDuration } = await getSponsorBlockSegments(
-          props.videoId,
+          videoId,
           SPONSORBLOCK_INFO_CATEGORIES,
           SPONSORBLOCK_INFO_ACTION_TYPES
         ))
@@ -2124,7 +2126,7 @@ export default defineComponent({
         return
       }
 
-      if (!ui || !player) {
+      if (!ui || !player || generation !== sponsorBlockRequestGeneration || videoId !== props.videoId) {
         return
       }
 
