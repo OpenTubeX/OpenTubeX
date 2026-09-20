@@ -100,7 +100,7 @@ function takeGetInfoAbortSignal(key) {
  * @property {string} template
  * @property {boolean} [automatic]
  * @property {YtDlpDownloadPayload} [retryPayload]
- * @property {'queued' | 'downloading' | 'processing' | 'pausing' | 'paused' | 'completed' | 'failed' | 'cancelled' | 'skipped'} status
+ * @property {'queued' | 'preparing' | 'downloading' | 'processing' | 'pausing' | 'paused' | 'completed' | 'failed' | 'cancelled' | 'skipped'} status
  * @property {number} queuePosition
  * @property {boolean} [started]
  * @property {number} percent
@@ -346,7 +346,7 @@ function loadDownloadRecords() {
 
 function hasAutomaticDownloadRecord(videoId) {
   return [...downloadRecords.values()].some(record => (
-    record.videoId === videoId && ['queued', 'downloading', 'processing', 'pausing', 'paused', 'completed', 'skipped'].includes(record.status)
+    record.videoId === videoId && ['queued', 'preparing', 'downloading', 'processing', 'pausing', 'paused', 'completed', 'skipped'].includes(record.status)
   ))
 }
 
@@ -355,7 +355,7 @@ function saveDownloadRecords() {
     .catch(() => {})
     .then(() => {
       const records = [...downloadRecords.values()]
-        .map(record => ['downloading', 'processing', 'pausing'].includes(record.status)
+        .map(record => ['preparing', 'downloading', 'processing', 'pausing'].includes(record.status)
           ? { ...record, status: record.status === 'pausing' ? 'paused' : 'queued', speed: null, eta: null }
           : record)
         .slice(-200)
@@ -2234,7 +2234,7 @@ async function startYtDlpDownload(
   if (queuedPreparationWasInterrupted()) return abortQueuedPreparation()
 
   individuallyResumedDownloadIds.delete(id)
-  status.status = 'downloading'
+  status.status = 'preparing'
   status.started = true
   const child = spawn(executable, args, { windowsHide: true })
   const entry = { child, cancelled: false, paused: false, restarting: false, restartStatus: 'queued' }
@@ -2247,10 +2247,37 @@ async function startYtDlpDownload(
   /** @type {Set<string>} */
   const subtitleDestinations = new Set()
 
+  /** @param {'preparing' | 'downloading' | 'processing'} phase */
+  function setDownloadPhase(phase) {
+    if (status.status === 'paused' || status.status === 'pausing') {
+      entry.resumeStatus = phase
+    } else {
+      status.status = phase
+    }
+  }
+
   /**
    * @param {string} line
    */
   function handleStdoutLine(line) {
+    if (line.startsWith('__OPENTUBEX_PREPARING__:') || line === '__OPENTUBEX_PROCESSING__' || line.startsWith('__OPENTUBEX_DOWNLOAD__:finished')) {
+      setDownloadPhase(line.startsWith('__OPENTUBEX_PREPARING__:') ? 'preparing' : 'processing')
+      status.percent = 0
+      status.speed = null
+      status.eta = null
+      sendStatus(true)
+      return
+    }
+    if (line.startsWith('__OPENTUBEX_DOWNLOAD__:downloading\t')) {
+      const [, percent, speed, eta] = line.split('\t')
+      const changed = status.status !== 'downloading'
+      setDownloadPhase('downloading')
+      status.percent = Number.parseFloat(percent) || 0
+      status.speed = !speed || /^(Unknown|NA)/.test(speed.trim()) ? null : speed.trim()
+      status.eta = !eta || /^(Unknown|NA)/.test(eta.trim()) ? null : eta.trim()
+      sendStatus(changed)
+      return
+    }
     if (line.startsWith(FINAL_METADATA_PREFIX)) {
       const [rawVideoId, rawTitle, rawThumbnail] = line.slice(FINAL_METADATA_PREFIX.length).split('\t')
       try {
@@ -2312,11 +2339,12 @@ async function startYtDlpDownload(
     }
     const progressMatch = PROGRESS_REGEX.exec(line)
     if (progressMatch) {
-      status.status = 'downloading'
+      const previousStatus = status.status
+      setDownloadPhase(/\bin\s/.test(line) && Number(progressMatch[1]) === 100 ? 'processing' : 'downloading')
       status.percent = parseFloat(progressMatch[1])
-      status.speed = progressMatch[2] ?? status.speed
-      status.eta = progressMatch[3] ?? status.eta
-      sendStatus()
+      status.speed = progressMatch[2] ?? null
+      status.eta = progressMatch[3] ?? null
+      sendStatus(previousStatus !== status.status)
       return
     }
 
@@ -2327,7 +2355,7 @@ async function startYtDlpDownload(
       status.destination = destinationMatch[1]
 
       if (line.startsWith('[ExtractAudio]')) {
-        status.status = 'processing'
+        setDownloadPhase('processing')
       }
 
       sendStatus(true)
@@ -2336,7 +2364,7 @@ async function startYtDlpDownload(
 
     const mergerMatch = MERGER_REGEX.exec(line)
     if (mergerMatch) {
-      status.status = 'processing'
+      setDownloadPhase('processing')
       status.destination = mergerMatch[1]
       sendStatus(true)
     }
@@ -2355,15 +2383,27 @@ async function startYtDlpDownload(
     lines.forEach(handleStdoutLine)
   })
 
+  let stderrBuffer = ''
   child.stderr.setEncoding('utf-8')
   child.stderr.on('data', (chunk) => {
-    stderrLines.push(...chunk.split(/\r?\n/).filter((line) => line.length > 0))
+    stderrBuffer += chunk
+    const lines = stderrBuffer.split(/\r?\n/)
+    stderrBuffer = lines.pop()
+    lines.forEach(handleStderrLine)
+  })
+  child.stderr.on('end', () => {
+    if (stderrBuffer) handleStderrLine(stderrBuffer)
+  })
 
+  /** @param {string} line */
+  function handleStderrLine(line) {
+    handleStdoutLine(line)
+    if (line.length > 0) stderrLines.push(line)
     // only keep the last few lines for error reporting
     if (stderrLines.length > 5) {
       stderrLines.splice(0, stderrLines.length - 5)
     }
-  })
+  }
 
   child.on('error', (error) => {
     if (finished) {
@@ -2619,7 +2659,8 @@ export async function handleYtDlpControlDownload(event, id, action, value) {
     if (record.status === 'queued') {
       individuallyResumedDownloadIds.delete(id)
       record.status = 'paused'
-    } else if (entry && ['downloading', 'processing'].includes(record.status)) {
+    } else if (entry && ['preparing', 'downloading', 'processing'].includes(record.status)) {
+      entry.resumeStatus = record.status
       if (process.platform !== 'win32' && entry.child.kill('SIGSTOP')) {
         entry.paused = true
         record.status = 'paused'
@@ -2635,7 +2676,7 @@ export async function handleYtDlpControlDownload(event, id, action, value) {
     if (entry?.paused && record.status === 'paused') {
       entry.child.kill('SIGCONT')
       entry.paused = false
-      record.status = 'downloading'
+      record.status = entry.resumeStatus ?? 'preparing'
     } else if (record.status === 'paused') {
       if (!queuedDownloadWaiters.has(id)) {
         const result = await restartPersistedDownload(event, record, true)
@@ -2645,7 +2686,7 @@ export async function handleYtDlpControlDownload(event, id, action, value) {
       }
       resumePendingDownload(record, individuallyResumedDownloadIds, downloadQueuePaused)
     } else if (record.status === 'pausing') {
-      record.status = 'downloading'
+      record.status = entry.resumeStatus ?? 'preparing'
       const anotherDownloadIsPausing = [...downloadRecords.values()]
         .some(download => download.id !== id && download.status === 'pausing')
       if (!downloadQueuePauseAllRequested && !anotherDownloadIsPausing) {
@@ -2697,6 +2738,7 @@ export async function handleYtDlpQueueAction(event, action) {
     for (const [id, entry] of activeDownloads) {
       const record = downloadRecords.get(id)
       if (!record || entry.paused) continue
+      if (record.status !== 'pausing') entry.resumeStatus = record.status
       if (process.platform !== 'win32' && entry.child.kill('SIGSTOP')) {
         entry.paused = true
         record.status = 'paused'
@@ -2716,10 +2758,10 @@ export async function handleYtDlpQueueAction(event, action) {
       if (entry?.paused) {
         entry.child.kill('SIGCONT')
         entry.paused = false
-        record.status = 'downloading'
+        record.status = entry.resumeStatus ?? 'preparing'
         broadcastDownloadStatus(record)
       } else if (entry && record.status === 'pausing') {
-        record.status = 'downloading'
+        record.status = entry.resumeStatus ?? 'preparing'
         broadcastDownloadStatus(record)
       } else if (record.status === 'paused') {
         persistedPaused.push(record)

@@ -82,7 +82,7 @@ public final class YtDlpDownloadWorker extends Worker {
         int percent = record == null ? 0 : record.optInt("percent");
         return builder.setSmallIcon(R.drawable.ic_stat_opentubex)
             .setContentTitle(record == null ? "yt-dlp" : record.optString("title", "yt-dlp")).setContentIntent(open)
-            .setProgress(100, percent, record == null || record.optString("status").equals("processing"))
+            .setProgress(100, percent, record == null || !record.optString("status").equals("downloading"))
             .addAction(new Notification.Action.Builder(0, context.getString(android.R.string.cancel), cancel).build())
             .setCategory(Notification.CATEGORY_PROGRESS).setOngoing(true).setOnlyAlertOnce(true).build();
     }

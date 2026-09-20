@@ -1702,6 +1702,7 @@ CommandPalette:
     Download Finished: Tämä lataus ei ole enää käynnissä
     Video: Avaa ensin video
 Downloads:
+  Preparing: Valmistellaan…
   Export Failed: "Ladattua tiedostoa ei voitu tallentaa. Valitse latauskansio, johon on kirjoitusoikeus, ja yritä uudelleen."
   Remove File Permanently Warning: "Tämä poistaa kohteen ”{title}” pysyvästi."
   Download: Lataa

@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 /** Native queue ownership keeps downloads independent of WebView and activity lifetime. */
 final class YtDlpDownloads {
     private static YtDlpDownloads instance;
-    private static final List<String> ACTIVE = asList("queued", "downloading", "processing", "paused", "pausing");
+    private static final List<String> ACTIVE = asList("queued", "preparing", "downloading", "processing", "paused", "pausing");
     private static final Pattern PROGRESS = Pattern.compile("^\\[download]\\s+(\\d+(?:\\.\\d+)?)%(?:.*?\\bat\\s+(\\S+))?(?:.*?\\bETA\\s+(\\S+))?");
     private final Context context;
     private final AtomicFile file;
@@ -64,7 +64,7 @@ final class YtDlpDownloads {
             if (list != null) for (int i = 0; i < list.length(); i++) {
                 JSONObject record = list.getJSONObject(i);
                 String status = record.optString("status");
-                if (asList("downloading", "processing", "pausing").contains(status)) {
+                if (asList("preparing", "downloading", "processing", "pausing").contains(status)) {
                     record.put("status", paused || status.equals("pausing") ? "paused" : "queued");
                 }
                 records.put(record.getLong("id"), record);
@@ -168,7 +168,7 @@ final class YtDlpDownloads {
             if (running.size() >= concurrency) break;
             long id = record.getLong("id");
             running.add(id);
-            record.put("status", "downloading").put("started", true);
+            record.put("status", "preparing").put("started", true);
             ids.add(id);
             publish(record);
         }
@@ -302,26 +302,43 @@ final class YtDlpDownloads {
 
     private synchronized boolean isExecuting(long id) {
         JSONObject record = records.get(id);
-        return record != null && asList("downloading", "processing").contains(record.optString("status"));
+        return record != null && asList("preparing", "downloading", "processing").contains(record.optString("status"));
     }
 
     private synchronized void progress(long id, String lines) {
         JSONObject record = records.get(id);
         if (!isExecuting(id)) return;
         try {
-            for (String line : lines.split("\n")) {
-                var match = PROGRESS.matcher(line);
-                if (match.find()) {
-                    record.put("percent", Double.parseDouble(match.group(1))).put("speed", match.group(2)).put("eta", match.group(3));
-                    record.put("status", "downloading");
-                } else if (line.startsWith("[Merger]") || line.startsWith("[ExtractAudio]")) record.put("status", "processing");
-            }
+            String previousStatus = record.optString("status");
+            for (String line : lines.split("\n")) updateProgress(record, line);
             long now = System.currentTimeMillis();
-            if (now - record.optLong("lastProgress") >= 500) {
+            if (!previousStatus.equals(record.optString("status")) || now - record.optLong("lastProgress") >= 500) {
                 record.put("lastProgress", now);
                 publish(record);
             }
         } catch (Exception error) { Log.w("OpenTubeXYtDlp", "Invalid download progress", error); }
+    }
+
+    static void updateProgress(JSONObject record, String line) throws org.json.JSONException {
+        if (line.startsWith("__OPENTUBEX_PREPARING__:") || line.equals("__OPENTUBEX_PROCESSING__") || line.startsWith("__OPENTUBEX_DOWNLOAD__:finished")) {
+            record.put("status", line.startsWith("__OPENTUBEX_PREPARING__:") ? "preparing" : "processing")
+                .put("percent", 0).put("speed", JSONObject.NULL).put("eta", JSONObject.NULL);
+            return;
+        }
+        if (line.startsWith("__OPENTUBEX_DOWNLOAD__:downloading\t")) {
+            String[] fields = line.split("\t", -1);
+            double percent = 0;
+            try { percent = Double.parseDouble(fields[1].trim().replace("%", "")); } catch (NumberFormatException ignored) { }
+            record.put("status", "downloading").put("percent", percent)
+                .put("speed", fields[2].trim().matches("Unknown.*|NA") ? JSONObject.NULL : fields[2].trim())
+                .put("eta", fields[3].trim().matches("Unknown.*|NA") ? JSONObject.NULL : fields[3].trim());
+            return;
+        }
+        var match = PROGRESS.matcher(line);
+        if (match.find()) {
+            record.put("percent", Double.parseDouble(match.group(1))).put("speed", match.group(2)).put("eta", match.group(3));
+            record.put("status", Double.parseDouble(match.group(1)) == 100 && line.contains(" in ") ? "processing" : "downloading");
+        } else if (line.startsWith("[Merger]") || line.startsWith("[ExtractAudio]")) record.put("status", "processing");
     }
 
     private synchronized void updateStatus(long id, String status, String error) {

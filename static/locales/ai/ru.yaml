@@ -1672,6 +1672,7 @@ CommandPalette:
     Download Finished: Эта загрузка больше не выполняется
     Video: Сначала откройте видео
 Downloads:
+  Preparing: Подготовка…
   Export Failed: "Не удалось сохранить скачанный файл. Выберите папку загрузок с разрешением на запись и повторите попытку."
   Remove File Permanently Warning: "«{title}» будет удалено безвозвратно."
   Download Playlist: Скачать плейлист

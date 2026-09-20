@@ -1674,6 +1674,7 @@ CommandPalette:
     Download Finished: Deskarga hau ez dago martxan
     Video: Ireki bideo bat lehenik
 Downloads:
+  Preparing: Prestatzen…
   Export Failed: "Ezin izan da deskargatutako fitxategia gorde. Aukeratu idazteko baimena duen deskarga-karpeta bat eta saiatu berriro."
   Remove File Permanently Warning: "Honek \"{title}\" behin betiko ezabatuko du."
   Download: Deskargatu

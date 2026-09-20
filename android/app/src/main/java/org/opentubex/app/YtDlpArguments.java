@@ -11,7 +11,7 @@ final class YtDlpArguments {
     // Restrict the bridge to media options. yt-dlp also accepts code execution,
     // arbitrary file access and abbreviated/short options, which must not cross it.
     private static final List<String> FLAGS = asList(
-        "--no-playlist", "--yes-playlist", "--no-warnings", "--no-progress", "--ignore-no-formats-error",
+        "--no-simulate", "--no-playlist", "--yes-playlist", "--no-warnings", "--no-progress", "--ignore-no-formats-error",
         "--write-auto-subs", "--write-subs", "--extract-audio", "--skip-download", "--no-quiet",
         "--split-chapters", "--embed-subs", "--embed-thumbnail", "--embed-metadata", "--embed-chapters",
         "--no-overwrites", "--force-keyframes-at-cuts", "--flat-playlist", "--dump-single-json",
@@ -29,7 +29,7 @@ final class YtDlpArguments {
         "--playlist-end", "--playlist-start", "--playlist-items", "--socket-timeout", "--retries",
         "--fragment-retries", "--concurrent-fragments", "--limit-rate", "--sleep-interval",
         "--max-sleep-interval", "--sleep-requests", "--geo-bypass-country", "--user-agent",
-        "--referer", "--add-headers", "--proxy", "--trim-filenames"
+        "--progress-template", "--referer", "--add-headers", "--proxy", "--trim-filenames"
     );
 
     static List<String> validate(JSONArray input) {

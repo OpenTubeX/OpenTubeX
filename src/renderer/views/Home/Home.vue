@@ -876,6 +876,7 @@ function downloadStatus(download) {
     case 'queued': return t('Downloads.Queued')
     case 'paused': return t('Downloads.Paused')
     case 'pausing': return t('Downloads.Pausing')
+    case 'preparing': return t('Downloads.Preparing')
     case 'downloading': return t('Downloads.Downloading')
     case 'processing': return t('Downloads.Processing')
     default: return t('Downloads.Download Complete')

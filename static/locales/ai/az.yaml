@@ -1672,6 +1672,7 @@ CommandPalette:
     Download Finished: Bu endirmə artıq davam etmir
     Video: Əvvəlcə video açın
 Downloads:
+  Preparing: Hazırlanır…
   Export Failed: Endirilmiş fayl saxlanıla bilmədi. Yazıla bilən endirmə qovluğu seçib yenidən cəhd edin.
   Remove File Permanently Warning: Bu, "{title}" faylını həmişəlik siləcək.
   Download: Endir
