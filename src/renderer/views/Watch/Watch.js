@@ -4365,14 +4365,19 @@ export default defineComponent({
       // otherwise save a spurious ~1 second resume point. Only persist progress
       // for tabs the user has actually presented.
       if (!this.isCurrentlyPresented() || !this.hasBeenPresented) { return }
-      if (!this.$refs.player?.hasLoaded) { return }
-      // Shaka can finish loading before it seeks to the resume point. Saving
-      // the media element's initial zero in that gap would erase progress.
-      if (!this.$refs.player.hasPlaybackPosition) { return }
+      if (this.playerTeardownInProgress) { return }
+      const player = this.$refs.player
+      // A seek establishes a position before its media segment finishes loading.
+      // Save that position, but never the initial zero before playback or a seek.
+      if (!player?.hasPlaybackPosition) { return }
 
       const currentTime = this.shortsPlaybackCompleted && this.watchedProgressSavingEnabled
         ? this.videoLengthSeconds
-        : this.getWatchedProgress()
+        : player.getCurrentTime()
+      if (!this.historyEntryExists) {
+        this.addToHistory(currentTime)
+        return
+      }
       const payload = {
         videoId: this.videoId,
         watchProgress: currentTime

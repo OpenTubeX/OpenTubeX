@@ -86,3 +86,73 @@ for (const position of [0, 12]) {
     await expect.poll(() => savedProgress(app)).toBe(position)
   })
 }
+
+for (const exit of ['navigate', 'close tab']) {
+  test(`retains successive seeks after reopening with ${exit}`, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    for (const position of [12, 15]) {
+      if (exit === 'close tab') await page.keyboard.press('Control+t')
+      const video = await openMockedVideo(page)
+      await video.evaluate((element, seconds) => {
+        element.pause()
+        return new Promise(resolve => {
+          element.addEventListener('seeked', resolve, { once: true })
+          element.currentTime = seconds
+        })
+      }, position)
+      if (exit === 'navigate') {
+        await page.locator(sel.sideNavLink('history')).first().evaluate(element => element.click())
+        await expect(page).toHaveURL(/#\/history/)
+      } else {
+        await page.keyboard.press('Control+w')
+        await expect(video).toHaveCount(0)
+      }
+      await expect.poll(() => savedProgress(app)).toBe(position)
+    }
+    const reopened = await openMockedVideo(page)
+    await expect.poll(() => reopened.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(15)
+  })
+}
+
+test('persists the latest seek when quitting the desktop app', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => {
+    element.pause()
+    return new Promise(resolve => {
+      element.addEventListener('seeked', resolve, { once: true })
+      element.currentTime = 15
+    })
+  })
+  await app.electronApp.close()
+  expect(await savedProgress(app)).toBe(15)
+})
+
+for (const existing of [true, false]) {
+  test(`saves a seek before the first media data loads with ${existing ? 'existing' : 'new'} history`, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    if (!existing) {
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('removeAllHistory'))
+    }
+    await page.locator(sel.sideNavLink('history')).first().evaluate(element => element.click())
+    await expect(page).toHaveURL(/#\/history/)
+    await page.evaluate(backSelector => {
+      document.addEventListener('loadedmetadata', event => {
+        const video = event.target
+        video.addEventListener('seeking', () => {
+          // Let the player's seeking listener establish the position before
+          // leaving, without waiting for seeked or any media data.
+          queueMicrotask(() => document.querySelector(backSelector).click())
+        }, { once: true })
+        video.currentTime = 15
+      }, { capture: true, once: true })
+    }, sel.backButton)
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect.poll(() => savedProgress(app)).toBe(15)
+    const entry = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById.jNQXAC9IVRw)
+    expect(entry.title).toBeTruthy()
+    expect(entry.lengthSeconds).toBeGreaterThan(0)
+    await expect(page).toHaveURL(/#\/history/)
+  })
+}

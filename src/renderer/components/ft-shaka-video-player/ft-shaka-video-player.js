@@ -11058,6 +11058,7 @@ export default defineComponent({
           // still arrive from the media element in that window, so stop handlers
           // from querying player state as soon as the format switch begins.
           hasLoaded.value = false
+          hasPlaybackPosition.value = false
         }
 
         const {
@@ -11192,6 +11193,7 @@ export default defineComponent({
       cancelPendingVolumeUserSet()
       fullWindowAnimation?.cancel()
       hasLoaded.value = false
+      hasPlaybackPosition.value = false
       closeFullscreenMetadata()
       closeFullscreenTranscript()
       closeFullscreenSponsorBlock()
@@ -11397,6 +11399,7 @@ export default defineComponent({
       // The media element can emit one final timeupdate while Shaka is being
       // destroyed, after its internal manifest has already been cleared.
       hasLoaded.value = false
+      hasPlaybackPosition.value = false
 
       // Shaka clears the video's intrinsic dimensions before this component
       // unmounts. Keep its ratio and restore the poster so recovery doesn't
