@@ -47,9 +47,17 @@ for (const [loaded, loading] of [[false, false], [true, false], [false, true]]) 
     let change
     let setups = 0
     let schedules = 0
-    vm.runInNewContext(source.slice(start, end), {
-      watch: (_source, callback) => { change = callback }, useSponsorBlock: ref(false),
-      sponsorBlockSegmentsLoaded: loaded, sponsorBlockInfoLoading: ref(loading),
+    const restored = []
+    const helperStart = source.indexOf('    function syncSponsorBlockPlaybackState()')
+    const helper = source.slice(helperStart, source.indexOf('    async function refreshSponsorBlockInfo()', helperStart))
+    vm.runInNewContext(`${helper}\n${source.slice(start, end)}`, {
+      watch: (_source, callback) => { change = callback }, useSponsorBlock: ref(true),
+      sponsorBlockLoadedVideoId: loaded ? 'video' : null, sponsorBlockInfoLoading: ref(loading),
+      props: { videoId: 'video', sponsorBlockAutoSkipDisabled: false },
+      video: ref({ currentTime: 42, paused: true }), sponsorBlockSegments: [{}], canSeek: () => true,
+      syncPromptSponsorBlockSegments: time => restored.push(['prompt', time]),
+      updateSponsorBlockHighlightState: time => restored.push(['highlight', time]),
+      syncSponsorBlockMuteSegments: (time, enabled) => restored.push(['mute', time, enabled]),
       setupSponsorBlock: () => { setups++ }, scheduleSponsorBlockSkip() { schedules++ },
       closeSponsorBlockInfo() {}, sponsorBlockMuteController: { reset() {} },
       clearSponsorBlockMuteSegments() {}, cancelSponsorBlockSkipSchedule() {},
@@ -57,5 +65,58 @@ for (const [loaded, loading] of [[false, false], [true, false], [false, true]]) 
     change(true)
     assert.equal(setups, loaded || loading ? 0 : 1)
     assert.equal(schedules, loaded ? 1 : 0)
+    assert.deepEqual(restored, loaded ? [['prompt', 42], ['highlight', 42], ['mute', 42, true]] : [])
   })
 }
+
+for (const nextVideoId of ['first', 'second']) {
+  test(`a stale SponsorBlock response cannot finish the current request for ${nextVideoId}`, async () => {
+    const start = source.indexOf('    async function setupSponsorBlock() {')
+    const end = source.indexOf('    async function refreshSponsorBlockInfo()', start)
+    const requests = []
+    const props = { videoId: 'first' }
+    const loading = ref(false)
+    const harness = vm.runInNewContext(`
+      let sponsorBlockLoadedVideoId = null;
+      let sponsorBlockRequestGeneration = 0;
+      ${source.slice(start, end)}
+      ({ setupSponsorBlock, loaded: () => sponsorBlockLoadedVideoId })
+    `, {
+      props, sponsorBlockInfoLoading: loading, sponsorBlockInfoSegments: ref([]),
+      hasSponsorBlockMusicOfftopicSegment: ref(false), activeSponsorBlockHighlightSegment: ref(null),
+      clearSponsorBlockNotFoundRefetchTimeout() {}, cancelSponsorBlockSkipSchedule() {},
+      clearSponsorBlockMuteSegments() {}, updateSponsorBlockHighlightState() {}, emitSponsorBlockInfoState() {},
+      getSponsorBlockSegments: () => new Promise(resolve => requests.push(resolve)),
+      SPONSORBLOCK_INFO_CATEGORIES: [], SPONSORBLOCK_INFO_ACTION_TYPES: [], ui: null, player: null,
+    })
+    const first = harness.setupSponsorBlock()
+    props.videoId = nextVideoId
+    const second = harness.setupSponsorBlock()
+    requests[0]({ segments: [], averageDuration: 0 })
+    await first
+    assert.equal(loading.value, true, 'the stale response must not finish the newer pending request')
+    assert.equal(harness.loaded(), null)
+    requests[1]({ segments: [], averageDuration: 0 })
+    await second
+    assert.equal(loading.value, false)
+    assert.equal(harness.loaded(), nextVideoId)
+  })
+}
+
+test('temporary offline cleanup preserves manual SponsorBlock mute decisions', () => {
+  const start = source.indexOf('    function clearSponsorBlockMuteSegments(')
+  const end = source.indexOf('\n    }', start) + '\n    }'.length
+  const manuallyMuted = new Set(['manual'])
+  const doNotMute = new Set(['unmuted'])
+  const clear = vm.runInNewContext(`${source.slice(start, end)}\nclearSponsorBlockMuteSegments`, {
+    manuallyMutedSponsorBlockSegments: manuallyMuted, sponsorBlockDoNotMuteSegments: doNotMute,
+    notifiedSponsorBlockMuteSegments: new Set(), skippedSponsorBlockSegments: ref([]),
+    sponsorBlockMuteController: { setSourceActive() {} },
+  })
+  clear(true)
+  assert.equal(manuallyMuted.has('manual'), true)
+  assert.equal(doNotMute.has('unmuted'), true)
+  clear()
+  assert.equal(manuallyMuted.size, 0)
+  assert.equal(doNotMute.size, 0)
+})

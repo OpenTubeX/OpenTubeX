@@ -1932,7 +1932,8 @@ export default defineComponent({
      * }[]}
      */
     let sponsorBlockSegments = []
-    let sponsorBlockSegmentsLoaded = false
+    let sponsorBlockLoadedVideoId = null
+    let sponsorBlockRequestGeneration = 0
     const sponsorBlockInfoSegments = ref([])
     const sponsorBlockInfoOpen = ref(props.sponsorBlockInfoOpen)
     const sponsorBlockInfoLoading = ref(false)
@@ -2149,7 +2150,10 @@ export default defineComponent({
     }
 
     async function setupSponsorBlock() {
-      sponsorBlockSegmentsLoaded = false
+      const videoId = props.videoId
+      const generation = ++sponsorBlockRequestGeneration
+      const isCurrentRequest = () => generation === sponsorBlockRequestGeneration && videoId === props.videoId
+      sponsorBlockLoadedVideoId = null
       let segments
       let averageDuration = 0
       let refetchWhenNotFound = false
@@ -2173,18 +2177,22 @@ export default defineComponent({
       emitSponsorBlockInfoState()
       try {
         ({ segments, averageDuration } = await getSponsorBlockSegments(
-          props.videoId,
+          videoId,
           SPONSORBLOCK_INFO_CATEGORIES,
           SPONSORBLOCK_INFO_ACTION_TYPES
         ))
-        sponsorBlockSegmentsLoaded = true
+        if (!isCurrentRequest()) return
+        sponsorBlockLoadedVideoId = videoId
         refetchWhenNotFound = segments.length === 0
       } catch (e) {
+        if (!isCurrentRequest()) return
         console.error(e)
         segments = []
       } finally {
-        sponsorBlockInfoLoading.value = false
-        emitSponsorBlockInfoState()
+        if (isCurrentRequest()) {
+          sponsorBlockInfoLoading.value = false
+          emitSponsorBlockInfoState()
+        }
       }
 
       // check if the component is already getting destroyed
@@ -2209,7 +2217,11 @@ export default defineComponent({
       emitSponsorBlockInfoState()
 
       refreshSponsorBlockMarkers()
-      if (sponsorBlockSegments.length > 0 && canSeek()) {
+      syncSponsorBlockPlaybackState()
+    }
+
+    function syncSponsorBlockPlaybackState() {
+      if (useSponsorBlock.value && sponsorBlockSegments.length > 0 && canSeek()) {
         const currentTime = video.value?.currentTime ?? 0
         syncPromptSponsorBlockSegments(currentTime)
         updateSponsorBlockHighlightState(currentTime)
@@ -3217,9 +3229,11 @@ export default defineComponent({
       })
     }
 
-    function clearSponsorBlockMuteSegments() {
-      manuallyMutedSponsorBlockSegments.clear()
-      sponsorBlockDoNotMuteSegments.clear()
+    function clearSponsorBlockMuteSegments(preserveDecisions = false) {
+      if (!preserveDecisions) {
+        manuallyMutedSponsorBlockSegments.clear()
+        sponsorBlockDoNotMuteSegments.clear()
+      }
       notifiedSponsorBlockMuteSegments.clear()
       skippedSponsorBlockSegments.value
         .filter(segment => segment.isMute)
@@ -5581,6 +5595,9 @@ export default defineComponent({
     let mediaSessionStopped = false
 
     watch(() => props.videoId, () => {
+      sponsorBlockRequestGeneration++
+      sponsorBlockLoadedVideoId = null
+      sponsorBlockInfoLoading.value = false
       resetAbRepeat()
       repeatStatsTracker?.reset()
       syncRepeatStatsMode()
@@ -5632,10 +5649,10 @@ export default defineComponent({
       if (!enabled) {
         closeSponsorBlockInfo()
         sponsorBlockMuteController.reset()
-        clearSponsorBlockMuteSegments()
+        clearSponsorBlockMuteSegments(props.offline)
         cancelSponsorBlockSkipSchedule()
-      } else if (sponsorBlockSegmentsLoaded) {
-        scheduleSponsorBlockSkip()
+      } else if (sponsorBlockLoadedVideoId === props.videoId) {
+        syncSponsorBlockPlaybackState()
       } else if (!sponsorBlockInfoLoading.value) {
         setupSponsorBlock()
       }
@@ -11167,6 +11184,7 @@ export default defineComponent({
     // #region tear down
 
     onBeforeUnmount(() => {
+      sponsorBlockRequestGeneration++
       screenWakeBinding?.destroy()
       screenWakeBinding = null
       nativePlaybackCleanup?.()
