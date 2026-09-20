@@ -728,6 +728,22 @@ test.describe('without watch history', () => {
     await expectNoHistory(page)
   })
 
+  test('restores the no-history state after hiding the last positive seed channel', async ({ page }) => {
+    await page.evaluate(async record => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateEnableHomeRecommendations', true)
+      await store.dispatch('recordRecommendationEvent', { type: 'positive', video: record })
+    }, channelCandidate)
+    const backend = await mockCandidates(page)
+    backend.channelVideos = [channelCandidate]
+    backend.searchVideos = []
+    await goTo(page, 'home')
+    const section = recommendations(page)
+    await expect(section.locator('.recommendationEntry')).toHaveCount(1)
+    await section.getByRole('button', { name: 'Hide this channel: Linux Desktop Channel', exact: true }).click()
+    await expectNoHistory(page)
+  })
+
   test('explains how to get recommendations without making candidate requests', async ({ page }) => {
     const backend = await mockCandidates(page)
     await goTo(page, 'home')

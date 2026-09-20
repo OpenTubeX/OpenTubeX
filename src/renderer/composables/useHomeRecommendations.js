@@ -38,18 +38,16 @@ export function useHomeRecommendations(visible) {
     eligibleHistory.value.length > 0 || favorites.value.length > 0 || saved.value.length > 0 ||
     records.value.some(record => record.feedback === 'positive') || subscriptions.value.length > 0
   ))
+  // Dismissals affect the next ranking; channel blocks still hide cards immediately.
+  const visibleRanked = computed(() => ranked.value.filter(video => {
+    const record = store.state.recommendations.recommendationRecords[video.videoId]
+    return isVisible(video) && record?.feedback !== 'blockChannel' &&
+      !records.value.some(record => record.feedback === 'blockChannel' && record.authorId === video.authorId)
+  }))
   // Keep an existing feed usable when feedback removes its last positive seed.
   const hasHistory = computed(() => store.getters.getRememberHistory &&
-    (hasSeeds.value || ranked.value.some(isVisible)))
-  // Dismissals affect the next ranking; keep the current card available for feedback.
-  const recommendations = computed(() => enabled.value && hasHistory.value
-    ? ranked.value.filter(video => {
-        const record = store.state.recommendations.recommendationRecords[video.videoId]
-        return isVisible(video) &&
-      record?.feedback !== 'blockChannel' &&
-      !records.value.some(record => record.feedback === 'blockChannel' && record.authorId === video.authorId)
-      })
-    : [])
+    (hasSeeds.value || visibleRanked.value.length > 0))
+  const recommendations = computed(() => enabled.value && hasHistory.value ? visibleRanked.value : [])
 
   function isVisible(video) {
     return video != null && typeof video === 'object' &&
