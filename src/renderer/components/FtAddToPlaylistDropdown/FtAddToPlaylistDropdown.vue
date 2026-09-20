@@ -90,6 +90,7 @@ import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 const props = defineProps({
   belowPlayer: { type: Boolean, default: true },
+  forceSheet: { type: Boolean, default: false },
   videoData: {
     type: Object,
     required: true
@@ -97,9 +98,15 @@ const props = defineProps({
 })
 
 const { t } = useI18n()
-const phoneLayout = usePhoneLayout()
+const emit = defineEmits(['closed'])
+const compactLayout = usePhoneLayout()
+const phoneLayout = computed(() => props.forceSheet || compactLayout.value)
 const search = ref('')
-const closeDropdown = inject('closeIconDropdown', () => {})
+const closeIconDropdown = inject('closeIconDropdown', () => {})
+function closeDropdown() {
+  closeIconDropdown()
+  emit('closed')
+}
 const sheetOpen = ref(true)
 const listScroller = useTemplateRef('listScroller')
 const listContent = useTemplateRef('listContent')

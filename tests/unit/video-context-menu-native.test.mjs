@@ -52,6 +52,7 @@ function openMenu ({ playlist = false, electron = false, capacitor = false, medi
     titleForDisplay: { value: 'Test playlist' },
     playlistMenuItems: { value: [] },
     videoMenuOptions: { value: [{ label: 'Play Next', value: 'playNext', icon: ['fas', 'step-forward'] }] },
+    mobileThumbnailActions: { value: [] },
     openMobileContextActions: menu => mobileMenus.push(menu),
     videoContextMenuItems: { value: [{ label: 'Play Next', icon: ['fas', 'step-forward'], quickAction: true }] },
     event
@@ -105,7 +106,7 @@ for (const platform of [{}, { capacitor: true }, { electron: true }]) {
 
 test('Android video menus share a public video URL and omit private playlist IDs', async () => {
   const start = source.indexOf('const videoContextMenuItems = computed(')
-  const menuSource = source.slice(start, source.indexOf('const openMobileContextActions', start))
+  const menuSource = source.slice(start, source.indexOf('const phoneLayout', start))
   for (const publicPlaylist of [true, false]) {
     const shared = []
     const context = {
@@ -150,6 +151,7 @@ for (const { capacitor, phone } of [
       cancelMenuHold () {},
       title: { value: 'Test video' },
       videoContextMenuItems: items,
+      mobileThumbnailActions: { value: [] },
       openMobileContextActions: menu => mobileMenus.push(menu),
       videoMenuButton: { value: { $el: { querySelector: () => ({
         focus () {},
