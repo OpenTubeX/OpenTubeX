@@ -105,8 +105,8 @@ importers:
         specifier: ^4.1.2
         version: 4.1.2
       '@vot.js/core':
-        specifier: ^3.0.3
-        version: 3.0.3(typescript@6.0.3)
+        specifier: ^3.0.4
+        version: 3.0.4(typescript@6.0.3)
       autolinker:
         specifier: ^4.1.5
         version: 4.1.5
@@ -199,8 +199,8 @@ importers:
         specifier: ^1.2.10
         version: 1.2.10
       '@iconify-json/simple-icons':
-        specifier: ^1.2.95
-        version: 1.2.95
+        specifier: ^1.2.96
+        version: 1.2.96
       '@iconify/utils':
         specifier: ^3.1.5
         version: 3.1.7
@@ -340,8 +340,8 @@ importers:
         specifier: ^6.0.0
         version: 6.0.0(supports-color@10.2.2)(tslib@2.8.1)(webpack-cli@7.2.3)(webpack@5.110.3)
       yaml:
-        specifier: ^2.9.0
-        version: 2.9.0
+        specifier: ^2.9.1
+        version: 2.9.1
 
 packages:
 
@@ -1174,8 +1174,8 @@ packages:
   '@iconify-json/ri@1.2.10':
     resolution: {integrity: sha512-WWMhoncVVM+Xmu9T5fgu2lhYRrKTEWhKk3Com0KiM111EeEsRLiASjpsFKnC/SrB6covhUp95r2mH8tGxhgd5Q==}
 
-  '@iconify-json/simple-icons@1.2.95':
-    resolution: {integrity: sha512-QwWgcoiL+eNCD38QM0OStFVFoOgDvzeHrcwMAvATvcFl0VvMEtED92qp3K3juS0H6RZ9BGUlgq9mODPwNWkjJg==}
+  '@iconify-json/simple-icons@1.2.96':
+    resolution: {integrity: sha512-/FmCYo/H5rIywTLV/P6OYsr0rg/31vuc8jYq0QnkOZl6m7PWIs+h5oAnSTT2cqRhOsMaKqbXcdkka6tnZ1WiUA==}
 
   '@iconify/types@2.0.0':
     resolution: {integrity: sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==}
@@ -1956,14 +1956,14 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@vot.js/core@3.0.3':
-    resolution: {integrity: sha512-jMY+edEF5i9i0k9To439vrvnZY6Pw6+ikeo+z5NnXZYd8MAqkhOkwPr8rjUh1issi8ov3PrOpaifvDJxDwQbNA==}
+  '@vot.js/core@3.0.4':
+    resolution: {integrity: sha512-xGKvTOPBD9XedyyAvZ98si4weOlr7/qfetXOj95RfkDDDdDQkXum8MYXjnnMmMSEANwRnLH4V7hdewiumFUpMw==}
     engines: {node: '>=18'}
     peerDependencies:
       typescript: ^6.0.0
 
-  '@vot.js/shared@3.0.3':
-    resolution: {integrity: sha512-jfHyzduppiWnundB3pXsMfNayGeWt37ZkWFazwf0rfvf/9Arnu7gTaeY50jafo4cytqDoYQOrO69fV8U+g9xHQ==}
+  '@vot.js/shared@3.0.4':
+    resolution: {integrity: sha512-b1ozQ7nH92vR+TEoT0eV9OXX3OErNFCl8D1Q6moeyXsgSzI4iOy7fzOjsKiAkocXNKTtFsJTMypUwPAHyjPuEQ==}
     engines: {node: '>=18'}
     peerDependencies:
       typescript: ^6.0.0
@@ -5685,9 +5685,10 @@ packages:
     resolution: {integrity: sha512-1zo9KRfp6vIAXBEhWAz09ex3hUwh3T+/6dGbGteHvNseA0Uk4FgQnPES55klZ6cDzSy9FpgKS0D/CoLUvCCj4w==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
 
-  yaml@2.9.0:
-    resolution: {integrity: sha512-2AvhNX3mb8zd6Zy7INTtSpl1F15HW6Wnqj0srWlkKLcpYl/gMIMJiyuGq2KeI2YFxUPjdlB+3Lc10seMLtL4cA==}
+  yaml@2.9.1:
+    resolution: {integrity: sha512-3NxN8+78OdzbT7C/WjGsyfPAtJaN3FNDsWxv7Y7mcDsT/oOmgW8BpyQQFFBnvZE3j9Y2Sdz1ULFLezL7Eb2yFw==}
     engines: {node: '>= 14.6'}
+    hasBin: true
 
   yargs-parser@18.1.3:
     resolution: {integrity: sha512-o50j0JeToy/4K6OZcaQmW6lyXXKhq7csREXcDwk2omFPJEwUNOVtJKvmDr9EI1fAJZUyZcRF7kxGBWmRXudrCQ==}
@@ -6674,7 +6675,7 @@ snapshots:
     dependencies:
       '@iconify/types': 2.0.0
 
-  '@iconify-json/simple-icons@1.2.95':
+  '@iconify-json/simple-icons@1.2.96':
     dependencies:
       '@iconify/types': 2.0.0
 
@@ -7564,12 +7565,12 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.12.2':
     optional: true
 
-  '@vot.js/core@3.0.3(typescript@6.0.3)':
+  '@vot.js/core@3.0.4(typescript@6.0.3)':
     dependencies:
-      '@vot.js/shared': 3.0.3(typescript@6.0.3)
+      '@vot.js/shared': 3.0.4(typescript@6.0.3)
       typescript: 6.0.3
 
-  '@vot.js/shared@3.0.3(typescript@6.0.3)':
+  '@vot.js/shared@3.0.4(typescript@6.0.3)':
     dependencies:
       '@bufbuild/protobuf': 2.14.1
       typescript: 6.0.3
@@ -7606,7 +7607,7 @@ snapshots:
       '@vue/shared': 3.5.42
       estree-walker: 2.0.2
       magic-string: 0.30.21
-      postcss: 8.5.26
+      postcss: 8.5.28
       source-map-js: 1.2.1
 
   '@vue/compiler-ssr@3.5.42':
@@ -8756,7 +8757,7 @@ snapshots:
       reserved-identifiers: 1.2.0
       semver: 7.8.5
       strip-indent: 4.1.1
-      yaml: 2.9.0
+      yaml: 2.9.1
 
   eslint-plugin-vue@10.11.0(@stylistic/eslint-plugin@5.10.0)(eslint@10.10.0)(vue-eslint-parser@10.4.1):
     dependencies:
@@ -11457,9 +11458,9 @@ snapshots:
   yaml-eslint-parser@2.1.0:
     dependencies:
       eslint-visitor-keys: 5.0.1
-      yaml: 2.9.0
+      yaml: 2.9.1
 
-  yaml@2.9.0: {}
+  yaml@2.9.1: {}
 
   yargs-parser@18.1.3:
     dependencies:
