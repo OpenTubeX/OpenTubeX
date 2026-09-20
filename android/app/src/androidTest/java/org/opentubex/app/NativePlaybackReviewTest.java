@@ -17,7 +17,7 @@ public class NativePlaybackReviewTest {
         try (androidx.test.core.app.ActivityScenario<MainActivity> scenario =
                 androidx.test.core.app.ActivityScenario.launch(MainActivity.class)) {
             scenario.onActivity(activity -> {
-                // Model a PiP exit that happened while the renderer was suspended.
+                // Leave a stale PiP flag, as if the exit callback was missed while suspended.
                 activity.onPictureInPictureModeChanged(true, activity.getResources().getConfiguration());
             });
             scenario.moveToState(androidx.lifecycle.Lifecycle.State.CREATED);

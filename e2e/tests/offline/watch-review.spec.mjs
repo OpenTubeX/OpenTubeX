@@ -33,6 +33,18 @@ test('downloaded playback without metadata hides unavailable channel actions and
   await expect(page.locator('.watchVideo .ftSubscribeButton')).toHaveCount(0)
 })
 
+test('offline recommendations hidden by preferences do not leave an empty card', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const watch = await watchViewHandle(page)
+  await watch.evaluate(async vm => {
+    await vm.$store.dispatch('updateForbiddenTitles', JSON.stringify(['blocked']))
+    vm.localFilePlayback = true
+    vm.recommendedVideos = [{ videoId: 'blocked0001', title: 'Blocked video', author: 'Channel', authorId: 'channel-id' }]
+  })
+  await expect(page.locator('.watchVideoRecommendations')).toHaveCount(0)
+})
+
 test('Android native controls leave the actual phone search input and suggestions uncovered', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)

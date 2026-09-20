@@ -347,11 +347,10 @@ $watched-transition-duration: 0.5s;
       }
 
       .videoInfo {
+        // The outer infoLine clips wrapped separators, including the channel dot.
         overflow: visible;
-        column-gap: 0.75em;
-        display: flex;
+        row-gap: 0;
         flex: 0 0 auto;
-        flex-wrap: wrap;
         inline-size: max-content;
         max-inline-size: 100%;
         position: relative;

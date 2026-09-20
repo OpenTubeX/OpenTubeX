@@ -25,6 +25,7 @@ public final class YtDlpDownloadWorker extends Worker {
     }
 
     @NonNull @Override public Result doWork() {
+        OpenTubeXNotificationChannels.createAll(getApplicationContext());
         boolean foreground = AppVisibility.isVisible();
         long started = android.os.SystemClock.elapsedRealtime();
         java.util.function.Consumer<org.json.JSONObject> progress = record -> {
@@ -66,7 +67,6 @@ public final class YtDlpDownloadWorker extends Worker {
 
     private Notification notification(org.json.JSONObject record) {
         Context context = getApplicationContext();
-        OpenTubeXNotificationChannels.createAll(context);
         String channelId = OpenTubeXNotificationChannels.DOWNLOADS_ID;
         PendingIntent open = PendingIntent.getActivity(context, 0,
             new Intent(context, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP),

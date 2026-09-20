@@ -41,5 +41,9 @@ public class OpenTubeXNotificationChannelsTest {
         assertFalse(channels[0].showBadge);
         assertFalse(channels[1].showBadge);
         assertTrue(channels[2].showBadge);
+        assertEquals(NotificationManager.IMPORTANCE_LOW, channels[3].importance);
+        assertEquals(R.string.notification_channel_downloads_name, channels[3].nameResource);
+        assertEquals(R.string.notification_channel_downloads_description, channels[3].descriptionResource);
+        assertFalse(channels[3].showBadge);
     }
 }
