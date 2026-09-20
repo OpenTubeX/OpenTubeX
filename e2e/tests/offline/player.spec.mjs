@@ -2374,6 +2374,7 @@ for (const uiScale of [100, 125]) {
       await expect(player).toHaveClass(/scrollMiniPlayer/)
       const replay = player.locator('.scrollMiniPlayPause')
       await expect(replay).not.toHaveClass(/isHidden/)
+      await expect(replay).toHaveAccessibleName('Replay')
       await expect(replay.locator('[data-icon="replay"] svg')).toBeVisible()
       await replay.click()
       await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
