@@ -188,6 +188,8 @@ User Playlists:
     This playlist could not be loaded.: 无法加载此播放列表。
     More videos could not be loaded.: 无法加载更多视频。
 History:
+  Repair Use Cookies: "使用已配置的 yt-dlp Cookie"
+  Repair Cookies Hint: "需要检查超过 500 个视频。请在 yt-dlp 设置中配置 Cookie 并在此处启用，以降低请求被限流的风险。"
   Repair Description: "在导入历史记录后，或视频信息缺失、被错误标记为 LIVE 时使用。"
   Repair Details: "补全缺失的标题、频道和发布日期，并检查时长和 LIVE 标签。观看进度和已观看状态保持不变。"
   Repair Notice: "历史记录较多时可能需要一些时间。失败的请求会自动重试。已删除或私密视频的信息可能仍不完整。"

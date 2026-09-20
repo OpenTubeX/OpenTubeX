@@ -1,3 +1,4 @@
+import { historyRepairYtDlpArguments, historyRepairYtDlpError } from '../historyRepair'
 import {
   buildYtDlpDownloadArguments, ID_REGEX, PLAYLIST_ID_REGEX, DOWNLOAD_TITLE_FILENAME_BYTE_LIMIT,
   SUBTITLE_FORMATS, MAX_LOCAL_PLAYLIST_VIDEOS, DENIED_CUSTOM_ARGS, AUTOMATIC_NUMBER_LIMITS,
@@ -1626,6 +1627,29 @@ export async function handleYtDlpGetPlaybackInfo(
     captions,
     captionTranslations,
     formats: formats.filter(format => format.protocol !== 'mhtml').map(mapPlaybackFormat)
+  }
+}
+
+export async function handleYtDlpGetHistoryMetadata(event, videoId) {
+  if (!isOpenTubeXUrl(event.senderFrame.url) || typeof videoId !== 'string' || !ID_REGEX.test(videoId)) return null
+  const { source, executable } = await resolveExecutable('ytDlpSource', 'ytDlpPath', 'yt-dlp')
+  if (source === 'managed' && !existsSync(executable)) {
+    const result = await downloadManagedYtDlp()
+    if ('error' in result) return { error: result.error }
+  }
+  const args = historyRepairYtDlpArguments()
+  const authenticationError = await pushYtDlpPlaybackAuthenticationArguments(args)
+  if (authenticationError !== null) return { error: authenticationError }
+  await pushProxyArgument(args)
+  args.push(`https://www.youtube.com/watch?v=${videoId}`)
+  try {
+    const { stdout } = await execFileAsync(executable, args, {
+      timeout: PLAYBACK_INFO_TIMEOUT, maxBuffer: PLAYBACK_INFO_MAX_BUFFER, windowsHide: true
+    })
+    return JSON.parse(stdout)
+  } catch (error) {
+    // Do not expose cookie paths or signed URLs from stderr to the renderer.
+    return historyRepairYtDlpError(error.stderr)
   }
 }
 

@@ -188,6 +188,8 @@ User Playlists:
     This playlist could not be loaded.: A lejátszási lista nem tölthető be.
     More videos could not be loaded.: Nem tölthető be több videó.
 History:
+  Repair Use Cookies: "Beállított yt-dlp-sütik használata"
+  Repair Cookies Hint: "Több mint 500 videót kell ellenőrizni. Állítsa be a sütiket a yt-dlp beállításaiban, és engedélyezze őket itt a kérések korlátozásának kisebb kockázatáért."
   Repair Description: "Használd az előzmények importálása után, illetve ha a videók adatai hiányosak, vagy téves LIVE címkét kaptak."
   Repair Details: "Pótolja a hiányzó címeket, csatornákat és közzétételi dátumokat, és ellenőrzi az időtartamokat és a LIVE címkéket. A lejátszási pozíció és a megtekintési állapot változatlan marad."
   Repair Notice: "A nagy előzmények feldolgozása időbe telhet. A sikertelen kéréseket automatikusan újrapróbálja. A törölt vagy privát videók adatai hiányosak maradhatnak."

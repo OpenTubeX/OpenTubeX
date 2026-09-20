@@ -184,6 +184,18 @@
           <p class="repairDetails">
             {{ t('History.Repair Details') }}
           </p>
+          <FtCheckboxList
+            v-if="repairCookiesConfigured"
+            v-model="repairOptions"
+            :labels="[t('History.Repair Use Cookies')]"
+            :values="['cookies']"
+          />
+          <p
+            v-if="showRepairCookieHint"
+            class="repairNotice"
+          >
+            {{ t('History.Repair Cookies Hint') }}
+          </p>
           <p class="repairNotice">
             {{ t('History.Repair Notice') }}
           </p>
@@ -282,6 +294,7 @@ import { isNavigationFailure, NavigationFailureType, useRoute, useRouter } from 
 
 import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrapper.vue'
 import FtButton from '../../components/FtButton/FtButton.vue'
+import FtCheckboxList from '../../components/FtCheckboxList/FtCheckboxList.vue'
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
@@ -292,6 +305,7 @@ import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store'
 
+import { needsHistoryRepair } from '../../../historyRepair'
 import { canMarkHistoryEntryAsWatched } from '../../helpers/history'
 import { historyRepairState, startHistoryRepair, cancelHistoryRepair } from '../../helpers/historyRepair'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
@@ -317,6 +331,19 @@ const searchBar = useTemplateRef('searchBar')
 const historyCleanupPeriod = ref('30')
 const customHistoryCleanupDays = ref('')
 const showRepairPrompt = ref(false)
+const repairOptions = ref([])
+const repairCookiesConfigured = computed(() => {
+  if (!process.env.IS_ELECTRON && !process.env.IS_CAPACITOR) return false
+  const getters = store.getters
+  return getters.getYtDlpPlaybackAuthMode === 'file'
+    ? !!getters.getYtDlpPlaybackCookiesPath?.trim()
+    : process.env.IS_ELECTRON && getters.getYtDlpPlaybackAuthMode === 'browser' && !!getters.getYtDlpPlaybackCookiesBrowser?.trim()
+})
+const repairUseCookies = computed(() => repairCookiesConfigured.value && repairOptions.value.includes('cookies'))
+const showRepairCookieHint = computed(() => !repairUseCookies.value && store.getters.getHistoryCacheSorted.filter(needsHistoryRepair).length > 500)
+watch(showRepairPrompt, open => {
+  if (open) repairOptions.value = []
+})
 const repairAction = useTemplateRef('repairAction')
 const repairCancel = useTemplateRef('repairCancel')
 const showMarkAllPrompt = ref(false)
@@ -336,7 +363,7 @@ const repairProgressValue = computed(() => historyRepairState.running && history
 
 function beginHistoryRepair() {
   showRepairPrompt.value = false
-  startHistoryRepair()
+  startHistoryRepair({ useCookies: repairUseCookies.value })
   nextTick(() => repairCancel.value?.$el.focus({ preventScroll: true }))
 }
 

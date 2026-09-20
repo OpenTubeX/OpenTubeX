@@ -66,6 +66,38 @@ export function parseHistoryRepairPlayer(response, videoId) {
   }
 }
 
+const HISTORY_REPAIR_OUTPUT_TEMPLATE = '%(.{id,title,channel,uploader,channel_id,description,duration,timestamp,upload_date,is_live,live_status})j'
+
+export function historyRepairYtDlpArguments() {
+  return ['--no-playlist', '--no-warnings', '--no-progress', '--socket-timeout', '15', '--skip-download', '--ignore-no-formats-error', '--print', HISTORY_REPAIR_OUTPUT_TEMPLATE]
+}
+
+export function historyRepairYtDlpError(message) {
+  // Share sanitized errors across native adapters without exposing cookie paths.
+  return { error: /429|too many requests|rate.?limit|confirm.*not a bot/i.test(message ?? '') ? 'rate-limit' : 'History metadata unavailable' }
+}
+
+export function parseHistoryRepairYtDlp(info, videoId) {
+  if (info?.error) {
+    if (info.error === 'rate-limit') {
+      throw new HistoryRepairRateLimitError('YouTube rate limited history repair')
+    }
+    throw new Error('yt-dlp could not load history metadata')
+  }
+  if (info?.id !== videoId) throw new HistoryRepairUnavailableError('Video metadata unavailable')
+  const uploadDate = /^(\d{4})(\d{2})(\d{2})$/.exec(info.upload_date ?? '')
+  return {
+    title: info.title,
+    author: info.channel || info.uploader,
+    authorId: info.channel_id,
+    description: info.description,
+    lengthSeconds: Number(info.duration),
+    published: positive(info.timestamp) ? Number(info.timestamp) * 1000 : uploadDate ? Date.parse(`${uploadDate[1]}-${uploadDate[2]}-${uploadDate[3]}`) : NaN,
+    isLive: info.is_live === true || info.live_status === 'is_live',
+    isUpcoming: info.live_status === 'is_upcoming',
+  }
+}
+
 function waitForRepair(milliseconds, signal) {
   return new Promise(resolve => {
     if (signal.aborted) {

@@ -197,6 +197,8 @@ User Playlists:
     Toast:
       Video(s) added to {playlistCount} playlists: Videoen blev føjet til 1 playliste | Videoerne blev føjet til {playlistCount} playlister
 History:
+  Repair Use Cookies: "Brug konfigurerede yt-dlp-cookies"
+  Repair Cookies Hint: "Over 500 videoer skal kontrolleres. Konfigurer cookies i yt-dlp-indstillingerne, og aktivér dem her for at mindske risikoen for begrænsning af forespørgsler."
   Repair Description: "Brug dette efter import af historik, eller når videoer mangler oplysninger eller har en forkert LIVE-markering."
   Repair Details: "Udfylder manglende titler, kanaler og udgivelsesdatoer og kontrollerer varigheder og LIVE-markeringer. Din afspilningsposition og status som set forbliver uændret."
   Repair Notice: "Stor historik kan tage tid. Mislykkede anmodninger forsøges igen automatisk. Slettede eller private videoer kan forblive ufuldstændige."

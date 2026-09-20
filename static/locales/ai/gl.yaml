@@ -192,6 +192,8 @@ User Playlists:
     This playlist could not be loaded.: Non se puido cargar esta lista de reprodución.
     More videos could not be loaded.: Non se puideron cargar máis vídeos.
 History:
+  Repair Use Cookies: "Usar as cookies configuradas de yt-dlp"
+  Repair Cookies Hint: "Hai que comprobar máis de 500 vídeos. Configura as cookies nos axustes de yt-dlp e actívaas aquí para reducir o risco de limitación de solicitudes."
   Repair Description: "Úsao despois de importar o historial ou cando falten datos dos vídeos ou teñan unha etiqueta LIVE incorrecta."
   Repair Details: "Completa os títulos, canles e datas de publicación que faltan e comproba as duracións e etiquetas LIVE. O progreso de reprodución e o estado de visto non cambian."
   Repair Notice: "Os historiais grandes poden levar tempo. As solicitudes fallidas repítense automaticamente. Os vídeos eliminados ou privados poden quedar incompletos."

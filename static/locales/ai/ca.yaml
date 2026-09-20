@@ -314,6 +314,8 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: S'ha creat correctament la llista de reproducció {playlistName}.
       There was an issue with creating the playlist.: Hi ha hagut un problema en crear la llista de reproducció.
 History:
+  Repair Use Cookies: "Utilitza les galetes configurades de yt-dlp"
+  Repair Cookies Hint: "Cal comprovar més de 500 vídeos. Configureu les galetes als paràmetres de yt-dlp i activeu-les aquí per reduir el risc de limitació de peticions."
   Repair Description: "Feu-ho servir després d'importar l'historial, o quan faltin dades dels vídeos o tinguin una etiqueta LIVE incorrecta."
   Repair Details: "Completa els títols, canals i dates de publicació que falten, i comprova la durada i les etiquetes LIVE. El progrés de reproducció i l'estat de visualització es mantenen."
   Repair Notice: "Els historials grans poden trigar. Les sol·licituds fallides es reintenten automàticament. Els vídeos suprimits o privats poden quedar incomplets."

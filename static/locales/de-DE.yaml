@@ -284,6 +284,8 @@ User Playlists:
   Choose Image: Bild auswählen
   Use Bookmark Icon: Lesezeichensymbol verwenden
 History:
+  Repair Use Cookies: "Konfigurierte yt-dlp-Cookies verwenden"
+  Repair Cookies Hint: "Mehr als 500 Videos müssen geprüft werden. Konfiguriere Cookies in den yt-dlp-Einstellungen und aktiviere sie hier, um das Risiko einer Anfragelimitierung zu verringern."
   Repair Description: "Nutze diese Funktion nach einem Verlaufsimport oder wenn Videodetails fehlen oder Videos fälschlich als LIVE angezeigt werden."
   Repair Details: "Ergänzt fehlende Titel, Kanalangaben und Veröffentlichungsdaten und prüft die Dauer sowie LIVE-Markierungen. Dein Wiedergabefortschritt und Gesehen-Status bleiben erhalten."
   Repair Notice: "Bei einem großen Verlauf kann das dauern. Fehlgeschlagene Anfragen werden automatisch wiederholt. Gelöschte oder private Videos bleiben möglicherweise unvollständig."

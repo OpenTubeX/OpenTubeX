@@ -188,6 +188,8 @@ User Playlists:
     This playlist could not be loaded.: Bu oynatma listesi yüklenemedi.
     More videos could not be loaded.: Daha fazla video yüklenemedi.
 History:
+  Repair Use Cookies: "Yapılandırılmış yt-dlp çerezlerini kullan"
+  Repair Cookies Hint: "500'den fazla videonun kontrol edilmesi gerekiyor. İstek sınırlaması riskini azaltmak için yt-dlp ayarlarında çerezleri yapılandırın ve burada etkinleştirin."
   Repair Description: "Geçmişi içe aktardıktan sonra veya videoların bilgileri eksikse ya da LIVE etiketi yanlışsa kullanın."
   Repair Details: "Eksik başlıkları, kanalları ve yayın tarihlerini tamamlar, süreleri ve LIVE etiketlerini kontrol eder. İzleme ilerlemeniz ve izlendi durumu değişmez."
   Repair Notice: "Büyük geçmişler zaman alabilir. Başarısız istekler otomatik olarak yeniden denenir. Silinen veya gizli videoların bilgileri eksik kalabilir."

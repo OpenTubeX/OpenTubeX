@@ -997,6 +997,8 @@ App Icon:
   Error: "Nie udało się wczytać lub zmienić ikony aplikacji"
 
 History:
+  Repair Use Cookies: "Użyj skonfigurowanych ciasteczek yt-dlp"
+  Repair Cookies Hint: "Trzeba sprawdzić ponad 500 filmów. Skonfiguruj ciasteczka w ustawieniach yt-dlp i włącz je tutaj, aby zmniejszyć ryzyko ograniczenia zapytań."
   Repair Description: "Użyj po zaimportowaniu historii lub gdy brakuje danych filmów albo mają nieprawidłową etykietę LIVE."
   Repair Details: "Uzupełnia brakujące tytuły, kanały i daty publikacji oraz sprawdza długość filmów i etykiety LIVE. Postęp oglądania i oznaczenie jako obejrzane pozostają bez zmian."
   Repair Notice: "Duża historia może wymagać czasu. Nieudane żądania są ponawiane automatycznie. Dane usuniętych lub prywatnych filmów mogą pozostać niepełne."

@@ -503,6 +503,8 @@ export default {
     return ipcRenderer.invoke(IpcChannels.YT_DLP_GET_INFO, options)
   },
 
+  ytDlpGetHistoryMetadata: videoId => ipcRenderer.invoke(IpcChannels.YT_DLP_GET_HISTORY_METADATA, videoId),
+
   /**
    * @param {string} videoId
    * @param {boolean} [useDefaultClients]

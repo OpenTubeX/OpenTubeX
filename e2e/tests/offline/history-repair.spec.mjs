@@ -1,3 +1,5 @@
+import { chmod, readFile, writeFile } from 'node:fs/promises'
+import path from 'node:path'
 import { test, expect, goTo } from '../../helpers/app.mjs'
 
 const timeWatched = Date.now() - 1000
@@ -363,3 +365,110 @@ for (const backend of ['local', 'invidious']) {
     }
   })
 }
+
+test.describe('history repair cookies', () => {
+  for (const mode of ['file', 'browser', 'none']) {
+    test.describe(mode, () => {
+      test.use({
+        seed: {
+          history: Array.from({ length: 501 }, (_, index) => ({ ...original, _id: String(index).padStart(11, '0'), videoId: String(index).padStart(11, '0') })),
+          settings: { ytDlpPlaybackAuthMode: mode, ytDlpPlaybackCookiesPath: '/tmp/history-cookies.txt', ytDlpPlaybackCookiesBrowser: 'firefox' }
+        }
+      })
+      test('offers configured cookies and warns only above 500 pending checks', async ({ page }, testInfo) => {
+        await goTo(page, 'history')
+        await page.getByRole('button', { name: 'Repair History', exact: true }).click()
+        const dialog = page.getByRole('dialog', { name: 'Repair History' })
+        const checkbox = dialog.getByRole('checkbox', { name: 'Use configured yt-dlp cookies' })
+        const hint = dialog.getByText('More than 500 videos need checking.', { exact: false })
+        await expect(hint).toBeVisible()
+        if (mode === 'file') {
+          for (const theme of ['dark', 'light']) {
+            await page.emulateMedia({ colorScheme: theme })
+            await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+            await dialog.screenshot({ path: testInfo.outputPath(`history-repair-cookies-${theme}.png`), animations: 'disabled' })
+          }
+        }
+        if (mode === 'none') {
+          await expect(checkbox).toHaveCount(0)
+        } else {
+          await expect(checkbox).not.toBeChecked()
+          await dialog.getByText('Use configured yt-dlp cookies', { exact: true }).click()
+          await expect(checkbox).toBeChecked()
+          await expect(hint).toHaveCount(0)
+          await checkbox.focus()
+          await checkbox.press('Space')
+          await expect(checkbox).not.toBeChecked()
+          await expect(hint).toBeVisible()
+        }
+        await page.evaluate(() => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          return store.dispatch('updateSubscriptionHistory', { metadata: [{ videoId: '00000000000', author: 'Channel', authorId: 'channel', published: 1, lengthSeconds: 120, isLive: false }] })
+        })
+        await expect(hint).toHaveCount(0)
+      })
+    })
+  }
+})
+
+test.describe('authenticated history metadata', () => {
+  test.use({ seed: { history: [original], settings: { ytDlpPlaybackAuthMode: 'file', ytDlpPlaybackCookiesPath: '/tmp/history-cookies.txt' } } })
+  test('uses yt-dlp when checked and preserves watch progress', async ({ page, app }, testInfo) => {
+    test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+    const executable = path.join(app.userDataDir, 'history-yt-dlp.sh')
+    const capturedArgs = path.join(app.userDataDir, 'history-args.txt')
+    const metadata = { id: original.videoId, title: 'Imported video', channel: 'Cookie channel', channel_id: 'UCabcdefghijklmnopqrstuv', duration: 120, upload_date: '20250920', live_status: 'was_live' }
+    await writeFile(executable, [
+      '#!/bin/sh',
+      `printf '%s\\n' "$@" > '${capturedArgs}'`,
+      `printf '%s' '${JSON.stringify(metadata)}'`
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.evaluate(async executable => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', executable)
+    }, executable)
+    await goTo(page, 'history')
+    await page.getByRole('button', { name: 'Repair History', exact: true }).click()
+    const dialog = page.getByRole('dialog', { name: 'Repair History' })
+    await dialog.getByText('Use configured yt-dlp cookies', { exact: true }).click()
+    await page.screenshot({ path: testInfo.outputPath('history-repair-cookies.png') })
+    await dialog.getByRole('button', { name: 'Start repair', exact: true }).click()
+    await expect(page.getByRole('status')).toContainText('Checked 1/1 · Repaired 1 · Failed 0')
+    const saved = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById.abcdefghijk)
+    const args = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
+    expect(args[args.indexOf('--cookies') + 1]).toBe('/tmp/history-cookies.txt')
+    expect(args).toContain('--skip-download')
+    expect(args.at(-1)).toBe(`https://www.youtube.com/watch?v=${original.videoId}`)
+    expect(saved).toMatchObject({ author: 'Cookie channel', published: Date.parse('2025-09-20'), lengthSeconds: 120, isLive: false, watchProgress: 42, isWatched: true })
+  })
+})
+
+test.describe('cookie repair cancellation', () => {
+  test.use({ seed: { history: [original], settings: { ytDlpPlaybackAuthMode: 'file', ytDlpPlaybackCookiesPath: '/tmp/history-cookies.txt' } } })
+  test('cancels pending cookie requests without saving late metadata', async ({ page, app }) => {
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      ipcMain.removeHandler('yt-dlp-get-history-metadata')
+      globalThis.historyCookieRequestStarted = false
+      ipcMain.handle('yt-dlp-get-history-metadata', () => new Promise(resolve => {
+        globalThis.historyCookieRequestStarted = true
+        globalThis.finishHistoryCookieRequest = () => resolve({ id: 'abcdefghijk', channel: 'Late channel', duration: 120 })
+      }))
+    })
+    await goTo(page, 'history')
+    await page.getByRole('button', { name: 'Repair History', exact: true }).click()
+    const dialog = page.getByRole('dialog', { name: 'Repair History' })
+    await dialog.getByText('Use configured yt-dlp cookies', { exact: true }).click()
+    await dialog.getByRole('button', { name: 'Start repair', exact: true }).click()
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.historyCookieRequestStarted)).toBe(true)
+    await page.getByRole('button', { name: 'Cancel', exact: true }).click()
+    try {
+      await expect(page.getByRole('button', { name: 'Repair History', exact: true })).toBeEnabled({ timeout: 2000 })
+    } finally {
+      await app.electronApp.evaluate(() => globalThis.finishHistoryCookieRequest())
+    }
+    await expect(page.getByText('Late channel', { exact: true })).toHaveCount(0)
+    const saved = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById.abcdefghijk)
+    expect(saved.author).toBe('')
+  })
+})

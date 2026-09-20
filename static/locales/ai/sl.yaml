@@ -306,6 +306,8 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: Seznam predvajanja {playlistName} je uspešno ustvarjen.
       There was an issue with creating the playlist.: Pri ustvarjanju seznama predvajanja je prišlo do težave.
 History:
+  Repair Use Cookies: "Uporabi nastavljene piškotke yt-dlp"
+  Repair Cookies Hint: "Preveriti je treba več kot 500 videoposnetkov. Nastavite piškotke v nastavitvah yt-dlp in jih tukaj omogočite, da zmanjšate tveganje omejevanja zahtev."
   Repair Description: "Uporabite po uvozu zgodovine ali ko videoposnetkom manjkajo podatki ali imajo napačno oznako LIVE."
   Repair Details: "Dopolni manjkajoče naslove, kanale in datume objave ter preveri trajanje in oznake LIVE. Napredek in stanje ogleda ostaneta nespremenjena."
   Repair Notice: "Velika zgodovina lahko zahteva čas. Neuspele zahteve se samodejno ponovijo. Izbrisani ali zasebni videoposnetki lahko ostanejo nepopolni."

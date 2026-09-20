@@ -190,6 +190,8 @@ User Playlists:
     This playlist could not be loaded.: Bu pleylisti yükləmək mümkün olmadı.
     More videos could not be loaded.: Daha çox video yükləmək mümkün olmadı.
 History:
+  Repair Use Cookies: "Konfiqurasiya edilmiş yt-dlp kukilərindən istifadə et"
+  Repair Cookies Hint: "500-dən çox video yoxlanmalıdır. Sorğuların məhdudlaşdırılması riskini azaltmaq üçün yt-dlp ayarlarında kukiləri qurun və burada aktivləşdirin."
   Repair Description: "Tarixçəni idxal etdikdən sonra və ya videoların məlumatları çatışmadıqda, yaxud səhv LIVE işarəsi olduqda istifadə edin."
   Repair Details: "Çatışmayan başlıqları, kanal məlumatlarını və yayım tarixlərini tamamlayır, müddətləri və LIVE işarələrini yoxlayır. Baxış irəliləyişiniz və izlənmə vəziyyəti dəyişmir."
   Repair Notice: "Böyük tarixçələr vaxt apara bilər. Uğursuz sorğular avtomatik təkrarlanır. Silinmiş və ya şəxsi videoların məlumatları natamam qala bilər."

@@ -199,6 +199,8 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: Spelelista {playlistName} er oppretta.
       There was an issue with creating the playlist.: Det oppstod eit problem då spelelista skulle opprettast.
 History:
+  Repair Use Cookies: "Bruk konfigurerte yt-dlp-informasjonskapslar"
+  Repair Cookies Hint: "Over 500 videoar må kontrollerast. Konfigurer informasjonskapslar i yt-dlp-innstillingane og aktiver dei her for å redusere risikoen for avgrensing av førespurnader."
   Repair Description: "Bruk dette etter import av historikk, eller når videoar manglar opplysningar eller har feil LIVE-merking."
   Repair Details: "Fyller inn manglande titlar, kanalar og publiseringsdatoar og kontrollerer lengd og LIVE-merking. Avspelingsposisjonen og statusen som sett vert uendra."
   Repair Notice: "Store historikkar kan ta tid. Mislukka førespurnader vert prøvde på nytt automatisk. Sletta eller private videoar kan framleis mangle opplysningar."
