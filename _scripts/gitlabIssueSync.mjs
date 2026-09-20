@@ -23,6 +23,11 @@ export function content(body = '', fromGitlab = false) {
     result = result.replace(/(^|[(<"'\s])\/uploads\//g, `$1${uploadsUrl}`)
     // GitHub does not support GitLab's image dimension attributes.
     result = result.replace(/(!\[[^\]\n]*\]\((?:[^()\n]|\([^()\n]*\))*\))\{[ \t]*(?:(?:width|height)=\d+(?:px|%)?[ \t]*)+\}/g, '$1')
+    // GitLab renders video image syntax as a player; GitHub needs a normal link.
+    result = result.replace(/!\[([^\]\n]*)\]\(((?:[^()\n]|\([^()\n]*\))*)\)/g, (image, label, target) => {
+      const path = target.match(/^<?([^>\s?#]+)/)?.[1] ?? ''
+      return /\.(mp4|m4v|mov|webm|ogv)$/i.test(path) ? `[${label || 'Video'}](${target})` : image
+    })
   } else {
     let fence = null
     result = result.split('\n').map(line => {

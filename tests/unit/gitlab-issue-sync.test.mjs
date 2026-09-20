@@ -192,6 +192,42 @@ test('converts upload links and image dimensions without changing unrelated link
   assert.equal(content(githubImage), githubImage)
 })
 
+test('repairs video embeds from issue 1452 in existing descriptions and comments', async () => {
+  const { state, client } = fixture()
+  const file = 'ad58bc7f52258220477bffdbf89decab/screen-20260919-215554-1789847747236.mp4'
+  const link = `[Recording](https://gitlab.com/-/project/85121418/uploads/${file})`
+  state.sources[0].description = `![Recording](/uploads/${file})`
+  state.notes.push({ id: 10, body: state.sources[0].description, author: { id: 1, username: 'reporter' } })
+  await sync(client)
+  assert.ok(state.targets[0].body.endsWith(`\n\n${link}`))
+  assert.ok(state.comments[0].body.endsWith(`\n\n${link}`))
+  for (const item of [state.targets[0], state.comments[0]]) {
+    item.body = item.body.replace(link, `!${link}`)
+  }
+  await sync(client)
+  assert.equal(state.targets.length, 1)
+  assert.equal(state.comments.length, 1)
+  assert.ok(state.targets[0].body.endsWith(`\n\n${link}`))
+  assert.ok(state.comments[0].body.endsWith(`\n\n${link}`))
+  state.writes = []
+  await sync(client)
+  assert.deepEqual(state.writes, [])
+})
+
+test('links GitLab video formats while preserving images and GitHub content', () => {
+  for (const extension of ['mp4', 'm4v', 'mov', 'webm', 'ogv', 'MP4']) {
+    const url = `https://example.org/recording(1).${extension}`
+    for (const target of [url, `${url}?download=1#t=2`, `<${url}>`, `${url} "Recording"`]) {
+      assert.equal(content(`![Video](${target}){width=900 height=507}`, true), `[Video](${target})`)
+    }
+    assert.equal(content(`![](${url})`, true), `[Video](${url})`)
+  }
+  const unchanged = '![Screenshot](https://example.org/image.png?name=video.mp4)\n![Image](https://example.org/video.mp4.png)'
+  assert.equal(content(unchanged, true), unchanged)
+  const githubVideo = '![Recording](https://example.org/video.mp4)'
+  assert.equal(content(githubVideo), githubVideo)
+})
+
 test('a broken link does not starve later reports', async () => {
   const { state, client } = fixture()
   await sync(client)
