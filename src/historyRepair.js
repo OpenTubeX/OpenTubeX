@@ -93,7 +93,7 @@ export function parseHistoryRepairYtDlp(info, videoId) {
     description: info.description,
     lengthSeconds: Number(info.duration),
     published: positive(info.timestamp) ? Number(info.timestamp) * 1000 : uploadDate ? Date.parse(`${uploadDate[1]}-${uploadDate[2]}-${uploadDate[3]}`) : NaN,
-    isLive: info.is_live === true || info.live_status === 'is_live',
+    isLive: info.live_status !== 'is_upcoming' && (info.is_live === true || info.live_status === 'is_live'),
     isUpcoming: info.live_status === 'is_upcoming',
   }
 }

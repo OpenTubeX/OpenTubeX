@@ -1630,26 +1630,44 @@ export async function handleYtDlpGetPlaybackInfo(
   }
 }
 
+const historyMetadataRequests = new Map()
+
+export function handleYtDlpCancelHistoryRepair(event) {
+  if (!isOpenTubeXUrl(event.senderFrame.url)) return
+  for (const controller of historyMetadataRequests.get(event.sender.id) ?? []) controller.abort()
+}
+
 export async function handleYtDlpGetHistoryMetadata(event, videoId) {
   if (!isOpenTubeXUrl(event.senderFrame.url) || typeof videoId !== 'string' || !ID_REGEX.test(videoId)) return null
-  const { source, executable } = await resolveExecutable('ytDlpSource', 'ytDlpPath', 'yt-dlp')
-  if (source === 'managed' && !existsSync(executable)) {
-    const result = await downloadManagedYtDlp()
-    if ('error' in result) return { error: result.error }
-  }
-  const args = historyRepairYtDlpArguments()
-  const authenticationError = await pushYtDlpPlaybackAuthenticationArguments(args)
-  if (authenticationError !== null) return { error: authenticationError }
-  await pushProxyArgument(args)
-  args.push(`https://www.youtube.com/watch?v=${videoId}`)
+  const senderId = event.sender.id
+  const controller = new AbortController()
+  const requests = historyMetadataRequests.get(senderId) ?? new Set()
+  requests.add(controller)
+  historyMetadataRequests.set(senderId, requests)
   try {
+    const { source, executable } = await resolveExecutable('ytDlpSource', 'ytDlpPath', 'yt-dlp')
+    if (source === 'managed' && !existsSync(executable)) {
+      const result = await downloadManagedYtDlp()
+      if ('error' in result) return { error: result.error }
+    }
+    const args = historyRepairYtDlpArguments()
+    const authenticationError = await pushYtDlpPlaybackAuthenticationArguments(args)
+    if (authenticationError !== null) return { error: authenticationError }
+    await pushProxyArgument(args)
+    args.push(`https://www.youtube.com/watch?v=${videoId}`)
+    controller.signal.throwIfAborted()
     const { stdout } = await execFileAsync(executable, args, {
-      timeout: PLAYBACK_INFO_TIMEOUT, maxBuffer: PLAYBACK_INFO_MAX_BUFFER, windowsHide: true
+      signal: controller.signal,
+      timeout: PLAYBACK_INFO_TIMEOUT,
+      maxBuffer: PLAYBACK_INFO_MAX_BUFFER,
+      windowsHide: true
     })
     return JSON.parse(stdout)
   } catch (error) {
-    // Do not expose cookie paths or signed URLs from stderr to the renderer.
     return historyRepairYtDlpError(error.stderr)
+  } finally {
+    requests.delete(controller)
+    if (requests.size === 0) historyMetadataRequests.delete(senderId)
   }
 }
 

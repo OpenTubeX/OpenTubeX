@@ -355,3 +355,11 @@ test('yt-dlp errors preserve rate limits without exposing native error details',
   assert.deepEqual(historyRepairYtDlpError('Cannot read /private/cookies.txt'), { error: 'History metadata unavailable' })
   assert.deepEqual(historyRepairYtDlpError(undefined), { error: 'History metadata unavailable' })
 })
+
+test('yt-dlp upcoming status overrides a legacy live flag', async () => {
+  const { parseHistoryRepairYtDlp } = await import('../../src/historyRepair.js')
+  const parsed = parseHistoryRepairYtDlp({ id: record.videoId, is_live: true, live_status: 'is_upcoming' }, record.videoId)
+  assert.equal(parsed.isUpcoming, true)
+  assert.equal(parsed.isLive, false)
+  assert.equal(historyRepairPatch(record, parsed).liveNow, false)
+})

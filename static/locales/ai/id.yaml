@@ -188,8 +188,8 @@ User Playlists:
     This playlist could not be loaded.: Daftar putar ini tidak dapat dimuat.
     More videos could not be loaded.: Video lainnya tidak dapat dimuat.
 History:
-  Repair Use Cookies: "Gunakan cookie yt-dlp yang dikonfigurasi"
-  Repair Cookies Hint: "Lebih dari 500 video perlu diperiksa. Konfigurasikan cookie di pengaturan yt-dlp dan aktifkan di sini untuk mengurangi risiko pembatasan permintaan."
+  Repair Use Cookies: "Gunakan kuki yt-dlp yang telah dikonfigurasi"
+  Repair Cookies Hint: "Lebih dari 500 video perlu diperiksa. Konfigurasikan kuki di pengaturan yt-dlp dan aktifkan di sini untuk mengurangi risiko pembatasan permintaan."
   Repair Description: "Gunakan setelah mengimpor riwayat, atau saat detail video tidak lengkap atau label LIVE tidak sesuai."
   Repair Details: "Melengkapi judul, kanal, dan tanggal publikasi yang hilang, serta memeriksa durasi dan label LIVE. Progres dan status tontonan Anda tidak berubah."
   Repair Notice: "Riwayat besar dapat memerlukan waktu. Permintaan yang gagal dicoba ulang otomatis. Video yang dihapus atau pribadi mungkin tetap tidak lengkap."

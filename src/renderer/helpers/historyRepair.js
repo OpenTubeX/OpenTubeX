@@ -12,6 +12,7 @@ let controller
 
 export function cancelHistoryRepair() {
   controller?.abort()
+  if (process.env.IS_ELECTRON) ytDlp.ytDlpCancelHistoryRepair().catch(console.error)
 }
 
 async function fetchMetadata(videoId, signal, useCookies) {

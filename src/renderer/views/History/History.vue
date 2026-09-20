@@ -340,7 +340,7 @@ const repairCookiesConfigured = computed(() => {
     : process.env.IS_ELECTRON && getters.getYtDlpPlaybackAuthMode === 'browser' && !!getters.getYtDlpPlaybackCookiesBrowser?.trim()
 })
 const repairUseCookies = computed(() => repairCookiesConfigured.value && repairOptions.value.includes('cookies'))
-const showRepairCookieHint = computed(() => !repairUseCookies.value && store.getters.getHistoryCacheSorted.filter(needsHistoryRepair).length > 500)
+const showRepairCookieHint = computed(() => (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && !repairUseCookies.value && store.getters.getHistoryCacheSorted.filter(needsHistoryRepair).length > 500)
 watch(showRepairPrompt, open => {
   if (open) repairOptions.value = []
 })

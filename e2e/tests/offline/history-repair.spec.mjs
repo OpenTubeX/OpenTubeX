@@ -472,3 +472,32 @@ test.describe('cookie repair cancellation', () => {
     expect(saved.author).toBe('')
   })
 })
+
+test.describe('native cookie repair cancellation', () => {
+  test.use({ seed: { history: [original], settings: { ytDlpPlaybackAuthMode: 'file', ytDlpPlaybackCookiesPath: '/tmp/history-cookies.txt' } } })
+  test('terminates the desktop metadata process on cancel', async ({ page, app }) => {
+    test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+    const executable = path.join(app.userDataDir, 'pending-history-yt-dlp.sh')
+    const pidFile = path.join(app.userDataDir, 'history-pid.txt')
+    await writeFile(executable, `#!/bin/sh\nprintf '%s' "$$" > '${pidFile}'\nexec sleep 30\n`)
+    await chmod(executable, 0o755)
+    await page.evaluate(async executable => {
+      await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateYtDlpPath', executable)
+    }, executable)
+    await goTo(page, 'history')
+    await page.getByRole('button', { name: 'Repair History', exact: true }).click()
+    const dialog = page.getByRole('dialog', { name: 'Repair History' })
+    await dialog.getByText('Use configured yt-dlp cookies', { exact: true }).click()
+    await dialog.getByRole('button', { name: 'Start repair', exact: true }).click()
+    await expect.poll(() => readFile(pidFile, 'utf8').catch(() => '')).toMatch(/^\d+$/)
+    const pid = Number(await readFile(pidFile, 'utf8'))
+    try {
+      await page.getByRole('button', { name: 'Cancel', exact: true }).click()
+      await expect.poll(() => {
+        try { process.kill(pid, 0); return true } catch { return false }
+      }, { timeout: 2000 }).toBe(false)
+    } finally {
+      try { process.kill(pid) } catch { /* Already stopped. */ }
+    }
+  })
+})
