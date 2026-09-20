@@ -859,6 +859,7 @@ Settings:
     Expanded: Expanderade
     Playing Interface Hide Delay: Fördröjning innan gränssnittet döljs under uppspelning
     Hide Startup Splash: Dölj startskärm
+    Hide Header Sync Indicator: Dölj synkroniseringsindikatorn i apphuvudet
     Hide Repeat Stats: Dölj upprepningsstatistik
     Sections:
       Visible While Paused: Synligt under paus i helfönster eller helskärm

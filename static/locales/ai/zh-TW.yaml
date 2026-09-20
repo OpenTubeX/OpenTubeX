@@ -857,6 +857,7 @@ Settings:
     Expanded: 展開
     Playing Interface Hide Delay: 播放時介面隱藏延遲
     Hide Startup Splash: 隱藏啟動畫面
+    Hide Header Sync Indicator: 隱藏應用程式標題列中的同步指示器
     Hide Repeat Stats: 隱藏循環統計
     Sections:
       Visible While Paused: 在全視窗／全螢幕模式暫停播放時顯示

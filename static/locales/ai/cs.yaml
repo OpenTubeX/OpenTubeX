@@ -857,6 +857,7 @@ Settings:
     Expanded: Rozbalená
     Playing Interface Hide Delay: Prodleva skrytí rozhraní při přehrávání
     Hide Startup Splash: Skrýt úvodní obrazovku
+    Hide Header Sync Indicator: Skrýt indikátor synchronizace v záhlaví aplikace
     Hide Repeat Stats: Skrýt statistiky opakování
     Sections:
       Visible While Paused: Viditelné při pozastavení v režimu celého okna nebo celé obrazovky

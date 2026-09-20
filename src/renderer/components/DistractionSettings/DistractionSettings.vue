@@ -18,6 +18,13 @@
           @change="updateHideStartupSplash"
         />
         <FtToggleSwitch
+          :label="t('Settings.Distraction Free Settings.Hide Header Sync Indicator')"
+          :compact="true"
+          :default-value="hideHeaderSyncIndicator"
+          setting-key="hideHeaderSyncIndicator"
+          @change="updateHideHeaderSyncIndicator"
+        />
+        <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Video Views')"
           :compact="true"
           :default-value="hideVideoViews"
@@ -435,6 +442,13 @@ const hideStartupSplash = computed(() => store.getters.getHideStartupSplash)
 /** @param {boolean} value */
 function updateHideStartupSplash(value) {
   store.dispatch('updateHideStartupSplash', value)
+}
+
+const hideHeaderSyncIndicator = computed(() => store.getters.getHideHeaderSyncIndicator)
+
+/** @param {boolean} value */
+function updateHideHeaderSyncIndicator(value) {
+  store.dispatch('updateHideHeaderSyncIndicator', value)
 }
 
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */

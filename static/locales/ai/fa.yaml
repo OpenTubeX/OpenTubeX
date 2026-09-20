@@ -886,6 +886,7 @@ Settings:
     Expanded: بازشده
     Playing Interface Hide Delay: تأخیر پنهان شدن رابط هنگام پخش
     Hide Startup Splash: پنهان کردن صفحهٔ آغازین
+    Hide Header Sync Indicator: پنهان کردن نشانگر همگام‌سازی در سربرگ برنامه
     Hide Repeat Stats: پنهان کردن آمار تکرار
     Sections:
       Visible While Paused: نمایش هنگام توقف در پنجرهٔ کامل / تمام‌صفحه

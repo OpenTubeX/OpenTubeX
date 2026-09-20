@@ -861,6 +861,7 @@ Settings:
     Expanded: Extinse
     Playing Interface Hide Delay: Întârziere la ascunderea interfeței în timpul redării
     Hide Startup Splash: Ascunde ecranul de pornire
+    Hide Header Sync Indicator: Ascunde indicatorul de sincronizare din antetul aplicației
     Hide Repeat Stats: Ascunde statisticile de repetare
     Sections:
       Visible While Paused: Vizibile în pauză în fereastră completă / pe ecran complet

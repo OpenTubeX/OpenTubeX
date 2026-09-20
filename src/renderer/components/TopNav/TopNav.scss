@@ -387,11 +387,11 @@
   flex-shrink: 0;
   padding: 6px;
   color: var(--primary-text-color);
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .syncIndicator :deep(.ft-icon__glyph) {
-  animation: sync-rotation 1.2s linear infinite;
+  animation: sync-rotation 2s linear infinite;
 }
 
 .topNavBarColor .syncIndicator {

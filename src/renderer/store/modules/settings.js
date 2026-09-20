@@ -349,6 +349,7 @@ const state = {
   hideLiveChatReplay: false,
   hideLiveStreams: false,
   hideHeaderLogo: false,
+  hideHeaderSyncIndicator: false,
   hideStartupSplash: false,
   // Former navigation switches remain loadable so older settings can migrate.
   hideHome: false,

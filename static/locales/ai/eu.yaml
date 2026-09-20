@@ -857,6 +857,7 @@ Settings:
     Expanded: Zabalduta
     Playing Interface Hide Delay: Erreprodukzioan interfazea ezkutatzeko atzerapena
     Hide Startup Splash: Ezkutatu abio-pantaila
+    Hide Header Sync Indicator: Ezkutatu aplikazioaren goiburuko sinkronizazio-adierazlea
     Hide Repeat Stats: Ezkutatu errepikapenen estatistikak
     Sections:
       Visible While Paused: Ikusgai pausatuta dagoenean leiho osoan edo pantaila osoan

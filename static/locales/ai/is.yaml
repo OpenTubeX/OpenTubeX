@@ -861,6 +861,7 @@ Settings:
     Expanded: Útvíkkuð
     Playing Interface Hide Delay: Töf áður en viðmótið er falið við spilun
     Hide Startup Splash: Fela upphafsskjá
+    Hide Header Sync Indicator: Fela samstillingarvísi í haus forritsins
     Hide Repeat Stats: Fela tölfræði endurtekninga
     Sections:
       Visible While Paused: Sýnilegt þegar gert er hlé í heilum glugga eða á öllum skjánum

@@ -870,6 +870,7 @@ Settings:
     Expanded: Αναπτυγμένες
     Playing Interface Hide Delay: Καθυστέρηση απόκρυψης διεπαφής κατά την αναπαραγωγή
     Hide Startup Splash: Απόκρυψη οθόνης εκκίνησης
+    Hide Header Sync Indicator: Απόκρυψη ένδειξης συγχρονισμού στην κεφαλίδα της εφαρμογής
     Hide Repeat Stats: Απόκρυψη στατιστικών επανάληψης
     Sections:
       Visible While Paused: Ορατά κατά την παύση σε πλήρες παράθυρο / πλήρη οθόνη

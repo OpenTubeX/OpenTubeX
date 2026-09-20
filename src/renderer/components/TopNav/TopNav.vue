@@ -116,7 +116,7 @@
       </div>
       <div class="side profiles">
         <span
-          v-if="syncing"
+          v-if="syncing && !hideHeaderSyncIndicator"
           class="syncIndicator"
           role="progressbar"
           :aria-label="syncLabel"
@@ -204,6 +204,7 @@ import { getTabNavigationService } from '../../tabs/TabNavigationService'
 const { t } = useI18n()
 const syncing = computed(() => store.getters.getSyncServerStatus === 'syncing')
 const syncLabel = computed(() => syncProgressLabel(t, store.getters.getSyncServerProgress?.stage))
+const hideHeaderSyncIndicator = computed(() => store.getters.getHideHeaderSyncIndicator)
 const emit = defineEmits(['request-android-exit'])
 const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
   store.getters.getKeyboardShortcuts

@@ -857,6 +857,7 @@ Settings:
     Expanded: Utvidet
     Playing Interface Hide Delay: Forsinkelse før grensesnittet skjules under avspilling
     Hide Startup Splash: Skjul oppstartsskjerm
+    Hide Header Sync Indicator: Skjul synkroniseringsindikatoren i apphodet
     Hide Repeat Stats: Skjul gjentakelsesstatistikk
     Sections:
       Visible While Paused: Synlig ved pause i fullt vindu / fullskjerm

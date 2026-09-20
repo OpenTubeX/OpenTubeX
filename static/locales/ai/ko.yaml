@@ -1050,6 +1050,7 @@ Settings:
     Expanded: 펼침
     Playing Interface Hide Delay: 재생 중 인터페이스 숨김 지연
     Hide Startup Splash: 시작 화면 숨기기
+    Hide Header Sync Indicator: 앱 헤더의 동기화 표시기 숨기기
     Hide Repeat Stats: 반복 통계 숨기기
     Sections:
       Side Bar: 사이드바
