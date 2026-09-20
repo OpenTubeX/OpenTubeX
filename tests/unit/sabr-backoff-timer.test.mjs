@@ -23,7 +23,7 @@ function fixture() {
     sleepTimer: { pauseCountdown: noop, consumeEndOfVideo: noop }, pauseSponsorBlockHighlightLabelCountdown: noop,
     cancelSponsorBlockSkipSchedule: noop, promptSponsorBlockSegments: {}, clearAbRepeatBoundarySchedule: noop,
     tabMediaCoordinator: { setPlaybackState: noop }, mediaTabId: 'test', process: { env: {} }, updateAutoPip: noop,
-    scrollMiniPlayerActive: { value: false }, emit: noop,
+    scrollMiniPlayerActive: { value: false }, updateScrollMiniPlayer: noop, emit: noop,
   }
   const methods = vm.runInNewContext(['clearSabrBackoffTimer', 'startSabrBackoffTimer', 'handleEnded'].map(extract).join('\n') + '\n({ startSabrBackoffTimer, handleEnded })', context)
   return { ...methods, video, remaining, duration, intervals }

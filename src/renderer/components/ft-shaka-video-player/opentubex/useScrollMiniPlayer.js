@@ -566,7 +566,9 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     if (isNativeFullscreenActive()) return false
     if (isNativePipActive()) return false
     const videoElement = video.value
-    if (!videoElement || videoElement.ended) return false
+    if (!videoElement) return false
+    if (videoElement.ended && !(scrollMiniPlayerDetached.value &&
+      store.getters.getKeepPlayingOnNavigation && watchNavigation?.detached.value)) return false
     return true
   }
 
@@ -1079,7 +1081,10 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     const videoElement = video.value
     if (!videoElement) return
 
-    if (videoElement.paused) {
+    if (videoElement.ended) {
+      videoElement.currentTime = 0
+      videoElement.play()
+    } else if (videoElement.paused) {
       videoElement.play()
     } else {
       videoElement.pause()

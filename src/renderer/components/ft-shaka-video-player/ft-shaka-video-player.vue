@@ -1376,7 +1376,10 @@
           @pointerdown.stop
           @mousedown.stop.prevent
         >
-          <ft-icon :icon="['fas', scrollMiniIsPaused ? 'play' : 'pause']" />
+          <ft-icon
+            :icon="['fas', playbackEnded ? 'replay' : scrollMiniIsPaused ? 'play' : 'pause']"
+            aria-hidden="true"
+          />
         </button>
         <div
           v-if="!useNativePlayback && !scrollMiniPlayerStashed"

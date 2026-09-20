@@ -6290,8 +6290,9 @@ export default defineComponent({
 
       updateAutoPip()
 
+      updateScrollMiniPlayer()
       if (scrollMiniPlayerActive.value) {
-        deactivateScrollMiniPlayer()
+        showScrollMiniPlayPause(false)
       }
 
       emit('ended', sleepTimerEnded)
