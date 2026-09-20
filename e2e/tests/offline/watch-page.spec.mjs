@@ -3846,6 +3846,7 @@ test.describe('watch page', () => {
     await auxPanel.getByRole('button', { name: /Save channel setting/i }).click()
     const settingsMenu = page.locator('.app > .dropdownLayer > .iconDropdown.portal')
     await expect(settingsMenu).toBeVisible()
+    await expect(settingsMenu).not.toHaveCSS('max-inline-size', 'none')
     expect(await settingsMenu.evaluate(element => {
       const bounds = element.getBoundingClientRect()
       const hit = document.elementFromPoint(

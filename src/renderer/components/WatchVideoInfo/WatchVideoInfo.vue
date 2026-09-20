@@ -202,23 +202,44 @@
             @click="saveWatchedProgressManually"
           />
           <FtIconButton
-            v-if="channelSettingSaveActions.length === 1"
-            :title="channelSettingSaveActions[0].label"
-            :icon="channelSettingSaveActions[0].icon"
-            :overlay-icon="channelSettingSaveActions[0].saved ? ['fas', 'check'] : null"
-            :disabled="channelSettingSaveActions[0].disabled"
-            @click="saveChannelSetting(channelSettingSaveActions[0].value)"
-          />
-          <FtIconButton
-            v-else-if="channelSettingSaveActions.length > 1"
+            v-if="channelSettingSaveActions.length > 0"
+            ref="channelSettingsButton"
             :title="t('Video.Save Channel Setting')"
             :icon="['fas', 'floppy-disk']"
             :overlay-icon="channelSettingSaveActions.some(action => action.saved) ? ['fas', 'check'] : null"
-            :dropdown-options="channelSettingSaveActions"
             :dropdown-portal="channelSettingDropdownPortal"
+            dropdown-class="channelSettingsDropdown"
             dropdown-position-x="left"
-            @click="saveChannelSetting"
-          />
+            force-dropdown
+          >
+            <div
+              v-for="action in channelSettingSaveActions"
+              :key="action.value"
+              class="channelSettingRow"
+            >
+              <button
+                type="button"
+                class="channelSettingSave"
+                :disabled="action.disabled"
+                @click="saveChannelSetting(action.value)"
+              >
+                <FtIcon
+                  :icon="action.icon"
+                  aria-hidden="true"
+                />
+                <span>{{ action.label }}</span>
+              </button>
+              <FtIconButton
+                :disabled="!action.saved"
+                :size="14"
+                :use-shadow="false"
+                theme="base-no-default"
+                :title="t('Settings.Channel Settings.Forget Value')"
+                :icon="['fas', 'trash']"
+                @click="removeChannelSetting(action.value)"
+              />
+            </div>
+          </FtIconButton>
           <FtIconButton
             v-if="useSponsorBlock && !isUpcoming && !hideFullscreenDockActions"
             :title="sponsorBlockInfoTitle"
@@ -319,7 +340,7 @@ import FtRetryImage from '../FtRetryImage.vue'
 import { ytDlp } from '../../helpers/ytDlp'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtAddToPlaylistDropdown from '../FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
@@ -339,7 +360,7 @@ import { vSaferHtml } from '../../directives/vSaferHtml'
 import { linkifyHashtagsAndHandles } from '../../helpers/descriptionLinks'
 import { escapeHTML, formatNumber, formatViewCount, getRelativeTimeFromDate, getVideoThumbnailUrl, openInternalPath, showToast } from '../../helpers/utils'
 import { translateSponsorBlockCategory } from '../../helpers/player/utils'
-import { parseChannelPreferences } from '../../helpers/channel-preferences'
+import { parseChannelPreferences, removeChannelPreference } from '../../helpers/channel-preferences'
 import { useTabContext } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
@@ -815,6 +836,8 @@ const showSaveChannelVolumeButton = computed(() => {
     !store.getters.getAutoUpdateChannelVolumes
 })
 
+const channelSettingsButton = useTemplateRef('channelSettingsButton')
+
 const savedChannelSettings = computed(() => ({
   playbackSpeed: parseChannelPreferences(
     store.getters.getChannelPlaybackSpeeds,
@@ -898,6 +921,7 @@ const channelSettingSaveActions = computed(() => [
  * @param {'playbackSpeed'|'videoQuality'|'subtitlesState'|'volume'} setting
  */
 function saveChannelSetting(setting) {
+  channelSettingsButton.value?.hideDropdown()
   switch (setting) {
     case 'playbackSpeed':
       emit('save-channel-playback-speed')
@@ -912,6 +936,14 @@ function saveChannelSetting(setting) {
       emit('save-channel-volume')
       break
   }
+}
+
+/**
+ * @param {'playbackSpeed'|'videoQuality'|'subtitlesState'|'volume'} setting
+ */
+async function removeChannelSetting(setting) {
+  await removeChannelPreference(store, props.channelId, setting)
+  channelSettingsButton.value?.hideDropdown()
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

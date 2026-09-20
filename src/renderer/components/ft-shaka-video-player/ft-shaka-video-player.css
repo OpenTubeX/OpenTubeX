@@ -3594,6 +3594,12 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   white-space: nowrap;
 }
 
+:deep(.ft-quick-playback-rate-save) {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
 :deep(.ft-quick-playback-rate-button:hover) {
   background: rgb(255 255 255 / 16%);
 }
