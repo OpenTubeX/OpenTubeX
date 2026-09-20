@@ -67,11 +67,14 @@ test('long toast actions wrap below readable text on a phone and after resize', 
   await expect(toast).toBeVisible()
   for (const width of [375, 740, 320]) {
     await page.setViewportSize({ width, height: 812 })
-    await expect.poll(() => toast.evaluate(el => {
+    await expect.poll(() => toast.evaluate((el, viewportWidth) => {
       const message = el.querySelector('.message').getBoundingClientRect()
       const actions = el.querySelector('.toastActions').getBoundingClientRect()
-      return message.width > 180 && actions.top >= message.bottom - 1 && el.scrollWidth <= el.clientWidth + 1
-    })).toBe(true)
+      const actionsFit = viewportWidth <= 375
+        ? actions.top >= message.bottom - 1
+        : actions.left >= message.right - 1
+      return message.width > 180 && actionsFit && el.scrollWidth <= el.clientWidth + 1
+    }, width)).toBe(true)
   }
   await toast.getByRole('button', { name: 'Ausblenden', exact: true }).click()
   await expect(toast).toHaveCount(0)

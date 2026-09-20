@@ -171,8 +171,15 @@ test.describe('video link copy actions', () => {
         .toBe('https://youtu.be/eeeeeeeeeee')
 
       await app.electronApp.evaluate(({ clipboard }) => clipboard.clear())
-      await video.hover()
-      await video.locator('.extraThumbnailActionIcon .iconButton').click()
+      if (width <= 600) {
+        await video.locator('.title').evaluate(element => element.dispatchEvent(new PointerEvent('contextmenu', {
+          bubbles: true, cancelable: true, pointerType: 'touch'
+        })))
+        await page.locator('.mobileThumbnailActionRow').getByRole('menuitem', { name: 'Copy YouTube Link', exact: true }).click()
+      } else {
+        await video.hover()
+        await video.locator('.extraThumbnailActionIcon .iconButton').click()
+      }
       await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText()))
         .toBe('https://youtu.be/eeeeeeeeeee')
     })
@@ -417,7 +424,7 @@ test.describe('video downloads', () => {
     const executable = path.join(app.userDataDir, 'long-title-yt-dlp.sh')
     const capturedArgs = path.join(app.userDataDir, 'long-title-yt-dlp-args.txt')
     const longTitle = '界'.repeat(80)
-    const metadataLine = `__OPENTUBEX_METADATA__:${JSON.stringify('eeeeeeeeeee')}\t${JSON.stringify(longTitle)}\tnull`
+    const metadataLine = `__OPENTUBEX_METADATA__:${JSON.stringify('eeeeeeeeeee')}\t${JSON.stringify(longTitle)}\tnull\tnull\tnull`
     await writeFile(downloadedFile, '')
     await writeFile(executable, [
       '#!/bin/sh',
@@ -453,7 +460,7 @@ test.describe('video downloads', () => {
     const downloadedFile = path.join(app.userDataDir, 'shortened-playlist-title.webm')
     const executable = path.join(app.userDataDir, 'long-playlist-title-yt-dlp.sh')
     const longTitle = '界'.repeat(80)
-    const metadataLine = `__OPENTUBEX_METADATA__:${JSON.stringify('eeeeeeeeeee')}\t${JSON.stringify(longTitle)}\tnull`
+    const metadataLine = `__OPENTUBEX_METADATA__:${JSON.stringify('eeeeeeeeeee')}\t${JSON.stringify(longTitle)}\tnull\tnull\tnull`
     await writeFile(downloadedFile, '')
     await writeFile(executable, [
       '#!/bin/sh',
@@ -848,7 +855,7 @@ test.describe('video downloads', () => {
     const executable = path.join(app.userDataDir, 'metadata-yt-dlp.sh')
     const currentTitle = 'Current video title'
     const currentThumbnail = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciLz4='
-    const metadataLine = `__OPENTUBEX_METADATA__:${JSON.stringify('eeeeeeeeeee')}\t${JSON.stringify(currentTitle)}\t${JSON.stringify(currentThumbnail)}`
+    const metadataLine = `__OPENTUBEX_METADATA__:${JSON.stringify('eeeeeeeeeee')}\t${JSON.stringify(currentTitle)}\t${JSON.stringify(currentThumbnail)}\tnull\tnull`
     await writeFile(downloadedFile, '')
     await writeFile(executable, [
       '#!/bin/sh',
@@ -890,7 +897,7 @@ test.describe('video downloads', () => {
     await writeFile(downloadedFile, '')
     await writeFile(executable, [
       '#!/bin/sh',
-      'printf \'__OPENTUBEX_METADATA__:"eeeeeeeeeee"\\t"Current video title"\\tnull\\n\'',
+      'printf \'__OPENTUBEX_METADATA__:"eeeeeeeeeee"\\t"Current video title"\\tnull\\tnull\\tnull\\n\'',
       `printf '__OPENTUBEX_FILE__:eeeeeeeeeee\\t1\\t640\\t360\\t${downloadedFile}\\n'`
     ].join('\n'))
     await chmod(executable, 0o755)
@@ -1423,7 +1430,7 @@ test.describe('video downloads', () => {
     const executable = path.join(app.userDataDir, 'long-subtitle-playlist-title-yt-dlp.sh')
     const argumentsFile = path.join(app.userDataDir, 'long-subtitle-playlist-title-arguments.txt')
     const longTitle = '界'.repeat(80)
-    const metadataLine = `__OPENTUBEX_METADATA__:${JSON.stringify('eeeeeeeeeee')}\t${JSON.stringify(longTitle)}\tnull`
+    const metadataLine = `__OPENTUBEX_METADATA__:${JSON.stringify('eeeeeeeeeee')}\t${JSON.stringify(longTitle)}\tnull\tnull\tnull`
     await writeFile(executable, [
       '#!/bin/sh',
       `printf '%s\\n' "$@" > ${argumentsFile}`,
@@ -1450,7 +1457,7 @@ test.describe('video downloads', () => {
       titleTruncated: true
     })
     const passedArguments = (await readFile(argumentsFile, 'utf8')).split('\n')
-    expect(passedArguments).toContain('video:__OPENTUBEX_METADATA__:%(id)j\t%(title)j\t%(thumbnail)j')
+    expect(passedArguments).toContain('video:__OPENTUBEX_METADATA__:%(id)j\t%(title)j\t%(thumbnail|null)j\t%(channel,uploader|null)j\t%(channel_id|null)j')
 
     await goTo(page, 'downloads')
     const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Subtitle playlist with a long title' })

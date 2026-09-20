@@ -221,7 +221,9 @@ test.describe('while collaborators are loading', () => {
   test.use({
     seed: {
       settings: {
-        fetchSubscriptionsAutomatically: false
+        fetchSubscriptionsAutomatically: false,
+        // Install request interception before avatars can prefetch collaborators.
+        landingPage: 'history'
       },
       profiles: [
         {

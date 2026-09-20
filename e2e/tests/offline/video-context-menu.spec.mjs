@@ -178,7 +178,7 @@ test('mobile groups quick actions and resets scrolling when entering and leaving
   })))
   const menu = page.locator('.mobileLinkActions')
   const scroller = menu.locator('.mobileLinkActionsScroll')
-  const quickActions = menu.locator('.mobileLinkQuickActions [role="menuitem"]')
+  const quickActions = menu.locator('.mobileLinkQuickActions:not(.mobileThumbnailActionRow) [role="menuitem"]')
   await expect(quickActions).toHaveCount(4)
   const tops = await quickActions.evaluateAll(elements => elements.map(element => element.getBoundingClientRect().top))
   expect(new Set(tops).size).toBe(1)

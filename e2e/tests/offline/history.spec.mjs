@@ -182,8 +182,8 @@ test.describe('watch history', () => {
     }).toBeGreaterThanOrEqual(12)
   })
 
-  test('keeps thumbnail actions inset and separated on narrow layouts', async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 800 })
+  test('keeps thumbnail actions inset and separated on narrow desktop layouts', async ({ page }) => {
+    await page.setViewportSize({ width: 680, height: 800 })
     await goTo(page, 'history')
 
     const video = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere' })
