@@ -17,7 +17,8 @@ jobs:
   sync:
     if: >-
       github.repository == 'OpenTubeX/OpenTubeX' &&
-      github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+      (github.event_name == 'schedule' ||
+      github.ref == format('refs/heads/{0}', github.event.repository.default_branch))
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

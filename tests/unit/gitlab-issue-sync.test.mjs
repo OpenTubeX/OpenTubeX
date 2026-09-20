@@ -196,12 +196,14 @@ test('the privileged workflow job runs only on the canonical default branch', as
   const { runInNewContext } = await import('node:vm')
   const { parse } = await import('yaml')
   const workflow = parse(readFileSync(new URL('../../.github/workflows/gitlab-issue-sync.yml', import.meta.url), 'utf8'))
-  const canRun = (repository, ref) => runInNewContext(workflow.jobs.sync.if, {
-    github: { repository, ref, event: { repository: { default_branch: 'development' } } },
+  const canRun = (repository, ref, eventName = 'workflow_dispatch') => runInNewContext(workflow.jobs.sync.if, {
+    github: { repository, ref, event_name: eventName, event: { repository: eventName === 'schedule' ? {} : { default_branch: 'development' } } },
     format: (template, value) => template.replace('{0}', value),
   })
   assert.equal(canRun('OpenTubeX/OpenTubeX', 'refs/heads/development'), true)
   assert.equal(canRun('OpenTubeX/OpenTubeX', 'refs/heads/feature'), false)
   assert.equal(canRun('OpenTubeX/OpenTubeX', 'refs/tags/development'), false)
   assert.equal(canRun('other/fork', 'refs/heads/development'), false)
+  assert.equal(canRun('OpenTubeX/OpenTubeX', 'refs/heads/development', 'schedule'), true)
+  assert.equal(canRun('other/fork', 'refs/heads/development', 'schedule'), false)
 })
