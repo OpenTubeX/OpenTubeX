@@ -13,6 +13,7 @@ public class YtDlpDownloadProgressTest {
         assertEquals("preparing", record.getString("status"));
         assertEquals(0, record.getDouble("percent"), 0);
         assertTrue(record.isNull("eta"));
+        assertTrue(record.isNull("speed"));
         YtDlpDownloads.updateProgress(record, "__OPENTUBEX_DOWNLOAD__:downloading\t97.3%\t2MiB/s\t00:00");
         assertEquals("downloading", record.getString("status"));
         assertEquals(97.3, record.getDouble("percent"), 0);

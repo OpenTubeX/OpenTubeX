@@ -105,3 +105,15 @@ for (const initialStatus of ['paused', 'pausing']) {
     assert.equal(entry.resumeStatus, 'processing')
   })
 }
+
+test('storage history includes only terminal downloads that the backend can clear', () => {
+  const storageSource = readFileSync(new URL('../../src/renderer/components/StorageSettings/StorageSettings.vue', import.meta.url), 'utf8')
+  const start = storageSource.indexOf('const finishedDownloads = computed(')
+  const end = storageSource.indexOf('\nconst downloadedMediaBytes', start)
+  const records = ['queued', 'preparing', 'downloading', 'processing', 'pausing', 'paused', 'completed', 'failed', 'cancelled', 'skipped']
+    .map((status, id) => ({ id, status }))
+  const result = vm.runInNewContext(`${storageSource.slice(start, end)}\nfinishedDownloads.value`, {
+    computed: getter => ({ value: getter() }), downloads: { value: records },
+  })
+  assert.deepEqual(Array.from(result, record => record.status), ['completed', 'failed', 'cancelled', 'skipped'])
+})
