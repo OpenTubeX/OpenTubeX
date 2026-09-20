@@ -308,9 +308,10 @@ Settings:
       After current tab: پس از زبانه فعلی
       After current tab in opened order: پس از زبانه فعلی، به ترتیب بازشدن
     Tab Close Focus:
+      Last active tab: "آخرین زبانهٔ فعال"
+      Next tab in tab order: "زبانهٔ بعدی در ترتیب زبانه‌ها"
+      Previous tab in tab order: "زبانهٔ قبلی در ترتیب زبانه‌ها"
       Tab Close Focus: پس از بستن زبانه
-      Previous tab: انتخاب زبانه قبلی
-      Next tab: انتخاب زبانه بعدی
     Startup Behavior:
       Startup Behavior: هنگام راه‌اندازی
       Load all tabs: بارگذاری همه زبانه‌ها

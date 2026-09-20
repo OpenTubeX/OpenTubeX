@@ -293,9 +293,10 @@ Settings:
       After current tab: След текущия раздел
       After current tab in opened order: След текущия раздел, по реда на отваряне
     Tab Close Focus:
+      Last active tab: "Последно активен раздел"
+      Next tab in tab order: "Следващ раздел в реда на разделите"
+      Previous tab in tab order: "Предишен раздел в реда на разделите"
       Tab Close Focus: След затваряне на раздел
-      Previous tab: Избери предишния раздел
-      Next tab: Избери следващия раздел
     Startup Behavior:
       Startup Behavior: При стартиране
       Load all tabs: Зареди всички раздели

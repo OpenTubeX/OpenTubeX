@@ -291,9 +291,10 @@ Settings:
       After current tab: 現在のタブの後ろ
       After current tab in opened order: 現在のタブの後ろに開いた順で配置
     Tab Close Focus:
+      Last active tab: "最後にアクティブだったタブ"
+      Next tab in tab order: "タブの並び順で次のタブ"
+      Previous tab in tab order: "タブの並び順で前のタブ"
       Tab Close Focus: タブを閉じた後
-      Previous tab: 前のタブを選択
-      Next tab: 次のタブを選択
     Startup Behavior:
       Startup Behavior: 起動時
       Load all tabs: すべてのタブを読み込む

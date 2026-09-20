@@ -291,9 +291,10 @@ Settings:
       After current tab: Après l’onglet actuel
       After current tab in opened order: Après l’onglet actuel, dans l’ordre d’ouverture
     Tab Close Focus:
+      Last active tab: "Dernier onglet actif"
+      Next tab in tab order: "Onglet suivant dans l’ordre des onglets"
+      Previous tab in tab order: "Onglet précédent dans l’ordre des onglets"
       Tab Close Focus: Après la fermeture d’un onglet
-      Previous tab: Sélectionner l’onglet précédent
-      Next tab: Sélectionner l’onglet suivant
     Startup Behavior:
       Startup Behavior: Au démarrage
       Load all tabs: Charger tous les onglets

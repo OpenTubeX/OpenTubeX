@@ -291,9 +291,10 @@ Settings:
       After current tab: 当前标签页之后
       After current tab in opened order: 按打开顺序排列在当前标签页之后
     Tab Close Focus:
+      Last active tab: "最后使用的标签页"
+      Next tab in tab order: "按标签页顺序选择下一个"
+      Previous tab in tab order: "按标签页顺序选择上一个"
       Tab Close Focus: 关闭标签页后
-      Previous tab: 选择上一个标签页
-      Next tab: 选择下一个标签页
     Startup Behavior:
       Startup Behavior: 启动时
       Load all tabs: 加载所有标签页
@@ -1528,7 +1529,7 @@ Tooltips:
       选择 OpenTubeX 启动时执行的操作。
       加载所有标签页会立即恢复所有已保存的标签页，但后台标签页不会自动播放视频。
       加载上次已加载的标签页会重新加载 OpenTubeX 关闭时已加载的标签页，其他标签页则保持未加载状态。
-      加载上次活动的标签页会恢复上一个会话，同时打开其他标签页但不加载；点击这些标签页时才会加载。
+      加载最后使用的标签页会恢复上一个会话，同时打开其他标签页但不加载；点击这些标签页时才会加载。
       以空会话启动会跳过已保存的标签页并打开一个新窗口。
     Remember Tab Navigation History: 保存每个标签页的前进和后退导航历史，并在 OpenTubeX 重新启动时恢复。
   Proxy Settings:

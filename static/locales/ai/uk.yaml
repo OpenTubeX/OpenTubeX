@@ -295,9 +295,10 @@ Settings:
       After current tab: Після поточної вкладки
       After current tab in opened order: Після поточної вкладки в порядку відкриття
     Tab Close Focus:
+      Last active tab: "Остання активна вкладка"
+      Next tab in tab order: "Наступна вкладка в порядку вкладок"
+      Previous tab in tab order: "Попередня вкладка в порядку вкладок"
       Tab Close Focus: Після закриття вкладки
-      Previous tab: Вибрати попередню вкладку
-      Next tab: Вибрати наступну вкладку
     Startup Behavior:
       Startup Behavior: Під час запуску
       Load all tabs: Завантажувати всі вкладки

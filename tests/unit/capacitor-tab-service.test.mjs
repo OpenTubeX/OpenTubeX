@@ -613,3 +613,52 @@ test('the mobile tab budget protects changed select controls', t => {
   }
   service.dispose()
 })
+
+for (const focus of ['lastActiveTab', undefined]) {
+  test(`mobile ${focus ?? 'default'} returns to the last active surviving tab`, async () => {
+    const store = createStore(createThreeTabSession())
+    store.getters.getTabCloseFocus = focus
+    const service = new CapacitorTabService(createRouter(), store, createNavigation(store, true))
+    await service.activateTab('tab-a')
+    await service.activateTab('tab-c')
+    assert.equal(await service.closeTab('tab-c'), true)
+    assert.equal(store.getters.getActiveTabId, 'tab-a')
+    assert.equal(await service.closeTab('tab-a'), true)
+    assert.equal(store.getters.getActiveTabId, 'tab-b')
+  })
+}
+
+test('mobile background opens and closes do not change activation history', async () => {
+  const store = createStore(createThreeTabSession())
+  const service = new CapacitorTabService(createRouter(), store, createNavigation(store, true))
+  await service.activateTab('tab-a')
+  await service.activateTab('tab-c')
+  const background = await service.createTab(WATCH_ROUTE, '', false)
+  await service.closeTab('tab-b')
+  assert.equal(store.getters.getActiveTabId, 'tab-c')
+  await service.closeTab('tab-c')
+  assert.equal(store.getters.getActiveTabId, 'tab-a')
+  assert.ok(store.getters.getTabById(background))
+})
+
+test('mobile without activation history falls back to next then previous tab', async () => {
+  const store = createStore(createThreeTabSession())
+  const service = new CapacitorTabService(createRouter(), store, createNavigation(store, true))
+  await service.closeTab('tab-b')
+  assert.equal(store.getters.getActiveTabId, 'tab-c')
+  await service.closeTab('tab-c')
+  assert.equal(store.getters.getActiveTabId, 'tab-a')
+})
+
+test('mobile failed activation does not become the last active tab', async () => {
+  const store = createStore(createThreeTabSession())
+  const navigation = createNavigation(store, true)
+  const service = new CapacitorTabService(createRouter(), store, navigation)
+  await service.activateTab('tab-c')
+  await service.activateTab('tab-a')
+  const present = navigation.requestPresentation
+  navigation.requestPresentation = async (id, revision) => id !== 'tab-b' && present(id, revision)
+  assert.equal(await service.activateTab('tab-b'), false)
+  assert.equal(await service.closeTab('tab-a'), true)
+  assert.equal(store.getters.getActiveTabId, 'tab-c')
+})

@@ -426,9 +426,10 @@ Settings:
       After current tab: Després de la pestanya actual
       After current tab in opened order: Després de la pestanya actual, en l'ordre d'obertura
     Tab Close Focus:
+      Last active tab: "Darrera pestanya activa"
+      Next tab in tab order: "Pestanya següent en l’ordre de pestanyes"
+      Previous tab in tab order: "Pestanya anterior en l’ordre de pestanyes"
       Tab Close Focus: Després de tancar una pestanya
-      Previous tab: Selecciona la pestanya anterior
-      Next tab: Selecciona la pestanya següent
     Startup Behavior:
       Startup Behavior: En iniciar
       Load all tabs: Carrega totes les pestanyes

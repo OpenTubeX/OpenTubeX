@@ -291,9 +291,10 @@ Settings:
       After current tab: Setelah tab saat ini
       After current tab in opened order: Setelah tab saat ini, sesuai urutan dibuka
     Tab Close Focus:
+      Last active tab: "Tab aktif terakhir"
+      Next tab in tab order: "Tab berikutnya dalam urutan tab"
+      Previous tab in tab order: "Tab sebelumnya dalam urutan tab"
       Tab Close Focus: Setelah Menutup Tab
-      Previous tab: Pilih tab sebelumnya
-      Next tab: Pilih tab berikutnya
     Startup Behavior:
       Startup Behavior: Saat Aplikasi Dimulai
       Load all tabs: Muat semua tab

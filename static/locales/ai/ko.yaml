@@ -384,9 +384,10 @@ Settings:
       After current tab: 현재 탭 뒤
       After current tab in opened order: 현재 탭 뒤, 연 순서대로
     Tab Close Focus:
+      Last active tab: "마지막 활성 탭"
+      Next tab in tab order: "탭 순서상 다음 탭"
+      Previous tab in tab order: "탭 순서상 이전 탭"
       Tab Close Focus: 탭을 닫은 후
-      Previous tab: 이전 탭 선택
-      Next tab: 다음 탭 선택
     Startup Behavior:
       Startup Behavior: 시작할 때
       Load all tabs: 모든 탭 불러오기

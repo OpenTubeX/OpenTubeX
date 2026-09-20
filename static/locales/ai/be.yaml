@@ -308,9 +308,10 @@ Settings:
       After current tab: Пасля бягучай укладкі
       After current tab in opened order: Пасля бягучай укладкі паводле чаргі адкрыцця
     Tab Close Focus:
+      Last active tab: "Апошняя актыўная ўкладка"
+      Next tab in tab order: "Наступная ўкладка ў парадку ўкладак"
+      Previous tab in tab order: "Папярэдняя ўкладка ў парадку ўкладак"
       Tab Close Focus: Пасля закрыцця ўкладкі
-      Previous tab: Выбраць папярэднюю ўкладку
-      Next tab: Выбраць наступную ўкладку
     Startup Behavior:
       Startup Behavior: Пры запуску
       Load all tabs: Загрузіць усе ўкладкі

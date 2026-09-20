@@ -402,3 +402,47 @@ test('group icons are validated, updated and restored from session metadata', t 
   manager.updateTabGroup(group.id, { icon: '../invalid.svg' })
   assert.equal(manager.tabGroups.get(group.id).icon, 'layer-group')
 })
+
+test('closing tabs returns through activation history instead of tab order', async t => {
+  TabManager.setTabCloseFocus('lastActiveTab')
+  const manager = createManager(t)
+  await manager.restoreFromData(session(5), { restoreTabLoadState: true })
+  manager.activateTab('tab-0')
+  manager.activateTab('tab-2')
+  manager.closeTab('tab-2')
+  assert.equal(manager.activeTabId, 'tab-0')
+  manager.closeTab('tab-0')
+  assert.equal(manager.activeTabId, 'tab-4')
+})
+
+test('last active focus skips unavailable tabs and falls back right then left', async t => {
+  TabManager.setTabCloseFocus('lastActiveTab')
+  const manager = createManager(t)
+  await manager.restoreFromData(session(5), { restoreTabLoadState: true })
+  manager.activateTab('tab-0')
+  manager.activateTab('tab-2')
+  manager._deferredCloseTabIds.add('tab-0')
+  assert.equal(manager._getNeighborTabId('tab-2'), 'tab-4')
+  assert.equal(manager._getNeighborTabId('tab-2', false, new Set(['tab-4'])), 'tab-3')
+  manager.tabs.get('tab-3').isTransferStaged = true
+  assert.equal(manager._getNeighborTabId('tab-2', false, new Set(['tab-4'])), 'tab-1')
+})
+
+test('desktop background closes preserve focus and closed history entries are skipped', async t => {
+  TabManager.setTabCloseFocus('lastActiveTab')
+  const manager = createManager(t)
+  await manager.restoreFromData(session(5), { restoreTabLoadState: true })
+  manager.activateTab('tab-0')
+  manager.activateTab('tab-2')
+  manager.closeTab('tab-0')
+  assert.equal(manager.activeTabId, 'tab-2')
+  manager.closeTab('tab-2')
+  assert.equal(manager.activeTabId, 'tab-4')
+})
+
+test('desktop defaults to last active focus while preserving directional preferences', () => {
+  assert.equal(TabManager.normalizeTabCloseFocus(undefined), 'lastActiveTab')
+  assert.equal(TabManager.normalizeTabCloseFocus('invalid'), 'lastActiveTab')
+  assert.equal(TabManager.normalizeTabCloseFocus('previousTab'), 'previousTab')
+  assert.equal(TabManager.normalizeTabCloseFocus('nextTab'), 'nextTab')
+})

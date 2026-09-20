@@ -291,9 +291,10 @@ Settings:
       After current tab: Praeguse vahekaardi järel
       After current tab in opened order: Praeguse vahekaardi järel avamisjärjekorras
     Tab Close Focus:
+      Last active tab: "Viimati aktiivne vahekaart"
+      Next tab in tab order: "Järgmine vahekaart vahekaartide järjekorras"
+      Previous tab in tab order: "Eelmine vahekaart vahekaartide järjekorras"
       Tab Close Focus: Pärast vahekaardi sulgemist
-      Previous tab: Vali eelmine vahekaart
-      Next tab: Vali järgmine vahekaart
     Startup Behavior:
       Startup Behavior: Käivitamisel
       Load all tabs: Laadi kõik vahekaardid

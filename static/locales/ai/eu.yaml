@@ -291,9 +291,10 @@ Settings:
       After current tab: Uneko fitxaren ondoren
       After current tab in opened order: Uneko fitxaren ondoren, irekitze-ordenan
     Tab Close Focus:
+      Last active tab: "Azken fitxa aktiboa"
+      Next tab in tab order: "Hurrengo fitxa fitxen ordenan"
+      Previous tab in tab order: "Aurreko fitxa fitxen ordenan"
       Tab Close Focus: Fitxa bat itxi ondoren
-      Previous tab: Hautatu aurreko fitxa
-      Next tab: Hautatu hurrengo fitxa
     Startup Behavior:
       Startup Behavior: Abioan
       Load all tabs: Kargatu fitxa guztiak

@@ -409,9 +409,10 @@ Settings:
       After current tab: Po dabartinio skirtuko
       After current tab in opened order: Po dabartinio skirtuko, atidarymo eilės tvarka
     Tab Close Focus:
+      Last active tab: "Paskutinis aktyvus skirtukas"
+      Next tab in tab order: "Kitas skirtukas skirtukų eilėje"
+      Previous tab in tab order: "Ankstesnis skirtukas skirtukų eilėje"
       Tab Close Focus: Užvėrus skirtuką
-      Previous tab: Pasirinkti ankstesnį skirtuką
-      Next tab: Pasirinkti kitą skirtuką
     Startup Behavior:
       Startup Behavior: Paleidžiant programą
       Load all tabs: Įkelti visus skirtukus

@@ -295,9 +295,10 @@ Settings:
       After current tab: Μετά την τρέχουσα καρτέλα
       After current tab in opened order: Μετά την τρέχουσα καρτέλα, με τη σειρά ανοίγματος
     Tab Close Focus:
+      Last active tab: "Τελευταία ενεργή καρτέλα"
+      Next tab in tab order: "Επόμενη καρτέλα στη σειρά καρτελών"
+      Previous tab in tab order: "Προηγούμενη καρτέλα στη σειρά καρτελών"
       Tab Close Focus: Μετά το κλείσιμο καρτέλας
-      Previous tab: Επιλογή προηγούμενης καρτέλας
-      Next tab: Επιλογή επόμενης καρτέλας
     Startup Behavior:
       Startup Behavior: Κατά την εκκίνηση
       Load all tabs: Φόρτωση όλων των καρτελών

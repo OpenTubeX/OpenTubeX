@@ -291,9 +291,10 @@ Settings:
       After current tab: Dopo la scheda corrente
       After current tab in opened order: Dopo la scheda corrente, in ordine di apertura
     Tab Close Focus:
+      Last active tab: "Ultima scheda attiva"
+      Next tab in tab order: "Scheda successiva nell’ordine delle schede"
+      Previous tab in tab order: "Scheda precedente nell’ordine delle schede"
       Tab Close Focus: Dopo la chiusura di una scheda
-      Previous tab: Seleziona la scheda precedente
-      Next tab: Seleziona la scheda successiva
     Startup Behavior:
       Startup Behavior: All'avvio
       Load all tabs: Carica tutte le schede

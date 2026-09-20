@@ -291,9 +291,10 @@ Settings:
       After current tab: Az aktuális lap után
       After current tab in opened order: Az aktuális lap után, megnyitási sorrendben
     Tab Close Focus:
+      Last active tab: "Legutóbb aktív lap"
+      Next tab in tab order: "Következő lap a lapok sorrendjében"
+      Previous tab in tab order: "Előző lap a lapok sorrendjében"
       Tab Close Focus: Lap bezárása után
-      Previous tab: Előző lap kiválasztása
-      Next tab: Következő lap kiválasztása
     Startup Behavior:
       Startup Behavior: Indításkor
       Load all tabs: Összes lap betöltése
