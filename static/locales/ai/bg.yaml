@@ -1373,6 +1373,10 @@ Share:
   Share failed: "Връзката не можа да бъде споделена"
   Timestamp Link Copied: Връзката към времевия маркер е копирана в системния буфер
 Context Menu:
+  Select Tab: Избиране на раздел
+  Close Tabs Before: Затваряне на предишните раздели
+  Close Tabs After: Затваряне на следващите раздели
+  Close Other Tabs: Затваряне на другите раздели
   Copy {service} link without playlist: "Копиране на връзката към {service} без плейлиста"
   Context Menu: Контекстно меню
   Select All: Избиране на всичко

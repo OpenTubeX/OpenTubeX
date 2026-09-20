@@ -1359,6 +1359,10 @@ Share:
   Share failed: "Odkaz sa nepodarilo zdieľať"
   Timestamp Link Copied: Odkaz s časovým údajom bol skopírovaný do schránky
 Context Menu:
+  Select Tab: Vybrať kartu
+  Close Tabs Before: Zavrieť predchádzajúce karty
+  Close Tabs After: Zavrieť nasledujúce karty
+  Close Other Tabs: Zavrieť ostatné karty
   Copy {service} link without playlist: "Kopírovať odkaz na {service} bez zoznamu videí"
   Context Menu: Kontextová ponuka
   Select All: Vybrať všetko

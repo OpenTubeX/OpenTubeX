@@ -1382,6 +1382,10 @@ Share:
   Share failed: "Methu rhannu’r ddolen"
   Timestamp Link Copied: Wedi copïo dolen y stamp amser i'r clipfwrdd
 Context Menu:
+  Select Tab: Dewis tab
+  Close Tabs Before: Cau tabiau blaenorol
+  Close Tabs After: Cau tabiau dilynol
+  Close Other Tabs: Cau tabiau eraill
   Copy {service} link without playlist: "Copïo dolen {service} heb restr chwarae"
   Context Menu: Dewislen cyd-destun
   Select All: Dewis y cyfan

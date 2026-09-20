@@ -1397,6 +1397,10 @@ Share:
   Share failed: "Δεν ήταν δυνατή η κοινοποίηση του συνδέσμου"
   Timestamp Link Copied: Ο σύνδεσμος χρονικής ένδειξης αντιγράφηκε στο πρόχειρο
 Context Menu:
+  Select Tab: Επιλογή καρτέλας
+  Close Tabs Before: Κλείσιμο προηγούμενων καρτελών
+  Close Tabs After: Κλείσιμο επόμενων καρτελών
+  Close Other Tabs: Κλείσιμο άλλων καρτελών
   Copy {service} link without playlist: "Αντιγραφή συνδέσμου {service} χωρίς λίστα αναπαραγωγής"
   Context Menu: Μενού περιβάλλοντος
   Select All: Επιλογή όλων

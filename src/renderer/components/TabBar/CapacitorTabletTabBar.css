@@ -205,3 +205,24 @@
 :global(:root[data-reduced-motion='reduce']) .capacitorTabletTab {
   transition: none;
 }
+
+.capacitorTabletTabSelection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 48px;
+  min-block-size: 48px;
+  cursor: pointer;
+}
+
+.capacitorTabletTabSelection input {
+  inline-size: 20px;
+  block-size: 20px;
+  accent-color: var(--primary-color);
+  cursor: pointer;
+}
+
+.capacitorTabletTabSelection input:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 1px;
+}

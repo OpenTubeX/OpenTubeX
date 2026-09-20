@@ -1392,6 +1392,10 @@ Share:
   Share failed: "Не вдалося поділитися посиланням"
   Timestamp Link Copied: Посилання з позначкою часу скопійовано до буфера обміну
 Context Menu:
+  Select Tab: Вибрати вкладку
+  Close Tabs Before: Закрити попередні вкладки
+  Close Tabs After: Закрити наступні вкладки
+  Close Other Tabs: Закрити інші вкладки
   Copy {service} link without playlist: "Копіювати посилання {service} без списку відтворення"
   Context Menu: Контекстне меню
   Select All: Вибрати все

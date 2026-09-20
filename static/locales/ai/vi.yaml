@@ -1389,6 +1389,10 @@ Share:
   Share failed: "Không thể chia sẻ liên kết"
   Timestamp Link Copied: Đã sao chép liên kết có mốc thời gian vào bảng nhớ tạm
 Context Menu:
+  Select Tab: Chọn thẻ
+  Close Tabs Before: Đóng các thẻ trước
+  Close Tabs After: Đóng các thẻ sau
+  Close Other Tabs: Đóng các thẻ khác
   Copy {service} link without playlist: "Sao chép liên kết {service} không kèm danh sách phát"
   Context Menu: Menu ngữ cảnh
   Select All: Chọn tất cả

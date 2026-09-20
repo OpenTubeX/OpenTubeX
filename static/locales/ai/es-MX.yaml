@@ -1688,6 +1688,10 @@ Clipboard:
   Copy failed: Error al copiar al portapapeles
   Cannot access clipboard without a secure connection: No se puede acceder al portapapeles sin una conexión segura
 Context Menu:
+  Select Tab: Seleccionar pestaña
+  Close Tabs Before: Cerrar pestañas anteriores
+  Close Tabs After: Cerrar pestañas posteriores
+  Close Other Tabs: Cerrar otras pestañas
   Copy {service} link without playlist: "Copiar enlace de {service} sin lista de reproducción"
   Context Menu: Menú contextual
   Select All: Seleccionar todo

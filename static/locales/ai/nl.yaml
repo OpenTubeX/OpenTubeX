@@ -1408,6 +1408,10 @@ Share:
   Share failed: "Kan de link niet delen"
   Timestamp Link Copied: Link met tijdsaanduiding naar klembord gekopieerd
 Context Menu:
+  Select Tab: Tabblad selecteren
+  Close Tabs Before: Voorgaande tabbladen sluiten
+  Close Tabs After: Volgende tabbladen sluiten
+  Close Other Tabs: Andere tabbladen sluiten
   Copy {service} link without playlist: "{service}-link zonder afspeellijst kopiëren"
   Context Menu: Contextmenu
   Select All: Alles selecteren

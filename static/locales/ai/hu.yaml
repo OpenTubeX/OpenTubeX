@@ -1359,6 +1359,10 @@ Share:
   Share failed: "Nem sikerült megosztani a hivatkozást"
   Timestamp Link Copied: Időbélyeges hivatkozás a vágólapra másolva
 Context Menu:
+  Select Tab: Lap kijelölése
+  Close Tabs Before: Előző lapok bezárása
+  Close Tabs After: Következő lapok bezárása
+  Close Other Tabs: Többi lap bezárása
   Copy {service} link without playlist: "{service}-hivatkozás másolása lejátszási lista nélkül"
   Context Menu: Helyi menü
   Select All: Összes kijelölése

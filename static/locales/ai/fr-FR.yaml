@@ -1358,6 +1358,10 @@ Share:
   Share failed: "Impossible de partager le lien"
   Timestamp Link Copied: Lien horodaté copié dans le presse-papiers
 Context Menu:
+  Select Tab: Sélectionner l’onglet
+  Close Tabs Before: Fermer les onglets précédents
+  Close Tabs After: Fermer les onglets suivants
+  Close Other Tabs: Fermer les autres onglets
   Copy {service} link without playlist: "Copier le lien {service} sans la playlist"
   Context Menu: Menu contextuel
   Select All: Tout sélectionner

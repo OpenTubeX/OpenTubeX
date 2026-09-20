@@ -688,6 +688,10 @@ Change Format:
   yt-dlp Default Clients Fallback: Preferowani klienci yt-dlp nie dostarczyli strumieni możliwych do odtworzenia. Zostaną użyci domyślni klienci yt-dlp
   Built-in Fallback Template: 'Wbudowany mechanizm nie odtworzył strumienia. Zostanie użyty yt-dlp: {error}'
 Context Menu:
+  Select Tab: Zaznacz kartę
+  Close Tabs Before: Zamknij poprzednie karty
+  Close Tabs After: Zamknij następne karty
+  Close Other Tabs: Zamknij inne karty
   Copy {service} link without playlist: "Kopiuj link do {service} bez playlisty"
   Move Tab to Group: Przenieś kartę do grupy
   Collapse Group: Zwiń grupę

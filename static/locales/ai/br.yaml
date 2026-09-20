@@ -1369,6 +1369,10 @@ Share:
   Share failed: "N’eus ket bet gallet rannañ al liamm"
   Timestamp Link Copied: "Eilet eo bet al liamm gant ar mare er golver"
 Context Menu:
+  Select Tab: Diuzañ an ivinell
+  Close Tabs Before: Serriñ an ivinelloù a-raok
+  Close Tabs After: Serriñ an ivinelloù war-lerc’h
+  Close Other Tabs: Serriñ an ivinelloù all
   Copy {service} link without playlist: "Eilañ al liamm {service} hep ar roll-lenn"
   Context Menu: "Roll lañser"
   Select All: "Diuzañ pep tra"

@@ -1373,6 +1373,10 @@ Share:
   Share failed: "Kunne ikke dele lenken"
   Timestamp Link Copied: Lenken med tidsstempel er kopiert til utklippstavlen
 Context Menu:
+  Select Tab: Velg fane
+  Close Tabs Before: Lukk foregående faner
+  Close Tabs After: Lukk etterfølgende faner
+  Close Other Tabs: Lukk andre faner
   Copy {service} link without playlist: "Kopier {service}-lenke uten spilleliste"
   Context Menu: Kontekstmeny
   Select All: Merk alt

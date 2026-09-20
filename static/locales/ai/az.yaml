@@ -1371,6 +1371,10 @@ Share:
   Share failed: Link paylaşıla bilmədi
   Timestamp Link Copied: Vaxt göstəricili link buferə köçürüldü
 Context Menu:
+  Select Tab: Vərəqi seç
+  Close Tabs Before: Əvvəlki vərəqləri bağla
+  Close Tabs After: Sonrakı vərəqləri bağla
+  Close Other Tabs: Digər vərəqləri bağla
   Copy {service} link without playlist: "{service} keçidini pleylist olmadan kopyala"
   Context Menu: Kontekst menyusu
   Select All: Hamısını seç

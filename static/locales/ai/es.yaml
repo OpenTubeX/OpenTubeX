@@ -1387,6 +1387,10 @@ Share:
   Share failed: "No se pudo compartir el enlace"
   Timestamp Link Copied: Enlace con marca de tiempo copiado al portapapeles
 Context Menu:
+  Select Tab: Seleccionar pestaña
+  Close Tabs Before: Cerrar pestañas anteriores
+  Close Tabs After: Cerrar pestañas posteriores
+  Close Other Tabs: Cerrar otras pestañas
   Copy {service} link without playlist: "Copiar enlace de {service} sin lista de reproducción"
   Context Menu: Menú contextual
   Select All: Seleccionar todo

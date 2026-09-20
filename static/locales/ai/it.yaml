@@ -1359,6 +1359,10 @@ Share:
   Share failed: "Impossibile condividere il link"
   Timestamp Link Copied: Link con indicazione temporale copiato negli appunti
 Context Menu:
+  Select Tab: Seleziona scheda
+  Close Tabs Before: Chiudi schede precedenti
+  Close Tabs After: Chiudi schede successive
+  Close Other Tabs: Chiudi altre schede
   Copy {service} link without playlist: "Copia il link di {service} senza playlist"
   Context Menu: Menu contestuale
   Select All: Seleziona tutto

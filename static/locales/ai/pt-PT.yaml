@@ -1389,6 +1389,10 @@ Share:
   Share failed: "Não foi possível partilhar a ligação"
   Timestamp Link Copied: Hiperligação com marca temporal copiada para a área de transferência
 Context Menu:
+  Select Tab: Selecionar separador
+  Close Tabs Before: Fechar separadores anteriores
+  Close Tabs After: Fechar separadores seguintes
+  Close Other Tabs: Fechar outros separadores
   Copy {service} link without playlist: "Copiar ligação do {service} sem lista de reprodução"
   Context Menu: Menu de contexto
   Select All: Selecionar tudo

@@ -1374,6 +1374,10 @@ Share:
   Share failed: "Ezin izan da esteka partekatu"
   Timestamp Link Copied: Denbora-markaren esteka arbelean kopiatu da
 Context Menu:
+  Select Tab: Hautatu fitxa
+  Close Tabs Before: Itxi aurreko fitxak
+  Close Tabs After: Itxi ondorengo fitxak
+  Close Other Tabs: Itxi beste fitxak
   Copy {service} link without playlist: "Kopiatu {service} esteka erreprodukzio-zerrendarik gabe"
   Context Menu: Laster-menua
   Select All: Hautatu dena

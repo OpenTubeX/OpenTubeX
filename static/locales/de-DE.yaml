@@ -2602,6 +2602,10 @@ Next match: Nächster Treffer
 Close find bar: Suchleiste schließen
 No matches: Keine Treffer
 Context Menu:
+  Select Tab: Tab auswählen
+  Close Tabs Before: Tabs davor schließen
+  Close Tabs After: Tabs danach schließen
+  Close Other Tabs: Andere Tabs schließen
   Copy {service} link without playlist: "{service}-Link ohne Playlist kopieren"
   Context Menu: Kontextmenü
   Select All: Alles auswählen

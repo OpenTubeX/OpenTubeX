@@ -1367,6 +1367,10 @@ Share:
   Share failed: "Tidak dapat membagikan tautan"
   Timestamp Link Copied: Tautan stempel waktu disalin ke papan klip
 Context Menu:
+  Select Tab: Pilih Tab
+  Close Tabs Before: Tutup Tab Sebelumnya
+  Close Tabs After: Tutup Tab Sesudahnya
+  Close Other Tabs: Tutup Tab Lainnya
   Copy {service} link without playlist: "Salin tautan {service} tanpa playlist"
   Context Menu: Menu konteks
   Select All: Pilih Semua

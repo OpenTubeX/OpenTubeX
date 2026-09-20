@@ -2350,3 +2350,82 @@ test('fetches an uncached local channel avatar in the phone organizer', async ({
   expect(requests).toBe(1)
   expect(page.url()).toBe(activeUrl)
 })
+
+for (const zoom of [1, 0.95]) {
+  test(`mobile tab selection uses checkboxes and cancels without activating at ${zoom} scale`, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 375, height: 760 })
+    await page.evaluate(async factor => {
+      await window.ftElectron.setZoomFactor(factor)
+      const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+      for (let index = 0; index < 5; index++) {
+        await store.dispatch('createTab', { route: '/subscriptions', makeActive: false })
+      }
+    }, zoom)
+    await enablePhoneTabSwitcher(page)
+    await page.locator('.capacitorPhoneTabSwitcherButton').click()
+    const cards = page.locator('.capacitorPhoneTabRow')
+    const target = cards.first().locator('.capacitorPhoneTabTarget')
+    const bounds = await target.boundingBox()
+    await page.mouse.move(bounds.x + 24, bounds.y + 24)
+    await page.mouse.down()
+    await expect(page.locator('.capacitorTabActions')).toBeVisible()
+    await page.mouse.up()
+    await page.getByRole('menuitem', { name: 'Close Tabs', exact: true }).click()
+    await expect(page.getByRole('menuitem', { name: 'Close Tabs Before', exact: true })).toBeDisabled()
+    await expect(page.getByRole('menuitem', { name: 'Close Tabs After', exact: true })).toBeEnabled()
+    await expect(page.getByRole('menuitem', { name: 'Close Other Tabs', exact: true })).toBeEnabled()
+    await page.getByRole('menuitem', { name: 'Back', exact: true }).click()
+    await page.getByRole('menuitem', { name: 'Select Tab', exact: true }).click()
+    await expect(cards.first().getByRole('checkbox')).toBeChecked()
+    await expect(target).toBeFocused()
+    await expect(cards.getByRole('checkbox')).toHaveCount(6)
+    await expect(page.locator('.capacitorPhoneTabFab')).toBeHidden()
+    await cards.nth(1).getByRole('checkbox').check()
+    await expect(page.getByRole('button', { name: 'Close 2 Tabs', exact: true })).toBeVisible()
+    await cards.nth(2).locator('.capacitorPhoneTabTarget').click()
+    await expect(cards.nth(2).getByRole('checkbox')).toBeChecked()
+    await expect(page.locator('.capacitorPhoneTabDialog')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Close 3 Tabs', exact: true })).toBeVisible()
+    const panel = page.locator('#capacitor-phone-open-tabs-panel')
+    await panel.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await page.getByRole('button', { name: 'Cancel', exact: true }).click()
+    await expect(cards.getByRole('checkbox')).toHaveCount(0)
+    await expect(page.locator('.capacitorPhoneTabFab')).toBeVisible()
+    await expect.poll(async () => {
+      const state = await phoneTabScrollState(page, '.capacitorPhoneOpenTabs')
+      return state.scrollTop <= state.maximum + 1
+    }).toBe(true)
+    await setWindowSize(app, page, { width: 760, height: 375 })
+    await cards.first().locator('.capacitorPhoneTabTarget').click({ button: 'right' })
+    const menuScroll = page.locator('.capacitorTabActionList')
+    await menuScroll.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => menuScroll.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await page.getByRole('menuitem', { name: 'Close Tabs', exact: true }).click()
+    await expect(page.getByRole('menuitem', { name: 'Select Tab', exact: true })).toHaveCount(0)
+    await expect.poll(() => menuScroll.evaluate(element => ({
+      offset: element.scrollTop,
+      unusable: element.querySelector('.os-scrollbar-vertical').classList.contains('os-scrollbar-unusable'),
+    }))).toEqual({ offset: 0, unusable: true })
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('menuitem', { name: 'Close Tabs', exact: true })).toBeFocused()
+    await expect.poll(() => menuScroll.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await page.getByRole('menuitem', { name: 'Select Tab', exact: true }).click()
+    await expect(page.getByRole('button', { name: 'Cancel', exact: true })).toBeVisible()
+    await expect(cards.first().getByRole('checkbox')).toBeChecked()
+  })
+}
+
+test('mobile close submenu keeps Back focused when every action is disabled', async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 375, height: 760 })
+  await enablePhoneTabSwitcher(page)
+  await page.locator('.capacitorPhoneTabSwitcherButton').click()
+  await page.locator('.capacitorPhoneTabTarget').click({ button: 'right' })
+  await page.getByRole('menuitem', { name: 'Close Tabs', exact: true }).click()
+  await expect(page.locator('.capacitorTabActionList button:disabled')).toHaveCount(3)
+  await expect(page.getByRole('menuitem', { name: 'Back', exact: true })).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('menuitem', { name: 'Close Tabs', exact: true })).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(page.locator('.capacitorTabActions')).toBeHidden()
+  await expect(page.locator('.capacitorPhoneTabDialog')).toBeVisible()
+})

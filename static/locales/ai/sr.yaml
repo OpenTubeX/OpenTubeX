@@ -1422,6 +1422,10 @@ Share:
   Share Post: Подели објаву
   Timestamp Link Copied: Веза до временске ознаке је копирана у привремену меморију
 Context Menu:
+  Select Tab: Изабери картицу
+  Close Tabs Before: Затвори претходне картице
+  Close Tabs After: Затвори следеће картице
+  Close Other Tabs: Затвори остале картице
   Copy {service} link without playlist: "Копирај {service} везу без листе за репродукцију"
   Context Menu: Контекстни мени
   Select All: Изабери све

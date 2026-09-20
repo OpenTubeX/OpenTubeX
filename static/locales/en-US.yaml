@@ -2372,6 +2372,10 @@ Clipboard:
   Cannot access clipboard without a secure connection: Cannot access clipboard without a secure connection
 
 Context Menu:
+  Select Tab: Select Tab
+  Close Tabs Before: Close Tabs Before
+  Close Tabs After: Close Tabs After
+  Close Other Tabs: Close Other Tabs
   Copy {service} link without playlist: "Copy {service} link without playlist"
   Context Menu: Context menu
   Select All: Select All
