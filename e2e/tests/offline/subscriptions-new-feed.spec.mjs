@@ -49,7 +49,7 @@ function profile (subscriptions = [{ id: CHANNEL_ID, name: 'Channel A', thumbnai
 }
 
 const newVideo = video('new-video-1', 'New video', now - HOUR, { isNewInSubscriptionFeed: true })
-const watchedVideo = video('watched-new', 'Watched new video', now - 2 * HOUR, { isNewInSubscriptionFeed: true })
+const watchedVideo = video('watched-new', 'Watched new video', now - 2 * HOUR, { isNewInSubscriptionFeed: false })
 const oldVideo = video('not-new', 'Previously seen video', now - 3 * HOUR, { isNewInSubscriptionFeed: false })
 const newShort = video('new-short-1', 'New short', now - 30 * 60000, {
   isNewInSubscriptionFeed: true,
@@ -407,7 +407,8 @@ test.describe('new subscriptions feed', () => {
     })
     const alreadyNew = page.locator('.ft-list-video').filter({ has: page.getByText('New video', { exact: true }) })
     await alreadyNew.locator('.title').click({ button: 'right' })
-    await expect(page.getByRole('menuitem', { name: 'Mark as unseen', exact: true })).toBeVisible()
+    await expect(page.getByRole('menuitem', { name: 'Mark as seen', exact: true })).toBeVisible()
+    await expect(page.getByRole('menuitem', { name: 'Mark as unseen', exact: true })).toHaveCount(0)
     await page.keyboard.press('Escape')
     const watched = page.locator('.ft-list-video').filter({ hasText: 'Watched new video' })
     await expect(watched).toHaveClass(/watched/)
