@@ -392,7 +392,7 @@ const pendingAction = ref(null)
 let removeVideoMetadataCacheClearedListener = null
 
 const finishedDownloads = computed(() => downloads.value.filter(download => (
-  !['downloading', 'processing'].includes(download.status)
+  ['completed', 'failed', 'cancelled', 'skipped'].includes(download.status)
 )))
 const downloadedMediaBytes = computed(() => downloads.value.reduce((total, download) => (
   total + (download.sizeBytes ?? 0)

@@ -430,7 +430,7 @@ function addPlaylistCommands(commands, { t, groups, store, navigate }) {
 
 function addDownloadCommands(commands, { t, groups, store, isElectron }) {
   if (!isElectron && !process.env.IS_CAPACITOR) return
-  const activeStatuses = new Set(['downloading', 'processing'])
+  const activeStatuses = new Set(['preparing', 'downloading', 'processing'])
   for (const download of Object.values(store.getters.getYtDlpDownloads)) {
     commands.push(command(`downloads.cancel.${download.id}`, t('CommandPalette.Cancel Download', {
       title: download.title || download.id

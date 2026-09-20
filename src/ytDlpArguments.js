@@ -214,7 +214,13 @@ export function buildYtDlpDownloadArguments(payload, globalArguments = '') {
   if (startTime !== '' || endTime !== '') {
     args.push('--download-sections', `*${startTime || '0'}-${endTime || 'inf'}`, '--force-keyframes-at-cuts')
   }
-  args.push(...customArgs)
+  args.push(
+    ...customArgs,
+    '--no-simulate',
+    '--print', 'video:__OPENTUBEX_PREPARING__:%(id)s',
+    '--progress-template', 'download:__OPENTUBEX_DOWNLOAD__:%(progress.status)s\t%(progress._percent_str)s\t%(progress._speed_str)s\t%(progress._eta_str)s',
+    '--progress-template', 'postprocess:__OPENTUBEX_PROCESSING__'
+  )
 
   if (isRemotePlaylist) {
     args.push(`https://www.youtube.com/playlist?list=${payload.playlistId}`)

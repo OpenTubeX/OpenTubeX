@@ -109,6 +109,7 @@ final class YtDlpRuntime {
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(current.process.getErrorStream(), StandardCharsets.UTF_8))) {
                     String line;
                     while ((line = reader.readLine()) != null) {
+                        if (progress != null) progress.accept(line);
                         errors.append(line).append('\n');
                         if (errors.length() > 65536) errors.delete(0, errors.length() - 65536);
                     }

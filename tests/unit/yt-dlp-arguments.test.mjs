@@ -68,3 +68,14 @@ test('caption mapping separates translated tracks and rejects non-HTTPS URLs', (
   assert.equal(result.captionTranslations.length, 1)
   assert.equal(result.captionTranslations[0].language, 'de')
 })
+
+test('download phase hooks keep real downloads enabled and override custom progress templates', () => {
+  const { args } = buildYtDlpDownloadArguments({
+    videoId, mode: 'video', customArgs: '--progress-template "download:custom"'
+  })
+  assert.ok(args.includes('--no-simulate'))
+  assert.ok(args.includes('video:__OPENTUBEX_PREPARING__:%(id)s'))
+  const templates = args.flatMap((arg, index) => arg === '--progress-template' ? [args[index + 1]] : [])
+  assert.match(templates.at(-2), /^download:__OPENTUBEX_DOWNLOAD__:%\(progress.status\)s/)
+  assert.equal(templates.at(-1), 'postprocess:__OPENTUBEX_PROCESSING__')
+})

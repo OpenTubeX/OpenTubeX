@@ -2047,6 +2047,7 @@ CommandPalette:
     Download Finished: Denne nedlastinga er ikkje lenger aktiv
     Video: Opne ein video først
 Downloads:
+  Preparing: Førebur…
   Export Failed: "Klarte ikkje å lagre den nedlasta fila. Vel ei nedlastingsmappe med skrivetilgang og prøv igjen."
   Remove File Permanently Warning: "Dette slettar «{title}» permanent."
   Download: Last ned

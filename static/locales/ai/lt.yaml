@@ -2155,6 +2155,7 @@ CommandPalette:
     Download Finished: Šis atsisiuntimas nebevykdomas
     Video: Pirmiausia atverkite vaizdo įrašą
 Downloads:
+  Preparing: Ruošiama…
   Export Failed: "Nepavyko išsaugoti atsisiųsto failo. Pasirinkite atsisiuntimų aplanką su rašymo teise ir bandykite dar kartą."
   Remove File Permanently Warning: "„{title}“ bus ištrinta visam laikui."
   Download: Atsisiųsti

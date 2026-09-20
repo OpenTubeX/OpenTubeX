@@ -1667,6 +1667,7 @@ CommandPalette:
     Download Finished: Unduhan ini tidak lagi berjalan
     Video: Buka video terlebih dahulu
 Downloads:
+  Preparing: Menyiapkan…
   Export Failed: "File yang diunduh tidak dapat disimpan. Pilih folder unduhan yang dapat ditulisi dan coba lagi."
   Remove File Permanently Warning: "Ini akan menghapus \"{title}\" secara permanen."
   Download: Unduh
