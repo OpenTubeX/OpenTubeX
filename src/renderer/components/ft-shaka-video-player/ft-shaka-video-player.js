@@ -2136,13 +2136,7 @@ export default defineComponent({
         sponsorBlockAverageVideoDuration = averageDuration
         hasSponsorBlockMusicOfftopicSegment.value = segments.some(segment => segment.category === 'music_offtopic')
         refreshSponsorBlockMarkers()
-        if (canSeek()) {
-          const currentTime = video.value?.currentTime ?? 0
-          syncPromptSponsorBlockSegments(currentTime)
-          updateSponsorBlockHighlightState(currentTime)
-          syncSponsorBlockMuteSegments(currentTime, !props.sponsorBlockAutoSkipDisabled)
-          scheduleSponsorBlockSkip()
-        }
+        syncSponsorBlockPlaybackState()
       } else {
         scheduleSponsorBlockNotFoundRefetch()
       }
