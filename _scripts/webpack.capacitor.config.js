@@ -13,8 +13,14 @@ config.plugins.push(new CopyWebpackPlugin({
 }))
 
 config.name = 'capacitor'
+config.plugins.push(new webpack.NormalModuleReplacementPlugin(/^\.\/storage\.js$/, resource => {
+  const context = resource.context.replaceAll('\\', '/')
+  if (context.includes('@seald-io/nedb') && context.endsWith('/lib')) {
+    resource.request = path.join(__dirname, '../src/datastores/androidStorage.js')
+  }
+}),
 // VOT uses window.crypto in WebViews; its Node fallback must stay out of this bundle.
-config.plugins.push(new webpack.IgnorePlugin({ resourceRegExp: /^node:crypto$/ }))
+new webpack.IgnorePlugin({ resourceRegExp: /^node:crypto$/ }))
 // These document-wide selectors must not invalidate desktop playback layout.
 config.entry.web = [config.entry.web, path.join(__dirname, '../src/renderer/helpers/player/androidNativeScreen.css')]
 botGuardConfig.name = 'capacitorBotGuardScript'

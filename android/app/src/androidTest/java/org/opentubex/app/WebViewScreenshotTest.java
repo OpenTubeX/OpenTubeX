@@ -29,6 +29,114 @@ import java.util.concurrent.atomic.AtomicReference;
 @RunWith(AndroidJUnit4.class)
 public class WebViewScreenshotTest {
     @Test
+    public void longFeedReleasesCardsAndPreservesGeometryThroughLayoutAndFiltering() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            AtomicReference<WebView> view = new AtomicReference<>();
+            scenario.onActivity(activity -> view.set(activity.getBridge().getWebView()));
+            WebView webView = view.get();
+            awaitCondition(webView, "!!document.querySelector('.app')");
+            evaluate(webView, """
+                (() => {
+                    const app = document.querySelector('#app').__vue_app__.config.globalProperties;
+                    const store = app.$store;
+                    const channelId = 'UCaaaaaaaaaaaaaaaaaaaaaa';
+                    store.commit('setFetchSubscriptionsAutomatically', false);
+                    store.commit('setShowNewSubscriptionFeed', true);
+                    store.commit('setNewSubscriptionFeedView', 'tabbed');
+                    store.commit('setProfileList', [{
+                        _id: 'allChannels', name: 'All Channels',
+                        subscriptions: [{ id: channelId, name: 'Test channel', thumbnail: '' }]
+                    }]);
+                    store.commit('updateVideoCacheByChannel', {
+                        channelId,
+                        entries: Array.from({ length: 50 }, (_, index) => ({
+                            videoId: 'video' + String(index).padStart(6, '0'),
+                            title: 'Preview test ' + index, author: 'Test channel', authorId: channelId,
+                            published: Date.now() - index * 3600000, viewCount: 1000,
+                            lengthSeconds: 120, liveNow: false, isUpcoming: false,
+                            type: 'video', isNewInSubscriptionFeed: true
+                        }))
+                    });
+                    localStorage.setItem('Subscriptions/currentTab', 'new');
+                    app.$router.push('/subscriptions');
+                })()
+                """);
+            awaitCondition(webView, "!!document.querySelector('[data-subscription-feed-tab=\"all\"]')");
+            evaluate(webView, "document.querySelector('[data-subscription-feed-tab=\"all\"]').click()");
+            awaitCondition(webView, "!!document.querySelector('.newFeedTab') && document.querySelectorAll('.ft-list-video').length > 0");
+            // A fresh WebView profile can show the first-run tutorial over the feed.
+            evaluate(webView, "document.querySelector('.tutorialActions button')?.click()");
+            awaitCondition(webView, "!document.querySelector('.tutorialOverlay')");
+
+            evaluate(webView, "window.__firstCard = document.querySelector('.ft-list-video'); window.scrollTo(0, document.documentElement.scrollHeight)");
+            awaitCondition(webView, "!window.__firstCard.isConnected && document.querySelectorAll('.ft-list-video').length > 0 && document.querySelectorAll('.ft-list-video').length < 20");
+            assertFeedLayoutChange(webView, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setListType', 'list')");
+            assertFeedLayoutChange(webView, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setListType', 'grid')");
+            assertFeedLayoutChange(webView, "document.querySelector('.autoGrid').style.inlineSize = '73.25%'");
+            assertFeedLayoutChange(webView, "document.querySelector('.autoGrid').style.inlineSize = ''");
+            evaluate(webView, """
+                (() => {
+                    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                    store.commit('updateVideoCacheByChannel', {
+                        channelId: 'UCaaaaaaaaaaaaaaaaaaaaaa',
+                        entries: [{videoId:'shortened01',title:'Shortened feed',author:'Test channel',authorId:'UCaaaaaaaaaaaaaaaaaaaaaa',
+                            published:Date.now(),viewCount:1,lengthSeconds:120,type:'video',isNewInSubscriptionFeed:true}]
+                    });
+                })()
+                """);
+            awaitCondition(webView, "document.querySelectorAll('.ft-list-video').length === 1 && document.body.textContent.includes('Shortened feed')");
+            awaitCondition(webView, "window.scrollY <= Math.max(0, document.documentElement.scrollHeight - window.innerHeight) + 1");
+        }
+    }
+
+    @Test
+    public void thumbnailIsCroppedAndEncodedAtBoundedDimensions() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            AtomicReference<WebView> view = new AtomicReference<>();
+            scenario.onActivity(activity -> view.set(activity.getBridge().getWebView()));
+            WebView webView = view.get();
+            awaitCondition(webView, "!!document.querySelector('.app')");
+            evaluate(webView, """
+                (() => {
+                    const marker = document.createElement('div');
+                    marker.style.cssText = 'position:fixed;inset:0;background:linear-gradient(to bottom,red 50%,blue 50%);z-index:2147483647';
+                    document.body.append(marker);
+                })();
+                """);
+            CountDownLatch rendered = new CountDownLatch(1);
+            scenario.onActivity(activity -> webView.postVisualStateCallback(3, new WebView.VisualStateCallback() {
+                @Override public void onComplete(long requestId) {
+                    webView.postOnAnimation(() -> webView.postOnAnimation(rendered::countDown));
+                }
+            }));
+            assertTrue(rendered.await(10, TimeUnit.SECONDS));
+            evaluate(webView, """
+                window.__thumbnail = null;
+                Capacitor.Plugins.Screenshot.take({width:320,height:180,top:0.55,cropHeight:0.4}).then(
+                    result => { window.__thumbnail = result; },
+                    error => { window.__thumbnail = {error:String(error)}; }
+                );
+                """);
+            awaitCondition(webView, "window.__thumbnail !== null");
+            JSONObject result = new JSONObject((String) new JSONTokener(evaluate(webView,
+                "JSON.stringify(window.__thumbnail)")).nextValue());
+            assertTrue("Thumbnail succeeds: " + result, !result.has("error"));
+            assertTrue("No temporary screenshot file", !result.has("uri"));
+            String data = result.getString("dataUrl");
+            byte[] bytes = android.util.Base64.decode(data.substring(data.indexOf(',') + 1), android.util.Base64.DEFAULT);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+            assertNotNull(bitmap);
+            try {
+                assertEquals(320, bitmap.getWidth());
+                assertEquals(180, bitmap.getHeight());
+                int color = bitmap.getPixel(160, 90);
+                assertTrue("The crop contains the lower blue half", Color.blue(color) > 220 && Color.red(color) < 40);
+                assertEquals(320 * 180 * 4, bitmap.getAllocationByteCount());
+            } finally { bitmap.recycle(); }
+        }
+    }
+
+    @Test
     public void windowCaptureIncludesNativeVideoAndWebControls() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             AtomicReference<WebView> view = new AtomicReference<>();
@@ -193,6 +301,23 @@ public class WebViewScreenshotTest {
                 assertTrue("The temporary screenshot can be deleted", screenshot.delete());
             }
         }
+    }
+
+    private static void assertFeedLayoutChange(WebView webView, String change) throws Exception {
+        evaluate(webView, "window.scrollTo(0, document.documentElement.scrollHeight)");
+        evaluate(webView, change + "; window.__layoutReady = false; requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(() => { window.__layoutReady = true; })))");
+        awaitCondition(webView, "window.__layoutReady");
+        evaluate(webView, """
+            window.__cachedShellHeight = document.querySelector('.autoGrid').firstElementChild.getBoundingClientRect().height;
+            window.__cachedGridHeight = document.querySelector('.autoGrid').getBoundingClientRect().height;
+            window.scrollTo(0, 0);
+            """);
+        awaitCondition(webView, "!!document.querySelector('.autoGrid').firstElementChild.querySelector('.ft-list-video')");
+        awaitCondition(webView, "Math.abs(document.querySelector('.autoGrid').firstElementChild.getBoundingClientRect().height - window.__cachedShellHeight) <= 1");
+        evaluate(webView, "window.scrollTo(0, document.documentElement.scrollHeight)");
+        awaitCondition(webView, "!!document.querySelector('.autoGrid').lastElementChild.querySelector('.ft-list-video')");
+        awaitCondition(webView, "Math.abs(document.querySelector('.autoGrid').getBoundingClientRect().height - window.__cachedGridHeight) <= 1");
+        awaitCondition(webView, "document.querySelector('.autoGrid').lastElementChild.getBoundingClientRect().top < window.innerHeight");
     }
 
     private static String evaluate(WebView view, String script) throws Exception {

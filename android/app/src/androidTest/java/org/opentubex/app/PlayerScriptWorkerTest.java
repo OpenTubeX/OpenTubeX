@@ -60,6 +60,46 @@ public class PlayerScriptWorkerTest {
         }
     }
 
+
+    @Test
+    public void packagedSabrEncoderKeepsRendererResponsiveAndPreservesBytes() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            AtomicReference<WebView> view = new AtomicReference<>();
+            scenario.onActivity(activity -> view.set(activity.getBridge().getWebView()));
+            WebView webView = view.get();
+            awaitCondition(webView, "!!document.querySelector('#app')?.__vue_app__");
+            evaluate(webView, """
+                (() => {
+                    const worker = new Worker('/android-segment-encoder.js');
+                    let ticks = 0;
+                    const timer = setInterval(() => ticks++, 0);
+                    const finish = result => {
+                        window.sabrEncoderResult = result;
+                        clearInterval(timer);
+                        worker.terminate();
+                    };
+                    worker.onerror = event => finish({error: event.message});
+                    worker.onmessage = ({data}) => {
+                        if (data.error) return finish({error: data.error});
+                        const decoded = atob(data.data);
+                        let valid = decoded.length === 4 * 1024 * 1024;
+                        for (let i = 0; valid && i < decoded.length; i++) valid = decoded.charCodeAt(i) === i % 251;
+                        finish({valid, ticks, id: data.id});
+                    };
+                    const bytes = new Uint8Array(4 * 1024 * 1024);
+                    for (let i = 0; i < bytes.length; i++) bytes[i] = i % 251;
+                    worker.postMessage({id: 7, bytes}, [bytes.buffer]);
+                })()
+                """);
+            awaitCondition(webView, "window.sabrEncoderResult !== undefined");
+            JSONObject result = new JSONObject(evaluate(webView, "window.sabrEncoderResult"));
+            assertFalse(result.toString(), result.has("error"));
+            assertTrue(result.toString(), result.getBoolean("valid"));
+            assertEquals(7, result.getInt("id"));
+            assertTrue("Renderer timers must run during encoding: " + result, result.getInt("ticks") > 0);
+        }
+    }
+
     private static String evaluate(WebView view, String script) throws Exception {
         AtomicReference<String> result = new AtomicReference<>();
         CountDownLatch evaluated = new CountDownLatch(1);

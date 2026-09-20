@@ -29,4 +29,34 @@ public class NativeAudioSpectrumTest {
         spectrum.reset();
         for (int bin : spectrum.snapshot()) assertEquals(0, bin);
     }
+
+    @Test public void fftMatchesReferenceTransformForStereoAndWrappedWindows() {
+        NativeAudioSpectrum spectrum = new NativeAudioSpectrum();
+        double[] expectedSamples = new double[256];
+        java.util.Random random = new java.util.Random(19);
+        for (int pass = 0; pass < 3; pass++) {
+            ByteBuffer buffer = ByteBuffer.allocate(600 * 4).order(ByteOrder.LITTLE_ENDIAN);
+            for (int i = 0; i < 600; i++) {
+                short left = (short) random.nextInt();
+                short right = (short) random.nextInt();
+                buffer.putShort(left).putShort(right);
+                if (i >= 344) expectedSamples[i - 344] = (left + (double) right) / 65536.0;
+            }
+            buffer.flip();
+            spectrum.append(buffer, 2);
+            int[] actual = spectrum.snapshot();
+            for (int bin = 0; bin < 128; bin++) {
+                double real = 0, imaginary = 0;
+                for (int i = 0; i < 256; i++) {
+                    double windowed = expectedSamples[i] * (0.5 - 0.5 * Math.cos(2 * Math.PI * i / 256));
+                    double phase = 2 * Math.PI * bin * i / 256;
+                    real += windowed * Math.cos(phase);
+                    imaginary -= windowed * Math.sin(phase);
+                }
+                double db = 20 * Math.log10(Math.max(1e-8, Math.hypot(real, imaginary) / 256));
+                int expected = (int) Math.max(0, Math.min(255, (db + 100) / 70 * 255));
+                assertEquals("bin " + bin, expected, actual[bin], 1);
+            }
+        }
+    }
 }

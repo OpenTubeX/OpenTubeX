@@ -1,9 +1,12 @@
+import { createAndroidSegmentEncoder } from './androidSegmentEncoder.js'
+
 /**
  * Keeps native events and SABR reads scoped to one playback owner. The caller
  * supplies the Capacitor plugin so transport lifetime can be tested independently.
  */
 export async function createAndroidPlaybackController(plugin, {
   owner, continueInBackground, onState, onError, onScreenAction, isCurrent = () => true,
+  createEncoder = createAndroidSegmentEncoder,
 }) {
   let source = null
   let loaded = false
@@ -11,10 +14,14 @@ export async function createAndroidPlaybackController(plugin, {
   let suspended = false
   let state = {}
   const listeners = []
+  let encoder
+
+  function closeEncoder() { encoder?.close(); encoder = null }
 
   async function close() {
     if (closed) return
     closed = true
+    closeEncoder()
     source?.close?.()
     source = null
     await Promise.allSettled(listeners.map(listener => listener.remove()))
@@ -27,6 +34,7 @@ export async function createAndroidPlaybackController(plugin, {
       if (closed || suspended || event.owner !== owner) return
       state = event
       suspended = event.event === 'suspended'
+      if (suspended) closeEncoder()
       onState(event)
     })
     listeners[1] = await plugin.addListener('segment', async event => {
@@ -36,11 +44,10 @@ export async function createAndroidPlaybackController(plugin, {
         if (!requestedSource?.read) throw new Error('No SABR source is loaded')
         const bytes = await requestedSource.read(event)
         if (closed || suspended || source !== requestedSource) throw new Error('Playback was replaced')
-        const parts = []
-        for (let i = 0; i < bytes.length; i += 32768) {
-          parts.push(String.fromCharCode(...bytes.subarray(i, i + 32768)))
-        }
-        await plugin.respond({ requestId: event.requestId, data: btoa(parts.join('')) })
+        encoder ??= createEncoder()
+        const data = await encoder.encode(bytes)
+        if (closed || suspended || source !== requestedSource) throw new Error('Playback was replaced')
+        await plugin.respond({ requestId: event.requestId, data })
       } catch (error) {
         await plugin.respond({ requestId: event.requestId, error: String(error) }).catch(onError)
       }

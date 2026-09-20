@@ -74,7 +74,10 @@ function setup(t, { cleanupError, decodeError, videos = [] } = {}) {
   t.mock.timers.enable({ apis: ['setTimeout'] })
   t.mock.method(Capacitor, 'isPluginAvailable', () => true)
   t.mock.method(Capacitor, 'convertFileSrc', value => value)
-  const take = t.mock.fn(async () => ({ uri }))
+  const take = t.mock.fn(async () => {
+    if (decodeError) throw decodeError
+    return { dataUrl: captureImage }
+  })
   const remove = t.mock.fn(async () => {
     if (cleanupError) throw cleanupError
   })
@@ -137,29 +140,27 @@ for (const playback of [
     await captureBeforeTabOrganizer()
 
     assert.equal(getCapacitorTabPreview(state.tab), state.preview)
-    assert.equal(state.drawImage.mock.callCount(), 1)
-    assert.equal(state.remove.mock.callCount(), 1)
+    assert.equal(state.drawImage.mock.callCount(), 0)
+    assert.equal(state.remove.mock.callCount(), 0)
     assert.equal(state.warn.mock.callCount(), 0)
   })
 }
 
-test('a cleanup failure preserves the successfully captured page preview', async t => {
-  const error = new Error('Temporary file could not be deleted')
-  const state = setup(t, { cleanupError: error })
+test('native thumbnails are bounded and require no renderer encoding or temporary file', async t => {
+  const state = setup(t)
   await captureBeforeTabOrganizer()
   assert.equal(getCapacitorTabPreview(state.tab), state.preview)
-  assert.deepEqual(state.remove.mock.calls[0].arguments, [{ path: state.uri }])
-  assert.equal(state.warn.mock.callCount(), 1)
-  assert.equal(state.warn.mock.calls[0].arguments[1], error)
+  assert.deepEqual(state.take.mock.calls[0].arguments, [{ width: 375, height: 211, top: 0, cropHeight: (375 * 9 / 16) / 700 }])
+  assert.equal(state.drawImage.mock.callCount(), 0)
+  assert.equal(state.remove.mock.callCount(), 0)
 })
 
-test('cleanup is attempted after decoding fails without replacing the capture error', async t => {
-  const decodeError = new Error('Invalid screenshot')
-  const state = setup(t, { decodeError, cleanupError: new Error('Cleanup failed') })
+test('failed native capture leaves the cache empty', async t => {
+  const error = new Error('Capture failed')
+  const state = setup(t, { decodeError: error })
   await captureBeforeTabOrganizer()
   assert.equal(getCapacitorTabPreview(state.tab), null)
-  assert.equal(state.remove.mock.callCount(), 1)
-  assert.equal(state.warn.mock.calls.at(-1).arguments[1], decodeError)
+  assert.equal(state.warn.mock.calls.at(-1).arguments[1], error)
 })
 
 test('scroll events defer overlay reads and native capture until scrolling settles', async t => {
