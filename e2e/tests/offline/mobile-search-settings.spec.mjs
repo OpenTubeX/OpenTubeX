@@ -132,6 +132,16 @@ for (const uiScale of [100, 125]) {
       const rows = page.locator('.mobileLinkQuickActions')
       await expect(rows).toHaveCount(2)
       expect((await rows.nth(1).boundingBox()).y).toBeGreaterThan((await rows.first().boundingBox()).y)
+      await expect(actions.getByRole('menuitemcheckbox', { name: 'Add to Favorites', checked: false })).toBeVisible()
+      await actions.getByRole('menuitemcheckbox', { name: 'Add to Favorites', checked: false }).click()
+      await expect(page.locator('.mobileLinkActions')).toHaveCount(0)
+      await session.send('Input.dispatchTouchEvent', {
+        type: 'touchStart', touchPoints: [{ x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }]
+      })
+      await expect(actions).toBeVisible()
+      await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+      await expect(actions.getByRole('menuitemcheckbox', { name: 'Remove from Favorites', checked: true })).toBeVisible()
+
       await expect(actions.getByRole('menuitem', { name: /^Add to Playlist$/i })).toBeVisible()
       await actions.getByRole('menuitem', { name: /^Add to Playlist$/i }).click()
       await expect(page.locator('.mobileLinkActions')).toHaveCount(0)

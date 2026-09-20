@@ -247,10 +247,10 @@
               v-for="action in mobileContextThumbnailActions"
               :key="action.label"
               type="button"
-              role="menuitem"
+              :role="action.pressed === undefined ? 'menuitem' : 'menuitemcheckbox'"
               :title="action.label"
               :aria-label="action.label"
-              :aria-pressed="action.pressed"
+              :aria-checked="action.pressed"
               :disabled="action.enabled === false"
               @click="runMobileContextAction(action)"
             >
