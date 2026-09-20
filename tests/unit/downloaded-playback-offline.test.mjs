@@ -74,3 +74,20 @@ for (const existing of [false, true]) {
     assert.equal(watch.channelName, 'Channel')
   })
 }
+
+test('disconnecting dismisses network panels through their cleanup methods', () => {
+  const start = source.indexOf('    handleDownloadConnectionChange({ detail }) {')
+  const end = source.indexOf('\n    updateAndroidBackgroundPlaybackFormat()', start)
+  const handle = vm.runInNewContext(`({ ${source.slice(start, end)} }).handleDownloadConnectionChange`)
+  const closed = []
+  const watch = {
+    isLoading: false, localFilePlayback: true,
+    showTranscript: true, showLiveChat: true, liveChatOpen: true, showSidebarSponsorBlock: true,
+    closeTranscript() { closed.push('transcript') },
+    closeLiveChat() { closed.push('chat') },
+    closeSidebarSponsorBlock() { closed.push('sponsorblock') },
+    abortAutoplayCountdown() {},
+  }
+  handle.call(watch, { detail: 'offline' })
+  assert.deepEqual(closed, ['transcript', 'chat', 'sponsorblock'])
+})

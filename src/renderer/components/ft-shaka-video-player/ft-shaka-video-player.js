@@ -5632,7 +5632,7 @@ export default defineComponent({
         clearSponsorBlockMuteSegments()
         cancelSponsorBlockSkipSchedule()
       } else {
-        scheduleSponsorBlockSkip()
+        setupSponsorBlock()
       }
     })
 

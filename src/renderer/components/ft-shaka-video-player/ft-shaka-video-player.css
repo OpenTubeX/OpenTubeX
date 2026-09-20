@@ -2979,9 +2979,6 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   gap: 2px 5px;
 }
 
-.fullscreenMetadataTarget :deep(.datePublishedAndViewCount .seperator) {
-  display: none;
-}
 
 .fullscreenMetadataTarget :deep(.publishedTimeAgo::before),
 .fullscreenMetadataTarget :deep(.videoViews::before),

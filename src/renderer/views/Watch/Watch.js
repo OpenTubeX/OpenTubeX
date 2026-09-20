@@ -1097,13 +1097,14 @@ export default defineComponent({
       return this.$store.getters.getPlaylist(this.playlistId)
     },
     endScreenRecommendations: function () {
-      if (this.hideRecommendedVideos) return []
+      if (this.isOffline || this.hideRecommendedVideos) return []
       return this.recommendedVideos.filter(video =>
         video.videoId && video.videoId !== this.videoId &&
         !this.isHiddenVideo(this.forbiddenTitles, this.channelsHidden, video)
       ).slice(0, 6)
     },
     nextRecommendedVideo: function () {
+      if (this.isOffline) return undefined
       return this.recommendedVideos.find((video) =>
         !this.isHiddenVideo(this.forbiddenTitles, this.channelsHidden, video)
       )
@@ -1359,12 +1360,14 @@ export default defineComponent({
       if (panel === 'chat') this.liveChatOpen = true
     },
     handleDownloadConnectionChange({ detail }) {
+      const chatWasOpen = this.showLiveChat || this.fullscreenLiveChatOpen || this.mobilePanel === 'chat'
       this.isOffline = detail === 'offline'
       if (this.isOffline) {
-        this.showTranscript = false
-        this.liveChatOpen = false
-        this.showSidebarSponsorBlock = false
-        if (['comments', 'chat', 'transcript'].includes(this.mobilePanel)) this.mobilePanel = null
+        if (this.showTranscript || this.fullscreenTranscriptOpen || this.mobilePanel === 'transcript') this.closeTranscript()
+        if (chatWasOpen) this.closeLiveChat()
+        if (this.showSidebarSponsorBlock || this.fullscreenSponsorBlockOpen) this.closeSidebarSponsorBlock()
+        if (this.fullscreenCommentsOpen || this.shortsCommentsOpen || this.mobilePanel === 'comments') this.closeFullscreenComments()
+        if (!this.watchingPlaylist) this.abortAutoplayCountdown(true)
       }
       if (detail !== 'offline' || !this.isLoading || this.localFilePlayback) return
       if (this.finishDownloadedPlaybackWithoutMetadata()) {
@@ -4881,7 +4884,7 @@ export default defineComponent({
 
       if (this.watchingPlaylist) {
         this.$refs.watchVideoPlaylist?.playNextVideo()
-      } else if (nextVideoId) {
+      } else if (!this.isOffline && nextVideoId) {
         this.tabRouter.push({
           path: `/watch/${nextVideoId}`
         })

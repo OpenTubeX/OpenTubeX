@@ -1014,9 +1014,6 @@
       gap: 2px 5px;
     }
 
-    .shortsAuxPanelTarget :deep(.datePublishedAndViewCount .seperator) {
-      display: none;
-    }
 
     .shortsAuxPanelTarget :deep(.publishedTimeAgo::before),
     .shortsAuxPanelTarget :deep(.videoViews::before),

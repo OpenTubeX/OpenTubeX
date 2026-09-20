@@ -628,7 +628,10 @@ const liveChatToggleTitle = computed(() => {
 })
 
 watch(() => props.offline, offline => {
-  if (offline) showDownloadPrompt.value = false
+  if (offline) {
+    showDownloadPrompt.value = false
+    if (props.localPlaybackDownloads.length === 0) showFormatPrompt.value = false
+  }
 })
 
 watch(enableDownloads, (enabled) => {

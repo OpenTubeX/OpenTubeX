@@ -39,3 +39,18 @@ test('voice-over translation is unavailable offline and returns after reconnecti
   props.offline = false
   assert.equal(available.value, true)
 })
+
+test('enabling SponsorBlock after an offline start initializes its segments', () => {
+  const start = source.indexOf('    watch(useSponsorBlock, enabled => {')
+  const end = source.indexOf('\n    })', start) + '\n    })'.length
+  let change
+  let setups = 0
+  vm.runInNewContext(source.slice(start, end), {
+    watch: (_source, callback) => { change = callback }, useSponsorBlock: ref(false),
+    setupSponsorBlock: () => { setups++ }, scheduleSponsorBlockSkip() {},
+    closeSponsorBlockInfo() {}, sponsorBlockMuteController: { reset() {} },
+    clearSponsorBlockMuteSegments() {}, cancelSponsorBlockSkipSchedule() {},
+  })
+  change(true)
+  assert.equal(setups, 1)
+})

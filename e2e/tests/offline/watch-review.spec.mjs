@@ -184,3 +184,35 @@ test('custom Shorts hides SponsorBlock offline and restores it on reconnect', as
   })
   await expect(sponsorBlock).toHaveCount(1)
 })
+
+test('disconnecting removes cached end-screen recommendations and their autoplay countdown', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const watch = await watchViewHandle(page)
+  await watch.evaluate(vm => {
+    vm.recommendedVideos = [{ videoId: 'recommended1', title: 'Online recommendation' }]
+    vm.autoplayCountdown = { remainingSeconds: 10, video: vm.recommendedVideos[0] }
+  })
+  await expect.poll(() => watch.evaluate(vm => vm.endScreenRecommendations.length)).toBe(1)
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })
+    window.dispatchEvent(new Event('offline'))
+  })
+  await expect.poll(() => watch.evaluate(vm => ({
+    endScreenCount: vm.endScreenRecommendations.length,
+    hasNextRecommendation: !!vm.nextRecommendedVideo,
+    countdown: vm.autoplayCountdown,
+  }))).toEqual({ endScreenCount: 0, hasNextRecommendation: false, countdown: null })
+})
+
+test('disconnecting closes a format picker that has no local sources', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await page.locator('.watchVideoInfo').getByRole('button', { name: 'Change Media Formats', exact: true }).click()
+  await expect(page.locator('.formatPrompt')).toBeVisible()
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })
+    window.dispatchEvent(new Event('offline'))
+  })
+  await expect(page.locator('.formatPrompt')).toHaveCount(0)
+})
