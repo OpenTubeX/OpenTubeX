@@ -35,15 +35,27 @@ export function content(body = '', fromGitlab = false) {
   return result
 }
 
+function githubBody(header, body) {
+  const available = 65536 - header.length - 2
+  if (body.length <= available) return `${header}\n\n${body}`
+  const notice = '> Truncated to fit GitHub. Read the full text at the original GitLab link above.\n\n'
+  // UTF-16 length is conservative for astral characters; never split a surrogate pair.
+  const excerpt = body.slice(0, available - notice.length).replace(/[\uD800-\uDBFF]$/, '')
+  return `${header}\n\n${notice}${excerpt}`
+}
+
 function issueBody(issue) {
-  return `${marker('issue', issue.iid)}\nReported by ${content(issue.author.username)} on [GitLab](${issue.web_url}).\n\n${content(issue.description, true)}`
+  const header = `${marker('issue', issue.iid)}\nReported by ${content(issue.author.username)} on [GitLab](${issue.web_url}).`
+  return githubBody(header, content(issue.description, true))
 }
 
 function commentBody(comment, side, issue) {
   const gitlab = side === 'gitlab'
   const author = gitlab ? comment.author.username : comment.user.login
   const url = gitlab ? `${issue.web_url}#note_${comment.id}` : comment.html_url
-  return `${marker(side, comment.id)}\n${content(author)} on [${gitlab ? 'GitLab' : 'GitHub'}](${url}):\n\n${content(comment.body, gitlab)}`
+  const header = `${marker(side, comment.id)}\n${content(author)} on [${gitlab ? 'GitLab' : 'GitHub'}](${url}):`
+  const body = content(comment.body, gitlab)
+  return gitlab ? githubBody(header, body) : `${header}\n\n${body}`
 }
 
 export function createClient(token) {

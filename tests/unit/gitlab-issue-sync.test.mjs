@@ -207,3 +207,25 @@ test('the privileged workflow job runs only on the canonical default branch', as
   assert.equal(canRun('OpenTubeX/OpenTubeX', 'refs/heads/development', 'schedule'), true)
   assert.equal(canRun('other/fork', 'refs/heads/development', 'schedule'), false)
 })
+
+test('oversized reports and notes fit GitHub limits with attribution and stable truncation notices', async () => {
+  const { state, client } = fixture()
+  state.sources[0].description = '😀'.repeat(40000)
+  state.notes.push({ id: 10, body: 'x'.repeat(70000), author: { id: 1, username: 'reporter' } })
+  await sync(client)
+  for (const body of [state.targets[0].body, state.comments[0].body]) {
+    assert.ok(body.length <= 65536)
+    assert.match(body, /Truncated to fit GitHub/)
+    assert.match(body, /https:\/\/gitlab.com\/opentubex\/OpenTubeX\/-\/issues\/1/)
+    assert.match(body, /^<!-- opentubex-sync:/)
+    assert.ok(!/[\uD800-\uDBFF]$/.test(body))
+  }
+  state.writes = []
+  await sync(client)
+  assert.deepEqual(state.writes, [])
+  state.sources[0].description = 'Short again'
+  state.notes[0].body = 'Short comment again'
+  await sync(client)
+  assert.doesNotMatch(state.targets[0].body, /Truncated to fit GitHub/)
+  assert.doesNotMatch(state.comments[0].body, /Truncated to fit GitHub/)
+})
