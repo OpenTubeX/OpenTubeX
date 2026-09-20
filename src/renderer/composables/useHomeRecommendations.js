@@ -110,7 +110,10 @@ export function useHomeRecommendations(visible) {
       try { await store.dispatch('loadRecommendations') } catch { hasError.value = true }
       if (requestGeneration !== generation || !store.getters.getRecommendationEpoch) return
     }
-    if (!hasSeeds.value) { clearFeed(); return }
+    if (!hasSeeds.value) {
+      if (!append) clearFeed()
+      return
+    }
     const requestContext = context.value
     if (!append) {
       limit = 24
@@ -228,6 +231,7 @@ export function useHomeRecommendations(visible) {
   return {
     enabled,
     hasHistory,
+    hasSeeds,
     isLoading,
     hasError,
     recommendations,

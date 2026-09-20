@@ -266,7 +266,7 @@
             class="recommendationLoadMore"
             :label="t('Subscriptions.Load More Videos')"
             :icon="['fas', 'angle-down']"
-            :disabled="recommendationsLoading"
+            :disabled="recommendationsLoading || !recommendationsHaveSeeds"
             @click="loadMoreRecommendations"
           />
         </template>
@@ -591,6 +591,7 @@ const allSectionsHidden = computed(() => visibleSections.value.length === 0)
 const {
   enabled: recommendationsEnabled,
   hasHistory: recommendationsHaveHistory,
+  hasSeeds: recommendationsHaveSeeds,
   isLoading: recommendationsLoading,
   hasError: recommendationsError,
   recommendations,
