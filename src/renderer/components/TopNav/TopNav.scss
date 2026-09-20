@@ -383,10 +383,7 @@
 /* stylelint-enable liberty/use-logical-spec */
 
 .syncIndicator {
-  display: inline-flex;
   flex-shrink: 0;
-  padding: 6px;
-  color: var(--primary-text-color);
   font-size: 16px;
 }
 

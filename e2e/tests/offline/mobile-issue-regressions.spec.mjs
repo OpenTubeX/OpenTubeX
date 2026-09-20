@@ -86,7 +86,7 @@ for (const scale of [1, 1.25]) {
   })
 }
 
-test('header sync indicator follows active sync stages and disappears on completion', async ({ page }) => {
+test('header sync indicator follows active sync stages, opens sync settings, and disappears on completion', async ({ page }) => {
   const indicator = page.locator('.topNav .syncIndicator')
   await expect(indicator).toHaveCount(0)
   await page.evaluate(() => {
@@ -94,10 +94,10 @@ test('header sync indicator follows active sync stages and disappears on complet
     store.commit('setSyncServerStatus', 'syncing')
     store.commit('setSyncServerProgress', { stage: 'subscriptions' })
   })
-  await expect(indicator).toHaveAttribute('role', 'progressbar')
-  await expect(indicator).toHaveAccessibleName('Syncing subscriptions…')
+  await expect(indicator).toHaveAttribute('type', 'button')
+  await expect(indicator).toHaveAccessibleName('Sync: Syncing subscriptions…')
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setSyncServerProgress', { stage: 'history' }))
-  await expect(indicator).toHaveAccessibleName('Syncing watch history…')
+  await expect(indicator).toHaveAccessibleName('Sync: Syncing watch history…')
   const focusSettings = await goToSettingsSection(page, 'focus')
   const hideIndicator = focusSettings.getByRole('checkbox', { name: 'Hide Header Sync Indicator' })
   await expect(hideIndicator).not.toBeChecked()
@@ -106,7 +106,7 @@ test('header sync indicator follows active sync stages and disappears on complet
   await expect(indicator).toHaveCount(0)
   await hideIndicator.locator('..').locator('label.switch-label').click()
   await expect(hideIndicator).not.toBeChecked()
-  await expect(indicator).toHaveAccessibleName('Syncing watch history…')
+  await expect(indicator).toHaveAccessibleName('Sync: Syncing watch history…')
   await expect(indicator).toHaveCSS('font-size', '16px')
   await expect(indicator.locator('svg')).toHaveCSS('animation-duration', '2s')
   await expect.poll(() => indicator.locator('svg').evaluate(element => getComputedStyle(element).animationName)).toMatch(/^sync-rotation(?:-|$)/)
@@ -117,6 +117,10 @@ test('header sync indicator follows active sync stages and disappears on complet
   await expect(indicator).toHaveCSS('color', 'rgb(12, 34, 56)')
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await expect.poll(() => indicator.locator('svg').evaluate(element => getComputedStyle(element).animationName)).toBe('none')
+  await indicator.focus()
+  await indicator.press('Enter')
+  await expect(page.locator('.settingsWindow')).toBeVisible()
+  await expect(page.locator('.settingsContent > [data-section="sync"]')).toBeVisible()
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setSyncServerStatus', 'idle'))
   await expect(indicator).toHaveCount(0)
 })
