@@ -450,6 +450,10 @@
     "ri": "login-box-line",
     "material": "login-rounded"
   },
+  "replay": {
+    "ri": "restart-line",
+    "material": "replay-rounded"
+  },
   "rss": {
     "ri": "rss-line",
     "material": "rss-feed-rounded"

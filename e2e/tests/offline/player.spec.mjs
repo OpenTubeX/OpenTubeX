@@ -2361,6 +2361,27 @@ for (const uiScale of [100, 125]) {
   test.describe(`playback when navigating away at ${uiScale}%`, () => {
     test.use({ seed: { settings: { ...PLAYER_SEED, keepPlayingOnNavigation: true, uiScale } } })
 
+    test('keeps the ended mini player visible and replays while browsing', async ({ app, page }) => {
+      await openDemoVideo({ app, page })
+      const player = page.locator('.ftVideoPlayer')
+      const video = player.locator('video')
+      await page.getByRole('link', { name: 'Go to Subscriptions', exact: true }).click()
+      await expect(page).toHaveURL(/#\/subscriptions$/)
+      await expect(player).toHaveClass(/scrollMiniPlayer/)
+      await video.evaluate(element => { element.currentTime = element.duration })
+      await expect.poll(() => video.evaluate(element => element.ended)).toBe(true)
+      await expect(player).toBeVisible()
+      await expect(player).toHaveClass(/scrollMiniPlayer/)
+      const replay = player.locator('.scrollMiniPlayPause')
+      await expect(replay).not.toHaveClass(/isHidden/)
+      await expect(replay).toHaveAccessibleName('Replay')
+      await expect(replay.locator('[data-icon="replay"] svg')).toBeVisible()
+      await replay.click()
+      await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
+      await expect.poll(() => video.evaluate(element => element.currentTime)).toBeLessThan(5)
+      await expect(page).toHaveURL(/#\/subscriptions$/)
+    })
+
     test('keeps the same video playing while browsing and returning', async ({ app, page, attachScreenshot }) => {
       await openDemoVideo({ app, page })
       const player = page.locator('.ftVideoPlayer')

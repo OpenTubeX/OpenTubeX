@@ -5979,6 +5979,7 @@ export default defineComponent({
     // shaka-player ships with some locales prebundled and already loaded
     const loadedLocales = new Set(process.env.SHAKA_LOCALES_PREBUNDLED)
     const originalShakaControlLocalizations = new Map()
+    const replayLabel = ref('')
 
     /**
      * @param {string} locale
@@ -6004,6 +6005,7 @@ export default defineComponent({
       }
 
       localization.changeLocale([shakaLocale])
+      replayLabel.value = localization.resolve('REPLAY')
 
       // Add the keyboard shortcut to the label for the default Shaka controls
       if (!originalShakaControlLocalizations.has(shakaLocale)) {
@@ -6290,8 +6292,9 @@ export default defineComponent({
 
       updateAutoPip()
 
+      updateScrollMiniPlayer()
       if (scrollMiniPlayerActive.value) {
-        deactivateScrollMiniPlayer()
+        showScrollMiniPlayPause(false)
       }
 
       emit('ended', sleepTimerEnded)
@@ -11559,6 +11562,7 @@ export default defineComponent({
       shortsPaused,
       playbackEnded,
       replayIcon: shaka.ui.Enums.MaterialDesignSVGIcons.REPLAY,
+      replayLabel,
       shortsMuted,
       shortsCaptionsAvailable,
       shortsCaptionsEnabled,
