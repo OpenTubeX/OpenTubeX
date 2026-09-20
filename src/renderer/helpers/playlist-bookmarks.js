@@ -86,8 +86,9 @@ export function playlistBookmarkToListData(bookmark) {
 
 export function playlistBookmarkForSync(bookmark) {
   return {
-    playlist: bookmark.playlist,
-    uploader: bookmark.uploader,
+    // Copy the scalar metadata out of Vue proxies for encrypted sync's structuredClone.
+    playlist: { ...bookmark.playlist },
+    uploader: { ...bookmark.uploader },
   }
 }
 
