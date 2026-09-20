@@ -40,17 +40,22 @@ test('voice-over translation is unavailable offline and returns after reconnecti
   assert.equal(available.value, true)
 })
 
-test('enabling SponsorBlock after an offline start initializes its segments', () => {
-  const start = source.indexOf('    watch(useSponsorBlock, enabled => {')
-  const end = source.indexOf('\n    })', start) + '\n    })'.length
-  let change
-  let setups = 0
-  vm.runInNewContext(source.slice(start, end), {
-    watch: (_source, callback) => { change = callback }, useSponsorBlock: ref(false),
-    setupSponsorBlock: () => { setups++ }, scheduleSponsorBlockSkip() {},
-    closeSponsorBlockInfo() {}, sponsorBlockMuteController: { reset() {} },
-    clearSponsorBlockMuteSegments() {}, cancelSponsorBlockSkipSchedule() {},
+for (const [loaded, loading] of [[false, false], [true, false], [false, true]]) {
+  test(`reconnecting SponsorBlock ${loaded ? 'reuses loaded segments and decisions' : loading ? 'keeps the pending request' : 'initializes missing segments'}`, () => {
+    const start = source.indexOf('    watch(useSponsorBlock, enabled => {')
+    const end = source.indexOf('\n    })', start) + '\n    })'.length
+    let change
+    let setups = 0
+    let schedules = 0
+    vm.runInNewContext(source.slice(start, end), {
+      watch: (_source, callback) => { change = callback }, useSponsorBlock: ref(false),
+      sponsorBlockSegmentsLoaded: loaded, sponsorBlockInfoLoading: ref(loading),
+      setupSponsorBlock: () => { setups++ }, scheduleSponsorBlockSkip() { schedules++ },
+      closeSponsorBlockInfo() {}, sponsorBlockMuteController: { reset() {} },
+      clearSponsorBlockMuteSegments() {}, cancelSponsorBlockSkipSchedule() {},
+    })
+    change(true)
+    assert.equal(setups, loaded || loading ? 0 : 1)
+    assert.equal(schedules, loaded ? 1 : 0)
   })
-  change(true)
-  assert.equal(setups, 1)
-})
+}

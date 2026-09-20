@@ -1932,6 +1932,7 @@ export default defineComponent({
      * }[]}
      */
     let sponsorBlockSegments = []
+    let sponsorBlockSegmentsLoaded = false
     const sponsorBlockInfoSegments = ref([])
     const sponsorBlockInfoOpen = ref(props.sponsorBlockInfoOpen)
     const sponsorBlockInfoLoading = ref(false)
@@ -2148,6 +2149,7 @@ export default defineComponent({
     }
 
     async function setupSponsorBlock() {
+      sponsorBlockSegmentsLoaded = false
       let segments
       let averageDuration = 0
       let refetchWhenNotFound = false
@@ -2175,6 +2177,7 @@ export default defineComponent({
           SPONSORBLOCK_INFO_CATEGORIES,
           SPONSORBLOCK_INFO_ACTION_TYPES
         ))
+        sponsorBlockSegmentsLoaded = true
         refetchWhenNotFound = segments.length === 0
       } catch (e) {
         console.error(e)
@@ -5631,7 +5634,9 @@ export default defineComponent({
         sponsorBlockMuteController.reset()
         clearSponsorBlockMuteSegments()
         cancelSponsorBlockSkipSchedule()
-      } else {
+      } else if (sponsorBlockSegmentsLoaded) {
+        scheduleSponsorBlockSkip()
+      } else if (!sponsorBlockInfoLoading.value) {
         setupSponsorBlock()
       }
     })
