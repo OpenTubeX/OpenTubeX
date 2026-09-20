@@ -578,3 +578,38 @@ test('hiding the app flushes a pending session save immediately', async t => {
   t.mock.timers.tick(1000)
   assert.equal(write.mock.callCount(), before + 1)
 })
+
+test('the mobile tab budget protects changed select controls', t => {
+  const originalDocument = globalThis.document
+  globalThis.document = {
+    querySelectorAll: () => [{
+      dataset: { tabId: 'browse-2' },
+      querySelector: () => null,
+      querySelectorAll: selector => selector.includes('select') ? [{ tagName: 'SELECT', options: [{ selected: true, defaultSelected: false }] }] : [],
+    }],
+    removeEventListener() {},
+  }
+  t.after(() => {
+    if (originalDocument === undefined) delete globalThis.document
+    else globalThis.document = originalDocument
+  })
+  let session = createLoadedSession()
+  for (let index = 0; index < 6; index++) {
+    const tab = createCapacitorTab({ path: '/history', fullPath: '/history', query: {} }, '', `browse-${index}`)
+    session = addCapacitorTab(session, tab, false)
+    session.tabs = session.tabs.map(entry => ({ ...entry, loadState: 'loaded', isLoading: false }))
+  }
+  for (const [id, path] of [['player', '/watch/video'], ['editor', '/playlist/test']]) {
+    session = addCapacitorTab(session, createCapacitorTab({ path, fullPath: path, query: {} }, '', id), false)
+  }
+  session.tabs = session.tabs.map(entry => ({ ...entry, loadState: 'loaded', isLoading: false, isPinned: entry.id === 'browse-0' }))
+  const store = createStore(session)
+  const service = new CapacitorTabService(createRouter(), store, createNavigation(store))
+  service.lastPresented.set('browse-1', 10)
+  service.enforceTabBudget()
+  assert.deepEqual(store.getters.getTabs.filter(tab => tab.loadState === 'unloaded').map(tab => tab.id), ['browse-3', 'browse-4'])
+  for (const id of ['tab-a', 'browse-0', 'browse-1', 'browse-2', 'browse-5', 'player', 'editor']) {
+    assert.equal(store.getters.getTabById(id).loadState, 'loaded', id)
+  }
+  service.dispose()
+})

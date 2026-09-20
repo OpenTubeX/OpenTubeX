@@ -14,7 +14,8 @@ config.plugins.push(new CopyWebpackPlugin({
 
 config.name = 'capacitor'
 config.plugins.push(new webpack.NormalModuleReplacementPlugin(/^\.\/storage\.js$/, resource => {
-  if (resource.context.includes('@seald-io/nedb') && resource.context.endsWith('/lib')) {
+  const context = resource.context.replaceAll('\\', '/')
+  if (context.includes('@seald-io/nedb') && context.endsWith('/lib')) {
     resource.request = path.join(__dirname, '../src/datastores/androidStorage.js')
   }
 }),

@@ -22,12 +22,21 @@ public class YtDlpDownloadAvailabilityTest {
         YtDlpDownloadAvailability.annotate(records, availability);
         assertEquals(Integer.valueOf(1), calls.get("present"));
         assertEquals(Integer.valueOf(1), calls.get("missing"));
+        assertEquals(2, record.getInt("destinationCount"));
         assertEquals("partial", record.getString("availability"));
         assertEquals(1, record.getInt("availableDestinationCount"));
         assertFalse(record.getJSONArray("files").getJSONObject(1).getBoolean("available"));
         YtDlpDownloadAvailability.annotate(records, YtDlpDownloadAvailability.inspect(records, path -> true));
         assertEquals("available", record.getString("availability"));
+        assertEquals(2, record.getInt("availableDestinationCount"));
+        assertEquals(2, record.getInt("destinationCount"));
         assertTrue(record.getJSONArray("files").getJSONObject(1).getBoolean("available"));
+        YtDlpDownloadAvailability.annotate(records, YtDlpDownloadAvailability.inspect(records, path -> false));
+        assertEquals("missing", record.getString("availability"));
+        assertEquals(0, record.getInt("availableDestinationCount"));
+        assertEquals(2, record.getInt("destinationCount"));
+        assertFalse(record.getJSONArray("files").getJSONObject(0).getBoolean("available"));
+        assertFalse(record.getJSONArray("files").getJSONObject(1).getBoolean("available"));
     }
 
     @Test public void newExportsKeepTheirMetadataUntilTheyHaveBeenInspected() throws Exception {

@@ -8,10 +8,15 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Dns;
+import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -27,6 +32,7 @@ final class AndroidMediaArtwork implements AutoCloseable {
     private final ArtworkRequestQueue requests = new ArtworkRequestQueue();
     private final Executor delivery;
     private final OkHttpClient client = new OkHttpClient.Builder()
+        .dns(publicDns(Dns.SYSTEM))
         .followRedirects(false).followSslRedirects(false)
         .connectTimeout(5, TimeUnit.SECONDS).readTimeout(5, TimeUnit.SECONDS)
         .callTimeout(10, TimeUnit.SECONDS).build();
@@ -34,48 +40,49 @@ final class AndroidMediaArtwork implements AutoCloseable {
     AndroidMediaArtwork(Executor delivery) { this.delivery = delivery; }
 
     void load(String url, Consumer<Bitmap> listener) {
-        requests.replace(url.isEmpty() ? null : request -> {
-            Bitmap bitmap = download(request, url);
-            if (bitmap == null) return;
-            delivery.execute(() -> {
-                if (request.isCancelled()) bitmap.recycle();
-                else listener.accept(bitmap);
-            });
-        });
+        requests.replace(url.isEmpty() ? null : request -> download(request, url, 0, listener));
     }
 
     void cancel() { requests.cancel(); }
     @Override public void close() { requests.close(); }
 
-    private Bitmap download(ArtworkRequestQueue.Request request, String source) {
+    private void download(ArtworkRequestQueue.Request request, String source, int redirects, Consumer<Bitmap> listener) {
         try {
             URL url = new URL(source);
-            for (int redirects = 0; redirects <= MAX_ARTWORK_REDIRECTS; redirects++) {
-                if (request.isCancelled() || !isSafeArtworkUrl(url)) return null;
-                Call call = client.newCall(new Request.Builder().url(url).build());
-                // Cancellation also interrupts a blocked socket read. A request
-                // replaced while resolving DNS cancels its call before execution.
-                request.onCancel(call::cancel);
-                try (Response response = call.execute()) {
-                    if (request.isCancelled()) return null;
-                    if (isRedirectStatus(response.code())) {
-                        String location = response.header("Location");
-                        if (location == null || redirects == MAX_ARTWORK_REDIRECTS) return null;
-                        url = new URL(url, location);
-                        continue;
+            if (request.isCancelled() || !isSafeArtworkUrl(url)) return;
+            Call call = client.newCall(new Request.Builder().url(url).build());
+            request.onCancel(call::cancel);
+            // DNS runs on OkHttp's bounded dispatcher. Obsolete DNS cannot hold
+            // the latest-only request queue, even when the OS resolver blocks.
+            call.enqueue(new Callback() {
+                @Override public void onFailure(Call call, IOException error) {}
+
+                @Override public void onResponse(Call call, Response response) throws IOException {
+                    try (response) {
+                        if (request.isCancelled()) return;
+                        if (isRedirectStatus(response.code())) {
+                            String location = response.header("Location");
+                            if (location != null && redirects < MAX_ARTWORK_REDIRECTS) {
+                                download(request, new URL(url, location).toString(), redirects + 1, listener);
+                            }
+                            return;
+                        }
+                        ResponseBody body = response.body();
+                        if (!response.isSuccessful() || body == null) return;
+                        byte[] encoded = readArtworkBytes(body.byteStream(), body.contentLength());
+                        if (encoded == null || request.isCancelled()) return;
+                        Bitmap bitmap = decodeArtwork(encoded);
+                        if (bitmap == null) return;
+                        delivery.execute(() -> {
+                            if (request.isCancelled()) bitmap.recycle();
+                            else listener.accept(bitmap);
+                        });
                     }
-                    ResponseBody body = response.body();
-                    if (!response.isSuccessful() || body == null) return null;
-                    byte[] encoded = readArtworkBytes(body.byteStream(), body.contentLength());
-                    return encoded == null || request.isCancelled() ? null : decodeArtwork(encoded);
-                } finally {
-                    request.onCancel(null);
                 }
-            }
+            });
         } catch (Exception ignored) {
-            return null;
+            // Artwork failure must not interrupt playback.
         }
-        return null;
     }
 
     static byte[] readArtworkBytes(InputStream input, long contentLength) throws IOException {
@@ -141,16 +148,25 @@ final class AndroidMediaArtwork implements AutoCloseable {
 
     static boolean isSafeArtworkUrl(URL url) {
         if (!"https".equalsIgnoreCase(url.getProtocol()) || url.getUserInfo() != null) return false;
-        try {
-            InetAddress[] addresses = InetAddress.getAllByName(url.getHost());
-            if (addresses.length == 0) return false;
+        // OkHttp bypasses Dns for IP literals. Check those without resolving a
+        // hostname; actual hostname answers are validated at connection time.
+        HttpUrl parsed = HttpUrl.parse(url.toString());
+        if (parsed == null) return false;
+        String host = parsed.host();
+        if (!host.contains(":") && !host.matches("[0-9.]+")) return true;
+        try { return isPublicAddress(InetAddress.getByName(host)); }
+        catch (UnknownHostException ignored) { return false; }
+    }
+
+    static Dns publicDns(Dns resolver) {
+        return hostname -> {
+            List<InetAddress> addresses = resolver.lookup(hostname);
+            if (addresses.isEmpty()) throw new UnknownHostException("No artwork addresses");
             for (InetAddress address : addresses) {
-                if (!isPublicAddress(address)) return false;
+                if (!isPublicAddress(address)) throw new UnknownHostException("Non-public artwork address");
             }
-            return true;
-        } catch (Exception ignored) {
-            return false;
-        }
+            return addresses;
+        };
     }
 
     private static boolean isPublicAddress(InetAddress address) {

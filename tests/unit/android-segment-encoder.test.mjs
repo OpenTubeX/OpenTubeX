@@ -46,3 +46,19 @@ test('encoding rejects oversized segments before posting to the worker', async (
   assert.equal(sent.length, 0)
   encoder.close()
 })
+
+test('a timeout rejects only its segment and leaves later segments usable', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const { encoder, sent, events, terminated } = fixture()
+  const first = assert.rejects(encoder.encode(Uint8Array.of(1)), /timed out/)
+  t.mock.timers.tick(1000)
+  const second = encoder.encode(Uint8Array.of(2))
+  // Install a handler immediately so failure remains an assertion, not an unhandled rejection.
+  const result = Promise.allSettled([second])
+  t.mock.timers.tick(29_000)
+  await first
+  events.get('message')({ data: { id: sent[1].id, data: 'Ag==' } })
+  assert.deepEqual(await result, [{ status: 'fulfilled', value: 'Ag==' }])
+  assert.equal(terminated(), false)
+  encoder.close()
+})

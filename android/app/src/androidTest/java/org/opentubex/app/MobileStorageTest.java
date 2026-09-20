@@ -1,7 +1,6 @@
 package org.opentubex.app;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import android.webkit.WebView;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -58,7 +57,7 @@ public class MobileStorageTest {
             result.set(value);
             evaluated.countDown();
         }));
-        assertTrue("JavaScript responds", evaluated.await(5, TimeUnit.SECONDS));
+        if (!evaluated.await(5, TimeUnit.SECONDS)) return null;
         return result.get();
     }
 

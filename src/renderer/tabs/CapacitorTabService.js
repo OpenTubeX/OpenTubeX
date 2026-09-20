@@ -432,8 +432,9 @@ export class CapacitorTabService {
       if (!/^\/(?:home|subscriptions|subscribedchannels|trending|popular|history|search|channel|hashtag)(?:\/|$)/.test(tab.route.path)) return false
       const root = roots.get(tab.id)
       return !root?.querySelector('[contenteditable="true"]') &&
-        ![...(root?.querySelectorAll('input, textarea') ?? [])].some(input =>
-          !['button', 'submit', 'hidden'].includes(input.type) &&
+        ![...(root?.querySelectorAll('input, textarea, select') ?? [])].some(input => input.tagName === 'SELECT'
+          ? [...input.options].some(option => option.selected !== option.defaultSelected)
+          : !['button', 'submit', 'hidden'].includes(input.type) &&
           (input.value !== input.defaultValue || input.checked !== input.defaultChecked))
     }).sort((left, right) => (this.lastPresented.get(left.id) ?? 0) - (this.lastPresented.get(right.id) ?? 0))
     for (const tab of candidates.slice(0, Math.max(0, candidates.length - 2))) {

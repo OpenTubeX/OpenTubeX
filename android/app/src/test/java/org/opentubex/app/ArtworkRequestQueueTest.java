@@ -17,7 +17,7 @@ public class ArtworkRequestQueueTest {
             queue.replace(request -> {
                 request.onCancel(cancelled::countDown);
                 started.countDown();
-                try { release.await(5, TimeUnit.SECONDS); }
+                try { release.await(); }
                 catch (InterruptedException error) { Thread.currentThread().interrupt(); }
             });
             assertTrue(started.await(5, TimeUnit.SECONDS));

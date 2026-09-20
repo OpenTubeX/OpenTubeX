@@ -35,7 +35,10 @@ export function createAndroidSegmentEncoder(createWorker = () => new Worker(
         if (closed) throw new Error('Playback was replaced')
         if (bytes.byteLength > 32 * 1024 * 1024) throw new Error('SABR segment exceeds the size limit')
         const id = ++sequence
-        const timer = setTimeout(() => close(new Error('SABR encoding timed out')), 30_000)
+        const timer = setTimeout(() => {
+          pending.delete(id)
+          reject(new Error('SABR encoding timed out'))
+        }, 30_000)
         pending.set(id, { resolve, reject, timer })
         try {
           // Source bytes may belong to a shared cache. Transfer our own copy.
