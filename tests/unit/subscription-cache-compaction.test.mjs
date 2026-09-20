@@ -74,3 +74,30 @@ test('a failed periodic compaction is reported and the next attempt succeeds', a
   assert.equal(attempts, 2)
   assert.equal(errors.length, 1)
 })
+
+test('slow compaction does not queue redundant rewrites', async (t) => {
+  t.mock.timers.enable({ apis: ['setInterval'] })
+  const createDatastore = vm.runInNewContext(`(${factory})`, {
+    Datastore,
+    dbPath: () => undefined,
+    process: { env: { IS_ELECTRON_MAIN: true } },
+    setInterval,
+    console,
+  })
+  const db = createDatastore('subscription-cache')
+  await db.loadDatabaseAsync()
+  let release
+  const pending = new Promise(resolve => { release = resolve })
+  t.after(() => release())
+  t.mock.method(db.persistence, 'persistCachedDatabaseAsync', () => pending)
+  const compact = t.mock.method(db, 'compactDatafileAsync')
+  t.mock.timers.tick(5 * 60 * 1000)
+  await new Promise(resolve => setImmediate(resolve))
+  t.mock.timers.tick(10 * 60 * 1000)
+  assert.equal(compact.mock.callCount(), 1)
+  release()
+  await new Promise(resolve => setImmediate(resolve))
+  t.mock.timers.tick(5 * 60 * 1000)
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(compact.mock.callCount(), 2)
+})

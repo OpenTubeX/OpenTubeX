@@ -36,9 +36,14 @@ function createDatastore(name) {
   // Background refreshes append whole channel records. Compact during long
   // sessions so an interrupted shutdown cannot leave gigabytes to replay.
   if (process.env.IS_ELECTRON_MAIN && name === 'subscription-cache') {
+    let compactionInProgress = false
     setInterval(() => {
+      if (compactionInProgress) return
+      compactionInProgress = true
       datastore.compactDatafileAsync().catch(error => {
         console.error('Failed to compact subscription cache:', error)
+      }).finally(() => {
+        compactionInProgress = false
       })
     }, 5 * 60 * 1000).unref()
   }
