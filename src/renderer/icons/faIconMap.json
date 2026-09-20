@@ -537,9 +537,17 @@
     "ri": "thumb-down-line",
     "material": "thumb-down-outline"
   },
+  "thumbs-down-filled": {
+    "ri": "thumb-down-fill",
+    "material": "thumb-down"
+  },
   "thumbs-up": {
     "ri": "thumb-up-line",
     "material": "thumb-up-outline"
+  },
+  "thumbs-up-filled": {
+    "ri": "thumb-up-fill",
+    "material": "thumb-up"
   },
   "thumbtack": {
     "ri": "pushpin-line",

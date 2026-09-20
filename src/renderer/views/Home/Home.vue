@@ -251,7 +251,8 @@
                     v-for="action in recommendationActions"
                     :key="action.type"
                     :title="t('Display Label', { label: action.label, value: action.type === 'blockChannel' ? video.author : (recommendationDisplayTitles.get(video.videoId) ?? video.title) })"
-                    :icon="action.icon"
+                    :icon="recommendationFeedbackById.get(video.videoId) === action.type ? (action.selectedIcon ?? action.icon) : action.icon"
+                    :aria-pressed="action.selectedIcon ? recommendationFeedbackById.get(video.videoId) === action.type : null"
                     :use-shadow="false"
                     theme="base-no-default"
                     @click="recommendationFeedback(video, action.type)"
@@ -604,9 +605,12 @@ const {
   feedVersion: recommendationFeedVersion,
 } = useHomeRecommendations(computed(() => visibleSections.value.some(section => section.id === 'recommendations')))
 
+const recommendationFeedbackById = computed(() => new Map(store.getters.getRecommendationRecords
+  .map(record => [record.videoId, record.feedback])))
+
 const recommendationActions = computed(() => [
-  { type: 'positive', label: t('Home Page.More like this'), icon: ['fas', 'thumbs-up'] },
-  { type: 'dismiss', label: t('Home Page.Not interested'), icon: ['fas', 'thumbs-down'] },
+  { type: 'positive', label: t('Home Page.More like this'), icon: ['fas', 'thumbs-up'], selectedIcon: ['fas', 'thumbs-up-filled'] },
+  { type: 'dismiss', label: t('Home Page.Not interested'), icon: ['fas', 'thumbs-down'], selectedIcon: ['fas', 'thumbs-down-filled'] },
   { type: 'blockChannel', label: t('Home Page.Hide this channel'), icon: ['fas', 'eye-slash'] },
 ])
 

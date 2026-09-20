@@ -706,6 +706,28 @@ test.describe('without watch history', () => {
     await expect(recommendations(page).getByRole('link', { name: /Linux desktop shortcuts/ })).toBeVisible()
   })
 
+  test('keeps the feed when disliking its last positive seed until refresh', async ({ page }) => {
+    await page.evaluate(async record => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateEnableHomeRecommendations', true)
+      await store.dispatch('recordRecommendationEvent', { type: 'positive', video: record })
+    }, channelCandidate)
+    await mockCandidates(page)
+    await goTo(page, 'home')
+    const section = recommendations(page)
+    const positive = section.getByRole('button', { name: 'More like this: Linux desktop shortcuts', exact: true })
+    const negative = section.getByRole('button', { name: 'Not interested: Linux desktop shortcuts', exact: true })
+    await expect(positive).toHaveAttribute('aria-pressed', 'true')
+    await negative.click()
+    await expect(negative).toHaveAttribute('aria-pressed', 'true')
+    await positive.click()
+    await expect(positive).toHaveAttribute('aria-pressed', 'true')
+    await negative.click()
+    await expect(negative).toHaveAttribute('aria-pressed', 'true')
+    await section.getByRole('button', { name: REFRESH, exact: true }).click()
+    await expectNoHistory(page)
+  })
+
   test('explains how to get recommendations without making candidate requests', async ({ page }) => {
     const backend = await mockCandidates(page)
     await goTo(page, 'home')
@@ -818,7 +840,7 @@ test('learns from feedback across restarts and lets the user reset recommendatio
   const section = recommendations(page)
   await expect(section.getByRole('link', { name: /Linux desktop shortcuts/ })).toBeVisible()
   await section.getByRole('button', { name: 'Not interested: Linux desktop shortcuts', exact: true }).click()
-  await expect(section.getByRole('link', { name: /Linux desktop shortcuts/ })).toHaveCount(0)
+  await expect(section.getByRole('link', { name: /Linux desktop shortcuts/ })).toBeVisible()
   await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
     .getters.getRecommendationRecords.find(record => record.videoId === 'recchan0001')?.feedback)).toBe('dismiss')
 
@@ -845,8 +867,13 @@ test('records real grid impressions once per feed and supports positive and chan
   const getRecord = id => page.evaluate(id => document.querySelector('#app').__vue_app__.config.globalProperties.$store
     .getters.getRecommendationRecords.find(record => record.videoId === id), id)
   await expect.poll(async () => (await getRecord('recchan0001'))?.impressions?.length).toBe(1)
-  await section.getByRole('button', { name: 'More like this: Linux desktop shortcuts', exact: true }).click()
+  const positive = section.getByRole('button', { name: 'More like this: Linux desktop shortcuts', exact: true })
+  await expect(positive).toHaveAttribute('aria-pressed', 'false')
+  await positive.click()
+  await page.mouse.move(0, 0)
   await expect.poll(async () => (await getRecord('recchan0001'))?.feedback).toBe('positive')
+  await expect(positive).toHaveAttribute('aria-pressed', 'true')
+  await expect(positive.locator('[data-icon="thumbs-up-filled"] svg')).toBeVisible()
   const hideChannel = section.locator('.recommendationEntry').filter({ hasText: 'Linux desktop themes' })
     .getByRole('button', { name: /^Hide this channel:/ })
   await expect(hideChannel).toHaveAttribute('title', 'Hide this channel: Discovery Channel')
@@ -854,6 +881,81 @@ test('records real grid impressions once per feed and supports positive and chan
   await hideChannel.click()
   await expect(section.getByRole('link', { name: /Linux desktop themes/ })).toHaveCount(0)
   await expect.poll(async () => (await getRecord('recsrch0001'))?.feedback).toBe('blockChannel')
+})
+
+test('preserves positive button feedback after restart and clears it on reset', async ({ app, page }, testInfo) => {
+  await mockCandidates(page)
+  await goTo(page, 'home')
+  await setEnabled(page, true)
+  const positiveButton = () => recommendations(page).getByRole('button', { name: 'More like this: Linux desktop shortcuts', exact: true })
+  await positiveButton().focus()
+  await page.keyboard.press('Enter')
+  await expect(positiveButton()).toHaveAttribute('aria-pressed', 'true')
+  await positiveButton().evaluate(button => button.blur())
+  await page.mouse.move(0, 0)
+  await changeLayoutSetting(page, 'updateUiScale', 100)
+  await changeLayoutSetting(page, 'updateBaseTheme', 'system')
+  await changeLayoutSetting(page, 'updateSystemDarkTheme', 'dark')
+  await changeLayoutSetting(page, 'updateSystemLightTheme', 'light')
+  await changeLayoutSetting(page, 'updateMainColor', 'Red')
+  await changeLayoutSetting(page, 'updateSecColor', 'Blue')
+  for (const [theme, pack] of [['light', 'material'], ['dark', 'remix']]) {
+    await page.emulateMedia({ colorScheme: theme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+    await expectImagesLoaded(recommendations(page).locator('.thumbnailImage'))
+    await changeLayoutSetting(page, 'updateIconPack', pack)
+    await expect(positiveButton().locator(`[data-icon="thumbs-up-filled"][data-icon-pack="${pack}"] svg`)).toBeVisible()
+    await recommendations(page).locator('.recommendationActions').first().screenshot({ path: testInfo.outputPath(`positive-feedback-${theme}.png`), animations: 'disabled' })
+  }
+  const relaunched = await app.relaunch()
+  page = relaunched.page
+  await mockCandidates(page)
+  await goTo(page, 'home')
+  await expect(positiveButton()).toHaveAttribute('aria-pressed', 'true')
+  await expect(positiveButton()).toHaveClass(/base-no-default/)
+  await chooseRecommendationOption(page, 'Reset recommendations')
+  await expect(positiveButton()).toHaveAttribute('aria-pressed', 'false')
+  await expect(positiveButton()).toHaveClass(/base-no-default/)
+  await expect(positiveButton().locator('[data-icon="thumbs-up"] svg')).toBeVisible()
+})
+
+test('keeps disliked videos visible until refresh and switches the filled thumb', async ({ page }, testInfo) => {
+  await mockCandidates(page)
+  await goTo(page, 'home')
+  await setEnabled(page, true)
+  const section = recommendations(page)
+  const positive = section.getByRole('button', { name: 'More like this: Linux desktop shortcuts', exact: true })
+  const negative = section.getByRole('button', { name: 'Not interested: Linux desktop shortcuts', exact: true })
+  await positive.click()
+  await expect(positive).toHaveAttribute('aria-pressed', 'true')
+  await negative.click()
+  await expect(negative).toHaveAttribute('aria-pressed', 'true')
+  await expect(positive).toHaveAttribute('aria-pressed', 'false')
+  await expect(positive.locator('[data-icon="thumbs-up"] svg')).toBeVisible()
+  await negative.evaluate(button => button.blur())
+  await page.mouse.move(0, 0)
+  await changeLayoutSetting(page, 'updateUiScale', 100)
+  await changeLayoutSetting(page, 'updateBaseTheme', 'system')
+  await changeLayoutSetting(page, 'updateSystemDarkTheme', 'dark')
+  await changeLayoutSetting(page, 'updateSystemLightTheme', 'light')
+  await changeLayoutSetting(page, 'updateMainColor', 'Red')
+  await changeLayoutSetting(page, 'updateSecColor', 'Blue')
+  for (const [theme, pack] of [['light', 'material'], ['dark', 'remix']]) {
+    await page.emulateMedia({ colorScheme: theme })
+    await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+    await expectImagesLoaded(recommendations(page).locator('.thumbnailImage'))
+    await changeLayoutSetting(page, 'updateIconPack', pack)
+    await expect(negative.locator(`[data-icon="thumbs-down-filled"][data-icon-pack="${pack}"] svg`)).toBeVisible()
+    await section.locator('.recommendationActions').first().screenshot({ path: testInfo.outputPath(`negative-feedback-${theme}.png`), animations: 'disabled' })
+  }
+  await positive.click()
+  await expect(negative).toHaveAttribute('aria-pressed', 'false')
+  await expect(negative.locator('[data-icon="thumbs-down"] svg')).toBeVisible()
+  await expect(positive).toHaveAttribute('aria-pressed', 'true')
+  await negative.click()
+  await expect(negative).toHaveAttribute('aria-pressed', 'true')
+  await section.getByRole('button', { name: REFRESH, exact: true }).click()
+  await expect(section.getByRole('link', { name: /Linux desktop shortcuts/ })).toHaveCount(0)
 })
 
 for (const avoidTranslation of ['entire_app', 'disabled', 'watch_only']) {
@@ -1014,7 +1116,7 @@ test.describe('recommendation grid and list', () => {
     await page.screenshot({ path: testInfo.outputPath('recommendation-grid-narrow-dark.png'), animations: 'disabled' })
   })
 
-  for (const trigger of ['grid layout', 'window resize', 'thumbnail size', 'dismissal', 'channel hiding', 'hidden-channel filter', 'forbidden-title filter', 'live-stream filter', 'premiere filter', 'refresh', 'disable', 'section hiding', 'history clearing']) {
+  for (const trigger of ['grid layout', 'window resize', 'thumbnail size', 'refresh after dismissal', 'channel hiding', 'hidden-channel filter', 'forbidden-title filter', 'live-stream filter', 'premiere filter', 'refresh', 'disable', 'section hiding', 'history clearing']) {
     test(`clamps the scrolled feed after ${trigger} at 95% scale`, async ({ app, page }) => {
       const backend = await mockCandidates(page)
       backend.channelVideos = gridVideos
@@ -1051,8 +1153,13 @@ test.describe('recommendation grid and list', () => {
         await changeLayoutSetting(page, trigger === 'live-stream filter' ? 'updateHideLiveStreams' : 'updateHideUpcomingPremieres', true)
         await expect(recommendations(page).locator('.recommendationEntry')).toHaveCount(11)
       }
-      if (trigger === 'dismissal' || trigger === 'channel hiding') {
-        await recommendations(page).getByRole('button', { name: new RegExp(`^${trigger === 'dismissal' ? 'Not interested' : 'Hide this channel'}:`) }).last().evaluate(button => button.click())
+      if (trigger === 'refresh after dismissal' || trigger === 'channel hiding') {
+        await recommendations(page).getByRole('button', { name: new RegExp(`^${trigger === 'refresh after dismissal' ? 'Not interested' : 'Hide this channel'}:`) }).last().evaluate(button => button.click())
+        if (trigger === 'refresh after dismissal') {
+          await expect(recommendations(page).getByRole('button', { name: /^Not interested:/ }).last()).toHaveAttribute('aria-pressed', 'true')
+          await expect(recommendations(page).locator('.recommendationEntry')).toHaveCount(12)
+          await recommendations(page).getByRole('button', { name: REFRESH, exact: true }).evaluate(button => button.click())
+        }
         await expect(recommendations(page).locator('.recommendationEntry')).toHaveCount(11)
       }
       if (trigger === 'refresh') {
