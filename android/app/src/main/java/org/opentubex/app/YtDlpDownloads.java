@@ -418,22 +418,23 @@ final class YtDlpDownloads {
         }
     }
 
-    synchronized JSONArray list() throws Exception {
+    JSONArray list() throws Exception {
+        return list(path -> YtDlpFiles.exists(context, path));
+    }
+
+    JSONArray list(java.util.function.Predicate<String> exists) throws Exception {
+        // Provider calls can block on removable or remote storage. They must not
+        // hold the queue monitor needed by progress, pause and cancellation.
+        Map<String, Boolean> availability = YtDlpDownloadAvailability.inspect(snapshots(), exists);
+        JSONArray result = snapshots();
+        // Controls/progress may have changed records while inspection was running.
+        YtDlpDownloadAvailability.annotate(result, availability);
+        return result;
+    }
+
+    private synchronized JSONArray snapshots() throws Exception {
         JSONArray result = new JSONArray();
-        for (JSONObject record : records.values()) {
-            JSONObject copy = snapshot(record);
-            JSONArray destinations = copy.optJSONArray("destinations");
-            int available = 0;
-            for (int i = 0; i < destinations.length(); i++) if (YtDlpFiles.exists(context, destinations.getString(i))) available++;
-            copy.put("availableDestinationCount", available).put("destinationCount", destinations.length());
-            copy.put("availability", available == 0 ? "missing" : available == destinations.length() ? "available" : "partial");
-            JSONArray files = copy.getJSONArray("files");
-            for (int i = 0; i < files.length(); i++) {
-                JSONObject item = files.getJSONObject(i);
-                item.put("available", YtDlpFiles.exists(context, item.getString("path")));
-            }
-            result.put(copy);
-        }
+        for (JSONObject record : records.values()) result.put(snapshot(record));
         return result;
     }
 
@@ -451,16 +452,19 @@ final class YtDlpDownloads {
         return removed;
     }
 
-    synchronized Uri firstFile(long id) {
-        JSONObject record = records.get(id);
-        if (record == null) return null;
-        JSONArray media = record.optJSONArray("files");
-        for (int i = 0; media != null && i < media.length(); i++) {
-            String path = media.optJSONObject(i).optString("path");
-            if (YtDlpFiles.exists(context, path)) return Uri.parse(path);
+    Uri firstFile(long id) {
+        Set<String> paths = new LinkedHashSet<>();
+        synchronized (this) {
+            JSONObject record = records.get(id);
+            if (record == null) return null;
+            JSONArray media = record.optJSONArray("files");
+            for (int i = 0; media != null && i < media.length(); i++) {
+                paths.add(media.optJSONObject(i).optString("path"));
+            }
+            JSONArray destinations = record.optJSONArray("destinations");
+            for (int i = 0; destinations != null && i < destinations.length(); i++) paths.add(destinations.optString(i));
         }
-        JSONArray paths = record.optJSONArray("destinations");
-        for (int i = 0; i < paths.length(); i++) if (YtDlpFiles.exists(context, paths.optString(i))) return Uri.parse(paths.optString(i));
+        for (String path : paths) if (YtDlpFiles.exists(context, path)) return Uri.parse(path);
         return null;
     }
 

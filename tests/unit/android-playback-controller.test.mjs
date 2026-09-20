@@ -25,6 +25,7 @@ test('native controller ignores other owners and returns requested SABR bytes', 
   const states = []
   const controller = await createAndroidPlaybackController(plugin, {
     owner: 'tab-1', continueInBackground: true, onState: state => states.push(state), onError: assert.fail,
+    createEncoder: () => ({ encode: async bytes => Buffer.from(bytes).toString('base64'), close() {} }),
   })
   await controller.load({ source: 'test', mimeType: 'application/dash+xml', read: async () => Uint8Array.of(1, 2, 3) }, {})
   listeners.get('state')({ owner: 'other', position: 20 })
@@ -101,5 +102,32 @@ test('a revoked controller preserves the final clock and ignores teardown events
   assert.equal(states.length, 1)
   await assert.rejects(controller.command('play'), /no longer owns/)
   assert.equal(calls.some(([type]) => type === 'command'), false)
+  await controller.close()
+})
+
+
+test('segment encoding yields and cannot publish after ownership is revoked', async () => {
+  const { plugin, listeners, calls } = fixture()
+  const encoding = Promise.withResolvers()
+  let started = false
+  let terminated = false
+  const controller = await createAndroidPlaybackController(plugin, {
+    owner: 'old', onState() {}, onError: assert.fail,
+    createEncoder: () => ({
+      encode() { started = true; return encoding.promise },
+      close() { terminated = true },
+    }),
+  })
+  await controller.load({ source: 'test', read: async () => Uint8Array.of(1, 2, 3) }, {})
+  const pending = listeners.get('segment')({ owner: 'old', requestId: '1' })
+  await Promise.resolve()
+  assert.equal(started, true)
+  assert.equal(calls.some(([type]) => type === 'respond'), false)
+  listeners.get('state')({ owner: 'old', event: 'suspended' })
+  encoding.resolve('AQID')
+  await pending
+  assert.equal(terminated, true)
+  assert.equal(calls.at(-1)[1].data, undefined)
+  assert.match(calls.at(-1)[1].error, /replaced/)
   await controller.close()
 })

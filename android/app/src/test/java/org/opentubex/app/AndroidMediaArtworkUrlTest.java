@@ -14,17 +14,17 @@ import org.junit.Test;
 public class AndroidMediaArtworkUrlTest {
     @Test
     public void acceptsPublicHttpsArtworkUrls() throws Exception {
-        assertTrue(AndroidMediaSessionService.isSafeArtworkUrl(
+        assertTrue(AndroidMediaArtwork.isSafeArtworkUrl(
             new URL("https://8.8.8.8/thumbnail.jpg")
         ));
     }
 
     @Test
     public void rejectsUnsafeArtworkSchemesAndCredentials() throws Exception {
-        assertFalse(AndroidMediaSessionService.isSafeArtworkUrl(
+        assertFalse(AndroidMediaArtwork.isSafeArtworkUrl(
             new URL("http://8.8.8.8/thumbnail.jpg")
         ));
-        assertFalse(AndroidMediaSessionService.isSafeArtworkUrl(
+        assertFalse(AndroidMediaArtwork.isSafeArtworkUrl(
             new URL("https://user:password@8.8.8.8/thumbnail.jpg")
         ));
     }
@@ -42,7 +42,7 @@ public class AndroidMediaArtworkUrlTest {
             "[fc00::1]"
         };
         for (String address : addresses) {
-            assertFalse(AndroidMediaSessionService.isSafeArtworkUrl(
+            assertFalse(AndroidMediaArtwork.isSafeArtworkUrl(
                 new URL("https://" + address + "/thumbnail.jpg")
             ));
         }
@@ -50,31 +50,31 @@ public class AndroidMediaArtworkUrlTest {
 
     @Test
     public void boundsArtworkResponsesWithAndWithoutContentLength() throws Exception {
-        byte[] allowed = new byte[AndroidMediaSessionService.MAX_ARTWORK_BYTES];
-        assertArrayEquals(allowed, AndroidMediaSessionService.readArtworkBytes(
+        byte[] allowed = new byte[AndroidMediaArtwork.MAX_ARTWORK_BYTES];
+        assertArrayEquals(allowed, AndroidMediaArtwork.readArtworkBytes(
             new ByteArrayInputStream(allowed),
             allowed.length
         ));
 
-        assertNull(AndroidMediaSessionService.readArtworkBytes(
+        assertNull(AndroidMediaArtwork.readArtworkBytes(
             new ByteArrayInputStream(new byte[0]),
-            AndroidMediaSessionService.MAX_ARTWORK_BYTES + 1L
+            AndroidMediaArtwork.MAX_ARTWORK_BYTES + 1L
         ));
-        assertNull(AndroidMediaSessionService.readArtworkBytes(
-            new ByteArrayInputStream(new byte[AndroidMediaSessionService.MAX_ARTWORK_BYTES + 1]),
+        assertNull(AndroidMediaArtwork.readArtworkBytes(
+            new ByteArrayInputStream(new byte[AndroidMediaArtwork.MAX_ARTWORK_BYTES + 1]),
             -1
         ));
     }
 
     @Test
     public void acceptsOnlyBoundedDecodedArtworkDimensions() {
-        assertTrue(AndroidMediaSessionService.hasSafeArtworkDimensions(1280, 720));
-        assertTrue(AndroidMediaSessionService.hasSafeArtworkDimensions(2048, 2048));
+        assertTrue(AndroidMediaArtwork.hasSafeArtworkDimensions(1280, 720));
+        assertTrue(AndroidMediaArtwork.hasSafeArtworkDimensions(2048, 2048));
 
-        assertFalse(AndroidMediaSessionService.hasSafeArtworkDimensions(0, 720));
-        assertFalse(AndroidMediaSessionService.hasSafeArtworkDimensions(2049, 1));
-        assertFalse(AndroidMediaSessionService.hasSafeArtworkDimensions(2048, 2049));
-        assertFalse(AndroidMediaSessionService.hasSafeArtworkDimensions(
+        assertFalse(AndroidMediaArtwork.hasSafeArtworkDimensions(0, 720));
+        assertFalse(AndroidMediaArtwork.hasSafeArtworkDimensions(2049, 1));
+        assertFalse(AndroidMediaArtwork.hasSafeArtworkDimensions(2048, 2049));
+        assertFalse(AndroidMediaArtwork.hasSafeArtworkDimensions(
             Integer.MAX_VALUE,
             Integer.MAX_VALUE
         ));
@@ -82,9 +82,9 @@ public class AndroidMediaArtworkUrlTest {
 
     @Test
     public void downsamplesOversizedArtworkBeforeAllocation() {
-        assertEquals(1, AndroidMediaSessionService.calculateArtworkSampleSize(1280, 720));
-        assertEquals(2, AndroidMediaSessionService.calculateArtworkSampleSize(4096, 2048));
-        assertEquals(4, AndroidMediaSessionService.calculateArtworkSampleSize(8000, 4000));
-        assertEquals(0, AndroidMediaSessionService.calculateArtworkSampleSize(-1, 720));
+        assertEquals(1, AndroidMediaArtwork.calculateArtworkSampleSize(1280, 720));
+        assertEquals(2, AndroidMediaArtwork.calculateArtworkSampleSize(4096, 2048));
+        assertEquals(4, AndroidMediaArtwork.calculateArtworkSampleSize(8000, 4000));
+        assertEquals(0, AndroidMediaArtwork.calculateArtworkSampleSize(-1, 720));
     }
 }

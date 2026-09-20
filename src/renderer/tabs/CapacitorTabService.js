@@ -14,6 +14,7 @@ import {
   unloadCapacitorTab
 } from './capacitorTabState.js'
 import { tabMediaCoordinator } from './TabMediaCoordinator.js'
+import { isAppHidden } from '../helpers/appVisibility.js'
 import { getSyncTabRoute } from '../helpers/sync-sessions.js'
 
 const STORAGE_KEY = 'opentubex-capacitor-tabs'
@@ -45,6 +46,12 @@ export class CapacitorTabService {
     this.store = store
     this.navigation = navigation
     this.initialized = false
+    this.persistTimer = null
+    this.budgetTimer = null
+    this.lastPresented = new Map()
+    this.presentationOrder = 0
+    this.flushOnHide = () => { if (isAppHidden()) this.flushPersistence() }
+    this.flushOnPageHide = () => this.flushPersistence()
     this.sessionGeneration = 0
     this.removeRouterHook = () => {}
     this.removeStoreSubscription = () => {}
@@ -98,9 +105,18 @@ export class CapacitorTabService {
       })
     })
     this.removeStoreSubscription = this.store.subscribe((mutation) => {
-      if (PERSISTED_MUTATIONS.has(mutation.type)) this.persist()
+      if (mutation.type === 'setRememberTabNavigationHistory') this.persist()
+      else if (PERSISTED_MUTATIONS.has(mutation.type)) this.schedulePersistence()
+      if (mutation.type === 'setPresentedTab') {
+        this.lastPresented.set(this.store.getters.getPresentedTabId, ++this.presentationOrder)
+      }
+      if (mutation.type === 'setTabsState' || mutation.type === 'setPresentedTab') this.scheduleTabBudget()
     })
 
+    globalThis.document?.addEventListener('visibilitychange', this.flushOnHide)
+    globalThis.window?.addEventListener?.('pagehide', this.flushOnPageHide)
+    this.lastPresented.set(session.activeTabId, ++this.presentationOrder)
+    this.scheduleTabBudget()
     const activeTab = this.store.getters.getActiveTab
     if (activeTab?.route.fullPath !== this.router.currentRoute.value.fullPath) {
       await this.navigation.projectRoute(activeTab.route)
@@ -382,7 +398,53 @@ export class CapacitorTabService {
     return this.sessionGeneration
   }
 
+  schedulePersistence() {
+    if (this.persistTimer !== null) return
+    this.sessionUpdatedAt = Date.now()
+    this.persistTimer = setTimeout(() => this.persist(), 0)
+  }
+
+  flushPersistence() {
+    if (this.persistTimer !== null) this.persist()
+  }
+
+  scheduleTabBudget() {
+    if (this.budgetTimer !== null) return
+    this.budgetTimer = setTimeout(() => {
+      this.budgetTimer = null
+      this.enforceTabBudget()
+    }, 1000)
+  }
+
+  enforceTabBudget() {
+    let session = this.currentSession()
+    const ids = new Set(session.tabs.map(tab => tab.id))
+    for (const id of this.lastPresented.keys()) {
+      if (!ids.has(id)) this.lastPresented.delete(id)
+    }
+    // Keep two inactive browsing tabs warm. Player and editing routes are
+    // protected, as are pinned tabs and any partially entered form values.
+    const roots = new Map([...(globalThis.document?.querySelectorAll('.tabContent[data-tab-id]') ?? [])]
+      .map(element => [element.dataset.tabId, element]))
+    const candidates = session.tabs.filter(tab => {
+      if (tab.id === session.activeTabId || tab.id === this.store.getters.getPresentedTabId ||
+          tab.isPinned || tab.isPlaying || tab.isLoading || tab.loadState !== 'loaded') return false
+      if (!/^\/(?:home|subscriptions|subscribedchannels|trending|popular|history|search|channel|hashtag)(?:\/|$)/.test(tab.route.path)) return false
+      const root = roots.get(tab.id)
+      return !root?.querySelector('[contenteditable="true"]') &&
+        ![...(root?.querySelectorAll('input, textarea') ?? [])].some(input =>
+          !['button', 'submit', 'hidden'].includes(input.type) &&
+          (input.value !== input.defaultValue || input.checked !== input.defaultChecked))
+    }).sort((left, right) => (this.lastPresented.get(left.id) ?? 0) - (this.lastPresented.get(right.id) ?? 0))
+    for (const tab of candidates.slice(0, Math.max(0, candidates.length - 2))) {
+      session = unloadCapacitorTab(session, tab.id)
+    }
+    if (candidates.length > 2) this.commitSession(session)
+  }
+
   persist() {
+    clearTimeout(this.persistTimer)
+    this.persistTimer = null
     try {
       this.sessionUpdatedAt = Date.now()
       localStorage.setItem(STORAGE_KEY, JSON.stringify(toPersistedSession(
@@ -395,6 +457,11 @@ export class CapacitorTabService {
   }
 
   dispose() {
+    this.flushPersistence()
+    clearTimeout(this.budgetTimer)
+    this.budgetTimer = null
+    globalThis.document?.removeEventListener('visibilitychange', this.flushOnHide)
+    globalThis.window?.removeEventListener?.('pagehide', this.flushOnPageHide)
     this.removeRouterHook()
     this.removeStoreSubscription()
     this.initialized = false
