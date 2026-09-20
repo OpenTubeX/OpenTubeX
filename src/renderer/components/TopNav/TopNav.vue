@@ -115,18 +115,19 @@
         </div>
       </div>
       <div class="side profiles">
-        <span
+        <button
           v-if="syncing && !hideHeaderSyncIndicator"
-          class="syncIndicator"
-          role="progressbar"
-          :aria-label="syncLabel"
-          :title="syncLabel"
+          type="button"
+          class="syncIndicator navButton"
+          :aria-label="syncIndicatorLabel"
+          :title="syncIndicatorLabel"
+          @click="openSyncSettings"
         >
           <FtIcon
             :icon="['fas', 'sync']"
             aria-hidden="true"
           />
-        </span>
+        </button>
         <button
           v-if="settingsWindowMinimized"
           type="button"
@@ -205,6 +206,7 @@ const { t } = useI18n()
 const syncing = computed(() => store.getters.getSyncServerStatus === 'syncing')
 const syncLabel = computed(() => syncProgressLabel(t, store.getters.getSyncServerProgress?.stage))
 const hideHeaderSyncIndicator = computed(() => store.getters.getHideHeaderSyncIndicator)
+const syncIndicatorLabel = computed(() => `${t('Settings.Sync Settings.Sync Settings')}: ${syncLabel.value}`)
 const emit = defineEmits(['request-android-exit'])
 const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
   store.getters.getKeyboardShortcuts
@@ -358,6 +360,11 @@ const restoreSettingsWindowLabel = computed(() => `${t('Restore')}: ${minimizedS
 
 function toggleDownloadsWindow() {
   store.dispatch(downloadsWindowOpen.value ? 'hideSettingsWindow' : 'showSettingsWindow', 'downloads')
+}
+
+function openSyncSettings() {
+  store.commit('setSettingsWindowSection', 'sync')
+  store.dispatch('showSettingsWindow')
 }
 
 function toggleSettingsWindow() {
