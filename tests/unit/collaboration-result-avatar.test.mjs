@@ -132,3 +132,13 @@ test('resolves collaborators for playlist and grid results without a collaborati
   assert.deepEqual(Array.from(f.avatar.channelThumbnails.value), ['https://images.test/first.jpg', 'https://images.test/second.jpg', null])
   assert.deepEqual(f.calls, ['collab'])
 })
+
+test('retains the available primary avatar when collaborator metadata omits its image', async () => {
+  const f = resolve({ videoId: 'collab', hasCollaborators: true, authorThumbnailUrl: '//images.test/primary.jpg' }, async () => [
+    { id: 'first', thumbnail: '' },
+    { id: 'second', thumbnail: '//images.test/second.jpg' }
+  ])
+  await f.pending
+  assert.deepEqual(Array.from(f.avatar.channelThumbnails.value), ['https://images.test/primary.jpg', 'https://images.test/second.jpg'])
+  assert.equal(f.avatar.channelThumbnail.value, 'https://images.test/primary.jpg')
+})

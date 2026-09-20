@@ -58,7 +58,9 @@ export function useResultChannelAvatar(result, channelId, enabled) {
           ? result.value.collaborators
           : result.value.videoId ? await getLocalVideoChannels(result.value.videoId) : []
         if (generation === loadGeneration && collaborators.length > 0) {
-          channelThumbnails.value = collaborators.map(channel => normalizeThumbnail(channel.thumbnail))
+          channelThumbnails.value = collaborators.map((channel, index) =>
+            normalizeThumbnail(channel.thumbnail) ?? (index === 0 ? cachedThumbnail : null)
+          )
           channelThumbnail.value = channelThumbnails.value[0]
         }
       } catch {
