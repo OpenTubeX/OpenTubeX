@@ -80,6 +80,7 @@ for (const backend of ['Local', 'Invidious']) {
     let localLoads = 0
     const watch = {
       ...methods,
+      abortAutoplayCountdown() {},
       firstLoad: true,
       isLoading: true,
       videoLoadGeneration: 0,

@@ -52,29 +52,28 @@
       </div>
     </div>
     <div class="videoMetrics">
-      <div class="datePublishedAndViewCount">
-        <span class="publishedDate">
-          {{ publishedDateText }}
-        </span>
-        <template
+      <FtInlineMetadata class="datePublishedAndViewCount">
+        <span
+          v-if="publishedDateText"
+          class="publishedDate"
+        >{{ publishedDateText }}</span>
+        <span
           v-if="publishedTimeAgo && !isPremiereInProgress"
-        >
-          <span class="seperator">•</span><span class="publishedTimeAgo">{{ publishedTimeAgo }}</span>
-        </template>
-        <template
+          class="publishedTimeAgo"
+        >{{ publishedTimeAgo }}</span>
+        <span
           v-if="parsedViewCount"
+          class="videoViews"
+        >{{ parsedViewCount }}</span>
+        <bdi
+          v-if="category"
+          class="videoCategory"
         >
-          <span class="seperator">•</span><span class="videoViews">{{ parsedViewCount }}</span>
-        </template>
-        <template v-if="category">
-          <span class="seperator">•</span>
-          <bdi class="videoCategory">
-            <strong>{{ t('Description.Video Category') }}</strong> {{ category }}
-          </bdi>
-        </template>
-      </div>
+          <strong>{{ t('Description.Video Category') }}</strong> {{ category }}
+        </bdi>
+      </FtInlineMetadata>
       <div
-        v-if="!hideVideoLikesAndDislikes"
+        v-if="!hideVideoLikesAndDislikes && (parsedLikeCount !== null || (useReturnYoutubeDislikes && parsedDislikeCount !== null))"
         class="likeBarContainer"
       >
         <div
@@ -86,9 +85,12 @@
             :style="{ background: `linear-gradient(to right, var(--accent-color) ${likePercentageRatio}%, #9E9E9E ${likePercentageRatio}%)` }"
           />
           <div class="likeCounts">
-            <span class="likeCount"><FtIcon :icon="['fas', 'thumbs-up']" /> {{ parsedLikeCount }}</span>
             <span
-              v-if="useReturnYoutubeDislikes"
+              v-if="parsedLikeCount !== null"
+              class="likeCount"
+            ><FtIcon :icon="['fas', 'thumbs-up']" /> {{ parsedLikeCount }}</span>
+            <span
+              v-if="useReturnYoutubeDislikes && parsedDislikeCount !== null"
               class="dislikeCount"
             >
               <FtIcon :icon="['fas', 'thumbs-down']" /> {{ parsedDislikeCount }}
@@ -241,7 +243,7 @@
             </div>
           </FtIconButton>
           <FtIconButton
-            v-if="useSponsorBlock && !isUpcoming && !hideFullscreenDockActions"
+            v-if="!offline && useSponsorBlock && !isUpcoming && !hideFullscreenDockActions"
             :title="sponsorBlockInfoTitle"
             :icon="['fas', 'shield-halved']"
             :theme="sponsorBlockPanelOpen ? 'secondary' : 'base'"
@@ -271,21 +273,21 @@
         </span>
         <span class="videoOptionsMobileRow">
           <FtIconButton
-            v-if="supportsYtDlp && enableDownloads && !isUpcoming"
+            v-if="!offline && supportsYtDlp && enableDownloads && !isUpcoming"
             :title="t('Downloads.Download Video')"
             :icon="['fas', 'download']"
             theme="secondary"
             @click="showDownloadPrompt = true"
           />
           <FtIconButton
-            v-if="USING_ELECTRON && externalPlayer !== ''"
+            v-if="!offline && USING_ELECTRON && externalPlayer !== ''"
             :title="t('Video.External Player.OpenInTemplate', { externalPlayer })"
             :icon="['fas', 'external-link-alt']"
             theme="secondary"
             @click="handleExternalPlayer"
           />
           <FtIconButton
-            v-if="!isUpcoming"
+            v-if="!isUpcoming && (!offline || localPlaybackDownloads.length > 0)"
             :title="t('Change Format.Change Media Formats')"
             theme="secondary"
             :icon="['fas', 'file-video']"
@@ -313,6 +315,7 @@
       :local-file-playback="localFilePlayback"
       :local-playback-downloads="localPlaybackDownloads"
       :can-change-playback-engine="supportsYtDlp"
+      :offline="offline"
       @change-format="changeFormat"
       @change-playback-engine="changePlaybackEngine"
       @use-local-source="emit('use-local-source', $event)"
@@ -320,7 +323,7 @@
       @close="showFormatPrompt = false"
     />
     <WatchVideoDownloadPrompt
-      v-if="enableDownloads && showDownloadPrompt"
+      v-if="!offline && enableDownloads && showDownloadPrompt"
       :video-id="id"
       :title="title"
       :thumbnail="videoThumbnail"
@@ -343,6 +346,7 @@ import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtAddToPlaylistDropdown from '../FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
+import FtInlineMetadata from '../FtInlineMetadata/FtInlineMetadata.vue'
 import FtCard from '../ft-card/ft-card.vue'
 import FtCollaboratorsPrompt from '../FtCollaboratorsPrompt/FtCollaboratorsPrompt.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
@@ -369,6 +373,10 @@ const { tabId } = useTabContext()
 const dateFormat = computed(() => store.getters.getDateFormat)
 
 const props = defineProps({
+  offline: {
+    type: Boolean,
+    default: false
+  },
   id: {
     type: String,
     required: true
@@ -617,6 +625,13 @@ const liveChatToggleTitle = computed(() => {
   }
 
   return props.liveChatOpen ? t('Video.Close Live Chat') : t('Video.Show Live Chat')
+})
+
+watch(() => props.offline, offline => {
+  if (offline) {
+    showDownloadPrompt.value = false
+    if (props.localPlaybackDownloads.length === 0) showFormatPrompt.value = false
+  }
 })
 
 watch(enableDownloads, (enabled) => {

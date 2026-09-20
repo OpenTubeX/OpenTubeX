@@ -148,9 +148,6 @@
   gap: 3px;
 }
 
-.seperator {
-  margin-inline: 4px;
-}
 
 .publishedTimeAgo,
 .videoViews {
@@ -193,9 +190,6 @@
     flex-direction: column;
   }
 
-  .seperator {
-    display: none;
-  }
 
 }
 

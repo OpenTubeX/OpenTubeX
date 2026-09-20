@@ -308,6 +308,7 @@ export default defineComponent({
       /** @type {'dash' | 'legacy' | null} */
       androidBackgroundRestoreFormat: null,
       localFilePlayback: false,
+      isOffline: getConnectionState() === 'offline',
       thumbnail: '',
       videoId: '',
       videoTitle: '',
@@ -321,9 +322,9 @@ export default defineComponent({
       /** @type {import('../../helpers/video-games').LocalVideoGame[]} */
       videoGames: [],
       license: '',
-      videoViewCount: 0,
-      videoLikeCount: 0,
-      videoDislikeCount: 0,
+      videoViewCount: null,
+      videoLikeCount: null,
+      videoDislikeCount: null,
       videoLengthSeconds: 0,
       videoChapters: [],
       videoCurrentChapterIndex: 0,
@@ -703,7 +704,7 @@ export default defineComponent({
       return caption ? this.captions.indexOf(caption) : 0
     },
     transcriptAvailable: function () {
-      return this.captions.length > 0
+      return !this.isOffline && this.captions.length > 0
     },
     ambientModeActive: function () {
       return this.$store.getters.getAmbientMode &&
@@ -1005,6 +1006,7 @@ export default defineComponent({
       return this.$store.getters.getHideLiveChatReplay
     },
     liveChatAvailable: function () {
+      if (this.isOffline) return false
       return this.liveChatIsReplay
         ? !this.hideLiveChatReplay
         : !this.hideLiveChat && (this.isLive || this.isUpcoming)
@@ -1095,13 +1097,14 @@ export default defineComponent({
       return this.$store.getters.getPlaylist(this.playlistId)
     },
     endScreenRecommendations: function () {
-      if (this.hideRecommendedVideos) return []
+      if (this.isOffline || this.hideRecommendedVideos) return []
       return this.recommendedVideos.filter(video =>
         video.videoId && video.videoId !== this.videoId &&
         !this.isHiddenVideo(this.forbiddenTitles, this.channelsHidden, video)
       ).slice(0, 6)
     },
     nextRecommendedVideo: function () {
+      if (this.isOffline) return undefined
       return this.recommendedVideos.find((video) =>
         !this.isHiddenVideo(this.forbiddenTitles, this.channelsHidden, video)
       )
@@ -1152,7 +1155,7 @@ export default defineComponent({
       return this.playerReady
     },
     useSponsorBlock: function () {
-      return this.$store.getters.getUseSponsorBlock
+      return !this.isOffline && this.$store.getters.getUseSponsorBlock
     },
     useReturnYouTubeDislikes: function () {
       return this.$store.getters.getUseReturnYouTubeDislikes
@@ -1296,6 +1299,7 @@ export default defineComponent({
   },
   mounted: function () {
     connectionEvents.addEventListener('change', this.handleDownloadConnectionChange)
+    this.isOffline = getConnectionState() === 'offline'
     document.addEventListener('keydown', this.handleShortsNavigationKeydown, true)
     document.addEventListener('visibilitychange', this.updateAndroidBackgroundPlaybackFormat)
     window.addEventListener('resize', this.updateShortsViewportHeight)
@@ -1356,6 +1360,15 @@ export default defineComponent({
       if (panel === 'chat') this.liveChatOpen = true
     },
     handleDownloadConnectionChange({ detail }) {
+      const chatWasOpen = this.showLiveChat || this.fullscreenLiveChatOpen || this.mobilePanel === 'chat'
+      this.isOffline = detail === 'offline'
+      if (this.isOffline) {
+        if (this.showTranscript || this.fullscreenTranscriptOpen || this.mobilePanel === 'transcript') this.closeTranscript()
+        if (chatWasOpen) this.closeLiveChat()
+        if (this.showSidebarSponsorBlock || this.fullscreenSponsorBlockOpen) this.closeSidebarSponsorBlock()
+        if (this.fullscreenCommentsOpen || this.shortsCommentsOpen || this.mobilePanel === 'comments') this.closeFullscreenComments()
+        if (!this.watchingPlaylist) this.abortAutoplayCountdown(true)
+      }
       if (detail !== 'offline' || !this.isLoading || this.localFilePlayback) return
       if (this.finishDownloadedPlaybackWithoutMetadata()) {
         // Ignore metadata responses that arrive after switching to the local file.
@@ -2091,9 +2104,9 @@ export default defineComponent({
       this.videoTags = []
       this.videoGames = []
       this.license = ''
-      this.videoViewCount = 0
-      this.videoLikeCount = 0
-      this.videoDislikeCount = 0
+      this.videoViewCount = null
+      this.videoLikeCount = null
+      this.videoDislikeCount = null
       this.videoLengthSeconds = 0
       this.videoChapters = []
       this.videoCurrentChapterIndex = 0
@@ -3055,7 +3068,7 @@ export default defineComponent({
           this.videoLikeCount = isNaN(likeCount) ? 0 : likeCount
 
           // YouTube doesn't return dislikes anymore
-          this.videoDislikeCount = 0
+          this.videoDislikeCount = null
 
           if (this.useReturnYouTubeDislikes) {
             this.fetchVideoDislikes()
@@ -4871,7 +4884,7 @@ export default defineComponent({
 
       if (this.watchingPlaylist) {
         this.$refs.watchVideoPlaylist?.playNextVideo()
-      } else if (nextVideoId) {
+      } else if (!this.isOffline && nextVideoId) {
         this.tabRouter.push({
           path: `/watch/${nextVideoId}`
         })

@@ -10,7 +10,7 @@ const binding = source.slice(bindingStart, source.indexOf('      wrapTextTrackSe
 // Exercise the actual subscription setup and lifecycle cleanup, without loading
 // Shaka or the unrelated DOM teardown that follows these lifecycle prefixes.
 const unmount = source.split('    onBeforeUnmount(() => {')
-  .find(body => body.trimStart().startsWith('screenWakeBinding?.destroy()'))
+  .find(body => body.trimStart().startsWith('sponsorBlockRequestGeneration++'))
   .split('      clearTimeout(paidPromotionTimer)')[0]
 const destroy = source.split('    async function destroyPlayer() {')[1].split('      ignoreErrors = true')[0]
 
@@ -27,7 +27,7 @@ function fixture(native = true) {
   } : null }
   const context = vm.createContext({
     player, localPlayer: player, controls: {}, mediaTabId: 'video',
-    nativePlaybackCleanup: null, screenWakeBinding: null,
+    nativePlaybackCleanup: null, screenWakeBinding: null, sponsorBlockRequestGeneration: 0,
     repeatStatsTracker: null, repeatStatsLoopObserver: null,
     clearSabrBackoffTimer() {},
     store: { getters: reactive({ getContinuePlaybackWhenScreenIsLocked: true }) },
