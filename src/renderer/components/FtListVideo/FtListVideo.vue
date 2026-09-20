@@ -222,9 +222,9 @@
           :disabled="isFetchingCollaborators"
           @click.stop.prevent="openChannelByline"
         >
-          <FtChannelAvatar
+          <FtChannelAvatarStack
             v-if="showChannelAvatar"
-            :thumbnail="channelThumbnail"
+            :thumbnails="channelThumbnails"
           />
           <span class="channelNameText">{{ channelName }}</span>
         </button>
@@ -236,9 +236,9 @@
           :to="`/channel/${channelId}`"
           @auxclick="handleChannelLinkClick"
         >
-          <FtChannelAvatar
+          <FtChannelAvatarStack
             v-if="showChannelAvatar"
-            :thumbnail="channelThumbnail"
+            :thumbnails="channelThumbnails"
           />
           <span class="channelNameText">{{ channelName }}</span>
         </component>
@@ -246,9 +246,9 @@
           v-else-if="channelName !== null"
           class="channelName"
         >
-          <FtChannelAvatar
+          <FtChannelAvatarStack
             v-if="showChannelAvatar"
-            :thumbnail="channelThumbnail"
+            :thumbnails="channelThumbnails"
           />
           <span class="channelNameText">{{ channelName }}</span>
         </bdi>
@@ -406,7 +406,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 
 import FtAddToPlaylistDropdown from '../FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
-import FtChannelAvatar from '../FtChannelAvatar/FtChannelAvatar.vue'
+import FtChannelAvatarStack from '../FtChannelAvatar/FtChannelAvatarStack.vue'
 import FtCollaboratorsPrompt from '../FtCollaboratorsPrompt/FtCollaboratorsPrompt.vue'
 import FtEmbeddedProgress from '../FtEmbeddedProgress/FtEmbeddedProgress.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
@@ -791,11 +791,10 @@ const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvid
 const showChannelAvatar = computed(() => (
   !store.getters.getHideChannelAvatars &&
   (props.appearance === 'result' || props.appearance === 'youtubeShort') &&
-  channelName.value !== null &&
-  channelId.value !== null
+  channelName.value !== null
 ))
 
-const { channelThumbnail } = useResultChannelAvatar(
+const { channelThumbnails } = useResultChannelAvatar(
   toRef(props, 'data'),
   channelId,
   showChannelAvatar
