@@ -143,17 +143,19 @@ const visible = ref(props.initialVisibleState && shouldBeVisible.value)
 const display = ref(shouldBeVisible.value ? 'block' : 'none')
 const loadedByVisibilityObserver = ref(false)
 
-watch(() => props.initialVisibleState, (initialVisibleState) => {
-  if (!shouldBeVisible.value) {
-    visible.value = false
-    display.value = 'none'
-  } else if (initialVisibleState) {
-    visible.value = true
+watch(
+  [() => props.initialVisibleState, shouldBeVisible],
+  ([initialVisibleState, isAllowed]) => {
+    if (!isAllowed) {
+      visible.value = false
+      display.value = 'none'
+      return
+    }
+
     display.value = 'block'
-  } else if (!loadedByVisibilityObserver.value) {
-    visible.value = false
+    visible.value = initialVisibleState || loadedByVisibilityObserver.value
   }
-})
+)
 
 /**
  * @param {boolean} isVisible
