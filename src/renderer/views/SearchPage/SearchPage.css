@@ -75,7 +75,7 @@
     color: var(--side-nav-hover-text-color);
   }
 
-  .card :deep(.ft-list-item .iconButton),
+  .card :deep(.optionsButton .iconButton),
   .card :deep(.ft-list-item .deArrowToggleButton),
   .card :deep(.channelSubscribeButton button) {
     box-sizing: border-box;

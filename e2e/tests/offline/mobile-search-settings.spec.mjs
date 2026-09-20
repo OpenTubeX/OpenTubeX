@@ -90,6 +90,11 @@ for (const uiScale of [100, 125]) {
       await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateListType', 'grid'))
       const desktopTextGap = await getVideoMetadataGap(title.locator('xpath=..'))
 
+      const touchSession = await page.context().newCDPSession(page)
+      await touchSession.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+      expect(await page.locator('.playlistIcons button').first().evaluate(element => element.getBoundingClientRect().width)).toBeLessThan(48)
+      await touchSession.detach()
+
       await setWindowSize(app, page, { width: 460, height: 850 })
       const session = await page.context().newCDPSession(page)
       await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
@@ -106,7 +111,7 @@ for (const uiScale of [100, 125]) {
         const channelBounds = await channel.boundingBox()
         expect(channelBounds.y).toBeGreaterThanOrEqual(titleBounds.y + titleBounds.height - 0.01)
         // Fractional UI scales can round a 48px target just below 48.
-        expect(await page.locator('.ft-list-item .iconButton, .ft-list-item .deArrowToggleButton').evaluateAll(elements => elements.every(element => {
+        expect(await page.locator('.ft-list-item .optionsButton .iconButton, .ft-list-item .deArrowToggleButton').evaluateAll(elements => elements.every(element => {
           const bounds = element.getBoundingClientRect()
           return bounds.width >= 47.99 && bounds.height >= 47.99
         }))).toBe(true)
@@ -115,6 +120,24 @@ for (const uiScale of [100, 125]) {
           return parseFloat(target.width) >= 47.99 && parseFloat(target.height) >= 47.99
         }))).toBe(true)
       }
+      await expect(page.locator('.playlistIcons')).toBeHidden()
+      const thumbnail = page.locator('.thumbnailLink').first()
+      const bounds = await thumbnail.boundingBox()
+      await session.send('Input.dispatchTouchEvent', {
+        type: 'touchStart', touchPoints: [{ x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }]
+      })
+      const actions = page.locator('.mobileThumbnailActionRow')
+      await expect(actions).toBeVisible()
+      await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+      const rows = page.locator('.mobileLinkQuickActions')
+      await expect(rows).toHaveCount(2)
+      expect((await rows.nth(1).boundingBox()).y).toBeGreaterThan((await rows.first().boundingBox()).y)
+      await expect(actions.getByRole('menuitem', { name: /^Add to Playlist$/i })).toBeVisible()
+      await actions.getByRole('menuitem', { name: /^Add to Playlist$/i }).click()
+      await expect(page.locator('.mobileLinkActions')).toHaveCount(0)
+      await expect(page.locator('.mobileSheet[open] .playlistSearch')).toBeVisible()
+      await page.keyboard.press('Escape')
+      await expect(page.locator('.mobileSheet[open]')).toHaveCount(0)
       await page.locator('.deArrowToggleButton').click({ position: { x: 4, y: 24 } })
       await expect(title).toHaveText('Short title')
       await channel.click({ position: { x: 12, y: 4 } })

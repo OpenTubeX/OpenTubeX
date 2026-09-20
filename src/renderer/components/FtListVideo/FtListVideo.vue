@@ -104,6 +104,7 @@
       />
       <span
         class="playlistIcons"
+        :class="{ mobileThumbnailActions: useMobileThumbnailActions }"
         draggable="true"
         @dragstart="onDragStart"
       >
@@ -194,6 +195,12 @@
         {{ t("Video.Watched") }}
       </div>
     </div>
+    <FtAddToPlaylistDropdown
+      v-if="mobilePlaylistPickerOpen"
+      :video-data="addToPlaylistVideoData"
+      force-sheet
+      @closed="mobilePlaylistPickerOpen = false"
+    />
     <div
       class="info"
       draggable="true"
@@ -398,7 +405,7 @@
 <script setup>
 import FtInlineMetadata from '../FtInlineMetadata/FtInlineMetadata.vue'
 import { useContextMenuHold } from '../../composables/useContextMenuHold'
-import { PHONE_LAYOUT_QUERY } from '../../composables/usePhoneLayout'
+import { PHONE_LAYOUT_QUERY, usePhoneLayout } from '../../composables/usePhoneLayout'
 import FtRetryImage from '../FtRetryImage.vue'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
@@ -1261,6 +1268,62 @@ const videoContextMenuItems = computed(() => {
   return rows
 })
 
+const phoneLayout = usePhoneLayout()
+const useMobileThumbnailActions = computed(() => process.env.IS_CAPACITOR || phoneLayout.value)
+const mobilePlaylistPickerOpen = ref(false)
+const mobileThumbnailActions = computed(() => {
+  const actions = []
+  if (extraThumbnailActionButton.value) {
+    actions.push({
+      label: extraThumbnailActionButton.value.title,
+      icon: extraThumbnailActionButton.value.icon,
+      run: handleExtraThumbnailAction
+    })
+  }
+  if (showPlaylists.value) {
+    actions.push({
+      label: t('User Playlists.Add to Playlist'),
+      icon: isInAnyPlaylist.value ? ['fac', 'playlist-check'] : ['fac', 'playlist-add'],
+      run: () => { mobilePlaylistPickerOpen.value = true }
+    })
+  }
+  if (isQuickBookmarkEnabled.value && props.quickBookmarkButtonEnabled) {
+    actions.push({
+      label: quickBookmarkIconText.value,
+      icon: quickBookmarkIcon.value,
+      pressed: isInQuickBookmarkPlaylist.value,
+      run: toggleQuickBookmarked
+    })
+  }
+  if (inUserPlaylist.value && props.canMoveVideoUp) {
+    actions.push({
+      label: t('User Playlists.Move Video Up'),
+      icon: effectiveListTypeIsList.value ? ['fas', 'arrow-up'] : ['fas', 'arrow-left'],
+      run: moveVideoUp
+    })
+  }
+  if (inUserPlaylist.value && props.canMoveVideoDown) {
+    actions.push({
+      label: t('User Playlists.Move Video Down'),
+      icon: effectiveListTypeIsList.value ? ['fas', 'arrow-down'] : ['fas', 'arrow-right'],
+      run: moveVideoDown
+    })
+  }
+  if (inUserPlaylist.value && props.canRemoveFromPlaylist) {
+    actions.push({ label: t('User Playlists.Remove from Playlist'), icon: ['fas', 'trash'], run: removeFromPlaylist })
+  }
+  if (canToggleLiveReminder.value) {
+    actions.push({
+      label: liveReminderActive.value ? t('Video.Notification on') : t('Video.Notify me'),
+      icon: ['fas', 'calendar-days'],
+      pressed: liveReminderActive.value,
+      enabled: !liveReminderLoading.value,
+      run: toggleLiveReminder
+    })
+  }
+  return actions
+})
+
 const openMobileContextActions = inject('openMobileContextActions')
 
 const { startMenuHold, moveMenuHold, cancelMenuHold, suppressMenuHoldClick } = useContextMenuHold(openVideoContextMenu)
@@ -1276,7 +1339,7 @@ const videoMenuButton = useTemplateRef('videoMenuButton')
 function openVideoOptionsMenu() {
   cancelMenuHold()
   if (process.env.IS_CAPACITOR || window.matchMedia(PHONE_LAYOUT_QUERY).matches) {
-    openMobileContextActions({ title: title.value, actions: videoContextMenuItems })
+    openMobileContextActions({ title: title.value, actions: videoContextMenuItems, thumbnailActions: mobileThumbnailActions })
     return
   }
   const button = videoMenuButton.value.$el.querySelector('button')
@@ -1303,7 +1366,8 @@ function openVideoContextMenu(event) {
     suppressMenuHoldClick()
     openMobileContextActions({
       title: title.value,
-      actions: videoContextMenuItems
+      actions: videoContextMenuItems,
+      thumbnailActions: mobileThumbnailActions
     })
     return
   }
