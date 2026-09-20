@@ -82,6 +82,22 @@ final class YtDlpDownloads {
         save();
     }
 
+    static JSONObject parseCompletedFile(String line) throws Exception {
+        String[] fields = line.substring("__OPENTUBEX_FILE__:".length()).split("\t", 8);
+        if (fields.length != 8) return null;
+        JSONObject item = new JSONObject().put("videoId", fields[0]).put("path", fields[7]);
+        String[] keys = {"duration", "width", "height"};
+        for (int i = 0; i < keys.length; i++) {
+            try { item.put(keys[i], Double.parseDouble(fields[i + 1])); } catch (Exception ignored) { }
+        }
+        String[] textKeys = {"author", "authorId", "title"};
+        for (int i = 0; i < textKeys.length; i++) {
+            Object value = new org.json.JSONTokener(fields[i + 4]).nextValue();
+            if (value instanceof String) item.put(textKeys[i], value);
+        }
+        return item;
+    }
+
     synchronized void discover(String channelId, String feedType, JSONObject response) throws Exception {
         if (!configuration.optBoolean("enabled")) return;
         JSONObject rules = configuration.optJSONObject("rules");
@@ -191,7 +207,7 @@ final class YtDlpDownloads {
             root.mkdirs();
             List<String> args = YtDlpArguments.validate(record.getJSONArray("args"));
             args.addAll(asList("--paths", root.getAbsolutePath(), "--paths", "temp:" + new File(root, "temp").getAbsolutePath(),
-                "--newline", "--progress", "--no-simulate", "--print", "after_move:__OPENTUBEX_FILE__:%(id)s\t%(duration)s\t%(width)s\t%(height)s\t%(filepath)s"));
+                "--newline", "--progress", "--no-simulate", "--print", "after_move:__OPENTUBEX_FILE__:%(id)s\t%(duration)s\t%(width)s\t%(height)s\t%(channel,uploader|null)j\t%(channel_id|null)j\t%(title)j\t%(filepath)s"));
             synchronized (this) {
                 if (record.optBoolean("useCookies")) {
                     File cookies = cookieFile(record.optString("cookies"));
@@ -217,14 +233,8 @@ final class YtDlpDownloads {
             Map<String, JSONObject> metadata = new HashMap<>();
             for (String line : completedOutput.toString().split("\n")) {
                 if (!line.startsWith("__OPENTUBEX_FILE__:")) continue;
-                String[] fields = line.substring("__OPENTUBEX_FILE__:".length()).split("\t", 5);
-                if (fields.length != 5) continue;
-                JSONObject item = new JSONObject().put("videoId", fields[0]);
-                String[] keys = {"duration", "width", "height"};
-                for (int i = 0; i < keys.length; i++) {
-                    try { item.put(keys[i], Double.parseDouble(fields[i + 1])); } catch (Exception ignored) { }
-                }
-                metadata.put(fields[4], item);
+                JSONObject item = parseCompletedFile(line);
+                if (item != null) metadata.put(item.getString("path"), item);
             }
             for (File completed : YtDlpFiles.completedFiles(root)) {
                 if (!isExecuting(id)) return;

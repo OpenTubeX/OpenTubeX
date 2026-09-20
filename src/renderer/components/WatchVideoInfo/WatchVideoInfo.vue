@@ -158,7 +158,7 @@
               </component>
             </div>
             <FtSubscribeButton
-              v-if="!hideUnsubscribeButton"
+              v-if="channelId && !hideUnsubscribeButton"
               :channel-id="channelId"
               :channel-name="channelName"
               :channel-thumbnail="channelThumbnail"
@@ -297,7 +297,6 @@
             :get-timestamp="getTimestamp"
             :playlist-id="playlistId"
           />
-          <slot name="phone-actions" />
         </span>
       </div>
     </div>

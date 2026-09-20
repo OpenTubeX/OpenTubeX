@@ -30,7 +30,7 @@ export function createAndroidNativeScreen({ element, container, getController, g
   let appChromeElements = []
   let globalMenuElements = []
   let globalElementsDirty = true
-  const appChromeSelector = '.topNav, .sideNav, .tabBar, .capacitorTabletTabBar'
+  const appChromeSelector = '.topNav, .topNav .searchContainer, .sideNav, .tabBar, .capacitorTabletTabBar'
 
   function nativeViewportWidth() {
     // innerWidth rounds CSS pixels, shifting the raised native layer at Android
@@ -250,7 +250,7 @@ export function createAndroidNativeScreen({ element, container, getController, g
     // Avoid searching the whole Watch page again on every scrolling frame.
     if (globalElementsDirty) {
       appChromeElements = [...document.querySelectorAll(appChromeSelector)]
-      globalMenuElements = [...document.querySelectorAll('dialog[open], [role="dialog"], [role="menu"], [aria-modal="true"]')]
+      globalMenuElements = [...document.querySelectorAll('dialog[open], [role="dialog"], [role="menu"], [aria-modal="true"], .ft-input-component .list')]
       globalElementsDirty = false
     }
     const appChrome = open ? [] : appChromeElements

@@ -88,8 +88,7 @@ for (const uiScale of [100, 95]) {
         }
       })
       await setWindowSize(app, page, { width: 360, height: 760 })
-      const actions = page.locator('.phonePanelActions')
-      await actions.getByRole('button', { name: 'Queue', exact: true }).click()
+      await page.locator('.phoneQueueButton').click()
       const sheet = page.locator('dialog[open]')
       await expect(sheet.locator('.queueItem')).toHaveCount(12)
       await sheet.evaluate(el => Promise.all(el.getAnimations().map(animation => animation.finished)))

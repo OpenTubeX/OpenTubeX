@@ -39,3 +39,38 @@ for (const method of ['getVideoInformationLocal', 'getVideoInformationInvidious'
     await loading
   })
 }
+
+test('offline download restores the matching file channel before initializing preferences', () => {
+  const start = source.indexOf('    finishDownloadedPlaybackWithoutMetadata:')
+  const end = source.indexOf('\n    },', start)
+  const finish = vm.runInNewContext(`({ ${source.slice(start, end)}\n} }).finishDownloadedPlaybackWithoutMetadata`)
+  const watch = {
+    videoId: 'video', localPlaybackDownloadId: 'download',
+    applyDownloadedPlaybackSource: () => ({ path: '/video.mp4', author: 'Channel', authorId: 'channel-id' }),
+    $store: { getters: { getYtDlpDownloads: { download: { videoId: 'video', title: 'Video' } } } },
+    initializePlaybackRate() { assert.equal(this.channelId, 'channel-id'); this.rateInitialized = true },
+    initializeVideoQuality() {}, updateTitle() {},
+  }
+  assert.equal(finish.call(watch), true)
+  assert.equal(watch.channelName, 'Channel')
+  assert.equal(watch.channelId, 'channel-id')
+  assert.equal(watch.rateInitialized, true)
+})
+
+for (const existing of [false, true]) {
+  test(`older offline downloads recover channel details from ${existing ? 'loaded metadata' : 'history'}`, () => {
+    const start = source.indexOf('    finishDownloadedPlaybackWithoutMetadata:')
+    const end = source.indexOf('\n    },', start)
+    const finish = vm.runInNewContext(`({ ${source.slice(start, end)}\n} }).finishDownloadedPlaybackWithoutMetadata`)
+    const watch = {
+      videoId: 'video', localPlaybackDownloadId: 'download',
+      applyDownloadedPlaybackSource: () => ({ path: '/video.mp4' }),
+      $store: { getters: { getYtDlpDownloads: { download: { videoId: 'video', title: 'Video' } } } },
+      ...(existing ? { channelId: 'channel-id', channelName: 'Channel' } : { historyEntry: { authorId: 'channel-id', author: 'Channel' } }),
+      initializePlaybackRate() {}, initializeVideoQuality() {}, updateTitle() {},
+    }
+    finish.call(watch)
+    assert.equal(watch.channelId, 'channel-id')
+    assert.equal(watch.channelName, 'Channel')
+  })
+}

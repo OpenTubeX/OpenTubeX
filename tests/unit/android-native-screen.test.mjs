@@ -7,7 +7,7 @@ import { overrideShakaMethods } from '../../src/renderer/helpers/player/override
 const source = (await readFile(new URL('../../src/renderer/helpers/player/androidNativeScreen.js', import.meta.url), 'utf8'))
   .replace(/^import .*\n/gm, '').replace('export function ', 'function ')
 
-async function fixture({ fullscreen = true, chrome = [], dialogs = [], previews = [], deferTransitions = false, deferFullscreen = false } = {}) {
+async function fixture({ fullscreen = true, chrome = [], dialogs = [], suggestions = [], previews = [], deferTransitions = false, deferFullscreen = false } = {}) {
   const snapshots = []
   const snapshotInvalidations = []
   let publishSnapshot
@@ -52,7 +52,7 @@ async function fixture({ fullscreen = true, chrome = [], dialogs = [], previews 
   const element = Object.assign(new EventTarget(), {
     getBoundingClientRect: () => bounds, getAnimations: () => [],
   })
-  const document = Object.assign(new EventTarget(), { body: { append() {}, getBoundingClientRect: () => ({ height: 2000 }) }, createElement: () => ({ setAttribute() {}, remove() {}, style: { getPropertyValue() { return '' }, setProperty(name, value) { styleWrites.push({ name, value }) } } }), elementFromPoint: () => null, querySelectorAll: selector => selector.includes('.topNav') ? chrome : selector.includes('dialog[open]') ? dialogs : [], querySelector: () => null, documentElement: { classList: { toggle() {} }, style: { getPropertyValue() { return '' }, setProperty(name, value) { styleWrites.push({ name, value }) }, removeProperty() {} } } })
+  const document = Object.assign(new EventTarget(), { body: { append() {}, getBoundingClientRect: () => ({ height: 2000 }) }, createElement: () => ({ setAttribute() {}, remove() {}, style: { getPropertyValue() { return '' }, setProperty(name, value) { styleWrites.push({ name, value }) } } }), elementFromPoint: () => null, querySelectorAll: selector => selector.includes('.topNav') ? chrome : selector.includes('dialog[open]') ? [...dialogs, ...(selector.includes('.ft-input-component .list') ? suggestions : [])] : [], querySelector: () => null, documentElement: { classList: { toggle() {} }, style: { getPropertyValue() { return '' }, setProperty(name, value) { styleWrites.push({ name, value }) }, removeProperty() {} } } })
   document.addEventListener('nativefullscreenready', () => readyEvents.push(true))
   document.addEventListener('fullscreenchange', () => fullscreenEvents.push(presentations.length))
   class Observer {
@@ -582,5 +582,14 @@ test('fullscreen readiness waits for a successful native show', async () => {
   f.completeFullscreen[1].reject(new Error('show failed'))
   await assert.rejects(failed, /show failed/)
   assert.equal(f.readyEvents.length, 1)
+  f.screen.destroy()
+})
+
+test('search suggestions exclude native controls from their entire rectangle', async () => {
+  const bounds = { x: 0, y: 80, width: 640, height: 420 }
+  const suggestions = [{ getBoundingClientRect: () => bounds, getAnimations: () => [] }]
+  const f = await fixture({ fullscreen: false, suggestions })
+  assert.ok(f.layouts.at(-1).menus.some(menu => menu.y === 80 && menu.height === 420))
+  assert.equal(f.layouts.at(-1).overlayActive, true)
   f.screen.destroy()
 })

@@ -252,7 +252,7 @@
           />
           <span class="channelNameText">{{ channelName }}</span>
         </bdi>
-        <span class="videoInfo">
+        <FtInlineMetadata class="videoInfo">
           <span
             v-if="!isLive && !isUpcoming && !isPremium && !isStation && !hideViews && viewCount != null"
             class="viewCount"
@@ -269,7 +269,7 @@
             v-if="(isLive || isStation) && !hideViews"
             class="viewCount"
           >{{ t('Global.Counts.Watching Count', { count: parsedViewCount }, viewCount) }}</span>
-        </span>
+        </FtInlineMetadata>
       </div>
       <FtCollaboratorsPrompt
         v-if="showCollaboratorsPrompt"
@@ -396,6 +396,7 @@
 </template>
 
 <script setup>
+import FtInlineMetadata from '../FtInlineMetadata/FtInlineMetadata.vue'
 import { useContextMenuHold } from '../../composables/useContextMenuHold'
 import FtRetryImage from '../FtRetryImage.vue'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'

@@ -124,10 +124,22 @@ public class MainActivity extends BridgeActivity {
         Configuration newConfig
     ) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
-        AndroidPlaybackPlugin.pictureInPictureChanged(isInPictureInPictureMode);
+        notifyPictureInPictureState(isInPictureInPictureMode);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // A PiP exit can happen while Chromium is suspended behind the lock
+        // screen. Reconcile both layers with the Activity's current state.
+        notifyPictureInPictureState(isInPictureInPictureMode());
+    }
+
+    private void notifyPictureInPictureState(boolean active) {
+        AndroidPlaybackPlugin.pictureInPictureChanged(active);
         getBridge().triggerWindowJSEvent(
             "opentubex:android-pip",
-            "{\"active\":" + isInPictureInPictureMode + "}"
+            "{\"active\":" + active + "}"
         );
     }
 

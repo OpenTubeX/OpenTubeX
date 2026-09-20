@@ -108,7 +108,7 @@ function takeGetInfoAbortSignal(key) {
  * @property {string | null} eta
  * @property {string | null} destination
  * @property {string[]} destinations
- * @property {{ videoId: string, path: string, duration?: number, width?: number, height?: number, available?: boolean }[]} [files]
+ * @property {{ videoId: string, path: string, title?: string, author?: string, authorId?: string, duration?: number, width?: number, height?: number, available?: boolean }[]} [files]
  * @property {'available' | 'partial' | 'missing'} [availability]
  * @property {number} [availableDestinationCount]
  * @property {number} [destinationCount]
@@ -2043,7 +2043,7 @@ async function startYtDlpDownload(
     '--print',
     `after_move:${FINAL_PATH_PREFIX}%(id)s\t%(duration)s\t%(width)s\t%(height)s\t%(filepath)s`,
     '--print',
-    `${subtitlesOnly ? 'video' : 'after_move'}:${FINAL_METADATA_PREFIX}%(id)j\t%(title)j\t%(thumbnail)j`
+    `${subtitlesOnly ? 'video' : 'after_move'}:${FINAL_METADATA_PREFIX}%(id)j\t%(title)j\t%(thumbnail|null)j\t%(channel,uploader|null)j\t%(channel_id|null)j`
   ]
 
   await pushProxyArgument(args)
@@ -2256,6 +2256,8 @@ async function startYtDlpDownload(
     }
   }
 
+  const metadataByVideoId = new Map()
+
   /**
    * @param {string} line
    */
@@ -2279,11 +2281,22 @@ async function startYtDlpDownload(
       return
     }
     if (line.startsWith(FINAL_METADATA_PREFIX)) {
-      const [rawVideoId, rawTitle, rawThumbnail] = line.slice(FINAL_METADATA_PREFIX.length).split('\t')
+      const [rawVideoId, rawTitle, rawThumbnail, rawAuthor, rawAuthorId] = line.slice(FINAL_METADATA_PREFIX.length).split('\t')
       try {
         const videoId = JSON.parse(rawVideoId)
         const title = JSON.parse(rawTitle)
         const thumbnail = JSON.parse(rawThumbnail)
+        const author = JSON.parse(rawAuthor)
+        const authorId = JSON.parse(rawAuthorId)
+        const metadata = {
+          title: typeof title === 'string' ? title.slice(0, 255) : '',
+          author: typeof author === 'string' ? author.slice(0, 255) : '',
+          authorId: typeof authorId === 'string' ? authorId.slice(0, 128) : ''
+        }
+        metadataByVideoId.set(videoId, metadata)
+        for (const file of status.files) {
+          if (file.videoId === videoId) Object.assign(file, metadata)
+        }
         if (typeof title === 'string' && title !== '') {
           status.titleTruncated ||= truncatesLongTitles &&
             Buffer.byteLength(title, 'utf8') > DOWNLOAD_TITLE_FILENAME_BYTE_LIMIT
@@ -2317,6 +2330,7 @@ async function startYtDlpDownload(
         const width = hasMediaMetadata ? Number(rawWidth) : NaN
         const height = hasMediaMetadata ? Number(rawHeight) : NaN
         status.files.push({
+          ...metadataByVideoId.get(videoId),
           videoId,
           path: status.destination,
           ...(Number.isFinite(duration) && duration > 0 ? { duration } : {}),

@@ -17,4 +17,6 @@
     <string name="media_next">Next</string>
     <string name="media_rewind">Rewind</string>
     <string name="media_fast_forward">Fast forward</string>
+    <string name="notification_channel_downloads_name">Downloads</string>
+    <string name="notification_channel_downloads_description">Progress for video and audio downloads</string>
 </resources>

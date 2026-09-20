@@ -43,6 +43,8 @@ for (const android of [false, true]) {
           isCurrentVideoLoad(generation) { return generation === this.videoLoadGeneration },
           cacheOnlinePlaybackSource() {},
           updateTitle() {},
+          initializePlaybackRate() {},
+          initializeVideoQuality() {},
           t: key => key,
         }
         await watch[`getVideoInformation${backend}`]()

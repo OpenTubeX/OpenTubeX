@@ -1,7 +1,6 @@
 package org.opentubex.app;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -67,12 +66,8 @@ public final class YtDlpDownloadWorker extends Worker {
 
     private Notification notification(org.json.JSONObject record) {
         Context context = getApplicationContext();
-        String channelId = "yt-dlp-downloads";
-        if (Build.VERSION.SDK_INT >= 26) {
-            NotificationChannel channel = new NotificationChannel(channelId, "yt-dlp", NotificationManager.IMPORTANCE_LOW);
-            channel.setShowBadge(false);
-            context.getSystemService(NotificationManager.class).createNotificationChannel(channel);
-        }
+        OpenTubeXNotificationChannels.createAll(context);
+        String channelId = OpenTubeXNotificationChannels.DOWNLOADS_ID;
         PendingIntent open = PendingIntent.getActivity(context, 0,
             new Intent(context, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP),
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
