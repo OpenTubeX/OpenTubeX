@@ -857,6 +857,7 @@ Settings:
     Expanded: 展開する
     Playing Interface Hide Delay: 再生中のインターフェースを非表示にするまでの時間
     Hide Startup Splash: 起動画面を非表示
+    Hide Header Sync Indicator: アプリヘッダーの同期インジケーターを非表示
     Hide Repeat Stats: リピート統計を非表示
     Sections:
       Visible While Paused: 全ウィンドウ表示・全画面表示で一時停止中に表示

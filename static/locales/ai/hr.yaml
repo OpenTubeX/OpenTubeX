@@ -859,6 +859,7 @@ Settings:
     Expanded: Prošireni
     Playing Interface Hide Delay: Odgoda skrivanja sučelja tijekom reprodukcije
     Hide Startup Splash: Sakrij početni zaslon
+    Hide Header Sync Indicator: Sakrij pokazatelj sinkronizacije u zaglavlju aplikacije
     Hide Repeat Stats: Sakrij statistiku ponavljanja
     Sections:
       Visible While Paused: Vidljivo tijekom pauze u punom prozoru / preko cijelog zaslona

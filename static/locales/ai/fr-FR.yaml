@@ -857,6 +857,7 @@ Settings:
     Expanded: Développés
     Playing Interface Hide Delay: Délai de masquage de l’interface pendant la lecture
     Hide Startup Splash: Masquer l’écran de démarrage
+    Hide Header Sync Indicator: Masquer l’indicateur de synchronisation dans l’en-tête de l’application
     Hide Repeat Stats: Masquer les statistiques de répétition
     Sections:
       Visible While Paused: Visible pendant la pause en mode pleine fenêtre ou plein écran

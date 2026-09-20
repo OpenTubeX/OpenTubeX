@@ -857,6 +857,7 @@ Settings:
     Expanded: Diperluas
     Playing Interface Hide Delay: Jeda penyembunyian antarmuka saat pemutaran
     Hide Startup Splash: Sembunyikan Layar Pembuka
+    Hide Header Sync Indicator: Sembunyikan indikator sinkronisasi di header aplikasi
     Hide Repeat Stats: Sembunyikan statistik pengulangan
     Sections:
       Visible While Paused: Terlihat Saat Dijeda dalam Jendela Penuh / Layar Penuh

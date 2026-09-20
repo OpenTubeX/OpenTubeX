@@ -1124,6 +1124,7 @@ Settings:
     Expanded: Desplegats
     Playing Interface Hide Delay: Retard per amagar la interfície durant la reproducció
     Hide Startup Splash: Amaga la pantalla d’inici
+    Hide Header Sync Indicator: Amaga l’indicador de sincronització de la capçalera de l’aplicació
     Hide Repeat Stats: Amaga les estadístiques de repetició
     Sections:
       Side Bar: Barra lateral

@@ -977,6 +977,7 @@ Settings:
     Expanded: Utvida
     Playing Interface Hide Delay: Forseinking før grensesnittet vert skjult under avspeling
     Hide Startup Splash: Gøym oppstartsskjerm
+    Hide Header Sync Indicator: Gøym synkroniseringsindikatoren i apphovudet
     Hide Repeat Stats: Skjul gjentakingsstatistikk
     Sections:
       Side Bar: Sidestolpe

@@ -865,6 +865,7 @@ Settings:
     Expanded: موسعة
     Playing Interface Hide Delay: مهلة إخفاء الواجهة أثناء التشغيل
     Hide Startup Splash: إخفاء شاشة بدء التشغيل
+    Hide Header Sync Indicator: إخفاء مؤشر المزامنة في ترويسة التطبيق
     Hide Repeat Stats: إخفاء إحصاءات التكرار
     Sections:
       Visible While Paused: مرئي أثناء الإيقاف المؤقت في نافذة كاملة/شاشة كاملة

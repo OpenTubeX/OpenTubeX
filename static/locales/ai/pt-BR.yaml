@@ -857,6 +857,7 @@ Settings:
     Expanded: Expandidos
     Playing Interface Hide Delay: Atraso para ocultar a interface durante a reprodução
     Hide Startup Splash: Ocultar tela de inicialização
+    Hide Header Sync Indicator: Ocultar indicador de sincronização no cabeçalho do aplicativo
     Hide Repeat Stats: Ocultar estatísticas de repetição
     Sections:
       Visible While Paused: Visível durante a pausa em tela cheia ou tela cheia

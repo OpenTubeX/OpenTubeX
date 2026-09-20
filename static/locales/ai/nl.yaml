@@ -870,6 +870,7 @@ Settings:
     Expanded: Uitgeklapt
     Playing Interface Hide Delay: Vertraging bij het verbergen van de interface tijdens het afspelen
     Hide Startup Splash: Opstartscherm verbergen
+    Hide Header Sync Indicator: Synchronisatie-indicator in de appkop verbergen
     Hide Repeat Stats: Herhaalstatistieken verbergen
     Sections:
       Visible While Paused: Zichtbaar wanneer gepauzeerd in volledig venster of volledig scherm

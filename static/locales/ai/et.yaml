@@ -857,6 +857,7 @@ Settings:
     Expanded: Laiendatud
     Playing Interface Hide Delay: Liidese peitmise viivitus esitamise ajal
     Hide Startup Splash: Peida käivituskuva
+    Hide Header Sync Indicator: Peida rakenduse päise sünkroonimisnäidik
     Hide Repeat Stats: Peida korduste statistika
     Sections:
       Visible While Paused: Pausi ajal täisaknas või täisekraanil nähtav

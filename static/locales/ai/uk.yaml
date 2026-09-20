@@ -865,6 +865,7 @@ Settings:
     Expanded: Розгорнуті
     Playing Interface Hide Delay: Затримка приховування інтерфейсу під час відтворення
     Hide Startup Splash: Приховати початковий екран
+    Hide Header Sync Indicator: Приховати індикатор синхронізації в заголовку застосунку
     Hide Repeat Stats: Приховати статистику повторів
     Sections:
       Visible While Paused: Видимі під час паузи в режимі на все вікно або на весь екран

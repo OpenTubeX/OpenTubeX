@@ -870,6 +870,7 @@ Settings:
     Expanded: Laajennettu
     Playing Interface Hide Delay: Käyttöliittymän piilotusviive toiston aikana
     Hide Startup Splash: Piilota käynnistysruutu
+    Hide Header Sync Indicator: Piilota sovelluksen otsakepalkin synkronoinnin ilmaisin
     Hide Repeat Stats: Piilota toistotilastot
     Sections:
       Visible While Paused: Näkyvissä keskeytyksen aikana koko ikkunan tai koko näytön tilassa

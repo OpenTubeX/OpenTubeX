@@ -857,6 +857,7 @@ Settings:
     Expanded: Genişletilmiş
     Playing Interface Hide Delay: Oynatma sırasında arayüzü gizleme gecikmesi
     Hide Startup Splash: Başlangıç Ekranını Gizle
+    Hide Header Sync Indicator: Uygulama başlığındaki eşitleme göstergesini gizle
     Hide Repeat Stats: Tekrar istatistiklerini gizle
     Sections:
       Visible While Paused: Tam Pencere / Tam Ekranda Duraklatıldığında Görünür

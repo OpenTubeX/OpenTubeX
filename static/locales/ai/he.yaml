@@ -870,6 +870,7 @@ Settings:
     Expanded: מורחבים
     Playing Interface Hide Delay: השהיה להסתרת הממשק בזמן ניגון
     Hide Startup Splash: הסתרת מסך הפתיחה
+    Hide Header Sync Indicator: הסתרת מחוון הסנכרון בכותרת היישום
     Hide Repeat Stats: הסתרת נתוני חזרה
     Sections:
       Visible While Paused: מוצג בזמן השהיה בחלון מלא או במסך מלא

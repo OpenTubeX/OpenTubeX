@@ -857,6 +857,7 @@ Settings:
     Expanded: Rozbalené
     Playing Interface Hide Delay: Oneskorenie skrytia rozhrania počas prehrávania
     Hide Startup Splash: Skryť úvodnú obrazovku
+    Hide Header Sync Indicator: Skryť indikátor synchronizácie v hlavičke aplikácie
     Hide Repeat Stats: Skryť štatistiky opakovania
     Sections:
       Visible While Paused: Viditeľné počas pozastavenia v režime celého okna alebo celej obrazovky

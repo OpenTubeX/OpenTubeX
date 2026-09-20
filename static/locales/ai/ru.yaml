@@ -840,6 +840,7 @@ Settings:
     Expanded: Развёрнутые
     Playing Interface Hide Delay: Задержка скрытия интерфейса во время воспроизведения
     Hide Startup Splash: Скрыть стартовый экран
+    Hide Header Sync Indicator: Скрыть индикатор синхронизации в заголовке приложения
     Hide Repeat Stats: Скрыть статистику повторов
     Sections:
       Visible While Paused: Показывать во время паузы в полнооконном и полноэкранном режимах

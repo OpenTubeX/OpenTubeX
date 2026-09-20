@@ -857,6 +857,7 @@ Settings:
     Expanded: Espansi
     Playing Interface Hide Delay: Ritardo per nascondere l’interfaccia durante la riproduzione
     Hide Startup Splash: Nascondi la schermata di avvio
+    Hide Header Sync Indicator: "Nascondi l'indicatore di sincronizzazione nell'intestazione dell'app"
     Hide Repeat Stats: Nascondi statistiche di ripetizione
     Sections:
       Visible While Paused: Visibile durante la pausa in finestra intera o a schermo intero

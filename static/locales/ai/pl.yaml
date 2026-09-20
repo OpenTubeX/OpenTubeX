@@ -396,6 +396,7 @@ Settings:
     Expanded: Rozwinięte
     Playing Interface Hide Delay: Opóźnienie ukrywania interfejsu podczas odtwarzania
     Hide Startup Splash: Ukryj ekran startowy
+    Hide Header Sync Indicator: Ukryj wskaźnik synchronizacji w nagłówku aplikacji
     Hide Repeat Stats: Ukryj statystyki powtarzania
     Sections:
       Visible While Paused: Widoczne po wstrzymaniu w trybie pełnego okna lub pełnego ekranu

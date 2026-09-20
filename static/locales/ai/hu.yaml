@@ -857,6 +857,7 @@ Settings:
     Expanded: Kibontva
     Playing Interface Hide Delay: Felület elrejtésének késleltetése lejátszás közben
     Hide Startup Splash: Indítóképernyő elrejtése
+    Hide Header Sync Indicator: Alkalmazásfejléc szinkronizálási jelzőjének elrejtése
     Hide Repeat Stats: Ismétlési statisztikák elrejtése
     Sections:
       Visible While Paused: Szüneteltetéskor látható teljes ablakos vagy teljes képernyős módban

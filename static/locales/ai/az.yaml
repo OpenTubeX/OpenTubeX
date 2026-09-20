@@ -859,6 +859,7 @@ Settings:
     Expanded: Genişləndirilmiş
     Playing Interface Hide Delay: Oxutma zamanı interfeysin gizlədilmə gecikməsi
     Hide Startup Splash: Başlanğıc ekranını gizlət
+    Hide Header Sync Indicator: Tətbiq başlığındakı sinxronizasiya göstəricisini gizlət
     Sections:
       Visible While Paused: Tam pəncərədə / tam ekranda fasilə zamanı görünənlər
     Hide Channel Avatars: Kanal avatarlarını gizlət
