@@ -130,3 +130,20 @@ for (const options of [{ navigatedAway: false }, { keepPlaying: false }]) {
     assert.equal(player.scrollMiniPlayerActive.value, false)
   })
 }
+
+test('a rejected replay remains retryable without an unhandled rejection', async t => {
+  const { player, video } = mountMiniPlayer(t, { detached: true })
+  video.value.ended = true
+  video.value.paused = true
+  const play = video.value.play
+  video.value.play = () => Promise.reject(new Error('Playback was interrupted'))
+  player.scrollMiniPlayPauseVisible.value = false
+  await player.scrollMiniTogglePlayPause()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(player.scrollMiniPlayerActive.value, true)
+  assert.equal(player.scrollMiniPlayPauseVisible.value, true)
+  video.value.play = play
+  await player.scrollMiniTogglePlayPause()
+  assert.equal(video.value.currentTime, 0)
+  assert.equal(video.value.paused, false)
+})

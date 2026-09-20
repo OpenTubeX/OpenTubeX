@@ -246,7 +246,7 @@ test('return button uses the same preview and continuous path as an upward swipe
 
 for (const navigatedAway of [false, true]) {
   test(`close ${navigatedAway ? 'disposes a retained page' : 'only hides a player from another tab'}`, () => {
-    const handler = source.slice(source.indexOf('  function dismissCrossTabMiniPlayer('), source.indexOf('  function scrollMiniTogglePlayPause('))
+    const handler = source.slice(source.indexOf('  function dismissCrossTabMiniPlayer('), source.indexOf('  async function scrollMiniTogglePlayPause('))
     const dismissed = { value: false }
     let disposals = 0
     vm.runInNewContext(`${handler}\ndismissCrossTabMiniPlayer()`, {

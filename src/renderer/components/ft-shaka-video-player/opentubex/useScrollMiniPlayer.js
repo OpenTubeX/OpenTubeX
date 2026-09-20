@@ -1074,18 +1074,20 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     scrollMiniPlayerDismissed.value = true
   }
 
-  function scrollMiniTogglePlayPause(event) {
+  async function scrollMiniTogglePlayPause(event) {
     event?.preventDefault()
     event?.stopPropagation()
 
     const videoElement = video.value
     if (!videoElement) return
 
-    if (videoElement.ended) {
-      videoElement.currentTime = 0
-      videoElement.play()
-    } else if (videoElement.paused) {
-      videoElement.play()
+    if (videoElement.ended || videoElement.paused) {
+      if (videoElement.ended) videoElement.currentTime = 0
+      try {
+        await videoElement.play()
+      } catch (error) {
+        console.warn('Unable to resume mini player playback:', error)
+      }
     } else {
       videoElement.pause()
     }
