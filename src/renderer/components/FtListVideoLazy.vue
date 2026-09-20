@@ -33,11 +33,12 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 import FtListVideo from './FtListVideo/FtListVideo.vue'
 
 import store from '../store/index'
+import { isVideoHiddenByPreferences } from '../helpers/subscriptions'
 
 const props = defineProps({
   data: {
@@ -114,9 +115,6 @@ const props = defineProps({
   }
 })
 
-const visible = ref(props.initialVisibleState)
-const display = ref('block')
-
 const EMPTY_SET = new Set()
 
 /** @type {import('vue').ComputedRef<Set<string>>} */
@@ -133,25 +131,38 @@ const forbiddenTitles = computed(() => {
   return store.getters.getForbiddenTitlesParsed
 })
 
-const hideChannelsBasedOnText = computed(() => {
-  return store.getters.getHideChannelsBasedOnText
-})
-
 const shouldBeVisible = computed(() => {
-  const lowerCaseTitle = props.data.title?.toLowerCase()
-  const lowerCaseAuthor = props.data.author?.toLowerCase()
-
-  return !(channelsHiddenNames.value.has(props.data.authorId) ||
-    channelsHiddenNames.value.has(props.data.author) ||
-    (lowerCaseTitle && forbiddenTitles.value.some((text) => lowerCaseTitle.includes(text))) ||
-    (hideChannelsBasedOnText.value && lowerCaseAuthor && forbiddenTitles.value.some((text) => lowerCaseAuthor.includes(text))))
+  return !isVideoHiddenByPreferences(props.data, {
+    hiddenChannelNames: channelsHiddenNames.value,
+    forbiddenTitles: forbiddenTitles.value,
+    hideChannelsBasedOnText: false,
+  })
 })
+
+const visible = ref(props.initialVisibleState && shouldBeVisible.value)
+const display = ref(shouldBeVisible.value ? 'block' : 'none')
+const loadedByVisibilityObserver = ref(false)
+
+watch(
+  [() => props.initialVisibleState, shouldBeVisible],
+  ([initialVisibleState, isAllowed]) => {
+    if (!isAllowed) {
+      visible.value = false
+      display.value = 'none'
+      return
+    }
+
+    display.value = 'block'
+    visible.value = initialVisibleState || loadedByVisibilityObserver.value
+  }
+)
 
 /**
  * @param {boolean} isVisible
  */
 function onVisibilityChanged(isVisible) {
   if (isVisible && shouldBeVisible.value) {
+    loadedByVisibilityObserver.value = true
     visible.value = isVisible
   } else if (isVisible) {
     display.value = 'none'

@@ -482,6 +482,7 @@ export function isUpcomingPremiere(video, now = Date.now()) {
  * @param {{
  *  hideLiveStreams?: boolean,
  *  hideUpcomingPremieres?: boolean,
+ *  hideChannelsBasedOnText?: boolean,
  *  hiddenChannelNames?: Set<string>,
  *  forbiddenTitles?: string[],
  * }} preferences
@@ -489,6 +490,7 @@ export function isUpcomingPremiere(video, now = Date.now()) {
 export function isVideoHiddenByPreferences(video, {
   hideLiveStreams = false,
   hideUpcomingPremieres = false,
+  hideChannelsBasedOnText = true,
   hiddenChannelNames = new Set(),
   forbiddenTitles = []
 } = {}) {
@@ -511,7 +513,8 @@ export function isVideoHiddenByPreferences(video, {
   const lowerCaseTitle = video.title?.toLowerCase()
 
   return forbiddenTitles.some(text =>
-    lowerCaseAuthor?.includes(text) || lowerCaseTitle?.includes(text)
+    lowerCaseTitle?.includes(text) ||
+      (hideChannelsBasedOnText && lowerCaseAuthor?.includes(text))
   )
 }
 
