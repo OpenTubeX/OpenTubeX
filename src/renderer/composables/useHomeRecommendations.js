@@ -34,18 +34,20 @@ export function useHomeRecommendations(visible) {
   const subscriptions = computed(() => recommendationSubscriptionIds(store.getters.getActiveProfile?.subscriptions))
   const exploration = computed(() => Math.max(0, Math.min(0.5, Number(store.getters.getRecommendationExploration) || 0)))
   const records = computed(() => store.getters.getRecommendationRecords.filter(isVisible))
-  const hasHistory = computed(() => store.getters.getRememberHistory && (
+  const hasSeeds = computed(() => store.getters.getRememberHistory && (
     eligibleHistory.value.length > 0 || favorites.value.length > 0 || saved.value.length > 0 ||
     records.value.some(record => record.feedback === 'positive') || subscriptions.value.length > 0
   ))
-  const recommendations = computed(() => enabled.value && hasHistory.value
-    ? ranked.value.filter(video => {
-        const record = store.state.recommendations.recommendationRecords[video.videoId]
-        return isVisible(video) &&
-      !['dismiss', 'blockChannel'].includes(record?.feedback) &&
+  // Dismissals affect the next ranking; channel blocks still hide cards immediately.
+  const visibleRanked = computed(() => ranked.value.filter(video => {
+    const record = store.state.recommendations.recommendationRecords[video.videoId]
+    return isVisible(video) && record?.feedback !== 'blockChannel' &&
       !records.value.some(record => record.feedback === 'blockChannel' && record.authorId === video.authorId)
-      })
-    : [])
+  }))
+  // Keep an existing feed usable when feedback removes its last positive seed.
+  const hasHistory = computed(() => store.getters.getRememberHistory &&
+    (hasSeeds.value || visibleRanked.value.length > 0))
+  const recommendations = computed(() => enabled.value && hasHistory.value ? visibleRanked.value : [])
 
   function isVisible(video) {
     return video != null && typeof video === 'object' &&
@@ -108,7 +110,10 @@ export function useHomeRecommendations(visible) {
       try { await store.dispatch('loadRecommendations') } catch { hasError.value = true }
       if (requestGeneration !== generation || !store.getters.getRecommendationEpoch) return
     }
-    if (!hasHistory.value) { clearFeed(); return }
+    if (!hasSeeds.value) {
+      if (!append) clearFeed()
+      return
+    }
     const requestContext = context.value
     if (!append) {
       limit = 24
@@ -226,6 +231,7 @@ export function useHomeRecommendations(visible) {
   return {
     enabled,
     hasHistory,
+    hasSeeds,
     isLoading,
     hasError,
     recommendations,
