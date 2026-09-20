@@ -160,3 +160,34 @@
   visibility: visible;
   z-index: 2147483647;
 }
+
+.nativePlaybackScreen .nativeFullscreenTransition[data-native-player-screen] {
+  display: grid;
+  place-items: center;
+  background: var(--bg-color) !important;
+}
+
+.nativeFullscreenTransition > img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+}
+
+.nativeFullscreenTransition::after {
+  content: '';
+  position: absolute;
+  inline-size: 36px;
+  block-size: 36px;
+  border: 3px solid var(--secondary-text-color);
+  border-block-start-color: var(--primary-color);
+  border-radius: 50%;
+  animation: native-fullscreen-loading 1s linear infinite;
+}
+
+@keyframes native-fullscreen-loading {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nativeFullscreenTransition::after { animation: none; }
+}

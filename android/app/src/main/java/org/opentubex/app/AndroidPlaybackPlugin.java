@@ -324,7 +324,7 @@ public class AndroidPlaybackPlugin extends Plugin {
                     engine.play();
                     break;
                 case "pause": engine.pause(); break;
-                case "seek": engine.seek((long) (Math.max(0, value) * 1000)); break;
+                case "seek": engine.seek(Math.round(Math.max(0, value) * 1000)); break;
                 case "live": engine.seekToLive(); break;
                 case "speed": engine.setSpeed((float) Math.max(0.1, Math.min(16, value))); break;
                 case "volume": engine.setVolume((float) Math.max(0, Math.min(1, value))); break;

@@ -1304,6 +1304,10 @@ Settings:
       Trenne mehrere Titelbegriffe durch Kommas. Ein Video muss mindestens einen eingeschlossenen und keinen
       ausgeschlossenen Begriff enthalten.
   External Software Settings:
+    Create YouTube session: "YouTube-Sitzung erstellen"
+    YouTube session hint: "Melde dich bei Bedarf an und speichere die Sitzung. Wähle in den Einstellungen, ob sie für Downloads, Wiedergabe oder Untertitel verwendet wird."
+    Use cookies for downloads: "Cookies für Downloads verwenden"
+    YouTube session failed: "Die YouTube-Sitzung konnte nicht gespeichert werden."
     Checking FFmpeg and FFprobe: FFmpeg/FFprobe werden überprüft…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe wurden noch nicht heruntergeladen. Klicke auf die Schaltfläche unten, um sie herunterzuladen.
     External Software Settings: Externe Software
@@ -1340,7 +1344,7 @@ Settings:
     Managed Tool Already Current Template: '{tool} {version} ist bereits auf dem neuesten Stand'
     yt-dlp Executable Path: Pfad zur ausführbaren yt-dlp-Datei
     FFmpeg Executable Path: Pfad zur ausführbaren FFmpeg-Datei
-    Restricted Playback Authentication: yt-dlp-Wiedergabe-Cookies
+    Restricted Playback Authentication: "yt-dlp-Cookies"
     Cookie Source: Cookie-Quelle
     Cookie Sources:
       None: Keine
@@ -1993,7 +1997,7 @@ Video:
   AI-generated content: KI-generierte Inhalte
   MembersOnly: Videos, die nur für Mitglieder bestimmt sind, können mit OpenTubeX nicht angesehen werden, da sie einen Google-Login und eine kostenpflichtige Kanalmitgliedschaft erfordern.
   AgeRestricted: Videos mit Altersbeschränkung können mit OpenTubeX nicht angesehen werden, da sie eine Google-Anmeldung und die Verwendung eines altersgeprüften YouTube-Kontos erfordern.
-  Configure Restricted Playback Cookies Hint: Konfiguriere Cookies unter Einstellungen → Erweitert → Externe Software → yt-dlp-Wiedergabe-Cookies.
+  Configure Restricted Playback Cookies Hint: "Konfiguriere Cookies unter Einstellungen → Erweitert → Externe Software → yt-dlp-Cookies."
   Try With Configured Cookies: Mit konfigurierten Cookies versuchen
   Restricted Playback Authentication Failed Template: 'yt-dlp konnte mit den konfigurierten Cookies nicht auf dieses Video zugreifen: {error}'
   DeArrow:
@@ -2379,7 +2383,7 @@ Tooltips:
     Cookie File: Wähle eine Cookie-Datei im Netscape-Format für die authentifizierte Wiedergabe aus.
     Browser for Cookies: Die Browserunterstützung wird anhand der ausgewählten ausführbaren yt-dlp-Datei ermittelt. OpenTubeX weist yt-dlp an, Cookies aus diesem Browser zu lesen, wenn eine authentifizierte Wiedergabe angefordert wird.
     Browser Profile: Optionaler Name oder Ordner des Browserprofils. Lasse das Feld leer, um das zuletzt verwendete Profil zu nutzen.
-    Always Use Cookies: "Verwendet die konfigurierten Cookies für Untertitel und bei jeder Stream-Extraktion mit yt-dlp. Dies wechselt die Methode zur Stream-Extraktion nicht zu yt-dlp. Wenn yt-dlp ausgewählt ist, können kontogebundene Formate verfügbar werden, einschließlich der höheren Bitrate von YouTube Premium, wenn das Konto darauf Zugriff hat."
+    Always Use Cookies: "Verwendet die konfigurierten Cookies für Downloads, Untertitel und bei jeder Stream-Extraktion mit yt-dlp. Dies wechselt die Methode zur Stream-Extraktion nicht zu yt-dlp. Wenn yt-dlp ausgewählt ist, können kontogebundene Formate verfügbar werden, einschließlich der höheren Bitrate von YouTube Premium, wenn das Konto darauf Zugriff hat."
     FFmpeg Executable Path: FFmpeg wird zum Zusammenführen von getrennten Video- und Audiospuren sowie zur Audiokonvertierung benötigt. Standardmäßig nimmt OpenTubeX an, dass FFmpeg über die PATH-Umgebungsvariable gefunden werden kann. Falls nötig, kann hier ein benutzerdefinierter Pfad festgelegt werden.
     Use cookies for subtitles: "Die konfigurierten Cookies für Untertitel und automatische Übersetzungen verwenden. Auch durch „Cookies immer verwenden“ aktiviert."
   Experimental Settings:

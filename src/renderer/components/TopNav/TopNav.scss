@@ -381,3 +381,29 @@
   }
 }
 /* stylelint-enable liberty/use-logical-spec */
+
+.syncIndicator {
+  display: inline-flex;
+  flex-shrink: 0;
+  padding: 6px;
+  color: var(--primary-text-color);
+  font-size: 18px;
+}
+
+.syncIndicator :deep(.ft-icon__glyph) {
+  animation: sync-rotation 1.2s linear infinite;
+}
+
+.topNavBarColor .syncIndicator {
+  color: var(--text-with-main-color);
+}
+
+@keyframes sync-rotation {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .syncIndicator :deep(.ft-icon__glyph) {
+    animation: none;
+  }
+}

@@ -51,7 +51,7 @@ for (const electron of [false, true]) {
     const start = source.indexOf('    function applyPendingPresentationModes(')
     const body = source.slice(start, source.indexOf('\n    }', start) + 6)
     const context = vm.createContext({
-      startInFullscreen: true, startInFullwindow: false, startInPip: false,
+      startInFullscreen: true, restoringNativeFullscreen: false, startInFullwindow: false, startInPip: false,
       isActiveTab: { value: false }, hasLoaded: { value: false },
       ui: {}, player: { nativePlayback: electron ? undefined : { show: async () => calls.push('native'), isScreenOpen: () => true } },
       process: { env: { IS_ELECTRON: electron } },
@@ -65,7 +65,7 @@ for (const electron of [false, true]) {
     assert.deepEqual(calls, [])
     context.hasLoaded.value = true
     restore()
-    await Promise.resolve()
+    await new Promise(resolve => setImmediate(resolve))
     assert.deepEqual(calls, [electron ? 'electron' : 'native'])
     restore()
     assert.equal(calls.length, 1, 'canplay must not enter fullscreen again')
@@ -79,7 +79,7 @@ test('Android retries fullscreen restoration when the native controller was not 
   let open = false
   let attempts = 0
   const context = vm.createContext({
-    startInFullscreen: true, startInFullwindow: false, startInPip: false,
+    startInFullscreen: true, restoringNativeFullscreen: false, startInFullwindow: false, startInPip: false,
     isActiveTab: { value: true }, hasLoaded: { value: true }, ui: {},
     player: { nativePlayback: {
       async show() { attempts++; open = ready },
@@ -89,13 +89,37 @@ test('Android retries fullscreen restoration when the native controller was not 
   })
   const restore = vm.runInContext(`${body}\napplyPendingPresentationModes`, context)
   restore()
-  await Promise.resolve()
+  await new Promise(resolve => setImmediate(resolve))
   assert.equal(context.startInFullscreen, true, 'A no-op show must retain the pending request')
   ready = true
   restore()
-  await Promise.resolve()
+  await new Promise(resolve => setImmediate(resolve))
   assert.equal(open, true)
   assert.equal(context.startInFullscreen, false)
   restore()
   assert.equal(attempts, 2)
+})
+
+test('repeated ready events wait for the same native fullscreen restoration', async () => {
+  const apply = source.slice(source.indexOf('    function applyPendingPresentationModes()'), source.indexOf('    function handleCanPlay()'))
+  let resolveShow
+  let calls = 0
+  const context = vm.createContext({
+    isActiveTab: { value: true }, ui: {}, startInFullwindow: false, startInPip: false,
+    startInFullscreen: true, restoringNativeFullscreen: false, hasLoaded: { value: true },
+    process: { env: { IS_ELECTRON: false } }, console,
+    player: { nativePlayback: {
+      show() { calls++; return new Promise(resolve => { resolveShow = resolve }) },
+      isScreenOpen: () => true,
+    } },
+  })
+  vm.runInContext(apply, context)
+  context.applyPendingPresentationModes()
+  context.applyPendingPresentationModes()
+  assert.equal(calls, 1)
+  assert.equal(context.startInFullscreen, true)
+  resolveShow()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(context.startInFullscreen, false)
+  assert.equal(context.restoringNativeFullscreen, false)
 })

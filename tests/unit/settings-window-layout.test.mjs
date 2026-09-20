@@ -83,3 +83,19 @@ test('desktop settings float at wide widths and maximize only at narrow widths',
   settings.resize(1280)
   assert.equal(settings.isWindowMaximized.value, false)
 })
+
+for (const desktop of [false, true]) {
+  for (const nested of [false, true]) {
+    test(`settings Escape ${desktop ? 'on desktop' : 'on mobile'} ${nested ? 'inside a page' : 'at the root'}`, () => {
+      const actions = []
+      const handle = vm.runInNewContext(`${componentFunction('handleSettingsEscape')}; handleSettingsEscape`, {
+        isInDesktopView: ref(desktop),
+        showBackButton: ref(nested),
+        goBack: () => actions.push('back'),
+        closeSettings: () => actions.push('close'),
+      })
+      handle({ target: { closest: () => null }, preventDefault() {}, stopPropagation() {} })
+      assert.deepEqual(actions, [!desktop && nested ? 'back' : 'close'])
+    })
+  }
+}

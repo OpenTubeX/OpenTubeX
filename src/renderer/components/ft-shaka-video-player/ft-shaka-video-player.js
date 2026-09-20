@@ -1252,6 +1252,7 @@ export default defineComponent({
     let fullWindowListenerReady = false
     let startInFullwindow = props.startInFullwindow
     let startInFullscreen = props.startInFullscreen
+    let restoringNativeFullscreen = false
     let startInPip = props.startInPip
     let restoreChapters = props.startWithChapters
     let restoreFullscreenMetadata = props.startWithFullscreenMetadata
@@ -6297,11 +6298,12 @@ export default defineComponent({
         events.dispatchEvent(new CustomEvent('setFullWindow', { detail: true }))
       }
 
-      if (startInFullscreen && hasLoaded.value && player?.nativePlayback) {
+      if (startInFullscreen && hasLoaded.value && player?.nativePlayback && !restoringNativeFullscreen) {
         const nativePlayback = player.nativePlayback
+        restoringNativeFullscreen = true
         nativePlayback.show().then(() => {
           if (nativePlayback.isScreenOpen()) startInFullscreen = false
-        }).catch(error => console.error('Unable to restore native fullscreen', error))
+        }).catch(error => console.error('Unable to restore native fullscreen', error)).finally(() => { restoringNativeFullscreen = false })
       } else if (startInFullscreen && hasLoaded.value && process.env.IS_ELECTRON) {
         startInFullscreen = false
         window.ftElectron.requestFullscreen(tabId)
@@ -10307,6 +10309,7 @@ export default defineComponent({
     }
 
     function fullscreenChangeHandler() {
+      if (process.env.IS_CAPACITOR && !isNativeFullscreenActive() && document.querySelector('.nativeFullscreenTransition')) return
       const fullscreen = isNativeFullscreenActive()
       isFullscreen.value = fullscreen
       if (props.shortsPlayer) {
@@ -10455,6 +10458,7 @@ export default defineComponent({
             vrCanvas: vrCanvas.value,
             sabrData: props.sabrData,
             captions: props.captions,
+            videoDimensions: props.legacyFormats.find(format => format.width > 0 && format.height > 0),
             audioOnly: props.format === 'audio',
             skipSilence: skipSilence.value,
             continueInBackground: store.getters.getContinuePlaybackWhenScreenIsLocked,
@@ -11442,6 +11446,11 @@ export default defineComponent({
 
     expose({
       isNativePlayback: () => !!player?.nativePlayback,
+      cancelPendingFullscreen() {
+        startInFullscreen = false
+        player?.nativePlayback?.hide().catch(() => {})
+      },
+      isFullscreen,
       hasLoaded,
       hasPlaybackPosition,
 

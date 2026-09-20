@@ -350,6 +350,7 @@
 </template>
 
 <script setup>
+import { displayAndroidPath } from '../../helpers/androidStorage'
 import { ytDlp } from '../../helpers/ytDlp'
 import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, reactive, ref, useTemplateRef } from 'vue'
@@ -601,7 +602,7 @@ const runningDownload = Object.values(store.getters.getYtDlpDownloads).filter(do
 const downloadId = ref(runningDownload?.id ?? null)
 const downloadFolderPath = computed(() => store.getters.getYtDlpDownloadFolderPath)
 const downloadFolderRequired = computed(() => (process.env.IS_CAPACITOR || window.ftElectron?.isFlatpak) && downloadFolderPath.value === '')
-const downloadFolderDisplay = computed(() => downloadFolderPath.value || (downloadFolderRequired.value
+const downloadFolderDisplay = computed(() => displayAndroidPath(downloadFolderPath.value) || (downloadFolderRequired.value
   ? t('Downloads.Folder Required')
   : t('Downloads.System Downloads Folder')))
 

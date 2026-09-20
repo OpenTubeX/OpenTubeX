@@ -1,3 +1,4 @@
+import { beginAndroidFullscreenTransition } from '../../helpers/player/androidFullscreenTransition'
 import { parseLocalVideoSummary } from '../../helpers/video-summary.js'
 import WatchVideoSummary from '../../components/WatchVideoSummary/WatchVideoSummary.vue'
 import FtPhonePanel from '../../components/FtPhonePanel/FtPhonePanel.vue'
@@ -51,6 +52,7 @@ import {
   getCachedOembedTitle,
   getOembedTitle,
   getShortThumbnailUrl,
+  getVideoThumbnailUrl,
   openInternalPath,
   showApiErrorToast,
   showToast,
@@ -235,6 +237,8 @@ export default defineComponent({
     return {
       mobilePanel: null,
       startNextVideoInFullscreen: false,
+      finishNativeFullscreenTransition: null,
+      fullscreenTransitionCancelled: false,
       startNextVideoInFullwindow: false,
       startNextVideoInPip: false,
       nextVideoAutoPictureInPictureState: null,
@@ -1165,6 +1169,12 @@ export default defineComponent({
     }
   },
   watch: {
+    '$store.getters.getWatchQueueLength'(length) {
+      if (length === 0 && this.mobilePanel === 'queue') this.mobilePanel = null
+    },
+    errorMessage(error) {
+      if (error) this.finishNativeFullscreenTransition?.()
+    },
     aiVideoSummaryMode() {
       if (this.videoSummary.length > 0) this.clampShortsAuxPanelScroll()
     },
@@ -1203,6 +1213,7 @@ export default defineComponent({
           this.hasBeenPresented = true
         } else {
           this.mobilePanel = null
+          this.finishNativeFullscreenTransition?.()
         }
       }
     },
@@ -1309,6 +1320,7 @@ export default defineComponent({
     this.onMountedDependOnLocalStateLoading()
   },
   beforeUnmount: function () {
+    this.finishNativeFullscreenTransition?.()
     connectionEvents.removeEventListener('change', this.handleDownloadConnectionChange)
     document.removeEventListener('keydown', this.handleShortsNavigationKeydown, true)
     document.removeEventListener('visibilitychange', this.updateAndroidBackgroundPlaybackFormat)
@@ -1927,14 +1939,17 @@ export default defineComponent({
     },
 
     async cleanupWatchRuntime() {
+      this.finishNativeFullscreenTransition?.()
+      // Closing a tab unmounts Watch while progress persistence is pending.
+      const player = this.$refs.player
       this.$store.commit('setCurrentWatchTimestamp', { tabId: this.tabId, value: null })
       await this.handleRouteChange()
       window.removeEventListener('beforeunload', this.handleWatchProgressAutoSave)
       window.removeEventListener('beforeunload', this.flushWatchTime)
       this.deactivateWatchRuntime()
 
-      if (this.$refs.player) {
-        await this.destroyPlayer()
+      if (player) {
+        await this.destroyPlayer(player, false)
       }
     },
 
@@ -6141,11 +6156,24 @@ export default defineComponent({
       this.currentVideoQuality = this.getDefaultVideoQuality()
     },
 
-    destroyPlayer: async function() {
+    destroyPlayer: async function(player = this.$refs.player, preserveFullscreen = true) {
+      if (process.env.IS_CAPACITOR && preserveFullscreen && player.isFullscreen) {
+        this.finishNativeFullscreenTransition?.()
+        this.fullscreenTransitionCancelled = false
+        const nextVideoId = this.tabRoute.params.id
+        const thumbnail = !nextVideoId || nextVideoId === this.videoId
+          ? this.thumbnail
+          : getVideoThumbnailUrl(nextVideoId, this.backendPreference, this.currentInvidiousInstanceUrl, this.thumbnailPreference)
+        this.finishNativeFullscreenTransition = beginAndroidFullscreenTransition(this.t('Video.Fetching Streams'), thumbnail, () => {
+          this.fullscreenTransitionCancelled = true
+          this.startNextVideoInFullscreen = false
+          this.$refs.player?.cancelPendingFullscreen()
+        })
+      }
       this.playerTeardownInProgress = true
       try {
-        const uiState = await this.$refs.player.destroyPlayer()
-        this.startNextVideoInFullscreen = uiState.startNextVideoInFullscreen
+        const uiState = await player.destroyPlayer()
+        this.startNextVideoInFullscreen = uiState.startNextVideoInFullscreen && !this.fullscreenTransitionCancelled
         this.startNextVideoInFullwindow = uiState.startNextVideoInFullwindow
         this.startNextVideoInPip = uiState.startNextVideoInPip
         this.nextVideoAutoPictureInPictureState = uiState.autoPictureInPictureState

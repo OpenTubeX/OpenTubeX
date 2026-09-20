@@ -1171,6 +1171,10 @@ Settings:
     Title Excludes: Title excludes
     Title Filter Hint: Separate multiple title terms with commas. A video must match at least one included term and no excluded terms.
   External Software Settings:
+    Create YouTube session: "Create YouTube session"
+    YouTube session hint: "Sign in if needed, then save. Choose in settings whether to use this session for downloads, playback or subtitles."
+    Use cookies for downloads: "Use cookies for downloads"
+    YouTube session failed: "Unable to save the YouTube session."
     Checking FFmpeg and FFprobe: Checking FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe have not been downloaded yet. Click the button below to download them.
     External Software Settings: External Software
@@ -1216,7 +1220,7 @@ Settings:
       Manual: Only update manually
     yt-dlp Executable Path: yt-dlp Executable Path
     FFmpeg Executable Path: FFmpeg Executable Path
-    Restricted Playback Authentication: yt-dlp Playback Cookies
+    Restricted Playback Authentication: "yt-dlp Cookies"
     Cookie Source: Cookie Source
     Cookie Sources:
       None: None
@@ -1972,7 +1976,7 @@ Video:
   Reloading video after streaming URL error: Reloading video after streaming URL error
   MembersOnly: This members-only video requires a Google account with an active membership to this channel.
   AgeRestricted: This age-restricted video requires an age-verified Google account.
-  Configure Restricted Playback Cookies Hint: Configure cookies in Settings → External Software → yt-dlp Playback Cookies.
+  Configure Restricted Playback Cookies Hint: "Configure cookies in Settings → External Software → yt-dlp Cookies."
   Try With Configured Cookies: Try with configured cookies
   Restricted Playback Authentication Failed Template: 'yt-dlp could not access this video with the configured cookies: {error}'
   DRMProtected: DRM protected videos cannot be played in OpenTubeX, as they require proprietary, closed source components. If you want to watch this video please watch it on the official YouTube website in a DRM enabled web browser.
@@ -2657,7 +2661,7 @@ Tooltips:
     Cookie File: Select a Netscape-formatted cookie file for authenticated playback.
     Browser for Cookies: Browser support is read from the selected yt-dlp executable. OpenTubeX asks yt-dlp to read this browser when authenticated playback is requested.
     Browser Profile: Optional browser profile name or folder. Leave blank to use the most recently accessed profile.
-    Always Use Cookies: "Use the configured cookies for subtitles and whenever yt-dlp extracts streams. This does not switch the stream extraction method to yt-dlp. With yt-dlp selected, account-only formats may become available, including YouTube Premium's enhanced bitrate when the account has access."
+    Always Use Cookies: "Use the configured cookies for downloads, subtitles and whenever yt-dlp extracts streams. This does not switch the stream extraction method to yt-dlp. With yt-dlp selected, account-only formats may become available, including YouTube Premium's enhanced bitrate when the account has access."
     FFmpeg Executable Path: FFmpeg is required for merging separate video and audio streams
       and for audio conversion. By default, OpenTubeX will assume that FFmpeg can be found
       via the PATH environment variable. If needed, a custom path can be set here.

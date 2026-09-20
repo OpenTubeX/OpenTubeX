@@ -621,17 +621,23 @@ test.describe('settings', () => {
 
     const advanced = await goToSettingsSection(page, 'advanced')
     const authentication = advanced.locator('.settingsSection').filter({
-      has: page.getByRole('heading', { name: 'yt-dlp Playback Cookies', exact: true })
+      has: page.getByRole('heading', { name: 'yt-dlp Cookies', exact: true })
     })
     const cookieSource = authentication.locator('.restrictedPlaybackAuthSource select')
     const alwaysUseCookies = authentication.getByRole('checkbox', { name: /^Always Use Cookies/ })
     const subtitleCookies = authentication.getByRole('checkbox', { name: /^Use cookies for subtitles/ })
+    const downloadCookies = authentication.getByRole('checkbox', { name: /^Use cookies for downloads/ })
     const authenticationHint = authentication.locator('.restrictedPlaybackAuthHint')
     const accountRestrictionWarning = authentication.locator(
       '.restrictedPlaybackAuthHint strong'
     )
 
     await expect(cookieSource.locator('option')).toHaveText(['None', 'File', 'Browser'])
+    await expect(cookieSource).toHaveValue('none')
+    await expect(downloadCookies).toBeChecked()
+    await expect(downloadCookies).toBeEnabled()
+    await downloadCookies.locator('..').locator('label.switch-label').click()
+    await expect(downloadCookies).not.toBeChecked()
     await expect(alwaysUseCookies).not.toBeChecked()
     await expect(subtitleCookies).not.toBeChecked()
     await expect(subtitleCookies).toBeEnabled()
@@ -648,7 +654,7 @@ test.describe('settings', () => {
       .locator('.selectTooltip button')
       .focus()
     await expect(page.locator('body > [role="tooltip"]:visible')).toHaveText(
-      "Use the configured cookies for subtitles and whenever yt-dlp extracts streams. This does not switch the stream extraction method to yt-dlp. With yt-dlp selected, account-only formats may become available, including YouTube Premium's enhanced bitrate when the account has access."
+      "Use the configured cookies for downloads, subtitles and whenever yt-dlp extracts streams. This does not switch the stream extraction method to yt-dlp. With yt-dlp selected, account-only formats may become available, including YouTube Premium's enhanced bitrate when the account has access."
     )
     await cookieSource.selectOption('browser')
 
@@ -664,9 +670,13 @@ test.describe('settings', () => {
     await profile.fill('/tmp/firefox-profile')
     await alwaysUseCookies.locator('..').locator('label.switch-label').click()
     await expect(alwaysUseCookies).toBeChecked()
+    await expect(downloadCookies).toBeChecked()
+    await expect(downloadCookies).toBeDisabled()
     await expect(subtitleCookies).toBeChecked()
     await expect(subtitleCookies).toBeDisabled()
     await alwaysUseCookies.locator('..').locator('label.switch-label').click()
+    await expect(downloadCookies).toBeEnabled()
+    await expect(downloadCookies).not.toBeChecked()
     await expect(subtitleCookies).toBeEnabled()
     await expect(subtitleCookies).toBeChecked()
     await subtitleCookies.locator('..').locator('label.switch-label').click()

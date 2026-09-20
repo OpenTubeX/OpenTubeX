@@ -135,6 +135,9 @@ final class YtDlpDownloads {
         for (String key : asList("videoId", "playlistId", "playlistKey", "title", "thumbnail", "mode", "template")) record.put(key, payload.optString(key));
         record.put("id", id).put("retryPayload", new JSONObject(payload.toString())).put("automatic", payload.optBoolean("automatic"));
         record.put("args", args).put("folder", folder).put("status", paused ? "paused" : "queued");
+        // Validate at execution so missing sessions also leave a visible failed automatic download.
+        record.put("useCookies", config.optBoolean("useCookies"))
+            .put("cookies", config.optBoolean("useCookies") ? config.optString("cookies") : "");
         record.put("queuePosition", position).put("percent", 0).put("speed", JSONObject.NULL).put("eta", JSONObject.NULL);
         record.put("errorMessage", JSONObject.NULL).put("started", false);
         if (!record.has("destinations")) record.put("destinations", new JSONArray()).put("files", new JSONArray());
@@ -147,6 +150,12 @@ final class YtDlpDownloads {
 
     void wake() {
         schedule.run();
+    }
+
+    private File cookieFile(String path) throws IOException {
+        File cookies = new File(context.getNoBackupFilesDir(), "yt-dlp-cookies.txt");
+        if (!cookies.getAbsolutePath().equals(path) || !cookies.isFile()) throw new IOException("Cookie file is unavailable");
+        return cookies;
     }
 
     synchronized List<Long> claim() throws Exception {
@@ -184,6 +193,10 @@ final class YtDlpDownloads {
             args.addAll(asList("--paths", root.getAbsolutePath(), "--paths", "temp:" + new File(root, "temp").getAbsolutePath(),
                 "--newline", "--progress", "--no-simulate", "--print", "after_move:__OPENTUBEX_FILE__:%(id)s\t%(duration)s\t%(width)s\t%(height)s\t%(filepath)s"));
             synchronized (this) {
+                if (record.optBoolean("useCookies")) {
+                    File cookies = cookieFile(record.optString("cookies"));
+                    args.addAll(asList("--cookies", cookies.getAbsolutePath()));
+                }
                 if (bandwidth > 0) args.addAll(asList("--limit-rate", Math.max(1, bandwidth / concurrency) + "K"));
                 long estimate = record.getJSONObject("retryPayload").optLong("estimatedSizeBytes");
                 record.put("availableSpaceBytes", root.getUsableSpace());

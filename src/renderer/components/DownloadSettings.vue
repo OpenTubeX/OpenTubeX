@@ -33,7 +33,8 @@
         :allow-action-button-when-empty="true"
         :force-action-button-icon-name="['fas', 'folder-open']"
         :show-label="true"
-        :value="ytDlpDownloadFolderPath"
+        :value="displayAndroidPath(ytDlpDownloadFolderPath)"
+        :readonly="isCapacitor"
         :tooltip="t('Tooltips.Download Settings.Download Folder')"
         @input="updateYtDlpDownloadFolderPath"
         @click="chooseDownloadFolder"
@@ -74,6 +75,7 @@
 </template>
 
 <script setup>
+import { displayAndroidPath } from '../helpers/androidStorage'
 import { ytDlp } from '../helpers/ytDlp'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -88,6 +90,7 @@ import AutomaticDownloadSettings from './AutomaticDownloadSettings/AutomaticDown
 import DownloadTemplateSettings from './DownloadTemplateSettings/DownloadTemplateSettings.vue'
 
 import store from '../store/index'
+const isCapacitor = process.env.IS_CAPACITOR
 
 const { t } = useI18n()
 
@@ -117,7 +120,7 @@ function openDownloads() {
  * @param {string} value
  */
 function updateYtDlpDownloadFolderPath(value) {
-  store.dispatch('updateYtDlpDownloadFolderPath', value)
+  if (!isCapacitor) store.dispatch('updateYtDlpDownloadFolderPath', value)
 }
 
 /**

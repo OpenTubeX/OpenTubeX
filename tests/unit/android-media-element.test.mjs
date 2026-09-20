@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { readFile } from 'node:fs/promises'
+import vm from 'node:vm'
 import { createRepeatStatsTracker } from '../../src/renderer/helpers/player/repeatStats.js'
 import { attachAndroidMediaElement } from '../../src/renderer/helpers/player/androidMediaElement.js'
 
@@ -238,4 +240,36 @@ test('startup poster receives a first-frame event only after native rendering, i
   assert.deepEqual(events, ['firstframe'])
   media.update({ ...ready, event: 'firstframe' })
   assert.deepEqual(events, ['firstframe', 'firstframe'])
+})
+
+test('opening SponsorBlock skips finish beyond fractional-millisecond segment boundaries', async () => {
+  const source = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
+  const skipSource = source.slice(source.indexOf('    function skipSponsorBlockSegments('), source.indexOf('    function getNextSponsorBlockAutoSkipSegment('))
+  const f = fixture()
+  const end = 2.123456
+  const skip = vm.runInNewContext(`${skipSource}; skipSponsorBlockSegments`, {
+    sponsorSkips: { value: { autoSkip: new Set(['music_offtopic']) } },
+    sponsorBlockDoNotSkipSegments: new Set(),
+    sponsorBlockSegments: [{ uuid: 'opening-segment', category: 'music_offtopic', actionType: 'skip', startTime: 0, endTime: end }],
+    isSponsorBlockPointSegment: () => false,
+    video: { value: f.element },
+    player: { seekRange: () => ({ end: 100 }) },
+    sponsorBlockCurrentTime: { value: 0 },
+    sponsorBlockShowSkippedToast: { value: false },
+    accumulatedSeekSeconds: 0,
+  })
+  f.element.addEventListener('timeupdate', () => skip(f.element.currentTime))
+  f.media.update({ ...f.ready, position: 0 })
+  // Android reports the seek at whole-millisecond precision.
+  for (let i = 0; i < 5 && i < f.commands.length; i++) {
+    const [action, target] = f.commands[i]
+    assert.equal(action, 'seek')
+    f.media.update({ ...f.ready, position: Math.round(target * 1000) / 1000, event: 'seeked' })
+  }
+  assert.equal(f.commands.length, 1, 'the acknowledged skip must not seek into the same segment again')
+  assert.ok(f.element.currentTime >= end)
+  assert.equal(f.element.seeking, false)
+  const position = f.element.currentTime
+  f.advance(1000)
+  assert.equal(f.element.currentTime, position + 1)
 })

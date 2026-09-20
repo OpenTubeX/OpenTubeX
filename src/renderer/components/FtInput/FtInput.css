@@ -329,6 +329,18 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
   opacity: 1;
 }
 
+@media (any-pointer: coarse), (width <= 680px) {
+  .search .list li {
+    min-block-size: 48px;
+  }
+
+  .search .removeButton {
+    min-inline-size: 48px;
+    justify-content: center;
+    padding-inline: 0;
+  }
+}
+
 .hover {
   background-color: var(--dropdown-item-hover-color);
   color: var(--dropdown-item-hover-text-color);

@@ -1322,7 +1322,8 @@ function handleSettingsEscape(event) {
   if (event.target.closest('[aria-expanded="true"], [data-settings-escape-scope]')) return
   event.preventDefault()
   event.stopPropagation()
-  closeSettings()
+  if (!isInDesktopView.value && showBackButton.value) goBack()
+  else closeSettings()
 }
 
 function handleHeaderDoubleClick(event) {
