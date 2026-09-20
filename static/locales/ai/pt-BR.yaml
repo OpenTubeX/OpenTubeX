@@ -291,9 +291,10 @@ Settings:
       After current tab: Depois da guia atual
       After current tab in opened order: Depois da guia atual, pela ordem de abertura
     Tab Close Focus:
+      Last active tab: "Última aba ativa"
+      Next tab in tab order: "Próxima aba na ordem das abas"
+      Previous tab in tab order: "Aba anterior na ordem das abas"
       Tab Close Focus: Depois de fechar uma guia
-      Previous tab: Selecionar a guia anterior
-      Next tab: Selecionar a guia seguinte
     Startup Behavior:
       Startup Behavior: Ao iniciar
       Load all tabs: Carregar todas as guias

@@ -295,9 +295,10 @@ Settings:
       After current tab: Na het huidige tabblad
       After current tab in opened order: Na het huidige tabblad, in volgorde van openen
     Tab Close Focus:
+      Last active tab: "Laatst actieve tabblad"
+      Next tab in tab order: "Volgend tabblad in de tabbladvolgorde"
+      Previous tab in tab order: "Vorig tabblad in de tabbladvolgorde"
       Tab Close Focus: Na het sluiten van een tabblad
-      Previous tab: Vorige tabblad selecteren
-      Next tab: Volgende tabblad selecteren
     Startup Behavior:
       Startup Behavior: Bij het opstarten
       Load all tabs: Alle tabbladen laden

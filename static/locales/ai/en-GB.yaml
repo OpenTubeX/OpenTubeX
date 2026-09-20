@@ -291,9 +291,10 @@ Settings:
       After current tab: After current tab
       After current tab in opened order: After current tab, in opened order
     Tab Close Focus:
+      Last active tab: "Last active tab"
+      Next tab in tab order: "Next tab in tab order"
+      Previous tab in tab order: "Previous tab in tab order"
       Tab Close Focus: After Closing a Tab
-      Previous tab: Select the previous tab
-      Next tab: Select the next tab
     Startup Behavior:
       Startup Behavior: On Startup
       Load all tabs: Load all tabs

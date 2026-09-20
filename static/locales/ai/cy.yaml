@@ -293,9 +293,10 @@ Settings:
       After current tab: Ar ôl y tab presennol
       After current tab in opened order: Ar ôl y tab presennol, yn nhrefn agor
     Tab Close Focus:
+      Last active tab: "Y tab gweithredol diwethaf"
+      Next tab in tab order: "Y tab nesaf yn nhrefn y tabiau"
+      Previous tab in tab order: "Y tab blaenorol yn nhrefn y tabiau"
       Tab Close Focus: Ar ôl cau tab
-      Previous tab: Dewis y tab blaenorol
-      Next tab: Dewis y tab nesaf
     Startup Behavior:
       Startup Behavior: Wrth gychwyn
       Load all tabs: Llwytho pob tab

@@ -301,9 +301,10 @@ Settings:
       After current tab: После тренутне картице
       After current tab in opened order: После тренутне картице, редоследом отварања
     Tab Close Focus:
+      Last active tab: "Последња активна картица"
+      Next tab in tab order: "Следећа картица по редоследу картица"
+      Previous tab in tab order: "Претходна картица по редоследу картица"
       Tab Close Focus: После затварања картице
-      Previous tab: Изабери претходну картицу
-      Next tab: Изабери следећу картицу
     Startup Behavior:
       Startup Behavior: При покретању
       Load all tabs: Учитај све картице

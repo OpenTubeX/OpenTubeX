@@ -291,9 +291,10 @@ Settings:
       After current tab: 当前标签页之后
       After current tab in opened order: 按打开顺序排列在当前标签页之后
     Tab Close Focus:
+      Last active tab: "上次活动的标签页"
+      Next tab in tab order: "按标签页顺序选择下一个"
+      Previous tab in tab order: "按标签页顺序选择上一个"
       Tab Close Focus: 关闭标签页后
-      Previous tab: 选择上一个标签页
-      Next tab: 选择下一个标签页
     Startup Behavior:
       Startup Behavior: 启动时
       Load all tabs: 加载所有标签页

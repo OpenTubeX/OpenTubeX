@@ -418,9 +418,10 @@ Settings:
       After current tab: Za trenutnim zavihkom
       After current tab in opened order: Za trenutnim zavihkom, po vrstnem redu odpiranja
     Tab Close Focus:
+      Last active tab: "Nazadnje dejaven zavihek"
+      Next tab in tab order: "Naslednji zavihek v vrstnem redu zavihkov"
+      Previous tab in tab order: "Prejšnji zavihek v vrstnem redu zavihkov"
       Tab Close Focus: Po zaprtju zavihka
-      Previous tab: Izberi prejšnji zavihek
-      Next tab: Izberi naslednji zavihek
     Startup Behavior:
       Startup Behavior: Ob zagonu
       Load all tabs: Naloži vse zavihke

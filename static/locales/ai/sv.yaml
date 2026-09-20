@@ -293,9 +293,10 @@ Settings:
       After current tab: Efter aktuell flik
       After current tab in opened order: Efter aktuell flik, i öppningsordning
     Tab Close Focus:
+      Last active tab: "Senast aktiva fliken"
+      Next tab in tab order: "Nästa flik i flikordningen"
+      Previous tab in tab order: "Föregående flik i flikordningen"
       Tab Close Focus: När en flik har stängts
-      Previous tab: Välj föregående flik
-      Next tab: Välj nästa flik
     Startup Behavior:
       Startup Behavior: Vid start
       Load all tabs: Läs in alla flikar

@@ -291,9 +291,10 @@ Settings:
       After current tab: "War-lerc'h an ivinell vremanel"
       After current tab in opened order: "War-lerc'h an ivinell vremanel, hervez urzh an digeriñ"
     Tab Close Focus:
+      Last active tab: "Ivinell oberiant diwezhañ"
+      Next tab in tab order: "Ivinell da-heul e urzh an ivinelloù"
+      Previous tab in tab order: "Ivinell gent e urzh an ivinelloù"
       Tab Close Focus: "Goude serriñ un ivinell"
-      Previous tab: "Dibab an ivinell gent"
-      Next tab: "Dibab an ivinell da-heul"
     Startup Behavior:
       Startup Behavior: "El loc'hañ"
       Load all tabs: "Kargañ an holl ivinelloù"

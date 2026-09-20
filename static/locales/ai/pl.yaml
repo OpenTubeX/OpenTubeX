@@ -101,6 +101,10 @@ Settings:
     Advanced Description: Dostawcy, aplikacje zewnętrzne i sieć
     Alternative providers: Dostawcy filmów i metadanych
   General Settings:
+    Tab Close Focus:
+      Last active tab: "Ostatnio aktywna karta"
+      Next tab in tab order: "Następna karta w kolejności kart"
+      Previous tab in tab order: "Poprzednia karta w kolejności kart"
     Use tray icon: "Używaj ikony w zasobniku"
     Close to system tray: "Zamykaj do zasobnika systemowego"
     Tray required for background refresh: "Ikona w zasobniku jest wymagana, gdy odświeżanie subskrypcji w tle jest włączone."

@@ -295,9 +295,10 @@ Settings:
       After current tab: אחרי הכרטיסייה הנוכחית
       After current tab in opened order: אחרי הכרטיסייה הנוכחית, לפי סדר הפתיחה
     Tab Close Focus:
+      Last active tab: "הכרטיסייה הפעילה האחרונה"
+      Next tab in tab order: "הכרטיסייה הבאה בסדר הכרטיסיות"
+      Previous tab in tab order: "הכרטיסייה הקודמת בסדר הכרטיסיות"
       Tab Close Focus: אחרי סגירת כרטיסייה
-      Previous tab: מעבר לכרטיסייה הקודמת
-      Next tab: מעבר לכרטיסייה הבאה
     Startup Behavior:
       Startup Behavior: בעת ההפעלה
       Load all tabs: טעינת כל הכרטיסיות

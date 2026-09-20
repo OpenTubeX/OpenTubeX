@@ -388,7 +388,7 @@ const state = {
   liveChatFilter: 'TOP_CHAT',
   landingPage: DEFAULT_LANDING_PAGE,
   newTabPosition: 'afterCurrentInOrder',
-  tabCloseFocus: 'previousTab',
+  tabCloseFocus: 'lastActiveTab',
   startupBehavior: 'loadLastActiveTab',
   showTabIcons: true,
   showTabPreviews: true,

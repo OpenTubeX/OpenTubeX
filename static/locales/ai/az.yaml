@@ -295,9 +295,10 @@ Settings:
       After current tab: Cari vərəqdən sonra
       After current tab in opened order: Cari vərəqdən sonra, açılma ardıcıllığı ilə
     Tab Close Focus:
+      Last active tab: "Son aktiv vərəq"
+      Next tab in tab order: "Vərəq sırasındakı növbəti vərəq"
+      Previous tab in tab order: "Vərəq sırasındakı əvvəlki vərəq"
       Tab Close Focus: Vərəq bağlandıqdan sonra
-      Previous tab: Əvvəlki vərəqi seç
-      Next tab: Növbəti vərəqi seç
     Startup Behavior:
       Startup Behavior: Başlanğıcda
       Load all tabs: Bütün vərəqləri yüklə

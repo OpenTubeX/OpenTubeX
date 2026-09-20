@@ -291,9 +291,10 @@ Settings:
       After current tab: 目前分頁之後
       After current tab in opened order: 目前分頁之後，並依開啟順序排列
     Tab Close Focus:
+      Last active tab: "上次作用中的分頁"
+      Next tab in tab order: "依分頁順序選取下一個"
+      Previous tab in tab order: "依分頁順序選取上一個"
       Tab Close Focus: 關閉分頁後
-      Previous tab: 選取上一個分頁
-      Next tab: 選取下一個分頁
     Startup Behavior:
       Startup Behavior: 啟動時
       Load all tabs: 載入所有分頁

@@ -293,9 +293,10 @@ Settings:
       After current tab: Á eftir núverandi flipa
       After current tab in opened order: Á eftir núverandi flipa, í opnunarröð
     Tab Close Focus:
+      Last active tab: "Síðasti virki flipinn"
+      Next tab in tab order: "Næsti flipi í fliparöð"
+      Previous tab in tab order: "Fyrri flipi í fliparöð"
       Tab Close Focus: Eftir að flipa er lokað
-      Previous tab: Velja fyrri flipa
-      Next tab: Velja næsta flipa
     Startup Behavior:
       Startup Behavior: Við ræsingu
       Load all tabs: Hlaða inn öllum flipum

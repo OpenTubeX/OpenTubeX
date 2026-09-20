@@ -1612,18 +1612,24 @@ test.describe('tab bar', () => {
     await expect(page.locator(sel.activeTab)).toHaveCount(1)
   })
 
-  test('closing the active tab selects the previous tab by default', async ({ page }) => {
+  test('closing the active tab returns to the last active tab by default', async ({ page }) => {
     const tabIds = await openThreeTabsAndActivate(page, 1)
 
+    await page.locator(sel.activeTab).locator('.closeButton').click()
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[2])
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
     await page.locator(sel.activeTab).locator('.closeButton').click()
     await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[0])
   })
 
-  test('falls back to the next tab when there is no previous tab', async ({ page }) => {
+  test('last active focus ignores background tabs and tab order', async ({ page }) => {
     const tabIds = await openThreeTabsAndActivate(page, 0)
+    await page.locator(sel.tabs).nth(2).click()
+    await page.evaluate(() => window.ftElectron.tabs.create({ makeActive: false }))
+    await expect(page.locator(sel.tabs)).toHaveCount(4)
 
     await page.locator(sel.activeTab).locator('.closeButton').click()
-    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[1])
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[0])
   })
 
   // Regression: removing a logical tab left its detached video presented in
@@ -1942,6 +1948,22 @@ test.describe('closed tabs', () => {
       await expect(page).toHaveURL(/#\/history/)
       await expect(page.locator(sel.backButton)).toBeDisabled()
     })
+  })
+})
+
+test.describe('tab close focus set to the previous tab', () => {
+  test.use({ seed: { settings: { tabCloseFocus: 'previousTab' } } })
+
+  test('closing the active tab selects the previous tab in tab order', async ({ page }) => {
+    const tabIds = await openThreeTabsAndActivate(page, 1)
+    await page.locator(sel.activeTab).locator('.closeButton').click()
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[0])
+  })
+
+  test('falls back to the next tab when there is no previous tab', async ({ page }) => {
+    const tabIds = await openThreeTabsAndActivate(page, 0)
+    await page.locator(sel.activeTab).locator('.closeButton').click()
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[1])
   })
 })
 

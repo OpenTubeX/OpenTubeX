@@ -291,9 +291,10 @@ Settings:
       After current tab: Geçerli sekmeden sonra
       After current tab in opened order: Açılma sırasına göre geçerli sekmeden sonra
     Tab Close Focus:
+      Last active tab: "Son etkin sekme"
+      Next tab in tab order: "Sekme sırasındaki sonraki sekme"
+      Previous tab in tab order: "Sekme sırasındaki önceki sekme"
       Tab Close Focus: Sekme Kapatıldıktan Sonra
-      Previous tab: Önceki sekmeyi seç
-      Next tab: Sonraki sekmeyi seç
     Startup Behavior:
       Startup Behavior: Başlangıçta
       Load all tabs: Tüm sekmeleri yükle

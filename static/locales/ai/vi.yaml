@@ -295,9 +295,10 @@ Settings:
       After current tab: Sau thẻ hiện tại
       After current tab in opened order: Sau thẻ hiện tại, theo thứ tự mở
     Tab Close Focus:
+      Last active tab: "Thẻ hoạt động gần nhất"
+      Next tab in tab order: "Thẻ tiếp theo trong thứ tự thẻ"
+      Previous tab in tab order: "Thẻ trước trong thứ tự thẻ"
       Tab Close Focus: Sau khi đóng một thẻ
-      Previous tab: Chọn thẻ trước
-      Next tab: Chọn thẻ sau
     Startup Behavior:
       Startup Behavior: Khi khởi động
       Load all tabs: Tải tất cả thẻ

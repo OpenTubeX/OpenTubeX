@@ -295,9 +295,10 @@ Settings:
       After current tab: بعد علامة التبويب الحالية
       After current tab in opened order: بعد علامة التبويب الحالية، بالترتيب المفتوح
     Tab Close Focus:
+      Last active tab: "آخر علامة تبويب نشطة"
+      Next tab in tab order: "علامة التبويب التالية حسب الترتيب"
+      Previous tab in tab order: "علامة التبويب السابقة حسب الترتيب"
       Tab Close Focus: بعد إغلاق علامة التبويب
-      Previous tab: حدد علامة التبويب السابقة
-      Next tab: حدد علامة التبويب التالية
     Startup Behavior:
       Startup Behavior: عند بدء التشغيل
       Load all tabs: تحميل كافة علامات التبويب

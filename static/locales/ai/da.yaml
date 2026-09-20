@@ -303,9 +303,10 @@ Settings:
       After current tab: Efter den aktuelle fane
       After current tab in opened order: Efter den aktuelle fane i den rækkefølge, de åbnes
     Tab Close Focus:
+      Last active tab: "Senest aktive fane"
+      Next tab in tab order: "Næste fane i fanerækkefølgen"
+      Previous tab in tab order: "Forrige fane i fanerækkefølgen"
       Tab Close Focus: Når en fane er lukket
-      Previous tab: Vælg den forrige fane
-      Next tab: Vælg den næste fane
     Startup Behavior:
       Startup Behavior: Ved opstart
       Load all tabs: Indlæs alle faner

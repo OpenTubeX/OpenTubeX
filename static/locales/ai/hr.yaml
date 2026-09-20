@@ -293,9 +293,10 @@ Settings:
       After current tab: Nakon trenutačne kartice
       After current tab in opened order: Nakon trenutačne kartice, redoslijedom otvaranja
     Tab Close Focus:
+      Last active tab: "Posljednja aktivna kartica"
+      Next tab in tab order: "Sljedeća kartica u redoslijedu kartica"
+      Previous tab in tab order: "Prethodna kartica u redoslijedu kartica"
       Tab Close Focus: Nakon zatvaranja kartice
-      Previous tab: Odaberi prethodnu karticu
-      Next tab: Odaberi sljedeću karticu
     Startup Behavior:
       Startup Behavior: Pri pokretanju
       Load all tabs: Učitaj sve kartice

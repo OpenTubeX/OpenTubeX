@@ -53,6 +53,7 @@ export class CapacitorTabService {
     this.flushOnHide = () => { if (isAppHidden()) this.flushPersistence() }
     this.flushOnPageHide = () => this.flushPersistence()
     this.sessionGeneration = 0
+    this.activationHistory = []
     this.removeRouterHook = () => {}
     this.removeStoreSubscription = () => {}
   }
@@ -167,7 +168,7 @@ export class CapacitorTabService {
     if (wasActive) this.navigation.saveScroll(tabId)
 
     if (wasActive && previous.tabs.length > 1) {
-      const nextTabId = findReplacementTabId(previous.tabs, tabId, this.store.getters.getTabCloseFocus)
+      const nextTabId = findReplacementTabId(previous.tabs, tabId, this.store.getters.getTabCloseFocus, this.activationHistory)
       if (!nextTabId || !await this.activateTab(nextTabId)) return false
       previous = this.currentSession()
     }
@@ -308,7 +309,7 @@ export class CapacitorTabService {
     if (session.activeTabId === tabId) {
       if (session.tabs.length <= 1) return false
 
-      const nextTabId = findReplacementTabId(session.tabs, tabId, this.store.getters.getTabCloseFocus)
+      const nextTabId = findReplacementTabId(session.tabs, tabId, this.store.getters.getTabCloseFocus, this.activationHistory)
       if (!nextTabId || !await this.activateTab(nextTabId)) return false
       session = this.currentSession()
     }
@@ -334,6 +335,7 @@ export class CapacitorTabService {
 
   async commitAndPresent(previous, session) {
     const previousPresentedTabId = this.store.getters.getPresentedTabId
+    const previousActivationHistory = this.activationHistory
     const presentationGeneration = this.commitSession(session)
     if (await this.navigation.requestPresentation(session.activeTabId, session.selectionRevision)) {
       return true
@@ -356,6 +358,7 @@ export class CapacitorTabService {
       selectionRevision: current.selectionRevision + 1
     }
     this.commitSession(rollback, rollbackPresentedTabId)
+    this.activationHistory = previousActivationHistory
     await this.navigation.requestPresentation(rollback.activeTabId, rollback.selectionRevision)
     return false
   }
@@ -393,6 +396,10 @@ export class CapacitorTabService {
   }
 
   commitSession(session, presentedTabId = this.store.getters.getPresentedTabId ?? session.activeTabId) {
+    const liveIds = new Set(session.tabs.map(tab => tab.id))
+    const previousActiveId = this.store.getters.getActiveTabId
+    this.activationHistory = [session.activeTabId, previousActiveId, ...this.activationHistory]
+      .filter((id, index, ids) => liveIds.has(id) && ids.indexOf(id) === index)
     this.store.commit('setTabsState', toRuntimeTabState(session, presentedTabId))
     this.sessionGeneration += 1
     return this.sessionGeneration
@@ -469,12 +476,15 @@ export class CapacitorTabService {
   }
 }
 
-function findReplacementTabId(tabs, tabId, focus) {
+function findReplacementTabId(tabs, tabId, focus = 'lastActiveTab', activationHistory = []) {
   const tabIndex = tabs.findIndex(tab => tab.id === tabId)
   if (tabIndex === -1) return null
 
   const previous = tabs[tabIndex - 1]
   const next = tabs[tabIndex + 1]
+  if (focus !== 'previousTab' && focus !== 'nextTab') {
+    return activationHistory.find(id => id !== tabId && tabs.some(tab => tab.id === id)) ?? next?.id ?? previous?.id ?? null
+  }
   const [preferred, fallback] = focus === 'nextTab' ? [next, previous] : [previous, next]
   // Match desktop: prefer a loaded opposite neighbor, but never skip over
   // the nearest tab on the configured side to find a more distant loaded tab.
