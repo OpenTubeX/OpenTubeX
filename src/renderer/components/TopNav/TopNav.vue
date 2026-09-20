@@ -124,6 +124,7 @@
           @click="openSyncSettings"
         >
           <FtIcon
+            class="navIcon"
             :icon="['fas', 'sync']"
             aria-hidden="true"
           />

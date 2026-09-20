@@ -108,6 +108,10 @@ test('header sync indicator follows active sync stages, opens sync settings, and
   await expect(hideIndicator).not.toBeChecked()
   await expect(indicator).toHaveAccessibleName('Sync: Syncing watch history…')
   await expect(indicator).toHaveCSS('font-size', '16px')
+  await expect.poll(async () => {
+    const { width, height } = await indicator.boundingBox()
+    return width - height
+  }).toBe(0)
   await expect(indicator.locator('svg')).toHaveCSS('animation-duration', '2s')
   await expect.poll(() => indicator.locator('svg').evaluate(element => getComputedStyle(element).animationName)).toMatch(/^sync-rotation(?:-|$)/)
   await page.locator('.topNav').evaluate(element => {
