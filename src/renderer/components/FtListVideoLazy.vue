@@ -141,11 +141,17 @@ const shouldBeVisible = computed(() => {
 
 const visible = ref(props.initialVisibleState && shouldBeVisible.value)
 const display = ref(shouldBeVisible.value ? 'block' : 'none')
+const loadedByVisibilityObserver = ref(false)
 
 watch(() => props.initialVisibleState, (initialVisibleState) => {
-  if (initialVisibleState && shouldBeVisible.value) {
+  if (!shouldBeVisible.value) {
+    visible.value = false
+    display.value = 'none'
+  } else if (initialVisibleState) {
     visible.value = true
     display.value = 'block'
+  } else if (!loadedByVisibilityObserver.value) {
+    visible.value = false
   }
 })
 
@@ -154,6 +160,7 @@ watch(() => props.initialVisibleState, (initialVisibleState) => {
  */
 function onVisibilityChanged(isVisible) {
   if (isVisible && shouldBeVisible.value) {
+    loadedByVisibilityObserver.value = true
     visible.value = isVisible
   } else if (isVisible) {
     display.value = 'none'

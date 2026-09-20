@@ -149,7 +149,20 @@ test('keeps an allowed Up Next recommendation rendered through loading and filte
     await view.$nextTick()
   }, hiddenTitles)
   await expect(page.locator(`${activeTab} .watchVideoRecommendations .title`, { hasText: allowedTitle })).toBeVisible()
+  await expect(page.locator(`${activeTab} .watchVideoRecommendations .ft-list-video`)).toHaveCount(5)
   await expectPopulatedUpNextHandoff(page)
+
+  await watchView.evaluate(async view => {
+    await view.$store.dispatch('updateForbiddenTitles', '[]')
+    await view.$nextTick()
+  })
+  await expect(page.locator(`${activeTab} .watchVideoRecommendations .ft-list-video`)).toHaveCount(5)
+
+  await watchView.evaluate(async (view, titles) => {
+    await view.$store.dispatch('updateForbiddenTitles', JSON.stringify(titles))
+    await view.$nextTick()
+  }, hiddenTitles)
+  await expect(page.locator(`${activeTab} .watchVideoRecommendations .title`, { hasText: allowedTitle })).toBeVisible()
 
   await watchView.evaluate(async view => {
     view.isLoading = true
@@ -162,6 +175,7 @@ test('keeps an allowed Up Next recommendation rendered through loading and filte
   })
   await expect(page.locator(`${activeTab} .watchVideoRecommendations .title`, { hasText: allowedTitle })).toBeVisible()
   await expectPopulatedUpNextHandoff(page)
+  await watchView.evaluate(view => view.$store.dispatch('updateForbiddenTitles', '[]'))
   await page.evaluate(() => {
     window.IntersectionObserver = window.__upNextIntersectionObserver
   })
