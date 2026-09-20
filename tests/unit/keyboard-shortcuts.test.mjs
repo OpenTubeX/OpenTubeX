@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 
 import {
@@ -48,6 +49,19 @@ test('keeps contextual app shortcuts fixed', () => {
 
 test('opens downloads with Ctrl or Command+J by default', () => {
   assert.equal(getConfiguredKeyboardShortcuts().APP.GENERAL.NAVIGATE_TO_DOWNLOADS, 'ctrl+J')
+})
+
+test('copies the current URL with Ctrl or Command+Shift+C by default', () => {
+  assert.equal(getConfiguredKeyboardShortcuts().APP.GENERAL.COPY_CURRENT_URL, 'ctrl+shift+C')
+})
+
+test('reserves Ctrl or Command+Shift+C for copying the current URL', async () => {
+  const source = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
+  const start = source.indexOf("label: 'Enter Inspect Element Mode'")
+  const menuItem = source.slice(start, source.indexOf('\n          },', start))
+
+  assert.match(menuItem, /accelerator: 'CmdOrCtrl\+Shift\+Alt\+C'/)
+  assert.doesNotMatch(menuItem, /accelerator: 'CmdOrCtrl\+Shift\+C'/)
 })
 
 test('reopens closed windows with a configurable Ctrl+Shift+N shortcut', () => {

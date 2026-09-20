@@ -351,9 +351,9 @@ export async function copyToClipboard(content, { messageOnSuccess = null, messag
       }
     } catch (error) {
       if (content instanceof Blob) {
-        console.error(`Failed to data of type "${content.type}" to clipboard`, error)
+        console.error('Failed to copy clipboard data of type', content.type, error)
       } else {
-        console.error(`Failed to copy ${content} to clipboard`, error)
+        console.error('Failed to copy content to clipboard', content, error)
       }
       showToast({
         message: messageOnError !== null

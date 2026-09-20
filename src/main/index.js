@@ -5867,7 +5867,7 @@ function runApp() {
           },
           {
             label: 'Enter Inspect Element Mode',
-            accelerator: 'CmdOrCtrl+Shift+C',
+            accelerator: 'CmdOrCtrl+Shift+Alt+C',
             click: (_, window) => {
               if (appShortcutBlockedWindows.has(window)) { return }
               if (window.webContents.isDevToolsOpened()) {

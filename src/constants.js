@@ -342,6 +342,7 @@ const DefaultKeyboardShortcuts = {
       FIND_PREVIOUS: 'ctrl+shift+G',
       FIND_PREVIOUS_ALT: 'shift+f3',
       FIND_PREVIOUS_ALT_ENTER: 'shift+enter',
+      COPY_CURRENT_URL: 'ctrl+shift+C',
       RESET_ZOOM: 'ctrl+0',
       ZOOM_IN: 'ctrl+plus',
       ZOOM_OUT: 'ctrl+-',
