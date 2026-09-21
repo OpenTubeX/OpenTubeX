@@ -2401,3 +2401,7 @@ App Icon:
 Tray:
   Hide All Windows: "Skrij vsa okna"
   Show All Windows: "Pokaži vsa okna"
+
+Tray Icon:
+  Title: "Ikona v sistemski vrstici"
+  Follow App Theme: "Sledi temi aplikacije"

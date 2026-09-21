@@ -1854,3 +1854,7 @@ App Icon:
 Tray:
   Hide All Windows: "Ascunde toate ferestrele"
   Show All Windows: "Arată toate ferestrele"
+
+Tray Icon:
+  Title: "Pictogramă în zona de notificare"
+  Follow App Theme: "Urmează tema aplicației"

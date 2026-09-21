@@ -3001,3 +3001,7 @@ App Icon:
 Tray:
   Hide All Windows: "Alle Fenster ausblenden"
   Show All Windows: "Alle Fenster anzeigen"
+
+Tray Icon:
+  Title: "Tray-Symbol"
+  Follow App Theme: "App-Design folgen"

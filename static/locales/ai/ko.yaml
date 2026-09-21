@@ -2258,3 +2258,7 @@ App Icon:
 Tray:
   Hide All Windows: "모든 창 숨기기"
   Show All Windows: "모든 창 표시"
+
+Tray Icon:
+  Title: "트레이 아이콘"
+  Follow App Theme: "앱 테마 따르기"

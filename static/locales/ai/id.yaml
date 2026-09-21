@@ -1814,3 +1814,7 @@ App Icon:
 Tray:
   Hide All Windows: "Sembunyikan semua jendela"
   Show All Windows: "Tampilkan Semua Jendela"
+
+Tray Icon:
+  Title: "Ikon baki sistem"
+  Follow App Theme: "Ikuti tema aplikasi"

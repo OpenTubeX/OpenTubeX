@@ -1816,3 +1816,7 @@ App Icon:
 Tray:
   Hide All Windows: "Kuzhat an holl brenestroù"
   Show All Windows: "Diskouez an holl brenestroù"
+
+Tray Icon:
+  Title: "Arlun ar maez reizhiad"
+  Follow App Theme: "Heuliañ neuz an arload"

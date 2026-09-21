@@ -1025,3 +1025,7 @@ Tray:
 Close Confirmation:
   Background Sync Warning: Zamknięcie aplikacji zatrzyma odświeżanie subskrypcji w tle.
   Hide Window: Ukryj okno
+
+Tray Icon:
+  Title: "Ikona w zasobniku"
+  Follow App Theme: "Używaj motywu aplikacji"

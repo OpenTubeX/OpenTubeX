@@ -1806,3 +1806,7 @@ App Icon:
 Tray:
   Hide All Windows: "すべてのウィンドウを非表示"
   Show All Windows: "すべてのウィンドウを表示"
+
+Tray Icon:
+  Title: "トレイアイコン"
+  Follow App Theme: "アプリのテーマに合わせる"

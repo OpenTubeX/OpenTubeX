@@ -1829,3 +1829,7 @@ App Icon:
 Tray:
   Hide All Windows: "Fela alla glugga"
   Show All Windows: "Sýna alla glugga"
+
+Tray Icon:
+  Title: "Tákn í kerfisbakka"
+  Follow App Theme: "Fylgja þema forritsins"

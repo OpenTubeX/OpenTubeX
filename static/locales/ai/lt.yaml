@@ -2305,3 +2305,7 @@ App Icon:
 Tray:
   Hide All Windows: "Slėpti visus langus"
   Show All Windows: "Rodyti visus langus"
+
+Tray Icon:
+  Title: "Sistemos dėklo piktograma"
+  Follow App Theme: "Naudoti programos apipavidalinimą"

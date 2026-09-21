@@ -2194,3 +2194,7 @@ App Icon:
 Tray:
   Hide All Windows: "Gøym alle vindauge"
   Show All Windows: "Vis alle vindauge"
+
+Tray Icon:
+  Title: "Ikon i systemtrauet"
+  Follow App Theme: "Følg temaet til appen"

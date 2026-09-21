@@ -1826,3 +1826,7 @@ App Icon:
 Tray:
   Hide All Windows: "Dölj alla fönster"
   Show All Windows: "Visa alla fönster"
+
+Tray Icon:
+  Title: "Ikon i systemfältet"
+  Follow App Theme: "Följ appens tema"

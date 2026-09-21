@@ -574,6 +574,7 @@ const state = {
   generalAutoLoadMorePaginatedItemsEnabled: true,
   enablePullToRefresh: true,
   useTrayIcon: true,
+  trayIconPreset: 'default',
   hideToTrayOnClose: false,
   hideToTrayOnMinimize: false,
   dateFormat: 'locale',
@@ -789,6 +790,7 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   // Others
   'disableSmoothScrolling',
   'useTrayIcon',
+  'trayIconPreset',
   'hideToTrayOnClose',
   'hideToTrayOnMinimize',
   'settingsPassword',

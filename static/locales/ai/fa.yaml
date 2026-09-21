@@ -1891,3 +1891,7 @@ App Icon:
 Tray:
   Hide All Windows: "پنهان کردن همهٔ پنجره‌ها"
   Show All Windows: "نمایش همهٔ پنجره‌ها"
+
+Tray Icon:
+  Title: "نماد سینی سیستم"
+  Follow App Theme: "پیروی از زمینهٔ برنامه"

@@ -1900,3 +1900,7 @@ App Icon:
 Tray:
   Hide All Windows: "Схаваць усе вокны"
   Show All Windows: "Паказаць усе вокны"
+
+Tray Icon:
+  Title: "Значок у трэі"
+  Follow App Theme: "Выкарыстоўваць тэму праграмы"

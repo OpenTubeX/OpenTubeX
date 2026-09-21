@@ -1857,3 +1857,7 @@ App Icon:
 Tray:
   Hide All Windows: "அனைத்து சாளரங்களையும் மறை"
   Show All Windows: "அனைத்து சாளரங்களையும் காட்டு"
+
+Tray Icon:
+  Title: "கணினித் தட்டு சின்னம்"
+  Follow App Theme: "செயலியின் கருப்பொருளைப் பின்பற்று"

@@ -184,11 +184,12 @@ for (const [index, theme] of [...PALETTE_BASE_THEMES, 'catppuccinMacchiato'].ent
           await expect.poll(async () => {
             const height = await label.evaluate(element => element.getBoundingClientRect().height)
             const x = checked ? 12 : 34
-            const [track, surface, thumb, thumbEdge] = await sampleColors(app, label, [
+            const [track, surface, thumb, ...thumbEdge] = await sampleColors(app, label, [
               [x, height / 2], [x, height / 2 - 15], [checked ? 30 : 15, height / 2],
-              [checked ? 31 : 15, height / 2 - 9],
+              // Fractional scroll offsets can put one sample on an antialiased edge.
+              ...[-0.5, 0, 0.5].map(offset => [checked ? 31 : 15, height / 2 - 9 + offset]),
             ])
-            return Math.min(contrast(track, surface), contrast(thumb, track), contrast(thumbEdge, surface))
+            return Math.min(contrast(track, surface), contrast(thumb, track), Math.max(...thumbEdge.map(color => contrast(color, surface))))
           }, { message: 'Painted toggle track, thumb and surrounding surface' }).toBeGreaterThanOrEqual(3)
           if (scale === 100) {
             await testInfo.attach(`${theme}-toggle-${checked ? 'on' : 'off'}`, {

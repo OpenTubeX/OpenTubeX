@@ -1842,3 +1842,7 @@ App Icon:
 Tray:
   Hide All Windows: "Ẩn tất cả cửa sổ"
   Show All Windows: "Hiển thị tất cả cửa sổ"
+
+Tray Icon:
+  Title: "Biểu tượng khay hệ thống"
+  Follow App Theme: "Theo chủ đề ứng dụng"

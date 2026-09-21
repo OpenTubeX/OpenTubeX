@@ -3,7 +3,7 @@ import {
   app, BrowserWindow, dialog, Menu, ipcMain,
   powerSaveBlocker, screen, session,
   nativeTheme, net, protocol, clipboard,
-  shell, Tray, Notification, ShareMenu
+  shell, Tray, Notification, ShareMenu, nativeImage
 } from 'electron'
 import './applicationDataBootstrap'
 import { isPortableBuild } from './applicationDataPaths'
@@ -1793,12 +1793,35 @@ function runApp() {
     backgroundSubscriptions.setBackground(hidden && !isSubscriptionAutoRefreshInProgress()).catch(console.error)
   }
 
+  const trayIconCachePath = path.join(userDataPath, 'tray-icon.png')
+  let selectedTrayImage = nativeImage.createFromPath(trayIconCachePath)
+  let trayIconWrite = Promise.resolve()
+  ipcMain.handle(IpcChannels.SET_TRAY_ICON, async (event, dataUrl) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url) || !TabManager.getFromWebContents(event.sender)) return
+    if (dataUrl !== null && (typeof dataUrl !== 'string' || dataUrl.length > 65536 || !dataUrl.startsWith('data:image/png;base64,'))) return
+    const image = dataUrl === null ? nativeImage.createEmpty() : nativeImage.createFromDataURL(dataUrl)
+    if (dataUrl !== null && (image.isEmpty() || image.getSize().width !== 64 || image.getSize().height !== 64)) return
+    selectedTrayImage = image
+    if (tray) tray.setImage(getTrayImage())
+    // Serialize writes so rapid palette changes also preserve the latest icon on restart.
+    trayIconWrite = trayIconWrite.catch(() => {}).then(() => dataUrl === null
+      ? asyncFs.rm(trayIconCachePath, { force: true })
+      : asyncFs.writeFile(trayIconCachePath, image.toPNG()))
+    await trayIconWrite
+  })
+
+  function getTrayImage() {
+    if (!selectedTrayImage.isEmpty()) {
+      return process.platform === 'darwin' ? selectedTrayImage.resize({ height: 18 }) : selectedTrayImage
+    }
+    return process.env.NODE_ENV === 'development'
+      ? path.join(__dirname, '..', '..', '_icons', 'iconColor.png')
+      : path.join(__dirname, '..', '_icons', 'iconColor.png')
+  }
+
   function ensureBackgroundTray() {
     if (!tray) {
-      const icon = process.env.NODE_ENV === 'development'
-        ? path.join(__dirname, '..', '..', '_icons', 'iconColor.png')
-        : path.join(__dirname, '..', '_icons', 'iconColor.png')
-      tray = new Tray(icon)
+      tray = new Tray(getTrayImage())
       trayMenuSignature = null
       tray.setToolTip('OpenTubeX')
       tray.on('click', toggleTrayWindow)
@@ -5627,6 +5650,7 @@ function runApp() {
     }
 
     await Promise.allSettled([
+      trayIconWrite,
       baseHandlers.compactAllDatastores(),
       shutdownYtDlpDownloads(),
       session.defaultSession.clearCache(),

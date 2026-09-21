@@ -1863,3 +1863,7 @@ App Icon:
 Tray:
   Hide All Windows: "Alle vensters verbergen"
   Show All Windows: "Alle vensters tonen"
+
+Tray Icon:
+  Title: "Systeemvakpictogram"
+  Follow App Theme: "Appthema volgen"

@@ -1821,3 +1821,7 @@ Tray:
 Close Confirmation:
   Background Sync Warning: Выход из приложения остановит фоновое обновление подписок.
   Hide Window: Скрыть окно
+
+Tray Icon:
+  Title: "Значок в трее"
+  Follow App Theme: "Использовать тему приложения"

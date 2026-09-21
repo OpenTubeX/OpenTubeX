@@ -1845,3 +1845,7 @@ App Icon:
 Tray:
   Hide All Windows: "Приховати всі вікна"
   Show All Windows: "Показати всі вікна"
+
+Tray Icon:
+  Title: "Значок у системному треї"
+  Follow App Theme: "Використовувати тему застосунку"
