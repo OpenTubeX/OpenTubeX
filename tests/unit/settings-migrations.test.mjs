@@ -1,10 +1,13 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { readFile } from 'node:fs/promises'
+import vm from 'node:vm'
 
 import { DEFAULT_NAVIGATION_ITEMS } from '../../src/navigationItems.js'
 import {
   migrateLegacySettings,
   migrateStoredAiVideoSummarySetting,
+  migrateSyncServerUrl,
 } from '../../src/renderer/helpers/settings-migrations.js'
 
 test('migrates an enabled legacy subscription progress notification preference', () => {
@@ -159,4 +162,77 @@ test('keeps Hide Playlists because it also controls playlist actions', () => {
     hidePlaylists: true,
     navigationItems: DEFAULT_NAVIGATION_ITEMS.filter(id => id !== 'userplaylists'),
   })
+})
+
+test('migrates the public sync server while preserving account and encryption settings', () => {
+  for (const syncServerUrl of ['https://sync.d3sox.me', 'https://sync.d3sox.me/', 'https://SYNC.D3SOX.ME:443/']) {
+    const settings = {
+      syncServerUrl,
+      syncServerToken: 'existing-token',
+      syncServerUsername: 'existing-user',
+      syncServerPrivacyKey: 'existing-key',
+      syncServerDeviceId: 'existing-device',
+      syncServerEnabled: false,
+    }
+    const migrated = migrateLegacySettings(settings)
+    assert.deepEqual(migrated, { ...settings, syncServerUrl: 'https://sync.opentubex.org' })
+    assert.equal(settings.syncServerUrl, syncServerUrl)
+    assert.deepEqual(migrateLegacySettings(migrated), migrated)
+  }
+})
+
+test('preserves custom sync servers and does not add an absent server setting', () => {
+  for (const syncServerUrl of [
+    'https://sync.opentubex.org', 'https://sync.libretube.dev',
+    'https://sync.d3sox.me/custom', 'https://sync.d3sox.me:8443',
+    'https://sync.d3sox.me.example.org', 'https://sync.d3sox.me?custom=1',
+    'https://user:password@sync.d3sox.me', '', null,
+  ]) {
+    assert.deepEqual(migrateLegacySettings({ syncServerUrl }), { syncServerUrl })
+  }
+  assert.deepEqual(migrateLegacySettings({}), {})
+})
+
+test('startup persists the new sync URL and retries after a failed write without clearing the session', async () => {
+  const source = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
+  const start = source.indexOf('      for (const { _id, value } of userSettings)')
+  const end = source.indexOf('      const hasNavigationItems', start)
+  assert.ok(start >= 0 && end > start)
+  const stored = {
+    syncServerUrl: 'https://sync.d3sox.me',
+    syncServerToken: 'existing-token',
+    syncServerPrivacyKey: 'existing-key',
+    syncServerDeviceId: 'existing-device',
+  }
+  let failWrite = true
+  let writes = 0
+  const run = async () => {
+    const loaded = {}
+    await vm.runInNewContext(`(async () => { ${source.slice(start, end)} })()`, {
+      userSettings: Object.entries(stored).map(([_id, value]) => ({ _id, value })),
+      mutationIds: Object.keys(stored),
+      defaultMutationId: key => key,
+      settingsWithSideEffects: [],
+      migrateSyncServerUrl,
+      DBSettingHandlers: {
+        async upsert(key, value) {
+          writes++
+          if (failWrite) throw new Error('write failed')
+          stored[key] = value
+        },
+      },
+      commit: (key, value) => { loaded[key] = value },
+      console: { error() {} },
+    })
+    assert.deepEqual(loaded, stored)
+    return loaded
+  }
+  assert.equal((await run()).syncServerUrl, 'https://sync.d3sox.me')
+  failWrite = false
+  assert.equal((await run()).syncServerUrl, 'https://sync.opentubex.org')
+  assert.equal((await run()).syncServerUrl, 'https://sync.opentubex.org')
+  assert.equal(writes, 2)
+  assert.equal(stored.syncServerToken, 'existing-token')
+  assert.equal(stored.syncServerPrivacyKey, 'existing-key')
+  assert.equal(stored.syncServerDeviceId, 'existing-device')
 })

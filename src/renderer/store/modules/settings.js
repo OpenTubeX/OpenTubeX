@@ -53,7 +53,7 @@ import {
   navigationItemsFromLegacySettings,
   normalizeNavigationItems,
 } from '../../../navigationItems.js'
-import { migrateStoredAiVideoSummarySetting } from '../../helpers/settings-migrations.js'
+import { migrateStoredAiVideoSummarySetting, migrateSyncServerUrl } from '../../helpers/settings-migrations.js'
 
 const CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING = 'channelSettingsSyncMigration'
 const TUTORIAL_STATE_SETTING_IDS = new Set([
@@ -485,7 +485,7 @@ const state = {
   extraThumbnailAction: '',
   blurThumbnails: false,
   syncServerEnabled: false,
-  syncServerUrl: 'https://sync.d3sox.me',
+  syncServerUrl: 'https://sync.opentubex.org',
   syncServerUsername: '',
   syncServerToken: '',
   syncServerDeviceId: '',
@@ -1189,6 +1189,17 @@ const customActions = {
 
       for (const { _id, value } of userSettings) {
         let resolvedValue = value
+        if (_id === 'syncServerUrl') {
+          const migratedUrl = migrateSyncServerUrl(value)
+          if (migratedUrl !== value) {
+            try {
+              await DBSettingHandlers.upsert(_id, migratedUrl)
+              resolvedValue = migratedUrl
+            } catch (error) {
+              console.error('Failed to migrate sync server URL', error)
+            }
+          }
+        }
         if (settingsWithSideEffects.includes(_id)) {
           if (_id === 'iconPack') {
             resolvedValue = await dispatch(defaultSideEffectsTriggerId(_id), value)

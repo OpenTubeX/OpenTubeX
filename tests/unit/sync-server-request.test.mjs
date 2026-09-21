@@ -189,3 +189,30 @@ test('browser sync requests do not add the Electron-only version marker', () => 
   assert.equal(headers.get('Accept'), 'application/json')
   assert.equal(headers.has('OpenTubeX-Client-Version'), false)
 })
+
+test('reads the operator privacy policy and capabilities from one health request', async () => {
+  const requests = []
+  const client = await loadClient({ IS_CAPACITOR: true }, '0.35.0', requests, () => ({
+    status: 200,
+    data: JSON.stringify({ capabilities: { encrypted_sync: 1 }, privacy_policy_url: 'https://operator.example/privacy' }),
+    headers: {},
+  }))
+  const [capabilities, policy] = await Promise.all([client.getCapabilities(), client.getPrivacyPolicyUrl()])
+  assert.equal(capabilities.encrypted_sync, 1)
+  assert.equal(policy, 'https://operator.example/privacy')
+  assert.equal(requests.length, 1)
+})
+
+test('ignores absent or unsafe operator privacy policy URLs', async () => {
+  for (const value of [undefined, null, 42, {}, '', '/privacy', 'javascript:alert(1)', 'data:text/html,test', 'file:///tmp/policy', 'https://user:secret@example.org/privacy']) {
+    const client = await loadClient({ IS_CAPACITOR: true }, '0.35.0', [], () => ({
+      status: 200, data: JSON.stringify({ privacy_policy_url: value }), headers: {},
+    }))
+    assert.equal(await client.getPrivacyPolicyUrl(), null, String(value))
+  }
+  const client = await loadClient({ IS_CAPACITOR: true }, '0.35.0', [], () => ({
+    status: 200, data: 'OK', headers: {},
+  }))
+  assert.equal(await client.getPrivacyPolicyUrl(), null)
+  assert.equal(Object.keys(await client.getCapabilities()).length, 0)
+})

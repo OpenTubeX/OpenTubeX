@@ -98,7 +98,7 @@ export class SyncServerClient {
     this.serverUrl = normalizeSyncServerUrl(serverUrl)
     this.token = token
     this.apiPrefix = null
-    this.capabilitiesPromise = null
+    this.serverInfoPromise = null
     this.requestControllers = new Set()
     this.cancelled = false
   }
@@ -160,15 +160,32 @@ export class SyncServerClient {
     return this.request('/health')
   }
 
-  getCapabilities() {
-    this.capabilitiesPromise ??= this.health().then(response => {
+  getServerInfo() {
+    this.serverInfoPromise ??= this.health().then(response => {
       // Existing LibreTube servers return the plain text "OK". A structured
       // health response advertises the optional OpenTubeX extensions.
       if (!response || typeof response !== 'object' || Array.isArray(response)) return {}
-      const capabilities = response.capabilities
-      return capabilities && typeof capabilities === 'object' ? capabilities : {}
+      return response
     })
-    return this.capabilitiesPromise
+    return this.serverInfoPromise
+  }
+
+  async getCapabilities() {
+    const { capabilities } = await this.getServerInfo()
+    return capabilities && typeof capabilities === 'object' ? capabilities : {}
+  }
+
+  async getPrivacyPolicyUrl() {
+    const { privacy_policy_url: value } = await this.getServerInfo()
+    if (typeof value !== 'string') return null
+    try {
+      const url = new URL(value)
+      return ['https:', 'http:'].includes(url.protocol) && !url.username && !url.password
+        ? url.href
+        : null
+    } catch {
+      return null
+    }
   }
 
   async supportsEncryptedSync() {
