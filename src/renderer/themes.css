@@ -80,6 +80,40 @@ body {
   box-shadow: inset 0 0 0 1px var(--focus-ring-contrast-color);
 }
 
+input[type='number']::-webkit-inner-spin-button {
+  /* Keep Chromium's stepping behavior and hit area; replace only its paint. */
+  /* stylelint-disable-next-line property-no-vendor-prefix */
+  -webkit-appearance: none;
+  appearance: none;
+  inline-size: 24px;
+  block-size: 28px;
+  align-self: center;
+  margin-inline: 8px -8px;
+  background-color: var(--secondary-text-color);
+  mask-image:
+    conic-gradient(from 135deg at 50% 0, #000 90deg, transparent 0),
+    conic-gradient(from -45deg at 50% 100%, #000 90deg, transparent 0);
+  mask-position: center 5px, center calc(100% - 5px);
+  mask-size: 10px 6px;
+  mask-repeat: no-repeat;
+  opacity: 1;
+  cursor: pointer;
+}
+
+input[type='number']:disabled::-webkit-inner-spin-button,
+input[type='number']:read-only::-webkit-inner-spin-button {
+  opacity: 0.4;
+  cursor: default;
+}
+
+input[type='number']:enabled:read-write::-webkit-inner-spin-button:hover {
+  background-color: var(--primary-color);
+}
+
+input[type='number']:enabled:read-write::-webkit-inner-spin-button:active {
+  background-color: var(--primary-color-active);
+}
+
 input[type='search']::-webkit-search-cancel-button {
   /* Chromium only exposes this native control through its prefixed appearance. */
   /* stylelint-disable-next-line property-no-vendor-prefix */
