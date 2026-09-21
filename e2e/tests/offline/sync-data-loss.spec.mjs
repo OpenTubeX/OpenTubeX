@@ -53,7 +53,7 @@ for (const lastUsedVersion of [null, '0.34.0']) {
       await waitForAppReady(page)
       await expect(notification).toHaveCount(0)
       const sync = await goToSettingsSection(page, 'sync')
-      await expect(sync.getByRole('checkbox', { name: 'Sync automatically after changes and every five minutes', exact: true })).not.toBeChecked()
+      await expect(sync.getByRole('checkbox', { name: 'Sync automatically', exact: true })).not.toBeChecked()
     })
 
     if (lastUsedVersion) {
@@ -81,12 +81,12 @@ for (const lastUsedVersion of [null, '0.34.0']) {
         await notification.getByRole('button', { name: 'Enable automatic sync', exact: true }).click()
         await expect(notification).toHaveCount(0)
         const sync = await goToSettingsSection(page, 'sync')
-        await expect(sync.getByRole('checkbox', { name: 'Sync automatically after changes and every five minutes', exact: true })).toBeChecked()
+        await expect(sync.getByRole('checkbox', { name: 'Sync automatically', exact: true })).toBeChecked()
         await page.reload()
         await waitForAppReady(page)
         await expect(notification).toHaveCount(0)
         const reloadedSync = await goToSettingsSection(page, 'sync')
-        await expect(reloadedSync.getByRole('checkbox', { name: 'Sync automatically after changes and every five minutes', exact: true })).toBeChecked()
+        await expect(reloadedSync.getByRole('checkbox', { name: 'Sync automatically', exact: true })).toBeChecked()
       })
     }
   })
@@ -128,7 +128,7 @@ for (const uiScale of [95, 125]) {
           : [])
       }))
       const sync = await goToSettingsSection(page, 'sync')
-      const autoSync = sync.getByRole('checkbox', { name: 'Sync automatically after changes and every five minutes', exact: true })
+      const autoSync = sync.getByRole('checkbox', { name: 'Sync automatically', exact: true })
       // Register lifecycle listeners after installing the mock server route.
       const enabled = sync.getByRole('checkbox', { name: 'Enable Sync', exact: true })
       await enabled.press('Space')
@@ -171,7 +171,7 @@ for (const uiScale of [95, 125]) {
       await expect(page.locator('.toast', { hasText: 'Sync stopped to prevent data loss.' })).toHaveCount(0)
       await warning.getByRole('button', { name: 'Cancel', exact: true }).click()
       await expect(warning).toBeHidden()
-      await expect(sync.getByRole('checkbox', { name: 'Sync automatically after changes and every five minutes', exact: true })).not.toBeChecked()
+      await expect(sync.getByRole('checkbox', { name: 'Sync automatically', exact: true })).not.toBeChecked()
 
       await sync.getByRole('button', { name: 'Sync now', exact: true }).click()
       await expect(warning).toBeVisible()
@@ -280,7 +280,7 @@ test.describe('automatic sync recovery', () => {
     await notification.getByRole('button', { name: 'Sync', exact: true }).click()
     await expect(activeWindow.locator('.settingsWindow')).toBeVisible()
     await expect(activeWindow.locator('[data-section="sync"]').getByRole('button', { name: 'Sync now', exact: true })).toBeVisible()
-    await expect(activeWindow.getByRole('checkbox', { name: 'Sync automatically after changes and every five minutes', exact: true })).not.toBeChecked()
+    await expect(activeWindow.getByRole('checkbox', { name: 'Sync automatically', exact: true })).not.toBeChecked()
     await expect(activeWindow.getByRole('dialog', { name: 'Confirm destructive sync?' })).toBeHidden()
   })
 
@@ -300,7 +300,7 @@ test.describe('automatic sync recovery', () => {
     const initialized = page.waitForResponse('https://sync.example/health')
     await enabled.press('Space')
     await initialized
-    await sync.getByRole('checkbox', { name: 'Sync automatically after changes and every five minutes' }).press('Space')
+    await sync.getByRole('checkbox', { name: 'Sync automatically' }).press('Space')
     await page.keyboard.press('Escape')
     await expect(page.locator('.settingsWindow')).toBeHidden()
     await reconnect(page)
@@ -314,7 +314,7 @@ test.describe('automatic sync recovery', () => {
     const restarted = app.page
     await mockServer(restarted)
     const restartedSync = await goToSettingsSection(restarted, 'sync')
-    const autoSync = restartedSync.getByRole('checkbox', { name: 'Sync automatically after changes and every five minutes' })
+    const autoSync = restartedSync.getByRole('checkbox', { name: 'Sync automatically' })
     await expect(autoSync).not.toBeChecked()
     await restartedSync.getByRole('button', { name: 'Sync now', exact: true }).click()
     const warning = restarted.getByRole('dialog', { name: 'Confirm destructive sync?' })

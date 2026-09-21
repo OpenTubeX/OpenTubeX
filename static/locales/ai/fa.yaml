@@ -931,6 +931,7 @@ Settings:
     Import playlists formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)'
   Sync Settings:
+    Sync Automatically: "همگام‌سازی خودکار"
     Activity: "فعالیت حساب"
     No Activity: "فعالیت اخیری وجود ندارد"
     Setting Changed: "{device} مقدار {setting} را به {value} تغییر داد"
@@ -1037,7 +1038,6 @@ Settings:
     Password Required: گذرواژه لازم است
     Account Deleted: حساب همگام‌سازی حذف شد
     Connected as: متصل با نام {username}
-    Automatic Sync: همگام‌سازی خودکار پس از تغییرات و هر پنج دقیقه
     Profiles: نمایه‌ها
     Open Tabs: زبانه‌های باز و نشست
     Disable Setting Sync: توقف همگام‌سازی این تنظیم

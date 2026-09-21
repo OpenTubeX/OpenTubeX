@@ -889,6 +889,7 @@ Settings:
     Import playlists formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Sync Automatically: "Cysoni yn awtomatig"
     Activity: "Gweithgarwch cyfrif"
     No Activity: "Dim gweithgarwch diweddar"
     Setting Changed: "Newidiodd {device} {setting} i {value}"
@@ -995,7 +996,6 @@ Settings:
     Password Required: Mae angen cyfrinair
     Account Deleted: Mae'r cyfrif cysoni wedi'i ddileu
     Connected as: Wedi cysylltu fel {username}
-    Automatic Sync: Cysoni'n awtomatig ar ôl newidiadau a phob pum munud
     Profiles: Proffiliau
     Open Tabs: Tabiau agored a sesiwn
     Disable Setting Sync: Rhoi'r gorau i gysoni'r gosodiad hwn

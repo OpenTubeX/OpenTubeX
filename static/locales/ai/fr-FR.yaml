@@ -885,6 +885,7 @@ Settings:
     Import playlists formats: 'Formats pris en charge : OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Formats pris en charge : OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Sync Automatically: "Synchroniser automatiquement"
     Activity: "Activité du compte"
     No Activity: "Aucune activité récente"
     Setting Changed: "{device} a changé {setting} en {value}"
@@ -991,7 +992,6 @@ Settings:
     Password Required: Le mot de passe est requis
     Account Deleted: Compte de synchronisation supprimé
     Connected as: Connecté en tant que {username}
-    Automatic Sync: Synchroniser automatiquement après les modifications et toutes les cinq minutes
     Profiles: Profils
     Open Tabs: Onglets ouverts et session
     Disable Setting Sync: Arrêter de synchroniser ce paramètre

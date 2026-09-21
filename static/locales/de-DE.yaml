@@ -1470,6 +1470,7 @@ Settings:
     Subtitles Enabled: Untertitel aktiviert
     Volume: Lautstärke
   Sync Settings:
+    Sync Automatically: "Automatisch synchronisieren"
     Activity: "Kontoaktivität"
     No Activity: "Keine kürzlichen Aktivitäten"
     Setting Changed: "{device} hat {setting} auf {value} geändert"
@@ -1585,7 +1586,6 @@ Settings:
     New Passwords Do Not Match: Die neuen Passwörter stimmen nicht überein.
     Password Changed: Passwort geändert. Andere Geräte wurden abgemeldet.
     Connected as: Verbunden als {username}
-    Automatic Sync: Nach Änderungen und alle fünf Minuten automatisch synchronisieren
     Profiles: Profile
     Open Tabs: Offene Tabs und Sitzung
     Use Shared Tabs: Einen gemeinsamen Tab-Satz auf allen Geräten verwenden

@@ -1,4 +1,4 @@
-import { SyncCollectionCache, createSyncActivity, validateDeviceRequest, watchSyncChanges } from '../../helpers/sync-server-live'
+import { SyncLiveConnectionState, SyncCollectionCache, createSyncActivity, validateDeviceRequest, watchSyncChanges } from '../../helpers/sync-server-live'
 import i18n from '../../i18n/index'
 import { showToastOnAllTabs } from '../../helpers/utils'
 import { isAppHidden } from '../../helpers/appVisibility.js'
@@ -48,6 +48,10 @@ import { isSettingSyncEnabled } from './settings'
 import { syncSubscriptionSeenVideos } from '../../helpers/subscription-seen-videos'
 
 const EVENT_SYNC_DEBOUNCE_MS = 1500
+const EVENT_SYNC_DELAYS = {
+  sessions: { delay: 10000, maxWait: 30000 },
+  history: { delay: 30000, maxWait: 60000 },
+}
 const ENCRYPTED_SYNC_RETRIES = 3
 const LEGACY_ENCRYPTED_COLLECTIONS = [
   'subscriptions',
@@ -58,16 +62,16 @@ const LEGACY_ENCRYPTED_COLLECTIONS = [
 ]
 
 const collectionCache = new SyncCollectionCache()
+const liveConnection = new SyncLiveConnectionState(typeof navigator !== 'undefined' ? navigator.locks : null)
 let liveClient = null
 let liveLockController = null
 let liveGeneration = 0
 let eventsSince = ''
-let pendingLocalSync = false
 let activeSyncPromise = null
 let activeSyncRemoteOnly = false
 const activeSyncClients = new Set()
 let autoSyncTimer = null
-let eventSyncTimer = null
+const eventSyncTimers = new Map()
 let lifecycleSyncStarted = false
 let deviceRefreshId = 0
 
@@ -586,6 +590,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
 const actions = {
   stopSyncServerLive() {
     liveGeneration++
+    liveConnection.setConnected(false)
     liveClient?.cancel()
     liveLockController?.abort()
     liveLockController = null
@@ -622,6 +627,9 @@ const actions = {
         }
         return true
       }, {
+        onConnectionChange: connected => {
+          if (generation === liveGeneration) liveConnection.setConnected(connected)
+        },
         prepare: async () => {
           const supported = (await client.getCapabilities()).live_sync === 1
           if (generation !== liveGeneration) return false
@@ -1100,10 +1108,6 @@ const actions = {
     if (!activeSyncPromise) {
       activeSyncRemoteOnly = options.remoteOnly === true
       let syncStarted = false
-      if (!options.remoteOnly) {
-        clearTimeout(eventSyncTimer)
-        eventSyncTimer = null
-      }
       activeSyncPromise = withSyncLock(() => {
         if (!context.rootState.settings.syncServerEnabled || isSyncServerOffline()) return null
         if (options.skipIfRecent &&
@@ -1111,14 +1115,15 @@ const actions = {
           return null
         }
         syncStarted = !options.remoteOnly
+        if (syncStarted) {
+          // A full sync includes every collection, consuming all pending edits.
+          for (const pending of eventSyncTimers.values()) clearTimeout(pending.timer)
+          eventSyncTimers.clear()
+        }
         return runSync(context, options)
       }).finally(() => {
         activeSyncPromise = null
         activeSyncRemoteOnly = false
-        if (pendingLocalSync) {
-          pendingLocalSync = false
-          context.dispatch('scheduleSyncServer', 'data')
-        }
         context.dispatch(syncStarted
           ? 'restartSyncServerAutoSync'
           : 'startSyncServerAutoSync')
@@ -1216,11 +1221,22 @@ const actions = {
       return
     }
 
-    autoSyncTimer = setTimeout(() => {
+    autoSyncTimer = setTimeout(async () => {
       autoSyncTimer = null
-      dispatch('syncWithSyncServer', { skipIfRecent: true, automatic: true }).catch(error => {
+      try {
+        const connected = await liveConnection.isConnected()
+        if (!rootState.settings.syncServerEnabled || !rootState.settings.syncServerAutoSync ||
+            !rootState.settings.syncServerToken || isSyncServerOffline()) return
+        // Live notifications replace periodic downloads, but a failed local
+        // upload still needs a retry even if no remote change arrives.
+        if (!connected || rootState.syncServer.syncServerStatus === 'error') {
+          await dispatch('syncWithSyncServer', { skipIfRecent: true, automatic: true })
+        }
+      } catch (error) {
         console.error('Sync server automatic sync failed', error)
-      })
+      } finally {
+        dispatch('startSyncServerAutoSync')
+      }
     }, AUTO_SYNC_INTERVAL_MS)
   },
 
@@ -1278,9 +1294,9 @@ const actions = {
   stopSyncServerAutoSync({ dispatch }) {
     dispatch('stopSyncServerLive')
     clearTimeout(autoSyncTimer)
-    clearTimeout(eventSyncTimer)
+    for (const pending of eventSyncTimers.values()) clearTimeout(pending.timer)
+    eventSyncTimers.clear()
     autoSyncTimer = null
-    eventSyncTimer = null
   },
 
   scheduleSyncServer({ dispatch, rootState }, reason = 'data') {
@@ -1291,20 +1307,35 @@ const actions = {
         !isSyncReasonEnabled(rootState.settings, reason)) {
       return
     }
-    if (activeSyncPromise || rootState.syncServer.syncServerStatus === 'syncing') {
-      if (activeSyncPromise && reason !== 'automatic') pendingLocalSync = true
-      return
-    }
-    clearTimeout(eventSyncTimer)
-    eventSyncTimer = setTimeout(() => {
-      eventSyncTimer = null
+    if (!activeSyncPromise && rootState.syncServer.syncServerStatus === 'syncing') return
+
+    const previous = eventSyncTimers.get(reason)
+    const firstChangeAt = previous?.firstChangeAt ?? Date.now()
+    const { delay, maxWait } = EVENT_SYNC_DELAYS[reason] ?? { delay: EVENT_SYNC_DEBOUNCE_MS, maxWait: Infinity }
+    clearTimeout(previous?.timer)
+    const pending = { firstChangeAt, timer: null }
+    eventSyncTimers.set(reason, pending)
+    pending.timer = setTimeout(async () => {
+      // Edits made during a sync retain their own deadline. Once due, wait for
+      // that sync to finish rather than starting a second debounce period.
+      for (let syncing = activeSyncPromise; syncing; syncing = activeSyncPromise) {
+        await syncing.catch(() => {})
+      }
+      if (eventSyncTimers.get(reason) !== pending) return
+      eventSyncTimers.delete(reason)
+      if (isSyncServerOffline() ||
+          !rootState.settings.syncServerEnabled ||
+          !rootState.settings.syncServerAutoSync ||
+          !rootState.settings.syncServerToken ||
+          !isSyncReasonEnabled(rootState.settings, reason) ||
+          rootState.syncServer.syncServerStatus === 'syncing') return
       dispatch('syncWithSyncServer', {
         skipIfRecent: reason === 'automatic',
         automatic: true,
       }).catch(error => {
         console.error('Sync server event sync failed', error)
       })
-    }, EVENT_SYNC_DEBOUNCE_MS)
+    }, Math.max(0, Math.min(delay, firstChangeAt + maxWait - Date.now())))
   },
 
   async setSyncServerAutoSync({ dispatch }, enabled) {

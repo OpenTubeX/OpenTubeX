@@ -885,6 +885,7 @@ Settings:
     Import playlists formats: '対応形式: OpenTubeX / FreeTube（.db）'
     Import search history formats: '対応形式: OpenTubeX / FreeTube（.db）、YouTube Takeout（.json）'
   Sync Settings:
+    Sync Automatically: "自動的に同期"
     Activity: "アカウントのアクティビティ"
     No Activity: "最近のアクティビティはありません"
     Setting Changed: "{device} が {setting} を {value} に変更しました"
@@ -991,7 +992,6 @@ Settings:
     Password Required: パスワードが必要です
     Account Deleted: 同期アカウントを削除しました
     Connected as: '{username}として接続中'
-    Automatic Sync: 変更後および5分ごとに自動同期
     Profiles: プロフィール
     Open Tabs: 開いているタブとセッション
     Disable Setting Sync: この設定の同期を停止

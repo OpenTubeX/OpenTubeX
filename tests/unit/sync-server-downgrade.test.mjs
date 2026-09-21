@@ -978,7 +978,8 @@ for (const [scenario, desktopKeys, phoneKeys] of [
   })
 }
 
-test('a user edit during remote collection application schedules a follow-up upload', async () => {
+test('a user edit during remote collection application schedules a follow-up upload', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
   const f = liveFixture({ syncServerSyncSettings: true, autoplayVideos: true })
   f.context.rootState.syncServer = f.context.state
   await f.actions.syncWithSyncServer(f.context)
@@ -1010,8 +1011,9 @@ test('a user edit during remote collection application schedules a follow-up upl
     releaseRemote()
     await syncing
   }
-  assert.ok(f.dispatched.some(([action, reason]) => action === 'scheduleSyncServer' && reason === 'data'))
   f.requests.length = 0
+  t.mock.timers.tick(1500)
+  assert.ok(f.dispatched.some(([action, options]) => action === 'syncWithSyncServer' && options.automatic && !options.remoteOnly))
   await f.actions.syncWithSyncServer(f.context, { automatic: true })
   assert.ok(f.requests.some(request => request.method === 'PUT' && request.url.endsWith('/encrypted_sync/settings')))
   const saved = await privacy.decryptSyncDocument(f.collections.get('settings').payload, f.settings.syncServerPrivacyKey)

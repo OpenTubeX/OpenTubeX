@@ -879,6 +879,7 @@ Settings:
     Import playlists formats: 'Поддерживаемые форматы: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Поддерживаемые форматы: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Sync Automatically: "Синхронизировать автоматически"
     Activity: "Действия аккаунта"
     No Activity: "Нет недавних действий"
     Setting Changed: "{device} изменило {setting} на {value}"
@@ -985,7 +986,6 @@ Settings:
     Password Required: Введите пароль
     Account Deleted: Учётная запись синхронизации удалена
     Connected as: Вы вошли как {username}
-    Automatic Sync: Автоматически синхронизировать после изменений и каждые пять минут
     Profiles: Профили
     Open Tabs: Открытые вкладки и сеанс
     Disable Setting Sync: Не синхронизировать эту настройку

@@ -885,6 +885,7 @@ Settings:
     Import playlists formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Sync Automatically: "Sünkrooni automaatselt"
     Activity: "Konto tegevus"
     No Activity: "Hiljutisi tegevusi pole"
     Setting Changed: "{device} muutis sätte {setting} väärtuseks {value}"
@@ -991,7 +992,6 @@ Settings:
     Password Required: Parool on nõutav
     Account Deleted: Sünkroonimiskonto on kustutatud
     Connected as: Ühendatud kasutajana {username}
-    Automatic Sync: Sünkrooni automaatselt pärast muudatusi ja iga viie minuti järel
     Profiles: Profiilid
     Open Tabs: Avatud vahekaardid ja seanss
     Disable Setting Sync: Lõpeta selle seade sünkroonimine

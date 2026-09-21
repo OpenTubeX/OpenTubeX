@@ -155,7 +155,7 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
       return !connected
     }
     if ([
-      'Automatic Sync',
+      'Sync Automatically',
       'Profiles',
       'Settings',
       'Sync Now',

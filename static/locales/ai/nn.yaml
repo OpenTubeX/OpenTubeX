@@ -1047,6 +1047,7 @@ Settings:
     Import playlists formats: 'Støtta format: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Støtta format: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Sync Automatically: "Synkroniser automatisk"
     Activity: "Kontoaktivitet"
     No Activity: "Ingen nyleg aktivitet"
     Setting Changed: "{device} endra {setting} til {value}"
@@ -1153,7 +1154,6 @@ Settings:
     Password Required: Passordet er påkravd
     Account Deleted: Synkroniseringskontoen er sletta
     Connected as: Tilkopla som {username}
-    Automatic Sync: Synkroniser automatisk etter endringar og kvart femte minutt
     Profiles: Profilar
     Open Tabs: Opne faner og den gjeldande økta
     Disable Setting Sync: Stopp synkroniseringa av denne innstillinga

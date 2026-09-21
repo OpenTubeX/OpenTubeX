@@ -909,6 +909,7 @@ Settings:
     Import playlists formats: 'Ondersteunde indelingen: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Ondersteunde indelingen: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Sync Automatically: "Automatisch synchroniseren"
     Activity: "Accountactiviteit"
     No Activity: "Geen recente activiteit"
     Setting Changed: "{device} heeft {setting} gewijzigd naar {value}"
@@ -1015,7 +1016,6 @@ Settings:
     Password Required: Wachtwoord is vereist
     Account Deleted: Synchronisatieaccount verwijderd
     Connected as: Verbonden als {username}
-    Automatic Sync: Automatisch synchroniseren na wijzigingen en elke vijf minuten
     Profiles: Profielen
     Open Tabs: Geopende tabbladen en sessie
     Disable Setting Sync: Synchronisatie van deze instelling stoppen

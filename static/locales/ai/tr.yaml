@@ -885,6 +885,7 @@ Settings:
     Import playlists formats: 'Desteklenen biçimler: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Desteklenen biçimler: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Sync Automatically: "Otomatik eşitle"
     Activity: "Hesap etkinliği"
     No Activity: "Son etkinlik yok"
     Setting Changed: "{device}, {setting} ayarını {value} olarak değiştirdi"
@@ -991,7 +992,6 @@ Settings:
     Password Required: Parola gereklidir
     Account Deleted: Eşitleme hesabı silindi
     Connected as: '{username} olarak bağlandı'
-    Automatic Sync: Değişikliklerden sonra ve beş dakikada bir otomatik eşitle
     Profiles: Profiller
     Open Tabs: Açık sekmeler ve oturum
     Disable Setting Sync: Bu ayarı eşitlemeyi durdur

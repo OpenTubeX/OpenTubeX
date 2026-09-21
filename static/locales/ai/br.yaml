@@ -885,6 +885,7 @@ Settings:
     Import playlists formats: "Mentrezhioù skoret: OpenTubeX / FreeTube (.db)"
     Import search history formats: "Mentrezhioù skoret: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)"
   Sync Settings:
+    Sync Automatically: "Goubredañ ent emgefreek"
     Activity: "Obererezh ar gont"
     No Activity: "Obererezh nevez ebet"
     Setting Changed: "Kemmet eo bet {setting} da {value} gant {device}"
@@ -991,7 +992,6 @@ Settings:
     Password Required: "Rekis eo ar ger-tremen"
     Account Deleted: "Dilamet eo bet ar gont goubredañ"
     Connected as: "Kennasket evel {username}"
-    Automatic Sync: "Goubredañ ent emgefreek goude ar c'hemmoù ha bep pemp munutenn"
     Profiles: "Profiloù"
     Open Tabs: "Ivinelloù digor hag estez"
     Disable Setting Sync: "Paouez da c'houbredañ an arventenn-mañ"

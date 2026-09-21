@@ -904,6 +904,7 @@ Settings:
     Import playlists formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)'
   Sync Settings:
+    Sync Automatically: "المزامنة تلقائيًا"
     Activity: "نشاط الحساب"
     No Activity: "لا يوجد نشاط حديث"
     Setting Changed: "غيّر {device} الإعداد {setting} إلى {value}"
@@ -1010,7 +1011,6 @@ Settings:
     Password Required: كلمة المرور مطلوبة
     Account Deleted: تم حذف حساب المزامنة
     Connected as: متصل كـ {username}
-    Automatic Sync: المزامنة تلقائيًا بعد التغييرات وكل خمس دقائق
     Profiles: الملفات الشخصية
     Open Tabs: فتح علامات التبويب والجلسة
     Disable Setting Sync: توقف عن مزامنة هذا الإعداد

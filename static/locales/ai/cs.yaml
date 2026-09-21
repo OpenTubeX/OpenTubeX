@@ -885,6 +885,7 @@ Settings:
     Import playlists formats: 'Podporované formáty: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Sync Automatically: "Synchronizovat automaticky"
     Activity: "Aktivita účtu"
     No Activity: "Žádná nedávná aktivita"
     Setting Changed: "Zařízení {device}: změna nastavení {setting} na {value}"
@@ -991,7 +992,6 @@ Settings:
     Password Required: Je vyžadováno heslo
     Account Deleted: Synchronizační účet byl smazán
     Connected as: Připojeno jako {username}
-    Automatic Sync: Synchronizovat automaticky po změnách a každých pět minut
     Profiles: Profily
     Open Tabs: Otevřené karty a relace
     Disable Setting Sync: Přestat synchronizovat toto nastavení
