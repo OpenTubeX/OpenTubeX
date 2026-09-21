@@ -888,6 +888,7 @@ Settings:
     Import playlists formats: 'Dəstəklənən formatlar: OpenTubeX (.db)'
     Import search history formats: 'Dəstəklənən formatlar: OpenTubeX (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Sync Automatically: "Avtomatik sinxronlaşdır"
     Activity: "Hesab fəaliyyəti"
     No Activity: "Son fəaliyyət yoxdur"
     Setting Changed: "{device} {setting} ayarını {value} olaraq dəyişdi"
@@ -994,7 +995,6 @@ Settings:
     New Passwords Do Not Match: Yeni parollar uyğun gəlmir.
     Password Changed: Parol dəyişdirildi. Digər cihazlarda hesabdan çıxış edildi.
     Connected as: "{username} kimi qoşulub"
-    Automatic Sync: Dəyişikliklərdən sonra və hər beş dəqiqədən bir avtomatik sinxronlaşdır
     Profiles: Profillər
     Open Tabs: Açıq vərəqlər və sessiya
     Use Shared Tabs: Cihazlar arasında vahid ortaq vərəq dəstindən istifadə et

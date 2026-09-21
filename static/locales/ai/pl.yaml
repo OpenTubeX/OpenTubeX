@@ -420,6 +420,7 @@ Settings:
     Open Profile Directory: Otwórz katalog profilu
     Invalid JSON row, skipping item: Nieprawidłowy JSON w wierszu {row}. Element zostanie pominięty
   Sync Settings:
+    Sync Automatically: "Synchronizuj automatycznie"
     Activity: "Aktywność konta"
     No Activity: "Brak ostatniej aktywności"
     Setting Changed: "{device} zmieniło {setting} na {value}"

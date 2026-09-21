@@ -1170,6 +1170,7 @@ Settings:
     Import playlists formats: 'Podprte oblike: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Podprte oblike: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Sync Automatically: "Samodejno sinhroniziraj"
     Activity: "Dejavnost računa"
     No Activity: "Ni nedavne dejavnosti"
     Setting Changed: "{device} je spremenil {setting} v {value}"
@@ -1276,7 +1277,6 @@ Settings:
     Password Required: Zahtevano je geslo
     Account Deleted: Sinhronizacijski račun je izbrisan
     Connected as: Povezani ste kot {username}
-    Automatic Sync: Samodejno sinhroniziraj po spremembah in vsakih pet minut
     Profiles: Profili
     Open Tabs: Odprti zavihki in seja
     Disable Setting Sync: Prenehaj sinhronizirati to nastavitev

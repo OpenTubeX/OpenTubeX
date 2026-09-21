@@ -1137,6 +1137,7 @@ Settings:
     Import playlists formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Sync Automatically: "Sinchronizuoti automatiškai"
     Activity: "Paskyros veikla"
     No Activity: "Nėra naujausios veiklos"
     Setting Changed: "{device} pakeitė {setting} į {value}"
@@ -1243,7 +1244,6 @@ Settings:
     Password Required: Būtinas slaptažodis
     Account Deleted: Sinchronizavimo paskyra ištrinta
     Connected as: Prisijungta kaip {username}
-    Automatic Sync: Sinchronizuoti automatiškai po pakeitimų ir kas penkias minutes
     Profiles: Profiliai
     Open Tabs: Atvertos kortelės ir seansas
     Disable Setting Sync: Nebesinchronizuoti šio nustatymo

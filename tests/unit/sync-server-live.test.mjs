@@ -115,3 +115,43 @@ test('live sync retries discovery before polling and stops when unsupported or c
 test('history retention activity uses the setting name instead of its input hint', () => {
   assert.equal(SYNC_SETTING_LABELS.historyRetentionDays, 'Settings.Privacy Settings.Automatic History Retention')
 })
+
+test('live connection health follows successful polls, errors, recovery, and cancellation', async () => {
+  const connected = []
+  let polls = 0
+  const client = {
+    cancelled: false,
+    async waitForSyncChanges() {
+      if (++polls === 2) throw new Error('Disconnected')
+      if (polls === 4) this.cancelled = true
+      return { cursor: 'latest' }
+    },
+  }
+  await watchSyncChanges(client, async () => {}, async () => true, {
+    sleep: async () => {},
+    onConnectionChange: value => connected.push(value),
+  })
+  assert.deepEqual(connected, [true, false, true, false])
+})
+
+test('live connection health is shared across owners and released on disconnect', async () => {
+  const { locks } = await import('node:worker_threads')
+  const { SyncLiveConnectionState } = await import('../../src/renderer/helpers/sync-server-live.js')
+  const owner = new SyncLiveConnectionState(locks)
+  const otherTab = new SyncLiveConnectionState(locks)
+  try {
+    assert.equal(await otherTab.isConnected(), false)
+    owner.setConnected(true)
+    await new Promise(resolve => setImmediate(resolve))
+    assert.equal(await otherTab.isConnected(), true)
+    owner.setConnected(false)
+    await new Promise(resolve => setImmediate(resolve))
+    assert.equal(await otherTab.isConnected(), false)
+    owner.setConnected(true)
+    await new Promise(resolve => setImmediate(resolve))
+    assert.equal(await otherTab.isConnected(), true)
+  } finally {
+    owner.setConnected(false)
+    await new Promise(resolve => setImmediate(resolve))
+  }
+})

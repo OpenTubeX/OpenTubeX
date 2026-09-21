@@ -909,6 +909,7 @@ Settings:
     Import playlists formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Tuetut muodot: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Sync Automatically: "Synkronoi automaattisesti"
     Activity: "Tilin tapahtumat"
     No Activity: "Ei viimeaikaisia tapahtumia"
     Setting Changed: "{device} muutti asetuksen {setting} arvoksi {value}"
@@ -1015,7 +1016,6 @@ Settings:
     Password Required: Salasana vaaditaan
     Account Deleted: Synkronointitili poistettu
     Connected as: Yhdistetty käyttäjänä {username}
-    Automatic Sync: Synkronoi automaattisesti muutosten jälkeen ja viiden minuutin välein
     Profiles: Profiilit
     Open Tabs: Avoimet välilehdet ja istunto
     Disable Setting Sync: Lopeta tämän asetuksen synkronointi

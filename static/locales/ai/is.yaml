@@ -893,6 +893,7 @@ Settings:
     Import playlists formats: 'Studd snið: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Sync Automatically: "Samstilla sjálfkrafa"
     Activity: "Virkni reiknings"
     No Activity: "Engin nýleg virkni"
     Setting Changed: "{device} breytti {setting} í {value}"
@@ -999,7 +1000,6 @@ Settings:
     Password Required: Aðgangsorð vantar
     Account Deleted: Samstillingarreikningi eytt
     Connected as: Tengt sem {username}
-    Automatic Sync: Samstilla sjálfkrafa eftir breytingar og á fimm mínútna fresti
     Profiles: Notandasnið
     Open Tabs: Opnir flipar og seta
     Disable Setting Sync: Hætta að samstilla þessa stillingu

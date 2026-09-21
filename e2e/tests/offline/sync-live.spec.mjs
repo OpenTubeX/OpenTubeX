@@ -127,7 +127,7 @@ for (const uiScale of [95, 125]) {
       await expect(sync.locator('.syncActivity')).toBeVisible()
       await sync.getByRole('button', { name: 'Sync now', exact: true }).click()
       await expect.poll(() => collections.has('settings')).toBe(true)
-      const auto = sync.getByRole('checkbox', { name: 'Sync automatically after changes and every five minutes', exact: true })
+      const auto = sync.getByRole('checkbox', { name: 'Sync automatically', exact: true })
       await auto.press('Space')
       await expect(auto).toBeChecked()
       await expect.poll(() => waiting.size).toBeGreaterThan(0)
@@ -168,7 +168,7 @@ for (const uiScale of [95, 125]) {
       const otherSync = await goToSettingsSection(otherWindow, 'sync')
       await expect(otherSync.locator('.syncActivity')).toBeVisible()
       await expect.poll(() => waiting.size).toBe(1)
-      const otherAuto = otherSync.getByRole('checkbox', { name: 'Sync automatically after changes and every five minutes', exact: true })
+      const otherAuto = otherSync.getByRole('checkbox', { name: 'Sync automatically', exact: true })
       await otherAuto.press('Space')
       await expect(otherAuto).not.toBeChecked()
       await expect.poll(() => waiting.size).toBe(0)
@@ -192,6 +192,7 @@ for (const uiScale of [95, 125]) {
 }
 
 test('two independent devices settle after live sync and propagate a real edit once', async () => {
+  test.setTimeout(90000)
   const clients = []
   const collections = new Map()
   const waiting = new Map()
@@ -273,6 +274,7 @@ test('two independent devices settle after live sync and propagate a real edit o
       await tutorial.locator('.tutorialActions').getByRole('button').last().click()
       const sync = await goToSettingsSection(page, 'sync')
       await sync.getByRole('checkbox', { name: 'Enable Sync', exact: true }).press('Space')
+      await expect(sync.getByRole('checkbox', { name: 'Enable Sync', exact: true })).toBeChecked()
       await expect.poll(() => waiting.has(name)).toBe(true)
     }
     await expect.poll(() => waiting.size).toBe(2)
@@ -292,7 +294,11 @@ test('two independent devices settle after live sync and propagate a real edit o
     await clients[0].page.waitForTimeout(2000)
     expect(writes.slice(initialWrites)).toEqual([{ name: 'Desktop', collection: 'settings' }])
     await clients[0].page.evaluate(videoId => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateWatchProgress', { videoId, watchProgress: 12 }), videoId)
-    await expect.poll(() => progress(clients[1])).toBe(12)
+    expect(await progress(clients[0])).toBe(12)
+    await clients[0].page.waitForTimeout(2000)
+    expect(await progress(clients[1])).toBe(169.743)
+    expect(writes.slice(initialWrites)).toEqual([{ name: 'Desktop', collection: 'settings' }])
+    await expect.poll(() => progress(clients[1]), { timeout: 40000 }).toBe(12)
     await expect.poll(() => waiting.size).toBe(2)
     await clients[0].page.waitForTimeout(2000)
     expect(writes.slice(initialWrites)).toEqual([

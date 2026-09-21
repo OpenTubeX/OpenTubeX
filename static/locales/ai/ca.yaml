@@ -1206,6 +1206,7 @@ Settings:
     Import playlists formats: 'Formats admesos: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Formats admesos: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Sync Automatically: "Sincronitza automàticament"
     Activity: "Activitat del compte"
     No Activity: "No hi ha activitat recent"
     Setting Changed: "{device} ha canviat {setting} a {value}"
@@ -1312,7 +1313,6 @@ Settings:
     Password Required: Cal la contrasenya
     Account Deleted: S'ha suprimit el compte de sincronització
     Connected as: Connectat com a {username}
-    Automatic Sync: Sincronitza automàticament després dels canvis i cada cinc minuts
     Profiles: Perfils
     Open Tabs: Pestanyes obertes i sessió
     Disable Setting Sync: Deixa de sincronitzar aquesta opció

@@ -73,35 +73,79 @@ export function validateDeviceRequest(value, recipient, now = Date.now()) {
     Number.isFinite(value.position) && value.position >= 0 && value.position <= 7 * 24 * 60 * 60
 }
 
+// A held Web Lock shares connection health across renderer tabs and disappears
+// automatically if its owner closes. Without Web Locks there is one local owner.
+export class SyncLiveConnectionState {
+  constructor(locks) {
+    this.locks = locks
+    this.connected = false
+    this.controller = null
+  }
+
+  setConnected(connected) {
+    if (this.connected === connected) return
+    this.connected = connected
+    this.controller?.abort()
+    this.controller = null
+    if (!connected || !this.locks) return
+    const controller = new AbortController()
+    this.controller = controller
+    this.locks.request('opentubex-sync-server-live-connected', { signal: controller.signal }, () => {
+      return new Promise(resolve => {
+        if (controller.signal.aborted) resolve()
+        else controller.signal.addEventListener('abort', () => resolve(), { once: true })
+      })
+    }).catch(() => {})
+  }
+
+  async isConnected() {
+    if (!this.locks) return this.connected
+    try {
+      const { held } = await this.locks.query()
+      return held.some(lock => lock.name === 'opentubex-sync-server-live-connected')
+    } catch {
+      // If health cannot be shared, keep the periodic fallback running.
+      return false
+    }
+  }
+}
+
 // Long polling uses the same authenticated, cancellable HTTP transport on
 // desktop and Android. The durable server cursor handles missed notifications.
 export async function watchSyncChanges(client, onChange, onError, {
   prepare = async () => true,
+  onConnectionChange = () => {},
   sleep = ms => new Promise(resolve => setTimeout(resolve, ms)),
 } = {}) {
   let prepared = false
   let cursor = ''
   let retryMs = 1000
-  while (!client.cancelled) {
-    try {
-      if (!prepared) {
-        if (!await prepare() || client.cancelled) return
-        prepared = true
+  try {
+    while (!client.cancelled) {
+      try {
+        if (!prepared) {
+          if (!await prepare() || client.cancelled) return
+          prepared = true
+        }
+        const response = await client.waitForSyncChanges(cursor)
+        if (client.cancelled) return
+        if (typeof response?.cursor !== 'string' || !response.cursor) throw new Error('Invalid sync change cursor')
+        if (response.cursor !== cursor) {
+          await onChange()
+          // Advance only after successful processing; failures retry the same change.
+          cursor = response.cursor
+        }
+        onConnectionChange(true)
+        retryMs = 1000
+      } catch (error) {
+        onConnectionChange(false)
+        if (client.cancelled) return
+        if (await onError(error) === false) return
+        await sleep(retryMs)
+        retryMs = Math.min(retryMs * 2, 30000)
       }
-      const response = await client.waitForSyncChanges(cursor)
-      if (client.cancelled) return
-      if (typeof response?.cursor !== 'string' || !response.cursor) throw new Error('Invalid sync change cursor')
-      if (response.cursor !== cursor) {
-        await onChange()
-        // Advance only after successful processing; failures retry the same change.
-        cursor = response.cursor
-      }
-      retryMs = 1000
-    } catch (error) {
-      if (client.cancelled) return
-      if (await onError(error) === false) return
-      await sleep(retryMs)
-      retryMs = Math.min(retryMs * 2, 30000)
     }
+  } finally {
+    onConnectionChange(false)
   }
 }

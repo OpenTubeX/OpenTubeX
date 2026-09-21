@@ -1521,6 +1521,7 @@ Settings:
     Import search history formats: 'Supported formats: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Manage Subscriptions: Manage Subscriptions
   Sync Settings:
+    Sync Automatically: "Sync automatically"
     Activity: "Account activity"
     No Activity: "No recent activity"
     Setting Changed: "{device} changed {setting} to {value}"
@@ -1627,7 +1628,6 @@ Settings:
     New Passwords Do Not Match: The new passwords do not match.
     Password Changed: Password changed. Other devices have been signed out.
     Connected as: 'Connected as {username}'
-    Automatic Sync: Sync automatically after changes and every five minutes
     Profiles: Profiles
     Open Tabs: Open tabs and session
     Use Shared Tabs: Use one shared tab set across devices

@@ -898,6 +898,7 @@ Settings:
     Import playlists formats: 'Formate acceptate: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Formate acceptate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Sync Automatically: "Sincronizează automat"
     Activity: "Activitatea contului"
     No Activity: "Nicio activitate recentă"
     Setting Changed: "{device} a schimbat {setting} la {value}"
@@ -1004,7 +1005,6 @@ Settings:
     Password Required: Parola este obligatorie
     Account Deleted: Contul de sincronizare a fost șters
     Connected as: Conectat ca {username}
-    Automatic Sync: Sincronizează automat după modificări și la fiecare cinci minute
     Profiles: Profiluri
     Open Tabs: File deschise și sesiune
     Disable Setting Sync: Oprește sincronizarea acestei setări

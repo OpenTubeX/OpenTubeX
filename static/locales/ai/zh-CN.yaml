@@ -885,6 +885,7 @@ Settings:
     Import playlists formats: '支持的格式：OpenTubeX / FreeTube (.db)'
     Import search history formats: '支持的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.json)'
   Sync Settings:
+    Sync Automatically: "自动同步"
     Activity: "账户活动"
     No Activity: "暂无近期活动"
     Setting Changed: "{device} 将 {setting} 更改为 {value}"
@@ -991,7 +992,6 @@ Settings:
     Password Required: 必须输入密码
     Account Deleted: 同步账户已删除
     Connected as: 已以 {username} 身份连接
-    Automatic Sync: 更改后自动同步，并且每五分钟同步一次
     Profiles: 配置文件
     Open Tabs: 打开的标签页和会话
     Disable Setting Sync: 停止同步此设置

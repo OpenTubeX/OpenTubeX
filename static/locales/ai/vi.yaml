@@ -904,6 +904,7 @@ Settings:
     Import playlists formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Sync Automatically: "Tự động đồng bộ"
     Activity: "Hoạt động tài khoản"
     No Activity: "Không có hoạt động gần đây"
     Setting Changed: "{device} đã đổi {setting} thành {value}"
@@ -1010,7 +1011,6 @@ Settings:
     Password Required: Cần nhập mật khẩu
     Account Deleted: Đã xóa tài khoản đồng bộ
     Connected as: Đã kết nối với tên {username}
-    Automatic Sync: Tự động đồng bộ sau khi có thay đổi và mỗi năm phút
     Profiles: Hồ sơ
     Open Tabs: Thẻ đang mở và phiên
     Disable Setting Sync: Ngừng đồng bộ cài đặt này
