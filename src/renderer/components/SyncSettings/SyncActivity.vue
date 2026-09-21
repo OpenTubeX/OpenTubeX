@@ -33,7 +33,9 @@
     </p>
     <ol
       v-else
+      :id="activityListId"
       class="activityList"
+      :class="{ activityPreview: hasHiddenEntries }"
     >
       <li
         v-for="entry in visibleEntries"
@@ -71,17 +73,20 @@
       </li>
     </ol>
     <FtButton
-      v-if="entries.length > visibleCount"
+      v-if="!error && hasHiddenEntries"
+      class="activityLoadMore"
       :label="t('Theme Discovery.Load More')"
       :icon="['fas', 'angle-down']"
-      @click="visibleCount += 20"
+      :aria-controls="activityListId"
+      :aria-expanded="false"
+      @click="showAll = true"
     />
   </section>
 </template>
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, inject, onMounted, ref } from 'vue'
+import { computed, inject, onMounted, ref, useId } from 'vue'
 import { Translation as I18nT, useI18n } from 'vue-i18n'
 import store from '../../store'
 import FtButton from '../FtButton/FtButton.vue'
@@ -97,7 +102,9 @@ const navigation = inject(settingsSearchNavigationKey, null)
 const relativeTimeNow = useRelativeTimeClock()
 const { t, te, locale } = useI18n()
 const entries = computed(() => store.getters.getSyncServerActivity)
-const visibleCount = ref(20)
+const activityListId = useId()
+const showAll = ref(false)
+const hasHiddenEntries = computed(() => !showAll.value && entries.value.length > 3)
 const loading = ref(false)
 const error = ref('')
 const collectionLabels = {
@@ -107,7 +114,7 @@ const collectionLabels = {
   playlistBookmarks: 'Playlists',
 }
 
-const visibleEntries = computed(() => entries.value.slice(0, visibleCount.value).map(entry => {
+const visibleEntries = computed(() => (showAll.value ? entries.value : entries.value.slice(0, 3)).map(entry => {
   const labelKey = entry.key ? SYNC_SETTING_LABELS[entry.key] : collectionLabels[entry.collection]
   const labels = (Array.isArray(labelKey) ? labelKey : [labelKey])
     // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
