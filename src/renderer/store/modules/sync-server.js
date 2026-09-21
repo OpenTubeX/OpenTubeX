@@ -1291,7 +1291,7 @@ const actions = {
       return
     }
     if (activeSyncPromise || rootState.syncServer.syncServerStatus === 'syncing') {
-      if (reason !== 'automatic') pendingLocalSync = true
+      if (activeSyncPromise && reason !== 'automatic') pendingLocalSync = true
       return
     }
     clearTimeout(eventSyncTimer)

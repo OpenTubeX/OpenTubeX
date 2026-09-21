@@ -1017,3 +1017,13 @@ test('a user edit during remote collection application schedules a follow-up upl
   const saved = await privacy.decryptSyncDocument(f.collections.get('settings').payload, f.settings.syncServerPrivacyKey)
   assert.equal(saved.find(entry => entry.key === 'autoplayVideos').value, true)
 })
+
+test('a non-sync operation does not leave a stale follow-up sync request', async () => {
+  const f = liveFixture({ syncServerSyncSettings: true, autoplayVideos: true })
+  f.context.rootState.syncServer = f.context.state
+  f.context.commit('setSyncServerStatus', 'syncing')
+  f.actions.scheduleSyncServer(f.context, 'settings')
+  f.context.commit('setSyncServerStatus', 'idle')
+  await f.actions.syncWithSyncServer(f.context)
+  assert.equal(f.dispatched.some(([action]) => action === 'scheduleSyncServer'), false)
+})
