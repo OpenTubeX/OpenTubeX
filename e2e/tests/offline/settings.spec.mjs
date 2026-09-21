@@ -2958,6 +2958,7 @@ test.describe('settings', () => {
         }
       })
       const box = await slider.boundingBox()
+      expect(box, 'Animation Speed slider must be visible before dragging').not.toBeNull()
       await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
       await page.mouse.down()
       const before = await measure()
