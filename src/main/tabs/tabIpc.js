@@ -164,7 +164,9 @@ export async function setupTabsIPC(options = {}) {
       return { hasRemainingTabs: false }
     }
 
-    const closingTabIds = tabIds.filter(tabId => typeof tabId === 'string' && manager.tabs.has(tabId))
+    const closingTabIds = Array.from(new Set(
+      tabIds.filter(tabId => typeof tabId === 'string' && manager.tabs.has(tabId))
+    ))
     if (closingTabIds.length === 0) {
       return { hasRemainingTabs: manager.tabs.size > 0 }
     }
@@ -409,7 +411,8 @@ export async function setupTabsIPC(options = {}) {
     if (
       manager &&
       typeof payload?.tabId === 'string' &&
-      typeof payload?.route?.path === 'string'
+      typeof payload?.route?.path === 'string' &&
+      (payload.url == null || typeof payload.url === 'string')
     ) {
       manager.updateTabRoute(payload.tabId, payload.route, payload.url)
     }

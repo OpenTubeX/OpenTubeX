@@ -57,6 +57,23 @@ function createManager(t, sessionId, windowId = 1) {
   return manager
 }
 
+async function setupIpc(t, managers, options = {}) {
+  const handlers = new Map()
+  ipcMain.on = ipcMain.handle = (channel, handler) => {
+    assert.equal(handlers.has(channel), false, 'register each channel once')
+    handlers.set(channel, handler)
+  }
+  BrowserWindow.fromWebContents = sender => managers
+    .find(manager => manager.browserWindow.webContents === sender)?.browserWindow
+  t.after(() => {
+    delete ipcMain.on
+    delete ipcMain.handle
+    delete BrowserWindow.fromWebContents
+  })
+  await setupTabsIPC(options)
+  return handlers
+}
+
 function session(count) {
   return {
     tabs: Array.from({ length: count }, (_, index) => ({
@@ -501,19 +518,7 @@ test('extracted IPC handlers keep tab commands scoped to the sender window', asy
   const second = createManager(t, 'second', 2)
   const firstTab = first.createTab({ route: '/history' })
   const secondTab = second.createTab({ route: '/home' })
-  const handlers = new Map()
-  ipcMain.on = ipcMain.handle = (channel, handler) => {
-    assert.equal(handlers.has(channel), false, 'register each channel once')
-    handlers.set(channel, handler)
-  }
-  BrowserWindow.fromWebContents = sender => [first, second]
-    .find(manager => manager.browserWindow.webContents === sender)?.browserWindow
-  t.after(() => {
-    delete ipcMain.on
-    delete ipcMain.handle
-    delete BrowserWindow.fromWebContents
-  })
-  await setupTabsIPC()
+  const handlers = await setupIpc(t, [first, second])
   const sender = { sender: first.browserWindow.webContents }
   handlers.get(IpcChannels.TABS_UPDATE_TITLE)(sender, 'First title', firstTab.id)
   assert.equal(firstTab.title, 'First title')
@@ -560,4 +565,54 @@ test('failed session writes can retry the same snapshot', async t => {
   await manager._saveSession()
   await manager._saveSession()
   assert.equal(attempts, 2)
+})
+
+for (const count of [1, 2]) {
+  test(`duplicate tab IDs cannot bypass close confirmation for ${count} tabs`, async t => {
+    const manager = createManager(t)
+    const tabs = Array.from({ length: count }, () => manager.createTab({ route: '/history' }))
+    let confirmations = 0
+    let windowCloses = 0
+    let allowClose = false
+    manager.browserWindow.close = () => { windowCloses++ }
+    const handlers = await setupIpc(t, [manager], {
+      confirmCloseWindow: () => { confirmations++; return allowClose }
+    })
+    const close = handlers.get(IpcChannels.TABS_CLOSE_MULTIPLE)
+    const event = { sender: manager.browserWindow.webContents }
+    const ids = [...tabs.flatMap(tab => [tab.id, tab.id]), 'missing', null, 123]
+    const cancelled = await close(event, ids)
+    assert.equal(confirmations, 1)
+    assert.equal(cancelled.hasRemainingTabs, true)
+    assert.equal(manager.tabs.size, count)
+    assert.equal(windowCloses, 0)
+    allowClose = true
+    const approved = await close(event, ids)
+    assert.equal(confirmations, 2)
+    assert.equal(approved.hasRemainingTabs, false)
+    assert.equal(manager.tabs.size, 0)
+    assert.equal(manager.closedTabs.length, count)
+    assert.equal(windowCloses, 1)
+  })
+}
+
+test('route IPC rejects malformed URL values and permits omitted URLs', async t => {
+  const manager = createManager(t)
+  const tab = manager.createTab({ route: '/history' })
+  const handlers = await setupIpc(t, [manager])
+  const update = handlers.get(IpcChannels.TABS_UPDATE_ROUTE)
+  const event = { sender: manager.browserWindow.webContents }
+  const originalUrl = tab.url
+  for (const url of [{ path: '/home' }, [], true, 42]) {
+    update(event, { tabId: tab.id, route: { path: '/home' }, url })
+    assert.equal(tab.url, originalUrl)
+    assert.equal(tab.route.path, '/history')
+  }
+  for (const url of [undefined, null, 'app://bundle/index.html#/home']) {
+    update(event, { tabId: tab.id, route: { path: '/home' }, url })
+    assert.equal(tab.url, 'app://bundle/index.html#/home')
+    assert.equal(tab.route.path, '/home')
+  }
+  await manager._saveSession()
+  assert.equal(tabSession.saved.tabs[0].url, 'app://bundle/index.html#/home')
 })
