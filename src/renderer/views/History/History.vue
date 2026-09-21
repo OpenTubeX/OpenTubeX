@@ -4,7 +4,10 @@
       class="card"
     >
       <div class="headingRow">
-        <h2>
+        <h2
+          ref="historyHeading"
+          tabindex="-1"
+        >
           <FtIcon
             :icon="['fas', 'history']"
             class="headingIcon"
@@ -64,6 +67,14 @@
             :label="t('Cancel')"
             :icon="['fas', 'xmark']"
             @click="cancelHistoryRepair"
+          />
+          <FtButton
+            v-else
+            ref="repairClose"
+            class="historyActionButton"
+            :label="t('Close')"
+            :icon="['fas', 'xmark']"
+            @click="closeHistoryRepairStatus"
           />
         </div>
         <p
@@ -327,6 +338,7 @@ const showLoadMoreButton = ref(false)
 const query = ref('')
 const activeData = ref([])
 const historyContent = useTemplateRef('historyContent')
+const historyHeading = useTemplateRef('historyHeading')
 const searchBar = useTemplateRef('searchBar')
 const historyCleanupPeriod = ref('30')
 const customHistoryCleanupDays = ref('')
@@ -346,6 +358,7 @@ watch(showRepairPrompt, open => {
 })
 const repairAction = useTemplateRef('repairAction')
 const repairCancel = useTemplateRef('repairCancel')
+const repairClose = useTemplateRef('repairClose')
 const showMarkAllPrompt = ref(false)
 const showHistoryCleanupPrompt = ref(false)
 
@@ -367,9 +380,15 @@ function beginHistoryRepair() {
   nextTick(() => repairCancel.value?.$el.focus({ preventScroll: true }))
 }
 
+function closeHistoryRepairStatus() {
+  if (historyRepairState.running) return
+  historyRepairState.started = false
+  nextTick(() => (repairAction.value?.$el ?? historyHeading.value)?.focus({ preventScroll: true }))
+}
+
 watch(() => historyRepairState.running, running => {
   if (!running && document.activeElement === repairCancel.value?.$el) {
-    nextTick(() => repairAction.value?.$el.focus({ preventScroll: true }))
+    nextTick(() => repairClose.value?.$el.focus({ preventScroll: true }))
   }
 })
 
