@@ -1229,8 +1229,9 @@ const actions = {
             !rootState.settings.syncServerToken || isSyncServerOffline()) return
         // Live notifications replace periodic downloads, but a failed local
         // upload still needs a retry even if no remote change arrives.
-        if (!connected || rootState.syncServer.syncServerStatus === 'error') {
-          await dispatch('syncWithSyncServer', { skipIfRecent: true, automatic: true })
+        const retryFailedUpload = rootState.syncServer.syncServerStatus === 'error'
+        if (!connected || retryFailedUpload) {
+          await dispatch('syncWithSyncServer', { skipIfRecent: !retryFailedUpload, automatic: true })
         }
       } catch (error) {
         console.error('Sync server automatic sync failed', error)

@@ -323,11 +323,14 @@ test('periodic fallback resumes after a live disconnect', async t => {
   assert.equal(f.calls.length, 1)
 })
 
-test('periodic fallback retries failed uploads even with a healthy live connection', async t => {
+test('periodic fallback retries failed uploads despite a healthy live connection and recent sync', async t => {
   const f = await schedulingFixture(t)
   f.liveConnection.setConnected(true)
   f.context.rootState.syncServer.syncServerStatus = 'error'
   f.start()
-  await f.tick(AUTO_SYNC_INTERVAL_MS)
+  await f.tick(AUTO_SYNC_INTERVAL_MS - 1000)
+  // Another renderer can update this shared timestamp while our upload failed.
+  f.context.rootState.settings.syncServerLastSyncAt = Date.now()
+  await f.tick(1000)
   assert.equal(f.calls.length, 1)
 })
