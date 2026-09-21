@@ -2329,7 +2329,7 @@ test.describe('tab organizer', () => {
       window.__deviceNameRefreshCompletions = 0
       store.subscribeAction({
         after(action) {
-          if (action.type === 'refreshSyncServerDeviceNames') {
+          if (action.type === 'refreshSyncServerDevices') {
             window.__deviceNameRefreshCompletions++
           }
         },
@@ -2456,7 +2456,7 @@ test.describe('tab organizer', () => {
     await expect.poll(() => page.evaluate(() => window.__deviceNameRefreshCompletions)).toBe(4)
     await expect.poll(() => page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      return store.state.syncServer.syncServerDeviceNames
+      return store.state.syncServer.syncServerDevices
     })).toEqual({})
     await expect.poll(() => page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store

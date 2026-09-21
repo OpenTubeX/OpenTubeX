@@ -53,7 +53,7 @@
           class="sessionDeviceIcon"
           aria-hidden="true"
         >
-          <FtIcon :icon="deviceIcon(session.deviceInfo.platform)" />
+          <FtIcon :icon="getSyncServerDeviceIcon(session.deviceInfo.platform)" />
         </span>
         <div class="sessionContent">
           <div class="sessionSummary">
@@ -239,6 +239,7 @@ import {
 } from '../../helpers/sync-server'
 import {
   decryptSyncServerDeviceInfo,
+  getSyncServerDeviceIcon,
   encryptSyncServerDeviceInfo,
   getCurrentSyncServerSystemInfo,
   isValidSyncServerDeviceId,
@@ -326,11 +327,6 @@ function systemLabel(deviceInfo) {
     .join(' · ')
 }
 
-function deviceIcon(platform) {
-  if (platform === 'web') return ['fas', 'globe']
-  return platform === 'android' ? ['fas', 'smartphone'] : ['fas', 'display']
-}
-
 async function handleRequestError(requestError, requestToken, target = error) {
   if (isSessionExpiredError(requestError)) {
     if (requestToken !== store.getters.getSyncServerToken) return
@@ -350,7 +346,7 @@ async function loadSessions(token = props.token) {
     if (!response || !Array.isArray(response.sessions)) throw new Error()
     emit('password-login-changed', response.password_login === true)
     const currentSystemInfo = await getCurrentSyncServerSystemInfo()
-    const deviceNames = {}
+    const devices = {}
     sessions.value = await Promise.all(response.sessions.map(async session => {
       if (!session || typeof session.id !== 'string' ||
           !isValidSyncServerDeviceId(session.device_id) ||
@@ -401,12 +397,12 @@ async function loadSessions(token = props.token) {
         await requestClient.updateAccountSession(session.id, session.encrypted_device_info)
       }
       if (deviceInfoDecrypted || currentSystemInfoChanged) {
-        deviceNames[session.device_id] = deviceInfo.name
+        devices[session.device_id] = { name: deviceInfo.name, platform: deviceInfo.platform }
       }
       return { ...session, deviceInfo }
     }))
     if (requestClient.token === store.getters.getSyncServerToken) {
-      store.commit('setSyncServerDeviceNames', deviceNames)
+      store.commit('setSyncServerDevices', devices)
     }
   } catch (requestError) {
     await handleRequestError(requestError, requestClient.token)

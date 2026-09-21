@@ -146,6 +146,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
         settings[key[0].toLowerCase() + key.slice(1)] = value
       }
       if (action === 'updateChannelPlaybackSpeeds') settings.channelPlaybackSpeeds = value
+      if (action === 'updateAutoplayVideos') settings.autoplayVideos = value
       if (action === 'replaceSyncServerToken') settings.syncServerToken = value
       if (action === 'initializeSyncServer') return store.exports.actions.initializeSyncServer(context, value)
       if (action === 'syncWithSyncServer') return store.exports.actions.syncWithSyncServer(context, value)
@@ -917,3 +918,61 @@ test('live checks retry failed local uploads before clearing the sync error', as
   assert.equal(f.context.state.syncServerError, '')
   assert.equal(JSON.parse(f.settings.syncServerSnapshot).settings.autoplayVideos.value, false)
 })
+
+for (const [scenario, desktopKeys, phoneKeys] of [
+  ['different setting orders', ['autoplayVideos', 'baseTheme'], ['baseTheme', 'autoplayVideos']],
+  ['different enabled settings', ['baseTheme', 'autoplayVideos'], ['autoplayVideos']],
+]) {
+  test(`two devices with ${scenario} settle after live notifications`, async () => {
+    const collections = new Map()
+    const writes = []
+    const documents = []
+    const respond = async (url, options) => {
+      const path = new URL(url).pathname
+      if (path === '/health') return { capabilities: { encrypted_sync: 1, live_sync: 1 } }
+      if (path === '/v1/encrypted_sync') return {
+        collections: [...collections].map(([collection, entry]) => ({ collection, revision: entry.revision })),
+        legacy_data: false,
+      }
+      if (path === '/v1/encrypted_sync/events') return []
+      if (path.startsWith('/v1/encrypted_sync/')) {
+        const collection = path.split('/').at(-1)
+        if (options.method === 'PUT') {
+          const body = JSON.parse(options.body)
+          writes.push(collection)
+          documents.push(await privacy.decryptSyncDocument(body.payload, Buffer.alloc(32, 1).toString('base64')))
+          collections.set(collection, { revision: body.revision + 1, payload: body.payload })
+        }
+        return collections.get(collection) ?? { revision: 0, payload: null }
+      }
+    }
+    const settings = { syncServerSyncSubscriptions: false, syncServerSyncSettings: true, autoplayVideos: true, baseTheme: 'dark' }
+    const a = fixture({ ...settings, syncServerDeviceId: 'desktop' }, { encrypted: true, respond, syncableSettingKeys: desktopKeys })
+    const b = fixture({ ...settings, syncServerDeviceId: 'phone' }, { encrypted: true, respond, syncableSettingKeys: phoneKeys })
+    await a.actions.syncWithSyncServer(a.context)
+    await b.actions.syncWithSyncServer(b.context)
+    // A peer can serialize the same entries in another order. Do not echo it.
+    const saved = collections.get('settings')
+    const reordered = (await privacy.decryptSyncDocument(saved.payload, a.settings.syncServerPrivacyKey)).reverse()
+    collections.set('settings', {
+      revision: saved.revision + 1,
+      payload: await privacy.encryptSyncDocument(reordered, a.settings.syncServerPrivacyKey, a.settings.syncServerPrivacySalt),
+    })
+    writes.length = 0
+    for (let notification = 0; notification < 4; notification++) {
+      await a.actions.syncWithSyncServer(a.context, { automatic: true, remoteOnly: true })
+      await b.actions.syncWithSyncServer(b.context, { automatic: true, remoteOnly: true })
+    }
+    const sorted = document => [...document].sort((a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0)
+    for (const document of documents) assert.deepEqual(sorted(document), sorted(documents[0]))
+    assert.deepEqual(writes, [])
+    a.settings.autoplayVideos = false
+    a.settings.syncServerSettingUpdatedAt = { autoplayVideos: Date.now() + 1000 }
+    await a.actions.syncWithSyncServer(a.context, { automatic: true })
+    await b.actions.syncWithSyncServer(b.context, { automatic: true, remoteOnly: true })
+    await a.actions.syncWithSyncServer(a.context, { automatic: true, remoteOnly: true })
+    await b.actions.syncWithSyncServer(b.context, { automatic: true, remoteOnly: true })
+    assert.equal(b.settings.autoplayVideos, false)
+    assert.deepEqual(writes, ['settings'])
+  })
+}

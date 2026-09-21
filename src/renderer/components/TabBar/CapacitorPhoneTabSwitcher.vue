@@ -550,7 +550,7 @@ async function openSwitcher() {
   activeView.value = 'open'
   open.value = true
   if (showSyncedTabsView.value) {
-    store.dispatch('refreshSyncServerDeviceNames').catch(error => {
+    store.dispatch('refreshSyncServerDevices').catch(error => {
       console.error('Failed to refresh sync device names:', error)
     })
   }

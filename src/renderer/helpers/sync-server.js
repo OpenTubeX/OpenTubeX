@@ -1285,7 +1285,9 @@ export async function syncSessions(client, store, previous = null) {
 export async function syncSettings(client, store, previous = {}) {
   const remoteEntries = await client.getSettings()
   const remote = Object.fromEntries(remoteEntries.map(entry => [entry.key, entry]))
-  const merged = {}
+  // Keep the server's entry order even when devices sync different keys.
+  // Reordering unchanged settings would create revisions that wake each other.
+  const merged = { ...remote }
   const now = Date.now()
   const localUpdatedAt = store.state.settings.syncServerSettingUpdatedAt !== null &&
     typeof store.state.settings.syncServerSettingUpdatedAt === 'object' &&
@@ -1342,10 +1344,6 @@ export async function syncSettings(client, store, previous = {}) {
         await store.dispatch(settingUpdater(key), deepCopy(entry.value))
       }
     }
-  }
-
-  for (const [key, entry] of Object.entries(remote)) {
-    if (!Object.prototype.hasOwnProperty.call(local, key)) merged[key] = entry
   }
 
   await client.putSettings(Object.values(merged))
