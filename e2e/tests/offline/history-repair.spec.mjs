@@ -86,6 +86,10 @@ test('keeps Cancel available if history is cleared during a repair', async ({ pa
     await expect(page.getByRole('button', { name: 'Cancel', exact: true })).toBeVisible()
     await page.getByRole('button', { name: 'Cancel', exact: true }).click()
     await expect(page.getByRole('button', { name: 'Cancel', exact: true })).toHaveCount(0)
+    const close = page.getByRole('button', { name: 'Close', exact: true })
+    await expect(close).toBeFocused()
+    await close.click()
+    await expect(page.getByRole('heading', { name: 'History', exact: true })).toBeFocused()
   } finally {
     release()
   }
@@ -105,9 +109,11 @@ test('can dismiss the repair status after the repair stops', async ({ page }) =>
     await expect(status.getByRole('button', { name: 'Cancel', exact: true })).toBeVisible()
     await expect(status.getByRole('button', { name: 'Close', exact: true })).toHaveCount(0)
     await status.getByRole('button', { name: 'Cancel', exact: true }).click()
-    await expect(status.getByRole('button', { name: 'Close', exact: true })).toBeVisible()
-    await status.getByRole('button', { name: 'Close', exact: true }).click()
+    const close = status.getByRole('button', { name: 'Close', exact: true })
+    await expect(close).toBeFocused()
+    await close.click()
     await expect(status).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Repair History', exact: true })).toBeFocused()
   } finally {
     release()
   }
@@ -326,7 +332,7 @@ test.describe('German repair explanation', () => {
 })
 
 for (const outcome of ['finish', 'cancel']) {
-  test(`restores focus to Repair History after ${outcome}`, async ({ page }) => {
+  test(`moves focus to Close after ${outcome}`, async ({ page }) => {
     let release
     const pending = new Promise(resolve => { release = resolve })
     await page.route('**/youtubei/v1/player*', async route => {
@@ -341,6 +347,9 @@ for (const outcome of ['finish', 'cancel']) {
       if (outcome === 'cancel') await cancel.click()
       else release()
       await expect(cancel).toHaveCount(0)
+      const close = page.getByRole('button', { name: 'Close', exact: true })
+      await expect(close).toBeFocused()
+      await close.click()
       await expect(page.getByRole('button', { name: 'Repair History', exact: true })).toBeFocused()
     } finally {
       release()
