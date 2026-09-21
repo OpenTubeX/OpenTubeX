@@ -798,7 +798,7 @@ const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvid
 
 const showChannelAvatar = computed(() => (
   !store.getters.getHideChannelAvatars &&
-  (props.appearance === 'result' || props.appearance === 'youtubeShort') &&
+  ['result', 'youtubeShort', 'communityPost'].includes(props.appearance) &&
   channelName.value !== null
 ))
 
