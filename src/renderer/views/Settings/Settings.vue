@@ -399,6 +399,8 @@ import {
   findSettingsSearchTab,
   normalizeSettingsSearchText,
   removeRedundantSettingsSearchMatches,
+  settingsSearchNavigationKey,
+  findSettingsSearchTarget,
 } from '../../helpers/settingsSearch'
 
 const USING_ELECTRON = !!process.env.IS_ELECTRON
@@ -660,6 +662,18 @@ const settingsSearchableValues = computed(() => createSettingsSearchIndex({
   supportsAutoPictureInPictureMinimize: supportsAutoPictureInPictureMinimize.value,
   systemUsesDarkTheme: systemUsesDarkTheme.value,
 }))
+provide(settingsSearchNavigationKey, {
+  find(labels, settingKey) {
+    return findSettingsSearchTarget(settingsSearchableValues.value, labels, settingKey)
+  },
+  async open({ section, match }) {
+    const target = await openSearchResult(section, match)
+    const focusable = 'button, input, select, textarea, [tabindex]'
+    const control = target?.matches(focusable) ? target : target?.querySelector(focusable)
+    settingsWindowRef.value?.focus({ preventScroll: true })
+    control?.focus({ preventScroll: true })
+  }
+})
 const settingsSearchResults = computed(() => {
   const query = normalizeSearchText(settingsSearchQuery.value)
   if (query === '') return []
@@ -1092,9 +1106,13 @@ async function openSearchResult(sectionType, match) {
   const section = settingsSectionComponents.value.find(({ type }) => type === sectionType)
   const isSectionMatch = [section?.title, section?.description]
     .some(value => normalizeSearchText(value ?? '') === normalizedLabel)
-  let target = isSectionMatch
-    ? content.querySelector(`.section[data-section="${sectionType}"]`)
+  const settingControl = match.settingKey
+    ? [...content.querySelectorAll('[data-setting-key]')].find(element =>
+        element.dataset.settingKey === match.settingKey && element.getClientRects().length > 0)
     : null
+  let target = settingControl ?? (isSectionMatch
+    ? content.querySelector(`.section[data-section="${sectionType}"]`)
+    : null)
   if (match.subpage && normalizeSearchText(subpageTitle.value) === normalizedLabel) {
     target = content.querySelector('.settingsSubpageContent')
   }
@@ -1143,6 +1161,7 @@ async function openSearchResult(sectionType, match) {
     target.classList.remove('settingsSearchTarget')
     searchHighlightTimer = null
   }, 2200)
+  return target
 }
 
 function getSearchTargetText(element) {

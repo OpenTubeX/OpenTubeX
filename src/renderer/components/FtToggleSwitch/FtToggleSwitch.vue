@@ -1,6 +1,7 @@
 <template>
   <div
     class="switch-ctn"
+    :data-setting-key="settingKey || undefined"
     :class="{
       compact,
       disabled: disabled,
