@@ -133,10 +133,12 @@ async function schedulingFixture(t) {
   const calls = []
   let releaseSync
   let blockSync = false
+  let pendingLock = Promise.resolve()
+  let releaseLock
   const sandbox = {
     Date, setTimeout, clearTimeout, console, isRecentSync, isSyncReasonEnabled, SyncLiveConnectionState, AUTO_SYNC_INTERVAL_MS,
     SyncCollectionCache: class {}, isSyncServerOffline: () => false,
-    withSyncLock: callback => Promise.resolve().then(callback),
+    withSyncLock: callback => pendingLock.then(callback),
     runSync: async () => {
       calls.push(Date.now())
       if (blockSync) await new Promise(resolve => { releaseSync = resolve })
@@ -166,6 +168,8 @@ async function schedulingFixture(t) {
     sync: options => actions.syncWithSyncServer(context, options),
     stop: () => actions.stopSyncServerAutoSync(context),
     block: () => { blockSync = true },
+    holdLock: () => { pendingLock = new Promise(resolve => { releaseLock = resolve }) },
+    releaseLock: () => releaseLock(),
     release: () => { blockSync = false; releaseSync() },
     tick: async ms => {
       t.mock.timers.tick(ms)
@@ -333,4 +337,37 @@ test('periodic fallback retries failed uploads despite a healthy live connection
   f.context.rootState.settings.syncServerLastSyncAt = Date.now()
   await f.tick(1000)
   assert.equal(f.calls.length, 1)
+})
+
+test('a due edit waits for session deletion to release the sync lock', async t => {
+  const f = await schedulingFixture(t)
+  f.schedule('sessions')
+  f.holdLock()
+  f.context.rootState.syncServer.syncServerStatus = 'syncing'
+  await f.tick(10000)
+  assert.equal(f.calls.length, 0)
+  f.context.rootState.syncServer.syncServerStatus = 'success'
+  f.releaseLock()
+  await f.tick(0)
+  assert.equal(f.calls.length, 1)
+})
+
+test('a due edit remains cancellable when another remote check starts during its wait', async t => {
+  const f = await schedulingFixture(t)
+  f.block()
+  const first = f.sync({ remoteOnly: true })
+  await f.tick(0)
+  const second = first.then(() => f.sync({ remoteOnly: true }))
+  f.schedule('sessions')
+  await f.tick(10000)
+  f.release()
+  f.block()
+  await first
+  await f.tick(0)
+  assert.equal(f.calls.length, 2)
+  f.stop()
+  f.release()
+  await second
+  await f.tick(0)
+  assert.equal(f.calls.length, 2, 'stopping sync must cancel the waiting local upload')
 })

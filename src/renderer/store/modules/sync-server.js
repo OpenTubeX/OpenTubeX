@@ -1328,8 +1328,7 @@ const actions = {
           !rootState.settings.syncServerEnabled ||
           !rootState.settings.syncServerAutoSync ||
           !rootState.settings.syncServerToken ||
-          !isSyncReasonEnabled(rootState.settings, reason) ||
-          rootState.syncServer.syncServerStatus === 'syncing') return
+          !isSyncReasonEnabled(rootState.settings, reason)) return
       dispatch('syncWithSyncServer', {
         skipIfRecent: reason === 'automatic',
         automatic: true,
