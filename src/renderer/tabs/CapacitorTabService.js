@@ -18,6 +18,7 @@ import { isAppHidden } from '../helpers/appVisibility.js'
 import { getSyncTabRoute } from '../helpers/sync-sessions.js'
 
 const STORAGE_KEY = 'opentubex-capacitor-tabs'
+const SESSION_SAVE_DELAY_MS = 250
 const PERSISTED_MUTATIONS = new Set([
   'setHistoryEntryScroll',
   'setPresentedTab',
@@ -47,6 +48,7 @@ export class CapacitorTabService {
     this.navigation = navigation
     this.initialized = false
     this.persistTimer = null
+    this.lastPersistedContent = null
     this.budgetTimer = null
     this.lastPresented = new Map()
     this.presentationOrder = 0
@@ -196,6 +198,7 @@ export class CapacitorTabService {
   }
 
   getSyncSessions() {
+    this.flushPersistence()
     const session = this.currentSession()
     return [{
       sessionId: 'mobile',
@@ -407,8 +410,7 @@ export class CapacitorTabService {
 
   schedulePersistence() {
     if (this.persistTimer !== null) return
-    this.sessionUpdatedAt = Date.now()
-    this.persistTimer = setTimeout(() => this.persist(), 0)
+    this.persistTimer = setTimeout(() => this.persist(), SESSION_SAVE_DELAY_MS)
   }
 
   flushPersistence() {
@@ -454,11 +456,17 @@ export class CapacitorTabService {
     clearTimeout(this.persistTimer)
     this.persistTimer = null
     try {
-      this.sessionUpdatedAt = Date.now()
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(toPersistedSession(
+      const session = toPersistedSession(
         this.currentSession(),
         this.store.getters.getRememberTabNavigationHistory === true
-      )))
+      )
+      // Runtime updates (mount acknowledgement, playback, presentation) often
+      // leave the persisted fields unchanged. Ignore them, including timestamps.
+      const content = JSON.stringify({ ...session, selectionRevision: undefined, updatedAt: undefined })
+      if (content === this.lastPersistedContent) return
+      this.sessionUpdatedAt = Date.now()
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...session, updatedAt: this.sessionUpdatedAt }))
+      this.lastPersistedContent = content
     } catch (error) {
       console.error('Failed to persist Capacitor tabs:', error)
     }

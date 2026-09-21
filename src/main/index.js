@@ -59,7 +59,9 @@ import { composeLocaleMessages } from '../localeComposition'
 import { appendYouTubeTimeZonePreference, buildProxyUrl, DEFAULT_PROXY_SETTINGS, isNonPublicNetworkAddress, isOpenTubeXUrl } from './utils'
 import { isInvidiousInstanceUrl } from './invidiousAuthorization'
 import { RendererCors } from './rendererCors'
-import { TabManager, setupTabsIPC } from './tabs/TabManager'
+import { TabManager } from './tabs/TabManager'
+import { tabPreviewStorage } from './tabs/TabPreviewStorage'
+import { setupTabsIPC } from './tabs/tabIpc'
 import { clearAllTabSessions, loadAllTabSessions } from './tabs/TabSessionStore'
 import { isShareableOpenTubeXRoute, transformOpenTubeXRouteUrl } from '../renderer/helpers/share'
 import {
@@ -2500,7 +2502,7 @@ function runApp() {
 
     // Start dropping cache entries that no restored tab points at. Captures wait
     // on this maintenance inside TabManager, but window creation does not.
-    TabManager.startTabPreviewCachePrune(
+    tabPreviewStorage.startPrune(
       savedSessions.flatMap(session => (
         Array.isArray(session?.tabs)
           ? session.tabs.flatMap(tab => [tab?.previewFileName, tab?.avatarFileName])
@@ -4231,12 +4233,46 @@ function runApp() {
    * @returns {Promise<{ exitCode: number | null, signal: NodeJS.Signals | null, stdout: string, stderr: string }>}
    */
   async function executeIpBlockRecoveryScript(scriptPath) {
-    const normalizedPath = path.normalize(path.resolve(scriptPath))
+    const configuredPath = (await baseHandlers.settings._findOne('videoIpBlockScriptPath'))?.value
+    if (typeof configuredPath !== 'string' || configuredPath.trim().length === 0 ||
+      path.resolve(scriptPath) !== path.resolve(configuredPath)) {
+      throw new Error('Requested recovery script does not match the saved setting')
+    }
+    const normalizedPath = path.normalize(path.resolve(configuredPath))
+    if (!(await asyncFs.stat(normalizedPath)).isFile()) {
+      throw new Error('Recovery script must be a file')
+    }
+
+    let command = normalizedPath
+    let args = []
+    let windowsVerbatimArguments = false
+    if (process.platform === 'win32') {
+      const systemDirectory = path.join(process.env.SystemRoot, 'System32')
+      const extension = path.extname(normalizedPath).toLowerCase()
+      if (extension === '.bat' || extension === '.cmd') {
+        // Batch files require cmd.exe. Reject expansion and command syntax even
+        // inside quotes, and disable AutoRun and delayed environment expansion.
+        // eslint-disable-next-line no-control-regex -- Control characters must not reach cmd.exe.
+        if (/[\x00-\x1f"%!&|<>^]/.test(normalizedPath)) {
+          throw new Error('Recovery batch script path contains shell syntax')
+        }
+        command = path.join(systemDirectory, 'cmd.exe')
+        args = ['/d', '/v:off', '/s', '/c', `""${normalizedPath}""`]
+        windowsVerbatimArguments = true
+      } else if (extension === '.ps1') {
+        command = path.join(systemDirectory, 'WindowsPowerShell', 'v1.0', 'powershell.exe')
+        args = ['-NoProfile', '-NonInteractive', '-File', normalizedPath]
+      } else if (extension === '.vbs') {
+        command = path.join(systemDirectory, 'cscript.exe')
+        args = ['//Nologo', normalizedPath]
+      }
+    }
     const maxOutputLength = 16_384
 
     return new Promise((resolve, reject) => {
-      const child = cp.spawn(normalizedPath, [], {
-        shell: process.platform === 'win32',
+      const child = cp.spawn(command, args, {
+        shell: false,
+        windowsVerbatimArguments,
         windowsHide: true
       })
 

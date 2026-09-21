@@ -36,11 +36,12 @@ const getters = {
   getTabGroups: (state) => state.groups,
   getClosedTabs: (state) => state.closedTabs,
   getActiveTabId: (state) => state.activeTabId,
-  getActiveTab: (state) => state.tabs.find(tab => tab.id === state.activeTabId) ?? null,
+  getTabsById: (state) => new Map(state.tabs.map(tab => [tab.id, tab])),
+  getActiveTab: (state, getters) => getters.getTabsById.get(state.activeTabId) ?? null,
   getSelectedTabIds: (state) => state.selectedTabIds,
   getPresentedTabId: (state) => state.presentedTabId,
-  getPresentedTab: (state) => state.tabs.find(tab => tab.id === state.presentedTabId) ?? null,
-  getTabById: (state) => (tabId) => state.tabs.find(tab => tab.id === tabId) ?? null,
+  getPresentedTab: (state, getters) => getters.getTabsById.get(state.presentedTabId) ?? null,
+  getTabById: (_state, getters) => (tabId) => getters.getTabsById.get(tabId) ?? null,
   getTabCount: (state) => state.tabs.length,
   getTabContainerIds: (state) => state.containerIds,
   getTabBarScrollPosition: (state) => state.tabBarScrollPosition,
@@ -89,12 +90,15 @@ const mutations = {
     const incomingTabs = Array.isArray(payload.tabs) ? payload.tabs : []
     const incomingIds = new Set(incomingTabs.map(tab => tab.id))
 
-    state.containerIds = state.containerIds.filter(tabId => incomingIds.has(tabId))
+    const containerIds = state.containerIds.filter(tabId => incomingIds.has(tabId))
+    const containerIdSet = new Set(containerIds)
     for (const tab of incomingTabs) {
-      if (!state.containerIds.includes(tab.id)) {
-        state.containerIds.push(tab.id)
+      if (!containerIdSet.has(tab.id)) {
+        containerIds.push(tab.id)
+        containerIdSet.add(tab.id)
       }
     }
+    state.containerIds = reuseEqualSnapshot(state.containerIds, containerIds)
 
     const reconciledTabs = incomingTabs.map(tab => reconcileTab(previousTabsById.get(tab.id), tab))
     const pendingOrderAcknowledged = payload.reorderRequestId === state.pendingTabOrderRequestId
@@ -103,9 +107,9 @@ const mutations = {
       state.pendingTabOrder,
       pendingOrderAcknowledged
     )
-    state.tabs = reconciledOrder.tabs
-    state.groups = Array.isArray(payload.groups) ? payload.groups : []
-    state.closedTabs = Array.isArray(payload.closedTabs) ? payload.closedTabs : []
+    state.tabs = reuseEqualSnapshot(state.tabs, reconciledOrder.tabs)
+    state.groups = reconcileSnapshotList(state.groups, payload.groups)
+    state.closedTabs = reconcileSnapshotList(state.closedTabs, payload.closedTabs)
     state.pendingTabOrder = reconciledOrder.pendingTabOrder
     if (reconciledOrder.pendingTabOrder == null) {
       state.pendingTabOrderRequestId = null
@@ -446,10 +450,33 @@ const actions = {
   }
 }
 
+// Snapshots contain plain serializable data. Keep existing references when IPC
+// supplies equal values so unrelated metadata does not invalidate Vue consumers.
+function equalSnapshot(left, right) {
+  if (left === right) return true
+  if (left == null || right == null || typeof left !== 'object' || typeof right !== 'object') return false
+  if (Array.isArray(left) !== Array.isArray(right)) return false
+  const keys = Object.keys(right)
+  return Object.keys(left).length === keys.length && keys.every(key => (
+    Object.hasOwn(left, key) && equalSnapshot(left[key], right[key])
+  ))
+}
+
+function reuseEqualSnapshot(previous, incoming) {
+  return equalSnapshot(previous, incoming) ? previous : incoming
+}
+
+function reconcileSnapshotList(previous, incoming) {
+  const previousById = new Map(previous.map(item => [item.id, item]))
+  const items = (Array.isArray(incoming) ? incoming : []).map(item => (
+    reuseEqualSnapshot(previousById.get(item.id), item)
+  ))
+  return reuseEqualSnapshot(previous, items)
+}
+
 function reconcileTab(previous, incoming) {
-  const incomingRoute = normalizeRoute(incoming.route ?? routeFromUrl(incoming.url))
   if (!previous) {
-    return createRuntimeTab(incoming, incomingRoute)
+    return createRuntimeTab(incoming, normalizeRoute(incoming.route ?? routeFromUrl(incoming.url)))
   }
 
   let history = previous.history
@@ -464,6 +491,7 @@ function reconcileTab(previous, incoming) {
     Number.isInteger(incoming.syncedNavigationRevision) &&
     incoming.syncedNavigationRevision !== previous.syncedNavigationRevision
   ) {
+    const incomingRoute = normalizeRoute(incoming.route ?? routeFromUrl(incoming.url))
     const title = stripDocumentTitle(incoming.title || incomingRoute.fullPath)
     const restored = restoredHistoryState(incoming, incomingRoute, title)
     history = restored.history
@@ -478,7 +506,7 @@ function reconcileTab(previous, incoming) {
     route = currentEntry.route
   }
 
-  return {
+  return reuseEqualSnapshot(previous, {
     ...previous,
     ...incoming,
     route,
@@ -487,7 +515,7 @@ function reconcileTab(previous, incoming) {
     pendingReloadRoute,
     contentTitle,
     refreshKey: incoming.refreshKey ?? previous.refreshKey ?? 0
-  }
+  })
 }
 
 function createRuntimeTab(incoming, route) {

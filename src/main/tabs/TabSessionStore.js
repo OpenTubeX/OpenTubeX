@@ -46,13 +46,15 @@ export async function loadAllTabSessions() {
  * Save a single window's tab session to the tab session datastore.
  * @param {string} sessionId
  * @param {TabSessionData} sessionData
- * @returns {Promise<void>}
+ * @returns {Promise<boolean>} whether the write succeeded
  */
 export async function saveTabSession(sessionId, sessionData) {
   try {
     await baseHandlers.tabSession.save(sessionId, sessionData)
+    return true
   } catch (err) {
     console.error('Failed to save tab session:', err)
+    return false
   }
 }
 

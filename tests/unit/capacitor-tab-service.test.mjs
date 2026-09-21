@@ -506,7 +506,7 @@ test('tab mutation bursts produce one deferred session write and dispose flushes
   service.setPinned(store.getters.getActiveTabId, true)
   service.setPinned(store.getters.getActiveTabId, false)
   assert.equal(saved.length, 0)
-  t.mock.timers.tick(0)
+  t.mock.timers.tick(250)
   assert.equal(saved.length, 1)
   service.setPinned(store.getters.getActiveTabId, true)
   service.dispose()
@@ -661,4 +661,34 @@ test('mobile failed activation does not become the last active tab', async () =>
   assert.equal(await service.activateTab('tab-b'), false)
   assert.equal(await service.closeTab('tab-a'), true)
   assert.equal(store.getters.getActiveTabId, 'tab-c')
+})
+
+test('mobile session writes coalesce across tasks and skip transient tab state', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const writes = []
+  t.mock.method(globalThis.localStorage, 'setItem', (_key, value) => writes.push(JSON.parse(value)))
+  const store = createStore(createLoadedSession())
+  const service = new CapacitorTabService(createRouter(), store, createNavigation(store, true))
+  t.after(() => service.dispose())
+  service.persist()
+  writes.length = 0
+  store.runtime.tabs[0].title = 'First'
+  service.schedulePersistence()
+  t.mock.timers.tick(20)
+  store.runtime.tabs[0].title = 'Final'
+  service.schedulePersistence()
+  assert.equal(writes.length, 0)
+  t.mock.timers.tick(230)
+  assert.equal(writes.length, 1)
+  assert.equal(writes[0].tabs[0].title, 'Final')
+  store.runtime.tabs[0].isPlaying = true
+  service.schedulePersistence()
+  t.mock.timers.tick(250)
+  assert.equal(writes.length, 1, 'runtime-only state does not write localStorage')
+  store.runtime.tabs[0].title = 'Flushed on hide'
+  service.schedulePersistence()
+  service.flushOnPageHide()
+  assert.equal(writes.length, 2)
+  t.mock.timers.tick(250)
+  assert.equal(writes.length, 2)
 })

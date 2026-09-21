@@ -4,6 +4,7 @@ import { basename, join } from 'node:path'
 
 import * as baseHandlers from '../datastores/handlers/base'
 import { TabManager } from './tabs/TabManager'
+import { tabPreviewStorage } from './tabs/TabPreviewStorage'
 import { clearYtDlpPlaybackCache } from './ytDlpPlaybackCache'
 
 const USER_DATA_FILES = {
@@ -168,7 +169,7 @@ export async function getStorageUsage() {
   const categorizedUsage = {
     ...Object.fromEntries(fileEntries),
     httpCache: sumEntries(entrySizes, ['Cache']),
-    tabPreviews: sumEntries(entrySizes, [basename(TabManager.getTabPreviewCacheDirectory())]),
+    tabPreviews: sumEntries(entrySizes, [basename(tabPreviewStorage.directory())]),
     playerCache: sumEntries(entrySizes, ['player_cache']),
     browserCacheData: sumEntries(entrySizes, BROWSER_CACHE_ENTRIES),
     browserRuntimeData: sumEntries(entrySizes, BROWSER_RUNTIME_ENTRIES)
