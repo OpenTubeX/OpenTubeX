@@ -86,6 +86,12 @@ for (const [tab, field, cacheKey, update, mark] of [
 }
 
 for (const idKey of ['videoId', 'postId']) {
+  test(`malformed persisted ${idKey} feed does not prevent refresh`, () => {
+    const incoming = [{ [idKey]: 'new', isNewInSubscriptionFeed: true }]
+    for (const previous of [{}, 'invalid', 1, true, null, undefined]) {
+      assert.equal(feedState.preserveSubscriptionSeenEntries(incoming, previous, idKey), incoming)
+    }
+  })
   test(`missing ${idKey} cannot dismiss an unrelated feed entry`, () => {
     const incoming = [{ isNewInSubscriptionFeed: true }, { [idKey]: '', isNewInSubscriptionFeed: true }]
     const old = incoming.map(entry => ({ ...entry, isNewInSubscriptionFeed: false }))
