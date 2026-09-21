@@ -91,6 +91,28 @@ test('keeps Cancel available if history is cleared during a repair', async ({ pa
   }
 })
 
+test('can dismiss the repair status after the repair stops', async ({ page }) => {
+  let release
+  const pending = new Promise(resolve => { release = resolve })
+  await page.route('**/youtubei/v1/player*', async route => {
+    await pending
+    await route.fulfill({ json: {} }).catch(() => {})
+  })
+  try {
+    await goTo(page, 'history')
+    await startRepair(page)
+    const status = page.getByRole('region', { name: 'Repair History' })
+    await expect(status.getByRole('button', { name: 'Cancel', exact: true })).toBeVisible()
+    await expect(status.getByRole('button', { name: 'Close', exact: true })).toHaveCount(0)
+    await status.getByRole('button', { name: 'Cancel', exact: true }).click()
+    await expect(status.getByRole('button', { name: 'Close', exact: true })).toBeVisible()
+    await status.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(status).toHaveCount(0)
+  } finally {
+    release()
+  }
+})
+
 test.describe('Invidious history repair', () => {
   test.use({
     seed: {

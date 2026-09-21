@@ -65,6 +65,13 @@
             :icon="['fas', 'xmark']"
             @click="cancelHistoryRepair"
           />
+          <FtButton
+            v-else
+            class="historyActionButton"
+            :label="t('Close')"
+            :icon="['fas', 'xmark']"
+            @click="closeHistoryRepairStatus"
+          />
         </div>
         <p
           class="repairCounts"
@@ -365,6 +372,12 @@ function beginHistoryRepair() {
   showRepairPrompt.value = false
   startHistoryRepair({ useCookies: repairUseCookies.value })
   nextTick(() => repairCancel.value?.$el.focus({ preventScroll: true }))
+}
+
+function closeHistoryRepairStatus() {
+  if (historyRepairState.running) return
+  historyRepairState.started = false
+  nextTick(() => repairAction.value?.$el.focus({ preventScroll: true }))
 }
 
 watch(() => historyRepairState.running, running => {
