@@ -1027,3 +1027,11 @@ test('a non-sync operation does not leave a stale follow-up sync request', async
   await f.actions.syncWithSyncServer(f.context)
   assert.equal(f.dispatched.some(([action]) => action === 'scheduleSyncServer'), false)
 })
+
+for (const syncServerPrivacyMode of ['enhanced', 'legacy']) {
+  test(`manual sync rejects an encryption downgrade with a saved key in ${syncServerPrivacyMode} mode`, async () => {
+    const f = fixture({ syncServerPrivacyMode })
+    await assert.rejects(f.actions.syncWithSyncServer(f.context), /server no longer supports it/)
+    assert.ok(f.requests.every(request => request.url.endsWith('/health')))
+  })
+}

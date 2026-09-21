@@ -338,6 +338,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
 
   try {
     const capabilities = await networkClient.getCapabilities()
+    assertEncryptionSupported(capabilities.encrypted_sync === 1, encrypted)
     const liveSupported = encrypted && capabilities.live_sync === 1
     commit('setSyncServerLiveSupported', liveSupported)
     if (encrypted) {
