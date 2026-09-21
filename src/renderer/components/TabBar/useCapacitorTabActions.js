@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { isShareableOpenTubeXRoute, transformOpenTubeXRouteUrl } from '../../helpers/share'
@@ -16,6 +16,7 @@ const noop = () => {}
  * @param {() => void} options.requestExit
  * @param {() => void | Promise<void>} [options.afterCreate]
  * @param {() => void | Promise<void>} [options.afterActivate]
+ * @param {(tabId: string) => void | Promise<void>} [options.afterSelect]
  * @param {() => void | Promise<void>} [options.afterClose]
  * @param {() => void | Promise<void>} [options.afterDuplicate]
  * @param {() => void} [options.beforeOpenActions]
@@ -27,6 +28,7 @@ export function useCapacitorTabActions({
   requestExit,
   afterCreate = noop,
   afterActivate = noop,
+  afterSelect = noop,
   afterClose = noop,
   afterDuplicate = noop,
   beforeOpenActions = noop,
@@ -34,6 +36,12 @@ export function useCapacitorTabActions({
   stopContextMenuPropagation = false,
 }) {
   const { t } = useI18n()
+  const selecting = ref(false)
+  const selectedTabIds = ref(new Set())
+  const closingTabs = ref(false)
+  watch(tabs, () => {
+    selectedTabIds.value = new Set([...selectedTabIds.value].filter(id => tabs.value.some(tab => tab.id === id)))
+  })
   const actionTabId = ref(null)
   const actionTab = computed(() => (
     tabs.value.find(tab => tab.id === actionTabId.value) ?? null
@@ -64,7 +72,74 @@ export function useCapacitorTabActions({
     await afterCreate()
   }
 
+  function clearSelection() {
+    selecting.value = false
+    selectedTabIds.value = new Set()
+  }
+
+  function toggleTabSelection(tabId) {
+    const ids = new Set(selectedTabIds.value)
+    if (ids.has(tabId)) ids.delete(tabId)
+    else ids.add(tabId)
+    selectedTabIds.value = ids
+  }
+
+  async function selectActionTab() {
+    if (!actionTab.value) return
+    const tabId = actionTab.value.id
+    selecting.value = true
+    selectedTabIds.value = new Set([...selectedTabIds.value, tabId])
+    closeTabActions()
+    await nextTick()
+    await afterSelect(tabId)
+  }
+
+  const relatedTabIds = computed(() => {
+    const index = tabs.value.findIndex(tab => tab.id === actionTab.value?.id)
+    const ids = list => list.filter(tab => !tab.isPinned).map(tab => tab.id)
+    return index < 0
+      ? { before: [], after: [], other: [] }
+      : {
+          before: ids(tabs.value.slice(0, index)),
+          after: ids(tabs.value.slice(index + 1)),
+          other: ids(tabs.value.filter(tab => tab.id !== actionTab.value.id)),
+        }
+  })
+
+  async function closeTabIds(ids) {
+    if (closingTabs.value || ids.length === 0) return
+    closingTabs.value = true
+    closeTabActions()
+    try {
+      // Keep a landing tab so every selected tab enters the closed-tab history.
+      if (tabs.value.every(tab => ids.includes(tab.id))) {
+        if (!await getCapacitorTabService().createTab()) return
+      }
+      for (const id of ids) {
+        if (tabs.value.some(tab => tab.id === id)) {
+          if (!await getCapacitorTabService().closeTab(id)) return
+        }
+      }
+      clearSelection()
+      await afterClose()
+    } finally {
+      closingTabs.value = false
+    }
+  }
+
+  async function closeRelatedTabs(position) {
+    await closeTabIds(relatedTabIds.value[position])
+  }
+
+  async function closeSelectedTabs() {
+    await closeTabIds([...selectedTabIds.value])
+  }
+
   async function activateTab(tabId) {
+    if (selecting.value) {
+      toggleTabSelection(tabId)
+      return
+    }
     await getCapacitorTabService().activateTab(tabId)
     await afterActivate()
   }
@@ -153,6 +228,15 @@ export function useCapacitorTabActions({
   }
 
   return {
+    selecting,
+    selectedTabIds,
+    closingTabs,
+    clearSelection,
+    toggleTabSelection,
+    selectActionTab,
+    relatedTabIds,
+    closeRelatedTabs,
+    closeSelectedTabs,
     actionTab,
     actionTabYoutubeUrl,
     activateTab,

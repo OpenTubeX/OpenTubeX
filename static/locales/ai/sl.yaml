@@ -306,6 +306,17 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: Seznam predvajanja {playlistName} je uspešno ustvarjen.
       There was an issue with creating the playlist.: Pri ustvarjanju seznama predvajanja je prišlo do težave.
 History:
+  Repair Use Cookies: "Uporabi nastavljene piškotke yt-dlp"
+  Repair Cookies Hint: "Preveriti je treba več kot 500 videoposnetkov. Nastavite piškotke v nastavitvah yt-dlp in jih tukaj omogočite, da zmanjšate tveganje omejevanja zahtev."
+  Repair Description: "Uporabite po uvozu zgodovine ali ko videoposnetkom manjkajo podatki ali imajo napačno oznako LIVE."
+  Repair Details: "Dopolni manjkajoče naslove, kanale in datume objave ter preveri trajanje in oznake LIVE. Napredek in stanje ogleda ostaneta nespremenjena."
+  Repair Notice: "Velika zgodovina lahko zahteva čas. Neuspele zahteve se samodejno ponovijo. Izbrisani ali zasebni videoposnetki lahko ostanejo nepopolni."
+  Start Repair: "Začni popravljanje"
+  Repair Checking: "Preverjanje podatkov videoposnetkov"
+  Repair Waiting: "Čakanje na YouTube. Popravljanje se bo samodejno nadaljevalo."
+  Repair Retrying: "Ponavljanje neuspelih zahtev"
+  Repair Finished: "Popravljanje končano"
+  Repair Stopped: "Popravljanje ustavljeno"
   Repair: "Popravi zgodovino"
   Repair Progress: "Preverjeno {checked}/{total} · Popravljeno {repaired} · Neuspešno {failed}"
   Case Sensitive Search: Iskanje z razlikovanjem velikih in malih črk
@@ -409,9 +420,10 @@ Settings:
       After current tab: Za trenutnim zavihkom
       After current tab in opened order: Za trenutnim zavihkom, po vrstnem redu odpiranja
     Tab Close Focus:
+      Last active tab: "Nazadnje dejaven zavihek"
+      Next tab in tab order: "Naslednji zavihek v vrstnem redu zavihkov"
+      Previous tab in tab order: "Prejšnji zavihek v vrstnem redu zavihkov"
       Tab Close Focus: Po zaprtju zavihka
-      Previous tab: Izberi prejšnji zavihek
-      Next tab: Izberi naslednji zavihek
     Startup Behavior:
       Startup Behavior: Ob zagonu
       Load all tabs: Naloži vse zavihke
@@ -882,6 +894,10 @@ Settings:
     Title Excludes: Naslov ne vključuje
     Title Filter Hint: Več izrazov za naslov ločite z vejicami. Videoposnetek se mora ujemati z vsaj enim vključenim izrazom in z nobenim izključenim izrazom.
   External Software Settings:
+    Create YouTube session: "Ustvari sejo YouTube"
+    YouTube session hint: "Po potrebi se prijavite in shranite sejo. V nastavitvah izberite, ali naj se uporablja za prenose, predvajanje ali podnapise."
+    Use cookies for downloads: "Uporabi piškotke za prenose"
+    YouTube session failed: "Seje YouTube ni bilo mogoče shraniti."
     Checking FFmpeg and FFprobe: Preverjanje FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg in FFprobe še nista prenesena. Za prenos kliknite spodnji gumb.
     External Software Settings: Zunanja programska oprema
@@ -927,7 +943,7 @@ Settings:
       Manual: Posodobi samo ročno
     yt-dlp Executable Path: Pot do izvedljive datoteke yt-dlp
     FFmpeg Executable Path: Pot do izvedljive datoteke FFmpeg
-    Restricted Playback Authentication: Piškotki yt-dlp za predvajanje
+    Restricted Playback Authentication: "Piškotki yt-dlp"
     Cookie Source: Vir piškotkov
     Cookie Sources:
       None: Brez
@@ -1077,6 +1093,7 @@ Settings:
     Expanded: Razširjeni
     Playing Interface Hide Delay: Zakasnitev skrivanja vmesnika med predvajanjem
     Hide Startup Splash: Skrij začetni zaslon
+    Hide Header Sync Indicator: Skrij kazalnik sinhronizacije v glavi aplikacije
     Hide Repeat Stats: Skrij statistiko ponavljanja
     Sections:
       Side Bar: Stranska vrstica
@@ -1507,7 +1524,7 @@ Video:
   Reloading video after streaming URL error: Ponovno nalaganje videoposnetka po napaki URL-ja prenosa
   MembersOnly: Za ogled tega videoposnetka samo za člane potrebujete račun Google z aktivnim članstvom v tem kanalu.
   AgeRestricted: Za ogled tega videoposnetka s starostno omejitvijo potrebujete račun Google s potrjeno starostjo.
-  Configure Restricted Playback Cookies Hint: Nastavite piškotke v Nastavitve → Zunanja programska oprema → Piškotki za predvajanje yt-dlp.
+  Configure Restricted Playback Cookies Hint: "Nastavite piškotke v Nastavitve → Zunanja programska oprema → Piškotki yt-dlp."
   Try With Configured Cookies: Poskusi z nastavljenimi piškotki
   Restricted Playback Authentication Failed Template: 'yt-dlp s temi piškotki ni mogel dostopati do videoposnetka: {error}'
   DRMProtected: Videoposnetkov z zaščito DRM ni mogoče predvajati v OpenTubeX, saj zahtevajo lastniške zaprtokodne komponente. Za ogled tega videoposnetka obiščite uradno spletno mesto YouTube v brskalniku, ki podpira DRM.
@@ -1824,6 +1841,10 @@ Clipboard:
   Copy failed: Kopiranje v odložišče ni uspelo
   Cannot access clipboard without a secure connection: Brez varne povezave dostop do odložišča ni mogoč
 Context Menu:
+  Select Tab: Izberi zavihek
+  Close Tabs Before: Zapri prejšnje zavihke
+  Close Tabs After: Zapri naslednje zavihke
+  Close Other Tabs: Zapri druge zavihke
   Copy {service} link without playlist: "Kopiraj povezavo do {service} brez seznama predvajanja"
   Context Menu: Kontekstni meni
   Select All: Izberi vse
@@ -2057,7 +2078,7 @@ Tooltips:
     Cookie File: Izberite datoteko s piškotki v obliki Netscape za overjeno predvajanje.
     Browser for Cookies: Podpora za brskalnike se prebere iz izbrane izvedljive datoteke yt-dlp. OpenTubeX ob zahtevanem overjenem predvajanju naroči yt-dlp, naj prebere podatke tega brskalnika.
     Browser Profile: Izbirno ime ali mapa profila brskalnika. Če želite uporabiti nazadnje uporabljeni profil, pustite prazno.
-    Always Use Cookies: "Uporabi nastavljene piškotke vsakič, ko yt-dlp pridobiva pretoke. S tem se način pridobivanja pretoka ne preklopi na yt-dlp. Ko je izbran yt-dlp, so lahko na voljo oblike, dostopne samo z računom, vključno z izboljšano bitno hitrostjo storitve YouTube Premium, če ima račun dostop. Uporabi nastavljene piškotke za podnapise in samodejne prevode."
+    Always Use Cookies: "Uporabite nastavljene piškotke za prenose, podnapise in kadar yt-dlp pridobiva tokove. S tem se način pridobivanja pretoka ne preklopi na yt-dlp. Ko je izbran yt-dlp, so lahko na voljo oblike, dostopne samo z računom, vključno z izboljšano bitno hitrostjo storitve YouTube Premium, če ima račun dostop."
     FFmpeg Executable Path: FFmpeg je potreben za združevanje ločenih video- in zvočnih pretokov ter pretvarjanje zvoka. OpenTubeX privzeto predvideva, da je FFmpeg mogoče najti prek okoljske spremenljivke PATH. Po potrebi lahko tukaj nastavite pot po meri.
     Use cookies for subtitles: "Uporabi nastavljene piškotke za podnapise in samodejne prevode. To možnost omogoči tudi nastavitev »Vedno uporabi piškotke«."
   Distraction Free Settings:
@@ -2237,6 +2258,7 @@ CommandPalette:
     Download Finished: Ta prenos se ne izvaja več
     Video: Najprej odprite videoposnetek
 Downloads:
+  Preparing: Pripravljanje…
   Export Failed: "Prenesene datoteke ni bilo mogoče shraniti. Izberite mapo za prenose z dovoljenjem za pisanje in poskusite znova."
   Remove File Permanently Warning: "S tem boste trajno izbrisali »{title}«."
   Download: Prenesi

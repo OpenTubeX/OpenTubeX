@@ -1,5 +1,5 @@
 /** Supplies native frames to the existing WebGL VR renderer and frame callbacks. */
-export function attachAndroidVideoFrames(element, canvas, { captureFrame, canCapture, onError }) {
+export function attachAndroidVideoFrames(element, canvas, { captureFrame, canCapture, onError, getFieldOfView = () => 75 }) {
   const callbacks = new Map()
   const originalRequest = Object.getOwnPropertyDescriptor(element, 'requestVideoFrameCallback')
   const originalCancel = Object.getOwnPropertyDescriptor(element, 'cancelVideoFrameCallback')
@@ -40,8 +40,19 @@ export function attachAndroidVideoFrames(element, canvas, { captureFrame, canCap
     busy = true
     const capturedGeneration = generation
     try {
+      // A panorama covers more than the visible viewport. Account for zoom so
+      // downscaling does not turn a small field of view into a blurry texture.
+      // The drawing buffer includes device pixel ratio and UI scale; also stay
+      // within the native capture API's 16-megapixel allocation limit.
+      const fieldOfView = getFieldOfView()
+      const panoramaScale = Number.isFinite(fieldOfView) && fieldOfView > 0 ? 360 / fieldOfView : Infinity
+      const scale = Math.min(1, Math.sqrt(16777216 / (element.videoWidth * element.videoHeight)), panoramaScale * Math.max(
+        (canvas?.width || element.videoWidth) / element.videoWidth,
+        (canvas?.height || element.videoHeight) / element.videoHeight))
       const { dataUrl } = await captureFrame({
-        width: element.videoWidth, height: element.videoHeight, format: 'jpeg',
+        width: Math.max(1, Math.floor(element.videoWidth * scale)),
+        height: Math.max(1, Math.floor(element.videoHeight * scale)),
+        format: 'jpeg',
       })
       const nextImage = new Image()
       nextImage.src = dataUrl

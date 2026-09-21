@@ -566,7 +566,9 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     if (isNativeFullscreenActive()) return false
     if (isNativePipActive()) return false
     const videoElement = video.value
-    if (!videoElement || videoElement.ended) return false
+    if (!videoElement) return false
+    if (videoElement.ended && !(scrollMiniPlayerDetached.value &&
+      store.getters.getKeepPlayingOnNavigation && watchNavigation?.detached.value)) return false
     return true
   }
 
@@ -1072,15 +1074,20 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     scrollMiniPlayerDismissed.value = true
   }
 
-  function scrollMiniTogglePlayPause(event) {
+  async function scrollMiniTogglePlayPause(event) {
     event?.preventDefault()
     event?.stopPropagation()
 
     const videoElement = video.value
     if (!videoElement) return
 
-    if (videoElement.paused) {
-      videoElement.play()
+    if (videoElement.ended || videoElement.paused) {
+      if (videoElement.ended) videoElement.currentTime = 0
+      try {
+        await videoElement.play()
+      } catch (error) {
+        console.warn('Unable to resume mini player playback:', error)
+      }
     } else {
       videoElement.pause()
     }

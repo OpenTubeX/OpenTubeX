@@ -192,6 +192,17 @@ User Playlists:
     This playlist could not be loaded.: Δεν ήταν δυνατή η φόρτωση αυτής της λίστας αναπαραγωγής.
     More videos could not be loaded.: Δεν ήταν δυνατή η φόρτωση περισσότερων βίντεο.
 History:
+  Repair Use Cookies: "Χρήση των ρυθμισμένων cookies του yt-dlp"
+  Repair Cookies Hint: "Πρέπει να ελεγχθούν πάνω από 500 βίντεο. Διαμορφώστε cookies στις ρυθμίσεις του yt-dlp και ενεργοποιήστε τα εδώ για να μειώσετε τον κίνδυνο περιορισμού αιτημάτων."
+  Repair Description: "Χρησιμοποιήστε το μετά την εισαγωγή ιστορικού ή όταν λείπουν στοιχεία βίντεο ή υπάρχει λανθασμένη ένδειξη LIVE."
+  Repair Details: "Συμπληρώνει τίτλους, κανάλια και ημερομηνίες δημοσίευσης που λείπουν και ελέγχει τη διάρκεια και τις ενδείξεις LIVE. Η πρόοδος και η κατάσταση παρακολούθησης παραμένουν ίδιες."
+  Repair Notice: "Τα μεγάλα ιστορικά μπορεί να χρειαστούν χρόνο. Τα αποτυχημένα αιτήματα επαναλαμβάνονται αυτόματα. Διαγραμμένα ή ιδιωτικά βίντεο μπορεί να παραμείνουν ελλιπή."
+  Start Repair: "Έναρξη επιδιόρθωσης"
+  Repair Checking: "Έλεγχος στοιχείων βίντεο"
+  Repair Waiting: "Αναμονή για το YouTube. Η επιδιόρθωση θα συνεχιστεί αυτόματα."
+  Repair Retrying: "Επανάληψη αποτυχημένων αιτημάτων"
+  Repair Finished: "Η επιδιόρθωση ολοκληρώθηκε"
+  Repair Stopped: "Η επιδιόρθωση σταμάτησε"
   Repair: "Επιδιόρθωση ιστορικού"
   Repair Progress: "Ελέγχθηκαν {checked}/{total} · Διορθώθηκαν {repaired} · Απέτυχαν {failed}"
   Mark All As Watched: Επισήμανση όλων ως παρακολουθημένων
@@ -286,9 +297,10 @@ Settings:
       After current tab: Μετά την τρέχουσα καρτέλα
       After current tab in opened order: Μετά την τρέχουσα καρτέλα, με τη σειρά ανοίγματος
     Tab Close Focus:
+      Last active tab: "Τελευταία ενεργή καρτέλα"
+      Next tab in tab order: "Επόμενη καρτέλα στη σειρά καρτελών"
+      Previous tab in tab order: "Προηγούμενη καρτέλα στη σειρά καρτελών"
       Tab Close Focus: Μετά το κλείσιμο καρτέλας
-      Previous tab: Επιλογή προηγούμενης καρτέλας
-      Next tab: Επιλογή επόμενης καρτέλας
     Startup Behavior:
       Startup Behavior: Κατά την εκκίνηση
       Load all tabs: Φόρτωση όλων των καρτελών
@@ -678,6 +690,10 @@ Settings:
     Title Excludes: Ο τίτλος δεν περιλαμβάνει
     Title Filter Hint: Διαχωρίστε πολλούς όρους τίτλου με κόμματα. Ένα βίντεο πρέπει να αντιστοιχεί σε τουλάχιστον έναν όρο συμπερίληψης και σε κανέναν όρο αποκλεισμού.
   External Software Settings:
+    Create YouTube session: "Δημιουργία συνεδρίας YouTube"
+    YouTube session hint: "Συνδεθείτε αν χρειάζεται και αποθηκεύστε τη συνεδρία. Επιλέξτε στις ρυθμίσεις αν θα χρησιμοποιείται για λήψεις, αναπαραγωγή ή υπότιτλους."
+    Use cookies for downloads: "Χρήση cookies για λήψεις"
+    YouTube session failed: "Αδυναμία αποθήκευσης της συνεδρίας YouTube."
     Checking FFmpeg and FFprobe: Έλεγχος FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: Δεν έχει γίνει ακόμη λήψη του FFmpeg/FFprobe. Κάντε κλικ στο παρακάτω κουμπί για να το κατεβάσετε.
     External Software Settings: Εξωτερικό λογισμικό
@@ -723,7 +739,7 @@ Settings:
       Manual: Μόνο μη αυτόματη ενημέρωση
     yt-dlp Executable Path: Διαδρομή εκτελέσιμου yt-dlp
     FFmpeg Executable Path: Διαδρομή εκτελέσιμου FFmpeg
-    Restricted Playback Authentication: Cookie αναπαραγωγής yt-dlp
+    Restricted Playback Authentication: "Cookies του yt-dlp"
     Cookie Source: Προέλευση cookie
     Cookie Sources:
       None: Καμία
@@ -857,6 +873,7 @@ Settings:
     Expanded: Αναπτυγμένες
     Playing Interface Hide Delay: Καθυστέρηση απόκρυψης διεπαφής κατά την αναπαραγωγή
     Hide Startup Splash: Απόκρυψη οθόνης εκκίνησης
+    Hide Header Sync Indicator: Απόκρυψη ένδειξης συγχρονισμού στην κεφαλίδα της εφαρμογής
     Hide Repeat Stats: Απόκρυψη στατιστικών επανάληψης
     Sections:
       Visible While Paused: Ορατά κατά την παύση σε πλήρες παράθυρο / πλήρη οθόνη
@@ -1168,7 +1185,7 @@ Video:
   Retry With Built-in Extraction: Νέα προσπάθεια με ενσωματωμένη εξαγωγή
   Retry With yt-dlp Extraction: Νέα προσπάθεια με εξαγωγή yt-dlp
   Reloading video after streaming URL error: Επαναφόρτωση βίντεο μετά από σφάλμα URL ροής
-  Configure Restricted Playback Cookies Hint: Ρυθμίστε τα cookie στις Ρυθμίσεις → Εξωτερικό λογισμικό → Cookie αναπαραγωγής yt-dlp.
+  Configure Restricted Playback Cookies Hint: "Ρυθμίστε τα cookie στις Ρυθμίσεις → Εξωτερικό λογισμικό → Cookies του yt-dlp."
   Try With Configured Cookies: Δοκιμή με τα ρυθμισμένα cookie
   Restricted Playback Authentication Failed Template: 'Το yt-dlp δεν μπόρεσε να αποκτήσει πρόσβαση σε αυτό το βίντεο με τα ρυθμισμένα cookie: {error}'
   Private: Τα ιδιωτικά βίντεο δεν μπορούν να προβληθούν στο OpenTubeX, επειδή απαιτούν σύνδεση στο Google και κυριότητα του βίντεο.
@@ -1388,6 +1405,10 @@ Share:
   Share failed: "Δεν ήταν δυνατή η κοινοποίηση του συνδέσμου"
   Timestamp Link Copied: Ο σύνδεσμος χρονικής ένδειξης αντιγράφηκε στο πρόχειρο
 Context Menu:
+  Select Tab: Επιλογή καρτέλας
+  Close Tabs Before: Κλείσιμο προηγούμενων καρτελών
+  Close Tabs After: Κλείσιμο επόμενων καρτελών
+  Close Other Tabs: Κλείσιμο άλλων καρτελών
   Copy {service} link without playlist: "Αντιγραφή συνδέσμου {service} χωρίς λίστα αναπαραγωγής"
   Context Menu: Μενού περιβάλλοντος
   Select All: Επιλογή όλων
@@ -1592,7 +1613,7 @@ Tooltips:
     Cookie File: Επιλέξτε ένα αρχείο cookie σε μορφή Netscape για πιστοποιημένη αναπαραγωγή.
     Browser for Cookies: Η υποστήριξη προγραμμάτων περιήγησης διαβάζεται από το επιλεγμένο εκτελέσιμο yt-dlp. Το OpenTubeX ζητά από το yt-dlp να διαβάσει αυτό το πρόγραμμα περιήγησης όταν ζητείται πιστοποιημένη αναπαραγωγή.
     Browser Profile: Προαιρετικό όνομα ή φάκελος προφίλ προγράμματος περιήγησης. Αφήστε το κενό για να χρησιμοποιηθεί το προφίλ που προσπελάστηκε πιο πρόσφατα.
-    Always Use Cookies: "Χρησιμοποιεί τα ρυθμισμένα cookie κάθε φορά που το yt-dlp εξάγει ροές. Δεν αλλάζει τη μέθοδο εξαγωγής ροής σε yt-dlp. Με επιλεγμένο το yt-dlp, μπορεί να γίνουν διαθέσιμες μορφές μόνο για λογαριασμούς, όπως ο βελτιωμένος ρυθμός μετάδοσης bit του YouTube Premium, όταν ο λογαριασμός έχει πρόσβαση. Χρήση των ρυθμισμένων cookies για υπότιτλους και αυτόματες μεταφράσεις."
+    Always Use Cookies: "Χρησιμοποιήστε τα ρυθμισμένα cookies για λήψεις, υπότιτλους και όποτε το yt-dlp εξάγει ροές. Δεν αλλάζει τη μέθοδο εξαγωγής ροής σε yt-dlp. Με επιλεγμένο το yt-dlp, μπορεί να γίνουν διαθέσιμες μορφές μόνο για λογαριασμούς, όπως ο βελτιωμένος ρυθμός μετάδοσης bit του YouTube Premium, όταν ο λογαριασμός έχει πρόσβαση."
     FFmpeg Executable Path: Το FFmpeg απαιτείται για τη συγχώνευση ξεχωριστών ροών βίντεο και ήχου, καθώς και για τη μετατροπή ήχου. Από προεπιλογή, το OpenTubeX θεωρεί ότι το FFmpeg μπορεί να βρεθεί μέσω της μεταβλητής περιβάλλοντος PATH. Αν χρειάζεται, μπορείτε να ορίσετε εδώ μια προσαρμοσμένη διαδρομή.
     Use cookies for subtitles: "Χρήση των ρυθμισμένων cookies για υπότιτλους και αυτόματες μεταφράσεις. Ενεργοποιείται επίσης από το «Να χρησιμοποιούνται πάντα cookies»."
   Distraction Free Settings:
@@ -1685,6 +1706,7 @@ CommandPalette:
     Download Finished: Αυτή η λήψη δεν εκτελείται πλέον
     Video: Ανοίξτε πρώτα ένα βίντεο
 Downloads:
+  Preparing: Προετοιμασία…
   Export Failed: "Δεν ήταν δυνατή η αποθήκευση του ληφθέντος αρχείου. Επιλέξτε έναν φάκελο λήψεων με δικαίωμα εγγραφής και δοκιμάστε ξανά."
   Remove File Permanently Warning: "Αυτό θα διαγράψει οριστικά το «{title}»."
   Download: Λήψη

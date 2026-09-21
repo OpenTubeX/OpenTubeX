@@ -188,6 +188,17 @@ User Playlists:
     This playlist could not be loaded.: A lejátszási lista nem tölthető be.
     More videos could not be loaded.: Nem tölthető be több videó.
 History:
+  Repair Use Cookies: "Beállított yt-dlp sütik használata"
+  Repair Cookies Hint: "Több mint 500 videót kell ellenőrizni. Állítsa be a sütiket a yt-dlp beállításaiban, és engedélyezze őket itt, hogy csökkentse a kérések korlátozásának kockázatát."
+  Repair Description: "Használd az előzmények importálása után, illetve ha a videók adatai hiányosak, vagy téves LIVE címkét kaptak."
+  Repair Details: "Pótolja a hiányzó címeket, csatornákat és közzétételi dátumokat, és ellenőrzi az időtartamokat és a LIVE címkéket. A lejátszási pozíció és a megtekintési állapot változatlan marad."
+  Repair Notice: "A nagy előzmények feldolgozása időbe telhet. A sikertelen kéréseket automatikusan újrapróbálja. A törölt vagy privát videók adatai hiányosak maradhatnak."
+  Start Repair: "Javítás indítása"
+  Repair Checking: "Videóadatok ellenőrzése"
+  Repair Waiting: "Várakozás a YouTube-ra. A javítás automatikusan folytatódik."
+  Repair Retrying: "Sikertelen kérések újrapróbálása"
+  Repair Finished: "Javítás befejezve"
+  Repair Stopped: "Javítás leállítva"
   Repair: "Előzmények javítása"
   Repair Progress: "Ellenőrizve: {checked}/{total} · Javítva: {repaired} · Sikertelen: {failed}"
   Mark All As Watched: Összes megjelölése megtekintettként
@@ -282,9 +293,10 @@ Settings:
       After current tab: Az aktuális lap után
       After current tab in opened order: Az aktuális lap után, megnyitási sorrendben
     Tab Close Focus:
+      Last active tab: "Legutóbb aktív lap"
+      Next tab in tab order: "Következő lap a lapok sorrendjében"
+      Previous tab in tab order: "Előző lap a lapok sorrendjében"
       Tab Close Focus: Lap bezárása után
-      Previous tab: Előző lap kiválasztása
-      Next tab: Következő lap kiválasztása
     Startup Behavior:
       Startup Behavior: Indításkor
       Load all tabs: Összes lap betöltése
@@ -665,6 +677,10 @@ Settings:
     Title Excludes: A cím nem tartalmazza
     Title Filter Hint: A cím több keresőkifejezését vesszővel válassza el. A videónak legalább egy megadott kifejezést tartalmaznia kell, a kizárt kifejezések egyikét sem tartalmazhatja.
   External Software Settings:
+    Create YouTube session: "YouTube-munkamenet létrehozása"
+    YouTube session hint: "Szükség esetén jelentkezz be, majd mentsd a munkamenetet. A beállításokban válaszd ki, hogy letöltésekhez, lejátszáshoz vagy feliratokhoz használod-e."
+    Use cookies for downloads: "Sütik használata letöltésekhez"
+    YouTube session failed: "Nem sikerült menteni a YouTube-munkamenetet."
     Checking FFmpeg and FFprobe: FFmpeg/FFprobe ellenőrzése…
     FFmpeg and FFprobe Managed Not Downloaded: Az FFmpeg/FFprobe még nincs letöltve. A letöltéshez kattintson az alábbi gombra.
     External Software Settings: Külső szoftverek
@@ -710,7 +726,7 @@ Settings:
       Manual: Csak kézi frissítés
     yt-dlp Executable Path: yt-dlp végrehajtható fájljának elérési útja
     FFmpeg Executable Path: FFmpeg végrehajtható fájljának elérési útja
-    Restricted Playback Authentication: yt-dlp lejátszási sütijei
+    Restricted Playback Authentication: "yt-dlp sütik"
     Cookie Source: Sütik forrása
     Cookie Sources:
       None: Nincs
@@ -844,6 +860,7 @@ Settings:
     Expanded: Kibontva
     Playing Interface Hide Delay: Felület elrejtésének késleltetése lejátszás közben
     Hide Startup Splash: Indítóképernyő elrejtése
+    Hide Header Sync Indicator: Alkalmazásfejléc szinkronizálási jelzőjének elrejtése
     Hide Repeat Stats: Ismétlési statisztikák elrejtése
     Sections:
       Visible While Paused: Szüneteltetéskor látható teljes ablakos vagy teljes képernyős módban
@@ -1136,7 +1153,7 @@ Video:
   Retry With Built-in Extraction: Újrapróbálkozás a beépített kinyeréssel
   Retry With yt-dlp Extraction: Újrapróbálkozás yt-dlp-kinyeréssel
   Reloading video after streaming URL error: Videó újratöltése az adatfolyam URL-jének hibája után
-  Configure Restricted Playback Cookies Hint: Állítsa be a sütiket a Beállítások → Külső szoftverek → yt-dlp lejátszási sütik menüpontban.
+  Configure Restricted Playback Cookies Hint: "Állítsa be a sütiket a Beállítások → Külső szoftverek → yt-dlp sütik menüpontban."
   Try With Configured Cookies: Próbálkozás a beállított sütikkel
   Restricted Playback Authentication Failed Template: 'Az yt-dlp nem tudta elérni ezt a videót a beállított sütikkel: {error}'
   Unmark As Watched: Megjelölés nem látottként
@@ -1350,6 +1367,10 @@ Share:
   Share failed: "Nem sikerült megosztani a hivatkozást"
   Timestamp Link Copied: Időbélyeges hivatkozás a vágólapra másolva
 Context Menu:
+  Select Tab: Lap kijelölése
+  Close Tabs Before: Előző lapok bezárása
+  Close Tabs After: Következő lapok bezárása
+  Close Other Tabs: Többi lap bezárása
   Copy {service} link without playlist: "{service}-hivatkozás másolása lejátszási lista nélkül"
   Context Menu: Helyi menü
   Select All: Összes kijelölése
@@ -1554,7 +1575,7 @@ Tooltips:
     Cookie File: Válasszon Netscape-formátumú cookie-fájlt a hitelesített lejátszáshoz.
     Browser for Cookies: A böngészőtámogatás adatait a kiválasztott yt-dlp végrehajtható fájlból olvassa be az alkalmazás. Hitelesített lejátszás kérésekor az OpenTubeX arra utasítja a yt-dlp-t, hogy ebből a böngészőből olvassa be a cookie-kat.
     Browser Profile: Nem kötelező böngészőprofilnév vagy -mappa. Hagyja üresen a legutóbb használt profil kiválasztásához.
-    Always Use Cookies: "A beállított cookie-k használata minden alkalommal, amikor a yt-dlp adatfolyamokat nyer ki. Ez nem állítja át az adatfolyam-kinyerési módszert yt-dlp-re. A yt-dlp kiválasztásával csak fiókkal elérhető formátumok is megjelenhetnek, köztük a YouTube Premium nagyobb bitrátája, ha a fiók hozzáfér. A beállított sütik használata a feliratokhoz és az automatikus fordításokhoz."
+    Always Use Cookies: "Használd a beállított sütiket a letöltésekhez, feliratokhoz és amikor a yt-dlp adatfolyamokat nyer ki. Ez nem állítja át az adatfolyam-kinyerési módszert yt-dlp-re. A yt-dlp kiválasztásával csak fiókkal elérhető formátumok is megjelenhetnek, köztük a YouTube Premium nagyobb bitrátája, ha a fiók hozzáfér."
     FFmpeg Executable Path: Az FFmpeg szükséges a különálló videó- és hangadatfolyamok egyesítéséhez, valamint a hangkonvertáláshoz. Az OpenTubeX alapértelmezés szerint azt feltételezi, hogy az FFmpeg megtalálható a PATH környezeti változó alapján. Szükség esetén itt egyéni elérési út adható meg.
     Use cookies for subtitles: "A beállított sütik használata a feliratokhoz és az automatikus fordításokhoz. A „Sütik használata mindig” beállítás is engedélyezi."
   Distraction Free Settings:
@@ -1643,6 +1664,7 @@ CommandPalette:
     Download Finished: Ez a letöltés már nem fut
     Video: Előbb nyisson meg egy videót
 Downloads:
+  Preparing: Előkészítés…
   Export Failed: "A letöltött fájlt nem sikerült menteni. Válasszon írható letöltési mappát, és próbálja újra."
   Remove File Permanently Warning: "Ez véglegesen törli a következőt: „{title}”."
   Download: Letöltés

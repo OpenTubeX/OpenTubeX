@@ -117,7 +117,7 @@ test('controls queue order, running jobs, bandwidth, and retry-all', async ({ ap
   const second = page.locator('.downloadRow').filter({ hasText: 'Second queued download' })
   const moved = page.locator('.downloadRow').filter({ hasText: 'Moved queue download' })
   const canceled = page.locator('.downloadRow').filter({ hasText: 'Canceled download' })
-  await expect(first).toContainText('0.0%')
+  await expect(first).toContainText('Preparing…')
   await expect(second).toContainText(/Queued, position/)
   await clickUntil(page, moved.getByTitle('Move earlier'), async () => (
     (await moved.textContent()).includes('Queued, position 1')
@@ -149,7 +149,7 @@ test('controls queue order, running jobs, bandwidth, and retry-all', async ({ ap
     ), submittedWhilePaused.id)) === 'cancelled'
   ))
   await clickUntil(page, page.getByRole('button', { name: 'Resume all' }), async () => (
-    (await first.textContent()).includes('0.0%')
+    (await first.textContent()).includes('Preparing…')
   ))
 
   await writeFile(path.join(app.userDataDir, 'release-aaaaaaaaaaa'), '')
@@ -288,7 +288,7 @@ test('keeps the unsupported active-pause fallback resumable', async ({ app, page
   await clickUntil(page, page.getByRole('button', { name: 'Resume all' }), async () => (
     (await page.evaluate(async id => (
       (await window.ftElectron.ytDlpListDownloads()).find(download => download.id === id)?.status
-    ), resumeAllActive.id)) === 'downloading'
+    ), resumeAllActive.id)) === 'preparing'
   ))
   await writeFile(path.join(app.userDataDir, 'release-ppppppppppp'), '')
 
@@ -415,4 +415,81 @@ test('checks destination space before starting a download', async ({ app, page }
   await goTo(page, 'downloads')
   await expect(page.locator('.downloadRow').filter({ hasText: 'Unknown size download' })).toContainText('Download size is unknown')
   await writeFile(path.join(app.userDataDir, 'release-hhhhhhhhhhh'), '')
+})
+
+test('honors the download cookie preference and Always override', async ({ app, page }) => {
+  const executable = path.join(app.userDataDir, 'cookie-yt-dlp.sh')
+  const argumentsFile = path.join(app.userDataDir, 'cookie-arguments.txt')
+  const cookies = path.join(app.userDataDir, 'session.txt')
+  await writeFile(cookies, '# Netscape HTTP Cookie File\n')
+  await writeFile(executable, `#!/bin/sh\nprintf '%s\\n' "$@" > '${argumentsFile}'\n`)
+  await chmod(executable, 0o755)
+  await configureQueue(page, {
+    enableDownloads: true,
+    ytDlpSource: 'system',
+    ytDlpPath: executable,
+    ytDlpFfmpegSource: 'system',
+    ytDlpPlaybackAuthMode: 'file',
+    ytDlpPlaybackCookiesPath: cookies
+  })
+  for (const [enabled, always, mode] of [[false, false, 'file'], [false, true, 'file'], [false, false, 'file'], [true, false, 'file'], [true, true, 'none']]) {
+    await configureQueue(page, { ytDlpDownloadUseCookies: enabled, ytDlpPlaybackAlwaysUseCookies: always, ytDlpPlaybackAuthMode: mode })
+    await writeFile(argumentsFile, '')
+    await submitDownloads(page, [{ videoId: 'iiiiiiiiiii', title: 'Cookie download', mode: 'video' }])
+    await expect.poll(async () => (await readFile(argumentsFile, 'utf8')).includes('https://www.youtube.com/watch?v=iiiiiiiiiii')).toBe(true)
+    const args = (await readFile(argumentsFile, 'utf8')).trim().split('\n')
+    expect(args.includes('--cookies')).toBe((enabled || always) && mode === 'file')
+    if ((enabled || always) && mode === 'file') expect(args[args.indexOf('--cookies') + 1]).toBe(cookies)
+  }
+  await configureQueue(page, { ytDlpPlaybackAuthMode: 'file', ytDlpDownloadUseCookies: false, ytDlpPlaybackAlwaysUseCookies: true })
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSettingsWindow', 'settings'))
+  await page.locator('.settingsMenu [data-section="advanced"]').click()
+  const downloadCookies = page.getByRole('checkbox', { name: /^Use cookies for downloads/ })
+  await expect(downloadCookies).toBeChecked()
+  await expect(downloadCookies).toBeDisabled()
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', false))
+  await expect(downloadCookies).not.toBeChecked()
+  await expect(downloadCookies).toBeEnabled()
+})
+
+test('shows preparation and processing without a stale percentage or ETA', async ({ app, page }) => {
+  const executable = path.join(app.userDataDir, 'phases-yt-dlp.sh')
+  const transfer = path.join(app.userDataDir, 'start-transfer')
+  const processing = path.join(app.userDataDir, 'start-processing')
+  const finish = path.join(app.userDataDir, 'finish-download')
+  await writeFile(executable, [
+    '#!/bin/sh',
+    `while [ ! -f '${transfer}' ]; do sleep 0.05; done`,
+    "printf '__OPENTUBEX_DOWNLOAD__:downloading\\t97.3%%\\t2MiB/s\\t00:00\\n' >&2",
+    `while [ ! -f '${processing}' ]; do sleep 0.05; done`,
+    "printf '__OPENTUBEX_DOWNLOAD__:finished\\t97.3%%\\t2MiB/s\\t00:00\\n' >&2",
+    "printf '__OPENTUBEX_PROCESSING__\\n' >&2",
+    `while [ ! -f '${finish}' ]; do sleep 0.05; done`,
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  await configureQueue(page, { ytDlpPath: executable, ytDlpDownloadFolderPath: app.userDataDir })
+  await submitDownloads(page, [{ videoId: 'aaaaaaaaaaa', title: 'Download phase test', mode: 'video' }])
+  await goTo(page, 'downloads')
+  const row = page.locator('.downloadRow').filter({ hasText: 'Download phase test' })
+  const progress = row.getByRole('progressbar')
+  await expect(row).toContainText('Preparing…')
+  await expect(progress).not.toHaveAttribute('aria-valuenow')
+  await expect(row.locator('.progressFill')).toHaveClass(/indeterminate/)
+  await expect(row.getByTitle('Pause Download')).toBeVisible()
+  await expect(row.getByTitle('Cancel Download')).toBeVisible()
+  await row.screenshot({ path: test.info().outputPath('preparing.png') })
+  await writeFile(transfer, '')
+  await expect(row).toContainText('97.3%')
+  await expect(progress).toHaveAttribute('aria-valuenow', '97.3')
+  await writeFile(processing, '')
+  await expect(row).toContainText('Processing…')
+  await expect(row).not.toContainText('97.3%')
+  await expect(row).not.toContainText('ETA')
+  await expect(progress).not.toHaveAttribute('aria-valuenow')
+  await expect(row.locator('.progressFill')).toHaveClass(/indeterminate/)
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await expect(row.locator('.progressFill')).toHaveCSS('animation-name', 'none')
+  await row.screenshot({ path: test.info().outputPath('processing.png') })
+  await writeFile(finish, '')
+  await expect(progress).toHaveCount(0)
 })

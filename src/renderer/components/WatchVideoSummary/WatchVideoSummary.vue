@@ -7,12 +7,12 @@
       @keydown.enter.space.stop
       @keyup.enter.space.stop
     >
-      <span class="summaryHeading">
+      <FtInlineMetadata class="summaryHeading">
         <span class="summaryTitle">{{ $t('Video.AI-generated video summary') }}</span>
         <span class="summaryDisclaimer">
           {{ $t('Video.Quality and accuracy may vary') }}
         </span>
-      </span>
+      </FtInlineMetadata>
       <ft-icon
         class="summaryChevron"
         :icon="['fas', 'angle-down']"
@@ -31,6 +31,8 @@
 </template>
 
 <script setup>
+import FtInlineMetadata from '../FtInlineMetadata/FtInlineMetadata.vue'
+
 defineProps({
   paragraphs: { type: Array, required: true },
   expanded: { type: Boolean, default: false }

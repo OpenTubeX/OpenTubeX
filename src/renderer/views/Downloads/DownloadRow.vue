@@ -36,7 +36,7 @@
         >
           <div
             class="progressFill"
-            :class="{ indeterminate: download.status === 'processing' }"
+            :class="{ indeterminate: download.status !== 'downloading' }"
             :style="{ inlineSize: `${progressPercentage}%` }"
             aria-hidden="true"
           />
@@ -174,6 +174,7 @@
 </template>
 
 <script setup>
+import { displayAndroidPath } from '../../helpers/androidStorage'
 import { ytDlp } from '../../helpers/ytDlp'
 import { FtIcon } from '@opentubex/icons'
 import { computed } from 'vue'
@@ -197,13 +198,13 @@ const props = defineProps({
 })
 const emit = defineEmits(['clear', 'move', 'open', 'pause', 'play', 'remove', 'resume', 'retry'])
 const { t } = useI18n()
-const inProgress = computed(() => ['downloading', 'processing'].includes(props.download.status))
+const inProgress = computed(() => ['preparing', 'downloading', 'processing'].includes(props.download.status))
 const progressPercentage = computed(() => (
   Number.isFinite(props.download.percent)
     ? Math.min(100, Math.max(0, props.download.percent))
     : 0
 ))
-const controllable = computed(() => ['queued', 'downloading', 'processing', 'pausing', 'paused'].includes(props.download.status))
+const controllable = computed(() => ['queued', 'preparing', 'downloading', 'processing', 'pausing', 'paused'].includes(props.download.status))
 const queuePending = computed(() => (
   ['queued', 'paused'].includes(props.download.status) && props.download.started !== true
 ))
@@ -252,7 +253,7 @@ const allDestinations = computed(() => {
   }
   return props.download.destination ? [props.download.destination] : []
 })
-const destinations = computed(() => allDestinations.value.slice(0, MAX_VISIBLE_DESTINATIONS))
+const destinations = computed(() => allDestinations.value.slice(0, MAX_VISIBLE_DESTINATIONS).map(displayAndroidPath))
 const hiddenDestinationCount = computed(() => allDestinations.value.length - destinations.value.length)
 const availabilityText = computed(() => {
   if (props.download.status !== 'completed') return ''
@@ -280,7 +281,7 @@ const errorText = computed(() => {
     : downloadErrorMessage(props.download.errorMessage, t)
 })
 const spaceWarningText = computed(() => {
-  if (!['queued', 'downloading', 'processing', 'pausing', 'paused'].includes(props.download.status)) return ''
+  if (!['queued', 'preparing', 'downloading', 'processing', 'pausing', 'paused'].includes(props.download.status)) return ''
   if (props.download.spaceWarning === 'unknown-estimate' && Number.isFinite(props.download.availableSpaceBytes)) {
     return t('Downloads.Unknown Download Size', { available: formatBytes(props.download.availableSpaceBytes) })
   }
@@ -302,6 +303,8 @@ const statusText = computed(() => {
       return t('Downloads.Paused')
     case 'pausing':
       return t('Downloads.Pausing')
+    case 'preparing':
+      return t('Downloads.Preparing')
     case 'processing':
       return t('Downloads.Processing')
     case 'completed':

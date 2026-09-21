@@ -38,6 +38,34 @@ public class AndroidProxyRelayTest {
         return client;
     }
 
+    @Test public void expiredDnsBudgetDoesNotStartAnotherConnection() throws Exception {
+        try (ServerSocket destination = server();
+             AndroidProxyRelay relay = new AndroidProxyRelay(new ProxyConfiguration(false, "socks5", "", "0", "", ""), null,
+                 host -> {
+                     try { Thread.sleep(31_000); } catch (InterruptedException error) { throw new IOException(error); }
+                     return new InetAddress[] { InetAddress.getByName("127.0.0.1") };
+                 });
+             Socket client = connect(relay, "destination.test:" + destination.getLocalPort())) {
+            client.setSoTimeout(35_000);
+            assertTrue(AndroidProxyRelay.readHeaders(client.getInputStream()).startsWith("HTTP/1.1 502"));
+            destination.setSoTimeout(100);
+            assertThrows(SocketTimeoutException.class, destination::accept);
+        }
+    }
+
+    @Test public void triesNextResolvedAddressWhenFirstAddressCannotConnect() throws Exception {
+        try (ServerSocket destination = server();
+             AndroidProxyRelay relay = new AndroidProxyRelay(new ProxyConfiguration(false, "socks5", "", "0", "", ""), null,
+                 host -> new InetAddress[] { InetAddress.getByName("127.0.0.2"), InetAddress.getByName("127.0.0.1") });
+             Socket client = connect(relay, "destination.test:" + destination.getLocalPort())) {
+            assertTrue(AndroidProxyRelay.readHeaders(client.getInputStream()).startsWith("HTTP/1.1 200"));
+            try (Socket remote = destination.accept()) {
+                remote.getOutputStream().write(42);
+                assertEquals(42, client.getInputStream().read());
+            }
+        }
+    }
+
     @Test public void unsupportedTlsHalfClosePreservesResponseAfterRequestEof() throws Exception {
         ByteArrayOutputStream sent = new ByteArrayOutputStream();
         Socket client = new Socket() {

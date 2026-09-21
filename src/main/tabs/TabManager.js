@@ -52,8 +52,8 @@ const tabManagers = new Map()
 
 const DEFAULT_NEW_TAB_POSITION = 'afterCurrentInOrder'
 const VALID_NEW_TAB_POSITIONS = new Set(['end', 'afterCurrent', 'afterCurrentInOrder'])
-const DEFAULT_TAB_CLOSE_FOCUS = 'previousTab'
-const VALID_TAB_CLOSE_FOCUS = new Set(['previousTab', 'nextTab'])
+const DEFAULT_TAB_CLOSE_FOCUS = 'lastActiveTab'
+const VALID_TAB_CLOSE_FOCUS = new Set(['lastActiveTab', 'previousTab', 'nextTab'])
 // Closing a tab has to pick the replacement synchronously, so the preference is
 // cached here instead of being read from the settings store on every close.
 let tabCloseFocus = DEFAULT_TAB_CLOSE_FOCUS
@@ -138,7 +138,7 @@ export class TabManager {
 
   /**
    * @param {unknown} value
-   * @returns {'previousTab' | 'nextTab'}
+   * @returns {'lastActiveTab' | 'previousTab' | 'nextTab'}
    */
   static normalizeTabCloseFocus(value) {
     return VALID_TAB_CLOSE_FOCUS.has(value)
@@ -758,6 +758,8 @@ export class TabManager {
     this.activeTabId = null
     /** @type {string|null} */
     this.presentedTabId = null
+    /** @type {string[]} Most recent activation first; background opens are excluded. */
+    this.activationHistory = []
     this.selectionRevision = 0
     /** @type {Array<{ id: string, url: string, title?: string, isPinned?: boolean, color?: string | null, groupId?: string | null, history?: object[] | null, historyIndex?: number, tabIndex: number }>} */
     this.closedTabs = []
@@ -1332,6 +1334,7 @@ export class TabManager {
     }
 
     tab.preloadInBackground = false
+    this.activationHistory = [tabId, ...this.activationHistory.filter(id => id !== tabId && this.tabs.has(id))]
     tab.lastActiveAt = Date.now()
     this.activeTabId = tabId
     this.selectionRevision += 1
@@ -1533,6 +1536,11 @@ export class TabManager {
       (!loadedOnly || this.tabs.get(candidateId)?.loadState === 'loaded') &&
       !this._deferredCloseTabIds.has(candidateId) &&
       !this._deferredUnloadTabIds.has(candidateId)
+
+    if (tabCloseFocus === 'lastActiveTab') {
+      const recentTabId = this.activationHistory.find(id => id !== tabId && this.tabs.has(id) && isSelectable(id))
+      return recentTabId ?? nextTabIds.find(isSelectable) ?? previousTabIds.find(isSelectable) ?? null
+    }
 
     const [preferredTabIds, fallbackTabIds] = tabCloseFocus === 'nextTab'
       ? [nextTabIds, previousTabIds]

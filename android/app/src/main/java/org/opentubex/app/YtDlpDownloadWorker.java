@@ -1,7 +1,6 @@
 package org.opentubex.app;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -26,6 +25,7 @@ public final class YtDlpDownloadWorker extends Worker {
     }
 
     @NonNull @Override public Result doWork() {
+        OpenTubeXNotificationChannels.createAll(getApplicationContext());
         boolean foreground = AppVisibility.isVisible();
         long started = android.os.SystemClock.elapsedRealtime();
         java.util.function.Consumer<org.json.JSONObject> progress = record -> {
@@ -67,12 +67,7 @@ public final class YtDlpDownloadWorker extends Worker {
 
     private Notification notification(org.json.JSONObject record) {
         Context context = getApplicationContext();
-        String channelId = "yt-dlp-downloads";
-        if (Build.VERSION.SDK_INT >= 26) {
-            NotificationChannel channel = new NotificationChannel(channelId, "yt-dlp", NotificationManager.IMPORTANCE_LOW);
-            channel.setShowBadge(false);
-            context.getSystemService(NotificationManager.class).createNotificationChannel(channel);
-        }
+        String channelId = OpenTubeXNotificationChannels.DOWNLOADS_ID;
         PendingIntent open = PendingIntent.getActivity(context, 0,
             new Intent(context, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP),
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
@@ -82,7 +77,7 @@ public final class YtDlpDownloadWorker extends Worker {
         int percent = record == null ? 0 : record.optInt("percent");
         return builder.setSmallIcon(R.drawable.ic_stat_opentubex)
             .setContentTitle(record == null ? "yt-dlp" : record.optString("title", "yt-dlp")).setContentIntent(open)
-            .setProgress(100, percent, record == null || record.optString("status").equals("processing"))
+            .setProgress(100, percent, record == null || !record.optString("status").equals("downloading"))
             .addAction(new Notification.Action.Builder(0, context.getString(android.R.string.cancel), cancel).build())
             .setCategory(Notification.CATEGORY_PROGRESS).setOngoing(true).setOnlyAlertOnce(true).build();
     }

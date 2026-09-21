@@ -103,6 +103,19 @@ public final class YtDlpPlugin extends Plugin {
             return new JSONObject().put("ok", true);
         });
     }
+    @PluginMethod public void createSession(PluginCall call) {
+        Intent intent = new Intent(getContext(), YouTubeSessionActivity.class);
+        for (String label : asList("saveLabel", "hint", "errorLabel")) intent.putExtra(label, call.getString(label, ""));
+        startActivityForResult(call, intent, "sessionCreated");
+    }
+
+    @ActivityCallback private void sessionCreated(PluginCall call, ActivityResult result) {
+        if (call == null) return;
+        String path = result.getResultCode() == Activity.RESULT_OK && result.getData() != null
+            ? result.getData().getStringExtra("path") : "";
+        call.resolve(new JSObject().put("path", path));
+    }
+
     @PluginMethod public void chooseCookies(PluginCall call) {
         startActivityForResult(call, new Intent(Intent.ACTION_OPEN_DOCUMENT).setType("*/*").addCategory(Intent.CATEGORY_OPENABLE), "cookiesChosen");
     }

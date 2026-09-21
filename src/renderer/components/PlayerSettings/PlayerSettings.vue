@@ -406,6 +406,7 @@
       />
       <div class="settingButtonWithSync quickPlaybackSpeedCustomizeButton">
         <FtButton
+          data-settings-subpage="quick-playback-speed"
           :label="t('Settings.Player Settings.Customize Quick Playback Speed Bar')"
           :icon="['fas', 'sliders-h']"
           :disabled="!useQuickPlaybackSpeedBar"
@@ -466,7 +467,7 @@
         </p>
         <FtInput
           class="screenshotFolderPath"
-          :placeholder="screenshotFolder"
+          :placeholder="displayAndroidPath(screenshotFolder)"
           :show-action-button="false"
           :show-label="false"
           :disabled="true"
@@ -621,6 +622,7 @@
 </template>
 
 <script setup>
+import { displayAndroidPath, chooseAndroidDirectory } from '../../helpers/androidStorage'
 import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -639,7 +641,6 @@ import FtTooltip from '../FtTooltip/FtTooltip.vue'
 import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
 
 import store from '../../store/index'
-import { chooseAndroidDirectory } from '../../helpers/androidStorage'
 import { showToast } from '../../helpers/utils'
 import { DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS } from '../../../constants'
 import { initializePlatformInfo, supportsAutoPictureInPictureMinimize } from '../../helpers/platform'

@@ -1,0 +1,26 @@
+.ftInlineMetadata {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 0.75em;
+  min-inline-size: 0;
+  overflow-x: clip;
+}
+
+.ftInlineMetadata > * {
+  position: relative;
+  min-inline-size: 0;
+}
+
+/* A wrapped item's separator falls outside the row and is clipped. */
+.ftInlineMetadata > * + *::before {
+  content: '';
+  position: absolute;
+  inline-size: 0.25em;
+  block-size: 0.25em;
+  inset-inline-start: -0.5em;
+  inset-block-start: 0.5lh;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background-color: currentcolor;
+}

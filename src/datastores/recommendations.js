@@ -3,7 +3,9 @@ import { RECOMMENDATION_RECORD_LIMIT, RECOMMENDATION_RETENTION_MS, updateRecomme
 /** Local evidence store, shared by Electron windows through its main process. */
 export function createRecommendationStore(db, createEpoch = () => crypto.randomUUID()) {
   let pending = Promise.resolve()
+  let pendingBatch = null
   const queue = operation => {
+    pendingBatch = null
     const result = pending.catch(() => {}).then(operation)
     pending = result
     return result
@@ -25,19 +27,44 @@ export function createRecommendationStore(db, createEpoch = () => crypto.randomU
       await db.removeAsync({ _id: { $ne: 'meta' }, updatedAt: { $lt: Date.now() - RECOMMENDATION_RETENTION_MS } }, { multi: true })
       return snapshot()
     }),
-    record: event => queue(async () => {
-      const { epoch, revision } = await meta()
-      if (event?.epoch !== epoch) return { epoch, revision, stale: true }
-      const previous = await db.findOneAsync({ _id: event.video?.videoId ?? '' })
-      const record = updateRecommendationRecord(previous, event)
-      if (!record || record === previous) return { epoch, revision }
-      await db.updateAsync({ _id: record._id }, record, { upsert: true })
-      const excess = await db.findAsync({ _id: { $ne: 'meta' } }, { _id: 1 }).sort({ updatedAt: -1 }).skip(RECOMMENDATION_RECORD_LIMIT)
-      const removed = excess.map(entry => entry._id)
-      if (removed.length) await db.removeAsync({ _id: { $in: removed } }, { multi: true })
-      await db.updateAsync({ _id: 'meta' }, { $set: { revision: revision + 1 } })
-      return { epoch, revision: revision + 1, record, removed }
-    }),
+    record(event) {
+      if (!pendingBatch) {
+        const batch = { events: [], result: null }
+        batch.result = queue(async () => {
+          if (pendingBatch === batch) pendingBatch = null
+          const { epoch, revision } = await meta()
+          const changed = new Map()
+          const existing = new Set()
+          for (const entry of batch.events) {
+            if (entry?.epoch !== epoch) continue
+            const id = entry.video?.videoId ?? ''
+            const previous = changed.get(id) ?? await db.findOneAsync({ _id: id })
+            if (previous && !changed.has(id)) existing.add(id)
+            const record = updateRecommendationRecord(previous, entry)
+            if (record && record !== previous) changed.set(id, record)
+          }
+          let removed = []
+          if (changed.size) {
+            const inserted = [...changed.values()].filter(record => !existing.has(record._id))
+            if (inserted.length) await db.insertAsync(inserted)
+            for (const record of changed.values()) {
+              if (existing.has(record._id)) await db.updateAsync({ _id: record._id }, record)
+            }
+            const excess = await db.findAsync({ _id: { $ne: 'meta' } }, { _id: 1 }).sort({ updatedAt: -1 }).skip(RECOMMENDATION_RECORD_LIMIT)
+            removed = excess.map(entry => entry._id)
+            if (removed.length) await db.removeAsync({ _id: { $in: removed } }, { multi: true })
+            await db.updateAsync({ _id: 'meta' }, { $set: { revision: revision + 1 } })
+          }
+          return batch.events.map(entry => entry?.epoch !== epoch
+            ? { epoch, revision, stale: true }
+            : { epoch, revision: revision + Number(changed.size > 0), record: changed.get(entry.video?.videoId), removed })
+        })
+        pendingBatch = batch
+      }
+      const batch = pendingBatch
+      const index = batch.events.push(event) - 1
+      return batch.result.then(results => results[index])
+    },
     remove: videoIds => queue(async () => {
       const { revision } = await meta()
       await db.removeAsync({ _id: { $in: videoIds } }, { multi: true })

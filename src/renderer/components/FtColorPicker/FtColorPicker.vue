@@ -81,6 +81,7 @@
           <span>{{ t('Color Picker.Hue') }}</span>
           <input
             v-model.number="hue"
+            v-touch-range
             class="hueSlider"
             type="range"
             min="0"
@@ -101,6 +102,7 @@
           >
             <input
               v-model.number="alpha"
+              v-touch-range
               class="alphaSlider"
               type="range"
               min="0"
@@ -119,6 +121,7 @@
           <span>{{ blurLabel }}</span>
           <input
             v-model.number="blurStrength"
+            v-touch-range
             class="blurSlider"
             type="range"
             min="0"
@@ -206,6 +209,7 @@
 </template>
 
 <script setup>
+import { vTouchRange } from '../../helpers/touchRange'
 import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 

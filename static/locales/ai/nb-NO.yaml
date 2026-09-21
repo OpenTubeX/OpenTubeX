@@ -188,6 +188,17 @@ User Playlists:
     This playlist could not be loaded.: Denne spillelisten kunne ikke lastes inn.
     More videos could not be loaded.: Flere videoer kunne ikke lastes inn.
 History:
+  Repair Use Cookies: "Bruk konfigurerte yt-dlp-informasjonskapsler"
+  Repair Cookies Hint: "Over 500 videoer må kontrolleres. Konfigurer informasjonskapsler i yt-dlp-innstillingene og aktiver dem her for å redusere risikoen for begrensning av forespørsler."
+  Repair Description: "Bruk dette etter import av historikk, eller når videoer mangler opplysninger eller har feil LIVE-merking."
+  Repair Details: "Fyller inn manglende titler, kanaler og publiseringsdatoer og kontrollerer varighet og LIVE-merking. Avspillingsposisjonen og statusen som sett beholdes."
+  Repair Notice: "Store historikker kan ta tid. Mislykkede forespørsler prøves automatisk på nytt. Slettede eller private videoer kan fortsatt mangle opplysninger."
+  Start Repair: "Start reparasjon"
+  Repair Checking: "Kontrollerer videoopplysninger"
+  Repair Waiting: "Venter på YouTube. Reparasjonen fortsetter automatisk."
+  Repair Retrying: "Prøver mislykkede forespørsler på nytt"
+  Repair Finished: "Reparasjon fullført"
+  Repair Stopped: "Reparasjon stoppet"
   Repair: "Reparer historikk"
   Repair Progress: "Kontrollert {checked}/{total} · Reparert {repaired} · Mislyktes {failed}"
   Mark All As Watched: Merk alle som sett
@@ -282,9 +293,10 @@ Settings:
       After current tab: Etter gjeldende fane
       After current tab in opened order: Etter gjeldende fane, i åpningsrekkefølge
     Tab Close Focus:
+      Last active tab: "Sist aktive fane"
+      Next tab in tab order: "Neste fane i fanerekkefølgen"
+      Previous tab in tab order: "Forrige fane i fanerekkefølgen"
       Tab Close Focus: Etter at en fane lukkes
-      Previous tab: Velg forrige fane
-      Next tab: Velg neste fane
     Startup Behavior:
       Startup Behavior: Ved oppstart
       Load all tabs: Last inn alle faner
@@ -665,6 +677,10 @@ Settings:
     Title Excludes: Tittelen inneholder ikke
     Title Filter Hint: Skill flere søkeord for tittelen med komma. En video må samsvare med minst ett inkludert søkeord og ingen ekskluderte søkeord.
   External Software Settings:
+    Create YouTube session: "Opprett YouTube-økt"
+    YouTube session hint: "Logg inn om nødvendig, og lagre økten. Velg i innstillingene om den skal brukes til nedlastinger, avspilling eller undertekster."
+    Use cookies for downloads: "Bruk informasjonskapsler for nedlastinger"
+    YouTube session failed: "Kunne ikke lagre YouTube-økten."
     Checking FFmpeg and FFprobe: Ser etter FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe er ikke lastet ned ennå. Klikk på knappen nedenfor for å laste dem ned.
     External Software Settings: Ekstern programvare
@@ -710,7 +726,7 @@ Settings:
       Manual: Oppdater bare manuelt
     yt-dlp Executable Path: Bane til kjørbar yt-dlp-fil
     FFmpeg Executable Path: Bane til kjørbar FFmpeg-fil
-    Restricted Playback Authentication: Informasjonskapsler for yt-dlp-avspilling
+    Restricted Playback Authentication: "yt-dlp-informasjonskapsler"
     Cookie Source: Kilde for informasjonskapsler
     Cookie Sources:
       None: Ingen
@@ -844,6 +860,7 @@ Settings:
     Expanded: Utvidet
     Playing Interface Hide Delay: Forsinkelse før grensesnittet skjules under avspilling
     Hide Startup Splash: Skjul oppstartsskjerm
+    Hide Header Sync Indicator: Skjul synkroniseringsindikatoren i apphodet
     Hide Repeat Stats: Skjul gjentakelsesstatistikk
     Sections:
       Visible While Paused: Synlig ved pause i fullt vindu / fullskjerm
@@ -1141,7 +1158,7 @@ Video:
   Retry With Built-in Extraction: Prøv på nytt med innebygd uthenting
   Retry With yt-dlp Extraction: Prøv på nytt med uthenting via yt-dlp
   Reloading video after streaming URL error: Laster inn videoen på nytt etter en feil med strømmeadressen
-  Configure Restricted Playback Cookies Hint: Konfigurer informasjonskapsler under Innstillinger → Ekstern programvare → Informasjonskapsler for yt-dlp-avspilling.
+  Configure Restricted Playback Cookies Hint: "Konfigurer informasjonskapsler under Innstillinger → Ekstern programvare → yt-dlp-informasjonskapsler."
   Try With Configured Cookies: Prøv med de konfigurerte informasjonskapslene
   Restricted Playback Authentication Failed Template: 'yt-dlp fikk ikke tilgang til denne videoen med de konfigurerte informasjonskapslene: {error}'
   Unmark As Watched: Merk som ikke sett
@@ -1364,6 +1381,10 @@ Share:
   Share failed: "Kunne ikke dele lenken"
   Timestamp Link Copied: Lenken med tidsstempel er kopiert til utklippstavlen
 Context Menu:
+  Select Tab: Velg fane
+  Close Tabs Before: Lukk foregående faner
+  Close Tabs After: Lukk etterfølgende faner
+  Close Other Tabs: Lukk andre faner
   Copy {service} link without playlist: "Kopier {service}-lenke uten spilleliste"
   Context Menu: Kontekstmeny
   Select All: Merk alt
@@ -1568,7 +1589,7 @@ Tooltips:
     Cookie File: Velg en informasjonskapselfil i Netscape-format for autentisert avspilling.
     Browser for Cookies: Nettleserstøtten leses fra den valgte kjørbare yt-dlp-filen. OpenTubeX ber yt-dlp lese informasjonskapsler fra denne nettleseren når autentisert avspilling etterspørres.
     Browser Profile: Valgfritt navn eller mappe for nettleserprofilen. La feltet stå tomt for å bruke profilen som ble åpnet sist.
-    Always Use Cookies: "Bruk de konfigurerte informasjonskapslene hver gang yt-dlp henter ut strømmer. Dette endrer ikke metoden for strømhenting til yt-dlp. Når yt-dlp er valgt, kan formater som krever konto, bli tilgjengelige, blant annet YouTube Premiums forbedrede bithastighet hvis kontoen har tilgang. Bruk de konfigurerte informasjonskapslene for undertekster og automatiske oversettelser."
+    Always Use Cookies: "Bruk de konfigurerte informasjonskapslene for nedlastinger, undertekster og hver gang yt-dlp henter strømmer. Dette endrer ikke metoden for strømhenting til yt-dlp. Når yt-dlp er valgt, kan formater som krever konto, bli tilgjengelige, blant annet YouTube Premiums forbedrede bithastighet hvis kontoen har tilgang."
     FFmpeg Executable Path: FFmpeg kreves for å slå sammen separate video- og lydstrømmer og for lydkonvertering. OpenTubeX antar som standard at FFmpeg finnes via miljøvariabelen PATH. Du kan angi en egendefinert bane her ved behov.
     Use cookies for subtitles: "Bruk de konfigurerte informasjonskapslene for undertekster og automatiske oversettelser. Aktiveres også av «Bruk alltid informasjonskapsler»."
   Distraction Free Settings:
@@ -1659,6 +1680,7 @@ CommandPalette:
     Download Finished: Denne nedlastingen pågår ikke lenger
     Video: Åpne en video først
 Downloads:
+  Preparing: Forbereder…
   Export Failed: "Kunne ikke lagre den nedlastede filen. Velg en nedlastingsmappe med skrivetilgang og prøv igjen."
   Remove File Permanently Warning: "Dette sletter «{title}» permanent."
   Download: Last ned

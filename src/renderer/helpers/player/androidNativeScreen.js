@@ -30,7 +30,7 @@ export function createAndroidNativeScreen({ element, container, getController, g
   let appChromeElements = []
   let globalMenuElements = []
   let globalElementsDirty = true
-  const appChromeSelector = '.topNav, .sideNav, .tabBar, .capacitorTabletTabBar'
+  const appChromeSelector = '.topNav, .topNav .searchContainer, .sideNav, .tabBar, .capacitorTabletTabBar'
 
   function nativeViewportWidth() {
     // innerWidth rounds CSS pixels, shifting the raised native layer at Android
@@ -250,7 +250,7 @@ export function createAndroidNativeScreen({ element, container, getController, g
     // Avoid searching the whole Watch page again on every scrolling frame.
     if (globalElementsDirty) {
       appChromeElements = [...document.querySelectorAll(appChromeSelector)]
-      globalMenuElements = [...document.querySelectorAll('dialog[open], [role="dialog"], [role="menu"], [aria-modal="true"]')]
+      globalMenuElements = [...document.querySelectorAll('dialog[open], [role="dialog"], [role="menu"], [aria-modal="true"], .ft-input-component .list')]
       globalElementsDirty = false
     }
     const appChrome = open ? [] : appChromeElements
@@ -354,9 +354,9 @@ export function createAndroidNativeScreen({ element, container, getController, g
       fullscreenFromRotation = false
       clearAmbientClips()
     }
-    document.documentElement.classList.toggle('nativePlaybackScreen', open)
     if (open) releaseInlineBackground()
     container.toggleAttribute('data-native-player-screen', open)
+    document.documentElement.classList.toggle('nativePlaybackScreen', open || !!document.querySelector('.nativeFullscreenTransition'))
     lastLayout = ''
     if (!open) document.dispatchEvent(new Event('fullscreenchange'))
     scheduleLayout()
@@ -382,6 +382,7 @@ export function createAndroidNativeScreen({ element, container, getController, g
       // frame. Waiting here presents portrait fullscreen before rotating it.
       document.dispatchEvent(new Event('fullscreenchange'))
       await attaching
+      if (presentationSequence === sequence && open) document.dispatchEvent(new Event('nativefullscreenready'))
     } catch (error) {
       if (presentationSequence === sequence) setOpen(false)
       throw error

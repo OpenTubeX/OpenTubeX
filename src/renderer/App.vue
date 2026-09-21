@@ -240,6 +240,27 @@
             </button>
           </div>
           <div
+            v-if="mobileContextThumbnailActions.length"
+            class="mobileLinkQuickActions mobileThumbnailActionRow"
+          >
+            <button
+              v-for="action in mobileContextThumbnailActions"
+              :key="action.label"
+              type="button"
+              :role="action.pressed === undefined ? 'menuitem' : 'menuitemcheckbox'"
+              :title="action.label"
+              :aria-label="action.label"
+              :aria-checked="action.pressed"
+              :disabled="action.enabled === false"
+              @click="runMobileContextAction(action)"
+            >
+              <FtIcon
+                :icon="action.icon"
+                aria-hidden="true"
+              />
+            </button>
+          </div>
+          <div
             ref="mobileLinkActionsScrollRef"
             v-overlay-scrollbars
             class="mobileLinkActionsScroll"
@@ -872,6 +893,9 @@ const mobileContextMenuStack = computed(() => {
 })
 const mobileContextMenuItems = computed(() => mobileContextMenuStack.value.at(-1).items)
 const mobileContextQuickActions = computed(() => mobileContextMenuItems.value.filter(action => action.quickAction))
+const mobileContextThumbnailActions = computed(() => mobileContextMenuStack.value.length === 1
+  ? unref(mobileContextActions.value?.thumbnailActions) ?? []
+  : [])
 const mobileContextMenuRows = computed(() => {
   const rows = mobileContextMenuItems.value.filter(action => !action.quickAction)
   return rows.filter((action, index) => action.type !== 'separator' || (
@@ -3302,6 +3326,18 @@ function handleKeyboardShortcuts(event) {
   }
 
   if (commandPaletteOpen.value || tabOrganizerOpen.value) return
+
+  if (matchesKeyboardShortcut(event, shortcuts.COPY_CURRENT_URL)) {
+    event.preventDefault()
+    const appUrl = window.location.href.split('#')[0]
+    const publicUrl = resolveMobileContextLinkCopyUrl(window.location.href, appUrl)
+    if (publicUrl) {
+      copyToClipboard(publicUrl, {
+        messageOnSuccess: t('Share.YouTube URL copied to clipboard')
+      })
+    }
+    return
+  }
 
   if (matchesKeyboardShortcut(event, shortcuts.FIND_IN_PAGE)) {
     event.preventDefault()

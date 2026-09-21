@@ -190,6 +190,17 @@ User Playlists:
     This playlist could not be loaded.: Nid oedd modd llwytho'r rhestr chwarae hon.
     More videos could not be loaded.: Nid oedd modd llwytho rhagor o fideos.
 History:
+  Repair Use Cookies: "Defnyddio cwcis yt-dlp sydd wedi'u ffurfweddu"
+  Repair Cookies Hint: "Mae angen gwirio dros 500 o fideos. Ffurfweddwch gwcis yng ngosodiadau yt-dlp a'u galluogi yma i leihau'r risg o gyfyngu ar geisiadau."
+  Repair Description: "Defnyddiwch hyn ar ôl mewnforio hanes, neu pan fo manylion fideos ar goll neu label LIVE anghywir."
+  Repair Details: "Yn llenwi teitlau, sianeli a dyddiadau cyhoeddi coll, ac yn gwirio hyd fideos a labeli LIVE. Mae cynnydd gwylio a statws gwylio yn aros yr un fath."
+  Repair Notice: "Gall hanesion mawr gymryd amser. Rhoddir cynnig arall ar geisiadau aflwyddiannus yn awtomatig. Gall fideos preifat neu wedi'u dileu aros yn anghyflawn."
+  Start Repair: "Dechrau trwsio"
+  Repair Checking: "Gwirio manylion fideos"
+  Repair Waiting: "Aros am YouTube. Bydd y trwsio'n ailddechrau'n awtomatig."
+  Repair Retrying: "Ailgynnig ceisiadau aflwyddiannus"
+  Repair Finished: "Trwsio wedi gorffen"
+  Repair Stopped: "Trwsio wedi stopio"
   Repair: "Trwsio’r hanes"
   Repair Progress: "Gwiriwyd {checked}/{total} · Trwsiwyd {repaired} · Methwyd {failed}"
   Mark All As Watched: Marcio'r cyfan fel wedi'u gwylio
@@ -284,9 +295,10 @@ Settings:
       After current tab: Ar ôl y tab presennol
       After current tab in opened order: Ar ôl y tab presennol, yn nhrefn agor
     Tab Close Focus:
+      Last active tab: "Y tab gweithredol diwethaf"
+      Next tab in tab order: "Y tab nesaf yn nhrefn y tabiau"
+      Previous tab in tab order: "Y tab blaenorol yn nhrefn y tabiau"
       Tab Close Focus: Ar ôl cau tab
-      Previous tab: Dewis y tab blaenorol
-      Next tab: Dewis y tab nesaf
     Startup Behavior:
       Startup Behavior: Wrth gychwyn
       Load all tabs: Llwytho pob tab
@@ -667,6 +679,10 @@ Settings:
     Title Excludes: Nid yw'r teitl yn cynnwys
     Title Filter Hint: Gwahanwch nifer o dermau teitl â choma. Rhaid i fideo gyfateb i o leiaf un term i'w gynnwys a dim un term i'w eithrio.
   External Software Settings:
+    Create YouTube session: "Creu sesiwn YouTube"
+    YouTube session hint: "Mewngofnodwch os oes angen, yna cadwch y sesiwn. Dewiswch yn y gosodiadau a ddylid ei defnyddio ar gyfer lawrlwythiadau, chwarae neu isdeitlau."
+    Use cookies for downloads: "Defnyddio cwcis ar gyfer lawrlwythiadau"
+    YouTube session failed: "Methu cadw'r sesiwn YouTube."
     Checking FFmpeg and FFprobe: Wrthi'n gwirio FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: Nid yw FFmpeg/FFprobe wedi'i lawrlwytho eto. Cliciwch y botwm isod i'w lawrlwytho.
     External Software Settings: Meddalwedd allanol
@@ -712,7 +728,7 @@ Settings:
       Manual: Diweddaru â llaw yn unig
     yt-dlp Executable Path: Llwybr gweithredadwy yt-dlp
     FFmpeg Executable Path: Llwybr gweithredadwy FFmpeg
-    Restricted Playback Authentication: Cwcis chwarae yt-dlp
+    Restricted Playback Authentication: "Cwcis yt-dlp"
     Cookie Source: Ffynhonnell cwcis
     Cookie Sources:
       None: Dim
@@ -846,6 +862,7 @@ Settings:
     Expanded: Wedi'u hehangu
     Playing Interface Hide Delay: Oedi cyn cuddio’r rhyngwyneb wrth chwarae
     Hide Startup Splash: Cuddio’r sgrin gychwyn
+    Hide Header Sync Indicator: Cuddio’r dangosydd cysoni ym mhennyn yr ap
     Hide Repeat Stats: Cuddio ystadegau ailadrodd
     Sections:
       Visible While Paused: Yn weladwy wrth oedi mewn ffenestr lawn / sgrin lawn
@@ -1145,7 +1162,7 @@ Video:
   Retry With Built-in Extraction: Rhoi cynnig arall arni gydag echdynnu mewnol
   Retry With yt-dlp Extraction: Rhoi cynnig arall arni gydag echdynnu yt-dlp
   Reloading video after streaming URL error: Wrthi'n ail-lwytho'r fideo ar ôl gwall URL ffrydio
-  Configure Restricted Playback Cookies Hint: Ffurfweddwch gwcis yn Gosodiadau → Meddalwedd allanol → Cwcis chwarae yt-dlp.
+  Configure Restricted Playback Cookies Hint: "Ffurfweddwch gwcis yn Gosodiadau → Meddalwedd allanol → Cwcis yt-dlp."
   Try With Configured Cookies: Rhoi cynnig arni gyda'r cwcis sydd wedi'u ffurfweddu
   Restricted Playback Authentication Failed Template: 'Nid oedd yt-dlp yn gallu cyrchu''r fideo hwn gyda''r cwcis sydd wedi''u ffurfweddu: {error}'
   Unmark As Watched: Dadfarcio fel wedi'i wylio
@@ -1373,6 +1390,10 @@ Share:
   Share failed: "Methu rhannu’r ddolen"
   Timestamp Link Copied: Wedi copïo dolen y stamp amser i'r clipfwrdd
 Context Menu:
+  Select Tab: Dewis tab
+  Close Tabs Before: Cau tabiau blaenorol
+  Close Tabs After: Cau tabiau dilynol
+  Close Other Tabs: Cau tabiau eraill
   Copy {service} link without playlist: "Copïo dolen {service} heb restr chwarae"
   Context Menu: Dewislen cyd-destun
   Select All: Dewis y cyfan
@@ -1577,7 +1598,7 @@ Tooltips:
     Cookie File: Dewiswch ffeil cwcis wedi'i fformatio ar gyfer Netscape er mwyn chwarae wedi'i ddilysu.
     Browser for Cookies: Darllenir cynhaliaeth porwyr o'r ffeil weithredadwy yt-dlp a ddewiswyd. Mae OpenTubeX yn gofyn i yt-dlp ddarllen y porwr hwn pan ofynnir am chwarae wedi'i ddilysu.
     Browser Profile: Enw neu ffolder proffil porwr dewisol. Gadewch yn wag i ddefnyddio'r proffil y cyrchwyd ato ddiwethaf.
-    Always Use Cookies: "Defnyddio'r cwcis sydd wedi'u ffurfweddu pryd bynnag y bydd yt-dlp yn echdynnu ffrydiau. Nid yw hyn yn newid y dull echdynnu ffrydiau i yt-dlp. Pan fydd yt-dlp wedi'i ddewis, gall fformatau i gyfrifon yn unig ddod ar gael, gan gynnwys cyfradd didau well YouTube Premium pan fydd gan y cyfrif fynediad ati. Defnyddio’r cwcis wedi’u ffurfweddu ar gyfer isdeitlau a chyfieithiadau awtomatig."
+    Always Use Cookies: "Defnyddiwch y cwcis wedi'u ffurfweddu ar gyfer lawrlwythiadau, isdeitlau a phryd bynnag y mae yt-dlp yn echdynnu ffrydiau. Nid yw hyn yn newid y dull echdynnu ffrydiau i yt-dlp. Pan fydd yt-dlp wedi'i ddewis, gall fformatau i gyfrifon yn unig ddod ar gael, gan gynnwys cyfradd didau well YouTube Premium pan fydd gan y cyfrif fynediad ati."
     FFmpeg Executable Path: Mae angen FFmpeg i uno ffrydiau fideo a sain ar wahân ac i drosi sain. Yn ddiofyn, bydd OpenTubeX yn tybio bod modd canfod FFmpeg drwy'r newidyn amgylchedd PATH. Os oes angen, gallwch osod llwybr personol yma.
     Use cookies for subtitles: "Defnyddio’r cwcis wedi’u ffurfweddu ar gyfer isdeitlau a chyfieithiadau awtomatig. Mae “Defnyddio cwcis bob amser” hefyd yn galluogi hyn."
   Distraction Free Settings:
@@ -1668,6 +1689,7 @@ CommandPalette:
     Download Finished: Nid yw'r lawrlwythiad hwn yn rhedeg mwyach
     Video: Agorwch fideo yn gyntaf
 Downloads:
+  Preparing: Yn paratoi…
   Export Failed: "Methu cadw’r ffeil a lawrlwythwyd. Dewiswch ffolder lawrlwytho y gellir ysgrifennu ynddi a rhowch gynnig arall arni."
   Remove File Permanently Warning: "Bydd hyn yn dileu \"{title}\" yn barhaol."
   Download: Lawrlwytho

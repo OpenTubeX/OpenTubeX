@@ -1,4 +1,4 @@
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
 
 function historyEntry (videoId, title, timeWatched) {
   return {
@@ -168,3 +168,17 @@ test('manages a temporary queue from video menus and the watch sidebar', async (
   await queue.getByRole('button', { name: 'Clear Queue' }).click()
   await expect(queue).toBeHidden()
 })
+
+for (const clearAll of [false, true]) {
+  test(`mobile queue closes after ${clearAll ? 'clearing everything' : 'removing the last video'}`, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 480, height: 850 })
+    await goTo(page, 'history')
+    await chooseVideoOption(page, 'Queue video one', 'Add to Queue')
+    await page.getByRole('link', { name: /Current video/ }).click()
+    await page.getByRole('button', { name: 'Queue Queue video one', exact: true }).click()
+    const panel = page.getByRole('dialog').filter({ has: page.locator('.watchQueue') })
+    await expect(panel).toBeVisible()
+    await panel.getByRole('button', { name: clearAll ? 'Clear Queue' : 'Remove Queue video one from queue', exact: true }).click()
+    await expect(page.locator('dialog[open]')).toHaveCount(0)
+  })
+}

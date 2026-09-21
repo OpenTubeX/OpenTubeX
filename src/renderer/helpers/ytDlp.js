@@ -1,3 +1,4 @@
+import { historyRepairYtDlpArguments, historyRepairYtDlpError } from '../../historyRepair'
 import { registerPlugin } from '@capacitor/core'
 import { LocalNotifications } from '@capacitor/local-notifications'
 import { normalizeYtDlpPlaybackCacheMaxEntrySize } from '../../ytDlpPlaybackCacheSettings'
@@ -39,6 +40,8 @@ function configuration() {
   }
   return {
     rules,
+    useCookies: (store.getters.getYtDlpPlaybackAlwaysUseCookies || store.getters.getYtDlpDownloadUseCookies) && store.getters.getYtDlpPlaybackAuthMode === 'file',
+    cookies: store.getters.getYtDlpPlaybackAuthMode === 'file' ? store.getters.getYtDlpPlaybackCookiesPath : '',
     concurrency: store.getters.getYtDlpMaxConcurrentDownloads,
     bandwidth: store.getters.getYtDlpDownloadBandwidthLimit,
     folder: store.getters.getYtDlpDownloadFolderPath,
@@ -88,6 +91,7 @@ const android = {
   handleYtDlpDownloadsRemoved: callback => listen('downloadsRemoved', result => callback(result.ids)),
   ytDlpChooseDownloadFolder: chooseAndroidDirectory,
   ytDlpChooseCookies: () => native.chooseCookies().then(result => result.path),
+  ytDlpCreateSession: labels => native.createSession(labels).then(result => result.path),
   ytDlpGetInfo: () => native.info(),
   ytDlpCheckBinaryUpdate: binary => native.checkUpdate({ binary, channel: configuration().channel }),
   ytDlpDownloadBinary: binary => native.update({ binary, channel: configuration().channel }),
@@ -107,6 +111,14 @@ const android = {
       return result.text
     } catch {
       return { error: 'Unable to load subtitle with configured cookies' }
+    }
+  },
+  async ytDlpGetHistoryMetadata(videoId) {
+    if (!/^[\w-]{11}$/.test(videoId)) return null
+    try {
+      return await extract([...historyRepairYtDlpArguments(), `https://www.youtube.com/watch?v=${videoId}`], true)
+    } catch (error) {
+      return historyRepairYtDlpError(error.message)
     }
   },
   async ytDlpGetPlaybackInfo(videoId, useDefaultClients = false, useAuthentication = false, includeSubtitles = true) {

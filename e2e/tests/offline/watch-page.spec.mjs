@@ -85,6 +85,103 @@ async function expectSponsorBlockContentClamp(content, previousScrollTop) {
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
+async function observeUpNextHandoff(page) {
+  await page.evaluate((activeTabSelector) => {
+    window.__emptyUpNextRendered = false
+    window.__upNextObserver = new MutationObserver(() => {
+      const recommendations = document.querySelector(`${activeTabSelector} .watchVideoRecommendations`)
+      if (recommendations && !recommendations.querySelector('.ft-list-video')) {
+        window.__emptyUpNextRendered = true
+      }
+    })
+    window.__upNextObserver.observe(document.querySelector('#app'), {
+      childList: true,
+      subtree: true,
+    })
+  }, activeTab)
+}
+
+async function expectPopulatedUpNextHandoff(page) {
+  expect(await page.evaluate(() => {
+    window.__upNextObserver.disconnect()
+    return window.__emptyUpNextRendered
+  })).toBe(false)
+}
+
+test('keeps an allowed Up Next recommendation rendered through loading and filtering', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await observeUpNextHandoff(page)
+  await openMockedVideo(page)
+  await expect(page.locator(`${activeTab} .watchVideoRecommendations .ft-list-video`).first()).toBeVisible()
+  await expectPopulatedUpNextHandoff(page)
+
+  const watchView = await watchViewHandle(page)
+  const { allowedTitle, hiddenTitles } = await watchView.evaluate(async view => {
+    view.isLoading = true
+    await view.$nextTick()
+
+    const hiddenTitles = view.recommendedVideos.slice(0, 5).map(video => video.title)
+    const nextAllowedVideo = view.recommendedVideos.slice(5)
+      .find(video => !hiddenTitles.some(title => video.title.toLowerCase().includes(title.toLowerCase())))
+    return { allowedTitle: nextAllowedVideo.title, hiddenTitles }
+  })
+  await page.evaluate(() => {
+    window.__upNextIntersectionObserver = window.IntersectionObserver
+    window.IntersectionObserver = class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+      takeRecords() { return [] }
+    }
+  })
+
+  await observeUpNextHandoff(page)
+  await watchView.evaluate(async view => {
+    view.isLoading = false
+    await view.$nextTick()
+  })
+  await expect(page.locator(`${activeTab} .watchVideoRecommendations .ft-list-video`)).toHaveCount(5)
+  await expectPopulatedUpNextHandoff(page)
+
+  await observeUpNextHandoff(page)
+  await watchView.evaluate(async (view, titles) => {
+    await view.$store.dispatch('updateForbiddenTitles', JSON.stringify(titles))
+    await view.$nextTick()
+  }, hiddenTitles)
+  await expect(page.locator(`${activeTab} .watchVideoRecommendations .title`, { hasText: allowedTitle })).toBeVisible()
+  await expect(page.locator(`${activeTab} .watchVideoRecommendations .ft-list-video`)).toHaveCount(5)
+  await expectPopulatedUpNextHandoff(page)
+
+  await watchView.evaluate(async view => {
+    await view.$store.dispatch('updateForbiddenTitles', '[]')
+    await view.$nextTick()
+  })
+  await expect(page.locator(`${activeTab} .watchVideoRecommendations .ft-list-video`)).toHaveCount(5)
+
+  await watchView.evaluate(async (view, titles) => {
+    await view.$store.dispatch('updateForbiddenTitles', JSON.stringify(titles))
+    await view.$nextTick()
+  }, hiddenTitles)
+  await expect(page.locator(`${activeTab} .watchVideoRecommendations .title`, { hasText: allowedTitle })).toBeVisible()
+
+  await watchView.evaluate(async view => {
+    view.isLoading = true
+    await view.$nextTick()
+  })
+  await observeUpNextHandoff(page)
+  await watchView.evaluate(async view => {
+    view.isLoading = false
+    await view.$nextTick()
+  })
+  await expect(page.locator(`${activeTab} .watchVideoRecommendations .title`, { hasText: allowedTitle })).toBeVisible()
+  await expectPopulatedUpNextHandoff(page)
+  await watchView.evaluate(view => view.$store.dispatch('updateForbiddenTitles', '[]'))
+  await page.evaluate(() => {
+    window.IntersectionObserver = window.__upNextIntersectionObserver
+  })
+  await watchView.dispose()
+})
+
 async function swipeVertically(session, bounds, distance) {
   const x = bounds.x + bounds.width / 2
   const y = bounds.y + bounds.height / 2
@@ -1190,7 +1287,7 @@ test('shows the restricted playback setup hint and loads yt-dlp subtitles after 
   })
 
   await expect(page.getByText(
-    'Configure cookies in Settings → External Software → yt-dlp Playback Cookies.'
+    'Configure cookies in Settings → External Software → yt-dlp Cookies.'
   )).toBeVisible()
   await expect(page.getByRole('button', { name: 'Try with configured cookies' })).toHaveCount(0)
 
@@ -1270,7 +1367,7 @@ test('shows the restricted playback setup hint and loads yt-dlp subtitles after 
   })
 
   await expect(page.getByText(
-    'Configure cookies in Settings → External Software → yt-dlp Playback Cookies.'
+    'Configure cookies in Settings → External Software → yt-dlp Cookies.'
   )).toHaveCount(0)
   const retry = page.getByRole('button', { name: 'Try with configured cookies' })
   await expect(retry).toBeVisible()
@@ -3704,6 +3801,71 @@ test.describe('watch page', () => {
     await component.dispose()
   })
 
+  test('keeps short and empty descriptions collapsible when they have metadata', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    const card = page.locator(`${activeTab} .videoDescription`)
+
+    for (const scale of [1, 1.25]) {
+      await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+      for (const text of ['Short description', '']) {
+        await watchComponent.evaluate(async (component, text) => {
+          const view = component.proxy
+          view.isLoading = true
+          await view.$nextTick()
+          view.videoDescription = text
+          view.videoDescriptionHtml = ''
+          view.videoTags = ['first tag', 'second tag']
+          view.videoGames = [{ title: 'Grand Theft Auto VI', subtitle: '2026' }]
+          view.isLoading = false
+          await view.$nextTick()
+        }, text)
+
+        await expect(card).toHaveClass(/short/)
+        await expect(card.locator('.videoTags')).toHaveCount(0)
+        await expect(card.locator('.gameList')).toHaveCount(0)
+        await card.locator(':scope > .descriptionStatus').click()
+        await expect(card).not.toHaveClass(/short/)
+        await expect(card.locator('.videoTagLink')).toHaveText(['first tag', 'second tag'])
+        await expect(card.locator('.gameTitle')).toHaveText('Grand Theft Auto VI')
+        await card.locator('.descriptionScroll > .descriptionStatus').click()
+        await expect(card).toHaveClass(/short/)
+        await expect(card.locator('.videoTags')).toHaveCount(0)
+        await expect(card.locator('.gameList')).toHaveCount(0)
+      }
+    }
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1))
+    await watchComponent.dispose()
+  })
+
+  test('keeps license-only descriptions accessible and collapsible', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await watchComponent.evaluate(async component => {
+      const view = component.proxy
+      view.isLoading = true
+      await view.$nextTick()
+      view.videoDescription = ''
+      view.videoDescriptionHtml = ''
+      view.videoTags = []
+      view.videoGames = []
+      view.license = 'Creative Commons Attribution license (reuse allowed)'
+      view.isLoading = false
+      await view.$nextTick()
+    })
+
+    const card = page.locator(`${activeTab} .videoDescription`)
+    await expect(card).toHaveClass(/short/)
+    await card.locator(':scope > .descriptionStatus').click()
+    await expect(card.locator('.license')).toHaveText('Creative Commons Attribution license (reuse allowed)')
+    await card.locator('.descriptionScroll > .descriptionStatus').click()
+    await expect(card).toHaveClass(/short/)
+    await expect(card.locator('.license')).toHaveCount(0)
+    await watchComponent.dispose()
+  })
+
   test('handles videos without a description', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
@@ -3719,6 +3881,7 @@ test.describe('watch page', () => {
       watchView.videoDescriptionHtml = ''
       watchView.videoTags = []
       watchView.videoGames = []
+      watchView.license = null
       watchView.isLoading = false
       await watchView.$nextTick()
     })
@@ -3846,6 +4009,7 @@ test.describe('watch page', () => {
     await auxPanel.getByRole('button', { name: /Save channel setting/i }).click()
     const settingsMenu = page.locator('.app > .dropdownLayer > .iconDropdown.portal')
     await expect(settingsMenu).toBeVisible()
+    await expect(settingsMenu).not.toHaveCSS('max-inline-size', 'none')
     expect(await settingsMenu.evaluate(element => {
       const bounds = element.getBoundingClientRect()
       const hit = document.elementFromPoint(

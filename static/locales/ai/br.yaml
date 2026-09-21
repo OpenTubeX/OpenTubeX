@@ -188,6 +188,17 @@ User Playlists:
     This playlist could not be loaded.: "N'eus ket bet gallet kargañ ar roll-videoioù-mañ."
     More videos could not be loaded.: "N'eus ket bet gallet kargañ muioc'h a videoioù."
 History:
+  Repair Use Cookies: "Implijout toupinoù yt-dlp kefluniet"
+  Repair Cookies Hint: "Ouzhpenn 500 video a rank bezañ gwiriekaet. Kefluniit toupinoù e arventennoù yt-dlp ha gweredekait anezho amañ evit digreskiñ ar riskl da vezañ bevennet an azgoulennoù."
+  Repair Description: "Implijit kement-mañ goude enporzhiañ an istor, pe pa vank titouroù d'ar videoioù pe pa vez ar merk LIVE dre fazi."
+  Repair Details: "Klokaat a ra an titloù, ar chadennoù hag an deiziadoù embann a vank, ha gwiriañ a ra ar padelezhioù hag ar merkoù LIVE. Ne cheñch ket ho araokadenn sellout na stad ar videoioù gwelet."
+  Repair Notice: "Gallout a ra an istorioù bras kemer amzer. Klasket e vez en-dro ent emgefre ar goulennoù c'hwitet. Gallout a ra ar videoioù diverket pe prevez chom diglok."
+  Start Repair: "Kregiñ da gempenn"
+  Repair Checking: "O wiriañ titouroù ar videoioù"
+  Repair Waiting: "O c'hortoz YouTube. Kenderc'hel a raio ar c'hempenn ent emgefre."
+  Repair Retrying: "O klask en-dro ar goulennoù c'hwitet"
+  Repair Finished: "Kempenn echuet"
+  Repair Stopped: "Kempenn paouezet"
   Repair: "Kempenn an istor"
   Repair Progress: "Gwiriet {checked}/{total} · Kempennet {repaired} · C’hwitet {failed}"
   Mark All As Watched: "Merkañ pep tra evel sellet"
@@ -282,9 +293,10 @@ Settings:
       After current tab: "War-lerc'h an ivinell vremanel"
       After current tab in opened order: "War-lerc'h an ivinell vremanel, hervez urzh an digeriñ"
     Tab Close Focus:
+      Last active tab: "Ivinell oberiant diwezhañ"
+      Next tab in tab order: "Ivinell da-heul e urzh an ivinelloù"
+      Previous tab in tab order: "Ivinell gent e urzh an ivinelloù"
       Tab Close Focus: "Goude serriñ un ivinell"
-      Previous tab: "Dibab an ivinell gent"
-      Next tab: "Dibab an ivinell da-heul"
     Startup Behavior:
       Startup Behavior: "El loc'hañ"
       Load all tabs: "Kargañ an holl ivinelloù"
@@ -665,6 +677,10 @@ Settings:
     Title Excludes: "An titl n'endalc'h ket"
     Title Filter Hint: "Dispartiit termenoù an titl gant skejoù. Ur video a rank klotañ gant un termen enkorfet da vihanañ ha gant termen ezkorfet ebet."
   External Software Settings:
+    Create YouTube session: "Krouiñ un estez YouTube"
+    YouTube session hint: "Kevreit ma vez ezhomm ha saveteit an estez. Dibabit en arventennoù he implijout evit ar pellgargañ, al lenn pe an istitloù."
+    Use cookies for downloads: "Implijout toupinoù evit ar pellgargañ"
+    YouTube session failed: "N'eus ket bet gallet saveteiñ an estez YouTube."
     Checking FFmpeg and FFprobe: O wiriañ FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: N'eo ket bet pellgarget FFmpeg/FFprobe c'hoazh. Klikit war ar bouton amañ dindan evit o fellgargañ.
     External Software Settings: "Meziantoù diavaez"
@@ -710,7 +726,7 @@ Settings:
       Manual: "Hizivaat gant an dorn hepken"
     yt-dlp Executable Path: "Hent erounezadus yt-dlp"
     FFmpeg Executable Path: "Hent erounezadus FFmpeg"
-    Restricted Playback Authentication: "Toupinoù lenn yt-dlp"
+    Restricted Playback Authentication: "Toupinoù yt-dlp"
     Cookie Source: "Tarzh an toupinoù"
     Cookie Sources:
       None: "Hini ebet"
@@ -844,6 +860,7 @@ Settings:
     Expanded: Digoret
     Playing Interface Hide Delay: Dale kuzhat an etrefas e-pad al lenn
     Hide Startup Splash: Kuzhat ar skramm locʼhañ
+    Hide Header Sync Indicator: Kuzhat meneger ar sinkronelaat e talbenn an arload
     Hide Repeat Stats: Kuzhat stadegoù an adlenn
     Sections:
       Visible While Paused: "Gwelus e-pad un ehan er prenestr leun pe er skramm leun"
@@ -1136,7 +1153,7 @@ Video:
   Retry With Built-in Extraction: "Klask en-dro gant an eztennañ enframmat"
   Retry With yt-dlp Extraction: "Klask en-dro gant eztennañ yt-dlp"
   Reloading video after streaming URL error: "Oc'h adkargañ ar video goude ur fazi URL gwazh"
-  Configure Restricted Playback Cookies Hint: "Kefluniit an toupinoù en Arventennoù → Meziantoù diavaez → Toupinoù lenn yt-dlp."
+  Configure Restricted Playback Cookies Hint: "Kefluniit an toupinoù en Arventennoù → Meziantoù diavaez → Toupinoù yt-dlp."
   Try With Configured Cookies: "Klask gant an toupinoù kefluniet"
   Restricted Playback Authentication Failed Template: "N'eus ket bet gallet da yt-dlp haeziñ ar video-mañ gant an toupinoù kefluniet: {error}"
   Unmark As Watched: "Tennañ ar merk sellet"
@@ -1360,6 +1377,10 @@ Share:
   Share failed: "N’eus ket bet gallet rannañ al liamm"
   Timestamp Link Copied: "Eilet eo bet al liamm gant ar mare er golver"
 Context Menu:
+  Select Tab: Diuzañ an ivinell
+  Close Tabs Before: Serriñ an ivinelloù a-raok
+  Close Tabs After: Serriñ an ivinelloù war-lerc’h
+  Close Other Tabs: Serriñ an ivinelloù all
   Copy {service} link without playlist: "Eilañ al liamm {service} hep ar roll-lenn"
   Context Menu: "Roll lañser"
   Select All: "Diuzañ pep tra"
@@ -1563,7 +1584,7 @@ Tooltips:
     Cookie File: "Dibabit ur restr toupinoù er mentrezh Netscape evit al lenn dilesaet."
     Browser for Cookies: "Lennet e vez skor ar merdeer diwar erounezadus yt-dlp diuzet. OpenTubeX a c'houlenn digant yt-dlp lenn ar merdeer-mañ pa vez goulennet al lenn dilesaet."
     Browser Profile: "Anv pe deuliad profil merdeer diret. Laoskit goullo evit implijout ar profil haeziñ diwezhañ."
-    Always Use Cookies: "Implijout an toupinoù kefluniet bep tro ma eztenn yt-dlp gwazhioù. Ne cheñch ket an dra-mañ an doare eztennañ gwazhioù da yt-dlp. Gant yt-dlp diuzet e c'hall mentrezhioù miret d'ar c'hontoù bezañ hegerz, en o zouez fonnder gwell YouTube Premium pa vez aotreet ar gont. Implijout an toupinoù kefluniet evit an istitloù hag an troidigezhioù emgefreek."
+    Always Use Cookies: "Implijit an toupinoù kefluniet evit ar pellgargañ, an istitloù ha bep tro ma tenn yt-dlp gwazhioù. Ne cheñch ket an dra-mañ an doare eztennañ gwazhioù da yt-dlp. Gant yt-dlp diuzet e c'hall mentrezhioù miret d'ar c'hontoù bezañ hegerz, en o zouez fonnder gwell YouTube Premium pa vez aotreet ar gont."
     FFmpeg Executable Path: "Rekis eo FFmpeg evit kendeuziñ gwazhioù video ha son distag hag evit amdreiñ ar son. Dre ziouer e soñj OpenTubeX e c'haller kavout FFmpeg dre argemmenn endro PATH. Gallout a reer lakaat un hent personelaet amañ ma vez ezhomm."
     Use cookies for subtitles: "Implijout an toupinoù kefluniet evit an istitloù hag an troidigezhioù emgefreek. Gweredekaet ivez gant « Implijout toupinoù atav »."
   Distraction Free Settings:
@@ -1652,6 +1673,7 @@ CommandPalette:
     Download Finished: "N'emañ ket ar pellgargadenn-mañ war ober ken"
     Video: "Digerit ur video da gentañ"
 Downloads:
+  Preparing: O prientiñ…
   Export Failed: "N'eo ket bet posupl enrollañ ar restr pellgarget. Dibabit un teuliad pellgargañ a c'haller skrivañ ennañ ha klaskit en-dro."
   Remove File Permanently Warning: "Diverket e vo \"{title}\" da vat."
   Download: "Pellgargañ"

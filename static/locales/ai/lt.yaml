@@ -297,6 +297,17 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: Grojaraštis {playlistName} sėkmingai sukurtas.
       There was an issue with creating the playlist.: Kuriant grojaraštį kilo klaida.
 History:
+  Repair Use Cookies: "Naudoti sukonfigūruotus yt-dlp slapukus"
+  Repair Cookies Hint: "Reikia patikrinti daugiau nei 500 vaizdo įrašų. Sukonfigūruokite slapukus yt-dlp nustatymuose ir įjunkite juos čia, kad sumažintumėte užklausų ribojimo riziką."
+  Repair Description: "Naudokite importavę istoriją arba kai trūksta vaizdo įrašų duomenų ar neteisingai rodoma LIVE žyma."
+  Repair Details: "Papildo trūkstamus pavadinimus, kanalus ir paskelbimo datas, patikrina trukmę bei LIVE žymas. Peržiūros eiga ir peržiūrėjimo būsena nesikeičia."
+  Repair Notice: "Didelės istorijos tvarkymas gali užtrukti. Nepavykusios užklausos kartojamos automatiškai. Ištrintų ar privačių vaizdo įrašų duomenys gali likti nepilni."
+  Start Repair: "Pradėti taisymą"
+  Repair Checking: "Tikrinami vaizdo įrašų duomenys"
+  Repair Waiting: "Laukiama YouTube. Taisymas bus tęsiamas automatiškai."
+  Repair Retrying: "Kartojamos nepavykusios užklausos"
+  Repair Finished: "Taisymas baigtas"
+  Repair Stopped: "Taisymas sustabdytas"
   Repair: "Taisyti istoriją"
   Repair Progress: "Patikrinta {checked}/{total} · Pataisyta {repaired} · Nepavyko {failed}"
   Case Sensitive Search: Skirti didžiąsias ir mažąsias raides
@@ -400,9 +411,10 @@ Settings:
       After current tab: Po dabartinio skirtuko
       After current tab in opened order: Po dabartinio skirtuko, atidarymo eilės tvarka
     Tab Close Focus:
+      Last active tab: "Paskutinis aktyvus skirtukas"
+      Next tab in tab order: "Kitas skirtukas skirtukų eilėje"
+      Previous tab in tab order: "Ankstesnis skirtukas skirtukų eilėje"
       Tab Close Focus: Užvėrus skirtuką
-      Previous tab: Pasirinkti ankstesnį skirtuką
-      Next tab: Pasirinkti kitą skirtuką
     Startup Behavior:
       Startup Behavior: Paleidžiant programą
       Load all tabs: Įkelti visus skirtukus
@@ -866,6 +878,10 @@ Settings:
     Title Excludes: Pavadinime nėra
     Title Filter Hint: Kelis pavadinimo terminus atskirkite kableliais. Vaizdo įrašas turi atitikti bent vieną įtrauktą terminą ir neturėti nė vieno atmesto termino.
   External Software Settings:
+    Create YouTube session: "Sukurti YouTube seansą"
+    YouTube session hint: "Jei reikia, prisijunkite ir išsaugokite seansą. Nustatymuose pasirinkite, ar naudoti jį atsisiuntimams, atkūrimui ar subtitrams."
+    Use cookies for downloads: "Naudoti slapukus atsisiuntimams"
+    YouTube session failed: "Nepavyko išsaugoti YouTube seanso."
     Checking FFmpeg and FFprobe: Tikrinama FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe dar neatsisiųsta. Norėdami atsisiųsti, spustelėkite toliau esantį mygtuką.
     External Software Settings: Išorinė programinė įranga
@@ -911,7 +927,7 @@ Settings:
       Manual: Atnaujinti tik rankiniu būdu
     yt-dlp Executable Path: Kelias iki yt-dlp vykdomojo failo
     FFmpeg Executable Path: Kelias iki FFmpeg vykdomojo failo
-    Restricted Playback Authentication: yt-dlp atkūrimo slapukai
+    Restricted Playback Authentication: "yt-dlp slapukai"
     Cookie Source: Slapukų šaltinis
     Cookie Sources:
       None: Nėra
@@ -1061,6 +1077,7 @@ Settings:
     Expanded: Išskleistos
     Playing Interface Hide Delay: Sąsajos slėpimo delsa atkuriant
     Hide Startup Splash: Slėpti paleidimo ekraną
+    Hide Header Sync Indicator: Slėpti sinchronizavimo indikatorių programos antraštėje
     Hide Repeat Stats: Slėpti kartojimo statistiką
     Sections:
       Subscriptions Page: Prenumeratų puslapis
@@ -1455,7 +1472,7 @@ Video:
   Reloading video after streaming URL error: Vaizdo įrašas įkeliamas iš naujo po srauto URL klaidos
   MembersOnly: Šiam tik nariams skirtam vaizdo įrašui reikia Google paskyros su aktyvia šio kanalo naryste.
   AgeRestricted: Šiam pagal amžių ribojamam vaizdo įrašui reikia Google paskyros su patvirtintu amžiumi.
-  Configure Restricted Playback Cookies Hint: Nustatykite slapukus skiltyje Nustatymai → Išorinė programinė įranga → yt-dlp atkūrimo slapukai.
+  Configure Restricted Playback Cookies Hint: "Nustatykite slapukus skiltyje Nustatymai → Išorinė programinė įranga → yt-dlp slapukai."
   Try With Configured Cookies: Bandyti su nustatytais slapukais
   Restricted Playback Authentication Failed Template: 'yt-dlp nepavyko pasiekti šio vaizdo įrašo su nustatytais slapukais: {error}'
   DRMProtected: DRM apsaugotų vaizdo įrašų negalima leisti naudojant OpenTubeX, nes jiems reikia nuosavybinių uždarojo kodo komponentų. Jei norite peržiūrėti šį vaizdo įrašą, atverkite jį oficialioje YouTube svetainėje, DRM palaikančioje žiniatinklio naršyklėje.
@@ -1746,6 +1763,10 @@ Share:
   Share Post: Bendrinti įrašą
   Timestamp Link Copied: Nuoroda su laiko žyma nukopijuota į iškarpinę
 Context Menu:
+  Select Tab: Pasirinkti kortelę
+  Close Tabs Before: Uždaryti ankstesnes korteles
+  Close Tabs After: Uždaryti paskesnes korteles
+  Close Other Tabs: Uždaryti kitas korteles
   Copy {service} link without playlist: "Kopijuoti {service} nuorodą be grojaraščio"
   Context Menu: Kontekstinis meniu
   Select All: Pasirinkti viską
@@ -1964,7 +1985,7 @@ Tooltips:
     Cookie File: Pasirinkite Netscape formato slapukų failą autentifikuotam atkūrimui.
     Browser for Cookies: Naršyklių palaikymo informacija gaunama iš pasirinkto yt-dlp vykdomojo failo. Paprašius autentifikuoto atkūrimo, OpenTubeX nurodo yt-dlp nuskaityti šią naršyklę.
     Browser Profile: Pasirinktinis naršyklės profilio pavadinimas arba aplankas. Palikite tuščią, jei norite naudoti paskutinį atvertą profilį.
-    Always Use Cookies: "Naudoti sukonfigūruotus slapukus kaskart, kai yt-dlp išgauna srautus. Tai nepakeičia srautų išgavimo būdo į yt-dlp. Pasirinkus yt-dlp gali tapti pasiekiami tik paskyrai skirti formatai, įskaitant didesnę YouTube Premium spartą, jei paskyra turi prieigą. Naudoti sukonfigūruotus slapukus subtitrams ir automatiniams vertimams."
+    Always Use Cookies: "Naudokite nustatytus slapukus atsisiuntimams, subtitrams ir kaskart, kai yt-dlp išgauna srautus. Tai nepakeičia srautų išgavimo būdo į yt-dlp. Pasirinkus yt-dlp gali tapti pasiekiami tik paskyrai skirti formatai, įskaitant didesnę YouTube Premium spartą, jei paskyra turi prieigą."
     FFmpeg Executable Path: FFmpeg reikalingas atskiriems vaizdo ir garso srautams sujungti bei garsui konvertuoti. Pagal numatymą OpenTubeX laikys, kad FFmpeg galima rasti naudojant PATH aplinkos kintamąjį. Jei reikia, čia galima nurodyti pasirinktinį kelią.
     Use cookies for subtitles: "Naudoti sukonfigūruotus slapukus subtitrams ir automatiniams vertimams. Taip pat įjungiama pasirinkus „Visada naudoti slapukus“."
   Distraction Free Settings:
@@ -2138,6 +2159,7 @@ CommandPalette:
     Download Finished: Šis atsisiuntimas nebevykdomas
     Video: Pirmiausia atverkite vaizdo įrašą
 Downloads:
+  Preparing: Ruošiama…
   Export Failed: "Nepavyko išsaugoti atsisiųsto failo. Pasirinkite atsisiuntimų aplanką su rašymo teise ir bandykite dar kartą."
   Remove File Permanently Warning: "„{title}“ bus ištrinta visam laikui."
   Download: Atsisiųsti

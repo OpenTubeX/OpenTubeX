@@ -192,6 +192,17 @@ User Playlists:
     This playlist could not be loaded.: لا يمكن تحميل قائمة التشغيل هذه.
     More videos could not be loaded.: لا يمكن تحميل المزيد من مقاطع الفيديو.
 History:
+  Repair Use Cookies: "استخدام ملفات تعريف الارتباط المعدّة لـ yt-dlp"
+  Repair Cookies Hint: "يلزم فحص أكثر من 500 فيديو. اضبط ملفات تعريف الارتباط في إعدادات yt-dlp وفعّلها هنا لتقليل خطر تقييد الطلبات."
+  Repair Description: "استخدم هذا بعد استيراد السجل، أو عندما تفتقد الفيديوهات بعض التفاصيل أو تحمل علامة LIVE بشكل غير صحيح."
+  Repair Details: "يكمل العناوين والقنوات وتواريخ النشر الناقصة ويتحقق من المدد وعلامات LIVE. يظل تقدم المشاهدة وحالة المشاهدة دون تغيير."
+  Repair Notice: "قد تستغرق السجلات الكبيرة وقتًا. تُعاد محاولة الطلبات الفاشلة تلقائيًا. قد تبقى الفيديوهات المحذوفة أو الخاصة غير مكتملة."
+  Start Repair: "بدء الإصلاح"
+  Repair Checking: "جارٍ التحقق من تفاصيل الفيديو"
+  Repair Waiting: "في انتظار YouTube. سيُستأنف الإصلاح تلقائيًا."
+  Repair Retrying: "جارٍ إعادة محاولة الطلبات الفاشلة"
+  Repair Finished: "اكتمل الإصلاح"
+  Repair Stopped: "توقف الإصلاح"
   Repair: "إصلاح السجل"
   Repair Progress: "تم فحص {checked}/{total} · تم إصلاح {repaired} · فشل {failed}"
   Mark All As Watched: وضع علامة على الكل كما تمت مشاهدته
@@ -286,9 +297,10 @@ Settings:
       After current tab: بعد علامة التبويب الحالية
       After current tab in opened order: بعد علامة التبويب الحالية، بالترتيب المفتوح
     Tab Close Focus:
+      Last active tab: "آخر علامة تبويب نشطة"
+      Next tab in tab order: "علامة التبويب التالية حسب الترتيب"
+      Previous tab in tab order: "علامة التبويب السابقة حسب الترتيب"
       Tab Close Focus: بعد إغلاق علامة التبويب
-      Previous tab: حدد علامة التبويب السابقة
-      Next tab: حدد علامة التبويب التالية
     Startup Behavior:
       Startup Behavior: عند بدء التشغيل
       Load all tabs: تحميل كافة علامات التبويب
@@ -673,6 +685,10 @@ Settings:
     Title Excludes: العنوان يستبعد
     Title Filter Hint: افصل بين مصطلحات العناوين المتعددة بفواصل. يجب أن يتطابق الفيديو مع مصطلح واحد مدرج على الأقل ولا يتطابق مع أي مصطلحات مستبعدة.
   External Software Settings:
+    Create YouTube session: "إنشاء جلسة YouTube"
+    YouTube session hint: "سجّل الدخول عند الحاجة، ثم احفظ الجلسة. اختر في الإعدادات استخدامها للتنزيلات أو التشغيل أو الترجمات."
+    Use cookies for downloads: "استخدام ملفات تعريف الارتباط للتنزيلات"
+    YouTube session failed: "تعذّر حفظ جلسة YouTube."
     Checking FFmpeg and FFprobe: جارٍ التحقق من FFmpeg/FFprobe...
     FFmpeg and FFprobe Managed Not Downloaded: لم يتم تنزيل FFmpeg/FFprobe بعد. انقر على الزر أدناه لتنزيلهما.
     External Software Settings: البرامج الخارجية
@@ -718,7 +734,7 @@ Settings:
       Manual: قم بالتحديث يدويًا فقط
     yt-dlp Executable Path: yt-dlp المسار القابل للتنفيذ
     FFmpeg Executable Path: المسار القابل للتنفيذ FFmpeg
-    Restricted Playback Authentication: ملفات تعريف الارتباط الخاصة بتشغيل yt-dlp
+    Restricted Playback Authentication: "ملفات تعريف ارتباط yt-dlp"
     Cookie Source: مصدر ملفات تعريف الارتباط
     Cookie Sources:
       None: لا شيء
@@ -852,6 +868,7 @@ Settings:
     Expanded: موسعة
     Playing Interface Hide Delay: مهلة إخفاء الواجهة أثناء التشغيل
     Hide Startup Splash: إخفاء شاشة بدء التشغيل
+    Hide Header Sync Indicator: إخفاء مؤشر المزامنة في ترويسة التطبيق
     Hide Repeat Stats: إخفاء إحصاءات التكرار
     Sections:
       Visible While Paused: مرئي أثناء الإيقاف المؤقت في نافذة كاملة/شاشة كاملة
@@ -1163,7 +1180,7 @@ Video:
   Retry With Built-in Extraction: أعد المحاولة باستخدام الاستخراج المدمج
   Retry With yt-dlp Extraction: أعد المحاولة باستخدام استخراج yt-dlp
   Reloading video after streaming URL error: إعادة تحميل الفيديو بعد حدوث خطأ في عنوان URL
-  Configure Restricted Playback Cookies Hint: قم بتكوين ملفات تعريف الارتباط في الإعدادات → البرامج الخارجية → ملفات تعريف الارتباط الخاصة بتشغيل yt-dlp.
+  Configure Restricted Playback Cookies Hint: "قم بتكوين ملفات تعريف الارتباط في الإعدادات → البرامج الخارجية → ملفات تعريف ارتباط yt-dlp."
   Try With Configured Cookies: حاول باستخدام ملفات تعريف الارتباط التي تم تكوينها
   Restricted Playback Authentication Failed Template: 'تعذر على yt-dlp الوصول إلى هذا الفيديو باستخدام ملفات تعريف الارتباط التي تم تكوينها: {error}'
   Private: لا يمكن مشاهدة مقاطع الفيديو الخاصة في OpenTubeX لأنها تتطلب تسجيل الدخول إلى Google وملكية الفيديو.
@@ -1383,6 +1400,10 @@ Share:
   Share failed: "تعذرت مشاركة الرابط"
   Timestamp Link Copied: تم نسخ رابط الطابع الزمني إلى الحافظة
 Context Menu:
+  Select Tab: تحديد علامة التبويب
+  Close Tabs Before: إغلاق علامات التبويب السابقة
+  Close Tabs After: إغلاق علامات التبويب التالية
+  Close Other Tabs: إغلاق علامات التبويب الأخرى
   Copy {service} link without playlist: "نسخ رابط {service} بدون قائمة التشغيل"
   Context Menu: قائمة السياق
   Select All: حدد الكل
@@ -1572,7 +1593,7 @@ Tooltips:
     Cookie File: حدد ملف تعريف الارتباط بتنسيق Netscape للتشغيل المعتمد.
     Browser for Cookies: تتم قراءة دعم المتصفح من الملف القابل للتنفيذ yt-dlp المحدد. يطلب OpenTubeX من yt-dlp قراءة هذا المتصفح عند طلب التشغيل المعتمد.
     Browser Profile: اسم أو مجلد ملف تعريف المتصفح الاختياري. اتركه فارغًا لاستخدام أحدث ملف تعريف تم الوصول إليه.
-    Always Use Cookies: "استخدم ملفات تعريف الارتباط التي تم تكوينها عندما يقوم yt-dlp باستخراج التدفقات. لا يؤدي هذا إلى تبديل طريقة استخراج الدفق إلى yt-dlp. عند تحديد yt-dlp، قد تصبح التنسيقات المخصصة للحساب فقط متاحة، بما في ذلك معدل البت المحسّن لـ YouTube Premium عندما يكون للحساب حق الوصول. استخدم ملفات تعريف الارتباط المُعدّة للترجمة والترجمة التلقائية."
+    Always Use Cookies: "استخدم ملفات تعريف الارتباط المُعدّة للتنزيلات والترجمات وكلما استخرج yt-dlp البث. لا يؤدي هذا إلى تبديل طريقة استخراج الدفق إلى yt-dlp. عند تحديد yt-dlp، قد تصبح التنسيقات المخصصة للحساب فقط متاحة، بما في ذلك معدل البت المحسّن لـ YouTube Premium عندما يكون للحساب حق الوصول."
     FFmpeg Executable Path: مطلوب FFmpeg لدمج تدفقات الفيديو والصوت المنفصلة ولتحويل الصوت. افتراضيًا، سيفترض OpenTubeX أنه يمكن العثور على FFmpeg عبر متغير البيئة PATH. إذا لزم الأمر، يمكن تعيين مسار مخصص هنا.
     Use cookies for subtitles: "استخدم ملفات تعريف الارتباط المُعدّة للترجمة والترجمة التلقائية. يُفعّل أيضًا عند تفعيل «استخدام ملفات تعريف الارتباط دائمًا»."
   Distraction Free Settings:
@@ -1663,6 +1684,7 @@ CommandPalette:
     Download Finished: لم يعد هذا التنزيل قيد التشغيل
     Video: افتح الفيديو أولاً
 Downloads:
+  Preparing: جارٍ التحضير…
   Export Failed: "تعذر حفظ الملف الذي تم تنزيله. اختر مجلد تنزيلات يمكن الكتابة فيه وحاول مجددًا."
   Remove File Permanently Warning: "سيؤدي هذا إلى حذف \"{title}\" نهائيًا."
   Download: تحميل

@@ -31,6 +31,20 @@
   flex-wrap: wrap;
   gap: 8px;
   justify-content: flex-end;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+.downloadHeaderActions :deep(.btn) {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  margin: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.downloadHeaderActions :deep(.btn svg) {
+  flex-shrink: 0;
 }
 
 .downloadRow h3,
@@ -146,6 +160,12 @@
 .progressFill.indeterminate {
   animation: download-pulse 1.5s ease-in-out infinite;
   inline-size: 100% !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progressFill.indeterminate {
+    animation: none;
+  }
 }
 
 .emptyDownloads {

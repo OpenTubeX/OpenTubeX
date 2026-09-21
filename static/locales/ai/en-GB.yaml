@@ -189,6 +189,17 @@ User Playlists:
     This playlist could not be loaded.: This playlist could not be loaded.
     More videos could not be loaded.: More videos could not be loaded.
 History:
+  Repair Use Cookies: "Use configured yt-dlp cookies"
+  Repair Cookies Hint: "More than 500 videos need checking. Configure cookies in yt-dlp settings and enable them here to reduce the risk of rate limiting."
+  Repair Description: "Use this after importing history, or when videos have missing details or an incorrect LIVE label."
+  Repair Details: "Fills in missing titles, channels and publish dates, and checks durations and LIVE labels. Your watch progress and watched status stay unchanged."
+  Repair Notice: "Large histories can take a while. Failed requests are retried automatically. Deleted or private videos may stay incomplete."
+  Start Repair: "Start repair"
+  Repair Checking: "Checking video details"
+  Repair Waiting: "Waiting for YouTube. Repair will resume automatically."
+  Repair Retrying: "Retrying failed requests"
+  Repair Finished: "Repair finished"
+  Repair Stopped: "Repair stopped"
   Repair: "Repair History"
   Repair Progress: "Checked {checked}/{total} · Repaired {repaired} · Failed {failed}"
   Mark All As Watched: Mark All As Watched
@@ -282,9 +293,10 @@ Settings:
       After current tab: After current tab
       After current tab in opened order: After current tab, in opened order
     Tab Close Focus:
+      Last active tab: "Last active tab"
+      Next tab in tab order: "Next tab in tab order"
+      Previous tab in tab order: "Previous tab in tab order"
       Tab Close Focus: After Closing a Tab
-      Previous tab: Select the previous tab
-      Next tab: Select the next tab
     Startup Behavior:
       Startup Behavior: On Startup
       Load all tabs: Load all tabs
@@ -652,6 +664,10 @@ Settings:
     Title Excludes: Title excludes
     Title Filter Hint: Separate multiple title terms with commas. A video must match at least one included term and no excluded terms.
   External Software Settings:
+    Create YouTube session: "Create YouTube session"
+    YouTube session hint: "Sign in if needed, then save. Choose in settings whether to use this session for downloads, playback or subtitles."
+    Use cookies for downloads: "Use cookies for downloads"
+    YouTube session failed: "Unable to save the YouTube session."
     Checking FFmpeg and FFprobe: Checking FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe have not been downloaded yet. Click the button below to download them.
     External Software Settings: External Software
@@ -697,7 +713,7 @@ Settings:
       Manual: Only update manually
     yt-dlp Executable Path: yt-dlp Executable Path
     FFmpeg Executable Path: FFmpeg Executable Path
-    Restricted Playback Authentication: yt-dlp Playback Cookies
+    Restricted Playback Authentication: "yt-dlp Cookies"
     Cookie Source: Cookie Source
     Cookie Sources:
       None: None
@@ -830,6 +846,7 @@ Settings:
     Expanded: Expanded
     Playing Interface Hide Delay: Playing Interface Hide Delay
     Hide Startup Splash: Hide Startup Splash
+    Hide Header Sync Indicator: Hide Header Sync Indicator
     Hide Repeat Stats: Hide Repeat Stats
     Hide Channel Avatars: Hide Channel Avatars
     Shorten View Counts: Shorten View, Comment and Comment Like Counts
@@ -1121,7 +1138,7 @@ Video:
   Retry With Built-in Extraction: Retry with built-in extraction
   Retry With yt-dlp Extraction: Retry with yt-dlp extraction
   Reloading video after streaming URL error: Reloading video after streaming URL error
-  Configure Restricted Playback Cookies Hint: Configure cookies in Settings → External Software → yt-dlp Playback Cookies.
+  Configure Restricted Playback Cookies Hint: "Configure cookies in Settings → External Software → yt-dlp Cookies."
   Try With Configured Cookies: Try with configured cookies
   Restricted Playback Authentication Failed Template: 'yt-dlp could not access this video with the configured cookies: {error}'
   Save Channel Playback Speed: Save Channel Playback Speed
@@ -1331,6 +1348,10 @@ Share:
   Share failed: "Could not share the link"
   Timestamp Link Copied: Timestamp link copied to clipboard
 Context Menu:
+  Select Tab: Select Tab
+  Close Tabs Before: Close Tabs Before
+  Close Tabs After: Close Tabs After
+  Close Other Tabs: Close Other Tabs
   Copy {service} link without playlist: "Copy {service} link without playlist"
   Context Menu: Context menu
   Select All: Select All
@@ -1535,7 +1556,7 @@ Tooltips:
     Cookie File: Select a Netscape-formatted cookie file for authenticated playback.
     Browser for Cookies: Browser support is read from the selected yt-dlp executable. OpenTubeX asks yt-dlp to read this browser when authenticated playback is requested.
     Browser Profile: Optional browser profile name or folder. Leave blank to use the most recently accessed profile.
-    Always Use Cookies: "Use the configured cookies whenever yt-dlp extracts streams. This does not switch the stream extraction method to yt-dlp. With yt-dlp selected, account-only formats may become available, including YouTube Premium's enhanced bitrate when the account has access. Use the configured cookies for subtitles and automatic translations."
+    Always Use Cookies: "Use the configured cookies for downloads, subtitles and whenever yt-dlp extracts streams. This does not switch the stream extraction method to yt-dlp. With yt-dlp selected, account-only formats may become available, including YouTube Premium's enhanced bitrate when the account has access."
     FFmpeg Executable Path: FFmpeg is required for merging separate video and audio streams and for audio conversion. By default, OpenTubeX will assume that FFmpeg can be found via the PATH environment variable. If needed, a custom path can be set here.
     Use cookies for subtitles: "Use the configured cookies for subtitles and automatic translations. Also enabled by \"Always Use Cookies\"."
   Distraction Free Settings:
@@ -1625,6 +1646,7 @@ CommandPalette:
     Download Finished: This download is no longer running
     Video: Open a video first
 Downloads:
+  Preparing: Preparing…
   Export Failed: "Could not save the downloaded file. Choose a writable download folder and retry."
   Remove File Permanently Warning: "This will permanently delete \"{title}\"."
   Download: Download

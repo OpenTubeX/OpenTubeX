@@ -51,7 +51,10 @@ export function attachAndroidMediaElement(element, { command, load, onError, now
     get: position,
     set(value) {
       if (!Number.isFinite(value)) return
-      state = { ...state, position: Math.max(0, value) }
+      // Native seeks have millisecond precision. Land beyond fractional
+      // segment ends so SponsorBlock does not repeatedly skip the same segment.
+      value = Math.ceil(Math.max(0, value) * 1000) / 1000
+      state = { ...state, position: value }
       sampledAt = now()
       seeking = true
       const sequence = ++seekSequence

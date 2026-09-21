@@ -1,3 +1,4 @@
+import { beginAndroidFullscreenTransition } from '../../helpers/player/androidFullscreenTransition'
 import { parseLocalVideoSummary } from '../../helpers/video-summary.js'
 import WatchVideoSummary from '../../components/WatchVideoSummary/WatchVideoSummary.vue'
 import FtPhonePanel from '../../components/FtPhonePanel/FtPhonePanel.vue'
@@ -51,6 +52,7 @@ import {
   getCachedOembedTitle,
   getOembedTitle,
   getShortThumbnailUrl,
+  getVideoThumbnailUrl,
   openInternalPath,
   showApiErrorToast,
   showToast,
@@ -235,6 +237,8 @@ export default defineComponent({
     return {
       mobilePanel: null,
       startNextVideoInFullscreen: false,
+      finishNativeFullscreenTransition: null,
+      fullscreenTransitionCancelled: false,
       startNextVideoInFullwindow: false,
       startNextVideoInPip: false,
       nextVideoAutoPictureInPictureState: null,
@@ -304,6 +308,7 @@ export default defineComponent({
       /** @type {'dash' | 'legacy' | null} */
       androidBackgroundRestoreFormat: null,
       localFilePlayback: false,
+      isOffline: getConnectionState() === 'offline',
       thumbnail: '',
       videoId: '',
       videoTitle: '',
@@ -317,9 +322,9 @@ export default defineComponent({
       /** @type {import('../../helpers/video-games').LocalVideoGame[]} */
       videoGames: [],
       license: '',
-      videoViewCount: 0,
-      videoLikeCount: 0,
-      videoDislikeCount: 0,
+      videoViewCount: null,
+      videoLikeCount: null,
+      videoDislikeCount: null,
       videoLengthSeconds: 0,
       videoChapters: [],
       videoCurrentChapterIndex: 0,
@@ -699,7 +704,7 @@ export default defineComponent({
       return caption ? this.captions.indexOf(caption) : 0
     },
     transcriptAvailable: function () {
-      return this.captions.length > 0
+      return !this.isOffline && this.captions.length > 0
     },
     ambientModeActive: function () {
       return this.$store.getters.getAmbientMode &&
@@ -1001,6 +1006,7 @@ export default defineComponent({
       return this.$store.getters.getHideLiveChatReplay
     },
     liveChatAvailable: function () {
+      if (this.isOffline) return false
       return this.liveChatIsReplay
         ? !this.hideLiveChatReplay
         : !this.hideLiveChat && (this.isLive || this.isUpcoming)
@@ -1091,13 +1097,14 @@ export default defineComponent({
       return this.$store.getters.getPlaylist(this.playlistId)
     },
     endScreenRecommendations: function () {
-      if (this.hideRecommendedVideos) return []
+      if (this.isOffline || this.hideRecommendedVideos) return []
       return this.recommendedVideos.filter(video =>
         video.videoId && video.videoId !== this.videoId &&
         !this.isHiddenVideo(this.forbiddenTitles, this.channelsHidden, video)
       ).slice(0, 6)
     },
     nextRecommendedVideo: function () {
+      if (this.isOffline) return undefined
       return this.recommendedVideos.find((video) =>
         !this.isHiddenVideo(this.forbiddenTitles, this.channelsHidden, video)
       )
@@ -1148,7 +1155,7 @@ export default defineComponent({
       return this.playerReady
     },
     useSponsorBlock: function () {
-      return this.$store.getters.getUseSponsorBlock
+      return !this.isOffline && this.$store.getters.getUseSponsorBlock
     },
     useReturnYouTubeDislikes: function () {
       return this.$store.getters.getUseReturnYouTubeDislikes
@@ -1165,6 +1172,12 @@ export default defineComponent({
     }
   },
   watch: {
+    '$store.getters.getWatchQueueLength'(length) {
+      if (length === 0 && this.mobilePanel === 'queue') this.mobilePanel = null
+    },
+    errorMessage(error) {
+      if (error) this.finishNativeFullscreenTransition?.()
+    },
     aiVideoSummaryMode() {
       if (this.videoSummary.length > 0) this.clampShortsAuxPanelScroll()
     },
@@ -1203,6 +1216,7 @@ export default defineComponent({
           this.hasBeenPresented = true
         } else {
           this.mobilePanel = null
+          this.finishNativeFullscreenTransition?.()
         }
       }
     },
@@ -1285,6 +1299,7 @@ export default defineComponent({
   },
   mounted: function () {
     connectionEvents.addEventListener('change', this.handleDownloadConnectionChange)
+    this.isOffline = getConnectionState() === 'offline'
     document.addEventListener('keydown', this.handleShortsNavigationKeydown, true)
     document.addEventListener('visibilitychange', this.updateAndroidBackgroundPlaybackFormat)
     window.addEventListener('resize', this.updateShortsViewportHeight)
@@ -1309,6 +1324,7 @@ export default defineComponent({
     this.onMountedDependOnLocalStateLoading()
   },
   beforeUnmount: function () {
+    this.finishNativeFullscreenTransition?.()
     connectionEvents.removeEventListener('change', this.handleDownloadConnectionChange)
     document.removeEventListener('keydown', this.handleShortsNavigationKeydown, true)
     document.removeEventListener('visibilitychange', this.updateAndroidBackgroundPlaybackFormat)
@@ -1344,6 +1360,15 @@ export default defineComponent({
       if (panel === 'chat') this.liveChatOpen = true
     },
     handleDownloadConnectionChange({ detail }) {
+      const chatWasOpen = this.showLiveChat || this.fullscreenLiveChatOpen || this.mobilePanel === 'chat'
+      this.isOffline = detail === 'offline'
+      if (this.isOffline) {
+        if (this.showTranscript || this.fullscreenTranscriptOpen || this.mobilePanel === 'transcript') this.closeTranscript()
+        if (chatWasOpen) this.closeLiveChat()
+        if (this.showSidebarSponsorBlock || this.fullscreenSponsorBlockOpen) this.closeSidebarSponsorBlock()
+        if (this.fullscreenCommentsOpen || this.shortsCommentsOpen || this.mobilePanel === 'comments') this.closeFullscreenComments()
+        if (!this.watchingPlaylist) this.abortAutoplayCountdown(true)
+      }
       if (detail !== 'offline' || !this.isLoading || this.localFilePlayback) return
       if (this.finishDownloadedPlaybackWithoutMetadata()) {
         // Ignore metadata responses that arrive after switching to the local file.
@@ -1927,14 +1952,17 @@ export default defineComponent({
     },
 
     async cleanupWatchRuntime() {
+      this.finishNativeFullscreenTransition?.()
+      // Closing a tab unmounts Watch while progress persistence is pending.
+      const player = this.$refs.player
       this.$store.commit('setCurrentWatchTimestamp', { tabId: this.tabId, value: null })
       await this.handleRouteChange()
       window.removeEventListener('beforeunload', this.handleWatchProgressAutoSave)
       window.removeEventListener('beforeunload', this.flushWatchTime)
       this.deactivateWatchRuntime()
 
-      if (this.$refs.player) {
-        await this.destroyPlayer()
+      if (player) {
+        await this.destroyPlayer(player, false)
       }
     },
 
@@ -2076,9 +2104,9 @@ export default defineComponent({
       this.videoTags = []
       this.videoGames = []
       this.license = ''
-      this.videoViewCount = 0
-      this.videoLikeCount = 0
-      this.videoDislikeCount = 0
+      this.videoViewCount = null
+      this.videoLikeCount = null
+      this.videoDislikeCount = null
       this.videoLengthSeconds = 0
       this.videoChapters = []
       this.videoCurrentChapterIndex = 0
@@ -2193,7 +2221,7 @@ export default defineComponent({
       this.thumbnail = download.thumbnail || this.thumbnail
       if (this.errorMessage) {
         const fileName = file.path.split(/[/\\]/).at(-1)?.replace(/\.[^.]+$/, '') ?? this.videoId
-        this.videoTitle = download.videoId === this.videoId ? download.title : fileName
+        this.videoTitle = file.title || (download.videoId === this.videoId ? download.title : '') || fileName
         this.hasResolvedVideoTitle = true
         this.errorMessage = null
         this.isLoading = false
@@ -2290,8 +2318,12 @@ export default defineComponent({
 
       const download = this.$store.getters.getYtDlpDownloads[this.localPlaybackDownloadId]
       const fileName = file.path.split(/[/\\]/).at(-1)?.replace(/\.[^.]+$/, '') ?? this.videoId
-      this.videoTitle = download.videoId === this.videoId ? download.title : fileName
+      this.videoTitle = file.title || (download.videoId === this.videoId ? download.title : '') || fileName
       this.hasResolvedVideoTitle = true
+      this.channelId = file.authorId || this.channelId || this.historyEntry?.authorId || ''
+      this.channelName = file.author || this.channelName || this.historyEntry?.author || ''
+      this.initializePlaybackRate()
+      this.initializeVideoQuality()
       this.thumbnail = download.thumbnail || this.thumbnail
       this.errorMessage = null
       this.isLoading = false
@@ -3036,7 +3068,7 @@ export default defineComponent({
           this.videoLikeCount = isNaN(likeCount) ? 0 : likeCount
 
           // YouTube doesn't return dislikes anymore
-          this.videoDislikeCount = 0
+          this.videoDislikeCount = null
 
           if (this.useReturnYouTubeDislikes) {
             this.fetchVideoDislikes()
@@ -4333,14 +4365,19 @@ export default defineComponent({
       // otherwise save a spurious ~1 second resume point. Only persist progress
       // for tabs the user has actually presented.
       if (!this.isCurrentlyPresented() || !this.hasBeenPresented) { return }
-      if (!this.$refs.player?.hasLoaded) { return }
-      // Shaka can finish loading before it seeks to the resume point. Saving
-      // the media element's initial zero in that gap would erase progress.
-      if (!this.$refs.player.hasPlaybackPosition) { return }
+      if (this.playerTeardownInProgress) { return }
+      const player = this.$refs.player
+      // A seek establishes a position before its media segment finishes loading.
+      // Save that position, but never the initial zero before playback or a seek.
+      if (!player?.hasPlaybackPosition) { return }
 
       const currentTime = this.shortsPlaybackCompleted && this.watchedProgressSavingEnabled
         ? this.videoLengthSeconds
-        : this.getWatchedProgress()
+        : player.getCurrentTime()
+      if (!this.historyEntryExists) {
+        this.addToHistory(currentTime)
+        return
+      }
       const payload = {
         videoId: this.videoId,
         watchProgress: currentTime
@@ -4852,7 +4889,7 @@ export default defineComponent({
 
       if (this.watchingPlaylist) {
         this.$refs.watchVideoPlaylist?.playNextVideo()
-      } else if (nextVideoId) {
+      } else if (!this.isOffline && nextVideoId) {
         this.tabRouter.push({
           path: `/watch/${nextVideoId}`
         })
@@ -6141,11 +6178,24 @@ export default defineComponent({
       this.currentVideoQuality = this.getDefaultVideoQuality()
     },
 
-    destroyPlayer: async function() {
+    destroyPlayer: async function(player = this.$refs.player, preserveFullscreen = true) {
+      if (process.env.IS_CAPACITOR && preserveFullscreen && player.isFullscreen) {
+        this.finishNativeFullscreenTransition?.()
+        this.fullscreenTransitionCancelled = false
+        const nextVideoId = this.tabRoute.params.id
+        const thumbnail = !nextVideoId || nextVideoId === this.videoId
+          ? this.thumbnail
+          : getVideoThumbnailUrl(nextVideoId, this.backendPreference, this.currentInvidiousInstanceUrl, this.thumbnailPreference)
+        this.finishNativeFullscreenTransition = beginAndroidFullscreenTransition(this.t('Video.Fetching Streams'), thumbnail, () => {
+          this.fullscreenTransitionCancelled = true
+          this.startNextVideoInFullscreen = false
+          this.$refs.player?.cancelPendingFullscreen()
+        })
+      }
       this.playerTeardownInProgress = true
       try {
-        const uiState = await this.$refs.player.destroyPlayer()
-        this.startNextVideoInFullscreen = uiState.startNextVideoInFullscreen
+        const uiState = await player.destroyPlayer()
+        this.startNextVideoInFullscreen = uiState.startNextVideoInFullscreen && !this.fullscreenTransitionCancelled
         this.startNextVideoInFullwindow = uiState.startNextVideoInFullwindow
         this.startNextVideoInPip = uiState.startNextVideoInPip
         this.nextVideoAutoPictureInPictureState = uiState.autoPictureInPictureState

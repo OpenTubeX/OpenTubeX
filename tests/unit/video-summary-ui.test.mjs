@@ -26,6 +26,7 @@ for (const [index, template] of placements.entries()) {
         })
       })
       app.component('WatchVideoSummary', summaryComponent)
+      app.component('FtInlineMetadata', { render() { return h('span', this.$slots.default()) } })
       app.component('ft-icon', { render: () => h('svg') })
       app.config.globalProperties.$t = key => key
       const html = await renderToString(app)
@@ -54,6 +55,7 @@ for (const fullscreenMetadataOpen of [false, true]) {
       })
     })
     app.component('WatchVideoSummary', summaryComponent)
+      app.component('FtInlineMetadata', { render() { return h('span', this.$slots.default()) } })
     app.component('ft-icon', { render: () => h('svg') })
     app.config.globalProperties.$t = key => key
     assert.equal((await renderToString(app)).includes('<details'), fullscreenMetadataOpen)

@@ -23,6 +23,7 @@ for (const expression of ['createLocalDashManifest(result, true)', 'createLocalD
     const watch = {
       load,
       handleDownloadConnectionChange,
+      abortAutoplayCountdown() {},
       videoLoadGeneration: 1,
       isLoading: true,
       localFilePlayback: false,
@@ -88,6 +89,7 @@ for (const backend of ['Local', 'Invidious']) {
     const watch = {
       recover,
       handleDownloadConnectionChange,
+      abortAutoplayCountdown() {},
       videoLoadGeneration: 1,
       isLoading: true,
       localFilePlayback: false,

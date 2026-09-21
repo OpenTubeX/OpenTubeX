@@ -97,7 +97,7 @@ import { AUTO_QUALITY_FALLBACK, streamsSupportAutoQuality } from '../../helpers/
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { prepareGoogleVideoRequest } from '../../helpers/player/playbackRequestPolicy'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
-import { parseChannelPreferences } from '../../helpers/channel-preferences'
+import { parseChannelPreferences, removeChannelPreference } from '../../helpers/channel-preferences'
 import { findLegacyFormatForQuality } from '../../helpers/player/legacyFormats'
 import { waitForYtDlpFormatAvailability } from '../../helpers/player/ytDlpFormatAvailability'
 import { getDashQualityFromDimensions } from '../../helpers/player/videoQuality'
@@ -289,6 +289,10 @@ export default defineComponent({
     playbackSourceKey: {
       type: Number,
       default: 0
+    },
+    offline: {
+      type: Boolean,
+      default: false
     },
     localFilePlayback: {
       type: Boolean,
@@ -1175,7 +1179,7 @@ export default defineComponent({
       return Number.isFinite(volume) ? Math.min(1, Math.max(0, volume)) : 0.1
     })
     const voiceOverTranslationAvailable = computed(() => {
-      return (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
+      return !props.offline && (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
         useVoiceOverTranslationSetting.value &&
         props.videoId !== '' &&
         !isLive.value
@@ -1252,6 +1256,7 @@ export default defineComponent({
     let fullWindowListenerReady = false
     let startInFullwindow = props.startInFullwindow
     let startInFullscreen = props.startInFullscreen
+    let restoringNativeFullscreen = false
     let startInPip = props.startInPip
     let restoreChapters = props.startWithChapters
     let restoreFullscreenMetadata = props.startWithFullscreenMetadata
@@ -1803,7 +1808,7 @@ export default defineComponent({
 
     /** @type {import('vue').ComputedRef<boolean>} */
     const useSponsorBlock = computed(() => {
-      return store.getters.getUseSponsorBlock
+      return !props.offline && store.getters.getUseSponsorBlock
     })
 
     /** @type {import('vue').ComputedRef<boolean>} */
@@ -1927,6 +1932,8 @@ export default defineComponent({
      * }[]}
      */
     let sponsorBlockSegments = []
+    let sponsorBlockLoadedVideoId = null
+    let sponsorBlockRequestGeneration = 0
     const sponsorBlockInfoSegments = ref([])
     const sponsorBlockInfoOpen = ref(props.sponsorBlockInfoOpen)
     const sponsorBlockInfoLoading = ref(false)
@@ -2104,11 +2111,13 @@ export default defineComponent({
     }
 
     async function refetchSponsorBlockSegmentsWhenNotFound() {
+      const videoId = props.videoId
+      const generation = sponsorBlockRequestGeneration
       let segments, averageDuration
 
       try {
         ({ segments, averageDuration } = await getSponsorBlockSegments(
-          props.videoId,
+          videoId,
           SPONSORBLOCK_INFO_CATEGORIES,
           SPONSORBLOCK_INFO_ACTION_TYPES
         ))
@@ -2117,7 +2126,7 @@ export default defineComponent({
         return
       }
 
-      if (!ui || !player) {
+      if (!ui || !player || generation !== sponsorBlockRequestGeneration || videoId !== props.videoId) {
         return
       }
 
@@ -2129,13 +2138,7 @@ export default defineComponent({
         sponsorBlockAverageVideoDuration = averageDuration
         hasSponsorBlockMusicOfftopicSegment.value = segments.some(segment => segment.category === 'music_offtopic')
         refreshSponsorBlockMarkers()
-        if (canSeek()) {
-          const currentTime = video.value?.currentTime ?? 0
-          syncPromptSponsorBlockSegments(currentTime)
-          updateSponsorBlockHighlightState(currentTime)
-          syncSponsorBlockMuteSegments(currentTime, !props.sponsorBlockAutoSkipDisabled)
-          scheduleSponsorBlockSkip()
-        }
+        syncSponsorBlockPlaybackState()
       } else {
         scheduleSponsorBlockNotFoundRefetch()
       }
@@ -2143,6 +2146,10 @@ export default defineComponent({
     }
 
     async function setupSponsorBlock() {
+      const videoId = props.videoId
+      const generation = ++sponsorBlockRequestGeneration
+      const isCurrentRequest = () => generation === sponsorBlockRequestGeneration && videoId === props.videoId
+      sponsorBlockLoadedVideoId = null
       let segments
       let averageDuration = 0
       let refetchWhenNotFound = false
@@ -2166,17 +2173,22 @@ export default defineComponent({
       emitSponsorBlockInfoState()
       try {
         ({ segments, averageDuration } = await getSponsorBlockSegments(
-          props.videoId,
+          videoId,
           SPONSORBLOCK_INFO_CATEGORIES,
           SPONSORBLOCK_INFO_ACTION_TYPES
         ))
+        if (!isCurrentRequest()) return
+        sponsorBlockLoadedVideoId = videoId
         refetchWhenNotFound = segments.length === 0
       } catch (e) {
+        if (!isCurrentRequest()) return
         console.error(e)
         segments = []
       } finally {
-        sponsorBlockInfoLoading.value = false
-        emitSponsorBlockInfoState()
+        if (isCurrentRequest()) {
+          sponsorBlockInfoLoading.value = false
+          emitSponsorBlockInfoState()
+        }
       }
 
       // check if the component is already getting destroyed
@@ -2201,7 +2213,11 @@ export default defineComponent({
       emitSponsorBlockInfoState()
 
       refreshSponsorBlockMarkers()
-      if (sponsorBlockSegments.length > 0 && canSeek()) {
+      syncSponsorBlockPlaybackState()
+    }
+
+    function syncSponsorBlockPlaybackState() {
+      if (useSponsorBlock.value && sponsorBlockSegments.length > 0 && canSeek()) {
         const currentTime = video.value?.currentTime ?? 0
         syncPromptSponsorBlockSegments(currentTime)
         updateSponsorBlockHighlightState(currentTime)
@@ -3209,9 +3225,11 @@ export default defineComponent({
       })
     }
 
-    function clearSponsorBlockMuteSegments() {
-      manuallyMutedSponsorBlockSegments.clear()
-      sponsorBlockDoNotMuteSegments.clear()
+    function clearSponsorBlockMuteSegments(preserveDecisions = false) {
+      if (!preserveDecisions) {
+        manuallyMutedSponsorBlockSegments.clear()
+        sponsorBlockDoNotMuteSegments.clear()
+      }
       notifiedSponsorBlockMuteSegments.clear()
       skippedSponsorBlockSegments.value
         .filter(segment => segment.isMute)
@@ -5573,6 +5591,9 @@ export default defineComponent({
     let mediaSessionStopped = false
 
     watch(() => props.videoId, () => {
+      sponsorBlockRequestGeneration++
+      sponsorBlockLoadedVideoId = null
+      sponsorBlockInfoLoading.value = false
       resetAbRepeat()
       repeatStatsTracker?.reset()
       syncRepeatStatsMode()
@@ -5624,10 +5645,12 @@ export default defineComponent({
       if (!enabled) {
         closeSponsorBlockInfo()
         sponsorBlockMuteController.reset()
-        clearSponsorBlockMuteSegments()
+        clearSponsorBlockMuteSegments(props.offline)
         cancelSponsorBlockSkipSchedule()
-      } else {
-        scheduleSponsorBlockSkip()
+      } else if (sponsorBlockLoadedVideoId === props.videoId) {
+        syncSponsorBlockPlaybackState()
+      } else if (!sponsorBlockInfoLoading.value) {
+        setupSponsorBlock()
       }
     })
 
@@ -5956,6 +5979,7 @@ export default defineComponent({
     // shaka-player ships with some locales prebundled and already loaded
     const loadedLocales = new Set(process.env.SHAKA_LOCALES_PREBUNDLED)
     const originalShakaControlLocalizations = new Map()
+    const replayLabel = ref('')
 
     /**
      * @param {string} locale
@@ -5981,6 +6005,7 @@ export default defineComponent({
       }
 
       localization.changeLocale([shakaLocale])
+      replayLabel.value = localization.resolve('REPLAY')
 
       // Add the keyboard shortcut to the label for the default Shaka controls
       if (!originalShakaControlLocalizations.has(shakaLocale)) {
@@ -6267,8 +6292,9 @@ export default defineComponent({
 
       updateAutoPip()
 
+      updateScrollMiniPlayer()
       if (scrollMiniPlayerActive.value) {
-        deactivateScrollMiniPlayer()
+        showScrollMiniPlayPause(false)
       }
 
       emit('ended', sleepTimerEnded)
@@ -6297,11 +6323,12 @@ export default defineComponent({
         events.dispatchEvent(new CustomEvent('setFullWindow', { detail: true }))
       }
 
-      if (startInFullscreen && hasLoaded.value && player?.nativePlayback) {
+      if (startInFullscreen && hasLoaded.value && player?.nativePlayback && !restoringNativeFullscreen) {
         const nativePlayback = player.nativePlayback
+        restoringNativeFullscreen = true
         nativePlayback.show().then(() => {
           if (nativePlayback.isScreenOpen()) startInFullscreen = false
-        }).catch(error => console.error('Unable to restore native fullscreen', error))
+        }).catch(error => console.error('Unable to restore native fullscreen', error)).finally(() => { restoringNativeFullscreen = false })
       } else if (startInFullscreen && hasLoaded.value && process.env.IS_ELECTRON) {
         startInFullscreen = false
         window.ftElectron.requestFullscreen(tabId)
@@ -8880,6 +8907,10 @@ export default defineComponent({
         emit('playback-rate-user-set', playbackRate)
       })
 
+      events.addEventListener('removeChannelPlaybackSpeed', () => {
+        removeChannelPreference(store, props.channelId, 'playbackSpeed')
+      })
+
       events.addEventListener('saveChannelPlaybackSpeed', () => {
         emit('save-channel-playback-speed')
       })
@@ -10303,6 +10334,7 @@ export default defineComponent({
     }
 
     function fullscreenChangeHandler() {
+      if (process.env.IS_CAPACITOR && !isNativeFullscreenActive() && document.querySelector('.nativeFullscreenTransition')) return
       const fullscreen = isNativeFullscreenActive()
       isFullscreen.value = fullscreen
       if (props.shortsPlayer) {
@@ -10451,6 +10483,7 @@ export default defineComponent({
             vrCanvas: vrCanvas.value,
             sabrData: props.sabrData,
             captions: props.captions,
+            videoDimensions: props.legacyFormats.find(format => format.width > 0 && format.height > 0),
             audioOnly: props.format === 'audio',
             skipSilence: skipSilence.value,
             continueInBackground: store.getters.getContinuePlaybackWhenScreenIsLocked,
@@ -11028,6 +11061,7 @@ export default defineComponent({
           // still arrive from the media element in that window, so stop handlers
           // from querying player state as soon as the format switch begins.
           hasLoaded.value = false
+          hasPlaybackPosition.value = false
         }
 
         const {
@@ -11150,6 +11184,7 @@ export default defineComponent({
     // #region tear down
 
     onBeforeUnmount(() => {
+      sponsorBlockRequestGeneration++
       screenWakeBinding?.destroy()
       screenWakeBinding = null
       nativePlaybackCleanup?.()
@@ -11161,6 +11196,7 @@ export default defineComponent({
       cancelPendingVolumeUserSet()
       fullWindowAnimation?.cancel()
       hasLoaded.value = false
+      hasPlaybackPosition.value = false
       closeFullscreenMetadata()
       closeFullscreenTranscript()
       closeFullscreenSponsorBlock()
@@ -11366,6 +11402,7 @@ export default defineComponent({
       // The media element can emit one final timeupdate while Shaka is being
       // destroyed, after its internal manifest has already been cleared.
       hasLoaded.value = false
+      hasPlaybackPosition.value = false
 
       // Shaka clears the video's intrinsic dimensions before this component
       // unmounts. Keep its ratio and restore the poster so recovery doesn't
@@ -11438,6 +11475,11 @@ export default defineComponent({
 
     expose({
       isNativePlayback: () => !!player?.nativePlayback,
+      cancelPendingFullscreen() {
+        startInFullscreen = false
+        player?.nativePlayback?.hide().catch(() => {})
+      },
+      isFullscreen,
       hasLoaded,
       hasPlaybackPosition,
 
@@ -11520,6 +11562,7 @@ export default defineComponent({
       shortsPaused,
       playbackEnded,
       replayIcon: shaka.ui.Enums.MaterialDesignSVGIcons.REPLAY,
+      replayLabel,
       shortsMuted,
       shortsCaptionsAvailable,
       shortsCaptionsEnabled,

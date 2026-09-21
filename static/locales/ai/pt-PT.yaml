@@ -192,6 +192,17 @@ User Playlists:
     This playlist could not be loaded.: Não foi possível carregar esta lista de reprodução.
     More videos could not be loaded.: Não foi possível carregar mais vídeos.
 History:
+  Repair Use Cookies: "Usar os cookies configurados do yt-dlp"
+  Repair Cookies Hint: "É necessário verificar mais de 500 vídeos. Configure os cookies nas definições do yt-dlp e ative-os aqui para reduzir o risco de limitação de pedidos."
+  Repair Description: "Utilize após importar o histórico ou quando faltarem dados dos vídeos ou tiverem uma etiqueta LIVE incorreta."
+  Repair Details: "Preenche os títulos, canais e datas de publicação em falta e verifica as durações e etiquetas LIVE. O progresso de reprodução e o estado de visualização não mudam."
+  Repair Notice: "Históricos grandes podem demorar. Os pedidos falhados são repetidos automaticamente. Vídeos eliminados ou privados podem continuar incompletos."
+  Start Repair: "Iniciar reparação"
+  Repair Checking: "A verificar dados dos vídeos"
+  Repair Waiting: "A aguardar pelo YouTube. A reparação continuará automaticamente."
+  Repair Retrying: "A repetir pedidos falhados"
+  Repair Finished: "Reparação concluída"
+  Repair Stopped: "Reparação interrompida"
   Repair: "Reparar histórico"
   Repair Progress: "Verificados {checked}/{total} · Reparados {repaired} · Falhas {failed}"
   Mark All As Watched: Marcar tudo como reproduzido
@@ -286,9 +297,10 @@ Settings:
       After current tab: Depois do separador atual
       After current tab in opened order: Depois do separador atual, pela ordem de abertura
     Tab Close Focus:
+      Last active tab: "Último separador ativo"
+      Next tab in tab order: "Separador seguinte na ordem dos separadores"
+      Previous tab in tab order: "Separador anterior na ordem dos separadores"
       Tab Close Focus: Depois de fechar um separador
-      Previous tab: Selecionar o separador anterior
-      Next tab: Selecionar o separador seguinte
     Startup Behavior:
       Startup Behavior: Ao iniciar
       Load all tabs: Carregar todos os separadores
@@ -673,6 +685,10 @@ Settings:
     Title Excludes: O título exclui
     Title Filter Hint: Separe vários termos do título com vírgulas. Um vídeo tem de corresponder a pelo menos um termo incluído e a nenhum termo excluído.
   External Software Settings:
+    Create YouTube session: "Criar sessão do YouTube"
+    YouTube session hint: "Inicie sessão se necessário e guarde-a. Escolha nas definições se pretende utilizá-la para transferências, reprodução ou legendas."
+    Use cookies for downloads: "Utilizar cookies nas transferências"
+    YouTube session failed: "Não foi possível guardar a sessão do YouTube."
     Checking FFmpeg and FFprobe: A verificar o FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe ainda não foram transferidos. Clique no botão abaixo para os transferir.
     External Software Settings: Software externo
@@ -718,7 +734,7 @@ Settings:
       Manual: Atualizar apenas manualmente
     yt-dlp Executable Path: Caminho do executável yt-dlp
     FFmpeg Executable Path: Caminho do executável FFmpeg
-    Restricted Playback Authentication: Cookies de reprodução do yt-dlp
+    Restricted Playback Authentication: "Cookies do yt-dlp"
     Cookie Source: Origem dos cookies
     Cookie Sources:
       None: Nenhuma
@@ -852,6 +868,7 @@ Settings:
     Expanded: Expandidos
     Playing Interface Hide Delay: Atraso para ocultar a interface durante a reprodução
     Hide Startup Splash: Ocultar ecrã de arranque
+    Hide Header Sync Indicator: Ocultar indicador de sincronização no cabeçalho da aplicação
     Hide Repeat Stats: Ocultar estatísticas de repetição
     Sections:
       Visible While Paused: Visível durante a pausa em janela inteira ou ecrã inteiro
@@ -1158,7 +1175,7 @@ Video:
   Retry With Built-in Extraction: Tentar novamente com a extração integrada
   Retry With yt-dlp Extraction: Tentar novamente com a extração do yt-dlp
   Reloading video after streaming URL error: A recarregar o vídeo após um erro no URL de transmissão
-  Configure Restricted Playback Cookies Hint: Configure os cookies em Definições → Software externo → Cookies de reprodução do yt-dlp.
+  Configure Restricted Playback Cookies Hint: "Configure os cookies em Definições → Software externo → Cookies do yt-dlp."
   Try With Configured Cookies: Tentar com os cookies configurados
   Restricted Playback Authentication Failed Template: 'O yt-dlp não conseguiu aceder a este vídeo com os cookies configurados: {error}'
   Private: Os vídeos privados não podem ser vistos no OpenTubeX porque exigem um início de sessão Google e que o utilizador seja proprietário do vídeo.
@@ -1380,6 +1397,10 @@ Share:
   Share failed: "Não foi possível partilhar a ligação"
   Timestamp Link Copied: Hiperligação com marca temporal copiada para a área de transferência
 Context Menu:
+  Select Tab: Selecionar separador
+  Close Tabs Before: Fechar separadores anteriores
+  Close Tabs After: Fechar separadores seguintes
+  Close Other Tabs: Fechar outros separadores
   Copy {service} link without playlist: "Copiar ligação do {service} sem lista de reprodução"
   Context Menu: Menu de contexto
   Select All: Selecionar tudo
@@ -1583,7 +1604,7 @@ Tooltips:
     Cookie File: Selecione um ficheiro de cookies no formato Netscape para a reprodução autenticada.
     Browser for Cookies: A compatibilidade com navegadores é obtida a partir do executável do yt-dlp selecionado. Quando é pedida a reprodução autenticada, o OpenTubeX solicita ao yt-dlp que leia os cookies deste navegador.
     Browser Profile: Nome ou pasta opcional do perfil do navegador. Deixe em branco para utilizar o perfil acedido mais recentemente.
-    Always Use Cookies: "Utiliza os cookies configurados sempre que o yt-dlp extrai transmissões. Isto não muda o método de extração da transmissão para o yt-dlp. Com o yt-dlp selecionado, podem ficar disponíveis formatos exclusivos de contas, incluindo a taxa de bits melhorada do YouTube Premium se a conta tiver acesso. Usar os cookies configurados para legendas e traduções automáticas."
+    Always Use Cookies: "Utilize os cookies configurados para transferências, legendas e sempre que o yt-dlp extrair transmissões. Isto não muda o método de extração da transmissão para o yt-dlp. Com o yt-dlp selecionado, podem ficar disponíveis formatos exclusivos de contas, incluindo a taxa de bits melhorada do YouTube Premium se a conta tiver acesso."
     FFmpeg Executable Path: O FFmpeg é necessário para combinar transmissões separadas de vídeo e áudio e para converter áudio. Por predefinição, o OpenTubeX assume que o FFmpeg pode ser encontrado através da variável de ambiente PATH. Se necessário, pode definir aqui um caminho personalizado.
     Use cookies for subtitles: "Usar os cookies configurados para legendas e traduções automáticas. Também é ativado por «Usar sempre cookies»."
   Distraction Free Settings:
@@ -1674,6 +1695,7 @@ CommandPalette:
     Download Finished: Esta descarga já não está em curso
     Video: Abra primeiro um vídeo
 Downloads:
+  Preparing: A preparar…
   Export Failed: "Não foi possível guardar o ficheiro transferido. Escolhe uma pasta de transferências com permissão de escrita e tenta novamente."
   Remove File Permanently Warning: "Isto eliminará \"{title}\" permanentemente."
   Download: Descarregar

@@ -323,6 +323,7 @@
           <div
             v-show="subpageTitle"
             :id="subpageTargetId"
+            ref="settingsSubpageContentRef"
             v-overlay-scrollbars
             class="settingsSubpageScroll"
             :class="{ settingsSubpageFlush: subpageFlush }"
@@ -485,6 +486,7 @@ const settingsMenuTransitionClass = ref('')
 const settingsWindowRef = useTemplateRef('settingsWindowRef')
 const settingsPageRef = useTemplateRef('settingsPageRef')
 const settingsContentRef = useTemplateRef('settingsContentRef')
+const settingsSubpageContentRef = useTemplateRef('settingsSubpageContentRef')
 const activeSettingsSectionRef = useTemplateRef('activeSettingsSectionRef')
 const standaloneScrollRef = useTemplateRef('standaloneScrollRef')
 const profileManagerScrollRef = useTemplateRef('profileManagerScrollRef')
@@ -1080,7 +1082,12 @@ async function openSearchResult(sectionType, match) {
     await nextTick()
   }
 
-  const content = settingsContentRef.value
+  if (match.subpage) {
+    settingsContentRef.value?.querySelector(`[data-settings-subpage="${match.subpage}"]`)?.click()
+    await nextTick()
+  }
+
+  const content = subpageTitle.value ? settingsSubpageContentRef.value : settingsContentRef.value
   if (!content) return
   const section = settingsSectionComponents.value.find(({ type }) => type === sectionType)
   const isSectionMatch = [section?.title, section?.description]
@@ -1088,6 +1095,9 @@ async function openSearchResult(sectionType, match) {
   let target = isSectionMatch
     ? content.querySelector(`.section[data-section="${sectionType}"]`)
     : null
+  if (match.subpage && normalizeSearchText(subpageTitle.value) === normalizedLabel) {
+    target = content.querySelector('.settingsSubpageContent')
+  }
   if (target === null) {
     const subsectionTarget = settingsSearchSubsectionTargets.value[sectionType]?.find(
       ({ search }) => normalizeSearchText(search) === normalizedLabel
@@ -1101,10 +1111,11 @@ async function openSearchResult(sectionType, match) {
   }
   if (target === null) {
     const visibleTextElements = [...content.querySelectorAll(
-      'label, button, p, h1, h2, h3, h4, span, legend, div'
+      'label, button, input[aria-label], p, h1, h2, h3, h4, span, legend, div'
     )]
       .filter(element => element.getClientRects().length > 0)
     const labelElement = visibleTextElements
+      .find(element => normalizeSearchText(element.getAttribute('aria-label') ?? '') === normalizedLabel) ?? visibleTextElements
       .filter(element => getSearchTargetText(element) === normalizedLabel)
       .at(-1) ?? visibleTextElements
       .filter(element => getSearchTargetText(element).startsWith(`${normalizedLabel}:`))
@@ -1322,7 +1333,8 @@ function handleSettingsEscape(event) {
   if (event.target.closest('[aria-expanded="true"], [data-settings-escape-scope]')) return
   event.preventDefault()
   event.stopPropagation()
-  closeSettings()
+  if (!isInDesktopView.value && showBackButton.value) goBack()
+  else closeSettings()
 }
 
 function handleHeaderDoubleClick(event) {

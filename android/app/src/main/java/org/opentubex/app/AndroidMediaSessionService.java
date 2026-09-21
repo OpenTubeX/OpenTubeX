@@ -6,7 +6,6 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.MediaMetadata;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
@@ -20,18 +19,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class AndroidMediaSessionService extends Service {
     private static java.lang.ref.WeakReference<AndroidMediaSessionService> activeService = new java.lang.ref.WeakReference<>(null);
@@ -43,16 +34,11 @@ public class AndroidMediaSessionService extends Service {
     private static final String CHANNEL_ID = OpenTubeXNotificationChannels.MEDIA_PLAYBACK_ID;
     private static final int NOTIFICATION_ID = 0x4d454449;
     private static final double DEFAULT_SEEK_SECONDS = 10;
-    private static final int MAX_ARTWORK_REDIRECTS = 5;
-    static final int MAX_ARTWORK_BYTES = 5 * 1024 * 1024;
-    static final int MAX_ARTWORK_DIMENSION = 2048;
-    static final long MAX_ARTWORK_PIXELS = 2048L * 2048L;
-    static final long MAX_ARTWORK_DECODED_BYTES = MAX_ARTWORK_PIXELS * 4L;
     private static final long PAUSED_WAKE_LOCK_GRACE_MS = 15_000;
 
-    private final ExecutorService artworkExecutor = Executors.newSingleThreadExecutor();
     private PowerManager.WakeLock playbackWakeLock;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private final AndroidMediaArtwork artworkLoader = new AndroidMediaArtwork(mainHandler::post);
     private final Runnable releasePlaybackWakeLock = () -> {
         if (playbackWakeLock != null && playbackWakeLock.isHeld()) playbackWakeLock.release();
     };
@@ -272,152 +258,10 @@ public class AndroidMediaSessionService extends Service {
         if (url.equals(artworkUrl)) return;
         artworkUrl = url;
         artwork = null;
-        if (url.isEmpty()) return;
-        artworkExecutor.execute(() -> {
-            Bitmap loaded = downloadArtwork(url);
-            if (loaded == null) return;
-            runOnMainThread(() -> {
-                if (!url.equals(artworkUrl) || currentState == null) return;
-                artwork = loaded;
-                applyState(currentState);
-            });
+        artworkLoader.load(url, loaded -> {
+            artwork = loaded;
+            if (currentState != null) applyState(currentState);
         });
-    }
-
-    private Bitmap downloadArtwork(String source) {
-        try {
-            URL url = new URL(source);
-            for (int redirects = 0; redirects <= MAX_ARTWORK_REDIRECTS; redirects++) {
-                if (!isSafeArtworkUrl(url)) return null;
-
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                try {
-                    connection.setConnectTimeout(5_000);
-                    connection.setReadTimeout(5_000);
-                    connection.setInstanceFollowRedirects(false);
-                    int status = connection.getResponseCode();
-                    if (isRedirectStatus(status)) {
-                        String location = connection.getHeaderField("Location");
-                        if (location == null || redirects == MAX_ARTWORK_REDIRECTS) return null;
-                        url = new URL(url, location);
-                        continue;
-                    }
-                    if (status < 200 || status >= 300) return null;
-                    try (InputStream input = connection.getInputStream()) {
-                        byte[] encoded = readArtworkBytes(input, connection.getContentLengthLong());
-                        return encoded == null ? null : decodeArtwork(encoded);
-                    }
-                } finally {
-                    connection.disconnect();
-                }
-            }
-        } catch (Exception ignored) {
-            return null;
-        }
-        return null;
-    }
-
-    static byte[] readArtworkBytes(InputStream input, long contentLength) throws IOException {
-        if (contentLength > MAX_ARTWORK_BYTES) return null;
-
-        int initialSize = contentLength > 0 ? (int) contentLength : 8192;
-        ByteArrayOutputStream output = new ByteArrayOutputStream(initialSize);
-        byte[] buffer = new byte[8192];
-        int read;
-        while ((read = input.read(buffer)) != -1) {
-            if (output.size() + read > MAX_ARTWORK_BYTES) return null;
-            output.write(buffer, 0, read);
-        }
-        return output.toByteArray();
-    }
-
-    private static Bitmap decodeArtwork(byte[] encoded) {
-        BitmapFactory.Options bounds = new BitmapFactory.Options();
-        bounds.inJustDecodeBounds = true;
-        BitmapFactory.decodeByteArray(encoded, 0, encoded.length, bounds);
-        int sampleSize = calculateArtworkSampleSize(bounds.outWidth, bounds.outHeight);
-        if (sampleSize == 0) return null;
-
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inScaled = false;
-        options.inSampleSize = sampleSize;
-        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        Bitmap decoded = BitmapFactory.decodeByteArray(encoded, 0, encoded.length, options);
-        if (
-            decoded != null &&
-            (
-                !hasSafeArtworkDimensions(decoded.getWidth(), decoded.getHeight()) ||
-                decoded.getByteCount() > MAX_ARTWORK_DECODED_BYTES
-            )
-        ) {
-            decoded.recycle();
-            return null;
-        }
-        return decoded;
-    }
-
-    static int calculateArtworkSampleSize(int width, int height) {
-        if (width <= 0 || height <= 0) return 0;
-
-        int sampleSize = 1;
-        while (!hasSafeArtworkDimensions(
-            (int) (((long) width + sampleSize - 1) / sampleSize),
-            (int) (((long) height + sampleSize - 1) / sampleSize)
-        )) {
-            sampleSize *= 2;
-        }
-        return sampleSize;
-    }
-
-    static boolean hasSafeArtworkDimensions(int width, int height) {
-        return width > 0 &&
-            height > 0 &&
-            width <= MAX_ARTWORK_DIMENSION &&
-            height <= MAX_ARTWORK_DIMENSION &&
-            (long) width * height <= MAX_ARTWORK_PIXELS &&
-            (long) width * height * 4L <= MAX_ARTWORK_DECODED_BYTES;
-    }
-
-    static boolean isSafeArtworkUrl(URL url) {
-        if (!"https".equalsIgnoreCase(url.getProtocol()) || url.getUserInfo() != null) return false;
-        try {
-            InetAddress[] addresses = InetAddress.getAllByName(url.getHost());
-            if (addresses.length == 0) return false;
-            for (InetAddress address : addresses) {
-                if (!isPublicAddress(address)) return false;
-            }
-            return true;
-        } catch (Exception ignored) {
-            return false;
-        }
-    }
-
-    private static boolean isPublicAddress(InetAddress address) {
-        if (
-            address.isAnyLocalAddress() ||
-            address.isLoopbackAddress() ||
-            address.isLinkLocalAddress() ||
-            address.isSiteLocalAddress() ||
-            address.isMulticastAddress()
-        ) {
-            return false;
-        }
-
-        byte[] bytes = address.getAddress();
-        if (bytes.length == 4) {
-            int first = Byte.toUnsignedInt(bytes[0]);
-            int second = Byte.toUnsignedInt(bytes[1]);
-            return first != 0 && !(first == 100 && second >= 64 && second <= 127);
-        }
-        return bytes.length != 16 || (Byte.toUnsignedInt(bytes[0]) & 0xfe) != 0xfc;
-    }
-
-    private static boolean isRedirectStatus(int status) {
-        return status == HttpURLConnection.HTTP_MOVED_PERM ||
-            status == HttpURLConnection.HTTP_MOVED_TEMP ||
-            status == HttpURLConnection.HTTP_SEE_OTHER ||
-            status == 307 ||
-            status == 308;
     }
 
     private void runOnMainThread(Runnable runnable) {
@@ -579,6 +423,7 @@ public class AndroidMediaSessionService extends Service {
         AndroidPlaybackPlugin.pauseOwner(nativeOwner);
         artworkUrl = "";
         artwork = null;
+        artworkLoader.cancel();
         metadataSignature = "";
         notificationSignature = "";
         mainHandler.removeCallbacks(releasePlaybackWakeLock);
@@ -597,7 +442,7 @@ public class AndroidMediaSessionService extends Service {
         AndroidPlaybackPlugin.pauseOwner(nativeOwner);
         if (activeService.get() == this) activeService.clear();
         artworkUrl = "";
-        artworkExecutor.shutdownNow();
+        artworkLoader.close();
         mainHandler.removeCallbacks(releasePlaybackWakeLock);
         releasePlaybackWakeLock.run();
         mediaSession.release();

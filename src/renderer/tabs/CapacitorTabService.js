@@ -14,6 +14,7 @@ import {
   unloadCapacitorTab
 } from './capacitorTabState.js'
 import { tabMediaCoordinator } from './TabMediaCoordinator.js'
+import { isAppHidden } from '../helpers/appVisibility.js'
 import { getSyncTabRoute } from '../helpers/sync-sessions.js'
 
 const STORAGE_KEY = 'opentubex-capacitor-tabs'
@@ -45,7 +46,14 @@ export class CapacitorTabService {
     this.store = store
     this.navigation = navigation
     this.initialized = false
+    this.persistTimer = null
+    this.budgetTimer = null
+    this.lastPresented = new Map()
+    this.presentationOrder = 0
+    this.flushOnHide = () => { if (isAppHidden()) this.flushPersistence() }
+    this.flushOnPageHide = () => this.flushPersistence()
     this.sessionGeneration = 0
+    this.activationHistory = []
     this.removeRouterHook = () => {}
     this.removeStoreSubscription = () => {}
   }
@@ -98,9 +106,18 @@ export class CapacitorTabService {
       })
     })
     this.removeStoreSubscription = this.store.subscribe((mutation) => {
-      if (PERSISTED_MUTATIONS.has(mutation.type)) this.persist()
+      if (mutation.type === 'setRememberTabNavigationHistory') this.persist()
+      else if (PERSISTED_MUTATIONS.has(mutation.type)) this.schedulePersistence()
+      if (mutation.type === 'setPresentedTab') {
+        this.lastPresented.set(this.store.getters.getPresentedTabId, ++this.presentationOrder)
+      }
+      if (mutation.type === 'setTabsState' || mutation.type === 'setPresentedTab') this.scheduleTabBudget()
     })
 
+    globalThis.document?.addEventListener('visibilitychange', this.flushOnHide)
+    globalThis.window?.addEventListener?.('pagehide', this.flushOnPageHide)
+    this.lastPresented.set(session.activeTabId, ++this.presentationOrder)
+    this.scheduleTabBudget()
     const activeTab = this.store.getters.getActiveTab
     if (activeTab?.route.fullPath !== this.router.currentRoute.value.fullPath) {
       await this.navigation.projectRoute(activeTab.route)
@@ -151,7 +168,7 @@ export class CapacitorTabService {
     if (wasActive) this.navigation.saveScroll(tabId)
 
     if (wasActive && previous.tabs.length > 1) {
-      const nextTabId = findReplacementTabId(previous.tabs, tabId, this.store.getters.getTabCloseFocus)
+      const nextTabId = findReplacementTabId(previous.tabs, tabId, this.store.getters.getTabCloseFocus, this.activationHistory)
       if (!nextTabId || !await this.activateTab(nextTabId)) return false
       previous = this.currentSession()
     }
@@ -292,7 +309,7 @@ export class CapacitorTabService {
     if (session.activeTabId === tabId) {
       if (session.tabs.length <= 1) return false
 
-      const nextTabId = findReplacementTabId(session.tabs, tabId, this.store.getters.getTabCloseFocus)
+      const nextTabId = findReplacementTabId(session.tabs, tabId, this.store.getters.getTabCloseFocus, this.activationHistory)
       if (!nextTabId || !await this.activateTab(nextTabId)) return false
       session = this.currentSession()
     }
@@ -318,6 +335,7 @@ export class CapacitorTabService {
 
   async commitAndPresent(previous, session) {
     const previousPresentedTabId = this.store.getters.getPresentedTabId
+    const previousActivationHistory = this.activationHistory
     const presentationGeneration = this.commitSession(session)
     if (await this.navigation.requestPresentation(session.activeTabId, session.selectionRevision)) {
       return true
@@ -340,6 +358,7 @@ export class CapacitorTabService {
       selectionRevision: current.selectionRevision + 1
     }
     this.commitSession(rollback, rollbackPresentedTabId)
+    this.activationHistory = previousActivationHistory
     await this.navigation.requestPresentation(rollback.activeTabId, rollback.selectionRevision)
     return false
   }
@@ -377,12 +396,63 @@ export class CapacitorTabService {
   }
 
   commitSession(session, presentedTabId = this.store.getters.getPresentedTabId ?? session.activeTabId) {
+    const liveIds = new Set(session.tabs.map(tab => tab.id))
+    const previousActiveId = this.store.getters.getActiveTabId
+    this.activationHistory = [session.activeTabId, previousActiveId, ...this.activationHistory]
+      .filter((id, index, ids) => liveIds.has(id) && ids.indexOf(id) === index)
     this.store.commit('setTabsState', toRuntimeTabState(session, presentedTabId))
     this.sessionGeneration += 1
     return this.sessionGeneration
   }
 
+  schedulePersistence() {
+    if (this.persistTimer !== null) return
+    this.sessionUpdatedAt = Date.now()
+    this.persistTimer = setTimeout(() => this.persist(), 0)
+  }
+
+  flushPersistence() {
+    if (this.persistTimer !== null) this.persist()
+  }
+
+  scheduleTabBudget() {
+    if (this.budgetTimer !== null) return
+    this.budgetTimer = setTimeout(() => {
+      this.budgetTimer = null
+      this.enforceTabBudget()
+    }, 1000)
+  }
+
+  enforceTabBudget() {
+    let session = this.currentSession()
+    const ids = new Set(session.tabs.map(tab => tab.id))
+    for (const id of this.lastPresented.keys()) {
+      if (!ids.has(id)) this.lastPresented.delete(id)
+    }
+    // Keep two inactive browsing tabs warm. Player and editing routes are
+    // protected, as are pinned tabs and any partially entered form values.
+    const roots = new Map([...(globalThis.document?.querySelectorAll('.tabContent[data-tab-id]') ?? [])]
+      .map(element => [element.dataset.tabId, element]))
+    const candidates = session.tabs.filter(tab => {
+      if (tab.id === session.activeTabId || tab.id === this.store.getters.getPresentedTabId ||
+          tab.isPinned || tab.isPlaying || tab.isLoading || tab.loadState !== 'loaded') return false
+      if (!/^\/(?:home|subscriptions|subscribedchannels|trending|popular|history|search|channel|hashtag)(?:\/|$)/.test(tab.route.path)) return false
+      const root = roots.get(tab.id)
+      return !root?.querySelector('[contenteditable="true"]') &&
+        ![...(root?.querySelectorAll('input, textarea, select') ?? [])].some(input => input.tagName === 'SELECT'
+          ? [...input.options].some(option => option.selected !== option.defaultSelected)
+          : !['button', 'submit', 'hidden'].includes(input.type) &&
+          (input.value !== input.defaultValue || input.checked !== input.defaultChecked))
+    }).sort((left, right) => (this.lastPresented.get(left.id) ?? 0) - (this.lastPresented.get(right.id) ?? 0))
+    for (const tab of candidates.slice(0, Math.max(0, candidates.length - 2))) {
+      session = unloadCapacitorTab(session, tab.id)
+    }
+    if (candidates.length > 2) this.commitSession(session)
+  }
+
   persist() {
+    clearTimeout(this.persistTimer)
+    this.persistTimer = null
     try {
       this.sessionUpdatedAt = Date.now()
       localStorage.setItem(STORAGE_KEY, JSON.stringify(toPersistedSession(
@@ -395,18 +465,26 @@ export class CapacitorTabService {
   }
 
   dispose() {
+    this.flushPersistence()
+    clearTimeout(this.budgetTimer)
+    this.budgetTimer = null
+    globalThis.document?.removeEventListener('visibilitychange', this.flushOnHide)
+    globalThis.window?.removeEventListener?.('pagehide', this.flushOnPageHide)
     this.removeRouterHook()
     this.removeStoreSubscription()
     this.initialized = false
   }
 }
 
-function findReplacementTabId(tabs, tabId, focus) {
+function findReplacementTabId(tabs, tabId, focus = 'lastActiveTab', activationHistory = []) {
   const tabIndex = tabs.findIndex(tab => tab.id === tabId)
   if (tabIndex === -1) return null
 
   const previous = tabs[tabIndex - 1]
   const next = tabs[tabIndex + 1]
+  if (focus !== 'previousTab' && focus !== 'nextTab') {
+    return activationHistory.find(id => id !== tabId && tabs.some(tab => tab.id === id)) ?? next?.id ?? previous?.id ?? null
+  }
   const [preferred, fallback] = focus === 'nextTab' ? [next, previous] : [previous, next]
   // Match desktop: prefer a loaded opposite neighbor, but never skip over
   // the nearest tab on the configured side to find a more distant loaded tab.

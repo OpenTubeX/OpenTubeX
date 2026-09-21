@@ -1,9 +1,11 @@
 <template>
   <div
     v-if="showResult"
-    v-observe-visibility="visible ? false : {
+    ref="shell"
+    v-observe-visibility="windowed || visible ? false : {
       callback: onVisibilityChanged
     }"
+    :style="!visible && shellHeight ? { blockSize: `${shellHeight}px` } : undefined"
     :class="{
       grid: layout === 'grid',
       list: layout === 'list',
@@ -66,7 +68,8 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
+import { observeWindowedListItem } from '../../helpers/windowedList.js'
 
 import { handleDragAndDrop } from '../../helpers/dragAndDrop'
 
@@ -295,6 +298,29 @@ const showResult = computed(() => {
 })
 
 const visible = ref(props.firstScreen)
+// Community cards contain expandable text/media whose local state must survive scrolling.
+const windowed = process.env.IS_CAPACITOR && finalDataType.value !== 'community'
+const shell = useTemplateRef('shell')
+const shellHeight = ref(0)
+let windowItem
+if (windowed) {
+  watch(shell, element => {
+    windowItem?.dispose()
+    windowItem = element
+      ? observeWindowedListItem(element, {
+          mount: () => { visible.value = true },
+          unmount: height => { shellHeight.value = height; visible.value = false },
+          isMounted: () => visible.value,
+          isProtected: () => {
+            return props.isVideoDragging || element.contains(document.activeElement) ||
+              !!element.querySelector('[aria-expanded="true"], [role="dialog"], [contenteditable="true"]')
+          },
+        })
+      : null
+  }, { flush: 'post' })
+  watch(() => [props.data, props.layout, props.appearance], () => windowItem?.refresh(), { flush: 'post' })
+  onBeforeUnmount(() => windowItem?.dispose())
+}
 
 /**
  * @param {boolean} isVisible

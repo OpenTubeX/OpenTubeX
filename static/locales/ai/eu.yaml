@@ -188,6 +188,17 @@ User Playlists:
     This playlist could not be loaded.: Ezin izan da erreprodukzio-zerrenda hau kargatu.
     More videos could not be loaded.: Ezin izan dira bideo gehiago kargatu.
 History:
+  Repair Use Cookies: "Erabili konfiguratutako yt-dlp cookieak"
+  Repair Cookies Hint: "500 bideo baino gehiago egiaztatu behar dira. Konfiguratu cookieak yt-dlp ezarpenetan eta gaitu hemen eskaeren mugaketa-arriskua murrizteko."
+  Repair Description: "Erabili historia inportatu ondoren, edo bideoei xehetasunak falta zaizkienean edo LIVE etiketa okerra dutenean."
+  Repair Details: "Falta diren izenburuak, kanalak eta argitalpen-datak betetzen ditu, eta iraupenak eta LIVE etiketak egiaztatzen ditu. Ikustearen aurrerapena eta ikusitako egoera ez dira aldatzen."
+  Repair Notice: "Historia handiek denbora behar dezakete. Huts egindako eskaerak automatikoki errepikatzen dira. Ezabatutako edo bideo pribatuen datuak osatu gabe gera daitezke."
+  Start Repair: "Hasi konpontzen"
+  Repair Checking: "Bideo-xehetasunak egiaztatzen"
+  Repair Waiting: "YouTube-ren zain. Konponketa automatikoki jarraituko da."
+  Repair Retrying: "Huts egindako eskaerak errepikatzen"
+  Repair Finished: "Konponketa amaitu da"
+  Repair Stopped: "Konponketa gelditu da"
   Repair: "Konpondu historia"
   Repair Progress: "Egiaztatuak: {checked}/{total} · Konponduak: {repaired} · Huts egindakoak: {failed}"
   Mark All As Watched: Markatu guztiak ikusita
@@ -282,9 +293,10 @@ Settings:
       After current tab: Uneko fitxaren ondoren
       After current tab in opened order: Uneko fitxaren ondoren, irekitze-ordenan
     Tab Close Focus:
+      Last active tab: "Azken fitxa aktiboa"
+      Next tab in tab order: "Hurrengo fitxa fitxen ordenan"
+      Previous tab in tab order: "Aurreko fitxa fitxen ordenan"
       Tab Close Focus: Fitxa bat itxi ondoren
-      Previous tab: Hautatu aurreko fitxa
-      Next tab: Hautatu hurrengo fitxa
     Startup Behavior:
       Startup Behavior: Abioan
       Load all tabs: Kargatu fitxa guztiak
@@ -665,6 +677,10 @@ Settings:
     Title Excludes: Izenburuak ez du hau
     Title Filter Hint: Bereizi izenburuko terminoak komaz. Bideoak sartutako terminoetako batekin bat etorri behar du gutxienez, eta baztertutako terminoekin ez.
   External Software Settings:
+    Create YouTube session: "Sortu YouTube saioa"
+    YouTube session hint: "Hasi saioa beharrezkoa bada eta gorde. Aukeratu ezarpenetan deskargetarako, erreprodukziorako edo azpitituluetarako erabiltzea."
+    Use cookies for downloads: "Erabili cookieak deskargetarako"
+    YouTube session failed: "Ezin izan da YouTube saioa gorde."
     Checking FFmpeg and FFprobe: FFmpeg/FFprobe egiaztatzen…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe ez dira deskargatu oraindik. Egin klik beheko botoian deskargatzeko.
     External Software Settings: Kanpoko softwarea
@@ -710,7 +726,7 @@ Settings:
       Manual: Eguneratu eskuz soilik
     yt-dlp Executable Path: yt-dlp exekutagarriaren bide-izena
     FFmpeg Executable Path: FFmpeg exekutagarriaren bide-izena
-    Restricted Playback Authentication: Erreprodukziorako yt-dlp cookieak
+    Restricted Playback Authentication: "yt-dlp cookieak"
     Cookie Source: Cookieen jatorria
     Cookie Sources:
       None: Bat ere ez
@@ -844,6 +860,7 @@ Settings:
     Expanded: Zabalduta
     Playing Interface Hide Delay: Erreprodukzioan interfazea ezkutatzeko atzerapena
     Hide Startup Splash: Ezkutatu abio-pantaila
+    Hide Header Sync Indicator: Ezkutatu aplikazioaren goiburuko sinkronizazio-adierazlea
     Hide Repeat Stats: Ezkutatu errepikapenen estatistikak
     Sections:
       Visible While Paused: Ikusgai pausatuta dagoenean leiho osoan edo pantaila osoan
@@ -1136,7 +1153,7 @@ Video:
   Retry With Built-in Extraction: Saiatu berriro erauzketa integratuarekin
   Retry With yt-dlp Extraction: Saiatu berriro yt-dlp erauzketarekin
   Reloading video after streaming URL error: Bideoa berriro kargatzen korrontearen URLak huts egin ondoren
-  Configure Restricted Playback Cookies Hint: Konfiguratu cookieak Ezarpenak → Kanpoko softwarea → Erreprodukziorako yt-dlp cookieak atalean.
+  Configure Restricted Playback Cookies Hint: "Konfiguratu cookieak Ezarpenak → Kanpoko softwarea → yt-dlp cookieak atalean."
   Try With Configured Cookies: Saiatu konfiguratutako cookieekin
   Restricted Playback Authentication Failed Template: 'yt-dlp-k ezin izan du bideo hau atzitu konfiguratutako cookieekin: {error}'
   Collapse Playlist: Tolestu erreprodukzio-zerrenda
@@ -1365,6 +1382,10 @@ Share:
   Share failed: "Ezin izan da esteka partekatu"
   Timestamp Link Copied: Denbora-markaren esteka arbelean kopiatu da
 Context Menu:
+  Select Tab: Hautatu fitxa
+  Close Tabs Before: Itxi aurreko fitxak
+  Close Tabs After: Itxi ondorengo fitxak
+  Close Other Tabs: Itxi beste fitxak
   Copy {service} link without playlist: "Kopiatu {service} esteka erreprodukzio-zerrendarik gabe"
   Context Menu: Laster-menua
   Select All: Hautatu dena
@@ -1568,7 +1589,7 @@ Tooltips:
     Cookie File: Hautatu Netscape formatuko cookie-fitxategi bat autentifikatutako erreprodukziorako.
     Browser for Cookies: Hautatutako yt-dlp exekutagarriak adierazten du zein arakatzaile onartzen diren. Autentifikatutako erreprodukzioa eskatzean, OpenTubeX aplikazioak arakatzaile hau irakurtzeko eskatzen dio yt-dlp-ri.
     Browser Profile: Arakatzailearen aukerako profil-izena edo karpeta. Utzi hutsik azkena erabilitako profila erabiltzeko.
-    Always Use Cookies: "Erabili konfiguratutako cookieak yt-dlp-k korronteak erauzten dituen bakoitzean. Honek ez du korronteak erauzteko metodoa yt-dlp aukerara aldatzen. yt-dlp hautatuta dagoenean, kontuarekin soilik erabil daitezkeen formatuak egon daitezke erabilgarri, YouTube Premium-en bit-tasa hobetua barne kontuak sarbidea badu. Erabili konfiguratutako cookieak azpitituluetarako eta itzulpen automatikoetarako."
+    Always Use Cookies: "Erabili konfiguratutako cookieak deskargetarako, azpitituluetarako eta yt-dlp-k korronteak ateratzen dituen bakoitzean. Honek ez du korronteak erauzteko metodoa yt-dlp aukerara aldatzen. yt-dlp hautatuta dagoenean, kontuarekin soilik erabil daitezkeen formatuak egon daitezke erabilgarri, YouTube Premium-en bit-tasa hobetua barne kontuak sarbidea badu."
     FFmpeg Executable Path: FFmpeg beharrezkoa da bideo- eta audio-korronte bereiziak bateratzeko eta audioa bihurtzeko. Modu lehenetsian, OpenTubeX aplikazioak FFmpeg PATH ingurune-aldagaiaren bidez aurki daitekeela joko du. Behar izanez gero, bide-izen pertsonalizatu bat ezar daiteke hemen.
     Use cookies for subtitles: "Erabili konfiguratutako cookieak azpitituluetarako eta itzulpen automatikoetarako. «Erabili beti cookieak» aukerak ere gaitzen du."
   Distraction Free Settings:
@@ -1657,6 +1678,7 @@ CommandPalette:
     Download Finished: Deskarga hau ez dago martxan
     Video: Ireki bideo bat lehenik
 Downloads:
+  Preparing: Prestatzen…
   Export Failed: "Ezin izan da deskargatutako fitxategia gorde. Aukeratu idazteko baimena duen deskarga-karpeta bat eta saiatu berriro."
   Remove File Permanently Warning: "Honek \"{title}\" behin betiko ezabatuko du."
   Download: Deskargatu

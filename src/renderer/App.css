@@ -861,3 +861,12 @@
   opacity: 0;
   pointer-events: none;
 }
+
+.mobileThumbnailActionRow {
+  grid-auto-flow: row;
+  grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
+}
+
+.mobileThumbnailActionRow button[aria-checked='true'] {
+  color: var(--primary-color);
+}

@@ -188,6 +188,17 @@ User Playlists:
     This playlist could not be loaded.: Seda esitusloendit ei saanud laadida.
     More videos could not be loaded.: Rohkem videoid ei saanud laadida.
 History:
+  Repair Use Cookies: "Kasuta seadistatud yt-dlp küpsiseid"
+  Repair Cookies Hint: "Kontrollida tuleb üle 500 video. Seadista küpsised yt-dlp seadetes ja luba need siin, et vähendada päringute piiramise ohtu."
+  Repair Description: "Kasuta pärast ajaloo importimist või kui videote andmed puuduvad või LIVE-märgis on vale."
+  Repair Details: "Täidab puuduvad pealkirjad, kanalid ja avaldamiskuupäevad ning kontrollib kestusi ja LIVE-märgiseid. Vaatamise edenemine ja vaadatuks märkimine ei muutu."
+  Repair Notice: "Suure ajaloo töötlemine võib võtta aega. Ebaõnnestunud päringuid korratakse automaatselt. Kustutatud või privaatsete videote andmed võivad jääda puudulikuks."
+  Start Repair: "Alusta parandamist"
+  Repair Checking: "Videoandmete kontrollimine"
+  Repair Waiting: "YouTube'i ootamine. Parandamine jätkub automaatselt."
+  Repair Retrying: "Ebaõnnestunud päringute kordamine"
+  Repair Finished: "Parandamine lõpetatud"
+  Repair Stopped: "Parandamine peatatud"
   Repair: "Paranda ajalugu"
   Repair Progress: "Kontrollitud {checked}/{total} · Parandatud {repaired} · Ebaõnnestunud {failed}"
   Mark All As Watched: Märgi kõik vaadatuks
@@ -282,9 +293,10 @@ Settings:
       After current tab: Praeguse vahekaardi järel
       After current tab in opened order: Praeguse vahekaardi järel avamisjärjekorras
     Tab Close Focus:
+      Last active tab: "Viimati aktiivne vahekaart"
+      Next tab in tab order: "Järgmine vahekaart vahekaartide järjekorras"
+      Previous tab in tab order: "Eelmine vahekaart vahekaartide järjekorras"
       Tab Close Focus: Pärast vahekaardi sulgemist
-      Previous tab: Vali eelmine vahekaart
-      Next tab: Vali järgmine vahekaart
     Startup Behavior:
       Startup Behavior: Käivitamisel
       Load all tabs: Laadi kõik vahekaardid
@@ -665,6 +677,10 @@ Settings:
     Title Excludes: Pealkiri ei sisalda
     Title Filter Hint: Eralda pealkirja otsingusõnad komadega. Video pealkiri peab sisaldama vähemalt üht nõutud otsingusõna ega tohi sisaldada ühtki välistatud otsingusõna.
   External Software Settings:
+    Create YouTube session: "Loo YouTube’i seanss"
+    YouTube session hint: "Vajadusel logi sisse ja salvesta seanss. Vali seadetes, kas kasutada seda allalaadimiseks, esitamiseks või subtiitrite jaoks."
+    Use cookies for downloads: "Kasuta allalaadimisel küpsiseid"
+    YouTube session failed: "YouTube’i seansi salvestamine ebaõnnestus."
     Checking FFmpeg and FFprobe: FFmpegi ja FFprobe’i kontrollimine…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe pole veel alla laaditud. Allalaadimiseks klõpsa allolevat nuppu.
     External Software Settings: Väline tarkvara
@@ -710,7 +726,7 @@ Settings:
       Manual: Uuenda ainult käsitsi
     yt-dlp Executable Path: yt-dlp täitmisfaili asukoht
     FFmpeg Executable Path: FFmpegi täitmisfaili asukoht
-    Restricted Playback Authentication: yt-dlp esitusküpsised
+    Restricted Playback Authentication: "yt-dlp küpsised"
     Cookie Source: Küpsiste allikas
     Cookie Sources:
       None: Puudub
@@ -844,6 +860,7 @@ Settings:
     Expanded: Laiendatud
     Playing Interface Hide Delay: Liidese peitmise viivitus esitamise ajal
     Hide Startup Splash: Peida käivituskuva
+    Hide Header Sync Indicator: Peida rakenduse päise sünkroonimisnäidik
     Hide Repeat Stats: Peida korduste statistika
     Sections:
       Visible While Paused: Pausi ajal täisaknas või täisekraanil nähtav
@@ -1136,7 +1153,7 @@ Video:
   Retry With Built-in Extraction: Proovi uuesti sisseehitatud meetodiga
   Retry With yt-dlp Extraction: Proovi uuesti yt-dlp abil
   Reloading video after streaming URL error: Video laaditakse voogedastuse URL-i vea tõttu uuesti
-  Configure Restricted Playback Cookies Hint: Seadista küpsised jaotises Seaded → Väline tarkvara → yt-dlp esitusküpsised.
+  Configure Restricted Playback Cookies Hint: "Seadista küpsised jaotises Seaded → Väline tarkvara → yt-dlp küpsised."
   Try With Configured Cookies: Proovi seadistatud küpsistega
   Restricted Playback Authentication Failed Template: 'yt-dlp ei pääsenud seadistatud küpsistega sellele videole juurde: {error}'
   Unmark As Watched: Eemalda vaadatuks märkimine
@@ -1352,6 +1369,10 @@ Share:
   Share failed: "Linki ei õnnestunud jagada"
   Timestamp Link Copied: Ajatempliga link kopeeriti lõikelauale
 Context Menu:
+  Select Tab: Vali vahekaart
+  Close Tabs Before: Sulge eelnevad vahekaardid
+  Close Tabs After: Sulge järgnevad vahekaardid
+  Close Other Tabs: Sulge teised vahekaardid
   Copy {service} link without playlist: "Kopeeri {service} link ilma esitusloendita"
   Context Menu: Kontekstimenüü
   Select All: Vali kõik
@@ -1556,7 +1577,7 @@ Tooltips:
     Cookie File: Vali autentitud esitamiseks Netscape'i vormingus küpsisefail.
     Browser for Cookies: Brauseritugi tuvastatakse valitud yt-dlp täitmisfailist. Autenditud esituse taotlemisel käsib OpenTubeX yt-dlp-l sellest brauserist küpsiseid lugeda.
     Browser Profile: Valikuline brauseriprofiili nimi või kaust. Viimati kasutatud profiili valimiseks jäta väli tühjaks.
-    Always Use Cookies: "Kasuta seadistatud küpsiseid alati, kui yt-dlp vooge eraldab. See ei muuda voo eraldamise meetodiks yt-dlp-d. Kui yt-dlp on valitud, võivad saada kättesaadavaks ainult kontoga kasutatavad vormingud, sealhulgas YouTube Premiumi täiustatud bitikiirus, kui kontol on sellele juurdepääs. Kasuta seadistatud küpsiseid subtiitrite ja automaattõlgete jaoks."
+    Always Use Cookies: "Kasuta seadistatud küpsiseid allalaadimiste, subtiitrite ja yt-dlp voogude hankimise jaoks. See ei muuda voo eraldamise meetodiks yt-dlp-d. Kui yt-dlp on valitud, võivad saada kättesaadavaks ainult kontoga kasutatavad vormingud, sealhulgas YouTube Premiumi täiustatud bitikiirus, kui kontol on sellele juurdepääs."
     FFmpeg Executable Path: FFmpeg on vajalik eraldi video- ja helivoogude ühendamiseks ning heli teisendamiseks. Vaikimisi eeldab OpenTubeX, et FFmpeg leitakse keskkonnamuutuja PATH kaudu. Vajaduse korral saab siin määrata kohandatud asukoha.
     Use cookies for subtitles: "Kasuta seadistatud küpsiseid subtiitrite ja automaattõlgete jaoks. Selle lubab ka „Kasuta alati küpsiseid“."
   Distraction Free Settings:
@@ -1645,6 +1666,7 @@ CommandPalette:
     Download Finished: See allalaadimine ei ole enam pooleli
     Video: Ava esmalt video
 Downloads:
+  Preparing: Ettevalmistamine…
   Export Failed: "Allalaaditud faili ei saanud salvestada. Vali allalaadimiskaust, kuhu saab kirjutada, ja proovi uuesti."
   Remove File Permanently Warning: "See kustutab faili „{title}“ jäädavalt."
   Download: Laadi alla

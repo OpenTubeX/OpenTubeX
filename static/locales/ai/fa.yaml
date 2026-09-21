@@ -205,6 +205,17 @@ User Playlists:
     Toast:
       Video(s) added to {playlistCount} playlists: ویدیو به 1 فهرست پخش افزوده شد | ویدیو به {playlistCount} فهرست پخش افزوده شد
 History:
+  Repair Use Cookies: "استفاده از کوکی‌های پیکربندی‌شدهٔ yt-dlp"
+  Repair Cookies Hint: "بیش از 500 ویدیو باید بررسی شود. کوکی‌ها را در تنظیمات yt-dlp پیکربندی و اینجا فعال کنید تا خطر محدود شدن درخواست‌ها کاهش یابد."
+  Repair Description: "پس از وارد کردن سابقه، یا وقتی جزئیات ویدیوها ناقص است یا برچسب LIVE اشتباه دارند، از این گزینه استفاده کنید."
+  Repair Details: "عنوان‌ها، کانال‌ها و تاریخ‌های انتشار ناقص را تکمیل و مدت ویدیوها و برچسب‌های LIVE را بررسی می‌کند. پیشرفت تماشا و وضعیت دیده‌شدن شما تغییر نمی‌کند."
+  Repair Notice: "سابقه‌های بزرگ ممکن است زمان ببرند. درخواست‌های ناموفق خودکار تکرار می‌شوند. ویدیوهای حذف‌شده یا خصوصی ممکن است ناقص بمانند."
+  Start Repair: "شروع ترمیم"
+  Repair Checking: "در حال بررسی جزئیات ویدیوها"
+  Repair Waiting: "در انتظار YouTube. ترمیم خودکار ادامه می‌یابد."
+  Repair Retrying: "در حال تکرار درخواست‌های ناموفق"
+  Repair Finished: "ترمیم پایان یافت"
+  Repair Stopped: "ترمیم متوقف شد"
   Repair: "ترمیم تاریخچه"
   Repair Progress: "بررسی‌شده {checked}/{total} · ترمیم‌شده {repaired} · ناموفق {failed}"
   Mark All As Watched: علامت‌گذاری همه به‌عنوان تماشاشده
@@ -299,9 +310,10 @@ Settings:
       After current tab: پس از زبانه فعلی
       After current tab in opened order: پس از زبانه فعلی، به ترتیب بازشدن
     Tab Close Focus:
+      Last active tab: "آخرین زبانهٔ فعال"
+      Next tab in tab order: "زبانهٔ بعدی در ترتیب زبانه‌ها"
+      Previous tab in tab order: "زبانهٔ قبلی در ترتیب زبانه‌ها"
       Tab Close Focus: پس از بستن زبانه
-      Previous tab: انتخاب زبانه قبلی
-      Next tab: انتخاب زبانه بعدی
     Startup Behavior:
       Startup Behavior: هنگام راه‌اندازی
       Load all tabs: بارگذاری همه زبانه‌ها
@@ -694,6 +706,10 @@ Settings:
     Title Excludes: عنوان شامل نباشد
     Title Filter Hint: عبارت‌های عنوان را با ویرگول جدا کنید. ویدیو باید دست‌کم با یکی از عبارت‌های شامل‌شده و با هیچ‌یک از عبارت‌های کنارگذاشته‌شده مطابقت داشته باشد.
   External Software Settings:
+    Create YouTube session: "ایجاد نشست YouTube"
+    YouTube session hint: "در صورت نیاز وارد شوید و نشست را ذخیره کنید. در تنظیمات انتخاب کنید که برای بارگیری، پخش یا زیرنویس استفاده شود."
+    Use cookies for downloads: "استفاده از کوکی‌ها برای بارگیری"
+    YouTube session failed: "ذخیرهٔ نشست YouTube ممکن نشد."
     Checking FFmpeg and FFprobe: در حال بررسی FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe هنوز بارگیری نشده است. برای بارگیری، روی دکمهٔ زیر کلیک کنید.
     External Software Settings: نرم‌افزار خارجی
@@ -739,7 +755,7 @@ Settings:
       Manual: فقط به‌روزرسانی دستی
     yt-dlp Executable Path: مسیر فایل اجرایی yt-dlp
     FFmpeg Executable Path: مسیر فایل اجرایی FFmpeg
-    Restricted Playback Authentication: کوکی‌های پخش yt-dlp
+    Restricted Playback Authentication: "کوکی‌های yt-dlp"
     Cookie Source: منبع کوکی
     Cookie Sources:
       None: هیچ‌کدام
@@ -873,6 +889,7 @@ Settings:
     Expanded: بازشده
     Playing Interface Hide Delay: تأخیر پنهان شدن رابط هنگام پخش
     Hide Startup Splash: پنهان کردن صفحهٔ آغازین
+    Hide Header Sync Indicator: پنهان کردن نشانگر همگام‌سازی در سربرگ برنامه
     Hide Repeat Stats: پنهان کردن آمار تکرار
     Sections:
       Visible While Paused: نمایش هنگام توقف در پنجرهٔ کامل / تمام‌صفحه
@@ -1191,7 +1208,7 @@ Video:
   Retry With Built-in Extraction: تلاش دوباره با استخراج داخلی
   Retry With yt-dlp Extraction: تلاش دوباره با استخراج yt-dlp
   Reloading video after streaming URL error: در حال بارگیری دوبارهٔ ویدیو پس از خطای نشانی پخش
-  Configure Restricted Playback Cookies Hint: کوکی‌ها را در تنظیمات ← نرم‌افزار خارجی ← کوکی‌های پخش yt-dlp پیکربندی کنید.
+  Configure Restricted Playback Cookies Hint: "کوکی‌ها را در تنظیمات ← نرم‌افزار خارجی ← کوکی‌های yt-dlp پیکربندی کنید."
   Try With Configured Cookies: تلاش با کوکی‌های پیکربندی‌شده
   Restricted Playback Authentication Failed Template: 'yt-dlp با کوکی‌های پیکربندی‌شده نتوانست به این ویدیو دسترسی پیدا کند: {error}'
   Private: ویدیوهای خصوصی در OpenTubeX قابل تماشا نیستند، زیرا به ورود به Google و مالکیت ویدیو نیاز دارند.
@@ -1424,6 +1441,10 @@ Share:
   Share Post: هم‌رسانی پست
   Timestamp Link Copied: پیوند زمان‌دار در بریده‌دان کپی شد
 Context Menu:
+  Select Tab: انتخاب زبانه
+  Close Tabs Before: بستن زبانه‌های قبلی
+  Close Tabs After: بستن زبانه‌های بعدی
+  Close Other Tabs: بستن سایر زبانه‌ها
   Copy {service} link without playlist: "کپی پیوند {service} بدون فهرست پخش"
   Context Menu: منوی زمینه
   Select All: انتخاب همه
@@ -1631,7 +1652,7 @@ Tooltips:
     Cookie File: یک فایل کوکی با قالب Netscape برای پخش با احراز هویت انتخاب کنید.
     Browser for Cookies: پشتیبانی از مرورگر از فایل اجرایی yt-dlp انتخاب‌شده خوانده می‌شود. هنگام درخواست پخش با احراز هویت، OpenTubeX از yt-dlp می‌خواهد کوکی‌های این مرورگر را بخواند.
     Browser Profile: نام یا پوشه نمایه مرورگر، اختیاری است. برای استفاده از آخرین نمایه‌ای که به آن دسترسی داشته‌اید، خالی بگذارید.
-    Always Use Cookies: "هر زمان yt-dlp جریان‌ها را استخراج می‌کند، از کوکی‌های پیکربندی‌شده استفاده شود. این گزینه روش استخراج جریان را به yt-dlp تغییر نمی‌دهد. با انتخاب yt-dlp، ممکن است قالب‌های ویژه حساب در دسترس قرار گیرند؛ از جمله نرخ بیت بهتر YouTube Premium، اگر حساب به آن دسترسی داشته باشد. از کوکی‌های پیکربندی‌شده برای زیرنویس‌ها و ترجمه‌های خودکار استفاده شود."
+    Always Use Cookies: "از کوکی‌های پیکربندی‌شده برای بارگیری‌ها، زیرنویس‌ها و هر بار که yt-dlp جریان‌ها را استخراج می‌کند استفاده کنید. این گزینه روش استخراج جریان را به yt-dlp تغییر نمی‌دهد. با انتخاب yt-dlp، ممکن است قالب‌های ویژه حساب در دسترس قرار گیرند؛ از جمله نرخ بیت بهتر YouTube Premium، اگر حساب به آن دسترسی داشته باشد."
     FFmpeg Executable Path: برای ادغام جریان‌های جداگانه ویدیو و صدا و نیز تبدیل صدا، FFmpeg لازم است. OpenTubeX به‌طور پیش‌فرض فرض می‌کند FFmpeg از طریق متغیر محیطی PATH پیدا می‌شود. در صورت نیاز می‌توانید اینجا مسیری سفارشی تعیین کنید.
     Use cookies for subtitles: "از کوکی‌های پیکربندی‌شده برای زیرنویس‌ها و ترجمه‌های خودکار استفاده شود. گزینهٔ «همیشه از کوکی‌ها استفاده شود» نیز این قابلیت را فعال می‌کند."
   Distraction Free Settings:
@@ -1724,6 +1745,7 @@ CommandPalette:
     Download Finished: این بارگیری دیگر در حال اجرا نیست
     Video: ابتدا ویدیویی باز کنید
 Downloads:
+  Preparing: در حال آماده‌سازی…
   Export Failed: "ذخیرهٔ فایل دانلودشده ممکن نشد. پوشه‌ای با اجازهٔ نوشتن برای دانلودها انتخاب کنید و دوباره تلاش کنید."
   Remove File Permanently Warning: "این کار «{title}» را برای همیشه حذف می‌کند."
   Download: بارگیری

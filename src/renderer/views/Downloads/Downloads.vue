@@ -149,7 +149,7 @@ const pendingRemoval = ref(null)
 const retryingDownloadIds = ref([])
 const downloads = computed(() => Object.values(store.getters.getYtDlpDownloads).sort((a, b) => b.id - a.id))
 const activeDownloads = computed(() => downloads.value.filter(download => (
-  ['downloading', 'processing', 'pausing'].includes(download.status) ||
+  ['preparing', 'downloading', 'processing', 'pausing'].includes(download.status) ||
   (download.status === 'paused' && download.started === true)
 )))
 const queuedDownloads = computed(() => downloads.value
@@ -157,9 +157,9 @@ const queuedDownloads = computed(() => downloads.value
   .sort((a, b) => (a.queuePosition ?? a.id) - (b.queuePosition ?? b.id)))
 const canceledDownloads = computed(() => downloads.value.filter(download => download.status === 'cancelled'))
 const finishedDownloads = computed(() => downloads.value.filter(download => (
-  !['queued', 'downloading', 'processing', 'pausing', 'paused', 'cancelled'].includes(download.status)
+  !['queued', 'preparing', 'downloading', 'processing', 'pausing', 'paused', 'cancelled'].includes(download.status)
 )))
-const pausableDownloads = computed(() => downloads.value.filter(download => ['queued', 'downloading', 'processing'].includes(download.status)))
+const pausableDownloads = computed(() => downloads.value.filter(download => ['queued', 'preparing', 'downloading', 'processing'].includes(download.status)))
 const resumableDownloads = computed(() => downloads.value.filter(download => ['paused', 'pausing'].includes(download.status)))
 const failedDownloads = computed(() => finishedDownloads.value.filter(download => download.status === 'failed'))
 const clearableDownloads = computed(() => downloads.value.filter(download => (

@@ -192,6 +192,17 @@ User Playlists:
     This playlist could not be loaded.: Не вдалося завантажити цей список відтворення.
     More videos could not be loaded.: Не вдалося завантажити інші відео.
 History:
+  Repair Use Cookies: "Використовувати налаштовані cookies yt-dlp"
+  Repair Cookies Hint: "Потрібно перевірити понад 500 відео. Налаштуйте cookies у налаштуваннях yt-dlp та ввімкніть їх тут, щоб зменшити ризик обмеження запитів."
+  Repair Description: "Використовуйте після імпорту історії або якщо у відео бракує даних чи помилково показано позначку LIVE."
+  Repair Details: "Доповнює відсутні назви, канали й дати публікації, перевіряє тривалість і позначки LIVE. Прогрес і стан перегляду залишаються незмінними."
+  Repair Notice: "Обробка великої історії може тривати довго. Невдалі запити повторюються автоматично. Дані видалених або приватних відео можуть залишитися неповними."
+  Start Repair: "Почати виправлення"
+  Repair Checking: "Перевірка даних відео"
+  Repair Waiting: "Очікування YouTube. Виправлення продовжиться автоматично."
+  Repair Retrying: "Повторення невдалих запитів"
+  Repair Finished: "Виправлення завершено"
+  Repair Stopped: "Виправлення зупинено"
   Repair: "Виправити історію"
   Repair Progress: "Перевірено {checked}/{total} · Виправлено {repaired} · Помилок {failed}"
   Mark All As Watched: Позначити все як переглянуте
@@ -286,9 +297,10 @@ Settings:
       After current tab: Після поточної вкладки
       After current tab in opened order: Після поточної вкладки в порядку відкриття
     Tab Close Focus:
+      Last active tab: "Остання активна вкладка"
+      Next tab in tab order: "Наступна вкладка в порядку вкладок"
+      Previous tab in tab order: "Попередня вкладка в порядку вкладок"
       Tab Close Focus: Після закриття вкладки
-      Previous tab: Вибрати попередню вкладку
-      Next tab: Вибрати наступну вкладку
     Startup Behavior:
       Startup Behavior: Під час запуску
       Load all tabs: Завантажувати всі вкладки
@@ -673,6 +685,10 @@ Settings:
     Title Excludes: Заголовок не містить
     Title Filter Hint: Розділяйте кілька фрагментів заголовка комами. Відео має містити принаймні один із доданих фрагментів і не містити жодного з виключених.
   External Software Settings:
+    Create YouTube session: "Створити сеанс YouTube"
+    YouTube session hint: "За потреби увійдіть в обліковий запис і збережіть сеанс. У налаштуваннях виберіть, чи використовувати його для завантажень, відтворення або субтитрів."
+    Use cookies for downloads: "Використовувати файли cookie для завантажень"
+    YouTube session failed: "Не вдалося зберегти сеанс YouTube."
     Checking FFmpeg and FFprobe: Перевірка FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe ще не завантажено. Натисніть кнопку нижче, щоб завантажити їх.
     External Software Settings: Зовнішнє програмне забезпечення
@@ -718,7 +734,7 @@ Settings:
       Manual: Оновлювати лише вручну
     yt-dlp Executable Path: Шлях до виконуваного файла yt-dlp
     FFmpeg Executable Path: Шлях до виконуваного файла FFmpeg
-    Restricted Playback Authentication: Файли cookie для відтворення через yt-dlp
+    Restricted Playback Authentication: "Файли cookie yt-dlp"
     Cookie Source: Джерело файлів cookie
     Cookie Sources:
       None: Немає
@@ -852,6 +868,7 @@ Settings:
     Expanded: Розгорнуті
     Playing Interface Hide Delay: Затримка приховування інтерфейсу під час відтворення
     Hide Startup Splash: Приховати початковий екран
+    Hide Header Sync Indicator: Приховати індикатор синхронізації в заголовку застосунку
     Hide Repeat Stats: Приховати статистику повторів
     Sections:
       Visible While Paused: Видимі під час паузи в режимі на все вікно або на весь екран
@@ -1161,7 +1178,7 @@ Video:
   Retry With Built-in Extraction: Повторити з вбудованим засобом видобування
   Retry With yt-dlp Extraction: Повторити з видобуванням через yt-dlp
   Reloading video after streaming URL error: Повторне завантаження відео після помилки URL-адреси потоку
-  Configure Restricted Playback Cookies Hint: Налаштуйте файли cookie в меню Налаштування → Зовнішнє ПЗ → Файли cookie для відтворення через yt-dlp.
+  Configure Restricted Playback Cookies Hint: "Налаштуйте файли cookie в меню Налаштування → Зовнішнє ПЗ → Файли cookie yt-dlp."
   Try With Configured Cookies: Спробувати з налаштованими файлами cookie
   Restricted Playback Authentication Failed Template: 'yt-dlp не вдалося отримати доступ до цього відео з налаштованими файлами cookie: {error}'
   Private: Приватні відео не можна переглядати в OpenTubeX, оскільки для цього потрібно ввійти в Google і бути власником відео.
@@ -1383,6 +1400,10 @@ Share:
   Share failed: "Не вдалося поділитися посиланням"
   Timestamp Link Copied: Посилання з позначкою часу скопійовано до буфера обміну
 Context Menu:
+  Select Tab: Вибрати вкладку
+  Close Tabs Before: Закрити попередні вкладки
+  Close Tabs After: Закрити наступні вкладки
+  Close Other Tabs: Закрити інші вкладки
   Copy {service} link without playlist: "Копіювати посилання {service} без списку відтворення"
   Context Menu: Контекстне меню
   Select All: Вибрати все
@@ -1587,7 +1608,7 @@ Tooltips:
     Cookie File: Виберіть файл cookie у форматі Netscape для автентифікованого відтворення.
     Browser for Cookies: Підтримувані браузери визначаються вибраним виконуваним файлом yt-dlp. Під час запиту на автентифіковане відтворення OpenTubeX доручає yt-dlp читати файли cookie із цього браузера.
     Browser Profile: Необов'язкова назва або папка профілю браузера. Залиште поле порожнім, щоб використовувати профіль, до якого востаннє зверталися.
-    Always Use Cookies: "Використовує налаштовані файли cookie щоразу, коли yt-dlp видобуває потоки. Це не перемикає спосіб видобування потоків на yt-dlp. Якщо вибрано yt-dlp, можуть стати доступними формати лише для облікових записів, зокрема підвищений бітрейт YouTube Premium, якщо обліковий запис має до нього доступ. Також використовує налаштовані файли cookie для субтитрів і автоматичних перекладів."
+    Always Use Cookies: "Використовує налаштовані файли cookie для завантажень, субтитрів і щоразу, коли yt-dlp отримує потоки. Це не перемикає спосіб видобування потоків на yt-dlp. Якщо вибрано yt-dlp, можуть стати доступними формати лише для облікових записів, зокрема підвищений бітрейт YouTube Premium, якщо обліковий запис має до нього доступ."
     FFmpeg Executable Path: FFmpeg потрібен для об'єднання окремих потоків відео й аудіо та перетворення аудіо. Типово OpenTubeX шукатиме FFmpeg за допомогою змінної середовища PATH. За потреби тут можна вказати власний шлях.
     Use cookies for subtitles: "Використовувати налаштовані cookie для субтитрів і автоматичних перекладів. Також вмикається параметром «Завжди використовувати файли cookie»."
   Distraction Free Settings:
@@ -1678,6 +1699,7 @@ CommandPalette:
     Download Finished: Це завантаження вже не виконується
     Video: Спочатку відкрийте відео
 Downloads:
+  Preparing: Підготовка…
   Export Failed: "Не вдалося зберегти завантажений файл. Виберіть папку завантажень із дозволом на запис і спробуйте ще раз."
   Remove File Permanently Warning: "«{title}» буде видалено назавжди."
   Download: Завантажити

@@ -40,11 +40,18 @@ final class AndroidProxyRelay implements AutoCloseable {
     });
     private final Semaphore capacity = new Semaphore(64);
     private final Set<Socket> sockets = new HashSet<>();
+    interface AddressResolver { InetAddress[] resolve(String host) throws IOException; }
+    private final AddressResolver resolver;
     private final ProxySelector systemSelector;
     private ProxyConfiguration configuration;
     private long generation;
 
     AndroidProxyRelay(ProxyConfiguration configuration, ProxySelector systemSelector) throws IOException {
+        this(configuration, systemSelector, InetAddress::getAllByName);
+    }
+
+    AndroidProxyRelay(ProxyConfiguration configuration, ProxySelector systemSelector, AddressResolver resolver) throws IOException {
+        this.resolver = resolver;
         this.configuration = configuration;
         this.systemSelector = systemSelector;
         server = new ServerSocket(0, 64, InetAddress.getByName("127.0.0.1"));
@@ -101,14 +108,10 @@ final class AndroidProxyRelay implements AutoCloseable {
             int port = target.getPort() == -1 ? (tunnel ? 443 : 80) : target.getPort();
             if (port < 1 || port > 65535) throw new IOException("Invalid destination port");
             String host = target.getHost().replace("[", "").replace("]", "");
-            upstream = new Socket(Proxy.NO_PROXY);
-            transport = upstream;
-            synchronized (this) {
-                if (version != generation || client.isClosed()) throw new IOException("Proxy changed");
-                sockets.add(upstream);
-            }
             ProxyConfiguration route = resolveSystemProxy(policy, target);
             boolean forwardHttp = !tunnel && route.enabled && Arrays.asList("http", "https").contains(route.protocol);
+            transport = connectTransport(route.enabled ? route.hostname : host, route.enabled ? route.port : port, version, client);
+            upstream = transport;
             upstream = connect(upstream, route, host, port, forwardHttp);
             final Socket remote = upstream;
             synchronized (this) {
@@ -180,15 +183,43 @@ final class AndroidProxyRelay implements AutoCloseable {
         return policy;
     }
 
+    private Socket connectTransport(String host, int port, long version, Socket client) throws IOException {
+        long deadline = System.nanoTime() + java.util.concurrent.TimeUnit.MILLISECONDS.toNanos(TIMEOUT);
+        InetAddress[] addresses = resolver.resolve(host);
+        IOException failure = new IOException("No reachable address");
+        for (int index = 0; index < addresses.length; index++) {
+            InetAddress address = addresses[index];
+            long remaining = java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(deadline - System.nanoTime());
+            if (remaining <= 0) break;
+            Socket socket = new Socket(Proxy.NO_PROXY);
+            synchronized (this) {
+                if (version != generation || client.isClosed()) {
+                    closeSocket(socket);
+                    throw new IOException("Proxy changed");
+                }
+                sockets.add(socket);
+            }
+            try {
+                // A broken address family must not prevent reaching another address.
+                // With a proxy enabled, only its endpoint is resolved locally.
+                socket.connect(new InetSocketAddress(address, port), (int) Math.max(1, remaining / (addresses.length - index)));
+                return socket;
+            } catch (IOException error) {
+                failure = error;
+                closeSocket(socket);
+                synchronized (this) { sockets.remove(socket); }
+            }
+        }
+        throw failure;
+    }
+
     private Socket connect(Socket socket, ProxyConfiguration policy, String host, int port, boolean forwardHttp) throws IOException {
         String endpoint = policy.enabled ? policy.hostname : host;
-        int endpointPort = policy.enabled ? policy.port : port;
-        socket.connect(new InetSocketAddress(endpoint, endpointPort), TIMEOUT);
         socket.setSoTimeout(TIMEOUT);
         if (!policy.enabled) return socket;
         if (policy.protocol.equals("https")) {
             SSLSocket tls = (SSLSocket) ((SSLSocketFactory) SSLSocketFactory.getDefault())
-                .createSocket(socket, endpoint, endpointPort, true);
+                .createSocket(socket, endpoint, policy.port, true);
             SSLParameters parameters = tls.getSSLParameters();
             parameters.setEndpointIdentificationAlgorithm("HTTPS");
             tls.setSSLParameters(parameters);

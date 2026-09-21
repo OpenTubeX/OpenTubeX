@@ -192,6 +192,17 @@ User Playlists:
     This playlist could not be loaded.: Deze afspeellijst kan niet worden geladen.
     More videos could not be loaded.: Er kunnen geen video's meer worden geladen.
 History:
+  Repair Use Cookies: "Geconfigureerde yt-dlp-cookies gebruiken"
+  Repair Cookies Hint: "Meer dan 500 video's moeten worden gecontroleerd. Configureer cookies in de yt-dlp-instellingen en schakel ze hier in om de kans op verzoekbeperking te verkleinen."
+  Repair Description: "Gebruik dit na het importeren van de geschiedenis, of wanneer videogegevens ontbreken of video's onterecht als LIVE worden aangeduid."
+  Repair Details: "Vult ontbrekende titels, kanalen en publicatiedatums aan en controleert speelduur en LIVE-aanduidingen. Je kijkvoortgang en bekeken-status blijven ongewijzigd."
+  Repair Notice: "Een grote geschiedenis kan even duren. Mislukte verzoeken worden automatisch opnieuw geprobeerd. Verwijderde of privévideo's kunnen onvolledig blijven."
+  Start Repair: "Herstel starten"
+  Repair Checking: "Videogegevens controleren"
+  Repair Waiting: "Wachten op YouTube. Het herstel wordt automatisch hervat."
+  Repair Retrying: "Mislukte verzoeken opnieuw proberen"
+  Repair Finished: "Herstel voltooid"
+  Repair Stopped: "Herstel gestopt"
   Repair: "Geschiedenis herstellen"
   Repair Progress: "Gecontroleerd {checked}/{total} · Hersteld {repaired} · Mislukt {failed}"
   Mark All As Watched: Alles markeren als bekeken
@@ -286,9 +297,10 @@ Settings:
       After current tab: Na het huidige tabblad
       After current tab in opened order: Na het huidige tabblad, in volgorde van openen
     Tab Close Focus:
+      Last active tab: "Laatst actieve tabblad"
+      Next tab in tab order: "Volgend tabblad in de tabbladvolgorde"
+      Previous tab in tab order: "Vorig tabblad in de tabbladvolgorde"
       Tab Close Focus: Na het sluiten van een tabblad
-      Previous tab: Vorige tabblad selecteren
-      Next tab: Volgende tabblad selecteren
     Startup Behavior:
       Startup Behavior: Bij het opstarten
       Load all tabs: Alle tabbladen laden
@@ -678,6 +690,10 @@ Settings:
     Title Excludes: Titel bevat niet
     Title Filter Hint: Scheid meerdere titeltermen met komma's. Een video moet ten minste één opgenomen term bevatten en geen enkele uitgesloten term.
   External Software Settings:
+    Create YouTube session: "YouTube-sessie maken"
+    YouTube session hint: "Log indien nodig in en sla de sessie op. Kies in de instellingen of je deze voor downloads, afspelen of ondertitels wilt gebruiken."
+    Use cookies for downloads: "Cookies gebruiken voor downloads"
+    YouTube session failed: "De YouTube-sessie kon niet worden opgeslagen."
     Checking FFmpeg and FFprobe: FFmpeg/FFprobe controleren…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe zijn nog niet gedownload. Klik op de knop hieronder om ze te downloaden.
     External Software Settings: Externe software
@@ -723,7 +739,7 @@ Settings:
       Manual: Alleen handmatig bijwerken
     yt-dlp Executable Path: Pad naar uitvoerbaar bestand van yt-dlp
     FFmpeg Executable Path: Pad naar uitvoerbaar bestand van FFmpeg
-    Restricted Playback Authentication: yt-dlp-cookies voor afspelen
+    Restricted Playback Authentication: "yt-dlp-cookies"
     Cookie Source: Cookiebron
     Cookie Sources:
       None: Geen
@@ -857,6 +873,7 @@ Settings:
     Expanded: Uitgeklapt
     Playing Interface Hide Delay: Vertraging bij het verbergen van de interface tijdens het afspelen
     Hide Startup Splash: Opstartscherm verbergen
+    Hide Header Sync Indicator: Synchronisatie-indicator in de appkop verbergen
     Hide Repeat Stats: Herhaalstatistieken verbergen
     Sections:
       Visible While Paused: Zichtbaar wanneer gepauzeerd in volledig venster of volledig scherm
@@ -1169,7 +1186,7 @@ Video:
   Retry With Built-in Extraction: Opnieuw proberen met ingebouwde extractie
   Retry With yt-dlp Extraction: Opnieuw proberen met yt-dlp-extractie
   Reloading video after streaming URL error: Video opnieuw laden na fout met stream-URL
-  Configure Restricted Playback Cookies Hint: Stel cookies in via Instellingen → Externe software → yt-dlp-cookies voor afspelen.
+  Configure Restricted Playback Cookies Hint: "Stel cookies in via Instellingen → Externe software → yt-dlp-cookies."
   Try With Configured Cookies: Proberen met ingestelde cookies
   Restricted Playback Authentication Failed Template: 'yt-dlp heeft met de ingestelde cookies geen toegang tot deze video: {error}'
   Private: Privévideo's kunnen niet in OpenTubeX worden bekeken, omdat hiervoor aanmelden bij Google en eigendom van de video vereist zijn.
@@ -1399,6 +1416,10 @@ Share:
   Share failed: "Kan de link niet delen"
   Timestamp Link Copied: Link met tijdsaanduiding naar klembord gekopieerd
 Context Menu:
+  Select Tab: Tabblad selecteren
+  Close Tabs Before: Voorgaande tabbladen sluiten
+  Close Tabs After: Volgende tabbladen sluiten
+  Close Other Tabs: Andere tabbladen sluiten
   Copy {service} link without playlist: "{service}-link zonder afspeellijst kopiëren"
   Context Menu: Contextmenu
   Select All: Alles selecteren
@@ -1603,7 +1624,7 @@ Tooltips:
     Cookie File: Selecteer een cookiebestand in Netscape-indeling voor geverifieerd afspelen.
     Browser for Cookies: Browserondersteuning wordt uit het geselecteerde uitvoerbare bestand van yt-dlp gelezen. OpenTubeX vraagt yt-dlp om deze browser te lezen wanneer geverifieerd afspelen wordt aangevraagd.
     Browser Profile: Optionele naam of map van het browserprofiel. Laat dit leeg om het laatst gebruikte profiel te gebruiken.
-    Always Use Cookies: "Gebruik de ingestelde cookies wanneer yt-dlp streams extraheert. Dit wijzigt de methode voor stream-extractie niet in yt-dlp. Als yt-dlp is geselecteerd, kunnen indelingen die alleen voor accounts beschikbaar zijn worden aangeboden, waaronder de verbeterde bitsnelheid van YouTube Premium als het account daar toegang toe heeft. Gebruik de ingestelde cookies voor ondertitels en automatische vertalingen."
+    Always Use Cookies: "Gebruik de ingestelde cookies voor downloads, ondertitels en telkens wanneer yt-dlp streams ophaalt. Dit wijzigt de methode voor stream-extractie niet in yt-dlp. Als yt-dlp is geselecteerd, kunnen indelingen die alleen voor accounts beschikbaar zijn worden aangeboden, waaronder de verbeterde bitsnelheid van YouTube Premium als het account daar toegang toe heeft."
     FFmpeg Executable Path: FFmpeg is vereist om afzonderlijke video- en audiostreams samen te voegen en audio te converteren. OpenTubeX gaat er standaard van uit dat FFmpeg via de omgevingsvariabele PATH kan worden gevonden. Je kunt hier zo nodig een aangepast pad instellen.
     Use cookies for subtitles: "Gebruik de ingestelde cookies voor ondertitels en automatische vertalingen. Wordt ook ingeschakeld door \"Altijd cookies gebruiken\"."
   Distraction Free Settings:
@@ -1696,6 +1717,7 @@ CommandPalette:
     Download Finished: Deze download wordt niet meer uitgevoerd
     Video: Open eerst een video
 Downloads:
+  Preparing: Voorbereiden…
   Export Failed: "Het gedownloade bestand kon niet worden opgeslagen. Kies een downloadmap met schrijfrechten en probeer het opnieuw."
   Remove File Permanently Warning: "Hiermee wordt \"{title}\" definitief verwijderd."
   Download: Downloaden

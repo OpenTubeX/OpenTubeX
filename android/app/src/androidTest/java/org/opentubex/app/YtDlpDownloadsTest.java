@@ -142,6 +142,93 @@ public class YtDlpDownloadsTest {
         } finally { folder.delete(); YtDlpFiles.deleteTree(root); }
     }
 
+    @Test public void savedCookiesAreUsedOnlyWhenDownloadsOptInAndSurviveQueueRestart() throws Exception {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        File cookies = new File(context.getNoBackupFilesDir(), "yt-dlp-cookies.txt");
+        org.junit.Assume.assumeFalse("Cookie regression requires a test profile without a saved session", cookies.exists());
+        File state = new File(context.getCacheDir(), "yt-dlp-cookies-" + UUID.randomUUID());
+        state.mkdirs();
+        DocumentFile folder = tree(context).createDirectory(UUID.randomUUID().toString());
+        assertNotNull(folder);
+        String folderUri = DocumentsContract.buildTreeDocumentUri(InstrumentationRegistry.getInstrumentation().getContext().getPackageName() + ".documents", DocumentsContract.getDocumentId(folder.getUri())).toString();
+        grant(context, Uri.parse(folderUri));
+        String fixtureCookie = "127.0.0.1\tFALSE\t/\tFALSE\t0\ttest_session\tfixture";
+        boolean fixtureCreated = false;
+        try (FixtureServer server = new FixtureServer(InstrumentationRegistry.getInstrumentation().getContext())) {
+            server.requireCookie = true;
+            org.junit.Assume.assumeTrue("A session was saved before the fixture started", cookies.createNewFile());
+            fixtureCreated = true;
+            YtDlpFiles.write(cookies, ("# Netscape HTTP Cookie File\n" + fixtureCookie + "\n").getBytes(StandardCharsets.UTF_8));
+            JSONObject config = new JSONObject().put("enabled", true).put("folder", folderUri)
+                .put("cookies", cookies.getAbsolutePath()).put("useCookies", false);
+            JSONObject payload = new JSONObject().put("mode", "video").put("videoId", "___________");
+            JSONArray args = new JSONArray(asList("--output", "%(id)s.%(ext)s", "--retries", "0", server.url()));
+            YtDlpDownloads queue = new YtDlpDownloads(context, state, () -> {});
+            long anonymous = queue.add(payload, args, config, -1).getLong("id");
+            long authenticated = queue.add(payload, args, config.put("useCookies", true), -1).getLong("id");
+            YtDlpDownloads restored = new YtDlpDownloads(context, state, () -> {});
+            restored.claim();
+            restored.run(anonymous);
+            assertEquals("Later cookie opt-in must not change a pending anonymous download", "failed", restored.list().getJSONObject(0).getString("status"));
+            restored.configure(config.put("useCookies", false).put("cookies", ""));
+            restored.run(authenticated);
+            JSONObject result = restored.list().getJSONObject(1);
+            assertEquals(result.toString(), "completed", result.getString("status"));
+            config.put("useCookies", true).put("cookies", new File(state, "unapproved-cookies.txt").getAbsolutePath());
+            long invalidCookies = restored.add(payload, args, config, -1).getLong("id");
+            restored.claim();
+            restored.run(invalidCookies);
+            JSONObject invalid = restored.list().getJSONObject(2);
+            assertEquals("failed", invalid.getString("status"));
+            assertTrue(invalid.getString("errorMessage").contains("Cookie file is unavailable"));
+            config.put("cookies", cookies.getAbsolutePath());
+            long missingCookies = restored.add(payload, args, config, -1).getLong("id");
+            assertTrue(cookies.delete());
+            restored.claim();
+            restored.run(missingCookies);
+            JSONObject missing = restored.list().getJSONObject(3);
+            assertEquals("failed", missing.getString("status"));
+            assertTrue(missing.getString("errorMessage").contains("Cookie file is unavailable"));
+            JSONObject automaticRule = new JSONObject().put("rule", new JSONObject().put("includeVideos", true).put("enabledAt", 1))
+                .put("payload", new JSONObject(payload.toString()).put("automatic", true)).put("args", args);
+            restored.configure(config.put("rules", new JSONObject().put("channel", automaticRule)));
+            restored.discover("channel", "videos", new JSONObject().put("videos", new JSONArray().put(new JSONObject()
+                .put("videoId", "__________2").put("published", System.currentTimeMillis() / 1000))));
+            JSONObject discovered = restored.list().getJSONObject(4);
+            assertEquals("queued", discovered.getString("status"));
+            restored.claim();
+            restored.run(discovered.getLong("id"));
+            JSONObject failedAutomatic = restored.list().getJSONObject(4);
+            assertEquals("failed", failedAutomatic.getString("status"));
+            assertTrue(failedAutomatic.getString("errorMessage").contains("Cookie file is unavailable"));
+        } finally {
+            // yt-dlp may rewrite its header. Never remove a newer session saved while testing.
+            if (fixtureCreated) removeFixtureCookies(cookies, fixtureCookie);
+            folder.delete();
+            YtDlpFiles.deleteTree(state);
+        }
+    }
+
+    @Test public void cookieFixtureCleanupRemovesEmptyReservationButPreservesNewSession() throws Exception {
+        File cookies = File.createTempFile("cookie-cleanup-", ".txt", InstrumentationRegistry.getInstrumentation().getTargetContext().getCacheDir());
+        try {
+            removeFixtureCookies(cookies, "fixture");
+            assertFalse("A failed fixture write must not leave its empty reservation", cookies.exists());
+            byte[] session = "# Netscape HTTP Cookie File\n.youtube.com\tTRUE\t/\tTRUE\t0\tSID\tnew-session\n".getBytes(StandardCharsets.UTF_8);
+            YtDlpFiles.write(cookies, session);
+            removeFixtureCookies(cookies, "fixture");
+            assertArrayEquals(session, YtDlpFiles.readFile(cookies));
+        } finally { cookies.delete(); }
+    }
+
+    private static void removeFixtureCookies(File cookies, String fixtureCookie) throws IOException {
+        if (!cookies.isFile()) return;
+        String current = new String(YtDlpFiles.readFile(cookies), StandardCharsets.UTF_8);
+        if (current.isEmpty() || current.contains(fixtureCookie) && java.util.Arrays.stream(current.split("\n"))
+            .filter(line -> !line.isBlank() && (!line.startsWith("#") || line.startsWith("#HttpOnly_")))
+            .allMatch(fixtureCookie::equals)) cookies.delete();
+    }
+
     private static DocumentFile tree(Context context) throws Exception {
         Uri uri = DocumentsContract.buildTreeDocumentUri(InstrumentationRegistry.getInstrumentation().getContext().getPackageName() + ".documents", "root");
         grant(context, uri);
@@ -160,6 +247,7 @@ public class YtDlpDownloadsTest {
     private static final class FixtureServer implements AutoCloseable {
         final ServerSocket server = new ServerSocket(0, 10, InetAddress.getByName("127.0.0.1"));
         final AtomicInteger rangeRequests = new AtomicInteger();
+        volatile boolean requireCookie;
         final byte[] media;
         final Thread thread;
         FixtureServer(Context context) throws Exception {
@@ -171,11 +259,17 @@ public class YtDlpDownloadsTest {
                         BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream(), StandardCharsets.US_ASCII));
                         String request = reader.readLine(), header;
                         int offset = 0;
+                        boolean cookie = false;
                         while ((header = reader.readLine()) != null && !header.isEmpty()) {
+                            if (header.toLowerCase().startsWith("cookie:") && header.contains("test_session=fixture")) cookie = true;
                             if (header.toLowerCase().startsWith("range: bytes=")) {
                                 offset = Integer.parseInt(header.substring(13).split("-")[0]);
                                 rangeRequests.incrementAndGet();
                             }
+                        }
+                        if (requireCookie && !cookie) {
+                            client.getOutputStream().write("HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".getBytes(StandardCharsets.US_ASCII));
+                            continue;
                         }
                         if (request != null && request.contains("/missing.webm ")) {
                             client.getOutputStream().write("HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".getBytes(StandardCharsets.US_ASCII));

@@ -48,6 +48,7 @@ export function createAndroidPlayer(element, container, getOptions) {
   let defaultTrickPlayRate = null
   let reverseTimer = null
   let detachVideoFrames = null
+  let controls = null
   let voiceOver = null
   const screen = createAndroidNativeScreen({
     element,
@@ -134,6 +135,7 @@ export function createAndroidPlayer(element, container, getOptions) {
     if (getOptions().vrCanvas) {
       detachVideoFrames = attachAndroidVideoFrames(element, getOptions().vrCanvas, {
         captureFrame: options => controller.captureFrame(options),
+        getFieldOfView: () => controls?.isPlayingVR() ? controls.getVRFieldOfView() : 75,
         canCapture: () => !!controller && screen.hasSurface() && element.readyState >= 2,
         onError: error => { if (!String(error).includes('No video frame')) console.warn('Unable to capture a native VR frame', error) },
       })
@@ -485,6 +487,10 @@ export function createAndroidPlayer(element, container, getOptions) {
     defaultTrickPlayRate = null
   }
   methods.nativePlayback = {
+    getVideoDimensions() {
+      const format = manifestData?.formats?.find(format => format.width > 0 && format.height > 0) ?? getOptions().videoDimensions
+      return { videoWidth: format?.width ?? 0, videoHeight: format?.height ?? 0 }
+    },
     createAudio() {
       const audio = new Audio()
       const track = { id: crypto.randomUUID(), source: '', element: audio, media: null }
@@ -553,7 +559,7 @@ export function createAndroidPlayer(element, container, getOptions) {
       }
     },
     hide: screen.hide,
-    bindControls: screen.bindControls,
+    bindControls: value => { controls = value; screen.bindControls(value) },
     captureFrame: options => controller?.captureFrame(options) ?? Promise.reject(new Error('No native video is loaded')),
     getAudioSpectrum: () => controller?.getAudioSpectrum() ?? Promise.resolve({ bins: [] }),
     setOutputGain: value => media?.setOutputGain(value) ?? Promise.resolve(),

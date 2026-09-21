@@ -188,6 +188,17 @@ User Playlists:
     This playlist could not be loaded.: Daftar putar ini tidak dapat dimuat.
     More videos could not be loaded.: Video lainnya tidak dapat dimuat.
 History:
+  Repair Use Cookies: "Gunakan kuki yt-dlp yang telah dikonfigurasi"
+  Repair Cookies Hint: "Lebih dari 500 video perlu diperiksa. Konfigurasikan kuki di pengaturan yt-dlp dan aktifkan di sini untuk mengurangi risiko pembatasan permintaan."
+  Repair Description: "Gunakan setelah mengimpor riwayat, atau saat detail video tidak lengkap atau label LIVE tidak sesuai."
+  Repair Details: "Melengkapi judul, kanal, dan tanggal publikasi yang hilang, serta memeriksa durasi dan label LIVE. Progres dan status tontonan Anda tidak berubah."
+  Repair Notice: "Riwayat besar dapat memerlukan waktu. Permintaan yang gagal dicoba ulang otomatis. Video yang dihapus atau pribadi mungkin tetap tidak lengkap."
+  Start Repair: "Mulai perbaikan"
+  Repair Checking: "Memeriksa detail video"
+  Repair Waiting: "Menunggu YouTube. Perbaikan akan dilanjutkan otomatis."
+  Repair Retrying: "Mencoba ulang permintaan yang gagal"
+  Repair Finished: "Perbaikan selesai"
+  Repair Stopped: "Perbaikan dihentikan"
   Repair: "Perbaiki riwayat"
   Repair Progress: "Diperiksa {checked}/{total} · Diperbaiki {repaired} · Gagal {failed}"
   Mark All As Watched: Tandai Semua Sudah Ditonton
@@ -282,9 +293,10 @@ Settings:
       After current tab: Setelah tab saat ini
       After current tab in opened order: Setelah tab saat ini, sesuai urutan dibuka
     Tab Close Focus:
+      Last active tab: "Tab aktif terakhir"
+      Next tab in tab order: "Tab berikutnya dalam urutan tab"
+      Previous tab in tab order: "Tab sebelumnya dalam urutan tab"
       Tab Close Focus: Setelah Menutup Tab
-      Previous tab: Pilih tab sebelumnya
-      Next tab: Pilih tab berikutnya
     Startup Behavior:
       Startup Behavior: Saat Aplikasi Dimulai
       Load all tabs: Muat semua tab
@@ -665,6 +677,10 @@ Settings:
     Title Excludes: Judul tidak memuat
     Title Filter Hint: Pisahkan beberapa istilah judul dengan koma. Video harus cocok dengan setidaknya satu istilah yang disertakan dan tidak boleh cocok dengan istilah yang dikecualikan.
   External Software Settings:
+    Create YouTube session: "Buat sesi YouTube"
+    YouTube session hint: "Masuk jika diperlukan, lalu simpan sesi. Pilih di pengaturan apakah sesi digunakan untuk unduhan, pemutaran, atau subtitel."
+    Use cookies for downloads: "Gunakan kuki untuk unduhan"
+    YouTube session failed: "Tidak dapat menyimpan sesi YouTube."
     Checking FFmpeg and FFprobe: Memeriksa FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe belum diunduh. Klik tombol di bawah untuk mengunduhnya.
     External Software Settings: Perangkat Lunak Eksternal
@@ -710,7 +726,7 @@ Settings:
       Manual: Hanya perbarui secara manual
     yt-dlp Executable Path: Jalur Program yt-dlp
     FFmpeg Executable Path: Jalur Program FFmpeg
-    Restricted Playback Authentication: Kuki Pemutaran yt-dlp
+    Restricted Playback Authentication: "Kuki yt-dlp"
     Cookie Source: Sumber Kuki
     Cookie Sources:
       None: Tidak Ada
@@ -844,6 +860,7 @@ Settings:
     Expanded: Diperluas
     Playing Interface Hide Delay: Jeda penyembunyian antarmuka saat pemutaran
     Hide Startup Splash: Sembunyikan Layar Pembuka
+    Hide Header Sync Indicator: Sembunyikan indikator sinkronisasi di header aplikasi
     Hide Repeat Stats: Sembunyikan statistik pengulangan
     Sections:
       Visible While Paused: Terlihat Saat Dijeda dalam Jendela Penuh / Layar Penuh
@@ -1136,7 +1153,7 @@ Video:
   Retry With Built-in Extraction: Coba lagi dengan ekstraksi bawaan
   Retry With yt-dlp Extraction: Coba lagi dengan ekstraksi yt-dlp
   Reloading video after streaming URL error: Memuat ulang video setelah galat URL streaming
-  Configure Restricted Playback Cookies Hint: Atur kuki di Pengaturan → Perangkat Lunak Eksternal → Kuki Pemutaran yt-dlp.
+  Configure Restricted Playback Cookies Hint: "Atur kuki di Pengaturan → Perangkat Lunak Eksternal → Kuki yt-dlp."
   Try With Configured Cookies: Coba dengan kuki yang telah dikonfigurasi
   Restricted Playback Authentication Failed Template: 'yt-dlp tidak dapat mengakses video ini dengan kuki yang telah dikonfigurasi: {error}'
   Collapse Playlist: Ciutkan Daftar Putar
@@ -1358,6 +1375,10 @@ Share:
   Share failed: "Tidak dapat membagikan tautan"
   Timestamp Link Copied: Tautan stempel waktu disalin ke papan klip
 Context Menu:
+  Select Tab: Pilih Tab
+  Close Tabs Before: Tutup Tab Sebelumnya
+  Close Tabs After: Tutup Tab Sesudahnya
+  Close Other Tabs: Tutup Tab Lainnya
   Copy {service} link without playlist: "Salin tautan {service} tanpa playlist"
   Context Menu: Menu konteks
   Select All: Pilih Semua
@@ -1561,7 +1582,7 @@ Tooltips:
     Cookie File: Pilih berkas kuki berformat Netscape untuk pemutaran terautentikasi.
     Browser for Cookies: Dukungan peramban dibaca dari program yt-dlp yang dipilih. OpenTubeX meminta yt-dlp membaca peramban ini saat pemutaran terautentikasi diminta.
     Browser Profile: Nama atau folder profil peramban opsional. Biarkan kosong untuk menggunakan profil yang terakhir diakses.
-    Always Use Cookies: "Gunakan kuki yang telah dikonfigurasi setiap kali yt-dlp mengekstrak stream. Opsi ini tidak mengubah metode ekstraksi stream menjadi yt-dlp. Jika yt-dlp dipilih, format khusus akun mungkin tersedia, termasuk laju bit lebih tinggi YouTube Premium jika akun memiliki akses. Gunakan kuki yang dikonfigurasi untuk takarir dan terjemahan otomatis."
+    Always Use Cookies: "Gunakan kuki yang dikonfigurasi untuk unduhan, takarir, dan setiap kali yt-dlp mengekstrak stream. Opsi ini tidak mengubah metode ekstraksi stream menjadi yt-dlp. Jika yt-dlp dipilih, format khusus akun mungkin tersedia, termasuk laju bit lebih tinggi YouTube Premium jika akun memiliki akses."
     FFmpeg Executable Path: FFmpeg diperlukan untuk menggabungkan stream video dan audio terpisah serta mengonversi audio. Secara bawaan, OpenTubeX menganggap FFmpeg dapat ditemukan melalui variabel lingkungan PATH. Jika perlu, tentukan jalur khusus di sini.
     Use cookies for subtitles: "Gunakan kuki yang dikonfigurasi untuk takarir dan terjemahan otomatis. Juga diaktifkan oleh \"Selalu Gunakan Kuki\"."
   Distraction Free Settings:
@@ -1650,6 +1671,7 @@ CommandPalette:
     Download Finished: Unduhan ini tidak lagi berjalan
     Video: Buka video terlebih dahulu
 Downloads:
+  Preparing: Menyiapkan…
   Export Failed: "File yang diunduh tidak dapat disimpan. Pilih folder unduhan yang dapat ditulisi dan coba lagi."
   Remove File Permanently Warning: "Ini akan menghapus \"{title}\" secara permanen."
   Download: Unduh

@@ -34,10 +34,6 @@
 }
 
 .summaryHeading {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 8px;
   flex: 1;
   min-inline-size: 0;
 }
@@ -49,11 +45,6 @@
 .summaryDisclaimer {
   color: var(--secondary-text-color);
   font-size: 0.875em;
-}
-
-.summaryDisclaimer::before {
-  content: '·';
-  margin-inline-end: 8px;
 }
 
 .summaryChevron {

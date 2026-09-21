@@ -19,7 +19,7 @@
       ref="persistentHolder"
       class="progress-toast-holder"
       :class="[`position-${toastPosition}`, tabBarToastClasses]"
-      :style="progressToastHolderStyle"
+      :style="toastHolderStyle"
     >
       <div
         v-if="showProgressToast"
@@ -61,6 +61,7 @@
       ref="connectionHolder"
       class="connection-status-holder"
       :class="tabBarToastClasses"
+      :style="toastHolderStyle"
     >
       <FtConnectionStatus :state="connectionState" />
     </div>
@@ -225,7 +226,7 @@ const tabBarToastClasses = computed(() => ({
   'bottom-tabs': tabBarPosition.value === 'bottom'
 }))
 const tabBarInlineOffset = computed(() => `${store.getters.getVerticalTabBarWidth}px`)
-const progressToastHolderStyle = computed(() => ({
+const toastHolderStyle = computed(() => ({
   '--connection-height': `${connectionHeight.value}px`,
   '--left-tab-bar-offset': tabBarPosition.value === 'left' ? tabBarInlineOffset.value : '0px',
   '--right-tab-bar-offset': tabBarPosition.value === 'right' ? tabBarInlineOffset.value : '0px'

@@ -192,6 +192,17 @@ User Playlists:
     This playlist could not be loaded.: Không thể tải danh sách phát này.
     More videos could not be loaded.: Không thể tải thêm video.
 History:
+  Repair Use Cookies: "Dùng cookie yt-dlp đã cấu hình"
+  Repair Cookies Hint: "Cần kiểm tra hơn 500 video. Hãy cấu hình cookie trong cài đặt yt-dlp và bật tại đây để giảm nguy cơ bị giới hạn yêu cầu."
+  Repair Description: "Dùng sau khi nhập lịch sử, hoặc khi video thiếu thông tin hay có nhãn LIVE không chính xác."
+  Repair Details: "Bổ sung tiêu đề, kênh và ngày đăng còn thiếu, đồng thời kiểm tra thời lượng và nhãn LIVE. Tiến trình xem và trạng thái đã xem không thay đổi."
+  Repair Notice: "Lịch sử lớn có thể mất thời gian. Yêu cầu thất bại sẽ tự động được thử lại. Video đã xóa hoặc riêng tư có thể vẫn thiếu thông tin."
+  Start Repair: "Bắt đầu sửa"
+  Repair Checking: "Đang kiểm tra thông tin video"
+  Repair Waiting: "Đang chờ YouTube. Quá trình sửa sẽ tự động tiếp tục."
+  Repair Retrying: "Đang thử lại các yêu cầu thất bại"
+  Repair Finished: "Đã sửa xong"
+  Repair Stopped: "Đã dừng sửa"
   Repair: "Sửa lịch sử"
   Repair Progress: "Đã kiểm tra {checked}/{total} · Đã sửa {repaired} · Thất bại {failed}"
   Mark All As Watched: Đánh dấu tất cả là đã xem
@@ -286,9 +297,10 @@ Settings:
       After current tab: Sau thẻ hiện tại
       After current tab in opened order: Sau thẻ hiện tại, theo thứ tự mở
     Tab Close Focus:
+      Last active tab: "Thẻ hoạt động gần nhất"
+      Next tab in tab order: "Thẻ tiếp theo trong thứ tự thẻ"
+      Previous tab in tab order: "Thẻ trước trong thứ tự thẻ"
       Tab Close Focus: Sau khi đóng một thẻ
-      Previous tab: Chọn thẻ trước
-      Next tab: Chọn thẻ sau
     Startup Behavior:
       Startup Behavior: Khi khởi động
       Load all tabs: Tải tất cả thẻ
@@ -673,6 +685,10 @@ Settings:
     Title Excludes: Tiêu đề không chứa
     Title Filter Hint: Phân tách nhiều cụm từ trong tiêu đề bằng dấu phẩy. Video phải khớp ít nhất một cụm từ cần có và không khớp cụm từ loại trừ nào.
   External Software Settings:
+    Create YouTube session: "Tạo phiên YouTube"
+    YouTube session hint: "Đăng nhập nếu cần rồi lưu phiên. Chọn trong cài đặt để sử dụng phiên cho tải xuống, phát hoặc phụ đề."
+    Use cookies for downloads: "Sử dụng cookie để tải xuống"
+    YouTube session failed: "Không thể lưu phiên YouTube."
     Checking FFmpeg and FFprobe: Đang kiểm tra FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: Chưa tải FFmpeg/FFprobe. Nhấp vào nút bên dưới để tải.
     External Software Settings: Phần mềm bên ngoài
@@ -718,7 +734,7 @@ Settings:
       Manual: Chỉ cập nhật thủ công
     yt-dlp Executable Path: Đường dẫn tệp thực thi yt-dlp
     FFmpeg Executable Path: Đường dẫn tệp thực thi FFmpeg
-    Restricted Playback Authentication: Cookie phát cho yt-dlp
+    Restricted Playback Authentication: "Cookie yt-dlp"
     Cookie Source: Nguồn cookie
     Cookie Sources:
       None: Không có
@@ -852,6 +868,7 @@ Settings:
     Expanded: Mở rộng
     Playing Interface Hide Delay: Độ trễ ẩn giao diện khi phát
     Hide Startup Splash: Ẩn màn hình khởi động
+    Hide Header Sync Indicator: Ẩn chỉ báo đồng bộ hóa trên thanh đầu ứng dụng
     Hide Repeat Stats: Ẩn thống kê lặp lại
     Sections:
       Visible While Paused: Hiện khi tạm dừng ở chế độ toàn cửa sổ / toàn màn hình
@@ -1161,7 +1178,7 @@ Video:
   Retry With Built-in Extraction: Thử lại bằng trình trích xuất tích hợp
   Retry With yt-dlp Extraction: Thử lại bằng yt-dlp
   Reloading video after streaming URL error: Đang tải lại video sau lỗi URL luồng
-  Configure Restricted Playback Cookies Hint: Thiết lập cookie trong Cài đặt → Phần mềm bên ngoài → Cookie phát cho yt-dlp.
+  Configure Restricted Playback Cookies Hint: "Thiết lập cookie trong Cài đặt → Phần mềm bên ngoài → Cookie yt-dlp."
   Try With Configured Cookies: Thử bằng cookie đã thiết lập
   Restricted Playback Authentication Failed Template: 'yt-dlp không thể truy cập video này bằng cookie đã thiết lập: {error}'
   Unmark As Watched: Bỏ đánh dấu đã xem
@@ -1380,6 +1397,10 @@ Share:
   Share failed: "Không thể chia sẻ liên kết"
   Timestamp Link Copied: Đã sao chép liên kết có mốc thời gian vào bảng nhớ tạm
 Context Menu:
+  Select Tab: Chọn thẻ
+  Close Tabs Before: Đóng các thẻ trước
+  Close Tabs After: Đóng các thẻ sau
+  Close Other Tabs: Đóng các thẻ khác
   Copy {service} link without playlist: "Sao chép liên kết {service} không kèm danh sách phát"
   Context Menu: Menu ngữ cảnh
   Select All: Chọn tất cả
@@ -1584,7 +1605,7 @@ Tooltips:
     Cookie File: Chọn tệp cookie định dạng Netscape để phát nội dung cần xác thực.
     Browser for Cookies: Khả năng hỗ trợ trình duyệt được đọc từ tệp thực thi yt-dlp đã chọn. OpenTubeX yêu cầu yt-dlp đọc trình duyệt này khi cần phát nội dung xác thực.
     Browser Profile: Tên hoặc thư mục hồ sơ trình duyệt không bắt buộc. Để trống để dùng hồ sơ được truy cập gần nhất.
-    Always Use Cookies: "Dùng cookie đã thiết lập mỗi khi yt-dlp trích xuất luồng. Tùy chọn này không chuyển phương thức trích xuất luồng sang yt-dlp. Khi chọn yt-dlp, các định dạng chỉ dành cho tài khoản có thể xuất hiện, gồm tốc độ bit nâng cao của YouTube Premium nếu tài khoản có quyền truy cập. Dùng cookie đã cấu hình cho phụ đề và bản dịch tự động."
+    Always Use Cookies: "Sử dụng cookie đã cấu hình cho tải xuống, phụ đề và mỗi khi yt-dlp trích xuất luồng. Tùy chọn này không chuyển phương thức trích xuất luồng sang yt-dlp. Khi chọn yt-dlp, các định dạng chỉ dành cho tài khoản có thể xuất hiện, gồm tốc độ bit nâng cao của YouTube Premium nếu tài khoản có quyền truy cập."
     FFmpeg Executable Path: Cần FFmpeg để ghép luồng video và âm thanh riêng biệt cũng như chuyển đổi âm thanh. Theo mặc định, OpenTubeX giả định có thể tìm thấy FFmpeg qua biến môi trường PATH. Bạn có thể đặt đường dẫn tùy chỉnh tại đây nếu cần.
     Use cookies for subtitles: "Dùng cookie đã cấu hình cho phụ đề và bản dịch tự động. Cũng được bật bởi \"Luôn dùng cookie\"."
   Distraction Free Settings:
@@ -1675,6 +1696,7 @@ CommandPalette:
     Download Finished: Lượt tải này không còn chạy
     Video: Hãy mở một video trước
 Downloads:
+  Preparing: Đang chuẩn bị…
   Export Failed: "Không thể lưu tệp đã tải xuống. Hãy chọn thư mục tải xuống có quyền ghi và thử lại."
   Remove File Permanently Warning: "Thao tác này sẽ xóa vĩnh viễn \"{title}\"."
   Download: Tải xuống

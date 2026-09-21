@@ -690,18 +690,19 @@ function updateNewTabPosition(value) {
   store.dispatch('updateNewTabPosition', value)
 }
 
-const TAB_CLOSE_FOCUS_VALUES = ['previousTab', 'nextTab']
+const TAB_CLOSE_FOCUS_VALUES = ['lastActiveTab', 'nextTab', 'previousTab']
 
 const tabCloseFocusNames = computed(() => [
-  t('Settings.General Settings.Tab Close Focus.Previous tab'),
-  t('Settings.General Settings.Tab Close Focus.Next tab')
+  t('Settings.General Settings.Tab Close Focus.Last active tab'),
+  t('Settings.General Settings.Tab Close Focus.Next tab in tab order'),
+  t('Settings.General Settings.Tab Close Focus.Previous tab in tab order')
 ])
 
-/** @type {import('vue').ComputedRef<'previousTab' | 'nextTab'>} */
+/** @type {import('vue').ComputedRef<'lastActiveTab' | 'previousTab' | 'nextTab'>} */
 const tabCloseFocus = computed(() => store.getters.getTabCloseFocus)
 
 /**
- * @param {'previousTab' | 'nextTab'} value
+ * @param {'lastActiveTab' | 'previousTab' | 'nextTab'} value
  */
 function updateTabCloseFocus(value) {
   store.dispatch('updateTabCloseFocus', value)

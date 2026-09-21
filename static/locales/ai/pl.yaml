@@ -101,6 +101,10 @@ Settings:
     Advanced Description: Dostawcy, aplikacje zewnętrzne i sieć
     Alternative providers: Dostawcy filmów i metadanych
   General Settings:
+    Tab Close Focus:
+      Last active tab: "Ostatnio aktywna karta"
+      Next tab in tab order: "Następna karta w kolejności kart"
+      Previous tab in tab order: "Poprzednia karta w kolejności kart"
     Use tray icon: "Używaj ikony w zasobniku"
     Close to system tray: "Zamykaj do zasobnika systemowego"
     Tray required for background refresh: "Ikona w zasobniku jest wymagana, gdy odświeżanie subskrypcji w tle jest włączone."
@@ -262,6 +266,10 @@ Settings:
     Concurrent Downloads: Jednoczesne pobieranie
     Bandwidth Limit: Limit przepustowości (KiB/s, 0 oznacza brak limitu)
   External Software Settings:
+    Create YouTube session: "Utwórz sesję YouTube"
+    YouTube session hint: "Zaloguj się w razie potrzeby i zapisz sesję. W ustawieniach wybierz, czy używać jej do pobierania, odtwarzania lub napisów."
+    Use cookies for downloads: "Używaj plików cookie do pobierania"
+    YouTube session failed: "Nie udało się zapisać sesji YouTube."
     Checking FFmpeg and FFprobe: Sprawdzanie FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe nie zostały jeszcze pobrane. Kliknij przycisk poniżej, aby je pobrać.
     Detected FFmpeg and FFprobe Version Template: 'Wykryta wersja FFmpeg/FFprobe: {version}'
@@ -275,7 +283,7 @@ Settings:
       Automatic: Aktualizuj automatycznie
       Ask: Pytaj przed aktualizacją
       Manual: Aktualizuj tylko ręcznie
-    Restricted Playback Authentication: Ciasteczka odtwarzania dla yt-dlp
+    Restricted Playback Authentication: "Pliki cookie yt-dlp"
     Cookie Source: Źródło ciasteczek
     Cookie Sources:
       None: Brak
@@ -392,6 +400,7 @@ Settings:
     Expanded: Rozwinięte
     Playing Interface Hide Delay: Opóźnienie ukrywania interfejsu podczas odtwarzania
     Hide Startup Splash: Ukryj ekran startowy
+    Hide Header Sync Indicator: Ukryj wskaźnik synchronizacji w nagłówku aplikacji
     Hide Repeat Stats: Ukryj statystyki powtarzania
     Sections:
       Visible While Paused: Widoczne po wstrzymaniu w trybie pełnego okna lub pełnego ekranu
@@ -587,7 +596,7 @@ Video:
   Retry With Built-in Extraction: Spróbuj ponownie za pomocą wbudowanego mechanizmu
   Retry With yt-dlp Extraction: Spróbuj ponownie za pomocą yt-dlp
   Reloading video after streaming URL error: Ponowne wczytywanie filmu po błędzie adresu URL strumienia
-  Configure Restricted Playback Cookies Hint: Skonfiguruj ciasteczka w sekcji Ustawienia → Oprogramowanie zewnętrzne → Ciasteczka odtwarzania dla yt-dlp.
+  Configure Restricted Playback Cookies Hint: "Skonfiguruj ciasteczka w sekcji Ustawienia → Oprogramowanie zewnętrzne → Pliki cookie yt-dlp."
   Try With Configured Cookies: Spróbuj ze skonfigurowanymi ciasteczkami
   Restricted Playback Authentication Failed Template: 'yt-dlp nie uzyskał dostępu do tego filmu za pomocą skonfigurowanych ciasteczek: {error}'
   Save Channel Subtitles State: Zapisz ustawienie napisów dla kanału
@@ -688,6 +697,10 @@ Change Format:
   yt-dlp Default Clients Fallback: Preferowani klienci yt-dlp nie dostarczyli strumieni możliwych do odtworzenia. Zostaną użyci domyślni klienci yt-dlp
   Built-in Fallback Template: 'Wbudowany mechanizm nie odtworzył strumienia. Zostanie użyty yt-dlp: {error}'
 Context Menu:
+  Select Tab: Zaznacz kartę
+  Close Tabs Before: Zamknij poprzednie karty
+  Close Tabs After: Zamknij następne karty
+  Close Other Tabs: Zamknij inne karty
   Copy {service} link without playlist: "Kopiuj link do {service} bez playlisty"
   Move Tab to Group: Przenieś kartę do grupy
   Collapse Group: Zwiń grupę
@@ -808,7 +821,7 @@ Tooltips:
     Cookie File: Wybierz plik ciasteczek w formacie Netscape na potrzeby uwierzytelnionego odtwarzania.
     Browser for Cookies: Obsługiwane przeglądarki są odczytywane z wybranego pliku wykonywalnego yt-dlp. Gdy potrzebne jest uwierzytelnione odtwarzanie, OpenTubeX zleca yt-dlp odczytanie ciasteczek z tej przeglądarki.
     Browser Profile: Opcjonalna nazwa lub folder profilu przeglądarki. Pozostaw puste pole, aby użyć ostatnio otwieranego profilu.
-    Always Use Cookies: "Używa skonfigurowanych ciasteczek przy każdym pobieraniu strumieni przez yt-dlp. Nie zmienia to metody pobierania strumienia na yt-dlp. Po wybraniu yt-dlp mogą być dostępne formaty przeznaczone tylko dla kont, w tym wyższa szybkość transmisji bitów YouTube Premium, jeśli konto ma do niej dostęp. Używaj skonfigurowanych plików cookie do napisów i tłumaczeń automatycznych."
+    Always Use Cookies: "Używaj skonfigurowanych plików cookie do pobierania, napisów i za każdym razem, gdy yt-dlp pobiera informacje o strumieniach. Nie zmienia to metody pobierania strumienia na yt-dlp. Po wybraniu yt-dlp mogą być dostępne formaty przeznaczone tylko dla kont, w tym wyższa szybkość transmisji bitów YouTube Premium, jeśli konto ma do niej dostęp."
     Use cookies for subtitles: "Używaj skonfigurowanych plików cookie do napisów i tłumaczeń automatycznych. Włącza się także przez „Zawsze używaj ciasteczek”."
   Distraction Free Settings:
     Shorten View Counts: Pokazuje liczbę wyświetleń, komentarzy i polubień komentarzy w skróconej postaci zaokrąglonej przez YouTube, na przykład 14 tys. zamiast 14 000. Dokładne wartości są zawsze wyświetlane w całości.
@@ -862,6 +875,7 @@ CommandPalette:
     Download Finished: To pobieranie nie jest już uruchomione
     Video: Najpierw otwórz film
 Downloads:
+  Preparing: Przygotowywanie…
   Export Failed: "Nie udało się zapisać pobranego pliku. Wybierz folder pobierania z uprawnieniami do zapisu i spróbuj ponownie."
   Remove File Permanently Warning: "Spowoduje to trwałe usunięcie „{title}”."
   Download Playlist: Pobierz playlistę
@@ -983,6 +997,17 @@ App Icon:
   Error: "Nie udało się wczytać lub zmienić ikony aplikacji"
 
 History:
+  Repair Use Cookies: "Użyj skonfigurowanych ciasteczek yt-dlp"
+  Repair Cookies Hint: "Trzeba sprawdzić ponad 500 filmów. Skonfiguruj ciasteczka w ustawieniach yt-dlp i włącz je tutaj, aby zmniejszyć ryzyko ograniczenia zapytań."
+  Repair Description: "Użyj po zaimportowaniu historii lub gdy brakuje danych filmów albo mają nieprawidłową etykietę LIVE."
+  Repair Details: "Uzupełnia brakujące tytuły, kanały i daty publikacji oraz sprawdza długość filmów i etykiety LIVE. Postęp oglądania i oznaczenie jako obejrzane pozostają bez zmian."
+  Repair Notice: "Duża historia może wymagać czasu. Nieudane żądania są ponawiane automatycznie. Dane usuniętych lub prywatnych filmów mogą pozostać niepełne."
+  Start Repair: "Rozpocznij naprawę"
+  Repair Checking: "Sprawdzanie danych filmów"
+  Repair Waiting: "Oczekiwanie na YouTube. Naprawa zostanie wznowiona automatycznie."
+  Repair Retrying: "Ponawianie nieudanych żądań"
+  Repair Finished: "Naprawa zakończona"
+  Repair Stopped: "Naprawa zatrzymana"
   Repair: "Napraw historię"
   Repair Progress: "Sprawdzono {checked}/{total} · Naprawiono {repaired} · Błędy {failed}"
 

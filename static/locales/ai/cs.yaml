@@ -188,6 +188,17 @@ User Playlists:
     This playlist could not be loaded.: Tento playlist se nepodařilo načíst.
     More videos could not be loaded.: Další videa se nepodařilo načíst.
 History:
+  Repair Use Cookies: "Použít nastavené cookies yt-dlp"
+  Repair Cookies Hint: "Je třeba zkontrolovat více než 500 videí. Nastavte cookies v nastavení yt-dlp a povolte je zde, abyste snížili riziko omezení požadavků."
+  Repair Description: "Použijte po importu historie nebo když videím chybí údaje či mají nesprávný štítek LIVE."
+  Repair Details: "Doplní chybějící názvy, kanály a data zveřejnění a zkontroluje délku videí a štítky LIVE. Průběh sledování a stav zhlédnutí se nezmění."
+  Repair Notice: "Rozsáhlá historie může chvíli trvat. Neúspěšné požadavky se opakují automaticky. Smazaná nebo soukromá videa mohou zůstat neúplná."
+  Start Repair: "Spustit opravu"
+  Repair Checking: "Kontrola údajů o videích"
+  Repair Waiting: "Čekání na YouTube. Oprava bude automaticky pokračovat."
+  Repair Retrying: "Opakování neúspěšných požadavků"
+  Repair Finished: "Oprava dokončena"
+  Repair Stopped: "Oprava zastavena"
   Repair: "Opravit historii"
   Repair Progress: "Zkontrolováno {checked}/{total} · Opraveno {repaired} · Selhalo {failed}"
   Mark All As Watched: Označit vše jako zhlédnuté
@@ -282,9 +293,10 @@ Settings:
       After current tab: Za aktuální kartou
       After current tab in opened order: Za aktuální kartou v pořadí otevření
     Tab Close Focus:
+      Last active tab: "Naposledy aktivní karta"
+      Next tab in tab order: "Následující karta v pořadí karet"
+      Previous tab in tab order: "Předchozí karta v pořadí karet"
       Tab Close Focus: Po zavření karty
-      Previous tab: Vybrat předchozí kartu
-      Next tab: Vybrat následující kartu
     Startup Behavior:
       Startup Behavior: Při spuštění
       Load all tabs: Načíst všechny karty
@@ -665,6 +677,10 @@ Settings:
     Title Excludes: Název neobsahuje
     Title Filter Hint: Více výrazů v názvu oddělte čárkami. Video musí odpovídat alespoň jednomu zahrnutému výrazu a žádnému vyloučenému výrazu.
   External Software Settings:
+    Create YouTube session: "Vytvořit relaci YouTube"
+    YouTube session hint: "V případě potřeby se přihlaste a uložte relaci. V nastavení zvolte, zda ji používat pro stahování, přehrávání nebo titulky."
+    Use cookies for downloads: "Používat cookies pro stahování"
+    YouTube session failed: "Relaci YouTube se nepodařilo uložit."
     Checking FFmpeg and FFprobe: Kontrola FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe zatím nejsou staženy. Stáhnete je kliknutím na tlačítko níže.
     External Software Settings: Externí software
@@ -710,7 +726,7 @@ Settings:
       Manual: Aktualizovat pouze ručně
     yt-dlp Executable Path: Cesta ke spustitelnému souboru yt-dlp
     FFmpeg Executable Path: Cesta ke spustitelnému souboru FFmpeg
-    Restricted Playback Authentication: Cookies pro přehrávání přes yt-dlp
+    Restricted Playback Authentication: "Cookies yt-dlp"
     Cookie Source: Zdroj cookies
     Cookie Sources:
       None: Žádný
@@ -844,6 +860,7 @@ Settings:
     Expanded: Rozbalená
     Playing Interface Hide Delay: Prodleva skrytí rozhraní při přehrávání
     Hide Startup Splash: Skrýt úvodní obrazovku
+    Hide Header Sync Indicator: Skrýt indikátor synchronizace v záhlaví aplikace
     Hide Repeat Stats: Skrýt statistiky opakování
     Sections:
       Visible While Paused: Viditelné při pozastavení v režimu celého okna nebo celé obrazovky
@@ -1136,7 +1153,7 @@ Video:
   Retry With Built-in Extraction: Zkusit znovu pomocí vestavěného získávání
   Retry With yt-dlp Extraction: Zkusit znovu pomocí yt-dlp
   Reloading video after streaming URL error: Opětovné načítání videa po chybě adresy URL streamu
-  Configure Restricted Playback Cookies Hint: Nastavte cookies v Nastavení → Externí software → Cookies pro přehrávání přes yt-dlp.
+  Configure Restricted Playback Cookies Hint: "Nastavte cookies v Nastavení → Externí software → Cookies yt-dlp."
   Try With Configured Cookies: Zkusit s nastavenými cookies
   Restricted Playback Authentication Failed Template: 'yt-dlp nemohl získat přístup k tomuto videu s nastavenými cookies: {error}'
   Unmark As Watched: Zrušit označení jako zhlédnuté
@@ -1350,6 +1367,10 @@ Share:
   Share failed: "Odkaz se nepodařilo sdílet"
   Timestamp Link Copied: Odkaz s časovým údajem byl zkopírován do schránky
 Context Menu:
+  Select Tab: Vybrat kartu
+  Close Tabs Before: Zavřít předchozí karty
+  Close Tabs After: Zavřít následující karty
+  Close Other Tabs: Zavřít ostatní karty
   Copy {service} link without playlist: "Kopírovat odkaz na {service} bez playlistu"
   Context Menu: Místní nabídka
   Select All: Vybrat vše
@@ -1553,7 +1574,7 @@ Tooltips:
     Cookie File: Vyberte soubor cookies ve formátu Netscape pro ověřené přehrávání.
     Browser for Cookies: Podpora prohlížečů se načítá z vybraného spustitelného souboru yt-dlp. Při požadavku na ověřené přehrávání OpenTubeX požádá yt-dlp o načtení tohoto prohlížeče.
     Browser Profile: Volitelný název nebo složka profilu prohlížeče. Chcete-li použít naposledy otevřený profil, ponechte pole prázdné.
-    Always Use Cookies: "Nastavené cookies použije při každém získávání streamů pomocí yt-dlp. Způsob získávání streamu se tím nepřepne na yt-dlp. Pokud je vybrán yt-dlp, mohou být dostupné formáty pouze pro účty, včetně vyšší přenosové rychlosti YouTube Premium, pokud k ní má účet přístup. Používat nastavené cookies pro titulky a automatické překlady."
+    Always Use Cookies: "Používejte nastavené cookies pro stahování, titulky a vždy, když yt-dlp získává streamy. Způsob získávání streamu se tím nepřepne na yt-dlp. Pokud je vybrán yt-dlp, mohou být dostupné formáty pouze pro účty, včetně vyšší přenosové rychlosti YouTube Premium, pokud k ní má účet přístup."
     FFmpeg Executable Path: FFmpeg je nutný ke slučování samostatných streamů obrazu a zvuku a k převodu zvuku. OpenTubeX ve výchozím nastavení předpokládá, že nástroj FFmpeg lze najít pomocí proměnné prostředí PATH. V případě potřeby zde můžete nastavit vlastní cestu.
     Use cookies for subtitles: "Používat nastavené cookies pro titulky a automatické překlady. Zapne se také volbou „Vždy používat cookies“."
   Distraction Free Settings:
@@ -1642,6 +1663,7 @@ CommandPalette:
     Download Finished: Toto stahování již neprobíhá
     Video: Nejprve otevřete video
 Downloads:
+  Preparing: Příprava…
   Export Failed: "Stažený soubor se nepodařilo uložit. Vyberte složku pro stahování s oprávněním k zápisu a zkuste to znovu."
   Remove File Permanently Warning: "Tímto trvale smažete „{title}“."
   Download: Stáhnout

@@ -190,6 +190,17 @@ User Playlists:
     This playlist could not be loaded.: Acest playlist nu a putut fi încărcat.
     More videos could not be loaded.: Nu au putut fi încărcate mai multe videoclipuri.
 History:
+  Repair Use Cookies: "Folosește cookie-urile configurate pentru yt-dlp"
+  Repair Cookies Hint: "Trebuie verificate peste 500 de videoclipuri. Configurează cookie-urile în setările yt-dlp și activează-le aici pentru a reduce riscul limitării cererilor."
+  Repair Description: "Folosește după importarea istoricului sau când lipsesc detalii despre videoclipuri ori eticheta LIVE este incorectă."
+  Repair Details: "Completează titlurile, canalele și datele publicării care lipsesc și verifică duratele și etichetele LIVE. Progresul de vizionare și marcajul de videoclip vizionat rămân neschimbate."
+  Repair Notice: "Istoricul mare poate dura. Solicitările eșuate sunt reîncercate automat. Videoclipurile șterse sau private pot rămâne incomplete."
+  Start Repair: "Începe repararea"
+  Repair Checking: "Se verifică detaliile videoclipurilor"
+  Repair Waiting: "Se așteaptă YouTube. Repararea va continua automat."
+  Repair Retrying: "Se reîncearcă solicitările eșuate"
+  Repair Finished: "Reparare încheiată"
+  Repair Stopped: "Reparare oprită"
   Repair: "Repară istoricul"
   Repair Progress: "Verificate {checked}/{total} · Reparate {repaired} · Eșuate {failed}"
   Mark All As Watched: Marchează totul ca vizionat
@@ -284,9 +295,10 @@ Settings:
       After current tab: După fila curentă
       After current tab in opened order: După fila curentă, în ordinea deschiderii
     Tab Close Focus:
+      Last active tab: "Ultima filă activă"
+      Next tab in tab order: "Fila următoare în ordinea filelor"
+      Previous tab in tab order: "Fila anterioară în ordinea filelor"
       Tab Close Focus: După închiderea unei file
-      Previous tab: Selectează fila anterioară
-      Next tab: Selectează fila următoare
     Startup Behavior:
       Startup Behavior: La pornire
       Load all tabs: Încarcă toate filele
@@ -669,6 +681,10 @@ Settings:
     Title Excludes: Titlul exclude
     Title Filter Hint: Separați prin virgule mai mulți termeni pentru titlu. Un videoclip trebuie să corespundă cel puțin unui termen inclus și niciunui termen exclus.
   External Software Settings:
+    Create YouTube session: "Creează o sesiune YouTube"
+    YouTube session hint: "Autentifică-te dacă este necesar și salvează sesiunea. Alege în setări dacă să o folosești pentru descărcări, redare sau subtitrări."
+    Use cookies for downloads: "Folosește cookie-uri pentru descărcări"
+    YouTube session failed: "Sesiunea YouTube nu a putut fi salvată."
     Checking FFmpeg and FFprobe: Se verifică FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe nu au fost descărcate încă. Apăsați butonul de mai jos pentru a le descărca.
     External Software Settings: Software extern
@@ -714,7 +730,7 @@ Settings:
       Manual: Actualizează numai manual
     yt-dlp Executable Path: Calea executabilului yt-dlp
     FFmpeg Executable Path: Calea executabilului FFmpeg
-    Restricted Playback Authentication: Cookie-uri yt-dlp pentru redare
+    Restricted Playback Authentication: "Cookie-uri yt-dlp"
     Cookie Source: Sursa cookie-urilor
     Cookie Sources:
       None: Niciuna
@@ -848,6 +864,7 @@ Settings:
     Expanded: Extinse
     Playing Interface Hide Delay: Întârziere la ascunderea interfeței în timpul redării
     Hide Startup Splash: Ascunde ecranul de pornire
+    Hide Header Sync Indicator: Ascunde indicatorul de sincronizare din antetul aplicației
     Hide Repeat Stats: Ascunde statisticile de repetare
     Sections:
       Visible While Paused: Vizibile în pauză în fereastră completă / pe ecran complet
@@ -1160,7 +1177,7 @@ Video:
   Retry With Built-in Extraction: Reîncearcă folosind extragerea încorporată
   Retry With yt-dlp Extraction: Reîncearcă folosind extragerea yt-dlp
   Reloading video after streaming URL error: Se reîncarcă videoclipul după o eroare a adresei URL a fluxului
-  Configure Restricted Playback Cookies Hint: Configurați cookie-urile în Setări → Software extern → Cookie-uri yt-dlp pentru redare.
+  Configure Restricted Playback Cookies Hint: "Configurați cookie-urile în Setări → Software extern → Cookie-uri yt-dlp."
   Try With Configured Cookies: Încearcă folosind cookie-urile configurate
   Restricted Playback Authentication Failed Template: 'yt-dlp nu a putut accesa acest videoclip cu cookie-urile configurate: {error}'
   Private: Videoclipurile private nu pot fi vizionate în OpenTubeX deoarece necesită autentificarea la Google și dreptul de proprietate asupra videoclipului.
@@ -1387,6 +1404,10 @@ Share:
   Share Post: Distribuie postarea
   Timestamp Link Copied: Linkul cu marcaj temporal a fost copiat în clipboard
 Context Menu:
+  Select Tab: Selectează fila
+  Close Tabs Before: Închide filele anterioare
+  Close Tabs After: Închide filele următoare
+  Close Other Tabs: Închide celelalte file
   Copy {service} link without playlist: "Copiază linkul {service} fără lista de redare"
   Context Menu: Meniu contextual
   Select All: Selectează tot
@@ -1594,7 +1615,7 @@ Tooltips:
     Cookie File: Selectați un fișier cookie în format Netscape pentru redarea autentificată.
     Browser for Cookies: Compatibilitatea cu browserele este citită din executabilul yt-dlp selectat. OpenTubeX solicită ca yt-dlp să citească acest browser atunci când este cerută redarea autentificată.
     Browser Profile: Numele sau folderul opțional al profilului de browser. Lăsați necompletat pentru a folosi profilul accesat cel mai recent.
-    Always Use Cookies: "Folosește cookie-urile configurate ori de câte ori yt-dlp extrage fluxuri. Această opțiune nu schimbă metoda de extragere a fluxului la yt-dlp. Când este selectat yt-dlp, pot deveni disponibile formate destinate exclusiv conturilor, inclusiv rata de biți îmbunătățită YouTube Premium dacă acel cont are acces. Folosește cookie-urile configurate pentru subtitrări și traduceri automate."
+    Always Use Cookies: "Folosește cookie-urile configurate pentru descărcări, subtitrări și ori de câte ori yt-dlp extrage fluxuri. Această opțiune nu schimbă metoda de extragere a fluxului la yt-dlp. Când este selectat yt-dlp, pot deveni disponibile formate destinate exclusiv conturilor, inclusiv rata de biți îmbunătățită YouTube Premium dacă acel cont are acces."
     FFmpeg Executable Path: FFmpeg este necesar pentru îmbinarea fluxurilor video și audio separate și pentru conversia audio. În mod implicit, OpenTubeX presupune că FFmpeg poate fi găsit prin variabila de mediu PATH. Dacă este necesar, puteți seta aici o cale personalizată.
     Use cookies for subtitles: "Folosește cookie-urile configurate pentru subtitrări și traduceri automate. Se activează și prin „Folosește întotdeauna cookie-uri”."
   Distraction Free Settings:
@@ -1687,6 +1708,7 @@ CommandPalette:
     Download Finished: Această descărcare nu mai rulează
     Video: Deschideți mai întâi un videoclip
 Downloads:
+  Preparing: Se pregătește…
   Export Failed: "Fișierul descărcat nu a putut fi salvat. Alegeți un dosar de descărcări cu permisiune de scriere și încercați din nou."
   Remove File Permanently Warning: "Aceasta va șterge definitiv „{title}”."
   Download: Descarcă

@@ -7,10 +7,17 @@
       shortsPlayer
     }"
   >
-    <LightsOffOverlay
-      v-if="lightsOffVisible"
-      :player="container"
-    />
+    <Teleport to="body">
+      <Transition
+        name="lights-off"
+        appear
+      >
+        <LightsOffOverlay
+          v-if="lightsOffVisible"
+          :player="container"
+        />
+      </Transition>
+    </Teleport>
     <canvas
       v-show="ambientModeVisible"
       ref="ambientLayoutCanvas"
@@ -1362,14 +1369,17 @@
           :tabindex="scrollMiniPlayerDetached ? 0 : -1"
           class="scrollMiniPlayPause"
           :class="{ isHidden: !scrollMiniPlayPauseVisible }"
-          :title="scrollMiniIsPaused ? $t('Video.Player.Scroll Mini Player.Play') : $t('Video.Player.Scroll Mini Player.Pause')"
+          :title="playbackEnded ? replayLabel : scrollMiniIsPaused ? $t('Video.Player.Scroll Mini Player.Play') : $t('Video.Player.Scroll Mini Player.Pause')"
           @click.stop.prevent="scrollMiniTogglePlayPause"
           @mouseenter="handleScrollMiniPlayPauseMouseEnter"
           @focusin="handleScrollMiniPlayPauseMouseEnter"
           @pointerdown.stop
           @mousedown.stop.prevent
         >
-          <ft-icon :icon="['fas', scrollMiniIsPaused ? 'play' : 'pause']" />
+          <ft-icon
+            :icon="['fas', playbackEnded ? 'replay' : scrollMiniIsPaused ? 'play' : 'pause']"
+            aria-hidden="true"
+          />
         </button>
         <div
           v-if="!useNativePlayback && !scrollMiniPlayerStashed"

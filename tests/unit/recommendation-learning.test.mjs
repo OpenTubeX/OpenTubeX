@@ -102,3 +102,19 @@ test('a sparse impression does not erase metadata learned during playback', () =
   assert.equal(seen.authorId, video.authorId)
   assert.deepEqual(seen.keywords, ['Plasma'])
 })
+
+test('a burst of impressions prunes once and persists new records together', async t => {
+  const db = new Datastore({ inMemoryOnly: true })
+  const store = createRecommendationStore(db)
+  const { epoch } = await store.find()
+  const find = t.mock.method(db, 'findAsync')
+  const insert = t.mock.method(db, 'insertAsync')
+  const update = t.mock.method(db, 'updateAsync')
+  await Promise.all(Array.from({ length: 24 }, (_, index) => store.record({
+    type: 'impression', video: { ...video, videoId: `batch-${index}` }, epoch, feedId: 'feed'
+  })))
+  assert.equal(find.mock.callCount(), 1)
+  assert.equal(insert.mock.callCount(), 1)
+  assert.equal(update.mock.callCount(), 1)
+  assert.equal((await store.find()).records.length, 24)
+})

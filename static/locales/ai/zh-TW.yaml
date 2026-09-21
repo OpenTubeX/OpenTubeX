@@ -188,6 +188,17 @@ User Playlists:
     This playlist could not be loaded.: 無法載入此播放清單。
     More videos could not be loaded.: 無法載入更多影片。
 History:
+  Repair Use Cookies: "使用已設定的 yt-dlp Cookie"
+  Repair Cookies Hint: "需要檢查超過 500 部影片。請在 yt-dlp 設定中設定 Cookie 並在此處啟用，以降低請求受到速率限制的風險。"
+  Repair Description: "在匯入歷史記錄後，或影片資訊缺漏、被錯誤標記為 LIVE 時使用。"
+  Repair Details: "補齊缺漏的標題、頻道及發布日期，並檢查片長和 LIVE 標籤。觀看進度和已觀看狀態維持不變。"
+  Repair Notice: "歷史記錄較多時可能需要一些時間。失敗的請求會自動重試。已刪除或私人影片的資訊可能仍不完整。"
+  Start Repair: "開始修復"
+  Repair Checking: "正在檢查影片資訊"
+  Repair Waiting: "正在等待 YouTube，修復將自動繼續。"
+  Repair Retrying: "正在重試失敗的請求"
+  Repair Finished: "修復完成"
+  Repair Stopped: "修復已停止"
   Repair: "修復觀看記錄"
   Repair Progress: "已檢查 {checked}/{total} · 已修復 {repaired} · 失敗 {failed}"
   Mark All As Watched: 全部標示為已觀看
@@ -282,9 +293,10 @@ Settings:
       After current tab: 目前分頁之後
       After current tab in opened order: 目前分頁之後，並依開啟順序排列
     Tab Close Focus:
+      Last active tab: "上次使用的分頁"
+      Next tab in tab order: "依分頁順序選取下一個"
+      Previous tab in tab order: "依分頁順序選取上一個"
       Tab Close Focus: 關閉分頁後
-      Previous tab: 選取上一個分頁
-      Next tab: 選取下一個分頁
     Startup Behavior:
       Startup Behavior: 啟動時
       Load all tabs: 載入所有分頁
@@ -665,6 +677,10 @@ Settings:
     Title Excludes: 標題不含
     Title Filter Hint: 請用逗號分隔多個標題詞彙。影片必須至少符合一個包含詞彙，且不得含有任何排除詞彙。
   External Software Settings:
+    Create YouTube session: "建立 YouTube 工作階段"
+    YouTube session hint: "如有需要，請登入並儲存工作階段。在設定中選擇是否將其用於下載、播放或字幕。"
+    Use cookies for downloads: "下載時使用 Cookie"
+    YouTube session failed: "無法儲存 YouTube 工作階段。"
     Checking FFmpeg and FFprobe: 正在檢查 FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: 尚未下載 FFmpeg/FFprobe。請按下方按鈕下載。
     External Software Settings: 外部軟體
@@ -710,7 +726,7 @@ Settings:
       Manual: 僅手動更新
     yt-dlp Executable Path: yt-dlp 執行檔路徑
     FFmpeg Executable Path: FFmpeg 執行檔路徑
-    Restricted Playback Authentication: yt-dlp 播放 Cookie
+    Restricted Playback Authentication: "yt-dlp Cookie"
     Cookie Source: Cookie 來源
     Cookie Sources:
       None: 無
@@ -844,6 +860,7 @@ Settings:
     Expanded: 展開
     Playing Interface Hide Delay: 播放時介面隱藏延遲
     Hide Startup Splash: 隱藏啟動畫面
+    Hide Header Sync Indicator: 隱藏應用程式標題列中的同步指示器
     Hide Repeat Stats: 隱藏循環統計
     Sections:
       Visible While Paused: 在全視窗／全螢幕模式暫停播放時顯示
@@ -1136,7 +1153,7 @@ Video:
   Retry With Built-in Extraction: 使用內建擷取功能重試
   Retry With yt-dlp Extraction: 使用 yt-dlp 擷取功能重試
   Reloading video after streaming URL error: 串流網址發生錯誤，正在重新載入影片
-  Configure Restricted Playback Cookies Hint: 請前往「設定 → 外部軟體 → yt-dlp 播放 Cookie」設定 Cookie。
+  Configure Restricted Playback Cookies Hint: "請前往「設定 → 外部軟體 → yt-dlp Cookie」設定 Cookie。"
   Try With Configured Cookies: 使用已設定的 Cookie 重試
   Restricted Playback Authentication Failed Template: 'yt-dlp 無法使用已設定的 Cookie 存取此影片：{error}'
   Unmark As Watched: 標示為未觀看
@@ -1352,6 +1369,10 @@ Share:
   Share failed: "無法分享連結"
   Timestamp Link Copied: 已將時間戳記連結複製到剪貼簿
 Context Menu:
+  Select Tab: 選取分頁
+  Close Tabs Before: 關閉之前的分頁
+  Close Tabs After: 關閉之後的分頁
+  Close Other Tabs: 關閉其他分頁
   Copy {service} link without playlist: "複製不含播放清單的 {service} 連結"
   Context Menu: 內容功能表
   Select All: 全選
@@ -1555,7 +1576,7 @@ Tooltips:
     Cookie File: 選擇 Netscape 格式的 Cookie 檔案，以進行驗證後播放。
     Browser for Cookies: 瀏覽器支援資訊是從所選的 yt-dlp 執行檔讀取。要求驗證後播放時，OpenTubeX 會要求 yt-dlp 讀取此瀏覽器。
     Browser Profile: 選填的瀏覽器設定檔名稱或資料夾。留白可使用最近存取的設定檔。
-    Always Use Cookies: "每當 yt-dlp 擷取串流時，都使用已設定的 Cookie。這不會將串流擷取方式切換為 yt-dlp。選用 yt-dlp 後，可能會提供僅限帳戶使用的格式，包括帳戶有權使用時的 YouTube Premium 增強型位元率。使用已設定的 Cookie 取得字幕和自動翻譯。"
+    Always Use Cookies: "將設定的 Cookie 用於下載、字幕以及 yt-dlp 擷取串流的過程。這不會將串流擷取方式切換為 yt-dlp。選用 yt-dlp 後，可能會提供僅限帳戶使用的格式，包括帳戶有權使用時的 YouTube Premium 增強型位元率。"
     FFmpeg Executable Path: 合併分開的影片與音訊串流及轉換音訊時需要 FFmpeg。OpenTubeX 預設會假設可透過 PATH 環境變數找到 FFmpeg。如有需要，可在此設定自訂路徑。
     Use cookies for subtitles: "使用已設定的 Cookie 取得字幕和自動翻譯。啟用「一律使用 Cookie」也會開啟此功能。"
   Distraction Free Settings:
@@ -1644,6 +1665,7 @@ CommandPalette:
     Download Finished: 此下載已不再執行
     Video: 請先開啟影片
 Downloads:
+  Preparing: 正在準備…
   Export Failed: "無法儲存已下載的檔案。請選擇有寫入權限的下載資料夾，然後重試。"
   Remove File Permanently Warning: "這將永久刪除「{title}」。"
   Download: 下載

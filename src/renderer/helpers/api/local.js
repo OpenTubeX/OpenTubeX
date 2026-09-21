@@ -3,6 +3,8 @@ import { ClientType, Constants, Innertube, Mixins, Parser, Platform, Player, Ses
 import Autolinker from 'autolinker'
 import { parseLooseJSON } from 'bgutils-js/utils'
 
+import { checkHistoryRepairResponse } from '../../../historyRepair'
+
 import { SEARCH_CHAR_LIMIT } from '../../../constants'
 import store from '../../store/index'
 import { PlayerCache } from './PlayerCache'
@@ -1901,7 +1903,10 @@ export async function getLocalCommunityPostComments(postId, channelId) {
 
 /** Fetch public history metadata without player setup or stream extraction. */
 export async function getLocalHistoryMetadata(videoId, signal) {
-  const innertube = await createInnertube({ signal })
+  const innertube = await createInnertube({
+    signal,
+    fetchFunc: async (input, init) => checkHistoryRepairResponse(await localApiFetch(input, init)),
+  })
   const response = await innertube.actions.execute('/player', {
     videoId,
     contentCheckOk: true,

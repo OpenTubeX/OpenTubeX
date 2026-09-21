@@ -33,6 +33,7 @@ public class AndroidPlaybackPlugin extends Plugin {
     private final Map<String, CompletableFuture<byte[]>> requests = new ConcurrentHashMap<>();
     private final AtomicLong requestSequence = new AtomicLong();
     private final java.util.concurrent.ExecutorService frameEncoder = java.util.concurrent.Executors.newSingleThreadExecutor();
+    private final java.util.concurrent.ExecutorService spectrumExecutor = java.util.concurrent.Executors.newSingleThreadExecutor();
     private NativePlaybackEngine engine;
     private NativePlaybackSession session;
     private NativePlaybackScreen screen;
@@ -324,7 +325,7 @@ public class AndroidPlaybackPlugin extends Plugin {
                     engine.play();
                     break;
                 case "pause": engine.pause(); break;
-                case "seek": engine.seek((long) (Math.max(0, value) * 1000)); break;
+                case "seek": engine.seek(Math.round(Math.max(0, value) * 1000)); break;
                 case "live": engine.seekToLive(); break;
                 case "speed": engine.setSpeed((float) Math.max(0.1, Math.min(16, value))); break;
                 case "volume": engine.setVolume((float) Math.max(0, Math.min(1, value))); break;
@@ -410,11 +411,16 @@ public class AndroidPlaybackPlugin extends Plugin {
     public void getAudioSpectrum(PluginCall call) {
         mainHandler.post(() -> {
             if (!checkOwner(call)) return;
-            com.getcapacitor.JSArray bins = new com.getcapacitor.JSArray();
-            for (int value : engine.getSpectrum()) bins.put(value);
-            JSObject result = new JSObject();
-            result.put("bins", bins);
-            call.resolve(result);
+            NativePlaybackEngine requestedEngine = engine;
+            spectrumExecutor.execute(() -> {
+                int[] spectrum = requestedEngine.getSpectrum();
+                mainHandler.post(() -> {
+                    if (!checkOwner(call)) return;
+                    com.getcapacitor.JSArray bins = new com.getcapacitor.JSArray();
+                    for (int value : spectrum) bins.put(value);
+                    call.resolve(new JSObject().put("bins", bins));
+                });
+            });
         });
     }
 
@@ -628,6 +634,7 @@ public class AndroidPlaybackPlugin extends Plugin {
     @Override protected void handleOnDestroy() {
         mainHandler.post(() -> {
             frameEncoder.shutdown();
+            spectrumExecutor.shutdown();
             closeScreen();
             cancelRequests();
             if (session != null) session.clear();

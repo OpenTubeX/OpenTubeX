@@ -82,6 +82,13 @@
                 />
               </button>
             </header>
+            <CapacitorTabSelectionControls
+              v-if="selecting"
+              :count="selectedTabIds.size"
+              :busy="closingTabs"
+              @close="closeSelectedTabs"
+              @cancel="clearSelection"
+            />
             <div
               v-if="showSyncedTabsView"
               class="capacitorPhoneTabViewTabs"
@@ -169,7 +176,20 @@
                       <span dir="auto">{{ tabTitle(tab) }}</span>
                     </span>
                   </button>
+                  <label
+                    v-if="selecting"
+                    class="capacitorPhoneTabSelection"
+                    @pointerdown.stop
+                  >
+                    <input
+                      type="checkbox"
+                      :checked="selectedTabIds.has(tab.id)"
+                      :aria-label="t('Tab Organizer.Select Tab', { title: tabTitle(tab) })"
+                      @change="toggleTabSelection(tab.id)"
+                    >
+                  </label>
                   <button
+                    v-else
                     type="button"
                     class="capacitorPhoneTabClose"
                     :aria-label="t('Tab Organizer.Close Tab', { title: tabTitle(tab) })"
@@ -283,7 +303,7 @@
               </div>
             </div>
             <button
-              v-if="activeView === 'open'"
+              v-if="activeView === 'open' && !selecting"
               type="button"
               class="capacitorPhoneTabFab"
               :aria-label="t('New Tab')"
@@ -296,11 +316,14 @@
               />
             </button>
             <CapacitorTabActionsMenu
+              :related-tab-ids="relatedTabIds"
               :tab="actionTab"
               :title="actionTab ? tabTitle(actionTab) : ''"
               :youtube-url="actionTabYoutubeUrl"
               :can-toggle-loaded="canToggleActionTabLoaded"
               mode="phone"
+              @select="selectActionTab"
+              @close-related="closeRelatedTabs"
               @close="closeActionTab"
               @copy-youtube-link="copyActionTabYoutubeLink"
               @dismiss="closeTabActions"
@@ -357,6 +380,7 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import { captureBeforeTabOrganizer } from '../../tabs/capacitorTabPreviews'
 import CapacitorTabPreview from './CapacitorTabPreview.vue'
 import { lockBodyScroll, unlockBodyScroll } from '../FtPrompt/scrollLock'
+import CapacitorTabSelectionControls from './CapacitorTabSelectionControls.vue'
 import CapacitorTabActionsMenu from './CapacitorTabActionsMenu.vue'
 import { useCapacitorTabActions } from './useCapacitorTabActions'
 import { getTabGridReorder } from './tabGridReorder'
@@ -462,6 +486,15 @@ const drag = reactive({
   moved: false,
 })
 const {
+  selecting,
+  selectedTabIds,
+  closingTabs,
+  clearSelection,
+  toggleTabSelection,
+  selectActionTab,
+  relatedTabIds,
+  closeRelatedTabs,
+  closeSelectedTabs,
   actionTab,
   actionTabYoutubeUrl,
   activateTab: activateTabAction,
@@ -481,6 +514,9 @@ const {
   toggleActionTabPinned,
 } = useCapacitorTabActions({
   tabs,
+  afterSelect: tabId => {
+    dialogRef.value?.querySelector(`[data-tab-id="${CSS.escape(tabId)}"]`)?.focus({ preventScroll: true })
+  },
   requestExit: () => {
     closeSwitcher()
     emit('request-exit')
@@ -521,6 +557,7 @@ async function openSwitcher() {
 }
 
 async function selectView(view, focus = false) {
+  clearSelection()
   const outgoingScroll = activeScrollRef()
   if (outgoingScroll) viewScrollTop[activeView.value] = outgoingScroll.scrollTop
   stopObservingContent()
@@ -568,6 +605,7 @@ function stopObservingContent() {
 }
 
 function closeSwitcher() {
+  clearSelection()
   closeTabActions()
   resetTabSwipe()
   resetTabDrag()
@@ -678,7 +716,7 @@ function tabCardStyle(tabId) {
 }
 
 function startTabGesture(event, tabId) {
-  if (dragSettling.value || event.button !== 0 || event.target.closest('.capacitorPhoneTabClose')) return
+  if (selecting.value || dragSettling.value || event.button !== 0 || event.target.closest('.capacitorPhoneTabClose')) return
 
   resetTabDrag()
   resetTabSwipe()
@@ -949,7 +987,7 @@ function handleDialogKeydown(event) {
   }
   if (event.key !== 'Tab') return
 
-  const focusable = Array.from(dialogRef.value?.querySelectorAll('button:not(:disabled)') ?? [])
+  const focusable = Array.from(dialogRef.value?.querySelectorAll('button:not(:disabled), input:not(:disabled)') ?? [])
   if (focusable.length === 0) return
 
   const first = focusable[0]

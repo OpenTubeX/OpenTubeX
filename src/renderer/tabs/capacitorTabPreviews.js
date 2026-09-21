@@ -1,5 +1,4 @@
 import { Capacitor, registerPlugin } from '@capacitor/core'
-import { Filesystem } from '@capacitor/filesystem'
 import { shallowReactive, watch } from 'vue'
 import { canCaptureCapacitorTab, createCapacitorPreviewCache } from './capacitorPreviewCache.js'
 
@@ -80,29 +79,13 @@ async function capturePage() {
   }
   top = Math.max(0, Math.min(top, height))
   if (height <= top || width <= 0) return null
-  const canvas = document.createElement('canvas')
-  canvas.width = Math.min(640, width)
-  const context = canvas.getContext('2d')
-  // Crop the top of the visible content to the card's aspect ratio.
+  const targetWidth = Math.min(640, Math.round(width))
   const cropHeight = Math.min(height - top, width * 9 / 16)
-  canvas.height = Math.round(canvas.width * cropHeight / width)
-  const { uri } = await Screenshot.take()
-  try {
-    const screenshot = new Image()
-    screenshot.src = Capacitor.convertFileSrc(uri)
-    await screenshot.decode()
-    if (hasVisibleOverlay()) return null
-    // PixelCopy captures the native video texture and the WebView together.
-    // Android's DOM video only carries playback state, not drawable frames.
-    context.drawImage(screenshot, 0, top * screenshot.height / height,
-      screenshot.width, cropHeight * screenshot.height / height,
-      0, 0, canvas.width, canvas.height)
-    return canvas.toDataURL('image/jpeg', 0.7)
-  } finally {
-    try {
-      await Filesystem.deleteFile({ path: uri })
-    } catch (error) {
-      console.warn('Failed to delete temporary tab screenshot', error)
-    }
-  }
+  const { dataUrl } = await Screenshot.take({
+    width: targetWidth,
+    height: Math.max(1, Math.round(targetWidth * cropHeight / width)),
+    top: top / height,
+    cropHeight: cropHeight / height,
+  })
+  return hasVisibleOverlay() ? null : dataUrl
 }

@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 /** Native queue ownership keeps downloads independent of WebView and activity lifetime. */
 final class YtDlpDownloads {
     private static YtDlpDownloads instance;
-    private static final List<String> ACTIVE = asList("queued", "downloading", "processing", "paused", "pausing");
+    private static final List<String> ACTIVE = asList("queued", "preparing", "downloading", "processing", "paused", "pausing");
     private static final Pattern PROGRESS = Pattern.compile("^\\[download]\\s+(\\d+(?:\\.\\d+)?)%(?:.*?\\bat\\s+(\\S+))?(?:.*?\\bETA\\s+(\\S+))?");
     private final Context context;
     private final AtomicFile file;
@@ -64,7 +64,7 @@ final class YtDlpDownloads {
             if (list != null) for (int i = 0; i < list.length(); i++) {
                 JSONObject record = list.getJSONObject(i);
                 String status = record.optString("status");
-                if (asList("downloading", "processing", "pausing").contains(status)) {
+                if (asList("preparing", "downloading", "processing", "pausing").contains(status)) {
                     record.put("status", paused || status.equals("pausing") ? "paused" : "queued");
                 }
                 records.put(record.getLong("id"), record);
@@ -80,6 +80,22 @@ final class YtDlpDownloads {
         concurrency = Math.max(1, Math.min(10, config.optInt("concurrency", 2)));
         bandwidth = Math.max(0, Math.min(10_000_000, config.optInt("bandwidth")));
         save();
+    }
+
+    static JSONObject parseCompletedFile(String line) throws Exception {
+        String[] fields = line.substring("__OPENTUBEX_FILE__:".length()).split("\t", 8);
+        if (fields.length != 8) return null;
+        JSONObject item = new JSONObject().put("videoId", fields[0]).put("path", fields[7]);
+        String[] keys = {"duration", "width", "height"};
+        for (int i = 0; i < keys.length; i++) {
+            try { item.put(keys[i], Double.parseDouble(fields[i + 1])); } catch (Exception ignored) { }
+        }
+        String[] textKeys = {"author", "authorId", "title"};
+        for (int i = 0; i < textKeys.length; i++) {
+            Object value = new org.json.JSONTokener(fields[i + 4]).nextValue();
+            if (value instanceof String) item.put(textKeys[i], value);
+        }
+        return item;
     }
 
     synchronized void discover(String channelId, String feedType, JSONObject response) throws Exception {
@@ -135,6 +151,9 @@ final class YtDlpDownloads {
         for (String key : asList("videoId", "playlistId", "playlistKey", "title", "thumbnail", "mode", "template")) record.put(key, payload.optString(key));
         record.put("id", id).put("retryPayload", new JSONObject(payload.toString())).put("automatic", payload.optBoolean("automatic"));
         record.put("args", args).put("folder", folder).put("status", paused ? "paused" : "queued");
+        // Validate at execution so missing sessions also leave a visible failed automatic download.
+        record.put("useCookies", config.optBoolean("useCookies"))
+            .put("cookies", config.optBoolean("useCookies") ? config.optString("cookies") : "");
         record.put("queuePosition", position).put("percent", 0).put("speed", JSONObject.NULL).put("eta", JSONObject.NULL);
         record.put("errorMessage", JSONObject.NULL).put("started", false);
         if (!record.has("destinations")) record.put("destinations", new JSONArray()).put("files", new JSONArray());
@@ -149,6 +168,12 @@ final class YtDlpDownloads {
         schedule.run();
     }
 
+    private File cookieFile(String path) throws IOException {
+        File cookies = new File(context.getNoBackupFilesDir(), "yt-dlp-cookies.txt");
+        if (!cookies.getAbsolutePath().equals(path) || !cookies.isFile()) throw new IOException("Cookie file is unavailable");
+        return cookies;
+    }
+
     synchronized List<Long> claim() throws Exception {
         List<JSONObject> pending = records.values().stream()
             .filter(record -> record.optString("status").equals("queued") && !running.contains(record.optLong("id")))
@@ -159,7 +184,7 @@ final class YtDlpDownloads {
             if (running.size() >= concurrency) break;
             long id = record.getLong("id");
             running.add(id);
-            record.put("status", "downloading").put("started", true);
+            record.put("status", "preparing").put("started", true);
             ids.add(id);
             publish(record);
         }
@@ -182,8 +207,12 @@ final class YtDlpDownloads {
             root.mkdirs();
             List<String> args = YtDlpArguments.validate(record.getJSONArray("args"));
             args.addAll(asList("--paths", root.getAbsolutePath(), "--paths", "temp:" + new File(root, "temp").getAbsolutePath(),
-                "--newline", "--progress", "--no-simulate", "--print", "after_move:__OPENTUBEX_FILE__:%(id)s\t%(duration)s\t%(width)s\t%(height)s\t%(filepath)s"));
+                "--newline", "--progress", "--no-simulate", "--print", "after_move:__OPENTUBEX_FILE__:%(id)s\t%(duration)s\t%(width)s\t%(height)s\t%(channel,uploader|null)j\t%(channel_id|null)j\t%(title)j\t%(filepath)s"));
             synchronized (this) {
+                if (record.optBoolean("useCookies")) {
+                    File cookies = cookieFile(record.optString("cookies"));
+                    args.addAll(asList("--cookies", cookies.getAbsolutePath()));
+                }
                 if (bandwidth > 0) args.addAll(asList("--limit-rate", Math.max(1, bandwidth / concurrency) + "K"));
                 long estimate = record.getJSONObject("retryPayload").optLong("estimatedSizeBytes");
                 record.put("availableSpaceBytes", root.getUsableSpace());
@@ -204,14 +233,8 @@ final class YtDlpDownloads {
             Map<String, JSONObject> metadata = new HashMap<>();
             for (String line : completedOutput.toString().split("\n")) {
                 if (!line.startsWith("__OPENTUBEX_FILE__:")) continue;
-                String[] fields = line.substring("__OPENTUBEX_FILE__:".length()).split("\t", 5);
-                if (fields.length != 5) continue;
-                JSONObject item = new JSONObject().put("videoId", fields[0]);
-                String[] keys = {"duration", "width", "height"};
-                for (int i = 0; i < keys.length; i++) {
-                    try { item.put(keys[i], Double.parseDouble(fields[i + 1])); } catch (Exception ignored) { }
-                }
-                metadata.put(fields[4], item);
+                JSONObject item = parseCompletedFile(line);
+                if (item != null) metadata.put(item.getString("path"), item);
             }
             for (File completed : YtDlpFiles.completedFiles(root)) {
                 if (!isExecuting(id)) return;
@@ -289,26 +312,43 @@ final class YtDlpDownloads {
 
     private synchronized boolean isExecuting(long id) {
         JSONObject record = records.get(id);
-        return record != null && asList("downloading", "processing").contains(record.optString("status"));
+        return record != null && asList("preparing", "downloading", "processing").contains(record.optString("status"));
     }
 
     private synchronized void progress(long id, String lines) {
         JSONObject record = records.get(id);
         if (!isExecuting(id)) return;
         try {
-            for (String line : lines.split("\n")) {
-                var match = PROGRESS.matcher(line);
-                if (match.find()) {
-                    record.put("percent", Double.parseDouble(match.group(1))).put("speed", match.group(2)).put("eta", match.group(3));
-                    record.put("status", "downloading");
-                } else if (line.startsWith("[Merger]") || line.startsWith("[ExtractAudio]")) record.put("status", "processing");
-            }
+            String previousStatus = record.optString("status");
+            for (String line : lines.split("\n")) updateProgress(record, line);
             long now = System.currentTimeMillis();
-            if (now - record.optLong("lastProgress") >= 500) {
+            if (!previousStatus.equals(record.optString("status")) || now - record.optLong("lastProgress") >= 500) {
                 record.put("lastProgress", now);
                 publish(record);
             }
         } catch (Exception error) { Log.w("OpenTubeXYtDlp", "Invalid download progress", error); }
+    }
+
+    static void updateProgress(JSONObject record, String line) throws org.json.JSONException {
+        if (line.startsWith("__OPENTUBEX_PREPARING__:") || line.equals("__OPENTUBEX_PROCESSING__") || line.startsWith("__OPENTUBEX_DOWNLOAD__:finished")) {
+            record.put("status", line.startsWith("__OPENTUBEX_PREPARING__:") ? "preparing" : "processing")
+                .put("percent", 0).put("speed", JSONObject.NULL).put("eta", JSONObject.NULL);
+            return;
+        }
+        if (line.startsWith("__OPENTUBEX_DOWNLOAD__:downloading\t")) {
+            String[] fields = line.split("\t", -1);
+            double percent = 0;
+            try { percent = Double.parseDouble(fields[1].trim().replace("%", "")); } catch (NumberFormatException ignored) { }
+            record.put("status", "downloading").put("percent", percent)
+                .put("speed", fields[2].trim().matches("Unknown.*|NA") ? JSONObject.NULL : fields[2].trim())
+                .put("eta", fields[3].trim().matches("Unknown.*|NA") ? JSONObject.NULL : fields[3].trim());
+            return;
+        }
+        var match = PROGRESS.matcher(line);
+        if (match.find()) {
+            record.put("percent", Double.parseDouble(match.group(1))).put("speed", match.group(2)).put("eta", match.group(3));
+            record.put("status", Double.parseDouble(match.group(1)) == 100 && line.contains(" in ") ? "processing" : "downloading");
+        } else if (line.startsWith("[Merger]") || line.startsWith("[ExtractAudio]")) record.put("status", "processing");
     }
 
     private synchronized void updateStatus(long id, String status, String error) {
@@ -378,22 +418,23 @@ final class YtDlpDownloads {
         }
     }
 
-    synchronized JSONArray list() throws Exception {
+    JSONArray list() throws Exception {
+        return list(path -> YtDlpFiles.exists(context, path));
+    }
+
+    JSONArray list(java.util.function.Predicate<String> exists) throws Exception {
+        // Provider calls can block on removable or remote storage. They must not
+        // hold the queue monitor needed by progress, pause and cancellation.
+        Map<String, Boolean> availability = YtDlpDownloadAvailability.inspect(snapshots(), exists);
+        JSONArray result = snapshots();
+        // Controls/progress may have changed records while inspection was running.
+        YtDlpDownloadAvailability.annotate(result, availability);
+        return result;
+    }
+
+    private synchronized JSONArray snapshots() throws Exception {
         JSONArray result = new JSONArray();
-        for (JSONObject record : records.values()) {
-            JSONObject copy = snapshot(record);
-            JSONArray destinations = copy.optJSONArray("destinations");
-            int available = 0;
-            for (int i = 0; i < destinations.length(); i++) if (YtDlpFiles.exists(context, destinations.getString(i))) available++;
-            copy.put("availableDestinationCount", available).put("destinationCount", destinations.length());
-            copy.put("availability", available == 0 ? "missing" : available == destinations.length() ? "available" : "partial");
-            JSONArray files = copy.getJSONArray("files");
-            for (int i = 0; i < files.length(); i++) {
-                JSONObject item = files.getJSONObject(i);
-                item.put("available", YtDlpFiles.exists(context, item.getString("path")));
-            }
-            result.put(copy);
-        }
+        for (JSONObject record : records.values()) result.put(snapshot(record));
         return result;
     }
 
@@ -411,16 +452,19 @@ final class YtDlpDownloads {
         return removed;
     }
 
-    synchronized Uri firstFile(long id) {
-        JSONObject record = records.get(id);
-        if (record == null) return null;
-        JSONArray media = record.optJSONArray("files");
-        for (int i = 0; media != null && i < media.length(); i++) {
-            String path = media.optJSONObject(i).optString("path");
-            if (YtDlpFiles.exists(context, path)) return Uri.parse(path);
+    Uri firstFile(long id) {
+        Set<String> paths = new LinkedHashSet<>();
+        synchronized (this) {
+            JSONObject record = records.get(id);
+            if (record == null) return null;
+            JSONArray media = record.optJSONArray("files");
+            for (int i = 0; media != null && i < media.length(); i++) {
+                paths.add(media.optJSONObject(i).optString("path"));
+            }
+            JSONArray destinations = record.optJSONArray("destinations");
+            for (int i = 0; destinations != null && i < destinations.length(); i++) paths.add(destinations.optString(i));
         }
-        JSONArray paths = record.optJSONArray("destinations");
-        for (int i = 0; i < paths.length(); i++) if (YtDlpFiles.exists(context, paths.optString(i))) return Uri.parse(paths.optString(i));
+        for (String path : paths) if (YtDlpFiles.exists(context, path)) return Uri.parse(path);
         return null;
     }
 

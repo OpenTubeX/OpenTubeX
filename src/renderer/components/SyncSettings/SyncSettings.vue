@@ -443,6 +443,7 @@
 </template>
 
 <script setup>
+import { syncProgressLabel as getSyncProgressLabel } from '../../helpers/syncProgressLabel'
 import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -540,23 +541,7 @@ const authenticationActionsDisabled = computed(() => (
 const status = computed(() => store.getters.getSyncServerStatus)
 const busy = computed(() => status.value === 'syncing')
 const syncProgress = computed(() => store.getters.getSyncServerProgress)
-const syncProgressLabel = computed(() => {
-  if (!syncProgress.value) return ''
-  const labels = {
-    download: t('Settings.Sync Settings.Downloading encrypted data'),
-    subscriptions: t('Settings.Sync Settings.Syncing subscriptions'),
-    playlists: t('Settings.Sync Settings.Syncing playlists'),
-    playlistBookmarks: t('Settings.Sync Settings.Syncing playlists'),
-    history: t('Settings.Sync Settings.Syncing history'),
-    profiles: t('Settings.Sync Settings.Syncing profiles'),
-    sessions: t('Settings.Sync Settings.Syncing open tabs'),
-    sessionsV2: t('Settings.Sync Settings.Syncing open tabs'),
-    settings: t('Settings.Sync Settings.Syncing settings'),
-    upload: t('Settings.Sync Settings.Uploading encrypted data'),
-    finishing: t('Settings.Sync Settings.Finishing sync'),
-  }
-  return labels[syncProgress.value.stage]
-})
+const syncProgressLabel = computed(() => getSyncProgressLabel(t, syncProgress.value?.stage))
 const errorMessage = computed(() => (
   localError.value || serverCheckError.value || store.getters.getSyncServerError
 ))

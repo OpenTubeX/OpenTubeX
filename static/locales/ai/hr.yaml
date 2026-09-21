@@ -190,6 +190,17 @@ User Playlists:
     This playlist could not be loaded.: Ovaj popis za reprodukciju nije moguće učitati.
     More videos could not be loaded.: Dodatne videozapise nije moguće učitati.
 History:
+  Repair Use Cookies: "Koristi konfigurirane yt-dlp kolačiće"
+  Repair Cookies Hint: "Potrebno je provjeriti više od 500 videozapisa. Konfigurirajte kolačiće u postavkama yt-dlp i omogućite ih ovdje kako biste smanjili rizik od ograničavanja zahtjeva."
+  Repair Description: "Koristite nakon uvoza povijesti ili kada videozapisima nedostaju podaci ili imaju pogrešnu oznaku LIVE."
+  Repair Details: "Dopunjava naslove, kanale i datume objave koji nedostaju te provjerava trajanja i oznake LIVE. Napredak gledanja i status pogledanog ostaju nepromijenjeni."
+  Repair Notice: "Velika povijest može potrajati. Neuspješni zahtjevi automatski se ponavljaju. Izbrisani ili privatni videozapisi mogu ostati nepotpuni."
+  Start Repair: "Pokreni popravak"
+  Repair Checking: "Provjera podataka o videozapisima"
+  Repair Waiting: "Čekanje na YouTube. Popravak će se automatski nastaviti."
+  Repair Retrying: "Ponavljanje neuspješnih zahtjeva"
+  Repair Finished: "Popravak dovršen"
+  Repair Stopped: "Popravak zaustavljen"
   Repair: "Popravi povijest"
   Repair Progress: "Provjereno {checked}/{total} · Popravljeno {repaired} · Neuspjelo {failed}"
   Mark All As Watched: Označi sve kao pogledano
@@ -284,9 +295,10 @@ Settings:
       After current tab: Nakon trenutačne kartice
       After current tab in opened order: Nakon trenutačne kartice, redoslijedom otvaranja
     Tab Close Focus:
+      Last active tab: "Posljednja aktivna kartica"
+      Next tab in tab order: "Sljedeća kartica u redoslijedu kartica"
+      Previous tab in tab order: "Prethodna kartica u redoslijedu kartica"
       Tab Close Focus: Nakon zatvaranja kartice
-      Previous tab: Odaberi prethodnu karticu
-      Next tab: Odaberi sljedeću karticu
     Startup Behavior:
       Startup Behavior: Pri pokretanju
       Load all tabs: Učitaj sve kartice
@@ -667,6 +679,10 @@ Settings:
     Title Excludes: Naslov ne sadržava
     Title Filter Hint: Više pojmova za naslov odvojite zarezima. Videozapis mora sadržavati barem jedan uključeni pojam i ne smije sadržavati nijedan isključeni pojam.
   External Software Settings:
+    Create YouTube session: "Stvori YouTube sesiju"
+    YouTube session hint: "Prijavite se po potrebi i spremite sesiju. U postavkama odaberite hoće li se koristiti za preuzimanja, reprodukciju ili titlove."
+    Use cookies for downloads: "Koristi kolačiće za preuzimanja"
+    YouTube session failed: "Nije moguće spremiti YouTube sesiju."
     Checking FFmpeg and FFprobe: Provjera alata FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe još nisu preuzeti. Kliknite gumb u nastavku da biste ih preuzeli.
     External Software Settings: Vanjski softver
@@ -712,7 +728,7 @@ Settings:
       Manual: Ažuriraj samo ručno
     yt-dlp Executable Path: Putanja do izvršne datoteke yt-dlp
     FFmpeg Executable Path: Putanja do izvršne datoteke FFmpeg
-    Restricted Playback Authentication: Kolačići za reprodukciju putem alata yt-dlp
+    Restricted Playback Authentication: "yt-dlp kolačići"
     Cookie Source: Izvor kolačića
     Cookie Sources:
       None: Nijedan
@@ -846,6 +862,7 @@ Settings:
     Expanded: Prošireni
     Playing Interface Hide Delay: Odgoda skrivanja sučelja tijekom reprodukcije
     Hide Startup Splash: Sakrij početni zaslon
+    Hide Header Sync Indicator: Sakrij pokazatelj sinkronizacije u zaglavlju aplikacije
     Hide Repeat Stats: Sakrij statistiku ponavljanja
     Sections:
       Visible While Paused: Vidljivo tijekom pauze u punom prozoru / preko cijelog zaslona
@@ -1143,7 +1160,7 @@ Video:
   Retry With Built-in Extraction: Pokušaj ponovno s ugrađenim izdvajanjem
   Retry With yt-dlp Extraction: Pokušaj ponovno s izdvajanjem putem yt-dlp-a
   Reloading video after streaming URL error: Ponovno učitavanje videozapisa nakon pogreške URL-a toka
-  Configure Restricted Playback Cookies Hint: Konfigurirajte kolačiće u Postavke → Vanjski softver → Kolačići za reprodukciju putem yt-dlp-a.
+  Configure Restricted Playback Cookies Hint: "Konfigurirajte kolačiće u Postavke → Vanjski softver → yt-dlp kolačići."
   Try With Configured Cookies: Pokušaj s konfiguriranim kolačićima
   Restricted Playback Authentication Failed Template: 'yt-dlp nije mogao pristupiti ovom videozapisu s konfiguriranim kolačićima: {error}'
   Collapse Playlist: Sažmi popis za reprodukciju
@@ -1368,6 +1385,10 @@ Share:
   Share failed: "Poveznicu nije moguće podijeliti"
   Timestamp Link Copied: Poveznica s vremenskom oznakom kopirana je u međuspremnik
 Context Menu:
+  Select Tab: Odaberi karticu
+  Close Tabs Before: Zatvori prethodne kartice
+  Close Tabs After: Zatvori sljedeće kartice
+  Close Other Tabs: Zatvori ostale kartice
   Copy {service} link without playlist: "Kopiraj poveznicu za {service} bez popisa za reprodukciju"
   Context Menu: Kontekstni izbornik
   Select All: Odaberi sve
@@ -1572,7 +1593,7 @@ Tooltips:
     Cookie File: Odaberite datoteku kolačića u formatu Netscape za reprodukciju uz prijavu.
     Browser for Cookies: Podrška za preglednike očitava se iz odabrane izvršne datoteke alata yt-dlp. Pri zahtjevu za reprodukciju uz prijavu OpenTubeX traži od alata yt-dlp da čita podatke iz ovog preglednika.
     Browser Profile: Neobavezan naziv ili mapa profila preglednika. Ostavite prazno za upotrebu posljednjeg korištenog profila.
-    Always Use Cookies: "Upotrijebi konfigurirane kolačiće kad god yt-dlp izdvaja tokove. Time se način izdvajanja tokova ne prebacuje na yt-dlp. Kada je yt-dlp odabran, mogu postati dostupni formati samo za prijavljene račune, uključujući poboljšanu brzinu prijenosa usluge YouTube Premium ako račun ima pristup toj usluzi. Koristi postavljene kolačiće za titlove i automatske prijevode."
+    Always Use Cookies: "Koristite konfigurirane kolačiće za preuzimanja, titlove i kad god yt-dlp dohvaća streamove. Time se način izdvajanja tokova ne prebacuje na yt-dlp. Kada je yt-dlp odabran, mogu postati dostupni formati samo za prijavljene račune, uključujući poboljšanu brzinu prijenosa usluge YouTube Premium ako račun ima pristup toj usluzi."
     FFmpeg Executable Path: FFmpeg je potreban za spajanje odvojenih tokova videozapisa i zvuka te za pretvorbu zvuka. OpenTubeX prema zadanim postavkama pretpostavlja da se FFmpeg može pronaći putem varijable okruženja PATH. Ovdje po potrebi možete postaviti prilagođenu putanju.
     Use cookies for subtitles: "Koristi postavljene kolačiće za titlove i automatske prijevode. Uključuje se i opcijom „Uvijek koristi kolačiće”."
   Distraction Free Settings:
@@ -1663,6 +1684,7 @@ CommandPalette:
     Download Finished: Ovo preuzimanje više nije u tijeku
     Video: Najprije otvorite videozapis
 Downloads:
+  Preparing: Priprema…
   Export Failed: "Preuzetu datoteku nije moguće spremiti. Odaberite mapu za preuzimanja s dozvolom pisanja i pokušajte ponovno."
   Remove File Permanently Warning: "Time ćete trajno izbrisati „{title}“."
   Download: Preuzmi

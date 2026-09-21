@@ -2361,6 +2361,27 @@ for (const uiScale of [100, 125]) {
   test.describe(`playback when navigating away at ${uiScale}%`, () => {
     test.use({ seed: { settings: { ...PLAYER_SEED, keepPlayingOnNavigation: true, uiScale } } })
 
+    test('keeps the ended mini player visible and replays while browsing', async ({ app, page }) => {
+      await openDemoVideo({ app, page })
+      const player = page.locator('.ftVideoPlayer')
+      const video = player.locator('video')
+      await page.getByRole('link', { name: 'Go to Subscriptions', exact: true }).click()
+      await expect(page).toHaveURL(/#\/subscriptions$/)
+      await expect(player).toHaveClass(/scrollMiniPlayer/)
+      await video.evaluate(element => { element.currentTime = element.duration })
+      await expect.poll(() => video.evaluate(element => element.ended)).toBe(true)
+      await expect(player).toBeVisible()
+      await expect(player).toHaveClass(/scrollMiniPlayer/)
+      const replay = player.locator('.scrollMiniPlayPause')
+      await expect(replay).not.toHaveClass(/isHidden/)
+      await expect(replay).toHaveAccessibleName('Replay')
+      await expect(replay.locator('[data-icon="replay"] svg')).toBeVisible()
+      await replay.click()
+      await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
+      await expect.poll(() => video.evaluate(element => element.currentTime)).toBeLessThan(5)
+      await expect(page).toHaveURL(/#\/subscriptions$/)
+    })
+
     test('keeps the same video playing while browsing and returning', async ({ app, page, attachScreenshot }) => {
       await openDemoVideo({ app, page })
       const player = page.locator('.ftVideoPlayer')
@@ -2375,9 +2396,34 @@ for (const uiScale of [100, 125]) {
       await expect(page.locator('.tabBar .tab')).toHaveCount(1)
       await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(time)
       await attachScreenshot('video continues while browsing subscriptions')
+      await player.evaluate(element => {
+        document.documentElement.dataset.reducedMotion = 'no-preference'
+        window.oversizedMiniControls = []
+        window.miniRestoreFrames = 0
+        const sample = () => {
+          if (!element.isConnected) return
+          if (element.hasAttribute('data-inline-mini-drag')) {
+            window.miniRestoreFrames++
+            for (const button of element.querySelectorAll('.scrollMiniPlayerControls button')) {
+              const style = getComputedStyle(button)
+              if (style.visibility === 'hidden' || style.display === 'none' || Number(style.opacity) === 0) continue
+              const scale = button.getBoundingClientRect().width / button.offsetWidth
+              if (scale > 1.1) window.oversizedMiniControls.push(scale)
+            }
+          }
+          window.miniRestoreSample = requestAnimationFrame(sample)
+        }
+        sample()
+      })
       await player.locator('.scrollMiniScrollTop').click()
       await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
       await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+      const samples = await page.evaluate(() => {
+        cancelAnimationFrame(window.miniRestoreSample)
+        return { frames: window.miniRestoreFrames, oversized: window.oversizedMiniControls }
+      })
+      expect(samples.frames).toBeGreaterThan(0)
+      expect(samples.oversized).toEqual([])
       expect(await video.evaluate((element, original) => element === original, originalVideo)).toBe(true)
       await expect(page.locator('.tabBar .tab')).toHaveText(title)
     })

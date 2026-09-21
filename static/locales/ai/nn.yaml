@@ -199,6 +199,17 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: Spelelista {playlistName} er oppretta.
       There was an issue with creating the playlist.: Det oppstod eit problem då spelelista skulle opprettast.
 History:
+  Repair Use Cookies: "Bruk konfigurerte yt-dlp-informasjonskapslar"
+  Repair Cookies Hint: "Over 500 videoar må kontrollerast. Konfigurer informasjonskapslar i yt-dlp-innstillingane og aktiver dei her for å redusere risikoen for avgrensing av førespurnader."
+  Repair Description: "Bruk dette etter import av historikk, eller når videoar manglar opplysningar eller har feil LIVE-merking."
+  Repair Details: "Fyller inn manglande titlar, kanalar og publiseringsdatoar og kontrollerer lengd og LIVE-merking. Avspelingsposisjonen og statusen som sett vert uendra."
+  Repair Notice: "Store historikkar kan ta tid. Mislukka førespurnader vert prøvde på nytt automatisk. Sletta eller private videoar kan framleis mangle opplysningar."
+  Start Repair: "Start reparasjon"
+  Repair Checking: "Kontrollerer videoopplysningar"
+  Repair Waiting: "Ventar på YouTube. Reparasjonen held fram automatisk."
+  Repair Retrying: "Prøver mislukka førespurnader på nytt"
+  Repair Finished: "Reparasjon fullført"
+  Repair Stopped: "Reparasjon stoppa"
   Repair: "Reparer historikk"
   Repair Progress: "Kontrollert {checked}/{total} · Reparert {repaired} · Mislukka {failed}"
   Case Sensitive Search: Skil mellom store og små bokstavar
@@ -302,9 +313,10 @@ Settings:
       After current tab: Etter gjeldande fane
       After current tab in opened order: Etter gjeldande fane, i opningsrekkjefølgje
     Tab Close Focus:
+      Last active tab: "Sist aktive fane"
+      Next tab in tab order: "Neste fane i fanerekkjefølgja"
+      Previous tab in tab order: "Førre fane i fanerekkjefølgja"
       Tab Close Focus: Etter at ei fane er lukka
-      Previous tab: Vel førre fane
-      Next tab: Vel neste fane
     Startup Behavior:
       Startup Behavior: Ved oppstart
       Load all tabs: Last inn alle faner
@@ -768,6 +780,10 @@ Settings:
     Title Excludes: Tittelen inneheld ikkje
     Title Filter Hint: Skil fleire tittelord med komma. Ein video må samsvare med minst eitt inkludert ord og ingen ekskluderte ord.
   External Software Settings:
+    Create YouTube session: "Opprett YouTube-økt"
+    YouTube session hint: "Logg inn om nødvendig, og lagra økta. Vel i innstillingane om ho skal brukast til nedlastingar, avspeling eller undertekstar."
+    Use cookies for downloads: "Bruk informasjonskapslar for nedlastingar"
+    YouTube session failed: "Klarte ikkje å lagra YouTube-økta."
     Checking FFmpeg and FFprobe: Ser etter FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe er ikkje lasta ned enno. Trykk på knappen nedanfor for å laste dei ned.
     External Software Settings: Ekstern programvare
@@ -813,7 +829,7 @@ Settings:
       Manual: Oppdater berre manuelt
     yt-dlp Executable Path: Stig til den køyrbare yt-dlp-fila
     FFmpeg Executable Path: Stig til den køyrbare FFmpeg-fila
-    Restricted Playback Authentication: Informasjonskapslar for avspeling med yt-dlp
+    Restricted Playback Authentication: "yt-dlp-informasjonskapslar"
     Cookie Source: Kjelde for informasjonskapslar
     Cookie Sources:
       None: Ingen
@@ -964,6 +980,7 @@ Settings:
     Expanded: Utvida
     Playing Interface Hide Delay: Forseinking før grensesnittet vert skjult under avspeling
     Hide Startup Splash: Gøym oppstartsskjerm
+    Hide Header Sync Indicator: Gøym synkroniseringsindikatoren i apphovudet
     Hide Repeat Stats: Skjul gjentakingsstatistikk
     Sections:
       Side Bar: Sidestolpe
@@ -1360,7 +1377,7 @@ Video:
   Reloading video after streaming URL error: Lastar inn videoen på nytt etter ein feil med straumadressa
   MembersOnly: Denne videoen er berre for medlemer og krev ein Google-konto med aktivt medlemskap i kanalen.
   AgeRestricted: Denne aldersavgrensa videoen krev ein aldersstadfesta Google-konto.
-  Configure Restricted Playback Cookies Hint: Set opp infokapslar under Innstillingar → Ekstern programvare → Infokapslar for avspeling med yt-dlp.
+  Configure Restricted Playback Cookies Hint: "Set opp informasjonskapslar under Innstillingar → Ekstern programvare → yt-dlp-informasjonskapslar."
   Try With Configured Cookies: Prøv med dei oppsette infokapslane
   Restricted Playback Authentication Failed Template: 'yt-dlp fekk ikkje tilgang til videoen med dei oppsette infokapslane: {error}'
   DRMProtected: DRM-verna videoar kan ikkje spelast av i OpenTubeX fordi dei krev proprietære komponentar med lukka kjeldekode. Sjå videoen på den offisielle YouTube-nettstaden i ein nettlesar med DRM-støtte.
@@ -1643,6 +1660,10 @@ Share:
   Share Post: Del innlegget
   Timestamp Link Copied: Lenkja med tidsstempel er kopiert til utklippstavla
 Context Menu:
+  Select Tab: Vel fane
+  Close Tabs Before: Lukk føregåande faner
+  Close Tabs After: Lukk etterfølgjande faner
+  Close Other Tabs: Lukk andre faner
   Copy {service} link without playlist: "Kopier {service}-lenkje utan speleliste"
   Context Menu: Samanhengsmeny
   Select All: Vel alt
@@ -1858,7 +1879,7 @@ Tooltips:
     Cookie File: Vel ei infokapselfil i Netscape-format for autentisert avspeling.
     Browser for Cookies: Nettlesarstøtta vert lesen frå den valde yt-dlp-programfila. OpenTubeX ber yt-dlp om å lese frå denne nettlesaren ved autentisert avspeling.
     Browser Profile: Valfritt namn på eller mappe til ein nettlesarprofil. La feltet stå tomt for å bruke profilen som sist vart opna.
-    Always Use Cookies: "Bruk dei oppsette infokapslane kvar gong yt-dlp hentar ut straumar. Dette byter ikkje metoden for straumuthenting til yt-dlp. Når yt-dlp er valt, kan format som krev konto, verte tilgjengelege. Det omfattar den utvida bithastigheita til YouTube Premium når kontoen har tilgang. Bruk dei konfigurerte informasjonskapslane for undertekstar og automatiske omsetjingar."
+    Always Use Cookies: "Bruk dei konfigurerte informasjonskapslane for nedlastingar, undertekstar og kvar gong yt-dlp hentar straumar. Dette byter ikkje metoden for straumuthenting til yt-dlp. Når yt-dlp er valt, kan format som krev konto, verte tilgjengelege. Det omfattar den utvida bithastigheita til YouTube Premium når kontoen har tilgang."
     FFmpeg Executable Path: FFmpeg trengst for å slå saman åtskilde video- og lydstraumar og for lydkonvertering. OpenTubeX går som standard ut frå at FFmpeg kan finnast gjennom miljøvariabelen PATH. Du kan velje ein eigen sti her dersom det trengst.
     Use cookies for subtitles: "Bruk dei konfigurerte informasjonskapslane for undertekstar og automatiske omsetjingar. Vert òg aktivert av «Bruk alltid informasjonskapslar»."
   Distraction Free Settings:
@@ -2030,6 +2051,7 @@ CommandPalette:
     Download Finished: Denne nedlastinga er ikkje lenger aktiv
     Video: Opne ein video først
 Downloads:
+  Preparing: Førebur…
   Export Failed: "Klarte ikkje å lagre den nedlasta fila. Vel ei nedlastingsmappe med skrivetilgang og prøv igjen."
   Remove File Permanently Warning: "Dette slettar «{title}» permanent."
   Download: Last ned

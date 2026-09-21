@@ -237,7 +237,7 @@
           >
             <div
               class="downloadProgressBarFill"
-              :class="{ indeterminate: activeDownload.status === 'processing' }"
+              :class="{ indeterminate: ['preparing', 'processing'].includes(activeDownload.status) }"
               :style="{ inlineSize: `${activeDownload.percent}%` }"
             />
           </div>
@@ -350,6 +350,7 @@
 </template>
 
 <script setup>
+import { displayAndroidPath } from '../../helpers/androidStorage'
 import { ytDlp } from '../../helpers/ytDlp'
 import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, reactive, ref, useTemplateRef } from 'vue'
@@ -596,12 +597,12 @@ function matchesDownload(download) {
 
 const runningDownload = Object.values(store.getters.getYtDlpDownloads).filter(download =>
   matchesDownload(download) &&
-  ['queued', 'downloading', 'processing', 'pausing', 'paused'].includes(download.status)
+  ['queued', 'preparing', 'downloading', 'processing', 'pausing', 'paused'].includes(download.status)
 ).at(-1)
 const downloadId = ref(runningDownload?.id ?? null)
 const downloadFolderPath = computed(() => store.getters.getYtDlpDownloadFolderPath)
 const downloadFolderRequired = computed(() => (process.env.IS_CAPACITOR || window.ftElectron?.isFlatpak) && downloadFolderPath.value === '')
-const downloadFolderDisplay = computed(() => downloadFolderPath.value || (downloadFolderRequired.value
+const downloadFolderDisplay = computed(() => displayAndroidPath(downloadFolderPath.value) || (downloadFolderRequired.value
   ? t('Downloads.Folder Required')
   : t('Downloads.System Downloads Folder')))
 
@@ -628,10 +629,10 @@ async function startDownload() {
 const activeDownload = computed(() => downloadId.value === null
   ? null
   : store.getters.getYtDlpDownloads[downloadId.value] ?? {
-    id: downloadId.value, status: 'downloading', percent: 0, speed: null, eta: null, errorMessage: null
+    id: downloadId.value, status: 'preparing', percent: 0, speed: null, eta: null, errorMessage: null
   })
 const downloadInProgress = computed(() => activeDownload.value !== null &&
-  ['queued', 'downloading', 'processing', 'pausing', 'paused'].includes(activeDownload.value.status))
+  ['queued', 'preparing', 'downloading', 'processing', 'pausing', 'paused'].includes(activeDownload.value.status))
 const statusLine = computed(() => {
   const download = activeDownload.value
   if (!download) return ''
@@ -639,6 +640,7 @@ const statusLine = computed(() => {
   if (download.status === 'paused') return t('Downloads.Paused')
   if (download.status === 'pausing') return t('Downloads.Pausing')
   if (download.status === 'downloading') return [`${download.percent.toFixed(1)}%`, download.speed, download.eta ? `ETA ${download.eta}` : null].filter(Boolean).join(' • ')
+  if (download.status === 'preparing') return t('Downloads.Preparing')
   if (download.status === 'processing') return t('Downloads.Processing')
   if (download.status === 'completed') return t('Downloads.Download Complete')
   if (download.status === 'cancelled') return t('Downloads.Download Cancelled')

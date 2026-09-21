@@ -116,6 +116,20 @@
       </div>
       <div class="side profiles">
         <button
+          v-if="syncing && !hideHeaderSyncIndicator"
+          type="button"
+          class="syncIndicator navButton"
+          :aria-label="syncIndicatorLabel"
+          :title="syncIndicatorLabel"
+          @click="openSyncSettings"
+        >
+          <FtIcon
+            class="navIcon"
+            :icon="['fas', 'sync']"
+            aria-hidden="true"
+          />
+        </button>
+        <button
           v-if="settingsWindowMinimized"
           type="button"
           class="minimizedUtilityButton navButton"
@@ -167,6 +181,7 @@
 </template>
 
 <script setup>
+import { syncProgressLabel } from '../../helpers/syncProgressLabel'
 import { FtIcon } from '@opentubex/icons'
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -189,6 +204,10 @@ import { getInvidiousSearchSuggestions } from '../../helpers/api/invidious'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 
 const { t } = useI18n()
+const syncing = computed(() => store.getters.getSyncServerStatus === 'syncing')
+const syncLabel = computed(() => syncProgressLabel(t, store.getters.getSyncServerProgress?.stage))
+const hideHeaderSyncIndicator = computed(() => store.getters.getHideHeaderSyncIndicator)
+const syncIndicatorLabel = computed(() => `${t('Settings.Sync Settings.Sync Settings')}: ${syncLabel.value}`)
 const emit = defineEmits(['request-android-exit'])
 const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
   store.getters.getKeyboardShortcuts
@@ -342,6 +361,11 @@ const restoreSettingsWindowLabel = computed(() => `${t('Restore')}: ${minimizedS
 
 function toggleDownloadsWindow() {
   store.dispatch(downloadsWindowOpen.value ? 'hideSettingsWindow' : 'showSettingsWindow', 'downloads')
+}
+
+function openSyncSettings() {
+  store.commit('setSettingsWindowSection', 'sync')
+  store.dispatch('showSettingsWindow')
 }
 
 function toggleSettingsWindow() {

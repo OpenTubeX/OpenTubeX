@@ -243,6 +243,10 @@
     "ri": "fire-line",
     "material": "local-fire-department-outline"
   },
+  "flag-checkered": {
+    "ri": "flag-2-line",
+    "material": "sports-score-rounded"
+  },
   "flask": {
     "ri": "flask-line",
     "material": "science-outline"
@@ -446,6 +450,10 @@
     "ri": "login-box-line",
     "material": "login-rounded"
   },
+  "replay": {
+    "ri": "restart-line",
+    "material": "replay-rounded"
+  },
   "rss": {
     "ri": "rss-line",
     "material": "rss-feed-rounded"
@@ -533,9 +541,17 @@
     "ri": "thumb-down-line",
     "material": "thumb-down-outline"
   },
+  "thumbs-down-filled": {
+    "ri": "thumb-down-fill",
+    "material": "thumb-down"
+  },
   "thumbs-up": {
     "ri": "thumb-up-line",
     "material": "thumb-up-outline"
+  },
+  "thumbs-up-filled": {
+    "ri": "thumb-up-fill",
+    "material": "thumb-up"
   },
   "thumbtack": {
     "ri": "pushpin-line",

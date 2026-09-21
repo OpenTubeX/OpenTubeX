@@ -1014,9 +1014,6 @@
       gap: 2px 5px;
     }
 
-    .shortsAuxPanelTarget :deep(.datePublishedAndViewCount .seperator) {
-      display: none;
-    }
 
     .shortsAuxPanelTarget :deep(.publishedTimeAgo::before),
     .shortsAuxPanelTarget :deep(.videoViews::before),
@@ -1630,11 +1627,7 @@
   }
 }
 
-.phonePanelActions {
-  display: contents;
-}
-
-.videoLayout .phoneCommentsButton {
+.videoLayout .phonePanelButton {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -1654,6 +1647,17 @@
   cursor: pointer;
 
   .phoneCommentsLabel {
+    min-inline-size: 0;
     flex: 1;
   }
+}
+
+.phoneQueuePreview {
+  display: block;
+  margin-block-start: 4px;
+  font-size: 0.875em;
+  color: var(--secondary-text-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

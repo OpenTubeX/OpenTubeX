@@ -4,8 +4,16 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 import { createAppShortcuts, getAppShortcutPath } from '../../src/renderer/helpers/appShortcuts.js'
+import { resolveMobileContextLinkCopyUrl } from '../../src/renderer/helpers/mobileLinkActions.js'
 
 const pages = ['subscriptions', 'userplaylists', 'history', 'downloads']
+
+async function loadKeyboardShortcutHandler(context) {
+  const source = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
+  const start = source.indexOf('function handleKeyboardShortcuts(event) {')
+  const handlerSource = source.slice(start, source.indexOf('\n/**', start))
+  return vm.runInNewContext(`${handlerSource}\nhandleKeyboardShortcuts`, context)
+}
 
 test('page shortcuts share stable IDs and translated titles across Android and iOS', () => {
   const labels = { subscriptions: 'Abonnements', userplaylists: 'Wiedergabelisten', history: 'Verlauf', downloads: 'Downloads' }
@@ -110,11 +118,8 @@ test('retained startup clicks and running-app clicks navigate and update localiz
 })
 
 test('tab organizer shortcut opens and closes it again with its search focused', async () => {
-  const source = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
-  const start = source.indexOf('function handleKeyboardShortcuts(event) {')
-  const handlerSource = source.slice(start, source.indexOf('\n/**', start))
   const tabOrganizerOpen = { value: false }
-  const handler = vm.runInNewContext(`${handlerSource}\nhandleKeyboardShortcuts`, {
+  const handler = await loadKeyboardShortcutHandler({
     showTutorial: { value: false },
     commandPaletteOpen: { value: false },
     tabOrganizerOpen,
@@ -137,4 +142,43 @@ test('tab organizer shortcut opens and closes it again with its search focused',
   assert.equal(tabOrganizerOpen.value, false)
   handler({ ...event, repeat: true })
   assert.equal(tabOrganizerOpen.value, false, 'holding the shortcut must not reopen the organizer')
+})
+
+test('copy-current-URL shortcut copies only portable active-route URLs', async () => {
+  const copied = []
+  let prevented = false
+  const appWindow = {
+    location: {
+      href: 'file:///opt/OpenTubeX/resources/app.asar/dist/index.html#/watch/abcdefghijk?playlistId=PL123&timestamp=42'
+    }
+  }
+  const handler = await loadKeyboardShortcutHandler({
+    showTutorial: { value: false },
+    isElectron: false,
+    commandPaletteOpen: { value: false },
+    tabOrganizerOpen: { value: false },
+    window: appWindow,
+    KeyboardShortcuts: { APP: { GENERAL: { COPY_CURRENT_URL: 'copy-url' } } },
+    matchesKeyboardShortcut: (_event, shortcut) => shortcut === 'copy-url',
+    resolveMobileContextLinkCopyUrl,
+    copyToClipboard: async (url, options) => { copied.push({ url, options }) },
+    t: key => key,
+  })
+
+  handler({ preventDefault: () => { prevented = true } })
+  await new Promise(resolve => setImmediate(resolve))
+
+  assert.equal(prevented, true)
+  assert.equal(copied.length, 1)
+  assert.equal(copied[0].url, 'https://youtu.be/abcdefghijk?list=PL123&t=42')
+  assert.equal(copied[0].options.messageOnSuccess, 'Share.YouTube URL copied to clipboard')
+
+  appWindow.location.href = 'file:///opt/OpenTubeX/resources/app.asar/dist/index.html#/history'
+  handler({ preventDefault: () => {} })
+  assert.equal(copied.length, 1)
+
+  appWindow.location.href =
+    'file:///opt/OpenTubeX/resources/app.asar/dist/index.html#/playlist/PL_PRIVATE?playlistType=user'
+  handler({ preventDefault: () => {} })
+  assert.equal(copied.length, 1)
 })

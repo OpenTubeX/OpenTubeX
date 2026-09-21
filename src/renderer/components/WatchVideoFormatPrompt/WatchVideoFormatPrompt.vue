@@ -29,7 +29,7 @@
       </div>
 
       <div
-        v-if="canChangePlaybackEngine && !localFilePlayback"
+        v-if="!offline && canChangePlaybackEngine && !localFilePlayback"
         class="engineSelector"
       >
         <p class="sectionLabel">
@@ -99,6 +99,10 @@ import { useI18n } from 'vue-i18n'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 
 const props = defineProps({
+  offline: {
+    type: Boolean,
+    default: false
+  },
   /** @type {import('vue').PropType<'dash' | 'legacy' | 'audio'>} */
   activeFormat: {
     type: String,
@@ -208,6 +212,8 @@ const options = computed(() => {
     available: true,
     active: download.id === activeDownloadId
   }))
+
+  if (props.offline) return localOptions
 
   if (props.localFilePlayback) {
     return [

@@ -241,6 +241,14 @@
   <FtSettingsSection
     :title="t('Settings.External Software Settings.Restricted Playback Authentication')"
   >
+    <FtFlexBox v-if="IS_CAPACITOR">
+      <FtButton
+        :label="t('Settings.External Software Settings.Create YouTube session')"
+        :icon="['fas', 'globe']"
+        :disabled="creatingSession"
+        @click="createYouTubeSession"
+      />
+    </FtFlexBox>
     <FtFlexBox class="restrictedPlaybackAuthControls settingsFlexStart460px">
       <div class="restrictedPlaybackAuthControl restrictedPlaybackAuthSource">
         <FtSelect
@@ -313,6 +321,14 @@
         :tooltip="t('Tooltips.External Software Settings.Always Use Cookies')"
         compact
         @change="updateYtDlpPlaybackAlwaysUseCookies"
+      />
+      <FtToggleSwitch
+        :label="t('Settings.External Software Settings.Use cookies for downloads')"
+        :default-value="ytDlpPlaybackAlwaysUseCookies || ytDlpDownloadUseCookies"
+        :disabled="ytDlpPlaybackAlwaysUseCookies"
+        setting-key="ytDlpDownloadUseCookies"
+        compact
+        @change="store.dispatch('updateYtDlpDownloadUseCookies', $event)"
       />
       <FtToggleSwitch
         :label="t('Settings.External Software Settings.Use cookies for subtitles')"
@@ -400,6 +416,8 @@ const ytDlpPlaybackCookiesBrowserProfile = computed(() => store.getters.getYtDlp
 /** @type {import('vue').ComputedRef<boolean>} */
 const ytDlpPlaybackAlwaysUseCookies = computed(() => store.getters.getYtDlpPlaybackAlwaysUseCookies)
 const ytDlpSubtitleUseCookies = computed(() => store.getters.getYtDlpSubtitleUseCookies)
+const ytDlpDownloadUseCookies = computed(() => store.getters.getYtDlpDownloadUseCookies)
+const creatingSession = ref(false)
 
 /** @type {import('vue').ComputedRef<'system' | 'managed'>} */
 const ytDlpFfmpegSource = computed(() => IS_CAPACITOR ? 'managed' : store.getters.getYtDlpFfmpegSource)
@@ -783,6 +801,26 @@ async function chooseExecutablePath(binary) {
 
   if (typeof path === 'string' && path.length > 0) {
     store.dispatch(binary === 'yt-dlp' ? 'updateYtDlpPath' : 'updateYtDlpFfmpegPath', path)
+  }
+}
+
+async function createYouTubeSession() {
+  creatingSession.value = true
+  try {
+    const path = await ytDlp.ytDlpCreateSession({
+      saveLabel: t('User Playlists.AddVideoPrompt.Save'),
+      hint: t('Settings.External Software Settings.YouTube session hint'),
+      errorLabel: t('Settings.External Software Settings.YouTube session failed')
+    })
+    if (path) {
+      await store.dispatch('updateYtDlpPlaybackCookiesPath', path)
+      await store.dispatch('updateYtDlpPlaybackAuthMode', 'file')
+      await store.dispatch('updateYtDlpDownloadUseCookies', true)
+    }
+  } catch {
+    showToast({ message: t('Settings.External Software Settings.YouTube session failed') })
+  } finally {
+    creatingSession.value = false
   }
 }
 

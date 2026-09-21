@@ -42,12 +42,14 @@ for (const uiScale of [100, 125]) {
         await expect.poll(() => menu.evaluate(element => {
           const bounds = element.getBoundingClientRect()
           const heading = element.querySelector('strong')
-          const buttons = [...element.querySelectorAll('.mobileLinkQuickActions button')].map(button => button.getBoundingClientRect())
+          const rows = [...element.querySelectorAll('.mobileLinkQuickActions')].map(row =>
+            [...row.querySelectorAll('button')].map(button => button.getBoundingClientRect()))
           return bounds.left >= 0 && bounds.right <= innerWidth + 1 &&
             heading.scrollWidth <= heading.clientWidth + 1 &&
             heading.clientHeight > parseFloat(getComputedStyle(heading).fontSize) * 2 &&
-            buttons.length >= 3 && buttons.every(button => button.left >= bounds.left && button.right <= bounds.right &&
-              Math.abs(button.width - buttons[0].width) < 1)
+            rows.length === 2 && rows.every(buttons => buttons.length >= 2 &&
+              buttons.every(button => button.left >= bounds.left && button.right <= bounds.right &&
+                Math.abs(button.width - buttons[0].width) < 1))
         })).toBe(true)
         await page.keyboard.press('Escape')
         await expect(menu).toHaveCount(0)

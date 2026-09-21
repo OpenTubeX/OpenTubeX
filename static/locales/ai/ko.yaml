@@ -272,6 +272,17 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: '{playlistName} 재생목록을 만들었습니다.'
       There was an issue with creating the playlist.: 재생목록을 만드는 중 문제가 발생했습니다.
 History:
+  Repair Use Cookies: "설정된 yt-dlp 쿠키 사용"
+  Repair Cookies Hint: "500개가 넘는 동영상을 확인해야 합니다. 요청 제한 위험을 줄이려면 yt-dlp 설정에서 쿠키를 구성하고 여기서 활성화하세요."
+  Repair Description: "기록을 가져온 후 또는 동영상 정보가 누락되거나 LIVE 표시가 잘못된 경우 사용하세요."
+  Repair Details: "누락된 제목, 채널, 게시 날짜를 채우고 재생 시간과 LIVE 표시를 확인합니다. 시청 진행 상황과 시청 완료 상태는 변경되지 않습니다."
+  Repair Notice: "기록이 많으면 시간이 걸릴 수 있습니다. 실패한 요청은 자동으로 다시 시도합니다. 삭제되거나 비공개인 동영상 정보는 불완전할 수 있습니다."
+  Start Repair: "복구 시작"
+  Repair Checking: "동영상 정보 확인 중"
+  Repair Waiting: "YouTube를 기다리는 중입니다. 복구가 자동으로 재개됩니다."
+  Repair Retrying: "실패한 요청 재시도 중"
+  Repair Finished: "복구 완료"
+  Repair Stopped: "복구 중지됨"
   Repair: "기록 복구"
   Repair Progress: "확인 {checked}/{total} · 복구 {repaired} · 실패 {failed}"
   Case Sensitive Search: 대소문자 구분 검색
@@ -375,9 +386,10 @@ Settings:
       After current tab: 현재 탭 뒤
       After current tab in opened order: 현재 탭 뒤, 연 순서대로
     Tab Close Focus:
+      Last active tab: "마지막 활성 탭"
+      Next tab in tab order: "탭 순서상 다음 탭"
+      Previous tab in tab order: "탭 순서상 이전 탭"
       Tab Close Focus: 탭을 닫은 후
-      Previous tab: 이전 탭 선택
-      Next tab: 다음 탭 선택
     Startup Behavior:
       Startup Behavior: 시작할 때
       Load all tabs: 모든 탭 불러오기
@@ -841,6 +853,10 @@ Settings:
     Title Excludes: 제목에서 제외
     Title Filter Hint: 제목 검색어가 여러 개이면 쉼표로 구분하세요. 동영상은 포함 검색어 중 하나 이상과 일치하고 제외 검색어와는 모두 일치하지 않아야 합니다.
   External Software Settings:
+    Create YouTube session: "YouTube 세션 만들기"
+    YouTube session hint: "필요한 경우 로그인한 다음 세션을 저장하세요. 설정에서 다운로드, 재생 또는 자막에 사용할지 선택하세요."
+    Use cookies for downloads: "다운로드에 쿠키 사용"
+    YouTube session failed: "YouTube 세션을 저장할 수 없습니다."
     Checking FFmpeg and FFprobe: FFmpeg/FFprobe 확인 중…
     FFmpeg and FFprobe Managed Not Downloaded: 아직 FFmpeg/FFprobe를 다운로드하지 않았습니다. 아래 버튼을 클릭하여 다운로드하세요.
     External Software Settings: 외부 소프트웨어
@@ -886,7 +902,7 @@ Settings:
       Manual: 수동으로만 업데이트
     yt-dlp Executable Path: yt-dlp 실행 파일 경로
     FFmpeg Executable Path: FFmpeg 실행 파일 경로
-    Restricted Playback Authentication: yt-dlp 재생 쿠키
+    Restricted Playback Authentication: "yt-dlp 쿠키"
     Cookie Source: 쿠키 소스
     Cookie Sources:
       None: 없음
@@ -1037,6 +1053,7 @@ Settings:
     Expanded: 펼침
     Playing Interface Hide Delay: 재생 중 인터페이스 숨김 지연
     Hide Startup Splash: 시작 화면 숨기기
+    Hide Header Sync Indicator: 앱 헤더의 동기화 표시기 숨기기
     Hide Repeat Stats: 반복 통계 숨기기
     Sections:
       Side Bar: 사이드바
@@ -1432,7 +1449,7 @@ Video:
   Reloading video after streaming URL error: 스트리밍 URL 오류 후 동영상 다시 불러오는 중
   MembersOnly: 이 회원 전용 동영상을 보려면 이 채널의 멤버십이 활성화된 Google 계정이 필요합니다.
   AgeRestricted: 이 연령 제한 동영상을 보려면 연령 인증된 Google 계정이 필요합니다.
-  Configure Restricted Playback Cookies Hint: 설정 → 외부 소프트웨어 → yt-dlp 재생 쿠키에서 쿠키를 설정하세요.
+  Configure Restricted Playback Cookies Hint: "설정 → 외부 소프트웨어 → yt-dlp 쿠키에서 쿠키를 설정하세요."
   Try With Configured Cookies: 설정된 쿠키로 시도
   Restricted Playback Authentication Failed Template: 'yt-dlp에서 설정된 쿠키로 이 동영상에 접근할 수 없습니다: {error}'
   DRMProtected: DRM 보호 동영상에는 독점 비공개 소스 구성 요소가 필요하므로 OpenTubeX에서 재생할 수 없습니다. 이 동영상을 보려면 DRM을 지원하는 웹 브라우저에서 공식 YouTube 웹사이트를 이용하세요.
@@ -1711,6 +1728,10 @@ Share:
   Share Post: 게시물 공유
   Timestamp Link Copied: 타임스탬프 링크를 클립보드에 복사했습니다
 Context Menu:
+  Select Tab: 탭 선택
+  Close Tabs Before: 이전 탭 닫기
+  Close Tabs After: 이후 탭 닫기
+  Close Other Tabs: 다른 탭 닫기
   Copy {service} link without playlist: "재생목록 없이 {service} 링크 복사"
   Context Menu: 상황에 맞는 메뉴
   Select All: 모두 선택
@@ -1926,7 +1947,7 @@ Tooltips:
     Cookie File: 인증된 재생에 사용할 Netscape 형식 쿠키 파일을 선택하세요.
     Browser for Cookies: 선택한 yt-dlp 실행 파일에서 지원하는 브라우저를 확인합니다. 인증된 재생을 요청하면 OpenTubeX가 yt-dlp에 이 브라우저의 쿠키를 읽도록 요청합니다.
     Browser Profile: 선택 사항인 브라우저 프로필 이름 또는 폴더입니다. 가장 최근에 사용한 프로필을 사용하려면 비워 두세요.
-    Always Use Cookies: "yt-dlp에서 스트림을 추출할 때마다 설정된 쿠키를 사용합니다. 스트림 추출 방법이 yt-dlp로 전환되지는 않습니다. yt-dlp를 선택하면 계정에 접근 권한이 있을 때 YouTube Premium의 향상된 비트 전송률을 포함한 계정 전용 형식을 사용할 수 있습니다. 설정된 쿠키를 자막과 자동 번역에 사용합니다."
+    Always Use Cookies: "다운로드, 자막 및 yt-dlp가 스트림을 추출할 때 설정된 쿠키를 사용합니다. 스트림 추출 방법이 yt-dlp로 전환되지는 않습니다. yt-dlp를 선택하면 계정에 접근 권한이 있을 때 YouTube Premium의 향상된 비트 전송률을 포함한 계정 전용 형식을 사용할 수 있습니다."
     FFmpeg Executable Path: 별도의 동영상 및 오디오 스트림을 병합하고 오디오를 변환하려면 FFmpeg가 필요합니다. 기본적으로 OpenTubeX는 PATH 환경 변수에서 FFmpeg를 찾습니다. 필요하면 여기서 사용자 지정 경로를 설정할 수 있습니다.
     Use cookies for subtitles: "설정된 쿠키를 자막과 자동 번역에 사용합니다. \"항상 쿠키 사용\"으로도 활성화됩니다."
   Distraction Free Settings:
@@ -2091,6 +2112,7 @@ CommandPalette:
     Download Finished: 이 다운로드는 더 이상 실행 중이 아닙니다
     Video: 먼저 동영상을 여세요
 Downloads:
+  Preparing: 준비 중…
   Export Failed: "다운로드한 파일을 저장할 수 없습니다. 쓰기 가능한 다운로드 폴더를 선택하고 다시 시도하세요."
   Remove File Permanently Warning: "\"{title}\"을(를) 영구적으로 삭제합니다."
   Download: 다운로드

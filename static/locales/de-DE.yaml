@@ -284,6 +284,17 @@ User Playlists:
   Choose Image: Bild auswählen
   Use Bookmark Icon: Lesezeichensymbol verwenden
 History:
+  Repair Use Cookies: "Konfigurierte yt-dlp-Cookies verwenden"
+  Repair Cookies Hint: "Mehr als 500 Videos müssen geprüft werden. Konfiguriere Cookies in den yt-dlp-Einstellungen und aktiviere sie hier, um das Risiko einer Anfragelimitierung zu verringern."
+  Repair Description: "Nutze diese Funktion nach einem Verlaufsimport oder wenn Videodetails fehlen oder Videos fälschlich als LIVE angezeigt werden."
+  Repair Details: "Ergänzt fehlende Titel, Kanalangaben und Veröffentlichungsdaten und prüft die Dauer sowie LIVE-Markierungen. Dein Wiedergabefortschritt und Gesehen-Status bleiben erhalten."
+  Repair Notice: "Bei einem großen Verlauf kann das dauern. Fehlgeschlagene Anfragen werden automatisch wiederholt. Gelöschte oder private Videos bleiben möglicherweise unvollständig."
+  Start Repair: "Reparatur starten"
+  Repair Checking: "Videodetails werden geprüft"
+  Repair Waiting: "Warten auf YouTube. Die Reparatur wird automatisch fortgesetzt."
+  Repair Retrying: "Fehlgeschlagene Anfragen werden wiederholt"
+  Repair Finished: "Reparatur abgeschlossen"
+  Repair Stopped: "Reparatur gestoppt"
   Repair: "Verlauf reparieren"
   Repair Progress: "Geprüft {checked}/{total} · Repariert {repaired} · Fehlgeschlagen {failed}"
   # On History Page
@@ -454,9 +465,10 @@ Settings:
       Loading Tabs: Laden mehrerer Tabs
       Unloading Tabs: Entladen mehrerer Tabs
     Tab Close Focus:
+      Last active tab: "Zuletzt aktiver Tab"
+      Next tab in tab order: "Nächster Tab in der Tab-Reihenfolge"
+      Previous tab in tab order: "Vorheriger Tab in der Tab-Reihenfolge"
       Tab Close Focus: Nach dem Schließen eines Tabs
-      Previous tab: Vorherigen Tab auswählen
-      Next tab: Nächsten Tab auswählen
   Theme Settings:
     Theme Settings: Farbschema
     Match Top Bar with Main Color: Obere Leiste an Hauptfarbe anpassen
@@ -1126,6 +1138,7 @@ Settings:
     Expanded: Ausgeklappt
     Playing Interface Hide Delay: Verzögerung zum Ausblenden der Oberfläche bei Wiedergabe
     Hide Startup Splash: Startbildschirm ausblenden
+    Hide Header Sync Indicator: Synchronisierungsanzeige in der App-Kopfzeile ausblenden
     Hide Repeat Stats: Wiederholungsstatistik ausblenden
     Hide Live Chat: Live-Chat ausblenden
     Hide Popular Videos: Beliebte Videos ausblenden
@@ -1295,6 +1308,10 @@ Settings:
       Trenne mehrere Titelbegriffe durch Kommas. Ein Video muss mindestens einen eingeschlossenen und keinen
       ausgeschlossenen Begriff enthalten.
   External Software Settings:
+    Create YouTube session: "YouTube-Sitzung erstellen"
+    YouTube session hint: "Melde dich bei Bedarf an und speichere die Sitzung. Wähle in den Einstellungen, ob sie für Downloads, Wiedergabe oder Untertitel verwendet wird."
+    Use cookies for downloads: "Cookies für Downloads verwenden"
+    YouTube session failed: "Die YouTube-Sitzung konnte nicht gespeichert werden."
     Checking FFmpeg and FFprobe: FFmpeg/FFprobe werden überprüft…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe wurden noch nicht heruntergeladen. Klicke auf die Schaltfläche unten, um sie herunterzuladen.
     External Software Settings: Externe Software
@@ -1331,7 +1348,7 @@ Settings:
     Managed Tool Already Current Template: '{tool} {version} ist bereits auf dem neuesten Stand'
     yt-dlp Executable Path: Pfad zur ausführbaren yt-dlp-Datei
     FFmpeg Executable Path: Pfad zur ausführbaren FFmpeg-Datei
-    Restricted Playback Authentication: yt-dlp-Wiedergabe-Cookies
+    Restricted Playback Authentication: "yt-dlp-Cookies"
     Cookie Source: Cookie-Quelle
     Cookie Sources:
       None: Keine
@@ -1984,7 +2001,7 @@ Video:
   AI-generated content: KI-generierte Inhalte
   MembersOnly: Videos, die nur für Mitglieder bestimmt sind, können mit OpenTubeX nicht angesehen werden, da sie einen Google-Login und eine kostenpflichtige Kanalmitgliedschaft erfordern.
   AgeRestricted: Videos mit Altersbeschränkung können mit OpenTubeX nicht angesehen werden, da sie eine Google-Anmeldung und die Verwendung eines altersgeprüften YouTube-Kontos erfordern.
-  Configure Restricted Playback Cookies Hint: Konfiguriere Cookies unter Einstellungen → Erweitert → Externe Software → yt-dlp-Wiedergabe-Cookies.
+  Configure Restricted Playback Cookies Hint: "Konfiguriere Cookies unter Einstellungen → Erweitert → Externe Software → yt-dlp-Cookies."
   Try With Configured Cookies: Mit konfigurierten Cookies versuchen
   Restricted Playback Authentication Failed Template: 'yt-dlp konnte mit den konfigurierten Cookies nicht auf dieses Video zugreifen: {error}'
   DeArrow:
@@ -2370,7 +2387,7 @@ Tooltips:
     Cookie File: Wähle eine Cookie-Datei im Netscape-Format für die authentifizierte Wiedergabe aus.
     Browser for Cookies: Die Browserunterstützung wird anhand der ausgewählten ausführbaren yt-dlp-Datei ermittelt. OpenTubeX weist yt-dlp an, Cookies aus diesem Browser zu lesen, wenn eine authentifizierte Wiedergabe angefordert wird.
     Browser Profile: Optionaler Name oder Ordner des Browserprofils. Lasse das Feld leer, um das zuletzt verwendete Profil zu nutzen.
-    Always Use Cookies: "Verwendet die konfigurierten Cookies für Untertitel und bei jeder Stream-Extraktion mit yt-dlp. Dies wechselt die Methode zur Stream-Extraktion nicht zu yt-dlp. Wenn yt-dlp ausgewählt ist, können kontogebundene Formate verfügbar werden, einschließlich der höheren Bitrate von YouTube Premium, wenn das Konto darauf Zugriff hat."
+    Always Use Cookies: "Verwendet die konfigurierten Cookies für Downloads, Untertitel und bei jeder Stream-Extraktion mit yt-dlp. Dies wechselt die Methode zur Stream-Extraktion nicht zu yt-dlp. Wenn yt-dlp ausgewählt ist, können kontogebundene Formate verfügbar werden, einschließlich der höheren Bitrate von YouTube Premium, wenn das Konto darauf Zugriff hat."
     FFmpeg Executable Path: FFmpeg wird zum Zusammenführen von getrennten Video- und Audiospuren sowie zur Audiokonvertierung benötigt. Standardmäßig nimmt OpenTubeX an, dass FFmpeg über die PATH-Umgebungsvariable gefunden werden kann. Falls nötig, kann hier ein benutzerdefinierter Pfad festgelegt werden.
     Use cookies for subtitles: "Die konfigurierten Cookies für Untertitel und automatische Übersetzungen verwenden. Auch durch „Cookies immer verwenden“ aktiviert."
   Experimental Settings:
@@ -2593,6 +2610,10 @@ Next match: Nächster Treffer
 Close find bar: Suchleiste schließen
 No matches: Keine Treffer
 Context Menu:
+  Select Tab: Tab auswählen
+  Close Tabs Before: Tabs davor schließen
+  Close Tabs After: Tabs danach schließen
+  Close Other Tabs: Andere Tabs schließen
   Copy {service} link without playlist: "{service}-Link ohne Playlist kopieren"
   Context Menu: Kontextmenü
   Select All: Alles auswählen
@@ -2768,6 +2789,7 @@ CommandPalette:
     Download Finished: Dieser Download läuft nicht mehr
     Video: Öffne zuerst ein Video
 Downloads:
+  Preparing: Vorbereitung läuft…
   Export Failed: "Die heruntergeladene Datei konnte nicht gespeichert werden. Wähle einen beschreibbaren Downloadordner und versuche es erneut."
   Remove File Permanently Warning: "„{title}“ wird dauerhaft gelöscht."
   Download: Herunterladen

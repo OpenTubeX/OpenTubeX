@@ -188,6 +188,17 @@ User Playlists:
     This playlist could not be loaded.: 无法加载此播放列表。
     More videos could not be loaded.: 无法加载更多视频。
 History:
+  Repair Use Cookies: "使用已配置的 yt-dlp Cookie"
+  Repair Cookies Hint: "需要检查超过 500 个视频。请在 yt-dlp 设置中配置 Cookie 并在此处启用，以降低请求被限流的风险。"
+  Repair Description: "在导入历史记录后，或视频信息缺失、被错误标记为 LIVE 时使用。"
+  Repair Details: "补全缺失的标题、频道和发布日期，并检查时长和 LIVE 标签。观看进度和已观看状态保持不变。"
+  Repair Notice: "历史记录较多时可能需要一些时间。失败的请求会自动重试。已删除或私密视频的信息可能仍不完整。"
+  Start Repair: "开始修复"
+  Repair Checking: "正在检查视频信息"
+  Repair Waiting: "正在等待 YouTube，修复将自动继续。"
+  Repair Retrying: "正在重试失败的请求"
+  Repair Finished: "修复完成"
+  Repair Stopped: "修复已停止"
   Repair: "修复历史记录"
   Repair Progress: "已检查 {checked}/{total} · 已修复 {repaired} · 失败 {failed}"
   Mark All As Watched: 全部标记为已观看
@@ -282,9 +293,10 @@ Settings:
       After current tab: 当前标签页之后
       After current tab in opened order: 按打开顺序排列在当前标签页之后
     Tab Close Focus:
+      Last active tab: "最后使用的标签页"
+      Next tab in tab order: "按标签页顺序选择下一个"
+      Previous tab in tab order: "按标签页顺序选择上一个"
       Tab Close Focus: 关闭标签页后
-      Previous tab: 选择上一个标签页
-      Next tab: 选择下一个标签页
     Startup Behavior:
       Startup Behavior: 启动时
       Load all tabs: 加载所有标签页
@@ -665,6 +677,10 @@ Settings:
     Title Excludes: 标题不包含
     Title Filter Hint: 多个标题关键词请用逗号分隔。视频必须至少匹配一个包含关键词，且不能匹配任何排除关键词。
   External Software Settings:
+    Create YouTube session: "创建 YouTube 会话"
+    YouTube session hint: "如有需要，请登录并保存会话。在设置中选择是否将其用于下载、播放或字幕。"
+    Use cookies for downloads: "下载时使用 Cookie"
+    YouTube session failed: "无法保存 YouTube 会话。"
     Checking FFmpeg and FFprobe: 正在检查 FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: 尚未下载 FFmpeg/FFprobe。点击下方按钮进行下载。
     External Software Settings: 外部软件
@@ -710,7 +726,7 @@ Settings:
       Manual: 仅手动更新
     yt-dlp Executable Path: yt-dlp 可执行文件路径
     FFmpeg Executable Path: FFmpeg 可执行文件路径
-    Restricted Playback Authentication: yt-dlp 播放 Cookie
+    Restricted Playback Authentication: "yt-dlp Cookie"
     Cookie Source: Cookie 来源
     Cookie Sources:
       None: 无
@@ -844,6 +860,7 @@ Settings:
     Expanded: 展开
     Playing Interface Hide Delay: 播放时界面隐藏延迟
     Hide Startup Splash: 隐藏启动画面
+    Hide Header Sync Indicator: 隐藏应用标题栏中的同步指示器
     Hide Repeat Stats: 隐藏循环统计
     Sections:
       Visible While Paused: 全窗口或全屏暂停时显示
@@ -1136,7 +1153,7 @@ Video:
   Retry With Built-in Extraction: 使用内置提取功能重试
   Retry With yt-dlp Extraction: 使用 yt-dlp 提取功能重试
   Reloading video after streaming URL error: 视频流 URL 出错后正在重新加载视频
-  Configure Restricted Playback Cookies Hint: 请在“设置 → 外部软件 → yt-dlp 播放 Cookie”中配置 Cookie。
+  Configure Restricted Playback Cookies Hint: "请在“设置 → 外部软件 → yt-dlp Cookie”中配置 Cookie。"
   Try With Configured Cookies: 使用已配置的 Cookie 重试
   Restricted Playback Authentication Failed Template: 'yt-dlp 无法使用已配置的 Cookie 访问此视频：{error}'
   Unmark As Watched: 标记为未观看
@@ -1350,6 +1367,10 @@ Share:
   Share failed: "无法分享链接"
   Timestamp Link Copied: 已将带时间戳的链接复制到剪贴板
 Context Menu:
+  Select Tab: 选择标签页
+  Close Tabs Before: 关闭之前的标签页
+  Close Tabs After: 关闭之后的标签页
+  Close Other Tabs: 关闭其他标签页
   Copy {service} link without playlist: "复制不含播放列表的 {service} 链接"
   Context Menu: 上下文菜单
   Select All: 全选
@@ -1510,7 +1531,7 @@ Tooltips:
       选择 OpenTubeX 启动时执行的操作。
       加载所有标签页会立即恢复所有已保存的标签页，但后台标签页不会自动播放视频。
       加载上次已加载的标签页会重新加载 OpenTubeX 关闭时已加载的标签页，其他标签页则保持未加载状态。
-      加载上次活动的标签页会恢复上一个会话，同时打开其他标签页但不加载；点击这些标签页时才会加载。
+      加载最后使用的标签页会恢复上一个会话，同时打开其他标签页但不加载；点击这些标签页时才会加载。
       以空会话启动会跳过已保存的标签页并打开一个新窗口。
     Remember Tab Navigation History: 保存每个标签页的前进和后退导航历史，并在 OpenTubeX 重新启动时恢复。
   Proxy Settings:
@@ -1553,7 +1574,7 @@ Tooltips:
     Cookie File: 选择用于身份验证播放的 Netscape 格式 Cookie 文件。
     Browser for Cookies: 从所选的 yt-dlp 可执行文件中读取浏览器支持信息。请求身份验证播放时，OpenTubeX 会让 yt-dlp 从此浏览器读取 Cookie。
     Browser Profile: 可选的浏览器配置文件名称或文件夹。留空则使用最近访问的配置文件。
-    Always Use Cookies: "每当 yt-dlp 提取流时都使用已配置的 Cookie。这不会将流提取方式切换为 yt-dlp。选择 yt-dlp 后，可能会提供仅限账号使用的格式，包括账号有权使用时的 YouTube Premium 增强比特率。使用已配置的 Cookie 获取字幕和自动翻译。"
+    Always Use Cookies: "将配置的 Cookie 用于下载、字幕以及 yt-dlp 提取流的过程。这不会将流提取方式切换为 yt-dlp。选择 yt-dlp 后，可能会提供仅限账号使用的格式，包括账号有权使用时的 YouTube Premium 增强比特率。"
     FFmpeg Executable Path: 合并独立的视频流和音频流以及转换音频需要 FFmpeg。默认情况下，OpenTubeX 假定可通过 PATH 环境变量找到 FFmpeg。如有需要，可在此设置自定义路径。
     Use cookies for subtitles: "使用已配置的 Cookie 获取字幕和自动翻译。启用“始终使用 Cookie”也会开启此功能。"
   Distraction Free Settings:
@@ -1642,6 +1663,7 @@ CommandPalette:
     Download Finished: 此下载已停止运行
     Video: 请先打开一个视频
 Downloads:
+  Preparing: 正在准备…
   Export Failed: "无法保存已下载的文件。请选择有写入权限的下载文件夹，然后重试。"
   Remove File Permanently Warning: "这将永久删除“{title}”。"
   Download: 下载

@@ -251,7 +251,8 @@
                     v-for="action in recommendationActions"
                     :key="action.type"
                     :title="t('Display Label', { label: action.label, value: action.type === 'blockChannel' ? video.author : (recommendationDisplayTitles.get(video.videoId) ?? video.title) })"
-                    :icon="action.icon"
+                    :icon="recommendationFeedbackById.get(video.videoId) === action.type ? (action.selectedIcon ?? action.icon) : action.icon"
+                    :aria-pressed="action.selectedIcon ? recommendationFeedbackById.get(video.videoId) === action.type : null"
                     :use-shadow="false"
                     theme="base-no-default"
                     @click="recommendationFeedback(video, action.type)"
@@ -265,7 +266,7 @@
             class="recommendationLoadMore"
             :label="t('Subscriptions.Load More Videos')"
             :icon="['fas', 'angle-down']"
-            :disabled="recommendationsLoading"
+            :disabled="recommendationsLoading || !recommendationsHaveSeeds"
             @click="loadMoreRecommendations"
           />
         </template>
@@ -590,6 +591,7 @@ const allSectionsHidden = computed(() => visibleSections.value.length === 0)
 const {
   enabled: recommendationsEnabled,
   hasHistory: recommendationsHaveHistory,
+  hasSeeds: recommendationsHaveSeeds,
   isLoading: recommendationsLoading,
   hasError: recommendationsError,
   recommendations,
@@ -604,9 +606,12 @@ const {
   feedVersion: recommendationFeedVersion,
 } = useHomeRecommendations(computed(() => visibleSections.value.some(section => section.id === 'recommendations')))
 
+const recommendationFeedbackById = computed(() => new Map(store.getters.getRecommendationRecords
+  .map(record => [record.videoId, record.feedback])))
+
 const recommendationActions = computed(() => [
-  { type: 'positive', label: t('Home Page.More like this'), icon: ['fas', 'thumbs-up'] },
-  { type: 'dismiss', label: t('Home Page.Not interested'), icon: ['fas', 'thumbs-down'] },
+  { type: 'positive', label: t('Home Page.More like this'), icon: ['fas', 'thumbs-up'], selectedIcon: ['fas', 'thumbs-up-filled'] },
+  { type: 'dismiss', label: t('Home Page.Not interested'), icon: ['fas', 'thumbs-down'], selectedIcon: ['fas', 'thumbs-down-filled'] },
   { type: 'blockChannel', label: t('Home Page.Hide this channel'), icon: ['fas', 'eye-slash'] },
 ])
 
@@ -876,6 +881,7 @@ function downloadStatus(download) {
     case 'queued': return t('Downloads.Queued')
     case 'paused': return t('Downloads.Paused')
     case 'pausing': return t('Downloads.Pausing')
+    case 'preparing': return t('Downloads.Preparing')
     case 'downloading': return t('Downloads.Downloading')
     case 'processing': return t('Downloads.Processing')
     default: return t('Downloads.Download Complete')

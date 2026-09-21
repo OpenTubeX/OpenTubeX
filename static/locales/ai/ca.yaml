@@ -314,6 +314,17 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: S'ha creat correctament la llista de reproducció {playlistName}.
       There was an issue with creating the playlist.: Hi ha hagut un problema en crear la llista de reproducció.
 History:
+  Repair Use Cookies: "Utilitza les galetes configurades de yt-dlp"
+  Repair Cookies Hint: "Cal comprovar més de 500 vídeos. Configureu les galetes als paràmetres de yt-dlp i activeu-les aquí per reduir el risc de limitació de peticions."
+  Repair Description: "Feu-ho servir després d'importar l'historial, o quan faltin dades dels vídeos o tinguin una etiqueta LIVE incorrecta."
+  Repair Details: "Completa els títols, canals i dates de publicació que falten, i comprova la durada i les etiquetes LIVE. El progrés de reproducció i l'estat de visualització es mantenen."
+  Repair Notice: "Els historials grans poden trigar. Les sol·licituds fallides es reintenten automàticament. Els vídeos suprimits o privats poden quedar incomplets."
+  Start Repair: "Inicia la reparació"
+  Repair Checking: "S'estan comprovant les dades dels vídeos"
+  Repair Waiting: "S'està esperant YouTube. La reparació es reprendrà automàticament."
+  Repair Retrying: "S'estan reintentant les sol·licituds fallides"
+  Repair Finished: "Reparació acabada"
+  Repair Stopped: "Reparació aturada"
   Repair: "Repara l’historial"
   Repair Progress: "Comprovats {checked}/{total} · Reparats {repaired} · Fallits {failed}"
   Case Sensitive Search: Cerca amb distinció entre majúscules i minúscules
@@ -417,9 +428,10 @@ Settings:
       After current tab: Després de la pestanya actual
       After current tab in opened order: Després de la pestanya actual, en l'ordre d'obertura
     Tab Close Focus:
+      Last active tab: "Darrera pestanya activa"
+      Next tab in tab order: "Pestanya següent en l’ordre de pestanyes"
+      Previous tab in tab order: "Pestanya anterior en l’ordre de pestanyes"
       Tab Close Focus: Després de tancar una pestanya
-      Previous tab: Selecciona la pestanya anterior
-      Next tab: Selecciona la pestanya següent
     Startup Behavior:
       Startup Behavior: En iniciar
       Load all tabs: Carrega totes les pestanyes
@@ -915,6 +927,10 @@ Settings:
     Title Excludes: El títol exclou
     Title Filter Hint: Separeu amb comes els diversos termes del títol. Un vídeo ha de coincidir amb almenys un terme inclòs i amb cap d'exclòs.
   External Software Settings:
+    Create YouTube session: "Crea una sessió de YouTube"
+    YouTube session hint: "Inicia la sessió si cal i desa-la. Tria a la configuració si vols utilitzar-la per a baixades, reproducció o subtítols."
+    Use cookies for downloads: "Utilitza galetes per a les baixades"
+    YouTube session failed: "No s'ha pogut desar la sessió de YouTube."
     Checking FFmpeg and FFprobe: S'estan comprovant FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: Encara no s'han baixat FFmpeg/FFprobe. Feu clic al botó de sota per baixar-los.
     External Software Settings: Programari extern
@@ -960,7 +976,7 @@ Settings:
       Manual: Actualitza només manualment
     yt-dlp Executable Path: Camí de l'executable yt-dlp
     FFmpeg Executable Path: Camí de l'executable FFmpeg
-    Restricted Playback Authentication: Galetes de reproducció de yt-dlp
+    Restricted Playback Authentication: "Galetes de yt-dlp"
     Cookie Source: Origen de les galetes
     Cookie Sources:
       None: Cap
@@ -1111,6 +1127,7 @@ Settings:
     Expanded: Desplegats
     Playing Interface Hide Delay: Retard per amagar la interfície durant la reproducció
     Hide Startup Splash: Amaga la pantalla d’inici
+    Hide Header Sync Indicator: Amaga l’indicador de sincronització de la capçalera de l’aplicació
     Hide Repeat Stats: Amaga les estadístiques de repetició
     Sections:
       Side Bar: Barra lateral
@@ -1542,7 +1559,7 @@ Video:
   Reloading video after streaming URL error: S'està tornant a carregar el vídeo després d'un error de l'URL del flux
   MembersOnly: Aquest vídeo només per a membres requereix un compte de Google amb una subscripció activa al canal.
   AgeRestricted: Aquest vídeo amb restricció d'edat requereix un compte de Google amb l'edat verificada.
-  Configure Restricted Playback Cookies Hint: Configureu les galetes a Configuració → Programari extern → Galetes de reproducció de yt-dlp.
+  Configure Restricted Playback Cookies Hint: "Configureu les galetes a Configuració → Programari extern → Galetes de yt-dlp."
   Try With Configured Cookies: Prova-ho amb les galetes configurades
   Restricted Playback Authentication Failed Template: 'yt-dlp no ha pogut accedir a aquest vídeo amb les galetes configurades: {error}'
   DRMProtected: Els vídeos protegits amb DRM no es poden reproduir a l'OpenTubeX perquè requereixen components propietaris de codi tancat. Per mirar aquest vídeo, obriu el lloc web oficial de YouTube en un navegador amb DRM activat.
@@ -1849,6 +1866,10 @@ Clipboard:
   Copy failed: No s'ha pogut copiar al porta-retalls
   Cannot access clipboard without a secure connection: No es pot accedir al porta-retalls sense una connexió segura
 Context Menu:
+  Select Tab: Selecciona la pestanya
+  Close Tabs Before: Tanca les pestanyes anteriors
+  Close Tabs After: Tanca les pestanyes posteriors
+  Close Other Tabs: Tanca les altres pestanyes
   Copy {service} link without playlist: "Copia l’enllaç de {service} sense la llista de reproducció"
   Context Menu: Menú contextual
   Select All: Selecciona-ho tot
@@ -2097,7 +2118,7 @@ Tooltips:
     Cookie File: Seleccioneu un fitxer de galetes amb format de Netscape per a la reproducció autenticada.
     Browser for Cookies: La compatibilitat amb navegadors es consulta a l'executable yt-dlp seleccionat. L'OpenTubeX demana a yt-dlp que llegeixi aquest navegador quan se sol·licita una reproducció autenticada.
     Browser Profile: Nom o carpeta opcional del perfil del navegador. Deixeu-ho en blanc per utilitzar el perfil al qual s'ha accedit més recentment.
-    Always Use Cookies: "Utilitza les galetes configurades sempre que yt-dlp extregui fluxos. Això no canvia a yt-dlp el mètode d'extracció dels fluxos. Amb yt-dlp seleccionat, poden estar disponibles formats exclusius del compte, inclosa la taxa de bits millorada de YouTube Premium quan el compte hi tingui accés. Utilitza les galetes configurades per als subtítols i les traduccions automàtiques."
+    Always Use Cookies: "Utilitza les galetes configurades per a les baixades, els subtítols i sempre que yt-dlp extregui fluxos. Això no canvia a yt-dlp el mètode d'extracció dels fluxos. Amb yt-dlp seleccionat, poden estar disponibles formats exclusius del compte, inclosa la taxa de bits millorada de YouTube Premium quan el compte hi tingui accés."
     FFmpeg Executable Path: FFmpeg és necessari per combinar fluxos de vídeo i àudio separats i per convertir àudio. De manera predeterminada, l'OpenTubeX suposa que es pot trobar FFmpeg mitjançant la variable d'entorn PATH. Si cal, podeu definir aquí un camí personalitzat.
     Use cookies for subtitles: "Utilitza les galetes configurades per als subtítols i les traduccions automàtiques. També s’activa amb «Utilitza sempre galetes»."
   Distraction Free Settings:
@@ -2289,6 +2310,7 @@ CommandPalette:
     Download Finished: Aquesta baixada ja no s'està executant
     Video: Obriu primer un vídeo
 Downloads:
+  Preparing: S’està preparant…
   Export Failed: "No s’ha pogut desar el fitxer baixat. Trieu una carpeta de baixades amb permís d’escriptura i torneu-ho a provar."
   Remove File Permanently Warning: "Això suprimirà permanentment \"{title}\"."
   Download: Baixa

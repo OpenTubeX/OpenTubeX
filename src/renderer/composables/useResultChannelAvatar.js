@@ -3,8 +3,10 @@ import { onBeforeUnmount, ref, watch } from 'vue'
 import store from '../store/index'
 
 import { youtubeImageUrlToInvidious } from '../helpers/api/invidious'
+import { getLocalVideoChannels } from '../helpers/api/local'
 import { fetchChannelInfo, getCachedChannelInfo } from '../helpers/channel-preferences'
 import { getResultAuthorThumbnailUrl } from '../helpers/result-channel-avatar'
+import { isCollaborativeVideoAuthor } from '../helpers/video-collaborators'
 
 /**
  * Resolves the channel avatar for a video or playlist result.
@@ -14,6 +16,7 @@ import { getResultAuthorThumbnailUrl } from '../helpers/result-channel-avatar'
  */
 export function useResultChannelAvatar(result, channelId, enabled) {
   const channelThumbnail = ref(null)
+  const channelThumbnails = ref([null])
   let loadGeneration = 0
 
   function normalizeThumbnail(url) {
@@ -30,6 +33,7 @@ export function useResultChannelAvatar(result, channelId, enabled) {
   async function resolveThumbnail() {
     const generation = ++loadGeneration
     channelThumbnail.value = null
+    channelThumbnails.value = [null]
 
     if (!enabled.value) {
       return
@@ -45,8 +49,31 @@ export function useResultChannelAvatar(result, channelId, enabled) {
       directThumbnail ?? cachedChannel?.thumbnail
     )
 
+    channelThumbnail.value = cachedThumbnail
+    channelThumbnails.value = [cachedThumbnail]
+
+    if (result.value.hasCollaborators || result.value.collaborators?.length > 0 ||
+      (resolvingChannelId == null && result.value.videoId &&
+        (cachedThumbnail === null || isCollaborativeVideoAuthor(result.value.author)))) {
+      try {
+        const collaborators = result.value.collaborators?.length > 0
+          ? result.value.collaborators
+          : result.value.videoId ? await getLocalVideoChannels(result.value.videoId) : []
+        if (generation !== loadGeneration) return
+        if (collaborators.length > 0) {
+          channelThumbnails.value = collaborators.map((channel, index) =>
+            normalizeThumbnail(channel.thumbnail) ?? (index === 0 ? cachedThumbnail : null)
+          )
+          channelThumbnail.value = channelThumbnails.value[0]
+          return
+        }
+      } catch {
+        // Keep the available avatar when collaborator information is unavailable.
+        return
+      }
+    }
+
     if (cachedThumbnail !== null) {
-      channelThumbnail.value = cachedThumbnail
       return
     }
 
@@ -60,6 +87,7 @@ export function useResultChannelAvatar(result, channelId, enabled) {
       resolvingChannelId === channelId.value
     ) {
       channelThumbnail.value = normalizeThumbnail(resolvedChannel?.thumbnail)
+      channelThumbnails.value = [channelThumbnail.value]
     }
   }
 
@@ -69,5 +97,5 @@ export function useResultChannelAvatar(result, channelId, enabled) {
     loadGeneration++
   })
 
-  return { channelThumbnail }
+  return { channelThumbnail, channelThumbnails }
 }

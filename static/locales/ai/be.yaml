@@ -202,6 +202,17 @@ User Playlists:
     Toast:
       Video(s) added to {playlistCount} playlists: Відэа дададзена ў 1 спіс прайгравання | Відэа дададзена ў {playlistCount} спісы прайгравання | Відэа дададзена ў {playlistCount} спісаў прайгравання
 History:
+  Repair Use Cookies: "Выкарыстоўваць наладжаныя файлы cookie yt-dlp"
+  Repair Cookies Hint: "Трэба праверыць больш за 500 відэа. Наладзьце файлы cookie у наладах yt-dlp і ўключыце іх тут, каб зменшыць рызыку абмежавання запытаў."
+  Repair Description: "Выкарыстоўвайце пасля імпарту гісторыі або калі ў відэа адсутнічаюць звесткі ці памылкова паказваецца пазнака LIVE."
+  Repair Details: "Дапаўняе адсутныя назвы, каналы і даты публікацыі, правярае працягласць і пазнакі LIVE. Прагрэс і стан прагляду не змяняюцца."
+  Repair Notice: "Вялікая гісторыя можа патрабаваць часу. Няўдалыя запыты паўтараюцца аўтаматычна. Звесткі пра выдаленыя або прыватныя відэа могуць застацца няпоўнымі."
+  Start Repair: "Пачаць выпраўленне"
+  Repair Checking: "Праверка звестак пра відэа"
+  Repair Waiting: "Чаканне YouTube. Выпраўленне працягнецца аўтаматычна."
+  Repair Retrying: "Паўтарэнне няўдалых запытаў"
+  Repair Finished: "Выпраўленне завершана"
+  Repair Stopped: "Выпраўленне спынена"
   Repair: "Выправіць гісторыю"
   Repair Progress: "Праверана {checked}/{total} · Выпраўлена {repaired} · Памылак {failed}"
   Mark All As Watched: Пазначыць усё прагледжаным
@@ -299,9 +310,10 @@ Settings:
       After current tab: Пасля бягучай укладкі
       After current tab in opened order: Пасля бягучай укладкі паводле чаргі адкрыцця
     Tab Close Focus:
+      Last active tab: "Апошняя актыўная ўкладка"
+      Next tab in tab order: "Наступная ўкладка ў парадку ўкладак"
+      Previous tab in tab order: "Папярэдняя ўкладка ў парадку ўкладак"
       Tab Close Focus: Пасля закрыцця ўкладкі
-      Previous tab: Выбраць папярэднюю ўкладку
-      Next tab: Выбраць наступную ўкладку
     Startup Behavior:
       Startup Behavior: Пры запуску
       Load all tabs: Загрузіць усе ўкладкі
@@ -694,6 +706,10 @@ Settings:
     Title Excludes: Загаловак не змяшчае
     Title Filter Hint: Раздзяляйце некалькі фрагментаў загалоўка коскамі. Відэа павінна змяшчаць прынамсі адзін дададзены фрагмент і не змяшчаць ніводнага выключанага.
   External Software Settings:
+    Create YouTube session: "Стварыць сеанс YouTube"
+    YouTube session hint: "Пры неабходнасці ўвайдзіце і захавайце сеанс. У наладах выберыце, ці выкарыстоўваць яго для спампоўванняў, прайгравання або субцітраў."
+    Use cookies for downloads: "Выкарыстоўваць файлы cookie для спампоўванняў"
+    YouTube session failed: "Не ўдалося захаваць сеанс YouTube."
     Checking FFmpeg and FFprobe: Праверка FFmpeg/FFprobe…
     FFmpeg and FFprobe Managed Not Downloaded: FFmpeg/FFprobe яшчэ не спампаваныя. Каб спампаваць іх, націсніце кнопку ніжэй.
     External Software Settings: Вонкавае праграмнае забеспячэнне
@@ -739,7 +755,7 @@ Settings:
       Manual: Абнаўляць толькі ўручную
     yt-dlp Executable Path: Шлях да выканальнага файла yt-dlp
     FFmpeg Executable Path: Шлях да выканальнага файла FFmpeg
-    Restricted Playback Authentication: Файлы cookie для прайгравання праз yt-dlp
+    Restricted Playback Authentication: "Файлы cookie yt-dlp"
     Cookie Source: Крыніца файлаў cookie
     Cookie Sources:
       None: Няма
@@ -753,7 +769,7 @@ Settings:
     Always Use Cookies: Заўсёды выкарыстоўваць cookie
     Restricted Playback Authentication Hint: Прадвызначана OpenTubeX перадае гэтыя cookie у yt-dlp толькі пасля таго, як вы выбераце «Паспрабаваць з наладжанымі cookie» для відэа з абмежаваннем паводле ўзросту або толькі для ўдзельнікаў.
     Restricted Playback Authentication Warning: Выкарыстанне yt-dlp з уліковым запісам Google можа прывесці да часовых або пастаянных абмежаванняў уліковага запісу.
-    Use cookies for subtitles: "Выкарыстоўваць кукі для субцітраў"
+    Use cookies for subtitles: "Выкарыстоўваць файлы cookie для субцітраў"
   Privacy Settings:
     Internet Connectivity Checks: "Праверка інтэрнэт-злучэння"
     Internet Connectivity Checks Tooltip: "Адпраўляе невялікія запыты да сервера, размешчанага арганізацыяй GrapheneOS, для праверкі доступу да інтэрнэту."
@@ -873,6 +889,7 @@ Settings:
     Expanded: Разгорнутыя
     Playing Interface Hide Delay: Затрымка схавання інтэрфейсу падчас прайгравання
     Hide Startup Splash: Схаваць стартавы экран
+    Hide Header Sync Indicator: Схаваць індыкатар сінхранізацыі ў загалоўку праграмы
     Hide Repeat Stats: Схаваць статыстыку паўтораў
     Sections:
       Visible While Paused: Бачныя падчас паўзы ў поўным акне або поўнаэкранным рэжыме
@@ -1196,7 +1213,7 @@ Video:
   Retry With Built-in Extraction: Паўтарыць з убудаваным сродкам вымання
   Retry With yt-dlp Extraction: Паўтарыць з выманнем праз yt-dlp
   Reloading video after streaming URL error: Перазагрузка відэа пасля памылкі URL патоку
-  Configure Restricted Playback Cookies Hint: Наладзьце кукі ў раздзеле «Налады → Вонкавае праграмнае забеспячэнне → Кукі прайгравання yt-dlp».
+  Configure Restricted Playback Cookies Hint: "Наладзьце файлы cookie ў раздзеле «Налады → Вонкавае праграмнае забеспячэнне → Файлы cookie yt-dlp»."
   Try With Configured Cookies: Паспрабаваць з наладжанымі кукі
   Restricted Playback Authentication Failed Template: 'yt-dlp не змог атрымаць доступ да гэтага відэа з наладжанымі кукі: {error}'
   Private: Прыватныя відэа нельга глядзець у OpenTubeX, бо для гэтага трэба ўвайсці ў Google з уліковага запісу ўладальніка відэа.
@@ -1430,6 +1447,10 @@ Share:
   Share Post: Абагуліць допіс
   Timestamp Link Copied: Спасылка на гэты момант скапіявана ў буфер абмену
 Context Menu:
+  Select Tab: Вылучыць укладку
+  Close Tabs Before: Закрыць папярэднія ўкладкі
+  Close Tabs After: Закрыць наступныя ўкладкі
+  Close Other Tabs: Закрыць іншыя ўкладкі
   Copy {service} link without playlist: "Скапіяваць спасылку {service} без плэйліста"
   Context Menu: Кантэкстнае меню
   Select All: Выбраць усё
@@ -1637,7 +1658,7 @@ Tooltips:
     Cookie File: Выберыце файл cookie ў фармаце Netscape для аўтэнтыфікаванага прайгравання.
     Browser for Cookies: Падтрымка браўзераў вызначаецца з выбранага выканальнага файла yt-dlp. Пры запыце аўтэнтыфікаванага прайгравання OpenTubeX загадвае yt-dlp прачытаць файлы cookie з гэтага браўзера.
     Browser Profile: Неабавязковая назва або папка профілю браўзера. Пакіньце поле пустым, каб выкарыстоўваць апошні адкрыты профіль.
-    Always Use Cookies: "Выкарыстоўвае наладжаныя файлы cookie кожны раз, калі yt-dlp здабывае плыні. Гэта не пераключае метад здабывання плыняў на yt-dlp. Калі выбраны yt-dlp, могуць стаць даступнымі фарматы толькі для ўліковага запісу, у тым ліку палепшаны бітрэйт YouTube Premium, калі ўліковы запіс мае да яго доступ. Выкарыстоўваць наладжаныя кукі для субцітраў і аўтаматычных перакладаў."
+    Always Use Cookies: "Выкарыстоўвайце наладжаныя файлы cookie для спампоўванняў, субцітраў і кожны раз, калі yt-dlp атрымлівае патокі. Гэта не пераключае метад здабывання плыняў на yt-dlp. Калі выбраны yt-dlp, могуць стаць даступнымі фарматы толькі для ўліковага запісу, у тым ліку палепшаны бітрэйт YouTube Premium, калі ўліковы запіс мае да яго доступ."
     FFmpeg Executable Path: FFmpeg патрэбны для аб'яднання асобных плыняў відэа і аўдыя ды пераўтварэння аўдыя. Прадвызначана OpenTubeX мяркуе, што FFmpeg можна знайсці праз зменную асяроддзя PATH. Пры неабходнасці тут можна задаць іншы шлях.
     Use cookies for subtitles: "Выкарыстоўваць наладжаныя кукі для субцітраў і аўтаматычных перакладаў. Таксама ўключаецца праз «Заўсёды выкарыстоўваць кукі»."
   Distraction Free Settings:
@@ -1733,6 +1754,7 @@ CommandPalette:
     Download Finished: Гэтае спампоўванне больш не выконваецца
     Video: Спачатку адкрыйце відэа
 Downloads:
+  Preparing: Падрыхтоўка…
   Export Failed: "Не ўдалося захаваць спампаваны файл. Выберыце папку спамповак з дазволам на запіс і паўтарыце спробу."
   Remove File Permanently Warning: "«{title}» будзе выдалена назаўсёды."
   Download: Спампаваць
