@@ -1201,6 +1201,9 @@ test.describe('watch page', () => {
     await expect(body).toHaveClass(/playerFullWindow/)
     await expect(bodyScrollbar).toBeHidden()
 
+    await setPlayerFullscreen(page, true)
+    await setPlayerFullscreen(page, false)
+
     await page.mouse.wheel(0, 600)
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(scrollTop)
 
@@ -1210,6 +1213,17 @@ test.describe('watch page', () => {
     await expect.poll(async () => (
       bodyScrollbar.evaluate((element) => getComputedStyle(element).display)
     )).not.toBe('none')
+    await expect(bodyScrollbar.locator('.os-scrollbar-handle')).toBeVisible()
+
+    await page.keyboard.press('s')
+    await expect(page.locator('.ftVideoPlayer')).toHaveClass(/fullWindow/)
+    await page.locator('.shaka-controls-button-panel .shaka-pip-button').click({ force: true })
+    await expect.poll(() => page.evaluate(() => document.pictureInPictureElement !== null)).toBe(true)
+    await page.evaluate(() => document.exitPictureInPicture())
+    await expect.poll(() => page.evaluate(() => document.pictureInPictureElement === null)).toBe(true)
+    await page.keyboard.press('s')
+    await expect(page.locator('.ftVideoPlayer')).not.toHaveClass(/fullWindow/)
+    await expect(bodyScrollbar.locator('.os-scrollbar-handle')).toBeVisible()
     expect(await page.evaluate(() => window.scrollY)).toBe(scrollTop)
   })
 

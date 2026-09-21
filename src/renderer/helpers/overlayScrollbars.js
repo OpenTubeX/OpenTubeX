@@ -445,6 +445,11 @@ export function removeOverlayScrollbars(element) {
   toggleOverlayScrollbars(element, false)
 }
 
+/** Forces an existing instance to remeasure its overflow. @param {HTMLElement} element */
+export function updateOverlayScrollbars(element) {
+  OverlayScrollbars(element)?.update(true)
+}
+
 /**
  * Forces any pending layout update before restoring a consumer-managed scroll
  * position. This is needed when a scroll container moves between layouts,
