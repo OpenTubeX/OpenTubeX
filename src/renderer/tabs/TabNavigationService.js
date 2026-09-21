@@ -629,6 +629,7 @@ export class TabNavigationService {
 
   setLoadingSource(tabId, source, isLoading) {
     let sources = this.loadingSourcesByTabId.get(tabId)
+    const wasLoading = (sources?.size ?? 0) > 0
     if (!sources) {
       sources = new Set()
       this.loadingSourcesByTabId.set(tabId, sources)
@@ -643,7 +644,9 @@ export class TabNavigationService {
     if (sources.size === 0) {
       this.loadingSourcesByTabId.delete(tabId)
     }
-    window.ftElectron?.tabs?.setLoading?.(sources.size > 0, tabId)
+    if (wasLoading !== (sources.size > 0)) {
+      window.ftElectron?.tabs?.setLoading?.(sources.size > 0, tabId)
+    }
   }
 
   startRouteLoading(tabId) {

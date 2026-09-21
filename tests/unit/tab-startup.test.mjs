@@ -27,12 +27,16 @@ const hooks = registerHooks({
 })
 const { TabManager } = await import('../../src/main/tabs/TabManager.js')
 const { tabSession } = await import('../../src/datastores/handlers/base.js')
+const { tabPreviewStorage } = await import('../../src/main/tabs/TabPreviewStorage.js')
+const { setupTabsIPC } = await import('../../src/main/tabs/tabIpc.js')
+const { BrowserWindow, ipcMain } = await import('electron')
+const { IpcChannels } = await import('../../src/constants.js')
 hooks.deregister()
 const { createTabAvatarFileName } = await import('../../src/main/tabs/tabPreviewCache.js')
 
-function createManager(t, sessionId) {
+function createManager(t, sessionId, windowId = 1) {
   const window = new EventEmitter()
-  window.id = 1
+  window.id = windowId
   window.webContents = Object.assign(new EventEmitter(), {
     isDestroyed: () => false,
     setWindowOpenHandler() {},
@@ -326,10 +330,10 @@ test('reads each shared avatar once and starts independent reads together', asyn
   saved.tabs[1].avatarFileName = avatar
   saved.tabs[2].avatarFileName = missingAvatar
   const reads = new Map()
-  manager._loadTabPreviewDataUrl = fileName => {
+  t.mock.method(tabPreviewStorage, 'read', fileName => {
     assert.ok(!reads.has(fileName), 'shared file is read only once')
     return new Promise(resolve => reads.set(fileName, resolve))
-  }
+  })
   const restored = manager.restoreFromData(saved)
   await new Promise(setImmediate)
   assert.deepEqual([...reads.keys()], [avatar, missingAvatar])
@@ -445,4 +449,115 @@ test('desktop defaults to last active focus while preserving directional prefere
   assert.equal(TabManager.normalizeTabCloseFocus('invalid'), 'lastActiveTab')
   assert.equal(TabManager.normalizeTabCloseFocus('previousTab'), 'previousTab')
   assert.equal(TabManager.normalizeTabCloseFocus('nextTab'), 'nextTab')
+})
+
+test('navigation metadata shares one bounded session write and explicit saves flush it', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const manager = createManager(t)
+  const saves = t.mock.method(tabSession, 'save', async () => {})
+  const tab = manager.createTab({ route: '/history' })
+  manager.updateTabRoute(tab.id, { path: '/home' })
+  manager.updateTabNavigationHistory(tab.id, [{ route: { path: '/home' }, title: 'Home' }], 0, true)
+  manager.applyTabTitle(tab, 'Home title')
+  assert.equal(saves.mock.callCount(), 0, 'metadata must wait for the coalescing window')
+  t.mock.timers.tick(250)
+  await Promise.resolve()
+  assert.equal(saves.mock.callCount(), 1)
+  assert.equal(saves.mock.calls[0].arguments[1].tabs[0].title, 'Home title')
+  manager.applyTabTitle(tab, 'Latest title')
+  await manager._saveSession()
+  assert.equal(saves.mock.callCount(), 2)
+  t.mock.timers.tick(250)
+  assert.equal(saves.mock.callCount(), 2, 'flush cancels the pending timer')
+})
+
+test('clearing a session cancels pending writes instead of resurrecting it', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const manager = createManager(t)
+  const saves = t.mock.method(tabSession, 'save', async () => {})
+  manager.createTab({ route: '/history' })
+  await manager.clearSession()
+  t.mock.timers.tick(250)
+  await Promise.resolve()
+  assert.equal(saves.mock.callCount(), 0)
+})
+
+test('unpersisted history and unchanged session snapshots do not write again', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const manager = createManager(t)
+  const saves = t.mock.method(tabSession, 'save', async () => {})
+  const tab = manager.createTab({ route: '/history' })
+  await manager._saveSession()
+  manager.updateTabNavigationHistory(tab.id, [{ route: { path: '/history' }, title: 'History' }], 0, false)
+  await manager._saveSession()
+  assert.equal(saves.mock.callCount(), 1)
+  manager.updateTabNavigationHistory(tab.id, [{ route: { path: '/history' }, title: 'History' }], 0, true)
+  await manager._saveSession()
+  assert.equal(saves.mock.callCount(), 2)
+})
+
+test('extracted IPC handlers keep tab commands scoped to the sender window', async t => {
+  const first = createManager(t, 'first', 1)
+  const second = createManager(t, 'second', 2)
+  const firstTab = first.createTab({ route: '/history' })
+  const secondTab = second.createTab({ route: '/home' })
+  const handlers = new Map()
+  ipcMain.on = ipcMain.handle = (channel, handler) => {
+    assert.equal(handlers.has(channel), false, 'register each channel once')
+    handlers.set(channel, handler)
+  }
+  BrowserWindow.fromWebContents = sender => [first, second]
+    .find(manager => manager.browserWindow.webContents === sender)?.browserWindow
+  t.after(() => {
+    delete ipcMain.on
+    delete ipcMain.handle
+    delete BrowserWindow.fromWebContents
+  })
+  await setupTabsIPC()
+  const sender = { sender: first.browserWindow.webContents }
+  handlers.get(IpcChannels.TABS_UPDATE_TITLE)(sender, 'First title', firstTab.id)
+  assert.equal(firstTab.title, 'First title')
+  const originalTitle = secondTab.title
+  handlers.get(IpcChannels.TABS_UPDATE_TITLE)(sender, 'Foreign title', secondTab.id)
+  assert.equal(secondTab.title, originalTitle)
+  assert.equal(handlers.get(IpcChannels.TABS_GET_STATE)({ sender: {} }), null)
+  const created = await handlers.get(IpcChannels.TABS_CREATE)(sender, { route: '/about', id: secondTab.id })
+  assert.notEqual(created.id, secondTab.id)
+  assert.equal(created.route.path, '/about')
+  assert.equal(first.tabs.has(created.id), true)
+  assert.equal(second.tabs.has(created.id), false)
+  assert.equal(handlers.get(IpcChannels.TABS_GET_SYNC_SESSIONS)().length, 2)
+})
+
+test('a change reverted during an in-flight write still persists the latest state', async t => {
+  const manager = createManager(t)
+  const tab = manager.createTab({ route: '/history', title: 'Original' })
+  await manager._saveSession()
+  let finishWrite
+  const saves = t.mock.method(tabSession, 'save', () => new Promise(resolve => { finishWrite = resolve }))
+  manager.applyTabTitle(tab, 'Temporary')
+  const first = manager._saveSession()
+  const finishFirst = finishWrite
+  manager.applyTabTitle(tab, 'Original')
+  const second = manager._saveSession()
+  const calls = saves.mock.callCount()
+  finishFirst()
+  finishWrite()
+  await Promise.all([first, second])
+  assert.equal(calls, 2, 'the pending temporary snapshot must be followed by the reversion')
+  assert.equal(saves.mock.calls[1].arguments[1].tabs[0].title, 'Original')
+})
+
+test('failed session writes can retry the same snapshot', async t => {
+  const manager = createManager(t)
+  manager.createTab({ route: '/history' })
+  let attempts = 0
+  t.mock.method(console, 'error', () => {})
+  t.mock.method(tabSession, 'save', async () => {
+    if (++attempts === 1) throw new Error('disk write failed')
+  })
+  await manager._saveSession()
+  await manager._saveSession()
+  await manager._saveSession()
+  assert.equal(attempts, 2)
 })

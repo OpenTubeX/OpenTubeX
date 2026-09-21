@@ -59,7 +59,9 @@ import { composeLocaleMessages } from '../localeComposition'
 import { appendYouTubeTimeZonePreference, buildProxyUrl, DEFAULT_PROXY_SETTINGS, isNonPublicNetworkAddress, isOpenTubeXUrl } from './utils'
 import { isInvidiousInstanceUrl } from './invidiousAuthorization'
 import { RendererCors } from './rendererCors'
-import { TabManager, setupTabsIPC } from './tabs/TabManager'
+import { TabManager } from './tabs/TabManager'
+import { tabPreviewStorage } from './tabs/TabPreviewStorage'
+import { setupTabsIPC } from './tabs/tabIpc'
 import { clearAllTabSessions, loadAllTabSessions } from './tabs/TabSessionStore'
 import { isShareableOpenTubeXRoute, transformOpenTubeXRouteUrl } from '../renderer/helpers/share'
 import {
@@ -2500,7 +2502,7 @@ function runApp() {
 
     // Start dropping cache entries that no restored tab points at. Captures wait
     // on this maintenance inside TabManager, but window creation does not.
-    TabManager.startTabPreviewCachePrune(
+    tabPreviewStorage.startPrune(
       savedSessions.flatMap(session => (
         Array.isArray(session?.tabs)
           ? session.tabs.flatMap(tab => [tab?.previewFileName, tab?.avatarFileName])
