@@ -77,6 +77,12 @@ export function getAnimationSpeedMultiplier(value) {
  * @returns {Animation}
  */
 export function applyAnimationSpeed(animation) {
+  // Scroll-linked animations represent position, not elapsed time. Rescaling
+  // them makes scrollbar thumbs drift away from the actual scroll offset.
+  if (typeof ScrollTimeline !== 'undefined' && animation.timeline instanceof ScrollTimeline) {
+    return animation
+  }
+
   animation.updatePlaybackRate(animationPlaybackRate)
   return animation
 }
