@@ -40,6 +40,7 @@ import { mergePlaylistBookmarkConflict } from '../../helpers/playlist-bookmarks'
 import { getPreviousSyncSessions, getSyncTabRoute, removeSyncSession } from '../../helpers/sync-sessions'
 import {
   AUTO_SYNC_INTERVAL_MS,
+  dispatchRemoteSyncAction,
   isRecentSync,
   isSyncReasonEnabled,
 } from '../../helpers/sync-server-scheduling'
@@ -62,7 +63,6 @@ let liveLockController = null
 let liveGeneration = 0
 let eventsSince = ''
 let pendingLocalSync = false
-let applyingRemoteCollection = false
 let activeSyncPromise = null
 let activeSyncRemoteOnly = false
 const activeSyncClients = new Set()
@@ -182,7 +182,12 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   const previous = parseSnapshot(settings.syncServerSnapshot)
   const next = { ...previous }
   const result = {}
-  const store = { state: rootState, getters: rootGetters, commit, dispatch }
+  const store = {
+    state: rootState,
+    getters: rootGetters,
+    commit,
+    dispatch: (...args) => dispatchRemoteSyncAction(dispatch, ...args),
+  }
   const stages = [
     ...(encrypted ? ['download'] : []),
     ...(settings.syncServerSyncSubscriptions ? ['subscriptions'] : []),
@@ -443,12 +448,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       'settings',
     ].includes(stage))
     for (const collection of collections) {
-      applyingRemoteCollection = true
-      try {
-        await runStage(collection, () => applyCollection(collection, client))
-      } finally {
-        applyingRemoteCollection = false
-      }
+      await runStage(collection, () => applyCollection(collection, client))
     }
 
     if (encryptedCollections) {
@@ -578,7 +578,6 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     commit('setSyncServerStatus', 'error')
     throw error
   } finally {
-    applyingRemoteCollection = false
     releaseSyncClient(networkClient)
   }
 }
@@ -1292,7 +1291,7 @@ const actions = {
       return
     }
     if (activeSyncPromise || rootState.syncServer.syncServerStatus === 'syncing') {
-      if (!applyingRemoteCollection && reason !== 'automatic') pendingLocalSync = true
+      if (reason !== 'automatic') pendingLocalSync = true
       return
     }
     clearTimeout(eventSyncTimer)

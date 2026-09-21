@@ -12,7 +12,7 @@ import { mergeSettingEntry, resolveMergedThemeEntry } from '../../src/renderer/h
 
 import * as errors from '../../src/renderer/helpers/sync-server-errors.js'
 import * as privacy from '../../src/renderer/helpers/sync-server-privacy.js'
-import { isRecentSync, isSyncReasonEnabled } from '../../src/renderer/helpers/sync-server-scheduling.js'
+import { dispatchRemoteSyncAction, isRecentSync, isSyncReasonEnabled } from '../../src/renderer/helpers/sync-server-scheduling.js'
 import { createSyncServerRequestHeaders } from '../../src/renderer/helpers/sync-server-request.js'
 import { mergeSubscriptionSeenVideos } from '../../src/subscriptionSeenVideos.js'
 import { syncSubscriptionSeenVideos } from '../../src/renderer/helpers/subscription-seen-videos.js'
@@ -61,6 +61,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     i18n: { global: { t: key => key } },
     ...privacy,
     syncSubscriptionSeenVideos,
+    dispatchRemoteSyncAction,
     isRecentSync,
     isSyncReasonEnabled,
     getConnectionState: () => network.state,
@@ -976,3 +977,43 @@ for (const [scenario, desktopKeys, phoneKeys] of [
     assert.deepEqual(writes, ['settings'])
   })
 }
+
+test('a user edit during remote collection application schedules a follow-up upload', async () => {
+  const f = liveFixture({ syncServerSyncSettings: true, autoplayVideos: true })
+  f.context.rootState.syncServer = f.context.state
+  await f.actions.syncWithSyncServer(f.context)
+  const remote = await privacy.decryptSyncDocument(f.collections.get('settings').payload, f.settings.syncServerPrivacyKey)
+  const entry = remote.find(entry => entry.key === 'autoplayVideos')
+  entry.value = false
+  entry.updatedAt = Date.now() + 1000
+  f.collections.set('settings', { revision: 2, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) })
+  let releaseRemote
+  let reachedRemote
+  const blocked = new Promise(resolve => { releaseRemote = resolve })
+  const reached = new Promise(resolve => { reachedRemote = resolve })
+  const dispatch = f.context.dispatch
+  f.context.dispatch = async (...args) => {
+    const result = await dispatch(...args)
+    if (args[0] === 'updateAutoplayVideos') {
+      reachedRemote()
+      await blocked
+    }
+    return result
+  }
+  const syncing = f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true })
+  await reached
+  try {
+    f.settings.autoplayVideos = true
+    f.settings.syncServerSettingUpdatedAt = { autoplayVideos: entry.updatedAt + 1000 }
+    f.actions.scheduleSyncServer(f.context, 'settings')
+  } finally {
+    releaseRemote()
+    await syncing
+  }
+  assert.ok(f.dispatched.some(([action, reason]) => action === 'scheduleSyncServer' && reason === 'data'))
+  f.requests.length = 0
+  await f.actions.syncWithSyncServer(f.context, { automatic: true })
+  assert.ok(f.requests.some(request => request.method === 'PUT' && request.url.endsWith('/encrypted_sync/settings')))
+  const saved = await privacy.decryptSyncDocument(f.collections.get('settings').payload, f.settings.syncServerPrivacyKey)
+  assert.equal(saved.find(entry => entry.key === 'autoplayVideos').value, true)
+})

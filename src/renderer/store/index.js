@@ -19,11 +19,13 @@ import syncServer from './modules/sync-server'
 import {
   SYNC_ACTION_REASONS,
   SYNC_MUTATION_REASONS,
+  isRemoteSyncDispatch,
 } from '../helpers/sync-server-scheduling'
 
 function syncOnLocalChanges(store) {
   const revisions = new Map()
   const actionRevisions = new WeakMap()
+  const remoteActions = new WeakSet()
   const settingValues = new Map(Object.entries(store.state.settings).map(([key, value]) => {
     return [key, JSON.stringify(value)]
   }))
@@ -48,6 +50,7 @@ function syncOnLocalChanges(store) {
 
   store.subscribeAction({
     before: action => {
+      if (isRemoteSyncDispatch()) remoteActions.add(action)
       const setting = action.type.startsWith('update')
         ? action.type.charAt(6).toLowerCase() + action.type.slice(7)
         : ''
@@ -57,6 +60,7 @@ function syncOnLocalChanges(store) {
       if (reason) actionRevisions.set(action, revisions.get(reason) ?? 0)
     },
     after: action => {
+      if (remoteActions.has(action)) return
       const setting = action.type.startsWith('update')
         ? action.type.charAt(6).toLowerCase() + action.type.slice(7)
         : ''

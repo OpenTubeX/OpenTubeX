@@ -43,7 +43,7 @@
           @keydown.enter="authenticate('login')"
         />
         <FtInput
-          v-if="!connected && serverPrivacySupported !== false"
+          v-if="!connected && serverPrivacySupported !== false && serverCheckStatus !== 'error'"
           :placeholder="t('Settings.Sync Settings.Privacy Passphrase')"
           :show-action-button="false"
           :value="privacyPassphrase"
@@ -63,7 +63,7 @@
         </a>
       </p>
       <p
-        v-if="!connected && serverPrivacySupported !== false"
+        v-if="!connected && serverPrivacySupported !== false && serverCheckStatus !== 'error'"
         class="privacyHint"
       >
         {{ t('Settings.Sync Settings.Privacy Passphrase Hint') }}
