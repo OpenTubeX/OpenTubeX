@@ -626,7 +626,7 @@ watch([serverUrl, connected, syncEnabled], ([value, isConnected, isEnabled], [pr
       if (isConnected && !(error instanceof SyncServerUnsupportedError)) return
       serverCheckStatus.value = 'error'
       serverCheckError.value = error instanceof SyncServerUnsupportedError
-        ? t('Settings.Sync Settings.Server Update Required')
+        ? SYNC_SERVER_UPDATE_REQUIRED_MESSAGE
         : t('Settings.Sync Settings.Server Unavailable')
     } finally {
       if (serverCheckClient === client) serverCheckClient = null
