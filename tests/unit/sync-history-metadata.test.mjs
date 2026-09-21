@@ -158,3 +158,68 @@ test('newer local history keeps its own known duration when uploading', async ()
   assert.equal(changes, undefined)
   assert.equal(uploaded[0].video.duration, 700)
 })
+
+function historyDevice(record, savedSnapshot = [record.videoId]) {
+  const records = [structuredClone(record)]
+  let snapshot = structuredClone(savedSnapshot)
+  return {
+    records,
+    get snapshot() { return JSON.parse(JSON.stringify(snapshot)) },
+    async sync(server) {
+      snapshot = structuredClone(await context.syncHistory({
+        getWatchHistory: async () => structuredClone(server.entries),
+        supportsBulkSync: async () => true,
+        putWatchHistoryBulk: async entries => {
+          server.writes++
+          server.entries = structuredClone(entries)
+        },
+      }, {
+        state: { history: { historyCacheSorted: records } },
+        dispatch: async (action, changes) => {
+          assert.equal(action, 'applyHistorySyncChanges')
+          for (const entry of [...changes.insertions, ...changes.updates]) {
+            const index = records.findIndex(record => record.videoId === entry.videoId)
+            if (index === -1) records.push(structuredClone(entry))
+            else records[index] = structuredClone(entry)
+          }
+        },
+      }, snapshot))
+    },
+  }
+}
+
+test('two devices with equal watch timestamps and conflicting progress converge', async () => {
+  const laptop = historyDevice({ ...imported, isWatched: false, watchProgress: 0 })
+  const phone = historyDevice({ ...imported, isWatched: false, watchProgress: 169.743 })
+  const server = { entries: [{ ...remote, metadata: { added_date: 200, watched_state: 'watching', position_millis: 169743 } }], writes: 0 }
+  for (let turn = 0; turn < 4; turn++) {
+    await laptop.sync(server)
+    await phone.sync(server)
+  }
+  assert.equal(laptop.records[0].watchProgress, phone.records[0].watchProgress)
+  const settledWrites = server.writes
+  await laptop.sync(server)
+  await phone.sync(server)
+  assert.equal(server.writes, settledWrites)
+
+  // Seeking backwards is a real edit even though timeWatched stays unchanged.
+  const restarted = historyDevice(laptop.records[0], laptop.snapshot)
+  restarted.records[0].watchProgress = 12
+  await restarted.sync(server)
+  await phone.sync(server)
+  assert.equal(phone.records[0].watchProgress, 12)
+  assert.equal(server.writes, settledWrites + 1)
+
+  phone.records[0].isWatched = true
+  await phone.sync(server)
+  await restarted.sync(server)
+  assert.equal(restarted.records[0].isWatched, true)
+  phone.records[0].isWatched = false
+  await phone.sync(server)
+  await restarted.sync(server)
+  assert.equal(restarted.records[0].isWatched, false)
+  const finalWrites = server.writes
+  await phone.sync(server)
+  await restarted.sync(server)
+  assert.equal(server.writes, finalWrites)
+})

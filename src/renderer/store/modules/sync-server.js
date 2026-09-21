@@ -293,7 +293,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         if (history !== null) {
           commit('setSyncServerHistorySupported', true)
           next.history = history
-          result.history = history.length
+          result.history = Object.keys(history).length
         } else {
           commit('setSyncServerHistorySupported', false)
         }
