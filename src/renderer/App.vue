@@ -1462,6 +1462,7 @@ onMounted(async () => {
   })
   trayAppearanceReady = true
   updateTheme()
+  if (store.getters.getTrayIconPreset !== 'theme') refreshTrayIcon()
 
   if (defaultInvidiousInstance.value === '') {
     await store.dispatch('setRandomCurrentInvidiousInstance')
@@ -2887,7 +2888,7 @@ function updateTheme() {
   const customTheme = customThemes.find(theme => `custom:${theme.id}` === effectiveTheme) ??
     (effectiveTheme === 'custom' ? customThemes[0] : null) ?? null
   applyThemeToDocument(effectiveTheme, mainColor.value, secColor.value, customTheme)
-  refreshTrayIcon()
+  if (store.getters.getTrayIconPreset === 'theme') refreshTrayIcon()
   updateSystemBarsStyle()
 }
 

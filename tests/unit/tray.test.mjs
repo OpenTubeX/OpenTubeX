@@ -284,3 +284,25 @@ for (const platform of ['linux', 'win32', 'darwin']) {
     else assert.equal(trays.at(-1).image, image)
   })
 }
+
+test('quit waits for the queued tray icon cache write', async () => {
+  let finishWrite
+  const trayIconWrite = new Promise(resolve => { finishWrite = resolve })
+  const context = vm.createContext({
+    trayIconWrite,
+    baseHandlers: { compactAllDatastores: async () => {} },
+    shutdownYtDlpDownloads: async () => {},
+    session: { defaultSession: { clearCache: async () => {}, clearStorageData: async () => {} } },
+  })
+  vm.runInContext(`let resourcesCleanUpDone = false; ${source.slice(source.indexOf('  async function cleanUpResources()'), source.indexOf('  // MacOS event'))}`, context)
+  let finished = false
+  const cleanup = context.cleanUpResources().then(() => { finished = true })
+  try {
+    await new Promise(resolve => setImmediate(resolve))
+    assert.equal(finished, false)
+  } finally {
+    finishWrite()
+    await cleanup
+  }
+  assert.equal(finished, true)
+})

@@ -136,3 +136,19 @@ test('starting another renderer preserves the saved tray icon while settings loa
   await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getTrayIconPreset)).toBe('dracula')
   expect(await app.electronApp.evaluate(() => globalThis.trayDefaultResets)).toBe(0)
 })
+
+test('fixed tray palettes do not redraw when the app theme changes', async ({ app, page }) => {
+  await setSetting(page, 'TrayIconPreset', 'dracula')
+  await expect.poll(() => cachedIcon(app)).not.toBeNull()
+  await app.electronApp.evaluate(({ Tray }) => {
+    const original = Tray.prototype.setImage
+    globalThis.trayImageUpdates = 0
+    Tray.prototype.setImage = function (image) {
+      globalThis.trayImageUpdates++
+      return original.call(this, image)
+    }
+  })
+  await setSetting(page, 'BaseTheme', 'light')
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  expect(await app.electronApp.evaluate(() => globalThis.trayImageUpdates)).toBe(0)
+})

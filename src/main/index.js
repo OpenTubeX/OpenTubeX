@@ -5614,6 +5614,7 @@ function runApp() {
     }
 
     await Promise.allSettled([
+      trayIconWrite,
       baseHandlers.compactAllDatastores(),
       shutdownYtDlpDownloads(),
       session.defaultSession.clearCache(),
