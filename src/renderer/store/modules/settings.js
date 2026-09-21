@@ -1444,6 +1444,10 @@ const customActions = {
             }
             if (data._id === 'syncServerEnabled') {
               dispatch('applySyncServerEnabled', data.value, { root: true })
+            } else if (data._id === 'syncServerAutoSync') {
+              dispatch(data.value ? 'startSyncServerAutoSync' : 'stopSyncServerAutoSync', null, { root: true })
+            } else if (data._id === 'syncServerToken') {
+              dispatch('applySyncServerToken', null, { root: true })
             }
             break
 

@@ -889,6 +889,13 @@ Settings:
     Import playlists formats: 'Поддържани формати: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Поддържани формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Activity: "Активност на профила"
+    No Activity: "Няма скорошна активност"
+    Setting Changed: "{device} промени {setting} на {value}"
+    Item Updated: "{device} обнови {setting}"
+    Open On Device: "Отваряне на друго устройство"
+    Video Sent: "Видеото е изпратено. Офлайн устройствата ще го получат при свързване в рамките на 24 часа."
+    Video Received: "Получено видео: {title}"
     Previous Auto Sync Notice: "Автоматичното синхронизиране е изключено. По-ранна версия може да го е изключила, за да предотврати загуба на данни."
     Enable Automatic Sync: "Включване на автоматичното синхронизиране"
     Destructive Sync Blocked: "Синхронизирането е спряно, за да се предотврати загуба на данни. Автоматичното синхронизиране е изключено. Отворете настройките за синхронизиране, за да прегледате изтриванията."

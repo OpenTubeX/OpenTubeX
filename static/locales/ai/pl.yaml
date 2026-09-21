@@ -420,6 +420,13 @@ Settings:
     Open Profile Directory: Otwórz katalog profilu
     Invalid JSON row, skipping item: Nieprawidłowy JSON w wierszu {row}. Element zostanie pominięty
   Sync Settings:
+    Activity: "Aktywność konta"
+    No Activity: "Brak ostatniej aktywności"
+    Setting Changed: "{device} zmieniło {setting} na {value}"
+    Item Updated: "{device} zaktualizowało {setting}"
+    Open On Device: "Otwórz na innym urządzeniu"
+    Video Sent: "Film wysłany. Urządzenia offline otrzymają go po ponownym połączeniu w ciągu 24 godzin."
+    Video Received: "Odebrano film: {title}"
     Previous Auto Sync Notice: "Automatyczna synchronizacja jest wyłączona. Wcześniejsza wersja mogła ją wyłączyć, aby zapobiec utracie danych."
     Enable Automatic Sync: "Włącz automatyczną synchronizację"
     Destructive Sync Blocked: "Synchronizacja została zatrzymana, aby zapobiec utracie danych. Automatyczna synchronizacja jest wyłączona. Otwórz ustawienia synchronizacji, aby sprawdzić usuwane elementy."

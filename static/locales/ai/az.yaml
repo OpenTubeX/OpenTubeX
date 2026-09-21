@@ -888,6 +888,13 @@ Settings:
     Import playlists formats: 'Dəstəklənən formatlar: OpenTubeX (.db)'
     Import search history formats: 'Dəstəklənən formatlar: OpenTubeX (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Activity: "Hesab fəaliyyəti"
+    No Activity: "Son fəaliyyət yoxdur"
+    Setting Changed: "{device} {setting} ayarını {value} olaraq dəyişdi"
+    Item Updated: "{device} {setting} ayarını yenilədi"
+    Open On Device: "Başqa cihazda aç"
+    Video Sent: "Video göndərildi. Oflayn cihazlar 24 saat ərzində yenidən qoşulduqda onu alacaq."
+    Video Received: "Video alındı: {title}"
     Previous Auto Sync Notice: Avtomatik sinxronizasiya söndürülüb. Əvvəlki versiya məlumat itkisinin qarşısını almaq üçün onu söndürmüş ola bilər.
     Enable Automatic Sync: Avtomatik sinxronizasiyanı aktivləşdir
     Destructive Sync Blocked: Məlumat itkisinin qarşısını almaq üçün sinxronizasiya dayandırıldı. Avtomatik sinxronizasiya söndürülüb. Silinəcək elementləri nəzərdən keçirmək üçün sinxronizasiya ayarlarını açın.

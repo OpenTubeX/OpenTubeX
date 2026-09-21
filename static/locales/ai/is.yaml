@@ -893,6 +893,13 @@ Settings:
     Import playlists formats: 'Studd snið: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Activity: "Virkni reiknings"
+    No Activity: "Engin nýleg virkni"
+    Setting Changed: "{device} breytti {setting} í {value}"
+    Item Updated: "{device} uppfærði {setting}"
+    Open On Device: "Opna á öðru tæki"
+    Video Sent: "Myndskeið sent. Ótengd tæki fá það þegar þau tengjast aftur innan 24 klukkustunda."
+    Video Received: "Móttekið myndskeið: {title}"
     Previous Auto Sync Notice: "Slökkt er á sjálfvirkri samstillingu. Eldri útgáfa gæti hafa slökkt á henni til að koma í veg fyrir gagnatap."
     Enable Automatic Sync: "Kveikja á sjálfvirkri samstillingu"
     Destructive Sync Blocked: "Samstilling var stöðvuð til að koma í veg fyrir gagnatap. Slökkt er á sjálfvirkri samstillingu. Opnaðu samstillingarstillingar til að fara yfir eyðingar."

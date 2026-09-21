@@ -1170,6 +1170,13 @@ Settings:
     Import playlists formats: 'Podprte oblike: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Podprte oblike: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Activity: "Dejavnost računa"
+    No Activity: "Ni nedavne dejavnosti"
+    Setting Changed: "{device} je spremenil {setting} v {value}"
+    Item Updated: "{device} je posodobil {setting}"
+    Open On Device: "Odpri v drugi napravi"
+    Video Sent: "Videoposnetek je poslan. Naprave brez povezave ga prejmejo ob ponovni povezavi v 24 urah."
+    Video Received: "Prejeti videoposnetek: {title}"
     Previous Auto Sync Notice: "Samodejna sinhronizacija je izklopljena. Prejšnja različica jo je morda izklopila, da bi preprečila izgubo podatkov."
     Enable Automatic Sync: "Vklopi samodejno sinhronizacijo"
     Destructive Sync Blocked: "Sinhronizacija je bila ustavljena, da se prepreči izguba podatkov. Samodejna sinhronizacija je izklopljena. Odprite nastavitve sinhronizacije in preglejte brisanja."

@@ -110,6 +110,7 @@ test('Android video menus share a public video URL and omit private playlist IDs
   for (const publicPlaylist of [true, false]) {
     const shared = []
     const context = {
+      store: { getters: {} },
       process: { env: { IS_CAPACITOR: true } },
       computed: get => ({ value: get() }),
       videoMenuOptions: { value: [] },

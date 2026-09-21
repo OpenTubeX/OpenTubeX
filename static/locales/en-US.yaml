@@ -1521,6 +1521,13 @@ Settings:
     Import search history formats: 'Supported formats: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
     Manage Subscriptions: Manage Subscriptions
   Sync Settings:
+    Activity: "Account activity"
+    No Activity: "No recent activity"
+    Setting Changed: "{device} changed {setting} to {value}"
+    Item Updated: "{device} updated {setting}"
+    Open On Device: "Open on another device"
+    Video Sent: "Video sent. Offline devices receive it when they reconnect, for up to 24 hours."
+    Video Received: "Received video: {title}"
     Previous Auto Sync Notice: "Automatic sync is off. An earlier version may have disabled it to prevent data loss."
     Enable Automatic Sync: "Enable automatic sync"
     Destructive Sync Blocked: "Sync stopped to prevent data loss. Automatic sync is off. Open Sync settings to review the deletions."

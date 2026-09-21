@@ -1470,6 +1470,13 @@ Settings:
     Subtitles Enabled: Untertitel aktiviert
     Volume: Lautstärke
   Sync Settings:
+    Activity: "Kontoaktivität"
+    No Activity: "Keine kürzlichen Aktivitäten"
+    Setting Changed: "{device} hat {setting} auf {value} geändert"
+    Item Updated: "{device} hat {setting} aktualisiert"
+    Open On Device: "Auf anderem Gerät öffnen"
+    Video Sent: "Video gesendet. Geräte, die offline sind, erhalten es innerhalb von 24 Stunden beim erneuten Verbinden."
+    Video Received: "Video empfangen: {title}"
     Previous Auto Sync Notice: "Die automatische Synchronisierung ist ausgeschaltet. Eine frühere Version hat sie möglicherweise deaktiviert, um Datenverlust zu verhindern."
     Enable Automatic Sync: "Automatische Synchronisierung einschalten"
     Destructive Sync Blocked: "Die Synchronisierung wurde gestoppt, um Datenverlust zu verhindern. Die automatische Synchronisierung ist ausgeschaltet. Prüfe die Löschungen in den Synchronisierungseinstellungen."

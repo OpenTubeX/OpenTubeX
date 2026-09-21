@@ -286,7 +286,7 @@ export class SyncServerClient {
     return this.request('/v1/encrypted_sync/legacy', { timeoutMs: MAX_ENCRYPTED_SYNC_TIMEOUT_MS })
   }
 
-  putEncryptedSyncCollection(collection, revision, payload) {
+  putEncryptedSyncCollection(collection, revision, payload, activity) {
     const timeoutMs = Math.min(
       MAX_ENCRYPTED_SYNC_TIMEOUT_MS,
       Math.max(
@@ -297,9 +297,25 @@ export class SyncServerClient {
     )
     return this.request(`/v1/encrypted_sync/${encodeURIComponent(collection)}`, {
       method: 'PUT',
-      body: { revision, payload },
+      body: { revision, payload, ...(activity ? { activity } : {}) },
       timeoutMs,
     })
+  }
+
+  waitForSyncChanges(cursor) {
+    return this.request(`/v1/encrypted_sync/changes?since=${encodeURIComponent(cursor)}`, { timeoutMs: 35000 })
+  }
+
+  getSyncEvents(since = '') {
+    return this.request(`/v1/encrypted_sync/events?since=${encodeURIComponent(since)}`)
+  }
+
+  sendDeviceRequest(recipient, payload) {
+    return this.request('/v1/encrypted_sync/events', { method: 'POST', body: { recipient, payload } })
+  }
+
+  acknowledgeDeviceRequest(id) {
+    return this.request(`/v1/encrypted_sync/events/${encodeURIComponent(id)}`, { method: 'DELETE' })
   }
 
   async apiRequest(path, options = {}) {
