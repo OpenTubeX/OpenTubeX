@@ -166,6 +166,9 @@ export class SyncServerClient {
       // health response advertises the optional OpenTubeX extensions.
       if (!response || typeof response !== 'object' || Array.isArray(response)) return {}
       return response
+    }).catch(error => {
+      this.serverInfoPromise = null
+      throw error
     })
     return this.serverInfoPromise
   }

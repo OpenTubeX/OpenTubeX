@@ -3,7 +3,7 @@
     <div class="activityHeader">
       <h3>{{ t('Settings.Sync Settings.Activity') }}</h3>
       <FtIconButton
-        :title="t('Settings.Sync Settings.Sync Now')"
+        :title="t('Theme Discovery.Refresh')"
         :icon="['fas', 'sync']"
         :disabled="loading"
         @click="refresh"

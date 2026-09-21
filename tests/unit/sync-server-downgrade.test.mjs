@@ -673,3 +673,14 @@ test('a sign-out received from another window stops sync and clears account acti
   assert.equal(f.context.state.syncServerLiveSupported, false)
   assert.equal(f.dispatched.some(([action]) => action === 'initializeSyncServer'), false)
 })
+
+test('failed capability discovery can be retried on the same client', async () => {
+  let attempts = 0
+  const f = fixture({}, { respond: () => ++attempts === 1
+    ? new Response('temporarily unavailable', { status: 503 })
+    : { capabilities: { encrypted_sync: 1, live_sync: 1 } } })
+  const client = new f.Client(f.settings.syncServerUrl, f.settings.syncServerToken)
+  await assert.rejects(client.getCapabilities(), { status: 503 })
+  assert.equal((await client.getCapabilities()).live_sync, 1)
+  assert.equal(attempts, 2)
+})

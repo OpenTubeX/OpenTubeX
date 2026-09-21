@@ -78,7 +78,7 @@ test('live sync retries an unprocessed cursor after failure, ignores unchanged c
   const errors = []
   await watchSyncChanges(client, async () => {
     if (++changes === 1) throw new Error('Network lost during download')
-  }, error => errors.push(error.message), async () => {})
+  }, error => errors.push(error.message), { sleep: async () => {} })
   assert.deepEqual(cursors, ['', '', 'latest', 'latest'])
   assert.equal(changes, 2)
   assert.deepEqual(errors, ['Network lost during download'])
@@ -88,6 +88,26 @@ test('live sync stops retrying expired authentication and exponentially backs of
   const delays = []
   let attempts = 0
   await watchSyncChanges({ cancelled: false, waitForSyncChanges: async () => { throw new Error(++attempts < 5 ? 'offline' : 'expired') } },
-    () => assert.fail(), error => error.message !== 'expired', async delay => delays.push(delay))
+    () => assert.fail(), error => error.message !== 'expired', { sleep: async delay => delays.push(delay) })
   assert.deepEqual(delays, [1000, 2000, 4000, 8000])
+})
+
+test('live sync retries discovery before polling and stops when unsupported or cancelled', async () => {
+  const delays = []
+  let attempts = 0
+  let polls = 0
+  const client = { cancelled: false, waitForSyncChanges: async () => { polls++; client.cancelled = true; return { cursor: 'ready' } } }
+  await watchSyncChanges(client, () => assert.fail(), () => true, {
+    prepare: async () => { if (++attempts < 3) throw new Error('temporary discovery failure'); return true },
+    sleep: async ms => delays.push(ms),
+  })
+  assert.equal(attempts, 3)
+  assert.equal(polls, 1)
+  assert.deepEqual(delays, [1000, 2000])
+  for (const supported of [false, true]) {
+    const stopped = { cancelled: false, waitForSyncChanges: () => assert.fail('must not poll') }
+    await watchSyncChanges(stopped, () => assert.fail(), () => true, {
+      prepare: async () => { stopped.cancelled = supported; return supported },
+    })
+  }
 })

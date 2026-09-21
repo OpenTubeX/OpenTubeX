@@ -560,10 +560,6 @@ const actions = {
     liveLockController = lockController
     const listen = async () => {
       if (generation !== liveGeneration) return
-      const supported = (await client.getCapabilities()).live_sync === 1
-      if (generation !== liveGeneration) return
-      commit('setSyncServerLiveSupported', supported)
-      if (!supported) return
       await watchSyncChanges(client, async () => {
         if (generation !== liveGeneration) return
         // A change arriving during an upload needs a second pass after it finishes.
@@ -576,6 +572,13 @@ const actions = {
           return false
         }
         return true
+      }, {
+        prepare: async () => {
+          const supported = (await client.getCapabilities()).live_sync === 1
+          if (generation !== liveGeneration) return false
+          commit('setSyncServerLiveSupported', supported)
+          return supported
+        },
       })
     }
     try {

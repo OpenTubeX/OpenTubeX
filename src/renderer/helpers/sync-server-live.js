@@ -63,11 +63,19 @@ export function validateDeviceRequest(value, recipient, now = Date.now()) {
 
 // Long polling uses the same authenticated, cancellable HTTP transport on
 // desktop and Android. The durable server cursor handles missed notifications.
-export async function watchSyncChanges(client, onChange, onError, sleep = ms => new Promise(resolve => setTimeout(resolve, ms))) {
+export async function watchSyncChanges(client, onChange, onError, {
+  prepare = async () => true,
+  sleep = ms => new Promise(resolve => setTimeout(resolve, ms)),
+} = {}) {
+  let prepared = false
   let cursor = ''
   let retryMs = 1000
   while (!client.cancelled) {
     try {
+      if (!prepared) {
+        if (!await prepare() || client.cancelled) return
+        prepared = true
+      }
       const response = await client.waitForSyncChanges(cursor)
       if (client.cancelled) return
       if (typeof response?.cursor !== 'string' || !response.cursor) throw new Error('Invalid sync change cursor')

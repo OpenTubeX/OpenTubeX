@@ -81,6 +81,7 @@ for (const uiScale of [95, 125]) {
         const pathname = url.pathname
         if (pathname === '/health') return route.fulfill({ json: { capabilities: { encrypted_sync: 1, account_sessions: 1, live_sync: 1 } } })
         if (pathname === '/v1/account/sessions') return route.fulfill({ json: { sessions } })
+        if (pathname.startsWith('/v1/account/sessions/') && request.method() === 'PATCH') return route.fulfill({ status: 204 })
         if (pathname === '/v1/encrypted_sync/changes') {
           if (url.searchParams.get('since') !== String(cursor)) return route.fulfill({ json: { cursor: String(cursor) } })
           waiting.add(route)
@@ -107,6 +108,7 @@ for (const uiScale of [95, 125]) {
             }
           })
         }
+        if (!pathname.startsWith('/v1/encrypted_sync/')) return route.fulfill({ status: 404 })
         const collection = pathname.split('/').at(-1)
         if (request.method() === 'PUT') {
           const { revision, payload, activity } = request.postDataJSON()
@@ -121,8 +123,8 @@ for (const uiScale of [95, 125]) {
       await page.route('https://sync.example/**', routeSync)
       const sync = await goToSettingsSection(page, 'sync')
       await sync.getByRole('checkbox', { name: 'Enable Sync', exact: true }).press('Space')
-      await sync.getByRole('button', { name: 'Sync now', exact: true }).click()
       await expect(sync.locator('.syncActivity')).toBeVisible()
+      await sync.getByRole('button', { name: 'Sync now', exact: true }).click()
       await expect.poll(() => collections.has('settings')).toBe(true)
       const auto = sync.getByRole('checkbox', { name: 'Sync automatically after changes and every five minutes', exact: true })
       await auto.press('Space')
