@@ -1,0 +1,16 @@
+.trayIconPreview {
+  background-color: var(--bg-color);
+  border-radius: 22.5%;
+  color: var(--logo-primary-color);
+  display: block;
+  block-size: 64px;
+  inline-size: 64px;
+}
+
+.trayIconPreview > span {
+  background-color: currentcolor;
+  display: block;
+  block-size: 100%;
+  mask-size: contain;
+  inline-size: 100%;
+}

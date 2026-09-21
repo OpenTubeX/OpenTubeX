@@ -124,10 +124,11 @@
       />
     </FtFlexBox>
     <FtFlexBox
-      v-if="IS_CAPACITOR"
+      v-if="IS_CAPACITOR || usingElectron"
       class="appIconActions"
     >
-      <AppIconSettings />
+      <AppIconSettings v-if="IS_CAPACITOR" />
+      <TrayIconSettings v-if="usingElectron" />
     </FtFlexBox>
     <ThemeDiscovery
       :open="showThemeDiscovery"
@@ -398,6 +399,7 @@
 
 <script setup>
 import AppIconSettings from './AppIconSettings.vue'
+import TrayIconSettings from './TrayIconSettings.vue'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 

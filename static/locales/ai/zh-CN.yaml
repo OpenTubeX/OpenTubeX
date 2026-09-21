@@ -1798,3 +1798,7 @@ App Icon:
 Tray:
   Hide All Windows: "隐藏所有窗口"
   Show All Windows: "显示所有窗口"
+
+Tray Icon:
+  Title: "托盘图标"
+  Follow App Theme: "跟随应用主题"

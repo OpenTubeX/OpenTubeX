@@ -129,6 +129,7 @@ const IpcChannels = {
   DB_SUBSCRIPTION_CACHE: 'db-subscription-cache',
 
   SYNC_SETTINGS: 'sync-settings',
+  SET_TRAY_ICON: 'set-tray-icon',
   SYNC_HISTORY: 'sync-history',
   SYNC_WATCH_STATS: 'sync-watch-stats',
   SYNC_SEARCH_HISTORY: 'sync-search-history',

@@ -1822,3 +1822,7 @@ App Icon:
 Tray:
   Hide All Windows: "Sakrij sve prozore"
   Show All Windows: "Prikaži sve prozore"
+
+Tray Icon:
+  Title: "Ikona u sistemskoj traci"
+  Follow App Theme: "Prati temu aplikacije"

@@ -2443,3 +2443,7 @@ App Icon:
 Tray:
   Hide All Windows: "Amaga totes les finestres"
   Show All Windows: "Mostra totes les finestres"
+
+Tray Icon:
+  Title: "Icona de la safata"
+  Follow App Theme: "Segueix el tema de l’aplicació"

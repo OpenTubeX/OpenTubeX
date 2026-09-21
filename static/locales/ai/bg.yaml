@@ -1818,3 +1818,7 @@ App Icon:
 Tray:
   Hide All Windows: "Скриване на всички прозорци"
   Show All Windows: "Показване на всички прозорци"
+
+Tray Icon:
+  Title: "Икона в системната област"
+  Follow App Theme: "Следване на темата на приложението"

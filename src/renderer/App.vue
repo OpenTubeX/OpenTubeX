@@ -560,6 +560,7 @@ import { repairSystemThemeSettings } from './helpers/customThemeSync'
 
 import packageDetails from '../../package.json'
 import { MULTIPLE_TABS_CONFIRM_THRESHOLD, KeyboardShortcuts } from '../constants'
+import { updateTrayIcon } from './helpers/trayIcon'
 import { resolveBaseTheme, resolveSystemThemeSettings } from '../appearanceSettings'
 import { calculateColorLuminance, resolveColor } from './helpers/colors'
 import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
@@ -1459,6 +1460,7 @@ onMounted(async () => {
     await repairSystemThemeSettings(store, themes)
     updateTheme()
   })
+  trayAppearanceReady = true
   updateTheme()
 
   if (defaultInvidiousInstance.value === '') {
@@ -2868,6 +2870,15 @@ const thumbnailSize = computed(() => store.getters.getThumbnailSize)
 
 watch(thumbnailSize, updateThumbnailListSize)
 
+let trayAppearanceReady = false
+watch(() => store.getters.getTrayIconPreset, refreshTrayIcon)
+
+function refreshTrayIcon() {
+  if (isElectron && trayAppearanceReady) {
+    updateTrayIcon(store.getters.getTrayIconPreset).catch(error => console.error('Unable to update tray icon', error))
+  }
+}
+
 function updateTheme() {
   const effectiveTheme = baseTheme.value === 'system'
     ? (systemUsesDarkTheme.value ? store.getters.getSystemDarkTheme : store.getters.getSystemLightTheme)
@@ -2876,6 +2887,7 @@ function updateTheme() {
   const customTheme = customThemes.find(theme => `custom:${theme.id}` === effectiveTheme) ??
     (effectiveTheme === 'custom' ? customThemes[0] : null) ?? null
   applyThemeToDocument(effectiveTheme, mainColor.value, secColor.value, customTheme)
+  refreshTrayIcon()
   updateSystemBarsStyle()
 }
 

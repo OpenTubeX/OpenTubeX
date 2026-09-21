@@ -1881,3 +1881,7 @@ App Icon:
 Tray:
   Hide All Windows: "Skjul alle vinduer"
   Show All Windows: "Vis alle vinduer"
+
+Tray Icon:
+  Title: "Ikon i systembakken"
+  Follow App Theme: "Følg appens tema"

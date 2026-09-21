@@ -35,7 +35,7 @@ function fixture(platform = 'linux') {
   }
   class Tray extends EventEmitter {
     destroyed = false
-    constructor() { super(); trays.push(this) }
+    constructor(image) { super(); this.image = image; trays.push(this) }
     setToolTip() {}
     setIgnoreDoubleClickEvents() {}
     setContextMenu(menu) { this.menu = menu }
@@ -45,6 +45,7 @@ function fixture(platform = 'linux') {
   }
   const context = vm.createContext({
     process: { platform, env: {} }, path: { join: () => '/icon.png' }, __dirname: '/',
+    selectedTrayImage: { isEmpty: () => true },
     Tray, BrowserWindow: { getAllWindows: () => windows, getFocusedWindow: () => windows[0] },
     Menu: { buildFromTemplate: items => items },
     createWindow: () => new Window(), requestQuit: () => {},
@@ -66,7 +67,7 @@ function fixture(platform = 'linux') {
     const trayTranslate = key => key;
     const dockMediaLabels = { previous: 'Previous', play: 'Play', pause: 'Pause', next: 'Next', newWindow: 'New Window' };
     let isTrayOnMinimizeSupported = true;
-    ${source.slice(source.indexOf('  function ensureBackgroundTray()'), source.indexOf('\n  asyncFs.rm(', source.indexOf('  function ensureBackgroundTray()')))}
+    ${source.slice(source.indexOf('  function getTrayImage()'), source.indexOf('\n  asyncFs.rm(', source.indexOf('  function ensureBackgroundTray()')))}
     ${source.slice(source.indexOf('  function isTrayEnabled()'), source.indexOf('  /**\n   * @param {string} extension'))}
     function configure(values) {
       if ('enabled' in values) useTrayIcon = values.enabled;
@@ -271,3 +272,15 @@ test('a recreated tray receives a menu even when its contents are unchanged', ()
   context.configure({ enabled: true })
   assert.ok(trays[1].menu.length > 0)
 })
+
+for (const platform of ['linux', 'win32', 'darwin']) {
+  test(`selected tray artwork survives tray recreation on ${platform}`, () => {
+    const { context, trays } = fixture(platform)
+    const image = { isEmpty: () => false, resize: ({ height }) => ({ height }) }
+    context.selectedTrayImage = image
+    context.configure({ enabled: false })
+    context.configure({ enabled: true })
+    if (platform === 'darwin') assert.equal(trays.at(-1).image.height, 18)
+    else assert.equal(trays.at(-1).image, image)
+  })
+}

@@ -1798,3 +1798,7 @@ App Icon:
 Tray:
   Hide All Windows: "Skrýt všechna okna"
   Show All Windows: "Zobrazit všechna okna"
+
+Tray Icon:
+  Title: "Ikona v oznamovací oblasti"
+  Follow App Theme: "Použít motiv aplikace"

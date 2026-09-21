@@ -1800,3 +1800,7 @@ App Icon:
 Tray:
   Hide All Windows: "隱藏所有視窗"
   Show All Windows: "顯示所有視窗"
+
+Tray Icon:
+  Title: "系統匣圖示"
+  Follow App Theme: "跟隨應用程式主題"

@@ -1827,3 +1827,7 @@ App Icon:
 Tray:
   Hide All Windows: "Cuddio pob ffenestr"
   Show All Windows: "Dangos pob ffenestr"
+
+Tray Icon:
+  Title: "Eicon hambwrdd"
+  Follow App Theme: "Dilyn thema’r ap"

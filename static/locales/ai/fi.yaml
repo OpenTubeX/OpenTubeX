@@ -1844,3 +1844,7 @@ App Icon:
 Tray:
   Hide All Windows: "Piilota kaikki ikkunat"
   Show All Windows: "Näytä kaikki ikkunat"
+
+Tray Icon:
+  Title: "Ilmoitusalueen kuvake"
+  Follow App Theme: "Seuraa sovelluksen teemaa"

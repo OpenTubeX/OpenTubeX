@@ -1846,3 +1846,7 @@ App Icon:
 Tray:
   Hide All Windows: "הסתרת כל החלונות"
   Show All Windows: "הצגת כל החלונות"
+
+Tray Icon:
+  Title: "סמל במגש המערכת"
+  Follow App Theme: "התאמה לערכת הנושא של היישום"

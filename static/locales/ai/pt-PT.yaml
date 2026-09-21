@@ -1833,3 +1833,7 @@ App Icon:
 Tray:
   Hide All Windows: "Ocultar todas as janelas"
   Show All Windows: "Mostrar todas as janelas"
+
+Tray Icon:
+  Title: "Ícone da área de notificação"
+  Follow App Theme: "Seguir o tema da aplicação"

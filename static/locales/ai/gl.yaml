@@ -1846,3 +1846,7 @@ App Icon:
 Tray:
   Hide All Windows: "Agochar todas as xanelas"
   Show All Windows: "Mostrar todas as xanelas"
+
+Tray Icon:
+  Title: "Icona da área de notificación"
+  Follow App Theme: "Seguir o tema da aplicación"

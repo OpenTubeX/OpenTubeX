@@ -1813,3 +1813,7 @@ App Icon:
 Tray:
   Hide All Windows: "Ezkutatu leiho guztiak"
   Show All Windows: "Erakutsi leiho guztiak"
+
+Tray Icon:
+  Title: "Sistemaren erretiluko ikonoa"
+  Follow App Theme: "Jarraitu aplikazioaren gaiari"

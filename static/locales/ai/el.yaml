@@ -1844,3 +1844,7 @@ App Icon:
 Tray:
   Hide All Windows: "Απόκρυψη όλων των παραθύρων"
   Show All Windows: "Εμφάνιση όλων των παραθύρων"
+
+Tray Icon:
+  Title: "Εικονίδιο περιοχής ειδοποιήσεων"
+  Follow App Theme: "Ακολούθηση θέματος εφαρμογής"

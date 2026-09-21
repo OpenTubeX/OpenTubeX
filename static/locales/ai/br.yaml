@@ -1808,3 +1808,7 @@ App Icon:
 Tray:
   Hide All Windows: "Kuzhat an holl brenestroù"
   Show All Windows: "Diskouez an holl brenestroù"
+
+Tray Icon:
+  Title: "Arlun ar maez reizh"
+  Follow App Theme: "Heuliañ neuz an arload"

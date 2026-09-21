@@ -1808,3 +1808,7 @@ App Icon:
 Tray:
   Hide All Windows: "Bütün pəncərələri gizlət"
   Show All Windows: "Bütün pəncərələri göstər"
+
+Tray Icon:
+  Title: "Sistem treyi nişanı"
+  Follow App Theme: "Tətbiqin mövzusunu izlə"

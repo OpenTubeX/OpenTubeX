@@ -1798,3 +1798,7 @@ App Icon:
 Tray:
   Hide All Windows: "Nascondi tutte le finestre"
   Show All Windows: "Mostra tutte le finestre"
+
+Tray Icon:
+  Title: "Icona nell’area di notifica"
+  Follow App Theme: "Segui il tema dell’app"

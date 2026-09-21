@@ -25,7 +25,7 @@
   border-color: var(--primary-color);
 }
 
-.appIconPreset:focus-within {
+.appIconPreset:has(:focus-visible) {
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
 }

@@ -1782,3 +1782,7 @@ App Icon:
 Tray:
   Hide All Windows: "Hide All Windows"
   Show All Windows: "Show All Windows"
+
+Tray Icon:
+  Title: "Tray icon"
+  Follow App Theme: "Follow app theme"

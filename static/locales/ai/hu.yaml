@@ -1799,3 +1799,7 @@ App Icon:
 Tray:
   Hide All Windows: "Összes ablak elrejtése"
   Show All Windows: "Összes ablak megjelenítése"
+
+Tray Icon:
+  Title: "Tálcaikon"
+  Follow App Theme: "Alkalmazástéma követése"

@@ -2360,3 +2360,7 @@ App Icon:
 Tray:
   Hide All Windows: "Ocultar todas las ventanas"
   Show All Windows: "Mostrar todas las ventanas"
+
+Tray Icon:
+  Title: "Icono de la bandeja"
+  Follow App Theme: "Seguir el tema de la aplicación"

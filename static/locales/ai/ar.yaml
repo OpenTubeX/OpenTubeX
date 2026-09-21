@@ -1822,3 +1822,7 @@ App Icon:
 Tray:
   Hide All Windows: "إخفاء جميع النوافذ"
   Show All Windows: "إظهار جميع النوافذ"
+
+Tray Icon:
+  Title: "أيقونة علبة النظام"
+  Follow App Theme: "اتباع سمة التطبيق"

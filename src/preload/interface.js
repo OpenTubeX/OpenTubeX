@@ -71,6 +71,7 @@ ipcRenderer.on(IpcChannels.TABS_EXIT_FULLSCREEN, (_, targetTabId) => {
 })
 
 export default {
+  setTrayIcon: image => ipcRenderer.invoke(IpcChannels.SET_TRAY_ICON, image),
   shareLink: url => ipcRenderer.invoke(IpcChannels.SHARE_LINK, url),
   startupSplashReady: () => ipcRenderer.send(IpcChannels.STARTUP_SPLASH_READY),
   startupAppearance: {
