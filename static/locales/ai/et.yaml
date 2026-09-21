@@ -188,6 +188,8 @@ User Playlists:
     This playlist could not be loaded.: Seda esitusloendit ei saanud laadida.
     More videos could not be loaded.: Rohkem videoid ei saanud laadida.
 History:
+  Repair Use Cookies: "Kasuta seadistatud yt-dlp küpsiseid"
+  Repair Cookies Hint: "Kontrollida tuleb üle 500 video. Seadista küpsised yt-dlp seadetes ja luba need siin, et vähendada päringute piiramise ohtu."
   Repair Description: "Kasuta pärast ajaloo importimist või kui videote andmed puuduvad või LIVE-märgis on vale."
   Repair Details: "Täidab puuduvad pealkirjad, kanalid ja avaldamiskuupäevad ning kontrollib kestusi ja LIVE-märgiseid. Vaatamise edenemine ja vaadatuks märkimine ei muutu."
   Repair Notice: "Suure ajaloo töötlemine võib võtta aega. Ebaõnnestunud päringuid korratakse automaatselt. Kustutatud või privaatsete videote andmed võivad jääda puudulikuks."

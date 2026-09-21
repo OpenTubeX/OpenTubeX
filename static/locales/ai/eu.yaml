@@ -188,6 +188,8 @@ User Playlists:
     This playlist could not be loaded.: Ezin izan da erreprodukzio-zerrenda hau kargatu.
     More videos could not be loaded.: Ezin izan dira bideo gehiago kargatu.
 History:
+  Repair Use Cookies: "Erabili konfiguratutako yt-dlp cookieak"
+  Repair Cookies Hint: "500 bideo baino gehiago egiaztatu behar dira. Konfiguratu cookieak yt-dlp ezarpenetan eta gaitu hemen eskaeren mugaketa-arriskua murrizteko."
   Repair Description: "Erabili historia inportatu ondoren, edo bideoei xehetasunak falta zaizkienean edo LIVE etiketa okerra dutenean."
   Repair Details: "Falta diren izenburuak, kanalak eta argitalpen-datak betetzen ditu, eta iraupenak eta LIVE etiketak egiaztatzen ditu. Ikustearen aurrerapena eta ikusitako egoera ez dira aldatzen."
   Repair Notice: "Historia handiek denbora behar dezakete. Huts egindako eskaerak automatikoki errepikatzen dira. Ezabatutako edo bideo pribatuen datuak osatu gabe gera daitezke."

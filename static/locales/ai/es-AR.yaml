@@ -206,6 +206,8 @@ User Playlists:
     Toast:
       Video(s) added to {playlistCount} playlists: Video(s) agregado(s) a 1 lista de reproducción | Video(s) agregado(s) a {playlistCount} listas de reproducción | Video(s) agregado(s) a {playlistCount} listas de reproducción
 History:
+  Repair Use Cookies: "Usar las cookies configuradas de yt-dlp"
+  Repair Cookies Hint: "Hay que comprobar más de 500 videos. Configurá las cookies en los ajustes de yt-dlp y activalas acá para reducir el riesgo de limitación de solicitudes."
   Repair Description: "Usalo después de importar el historial o si faltan datos de los videos o tienen una etiqueta LIVE incorrecta."
   Repair Details: "Completa los títulos, canales y fechas de publicación que faltan, y comprueba las duraciones y etiquetas LIVE. El progreso de reproducción y la marca de visto no cambian."
   Repair Notice: "Los historiales grandes pueden tardar. Las solicitudes fallidas se reintentan automáticamente. Los videos eliminados o privados pueden quedar incompletos."

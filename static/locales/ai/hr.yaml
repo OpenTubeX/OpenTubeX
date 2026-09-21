@@ -190,6 +190,8 @@ User Playlists:
     This playlist could not be loaded.: Ovaj popis za reprodukciju nije moguće učitati.
     More videos could not be loaded.: Dodatne videozapise nije moguće učitati.
 History:
+  Repair Use Cookies: "Koristi konfigurirane yt-dlp kolačiće"
+  Repair Cookies Hint: "Potrebno je provjeriti više od 500 videozapisa. Konfigurirajte kolačiće u postavkama yt-dlp i omogućite ih ovdje kako biste smanjili rizik od ograničavanja zahtjeva."
   Repair Description: "Koristite nakon uvoza povijesti ili kada videozapisima nedostaju podaci ili imaju pogrešnu oznaku LIVE."
   Repair Details: "Dopunjava naslove, kanale i datume objave koji nedostaju te provjerava trajanja i oznake LIVE. Napredak gledanja i status pogledanog ostaju nepromijenjeni."
   Repair Notice: "Velika povijest može potrajati. Neuspješni zahtjevi automatski se ponavljaju. Izbrisani ili privatni videozapisi mogu ostati nepotpuni."

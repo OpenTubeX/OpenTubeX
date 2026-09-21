@@ -190,6 +190,8 @@ User Playlists:
     This playlist could not be loaded.: Ekki tókst að hlaða þessum spilunarlista.
     More videos could not be loaded.: Ekki tókst að hlaða fleiri myndböndum.
 History:
+  Repair Use Cookies: "Nota stilltar yt-dlp vafrakökur"
+  Repair Cookies Hint: "Yfir 500 myndskeið þarf að athuga. Stilltu vafrakökur í yt-dlp stillingum og virkjaðu þær hér til að draga úr hættu á takmörkun beiðna."
   Repair Description: "Notaðu þetta eftir innflutning ferils eða þegar upplýsingar um myndskeið vantar eða þau eru ranglega merkt LIVE."
   Repair Details: "Fyllir inn titla, rásir og birtingardagsetningar sem vantar og athugar lengd myndskeiða og LIVE-merkingar. Áhorfsframvinda og áhorfsstaða haldast óbreyttar."
   Repair Notice: "Stór ferill getur tekið tíma. Misheppnaðar beiðnir eru endurteknar sjálfkrafa. Eydd eða einkarekin myndskeið geta enn haft ófullnægjandi upplýsingar."

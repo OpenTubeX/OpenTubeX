@@ -1,3 +1,4 @@
+import { historyRepairYtDlpArguments, historyRepairYtDlpError } from '../../historyRepair'
 import { registerPlugin } from '@capacitor/core'
 import { LocalNotifications } from '@capacitor/local-notifications'
 import { normalizeYtDlpPlaybackCacheMaxEntrySize } from '../../ytDlpPlaybackCacheSettings'
@@ -110,6 +111,14 @@ const android = {
       return result.text
     } catch {
       return { error: 'Unable to load subtitle with configured cookies' }
+    }
+  },
+  async ytDlpGetHistoryMetadata(videoId) {
+    if (!/^[\w-]{11}$/.test(videoId)) return null
+    try {
+      return await extract([...historyRepairYtDlpArguments(), `https://www.youtube.com/watch?v=${videoId}`], true)
+    } catch (error) {
+      return historyRepairYtDlpError(error.message)
     }
   },
   async ytDlpGetPlaybackInfo(videoId, useDefaultClients = false, useAuthentication = false, includeSubtitles = true) {

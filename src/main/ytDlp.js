@@ -1,3 +1,4 @@
+import { historyRepairYtDlpArguments, historyRepairYtDlpError } from '../historyRepair'
 import {
   buildYtDlpDownloadArguments, ID_REGEX, PLAYLIST_ID_REGEX, DOWNLOAD_TITLE_FILENAME_BYTE_LIMIT,
   SUBTITLE_FORMATS, MAX_LOCAL_PLAYLIST_VIDEOS, DENIED_CUSTOM_ARGS, AUTOMATIC_NUMBER_LIMITS,
@@ -1626,6 +1627,47 @@ export async function handleYtDlpGetPlaybackInfo(
     captions,
     captionTranslations,
     formats: formats.filter(format => format.protocol !== 'mhtml').map(mapPlaybackFormat)
+  }
+}
+
+const historyMetadataRequests = new Map()
+
+export function handleYtDlpCancelHistoryRepair(event) {
+  if (!isOpenTubeXUrl(event.senderFrame.url)) return
+  for (const controller of historyMetadataRequests.get(event.sender.id) ?? []) controller.abort()
+}
+
+export async function handleYtDlpGetHistoryMetadata(event, videoId) {
+  if (!isOpenTubeXUrl(event.senderFrame.url) || typeof videoId !== 'string' || !ID_REGEX.test(videoId)) return null
+  const senderId = event.sender.id
+  const controller = new AbortController()
+  const requests = historyMetadataRequests.get(senderId) ?? new Set()
+  requests.add(controller)
+  historyMetadataRequests.set(senderId, requests)
+  try {
+    const { source, executable } = await resolveExecutable('ytDlpSource', 'ytDlpPath', 'yt-dlp')
+    if (source === 'managed' && !existsSync(executable)) {
+      const result = await downloadManagedYtDlp()
+      if ('error' in result) return { error: result.error }
+    }
+    const args = historyRepairYtDlpArguments()
+    const authenticationError = await pushYtDlpPlaybackAuthenticationArguments(args)
+    if (authenticationError !== null) return { error: authenticationError }
+    await pushProxyArgument(args)
+    args.push(`https://www.youtube.com/watch?v=${videoId}`)
+    controller.signal.throwIfAborted()
+    const { stdout } = await execFileAsync(executable, args, {
+      signal: controller.signal,
+      timeout: PLAYBACK_INFO_TIMEOUT,
+      maxBuffer: PLAYBACK_INFO_MAX_BUFFER,
+      windowsHide: true
+    })
+    return JSON.parse(stdout)
+  } catch (error) {
+    return historyRepairYtDlpError(error.stderr)
+  } finally {
+    requests.delete(controller)
+    if (requests.size === 0) historyMetadataRequests.delete(senderId)
   }
 }
 

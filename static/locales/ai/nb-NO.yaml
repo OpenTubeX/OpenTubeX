@@ -188,6 +188,8 @@ User Playlists:
     This playlist could not be loaded.: Denne spillelisten kunne ikke lastes inn.
     More videos could not be loaded.: Flere videoer kunne ikke lastes inn.
 History:
+  Repair Use Cookies: "Bruk konfigurerte yt-dlp-informasjonskapsler"
+  Repair Cookies Hint: "Over 500 videoer må kontrolleres. Konfigurer informasjonskapsler i yt-dlp-innstillingene og aktiver dem her for å redusere risikoen for begrensning av forespørsler."
   Repair Description: "Bruk dette etter import av historikk, eller når videoer mangler opplysninger eller har feil LIVE-merking."
   Repair Details: "Fyller inn manglende titler, kanaler og publiseringsdatoer og kontrollerer varighet og LIVE-merking. Avspillingsposisjonen og statusen som sett beholdes."
   Repair Notice: "Store historikker kan ta tid. Mislykkede forespørsler prøves automatisk på nytt. Slettede eller private videoer kan fortsatt mangle opplysninger."

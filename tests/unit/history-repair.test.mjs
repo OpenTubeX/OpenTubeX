@@ -317,3 +317,49 @@ for (const failure of ['unavailable', 'malformed', 400, 403, 404, 429, 503, 'net
     if (failure === 429) assert.deepEqual(waits, [30000])
   })
 }
+
+test('yt-dlp history metadata repairs fields without overwriting watch state', async () => {
+  const { parseHistoryRepairYtDlp } = await import('../../src/historyRepair.js')
+  const parsed = parseHistoryRepairYtDlp({
+    id: record.videoId, title: 'Recovered title', channel: 'Channel', channel_id: 'channel',
+    duration: 120, upload_date: '20250920', live_status: 'was_live'
+  }, record.videoId)
+  assert.equal(parsed.published, Date.parse('2025-09-20'))
+  assert.equal(parsed.authorId, 'channel')
+  assert.deepEqual(historyRepairPatch(record, parsed), { videoId: record.videoId, lengthSeconds: 120, isLive: false, liveNow: false, isUpcoming: false })
+  assert.throws(() => parseHistoryRepairYtDlp({ id: 'wrong' }, record.videoId))
+  assert.equal(parseHistoryRepairYtDlp({ id: record.videoId, timestamp: 123, live_status: 'is_upcoming' }, record.videoId).isUpcoming, true)
+  assert.equal(parseHistoryRepairYtDlp({ id: record.videoId, timestamp: 123 }, record.videoId).published, 123000)
+})
+
+test('yt-dlp rate limits pause repair before retrying', async () => {
+  const { parseHistoryRepairYtDlp } = await import('../../src/historyRepair.js')
+  const waits = []
+  let calls = 0
+  const result = await repairHistory({
+    records: [record], getRecord: () => record, signal: new AbortController().signal,
+    onProgress: () => {}, wait: async delay => waits.push(delay),
+    fetchMetadata: async () => ++calls === 1 ? parseHistoryRepairYtDlp({ error: 'rate-limit' }, record.videoId) : metadata,
+    saveMetadata: async () => ({ repaired: 1, failed: 0 })
+  })
+  assert.equal(result.repaired, 1)
+  assert.equal(result.failed, 0)
+  assert.ok(waits.includes(30000))
+})
+
+test('yt-dlp errors preserve rate limits without exposing native error details', async () => {
+  const { historyRepairYtDlpError } = await import('../../src/historyRepair.js')
+  for (const message of ['HTTP Error 429', 'Too Many Requests', "Sign in to confirm you’re not a bot"]) {
+    assert.deepEqual(historyRepairYtDlpError(message), { error: 'rate-limit' })
+  }
+  assert.deepEqual(historyRepairYtDlpError('Cannot read /private/cookies.txt'), { error: 'History metadata unavailable' })
+  assert.deepEqual(historyRepairYtDlpError(undefined), { error: 'History metadata unavailable' })
+})
+
+test('yt-dlp upcoming status overrides a legacy live flag', async () => {
+  const { parseHistoryRepairYtDlp } = await import('../../src/historyRepair.js')
+  const parsed = parseHistoryRepairYtDlp({ id: record.videoId, is_live: true, live_status: 'is_upcoming' }, record.videoId)
+  assert.equal(parsed.isUpcoming, true)
+  assert.equal(parsed.isLive, false)
+  assert.equal(historyRepairPatch(record, parsed).liveNow, false)
+})

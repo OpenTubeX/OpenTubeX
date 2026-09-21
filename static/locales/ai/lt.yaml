@@ -297,6 +297,8 @@ User Playlists:
       Playlist {playlistName} has been successfully created.: Grojaraštis {playlistName} sėkmingai sukurtas.
       There was an issue with creating the playlist.: Kuriant grojaraštį kilo klaida.
 History:
+  Repair Use Cookies: "Naudoti sukonfigūruotus yt-dlp slapukus"
+  Repair Cookies Hint: "Reikia patikrinti daugiau nei 500 vaizdo įrašų. Sukonfigūruokite slapukus yt-dlp nustatymuose ir įjunkite juos čia, kad sumažintumėte užklausų ribojimo riziką."
   Repair Description: "Naudokite importavę istoriją arba kai trūksta vaizdo įrašų duomenų ar neteisingai rodoma LIVE žyma."
   Repair Details: "Papildo trūkstamus pavadinimus, kanalus ir paskelbimo datas, patikrina trukmę bei LIVE žymas. Peržiūros eiga ir peržiūrėjimo būsena nesikeičia."
   Repair Notice: "Didelės istorijos tvarkymas gali užtrukti. Nepavykusios užklausos kartojamos automatiškai. Ištrintų ar privačių vaizdo įrašų duomenys gali likti nepilni."

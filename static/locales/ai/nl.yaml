@@ -192,6 +192,8 @@ User Playlists:
     This playlist could not be loaded.: Deze afspeellijst kan niet worden geladen.
     More videos could not be loaded.: Er kunnen geen video's meer worden geladen.
 History:
+  Repair Use Cookies: "Geconfigureerde yt-dlp-cookies gebruiken"
+  Repair Cookies Hint: "Meer dan 500 video's moeten worden gecontroleerd. Configureer cookies in de yt-dlp-instellingen en schakel ze hier in om de kans op verzoekbeperking te verkleinen."
   Repair Description: "Gebruik dit na het importeren van de geschiedenis, of wanneer videogegevens ontbreken of video's onterecht als LIVE worden aangeduid."
   Repair Details: "Vult ontbrekende titels, kanalen en publicatiedatums aan en controleert speelduur en LIVE-aanduidingen. Je kijkvoortgang en bekeken-status blijven ongewijzigd."
   Repair Notice: "Een grote geschiedenis kan even duren. Mislukte verzoeken worden automatisch opnieuw geprobeerd. Verwijderde of privévideo's kunnen onvolledig blijven."

@@ -188,6 +188,8 @@ User Playlists:
     This playlist could not be loaded.: Tento playlist se nepodařilo načíst.
     More videos could not be loaded.: Další videa se nepodařilo načíst.
 History:
+  Repair Use Cookies: "Použít nastavené cookies yt-dlp"
+  Repair Cookies Hint: "Je třeba zkontrolovat více než 500 videí. Nastavte cookies v nastavení yt-dlp a povolte je zde, abyste snížili riziko omezení požadavků."
   Repair Description: "Použijte po importu historie nebo když videím chybí údaje či mají nesprávný štítek LIVE."
   Repair Details: "Doplní chybějící názvy, kanály a data zveřejnění a zkontroluje délku videí a štítky LIVE. Průběh sledování a stav zhlédnutí se nezmění."
   Repair Notice: "Rozsáhlá historie může chvíli trvat. Neúspěšné požadavky se opakují automaticky. Smazaná nebo soukromá videa mohou zůstat neúplná."

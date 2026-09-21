@@ -188,6 +188,8 @@ User Playlists:
     This playlist could not be loaded.: このプレイリストを読み込めませんでした。
     More videos could not be loaded.: 動画をさらに読み込めませんでした。
 History:
+  Repair Use Cookies: "設定済みの yt-dlp Cookie を使用する"
+  Repair Cookies Hint: "500 件を超える動画の確認が必要です。リクエスト制限のリスクを減らすため、yt-dlp の設定で Cookie を設定し、ここで有効にしてください。"
   Repair Description: "履歴をインポートした後や、動画の情報が不足している場合、LIVEラベルが誤って表示されている場合に使用します。"
   Repair Details: "不足しているタイトル、チャンネル、公開日を補完し、再生時間とLIVEラベルを確認します。視聴の進行状況と視聴済みの状態は変更されません。"
   Repair Notice: "履歴が多い場合は時間がかかります。失敗したリクエストは自動で再試行されます。削除済みや非公開の動画は情報を補完できない場合があります。"

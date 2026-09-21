@@ -189,6 +189,8 @@ User Playlists:
     This playlist could not be loaded.: This playlist could not be loaded.
     More videos could not be loaded.: More videos could not be loaded.
 History:
+  Repair Use Cookies: "Use configured yt-dlp cookies"
+  Repair Cookies Hint: "More than 500 videos need checking. Configure cookies in yt-dlp settings and enable them here to reduce the risk of rate limiting."
   Repair Description: "Use this after importing history, or when videos have missing details or an incorrect LIVE label."
   Repair Details: "Fills in missing titles, channels and publish dates, and checks durations and LIVE labels. Your watch progress and watched status stay unchanged."
   Repair Notice: "Large histories can take a while. Failed requests are retried automatically. Deleted or private videos may stay incomplete."

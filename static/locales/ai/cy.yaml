@@ -190,6 +190,8 @@ User Playlists:
     This playlist could not be loaded.: Nid oedd modd llwytho'r rhestr chwarae hon.
     More videos could not be loaded.: Nid oedd modd llwytho rhagor o fideos.
 History:
+  Repair Use Cookies: "Defnyddio cwcis yt-dlp sydd wedi'u ffurfweddu"
+  Repair Cookies Hint: "Mae angen gwirio dros 500 o fideos. Ffurfweddwch gwcis yng ngosodiadau yt-dlp a'u galluogi yma i leihau'r risg o gyfyngu ar geisiadau."
   Repair Description: "Defnyddiwch hyn ar ôl mewnforio hanes, neu pan fo manylion fideos ar goll neu label LIVE anghywir."
   Repair Details: "Yn llenwi teitlau, sianeli a dyddiadau cyhoeddi coll, ac yn gwirio hyd fideos a labeli LIVE. Mae cynnydd gwylio a statws gwylio yn aros yr un fath."
   Repair Notice: "Gall hanesion mawr gymryd amser. Rhoddir cynnig arall ar geisiadau aflwyddiannus yn awtomatig. Gall fideos preifat neu wedi'u dileu aros yn anghyflawn."
