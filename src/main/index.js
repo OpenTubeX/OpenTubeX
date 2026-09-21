@@ -4887,6 +4887,15 @@ function runApp() {
           return value
         }
 
+        case DBActions.SETTINGS.MERGE_SEEN_POSTS: {
+          const value = await baseHandlers.settings.mergeSeenPosts(data)
+          syncOtherWindows(IpcChannels.SYNC_SETTINGS, event, {
+            event: SyncEvents.GENERAL.UPSERT,
+            data: { _id: 'subscriptionSeenPosts', value }
+          })
+          return value
+        }
+
         case DBActions.GENERAL.FIND:
           return await baseHandlers.settings.find()
 
@@ -5465,6 +5474,15 @@ function runApp() {
             IpcChannels.SYNC_SUBSCRIPTION_CACHE,
             event,
             { event: SyncEvents.SUBSCRIPTION_CACHE.UPDATE_VIDEOS_BY_CHANNEL, data }
+          )
+          return null
+
+        case DBActions.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN:
+          await baseHandlers.subscriptionCache.markEntriesAsSeen(data.channelId, data.tab, data.entries)
+          syncOtherWindows(
+            IpcChannels.SYNC_SUBSCRIPTION_CACHE,
+            event,
+            { event: SyncEvents.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN, data }
           )
           return null
 

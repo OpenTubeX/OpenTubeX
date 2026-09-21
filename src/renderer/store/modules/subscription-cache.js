@@ -2,7 +2,8 @@ import {
   DBSubscriptionCacheHandlers,
 } from '../../../datastores/handlers/index'
 import { ensureSubscriptionFeedEntryState } from '../../helpers/subscription-entries'
-import { applySubscriptionSeenVideosToCache } from '../../helpers/subscription-seen-videos'
+import { applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache } from '../../helpers/subscription-seen-videos'
+import { preserveSubscriptionSeenEntries } from '../../../subscriptionFeedState'
 
 const MAX_CONCURRENT_CACHE_WRITES = 8
 
@@ -84,7 +85,7 @@ const getters = {
 
   getLiveCache: (state, getters) => applySubscriptionSeenVideosToCache(state.liveCache, getters.getSubscriptionSeenVideos),
 
-  getPostsCache: (state) => state.postsCache,
+  getPostsCache: (state, getters) => applySubscriptionSeenPostsToCache(state.postsCache, getters.getSubscriptionSeenPosts),
 }
 
 const actions = {
@@ -226,28 +227,25 @@ const actions = {
     const cacheConfigs = {
       videos: {
         cache: applySubscriptionSeenVideosToCache(state.videoCache, rootGetters?.getSubscriptionSeenVideos),
-        entriesKey: 'videos',
-        updateEntries: DBSubscriptionCacheHandlers.updateVideosByChannelId
+        entriesKey: 'videos'
       },
       shorts: {
         cache: applySubscriptionSeenVideosToCache(state.shortsCache, rootGetters?.getSubscriptionSeenVideos),
-        entriesKey: 'videos',
-        updateEntries: DBSubscriptionCacheHandlers.updateShortsByChannelId
+        entriesKey: 'videos'
       },
       live: {
         cache: applySubscriptionSeenVideosToCache(state.liveCache, rootGetters?.getSubscriptionSeenVideos),
-        entriesKey: 'videos',
-        updateEntries: DBSubscriptionCacheHandlers.updateLiveStreamsByChannelId
+        entriesKey: 'videos'
       },
       posts: {
-        cache: state.postsCache,
-        entriesKey: 'posts',
-        updateEntries: DBSubscriptionCacheHandlers.updateCommunityPostsByChannelId
+        cache: applySubscriptionSeenPostsToCache(state.postsCache, rootGetters?.getSubscriptionSeenPosts),
+        entriesKey: 'posts'
       }
     }
 
     const writes = []
     const seenVideos = []
+    const seenPosts = []
 
     for (const feedTab of tabs) {
       const channelIdSet = new Set(channelIdsByTab[feedTab] ?? channelIds)
@@ -266,20 +264,20 @@ const actions = {
           continue
         }
 
-        const seenEntries = entries.map(entry => ({
-          ...entry,
+        const seenEntries = entries.filter(entry => entry.isNewInSubscriptionFeed === true).map(entry => ({
+          ...(feedTab === 'posts' ? { postId: entry.postId } : { videoId: entry.videoId, isMembersOnly: entry.isMembersOnly === true }),
           isNewInSubscriptionFeed: false
         }))
-        const timestamp = cacheEntry.timestamp
 
         writes.push(async () => {
           try {
-            if (await config.updateEntries(channelId, seenEntries, timestamp) === false) return null
+            await DBSubscriptionCacheHandlers.markEntriesAsSeen(channelId, feedTab, seenEntries)
             if (feedTab !== 'posts') {
-              seenVideos.push(...entries.filter(entry => entry.isNewInSubscriptionFeed === true)
-                .map(entry => ({ videoId: entry.videoId, isMembersOnly: entry.isMembersOnly === true })))
+              seenVideos.push(...seenEntries.map(({ videoId, isMembersOnly }) => ({ videoId, isMembersOnly })))
+            } else {
+              seenPosts.push(...seenEntries.map(({ postId }) => ({ postId })))
             }
-            return { tab: feedTab, channelId, timestamp }
+            return { tab: feedTab, channelId, entries: seenEntries }
           } catch (errMessage) {
             console.error(errMessage)
             return null
@@ -295,46 +293,43 @@ const actions = {
     if (seenVideos.length > 0) {
       await dispatch('mergeSubscriptionSeenVideos', { videos: seenVideos }).catch(error => console.error(error))
     }
+    if (seenPosts.length > 0) {
+      await dispatch('mergeSubscriptionSeenPosts', { posts: seenPosts }).catch(error => console.error(error))
+    }
   },
 
   async markSubscriptionVideoAsSeen({ commit, dispatch, state, rootGetters }, videoId) {
     const cacheConfigs = [
       {
         cache: applySubscriptionSeenVideosToCache(state.videoCache, rootGetters?.getSubscriptionSeenVideos),
-        tab: 'videos',
-        updateEntries: DBSubscriptionCacheHandlers.updateVideosByChannelId
+        tab: 'videos'
       },
       {
         cache: applySubscriptionSeenVideosToCache(state.shortsCache, rootGetters?.getSubscriptionSeenVideos),
-        tab: 'shorts',
-        updateEntries: DBSubscriptionCacheHandlers.updateShortsByChannelId
+        tab: 'shorts'
       },
       {
         cache: applySubscriptionSeenVideosToCache(state.liveCache, rootGetters?.getSubscriptionSeenVideos),
-        tab: 'live',
-        updateEntries: DBSubscriptionCacheHandlers.updateLiveStreamsByChannelId
+        tab: 'live'
       }
     ]
 
     const writes = []
     const seenVideos = []
-    for (const { cache, tab, updateEntries } of cacheConfigs) {
+    for (const { cache, tab } of cacheConfigs) {
       for (const [channelId, cacheEntry] of Object.entries(cache)) {
         const entry = cacheEntry?.videos?.find(video => video.videoId === videoId)
         if (entry?.isNewInSubscriptionFeed !== true) {
           continue
         }
 
-        const seenEntries = cacheEntry.videos.map(video => video.videoId === videoId
-          ? { ...video, isNewInSubscriptionFeed: false }
-          : video)
-        const timestamp = cacheEntry.timestamp
+        const seenEntries = [{ videoId, isMembersOnly: entry.isMembersOnly === true, isNewInSubscriptionFeed: false }]
 
         writes.push(async () => {
           try {
-            if (await updateEntries(channelId, seenEntries, timestamp) === false) return
-            seenVideos.push({ videoId, isMembersOnly: entry.isMembersOnly === true })
-            commit('markSubscriptionVideoAsSeenByChannel', { tab, channelId, videoId, timestamp })
+            await DBSubscriptionCacheHandlers.markEntriesAsSeen(channelId, tab, seenEntries)
+            seenVideos.push({ videoId, isMembersOnly: seenEntries[0].isMembersOnly })
+            commit('markSubscriptionEntriesAsSeenInCache', [{ tab, channelId, entries: seenEntries }])
           } catch (errMessage) {
             console.error(errMessage)
           }
@@ -359,34 +354,32 @@ const actions = {
     }).catch(error => console.error(error))
   },
 
-  async markSubscriptionPostAsSeen({ commit, state }, postId) {
+  async markSubscriptionPostAsSeen({ commit, dispatch, state, rootGetters }, postId) {
     const writes = []
-    for (const [channelId, cacheEntry] of Object.entries(state.postsCache)) {
+    let marked = false
+    const cache = applySubscriptionSeenPostsToCache(state.postsCache, rootGetters?.getSubscriptionSeenPosts)
+    for (const [channelId, cacheEntry] of Object.entries(cache)) {
       const entry = cacheEntry?.posts?.find(post => post.postId === postId)
       if (entry?.isNewInSubscriptionFeed !== true) {
         continue
       }
 
-      const seenEntries = cacheEntry.posts.map(post => post.postId === postId
-        ? { ...post, isNewInSubscriptionFeed: false }
-        : post)
-      const timestamp = cacheEntry.timestamp
+      const seenEntries = [{ postId, isNewInSubscriptionFeed: false }]
 
       writes.push(async () => {
         try {
-          const applied = await DBSubscriptionCacheHandlers.updateCommunityPostsByChannelId(
-            channelId,
-            seenEntries,
-            timestamp
-          )
-          if (applied === false) return
-          commit('markSubscriptionPostAsSeenByChannel', { channelId, postId, timestamp })
+          await DBSubscriptionCacheHandlers.markEntriesAsSeen(channelId, 'posts', seenEntries)
+          marked = true
+          commit('markSubscriptionEntriesAsSeenInCache', [{ tab: 'posts', channelId, entries: seenEntries }])
         } catch (errMessage) {
           console.error(errMessage)
         }
       })
     }
     await runSubscriptionCacheWrites(writes)
+    if (marked) {
+      await dispatch('mergeSubscriptionSeenPosts', { posts: [{ postId }] }).catch(error => console.error(error))
+    }
   },
 
   async clearSubscriptionsCacheForManyChannels({ commit }, channelIds) {
@@ -411,31 +404,8 @@ const actions = {
 }
 
 const mutations = {
-  markSubscriptionPostAsSeenByChannel(state, { channelId, postId, timestamp }) {
-    if (toDate(state.postsCache[channelId]?.timestamp).getTime() !== toDate(timestamp).getTime()) return
-    const entry = state.postsCache[channelId]?.posts?.find(post => post.postId === postId)
-
-    if (entry) {
-      entry.isNewInSubscriptionFeed = false
-    }
-  },
-
-  markSubscriptionVideoAsSeenByChannel(state, { tab, channelId, videoId, timestamp }) {
-    const cacheEntry = tab === 'videos'
-      ? state.videoCache[channelId]
-      : tab === 'shorts'
-        ? state.shortsCache[channelId]
-        : state.liveCache[channelId]
-    if (toDate(cacheEntry?.timestamp).getTime() !== toDate(timestamp).getTime()) return
-    const entry = cacheEntry?.videos?.find(video => video.videoId === videoId)
-
-    if (entry) {
-      entry.isNewInSubscriptionFeed = false
-    }
-  },
-
   markSubscriptionEntriesAsSeenInCache(state, cacheEntries) {
-    for (const { tab, channelId, timestamp } of cacheEntries) {
+    for (const { tab, channelId, entries: marked } of cacheEntries) {
       const cache = tab === 'videos'
         ? state.videoCache
         : tab === 'shorts'
@@ -444,12 +414,15 @@ const mutations = {
             ? state.liveCache
             : state.postsCache
       const cacheEntry = cache[channelId]
-      if (toDate(cacheEntry?.timestamp).getTime() !== toDate(timestamp).getTime()) continue
-      const entries = tab === 'posts' ? cacheEntry?.posts : cacheEntry?.videos
-
-      entries?.forEach(entry => {
-        entry.isNewInSubscriptionFeed = false
-      })
+      if (!cacheEntry) continue
+      const key = tab === 'posts' ? 'posts' : 'videos'
+      const entries = cacheEntry[key] ?? []
+      // Existing feed panels retain entry references. Update those objects so
+      // their indicators and menus change along with the New feed.
+      preserveSubscriptionSeenEntries(entries, marked, tab === 'posts' ? 'postId' : 'videoId')
+        .forEach((entry, index) => {
+          if (entry !== entries[index]) entries[index].isNewInSubscriptionFeed = false
+        })
     }
   },
 
@@ -457,7 +430,7 @@ const mutations = {
     const existingObject = state.videoCache[channelId]
     if (toDate(existingObject?.timestamp).getTime() > toDate(timestamp).getTime()) return
     const newObject = existingObject ?? { videos: null }
-    if (entries != null) { newObject.videos = entries }
+    if (entries != null) { newObject.videos = preserveSubscriptionSeenEntries(entries, existingObject?.videos) }
     newObject.timestamp = toDate(timestamp)
     state.videoCache[channelId] = newObject
   },
@@ -465,7 +438,7 @@ const mutations = {
     const existingObject = state.shortsCache[channelId]
     if (toDate(existingObject?.timestamp).getTime() > toDate(timestamp).getTime()) return
     const newObject = existingObject ?? { videos: null }
-    if (entries != null) { newObject.videos = entries }
+    if (entries != null) { newObject.videos = preserveSubscriptionSeenEntries(entries, existingObject?.videos) }
     newObject.timestamp = toDate(timestamp)
     state.shortsCache[channelId] = newObject
   },
@@ -499,7 +472,7 @@ const mutations = {
     const existingObject = state.liveCache[channelId]
     if (toDate(existingObject?.timestamp).getTime() > toDate(timestamp).getTime()) return
     const newObject = existingObject ?? { videos: null }
-    if (entries != null) { newObject.videos = entries }
+    if (entries != null) { newObject.videos = preserveSubscriptionSeenEntries(entries, existingObject?.videos) }
     newObject.timestamp = toDate(timestamp)
     state.liveCache[channelId] = newObject
   },
@@ -507,7 +480,7 @@ const mutations = {
     const existingObject = state.postsCache[channelId]
     if (toDate(existingObject?.timestamp).getTime() > toDate(timestamp).getTime()) return
     const newObject = existingObject ?? { posts: null }
-    if (entries != null) { newObject.posts = entries }
+    if (entries != null) { newObject.posts = preserveSubscriptionSeenEntries(entries, existingObject?.posts, 'postId') }
     newObject.timestamp = toDate(timestamp)
     state.postsCache[channelId] = newObject
   },

@@ -259,7 +259,11 @@ test.describe('new subscriptions feed', () => {
       window.__unsubscribeMarkSeen()
       return window.__markSeenMutations
     })).toEqual([[
-      { tab: 'videos', channelId: CHANNEL_ID, timestamp: expect.any(Date) }
+      {
+        tab: 'videos',
+        channelId: CHANNEL_ID,
+        entries: [{ videoId: newVideo.videoId, isMembersOnly: false, isNewInSubscriptionFeed: false }]
+      }
     ]])
   })
 
@@ -514,7 +518,7 @@ test.describe('new subscriptions feed', () => {
     await expect(relaunched.page.getByRole('option', { name: 'Mark as seen', exact: true })).toHaveCount(0)
   })
 
-  test('history sync imports seen videos and keeps them seen after refresh and restart', async ({ app, page }) => {
+  test('history sync merges seen videos and posts and retains them after refresh and restart', async ({ app, page }) => {
     const key = Buffer.alloc(32, 1).toString('base64')
     const salt = Buffer.alloc(16, 2).toString('base64')
     const marks = [newVideo, newShort, newLive, { videoId: 'fetched-later' }]
@@ -529,6 +533,10 @@ test.describe('new subscriptions feed', () => {
         ...olderMarks, ...marks,
         { videoId: watchedVideo.videoId, seenAt: now + 1, isMembersOnly: false },
       ], key, salt),
+      seenPosts: await encryptSyncDocument([
+        { postId: 'new-post-1', seenAt: now },
+        { postId: 'post-fetched-later', seenAt: now },
+      ], key, salt),
     }
     const uploads = []
     await page.route('https://seen-sync.example/**', async route => {
@@ -536,7 +544,7 @@ test.describe('new subscriptions feed', () => {
       const pathname = new URL(request.url()).pathname
       let body
       if (pathname === '/health') {
-        body = { capabilities: { encrypted_sync: 1, live_sync: 1, seen_videos: 1 } }
+        body = { capabilities: { encrypted_sync: 1, live_sync: 1, seen_videos: 1, seen_posts: 1 } }
       } else if (pathname === '/v1/encrypted_sync/events') {
         body = []
       } else if (pathname === '/v1/account/sessions') {
@@ -558,6 +566,9 @@ test.describe('new subscriptions feed', () => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(page.getByText('New video', { exact: true })).toBeVisible()
+    await page.locator('[data-subscription-feed-tab="posts"]').click()
+    const postCard = page.locator('.ft-list-post').filter({ hasText: 'New community post' })
+    await expect(postCard.locator('.newContentDot')).toBeVisible()
 
     const result = await page.evaluate(async ({ key, salt }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -586,10 +597,32 @@ test.describe('new subscriptions feed', () => {
       }
     }, { key, salt })
     expect(result).toEqual({ status: 'success', error: '', historyUnchanged: true })
+    await expect(postCard.locator('.newContentDot')).toHaveCount(0)
+    await page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(page.getByText('New video', { exact: true })).toHaveCount(0)
     await expect(page.getByText('New short', { exact: true })).toHaveCount(0)
     await expect(page.getByText('New live stream', { exact: true })).toHaveCount(0)
-    await expect(page.getByText('New community post', { exact: true })).toBeVisible()
+    await expect(page.getByText('New community post', { exact: true })).toHaveCount(0)
+
+    await page.evaluate(async ({ channelId, posts }) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateSubscriptionPostsCacheByChannel', { channelId, posts, timestamp: new Date() })
+    }, {
+      channelId: CHANNEL_ID,
+      posts: [post('post-fetched-later', 'Post fetched after sync', now), post('local-post', 'Locally marked post', now)]
+    })
+    await expect(page.getByText('Post fetched after sync', { exact: true })).toHaveCount(0)
+    const localPost = page.locator('.ft-list-post').filter({ hasText: 'Locally marked post' })
+    await expect(localPost).toBeVisible()
+    await localPost.getByRole('button', { name: /^More options$/i }).click()
+    await page.getByRole('option', { name: 'Mark as seen', exact: true }).click()
+    await expect(localPost).toHaveCount(0)
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('syncWithSyncServer')
+    })
+    expect((await decryptSyncDocument(remote.seenPosts, key)).map(entry => entry.postId).sort())
+      .toEqual(['local-post', 'new-post-1', 'post-fetched-later'])
 
     await page.evaluate(async ({ channelId, videos }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -611,7 +644,8 @@ test.describe('new subscriptions feed', () => {
     const relaunched = await app.relaunch()
     await goTo(relaunched.page, 'subscriptions')
     await relaunched.page.locator('[data-subscription-feed-tab="all"]').click()
-    await expect(relaunched.page.getByText('New community post', { exact: true })).toBeVisible()
+    await expect(relaunched.page.getByText('Post fetched after sync', { exact: true })).toHaveCount(0)
+    await expect(relaunched.page.getByText('Locally marked post', { exact: true })).toHaveCount(0)
     await expect(relaunched.page.getByText('Fetched unseen video', { exact: true })).toBeVisible()
     await expect(relaunched.page.getByText('Fetched after sync', { exact: true })).toHaveCount(0)
     expect(await relaunched.page.evaluate(() => {
@@ -858,12 +892,12 @@ test.describe('new feed settings and seen state', () => {
     await expect(page.getByText('There is no new content.')).toBeVisible()
     expect(await page.evaluate(() => {
       window.__unsubscribeMarkSeen()
-      return window.__markSeenMutations
+      return window.__markSeenMutations.map(batch => batch.map(({ tab, channelId }) => ({ tab, channelId })))
     })).toEqual([[
-      { tab: 'videos', channelId: CHANNEL_ID, timestamp: expect.any(Date) },
-      { tab: 'shorts', channelId: CHANNEL_ID, timestamp: expect.any(Date) },
-      { tab: 'live', channelId: CHANNEL_ID, timestamp: expect.any(Date) },
-      { tab: 'posts', channelId: CHANNEL_ID, timestamp: expect.any(Date) }
+      { tab: 'videos', channelId: CHANNEL_ID },
+      { tab: 'shorts', channelId: CHANNEL_ID },
+      { tab: 'live', channelId: CHANNEL_ID },
+      { tab: 'posts', channelId: CHANNEL_ID }
     ]])
     await expect(markAllAsSeen).toHaveCount(0)
 

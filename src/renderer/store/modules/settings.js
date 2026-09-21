@@ -47,6 +47,7 @@ import { CUSTOM_THEMES_SYNC_KEY } from '../../../customTheme.js'
 import { DEFAULT_QUICK_SETTINGS, normalizeQuickSettings } from '../../helpers/quickSettings.js'
 import { createOptimisticSettingUpdater, createSettingUpdateQueue } from '../../helpers/settingUpdateQueue.js'
 import { mergeSubscriptionSeenVideos } from '../../../subscriptionSeenVideos.js'
+import { mergeSubscriptionSeenPosts } from '../../../subscriptionSeenPosts.js'
 import { filterAvailableNavigationItems } from '../../../navigationAvailability.js'
 import {
   DEFAULT_NAVIGATION_ITEMS,
@@ -507,6 +508,7 @@ const state = {
   syncServerLastSyncAt: 0,
   syncServerSnapshot: '{}',
   subscriptionSeenVideos: '[]',
+  subscriptionSeenPosts: '[]',
   playlistBookmarks: [],
   useProxy: false,
   userPlaylistSortOrder: 'date_added_descending',
@@ -819,6 +821,7 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'syncServerLastSyncAt',
   'syncServerSnapshot',
   'subscriptionSeenVideos',
+  'subscriptionSeenPosts',
 
   /* Depends on process.env.SUPPORTS_LOCAL_API */
   'backendFallback',
@@ -1028,6 +1031,14 @@ const customActions = {
   async mergeSubscriptionSeenVideos({ dispatch }, update) {
     const saved = await DBSettingHandlers.mergeSeenVideos(update)
     await dispatch('applySubscriptionSeenVideos', saved)
+  },
+  async mergeSubscriptionSeenPosts({ dispatch }, update) {
+    const saved = await DBSettingHandlers.mergeSeenPosts(update)
+    await dispatch('applySubscriptionSeenPosts', saved)
+  },
+  applySubscriptionSeenPosts({ commit, state }, saved) {
+    const value = JSON.stringify(mergeSubscriptionSeenPosts(state.subscriptionSeenPosts, saved))
+    if (value !== state.subscriptionSeenPosts) commit('setSubscriptionSeenPosts', value)
   },
   applySubscriptionSeenVideos({ commit, state, rootGetters }, saved) {
     // Another window's newer update may arrive before this request's reply.
@@ -1624,6 +1635,10 @@ const customActions = {
 
       window.ftElectron.handleSyncSubscriptionCache((event, data) => {
         switch (event) {
+          case SyncEvents.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN:
+            commit('markSubscriptionEntriesAsSeenInCache', [data])
+            break
+
           case SyncEvents.SUBSCRIPTION_CACHE.UPDATE_VIDEOS_BY_CHANNEL:
             commit('updateVideoCacheByChannel', data)
             break
