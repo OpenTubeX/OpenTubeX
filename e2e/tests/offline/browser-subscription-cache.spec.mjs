@@ -37,15 +37,28 @@ for (const [tab, field, update] of [
         other[update]('channel', fresh, new Date(3000)),
       ])
       const reopened = (await window.createTestCache(async () => [], name).find())[0]
+      const originalPut = IDBObjectStore.prototype.put
+      let redundantWrites = 0
+      IDBObjectStore.prototype.put = function (...args) {
+        redundantWrites++
+        return originalPut.apply(this, args)
+      }
+      try {
+        await cache.markEntriesAsSeen('channel', tab, marks)
+        await cache.markEntriesAsSeen('channel', tab, [{ ...marks[0], [idKey]: 'absent' }])
+      } finally {
+        IDBObjectStore.prototype.put = originalPut
+      }
       await cache.deleteAll()
       await cache.markEntriesAsSeen('channel', tab, marks)
-      return { first, reopened, cleared: await cache.find() }
+      return { first, reopened, redundantWrites, cleared: await cache.find() }
     }, { tab, field, update })
     for (const record of [result.first, result.reopened]) {
       expect(record[field].map(entry => entry.isNewInSubscriptionFeed)).toEqual([false, true])
       expect(record[field][0].title).toBe('Refreshed')
     }
     expect(new Date(result.reopened[`${field}Timestamp`]).getTime()).toBe(3000)
+    expect(result.redundantWrites).toBe(0)
     expect(result.cleared).toEqual([])
   })
 }

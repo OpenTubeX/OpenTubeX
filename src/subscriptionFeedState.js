@@ -2,7 +2,8 @@
 // Preserve that action without replacing newer metadata or hiding new entries.
 export function preserveSubscriptionSeenEntries(entries, previousEntries, idKey = 'videoId') {
   const seen = new Map((previousEntries ?? [])
-    .filter(entry => entry.isNewInSubscriptionFeed === false)
+    .filter(entry => entry?.isNewInSubscriptionFeed === false &&
+      typeof entry[idKey] === 'string' && entry[idKey].length > 0)
     .map(entry => [entry[idKey], entry]))
   if (seen.size === 0) return entries
   let changed = false

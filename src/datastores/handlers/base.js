@@ -32,7 +32,7 @@ class Settings {
       const local = parseSubscriptionSeenPosts(saved?.value)
       const seenAt = local.reduce((timestamp, entry) => Math.max(timestamp, entry.seenAt + 1), Date.now())
       const incoming = Array.isArray(update?.posts)
-        ? update.posts.map(({ postId }) => ({ postId, seenAt }))
+        ? update.posts.map(post => ({ postId: post?.postId, seenAt }))
         : update
       const value = JSON.stringify(mergeSubscriptionSeenPosts(local, incoming))
       if (value !== saved?.value) await this.upsert('subscriptionSeenPosts', value)
@@ -850,6 +850,7 @@ class SubscriptionCache {
       const current = await db.subscriptionCache.findOneAsync({ _id: channelId })
       if (!current?.[field]) return
       const marked = preserveSubscriptionSeenEntries(current[field], entries, tab === 'posts' ? 'postId' : 'videoId')
+      if (marked === current[field]) return
       await db.subscriptionCache.updateAsync({ _id: channelId }, { $set: { [field]: marked } })
     })
   }

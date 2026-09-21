@@ -65,6 +65,12 @@ test('post marks ignore malformed data, merge deterministically, and retain the 
     postData.mergeSubscriptionSeenPosts([], ties.toReversed()))
 })
 
+test('malformed local post marks do not discard valid dismissals', async () => {
+  const { Settings } = await settingsFixture()
+  const result = await Settings.mergeSeenPosts({ posts: [null, {}, { postId: 'valid' }] })
+  assert.deepEqual(JSON.parse(result).map(entry => entry.postId), ['valid'])
+})
+
 test('concurrent post marks persist together and delayed window replies retain newer marks', async () => {
   const { Settings } = await settingsFixture()
   const [older, latest] = await Promise.all([

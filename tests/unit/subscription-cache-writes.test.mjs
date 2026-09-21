@@ -85,6 +85,27 @@ for (const [tab, field, cacheKey, update, mark] of [
   }
 }
 
+for (const idKey of ['videoId', 'postId']) {
+  test(`missing ${idKey} cannot dismiss an unrelated feed entry`, () => {
+    const incoming = [{ isNewInSubscriptionFeed: true }, { [idKey]: '', isNewInSubscriptionFeed: true }]
+    const old = incoming.map(entry => ({ ...entry, isNewInSubscriptionFeed: false }))
+    assert.equal(feedState.preserveSubscriptionSeenEntries(incoming, old, idKey), incoming)
+  })
+}
+
+test('duplicate and absent seen marks do not rewrite the persisted feed', async () => {
+  const db = { subscriptionCache: new Datastore({ inMemoryOnly: true }) }
+  const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db, ...feedState })
+  const entry = { videoId: 'seen', isNewInSubscriptionFeed: false }
+  await Cache.updateVideosByChannelId('channel', [entry], new Date(1000))
+  let writes = 0
+  const update = db.subscriptionCache.updateAsync.bind(db.subscriptionCache)
+  db.subscriptionCache.updateAsync = (...args) => { writes++; return update(...args) }
+  await Cache.markEntriesAsSeen('channel', 'videos', [entry])
+  await Cache.markEntriesAsSeen('channel', 'videos', [{ ...entry, videoId: 'absent' }])
+  assert.equal(writes, 0)
+})
+
 test('a stale members-only seen action leaves a newly public upload new', async () => {
   const db = { subscriptionCache: new Datastore({ inMemoryOnly: true }) }
   const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db, ...feedState })

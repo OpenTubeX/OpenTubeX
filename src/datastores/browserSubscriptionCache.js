@@ -135,7 +135,9 @@ export function createBrowserSubscriptionCache(loadLegacyRecords, name = 'opentu
       const snapshot = JSON.parse(JSON.stringify(entries))
       return updateChannel(channelId, record => {
         if (!record[field]) return false
-        record[field] = preserveSubscriptionSeenEntries(record[field], snapshot, tab === 'posts' ? 'postId' : 'videoId')
+        const marked = preserveSubscriptionSeenEntries(record[field], snapshot, tab === 'posts' ? 'postId' : 'videoId')
+        if (marked === record[field]) return false
+        record[field] = marked
         return true
       })
     },
