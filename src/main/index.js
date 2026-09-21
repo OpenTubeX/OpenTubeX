@@ -4234,11 +4234,40 @@ function runApp() {
    */
   async function executeIpBlockRecoveryScript(scriptPath) {
     const normalizedPath = path.normalize(path.resolve(scriptPath))
+    if (!(await asyncFs.stat(normalizedPath)).isFile()) {
+      throw new Error('Recovery script must be a file')
+    }
+
+    let command = normalizedPath
+    let args = []
+    let windowsVerbatimArguments = false
+    if (process.platform === 'win32') {
+      const systemDirectory = path.join(process.env.SystemRoot, 'System32')
+      const extension = path.extname(normalizedPath).toLowerCase()
+      if (extension === '.bat' || extension === '.cmd') {
+        // Batch files require cmd.exe. Reject expansion and command syntax even
+        // inside quotes, and disable AutoRun and delayed environment expansion.
+        // eslint-disable-next-line no-control-regex -- Control characters must not reach cmd.exe.
+        if (/[\x00-\x1f"%!&|<>^]/.test(normalizedPath)) {
+          throw new Error('Recovery batch script path contains shell syntax')
+        }
+        command = path.join(systemDirectory, 'cmd.exe')
+        args = ['/d', '/v:off', '/s', '/c', `""${normalizedPath}""`]
+        windowsVerbatimArguments = true
+      } else if (extension === '.ps1') {
+        command = path.join(systemDirectory, 'WindowsPowerShell', 'v1.0', 'powershell.exe')
+        args = ['-NoProfile', '-NonInteractive', '-File', normalizedPath]
+      } else if (extension === '.vbs') {
+        command = path.join(systemDirectory, 'cscript.exe')
+        args = ['//Nologo', normalizedPath]
+      }
+    }
     const maxOutputLength = 16_384
 
     return new Promise((resolve, reject) => {
-      const child = cp.spawn(normalizedPath, [], {
-        shell: process.platform === 'win32',
+      const child = cp.spawn(command, args, {
+        shell: false,
+        windowsVerbatimArguments,
         windowsHide: true
       })
 
