@@ -179,7 +179,10 @@ watch(() => activeSubscriptionList.value.map((channel) => channel.id).join(','),
 })
 
 watch(
-  () => store.getters.getSubscriptionPostsLastRefreshTimestamp,
+  [
+    () => store.getters.getSubscriptionPostsLastRefreshTimestamp,
+    () => store.getters.getSubscriptionSeenPosts
+  ],
   () => {
     if (subscriptionCacheReady.value) {
       loadPostsFromCacheForAllActiveProfileChannels()

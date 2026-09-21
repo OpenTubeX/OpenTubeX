@@ -5,11 +5,105 @@ import vm from 'node:vm'
 import Datastore from '@seald-io/nedb'
 import * as seenSync from '../../src/renderer/helpers/subscription-seen-videos.js'
 import * as seenData from '../../src/subscriptionSeenVideos.js'
+import * as postData from '../../src/subscriptionSeenPosts.js'
+import * as feedState from '../../src/subscriptionFeedState.js'
 import * as historyHelpers from '../../src/history.js'
 import { EncryptedSyncAdapter, createEmptySyncDocument } from '../../src/renderer/helpers/sync-server-privacy.js'
 
 const source = await readFile(new URL('../../src/renderer/store/modules/subscription-cache.js', import.meta.url), 'utf8')
-const seenVideos = { ...seenSync, ...seenData }
+const seenVideos = { ...seenSync, ...seenData, ...postData }
+
+test('marking a community post as seen records a durable mark for sync', async () => {
+  const fixture = cacheFixture()
+  await fixture.actions.markSubscriptionPostAsSeen(fixture.context, 'post')
+  assert.equal(fixture.recorded.length, 1)
+  assert.equal(fixture.recorded[0][0], 'mergeSubscriptionSeenPosts')
+  assert.deepEqual(fixture.recorded[0][1], { posts: [{ postId: 'post' }] })
+})
+
+test('two devices merge persisted post marks without changing video marks or watch history', async () => {
+  const document = createEmptySyncDocument()
+  document.history = [{ video: { id: 'attached-video' }, metadata: { position_millis: 42000 } }]
+  document.seenVideos = [{ videoId: 'first', seenAt: 500 }]
+  const client = new EncryptedSyncAdapter(document)
+  const device = async postId => {
+    const { Settings } = await settingsFixture()
+    return {
+      state: { settings: { subscriptionSeenPosts: await Settings.mergeSeenPosts({ posts: [{ postId }] }) } },
+      async dispatch(action, remote) {
+        assert.equal(action, 'mergeSubscriptionSeenPosts')
+        this.state.settings.subscriptionSeenPosts = await Settings.mergeSeenPosts(remote)
+      },
+    }
+  }
+  const first = await device('first')
+  const second = await device('second')
+  await seenSync.syncSubscriptionSeenPosts(client, first)
+  await seenSync.syncSubscriptionSeenPosts(client, second)
+  await seenSync.syncSubscriptionSeenPosts(client, first)
+  assert.equal(first.state.settings.subscriptionSeenPosts, second.state.settings.subscriptionSeenPosts)
+  assert.deepEqual(document.seenPosts.map(entry => entry.postId), ['first', 'second'])
+  assert.deepEqual(document.seenVideos, [{ videoId: 'first', seenAt: 500 }])
+  assert.deepEqual(document.history, [{ video: { id: 'attached-video' }, metadata: { position_millis: 42000 } }])
+  const post = { postId: 'first', isNewInSubscriptionFeed: true,
+    postContent: { type: 'video', content: { videoId: 'attached-video', isNewInSubscriptionFeed: true } } }
+  const cache = { channel: { posts: [post, { postId: 'unseen', isNewInSubscriptionFeed: true }] } }
+  const filtered = seenSync.applySubscriptionSeenPostsToCache(cache, second.state.settings.subscriptionSeenPosts)
+  assert.deepEqual(filtered.channel.posts.map(entry => entry.isNewInSubscriptionFeed), [false, true])
+  assert.equal(filtered.channel.posts[0].postContent.content.isNewInSubscriptionFeed, true)
+})
+
+test('post marks ignore malformed data, merge deterministically, and retain the newest 10,000', () => {
+  assert.deepEqual(postData.mergeSubscriptionSeenPosts('invalid', [null, {}, { postId: 'post', seenAt: 'bad' },
+    { postId: 'post', seenAt: 1000 }]), [{ postId: 'post', seenAt: 1000 }])
+  const marks = Array.from({ length: 10002 }, (_, index) => ({ postId: `post-${index}`, seenAt: index + 1 }))
+  const merged = postData.mergeSubscriptionSeenPosts(marks, [])
+  assert.equal(merged.length, 10000)
+  assert.ok(!merged.some(entry => ['post-0', 'post-1'].includes(entry.postId)))
+  const ties = marks.map(entry => ({ ...entry, seenAt: 1000 }))
+  assert.deepEqual(postData.mergeSubscriptionSeenPosts(ties, []),
+    postData.mergeSubscriptionSeenPosts([], ties.toReversed()))
+})
+
+test('malformed local post marks do not discard valid dismissals', async () => {
+  const { Settings } = await settingsFixture()
+  const result = await Settings.mergeSeenPosts({ posts: [null, {}, { postId: 'valid' }] })
+  assert.deepEqual(JSON.parse(result).map(entry => entry.postId), ['valid'])
+})
+
+test('concurrent post marks persist together and delayed window replies retain newer marks', async () => {
+  const { Settings } = await settingsFixture()
+  const [older, latest] = await Promise.all([
+    Settings.mergeSeenPosts({ posts: [{ postId: 'first' }] }),
+    Settings.mergeSeenPosts({ posts: [{ postId: 'second' }] }),
+  ])
+  assert.deepEqual(JSON.parse(latest).map(entry => entry.postId), ['first', 'second'])
+  const source = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
+  const context = vm.createContext({ ...seenVideos, ANDROID_PROXY_SETTING_KEYS: [] })
+  vm.runInContext(source.slice(source.indexOf('const customActions ='), source.indexOf('  recordSyncSettingEdit:')) +
+    '\n}\nglobalThis.actions = customActions', context)
+  const state = { subscriptionSeenPosts: latest }
+  context.actions.applySubscriptionSeenPosts({ state, commit(type, value) { state.subscriptionSeenPosts = value } }, older)
+  assert.equal(state.subscriptionSeenPosts, latest)
+})
+
+test('failed post persistence prevents a stale sync upload', async () => {
+  const failure = new Error('Post persistence failed')
+  let uploads = 0
+  await assert.rejects(seenSync.syncSubscriptionSeenPosts({
+    getSeenPosts: async () => [], putSeenPosts: async () => { uploads++ },
+  }, { dispatch: async () => { throw failure } }), failure)
+  assert.equal(uploads, 0)
+})
+
+test('mark all still dismisses displayed videos when a refresh wins the cache write race', async () => {
+  const fixture = cacheFixture(false)
+  fixture.context.rootGetters = { getSubscriptionSeenVideos: [] }
+  await fixture.actions.markSubscriptionEntriesAsSeen(fixture.context, {
+    tabs: ['videos', 'shorts', 'live'], channelIds: ['channel'],
+  })
+  assert.equal(fixture.recorded.length, 1, 'The explicit seen action must survive a newer cache timestamp')
+})
 
 async function settingsFixture(history = []) {
   const baseSource = await readFile(new URL('../../src/datastores/handlers/base.js', import.meta.url), 'utf8')
@@ -28,7 +122,9 @@ function cacheFixture(applied = true, logger = console) {
   const context = vm.createContext({
     console: logger,
     ...seenVideos,
+    ...feedState,
     DBSubscriptionCacheHandlers: {
+      markEntriesAsSeen: async () => {},
       updateVideosByChannelId: async () => applied,
       updateShortsByChannelId: async () => applied,
       updateLiveStreamsByChannelId: async () => applied,
@@ -53,6 +149,7 @@ function cacheFixture(applied = true, logger = console) {
     actions,
     getters: context.module.getters,
     recorded,
+    handlers: context.DBSubscriptionCacheHandlers,
     context: {
       state,
       commit: (type, payload) => mutations[type](state, payload),
@@ -72,8 +169,9 @@ test('marking a subscription video as seen records it for history sync without w
   assert.ok(Number.isFinite(marks[0].seenAt))
 })
 
-test('rejected cache writes do not record seen videos', async () => {
-  const fixture = cacheFixture(false)
+test('failed seen writes do not record seen videos', async () => {
+  const fixture = cacheFixture(true, { error() {} })
+  fixture.handlers.markEntriesAsSeen = async () => { throw new Error('Disk failure') }
   await fixture.actions.markSubscriptionVideoAsSeen(fixture.context, 'videoCache')
   await fixture.actions.markSubscriptionEntriesAsSeen(fixture.context, {
     tabs: ['videos', 'shorts', 'live'], channelIds: ['channel'],
@@ -190,12 +288,13 @@ test('two windows persist both marks and delayed replies cannot overwrite newer 
   assert.equal(second.state.subscriptionSeenVideos, saved.value)
 })
 
-test('mark all records videos, Shorts and live streams, excluding community posts', async () => {
+test('mark all records videos, Shorts, live streams and community posts', async () => {
   const fixture = cacheFixture()
   await fixture.actions.markSubscriptionEntriesAsSeen(fixture.context, {
     tabs: ['videos', 'shorts', 'live', 'posts'], channelIds: ['channel'],
   })
-  assert.equal(fixture.recorded.length, 1)
+  assert.equal(fixture.recorded.length, 2)
+  assert.deepEqual(fixture.recorded[1], ['mergeSubscriptionSeenPosts', { posts: [{ postId: 'post' }] }])
   assert.equal(fixture.recorded[0][0], 'mergeSubscriptionSeenVideos')
   assert.deepEqual(fixture.recorded[0][1].videos.map(entry => entry.videoId).sort(),
     ['liveCache', 'shortsCache', 'videoCache'])

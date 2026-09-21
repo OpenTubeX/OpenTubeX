@@ -4,6 +4,9 @@ import test from 'node:test'
 import vm from 'node:vm'
 import Datastore from '@seald-io/nedb'
 import { ensureSubscriptionFeedEntryState } from '../../src/renderer/helpers/subscription-entries.js'
+import * as seenData from '../../src/subscriptionSeenVideos.js'
+import * as feedState from '../../src/subscriptionFeedState.js'
+import { applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache } from '../../src/renderer/helpers/subscription-seen-videos.js'
 
 // The handlers module imports the platform datastore singleton through webpack.
 // Run the actual cache class with an isolated real NeDB for each interleaving.
@@ -14,10 +17,132 @@ const storeSource = await readFile(new URL('../../src/renderer/store/modules/sub
 const moduleSource = storeSource.slice(storeSource.indexOf('const MAX_CONCURRENT_CACHE_WRITES'))
   .replace('export default', 'globalThis.cacheModule =')
 
+for (const [tab, field, cacheKey, update, mark] of [
+  ['videos', 'videos', 'videoCache', 'updateVideosByChannelId', 'markSubscriptionVideoAsSeen'],
+  ['shorts', 'shorts', 'shortsCache', 'updateShortsByChannelId', 'markSubscriptionVideoAsSeen'],
+  ['live', 'liveStreams', 'liveCache', 'updateLiveStreamsByChannelId', 'markSubscriptionVideoAsSeen'],
+  ['posts', 'communityPosts', 'postsCache', 'updateCommunityPostsByChannelId', 'markSubscriptionPostAsSeen'],
+]) {
+  test(`marking ${tab} seen tolerates a malformed persisted feed`, async () => {
+    const db = { subscriptionCache: new Datastore({ inMemoryOnly: true }) }
+    const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db, ...feedState })
+    const idKey = tab === 'posts' ? 'postId' : 'videoId'
+    for (const malformed of [{}, 'invalid', 1, true]) {
+      await db.subscriptionCache.updateAsync({ _id: 'channel' }, {
+        _id: 'channel', [field]: malformed, [`${field}Timestamp`]: new Date(1000),
+      }, { upsert: true })
+      await Cache.markEntriesAsSeen('channel', tab, [{ [idKey]: 'displayed', isNewInSubscriptionFeed: false }])
+      const saved = (await Cache.find())[0]
+      assert.deepEqual(saved[field], [])
+      assert.equal(new Date(saved[`${field}Timestamp`]).getTime(), 1000)
+    }
+  })
+  for (const bulk of [false, true]) {
+    test(`${bulk ? 'bulk' : 'individual'} seen action survives a concurrent ${tab} refresh and sync`, async () => {
+      const db = { subscriptionCache: new Datastore({ inMemoryOnly: true }) }
+      const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db, ...seenData, ...feedState })
+      const idKey = tab === 'posts' ? 'postId' : 'videoId'
+      const entriesKey = tab === 'posts' ? 'posts' : 'videos'
+      const old = { [idKey]: 'displayed', title: 'Old metadata', isNewInSubscriptionFeed: true }
+      const fresh = [
+        { ...old, title: 'Fresh metadata' },
+        { [idKey]: 'arrived-during-mark', isNewInSubscriptionFeed: true },
+      ]
+      await Cache[update]('channel', [old], new Date(1000))
+      const context = vm.createContext({
+        console, ...seenData, ...feedState, applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache,
+        DBSubscriptionCacheHandlers: Cache,
+      })
+      vm.runInContext(moduleSource, context)
+      const { actions, mutations, state } = context.cacheModule
+      state[cacheKey].channel = { [entriesKey]: [old], timestamp: new Date(1000) }
+      let marks = []
+      const actionContext = {
+        state,
+        rootGetters: { getSubscriptionSeenVideos: [] },
+        commit: (type, payload) => mutations[type](state, payload),
+        dispatch: async (type, payload) => {
+          if (type === 'mergeSubscriptionSeenPosts') {
+            assert.deepEqual(structuredClone(payload), { posts: [{ postId: 'displayed' }] })
+            return
+          }
+          assert.equal(type, 'mergeSubscriptionSeenVideos')
+          marks = seenData.mergeSubscriptionSeenVideos(marks,
+            payload.videos.map(video => ({ ...video, seenAt: 3000 })))
+        },
+      }
+      // The database receives the refresh before its acknowledgement reaches
+      // the renderer. The clicked card still carries the earlier timestamp.
+      await Cache[update]('channel', fresh, new Date(2000))
+      await (bulk
+        ? actions.markSubscriptionEntriesAsSeen(actionContext, { tab, channelIds: ['channel'] })
+        : actions[mark](actionContext, 'displayed'))
+      assert.equal(old.isNewInSubscriptionFeed, false, 'feed cards retaining the original object must update too')
+      // A delayed refresh reply must not restore the dismissed card.
+      const mutation = { videos: 'updateVideoCacheByChannel', shorts: 'updateShortsCacheByChannel',
+        live: 'updateLiveCacheByChannel', posts: 'updatePostsCacheByChannel' }[tab]
+      mutations[mutation](state, { channelId: 'channel', entries: fresh, timestamp: new Date(2000) })
+      const saved = (await Cache.find())[0]
+      assert.deepEqual(saved[field].map(entry => entry.isNewInSubscriptionFeed), [false, true])
+      assert.equal(saved[field][0].title, 'Fresh metadata')
+      assert.equal(new Date(saved[`${field}Timestamp`]).getTime(), 2000)
+      assert.deepEqual(state[cacheKey].channel[entriesKey].map(entry => entry.isNewInSubscriptionFeed), [false, true])
+      if (tab !== 'posts') {
+        // Replay the uploaded marks on another device with its own stale feed.
+        const remote = applySubscriptionSeenVideosToCache({ channel: { videos: fresh } }, marks)
+        assert.deepEqual(remote.channel.videos.map(entry => entry.isNewInSubscriptionFeed), [false, true])
+      }
+      // A response already computed before the click can arrive after it too.
+      await Cache[update]('channel', fresh, new Date(4000))
+      assert.deepEqual((await Cache.find())[0][field].map(entry => entry.isNewInSubscriptionFeed), [false, true])
+    })
+  }
+}
+
+for (const idKey of ['videoId', 'postId']) {
+  test(`malformed persisted ${idKey} feed does not prevent refresh`, () => {
+    const incoming = [{ [idKey]: 'new', isNewInSubscriptionFeed: true }]
+    for (const previous of [{}, 'invalid', 1, true, null, undefined]) {
+      assert.equal(feedState.preserveSubscriptionSeenEntries(incoming, previous, idKey), incoming)
+    }
+  })
+  test(`missing ${idKey} cannot dismiss an unrelated feed entry`, () => {
+    const incoming = [{ isNewInSubscriptionFeed: true }, { [idKey]: '', isNewInSubscriptionFeed: true }]
+    const old = incoming.map(entry => ({ ...entry, isNewInSubscriptionFeed: false }))
+    assert.equal(feedState.preserveSubscriptionSeenEntries(incoming, old, idKey), incoming)
+  })
+}
+
+test('duplicate and absent seen marks do not rewrite the persisted feed', async () => {
+  const db = { subscriptionCache: new Datastore({ inMemoryOnly: true }) }
+  const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db, ...feedState })
+  const entry = { videoId: 'seen', isNewInSubscriptionFeed: false }
+  await Cache.updateVideosByChannelId('channel', [entry], new Date(1000))
+  let writes = 0
+  const update = db.subscriptionCache.updateAsync.bind(db.subscriptionCache)
+  db.subscriptionCache.updateAsync = (...args) => { writes++; return update(...args) }
+  await Cache.markEntriesAsSeen('channel', 'videos', [entry])
+  await Cache.markEntriesAsSeen('channel', 'videos', [{ ...entry, videoId: 'absent' }])
+  assert.equal(writes, 0)
+})
+
+test('a stale members-only seen action leaves a newly public upload new', async () => {
+  const db = { subscriptionCache: new Datastore({ inMemoryOnly: true }) }
+  const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db, ...feedState })
+  const privateVideo = { videoId: 'video', isMembersOnly: true, isNewInSubscriptionFeed: false }
+  await Cache.updateVideosByChannelId('channel', [privateVideo], new Date(1000))
+  const publicVideo = { ...privateVideo, isMembersOnly: false, isNewInSubscriptionFeed: true }
+  await Cache.updateVideosByChannelId('channel', [publicVideo], new Date(2000))
+  await Cache.markEntriesAsSeen('channel', 'videos', [privateVideo])
+  assert.equal((await Cache.find())[0].videos[0].isNewInSubscriptionFeed, true)
+  await Cache.markEntriesAsSeen('channel', 'videos', [{ ...publicVideo, isNewInSubscriptionFeed: false }])
+  assert.equal((await Cache.find())[0].videos[0].isNewInSubscriptionFeed, false)
+})
+
 for (const enrichmentFirst of [false, true]) {
   test(`Shorts refresh preserves new entries when enrichment starts ${enrichmentFirst ? 'first' : 'second'}`, async () => {
     const db = { subscriptionCache: new Datastore({ inMemoryOnly: true }) }
-    const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db })
+    const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db, ...feedState })
     await Cache.updateShortsByChannelId('channel', [{ videoId: 'old', title: 'Old title' }], new Date(1000))
 
     const refresh = () => Cache.updateShortsByChannelId('channel', [
@@ -44,7 +169,7 @@ for (const enrichmentFirst of [false, true]) {
 for (const delayDatabaseReply of [false, true]) {
   test(`a premiere update cannot overwrite a full refresh when its database ${delayDatabaseReply ? 'reply' : 'write'} arrives late`, async () => {
     const db = { subscriptionCache: new Datastore({ inMemoryOnly: true }) }
-    const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db })
+    const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db, ...feedState })
     const cachedVideos = [{ videoId: 'premiere', viewCount: 1000, isNewInSubscriptionFeed: false }]
     await Cache.updateVideosByChannelId('channel', cachedVideos, new Date(1000))
 
@@ -54,6 +179,7 @@ for (const delayDatabaseReply of [false, true]) {
     const resume = new Promise(resolve => { releasePremiere = resolve })
     const context = vm.createContext({
       console,
+      ...feedState,
       ensureSubscriptionFeedEntryState,
       DBSubscriptionCacheHandlers: {
         async updateVideosByChannelId(channelId, videos, timestamp) {

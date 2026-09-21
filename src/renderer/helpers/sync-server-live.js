@@ -41,7 +41,7 @@ const NOISY_ACTIVITY_SETTINGS = new Set([
 ])
 
 export function createSyncActivity(collection, before, after, deviceId, deviceName) {
-  if (['history', 'seenVideos', 'sessions', 'sessionsV2'].includes(collection)) return null
+  if (['history', 'seenVideos', 'seenPosts', 'sessions', 'sessionsV2'].includes(collection)) return null
   const changes = []
   if (collection === 'settings') {
     const previous = new Map((before ?? []).map(entry => [entry.key, entry.value]))

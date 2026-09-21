@@ -2,12 +2,84 @@ import { readFile } from 'node:fs/promises'
 import { test, expect } from '../../helpers/app.mjs'
 
 const source = await readFile(new URL('../../../src/datastores/browserSubscriptionCache.js', import.meta.url), 'utf8')
+const seenSource = await readFile(new URL('../../../src/subscriptionFeedState.js', import.meta.url), 'utf8')
 
 test.beforeEach(async ({ page }) => {
   // Exercise the browser backend against Chromium's real IndexedDB, including
   // transaction commits and structured cloning, without touching the app cache.
-  await page.evaluate(`${source.replace('export function', 'function')}; window.createTestCache = createBrowserSubscriptionCache`)
+  await page.evaluate(`${seenSource.replaceAll('export function', 'function')}\n${source.replace(/^import .*\n/m, '').replace('export function', 'function')}; window.createTestCache = createBrowserSubscriptionCache`)
 })
+
+for (const [tab, field, update] of [
+  ['videos', 'videos', 'updateVideosByChannelId'],
+  ['shorts', 'shorts', 'updateShortsByChannelId'],
+  ['live', 'liveStreams', 'updateLiveStreamsByChannelId'],
+  ['posts', 'communityPosts', 'updateCommunityPostsByChannelId'],
+]) {
+  test(`marking ${tab} seen tolerates malformed IndexedDB feed data`, async ({ page }) => {
+    const records = await page.evaluate(async ({ tab, field }) => {
+      const malformed = [{}, 'invalid', 1, true]
+      const cache = window.createTestCache(async () => malformed.map((value, index) => ({
+        _id: `channel-${index}`, [field]: value, [`${field}Timestamp`]: new Date(1000),
+      })), `malformed-seen-${tab}`)
+      for (let index = 0; index < malformed.length; index++) {
+        await cache.markEntriesAsSeen(`channel-${index}`, tab, [{
+          [tab === 'posts' ? 'postId' : 'videoId']: 'displayed', isNewInSubscriptionFeed: false,
+        }])
+      }
+      return cache.find()
+    }, { tab, field })
+    for (const record of records) {
+      expect(record[field]).toEqual([])
+      expect(new Date(record[`${field}Timestamp`]).getTime()).toBe(1000)
+    }
+  })
+  test(`marking ${tab} seen survives competing refreshes and reopening IndexedDB`, async ({ page }) => {
+    const result = await page.evaluate(async ({ tab, field, update }) => {
+      const name = `seen-race-${tab}`
+      const cache = window.createTestCache(async () => [], name)
+      const other = window.createTestCache(async () => [], name)
+      const idKey = tab === 'posts' ? 'postId' : 'videoId'
+      const entry = { [idKey]: 'displayed', isNewInSubscriptionFeed: true }
+      const fresh = [{ ...entry, title: 'Refreshed' }, { [idKey]: 'new', isNewInSubscriptionFeed: true }]
+      const marks = [{ ...entry, isNewInSubscriptionFeed: false }]
+      await cache[update]('channel', [entry], new Date(1000))
+      await other.find()
+      await Promise.all([
+        other[update]('channel', fresh, new Date(2000)),
+        cache.markEntriesAsSeen('channel', tab, marks),
+      ])
+      const first = (await cache.find())[0]
+      await Promise.all([
+        cache.markEntriesAsSeen('channel', tab, marks),
+        other[update]('channel', fresh, new Date(3000)),
+      ])
+      const reopened = (await window.createTestCache(async () => [], name).find())[0]
+      const originalPut = IDBObjectStore.prototype.put
+      let redundantWrites = 0
+      IDBObjectStore.prototype.put = function (...args) {
+        redundantWrites++
+        return originalPut.apply(this, args)
+      }
+      try {
+        await cache.markEntriesAsSeen('channel', tab, marks)
+        await cache.markEntriesAsSeen('channel', tab, [{ ...marks[0], [idKey]: 'absent' }])
+      } finally {
+        IDBObjectStore.prototype.put = originalPut
+      }
+      await cache.deleteAll()
+      await cache.markEntriesAsSeen('channel', tab, marks)
+      return { first, reopened, redundantWrites, cleared: await cache.find() }
+    }, { tab, field, update })
+    for (const record of [result.first, result.reopened]) {
+      expect(record[field].map(entry => entry.isNewInSubscriptionFeed)).toEqual([false, true])
+      expect(record[field][0].title).toBe('Refreshed')
+    }
+    expect(new Date(result.reopened[`${field}Timestamp`]).getTime()).toBe(3000)
+    expect(result.redundantWrites).toBe(0)
+    expect(result.cleared).toEqual([])
+  })
+}
 
 test('refresh writes scale with one channel instead of the entire subscription cache', async ({ page }) => {
   const result = await page.evaluate(async () => {

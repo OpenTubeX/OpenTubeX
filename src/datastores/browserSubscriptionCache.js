@@ -1,3 +1,5 @@
+import { preserveSubscriptionSeenEntries, subscriptionFeedField } from '../subscriptionFeedState'
+
 /**
  * Browser NeDB rewrites its entire append log for every channel update. Keep
  * channels in separate IndexedDB records instead, with atomic read/write
@@ -121,13 +123,24 @@ export function createBrowserSubscriptionCache(loadLegacyRecords, name = 'opentu
     return updateChannel(channelId, record => {
       const timestampField = `${field}Timestamp`
       if (new Date(record[timestampField]).getTime() > date.getTime()) return false
-      record[field] = snapshot
+      record[field] = preserveSubscriptionSeenEntries(snapshot, record[field], field === 'communityPosts' ? 'postId' : 'videoId')
       record[timestampField] = date
       return true
     })
   }
 
   return {
+    markEntriesAsSeen(channelId, tab, entries) {
+      const field = subscriptionFeedField(tab)
+      const snapshot = JSON.parse(JSON.stringify(entries))
+      return updateChannel(channelId, record => {
+        if (!record[field]) return false
+        const marked = preserveSubscriptionSeenEntries(record[field], snapshot, tab === 'posts' ? 'postId' : 'videoId')
+        if (marked === record[field]) return false
+        record[field] = marked
+        return true
+      })
+    },
     async find() {
       return transaction(await database(), ['channels'], 'readonly', (tx, done) => {
         const request = tx.objectStore('channels').getAll()

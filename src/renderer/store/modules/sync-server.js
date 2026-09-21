@@ -45,7 +45,7 @@ import {
   isSyncReasonEnabled,
 } from '../../helpers/sync-server-scheduling'
 import { isSettingSyncEnabled } from './settings'
-import { syncSubscriptionSeenVideos } from '../../helpers/subscription-seen-videos'
+import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../helpers/subscription-seen-videos'
 
 const EVENT_SYNC_DEBOUNCE_MS = 1500
 const EVENT_SYNC_DELAYS = {
@@ -235,7 +235,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
 
   async function runStage(stage, callback) {
     assertSyncStillActive()
-    const progressStage = stage === 'seenVideos' ? 'history' : stage
+    const progressStage = ['seenVideos', 'seenPosts'].includes(stage) ? 'history' : stage
     if (progressStarted) {
       commit('setSyncServerProgress', {
         stage: progressStage,
@@ -260,6 +260,9 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     switch (collection) {
       case 'seenVideos':
         result.seenVideos = await syncSubscriptionSeenVideos(targetClient, store)
+        break
+      case 'seenPosts':
+        result.seenPosts = await syncSubscriptionSeenPosts(targetClient, store)
         break
       case 'subscriptions':
         next.subscriptions = await syncSubscriptions(
@@ -349,6 +352,9 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     if (encrypted) {
       if (settings.syncServerSyncHistory && await networkClient.supportsSeenVideosSync()) {
         stages.splice(stages.indexOf('history') + 1, 0, 'seenVideos')
+      }
+      if (settings.syncServerSyncHistory && capabilities.seen_posts === 1) {
+        stages.splice(stages.indexOf('history') + 1, 0, 'seenPosts')
       }
       if (!settings.syncServerPrivacyKey) {
         throw new Error('Reconnect and enter your privacy passphrase to enable enhanced privacy')

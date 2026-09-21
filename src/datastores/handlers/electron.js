@@ -30,6 +30,10 @@ const dbSearchHistory = (action, data) => window.ftElectron.dbSearchHistory(acti
 const dbSubscriptionCache = (action, data) => window.ftElectron.dbSubscriptionCache(action, toPlain(data))
 
 class Settings {
+  static mergeSeenPosts(update) {
+    return dbSettings(DBActions.SETTINGS.MERGE_SEEN_POSTS, update)
+  }
+
   static mergeSeenVideos(update) {
     return dbSettings(DBActions.SETTINGS.MERGE_SEEN_VIDEOS, update)
   }
@@ -246,6 +250,10 @@ class SearchHistory {
 }
 
 class SubscriptionCache {
+  static markEntriesAsSeen(channelId, tab, entries) {
+    return dbSubscriptionCache(DBActions.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN, { channelId, tab, entries })
+  }
+
   static find() {
     return dbSubscriptionCache(DBActions.GENERAL.FIND)
   }

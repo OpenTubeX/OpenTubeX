@@ -15,7 +15,13 @@ test('encrypted subscription retries retain concurrent remote edits', async ({ p
     const request = route.request()
     const pathname = new URL(request.url()).pathname
     let response
-    if (pathname === '/v1/encrypted_sync') {
+    if (pathname === '/health') {
+      response = { status: 'ok', capabilities: { encrypted_sync: 1, live_sync: 1 } }
+    } else if (pathname === '/v1/encrypted_sync/events') {
+      response = []
+    } else if (pathname === '/v1/account/sessions') {
+      response = { sessions: [] }
+    } else if (pathname === '/v1/encrypted_sync') {
       response = { collections: [{ collection: 'subscriptions' }] }
     } else if (pathname === '/v1/encrypted_sync/subscriptions' && request.method() === 'GET') {
       response = { revision, payload: await encryptSyncDocument(remote, key, salt) }
@@ -191,7 +197,7 @@ test('stale refresh completion cannot rewind feed refresh timing', async ({ page
 })
 
 for (const mode of ['all', 'video', 'post']) {
-  test(`marking ${mode} seen does not mutate a newer refresh after a rejected write`, async ({ app, page }) => {
+  test(`marking ${mode} seen survives a newer refresh without dismissing newly arrived entries`, async ({ app, page }) => {
     const result = await page.evaluate(async mode => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const isPost = mode === 'post'
@@ -211,7 +217,7 @@ for (const mode of ['all', 'video', 'post']) {
       await Promise.all([refresh, seen])
       return store.state.subscriptionCache[isPost ? 'postsCache' : 'videoCache']['audit-seen'][key]
     }, mode)
-    expect(result.map(entry => entry.isNewInSubscriptionFeed)).toEqual([true, true])
+    expect(result.map(entry => entry.isNewInSubscriptionFeed)).toEqual([false, true])
     const records = (await readFile(path.join(app.userDataDir, 'subscription-cache.db'), 'utf8'))
       .trim().split('\n').map(line => JSON.parse(line))
     const persisted = records.filter(record => record._id === 'audit-seen').at(-1)

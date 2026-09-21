@@ -5,23 +5,39 @@ import { hasReachedWatchedThreshold, migrateLegacyHistoryRecord } from '../../hi
 import { resolveSearchHistoryEntry } from '../../search-history'
 import { createRecommendationStore } from '../recommendations'
 import { mergeSubscriptionSeenVideos, parseSubscriptionSeenVideos, nextSubscriptionSeenTimestamp } from '../../subscriptionSeenVideos'
+import { preserveSubscriptionSeenEntries, subscriptionFeedField } from '../../subscriptionFeedState'
+import { mergeSubscriptionSeenPosts, parseSubscriptionSeenPosts } from '../../subscriptionSeenPosts'
 
 const recommendations = createRecommendationStore(db.recommendations)
 
 const HISTORY_WATCHED_STATUS_MIGRATION_ID = 'historyWatchedStatusMigrated'
 
 class Settings {
-  static pendingSeenVideosUpdate = Promise.resolve()
+  static pendingSeenStateUpdate = Promise.resolve()
 
-  static runSeenVideosUpdate(operation) {
+  static runSeenStateUpdate(operation) {
     // Share one queue for complete history-status and subscription-mark edits
     // across Electron windows, so another action cannot split their writes.
-    this.pendingSeenVideosUpdate = this.pendingSeenVideosUpdate.catch(() => {}).then(operation)
-    return this.pendingSeenVideosUpdate
+    this.pendingSeenStateUpdate = this.pendingSeenStateUpdate.catch(() => {}).then(operation)
+    return this.pendingSeenStateUpdate
   }
 
   static mergeSeenVideos(update) {
-    return this.runSeenVideosUpdate(() => this._mergeSeenVideos(update))
+    return this.runSeenStateUpdate(() => this._mergeSeenVideos(update))
+  }
+
+  static mergeSeenPosts(update) {
+    return this.runSeenStateUpdate(async () => {
+      const saved = await db.settings.findOneAsync({ _id: 'subscriptionSeenPosts' })
+      const local = parseSubscriptionSeenPosts(saved?.value)
+      const seenAt = local.reduce((timestamp, entry) => Math.max(timestamp, entry.seenAt + 1), Date.now())
+      const incoming = Array.isArray(update?.posts)
+        ? update.posts.map(post => ({ postId: post?.postId, seenAt }))
+        : update
+      const value = JSON.stringify(mergeSubscriptionSeenPosts(local, incoming))
+      if (value !== saved?.value) await this.upsert('subscriptionSeenPosts', value)
+      return value
+    })
   }
 
   static async _mergeSeenVideos(update) {
@@ -172,7 +188,7 @@ class History {
   }
 
   static updateSubscriptionState({ records = [], unseenVideo, metadata }) {
-    return Settings.runSeenVideosUpdate(async () => {
+    return Settings.runSeenStateUpdate(async () => {
       const updatedRecords = []
       if (metadata) {
         let failedCount = 0
@@ -813,6 +829,8 @@ class SubscriptionCache {
       const current = await db.subscriptionCache.findOneAsync({ _id: channelId })
       if (new Date(current?.[timestampField]).getTime() > new Date(timestamp).getTime()) return false
 
+      entries = preserveSubscriptionSeenEntries(entries, current?.[field], field === 'communityPosts' ? 'postId' : 'videoId')
+
       await db.subscriptionCache.updateAsync(
         { _id: channelId },
         { $set: { [field]: entries, [timestampField]: timestamp } },
@@ -824,6 +842,17 @@ class SubscriptionCache {
 
   static find() {
     return db.subscriptionCache.findAsync({})
+  }
+
+  static markEntriesAsSeen(channelId, tab, entries) {
+    const field = subscriptionFeedField(tab)
+    return this.queueUpdate(channelId, field, async () => {
+      const current = await db.subscriptionCache.findOneAsync({ _id: channelId })
+      if (!current?.[field]) return
+      const marked = preserveSubscriptionSeenEntries(current[field], entries, tab === 'posts' ? 'postId' : 'videoId')
+      if (marked === current[field]) return
+      await db.subscriptionCache.updateAsync({ _id: channelId }, { $set: { [field]: marked } })
+    })
   }
 
   static updateVideosByChannelId(channelId, entries, timestamp) {
