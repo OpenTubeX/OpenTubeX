@@ -5660,6 +5660,7 @@ test.describe('tabs from other synced devices', () => {
       settings: {
         currentLocale: 'en-US',
         syncServerEnabled: true,
+        syncServerAutoSync: false,
         syncServerUsername: 'test-user',
         syncServerToken: 'offline-test-token',
         syncServerPrivacyMode: 'enhanced',
@@ -5670,6 +5671,9 @@ test.describe('tabs from other synced devices', () => {
   })
 
   test('keeps synced tab sets in the tab organizer instead of settings', async ({ page }) => {
+    await page.route('https://sync.opentubex.org/**', route => route.fulfill({
+      json: { status: 'ok', capabilities: {} }
+    }))
     const section = await goToSettingsSection(page, 'sync')
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
