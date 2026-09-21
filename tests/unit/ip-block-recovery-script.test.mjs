@@ -13,12 +13,21 @@ const end = source.indexOf('  const ipBlockRecoveryScriptCooldownMs', start)
 assert.ok(start > 0 && end > start)
 
 function loadRunner(platform, spawn, fileStat = async () => ({ isFile: () => true })) {
-  return runInNewContext(`(${source.slice(start, end).trim()})`, {
+  let savedPath
+  const execute = runInNewContext(`(${source.slice(start, end).trim()})`, {
     path: platform === 'win32' ? path.win32 : path.posix,
     process: { platform, env: { SystemRoot: 'C:\\Windows' } },
     cp: { spawn },
-    asyncFs: { stat: fileStat }
+    asyncFs: { stat: fileStat },
+    baseHandlers: { settings: { _findOne: async (key) => {
+      assert.equal(key, 'videoIpBlockScriptPath')
+      return { value: savedPath }
+    } } }
   })
+  return (scriptPath, configuredPath = scriptPath) => {
+    savedPath = configuredPath
+    return execute(scriptPath)
+  }
 }
 
 function captureSpawn(calls) {
@@ -75,4 +84,15 @@ test('executes a literal Unix filename containing spaces and shell syntax', { sk
   assert.equal(result.stdout, 'recovered')
   assert.equal(result.stderr, 'diagnostic')
   assert.equal(result.exitCode, 7)
+})
+
+test('only executes the recovery script configured in saved settings', async () => {
+  const calls = []
+  const run = loadRunner('linux', captureSpawn(calls))
+  await assert.rejects(run('/attacker/script.sh', '/saved/recovery.sh'))
+  await assert.rejects(run('/attacker/script.sh', ''))
+  await assert.rejects(run('/attacker/script.sh', 42))
+  assert.equal(calls.length, 0)
+  await run('/saved/recovery.sh', '/saved/recovery.sh')
+  assert.equal(calls[0].command, '/saved/recovery.sh')
 })

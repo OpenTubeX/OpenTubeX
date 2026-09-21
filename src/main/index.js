@@ -4233,7 +4233,12 @@ function runApp() {
    * @returns {Promise<{ exitCode: number | null, signal: NodeJS.Signals | null, stdout: string, stderr: string }>}
    */
   async function executeIpBlockRecoveryScript(scriptPath) {
-    const normalizedPath = path.normalize(path.resolve(scriptPath))
+    const configuredPath = (await baseHandlers.settings._findOne('videoIpBlockScriptPath'))?.value
+    if (typeof configuredPath !== 'string' || configuredPath.trim().length === 0 ||
+      path.resolve(scriptPath) !== path.resolve(configuredPath)) {
+      throw new Error('Requested recovery script does not match the saved setting')
+    }
+    const normalizedPath = path.normalize(path.resolve(configuredPath))
     if (!(await asyncFs.stat(normalizedPath)).isFile()) {
       throw new Error('Recovery script must be a file')
     }
