@@ -1625,6 +1625,7 @@ export class TabManager {
     this.selectedTabIds = this.selectedTabIds.filter(selectedTabId => selectedTabId !== tabId)
     this._deferredCloseTabIds.delete(tabId)
     this._deferredUnloadTabIds.delete(tabId)
+    this._deferredStartupTabIds.delete(tabId)
     this._resolveTabMountWaiters(tabId, Number.MAX_SAFE_INTEGER, false)
     if (this.contextMenuTabId === tabId) {
       this.contextMenuTabId = null
@@ -2624,6 +2625,7 @@ export class TabManager {
     this.tabs.delete(tabId)
     this._deferredCloseTabIds.delete(tabId)
     this._deferredUnloadTabIds.delete(tabId)
+    this._deferredStartupTabIds.delete(tabId)
     this._resolveTabMountWaiters(tabId, Number.MAX_SAFE_INTEGER, false)
     if (this.contextMenuTabId === tabId) {
       this.contextMenuTabId = null

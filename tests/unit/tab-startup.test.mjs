@@ -651,6 +651,26 @@ for (const outcome of ['playing', 'paused', 'failed']) {
   })
 }
 
+for (const action of ['closeTab', 'detachTabForTransfer']) {
+  test(`startup queue drops tabs removed by ${action}`, async t => {
+    t.mock.timers.enable({ apis: ['setTimeout'] })
+    const manager = createManager(t)
+    const saved = session(3)
+    saved.tabs[2].url = 'app://bundle/index.html#/watch/active'
+    await manager.restoreFromData(saved, { restoreTabLoadState: true })
+    presentActive(manager)
+
+    manager[action]('tab-0')
+    assert.deepEqual([...manager._deferredStartupTabIds], ['tab-1'])
+    manager[action]('tab-1')
+    assert.equal(manager._deferredStartupTabIds.size, 0)
+
+    const tab = manager.createTab({ route: '/watch/new', makeActive: false })
+    manager.activateTab(tab.id)
+    assert.equal(manager._startupPriorityTabId, 'tab-2', 'removed tabs cannot redirect startup priority')
+  })
+}
+
 for (const action of ['select', 'close', 'navigate', 'unload queued']) {
   test(`startup playback wait handles ${action}`, async t => {
     t.mock.timers.enable({ apis: ['setTimeout'] })
