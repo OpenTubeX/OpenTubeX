@@ -136,7 +136,7 @@ async function schedulingFixture(t) {
   let pendingLock = Promise.resolve()
   let releaseLock
   const sandbox = {
-    Date, setTimeout, clearTimeout, console, isRecentSync, isSyncReasonEnabled, SyncLiveConnectionState, AUTO_SYNC_INTERVAL_MS,
+    Date, setTimeout, clearTimeout, AbortController, console, isRecentSync, isSyncReasonEnabled, SyncLiveConnectionState, AUTO_SYNC_INTERVAL_MS,
     SyncCollectionCache: class {}, isSyncServerOffline: () => false,
     withSyncLock: callback => pendingLock.then(callback),
     runSync: async () => {
@@ -370,4 +370,73 @@ test('a due edit remains cancellable when another remote check starts during its
   await second
   await f.tick(0)
   assert.equal(f.calls.length, 2, 'stopping sync must cancel the waiting local upload')
+})
+
+test('edits made during session deletion wait for its sync lock', async t => {
+  const f = await schedulingFixture(t)
+  f.holdLock()
+  f.context.rootState.syncServer.syncServerStatus = 'syncing'
+  f.schedule('history')
+  await f.tick(30000)
+  assert.equal(f.calls.length, 0)
+  f.context.rootState.syncServer.syncServerStatus = 'success'
+  f.releaseLock()
+  await f.tick(0)
+  assert.equal(f.calls.length, 1)
+})
+
+test('stopping during a fallback health check cancels its upload and rescheduling', async t => {
+  const f = await schedulingFixture(t)
+  let finishHealthCheck
+  f.liveConnection.isConnected = () => new Promise(resolve => { finishHealthCheck = resolve })
+  f.start()
+  await f.tick(AUTO_SYNC_INTERVAL_MS)
+  f.stop()
+  finishHealthCheck(false)
+  await f.tick(0)
+  assert.equal(f.calls.length, 0)
+  f.liveConnection.isConnected = async () => false
+  await f.tick(AUTO_SYNC_INTERVAL_MS)
+  assert.equal(f.calls.length, 0)
+  f.start()
+  await f.tick(AUTO_SYNC_INTERVAL_MS)
+  assert.equal(f.calls.length, 1, 'an explicit restart still works')
+})
+
+test('stopping during an active sync prevents completion or later edits from restarting it', async t => {
+  const f = await schedulingFixture(t)
+  f.block()
+  const syncing = f.sync()
+  await f.tick(0)
+  f.stop()
+  f.release()
+  await syncing
+  f.schedule('history')
+  await f.tick(AUTO_SYNC_INTERVAL_MS)
+  assert.equal(f.calls.length, 1)
+})
+
+test('stopping sync cancels an automatic upload already queued behind the lock', async t => {
+  const f = await schedulingFixture(t)
+  f.holdLock()
+  f.schedule('sessions')
+  await f.tick(10000)
+  f.stop()
+  f.releaseLock()
+  await f.tick(0)
+  assert.equal(f.calls.length, 0)
+})
+
+test('automatic sync can restart before any collection is enabled', async t => {
+  const f = await schedulingFixture(t)
+  f.stop()
+  const settings = f.context.rootState.settings
+  settings.syncServerSyncSessions = false
+  settings.syncServerSyncHistory = false
+  settings.syncServerSyncSettings = false
+  f.start()
+  settings.syncServerSyncHistory = true
+  f.schedule('history')
+  await f.tick(30000)
+  assert.equal(f.calls.length, 1)
 })

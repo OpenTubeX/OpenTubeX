@@ -274,6 +274,7 @@ test('two independent devices settle after live sync and propagate a real edit o
       await tutorial.locator('.tutorialActions').getByRole('button').last().click()
       const sync = await goToSettingsSection(page, 'sync')
       await sync.getByRole('checkbox', { name: 'Enable Sync', exact: true }).press('Space')
+      await expect(sync.getByRole('checkbox', { name: 'Enable Sync', exact: true })).toBeChecked()
       await expect.poll(() => waiting.has(name)).toBe(true)
     }
     await expect.poll(() => waiting.size).toBe(2)

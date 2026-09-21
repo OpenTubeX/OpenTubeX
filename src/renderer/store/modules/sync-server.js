@@ -71,6 +71,7 @@ let activeSyncPromise = null
 let activeSyncRemoteOnly = false
 const activeSyncClients = new Set()
 let autoSyncTimer = null
+let autoSyncController = new AbortController()
 const eventSyncTimers = new Map()
 let lifecycleSyncStarted = false
 let deviceRefreshId = 0
@@ -1094,22 +1095,27 @@ const actions = {
   },
 
   syncWithSyncServer(context, options = {}) {
+    const autoSyncSignal = autoSyncController.signal
     if (!context.rootState.settings.syncServerEnabled) {
       return Promise.reject(new Error('Enable sync first'))
     }
     if (!context.rootState.settings.syncServerToken) {
       return Promise.reject(new Error('Connect to a sync server first'))
     }
-    if (isSyncServerOffline()) return Promise.resolve(null)
+    if (isSyncServerOffline() || (options.automatic && autoSyncSignal.aborted)) return Promise.resolve(null)
     // A remote-only check may skip all merges, so it cannot consume local work.
     if (activeSyncPromise && activeSyncRemoteOnly && !options.remoteOnly) {
-      return activeSyncPromise.catch(() => {}).then(() => actions.syncWithSyncServer(context, options))
+      return activeSyncPromise.catch(() => {}).then(() => {
+        if (options.automatic && autoSyncSignal.aborted) return null
+        return actions.syncWithSyncServer(context, options)
+      })
     }
     if (!activeSyncPromise) {
       activeSyncRemoteOnly = options.remoteOnly === true
       let syncStarted = false
       activeSyncPromise = withSyncLock(() => {
-        if (!context.rootState.settings.syncServerEnabled || isSyncServerOffline()) return null
+        if (!context.rootState.settings.syncServerEnabled || isSyncServerOffline() ||
+            (options.automatic && autoSyncSignal.aborted)) return null
         if (options.skipIfRecent &&
             isRecentSync(context.rootState.settings.syncServerLastSyncAt)) {
           return null
@@ -1124,9 +1130,11 @@ const actions = {
       }).finally(() => {
         activeSyncPromise = null
         activeSyncRemoteOnly = false
-        context.dispatch(syncStarted
-          ? 'restartSyncServerAutoSync'
-          : 'startSyncServerAutoSync')
+        if (!autoSyncSignal.aborted) {
+          context.dispatch(syncStarted
+            ? 'restartSyncServerAutoSync'
+            : 'startSyncServerAutoSync')
+        }
       })
     }
     return activeSyncPromise
@@ -1216,16 +1224,18 @@ const actions = {
     if (autoSyncTimer ||
         !rootState.settings.syncServerEnabled ||
         !rootState.settings.syncServerAutoSync ||
-        !rootState.settings.syncServerToken ||
-        !isSyncReasonEnabled(rootState.settings, 'automatic')) {
+        !rootState.settings.syncServerToken) {
       return
     }
 
+    if (autoSyncController.signal.aborted) autoSyncController = new AbortController()
+    if (!isSyncReasonEnabled(rootState.settings, 'automatic')) return
+    const { signal } = autoSyncController
     autoSyncTimer = setTimeout(async () => {
       autoSyncTimer = null
       try {
         const connected = await liveConnection.isConnected()
-        if (!rootState.settings.syncServerEnabled || !rootState.settings.syncServerAutoSync ||
+        if (signal.aborted || !rootState.settings.syncServerEnabled || !rootState.settings.syncServerAutoSync ||
             !rootState.settings.syncServerToken || isSyncServerOffline()) return
         // Live notifications replace periodic downloads, but a failed local
         // upload still needs a retry even if no remote change arrives.
@@ -1236,7 +1246,7 @@ const actions = {
       } catch (error) {
         console.error('Sync server automatic sync failed', error)
       } finally {
-        dispatch('startSyncServerAutoSync')
+        if (!signal.aborted) dispatch('startSyncServerAutoSync')
       }
     }, AUTO_SYNC_INTERVAL_MS)
   },
@@ -1293,6 +1303,7 @@ const actions = {
   },
 
   stopSyncServerAutoSync({ dispatch }) {
+    autoSyncController.abort()
     dispatch('stopSyncServerLive')
     clearTimeout(autoSyncTimer)
     for (const pending of eventSyncTimers.values()) clearTimeout(pending.timer)
@@ -1301,15 +1312,13 @@ const actions = {
   },
 
   scheduleSyncServer({ dispatch, rootState }, reason = 'data') {
-    if (isSyncServerOffline() ||
+    if (autoSyncController.signal.aborted || isSyncServerOffline() ||
         !rootState.settings.syncServerEnabled ||
         !rootState.settings.syncServerAutoSync ||
         !rootState.settings.syncServerToken ||
         !isSyncReasonEnabled(rootState.settings, reason)) {
       return
     }
-    if (!activeSyncPromise && rootState.syncServer.syncServerStatus === 'syncing') return
-
     const previous = eventSyncTimers.get(reason)
     const firstChangeAt = previous?.firstChangeAt ?? Date.now()
     const { delay, maxWait } = EVENT_SYNC_DELAYS[reason] ?? { delay: EVENT_SYNC_DEBOUNCE_MS, maxWait: Infinity }
