@@ -9,9 +9,9 @@ import {
 import {
   SyncServerDataLossError,
   SyncServerCancelledError,
+  SyncServerError,
   SyncServerUnsupportedError,
   SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
-  SyncServerError,
   SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
   isExpiredSessionReauthentication,
   isSessionExpiredError,
@@ -66,9 +66,9 @@ function syncServerFetch(input, init, timeoutMs) {
 export {
   SyncServerDataLossError,
   SyncServerCancelledError,
+  SyncServerError,
   SyncServerUnsupportedError,
   SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
-  SyncServerError,
   SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
   isExpiredSessionReauthentication,
   isSessionExpiredError,
@@ -101,6 +101,7 @@ export class SyncServerClient {
   constructor(serverUrl, token = '') {
     this.serverUrl = normalizeSyncServerUrl(serverUrl)
     this.token = token
+    this.apiPrefix = null
     this.serverInfoPromise = null
     this.requestControllers = new Set()
     this.cancelled = false
@@ -165,7 +166,8 @@ export class SyncServerClient {
 
   getServerInfo() {
     this.serverInfoPromise ??= this.health().then(response => {
-      // Discovery also feeds the privacy-policy link before authentication.
+      // Existing LibreTube servers return the plain text "OK". A structured
+      // health response advertises the optional OpenTubeX extensions.
       if (!response || typeof response !== 'object' || Array.isArray(response)) return {}
       return response
     }).catch(error => {
@@ -177,10 +179,11 @@ export class SyncServerClient {
 
   async getCapabilities() {
     const { capabilities } = await this.getServerInfo()
-    if (capabilities?.encrypted_sync !== 1 || capabilities?.live_sync !== 1) {
+    const supported = capabilities && typeof capabilities === 'object' ? capabilities : {}
+    if (supported.encrypted_sync === 1 && supported.live_sync !== 1) {
       throw new SyncServerUnsupportedError()
     }
-    return capabilities
+    return supported
   }
 
   async getPrivacyPolicyUrl() {
@@ -194,6 +197,11 @@ export class SyncServerClient {
     } catch {
       return null
     }
+  }
+
+  async supportsEncryptedSync() {
+    const capabilities = await this.getCapabilities()
+    return capabilities.encrypted_sync === 1
   }
 
   async supportsBulkSync() {
@@ -321,11 +329,25 @@ export class SyncServerClient {
     return this.request(`/v1/encrypted_sync/events/${encodeURIComponent(id)}`, { method: 'DELETE' })
   }
 
-  apiRequest(path, options = {}) {
-    return this.request(`/v1${path}`, options)
+  async apiRequest(path, options = {}) {
+    if (this.apiPrefix !== null) {
+      return this.request(`${this.apiPrefix}${path}`, options)
+    }
+
+    try {
+      const response = await this.request(`/v1${path}`, options)
+      this.apiPrefix = '/v1'
+      return response
+    } catch (error) {
+      if (error.status !== 404) throw error
+      const response = await this.request(path, options)
+      this.apiPrefix = ''
+      return response
+    }
   }
 
   async authenticate(mode, name, password, deviceId) {
+    // Account operations use the v1 contract, independent of legacy sync routing.
     const response = await this.request(`/v1/account/${mode}`, {
       method: 'POST',
       body: { name, password, device_id: deviceId },

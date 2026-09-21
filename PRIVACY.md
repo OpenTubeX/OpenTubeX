@@ -6,9 +6,12 @@ This document describes the data exposed by OpenTubeX itself. It assumes that yo
 
 ## Data stored by OpenTubeX
 
-By default, subscriptions, playlists, settings (including saved channel settings), history, profiles and open tabs remain on your device. Synchronization requires a server with encrypted live sync support. Enabling it sends copies of the selected categories, encrypted on your device before upload, to the configured server. The server still receives account and traffic metadata.
+By default, subscriptions, playlists, settings (including saved channel settings), history, profiles and open tabs remain on your device. Enabling synchronization sends copies of the selected categories to the configured sync server:
 
-Sync also uploads encrypted account activity, including changed setting keys and scalar values, while excluding watch history and frequent playback changes. Object values and strings longer than 128 bytes are omitted from activity. Opening a video on another device sends an encrypted request containing its video ID, title, and playback position. The OpenTubeX sync server retains up to 100 activity batches per account for 30 days and up to 100 pending device requests per account for 24 hours; acknowledged requests are deleted, and expired records are normally removed within one hour.
+- Enhanced-privacy sync encrypts the selected data on your device before upload. The server must support live sync and still receives account and traffic metadata.
+- A legacy sync server does not support this encryption. Synced data is visible to that server's operator.
+
+On compatible servers, enhanced-privacy sync also uploads encrypted account activity, including changed setting keys and scalar values, while excluding watch history and frequent playback changes. Object values and strings longer than 128 bytes are omitted from activity. Opening a video on another device sends an encrypted request containing its video ID, title, and playback position. The OpenTubeX sync server retains up to 100 activity batches per account for 30 days and up to 100 pending device requests per account for 24 hours; acknowledged requests are deleted, and expired records are normally removed within one hour.
 
 ## Network exposure
 
@@ -24,6 +27,7 @@ Rows for optional services apply only when the feature is enabled. An IP address
 | Return YouTube Dislike | Configured Return YouTube Dislike operator | IP address, video identifiers, and timing |
 | Voice-over translation | Unofficial Yandex voice-over translation service | IP address, YouTube video identifier and URL, video duration, requested output language, and timing |
 | Enhanced-privacy sync | Configured sync operator | IP address, OpenTubeX application version from Electron desktop builds, account identifier, authentication data, encrypted payloads, collection names, payload sizes, revisions, event IDs, recipient device IDs, creation and expiry times, and request timing; not the decrypted selected data, activity details, or video requests |
+| Legacy sync | Configured sync operator | IP address, OpenTubeX application version from Electron desktop builds, account identifier, authentication data, selected synced data, and timing |
 | `yt-dlp` playback and downloads | YouTube and the configured proxy, if any | IP address, requested page and media resources, video identifier, formats, and timing. OpenTubeX's proxy setting is passed to `yt-dlp`. |
 
 Voice-over translation is disabled by default. When it is enabled, no translation-service request is made until you request a translation. The separate background-preparation option is also disabled by default; enabling it requests a translation whenever a supported non-live video loads. These requests omit browser credentials and cookies.
@@ -33,6 +37,6 @@ HTTPS encrypts request paths and payloads in transit, but DNS providers and netw
 ## Choosing a setup
 
 - To keep app data local, leave synchronization disabled.
-- To prevent a sync operator from reading synced data, use a separate, strong privacy passphrase.
+- To prevent a sync operator from reading synced data, use a server that supports enhanced-privacy sync and use a separate, strong privacy passphrase.
 - To avoid sending requests to optional services, leave SponsorBlock, DeArrow, Return YouTube Dislike, voice-over translation, and synchronization disabled.
 - To hide your direct IP address from YouTube or optional services, route the relevant requests through a trusted VPN or Tor and verify the proxy configuration.

@@ -933,7 +933,8 @@ Settings:
     Privacy Passphrase Hint: Použijte jinou přístupovou frázi než heslo k účtu. Nikdy neopustí toto zařízení a je nutná na všech zařízeních. Pokud ji ztratíte, šifrovaná synchronizovaná data nepůjde obnovit.
     Privacy Policy: Zásady ochrany soukromí tohoto serveru
     Enhanced Privacy Enabled: Rozšířená ochrana soukromí je zapnutá. Server ukládá pouze šifrovaná synchronizovaná data.
-    Description: "Synchronizujte s aktuálním serverem OpenTubeX. Panely počítače a mobilu zůstanou oddělené, pokud je nesdílíte."
+    Enhanced Privacy Unsupported: Varování. Tento server nepodporuje rozšířenou ochranu soukromí. Jeho provozovatel může synchronizovaná data zobrazit.
+    Description: 'Synchronizujte odběry, profily, playlisty, historii sledování a podporovaná nastavení se synchronizačním serverem OpenTubeX nebo LibreTube. Karty na počítači a mobilu zůstanou oddělené, pokud je výslovně nesdílíte. Servery LibreTube nemusí podporovat všechny funkce synchronizace.'
     Server URL: Adresa URL serveru
     Checking Server: Kontrola synchronizačního serveru…
     Server Unavailable: K tomuto synchronizačnímu serveru se nelze připojit. Zkontrolujte adresu URL a zkuste to znovu.

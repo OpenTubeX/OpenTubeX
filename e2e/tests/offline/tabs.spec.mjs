@@ -2292,7 +2292,7 @@ test.describe('tab organizer', () => {
         healthRequests++
         await route.fulfill({
           status: 200,
-          json: { capabilities: { encrypted_sync: 1, live_sync: 1, account_sessions: 1 } },
+          json: { capabilities: { account_sessions: 1 } },
         })
       } else if (pathname === '/v1/account/sessions') {
         const requestNumber = ++accountSessionRequests

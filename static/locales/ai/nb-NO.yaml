@@ -935,7 +935,8 @@ Settings:
     Privacy Passphrase Hint: Bruk en annen passordfrase enn kontopassordet. Den forlater aldri denne enheten og må brukes på alle enheter. Hvis du mister den, kan ikke de krypterte synkroniseringsdataene gjenopprettes.
     Privacy Policy: Personvernerklæring for denne serveren
     Enhanced Privacy Enabled: Utvidet personvern er slått på. Serveren lagrer bare krypterte synkroniseringsdata.
-    Description: "Synkroniser med en oppdatert OpenTubeX-server. Faner på datamaskin og mobil forblir atskilt med mindre du deler dem."
+    Enhanced Privacy Unsupported: Advarsel. Denne serveren støtter ikke utvidet personvern. De synkroniserte dataene er synlige for den som driver serveren.
+    Description: 'Synkroniser abonnementer, profiler, spillelister, seerhistorikk og støttede innstillinger med en OpenTubeX- eller LibreTube-synkroniseringsserver. Faner på datamaskin og mobil holdes adskilt med mindre du uttrykkelig deler dem. LibreTube-servere støtter kanskje ikke alle synkroniseringsfunksjoner.'
     Server URL: Server-URL
     Checking Server: Kontrollerer synkroniseringsserveren…
     Server Unavailable: Kan ikke koble til denne synkroniseringsserveren. Kontroller URL-en og prøv på nytt.

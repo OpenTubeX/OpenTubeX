@@ -933,7 +933,8 @@ Settings:
     Privacy Passphrase Hint: Kasutage konto paroolist erinevat salafraasi. Seda ei edastata sellest seadmest välja ja seda on vaja igas seadmes. Selle kaotamisel ei saa krüptitud sünkroonimisandmeid taastada.
     Privacy Policy: Selle serveri privaatsuspoliitika
     Enhanced Privacy Enabled: Täiustatud privaatsus on lubatud. Server salvestab ainult krüptitud sünkroonimisandmeid.
-    Description: "Sünkrooni ajakohase OpenTubeXi serveriga. Arvuti ja mobiili vahelehed jäävad eraldi, kui sa neid ei jaga."
+    Enhanced Privacy Unsupported: Hoiatus — see server ei toeta täiustatud privaatsust. Sünkroonitud andmed on serveri haldajale nähtavad.
+    Description: 'Sünkrooni tellimused, profiilid, esitusloendid, vaatamisajalugu ja toetatud seaded OpenTubeXi või LibreTube’i sünkroonimisserveriga. Arvuti ja mobiilseadme vahelehed jäävad eraldi, kui sa neid otseselt ei jaga. LibreTube’i serverid ei pruugi kõiki sünkroonimisfunktsioone toetada.'
     Server URL: Serveri URL
     Checking Server: Sünkroonimisserveri kontrollimine…
     Server Unavailable: Selle sünkroonimisserveriga ei saa ühendust luua. Kontrollige URL-i ja proovige uuesti.

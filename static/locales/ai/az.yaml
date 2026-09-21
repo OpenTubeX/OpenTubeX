@@ -906,7 +906,8 @@ Settings:
     Privacy Passphrase Hint: Hesab parolunuzdan fərqli parol ifadəsi istifadə edin. O, bu cihazdan kənara çıxmır və hər cihazda tələb olunur; onu itirsəniz, şifrələnmiş sinxronizasiya məlumatlarını bərpa etmək mümkün olmayacaq.
     Privacy Policy: Bu serverin məxfilik siyasəti
     Enhanced Privacy Enabled: Təkmilləşdirilmiş məxfilik aktivdir. Server yalnız şifrələnmiş sinxronizasiya məlumatlarını saxlayır.
-    Description: "Yenilənmiş OpenTubeX serveri ilə sinxronlaşdırın. Paylaşmadığınız halda masaüstü və mobil vərəqlər ayrı qalır."
+    Enhanced Privacy Unsupported: Xəbərdarlıq — bu server təkmilləşdirilmiş məxfiliyi dəstəkləmir. Sinxronlaşdırılan məlumatlar serverin operatoruna görünür.
+    Description: Abunəlikləri, profilləri, pleylistləri, baxış tarixçəsini və dəstəklənən tənzimləmələri OpenTubeX və ya LibreTube sinxronizasiya serveri ilə sinxronlaşdırın. Açıq şəkildə paylaşmadığınız müddətdə masaüstü və mobil vərəqlər ayrı qalır. LibreTube serverləri bütün sinxronizasiya funksiyalarını dəstəkləməyə bilər.
     Server URL: Server URL-i
     Checking Server: Sinxronizasiya serveri yoxlanılır…
     Server Unavailable: Bu sinxronizasiya serverinə qoşulmaq mümkün olmadı. URL-i yoxlayıb yenidən cəhd edin.

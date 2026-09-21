@@ -7,9 +7,9 @@ import {
   SyncServerClient,
   SyncServerCancelledError,
   SyncServerUnsupportedError,
+  SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
   SyncServerDataLossError,
   SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
-  SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
   getSavedOtherDeviceSessions,
   isExpiredSessionReauthentication,
   isSessionExpiredError,
@@ -158,32 +158,47 @@ function withSyncLock(callback) {
   return callback()
 }
 
+function requiresEncryptedSync(settings) {
+  // A key may survive a privacy-mode downgrade made by an older app version.
+  return settings.syncServerPrivacyMode === 'enhanced' || Boolean(settings.syncServerPrivacyKey)
+}
+
+function assertEncryptionSupported(supported, required) {
+  if (required && !supported) {
+    throw new Error('This account requires encrypted sync, but the server no longer supports it')
+  }
+}
+
 async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, automatic = false, remoteOnly = false } = {}) {
   const { commit, dispatch, rootGetters, rootState } = context
   const settings = rootState.settings
+  const encrypted = requiresEncryptedSync(settings)
   const networkClient = trackSyncClient(
     new SyncServerClient(settings.syncServerUrl, settings.syncServerToken)
   )
+  let client = networkClient
+  let encryptedCollections = null
   collectionCache.use(JSON.stringify([settings.syncServerUrl, settings.syncServerToken, settings.syncServerPrivacyKey]))
   const previous = parseSnapshot(settings.syncServerSnapshot)
   const next = { ...previous }
   const result = {}
   const store = { state: rootState, getters: rootGetters, commit, dispatch }
   const stages = [
-    'download',
+    ...(encrypted ? ['download'] : []),
     ...(settings.syncServerSyncSubscriptions ? ['subscriptions'] : []),
     ...(settings.syncServerSyncPlaylists ? ['playlists'] : []),
     ...(settings.syncServerSyncPlaylists ? ['playlistBookmarks'] : []),
     ...(settings.syncServerSyncHistory ? ['history'] : []),
     ...(settings.syncServerSyncProfiles ? ['profiles'] : []),
     ...((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
+      encrypted &&
       settings.syncServerSyncSessions
       ? ['sessionsV2']
       : []),
-    ...(settings.syncServerSyncSettings
+    ...(encrypted && settings.syncServerSyncSettings
       ? ['settings']
       : []),
-    'upload',
+    ...(encrypted ? ['upload'] : []),
     'finishing',
   ]
   let completedStages = 0
@@ -229,7 +244,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     return value
   }
 
-  if (!automatic) startProgress(stages[0])
+  if (!automatic || !encrypted) startProgress(stages[0])
 
   async function applyCollection(collection, targetClient) {
     switch (collection) {
@@ -317,102 +332,117 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   }
 
   try {
-    await networkClient.getCapabilities()
-    commit('setSyncServerLiveSupported', true)
-    if (settings.syncServerSyncHistory && await networkClient.supportsSeenVideosSync()) {
-      stages.splice(stages.indexOf('history') + 1, 0, 'seenVideos')
+    const capabilities = await networkClient.getCapabilities()
+    const liveSupported = encrypted && capabilities.live_sync === 1
+    commit('setSyncServerLiveSupported', liveSupported)
+    if (encrypted) {
+      if (settings.syncServerSyncHistory && await networkClient.supportsSeenVideosSync()) {
+        stages.splice(stages.indexOf('history') + 1, 0, 'seenVideos')
+      }
+      if (!settings.syncServerPrivacyKey) {
+        throw new Error('Reconnect and enter your privacy passphrase to enable enhanced privacy')
+      }
+      const enabledCollections = stages.filter(stage => ![
+        'download',
+        'upload',
+        'finishing',
+      ].includes(stage))
+      const {
+        document,
+        original,
+        remote,
+        uploadCollections,
+        unchanged,
+      } = await runStage('download', async () => {
+        // The snapshot is saved only after successful collection uploads.
+        // Never infer completed migration from unrelated encrypted settings.
+        const playbackSpeedsInSettings = settings.syncServerSyncSettings &&
+          isSettingSyncEnabled(settings, 'channelPlaybackSpeeds') &&
+          Boolean(previous.settings?.channelPlaybackSpeeds)
+        const manifest = await networkClient.getEncryptedSyncManifest({ playbackSpeedsInSettings })
+        const legacyEncrypted = manifest.legacy_encrypted_data
+          ? await networkClient.getLegacyEncryptedSync()
+          : null
+        const legacy = legacyEncrypted?.payload
+          ? await decryptLegacySyncDocument(
+              legacyEncrypted.payload,
+              settings.syncServerPrivacyKey
+            )
+          : manifest.legacy_data
+            ? await loadLegacySyncDocument(networkClient)
+            : createEmptySyncDocument()
+        const uploadCollections = manifest.legacy_data || legacyEncrypted?.payload
+          ? Array.from(new Set([...enabledCollections, ...LEGACY_ENCRYPTED_COLLECTIONS]))
+          : enabledCollections
+        const hasLegacyPlaybackSpeeds = manifest.collections.some(
+          entry => entry.collection === 'playbackSpeeds'
+        )
+        const compatibilityCollections = [
+          ...(hasLegacyPlaybackSpeeds ? ['playbackSpeeds'] : []),
+          ...(enabledCollections.includes('sessionsV2') ? ['sessions'] : []),
+        ]
+        const downloadCollections = Array.from(new Set([
+          ...uploadCollections,
+          ...compatibilityCollections,
+        ]))
+        // A cursor also changes for our own uploads and device messages. Avoid
+        // merging every collection again when its revision is already cached.
+        if (remoteOnly && context.state.syncServerStatus !== 'error' && !manifest.legacy_data && !legacyEncrypted?.payload &&
+            downloadCollections.every(collection => collectionCache.isSynced(
+              collection, manifest.collections.find(entry => entry.collection === collection)?.revision ?? 0
+            ))) return { unchanged: true }
+        const document = createEmptySyncDocument()
+        // Legacy speeds are read for migration into settings, never uploaded.
+        document.playbackSpeeds = legacy.playbackSpeeds ?? []
+        const original = {}
+        const entries = await Promise.all(downloadCollections.map(async collection => {
+          const manifestRevision = manifest.collections.find(entry => entry.collection === collection)?.revision ?? 0
+          const cached = !manifest.legacy_data && !legacyEncrypted?.payload
+            ? collectionCache.get(collection, manifestRevision)
+            : null
+          if (!cached) startProgress('download')
+          const response = cached ?? await networkClient.getEncryptedSyncCollection(collection)
+          const data = cached
+            ? cached.data
+            : response.payload
+              ? await decryptSyncDocument(response.payload, settings.syncServerPrivacyKey)
+              : legacy[collection]
+          document[collection] = data ?? document[collection]
+          collectionCache.put(collection, response.revision, document[collection])
+          original[collection] = structuredClone(document[collection])
+          return [collection, response]
+        }))
+        if (settings.syncServerSyncSettings &&
+            isSettingSyncEnabled(settings, 'channelPlaybackSpeeds')) {
+          migrateLegacyPlaybackSpeedsToSettings(
+            document,
+            settings.channelPlaybackSpeeds
+          )
+        }
+        return { document, original, remote: Object.fromEntries(entries), uploadCollections }
+      })
+      if (unchanged) {
+        await dispatch('refreshSyncServerEvents')
+        await dispatch('refreshSyncServerDeviceNames')
+        finishProgress()
+        return null
+      }
+      client = new EncryptedSyncAdapter(document)
+      encryptedCollections = {
+        original,
+        remote,
+        enabled: enabledCollections,
+        upload: uploadCollections,
+      }
     }
-    if (!settings.syncServerPrivacyKey) {
-      throw new Error('Reconnect and enter your privacy passphrase to enable enhanced privacy')
-    }
-    const enabledCollections = stages.filter(stage => ![
+
+    const collections = encryptedCollections?.enabled ?? stages.filter(stage => ![
       'download',
       'upload',
       'finishing',
+      'settings',
     ].includes(stage))
-    const {
-      document,
-      original,
-      remote,
-      uploadCollections,
-      unchanged,
-    } = await runStage('download', async () => {
-      // The snapshot is saved only after successful collection uploads.
-      // Never infer completed migration from unrelated encrypted settings.
-      const playbackSpeedsInSettings = settings.syncServerSyncSettings &&
-        isSettingSyncEnabled(settings, 'channelPlaybackSpeeds') &&
-        Boolean(previous.settings?.channelPlaybackSpeeds)
-      const manifest = await networkClient.getEncryptedSyncManifest({ playbackSpeedsInSettings })
-      const legacyEncrypted = manifest.legacy_encrypted_data
-        ? await networkClient.getLegacyEncryptedSync()
-        : null
-      const legacy = legacyEncrypted?.payload
-        ? await decryptLegacySyncDocument(
-            legacyEncrypted.payload,
-            settings.syncServerPrivacyKey
-          )
-        : manifest.legacy_data
-          ? await loadLegacySyncDocument(networkClient)
-          : createEmptySyncDocument()
-      const uploadCollections = manifest.legacy_data || legacyEncrypted?.payload
-        ? Array.from(new Set([...enabledCollections, ...LEGACY_ENCRYPTED_COLLECTIONS]))
-        : enabledCollections
-      const hasLegacyPlaybackSpeeds = manifest.collections.some(
-        entry => entry.collection === 'playbackSpeeds'
-      )
-      const compatibilityCollections = [
-        ...(hasLegacyPlaybackSpeeds ? ['playbackSpeeds'] : []),
-        ...(enabledCollections.includes('sessionsV2') ? ['sessions'] : []),
-      ]
-      const downloadCollections = Array.from(new Set([
-        ...uploadCollections,
-        ...compatibilityCollections,
-      ]))
-      // A cursor also changes for our own uploads and device messages. Avoid
-      // merging every collection again when its revision is already cached.
-      if (remoteOnly && !manifest.legacy_data && !legacyEncrypted?.payload &&
-          downloadCollections.every(collection => collectionCache.isSynced(
-            collection, manifest.collections.find(entry => entry.collection === collection)?.revision ?? 0
-          ))) return { unchanged: true }
-      const document = createEmptySyncDocument()
-      // Legacy speeds are read for migration into settings, never uploaded.
-      document.playbackSpeeds = legacy.playbackSpeeds ?? []
-      const original = {}
-      const entries = await Promise.all(downloadCollections.map(async collection => {
-        const manifestRevision = manifest.collections.find(entry => entry.collection === collection)?.revision ?? 0
-        const cached = !manifest.legacy_data && !legacyEncrypted?.payload
-          ? collectionCache.get(collection, manifestRevision)
-          : null
-        if (!cached) startProgress('download')
-        const response = cached ?? await networkClient.getEncryptedSyncCollection(collection)
-        const data = cached
-          ? cached.data
-          : response.payload
-            ? await decryptSyncDocument(response.payload, settings.syncServerPrivacyKey)
-            : legacy[collection]
-        document[collection] = data ?? document[collection]
-        collectionCache.put(collection, response.revision, document[collection])
-        original[collection] = structuredClone(document[collection])
-        return [collection, response]
-      }))
-      if (settings.syncServerSyncSettings &&
-          isSettingSyncEnabled(settings, 'channelPlaybackSpeeds')) {
-        migrateLegacyPlaybackSpeedsToSettings(
-          document,
-          settings.channelPlaybackSpeeds
-        )
-      }
-      return { document, original, remote: Object.fromEntries(entries), uploadCollections }
-    })
-    if (unchanged) {
-      await dispatch('refreshSyncServerEvents')
-      await dispatch('refreshSyncServerDeviceNames')
-      finishProgress()
-      return null
-    }
-    const client = new EncryptedSyncAdapter(document)
-
-    for (const collection of enabledCollections) {
+    for (const collection of collections) {
       applyingRemoteCollection = true
       try {
         await runStage(collection, () => applyCollection(collection, client))
@@ -421,70 +451,79 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
       }
     }
 
-    await runStage('upload', async () => {
-      for (const collection of uploadCollections) {
-        assertSyncStillActive()
-        let revision = remote[collection].revision
-        let data = client.document[collection]
-        if (revision > 0 &&
-            JSON.stringify(data) === JSON.stringify(original[collection])) {
-          continue
-        }
-        startProgress('upload')
-        let activityBefore = original[collection]
-        for (let attempt = 0; attempt < ENCRYPTED_SYNC_RETRIES; attempt++) {
-          const activity = createSyncActivity(
-            collection, activityBefore, data, settings.syncServerDeviceId, settings.syncServerDeviceName
-          )
-          const activityPayload = activity
-            ? await encryptSyncDocument(
-                activity, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt
-              )
-            : undefined
-          const payload = await encryptSyncDocument(
-            data,
-            settings.syncServerPrivacyKey,
-            settings.syncServerPrivacySalt
-          )
-          try {
-            const saved = await networkClient.putEncryptedSyncCollection(collection, revision, payload, activityPayload)
-            collectionCache.put(collection, saved.revision, data)
-            break
-          } catch (error) {
-            if (error.status !== 409 || attempt === ENCRYPTED_SYNC_RETRIES - 1) throw error
-            const remote = await networkClient.getEncryptedSyncCollection(collection)
-            const retryDocument = createEmptySyncDocument()
-            const remoteData = await decryptSyncDocument(
-              remote.payload,
-              settings.syncServerPrivacyKey
+    if (encryptedCollections) {
+      await runStage('upload', async () => {
+        for (const collection of encryptedCollections.upload) {
+          assertSyncStillActive()
+          let revision = encryptedCollections.remote[collection].revision
+          let data = client.document[collection]
+          if (revision > 0 &&
+              JSON.stringify(data) === JSON.stringify(encryptedCollections.original[collection])) {
+            continue
+          }
+          startProgress('upload')
+          let activityBefore = encryptedCollections.original[collection]
+          for (let attempt = 0; attempt < ENCRYPTED_SYNC_RETRIES; attempt++) {
+            const activity = createSyncActivity(
+              collection, activityBefore, data, settings.syncServerDeviceId, settings.syncServerDeviceName
             )
-            activityBefore = remoteData
-            if (collection === 'playlistBookmarks') {
+            const activityPayload = activity
+              ? await encryptSyncDocument(
+                  activity, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt
+                )
+              : undefined
+            const payload = await encryptSyncDocument(
+              data,
+              settings.syncServerPrivacyKey,
+              settings.syncServerPrivacySalt
+            )
+            try {
+              const saved = await networkClient.putEncryptedSyncCollection(collection, revision, payload, activityPayload)
+              collectionCache.put(collection, saved.revision, data)
+              break
+            } catch (error) {
+              if (error.status !== 409 || attempt === ENCRYPTED_SYNC_RETRIES - 1) throw error
+              const remote = await networkClient.getEncryptedSyncCollection(collection)
+              const retryDocument = createEmptySyncDocument()
+              const remoteData = await decryptSyncDocument(
+                remote.payload,
+                settings.syncServerPrivacyKey
+              )
+              activityBefore = remoteData
+              if (collection === 'playlistBookmarks') {
+                revision = remote.revision
+                data = mergePlaylistBookmarkConflict({
+                  original: encryptedCollections.original.playlistBookmarks,
+                  local: data,
+                  remote: remoteData,
+                })
+                retryDocument.playlistBookmarks = data
+                const retryClient = new EncryptedSyncAdapter(retryDocument)
+                next.playlistBookmarks = await syncPlaylistBookmarks(
+                  retryClient, store, next.playlistBookmarks, { allowDataLoss }
+                )
+                result.playlistBookmarks = next.playlistBookmarks.length
+                data = retryClient.document.playlistBookmarks
+                continue
+              }
+              retryDocument[collection] = remoteData
+              if (collection !== 'subscriptions') {
+                retryDocument.subscriptions = client.document.subscriptions
+              }
+              const retryClient = new EncryptedSyncAdapter(retryDocument)
+              if (collection === 'settings') {
+                next.settings = await syncSettings(retryClient, store, next.settings)
+                result.settings = Object.keys(next.settings).length
+              } else {
+                await applyCollection(collection, retryClient)
+              }
               revision = remote.revision
-              data = mergePlaylistBookmarkConflict({
-                original: original.playlistBookmarks,
-                local: data,
-                remote: remoteData,
-              })
-              continue
+              data = retryClient.document[collection]
             }
-            retryDocument[collection] = remoteData
-            if (collection !== 'subscriptions') {
-              retryDocument.subscriptions = client.document.subscriptions
-            }
-            const retryClient = new EncryptedSyncAdapter(retryDocument)
-            if (collection === 'settings') {
-              next.settings = await syncSettings(retryClient, store, next.settings)
-              result.settings = Object.keys(next.settings).length
-            } else {
-              await applyCollection(collection, retryClient)
-            }
-            revision = remote.revision
-            data = retryClient.document[collection]
           }
         }
-      }
-    })
+      })
+    }
 
     await runStage('finishing', async () => {
       const lastSyncAt = Date.now()
@@ -493,9 +532,11 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         dispatch('updateSyncServerLastSyncAt', lastSyncAt, { root: true }),
       ])
     })
-    collectionCache.markSynced(Object.keys(remote))
-    await dispatch('refreshSyncServerEvents')
-    await dispatch('refreshSyncServerDeviceNames')
+    if (encryptedCollections) collectionCache.markSynced(Object.keys(encryptedCollections.remote))
+    if (liveSupported) {
+      await dispatch('refreshSyncServerEvents')
+      await dispatch('refreshSyncServerDeviceNames')
+    }
     if (settings.syncServerResumeAutoSync) {
       await dispatch('setSyncServerAutoSync', true)
     }
@@ -503,7 +544,6 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     finishProgress()
     return result
   } catch (error) {
-    if (error instanceof SyncServerUnsupportedError) commit('setSyncServerLiveSupported', false)
     if (error instanceof SyncServerCancelledError) {
       commit('setSyncServerProgress', null)
       commit('setSyncServerError', '')
@@ -572,8 +612,8 @@ const actions = {
         await dispatch('syncWithSyncServer', { automatic: true, remoteOnly: true })
       }, async error => {
         if (error instanceof SyncServerUnsupportedError) {
-          commit('setSyncServerLiveSupported', false)
           commit('setSyncServerError', error.message)
+          commit('setSyncServerLiveSupported', false)
           return false
         }
         if (isSessionExpiredError(error)) {
@@ -583,10 +623,10 @@ const actions = {
         return true
       }, {
         prepare: async () => {
-          await client.getCapabilities()
+          const supported = (await client.getCapabilities()).live_sync === 1
           if (generation !== liveGeneration) return false
-          commit('setSyncServerLiveSupported', true)
-          return true
+          commit('setSyncServerLiveSupported', supported)
+          return supported
         },
       })
     }
@@ -895,29 +935,38 @@ const actions = {
         assertSyncEnabled(rootState, client)
       }
 
-      await client.getCapabilities()
+      const privacySupported = await client.supportsEncryptedSync()
       const sameAccount = normalizedUrl === rootState.settings.syncServerUrl &&
         trimmedUsername === rootState.settings.syncServerUsername
-      if (!privacyPassphrase) {
+      assertEncryptionSupported(privacySupported, Boolean(privacyPassphrase) ||
+        (sameAccount && requiresEncryptedSync(rootState.settings)))
+      if (privacySupported && !privacyPassphrase) {
         throw new Error('A privacy passphrase is required by this server')
       }
-      if (privacyPassphrase.length < 12) {
+      if (privacySupported && privacyPassphrase.length < 12) {
         throw new Error('The privacy passphrase must be at least 12 characters')
       }
-      if (privacyPassphrase === password) {
+      if (privacySupported && privacyPassphrase === password) {
         throw new Error('The privacy passphrase must be different from the account password')
       }
       const token = await client.authenticate(mode, trimmedUsername, password, deviceId)
-      const manifest = await client.getEncryptedSyncManifest()
-      const firstCollection = manifest.collections[0]?.collection
-      const remote = firstCollection
-        ? await client.getEncryptedSyncCollection(firstCollection)
-        : manifest.legacy_encrypted_data
-          ? await client.getLegacyEncryptedSync()
-          : null
-      const { key: privacyKey, salt: privacySalt } = await preparePrivacyKey(remote?.payload, privacyPassphrase)
+      let privacyKey = ''
+      let privacySalt = ''
 
-      if (await client.supportsAccountSessions()) {
+      if (privacySupported) {
+        const manifest = await client.getEncryptedSyncManifest()
+        const firstCollection = manifest.collections[0]?.collection
+        const remote = firstCollection
+          ? await client.getEncryptedSyncCollection(firstCollection)
+          : manifest.legacy_encrypted_data
+            ? await client.getLegacyEncryptedSync()
+            : null
+        const privacy = await preparePrivacyKey(remote?.payload, privacyPassphrase)
+        privacyKey = privacy.key
+        privacySalt = privacy.salt
+      }
+
+      if (privacySupported && await client.supportsAccountSessions()) {
         const encryptedDeviceInfo = await encryptSyncServerDeviceInfo(
           { name: deviceName, ...deviceSystemInfo },
           privacyKey,
@@ -941,7 +990,10 @@ const actions = {
         await updateWhileEnabled('updateSyncServerSnapshot', '{}')
         await updateWhileEnabled('updateSyncServerLastSyncAt', 0)
       }
-      await updateWhileEnabled('updateSyncServerPrivacyMode', 'enhanced')
+      await updateWhileEnabled(
+        'updateSyncServerPrivacyMode',
+        privacySupported ? 'enhanced' : 'legacy'
+      )
       await updateWhileEnabled('updateSyncServerPrivacyKey', privacyKey)
       await updateWhileEnabled('updateSyncServerPrivacySalt', privacySalt)
       await updateWhileEnabled('replaceSyncServerToken', token)
@@ -1122,16 +1174,20 @@ const actions = {
         rootState.settings.syncServerUrl,
         rootState.settings.syncServerToken
       ))
+      let privacySupported
       try {
-        await client.getCapabilities()
+        privacySupported = await client.supportsEncryptedSync()
+        const liveSupported = privacySupported && (await client.getCapabilities()).live_sync === 1
         assertSyncEnabled(rootState, client)
-        commit('setSyncServerLiveSupported', true)
-        await dispatch('refreshSyncServerDeviceNames')
+        commit('setSyncServerLiveSupported', liveSupported)
+        if (liveSupported) await dispatch('refreshSyncServerDeviceNames')
       } finally {
         releaseSyncClient(client)
       }
-      await dispatch('updateSyncServerPrivacyMode', 'enhanced', { root: true })
-      if (!rootState.settings.syncServerPrivacyKey) {
+      assertEncryptionSupported(privacySupported, requiresEncryptedSync(rootState.settings))
+      const privacyMode = privacySupported ? 'enhanced' : 'legacy'
+      await dispatch('updateSyncServerPrivacyMode', privacyMode, { root: true })
+      if (privacySupported && !rootState.settings.syncServerPrivacyKey) {
         commit(
           'setSyncServerError',
           'Reconnect and enter your privacy passphrase to enable enhanced privacy'
@@ -1140,7 +1196,6 @@ const actions = {
       }
     } catch (error) {
       if (error instanceof SyncServerCancelledError) return
-      if (error instanceof SyncServerUnsupportedError) commit('setSyncServerLiveSupported', false)
       commit('setSyncServerError', error.message)
       return
     }

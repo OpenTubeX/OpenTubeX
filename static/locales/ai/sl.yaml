@@ -1218,7 +1218,8 @@ Settings:
     Privacy Passphrase Hint: Uporabite drugo šifrirno geslo kot za svoj račun. To geslo nikoli ne zapusti naprave in je potrebno v vsaki napravi. Če ga izgubite, šifriranih sinhroniziranih podatkov ne bo mogoče obnoviti.
     Privacy Policy: Pravilnik o zasebnosti tega strežnika
     Enhanced Privacy Enabled: Izboljšana zasebnost je omogočena. Strežnik hrani samo šifrirane sinhronizirane podatke.
-    Description: "Sinhronizirajte s posodobljenim strežnikom OpenTubeX. Zavihki računalnika in mobilne naprave ostanejo ločeni, razen če jih delite."
+    Enhanced Privacy Unsupported: Opozorilo — ta strežnik ne podpira izboljšane zasebnosti. Sinhronizirani podatki so vidni njegovemu upravljavcu.
+    Description: 'Sinhronizirajte naročnine, profile, sezname predvajanja, zgodovino ogledov in podprte nastavitve s sinhronizacijskim strežnikom OpenTubeX ali LibreTube. Zavihki v računalniku in mobilni napravi ostanejo ločeni, razen če jih izrecno delite. Strežniki LibreTube morda ne podpirajo vseh funkcij sinhronizacije.'
     Server URL: URL strežnika
     Checking Server: Preverjanje sinhronizacijskega strežnika …
     Server Unavailable: Povezava s tem sinhronizacijskim strežnikom ni mogoča. Preverite URL in poskusite znova.

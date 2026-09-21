@@ -1185,7 +1185,8 @@ Settings:
     Privacy Passphrase Hint: Naudokite kitą slaptafrazę nei paskyros slaptažodis. Ji niekada neperduodama iš šio įrenginio ir reikalinga kiekviename įrenginyje; ją praradus, užšifruotų sinchronizavimo duomenų atkurti nepavyks.
     Privacy Policy: Šio serverio privatumo politika
     Enhanced Privacy Enabled: Sustiprintas privatumas įjungtas. Serveryje saugomi tik užšifruoti sinchronizavimo duomenys.
-    Description: "Sinchronizuokite su atnaujintu OpenTubeX serveriu. Kompiuterio ir mobiliojo įrenginio kortelės lieka atskiros, nebent jomis bendrinate."
+    Enhanced Privacy Unsupported: Įspėjimas — šis serveris nepalaiko sustiprinto privatumo. Sinchronizuojamus duomenis gali matyti jo operatorius.
+    Description: 'Sinchronizuokite prenumeratas, profilius, grojaraščius, žiūrėjimo istoriją ir palaikomus nustatymus su „OpenTubeX“ arba „LibreTube“ sinchronizavimo serveriu. Kompiuterio ir mobiliojo įrenginio kortelės lieka atskiros, nebent aiškiai jas bendrinate. „LibreTube“ serveriai gali nepalaikyti visų sinchronizavimo funkcijų.'
     Server URL: Serverio URL
     Checking Server: Tikrinamas sinchronizavimo serveris…
     Server Unavailable: Nepavyko prisijungti prie šio sinchronizavimo serverio. Patikrinkite URL ir bandykite dar kartą.

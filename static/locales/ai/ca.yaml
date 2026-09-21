@@ -1254,7 +1254,8 @@ Settings:
     Privacy Passphrase Hint: Utilitzeu una frase de contrasenya diferent de la contrasenya del compte. No surt mai d'aquest dispositiu i és necessària a tots els dispositius; si la perdeu, no podreu recuperar les dades de sincronització xifrades.
     Privacy Policy: Política de privadesa d'aquest servidor
     Enhanced Privacy Enabled: La privadesa millorada està activada. El servidor només desa dades de sincronització xifrades.
-    Description: "Sincronitza amb un servidor OpenTubeX actualitzat. Les pestanyes d’escriptori i de mòbil es mantenen separades tret que les comparteixis."
+    Enhanced Privacy Unsupported: 'Avís: aquest servidor no admet la privadesa millorada. L''operador pot veure les dades sincronitzades.'
+    Description: 'Sincronitza les subscripcions, els perfils, les llistes de reproducció, l’historial de visualitzacions i els ajusts compatibles amb un servidor de sincronització d’OpenTubeX o LibreTube. Les pestanyes de l’ordinador i del mòbil es mantenen separades tret que les comparteixis explícitament. És possible que els servidors de LibreTube no admetin totes les funcions de sincronització.'
     Server URL: URL del servidor
     Checking Server: S'està comprovant el servidor de sincronització…
     Server Unavailable: No s'ha pogut connectar a aquest servidor de sincronització. Comproveu l'URL i torneu-ho a provar.

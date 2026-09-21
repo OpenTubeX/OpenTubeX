@@ -214,5 +214,20 @@ test('ignores absent or unsafe operator privacy policy URLs', async () => {
     status: 200, data: 'OK', headers: {},
   }))
   assert.equal(await client.getPrivacyPolicyUrl(), null)
-  await assert.rejects(client.getCapabilities(), /encrypted live sync/)
+  assert.equal(Object.keys(await client.getCapabilities()).length, 0)
+})
+
+test('requires live sync only for servers advertising encrypted sync', async () => {
+  for (const capabilities of [{}, { bulk_sync: 1 }, { encrypted_sync: 1, live_sync: 1 }]) {
+    const client = await loadClient({ IS_CAPACITOR: true }, '0.35.0', [], () => ({
+      status: 200, data: JSON.stringify({ capabilities }), headers: {},
+    }))
+    assert.equal(await client.supportsEncryptedSync(), capabilities.encrypted_sync === 1)
+  }
+  for (const live_sync of [undefined, 0, 2]) {
+    const client = await loadClient({ IS_CAPACITOR: true }, '0.35.0', [], () => ({
+      status: 200, data: JSON.stringify({ capabilities: { encrypted_sync: 1, live_sync } }), headers: {},
+    }))
+    await assert.rejects(client.supportsEncryptedSync(), { message: 'This server must be updated to support encrypted live sync.' })
+  }
 })

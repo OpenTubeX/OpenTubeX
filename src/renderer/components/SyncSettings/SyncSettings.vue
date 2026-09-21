@@ -43,7 +43,7 @@
           @keydown.enter="authenticate('login')"
         />
         <FtInput
-          v-if="!connected"
+          v-if="!connected && serverPrivacySupported !== false"
           :placeholder="t('Settings.Sync Settings.Privacy Passphrase')"
           :show-action-button="false"
           :value="privacyPassphrase"
@@ -63,7 +63,7 @@
         </a>
       </p>
       <p
-        v-if="!connected"
+        v-if="!connected && serverPrivacySupported !== false"
         class="privacyHint"
       >
         {{ t('Settings.Sync Settings.Privacy Passphrase Hint') }}
@@ -75,6 +75,14 @@
       >
         {{ t('Settings.Sync Settings.Checking Server') }}
       </p>
+      <p
+        v-if="!connected && serverPrivacySupported === false"
+        class="privacyWarning"
+        role="status"
+      >
+        {{ t('Settings.Sync Settings.Enhanced Privacy Unsupported') }}
+      </p>
+
       <div
         v-if="busy && syncProgress"
         class="syncProgress"
@@ -120,6 +128,13 @@
           class="privacyStatus"
         >
           {{ t('Settings.Sync Settings.Enhanced Privacy Enabled') }}
+        </p>
+        <p
+          v-else-if="privacyMode === 'legacy'"
+          class="privacyWarning"
+          role="alert"
+        >
+          {{ t('Settings.Sync Settings.Enhanced Privacy Unsupported') }}
         </p>
         <FtFlexBox class="toggles">
           <FtToggleSwitch
@@ -447,9 +462,9 @@ import SyncActivity from './SyncActivity.vue'
 import store from '../../store/index'
 import {
   SyncServerClient,
-  SyncServerDataLossError,
   SyncServerUnsupportedError,
   SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
+  SyncServerDataLossError,
   isSessionExpiredError,
   normalizeSyncServerUrl,
 } from '../../helpers/sync-server'
@@ -466,12 +481,16 @@ const { locale, t } = useI18n()
 const dateFormat = computed(() => store.getters.getDateFormat)
 const timeFormat = computed(() => store.getters.getTimeFormat)
 const OPENTUBEX_SYNC_SERVER_URL = 'https://sync.opentubex.org'
-const syncServerInstances = [OPENTUBEX_SYNC_SERVER_URL]
+const syncServerInstances = [
+  OPENTUBEX_SYNC_SERVER_URL,
+  'https://sync.libretube.dev'
+]
 
 const serverUrl = ref(store.getters.getSyncServerUrl)
 const username = ref(store.getters.getSyncServerUsername)
 const password = ref('')
 const privacyPassphrase = ref('')
+const serverPrivacySupported = ref(null)
 const serverPairingSupported = ref(false)
 const serverAccountSessionsSupported = ref(false)
 const serverCheckStatus = ref('idle')
@@ -511,7 +530,7 @@ const pairingActionDisabled = computed(() => (
 const authenticationActionsDisabled = computed(() => (
   serverCredentialsDisabled.value ||
   !accountCredentialsReady.value ||
-  privacyPassphrase.value === ''
+  (serverPrivacySupported.value === true && privacyPassphrase.value === '')
 ))
 const status = computed(() => store.getters.getSyncServerStatus)
 const busy = computed(() => status.value === 'syncing')
@@ -574,6 +593,7 @@ watch([serverUrl, connected, syncEnabled], ([value, isConnected, isEnabled], [pr
   serverCheckClient = null
   const sequence = ++serverCheckSequence
   const disconnected = wasConnected && !isConnected && value === previousValue
+  serverPrivacySupported.value = null
   serverPairingSupported.value = false
   serverAccountSessionsSupported.value = false
   privacyPolicyUrl.value = null
@@ -596,6 +616,7 @@ watch([serverUrl, connected, syncEnabled], ([value, isConnected, isEnabled], [pr
       ])
       if (sequence !== serverCheckSequence) return
       privacyPolicyUrl.value = policyUrl
+      serverPrivacySupported.value = capabilities.encrypted_sync === 1
       serverPairingSupported.value = capabilities.key_pairing === 1
       serverAccountSessionsSupported.value = capabilities.encrypted_sync === 1 &&
         capabilities.account_sessions === 1

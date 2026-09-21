@@ -957,7 +957,8 @@ Settings:
     Privacy Passphrase Hint: Gebruik een andere wachtzin dan je accountwachtwoord. Deze verlaat dit apparaat nooit en is op elk apparaat vereist. Als je de wachtzin kwijtraakt, kunnen versleutelde synchronisatiegegevens niet worden hersteld.
     Privacy Policy: Privacybeleid van deze server
     Enhanced Privacy Enabled: Verbeterde privacy is ingeschakeld. De server bewaart alleen versleutelde synchronisatiegegevens.
-    Description: "Synchroniseer met een bijgewerkte OpenTubeX-server. Tabbladen op desktop en mobiel blijven gescheiden, tenzij je ze deelt."
+    Enhanced Privacy Unsupported: Waarschuwing. Deze server ondersteunt geen verbeterde privacy. De beheerder kan gesynchroniseerde gegevens bekijken.
+    Description: 'Synchroniseer abonnementen, profielen, afspeellijsten, kijkgeschiedenis en ondersteunde instellingen met een OpenTubeX- of LibreTube-synchronisatieserver. Tabbladen op desktop en mobiel blijven gescheiden, tenzij je ze uitdrukkelijk deelt. LibreTube-servers ondersteunen mogelijk niet alle synchronisatiefuncties.'
     Server URL: Server-URL
     Checking Server: Synchronisatieserver controleren…
     Server Unavailable: Kan geen verbinding maken met deze synchronisatieserver. Controleer de URL en probeer het opnieuw.

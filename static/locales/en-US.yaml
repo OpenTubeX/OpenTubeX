@@ -1539,7 +1539,8 @@ Settings:
     Privacy Passphrase Hint: Use a separate passphrase from your account password. It never leaves this device and is required on every device; losing it makes encrypted sync data unrecoverable.
     Privacy Policy: Privacy policy for this server
     Enhanced Privacy Enabled: Enhanced privacy is enabled. The server stores only encrypted sync data.
-    Description: "Sync with an up-to-date OpenTubeX server. Desktop and mobile tabs stay separate unless you share them."
+    Enhanced Privacy Unsupported: Warning — this server does not support enhanced privacy. Synced data is visible to its operator.
+    Description: Synchronize subscriptions, profiles, playlists, watch history, and supported settings with an OpenTubeX or LibreTube sync server. Desktop and mobile tabs stay separate unless you explicitly share them. LibreTube servers may not support every sync feature.
     Server URL: Server URL
     Checking Server: Checking sync server…
     Server Unavailable: Unable to connect to this sync server. Check the URL and try again.

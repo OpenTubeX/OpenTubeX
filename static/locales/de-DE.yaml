@@ -1490,7 +1490,13 @@ Settings:
       benötigt. Bei Verlust können verschlüsselte Synchronisierungsdaten nicht wiederhergestellt werden.
     Privacy Policy: Datenschutzerklärung dieses Servers
     Enhanced Privacy Enabled: Erweiterter Datenschutz ist aktiviert. Der Server speichert nur verschlüsselte Synchronisierungsdaten.
-    Description: "Synchronisiere mit einem aktuellen OpenTubeX-Server. Desktop- und mobile Tabs bleiben getrennt, sofern du sie nicht teilst."
+    Enhanced Privacy Unsupported: >-
+      Warnung – dieser Server unterstützt keinen erweiterten Datenschutz. Synchronisierte Daten sind für den Betreiber
+      sichtbar.
+    Description: >-
+      Synchronisiere Abos, Profile, Wiedergabelisten, Wiedergabeverlauf und unterstützte Einstellungen mit einem
+      OpenTubeX- oder LibreTube-Synchronisierungsserver. Desktop- und Mobil-Tabs bleiben getrennt, sofern du sie nicht
+      ausdrücklich teilst. LibreTube-Server unterstützen möglicherweise nicht alle Synchronisierungsfunktionen.
     Server URL: Server-URL
     Checking Server: Synchronisierungsserver wird überprüft…
     Server Unavailable: Verbindung zu diesem Synchronisierungsserver fehlgeschlagen. Überprüfe die URL und versuche es erneut.

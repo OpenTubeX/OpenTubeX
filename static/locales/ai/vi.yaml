@@ -952,7 +952,8 @@ Settings:
     Privacy Passphrase Hint: Dùng cụm mật khẩu khác với mật khẩu tài khoản. Cụm này không bao giờ rời khỏi thiết bị và cần có trên mọi thiết bị; nếu mất, bạn không thể khôi phục dữ liệu đồng bộ đã mã hóa.
     Privacy Policy: Chính sách riêng tư của máy chủ này
     Enhanced Privacy Enabled: Đã bật quyền riêng tư nâng cao. Máy chủ chỉ lưu dữ liệu đồng bộ đã mã hóa.
-    Description: "Đồng bộ với máy chủ OpenTubeX đã cập nhật. Các thẻ trên máy tính và thiết bị di động được giữ riêng trừ khi bạn chia sẻ chúng."
+    Enhanced Privacy Unsupported: Cảnh báo — máy chủ này không hỗ trợ quyền riêng tư nâng cao. Đơn vị vận hành có thể xem dữ liệu đã đồng bộ.
+    Description: 'Đồng bộ gói đăng ký, hồ sơ, danh sách phát, lịch sử xem và các cài đặt được hỗ trợ với máy chủ đồng bộ OpenTubeX hoặc LibreTube. Các thẻ trên máy tính và thiết bị di động được giữ riêng trừ khi bạn chủ động chia sẻ chúng. Máy chủ LibreTube có thể không hỗ trợ mọi tính năng đồng bộ.'
     Server URL: URL máy chủ
     Checking Server: Đang kiểm tra máy chủ đồng bộ…
     Server Unavailable: Không thể kết nối với máy chủ đồng bộ này. Hãy kiểm tra URL rồi thử lại.
@@ -1041,7 +1042,7 @@ Settings:
     Desktop Device: 'Máy tính'
     Open All Tabs: 'Mở tất cả thẻ'
     Open All Tabs Confirmation: "Mở tất cả thẻ?"
-    Server Update Required: "Cập nhật máy chủ này để hỗ trợ đồng bộ trực tiếp được mã hóa."
+    Server Update Required: "Cập nhật máy chủ này để hỗ trợ đồng bộ theo thời gian thực được mã hóa."
   Proxy Settings:
     IP Block Recovery Script Path: Đường dẫn tập lệnh khôi phục khi bị chặn IP
     Select IP Block Recovery Script File: Chọn tệp tập lệnh khôi phục khi bị chặn IP

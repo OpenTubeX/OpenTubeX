@@ -933,7 +933,8 @@ Settings:
     Privacy Passphrase Hint: Gunakan frasa sandi yang berbeda dari kata sandi akun. Frasa ini tidak pernah meninggalkan perangkat dan diperlukan di setiap perangkat. Jika hilang, data sinkronisasi terenkripsi tidak dapat dipulihkan.
     Privacy Policy: Kebijakan privasi server ini
     Enhanced Privacy Enabled: Privasi tingkat lanjut aktif. Server hanya menyimpan data sinkronisasi terenkripsi.
-    Description: "Sinkronkan dengan server OpenTubeX terbaru. Tab desktop dan seluler tetap terpisah kecuali Anda membagikannya."
+    Enhanced Privacy Unsupported: 'Peringatan: server ini tidak mendukung privasi tingkat lanjut. Data yang disinkronkan dapat dilihat oleh operatornya.'
+    Description: 'Sinkronkan langganan, profil, daftar putar, histori tontonan, dan pengaturan yang didukung dengan server sinkronisasi OpenTubeX atau LibreTube. Tab desktop dan seluler tetap terpisah kecuali Anda membagikannya secara khusus. Server LibreTube mungkin tidak mendukung semua fitur sinkronisasi.'
     Server URL: URL Server
     Checking Server: Memeriksa server sinkronisasi…
     Server Unavailable: Tidak dapat terhubung ke server sinkronisasi ini. Periksa URL lalu coba lagi.

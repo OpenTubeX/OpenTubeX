@@ -1168,7 +1168,8 @@ Settings:
     Privacy Passphrase Hint: 계정 비밀번호와 다른 암호문을 사용하세요. 암호문은 이 기기를 벗어나지 않으며 모든 기기에 필요합니다. 잃어버리면 암호화된 동기화 데이터를 복구할 수 없습니다.
     Privacy Policy: 이 서버의 개인 정보 처리 방침
     Enhanced Privacy Enabled: 강화된 개인 정보 보호가 활성화되었습니다. 서버에는 암호화된 동기화 데이터만 저장됩니다.
-    Description: "최신 OpenTubeX 서버와 동기화합니다. 데스크톱과 모바일 탭은 공유하지 않는 한 별도로 유지됩니다."
+    Enhanced Privacy Unsupported: 경고. 이 서버는 강화된 개인 정보 보호를 지원하지 않습니다. 동기화된 데이터를 서버 운영자가 볼 수 있습니다.
+    Description: 'OpenTubeX 또는 LibreTube 동기화 서버와 구독, 프로필, 재생목록, 시청 기록 및 지원되는 설정을 동기화합니다. 명시적으로 공유하지 않는 한 데스크톱과 모바일 탭은 따로 유지됩니다. LibreTube 서버는 일부 동기화 기능을 지원하지 않을 수 있습니다.'
     Server URL: 서버 URL
     Checking Server: 동기화 서버 확인 중…
     Server Unavailable: 이 동기화 서버에 연결할 수 없습니다. URL을 확인하고 다시 시도하세요.

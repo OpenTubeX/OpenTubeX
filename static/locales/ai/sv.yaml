@@ -937,7 +937,8 @@ Settings:
     Privacy Passphrase Hint: Använd en annan lösenfras än kontolösenordet. Den lämnar aldrig enheten och krävs på alla enheter. Om du förlorar den går krypterade synkroniseringsdata inte att återställa.
     Privacy Policy: Integritetspolicy för den här servern
     Enhanced Privacy Enabled: Förstärkt integritet är aktiverad. Servern lagrar endast krypterade synkroniseringsdata.
-    Description: "Synkronisera med en uppdaterad OpenTubeX-server. Flikar på dator och mobil hålls separata om du inte delar dem."
+    Enhanced Privacy Unsupported: Varning! Den här servern stöder inte förstärkt integritet. Synkroniserade data är synliga för serveroperatören.
+    Description: 'Synkronisera prenumerationer, profiler, spellistor, visningshistorik och inställningar som stöds med en synkroniseringsserver för OpenTubeX eller LibreTube. Flikar på dator och mobil hålls åtskilda om du inte uttryckligen delar dem. LibreTube-servrar stöder kanske inte alla synkroniseringsfunktioner.'
     Server URL: Server-URL
     Checking Server: Kontrollerar synkroniseringsservern…
     Server Unavailable: Det gick inte att ansluta till synkroniseringsservern. Kontrollera URL:en och försök igen.

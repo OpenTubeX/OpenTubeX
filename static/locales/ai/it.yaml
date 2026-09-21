@@ -933,7 +933,8 @@ Settings:
     Privacy Passphrase Hint: Usa una frase segreta diversa dalla password dell'account. Non lascia mai questo dispositivo ed è richiesta su ogni dispositivo; se la perdi, i dati di sincronizzazione cifrati non potranno essere recuperati.
     Privacy Policy: Informativa sulla privacy di questo server
     Enhanced Privacy Enabled: La privacy avanzata è abilitata. Il server memorizza solo dati di sincronizzazione cifrati.
-    Description: "Sincronizza con un server OpenTubeX aggiornato. Le schede desktop e mobili restano separate, a meno che tu non le condivida."
+    Enhanced Privacy Unsupported: Avviso — questo server non supporta la privacy avanzata. I dati sincronizzati sono visibili al suo gestore.
+    Description: 'Sincronizza iscrizioni, profili, playlist, cronologia di visualizzazione e impostazioni supportate con un server di sincronizzazione OpenTubeX o LibreTube. Le schede su computer e dispositivi mobili rimangono separate a meno che tu non scelga esplicitamente di condividerle. I server LibreTube potrebbero non supportare tutte le funzioni di sincronizzazione.'
     Server URL: URL del server
     Checking Server: Controllo del server di sincronizzazione…
     Server Unavailable: Impossibile connettersi a questo server di sincronizzazione. Controlla l'URL e riprova.
@@ -1022,7 +1023,7 @@ Settings:
     Desktop Device: 'Computer'
     Open All Tabs: 'Apri tutte le schede'
     Open All Tabs Confirmation: "Aprire tutte le schede?"
-    Server Update Required: "Aggiorna questo server per supportare la sincronizzazione crittografata in tempo reale."
+    Server Update Required: "Aggiorna questo server per supportare la sincronizzazione cifrata in tempo reale."
   Proxy Settings:
     IP Block Recovery Script Path: Percorso dello script di ripristino dal blocco IP
     Select IP Block Recovery Script File: Seleziona file dello script di ripristino dal blocco IP

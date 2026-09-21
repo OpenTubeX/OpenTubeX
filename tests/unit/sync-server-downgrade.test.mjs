@@ -1,3 +1,4 @@
+import * as bookmarks from '../../src/renderer/helpers/playlist-bookmarks.js'
 import * as syncLive from '../../src/renderer/helpers/sync-server-live.js'
 import * as subscriptionSettingsSync from '../../src/renderer/helpers/subscription-settings-sync.js'
 import assert from 'node:assert/strict'
@@ -50,6 +51,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
   }
   const common = {
     ...syncLive,
+    ...bookmarks,
     ...subscriptionSettingsSync,
     ...errors,
     showToast: options => notifications.push(options),
@@ -97,6 +99,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
       let result = null
       if (url.endsWith('/health')) result = encrypted ? { capabilities: { encrypted_sync: 1, live_sync: 1 } } : 'OK'
       else if (url.endsWith('/account/login') || url.endsWith('/account/register')) result = { jwt: 'new-token' }
+      else if (new URL(url).pathname === '/v1/encrypted_sync/events') result = []
       else if (url.endsWith('/encrypted_sync')) result = { collections: [], legacy_data: false }
       else if (url.includes('/encrypted_sync/')) result = { revision: 0, payload: null }
       else if (url.endsWith('/subscriptions/') && !options.method) result = []
@@ -104,13 +107,14 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     },
   }
   const helper = vm.createContext({ ...common })
-  vm.runInContext(withoutImports(helperSource) + '\nglobalThis.exports = { SyncServerClient, syncSubscriptions, syncSettings, syncHistory, normalizeSyncServerUrl };', helper)
+  vm.runInContext(withoutImports(helperSource) + '\nglobalThis.exports = { SyncServerClient, syncSubscriptions, syncSettings, syncHistory, syncPlaylists, syncPlaylistBookmarks, normalizeSyncServerUrl };', helper)
   const store = vm.createContext({ ...common, ...helper.exports, getSavedOtherDeviceSessions: () => [] })
   vm.runInContext(withoutImports(storeSource).replace('export default { state, getters, actions, mutations }', 'globalThis.exports = { state, actions, mutations }'), store)
   const context = {
     rootState: {
       settings,
       history: { historyCacheSorted: [] },
+      playlists: { playlists: [] },
       utils: { customThemes: [] },
       profiles: { profileList: [{ _id: 'main', subscriptions: [{ id: 'private-channel', name: 'Private subscription' }] }] },
     },
@@ -123,6 +127,10 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     },
     dispatch: async (action, value) => {
       dispatched.push([action, value])
+      if (action === 'replacePlaylistBookmarks') {
+        settings.playlistBookmarks = value
+        return true
+      }
       if (action === 'updateChannelSettings') {
         const channel = context.rootState.profiles.profileList[0].subscriptions.find(channel => channel.id === value.channelId)
         Object.assign(channel, value.settings, { subscriptionSettingsUpdatedAt: value.updatedAt })
@@ -167,7 +175,13 @@ for (const [method, args, path, verb] of [
     ])
   })
 
-
+  test(`${verb} ${path} stays on v1 after legacy API prefix discovery`, async () => {
+    const f = fixture()
+    const client = new f.Client('https://sync.example', 'saved-token')
+    client.apiPrefix = ''
+    await client[method](...args)
+    assert.equal(f.requests[0].url, `https://sync.example/v1${path}`)
+  })
 }
 
 for (const historyEnabled of [false, true]) {
@@ -232,15 +246,15 @@ for (const overrides of [
     await f.actions.initializeSyncServer(f.context)
     assert.deepEqual(f.settings, saved)
     assert.equal(f.requests.length, 1)
-    assert.ok(f.context.state.syncServerError.includes('encrypted live sync'))
+    assert.ok(f.context.state.syncServerError.includes('encrypted sync'))
   })
 }
 
-test('plaintext accounts require an upgraded server and never upload plaintext', async () => {
+test('legacy clients still upload subscriptions to legacy servers', async () => {
   const f = fixture({ syncServerPrivacyMode: 'legacy', syncServerPrivacyKey: '' })
   await f.actions.initializeSyncServer(f.context)
-  assert.ok(f.context.state.syncServerError.includes('encrypted live sync'))
-  assert.ok(f.requests.every(request => request.url.endsWith('/health')))
+  assert.equal(f.settings.syncServerPrivacyMode, 'legacy')
+  assert.ok(f.requests.some(request => request.method === 'PUT' && request.url.endsWith('/subscriptions/') && request.body.includes('Private subscription')))
 })
 
 test('encrypted accounts still sync when the server supports encryption', async () => {
@@ -257,13 +271,26 @@ test('encrypted accounts still sync when the server supports encryption', async 
   assert.equal(document[0].name, 'Private subscription')
 })
 
-test('clients reject servers without live sync before syncing or authenticating', async () => {
-  for (const capabilities of [{ encrypted_sync: 1 }, { encrypted_sync: 1, live_sync: 0 }, {}]) {
-    const f = fixture({}, { respond: url => url.endsWith('/health') ? { capabilities } : undefined })
-    await assert.rejects(f.actions.syncWithSyncServer(f.context), /encrypted live sync/)
-    await assert.rejects(f.actions.authenticateSyncServer(f.context, { ...credentials, privacyPassphrase: 'privacy-passphrase' }), /encrypted live sync/)
-    assert.ok(f.requests.every(request => request.url.endsWith('/health')))
-  }
+test('encrypted servers without live sync stop before authentication or data transfer', async () => {
+  const f = fixture({}, {
+    encrypted: true,
+    respond: url => url.endsWith('/health') ? { capabilities: { encrypted_sync: 1 } } : undefined,
+  })
+  await f.actions.initializeSyncServer(f.context)
+  assert.equal(f.context.state.syncServerError, errors.SYNC_SERVER_UPDATE_REQUIRED_MESSAGE)
+  await assert.rejects(f.actions.syncWithSyncServer(f.context), errors.SyncServerUnsupportedError)
+  await assert.rejects(f.actions.authenticateSyncServer(f.context, credentials), errors.SyncServerUnsupportedError)
+  assert.ok(f.requests.every(request => request.url.endsWith('/health')))
+  assert.equal(f.settings.syncServerPrivacyMode, 'enhanced')
+  assert.ok(f.settings.syncServerPrivacyKey)
+})
+
+test('saved legacy accounts cannot bypass the encrypted live requirement with manual sync', async () => {
+  const f = fixture({ syncServerPrivacyMode: 'legacy', syncServerPrivacyKey: '' }, {
+    respond: url => url.endsWith('/health') ? { capabilities: { encrypted_sync: 1 } } : undefined,
+  })
+  await assert.rejects(f.actions.syncWithSyncServer(f.context), errors.SyncServerUnsupportedError)
+  assert.ok(f.requests.every(request => request.url.endsWith('/health')))
 })
 
 test('manual sync uses encryption when a saved key survives an earlier downgrade', async () => {
@@ -288,7 +315,7 @@ const credentials = {
 test('reauthentication cannot downgrade the same encrypted account', async () => {
   const f = fixture()
   const saved = { ...f.settings }
-  await assert.rejects(f.actions.authenticateSyncServer(f.context, credentials), /encrypted live sync/)
+  await assert.rejects(f.actions.authenticateSyncServer(f.context, credentials), /encrypted sync/)
   assert.deepEqual(f.settings, saved)
   assert.ok(!f.requests.some(request => request.url.endsWith('/account/login')))
 })
@@ -297,21 +324,25 @@ test('a supplied privacy passphrase cannot silently select plaintext login', asy
   const f = fixture({ syncServerPrivacyMode: 'unknown', syncServerPrivacyKey: '' })
   await assert.rejects(f.actions.authenticateSyncServer(f.context, {
     ...credentials, privacyPassphrase: 'privacy-passphrase',
-  }), /encrypted live sync/)
+  }), /encrypted sync/)
   assert.ok(!f.requests.some(request => request.url.endsWith('/account/login')))
 })
 
-test('connecting a different account also requires encrypted live sync', async () => {
+test('connecting a different legacy account does not inherit the previous account encryption requirement', async () => {
   const f = fixture()
-  await assert.rejects(f.actions.authenticateSyncServer(f.context, { ...credentials, username: 'bob' }), /encrypted live sync/)
-  assert.ok(!f.requests.some(request => request.url.endsWith('/account/login')))
+  await f.actions.authenticateSyncServer(f.context, { ...credentials, username: 'bob' })
+  assert.equal(f.settings.syncServerPrivacyMode, 'legacy')
+  assert.equal(f.settings.syncServerPrivacyKey, '')
+  assert.equal(f.settings.syncServerUsername, 'bob')
+  assert.ok(f.requests.some(request => request.url.endsWith('/account/login')))
 })
 
 for (const source of ['plaintext', 'single document', 'collection']) {
   test(`migrates ${source} playback speeds into settings without recreating the deleted collection`, async () => {
     const collections = new Map()
     const speeds = [{ channel_id: 'legacy-channel', playback_speed: 1.5 }]
-    // An upgraded server retains the migration flag while older account data remains.
+    // Retain the legacy migration flag on subsequent runs, as an older server
+    // does when playbackSpeeds is missing or plaintext data remains.
     const f = fixture({
       syncServerSyncSettings: true,
       channelPlaybackSpeeds: JSON.stringify({ 'local-channel': 2 }),
@@ -391,8 +422,10 @@ for (const overrides of [
 
 test('blocked background sync notifies the user and links to sync settings', async () => {
   const f = fixture({
+    syncServerPrivacyMode: 'legacy',
+    syncServerPrivacyKey: '',
     syncServerSnapshot: JSON.stringify({ subscriptions: ['private-channel'] }),
-  }, { encrypted: true })
+  })
 
   await assert.rejects(f.actions.syncWithSyncServer(f.context), errors.SyncServerDataLossError)
 
@@ -408,8 +441,10 @@ test('blocked background sync notifies the user and links to sync settings', asy
 
 test('manual sync can present its confirmation without a duplicate notification', async () => {
   const f = fixture({
+    syncServerPrivacyMode: 'legacy',
+    syncServerPrivacyKey: '',
     syncServerSnapshot: JSON.stringify({ subscriptions: ['private-channel'] }),
-  }, { encrypted: true })
+  })
   await assert.rejects(f.actions.syncWithSyncServer(f.context, { notifyDataLoss: false }), errors.SyncServerDataLossError)
   assert.equal(f.settings.syncServerAutoSync, false)
   assert.equal(f.notifications.length, 0)
@@ -419,9 +454,10 @@ test('manual sync can present its confirmation without a duplicate notification'
 for (const previouslyEnabled of [true, false]) {
   test(`successful confirmation restores automatic sync only when previously enabled: ${previouslyEnabled}`, async () => {
     const f = fixture({
-        syncServerAutoSync: previouslyEnabled,
+      syncServerPrivacyMode: 'legacy', syncServerPrivacyKey: '',
+      syncServerAutoSync: previouslyEnabled,
       syncServerSnapshot: JSON.stringify({ subscriptions: ['private-channel'] }),
-    }, { encrypted: true })
+    })
     // Cancel and retry must not overwrite the remembered preference with false.
     for (let attempt = 0; attempt < 2; attempt++) {
       await assert.rejects(f.actions.syncWithSyncServer(f.context), errors.SyncServerDataLossError)
@@ -435,12 +471,12 @@ for (const previouslyEnabled of [true, false]) {
 
 test('remembers paused automatic sync across restart and resumes only after success', async () => {
   const f = fixture({
+    syncServerPrivacyMode: 'legacy', syncServerPrivacyKey: '',
     syncServerSnapshot: JSON.stringify({ subscriptions: ['private-channel'] }),
-  }, { encrypted: true })
+  })
   await assert.rejects(f.actions.syncWithSyncServer(f.context), errors.SyncServerDataLossError)
   let fail = true
   const restarted = fixture(structuredClone(f.settings), {
-    encrypted: true,
     respond: () => fail ? new Response('Offline', { status: 503 }) : undefined,
   })
   await assert.rejects(restarted.actions.syncWithSyncServer(restarted.context, { allowDataLoss: true }))
@@ -453,8 +489,9 @@ test('remembers paused automatic sync across restart and resumes only after succ
 
 test('an explicit automatic-sync choice clears a pending resume', async () => {
   const f = fixture({
+    syncServerPrivacyMode: 'legacy', syncServerPrivacyKey: '',
     syncServerAutoSync: false, syncServerResumeAutoSync: true,
-  }, { encrypted: true })
+  })
   await f.actions.setSyncServerAutoSync(f.context, false)
   await f.actions.syncWithSyncServer(f.context)
   assert.equal(f.settings.syncServerAutoSync, false)
@@ -463,8 +500,9 @@ test('an explicit automatic-sync choice clears a pending resume', async () => {
 
 test('disabling sync clears recovery before a later manual sync succeeds', async () => {
   const f = fixture({
+    syncServerPrivacyMode: 'legacy', syncServerPrivacyKey: '',
     syncServerSnapshot: JSON.stringify({ subscriptions: ['private-channel'] }),
-  }, { encrypted: true })
+  })
   await assert.rejects(f.actions.syncWithSyncServer(f.context), errors.SyncServerDataLossError)
   assert.equal(f.settings.syncServerResumeAutoSync, true)
   await f.actions.setSyncServerEnabled(f.context, false)
@@ -835,4 +873,47 @@ test('a failed remote-only check does not consume a queued local setting upload'
   assert.equal(results[0].status, 'rejected')
   assert.equal(results[1].status, 'fulfilled')
   assert.equal(f.requests.filter(request => request.method === 'PUT').length, 1)
+})
+
+test('bookmark upload conflicts persist the merged baseline and local bookmarks', async () => {
+  const local = bookmarks.createPlaylistBookmark({ id: 'local', title: 'Local', uploaderId: 'channel', uploaderName: 'Channel', savedAt: 123 })
+  const remote = bookmarks.createPlaylistBookmark({ id: 'remote', title: 'Remote', uploaderId: 'channel', uploaderName: 'Channel', savedAt: 456 })
+  let uploads = 0
+  let uploaded
+  const f = fixture({ syncServerSyncSubscriptions: false, syncServerSyncPlaylists: true, playlistBookmarks: [local] }, {
+    encrypted: true,
+    respond: async (url, options) => {
+      if (!url.endsWith('/encrypted_sync/playlistBookmarks')) return undefined
+      if (options.method === 'PUT') {
+        if (++uploads === 1) return new Response('{}', { status: 409 })
+        uploaded = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
+        return { revision: 2 }
+      }
+      if (!uploads) return { revision: 0, payload: null }
+      return { revision: 1, payload: await privacy.encryptSyncDocument([bookmarks.playlistBookmarkForSync(remote)], f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) }
+    },
+  })
+  await f.actions.syncWithSyncServer(f.context)
+  assert.equal(uploads, 2)
+  assert.deepEqual(uploaded.map(item => item.playlist.id).sort(), ['local', 'remote'])
+  assert.deepEqual(JSON.parse(f.settings.syncServerSnapshot).playlistBookmarks.sort(), ['local', 'remote'])
+  assert.deepEqual(Array.from(f.settings.playlistBookmarks, item => item.playlist.id).sort(), ['local', 'remote'])
+})
+
+test('live checks retry failed local uploads before clearing the sync error', async () => {
+  const f = liveFixture({ syncServerSyncSettings: true, autoplayVideos: true })
+  await f.actions.syncWithSyncServer(f.context)
+  f.settings.autoplayVideos = false
+  const put = f.Client.prototype.putEncryptedSyncCollection
+  f.Client.prototype.putEncryptedSyncCollection = async () => { throw new Error('Upload unavailable') }
+  await assert.rejects(f.actions.syncWithSyncServer(f.context), /Upload unavailable/)
+  await assert.rejects(f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true }), /Upload unavailable/)
+  assert.equal(f.context.state.syncServerStatus, 'error')
+  f.Client.prototype.putEncryptedSyncCollection = put
+  f.requests.length = 0
+  await f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true })
+  assert.ok(f.requests.some(request => request.method === 'PUT' && request.url.endsWith('/encrypted_sync/settings')))
+  assert.equal(f.context.state.syncServerStatus, 'success')
+  assert.equal(f.context.state.syncServerError, '')
+  assert.equal(JSON.parse(f.settings.syncServerSnapshot).settings.autoplayVideos.value, false)
 })

@@ -933,7 +933,8 @@ Settings:
     Privacy Passphrase Hint: Utilisez une phrase secrète différente du mot de passe de votre compte. Elle ne quitte jamais cet appareil et doit être saisie sur chaque appareil ; si vous la perdez, les données synchronisées et chiffrées seront irrécupérables.
     Privacy Policy: Politique de confidentialité de ce serveur
     Enhanced Privacy Enabled: La confidentialité renforcée est activée. Le serveur ne stocke que des données de synchronisation chiffrées.
-    Description: "Synchronisez avec un serveur OpenTubeX à jour. Les onglets d’ordinateur et de mobile restent séparés, sauf si vous les partagez."
+    Enhanced Privacy Unsupported: Avertissement — ce serveur ne prend pas en charge la confidentialité renforcée. Les données synchronisées sont visibles par son opérateur.
+    Description: 'Synchronisez les abonnements, profils, playlists, historique de visionnage et paramètres compatibles avec un serveur de synchronisation OpenTubeX ou LibreTube. Les onglets sur ordinateur et mobile restent séparés sauf si vous choisissez explicitement de les partager. Les serveurs LibreTube peuvent ne pas prendre en charge toutes les fonctions de synchronisation.'
     Server URL: URL du serveur
     Checking Server: Vérification du serveur de synchronisation…
     Server Unavailable: Impossible de se connecter à ce serveur de synchronisation. Vérifiez l’URL et réessayez.

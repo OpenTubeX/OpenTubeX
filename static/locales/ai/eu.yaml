@@ -933,7 +933,8 @@ Settings:
     Privacy Passphrase Hint: Erabili kontuaren pasahitzaz bestelako pasaesaldi bat. Ez da inoiz gailu honetatik ateratzen eta gailu guztietan behar da; galtzen baduzu, ezin izango dituzu berreskuratu sinkronizatutako datu zifratuak.
     Privacy Policy: Zerbitzari honen pribatutasun-politika
     Enhanced Privacy Enabled: Pribatutasun hobetua gaituta dago. Zerbitzariak sinkronizatutako datu zifratuak soilik gordetzen ditu.
-    Description: "Sinkronizatu eguneratutako OpenTubeX zerbitzari batekin. Ordenagailuko eta mugikorreko fitxak bereizita mantentzen dira partekatzen ez badituzu."
+    Enhanced Privacy Unsupported: Abisua. Zerbitzari honek ez du pribatutasun hobetua onartzen. Sinkronizatutako datuak zerbitzariaren operadoreak ikus ditzake.
+    Description: 'Sinkronizatu harpidetzak, profilak, erreprodukzio-zerrendak, ikustaldien historia eta onartutako ezarpenak OpenTubeX edo LibreTube sinkronizazio-zerbitzari batekin. Mahaigaineko eta mugikorreko fitxak bereizita mantenduko dira berariaz partekatzen ez badituzu. Baliteke LibreTube zerbitzariek sinkronizazio-eginbide guztiak ez onartzea.'
     Server URL: Zerbitzariaren URLa
     Checking Server: Sinkronizazio-zerbitzaria egiaztatzen…
     Server Unavailable: Ezin da sinkronizazio-zerbitzari honekin konektatu. Egiaztatu URLa eta saiatu berriro.

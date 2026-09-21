@@ -1035,7 +1035,8 @@ Settings:
     Privacy Passphrase Hint: Usa una frase de contraseña distinta de la contraseña de tu cuenta. Nunca sale de este dispositivo y se necesita en todos los dispositivos; si la pierdes, no podrás recuperar los datos de sincronización cifrados.
     Privacy Policy: Política de privacidad de este servidor
     Enhanced Privacy Enabled: La privacidad mejorada está activada. El servidor solo guarda datos de sincronización cifrados.
-    Description: "Sincronizá con un servidor OpenTubeX actualizado. Las pestañas de la computadora y del celular permanecen separadas salvo que las compartas."
+    Enhanced Privacy Unsupported: 'Advertencia: este servidor no admite la privacidad mejorada. Su operador puede ver los datos sincronizados.'
+    Description: 'Sincronizá suscripciones, perfiles, listas de reproducción, historial de reproducciones y ajustes compatibles con un servidor de sincronización de OpenTubeX o LibreTube. Las pestañas de escritorio y del celular permanecen separadas salvo que elijas compartirlas. Es posible que los servidores de LibreTube no admitan todas las funciones de sincronización.'
     Server URL: URL del servidor
     Checking Server: Comprobando el servidor de sincronización…
     Server Unavailable: No se pudo conectar a este servidor de sincronización. Comprobá la URL y vuelve a intentarlo.

@@ -1095,7 +1095,8 @@ Settings:
     Privacy Passphrase Hint: Bruk ei anna passfrase enn kontopassordet. Ho forlèt aldri denne eininga og må brukast på alle einingar. Dersom du mistar henne, kan ikkje dei krypterte synkroniseringsdataa gjenopprettast.
     Privacy Policy: Personvernerklæring for denne tenaren
     Enhanced Privacy Enabled: Styrkt personvern er slått på. Tenaren lagrar berre krypterte synkroniseringsdata.
-    Description: "Synkroniser med ein oppdatert OpenTubeX-tenar. Faner på datamaskin og mobil held seg skilde med mindre du deler dei."
+    Enhanced Privacy Unsupported: Åtvaring — denne tenaren støttar ikkje styrkt personvern. Den som driv tenaren, kan sjå dei synkroniserte dataa.
+    Description: 'Synkroniser abonnement, profilar, spelelister, sjåarhistorikk og støtta innstillingar med ein OpenTubeX- eller LibreTube-synkroniseringstenar. Faner på datamaskin og mobil blir haldne frå kvarandre med mindre du uttrykkjeleg deler dei. LibreTube-tenarar støttar kanskje ikkje alle synkroniseringsfunksjonar.'
     Server URL: Tenaradresse
     Checking Server: Kontrollerer synkroniseringstenaren …
     Server Unavailable: Klarte ikkje å kopla til denne synkroniseringstenaren. Kontroller adressa og prøv på nytt.

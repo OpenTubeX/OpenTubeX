@@ -933,7 +933,8 @@ Settings:
     Privacy Passphrase Hint: アカウントのパスワードとは別のパスフレーズを使用してください。このデバイスの外へ送信されず、すべてのデバイスで必要です。紛失すると暗号化された同期データを復元できません。
     Privacy Policy: このサーバーのプライバシーポリシー
     Enhanced Privacy Enabled: 強化プライバシーが有効です。サーバーには暗号化された同期データのみ保存されます。
-    Description: "最新のOpenTubeXサーバーと同期します。デスクトップとモバイルのタブは、共有しない限り別々に管理されます。"
+    Enhanced Privacy Unsupported: '警告: このサーバーは強化プライバシーに対応していません。同期データはサーバーの運営者が閲覧できます。'
+    Description: 'OpenTubeX または LibreTube の同期サーバーと、登録チャンネル、プロフィール、再生リスト、視聴履歴、対応する設定を同期します。明示的に共有しない限り、デスクトップとモバイルのタブは別々に保持されます。LibreTube サーバーでは一部の同期機能を利用できない場合があります。'
     Server URL: サーバーURL
     Checking Server: 同期サーバーを確認中…
     Server Unavailable: この同期サーバーに接続できません。URLを確認して再試行してください。

@@ -101,7 +101,7 @@ OpenTubeX uses a built-in extractor to request data and videos directly from You
 
 OpenTubeX does not load the standard YouTube website or its page JavaScript, which reduces the browser-based tracking surface. It does not hide network requests: YouTube, an Invidious operator, or an optional service may still observe request metadata, including your IP address unless a proxy is used. See [PRIVACY.md](PRIVACY.md) for the complete threat model.
 
-By default, subscriptions, playlists, settings, history, profiles and other app data remain on your device. When synchronization is enabled, copies of the selected data categories are sent to the configured sync server. Sync requires a server with encrypted live sync support and encrypts those copies on your device before upload.
+By default, subscriptions, playlists, settings, history, profiles and other app data remain on your device. When synchronization is enabled, copies of the selected data categories are sent to the configured sync server. Enhanced-privacy sync encrypts those copies on your device before upload; legacy sync servers may receive them in plaintext.
 
 > [!IMPORTANT]  
 > Using a VPN or Tor is highly recommended to hide your IP while using OpenTubeX.

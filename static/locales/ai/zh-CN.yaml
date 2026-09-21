@@ -933,7 +933,8 @@ Settings:
     Privacy Passphrase Hint: 请使用与账号密码不同的口令。该口令不会离开此设备，但每台设备上都需要输入；如果丢失，将无法恢复加密的同步数据。
     Privacy Policy: 此服务器的隐私政策
     Enhanced Privacy Enabled: 已启用增强隐私保护。服务器仅存储加密的同步数据。
-    Description: "与最新的 OpenTubeX 服务器同步。桌面和移动设备的标签页保持独立，除非你选择共享。"
+    Enhanced Privacy Unsupported: 警告：此服务器不支持增强隐私保护，服务器运营者可以查看同步的数据。
+    Description: '通过 OpenTubeX 或 LibreTube 同步服务器同步订阅、个人资料、播放列表、观看历史记录及支持的设置。除非您明确选择共享，否则桌面端和移动端的标签页会保持独立。LibreTube 服务器可能不支持所有同步功能。'
     Server URL: 服务器 URL
     Checking Server: 正在检查同步服务器…
     Server Unavailable: 无法连接到此同步服务器。请检查 URL 后重试。
