@@ -1,5 +1,20 @@
 import { navigationItemsFromLegacySettings } from '../../navigationItems.js'
 
+export function migrateSyncServerUrl(value) {
+  if (typeof value !== 'string') return value
+  try {
+    const url = new URL(value)
+    if (url.origin === 'https://sync.d3sox.me' &&
+        url.pathname === '/' && !url.search && !url.hash &&
+        !url.username && !url.password) {
+      return 'https://sync.opentubex.org'
+    }
+  } catch {
+    // Leave custom or invalid settings untouched.
+  }
+  return value
+}
+
 /**
  * Persists the replacement for the legacy AI summary visibility setting before
  * removing the legacy value. This keeps the old preference recoverable when

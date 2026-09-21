@@ -3026,7 +3026,11 @@ test.describe('settings', () => {
     await expect(watchedProgressMode).toHaveValue('semi-auto')
   })
 
-  test('links the public sync server privacy policy', async ({ page }) => {
+  test('links the server-provided sync privacy policy and clears it when switching servers', async ({ page }) => {
+    await page.route('https://sync.opentubex.org/health', route => route.fulfill({
+      json: { status: 'ok', privacy_policy_url: 'https://operator.example/privacy', capabilities: {} }
+    }))
+    await page.route('https://sync.libretube.dev/health', route => route.fulfill({ body: 'OK' }))
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="sync"]').click()
 
@@ -3039,11 +3043,13 @@ test.describe('settings', () => {
 
     await expect(privacyPolicy).toHaveAttribute(
       'href',
-      'https://github.com/OpenTubeX/sync-server/blob/main/PRIVACY.md'
+      'https://operator.example/privacy'
     )
 
     await syncSection.getByLabel('Server URL').fill('https://sync.libretube.dev')
     await expect(privacyPolicy).toHaveCount(0)
+    await syncSection.getByLabel('Server URL').fill('https://sync.opentubex.org')
+    await expect(privacyPolicy).toHaveAttribute('href', 'https://operator.example/privacy')
   })
 
   test('waits for the device name before creating a secure sync pairing code', async ({ app, page }) => {
@@ -3162,7 +3168,7 @@ test.describe('settings', () => {
 
   test('keeps the sync server idle until sync is enabled', async ({ page }) => {
     const syncRequests = []
-    await page.route('https://sync.d3sox.me/**', async (route) => {
+    await page.route('https://sync.opentubex.org/**', async (route) => {
       syncRequests.push(route.request().url())
       await route.fulfill({ status: 200, body: 'OK' })
     })
@@ -4629,7 +4635,7 @@ test.describe('sync settings', () => {
         syncServerPrivacyMode: 'legacy',
         syncServerSnapshot: '{"subscriptions":[]}',
         syncServerToken: 'invalid-token',
-        syncServerUrl: 'https://sync.d3sox.me',
+        syncServerUrl: 'https://sync.opentubex.org',
         syncServerUsername: 'sync-user',
         syncServerLastSyncAt: 1234
       }
@@ -4638,7 +4644,7 @@ test.describe('sync settings', () => {
 
   for (const scale of [1, 1.25]) {
     test(`keeps the connected account label in the settings layout at UI scale ${scale}`, async ({ page }) => {
-      await page.route('https://sync.d3sox.me/**', route => route.fulfill({
+      await page.route('https://sync.opentubex.org/**', route => route.fulfill({
         json: { status: 'ok', capabilities: {} }
       }))
       await goTo(page, 'settings')
@@ -4671,7 +4677,7 @@ test.describe('sync settings', () => {
   }
 
   test('keeps the paired username when its device metadata update fails', async ({ page }) => {
-    await page.route('https://sync.d3sox.me/**', route => {
+    await page.route('https://sync.opentubex.org/**', route => {
       const url = new URL(route.request().url())
       if (url.pathname === '/health') {
         return route.fulfill({
@@ -4696,7 +4702,7 @@ test.describe('sync settings', () => {
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       return store.dispatch('completeSyncServerPairing', {
-        serverUrl: 'https://sync.d3sox.me',
+        serverUrl: 'https://sync.opentubex.org',
         username: 'paired-user',
         token: 'paired-token',
         privacyKey: 'paired-privacy-key',
@@ -4735,16 +4741,16 @@ test.describe('sync settings', () => {
       credentialedRequestStarted = resolve
     })
     let downgradedRequests = 0
-    await page.route('https://sync.d3sox.me/**', route => {
+    await page.route('https://sync.opentubex.org/**', route => {
       if (route.request().headers().authorization === 'invalid-token') {
         credentialedRequestStarted()
       }
       return route.fulfill({
         status: 307,
-        headers: { location: 'http://sync.d3sox.me/health' }
+        headers: { location: 'http://sync.opentubex.org/health' }
       })
     })
-    await page.route('http://sync.d3sox.me/**', route => {
+    await page.route('http://sync.opentubex.org/**', route => {
       downgradedRequests++
       return route.fulfill({ status: 200, body: 'OK' })
     })
@@ -4758,7 +4764,7 @@ test.describe('sync settings', () => {
 
   test('shows session expiration and other sync failures outside Sync settings', async ({ page }) => {
     let response = { status: 500, body: 'Background sync failed' }
-    await page.route('https://sync.d3sox.me/**', async (route) => {
+    await page.route('https://sync.opentubex.org/**', async (route) => {
       await route.fulfill(response)
     })
 
@@ -4791,7 +4797,7 @@ test.describe('sync settings', () => {
     const serverCheckRequested = new Promise((resolve) => {
       serverCheckStarted = resolve
     })
-    await page.route('https://sync.d3sox.me/**', async (route) => {
+    await page.route('https://sync.opentubex.org/**', async (route) => {
       if (new URL(route.request().url()).pathname === '/health') {
         if (delayServerCheck) {
           serverCheckStarted()
@@ -4841,7 +4847,7 @@ test.describe('sync settings', () => {
     })
     const syncRequests = []
 
-    await page.route('https://sync.d3sox.me/**', async (route) => {
+    await page.route('https://sync.opentubex.org/**', async (route) => {
       const pathname = new URL(route.request().url()).pathname
       if (pathname === '/health') {
         await route.fulfill({ status: 200, body: 'OK' })
@@ -4884,7 +4890,7 @@ test.describe('sync settings', () => {
     })
     const syncRequests = []
 
-    await otherWindow.route('https://sync.d3sox.me/**', async (route) => {
+    await otherWindow.route('https://sync.opentubex.org/**', async (route) => {
       const pathname = new URL(route.request().url()).pathname
       if (pathname === '/health') {
         await route.fulfill({ status: 200, body: 'OK' })
@@ -4925,7 +4931,7 @@ test.describe('sync settings', () => {
       authenticationStarted = resolve
     })
 
-    await page.route('https://sync.d3sox.me/**', async (route) => {
+    await page.route('https://sync.opentubex.org/**', async (route) => {
       const pathname = new URL(route.request().url()).pathname
       if (pathname === '/health') {
         await route.fulfill({ status: 200, body: 'OK' })
@@ -4961,7 +4967,7 @@ test.describe('sync settings', () => {
     const authenticationPending = new Promise((resolve) => {
       finishAuthentication = resolve
     })
-    await page.route('https://sync.d3sox.me/**', async (route) => {
+    await page.route('https://sync.opentubex.org/**', async (route) => {
       const pathname = new URL(route.request().url()).pathname
       if (pathname === '/health') {
         await route.fulfill({ status: 200, body: 'OK' })
@@ -5004,7 +5010,7 @@ test.describe('sync settings', () => {
     })
     let authenticatedManifestRequests = 0
 
-    await page.route('https://sync.d3sox.me/**', async (route) => {
+    await page.route('https://sync.opentubex.org/**', async (route) => {
       const request = route.request()
       const pathname = new URL(request.url()).pathname
       const authorization = request.headers().authorization
@@ -5654,6 +5660,7 @@ test.describe('tabs from other synced devices', () => {
       settings: {
         currentLocale: 'en-US',
         syncServerEnabled: true,
+        syncServerAutoSync: false,
         syncServerUsername: 'test-user',
         syncServerToken: 'offline-test-token',
         syncServerPrivacyMode: 'enhanced',
@@ -5664,6 +5671,9 @@ test.describe('tabs from other synced devices', () => {
   })
 
   test('keeps synced tab sets in the tab organizer instead of settings', async ({ page }) => {
+    await page.route('https://sync.opentubex.org/**', route => route.fulfill({
+      json: { status: 'ok', capabilities: {} }
+    }))
     const section = await goToSettingsSection(page, 'sync')
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store

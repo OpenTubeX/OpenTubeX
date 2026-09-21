@@ -476,9 +476,7 @@ import {
 const { locale, t } = useI18n()
 const dateFormat = computed(() => store.getters.getDateFormat)
 const timeFormat = computed(() => store.getters.getTimeFormat)
-const OPENTUBEX_SYNC_SERVER_URL = 'https://sync.d3sox.me'
-const OPENTUBEX_SYNC_SERVER_PRIVACY_POLICY_URL =
-  'https://github.com/OpenTubeX/sync-server/blob/main/PRIVACY.md'
+const OPENTUBEX_SYNC_SERVER_URL = 'https://sync.opentubex.org'
 const syncServerInstances = [
   OPENTUBEX_SYNC_SERVER_URL,
   'https://sync.libretube.dev'
@@ -514,15 +512,7 @@ const connected = computed(() => store.getters.getSyncServerToken !== '')
 const syncServerToken = computed(() => store.getters.getSyncServerToken)
 const currentDeviceId = computed(() => store.getters.getSyncServerDeviceId)
 const currentDeviceName = computed(() => store.getters.getSyncServerDeviceName)
-const privacyPolicyUrl = computed(() => {
-  try {
-    return normalizeSyncServerUrl(serverUrl.value) === OPENTUBEX_SYNC_SERVER_URL
-      ? OPENTUBEX_SYNC_SERVER_PRIVACY_POLICY_URL
-      : null
-  } catch {
-    return null
-  }
-})
+const privacyPolicyUrl = ref(null)
 const serverCredentialsDisabled = computed(() => (
   authenticating.value ||
   (!connected.value && serverCheckStatus.value !== 'valid')
@@ -599,6 +589,7 @@ watch([serverUrl, connected, syncEnabled], ([value, isConnected, isEnabled], [pr
   serverPrivacySupported.value = null
   serverPairingSupported.value = false
   serverAccountSessionsSupported.value = false
+  privacyPolicyUrl.value = null
   serverCheckStatus.value = disconnected ? 'valid' : 'idle'
   serverCheckError.value = ''
   if (!isEnabled || !value.trim()) return
@@ -612,8 +603,12 @@ watch([serverUrl, connected, syncEnabled], ([value, isConnected, isEnabled], [pr
     )
     serverCheckClient = client
     try {
-      const capabilities = await client.getCapabilities()
+      const [capabilities, policyUrl] = await Promise.all([
+        client.getCapabilities(),
+        client.getPrivacyPolicyUrl(),
+      ])
       if (sequence !== serverCheckSequence) return
+      privacyPolicyUrl.value = policyUrl
       serverPrivacySupported.value = capabilities.encrypted_sync === 1
       serverPairingSupported.value = capabilities.key_pairing === 1
       serverAccountSessionsSupported.value = capabilities.encrypted_sync === 1 &&
