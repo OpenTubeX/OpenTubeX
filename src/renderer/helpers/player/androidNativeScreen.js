@@ -9,6 +9,7 @@ export function createAndroidNativeScreen({ element, container, getController, g
   let open = false
   let presentationSequence = 0
   let fullscreenFromRotation = false
+  let pictureInPicture = false
   let frame = null
   let lastLayout = ''
   const ambientClips = new Map()
@@ -392,7 +393,15 @@ export function createAndroidNativeScreen({ element, container, getController, g
     setOpen(false)
     await getController()?.hide()
   }
+  function handlePictureInPicture(event) {
+    pictureInPicture = event.active === true
+  }
+  window.addEventListener('opentubex:android-pip', handlePictureInPicture)
+
   function handleRotation() {
+    // PiP uses the launcher orientation. Keep the player's fullscreen state and
+    // orientation lock so expanding PiP restores the view it came from.
+    if (pictureInPicture || document.body.classList.contains('androidPictureInPicture')) return
     if (!isFullscreenOnRotationEnabled() || !attached || document.hidden || !element.readyState ||
         container.getBoundingClientRect().width <= 0 || controls?.isFullScreenSupported() === false) return
     const orientation = window.screen?.orientation?.type ?? ''
@@ -491,6 +500,7 @@ export function createAndroidNativeScreen({ element, container, getController, g
       resize.disconnect()
       mutations.disconnect()
       window.screen?.orientation?.removeEventListener('change', handleRotation)
+      window.removeEventListener('opentubex:android-pip', handlePictureInPicture)
       window.removeEventListener('resize', scheduleLayout)
       window.removeEventListener('scroll', scheduleLayout, true)
       document.removeEventListener('visibilitychange', scheduleLayout)

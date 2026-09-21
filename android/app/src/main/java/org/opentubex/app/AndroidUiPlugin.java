@@ -165,7 +165,17 @@ public class AndroidUiPlugin extends Plugin {
             return;
         }
 
-        PictureInPicture.enter(getActivity(), pictureInPictureAspectRatio, false);
+        // Android 8 can rotate the WebView before its PiP mode callback arrives.
+        // Preserve fullscreen through that configuration change, as manual entry does.
+        getBridge().triggerWindowJSEvent("opentubex:android-pip", "{\"active\":true}");
+        boolean entered = false;
+        try {
+            entered = PictureInPicture.enter(getActivity(), pictureInPictureAspectRatio, false);
+        } finally {
+            if (!entered) {
+                getBridge().triggerWindowJSEvent("opentubex:android-pip", "{\"active\":false}");
+            }
+        }
     }
 
     private boolean supportsPictureInPicture() {

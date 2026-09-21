@@ -7,7 +7,7 @@ import { overrideShakaMethods } from '../../src/renderer/helpers/player/override
 const source = (await readFile(new URL('../../src/renderer/helpers/player/androidNativeScreen.js', import.meta.url), 'utf8'))
   .replace(/^import .*\n/gm, '').replace('export function ', 'function ')
 
-async function fixture({ fullscreen = true, chrome = [], dialogs = [], suggestions = [], previews = [], deferTransitions = false, deferFullscreen = false } = {}) {
+async function fixture({ fullscreen = true, chrome = [], dialogs = [], suggestions = [], previews = [], deferTransitions = false, deferFullscreen = false, rotateFullscreen = false } = {}) {
   const snapshots = []
   const snapshotInvalidations = []
   let publishSnapshot
@@ -21,6 +21,7 @@ async function fixture({ fullscreen = true, chrome = [], dialogs = [], suggestio
   const observers = []
   const styleWrites = []
   const window = Object.assign(new EventTarget(), { innerWidth: 1000, innerHeight: 700, scrollX: 0, scrollY: 0 })
+  window.screen = { orientation: Object.assign(new EventTarget(), { type: 'landscape-primary' }) }
   let shown = true
   let menu = false
   let panel = false
@@ -50,9 +51,9 @@ async function fixture({ fullscreen = true, chrome = [], dialogs = [], suggestio
     },
   })
   const element = Object.assign(new EventTarget(), {
-    getBoundingClientRect: () => bounds, getAnimations: () => [],
+    readyState: 4, getBoundingClientRect: () => bounds, getAnimations: () => [],
   })
-  const document = Object.assign(new EventTarget(), { body: { append() {}, getBoundingClientRect: () => ({ height: 2000 }) }, createElement: () => ({ setAttribute() {}, remove() {}, style: { getPropertyValue() { return '' }, setProperty(name, value) { styleWrites.push({ name, value }) } } }), elementFromPoint: () => null, querySelectorAll: selector => selector.includes('.topNav') ? chrome : selector.includes('dialog[open]') ? [...dialogs, ...(selector.includes('.ft-input-component .list') ? suggestions : [])] : [], querySelector: () => null, documentElement: { classList: { toggle() {} }, style: { getPropertyValue() { return '' }, setProperty(name, value) { styleWrites.push({ name, value }) }, removeProperty() {} } } })
+  const document = Object.assign(new EventTarget(), { body: { classList: { contains: () => false }, append() {}, getBoundingClientRect: () => ({ height: 2000 }) }, createElement: () => ({ setAttribute() {}, remove() {}, style: { getPropertyValue() { return '' }, setProperty(name, value) { styleWrites.push({ name, value }) } } }), elementFromPoint: () => null, querySelectorAll: selector => selector.includes('.topNav') ? chrome : selector.includes('dialog[open]') ? [...dialogs, ...(selector.includes('.ft-input-component .list') ? suggestions : [])] : [], querySelector: () => null, documentElement: { classList: { toggle() {} }, style: { getPropertyValue() { return '' }, setProperty(name, value) { styleWrites.push({ name, value }) }, removeProperty() {} } } })
   document.addEventListener('nativefullscreenready', () => readyEvents.push(true))
   document.addEventListener('fullscreenchange', () => fullscreenEvents.push(presentations.length))
   class Observer {
@@ -79,7 +80,7 @@ async function fixture({ fullscreen = true, chrome = [], dialogs = [], suggestio
       layouts.push(value)
       if (deferTransitions && value.transition) await new Promise(resolve => completeTransitions.push(resolve))
     },
-  }), getLocale: () => 'en-US', onError: error => { throw error } })
+  }), getLocale: () => 'en-US', isFullscreenOnRotationEnabled: () => rotateFullscreen, onError: error => { throw error } })
   async function flush() {
     for (const [id, callback] of [...frames]) { frames.delete(id); callback() }
     await Promise.resolve()
@@ -87,7 +88,7 @@ async function fixture({ fullscreen = true, chrome = [], dialogs = [], suggestio
   if (fullscreen) await screen.show()
   else await screen.attach()
   await flush()
-  return { readyEvents, snapshotInvalidations, snapshots, publishSnapshot, screen, container, layouts, presentations, completeTransitions, completeFullscreen, fullscreenEvents, bounds, observers, window, styleWrites, flush, change({ visible = shown, menuOpen = menu, panelOpen = panel, containerAnimating = animating, endedRecommendations = recommendations, playbackEnded = ended, loadingPoster = poster }) {
+  return { document, readyEvents, snapshotInvalidations, snapshots, publishSnapshot, screen, container, layouts, presentations, completeTransitions, completeFullscreen, fullscreenEvents, bounds, observers, window, styleWrites, flush, change({ visible = shown, menuOpen = menu, panelOpen = panel, containerAnimating = animating, endedRecommendations = recommendations, playbackEnded = ended, loadingPoster = poster }) {
     poster = loadingPoster
     shown = visible; menu = menuOpen; panel = panelOpen
     recommendations = endedRecommendations
@@ -591,5 +592,49 @@ test('search suggestions exclude native controls from their entire rectangle', a
   const f = await fixture({ fullscreen: false, suggestions })
   assert.ok(f.layouts.at(-1).menus.some(menu => menu.y === 80 && menu.height === 420))
   assert.equal(f.layouts.at(-1).overlayActive, true)
+  f.screen.destroy()
+})
+
+for (const fullscreen of [false, true]) {
+  test(`PiP portrait configuration preserves ${fullscreen ? 'fullscreen' : 'inline'} playback on return`, async () => {
+    const f = await fixture({ fullscreen, rotateFullscreen: true })
+    const pip = active => {
+      const event = new Event('opentubex:android-pip')
+      event.active = active
+      f.window.dispatchEvent(event)
+    }
+    pip(true)
+    for (const orientation of ['portrait-primary', 'landscape-primary', 'portrait-primary']) {
+      f.window.screen.orientation.type = orientation
+      f.window.screen.orientation.dispatchEvent(new Event('change'))
+      await f.flush()
+      assert.equal(f.screen.isOpen(), fullscreen, 'PiP rotation must preserve the existing view')
+    }
+    pip(false)
+    await f.flush()
+    assert.equal(f.screen.isOpen(), fullscreen, 'PiP configuration changes must not discard the view to restore')
+    f.window.screen.orientation.type = 'landscape-primary'
+    f.window.screen.orientation.dispatchEvent(new Event('change'))
+    await f.flush()
+    f.window.screen.orientation.type = 'portrait-primary'
+    f.window.screen.orientation.dispatchEvent(new Event('change'))
+    await f.flush()
+    assert.equal(f.screen.isOpen(), false, 'Normal rotation must still work after returning')
+    f.screen.destroy()
+  })
+}
+
+test('manual PiP preserves fullscreen before Android confirms entry and after a rejected request', async () => {
+  const f = await fixture({ rotateFullscreen: true })
+  f.document.body.classList.contains = name => name === 'androidPictureInPicture'
+  f.window.screen.orientation.type = 'portrait-primary'
+  f.window.screen.orientation.dispatchEvent(new Event('change'))
+  await f.flush()
+  assert.equal(f.screen.isOpen(), true)
+  // Failed entry removes the optimistic document state without a native event.
+  f.document.body.classList.contains = () => false
+  f.window.screen.orientation.dispatchEvent(new Event('change'))
+  await f.flush()
+  assert.equal(f.screen.isOpen(), false)
   f.screen.destroy()
 })
