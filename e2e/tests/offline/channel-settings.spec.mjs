@@ -29,7 +29,8 @@ test.use({
       rememberVolumePerChannel: true,
       syncServerSettingsExcluded: ['channelPlaybackSpeeds'],
       syncServerAutoSync: false,
-      syncServerEnabled: true,
+      syncServerEnabled: false,
+      syncServerPrivacyKey: 'e2e-privacy-key',
       syncServerPrivacyMode: 'enhanced',
       syncServerSyncSettings: true,
       syncServerToken: 'e2e-sync-token'
@@ -52,6 +53,16 @@ test.use({
 })
 
 test.describe('channel settings', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.route('https://sync.opentubex.org/**', route => route.fulfill({
+      json: { status: 'ok', capabilities: { encrypted_sync: 1 } }
+    }))
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('setSyncServerEnabled', true)
+    })
+  })
+
   test('configures saved channel setting sync beside the manager and in its breadcrumb', async ({ page }) => {
     await goToSettingsSection(page, 'playback')
 

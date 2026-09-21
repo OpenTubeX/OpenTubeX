@@ -249,6 +249,11 @@ test('subscription refresh waits for an active IP block recovery', async ({ app,
     await chmod(scriptPath, 0o700)
   }
 
+  await page.evaluate(async (recoveryScriptPath) => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateVideoIpBlockScriptPath', recoveryScriptPath)
+  }, scriptPath)
+
   const result = await page.evaluate(async (recoveryScriptPath) => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     const tabId = store.getters.getActiveTabId
