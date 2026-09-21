@@ -15,7 +15,13 @@ test('encrypted subscription retries retain concurrent remote edits', async ({ p
     const request = route.request()
     const pathname = new URL(request.url()).pathname
     let response
-    if (pathname === '/v1/encrypted_sync') {
+    if (pathname === '/health') {
+      response = { status: 'ok', capabilities: { encrypted_sync: 1, live_sync: 1 } }
+    } else if (pathname === '/v1/encrypted_sync/events') {
+      response = []
+    } else if (pathname === '/v1/account/sessions') {
+      response = { sessions: [] }
+    } else if (pathname === '/v1/encrypted_sync') {
       response = { collections: [{ collection: 'subscriptions' }] }
     } else if (pathname === '/v1/encrypted_sync/subscriptions' && request.method() === 'GET') {
       response = { revision, payload: await encryptSyncDocument(remote, key, salt) }
