@@ -219,7 +219,18 @@ test('two independent devices settle after live sync and propagate a real edit o
           syncServerSettingsExcluded: excluded,
           syncServerSyncSettings: true,
           baseTheme: 'dark',
-        }
+        },
+        history: [{
+          _id: videoId,
+          videoId,
+          title: 'History conflict',
+          author: 'Test channel',
+          authorId: 'test-channel',
+          timeWatched: 1000,
+          lengthSeconds: 300,
+          isWatched: false,
+          watchProgress: name === 'Desktop' ? 0 : 169.743,
+        }]
       })
       const client = { userDataDir }
       clients.push(client)
@@ -265,6 +276,9 @@ test('two independent devices settle after live sync and propagate a real edit o
       await expect.poll(() => waiting.has(name)).toBe(true)
     }
     await expect.poll(() => waiting.size).toBe(2)
+    const progress = client => client.page.evaluate(videoId => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById[videoId].watchProgress, videoId)
+    await expect.poll(() => progress(clients[0])).toBe(169.743)
+    await expect.poll(() => progress(clients[1])).toBe(169.743)
     const initialWrites = writes.length
     for (let notification = 0; notification < 3; notification++) {
       wake()
@@ -277,6 +291,14 @@ test('two independent devices settle after live sync and propagate a real edit o
     // Allow the local-change debounce on both devices to finish as well.
     await clients[0].page.waitForTimeout(2000)
     expect(writes.slice(initialWrites)).toEqual([{ name: 'Desktop', collection: 'settings' }])
+    await clients[0].page.evaluate(videoId => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateWatchProgress', { videoId, watchProgress: 12 }), videoId)
+    await expect.poll(() => progress(clients[1])).toBe(12)
+    await expect.poll(() => waiting.size).toBe(2)
+    await clients[0].page.waitForTimeout(2000)
+    expect(writes.slice(initialWrites)).toEqual([
+      { name: 'Desktop', collection: 'settings' },
+      { name: 'Desktop', collection: 'history' },
+    ])
   } finally {
     for (const client of clients) {
       await client.electronApp?.close()

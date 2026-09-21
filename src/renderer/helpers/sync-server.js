@@ -970,7 +970,11 @@ function historyStateEquals(localPayload, remote) {
     localPayload.metadata.position_millis === remote.metadata.position_millis
 }
 
-export async function syncHistory(client, store, previousIds = [], options = {}) {
+export async function syncHistory(client, store, previous = {}, options = {}) {
+  // Older snapshots contain only IDs, without a baseline for watch-state edits.
+  const previousIds = Array.isArray(previous) ? previous : Object.keys(previous)
+  const previousStates = Array.isArray(previous) ? {} : previous
+  const next = {}
   const localHistory = store.state.history.historyCacheSorted
   const syncableLocalHistory = localHistory.filter(record => historyToRemote(record) !== null)
   const localById = mapBy(syncableLocalHistory, record => record.videoId)
@@ -1002,7 +1006,21 @@ export async function syncHistory(client, store, previousIds = [], options = {})
   for (const id of mergedIds) {
     const local = localById.get(id)
     const remote = remoteById.get(id)
-    const useLocal = local && (!remote || local.timeWatched >= remote.metadata.added_date)
+    let useLocal = local && (!remote || local.timeWatched > remote.metadata.added_date)
+    if (local && remote && local.timeWatched === remote.metadata.added_date) {
+      const localState = historyToRemote(local)
+      const baseline = previousStates[id]
+      const localChanged = !baseline || !historyStateEquals(localState, { metadata: baseline })
+      const remoteChanged = !baseline || !historyStateEquals(remote, { metadata: baseline })
+      // A sole local edit can move progress backwards or clear watched status.
+      // Concurrent/unknown edits need a stable tie-break, never local-wins on
+      // both devices. Prefer farther progress, then completed watch state.
+      useLocal = localChanged && (!remoteChanged ||
+        localState.metadata.position_millis > remote.metadata.position_millis ||
+        (localState.metadata.position_millis === remote.metadata.position_millis &&
+          localState.metadata.watched_state === 'completed'))
+      if (historyStateEquals(localState, remote)) useLocal = true
+    }
     let merged = useLocal ? local : historyToLocal(remote, local)
     // Watch time orders progress, not metadata completeness. Fill an unknown
     // local duration before uploading so it cannot erase a known server value.
@@ -1016,6 +1034,7 @@ export async function syncHistory(client, store, previousIds = [], options = {})
       localUpdates.push(merged)
     }
     const localPayload = useLocal ? historyToRemote(merged) : null
+    next[id] = { ...(localPayload ?? remote).metadata }
 
     if (useLocal && localPayload && (
       !remote ||
@@ -1044,7 +1063,7 @@ export async function syncHistory(client, store, previousIds = [], options = {})
     })
   }
 
-  return Array.from(mergedIds)
+  return next
 }
 
 function profileMetadata(profile, fallback = {}) {
