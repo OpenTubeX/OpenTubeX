@@ -1296,7 +1296,7 @@ export default {
 
     /**
      * Set playback state for a logical tab.
-     * @param {'playing' | 'paused' | 'none'} state
+     * @param {'playing' | 'paused' | 'waiting' | 'failed' | 'none'} state
      * @param {string} tabId
      */
     setPlaybackState: (state, tabId) => {

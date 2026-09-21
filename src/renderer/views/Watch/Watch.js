@@ -1176,7 +1176,12 @@ export default defineComponent({
       if (length === 0 && this.mobilePanel === 'queue') this.mobilePanel = null
     },
     errorMessage(error) {
-      if (error) this.finishNativeFullscreenTransition?.()
+      if (error) {
+        this.finishNativeFullscreenTransition?.()
+        if (process.env.IS_ELECTRON) {
+          window.ftElectron?.tabs?.setPlaybackState('failed', this.tabId)
+        }
+      }
     },
     aiVideoSummaryMode() {
       if (this.videoSummary.length > 0) this.clampShortsAuxPanelScroll()
@@ -1189,6 +1194,11 @@ export default defineComponent({
     timeFormatPreference: 'updateUpcomingTimestamp',
     isLoading(loading) {
       if (!loading) {
+        // Upcoming videos without a trailer never mount a player to report a
+        // playback state. Their settled page must still release startup tabs.
+        if (process.env.IS_ELECTRON && this.isUpcoming && this.playabilityStatus !== 'OK') {
+          window.ftElectron?.tabs?.setPlaybackState('paused', this.tabId)
+        }
         this.updateVideoMetadataCache()
 
         if (!this.transcriptAvailable && this.showTranscript) {

@@ -6220,7 +6220,7 @@ export default defineComponent({
 
     function handleWaiting() {
       if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
-        window.ftElectron.tabs.setPlaybackState('paused', tabId)
+        window.ftElectron.tabs.setPlaybackState('waiting', tabId)
       }
     }
 
@@ -10826,6 +10826,9 @@ export default defineComponent({
       const mediaElement = video.value
       // Background tabs may finish loading without emitting play or pause.
       shortsPaused.value = mediaElement.paused
+      if (process.env.IS_ELECTRON && !mediaElement.autoplay && mediaElement.paused) {
+        window.ftElectron?.tabs?.setPlaybackState('paused', tabId)
+      }
       if (props.format === 'legacy' && activeLegacyFormat.value?.localFile &&
         mediaElement.videoWidth > 0 && mediaElement.videoHeight > 0) {
         const format = activeLegacyFormat.value

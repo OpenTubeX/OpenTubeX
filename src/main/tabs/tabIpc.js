@@ -473,8 +473,7 @@ export async function setupTabsIPC(options = {}) {
     const manager = getManager(event)
     const tab = typeof tabId === 'string' ? manager?.tabs.get(tabId) : null
     if (manager && tab && typeof playbackState === 'string') {
-      tab.isPlaying = playbackState === 'playing'
-      manager._broadcastStateUpdate()
+      manager.setTabPlaybackState(tabId, playbackState)
     }
   })
 
