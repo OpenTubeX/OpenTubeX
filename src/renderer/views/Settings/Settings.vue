@@ -667,8 +667,7 @@ provide(settingsSearchNavigationKey, {
     return findSettingsSearchTarget(settingsSearchableValues.value, labels, settingKey)
   },
   async open({ section, match }) {
-    await openSearchResult(section, match)
-    const target = settingsWindowRef.value?.querySelector('.settingsSearchTarget')
+    const target = await openSearchResult(section, match)
     const focusable = 'button, input, select, textarea, [tabindex]'
     const control = target?.matches(focusable) ? target : target?.querySelector(focusable)
     settingsWindowRef.value?.focus({ preventScroll: true })
@@ -1162,6 +1161,7 @@ async function openSearchResult(sectionType, match) {
     target.classList.remove('settingsSearchTarget')
     searchHighlightTimer = null
   }, 2200)
+  return target
 }
 
 function getSearchTargetText(element) {

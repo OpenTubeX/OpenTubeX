@@ -99,3 +99,27 @@ for (const desktop of [false, true]) {
     })
   }
 }
+
+test('activity navigation focuses its new target even when a previous highlight remains', async () => {
+  const focused = []
+  const targets = ['first', 'second'].map(name => ({
+    matches: () => true,
+    focus: () => focused.push(name),
+  }))
+  let nextTarget = 0
+  let navigation
+  const start = component.indexOf('provide(settingsSearchNavigationKey, {')
+  const end = component.indexOf('\nconst settingsSearchResults', start)
+  vm.runInNewContext(component.slice(start, end), {
+    settingsSearchNavigationKey: Symbol(),
+    provide(_key, value) { navigation = value },
+    openSearchResult: async () => targets[nextTarget++],
+    settingsWindowRef: { value: {
+      querySelector: () => targets[0],
+      focus() {},
+    } },
+  })
+  await navigation.open({ section: 'playback', match: { label: 'First setting' } })
+  await navigation.open({ section: 'playback', match: { label: 'Second setting' } })
+  assert.deepEqual(focused, ['first', 'second'])
+})
