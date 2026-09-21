@@ -23,6 +23,20 @@ for (const [tab, field, cacheKey, update, mark] of [
   ['live', 'liveStreams', 'liveCache', 'updateLiveStreamsByChannelId', 'markSubscriptionVideoAsSeen'],
   ['posts', 'communityPosts', 'postsCache', 'updateCommunityPostsByChannelId', 'markSubscriptionPostAsSeen'],
 ]) {
+  test(`marking ${tab} seen tolerates a malformed persisted feed`, async () => {
+    const db = { subscriptionCache: new Datastore({ inMemoryOnly: true }) }
+    const Cache = vm.runInNewContext(`${cacheSource}\nSubscriptionCache`, { db, ...feedState })
+    const idKey = tab === 'posts' ? 'postId' : 'videoId'
+    for (const malformed of [{}, 'invalid', 1, true]) {
+      await db.subscriptionCache.updateAsync({ _id: 'channel' }, {
+        _id: 'channel', [field]: malformed, [`${field}Timestamp`]: new Date(1000),
+      }, { upsert: true })
+      await Cache.markEntriesAsSeen('channel', tab, [{ [idKey]: 'displayed', isNewInSubscriptionFeed: false }])
+      const saved = (await Cache.find())[0]
+      assert.deepEqual(saved[field], [])
+      assert.equal(new Date(saved[`${field}Timestamp`]).getTime(), 1000)
+    }
+  })
   for (const bulk of [false, true]) {
     test(`${bulk ? 'bulk' : 'individual'} seen action survives a concurrent ${tab} refresh and sync`, async () => {
       const db = { subscriptionCache: new Datastore({ inMemoryOnly: true }) }

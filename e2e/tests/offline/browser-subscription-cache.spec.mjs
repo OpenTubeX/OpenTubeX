@@ -16,6 +16,24 @@ for (const [tab, field, update] of [
   ['live', 'liveStreams', 'updateLiveStreamsByChannelId'],
   ['posts', 'communityPosts', 'updateCommunityPostsByChannelId'],
 ]) {
+  test(`marking ${tab} seen tolerates malformed IndexedDB feed data`, async ({ page }) => {
+    const records = await page.evaluate(async ({ tab, field }) => {
+      const malformed = [{}, 'invalid', 1, true]
+      const cache = window.createTestCache(async () => malformed.map((value, index) => ({
+        _id: `channel-${index}`, [field]: value, [`${field}Timestamp`]: new Date(1000),
+      })), `malformed-seen-${tab}`)
+      for (let index = 0; index < malformed.length; index++) {
+        await cache.markEntriesAsSeen(`channel-${index}`, tab, [{
+          [tab === 'posts' ? 'postId' : 'videoId']: 'displayed', isNewInSubscriptionFeed: false,
+        }])
+      }
+      return cache.find()
+    }, { tab, field })
+    for (const record of records) {
+      expect(record[field]).toEqual([])
+      expect(new Date(record[`${field}Timestamp`]).getTime()).toBe(1000)
+    }
+  })
   test(`marking ${tab} seen survives competing refreshes and reopening IndexedDB`, async ({ page }) => {
     const result = await page.evaluate(async ({ tab, field, update }) => {
       const name = `seen-race-${tab}`

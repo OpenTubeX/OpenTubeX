@@ -1,6 +1,7 @@
 // Refresh responses can have been prepared before a seen action completed.
 // Preserve that action without replacing newer metadata or hiding new entries.
 export function preserveSubscriptionSeenEntries(entries, previousEntries, idKey = 'videoId') {
+  if (!Array.isArray(entries)) return []
   const normalizedPreviousEntries = Array.isArray(previousEntries) ? previousEntries : []
   const seen = new Map(normalizedPreviousEntries
     .filter(entry => entry?.isNewInSubscriptionFeed === false &&
