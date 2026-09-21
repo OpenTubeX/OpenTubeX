@@ -164,33 +164,18 @@ test('keeps Hide Playlists because it also controls playlist actions', () => {
   })
 })
 
-test('migrates the public sync server while preserving account and encryption settings', () => {
-  for (const syncServerUrl of ['https://sync.d3sox.me', 'https://sync.d3sox.me/', 'https://SYNC.D3SOX.ME:443/']) {
-    const settings = {
-      syncServerUrl,
-      syncServerToken: 'existing-token',
-      syncServerUsername: 'existing-user',
-      syncServerPrivacyKey: 'existing-key',
-      syncServerDeviceId: 'existing-device',
-      syncServerEnabled: false,
-    }
-    const migrated = migrateLegacySettings(settings)
-    assert.deepEqual(migrated, { ...settings, syncServerUrl: 'https://sync.opentubex.org' })
-    assert.equal(settings.syncServerUrl, syncServerUrl)
-    assert.deepEqual(migrateLegacySettings(migrated), migrated)
+test('migrates only the old public sync server URL', () => {
+  for (const value of ['https://sync.d3sox.me', 'https://sync.d3sox.me/', 'https://SYNC.D3SOX.ME:443/']) {
+    assert.equal(migrateSyncServerUrl(value), 'https://sync.opentubex.org')
   }
-})
-
-test('preserves custom sync servers and does not add an absent server setting', () => {
-  for (const syncServerUrl of [
+  for (const value of [
     'https://sync.opentubex.org', 'https://sync.libretube.dev',
     'https://sync.d3sox.me/custom', 'https://sync.d3sox.me:8443',
     'https://sync.d3sox.me.example.org', 'https://sync.d3sox.me?custom=1',
     'https://user:password@sync.d3sox.me', '', null,
   ]) {
-    assert.deepEqual(migrateLegacySettings({ syncServerUrl }), { syncServerUrl })
+    assert.equal(migrateSyncServerUrl(value), value)
   }
-  assert.deepEqual(migrateLegacySettings({}), {})
 })
 
 test('startup persists the new sync URL and retries after a failed write without clearing the session', async () => {

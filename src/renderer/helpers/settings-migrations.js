@@ -45,9 +45,6 @@ export async function migrateStoredAiVideoSummarySetting({
  */
 export function migrateLegacySettings(settings) {
   const migratedSettings = { ...settings }
-  if (Object.hasOwn(migratedSettings, 'syncServerUrl')) {
-    migratedSettings.syncServerUrl = migrateSyncServerUrl(migratedSettings.syncServerUrl)
-  }
 
   const formerNavigationKeys = [
     'hideHome',

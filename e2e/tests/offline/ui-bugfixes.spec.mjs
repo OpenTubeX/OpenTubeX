@@ -774,7 +774,7 @@ test('restores and clamps the real phone tab organizer viewports', async ({ app,
   }, privacyKey, desktopDeviceId)
   let accountSessionRequests = 0
   let healthRequests = 0
-  await page.route('https://sync.d3sox.me/**', async route => {
+  await page.route('https://sync.opentubex.org/**', async route => {
     const pathname = new URL(route.request().url()).pathname
     if (pathname === '/health') {
       healthRequests++

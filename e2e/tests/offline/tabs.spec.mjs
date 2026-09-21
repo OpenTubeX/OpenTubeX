@@ -2286,7 +2286,7 @@ test.describe('tab organizer', () => {
     })
     let accountSessionRequests = 0
     let healthRequests = 0
-    await page.route('https://sync.d3sox.me/**', async route => {
+    await page.route('https://sync.opentubex.org/**', async route => {
       const pathname = new URL(route.request().url()).pathname
       if (pathname === '/health') {
         healthRequests++
