@@ -34,12 +34,14 @@
     <ol
       v-else
       :id="activityListId"
+      ref="activityList"
       class="activityList"
       :class="{ activityPreview: hasHiddenEntries }"
     >
       <li
         v-for="entry in visibleEntries"
         :key="entry.id"
+        tabindex="-1"
       >
         <I18nT
           :keypath="entry.messageKey"
@@ -78,15 +80,15 @@
       :label="t('Theme Discovery.Load More')"
       :icon="['fas', 'angle-down']"
       :aria-controls="activityListId"
-      :aria-expanded="false"
-      @click="showAll = true"
+      :aria-expanded="showAll"
+      @click="expandActivity"
     />
   </section>
 </template>
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, inject, onMounted, ref, useId } from 'vue'
+import { computed, inject, nextTick, onMounted, ref, useId, useTemplateRef } from 'vue'
 import { Translation as I18nT, useI18n } from 'vue-i18n'
 import store from '../../store'
 import FtButton from '../FtButton/FtButton.vue'
@@ -103,6 +105,7 @@ const relativeTimeNow = useRelativeTimeClock()
 const { t, te, locale } = useI18n()
 const entries = computed(() => store.getters.getSyncServerActivity)
 const activityListId = useId()
+const activityList = useTemplateRef('activityList')
 const showAll = ref(false)
 const hasHiddenEntries = computed(() => !showAll.value && entries.value.length > 3)
 const loading = ref(false)
@@ -128,6 +131,12 @@ const visibleEntries = computed(() => (showAll.value ? entries.value : entries.v
     displayValue: typeof entry.value === 'boolean' ? (entry.value ? t('Yes') : t('No')) : String(entry.value),
   }
 }))
+
+async function expandActivity() {
+  showAll.value = true
+  await nextTick()
+  activityList.value?.children[3]?.focus()
+}
 
 function dateLabel(timestamp) {
   return formatDateTime(timestamp, locale.value, store.getters.getDateFormat,
