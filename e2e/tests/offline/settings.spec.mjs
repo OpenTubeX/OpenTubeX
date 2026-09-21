@@ -3028,7 +3028,7 @@ test.describe('settings', () => {
 
   test('links the server-provided sync privacy policy and clears it when switching servers', async ({ page }) => {
     await page.route('https://sync.opentubex.org/health', route => route.fulfill({
-      json: { status: 'ok', privacy_policy_url: 'https://operator.example/privacy', capabilities: {} }
+      json: { status: 'ok', privacy_policy_url: 'https://operator.example/privacy', capabilities: { encrypted_sync: 1, live_sync: 1 } }
     }))
     await page.route('https://sync.libretube.dev/health', route => route.fulfill({ body: 'OK' }))
     await goTo(page, 'settings')
@@ -3048,6 +3048,8 @@ test.describe('settings', () => {
 
     await syncSection.getByLabel('Server URL').fill('https://sync.libretube.dev')
     await expect(privacyPolicy).toHaveCount(0)
+    await expect(syncSection.locator('.error')).toHaveText('Update this server to support encrypted live sync.')
+    await expect(syncSection.getByRole('button', { name: 'Log in', exact: true })).toBeDisabled()
     await syncSection.getByLabel('Server URL').fill('https://sync.opentubex.org')
     await expect(privacyPolicy).toHaveAttribute('href', 'https://operator.example/privacy')
   })
@@ -3073,7 +3075,7 @@ test.describe('settings', () => {
         await route.fulfill({
           json: {
             status: 'ok',
-            capabilities: { encrypted_sync: 1, key_pairing: 1 }
+            capabilities: { encrypted_sync: 1, live_sync: 1, key_pairing: 1 }
           }
         })
         return
@@ -3170,7 +3172,7 @@ test.describe('settings', () => {
     const syncRequests = []
     await page.route('https://sync.opentubex.org/**', async (route) => {
       syncRequests.push(route.request().url())
-      await route.fulfill({ status: 200, body: 'OK' })
+      await route.fulfill({ status: 200, json: { capabilities: { encrypted_sync: 1, live_sync: 1 } } })
     })
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="sync"]').click()
@@ -4558,7 +4560,7 @@ test.describe('secure pairing manual entry', () => {
         await route.fulfill({
           json: {
             status: 'ok',
-            capabilities: { encrypted_sync: 1, key_pairing: 1 }
+            capabilities: { encrypted_sync: 1, live_sync: 1, key_pairing: 1 }
           }
         })
         return
@@ -4631,11 +4633,12 @@ test.describe('sync settings', () => {
       settings: {
         syncServerEnabled: true,
         syncServerAutoSync: false,
-        syncServerPrivacyKey: 'e2e-privacy-key',
+        syncServerPrivacyKey: Buffer.alloc(32, 1).toString('base64'),
+        syncServerPrivacySalt: Buffer.alloc(16, 2).toString('base64'),
         syncServerPrivacyMode: 'legacy',
         syncServerSnapshot: '{"subscriptions":[]}',
         syncServerToken: 'invalid-token',
-        syncServerUrl: 'https://sync.opentubex.org',
+        syncServerUrl: 'https://sync.example',
         syncServerUsername: 'sync-user',
         syncServerLastSyncAt: 1234
       }
@@ -4644,8 +4647,8 @@ test.describe('sync settings', () => {
 
   for (const scale of [1, 1.25]) {
     test(`keeps the connected account label in the settings layout at UI scale ${scale}`, async ({ page }) => {
-      await page.route('https://sync.opentubex.org/**', route => route.fulfill({
-        json: { status: 'ok', capabilities: {} }
+      await page.route('https://sync.example/**', route => route.fulfill({
+        json: { status: 'ok', capabilities: { encrypted_sync: 1, live_sync: 1 } }
       }))
       await goTo(page, 'settings')
       await page.evaluate(scale => window.ftElectron.setZoomFactor(scale), scale)
@@ -4677,11 +4680,11 @@ test.describe('sync settings', () => {
   }
 
   test('keeps the paired username when its device metadata update fails', async ({ page }) => {
-    await page.route('https://sync.opentubex.org/**', route => {
+    await page.route('https://sync.example/**', route => {
       const url = new URL(route.request().url())
       if (url.pathname === '/health') {
         return route.fulfill({
-          json: { status: 'ok', capabilities: { account_sessions: 1 } }
+          json: { status: 'ok', capabilities: { encrypted_sync: 1, live_sync: 1, account_sessions: 1 } }
         })
       }
       if (url.pathname.endsWith('/account/sessions/current')) {
@@ -4702,7 +4705,7 @@ test.describe('sync settings', () => {
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       return store.dispatch('completeSyncServerPairing', {
-        serverUrl: 'https://sync.opentubex.org',
+        serverUrl: 'https://sync.example',
         username: 'paired-user',
         token: 'paired-token',
         privacyKey: 'paired-privacy-key',
@@ -4741,18 +4744,18 @@ test.describe('sync settings', () => {
       credentialedRequestStarted = resolve
     })
     let downgradedRequests = 0
-    await page.route('https://sync.opentubex.org/**', route => {
+    await page.route('https://sync.example/**', route => {
       if (route.request().headers().authorization === 'invalid-token') {
         credentialedRequestStarted()
       }
       return route.fulfill({
         status: 307,
-        headers: { location: 'http://sync.opentubex.org/health' }
+        headers: { location: 'http://sync.example/health' }
       })
     })
-    await page.route('http://sync.opentubex.org/**', route => {
+    await page.route('http://sync.example/**', route => {
       downgradedRequests++
-      return route.fulfill({ status: 200, body: 'OK' })
+      return route.fulfill({ status: 200, json: { capabilities: { encrypted_sync: 1, live_sync: 1 } } })
     })
 
     await goTo(page, 'settings')
@@ -4764,7 +4767,7 @@ test.describe('sync settings', () => {
 
   test('shows session expiration and other sync failures outside Sync settings', async ({ page }) => {
     let response = { status: 500, body: 'Background sync failed' }
-    await page.route('https://sync.opentubex.org/**', async (route) => {
+    await page.route('https://sync.example/**', async (route) => {
       await route.fulfill(response)
     })
 
@@ -4797,13 +4800,13 @@ test.describe('sync settings', () => {
     const serverCheckRequested = new Promise((resolve) => {
       serverCheckStarted = resolve
     })
-    await page.route('https://sync.opentubex.org/**', async (route) => {
+    await page.route('https://sync.example/**', async (route) => {
       if (new URL(route.request().url()).pathname === '/health') {
         if (delayServerCheck) {
           serverCheckStarted()
           await serverCheckPending
         }
-        await route.fulfill({ status: 200, body: 'OK' })
+        await route.fulfill({ status: 200, json: { capabilities: { encrypted_sync: 1, live_sync: 1 } } })
       } else {
         await route.fulfill({ status: 500, body: 'Sync failed' })
       }
@@ -4847,13 +4850,15 @@ test.describe('sync settings', () => {
     })
     const syncRequests = []
 
-    await page.route('https://sync.opentubex.org/**', async (route) => {
+    await page.route('https://sync.example/**', async (route) => {
       const pathname = new URL(route.request().url()).pathname
       if (pathname === '/health') {
-        await route.fulfill({ status: 200, body: 'OK' })
+        await route.fulfill({ status: 200, json: { capabilities: { encrypted_sync: 1, live_sync: 1 } } })
         return
       }
 
+      if (pathname === '/v1/account/sessions') return route.fulfill({ json: { sessions: [] } })
+      if (pathname === '/v1/encrypted_sync/events') return route.fulfill({ json: [] })
       syncRequests.push(pathname)
       syncRequestStarted()
       await syncRequestPending
@@ -4890,12 +4895,14 @@ test.describe('sync settings', () => {
     })
     const syncRequests = []
 
-    await otherWindow.route('https://sync.opentubex.org/**', async (route) => {
+    await otherWindow.route('https://sync.example/**', async (route) => {
       const pathname = new URL(route.request().url()).pathname
       if (pathname === '/health') {
-        await route.fulfill({ status: 200, body: 'OK' })
+        await route.fulfill({ status: 200, json: { capabilities: { encrypted_sync: 1, live_sync: 1 } } })
         return
       }
+      if (pathname === '/v1/account/sessions') return route.fulfill({ json: { sessions: [] } })
+      if (pathname === '/v1/encrypted_sync/events') return route.fulfill({ json: [] })
       syncRequests.push(pathname)
       syncRequestStarted()
       await syncRequestPending
@@ -4931,10 +4938,10 @@ test.describe('sync settings', () => {
       authenticationStarted = resolve
     })
 
-    await page.route('https://sync.opentubex.org/**', async (route) => {
+    await page.route('https://sync.example/**', async (route) => {
       const pathname = new URL(route.request().url()).pathname
       if (pathname === '/health') {
-        await route.fulfill({ status: 200, body: 'OK' })
+        await route.fulfill({ status: 200, json: { capabilities: { encrypted_sync: 1, live_sync: 1 } } })
         return
       }
       authenticationStarted()
@@ -4948,6 +4955,7 @@ test.describe('sync settings', () => {
     await syncSection.getByRole('button', { name: 'Disconnect' }).click()
     await syncSection.getByLabel('Username').fill('sync-user')
     await syncSection.getByLabel('Password').fill('sync-password')
+    await syncSection.getByLabel(/Privacy passphrase/).fill('sync-privacy-passphrase')
     await syncSection.getByRole('button', { name: 'Log in' }).click()
     await authenticationRequested
     await syncSection.getByText('Enable Sync', { exact: true }).click()
@@ -4967,10 +4975,10 @@ test.describe('sync settings', () => {
     const authenticationPending = new Promise((resolve) => {
       finishAuthentication = resolve
     })
-    await page.route('https://sync.opentubex.org/**', async (route) => {
+    await page.route('https://sync.example/**', async (route) => {
       const pathname = new URL(route.request().url()).pathname
       if (pathname === '/health') {
-        await route.fulfill({ status: 200, body: 'OK' })
+        await route.fulfill({ status: 200, json: { capabilities: { encrypted_sync: 1, live_sync: 1 } } })
       } else {
         await authenticationPending
         await route.fulfill({ status: 401, body: 'Invalid credentials' })
@@ -4984,6 +4992,7 @@ test.describe('sync settings', () => {
     await expect(syncSection.getByLabel('Username')).toBeEnabled()
     await syncSection.getByLabel('Username').fill('sync-user')
     await syncSection.getByLabel('Password').fill('sync-password')
+    await syncSection.getByLabel(/Privacy passphrase/).fill('sync-privacy-passphrase')
     await syncSection.getByRole('button', { name: 'Log in' }).click()
 
     await expect(syncSection.getByLabel('Server URL')).toBeDisabled()
@@ -5010,7 +5019,7 @@ test.describe('sync settings', () => {
     })
     let authenticatedManifestRequests = 0
 
-    await page.route('https://sync.opentubex.org/**', async (route) => {
+    await page.route('https://sync.example/**', async (route) => {
       const request = route.request()
       const pathname = new URL(request.url()).pathname
       const authorization = request.headers().authorization
@@ -5018,7 +5027,7 @@ test.describe('sync settings', () => {
       if (pathname === '/health') {
         await route.fulfill({
           status: 200,
-          json: { capabilities: { encrypted_sync: 1 } }
+          json: { capabilities: { encrypted_sync: 1, live_sync: 1 } }
         })
       } else if (pathname === '/v1/account/login') {
         await route.fulfill({ status: 200, json: { jwt: 'renewed-token' } })
@@ -5672,7 +5681,7 @@ test.describe('tabs from other synced devices', () => {
 
   test('keeps synced tab sets in the tab organizer instead of settings', async ({ page }) => {
     await page.route('https://sync.opentubex.org/**', route => route.fulfill({
-      json: { status: 'ok', capabilities: {} }
+      json: { status: 'ok', capabilities: { encrypted_sync: 1, live_sync: 1 } }
     }))
     const section = await goToSettingsSection(page, 'sync')
     await page.evaluate(() => {

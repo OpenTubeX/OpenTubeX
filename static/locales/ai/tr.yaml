@@ -933,8 +933,7 @@ Settings:
     Privacy Passphrase Hint: Hesap parolanızdan farklı bir parola kullanın. Bu parola cihazdan ayrılmaz ve her cihazda gereklidir. Kaybederseniz şifrelenmiş eşitleme verileri kurtarılamaz.
     Privacy Policy: Bu sunucunun gizlilik politikası
     Enhanced Privacy Enabled: Gelişmiş gizlilik etkin. Sunucu yalnızca şifrelenmiş eşitleme verilerini saklar.
-    Enhanced Privacy Unsupported: 'Uyarı: Bu sunucu gelişmiş gizliliği desteklemiyor. Eşitlenen veriler sunucu işletmecisi tarafından görülebilir.'
-    Description: 'Abonelikleri, profilleri, oynatma listelerini, izleme geçmişini ve desteklenen ayarları bir OpenTubeX veya LibreTube eşitleme sunucusuyla eşitleyin. Açıkça paylaşmadığınız sürece masaüstü ve mobil sekmeler ayrı kalır. LibreTube sunucuları tüm eşitleme özelliklerini desteklemeyebilir.'
+    Description: "Güncel bir OpenTubeX sunucusuyla eşitleyin. Paylaşmadığınız sürece masaüstü ve mobil sekmeleri ayrı kalır."
     Server URL: Sunucu URL'si
     Checking Server: Eşitleme sunucusu denetleniyor…
     Server Unavailable: Bu eşitleme sunucusuna bağlanılamadı. URL'yi denetleyip yeniden deneyin.
@@ -1023,6 +1022,7 @@ Settings:
     Desktop Device: 'Masaüstü'
     Open All Tabs: 'Tüm sekmeleri aç'
     Open All Tabs Confirmation: "Tüm sekmeler açılsın mı?"
+    Server Update Required: "Şifreli canlı eşitlemeyi desteklemek için bu sunucuyu güncelleyin."
   Proxy Settings:
     IP Block Recovery Script Path: IP Engeli Kurtarma Betiği Yolu
     Select IP Block Recovery Script File: IP Engeli Kurtarma Betiği Dosyasını Seç

@@ -957,8 +957,7 @@ Settings:
     Privacy Passphrase Hint: Käytä eri tunnuslausetta kuin tilisi salasanaa. Tunnuslause ei koskaan poistu tältä laitteelta, ja sitä tarvitaan kaikilla laitteilla. Jos kadotat sen, salattuja synkronointitietoja ei voi palauttaa.
     Privacy Policy: Tämän palvelimen tietosuojakäytäntö
     Enhanced Privacy Enabled: Parannettu tietosuoja on käytössä. Palvelin säilyttää vain salattuja synkronointitietoja.
-    Enhanced Privacy Unsupported: Varoitus — tämä palvelin ei tue parannettua tietosuojaa. Palvelimen ylläpitäjä voi nähdä synkronoidut tiedot.
-    Description: 'Synkronoi tilaukset, profiilit, soittolistat, katseluhistoria ja tuetut asetukset OpenTubeX- tai LibreTube-synkronointipalvelimen kanssa. Tietokoneen ja mobiililaitteen välilehdet pysyvät erillään, ellet erikseen jaa niitä. LibreTube-palvelimet eivät välttämättä tue kaikkia synkronointiominaisuuksia.'
+    Description: "Synkronoi ajantasaisen OpenTubeX-palvelimen kanssa. Tietokoneen ja mobiililaitteen välilehdet pysyvät erillään, ellet jaa niitä."
     Server URL: Palvelimen URL-osoite
     Checking Server: Tarkistetaan synkronointipalvelinta…
     Server Unavailable: Synkronointipalvelimeen ei saatu yhteyttä. Tarkista URL-osoite ja yritä uudelleen.
@@ -1047,6 +1046,7 @@ Settings:
     Desktop Device: 'Tietokone'
     Open All Tabs: 'Avaa kaikki välilehdet'
     Open All Tabs Confirmation: "Avataanko kaikki välilehdet?"
+    Server Update Required: "Päivitä tämä palvelin tukemaan salattua reaaliaikaista synkronointia."
   Proxy Settings:
     IP Block Recovery Script Path: IP-eston palautuskomentosarjan polku
     Select IP Block Recovery Script File: Valitse IP-eston palautuskomentosarjatiedosto

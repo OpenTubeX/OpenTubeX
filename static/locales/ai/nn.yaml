@@ -1095,8 +1095,7 @@ Settings:
     Privacy Passphrase Hint: Bruk ei anna passfrase enn kontopassordet. Ho forlèt aldri denne eininga og må brukast på alle einingar. Dersom du mistar henne, kan ikkje dei krypterte synkroniseringsdataa gjenopprettast.
     Privacy Policy: Personvernerklæring for denne tenaren
     Enhanced Privacy Enabled: Styrkt personvern er slått på. Tenaren lagrar berre krypterte synkroniseringsdata.
-    Enhanced Privacy Unsupported: Åtvaring — denne tenaren støttar ikkje styrkt personvern. Den som driv tenaren, kan sjå dei synkroniserte dataa.
-    Description: 'Synkroniser abonnement, profilar, spelelister, sjåarhistorikk og støtta innstillingar med ein OpenTubeX- eller LibreTube-synkroniseringstenar. Faner på datamaskin og mobil blir haldne frå kvarandre med mindre du uttrykkjeleg deler dei. LibreTube-tenarar støttar kanskje ikkje alle synkroniseringsfunksjonar.'
+    Description: "Synkroniser med ein oppdatert OpenTubeX-tenar. Faner på datamaskin og mobil held seg skilde med mindre du deler dei."
     Server URL: Tenaradresse
     Checking Server: Kontrollerer synkroniseringstenaren …
     Server Unavailable: Klarte ikkje å kopla til denne synkroniseringstenaren. Kontroller adressa og prøv på nytt.
@@ -1185,6 +1184,7 @@ Settings:
     Desktop Device: 'Datamaskin'
     Open All Tabs: 'Opne alle faner'
     Open All Tabs Confirmation: "Opne alle faner?"
+    Server Update Required: "Oppdater denne tenaren for å støtte kryptert synkronisering i sanntid."
   Proxy Settings:
     Proxy Warning: OpenTubeX har ingen innebygd mellomtenar, men kan kopla til ein ekstern mellomtenar, til dømes Tor som køyrer på maskina di, eller ein SOCKS5-mellomtenar frå enkelte VPN-tenester. Dersom du slår på dette, må du kontrollera at mellomtenaren eller Tor er rett sett opp. Elles kan ikkje OpenTubeX henta data.
     Proxy Username: Brukarnamn for mellomtenar

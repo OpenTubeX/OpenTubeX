@@ -957,8 +957,7 @@ Settings:
     Privacy Passphrase Hint: השתמשו בביטוי סיסמה שונה מסיסמת החשבון. הוא לעולם אינו יוצא מהמכשיר הזה ונדרש בכל מכשיר. אם תאבדו אותו, לא יהיה ניתן לשחזר את נתוני הסנכרון המוצפנים.
     Privacy Policy: מדיניות הפרטיות של השרת
     Enhanced Privacy Enabled: פרטיות מוגברת מופעלת. השרת שומר רק נתוני סנכרון מוצפנים.
-    Enhanced Privacy Unsupported: אזהרה — השרת הזה אינו תומך בפרטיות מוגברת. מפעיל השרת יכול לראות את הנתונים המסונכרנים.
-    Description: 'סנכרון מינויים, פרופילים, רשימות השמעה, היסטוריית צפייה והגדרות נתמכות עם שרת סנכרון של OpenTubeX או LibreTube. כרטיסיות במחשב ובנייד נשארות נפרדות אלא אם משתפים אותן במפורש. ייתכן ששרתי LibreTube לא יתמכו בכל תכונות הסנכרון.'
+    Description: "סנכרון עם שרת OpenTubeX מעודכן. הכרטיסיות במחשב ובנייד נשארות נפרדות אלא אם משתפים אותן."
     Server URL: כתובת ה-URL של השרת
     Checking Server: שרת הסנכרון נבדק…
     Server Unavailable: לא ניתן להתחבר לשרת הסנכרון. בדקו את כתובת ה-URL ונסו שוב.
@@ -1047,6 +1046,7 @@ Settings:
     Desktop Device: 'מחשב'
     Open All Tabs: 'פתיחת כל הכרטיסיות'
     Open All Tabs Confirmation: "לפתוח את כל הכרטיסיות?"
+    Server Update Required: "יש לעדכן שרת זה כדי לתמוך בסנכרון מוצפן בזמן אמת."
   Proxy Settings:
     IP Block Recovery Script Path: נתיב לסקריפט התאוששות מחסימת IP
     Select IP Block Recovery Script File: בחירת קובץ סקריפט התאוששות מחסימת IP

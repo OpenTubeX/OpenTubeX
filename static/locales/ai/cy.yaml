@@ -937,8 +937,7 @@ Settings:
     Privacy Passphrase Hint: Defnyddiwch gyfrinymadrodd ar wahân i gyfrinair eich cyfrif. Nid yw byth yn gadael y ddyfais hon ac mae ei angen ar bob dyfais; os collwch ef, ni ellir adfer y data cysoni wedi'u hamgryptio.
     Privacy Policy: Polisi preifatrwydd y gweinydd hwn
     Enhanced Privacy Enabled: Mae preifatrwydd estynedig wedi'i alluogi. Dim ond data cysoni wedi'u hamgryptio y mae'r gweinydd yn eu storio.
-    Enhanced Privacy Unsupported: 'Rhybudd: nid yw''r gweinydd hwn yn cynnal preifatrwydd estynedig. Gall ei weithredwr weld y data sydd wedi''u cysoni.'
-    Description: 'Cydweddwch danysgrifiadau, proffiliau, rhestrau chwarae, hanes gwylio a gosodiadau a gynhelir â gweinydd cydweddu OpenTubeX neu LibreTube. Cedwir tabiau bwrdd gwaith a symudol ar wahân oni bai eich bod yn eu rhannu’n benodol. Efallai na fydd gweinyddion LibreTube yn cynnal pob nodwedd gydweddu.'
+    Description: "Cysonwch â gweinydd OpenTubeX cyfredol. Bydd tabiau bwrdd gwaith a symudol yn aros ar wahân oni bai eich bod yn eu rhannu."
     Server URL: URL y gweinydd
     Checking Server: Wrthi'n gwirio'r gweinydd cysoni…
     Server Unavailable: Nid oedd modd cysylltu â'r gweinydd cysoni hwn. Gwiriwch yr URL a rhowch gynnig arall arni.
@@ -1027,6 +1026,7 @@ Settings:
     Desktop Device: 'Bwrdd gwaith'
     Open All Tabs: 'Agor pob tab'
     Open All Tabs Confirmation: "Agor pob tab?"
+    Server Update Required: "Diweddarwch y gweinydd hwn i gefnogi cysoni byw wedi’i amgryptio."
   Proxy Settings:
     IP Block Recovery Script Path: Llwybr sgript adfer ar ôl rhwystr IP
     Select IP Block Recovery Script File: Dewis ffeil sgript adfer ar ôl rhwystr IP

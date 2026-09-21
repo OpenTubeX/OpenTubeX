@@ -933,8 +933,7 @@ Settings:
     Privacy Passphrase Hint: A fiók jelszavától eltérő jelmondatot használjon. Ez soha nem hagyja el az eszközt, és minden eszközön szükséges; elvesztése esetén a titkosított szinkronizálási adatok nem állíthatók vissza.
     Privacy Policy: A kiszolgáló adatvédelmi irányelvei
     Enhanced Privacy Enabled: A fokozott adatvédelem be van kapcsolva. A kiszolgáló csak titkosított szinkronizálási adatokat tárol.
-    Enhanced Privacy Unsupported: Figyelmeztetés — ez a kiszolgáló nem támogatja a fokozott adatvédelmet. A szinkronizált adatokat a kiszolgáló üzemeltetője láthatja.
-    Description: 'Szinkronizáld a feliratkozásokat, profilokat, lejátszási listákat, megtekintési előzményeket és támogatott beállításokat egy OpenTubeX- vagy LibreTube-szinkronizálási kiszolgálóval. Az asztali és mobilos lapok külön maradnak, hacsak kifejezetten meg nem osztod őket. Előfordulhat, hogy a LibreTube-kiszolgálók nem támogatnak minden szinkronizálási funkciót.'
+    Description: "Szinkronizáljon egy naprakész OpenTubeX-kiszolgálóval. Az asztali és mobilos lapok külön maradnak, hacsak nem osztja meg őket."
     Server URL: Kiszolgáló URL-je
     Checking Server: Szinkronizálási kiszolgáló ellenőrzése…
     Server Unavailable: Nem lehet kapcsolódni ehhez a szinkronizálási kiszolgálóhoz. Ellenőrizze az URL-t, majd próbálja újra.
@@ -1023,6 +1022,7 @@ Settings:
     Desktop Device: 'Asztali gép'
     Open All Tabs: 'Összes lap megnyitása'
     Open All Tabs Confirmation: "Megnyitja az összes lapot?"
+    Server Update Required: "Frissítse ezt a kiszolgálót a titkosított, valós idejű szinkronizálás támogatásához."
   Proxy Settings:
     IP Block Recovery Script Path: IP-tiltás helyreállító parancsfájljának elérési útja
     Select IP Block Recovery Script File: IP-tiltás helyreállító parancsfájljának kiválasztása

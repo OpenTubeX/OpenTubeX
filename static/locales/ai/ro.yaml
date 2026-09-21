@@ -946,8 +946,7 @@ Settings:
     Privacy Passphrase Hint: Folosiți o frază secretă diferită de parola contului. Aceasta nu părăsește niciodată dispozitivul și este necesară pe fiecare dispozitiv; dacă o pierdeți, datele de sincronizare criptate nu mai pot fi recuperate.
     Privacy Policy: Politica de confidențialitate a acestui server
     Enhanced Privacy Enabled: Confidențialitatea sporită este activată. Serverul stochează numai date de sincronizare criptate.
-    Enhanced Privacy Unsupported: Avertisment — acest server nu acceptă confidențialitatea sporită. Datele sincronizate sunt vizibile operatorului său.
-    Description: 'Sincronizați abonamentele, profilurile, listele de redare, istoricul vizionărilor și setările acceptate cu un server de sincronizare OpenTubeX sau LibreTube. Filele de pe desktop și mobil rămân separate dacă nu le partajați în mod explicit. Este posibil ca serverele LibreTube să nu accepte toate funcțiile de sincronizare.'
+    Description: "Sincronizați cu un server OpenTubeX actualizat. Filele de pe computer și mobil rămân separate dacă nu le partajați."
     Server URL: Adresa URL a serverului
     Checking Server: Se verifică serverul de sincronizare…
     Server Unavailable: Conectarea la acest server de sincronizare nu a reușit. Verificați adresa URL și încercați din nou.
@@ -1036,6 +1035,7 @@ Settings:
     Desktop Device: 'Desktop'
     Open All Tabs: 'Deschide toate filele'
     Open All Tabs Confirmation: "Deschideți toate filele?"
+    Server Update Required: "Actualizați acest server pentru a accepta sincronizarea criptată în timp real."
   Proxy Settings:
     Proxy Username: Nume de utilizator pentru proxy
     Proxy Password: Parolă pentru proxy

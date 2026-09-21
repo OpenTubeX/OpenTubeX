@@ -194,7 +194,7 @@ test('reads the operator privacy policy and capabilities from one health request
   const requests = []
   const client = await loadClient({ IS_CAPACITOR: true }, '0.35.0', requests, () => ({
     status: 200,
-    data: JSON.stringify({ capabilities: { encrypted_sync: 1 }, privacy_policy_url: 'https://operator.example/privacy' }),
+    data: JSON.stringify({ capabilities: { encrypted_sync: 1, live_sync: 1 }, privacy_policy_url: 'https://operator.example/privacy' }),
     headers: {},
   }))
   const [capabilities, policy] = await Promise.all([client.getCapabilities(), client.getPrivacyPolicyUrl()])
@@ -214,5 +214,5 @@ test('ignores absent or unsafe operator privacy policy URLs', async () => {
     status: 200, data: 'OK', headers: {},
   }))
   assert.equal(await client.getPrivacyPolicyUrl(), null)
-  assert.equal(Object.keys(await client.getCapabilities()).length, 0)
+  await assert.rejects(client.getCapabilities(), /encrypted live sync/)
 })

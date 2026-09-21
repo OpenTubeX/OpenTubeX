@@ -2,6 +2,38 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { test, expect, goToSettingsSection, latestSettings, openNewWindowFromTabBar, setWindowSize, waitForAppReady } from '../../helpers/app.mjs'
 
+const privacyKey = Buffer.alloc(32, 1).toString('base64')
+const privacySalt = Buffer.alloc(16, 2).toString('base64')
+
+function emptySyncServer() {
+  const collections = new Map()
+  return route => {
+    const request = route.request()
+    const url = new URL(request.url())
+    if (url.pathname === '/health') return route.fulfill({ json: { capabilities: { encrypted_sync: 1, live_sync: 1 } } })
+    if (url.pathname.endsWith('/changes')) {
+      const cursor = JSON.stringify([...collections].map(([name, entry]) => [name, entry.revision]))
+      if (url.searchParams.get('since') === cursor) return
+      return route.fulfill({ json: { cursor } })
+    }
+    if (url.pathname.endsWith('/events')) return route.fulfill({ json: [] })
+    if (url.pathname === '/v1/encrypted_sync') {
+      return route.fulfill({
+        json: {
+          collections: [...collections].map(([collection, entry]) => ({ collection, revision: entry.revision })),
+          legacy_data: false,
+        }
+      })
+    }
+    const collection = url.pathname.split('/').at(-1)
+    if (request.method() === 'PUT') {
+      const { revision, payload } = request.postDataJSON()
+      collections.set(collection, { revision: revision + 1, payload })
+    }
+    return route.fulfill({ json: collections.get(collection) ?? { revision: 0, payload: null } })
+  }
+}
+
 async function reconnect(page) {
   await page.evaluate(() => {
     Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
@@ -102,12 +134,16 @@ for (const uiScale of [95, 125]) {
           syncServerUrl: 'https://sync.example',
           syncServerUsername: 'test-user',
           syncServerToken: 'test-token',
-          syncServerPrivacyMode: 'legacy',
+          syncServerPrivacyMode: 'enhanced',
+          syncServerPrivacyKey: privacyKey,
+          syncServerPrivacySalt: privacySalt,
           syncServerAutoSync: false,
           syncServerSyncSubscriptions: false,
           syncServerSyncPlaylists: false,
           syncServerSyncHistory: false,
           syncServerSyncProfiles: true,
+          syncServerSyncSessions: false,
+          syncServerSyncSettings: false,
           syncServerSnapshot: JSON.stringify({
             profiles: Object.fromEntries(profiles.map(profile => [profile._id, {
               remoteId: profile._id,
@@ -121,12 +157,7 @@ for (const uiScale of [95, 125]) {
     })
 
     test('background sync warns outside Settings and opens sync settings from the notification', async ({ page }) => {
-      await page.route('https://sync.example/**', route => route.fulfill({
-        contentType: 'application/json',
-        body: JSON.stringify(route.request().url().endsWith('/health')
-          ? { capabilities: { encrypted_sync: 0 } }
-          : [])
-      }))
+      await page.route('https://sync.example/**', emptySyncServer())
       const sync = await goToSettingsSection(page, 'sync')
       const autoSync = sync.getByRole('checkbox', { name: 'Sync automatically after changes and every five minutes', exact: true })
       // Register lifecycle listeners after installing the mock server route.
@@ -152,12 +183,7 @@ for (const uiScale of [95, 125]) {
     })
 
     test('lists affected profiles and keeps long deletion lists usable', async ({ app, page }, testInfo) => {
-      await page.route('https://sync.example/**', route => route.fulfill({
-        contentType: 'application/json',
-        body: JSON.stringify(route.request().url().endsWith('/health')
-          ? { capabilities: { encrypted_sync: 0 } }
-          : [])
-      }))
+      await page.route('https://sync.example/**', emptySyncServer())
       const sync = await goToSettingsSection(page, 'sync')
       await sync.getByRole('button', { name: 'Sync now', exact: true }).click()
       const warning = page.getByRole('dialog', { name: 'Confirm destructive sync?' })
@@ -228,12 +254,16 @@ test.describe('automatic sync recovery', () => {
         syncServerUrl: 'https://sync.example',
         syncServerUsername: 'example-user',
         syncServerToken: 'test-token',
-        syncServerPrivacyMode: 'legacy',
+        syncServerPrivacyMode: 'enhanced',
+        syncServerPrivacyKey: privacyKey,
+        syncServerPrivacySalt: privacySalt,
         syncServerAutoSync: false,
         syncServerSyncSubscriptions: false,
         syncServerSyncPlaylists: false,
         syncServerSyncHistory: false,
         syncServerSyncProfiles: true,
+        syncServerSyncSessions: false,
+        syncServerSyncSettings: false,
         syncServerSnapshot: JSON.stringify({
           profiles: {
             music: { remoteId: 'music', metadata: { title: 'Music' }, channels: [] }
@@ -250,12 +280,7 @@ test.describe('automatic sync recovery', () => {
   test('shows a background window sync failure and its shortcut in the active window', async ({ app, page }) => {
     const activeWindow = await openNewWindowFromTabBar(app, page)
     await waitForAppReady(activeWindow)
-    await page.route('https://sync.example/**', route => route.fulfill({
-      contentType: 'application/json',
-      body: JSON.stringify(route.request().url().endsWith('/health')
-        ? { capabilities: { encrypted_sync: 0 } }
-        : [])
-    }))
+    await page.route('https://sync.example/**', emptySyncServer())
     // Only the originating window makes a sync request. The other window must
     // receive the notification through IPC, without retrying the failed sync.
     const sourceWindow = await app.electronApp.browserWindow(page)
@@ -286,12 +311,7 @@ test.describe('automatic sync recovery', () => {
 
   test('resumes previously enabled automatic sync after confirmation across an app restart', async ({ app, page }, testInfo) => {
     async function mockServer(targetPage) {
-      await targetPage.route('https://sync.example/**', route => route.fulfill({
-        contentType: 'application/json',
-        body: JSON.stringify(route.request().url().endsWith('/health')
-          ? { capabilities: { encrypted_sync: 0 } }
-          : [])
-      }))
+      await targetPage.route('https://sync.example/**', emptySyncServer())
     }
     await mockServer(page)
     const sync = await goToSettingsSection(page, 'sync')

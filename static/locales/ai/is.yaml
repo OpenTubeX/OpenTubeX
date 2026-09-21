@@ -941,8 +941,7 @@ Settings:
     Privacy Passphrase Hint: Notaðu aðra leynisetningu en aðgangsorð reikningsins. Hún fer aldrei úr þessu tæki og þarf að slá hana inn í öllum tækjum. Ef hún glatast er ekki hægt að endurheimta dulkóðuð samstillingargögn.
     Privacy Policy: Persónuverndarstefna þessa þjóns
     Enhanced Privacy Enabled: Aukin persónuvernd er virk. Þjónninn geymir aðeins dulkóðuð samstillingargögn.
-    Enhanced Privacy Unsupported: Viðvörun. Þessi þjónn styður ekki aukna persónuvernd. Rekstraraðili hans getur séð samstillt gögn.
-    Description: 'Samstilltu áskriftir, notandasnið, spilunarlista, áhorfsferil og studdar stillingar við OpenTubeX- eða LibreTube-samstillingarþjón. Flipar á tölvu og fartæki haldast aðskildir nema þú deilir þeim sérstaklega. LibreTube-þjónar styðja hugsanlega ekki alla samstillingareiginleika.'
+    Description: "Samstilltu við uppfærðan OpenTubeX-þjón. Flipar á tölvu og farsíma haldast aðskildir nema þú deilir þeim."
     Server URL: Vefslóð þjóns
     Checking Server: Athuga samstillingarþjón…
     Server Unavailable: Ekki tókst að tengjast þessum samstillingarþjóni. Athugaðu vefslóðina og reyndu aftur.
@@ -1031,6 +1030,7 @@ Settings:
     Desktop Device: 'Tölva'
     Open All Tabs: 'Opna alla flipa'
     Open All Tabs Confirmation: "Opna alla flipa?"
+    Server Update Required: "Uppfærðu þennan þjón til að styðja dulkóðaða samstillingu í rauntíma."
   Proxy Settings:
     IP Block Recovery Script Path: Slóð að endurheimtarskriftu fyrir IP-lokun
     Select IP Block Recovery Script File: Velja skrá með endurheimtarskriftu fyrir IP-lokun

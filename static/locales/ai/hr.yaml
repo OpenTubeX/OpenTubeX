@@ -937,8 +937,7 @@ Settings:
     Privacy Passphrase Hint: Upotrijebite pristupnu frazu koja se razlikuje od lozinke računa. Ona nikada ne napušta ovaj uređaj i potrebna je na svakom uređaju. Ako je izgubite, šifrirani podaci sinkronizacije neće se moći oporaviti.
     Privacy Policy: Pravila o privatnosti ovog poslužitelja
     Enhanced Privacy Enabled: Poboljšana privatnost je omogućena. Poslužitelj pohranjuje samo šifrirane podatke sinkronizacije.
-    Enhanced Privacy Unsupported: Upozorenje — ovaj poslužitelj ne podržava poboljšanu privatnost. Sinkronizirani podaci vidljivi su njegovu administratoru.
-    Description: 'Sinkronizirajte pretplate, profile, popise za reprodukciju, povijest gledanja i podržane postavke s OpenTubeX ili LibreTube poslužiteljem za sinkronizaciju. Kartice na računalu i mobilnom uređaju ostaju odvojene osim ako ih izričito ne podijelite. LibreTube poslužitelji možda ne podržavaju sve značajke sinkronizacije.'
+    Description: "Sinkronizirajte s ažurnim poslužiteljem OpenTubeX. Kartice računala i mobitela ostaju odvojene ako ih ne podijelite."
     Server URL: URL poslužitelja
     Checking Server: Provjera poslužitelja za sinkronizaciju…
     Server Unavailable: Povezivanje s ovim poslužiteljem za sinkronizaciju nije moguće. Provjerite URL i pokušajte ponovno.
@@ -1027,6 +1026,7 @@ Settings:
     Desktop Device: 'Računalo'
     Open All Tabs: 'Otvori sve kartice'
     Open All Tabs Confirmation: "Otvoriti sve kartice?"
+    Server Update Required: "Ažurirajte ovaj poslužitelj za podršku šifriranoj sinkronizaciji u stvarnom vremenu."
   Proxy Settings:
     IP Block Recovery Script Path: Putanja skripte za oporavak nakon blokiranja IP adrese
     Select IP Block Recovery Script File: Odaberi datoteku skripte za oporavak nakon blokiranja IP adrese

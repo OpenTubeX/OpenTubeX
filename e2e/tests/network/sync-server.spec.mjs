@@ -3,6 +3,7 @@ import { randomBytes, randomUUID } from 'node:crypto'
 import path from 'node:path'
 
 import { test, expect, goToSettingsSection, latestSettings } from '../../helpers/app.mjs'
+import { encryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
 import { DEFAULT_CUSTOM_THEME } from '../../../src/customTheme.js'
 
 const syncServerUrl = process.env.OPENTUBEX_SYNC_SERVER_URL
@@ -743,53 +744,38 @@ test.describe('OpenTubeX sync server', () => {
     expect(plaintextResponse.status).toBe(409)
   })
 
-  test('uses advertised history optimizations without rewriting unchanged local data', async ({ app, page }, testInfo) => {
+  test('skips unchanged encrypted history uploads without rewriting local data', async ({ app, page }, testInfo) => {
     const username = `opentubex-fast-${Date.now()}-${Math.random().toString(16).slice(2)}`
-    const bulkRequests = []
-    const historyPageSizes = []
-
-    await page.route('**/health', route => route.fulfill({
-      contentType: 'application/json',
-      body: JSON.stringify({
-        status: 'ok',
-        capabilities: { encrypted_sync: 0, bulk_sync: 1, history_page_size: 1000 }
-      })
-    }))
+    const uploads = []
     page.on('request', request => {
       const url = new URL(request.url())
-      if (url.pathname.endsWith('/bulk')) bulkRequests.push(url.pathname)
-      if (url.pathname.endsWith('/watch_history/')) {
-        historyPageSizes.push(url.searchParams.get('page_size'))
-      }
+      if (request.method() === 'PUT' && url.pathname.startsWith('/v1/encrypted_sync/')) uploads.push(url.pathname)
     })
 
     const syncSection = await goToSettingsSection(page, 'sync')
     await syncSection.getByLabel('Server URL').fill(syncServerUrl)
     await syncSection.getByLabel('Username').fill(username)
     await syncSection.getByLabel('Password').fill('local-test-password')
+    await syncSection.getByLabel(/Privacy passphrase/).fill('local-privacy-passphrase')
     await syncSection.getByRole('button', { name: 'Register' }).click()
 
     await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
     await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
     await expect(syncSection.locator('.syncProgress')).toBeHidden()
-    expect(bulkRequests).toEqual(expect.arrayContaining([
-      '/v1/subscriptions/bulk',
-      '/v1/watch_history/bulk'
-    ]))
-    expect(historyPageSizes).toContain('1000')
+    expect(uploads).toEqual(expect.arrayContaining(['/v1/encrypted_sync/subscriptions', '/v1/encrypted_sync/history']))
 
     const historyPath = path.join(app.userDataDir, 'history.db')
     const settingsPath = path.join(app.userDataDir, 'settings.db')
     const historyLinesAfterFirstSync = (await readFile(historyPath, 'utf8')).trim().split('\n').length
     const firstSyncAt = latestSettings(await readFile(settingsPath, 'utf8')).syncServerLastSyncAt
-    bulkRequests.length = 0
+    uploads.length = 0
 
     await syncSection.getByRole('button', { name: 'Sync now' }).click()
     await expect.poll(async () => {
       return latestSettings(await readFile(settingsPath, 'utf8')).syncServerLastSyncAt
     }).toBeGreaterThan(firstSyncAt)
 
-    expect(bulkRequests).not.toContain('/v1/watch_history/bulk')
+    expect(uploads).not.toContain('/v1/encrypted_sync/history')
     expect((await readFile(historyPath, 'utf8')).trim().split('\n')).toHaveLength(
       historyLinesAfterFirstSync
     )
@@ -810,26 +796,23 @@ test.describe('OpenTubeX sync server', () => {
   test('requires confirmation before an empty remote deletes local data', async ({ app, page }, testInfo) => {
     const username = `opentubex-reset-guard-${Date.now()}-${Math.random().toString(16).slice(2)}`
 
-    await page.route('**/health', route => route.fulfill({
-      contentType: 'application/json',
-      body: JSON.stringify({
-        status: 'ok',
-        capabilities: { encrypted_sync: 0, bulk_sync: 1, history_page_size: 1000 }
-      })
-    }))
-    await page.route('**/v1/subscriptions/', route => {
-      if (route.request().method() === 'GET') {
-        return route.fulfill({ contentType: 'application/json', body: '[]' })
-      }
-      return route.continue()
-    })
-
     const syncSection = await goToSettingsSection(page, 'sync')
     await syncSection.getByLabel('Server URL').fill(syncServerUrl)
     await syncSection.getByLabel('Username').fill(username)
     await syncSection.getByLabel('Password').fill('local-test-password')
+    await syncSection.getByLabel(/Privacy passphrase/).fill('local-privacy-passphrase')
     await syncSection.getByRole('button', { name: 'Register' }).click()
     await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
+
+    const saved = latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8'))
+    const headers = { Authorization: saved.syncServerToken, 'Content-Type': 'application/json' }
+    const remote = await (await fetch(`${syncServerUrl}/v1/encrypted_sync/subscriptions`, { headers })).json()
+    const cleared = await fetch(`${syncServerUrl}/v1/encrypted_sync/subscriptions`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify({ revision: remote.revision, payload: await encryptSyncDocument([], saved.syncServerPrivacyKey, saved.syncServerPrivacySalt) }),
+    })
+    expect(cleared.ok).toBe(true)
 
     await syncSection.getByRole('button', { name: 'Sync now' }).click()
     const warning = page.getByRole('dialog', { name: 'Confirm destructive sync?' })
@@ -875,37 +858,11 @@ test.describe('OpenTubeX sync server', () => {
     expect(cleanupResponse.ok).toBe(true)
   })
 
-  test('supports legacy servers without a capabilities endpoint', async ({ app, page }) => {
-    const username = `opentubex-legacy-${Date.now()}-${Math.random().toString(16).slice(2)}`
-    let activeSubscriptionWrites = 0
-    let maxConcurrentSubscriptionWrites = 0
-    const bulkRequests = []
-    const historyPageSizes = []
-
+  test('rejects legacy servers before accepting credentials', async ({ app, page }) => {
     await page.route('**/health', route => route.fulfill({
       contentType: 'text/plain',
       body: 'OK'
     }))
-    page.on('request', request => {
-      const url = new URL(request.url())
-      if (url.pathname.endsWith('/bulk')) bulkRequests.push(url.pathname)
-      if (url.pathname.endsWith('/watch_history/')) {
-        historyPageSizes.push(url.searchParams.get('page_size'))
-      }
-    })
-    await page.route('**/v1/subscriptions/', async route => {
-      if (route.request().method() === 'PUT') {
-        activeSubscriptionWrites++
-        maxConcurrentSubscriptionWrites = Math.max(
-          maxConcurrentSubscriptionWrites,
-          activeSubscriptionWrites
-        )
-        await new Promise(resolve => setTimeout(resolve, 150))
-        activeSubscriptionWrites--
-      }
-      await route.continue()
-    })
-
     const syncSection = await goToSettingsSection(page, 'sync')
     const serverUrlInput = syncSection.getByLabel('Server URL')
     // A connection abort waits for network recovery; an HTTP error rejects
@@ -930,20 +887,10 @@ test.describe('OpenTubeX sync server', () => {
       const contents = await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
       return latestSettings(contents).syncServerUrl
     }).toBe(syncServerUrl)
-    await expect(syncSection.getByLabel(/Privacy passphrase/)).toBeHidden()
-    await expect(syncSection.getByText(/does not support enhanced privacy/)).toBeVisible()
-    await syncSection.getByLabel('Username').fill(username)
-    await syncSection.getByLabel('Password').fill('local-test-password')
-    await syncSection.getByRole('button', { name: 'Register' }).click()
-
-    await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
-    await expect(syncSection.getByLabel('Settings')).toBeVisible()
-    await expect(syncSection.getByLabel('Settings')).toBeDisabled()
-    await expect(syncSection.getByRole('button', { name: 'Change password' })).toHaveCount(0)
-    await expect(syncSection.getByText(/does not support settings syncing/)).toBeVisible()
-    await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
-    expect(maxConcurrentSubscriptionWrites).toBeGreaterThan(1)
-    expect(bulkRequests).toEqual([])
-    expect(historyPageSizes).toContain(null)
+    await expect(syncSection.getByText('Update this server to support encrypted live sync.')).toBeVisible()
+    await expect(syncSection.getByLabel('Username')).toBeDisabled()
+    await expect(syncSection.getByLabel('Password')).toBeDisabled()
+    await expect(syncSection.getByRole('button', { name: 'Log in', exact: true })).toBeDisabled()
+    await expect(syncSection.getByRole('button', { name: 'Register', exact: true })).toBeDisabled()
   })
 })

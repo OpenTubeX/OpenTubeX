@@ -1254,8 +1254,7 @@ Settings:
     Privacy Passphrase Hint: Utilitzeu una frase de contrasenya diferent de la contrasenya del compte. No surt mai d'aquest dispositiu i és necessària a tots els dispositius; si la perdeu, no podreu recuperar les dades de sincronització xifrades.
     Privacy Policy: Política de privadesa d'aquest servidor
     Enhanced Privacy Enabled: La privadesa millorada està activada. El servidor només desa dades de sincronització xifrades.
-    Enhanced Privacy Unsupported: 'Avís: aquest servidor no admet la privadesa millorada. L''operador pot veure les dades sincronitzades.'
-    Description: 'Sincronitza les subscripcions, els perfils, les llistes de reproducció, l’historial de visualitzacions i els ajusts compatibles amb un servidor de sincronització d’OpenTubeX o LibreTube. Les pestanyes de l’ordinador i del mòbil es mantenen separades tret que les comparteixis explícitament. És possible que els servidors de LibreTube no admetin totes les funcions de sincronització.'
+    Description: "Sincronitza amb un servidor OpenTubeX actualitzat. Les pestanyes d’escriptori i de mòbil es mantenen separades tret que les comparteixis."
     Server URL: URL del servidor
     Checking Server: S'està comprovant el servidor de sincronització…
     Server Unavailable: No s'ha pogut connectar a aquest servidor de sincronització. Comproveu l'URL i torneu-ho a provar.
@@ -1344,6 +1343,7 @@ Settings:
     Desktop Device: 'Ordinador'
     Open All Tabs: 'Obre totes les pestanyes'
     Open All Tabs Confirmation: "Voleu obrir totes les pestanyes?"
+    Server Update Required: "Actualitza aquest servidor perquè admeti la sincronització en directe xifrada."
   Proxy Settings:
     Proxy Warning: L'OpenTubeX no té cap servidor intermediari integrat, però es pot connectar a un d'extern, com ara Tor executant-se al vostre ordinador o un servidor intermediari SOCKS5 proporcionat per algunes VPN. Si l'activeu, assegureu-vos que el servidor intermediari o Tor estigui ben configurat; altrament, l'OpenTubeX no podrà obtenir dades.
     Proxy Username: Nom d'usuari del servidor intermediari

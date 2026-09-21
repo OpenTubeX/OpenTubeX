@@ -906,8 +906,7 @@ Settings:
     Privacy Passphrase Hint: Hesab parolunuzdan fərqli parol ifadəsi istifadə edin. O, bu cihazdan kənara çıxmır və hər cihazda tələb olunur; onu itirsəniz, şifrələnmiş sinxronizasiya məlumatlarını bərpa etmək mümkün olmayacaq.
     Privacy Policy: Bu serverin məxfilik siyasəti
     Enhanced Privacy Enabled: Təkmilləşdirilmiş məxfilik aktivdir. Server yalnız şifrələnmiş sinxronizasiya məlumatlarını saxlayır.
-    Enhanced Privacy Unsupported: Xəbərdarlıq — bu server təkmilləşdirilmiş məxfiliyi dəstəkləmir. Sinxronlaşdırılan məlumatlar serverin operatoruna görünür.
-    Description: Abunəlikləri, profilləri, pleylistləri, baxış tarixçəsini və dəstəklənən tənzimləmələri OpenTubeX və ya LibreTube sinxronizasiya serveri ilə sinxronlaşdırın. Açıq şəkildə paylaşmadığınız müddətdə masaüstü və mobil vərəqlər ayrı qalır. LibreTube serverləri bütün sinxronizasiya funksiyalarını dəstəkləməyə bilər.
+    Description: "Yenilənmiş OpenTubeX serveri ilə sinxronlaşdırın. Paylaşmadığınız halda masaüstü və mobil vərəqlər ayrı qalır."
     Server URL: Server URL-i
     Checking Server: Sinxronizasiya serveri yoxlanılır…
     Server Unavailable: Bu sinxronizasiya serverinə qoşulmaq mümkün olmadı. URL-i yoxlayıb yenidən cəhd edin.
@@ -1026,6 +1025,7 @@ Settings:
     Data Loss Confirmation: Məlumatları silən sinxronizasiya təsdiqlənsin?
     Data Loss Warning: Serverdəki vəziyyət əvvəllər sinxronlaşdırılmış {previous} {collection} elementindən {deleted} ədədinin silinməsinə səbəb olacaq. Bu, uğursuz server miqrasiyasını və ya sıfırlanmasını göstərə bilər. Yalnız bu silinmə qəsdəndirsə və ehtiyat nüsxəniz varsa davam edin.
     Confirm Data Loss: Sil və davam et
+    Server Update Required: "Şifrələnmiş canlı sinxronizasiyanı dəstəkləmək üçün bu serveri yeniləyin."
   Proxy Settings:
     IP Block Recovery Script Path: IP blokundan bərpa skriptinin yolu
     Select IP Block Recovery Script File: IP blokundan bərpa skripti faylını seç

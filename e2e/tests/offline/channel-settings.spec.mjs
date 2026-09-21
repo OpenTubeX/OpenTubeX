@@ -55,7 +55,7 @@ test.use({
 test.describe('channel settings', () => {
   test.beforeEach(async ({ page }) => {
     await page.route('https://sync.opentubex.org/**', route => route.fulfill({
-      json: { status: 'ok', capabilities: { encrypted_sync: 1 } }
+      json: { status: 'ok', capabilities: { encrypted_sync: 1, live_sync: 1 } }
     }))
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store

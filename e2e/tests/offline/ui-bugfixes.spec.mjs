@@ -778,7 +778,7 @@ test('restores and clamps the real phone tab organizer viewports', async ({ app,
     const pathname = new URL(route.request().url()).pathname
     if (pathname === '/health') {
       healthRequests++
-      await route.fulfill({ status: 200, json: { capabilities: { account_sessions: 1 } } })
+      await route.fulfill({ status: 200, json: { capabilities: { encrypted_sync: 1, live_sync: 1, account_sessions: 1 } } })
     } else if (pathname === '/v1/account/sessions') {
       accountSessionRequests++
       await route.fulfill({

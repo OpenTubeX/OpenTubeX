@@ -1106,8 +1106,7 @@ Settings:
     Privacy Passphrase Hint: Usa una frase de contraseña distinta de la contraseña de tu cuenta. Nunca sale de este dispositivo y se necesita en todos los dispositivos; si la pierdes, no podrás recuperar los datos de sincronización cifrados.
     Privacy Policy: Política de privacidad de este servidor
     Enhanced Privacy Enabled: La privacidad mejorada está activada. El servidor solo guarda datos de sincronización cifrados.
-    Enhanced Privacy Unsupported: 'Advertencia: este servidor no admite la privacidad mejorada. Su operador puede ver los datos sincronizados.'
-    Description: 'Sincroniza suscripciones, perfiles, listas de reproducción, historial de reproducciones y ajustes compatibles con un servidor de sincronización de OpenTubeX o LibreTube. Las pestañas de escritorio y del celular permanecen separadas a menos que decidas compartirlas. Es posible que los servidores de LibreTube no admitan todas las funciones de sincronización.'
+    Description: "Sincroniza con un servidor OpenTubeX actualizado. Las pestañas de la computadora y del celular permanecen separadas salvo que las compartas."
     Server URL: URL del servidor
     Checking Server: Comprobando el servidor de sincronización…
     Server Unavailable: No se pudo conectar a este servidor de sincronización. Comprueba la URL y vuelve a intentarlo.
@@ -1196,6 +1195,7 @@ Settings:
     Desktop Device: 'Escritorio'
     Open All Tabs: 'Abrir todas las pestañas'
     Open All Tabs Confirmation: "¿Abrir todas las pestañas?"
+    Server Update Required: "Actualiza este servidor para admitir la sincronización cifrada en tiempo real."
   Proxy Settings:
     Proxy Warning: OpenTubeX no tiene un proxy incorporado, pero puede conectarse a un proxy externo, como uno que se ejecuta en su máquina como Tor o un proxy externo como un proxy SOCKS5 proporcionado por algunas VPN. Si está habilitado, asegúrese de que su proxy/Tor esté configurado correctamente, o OpenTubeX no podrá recuperar ningún dato.
     Proxy Username: Nombre de Usuario del proxy
