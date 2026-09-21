@@ -212,6 +212,7 @@ for (const persistence of ['disk', 'sync']) {
     await restarted.restoreFromData(snapshot, { restoreTabLoadState: true })
     restarted.setTabLoading('tab-3', true)
     restarted.setTabLoading('tab-3', false)
+    restarted.setTabPlaybackState('tab-3', 'playing')
     await new Promise(setImmediate)
     assert.notEqual(restarted.tabs.get('tab-0').loadState, 'unloaded')
     assert.equal(restarted.tabs.get('tab-2').loadState, 'unloaded')
@@ -616,3 +617,68 @@ test('route IPC rejects malformed URL values and permits omitted URLs', async t 
   await manager._saveSession()
   assert.equal(tabSession.saved.tabs[0].url, 'app://bundle/index.html#/home')
 })
+
+for (const outcome of ['playing', 'paused', 'failed']) {
+  test(`startup waits for active playback before releasing all background tabs: ${outcome}`, async t => {
+    t.mock.timers.enable({ apis: ['setTimeout'] })
+    const manager = createManager(t)
+    const saved = session(4)
+    saved.tabs[0].url = 'app://bundle/index.html#/watch/background'
+    saved.tabs[2].isUnloaded = true
+    saved.tabs[3].url = 'app://bundle/index.html#/watch/active'
+    await manager.restoreFromData(saved, { restoreTabLoadState: true })
+    const handlers = await setupIpc(t, [manager])
+    const playback = state => handlers.get(IpcChannels.TABS_SET_PLAYBACK_STATE)(
+      { sender: manager.browserWindow.webContents }, state, 'tab-3')
+    presentActive(manager)
+    manager.setTabLoading('tab-3', true)
+    manager.setTabLoading('tab-3', false)
+    playback('waiting')
+    playback('none')
+    manager.setTabPlaybackState('tab-0', 'playing')
+    await tick(t, 1000)
+    for (const id of ['tab-0', 'tab-1']) {
+      const tab = manager.getState().tabs.find(tab => tab.id === id)
+      assert.equal(tab.isLoading, true, 'queued tabs show a spinner')
+      assert.equal(tab.isUnloaded, false, 'queued tabs do not look unloaded')
+      assert.ok(tab.loadState === 'unloaded' || tab.mountDeferred, 'metadata and buffering do not release background work')
+    }
+    playback(outcome)
+    await tick(t)
+    assert.equal(manager.tabs.get('tab-0').mountDeferred, false)
+    assert.equal(manager.tabs.get('tab-0').loadState, 'mounting')
+    assert.equal(manager.tabs.get('tab-2').loadState, 'unloaded')
+  })
+}
+
+for (const action of ['select', 'close', 'navigate', 'unload queued']) {
+  test(`startup playback wait handles ${action}`, async t => {
+    t.mock.timers.enable({ apis: ['setTimeout'] })
+    const manager = createManager(t)
+    const saved = session(3)
+    saved.tabs[2].url = 'app://bundle/index.html#/watch/active'
+    await manager.restoreFromData(saved, { restoreTabLoadState: true })
+    presentActive(manager)
+    if (action === 'select') {
+      manager.activateTab('tab-1')
+      presentActive(manager)
+    } else if (action === 'close') {
+      manager.closeTab('tab-2')
+      presentActive(manager)
+    } else if (action === 'navigate') {
+      manager.updateTabRoute('tab-2', { path: '/history' })
+    } else {
+      await manager.unloadTab('tab-0')
+      const tab = manager.getState().tabs.find(tab => tab.id === 'tab-0')
+      assert.equal(tab.isLoading, false)
+      assert.equal(tab.isUnloaded, true)
+      manager.setTabPlaybackState('tab-2', 'playing')
+      await tick(t)
+      assert.equal(manager.tabs.get('tab-0').loadState, 'unloaded')
+      return
+    }
+    await tick(t)
+    assert.equal(manager.tabs.get('tab-0').loadState, 'mounting')
+    assert.equal(manager.tabs.get('tab-0').mountDeferred, false)
+  })
+}

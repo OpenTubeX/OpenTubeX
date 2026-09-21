@@ -3,6 +3,7 @@ import { createServer } from 'node:http'
 import path from 'node:path'
 
 import { test, expect, sel, goTo } from '../../helpers/app.mjs'
+import { mockPlayableWatchPage, mockUnplayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 const SUBSCRIPTIONS_TAB_ID = 'e2e-subscriptions-tab'
 const HISTORY_TAB_ID = 'e2e-history-tab'
@@ -317,65 +318,118 @@ test.describe('restored watch tab startup priority', () => {
     await new Promise(resolve => invidiousServer.close(resolve))
   })
 
-  test('defers background watch tabs until the active watch load finishes', async ({ page }) => {
-    const backgroundWatchTab = page.locator(`.tab[data-tab-id="${BACKGROUND_WATCH_TAB_ID}"]`)
-    const subscriptionsTab = page.locator(`.tab[data-tab-id="${SUBSCRIPTIONS_TAB_ID}"]`)
+  for (const autoplay of [true, false]) {
+    test(`waits for real player readiness with autoplay ${autoplay}`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      let releaseMedia
+      const mediaGate = new Promise(resolve => { releaseMedia = resolve })
+      await page.route('**/*.googlevideo.com/**', async route => {
+        await mediaGate
+        await route.fallback()
+      })
+      try {
+        await page.evaluate(async autoplay => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          await store.dispatch('updateBackendPreference', 'local')
+          await store.dispatch('updateAutoplayVideos', autoplay)
+        }, autoplay)
+        await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+        await page.locator(sel.searchInput).press('Enter')
+        await expect(page.locator('.tabContent[aria-hidden="false"] .videoTitle')).toHaveText(/\S/)
+        const state = await page.evaluate(() => window.ftElectron.tabs.getState())
+        expect(state.tabs.filter(tab => tab.id !== ACTIVE_WATCH_TAB_ID).every(tab => tab.loadState === 'unloaded')).toBe(true)
+        releaseMedia()
+        await expect.poll(async () => {
+          const state = await page.evaluate(() => window.ftElectron.tabs.getState())
+          return state.tabs.every(tab => tab.loadState === 'loaded')
+        }).toBe(true)
+        const video = page.locator('.tabContent[aria-hidden="false"] video')
+        await expect.poll(() => video.evaluate(video => video.paused)).toBe(!autoplay)
+      } finally {
+        releaseMedia()
+      }
+    })
+  }
 
-    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', ACTIVE_WATCH_TAB_ID)
-    await expect(backgroundWatchTab).toHaveClass(/unloaded/)
-    await expect(subscriptionsTab).not.toHaveClass(/unloaded/)
-    await page.evaluate(activeTabId => {
-      window.ftElectron.tabs.setLoading(true, activeTabId)
-    }, ACTIVE_WATCH_TAB_ID)
+  for (const playabilityStatus of ['LIVE_STREAM_OFFLINE', 'OK']) {
+    test(`upcoming video releases queued tabs only without a playable trailer: ${playabilityStatus}`, async ({ page }) => {
+      const watch = await watchViewHandle(page, ACTIVE_WATCH_TAB_ID)
+      await watch.evaluate((view, status) => {
+        view.isUpcoming = true
+        view.playabilityStatus = status
+        view.isLoading = false
+      }, playabilityStatus)
+      if (playabilityStatus === 'OK') {
+        const state = await page.evaluate(() => window.ftElectron.tabs.getState())
+        expect(state.tabs.filter(tab => tab.id !== ACTIVE_WATCH_TAB_ID).every(tab => tab.loadState === 'unloaded')).toBe(true)
+      } else {
+        await expect.poll(async () => {
+          const state = await page.evaluate(() => window.ftElectron.tabs.getState())
+          return state.tabs.every(tab => tab.loadState === 'loaded')
+        }).toBe(true)
+      }
+    })
+  }
+
+  test('releases queued tabs when the video is unavailable', async ({ app, page }) => {
+    await mockUnplayableWatchPage(app, page)
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateBackendPreference', 'local')
+    })
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+    await page.locator(sel.searchInput).press('Enter')
     await expect.poll(async () => {
       const state = await page.evaluate(() => window.ftElectron.tabs.getState())
-      return state.tabs.find(tab => tab.id === ACTIVE_WATCH_TAB_ID)?.isLoading
+      return state.tabs.every(tab => tab.loadState === 'loaded')
     }).toBe(true)
+  })
 
-    await page.evaluate(activeTabId => {
-      window.ftElectron.tabs.setLoading(false, activeTabId)
-    }, ACTIVE_WATCH_TAB_ID)
+  for (const outcome of ['playing', 'paused', 'failed']) {
+    test(`defers all background tabs until active playback is ${outcome}`, async ({ page }) => {
+      const backgroundWatchTab = page.locator(`.tab[data-tab-id="${BACKGROUND_WATCH_TAB_ID}"]`)
+      const subscriptionsTab = page.locator(`.tab[data-tab-id="${SUBSCRIPTIONS_TAB_ID}"]`)
+      await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', ACTIVE_WATCH_TAB_ID)
+      for (const tab of [backgroundWatchTab, subscriptionsTab]) {
+        await expect(tab).toHaveClass(/loading/)
+        await expect(tab).not.toHaveClass(/unloaded/)
+      }
+      await page.evaluate(activeTabId => {
+        window.ftElectron.tabs.setLoading(true, activeTabId)
+        window.ftElectron.tabs.setLoading(false, activeTabId)
+        window.ftElectron.tabs.setPlaybackState('waiting', activeTabId)
+      }, ACTIVE_WATCH_TAB_ID)
+      const state = await page.evaluate(() => window.ftElectron.tabs.getState())
+      expect(state.tabs.filter(tab => tab.id !== ACTIVE_WATCH_TAB_ID).every(tab => tab.loadState === 'unloaded')).toBe(true)
+      await page.evaluate(({ activeTabId, outcome }) => {
+        window.ftElectron.tabs.setPlaybackState(outcome, activeTabId)
+      }, { activeTabId: ACTIVE_WATCH_TAB_ID, outcome })
+      await expect.poll(async () => {
+        const state = await page.evaluate(() => window.ftElectron.tabs.getState())
+        return state.tabs.every(tab => tab.loadState === 'loaded')
+      }).toBe(true)
+    })
+  }
 
-    await expect(backgroundWatchTab).not.toHaveClass(/unloaded/)
-    await expect(page.locator(
-      `.tabContent[data-tab-id="${BACKGROUND_WATCH_TAB_ID}"] [data-tab-loading-indicator]`
-    )).toHaveCount(1)
+  test('selecting a queued page releases the remaining background tabs', async ({ page }) => {
+    await page.locator(`.tab[data-tab-id="${SUBSCRIPTIONS_TAB_ID}"]`).click()
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', SUBSCRIPTIONS_TAB_ID)
     await expect.poll(async () => {
       const state = await page.evaluate(() => window.ftElectron.tabs.getState())
       return state.tabs.find(tab => tab.id === BACKGROUND_WATCH_TAB_ID)?.loadState
-    }).not.toBe('unloaded')
+    }).toBe('loaded')
   })
 
-  test('releases background watch tabs when a loaded tab becomes active', async ({ page }) => {
-    const backgroundWatchTab = page.locator(`.tab[data-tab-id="${BACKGROUND_WATCH_TAB_ID}"]`)
-    const subscriptionsTab = page.locator(`.tab[data-tab-id="${SUBSCRIPTIONS_TAB_ID}"]`)
-
-    await expect(backgroundWatchTab).toHaveClass(/unloaded/)
+  test('releases background tabs when the priority mount fails', async ({ page }) => {
+    await page.evaluate(async activeTabId => {
+      const state = await window.ftElectron.tabs.getState()
+      const tab = state.tabs.find(tab => tab.id === activeTabId)
+      window.ftElectron.tabs.mountFailed(activeTabId, tab.mountRevision)
+    }, ACTIVE_WATCH_TAB_ID)
     await expect.poll(async () => {
       const state = await page.evaluate(() => window.ftElectron.tabs.getState())
-      return state.tabs.find(tab => tab.id === SUBSCRIPTIONS_TAB_ID)?.loadState
+      return state.tabs.find(tab => tab.id === BACKGROUND_WATCH_TAB_ID)?.loadState
     }).toBe('loaded')
-
-    await subscriptionsTab.click()
-
-    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', SUBSCRIPTIONS_TAB_ID)
-    await expect(backgroundWatchTab).not.toHaveClass(/unloaded/)
-  })
-
-  test('releases background watch tabs when the priority mount fails', async ({ page }) => {
-    const backgroundWatchTab = page.locator(`.tab[data-tab-id="${BACKGROUND_WATCH_TAB_ID}"]`)
-
-    await expect(backgroundWatchTab).toHaveClass(/unloaded/)
-    const mountRevision = await page.evaluate(async activeTabId => {
-      const state = await window.ftElectron.tabs.getState()
-      return state.tabs.find(tab => tab.id === activeTabId)?.mountRevision
-    }, ACTIVE_WATCH_TAB_ID)
-
-    await page.evaluate(({ activeTabId, mountRevision }) => {
-      window.ftElectron.tabs.mountFailed(activeTabId, mountRevision)
-    }, { activeTabId: ACTIVE_WATCH_TAB_ID, mountRevision })
-
-    await expect(backgroundWatchTab).not.toHaveClass(/unloaded/)
   })
 })
 
