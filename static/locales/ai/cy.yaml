@@ -1027,6 +1027,7 @@ Settings:
     Desktop Device: 'Bwrdd gwaith'
     Open All Tabs: 'Agor pob tab'
     Open All Tabs Confirmation: "Agor pob tab?"
+    Server Update Required: "Diweddarwch y gweinydd hwn i gefnogi cysoni byw wedi’i amgryptio."
   Proxy Settings:
     IP Block Recovery Script Path: Llwybr sgript adfer ar ôl rhwystr IP
     Select IP Block Recovery Script File: Dewis ffeil sgript adfer ar ôl rhwystr IP

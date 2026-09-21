@@ -514,6 +514,7 @@ Settings:
     Desktop Device: 'Komputer'
     Open All Tabs: 'Otwórz wszystkie karty'
     Open All Tabs Confirmation: "Otworzyć wszystkie karty?"
+    Server Update Required: "Zaktualizuj ten serwer, aby obsługiwał szyfrowaną synchronizację w czasie rzeczywistym."
   SponsorBlock Settings:
     Reveal Generated User ID: Pokaż wygenerowany identyfikator użytkownika
     Custom Color: Własny kolor

@@ -180,7 +180,7 @@ export async function decryptSyncServerDeviceInfo(payload, exportedKey, deviceId
   }
 }
 
-export async function loadSyncServerDeviceNames(client, exportedKey) {
+export async function loadSyncServerDevices(client, exportedKey) {
   const response = await client.getAccountSessions()
   if (!response || !Array.isArray(response.sessions)) {
     throw new Error('The sync server account sessions are invalid')
@@ -198,11 +198,16 @@ export async function loadSyncServerDeviceNames(client, exportedKey) {
         exportedKey,
         session.device_id
       )
-      return [session.device_id, deviceInfo.name]
+      return [session.device_id, { name: deviceInfo.name, platform: deviceInfo.platform }]
     } catch {
       return null
     }
   }))
 
   return Object.fromEntries(entries.filter(Boolean))
+}
+
+export function getSyncServerDeviceIcon(platform) {
+  if (platform === 'web') return ['fas', 'globe']
+  return platform === 'android' ? ['fas', 'smartphone'] : ['fas', 'display']
 }

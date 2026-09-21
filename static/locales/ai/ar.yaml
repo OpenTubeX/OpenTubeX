@@ -1042,6 +1042,7 @@ Settings:
     Desktop Device: 'سطح المكتب'
     Open All Tabs: 'فتح كل علامات التبويب'
     Open All Tabs Confirmation: "هل تريد فتح كل علامات التبويب؟"
+    Server Update Required: "حدّث هذا الخادم لدعم المزامنة المباشرة المشفّرة."
   Proxy Settings:
     IP Block Recovery Script Path: مسار البرنامج النصي لاسترداد كتلة IP
     Select IP Block Recovery Script File: حدد ملف البرنامج النصي لاسترداد حظر IP

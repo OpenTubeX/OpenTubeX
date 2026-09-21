@@ -1023,6 +1023,7 @@ Settings:
     Desktop Device: 'Arvuti'
     Open All Tabs: 'Ava kõik vahelehed'
     Open All Tabs Confirmation: "Kas avada kõik vahelehed?"
+    Server Update Required: "Uuenda seda serverit, et toetada krüptitud reaalajas sünkroonimist."
   Proxy Settings:
     IP Block Recovery Script Path: IP-blokeeringust taastamise skripti asukoht
     Select IP Block Recovery Script File: Vali IP-blokeeringust taastamise skriptifail

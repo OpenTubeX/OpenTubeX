@@ -1,8 +1,13 @@
+import { readFile } from 'node:fs/promises'
+import vm from 'node:vm'
+import { createStore } from 'vuex'
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
   AUTO_SYNC_INTERVAL_MS,
+  dispatchRemoteSyncAction,
+  isRemoteSyncDispatch,
   SYNC_ACTION_REASONS,
   SYNC_MUTATION_REASONS,
   isRecentSync,
@@ -62,4 +67,59 @@ test('treats syncs as recent only inside the automatic sync interval', () => {
   assert.equal(isRecentSync(now + 1, now), false)
   assert.equal(isRecentSync(now - AUTO_SYNC_INTERVAL_MS + 1, now), true)
   assert.equal(isRecentSync(now - AUTO_SYNC_INTERVAL_MS, now), false)
+})
+
+async function loadLocalChangePlugin() {
+  const source = await readFile(new URL('../../src/renderer/store/index.js', import.meta.url), 'utf8')
+  return vm.runInNewContext(
+    source.slice(source.indexOf('function syncOnLocalChanges('), source.indexOf('function reloadRecommendationEvidenceAfterHistoryRemoval(')) + '\nsyncOnLocalChanges',
+    { SYNC_ACTION_REASONS, SYNC_MUTATION_REASONS, isRemoteSyncDispatch,
+      isSettingSyncable: key => key === 'autoplayVideos', isSettingSyncEnabled: () => true }
+  )
+}
+
+test('remote actions do not schedule uploads while concurrent user actions still do', async () => {
+  let releaseRemote
+  const pendingRemote = new Promise(resolve => { releaseRemote = resolve })
+  const scheduled = []
+  const store = createStore({
+    state: { settings: { autoplayVideos: true }, progress: 0 },
+    plugins: [await loadLocalChangePlugin()],
+    mutations: {
+      setAutoplayVideos: (state, value) => { state.settings.autoplayVideos = value },
+      updateRecordWatchProgressInHistoryCache: (state, value) => { state.progress = value },
+    },
+    actions: {
+      async updateAutoplayVideos({ commit }, value) {
+        await pendingRemote
+        commit('setAutoplayVideos', value)
+      },
+      updateWatchProgress: ({ commit }, value) => commit('updateRecordWatchProgressInHistoryCache', value),
+      scheduleSyncServer: (_, reason) => { scheduled.push(reason) },
+    },
+  })
+  const remote = dispatchRemoteSyncAction(store.dispatch, 'updateAutoplayVideos', false)
+  assert.equal(isRemoteSyncDispatch(), false)
+  try {
+    await store.dispatch('updateWatchProgress', 42)
+    assert.deepEqual(scheduled, ['history'])
+  } finally {
+    releaseRemote()
+    await remote
+  }
+  assert.deepEqual(scheduled, ['history'])
+  await store.dispatch('updateAutoplayVideos', true)
+  assert.deepEqual(scheduled, ['history', 'settings'])
+})
+
+test('nested remote dispatches and thrown dispatches restore their origin scope', () => {
+  dispatchRemoteSyncAction(() => {
+    assert.equal(isRemoteSyncDispatch(), true)
+    assert.throws(() => dispatchRemoteSyncAction(() => {
+      assert.equal(isRemoteSyncDispatch(), true)
+      throw new Error('Dispatch failed')
+    }), /Dispatch failed/)
+    assert.equal(isRemoteSyncDispatch(), true)
+  })
+  assert.equal(isRemoteSyncDispatch(), false)
 })

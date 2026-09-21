@@ -1065,6 +1065,7 @@ Settings:
     Desktop Device: 'Computer'
     Open All Tabs: 'Åbn alle faner'
     Open All Tabs Confirmation: "Åbn alle faner?"
+    Server Update Required: "Opdater denne server for at understøtte krypteret synkronisering i realtid."
   Proxy Settings:
     Proxy Username: Proxybrugernavn
     Proxy Password: Proxyadgangskode

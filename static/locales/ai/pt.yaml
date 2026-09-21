@@ -1049,6 +1049,7 @@ Settings:
     Desktop Device: 'Computador'
     Open All Tabs: 'Abrir todos os separadores'
     Open All Tabs Confirmation: "Abrir todos os separadores?"
+    Server Update Required: "Atualize este servidor para suportar sincronização encriptada em tempo real."
   Proxy Settings:
     IP Block Recovery Script Path: Caminho do script de recuperação de bloqueio de IP
     Select IP Block Recovery Script File: Selecionar ficheiro do script de recuperação de bloqueio de IP

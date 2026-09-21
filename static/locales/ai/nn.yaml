@@ -1185,6 +1185,7 @@ Settings:
     Desktop Device: 'Datamaskin'
     Open All Tabs: 'Opne alle faner'
     Open All Tabs Confirmation: "Opne alle faner?"
+    Server Update Required: "Oppdater denne tenaren for å støtte kryptert synkronisering i sanntid."
   Proxy Settings:
     Proxy Warning: OpenTubeX har ingen innebygd mellomtenar, men kan kopla til ein ekstern mellomtenar, til dømes Tor som køyrer på maskina di, eller ein SOCKS5-mellomtenar frå enkelte VPN-tenester. Dersom du slår på dette, må du kontrollera at mellomtenaren eller Tor er rett sett opp. Elles kan ikkje OpenTubeX henta data.
     Proxy Username: Brukarnamn for mellomtenar

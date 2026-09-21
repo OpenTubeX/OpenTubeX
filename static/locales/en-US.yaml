@@ -1659,6 +1659,7 @@ Settings:
     Data Loss Confirmation: Confirm destructive sync?
     Data Loss Warning: 'The server state would delete {deleted} of {previous} previously synced {collection} items. This can indicate a failed server migration or reset. Continue only if this deletion is intentional and you have a backup.'
     Confirm Data Loss: Delete and continue
+    Server Update Required: "Update this server to support encrypted live sync."
   Proxy Settings:
     Proxy Settings: Proxy
     Proxy Warning: OpenTubeX doesn't have a built-in proxy but can connect to an external proxy, such as one running on your machine like Tor or an external proxy such-as a SOCKS5 proxy provided by some VPNs. If enabled, make sure your proxy/Tor is configured properly, or OpenTubeX won't be able to fetch any data.

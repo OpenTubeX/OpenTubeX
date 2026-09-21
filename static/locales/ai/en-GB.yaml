@@ -1004,6 +1004,7 @@ Settings:
     Desktop Device: 'Desktop'
     Open All Tabs: 'Open all tabs'
     Open All Tabs Confirmation: "Open all tabs?"
+    Server Update Required: "Update this server to support encrypted live sync."
   Proxy Settings:
     IP Block Recovery Script Path: IP Block Recovery Script Path
     Select IP Block Recovery Script File: Select IP Block Recovery Script File

@@ -869,7 +869,7 @@ test('restores and clamps the real phone tab organizer viewports', async ({ app,
   await syncedPanel.evaluate(element => { element.scrollTop = element.scrollHeight })
   await page.evaluate(desktopDeviceId => {
     const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
-    store.commit('setSyncServerDeviceNames', { [desktopDeviceId]: 'Desk PC' })
+    store.commit('setSyncServerDevices', { [desktopDeviceId]: { name: 'Desk PC', platform: 'linux' } })
   }, desktopDeviceId)
   await page.getByRole('tab', { name: 'Desk PC · 1 tab', exact: true }).click()
   await expect(page.locator('.capacitorPhoneSyncedTabTarget')).toHaveCount(1)

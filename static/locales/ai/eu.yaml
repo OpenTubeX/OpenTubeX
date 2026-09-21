@@ -1023,6 +1023,7 @@ Settings:
     Desktop Device: 'Mahaigaina'
     Open All Tabs: 'Ireki fitxa guztiak'
     Open All Tabs Confirmation: "Fitxa guztiak ireki?"
+    Server Update Required: "Eguneratu zerbitzari hau zifratutako zuzeneko sinkronizazioa onartzeko."
   Proxy Settings:
     IP Block Recovery Script Path: IP blokeoa berreskuratzeko scriptaren bide-izena
     Select IP Block Recovery Script File: Hautatu IP blokeoa berreskuratzeko script-fitxategia

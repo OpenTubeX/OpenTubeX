@@ -363,7 +363,7 @@ test.describe('OpenTubeX sync server', () => {
         ).syncServerToken
         await page.evaluate(() => {
           const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-          store.commit('setSyncServerDeviceNames', { 'new-account': 'New account' })
+          store.commit('setSyncServerDevices', { 'new-account': { name: 'New account', platform: 'linux' } })
         })
       } finally {
         finishStaleSessionRequest()
@@ -371,8 +371,8 @@ test.describe('OpenTubeX sync server', () => {
       await staleSessionRequestCompleted
       await expect.poll(() => page.evaluate(() => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-        return store.state.syncServer.syncServerDeviceNames
-      })).toEqual({ 'new-account': 'New account' })
+        return store.state.syncServer.syncServerDevices
+      })).toEqual({ 'new-account': { name: 'New account', platform: 'linux' } })
       await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
       await expect(currentCard).toBeVisible()
 

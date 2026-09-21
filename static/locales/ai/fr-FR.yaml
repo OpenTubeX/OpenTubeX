@@ -1023,6 +1023,7 @@ Settings:
     Desktop Device: 'Ordinateur'
     Open All Tabs: 'Ouvrir tous les onglets'
     Open All Tabs Confirmation: "Ouvrir tous les onglets ?"
+    Server Update Required: "Mettez à jour ce serveur pour prendre en charge la synchronisation chiffrée en temps réel."
   Proxy Settings:
     IP Block Recovery Script Path: Chemin du script de récupération après blocage d’IP
     Select IP Block Recovery Script File: Sélectionner le fichier du script de récupération après blocage d’IP

@@ -6,6 +6,8 @@ import { connectionEvents, getConnectionState } from '../../helpers/networkRecov
 import {
   SyncServerClient,
   SyncServerCancelledError,
+  SyncServerUnsupportedError,
+  SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
   SyncServerDataLossError,
   SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
   getSavedOtherDeviceSessions,
@@ -32,12 +34,13 @@ import {
 } from '../../helpers/sync-server-privacy'
 import {
   encryptSyncServerDeviceInfo,
-  loadSyncServerDeviceNames,
+  loadSyncServerDevices,
 } from '../../helpers/sync-server-sessions'
 import { mergePlaylistBookmarkConflict } from '../../helpers/playlist-bookmarks'
 import { getPreviousSyncSessions, getSyncTabRoute, removeSyncSession } from '../../helpers/sync-sessions'
 import {
   AUTO_SYNC_INTERVAL_MS,
+  dispatchRemoteSyncAction,
   isRecentSync,
   isSyncReasonEnabled,
 } from '../../helpers/sync-server-scheduling'
@@ -60,22 +63,22 @@ let liveLockController = null
 let liveGeneration = 0
 let eventsSince = ''
 let pendingLocalSync = false
-let applyingRemoteCollection = false
 let activeSyncPromise = null
+let activeSyncRemoteOnly = false
 const activeSyncClients = new Set()
 let autoSyncTimer = null
 let eventSyncTimer = null
 let lifecycleSyncStarted = false
-let deviceNameRefreshId = 0
+let deviceRefreshId = 0
 
 function isSyncServerOffline() {
   return getConnectionState() === 'offline' ||
     (typeof navigator !== 'undefined' && navigator.onLine === false)
 }
 
-function clearSyncServerDeviceNames(commit) {
-  deviceNameRefreshId++
-  commit('setSyncServerDeviceNames', {})
+function clearSyncServerDevices(commit) {
+  deviceRefreshId++
+  commit('setSyncServerDevices', {})
 }
 
 function trackSyncClient(client) {
@@ -97,12 +100,12 @@ function assertSyncEnabled(rootState, client) {
   }
 }
 
-async function tryLoadSyncServerDeviceNames(client, privacyKey) {
+async function tryLoadSyncServerDevices(client, privacyKey) {
   try {
-    return await loadSyncServerDeviceNames(client, privacyKey)
+    return await loadSyncServerDevices(client, privacyKey)
   } catch (error) {
     if (error instanceof SyncServerCancelledError || isSessionExpiredError(error)) throw error
-    console.warn('Failed to load encrypted sync device names:', error)
+    console.warn('Failed to load encrypted sync devices:', error)
     return null
   }
 }
@@ -117,23 +120,25 @@ const state = {
   syncServerHistorySupported: null,
   syncServerSessionExpired: false,
   syncServerOtherDeviceSessions: [],
-  syncServerDeviceNames: {},
+  syncServerDevices: {},
 }
 
 const getters = {
   getSyncServerLiveSupported: state => state.syncServerLiveSupported,
   getSyncServerActivity: state => state.syncServerActivity,
-  getSyncServerDevices: (state, getters, rootState) => Object.entries(state.syncServerDeviceNames)
+  getSyncServerDevices: (state, getters, rootState) => Object.entries(state.syncServerDevices)
     .filter(([id]) => id !== rootState.settings.syncServerDeviceId)
-    .map(([id, name]) => ({ id, name })),
+    .map(([id, device]) => ({ id, ...device })),
   getSyncServerStatus: state => state.syncServerStatus,
   getSyncServerProgress: state => state.syncServerProgress,
-  getSyncServerError: state => state.syncServerError,
+  getSyncServerError: state => state.syncServerError === SYNC_SERVER_UPDATE_REQUIRED_MESSAGE
+    ? i18n.global.t('Settings.Sync Settings.Server Update Required')
+    : state.syncServerError,
   getSyncServerLastResult: state => state.syncServerLastResult,
   getSyncServerHistorySupported: state => state.syncServerHistorySupported,
   getSyncServerOtherDeviceSessions: state => state.syncServerOtherDeviceSessions.map(session => ({
     ...session,
-    syncDeviceName: state.syncServerDeviceNames[session.syncDeviceId] ?? '',
+    syncDeviceName: state.syncServerDevices[session.syncDeviceId]?.name ?? '',
   })),
 }
 
@@ -164,7 +169,7 @@ function assertEncryptionSupported(supported, required) {
   }
 }
 
-async function runSync(context, { allowDataLoss = false, notifyDataLoss = true } = {}) {
+async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, automatic = false, remoteOnly = false } = {}) {
   const { commit, dispatch, rootGetters, rootState } = context
   const settings = rootState.settings
   const encrypted = requiresEncryptedSync(settings)
@@ -177,7 +182,12 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true }
   const previous = parseSnapshot(settings.syncServerSnapshot)
   const next = { ...previous }
   const result = {}
-  const store = { state: rootState, getters: rootGetters, commit, dispatch }
+  const store = {
+    state: rootState,
+    getters: rootGetters,
+    commit,
+    dispatch: (...args) => dispatchRemoteSyncAction(dispatch, ...args),
+  }
   const stages = [
     ...(encrypted ? ['download'] : []),
     ...(settings.syncServerSyncSubscriptions ? ['subscriptions'] : []),
@@ -197,6 +207,22 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true }
     'finishing',
   ]
   let completedStages = 0
+  let progressStarted = false
+
+  function startProgress(stage) {
+    if (progressStarted) return
+    progressStarted = true
+    commit('setSyncServerStatus', 'syncing')
+    commit('setSyncServerProgress', { stage, percentage: Math.round((completedStages / stages.length) * 100) })
+    commit('setSyncServerError', '')
+  }
+
+  function finishProgress() {
+    if (!progressStarted && context.state.syncServerStatus !== 'error') return
+    commit('setSyncServerError', '')
+    commit('setSyncServerProgress', null)
+    commit('setSyncServerStatus', 'success')
+  }
 
   function assertSyncStillActive() {
     assertSyncEnabled(rootState, networkClient)
@@ -205,23 +231,25 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true }
   async function runStage(stage, callback) {
     assertSyncStillActive()
     const progressStage = stage === 'seenVideos' ? 'history' : stage
-    commit('setSyncServerProgress', {
-      stage: progressStage,
-      percentage: Math.round((completedStages / stages.length) * 100),
-    })
+    if (progressStarted) {
+      commit('setSyncServerProgress', {
+        stage: progressStage,
+        percentage: Math.round((completedStages / stages.length) * 100),
+      })
+    }
     const value = await callback()
     assertSyncStillActive()
     completedStages++
-    commit('setSyncServerProgress', {
-      stage: progressStage,
-      percentage: Math.round((completedStages / stages.length) * 100),
-    })
+    if (progressStarted) {
+      commit('setSyncServerProgress', {
+        stage: progressStage,
+        percentage: Math.round((completedStages / stages.length) * 100),
+      })
+    }
     return value
   }
 
-  commit('setSyncServerStatus', 'syncing')
-  commit('setSyncServerProgress', { stage: stages[0], percentage: 0 })
-  commit('setSyncServerError', '')
+  if (!automatic || !encrypted) startProgress(stages[0])
 
   async function applyCollection(collection, targetClient) {
     switch (collection) {
@@ -309,7 +337,9 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true }
   }
 
   try {
-    const liveSupported = encrypted && (await networkClient.getCapabilities()).live_sync === 1
+    const capabilities = await networkClient.getCapabilities()
+    assertEncryptionSupported(capabilities.encrypted_sync === 1, encrypted)
+    const liveSupported = encrypted && capabilities.live_sync === 1
     commit('setSyncServerLiveSupported', liveSupported)
     if (encrypted) {
       if (settings.syncServerSyncHistory && await networkClient.supportsSeenVideosSync()) {
@@ -328,6 +358,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true }
         original,
         remote,
         uploadCollections,
+        unchanged,
       } = await runStage('download', async () => {
         // The snapshot is saved only after successful collection uploads.
         // Never infer completed migration from unrelated encrypted settings.
@@ -360,6 +391,12 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true }
           ...uploadCollections,
           ...compatibilityCollections,
         ]))
+        // A cursor also changes for our own uploads and device messages. Avoid
+        // merging every collection again when its revision is already cached.
+        if (remoteOnly && context.state.syncServerStatus !== 'error' && !manifest.legacy_data && !legacyEncrypted?.payload &&
+            downloadCollections.every(collection => collectionCache.isSynced(
+              collection, manifest.collections.find(entry => entry.collection === collection)?.revision ?? 0
+            ))) return { unchanged: true }
         const document = createEmptySyncDocument()
         // Legacy speeds are read for migration into settings, never uploaded.
         document.playbackSpeeds = legacy.playbackSpeeds ?? []
@@ -369,6 +406,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true }
           const cached = !manifest.legacy_data && !legacyEncrypted?.payload
             ? collectionCache.get(collection, manifestRevision)
             : null
+          if (!cached) startProgress('download')
           const response = cached ?? await networkClient.getEncryptedSyncCollection(collection)
           const data = cached
             ? cached.data
@@ -389,6 +427,12 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true }
         }
         return { document, original, remote: Object.fromEntries(entries), uploadCollections }
       })
+      if (unchanged) {
+        await dispatch('refreshSyncServerEvents')
+        await dispatch('refreshSyncServerDevices')
+        finishProgress()
+        return null
+      }
       client = new EncryptedSyncAdapter(document)
       encryptedCollections = {
         original,
@@ -405,12 +449,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true }
       'settings',
     ].includes(stage))
     for (const collection of collections) {
-      applyingRemoteCollection = true
-      try {
-        await runStage(collection, () => applyCollection(collection, client))
-      } finally {
-        applyingRemoteCollection = false
-      }
+      await runStage(collection, () => applyCollection(collection, client))
     }
 
     if (encryptedCollections) {
@@ -423,13 +462,12 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true }
               JSON.stringify(data) === JSON.stringify(encryptedCollections.original[collection])) {
             continue
           }
+          startProgress('upload')
           let activityBefore = encryptedCollections.original[collection]
           for (let attempt = 0; attempt < ENCRYPTED_SYNC_RETRIES; attempt++) {
-            const activity = liveSupported
-              ? createSyncActivity(
-                  collection, activityBefore, data, settings.syncServerDeviceId, settings.syncServerDeviceName
-                )
-              : null
+            const activity = createSyncActivity(
+              collection, activityBefore, data, settings.syncServerDeviceId, settings.syncServerDeviceName
+            )
             const activityPayload = activity
               ? await encryptSyncDocument(
                   activity, settings.syncServerPrivacyKey, settings.syncServerPrivacySalt
@@ -460,6 +498,13 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true }
                   local: data,
                   remote: remoteData,
                 })
+                retryDocument.playlistBookmarks = data
+                const retryClient = new EncryptedSyncAdapter(retryDocument)
+                next.playlistBookmarks = await syncPlaylistBookmarks(
+                  retryClient, store, next.playlistBookmarks, { allowDataLoss }
+                )
+                result.playlistBookmarks = next.playlistBookmarks.length
+                data = retryClient.document.playlistBookmarks
                 continue
               }
               retryDocument[collection] = remoteData
@@ -488,16 +533,16 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true }
         dispatch('updateSyncServerLastSyncAt', lastSyncAt, { root: true }),
       ])
     })
+    if (encryptedCollections) collectionCache.markSynced(Object.keys(encryptedCollections.remote))
     if (liveSupported) {
       await dispatch('refreshSyncServerEvents')
-      await dispatch('refreshSyncServerDeviceNames')
+      await dispatch('refreshSyncServerDevices')
     }
     if (settings.syncServerResumeAutoSync) {
       await dispatch('setSyncServerAutoSync', true)
     }
-    commit('setSyncServerLastResult', result)
-    commit('setSyncServerProgress', null)
-    commit('setSyncServerStatus', 'success')
+    if (progressStarted) commit('setSyncServerLastResult', result)
+    finishProgress()
     return result
   } catch (error) {
     if (error instanceof SyncServerCancelledError) {
@@ -534,7 +579,6 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true }
     commit('setSyncServerStatus', 'error')
     throw error
   } finally {
-    applyingRemoteCollection = false
     releaseSyncClient(networkClient)
   }
 }
@@ -565,8 +609,13 @@ const actions = {
         // A change arriving during an upload needs a second pass after it finishes.
         await activeSyncPromise
         if (generation !== liveGeneration) return
-        await dispatch('syncWithSyncServer')
+        await dispatch('syncWithSyncServer', { automatic: true, remoteOnly: true })
       }, async error => {
+        if (error instanceof SyncServerUnsupportedError) {
+          commit('setSyncServerError', error.message)
+          commit('setSyncServerLiveSupported', false)
+          return false
+        }
         if (isSessionExpiredError(error)) {
           await dispatch('expireSyncServerSession')
           return false
@@ -604,7 +653,7 @@ const actions = {
     eventsSince = ''
     commit('setSyncServerActivity', [])
     commit('setSyncServerLiveSupported', false)
-    clearSyncServerDeviceNames(commit)
+    clearSyncServerDevices(commit)
     if (rootState.settings.syncServerToken) await dispatch('initializeSyncServer')
   },
 
@@ -1044,20 +1093,28 @@ const actions = {
       return Promise.reject(new Error('Connect to a sync server first'))
     }
     if (isSyncServerOffline()) return Promise.resolve(null)
+    // A remote-only check may skip all merges, so it cannot consume local work.
+    if (activeSyncPromise && activeSyncRemoteOnly && !options.remoteOnly) {
+      return activeSyncPromise.catch(() => {}).then(() => actions.syncWithSyncServer(context, options))
+    }
     if (!activeSyncPromise) {
+      activeSyncRemoteOnly = options.remoteOnly === true
       let syncStarted = false
-      clearTimeout(eventSyncTimer)
-      eventSyncTimer = null
+      if (!options.remoteOnly) {
+        clearTimeout(eventSyncTimer)
+        eventSyncTimer = null
+      }
       activeSyncPromise = withSyncLock(() => {
         if (!context.rootState.settings.syncServerEnabled || isSyncServerOffline()) return null
         if (options.skipIfRecent &&
             isRecentSync(context.rootState.settings.syncServerLastSyncAt)) {
           return null
         }
-        syncStarted = true
+        syncStarted = !options.remoteOnly
         return runSync(context, options)
       }).finally(() => {
         activeSyncPromise = null
+        activeSyncRemoteOnly = false
         if (pendingLocalSync) {
           pendingLocalSync = false
           context.dispatch('scheduleSyncServer', 'data')
@@ -1123,7 +1180,7 @@ const actions = {
         const liveSupported = privacySupported && (await client.getCapabilities()).live_sync === 1
         assertSyncEnabled(rootState, client)
         commit('setSyncServerLiveSupported', liveSupported)
-        if (liveSupported) await dispatch('refreshSyncServerDeviceNames')
+        if (liveSupported) await dispatch('refreshSyncServerDevices')
       } finally {
         releaseSyncClient(client)
       }
@@ -1145,7 +1202,7 @@ const actions = {
 
     await dispatch('startSyncServerAutoSync')
     if (rootState.settings.syncServerAutoSync) {
-      await dispatch('syncWithSyncServer', { skipIfRecent })
+      await dispatch('syncWithSyncServer', { skipIfRecent, automatic: true })
     }
   },
 
@@ -1161,36 +1218,36 @@ const actions = {
 
     autoSyncTimer = setTimeout(() => {
       autoSyncTimer = null
-      dispatch('syncWithSyncServer', { skipIfRecent: true }).catch(error => {
+      dispatch('syncWithSyncServer', { skipIfRecent: true, automatic: true }).catch(error => {
         console.error('Sync server automatic sync failed', error)
       })
     }, AUTO_SYNC_INTERVAL_MS)
   },
 
-  async refreshSyncServerDeviceNames({ commit, dispatch, rootState }) {
+  async refreshSyncServerDevices({ commit, dispatch, rootState }) {
     if (isSyncServerOffline()) return
     const settings = rootState.settings
     if (!settings.syncServerToken || !settings.syncServerPrivacyKey) {
-      clearSyncServerDeviceNames(commit)
+      clearSyncServerDevices(commit)
       return
     }
-    const refreshId = ++deviceNameRefreshId
+    const refreshId = ++deviceRefreshId
 
     const client = trackSyncClient(new SyncServerClient(
       settings.syncServerUrl,
       settings.syncServerToken
     ))
     try {
-      const deviceNames = await tryLoadSyncServerDeviceNames(
+      const devices = await tryLoadSyncServerDevices(
         client,
         settings.syncServerPrivacyKey
       )
       assertSyncEnabled(rootState, client)
-      if (refreshId === deviceNameRefreshId && deviceNames !== null) {
-        commit('setSyncServerDeviceNames', deviceNames)
+      if (refreshId === deviceRefreshId && devices !== null) {
+        commit('setSyncServerDevices', devices)
       }
     } catch (error) {
-      if (refreshId !== deviceNameRefreshId) return
+      if (refreshId !== deviceRefreshId) return
       if (error instanceof SyncServerCancelledError) return
       if (isSessionExpiredError(error)) {
         await dispatch('expireSyncServerSession')
@@ -1208,7 +1265,7 @@ const actions = {
     eventsSince = ''
     commit('setSyncServerActivity', [])
     commit('setSyncServerLiveSupported', false)
-    clearSyncServerDeviceNames(commit)
+    clearSyncServerDevices(commit)
     await dispatch('updateSyncServerToken', token, { root: true })
   },
 
@@ -1234,8 +1291,8 @@ const actions = {
         !isSyncReasonEnabled(rootState.settings, reason)) {
       return
     }
-    if (rootState.syncServer.syncServerStatus === 'syncing') {
-      if (!applyingRemoteCollection && reason !== 'automatic') pendingLocalSync = true
+    if (activeSyncPromise || rootState.syncServer.syncServerStatus === 'syncing') {
+      if (activeSyncPromise && reason !== 'automatic') pendingLocalSync = true
       return
     }
     clearTimeout(eventSyncTimer)
@@ -1243,6 +1300,7 @@ const actions = {
       eventSyncTimer = null
       dispatch('syncWithSyncServer', {
         skipIfRecent: reason === 'automatic',
+        automatic: true,
       }).catch(error => {
         console.error('Sync server event sync failed', error)
       })
@@ -1264,7 +1322,7 @@ const actions = {
       commit('setSyncServerError', '')
       commit('setSyncServerStatus', 'idle')
       commit('setSyncServerOtherDeviceSessions', [])
-      clearSyncServerDeviceNames(commit)
+      clearSyncServerDevices(commit)
       return
     }
     if (rootState.settings.syncServerToken) {
@@ -1312,8 +1370,8 @@ const mutations = {
   setSyncServerOtherDeviceSessions(state, sessions) {
     state.syncServerOtherDeviceSessions = sessions
   },
-  setSyncServerDeviceNames(state, deviceNames) {
-    state.syncServerDeviceNames = deviceNames
+  setSyncServerDevices(state, devices) {
+    state.syncServerDevices = devices
   },
 }
 

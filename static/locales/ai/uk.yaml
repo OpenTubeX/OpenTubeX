@@ -1042,6 +1042,7 @@ Settings:
     Desktop Device: 'Комп’ютер'
     Open All Tabs: 'Відкрити всі вкладки'
     Open All Tabs Confirmation: "Відкрити всі вкладки?"
+    Server Update Required: "Оновіть цей сервер для підтримки зашифрованої синхронізації в реальному часі."
   Proxy Settings:
     IP Block Recovery Script Path: Шлях до сценарію відновлення після блокування IP-адреси
     Select IP Block Recovery Script File: Вибрати файл сценарію відновлення після блокування IP-адреси

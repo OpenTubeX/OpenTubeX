@@ -10,6 +10,8 @@ import {
   SyncServerDataLossError,
   SyncServerCancelledError,
   SyncServerError,
+  SyncServerUnsupportedError,
+  SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
   SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
   isExpiredSessionReauthentication,
   isSessionExpiredError,
@@ -65,6 +67,8 @@ export {
   SyncServerDataLossError,
   SyncServerCancelledError,
   SyncServerError,
+  SyncServerUnsupportedError,
+  SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
   SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
   isExpiredSessionReauthentication,
   isSessionExpiredError,
@@ -175,7 +179,11 @@ export class SyncServerClient {
 
   async getCapabilities() {
     const { capabilities } = await this.getServerInfo()
-    return capabilities && typeof capabilities === 'object' ? capabilities : {}
+    const supported = capabilities && typeof capabilities === 'object' ? capabilities : {}
+    if (supported.encrypted_sync === 1 && supported.live_sync !== 1) {
+      throw new SyncServerUnsupportedError()
+    }
+    return supported
   }
 
   async getPrivacyPolicyUrl() {
@@ -1277,7 +1285,9 @@ export async function syncSessions(client, store, previous = null) {
 export async function syncSettings(client, store, previous = {}) {
   const remoteEntries = await client.getSettings()
   const remote = Object.fromEntries(remoteEntries.map(entry => [entry.key, entry]))
-  const merged = {}
+  // Keep the server's entry order even when devices sync different keys.
+  // Reordering unchanged settings would create revisions that wake each other.
+  const merged = { ...remote }
   const now = Date.now()
   const localUpdatedAt = store.state.settings.syncServerSettingUpdatedAt !== null &&
     typeof store.state.settings.syncServerSettingUpdatedAt === 'object' &&
@@ -1334,10 +1344,6 @@ export async function syncSettings(client, store, previous = {}) {
         await store.dispatch(settingUpdater(key), deepCopy(entry.value))
       }
     }
-  }
-
-  for (const [key, entry] of Object.entries(remote)) {
-    if (!Object.prototype.hasOwnProperty.call(local, key)) merged[key] = entry
   }
 
   await client.putSettings(Object.values(merged))

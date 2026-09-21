@@ -1,6 +1,6 @@
-import { readFile } from 'node:fs/promises'
+import { readFile, rm } from 'node:fs/promises'
 import path from 'node:path'
-import { test, expect, goTo, goToSettingsSection, latestSettings, openNewWindowFromTabBar, waitForAppReady } from '../../helpers/app.mjs'
+import { test, expect, createUserDataDir, launchApp, abortUnmockedRequest, goTo, goToSettingsSection, latestSettings, openNewWindowFromTabBar, waitForAppReady } from '../../helpers/app.mjs'
 import { encryptSyncDocument, decryptSyncDocument } from '../../../src/renderer/helpers/sync-server-privacy.js'
 import { encryptSyncServerDeviceInfo } from '../../../src/renderer/helpers/sync-server-sessions.js'
 
@@ -16,6 +16,7 @@ for (const uiScale of [95, 125]) {
       seed: {
         settings: {
           uiScale,
+          iconPack: uiScale === 95 ? 'material' : 'remix',
           syncServerEnabled: false,
           syncServerAutoSync: false,
           syncServerUrl: 'https://sync.example',
@@ -73,7 +74,7 @@ for (const uiScale of [95, 125]) {
         created_at: Date.now(),
         last_active_at: Date.now(),
         expires_at: Date.now() + 86400000,
-        encrypted_device_info: await encryptSyncServerDeviceInfo({ name, platform: 'linux', architecture: '', release: '' }, key, id),
+        encrypted_device_info: await encryptSyncServerDeviceInfo({ name, platform: id === phone ? 'android' : 'linux', architecture: '', release: '' }, key, id),
       })))
       const routeSync = async route => {
         const request = route.request()
@@ -156,6 +157,7 @@ for (const uiScale of [95, 125]) {
       const menu = page.getByRole('menu', { name: 'Context menu', exact: true })
       await menu.getByRole('menuitem', { name: 'Open on another device', exact: true }).click()
       await expect(menu.getByRole('menuitem', { name: 'Phone', exact: true })).toBeVisible()
+      await expect(menu.getByRole('menuitem', { name: 'Phone', exact: true }).locator('[data-icon="smartphone"]')).toBeVisible()
       await attachScreenshot('send video to another device')
       await menu.getByRole('menuitem', { name: 'Phone', exact: true }).click()
       await expect.poll(() => sent.length).toBe(1)
@@ -188,3 +190,97 @@ for (const uiScale of [95, 125]) {
     })
   })
 }
+
+test('two independent devices settle after live sync and propagate a real edit once', async () => {
+  const clients = []
+  const collections = new Map()
+  const waiting = new Map()
+  const writes = []
+  let cursor = 1
+  const wake = () => {
+    cursor++
+    for (const route of waiting.values()) route.fulfill({ json: { cursor: String(cursor) } }).catch(() => {})
+    waiting.clear()
+  }
+  try {
+    for (const [name, id, excluded] of [['Desktop', device, []], ['Phone', phone, ['autoplayVideos']]]) {
+      const userDataDir = await createUserDataDir({
+        settings: {
+          syncServerEnabled: false,
+          syncServerAutoSync: true,
+          syncServerUrl: 'https://two-devices.example',
+          syncServerToken: name,
+          syncServerUsername: 'test',
+          syncServerPrivacyMode: 'enhanced',
+          syncServerPrivacyKey: key,
+          syncServerPrivacySalt: salt,
+          syncServerDeviceId: id,
+          syncServerDeviceName: name,
+          syncServerSettingsExcluded: excluded,
+          syncServerSyncSettings: true,
+          baseTheme: 'dark',
+        }
+      })
+      const client = { userDataDir }
+      clients.push(client)
+      Object.assign(client, await launchApp(userDataDir))
+      const { page } = client
+      await page.context().route('**/*', abortUnmockedRequest)
+      await page.context().route('https://two-devices.example/**', async route => {
+        const request = route.request()
+        const url = new URL(request.url())
+        const path = url.pathname
+        if (path === '/health') return route.fulfill({ json: { capabilities: { encrypted_sync: 1, live_sync: 1 } } })
+        if (path === '/v1/account/sessions') return route.fulfill({ json: { sessions: [] } })
+        if (path === '/v1/encrypted_sync/events') return route.fulfill({ json: [] })
+        if (path === '/v1/encrypted_sync/changes') {
+          if (url.searchParams.get('since') !== String(cursor)) return route.fulfill({ json: { cursor: String(cursor) } })
+          waiting.set(name, route)
+          return
+        }
+        if (path === '/v1/encrypted_sync') {
+          return route.fulfill({
+            json: {
+              collections: [...collections].map(([collection, value]) => ({ collection, revision: value.revision })),
+              legacy_data: false,
+            }
+          })
+        }
+        if (!path.startsWith('/v1/encrypted_sync/')) return route.fulfill({ status: 404 })
+        const collection = path.split('/').at(-1)
+        if (request.method() === 'PUT') {
+          const { revision, payload } = request.postDataJSON()
+          if (revision !== (collections.get(collection)?.revision ?? 0)) return route.fulfill({ status: 409 })
+          writes.push({ name, collection })
+          collections.set(collection, { revision: revision + 1, payload })
+          wake()
+        }
+        return route.fulfill({ json: collections.get(collection) ?? { revision: 0, payload: null } })
+      })
+      const tutorial = page.locator('.tutorialOverlay')
+      await expect(tutorial).toBeVisible()
+      await tutorial.locator('.tutorialActions').getByRole('button').last().click()
+      const sync = await goToSettingsSection(page, 'sync')
+      await sync.getByRole('checkbox', { name: 'Enable Sync', exact: true }).press('Space')
+      await expect.poll(() => waiting.has(name)).toBe(true)
+    }
+    await expect.poll(() => waiting.size).toBe(2)
+    const initialWrites = writes.length
+    for (let notification = 0; notification < 3; notification++) {
+      wake()
+      await expect.poll(() => waiting.size).toBe(2)
+    }
+    expect(writes).toHaveLength(initialWrites)
+    await clients[0].page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBaseTheme', 'light'))
+    await expect.poll(() => clients[1].page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getBaseTheme)).toBe('light')
+    await expect.poll(() => waiting.size).toBe(2)
+    // Allow the local-change debounce on both devices to finish as well.
+    await clients[0].page.waitForTimeout(2000)
+    expect(writes.slice(initialWrites)).toEqual([{ name: 'Desktop', collection: 'settings' }])
+  } finally {
+    for (const client of clients) {
+      await client.electronApp?.close()
+      await rm(client.userDataDir, { recursive: true, force: true })
+    }
+  }
+})

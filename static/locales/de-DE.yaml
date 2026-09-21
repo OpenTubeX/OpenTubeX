@@ -1620,6 +1620,7 @@ Settings:
       löschen. Dies kann auf eine fehlgeschlagene Servermigration oder Zurücksetzung hindeuten. Fahre nur fort, wenn diese
       Löschung beabsichtigt ist und du eine Sicherung hast.
     Confirm Data Loss: Löschen und fortfahren
+    Server Update Required: "Aktualisiere diesen Server, um verschlüsselte Live-Synchronisierung zu unterstützen."
   Search Settings: Einstellungen durchsuchen
   No Settings Found: Keine Einstellungen gefunden
 About:

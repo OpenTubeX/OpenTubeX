@@ -1,3 +1,4 @@
+import * as bookmarks from '../../src/renderer/helpers/playlist-bookmarks.js'
 import * as syncLive from '../../src/renderer/helpers/sync-server-live.js'
 import * as subscriptionSettingsSync from '../../src/renderer/helpers/subscription-settings-sync.js'
 import assert from 'node:assert/strict'
@@ -11,7 +12,7 @@ import { mergeSettingEntry, resolveMergedThemeEntry } from '../../src/renderer/h
 
 import * as errors from '../../src/renderer/helpers/sync-server-errors.js'
 import * as privacy from '../../src/renderer/helpers/sync-server-privacy.js'
-import { isRecentSync, isSyncReasonEnabled } from '../../src/renderer/helpers/sync-server-scheduling.js'
+import { dispatchRemoteSyncAction, isRecentSync, isSyncReasonEnabled } from '../../src/renderer/helpers/sync-server-scheduling.js'
 import { createSyncServerRequestHeaders } from '../../src/renderer/helpers/sync-server-request.js'
 import { mergeSubscriptionSeenVideos } from '../../src/subscriptionSeenVideos.js'
 import { syncSubscriptionSeenVideos } from '../../src/renderer/helpers/subscription-seen-videos.js'
@@ -27,7 +28,7 @@ function withoutImports (source) {
 const helperSource = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
 
-function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false } = {}) {
+function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'] } = {}) {
   const connectionEvents = new EventTarget()
   const network = { state: connectionState, online }
   const requests = []
@@ -50,6 +51,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
   }
   const common = {
     ...syncLive,
+    ...bookmarks,
     ...subscriptionSettingsSync,
     ...errors,
     showToast: options => notifications.push(options),
@@ -59,6 +61,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     i18n: { global: { t: key => key } },
     ...privacy,
     syncSubscriptionSeenVideos,
+    dispatchRemoteSyncAction,
     isRecentSync,
     isSyncReasonEnabled,
     getConnectionState: () => network.state,
@@ -85,7 +88,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     normalizeCustomThemes,
     mergeSettingEntry,
     resolveMergedThemeEntry,
-    getSyncableSettingKeys: () => ['channelPlaybackSpeeds'],
+    getSyncableSettingKeys: () => syncableSettingKeys,
     isSettingSyncEnabled: (settings, key) => !settings.syncServerSettingsExcluded?.includes(key),
     fetch: async (url, options) => {
       requests.push({ url, method: options.method ?? 'GET', body: options.body })
@@ -95,8 +98,9 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
         if (response !== undefined) return new Response(JSON.stringify(response))
       }
       let result = null
-      if (url.endsWith('/health')) result = encrypted ? { capabilities: { encrypted_sync: 1 } } : 'OK'
+      if (url.endsWith('/health')) result = encrypted ? { capabilities: { encrypted_sync: 1, live_sync: 1 } } : 'OK'
       else if (url.endsWith('/account/login') || url.endsWith('/account/register')) result = { jwt: 'new-token' }
+      else if (new URL(url).pathname === '/v1/encrypted_sync/events') result = []
       else if (url.endsWith('/encrypted_sync')) result = { collections: [], legacy_data: false }
       else if (url.includes('/encrypted_sync/')) result = { revision: 0, payload: null }
       else if (url.endsWith('/subscriptions/') && !options.method) result = []
@@ -104,13 +108,14 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     },
   }
   const helper = vm.createContext({ ...common })
-  vm.runInContext(withoutImports(helperSource) + '\nglobalThis.exports = { SyncServerClient, syncSubscriptions, syncSettings, syncHistory, normalizeSyncServerUrl };', helper)
+  vm.runInContext(withoutImports(helperSource) + '\nglobalThis.exports = { SyncServerClient, syncSubscriptions, syncSettings, syncHistory, syncPlaylists, syncPlaylistBookmarks, normalizeSyncServerUrl };', helper)
   const store = vm.createContext({ ...common, ...helper.exports, getSavedOtherDeviceSessions: () => [] })
   vm.runInContext(withoutImports(storeSource).replace('export default { state, getters, actions, mutations }', 'globalThis.exports = { state, actions, mutations }'), store)
   const context = {
     rootState: {
       settings,
       history: { historyCacheSorted: [] },
+      playlists: { playlists: [] },
       utils: { customThemes: [] },
       profiles: { profileList: [{ _id: 'main', subscriptions: [{ id: 'private-channel', name: 'Private subscription' }] }] },
     },
@@ -123,6 +128,10 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     },
     dispatch: async (action, value) => {
       dispatched.push([action, value])
+      if (action === 'replacePlaylistBookmarks') {
+        settings.playlistBookmarks = value
+        return true
+      }
       if (action === 'updateChannelSettings') {
         const channel = context.rootState.profiles.profileList[0].subscriptions.find(channel => channel.id === value.channelId)
         Object.assign(channel, value.settings, { subscriptionSettingsUpdatedAt: value.updatedAt })
@@ -138,6 +147,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
         settings[key[0].toLowerCase() + key.slice(1)] = value
       }
       if (action === 'updateChannelPlaybackSpeeds') settings.channelPlaybackSpeeds = value
+      if (action === 'updateAutoplayVideos') settings.autoplayVideos = value
       if (action === 'replaceSyncServerToken') settings.syncServerToken = value
       if (action === 'initializeSyncServer') return store.exports.actions.initializeSyncServer(context, value)
       if (action === 'syncWithSyncServer') return store.exports.actions.syncWithSyncServer(context, value)
@@ -185,7 +195,7 @@ for (const historyEnabled of [false, true]) {
       }, {
         encrypted: true,
         respond: url => url.endsWith('/health')
-          ? { capabilities: { encrypted_sync: 1, seen_videos: supported ? 1 : 0 } }
+          ? { capabilities: { encrypted_sync: 1, live_sync: 1, seen_videos: supported ? 1 : 0 } }
           : undefined,
       })
       await f.actions.syncWithSyncServer(f.context)
@@ -213,7 +223,7 @@ test('seen-video upload conflicts retain marks added by both devices', async () 
   }, {
     encrypted: true,
     respond(url, options) {
-      if (url.endsWith('/health')) return { capabilities: { encrypted_sync: 1, seen_videos: 1 } }
+      if (url.endsWith('/health')) return { capabilities: { encrypted_sync: 1, live_sync: 1, seen_videos: 1 } }
       if (!url.endsWith('/encrypted_sync/seenVideos')) return
       if (options.method === 'PUT' && ++uploads === 1) return new Response('{}', { status: 409 })
       if (!options.method && uploads > 0) return { revision: 1, payload: remote }
@@ -263,36 +273,26 @@ test('encrypted accounts still sync when the server supports encryption', async 
   assert.equal(document[0].name, 'Private subscription')
 })
 
-test('new clients keep the old encrypted protocol when live sync is unavailable', async () => {
-  const collections = new Map()
+test('encrypted servers without live sync stop before authentication or data transfer', async () => {
   const f = fixture({}, {
     encrypted: true,
-    respond: (url, options) => {
-      const path = new URL(url).pathname
-      assert.ok(!path.includes('/events') && !path.includes('/changes'))
-      if (path === '/v1/encrypted_sync') return {
-        collections: [...collections].map(([collection, entry]) => ({ collection, revision: entry.revision })),
-        legacy_data: false,
-      }
-      if (path.startsWith('/v1/encrypted_sync/')) {
-        const collection = path.split('/').at(-1)
-        if (options.method === 'PUT') {
-          const body = JSON.parse(options.body)
-          assert.deepEqual(Object.keys(body).sort(), ['payload', 'revision'])
-          assert.equal(body.revision, collections.get(collection)?.revision ?? 0)
-          collections.set(collection, { revision: body.revision + 1, payload: body.payload })
-        }
-        return collections.get(collection) ?? { revision: 0, payload: null }
-      }
-    },
+    respond: url => url.endsWith('/health') ? { capabilities: { encrypted_sync: 1 } } : undefined,
   })
   await f.actions.initializeSyncServer(f.context)
-  f.context.rootState.profiles.profileList[0].subscriptions.push({ id: 'another-channel', name: 'Another channel' })
-  await f.actions.syncWithSyncServer(f.context)
-  assert.equal(f.context.state.syncServerLiveSupported, false)
-  assert.equal(collections.get('subscriptions').revision, 2)
-  const document = await privacy.decryptSyncDocument(collections.get('subscriptions').payload, f.settings.syncServerPrivacyKey)
-  assert.ok(document.some(channel => channel.id === 'another-channel'))
+  assert.equal(f.context.state.syncServerError, errors.SYNC_SERVER_UPDATE_REQUIRED_MESSAGE)
+  await assert.rejects(f.actions.syncWithSyncServer(f.context), errors.SyncServerUnsupportedError)
+  await assert.rejects(f.actions.authenticateSyncServer(f.context, credentials), errors.SyncServerUnsupportedError)
+  assert.ok(f.requests.every(request => request.url.endsWith('/health')))
+  assert.equal(f.settings.syncServerPrivacyMode, 'enhanced')
+  assert.ok(f.settings.syncServerPrivacyKey)
+})
+
+test('saved legacy accounts cannot bypass the encrypted live requirement with manual sync', async () => {
+  const f = fixture({ syncServerPrivacyMode: 'legacy', syncServerPrivacyKey: '' }, {
+    respond: url => url.endsWith('/health') ? { capabilities: { encrypted_sync: 1 } } : undefined,
+  })
+  await assert.rejects(f.actions.syncWithSyncServer(f.context), errors.SyncServerUnsupportedError)
+  assert.ok(f.requests.every(request => request.url.endsWith('/health')))
 })
 
 test('manual sync uses encryption when a saved key survives an earlier downgrade', async () => {
@@ -732,3 +732,306 @@ test('cross-window token refresh logs a rejected initialization', async () => {
   assert.equal(logged.length, 1)
   assert.equal(logged[0][1], failure)
 })
+
+function liveFixture(settings = {}) {
+  const collections = new Map()
+  let polls = 0
+  const f = fixture(settings, {
+    encrypted: true,
+    syncableSettingKeys: ['autoplayVideos'],
+    respond: (url, options) => {
+      const path = new URL(url).pathname
+      if (path === '/health') return { capabilities: { encrypted_sync: 1, live_sync: 1 } }
+      if (path === '/v1/encrypted_sync/changes') {
+        const cursor = String(collections.get('subscriptions')?.revision ?? 0)
+        if (++polls === 3) queueMicrotask(() => f.actions.stopSyncServerLive())
+        return { cursor }
+      }
+      if (path === '/v1/encrypted_sync') return {
+        collections: [...collections].map(([collection, entry]) => ({ collection, revision: entry.revision })),
+        legacy_data: false,
+      }
+      if (path.startsWith('/v1/encrypted_sync/')) {
+        const collection = path.split('/').at(-1)
+        if (options.method === 'PUT') {
+          const body = JSON.parse(options.body)
+          collections.set(collection, { revision: body.revision + 1, payload: body.payload })
+        }
+        return collections.get(collection) ?? { revision: 0, payload: null }
+      }
+    },
+  })
+  return { ...f, collections }
+}
+
+test('startup and its own live notifications produce only one visible sync', async () => {
+  const f = liveFixture()
+  await Promise.all([
+    f.actions.syncWithSyncServer(f.context),
+    f.actions.startSyncServerLive(f.context),
+  ])
+  assert.equal(f.commits.filter(([action, value]) => action === 'setSyncServerStatus' && value === 'syncing').length, 1)
+  assert.equal(f.requests.filter(request => request.method === 'PUT').length, 1)
+  assert.equal(f.dispatched.filter(([action]) => action === 'updateSyncServerSnapshot').length, 1)
+})
+
+test('an automatic check with no net local change neither uploads nor displays a sync cycle', async () => {
+  const f = liveFixture({ syncServerSyncSettings: true, autoplayVideos: true })
+  await f.actions.syncWithSyncServer(f.context)
+  f.commits.length = 0
+  f.requests.length = 0
+  // A setting toggled twice during debounce retains its value, despite a new edit timestamp.
+  f.settings.autoplayVideos = false
+  f.settings.autoplayVideos = true
+  f.settings.syncServerSettingUpdatedAt = { autoplayVideos: Date.now() + 1000 }
+  await f.actions.syncWithSyncServer(f.context, { automatic: true })
+  assert.equal(f.requests.filter(request => request.method === 'PUT').length, 0)
+  assert.equal(f.commits.filter(([action, value]) => action === 'setSyncServerStatus' && value === 'syncing').length, 0)
+})
+
+
+test('automatic sync still uploads a real setting change and reports progress', async () => {
+  const f = liveFixture({ syncServerSyncSettings: true, autoplayVideos: true })
+  await f.actions.syncWithSyncServer(f.context)
+  f.commits.length = 0
+  f.requests.length = 0
+  f.settings.autoplayVideos = false
+  await f.actions.syncWithSyncServer(f.context, { automatic: true })
+  assert.deepEqual(f.requests.filter(request => request.method === 'PUT').map(request => new URL(request.url).pathname), ['/v1/encrypted_sync/settings'])
+  assert.equal(f.commits.filter(([action, value]) => action === 'setSyncServerStatus' && value === 'syncing').length, 1)
+})
+
+test('remote-only checks process changed revisions and keep message delivery on unchanged revisions', async () => {
+  const f = liveFixture()
+  await f.actions.syncWithSyncServer(f.context)
+  const remote = [{ id: 'private-channel', name: 'Private subscription' }, { id: 'remote-channel', name: 'Remote channel' }]
+  f.collections.set('subscriptions', { revision: 2, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) })
+  f.requests.length = 0
+  f.dispatched.length = 0
+  await f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true })
+  assert.ok(f.requests.some(request => request.method === 'GET' && request.url.endsWith('/encrypted_sync/subscriptions')))
+  assert.ok(f.dispatched.some(([action]) => action === 'updateSyncServerSnapshot'))
+  f.dispatched.length = 0
+  f.requests.length = 0
+  await f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true })
+  assert.equal(f.requests.some(request => request.url.endsWith('/encrypted_sync/subscriptions')), false)
+  assert.equal(f.dispatched.some(([action]) => action === 'updateSyncServerSnapshot'), false)
+  assert.ok(f.dispatched.some(([action]) => action === 'refreshSyncServerEvents'))
+})
+
+test('live retries a downloaded revision when applying its snapshot failed', async () => {
+  const f = liveFixture()
+  const dispatch = f.context.dispatch
+  let attempts = 0
+  f.context.dispatch = (action, value) => {
+    if (action === 'updateSyncServerSnapshot' && ++attempts === 1) throw new Error('Snapshot write failed')
+    return dispatch(action, value)
+  }
+  await assert.rejects(f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true }), /Snapshot write failed/)
+  await f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true })
+  assert.equal(attempts, 2)
+})
+
+test('a local sync requested during a remote-only check still uploads local changes', async () => {
+  const f = liveFixture({ syncServerSyncSettings: true, autoplayVideos: true })
+  await f.actions.syncWithSyncServer(f.context)
+  f.settings.autoplayVideos = false
+  f.requests.length = 0
+  await Promise.all([
+    f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true }),
+    f.actions.syncWithSyncServer(f.context, { automatic: true }),
+  ])
+  assert.equal(f.requests.filter(request => request.method === 'PUT').length, 1)
+})
+
+test('successful silent remote checks clear a transient error without showing sync progress', async () => {
+  const f = liveFixture()
+  await f.actions.syncWithSyncServer(f.context)
+  const manifest = f.Client.prototype.getEncryptedSyncManifest
+  f.Client.prototype.getEncryptedSyncManifest = () => { throw new Error('Temporary network failure') }
+  await assert.rejects(f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true }), /Temporary network failure/)
+  f.Client.prototype.getEncryptedSyncManifest = manifest
+  f.commits.length = 0
+  await f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true })
+  assert.equal(f.context.state.syncServerStatus, 'success')
+  assert.equal(f.context.state.syncServerError, '')
+  assert.equal(f.commits.some(([action, value]) => action === 'setSyncServerStatus' && value === 'syncing'), false)
+})
+
+test('a failed remote-only check does not consume a queued local setting upload', async () => {
+  const f = liveFixture({ syncServerSyncSettings: true, autoplayVideos: true })
+  await f.actions.syncWithSyncServer(f.context)
+  f.settings.autoplayVideos = false
+  f.requests.length = 0
+  const manifest = f.Client.prototype.getEncryptedSyncManifest
+  f.Client.prototype.getEncryptedSyncManifest = () => {
+    f.Client.prototype.getEncryptedSyncManifest = manifest
+    throw new Error('Temporary network failure')
+  }
+  const results = await Promise.allSettled([
+    f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true }),
+    f.actions.syncWithSyncServer(f.context, { automatic: true }),
+  ])
+  assert.equal(results[0].status, 'rejected')
+  assert.equal(results[1].status, 'fulfilled')
+  assert.equal(f.requests.filter(request => request.method === 'PUT').length, 1)
+})
+
+test('bookmark upload conflicts persist the merged baseline and local bookmarks', async () => {
+  const local = bookmarks.createPlaylistBookmark({ id: 'local', title: 'Local', uploaderId: 'channel', uploaderName: 'Channel', savedAt: 123 })
+  const remote = bookmarks.createPlaylistBookmark({ id: 'remote', title: 'Remote', uploaderId: 'channel', uploaderName: 'Channel', savedAt: 456 })
+  let uploads = 0
+  let uploaded
+  const f = fixture({ syncServerSyncSubscriptions: false, syncServerSyncPlaylists: true, playlistBookmarks: [local] }, {
+    encrypted: true,
+    respond: async (url, options) => {
+      if (!url.endsWith('/encrypted_sync/playlistBookmarks')) return undefined
+      if (options.method === 'PUT') {
+        if (++uploads === 1) return new Response('{}', { status: 409 })
+        uploaded = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
+        return { revision: 2 }
+      }
+      if (!uploads) return { revision: 0, payload: null }
+      return { revision: 1, payload: await privacy.encryptSyncDocument([bookmarks.playlistBookmarkForSync(remote)], f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) }
+    },
+  })
+  await f.actions.syncWithSyncServer(f.context)
+  assert.equal(uploads, 2)
+  assert.deepEqual(uploaded.map(item => item.playlist.id).sort(), ['local', 'remote'])
+  assert.deepEqual(JSON.parse(f.settings.syncServerSnapshot).playlistBookmarks.sort(), ['local', 'remote'])
+  assert.deepEqual(Array.from(f.settings.playlistBookmarks, item => item.playlist.id).sort(), ['local', 'remote'])
+})
+
+test('live checks retry failed local uploads before clearing the sync error', async () => {
+  const f = liveFixture({ syncServerSyncSettings: true, autoplayVideos: true })
+  await f.actions.syncWithSyncServer(f.context)
+  f.settings.autoplayVideos = false
+  const put = f.Client.prototype.putEncryptedSyncCollection
+  f.Client.prototype.putEncryptedSyncCollection = async () => { throw new Error('Upload unavailable') }
+  await assert.rejects(f.actions.syncWithSyncServer(f.context), /Upload unavailable/)
+  await assert.rejects(f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true }), /Upload unavailable/)
+  assert.equal(f.context.state.syncServerStatus, 'error')
+  f.Client.prototype.putEncryptedSyncCollection = put
+  f.requests.length = 0
+  await f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true })
+  assert.ok(f.requests.some(request => request.method === 'PUT' && request.url.endsWith('/encrypted_sync/settings')))
+  assert.equal(f.context.state.syncServerStatus, 'success')
+  assert.equal(f.context.state.syncServerError, '')
+  assert.equal(JSON.parse(f.settings.syncServerSnapshot).settings.autoplayVideos.value, false)
+})
+
+for (const [scenario, desktopKeys, phoneKeys] of [
+  ['different setting orders', ['autoplayVideos', 'baseTheme'], ['baseTheme', 'autoplayVideos']],
+  ['different enabled settings', ['baseTheme', 'autoplayVideos'], ['autoplayVideos']],
+]) {
+  test(`two devices with ${scenario} settle after live notifications`, async () => {
+    const collections = new Map()
+    const writes = []
+    const documents = []
+    const respond = async (url, options) => {
+      const path = new URL(url).pathname
+      if (path === '/health') return { capabilities: { encrypted_sync: 1, live_sync: 1 } }
+      if (path === '/v1/encrypted_sync') return {
+        collections: [...collections].map(([collection, entry]) => ({ collection, revision: entry.revision })),
+        legacy_data: false,
+      }
+      if (path === '/v1/encrypted_sync/events') return []
+      if (path.startsWith('/v1/encrypted_sync/')) {
+        const collection = path.split('/').at(-1)
+        if (options.method === 'PUT') {
+          const body = JSON.parse(options.body)
+          writes.push(collection)
+          documents.push(await privacy.decryptSyncDocument(body.payload, Buffer.alloc(32, 1).toString('base64')))
+          collections.set(collection, { revision: body.revision + 1, payload: body.payload })
+        }
+        return collections.get(collection) ?? { revision: 0, payload: null }
+      }
+    }
+    const settings = { syncServerSyncSubscriptions: false, syncServerSyncSettings: true, autoplayVideos: true, baseTheme: 'dark' }
+    const a = fixture({ ...settings, syncServerDeviceId: 'desktop' }, { encrypted: true, respond, syncableSettingKeys: desktopKeys })
+    const b = fixture({ ...settings, syncServerDeviceId: 'phone' }, { encrypted: true, respond, syncableSettingKeys: phoneKeys })
+    await a.actions.syncWithSyncServer(a.context)
+    await b.actions.syncWithSyncServer(b.context)
+    // A peer can serialize the same entries in another order. Do not echo it.
+    const saved = collections.get('settings')
+    const reordered = (await privacy.decryptSyncDocument(saved.payload, a.settings.syncServerPrivacyKey)).reverse()
+    collections.set('settings', {
+      revision: saved.revision + 1,
+      payload: await privacy.encryptSyncDocument(reordered, a.settings.syncServerPrivacyKey, a.settings.syncServerPrivacySalt),
+    })
+    writes.length = 0
+    for (let notification = 0; notification < 4; notification++) {
+      await a.actions.syncWithSyncServer(a.context, { automatic: true, remoteOnly: true })
+      await b.actions.syncWithSyncServer(b.context, { automatic: true, remoteOnly: true })
+    }
+    const sorted = document => [...document].sort((a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0)
+    for (const document of documents) assert.deepEqual(sorted(document), sorted(documents[0]))
+    assert.deepEqual(writes, [])
+    a.settings.autoplayVideos = false
+    a.settings.syncServerSettingUpdatedAt = { autoplayVideos: Date.now() + 1000 }
+    await a.actions.syncWithSyncServer(a.context, { automatic: true })
+    await b.actions.syncWithSyncServer(b.context, { automatic: true, remoteOnly: true })
+    await a.actions.syncWithSyncServer(a.context, { automatic: true, remoteOnly: true })
+    await b.actions.syncWithSyncServer(b.context, { automatic: true, remoteOnly: true })
+    assert.equal(b.settings.autoplayVideos, false)
+    assert.deepEqual(writes, ['settings'])
+  })
+}
+
+test('a user edit during remote collection application schedules a follow-up upload', async () => {
+  const f = liveFixture({ syncServerSyncSettings: true, autoplayVideos: true })
+  f.context.rootState.syncServer = f.context.state
+  await f.actions.syncWithSyncServer(f.context)
+  const remote = await privacy.decryptSyncDocument(f.collections.get('settings').payload, f.settings.syncServerPrivacyKey)
+  const entry = remote.find(entry => entry.key === 'autoplayVideos')
+  entry.value = false
+  entry.updatedAt = Date.now() + 1000
+  f.collections.set('settings', { revision: 2, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) })
+  let releaseRemote
+  let reachedRemote
+  const blocked = new Promise(resolve => { releaseRemote = resolve })
+  const reached = new Promise(resolve => { reachedRemote = resolve })
+  const dispatch = f.context.dispatch
+  f.context.dispatch = async (...args) => {
+    const result = await dispatch(...args)
+    if (args[0] === 'updateAutoplayVideos') {
+      reachedRemote()
+      await blocked
+    }
+    return result
+  }
+  const syncing = f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true })
+  await reached
+  try {
+    f.settings.autoplayVideos = true
+    f.settings.syncServerSettingUpdatedAt = { autoplayVideos: entry.updatedAt + 1000 }
+    f.actions.scheduleSyncServer(f.context, 'settings')
+  } finally {
+    releaseRemote()
+    await syncing
+  }
+  assert.ok(f.dispatched.some(([action, reason]) => action === 'scheduleSyncServer' && reason === 'data'))
+  f.requests.length = 0
+  await f.actions.syncWithSyncServer(f.context, { automatic: true })
+  assert.ok(f.requests.some(request => request.method === 'PUT' && request.url.endsWith('/encrypted_sync/settings')))
+  const saved = await privacy.decryptSyncDocument(f.collections.get('settings').payload, f.settings.syncServerPrivacyKey)
+  assert.equal(saved.find(entry => entry.key === 'autoplayVideos').value, true)
+})
+
+test('a non-sync operation does not leave a stale follow-up sync request', async () => {
+  const f = liveFixture({ syncServerSyncSettings: true, autoplayVideos: true })
+  f.context.rootState.syncServer = f.context.state
+  f.context.commit('setSyncServerStatus', 'syncing')
+  f.actions.scheduleSyncServer(f.context, 'settings')
+  f.context.commit('setSyncServerStatus', 'idle')
+  await f.actions.syncWithSyncServer(f.context)
+  assert.equal(f.dispatched.some(([action]) => action === 'scheduleSyncServer'), false)
+})
+
+for (const syncServerPrivacyMode of ['enhanced', 'legacy']) {
+  test(`manual sync rejects an encryption downgrade with a saved key in ${syncServerPrivacyMode} mode`, async () => {
+    const f = fixture({ syncServerPrivacyMode })
+    await assert.rejects(f.actions.syncWithSyncServer(f.context), /server no longer supports it/)
+    assert.ok(f.requests.every(request => request.url.endsWith('/health')))
+  })
+}

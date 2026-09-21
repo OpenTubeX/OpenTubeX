@@ -1023,6 +1023,7 @@ Settings:
     Desktop Device: '桌面设备'
     Open All Tabs: '打开所有标签页'
     Open All Tabs Confirmation: "打开所有标签页？"
+    Server Update Required: "请更新此服务器以支持加密实时同步。"
   Proxy Settings:
     IP Block Recovery Script Path: IP 封锁恢复脚本路径
     Select IP Block Recovery Script File: 选择 IP 封锁恢复脚本文件

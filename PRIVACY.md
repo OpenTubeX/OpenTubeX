@@ -8,7 +8,7 @@ This document describes the data exposed by OpenTubeX itself. It assumes that yo
 
 By default, subscriptions, playlists, settings (including saved channel settings), history, profiles and open tabs remain on your device. Enabling synchronization sends copies of the selected categories to the configured sync server:
 
-- Enhanced-privacy sync encrypts the selected data on your device before upload. The server still receives account and traffic metadata.
+- Enhanced-privacy sync encrypts the selected data on your device before upload. This mode requires a server with live-sync support. The server still receives account and traffic metadata.
 - A legacy sync server does not support this encryption. Synced data is visible to that server's operator.
 
 On compatible servers, enhanced-privacy sync also uploads encrypted account activity, including changed setting keys and scalar values, while excluding watch history and frequent playback changes. Object values and strings longer than 128 bytes are omitted from activity. Opening a video on another device sends an encrypted request containing its video ID, title, and playback position. The OpenTubeX sync server retains up to 100 activity batches per account for 30 days and up to 100 pending device requests per account for 24 hours; acknowledged requests are deleted, and expired records are normally removed within one hour.

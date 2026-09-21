@@ -4,12 +4,24 @@ export class SyncCollectionCache {
   constructor() {
     this.identity = ''
     this.collections = new Map()
+    this.syncedRevisions = new Map()
   }
 
   use(identity) {
     if (identity !== this.identity) {
       this.identity = identity
       this.collections.clear()
+      this.syncedRevisions.clear()
+    }
+  }
+
+  isSynced(collection, revision) {
+    return this.syncedRevisions.get(collection) === revision
+  }
+
+  markSynced(collections) {
+    for (const collection of collections) {
+      this.syncedRevisions.set(collection, this.collections.get(collection).revision)
     }
   }
 

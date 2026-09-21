@@ -1040,6 +1040,7 @@ Settings:
     Desktop Device: 'Ordenador'
     Open All Tabs: 'Abrir todas las pestañas'
     Open All Tabs Confirmation: "¿Abrir todas las pestañas?"
+    Server Update Required: "Actualiza este servidor para admitir la sincronización cifrada en tiempo real."
   Proxy Settings:
     IP Block Recovery Script Path: Ruta del script de recuperación tras un bloqueo de IP
     Select IP Block Recovery Script File: Seleccionar archivo del script de recuperación tras un bloqueo de IP

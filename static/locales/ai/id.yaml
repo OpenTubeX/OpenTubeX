@@ -1023,6 +1023,7 @@ Settings:
     Desktop Device: 'Desktop'
     Open All Tabs: 'Buka semua tab'
     Open All Tabs Confirmation: "Buka semua tab?"
+    Server Update Required: "Perbarui server ini untuk mendukung sinkronisasi langsung terenkripsi."
   Proxy Settings:
     IP Block Recovery Script Path: Jalur Skrip Pemulihan Blokir IP
     Select IP Block Recovery Script File: Pilih Berkas Skrip Pemulihan Blokir IP

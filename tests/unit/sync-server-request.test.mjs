@@ -194,7 +194,7 @@ test('reads the operator privacy policy and capabilities from one health request
   const requests = []
   const client = await loadClient({ IS_CAPACITOR: true }, '0.35.0', requests, () => ({
     status: 200,
-    data: JSON.stringify({ capabilities: { encrypted_sync: 1 }, privacy_policy_url: 'https://operator.example/privacy' }),
+    data: JSON.stringify({ capabilities: { encrypted_sync: 1, live_sync: 1 }, privacy_policy_url: 'https://operator.example/privacy' }),
     headers: {},
   }))
   const [capabilities, policy] = await Promise.all([client.getCapabilities(), client.getPrivacyPolicyUrl()])
@@ -215,4 +215,19 @@ test('ignores absent or unsafe operator privacy policy URLs', async () => {
   }))
   assert.equal(await client.getPrivacyPolicyUrl(), null)
   assert.equal(Object.keys(await client.getCapabilities()).length, 0)
+})
+
+test('requires live sync only for servers advertising encrypted sync', async () => {
+  for (const capabilities of [{}, { bulk_sync: 1 }, { encrypted_sync: 1, live_sync: 1 }]) {
+    const client = await loadClient({ IS_CAPACITOR: true }, '0.35.0', [], () => ({
+      status: 200, data: JSON.stringify({ capabilities }), headers: {},
+    }))
+    assert.equal(await client.supportsEncryptedSync(), capabilities.encrypted_sync === 1)
+  }
+  for (const live_sync of [undefined, 0, 2]) {
+    const client = await loadClient({ IS_CAPACITOR: true }, '0.35.0', [], () => ({
+      status: 200, data: JSON.stringify({ capabilities: { encrypted_sync: 1, live_sync } }), headers: {},
+    }))
+    await assert.rejects(client.supportsEncryptedSync(), { message: 'This server must be updated to support encrypted live sync.' })
+  }
 })

@@ -1027,6 +1027,7 @@ Settings:
     Desktop Device: 'Настолен компютър'
     Open All Tabs: 'Отваряне на всички раздели'
     Open All Tabs Confirmation: "Отваряне на всички раздели?"
+    Server Update Required: "Обновете този сървър за поддръжка на шифрована синхронизация в реално време."
   Proxy Settings:
     IP Block Recovery Script Path: Път до скрипта за възстановяване след блокиране на IP адреса
     Select IP Block Recovery Script File: Избор на файл със скрипт за възстановяване след блокиране на IP адреса

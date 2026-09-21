@@ -1,3 +1,20 @@
+let remoteSyncDispatchDepth = 0
+
+// Vuex calls action subscribers synchronously when dispatch starts. Scope this
+// marker to that call, not its promise, so concurrent user actions stay local.
+export function dispatchRemoteSyncAction(dispatch, ...args) {
+  remoteSyncDispatchDepth++
+  try {
+    return dispatch(...args)
+  } finally {
+    remoteSyncDispatchDepth--
+  }
+}
+
+export function isRemoteSyncDispatch() {
+  return remoteSyncDispatchDepth > 0
+}
+
 export const AUTO_SYNC_INTERVAL_MS = 5 * 60 * 1000
 
 export const SYNC_ACTION_REASONS = new Map([

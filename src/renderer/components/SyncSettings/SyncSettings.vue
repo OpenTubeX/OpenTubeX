@@ -43,7 +43,7 @@
           @keydown.enter="authenticate('login')"
         />
         <FtInput
-          v-if="!connected && serverPrivacySupported !== false"
+          v-if="!connected && serverPrivacySupported !== false && serverCheckStatus !== 'error'"
           :placeholder="t('Settings.Sync Settings.Privacy Passphrase')"
           :show-action-button="false"
           :value="privacyPassphrase"
@@ -63,7 +63,7 @@
         </a>
       </p>
       <p
-        v-if="!connected && serverPrivacySupported !== false"
+        v-if="!connected && serverPrivacySupported !== false && serverCheckStatus !== 'error'"
         class="privacyHint"
       >
         {{ t('Settings.Sync Settings.Privacy Passphrase Hint') }}
@@ -462,6 +462,8 @@ import SyncActivity from './SyncActivity.vue'
 import store from '../../store/index'
 import {
   SyncServerClient,
+  SyncServerUnsupportedError,
+  SYNC_SERVER_UPDATE_REQUIRED_MESSAGE,
   SyncServerDataLossError,
   isSessionExpiredError,
   normalizeSyncServerUrl,
@@ -534,9 +536,12 @@ const status = computed(() => store.getters.getSyncServerStatus)
 const busy = computed(() => status.value === 'syncing')
 const syncProgress = computed(() => store.getters.getSyncServerProgress)
 const syncProgressLabel = computed(() => getSyncProgressLabel(t, syncProgress.value?.stage))
-const errorMessage = computed(() => (
-  localError.value || serverCheckError.value || store.getters.getSyncServerError
-))
+const errorMessage = computed(() => {
+  const message = localError.value || serverCheckError.value || store.getters.getSyncServerError
+  return message === SYNC_SERVER_UPDATE_REQUIRED_MESSAGE
+    ? t('Settings.Sync Settings.Server Update Required')
+    : message
+})
 const autoSync = computed(() => store.getters.getSyncServerAutoSync)
 const syncSubscriptionsEnabled = computed(() => store.getters.getSyncServerSyncSubscriptions)
 const syncPlaylistsEnabled = computed(() => store.getters.getSyncServerSyncPlaylists)
@@ -616,11 +621,13 @@ watch([serverUrl, connected, syncEnabled], ([value, isConnected, isEnabled], [pr
       serverAccountSessionsSupported.value = capabilities.encrypted_sync === 1 &&
         capabilities.account_sessions === 1
       serverCheckStatus.value = 'valid'
-    } catch {
+    } catch (error) {
       if (sequence !== serverCheckSequence) return
-      if (isConnected) return
+      if (isConnected && !(error instanceof SyncServerUnsupportedError)) return
       serverCheckStatus.value = 'error'
-      serverCheckError.value = t('Settings.Sync Settings.Server Unavailable')
+      serverCheckError.value = error instanceof SyncServerUnsupportedError
+        ? SYNC_SERVER_UPDATE_REQUIRED_MESSAGE
+        : t('Settings.Sync Settings.Server Unavailable')
     } finally {
       if (serverCheckClient === client) serverCheckClient = null
     }

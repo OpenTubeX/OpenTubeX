@@ -536,7 +536,11 @@ test.describe('new subscriptions feed', () => {
       const pathname = new URL(request.url()).pathname
       let body
       if (pathname === '/health') {
-        body = { capabilities: { encrypted_sync: 1, seen_videos: 1 } }
+        body = { capabilities: { encrypted_sync: 1, live_sync: 1, seen_videos: 1 } }
+      } else if (pathname === '/v1/encrypted_sync/events') {
+        body = []
+      } else if (pathname === '/v1/account/sessions') {
+        body = { sessions: [] }
       } else if (pathname === '/v1/encrypted_sync') {
         body = { collections: [], legacy_data: false, legacy_encrypted_data: false }
       } else {

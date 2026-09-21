@@ -858,7 +858,7 @@ onMounted(async () => {
   lastActiveElement = document.activeElement
   store.commit('addOpenPrompt', promptId)
   if (showSyncedTabs.value) {
-    store.dispatch('refreshSyncServerDeviceNames').catch(error => {
+    store.dispatch('refreshSyncServerDevices').catch(error => {
       console.error('Failed to refresh sync device names:', error)
     })
   }

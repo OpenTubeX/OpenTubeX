@@ -1047,6 +1047,7 @@ Settings:
     Desktop Device: 'Υπολογιστής'
     Open All Tabs: 'Άνοιγμα όλων των καρτελών'
     Open All Tabs Confirmation: "Άνοιγμα όλων των καρτελών;"
+    Server Update Required: "Ενημερώστε αυτόν τον διακομιστή για υποστήριξη κρυπτογραφημένου συγχρονισμού σε πραγματικό χρόνο."
   Proxy Settings:
     IP Block Recovery Script Path: Διαδρομή δέσμης ενεργειών αποκατάστασης αποκλεισμού IP
     Select IP Block Recovery Script File: Επιλογή αρχείου δέσμης ενεργειών αποκατάστασης αποκλεισμού IP

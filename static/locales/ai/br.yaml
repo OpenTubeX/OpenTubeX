@@ -1023,6 +1023,7 @@ Settings:
     Desktop Device: 'Urzhiataer'
     Open All Tabs: 'Digeriñ an holl ivinelloù'
     Open All Tabs Confirmation: "Digeriñ an holl ivinelloù?"
+    Server Update Required: "Hizivait ar servijer-mañ evit ma vo skoret ar c’henamzeriañ sifret en amzer wir."
   Proxy Settings:
     IP Block Recovery Script Path: "Hent ar skript adtapout goude ur stankadur IP"
     Select IP Block Recovery Script File: "Dibab restr ar skript adtapout goude ur stankadur IP"

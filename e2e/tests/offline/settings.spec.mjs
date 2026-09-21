@@ -3052,6 +3052,33 @@ test.describe('settings', () => {
     await expect(privacyPolicy).toHaveAttribute('href', 'https://operator.example/privacy')
   })
 
+  test('requires live support for encrypted sync while retaining legacy servers', async ({ page }) => {
+    await page.route('https://sync.opentubex.org/health', route => route.fulfill({
+      json: { capabilities: { encrypted_sync: 1 } }
+    }))
+    await page.route('https://sync.libretube.dev/health', route => route.fulfill({ body: 'OK' }))
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
+    const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.locator('label.switch-label').filter({ hasText: 'Enable Sync' }).click()
+    await expect(syncSection.locator('.error')).toHaveText('Update this server to support encrypted live sync.')
+    await expect(syncSection.getByLabel(/Privacy passphrase/)).toBeHidden()
+    await expect(syncSection.locator('.privacyHint')).toBeHidden()
+    await expect(syncSection.getByText(/does not support enhanced privacy/)).toBeHidden()
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'de-DE'))
+    await expect(syncSection.locator('.error')).toHaveText('Aktualisiere diesen Server, um verschlüsselte Live-Synchronisierung zu unterstützen.')
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'en-US'))
+    await expect(syncSection.locator('.error')).toHaveText('Update this server to support encrypted live sync.')
+    await expect(syncSection.getByRole('button', { name: 'Log in' })).toBeDisabled()
+    await syncSection.getByLabel('Server URL').fill('https://sync.libretube.dev')
+    await expect(syncSection.getByText(/does not support enhanced privacy/)).toBeVisible()
+    await expect(syncSection.getByLabel(/Privacy passphrase/)).toBeHidden()
+    await syncSection.getByLabel('Username').fill('legacy-user')
+    await syncSection.getByLabel('Password').fill('test-password')
+    await expect(syncSection.getByRole('button', { name: 'Log in' })).toBeEnabled()
+    await expect(syncSection.locator('.error')).toHaveCount(0)
+  })
+
   test('waits for the device name before creating a secure sync pairing code', async ({ app, page }) => {
     const serverUrl = 'https://pairing.example'
     let createdSession
@@ -3073,7 +3100,7 @@ test.describe('settings', () => {
         await route.fulfill({
           json: {
             status: 'ok',
-            capabilities: { encrypted_sync: 1, key_pairing: 1 }
+            capabilities: { encrypted_sync: 1, live_sync: 1, key_pairing: 1 }
           }
         })
         return
@@ -4558,7 +4585,7 @@ test.describe('secure pairing manual entry', () => {
         await route.fulfill({
           json: {
             status: 'ok',
-            capabilities: { encrypted_sync: 1, key_pairing: 1 }
+            capabilities: { encrypted_sync: 1, live_sync: 1, key_pairing: 1 }
           }
         })
         return
@@ -4635,7 +4662,7 @@ test.describe('sync settings', () => {
         syncServerPrivacyMode: 'legacy',
         syncServerSnapshot: '{"subscriptions":[]}',
         syncServerToken: 'invalid-token',
-        syncServerUrl: 'https://sync.opentubex.org',
+        syncServerUrl: 'https://sync.example',
         syncServerUsername: 'sync-user',
         syncServerLastSyncAt: 1234
       }
@@ -4644,7 +4671,7 @@ test.describe('sync settings', () => {
 
   for (const scale of [1, 1.25]) {
     test(`keeps the connected account label in the settings layout at UI scale ${scale}`, async ({ page }) => {
-      await page.route('https://sync.opentubex.org/**', route => route.fulfill({
+      await page.route('https://sync.example/**', route => route.fulfill({
         json: { status: 'ok', capabilities: {} }
       }))
       await goTo(page, 'settings')
@@ -4677,7 +4704,7 @@ test.describe('sync settings', () => {
   }
 
   test('keeps the paired username when its device metadata update fails', async ({ page }) => {
-    await page.route('https://sync.opentubex.org/**', route => {
+    await page.route('https://sync.example/**', route => {
       const url = new URL(route.request().url())
       if (url.pathname === '/health') {
         return route.fulfill({
@@ -4702,7 +4729,7 @@ test.describe('sync settings', () => {
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       return store.dispatch('completeSyncServerPairing', {
-        serverUrl: 'https://sync.opentubex.org',
+        serverUrl: 'https://sync.example',
         username: 'paired-user',
         token: 'paired-token',
         privacyKey: 'paired-privacy-key',
@@ -4741,7 +4768,7 @@ test.describe('sync settings', () => {
       credentialedRequestStarted = resolve
     })
     let downgradedRequests = 0
-    await page.route('https://sync.opentubex.org/**', route => {
+    await page.route('https://sync.example/**', route => {
       if (route.request().headers().authorization === 'invalid-token') {
         credentialedRequestStarted()
       }
@@ -4764,7 +4791,7 @@ test.describe('sync settings', () => {
 
   test('shows session expiration and other sync failures outside Sync settings', async ({ page }) => {
     let response = { status: 500, body: 'Background sync failed' }
-    await page.route('https://sync.opentubex.org/**', async (route) => {
+    await page.route('https://sync.example/**', async (route) => {
       await route.fulfill(response)
     })
 
@@ -4797,13 +4824,13 @@ test.describe('sync settings', () => {
     const serverCheckRequested = new Promise((resolve) => {
       serverCheckStarted = resolve
     })
-    await page.route('https://sync.opentubex.org/**', async (route) => {
+    await page.route('https://sync.example/**', async (route) => {
       if (new URL(route.request().url()).pathname === '/health') {
         if (delayServerCheck) {
           serverCheckStarted()
           await serverCheckPending
         }
-        await route.fulfill({ status: 200, body: 'OK' })
+        await route.fulfill({ status: 200, json: { capabilities: { encrypted_sync: 1, live_sync: 1 } } })
       } else {
         await route.fulfill({ status: 500, body: 'Sync failed' })
       }
@@ -4847,13 +4874,17 @@ test.describe('sync settings', () => {
     })
     const syncRequests = []
 
-    await page.route('https://sync.opentubex.org/**', async (route) => {
+    await page.route('https://sync.example/**', async (route) => {
       const pathname = new URL(route.request().url()).pathname
       if (pathname === '/health') {
-        await route.fulfill({ status: 200, body: 'OK' })
+        await route.fulfill({ status: 200, json: { capabilities: { encrypted_sync: 1, live_sync: 1 } } })
         return
       }
 
+      if (pathname === '/v1/account/sessions' || pathname === '/v1/encrypted_sync/events') {
+        await route.fulfill({ json: [] })
+        return
+      }
       syncRequests.push(pathname)
       syncRequestStarted()
       await syncRequestPending
@@ -4890,10 +4921,14 @@ test.describe('sync settings', () => {
     })
     const syncRequests = []
 
-    await otherWindow.route('https://sync.opentubex.org/**', async (route) => {
+    await otherWindow.route('https://sync.example/**', async (route) => {
       const pathname = new URL(route.request().url()).pathname
       if (pathname === '/health') {
-        await route.fulfill({ status: 200, body: 'OK' })
+        await route.fulfill({ status: 200, json: { capabilities: { encrypted_sync: 1, live_sync: 1 } } })
+        return
+      }
+      if (pathname === '/v1/account/sessions' || pathname === '/v1/encrypted_sync/events') {
+        await route.fulfill({ json: [] })
         return
       }
       syncRequests.push(pathname)
@@ -4931,7 +4966,7 @@ test.describe('sync settings', () => {
       authenticationStarted = resolve
     })
 
-    await page.route('https://sync.opentubex.org/**', async (route) => {
+    await page.route('https://sync.example/**', async (route) => {
       const pathname = new URL(route.request().url()).pathname
       if (pathname === '/health') {
         await route.fulfill({ status: 200, body: 'OK' })
@@ -4967,7 +5002,7 @@ test.describe('sync settings', () => {
     const authenticationPending = new Promise((resolve) => {
       finishAuthentication = resolve
     })
-    await page.route('https://sync.opentubex.org/**', async (route) => {
+    await page.route('https://sync.example/**', async (route) => {
       const pathname = new URL(route.request().url()).pathname
       if (pathname === '/health') {
         await route.fulfill({ status: 200, body: 'OK' })
@@ -5010,7 +5045,7 @@ test.describe('sync settings', () => {
     })
     let authenticatedManifestRequests = 0
 
-    await page.route('https://sync.opentubex.org/**', async (route) => {
+    await page.route('https://sync.example/**', async (route) => {
       const request = route.request()
       const pathname = new URL(request.url()).pathname
       const authorization = request.headers().authorization
@@ -5018,7 +5053,7 @@ test.describe('sync settings', () => {
       if (pathname === '/health') {
         await route.fulfill({
           status: 200,
-          json: { capabilities: { encrypted_sync: 1 } }
+          json: { capabilities: { encrypted_sync: 1, live_sync: 1 } }
         })
       } else if (pathname === '/v1/account/login') {
         await route.fulfill({ status: 200, json: { jwt: 'renewed-token' } })

@@ -1023,6 +1023,7 @@ Settings:
     Desktop Device: 'Asztali gép'
     Open All Tabs: 'Összes lap megnyitása'
     Open All Tabs Confirmation: "Megnyitja az összes lapot?"
+    Server Update Required: "Frissítse ezt a kiszolgálót a titkosított, valós idejű szinkronizálás támogatásához."
   Proxy Settings:
     IP Block Recovery Script Path: IP-tiltás helyreállító parancsfájljának elérési útja
     Select IP Block Recovery Script File: IP-tiltás helyreállító parancsfájljának kiválasztása

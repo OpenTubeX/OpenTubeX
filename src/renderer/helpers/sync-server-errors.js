@@ -14,6 +14,16 @@ export class SyncServerError extends Error {
   }
 }
 
+export const SYNC_SERVER_UPDATE_REQUIRED_MESSAGE =
+  'This server must be updated to support encrypted live sync.'
+
+export class SyncServerUnsupportedError extends Error {
+  constructor() {
+    super(SYNC_SERVER_UPDATE_REQUIRED_MESSAGE)
+    this.name = 'SyncServerUnsupportedError'
+  }
+}
+
 export class SyncServerCancelledError extends Error {
   constructor() {
     super('Sync cancelled')

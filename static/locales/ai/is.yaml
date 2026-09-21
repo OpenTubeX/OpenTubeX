@@ -1031,6 +1031,7 @@ Settings:
     Desktop Device: 'Tölva'
     Open All Tabs: 'Opna alla flipa'
     Open All Tabs Confirmation: "Opna alla flipa?"
+    Server Update Required: "Uppfærðu þennan þjón til að styðja dulkóðaða samstillingu í rauntíma."
   Proxy Settings:
     IP Block Recovery Script Path: Slóð að endurheimtarskriftu fyrir IP-lokun
     Select IP Block Recovery Script File: Velja skrá með endurheimtarskriftu fyrir IP-lokun

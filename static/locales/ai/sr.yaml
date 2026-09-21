@@ -1062,6 +1062,7 @@ Settings:
     Desktop Device: 'Рачунар'
     Open All Tabs: 'Отвори све картице'
     Open All Tabs Confirmation: "Отворити све картице?"
+    Server Update Required: "Ажурирајте овај сервер да подржи шифровану синхронизацију у реалном времену."
   Proxy Settings:
     Proxy Username: Корисничко име за прокси
     Proxy Password: Лозинка за прокси

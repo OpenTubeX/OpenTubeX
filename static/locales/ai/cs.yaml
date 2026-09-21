@@ -1023,6 +1023,7 @@ Settings:
     Desktop Device: 'Počítač'
     Open All Tabs: 'Otevřít všechny karty'
     Open All Tabs Confirmation: "Otevřít všechny karty?"
+    Server Update Required: "Aktualizujte tento server, aby podporoval šifrovanou synchronizaci v reálném čase."
   Proxy Settings:
     IP Block Recovery Script Path: Cesta ke skriptu pro obnovení po blokování IP adresy
     Select IP Block Recovery Script File: Vybrat soubor skriptu pro obnovení po blokování IP adresy

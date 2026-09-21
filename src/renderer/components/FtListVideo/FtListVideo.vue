@@ -403,6 +403,7 @@
 </template>
 
 <script setup>
+import { getSyncServerDeviceIcon } from '../../helpers/sync-server-sessions'
 import FtInlineMetadata from '../FtInlineMetadata/FtInlineMetadata.vue'
 import { useContextMenuHold } from '../../composables/useContextMenuHold'
 import { PHONE_LAYOUT_QUERY, usePhoneLayout } from '../../composables/usePhoneLayout'
@@ -1265,7 +1266,7 @@ const videoContextMenuItems = computed(() => {
       enabled: devices.length > 0,
       submenu: devices.map(device => ({
         label: device.name,
-        icon: ['fas', 'display'],
+        icon: getSyncServerDeviceIcon(device.platform),
         enabled: true,
         run: () => sendToDevice(device.id),
       })),

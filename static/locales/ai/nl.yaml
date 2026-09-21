@@ -1047,6 +1047,7 @@ Settings:
     Desktop Device: 'Desktop'
     Open All Tabs: 'Alle tabbladen openen'
     Open All Tabs Confirmation: "Alle tabbladen openen?"
+    Server Update Required: "Werk deze server bij om versleutelde livesynchronisatie te ondersteunen."
   Proxy Settings:
     IP Block Recovery Script Path: Pad naar herstelscript voor IP-blokkade
     Select IP Block Recovery Script File: Herstelscript voor IP-blokkade selecteren

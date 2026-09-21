@@ -5,9 +5,10 @@ import {
   decryptSyncServerDeviceInfo,
   encryptSyncServerDeviceInfo,
   getCurrentSyncServerDeviceInfo,
+  getSyncServerDeviceIcon,
   isValidSyncServerDeviceId,
   isValidSyncServerDeviceName,
-  loadSyncServerDeviceNames,
+  loadSyncServerDevices,
   randomSyncServerDeviceId,
   resolveSyncServerDeviceName,
 } from '../../src/renderer/helpers/sync-server-sessions.js'
@@ -74,7 +75,7 @@ test('encrypts device identification for one device and privacy key', async () =
   )
 })
 
-test('loads valid device names from encrypted account-session metadata', async () => {
+test('loads names and platforms from encrypted account-session metadata', async () => {
   const key = bytesToBase64(crypto.getRandomValues(new Uint8Array(32)))
   const laptopId = randomSyncServerDeviceId()
   const phoneId = randomSyncServerDeviceId()
@@ -85,17 +86,23 @@ test('loads valid device names from encrypted account-session metadata', async (
     release: '6.16.4-arch1-1',
   }, key, laptopId)
 
-  const names = await loadSyncServerDeviceNames({
+  const encryptedPhone = await encryptSyncServerDeviceInfo({ name: 'Pixel 8 Pro', platform: 'android', architecture: 'arm64', release: '16' }, key, phoneId)
+
+  const devices = await loadSyncServerDevices({
     getAccountSessions: async () => ({
       sessions: [
         { device_id: laptopId, encrypted_device_info: encryptedLaptop },
-        { device_id: phoneId, encrypted_device_info: 'invalid ciphertext' },
+        { device_id: phoneId, encrypted_device_info: encryptedPhone },
+        { device_id: randomSyncServerDeviceId(), encrypted_device_info: 'invalid ciphertext' },
         { device_id: 'invalid-device-id', encrypted_device_info: encryptedLaptop },
       ],
     }),
   }, key)
 
-  assert.deepEqual(names, { [laptopId]: 'Travel laptop' })
+  assert.deepEqual(devices, {
+    [laptopId]: { name: 'Travel laptop', platform: 'linux' },
+    [phoneId]: { name: 'Pixel 8 Pro', platform: 'android' },
+  })
 })
 
 test('validates device names and rejects invalid encrypted device info', async () => {
@@ -109,4 +116,12 @@ test('validates device names and rejects invalid encrypted device info', async (
     architecture: 'x64',
     release: '',
   }, key, deviceId))
+})
+
+test('uses platform icons consistently for account sessions and device requests', () => {
+  assert.deepEqual(getSyncServerDeviceIcon('android'), ['fas', 'smartphone'])
+  assert.deepEqual(getSyncServerDeviceIcon('web'), ['fas', 'globe'])
+  for (const platform of ['linux', 'darwin', 'win32', '']) {
+    assert.deepEqual(getSyncServerDeviceIcon(platform), ['fas', 'display'])
+  }
 })

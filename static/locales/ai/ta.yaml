@@ -1046,6 +1046,7 @@ Settings:
     Desktop Device: 'கணினி'
     Open All Tabs: 'எல்லா தாவல்களையும் திறக்கவும்'
     Open All Tabs Confirmation: "எல்லா தாவல்களையும் திறக்கவா?"
+    Server Update Required: "மறையாக்கப்பட்ட நேரடி ஒத்திசைவை ஆதரிக்க இந்தச் சேவையகத்தைப் புதுப்பிக்கவும்."
   Proxy Settings:
     IP Block Recovery Script Path: IP தடுப்பு மீட்பு நிரலாக்கப் பாதை
     Select IP Block Recovery Script File: IP தடுப்பு மீட்பு நிரலாக்கக் கோப்பைத் தேர்ந்தெடு
