@@ -1218,7 +1218,7 @@ test.describe('watch page', () => {
     await page.keyboard.press('s')
     await expect(page.locator('.ftVideoPlayer')).toHaveClass(/fullWindow/)
     await page.locator('.ftVideoPlayer').hover()
-    await page.locator('.shaka-controls-button-panel .shaka-pip-button').click()
+    await page.getByRole('button', { name: /enter picture-in-picture/i }).click()
     await expect.poll(() => page.evaluate(() => document.pictureInPictureElement !== null)).toBe(true)
     await page.evaluate(() => document.exitPictureInPicture())
     await expect.poll(() => page.evaluate(() => document.pictureInPictureElement === null)).toBe(true)
