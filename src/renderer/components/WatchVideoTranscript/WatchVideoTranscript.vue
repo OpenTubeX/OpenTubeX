@@ -293,6 +293,9 @@ watch(() => props.fullscreenOverlay, () => {
 })
 
 watch(normalizedSearchQuery, () => {
+  // Search resets the viewport, so resume playback with the same bounded
+  // alignment as opening the transcript instead of animating from the top.
+  hasAlignedActiveSegment = false
   if (segmentList.value != null) {
     restoreOverlayScrollTop(segmentList.value, 0)
   }
