@@ -62,6 +62,7 @@ let eventsSince = ''
 let pendingLocalSync = false
 let applyingRemoteCollection = false
 let activeSyncPromise = null
+let activeSyncRemoteOnly = false
 const activeSyncClients = new Set()
 let autoSyncTimer = null
 let eventSyncTimer = null
@@ -164,7 +165,7 @@ function assertEncryptionSupported(supported, required) {
   }
 }
 
-async function runSync(context, { allowDataLoss = false, notifyDataLoss = true } = {}) {
+async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, automatic = false, remoteOnly = false } = {}) {
   const { commit, dispatch, rootGetters, rootState } = context
   const settings = rootState.settings
   const encrypted = requiresEncryptedSync(settings)
@@ -197,6 +198,22 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true }
     'finishing',
   ]
   let completedStages = 0
+  let progressStarted = false
+
+  function startProgress(stage) {
+    if (progressStarted) return
+    progressStarted = true
+    commit('setSyncServerStatus', 'syncing')
+    commit('setSyncServerProgress', { stage, percentage: Math.round((completedStages / stages.length) * 100) })
+    commit('setSyncServerError', '')
+  }
+
+  function finishProgress() {
+    if (!progressStarted && context.state.syncServerStatus !== 'error') return
+    commit('setSyncServerError', '')
+    commit('setSyncServerProgress', null)
+    commit('setSyncServerStatus', 'success')
+  }
 
   function assertSyncStillActive() {
     assertSyncEnabled(rootState, networkClient)
@@ -205,23 +222,25 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true }
   async function runStage(stage, callback) {
     assertSyncStillActive()
     const progressStage = stage === 'seenVideos' ? 'history' : stage
-    commit('setSyncServerProgress', {
-      stage: progressStage,
-      percentage: Math.round((completedStages / stages.length) * 100),
-    })
+    if (progressStarted) {
+      commit('setSyncServerProgress', {
+        stage: progressStage,
+        percentage: Math.round((completedStages / stages.length) * 100),
+      })
+    }
     const value = await callback()
     assertSyncStillActive()
     completedStages++
-    commit('setSyncServerProgress', {
-      stage: progressStage,
-      percentage: Math.round((completedStages / stages.length) * 100),
-    })
+    if (progressStarted) {
+      commit('setSyncServerProgress', {
+        stage: progressStage,
+        percentage: Math.round((completedStages / stages.length) * 100),
+      })
+    }
     return value
   }
 
-  commit('setSyncServerStatus', 'syncing')
-  commit('setSyncServerProgress', { stage: stages[0], percentage: 0 })
-  commit('setSyncServerError', '')
+  if (!automatic || !encrypted) startProgress(stages[0])
 
   async function applyCollection(collection, targetClient) {
     switch (collection) {
@@ -328,6 +347,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true }
         original,
         remote,
         uploadCollections,
+        unchanged,
       } = await runStage('download', async () => {
         // The snapshot is saved only after successful collection uploads.
         // Never infer completed migration from unrelated encrypted settings.
@@ -360,6 +380,12 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true }
           ...uploadCollections,
           ...compatibilityCollections,
         ]))
+        // A cursor also changes for our own uploads and device messages. Avoid
+        // merging every collection again when its revision is already cached.
+        if (remoteOnly && !manifest.legacy_data && !legacyEncrypted?.payload &&
+            downloadCollections.every(collection => collectionCache.isSynced(
+              collection, manifest.collections.find(entry => entry.collection === collection)?.revision ?? 0
+            ))) return { unchanged: true }
         const document = createEmptySyncDocument()
         // Legacy speeds are read for migration into settings, never uploaded.
         document.playbackSpeeds = legacy.playbackSpeeds ?? []
@@ -369,6 +395,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true }
           const cached = !manifest.legacy_data && !legacyEncrypted?.payload
             ? collectionCache.get(collection, manifestRevision)
             : null
+          if (!cached) startProgress('download')
           const response = cached ?? await networkClient.getEncryptedSyncCollection(collection)
           const data = cached
             ? cached.data
@@ -389,6 +416,12 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true }
         }
         return { document, original, remote: Object.fromEntries(entries), uploadCollections }
       })
+      if (unchanged) {
+        await dispatch('refreshSyncServerEvents')
+        await dispatch('refreshSyncServerDeviceNames')
+        finishProgress()
+        return null
+      }
       client = new EncryptedSyncAdapter(document)
       encryptedCollections = {
         original,
@@ -423,6 +456,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true }
               JSON.stringify(data) === JSON.stringify(encryptedCollections.original[collection])) {
             continue
           }
+          startProgress('upload')
           let activityBefore = encryptedCollections.original[collection]
           for (let attempt = 0; attempt < ENCRYPTED_SYNC_RETRIES; attempt++) {
             const activity = liveSupported
@@ -488,6 +522,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true }
         dispatch('updateSyncServerLastSyncAt', lastSyncAt, { root: true }),
       ])
     })
+    if (encryptedCollections) collectionCache.markSynced(Object.keys(encryptedCollections.remote))
     if (liveSupported) {
       await dispatch('refreshSyncServerEvents')
       await dispatch('refreshSyncServerDeviceNames')
@@ -495,9 +530,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true }
     if (settings.syncServerResumeAutoSync) {
       await dispatch('setSyncServerAutoSync', true)
     }
-    commit('setSyncServerLastResult', result)
-    commit('setSyncServerProgress', null)
-    commit('setSyncServerStatus', 'success')
+    if (progressStarted) commit('setSyncServerLastResult', result)
+    finishProgress()
     return result
   } catch (error) {
     if (error instanceof SyncServerCancelledError) {
@@ -565,7 +599,7 @@ const actions = {
         // A change arriving during an upload needs a second pass after it finishes.
         await activeSyncPromise
         if (generation !== liveGeneration) return
-        await dispatch('syncWithSyncServer')
+        await dispatch('syncWithSyncServer', { automatic: true, remoteOnly: true })
       }, async error => {
         if (isSessionExpiredError(error)) {
           await dispatch('expireSyncServerSession')
@@ -1044,20 +1078,28 @@ const actions = {
       return Promise.reject(new Error('Connect to a sync server first'))
     }
     if (isSyncServerOffline()) return Promise.resolve(null)
+    // A remote-only check may skip all merges, so it cannot consume local work.
+    if (activeSyncPromise && activeSyncRemoteOnly && !options.remoteOnly) {
+      return activeSyncPromise.catch(() => {}).then(() => actions.syncWithSyncServer(context, options))
+    }
     if (!activeSyncPromise) {
+      activeSyncRemoteOnly = options.remoteOnly === true
       let syncStarted = false
-      clearTimeout(eventSyncTimer)
-      eventSyncTimer = null
+      if (!options.remoteOnly) {
+        clearTimeout(eventSyncTimer)
+        eventSyncTimer = null
+      }
       activeSyncPromise = withSyncLock(() => {
         if (!context.rootState.settings.syncServerEnabled || isSyncServerOffline()) return null
         if (options.skipIfRecent &&
             isRecentSync(context.rootState.settings.syncServerLastSyncAt)) {
           return null
         }
-        syncStarted = true
+        syncStarted = !options.remoteOnly
         return runSync(context, options)
       }).finally(() => {
         activeSyncPromise = null
+        activeSyncRemoteOnly = false
         if (pendingLocalSync) {
           pendingLocalSync = false
           context.dispatch('scheduleSyncServer', 'data')
@@ -1145,7 +1187,7 @@ const actions = {
 
     await dispatch('startSyncServerAutoSync')
     if (rootState.settings.syncServerAutoSync) {
-      await dispatch('syncWithSyncServer', { skipIfRecent })
+      await dispatch('syncWithSyncServer', { skipIfRecent, automatic: true })
     }
   },
 
@@ -1161,7 +1203,7 @@ const actions = {
 
     autoSyncTimer = setTimeout(() => {
       autoSyncTimer = null
-      dispatch('syncWithSyncServer', { skipIfRecent: true }).catch(error => {
+      dispatch('syncWithSyncServer', { skipIfRecent: true, automatic: true }).catch(error => {
         console.error('Sync server automatic sync failed', error)
       })
     }, AUTO_SYNC_INTERVAL_MS)
@@ -1234,7 +1276,7 @@ const actions = {
         !isSyncReasonEnabled(rootState.settings, reason)) {
       return
     }
-    if (rootState.syncServer.syncServerStatus === 'syncing') {
+    if (activeSyncPromise || rootState.syncServer.syncServerStatus === 'syncing') {
       if (!applyingRemoteCollection && reason !== 'automatic') pendingLocalSync = true
       return
     }
@@ -1243,6 +1285,7 @@ const actions = {
       eventSyncTimer = null
       dispatch('syncWithSyncServer', {
         skipIfRecent: reason === 'automatic',
+        automatic: true,
       }).catch(error => {
         console.error('Sync server event sync failed', error)
       })

@@ -27,7 +27,7 @@ function withoutImports (source) {
 const helperSource = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
 
-function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false } = {}) {
+function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'] } = {}) {
   const connectionEvents = new EventTarget()
   const network = { state: connectionState, online }
   const requests = []
@@ -85,7 +85,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     normalizeCustomThemes,
     mergeSettingEntry,
     resolveMergedThemeEntry,
-    getSyncableSettingKeys: () => ['channelPlaybackSpeeds'],
+    getSyncableSettingKeys: () => syncableSettingKeys,
     isSettingSyncEnabled: (settings, key) => !settings.syncServerSettingsExcluded?.includes(key),
     fetch: async (url, options) => {
       requests.push({ url, method: options.method ?? 'GET', body: options.body })
@@ -731,4 +731,148 @@ test('cross-window token refresh logs a rejected initialization', async () => {
   await new Promise(resolve => setImmediate(resolve))
   assert.equal(logged.length, 1)
   assert.equal(logged[0][1], failure)
+})
+
+function liveFixture(settings = {}) {
+  const collections = new Map()
+  let polls = 0
+  const f = fixture(settings, {
+    encrypted: true,
+    syncableSettingKeys: ['autoplayVideos'],
+    respond: (url, options) => {
+      const path = new URL(url).pathname
+      if (path === '/health') return { capabilities: { encrypted_sync: 1, live_sync: 1 } }
+      if (path === '/v1/encrypted_sync/changes') {
+        const cursor = String(collections.get('subscriptions')?.revision ?? 0)
+        if (++polls === 3) queueMicrotask(() => f.actions.stopSyncServerLive())
+        return { cursor }
+      }
+      if (path === '/v1/encrypted_sync') return {
+        collections: [...collections].map(([collection, entry]) => ({ collection, revision: entry.revision })),
+        legacy_data: false,
+      }
+      if (path.startsWith('/v1/encrypted_sync/')) {
+        const collection = path.split('/').at(-1)
+        if (options.method === 'PUT') {
+          const body = JSON.parse(options.body)
+          collections.set(collection, { revision: body.revision + 1, payload: body.payload })
+        }
+        return collections.get(collection) ?? { revision: 0, payload: null }
+      }
+    },
+  })
+  return { ...f, collections }
+}
+
+test('startup and its own live notifications produce only one visible sync', async () => {
+  const f = liveFixture()
+  await Promise.all([
+    f.actions.syncWithSyncServer(f.context),
+    f.actions.startSyncServerLive(f.context),
+  ])
+  assert.equal(f.commits.filter(([action, value]) => action === 'setSyncServerStatus' && value === 'syncing').length, 1)
+  assert.equal(f.requests.filter(request => request.method === 'PUT').length, 1)
+  assert.equal(f.dispatched.filter(([action]) => action === 'updateSyncServerSnapshot').length, 1)
+})
+
+test('an automatic check with no net local change neither uploads nor displays a sync cycle', async () => {
+  const f = liveFixture({ syncServerSyncSettings: true, autoplayVideos: true })
+  await f.actions.syncWithSyncServer(f.context)
+  f.commits.length = 0
+  f.requests.length = 0
+  // A setting toggled twice during debounce retains its value, despite a new edit timestamp.
+  f.settings.autoplayVideos = false
+  f.settings.autoplayVideos = true
+  f.settings.syncServerSettingUpdatedAt = { autoplayVideos: Date.now() + 1000 }
+  await f.actions.syncWithSyncServer(f.context, { automatic: true })
+  assert.equal(f.requests.filter(request => request.method === 'PUT').length, 0)
+  assert.equal(f.commits.filter(([action, value]) => action === 'setSyncServerStatus' && value === 'syncing').length, 0)
+})
+
+
+test('automatic sync still uploads a real setting change and reports progress', async () => {
+  const f = liveFixture({ syncServerSyncSettings: true, autoplayVideos: true })
+  await f.actions.syncWithSyncServer(f.context)
+  f.commits.length = 0
+  f.requests.length = 0
+  f.settings.autoplayVideos = false
+  await f.actions.syncWithSyncServer(f.context, { automatic: true })
+  assert.deepEqual(f.requests.filter(request => request.method === 'PUT').map(request => new URL(request.url).pathname), ['/v1/encrypted_sync/settings'])
+  assert.equal(f.commits.filter(([action, value]) => action === 'setSyncServerStatus' && value === 'syncing').length, 1)
+})
+
+test('remote-only checks process changed revisions and keep message delivery on unchanged revisions', async () => {
+  const f = liveFixture()
+  await f.actions.syncWithSyncServer(f.context)
+  const remote = [{ id: 'private-channel', name: 'Private subscription' }, { id: 'remote-channel', name: 'Remote channel' }]
+  f.collections.set('subscriptions', { revision: 2, payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt) })
+  f.requests.length = 0
+  f.dispatched.length = 0
+  await f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true })
+  assert.ok(f.requests.some(request => request.method === 'GET' && request.url.endsWith('/encrypted_sync/subscriptions')))
+  assert.ok(f.dispatched.some(([action]) => action === 'updateSyncServerSnapshot'))
+  f.dispatched.length = 0
+  f.requests.length = 0
+  await f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true })
+  assert.equal(f.requests.some(request => request.url.endsWith('/encrypted_sync/subscriptions')), false)
+  assert.equal(f.dispatched.some(([action]) => action === 'updateSyncServerSnapshot'), false)
+  assert.ok(f.dispatched.some(([action]) => action === 'refreshSyncServerEvents'))
+})
+
+test('live retries a downloaded revision when applying its snapshot failed', async () => {
+  const f = liveFixture()
+  const dispatch = f.context.dispatch
+  let attempts = 0
+  f.context.dispatch = (action, value) => {
+    if (action === 'updateSyncServerSnapshot' && ++attempts === 1) throw new Error('Snapshot write failed')
+    return dispatch(action, value)
+  }
+  await assert.rejects(f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true }), /Snapshot write failed/)
+  await f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true })
+  assert.equal(attempts, 2)
+})
+
+test('a local sync requested during a remote-only check still uploads local changes', async () => {
+  const f = liveFixture({ syncServerSyncSettings: true, autoplayVideos: true })
+  await f.actions.syncWithSyncServer(f.context)
+  f.settings.autoplayVideos = false
+  f.requests.length = 0
+  await Promise.all([
+    f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true }),
+    f.actions.syncWithSyncServer(f.context, { automatic: true }),
+  ])
+  assert.equal(f.requests.filter(request => request.method === 'PUT').length, 1)
+})
+
+test('successful silent remote checks clear a transient error without showing sync progress', async () => {
+  const f = liveFixture()
+  await f.actions.syncWithSyncServer(f.context)
+  const manifest = f.Client.prototype.getEncryptedSyncManifest
+  f.Client.prototype.getEncryptedSyncManifest = () => { throw new Error('Temporary network failure') }
+  await assert.rejects(f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true }), /Temporary network failure/)
+  f.Client.prototype.getEncryptedSyncManifest = manifest
+  f.commits.length = 0
+  await f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true })
+  assert.equal(f.context.state.syncServerStatus, 'success')
+  assert.equal(f.context.state.syncServerError, '')
+  assert.equal(f.commits.some(([action, value]) => action === 'setSyncServerStatus' && value === 'syncing'), false)
+})
+
+test('a failed remote-only check does not consume a queued local setting upload', async () => {
+  const f = liveFixture({ syncServerSyncSettings: true, autoplayVideos: true })
+  await f.actions.syncWithSyncServer(f.context)
+  f.settings.autoplayVideos = false
+  f.requests.length = 0
+  const manifest = f.Client.prototype.getEncryptedSyncManifest
+  f.Client.prototype.getEncryptedSyncManifest = () => {
+    f.Client.prototype.getEncryptedSyncManifest = manifest
+    throw new Error('Temporary network failure')
+  }
+  const results = await Promise.allSettled([
+    f.actions.syncWithSyncServer(f.context, { automatic: true, remoteOnly: true }),
+    f.actions.syncWithSyncServer(f.context, { automatic: true }),
+  ])
+  assert.equal(results[0].status, 'rejected')
+  assert.equal(results[1].status, 'fulfilled')
+  assert.equal(f.requests.filter(request => request.method === 'PUT').length, 1)
 })
