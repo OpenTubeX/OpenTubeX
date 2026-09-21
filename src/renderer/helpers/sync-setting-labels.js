@@ -145,7 +145,7 @@ export const SYNC_SETTING_LABELS = {
   hideVideoViews: 'Settings.Distraction Free Settings.Hide Video Views',
   hideWatchedSubs: 'Settings.Distraction Free Settings.Hide Videos on Watch',
   highlightChangedSettings: 'Settings.Highlight Changed Settings',
-  historyRetentionDays: 'Settings.Privacy Settings.Automatic History Retention Placeholder',
+  historyRetentionDays: 'Settings.Privacy Settings.Automatic History Retention',
   holdToDoublePlaybackSpeed: 'Settings.Player Settings.Hold to Double Playback Speed',
   homeSectionLayout: 'Home Page.Customize',
   iconPack: 'Settings.Theme Settings.Icon Pack.Icon Pack',

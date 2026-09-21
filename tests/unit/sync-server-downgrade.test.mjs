@@ -684,3 +684,51 @@ test('failed capability discovery can be retried on the same client', async () =
   assert.equal((await client.getCapabilities()).live_sync, 1)
   assert.equal(attempts, 2)
 })
+
+test('encrypted upload deadlines include activity ciphertext', async () => {
+  const f = fixture()
+  const client = new f.Client(f.settings.syncServerUrl)
+  client.request = async (_path, options) => options
+  const response = await client.putEncryptedSyncCollection('settings', 0, 'x'.repeat(1024 * 1024), 'a'.repeat(256 * 1024))
+  assert.equal(response.timeoutMs, 25000)
+})
+
+test('unreadable and expired broadcast events advance the activity cursor', async () => {
+  const now = Date.now()
+  const events = [
+    { id: '001', recipient: '', payload: 'unreadable', expires_at: now + 60000 },
+    { id: '002', recipient: '', payload: 'expired', expires_at: now - 1000 },
+  ]
+  const cursors = []
+  const f = fixture({}, { respond: url => {
+    const since = new URL(url).searchParams.get('since')
+    cursors.push(since)
+    return events.filter(event => event.id > since)
+  } })
+  await f.actions.refreshSyncServerEvents(f.context)
+  await f.actions.refreshSyncServerEvents(f.context)
+  assert.deepEqual(cursors, ['', '002'])
+  assert.equal(f.context.state.syncServerActivity.length, 0)
+})
+
+test('cross-window token refresh logs a rejected initialization', async () => {
+  const source = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
+  const start = source.indexOf('window.ftElectron.handleSyncSettings(')
+  const end = source.indexOf('window.ftElectron.handleSyncHistory(', start)
+  let listener
+  const logged = []
+  const failure = new Error('temporary remote sync failure')
+  vm.runInNewContext(source.slice(start, end), {
+    window: { ftElectron: { handleSyncSettings: callback => { listener = callback } } },
+    SyncEvents: { GENERAL: { UPSERT: 'upsert' } },
+    settingsWithSideEffects: [],
+    defaultMutationId: key => key,
+    commit: () => {},
+    dispatch: async () => { throw failure },
+    console: { error: (...args) => logged.push(args) },
+  })
+  listener('upsert', { _id: 'syncServerToken', value: 'replacement-token' })
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(logged.length, 1)
+  assert.equal(logged[0][1], failure)
+})

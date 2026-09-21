@@ -295,7 +295,7 @@ export class SyncServerClient {
       Math.max(
         REQUEST_TIMEOUT_MS,
         ENCRYPTED_SYNC_TIMEOUT_OVERHEAD_MS +
-          Math.ceil(payload.length / ENCRYPTED_SYNC_MIN_BYTES_PER_SECOND) * 1000
+          Math.ceil((payload.length + (activity?.length ?? 0)) / ENCRYPTED_SYNC_MIN_BYTES_PER_SECOND) * 1000
       )
     )
     return this.request(`/v1/encrypted_sync/${encodeURIComponent(collection)}`, {

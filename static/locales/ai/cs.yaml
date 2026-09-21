@@ -887,8 +887,8 @@ Settings:
   Sync Settings:
     Activity: "Aktivita účtu"
     No Activity: "Žádná nedávná aktivita"
-    Setting Changed: "{device} změnilo {setting} na {value}"
-    Item Updated: "{device} aktualizovalo {setting}"
+    Setting Changed: "Zařízení {device}: změna nastavení {setting} na {value}"
+    Item Updated: "Zařízení {device}: aktualizace {setting}"
     Open On Device: "Otevřít na jiném zařízení"
     Video Sent: "Video odesláno. Offline zařízení ho obdrží po připojení během 24 hodin."
     Video Received: "Přijaté video: {title}"

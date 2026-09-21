@@ -622,7 +622,11 @@ const actions = {
       let nextEventsSince = eventsSince
       for (const event of events) {
         if (!stillCurrent()) return
-        if (typeof event.id !== 'string' || event.expires_at <= Date.now()) continue
+        if (typeof event.id !== 'string') continue
+        // Discarded broadcast entries need not be fetched again. Device requests
+        // stay outside this cursor and remain pending until acknowledged.
+        if (event.recipient === '' && event.id > nextEventsSince) nextEventsSince = event.id
+        if (event.expires_at <= Date.now()) continue
         let value
         try {
           value = await decryptSyncDocument(event.payload, settings.syncServerPrivacyKey)
@@ -644,7 +648,6 @@ const actions = {
               }
             }
           }
-          if (event.id > nextEventsSince) nextEventsSince = event.id
         } else if (event.recipient === settings.syncServerDeviceId &&
             (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
             !(process.env.IS_CAPACITOR && isAppHidden())) {

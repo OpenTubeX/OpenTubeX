@@ -111,3 +111,7 @@ test('live sync retries discovery before polling and stops when unsupported or c
     })
   }
 })
+
+test('history retention activity uses the setting name instead of its input hint', () => {
+  assert.equal(SYNC_SETTING_LABELS.historyRetentionDays, 'Settings.Privacy Settings.Automatic History Retention')
+})
