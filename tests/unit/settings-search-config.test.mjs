@@ -12,6 +12,7 @@ import {
 import {
   createSettingsSearchIndex,
   findSettingsSearchTab,
+  findSettingsSearchTarget,
 } from '../../src/renderer/helpers/settingsSearch.js'
 
 const locale = loadYaml(await readFile(
@@ -440,4 +441,20 @@ test('settings search excludes playback speed fields only available while editin
   assert.ok(!values.some(match => match.label === 'Name'))
   assert.ok(!values.some(match => match.label === 'Use automatic playback speed name'))
   assert.ok(values.some(match => match.label === 'Edit playback speed name'))
+})
+
+
+test('activity links retain search tabs and subpages and reject unavailable or ambiguous labels', () => {
+  const match = { label: 'Playback Speed', tab: 'player', subpage: 'quick-playback-speed' }
+  const index = new Map([
+    ['playback', [{ label: 'Player' }, match, { label: 'Auto Update' }]],
+    ['general', [{ label: 'Auto Update' }]],
+  ])
+  assert.deepEqual(findSettingsSearchTarget(index, ['Playback Speed', 'Auto Update']), { section: 'playback', match })
+  assert.equal(findSettingsSearchTarget(index, ['Unavailable setting']), null)
+  assert.equal(findSettingsSearchTarget(index, ['Auto Update']), null)
+  assert.equal(findSettingsSearchTarget(index, []), null)
+  assert.deepEqual(findSettingsSearchTarget(index, ['Playback Speed', 'Auto Update'], 'defaultPlayback'), {
+    section: 'playback', match: { ...match, settingKey: 'defaultPlayback' }
+  })
 })

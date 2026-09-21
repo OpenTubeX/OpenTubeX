@@ -16,6 +16,8 @@ for (const uiScale of [95, 125]) {
       seed: {
         settings: {
           uiScale,
+          rememberPlaybackSpeedPerChannel: true,
+          rememberVideoQualityPerChannel: true,
           iconPack: uiScale === 95 ? 'material' : 'remix',
           syncServerEnabled: false,
           syncServerAutoSync: false,
@@ -142,7 +144,7 @@ for (const uiScale of [95, 125]) {
         recipient: '',
         created_at: Date.now(),
         expires_at: Date.now() + 86400000,
-        payload: await encryptSyncDocument({ version: 1, type: 'activity', deviceName: 'Phone', changes: [{ key: 'baseTheme', value: 'light' }] }, key, salt)
+        payload: await encryptSyncDocument({ version: 1, type: 'activity', deviceName: 'Phone', changes: [{ key: 'baseTheme', value: 'light' }, { key: 'autoUpdateChannelPlaybackSpeeds', value: true }] }, key, salt)
       })
       wake()
       await expect.poll(async () => latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')).baseTheme).toBe('light')
@@ -150,8 +152,29 @@ for (const uiScale of [95, 125]) {
       await expect.poll(() => waiting.size).toBeGreaterThan(0)
       expect(downloads.slice(baselineDownloads)).toEqual(['settings'])
       await sync.locator('.syncActivity').scrollIntoViewIfNeeded()
+      const activity = sync.locator('.activityList li').filter({ hasText: 'Phone changed Base theme to light' })
+      await expect(activity.locator('time')).toContainText(/ago/)
+      await expect(activity.locator('time')).toHaveAttribute('title', /\d/)
       await attachScreenshot('encrypted account activity')
-      await page.keyboard.press('Escape')
+      await activity.getByRole('button', { name: 'Base theme', exact: true }).focus()
+      await page.keyboard.press('Enter')
+      await expect(page.locator('.select.settingsSearchTarget')).toContainText(/Base theme/i)
+      await expect.poll(() => page.evaluate(() => !!document.activeElement?.closest('.settingsWindow'))).toBe(true)
+      await goToSettingsSection(page, 'sync')
+      await sync.locator('.activityList').getByRole('button', {
+        name: 'Enable Playback Speed · Automatically update when changing via player options', exact: true
+      }).click()
+      const autoUpdateHighlight = page.locator('.switch-ctn.settingsSearchTarget')
+      await expect(autoUpdateHighlight).toContainText('Automatically update when changing via player options')
+      await expect(autoUpdateHighlight.locator('..')).toContainText('Enable Playback Speed')
+      await page.locator('[data-setting-key="rememberPlaybackSpeedPerChannel"] input').press('Space')
+      await goToSettingsSection(page, 'sync')
+      await sync.locator('.activityList').getByRole('button', {
+        name: 'Enable Playback Speed · Automatically update when changing via player options', exact: true
+      }).click()
+      await expect(page.locator('.switch-ctn.settingsSearchTarget')).toContainText('Enable Playback Speed')
+
+      await page.getByRole('dialog', { name: 'Settings', exact: true }).getByRole('button', { name: 'Close', exact: true }).click()
       await goTo(page, 'history')
       await page.locator('.ft-list-video .title').first().click({ button: 'right' })
       const menu = page.getByRole('menu', { name: 'Context menu', exact: true })

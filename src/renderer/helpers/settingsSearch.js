@@ -6,6 +6,8 @@ import {
   SETTINGS_SEARCH_SOURCES,
 } from './settings-search-config.js'
 
+export const settingsSearchNavigationKey = Symbol('settingsSearchNavigation')
+
 const NON_SETTING_MESSAGE_KEY_PATTERN = /(?:^Are you sure\b|^Failed to\b|^Invalid\b|^No\b|^How\b|^Checking\b|^Downloading\b|^Loading\b|^Loaded\b|^Current .+\b(?:has|is|will)\b|\b(?:has|have) been (?:cleared|removed|saved|updated)\b|^Operation in Progress$|(?:Description|Hint|Tooltip|Placeholder|Template|Warning|Error|Status|Message|Not Downloaded|Unavailable|Connected|Connecting|Success|Failed|Failure|Invalid|Saved|Copied|Already Exists)$)/i
 
 /**
@@ -407,4 +409,18 @@ export function removeRedundantSettingsSearchMatches(values, locale) {
 
 export function normalizeSettingsSearchText(value, locale) {
   return value.toLocaleLowerCase(locale).normalize('NFKD').replaceAll(/\s+/g, ' ').trim()
+}
+
+// Use the descriptive parent label for navigation; settingKey identifies the exact control.
+export function findSettingsSearchTarget(index, labels, settingKey) {
+  for (const label of labels) {
+    const targets = [...index].flatMap(([section, matches]) =>
+      matches.filter(match => match.label === label).map(match => ({ section, match }))
+    )
+    if (targets.length === 1) {
+      const { section, match } = targets[0]
+      return { section, match: settingKey ? { ...match, settingKey } : match }
+    }
+  }
+  return null
 }

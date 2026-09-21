@@ -1,21 +1,37 @@
 .syncActivity {
-  margin-block-start: 1.5rem;
+  background-color: var(--secondary-card-bg-color);
+  border: 1px solid var(--divider-color);
+  border-radius: calc(12px * var(--ui-roundness));
+  box-shadow: 0 8px 24px rgb(0 0 0 / 14%);
+  box-sizing: border-box;
+  margin-block-start: 1.25rem;
+  margin-inline: auto;
+  max-inline-size: 64rem;
+  padding: 1.25rem;
 }
 
 .activityHeader {
   align-items: center;
   display: flex;
+  gap: 1rem;
   justify-content: space-between;
+  margin-block-end: 1rem;
 }
 
 .activityList {
+  display: grid;
+  gap: 0.75rem;
   list-style: none;
+  margin-block: 0 1rem;
   padding: 0;
 }
 
 .activityList li {
-  border-block-end: 1px solid var(--secondary-text-color);
-  padding-block: 0.75rem;
+  background-color: var(--card-bg-color);
+  border: 1px solid var(--divider-color);
+  border-radius: calc(10px * var(--ui-roundness));
+  box-shadow: 0 1px 3px rgb(0 0 0 / 16%);
+  padding: 1rem;
 }
 
 .activityList p {
@@ -27,4 +43,80 @@
 .activityList time {
   color: var(--secondary-text-color);
   font-size: 0.875rem;
+}
+
+.activityHeader h3 {
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.activitySetting {
+  background: none;
+  border: 0;
+  color: var(--primary-color);
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-align: start;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.activitySetting:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 3px;
+}
+
+.activitySetting:hover {
+  color: var(--primary-text-color);
+}
+
+@media only screen and (width <= 700px) {
+  .syncActivity {
+    padding: 1rem;
+  }
+}
+
+.activityTitle {
+  align-items: center;
+  display: flex;
+  gap: 0.875rem;
+  min-inline-size: 0;
+}
+
+.activityIcon {
+  align-items: center;
+  background-color: color-mix(in srgb, var(--primary-color) 14%, transparent);
+  block-size: 2.75rem;
+  border-radius: calc(10px * var(--ui-roundness));
+  color: var(--primary-color);
+  display: inline-flex;
+  flex-shrink: 0;
+  font-size: 1.35rem;
+  inline-size: 2.75rem;
+  justify-content: center;
+}
+
+.activityAction :deep(.iconButton) {
+  background-color: color-mix(in srgb, var(--card-bg-color) 82%, var(--primary-text-color));
+  border: 1px solid var(--divider-color);
+  border-radius: calc(9px * var(--ui-roundness));
+  box-sizing: border-box;
+  min-block-size: 44px;
+  min-inline-size: 44px;
+}
+
+.activityAction :deep(.iconButton:not(.disabled):is(:hover, :focus-visible, :active)) {
+  background-color: var(--side-nav-hover-color);
+  color: var(--side-nav-hover-text-color);
+}
+
+@media only screen and (width <= 480px) {
+  .activityHeader {
+    align-items: flex-start;
+  }
+
+  .activityIcon {
+    display: none;
+  }
 }
