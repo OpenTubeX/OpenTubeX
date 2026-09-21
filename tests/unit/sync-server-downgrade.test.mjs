@@ -1,3 +1,4 @@
+import * as syncLive from '../../src/renderer/helpers/sync-server-live.js'
 import * as subscriptionSettingsSync from '../../src/renderer/helpers/subscription-settings-sync.js'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
@@ -48,6 +49,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     ...overrides,
   }
   const common = {
+    ...syncLive,
     ...subscriptionSettingsSync,
     ...errors,
     showToast: options => notifications.push(options),
@@ -259,6 +261,38 @@ test('encrypted accounts still sync when the server supports encryption', async 
     f.settings.syncServerPrivacyKey
   )
   assert.equal(document[0].name, 'Private subscription')
+})
+
+test('new clients keep the old encrypted protocol when live sync is unavailable', async () => {
+  const collections = new Map()
+  const f = fixture({}, {
+    encrypted: true,
+    respond: (url, options) => {
+      const path = new URL(url).pathname
+      assert.ok(!path.includes('/events') && !path.includes('/changes'))
+      if (path === '/v1/encrypted_sync') return {
+        collections: [...collections].map(([collection, entry]) => ({ collection, revision: entry.revision })),
+        legacy_data: false,
+      }
+      if (path.startsWith('/v1/encrypted_sync/')) {
+        const collection = path.split('/').at(-1)
+        if (options.method === 'PUT') {
+          const body = JSON.parse(options.body)
+          assert.deepEqual(Object.keys(body).sort(), ['payload', 'revision'])
+          assert.equal(body.revision, collections.get(collection)?.revision ?? 0)
+          collections.set(collection, { revision: body.revision + 1, payload: body.payload })
+        }
+        return collections.get(collection) ?? { revision: 0, payload: null }
+      }
+    },
+  })
+  await f.actions.initializeSyncServer(f.context)
+  f.context.rootState.profiles.profileList[0].subscriptions.push({ id: 'another-channel', name: 'Another channel' })
+  await f.actions.syncWithSyncServer(f.context)
+  assert.equal(f.context.state.syncServerLiveSupported, false)
+  assert.equal(collections.get('subscriptions').revision, 2)
+  const document = await privacy.decryptSyncDocument(collections.get('subscriptions').payload, f.settings.syncServerPrivacyKey)
+  assert.ok(document.some(channel => channel.id === 'another-channel'))
 })
 
 test('manual sync uses encryption when a saved key survives an earlier downgrade', async () => {
@@ -586,4 +620,115 @@ test('disconnect cancels an active sync and reconnect waits for it to settle', a
   }
   for (let i = 0; i < 100 && f.requests.length === 1; i++) await Promise.resolve()
   assert.ok(f.requests.length > 1, 'a fresh sync starts after cancellation settles')
+})
+
+test('unchanged collection revisions skip downloads and uploads; remote changes download only their collection', async () => {
+  const collections = new Map()
+  const f = fixture({ syncServerSyncSettings: true, channelPlaybackSpeeds: '{}' }, {
+    encrypted: true,
+    respond: (url, options) => {
+      const path = new URL(url).pathname
+      if (path === '/v1/encrypted_sync') return {
+        collections: [...collections].map(([collection, entry]) => ({ collection, revision: entry.revision })),
+        legacy_data: false,
+      }
+      if (path.startsWith('/v1/encrypted_sync/')) {
+        const collection = path.split('/').at(-1)
+        if (options.method === 'PUT') {
+          const body = JSON.parse(options.body)
+          assert.equal(body.revision, collections.get(collection)?.revision ?? 0)
+          collections.set(collection, { revision: body.revision + 1, payload: body.payload })
+        }
+        return collections.get(collection) ?? { revision: 0, payload: null }
+      }
+    },
+  })
+  await f.actions.syncWithSyncServer(f.context)
+  f.requests.length = 0
+  await f.actions.syncWithSyncServer(f.context)
+  assert.equal(f.requests.some(request => request.url.includes('/encrypted_sync/')), false)
+  const remote = await privacy.decryptSyncDocument(collections.get('settings').payload, f.settings.syncServerPrivacyKey)
+  const entry = remote.find(entry => entry.key === 'channelPlaybackSpeeds')
+  entry.value = JSON.stringify({ channel: 1.5 })
+  entry.updatedAt = Date.now() + 1000
+  collections.set('settings', {
+    revision: collections.get('settings').revision + 1,
+    payload: await privacy.encryptSyncDocument(remote, f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt),
+  })
+  f.requests.length = 0
+  await f.actions.syncWithSyncServer(f.context)
+  assert.deepEqual(f.requests.filter(request => request.url.includes('/encrypted_sync/')).map(request => [request.method, new URL(request.url).pathname]), [
+    ['GET', '/v1/encrypted_sync/settings'],
+  ])
+  assert.deepEqual(JSON.parse(f.settings.channelPlaybackSpeeds), { channel: 1.5 })
+})
+
+test('a sign-out received from another window stops sync and clears account activity', async () => {
+  const f = fixture({ syncServerToken: '' })
+  f.context.state.syncServerActivity = [{ id: 'old-account-event' }]
+  f.context.state.syncServerLiveSupported = true
+  await f.actions.applySyncServerToken(f.context)
+  assert.equal(f.dispatched[0][0], 'stopSyncServerAutoSync')
+  assert.equal(f.context.state.syncServerActivity.length, 0)
+  assert.equal(f.context.state.syncServerLiveSupported, false)
+  assert.equal(f.dispatched.some(([action]) => action === 'initializeSyncServer'), false)
+})
+
+test('failed capability discovery can be retried on the same client', async () => {
+  let attempts = 0
+  const f = fixture({}, { respond: () => ++attempts === 1
+    ? new Response('temporarily unavailable', { status: 503 })
+    : { capabilities: { encrypted_sync: 1, live_sync: 1 } } })
+  const client = new f.Client(f.settings.syncServerUrl, f.settings.syncServerToken)
+  await assert.rejects(client.getCapabilities(), { status: 503 })
+  assert.equal((await client.getCapabilities()).live_sync, 1)
+  assert.equal(attempts, 2)
+})
+
+test('encrypted upload deadlines include activity ciphertext', async () => {
+  const f = fixture()
+  const client = new f.Client(f.settings.syncServerUrl)
+  client.request = async (_path, options) => options
+  const response = await client.putEncryptedSyncCollection('settings', 0, 'x'.repeat(1024 * 1024), 'a'.repeat(256 * 1024))
+  assert.equal(response.timeoutMs, 25000)
+})
+
+test('unreadable and expired broadcast events advance the activity cursor', async () => {
+  const now = Date.now()
+  const events = [
+    { id: '001', recipient: '', payload: 'unreadable', expires_at: now + 60000 },
+    { id: '002', recipient: '', payload: 'expired', expires_at: now - 1000 },
+  ]
+  const cursors = []
+  const f = fixture({}, { respond: url => {
+    const since = new URL(url).searchParams.get('since')
+    cursors.push(since)
+    return events.filter(event => event.id > since)
+  } })
+  await f.actions.refreshSyncServerEvents(f.context)
+  await f.actions.refreshSyncServerEvents(f.context)
+  assert.deepEqual(cursors, ['', '002'])
+  assert.equal(f.context.state.syncServerActivity.length, 0)
+})
+
+test('cross-window token refresh logs a rejected initialization', async () => {
+  const source = await readFile(new URL('../../src/renderer/store/modules/settings.js', import.meta.url), 'utf8')
+  const start = source.indexOf('window.ftElectron.handleSyncSettings(')
+  const end = source.indexOf('window.ftElectron.handleSyncHistory(', start)
+  let listener
+  const logged = []
+  const failure = new Error('temporary remote sync failure')
+  vm.runInNewContext(source.slice(start, end), {
+    window: { ftElectron: { handleSyncSettings: callback => { listener = callback } } },
+    SyncEvents: { GENERAL: { UPSERT: 'upsert' } },
+    settingsWithSideEffects: [],
+    defaultMutationId: key => key,
+    commit: () => {},
+    dispatch: async () => { throw failure },
+    console: { error: (...args) => logged.push(args) },
+  })
+  listener('upsert', { _id: 'syncServerToken', value: 'replacement-token' })
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(logged.length, 1)
+  assert.equal(logged[0][1], failure)
 })

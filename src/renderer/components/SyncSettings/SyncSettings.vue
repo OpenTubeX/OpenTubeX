@@ -258,6 +258,7 @@
             @click="showDeleteAccountPrompt = true"
           />
         </FtFlexBox>
+        <SyncActivity v-if="store.getters.getSyncServerLiveSupported" />
         <SyncAccountManagement
           v-if="accountSessionsSupported"
           ref="accountManagement"
@@ -456,6 +457,7 @@ import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import SyncPairing from './SyncPairing.vue'
 import SyncAccountManagement from './SyncAccountManagement.vue'
+import SyncActivity from './SyncActivity.vue'
 
 import store from '../../store/index'
 import {

@@ -885,6 +885,13 @@ Settings:
     Import playlists formats: 'Podporované formáty: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Activity: "Aktivita účtu"
+    No Activity: "Žiadna nedávna aktivita"
+    Setting Changed: "{device} zmenilo {setting} na {value}"
+    Item Updated: "{device} aktualizovalo {setting}"
+    Open On Device: "Otvoriť na inom zariadení"
+    Video Sent: "Video odoslané. Offline zariadenia ho dostanú po pripojení do 24 hodín."
+    Video Received: "Prijaté video: {title}"
     Previous Auto Sync Notice: "Automatická synchronizácia je vypnutá. Staršia verzia ju mohla vypnúť, aby zabránila strate údajov."
     Enable Automatic Sync: "Zapnúť automatickú synchronizáciu"
     Destructive Sync Blocked: "Synchronizácia bola zastavená, aby sa zabránilo strate údajov. Automatická synchronizácia je vypnutá. Otvorte nastavenia synchronizácie a skontrolujte vymazávania."

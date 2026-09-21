@@ -885,6 +885,13 @@ Settings:
     Import playlists formats: 'Formatos suportados: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Activity: "Atividade da conta"
+    No Activity: "Nenhuma atividade recente"
+    Setting Changed: "{device} alterou {setting} para {value}"
+    Item Updated: "{device} atualizou {setting}"
+    Open On Device: "Abrir em outro dispositivo"
+    Video Sent: "Vídeo enviado. Os dispositivos offline o receberão ao se reconectarem em até 24 horas."
+    Video Received: "Vídeo recebido: {title}"
     Previous Auto Sync Notice: "A sincronização automática está desativada. Uma versão anterior pode tê-la desativado para evitar a perda de dados."
     Enable Automatic Sync: "Ativar sincronização automática"
     Destructive Sync Blocked: "A sincronização foi interrompida para evitar a perda de dados. A sincronização automática está desativada. Abra as configurações de sincronização para revisar as exclusões."

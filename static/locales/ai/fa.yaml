@@ -931,6 +931,13 @@ Settings:
     Import playlists formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)'
   Sync Settings:
+    Activity: "فعالیت حساب"
+    No Activity: "فعالیت اخیری وجود ندارد"
+    Setting Changed: "{device} مقدار {setting} را به {value} تغییر داد"
+    Item Updated: "{device} گزینهٔ {setting} را به‌روز کرد"
+    Open On Device: "باز کردن در دستگاه دیگر"
+    Video Sent: "ویدیو ارسال شد. دستگاه‌های آفلاین هنگام اتصال دوباره در مدت ۲۴ ساعت آن را دریافت می‌کنند."
+    Video Received: "ویدیوی دریافت‌شده: {title}"
     Previous Auto Sync Notice: "همگام‌سازی خودکار خاموش است. ممکن است نسخه‌ای پیشین برای جلوگیری از ازدست‌رفتن داده‌ها آن را غیرفعال کرده باشد."
     Enable Automatic Sync: "فعال‌کردن همگام‌سازی خودکار"
     Destructive Sync Blocked: "همگام‌سازی برای جلوگیری از ازدست‌رفتن داده‌ها متوقف شد. همگام‌سازی خودکار خاموش است. برای بررسی حذف‌ها، تنظیمات همگام‌سازی را باز کنید."

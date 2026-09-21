@@ -904,6 +904,13 @@ Settings:
     Import playlists formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'التنسيقات المدعومة: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)'
   Sync Settings:
+    Activity: "نشاط الحساب"
+    No Activity: "لا يوجد نشاط حديث"
+    Setting Changed: "غيّر {device} الإعداد {setting} إلى {value}"
+    Item Updated: "حدّث {device} الإعداد {setting}"
+    Open On Device: "فتح على جهاز آخر"
+    Video Sent: "تم إرسال الفيديو. تستلمه الأجهزة غير المتصلة عند إعادة الاتصال خلال 24 ساعة."
+    Video Received: "فيديو مستلم: {title}"
     Previous Auto Sync Notice: "المزامنة التلقائية متوقفة. ربما عطّلها إصدار سابق لمنع فقدان البيانات."
     Enable Automatic Sync: "تفعيل المزامنة التلقائية"
     Destructive Sync Blocked: "توقفت المزامنة لمنع فقدان البيانات. المزامنة التلقائية معطلة. افتح إعدادات المزامنة لمراجعة عمليات الحذف."

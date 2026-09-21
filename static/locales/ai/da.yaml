@@ -927,6 +927,13 @@ Settings:
     Import playlists formats: 'Understøttede formater: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Understøttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Activity: "Kontoaktivitet"
+    No Activity: "Ingen nylig aktivitet"
+    Setting Changed: "{device} ændrede {setting} til {value}"
+    Item Updated: "{device} opdaterede {setting}"
+    Open On Device: "Åbn på en anden enhed"
+    Video Sent: "Video sendt. Offlineenheder modtager den, når de opretter forbindelse igen inden for 24 timer."
+    Video Received: "Modtaget video: {title}"
     Previous Auto Sync Notice: "Automatisk synkronisering er slået fra. En tidligere version kan have slået den fra for at forhindre datatab."
     Enable Automatic Sync: "Slå automatisk synkronisering til"
     Destructive Sync Blocked: "Synkronisering er stoppet for at forhindre datatab. Automatisk synkronisering er slået fra. Åbn synkroniseringsindstillingerne for at gennemgå sletningerne."

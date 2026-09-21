@@ -904,6 +904,13 @@ Settings:
     Import playlists formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Activity: "Hoạt động tài khoản"
+    No Activity: "Không có hoạt động gần đây"
+    Setting Changed: "{device} đã đổi {setting} thành {value}"
+    Item Updated: "{device} đã cập nhật {setting}"
+    Open On Device: "Mở trên thiết bị khác"
+    Video Sent: "Đã gửi video. Thiết bị ngoại tuyến sẽ nhận được khi kết nối lại trong vòng 24 giờ."
+    Video Received: "Video đã nhận: {title}"
     Previous Auto Sync Notice: "Đồng bộ tự động đang tắt. Phiên bản trước có thể đã tắt tính năng này để tránh mất dữ liệu."
     Enable Automatic Sync: "Bật đồng bộ tự động"
     Destructive Sync Blocked: "Đã dừng đồng bộ để tránh mất dữ liệu. Đồng bộ tự động đã tắt. Mở cài đặt đồng bộ để xem lại các mục sẽ bị xóa."

@@ -885,6 +885,13 @@ Settings:
     Import playlists formats: '支持的格式：OpenTubeX / FreeTube (.db)'
     Import search history formats: '支持的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.json)'
   Sync Settings:
+    Activity: "账户活动"
+    No Activity: "暂无近期活动"
+    Setting Changed: "{device} 将 {setting} 更改为 {value}"
+    Item Updated: "{device} 更新了 {setting}"
+    Open On Device: "在其他设备上打开"
+    Video Sent: "视频已发送。离线设备将在 24 小时内重新连接时收到。"
+    Video Received: "收到视频：{title}"
     Previous Auto Sync Notice: "自动同步已关闭。较早的版本可能为防止数据丢失而将其禁用。"
     Enable Automatic Sync: "启用自动同步"
     Destructive Sync Blocked: "为防止数据丢失，同步已停止。自动同步已关闭。请打开同步设置查看将要删除的项目。"

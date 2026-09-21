@@ -1137,6 +1137,13 @@ Settings:
     Import playlists formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Palaikomi formatai: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Activity: "Paskyros veikla"
+    No Activity: "Nėra naujausios veiklos"
+    Setting Changed: "{device} pakeitė {setting} į {value}"
+    Item Updated: "{device} atnaujino {setting}"
+    Open On Device: "Atverti kitame įrenginyje"
+    Video Sent: "Vaizdo įrašas išsiųstas. Neprisijungę įrenginiai jį gaus prisijungę per 24 valandas."
+    Video Received: "Gautas vaizdo įrašas: {title}"
     Previous Auto Sync Notice: "Automatinis sinchronizavimas išjungtas. Ankstesnė versija galėjo jį išjungti, kad išvengtų duomenų praradimo."
     Enable Automatic Sync: "Įjungti automatinį sinchronizavimą"
     Destructive Sync Blocked: "Sinchronizavimas sustabdytas siekiant išvengti duomenų praradimo. Automatinis sinchronizavimas išjungtas. Atverkite sinchronizavimo nuostatas ir peržiūrėkite trynimus."

@@ -166,6 +166,9 @@ export class SyncServerClient {
       // health response advertises the optional OpenTubeX extensions.
       if (!response || typeof response !== 'object' || Array.isArray(response)) return {}
       return response
+    }).catch(error => {
+      this.serverInfoPromise = null
+      throw error
     })
     return this.serverInfoPromise
   }
@@ -286,20 +289,36 @@ export class SyncServerClient {
     return this.request('/v1/encrypted_sync/legacy', { timeoutMs: MAX_ENCRYPTED_SYNC_TIMEOUT_MS })
   }
 
-  putEncryptedSyncCollection(collection, revision, payload) {
+  putEncryptedSyncCollection(collection, revision, payload, activity) {
     const timeoutMs = Math.min(
       MAX_ENCRYPTED_SYNC_TIMEOUT_MS,
       Math.max(
         REQUEST_TIMEOUT_MS,
         ENCRYPTED_SYNC_TIMEOUT_OVERHEAD_MS +
-          Math.ceil(payload.length / ENCRYPTED_SYNC_MIN_BYTES_PER_SECOND) * 1000
+          Math.ceil((payload.length + (activity?.length ?? 0)) / ENCRYPTED_SYNC_MIN_BYTES_PER_SECOND) * 1000
       )
     )
     return this.request(`/v1/encrypted_sync/${encodeURIComponent(collection)}`, {
       method: 'PUT',
-      body: { revision, payload },
+      body: { revision, payload, ...(activity ? { activity } : {}) },
       timeoutMs,
     })
+  }
+
+  waitForSyncChanges(cursor) {
+    return this.request(`/v1/encrypted_sync/changes?since=${encodeURIComponent(cursor)}`, { timeoutMs: 35000 })
+  }
+
+  getSyncEvents(since = '') {
+    return this.request(`/v1/encrypted_sync/events?since=${encodeURIComponent(since)}`)
+  }
+
+  sendDeviceRequest(recipient, payload) {
+    return this.request('/v1/encrypted_sync/events', { method: 'POST', body: { recipient, payload } })
+  }
+
+  acknowledgeDeviceRequest(id) {
+    return this.request(`/v1/encrypted_sync/events/${encodeURIComponent(id)}`, { method: 'DELETE' })
   }
 
   async apiRequest(path, options = {}) {

@@ -1444,6 +1444,12 @@ const customActions = {
             }
             if (data._id === 'syncServerEnabled') {
               dispatch('applySyncServerEnabled', data.value, { root: true })
+            } else if (data._id === 'syncServerAutoSync') {
+              dispatch(data.value ? 'startSyncServerAutoSync' : 'stopSyncServerAutoSync', null, { root: true })
+            } else if (data._id === 'syncServerToken') {
+              dispatch('applySyncServerToken', null, { root: true }).catch(error => {
+                console.error('Failed to refresh sync after a token change in another window', error)
+              })
             }
             break
 

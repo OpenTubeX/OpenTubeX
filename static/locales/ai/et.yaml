@@ -885,6 +885,13 @@ Settings:
     Import playlists formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Activity: "Konto tegevus"
+    No Activity: "Hiljutisi tegevusi pole"
+    Setting Changed: "{device} muutis sätte {setting} väärtuseks {value}"
+    Item Updated: "{device} uuendas sätet {setting}"
+    Open On Device: "Ava teises seadmes"
+    Video Sent: "Video saadetud. Võrguühenduseta seadmed saavad selle uuesti ühendudes 24 tunni jooksul."
+    Video Received: "Saadud video: {title}"
     Previous Auto Sync Notice: "Automaatne sünkroonimine on välja lülitatud. Varasem versioon võis selle andmekao vältimiseks välja lülitada."
     Enable Automatic Sync: "Luba automaatne sünkroonimine"
     Destructive Sync Blocked: "Sünkroonimine peatati andmekao vältimiseks. Automaatne sünkroonimine on välja lülitatud. Kustutamiste ülevaatamiseks ava sünkroonimise seaded."

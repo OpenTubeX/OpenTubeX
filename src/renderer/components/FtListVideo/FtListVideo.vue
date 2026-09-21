@@ -1257,6 +1257,20 @@ const videoContextMenuItems = computed(() => {
           submenu: openItems
         })
   }
+  if (store.getters.getSyncServerEnabled && store.getters.getSyncServerLiveSupported) {
+    const devices = store.getters.getSyncServerDevices
+    rows.push({
+      label: t('Settings.Sync Settings.Open On Device'),
+      icon: ['fas', 'devices'],
+      enabled: devices.length > 0,
+      submenu: devices.map(device => ({
+        label: device.name,
+        icon: ['fas', 'display'],
+        enabled: true,
+        run: () => sendToDevice(device.id),
+      })),
+    })
+  }
   if (process.env.IS_CAPACITOR) {
     rows.push({
       label: t('Share.Share Link'),
@@ -1267,6 +1281,15 @@ const videoContextMenuItems = computed(() => {
   }
   return rows
 })
+
+async function sendToDevice(recipient) {
+  try {
+    await store.dispatch('sendSyncServerVideo', { recipient, videoId: id.value, title: title.value })
+    showToast({ message: t('Settings.Sync Settings.Video Sent'), icon: ['fas', 'devices'] })
+  } catch (error) {
+    showToast({ message: error.message, icon: ['fas', 'circle-exclamation'] })
+  }
+}
 
 const phoneLayout = usePhoneLayout()
 const useMobileThumbnailActions = computed(() => process.env.IS_CAPACITOR || phoneLayout.value)

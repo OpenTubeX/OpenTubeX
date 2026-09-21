@@ -889,6 +889,13 @@ Settings:
     Import playlists formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Activity: "Gweithgarwch cyfrif"
+    No Activity: "Dim gweithgarwch diweddar"
+    Setting Changed: "Newidiodd {device} {setting} i {value}"
+    Item Updated: "Diweddarodd {device} {setting}"
+    Open On Device: "Agor ar ddyfais arall"
+    Video Sent: "Anfonwyd y fideo. Bydd dyfeisiau all-lein yn ei dderbyn pan fyddant yn ailgysylltu o fewn 24 awr."
+    Video Received: "Fideo wedi'i dderbyn: {title}"
     Previous Auto Sync Notice: "Mae cysoni awtomatig wedi'i ddiffodd. Efallai bod fersiwn gynharach wedi'i analluogi i atal colli data."
     Enable Automatic Sync: "Galluogi cysoni awtomatig"
     Destructive Sync Blocked: "Ataliwyd cysoni i atal colli data. Mae cysoni awtomatig wedi'i ddiffodd. Agorwch osodiadau cysoni i adolygu'r dileadau."
