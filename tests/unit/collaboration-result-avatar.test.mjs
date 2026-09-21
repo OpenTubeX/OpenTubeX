@@ -52,6 +52,13 @@ test('collaboration bylines show avatars without a single channel ID in grid/lis
   assert.equal(visible({ hidden: true }), false)
 })
 
+test('post video bylines show avatars and respect the hide avatars setting', () => {
+  assert.equal(visible({ appearance: 'communityPost' }), true)
+  assert.equal(visible({ appearance: 'communityPost', hidden: true }), false)
+  assert.equal(visible({ appearance: 'recommendation' }), false)
+  assert.equal(visible({ appearance: 'watchPlaylistItem' }), false)
+})
+
 test('collaboration cards resolve the primary channel avatar by video ID', async () => {
   const f = resolve({ videoId: 'collab', hasCollaborators: true })
   await f.pending

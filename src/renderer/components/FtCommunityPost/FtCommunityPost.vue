@@ -95,7 +95,7 @@
       <FtListVideo
         v-if="!hideVideo"
         :data="data.postContent.content"
-        appearance=""
+        appearance="communityPost"
         force-list-type="grid"
       />
       <p
