@@ -4830,7 +4830,7 @@ test.describe('sync settings', () => {
           serverCheckStarted()
           await serverCheckPending
         }
-        await route.fulfill({ status: 200, body: 'OK' })
+        await route.fulfill({ status: 200, json: { capabilities: { encrypted_sync: 1, live_sync: 1 } } })
       } else {
         await route.fulfill({ status: 500, body: 'Sync failed' })
       }
@@ -4877,10 +4877,14 @@ test.describe('sync settings', () => {
     await page.route('https://sync.example/**', async (route) => {
       const pathname = new URL(route.request().url()).pathname
       if (pathname === '/health') {
-        await route.fulfill({ status: 200, body: 'OK' })
+        await route.fulfill({ status: 200, json: { capabilities: { encrypted_sync: 1, live_sync: 1 } } })
         return
       }
 
+      if (pathname === '/v1/account/sessions' || pathname === '/v1/encrypted_sync/events') {
+        await route.fulfill({ json: [] })
+        return
+      }
       syncRequests.push(pathname)
       syncRequestStarted()
       await syncRequestPending
@@ -4920,7 +4924,11 @@ test.describe('sync settings', () => {
     await otherWindow.route('https://sync.example/**', async (route) => {
       const pathname = new URL(route.request().url()).pathname
       if (pathname === '/health') {
-        await route.fulfill({ status: 200, body: 'OK' })
+        await route.fulfill({ status: 200, json: { capabilities: { encrypted_sync: 1, live_sync: 1 } } })
+        return
+      }
+      if (pathname === '/v1/account/sessions' || pathname === '/v1/encrypted_sync/events') {
+        await route.fulfill({ json: [] })
         return
       }
       syncRequests.push(pathname)
