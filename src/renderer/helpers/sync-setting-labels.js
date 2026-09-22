@@ -304,7 +304,7 @@ export const SYNC_SETTING_LABELS = {
   sponsorBlockUserId: 'Settings.SponsorBlock Settings.SponsorBlock Private User ID (optional)',
   startupBehavior: 'Settings.General Settings.Startup Behavior.Startup Behavior',
   statsWeekStartsOn: 'Settings.Privacy Settings.Week Starts On',
-  subscriptionChannelSettings: 'Settings.Subscription Settings.Subscription Settings',
+  subscriptionChannelSettings: 'Channel.Subscription settings',
   subscriptionFeedAutoRefreshInterval: 'Settings.Subscription Settings.Videos Auto Refresh Interval',
   subscriptionLiveAutoRefreshInterval: 'Settings.Subscription Settings.Live Auto Refresh Interval',
   subscriptionPostsAutoRefreshInterval: 'Settings.Subscription Settings.Posts Auto Refresh Interval',

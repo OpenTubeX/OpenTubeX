@@ -23,6 +23,9 @@ export function createSettingsSearchIndex(options) {
     tm,
   } = options
   const extraValues = {
+    // Resolve this label individually so partially translated Channel groups
+    // still use the same fallback as the subscription settings button.
+    subscriptions: flattenSettingsSearchMessageValues(tm('Channel.Subscription settings')),
     privacy: flattenSettingsSearchMessageValues(
       tm('Settings.Password Settings'),
       {},

@@ -292,3 +292,20 @@ test('rejects invalid remote edit times before dispatching channel settings', as
     assert.equal(store.state.profiles.profileList[0].subscriptions[0].subscriptionSettingsUpdatedAt, 100)
   }
 })
+
+test('subscribing with untouched defaults does not upload a per-channel settings record or report a settings change', async () => {
+  const store = createStore([])
+  const client = createClient()
+  const previous = await context.syncSettings(client, store)
+  const before = structuredClone(client.entries)
+  for (const profile of store.state.profiles.profileList) profile.subscriptions.push({ id: 'new-channel' })
+  await context.syncSettings(client, store, previous)
+  assert.deepEqual(client.entries.find(entry => entry.key === key).value, {})
+  const { createSyncActivity } = await import('../../src/renderer/helpers/sync-server-live.js')
+  assert.equal(createSyncActivity('settings', before, client.entries, 'device', 'Laptop'), null)
+})
+
+test('explicit resets to defaults remain in the sync payload', () => {
+  const store = createStore([{ id: 'reset', subscriptionSettingsUpdatedAt: 123 }])
+  assert.equal(subscriptionSync.getSubscriptionSettingsForSync(store).reset.updatedAt, 123)
+})

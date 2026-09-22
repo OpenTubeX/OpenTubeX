@@ -1,3 +1,6 @@
+import { areJsonValuesEqual } from './jsonValues.js'
+import { normalizeSubscriptionChannelSettings } from './subscription-channels.js'
+
 // Decrypted collections are cached only for this renderer session. A new account,
 // key, or token starts with an empty cache; snapshots remain merge baselines.
 export class SyncCollectionCache {
@@ -40,6 +43,13 @@ const NOISY_ACTIVITY_SETTINGS = new Set([
   'playlistReverseStates', 'sponsorBlockDraftSegmentsByVideoId',
 ])
 
+function subscriptionPreferences(value) {
+  return Object.fromEntries(Object.entries(value ?? {}).flatMap(([id, entry]) => {
+    const settings = normalizeSubscriptionChannelSettings(entry.value)
+    return areJsonValuesEqual(settings, normalizeSubscriptionChannelSettings()) ? [] : [[id, settings]]
+  }))
+}
+
 export function createSyncActivity(collection, before, after, deviceId, deviceName) {
   if (['history', 'seenVideos', 'seenPosts', 'sessions', 'sessionsV2'].includes(collection)) return null
   const changes = []
@@ -49,6 +59,9 @@ export function createSyncActivity(collection, before, after, deviceId, deviceNa
       // The first upload establishes a baseline, rather than hundreds of actions.
       if (NOISY_ACTIVITY_SETTINGS.has(entry.key) || !previous.has(entry.key) ||
           JSON.stringify(previous.get(entry.key)) === JSON.stringify(entry.value)) continue
+      if (entry.key === 'subscriptionChannelSettings' && areJsonValuesEqual(
+        subscriptionPreferences(previous.get(entry.key)), subscriptionPreferences(entry.value)
+      )) continue
       const value = entry.value
       // Large JSON-backed settings get an update entry rather than filling the
       // activity feed with configuration data or exceeding its payload limit.

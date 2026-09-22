@@ -46,8 +46,6 @@ const LEGACY_HISTORY_PAGE_SIZE = 50
 const BULK_SYNC_CHUNK_SIZE = 100
 const LEGACY_SYNC_CONCURRENCY = 4
 const REQUEST_TIMEOUT_MS = 20_000
-const ENCRYPTED_SYNC_MIN_BYTES_PER_SECOND = 128 * 1024
-const ENCRYPTED_SYNC_TIMEOUT_OVERHEAD_MS = 15_000
 const MAX_ENCRYPTED_SYNC_TIMEOUT_MS = 5 * 60 * 1000
 const DEFAULT_CHANNEL_AVATAR = 'https://yt3.googleusercontent.com/ytc/default'
 const YOUTUBE_VIDEO_THUMBNAIL_REGEX = /^https?:\/\/i\.ytimg\.com\/vi(?:_webp)?\//
@@ -298,18 +296,12 @@ export class SyncServerClient {
   }
 
   putEncryptedSyncCollection(collection, revision, payload, activity) {
-    const timeoutMs = Math.min(
-      MAX_ENCRYPTED_SYNC_TIMEOUT_MS,
-      Math.max(
-        REQUEST_TIMEOUT_MS,
-        ENCRYPTED_SYNC_TIMEOUT_OVERHEAD_MS +
-          Math.ceil((payload.length + (activity?.length ?? 0)) / ENCRYPTED_SYNC_MIN_BYTES_PER_SECOND) * 1000
-      )
-    )
+    // Upload throughput and server commit latency cannot be inferred from size.
+    // Allow the same bounded transfer window as encrypted downloads.
     return this.request(`/v1/encrypted_sync/${encodeURIComponent(collection)}`, {
       method: 'PUT',
       body: { revision, payload, ...(activity ? { activity } : {}) },
-      timeoutMs,
+      timeoutMs: MAX_ENCRYPTED_SYNC_TIMEOUT_MS,
     })
   }
 
