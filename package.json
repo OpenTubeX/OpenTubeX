@@ -91,7 +91,7 @@
     "@fontsource-variable/plus-jakarta-sans": "^5.3.0",
     "@fontsource-variable/source-sans-3": "^5.3.0",
     "@hpke/core": "^1.9.0",
-    "@iconify/vue": "^5.0.1",
+    "@iconify/vue": "^5.0.2",
     "@jitl/quickjs-wasmfile-release-sync": "^0.32.0",
     "@seald-io/nedb": "^4.1.2",
     "@vot.js/core": "^3.1.0",
