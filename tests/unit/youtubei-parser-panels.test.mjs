@@ -36,7 +36,7 @@ test('parses loading panel content without runtime parser generation or type mis
   assert.equal(panel.content.use_spinner, true)
 })
 
-test('parses player interstitials and their text and button without runtime generation', (t) => {
+test('ignores unused player interstitials without runtime parser generation', (t) => {
   const warn = t.mock.method(console, 'warn', () => {})
   const node = Parser.parseItem({
     playerInterstitialRenderer: {
@@ -51,12 +51,7 @@ test('parses player interstitials and their text and button without runtime gene
     }
   })
   assert.equal(warn.mock.callCount(), 0)
-  assert.ok(node instanceof YTNodes.PlayerInterstitial)
-  assert.ok(node.content instanceof YTNodes.InterstitialView)
-  assert.equal(node.content.title.toString(), 'Before you continue')
-  assert.equal(node.content.description.toString(), 'Please confirm')
-  assert.ok(node.content.primary_button instanceof YTNodes.ButtonView)
-  assert.equal(node.content.primary_button.title, 'Continue')
+  assert.equal(node, null)
 })
 
 test('retains comment filter context in a reloaded comment response without runtime generation', (t) => {
