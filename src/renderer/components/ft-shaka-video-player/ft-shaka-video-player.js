@@ -79,7 +79,11 @@ import {
   FULLSCREEN_DOCK_OUTER_INSET,
   toggleFullscreenDockCollapsed,
 } from '../../helpers/fullscreenDocks'
-import { addOverlayScrollbars, removeOverlayScrollbars } from '../../helpers/overlayScrollbars'
+import {
+  addOverlayScrollbars,
+  removeOverlayScrollbars,
+  updateOverlayScrollbars,
+} from '../../helpers/overlayScrollbars'
 import { setFullscreenOrientation } from '../../helpers/capacitorUi'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import {
@@ -8284,6 +8288,9 @@ export default defineComponent({
         } else if (document.body.dataset.playerFullWindowOwner === mediaTabId) {
           delete document.body.dataset.playerFullWindowOwner
           document.body.classList.remove('playerFullWindow')
+          // Nested fullscreen or Picture-in-Picture can leave the page instance
+          // with the zero-overflow range it measured while this class was active.
+          updateOverlayScrollbars(document.body)
         }
 
         if (previousRect === null) {
