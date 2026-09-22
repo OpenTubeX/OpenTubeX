@@ -384,6 +384,27 @@ test.describe('history search pagination', () => {
     }
   })
 
+  test('treats whitespace-only queries as cleared history when loading more', async ({ page }) => {
+    await goTo(page, 'history')
+    const input = page.getByRole('searchbox', { name: 'Search in History' })
+    const videos = page.locator('.tabContent[aria-hidden="false"] .autoGrid > *')
+    const loadMore = page.getByRole('button', { name: 'Load More Videos' })
+    await expect(videos).toHaveCount(100)
+    await loadMore.click()
+    await expect(videos).toHaveCount(200)
+
+    await input.fill('   ')
+    await expect(page.locator('.historySearchLoader')).toHaveCount(0)
+    await expect(videos).toHaveCount(200)
+    await loadMore.click()
+    await expect(videos).toHaveCount(300)
+
+    await input.fill('Alpha match')
+    await expect(videos).toHaveCount(100)
+    await input.fill('')
+    await expect(videos).toHaveCount(300)
+  })
+
   test('loads every filtered batch and resets the limit for a new query', async ({ page }) => {
     await goTo(page, 'history')
 

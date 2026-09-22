@@ -549,7 +549,7 @@ function handleQueryChange(query_, limit = undefined, doCaseSensitiveSearch_ = u
 }
 
 function increaseLimit() {
-  if (query.value.length > 0) {
+  if (query.value.trim().length > 0) {
     searchDataLimit.value += 100
     filterHistory()
   } else {
@@ -561,7 +561,7 @@ function increaseLimit() {
 function filterHistory() {
   filterHistoryAsync.cancel()
   isSearching.value = false
-  if (query.value.length === 0) {
+  if (query.value.trim().length === 0) {
     activeData.value = fullData.value
     showLoadMoreButton.value = activeData.value.length < historyCacheSorted.value.length
     clampHistoryScroll()
@@ -599,7 +599,7 @@ async function saveStateInRouter() {
 
   let location
 
-  if (query_.length === 0) {
+  if (query_.trim().length === 0) {
     location = { path: '/history' }
   } else {
     location = {
