@@ -509,6 +509,7 @@ const fullData = computed(() => {
 })
 
 watch(fullData, filterHistory)
+watch(locale, scheduleHistorySearch)
 watch(doCaseSensitiveSearch, () => {
   scheduleHistorySearch()
   saveStateInRouter()

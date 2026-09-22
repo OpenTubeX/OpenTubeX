@@ -19,8 +19,7 @@ export function filterVideosWithQuery(videos, query, caseSensitive = false, loca
     const fields = [video.title, video.author]
       .filter(value => typeof value === 'string')
       .map(normalize)
-    return tokens.every(token => fields.some(field => caseSensitive
-      ? field.includes(token)
-      : Number.isFinite(fuzzyTextScore(token, field))))
+    return tokens.every(token => fields.some(field => field.includes(token) ||
+      (!caseSensitive && Number.isFinite(fuzzyTextScore(token, field)))))
   })
 }

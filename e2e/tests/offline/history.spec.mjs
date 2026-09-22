@@ -38,13 +38,16 @@ function matchingHistoryEntries(prefix, count, timeOffset = 0) {
 }
 
 async function scrollPageToEnd(page) {
-  await page.evaluate(() => {
-    document.activeElement?.blur()
-    window.scrollTo(0, document.documentElement.scrollHeight)
-  })
   await expect.poll(() => page.evaluate(() => {
-    const maximumScrollY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
-    return Math.abs(window.scrollY - maximumScrollY)
+    document.activeElement?.blur()
+    // Layout can settle after the first scroll. Retry the action and measure
+    // the rendered end instead of mixing rounded dimensions at fractional zoom.
+    window.scrollTo(0, document.documentElement.scrollHeight)
+    const content = document.querySelector('.app > .routerView')
+    const marginBottom = Number.parseFloat(getComputedStyle(content).marginBottom) || 0
+    const viewportHeight = window.visualViewport?.height ?? window.innerHeight
+    const remaining = Math.max(-window.scrollY, content.getBoundingClientRect().bottom + marginBottom - viewportHeight)
+    return Math.abs(remaining) * window.devicePixelRatio
   })).toBeLessThanOrEqual(1)
 }
 
@@ -717,5 +720,36 @@ test.describe('history search feedback', () => {
     await page.clock.runFor(600)
     await expect(videos).toHaveCount(2)
     await expect(loader).toHaveCount(0)
+  })
+})
+
+test.describe('history search locale changes', () => {
+  test.use({
+    seed: {
+      settings: { uiScale: 125, currentLocale: 'en-US' },
+      history: matchingHistoryEntries('Istanbul', 120)
+    }
+  })
+
+  test('refreshes locale-sensitive matches and clamps shorter results after changing language', async ({ page }) => {
+    await goTo(page, 'history')
+    await page.getByRole('searchbox', { name: 'Search in History' }).fill('i')
+    const videos = page.locator('.tabContent[aria-hidden="false"] .autoGrid > *')
+    await expect(videos).toHaveCount(100)
+    await scrollPageToEnd(page)
+
+    await page.clock.install()
+    await page.clock.pauseAt(new Date(Date.now() + 1000))
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateCurrentLocale', 'tr')
+    })
+    await expect(page.locator('.historySearchLoader')).toBeVisible()
+    await expect(videos).toHaveCount(0)
+    await expectPageScrollWithinRenderedRange(page)
+    await page.clock.resume()
+    await expect(videos).toHaveCount(0)
+    await expect(page.locator('.historySearchLoader')).toHaveCount(0)
+    await expectPageScrollWithinRenderedRange(page)
   })
 })
