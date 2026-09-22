@@ -388,7 +388,11 @@ const actions = {
           const playlist = payload.find((entry) => entry._id === defaultPlaylist._id)
           if (playlist != null && playlist.protected !== defaultPlaylist.protected) {
             playlist.protected = defaultPlaylist.protected
-            await DBPlaylistHandlers.upsert(playlist)
+            try {
+              await DBPlaylistHandlers.upsert(playlist)
+            } catch (errMessage) {
+              console.error(errMessage)
+            }
           }
         }
 
