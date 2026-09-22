@@ -382,52 +382,13 @@ const actions = {
           }
         })
 
-        const favoritesPlaylist = payload.find((playlist) => {
-          return playlist.playlistName === 'Favorites' || playlist._id === 'favorites'
-        })
-        const watchLaterPlaylist = payload.find((playlist) => {
-          return playlist.playlistName === 'Watch Later' || playlist._id === 'watchLater'
-        })
-
-        if (favoritesPlaylist != null) {
-          const defaultFavoritesPlaylist = state.defaultPlaylists.find((e) => e._id === 'favorites')
-
-          // Update existing matching playlist only if it exists
-          if (favoritesPlaylist._id !== defaultFavoritesPlaylist._id || favoritesPlaylist.protected !== defaultFavoritesPlaylist.protected) {
-            const oldId = favoritesPlaylist._id
-            favoritesPlaylist._id = defaultFavoritesPlaylist._id
-            favoritesPlaylist.protected = defaultFavoritesPlaylist.protected
-            if (oldId === defaultFavoritesPlaylist._id) {
-              // Update playlist if ID already the same
-              DBPlaylistHandlers.upsert(favoritesPlaylist)
-            } else {
-              dispatch('removePlaylist', oldId)
-              // DO NOT use dispatch('addPlaylist', ...)
-              // Which causes duplicate displayed playlist in window (But DB is fine)
-              // Due to the object is already in `payload`
-              DBPlaylistHandlers.create(favoritesPlaylist)
-            }
-          }
-        }
-
-        if (watchLaterPlaylist != null) {
-          const defaultWatchLaterPlaylist = state.defaultPlaylists.find((e) => e._id === 'watchLater')
-
-          // Update existing matching playlist only if it exists
-          if (watchLaterPlaylist._id !== defaultWatchLaterPlaylist._id || watchLaterPlaylist.protected !== defaultWatchLaterPlaylist.protected) {
-            const oldId = watchLaterPlaylist._id
-            watchLaterPlaylist._id = defaultWatchLaterPlaylist._id
-            watchLaterPlaylist.protected = defaultWatchLaterPlaylist.protected
-            if (oldId === defaultWatchLaterPlaylist._id) {
-              // Update playlist if ID already the same
-              DBPlaylistHandlers.upsert(watchLaterPlaylist)
-            } else {
-              dispatch('removePlaylist', oldId)
-              // DO NOT use dispatch('addPlaylist', ...)
-              // Which causes duplicate displayed playlist in window (But DB is fine)
-              // Due to the object is already in `payload`
-              DBPlaylistHandlers.create(watchLaterPlaylist)
-            }
+        // Names are editable and non-unique. Only the stable ID identifies a
+        // built-in playlist; replacing a namesake can delete user data.
+        for (const defaultPlaylist of state.defaultPlaylists) {
+          const playlist = payload.find((entry) => entry._id === defaultPlaylist._id)
+          if (playlist != null && playlist.protected !== defaultPlaylist.protected) {
+            playlist.protected = defaultPlaylist.protected
+            await DBPlaylistHandlers.upsert(playlist)
           }
         }
 
