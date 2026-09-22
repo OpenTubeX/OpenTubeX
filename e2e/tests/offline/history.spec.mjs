@@ -38,13 +38,16 @@ function matchingHistoryEntries(prefix, count, timeOffset = 0) {
 }
 
 async function scrollPageToEnd(page) {
-  await page.evaluate(() => {
-    document.activeElement?.blur()
-    window.scrollTo(0, document.documentElement.scrollHeight)
-  })
   await expect.poll(() => page.evaluate(() => {
-    const maximumScrollY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight)
-    return Math.abs(window.scrollY - maximumScrollY)
+    document.activeElement?.blur()
+    // Layout can settle after the first scroll. Retry the action and measure
+    // the rendered end instead of mixing rounded dimensions at fractional zoom.
+    window.scrollTo(0, document.documentElement.scrollHeight)
+    const content = document.querySelector('.app > .routerView')
+    const marginBottom = Number.parseFloat(getComputedStyle(content).marginBottom) || 0
+    const viewportHeight = window.visualViewport?.height ?? window.innerHeight
+    const remaining = Math.max(-window.scrollY, content.getBoundingClientRect().bottom + marginBottom - viewportHeight)
+    return Math.abs(remaining) * window.devicePixelRatio
   })).toBeLessThanOrEqual(1)
 }
 
@@ -378,10 +381,32 @@ test.describe('history search pagination', () => {
       history: [
         ...matchingHistoryEntries('Decoy', 100),
         ...matchingHistoryEntries('Alpha', 220, 1000),
-        ...matchingHistoryEntries('Beta', 130, 2000),
+        ...matchingHistoryEntries('Beta', 129, 2000),
+        historyEntry('betacase000', 'beta match lowercase', now - 2500),
         ...matchingHistoryEntries('Gamma', 20, 3000)
       ]
     }
+  })
+
+  test('treats whitespace-only queries as cleared history when loading more', async ({ page }) => {
+    await goTo(page, 'history')
+    const input = page.getByRole('searchbox', { name: 'Search in History' })
+    const videos = page.locator('.tabContent[aria-hidden="false"] .autoGrid > *')
+    const loadMore = page.getByRole('button', { name: 'Load More Videos' })
+    await expect(videos).toHaveCount(100)
+    await loadMore.click()
+    await expect(videos).toHaveCount(200)
+
+    await input.fill('   ')
+    await expect(page.locator('.historySearchLoader')).toHaveCount(0)
+    await expect(videos).toHaveCount(200)
+    await loadMore.click()
+    await expect(videos).toHaveCount(300)
+
+    await input.fill('Alpha match')
+    await expect(videos).toHaveCount(100)
+    await input.fill('')
+    await expect(videos).toHaveCount(300)
   })
 
   test('loads every filtered batch and resets the limit for a new query', async ({ page }) => {
@@ -404,7 +429,13 @@ test.describe('history search pagination', () => {
     await expect(loadMoreButton).toBeVisible()
 
     await scrollPageToEnd(page)
+    await page.clock.install()
+    await page.clock.pauseAt(new Date(Date.now() + 1000))
     await updateInputWithoutScrolling(filterInput, 'Beta match')
+    await expect(page.locator('.historySearchLoader')).toBeVisible()
+    await expect(videos).toHaveCount(0)
+    await expectPageScrollWithinRenderedRange(page)
+    await page.clock.resume()
     await expect(videos.first()).toContainText('Beta match')
     await expect(videos).toHaveCount(100)
     await expect(loadMoreButton).toBeVisible()
@@ -413,6 +444,18 @@ test.describe('history search pagination', () => {
     await loadMoreButton.click()
     await expect(videos).toHaveCount(130)
     await expect(loadMoreButton).toHaveCount(0)
+
+    await scrollPageToEnd(page)
+    await expect(videos.filter({ hasText: 'beta match lowercase' })).toHaveCount(1)
+    await page.clock.pauseAt(new Date(Date.now() + 1000))
+    await page.getByRole('checkbox', { name: 'Case Sensitive Search' }).evaluate(element => element.click())
+    await expect(page.locator('.historySearchLoader')).toBeVisible()
+    await expect(videos).toHaveCount(0)
+    await expectPageScrollWithinRenderedRange(page)
+    await page.clock.resume()
+    await expect(videos).toHaveCount(129)
+    await expect(videos.filter({ hasText: 'beta match lowercase' })).toHaveCount(0)
+    await expectPageScrollWithinRenderedRange(page)
 
     await scrollPageToEnd(page)
     await expect(filterInput).toHaveAttribute('type', 'search')
@@ -626,5 +669,90 @@ test.describe('legacy watch history', () => {
       const records = contents.trim().split('\n').map((line) => JSON.parse(line))
       return records.find((record) => record._id === 'legacyvideo')
     }).toMatchObject({ watchProgress: 95, isWatched: true, isLive: false })
+  })
+})
+
+test.describe('history search feedback', () => {
+  test.use({
+    seed: {
+      settings: { uiScale: 110 },
+      history: [
+        historyEntry('searchaaaaa', 'City night walking tour', now),
+        historyEntry('searchbbbbb', 'Another video', now - 1000)
+      ]
+    }
+  })
+
+  test('replaces stale results and empty messages with a spinner until the latest query settles', async ({ page }) => {
+    await goTo(page, 'history')
+    const input = page.getByRole('searchbox', { name: 'Search in History' })
+    const videos = page.locator('.ft-list-video')
+    const loader = page.locator('.historySearchLoader')
+    await expect(videos).toHaveCount(2)
+    await page.clock.install()
+    await page.clock.pauseAt(new Date(Date.now() + 1000))
+
+    await input.fill('city tour')
+    await expect(loader).toBeVisible()
+    await expect(videos).toHaveCount(0)
+    await expect(input).toBeFocused()
+    await page.clock.runFor(600)
+    await expect(loader).toHaveCount(0)
+    await expect(videos).toHaveCount(1)
+    await expect(videos).toContainText('City night walking tour')
+
+    await input.fill('zzzzzz')
+    await page.clock.runFor(100)
+    await input.fill('Another')
+    await page.clock.runFor(150)
+    await expect(loader).toBeVisible()
+    await expect(videos).toHaveCount(0)
+    await page.clock.runFor(300)
+    await expect(videos).toHaveCount(1)
+    await expect(videos).toContainText('Another video')
+
+    await input.fill('zzzzzz')
+    await page.clock.runFor(600)
+    const empty = page.getByText('There are no videos in your history that match your search')
+    await expect(loader).toHaveCount(0)
+    await expect(videos).toHaveCount(0)
+    await expect(empty).toBeVisible()
+    await input.fill('')
+    await expect(loader).toBeVisible()
+    await expect(empty).toHaveCount(0)
+    await page.clock.runFor(600)
+    await expect(videos).toHaveCount(2)
+    await expect(loader).toHaveCount(0)
+  })
+})
+
+test.describe('history search locale changes', () => {
+  test.use({
+    seed: {
+      settings: { uiScale: 125, currentLocale: 'en-US' },
+      history: matchingHistoryEntries('Istanbul', 120)
+    }
+  })
+
+  test('refreshes locale-sensitive matches and clamps shorter results after changing language', async ({ page }) => {
+    await goTo(page, 'history')
+    await page.getByRole('searchbox', { name: 'Search in History' }).fill('i')
+    const videos = page.locator('.tabContent[aria-hidden="false"] .autoGrid > *')
+    await expect(videos).toHaveCount(100)
+    await scrollPageToEnd(page)
+
+    await page.clock.install()
+    await page.clock.pauseAt(new Date(Date.now() + 1000))
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateCurrentLocale', 'tr')
+    })
+    await expect(page.locator('.historySearchLoader')).toBeVisible()
+    await expect(videos).toHaveCount(0)
+    await expectPageScrollWithinRenderedRange(page)
+    await page.clock.resume()
+    await expect(videos).toHaveCount(0)
+    await expect(page.locator('.historySearchLoader')).toHaveCount(0)
+    await expectPageScrollWithinRenderedRange(page)
   })
 })
