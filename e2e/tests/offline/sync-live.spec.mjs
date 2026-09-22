@@ -144,7 +144,7 @@ for (const uiScale of [95, 125]) {
         recipient: '',
         created_at: Date.now(),
         expires_at: Date.now() + 86400000,
-        payload: await encryptSyncDocument({ version: 1, type: 'activity', deviceName: 'Phone', changes: [{ key: 'baseTheme', value: 'light' }, { key: 'autoUpdateChannelPlaybackSpeeds', value: true }] }, key, salt)
+        payload: await encryptSyncDocument({ version: 1, type: 'activity', deviceName: 'Phone', changes: [{ key: 'baseTheme', value: 'light' }, { key: 'autoUpdateChannelPlaybackSpeeds', value: true }, { key: 'subscriptionChannelSettings', value: null }] }, key, salt)
       })
       wake()
       await expect.poll(async () => latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')).baseTheme).toBe('light')
@@ -156,6 +156,14 @@ for (const uiScale of [95, 125]) {
       await expect(activity.locator('time')).toContainText(/ago/)
       await expect(activity.locator('time')).toHaveAttribute('title', /\d/)
       await attachScreenshot('encrypted account activity')
+      await sync.locator('.activityList').getByRole('button', { name: 'Subscription settings', exact: true }).click()
+      const subscriptionTarget = page.locator('.settingsSearchTarget')
+      await expect(subscriptionTarget).toContainText('Subscription settings')
+      await expect(page.locator('.settingsContent.settingsSearchTarget')).toHaveCount(0)
+      await page.locator('.settingsContent').getByRole('button', { name: 'Subscription settings', exact: true }).click()
+      await expect(page.locator('.settingsSubpageContent')).toBeVisible()
+      await page.getByRole('dialog', { name: 'Settings', exact: true }).getByRole('button', { name: 'Back', exact: true }).click()
+      await goToSettingsSection(page, 'sync')
       await activity.getByRole('button', { name: 'Base theme', exact: true }).focus()
       await page.keyboard.press('Enter')
       await expect(page.locator('.select.settingsSearchTarget')).toContainText(/Base theme/i)

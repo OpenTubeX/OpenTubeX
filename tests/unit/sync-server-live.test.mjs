@@ -155,3 +155,14 @@ test('live connection health is shared across owners and released on disconnect'
     await new Promise(resolve => setImmediate(resolve))
   }
 })
+
+test('subscription settings activity ignores default additions and timestamps but reports actual preference changes', () => {
+  const key = 'subscriptionChannelSettings'
+  const defaults = { feedTypes: ['videos', 'shorts', 'live', 'posts'], showMembersOnly: false }
+  const before = [{ key, value: { first: { value: defaults, updatedAt: 1 } } }]
+  const after = [{ key, value: { first: { value: defaults, updatedAt: 2 }, second: { value: defaults, updatedAt: 2 } } }]
+  assert.equal(createSyncActivity('settings', before, after, 'device', 'Laptop'), null)
+  after[0].value.first.value = { ...defaults, dailyVideoLimit: 3 }
+  assert.deepEqual(createSyncActivity('settings', before, after, 'device', 'Laptop').changes, [{ key, value: null }])
+  assert.equal(SYNC_SETTING_LABELS[key], 'Channel.Subscription settings')
+})

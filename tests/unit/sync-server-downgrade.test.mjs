@@ -695,12 +695,12 @@ test('failed capability discovery can be retried on the same client', async () =
   assert.equal(attempts, 2)
 })
 
-test('encrypted upload deadlines include activity ciphertext', async () => {
+test('encrypted uploads with activity use the full transfer deadline', async () => {
   const f = fixture()
   const client = new f.Client(f.settings.syncServerUrl)
   client.request = async (_path, options) => options
   const response = await client.putEncryptedSyncCollection('settings', 0, 'x'.repeat(1024 * 1024), 'a'.repeat(256 * 1024))
-  assert.equal(response.timeoutMs, 25000)
+  assert.equal(response.timeoutMs, 300000)
 })
 
 test('unreadable and expired broadcast events advance the activity cursor', async () => {

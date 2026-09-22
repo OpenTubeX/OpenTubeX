@@ -10,7 +10,7 @@ import { createSyncServerRequestHeaders } from '../../src/renderer/helpers/sync-
 import * as errors from '../../src/renderer/helpers/sync-server-errors.js'
 import { createAbortError } from '../../src/renderer/helpers/api/requestErrors.js'
 
-async function loadClient(env, version, requests, nativeRequest) {
+async function loadClient(env, version, requests, nativeRequest, browserRequest) {
   const context = vm.createContext({
     ...errors,
     withNetworkRecovery,
@@ -29,7 +29,7 @@ async function loadClient(env, version, requests, nativeRequest) {
     },
     fetch: async (url, options) => {
       requests.push({ url, ...options })
-      return new Response('{}')
+      return browserRequest ? browserRequest(options) : new Response('{}')
     },
   })
   for (const file of ['api/capacitor-http.js', 'sync-server.js']) {
@@ -43,6 +43,7 @@ async function loadClient(env, version, requests, nativeRequest) {
 }
 
 for (const [operation, run] of [
+  ['small collection upload', client => client.putEncryptedSyncCollection('settings', 1, 'encrypted')],
   ['manifest', client => client.getEncryptedSyncManifest()],
   ['collection download', client => client.getEncryptedSyncCollection('history')],
   ['legacy download', client => client.getLegacyEncryptedSync()],
@@ -73,8 +74,8 @@ for (const [operation, run] of [
 for (const [operation, run, timeoutMs] of [
   ['health check', client => client.health(), 20_000],
   ['collection download', client => client.getEncryptedSyncCollection('history'), 300_000],
-  ['small collection upload', client => client.putEncryptedSyncCollection('history', 1, 'encrypted'), 20_000],
-  ['large collection upload', client => client.putEncryptedSyncCollection('history', 1, 'a'.repeat(4 * 1024 * 1024)), 47_000],
+  ['small collection upload', client => client.putEncryptedSyncCollection('history', 1, 'encrypted'), 300_000],
+  ['large collection upload', client => client.putEncryptedSyncCollection('history', 1, 'a'.repeat(4 * 1024 * 1024)), 300_000],
 ]) {
   test(`Android sync ${operation} still stops at its request deadline`, async t => {
     t.mock.timers.enable({ apis: ['setTimeout'] })
@@ -231,3 +232,23 @@ test('requires live sync only for servers advertising encrypted sync', async () 
     await assert.rejects(client.supportsEncryptedSync(), { message: 'This server must be updated to support encrypted live sync.' })
   }
 })
+
+for (const payload of ['encrypted', 'a'.repeat(4 * 1024 * 1024)]) {
+  test(`Electron encrypted upload tolerates a slow response (${payload.length} bytes)`, async t => {
+    t.mock.timers.enable({ apis: ['setTimeout'] })
+    const client = await loadClient({ IS_ELECTRON: true }, '0.35.0', [], undefined, options => new Promise((resolve, reject) => {
+      const timer = setTimeout(() => resolve(new Response('{"revision":2}')), 60_000)
+      options.signal.addEventListener('abort', () => {
+        clearTimeout(timer)
+        reject(new DOMException('Aborted', 'AbortError'))
+      }, { once: true })
+    }))
+    const completed = assert.doesNotReject(async () => {
+      assert.equal((await client.putEncryptedSyncCollection('history', 1, payload)).revision, 2)
+    })
+    await nextEventLoopTurn()
+    t.mock.timers.tick(60_000)
+    await completed
+    assert.equal(client.requestControllers.size, 0)
+  })
+}

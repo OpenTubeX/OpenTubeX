@@ -7,11 +7,15 @@ import { mergeSettingEntry } from './sync-settings-conflict.js'
 export const SUBSCRIPTION_CHANNEL_SETTINGS_SYNC_KEY = 'subscriptionChannelSettings'
 
 export function getSubscriptionSettingsForSync(store) {
-  return Object.fromEntries(store.state.profiles.profileList[0].subscriptions.map(channel => {
+  return Object.fromEntries(store.state.profiles.profileList[0].subscriptions.flatMap(channel => {
     const settings = normalizeSubscriptionChannelSettings(channel)
+    // Untouched subscriptions inherit defaults without needing a sync record.
+    // Keep explicit resets so they can overwrite older custom values elsewhere.
+    if (channel.subscriptionSettingsUpdatedAt === undefined &&
+        areJsonValuesEqual(settings, normalizeSubscriptionChannelSettings())) return []
     // JSON has no undefined value. Omission means "use the global limit".
     if (settings.dailyVideoLimit === undefined) delete settings.dailyVideoLimit
-    return [channel.id, { value: settings, updatedAt: channel.subscriptionSettingsUpdatedAt }]
+    return [[channel.id, { value: settings, updatedAt: channel.subscriptionSettingsUpdatedAt }]]
   }))
 }
 

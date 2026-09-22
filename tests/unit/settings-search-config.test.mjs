@@ -458,3 +458,16 @@ test('activity links retain search tabs and subpages and reject unavailable or a
     section: 'playback', match: { ...match, settingKey: 'defaultPlayback' }
   })
 })
+
+
+test('subscription activity resolves to its control even with a partially translated Channel group', () => {
+  const index = createSettingsSearchIndex({
+    sections: [{ type: 'subscriptions', title: 'Subscription', description: '' }],
+    tm: path => path === 'Channel' ? {} : getAtPath(locale, path),
+    store: { getters: {} },
+    usingElectron: true,
+  })
+  assert.deepEqual(findSettingsSearchTarget(index, ['Subscription settings'], 'subscriptionChannelSettings'), {
+    section: 'subscriptions', match: { label: 'Subscription settings', settingKey: 'subscriptionChannelSettings' },
+  })
+})
