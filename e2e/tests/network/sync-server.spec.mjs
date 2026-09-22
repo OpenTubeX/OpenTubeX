@@ -730,6 +730,9 @@ test.describe('OpenTubeX sync server', () => {
       { collection: 'profiles', revision: 1, payload: null },
       { collection: 'sessionsV2', revision: 1, payload: null },
       { collection: 'settings', revision: 1, payload: null },
+      ...(capabilities.seen_posts === 1
+        ? [{ collection: 'seenPosts', revision: 1, payload: null }]
+        : []),
       ...(capabilities.seen_videos === 1
         ? [{ collection: 'seenVideos', revision: 1, payload: null }]
         : [])
