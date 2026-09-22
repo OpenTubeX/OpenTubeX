@@ -167,6 +167,40 @@ test('shows the poster and recommendations after canceling autoplay, and starts 
   await expect(page.locator('.endedRecommendations')).toHaveCount(0)
 })
 
+for (const defaultInterval of [0, 1]) {
+  test(`does not flash the end screen when autoplay advances after ${defaultInterval} seconds`, async ({ app, page }) => {
+    const { video, watch } = await openVideo({ app, page })
+    await watch.evaluate(async (component, interval) => {
+      await component.proxy.$store.dispatch('updateDefaultInterval', interval)
+      component.proxy.autoplayNextRecommendedVideo = true
+      component.proxy.recommendedVideos = [{ videoId: 'video000000', title: 'Next video', type: 'video' }]
+    }, defaultInterval)
+    const endScreen = await page.evaluateHandle(() => {
+      const state = { appeared: false }
+      const observer = new MutationObserver(records => {
+        for (const record of records) {
+          for (const node of record.addedNodes) {
+            if (node instanceof Element && (node.matches('.endedPoster') || node.querySelector('.endedPoster'))) {
+              state.appeared = true
+            }
+          }
+        }
+      })
+      observer.observe(document.body, { childList: true, subtree: true })
+      return { state, observer }
+    })
+    await video.evaluate(element => {
+      element.currentTime = element.duration - 0.1
+      return element.play()
+    })
+    await expect(page).toHaveURL(/#\/watch\/video000000$/)
+    expect(await endScreen.evaluate(({ state, observer }) => {
+      observer.disconnect()
+      return state.appeared
+    })).toBe(false)
+  })
+}
+
 test('filters hidden and current videos and keeps the poster darkened when none remain', async ({ app, page }) => {
   const { video, watch } = await openVideo({ app, page })
   await watch.evaluate(async component => {
