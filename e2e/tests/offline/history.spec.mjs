@@ -404,7 +404,13 @@ test.describe('history search pagination', () => {
     await expect(loadMoreButton).toBeVisible()
 
     await scrollPageToEnd(page)
+    await page.clock.install()
+    await page.clock.pauseAt(new Date(Date.now() + 1000))
     await updateInputWithoutScrolling(filterInput, 'Beta match')
+    await expect(page.locator('.historySearchLoader')).toBeVisible()
+    await expect(videos).toHaveCount(0)
+    await expectPageScrollWithinRenderedRange(page)
+    await page.clock.resume()
     await expect(videos.first()).toContainText('Beta match')
     await expect(videos).toHaveCount(100)
     await expect(loadMoreButton).toBeVisible()
@@ -413,6 +419,16 @@ test.describe('history search pagination', () => {
     await loadMoreButton.click()
     await expect(videos).toHaveCount(130)
     await expect(loadMoreButton).toHaveCount(0)
+
+    await scrollPageToEnd(page)
+    await page.clock.pauseAt(new Date(Date.now() + 1000))
+    await page.getByRole('checkbox', { name: 'Case Sensitive Search' }).evaluate(element => element.click())
+    await expect(page.locator('.historySearchLoader')).toBeVisible()
+    await expect(videos).toHaveCount(0)
+    await expectPageScrollWithinRenderedRange(page)
+    await page.clock.resume()
+    await expect(videos).toHaveCount(130)
+    await expectPageScrollWithinRenderedRange(page)
 
     await scrollPageToEnd(page)
     await expect(filterInput).toHaveAttribute('type', 'search')
@@ -626,5 +642,59 @@ test.describe('legacy watch history', () => {
       const records = contents.trim().split('\n').map((line) => JSON.parse(line))
       return records.find((record) => record._id === 'legacyvideo')
     }).toMatchObject({ watchProgress: 95, isWatched: true, isLive: false })
+  })
+})
+
+test.describe('history search feedback', () => {
+  test.use({
+    seed: {
+      settings: { uiScale: 110 },
+      history: [
+        historyEntry('searchaaaaa', 'City night walking tour', now),
+        historyEntry('searchbbbbb', 'Another video', now - 1000)
+      ]
+    }
+  })
+
+  test('replaces stale results and empty messages with a spinner until the latest query settles', async ({ page }) => {
+    await goTo(page, 'history')
+    const input = page.getByRole('searchbox', { name: 'Search in History' })
+    const videos = page.locator('.ft-list-video')
+    const loader = page.locator('.historySearchLoader')
+    await expect(videos).toHaveCount(2)
+    await page.clock.install()
+    await page.clock.pauseAt(new Date(Date.now() + 1000))
+
+    await input.fill('city tour')
+    await expect(loader).toBeVisible()
+    await expect(videos).toHaveCount(0)
+    await expect(input).toBeFocused()
+    await page.clock.runFor(600)
+    await expect(loader).toHaveCount(0)
+    await expect(videos).toHaveCount(1)
+    await expect(videos).toContainText('City night walking tour')
+
+    await input.fill('zzzzzz')
+    await page.clock.runFor(100)
+    await input.fill('Another')
+    await page.clock.runFor(150)
+    await expect(loader).toBeVisible()
+    await expect(videos).toHaveCount(0)
+    await page.clock.runFor(300)
+    await expect(videos).toHaveCount(1)
+    await expect(videos).toContainText('Another video')
+
+    await input.fill('zzzzzz')
+    await page.clock.runFor(600)
+    const empty = page.getByText('There are no videos in your history that match your search')
+    await expect(loader).toHaveCount(0)
+    await expect(videos).toHaveCount(0)
+    await expect(empty).toBeVisible()
+    await input.fill('')
+    await expect(loader).toBeVisible()
+    await expect(empty).toHaveCount(0)
+    await page.clock.runFor(600)
+    await expect(videos).toHaveCount(2)
+    await expect(loader).toHaveCount(0)
   })
 })

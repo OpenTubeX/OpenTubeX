@@ -131,43 +131,53 @@
           @change="updateUserHistorySortBy"
         />
       </div>
-      <FtFlexBox
-        v-if="fullData.length === 0"
-      >
-        <p class="message">
-          {{ t("History['Your history list is currently empty.']") }}
-        </p>
-      </FtFlexBox>
-      <FtFlexBox
-        v-else-if="activeData.length === 0"
-      >
-        <p class="message">
-          {{ t("History['Empty Search Message']") }}
-        </p>
-      </FtFlexBox>
-      <FtElementList
-        v-if="activeData.length > 0"
-        :data="activeData"
-        :stable-item-keys="true"
-        :show-video-with-last-viewed-playlist="true"
-        :show-watched-style-in-history="true"
-        :use-channels-hidden-preference="false"
-        :hide-forbidden-titles="false"
-      />
-      <FtAutoLoadNextPageWrapper
-        v-if="showLoadMoreButton"
-        @load-next-page="increaseLimit"
-      >
-        <FtFlexBox>
-          <FtButton
-            :label="t('Subscriptions.Load More Videos')"
-            :icon="['fas', 'arrow-down']"
-            background-color="var(--primary-color)"
-            text-color="var(--text-with-main-color)"
-            @click="increaseLimit"
+      <div :aria-busy="isSearching">
+        <FtLoader
+          v-if="isSearching"
+          class="historySearchLoader"
+          role="progressbar"
+          :aria-label="t('History.Search bar placeholder')"
+        />
+        <template v-else>
+          <FtFlexBox
+            v-if="fullData.length === 0"
+          >
+            <p class="message">
+              {{ t("History['Your history list is currently empty.']") }}
+            </p>
+          </FtFlexBox>
+          <FtFlexBox
+            v-else-if="activeData.length === 0"
+          >
+            <p class="message">
+              {{ t("History['Empty Search Message']") }}
+            </p>
+          </FtFlexBox>
+          <FtElementList
+            v-if="activeData.length > 0"
+            :data="activeData"
+            :stable-item-keys="true"
+            :show-video-with-last-viewed-playlist="true"
+            :show-watched-style-in-history="true"
+            :use-channels-hidden-preference="false"
+            :hide-forbidden-titles="false"
           />
-        </FtFlexBox>
-      </FtAutoLoadNextPageWrapper>
+          <FtAutoLoadNextPageWrapper
+            v-if="showLoadMoreButton"
+            @load-next-page="increaseLimit"
+          >
+            <FtFlexBox>
+              <FtButton
+                :label="t('Subscriptions.Load More Videos')"
+                :icon="['fas', 'arrow-down']"
+                background-color="var(--primary-color)"
+                text-color="var(--text-with-main-color)"
+                @click="increaseLimit"
+              />
+            </FtFlexBox>
+          </FtAutoLoadNextPageWrapper>
+        </template>
+      </div>
       <FtPrompt
         v-if="showRepairPrompt"
         card-class="historyRepairPrompt"
@@ -310,6 +320,7 @@ import FtCard from '../../components/ft-card/ft-card.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import FtInput from '../../components/FtInput/FtInput.vue'
+import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtPrompt from '../../components/FtPrompt/FtPrompt.vue'
 import FtSelect from '../../components/FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
@@ -317,13 +328,14 @@ import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store'
 
 import { needsHistoryRepair } from '../../../historyRepair'
+import { filterVideosWithQuery } from '../../helpers/historySearch'
 import { canMarkHistoryEntryAsWatched } from '../../helpers/history'
 import { historyRepairState, startHistoryRepair, cancelHistoryRepair } from '../../helpers/historyRepair'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { ctrlFHandler, debounce, getIconForSortPreference, showToast } from '../../helpers/utils'
 import { useTabContext } from '../../tabs/TabContext'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const { tabId } = useTabContext()
@@ -336,6 +348,7 @@ const searchDataLimit = ref(100)
 const doCaseSensitiveSearch = ref(false)
 const showLoadMoreButton = ref(false)
 const query = ref('')
+const isSearching = ref(false)
 const activeData = ref([])
 const historyContent = useTemplateRef('historyContent')
 const historyHeading = useTemplateRef('historyHeading')
@@ -497,7 +510,7 @@ const fullData = computed(() => {
 
 watch(fullData, filterHistory)
 watch(doCaseSensitiveSearch, () => {
-  filterHistory()
+  scheduleHistorySearch()
   saveStateInRouter()
 })
 
@@ -531,7 +544,7 @@ function handleQueryChange(query_, limit = undefined, doCaseSensitiveSearch_ = u
   if (filterNow) {
     filterHistory()
   } else {
-    filterHistoryAsync()
+    scheduleHistorySearch()
   }
 }
 
@@ -546,6 +559,8 @@ function increaseLimit() {
 }
 
 function filterHistory() {
+  filterHistoryAsync.cancel()
+  isSearching.value = false
   if (query.value.length === 0) {
     activeData.value = fullData.value
     showLoadMoreButton.value = activeData.value.length < historyCacheSorted.value.length
@@ -553,12 +568,7 @@ function filterHistory() {
     return
   }
 
-  let filteredQuery
-  if (doCaseSensitiveSearch.value) {
-    filteredQuery = filterVideosWithQuery(historyCacheSorted.value, query.value)
-  } else {
-    filteredQuery = filterVideosWithQuery(historyCacheSorted.value, query.value.toLowerCase(), (s) => s.toLowerCase())
-  }
+  const filteredQuery = filterVideosWithQuery(historyCacheSorted.value, query.value, doCaseSensitiveSearch.value, locale.value)
 
   const filteredResultCount = filteredQuery.length
 
@@ -576,7 +586,13 @@ function clampHistoryScroll() {
   })
 }
 
-const filterHistoryAsync = debounce(filterHistory, 500)
+const filterHistoryAsync = debounce(filterHistory, 250)
+
+function scheduleHistorySearch() {
+  isSearching.value = true
+  clampHistoryScroll()
+  filterHistoryAsync()
+}
 
 async function saveStateInRouter() {
   const query_ = query.value
@@ -612,7 +628,7 @@ async function saveStateInRouter() {
 
 const oldQuery = route.query.searchQueryText
 if (oldQuery != null && oldQuery !== '') {
-  // `handleQueryChange` must be called after `filterHistoryDebounce` assigned
+  // `handleQueryChange` must be called after `filterHistoryAsync` is assigned
   handleQueryChange(
     oldQuery,
     route.query.searchDataLimit,
@@ -636,27 +652,10 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  filterHistoryAsync.cancel()
   document.removeEventListener('keydown', keyboardShortcutHandler)
 })
 
-const identity = (v) => v
-
-/**
- * @param {any[]} videos
- * @param {string} query
- * @param {(attr: string) => string} attrProcessor
- */
-function filterVideosWithQuery(videos, query, attrProcessor = identity) {
-  return videos.filter((video) => {
-    if (typeof (video.title) === 'string' && attrProcessor(video.title).includes(query)) {
-      return true
-    } else if (typeof (video.author) === 'string' && attrProcessor(video.author).includes(query)) {
-      return true
-    }
-
-    return false
-  })
-}
 </script>
 
 <style scoped src="./History.css" />
