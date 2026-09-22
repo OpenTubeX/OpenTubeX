@@ -2939,6 +2939,59 @@ test.describe('settings', () => {
     }).toBe(100)
   })
 
+  for (const scale of [1, 1.25]) {
+    test(`keeps the settings scrollbar stationary while dragging animation speed at ${scale} scale`, async ({ page }) => {
+      await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAnimationSpeed', 50))
+      await goTo(page, 'settings')
+      await page.locator('.settingsMenu [data-section="appearance"]').click()
+      const slider = page.getByRole('slider', { name: /Animation Speed/ })
+      await slider.scrollIntoViewIfNeeded()
+      const content = page.locator('.settingsContent')
+      const measure = () => content.evaluate(element => {
+        const handle = element.querySelector('.os-scrollbar-vertical .os-scrollbar-handle')
+        return {
+          scrollTop: element.scrollTop,
+          scrollHeight: element.scrollHeight,
+          thumbTop: handle.getBoundingClientRect().top,
+          thumbHeight: handle.getBoundingClientRect().height
+        }
+      })
+      const box = await slider.boundingBox()
+      expect(box, 'Animation Speed slider must be visible before dragging').not.toBeNull()
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+      await page.mouse.down()
+      const before = await measure()
+      const initialValue = await slider.inputValue()
+      try {
+        for (const fraction of [0.1, 0.9, 0.3, 0.7]) {
+          await page.mouse.move(box.x + box.width * fraction, box.y + box.height / 2, { steps: 12 })
+          await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+          const after = await measure()
+          expect(after.scrollTop).toBeCloseTo(before.scrollTop, 0)
+          expect(after.scrollHeight).toBe(before.scrollHeight)
+          expect(Math.abs(after.thumbTop - before.thumbTop)).toBeLessThanOrEqual(1)
+          expect(Math.abs(after.thumbHeight - before.thumbHeight)).toBeLessThanOrEqual(1)
+        }
+        expect(await slider.inputValue()).not.toBe(initialValue)
+      } finally {
+        await page.mouse.up()
+      }
+
+      // A changed timeline rate can also leave the thumb at the wrong
+      // position on subsequent scrolling, even if the drag looked stable.
+      await content.evaluate(element => {
+        element.scrollTop = (element.scrollHeight - element.clientHeight) / 2
+      })
+      await expect.poll(() => content.evaluate(element => {
+        const track = element.querySelector('.os-scrollbar-vertical .os-scrollbar-track').getBoundingClientRect()
+        const thumb = element.querySelector('.os-scrollbar-vertical .os-scrollbar-handle').getBoundingClientRect()
+        const progress = element.scrollTop / (element.scrollHeight - element.clientHeight)
+        return Math.abs(thumb.top - track.top - (track.height - thumb.height) * progress)
+      })).toBeLessThanOrEqual(1)
+    })
+  }
+
   test('configures animation speed and disables it with reduced motion', async ({ page }) => {
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="appearance"]').click()

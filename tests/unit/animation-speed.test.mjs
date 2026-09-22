@@ -23,6 +23,7 @@ class FakeElement {
 }
 
 globalThis.Element = FakeElement
+globalThis.ScrollTimeline = class ScrollTimeline {}
 
 const activeAnimations = []
 const listeners = new Map()
@@ -115,4 +116,27 @@ test('restores existing animations when returning to default speed', () => {
   setAnimationSpeed(100)
   assert.deepEqual(playbackRates, [2, 1])
   activeAnimations.length = 0
+})
+
+test('keeps scroll-linked animations tied to scroll position when speed changes', async () => {
+  const playbackRates = []
+  const target = new FakeElement()
+  const animation = {
+    effect: { target },
+    timeline: new ScrollTimeline(),
+    updatePlaybackRate: rate => playbackRates.push(rate),
+  }
+  target.animations = [animation]
+  activeAnimations.push(animation)
+  try {
+    setAnimationSpeed(50)
+    setAnimationSpeed(200)
+    listeners.get('animationstart')({ target })
+    listeners.get('transitionrun')({ target })
+    await Promise.resolve()
+    setAnimationSpeed(100)
+    assert.deepEqual(playbackRates, [])
+  } finally {
+    activeAnimations.length = 0
+  }
 })
