@@ -43,7 +43,7 @@ async function fixture(records) {
     dispatch: (name, value) => module.actions[name]?.(context, value),
   }
   return {
-    db, module, errors,
+    db, module, errors, handlers: DBPlaylistHandlers,
     async load() {
       await module.actions.grabAllPlaylists(context)
       for (let i = 0; i < pending.length; i++) await pending[i]
@@ -74,3 +74,16 @@ for (const [id, name] of [['watchLater', 'Watch Later'], ['favorites', 'Favorite
     assert.equal((await db.playlists.findOneAsync({ _id: id })).protected, false)
   })
 }
+
+test('a failed protection repair does not hide loaded playlists', async () => {
+  const records = [playlist('watchLater', 'Watch Later', true), playlist('custom', 'My playlist')]
+  const { module, errors, handlers, load } = await fixture(records)
+  const failure = new Error('Storage temporarily unavailable')
+  handlers.upsert = async () => { throw failure }
+
+  await load()
+
+  assert.equal(module.state.playlistsReady, true)
+  assert.deepEqual(Array.from(module.state.playlists, p => p._id).sort(), ['custom', 'watchLater'])
+  assert.deepEqual(errors, [failure])
+})
