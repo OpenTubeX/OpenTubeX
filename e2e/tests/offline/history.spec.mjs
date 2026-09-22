@@ -381,7 +381,8 @@ test.describe('history search pagination', () => {
       history: [
         ...matchingHistoryEntries('Decoy', 100),
         ...matchingHistoryEntries('Alpha', 220, 1000),
-        ...matchingHistoryEntries('Beta', 130, 2000),
+        ...matchingHistoryEntries('Beta', 129, 2000),
+        historyEntry('betacase000', 'beta match lowercase', now - 2500),
         ...matchingHistoryEntries('Gamma', 20, 3000)
       ]
     }
@@ -445,13 +446,15 @@ test.describe('history search pagination', () => {
     await expect(loadMoreButton).toHaveCount(0)
 
     await scrollPageToEnd(page)
+    await expect(videos.filter({ hasText: 'beta match lowercase' })).toHaveCount(1)
     await page.clock.pauseAt(new Date(Date.now() + 1000))
     await page.getByRole('checkbox', { name: 'Case Sensitive Search' }).evaluate(element => element.click())
     await expect(page.locator('.historySearchLoader')).toBeVisible()
     await expect(videos).toHaveCount(0)
     await expectPageScrollWithinRenderedRange(page)
     await page.clock.resume()
-    await expect(videos).toHaveCount(130)
+    await expect(videos).toHaveCount(129)
+    await expect(videos.filter({ hasText: 'beta match lowercase' })).toHaveCount(0)
     await expectPageScrollWithinRenderedRange(page)
 
     await scrollPageToEnd(page)
