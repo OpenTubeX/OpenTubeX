@@ -608,11 +608,13 @@ export default defineComponent({
     // while the media element is still preparing its first `play` event.
     const shortsPaused = ref(false)
     const playbackEnded = ref(false)
+    const autoplayCanceled = ref(false)
     const shortsMuted = ref(false)
     const shortsCaptionsAvailable = ref(false)
     const shortsCaptionsEnabled = ref(false)
     const showEndedScreen = computed(() => playbackEnded.value &&
-      !props.autoplayEnabled && !props.autoplayCountdown && !props.shortsPlayer && !audioPlayerMode.value)
+      (!props.autoplayEnabled || autoplayCanceled.value) &&
+      !props.autoplayCountdown && !props.shortsPlayer && !audioPlayerMode.value)
     const blurThumbnails = computed(() => store.getters.getBlurThumbnails)
     const originalEndedTitles = ref({})
     const preferOriginalRecommendationTitles = computed(() => store.getters.getAvoidTranslation === 'entire_app')
@@ -703,6 +705,7 @@ export default defineComponent({
     })
 
     function cancelAutoplayCountdown() {
+      autoplayCanceled.value = true
       emit('autoplay-cancel')
     }
 
@@ -6273,6 +6276,7 @@ export default defineComponent({
 
       setShowUiOnPaused(true)
       shortsPaused.value = true
+      autoplayCanceled.value = false
       playbackEnded.value = true
       syncPlayPauseControlIcons()
 

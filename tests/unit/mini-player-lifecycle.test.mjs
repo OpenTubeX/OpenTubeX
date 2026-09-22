@@ -90,7 +90,7 @@ test('the ended event keeps an eligible detached mini player and reveals replay'
   const noop = () => {}
   vm.runInNewContext(`${handler}; handleEnded()`, {
     ...player, clearSabrBackoffTimer: noop, abRepeatEnabled: ref(false),
-    setShowUiOnPaused: noop, shortsPaused: ref(false), playbackEnded: ref(false),
+    setShowUiOnPaused: noop, shortsPaused: ref(false), playbackEnded: ref(false), autoplayCanceled: ref(false),
     syncPlayPauseControlIcons: noop, isCapacitorMobilePlayer: () => false,
     sleepTimer: { pauseCountdown: noop, consumeEndOfVideo: () => false },
     pauseSponsorBlockHighlightLabelCountdown: noop, cancelSponsorBlockSkipSchedule: noop,
