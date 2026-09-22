@@ -140,13 +140,27 @@ test('shows recommended thumbnails over a darkened poster with working keyboard 
   await waitForPlayback(page)
 })
 
-test('keeps the autoplay countdown instead of the finished poster when autoplay is enabled', async ({ app, page }) => {
+test('shows the poster and recommendations after canceling autoplay, and starts a fresh countdown on replay', async ({ app, page }) => {
   const { video, watch } = await openVideo({ app, page })
   await watch.evaluate(async component => {
     await component.proxy.$store.dispatch('updateHideRecommendedVideos', false)
     component.proxy.autoplayNextRecommendedVideo = true
     component.proxy.recommendedVideos = [{ videoId: 'video000000', title: 'Next video', type: 'video' }]
   })
+  await endVideo(video)
+  await expect(page.locator('.autoplayCountdownOverlay')).toBeVisible()
+  await expect(page.locator('.endedPoster')).toHaveCount(0)
+  await expect(page.locator('.endedRecommendations')).toHaveCount(0)
+  await page.locator('.autoplayCountdownOverlay').getByRole('button', { name: 'Cancel', exact: true }).click()
+  await expect(page.locator('.autoplayCountdownOverlay')).toHaveCount(0)
+  await expect(page.locator('.endedPoster')).toBeVisible()
+  await expect(page.locator('.endedRecommendation')).toBeVisible()
+  await expect(page.locator('.endedRecommendation')).toHaveAttribute('aria-label', 'Next video')
+  expect(await watch.evaluate(component => component.proxy.autoplayEnabled)).toBe(true)
+  expect(await watch.evaluate(component => component.proxy.playNextTimeout)).toBeNull()
+  await video.evaluate(element => { element.currentTime = 1 })
+  await expect(page.locator('.endedPoster')).toHaveCount(0)
+  await expect(page.locator('.endedRecommendations')).toHaveCount(0)
   await endVideo(video)
   await expect(page.locator('.autoplayCountdownOverlay')).toBeVisible()
   await expect(page.locator('.endedPoster')).toHaveCount(0)

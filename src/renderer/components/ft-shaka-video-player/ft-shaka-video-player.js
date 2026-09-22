@@ -612,7 +612,7 @@ export default defineComponent({
     const shortsCaptionsAvailable = ref(false)
     const shortsCaptionsEnabled = ref(false)
     const showEndedScreen = computed(() => playbackEnded.value &&
-      !props.autoplayEnabled && !props.autoplayCountdown && !props.shortsPlayer && !audioPlayerMode.value)
+      !props.autoplayCountdown && !props.shortsPlayer && !audioPlayerMode.value)
     const blurThumbnails = computed(() => store.getters.getBlurThumbnails)
     const originalEndedTitles = ref({})
     const preferOriginalRecommendationTitles = computed(() => store.getters.getAvoidTranslation === 'entire_app')
