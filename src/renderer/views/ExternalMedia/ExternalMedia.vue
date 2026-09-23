@@ -67,12 +67,19 @@
       />
 
       <FtCard class="externalMediaDetails">
-        <h1
-          class="videoTitle"
-          dir="auto"
-        >
-          {{ info.title || mediaUrl }}
-        </h1>
+        <div class="externalMediaHeading">
+          <h1
+            class="videoTitle"
+            dir="auto"
+          >
+            {{ info.title || mediaUrl }}
+          </h1>
+          <FtShareButton
+            v-if="!hideSharingActions"
+            id=""
+            :external-url="mediaUrl"
+          />
+        </div>
         <FtInlineMetadata class="externalMediaMetrics">
           <span v-if="info.viewCount !== null">{{ formattedViewCount }} {{ t('Video.Views') }}</span>
           <time
@@ -125,6 +132,7 @@ import FtCard from '../../components/ft-card/ft-card.vue'
 import FtInlineMetadata from '../../components/FtInlineMetadata/FtInlineMetadata.vue'
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtRetryImage from '../../components/FtRetryImage.vue'
+import FtShareButton from '../../components/FtShareButton/FtShareButton.vue'
 import FtShakaVideoPlayer from '../../components/ft-shaka-video-player/ft-shaka-video-player.vue'
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
 import { getExternalYtDlpPlaybackSource } from '../../helpers/player/ytDlpPlayback'
@@ -163,6 +171,7 @@ const thumbnail = computed(() => safeWebUrl(info.value?.thumbnail))
 const creatorName = computed(() => info.value?.channel || info.value?.uploader || '')
 const creatorUrl = computed(() => safeWebUrl(info.value?.channel ? info.value.channelUrl : info.value?.uploaderUrl))
 const creatorAvatarUrl = computed(() => safeWebUrl(info.value?.channel ? info.value.channelThumbnail : info.value?.uploaderThumbnail))
+const hideSharingActions = computed(() => store.getters.getHideSharingActions)
 const formattedViewCount = computed(() => new Intl.NumberFormat(locale.value).format(info.value?.viewCount ?? 0))
 const uploadDate = computed(() => {
   const value = info.value?.uploadDate
@@ -223,7 +232,6 @@ onBeforeUnmount(() => { loadGeneration++ })
 <style scoped>
 .externalMedia {
   margin-inline: auto;
-  max-inline-size: 1100px;
   padding: 24px;
 }
 
@@ -332,6 +340,13 @@ onBeforeUnmount(() => { loadGeneration++ })
   line-height: 1.3;
   margin: 0;
   overflow-wrap: anywhere;
+}
+
+.externalMediaHeading {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
 }
 
 .externalMediaMetrics {
