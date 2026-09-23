@@ -272,12 +272,15 @@ test.describe('synced watch stats', () => {
         ...store.getters.getSyncedWatchStats,
         ...Array.from({ length: 15 }, (_, index) => ({
           deviceId: `extra-${index}`,
-          deviceName: `Extra device ${index}`,
+          deviceName: index === 0 ? 'Extra device with a much longer name' : `Extra device ${index}`,
           days: {},
         })),
       ])
     })
     await expect(selector.getByRole('button')).toHaveCount(18)
+    await selector.getByRole('button', { name: 'Extra device with a much longer name' }).click()
+    await selectedSegmentIsAligned('Extra device with a much longer name')
+    await selector.getByRole('button', { name: 'All devices' }).click()
     const scrollbar = selector.locator(':scope > .os-scrollbar-horizontal')
     await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
     await app.electronApp.evaluate(({ BrowserWindow }) => {

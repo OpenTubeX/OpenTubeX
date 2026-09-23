@@ -930,7 +930,7 @@ Settings:
     New Passwords Do Not Match: "新しいパスワードが一致しません。"
     Password Changed: "パスワードを変更しました。他のデバイスからログアウトしました。"
     Sync Settings: 同期
-    Sync statistics: 統計を同期
+    Sync statistics: 視聴統計を同期
     Enable Sync: 同期を有効化
     Privacy Passphrase: プライバシーパスフレーズ
     Privacy Passphrase Hint: アカウントのパスワードとは別のパスフレーズを使用してください。このデバイスの外へ送信されず、すべてのデバイスで必要です。紛失すると暗号化された同期データを復元できません。

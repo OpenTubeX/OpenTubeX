@@ -930,7 +930,7 @@ Settings:
     New Passwords Do Not Match: "Ne glot ket ar gerioù-tremen nevez."
     Password Changed: "Ger-tremen cheñchet. Diskonektet eo bet an trobarzhelloù all."
     Sync Settings: "Goubredañ"
-    Sync statistics: Sinkronelaat ar stadegoù
+    Sync statistics: "Goubredañ ar stadegoù"
     Enable Sync: "Gweredekaat ar goubredañ"
     Privacy Passphrase: "Lavarenn-dremen brevezded"
     Privacy Passphrase Hint: "Implijit ul lavarenn-dremen disheñvel diouzh ger-tremen ho kont. Ne guita morse an trevnad-mañ ha rekis eo war bep trevnad; ma kollit anezhi ne c'hallo ket ar roadennoù goubredañ sifret bezañ adtapet."
@@ -1003,7 +1003,7 @@ Settings:
     Syncing subscriptions: "O c'houbredañ ar c'houmanantoù…"
     Syncing playlists: "O c'houbredañ ar rolloù-videoioù…"
     Syncing history: "O c'houbredañ an istor sellout…"
-    Syncing statistics: O sinkronelaat stadegoù an arsell…
+    Syncing statistics: "O c'houbredañ ar stadegoù…"
     Syncing profiles: "O c'houbredañ ar profiloù…"
     Syncing open tabs: "O c'houbredañ an ivinelloù digor hag an estez…"
     Syncing settings: "O c'houbredañ an arventennoù…"
