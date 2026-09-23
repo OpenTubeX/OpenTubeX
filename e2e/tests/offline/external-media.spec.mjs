@@ -334,6 +334,66 @@ test('uses configured playback cookies for external streams', async ({ app, page
   }
 })
 
+test('uses only format cookies for browser-authenticated external streams', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+
+  const media = await readFile(DEMO_MEDIA_PATH)
+  const server = createServer((request, response) => {
+    if (request.headers.cookie !== 'account_session=test-token') {
+      response.writeHead(403).end()
+      return
+    }
+    response.writeHead(200, {
+      'content-type': 'video/webm',
+      'content-length': media.length,
+      'accept-ranges': 'bytes'
+    }).end(media)
+  })
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
+
+  try {
+    const executable = path.join(app.userDataDir, 'external-media-browser-auth.sh')
+    const capturedArgs = path.join(app.userDataDir, 'external-media-browser-args.txt')
+    const streamUrl = `http://127.0.0.1:${server.address().port}/video.webm`
+    const response = JSON.stringify({
+      title: 'Browser authenticated stream',
+      formats: [{
+        format_id: '360',
+        url: streamUrl,
+        protocol: 'http',
+        ext: 'webm',
+        height: 360,
+        cookies: 'account_session=test-token; Domain=127.0.0.1; Path=/'
+      }]
+    })
+    await writeFile(executable, [
+      '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+      `printf '%s\\n' "$@" > '${capturedArgs}'`,
+      `printf '%s\\n' '${response}'`
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.evaluate(async ytDlpPath => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpSource', 'system')
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+      await store.dispatch('updateYtDlpPlaybackAuthMode', 'browser')
+      await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
+      await store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', true)
+    }, executable)
+
+    await page.locator(sel.searchInput).fill('https://www.tiktok.com/@example/video/123')
+    await page.locator(sel.searchInput).press('Enter')
+    await waitForPlayback(page)
+    const args = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
+    expect(args).toContain('--cookies-from-browser')
+    expect(args).not.toContain('--cookies')
+  } finally {
+    server.closeAllConnections()
+    await new Promise(resolve => server.close(resolve))
+  }
+})
+
 test('skips a TikTok codec unsupported by the player when a compatible stream exists', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
 

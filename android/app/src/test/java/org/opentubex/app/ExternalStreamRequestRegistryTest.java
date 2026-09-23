@@ -8,6 +8,23 @@ import java.util.Map;
 import static org.junit.Assert.*;
 
 public class ExternalStreamRequestRegistryTest {
+    @Test public void ignoresHeaderAndCookieValuesThatOkHttpCannotSend() throws Exception {
+        ExternalStreamRequestRegistry registry = new ExternalStreamRequestRegistry();
+        registry.register(new JSONArray().put(new JSONObject()
+            .put("url", "https://media.example/video.mp4")
+            .put("protocol", "https")
+            .put("http_headers", new JSONObject()
+                .put("Referer", "https://example.com/\u00e9")
+                .put("User-Agent", "safe-agent"))),
+            "media.example\tFALSE\t/\tFALSE\t0\tbad\t\u00e9\n" +
+            "media.example\tFALSE\t/\tFALSE\t0\tgood\ttoken\n");
+
+        Map<String, String> headers = registry.headersFor(new URL("https://media.example/video.mp4"));
+        assertNull(headers.get("Referer"));
+        assertEquals("safe-agent", headers.get("User-Agent"));
+        assertEquals("good=token", headers.get("Cookie"));
+    }
+
     @Test public void forwardsHeadersAndCookiesOnlyToRegisteredMediaPaths() throws Exception {
         ExternalStreamRequestRegistry registry = new ExternalStreamRequestRegistry();
         JSONObject format = new JSONObject()

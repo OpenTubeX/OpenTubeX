@@ -4,7 +4,7 @@ import {
   SUBTITLE_FORMATS, MAX_LOCAL_PLAYLIST_VIDEOS, DENIED_CUSTOM_ARGS, AUTOMATIC_NUMBER_LIMITS,
   splitArguments, automaticNumber,
 } from '../ytDlpArguments'
-import { PLAYBACK_INFO_OUTPUT_TEMPLATE, toFiniteNumber, toNonEmptyString, mapPlaybackFormat, mapPlaybackCaptions } from '../ytDlpMetadata'
+import { PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE, toFiniteNumber, toNonEmptyString, mapPlaybackFormat, mapPlaybackCaptions } from '../ytDlpMetadata'
 import { resolveYtDlpCreatorAvatarUrl } from './ytDlpCreatorAvatar'
 import { execFile, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
@@ -33,7 +33,7 @@ import { supportsNativeNotifications } from './nativeNotifications'
 
 const execFileAsync = promisify(execFile)
 
-/** Anonymous cookies acquired while extracting external media stay in memory. */
+/** Cookies acquired while extracting external media stay in memory. */
 const externalStreamCookies = new WeakMap()
 const externalStreamHeaders = new WeakMap()
 const externalManifestHeaders = new WeakMap()
@@ -90,17 +90,20 @@ function registerExternalStreamCookies(webContents, formats, cookieFileContents)
         return ['http:', 'https:'].includes(parsed.protocol) ? parsed.hostname : null
       } catch { return null }
     }).filter(Boolean))
-  if (hosts.size === 0 || cookieFileContents === '') return
+  if (hosts.size === 0) return
 
-  const cookies = cookieFileContents.split(/\r?\n/).flatMap(line => {
+  const cookieFileEntries = cookieFileContents.split(/\r?\n/).flatMap(line => {
     const fields = line.replace(/^#HttpOnly_/, '').split('\t')
     if (fields.length !== 7 || fields[0].startsWith('#')) return []
-    const [domain, , path, secure, expires, name, value] = fields
+    const [domain, includeSubdomains, path, secure, expires, name, value] = fields
     const cookieDomain = domain.replace(/^\./, '').toLowerCase()
-    if (![...hosts].some(host => host === cookieDomain || host.endsWith(`.${cookieDomain}`))) return []
-    if (!/^[^\s;=]+$/.test(name) || !value || /[\r\n;]/.test(value)) return []
+    if (!['TRUE', 'FALSE'].includes(includeSubdomains)) return []
+    if (![...hosts].some(host => host === cookieDomain || (includeSubdomains === 'TRUE' && host.endsWith(`.${cookieDomain}`)))) return []
+    if (!/^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/.test(name) || !value ||
+      !/^[\x20-\x7e]+$/.test(value) || value.includes(';')) return []
     return [{
       domain: cookieDomain,
+      includeSubdomains: includeSubdomains === 'TRUE',
       path,
       secure: secure === 'TRUE',
       expires: Math.min(Number(expires) || Infinity, Date.now() / 1000 + 3600),
@@ -108,7 +111,48 @@ function registerExternalStreamCookies(webContents, formats, cookieFileContents)
       value
     }]
   })
-  if (cookies.length === 0) return
+
+  // yt-dlp scopes each format's cookies to its URL. Use those in browser-cookie
+  // mode so the browser's entire cookie jar never needs to be written to disk.
+  const formatEntries = cookieFileContents === ''
+    ? formats.flatMap(format => {
+        if (typeof format.cookies !== 'string' || typeof format.url !== 'string') return []
+        let url
+        try { url = new URL(format.url) } catch { return [] }
+        if (!['http:', 'https:'].includes(url.protocol)) return []
+        const entries = []
+        let cookie = null
+        for (const part of format.cookies.split('; ')) {
+          const separator = part.indexOf('=')
+          const name = separator === -1 ? part : part.slice(0, separator)
+          const value = separator === -1 ? '' : part.slice(separator + 1)
+          if (name === 'Domain' || name === 'Path' || name === 'Expires' || name === 'Secure' || name === 'Version') {
+            if (cookie === null) continue
+            const domain = value.replace(/^\./, '').toLowerCase()
+            if (name === 'Domain' && url.hostname !== domain && !url.hostname.endsWith(`.${domain}`)) {
+              entries.pop()
+              cookie = null
+            } else if (name === 'Path' && value.startsWith('/')) cookie.path = value
+            else if (name === 'Expires') cookie.expires = Math.min(Number(value) || Infinity, Date.now() / 1000 + 3600)
+            else if (name === 'Secure') cookie.secure = true
+          } else if (/^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/.test(name) && value &&
+        /^[\x20-\x7e]+$/.test(value) && !value.includes(';')) {
+            cookie = {
+              domain: url.hostname,
+              includeSubdomains: false,
+              path: '/',
+              secure: false,
+              expires: Date.now() / 1000 + 3600,
+              name,
+              value
+            }
+            entries.push(cookie)
+          }
+        }
+        return entries
+      })
+    : []
+  const cookies = [...cookieFileEntries, ...formatEntries]
 
   const existing = externalStreamCookies.get(webContents) ?? new Map()
   for (const host of hosts) existing.set(host, cookies)
@@ -122,7 +166,7 @@ export function getYtDlpExternalStreamCookieHeader(webContents, requestUrl) {
   const now = Date.now() / 1000
   const matching = cookies.filter(cookie =>
     now < cookie.expires &&
-    (url.hostname === cookie.domain || url.hostname.endsWith(`.${cookie.domain}`)) &&
+    (url.hostname === cookie.domain || (cookie.includeSubdomains && url.hostname.endsWith(`.${cookie.domain}`))) &&
     (url.pathname === cookie.path ||
       url.pathname.startsWith(cookie.path.endsWith('/') ? cookie.path : `${cookie.path}/`)) &&
     (!cookie.secure || url.protocol === 'https:')
@@ -1658,7 +1702,7 @@ export async function handleYtDlpGetPlaybackInfo(
     '--format',
     isYouTubeVideo ? 'sb0/sb1/sb2/sb3' : 'bestvideo*+bestaudio/best',
     '--print',
-    PLAYBACK_INFO_OUTPUT_TEMPLATE
+    isYouTubeVideo ? PLAYBACK_INFO_OUTPUT_TEMPLATE : PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE
   ]
 
   if (includeSubtitles) {
@@ -1699,7 +1743,7 @@ export async function handleYtDlpGetPlaybackInfo(
     const configuredCookieIndex = args.lastIndexOf('--cookies')
     if (configuredCookieIndex !== -1) {
       cookieFile = args[configuredCookieIndex + 1]
-    } else {
+    } else if (!args.includes('--cookies-from-browser')) {
       cookieDirectory = await mkdtemp(join(app.getPath('temp'), 'opentubex-stream-cookies-'))
       cookieFile = join(cookieDirectory, 'cookies.txt')
       args.push('--cookies', cookieFile)
@@ -1752,7 +1796,7 @@ export async function handleYtDlpGetPlaybackInfo(
   const formats = Array.isArray(info.formats) ? info.formats : []
   if (!isYouTubeVideo) {
     registerExternalStreamHeaders(event.sender, formats)
-    if (extractedCookies !== '') registerExternalStreamCookies(event.sender, formats, extractedCookies)
+    registerExternalStreamCookies(event.sender, formats, extractedCookies)
   }
   const { captions, captionTranslations } = mapPlaybackCaptions(info.requested_subtitles)
   const creatorAvatarUrl = isYouTubeVideo

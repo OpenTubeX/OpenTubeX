@@ -36,7 +36,7 @@ final class ExternalStreamRequestRegistry {
                     String name = names.next();
                     String value = rawHeaders.optString(name, "");
                     if (ALLOWED_HEADERS.contains(name.toLowerCase(Locale.ROOT)) &&
-                        !value.contains("\r") && !value.contains("\n")) {
+                        isSafeHeaderValue(value)) {
                         headers.put(name, value);
                     }
                 }
@@ -61,8 +61,8 @@ final class ExternalStreamRequestRegistry {
             String normalized = line.startsWith("#HttpOnly_") ? line.substring(10) : line;
             if (normalized.startsWith("#")) continue;
             String[] fields = normalized.split("\t", -1);
-            if (fields.length != 7 || fields[5].isEmpty() || fields[5].contains(";") ||
-                fields[6].contains(";") || fields[6].contains("\r") || fields[6].contains("\n")) continue;
+            if (fields.length != 7 || !fields[5].matches("[!#$%&'*+.^_`|~0-9A-Za-z-]+") ||
+                fields[6].contains(";") || !isSafeHeaderValue(fields[6])) continue;
             String domain = fields[0].replaceFirst("^\\.", "").toLowerCase(Locale.ROOT);
             boolean includeSubdomains = "TRUE".equals(fields[1]);
             if (!includeSubdomains && !"FALSE".equals(fields[1])) continue;
@@ -129,6 +129,14 @@ final class ExternalStreamRequestRegistry {
 
     private static boolean domainMatches(String host, String domain, boolean includeSubdomains) {
         return host.equals(domain) || (includeSubdomains && host.endsWith("." + domain));
+    }
+
+    private static boolean isSafeHeaderValue(String value) {
+        for (int i = 0; i < value.length(); i++) {
+            char character = value.charAt(i);
+            if (character != '\t' && (character < 0x20 || character > 0x7e)) return false;
+        }
+        return true;
     }
 
     private static URL parseUrl(String candidate) {
