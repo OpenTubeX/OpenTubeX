@@ -295,6 +295,10 @@
   z-index: 1;
 }
 
+.app.capacitorTabs > .routerView {
+  position: relative;
+}
+
 @media (width <= 680px) {
   .app.capacitorPhoneLayout > .routerView {
     box-sizing: border-box;

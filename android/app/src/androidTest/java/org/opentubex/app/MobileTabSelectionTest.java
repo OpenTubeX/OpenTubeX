@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.webkit.WebView;
+import android.os.SystemClock;
+import android.view.InputDevice;
+import android.view.MotionEvent;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -16,6 +19,181 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class MobileTabSelectionTest {
     private static final String STORE = "document.querySelector('#app').__vue_app__.config.globalProperties.$store";
+
+    @Test
+    public void fastAppBarSwipeAnimatesTheIncomingTabBeforeSelectionChanges() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            AtomicReference<WebView> reference = new AtomicReference<>();
+            scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
+            WebView view = reference.get();
+            await(view, "!!document.querySelector('.capacitorTabletNewTab') && " +
+                STORE + ".getters.getActiveTab?.loadState === 'loaded'");
+            await(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || " +
+                "!!document.querySelector('.tutorialActions button')");
+            evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
+            await(view, "!document.querySelector('.tutorialOverlay')");
+            evaluate(view, "window.pageSwipeFirstId = " + STORE + ".getters.getActiveTabId;" +
+                "document.querySelector('.capacitorTabletNewTab').click()");
+            await(view, STORE + ".getters.getActiveTab?.loadState === 'loaded' && " +
+                STORE + ".getters.getActiveTabId !== window.pageSwipeFirstId");
+            assertEquals("The loaded neighboring page is rendered behind the current page", "true",
+                evaluate(view, "(() => { const neighbor = document.querySelector('.tabContent[data-tab-id=\"' + window.pageSwipeFirstId + '\"]');" +
+                    "const viewport = document.querySelector('.app > .routerView').getBoundingClientRect();" +
+                    "const rect = neighbor.getBoundingClientRect();" +
+                    "return getComputedStyle(neighbor).display !== 'none' && rect.width === viewport.width &&" +
+                    "rect.left === viewport.left && neighbor.inert && neighbor.getAttribute('aria-hidden') === 'true'; })()"));
+            evaluate(view, "window.pageSwipeOriginalAnimationSpeed = " + STORE + ".getters.getAnimationSpeed;" +
+                STORE + ".commit('setAnimationSpeed', 25)");
+            try {
+                evaluate(view, """
+                window.pageSwipeTransitions = [];
+                for (const type of ['transitionrun', 'transitionend', 'transitioncancel']) {
+                    document.querySelector('.app > .routerView').addEventListener(type, event => {
+                        if (event.target.classList.contains('tabContent')) {
+                            window.pageSwipeTransitions.push(type + ':' + event.propertyName + ':' +
+                                (event.target.dataset.tabId === String(window.pageSwipeFirstId) ? 'to' : 'from'));
+                        }
+                    });
+                }
+                """);
+
+                float x = Float.parseFloat(evaluate(view, "(() => { const r = document.querySelector('.topNav .middle').getBoundingClientRect(); return (r.left + r.right) / 2 })()"));
+                float y = Float.parseFloat(evaluate(view, "(() => { const r = document.querySelector('.topNav').getBoundingClientRect(); return (r.top + r.bottom) / 2 })()"));
+                float scale = view.getWidth() / Float.parseFloat(evaluate(view, "window.innerWidth"));
+                long downTime = SystemClock.uptimeMillis();
+                touch(view, downTime, MotionEvent.ACTION_DOWN, x * scale, y * scale);
+                touch(view, downTime, MotionEvent.ACTION_MOVE, (x + 80) * scale, y * scale);
+                touch(view, downTime, MotionEvent.ACTION_UP, (x + 80) * scale, y * scale);
+                await(view, STORE + ".getters.getActiveTabId === window.pageSwipeFirstId && " +
+                    "!document.querySelector('.pageSwipeTo')");
+                assertEquals("A fast release animates both pages before selecting the neighboring tab", "true",
+                    evaluate(view, "window.pageSwipeTransitions.includes('transitionrun:left:from') && " +
+                        "window.pageSwipeTransitions.includes('transitionrun:left:to')"));
+
+                evaluate(view, "window.pageSwipeTransitions = []");
+                downTime = SystemClock.uptimeMillis();
+                touch(view, downTime, MotionEvent.ACTION_DOWN, x * scale, y * scale);
+                touch(view, downTime, MotionEvent.ACTION_MOVE, (x - 80) * scale, y * scale);
+                await(view, "!!document.querySelector('.pageSwipeTo')");
+                touch(view, downTime, MotionEvent.ACTION_CANCEL, (x - 80) * scale, y * scale);
+                await(view, "!document.querySelector('.pageSwipeTo')");
+                assertEquals("A cancelled drag animates back to the original tab", "true",
+                    evaluate(view, "window.pageSwipeTransitions.includes('transitionrun:left:from') && " +
+                        "window.pageSwipeTransitions.includes('transitionrun:left:to') && " +
+                        STORE + ".getters.getActiveTabId === window.pageSwipeFirstId"));
+            } finally {
+                evaluate(view, STORE + ".commit('setAnimationSpeed', window.pageSwipeOriginalAnimationSpeed);" +
+                    "delete window.pageSwipeOriginalAnimationSpeed");
+            }
+        }
+    }
+
+    @Test
+    public void draggingEmptyAppBarSlidesBetweenLoadedTabs() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            AtomicReference<WebView> reference = new AtomicReference<>();
+            scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
+            WebView view = reference.get();
+            await(view, "!!document.querySelector('.capacitorTabletNewTab') && " +
+                STORE + ".getters.getActiveTab?.loadState === 'loaded'");
+            await(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || " +
+                "!!document.querySelector('.tutorialActions button')");
+            evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
+            await(view, "!document.querySelector('.tutorialOverlay')");
+            evaluate(view, "window.pageSwipeFirstId = " + STORE + ".getters.getActiveTabId;" +
+                "document.querySelector('.capacitorTabletNewTab').click()");
+            await(view, STORE + ".getters.getTabs.length >= 2 && " +
+                STORE + ".getters.getActiveTab?.loadState === 'loaded' && " +
+                STORE + ".getters.getActiveTabId === " + STORE + ".getters.getPresentedTabId && " +
+                STORE + ".getters.getActiveTabId !== window.pageSwipeFirstId");
+            evaluate(view, "window.pageSwipeSecondId = " + STORE + ".getters.getActiveTabId");
+
+            float x = Float.parseFloat(evaluate(view, "(() => { const r = document.querySelector('.topNav .middle').getBoundingClientRect(); return (r.left + r.right) / 2 })()"));
+            float y = Float.parseFloat(evaluate(view, "(() => { const r = document.querySelector('.topNav').getBoundingClientRect(); return (r.top + r.bottom) / 2 })()"));
+            float scale = view.getWidth() / Float.parseFloat(evaluate(view, "window.innerWidth"));
+            float distance = Math.min(150, (view.getWidth() / scale) - x - 20);
+            assertTrue("App bar has enough empty space for a swipe", distance > 80);
+            evaluate(view, "document.querySelector('.app > .routerView').style.direction = 'rtl'");
+            long downTime = SystemClock.uptimeMillis();
+            touch(view, downTime, MotionEvent.ACTION_DOWN, x * scale, y * scale);
+            touch(view, downTime, MotionEvent.ACTION_MOVE, (x + distance / 2) * scale, y * scale);
+            await(view, "!!document.querySelector('.pageSwipeTo') && " +
+                STORE + ".getters.getPresentedTabId !== window.pageSwipeFirstId");
+            assertEquals("The neighboring page stays flush with the moving page", "true",
+                evaluate(view, "Math.abs(document.querySelector('.pageSwipeTo').getBoundingClientRect().right - document.querySelector('.pageSwipeFrom').getBoundingClientRect().left) <= 1"));
+            touch(view, downTime, MotionEvent.ACTION_MOVE, (x + distance) * scale, y * scale);
+            touch(view, downTime, MotionEvent.ACTION_UP, (x + distance) * scale, y * scale);
+            await(view, STORE + ".getters.getPresentedTabId === window.pageSwipeFirstId && " +
+                STORE + ".getters.getActiveTabId === window.pageSwipeFirstId && " +
+                "!document.querySelector('.pageSwipeTo')");
+            float leftDistance = Math.min(150, x - 20);
+            assertTrue("App bar has enough empty space in both directions", leftDistance > 80);
+            downTime = SystemClock.uptimeMillis();
+            touch(view, downTime, MotionEvent.ACTION_DOWN, x * scale, y * scale);
+            touch(view, downTime, MotionEvent.ACTION_MOVE, (x - leftDistance) * scale, y * scale);
+            touch(view, downTime, MotionEvent.ACTION_UP, (x - leftDistance) * scale, y * scale);
+            await(view, STORE + ".getters.getPresentedTabId === window.pageSwipeSecondId && " +
+                STORE + ".getters.getActiveTabId === window.pageSwipeSecondId && " +
+                "!document.querySelector('.pageSwipeTo')");
+
+            evaluate(view, "document.querySelector('.capacitorTabletNewTab').click()");
+            await(view, STORE + ".getters.getActiveTab?.loadState === 'loaded' && " +
+                STORE + ".getters.getActiveTabId === " + STORE + ".getters.getPresentedTabId && " +
+                STORE + ".getters.getActiveTabId !== window.pageSwipeFirstId && " +
+                STORE + ".getters.getActiveTabId !== window.pageSwipeSecondId");
+            evaluate(view, "window.pageSwipeThirdId = " + STORE + ".getters.getActiveTabId");
+            evaluate(view, "document.querySelector('.capacitorTabletTabTarget[data-tab-id=\"' + " +
+                "window.pageSwipeSecondId + '\"]').click()");
+            await(view, STORE + ".getters.getPresentedTabId === window.pageSwipeSecondId && " +
+                STORE + ".getters.getActiveTabId === window.pageSwipeSecondId && " +
+                "!!document.querySelector('.pageSwipePrewarm[data-tab-id=\"' + window.pageSwipeThirdId + '\"]')");
+            downTime = SystemClock.uptimeMillis();
+            touch(view, downTime, MotionEvent.ACTION_DOWN, x * scale, y * scale);
+            touch(view, downTime, MotionEvent.ACTION_MOVE, (x + distance / 2) * scale, y * scale);
+            await(view, "document.querySelector('.pageSwipeTo')?.dataset.tabId === String(window.pageSwipeFirstId)");
+            assertEquals("The previous tab paints above the other prewarmed tab", "true",
+                evaluate(view, """
+                    (() => {
+                        const target = document.querySelector('.pageSwipeTo');
+                        const other = [...document.querySelectorAll('.pageSwipePrewarm')]
+                            .find(page => page !== target);
+                        const rect = target.getBoundingClientRect();
+                        target.inert = false;
+                        other.inert = false;
+                        other.style.pointerEvents = 'auto';
+                        try {
+                            return document.elementFromPoint(rect.right - 30, rect.top + 30)
+                                ?.closest('.tabContent') === target;
+                        } finally {
+                            target.inert = true;
+                            other.inert = true;
+                            other.style.pointerEvents = '';
+                        }
+                    })()
+                    """));
+            touch(view, downTime, MotionEvent.ACTION_CANCEL, (x + distance / 2) * scale, y * scale);
+            await(view, "!document.querySelector('.pageSwipeTo')");
+        }
+    }
+
+    private static void touch(WebView view, long downTime, int action, float x, float y) {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            MotionEvent.PointerProperties properties = new MotionEvent.PointerProperties();
+            properties.id = 0;
+            properties.toolType = MotionEvent.TOOL_TYPE_FINGER;
+            MotionEvent.PointerCoords coordinates = new MotionEvent.PointerCoords();
+            coordinates.x = x;
+            coordinates.y = y;
+            coordinates.pressure = 1;
+            coordinates.size = 1;
+            MotionEvent event = MotionEvent.obtain(downTime, SystemClock.uptimeMillis(), action,
+                1, new MotionEvent.PointerProperties[] {properties},
+                new MotionEvent.PointerCoords[] {coordinates}, 0, 0, 1, 1, 0, 0,
+                InputDevice.SOURCE_TOUCHSCREEN, 0);
+            view.dispatchTouchEvent(event);
+            event.recycle();
+        });
+    }
 
     @Test
     public void bulkCloseClampsPhoneAndTabletScrollbars() throws Exception {

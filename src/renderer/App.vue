@@ -31,6 +31,10 @@
     <TopNav
       :inert="isAnyPromptOpen"
       @request-android-exit="requestAndroidAppExit"
+      @pointerdown="startPageSwipe"
+      @pointermove="movePageSwipe"
+      @pointerup="finishPageSwipe"
+      @pointercancel="cancelPageSwipe"
     />
     <SideNav
       :inert="isAnyPromptOpen"
@@ -61,6 +65,8 @@
           v-for="tab in tabContainers"
           :key="tab.id"
           :tab="tab"
+          :page-swipe="pageSwipe"
+          :prewarm="pageSwipeNeighborIds.includes(tab.id)"
         />
       </template>
       <RouterView
@@ -632,6 +638,7 @@ import { getAppFontFamily } from './helpers/appFont'
 import { setupPhoneViewport } from './helpers/phoneViewport'
 import { createCapacitorUiScale } from './helpers/capacitorUiScale'
 import { usesCapacitorTabletLayout } from './helpers/capacitorLayout'
+import { findLoadedSwipeTab, shouldFinishPageSwipe } from './helpers/capacitorPageSwipe'
 import { getTabAccentColor } from './constants/tabColors'
 import { getThumbnailListStyles } from './constants/thumbnailSize'
 import {
@@ -690,6 +697,128 @@ const tabContainers = computed(() => {
 const activeTabId = computed(() => store.getters.getActiveTabId)
 const presentedTabId = computed(() => store.getters.getPresentedTabId)
 const selectionRevision = computed(() => store.state.tabs.selectionRevision)
+const pageSwipeNeighborIds = computed(() => {
+  if (!isCapacitor || activeTabId.value !== presentedTabId.value) return []
+  return [-1, 1]
+    .map(direction => findLoadedSwipeTab(store.getters.getTabs, presentedTabId.value, direction)?.id)
+    .filter(Boolean)
+})
+
+const pageSwipe = shallowRef(null)
+let pageSwipePointer = null
+
+function startPageSwipe(event) {
+  if (!isCapacitor || event.pointerType !== 'touch' || !event.isPrimary ||
+      pageSwipe.value || isAnyPromptOpen.value ||
+      activeTabId.value !== presentedTabId.value ||
+      event.target.closest('button, a, input, textarea, select, [role="button"], .searchContainer')) return
+
+  const width = document.querySelector('.app > .routerView')?.getBoundingClientRect().width
+  if (!width) return
+  pageSwipePointer = {
+    id: event.pointerId,
+    fromId: presentedTabId.value,
+    x: event.clientX,
+    y: event.clientY,
+    time: event.timeStamp,
+    width
+  }
+  event.currentTarget.setPointerCapture(event.pointerId)
+}
+
+function movePageSwipe(event) {
+  const pointer = pageSwipePointer
+  if (!pointer || pointer.id !== event.pointerId) return
+
+  const distance = event.clientX - pointer.x
+  const verticalDistance = Math.abs(event.clientY - pointer.y)
+  if (!pageSwipe.value && (Math.abs(distance) < 10 || Math.abs(distance) < verticalDistance * 1.2)) {
+    if (verticalDistance > 10) pageSwipePointer = null
+    return
+  }
+
+  if (activeTabId.value !== pointer.fromId || presentedTabId.value !== pointer.fromId) {
+    cancelPageSwipe()
+    return
+  }
+
+  const direction = distance < 0 ? 1 : -1
+  const target = findLoadedSwipeTab(store.getters.getTabs, pointer.fromId, direction)
+  pageSwipe.value = target
+    ? {
+        fromId: pointer.fromId,
+        toId: target.id,
+        direction,
+        offset: Math.max(-pointer.width, Math.min(pointer.width, distance)),
+        width: pointer.width,
+        settling: false
+      }
+    : null
+}
+
+async function finishPageSwipe(event, cancelled = false) {
+  const pointer = pageSwipePointer
+  if (!pointer || pointer.id !== event.pointerId) return
+  pageSwipePointer = null
+  const swipe = pageSwipe.value
+  if (!swipe) return
+
+  const commit = !cancelled && shouldFinishPageSwipe(swipe.offset, swipe.width, event.timeStamp - pointer.time) &&
+    findLoadedSwipeTab(store.getters.getTabs, swipe.fromId, swipe.direction)?.id === swipe.toId
+  const reducedMotion = document.documentElement.dataset.reducedMotion === 'reduce' ||
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (!reducedMotion) {
+    // Let a fast drag paint once before starting the release transition.
+    await nextTick()
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+    if (pageSwipe.value !== swipe) return
+  }
+  const settledSwipe = {
+    ...swipe,
+    offset: commit ? Math.sign(swipe.offset) * swipe.width : 0,
+    settling: true
+  }
+  pageSwipe.value = settledSwipe
+  await nextTick()
+  if (!reducedMotion) {
+    const target = document.querySelector('.pageSwipeTo')
+    if (target) {
+      await new Promise(resolve => {
+        const finish = () => {
+          target.removeEventListener('transitionend', onTransition)
+          target.removeEventListener('transitioncancel', onTransition)
+          window.clearTimeout(timeoutId)
+          resolve()
+        }
+        const onTransition = transition => {
+          if (transition.target === target && transition.propertyName === 'left') finish()
+        }
+        target.addEventListener('transitionend', onTransition)
+        target.addEventListener('transitioncancel', onTransition)
+        // Covers the slowest 25% animation-speed setting if WebView skips the event.
+        const timeoutId = window.setTimeout(finish, 1000)
+      })
+    }
+  }
+  if (pageSwipe.value !== settledSwipe) return
+  try {
+    if (commit && activeTabId.value === swipe.fromId && presentedTabId.value === swipe.fromId &&
+        findLoadedSwipeTab(store.getters.getTabs, swipe.fromId, swipe.direction)?.id === swipe.toId) {
+      await capacitorTabService.activateTab(swipe.toId)
+    }
+  } finally {
+    pageSwipe.value = null
+  }
+}
+
+function cancelPageSwipe(event) {
+  if (event) {
+    finishPageSwipe(event, true)
+    return
+  }
+  pageSwipePointer = null
+  pageSwipe.value = null
+}
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const isSideNavOpen = computed(() => store.getters.getIsSideNavOpen)
@@ -1639,6 +1768,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  cancelPageSwipe()
   removeInternetConnectivitySettingsListener?.()
   if (mobileLinkActionsLocked) {
     store.commit('removeOpenPrompt', mobileLinkActionsPromptId)

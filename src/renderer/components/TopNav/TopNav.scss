@@ -26,6 +26,10 @@
      the fixed mobile search bar is positioned relative to the top nav. */
   container: top-nav / inline-size;
 
+  .app.capacitorTabs & {
+    touch-action: pan-y;
+  }
+
   @include top-nav-is-colored {
     background-color: var(--primary-color);
   }
