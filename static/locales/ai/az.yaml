@@ -889,6 +889,7 @@ Settings:
     Import playlists formats: 'Dəstəklənən formatlar: OpenTubeX (.db)'
     Import search history formats: 'Dəstəklənən formatlar: OpenTubeX (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Show More: "Daha çox göstər"
     Sync Automatically: "Avtomatik sinxronlaşdır"
     Activity: "Hesab fəaliyyəti"
     No Activity: "Son fəaliyyət yoxdur"

@@ -932,6 +932,7 @@ Settings:
     Import playlists formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'قالب‌های پشتیبانی‌شده: OpenTubeX / FreeTube (.db)، YouTube Takeout (.json)'
   Sync Settings:
+    Show More: "نمایش بیشتر"
     Sync Automatically: "همگام‌سازی خودکار"
     Activity: "فعالیت حساب"
     No Activity: "فعالیت اخیری وجود ندارد"

@@ -894,6 +894,7 @@ Settings:
     Import playlists formats: 'Studd snið: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Studd snið: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Show More: "Sýna meira"
     Sync Automatically: "Samstilla sjálfkrafa"
     Activity: "Virkni reiknings"
     No Activity: "Engin nýleg virkni"

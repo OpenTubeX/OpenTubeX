@@ -18,9 +18,11 @@ for (const uiScale of [100, 125]) {
       const card = sync.locator('.syncActivity')
       const disclosure = card.locator('.activityDisclosure')
       await expect(disclosure).toHaveAttribute('aria-expanded', 'false')
+      await expect(disclosure).toHaveText('Show more')
       await expect(card.locator('.activityList li')).toHaveCount(3)
       await disclosure.click()
       await expect(disclosure).toHaveAttribute('aria-expanded', 'true')
+      await expect(disclosure).toHaveText('Show less')
       await expect(card.locator('.activityList li')).toHaveCount(12)
 
       const scroller = page.locator('.settingsContent')
@@ -28,6 +30,7 @@ for (const uiScale of [100, 125]) {
       await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
       await disclosure.click()
       await expect(disclosure).toHaveAttribute('aria-expanded', 'false')
+      await expect(disclosure).toHaveText('Show more')
       await expect(card.locator('.activityList li')).toHaveCount(3)
       await expectScrollAtRenderedEnd(scroller)
       await expect.poll(() => scroller.evaluate(element => {

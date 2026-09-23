@@ -886,6 +886,7 @@ Settings:
     Import playlists formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Toetatud vormingud: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Show More: "Näita rohkem"
     Sync Automatically: "Sünkrooni automaatselt"
     Activity: "Konto tegevus"
     No Activity: "Hiljutisi tegevusi pole"

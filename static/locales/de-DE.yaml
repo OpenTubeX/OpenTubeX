@@ -1473,6 +1473,7 @@ Settings:
     Sync Automatically: "Automatisch synchronisieren"
     Activity: "Kontoaktivität"
     No Activity: "Keine kürzlichen Aktivitäten"
+    Show More: "Mehr anzeigen"
     Setting Changed: "{device} hat {setting} auf {value} geändert"
     Item Updated: "{device} hat {setting} aktualisiert"
     Open On Device: "Auf anderem Gerät öffnen"

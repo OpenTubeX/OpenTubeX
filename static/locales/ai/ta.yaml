@@ -909,6 +909,7 @@ Settings:
     Import playlists formats: 'ஆதரிக்கப்படும் வடிவங்கள்: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'ஆதரிக்கப்படும் வடிவங்கள்: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Show More: "மேலும் காட்டு"
     Watch stats: "பார்வைப் புள்ளிவிவரங்கள்"
     Syncing statistics: பார்வை புள்ளிவிவரங்கள் ஒத்திசைக்கப்படுகின்றன…
     Sync Automatically: "தானாக ஒத்திசை"

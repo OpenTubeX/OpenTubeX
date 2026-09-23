@@ -890,6 +890,7 @@ Settings:
     Import playlists formats: 'Format som stöds: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Format som stöds: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Show More: "Visa mer"
     Watch stats: "Visningsstatistik"
     Syncing statistics: Synkroniserar visningsstatistik…
     Sync Automatically: "Synkronisera automatiskt"

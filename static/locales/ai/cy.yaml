@@ -890,6 +890,7 @@ Settings:
     Import playlists formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Fformatau a gynhelir: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Show More: "Dangos rhagor"
     Sync Automatically: "Cysoni'n awtomatig"
     Activity: "Gweithgarwch cyfrif"
     No Activity: "Dim gweithgarwch diweddar"

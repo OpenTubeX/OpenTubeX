@@ -890,6 +890,7 @@ Settings:
     Import playlists formats: 'Поддържани формати: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Поддържани формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Show More: "Покажи още"
     Sync Automatically: "Автоматично синхронизиране"
     Activity: "Активност на акаунта"
     No Activity: "Няма скорошна активност"

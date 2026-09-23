@@ -83,7 +83,7 @@
       :aria-expanded="showAll"
       @click="toggleActivity"
     >
-      <span>{{ showAll ? t('Description.Collapse Description') : t('Theme Discovery.Load More') }}</span>
+      <span>{{ showAll ? t('Description.Collapse Description') : t('Settings.Sync Settings.Show More') }}</span>
       <FtIcon
         :icon="['fas', showAll ? 'angle-up' : 'angle-down']"
         aria-hidden="true"

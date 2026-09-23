@@ -420,6 +420,7 @@ Settings:
     Open Profile Directory: Otwórz katalog profilu
     Invalid JSON row, skipping item: Nieprawidłowy JSON w wierszu {row}. Element zostanie pominięty
   Sync Settings:
+    Show More: "Pokaż więcej"
     Watch stats: "Statystyki oglądania"
     Syncing statistics: Synchronizowanie statystyk oglądania…
     Sync Automatically: "Synchronizuj automatycznie"

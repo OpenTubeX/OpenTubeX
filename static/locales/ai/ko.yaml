@@ -1121,6 +1121,7 @@ Settings:
     Import playlists formats: '지원 형식: OpenTubeX / FreeTube (.db)'
     Import search history formats: '지원 형식: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Show More: "더 보기"
     Sync Automatically: "자동으로 동기화"
     Activity: "계정 활동"
     No Activity: "최근 활동 없음"

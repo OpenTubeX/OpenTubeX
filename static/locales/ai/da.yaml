@@ -928,6 +928,7 @@ Settings:
     Import playlists formats: 'Understøttede formater: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Understøttede formater: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Show More: "Vis mere"
     Sync Automatically: "Synkroniser automatisk"
     Activity: "Kontoaktivitet"
     No Activity: "Ingen nylig aktivitet"

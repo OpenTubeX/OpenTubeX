@@ -22,6 +22,10 @@ test('activity disclosure remains available and can collapse after expansion', (
   assert.equal(context.showAll.value, false)
 })
 
+test('account activity expansion uses a show more label', () => {
+  assert.match(source, /showAll \? t\('Description\.Collapse Description'\) : t\('Settings\.Sync Settings\.Show More'\)/)
+})
+
 test('account activity shows the same loader as devices while refreshing', () => {
   assert.match(source, /<FtLoader v-if="loading"\s*\/>/)
   assert.match(source, /v-if="!loading && error"/)

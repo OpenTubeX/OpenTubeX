@@ -1171,6 +1171,7 @@ Settings:
     Import playlists formats: 'Podprte oblike: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Podprte oblike: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Show More: "Pokaži več"
     Watch stats: "Statistika ogledov"
     Syncing statistics: Sinhroniziranje statistike ogledov …
     Sync Automatically: "Samodejno sinhroniziraj"

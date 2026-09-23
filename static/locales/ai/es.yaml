@@ -903,6 +903,7 @@ Settings:
     Import playlists formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Show More: "Mostrar más"
     Sync Automatically: "Sincronizar automáticamente"
     Activity: "Actividad de la cuenta"
     No Activity: "No hay actividad reciente"

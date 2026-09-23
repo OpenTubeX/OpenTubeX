@@ -886,6 +886,7 @@ Settings:
     Import playlists formats: 'Podporované formáty: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Podporované formáty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Show More: "Zobrazit více"
     Sync Automatically: "Synchronizovat automaticky"
     Activity: "Aktivita účtu"
     No Activity: "Žádná nedávná aktivita"

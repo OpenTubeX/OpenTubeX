@@ -910,6 +910,7 @@ Settings:
     Import playlists formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Υποστηριζόμενες μορφές: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Show More: "Εμφάνιση περισσότερων"
     Sync Automatically: "Αυτόματος συγχρονισμός"
     Activity: "Δραστηριότητα λογαριασμού"
     No Activity: "Δεν υπάρχει πρόσφατη δραστηριότητα"

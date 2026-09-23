@@ -886,6 +886,7 @@ Settings:
     Import playlists formats: "Mentrezhioù skoret: OpenTubeX / FreeTube (.db)"
     Import search history formats: "Mentrezhioù skoret: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)"
   Sync Settings:
+    Show More: "Diskouez muioc'h"
     Sync Automatically: "Goubredañ ent emgefreek"
     Activity: "Obererezh ar gont"
     No Activity: "Obererezh nevez ebet"

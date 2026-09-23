@@ -899,6 +899,7 @@ Settings:
     Import playlists formats: 'Formate acceptate: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Formate acceptate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Show More: "Afișează mai mult"
     Watch stats: "Statistici de vizionare"
     Syncing statistics: Se sincronizează statisticile de vizionare…
     Sync Automatically: "Sincronizează automat"
