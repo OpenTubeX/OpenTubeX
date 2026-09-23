@@ -1469,8 +1469,17 @@
   max-inline-size: 44px;
 }
 
-:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsAction > span) {
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsAction:not(.shortsActionSkeleton) > span),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsActionSkeleton > small),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsSkeletonVolume) {
   display: none;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsActionSkeleton > span),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsSkeletonSound),
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsSkeletonControlGroup span) {
+  inline-size: 42px;
+  block-size: 42px;
 }
 
 :global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsNavigation) {

@@ -50,7 +50,7 @@
             <div class="shortsSkeletonControls">
               <div class="shortsSkeletonControlGroup">
                 <span class="ft-shimmer" />
-                <span class="ft-shimmer" />
+                <span class="shortsSkeletonVolume ft-shimmer" />
               </div>
               <div class="shortsSkeletonControlGroup">
                 <span class="ft-shimmer" />
