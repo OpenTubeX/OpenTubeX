@@ -46,11 +46,13 @@ import {
 } from '../../helpers/sync-server-scheduling'
 import { isSettingSyncEnabled } from './settings'
 import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../helpers/subscription-seen-videos'
+import { syncWatchStats } from '../../helpers/sync-watch-stats'
 
 const EVENT_SYNC_DEBOUNCE_MS = 1500
 const EVENT_SYNC_DELAYS = {
   sessions: { delay: 10000, maxWait: 30000 },
   history: { delay: 30000, maxWait: 60000 },
+  watchStats: { delay: 30000, maxWait: 60000 },
 }
 const ENCRYPTED_SYNC_RETRIES = 3
 const LEGACY_ENCRYPTED_COLLECTIONS = [
@@ -123,6 +125,7 @@ const state = {
   syncServerError: '',
   syncServerLastResult: null,
   syncServerHistorySupported: null,
+  syncServerWatchStatsSupported: null,
   syncServerSessionExpired: false,
   syncServerOtherDeviceSessions: [],
   syncServerDevices: {},
@@ -141,6 +144,7 @@ const getters = {
     : state.syncServerError,
   getSyncServerLastResult: state => state.syncServerLastResult,
   getSyncServerHistorySupported: state => state.syncServerHistorySupported,
+  getSyncServerWatchStatsSupported: state => state.syncServerWatchStatsSupported,
   getSyncServerOtherDeviceSessions: state => state.syncServerOtherDeviceSessions.map(session => ({
     ...session,
     syncDeviceName: state.syncServerDevices[session.syncDeviceId]?.name ?? '',
@@ -154,6 +158,14 @@ function parseSnapshot(value) {
   } catch {
     return {}
   }
+}
+
+async function clearUnsupportedWatchStats({ commit, dispatch, rootState }) {
+  commit('setSyncedWatchStats', [])
+  const snapshot = parseSnapshot(rootState.settings.syncServerSnapshot)
+  if (!('watchStats' in snapshot)) return
+  delete snapshot.watchStats
+  await dispatch('updateSyncServerSnapshot', JSON.stringify(snapshot), { root: true })
 }
 
 function withSyncLock(callback) {
@@ -199,6 +211,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     ...(settings.syncServerSyncPlaylists ? ['playlists'] : []),
     ...(settings.syncServerSyncPlaylists ? ['playlistBookmarks'] : []),
     ...(settings.syncServerSyncHistory ? ['history'] : []),
+    ...(encrypted && settings.syncServerSyncWatchStats ? ['watchStats'] : []),
     ...(settings.syncServerSyncProfiles ? ['profiles'] : []),
     ...((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
       encrypted &&
@@ -307,6 +320,10 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
         }
         break
       }
+      case 'watchStats':
+        next.watchStats = await syncWatchStats(targetClient, store)
+        result.watchStats = next.watchStats.length
+        break
       case 'profiles':
         {
           const profiles = await syncProfiles(
@@ -346,6 +363,14 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
 
   try {
     const capabilities = await networkClient.getCapabilities()
+    const watchStatsSupported = encrypted && capabilities.watch_stats === 1
+    commit('setSyncServerWatchStatsSupported', watchStatsSupported)
+    if (!watchStatsSupported) {
+      const index = stages.indexOf('watchStats')
+      if (index !== -1) stages.splice(index, 1)
+      delete next.watchStats
+      await clearUnsupportedWatchStats(context)
+    }
     assertEncryptionSupported(capabilities.encrypted_sync === 1, encrypted)
     const liveSupported = encrypted && capabilities.live_sync === 1
     commit('setSyncServerLiveSupported', liveSupported)
@@ -668,6 +693,8 @@ const actions = {
     eventsSince = ''
     commit('setSyncServerActivity', [])
     commit('setSyncServerLiveSupported', false)
+    commit('setSyncServerWatchStatsSupported', null)
+    commit('setSyncedWatchStats', [])
     clearSyncServerDevices(commit)
     if (rootState.settings.syncServerToken) await dispatch('initializeSyncServer')
   },
@@ -1178,10 +1205,12 @@ const actions = {
 
     if (!rootState.settings.syncServerEnabled || !rootState.settings.syncServerToken) return
 
+    const snapshot = parseSnapshot(rootState.settings.syncServerSnapshot)
+    commit('setSyncedWatchStats', Array.isArray(snapshot.watchStats) ? snapshot.watchStats : [])
     commit(
       'setSyncServerOtherDeviceSessions',
       getSavedOtherDeviceSessions(
-        parseSnapshot(rootState.settings.syncServerSnapshot),
+        snapshot,
         rootState.settings
       )
     )
@@ -1195,10 +1224,14 @@ const actions = {
       ))
       let privacySupported
       try {
-        privacySupported = await client.supportsEncryptedSync()
-        const liveSupported = privacySupported && (await client.getCapabilities()).live_sync === 1
+        const capabilities = await client.getCapabilities()
+        privacySupported = capabilities.encrypted_sync === 1
+        const liveSupported = privacySupported && capabilities.live_sync === 1
         assertSyncEnabled(rootState, client)
         commit('setSyncServerLiveSupported', liveSupported)
+        const watchStatsSupported = privacySupported && capabilities.watch_stats === 1
+        commit('setSyncServerWatchStatsSupported', watchStatsSupported)
+        if (!watchStatsSupported) await clearUnsupportedWatchStats({ commit, dispatch, rootState })
         if (liveSupported) await dispatch('refreshSyncServerDevices')
       } finally {
         releaseSyncClient(client)
@@ -1368,6 +1401,8 @@ const actions = {
       commit('setSyncServerError', '')
       commit('setSyncServerStatus', 'idle')
       commit('setSyncServerOtherDeviceSessions', [])
+      commit('setSyncedWatchStats', [])
+      commit('setSyncServerWatchStatsSupported', null)
       clearSyncServerDevices(commit)
       return
     }
@@ -1409,6 +1444,9 @@ const mutations = {
   },
   setSyncServerHistorySupported(state, supported) {
     state.syncServerHistorySupported = supported
+  },
+  setSyncServerWatchStatsSupported(state, supported) {
+    state.syncServerWatchStatsSupported = supported
   },
   setSyncServerSessionExpired(state, expired) {
     state.syncServerSessionExpired = expired

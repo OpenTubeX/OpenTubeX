@@ -1,13 +1,53 @@
 <template>
   <div>
     <FtCard class="statsPage">
-      <h2>
-        <FtIcon
-          :icon="['fas', 'chart-line']"
-          class="headingIcon"
-        />
-        {{ t('Stats.Stats') }}
-      </h2>
+      <div class="statsHeader">
+        <h2>
+          <FtIcon
+            :icon="['fas', 'chart-line']"
+            class="headingIcon"
+          />
+          {{ t('Stats.Stats') }}
+        </h2>
+
+        <div
+          v-if="syncStatsVisible"
+          ref="deviceSegments"
+          v-overlay-scrollbars
+          class="deviceSegments"
+          role="group"
+          :aria-label="t('Settings.Sync Settings.Devices')"
+        >
+          <div
+            ref="deviceSegmentTrack"
+            class="deviceSegmentTrack"
+            :style="{
+              '--device-count': deviceValues.length,
+              '--selected-index': deviceValues.indexOf(selectedDevice),
+            }"
+          >
+            <span
+              class="deviceSegmentIndicator"
+              aria-hidden="true"
+            />
+            <button
+              v-for="(value, index) in deviceValues"
+              :key="value"
+              type="button"
+              class="deviceSegment"
+              :aria-pressed="selectedDevice === value"
+              @click="selectedDevice = value"
+            >
+              <FtIcon
+                :icon="deviceIcons[index]"
+                class="deviceSegmentIcon"
+                aria-hidden="true"
+              />
+              {{ deviceNames[index] }}
+            </button>
+          </div>
+        </div>
+      </div>
 
       <section
         class="summaryGrid"
@@ -187,7 +227,7 @@
 
       <footer class="statsFooter">
         <div
-          v-if="hasHistoricalEstimate"
+          v-if="hasHistoricalEstimate && isLocalDeviceSelected"
           class="estimateControls"
         >
           <p class="estimateNote">
@@ -203,6 +243,7 @@
           </button>
         </div>
         <button
+          v-if="isLocalDeviceSelected"
           type="button"
           class="resetStatsButton"
           @click="showResetPrompt = true"
@@ -261,7 +302,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
@@ -272,6 +313,9 @@ import FtSelect from '../../components/FtSelect/FtSelect.vue'
 import store from '../../store'
 import { showToast } from '../../helpers/utils'
 import { formatDate } from '../../helpers/dateFormat'
+import { watchSecondsForDevice } from '../../helpers/sync-watch-stats'
+import { clampOverlayScrollLeft } from '../../helpers/overlayScrollbars'
+import { getCurrentSyncServerDeviceInfo, getSyncServerDeviceIcon } from '../../helpers/sync-server-sessions'
 
 const { locale, t } = useI18n()
 const router = useRouter()
@@ -279,7 +323,42 @@ const router = useRouter()
 const DAY_SECONDS = 24 * 60 * 60
 const RESET_PROMPT_VALUES = ['reset', 'cancel']
 
-const watchSecondsByDate = computed(() => store.getters.getWatchSecondsByDate)
+const localSecondsByDate = computed(() => store.getters.getWatchSecondsByDate)
+const syncedDevices = computed(() => store.getters.getSyncedWatchStats)
+const currentDeviceId = computed(() => store.getters.getSyncServerDeviceId)
+const currentDeviceName = computed(() => store.getters.getSyncServerDeviceName)
+const currentDevicePlatform = ref('')
+const syncStatsVisible = computed(() => store.getters.getSyncServerEnabled &&
+  store.getters.getSyncServerToken &&
+  store.getters.getSyncServerPrivacyMode === 'enhanced' &&
+  (store.getters.getSyncServerWatchStatsSupported === true || syncedDevices.value.length > 0) &&
+  store.getters.getSyncServerSyncWatchStats)
+const selectedDevice = ref('all')
+const deviceSegments = useTemplateRef('deviceSegments')
+const deviceSegmentTrack = useTemplateRef('deviceSegmentTrack')
+const otherDevices = computed(() => syncedDevices.value.filter(device => device.deviceId !== currentDeviceId.value))
+const deviceValues = computed(() => ['all', 'local', ...otherDevices.value.map(device => device.deviceId)])
+const deviceNames = computed(() => [
+  t('Stats.All devices'),
+  currentDeviceName.value || t('Settings.Sync Settings.This Device'),
+  ...otherDevices.value.map(device => device.deviceName || device.deviceId),
+])
+const iconForDevice = platform => platform ? getSyncServerDeviceIcon(platform) : ['fas', 'devices']
+const deviceIcons = computed(() => [
+  ['fas', 'devices'],
+  iconForDevice(currentDevicePlatform.value),
+  ...otherDevices.value.map(device => iconForDevice(device.platform)),
+])
+const isLocalDeviceSelected = computed(() => !syncStatsVisible.value || selectedDevice.value === 'local')
+const watchSecondsByDate = computed(() => {
+  if (isLocalDeviceSelected.value) return localSecondsByDate.value
+  return watchSecondsForDevice(
+    localSecondsByDate.value,
+    syncedDevices.value,
+    currentDeviceId.value,
+    selectedDevice.value
+  )
+})
 const hasData = computed(() => Object.values(watchSecondsByDate.value).some(seconds => seconds > 0))
 const hasHistoricalEstimate = computed(() => store.getters.getHasHistoricalWatchTimeEstimate)
 const historicalPlaybackSpeed = computed(() => store.getters.getHistoricalWatchTimePlaybackSpeed)
@@ -322,15 +401,42 @@ watch(watchStatsVisible, (visible) => {
   }
 }, { immediate: true })
 
-watch([hasHistoricalEstimate, historicalPlaybackSpeed], maybeOpenHistoricalAdjustment)
+watch(deviceValues, values => {
+  if (!values.includes(selectedDevice.value)) selectedDevice.value = 'all'
+})
+
+function clampDeviceSegments() {
+  if (deviceSegments.value && deviceSegmentTrack.value) {
+    clampOverlayScrollLeft(deviceSegments.value, deviceSegmentTrack.value)
+  }
+}
+
+watch([deviceValues, deviceNames], () => nextTick(clampDeviceSegments), { flush: 'post' })
+
+let deviceSegmentsResizeObserver = null
+watch(syncStatsVisible, async visible => {
+  deviceSegmentsResizeObserver?.disconnect()
+  if (!visible || typeof ResizeObserver !== 'function') return
+  await nextTick()
+  if (!deviceSegments.value || !deviceSegmentTrack.value) return
+  deviceSegmentsResizeObserver = new ResizeObserver(clampDeviceSegments)
+  deviceSegmentsResizeObserver.observe(deviceSegments.value)
+  deviceSegmentsResizeObserver.observe(deviceSegmentTrack.value)
+}, { immediate: true, flush: 'post' })
+
+onBeforeUnmount(() => deviceSegmentsResizeObserver?.disconnect())
+
+watch([hasHistoricalEstimate, historicalPlaybackSpeed, isLocalDeviceSelected], maybeOpenHistoricalAdjustment)
 
 onMounted(() => {
   statsPageMounted.value = true
   maybeOpenHistoricalAdjustment()
+  getCurrentSyncServerDeviceInfo().then(info => { currentDevicePlatform.value = info.platform })
 })
 
 function maybeOpenHistoricalAdjustment() {
   if (!statsPageMounted.value ||
+    !isLocalDeviceSelected.value ||
     !hasHistoricalEstimate.value ||
     historicalPlaybackSpeed.value !== null ||
     hasShownHistoricalAdjustment.value) {

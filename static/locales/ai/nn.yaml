@@ -62,6 +62,7 @@ Search Listing:
   Label:
     Members Only: Berre for medlemmer
 Stats:
+  All devices: Alle einingar
   Stats: Statistikk
   Watch time summary: Samandrag av sjåtid
   Today: I dag
@@ -1091,6 +1092,7 @@ Settings:
     New Passwords Do Not Match: "Dei nye passorda er ikkje like."
     Password Changed: "Passordet er endra. Andre einingar er logga ut."
     Sync Settings: Synkronisering
+    Sync statistics: Synkroniser statistikk
     Enable Sync: Slå på synkronisering
     Privacy Passphrase: Passfrase for personvern
     Privacy Passphrase Hint: Bruk ei anna passfrase enn kontopassordet. Ho forlèt aldri denne eininga og må brukast på alle einingar. Dersom du mistar henne, kan ikkje dei krypterte synkroniseringsdataa gjenopprettast.
@@ -1163,6 +1165,7 @@ Settings:
     Syncing subscriptions: Synkroniserer abonnement …
     Syncing playlists: Synkroniserer spelelister …
     Syncing history: Synkroniserer sjåarhistorikk …
+    Syncing statistics: Synkroniserer sjåarstatistikk…
     Syncing profiles: Synkroniserer profilar …
     Syncing open tabs: Synkroniserer opne faner og økta …
     Syncing settings: Synkroniserer innstillingar …

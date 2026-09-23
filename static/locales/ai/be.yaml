@@ -68,6 +68,7 @@ Search Filters:
     Prioritize: Аддаваць перавагу
     Popularity: Папулярнасць
 Stats:
+  All devices: Усе прылады
   Stats: Статыстыка
   Watch time summary: Зводка часу прагляду
   Today: Сёння
@@ -975,6 +976,7 @@ Settings:
     New Passwords Do Not Match: "Новыя паролі не супадаюць."
     Password Changed: "Пароль зменены. На іншых прыладах выкананы выхад."
     Sync Settings: Сінхранізацыя
+    Sync statistics: Сінхранізаваць статыстыку
     Enable Sync: Уключыць сінхранізацыю
     Privacy Passphrase: Кодавая фраза прыватнасці
     Privacy Passphrase Hint: Выкарыстоўвайце кодавую фразу, адрозную ад пароля ўліковага запісу. Яна ніколі не пакідае гэтую прыладу і патрэбна на кожнай прыладзе; калі яе страціць, зашыфраваныя даныя сінхранізацыі немагчыма будзе аднавіць.
@@ -1047,6 +1049,7 @@ Settings:
     Syncing subscriptions: Сінхранізацыя падпісак…
     Syncing playlists: Сінхранізацыя спісаў прайгравання…
     Syncing history: Сінхранізацыя гісторыі праглядаў…
+    Syncing statistics: Сінхранізацыя статыстыкі праглядаў…
     Syncing profiles: Сінхранізацыя профіляў…
     Syncing open tabs: Сінхранізацыя адкрытых укладак і сеанса…
     Syncing settings: Сінхранізацыя налад…

@@ -247,7 +247,7 @@ watch(tabAvatarUrl, (avatarUrl) => {
   flex-shrink: 0;
   border: 1px solid transparent;
   border-block-end: 0;
-  transition: background-color 0.15s ease, transform 0.2s ease;
+  transition: transform 0.2s ease;
   position: relative;
   user-select: none;
   touch-action: none;
@@ -257,7 +257,7 @@ watch(tabAvatarUrl, (avatarUrl) => {
 }
 
 .tab.noTransition {
-  transition: background-color 0.15s ease;
+  transition: none;
 }
 
 .tab.vertical {
@@ -342,7 +342,7 @@ watch(tabAvatarUrl, (avatarUrl) => {
 .tab.dragging {
   z-index: 10;
   cursor: grabbing;
-  transition: background-color 0.15s ease;
+  transition: none;
   box-shadow: 0 4px 12px rgb(0 0 0 / 18%);
 }
 

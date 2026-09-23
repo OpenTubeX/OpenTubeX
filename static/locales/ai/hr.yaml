@@ -62,6 +62,7 @@ Search Listing:
   Label:
     Members Only: Samo za članove
 Stats:
+  All devices: Svi uređaji
   Stats: Statistika
   Watch time summary: Sažetak vremena gledanja
   Today: Danas
@@ -933,6 +934,7 @@ Settings:
     New Passwords Do Not Match: "Nove lozinke se ne podudaraju."
     Password Changed: "Lozinka je promijenjena. Ostali uređaji su odjavljeni."
     Sync Settings: Sinkronizacija
+    Sync statistics: Sinkroniziraj statistiku
     Enable Sync: Omogući sinkronizaciju
     Privacy Passphrase: Pristupna fraza za privatnost
     Privacy Passphrase Hint: Upotrijebite pristupnu frazu koja se razlikuje od lozinke računa. Ona nikada ne napušta ovaj uređaj i potrebna je na svakom uređaju. Ako je izgubite, šifrirani podaci sinkronizacije neće se moći oporaviti.
@@ -1005,6 +1007,7 @@ Settings:
     Syncing subscriptions: Sinkroniziranje pretplata…
     Syncing playlists: Sinkroniziranje popisa za reprodukciju…
     Syncing history: Sinkroniziranje povijesti gledanja…
+    Syncing statistics: Sinkronizacija statistike gledanja…
     Syncing profiles: Sinkroniziranje profila…
     Syncing open tabs: Sinkroniziranje otvorenih kartica i sesije…
     Syncing settings: Sinkroniziranje postavki…

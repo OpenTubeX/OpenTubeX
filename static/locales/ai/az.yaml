@@ -62,6 +62,7 @@ Search Listing:
   Label:
     Members Only: Yalnız üzvlər üçün
 Stats:
+  All devices: Bütün cihazlar
   Stats: Statistika
   Watch time summary: Baxış müddətinin xülasəsi
   Today: Bu gün
@@ -902,6 +903,7 @@ Settings:
     Turn Flashlight On: Fənəri yandır
     Turn Flashlight Off: Fənəri söndür
     Sync Settings: Sinxronizasiya
+    Sync statistics: Statistikanı sinxronlaşdır
     Enable Sync: Sinxronizasiyanı aktivləşdir
     Privacy Passphrase: Məxfilik parol ifadəsi
     Privacy Passphrase Hint: Hesab parolunuzdan fərqli parol ifadəsi istifadə edin. O, bu cihazdan kənara çıxmır və hər cihazda tələb olunur; onu itirsəniz, şifrələnmiş sinxronizasiya məlumatlarını bərpa etmək mümkün olmayacaq.
@@ -1012,6 +1014,7 @@ Settings:
     Syncing subscriptions: Abunəliklər sinxronlaşdırılır…
     Syncing playlists: Pleylistlər sinxronlaşdırılır…
     Syncing history: Baxış tarixçəsi sinxronlaşdırılır…
+    Syncing statistics: Baxış statistikası sinxronlaşdırılır…
     Syncing profiles: Profillər sinxronlaşdırılır…
     Syncing open tabs: Açıq vərəqlər və sessiya sinxronlaşdırılır…
     Syncing settings: Tənzimləmələr sinxronlaşdırılır…

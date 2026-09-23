@@ -72,6 +72,7 @@ Search Filters:
     3 - 20 minutes: 3 تا 20 دقیقه
     '> 20 minutes': '> 20 دقیقه'
 Stats:
+  All devices: همه دستگاه‌ها
   Stats: آمار
   Watch time summary: خلاصه زمان تماشا
   Today: امروز
@@ -975,6 +976,7 @@ Settings:
     New Passwords Do Not Match: "گذرواژه‌های جدید یکسان نیستند."
     Password Changed: "گذرواژه تغییر کرد. دستگاه‌های دیگر خارج شدند."
     Sync Settings: همگام‌سازی
+    Sync statistics: همگام‌سازی آمار
     Enable Sync: فعال‌کردن همگام‌سازی
     Privacy Passphrase: عبارت عبور حریم خصوصی
     Privacy Passphrase Hint: عبارتی جدا از گذرواژهٔ حساب خود انتخاب کنید. این عبارت هرگز از دستگاه خارج نمی‌شود و در همهٔ دستگاه‌ها لازم است؛ با گم‌کردن آن، داده‌های رمزگذاری‌شدهٔ همگام‌سازی دیگر بازیابی نمی‌شوند.
@@ -1047,6 +1049,7 @@ Settings:
     Syncing subscriptions: در حال همگام‌سازی اشتراک‌ها…
     Syncing playlists: در حال همگام‌سازی فهرست‌های پخش…
     Syncing history: در حال همگام‌سازی سابقهٔ تماشا…
+    Syncing statistics: در حال همگام‌سازی آمار تماشا…
     Syncing profiles: در حال همگام‌سازی نمایه‌ها…
     Syncing open tabs: در حال همگام‌سازی زبانه‌های باز و نشست…
     Syncing settings: در حال همگام‌سازی تنظیمات…

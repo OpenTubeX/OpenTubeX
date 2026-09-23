@@ -91,6 +91,7 @@ Search Filters:
     360 Video: 360-stopinjski videoposnetek
   Clear Filters: Počisti filtre
 Stats:
+  All devices: Vse naprave
   Stats: Statistika
   Watch time summary: Povzetek časa gledanja
   Today: Danes
@@ -1170,6 +1171,8 @@ Settings:
     Import playlists formats: 'Podprte oblike: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Podprte oblike: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Sync statistics: Sinhroniziraj statistiko
+    Syncing statistics: Sinhronizacija statistike ogledov…
     Sync Automatically: "Samodejno sinhroniziraj"
     Activity: "Dejavnost računa"
     No Activity: "Ni nedavne dejavnosti"

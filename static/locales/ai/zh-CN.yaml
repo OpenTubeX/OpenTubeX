@@ -62,6 +62,7 @@ Search Listing:
   Label:
     Members Only: 仅限会员
 Stats:
+  All devices: 所有设备
   Stats: 统计信息
   Watch time summary: 观看时长概览
   Today: 今天
@@ -885,6 +886,8 @@ Settings:
     Import playlists formats: '支持的格式：OpenTubeX / FreeTube (.db)'
     Import search history formats: '支持的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.json)'
   Sync Settings:
+    Sync statistics: 同步统计数据
+    Syncing statistics: 正在同步观看统计数据…
     Sync Automatically: "自动同步"
     Activity: "账户活动"
     No Activity: "暂无近期活动"

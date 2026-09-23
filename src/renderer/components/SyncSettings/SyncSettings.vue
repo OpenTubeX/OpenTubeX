@@ -165,6 +165,13 @@
             @change="store.dispatch('updateSyncServerSyncHistory', $event)"
           />
           <FtToggleSwitch
+            :label="t('Settings.Sync Settings.Sync statistics')"
+            :default-value="syncWatchStatsEnabled"
+            :disabled="busy || watchStatsSupported !== true"
+            compact
+            @change="store.dispatch('updateSyncServerSyncWatchStats', $event)"
+          />
+          <FtToggleSwitch
             :label="t('Settings.Sync Settings.Profiles')"
             :default-value="syncProfilesEnabled"
             :disabled="busy"
@@ -546,6 +553,8 @@ const autoSync = computed(() => store.getters.getSyncServerAutoSync)
 const syncSubscriptionsEnabled = computed(() => store.getters.getSyncServerSyncSubscriptions)
 const syncPlaylistsEnabled = computed(() => store.getters.getSyncServerSyncPlaylists)
 const syncHistoryEnabled = computed(() => store.getters.getSyncServerSyncHistory)
+const syncWatchStatsEnabled = computed(() => store.getters.getSyncServerSyncWatchStats)
+const watchStatsSupported = computed(() => store.getters.getSyncServerWatchStatsSupported)
 const syncProfilesEnabled = computed(() => store.getters.getSyncServerSyncProfiles)
 const syncSessionsEnabled = computed(() => store.getters.getSyncServerSyncSessions)
 const sharedTabsEnabled = computed(() => store.getters.getSyncServerSharedTabs)

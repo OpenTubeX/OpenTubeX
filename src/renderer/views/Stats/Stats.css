@@ -19,6 +19,83 @@
   color: var(--primary-color);
 }
 
+.statsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-block: 16px 20px;
+}
+
+.statsHeader h2 {
+  margin: 0;
+}
+
+.deviceSegments {
+  inline-size: 460px;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+  overflow-x: auto;
+}
+
+.deviceSegmentTrack {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--device-count), minmax(max-content, 1fr));
+  inline-size: max-content;
+  min-inline-size: 100%;
+  box-sizing: border-box;
+  padding: 4px;
+  border: 1px solid color-mix(in srgb, var(--border-color) 35%, transparent);
+  border-radius: calc(12px * var(--ui-roundness));
+  background-color: color-mix(in srgb, var(--primary-text-color) 5%, var(--card-bg-color));
+}
+
+.deviceSegmentIndicator {
+  position: absolute;
+  inset-block: 4px;
+  inset-inline-start: calc(4px + var(--selected-index) * (100% - 8px) / var(--device-count));
+  inline-size: calc((100% - 8px) / var(--device-count));
+  border-radius: calc(9px * var(--ui-roundness));
+  background-color: var(--card-bg-color);
+  box-shadow: 0 1px 6px rgb(0 0 0 / 15%);
+  transition: inset-inline-start 180ms ease;
+}
+
+.deviceSegment {
+  position: relative;
+  min-inline-size: 0;
+  padding-block: 10px;
+  padding-inline: 16px;
+  border: 0;
+  border-radius: calc(9px * var(--ui-roundness));
+  background: transparent;
+  color: var(--secondary-text-color);
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.deviceSegmentIcon {
+  margin-inline-end: 6px;
+}
+
+.deviceSegment[aria-pressed='true'] {
+  color: var(--primary-text-color);
+  font-weight: 600;
+}
+
+.deviceSegment:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deviceSegmentIndicator {
+    transition: none;
+  }
+}
+
 .summaryGrid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -435,5 +512,15 @@
 
   .resetStatsButton {
     justify-self: end;
+  }
+}
+
+@media only screen and (width <= 500px) {
+  .statsHeader {
+    flex-wrap: wrap;
+  }
+
+  .deviceSegments {
+    flex-basis: 100%;
   }
 }

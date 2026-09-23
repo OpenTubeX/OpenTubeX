@@ -84,6 +84,7 @@ Search Filters:
     HDR: HDR
     VR180: VR180
 Stats:
+  All devices: Visi įrenginiai
   Stats: Statistika
   Watch time summary: Žiūrėjimo laiko suvestinė
   Today: Šiandien
@@ -1181,6 +1182,7 @@ Settings:
     New Passwords Do Not Match: "Nauji slaptažodžiai nesutampa."
     Password Changed: "Slaptažodis pakeistas. Kituose įrenginiuose atsijungta."
     Sync Settings: Sinchronizavimas
+    Sync statistics: Sinchronizuoti statistiką
     Enable Sync: Įjungti sinchronizavimą
     Privacy Passphrase: Privatumo slaptafrazė
     Privacy Passphrase Hint: Naudokite kitą slaptafrazę nei paskyros slaptažodis. Ji niekada neperduodama iš šio įrenginio ir reikalinga kiekviename įrenginyje; ją praradus, užšifruotų sinchronizavimo duomenų atkurti nepavyks.
@@ -1253,6 +1255,7 @@ Settings:
     Syncing subscriptions: Sinchronizuojamos prenumeratos…
     Syncing playlists: Sinchronizuojami grojaraščiai…
     Syncing history: Sinchronizuojama peržiūrų istorija…
+    Syncing statistics: Sinchronizuojama peržiūrų statistika…
     Syncing profiles: Sinchronizuojami profiliai…
     Syncing open tabs: Sinchronizuojamos atvertos kortelės ir seansas…
     Syncing settings: Sinchronizuojami nustatymai…

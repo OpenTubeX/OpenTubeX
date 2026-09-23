@@ -62,6 +62,7 @@ Search Listing:
   Label:
     Members Only: Chỉ dành cho hội viên
 Stats:
+  All devices: Tất cả thiết bị
   Stats: Thống kê
   Watch time summary: Tổng hợp thời gian xem
   Today: Hôm nay
@@ -904,6 +905,8 @@ Settings:
     Import playlists formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Sync statistics: Đồng bộ thống kê
+    Syncing statistics: Đang đồng bộ thống kê xem…
     Sync Automatically: "Tự động đồng bộ"
     Activity: "Hoạt động tài khoản"
     No Activity: "Không có hoạt động gần đây"

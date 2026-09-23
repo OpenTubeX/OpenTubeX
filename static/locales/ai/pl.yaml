@@ -420,6 +420,8 @@ Settings:
     Open Profile Directory: Otwórz katalog profilu
     Invalid JSON row, skipping item: Nieprawidłowy JSON w wierszu {row}. Element zostanie pominięty
   Sync Settings:
+    Sync statistics: Synchronizuj statystyki
+    Syncing statistics: Synchronizowanie statystyk oglądania…
     Sync Automatically: "Synchronizuj automatycznie"
     Activity: "Aktywność konta"
     No Activity: "Brak ostatniej aktywności"
@@ -1038,3 +1040,6 @@ Close Confirmation:
 Tray Icon:
   Title: "Ikona w zasobniku"
   Follow App Theme: "Używaj motywu aplikacji"
+
+Stats:
+  All devices: Wszystkie urządzenia

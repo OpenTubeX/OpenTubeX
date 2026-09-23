@@ -62,6 +62,7 @@ Search Listing:
   Label:
     Members Only: Aðeins fyrir meðlimi
 Stats:
+  All devices: Öll tæki
   Stats: Tölfræði
   Watch time summary: Yfirlit yfir áhorfstíma
   Today: Í dag
@@ -937,6 +938,7 @@ Settings:
     New Passwords Do Not Match: "Nýju lykilorðin passa ekki saman."
     Password Changed: "Lykilorði breytt. Skráð hefur verið út úr öðrum tækjum."
     Sync Settings: Samstilling
+    Sync statistics: Samstilla tölfræði
     Enable Sync: Virkja samstilling
     Privacy Passphrase: Persónuverndarleyndasetning
     Privacy Passphrase Hint: Notaðu aðra leynisetningu en aðgangsorð reikningsins. Hún fer aldrei úr þessu tæki og þarf að slá hana inn í öllum tækjum. Ef hún glatast er ekki hægt að endurheimta dulkóðuð samstillingargögn.
@@ -1009,6 +1011,7 @@ Settings:
     Syncing subscriptions: Samstilli áskriftir…
     Syncing playlists: Samstilli spilunarlista…
     Syncing history: Samstilli áhorfsferil…
+    Syncing statistics: Samstilli áhorfstölfræði…
     Syncing profiles: Samstilli notandasnið…
     Syncing open tabs: Samstilli opna flipa og setu…
     Syncing settings: Samstilli stillingar…

@@ -62,6 +62,7 @@ Search Listing:
   Label:
     Members Only: メンバー限定
 Stats:
+  All devices: すべてのデバイス
   Stats: 統計
   Watch time summary: 視聴時間の概要
   Today: 今日
@@ -929,6 +930,7 @@ Settings:
     New Passwords Do Not Match: "新しいパスワードが一致しません。"
     Password Changed: "パスワードを変更しました。他のデバイスからログアウトしました。"
     Sync Settings: 同期
+    Sync statistics: 統計を同期
     Enable Sync: 同期を有効化
     Privacy Passphrase: プライバシーパスフレーズ
     Privacy Passphrase Hint: アカウントのパスワードとは別のパスフレーズを使用してください。このデバイスの外へ送信されず、すべてのデバイスで必要です。紛失すると暗号化された同期データを復元できません。
@@ -1001,6 +1003,7 @@ Settings:
     Syncing subscriptions: 登録チャンネルを同期中…
     Syncing playlists: プレイリストを同期中…
     Syncing history: 視聴履歴を同期中…
+    Syncing statistics: 視聴統計を同期しています…
     Syncing profiles: プロフィールを同期中…
     Syncing open tabs: 開いているタブとセッションを同期中…
     Syncing settings: 設定を同期中…

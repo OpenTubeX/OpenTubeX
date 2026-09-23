@@ -62,6 +62,7 @@ Search Listing:
   Label:
     Members Only: Pouze pro členy
 Stats:
+  All devices: Všechna zařízení
   Stats: Statistiky
   Watch time summary: Přehled doby sledování
   Today: Dnes
@@ -929,6 +930,7 @@ Settings:
     New Passwords Do Not Match: "Nová hesla se neshodují."
     Password Changed: "Heslo bylo změněno. Ostatní zařízení byla odhlášena."
     Sync Settings: Synchronizace
+    Sync statistics: Synchronizovat statistiky
     Enable Sync: Povolit synchronizaci
     Privacy Passphrase: Přístupová fráze pro ochranu soukromí
     Privacy Passphrase Hint: Použijte jinou přístupovou frázi než heslo k účtu. Nikdy neopustí toto zařízení a je nutná na všech zařízeních. Pokud ji ztratíte, šifrovaná synchronizovaná data nepůjde obnovit.
@@ -1001,6 +1003,7 @@ Settings:
     Syncing subscriptions: Synchronizace odběrů…
     Syncing playlists: Synchronizace playlistů…
     Syncing history: Synchronizace historie sledování…
+    Syncing statistics: Synchronizují se statistiky sledování…
     Syncing profiles: Synchronizace profilů…
     Syncing open tabs: Synchronizace otevřených karet a relace…
     Syncing settings: Synchronizace nastavení…
