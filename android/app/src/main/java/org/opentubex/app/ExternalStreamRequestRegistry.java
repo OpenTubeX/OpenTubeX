@@ -64,21 +64,42 @@ final class ExternalStreamRequestRegistry {
             if (fields.length != 7 || fields[5].isEmpty() || fields[5].contains(";") ||
                 fields[6].contains(";") || fields[6].contains("\r") || fields[6].contains("\n")) continue;
             String domain = fields[0].replaceFirst("^\\.", "").toLowerCase(Locale.ROOT);
-            if (hosts.stream().noneMatch(host -> domainMatches(host, domain))) continue;
+            boolean includeSubdomains = "TRUE".equals(fields[1]);
+            if (!includeSubdomains && !"FALSE".equals(fields[1])) continue;
+            if (hosts.stream().noneMatch(host -> domainMatches(host, domain, includeSubdomains))) continue;
             long expiry;
             try { expiry = Long.parseLong(fields[4]); } catch (NumberFormatException error) { continue; }
-            extractedCookies.add(new Cookie(domain, fields[2], "TRUE".equals(fields[3]),
+            extractedCookies.add(new Cookie(domain, includeSubdomains, fields[2], "TRUE".equals(fields[3]),
                 expiry == 0 ? maximumExpiry : Math.min(expiry, maximumExpiry),
                 fields[5] + "=" + fields[6]));
         }
-        if (!extractedCookies.isEmpty()) {
-            cookies.removeIf(cookie -> hosts.stream().anyMatch(host -> domainMatches(host, cookie.domain)));
-            cookies.addAll(extractedCookies);
-        }
+        cookies.removeIf(cookie -> hosts.stream().anyMatch(host ->
+            domainMatches(host, cookie.domain, cookie.includeSubdomains)));
+        cookies.addAll(extractedCookies);
         if (cookies.size() > 1024) cookies.subList(0, cookies.size() - 1024).clear();
     }
 
     synchronized Map<String, String> headersFor(URL url) {
+        Map<String, String> source = sourceHeadersFor(url);
+        return source == null ? null : withCookies(source, url);
+    }
+
+    synchronized Map<String, String> headersForRedirect(URL original, URL destination) {
+        if (parseUrl(destination.toString()) == null) return null;
+        Map<String, String> registered = sourceHeadersFor(destination);
+        if (registered != null) return withCookies(registered, destination);
+        Map<String, String> originalHeaders = sourceHeadersFor(original);
+        if (originalHeaders == null) return null;
+        if (origin(original).equals(origin(destination))) return withCookies(originalHeaders, destination);
+        Map<String, String> safe = new HashMap<>();
+        for (Map.Entry<String, String> header : originalHeaders.entrySet()) {
+            if (Set.of("accept", "accept-language", "sec-fetch-mode", "user-agent")
+                .contains(header.getKey().toLowerCase(Locale.ROOT))) safe.put(header.getKey(), header.getValue());
+        }
+        return safe;
+    }
+
+    private Map<String, String> sourceHeadersFor(URL url) {
         Map<String, String> source = exact.get(url.toString());
         if (source == null) {
             String requestPath = origin(url) + url.getPath();
@@ -86,13 +107,16 @@ final class ExternalStreamRequestRegistry {
                 if (requestPath.startsWith(entry.getKey())) source = entry.getValue();
             }
         }
-        if (source == null) return null;
+        return source;
+    }
+
+    private Map<String, String> withCookies(Map<String, String> source, URL url) {
         Map<String, String> result = new HashMap<>(source);
         StringBuilder cookieHeader = new StringBuilder();
         long now = System.currentTimeMillis() / 1000;
         for (Cookie cookie : cookies) {
             if (cookie.expires <= now) continue;
-            if (!domainMatches(url.getHost().toLowerCase(Locale.ROOT), cookie.domain)) continue;
+            if (!domainMatches(url.getHost().toLowerCase(Locale.ROOT), cookie.domain, cookie.includeSubdomains)) continue;
             if (cookie.secure && !"https".equals(url.getProtocol())) continue;
             if (!url.getPath().equals(cookie.path) &&
                 !url.getPath().startsWith(cookie.path.endsWith("/") ? cookie.path : cookie.path + "/")) continue;
@@ -103,8 +127,8 @@ final class ExternalStreamRequestRegistry {
         return result;
     }
 
-    private static boolean domainMatches(String host, String domain) {
-        return host.equals(domain) || host.endsWith("." + domain);
+    private static boolean domainMatches(String host, String domain, boolean includeSubdomains) {
+        return host.equals(domain) || (includeSubdomains && host.endsWith("." + domain));
     }
 
     private static URL parseUrl(String candidate) {
@@ -127,12 +151,14 @@ final class ExternalStreamRequestRegistry {
 
     private static final class Cookie {
         final String domain;
+        final boolean includeSubdomains;
         final String path;
         final boolean secure;
         final long expires;
         final String value;
-        Cookie(String domain, String path, boolean secure, long expires, String value) {
+        Cookie(String domain, boolean includeSubdomains, String path, boolean secure, long expires, String value) {
             this.domain = domain;
+            this.includeSubdomains = includeSubdomains;
             this.path = path;
             this.secure = secure;
             this.expires = expires;

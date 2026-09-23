@@ -9,12 +9,16 @@ import com.getcapacitor.BridgeWebViewClient;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 public class OpenTubeXWebViewClient extends BridgeWebViewClient {
     private static final int CONNECT_TIMEOUT_MS = 15_000;
@@ -63,6 +67,7 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
         if (!"GET".equals(request.getMethod()) && !"HEAD".equals(request.getMethod())) {
             return super.shouldInterceptRequest(view, request);
         }
+        if (streamHeaders != null) return interceptExternalStream(request, streamHeaders);
 
         HttpURLConnection connection = null;
         try {
@@ -70,14 +75,8 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
             connection.setRequestMethod(request.getMethod());
             connection.setConnectTimeout(15_000);
             connection.setReadTimeout(30_000);
-            if (streamHeaders != null) connection.setInstanceFollowRedirects(false);
             for (Map.Entry<String, String> header : request.getRequestHeaders().entrySet()) {
                 connection.setRequestProperty(header.getKey(), header.getValue());
-            }
-            if (streamHeaders != null) {
-                for (Map.Entry<String, String> header : streamHeaders.entrySet()) {
-                    connection.setRequestProperty(header.getKey(), header.getValue());
-                }
             }
 
             int statusCode = connection.getResponseCode();
@@ -118,8 +117,53 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
             if (connection != null) {
                 connection.disconnect();
             }
-            return streamHeaders == null ? super.shouldInterceptRequest(view, request)
-                : errorResponse(502, "Bad Gateway");
+            return super.shouldInterceptRequest(view, request);
+        }
+    }
+
+    private WebResourceResponse interceptExternalStream(WebResourceRequest webRequest,
+                                                         Map<String, String> streamHeaders) {
+        Request.Builder builder = new Request.Builder().url(webRequest.getUrl().toString())
+            .method(webRequest.getMethod(), null);
+        for (Map.Entry<String, String> header : webRequest.getRequestHeaders().entrySet()) {
+            builder.header(header.getKey(), header.getValue());
+        }
+        for (Map.Entry<String, String> header : streamHeaders.entrySet()) {
+            builder.header(header.getKey(), header.getValue());
+        }
+
+        try {
+            Response response = ExternalStreamRedirects.client().newCall(builder.build()).execute();
+            int statusCode = response.code();
+            if (statusCode >= 300 && statusCode < 400) {
+                if (response.body() != null) response.close();
+                return errorResponse(502, "Bad Gateway");
+            }
+            ResponseBody body = response.body();
+            InputStream stream = body == null ? new ByteArrayInputStream(new byte[0]) : body.byteStream();
+            Map<String, String> responseHeaders = AndroidHttpUtils.flattenHeaders(response.headers().toMultimap());
+            responseHeaders.putAll(corsHeaders());
+            String responseMessage = response.message();
+            if (responseMessage == null || responseMessage.isEmpty()) responseMessage = "HTTP " + statusCode;
+            if (statusCode == 206) {
+                // WebView applies Range again to intercepted 206 responses.
+                statusCode = 200;
+                responseMessage = "OK";
+                removeHeader(responseHeaders, "Accept-Ranges");
+                removeHeader(responseHeaders, "Content-Length");
+                removeHeader(responseHeaders, "Content-Range");
+            }
+            return new WebResourceResponse(
+                AndroidHttpUtils.mimeType(response.header("Content-Type"), "application/octet-stream"),
+                null, statusCode, responseMessage, responseHeaders,
+                new FilterInputStream(stream) {
+                    @Override public void close() throws IOException {
+                        try { super.close(); } finally { if (body != null) response.close(); }
+                    }
+                }
+            );
+        } catch (IOException error) {
+            return errorResponse(502, "Bad Gateway");
         }
     }
 

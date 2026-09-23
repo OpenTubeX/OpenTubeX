@@ -6,6 +6,18 @@ import { expect, repoRoot, sel, test } from '../../helpers/app.mjs'
 import { activeTab, waitForPlayback } from '../../helpers/player.mjs'
 import { DEMO_MEDIA_PATH, DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 
+test('shows search for an unknown URL on the selected Invidious instance', async ({ page }) => {
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateDefaultInvidiousInstance', 'https://invidious.test')
+  })
+  await page.locator(sel.searchInput).fill('https://invidious.test/does/not/exist')
+  await expect(page.locator('.topNav .searchInput .inputAction .buttonIcon'))
+    .toHaveAttribute('data-icon', 'magnifying-glass')
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page).toHaveURL(/#\/search\//)
+})
+
 test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({ app, page }, testInfo) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
 

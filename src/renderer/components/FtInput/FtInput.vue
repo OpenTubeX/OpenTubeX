@@ -150,7 +150,7 @@ import store from '../../store/index'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { isKeyboardEventKeyPrintableChar, isNullOrEmpty } from '../../helpers/strings'
 import { getInputTextAscentOffset } from './inputTextMetrics'
-import { isExternalMediaUrl, shouldOpenExternalMediaUrl } from '../../helpers/externalMediaUrl'
+import { shouldOpenExternalMediaUrl } from '../../helpers/externalMediaUrl'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 
 const { t } = useI18n()
@@ -426,7 +426,8 @@ async function handleActionIconChange() {
     }
 
     if (props.forceActionButtonIconName === null) {
-      if (isYoutubeLink || (props.externalMediaNavigation && supportsYtDlp && isExternalMediaUrl(inputData.value))) {
+      if (isYoutubeLink || (props.externalMediaNavigation && supportsYtDlp &&
+        shouldOpenExternalMediaUrl(inputData.value, store.getters.getCurrentInvidiousInstanceUrl))) {
         // Go to URL (i.e. Video/Playlist/Channel
         actionButtonIconName.value = ['fas', 'arrow-right']
       } else {

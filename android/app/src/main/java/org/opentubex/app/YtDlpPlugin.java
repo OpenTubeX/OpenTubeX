@@ -141,17 +141,17 @@ public final class YtDlpPlugin extends Plugin {
             String cookies = call.getString("cookies", "");
             boolean externalMedia = call.getBoolean("externalMedia", false);
             File temporaryCookies = null;
-            if (!cookies.isEmpty()) {
-                File allowed = new File(getContext().getNoBackupFilesDir(), "yt-dlp-cookies.txt");
-                if (!cookies.equals(allowed.getAbsolutePath()) || !allowed.isFile()) throw new IOException("Cookie file is unavailable");
-                args.addAll(asList("--cookies", cookies));
-            } else if (externalMedia) {
-                temporaryCookies = File.createTempFile("yt-dlp-stream-", ".txt", getContext().getCacheDir());
-                YtDlpFiles.write(temporaryCookies, "# Netscape HTTP Cookie File\n".getBytes(StandardCharsets.UTF_8));
-                args.addAll(asList("--cookies", temporaryCookies.getAbsolutePath()));
-            }
-            args.add("--simulate");
             try {
+                if (!cookies.isEmpty()) {
+                    File allowed = new File(getContext().getNoBackupFilesDir(), "yt-dlp-cookies.txt");
+                    if (!cookies.equals(allowed.getAbsolutePath()) || !allowed.isFile()) throw new IOException("Cookie file is unavailable");
+                    args.addAll(asList("--cookies", cookies));
+                } else if (externalMedia) {
+                    temporaryCookies = File.createTempFile("yt-dlp-stream-", ".txt", getContext().getCacheDir());
+                    YtDlpFiles.write(temporaryCookies, "# Netscape HTTP Cookie File\n".getBytes(StandardCharsets.UTF_8));
+                    args.addAll(asList("--cookies", temporaryCookies.getAbsolutePath()));
+                }
+                args.add("--simulate");
                 String stdout = YtDlpRuntime.extract(getContext(), args);
                 if (externalMedia) {
                     File cookieFile = temporaryCookies == null ? new File(cookies) : temporaryCookies;

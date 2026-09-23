@@ -6,6 +6,7 @@ import androidx.media3.common.C;
 import androidx.media3.datasource.BaseDataSource;
 import androidx.media3.datasource.DataSource;
 import androidx.media3.datasource.DataSpec;
+import androidx.media3.datasource.okhttp.OkHttpDataSource;
 
 import java.io.IOException;
 import java.net.URL;
@@ -13,6 +14,9 @@ import java.util.Map;
 
 /** Adapts a SABR segment supplied by the renderer to Media3's extractor input. */
 final class NativePlaybackDataSource extends BaseDataSource {
+    private static final DataSource.Factory EXTERNAL_HTTP =
+        new OkHttpDataSource.Factory(ExternalStreamRedirects.client());
+
     interface Segments {
         byte[] read(Uri uri, long position, long length) throws IOException;
     }
@@ -34,17 +38,17 @@ final class NativePlaybackDataSource extends BaseDataSource {
             }
 
             @Override public long open(DataSpec spec) throws IOException {
+                Map<String, String> headers = null;
+                if ("http".equals(spec.uri.getScheme()) || "https".equals(spec.uri.getScheme())) {
+                    headers = ExternalStreamRequestRegistry.shared().headersFor(new URL(spec.uri.toString()));
+                }
                 current = "otxsabr".equals(spec.uri.getScheme())
-                    ? new NativePlaybackDataSource(segments) : fallback.createDataSource();
+                    ? new NativePlaybackDataSource(segments)
+                    : headers != null ? EXTERNAL_HTTP.createDataSource() : fallback.createDataSource();
                 for (androidx.media3.datasource.TransferListener listener : listeners) {
                     current.addTransferListener(listener);
                 }
-                DataSpec request = spec;
-                if ("http".equals(spec.uri.getScheme()) || "https".equals(spec.uri.getScheme())) {
-                    Map<String, String> headers = ExternalStreamRequestRegistry.shared()
-                        .headersFor(new URL(spec.uri.toString()));
-                    if (headers != null) request = spec.withAdditionalHeaders(headers);
-                }
+                DataSpec request = headers == null ? spec : spec.withAdditionalHeaders(headers);
                 return current.open(request);
             }
 
