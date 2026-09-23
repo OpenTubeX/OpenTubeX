@@ -7,6 +7,7 @@
 ## Documentation
 
 - Do not create new documentation files, feature writeups, implementation notes, plans, or task summaries unless the user explicitly requests them. Put change explanations and validation details in the PR description. Update existing documentation only when the change makes it inaccurate.
+- For user-facing changes, check the current user documentation in `OpenTubeX/opentubex.github.io`. If the change affects documented behavior, interface labels, steps, or screenshots, update the affected guides and screenshots in a separate PR in that website repository as part of the same task. Link the application and website PRs to each other. These updates are required without a separate user request; do not add unrelated documentation.
 
 ## Testing
 
