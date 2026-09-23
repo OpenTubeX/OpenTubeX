@@ -13,6 +13,25 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class ExternalStreamRedirectsTest {
+    @Test public void retriesNotModifiedWithoutConditionalHeadersForWebView() throws Exception {
+        try (MockWebServer server = new MockWebServer()) {
+            server.start();
+            server.enqueue(new MockResponse().setResponseCode(304));
+            server.enqueue(new MockResponse().setResponseCode(200).setBody("video"));
+            Request request = new Request.Builder().url(server.url("/video.mp4"))
+                .header("If-None-Match", "old-tag").build();
+            try (Response response = ExternalStreamRedirects.fetchForWebView(request)) {
+                assertEquals(200, response.code());
+            }
+            RecordedRequest conditional = server.takeRequest(5, TimeUnit.SECONDS);
+            RecordedRequest retry = server.takeRequest(5, TimeUnit.SECONDS);
+            assertNotNull(conditional);
+            assertNotNull(retry);
+            assertEquals("old-tag", conditional.getHeader("If-None-Match"));
+            assertNull(retry.getHeader("If-None-Match"));
+        }
+    }
+
     @Test public void keepsScopedHeadersOnSameOriginRedirects() throws Exception {
         try (MockWebServer server = new MockWebServer()) {
             server.start();

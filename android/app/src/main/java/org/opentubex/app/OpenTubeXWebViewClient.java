@@ -133,9 +133,10 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
         }
 
         try {
-            Response response = ExternalStreamRedirects.client().newCall(builder.build()).execute();
+            Response response = ExternalStreamRedirects.fetchForWebView(builder.build());
             int statusCode = response.code();
             if (statusCode >= 300 && statusCode < 400) {
+                // WebResourceResponse rejects every 3xx code, including 304.
                 if (response.body() != null) response.close();
                 return errorResponse(502, "Bad Gateway");
             }
