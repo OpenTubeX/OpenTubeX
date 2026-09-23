@@ -15,6 +15,14 @@ function markedId(body, kind) {
   return body?.match(new RegExp(`^<!-- ${prefix}:${kind}:(\\d+) -->`))?.[1]
 }
 
+function linkedState(body) {
+  return body?.match(/^<!-- opentubex-sync:state:(opened|closed) -->$/m)?.[1]
+}
+
+function linkBody(issue, state) {
+  return `${marker('link', issue.number)}\n<!-- ${prefix}:state:${state} -->\nThis report is tracked on [GitHub](${issue.html_url}). Comments, comment edits, and status changes are mirrored both ways. Edit this GitLab report to update its GitHub title and description. Triage is managed on GitHub.`
+}
+
 // Only escape GitLab quick-action syntax outside code fences. Preserve mentions,
 // URLs, email addresses and reproduction commands verbatim.
 export function content(body = '', fromGitlab = false) {
@@ -140,21 +148,27 @@ export async function sync(client) {
       } else if (target.title !== source.title || target.body !== body) {
         await client.gh(`${ghBase}/${target.number}`, 'PATCH', { title: source.title, body })
       }
-      if (!link) {
-        // The backlink marks initialization complete. Retry the initial close
-        // before creating it, even when a previous run already created the issue.
-        if (source.state === 'closed' && target.state !== 'closed') {
-          target = await client.gh(`${ghBase}/${target.number}`, 'PATCH', { state: 'closed' })
-        }
-        await client.gl(`${glIssue}/notes`, 'POST', {
-          body: `${marker('link', target.number)}\nThis report is tracked on [GitHub](${target.html_url}). Comments and comment edits are mirrored both ways. Edit this GitLab report to update its GitHub title and description. Status and triage are managed on GitHub.`,
-        })
-      }
       // Read status again after content updates, so a concurrent triage change wins.
       const current = await client.gh(`${ghBase}/${target.number}`)
-      const state = current.state === 'closed' ? 'closed' : 'opened'
-      if (source.state !== state) {
-        await client.gl(glIssue, 'PUT', { state_event: state === 'closed' ? 'close' : 'reopen' })
+      const githubState = current.state === 'closed' ? 'closed' : 'opened'
+      let state = githubState
+      if (source.state !== githubState) {
+        // The backlink records the state seen at the last successful sync, so
+        // the side that changed since then determines the new shared state.
+        // For older backlinks without a state marker, preserve a closure.
+        const previous = linkedState(link?.body)
+        state = previous === githubState ? source.state : previous === source.state ? githubState : 'closed'
+        if (state !== githubState) {
+          await client.gh(`${ghBase}/${target.number}`, 'PATCH', { state: state === 'closed' ? 'closed' : 'open' })
+        } else {
+          await client.gl(glIssue, 'PUT', { state_event: state === 'closed' ? 'close' : 'reopen' })
+        }
+      }
+      const backlink = linkBody(target, state)
+      if (!link) {
+        await client.gl(`${glIssue}/notes`, 'POST', { body: backlink })
+      } else if (link.body !== backlink) {
+        await client.gl(`${glIssue}/notes/${link.id}`, 'PUT', { body: backlink })
       }
       const comments = await list(client, 'gh', `${ghBase}/${target.number}/comments`)
       for (const note of notes) {

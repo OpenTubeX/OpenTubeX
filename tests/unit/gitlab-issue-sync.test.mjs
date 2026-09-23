@@ -50,7 +50,7 @@ test('creates a linked issue, mirrors comments both ways and makes repeat runs a
   assert.deepEqual(state.writes, [])
 })
 
-test('GitLab owns title/body, GitHub owns status and triage, even if the body marker is removed', async () => {
+test('GitLab owns title/body, both sides can change status, and GitHub owns triage', async () => {
   const { state, client } = fixture()
   await sync(client)
   Object.assign(state.targets[0], { title: 'Changed on GitHub', body: 'Marker removed', state: 'closed', labels: ['bug'], milestone: 3 })
@@ -67,7 +67,11 @@ test('GitLab owns title/body, GitHub owns status and triage, even if the body ma
   assert.equal(state.sources[0].state, 'opened')
   state.sources[0].state = 'closed'
   await sync(client)
-  assert.equal(state.sources[0].state, 'opened')
+  assert.equal(state.sources[0].state, 'closed')
+  assert.equal(state.targets[0].state, 'closed')
+  state.sources[0].state = 'opened'
+  await sync(client)
+  assert.equal(state.targets[0].state, 'open')
 })
 
 test('comment edits update their existing copies in both directions', async () => {
@@ -103,6 +107,37 @@ test('preserves initial closed state and does not recreate a missing linked issu
   assert.equal(state.targets[0].state, 'closed')
   state.targets = []
   await assert.rejects(sync(client), /Missing linked GitHub issue/)
+})
+
+test('an older backlink closes GitHub when GitLab closes the report', async () => {
+  const { state, client } = fixture()
+  await sync(client)
+  state.notes[0].body = state.notes[0].body.replace(/^<!-- opentubex-sync:state:opened -->\n/m, '')
+  state.sources[0].state = 'closed'
+  await sync(client)
+  assert.equal(state.targets[0].state, 'closed')
+  assert.equal(state.sources[0].state, 'closed')
+  assert.match(state.notes[0].body, /opentubex-sync:state:closed/)
+  state.targets[0].state = 'open'
+  await sync(client)
+  assert.equal(state.sources[0].state, 'opened')
+})
+
+test('a failed status update keeps the previous state marker for retry', async () => {
+  const { state, client } = fixture()
+  await sync(client)
+  state.sources[0].state = 'closed'
+  const gh = client.gh
+  client.gh = async (path, method, body) => {
+    if (body?.state === 'closed') throw new Error('Simulated API failure')
+    return gh(path, method, body)
+  }
+  await assert.rejects(sync(client), /Failed to sync/)
+  assert.match(state.notes[0].body, /opentubex-sync:state:opened/)
+  client.gh = gh
+  await sync(client)
+  assert.equal(state.targets[0].state, 'closed')
+  assert.match(state.notes[0].body, /opentubex-sync:state:closed/)
 })
 
 test('recovers from failure after issue creation before backlink creation', async () => {
