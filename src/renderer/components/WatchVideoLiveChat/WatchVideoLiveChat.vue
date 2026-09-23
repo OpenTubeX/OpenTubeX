@@ -420,7 +420,7 @@
 <script setup>
 import { FtIcon } from '@opentubex/icons'
 import autolinker from 'autolinker'
-import { inject, computed, nextTick, onBeforeUnmount, onMounted, ref, shallowReactive, useTemplateRef, watch } from 'vue'
+import { inject, computed, nextTick, onBeforeUnmount, onMounted, ref, shallowReactive, toRaw, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { YTNodes } from 'youtubei.js'
 
@@ -644,7 +644,7 @@ function initializeLiveChat() {
   switch (backendPreference.value) {
     case 'local':
       if (props.liveChat) {
-        liveChatInstance = props.liveChat
+        liveChatInstance = toRaw(props.liveChat)
         startLiveChatLocal()
       } else {
         showLiveChatUnavailable()

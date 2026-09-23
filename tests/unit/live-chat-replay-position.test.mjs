@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import { createContext, runInContext, runInNewContext } from 'node:vm'
-import { effectScope, nextTick, reactive, watch } from 'vue'
+import { effectScope, nextTick, reactive, toRaw, watch } from 'vue'
 import * as replayHelpers from '../../src/renderer/components/WatchVideoLiveChat/liveChatReplay.js'
 
 const source = readFileSync(new URL('../../src/renderer/components/WatchVideoLiveChat/WatchVideoLiveChat.vue', import.meta.url), 'utf8')
@@ -138,3 +138,27 @@ for (const playbackPosition of [null, 20, 23]) {
     assert.deepEqual(chat.seeks, [playbackPosition === 23 ? 23_000 : 20_900])
   })
 }
+
+test('starts the passed chat instance without Vue proxying its private fields', () => {
+  class ChatWithPrivateState {
+    #starts = 0
+
+    start() { this.#starts++ }
+    get starts() { return this.#starts }
+  }
+
+  const chat = new ChatWithPrivateState()
+  const props = reactive({ liveChat: chat })
+  const initialize = source.slice(source.indexOf('function initializeLiveChat()'), source.indexOf('function enableLiveChat()'))
+  const context = createContext({
+    process: { env: { SUPPORTS_LOCAL_API: true } },
+    props,
+    toRaw,
+    backendPreference: { value: 'local' },
+    backendFallback: { value: false },
+  })
+  runInContext(`function startLiveChatLocal() { liveChatInstance.start() }\n${initialize}`, context)
+
+  assert.doesNotThrow(() => runInContext('initializeLiveChat()', context))
+  assert.equal(chat.starts, 1)
+})
