@@ -26,6 +26,12 @@ const PLAYBACK_FORMAT_OUTPUT_FIELDS = [
 ].join(',')
 export const PLAYBACK_INFO_OUTPUT_TEMPLATE = [
   '{"title":%(title|null)j',
+  ',"description":%(description|null)j',
+  ',"uploader":%(uploader|null)j',
+  ',"thumbnail":%(thumbnail|null)j',
+  ',"webpage_url":%(webpage_url|null)j',
+  ',"view_count":%(view_count|null)j',
+  ',"upload_date":%(upload_date|null)j',
   ',"is_live":%(is_live|null)j',
   ',"live_status":%(live_status|null)j',
   ',"duration":%(duration|null)j',

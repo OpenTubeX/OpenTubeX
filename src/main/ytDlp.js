@@ -1383,6 +1383,12 @@ export async function handleYtDlpDownloadBinary(event, binary) {
  * @typedef YtDlpPlaybackInfo
  * @property {string | null} version the version of yt-dlp that extracted this
  * @property {string | null} title
+ * @property {string | null} description
+ * @property {string | null} uploader
+ * @property {string | null} thumbnail
+ * @property {string | null} webpageUrl
+ * @property {number | null} viewCount
+ * @property {string | null} uploadDate
  * @property {boolean} isLive
  * @property {'is_live' | 'post_live' | 'was_live' | 'not_live' | 'is_upcoming' | null} liveStatus
  * @property {number | null} duration
@@ -1505,8 +1511,20 @@ export async function handleYtDlpGetPlaybackInfo(
     return null
   }
 
-  if (typeof videoId !== 'string' || !ID_REGEX.test(videoId)) {
+  if (typeof videoId !== 'string') {
     return null
+  }
+
+  const isYouTubeVideo = ID_REGEX.test(videoId)
+  let mediaUrl = `https://www.youtube.com/watch?v=${videoId}`
+  if (!isYouTubeVideo) {
+    try {
+      const parsedUrl = new URL(videoId)
+      if (!['http:', 'https:'].includes(parsedUrl.protocol) || parsedUrl.username || parsedUrl.password || videoId.length > 8192) return null
+      mediaUrl = parsedUrl.toString()
+    } catch {
+      return null
+    }
   }
 
   if (
@@ -1535,7 +1553,7 @@ export async function handleYtDlpGetPlaybackInfo(
     '15',
     '--ignore-no-formats-error',
     '--format',
-    'sb0/sb1/sb2/sb3',
+    isYouTubeVideo ? 'sb0/sb1/sb2/sb3' : 'bestvideo*+bestaudio/best',
     '--print',
     PLAYBACK_INFO_OUTPUT_TEMPLATE
   ]
@@ -1550,7 +1568,7 @@ export async function handleYtDlpGetPlaybackInfo(
     )
   }
 
-  if (useDefaultClients !== true) {
+  if (isYouTubeVideo && useDefaultClients !== true) {
     // Keep yt-dlp's account-aware defaults first. For authenticated playback,
     // upstream recommends appending web_safari to obtain its merged HLS formats:
     // https://github.com/yt-dlp/yt-dlp/issues/17143
@@ -1572,7 +1590,7 @@ export async function handleYtDlpGetPlaybackInfo(
 
   await pushProxyArgument(args)
 
-  args.push(`https://www.youtube.com/watch?v=${videoId}`)
+  args.push(mediaUrl)
 
   let stdout
   let version
@@ -1617,6 +1635,12 @@ export async function handleYtDlpGetPlaybackInfo(
   return {
     version,
     title: toNonEmptyString(info.title),
+    description: toNonEmptyString(info.description),
+    uploader: toNonEmptyString(info.uploader),
+    thumbnail: toNonEmptyString(info.thumbnail),
+    webpageUrl: toNonEmptyString(info.webpage_url),
+    viewCount: toFiniteNumber(info.view_count),
+    uploadDate: toNonEmptyString(info.upload_date),
     isLive: !!info.is_live,
     liveStatus: toNonEmptyString(info.live_status),
     duration: toFiniteNumber(info.duration),

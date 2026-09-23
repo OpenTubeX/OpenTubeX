@@ -295,7 +295,7 @@ export default {
   },
 
   /**
-   * @param {string} videoId
+   * @param {string} videoId YouTube ID or HTTP(S) media URL
    * @param {string} context
    * @param {string} initialAttestationData
    * @param {string} ytConfig

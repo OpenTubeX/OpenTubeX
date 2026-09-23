@@ -29,7 +29,7 @@ Rows for optional services apply only when the feature is enabled. An IP address
 | Voice-over translation | Unofficial Yandex voice-over translation service | IP address, YouTube video identifier and URL, video duration, requested output language, and timing |
 | Enhanced-privacy sync | Configured sync operator | IP address, OpenTubeX application version from Electron desktop builds, account identifier, authentication data, encrypted payloads, collection names, payload sizes, revisions, event IDs, recipient device IDs, creation and expiry times, and request timing; not the decrypted selected data, activity details, or video requests |
 | Legacy sync | Configured sync operator | IP address, OpenTubeX application version from Electron desktop builds, account identifier, authentication data, selected synced data, and timing |
-| `yt-dlp` playback and downloads | YouTube and the configured proxy, if any | IP address, requested page and media resources, video identifier, formats, and timing. OpenTubeX's proxy setting is passed to `yt-dlp`. |
+| `yt-dlp` playback and downloads | YouTube or the media site you open, its media hosts, and the configured proxy, if any | IP address, requested page and media resources, video identifier, formats, and timing. OpenTubeX's proxy setting is passed to `yt-dlp`. |
 
 Connectivity checks may run at startup, when returning to the app, after connection changes, or during network recovery. Failed checks are retried while the system reports an internet connection. You can turn them off under Settings > Privacy > Internet connectivity checks.
 

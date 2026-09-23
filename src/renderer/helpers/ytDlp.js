@@ -122,17 +122,29 @@ const android = {
     }
   },
   async ytDlpGetPlaybackInfo(videoId, useDefaultClients = false, useAuthentication = false, includeSubtitles = true) {
-    if (!/^[\w-]{11}$/.test(videoId)) return null
+    const isYouTubeVideo = /^[\w-]{11}$/.test(videoId)
+    if (!isYouTubeVideo) {
+      try {
+        const url = new URL(videoId)
+        if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password || videoId.length > 8192) return null
+      } catch { return null }
+    }
     try {
-      const args = ['--no-playlist', '--no-warnings', '--no-progress', '--socket-timeout', '15', '--ignore-no-formats-error', '--format', 'sb0/sb1/sb2/sb3', '--print', PLAYBACK_INFO_OUTPUT_TEMPLATE]
+      const args = ['--no-playlist', '--no-warnings', '--no-progress', '--socket-timeout', '15', '--ignore-no-formats-error', '--format', isYouTubeVideo ? 'sb0/sb1/sb2/sb3' : 'bestvideo*+bestaudio/best', '--print', PLAYBACK_INFO_OUTPUT_TEMPLATE]
       if (includeSubtitles) args.push('--write-auto-subs', '--sub-langs', 'all', '--sub-format', 'vtt')
-      if (!useDefaultClients) args.push('--extractor-args', useAuthentication ? 'youtube:player_client=default,web_safari' : 'youtube:player_client=default,web_embedded,-android_vr')
-      args.push(`https://www.youtube.com/watch?v=${videoId}`)
+      if (isYouTubeVideo && !useDefaultClients) args.push('--extractor-args', useAuthentication ? 'youtube:player_client=default,web_safari' : 'youtube:player_client=default,web_embedded,-android_vr')
+      args.push(isYouTubeVideo ? `https://www.youtube.com/watch?v=${videoId}` : videoId)
       const [info, binaries] = await Promise.all([extract(args, useAuthentication), native.info()])
       const formats = Array.isArray(info.formats) ? info.formats : []
       return {
         version: binaries.ytDlp.version,
         title: toNonEmptyString(info.title),
+        description: toNonEmptyString(info.description),
+        uploader: toNonEmptyString(info.uploader),
+        thumbnail: toNonEmptyString(info.thumbnail),
+        webpageUrl: toNonEmptyString(info.webpage_url),
+        viewCount: toFiniteNumber(info.view_count),
+        uploadDate: toNonEmptyString(info.upload_date),
         isLive: !!info.is_live,
         liveStatus: toNonEmptyString(info.live_status),
         duration: toFiniteNumber(info.duration),

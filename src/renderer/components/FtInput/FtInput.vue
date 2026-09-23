@@ -150,6 +150,8 @@ import store from '../../store/index'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { isKeyboardEventKeyPrintableChar, isNullOrEmpty } from '../../helpers/strings'
 import { getInputTextAscentOffset } from './inputTextMetrics'
+import { isExternalMediaUrl, shouldOpenExternalMediaUrl } from '../../helpers/externalMediaUrl'
+import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 
 const { t } = useI18n()
 
@@ -388,6 +390,11 @@ async function handleActionIconChange() {
     return
   }
 
+  if (supportsYtDlp && shouldOpenExternalMediaUrl(inputData.value, store.getters.getCurrentInvidiousInstanceUrl)) {
+    if (props.forceActionButtonIconName === null) actionButtonIconName.value = ['fas', 'arrow-right']
+    return
+  }
+
   // Update action button icon according to input
   try {
     const result = await store.dispatch('getYoutubeUrlInfo', inputData.value)
@@ -415,7 +422,7 @@ async function handleActionIconChange() {
     }
 
     if (props.forceActionButtonIconName === null) {
-      if (isYoutubeLink) {
+      if (isYoutubeLink || (supportsYtDlp && isExternalMediaUrl(inputData.value))) {
         // Go to URL (i.e. Video/Playlist/Channel
         actionButtonIconName.value = ['fas', 'arrow-right']
       } else {
