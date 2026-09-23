@@ -26,11 +26,15 @@
   padding: 0;
 }
 
-.activityList li {
+.activityList li,
+.activityDisclosure {
   background-color: var(--card-bg-color);
   border: 1px solid var(--divider-color);
   border-radius: calc(10px * var(--ui-roundness));
   box-shadow: 0 1px 3px rgb(0 0 0 / 16%);
+}
+
+.activityList li {
   padding: 1rem;
 }
 
@@ -42,8 +46,30 @@
   mask-image: none;
 }
 
-.activityLoadMore {
-  margin-inline: auto;
+.activityDisclosure {
+  align-items: center;
+  box-sizing: border-box;
+  color: var(--primary-text-color);
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  font-weight: 500;
+  gap: 0.75rem;
+  inline-size: 100%;
+  justify-content: center;
+  min-block-size: 44px;
+  padding-block: 0.75rem;
+  padding-inline: 1rem;
+}
+
+.activityDisclosure:is(:hover, :active) {
+  background-color: var(--side-nav-hover-color);
+  color: var(--side-nav-hover-text-color);
+}
+
+.activityDisclosure:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
 }
 
 .activityList p {

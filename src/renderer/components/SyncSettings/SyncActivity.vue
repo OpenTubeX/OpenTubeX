@@ -22,8 +22,9 @@
         @click="refresh"
       />
     </div>
+    <FtLoader v-if="loading" />
     <p
-      v-if="error"
+      v-else-if="error"
       role="alert"
     >
       {{ error }}
@@ -74,15 +75,20 @@
         </time>
       </li>
     </ol>
-    <FtButton
-      v-if="!error && hasHiddenEntries"
-      class="activityLoadMore"
-      :label="t('Theme Discovery.Load More')"
-      :icon="['fas', 'angle-down']"
+    <button
+      v-if="!loading && !error && entries.length > 3"
+      type="button"
+      class="activityDisclosure"
       :aria-controls="activityListId"
       :aria-expanded="showAll"
-      @click="expandActivity"
-    />
+      @click="toggleActivity"
+    >
+      <span>{{ showAll ? t('Description.Collapse Description') : t('Theme Discovery.Load More') }}</span>
+      <FtIcon
+        :icon="['fas', showAll ? 'angle-up' : 'angle-down']"
+        aria-hidden="true"
+      />
+    </button>
   </section>
 </template>
 
@@ -91,8 +97,8 @@ import { FtIcon } from '@opentubex/icons'
 import { computed, inject, nextTick, onMounted, ref, useId, useTemplateRef } from 'vue'
 import { Translation as I18nT, useI18n } from 'vue-i18n'
 import store from '../../store'
-import FtButton from '../FtButton/FtButton.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
+import FtLoader from '../FtLoader/FtLoader.vue'
 import { SYNC_SETTING_LABELS } from '../../helpers/sync-setting-labels'
 
 import { settingsSearchNavigationKey } from '../../helpers/settingsSearch'
@@ -108,7 +114,7 @@ const activityListId = useId()
 const activityList = useTemplateRef('activityList')
 const showAll = ref(false)
 const hasHiddenEntries = computed(() => !showAll.value && entries.value.length > 3)
-const loading = ref(false)
+const loading = ref(true)
 const error = ref('')
 const collectionLabels = {
   subscriptions: 'Subscriptions.Subscriptions',
@@ -136,6 +142,14 @@ async function expandActivity() {
   showAll.value = true
   await nextTick()
   activityList.value?.children[3]?.focus()
+}
+
+async function toggleActivity() {
+  if (showAll.value) {
+    showAll.value = false
+  } else {
+    await expandActivity()
+  }
 }
 
 function dateLabel(timestamp) {
