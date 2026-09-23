@@ -135,6 +135,44 @@ public class MobileTabSelectionTest {
             await(view, STORE + ".getters.getPresentedTabId === window.pageSwipeSecondId && " +
                 STORE + ".getters.getActiveTabId === window.pageSwipeSecondId && " +
                 "!document.querySelector('.pageSwipeTo')");
+
+            evaluate(view, "document.querySelector('.capacitorTabletNewTab').click()");
+            await(view, STORE + ".getters.getActiveTab?.loadState === 'loaded' && " +
+                STORE + ".getters.getActiveTabId === " + STORE + ".getters.getPresentedTabId && " +
+                STORE + ".getters.getActiveTabId !== window.pageSwipeFirstId && " +
+                STORE + ".getters.getActiveTabId !== window.pageSwipeSecondId");
+            evaluate(view, "window.pageSwipeThirdId = " + STORE + ".getters.getActiveTabId");
+            evaluate(view, "document.querySelector('.capacitorTabletTabTarget[data-tab-id=\"' + " +
+                "window.pageSwipeSecondId + '\"]').click()");
+            await(view, STORE + ".getters.getPresentedTabId === window.pageSwipeSecondId && " +
+                STORE + ".getters.getActiveTabId === window.pageSwipeSecondId && " +
+                "!!document.querySelector('.pageSwipePrewarm[data-tab-id=\"' + window.pageSwipeThirdId + '\"]')");
+            downTime = SystemClock.uptimeMillis();
+            touch(view, downTime, MotionEvent.ACTION_DOWN, x * scale, y * scale);
+            touch(view, downTime, MotionEvent.ACTION_MOVE, (x + distance / 2) * scale, y * scale);
+            await(view, "document.querySelector('.pageSwipeTo')?.dataset.tabId === String(window.pageSwipeFirstId)");
+            assertEquals("The previous tab paints above the other prewarmed tab", "true",
+                evaluate(view, """
+                    (() => {
+                        const target = document.querySelector('.pageSwipeTo');
+                        const other = [...document.querySelectorAll('.pageSwipePrewarm')]
+                            .find(page => page !== target);
+                        const rect = target.getBoundingClientRect();
+                        target.inert = false;
+                        other.inert = false;
+                        other.style.pointerEvents = 'auto';
+                        try {
+                            return document.elementFromPoint(rect.right - 30, rect.top + 30)
+                                ?.closest('.tabContent') === target;
+                        } finally {
+                            target.inert = true;
+                            other.inert = true;
+                            other.style.pointerEvents = '';
+                        }
+                    })()
+                    """));
+            touch(view, downTime, MotionEvent.ACTION_CANCEL, (x + distance / 2) * scale, y * scale);
+            await(view, "!document.querySelector('.pageSwipeTo')");
         }
     }
 

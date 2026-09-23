@@ -348,12 +348,14 @@ function cancelLoaderSettle() {
 
 .pageSwipeFrom {
   position: relative;
+  z-index: 2;
 }
 
 .pageSwipeTo {
   position: absolute;
   inset-block-start: 0;
   inset-inline: 0;
+  z-index: 1;
 }
 
 .pageSwipeSettling {
