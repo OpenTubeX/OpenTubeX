@@ -1333,6 +1333,10 @@ export default defineComponent({
     }) ?? null
     this.onMountedDependOnLocalStateLoading()
   },
+  updated: function () {
+    const rail = this.$refs.shortsActionRail
+    if (rail?.scrollTop) clampOverlayScrollTop(rail)
+  },
   beforeUnmount: function () {
     this.finishNativeFullscreenTransition?.()
     connectionEvents.removeEventListener('change', this.handleDownloadConnectionChange)

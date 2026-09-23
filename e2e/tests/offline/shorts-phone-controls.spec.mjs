@@ -89,6 +89,48 @@ test('phone Shorts loading controls match the action rail', async ({ app, page }
   await watch.dispose()
 })
 
+test('short phone screens can reach every Shorts rail action with navigation present', async ({ app, page }) => {
+  await openShort({ app, page })
+  await page.evaluate(() => document.querySelector('.app').classList.add('capacitorPhoneLayout', 'capacitorTabs'))
+  await page.setViewportSize({ width: 390, height: 600 })
+  const rail = page.locator('.shortsActionRail')
+  await rail.evaluate(element => {
+    const navigation = document.createElement('div')
+    navigation.className = 'shortsNavigation'
+    for (const label of ['Previous', 'Next']) {
+      const button = document.createElement('button')
+      button.className = 'shortsNavigationButton'
+      button.textContent = label
+      navigation.append(button)
+    }
+    ;(element.querySelector('.os-content') ?? element).prepend(navigation)
+  })
+
+  const player = page.locator('.ftVideoPlayer.shortsPlayer')
+  const first = rail.locator('.shortsNavigationButton').first()
+  const last = rail.locator('.shortsSoundThumbnail')
+  const [playerBounds, railBounds, firstBounds] = await Promise.all([
+    player.boundingBox(), rail.boundingBox(), first.boundingBox(),
+  ])
+  expect(railBounds.y).toBeGreaterThanOrEqual(playerBounds.y + 60)
+  expect(firstBounds.y).toBeGreaterThanOrEqual(railBounds.y - 1)
+  expect(await rail.evaluate(element => element.scrollHeight - element.clientHeight)).toBeGreaterThan(1)
+
+  await rail.evaluate(element => { element.scrollTop = element.scrollHeight })
+  const lastBounds = await last.boundingBox()
+  expect(lastBounds.y).toBeGreaterThanOrEqual(railBounds.y - 1)
+  expect(lastBounds.y + lastBounds.height).toBeLessThanOrEqual(railBounds.y + railBounds.height + 1)
+
+  await rail.locator('.shortsNavigation').evaluate(element => element.remove())
+  await expect.poll(() => rail.evaluate(element => element.scrollTop)).toBe(0)
+  expect(await rail.evaluate(element => element.scrollHeight - element.clientHeight)).toBeLessThanOrEqual(1)
+  expect((await rail.locator('.shortsAction').first().boundingBox()).y).toBeGreaterThanOrEqual(railBounds.y - 1)
+
+  await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+  await page.setViewportSize({ width: 411, height: 842 })
+  await expect.poll(() => rail.evaluate(element => element.scrollHeight - element.clientHeight)).toBeLessThanOrEqual(1)
+})
+
 test('medium-width Shorts retain their player height without bottom tabs', async ({ app, page }) => {
   await openShort({ app, page })
   await setWindowSize(app, page, { width: 720, height: 820 })

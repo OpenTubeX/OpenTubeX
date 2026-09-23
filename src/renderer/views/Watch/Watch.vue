@@ -428,6 +428,8 @@
         </div>
         <div
           v-if="customShortsPlayerActive"
+          ref="shortsActionRail"
+          v-overlay-scrollbars
           class="shortsActionRail"
           :class="{ shortsActionRailSkeleton: isLoading }"
         >

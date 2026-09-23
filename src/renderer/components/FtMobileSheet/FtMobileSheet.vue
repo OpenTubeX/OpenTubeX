@@ -202,7 +202,10 @@ watch([dialog, () => props.enabled, () => props.open, docked, fullscreenElement,
           window.scrollBy({ top: bounds.top - toolbarBottom, behavior: 'instant' })
         }
       }
-      if (!presentationSuspended) expanded.value = landscape.value || shortsPlayer.value
+      if (!presentationSuspended) {
+        expanded.value = landscape.value || shortsPlayer.value
+        if (expanded.value && !landscape.value) resumePlayback = expandPanel?.()
+      }
       measurePlayer()
       element.show()
       animation = applyAnimationSpeed(element.animate([

@@ -74,6 +74,23 @@ test('a Shorts sheet opens maximized and cannot collapse below the player', asyn
   assert.equal(sheet.state.expanded.value, true)
 })
 
+test('an automatically maximized Shorts sheet pauses playback until it closes', async t => {
+  let pauses = 0
+  let resumes = 0
+  const sheet = mountSheet(t, () => {
+    pauses++
+    return () => { resumes++ }
+  })
+  sheet.player.shorts = true
+  sheet.props.open = true
+  await sheet.settle()
+  assert.equal(sheet.state.expanded.value, true)
+  assert.equal(pauses, 1)
+  sheet.props.open = false
+  await sheet.settle()
+  assert.equal(resumes, 1)
+})
+
 for (const mode of ['native', 'browser', 'fullwindow']) {
   test(`an open below-player sheet hides during ${mode} fullscreen and returns below the player`, async t => {
     const sheet = mountSheet(t)

@@ -1396,21 +1396,23 @@
   grid-column: 1;
   grid-row: 1;
   place-self: start end;
-  block-size: var(--shorts-player-height);
-  justify-content: flex-end;
+  block-size: max(0px, calc(var(--shorts-player-height) - 60px));
+  justify-content: safe flex-end;
   inset: auto;
   inline-size: auto;
   margin: 0;
+  margin-block-start: 60px;
   padding-inline-end: 8px;
   box-sizing: border-box;
   align-items: center;
   gap: 8px;
   padding-block-end: 0;
-  pointer-events: none;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
 }
 
-:global(.capacitorPhoneLayout .shortsActionRail > *) {
-  pointer-events: auto;
+:global(.capacitorPhoneLayout .shortsActionRail > :not(.os-scrollbar)) {
+  flex-shrink: 0;
 }
 
 :global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .videoArea .videoAreaMargin) {
