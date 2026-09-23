@@ -644,6 +644,7 @@ function initializeLiveChat() {
   switch (backendPreference.value) {
     case 'local':
       if (props.liveChat) {
+        // Vue proxies the chat stored in Watch data; its private-field methods need the raw instance.
         liveChatInstance = toRaw(props.liveChat)
         startLiveChatLocal()
       } else {
