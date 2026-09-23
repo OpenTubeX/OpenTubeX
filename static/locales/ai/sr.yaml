@@ -1166,6 +1166,7 @@ Channel:
   All Results: Све
   View All: Прикажи све
 Video:
+  External DRM Protected: "Видео снимци заштићени DRM не могу се репродуковати у OpenTubeX-у, јер захтевају власничке компоненте затвореног кода."
   Mark As Fully Watched: Означи као одгледано до краја
   AI-generated video summary: "Сажетак видеа генерисан вештачком интелигенцијом"
   Quality and accuracy may vary: "Квалитет и тачност могу да варирају"

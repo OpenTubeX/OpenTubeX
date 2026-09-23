@@ -7202,6 +7202,7 @@ export default defineComponent({
         variants = getDefaultAudioVariants(variants)
       }
 
+      if (variants.length === 0) return
       const isPortrait = variants[0].height > variants[0].width
 
       let matches = variants.filter(variant => {
@@ -7212,6 +7213,13 @@ export default defineComponent({
         matches = variants.filter(variant => {
           return quality > (isPortrait ? variant.width : variant.height)
         })
+      }
+
+      if (matches.length === 0) {
+        const dimension = isPortrait ? 'width' : 'height'
+        const lowest = Math.min(...variants.map(variant => variant[dimension]).filter(Number.isFinite))
+        matches = variants.filter(variant => variant[dimension] === lowest)
+        if (matches.length === 0) matches = [variants[0]]
       }
 
       matches.sort((a, b) => isPortrait ? b.width - a.width : b.height - a.height)

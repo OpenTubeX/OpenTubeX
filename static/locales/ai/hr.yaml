@@ -1123,6 +1123,7 @@ Channel:
   Search Result Types: Vrste rezultata pretraživanja
   All Results: Sve
 Video:
+  External DRM Protected: "DRM-om zaštićena videa ne mogu se reproducirati u OpenTubeXu jer zahtijevaju vlasničke komponente zatvorenog koda."
   Mark As Fully Watched: Označi kao pogledano do kraja
   AI-generated video summary: "Sažetak videozapisa generiran umjetnom inteligencijom"
   Quality and accuracy may vary: "Kvaliteta i točnost mogu varirati"

@@ -1170,6 +1170,7 @@ Channel:
   All Results: Alle
   View All: Vis alle
 Video:
+  External DRM Protected: "DRM-beskyttede videoer kan ikke afspilles i OpenTubeX, da de kræver proprietære komponenter med lukket kilde."
   Mark As Fully Watched: Markér som set til ende
   AI-generated video summary: "AI-genereret videoresumé"
   Quality and accuracy may vary: "Kvalitet og nøjagtighed kan variere"

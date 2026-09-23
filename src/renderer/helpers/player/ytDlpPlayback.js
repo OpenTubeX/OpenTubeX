@@ -165,17 +165,34 @@ export async function getExternalYtDlpPlaybackSource(url, useAuthentication = fa
     format.url !== null &&
     ['mp4', 'm4a', 'webm', 'mp3', 'ogg', 'opus'].includes(format.ext)
   )
-  const legacyFormats = await convertLegacyFormats(httpFormats.filter(format =>
-    isAudioFormat(format)
+  const hasVideoFormats = httpFormats.some(format =>
+    isVideoFormat(format) || isExternalProgressiveVideoFormat(format)
+  )
+  // H.265 may be unavailable in Chromium, so try other codecs first.
+  const preferredHttpFormats = httpFormats.filter(format => format.vcodec !== 'h265')
+  const h265Formats = httpFormats.filter(format => format.vcodec === 'h265')
+  let legacyFormats = await convertLegacyFormats(preferredHttpFormats.filter(format =>
+    (isAudioFormat(format) && (!hasVideoFormats || isVideoFormat(format))) ||
+    isExternalProgressiveVideoFormat(format)
   ))
 
-  const hlsUrl = info.hlsManifestUrl ?? info.formats.find(format =>
+  const hlsFormats = info.formats.filter(format =>
     ['m3u8', 'm3u8_native'].includes(format.protocol)
-  )?.manifestUrl ?? info.formats.find(format =>
-    ['m3u8', 'm3u8_native'].includes(format.protocol)
-  )?.url ?? null
+  )
+  const hlsUrls = new Set([
+    info.hlsManifestUrl,
+    ...hlsFormats.map(format => format.manifestUrl),
+    ...hlsFormats.toSorted((a, b) => (b.height ?? 0) - (a.height ?? 0)).map(format => format.url)
+  ].filter(url => url !== null))
+  let hlsUrl = null
+  for (const candidate of hlsUrls) {
+    if (await probeYtDlpHlsManifest(candidate)) {
+      hlsUrl = candidate
+      break
+    }
+  }
 
-  if (hlsUrl !== null && await probeYtDlpHlsManifest(hlsUrl)) {
+  if (hlsUrl !== null) {
     return {
       info,
       source: {
@@ -209,7 +226,7 @@ export async function getExternalYtDlpPlaybackSource(url, useAuthentication = fa
     }
   }
 
-  const adaptiveFormats = httpFormats.filter(format => isVideoFormat(format) !== isAudioFormat(format))
+  const adaptiveFormats = preferredHttpFormats.filter(format => isVideoFormat(format) !== isAudioFormat(format))
   const localFormats = getCompatibleAdaptiveFormats(await convertAdaptiveFormats(adaptiveFormats, info.duration))
   if (localFormats.some(format => format.has_video) && localFormats.some(format => format.has_audio)) {
     const manifest = await FormatUtils.toDash({ adaptive_formats: localFormats })
@@ -227,6 +244,9 @@ export async function getExternalYtDlpPlaybackSource(url, useAuthentication = fa
     }
   }
 
+  if (legacyFormats.length === 0) {
+    legacyFormats = await convertLegacyFormats(h265Formats.filter(format => isAudioFormat(format)))
+  }
   if (legacyFormats.length > 0) {
     return {
       info,
@@ -242,7 +262,9 @@ export async function getExternalYtDlpPlaybackSource(url, useAuthentication = fa
     }
   }
 
-  throw new Error('yt-dlp did not return any playable formats')
+  throw new Error(info.formats.length > 0
+    ? 'yt-dlp returned formats, but their stream URLs could not be accessed by the player'
+    : 'yt-dlp did not return any playable formats')
 }
 
 /**
@@ -259,6 +281,12 @@ function isAudioFormat(format) {
   return format.acodec !== null && format.acodec !== 'none'
 }
 
+/** Some extractors omit codec names for otherwise playable progressive video. */
+function isExternalProgressiveVideoFormat(format) {
+  return format.vcodec === null && format.acodec === null &&
+    ['mp4', 'webm'].includes(format.ext) && (format.width !== null || format.height !== null)
+}
+
 /**
  * @param {YtDlpPlaybackFormat} format
  * @returns {string} e.g. `video/mp4; codecs="av01.0.12M.08"`
@@ -267,6 +295,8 @@ function buildMimeType(format) {
   if (format.ext === 'mp3') return 'audio/mpeg'
   if (['ogg', 'opus'].includes(format.ext)) return 'audio/ogg'
   const container = format.ext === 'webm' ? 'webm' : 'mp4'
+
+  if (isExternalProgressiveVideoFormat(format)) return `video/${container}`
 
   if (isVideoFormat(format)) {
     const codecs = isAudioFormat(format) ? `${format.vcodec}, ${format.acodec}` : format.vcodec
@@ -426,7 +456,9 @@ function mapYtDlpLegacyFormat(format) {
     qualityLabel: buildQualityLabel(format),
     fps: format.fps,
     bitrate: format.bitrate,
-    mimeType: buildMimeType(format),
+    // yt-dlp's short "h264" name is not an RFC 6381 codec string. Let the
+    // browser inspect the MP4 rather than handing Shaka an invalid codec hint.
+    mimeType: ['h264', 'h265'].includes(format.vcodec) ? 'video/mp4' : buildMimeType(format),
     height: format.height,
     width: format.width,
     url: format.url,

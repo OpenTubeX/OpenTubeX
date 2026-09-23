@@ -57,15 +57,24 @@ export function useTabAvatar() {
     isMounted = false
   })
 
+  function getRouteKey(route) {
+    if (route?.path !== '/external-media') return route?.path
+    const url = new URL(route.fullPath, 'https://opentubex.invalid')
+    return `${url.pathname}${url.searchParams.size ? `?${url.searchParams}` : ''}${url.hash}`
+  }
+
   return async (avatarUrl) => {
     if (!isMounted || watchNavigation?.detached.value || !process.env.IS_ELECTRON || !tabId || !store.getters.getShowTabIcons) return
 
     try {
       const route = store.getters.getTabById(tabId)?.route
+      const routeKey = getRouteKey(route)
       const avatarBytes = await fetchTabAvatarBytes(avatarUrl)
-      if (!isMounted || watchNavigation?.detached.value || avatarBytes == null || route?.path == null) return
+      const currentRoute = store.getters.getTabById(tabId)?.route
+      const currentRouteKey = getRouteKey(currentRoute)
+      if (!isMounted || watchNavigation?.detached.value || avatarBytes == null || routeKey == null || currentRouteKey !== routeKey) return
 
-      const cached = await window.ftElectron.tabs.updateAvatar(avatarBytes, tabId, route.path)
+      const cached = await window.ftElectron.tabs.updateAvatar(avatarBytes, tabId, routeKey)
       if (cached) {
         removeLegacyTabAvatar(route)
       }

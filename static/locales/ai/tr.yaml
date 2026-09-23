@@ -1116,6 +1116,7 @@ Channel:
   Search Result Types: Arama sonucu türleri
   All Results: Tümü
 Video:
+  External DRM Protected: "DRM korumalı videolar, özel kapalı kaynak bileşenleri gerektirdiğinden OpenTubeX ile oynatılamaz."
   Mark As Fully Watched: Tamamı izlendi olarak işaretle
   AI-generated video summary: "Yapay zekâ tarafından oluşturulan video özeti"
   Quality and accuracy may vary: "Kalite ve doğruluk değişebilir"

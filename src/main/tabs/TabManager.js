@@ -859,7 +859,8 @@ export class TabManager {
    * @returns {Promise<boolean>}
    */
   async applyTabAvatar(tab, avatarBytes, routePath) {
-    if (!this._avatarsEnabled || tab.route.path !== routePath) {
+    const matchesRoute = () => tab.route.path === routePath || tab.route.fullPath === routePath
+    if (!this._avatarsEnabled || !matchesRoute()) {
       return false
     }
 
@@ -894,7 +895,7 @@ export class TabManager {
       if (
         !this._avatarsEnabled ||
         !this.tabs.has(tab.id) ||
-        tab.route.path !== routePath ||
+        !matchesRoute() ||
         buffer.length === 0
       ) {
         return false
@@ -908,7 +909,7 @@ export class TabManager {
       if (
         !this._avatarsEnabled ||
         !this.tabs.has(tab.id) ||
-        tab.route.path !== routePath
+        !matchesRoute()
       ) {
         const fileName = tab.avatarFileName
         tab.avatarFileName = null
@@ -2749,7 +2750,9 @@ export class TabManager {
     if (!tab) return
 
     const nextRoute = normalizeRoute(route)
-    if (nextRoute.path !== tab.route.path) {
+    if (nextRoute.path !== tab.route.path || (
+      nextRoute.path === '/external-media' && nextRoute.fullPath !== tab.route.fullPath
+    )) {
       const avatarFileName = tab.avatarFileName
       tab.avatarDataUrl = null
       tab.avatarFileName = null

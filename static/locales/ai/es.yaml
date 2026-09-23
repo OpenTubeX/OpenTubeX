@@ -1137,6 +1137,7 @@ Channel:
   All Results: Todo
   View All: Ver todo
 Video:
+  External DRM Protected: "Los videos restringidos con DRM no pueden reproducirse en OpenTubeX, dado que requieren componentes propietarias de fuente cerrada."
   Mark As Fully Watched: Marcar como visto por completo
   AI-generated video summary: "Resumen del vídeo generado por IA"
   Quality and accuracy may vary: "La calidad y la precisión pueden variar"

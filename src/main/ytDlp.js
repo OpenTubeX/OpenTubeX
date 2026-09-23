@@ -5,6 +5,7 @@ import {
   splitArguments, automaticNumber,
 } from '../ytDlpArguments'
 import { PLAYBACK_INFO_OUTPUT_TEMPLATE, toFiniteNumber, toNonEmptyString, mapPlaybackFormat, mapPlaybackCaptions } from '../ytDlpMetadata'
+import { resolveYtDlpCreatorAvatarUrl } from './ytDlpCreatorAvatar'
 import { execFile, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { chmod, mkdir, mkdtemp, readFile, rename, rm, stat, statfs, writeFile } from 'node:fs/promises'
@@ -31,6 +32,102 @@ import {
 import { supportsNativeNotifications } from './nativeNotifications'
 
 const execFileAsync = promisify(execFile)
+
+/** Anonymous cookies acquired while extracting external media stay in memory. */
+const externalStreamCookies = new WeakMap()
+const externalStreamHeaders = new WeakMap()
+const externalManifestHeaders = new WeakMap()
+const EXTERNAL_STREAM_HEADER_NAMES = new Set([
+  'accept', 'accept-language', 'origin', 'referer', 'sec-fetch-mode', 'user-agent'
+])
+
+function registerExternalStreamHeaders(webContents, formats) {
+  const existing = externalStreamHeaders.get(webContents) ?? new Map()
+  const manifestScopes = externalManifestHeaders.get(webContents) ?? new Map()
+  for (const format of formats) {
+    const headers = Object.fromEntries(Object.entries(format.http_headers ?? {})
+      .filter(([name, value]) => EXTERNAL_STREAM_HEADER_NAMES.has(name.toLowerCase()) &&
+        typeof value === 'string' && !/[\r\n]/.test(value)))
+    if (Object.keys(headers).length === 0) continue
+    for (const candidate of [format.url, format.manifest_url]) {
+      if (typeof candidate !== 'string' || !/^https?:\/\//.test(candidate)) continue
+      let streamUrl
+      try { streamUrl = new URL(candidate) } catch { continue }
+      existing.delete(candidate)
+      existing.set(candidate, headers)
+      if (existing.size > 256) existing.delete(existing.keys().next().value)
+
+      if (['m3u8', 'm3u8_native', 'dash', 'http_dash_segments'].includes(format.protocol)) {
+        const scope = `${streamUrl.origin}${new URL('.', streamUrl).pathname}`
+        manifestScopes.delete(scope)
+        manifestScopes.set(scope, headers)
+        if (manifestScopes.size > 256) manifestScopes.delete(manifestScopes.keys().next().value)
+      }
+    }
+  }
+  externalStreamHeaders.set(webContents, existing)
+  externalManifestHeaders.set(webContents, manifestScopes)
+}
+
+export function getYtDlpExternalStreamHeaders(webContents, requestUrl) {
+  const exact = externalStreamHeaders.get(webContents)?.get(requestUrl)
+  if (exact) return exact
+
+  const request = new URL(requestUrl)
+  for (const [scope, headers] of [...(externalManifestHeaders.get(webContents) ?? [])].reverse()) {
+    const base = new URL(scope)
+    if (request.origin === base.origin && request.pathname.startsWith(base.pathname)) return headers
+  }
+  return null
+}
+
+function registerExternalStreamCookies(webContents, formats, cookieFileContents) {
+  const hosts = new Set(formats.flatMap(format => [format.url, format.manifest_url])
+    .filter(url => typeof url === 'string')
+    .map(url => {
+      try {
+        const parsed = new URL(url)
+        return ['http:', 'https:'].includes(parsed.protocol) ? parsed.hostname : null
+      } catch { return null }
+    }).filter(Boolean))
+  if (hosts.size === 0 || cookieFileContents === '') return
+
+  const cookies = cookieFileContents.split(/\r?\n/).flatMap(line => {
+    const fields = line.replace(/^#HttpOnly_/, '').split('\t')
+    if (fields.length !== 7 || fields[0].startsWith('#')) return []
+    const [domain, , path, secure, expires, name, value] = fields
+    const cookieDomain = domain.replace(/^\./, '').toLowerCase()
+    if (![...hosts].some(host => host === cookieDomain || host.endsWith(`.${cookieDomain}`))) return []
+    if (!/^[^\s;=]+$/.test(name) || !value || /[\r\n;]/.test(value)) return []
+    return [{
+      domain: cookieDomain,
+      path,
+      secure: secure === 'TRUE',
+      expires: Math.min(Number(expires) || Infinity, Date.now() / 1000 + 3600),
+      name,
+      value
+    }]
+  })
+  if (cookies.length === 0) return
+
+  const existing = externalStreamCookies.get(webContents) ?? new Map()
+  for (const host of hosts) existing.set(host, cookies)
+  externalStreamCookies.set(webContents, existing)
+}
+
+export function getYtDlpExternalStreamCookieHeader(webContents, requestUrl) {
+  const url = new URL(requestUrl)
+  const cookies = externalStreamCookies.get(webContents)?.get(url.hostname)
+  if (!cookies) return null
+  const now = Date.now() / 1000
+  const matching = cookies.filter(cookie =>
+    now < cookie.expires &&
+    (url.hostname === cookie.domain || url.hostname.endsWith(`.${cookie.domain}`)) &&
+    url.pathname.startsWith(cookie.path) &&
+    (!cookie.secure || url.protocol === 'https:')
+  )
+  return matching.length > 0 ? matching.map(cookie => `${cookie.name}=${cookie.value}`).join('; ') : null
+}
 
 /** @type {Map<string, AbortController>} */
 const getInfoAbortControllers = new Map()
@@ -1385,6 +1482,11 @@ export async function handleYtDlpDownloadBinary(event, binary) {
  * @property {string | null} title
  * @property {string | null} description
  * @property {string | null} uploader
+ * @property {string | null} uploaderUrl
+ * @property {string | null} uploaderThumbnail
+ * @property {string | null} channel
+ * @property {string | null} channelUrl
+ * @property {string | null} channelThumbnail
  * @property {string | null} thumbnail
  * @property {string | null} webpageUrl
  * @property {number | null} viewCount
@@ -1590,10 +1692,24 @@ export async function handleYtDlpGetPlaybackInfo(
 
   await pushProxyArgument(args)
 
+  let cookieDirectory = null
+  let cookieFile = null
+  if (!isYouTubeVideo) {
+    const configuredCookieIndex = args.lastIndexOf('--cookies')
+    if (configuredCookieIndex !== -1) {
+      cookieFile = args[configuredCookieIndex + 1]
+    } else {
+      cookieDirectory = await mkdtemp(join(app.getPath('temp'), 'opentubex-stream-cookies-'))
+      cookieFile = join(cookieDirectory, 'cookies.txt')
+      args.push('--cookies', cookieFile)
+    }
+  }
+
   args.push(mediaUrl)
 
   let stdout
   let version
+  let extractedCookies = ''
   try {
     // Unlike --dump-single-json, yt-dlp's projected output does not expose its
     // own version in the template context. Resolve it alongside extraction so
@@ -1608,6 +1724,7 @@ export async function handleYtDlpGetPlaybackInfo(
     ])
     stdout = playbackInfo.stdout
     version = resolvedVersion
+    if (cookieFile !== null) extractedCookies = await readFile(cookieFile, 'utf8').catch(() => '')
   } catch (error) {
     if (error.code === 'ENOENT') {
       return { error: 'ENOENT' }
@@ -1620,6 +1737,8 @@ export async function handleYtDlpGetPlaybackInfo(
     // yt-dlp writes the reason for a failed extraction to stderr
     const stderr = typeof error.stderr === 'string' ? error.stderr.trim() : ''
     return { error: stderr.split('\n').at(-1) || error.message }
+  } finally {
+    if (cookieDirectory !== null) await rm(cookieDirectory, { recursive: true, force: true })
   }
 
   let info
@@ -1630,13 +1749,25 @@ export async function handleYtDlpGetPlaybackInfo(
   }
 
   const formats = Array.isArray(info.formats) ? info.formats : []
+  if (!isYouTubeVideo) {
+    registerExternalStreamHeaders(event.sender, formats)
+    if (extractedCookies !== '') registerExternalStreamCookies(event.sender, formats, extractedCookies)
+  }
   const { captions, captionTranslations } = mapPlaybackCaptions(info.requested_subtitles)
+  const creatorAvatarUrl = isYouTubeVideo
+    ? null
+    : await resolveYtDlpCreatorAvatarUrl(info, (url, options) => net.fetch(url, options))
 
   return {
     version,
     title: toNonEmptyString(info.title),
     description: toNonEmptyString(info.description),
     uploader: toNonEmptyString(info.uploader),
+    uploaderUrl: toNonEmptyString(info.uploader_url),
+    uploaderThumbnail: info.channel ? null : creatorAvatarUrl,
+    channel: toNonEmptyString(info.channel),
+    channelUrl: toNonEmptyString(info.channel_url),
+    channelThumbnail: info.channel ? creatorAvatarUrl : null,
     thumbnail: toNonEmptyString(info.thumbnail),
     webpageUrl: toNonEmptyString(info.webpage_url),
     viewCount: toFiniteNumber(info.view_count),

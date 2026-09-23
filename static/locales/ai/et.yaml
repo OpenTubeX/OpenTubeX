@@ -1116,6 +1116,7 @@ Channel:
   Search Result Types: Otsingutulemuste tüübid
   All Results: Kõik
 Video:
+  External DRM Protected: "Kuna vajalikud on suletud lähtekoodil põhinevad komponendid, siis DRMiga kaitstud videoid OpenTubeX esitada ei saa."
   Mark As Fully Watched: Märgi täielikult vaadatuks
   AI-generated video summary: "Tehisintellekti loodud video kokkuvõte"
   Quality and accuracy may vary: "Kvaliteet ja täpsus võivad erineda"

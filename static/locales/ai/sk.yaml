@@ -1116,6 +1116,7 @@ Channel:
   Search Result Types: Typy výsledkov hľadania
   All Results: Všetko
 Video:
+  External DRM Protected: "Videá chránené DRM nemôžu byť prehrávané vo OpenTubeX, pretože vyžadujú proprietárne, uzavreté zdrojové komponenty."
   Mark As Fully Watched: Označiť ako úplne pozreté
   AI-generated video summary: "Zhrnutie videa vytvorené AI"
   Quality and accuracy may vary: "Kvalita a presnosť sa môžu líšiť"
