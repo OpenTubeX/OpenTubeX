@@ -35,7 +35,7 @@ exit 0
     })
 
     assert.equal(result.status, 0, result.stderr)
-    assert.equal(readFileSync(count, 'utf8').trim(), '14')
+    assert.equal(readFileSync(count, 'utf8').trim(), '24')
   } finally {
     rmSync(directory, { recursive: true, force: true })
   }

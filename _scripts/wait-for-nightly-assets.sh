@@ -14,6 +14,11 @@ expected_assets=(
   "opentubex-${version}.arm64.rpm"
   "opentubex-${version}-linux-x64-portable.zip"
   "opentubex-${version}-linux-arm64-portable.zip"
+  "opentubex-${version}-android-arm64-v8a.apk"
+  "opentubex-${version}-android-armeabi-v7a.apk"
+  "opentubex-${version}-android-x86.apk"
+  "opentubex-${version}-android-x86_64.apk"
+  "opentubex-${version}-android-universal.apk"
 )
 
 for ((attempt = 1; attempt <= max_attempts; attempt++)); do
