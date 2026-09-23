@@ -499,7 +499,7 @@ const state = {
   syncServerSyncSubscriptions: true,
   syncServerSyncPlaylists: true,
   syncServerSyncHistory: true,
-  syncServerSyncWatchStats: false,
+  syncServerSyncWatchStats: true,
   syncServerSyncProfiles: true,
   syncServerSyncSessions: true,
   syncServerSharedTabs: false,

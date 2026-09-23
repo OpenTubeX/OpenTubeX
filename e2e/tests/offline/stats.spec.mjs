@@ -92,7 +92,7 @@ test.describe('watch stats', () => {
     await expect(page.locator('body')).toHaveClass(/\blight\b/)
     await page.locator('.sideNav .navOption.router-link-exact-active').hover()
     await expect.poll(async () => (await contrast()).tab).toBeGreaterThan(4.5)
-    await page.waitForTimeout(250)
+    await expect.poll(async () => (await contrast()).sidebar).toBeGreaterThan(4.5)
     await page.emulateMedia({ colorScheme: 'dark' })
     await expect(page.locator('body')).toHaveClass(/\bdark\b/)
     const changed = await contrast()
@@ -171,7 +171,6 @@ test.describe('synced watch stats', () => {
         syncServerSyncSubscriptions: false,
         syncServerSyncPlaylists: false,
         syncServerSyncHistory: false,
-        syncServerSyncWatchStats: false,
         syncServerSyncProfiles: false,
         syncServerSyncSessions: false,
         syncServerSyncSettings: false,
@@ -218,6 +217,8 @@ test.describe('synced watch stats', () => {
     await sync.getByRole('checkbox', { name: 'Enable Sync', exact: true }).press('Space')
     const statisticsToggle = sync.getByRole('checkbox', { name: 'Sync statistics' })
     await expect(statisticsToggle).toBeEnabled()
+    await expect(statisticsToggle).toBeChecked()
+    await statisticsToggle.press('Space')
     await expect(statisticsToggle).not.toBeChecked()
     await statisticsToggle.press('Space')
     await expect(statisticsToggle).toBeChecked()
