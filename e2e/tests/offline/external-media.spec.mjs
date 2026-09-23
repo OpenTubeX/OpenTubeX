@@ -274,7 +274,6 @@ test('plays a TikTok stream that requires extraction cookies and format headers'
 
 test('uses configured playback cookies for external streams', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
-  test.setTimeout(20_000)
 
   const media = await readFile(DEMO_MEDIA_PATH)
   const server = createServer((request, response) => {
@@ -325,7 +324,6 @@ test('uses configured playback cookies for external streams', async ({ app, page
 
 test('skips a TikTok codec unsupported by the player when a compatible stream exists', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
-  test.setTimeout(20_000)
 
   const executable = path.join(app.userDataDir, 'external-media-unsupported-codec.sh')
   const unsupportedUrl = 'https://codec.example.test/video.mp4'
@@ -361,7 +359,6 @@ test('skips a TikTok codec unsupported by the player when a compatible stream ex
 
 test('tries an accessible H.265 stream when another codec URL is blocked', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
-  test.setTimeout(20_000)
 
   const executable = path.join(app.userDataDir, 'external-media-h265-fallback.sh')
   const blockedUrl = 'https://codec.example.test/blocked.mp4'
@@ -401,7 +398,6 @@ test('tries an accessible H.265 stream when another codec URL is blocked', async
 
 test('plays an H.264 MP4 when yt-dlp supplies short codec names', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
-  test.setTimeout(20_000)
 
   const executable = path.join(app.userDataDir, 'external-media-h264.sh')
   const streamUrl = 'https://mp4.example.test/video.mp4'
@@ -535,7 +531,6 @@ ${segmentUrl}
 
 test('passes yt-dlp headers to HLS media segments', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
-  test.setTimeout(20_000)
 
   const media = await readFile(path.join(repoRoot, 'e2e/fixtures/media/hls-1080.mp4'))
   const server = createServer((request, response) => {
