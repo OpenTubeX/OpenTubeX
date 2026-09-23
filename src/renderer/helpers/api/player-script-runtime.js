@@ -32,6 +32,8 @@ export async function evaluatePlayerCode(code, { timeoutMs = 5000, memoryLimitBy
       result.dispose()
     }
   } finally {
+    // QuickJS may need to allocate while releasing objects after an OOM.
+    runtime.setMemoryLimit(-1)
     context?.dispose()
     runtime.dispose()
   }

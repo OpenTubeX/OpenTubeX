@@ -60,3 +60,43 @@ test('rejects oversized player source before copying it to a worker', async () =
   assert.equal(worker.requests.length, 0)
   assert.equal(evaluator.requests.size, 0)
 })
+
+test('retries a QuickJS runtime abort in a fresh worker for all pending player scripts', async () => {
+  const workers = []
+  const evaluator = new PlayerScriptEvaluator(() => {
+    const worker = new FakeWorker()
+    workers.push(worker)
+    return worker
+  })
+  const first = evaluator.evaluate('first')
+  const second = evaluator.evaluate('second')
+  workers[0].reply({
+    id: workers[0].requests[0].id,
+    error: 'RuntimeError: Aborted(Assertion failed: list_empty(&rt->gc_obj_list), at: ../../vendor/quickjs/quickjs.c,2036,JS_FreeRuntime)'
+  })
+  assert.equal(workers[0].terminated, true)
+  assert.equal(workers.length, 2)
+  assert.deepEqual(workers[1].requests.map(request => request.code), ['first', 'second'])
+  for (const [index, result] of ['one', 'two'].entries()) {
+    workers[1].reply({ id: workers[1].requests[index].id, result })
+  }
+  assert.deepEqual(await Promise.all([first, second]), ['one', 'two'])
+  assert.equal(evaluator.requests.size, 0)
+})
+
+test('stops retrying after a second QuickJS runtime abort', async () => {
+  const workers = []
+  const evaluator = new PlayerScriptEvaluator(() => {
+    const worker = new FakeWorker()
+    workers.push(worker)
+    return worker
+  })
+  const pending = assert.rejects(evaluator.evaluate('return 42'), /list_empty\(&rt->gc_obj_list\)/)
+  const error = 'RuntimeError: Aborted(Assertion failed: list_empty(&rt->gc_obj_list))'
+  workers[0].reply({ id: workers[0].requests[0].id, error })
+  workers[1].reply({ id: workers[1].requests[0].id, error })
+  await pending
+  assert.equal(workers.length, 2)
+  assert.equal(workers[1].terminated, true)
+  assert.equal(evaluator.requests.size, 0)
+})
