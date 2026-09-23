@@ -1116,7 +1116,8 @@ Channel:
   Search Result Types: Keresési találatok típusai
   All Results: Összes
 Video:
-  External DRM Protected: "A DRM-védelemmel ellátott videók nem játszhatók le a OpenTubeX-ban, mivel ezekhez zárt forráskódú, tulajdonosi komponensekre van szükség."
+  External DRM Protected: "A DRM-védelemmel ellátott videók nem játszhatók le az OpenTubeX-ban, mivel ezekhez zárt forráskódú, tulajdonosi komponensekre van szükség."
+  Invalid Media URL: "Érvénytelen média-URL"
   Mark As Fully Watched: Megjelölés teljesen megtekintettként
   AI-generated video summary: "MI által készített videóösszefoglaló"
   Quality and accuracy may vary: "A minőség és a pontosság változó lehet"

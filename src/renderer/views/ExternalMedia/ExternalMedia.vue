@@ -50,6 +50,7 @@
 
     <template v-else-if="source && info">
       <FtShakaVideoPlayer
+        :key="loadGeneration"
         class="externalMediaPlayer"
         :manifest-src="source.manifestSrc"
         :manifest-mime-type="source.manifestMimeType"
@@ -62,7 +63,7 @@
         :is-live="source.isLive"
         :external-url="mediaUrl"
         playback-engine="yt-dlp"
-        @error="handlePlayerError"
+        @error="playerErrorHandler"
       />
 
       <FtCard class="externalMediaDetails">
@@ -169,9 +170,11 @@ const uploadDate = computed(() => {
   const date = new Date(`${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6)}T00:00:00Z`)
   return Number.isNaN(date.getTime()) ? '' : date.toISOString().slice(0, 10)
 })
-const formattedUploadDate = computed(() => new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium' }).format(new Date(`${uploadDate.value}T00:00:00Z`)))
+const formattedUploadDate = computed(() => new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(`${uploadDate.value}T00:00:00Z`)))
+const playerErrorHandler = ref(() => {})
 
 function handlePlayerError(error) {
+  if (loading.value || !source.value) return
   errorMessage.value = error?.code === 6001
     ? t('Video.External DRM Protected')
     : error?.message ?? String(error)
@@ -179,6 +182,9 @@ function handlePlayerError(error) {
 
 async function loadMedia(url) {
   const generation = ++loadGeneration
+  playerErrorHandler.value = error => {
+    if (generation === loadGeneration) handlePlayerError(error)
+  }
   mediaUrl.value = typeof url === 'string' ? url : ''
   loading.value = true
   errorMessage.value = ''
@@ -187,7 +193,7 @@ async function loadMedia(url) {
   setTabTitle('Watch')
 
   if (!isExternalMediaUrl(url)) {
-    errorMessage.value = 'Invalid media URL'
+    errorMessage.value = t('Video.Invalid Media URL')
     loading.value = false
     return
   }

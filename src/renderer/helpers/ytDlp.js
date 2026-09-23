@@ -50,12 +50,12 @@ function configuration() {
   }
 }
 
-async function extract(args, useAuthentication = false) {
+async function extract(args, useAuthentication = false, externalMedia = false) {
   const cookies = useAuthentication && store.getters.getYtDlpPlaybackAuthMode === 'file'
     ? store.getters.getYtDlpPlaybackCookiesPath
     : ''
   if (useAuthentication && !cookies) throw new Error('yt-dlp playback authentication is not configured')
-  const { stdout } = await native.extract({ args, cookies })
+  const { stdout } = await native.extract({ args, cookies, externalMedia })
   return JSON.parse(stdout)
 }
 
@@ -134,13 +134,20 @@ const android = {
       if (includeSubtitles) args.push('--write-auto-subs', '--sub-langs', 'all', '--sub-format', 'vtt')
       if (isYouTubeVideo && !useDefaultClients) args.push('--extractor-args', useAuthentication ? 'youtube:player_client=default,web_safari' : 'youtube:player_client=default,web_embedded,-android_vr')
       args.push(isYouTubeVideo ? `https://www.youtube.com/watch?v=${videoId}` : videoId)
-      const [info, binaries] = await Promise.all([extract(args, useAuthentication), native.info()])
+      const [info, binaries] = await Promise.all([extract(args, useAuthentication, !isYouTubeVideo), native.info()])
       const formats = Array.isArray(info.formats) ? info.formats : []
+      const creatorAvatarUrl = [info.channel_thumbnail, info.channel_avatar, info.uploader_thumbnail, info.uploader_avatar]
+        .find(value => { try { return new URL(value).protocol === 'https:' } catch { return false } }) ?? null
       return {
         version: binaries.ytDlp.version,
         title: toNonEmptyString(info.title),
         description: toNonEmptyString(info.description),
         uploader: toNonEmptyString(info.uploader),
+        uploaderUrl: toNonEmptyString(info.uploader_url),
+        uploaderThumbnail: info.channel ? null : creatorAvatarUrl,
+        channel: toNonEmptyString(info.channel),
+        channelUrl: toNonEmptyString(info.channel_url),
+        channelThumbnail: info.channel ? creatorAvatarUrl : null,
         thumbnail: toNonEmptyString(info.thumbnail),
         webpageUrl: toNonEmptyString(info.webpage_url),
         viewCount: toFiniteNumber(info.view_count),

@@ -123,7 +123,8 @@ export function getYtDlpExternalStreamCookieHeader(webContents, requestUrl) {
   const matching = cookies.filter(cookie =>
     now < cookie.expires &&
     (url.hostname === cookie.domain || url.hostname.endsWith(`.${cookie.domain}`)) &&
-    url.pathname.startsWith(cookie.path) &&
+    (url.pathname === cookie.path ||
+      url.pathname.startsWith(cookie.path.endsWith('/') ? cookie.path : `${cookie.path}/`)) &&
     (!cookie.secure || url.protocol === 'https:')
   )
   return matching.length > 0 ? matching.map(cookie => `${cookie.name}=${cookie.value}`).join('; ') : null

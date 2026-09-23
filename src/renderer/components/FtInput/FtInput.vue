@@ -206,6 +206,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  externalMediaNavigation: {
+    type: Boolean,
+    default: false
+  },
   disabled: {
     type: Boolean,
     default: false
@@ -390,7 +394,7 @@ async function handleActionIconChange() {
     return
   }
 
-  if (supportsYtDlp && shouldOpenExternalMediaUrl(inputData.value, store.getters.getCurrentInvidiousInstanceUrl)) {
+  if (props.externalMediaNavigation && supportsYtDlp && shouldOpenExternalMediaUrl(inputData.value, store.getters.getCurrentInvidiousInstanceUrl)) {
     if (props.forceActionButtonIconName === null) actionButtonIconName.value = ['fas', 'arrow-right']
     return
   }
@@ -422,7 +426,7 @@ async function handleActionIconChange() {
     }
 
     if (props.forceActionButtonIconName === null) {
-      if (isYoutubeLink || (supportsYtDlp && isExternalMediaUrl(inputData.value))) {
+      if (isYoutubeLink || (props.externalMediaNavigation && supportsYtDlp && isExternalMediaUrl(inputData.value))) {
         // Go to URL (i.e. Video/Playlist/Channel
         actionButtonIconName.value = ['fas', 'arrow-right']
       } else {

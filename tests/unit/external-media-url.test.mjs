@@ -14,5 +14,9 @@ test('accepts only web media URLs without embedded credentials', () => {
 test('sends external video paths to yt-dlp before YouTube channel parsing', () => {
   assert.equal(shouldOpenExternalMediaUrl('https://vimeo.com/12345'), true)
   assert.equal(shouldOpenExternalMediaUrl('https://www.youtube.com/watch?v=abcdefghijk'), false)
+  assert.equal(shouldOpenExternalMediaUrl('https://www.youtube.com./watch?v=abcdefghijk'), false)
   assert.equal(shouldOpenExternalMediaUrl('https://invidious.example/watch?v=abcdefghijk', 'https://invidious.example'), false)
+  assert.equal(shouldOpenExternalMediaUrl('https://invidious.example/other/video', 'https://invidious.example/base'), true)
+  assert.equal(shouldOpenExternalMediaUrl('https://invidious.example/base/video', 'https://invidious.example/base'), false)
+  assert.equal(shouldOpenExternalMediaUrl('https://invidious.example:8443/base/video', 'https://invidious.example/base'), true)
 })

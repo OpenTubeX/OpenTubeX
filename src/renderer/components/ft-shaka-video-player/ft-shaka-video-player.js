@@ -7359,10 +7359,10 @@ export default defineComponent({
       const codecsMatch = mimeType.match(/codecs="(?<videoCodec>.+), ?(?<audioCodec>.+)"/)
 
       stats.codecs.audioItag = itag
-      stats.codecs.audioCodec = codecsMatch.groups.audioCodec
+      stats.codecs.audioCodec = codecsMatch?.groups?.audioCodec ?? ''
 
       stats.codecs.videoItag = itag
-      stats.codecs.videoCodec = codecsMatch.groups.videoCodec
+      stats.codecs.videoCodec = codecsMatch?.groups?.videoCodec ?? ''
 
       stats.resolution.frameRate = fps
 

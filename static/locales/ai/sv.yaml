@@ -1124,6 +1124,7 @@ Channel:
   All Results: Alla
 Video:
   External DRM Protected: "DRM-skyddade videor kan inte spelas upp i OpenTubeX eftersom de kräver proprietära komponenter med sluten källkod."
+  Invalid Media URL: "Ogiltig medie-URL"
   Mark As Fully Watched: Markera som sedd till slutet
   AI-generated video summary: "AI-genererad videosammanfattning"
   Quality and accuracy may vary: "Kvalitet och noggrannhet kan variera"

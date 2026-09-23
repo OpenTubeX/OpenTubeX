@@ -1124,6 +1124,7 @@ Channel:
   All Results: Всички
 Video:
   External DRM Protected: "Видеата, защитени с DRM не могат да се възпроизвеждат във OpenTubeX, тъй като изискват собствени компоненти със затворен код."
+  Invalid Media URL: "Невалиден URL адрес на медия"
   Mark As Fully Watched: Отбележи като изцяло гледано
   AI-generated video summary: "Резюме на видеоклипа, генерирано от ИИ"
   Quality and accuracy may vary: "Качеството и точността може да варират"

@@ -1338,6 +1338,7 @@ Channel:
     Video hidden by OpenTubeX: Videoen er gøymd av OpenTubeX
 Video:
   External DRM Protected: "DRM-verna videoar kan ikkje spelast av i OpenTubeX fordi dei krev proprietære komponentar med lukka kjeldekode."
+  Invalid Media URL: "Ugyldig medie-URL"
   Mark As Fully Watched: Merk som ferdig sett
   AI-generated video summary: "KI-generert videosamandrag"
   Quality and accuracy may vary: "Kvalitet og nøyaktigheit kan variere"

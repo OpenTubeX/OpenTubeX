@@ -1433,6 +1433,7 @@ Channel:
     Video hidden by OpenTubeX: Vaizdo įrašą paslėpė OpenTubeX
 Video:
   External DRM Protected: "DRM apsaugotų vaizdo įrašų negalima leisti naudojant OpenTubeX, nes jiems reikia nuosavybinių uždarojo kodo komponentų."
+  Invalid Media URL: "Neteisingas medijos URL"
   Mark As Fully Watched: Pažymėti kaip visiškai peržiūrėtą
   AI-generated video summary: "DI sukurta vaizdo įrašo santrauka"
   Quality and accuracy may vary: "Kokybė ir tikslumas gali skirtis"

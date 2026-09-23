@@ -24,13 +24,18 @@ export function isExternalMediaUrl(value) {
 export function shouldOpenExternalMediaUrl(value, invidiousInstanceUrl = '') {
   if (!isExternalMediaUrl(value)) return false
 
-  const hostname = new URL(value).hostname.toLowerCase()
+  const url = new URL(value)
+  const hostname = url.hostname.toLowerCase().replace(/\.$/, '')
   if (hostname === 'youtu.be' || hostname === 'youtube.com' || hostname.endsWith('.youtube.com') ||
     hostname === 'youtube-nocookie.com' || hostname.endsWith('.youtube-nocookie.com') ||
     hostname === 'redirect.invidious.io') return false
 
   try {
-    if (hostname === new URL(invidiousInstanceUrl).hostname.toLowerCase()) return false
+    const instance = new URL(invidiousInstanceUrl)
+    const instanceHost = instance.hostname.toLowerCase().replace(/\.$/, '')
+    const instancePath = instance.pathname.replace(/\/$/, '')
+    if (url.protocol === instance.protocol && hostname === instanceHost && url.port === instance.port &&
+      (url.pathname === instancePath || url.pathname.startsWith(`${instancePath}/`))) return false
   } catch { /* No configured instance. */ }
 
   return true

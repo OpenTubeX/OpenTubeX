@@ -1126,6 +1126,7 @@ Channel:
   All Results: Allt
 Video:
   External DRM Protected: "Ekki er hægt að spila DRM-varin myndskeið í OpenTubeX, þar sem þau krefjast notkunar lokaðs séreignarhugbúnaðar."
+  Invalid Media URL: "Ógild slóð á miðil"
   Mark As Fully Watched: Merkja sem fullhorft
   AI-generated video summary: "Myndbandsyfirlit búið til með gervigreind"
   Quality and accuracy may vary: "Gæði og nákvæmni geta verið breytileg"

@@ -8,6 +8,8 @@ import androidx.media3.datasource.DataSource;
 import androidx.media3.datasource.DataSpec;
 
 import java.io.IOException;
+import java.net.URL;
+import java.util.Map;
 
 /** Adapts a SABR segment supplied by the renderer to Media3's extractor input. */
 final class NativePlaybackDataSource extends BaseDataSource {
@@ -37,7 +39,13 @@ final class NativePlaybackDataSource extends BaseDataSource {
                 for (androidx.media3.datasource.TransferListener listener : listeners) {
                     current.addTransferListener(listener);
                 }
-                return current.open(spec);
+                DataSpec request = spec;
+                if ("http".equals(spec.uri.getScheme()) || "https".equals(spec.uri.getScheme())) {
+                    Map<String, String> headers = ExternalStreamRequestRegistry.shared()
+                        .headersFor(new URL(spec.uri.toString()));
+                    if (headers != null) request = spec.withAdditionalHeaders(headers);
+                }
+                return current.open(request);
             }
 
             @Override public int read(byte[] buffer, int offset, int length) throws IOException {

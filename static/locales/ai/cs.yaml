@@ -1117,6 +1117,7 @@ Channel:
   All Results: Vše
 Video:
   External DRM Protected: "Videa chráněná DRM nelze v aplikaci OpenTubeX přehrávat, protože vyžadují proprietární komponenty s uzavřeným zdrojovým kódem."
+  Invalid Media URL: "Neplatná adresa URL média"
   Mark As Fully Watched: Označit jako zcela zhlédnuté
   AI-generated video summary: "Shrnutí videa vytvořené AI"
   Quality and accuracy may vary: "Kvalita a přesnost se mohou lišit"

@@ -20,10 +20,12 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
     private static final int CONNECT_TIMEOUT_MS = 15_000;
     private static final int READ_TIMEOUT_MS = 30_000;
     private final SabrRequestRegistry sabrRequests;
+    private final ExternalStreamRequestRegistry externalStreams;
 
     public OpenTubeXWebViewClient(Bridge bridge) {
         super(bridge);
         sabrRequests = SabrRequestRegistry.shared();
+        externalStreams = ExternalStreamRequestRegistry.shared();
     }
 
     @Override
@@ -39,9 +41,11 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
             return interceptSabrRequest(url, request);
         }
 
+        Map<String, String> streamHeaders = externalStreams.headersFor(url);
         String host = url.getHost();
-        if (!"https".equals(url.getProtocol()) ||
-            !("googlevideo.com".equals(host) || host.endsWith(".googlevideo.com"))) {
+        boolean googleVideo = "https".equals(url.getProtocol()) &&
+            ("googlevideo.com".equals(host) || host.endsWith(".googlevideo.com"));
+        if (!googleVideo && streamHeaders == null) {
             return super.shouldInterceptRequest(view, request);
         }
 
@@ -66,8 +70,14 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
             connection.setRequestMethod(request.getMethod());
             connection.setConnectTimeout(15_000);
             connection.setReadTimeout(30_000);
+            if (streamHeaders != null) connection.setInstanceFollowRedirects(false);
             for (Map.Entry<String, String> header : request.getRequestHeaders().entrySet()) {
                 connection.setRequestProperty(header.getKey(), header.getValue());
+            }
+            if (streamHeaders != null) {
+                for (Map.Entry<String, String> header : streamHeaders.entrySet()) {
+                    connection.setRequestProperty(header.getKey(), header.getValue());
+                }
             }
 
             int statusCode = connection.getResponseCode();
@@ -108,7 +118,8 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
             if (connection != null) {
                 connection.disconnect();
             }
-            return super.shouldInterceptRequest(view, request);
+            return streamHeaders == null ? super.shouldInterceptRequest(view, request)
+                : errorResponse(502, "Bad Gateway");
         }
     }
 

@@ -73,3 +73,19 @@ test('ignores unsafe profile URLs and failed lookups', async () => {
   }, fetchPage), null)
   assert.equal(requests, 1)
 })
+
+test('stops reading an oversized profile response without a content length', async () => {
+  let chunksRead = 0
+  const body = new ReadableStream({
+    pull(controller) {
+      chunksRead++
+      controller.enqueue(new Uint8Array(400_000))
+    }
+  })
+  const avatar = await resolveYtDlpCreatorAvatarUrl({
+    webpage_url: 'https://soundcloud.com/creator/track',
+    uploader_url: 'https://soundcloud.com/creator'
+  }, async () => new Response(body, { headers: { 'content-type': 'text/html' } }))
+  assert.equal(avatar, null)
+  assert.ok(chunksRead < 10)
+})

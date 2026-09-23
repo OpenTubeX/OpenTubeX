@@ -61,8 +61,26 @@ export async function resolveYtDlpCreatorAvatarUrl(info, fetchPage) {
     if (!response.ok || Number(response.headers.get('content-length')) > 1_000_000) return null
     const contentType = response.headers.get('content-type') ?? ''
     if (!contentType.includes(source === 'dailymotion' ? 'application/json' : 'text/html')) return null
-    const body = await response.text()
-    if (body.length > 1_000_000) return null
+    if (!response.body) return null
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder()
+    let body = ''
+    let size = 0
+    try {
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        size += value.byteLength
+        if (size > 1_000_000) {
+          await reader.cancel()
+          return null
+        }
+        body += decoder.decode(value, { stream: true })
+      }
+      body += decoder.decode()
+    } finally {
+      reader.releaseLock()
+    }
 
     if (source === 'dailymotion') {
       return httpsUrl(JSON.parse(body).avatar_360_url)

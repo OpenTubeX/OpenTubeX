@@ -85,6 +85,7 @@
             :placeholder="t('Search / Go to URL')"
             class="searchInput"
             is-search
+            external-media-navigation
             :action-button-label="t('Search Bar.Search')"
             :data-list="activeDataList"
             :data-list-properties="activeDataListProperties"
@@ -202,7 +203,7 @@ import { translateWindowTitle } from '../../helpers/strings'
 import { clearLocalSearchSuggestionsSession, getLocalSearchSuggestions } from '../../helpers/api/local'
 import { getInvidiousSearchSuggestions } from '../../helpers/api/invidious'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
-import { isExternalMediaUrl, shouldOpenExternalMediaUrl } from '../../helpers/externalMediaUrl'
+import { shouldOpenExternalMediaUrl } from '../../helpers/externalMediaUrl'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 
 const { t } = useI18n()
@@ -707,7 +708,7 @@ async function getSearchDestination(queryText, selectedSearchSettings = null) {
 
     case 'invalid_url':
     default: {
-      if (supportsYtDlp && isExternalMediaUrl(queryText)) {
+      if (supportsYtDlp && shouldOpenExternalMediaUrl(queryText, store.getters.getCurrentInvidiousInstanceUrl)) {
         return {
           path: '/external-media',
           query: { url: queryText },

@@ -1117,6 +1117,7 @@ Channel:
   All Results: 全部
 Video:
   External DRM Protected: "受 DRM 保護的影片無法在 OpenTubeX 上播放，因為它們需要專屬的封閉原始碼元件。"
+  Invalid Media URL: "無效的媒體網址"
   Mark As Fully Watched: 標示為已完整觀看
   AI-generated video summary: "AI 產生的影片摘要"
   Quality and accuracy may vary: "品質和準確性可能有所不同"

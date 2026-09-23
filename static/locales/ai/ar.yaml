@@ -1142,6 +1142,7 @@ Channel:
   View All: عرض الكل
 Video:
   External DRM Protected: "لا يمكن تشغيل مقاطع الفيديو المحمية بنظام إدارة الحقوق الرقمية في OpenTubeX، لأنها تتطلب مكونات خاصة ومغلقة المصدر."
+  Invalid Media URL: "رابط الوسائط غير صالح"
   Mark As Fully Watched: وضع علامة على أنه تمت مشاهدته بالكامل
   AI-generated video summary: "ملخص فيديو تم إنشاؤه بالذكاء الاصطناعي"
   Quality and accuracy may vary: "قد تختلف الجودة والدقة"

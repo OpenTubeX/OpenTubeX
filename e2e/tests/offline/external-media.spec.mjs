@@ -198,7 +198,13 @@ test('plays a TikTok stream that requires extraction cookies and format headers'
 
   const media = await readFile(DEMO_MEDIA_PATH)
   const receivedHeaders = []
+  const siblingHeaders = []
   const server = createServer((request, response) => {
+    if (request.url === '/foobar/ping') {
+      siblingHeaders.push(request.headers)
+      response.writeHead(204).end()
+      return
+    }
     receivedHeaders.push(request.headers)
     if (
       !request.headers.cookie?.includes('stream_session=test-token') ||
@@ -218,7 +224,8 @@ test('plays a TikTok stream that requires extraction cookies and format headers'
 
   try {
     const executable = path.join(app.userDataDir, 'external-media-cookie-stream.sh')
-    const streamUrl = `http://127.0.0.1:${server.address().port}/video.webm`
+    const streamUrl = `http://127.0.0.1:${server.address().port}/foo/video.webm`
+    const siblingUrl = `http://127.0.0.1:${server.address().port}/foobar/ping`
     const response = JSON.stringify({
       title: 'Cookie protected stream',
       formats: [{
@@ -236,7 +243,7 @@ test('plays a TikTok stream that requires extraction cookies and format headers'
       'previous=""',
       'for argument in "$@"; do',
       '  if [ "$previous" = "--cookies" ]; then',
-      '    printf "127.0.0.1\\tFALSE\\t/\\tFALSE\\t4102444800\\tstream_session\\ttest-token\\n" > "$argument"',
+      '    printf "127.0.0.1\\tFALSE\\t/foo\\tFALSE\\t4102444800\\tstream_session\\ttest-token\\n" > "$argument"',
       '  fi',
       '  previous="$argument"',
       'done',
@@ -256,6 +263,9 @@ test('plays a TikTok stream that requires extraction cookies and format headers'
     expect(receivedHeaders.every(headers => headers.cookie?.includes('stream_session=test-token'))).toBe(true)
     expect(receivedHeaders.every(headers => headers.referer === 'https://www.tiktok.com/')).toBe(true)
     expect(receivedHeaders.every(headers => headers['user-agent'] === 'yt-dlp-test-agent')).toBe(true)
+    await page.evaluate(async url => { await fetch(url, { mode: 'no-cors' }) }, siblingUrl)
+    expect(siblingHeaders.length).toBe(1)
+    expect(siblingHeaders[0].cookie).toBeUndefined()
   } finally {
     server.closeAllConnections()
     await new Promise(resolve => server.close(resolve))

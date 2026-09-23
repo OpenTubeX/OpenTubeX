@@ -1149,7 +1149,8 @@ Channel:
   All Results: Alles
   View All: Alles bekijken
 Video:
-  External DRM Protected: "Videos die beschermd worden door DRM (Digital Rights Management) kunnen niet worden afgespeeld in OpenTubeX omdat ze beschermde closed source onderdelen vereisen."
+  External DRM Protected: "Video's die beschermd worden door DRM kunnen niet worden afgespeeld in OpenTubeX omdat ze propriëtaire onderdelen met gesloten broncode vereisen."
+  Invalid Media URL: "Ongeldige media-URL"
   Mark As Fully Watched: Markeren als volledig bekeken
   AI-generated video summary: "Door AI gegenereerde videosamenvatting"
   Quality and accuracy may vary: "Kwaliteit en nauwkeurigheid kunnen variëren"

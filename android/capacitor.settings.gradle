@@ -27,7 +27,7 @@ include ':capacitor-local-notifications'
 project(':capacitor-local-notifications').projectDir = new File('../node_modules/.pnpm/@capacitor+local-notifications@8.3.1_@capacitor+core@8.5.2/node_modules/@capacitor/local-notifications/android')
 
 include ':capacitor-share'
-project(':capacitor-share').projectDir = new File('../node_modules/.pnpm/@capacitor+share@8.0.1_@capacitor+core@8.5.2/node_modules/@capacitor/share/android')
+project(':capacitor-share').projectDir = new File('../node_modules/.pnpm/@capacitor+share@8.0.2_@capacitor+core@8.5.2/node_modules/@capacitor/share/android')
 
 include ':capawesome-capacitor-app-shortcuts'
 project(':capawesome-capacitor-app-shortcuts').projectDir = new File('../node_modules/.pnpm/@capawesome+capacitor-app-shortcuts@8.0.2_patch_hash=2581c86d60ce7892c0b3136523994591d2_5eba2b4c586967c767d87dc4824f83e0/node_modules/@capawesome/capacitor-app-shortcuts/android')

@@ -1146,7 +1146,8 @@ Channel:
   All Results: הכול
   View All: הצגת הכול
 Video:
-  External DRM Protected: "סרטונים המוגנים ב-DRM אינם יכולים להתנגן ב-OpenTubeX, מכיוון שהם דורשים רכיבים סגורים ובעלים."
+  External DRM Protected: "סרטונים המוגנים ב-DRM אינם יכולים להתנגן ב-OpenTubeX, מכיוון שהם דורשים רכיבים קנייניים בקוד סגור."
+  Invalid Media URL: "כתובת URL של מדיה אינה תקינה"
   Mark As Fully Watched: סימון כנצפה במלואו
   AI-generated video summary: "סיכום סרטון שנוצר באמצעות בינה מלאכותית"
   Quality and accuracy may vary: "האיכות והדיוק עשויים להשתנות"
