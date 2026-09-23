@@ -91,7 +91,7 @@ const pageSwipeStyle = computed(() => {
   if (isSwipeFrom.value) return { left: `${props.pageSwipe.offset}px` }
   if (isSwipeTarget.value) {
     const startingEdge = props.pageSwipe.direction
-    return { left: `${props.pageSwipe.offset + startingEdge * props.pageSwipe.width}px` }
+    return { left: `${props.pageSwipe.offset + startingEdge * props.pageSwipe.width}px`, right: 'auto' }
   }
   return undefined
 })

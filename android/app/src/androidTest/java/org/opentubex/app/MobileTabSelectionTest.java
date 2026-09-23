@@ -66,10 +66,9 @@ public class MobileTabSelectionTest {
                 touch(view, downTime, MotionEvent.ACTION_UP, (x + 80) * scale, y * scale);
                 await(view, STORE + ".getters.getActiveTabId === window.pageSwipeFirstId && " +
                     "!document.querySelector('.pageSwipeTo')");
-                assertEquals("A fast release finishes both page slides before switching tabs", "true",
-                    evaluate(view, "window.pageSwipeTransitions.includes('transitionend:left:from') && " +
-                        "window.pageSwipeTransitions.includes('transitionend:left:to') && " +
-                        "!window.pageSwipeTransitions.some(event => event.startsWith('transitioncancel:left'))"));
+                assertEquals("A fast release animates both pages before selecting the neighboring tab", "true",
+                    evaluate(view, "window.pageSwipeTransitions.includes('transitionrun:left:from') && " +
+                        "window.pageSwipeTransitions.includes('transitionrun:left:to')"));
 
                 evaluate(view, "window.pageSwipeTransitions = []");
                 downTime = SystemClock.uptimeMillis();
@@ -78,8 +77,9 @@ public class MobileTabSelectionTest {
                 await(view, "!!document.querySelector('.pageSwipeTo')");
                 touch(view, downTime, MotionEvent.ACTION_CANCEL, (x - 80) * scale, y * scale);
                 await(view, "!document.querySelector('.pageSwipeTo')");
-                assertEquals("A cancelled drag slides back before the pages are hidden", "true",
-                    evaluate(view, "window.pageSwipeTransitions.filter(event => event.startsWith('transitionend:left')).length === 2 && " +
+                assertEquals("A cancelled drag animates back to the original tab", "true",
+                    evaluate(view, "window.pageSwipeTransitions.includes('transitionrun:left:from') && " +
+                        "window.pageSwipeTransitions.includes('transitionrun:left:to') && " +
                         STORE + ".getters.getActiveTabId === window.pageSwipeFirstId"));
             } finally {
                 evaluate(view, STORE + ".commit('setAnimationSpeed', window.pageSwipeOriginalAnimationSpeed);" +
@@ -113,6 +113,7 @@ public class MobileTabSelectionTest {
             float scale = view.getWidth() / Float.parseFloat(evaluate(view, "window.innerWidth"));
             float distance = Math.min(150, (view.getWidth() / scale) - x - 20);
             assertTrue("App bar has enough empty space for a swipe", distance > 80);
+            evaluate(view, "document.querySelector('.app > .routerView').style.direction = 'rtl'");
             long downTime = SystemClock.uptimeMillis();
             touch(view, downTime, MotionEvent.ACTION_DOWN, x * scale, y * scale);
             touch(view, downTime, MotionEvent.ACTION_MOVE, (x + distance / 2) * scale, y * scale);
