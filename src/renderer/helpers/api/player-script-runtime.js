@@ -18,7 +18,9 @@ export async function evaluatePlayerCode(code, { timeoutMs = 5000, memoryLimitBy
   const quickjs = await modulePromise
   const runtime = quickjs.newRuntime()
   runtime.setMemoryLimit(memoryLimitBytes)
-  runtime.setMaxStackSize(1024 * 1024)
+  // QuickJS must catch stack exhaustion before the host's WASM call stack
+  // overflows, which bypasses its cleanup and aborts JS_FreeRuntime.
+  runtime.setMaxStackSize(128 * 1024)
   const deadline = Date.now() + timeoutMs
   runtime.setInterruptHandler(() => Date.now() >= deadline)
   let context

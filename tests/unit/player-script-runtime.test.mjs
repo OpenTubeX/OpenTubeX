@@ -95,3 +95,20 @@ test('retries WASM initialization after a transient failure', async () => {
   assert.equal(await evaluate('return 42'), 42)
   assert.equal(attempts, 2)
 })
+
+test('keeps stack exhaustion catchable inside player scripts', async () => {
+  assert.deepEqual(await evaluatePlayerCode(`
+    function recurse() { return recurse() }
+    try {
+      recurse()
+    } catch (error) {
+      return { n: 'decoded', error: error.message }
+    }
+  `), { n: 'decoded', error: 'stack overflow' })
+  assert.equal(await evaluatePlayerCode('return 42'), 42)
+})
+
+test('reports uncaught stack exhaustion without aborting runtime cleanup', async () => {
+  await assert.rejects(evaluatePlayerCode('function recurse() { return recurse() } recurse()'), /InternalError: stack overflow/)
+  assert.equal(await evaluatePlayerCode('return 42'), 42)
+})
