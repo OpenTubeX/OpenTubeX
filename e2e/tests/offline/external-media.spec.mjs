@@ -74,7 +74,13 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     await store.dispatch('updateYtDlpSource', 'system')
     await store.dispatch('updateYtDlpPath', ytDlpPath)
+    await store.dispatch('updateUseSponsorBlock', true)
   }, executable)
+
+  const sponsorBlockRequests = []
+  page.on('request', request => {
+    if (request.url().includes('/api/skipSegments')) sponsorBlockRequests.push(request.url())
+  })
 
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
@@ -87,17 +93,32 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await expect(page.locator(`${activeTab} .externalMediaDescription`)).toBeVisible()
   await waitForPlayback(page)
   await page.locator(`${activeTab} .externalMediaPlayer`).getByRole('button', { name: 'Pause (k)' }).click()
+  const externalMedia = page.locator(`${activeTab} .externalMedia`)
+  const player = externalMedia.locator('.externalMediaPlayer')
+  await expect(player.locator('.fullscreenSponsorBlockToggle, .ft-shaka-sponsorblock-button')).toHaveCount(0)
+  await expect(player.locator('.playerFullscreenTitleOverlay')).not.toHaveAttribute('role', 'button')
+  await expect(player.locator('.theatre-button')).toHaveCount(0)
+  expect((await player.boundingBox()).width / (await externalMedia.boundingBox()).width).toBeGreaterThan(0.95)
+  const shareButton = externalMedia.getByRole('button', { name: 'Share Video' }).first()
+  await shareButton.click()
+  await expect(externalMedia.getByRole('button', { name: 'Copy Link' })).toBeVisible()
+  await expect(externalMedia.getByRole('button', { name: 'Copy Embed' })).toHaveCount(0)
+  await externalMedia.getByRole('button', { name: 'Copy Link' }).click()
+  await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toBe(mediaUrl)
+  expect(sponsorBlockRequests).toEqual([])
   await expect(page.locator(`${sel.activeTab} .tabAvatar`)).toBeVisible()
   for (const theme of ['dark', 'light']) {
     await page.emulateMedia({ colorScheme: theme })
     await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
-    const playerBounds = await page.locator(`${activeTab} .externalMediaPlayer`).boundingBox()
+    const playerBounds = await page.locator(`${activeTab} .externalMediaPlayer video.player`).boundingBox()
     const descriptionBounds = await page.locator(`${activeTab} .externalMediaDescription`).boundingBox()
+    const topNavBounds = await page.locator('.topNav').boundingBox()
+    const top = Math.max(playerBounds.y, topNavBounds.y + topNavBounds.height)
     const clip = {
       x: playerBounds.x,
-      y: playerBounds.y,
+      y: top,
       width: playerBounds.width,
-      height: descriptionBounds.y + descriptionBounds.height - playerBounds.y + 8
+      height: descriptionBounds.y + descriptionBounds.height - top + 8
     }
     await page.screenshot({ path: testInfo.outputPath(`external-media-${theme}.png`), clip })
     await page.locator(`${activeTab} .externalMediaDetails`).screenshot({
@@ -107,6 +128,17 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
       path: testInfo.outputPath(`external-media-description-${theme}.png`)
     })
   }
+
+  await player.locator('.ftVideoPlayer').click({ position: { x: 20, y: 20 } })
+  await page.keyboard.press('s')
+  await expect(player.locator('.ftVideoPlayer')).toHaveClass(/fullWindow/)
+  await expect(player.locator('.fullscreenMetadataOverlay.open')).toHaveCount(0)
+  await player.locator('.fullscreenShareAction').getByRole('button', { name: 'Share Video' }).click()
+  const fullscreenShareDialog = page.getByRole('dialog', { name: 'Share Video' })
+  await expect(fullscreenShareDialog.getByRole('button', { name: 'Copy Embed' })).toHaveCount(0)
+  await fullscreenShareDialog.getByRole('button', { name: 'Copy Link' }).click()
+  await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toBe(mediaUrl)
+  await page.keyboard.press('s')
 
   const args = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
   expect(args).toContain(mediaUrl)

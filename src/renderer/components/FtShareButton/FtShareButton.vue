@@ -14,7 +14,7 @@
   >
     <FtFlexBox>
       <FtToggleSwitch
-        v-if="isVideo"
+        v-if="isVideo && !externalUrl"
         :label="t('Share.Include Timestamp')"
         :compact="true"
         :default-value="includeTimestamp"
@@ -22,7 +22,36 @@
       />
     </FtFlexBox>
     <div class="shareLinks">
-      <div class="header">
+      <template v-if="externalUrl">
+        <div class="header">
+          {{ externalHostname }}
+        </div>
+        <div class="buttons">
+          <FtButton
+            v-if="canShare"
+            class="action"
+            :icon="['fas', 'share-alt']"
+            :label="t('Share.Share Link')"
+            @click="shareExternal"
+          />
+          <FtButton
+            class="action"
+            :icon="['fas', 'copy']"
+            :label="t('Share.Copy Link')"
+            @click="copyExternal"
+          />
+          <FtButton
+            class="action"
+            :icon="['fas', 'globe']"
+            :label="t('Share.Open Link')"
+            @click="openExternal"
+          />
+        </div>
+      </template>
+      <div
+        v-if="!externalUrl"
+        class="header"
+      >
         <img
           id="youtubeShareImage"
           class="youtubeLogo"
@@ -33,7 +62,10 @@
         >
       </div>
 
-      <div class="buttons">
+      <div
+        v-if="!externalUrl"
+        class="buttons"
+      >
         <FtButton
           v-if="canShare"
           class="action"
@@ -78,7 +110,7 @@
         </template>
       </div>
 
-      <template v-if="showInvidiousOptions">
+      <template v-if="!externalUrl && showInvidiousOptions">
         <div class="divider" />
 
         <div
@@ -166,6 +198,10 @@ const props = defineProps({
     type: String,
     required: true
   },
+  externalUrl: {
+    type: String,
+    default: ''
+  },
   playlistId: {
     type: String,
     default: ''
@@ -201,6 +237,14 @@ const isPost = computed(() => {
 
 const isVideo = computed(() => {
   return props.shareTargetType === 'Video'
+})
+
+const externalHostname = computed(() => {
+  try {
+    return new URL(props.externalUrl).hostname
+  } catch {
+    return ''
+  }
 })
 
 const shareTitle = computed(() => {
@@ -306,8 +350,23 @@ const youtubeEmbedURL = computed(() => {
   return `https://www.youtube-nocookie.com/embed/${props.id}`
 })
 
-if (isVideo.value && !props.getTimestamp) {
+if (isVideo.value && !props.externalUrl && !props.getTimestamp) {
   console.error('Error in props validation: A Video FtShareButton requires a valid get-timestamp function.')
+}
+
+function shareExternal() {
+  iconButton.value.hideDropdown()
+  return shareLink(props.externalUrl)
+}
+
+function copyExternal() {
+  copyToClipboard(props.externalUrl)
+  iconButton.value.hideDropdown()
+}
+
+function openExternal() {
+  openExternalLink(props.externalUrl)
+  iconButton.value.hideDropdown()
 }
 
 function shareYoutube() {

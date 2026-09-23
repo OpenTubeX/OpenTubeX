@@ -540,6 +540,7 @@
         <FtShareButton
           v-if="showFullscreenShareAction"
           :id="videoId"
+          :external-url="externalUrl"
           class="fullscreenShareAction"
           :playlist-id="playlistId"
           :get-timestamp="getShareTimestamp"

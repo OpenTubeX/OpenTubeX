@@ -2549,6 +2549,11 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   outline-offset: 2px;
 }
 
+:deep(.playerFullscreenTitleOverlay.passiveTitle) {
+  cursor: default !important;
+  pointer-events: none !important;
+}
+
 :deep(.playerFullscreenTitleOverlay:dir(rtl)) {
   left: initial;
   right: 5px;

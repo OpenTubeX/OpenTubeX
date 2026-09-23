@@ -1819,7 +1819,7 @@ export default defineComponent({
 
     /** @type {import('vue').ComputedRef<boolean>} */
     const useSponsorBlock = computed(() => {
-      return !props.offline && store.getters.getUseSponsorBlock
+      return !props.offline && !props.externalUrl && store.getters.getUseSponsorBlock
     })
 
     /** @type {import('vue').ComputedRef<boolean>} */
@@ -4576,6 +4576,19 @@ export default defineComponent({
         removeFromArrayIfExists(elementList, 'ft_screenshot')
       }
 
+      if (props.externalUrl) {
+        for (const element of [
+          'ft_sponsorblock_highlight',
+          'ft_sponsorblock_open_menu',
+          'ft_sponsorblock_clear',
+          'ft_sponsorblock_start',
+          'ft_sponsorblock_cancel',
+          'ft_sponsorblock_end'
+        ]) {
+          removeFromArrayIfExists(uiConfig.controlPanelElements, element)
+        }
+      }
+
       // Keep the control mounted when a panel can make theatre mode available.
       if (!props.theatrePossible && props.chapters.length === 0 && !useSponsorBlock.value) {
         removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_theatre_mode')
@@ -5375,31 +5388,34 @@ export default defineComponent({
       fullscreenTitleOverlay.textContent = props.title
       fullscreenTitleOverlay.className = 'playerFullscreenTitleOverlay shaka-no-propagation'
       fullscreenTitleOverlay.dir = 'auto'
-      fullscreenTitleOverlay.role = 'button'
-      fullscreenTitleOverlay.tabIndex = 0
-      fullscreenTitleOverlay.ariaLabel = `${t('Video.Metadata', 'Video information')}: ${props.title}`
-      fullscreenTitleOverlay.ariaExpanded = String(showFullscreenMetadata.value)
+      if (props.externalUrl) {
+        fullscreenTitleOverlay.classList.add('passiveTitle')
+      } else {
+        fullscreenTitleOverlay.role = 'button'
+        fullscreenTitleOverlay.tabIndex = 0
+        fullscreenTitleOverlay.ariaLabel = `${t('Video.Metadata', 'Video information')}: ${props.title}`
+        fullscreenTitleOverlay.ariaExpanded = String(showFullscreenMetadata.value)
 
-      const toggleFullscreenMetadata = (event) => {
-        event.stopPropagation()
-        if (event instanceof MouseEvent) {
-          if (consumeMobileTitleClickSuppression()) {
-            event.preventDefault()
+        const toggleFullscreenMetadata = (event) => {
+          event.stopPropagation()
+          if (event instanceof MouseEvent) {
+            if (consumeMobileTitleClickSuppression()) {
+              event.preventDefault()
+              return
+            }
+            rememberFullscreenTitleClick(event)
+          }
+          setFullscreenMetadata(!showFullscreenMetadata.value)
+        }
+        fullscreenTitleOverlay.addEventListener('click', toggleFullscreenMetadata)
+        fullscreenTitleOverlay.addEventListener('keydown', (event) => {
+          if (event.key !== 'Enter' && event.key !== ' ') {
             return
           }
-          rememberFullscreenTitleClick(event)
-        }
-        setFullscreenMetadata(!showFullscreenMetadata.value)
+          event.preventDefault()
+          toggleFullscreenMetadata(event)
+        })
       }
-      fullscreenTitleOverlay.addEventListener('click', toggleFullscreenMetadata)
-      fullscreenTitleOverlay.addEventListener('keydown', (event) => {
-        if (event.key !== 'Enter' && event.key !== ' ') {
-          return
-        }
-
-        event.preventDefault()
-        toggleFullscreenMetadata(event)
-      })
       controlsContainer.appendChild(fullscreenTitleOverlay)
 
       if (hasLoaded.value && props.chapters.length > 0) {
@@ -7944,7 +7960,7 @@ export default defineComponent({
     function setFullscreenMetadata(shouldOpen) {
       const presentationActive = isNativeFullscreenActive() || fullWindowEnabled.value
       const open = Boolean(
-        shouldOpen && presentationActive
+        shouldOpen && !props.externalUrl && presentationActive
       )
       showFullscreenMetadata.value = open
       if (fullscreenTitleOverlay) {
