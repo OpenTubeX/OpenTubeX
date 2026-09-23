@@ -3,9 +3,11 @@ set -euo pipefail
 
 tag="$1"
 version="${tag#v}"
+repository="${GITHUB_REPOSITORY:-OpenTubeX/OpenTubeX}"
 max_attempts="${RELEASE_ASSET_MAX_ATTEMPTS:-60}"
 retry_delay="${RELEASE_ASSET_RETRY_DELAY:-15}"
 
+# Keep these names in sync with the artifacts uploaded by build.yml.
 expected_assets=(
   "opentubex_${version}_amd64.deb"
   "opentubex_${version}_arm64.deb"
@@ -24,7 +26,8 @@ expected_assets=(
 for ((attempt = 1; attempt <= max_attempts; attempt++)); do
   missing=()
   for asset in "${expected_assets[@]}"; do
-    if ! wget --spider --quiet "https://github.com/OpenTubeX/OpenTubeX/releases/download/${tag}/${asset}"; then
+    if ! wget --spider --quiet --timeout=10 --tries=1 \
+      "https://github.com/${repository}/releases/download/${tag}/${asset}"; then
       missing+=("$asset")
     fi
   done
