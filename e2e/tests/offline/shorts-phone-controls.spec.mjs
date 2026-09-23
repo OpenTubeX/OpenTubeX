@@ -70,6 +70,15 @@ test('phone Shorts controls clear navigation and show quick speeds', async ({ ap
   await watch.dispose()
 })
 
+test('medium-width Shorts retain their player height without bottom tabs', async ({ app, page }) => {
+  await openShort({ app, page })
+  await setWindowSize(app, page, { width: 720, height: 820 })
+  const player = page.locator('.videoLayout.shortsPlayerActive .videoPlayer')
+  const baseline = await player.boundingBox()
+  await page.evaluate(() => document.querySelector('.app').classList.add('capacitorPhoneLayout', 'capacitorTabs'))
+  await expect.poll(async () => (await player.boundingBox()).height).toBeCloseTo(baseline.height, 0)
+})
+
 test('Shorts playlist sheet opens maximized', async ({ app, page }) => {
   await openShort({ app, page })
   await page.locator('.shortsActionRail .shortsAction').filter({ hasText: 'Add to Playlist' }).locator('button').first().click()
@@ -90,7 +99,7 @@ test('phone Shorts opens video information from the rail without a bottom title'
   const information = page.locator('.shortsMetadataAction button')
   await expect(information).toBeVisible()
   await information.click()
-  await expect(information).toHaveAttribute('aria-pressed', 'true')
+  await expect(information).toHaveAttribute('aria-expanded', 'true')
   await expect(page.locator('.shortsAuxPanel.shortsAuxPanelOpen')).toBeVisible()
   await expect(page.locator('.shortsAuxPanelHeader')).toContainText(await information.getAttribute('title'))
 

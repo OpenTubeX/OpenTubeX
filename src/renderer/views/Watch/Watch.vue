@@ -475,7 +475,7 @@
             <FtIconButton
               :title="$t('Video.Metadata')"
               :icon="['fas', 'circle-info']"
-              :aria-pressed="shortsMetadataOpen"
+              :aria-expanded="shortsMetadataOpen"
               theme="base"
               @click="toggleShortsMetadata"
             />

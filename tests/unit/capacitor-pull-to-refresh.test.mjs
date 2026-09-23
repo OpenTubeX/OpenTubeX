@@ -98,14 +98,16 @@ test('accepts page content at the top, including fractional scroll offsets', () 
   assert.equal(api.canPullToRefreshTarget(null, root, 0), false)
 })
 
-test('does not start native pull to refresh on a Shorts watch page', async () => {
+test('blocks native pull to refresh only while the Shorts player is active', async () => {
   const state = setup()
   state.tab.route = { fullPath: '/watch/short?short=true', query: { short: 'true' } }
   const remove = await state.api.initializeCapacitorPullToRefresh()
+  assert.equal(state.window.__opentubexPullToRefresh(0.5, 0.5)?.tabId, 'a')
+
+  state.root.querySelector = selector => selector === '.videoLayout.shortsPlayerActive' ? {} : null
   assert.equal(state.window.__opentubexPullToRefresh(0.5, 0.5), null)
 
   state.tab.route = { fullPath: '/watch/short', query: {} }
-  state.root.querySelector = selector => selector === '.videoLayout.shortsPlayerActive' ? {} : null
   assert.equal(state.window.__opentubexPullToRefresh(0.5, 0.5), null)
 
   state.root.querySelector = () => null

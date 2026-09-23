@@ -1420,16 +1420,18 @@
   max-inline-size: 100%;
 }
 
-:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .videoArea) {
-  // The phone route starts below its top toolbar and reserves the bottom tab bar.
-  // Both the skeleton and the loaded player use this height.
-  --shorts-player-height: max(
-    0px,
-    calc(
-      100dvh - var(--top-nav-sticky-offset) - var(--mobile-nav-height) -
-      var(--mobile-progress-bar-space) - 48px
-    )
-  ) !important;
+@media (width <= 680px) {
+  :global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .videoArea) {
+    // The phone route starts below its top toolbar and reserves the bottom tab bar.
+    // Both the skeleton and the loaded player use this height.
+    --shorts-player-height: max(
+      0px,
+      calc(
+        100dvh - var(--top-nav-sticky-offset) - var(--mobile-nav-height) -
+        var(--mobile-progress-bar-space) - 48px
+      )
+    ) !important;
+  }
 }
 
 :global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive :is(.shortsChannelRow, .shortsSkeletonChannelRow)) {
