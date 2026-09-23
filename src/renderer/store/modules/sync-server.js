@@ -368,8 +368,10 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     if (!watchStatsSupported) {
       const index = stages.indexOf('watchStats')
       if (index !== -1) stages.splice(index, 1)
-      delete next.watchStats
-      await clearUnsupportedWatchStats(context)
+      if (settings.syncServerSyncWatchStats) {
+        delete next.watchStats
+        await clearUnsupportedWatchStats(context)
+      }
     }
     assertEncryptionSupported(capabilities.encrypted_sync === 1, encrypted)
     const liveSupported = encrypted && capabilities.live_sync === 1
@@ -1231,7 +1233,9 @@ const actions = {
         commit('setSyncServerLiveSupported', liveSupported)
         const watchStatsSupported = privacySupported && capabilities.watch_stats === 1
         commit('setSyncServerWatchStatsSupported', watchStatsSupported)
-        if (!watchStatsSupported) await clearUnsupportedWatchStats({ commit, dispatch, rootState })
+        if (!watchStatsSupported && rootState.settings.syncServerSyncWatchStats) {
+          await clearUnsupportedWatchStats({ commit, dispatch, rootState })
+        }
         if (liveSupported) await dispatch('refreshSyncServerDevices')
       } finally {
         releaseSyncClient(client)
@@ -1331,6 +1335,8 @@ const actions = {
     eventsSince = ''
     commit('setSyncServerActivity', [])
     commit('setSyncServerLiveSupported', false)
+    commit('setSyncServerWatchStatsSupported', null)
+    commit('setSyncedWatchStats', [])
     clearSyncServerDevices(commit)
     await dispatch('updateSyncServerToken', token, { root: true })
   },

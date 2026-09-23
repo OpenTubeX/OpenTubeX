@@ -262,10 +262,24 @@ test.describe('synced watch stats', () => {
     await expect(total).toContainText('1 hr')
     await selectedSegmentIsAligned('Laptop')
     await page.locator('.resetStatsButton').click()
+    await expect(page.getByRole('button', { name: 'Reset', exact: true })).toBeVisible()
+    await selector.getByRole('button', { name: 'Phone' }).evaluate(button => button.click())
+    await expect(page.getByRole('button', { name: 'Reset', exact: true })).toBeHidden()
+    await selector.getByRole('button', { name: 'Laptop' }).click()
+    await page.locator('.resetStatsButton').click()
     await page.getByRole('button', { name: 'Reset', exact: true }).click()
     await selector.getByRole('button', { name: 'All devices' }).click()
     await expect(total).toContainText('30 min')
     await selectedSegmentIsAligned('All devices')
+    await page.evaluate(() => document.querySelector('#app').__vue_app__
+      .config.globalProperties.$store.commit('setHasHistoricalWatchTimeEstimate', true))
+    await selector.getByRole('button', { name: 'Laptop' }).click()
+    await expect(page.locator('.historicalAdjustment')).toBeVisible()
+    await selector.getByRole('button', { name: 'Phone' }).evaluate(button => button.click())
+    await expect(page.locator('.historicalAdjustment')).toBeHidden()
+    await page.evaluate(() => document.querySelector('#app').__vue_app__
+      .config.globalProperties.$store.commit('setHasHistoricalWatchTimeEstimate', false))
+    await selector.getByRole('button', { name: 'All devices' }).click()
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       store.commit('setSyncedWatchStats', [
@@ -331,11 +345,35 @@ test.describe('synced watch stats', () => {
     await waitForAppReady(page)
     await goTo(page, 'stats')
     await expect(page.getByRole('group', { name: 'Devices' })).toBeHidden()
+
     await expect(page.locator('.summaryCard').filter({ hasText: 'Total watch time' })).toContainText('0 min')
     await page.context().setOffline(true)
     await page.reload()
     await waitForAppReady(page)
     await goTo(page, 'stats')
+    await expect(page.getByRole('group', { name: 'Devices' })).toBeHidden()
+    await page.evaluate(async cached => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateSyncServerSyncWatchStats', false)
+      await store.dispatch('updateSyncServerSnapshot', JSON.stringify({ watchStats: cached }))
+    }, remote)
+    await page.context().setOffline(false)
+    await page.reload()
+    await waitForAppReady(page)
+    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__
+      .config.globalProperties.$store.getters.getSyncServerWatchStatsSupported)).toBe(false)
+    await expect.poll(() => page.evaluate(() => JSON.parse(document.querySelector('#app').__vue_app__
+      .config.globalProperties.$store.state.settings.syncServerSnapshot).watchStats?.length)).toBe(1)
+    await goTo(page, 'stats')
+    await page.evaluate(async () => document.querySelector('#app').__vue_app__
+      .config.globalProperties.$store.dispatch('updateSyncServerSyncWatchStats', true))
+    await expect(page.getByRole('group', { name: 'Devices' })).toBeHidden()
+    await page.evaluate(async cached => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setSyncedWatchStats', cached)
+      store.commit('setSyncServerWatchStatsSupported', true)
+      await store.dispatch('replaceSyncServerToken', 'replacement-token')
+    }, remote)
     await expect(page.getByRole('group', { name: 'Devices' })).toBeHidden()
   })
 })

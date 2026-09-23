@@ -328,11 +328,15 @@ const syncedDevices = computed(() => store.getters.getSyncedWatchStats)
 const currentDeviceId = computed(() => store.getters.getSyncServerDeviceId)
 const currentDeviceName = computed(() => store.getters.getSyncServerDeviceName)
 const currentDevicePlatform = ref('')
-const syncStatsVisible = computed(() => store.getters.getSyncServerEnabled &&
-  store.getters.getSyncServerToken &&
-  store.getters.getSyncServerPrivacyMode === 'enhanced' &&
-  (store.getters.getSyncServerWatchStatsSupported === true || syncedDevices.value.length > 0) &&
-  store.getters.getSyncServerSyncWatchStats)
+const syncStatsVisible = computed(() => {
+  const supported = store.getters.getSyncServerWatchStatsSupported
+  return store.getters.getSyncServerEnabled &&
+    store.getters.getSyncServerToken &&
+    store.getters.getSyncServerPrivacyMode === 'enhanced' &&
+    supported !== false &&
+    (supported === true || syncedDevices.value.length > 0) &&
+    store.getters.getSyncServerSyncWatchStats
+})
 const selectedDevice = ref('all')
 const deviceSegments = useTemplateRef('deviceSegments')
 const deviceSegmentTrack = useTemplateRef('deviceSegmentTrack')
@@ -377,6 +381,12 @@ const selectedPlaybackSpeed = ref('1')
 const hasShownHistoricalAdjustment = ref(false)
 const statsPageMounted = ref(false)
 const resetPromptNames = computed(() => [t('Stats.Reset'), t('Cancel')])
+
+watch(isLocalDeviceSelected, localSelected => {
+  if (localSelected) return
+  showResetPrompt.value = false
+  showHistoricalAdjustment.value = false
+})
 
 const playbackSpeedValues = computed(() => {
   const speeds = []
@@ -453,6 +463,7 @@ function openHistoricalAdjustment() {
 }
 
 async function applyHistoricalAdjustment() {
+  if (!isLocalDeviceSelected.value) return
   let parsedChannelSpeeds = {}
   try {
     parsedChannelSpeeds = JSON.parse(channelPlaybackSpeeds.value || '{}')
@@ -475,7 +486,7 @@ async function applyHistoricalAdjustment() {
  */
 async function handleResetStats(option) {
   showResetPrompt.value = false
-  if (option !== 'reset') { return }
+  if (option !== 'reset' || !isLocalDeviceSelected.value) { return }
 
   await store.dispatch('clearWatchStats')
   showToast({ message: t('Stats.Reset success'), icon: ['fas', 'undo'] })
