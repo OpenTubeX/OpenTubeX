@@ -19,6 +19,7 @@
             ref="submenuBack"
             type="button"
             role="menuitem"
+            class="submenuBack"
             @click="setCloseMenu(false)"
           >
             <FtIcon
@@ -27,7 +28,10 @@
             />
             {{ t('Back') }}
           </button>
-          <strong dir="auto">{{ showCloseMenu ? t('Context Menu.Close Tabs') : title }}</strong>
+          <strong
+            v-if="!showCloseMenu"
+            dir="auto"
+          >{{ title }}</strong>
         </header>
         <div
           ref="actionList"

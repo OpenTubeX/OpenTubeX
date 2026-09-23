@@ -2429,3 +2429,28 @@ test('mobile close submenu keeps Back focused when every action is disabled', as
   await expect(page.locator('.capacitorTabActions')).toBeHidden()
   await expect(page.locator('.capacitorPhoneTabDialog')).toBeVisible()
 })
+
+for (const zoom of [1, 0.95]) {
+  test(`phone close-tabs submenu header is a full-width back target at ${zoom} scale`, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 375, height: 760 })
+    await page.evaluate(factor => window.ftElectron.setZoomFactor(factor), zoom)
+    await enablePhoneTabSwitcher(page)
+    await page.locator('.capacitorPhoneTabSwitcherButton').click()
+    await page.locator('.capacitorPhoneTabTarget').click({ button: 'right' })
+    await page.getByRole('menuitem', { name: 'Close Tabs', exact: true }).click()
+
+    const menu = page.locator('.capacitorTabActions')
+    const header = menu.locator('.capacitorTabActionHeader')
+    const back = header.getByRole('menuitem', { name: 'Back', exact: true })
+    const [menuBounds, headerBounds, backBounds] = await Promise.all([
+      menu.boundingBox(), header.boundingBox(), back.boundingBox(),
+    ])
+    expect(headerBounds.width).toBeGreaterThanOrEqual(menuBounds.width - 33)
+    expect(backBounds.width).toBeGreaterThanOrEqual(headerBounds.width - 1)
+    expect(backBounds.x).toBeCloseTo(headerBounds.x, 0)
+    await expect(back).toContainText('Back')
+    await expect(header).not.toContainText('Close Tabs')
+    await page.mouse.click(backBounds.x + backBounds.width - 12, backBounds.y + backBounds.height / 2)
+    await expect(menu.getByRole('menuitem', { name: 'Close Tabs', exact: true })).toBeVisible()
+  })
+}
