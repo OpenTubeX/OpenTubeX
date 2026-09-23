@@ -92,11 +92,26 @@ test('stops retrying after a second QuickJS runtime abort', async () => {
     return worker
   })
   const pending = assert.rejects(evaluator.evaluate('return 42'), /list_empty\(&rt->gc_obj_list\)/)
-  const error = 'RuntimeError: Aborted(Assertion failed: list_empty(&rt->gc_obj_list))'
+  const error = 'RuntimeError: Aborted(Assertion failed: list_empty(&rt->gc_obj_list), at: ../../vendor/quickjs/quickjs.c,2036,JS_FreeRuntime)'
   workers[0].reply({ id: workers[0].requests[0].id, error })
   workers[1].reply({ id: workers[1].requests[0].id, error })
   await pending
   assert.equal(workers.length, 2)
   assert.equal(workers[1].terminated, true)
   assert.equal(evaluator.requests.size, 0)
+})
+
+test('does not retry an ordinary player error containing the assertion text', async () => {
+  const workers = []
+  const evaluator = new PlayerScriptEvaluator(() => {
+    const worker = new FakeWorker()
+    workers.push(worker)
+    return worker
+  })
+  const pending = evaluator.evaluate('throw Error()')
+  workers[0].reply({ id: workers[0].requests[0].id, error: 'Error: Assertion failed: list_empty(&rt->gc_obj_list)' })
+  if (workers[1]) workers[1].reply({ id: workers[1].requests[0].id, result: 42 })
+  await assert.rejects(pending, /Assertion failed/)
+  assert.equal(workers.length, 1)
+  assert.equal(workers[0].terminated, false)
 })

@@ -39,7 +39,7 @@ export class PlayerScriptEvaluator {
     worker.addEventListener('message', ({ data }) => {
       const request = this.requests.get(data?.id)
       if (worker !== this.worker || !request) return
-      if (typeof data.error === 'string' && data.error.includes('Assertion failed: list_empty(&rt->gc_obj_list)')) {
+      if (typeof data.error === 'string' && /^RuntimeError: Aborted\(Assertion failed: list_empty\(&rt->gc_obj_list\), at: .*JS_FreeRuntime\)/.test(data.error)) {
         this.retryAfterRuntimeAbort(worker, new Error(data.error))
         return
       }
