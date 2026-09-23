@@ -204,7 +204,7 @@ watch([dialog, () => props.enabled, () => props.open, docked, fullscreenElement,
       }
       if (!presentationSuspended) {
         expanded.value = landscape.value || shortsPlayer.value
-        if (expanded.value && !landscape.value) resumePlayback = expandPanel?.()
+        if (shortsPlayer.value) resumePlayback = expandPanel?.()
       }
       measurePlayer()
       element.show()

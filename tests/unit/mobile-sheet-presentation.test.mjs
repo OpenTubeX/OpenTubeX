@@ -104,6 +104,34 @@ test('closing a Shorts sheet after rotating to landscape resumes the paused vide
   assert.equal(resumes, 1)
 })
 
+test('opening a Shorts sheet in landscape pauses playback until it closes', async t => {
+  let pauses = 0
+  let resumes = 0
+  const sheet = mountSheet(t, () => {
+    pauses++
+    return () => { resumes++ }
+  })
+  sheet.player.shorts = true
+  sheet.landscape.value = true
+  sheet.props.open = true
+  await sheet.settle()
+  assert.equal(sheet.state.expanded.value, true)
+  assert.equal(pauses, 1)
+  sheet.props.open = false
+  await sheet.settle()
+  assert.equal(resumes, 1)
+})
+
+test('opening a regular video sheet in landscape keeps playback running', async t => {
+  let pauses = 0
+  const sheet = mountSheet(t, () => { pauses++ })
+  sheet.landscape.value = true
+  sheet.props.open = true
+  await sheet.settle()
+  assert.equal(sheet.state.expanded.value, true)
+  assert.equal(pauses, 0)
+})
+
 for (const mode of ['native', 'browser', 'fullwindow']) {
   test(`an open below-player sheet hides during ${mode} fullscreen and returns below the player`, async t => {
     const sheet = mountSheet(t)
