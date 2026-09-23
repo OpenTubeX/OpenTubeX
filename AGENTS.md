@@ -2,12 +2,14 @@
 
 ## Pull requests
 
+Requests such as "implement issue #X" authorize local changes, not a PR. Open a PR only when the user explicitly requests or approves one for that repository. Approval for an application PR does not authorize a website PR, or vice versa.
+
 - For every PR opened in this repository, copy the linked issue's milestone if it has one. Otherwise, automatically assign the currently open milestone with the lowest version in its title. Query open milestones with `gh api --paginate` at PR creation time and compare titles by numeric version order, not alphabetical order or milestone number. Use the exact title with `gh pr create --milestone` or `gh pr edit --milestone`. If the issue has no milestone and no version milestone is open, report that instead of creating one.
 
 ## Documentation
 
 - Do not create new documentation files, feature writeups, implementation notes, plans, or task summaries unless the user explicitly requests them. Put change explanations and validation details in the PR description. Update existing documentation only when the change makes it inaccurate.
-- For user-facing changes, check the current user documentation in `OpenTubeX/opentubex.github.io`. If the change affects documented behavior, interface labels, steps, or screenshots, update the affected guides and screenshots in a separate PR in that website repository as part of the same task. Link the application and website PRs to each other. These updates are required without a separate user request; do not add unrelated documentation.
+- For user-facing changes, check the current user documentation in `OpenTubeX/opentubex.github.io`. If the change affects documented behavior, interface labels, steps, or screenshots, ask the user to approve updating the affected guides and screenshots in a separate website PR. Wait for approval before making the website changes or creating the PR. If approved, make the updates as part of the same task and link the application and website PRs when both exist. Do not add unrelated documentation.
 
 ## Testing
 
