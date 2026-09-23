@@ -98,6 +98,26 @@ test('accepts page content at the top, including fractional scroll offsets', () 
   assert.equal(api.canPullToRefreshTarget(null, root, 0), false)
 })
 
+test('blocks native pull to refresh only while the Shorts player is active', async () => {
+  const state = setup()
+  state.tab.route = { fullPath: '/watch/short?short=true', query: { short: 'true' } }
+  const remove = await state.api.initializeCapacitorPullToRefresh()
+  assert.equal(state.window.__opentubexPullToRefresh(0.5, 0.5)?.tabId, 'a')
+
+  state.root.querySelector = selector => selector === '.videoLayout.shortsPlayerActive .ftVideoPlayer' ? {} : null
+  assert.equal(state.window.__opentubexPullToRefresh(0.5, 0.5), null)
+
+  state.tab.route = { fullPath: '/watch/short', query: {} }
+  assert.equal(state.window.__opentubexPullToRefresh(0.5, 0.5), null)
+
+  state.root.querySelector = () => null
+  assert.equal(state.window.__opentubexPullToRefresh(0.5, 0.5)?.tabId, 'a')
+  state.root.querySelector = selector => selector === '.videoLayout.shortsPlayerActive' ? {} : null
+  assert.equal(state.window.__opentubexPullToRefresh(0.5, 0.5)?.tabId, 'a',
+    'the Shorts error poster must remain refreshable without a mounted player')
+  remove()
+})
+
 test('leaves controls, players, inert content and nested scrolling alone', () => {
   const { api, child, root } = setup()
   child.closest = () => ({})
@@ -139,7 +159,7 @@ test('watch page indicator starts at the page top just like other pages at fract
   const state = setup()
   state.tab.route = { name: 'watch', fullPath: '/watch/video' }
   const player = { getBoundingClientRect: () => ({ bottom: 370.25 }) }
-  state.root.querySelector = () => player
+  state.root.querySelector = selector => selector === '.videoLayout.shortsPlayerActive .ftVideoPlayer' ? null : player
   state.root.getBoundingClientRect = () => ({ top: 80.25 })
   await state.api.initializeCapacitorPullToRefresh()
   assert.equal(state.window.__opentubexPullToRefresh(0.5, 0.6).offset, 80.25 / 800)

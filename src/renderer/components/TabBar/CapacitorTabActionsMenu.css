@@ -107,6 +107,10 @@
   min-inline-size: 0;
 }
 
+.mode-phone .submenuBack {
+  inline-size: 100%;
+}
+
 .capacitorTabActions .closeMenuTrigger {
   grid-template-columns: 24px minmax(0, 1fr) 24px;
 }

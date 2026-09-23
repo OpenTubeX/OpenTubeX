@@ -200,6 +200,42 @@ test('SABR and preroll countdown rings cover native transport buttons', async ({
   await page.evaluate(() => window.nativeScreenTest.destroy())
 })
 
+test('Shorts comments and information panels cover native transport controls', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await enableMobileInput(page)
+  await openMockedVideo(page)
+  await setWindowSize(app, page, { width: 390, height: 800 })
+  await page.evaluate(() => document.querySelector('.app').classList.add('capacitorPhoneLayout'))
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate(async instance => {
+    instance.proxy.useCustomShortsPlayerForCurrentVideo = true
+    instance.proxy.updateShortsPlayerState(30, [{ width: 360, height: 640 }])
+    await instance.proxy.$nextTick()
+  })
+  await openNativeScreen(page, false)
+  for (const [property, selector] of [
+    ['shortsCommentsOpen', '.shortsCommentsPanel'],
+    ['shortsMetadataOpen', '.shortsAuxPanel'],
+  ]) {
+    await watch.evaluate((instance, property) => { instance.proxy[property] = true }, property)
+    const panel = page.locator(selector)
+    await expect(panel).toBeVisible()
+    await expect.poll(() => panel.evaluate(element => element.getAnimations().every(animation => animation.playState !== 'running'))).toBe(true)
+    const bounds = await panel.boundingBox()
+    await expect.poll(() => page.evaluate(rect => window.nativeLayoutTest.menus.some(menu =>
+      menu.x <= rect.x + 1 && menu.y <= rect.y + 1 &&
+      menu.x + menu.width >= rect.x + rect.width - 1 &&
+      menu.y + menu.height >= rect.y + rect.height - 1
+    ), bounds)).toBe(true)
+    expect(await page.evaluate(() => window.nativeLayoutTest.overlayActive)).toBe(true)
+    await watch.evaluate((instance, property) => { instance.proxy[property] = false }, property)
+    await expect(panel).toBeHidden()
+  }
+  await expect.poll(() => page.evaluate(() => window.nativeLayoutTest.overlayActive)).toBe(false)
+  await page.evaluate(() => window.nativeScreenTest.destroy())
+  await watch.dispose()
+})
+
 for (const uiScale of [100, 125]) {
   test.describe(`native countdown scrolling at ${uiScale}%`, () => {
     test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, uiScale, enterFullscreenOnDisplayRotate: false } } })

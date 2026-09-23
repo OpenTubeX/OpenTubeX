@@ -14,6 +14,8 @@ function mountSheet(t, expandPanel = null) {
   const props = reactive({ enabled: true, open: false, belowPlayer: true })
   const player = Object.assign(new EventTarget(), {
     coversWindow: false,
+    shorts: false,
+    classList: { contains(name) { return name === 'shortsPlayer' && player.shorts } },
     matches() { return this.coversWindow },
     setAttribute() {}, removeAttribute() {},
     getBoundingClientRect: () => ({ top: 50, bottom: 300 })
@@ -51,6 +53,84 @@ function mountSheet(t, expandPanel = null) {
     async settle() { await nextTick(); await nextTick(); await nextTick() }
   }
 }
+
+test('a Shorts sheet opens maximized and cannot collapse below the player', async t => {
+  const sheet = mountSheet(t)
+  sheet.player.shorts = true
+  sheet.props.open = true
+  await sheet.settle()
+  assert.equal(sheet.state.expanded.value, true)
+  assert.equal(sheet.state.sheetStyle.value.insetBlockStart, 'max(var(--app-safe-area-inset-top, 0px), 0px)')
+
+  const event = {
+    button: 0, pointerId: 1, clientY: 400,
+    target: { closest: () => null },
+    currentTarget: { setPointerCapture() {} }
+  }
+  sheet.state.startDrag(event)
+  sheet.state.moveDrag({ ...event, clientY: 500 })
+  sheet.state.endDrag(event)
+  await sheet.settle()
+  assert.equal(sheet.state.expanded.value, true)
+})
+
+test('an automatically maximized Shorts sheet pauses playback until it closes', async t => {
+  let pauses = 0
+  let resumes = 0
+  const sheet = mountSheet(t, () => {
+    pauses++
+    return () => { resumes++ }
+  })
+  sheet.player.shorts = true
+  sheet.props.open = true
+  await sheet.settle()
+  assert.equal(sheet.state.expanded.value, true)
+  assert.equal(pauses, 1)
+  sheet.props.open = false
+  await sheet.settle()
+  assert.equal(resumes, 1)
+})
+
+test('closing a Shorts sheet after rotating to landscape resumes the paused video', async t => {
+  let resumes = 0
+  const sheet = mountSheet(t, () => () => { resumes++ })
+  sheet.player.shorts = true
+  sheet.props.open = true
+  await sheet.settle()
+  sheet.landscape.value = true
+  await sheet.settle()
+  sheet.props.open = false
+  await sheet.settle()
+  assert.equal(resumes, 1)
+})
+
+test('opening a Shorts sheet in landscape pauses playback until it closes', async t => {
+  let pauses = 0
+  let resumes = 0
+  const sheet = mountSheet(t, () => {
+    pauses++
+    return () => { resumes++ }
+  })
+  sheet.player.shorts = true
+  sheet.landscape.value = true
+  sheet.props.open = true
+  await sheet.settle()
+  assert.equal(sheet.state.expanded.value, true)
+  assert.equal(pauses, 1)
+  sheet.props.open = false
+  await sheet.settle()
+  assert.equal(resumes, 1)
+})
+
+test('opening a regular video sheet in landscape keeps playback running', async t => {
+  let pauses = 0
+  const sheet = mountSheet(t, () => { pauses++ })
+  sheet.landscape.value = true
+  sheet.props.open = true
+  await sheet.settle()
+  assert.equal(sheet.state.expanded.value, true)
+  assert.equal(pauses, 0)
+})
 
 for (const mode of ['native', 'browser', 'fullwindow']) {
   test(`an open below-player sheet hides during ${mode} fullscreen and returns below the player`, async t => {

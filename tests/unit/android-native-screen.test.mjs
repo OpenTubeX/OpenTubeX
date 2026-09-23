@@ -7,7 +7,7 @@ import { overrideShakaMethods } from '../../src/renderer/helpers/player/override
 const source = (await readFile(new URL('../../src/renderer/helpers/player/androidNativeScreen.js', import.meta.url), 'utf8'))
   .replace(/^import .*\n/gm, '').replace('export function ', 'function ')
 
-async function fixture({ fullscreen = true, chrome = [], dialogs = [], suggestions = [], previews = [], deferTransitions = false, deferFullscreen = false, rotateFullscreen = false } = {}) {
+async function fixture({ fullscreen = true, shorts = false, chrome = [], dialogs = [], suggestions = [], previews = [], deferTransitions = false, deferFullscreen = false, rotateFullscreen = false } = {}) {
   const snapshots = []
   const snapshotInvalidations = []
   let publishSnapshot
@@ -28,12 +28,13 @@ async function fixture({ fullscreen = true, chrome = [], dialogs = [], suggestio
   let recommendations = false
   let ended = false
   let poster = false
+  let shortsPanelOpen = false
   let animating = false
   let id = 0
   const bounds = { x: 0, y: 0, width: 640, height: 360 }
   const controlsElement = { hasAttribute: () => shown, getBoundingClientRect: () => bounds }
   const container = Object.assign(new EventTarget(), {
-    classList: { contains: name => panel && ['fullscreenDockLayoutOpen', 'chaptersOverlayOpen'].includes(name) },
+    classList: { contains: name => (shorts && name === 'shortsPlayer') || (panel && ['fullscreenDockLayoutOpen', 'chaptersOverlayOpen'].includes(name)) },
     contains: element => previews.includes(element),
     getBoundingClientRect: () => bounds,
     toggleAttribute() {},
@@ -53,7 +54,8 @@ async function fixture({ fullscreen = true, chrome = [], dialogs = [], suggestio
   const element = Object.assign(new EventTarget(), {
     readyState: 4, getBoundingClientRect: () => bounds, getAnimations: () => [],
   })
-  const document = Object.assign(new EventTarget(), { body: { classList: { contains: () => false }, append() {}, getBoundingClientRect: () => ({ height: 2000 }) }, createElement: () => ({ setAttribute() {}, remove() {}, style: { getPropertyValue() { return '' }, setProperty(name, value) { styleWrites.push({ name, value }) } } }), elementFromPoint: () => null, querySelectorAll: selector => selector.includes('.topNav') ? chrome : selector.includes('dialog[open]') ? [...dialogs, ...(selector.includes('.ft-input-component .list') ? suggestions : [])] : [], querySelector: () => null, documentElement: { classList: { toggle() {} }, style: { getPropertyValue() { return '' }, setProperty(name, value) { styleWrites.push({ name, value }) }, removeProperty() {} } } })
+  const shortsPanel = { checkVisibility: () => shortsPanelOpen, getAnimations: () => [], getBoundingClientRect: () => ({ x: 60, y: 100, width: 300, height: 400 }) }
+  const document = Object.assign(new EventTarget(), { body: { classList: { contains: () => false }, append() {}, getBoundingClientRect: () => ({ height: 2000 }) }, createElement: () => ({ setAttribute() {}, remove() {}, style: { getPropertyValue() { return '' }, setProperty(name, value) { styleWrites.push({ name, value }) } } }), elementFromPoint: () => null, querySelectorAll: selector => selector.includes('.topNav') ? chrome : selector.includes('dialog[open]') ? [...dialogs, ...(selector.includes('.ft-input-component .list') ? suggestions : []), ...(selector.includes('.shortsCommentsPanel') ? [shortsPanel] : [])] : [], querySelector: () => null, documentElement: { classList: { toggle() {} }, style: { getPropertyValue() { return '' }, setProperty(name, value) { styleWrites.push({ name, value }) }, removeProperty() {} } } })
   document.addEventListener('nativefullscreenready', () => readyEvents.push(true))
   document.addEventListener('fullscreenchange', () => fullscreenEvents.push(presentations.length))
   class Observer {
@@ -88,15 +90,35 @@ async function fixture({ fullscreen = true, chrome = [], dialogs = [], suggestio
   if (fullscreen) await screen.show()
   else await screen.attach()
   await flush()
-  return { document, readyEvents, snapshotInvalidations, snapshots, publishSnapshot, screen, container, layouts, presentations, completeTransitions, completeFullscreen, fullscreenEvents, bounds, observers, window, styleWrites, flush, change({ visible = shown, menuOpen = menu, panelOpen = panel, containerAnimating = animating, endedRecommendations = recommendations, playbackEnded = ended, loadingPoster = poster }) {
+  return { document, readyEvents, snapshotInvalidations, snapshots, publishSnapshot, screen, container, layouts, presentations, completeTransitions, completeFullscreen, fullscreenEvents, bounds, observers, window, styleWrites, flush, change({ visible = shown, menuOpen = menu, panelOpen = panel, shortsOpen = shortsPanelOpen, containerAnimating = animating, endedRecommendations = recommendations, playbackEnded = ended, loadingPoster = poster }) {
     poster = loadingPoster
     shown = visible; menu = menuOpen; panel = panelOpen
+    shortsPanelOpen = shortsOpen
     recommendations = endedRecommendations
     ended = playbackEnded
     animating = containerAnimating
     for (const observer of observers) observer.callback([{ type: 'attributes', attributeName: 'style', target: container }])
   } }
 }
+
+test('Shorts use their top playback button without native center controls', async () => {
+  const f = await fixture({ fullscreen: false, shorts: true })
+  assert.equal(f.layouts.at(-1).controlsVisible, false)
+  f.screen.destroy()
+})
+
+test('open Shorts panels exclude native play controls and receive native touches', async () => {
+  const f = await fixture({ fullscreen: false })
+  f.change({ shortsOpen: true })
+  await f.flush()
+  assert.equal(f.layouts.at(-1).controlsVisible, true)
+  assert.ok(f.layouts.at(-1).menus.some(rect => rect.x === 60 && rect.y === 100 && rect.width === 300 && rect.height === 400))
+  assert.equal(f.layouts.at(-1).overlayActive, true)
+  f.change({ shortsOpen: false })
+  await f.flush()
+  assert.equal(f.layouts.at(-1).menus.some(rect => rect.x === 60 && rect.y === 100), false)
+  f.screen.destroy()
+})
 
 test('fractional Android scrolling does not repaint an unchanged document cutout', async () => {
   const f = await fixture({ fullscreen: false })

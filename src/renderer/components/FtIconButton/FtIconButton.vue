@@ -19,7 +19,7 @@
         fontSize: size + 'px'
       }"
       :aria-disabled="disabled"
-      :aria-expanded="dropdownShown"
+      :aria-expanded="ariaExpanded ?? dropdownShown"
       :aria-pressed="ariaPressed"
       @pointerdown="handleIconPointerDown"
       @contextmenu.prevent
@@ -229,6 +229,10 @@ const props = defineProps({
     default: false
   },
   ariaPressed: {
+    type: Boolean,
+    default: null
+  },
+  ariaExpanded: {
     type: Boolean,
     default: null
   },

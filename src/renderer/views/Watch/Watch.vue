@@ -50,7 +50,7 @@
             <div class="shortsSkeletonControls">
               <div class="shortsSkeletonControlGroup">
                 <span class="ft-shimmer" />
-                <span class="ft-shimmer" />
+                <span class="shortsSkeletonVolume ft-shimmer" />
               </div>
               <div class="shortsSkeletonControlGroup">
                 <span class="ft-shimmer" />
@@ -428,6 +428,8 @@
         </div>
         <div
           v-if="customShortsPlayerActive"
+          ref="shortsActionRail"
+          v-overlay-scrollbars
           class="shortsActionRail"
           :class="{ shortsActionRailSkeleton: isLoading }"
         >
@@ -467,6 +469,20 @@
             </div>
             <span class="shortsSkeletonSound ft-shimmer" />
           </template>
+          <div
+            v-if="!isLoading"
+            class="shortsAction shortsComponentAction shortsMetadataAction"
+            :class="{ active: shortsMetadataOpen }"
+          >
+            <FtIconButton
+              :title="$t('Video.Metadata')"
+              :icon="['fas', 'circle-info']"
+              :aria-expanded="shortsMetadataOpen"
+              theme="base"
+              @click="toggleShortsMetadata"
+            />
+            <span>{{ $t('Video.Metadata') }}</span>
+          </div>
           <div
             v-if="!isLoading && commentsAvailable"
             class="shortsAction shortsComponentAction shortsCommentsAction"

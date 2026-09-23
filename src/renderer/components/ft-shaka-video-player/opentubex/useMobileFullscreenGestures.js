@@ -13,6 +13,7 @@ export function useMobileFullscreenGestures({
   isPlaybackEnded,
   isPlayerSurfaceTarget,
   isScrollMiniPlayerActive,
+  isShortsPlayer,
   seekOnDoubleTap,
   getSwipeAction = () => 'disabled',
   adjustments,
@@ -30,7 +31,7 @@ export function useMobileFullscreenGestures({
       ? { '--mobile-fullscreen-swipe-offset': `${mobileFullscreenSwipeOffset.value}px` }
       : undefined
   ))
-  /** @type {{ pointerId: number, startX: number, startY: number, startTime: number, fullscreen: boolean, distance: number, tapDirection: number, controlsShownAtStart: boolean, fullscreenSwipeEnabled: boolean, surfaceTap: boolean, action: string, adjusting: boolean, height: number } | null} */
+  /** @type {{ pointerId: number, startX: number, startY: number, startTime: number, fullscreen: boolean, shorts: boolean, distance: number, tapDirection: number, controlsShownAtStart: boolean, fullscreenSwipeEnabled: boolean, surfaceTap: boolean, action: string, adjusting: boolean, height: number } | null} */
   let mobileFullscreenGesture = null
   /** @type {number | null} */
   let mobileFullscreenSettleTimer = null
@@ -105,7 +106,8 @@ export function useMobileFullscreenGestures({
     const relativeX = bounds?.width > 0 ? (event.clientX - bounds.left) / bounds.width : 0.5
     const side = relativeX <= 0.35 ? 'left' : relativeX >= 0.65 ? 'right' : null
     const restoring = isScrollMiniPlayerActive()
-    const action = side && !restoring ? getSwipeAction(side) : 'disabled'
+    const shorts = isShortsPlayer()
+    const action = side && !restoring && !shorts ? getSwipeAction(side) : 'disabled'
     mobileFullscreenGesture = {
       pointerId: event.pointerId,
       startX: event.clientX,
@@ -114,10 +116,11 @@ export function useMobileFullscreenGestures({
       surfaceTap,
       fullscreen: isFullscreenActive(),
       restoring,
+      shorts,
       distance: 0,
       tapDirection: relativeX <= 0.35 ? -1 : relativeX >= 0.65 ? 1 : 0,
       controlsShownAtStart: getControls()?.getControlsContainer().hasAttribute('shown') === true,
-      fullscreenSwipeEnabled: isFullscreenSwipeEnabled(),
+      fullscreenSwipeEnabled: !shorts && isFullscreenSwipeEnabled(),
       action: ['brightness', 'volume', 'speed'].includes(action) ? action : 'disabled',
       adjusting: false,
       height: Math.max(1, bounds?.height ?? 1),
@@ -144,7 +147,7 @@ export function useMobileFullscreenGestures({
       lastMobileSideTap = null
     }
     const dragDistance = deltaY * (mobileFullscreenGesture.restoring ? -1 : 1)
-    if (!mobileFullscreenGesture.fullscreen && mobileFullscreenGesture.action === 'disabled' &&
+    if (!mobileFullscreenGesture.fullscreen && !mobileFullscreenGesture.shorts && mobileFullscreenGesture.action === 'disabled' &&
       (mobileFullscreenGesture.minimizing || (dragDistance >= 8 && dragDistance > Math.abs(deltaX)))) {
       if (!mobileFullscreenGesture.minimizing) {
         if (!miniPlayerDrag?.begin(mobileFullscreenGesture.restoring)) return false

@@ -20,6 +20,46 @@ const handleLoadedSource = playerSource.slice(
   playerSource.indexOf('    async function handleLoaded() {'),
   playerSource.indexOf('    async function unloadForFormatSwitch() {')
 )
+const syncPlayPauseSource = playerSource.slice(
+  playerSource.indexOf('    function syncPlayPauseControlIcons() {'),
+  playerSource.indexOf('    /**\n     * @param {boolean} muted', playerSource.indexOf('    function syncPlayPauseControlIcons() {'))
+)
+const toggleFullscreenSource = playerSource.slice(
+  playerSource.indexOf('    function toggleShortsFullscreen() {'),
+  playerSource.indexOf('    function registerCaptionToggleButton()', playerSource.indexOf('    function toggleShortsFullscreen() {'))
+)
+
+test('the Shaka play control shows replay when playback ends', () => {
+  const attributes = new Map()
+  let iconPath
+  const button = {
+    querySelector(selector) {
+      if (selector === '.ft-play-pause-morph-icon') return {}
+      return { setAttribute(name, value) { iconPath = value } }
+    },
+    setAttribute(name, value) { attributes.set(name, value) },
+  }
+  const sync = vm.runInNewContext(`${syncPlayPauseSource}\nsyncPlayPauseControlIcons`, {
+    video: ref({ ended: false, paused: true, duration: 30 }),
+    playbackEnded: ref(true),
+    container: ref({ querySelectorAll: () => [button] }),
+    window: { requestAnimationFrame: callback => callback() },
+    shaka: { ui: { Enums: { MaterialDesignSVGIcons: { REPLAY: 'replay-path' } } } },
+  })
+  sync()
+  assert.equal(attributes.get('data-ft-play-pause-state'), 'replay')
+  assert.equal(iconPath, 'replay-path')
+})
+
+test('Shorts fullscreen uses player controls when Shaka hides its button', () => {
+  let toggles = 0
+  const toggle = vm.runInNewContext(`${toggleFullscreenSource}\ntoggleShortsFullscreen`, {
+    container: ref({ querySelector: () => null }),
+    togglePlayerFullScreen: () => { toggles++ },
+  })
+  toggle()
+  assert.equal(toggles, 1)
+})
 
 for (const paused of [true, false]) {
   test(`Shorts controls reflect media paused=${paused} after loading without a playback event`, async () => {
