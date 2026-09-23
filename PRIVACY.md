@@ -22,6 +22,7 @@ Rows for optional services apply only when the feature is enabled. An IP address
 | Local extractor | YouTube/Google | IP address, requested API, media and image resources, video or channel identifiers, searches, and timing |
 | Invidious | Configured Invidious operator; YouTube receives the instance's upstream requests and may receive direct media requests when video proxying is disabled | The operator can see your IP address, requested content, searches, and timing. YouTube normally sees the instance's IP for proxied requests, but sees your IP for direct media requests |
 | VPN or Tor | VPN or Tor infrastructure and the destination service | The intermediary can observe connection metadata depending on the setup. The destination sees the VPN or Tor exit address, requested resources, and timing instead of your direct IP address |
+| Internet connectivity checks (enabled by default) | GrapheneOS-hosted connectivity check server | IP address, request timing, and standard request metadata such as the User-Agent. The `HEAD` request to `connectivitycheck.grapheneos.network/generate_204` sends no cookies, referrer, or request body |
 | SponsorBlock | Configured SponsorBlock operator | IP address, timing, lookup hash prefixes and requested categories; contribution-stat lookups reveal a stable hash of a SponsorBlock user identifier; submissions and votes additionally reveal video identifiers, segment data, and a SponsorBlock user identifier |
 | DeArrow | Configured SponsorBlock/DeArrow and thumbnail-service operators | IP address, timing, video-ID hash prefixes for branding lookups, and full video identifiers and timestamps for generated-thumbnail requests |
 | Return YouTube Dislike | Configured Return YouTube Dislike operator | IP address, video identifiers, and timing |
@@ -29,6 +30,8 @@ Rows for optional services apply only when the feature is enabled. An IP address
 | Enhanced-privacy sync | Configured sync operator | IP address, OpenTubeX application version from Electron desktop builds, account identifier, authentication data, encrypted payloads, collection names, payload sizes, revisions, event IDs, recipient device IDs, creation and expiry times, and request timing; not the decrypted selected data, activity details, or video requests |
 | Legacy sync | Configured sync operator | IP address, OpenTubeX application version from Electron desktop builds, account identifier, authentication data, selected synced data, and timing |
 | `yt-dlp` playback and downloads | YouTube and the configured proxy, if any | IP address, requested page and media resources, video identifier, formats, and timing. OpenTubeX's proxy setting is passed to `yt-dlp`. |
+
+Connectivity checks may run at startup, when returning to the app, after connection changes, or during network recovery. Failed checks are retried while the system reports an internet connection. You can turn them off under Settings > Privacy > Internet connectivity checks.
 
 Voice-over translation is disabled by default. When it is enabled, no translation-service request is made until you request a translation. The separate background-preparation option is also disabled by default; enabling it requests a translation whenever a supported non-live video loads. These requests omit browser credentials and cookies.
 
@@ -38,5 +41,5 @@ HTTPS encrypts request paths and payloads in transit, but DNS providers and netw
 
 - To keep app data local, leave synchronization disabled.
 - To prevent a sync operator from reading synced data, use a server that supports enhanced-privacy sync and use a separate, strong privacy passphrase.
-- To avoid sending requests to optional services, leave SponsorBlock, DeArrow, Return YouTube Dislike, voice-over translation, and synchronization disabled.
+- To avoid sending requests to optional services, disable internet connectivity checks, SponsorBlock, DeArrow, Return YouTube Dislike, voice-over translation, and synchronization.
 - To hide your direct IP address from YouTube or optional services, route the relevant requests through a trusted VPN or Tor and verify the proxy configuration.
