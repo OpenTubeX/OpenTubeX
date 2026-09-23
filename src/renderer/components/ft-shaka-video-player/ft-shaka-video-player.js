@@ -5019,6 +5019,7 @@ export default defineComponent({
       isPlaybackEnded: () => video.value?.ended === true,
       isPlayerSurfaceTarget,
       isScrollMiniPlayerActive: () => scrollMiniPlayerActive.value,
+      isShortsPlayer: () => props.shortsPlayer,
       seekOnDoubleTap: seconds => {
         if (!canSeek()) return 0
         const multiplier = seekIntervalMultiplyByPlaybackRate.value ? getCurrentPlaybackRate() : 1
@@ -6137,7 +6138,7 @@ export default defineComponent({
       const video_ = video.value
       if (!video_) return
 
-      const nextState = video_.ended && video_.duration ? 'replay' : video_.paused ? 'play' : 'pause'
+      const nextState = (playbackEnded.value || video_.ended) && video_.duration ? 'replay' : video_.paused ? 'play' : 'pause'
 
       window.requestAnimationFrame(() => {
         container.value?.querySelectorAll('.shaka-play-button').forEach((button) => {
@@ -7869,7 +7870,7 @@ export default defineComponent({
     }
 
     function toggleShortsFullscreen() {
-      container.value?.querySelector('.shaka-fullscreen-button')?.click()
+      togglePlayerFullScreen()
     }
 
     function registerCaptionToggleButton() {

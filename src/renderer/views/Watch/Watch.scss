@@ -691,6 +691,10 @@
       text-align: center;
     }
 
+    .shortsMetadataAction {
+      display: none;
+    }
+
     .shortsSoundThumbnail {
       display: grid;
       place-items: center;
@@ -1402,6 +1406,11 @@
   align-items: center;
   gap: 8px;
   padding-block-end: 0;
+  pointer-events: none;
+}
+
+:global(.capacitorPhoneLayout .shortsActionRail > *) {
+  pointer-events: auto;
 }
 
 :global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .videoArea .videoAreaMargin) {
@@ -1409,6 +1418,34 @@
   column-gap: 0;
   inline-size: 100%;
   max-inline-size: 100%;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .videoArea) {
+  // The phone route starts below its top toolbar and reserves the bottom tab bar.
+  // Both the skeleton and the loaded player use this height.
+  --shorts-player-height: max(
+    0px,
+    calc(
+      100dvh - var(--top-nav-sticky-offset) - var(--mobile-nav-height) -
+      var(--mobile-progress-bar-space) - 48px
+    )
+  ) !important;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive :is(.shortsChannelRow, .shortsSkeletonChannelRow)) {
+  display: none;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive :is(.shortsExternalTitle, .shortsSkeletonTitle)) {
+  display: none;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsExternalMetadata) {
+  padding-block: 0;
+}
+
+:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsMetadataAction) {
+  display: flex;
 }
 
 :global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .videoArea .videoPlayer),

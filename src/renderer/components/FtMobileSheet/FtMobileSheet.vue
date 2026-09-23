@@ -86,6 +86,7 @@ const dragOffset = ref(0)
 const visibleTop = computed(() => Math.max(0, (expanded.value ? 0 : sheetTop.value) + Math.min(0, dragOffset.value)))
 const fullscreenElement = shallowRef(document.fullscreenElement)
 const playerCoversWindow = ref(false)
+const shortsPlayer = ref(false)
 const appHidden = ref(isAppHidden())
 const pictureInPicture = ref(document.body.classList.contains('androidPictureInPicture'))
 const docked = computed(() => props.enabled && props.belowPlayer && getPlayer !== null)
@@ -112,6 +113,7 @@ function updatePresentation() {
     }
   }
   playerCoversWindow.value = player?.matches('[data-native-player-screen], .fullWindow') ?? false
+  shortsPlayer.value = player?.classList.contains('shortsPlayer') ?? false
 }
 updatePresentation()
 // Options API $refs are not reactive; refresh the observed player when opening.
@@ -200,7 +202,7 @@ watch([dialog, () => props.enabled, () => props.open, docked, fullscreenElement,
           window.scrollBy({ top: bounds.top - toolbarBottom, behavior: 'instant' })
         }
       }
-      if (!presentationSuspended) expanded.value = landscape.value
+      if (!presentationSuspended) expanded.value = landscape.value || shortsPlayer.value
       measurePlayer()
       element.show()
       animation = applyAnimationSpeed(element.animate([
@@ -268,7 +270,7 @@ function endDrag(event) {
   const { distance, start } = drag
   drag = null
   const expand = !expanded.value && distance < -60
-  const collapse = expanded.value && distance > 80
+  const collapse = expanded.value && !shortsPlayer.value && distance > 80
   const close = !collapse && (distance > 80 || (distance > 20 && distance / (performance.now() - start) > 0.6))
   if (close) {
     emit('close')

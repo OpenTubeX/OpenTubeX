@@ -388,6 +388,15 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   opacity: 1;
 }
 
+:global(.capacitorTabs .ftVideoPlayer.shortsPlayer .shortsVolumeControl) {
+  display: none;
+}
+
+:global(.capacitorTabs .ftVideoPlayer.shortsPlayer .shaka-big-buttons-container),
+:global(.capacitorTabs .ftVideoPlayer.shortsPlayer .shaka-play-button-container) {
+  display: none;
+}
+
 .ftVideoPlayer.shortsPlayer :deep(.shaka-controls-button-panel) {
   display: none;
 }
@@ -418,6 +427,11 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 .ftVideoPlayer.shortsPlayer :deep(
   .shaka-controls-button-panel:has(> .ft-quick-playback-rate-bar:is(:hover, :focus-within))
 ) {
+  opacity: 1;
+}
+
+/* stylelint-disable-next-line selector-max-compound-selectors */
+:global(.capacitorPhoneLayout .ftVideoPlayer.shortsPlayer .shaka-controls-button-panel:has(> .ft-quick-playback-rate-bar)) {
   opacity: 1;
 }
 
@@ -548,8 +562,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   display: none;
 }
 
-.ftVideoPlayer.shortsPlayer :deep(.shaka-overflow-menu),
-.ftVideoPlayer.shortsPlayer :deep(.shaka-settings-menu) {
+.ftVideoPlayer.shortsPlayer :deep(.shaka-overflow-menu:not(.phonePlayerOptions > *)),
+.ftVideoPlayer.shortsPlayer :deep(.shaka-settings-menu:not(.phonePlayerOptions > *)) {
   inset: var(--shorts-menu-top, 72px) var(--shorts-menu-right, 16px) auto auto !important;
   max-inline-size: calc(100% - 16px);
   max-block-size: calc(100% - 88px);

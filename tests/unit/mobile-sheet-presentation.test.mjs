@@ -14,6 +14,8 @@ function mountSheet(t, expandPanel = null) {
   const props = reactive({ enabled: true, open: false, belowPlayer: true })
   const player = Object.assign(new EventTarget(), {
     coversWindow: false,
+    shorts: false,
+    classList: { contains(name) { return name === 'shortsPlayer' && player.shorts } },
     matches() { return this.coversWindow },
     setAttribute() {}, removeAttribute() {},
     getBoundingClientRect: () => ({ top: 50, bottom: 300 })
@@ -51,6 +53,26 @@ function mountSheet(t, expandPanel = null) {
     async settle() { await nextTick(); await nextTick(); await nextTick() }
   }
 }
+
+test('a Shorts sheet opens maximized and cannot collapse below the player', async t => {
+  const sheet = mountSheet(t)
+  sheet.player.shorts = true
+  sheet.props.open = true
+  await sheet.settle()
+  assert.equal(sheet.state.expanded.value, true)
+  assert.equal(sheet.state.sheetStyle.value.insetBlockStart, 'max(var(--app-safe-area-inset-top, 0px), 0px)')
+
+  const event = {
+    button: 0, pointerId: 1, clientY: 400,
+    target: { closest: () => null },
+    currentTarget: { setPointerCapture() {} }
+  }
+  sheet.state.startDrag(event)
+  sheet.state.moveDrag({ ...event, clientY: 500 })
+  sheet.state.endDrag(event)
+  await sheet.settle()
+  assert.equal(sheet.state.expanded.value, true)
+})
 
 for (const mode of ['native', 'browser', 'fullwindow']) {
   test(`an open below-player sheet hides during ${mode} fullscreen and returns below the player`, async t => {

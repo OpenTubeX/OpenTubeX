@@ -12,7 +12,7 @@ class ElementStub {
   closest(selectors) { return this.selector && selectors.includes(this.selector) ? this : null }
 }
 
-function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = true, mobile = true, mini = false, height = 200.5, nativeReplay = false, minimize = false } = {}) {
+function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = true, mobile = true, mini = false, shorts = false, height = 200.5, nativeReplay = false, minimize = false } = {}) {
   t.mock.method(globalThis, 'setTimeout', setTimeout)
   const previous = { document: globalThis.document, window: globalThis.window, Element: globalThis.Element }
   globalThis.Element = ElementStub
@@ -45,6 +45,7 @@ function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = t
           })
           : target => target === surface,
         isScrollMiniPlayerActive: () => mini,
+        isShortsPlayer: () => shorts,
         getSwipeAction: side => side === 'left' ? left : right,
         miniPlayerDrag: {
           begin: () => { if (minimize) calls.push('drag-begin'); return minimize },
@@ -72,6 +73,24 @@ function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = t
   }
   return { gestures, calls, event, captures }
 }
+
+test('Shorts vertical swipes stay available for feed navigation', t => {
+  const { gestures: g, event, calls, captures } = fixture(t, { shorts: true, minimize: true })
+  for (const [x, endY] of [[210, 50], [210, 250], [50, 50]]) {
+    g.startMobileFullscreenGesture(event(x, 150))
+    assert.equal(g.moveMobileFullscreenGesture(event(x, endY)), false)
+    g.finishMobileFullscreenGesture(event(x, endY))
+  }
+  assert.deepEqual(calls, [])
+  assert.equal(captures.size, 0)
+})
+
+test('Shorts taps still reveal playback controls', t => {
+  const { gestures: g, event, calls } = fixture(t, { shorts: true })
+  g.startMobileFullscreenGesture(event(210, 150))
+  g.finishMobileFullscreenGesture(event(210, 150))
+  assert.deepEqual(calls, ['show'])
+})
 
 test('left and right vertical swipes use their configured actions with fractional geometry', t => {
   const { gestures: g, event, calls, captures } = fixture(t, { left: 'volume', right: 'brightness', fullscreenSwipe: false })

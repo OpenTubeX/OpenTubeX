@@ -45,6 +45,8 @@ export async function initializeCapacitorPullToRefresh() {
     const tab = currentTab()
     if (blocked() || refreshing || !tab || tab.isLoading || EXCLUDED_ROUTES.has(tab.route.name)) return null
     const root = tabRuntimeRegistry.getRoot(tab.id)
+    if (tab.route.fullPath.startsWith('/watch/') &&
+      (tab.route.query?.short === 'true' || root?.querySelector('.videoLayout.shortsPlayerActive'))) return null
     const target = document.elementFromPoint(x * window.innerWidth, y * window.innerHeight)
     if (!canPullToRefreshTarget(target, root, window.scrollY)) return null
     const style = getComputedStyle(root)

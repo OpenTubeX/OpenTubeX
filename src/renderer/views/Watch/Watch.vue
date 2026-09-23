@@ -468,6 +468,20 @@
             <span class="shortsSkeletonSound ft-shimmer" />
           </template>
           <div
+            v-if="!isLoading"
+            class="shortsAction shortsComponentAction shortsMetadataAction"
+            :class="{ active: shortsMetadataOpen }"
+          >
+            <FtIconButton
+              :title="$t('Video.Metadata')"
+              :icon="['fas', 'circle-info']"
+              :aria-pressed="shortsMetadataOpen"
+              theme="base"
+              @click="toggleShortsMetadata"
+            />
+            <span>{{ $t('Video.Metadata') }}</span>
+          </div>
+          <div
             v-if="!isLoading && commentsAvailable"
             class="shortsAction shortsComponentAction shortsCommentsAction"
             :class="{ active: shortsCommentsPanelOpen }"

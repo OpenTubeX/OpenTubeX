@@ -251,7 +251,7 @@ export function createAndroidNativeScreen({ element, container, getController, g
     // Avoid searching the whole Watch page again on every scrolling frame.
     if (globalElementsDirty) {
       appChromeElements = [...document.querySelectorAll(appChromeSelector)]
-      globalMenuElements = [...document.querySelectorAll('dialog[open], [role="dialog"], [role="menu"], [aria-modal="true"], .ft-input-component .list')]
+      globalMenuElements = [...document.querySelectorAll('dialog[open], [role="dialog"], [role="menu"], [aria-modal="true"], .ft-input-component .list, .shortsCommentsPanel, .shortsAuxPanel')]
       globalElementsDirty = false
     }
     const appChrome = open ? [] : appChromeElements
@@ -291,6 +291,7 @@ export function createAndroidNativeScreen({ element, container, getController, g
       controlsHeight: controlBounds.height,
       videoVisible: visible,
       controlsVisible: visible && !gestureActive && controlBounds.width > 0 && controlBounds.height > 0 &&
+        !container.classList.contains('shortsPlayer') &&
         !container.querySelector('.endedPoster') &&
         !container.classList.contains('scrollMiniPlayer') && sharedControls?.hasAttribute('shown') === true,
       // Android clips and routes touches around these rectangles. A browser
