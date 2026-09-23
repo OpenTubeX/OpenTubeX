@@ -24,16 +24,16 @@
     </div>
     <FtLoader v-if="loading" />
     <p
-      v-else-if="error"
+      v-if="!loading && error"
       role="alert"
     >
       {{ error }}
     </p>
-    <p v-else-if="!entries.length">
+    <p v-if="!loading && !error && !entries.length">
       {{ t('Settings.Sync Settings.No Activity') }}
     </p>
     <ol
-      v-else
+      v-if="!loading && entries.length"
       :id="activityListId"
       ref="activityList"
       class="activityList"
@@ -76,7 +76,7 @@
       </li>
     </ol>
     <button
-      v-if="!loading && !error && entries.length > 3"
+      v-if="!loading && entries.length > 3"
       type="button"
       class="activityDisclosure"
       :aria-controls="activityListId"

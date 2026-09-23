@@ -4,7 +4,7 @@ for (const uiScale of [100, 125]) {
   test.describe(`account activity at ${uiScale}% UI scale`, () => {
     test.use({ seed: { settings: { uiScale, syncServerUrl: '' } } })
 
-    test('expands, collapses, and clamps the Settings scroll range', async ({ page }) => {
+    test('clamps after collapse and retains activity after a refresh error', async ({ page }) => {
       const sync = await goToSettingsSection(page, 'sync')
       await page.evaluate(() => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -37,6 +37,18 @@ for (const uiScale of [100, 125]) {
         const thumb = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
         return Math.abs(track.bottom - thumb.bottom) <= 1
       })).toBe(true)
+
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const dispatch = store.dispatch.bind(store)
+        store.dispatch = (...args) => args[0] === 'refreshSyncServerEvents'
+          ? Promise.reject(new Error('Activity refresh failed'))
+          : dispatch(...args)
+      })
+      await card.locator('.activityAction').click()
+      await expect(card.getByRole('alert')).toHaveText('Activity refresh failed')
+      await expect(card.locator('.activityList li')).toHaveCount(3)
+      await expect(disclosure).toBeVisible()
     })
   })
 }

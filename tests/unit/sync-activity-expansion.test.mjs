@@ -10,7 +10,7 @@ const declaration = babelParse(script, { sourceType: 'module' }).program.body
   .find(node => node.type === 'FunctionDeclaration' && node.id.name === 'expandActivity')
 
 test('activity disclosure remains available and can collapse after expansion', () => {
-  assert.match(source, /v-if="!loading && !error && entries\.length > 3"/)
+  assert.match(source, /v-if="!loading && entries\.length > 3"/)
   assert.match(source, /:aria-expanded="showAll"/)
   assert.match(source, /@click="toggleActivity"/)
   const toggle = babelParse(script, { sourceType: 'module' }).program.body
@@ -24,7 +24,7 @@ test('activity disclosure remains available and can collapse after expansion', (
 
 test('account activity shows the same loader as devices while refreshing', () => {
   assert.match(source, /<FtLoader v-if="loading"\s*\/>/)
-  assert.match(source, /v-else-if="error"/)
+  assert.match(source, /v-if="!loading && error"/)
   assert.match(script, /const loading = ref\(true\)/)
 })
 
