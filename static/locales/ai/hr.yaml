@@ -934,7 +934,7 @@ Settings:
     New Passwords Do Not Match: "Nove lozinke se ne podudaraju."
     Password Changed: "Lozinka je promijenjena. Ostali uređaji su odjavljeni."
     Sync Settings: Sinkronizacija
-    Sync statistics: Sinkroniziraj statistiku
+    Watch stats: "Statistika gledanja"
     Enable Sync: Omogući sinkronizaciju
     Privacy Passphrase: Pristupna fraza za privatnost
     Privacy Passphrase Hint: Upotrijebite pristupnu frazu koja se razlikuje od lozinke računa. Ona nikada ne napušta ovaj uređaj i potrebna je na svakom uređaju. Ako je izgubite, šifrirani podaci sinkronizacije neće se moći oporaviti.

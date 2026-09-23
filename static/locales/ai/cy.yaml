@@ -934,7 +934,7 @@ Settings:
     New Passwords Do Not Match: "Nid yw’r cyfrineiriau newydd yn cyfateb."
     Password Changed: "Cyfrinair wedi’i newid. Mae’r dyfeisiau eraill wedi’u hallgofnodi."
     Sync Settings: Cysoni
-    Sync statistics: Cysoni ystadegau
+    Watch stats: "Ystadegau gwylio"
     Enable Sync: Galluogi cysoni
     Privacy Passphrase: Cyfrinymadrodd preifatrwydd
     Privacy Passphrase Hint: Defnyddiwch gyfrinymadrodd ar wahân i gyfrinair eich cyfrif. Nid yw byth yn gadael y ddyfais hon ac mae ei angen ar bob dyfais; os collwch ef, ni ellir adfer y data cysoni wedi'u hamgryptio.

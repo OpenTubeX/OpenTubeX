@@ -905,7 +905,7 @@ Settings:
     Import playlists formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Định dạng được hỗ trợ: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
-    Sync statistics: Đồng bộ thống kê
+    Watch stats: "Thống kê xem"
     Syncing statistics: Đang đồng bộ thống kê xem…
     Sync Automatically: "Tự động đồng bộ"
     Activity: "Hoạt động tài khoản"

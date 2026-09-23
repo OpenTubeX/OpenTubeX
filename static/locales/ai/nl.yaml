@@ -954,7 +954,7 @@ Settings:
     New Passwords Do Not Match: "De nieuwe wachtwoorden komen niet overeen."
     Password Changed: "Wachtwoord gewijzigd. Andere apparaten zijn afgemeld."
     Sync Settings: Synchronisatie
-    Sync statistics: Statistieken synchroniseren
+    Watch stats: "Kijkstatistieken"
     Enable Sync: Synchronisatie inschakelen
     Privacy Passphrase: Privacywachtzin
     Privacy Passphrase Hint: Gebruik een andere wachtzin dan je accountwachtwoord. Deze verlaat dit apparaat nooit en is op elk apparaat vereist. Als je de wachtzin kwijtraakt, kunnen versleutelde synchronisatiegegevens niet worden hersteld.

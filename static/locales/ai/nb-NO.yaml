@@ -932,7 +932,7 @@ Settings:
     New Passwords Do Not Match: "De nye passordene er ikke like."
     Password Changed: "Passordet er endret. Andre enheter er logget av."
     Sync Settings: Synkronisering
-    Sync statistics: Synkroniser statistikk
+    Watch stats: "Seerstatistikk"
     Enable Sync: Slå på synkronisering
     Privacy Passphrase: Passordfrase for personvern
     Privacy Passphrase Hint: Bruk en annen passordfrase enn kontopassordet. Den forlater aldri denne enheten og må brukes på alle enheter. Hvis du mister den, kan ikke de krypterte synkroniseringsdataene gjenopprettes.

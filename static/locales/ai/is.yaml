@@ -938,7 +938,7 @@ Settings:
     New Passwords Do Not Match: "Nýju lykilorðin passa ekki saman."
     Password Changed: "Lykilorði breytt. Skráð hefur verið út úr öðrum tækjum."
     Sync Settings: Samstilling
-    Sync statistics: Samstilla tölfræði
+    Watch stats: "Áhorfstölfræði"
     Enable Sync: Virkja samstilling
     Privacy Passphrase: Persónuverndarleyndasetning
     Privacy Passphrase Hint: Notaðu aðra leynisetningu en aðgangsorð reikningsins. Hún fer aldrei úr þessu tæki og þarf að slá hana inn í öllum tækjum. Ef hún glatast er ekki hægt að endurheimta dulkóðuð samstillingargögn.

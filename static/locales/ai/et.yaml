@@ -930,7 +930,7 @@ Settings:
     New Passwords Do Not Match: "Uued paroolid ei ühti."
     Password Changed: "Parool on muudetud. Teised seadmed logiti välja."
     Sync Settings: Sünkroonimine
-    Sync statistics: Sünkrooni statistika
+    Watch stats: "Vaatamisstatistika"
     Enable Sync: Luba sünkroonimine
     Privacy Passphrase: Privaatsuse salafraas
     Privacy Passphrase Hint: Kasutage konto paroolist erinevat salafraasi. Seda ei edastata sellest seadmest välja ja seda on vaja igas seadmes. Selle kaotamisel ei saa krüptitud sünkroonimisandmeid taastada.

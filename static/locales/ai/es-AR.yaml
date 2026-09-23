@@ -1032,7 +1032,7 @@ Settings:
     New Passwords Do Not Match: "Las nuevas contraseñas no coinciden."
     Password Changed: "Contraseña cambiada. Se cerró la sesión en los demás dispositivos."
     Sync Settings: Sincronización
-    Sync statistics: Sincronizar estadísticas
+    Watch stats: "Estadísticas de visualización"
     Enable Sync: Activar sincronización
     Privacy Passphrase: Frase de contraseña de privacidad
     Privacy Passphrase Hint: Usa una frase de contraseña distinta de la contraseña de tu cuenta. Nunca sale de este dispositivo y se necesita en todos los dispositivos; si la pierdes, no podrás recuperar los datos de sincronización cifrados.

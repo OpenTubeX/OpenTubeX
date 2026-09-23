@@ -954,7 +954,7 @@ Settings:
     New Passwords Do Not Match: "Uudet salasanat eivät täsmää."
     Password Changed: "Salasana vaihdettu. Muut laitteet on kirjattu ulos."
     Sync Settings: Synkronointi
-    Sync statistics: Synkronoi tilastot
+    Watch stats: "Katselutilastot"
     Enable Sync: Ota synkronointi käyttöön
     Privacy Passphrase: Tietosuojan tunnuslause
     Privacy Passphrase Hint: Käytä eri tunnuslausetta kuin tilisi salasanaa. Tunnuslause ei koskaan poistu tältä laitteelta, ja sitä tarvitaan kaikilla laitteilla. Jos kadotat sen, salattuja synkronointitietoja ei voi palauttaa.

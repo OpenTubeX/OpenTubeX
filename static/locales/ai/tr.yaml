@@ -886,7 +886,7 @@ Settings:
     Import playlists formats: 'Desteklenen biçimler: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Desteklenen biçimler: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
-    Sync statistics: İstatistikleri eşitle
+    Watch stats: "İzleme istatistikleri"
     Syncing statistics: İzleme istatistikleri eşitleniyor…
     Sync Automatically: "Otomatik eşitle"
     Activity: "Hesap etkinliği"

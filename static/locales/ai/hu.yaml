@@ -930,7 +930,7 @@ Settings:
     New Passwords Do Not Match: "Az új jelszavak nem egyeznek."
     Password Changed: "A jelszó megváltozott. A többi eszközt kijelentkeztettük."
     Sync Settings: Szinkronizálás
-    Sync statistics: Statisztikák szinkronizálása
+    Watch stats: "Megtekintési statisztikák"
     Enable Sync: Szinkronizálás engedélyezése
     Privacy Passphrase: Adatvédelmi jelmondat
     Privacy Passphrase Hint: A fiók jelszavától eltérő jelmondatot használjon. Ez soha nem hagyja el az eszközt, és minden eszközön szükséges; elvesztése esetén a titkosított szinkronizálási adatok nem állíthatók vissza.

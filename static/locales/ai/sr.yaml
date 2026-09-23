@@ -925,7 +925,7 @@ Settings:
     Import playlists formats: 'Подржани формати: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Подржани формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
-    Sync statistics: Синхронизуј статистику
+    Watch stats: "Статистика гледања"
     Syncing statistics: Синхронизација статистике гледања…
     Sync Automatically: "Аутоматски синхронизуј"
     Activity: "Активност налога"

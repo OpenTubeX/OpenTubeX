@@ -165,7 +165,7 @@
             @change="store.dispatch('updateSyncServerSyncHistory', $event)"
           />
           <FtToggleSwitch
-            :label="t('Settings.Sync Settings.Sync statistics')"
+            :label="t('Settings.Sync Settings.Watch stats')"
             :default-value="syncWatchStatsEnabled"
             :disabled="busy || watchStatsSupported !== true"
             compact

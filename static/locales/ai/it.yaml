@@ -930,7 +930,7 @@ Settings:
     New Passwords Do Not Match: "Le nuove password non corrispondono."
     Password Changed: "Password modificata. Gli altri dispositivi sono stati disconnessi."
     Sync Settings: Sincronizzazione
-    Sync statistics: Sincronizza le statistiche
+    Watch stats: "Statistiche di visione"
     Enable Sync: Abilita sincronizzazione
     Privacy Passphrase: Frase segreta per la privacy
     Privacy Passphrase Hint: Usa una frase segreta diversa dalla password dell'account. Non lascia mai questo dispositivo ed è richiesta su ogni dispositivo; se la perdi, i dati di sincronizzazione cifrati non potranno essere recuperati.

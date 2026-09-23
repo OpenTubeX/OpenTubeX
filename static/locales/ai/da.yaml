@@ -972,7 +972,7 @@ Settings:
     New Passwords Do Not Match: "De nye adgangskoder er ikke ens."
     Password Changed: "Adgangskoden er ændret. Andre enheder er blevet logget ud."
     Sync Settings: Synkronisering
-    Sync statistics: Synkroniser statistik
+    Watch stats: "Seerstatistik"
     Enable Sync: Slå synkronisering til
     Privacy Passphrase: Adgangssætning til beskyttelse af personlige oplysninger
     Privacy Passphrase Hint: Brug en anden adgangssætning end adgangskoden til din konto. Den forlader aldrig denne enhed og skal bruges på alle enheder. Hvis du mister den, kan krypterede synkroniseringsdata ikke gendannes.

@@ -1165,7 +1165,7 @@ Settings:
     New Passwords Do Not Match: "새 비밀번호가 일치하지 않습니다."
     Password Changed: "비밀번호를 변경했습니다. 다른 기기에서 로그아웃했습니다."
     Sync Settings: 동기화
-    Sync statistics: 통계 동기화
+    Watch stats: "시청 통계"
     Enable Sync: 동기화 활성화
     Privacy Passphrase: 개인 정보 암호문
     Privacy Passphrase Hint: 계정 비밀번호와 다른 암호문을 사용하세요. 암호문은 이 기기를 벗어나지 않으며 모든 기기에 필요합니다. 잃어버리면 암호화된 동기화 데이터를 복구할 수 없습니다.

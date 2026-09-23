@@ -1092,7 +1092,7 @@ Settings:
     New Passwords Do Not Match: "Dei nye passorda er ikkje like."
     Password Changed: "Passordet er endra. Andre einingar er logga ut."
     Sync Settings: Synkronisering
-    Sync statistics: Synkroniser statistikk
+    Watch stats: "Sjåestatistikk"
     Enable Sync: Slå på synkronisering
     Privacy Passphrase: Passfrase for personvern
     Privacy Passphrase Hint: Bruk ei anna passfrase enn kontopassordet. Ho forlèt aldri denne eininga og må brukast på alle einingar. Dersom du mistar henne, kan ikkje dei krypterte synkroniseringsdataa gjenopprettast.

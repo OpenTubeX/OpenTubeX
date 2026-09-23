@@ -930,7 +930,7 @@ Settings:
     New Passwords Do Not Match: "Nová hesla se neshodují."
     Password Changed: "Heslo bylo změněno. Ostatní zařízení byla odhlášena."
     Sync Settings: Synchronizace
-    Sync statistics: Synchronizovat statistiky
+    Watch stats: "Statistiky sledování"
     Enable Sync: Povolit synchronizaci
     Privacy Passphrase: Přístupová fráze pro ochranu soukromí
     Privacy Passphrase Hint: Použijte jinou přístupovou frázi než heslo k účtu. Nikdy neopustí toto zařízení a je nutná na všech zařízeních. Pokud ji ztratíte, šifrovaná synchronizovaná data nepůjde obnovit.

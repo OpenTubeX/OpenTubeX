@@ -215,7 +215,7 @@ test.describe('synced watch stats', () => {
 
     const sync = await goToSettingsSection(page, 'sync')
     await sync.getByRole('checkbox', { name: 'Enable Sync', exact: true }).press('Space')
-    const statisticsToggle = sync.getByRole('checkbox', { name: 'Sync statistics' })
+    const statisticsToggle = sync.getByRole('checkbox', { name: 'Watch stats' })
     await expect(statisticsToggle).toBeEnabled()
     await expect(statisticsToggle).toBeChecked()
     await statisticsToggle.press('Space')

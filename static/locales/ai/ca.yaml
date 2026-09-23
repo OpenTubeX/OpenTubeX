@@ -1251,7 +1251,7 @@ Settings:
     New Passwords Do Not Match: "Les contrasenyes noves no coincideixen."
     Password Changed: "S’ha canviat la contrasenya. S’ha tancat la sessió als altres dispositius."
     Sync Settings: Sincronització
-    Sync statistics: Sincronitza les estadístiques
+    Watch stats: "Estadístiques de visualització"
     Enable Sync: Activa la sincronització
     Privacy Passphrase: Frase de contrasenya de privadesa
     Privacy Passphrase Hint: Utilitzeu una frase de contrasenya diferent de la contrasenya del compte. No surt mai d'aquest dispositiu i és necessària a tots els dispositius; si la perdeu, no podreu recuperar les dades de sincronització xifrades.

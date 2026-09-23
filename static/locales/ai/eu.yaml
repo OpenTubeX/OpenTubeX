@@ -930,7 +930,7 @@ Settings:
     New Passwords Do Not Match: "Pasahitz berriak ez datoz bat."
     Password Changed: "Pasahitza aldatu da. Beste gailuetako saioak itxi dira."
     Sync Settings: Sinkronizazioa
-    Sync statistics: Sinkronizatu estatistikak
+    Watch stats: "Ikustaldien estatistikak"
     Enable Sync: Gaitu sinkronizazioa
     Privacy Passphrase: Pribatutasun-pasaesaldia
     Privacy Passphrase Hint: Erabili kontuaren pasahitzaz bestelako pasaesaldi bat. Ez da inoiz gailu honetatik ateratzen eta gailu guztietan behar da; galtzen baduzu, ezin izango dituzu berreskuratu sinkronizatutako datu zifratuak.

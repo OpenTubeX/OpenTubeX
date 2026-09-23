@@ -930,7 +930,7 @@ Settings:
     New Passwords Do Not Match: "Kata sandi baru tidak cocok."
     Password Changed: "Kata sandi diubah. Perangkat lain telah dikeluarkan."
     Sync Settings: Sinkronisasi
-    Sync statistics: Sinkronkan statistik
+    Watch stats: "Statistik tontonan"
     Enable Sync: Aktifkan Sinkronisasi
     Privacy Passphrase: Frasa sandi privasi
     Privacy Passphrase Hint: Gunakan frasa sandi yang berbeda dari kata sandi akun. Frasa ini tidak pernah meninggalkan perangkat dan diperlukan di setiap perangkat. Jika hilang, data sinkronisasi terenkripsi tidak dapat dipulihkan.

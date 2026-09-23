@@ -886,7 +886,7 @@ Settings:
     Import playlists formats: '支援的格式：OpenTubeX / FreeTube (.db)'
     Import search history formats: '支援的格式：OpenTubeX / FreeTube (.db)、YouTube Takeout (.json)'
   Sync Settings:
-    Sync statistics: 同步統計資料
+    Watch stats: "觀看統計資料"
     Syncing statistics: 正在同步觀看統計資料…
     Sync Automatically: "自動同步"
     Activity: "帳戶活動"

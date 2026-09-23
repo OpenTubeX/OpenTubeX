@@ -1182,7 +1182,7 @@ Settings:
     New Passwords Do Not Match: "Nauji slaptažodžiai nesutampa."
     Password Changed: "Slaptažodis pakeistas. Kituose įrenginiuose atsijungta."
     Sync Settings: Sinchronizavimas
-    Sync statistics: Sinchronizuoti statistiką
+    Watch stats: "Žiūrėjimo statistika"
     Enable Sync: Įjungti sinchronizavimą
     Privacy Passphrase: Privatumo slaptafrazė
     Privacy Passphrase Hint: Naudokite kitą slaptafrazę nei paskyros slaptažodis. Ji niekada neperduodama iš šio įrenginio ir reikalinga kiekviename įrenginyje; ją praradus, užšifruotų sinchronizavimo duomenų atkurti nepavyks.
