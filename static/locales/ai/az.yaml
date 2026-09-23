@@ -1449,6 +1449,14 @@ Context Menu:
   Selection Too Long: Seçim axtarış üçün çox uzundur (> {count} simvol)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Podkast'
+    Clock: 'Saat'
+    Puzzle Piece: 'Pazl parçası'
+    People: 'İnsanlar'
+    Chart: 'Qrafik'
+    Calendar: 'Təqvim'
+    Images: 'Şəkillər'
+    Music: 'Musiqi'
     Folder: Qovluq
     Bookmark: Əlfəcin
     Favorites: Sevimlilər

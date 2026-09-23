@@ -1474,6 +1474,14 @@ Context Menu:
   Selection Too Long: Selecția este prea lungă pentru căutare (> {count} caractere)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Podcast'
+    Clock: 'Ceas'
+    Puzzle Piece: 'Piesă de puzzle'
+    People: 'Persoane'
+    Chart: 'Grafic'
+    Calendar: 'Calendar'
+    Images: 'Imagini'
+    Music: 'Muzică'
     Folder: Dosar
     Bookmark: Marcaj
     Favorites: Favorite

@@ -1500,6 +1500,14 @@ Context Menu:
   Selection Too Long: Избор је предугачак за претрагу (> {count} знакова)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Подкаст'
+    Clock: 'Сат'
+    Puzzle Piece: 'Део слагалице'
+    People: 'Људи'
+    Chart: 'Графикон'
+    Calendar: 'Календар'
+    Images: 'Слике'
+    Music: 'Музика'
     Folder: Фасцикла
     Bookmark: Обележивач
     Favorites: Омиљено

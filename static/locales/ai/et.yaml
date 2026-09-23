@@ -1439,6 +1439,14 @@ Context Menu:
   Selection Too Long: Valik on otsimiseks liiga pikk (> {count} märki)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Taskuhääling'
+    Clock: 'Kell'
+    Puzzle Piece: 'Pusletükk'
+    People: 'Inimesed'
+    Chart: 'Diagramm'
+    Calendar: 'Kalender'
+    Images: 'Pildid'
+    Music: 'Muusika'
     Folder: Kaust
     Bookmark: Järjehoidja
     Favorites: Lemmikud

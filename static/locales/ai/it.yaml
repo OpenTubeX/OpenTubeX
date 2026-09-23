@@ -1437,6 +1437,14 @@ Context Menu:
   Selection Too Long: La selezione è troppo lunga per la ricerca (> {count} caratteri)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Podcast'
+    Clock: 'Orologio'
+    Puzzle Piece: 'Tessera del puzzle'
+    People: 'Persone'
+    Chart: 'Grafico'
+    Calendar: 'Calendario'
+    Images: 'Immagini'
+    Music: 'Musica'
     Folder: Cartella
     Bookmark: Segnalibro
     Favorites: Preferiti

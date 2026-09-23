@@ -1458,6 +1458,14 @@ Context Menu:
   Selection Too Long: Valið er of langt fyrir leit (> {count} stafir)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Hlaðvarp'
+    Clock: 'Klukka'
+    Puzzle Piece: 'Púslbiti'
+    People: 'Fólk'
+    Chart: 'Graf'
+    Calendar: 'Dagatal'
+    Images: 'Myndir'
+    Music: 'Tónlist'
     Folder: Mappa
     Bookmark: Bókamerki
     Favorites: Eftirlæti

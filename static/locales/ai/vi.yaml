@@ -1467,6 +1467,14 @@ Context Menu:
   Selection Too Long: Phần đã chọn quá dài để tìm kiếm (> {count} ký tự)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Podcast'
+    Clock: 'Đồng hồ'
+    Puzzle Piece: 'Mảnh ghép'
+    People: 'Mọi người'
+    Chart: 'Biểu đồ'
+    Calendar: 'Lịch'
+    Images: 'Hình ảnh'
+    Music: 'Âm nhạc'
     Folder: Thư mục
     Bookmark: Dấu trang
     Favorites: Yêu thích

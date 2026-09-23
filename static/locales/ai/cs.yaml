@@ -1437,6 +1437,14 @@ Context Menu:
   Selection Too Long: Výběr je pro vyhledávání příliš dlouhý (> {count} znaků)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Podcast'
+    Clock: 'Hodiny'
+    Puzzle Piece: 'Dílek skládačky'
+    People: 'Lidé'
+    Chart: 'Graf'
+    Calendar: 'Kalendář'
+    Images: 'Obrázky'
+    Music: 'Hudba'
     Folder: Složka
     Bookmark: Záložka
     Favorites: Oblíbené

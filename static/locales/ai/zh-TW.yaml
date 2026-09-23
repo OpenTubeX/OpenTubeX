@@ -1439,6 +1439,14 @@ Context Menu:
   Selection Too Long: 選取內容過長，無法搜尋（> {count} 個字元）
 Tab Organizer:
   Icon Labels:
+    Podcast: '播客'
+    Clock: '時鐘'
+    Puzzle Piece: '拼圖塊'
+    People: '人物'
+    Chart: '圖表'
+    Calendar: '行事曆'
+    Images: '圖片'
+    Music: '音樂'
     Folder: 資料夾
     Bookmark: 書籤
     Favorites: 收藏

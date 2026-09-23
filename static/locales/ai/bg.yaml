@@ -1451,6 +1451,14 @@ Context Menu:
   Selection Too Long: Избраният текст е твърде дълъг за търсене (> {count} знака)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Подкаст'
+    Clock: 'Часовник'
+    Puzzle Piece: 'Част от пъзел'
+    People: 'Хора'
+    Chart: 'Диаграма'
+    Calendar: 'Календар'
+    Images: 'Изображения'
+    Music: 'Музика'
     Folder: Папка
     Bookmark: Отметка
     Favorites: Любими

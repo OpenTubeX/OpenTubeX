@@ -1911,6 +1911,14 @@ Context Menu:
   Selection Too Long: Izbrano besedilo je predolgo za iskanje (> {count} znakov)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Podkast'
+    Clock: 'Ura'
+    Puzzle Piece: 'Košček sestavljanke'
+    People: 'Ljudje'
+    Chart: 'Graf'
+    Calendar: 'Koledar'
+    Images: 'Slike'
+    Music: 'Glasba'
     Folder: Mapa
     Bookmark: Zaznamek
     Favorites: Priljubljeno

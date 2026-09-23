@@ -1833,6 +1833,14 @@ Context Menu:
   Selection Too Long: Pažymėtas tekstas per ilgas paieškai (> {count} simbolių)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Tinklalaidė'
+    Clock: 'Laikrodis'
+    Puzzle Piece: 'Dėlionės detalė'
+    People: 'Žmonės'
+    Chart: 'Diagrama'
+    Calendar: 'Kalendorius'
+    Images: 'Vaizdai'
+    Music: 'Muzika'
     Folder: Aplankas
     Bookmark: Žymelė
     Favorites: Mėgstamiausi

@@ -342,7 +342,7 @@
 
 .groupIconPicker {
   display: grid;
-  grid-template-columns: repeat(3, 34px);
+  grid-template-columns: repeat(5, 34px);
 }
 
 .groupNameButton {

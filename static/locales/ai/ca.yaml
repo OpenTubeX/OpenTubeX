@@ -1936,6 +1936,14 @@ Context Menu:
   Selection Too Long: La selecció és massa llarga per cercar-la (> {count} caràcters)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Pòdcast'
+    Clock: 'Rellotge'
+    Puzzle Piece: 'Peça de puzle'
+    People: 'Persones'
+    Chart: 'Gràfic'
+    Calendar: 'Calendari'
+    Images: 'Imatges'
+    Music: 'Música'
     Folder: Carpeta
     Bookmark: Marcador
     Favorites: Preferits

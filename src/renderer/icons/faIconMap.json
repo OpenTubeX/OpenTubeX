@@ -295,6 +295,10 @@
     "ri": "hashtag",
     "material": "tag"
   },
+  "headphones": {
+    "ri": "headphone-line",
+    "material": "headphones-outline-rounded"
+  },
   "heart": {
     "ri": "heart-line",
     "material": "favorite-outline"

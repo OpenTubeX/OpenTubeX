@@ -1455,6 +1455,14 @@ Context Menu:
   Selection Too Long: Odabir je predug za pretraživanje (> {count} znakova)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Podcast'
+    Clock: 'Sat'
+    Puzzle Piece: 'Dio slagalice'
+    People: 'Ljudi'
+    Chart: 'Grafikon'
+    Calendar: 'Kalendar'
+    Images: 'Slike'
+    Music: 'Glazba'
     Folder: Mapa
     Bookmark: Oznaka
     Favorites: Favoriti

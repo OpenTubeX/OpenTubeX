@@ -1437,6 +1437,14 @@ Context Menu:
   Selection Too Long: Seçim arama için çok uzun (> {count} karakter)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Podcast'
+    Clock: 'Saat'
+    Puzzle Piece: 'Yapboz parçası'
+    People: 'İnsanlar'
+    Chart: 'Grafik'
+    Calendar: 'Takvim'
+    Images: 'Görseller'
+    Music: 'Müzik'
     Folder: Klasör
     Bookmark: Yer imi
     Favorites: Favoriler

@@ -1447,6 +1447,14 @@ Context Menu:
   Selection Too Long: "Re hir eo an diuzadenn evit klask (> {count} arouezenn)"
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Podkast'
+    Clock: 'Eurier'
+    Puzzle Piece: 'Pezh ur miltamm'
+    People: 'Tud'
+    Chart: 'Grafik'
+    Calendar: 'Deiziadur'
+    Images: 'Skeudennoù'
+    Music: 'Sonerezh'
     Folder: Teuliad
     Bookmark: Sined
     Favorites: Ma re well

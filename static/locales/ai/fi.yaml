@@ -1475,6 +1475,14 @@ Context Menu:
   Selection Too Long: Valinta on liian pitkä haettavaksi (> {count} merkkiä)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Podcast'
+    Clock: 'Kello'
+    Puzzle Piece: 'Palapelin pala'
+    People: 'Ihmiset'
+    Chart: 'Kaavio'
+    Calendar: 'Kalenteri'
+    Images: 'Kuvat'
+    Music: 'Musiikki'
     Folder: Kansio
     Bookmark: Kirjanmerkki
     Favorites: Suosikit

@@ -1452,6 +1452,14 @@ Context Menu:
   Selection Too Long: Hautapena luzeegia da bilatzeko (> {count} karaktere)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Podcasta'
+    Clock: 'Erlojua'
+    Puzzle Piece: 'Puzzle pieza'
+    People: 'Pertsonak'
+    Chart: 'Grafikoa'
+    Calendar: 'Egutegia'
+    Images: 'Irudiak'
+    Music: 'Musika'
     Folder: Karpeta
     Bookmark: Laster-marka
     Favorites: Gogokoak

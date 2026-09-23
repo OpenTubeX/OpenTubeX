@@ -1451,6 +1451,14 @@ Context Menu:
   Selection Too Long: Markeringen är för lång för en sökning (> {count} tecken)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Podd'
+    Clock: 'Klocka'
+    Puzzle Piece: 'Pusselbit'
+    People: 'Personer'
+    Chart: 'Diagram'
+    Calendar: 'Kalender'
+    Images: 'Bilder'
+    Music: 'Musik'
     Folder: Mapp
     Bookmark: Bokmärke
     Favorites: Favoriter
