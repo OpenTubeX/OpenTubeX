@@ -58,12 +58,15 @@ export class PlayerScriptEvaluator {
    * @param {Error} error
    */
   retryAfterRuntimeAbort(worker, error) {
-    if ([...this.requests.values()].some(request => request.retried)) {
-      this.fail(worker, error)
-      return
+    for (const [id, request] of this.requests) {
+      if (!request.retried) continue
+      clearTimeout(request.timer)
+      request.reject(error)
+      this.requests.delete(id)
     }
     worker.terminate()
     this.worker = null
+    if (this.requests.size === 0) return
     try {
       this.startWorker()
     } catch (startError) {

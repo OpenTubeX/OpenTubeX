@@ -115,3 +115,22 @@ test('does not retry an ordinary player error containing the assertion text', as
   assert.equal(workers.length, 1)
   assert.equal(workers[0].terminated, false)
 })
+
+test('retries a new request after an older request exhausts its retry', async () => {
+  const workers = []
+  const evaluator = new PlayerScriptEvaluator(() => {
+    const worker = new FakeWorker()
+    workers.push(worker)
+    return worker
+  })
+  const error = 'RuntimeError: Aborted(Assertion failed: list_empty(&rt->gc_obj_list), at: ../../vendor/quickjs/quickjs.c,2036,JS_FreeRuntime)'
+  const older = assert.rejects(evaluator.evaluate('older'), /JS_FreeRuntime/)
+  workers[0].reply({ id: workers[0].requests[0].id, error })
+  const newer = evaluator.evaluate('newer')
+  workers[1].reply({ id: workers[1].requests[0].id, error })
+  assert.equal(workers.length, 3)
+  assert.deepEqual(workers[2].requests.map(request => request.code), ['newer'])
+  workers[2].reply({ id: workers[2].requests[0].id, result: 'recovered' })
+  await older
+  assert.equal(await newer, 'recovered')
+})
