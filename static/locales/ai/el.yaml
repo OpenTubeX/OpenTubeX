@@ -1146,6 +1146,8 @@ Channel:
   All Results: Όλα
   View All: Προβολή όλων
 Video:
+  External DRM Protected: "Τα βίντεο που προστατεύονται με DRM δεν μπορούν να αναπαραχθούν στο OpenTubeX, καθώς απαιτούν ιδιόκτητα εξαρτήματα κλειστού κώδικα."
+  Invalid Media URL: "Μη έγκυρο URL πολυμέσων"
   Mark As Fully Watched: Σήμανση ως πλήρως προβληθέν
   AI-generated video summary: "Σύνοψη βίντεο που δημιουργήθηκε από ΤΝ"
   Quality and accuracy may vary: "Η ποιότητα και η ακρίβεια ενδέχεται να διαφέρουν"

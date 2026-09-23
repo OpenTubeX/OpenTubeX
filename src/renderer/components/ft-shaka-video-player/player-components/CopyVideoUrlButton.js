@@ -6,7 +6,7 @@ import { copyToClipboard } from '../../../helpers/utils'
  * @typedef {object} CopyVideoUrlContext
  * @property {(backend: 'youtube' | 'invidious', includeTimestamp: boolean) => string} getVideoUrl
  * @property {(backend: 'youtube' | 'invidious', includeTimestamp: boolean) => string} getLabel
- * @property {(backend: 'youtube' | 'invidious', includeTimestamp: boolean) => string} getSuccessMessage
+ * @property {(backend: 'youtube' | 'invidious', includeTimestamp: boolean) => string | null} getSuccessMessage
  */
 
 /**

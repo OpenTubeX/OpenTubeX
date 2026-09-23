@@ -5,6 +5,7 @@ const PLAYBACK_FORMAT_OUTPUT_FIELDS = [
   'format_id',
   'url',
   'manifest_url',
+  'http_headers',
   'protocol',
   'ext',
   'container',
@@ -24,18 +25,39 @@ const PLAYBACK_FORMAT_OUTPUT_FIELDS = [
   // Every Post-Live-DVR fragment carries the total count, so one is enough.
   'fragments.0.fragment_count'
 ].join(',')
-export const PLAYBACK_INFO_OUTPUT_TEMPLATE = [
-  '{"title":%(title|null)j',
-  ',"is_live":%(is_live|null)j',
-  ',"live_status":%(live_status|null)j',
-  ',"duration":%(duration|null)j',
-  ',"manifest_url":%(manifest_url|null)j',
-  ',"requested_subtitles":%(requested_subtitles|null)j',
-  `,"formats":%(formats.:.{${PLAYBACK_FORMAT_OUTPUT_FIELDS}})j`,
+function playbackInfoOutputTemplate(formatFields) {
+  return [
+    '{"title":%(title|null)j',
+    ',"description":%(description|null)j',
+    ',"uploader":%(uploader|null)j',
+    ',"uploader_id":%(uploader_id|null)j',
+    ',"uploader_url":%(uploader_url|null)j',
+    ',"uploader_thumbnail":%(uploader_thumbnail|null)j',
+    ',"uploader_avatar":%(uploader_avatar|null)j',
+    ',"channel":%(channel|null)j',
+    ',"channel_url":%(channel_url|null)j',
+    ',"channel_thumbnail":%(channel_thumbnail|null)j',
+    ',"channel_avatar":%(channel_avatar|null)j',
+    ',"thumbnail":%(thumbnail|null)j',
+    ',"webpage_url":%(webpage_url|null)j',
+    ',"view_count":%(view_count|null)j',
+    ',"upload_date":%(upload_date|null)j',
+    ',"is_live":%(is_live|null)j',
+    ',"live_status":%(live_status|null)j',
+    ',"duration":%(duration|null)j',
+    ',"manifest_url":%(manifest_url|null)j',
+    ',"requested_subtitles":%(requested_subtitles|null)j',
+  `,"formats":%(formats.:.{${formatFields}})j`,
   // Selecting sb0 keeps the complete high-resolution storyboard without
   // retaining the much larger media-fragment arrays from every format.
   ',"storyboard":%(.{protocol,width,height,fps,rows,columns,fragments})j}'
-].join('')
+  ].join('')
+}
+
+export const PLAYBACK_INFO_OUTPUT_TEMPLATE = playbackInfoOutputTemplate(PLAYBACK_FORMAT_OUTPUT_FIELDS)
+// Desktop keeps these scoped cookies in the main process; Android uses its
+// native cookie jar and must not return them to the WebView.
+export const PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE = playbackInfoOutputTemplate(`${PLAYBACK_FORMAT_OUTPUT_FIELDS},cookies`)
 
 /**
  * @param {unknown} value

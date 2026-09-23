@@ -1099,6 +1099,8 @@ Channel:
   Search Result Types: Search result types
   All Results: All
 Video:
+  External DRM Protected: "DRM protected videos cannot be played in OpenTubeX, as they require proprietary, closed source components."
+  Invalid Media URL: "Invalid media URL"
   Mark As Fully Watched: Mark As Fully Watched
   AI-generated video summary: "AI-generated video summary"
   Quality and accuracy may vary: "Quality and accuracy may vary"

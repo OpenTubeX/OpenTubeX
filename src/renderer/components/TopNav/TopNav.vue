@@ -85,6 +85,7 @@
             :placeholder="t('Search / Go to URL')"
             class="searchInput"
             is-search
+            external-media-navigation
             :action-button-label="t('Search Bar.Search')"
             :data-list="activeDataList"
             :data-list-properties="activeDataListProperties"
@@ -202,6 +203,8 @@ import { translateWindowTitle } from '../../helpers/strings'
 import { clearLocalSearchSuggestionsSession, getLocalSearchSuggestions } from '../../helpers/api/local'
 import { getInvidiousSearchSuggestions } from '../../helpers/api/invidious'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
+import { shouldOpenExternalMediaUrl } from '../../helpers/externalMediaUrl'
+import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 
 const { t } = useI18n()
 const syncing = computed(() => store.getters.getSyncServerStatus === 'syncing')
@@ -640,6 +643,14 @@ if (usesLogicalTabs) {
  * @returns {Promise<{ path: string, query?: object, searchQueryText: string }>}
  */
 async function getSearchDestination(queryText, selectedSearchSettings = null) {
+  if (supportsYtDlp && shouldOpenExternalMediaUrl(queryText, store.getters.getCurrentInvidiousInstanceUrl)) {
+    return {
+      path: '/external-media',
+      query: { url: queryText },
+      searchQueryText: queryText
+    }
+  }
+
   const result = await store.dispatch('getYoutubeUrlInfo', queryText)
 
   switch (result.urlType) {
@@ -697,6 +708,13 @@ async function getSearchDestination(queryText, selectedSearchSettings = null) {
 
     case 'invalid_url':
     default: {
+      if (supportsYtDlp && shouldOpenExternalMediaUrl(queryText, store.getters.getCurrentInvidiousInstanceUrl)) {
+        return {
+          path: '/external-media',
+          query: { url: queryText },
+          searchQueryText: queryText
+        }
+      }
       const settings = selectedSearchSettings ?? searchSettings.value
       return {
         path: `/search/${encodeURIComponent(queryText)}`,

@@ -350,6 +350,10 @@ export default defineComponent({
       type: String,
       default: ''
     },
+    externalUrl: {
+      type: String,
+      default: ''
+    },
     playlistId: {
       type: String,
       default: ''
@@ -4425,9 +4429,12 @@ export default defineComponent({
     const contextMenuElements = computed(() => {
       const elements = [
         'ft_loop',
-        'ft_copy_youtube_video_url',
-        'ft_copy_youtube_video_url_at_current_time'
+        'ft_copy_youtube_video_url'
       ]
+
+      if (props.externalUrl) return [...elements, 'ft_stats']
+
+      elements.push('ft_copy_youtube_video_url_at_current_time')
 
       if (showInvidiousShareOptions.value) {
         elements.push(
@@ -7195,6 +7202,7 @@ export default defineComponent({
         variants = getDefaultAudioVariants(variants)
       }
 
+      if (variants.length === 0) return
       const isPortrait = variants[0].height > variants[0].width
 
       let matches = variants.filter(variant => {
@@ -7205,6 +7213,13 @@ export default defineComponent({
         matches = variants.filter(variant => {
           return quality > (isPortrait ? variant.width : variant.height)
         })
+      }
+
+      if (matches.length === 0) {
+        const dimension = isPortrait ? 'width' : 'height'
+        const lowest = Math.min(...variants.map(variant => variant[dimension]).filter(Number.isFinite))
+        matches = variants.filter(variant => variant[dimension] === lowest)
+        if (matches.length === 0) matches = [variants[0]]
       }
 
       matches.sort((a, b) => isPortrait ? b.width - a.width : b.height - a.height)
@@ -7344,10 +7359,10 @@ export default defineComponent({
       const codecsMatch = mimeType.match(/codecs="(?<videoCodec>.+), ?(?<audioCodec>.+)"/)
 
       stats.codecs.audioItag = itag
-      stats.codecs.audioCodec = codecsMatch.groups.audioCodec
+      stats.codecs.audioCodec = codecsMatch?.groups?.audioCodec ?? ''
 
       stats.codecs.videoItag = itag
-      stats.codecs.videoCodec = codecsMatch.groups.videoCodec
+      stats.codecs.videoCodec = codecsMatch?.groups?.videoCodec ?? ''
 
       stats.resolution.frameRate = fps
 
@@ -8668,6 +8683,7 @@ export default defineComponent({
        * @returns {string}
        */
       function getVideoUrl(backend, includeTimestamp) {
+        if (props.externalUrl) return props.externalUrl
         const videoUrl = backend === 'invidious'
           ? getInvidiousVideoUrl(store.getters.getCurrentInvidiousInstanceUrl, props.videoId, shareablePlaylistId.value)
           : getYoutubeVideoShareUrl(props.videoId, shareablePlaylistId.value)
@@ -8682,9 +8698,10 @@ export default defineComponent({
       /**
        * @param {'youtube' | 'invidious'} backend
        * @param {boolean} includeTimestamp
-       * @returns {string}
+       * @returns {string | null}
        */
       function getCopySuccessMessage(backend, includeTimestamp) {
+        if (props.externalUrl) return null
         if (includeTimestamp) {
           return t('Share.Timestamp Link Copied')
         }
@@ -8700,6 +8717,7 @@ export default defineComponent({
        * @returns {string}
        */
       function getCopyLabel(backend, includeTimestamp) {
+        if (props.externalUrl) return t('Share.Copy Link')
         const baseLabel = backend === 'invidious'
           ? t('Video.Copy Invidious Link')
           : t('Video.Copy YouTube Link')

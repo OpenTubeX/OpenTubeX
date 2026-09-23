@@ -2019,6 +2019,8 @@ Video:
     Show Modified Details: Geänderte Details anzeigen
     Show Original Details: Originale Details anzeigen
   DRMProtected: DRM-geschützte Videos können in OpenTubeX nicht abgespielt werden, da sie proprietäre Closed-Source-Komponenten benötigen. Wenn du dieses Video ansehen möchtest, sieh es dir bitte auf der offiziellen YouTube-Website in einem DRM-fähigen Webbrowser an.
+  External DRM Protected: DRM-geschützte Videos können in OpenTubeX nicht abgespielt werden, da sie proprietäre Closed-Source-Komponenten benötigen.
+  Invalid Media URL: Ungültige Medien-URL
   Save Channel Playback Speed: Kanal-Wiedergabegeschwindigkeit speichern
   Channel Playback Speed Saved: Kanal-Wiedergabegeschwindigkeit gespeichert
   Save Channel Video Quality: Kanal-Videoqualität speichern

@@ -149,6 +149,125 @@ export function invalidateAllYtDlpPlaybackSources() {
 }
 
 /**
+ * Extracts one media URL without applying YouTube's client retries or cache keys.
+ * The caller keeps the original URL as the stable identity for its tab.
+ * @param {string} url
+ * @param {boolean} useAuthentication
+ */
+export async function getExternalYtDlpPlaybackSource(url, useAuthentication = false) {
+  const info = await ytDlp.ytDlpGetPlaybackInfo(url, true, useAuthentication)
+  if (info === null) throw new Error('yt-dlp is not available')
+  if ('error' in info) throw new Error(info.error === 'ENOENT' ? 'yt-dlp could not be found' : info.error)
+
+  const isLive = info.isLive || info.liveStatus === 'is_live'
+  const httpFormats = info.formats.filter(format =>
+    ['http', 'https'].includes(format.protocol) &&
+    format.url !== null &&
+    ['mp4', 'm4a', 'webm', 'mp3', 'ogg', 'opus'].includes(format.ext)
+  )
+  const hasVideoFormats = httpFormats.some(format =>
+    isVideoFormat(format) || isExternalProgressiveVideoFormat(format)
+  )
+  // H.265 may be unavailable in Chromium, so try other codecs first.
+  const preferredHttpFormats = httpFormats.filter(format => format.vcodec !== 'h265')
+  const h265Formats = httpFormats.filter(format => format.vcodec === 'h265')
+  let legacyFormats = await convertLegacyFormats(preferredHttpFormats.filter(format =>
+    (isAudioFormat(format) && (!hasVideoFormats || isVideoFormat(format))) ||
+    isExternalProgressiveVideoFormat(format)
+  ))
+
+  const hlsFormats = info.formats.filter(format =>
+    ['m3u8', 'm3u8_native'].includes(format.protocol)
+  )
+  const hlsUrls = new Set([
+    info.hlsManifestUrl,
+    ...hlsFormats.map(format => format.manifestUrl),
+    ...hlsFormats.toSorted((a, b) => (b.height ?? 0) - (a.height ?? 0)).map(format => format.url)
+  ].filter(url => url !== null))
+  let hlsUrl = null
+  for (const candidate of hlsUrls) {
+    if (await probeYtDlpHlsManifest(candidate)) {
+      hlsUrl = candidate
+      break
+    }
+  }
+
+  if (hlsUrl !== null) {
+    return {
+      info,
+      source: {
+        manifestSrc: hlsUrl,
+        manifestMimeType: MANIFEST_TYPE_HLS,
+        legacyFormats,
+        captions: info.captions ?? [],
+        captionTranslations: info.captionTranslations ?? [],
+        storyboardSrc: null,
+        isLive
+      }
+    }
+  }
+
+  const dashUrl = info.formats.find(format =>
+    ['http_dash_segments', 'dash'].includes(format.protocol) &&
+    format.manifestUrl !== null
+  )?.manifestUrl ?? null
+  if (dashUrl !== null && await probeYtDlpUrl(dashUrl)) {
+    return {
+      info,
+      source: {
+        manifestSrc: dashUrl,
+        manifestMimeType: MANIFEST_TYPE_DASH,
+        legacyFormats,
+        captions: info.captions ?? [],
+        captionTranslations: info.captionTranslations ?? [],
+        storyboardSrc: null,
+        isLive
+      }
+    }
+  }
+
+  const adaptiveFormats = preferredHttpFormats.filter(format => isVideoFormat(format) !== isAudioFormat(format))
+  const localFormats = getCompatibleAdaptiveFormats(await convertAdaptiveFormats(adaptiveFormats, info.duration))
+  if (localFormats.some(format => format.has_video) && localFormats.some(format => format.has_audio)) {
+    const manifest = await FormatUtils.toDash({ adaptive_formats: localFormats })
+    return {
+      info,
+      source: {
+        manifestSrc: `data:${MANIFEST_TYPE_DASH};charset=UTF-8,${encodeURIComponent(manifest)}`,
+        manifestMimeType: MANIFEST_TYPE_DASH,
+        legacyFormats,
+        captions: info.captions ?? [],
+        captionTranslations: info.captionTranslations ?? [],
+        storyboardSrc: null,
+        isLive
+      }
+    }
+  }
+
+  if (legacyFormats.length === 0) {
+    legacyFormats = await convertLegacyFormats(h265Formats.filter(format => isAudioFormat(format)))
+  }
+  if (legacyFormats.length > 0) {
+    return {
+      info,
+      source: {
+        manifestSrc: null,
+        manifestMimeType: MANIFEST_TYPE_DASH,
+        legacyFormats,
+        captions: info.captions ?? [],
+        captionTranslations: info.captionTranslations ?? [],
+        storyboardSrc: null,
+        isLive
+      }
+    }
+  }
+
+  throw new Error(info.formats.length > 0
+    ? 'yt-dlp returned formats, but their stream URLs could not be accessed by the player'
+    : 'yt-dlp did not return any playable formats')
+}
+
+/**
  * @param {YtDlpPlaybackFormat} format
  */
 function isVideoFormat(format) {
@@ -162,12 +281,22 @@ function isAudioFormat(format) {
   return format.acodec !== null && format.acodec !== 'none'
 }
 
+/** Some extractors omit codec names for otherwise playable progressive video. */
+function isExternalProgressiveVideoFormat(format) {
+  return format.vcodec === null && format.acodec === null &&
+    ['mp4', 'webm'].includes(format.ext) && (format.width !== null || format.height !== null)
+}
+
 /**
  * @param {YtDlpPlaybackFormat} format
  * @returns {string} e.g. `video/mp4; codecs="av01.0.12M.08"`
  */
 function buildMimeType(format) {
+  if (format.ext === 'mp3') return 'audio/mpeg'
+  if (['ogg', 'opus'].includes(format.ext)) return 'audio/ogg'
   const container = format.ext === 'webm' ? 'webm' : 'mp4'
+
+  if (isExternalProgressiveVideoFormat(format)) return `video/${container}`
 
   if (isVideoFormat(format)) {
     const codecs = isAudioFormat(format) ? `${format.vcodec}, ${format.acodec}` : format.vcodec
@@ -186,6 +315,18 @@ function buildQualityLabel(format) {
   }
 
   return format.fps !== null && format.fps > 30 ? `${format.height}p${Math.round(format.fps)}` : `${format.height}p`
+}
+
+/** yt-dlp format IDs outside YouTube are often strings such as `hls-720p`. */
+function getFormatItag(formatId) {
+  const numericId = ITAG_REGEX.exec(formatId)?.[0]
+  if (numericId !== undefined) return parseInt(numericId, 10)
+
+  let hash = 2166136261
+  for (let index = 0; index < formatId.length; index++) {
+    hash = Math.imul(hash ^ formatId.charCodeAt(index), 16777619)
+  }
+  return 1_000_000 + (hash >>> 0)
 }
 
 /**
@@ -243,7 +384,7 @@ function convertYtDlpToLocalFormat(format, byteRanges, fallbackDuration) {
   const isVideo = isVideoFormat(format)
 
   const localFormat = new Misc.Format({
-    itag: parseInt(ITAG_REGEX.exec(format.formatId)?.[0] ?? '0'),
+    itag: getFormatItag(format.formatId),
     mimeType: buildMimeType(format),
     bitrate: format.bitrate ?? 0,
     ...(format.width !== null && format.height !== null ? { width: format.width, height: format.height } : {}),
@@ -311,11 +452,13 @@ function isPostLiveDvrSegmentedFormat(format) {
  */
 function mapYtDlpLegacyFormat(format) {
   return {
-    itag: parseInt(ITAG_REGEX.exec(format.formatId)?.[0] ?? '0'),
+    itag: getFormatItag(format.formatId),
     qualityLabel: buildQualityLabel(format),
     fps: format.fps,
     bitrate: format.bitrate,
-    mimeType: buildMimeType(format),
+    // yt-dlp's short "h264" name is not an RFC 6381 codec string. Let the
+    // browser inspect the MP4 rather than handing Shaka an invalid codec hint.
+    mimeType: ['h264', 'h265'].includes(format.vcodec) ? 'video/mp4' : buildMimeType(format),
     height: format.height,
     width: format.width,
     url: format.url,

@@ -1139,6 +1139,8 @@ Channel:
   All Results: Tất cả
   View All: Xem tất cả
 Video:
+  External DRM Protected: "Không thể phát video được bảo vệ DRM trong OpenTubeX vì chúng yêu cầu các thành phần nguồn đóng độc quyền."
+  Invalid Media URL: "URL phương tiện không hợp lệ"
   Mark As Fully Watched: Đánh dấu là đã xem hết
   AI-generated video summary: "Bản tóm tắt video do AI tạo"
   Quality and accuracy may vary: "Chất lượng và độ chính xác có thể khác nhau"

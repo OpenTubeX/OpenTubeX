@@ -4,7 +4,8 @@ import {
   SUBTITLE_FORMATS, MAX_LOCAL_PLAYLIST_VIDEOS, DENIED_CUSTOM_ARGS, AUTOMATIC_NUMBER_LIMITS,
   splitArguments, automaticNumber,
 } from '../ytDlpArguments'
-import { PLAYBACK_INFO_OUTPUT_TEMPLATE, toFiniteNumber, toNonEmptyString, mapPlaybackFormat, mapPlaybackCaptions } from '../ytDlpMetadata'
+import { PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE, toFiniteNumber, toNonEmptyString, mapPlaybackFormat, mapPlaybackCaptions } from '../ytDlpMetadata'
+import { resolveYtDlpCreatorAvatarUrl } from './ytDlpCreatorAvatar'
 import { execFile, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { chmod, mkdir, mkdtemp, readFile, rename, rm, stat, statfs, writeFile } from 'node:fs/promises'
@@ -31,6 +32,147 @@ import {
 import { supportsNativeNotifications } from './nativeNotifications'
 
 const execFileAsync = promisify(execFile)
+
+/** Cookies acquired while extracting external media stay in memory. */
+const externalStreamCookies = new WeakMap()
+const externalStreamHeaders = new WeakMap()
+const externalManifestHeaders = new WeakMap()
+const EXTERNAL_STREAM_HEADER_NAMES = new Set([
+  'accept', 'accept-language', 'origin', 'referer', 'sec-fetch-mode', 'user-agent'
+])
+
+function registerExternalStreamHeaders(webContents, formats) {
+  const existing = externalStreamHeaders.get(webContents) ?? new Map()
+  const manifestScopes = externalManifestHeaders.get(webContents) ?? new Map()
+  for (const format of formats) {
+    const headers = Object.fromEntries(Object.entries(format.http_headers ?? {})
+      .filter(([name, value]) => EXTERNAL_STREAM_HEADER_NAMES.has(name.toLowerCase()) &&
+        typeof value === 'string' && !/[\r\n]/.test(value)))
+    if (Object.keys(headers).length === 0) continue
+    for (const candidate of [format.url, format.manifest_url]) {
+      if (typeof candidate !== 'string' || !/^https?:\/\//.test(candidate)) continue
+      let streamUrl
+      try { streamUrl = new URL(candidate) } catch { continue }
+      existing.delete(candidate)
+      existing.set(candidate, headers)
+      if (existing.size > 256) existing.delete(existing.keys().next().value)
+
+      if (['m3u8', 'm3u8_native', 'dash', 'http_dash_segments'].includes(format.protocol)) {
+        const scope = `${streamUrl.origin}${new URL('.', streamUrl).pathname}`
+        manifestScopes.delete(scope)
+        manifestScopes.set(scope, headers)
+        if (manifestScopes.size > 256) manifestScopes.delete(manifestScopes.keys().next().value)
+      }
+    }
+  }
+  externalStreamHeaders.set(webContents, existing)
+  externalManifestHeaders.set(webContents, manifestScopes)
+}
+
+export function getYtDlpExternalStreamHeaders(webContents, requestUrl) {
+  const exact = externalStreamHeaders.get(webContents)?.get(requestUrl)
+  if (exact) return exact
+
+  const request = new URL(requestUrl)
+  for (const [scope, headers] of [...(externalManifestHeaders.get(webContents) ?? [])].reverse()) {
+    const base = new URL(scope)
+    if (request.origin === base.origin && request.pathname.startsWith(base.pathname)) return headers
+  }
+  return null
+}
+
+function registerExternalStreamCookies(webContents, formats, cookieFileContents) {
+  const hosts = new Set(formats.flatMap(format => [format.url, format.manifest_url])
+    .filter(url => typeof url === 'string')
+    .map(url => {
+      try {
+        const parsed = new URL(url)
+        return ['http:', 'https:'].includes(parsed.protocol) ? parsed.hostname : null
+      } catch { return null }
+    }).filter(Boolean))
+  if (hosts.size === 0) return
+
+  const cookieFileEntries = cookieFileContents.split(/\r?\n/).flatMap(line => {
+    const fields = line.replace(/^#HttpOnly_/, '').split('\t')
+    if (fields.length !== 7 || fields[0].startsWith('#')) return []
+    const [domain, includeSubdomains, path, secure, expires, name, value] = fields
+    const cookieDomain = domain.replace(/^\./, '').toLowerCase()
+    if (!['TRUE', 'FALSE'].includes(includeSubdomains)) return []
+    if (![...hosts].some(host => host === cookieDomain || (includeSubdomains === 'TRUE' && host.endsWith(`.${cookieDomain}`)))) return []
+    if (!/^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/.test(name) || !value ||
+      !/^[\x20-\x7e]+$/.test(value) || value.includes(';')) return []
+    return [{
+      domain: cookieDomain,
+      includeSubdomains: includeSubdomains === 'TRUE',
+      path,
+      secure: secure === 'TRUE',
+      expires: Math.min(Number(expires) || Infinity, Date.now() / 1000 + 3600),
+      name,
+      value
+    }]
+  })
+
+  // yt-dlp scopes each format's cookies to its URL. Use those in browser-cookie
+  // mode so the browser's entire cookie jar never needs to be written to disk.
+  const formatEntries = cookieFileContents === ''
+    ? formats.flatMap(format => {
+        if (typeof format.cookies !== 'string' || typeof format.url !== 'string') return []
+        let url
+        try { url = new URL(format.url) } catch { return [] }
+        if (!['http:', 'https:'].includes(url.protocol)) return []
+        const entries = []
+        let cookie = null
+        for (const part of format.cookies.split('; ')) {
+          const separator = part.indexOf('=')
+          const name = separator === -1 ? part : part.slice(0, separator)
+          const value = separator === -1 ? '' : part.slice(separator + 1)
+          if (name === 'Domain' || name === 'Path' || name === 'Expires' || name === 'Secure' || name === 'Version') {
+            if (cookie === null) continue
+            const domain = value.replace(/^\./, '').toLowerCase()
+            if (name === 'Domain' && url.hostname !== domain && !url.hostname.endsWith(`.${domain}`)) {
+              entries.pop()
+              cookie = null
+            } else if (name === 'Path' && value.startsWith('/')) cookie.path = value
+            else if (name === 'Expires') cookie.expires = Math.min(Number(value) || Infinity, Date.now() / 1000 + 3600)
+            else if (name === 'Secure') cookie.secure = true
+          } else if (/^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/.test(name) && value &&
+        /^[\x20-\x7e]+$/.test(value) && !value.includes(';')) {
+            cookie = {
+              domain: url.hostname,
+              includeSubdomains: false,
+              path: '/',
+              secure: false,
+              expires: Date.now() / 1000 + 3600,
+              name,
+              value
+            }
+            entries.push(cookie)
+          }
+        }
+        return entries
+      })
+    : []
+  const cookies = [...cookieFileEntries, ...formatEntries]
+
+  const existing = externalStreamCookies.get(webContents) ?? new Map()
+  for (const host of hosts) existing.set(host, cookies)
+  externalStreamCookies.set(webContents, existing)
+}
+
+export function getYtDlpExternalStreamCookieHeader(webContents, requestUrl) {
+  const url = new URL(requestUrl)
+  const cookies = externalStreamCookies.get(webContents)?.get(url.hostname)
+  if (!cookies) return null
+  const now = Date.now() / 1000
+  const matching = cookies.filter(cookie =>
+    now < cookie.expires &&
+    (url.hostname === cookie.domain || (cookie.includeSubdomains && url.hostname.endsWith(`.${cookie.domain}`))) &&
+    (url.pathname === cookie.path ||
+      url.pathname.startsWith(cookie.path.endsWith('/') ? cookie.path : `${cookie.path}/`)) &&
+    (!cookie.secure || url.protocol === 'https:')
+  )
+  return matching.length > 0 ? matching.map(cookie => `${cookie.name}=${cookie.value}`).join('; ') : null
+}
 
 /** @type {Map<string, AbortController>} */
 const getInfoAbortControllers = new Map()
@@ -1383,6 +1525,17 @@ export async function handleYtDlpDownloadBinary(event, binary) {
  * @typedef YtDlpPlaybackInfo
  * @property {string | null} version the version of yt-dlp that extracted this
  * @property {string | null} title
+ * @property {string | null} description
+ * @property {string | null} uploader
+ * @property {string | null} uploaderUrl
+ * @property {string | null} uploaderThumbnail
+ * @property {string | null} channel
+ * @property {string | null} channelUrl
+ * @property {string | null} channelThumbnail
+ * @property {string | null} thumbnail
+ * @property {string | null} webpageUrl
+ * @property {number | null} viewCount
+ * @property {string | null} uploadDate
  * @property {boolean} isLive
  * @property {'is_live' | 'post_live' | 'was_live' | 'not_live' | 'is_upcoming' | null} liveStatus
  * @property {number | null} duration
@@ -1505,8 +1658,20 @@ export async function handleYtDlpGetPlaybackInfo(
     return null
   }
 
-  if (typeof videoId !== 'string' || !ID_REGEX.test(videoId)) {
+  if (typeof videoId !== 'string') {
     return null
+  }
+
+  const isYouTubeVideo = ID_REGEX.test(videoId)
+  let mediaUrl = `https://www.youtube.com/watch?v=${videoId}`
+  if (!isYouTubeVideo) {
+    try {
+      const parsedUrl = new URL(videoId)
+      if (!['http:', 'https:'].includes(parsedUrl.protocol) || parsedUrl.username || parsedUrl.password || videoId.length > 8192) return null
+      mediaUrl = parsedUrl.toString()
+    } catch {
+      return null
+    }
   }
 
   if (
@@ -1535,9 +1700,9 @@ export async function handleYtDlpGetPlaybackInfo(
     '15',
     '--ignore-no-formats-error',
     '--format',
-    'sb0/sb1/sb2/sb3',
+    isYouTubeVideo ? 'sb0/sb1/sb2/sb3' : 'bestvideo*+bestaudio/best',
     '--print',
-    PLAYBACK_INFO_OUTPUT_TEMPLATE
+    isYouTubeVideo ? PLAYBACK_INFO_OUTPUT_TEMPLATE : PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE
   ]
 
   if (includeSubtitles) {
@@ -1550,7 +1715,7 @@ export async function handleYtDlpGetPlaybackInfo(
     )
   }
 
-  if (useDefaultClients !== true) {
+  if (isYouTubeVideo && useDefaultClients !== true) {
     // Keep yt-dlp's account-aware defaults first. For authenticated playback,
     // upstream recommends appending web_safari to obtain its merged HLS formats:
     // https://github.com/yt-dlp/yt-dlp/issues/17143
@@ -1572,10 +1737,24 @@ export async function handleYtDlpGetPlaybackInfo(
 
   await pushProxyArgument(args)
 
-  args.push(`https://www.youtube.com/watch?v=${videoId}`)
+  let cookieDirectory = null
+  let cookieFile = null
+  if (!isYouTubeVideo) {
+    const configuredCookieIndex = args.lastIndexOf('--cookies')
+    if (configuredCookieIndex !== -1) {
+      cookieFile = args[configuredCookieIndex + 1]
+    } else if (!args.includes('--cookies-from-browser')) {
+      cookieDirectory = await mkdtemp(join(app.getPath('temp'), 'opentubex-stream-cookies-'))
+      cookieFile = join(cookieDirectory, 'cookies.txt')
+      args.push('--cookies', cookieFile)
+    }
+  }
+
+  args.push(mediaUrl)
 
   let stdout
   let version
+  let extractedCookies = ''
   try {
     // Unlike --dump-single-json, yt-dlp's projected output does not expose its
     // own version in the template context. Resolve it alongside extraction so
@@ -1590,6 +1769,7 @@ export async function handleYtDlpGetPlaybackInfo(
     ])
     stdout = playbackInfo.stdout
     version = resolvedVersion
+    if (cookieFile !== null) extractedCookies = await readFile(cookieFile, 'utf8').catch(() => '')
   } catch (error) {
     if (error.code === 'ENOENT') {
       return { error: 'ENOENT' }
@@ -1602,6 +1782,8 @@ export async function handleYtDlpGetPlaybackInfo(
     // yt-dlp writes the reason for a failed extraction to stderr
     const stderr = typeof error.stderr === 'string' ? error.stderr.trim() : ''
     return { error: stderr.split('\n').at(-1) || error.message }
+  } finally {
+    if (cookieDirectory !== null) await rm(cookieDirectory, { recursive: true, force: true })
   }
 
   let info
@@ -1612,11 +1794,29 @@ export async function handleYtDlpGetPlaybackInfo(
   }
 
   const formats = Array.isArray(info.formats) ? info.formats : []
+  if (!isYouTubeVideo) {
+    registerExternalStreamHeaders(event.sender, formats)
+    registerExternalStreamCookies(event.sender, formats, extractedCookies)
+  }
   const { captions, captionTranslations } = mapPlaybackCaptions(info.requested_subtitles)
+  const creatorAvatarUrl = isYouTubeVideo
+    ? null
+    : await resolveYtDlpCreatorAvatarUrl(info, (url, options) => net.fetch(url, options))
 
   return {
     version,
     title: toNonEmptyString(info.title),
+    description: toNonEmptyString(info.description),
+    uploader: toNonEmptyString(info.uploader),
+    uploaderUrl: toNonEmptyString(info.uploader_url),
+    uploaderThumbnail: info.channel ? null : creatorAvatarUrl,
+    channel: toNonEmptyString(info.channel),
+    channelUrl: toNonEmptyString(info.channel_url),
+    channelThumbnail: info.channel ? creatorAvatarUrl : null,
+    thumbnail: toNonEmptyString(info.thumbnail),
+    webpageUrl: toNonEmptyString(info.webpage_url),
+    viewCount: toFiniteNumber(info.view_count),
+    uploadDate: toNonEmptyString(info.upload_date),
     isLive: !!info.is_live,
     liveStatus: toNonEmptyString(info.live_status),
     duration: toFiniteNumber(info.duration),

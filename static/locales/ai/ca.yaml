@@ -1517,6 +1517,8 @@ Channel:
     Hide Answers: Oculta les respostes
     Video hidden by OpenTubeX: Vídeo ocult per l'OpenTubeX
 Video:
+  External DRM Protected: "Els vídeos protegits amb DRM no es poden reproduir a l'OpenTubeX perquè requereixen components propietaris de codi tancat."
+  Invalid Media URL: "URL de contingut multimèdia no vàlida"
   Mark As Fully Watched: Marca com a vist completament
   AI-generated video summary: "Resum del vídeo generat per IA"
   Quality and accuracy may vary: "La qualitat i la precisió poden variar"

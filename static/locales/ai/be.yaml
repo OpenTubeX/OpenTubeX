@@ -1174,6 +1174,8 @@ Channel:
   All Results: Усе
   View All: Паказаць усе
 Video:
+  External DRM Protected: "Відэа, абароненыя DRM, нельга прайграваць у OpenTubeX, бо для іх патрэбны прапрыетарныя кампаненты з закрытым зыходным кодам."
+  Invalid Media URL: "Няправільны URL медыя"
   Mark As Fully Watched: Пазначыць як цалкам прагледжанае
   AI-generated video summary: "Зводка відэа, створаная ШІ"
   Quality and accuracy may vary: "Якасць і дакладнасць могуць адрознівацца"

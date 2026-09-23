@@ -139,13 +139,34 @@ public final class YtDlpPlugin extends Plugin {
         run(call, () -> {
             List<String> args = YtDlpArguments.validate(call.getArray("args"));
             String cookies = call.getString("cookies", "");
-            if (!cookies.isEmpty()) {
-                File allowed = new File(getContext().getNoBackupFilesDir(), "yt-dlp-cookies.txt");
-                if (!cookies.equals(allowed.getAbsolutePath()) || !allowed.isFile()) throw new IOException("Cookie file is unavailable");
-                args.addAll(asList("--cookies", cookies));
+            boolean externalMedia = call.getBoolean("externalMedia", false);
+            File temporaryCookies = null;
+            try {
+                if (!cookies.isEmpty()) {
+                    File allowed = new File(getContext().getNoBackupFilesDir(), "yt-dlp-cookies.txt");
+                    if (!cookies.equals(allowed.getAbsolutePath()) || !allowed.isFile()) throw new IOException("Cookie file is unavailable");
+                    args.addAll(asList("--cookies", cookies));
+                } else if (externalMedia) {
+                    temporaryCookies = File.createTempFile("yt-dlp-stream-", ".txt", getContext().getCacheDir());
+                    YtDlpFiles.write(temporaryCookies, "# Netscape HTTP Cookie File\n".getBytes(StandardCharsets.UTF_8));
+                    args.addAll(asList("--cookies", temporaryCookies.getAbsolutePath()));
+                }
+                args.add("--simulate");
+                String stdout = YtDlpRuntime.extract(getContext(), args);
+                if (externalMedia) {
+                    File cookieFile = temporaryCookies == null ? new File(cookies) : temporaryCookies;
+                    String extractedCookies;
+                    try (InputStream input = new FileInputStream(cookieFile)) {
+                        extractedCookies = new String(YtDlpFiles.read(input, 2 * 1024 * 1024), StandardCharsets.UTF_8);
+                    }
+                    JSONObject info = new JSONObject(stdout);
+                    ExternalStreamRequestRegistry.shared().register(info.optJSONArray("formats") == null
+                        ? new JSONArray() : info.getJSONArray("formats"), extractedCookies);
+                }
+                return new JSONObject().put("stdout", stdout);
+            } finally {
+                if (temporaryCookies != null) temporaryCookies.delete();
             }
-            args.add("--simulate");
-            return new JSONObject().put("stdout", YtDlpRuntime.extract(getContext(), args));
         });
     }
     @PluginMethod public void subtitle(PluginCall call) {

@@ -1140,6 +1140,8 @@ Channel:
   All Results: Toate
   View All: Vezi tot
 Video:
+  External DRM Protected: "Videoclipurile protejate DRM nu pot fi redate în OpenTubeX, deoarece necesită componente proprietare, cu sursă închisă."
+  Invalid Media URL: "Adresă URL media nevalidă"
   Mark As Fully Watched: Marchează ca vizionat integral
   AI-generated video summary: "Rezumat video generat de IA"
   Quality and accuracy may vary: "Calitatea și precizia pot varia"

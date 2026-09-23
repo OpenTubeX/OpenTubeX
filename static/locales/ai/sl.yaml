@@ -1484,6 +1484,8 @@ Channel:
     Hide Answers: Skrij odgovore
     Video hidden by OpenTubeX: OpenTubeX je skril videoposnetek
 Video:
+  External DRM Protected: "Videoposnetkov z zaščito DRM ni mogoče predvajati v OpenTubeX, saj zahtevajo lastniške zaprtokodne komponente."
+  Invalid Media URL: "Neveljaven URL predstavnosti"
   Mark As Fully Watched: Označi kot ogledano do konca
   AI-generated video summary: "Povzetek videoposnetka, ustvarjen z UI"
   Quality and accuracy may vary: "Kakovost in natančnost se lahko razlikujeta"

@@ -1116,6 +1116,8 @@ Channel:
   Search Result Types: "Doareoù disoc'hoù enklask"
   All Results: "Pep tra"
 Video:
+  External DRM Protected: "Ne c'heller ket lenn ar videoioù gwarezet gant DRM war OpenTubeX, peogwir e vije ezhomm implijout elfennoù perc'hennet gant gwirioù ha n'int ket digor."
+  Invalid Media URL: "URL media didalvoudek"
   Mark As Fully Watched: Merkañ evel gwelet penn-da-benn
   AI-generated video summary: "Diverradenn ar video ganet gant an IA"
   Quality and accuracy may vary: "Gallout a ra ar perzhded hag ar resisted cheñch"

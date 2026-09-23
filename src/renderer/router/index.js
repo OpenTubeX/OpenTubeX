@@ -38,6 +38,7 @@ const SearchPage = createAsyncRoute(() => import('../views/SearchPage/SearchPage
 const Playlist = createAsyncRoute(() => import('../views/Playlist/Playlist.vue'))
 const Channel = createAsyncRoute(() => import('../views/Channel/Channel.vue'))
 const Watch = createAsyncRoute(() => import('../views/Watch/Watch.vue'))
+const ExternalMedia = createAsyncRoute(() => import('../views/ExternalMedia/ExternalMedia.vue'))
 const Hashtag = createAsyncRoute(() => import('../views/Hashtag/Hashtag.vue'))
 const Post = createAsyncRoute(() => import('../views/Post.vue'))
 
@@ -223,6 +224,16 @@ export const routes = [
     },
     component: Watch
   },
+  ...(supportsYtDlp
+    ? [{
+        path: '/external-media',
+        meta: {
+          title: 'Watch',
+          hasDynamicTitle: true
+        },
+        component: ExternalMedia
+      }]
+    : []),
   {
     path: '/hashtag/:hashtag',
     meta: {

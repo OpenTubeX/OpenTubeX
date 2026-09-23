@@ -1116,6 +1116,8 @@ Channel:
   Search Result Types: Tipi di risultati della ricerca
   All Results: Tutti
 Video:
+  External DRM Protected: "I video protetti da DRM non possono essere riprodotti in OpenTubeX, poiché richiedono componenti proprietari e closed source."
+  Invalid Media URL: "URL multimediale non valido"
   Mark As Fully Watched: Segna come visto interamente
   AI-generated video summary: "Riepilogo del video generato dall'IA"
   Quality and accuracy may vary: "La qualità e l'accuratezza possono variare"

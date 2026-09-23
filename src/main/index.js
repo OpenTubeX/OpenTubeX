@@ -51,7 +51,7 @@ import { brotliDecompress } from 'zlib'
 
 import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
-import { getYtDlpDownloadFile, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpControlDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetSubtitle, handleYtDlpGetPlaybackInfo, handleYtDlpGetHistoryMetadata, handleYtDlpCancelHistoryRepair, handleYtDlpGetRecommendations, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpQueueAction, handleYtDlpRemoveDownload, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
+import { getYtDlpDownloadFile, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpControlDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetSubtitle, handleYtDlpGetPlaybackInfo, handleYtDlpGetHistoryMetadata, handleYtDlpCancelHistoryRepair, handleYtDlpGetRecommendations, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpQueueAction, handleYtDlpRemoveDownload, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
 import { applyYtDlpPlaybackCacheSettings, handleYtDlpPlaybackCacheClear, handleYtDlpPlaybackCacheDelete, handleYtDlpPlaybackCacheGet, handleYtDlpPlaybackCacheSet } from './ytDlpPlaybackCache'
 import { generatePoToken } from './poTokenGenerator'
 import { expandMultipleOnlyPluralMessages, selectPluralForm } from '../renderer/i18n/plurals'
@@ -2268,6 +2268,17 @@ function runApp() {
 
         if (invidiousAuthorization && isInvidiousInstanceUrl(url, invidiousAuthorization.url)) {
           requestHeaders.Authorization = invidiousAuthorization.authorization
+        }
+      }
+
+      if (webContents && isOpenTubeXUrl(webContents.getURL())) {
+        Object.assign(requestHeaders, getYtDlpExternalStreamHeaders(webContents, url))
+        const streamCookies = getYtDlpExternalStreamCookieHeader(webContents, url)
+        if (streamCookies !== null) {
+          const names = new Set(streamCookies.split('; ').map(cookie => cookie.split('=')[0]))
+          const existing = (requestHeaders.Cookie ?? '').split('; ')
+            .filter(cookie => cookie && !names.has(cookie.split('=')[0]))
+          requestHeaders.Cookie = [...existing, streamCookies].join('; ')
         }
       }
 

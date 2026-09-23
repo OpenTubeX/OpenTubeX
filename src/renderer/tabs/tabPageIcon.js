@@ -15,6 +15,7 @@ const PAGE_ICONS = [
   [/^\/hashtag(?:\/|$)/, ['fas', 'hashtag']],
   [/^\/post(?:\/|$)/, ['fas', 'comment']],
   [/^\/watch(?:\/|$)/, ['fas', 'clapperboard']],
+  [/^\/external-media(?:\/|$)/, ['fas', 'clapperboard']],
 ]
 
 export function getTabPageIcon(tab) {

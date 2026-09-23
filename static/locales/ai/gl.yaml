@@ -1141,6 +1141,8 @@ Channel:
   All Results: Todos
   View All: Ver todo
 Video:
+  External DRM Protected: "Os vídeos protexidos con DRM non se poden reproducir en OpenTubeX, xa que requiren compoñentes propietarios e de código pechado."
+  Invalid Media URL: "URL multimedia non válida"
   Mark As Fully Watched: Marcar como visto por completo
   AI-generated video summary: "Resumo do vídeo xerado por IA"
   Quality and accuracy may vary: "A calidade e a precisión poden variar"

@@ -150,6 +150,8 @@ import store from '../../store/index'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { isKeyboardEventKeyPrintableChar, isNullOrEmpty } from '../../helpers/strings'
 import { getInputTextAscentOffset } from './inputTextMetrics'
+import { shouldOpenExternalMediaUrl } from '../../helpers/externalMediaUrl'
+import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 
 const { t } = useI18n()
 
@@ -201,6 +203,10 @@ const props = defineProps({
     default: false
   },
   isSearch: {
+    type: Boolean,
+    default: false
+  },
+  externalMediaNavigation: {
     type: Boolean,
     default: false
   },
@@ -388,6 +394,11 @@ async function handleActionIconChange() {
     return
   }
 
+  if (props.externalMediaNavigation && supportsYtDlp && shouldOpenExternalMediaUrl(inputData.value, store.getters.getCurrentInvidiousInstanceUrl)) {
+    if (props.forceActionButtonIconName === null) actionButtonIconName.value = ['fas', 'arrow-right']
+    return
+  }
+
   // Update action button icon according to input
   try {
     const result = await store.dispatch('getYoutubeUrlInfo', inputData.value)
@@ -415,7 +426,8 @@ async function handleActionIconChange() {
     }
 
     if (props.forceActionButtonIconName === null) {
-      if (isYoutubeLink) {
+      if (isYoutubeLink || (props.externalMediaNavigation && supportsYtDlp &&
+        shouldOpenExternalMediaUrl(inputData.value, store.getters.getCurrentInvidiousInstanceUrl))) {
         // Go to URL (i.e. Video/Playlist/Channel
         actionButtonIconName.value = ['fas', 'arrow-right']
       } else {

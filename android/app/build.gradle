@@ -146,6 +146,7 @@ repositories {
 
 dependencies {
     implementation "com.squareup.okhttp3:okhttp:4.12.0"
+    testImplementation "com.squareup.okhttp3:mockwebserver:4.12.0"
     implementation "io.github.junkfood02.youtubedl-android:library:0.18.1"
     implementation "io.github.junkfood02.youtubedl-android:ffmpeg:0.18.1"
     implementation "androidx.documentfile:documentfile:1.0.1"
@@ -160,6 +161,7 @@ dependencies {
     implementation "androidx.media3:media3-exoplayer:1.9.2"
     implementation "androidx.media3:media3-exoplayer-dash:1.9.2"
     implementation "androidx.media3:media3-exoplayer-hls:1.9.2"
+    implementation "androidx.media3:media3-datasource-okhttp:1.9.2"
     implementation "androidx.media3:media3-ui:1.9.2"
     implementation project(':capacitor-android')
     testImplementation "junit:junit:$junitVersion"
