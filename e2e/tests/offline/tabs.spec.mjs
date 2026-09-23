@@ -3097,6 +3097,7 @@ test('selects whole tab groups and changes their icons', async ({ page }) => {
   await group.locator('.groupIconButton').click()
   await expect(group.locator('.groupIconPicker button')).toHaveCount(17)
   const pickerSize = await group.locator('.groupIconPicker').boundingBox()
+  expect(pickerSize).not.toBeNull()
   expect(pickerSize.width).toBeGreaterThan(pickerSize.height)
   await expect(group.locator('.groupIconPicker')).not.toContainText(/Home|Subscriptions|History/)
   await group.getByRole('button', { name: 'Research', exact: true }).click()
