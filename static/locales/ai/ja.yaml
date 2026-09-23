@@ -1437,6 +1437,14 @@ Context Menu:
   Selection Too Long: 選択範囲が検索には長すぎます（{count}文字超）
 Tab Organizer:
   Icon Labels:
+    Podcast: 'ポッドキャスト'
+    Clock: '時計'
+    Puzzle Piece: 'パズルのピース'
+    People: '人物'
+    Chart: 'グラフ'
+    Calendar: 'カレンダー'
+    Images: '画像'
+    Music: '音楽'
     Folder: フォルダー
     Bookmark: ブックマーク
     Favorites: お気に入り

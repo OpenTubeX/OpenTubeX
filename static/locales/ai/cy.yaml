@@ -1460,6 +1460,14 @@ Context Menu:
   Selection Too Long: Mae'r dewis yn rhy hir i'w chwilio (> {count} nod)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Podlediad'
+    Clock: 'Cloc'
+    Puzzle Piece: 'Darn jig-so'
+    People: 'Pobl'
+    Chart: 'Siart'
+    Calendar: 'Calendr'
+    Images: 'Delweddau'
+    Music: 'Cerddoriaeth'
     Folder: Ffolder
     Bookmark: Nod tudalen
     Favorites: Ffefrynnau

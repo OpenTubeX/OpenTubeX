@@ -1517,6 +1517,14 @@ Context Menu:
   Selection Too Long: Вылучаны тэкст задоўгі для пошуку (> {count} знакаў)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Падкаст'
+    Clock: 'Гадзіннік'
+    Puzzle Piece: 'Элемент пазла'
+    People: 'Людзі'
+    Chart: 'Дыяграма'
+    Calendar: 'Каляндар'
+    Images: 'Выявы'
+    Music: 'Музыка'
     Folder: Папка
     Bookmark: Закладка
     Favorites: Абранае

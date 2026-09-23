@@ -1451,6 +1451,14 @@ Context Menu:
   Selection Too Long: Den merkede teksten er for lang for søk (> {count} tegn)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Podkast'
+    Clock: 'Klokke'
+    Puzzle Piece: 'Puslespillbrikke'
+    People: 'Personer'
+    Chart: 'Diagram'
+    Calendar: 'Kalender'
+    Images: 'Bilder'
+    Music: 'Musikk'
     Folder: Mappe
     Bookmark: Bokmerke
     Favorites: Favoritter

@@ -1479,6 +1479,14 @@ Context Menu:
   Selection Too Long: A selección é demasiado longa para a busca (> {count} caracteres)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Pódcast'
+    Clock: 'Reloxo'
+    Puzzle Piece: 'Peza de crebacabezas'
+    People: 'Persoas'
+    Chart: 'Gráfico'
+    Calendar: 'Calendario'
+    Images: 'Imaxes'
+    Music: 'Música'
     Folder: Cartafol
     Bookmark: Marcador
     Favorites: Favoritos

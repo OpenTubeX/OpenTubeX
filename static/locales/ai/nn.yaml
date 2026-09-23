@@ -1730,6 +1730,14 @@ Context Menu:
   Selection Too Long: Utvalet er for langt til å søkje etter (> {count} teikn)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Podkast'
+    Clock: 'Klokke'
+    Puzzle Piece: 'Puslespelbrikke'
+    People: 'Folk'
+    Chart: 'Diagram'
+    Calendar: 'Kalender'
+    Images: 'Bilete'
+    Music: 'Musikk'
     Folder: Mappe
     Bookmark: Bokmerke
     Favorites: Favorittar

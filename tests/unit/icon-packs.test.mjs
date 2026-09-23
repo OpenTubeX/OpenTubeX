@@ -8,6 +8,7 @@ import {
   normalizeFaIcon,
   resolveMappedIcon,
 } from '../../src/renderer/icons/iconMappingResolver.js'
+import { TAB_GROUP_ICONS } from '../../src/tabGroupIcons.js'
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const rendererRoot = path.join(repoRoot, 'src/renderer')
@@ -74,6 +75,17 @@ test('every mapped glyph is present in its generated pack bundle', async () => {
           `${pack} bundle is missing simple-icons:${entry.simple}`
         )
       }
+    }
+  }
+})
+
+test('every selectable tab group icon is available in both icon packs', async () => {
+  for (const pack of packs) {
+    const bundle = await readJson(`iconifyBundles/${pack}.json`)
+    for (const name of TAB_GROUP_ICONS) {
+      const iconifyId = resolveIconifyId(['fas', name], pack)
+      assert.ok(iconifyId, `${pack} is missing a mapping for ${name}`)
+      assert.ok(bundle[iconifyId], `${pack} bundle is missing ${iconifyId}`)
     }
   }
 })

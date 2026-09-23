@@ -1475,6 +1475,14 @@ Context Menu:
   Selection Too Long: Η επιλογή είναι πολύ μεγάλη για αναζήτηση (> {count} χαρακτήρες)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Podcast'
+    Clock: 'Ρολόι'
+    Puzzle Piece: 'Κομμάτι παζλ'
+    People: 'Άτομα'
+    Chart: 'Γράφημα'
+    Calendar: 'Ημερολόγιο'
+    Images: 'Εικόνες'
+    Music: 'Μουσική'
     Folder: Φάκελος
     Bookmark: Σελιδοδείκτης
     Favorites: Αγαπημένα

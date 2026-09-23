@@ -719,6 +719,14 @@ Context Menu:
   Search With Multiple: Wyszukaj za pomocą...
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Podcast'
+    Clock: 'Zegar'
+    Puzzle Piece: 'Element układanki'
+    People: 'Ludzie'
+    Chart: 'Wykres'
+    Calendar: 'Kalendarz'
+    Images: 'Obrazy'
+    Music: 'Muzyka'
     Folder: Folder
     Bookmark: Zakładka
     Favorites: Ulubione

@@ -1418,6 +1418,14 @@ Context Menu:
   Selection Too Long: Selection is too long for search (> {count} characters)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Podcast'
+    Clock: 'Clock'
+    Puzzle Piece: 'Puzzle piece'
+    People: 'People'
+    Chart: 'Chart'
+    Calendar: 'Calendar'
+    Images: 'Images'
+    Music: 'Music'
     Folder: Folder
     Bookmark: Bookmark
     Favorites: Favourites

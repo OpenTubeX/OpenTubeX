@@ -1480,6 +1480,14 @@ Context Menu:
   Selection Too Long: தேடுவதற்குத் தேர்வு மிக நீளமாக உள்ளது (> {count} எழுத்துகள்)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'வலையொலி'
+    Clock: 'கடிகாரம்'
+    Puzzle Piece: 'புதிர்த் துண்டு'
+    People: 'மக்கள்'
+    Chart: 'விளக்கப்படம்'
+    Calendar: 'நாட்காட்டி'
+    Images: 'படங்கள்'
+    Music: 'இசை'
     Folder: கோப்புறை
     Bookmark: புக்மார்க்
     Favorites: பிடித்தவை

@@ -1445,6 +1445,14 @@ Context Menu:
   Selection Too Long: Pilihan terlalu panjang untuk dicari (> {count} karakter)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Podcast'
+    Clock: 'Jam'
+    Puzzle Piece: 'Potongan teka-teki'
+    People: 'Orang'
+    Chart: 'Bagan'
+    Calendar: 'Kalender'
+    Images: 'Gambar'
+    Music: 'Musik'
     Folder: Folder
     Bookmark: Markah
     Favorites: Favorit

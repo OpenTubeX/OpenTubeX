@@ -2459,6 +2459,14 @@ Tab Organizer:
     Research: Research
     Art: Art
     Travel: Travel
+    Podcast: Podcast
+    Clock: Clock
+    Puzzle Piece: Puzzle piece
+    People: People
+    Chart: Chart
+    Calendar: Calendar
+    Images: Images
+    Music: Music
   Group Icon: Group icon
   Title: Tab Organizer
   Open Tab Count: '{count} open tab | {count} open tabs'

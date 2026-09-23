@@ -1477,6 +1477,14 @@ Context Menu:
   Selection Too Long: הטקסט שנבחר ארוך מדי לחיפוש (מעל {count} תווים)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'פודקאסט'
+    Clock: 'שעון'
+    Puzzle Piece: 'חתיכת פאזל'
+    People: 'אנשים'
+    Chart: 'תרשים'
+    Calendar: 'לוח שנה'
+    Images: 'תמונות'
+    Music: 'מוזיקה'
     Folder: תיקייה
     Bookmark: סימנייה
     Favorites: מועדפים

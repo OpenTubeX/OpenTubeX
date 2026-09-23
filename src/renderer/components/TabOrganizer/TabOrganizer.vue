@@ -708,7 +708,15 @@ const groupIconNames = computed(() => [
   t('Tab Organizer.Icon Labels.Gaming'),
   t('Tab Organizer.Icon Labels.Research'),
   t('Tab Organizer.Icon Labels.Art'),
-  t('Tab Organizer.Icon Labels.Travel')
+  t('Tab Organizer.Icon Labels.Travel'),
+  t('Tab Organizer.Icon Labels.Podcast'),
+  t('Tab Organizer.Icon Labels.Clock'),
+  t('Tab Organizer.Icon Labels.Puzzle Piece'),
+  t('Tab Organizer.Icon Labels.People'),
+  t('Tab Organizer.Icon Labels.Chart'),
+  t('Tab Organizer.Icon Labels.Calendar'),
+  t('Tab Organizer.Icon Labels.Images'),
+  t('Tab Organizer.Icon Labels.Music')
 ])
 const titleId = `tab-organizer-title-${useId().replaceAll(':', '')}`
 const promptId = `tab-organizer-${useId().replaceAll(':', '')}`

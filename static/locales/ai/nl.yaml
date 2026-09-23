@@ -1486,6 +1486,14 @@ Context Menu:
   Selection Too Long: Selectie is te lang om te zoeken (> {count} tekens)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Podcast'
+    Clock: 'Klok'
+    Puzzle Piece: 'Puzzelstuk'
+    People: 'Mensen'
+    Chart: 'Grafiek'
+    Calendar: 'Agenda'
+    Images: 'Afbeeldingen'
+    Music: 'Muziek'
     Folder: Map
     Bookmark: Bladwijzer
     Favorites: Favorieten

@@ -1437,6 +1437,14 @@ Context Menu:
   Selection Too Long: A kijelölt szöveg túl hosszú a kereséshez (> {count} karakter)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Podcast'
+    Clock: 'Óra'
+    Puzzle Piece: 'Kirakósdarab'
+    People: 'Emberek'
+    Chart: 'Diagram'
+    Calendar: 'Naptár'
+    Images: 'Képek'
+    Music: 'Zene'
     Folder: Mappa
     Bookmark: Könyvjelző
     Favorites: Kedvencek

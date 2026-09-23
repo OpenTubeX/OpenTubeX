@@ -1470,6 +1470,14 @@ Context Menu:
   Selection Too Long: التحديد طويل جدًا للبحث (> {count} حرفًا)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'بودكاست'
+    Clock: 'ساعة'
+    Puzzle Piece: 'قطعة أحجية'
+    People: 'أشخاص'
+    Chart: 'مخطط'
+    Calendar: 'تقويم'
+    Images: 'صور'
+    Music: 'موسيقى'
     Folder: مجلد
     Bookmark: إشارة مرجعية
     Favorites: المفضلة

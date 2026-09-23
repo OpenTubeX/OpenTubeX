@@ -1798,6 +1798,14 @@ Context Menu:
   Selection Too Long: 선택한 텍스트가 너무 길어 검색할 수 없습니다. {count}자 이하여야 합니다
 Tab Organizer:
   Icon Labels:
+    Podcast: '팟캐스트'
+    Clock: '시계'
+    Puzzle Piece: '퍼즐 조각'
+    People: '사람'
+    Chart: '차트'
+    Calendar: '달력'
+    Images: '이미지'
+    Music: '음악'
     Folder: 폴더
     Bookmark: 북마크
     Favorites: 즐겨찾기

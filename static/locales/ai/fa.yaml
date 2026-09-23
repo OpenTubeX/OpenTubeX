@@ -1511,6 +1511,14 @@ Context Menu:
   Selection Too Long: متن انتخاب‌شده برای جست‌وجو بیش از حد بلند است (> {count} نویسه)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'پادکست'
+    Clock: 'ساعت'
+    Puzzle Piece: 'قطعه پازل'
+    People: 'افراد'
+    Chart: 'نمودار'
+    Calendar: 'تقویم'
+    Images: 'تصاویر'
+    Music: 'موسیقی'
     Folder: پوشه
     Bookmark: نشانک
     Favorites: علاقه‌مندی‌ها

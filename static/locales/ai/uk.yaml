@@ -1470,6 +1470,14 @@ Context Menu:
   Selection Too Long: Вибраний текст задовгий для пошуку (> {count} символів)
 Tab Organizer:
   Icon Labels:
+    Podcast: 'Подкаст'
+    Clock: 'Годинник'
+    Puzzle Piece: 'Елемент пазла'
+    People: 'Люди'
+    Chart: 'Діаграма'
+    Calendar: 'Календар'
+    Images: 'Зображення'
+    Music: 'Музика'
     Folder: Тека
     Bookmark: Закладка
     Favorites: Улюблене
