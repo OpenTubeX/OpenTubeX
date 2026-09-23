@@ -178,6 +178,7 @@ Search Filters:
 # Sidebar
 Stats:
   Stats: Stats
+  All devices: All devices
   Watch time summary: Watch time summary
   Today: Today
   This week: This week
@@ -1535,6 +1536,7 @@ Settings:
     Turn Flashlight On: Turn flashlight on
     Turn Flashlight Off: Turn flashlight off
     Sync Settings: Sync
+    Sync statistics: Sync statistics
     Enable Sync: Enable Sync
     Privacy Passphrase: Privacy passphrase
     Privacy Passphrase Hint: Use a separate passphrase from your account password. It never leaves this device and is required on every device; losing it makes encrypted sync data unrecoverable.
@@ -1645,6 +1647,7 @@ Settings:
     Syncing subscriptions: Syncing subscriptions…
     Syncing playlists: Syncing playlists…
     Syncing history: Syncing watch history…
+    Syncing statistics: Syncing watch statistics…
     Syncing profiles: Syncing profiles…
     Syncing open tabs: Syncing open tabs and session…
     Syncing settings: Syncing settings…

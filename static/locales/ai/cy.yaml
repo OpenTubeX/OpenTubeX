@@ -62,6 +62,7 @@ Search Listing:
   Label:
     Members Only: Aelodau yn unig
 Stats:
+  All devices: Pob dyfais
   Stats: Ystadegau
   Watch time summary: Crynodeb o'r amser gwylio
   Today: Heddiw
@@ -933,6 +934,7 @@ Settings:
     New Passwords Do Not Match: "Nid yw’r cyfrineiriau newydd yn cyfateb."
     Password Changed: "Cyfrinair wedi’i newid. Mae’r dyfeisiau eraill wedi’u hallgofnodi."
     Sync Settings: Cysoni
+    Sync statistics: Cysoni ystadegau
     Enable Sync: Galluogi cysoni
     Privacy Passphrase: Cyfrinymadrodd preifatrwydd
     Privacy Passphrase Hint: Defnyddiwch gyfrinymadrodd ar wahân i gyfrinair eich cyfrif. Nid yw byth yn gadael y ddyfais hon ac mae ei angen ar bob dyfais; os collwch ef, ni ellir adfer y data cysoni wedi'u hamgryptio.
@@ -1005,6 +1007,7 @@ Settings:
     Syncing subscriptions: Wrthi'n cysoni tanysgrifiadau…
     Syncing playlists: Wrthi'n cysoni rhestrau chwarae…
     Syncing history: Wrthi'n cysoni hanes gwylio…
+    Syncing statistics: Wrthi'n cysoni ystadegau gwylio…
     Syncing profiles: Wrthi'n cysoni proffiliau…
     Syncing open tabs: Wrthi'n cysoni tabiau agored a'r sesiwn…
     Syncing settings: Wrthi'n cysoni gosodiadau…

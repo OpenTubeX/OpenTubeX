@@ -64,6 +64,7 @@ Search Listing:
   Label:
     Members Only: Само за чланове
 Stats:
+  All devices: Сви уређаји
   Stats: Статистика
   Watch time summary: Преглед времена гледања
   Today: Данас
@@ -924,6 +925,8 @@ Settings:
     Import playlists formats: 'Подржани формати: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Подржани формати: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Sync statistics: Синхронизуј статистику
+    Syncing statistics: Синхронизација статистике гледања…
     Sync Automatically: "Аутоматски синхронизуј"
     Activity: "Активност налога"
     No Activity: "Нема недавних активности"

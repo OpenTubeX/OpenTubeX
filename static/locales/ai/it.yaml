@@ -62,6 +62,7 @@ Search Listing:
   Label:
     Members Only: Solo membri
 Stats:
+  All devices: Tutti i dispositivi
   Stats: Statistiche
   Watch time summary: Riepilogo del tempo di visione
   Today: Oggi
@@ -929,6 +930,7 @@ Settings:
     New Passwords Do Not Match: "Le nuove password non corrispondono."
     Password Changed: "Password modificata. Gli altri dispositivi sono stati disconnessi."
     Sync Settings: Sincronizzazione
+    Sync statistics: Sincronizza le statistiche
     Enable Sync: Abilita sincronizzazione
     Privacy Passphrase: Frase segreta per la privacy
     Privacy Passphrase Hint: Usa una frase segreta diversa dalla password dell'account. Non lascia mai questo dispositivo ed è richiesta su ogni dispositivo; se la perdi, i dati di sincronizzazione cifrati non potranno essere recuperati.
@@ -1001,6 +1003,7 @@ Settings:
     Syncing subscriptions: Sincronizzazione delle iscrizioni…
     Syncing playlists: Sincronizzazione delle playlist…
     Syncing history: Sincronizzazione della cronologia di visione…
+    Syncing statistics: Sincronizzazione delle statistiche di visualizzazione…
     Syncing profiles: Sincronizzazione dei profili…
     Syncing open tabs: Sincronizzazione delle schede aperte e della sessione…
     Syncing settings: Sincronizzazione delle impostazioni…

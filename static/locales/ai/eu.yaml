@@ -62,6 +62,7 @@ Search Listing:
   Label:
     Members Only: Kideentzat soilik
 Stats:
+  All devices: Gailu guztiak
   Stats: Estatistikak
   Watch time summary: Ikustaldi-denboraren laburpena
   Today: Gaur
@@ -929,6 +930,7 @@ Settings:
     New Passwords Do Not Match: "Pasahitz berriak ez datoz bat."
     Password Changed: "Pasahitza aldatu da. Beste gailuetako saioak itxi dira."
     Sync Settings: Sinkronizazioa
+    Sync statistics: Sinkronizatu estatistikak
     Enable Sync: Gaitu sinkronizazioa
     Privacy Passphrase: Pribatutasun-pasaesaldia
     Privacy Passphrase Hint: Erabili kontuaren pasahitzaz bestelako pasaesaldi bat. Ez da inoiz gailu honetatik ateratzen eta gailu guztietan behar da; galtzen baduzu, ezin izango dituzu berreskuratu sinkronizatutako datu zifratuak.
@@ -1001,6 +1003,7 @@ Settings:
     Syncing subscriptions: Harpidetzak sinkronizatzen…
     Syncing playlists: Erreprodukzio-zerrendak sinkronizatzen…
     Syncing history: Ikustaldi-historia sinkronizatzen…
+    Syncing statistics: Ikustaldien estatistikak sinkronizatzen…
     Syncing profiles: Profilak sinkronizatzen…
     Syncing open tabs: Irekitako fitxak eta saioa sinkronizatzen…
     Syncing settings: Ezarpenak sinkronizatzen…

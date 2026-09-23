@@ -62,6 +62,7 @@ Search Listing:
   Label:
     Members Only: الأعضاء فقط
 Stats:
+  All devices: جميع الأجهزة
   Stats: احصائيات
   Watch time summary: مشاهدة ملخص الوقت
   Today: اليوم
@@ -948,6 +949,7 @@ Settings:
     New Passwords Do Not Match: "كلمتا المرور الجديدتان غير متطابقتين."
     Password Changed: "تم تغيير كلمة المرور. تم تسجيل خروج الأجهزة الأخرى."
     Sync Settings: مزامنة
+    Sync statistics: مزامنة الإحصاءات
     Enable Sync: تمكين المزامنة
     Privacy Passphrase: عبارة مرور الخصوصية
     Privacy Passphrase Hint: استخدم عبارة مرور منفصلة عن كلمة مرور حسابك. لا يغادر هذا الجهاز أبدًا وهو مطلوب في كل جهاز؛ وفقدانها يجعل بيانات المزامنة المشفرة غير قابلة للاسترداد.
@@ -1020,6 +1022,7 @@ Settings:
     Syncing subscriptions: جارٍ مزامنة الاشتراكات…
     Syncing playlists: جارٍ مزامنة قوائم التشغيل…
     Syncing history: جارٍ مزامنة سجل المشاهدة…
+    Syncing statistics: جارٍ مزامنة إحصاءات المشاهدة…
     Syncing profiles: جارٍ مزامنة الملفات الشخصية…
     Syncing open tabs: جارٍ مزامنة علامات التبويب المفتوحة والجلسة...
     Syncing settings: جارٍ مزامنة الإعدادات…

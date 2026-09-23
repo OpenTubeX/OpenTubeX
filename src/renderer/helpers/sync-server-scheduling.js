@@ -48,6 +48,9 @@ export const SYNC_ACTION_REASONS = new Map([
   ['savePlaylistBookmark', 'playlists'],
   ['updateProfile', 'profilesOrSubscriptions'],
   ['updateWatchProgress', 'history'],
+  ['recordWatchTime', 'watchStats'],
+  ['adjustHistoricalWatchTime', 'watchStats'],
+  ['clearWatchStats', 'watchStats'],
 ])
 
 export const SYNC_MUTATION_REASONS = new Map([
@@ -84,6 +87,9 @@ export const SYNC_MUTATION_REASONS = new Map([
   ['removeFromHistoryCacheById', 'history'],
   ['removeMultipleFromHistoryCache', 'history'],
   ['updateRecordWatchProgressInHistoryCache', 'history'],
+  ['addWatchTime', 'watchStats'],
+  ['setWatchStats', 'watchStats'],
+  ['resetWatchStats', 'watchStats'],
 ])
 
 export function isSyncReasonEnabled(settings, reason) {
@@ -94,6 +100,8 @@ export function isSyncReasonEnabled(settings, reason) {
       return settings.syncServerSyncPlaylists
     case 'history':
       return settings.syncServerSyncHistory
+    case 'watchStats':
+      return settings.syncServerPrivacyMode === 'enhanced' && settings.syncServerSyncWatchStats
     case 'profiles':
       return settings.syncServerSyncProfiles
     case 'profilesOrSubscriptions':
@@ -109,6 +117,7 @@ export function isSyncReasonEnabled(settings, reason) {
       return settings.syncServerSyncSubscriptions ||
         settings.syncServerSyncPlaylists ||
         settings.syncServerSyncHistory ||
+        (settings.syncServerPrivacyMode === 'enhanced' && settings.syncServerSyncWatchStats) ||
         settings.syncServerSyncProfiles ||
         (settings.syncServerPrivacyMode === 'enhanced' && (
           settings.syncServerSyncSessions || settings.syncServerSyncSettings

@@ -64,6 +64,7 @@ Search Listing:
   Label:
     Members Only: Kun for medlemmer
 Stats:
+  All devices: Alle enheder
   Stats: Statistik
   Watch time summary: Oversigt over visningstid
   Today: I dag
@@ -971,6 +972,7 @@ Settings:
     New Passwords Do Not Match: "De nye adgangskoder er ikke ens."
     Password Changed: "Adgangskoden er ændret. Andre enheder er blevet logget ud."
     Sync Settings: Synkronisering
+    Sync statistics: Synkroniser statistik
     Enable Sync: Slå synkronisering til
     Privacy Passphrase: Adgangssætning til beskyttelse af personlige oplysninger
     Privacy Passphrase Hint: Brug en anden adgangssætning end adgangskoden til din konto. Den forlader aldrig denne enhed og skal bruges på alle enheder. Hvis du mister den, kan krypterede synkroniseringsdata ikke gendannes.
@@ -1043,6 +1045,7 @@ Settings:
     Syncing subscriptions: Synkroniserer abonnementer…
     Syncing playlists: Synkroniserer playlister…
     Syncing history: Synkroniserer visningshistorik…
+    Syncing statistics: Synkroniserer visningsstatistik…
     Syncing profiles: Synkroniserer profiler…
     Syncing open tabs: Synkroniserer åbne faner og session…
     Syncing settings: Synkroniserer indstillinger…

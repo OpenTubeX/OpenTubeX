@@ -62,6 +62,7 @@ Search Listing:
   Label:
     Members Only: Csak tagoknak
 Stats:
+  All devices: Összes eszköz
   Stats: Statisztika
   Watch time summary: Nézési idő összesítése
   Today: Ma
@@ -929,6 +930,7 @@ Settings:
     New Passwords Do Not Match: "Az új jelszavak nem egyeznek."
     Password Changed: "A jelszó megváltozott. A többi eszközt kijelentkeztettük."
     Sync Settings: Szinkronizálás
+    Sync statistics: Statisztikák szinkronizálása
     Enable Sync: Szinkronizálás engedélyezése
     Privacy Passphrase: Adatvédelmi jelmondat
     Privacy Passphrase Hint: A fiók jelszavától eltérő jelmondatot használjon. Ez soha nem hagyja el az eszközt, és minden eszközön szükséges; elvesztése esetén a titkosított szinkronizálási adatok nem állíthatók vissza.
@@ -1001,6 +1003,7 @@ Settings:
     Syncing subscriptions: Feliratkozások szinkronizálása…
     Syncing playlists: Lejátszási listák szinkronizálása…
     Syncing history: Megtekintési előzmények szinkronizálása…
+    Syncing statistics: Megtekintési statisztikák szinkronizálása…
     Syncing profiles: Profilok szinkronizálása…
     Syncing open tabs: Megnyitott lapok és munkamenet szinkronizálása…
     Syncing settings: Beállítások szinkronizálása…

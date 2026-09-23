@@ -62,6 +62,7 @@ Search Listing:
   Label:
     Members Only: Só para membros
 Stats:
+  All devices: Todos os dispositivos
   Stats: Estatísticas
   Watch time summary: Resumo do tempo de visualización
   Today: Hoxe
@@ -948,6 +949,7 @@ Settings:
     New Passwords Do Not Match: "Os novos contrasinais non coinciden."
     Password Changed: "Contrasinal cambiado. Pechouse a sesión nos demais dispositivos."
     Sync Settings: Sincronización
+    Sync statistics: Sincronizar as estatísticas de visualización
     Enable Sync: Activar a sincronización
     Privacy Passphrase: Frase secreta de privacidade
     Privacy Passphrase Hint: Usa unha frase secreta distinta do contrasinal da conta. Nunca sae deste dispositivo e cómpre introducila en todos os dispositivos; se a perdes, non poderás recuperar os datos de sincronización cifrados.
@@ -1020,6 +1022,7 @@ Settings:
     Syncing subscriptions: Sincronizando as subscricións…
     Syncing playlists: Sincronizando as listas de reprodución…
     Syncing history: Sincronizando o historial de visualización…
+    Syncing statistics: Sincronizando as estatísticas de visualización…
     Syncing profiles: Sincronizando os perfís…
     Syncing open tabs: Sincronizando as lapelas abertas e a sesión…
     Syncing settings: Sincronizando a configuración…

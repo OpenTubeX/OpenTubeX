@@ -62,6 +62,7 @@ Search Listing:
   Label:
     Members Only: לחברים בלבד
 Stats:
+  All devices: כל המכשירים
   Stats: סטטיסטיקה
   Watch time summary: סיכום זמן הצפייה
   Today: היום
@@ -953,6 +954,7 @@ Settings:
     New Passwords Do Not Match: "הסיסמאות החדשות אינן תואמות."
     Password Changed: "הסיסמה שונתה. המכשירים האחרים נותקו."
     Sync Settings: סנכרון
+    Sync statistics: סנכרון סטטיסטיקות
     Enable Sync: הפעלת סנכרון
     Privacy Passphrase: ביטוי סיסמה לפרטיות
     Privacy Passphrase Hint: השתמשו בביטוי סיסמה שונה מסיסמת החשבון. הוא לעולם אינו יוצא מהמכשיר הזה ונדרש בכל מכשיר. אם תאבדו אותו, לא יהיה ניתן לשחזר את נתוני הסנכרון המוצפנים.
@@ -1025,6 +1027,7 @@ Settings:
     Syncing subscriptions: המינויים מסתנכרנים…
     Syncing playlists: הפלייליסטים מסתנכרנים…
     Syncing history: היסטוריית הצפייה מסתנכרנת…
+    Syncing statistics: הסטטיסטיקות מסתנכרנות…
     Syncing profiles: הפרופילים מסתנכרנים…
     Syncing open tabs: הכרטיסיות הפתוחות וההפעלה הנוכחית מסתנכרנות…
     Syncing settings: ההגדרות מסתנכרנות…

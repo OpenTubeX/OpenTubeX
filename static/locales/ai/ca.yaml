@@ -92,6 +92,7 @@ Search Filters:
     VR180: VR180
   Clear Filters: Neteja els filtres
 Stats:
+  All devices: Tots els dispositius
   Stats: Estadístiques
   Watch time summary: Resum del temps de reproducció
   Today: Avui
@@ -1250,6 +1251,7 @@ Settings:
     New Passwords Do Not Match: "Les contrasenyes noves no coincideixen."
     Password Changed: "S’ha canviat la contrasenya. S’ha tancat la sessió als altres dispositius."
     Sync Settings: Sincronització
+    Sync statistics: Sincronitza les estadístiques
     Enable Sync: Activa la sincronització
     Privacy Passphrase: Frase de contrasenya de privadesa
     Privacy Passphrase Hint: Utilitzeu una frase de contrasenya diferent de la contrasenya del compte. No surt mai d'aquest dispositiu i és necessària a tots els dispositius; si la perdeu, no podreu recuperar les dades de sincronització xifrades.
@@ -1322,6 +1324,7 @@ Settings:
     Syncing subscriptions: S'estan sincronitzant les subscripcions…
     Syncing playlists: S'estan sincronitzant les llistes de reproducció…
     Syncing history: S'està sincronitzant l'historial de reproducció…
+    Syncing statistics: S'estan sincronitzant les estadístiques de visualització…
     Syncing profiles: S'estan sincronitzant els perfils…
     Syncing open tabs: S'estan sincronitzant les pestanyes obertes i la sessió…
     Syncing settings: S'està sincronitzant la configuració…

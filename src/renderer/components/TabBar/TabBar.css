@@ -73,7 +73,7 @@
   color: var(--tab-group-color);
   cursor: pointer;
   flex-shrink: 0;
-  transition: background-color 0.15s ease, transform 0.2s ease;
+  transition: transform 0.2s ease;
   touch-action: manipulation;
   -webkit-app-region: no-drag;
 }
@@ -94,7 +94,7 @@
 }
 
 .collapsedTabGroup.noTransition {
-  transition: background-color 0.15s ease;
+  transition: none;
 }
 
 .collapsedTabGroup.bottom {

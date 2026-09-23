@@ -62,6 +62,7 @@ Search Listing:
   Label:
     Members Only: Vain jäsenille
 Stats:
+  All devices: Kaikki laitteet
   Stats: Tilastot
   Watch time summary: Katseluajan yhteenveto
   Today: Tänään
@@ -953,6 +954,7 @@ Settings:
     New Passwords Do Not Match: "Uudet salasanat eivät täsmää."
     Password Changed: "Salasana vaihdettu. Muut laitteet on kirjattu ulos."
     Sync Settings: Synkronointi
+    Sync statistics: Synkronoi tilastot
     Enable Sync: Ota synkronointi käyttöön
     Privacy Passphrase: Tietosuojan tunnuslause
     Privacy Passphrase Hint: Käytä eri tunnuslausetta kuin tilisi salasanaa. Tunnuslause ei koskaan poistu tältä laitteelta, ja sitä tarvitaan kaikilla laitteilla. Jos kadotat sen, salattuja synkronointitietoja ei voi palauttaa.
@@ -1025,6 +1027,7 @@ Settings:
     Syncing subscriptions: Synkronoidaan tilauksia…
     Syncing playlists: Synkronoidaan soittolistoja…
     Syncing history: Synkronoidaan katseluhistoriaa…
+    Syncing statistics: Synkronoidaan katselutilastoja…
     Syncing profiles: Synkronoidaan profiileja…
     Syncing open tabs: Synkronoidaan avoimia välilehtiä ja istuntoa…
     Syncing settings: Synkronoidaan asetuksia…

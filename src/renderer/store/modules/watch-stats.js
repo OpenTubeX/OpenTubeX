@@ -2,6 +2,7 @@ import { DBWatchStatsHandlers } from '../../../datastores/handlers/index'
 
 const state = {
   watchSecondsByDate: {},
+  syncedWatchStats: [],
   hasHistoricalWatchTimeEstimate: false,
   historicalWatchTimePlaybackSpeed: null,
   watchStatsResetVersion: 0
@@ -10,6 +11,10 @@ const state = {
 const getters = {
   getWatchSecondsByDate(state) {
     return state.watchSecondsByDate
+  },
+
+  getSyncedWatchStats(state) {
+    return state.syncedWatchStats
   },
 
   getHasHistoricalWatchTimeEstimate(state) {
@@ -86,6 +91,10 @@ const mutations = {
     state.watchSecondsByDate = Object.fromEntries(
       records.map(({ date, seconds }) => [date, seconds])
     )
+  },
+
+  setSyncedWatchStats(state, devices) {
+    state.syncedWatchStats = devices
   },
 
   addWatchTime(state, { date, seconds }) {

@@ -62,6 +62,7 @@ Search Listing:
   Label:
     Members Only: Ainult liikmetele
 Stats:
+  All devices: Kõik seadmed
   Stats: Statistika
   Watch time summary: Vaatamisaja kokkuvõte
   Today: Täna
@@ -929,6 +930,7 @@ Settings:
     New Passwords Do Not Match: "Uued paroolid ei ühti."
     Password Changed: "Parool on muudetud. Teised seadmed logiti välja."
     Sync Settings: Sünkroonimine
+    Sync statistics: Sünkrooni statistika
     Enable Sync: Luba sünkroonimine
     Privacy Passphrase: Privaatsuse salafraas
     Privacy Passphrase Hint: Kasutage konto paroolist erinevat salafraasi. Seda ei edastata sellest seadmest välja ja seda on vaja igas seadmes. Selle kaotamisel ei saa krüptitud sünkroonimisandmeid taastada.
@@ -1001,6 +1003,7 @@ Settings:
     Syncing subscriptions: Tellimuste sünkroonimine…
     Syncing playlists: Esitusloendite sünkroonimine…
     Syncing history: Vaatamisajaloo sünkroonimine…
+    Syncing statistics: Vaatamisstatistika sünkroonimine…
     Syncing profiles: Profiilide sünkroonimine…
     Syncing open tabs: Avatud vahekaartide ja seansi sünkroonimine…
     Syncing settings: Seadete sünkroonimine…

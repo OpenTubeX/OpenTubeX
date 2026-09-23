@@ -5,6 +5,7 @@ export function syncProgressLabel(t, stage) {
     playlists: t('Settings.Sync Settings.Syncing playlists'),
     playlistBookmarks: t('Settings.Sync Settings.Syncing playlists'),
     history: t('Settings.Sync Settings.Syncing history'),
+    watchStats: t('Settings.Sync Settings.Syncing statistics'),
     profiles: t('Settings.Sync Settings.Syncing profiles'),
     sessions: t('Settings.Sync Settings.Syncing open tabs'),
     sessionsV2: t('Settings.Sync Settings.Syncing open tabs'),

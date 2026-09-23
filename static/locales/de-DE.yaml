@@ -1484,6 +1484,7 @@ Settings:
     Turn Flashlight On: Taschenlampe einschalten
     Turn Flashlight Off: Taschenlampe ausschalten
     Sync Settings: Synchronisierung
+    Sync statistics: Statistik synchronisieren
     Enable Sync: Synchronisierung aktivieren
     Privacy Passphrase: Datenschutz-Passphrase
     Privacy Passphrase Hint: >-
@@ -1603,6 +1604,7 @@ Settings:
     Syncing subscriptions: Abos werden synchronisiert…
     Syncing playlists: Wiedergabelisten werden synchronisiert…
     Syncing history: Wiedergabeverlauf wird synchronisiert…
+    Syncing statistics: Wiedergabestatistik wird synchronisiert…
     Syncing profiles: Profile werden synchronisiert…
     Syncing open tabs: Offene Tabs und Sitzung werden synchronisiert…
     Syncing settings: Einstellungen werden synchronisiert…
@@ -2739,6 +2741,7 @@ Tab Organizer:
 
 Stats:
   Stats: Statistik
+  All devices: Alle Geräte
   Watch time summary: Übersicht der Wiedergabezeit
   Today: Heute
   This week: Diese Woche

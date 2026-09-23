@@ -62,6 +62,7 @@ Search Listing:
   Label:
     Members Only: Apenas para membros
 Stats:
+  All devices: Todos os dispositivos
   Stats: Estatísticas
   Watch time summary: Resumo do tempo de visualização
   Today: Hoje
@@ -904,6 +905,8 @@ Settings:
     Import playlists formats: 'Formatos suportados: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Formatos suportados: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Sync Settings:
+    Sync statistics: Sincronizar estatísticas
+    Syncing statistics: A sincronizar estatísticas de visualização…
     Sync Automatically: "Sincronizar automaticamente"
     Activity: "Atividade da conta"
     No Activity: "Sem atividade recente"
