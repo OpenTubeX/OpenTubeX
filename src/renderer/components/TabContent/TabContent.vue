@@ -1,8 +1,16 @@
 <template>
   <div
-    v-show="isPresented"
+    v-show="isPresented || isSwipeFrom || isSwipeTarget || isPrewarmed"
     ref="tabContentRef"
     class="tabContent"
+    :class="{
+      pageSwipeFrom: isSwipeFrom,
+      pageSwipeTo: isSwipeTarget,
+      pageSwipePresented: isPresented && isCapacitor,
+      pageSwipePrewarm: isPrewarmed,
+      pageSwipeSettling: pageSwipe?.settling
+    }"
+    :style="pageSwipeStyle"
     :data-tab-id="tab.id"
     :inert="!isPresented"
     :aria-hidden="String(!isPresented)"
@@ -61,12 +69,32 @@ const props = defineProps({
   tab: {
     type: Object,
     required: true
+  },
+  pageSwipe: {
+    type: Object,
+    default: null
+  },
+  prewarm: {
+    type: Boolean,
+    default: false
   }
 })
 
+const isCapacitor = process.env.IS_CAPACITOR
 const navigation = getTabNavigationService()
 const tabContentRef = useTemplateRef('tabContentRef')
 const isPresented = computed(() => store.getters.getPresentedTabId === props.tab.id)
+const isSwipeFrom = computed(() => props.pageSwipe?.fromId === props.tab.id)
+const isSwipeTarget = computed(() => props.pageSwipe?.toId === props.tab.id)
+const isPrewarmed = computed(() => props.prewarm && !isPresented.value && !isSwipeFrom.value && !isSwipeTarget.value)
+const pageSwipeStyle = computed(() => {
+  if (isSwipeFrom.value) return { left: `${props.pageSwipe.offset}px` }
+  if (isSwipeTarget.value) {
+    const startingEdge = props.pageSwipe.direction
+    return { left: `${props.pageSwipe.offset + startingEdge * props.pageSwipe.width}px` }
+  }
+  return undefined
+})
 const shouldMount = computed(() => !props.tab.mountDeferred && props.tab.loadState !== 'unloaded' && props.tab.loadState !== 'unloading')
 const initialized = ref(shouldMount.value)
 const routerFacade = navigation.createRouterFacade(props.tab.id)
@@ -297,5 +325,48 @@ function cancelLoaderSettle() {
 .tabContent {
   min-inline-size: 0;
   inline-size: 100%;
+}
+
+.pageSwipePresented {
+  position: relative;
+  z-index: 1;
+  background-color: var(--bg-color);
+}
+
+.pageSwipePrewarm {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.pageSwipeFrom,
+.pageSwipeTo {
+  background-color: var(--bg-color);
+}
+
+.pageSwipeFrom {
+  position: relative;
+}
+
+.pageSwipeTo {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+}
+
+.pageSwipeSettling {
+  transition: left 200ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pageSwipeSettling {
+    transition-duration: 0ms;
+  }
+}
+
+:global(:root[data-reduced-motion='reduce']) .pageSwipeSettling {
+  transition-duration: 0ms;
 }
 </style>
