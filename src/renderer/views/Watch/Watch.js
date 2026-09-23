@@ -37,7 +37,7 @@ import FtButton from '../../components/FtButton/FtButton.vue'
 import { calculateColorLuminance } from '../../helpers/colors'
 import { applyAnimationSpeed } from '../../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
-import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { clampOverlayScrollTop, isOverlayScrollTopOutOfBounds, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
 import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
 import { DOWNLOADED_MEDIA_MIME_TYPES } from '../../../constants'
@@ -1335,7 +1335,10 @@ export default defineComponent({
   },
   updated: function () {
     const rail = this.$refs.shortsActionRail
-    if (rail?.scrollTop) clampOverlayScrollTop(rail)
+    if (!rail?.scrollTop) return
+    const contentEnd = rail.querySelector(':scope > .shortsSoundThumbnail, :scope > .shortsSkeletonSound') ??
+      [...rail.querySelectorAll(':scope > .shortsAction')].at(-1) ?? null
+    if (isOverlayScrollTopOutOfBounds(rail, contentEnd)) clampOverlayScrollTop(rail, contentEnd)
   },
   beforeUnmount: function () {
     this.finishNativeFullscreenTransition?.()

@@ -136,7 +136,7 @@ let openingSequence = 0
 let presentationSuspended = false
 
 function restorePlayback() {
-  if (!landscape.value) resumePlayback?.()
+  resumePlayback?.()
   resumePlayback = null
 }
 
