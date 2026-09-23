@@ -300,7 +300,7 @@ Settings:
       Last active tab: "Último separador ativo"
       Next tab in tab order: "Separador seguinte na ordem dos separadores"
       Previous tab in tab order: "Separador anterior na ordem dos separadores"
-      Tab Close Focus: Depois de fechar um separador
+      Tab Close Focus: Depois de fechar o separador ativo
     Startup Behavior:
       Startup Behavior: Ao iniciar
       Load all tabs: Carregar todos os separadores

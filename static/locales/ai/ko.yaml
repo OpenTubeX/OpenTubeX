@@ -389,7 +389,7 @@ Settings:
       Last active tab: "마지막 활성 탭"
       Next tab in tab order: "탭 순서상 다음 탭"
       Previous tab in tab order: "탭 순서상 이전 탭"
-      Tab Close Focus: 탭을 닫은 후
+      Tab Close Focus: 활성 탭을 닫은 후
     Startup Behavior:
       Startup Behavior: 시작할 때
       Load all tabs: 모든 탭 불러오기

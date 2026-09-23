@@ -298,7 +298,7 @@ Settings:
       Last active tab: "Última pestaña activa"
       Next tab in tab order: "Pestaña siguiente en el orden de pestañas"
       Previous tab in tab order: "Pestaña anterior en el orden de pestañas"
-      Tab Close Focus: Al cerrar una pestaña
+      Tab Close Focus: Al cerrar la pestaña activa
     Startup Behavior:
       Startup Behavior: Al iniciar
       Load all tabs: Cargar todas las pestañas

@@ -296,7 +296,7 @@ Settings:
       Last active tab: "最後にアクティブだったタブ"
       Next tab in tab order: "タブの並び順で次のタブ"
       Previous tab in tab order: "タブの並び順で前のタブ"
-      Tab Close Focus: タブを閉じた後
+      Tab Close Focus: アクティブなタブを閉じた後
     Startup Behavior:
       Startup Behavior: 起動時
       Load all tabs: すべてのタブを読み込む

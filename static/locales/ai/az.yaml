@@ -300,7 +300,7 @@ Settings:
       Last active tab: "Son aktiv vərəq"
       Next tab in tab order: "Vərəq sırasındakı növbəti vərəq"
       Previous tab in tab order: "Vərəq sırasındakı əvvəlki vərəq"
-      Tab Close Focus: Vərəq bağlandıqdan sonra
+      Tab Close Focus: Aktiv vərəq bağlandıqdan sonra
     Startup Behavior:
       Startup Behavior: Başlanğıcda
       Load all tabs: Bütün vərəqləri yüklə

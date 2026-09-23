@@ -300,7 +300,7 @@ Settings:
       Last active tab: "Thẻ hoạt động gần nhất"
       Next tab in tab order: "Thẻ tiếp theo trong thứ tự thẻ"
       Previous tab in tab order: "Thẻ trước trong thứ tự thẻ"
-      Tab Close Focus: Sau khi đóng một thẻ
+      Tab Close Focus: Sau khi đóng thẻ đang hoạt động
     Startup Behavior:
       Startup Behavior: Khi khởi động
       Load all tabs: Tải tất cả thẻ

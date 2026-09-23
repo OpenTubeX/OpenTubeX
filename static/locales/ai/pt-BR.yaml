@@ -296,7 +296,7 @@ Settings:
       Last active tab: "Última guia ativa"
       Next tab in tab order: "Próxima guia na ordem das guias"
       Previous tab in tab order: "Guia anterior na ordem das guias"
-      Tab Close Focus: Depois de fechar uma guia
+      Tab Close Focus: Depois de fechar a guia ativa
     Startup Behavior:
       Startup Behavior: Ao iniciar
       Load all tabs: Carregar todas as guias

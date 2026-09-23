@@ -313,7 +313,7 @@ Settings:
       Last active tab: "Апошняя актыўная ўкладка"
       Next tab in tab order: "Наступная ўкладка ў парадку ўкладак"
       Previous tab in tab order: "Папярэдняя ўкладка ў парадку ўкладак"
-      Tab Close Focus: Пасля закрыцця ўкладкі
+      Tab Close Focus: Пасля закрыцця актыўнай укладкі
     Startup Behavior:
       Startup Behavior: Пры запуску
       Load all tabs: Загрузіць усе ўкладкі

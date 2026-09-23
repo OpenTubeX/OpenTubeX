@@ -300,7 +300,7 @@ Settings:
       Last active tab: "Viimeksi aktiivinen välilehti"
       Next tab in tab order: "Seuraava välilehti välilehtijärjestyksessä"
       Previous tab in tab order: "Edellinen välilehti välilehtijärjestyksessä"
-      Tab Close Focus: Välilehden sulkemisen jälkeen
+      Tab Close Focus: Aktiivisen välilehden sulkemisen jälkeen
     Startup Behavior:
       Startup Behavior: Käynnistettäessä
       Load all tabs: Lataa kaikki välilehdet

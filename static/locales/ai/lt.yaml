@@ -414,7 +414,7 @@ Settings:
       Last active tab: "Paskutinis aktyvus skirtukas"
       Next tab in tab order: "Kitas skirtukas skirtukų eilėje"
       Previous tab in tab order: "Ankstesnis skirtukas skirtukų eilėje"
-      Tab Close Focus: Užvėrus skirtuką
+      Tab Close Focus: Užvėrus aktyvų skirtuką
     Startup Behavior:
       Startup Behavior: Paleidžiant programą
       Load all tabs: Įkelti visus skirtukus

@@ -296,7 +296,7 @@ Settings:
       Last active tab: "Son etkin sekme"
       Next tab in tab order: "Sekme sırasındaki sonraki sekme"
       Previous tab in tab order: "Sekme sırasındaki önceki sekme"
-      Tab Close Focus: Sekme Kapatıldıktan Sonra
+      Tab Close Focus: Etkin Sekme Kapatıldıktan Sonra
     Startup Behavior:
       Startup Behavior: Başlangıçta
       Load all tabs: Tüm sekmeleri yükle

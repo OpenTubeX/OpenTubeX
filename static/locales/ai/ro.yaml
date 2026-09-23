@@ -298,7 +298,7 @@ Settings:
       Last active tab: "Ultima filă activă"
       Next tab in tab order: "Fila următoare în ordinea filelor"
       Previous tab in tab order: "Fila anterioară în ordinea filelor"
-      Tab Close Focus: După închiderea unei file
+      Tab Close Focus: După închiderea filei active
     Startup Behavior:
       Startup Behavior: La pornire
       Load all tabs: Încarcă toate filele

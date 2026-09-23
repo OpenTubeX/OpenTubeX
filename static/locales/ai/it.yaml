@@ -296,7 +296,7 @@ Settings:
       Last active tab: "Ultima scheda attiva"
       Next tab in tab order: "Scheda successiva nell’ordine delle schede"
       Previous tab in tab order: "Scheda precedente nell’ordine delle schede"
-      Tab Close Focus: Dopo la chiusura di una scheda
+      Tab Close Focus: Dopo la chiusura della scheda attiva
     Startup Behavior:
       Startup Behavior: All'avvio
       Load all tabs: Carica tutte le schede

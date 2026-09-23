@@ -301,7 +301,7 @@ Settings:
       Last active tab: "கடைசியாகச் செயலில் இருந்த தாவல்"
       Next tab in tab order: "தாவல் வரிசையில் அடுத்த தாவல்"
       Previous tab in tab order: "தாவல் வரிசையில் முந்தைய தாவல்"
-      Tab Close Focus: தாவலை மூடிய பிறகு
+      Tab Close Focus: செயலில் உள்ள தாவலை மூடிய பிறகு
     Startup Behavior:
       Startup Behavior: தொடக்கத்தில்
       Load all tabs: எல்லாத் தாவல்களையும் ஏற்று

@@ -296,7 +296,7 @@ Settings:
       Last active tab: "上次使用的分頁"
       Next tab in tab order: "依分頁順序選取下一個"
       Previous tab in tab order: "依分頁順序選取上一個"
-      Tab Close Focus: 關閉分頁後
+      Tab Close Focus: 關閉目前分頁後
     Startup Behavior:
       Startup Behavior: 啟動時
       Load all tabs: 載入所有分頁

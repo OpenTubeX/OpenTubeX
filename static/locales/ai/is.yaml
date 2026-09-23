@@ -298,7 +298,7 @@ Settings:
       Last active tab: "Síðasti virki flipinn"
       Next tab in tab order: "Næsti flipi í fliparöð"
       Previous tab in tab order: "Fyrri flipi í fliparöð"
-      Tab Close Focus: Eftir að flipa er lokað
+      Tab Close Focus: Eftir að virka flipanum er lokað
     Startup Behavior:
       Startup Behavior: Við ræsingu
       Load all tabs: Hlaða inn öllum flipum

@@ -296,7 +296,7 @@ Settings:
       Last active tab: "Azken fitxa aktiboa"
       Next tab in tab order: "Hurrengo fitxa fitxen ordenan"
       Previous tab in tab order: "Aurreko fitxa fitxen ordenan"
-      Tab Close Focus: Fitxa bat itxi ondoren
+      Tab Close Focus: Fitxa aktiboa itxi ondoren
     Startup Behavior:
       Startup Behavior: Abioan
       Load all tabs: Kargatu fitxa guztiak

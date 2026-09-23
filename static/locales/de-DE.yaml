@@ -468,7 +468,7 @@ Settings:
       Last active tab: "Zuletzt aktiver Tab"
       Next tab in tab order: "Nächster Tab in der Tab-Reihenfolge"
       Previous tab in tab order: "Vorheriger Tab in der Tab-Reihenfolge"
-      Tab Close Focus: Nach dem Schließen eines Tabs
+      Tab Close Focus: Nach dem Schließen des aktiven Tabs
   Theme Settings:
     Theme Settings: Farbschema
     Match Top Bar with Main Color: Obere Leiste an Hauptfarbe anpassen

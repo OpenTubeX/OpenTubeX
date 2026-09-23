@@ -296,7 +296,7 @@ Settings:
       Last active tab: "Naposledy aktivní karta"
       Next tab in tab order: "Následující karta v pořadí karet"
       Previous tab in tab order: "Předchozí karta v pořadí karet"
-      Tab Close Focus: Po zavření karty
+      Tab Close Focus: Po zavření aktivní karty
     Startup Behavior:
       Startup Behavior: Při spuštění
       Load all tabs: Načíst všechny karty

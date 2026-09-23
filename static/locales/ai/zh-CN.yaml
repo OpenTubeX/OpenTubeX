@@ -296,7 +296,7 @@ Settings:
       Last active tab: "最后使用的标签页"
       Next tab in tab order: "按标签页顺序选择下一个"
       Previous tab in tab order: "按标签页顺序选择上一个"
-      Tab Close Focus: 关闭标签页后
+      Tab Close Focus: 关闭当前标签页后
     Startup Behavior:
       Startup Behavior: 启动时
       Load all tabs: 加载所有标签页

@@ -316,7 +316,7 @@ Settings:
       Last active tab: "Sist aktive fane"
       Next tab in tab order: "Neste fane i fanerekkjefølgja"
       Previous tab in tab order: "Førre fane i fanerekkjefølgja"
-      Tab Close Focus: Etter at ei fane er lukka
+      Tab Close Focus: Etter at den aktive fana er lukka
     Startup Behavior:
       Startup Behavior: Ved oppstart
       Load all tabs: Last inn alle faner

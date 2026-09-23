@@ -300,7 +300,7 @@ Settings:
       Last active tab: "הכרטיסייה הפעילה האחרונה"
       Next tab in tab order: "הכרטיסייה הבאה בסדר הכרטיסיות"
       Previous tab in tab order: "הכרטיסייה הקודמת בסדר הכרטיסיות"
-      Tab Close Focus: אחרי סגירת כרטיסייה
+      Tab Close Focus: אחרי סגירת הכרטיסייה הפעילה
     Startup Behavior:
       Startup Behavior: בעת ההפעלה
       Load all tabs: טעינת כל הכרטיסיות

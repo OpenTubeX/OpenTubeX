@@ -300,7 +300,7 @@ Settings:
       Last active tab: "Última lapela activa"
       Next tab in tab order: "Lapela seguinte na orde das lapelas"
       Previous tab in tab order: "Lapela anterior na orde das lapelas"
-      Tab Close Focus: Despois de pechar unha lapela
+      Tab Close Focus: Despois de pechar a lapela activa
     Startup Behavior:
       Startup Behavior: Ao iniciar
       Load all tabs: Cargar todas as lapelas

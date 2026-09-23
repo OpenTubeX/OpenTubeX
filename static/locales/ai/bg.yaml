@@ -298,7 +298,7 @@ Settings:
       Last active tab: "Последно активен раздел"
       Next tab in tab order: "Следващ раздел в реда на разделите"
       Previous tab in tab order: "Предишен раздел в реда на разделите"
-      Tab Close Focus: След затваряне на раздел
+      Tab Close Focus: След затваряне на активния раздел
     Startup Behavior:
       Startup Behavior: При стартиране
       Load all tabs: Зареди всички раздели

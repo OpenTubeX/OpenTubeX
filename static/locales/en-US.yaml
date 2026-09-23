@@ -574,7 +574,7 @@ Settings:
       Last active tab: "Last active tab"
       Next tab in tab order: "Next tab in tab order"
       Previous tab in tab order: "Previous tab in tab order"
-      Tab Close Focus: After Closing a Tab
+      Tab Close Focus: After Closing the Active Tab
     Startup Behavior:
       Startup Behavior: On Startup
       Load all tabs: Load all tabs

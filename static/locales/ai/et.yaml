@@ -296,7 +296,7 @@ Settings:
       Last active tab: "Viimati aktiivne vahekaart"
       Next tab in tab order: "Järgmine vahekaart vahekaartide järjekorras"
       Previous tab in tab order: "Eelmine vahekaart vahekaartide järjekorras"
-      Tab Close Focus: Pärast vahekaardi sulgemist
+      Tab Close Focus: Pärast aktiivse vahekaardi sulgemist
     Startup Behavior:
       Startup Behavior: Käivitamisel
       Load all tabs: Laadi kõik vahekaardid

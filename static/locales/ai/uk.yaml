@@ -300,7 +300,7 @@ Settings:
       Last active tab: "Остання активна вкладка"
       Next tab in tab order: "Наступна вкладка в порядку вкладок"
       Previous tab in tab order: "Попередня вкладка в порядку вкладок"
-      Tab Close Focus: Після закриття вкладки
+      Tab Close Focus: Після закриття активної вкладки
     Startup Behavior:
       Startup Behavior: Під час запуску
       Load all tabs: Завантажувати всі вкладки

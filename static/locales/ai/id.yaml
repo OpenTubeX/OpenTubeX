@@ -296,7 +296,7 @@ Settings:
       Last active tab: "Tab aktif terakhir"
       Next tab in tab order: "Tab berikutnya dalam urutan tab"
       Previous tab in tab order: "Tab sebelumnya dalam urutan tab"
-      Tab Close Focus: Setelah Menutup Tab
+      Tab Close Focus: Setelah Menutup Tab Aktif
     Startup Behavior:
       Startup Behavior: Saat Aplikasi Dimulai
       Load all tabs: Muat semua tab

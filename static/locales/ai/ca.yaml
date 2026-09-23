@@ -431,7 +431,7 @@ Settings:
       Last active tab: "Darrera pestanya activa"
       Next tab in tab order: "Pestanya següent en l’ordre de pestanyes"
       Previous tab in tab order: "Pestanya anterior en l’ordre de pestanyes"
-      Tab Close Focus: Després de tancar una pestanya
+      Tab Close Focus: Després de tancar la pestanya activa
     Startup Behavior:
       Startup Behavior: En iniciar
       Load all tabs: Carrega totes les pestanyes
