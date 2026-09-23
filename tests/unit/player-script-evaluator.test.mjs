@@ -134,3 +134,20 @@ test('retries a new request after an older request exhausts its retry', async ()
   await older
   assert.equal(await newer, 'recovered')
 })
+
+test('preserves the worker startup error when recovery cannot start', async () => {
+  const worker = new FakeWorker()
+  const startupError = new Error('worker startup failed')
+  let attempts = 0
+  const evaluator = new PlayerScriptEvaluator(() => {
+    if (++attempts > 1) throw startupError
+    return worker
+  })
+  const pending = evaluator.evaluate('return 42')
+  worker.reply({
+    id: worker.requests[0].id,
+    error: 'RuntimeError: Aborted(Assertion failed: list_empty(&rt->gc_obj_list), at: ../../vendor/quickjs/quickjs.c,2036,JS_FreeRuntime)'
+  })
+  await assert.rejects(pending, error => error === startupError)
+  assert.equal(evaluator.requests.size, 0)
+})

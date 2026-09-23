@@ -27,7 +27,7 @@ export class PlayerScriptEvaluator {
       try {
         worker.postMessage({ id, code })
       } catch (error) {
-        this.fail(worker, new Error(String(error)))
+        this.fail(worker, error instanceof Error ? error : new Error(String(error)))
       }
     })
   }
@@ -70,9 +70,10 @@ export class PlayerScriptEvaluator {
     try {
       this.startWorker()
     } catch (startError) {
+      const failure = startError instanceof Error ? startError : new Error(String(startError))
       for (const request of this.requests.values()) {
         clearTimeout(request.timer)
-        request.reject(new Error(String(startError)))
+        request.reject(failure)
       }
       this.requests.clear()
       return
@@ -85,7 +86,7 @@ export class PlayerScriptEvaluator {
       try {
         this.worker.postMessage({ id, code: request.code })
       } catch (postError) {
-        this.fail(this.worker, new Error(String(postError)))
+        this.fail(this.worker, postError instanceof Error ? postError : new Error(String(postError)))
         break
       }
     }
