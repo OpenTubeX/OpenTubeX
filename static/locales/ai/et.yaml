@@ -144,7 +144,7 @@ Home Page:
   All sections hidden: Kõik jaotised on peidetud
   All sections hidden description: Kohanda avalehte, et mõni jaotis uuesti kuvada.
 Subscriptions:
-  Mark as Unseen: Märgi mittenähtuks
+  Mark As Unseen: Märgi mittenähtuks
   Copy Error Details: "Kopeeri tehnilised üksikasjad"
   Refresh Errors: "Kanalid, mida ei saanud värskendada: {channels}. Klõpsa üksikasjade vaatamiseks."
   Refresh Error Channels More: "{channels} ja veel {count} | {channels} ja veel {count}"
@@ -157,7 +157,7 @@ Subscriptions:
   New Feed Refresh Warning Title: Kas värskendada kõiki tellimuste vooge?
   New Feed Refresh Warning: Ühe tellimuse kõigi sisutüüpide värskendamine ilma RSS-ita võib võtta kaua aega. Kas soovite jätkata? | {count} tellimuse kõigi sisutüüpide värskendamine ilma RSS-ita võib võtta kaua aega. Kas soovite jätkata?
   New Since Last Refresh: Uus pärast viimast värskendamist
-  Mark as Seen: Märgi nähtuks
+  Mark As Seen: Märgi nähtuks
   Mark All as Seen: Märgi kõik nähtuks
   No New Content: Uut sisu pole.
   New Content Tabs: Uue sisu vahekaardid
@@ -1112,7 +1112,7 @@ Channel:
   Search Result Types: Otsingutulemuste tüübid
   All Results: Kõik
 Video:
-  Mark as fully seen: Märgi täielikult vaadatuks
+  Mark As Fully Watched: Märgi täielikult vaadatuks
   AI-generated video summary: "Tehisintellekti loodud video kokkuvõte"
   Quality and accuracy may vary: "Kvaliteet ja täpsus võivad erineda"
   Move Queue Item Up: "Liiguta {title} üles"

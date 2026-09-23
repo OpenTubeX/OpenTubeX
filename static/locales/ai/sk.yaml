@@ -144,7 +144,7 @@ Home Page:
   All sections hidden: Všetky sekcie sú skryté
   All sections hidden description: Prispôsobte domovskú stránku a znova zobrazte sekciu.
 Subscriptions:
-  Mark as Unseen: Označiť ako nevidené
+  Mark As Unseen: Označiť ako nevidené
   Copy Error Details: "Kopírovať technické podrobnosti"
   Refresh Errors: "Kanály, ktoré sa nepodarilo obnoviť: {channels}. Kliknutím zobrazíte podrobnosti."
   Refresh Error Channels More: "{channels} a {count} ďalší | {channels} a ďalších {count} | {channels} a ďalších {count}"
@@ -157,7 +157,7 @@ Subscriptions:
   New Feed Refresh Warning Title: Obnoviť všetky kanály odberov?
   New Feed Refresh Warning: Obnovenie všetkých typov obsahu bez RSS pre 1 odber môže trvať dlho. Chcete pokračovať? | Obnovenie všetkých typov obsahu bez RSS pre {count} odbery môže trvať dlho. Chcete pokračovať? | Obnovenie všetkých typov obsahu bez RSS pre {count} odberov môže trvať dlho. Chcete pokračovať?
   New Since Last Refresh: Nové od posledného obnovenia
-  Mark as Seen: Označiť ako zobrazené
+  Mark As Seen: Označiť ako zobrazené
   Mark All as Seen: Označiť všetko ako zobrazené
   No New Content: Žiadny nový obsah.
   New Content Tabs: Karty nového obsahu
@@ -1112,7 +1112,7 @@ Channel:
   Search Result Types: Typy výsledkov hľadania
   All Results: Všetko
 Video:
-  Mark as fully seen: Označiť ako úplne pozreté
+  Mark As Fully Watched: Označiť ako úplne pozreté
   AI-generated video summary: "Zhrnutie videa vytvorené AI"
   Quality and accuracy may vary: "Kvalita a presnosť sa môžu líšiť"
   Move Queue Item Up: "Posunúť video {title} nahor"

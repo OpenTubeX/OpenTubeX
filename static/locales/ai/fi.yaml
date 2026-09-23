@@ -144,7 +144,7 @@ Home Page:
   All sections hidden: Kaikki osiot on piilotettu
   All sections hidden description: Mukauta etusivua, jotta voit näyttää osion uudelleen.
 Subscriptions:
-  Mark as Unseen: Merkitse näkemättömäksi
+  Mark As Unseen: Merkitse näkemättömäksi
   Copy Error Details: "Kopioi tekniset tiedot"
   Refresh Errors: "Kanavat, joita ei voitu päivittää: {channels}. Näytä tiedot napsauttamalla."
   Refresh Error Channels More: "{channels} ja {count} muuta | {channels} ja {count} muuta"
@@ -157,7 +157,7 @@ Subscriptions:
   New Feed Refresh Warning Title: Päivitetäänkö kaikki tilaussyötteet?
   New Feed Refresh Warning: Kun RSS ei ole käytössä, yhden tilauksen kaikkien sisältötyyppien päivittäminen voi kestää kauan. Haluatko jatkaa? | Kun RSS ei ole käytössä, {count} tilauksen kaikkien sisältötyyppien päivittäminen voi kestää kauan. Haluatko jatkaa?
   New Since Last Refresh: Uutta viime päivityksen jälkeen
-  Mark as Seen: Merkitse nähdyksi
+  Mark As Seen: Merkitse nähdyksi
   Mark All as Seen: Merkitse kaikki nähdyiksi
   No New Content: Uutta sisältöä ei ole.
   New Content Tabs: Uuden sisällön välilehdet
@@ -1142,7 +1142,7 @@ Channel:
   All Results: Kaikki
   View All: Näytä kaikki
 Video:
-  Mark as fully seen: Merkitse kokonaan katsotuksi
+  Mark As Fully Watched: Merkitse kokonaan katsotuksi
   AI-generated video summary: "Tekoälyn luoma videoyhteenveto"
   Quality and accuracy may vary: "Laatu ja tarkkuus voivat vaihdella"
   Move Queue Item Up: "Siirrä {title} ylöspäin"

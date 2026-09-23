@@ -166,7 +166,7 @@ Home Page:
   All sections hidden: Visi skyriai paslėpti
   All sections hidden description: Tinkinkite pradžios puslapį, kad vėl būtų rodomas skyrius.
 Subscriptions:
-  Mark as Unseen: Pažymėti kaip nematytą
+  Mark As Unseen: Pažymėti kaip nematytą
   Copy Error Details: "Kopijuoti techninę informaciją"
   Refresh Errors: "Kanalai, kurių nepavyko atnaujinti: {channels}. Spustelėkite, kad peržiūrėtumėte išsamią informaciją."
   Refresh Error Channels More: "{channels} ir dar {count} | {channels} ir dar {count} | {channels} ir dar {count}"
@@ -182,7 +182,7 @@ Subscriptions:
   New Feed Refresh Warning Title: Atnaujinti visus prenumeratų kanalus?
   New Feed Refresh Warning: Visų vienos prenumeratos turinio tipų atnaujinimas be RSS gali užtrukti. Ar norite tęsti? | Visų {count} prenumeratų turinio tipų atnaujinimas be RSS gali užtrukti. Ar norite tęsti? | Visų {count} prenumeratų turinio tipų atnaujinimas be RSS gali užtrukti. Ar norite tęsti?
   New Since Last Refresh: Nauja nuo paskutinio atnaujinimo
-  Mark as Seen: Pažymėti kaip peržiūrėtą
+  Mark As Seen: Pažymėti kaip peržiūrėtą
   Mark All as Seen: Pažymėti viską kaip peržiūrėta
   No New Content: Naujo turinio nėra.
   New Content Tabs: Naujo turinio kortelės
@@ -1428,7 +1428,7 @@ Channel:
     Hide Answers: Slėpti atsakymus
     Video hidden by OpenTubeX: Vaizdo įrašą paslėpė OpenTubeX
 Video:
-  Mark as fully seen: Pažymėti kaip visiškai peržiūrėtą
+  Mark As Fully Watched: Pažymėti kaip visiškai peržiūrėtą
   AI-generated video summary: "DI sukurta vaizdo įrašo santrauka"
   Quality and accuracy may vary: "Kokybė ir tikslumas gali skirtis"
   Move Queue Item Up: "Perkelti {title} aukštyn"

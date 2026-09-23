@@ -55,7 +55,7 @@ Home Page:
   All sections hidden: Wszystkie sekcje są ukryte
   All sections hidden description: Dostosuj stronę główną, aby ponownie wyświetlić sekcję.
 Subscriptions:
-  Mark as Unseen: Oznacz jako niewidziane
+  Mark As Unseen: Oznacz jako niewidziane
   Copy Error Details: "Kopiuj szczegóły techniczne"
   Refresh Errors: "Kanały, których nie udało się odświeżyć: {channels}. Kliknij, aby zobaczyć szczegóły."
   Refresh Error Channels More: "{channels} i jeszcze {count} | {channels} i jeszcze {count} | {channels} i jeszcze {count}"
@@ -583,7 +583,7 @@ Channel:
   Search Result Types: Typy wyników wyszukiwania
   All Results: Wszystkie
 Video:
-  Mark as fully seen: Oznacz jako obejrzany w całości
+  Mark As Fully Watched: Oznacz jako obejrzany w całości
   AI-generated video summary: "Podsumowanie filmu wygenerowane przez SI"
   Quality and accuracy may vary: "Jakość i dokładność mogą się różnić"
   Move Queue Item Up: "Przenieś film {title} w górę"

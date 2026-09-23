@@ -144,7 +144,7 @@ Home Page:
   All sections hidden: 所有區塊均已隱藏
   All sections hidden description: 自訂首頁以重新顯示區塊。
 Subscriptions:
-  Mark as Unseen: 標記為未看過
+  Mark As Unseen: 標記為未看過
   Copy Error Details: "複製技術詳細資訊"
   Refresh Errors: "無法重新整理的頻道：{channels}。點擊查看詳細資訊。"
   Refresh Error Channels More: "{channels} 以及其他 {count} 個頻道"
@@ -157,7 +157,7 @@ Subscriptions:
   New Feed Refresh Warning Title: 要重新整理所有訂閱動態消息嗎？
   New Feed Refresh Warning: 為 {count} 個訂閱重新整理所有未使用 RSS 的內容類型可能需要很長時間。要繼續嗎？
   New Since Last Refresh: 上次重新整理後的新內容
-  Mark as Seen: 標示為已看過
+  Mark As Seen: 標示為已看過
   Mark All as Seen: 全部標示為已看過
   No New Content: 沒有新內容。
   New Content Tabs: 新內容分頁
@@ -1112,7 +1112,7 @@ Channel:
   Search Result Types: 搜尋結果類型
   All Results: 全部
 Video:
-  Mark as fully seen: 標示為已完整觀看
+  Mark As Fully Watched: 標示為已完整觀看
   AI-generated video summary: "AI 產生的影片摘要"
   Quality and accuracy may vary: "品質和準確性可能有所不同"
   Move Queue Item Up: "將{title}上移"

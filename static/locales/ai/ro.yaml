@@ -144,7 +144,7 @@ Home Page:
   All sections hidden: Toate secțiunile sunt ascunse
   All sections hidden description: Personalizează pagina principală pentru a afișa din nou o secțiune.
 Subscriptions:
-  Mark as Unseen: Marchează ca nevăzut
+  Mark As Unseen: Marchează ca nevăzut
   Copy Error Details: "Copiază detaliile tehnice"
   Refresh Errors: "Canale care nu au putut fi actualizate: {channels}. Faceți clic pentru a vedea detaliile."
   Refresh Error Channels More: "{channels} și încă {count} | {channels} și încă {count} | {channels} și încă {count}"
@@ -157,7 +157,7 @@ Subscriptions:
   New Feed Refresh Warning Title: Reîmprospătați toate fluxurile de abonamente?
   New Feed Refresh Warning: Reîmprospătarea fără RSS a tuturor tipurilor de conținut pentru 1 abonament poate dura mult. Doriți să continuați? | Reîmprospătarea fără RSS a tuturor tipurilor de conținut pentru {count} abonamente poate dura mult. Doriți să continuați? | Reîmprospătarea fără RSS a tuturor tipurilor de conținut pentru {count} de abonamente poate dura mult. Doriți să continuați?
   New Since Last Refresh: Nou de la ultima reîmprospătare
-  Mark as Seen: Marchează ca văzut
+  Mark As Seen: Marchează ca văzut
   Mark All as Seen: Marchează totul ca văzut
   No New Content: Nu există conținut nou.
   New Content Tabs: File pentru conținut nou
@@ -1136,7 +1136,7 @@ Channel:
   All Results: Toate
   View All: Vezi tot
 Video:
-  Mark as fully seen: Marchează ca vizionat integral
+  Mark As Fully Watched: Marchează ca vizionat integral
   AI-generated video summary: "Rezumat video generat de IA"
   Quality and accuracy may vary: "Calitatea și precizia pot varia"
   Move Queue Item Up: "Mută {title} în sus"

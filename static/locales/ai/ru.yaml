@@ -117,7 +117,7 @@ Home Page:
   All sections hidden: Все разделы скрыты
   All sections hidden description: Настройте главную, чтобы снова показать раздел.
 Subscriptions:
-  Mark as Unseen: Отметить как непросмотренное
+  Mark As Unseen: Отметить как непросмотренное
   Copy Error Details: "Скопировать технические подробности"
   Refresh Errors: "Каналы, которые не удалось обновить: {channels}. Нажмите, чтобы посмотреть подробности."
   Refresh Error Channels More: "{channels} и ещё {count} | {channels} и ещё {count} | {channels} и ещё {count}"
@@ -130,7 +130,7 @@ Subscriptions:
   New Feed Refresh Warning Title: Обновить все ленты подписок?
   New Feed Refresh Warning: Обновление всех типов материалов без RSS для 1 подписки может занять много времени. Продолжить? | Обновление всех типов материалов без RSS для {count} подписок может занять много времени. Продолжить? | Обновление всех типов материалов без RSS для {count} подписок может занять много времени. Продолжить?
   New Since Last Refresh: Новое с последнего обновления
-  Mark as Seen: Отметить как просмотренное
+  Mark As Seen: Отметить как просмотренное
   Mark All as Seen: Отметить всё как просмотренное
   No New Content: Новых материалов нет.
   New Content Tabs: Вкладки с новыми материалами
@@ -1112,7 +1112,7 @@ Channel:
   All Results: Все
   View All: Показать все
 Video:
-  Mark as fully seen: Отметить как полностью просмотренное
+  Mark As Fully Watched: Отметить как полностью просмотренное
   AI-generated video summary: "Сводка видео, созданная ИИ"
   Quality and accuracy may vary: "Качество и точность могут различаться"
   Move Queue Item Up: "{title}: переместить вверх"

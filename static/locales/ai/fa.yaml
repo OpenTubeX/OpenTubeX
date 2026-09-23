@@ -154,7 +154,7 @@ Home Page:
   All sections hidden: همهٔ بخش‌ها پنهان هستند
   All sections hidden description: صفحهٔ اصلی را سفارشی کنید تا بخشی دوباره نمایش داده شود.
 Subscriptions:
-  Mark as Unseen: علامت‌گذاری به‌عنوان دیده‌نشده
+  Mark As Unseen: علامت‌گذاری به‌عنوان دیده‌نشده
   Copy Error Details: "کپی جزئیات فنی"
   Refresh Errors: "کانال‌هایی که به‌روزرسانی نشدند: {channels}. برای مشاهده جزئیات کلیک کنید."
   Refresh Error Channels More: "{channels} و {count} مورد دیگر | {channels} و {count} مورد دیگر"
@@ -167,7 +167,7 @@ Subscriptions:
   New Feed Refresh Warning Title: همه خوراک‌های اشتراک تازه‌سازی شوند؟
   New Feed Refresh Warning: تازه‌سازی همه انواع محتوا بدون RSS برای 1 اشتراک ممکن است زمان زیادی ببرد. می‌خواهید ادامه دهید؟ | تازه‌سازی همه انواع محتوا بدون RSS برای {count} اشتراک ممکن است زمان زیادی ببرد. می‌خواهید ادامه دهید؟
   New Since Last Refresh: جدید از آخرین تازه‌سازی
-  Mark as Seen: علامت‌گذاری به‌عنوان دیده‌شده
+  Mark As Seen: علامت‌گذاری به‌عنوان دیده‌شده
   Mark All as Seen: علامت‌گذاری همه به‌عنوان دیده‌شده
   No New Content: محتوای جدیدی نیست.
   New Content Tabs: زبانه‌های محتوای جدید
@@ -1167,7 +1167,7 @@ Channel:
   All Results: همه
   View All: مشاهدهٔ همه
 Video:
-  Mark as fully seen: علامت‌گذاری به‌عنوان کاملاً دیده‌شده
+  Mark As Fully Watched: علامت‌گذاری به‌عنوان کاملاً دیده‌شده
   AI-generated video summary: "خلاصهٔ تولیدشده با هوش مصنوعی از ویدیو"
   Quality and accuracy may vary: "کیفیت و دقت ممکن است متفاوت باشد"
   Move Queue Item Up: "انتقال {title} به بالا"

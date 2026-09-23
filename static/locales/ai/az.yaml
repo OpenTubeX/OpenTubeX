@@ -144,7 +144,7 @@ Home Page:
   All sections hidden: Bütün bölmələr gizlədilib
   All sections hidden description: Bölməni yenidən göstərmək üçün ana səhifəni fərdiləşdirin.
 Subscriptions:
-  Mark as Unseen: Görülməmiş kimi işarələ
+  Mark As Unseen: Görülməmiş kimi işarələ
   Copy Error Details: "Texniki təfərrüatları kopyala"
   Refresh Errors: "Yenilənə bilməyən kanallar: {channels}. Təfərrüatlara baxmaq üçün klikləyin."
   Refresh Error Channels More: "{channels} və daha {count} kanal | {channels} və daha {count} kanal"
@@ -157,7 +157,7 @@ Subscriptions:
   New Feed Refresh Warning Title: Bütün abunəlik lentləri yenilənsin?
   New Feed Refresh Warning: 1 abunəliyin bütün məzmun növlərinin RSS olmadan yenilənməsi uzun çəkə bilər. Davam etmək istəyirsiniz? | {count} abunəliyin bütün məzmun növlərinin RSS olmadan yenilənməsi uzun çəkə bilər. Davam etmək istəyirsiniz?
   New Since Last Refresh: Son yeniləmədən bəri yeniliklər
-  Mark as Seen: Görülmüş kimi işarələ
+  Mark As Seen: Görülmüş kimi işarələ
   Mark All as Seen: Hamısını görülmüş kimi işarələ
   No New Content: Yeni məzmun yoxdur.
   New Content Tabs: Yeni məzmun vərəqləri
@@ -1115,7 +1115,7 @@ Channel:
   Search Result Types: Axtarış nəticələrinin növləri
   All Results: Hamısı
 Video:
-  Mark as fully seen: Tam baxılmış kimi işarələ
+  Mark As Fully Watched: Tam baxılmış kimi işarələ
   AI-generated video summary: "Süni intellektlə yaradılmış video xülasəsi"
   Quality and accuracy may vary: "Keyfiyyət və dəqiqlik dəyişə bilər"
   Move Queue Item Up: "{title} videosunu yuxarı köçür"

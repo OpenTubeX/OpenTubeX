@@ -146,7 +146,7 @@ Home Page:
   All sections hidden: Сви одељци су сакривени
   All sections hidden description: Прилагодите почетну страницу да бисте поново приказали одељак.
 Subscriptions:
-  Mark as Unseen: Означи као невиђено
+  Mark As Unseen: Означи као невиђено
   Copy Error Details: "Копирај техничке детаље"
   Refresh Errors: "Канали које није било могуће освежити: {channels}. Кликните да видите детаље."
   Refresh Error Channels More: "{channels} и још {count} | {channels} и још {count} | {channels} и још {count}"
@@ -159,7 +159,7 @@ Subscriptions:
   New Feed Refresh Warning Title: Освежити све изворе претплата?
   New Feed Refresh Warning: Освежавање свих врста садржаја без RSS-а за 1 претплату може дуго да траје. Желите ли да наставите? | Освежавање свих врста садржаја без RSS-а за {count} претплате може дуго да траје. Желите ли да наставите? | Освежавање свих врста садржаја без RSS-а за {count} претплата може дуго да траје. Желите ли да наставите?
   New Since Last Refresh: Ново од последњег освежавања
-  Mark as Seen: Означи као виђено
+  Mark As Seen: Означи као виђено
   Mark All as Seen: Означи све као виђено
   No New Content: Нема новог садржаја.
   New Content Tabs: Картице са новим садржајем
@@ -1162,7 +1162,7 @@ Channel:
   All Results: Све
   View All: Прикажи све
 Video:
-  Mark as fully seen: Означи као одгледано до краја
+  Mark As Fully Watched: Означи као одгледано до краја
   AI-generated video summary: "Сажетак видеа генерисан вештачком интелигенцијом"
   Quality and accuracy may vary: "Квалитет и тачност могу да варирају"
   Move Queue Item Up: "Помери {title} нагоре"

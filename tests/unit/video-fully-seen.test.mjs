@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
+import { load as loadYaml } from 'js-yaml'
 
 const source = await readFile(new URL('../../src/renderer/components/FtListVideo/FtListVideo.vue', import.meta.url), 'utf8')
 const handler = source.slice(source.indexOf('function markAsWatched('), source.indexOf('\nasync function unmarkAsWatched'))
@@ -70,14 +71,16 @@ test('fully seen thumbnail action shows only for eligible videos and invokes com
       t: key => key
     }
     const result = vm.runInNewContext(button + '\nextraThumbnailActionButton.value', context)
-    assert.equal(result?.title ?? null, allowed ? 'Video.Mark as fully seen' : null)
+    assert.equal(result?.title ?? null, allowed ? 'Video.Mark As Fully Watched' : null)
     vm.runInNewContext(options + '\n' + click + '\nhandleExtraThumbnailAction()', context)
     assert.deepEqual(calls, allowed ? [true] : [])
   }
 })
 
-test('thumbnail action setting pairs the fully seen label with its saved value', async () => {
+test('fully watched label is consistent across the menu and thumbnail action setting', async () => {
   const settings = await readFile(new URL('../../src/renderer/components/GeneralSettings/GeneralSettings.vue', import.meta.url), 'utf8')
+  const messages = loadYaml(await readFile(new URL('../../static/locales/en-US.yaml', import.meta.url), 'utf8'))
+  assert.equal(messages.Video['Mark As Fully Watched'], 'Mark As Fully Watched')
   const choices = settings.slice(settings.indexOf('const extraThumbnailActionValues ='), settings.indexOf('\n/**', settings.indexOf('const extraThumbnailActionNames =')))
   for (const downloads of [true, false]) {
     const result = vm.runInNewContext(choices + '\n;({ values: extraThumbnailActionValues.value, names: extraThumbnailActionNames.value })', {
@@ -87,7 +90,7 @@ test('thumbnail action setting pairs the fully seen label with its saved value',
       t: key => key
     })
     assert.equal(result.values.length, result.names.length)
-    assert.equal(result.names[result.values.indexOf('markAsFullySeen')], 'Video.Mark as fully seen')
+    assert.equal(result.names[result.values.indexOf('markAsFullySeen')], 'Video.Mark As Fully Watched')
   }
 })
 

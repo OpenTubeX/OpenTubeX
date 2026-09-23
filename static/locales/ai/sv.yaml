@@ -144,7 +144,7 @@ Home Page:
   All sections hidden: Alla avsnitt är dolda
   All sections hidden description: Anpassa startsidan för att visa ett avsnitt igen.
 Subscriptions:
-  Mark as Unseen: Markera som osedd
+  Mark As Unseen: Markera som osedd
   Copy Error Details: "Kopiera tekniska detaljer"
   Refresh Errors: "Kanaler som inte kunde uppdateras: {channels}. Klicka för att visa detaljer."
   Refresh Error Channels More: "{channels} och {count} till | {channels} och {count} till"
@@ -157,7 +157,7 @@ Subscriptions:
   New Feed Refresh Warning Title: Uppdatera alla prenumerationsflöden?
   New Feed Refresh Warning: Det kan ta lång tid att uppdatera alla innehållstyper utan RSS för 1 prenumeration. Vill du fortsätta? | Det kan ta lång tid att uppdatera alla innehållstyper utan RSS för {count} prenumerationer. Vill du fortsätta?
   New Since Last Refresh: Nytt sedan senaste uppdateringen
-  Mark as Seen: Markera som sett
+  Mark As Seen: Markera som sett
   Mark All as Seen: Markera allt som sett
   No New Content: Det finns inget nytt innehåll.
   New Content Tabs: Flikar för nytt innehåll
@@ -1119,7 +1119,7 @@ Channel:
   Search Result Types: Typer av sökresultat
   All Results: Alla
 Video:
-  Mark as fully seen: Markera som sedd till slutet
+  Mark As Fully Watched: Markera som sedd till slutet
   AI-generated video summary: "AI-genererad videosammanfattning"
   Quality and accuracy may vary: "Kvalitet och noggrannhet kan variera"
   Move Queue Item Up: "Flytta {title} uppåt"

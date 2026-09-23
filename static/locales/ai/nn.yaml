@@ -144,7 +144,7 @@ Home Page:
   All sections hidden: Alle delar er gøymde
   All sections hidden description: Tilpass heimesida for å vise ein del igjen.
 Subscriptions:
-  Mark as Unseen: Merk som ikkje sett
+  Mark As Unseen: Merk som ikkje sett
   Copy Error Details: "Kopier tekniske detaljar"
   Refresh Errors: "Kanalar som ikkje kunne oppdaterast: {channels}. Klikk for å sjå detaljar."
   Refresh Error Channels More: "{channels} og {count} til | {channels} og {count} til"
@@ -157,7 +157,7 @@ Subscriptions:
   New Feed Refresh Warning Title: Vil du oppdatere alle abonnementsstraumane?
   New Feed Refresh Warning: Det kan ta lang tid å oppdatere alle innhaldstypar utan RSS for 1 abonnement. Vil du halde fram? | Det kan ta lang tid å oppdatere alle innhaldstypar utan RSS for {count} abonnement. Vil du halde fram?
   New Since Last Refresh: Nytt sidan førre oppdatering
-  Mark as Seen: Merk som sett
+  Mark As Seen: Merk som sett
   Mark All as Seen: Merk alt som sett
   No New Content: Det finst ikkje noko nytt innhald.
   New Content Tabs: Faner for nytt innhald
@@ -1333,7 +1333,7 @@ Channel:
     Hide Answers: Gøym svar
     Video hidden by OpenTubeX: Videoen er gøymd av OpenTubeX
 Video:
-  Mark as fully seen: Merk som ferdig sett
+  Mark As Fully Watched: Merk som ferdig sett
   AI-generated video summary: "KI-generert videosamandrag"
   Quality and accuracy may vary: "Kvalitet og nøyaktigheit kan variere"
   Move Queue Item Up: "Flytt {title} opp"

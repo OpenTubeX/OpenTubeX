@@ -174,7 +174,7 @@ Home Page:
   All sections hidden: Totes les seccions estan ocultes
   All sections hidden description: Personalitzeu l'inici per tornar a mostrar una secció.
 Subscriptions:
-  Mark as Unseen: Marca com a no vist
+  Mark As Unseen: Marca com a no vist
   Copy Error Details: "Copia els detalls tècnics"
   Refresh Errors: "Canals que no s'han pogut actualitzar: {channels}. Feu clic per veure els detalls."
   Refresh Error Channels More: "{channels} i {count} més | {channels} i {count} més | {channels} i {count} més"
@@ -193,7 +193,7 @@ Subscriptions:
   New Feed Refresh Warning Title: Voleu actualitzar tots els canals de subscripcions?
   New Feed Refresh Warning: Actualitzar tots els tipus de contingut sense RSS d'1 subscripció pot trigar molt. Voleu continuar? | Actualitzar tots els tipus de contingut sense RSS de {count} subscripcions pot trigar molt. Voleu continuar? | Actualitzar tots els tipus de contingut sense RSS de {count} subscripcions pot trigar molt. Voleu continuar?
   New Since Last Refresh: Nou des de la darrera actualització
-  Mark as Seen: Marca com a vist
+  Mark As Seen: Marca com a vist
   Mark All as Seen: Marca-ho tot com a vist
   No New Content: No hi ha contingut nou.
   New Content Tabs: Pestanyes de contingut nou
@@ -1513,7 +1513,7 @@ Channel:
     Hide Answers: Oculta les respostes
     Video hidden by OpenTubeX: Vídeo ocult per l'OpenTubeX
 Video:
-  Mark as fully seen: Marca com a vist completament
+  Mark As Fully Watched: Marca com a vist completament
   AI-generated video summary: "Resum del vídeo generat per IA"
   Quality and accuracy may vary: "La qualitat i la precisió poden variar"
   Move Queue Item Up: "Mou {title} amunt"

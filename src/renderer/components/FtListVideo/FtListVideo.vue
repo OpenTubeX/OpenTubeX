@@ -851,7 +851,7 @@ const extraThumbnailActionButton = computed(() => {
     case 'markAsFullySeen':
       return canMarkAsFullySeen.value
         ? {
-            title: t('Video.Mark as fully seen'),
+            title: t('Video.Mark As Fully Watched'),
             icon: ['fas', 'flag-checkered']
           }
         : null
@@ -949,14 +949,14 @@ const videoMenuOptions = computed(() => {
     },
     ...showMarkAsSeen.value
       ? [{
-          label: t('Subscriptions.Mark as Seen'),
+          label: t('Subscriptions.Mark As Seen'),
           value: 'markAsSeen',
           icon: ['fas', 'check']
         }]
       : [],
     ...inSubscriptions.value && props.data.isNewInSubscriptionFeed === false
       ? [{
-          label: t('Subscriptions.Mark as Unseen'),
+          label: t('Subscriptions.Mark As Unseen'),
           value: 'markAsUnseen',
           icon: ['fas', 'eye-slash']
         }]
@@ -972,7 +972,7 @@ const videoMenuOptions = computed(() => {
       : [],
     ...canMarkAsFullySeen.value
       ? [{
-          label: t('Video.Mark as fully seen'),
+          label: t('Video.Mark As Fully Watched'),
           value: 'markAsFullySeen',
           icon: ['fas', 'flag-checkered']
         }]

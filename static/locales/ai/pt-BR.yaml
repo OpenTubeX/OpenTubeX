@@ -144,7 +144,7 @@ Home Page:
   All sections hidden: Todas as seções estão ocultas
   All sections hidden description: Personalize a página inicial para mostrar uma seção novamente.
 Subscriptions:
-  Mark as Unseen: Marcar como não visto
+  Mark As Unseen: Marcar como não visto
   Copy Error Details: "Copiar detalhes técnicos"
   Refresh Errors: "Canais que não puderam ser atualizados: {channels}. Clique para ver os detalhes."
   Refresh Error Channels More: "{channels} e mais {count} | {channels} e mais {count} | {channels} e mais {count}"
@@ -157,7 +157,7 @@ Subscriptions:
   New Feed Refresh Warning Title: Atualizar todos os feeds de inscrições?
   New Feed Refresh Warning: Atualizar todos os tipos de conteúdo sem RSS para 1 inscrição pode demorar bastante tempo. Deseja continuar? | Atualizar todos os tipos de conteúdo sem RSS para {count} inscrições pode demorar bastante tempo. Deseja continuar? | Atualizar todos os tipos de conteúdo sem RSS para {count} inscrições pode demorar bastante tempo. Deseja continuar?
   New Since Last Refresh: Novidades desde a última atualização
-  Mark as Seen: Marcar como visto
+  Mark As Seen: Marcar como visto
   Mark All as Seen: Marcar tudo como visto
   No New Content: Não há conteúdo novo.
   New Content Tabs: Guias de conteúdo novo
@@ -1112,7 +1112,7 @@ Channel:
   Search Result Types: Tipos de resultados da pesquisa
   All Results: Todos
 Video:
-  Mark as fully seen: Marcar como visto por completo
+  Mark As Fully Watched: Marcar como visto por completo
   AI-generated video summary: "Resumo do vídeo gerado por IA"
   Quality and accuracy may vary: "A qualidade e a precisão podem variar"
   Move Queue Item Up: "Mover {title} para cima"

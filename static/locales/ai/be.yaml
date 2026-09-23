@@ -150,7 +150,7 @@ Home Page:
   All sections hidden: Усе раздзелы схаваны
   All sections hidden description: Наладзьце галоўную, каб зноў паказаць раздзел.
 Subscriptions:
-  Mark as Unseen: Пазначыць як непрагледжанае
+  Mark As Unseen: Пазначыць як непрагледжанае
   Copy Error Details: "Скапіяваць тэхнічныя падрабязнасці"
   Refresh Errors: "Каналы, якія не ўдалося абнавіць: {channels}. Націсніце, каб праглядзець падрабязнасці."
   Refresh Error Channels More: "{channels} і яшчэ {count} | {channels} і яшчэ {count} | {channels} і яшчэ {count}"
@@ -163,7 +163,7 @@ Subscriptions:
   New Feed Refresh Warning Title: Абнавіць усе стужкі падпісак?
   New Feed Refresh Warning: Абнаўленне ўсіх тыпаў змесціва без RSS для 1 падпіскі можа заняць шмат часу. Працягнуць? | Абнаўленне ўсіх тыпаў змесціва без RSS для {count} падпісак можа заняць шмат часу. Працягнуць? | Абнаўленне ўсіх тыпаў змесціва без RSS для {count} падпісак можа заняць шмат часу. Працягнуць?
   New Since Last Refresh: Новае з часу апошняга абнаўлення
-  Mark as Seen: Пазначыць прагледжаным
+  Mark As Seen: Пазначыць прагледжаным
   Mark All as Seen: Пазначыць усё прагледжаным
   No New Content: Новага змесціва няма.
   New Content Tabs: Укладкі новага змесціва
@@ -1170,7 +1170,7 @@ Channel:
   All Results: Усе
   View All: Паказаць усе
 Video:
-  Mark as fully seen: Пазначыць як цалкам прагледжанае
+  Mark As Fully Watched: Пазначыць як цалкам прагледжанае
   AI-generated video summary: "Зводка відэа, створаная ШІ"
   Quality and accuracy may vary: "Якасць і дакладнасць могуць адрознівацца"
   Move Queue Item Up: "Перамясціць {title} вышэй"

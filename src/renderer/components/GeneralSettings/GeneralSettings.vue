@@ -831,7 +831,7 @@ const extraThumbnailActionValues = computed(() => [
 const extraThumbnailActionNames = computed(() => [
   t('Settings.General Settings.Extra Thumbnail Action Button.None'),
   t('Settings.General Settings.Extra Thumbnail Action Button.Mark as Watched'),
-  t('Video.Mark as fully seen'),
+  t('Video.Mark As Fully Watched'),
   t('Settings.General Settings.Extra Thumbnail Action Button.Copy YouTube Link'),
   t('Settings.General Settings.Extra Thumbnail Action Button.Open in YouTube'),
   ...(supportsYtDlp && enableDownloads.value ? [t('Downloads.Download Video')] : [])

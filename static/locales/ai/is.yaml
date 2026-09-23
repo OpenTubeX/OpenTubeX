@@ -144,7 +144,7 @@ Home Page:
   All sections hidden: Allir hlutar eru faldir
   All sections hidden description: Sérsníddu heimasíðuna til að sýna hluta aftur.
 Subscriptions:
-  Mark as Unseen: Merkja sem óséð
+  Mark As Unseen: Merkja sem óséð
   Copy Error Details: "Afrita tæknilegar upplýsingar"
   Refresh Errors: "Rásir sem ekki tókst að uppfæra: {channels}. Smelltu til að sjá upplýsingar."
   Refresh Error Channels More: "{channels} og {count} til viðbótar | {channels} og {count} til viðbótar"
@@ -157,7 +157,7 @@ Subscriptions:
   New Feed Refresh Warning Title: Endurnýja alla áskriftarstrauma?
   New Feed Refresh Warning: Það getur tekið langan tíma að endurnýja allar efnisgerðir án RSS fyrir 1 áskrift. Viltu halda áfram? | Það getur tekið langan tíma að endurnýja allar efnisgerðir án RSS fyrir {count} áskriftir. Viltu halda áfram?
   New Since Last Refresh: Nýtt frá síðustu endurnýjun
-  Mark as Seen: Merkja sem séð
+  Mark As Seen: Merkja sem séð
   Mark All as Seen: Merkja allt sem séð
   No New Content: Ekkert nýtt efni.
   New Content Tabs: Flipar fyrir nýtt efni
@@ -1121,7 +1121,7 @@ Channel:
   Search Result Types: Tegundir leitarniðurstaðna
   All Results: Allt
 Video:
-  Mark as fully seen: Merkja sem fullhorft
+  Mark As Fully Watched: Merkja sem fullhorft
   AI-generated video summary: "Myndbandsyfirlit búið til með gervigreind"
   Quality and accuracy may vary: "Gæði og nákvæmni geta verið breytileg"
   Move Queue Item Up: "Færa {title} upp"

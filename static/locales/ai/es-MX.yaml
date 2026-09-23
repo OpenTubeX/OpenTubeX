@@ -150,7 +150,7 @@ Home Page:
   All sections hidden: Todas las secciones están ocultas
   All sections hidden description: Personaliza Inicio para volver a mostrar una sección.
 Subscriptions:
-  Mark as Unseen: Marcar como no visto
+  Mark As Unseen: Marcar como no visto
   Copy Error Details: "Copiar detalles técnicos"
   Refresh Errors: "Canales que no se pudieron actualizar: {channels}. Haz clic para ver los detalles."
   Refresh Error Channels More: "{channels} y {count} más | {channels} y {count} más | {channels} y {count} más"
@@ -163,7 +163,7 @@ Subscriptions:
   New Feed Refresh Warning Title: ¿Actualizar todos los canales de suscripciones?
   New Feed Refresh Warning: Actualizar sin RSS todos los tipos de contenido de 1 suscripción puede tardar mucho. ¿Quieres continuar? | Actualizar sin RSS todos los tipos de contenido de {count} suscripciones puede tardar mucho. ¿Quieres continuar? | Actualizar sin RSS todos los tipos de contenido de {count} suscripciones puede tardar mucho. ¿Quieres continuar?
   New Since Last Refresh: Nuevo desde la última actualización
-  Mark as Seen: Marcar como visto
+  Mark As Seen: Marcar como visto
   Mark All as Seen: Marcar todo como visto
   No New Content: No hay contenido nuevo.
   New Content Tabs: Pestañas de contenido nuevo
@@ -1363,7 +1363,7 @@ Channel:
     Hide Answers: Ocultar las respuestas
     Video hidden by OpenTubeX: Video oculto por OpenTubeX
 Video:
-  Mark as fully seen: Marcar como visto por completo
+  Mark As Fully Watched: Marcar como visto por completo
   AI-generated video summary: "Resumen del video generado por IA"
   Quality and accuracy may vary: "La calidad y la precisión pueden variar"
   Move Queue Item Up: "Mover {title} hacia arriba"

@@ -259,7 +259,7 @@ const dropdownOptions = computed(() => {
   const options = []
   if (showMarkAsSeen.value) {
     options.push({
-      label: t('Subscriptions.Mark as Seen'),
+      label: t('Subscriptions.Mark As Seen'),
       value: 'markAsSeen',
       icon: ['fas', 'check']
     })

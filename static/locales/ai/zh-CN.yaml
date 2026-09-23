@@ -144,7 +144,7 @@ Home Page:
   All sections hidden: 所有版块均已隐藏
   All sections hidden description: 自定义首页以重新显示版块。
 Subscriptions:
-  Mark as Unseen: 标记为未看过
+  Mark As Unseen: 标记为未看过
   Copy Error Details: "复制技术详情"
   Refresh Errors: "无法刷新的频道：{channels}。点击查看详情。"
   Refresh Error Channels More: "{channels} 以及其他 {count} 个频道"
@@ -157,7 +157,7 @@ Subscriptions:
   New Feed Refresh Warning Title: 要刷新所有订阅源吗？
   New Feed Refresh Warning: 为 {count} 个订阅刷新所有未使用 RSS 的内容类型可能需要很长时间。要继续吗？
   New Since Last Refresh: 上次刷新后的新内容
-  Mark as Seen: 标记为已看
+  Mark As Seen: 标记为已看
   Mark All as Seen: 全部标记为已看
   No New Content: 没有新内容。
   New Content Tabs: 新内容标签页
@@ -1112,7 +1112,7 @@ Channel:
   Search Result Types: 搜索结果类型
   All Results: 全部
 Video:
-  Mark as fully seen: 标记为已完整观看
+  Mark As Fully Watched: 标记为已完整观看
   AI-generated video summary: "AI 生成的视频摘要"
   Quality and accuracy may vary: "质量和准确性可能有所不同"
   Move Queue Item Up: "将{title}上移"

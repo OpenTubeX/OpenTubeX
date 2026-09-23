@@ -93,12 +93,12 @@ test('marks progress fully seen from the menu and the configurable thumbnail act
   await expect.poll(persistedProgress).toEqual({ watchProgress: 10, isWatched: true })
 
   await video.locator('.title').click({ button: 'right' })
-  await page.getByRole('menuitem', { name: 'Mark as fully seen', exact: true }).click()
+  await page.getByRole('menuitem', { name: 'Mark As Fully Watched', exact: true }).click()
   await expect.poll(persistedProgress).toEqual({ watchProgress: 60, isWatched: true })
 
   const generalSection = await goToSettingsSection(page, 'general')
   await generalSection.getByRole('combobox', { name: 'Extra Thumbnail Action Button' }).click()
-  await page.getByRole('option', { name: 'Mark as fully seen', exact: true }).click()
+  await page.getByRole('option', { name: 'Mark As Fully Watched', exact: true }).click()
   await page.locator('.settingsCloseButton').click()
 
   await page.evaluate(async () => {
@@ -134,7 +134,7 @@ test.describe('fully seen eligibility', () => {
       await expect(video.locator('.extraThumbnailActionIcon')).toHaveCount(0)
       await video.locator('.title').click({ button: 'right' })
       await expect(page.getByRole('menuitem', { name: 'Remove From History', exact: true })).toBeVisible()
-      await expect(page.getByRole('menuitem', { name: 'Mark as fully seen', exact: true })).toHaveCount(0)
+      await expect(page.getByRole('menuitem', { name: 'Mark As Fully Watched', exact: true })).toHaveCount(0)
       await page.keyboard.press('Escape')
     }
   })

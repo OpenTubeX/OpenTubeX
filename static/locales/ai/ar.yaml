@@ -144,7 +144,7 @@ Home Page:
   All sections hidden: جميع الأقسام مخفية
   All sections hidden description: خصّص الصفحة الرئيسية لإظهار قسم من جديد.
 Subscriptions:
-  Mark as Unseen: وضع علامة كغير مُشاهَد
+  Mark As Unseen: وضع علامة كغير مُشاهَد
   Copy Error Details: "نسخ التفاصيل التقنية"
   Refresh Errors: "القنوات التي تعذر تحديثها: {channels}. انقر لعرض التفاصيل."
   Refresh Error Channels More: "{channels} و{count} أخرى | {channels} و{count} أخرى | {channels} و{count} أخرى | {channels} و{count} أخرى | {channels} و{count} أخرى | {channels} و{count} أخرى"
@@ -157,7 +157,7 @@ Subscriptions:
   New Feed Refresh Warning Title: هل تريد تحديث كافة خلاصات الاشتراك؟
   New Feed Refresh Warning: 'قد يستغرق تحديث جميع أنواع المحتوى بدون RSS لـ {count} اشتراك وقتًا طويلاً. هل تريد المتابعة؟ | قد يستغرق تحديث جميع أنواع المحتوى بدون RSS لاشتراك واحد وقتًا طويلاً. هل تريد المتابعة؟ | قد يستغرق تحديث جميع أنواع المحتوى بدون RSS لاشتراكين ({count}) وقتًا طويلاً. هل تريد المتابعة؟ | قد يستغرق تحديث جميع أنواع المحتوى بدون RSS لـ {count} اشتراكات وقتًا طويلاً. هل تريد المتابعة؟ | قد يستغرق تحديث جميع أنواع المحتوى بدون RSS لـ {count} اشتراكًا وقتًا طويلاً. هل تريد المتابعة؟ | قد يستغرق تحديث جميع أنواع المحتوى بدون RSS لـ {count} اشتراك وقتًا طويلاً. هل تريد المتابعة؟'
   New Since Last Refresh: جديد منذ آخر تحديث
-  Mark as Seen: وضع علامة كما رأينا
+  Mark As Seen: وضع علامة كما رأينا
   Mark All as Seen: وضع علامة على الكل كما رأينا
   No New Content: لا يوجد محتوى جديد.
   New Content Tabs: علامات تبويب المحتوى الجديدة
@@ -1137,7 +1137,7 @@ Channel:
   All Results: الجميع
   View All: عرض الكل
 Video:
-  Mark as fully seen: وضع علامة على أنه تمت مشاهدته بالكامل
+  Mark As Fully Watched: وضع علامة على أنه تمت مشاهدته بالكامل
   AI-generated video summary: "ملخص فيديو تم إنشاؤه بالذكاء الاصطناعي"
   Quality and accuracy may vary: "قد تختلف الجودة والدقة"
   Move Queue Item Up: "نقل {title} لأعلى"

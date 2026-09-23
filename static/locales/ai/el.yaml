@@ -144,7 +144,7 @@ Home Page:
   All sections hidden: Όλες οι ενότητες είναι κρυφές
   All sections hidden description: Προσαρμόστε την αρχική για να εμφανίσετε ξανά μια ενότητα.
 Subscriptions:
-  Mark as Unseen: Επισήμανση ως μη προβεβλημένου
+  Mark As Unseen: Επισήμανση ως μη προβεβλημένου
   Copy Error Details: "Αντιγραφή τεχνικών λεπτομερειών"
   Refresh Errors: "Κανάλια που δεν ήταν δυνατό να ανανεωθούν: {channels}. Κάντε κλικ για προβολή λεπτομερειών."
   Refresh Error Channels More: "{channels} και {count} ακόμη | {channels} και {count} ακόμη"
@@ -157,7 +157,7 @@ Subscriptions:
   New Feed Refresh Warning Title: Ανανέωση όλων των ροών συνδρομών;
   New Feed Refresh Warning: Η ανανέωση όλων των τύπων περιεχομένου χωρίς RSS για 1 συνδρομή μπορεί να διαρκέσει πολύ. Θέλετε να συνεχίσετε; | Η ανανέωση όλων των τύπων περιεχομένου χωρίς RSS για {count} συνδρομές μπορεί να διαρκέσει πολύ. Θέλετε να συνεχίσετε;
   New Since Last Refresh: Νέα από την τελευταία ανανέωση
-  Mark as Seen: Επισήμανση ως προβεβλημένου
+  Mark As Seen: Επισήμανση ως προβεβλημένου
   Mark All as Seen: Επισήμανση όλων ως προβεβλημένων
   No New Content: Δεν υπάρχει νέο περιεχόμενο.
   New Content Tabs: Καρτέλες νέου περιεχομένου
@@ -1142,7 +1142,7 @@ Channel:
   All Results: Όλα
   View All: Προβολή όλων
 Video:
-  Mark as fully seen: Σήμανση ως πλήρως προβληθέν
+  Mark As Fully Watched: Σήμανση ως πλήρως προβληθέν
   AI-generated video summary: "Σύνοψη βίντεο που δημιουργήθηκε από ΤΝ"
   Quality and accuracy may vary: "Η ποιότητα και η ακρίβεια ενδέχεται να διαφέρουν"
   Move Queue Item Up: "Μετακίνηση του {title} επάνω"

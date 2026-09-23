@@ -144,7 +144,7 @@ Home Page:
   All sections hidden: Minden szakasz el van rejtve
   All sections hidden description: Szabja testre a kezdőlapot egy szakasz újbóli megjelenítéséhez.
 Subscriptions:
-  Mark as Unseen: Megjelölés nem látottként
+  Mark As Unseen: Megjelölés nem látottként
   Copy Error Details: "Technikai részletek másolása"
   Refresh Errors: "Nem frissíthető csatornák: {channels}. Kattintson a részletek megtekintéséhez."
   Refresh Error Channels More: "{channels} és további {count} | {channels} és további {count}"
@@ -157,7 +157,7 @@ Subscriptions:
   New Feed Refresh Warning Title: Frissíti az összes feliratkozási hírfolyamot?
   New Feed Refresh Warning: Az összes tartalomtípus RSS nélküli frissítése 1 feliratkozásnál sokáig tarthat. Folytatja? | Az összes tartalomtípus RSS nélküli frissítése {count} feliratkozásnál sokáig tarthat. Folytatja?
   New Since Last Refresh: Új az utolsó frissítés óta
-  Mark as Seen: Megjelölés látottként
+  Mark As Seen: Megjelölés látottként
   Mark All as Seen: Összes megjelölése látottként
   No New Content: Nincs új tartalom.
   New Content Tabs: Új tartalmak lapjai
@@ -1112,7 +1112,7 @@ Channel:
   Search Result Types: Keresési találatok típusai
   All Results: Összes
 Video:
-  Mark as fully seen: Megjelölés teljesen megtekintettként
+  Mark As Fully Watched: Megjelölés teljesen megtekintettként
   AI-generated video summary: "MI által készített videóösszefoglaló"
   Quality and accuracy may vary: "A minőség és a pontosság változó lehet"
   Move Queue Item Up: "{title} feljebb mozgatása"

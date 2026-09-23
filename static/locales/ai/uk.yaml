@@ -144,7 +144,7 @@ Home Page:
   All sections hidden: Усі розділи приховано
   All sections hidden description: Налаштуйте головну, щоб знову показати розділ.
 Subscriptions:
-  Mark as Unseen: Позначити як непереглянуте
+  Mark As Unseen: Позначити як непереглянуте
   Copy Error Details: "Скопіювати технічні подробиці"
   Refresh Errors: "Канали, які не вдалося оновити: {channels}. Натисніть, щоб переглянути подробиці."
   Refresh Error Channels More: "{channels} і ще {count} | {channels} і ще {count} | {channels} і ще {count}"
@@ -157,7 +157,7 @@ Subscriptions:
   New Feed Refresh Warning Title: Оновити всі стрічки підписок?
   New Feed Refresh Warning: Оновлення всіх типів вмісту без RSS для 1 підписки може тривати довго. Продовжити? | Оновлення всіх типів вмісту без RSS для {count} підписок може тривати довго. Продовжити? | Оновлення всіх типів вмісту без RSS для {count} підписок може тривати довго. Продовжити?
   New Since Last Refresh: Нове від останнього оновлення
-  Mark as Seen: Позначити як переглянуте
+  Mark As Seen: Позначити як переглянуте
   Mark All as Seen: Позначити все як переглянуте
   No New Content: Нового вмісту немає.
   New Content Tabs: Вкладки нового вмісту
@@ -1137,7 +1137,7 @@ Channel:
   All Results: Усі
   View All: Переглянути всі
 Video:
-  Mark as fully seen: Позначити як повністю переглянуте
+  Mark As Fully Watched: Позначити як повністю переглянуте
   AI-generated video summary: "Підсумок відео, створений ШІ"
   Quality and accuracy may vary: "Якість і точність можуть відрізнятися"
   Move Queue Item Up: "Перемістити {title} вгору"

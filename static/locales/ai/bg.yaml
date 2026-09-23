@@ -144,7 +144,7 @@ Home Page:
   All sections hidden: Всички раздели са скрити
   All sections hidden description: Персонализирайте началната страница, за да покажете отново раздел.
 Subscriptions:
-  Mark as Unseen: Отбележи като невидяно
+  Mark As Unseen: Отбележи като невидяно
   Copy Error Details: "Копиране на техническите подробности"
   Refresh Errors: "Канали, които не можаха да се обновят: {channels}. Натиснете, за да видите подробностите."
   Refresh Error Channels More: "{channels} и още {count} | {channels} и още {count}"
@@ -157,7 +157,7 @@ Subscriptions:
   New Feed Refresh Warning Title: Обновяване на всички емисии с абонаменти?
   New Feed Refresh Warning: Обновяването на всички видове съдържание без RSS за 1 абонамент може да отнеме много време. Искате ли да продължите? | Обновяването на всички видове съдържание без RSS за {count} абонамента може да отнеме много време. Искате ли да продължите?
   New Since Last Refresh: Ново от последното обновяване
-  Mark as Seen: Отбележи като видяно
+  Mark As Seen: Отбележи като видяно
   Mark All as Seen: Отбележи всичко като видяно
   No New Content: Няма ново съдържание.
   New Content Tabs: Раздели с ново съдържание
@@ -1119,7 +1119,7 @@ Channel:
   Search Result Types: Видове резултати от търсенето
   All Results: Всички
 Video:
-  Mark as fully seen: Отбележи като изцяло гледано
+  Mark As Fully Watched: Отбележи като изцяло гледано
   AI-generated video summary: "Резюме на видеоклипа, генерирано от ИИ"
   Quality and accuracy may vary: "Качеството и точността може да варират"
   Move Queue Item Up: "Преместване на {title} нагоре"

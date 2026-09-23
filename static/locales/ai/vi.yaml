@@ -144,7 +144,7 @@ Home Page:
   All sections hidden: Tất cả các mục đều bị ẩn
   All sections hidden description: Tùy chỉnh Trang chủ để hiển thị lại một mục.
 Subscriptions:
-  Mark as Unseen: Đánh dấu là chưa xem
+  Mark As Unseen: Đánh dấu là chưa xem
   Copy Error Details: "Sao chép chi tiết kỹ thuật"
   Refresh Errors: "Các kênh không thể làm mới: {channels}. Nhấp để xem chi tiết."
   Refresh Error Channels More: "{channels} và {count} kênh khác"
@@ -157,7 +157,7 @@ Subscriptions:
   New Feed Refresh Warning Title: Làm mới tất cả bảng tin đăng ký?
   New Feed Refresh Warning: Việc làm mới mọi loại nội dung không qua RSS cho {count} kênh đăng ký có thể mất nhiều thời gian. Bạn có muốn tiếp tục không?
   New Since Last Refresh: Mới kể từ lần làm mới trước
-  Mark as Seen: Đánh dấu đã xem
+  Mark As Seen: Đánh dấu đã xem
   Mark All as Seen: Đánh dấu tất cả là đã xem
   No New Content: Không có nội dung mới.
   New Content Tabs: Thẻ nội dung mới
@@ -1135,7 +1135,7 @@ Channel:
   All Results: Tất cả
   View All: Xem tất cả
 Video:
-  Mark as fully seen: Đánh dấu là đã xem hết
+  Mark As Fully Watched: Đánh dấu là đã xem hết
   AI-generated video summary: "Bản tóm tắt video do AI tạo"
   Quality and accuracy may vary: "Chất lượng và độ chính xác có thể khác nhau"
   Move Queue Item Up: "Di chuyển {title} lên"

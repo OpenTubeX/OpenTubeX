@@ -391,7 +391,7 @@ test.describe('new subscriptions feed', () => {
 
     await video.hover()
     await video.locator('.title').click({ button: 'right' })
-    await page.getByRole('menuitem', { name: 'Mark as seen' }).click()
+    await page.getByRole('menuitem', { name: /^Mark As Seen$/ }).click()
 
     await expect(video).toBeVisible()
     await expect(video.locator('.newContentDot')).toHaveCount(0)
@@ -400,7 +400,7 @@ test.describe('new subscriptions feed', () => {
 
     await video.hover()
     await video.locator('.title').click({ button: 'right' })
-    await expect(page.getByRole('menuitem', { name: 'Mark as seen' })).toHaveCount(0)
+    await expect(page.getByRole('menuitem', { name: 'Mark As Seen', exact: true })).toHaveCount(0)
   })
 
   test('marks watched and seen videos unseen without losing progress, including after restart', async ({ app, page, attachScreenshot }) => {
@@ -411,15 +411,15 @@ test.describe('new subscriptions feed', () => {
     })
     const alreadyNew = page.locator('.ft-list-video').filter({ has: page.getByText('New video', { exact: true }) })
     await alreadyNew.locator('.title').click({ button: 'right' })
-    await expect(page.getByRole('menuitem', { name: 'Mark as seen', exact: true })).toBeVisible()
-    await expect(page.getByRole('menuitem', { name: 'Mark as unseen', exact: true })).toHaveCount(0)
+    await expect(page.getByRole('menuitem', { name: 'Mark As Seen', exact: true })).toBeVisible()
+    await expect(page.getByRole('menuitem', { name: 'Mark As Unseen', exact: true })).toHaveCount(0)
     await page.keyboard.press('Escape')
     const watched = page.locator('.ft-list-video').filter({ hasText: 'Watched new video' })
     await expect(watched).toHaveClass(/watched/)
     await watched.locator('.title').click({ button: 'right' })
-    await expect(page.getByRole('menuitem', { name: 'Mark as unseen', exact: true })).toBeVisible()
+    await expect(page.getByRole('menuitem', { name: /^Mark As Unseen$/ })).toBeVisible()
     await attachScreenshot('mark as unseen in subscriptions')
-    await page.getByRole('menuitem', { name: 'Mark as unseen', exact: true }).click()
+    await page.getByRole('menuitem', { name: 'Mark As Unseen', exact: true }).click()
     await expect(watched).not.toHaveClass(/watched/)
     await expect(watched.locator('.newContentDot')).toBeVisible()
     const readHistory = targetPage => targetPage.evaluate(() => (
@@ -430,7 +430,7 @@ test.describe('new subscriptions feed', () => {
 
     const seen = page.locator('.ft-list-video').filter({ hasText: 'Previously seen video' })
     await seen.locator('.title').click({ button: 'right' })
-    await page.getByRole('menuitem', { name: 'Mark as unseen', exact: true }).click()
+    await page.getByRole('menuitem', { name: 'Mark As Unseen', exact: true }).click()
     await expect(seen.locator('.newContentDot')).toBeVisible()
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(watched).toBeVisible()
@@ -444,7 +444,7 @@ test.describe('new subscriptions feed', () => {
     expect((await readHistory(relaunched.page)).watchProgress).toBe(watchedVideo.lengthSeconds)
     expect((await readHistory(relaunched.page)).isWatched).toBe(false)
     await restored.locator('.title').click({ button: 'right' })
-    await relaunched.page.getByRole('menuitem', { name: 'Mark as seen', exact: true }).click()
+    await relaunched.page.getByRole('menuitem', { name: 'Mark As Seen', exact: true }).click()
     await expect(restored).toHaveCount(0)
     await relaunched.page.getByRole('button', { name: 'Mark all as seen' }).click()
     await expect(relaunched.page.getByText('Previously seen video', { exact: true })).toHaveCount(0)
@@ -454,7 +454,7 @@ test.describe('new subscriptions feed', () => {
     await goTo(page, 'subscriptions')
     const card = page.locator('.ft-list-video').filter({ hasText: 'Watched new video' })
     await card.locator('.title').click({ button: 'right' })
-    await page.getByRole('menuitem', { name: 'Mark as unseen', exact: true }).click()
+    await page.getByRole('menuitem', { name: 'Mark As Unseen', exact: true }).click()
     await expect(card).not.toHaveClass(/watched/)
     await card.locator('.title').click({ button: 'right' })
     await page.getByRole('menuitem', { name: 'Mark As Watched', exact: true }).click()
@@ -477,10 +477,10 @@ test.describe('new subscriptions feed', () => {
       await page.locator(`[data-subscription-feed-tab="${tab}"]`).click()
       const card = page.locator('.ft-list-video').filter({ hasText: title })
       await card.locator('.title').click({ button: 'right' })
-      await page.getByRole('menuitem', { name: 'Mark as seen', exact: true }).click()
+      await page.getByRole('menuitem', { name: 'Mark As Seen', exact: true }).click()
       await expect(card.locator('.newContentDot')).toHaveCount(0)
       await card.locator('.title').click({ button: 'right' })
-      await page.getByRole('menuitem', { name: 'Mark as unseen', exact: true }).click()
+      await page.getByRole('menuitem', { name: 'Mark As Unseen', exact: true }).click()
       await expect(card.locator('.newContentDot')).toBeVisible()
       await page.locator('[data-subscription-feed-tab="all"]').click()
       await expect(card).toBeVisible()
@@ -494,14 +494,14 @@ test.describe('new subscriptions feed', () => {
     const post = page.locator('.ft-list-post').filter({ hasText: 'New community post' })
     await expect(post.locator('.newContentDot')).toBeVisible()
     await post.getByRole('button', { name: /^More options$/i }).click()
-    await page.getByRole('option', { name: 'Mark as seen', exact: true }).click()
+    await page.getByRole('option', { name: /^Mark As Seen$/ }).click()
 
     await expect(post).toBeVisible()
     await expect(post.locator('.newContentDot')).toHaveCount(0)
     await expect(page.getByRole('button', { name: 'Mark all as seen' })).toHaveCount(0)
 
     await post.getByRole('button', { name: /^More options$/i }).click()
-    await expect(page.getByRole('option', { name: 'Mark as seen', exact: true })).toHaveCount(0)
+    await expect(page.getByRole('option', { name: 'Mark As Seen', exact: true })).toHaveCount(0)
     await expect(page.getByRole('option', { name: 'Never show Posts from this channel in feeds again' })).toBeVisible()
     await page.keyboard.press('Escape')
     await page.locator('[data-subscription-feed-tab="all"]').click()
@@ -515,7 +515,7 @@ test.describe('new subscriptions feed', () => {
     await expect(seenPost).toBeVisible()
     await expect(seenPost.locator('.newContentDot')).toHaveCount(0)
     await seenPost.getByRole('button', { name: /^More options$/i }).click()
-    await expect(relaunched.page.getByRole('option', { name: 'Mark as seen', exact: true })).toHaveCount(0)
+    await expect(relaunched.page.getByRole('option', { name: 'Mark As Seen', exact: true })).toHaveCount(0)
   })
 
   test('history sync merges seen videos and posts and retains them after refresh and restart', async ({ app, page }) => {
@@ -615,7 +615,7 @@ test.describe('new subscriptions feed', () => {
     const localPost = page.locator('.ft-list-post').filter({ hasText: 'Locally marked post' })
     await expect(localPost).toBeVisible()
     await localPost.getByRole('button', { name: /^More options$/i }).click()
-    await page.getByRole('option', { name: 'Mark as seen', exact: true }).click()
+    await page.getByRole('option', { name: 'Mark As Seen', exact: true }).click()
     await expect(localPost).toHaveCount(0)
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -915,7 +915,7 @@ test.describe('new feed settings and seen state', () => {
     })
     await regularFeedVideo.hover()
     await regularFeedVideo.locator('.title').click({ button: 'right' })
-    await expect(page.getByRole('menuitem', { name: 'Mark as seen' })).toHaveCount(0)
+    await expect(page.getByRole('menuitem', { name: 'Mark As Seen', exact: true })).toHaveCount(0)
 
     await page.keyboard.press('Escape')
     await page.locator('[data-subscription-feed-tab="all"]').click()
@@ -925,7 +925,7 @@ test.describe('new feed settings and seen state', () => {
     })
     await newFeedVideo.hover()
     await newFeedVideo.locator('.title').click({ button: 'right' })
-    await page.getByRole('menuitem', { name: 'Mark as seen' }).click()
+    await page.getByRole('menuitem', { name: 'Mark As Seen', exact: true }).click()
 
     await expect(newFeedVideo).toHaveCount(0)
   })
@@ -936,12 +936,12 @@ test.describe('new feed settings and seen state', () => {
 
     const post = page.locator('.ft-list-post').filter({ hasText: 'New community post' })
     await post.getByRole('button', { name: /^More options$/i }).click()
-    await expect(page.getByRole('option', { name: 'Mark as seen', exact: true })).toHaveCount(0)
+    await expect(page.getByRole('option', { name: 'Mark As Seen', exact: true })).toHaveCount(0)
     await page.keyboard.press('Escape')
     await page.locator('[data-subscription-feed-tab="all"]').click()
 
     await post.getByRole('button', { name: /^More options$/i }).click()
-    await page.getByRole('option', { name: 'Mark as seen', exact: true }).focus()
+    await page.getByRole('option', { name: 'Mark As Seen', exact: true }).focus()
     await page.keyboard.press('Enter')
     await expect(post).toHaveCount(0)
     await expect(page.getByText('New video post', { exact: true })).toBeVisible()
@@ -949,7 +949,7 @@ test.describe('new feed settings and seen state', () => {
     await page.locator('[data-subscription-feed-tab="posts"]').click()
     await expect(post).toBeVisible()
     await post.getByRole('button', { name: /^More options$/i }).click()
-    await expect(page.getByRole('option', { name: 'Mark as seen', exact: true })).toHaveCount(0)
+    await expect(page.getByRole('option', { name: 'Mark As Seen', exact: true })).toHaveCount(0)
   })
 
   test('keeps YouTube-style Shorts as portrait grid cards in list display mode', async ({ page }) => {
@@ -1001,7 +1001,7 @@ test.describe('new feed settings and seen state', () => {
     const attachedVideo = page.locator('.ft-list-post .ft-list-video').filter({ hasText: 'Attached video' })
     await attachedVideo.locator('.title').click({ button: 'right' })
     await expect(page.getByRole('menuitem', { name: 'Open in a New Window', exact: true })).toBeVisible()
-    await expect(page.getByRole('menuitem', { name: 'Mark as unseen', exact: true })).toHaveCount(0)
+    await expect(page.getByRole('menuitem', { name: 'Mark As Unseen', exact: true })).toHaveCount(0)
   })
 
   test('keeps an attached video inside a post as a full width card in list display mode', async ({ page }) => {

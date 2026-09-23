@@ -143,7 +143,7 @@ Home Page:
   All sections hidden: All sections are hidden
   All sections hidden description: Customise Home to show a section again.
 Subscriptions:
-  Mark as Unseen: Mark as unseen
+  Mark As Unseen: Mark As Unseen
   Copy Error Details: "Copy technical details"
   Refresh Errors: "Channels that could not be refreshed: {channels}. Click to view details."
   Refresh Error Channels More: "{channels} and {count} more | {channels} and {count} more"
@@ -156,7 +156,7 @@ Subscriptions:
   New Feed Refresh Warning Title: Refresh all subscription feeds?
   New Feed Refresh Warning: Refreshing all content types without RSS for 1 subscription can take a long time. Do you want to continue? | Refreshing all content types without RSS for {count} subscriptions can take a long time. Do you want to continue?
   New Since Last Refresh: New since last refresh
-  Mark as Seen: Mark as seen
+  Mark As Seen: Mark As Seen
   Mark All as Seen: Mark all as seen
   No New Content: There is no new content.
   New Content Tabs: New content tabs
@@ -1095,7 +1095,7 @@ Channel:
   Search Result Types: Search result types
   All Results: All
 Video:
-  Mark as fully seen: Mark as fully seen
+  Mark As Fully Watched: Mark As Fully Watched
   AI-generated video summary: "AI-generated video summary"
   Quality and accuracy may vary: "Quality and accuracy may vary"
   Move Queue Item Up: "Move {title} up"

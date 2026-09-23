@@ -144,7 +144,7 @@ Home Page:
   All sections hidden: Atal guztiak ezkutatuta daude
   All sections hidden description: Pertsonalizatu hasiera atal bat berriro erakusteko.
 Subscriptions:
-  Mark as Unseen: Markatu ikusi gabeko gisa
+  Mark As Unseen: Markatu ikusi gabeko gisa
   Copy Error Details: "Kopiatu xehetasun teknikoak"
   Refresh Errors: "Eguneratu ezin izan diren kanalak: {channels}. Egin klik xehetasunak ikusteko."
   Refresh Error Channels More: "{channels} eta beste {count} | {channels} eta beste {count}"
@@ -157,7 +157,7 @@ Subscriptions:
   New Feed Refresh Warning Title: Harpidetza-jario guztiak freskatu?
   New Feed Refresh Warning: RSS erabili gabe harpidetza 1eko eduki mota guztiak freskatzeak luze jo dezake. Jarraitu nahi duzu? | RSS erabili gabe {count} harpidetzatako eduki mota guztiak freskatzeak luze jo dezake. Jarraitu nahi duzu?
   New Since Last Refresh: Azken freskatzetik berria
-  Mark as Seen: Markatu ikusita
+  Mark As Seen: Markatu ikusita
   Mark All as Seen: Markatu guztiak ikusita
   No New Content: Ez dago eduki berririk.
   New Content Tabs: Eduki berriko fitxak
@@ -1112,7 +1112,7 @@ Channel:
   Search Result Types: Bilaketa-emaitzen motak
   All Results: Guztiak
 Video:
-  Mark as fully seen: Markatu osorik ikusita bezala
+  Mark As Fully Watched: Markatu osorik ikusita bezala
   AI-generated video summary: "AAk sortutako bideo-laburpena"
   Quality and accuracy may vary: "Kalitatea eta zehaztasuna alda daitezke"
   Move Queue Item Up: "Eraman {title} gora"

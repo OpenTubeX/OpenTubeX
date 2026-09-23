@@ -144,7 +144,7 @@ Home Page:
   All sections hidden: כל המקטעים מוסתרים
   All sections hidden description: התאימו אישית את דף הבית כדי להציג שוב מקטע.
 Subscriptions:
-  Mark as Unseen: סימון כלא נצפה
+  Mark As Unseen: סימון כלא נצפה
   Copy Error Details: "העתקת פרטים טכניים"
   Refresh Errors: "ערוצים שלא ניתן היה לרענן: {channels}. יש ללחוץ להצגת הפרטים."
   Refresh Error Channels More: "{channels} ועוד {count} | {channels} ועוד {count} | {channels} ועוד {count}"
@@ -157,7 +157,7 @@ Subscriptions:
   New Feed Refresh Warning Title: לרענן את כל עדכוני המינויים?
   New Feed Refresh Warning: רענון כל סוגי התוכן ללא RSS ל־1 מינוי עלול להימשך זמן רב. להמשיך? | רענון כל סוגי התוכן ללא RSS ל־{count} מינויים עלול להימשך זמן רב. להמשיך? | רענון כל סוגי התוכן ללא RSS ל־{count} מינויים עלול להימשך זמן רב. להמשיך?
   New Since Last Refresh: חדש מאז הרענון האחרון
-  Mark as Seen: סימון כנצפה
+  Mark As Seen: סימון כנצפה
   Mark All as Seen: סימון הכול כנצפה
   No New Content: אין תוכן חדש.
   New Content Tabs: כרטיסיות תוכן חדש
@@ -1142,7 +1142,7 @@ Channel:
   All Results: הכול
   View All: הצגת הכול
 Video:
-  Mark as fully seen: סימון כנצפה במלואו
+  Mark As Fully Watched: סימון כנצפה במלואו
   AI-generated video summary: "סיכום סרטון שנוצר באמצעות בינה מלאכותית"
   Quality and accuracy may vary: "האיכות והדיוק עשויים להשתנות"
   Move Queue Item Up: "העברת {title} למעלה"

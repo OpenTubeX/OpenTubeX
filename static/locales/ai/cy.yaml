@@ -144,7 +144,7 @@ Home Page:
   All sections hidden: Mae pob adran wedi'i chuddio
   All sections hidden description: Addaswch yr hafan i ddangos adran eto.
 Subscriptions:
-  Mark as Unseen: Marcio fel heb ei weld
+  Mark As Unseen: Marcio fel heb ei weld
   Copy Error Details: "Copïo manylion technegol"
   Refresh Errors: "Sianeli na ellid eu hadnewyddu: {channels}. Cliciwch i weld y manylion."
   Refresh Error Channels More: "{channels} a {count} arall | {channels} a {count} arall | {channels} a {count} arall | {channels} a {count} arall | {channels} a {count} arall | {channels} a {count} arall"
@@ -157,7 +157,7 @@ Subscriptions:
   New Feed Refresh Warning Title: Adnewyddu pob ffrwd tanysgrifiadau?
   New Feed Refresh Warning: Gall adnewyddu pob math o gynnwys heb RSS ar gyfer {count} o danysgrifiadau gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys heb RSS ar gyfer 1 tanysgrifiad gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys heb RSS ar gyfer {count} danysgrifiad gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys heb RSS ar gyfer {count} thanysgrifiad gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys heb RSS ar gyfer {count} thanysgrifiad gymryd amser hir. Ydych chi am barhau? | Gall adnewyddu pob math o gynnwys heb RSS ar gyfer {count} o danysgrifiadau gymryd amser hir. Ydych chi am barhau?
   New Since Last Refresh: Newydd ers yr adnewyddiad diwethaf
-  Mark as Seen: Marcio fel wedi'i weld
+  Mark As Seen: Marcio fel wedi'i weld
   Mark All as Seen: Marcio'r cyfan fel wedi'u gweld
   No New Content: Nid oes unrhyw gynnwys newydd.
   New Content Tabs: Tabiau cynnwys newydd
@@ -1119,7 +1119,7 @@ Channel:
   Search Result Types: Mathau o ganlyniadau chwilio
   All Results: Pob un
 Video:
-  Mark as fully seen: Marcio fel wedi ei wylio yn llawn
+  Mark As Fully Watched: Marcio fel wedi ei wylio yn llawn
   AI-generated video summary: "Crynodeb fideo wedi'i gynhyrchu gan AI"
   Quality and accuracy may vary: "Gall ansawdd a chywirdeb amrywio"
   Move Queue Item Up: "Symud {title} i fyny"

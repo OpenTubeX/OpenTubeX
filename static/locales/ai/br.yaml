@@ -144,7 +144,7 @@ Home Page:
   All sections hidden: Kuzhet eo an holl rannoù
   All sections hidden description: Personelait ar bajenn degemer evit diskouez ur rann en-dro.
 Subscriptions:
-  Mark as Unseen: Merkañ evel nann gwelet
+  Mark As Unseen: Merkañ evel nann gwelet
   Copy Error Details: "Eilañ ar munudoù teknikel"
   Refresh Errors: "Kanolioù n'int ket bet hizivaet: {channels}. Klikit evit gwelet ar munudoù."
   Refresh Error Channels More: "{channels} ha {count} all | {channels} ha {count} all | {channels} ha {count} all | {channels} ha {count} all | {channels} ha {count} all"
@@ -157,7 +157,7 @@ Subscriptions:
   New Feed Refresh Warning Title: "Adkargañ holl wazhioù ar c'houmanantoù?"
   New Feed Refresh Warning: "Adkargañ an holl zoareoù endalc'had hep RSS evit 1 c'houmanant a c'hall padout pell. Kenderc'hel? | Adkargañ an holl zoareoù endalc'had hep RSS evit {count} goumanant a c'hall padout pell. Kenderc'hel? | Adkargañ an holl zoareoù endalc'had hep RSS evit {count} c'houmanant a c'hall padout pell. Kenderc'hel? | Adkargañ an holl zoareoù endalc'had hep RSS evit {count} c'houmanant a c'hall padout pell. Kenderc'hel? | Adkargañ an holl zoareoù endalc'had hep RSS evit {count} koumanant a c'hall padout pell. Kenderc'hel?"
   New Since Last Refresh: "Nevez abaoe an adkargañ diwezhañ"
-  Mark as Seen: "Merkañ evel gwelet"
+  Mark As Seen: "Merkañ evel gwelet"
   Mark All as Seen: "Merkañ pep tra evel gwelet"
   No New Content: "N'eus endalc'had nevez ebet."
   New Content Tabs: "Ivinelloù an endalc'had nevez"
@@ -1112,7 +1112,7 @@ Channel:
   Search Result Types: "Doareoù disoc'hoù enklask"
   All Results: "Pep tra"
 Video:
-  Mark as fully seen: Merkañ evel gwelet penn-da-benn
+  Mark As Fully Watched: Merkañ evel gwelet penn-da-benn
   AI-generated video summary: "Diverradenn ar video ganet gant an IA"
   Quality and accuracy may vary: "Gallout a ra ar perzhded hag ar resisted cheñch"
   Move Queue Item Up: "Dilec'hiañ {title} d'ar c'hrec'h"

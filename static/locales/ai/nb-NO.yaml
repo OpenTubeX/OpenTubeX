@@ -144,7 +144,7 @@ Home Page:
   All sections hidden: Alle deler er skjult
   All sections hidden description: Tilpass startsiden for å vise en del igjen.
 Subscriptions:
-  Mark as Unseen: Merk som ikke sett
+  Mark As Unseen: Merk som ikke sett
   Copy Error Details: "Kopier tekniske detaljer"
   Refresh Errors: "Kanaler som ikke kunne oppdateres: {channels}. Klikk for å se detaljer."
   Refresh Error Channels More: "{channels} og {count} til | {channels} og {count} til"
@@ -157,7 +157,7 @@ Subscriptions:
   New Feed Refresh Warning Title: Oppdatere alle abonnementsstrømmer?
   New Feed Refresh Warning: Det kan ta lang tid å oppdatere alle innholdstyper uten RSS for 1 abonnement. Vil du fortsette? | Det kan ta lang tid å oppdatere alle innholdstyper uten RSS for {count} abonnementer. Vil du fortsette?
   New Since Last Refresh: Nytt siden forrige oppdatering
-  Mark as Seen: Merk som sett
+  Mark As Seen: Merk som sett
   Mark All as Seen: Merk alle som sett
   No New Content: Det finnes ikke noe nytt innhold.
   New Content Tabs: Faner for nytt innhold
@@ -1117,7 +1117,7 @@ Channel:
   Search Result Types: Typer søkeresultater
   All Results: Alle
 Video:
-  Mark as fully seen: Merk som ferdig sett
+  Mark As Fully Watched: Merk som ferdig sett
   AI-generated video summary: "KI-generert videosammendrag"
   Quality and accuracy may vary: "Kvalitet og nøyaktighet kan variere"
   Move Queue Item Up: "Flytt {title} opp"

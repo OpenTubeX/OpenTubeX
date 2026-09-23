@@ -151,7 +151,7 @@ Home Page:
   All sections hidden: 모든 섹션이 숨겨져 있습니다
   All sections hidden description: 홈을 맞춤 설정하여 섹션을 다시 표시하세요.
 Subscriptions:
-  Mark as Unseen: 보지 않음으로 표시
+  Mark As Unseen: 보지 않음으로 표시
   Copy Error Details: "기술 세부 정보 복사"
   Refresh Errors: "새로고침하지 못한 채널: {channels}. 클릭하여 세부 정보를 확인하세요."
   Refresh Error Channels More: "{channels} 외 {count}개"
@@ -164,7 +164,7 @@ Subscriptions:
   New Feed Refresh Warning Title: 모든 구독 피드를 새로 고치시겠습니까?
   New Feed Refresh Warning: RSS 없이 구독 {count}개의 모든 콘텐츠 유형을 새로 고치면 시간이 오래 걸릴 수 있습니다. 계속하시겠습니까?
   New Since Last Refresh: 마지막 새로 고침 이후 신규 항목
-  Mark as Seen: 확인함으로 표시
+  Mark As Seen: 확인함으로 표시
   Mark All as Seen: 모두 확인함으로 표시
   No New Content: 새 콘텐츠가 없습니다.
   New Content Tabs: 새 콘텐츠 탭
@@ -1405,7 +1405,7 @@ Channel:
     Hide Answers: 답변 숨기기
     Video hidden by OpenTubeX: OpenTubeX에서 숨긴 동영상
 Video:
-  Mark as fully seen: 끝까지 시청한 것으로 표시
+  Mark As Fully Watched: 끝까지 시청한 것으로 표시
   AI-generated video summary: "AI 생성 동영상 요약"
   Quality and accuracy may vary: "품질과 정확도는 다를 수 있습니다"
   Move Queue Item Up: "{title} 위로 이동"
