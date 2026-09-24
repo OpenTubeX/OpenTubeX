@@ -2,6 +2,8 @@ import assert from 'node:assert/strict'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import test from 'node:test'
+import { readFile } from 'node:fs/promises'
+import YAML from 'yaml'
 
 import {
   cleanupOverlayText,
@@ -93,6 +95,28 @@ test('AI translation validation allows count-aware external metric labels', () =
   assert.deepEqual(validateOverlayMessages('uk', { Label: 'label' }, {}, { Label: 'one | few | many' }), [
     'Label: source is not plural but translation has 3 forms'
   ])
+})
+
+test('external metric labels use the correct counted noun forms', async () => {
+  const cases = [
+    ['hu', 'Saves', 2, 'Mentés'],
+    ['fi', 'Reposts', 2, 'Uudelleenjulkaisua'],
+    ['br', 'Dislikes', 2, 'Displijadennoù'],
+    ['hr', 'Reposts', 5, 'Ponovnih objava'],
+    ['fa', 'Reposts', 2, 'بازنشرها'],
+    ['nn', 'Dislikes', 2, 'Mislikingar'],
+    ['nb-NO', 'Dislikes', 1, 'Misliking'],
+    ['sk', 'Reposts', 5, 'Opätovných zdieľaní'],
+    ['da', 'Saves', 2, 'Gemte elementer'],
+    ['lt', 'Saves', 10, 'Išsaugojimų'],
+    ['lt', 'Reposts', 10, 'Pakartotinių įrašų'],
+    ['ta', 'Saves', 2, 'சேமிப்புகள்'],
+    ['ar', 'Dislikes', 1, 'عدم إعجاب']
+  ]
+  for (const [locale, key, count, expected] of cases) {
+    const messages = YAML.parse(await readFile(new URL(`../../static/locales/ai/${locale}.yaml`, import.meta.url), 'utf8'))
+    assert.equal(selectPluralForm(locale, messages.Video['External Media'][key], count), expected, `${locale} ${key} ${count}`)
+  }
 })
 
 test('AI translation overlays cover every missing active-locale key', async () => {
