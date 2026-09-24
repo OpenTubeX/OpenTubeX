@@ -2054,7 +2054,7 @@ function updateUploadedTime() {
       timeFormat.value
     )
     published.value = props.data.premiereTimestamp * 1000
-  } else if (typeof props.data.published === 'number' && !isLive.value && !isStation.value) {
+  } else if (typeof props.data.published === 'number' && props.data.published > 0 && !isLive.value && !isStation.value) {
     published.value = props.data.published
 
     if (inHistory.value) {

@@ -123,6 +123,16 @@ test.use({
 })
 
 test.describe('watch history', () => {
+  test('omits an unknown publication date after a failed video load', async ({ page }) => {
+    await goTo(page, 'history')
+    await page.evaluate(record => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHistory', record),
+      historyEntry('missingdate1', 'Video with unavailable metadata', now, true, { published: 0 }))
+
+    const video = page.locator('.ft-list-video').filter({ hasText: 'Video with unavailable metadata' })
+    await expect(video).toBeVisible()
+    await expect(video.locator('.uploadedTime')).toHaveCount(0)
+  })
+
   test('shows seeded entries, newest first', async ({ page }) => {
     await goTo(page, 'history')
 

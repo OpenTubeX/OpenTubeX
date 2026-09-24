@@ -50,6 +50,20 @@ test('download playback with resolved online metadata refreshes history', () => 
   assert.equal(saved.description, 'New description')
 })
 
+test('failed metadata loading preserves a previously known publication date', () => {
+  let saved
+  addToHistory.call({
+    historyEntry: { published: 1234, title: 'Saved title' },
+    localFilePlayback: false,
+    videoId: 'video000001', videoTitle: 'Saved title', channelName: '', channelId: '',
+    videoPublished: 0, videoDescription: '', videoViewCount: 0, videoLengthSeconds: 42,
+    isLive: false, isUpcoming: false,
+    updateHistory(value) { saved = value },
+  }, 20, false)
+
+  assert.equal(saved.published, 1234)
+})
+
 test('offline download metadata does not create a false metadata cache observation', async () => {
   let updates = 0
   const { updateVideoMetadataCache } = runInNewContext(`({
