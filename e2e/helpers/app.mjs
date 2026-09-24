@@ -68,9 +68,11 @@ export async function expectScrollAtRenderedEnd(scroller) {
       Number.parseFloat(style.borderBottomWidth)
     // Keep every measurement fractional at non-100% UI scales. Chromium can
     // quantize the scroll offset to a physical pixel at the rendered boundary.
+    // At fractional zoom, the content and viewport edges can each round by a
+    // pixel, so allow their combined difference.
     const remaining = Math.max(-element.scrollTop, contentEnd - viewportEnd)
     return Math.abs(remaining) * devicePixelRatio
-  })).toBeLessThanOrEqual(1)
+  })).toBeLessThanOrEqual(2)
 }
 
 /**

@@ -6584,7 +6584,7 @@ test.describe('Shorts feed navigation', () => {
       const [rail, navigation, firstAction] = await Promise.all([
         page.locator('.shortsActionRail').boundingBox(),
         page.locator('.shortsNavigation').boundingBox(),
-        page.locator('.shortsAction').first().boundingBox()
+        page.locator('.shortsActionRail .shortsAction:visible').first().boundingBox()
       ])
 
       return {
