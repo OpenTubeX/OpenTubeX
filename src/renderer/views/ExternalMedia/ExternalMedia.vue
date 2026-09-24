@@ -45,6 +45,13 @@
           :icon="['fas', 'sync']"
           @click="loadMedia(route.query.url)"
         />
+        <FtButton
+          v-if="canRetryWithCookies"
+          class="externalMediaRetry"
+          :label="t('Video.Try With Configured Cookies')"
+          :icon="['fas', 'cookie']"
+          @click="loadMedia(mediaUrl, true)"
+        />
       </div>
     </div>
 
@@ -218,6 +225,7 @@ import FtShakaVideoPlayer from '../../components/ft-shaka-video-player/ft-shaka-
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
 import WatchVideoChapters from '../../components/WatchVideoChapters/WatchVideoChapters.vue'
 import { getExternalYtDlpPlaybackSource } from '../../helpers/player/ytDlpPlayback'
+import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { buildChaptersVttFile, formatDurationAsTimestamp } from '../../helpers/utils'
 import { isExternalMediaUrl } from '../../helpers/externalMediaUrl'
 import { useTabAvatar, useTabTitle } from '../../tabs/TabContext'
@@ -236,7 +244,10 @@ const player = useTemplateRef('player')
 const mediaUrl = ref('')
 const currentTime = ref(0)
 const showChapters = ref(false)
+const attemptUsedCookies = ref(false)
 let loadGeneration = 0
+const canRetryWithCookies = computed(() => errorMessage.value && isExternalMediaUrl(mediaUrl.value) && !attemptUsedCookies.value &&
+  hasConfiguredRestrictedPlaybackAuthentication(store.getters))
 
 const hostname = computed(() => {
   try {
@@ -375,12 +386,13 @@ function handlePlayerError(error) {
     : error?.message ?? String(error)
 }
 
-async function loadMedia(url) {
+async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysUseCookies) {
   const generation = ++loadGeneration
   playerErrorHandler.value = error => {
     if (generation === loadGeneration) handlePlayerError(error)
   }
   mediaUrl.value = typeof url === 'string' ? url : ''
+  attemptUsedCookies.value = useCookies
   loading.value = true
   errorMessage.value = ''
   info.value = null
@@ -396,10 +408,7 @@ async function loadMedia(url) {
   }
 
   try {
-    const result = await getExternalYtDlpPlaybackSource(
-      url,
-      store.getters.getYtDlpPlaybackAlwaysUseCookies
-    )
+    const result = await getExternalYtDlpPlaybackSource(url, useCookies)
     if (generation !== loadGeneration) return
     info.value = result.info
     source.value = result.source
@@ -413,7 +422,7 @@ async function loadMedia(url) {
   }
 }
 
-watch(() => route.query.url, loadMedia, { immediate: true })
+watch(() => route.query.url, url => loadMedia(url), { immediate: true })
 onBeforeUnmount(() => { loadGeneration++ })
 </script>
 

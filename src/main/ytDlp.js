@@ -2,7 +2,7 @@ import { historyRepairYtDlpArguments, historyRepairYtDlpError } from '../history
 import {
   buildYtDlpDownloadArguments, ID_REGEX, PLAYLIST_ID_REGEX, DOWNLOAD_TITLE_FILENAME_BYTE_LIMIT,
   SUBTITLE_FORMATS, MAX_LOCAL_PLAYLIST_VIDEOS, DENIED_CUSTOM_ARGS, AUTOMATIC_NUMBER_LIMITS,
-  splitArguments, automaticNumber, playbackSubtitleArguments,
+  splitArguments, automaticNumber, playbackImpersonationArguments, playbackSubtitleArguments,
 } from '../ytDlpArguments'
 import { EXTERNAL_PLAYBACK_FORMAT_SELECTOR, PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo, toFiniteNumber, toNonEmptyString, mapPlaybackFormat, mapPlaybackCaptions, mapExternalPlaybackMetadata } from '../ytDlpMetadata'
 import { resolveYtDlpCreatorAvatarUrl } from './ytDlpCreatorAvatar'
@@ -1735,6 +1735,8 @@ export async function handleYtDlpGetPlaybackInfo(
   if (includeSubtitles) {
     args.push(...playbackSubtitleArguments(isYouTubeVideo))
   }
+
+  args.push(...playbackImpersonationArguments(mediaUrl))
 
   if (isYouTubeVideo && useDefaultClients !== true) {
     // Keep yt-dlp's account-aware defaults first. For authenticated playback,

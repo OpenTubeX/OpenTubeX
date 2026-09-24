@@ -3,10 +3,19 @@ import test from 'node:test'
 import { readFile } from 'node:fs/promises'
 import YAML from 'yaml'
 import { createI18n } from 'vue-i18n'
-import { buildYtDlpDownloadArguments, playbackSubtitleArguments } from '../../src/ytDlpArguments.js'
+import { buildYtDlpDownloadArguments, playbackImpersonationArguments, playbackSubtitleArguments } from '../../src/ytDlpArguments.js'
 import { EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_OUTPUT_TEMPLATE, mapExternalPlaybackMetadata, mapPlaybackCaptions, mapPlaybackFormat } from '../../src/ytDlpMetadata.js'
 
 const videoId = 'jNQXAC9IVRw'
+
+test('Chrome impersonation applies only to Rumble playback URLs', () => {
+  for (const url of ['https://rumble.com/video', 'https://www.rumble.com/video', 'https://player.rumble.com/embed']) {
+    assert.deepEqual(playbackImpersonationArguments(url), ['--impersonate', 'chrome'])
+  }
+  for (const url of ['https://notrumble.com/video', 'https://rumble.com.example/video', 'https://www.youtube.com/watch?v=jNQXAC9IVRw']) {
+    assert.deepEqual(playbackImpersonationArguments(url), [])
+  }
+})
 
 test('playback subtitle options include authored tracks for external media', () => {
   assert.deepEqual(playbackSubtitleArguments(true), ['--write-auto-subs', '--sub-langs', 'all', '--sub-format', 'vtt'])

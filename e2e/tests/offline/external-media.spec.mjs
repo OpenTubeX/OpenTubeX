@@ -18,6 +18,110 @@ test('shows search for an unknown URL on the selected Invidious instance', async
   await expect(page).toHaveURL(/#\/search\//)
 })
 
+test('impersonates Chrome when extracting Rumble playback', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+
+  const executable = path.join(app.userDataDir, 'rumble-yt-dlp.sh')
+  const mediaUrl = 'https://rumble.com/v123456-example.html'
+  const response = JSON.stringify({ title: 'Rumble video', formats: [] })
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+    'case " $* " in',
+    `  *' --impersonate chrome '*) printf '%s\\n' '${response}' ;;`,
+    '  *) printf "%s\\n" "ERROR: [Rumble] Unable to download webpage: HTTP Error 403: Forbidden" >&2; exit 1 ;;',
+    'esac'
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  await page.evaluate(async ytDlpPath => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateYtDlpSource', 'system')
+    await store.dispatch('updateYtDlpPath', ytDlpPath)
+  }, executable)
+
+  const info = await page.evaluate(url => window.ftElectron.ytDlpGetPlaybackInfo(url), mediaUrl)
+  expect(info).toMatchObject({ title: 'Rumble video' })
+})
+
+test('retries failed external playback with configured cookies', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+
+  const executable = path.join(app.userDataDir, 'cookie-retry-yt-dlp.sh')
+  const cookiePath = path.join(app.userDataDir, 'playback-cookies.txt')
+  const mediaUrl = 'https://videos.example.test/cookie-required'
+  const response = JSON.stringify({
+    title: 'Cookie protected video',
+    formats: [{ url: DEMO_MEDIA_URL, protocol: 'https', ext: 'webm', vcodec: 'vp9', acodec: 'opus', width: 640, height: 360 }]
+  })
+  await writeFile(cookiePath, '# Netscape HTTP Cookie File\n')
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+    'case " $* " in',
+    `  *' ${cookiePath} '*) printf '%s\\n' '${response}' ;;`,
+    '  *) printf "%s\\n" "ERROR: Sign in to view this video" >&2; exit 1 ;;',
+    'esac'
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  await routeDemoMedia(page)
+  await page.evaluate(async ({ ytDlpPath, cookies }) => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateYtDlpSource', 'system')
+    await store.dispatch('updateYtDlpPath', ytDlpPath)
+    await store.dispatch('updateYtDlpPlaybackAuthMode', 'file')
+    await store.dispatch('updateYtDlpPlaybackCookiesPath', cookies)
+  }, { ytDlpPath: executable, cookies: cookiePath })
+
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page.locator('.externalMediaError')).toContainText('Sign in to view this video')
+  await page.getByRole('button', { name: 'Try with configured cookies' }).click()
+  await expect(page.locator('.externalMediaDetails h1')).toHaveText('Cookie protected video')
+  await expect(page.getByRole('button', { name: 'Try with configured cookies' })).toHaveCount(0)
+})
+
+test('offers cookie retry only after an unauthenticated external extraction', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+
+  const executable = path.join(app.userDataDir, 'failing-external-yt-dlp.sh')
+  const cookiePath = path.join(app.userDataDir, 'playback-cookies.txt')
+  await writeFile(cookiePath, '# Netscape HTTP Cookie File\n')
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+    'printf "%s\\n" "ERROR: Unable to extract video" >&2',
+    'exit 1'
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  await page.evaluate(async ({ ytDlpPath, cookies }) => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateYtDlpSource', 'system')
+    await store.dispatch('updateYtDlpPath', ytDlpPath)
+    await store.dispatch('updateYtDlpPlaybackAuthMode', 'file')
+    await store.dispatch('updateYtDlpPlaybackCookiesPath', cookies)
+  }, { ytDlpPath: executable, cookies: cookiePath })
+
+  await page.locator(sel.searchInput).fill('https://videos.example.test/unavailable')
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page.locator('.externalMediaError')).toContainText('Unable to extract video')
+  await page.getByRole('button', { name: 'Try with configured cookies' }).click()
+  await expect(page.locator('.externalMediaError')).toContainText('Unable to extract video')
+  await expect(page.getByRole('button', { name: 'Try with configured cookies' })).toHaveCount(0)
+
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const route = { path: '/external-media', query: { url: 'not-a-url' }, fullPath: '/external-media?url=not-a-url' }
+    store.commit('setTabNavigation', {
+      tabId: store.getters.getActiveTabId,
+      route,
+      history: [{ route, title: 'Watch' }],
+      historyIndex: 0
+    })
+  })
+  await expect(page.locator('.externalMediaError')).toContainText('Invalid')
+  await expect(page.getByRole('button', { name: 'Try with configured cookies' })).toHaveCount(0)
+})
+
 test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({ app, page }, testInfo) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
 
