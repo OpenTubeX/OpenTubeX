@@ -174,6 +174,25 @@ test('the mini-player cutout closes only after native playback has risen above t
   f.screen.destroy()
 })
 
+test('an older mini-player layout cannot close the cutout after its bounds change', async () => {
+  const f = await fixture({ fullscreen: false, detached: true, deferMiniLayout: true })
+  f.styleWrites.length = 0
+  f.change({ miniPlayer: true })
+  await f.flush()
+  f.bounds.x += 20
+  f.change({})
+  await f.flush()
+  assert.equal(f.completeMiniLayouts.length, 2)
+  f.completeMiniLayouts[0]()
+  await f.flush()
+  const clips = f.styleWrites.filter(write => write.name === 'clip-path')
+  assert.ok(clips.length > 0 && clips.every(write => write.value.includes(' Z M ')), 'The old native position must not close the page opening')
+  f.completeMiniLayouts[1]()
+  await f.flush()
+  assert.ok(f.styleWrites.filter(write => write.name === 'clip-path').slice(-2).every(write => !write.value.includes(' Z M ')))
+  f.screen.destroy()
+})
+
 test('an entering mini-player animation keeps the cutout until native playback is raised', async () => {
   const f = await fixture({ fullscreen: false, detached: true, deferMiniLayout: true, deferTransitions: true })
   f.styleWrites.length = 0

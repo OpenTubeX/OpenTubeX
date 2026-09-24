@@ -311,7 +311,6 @@ export function createAndroidNativeScreen({ element, container, getController, g
     }
     if (layout.miniPlayer !== miniRequested) {
       miniRequested = layout.miniPlayer
-      miniGeneration++
       if (!miniRequested) nativeMiniRaised = false
     }
     const signature = JSON.stringify(layout)
@@ -322,7 +321,7 @@ export function createAndroidNativeScreen({ element, container, getController, g
     syncInlineBackground(visible && !pageScrolling && (!gestureActive || !nativeMiniRaised))
     if (signature === lastLayout) return
     lastLayout = signature
-    const generation = miniGeneration
+    const generation = ++miniGeneration
     getController()?.layout(layout).then(() => {
       if (!layout.miniPlayer || generation !== miniGeneration || nativeMiniRaised || !attached) return
       // Native has raised the video. Only now may the WebView close its opening.
