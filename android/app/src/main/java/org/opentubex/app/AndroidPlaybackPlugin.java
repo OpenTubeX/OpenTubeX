@@ -40,9 +40,14 @@ public class AndroidPlaybackPlugin extends Plugin {
     private volatile String owner;
     private boolean activityVisible = true;
     private boolean pictureInPicture;
-    private final Runnable hideWhenStopped = () -> {
-        if (!activityVisible && !LauncherActivity.isReturningToApp() && session != null) {
-            session.setVisibility(false, false);
+    private final Runnable hideWhenStopped = new Runnable() {
+        @Override public void run() {
+            if (activityVisible || session == null) return;
+            if (LauncherActivity.isReturningToApp()) {
+                mainHandler.postDelayed(this, 10_000);
+            } else {
+                session.setVisibility(false, false);
+            }
         }
     };
 

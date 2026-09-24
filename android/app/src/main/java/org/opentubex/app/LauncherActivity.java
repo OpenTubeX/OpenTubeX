@@ -3,21 +3,22 @@ package org.opentubex.app;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.SystemClock;
 
 /** Keeps the running task independent of launcher aliases that can be disabled. */
 public class LauncherActivity extends Activity {
-    private static boolean returningToApp;
+    private static long returnDeadline;
 
     static synchronized void beginReturn() {
-        returningToApp = true;
+        returnDeadline = SystemClock.elapsedRealtime() + 10_000;
     }
 
     static synchronized boolean isReturningToApp() {
-        return returningToApp;
+        return returnDeadline > SystemClock.elapsedRealtime();
     }
 
     static synchronized void finishReturn() {
-        returningToApp = false;
+        returnDeadline = 0;
     }
 
     @Override

@@ -10,18 +10,23 @@ import com.getcapacitor.JSObject;
 import com.getcapacitor.PluginCall;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @RunWith(AndroidJUnit4.class)
 public class NativePlaybackReviewTest {
     @Test public void launcherHandoffDoesNotPauseNativePictureInPicturePlayback() throws InterruptedException {
+        CountDownLatch delayedHideProcessed = new CountDownLatch(1);
+        CountDownLatch paused = new CountDownLatch(1);
+        AtomicInteger pauses = new AtomicInteger();
         try (androidx.test.core.app.ActivityScenario<MainActivity> scenario =
                 androidx.test.core.app.ActivityScenario.launch(MainActivity.class)) {
-            final int[] pauses = {0};
             scenario.onActivity(activity -> {
                 AndroidPlaybackPlugin plugin = (AndroidPlaybackPlugin) activity.getBridge().getPlugin("AndroidPlayback").getInstance();
                 NativePlaybackSession session = new NativePlaybackSession(new NativePlaybackSession.Playback() {
                     @Override public void load(String source, long positionMs) {}
-                    @Override public void pause() { pauses[0]++; }
+                    @Override public void pause() { pauses.incrementAndGet(); paused.countDown(); }
                     @Override public void stop() {}
                     @Override public void setVideoVisible(boolean visible) {}
                 });
@@ -36,10 +41,10 @@ public class NativePlaybackReviewTest {
                 LauncherActivity.beginReturn();
                 plugin.handleOnStop();
                 activity.getWindow().getDecorView().post(() -> AndroidPlaybackPlugin.pictureInPictureChanged(false));
+                activity.getWindow().getDecorView().postDelayed(delayedHideProcessed::countDown, 350);
             });
-            Thread.sleep(350);
-            InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-            assertEquals("A slow launcher return must keep PiP playback running", 0, pauses[0]);
+            assertTrue("The delayed hide must run", delayedHideProcessed.await(3, TimeUnit.SECONDS));
+            assertEquals("A slow launcher return must keep PiP playback running", 0, pauses.get());
             scenario.onActivity(activity -> {
                 ((AndroidPlaybackPlugin) activity.getBridge().getPlugin("AndroidPlayback").getInstance()).handleOnStart();
                 LauncherActivity.finishReturn();
@@ -47,9 +52,10 @@ public class NativePlaybackReviewTest {
             InstrumentationRegistry.getInstrumentation().waitForIdleSync();
             scenario.onActivity(activity -> ((AndroidPlaybackPlugin) activity.getBridge()
                 .getPlugin("AndroidPlayback").getInstance()).handleOnStop());
-            Thread.sleep(350);
-            InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-            assertEquals("A sustained stop must still pause playback", 1, pauses[0]);
+            assertTrue("A sustained stop must still pause playback", paused.await(3, TimeUnit.SECONDS));
+            assertEquals("A sustained stop must pause once", 1, pauses.get());
+        } finally {
+            LauncherActivity.finishReturn();
         }
     }
 

@@ -4673,8 +4673,13 @@ async function enableCapacitorIntegrations() {
     if (Capacitor.getPlatform() === 'android' && !isActive) {
       // The launcher briefly stops the PiP Activity while returning to its
       // existing task. Do not hide or pause playback for that handoff.
-      backgroundStateTimeout = setTimeout(async () => {
-        if (await isAndroidLauncherReturnInProgress()) return
+      const checkBackgroundState = async () => {
+        if (await isAndroidLauncherReturnInProgress()) {
+          if (version === appStateVersion) {
+            backgroundStateTimeout = setTimeout(checkBackgroundState, 10_000)
+          }
+          return
+        }
         const state = await CapacitorApp.getState().catch(() => ({ isActive: false }))
         if (version !== appStateVersion || state.isActive) return
         setAndroidAppVisible(false)
@@ -4682,7 +4687,8 @@ async function enableCapacitorIntegrations() {
           false,
           store.getters.getContinuePlaybackWhenScreenIsLocked
         )) tabMediaCoordinator.pauseAll()
-      }, 250)
+      }
+      backgroundStateTimeout = setTimeout(checkBackgroundState, 250)
       return
     }
     setAndroidAppVisible(isActive)
