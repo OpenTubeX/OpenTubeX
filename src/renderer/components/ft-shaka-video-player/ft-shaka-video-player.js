@@ -4591,7 +4591,7 @@ export default defineComponent({
       }
 
       // Keep the control mounted when a panel can make theatre mode available.
-      if (props.externalUrl || (!props.theatrePossible && props.chapters.length === 0 && !useSponsorBlock.value)) {
+      if (!props.liveChatAvailable && (props.externalUrl || (!props.theatrePossible && props.chapters.length === 0 && !useSponsorBlock.value))) {
         removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_theatre_mode')
       }
 
