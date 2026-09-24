@@ -1334,6 +1334,7 @@ export default defineComponent({
     this.onMountedDependOnLocalStateLoading()
   },
   updated: function () {
+    this.clampShortsErrorScroll()
     const rail = this.$refs.shortsActionRail
     if (!rail?.scrollTop) return
     const contentEnd = rail.querySelector(':scope > .shortsSoundThumbnail, :scope > .shortsSkeletonSound') ??
@@ -1582,9 +1583,16 @@ export default defineComponent({
     },
     updateShortsViewportHeight() {
       this.shortsViewportHeight = window.innerHeight
+      requestAnimationFrame(() => this.clampShortsErrorScroll())
       if (this.shortsAuxPanelOpen) {
         this.clampShortsAuxPanelScroll()
       }
+    },
+    clampShortsErrorScroll() {
+      const container = this.$refs.errorContainer
+      if (!container?.scrollTop) return
+      const content = container.querySelector('.errorWrapper')
+      if (isOverlayScrollTopOutOfBounds(container, content)) clampOverlayScrollTop(container, content)
     },
     handleFullscreenMetadataChange({ open, target, presentationActive = false }) {
       const wasOpen = this.fullscreenMetadataOpen

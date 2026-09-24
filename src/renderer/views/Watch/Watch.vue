@@ -55,7 +55,6 @@
               <div class="shortsSkeletonControlGroup">
                 <span class="ft-shimmer" />
                 <span class="ft-shimmer" />
-                <span class="ft-shimmer" />
               </div>
             </div>
             <span class="shortsSkeletonSeek ft-shimmer" />
@@ -303,6 +302,8 @@
           </div>
           <div
             v-else-if="errorMessage"
+            ref="errorContainer"
+            v-overlay-scrollbars
             class="errorContainer"
           >
             <div

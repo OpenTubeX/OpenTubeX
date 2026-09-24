@@ -233,11 +233,15 @@ test('landscape Shorts keep every control inside the narrow player and action ra
     captions.className = 'shortsTopControl shortsCaptionsControl'
     group.prepend(captions)
   })
+  const captions = page.locator('.shortsCaptionsControl')
+  await expect(captions).toBeHidden()
   const playerBounds = await page.locator('.ftVideoPlayer.shortsPlayer').boundingBox()
   for (const button of await page.locator('.shortsTopControls .shortsTopControl:visible').all()) {
     const bounds = await button.boundingBox()
+    expect(bounds.width).toBeGreaterThanOrEqual(42)
     expect(bounds.x).toBeGreaterThanOrEqual(playerBounds.x - 1)
     expect(bounds.x + bounds.width).toBeLessThanOrEqual(playerBounds.x + playerBounds.width + 1)
+    expect(bounds.y + bounds.height).toBeLessThanOrEqual(playerBounds.y + playerBounds.height + 1)
   }
   await page.setViewportSize({ width: 600, height: 320 })
   const narrowPlayerBounds = await page.locator('.ftVideoPlayer.shortsPlayer').boundingBox()
@@ -245,8 +249,18 @@ test('landscape Shorts keep every control inside the narrow player and action ra
     const bounds = await button.boundingBox()
     expect(bounds.x).toBeGreaterThanOrEqual(narrowPlayerBounds.x - 1)
     expect(bounds.x + bounds.width).toBeLessThanOrEqual(narrowPlayerBounds.x + narrowPlayerBounds.width + 1)
+    expect(bounds.y + bounds.height).toBeLessThanOrEqual(narrowPlayerBounds.y + narrowPlayerBounds.height + 1)
   }
+  await expect(captions).toBeHidden()
+  await page.setViewportSize({ width: 1026, height: 600 })
+  await expect(captions).toBeVisible()
   await page.setViewportSize({ width: 1026, height: 461 })
+
+  const loadedButtons = [
+    page.locator('.shortsTopControlsGroup').first().locator('.shortsTopControl:visible').first(),
+    ...await page.locator('.shortsTopControlsGroup').last().locator('.shortsTopControl:visible').all(),
+  ]
+  const loadedControls = await Promise.all(loadedButtons.map(button => button.boundingBox()))
 
   const rail = page.locator('.shortsActionRail')
   await rail.evaluate(element => {
@@ -261,6 +275,18 @@ test('landscape Shorts keep every control inside the narrow player and action ra
     expect(bounds.x).toBeGreaterThanOrEqual(railBounds.x - 1)
     expect(bounds.x + bounds.width).toBeLessThanOrEqual(railBounds.x + railBounds.width + 1)
   }
+
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate(component => { component.proxy.isLoading = true })
+  const skeletonControls = page.locator('.shortsSkeletonControlGroup span:visible')
+  await expect(skeletonControls).toHaveCount(3)
+  for (const [index, expected] of loadedControls.entries()) {
+    const bounds = await skeletonControls.nth(index).boundingBox()
+    expect(bounds.x).toBeCloseTo(expected.x, 0)
+    expect(bounds.y).toBeCloseTo(expected.y, 0)
+    expect(bounds.width).toBeCloseTo(expected.width, 0)
+  }
+  await watch.dispose()
 })
 
 test('very narrow landscape Shorts keep the info action when the title has no room', async ({ app, page }) => {
@@ -269,6 +295,49 @@ test('very narrow landscape Shorts keep the info action when the title has no ro
   await page.setViewportSize({ width: 420, height: 320 })
   await expect(page.locator('.shortsExternalTitle')).toBeHidden()
   await expect(page.locator('.shortsMetadataAction')).toBeVisible()
+})
+
+test('landscape Shorts keep long playback errors and retry actions readable', async ({ app, page }) => {
+  await openShort({ app, page })
+  await page.evaluate(() => {
+    document.querySelector('.app').classList.add('capacitorTabs', 'capacitorTabletLayout')
+    document.documentElement.style.setProperty('--safe-area-inset-top', '27px')
+  })
+  await page.setViewportSize({ width: 1026, height: 461 })
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate(component => {
+    component.proxy.errorMessage = 'TypeError: Aborted(Assertion failed in quickjs/quickjs.c: quickjs_gc_object_list) '.repeat(12)
+  })
+  const container = page.locator('.videoPlayerError .errorContainer')
+  await expect(container).toBeVisible()
+  const containerBounds = await container.boundingBox()
+  const railBounds = await page.locator('.shortsActionRail').boundingBox()
+  expect(containerBounds.x + containerBounds.width).toBeLessThanOrEqual(railBounds.x - 8)
+  for (const element of await container.locator('.errorMessage, .errorActionButton').all()) {
+    const bounds = await element.boundingBox()
+    expect(bounds.x).toBeGreaterThanOrEqual(containerBounds.x - 1)
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(containerBounds.x + containerBounds.width + 1)
+  }
+  await expect.poll(() => container.evaluate(element => getComputedStyle(element).overflowY)).toBe('auto')
+  await container.evaluate(element => { element.scrollTop = element.scrollHeight })
+  expect(await container.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  await page.setViewportSize({ width: 420, height: 320 })
+  const narrowContainerBounds = await container.boundingBox()
+  const narrowRailBounds = await page.locator('.shortsActionRail').boundingBox()
+  expect(narrowContainerBounds.x + narrowContainerBounds.width).toBeLessThanOrEqual(narrowRailBounds.x - 8)
+  for (const element of await container.locator('.errorMessage, .errorActionButton').all()) {
+    const bounds = await element.boundingBox()
+    expect(bounds.x).toBeGreaterThanOrEqual(narrowContainerBounds.x - 1)
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(narrowContainerBounds.x + narrowContainerBounds.width + 1)
+  }
+  await page.setViewportSize({ width: 1026, height: 461 })
+  await watch.evaluate(component => { component.proxy.errorMessage = 'Playback failed.' })
+  await expect.poll(() => container.evaluate(element => ({
+    offset: element.scrollTop,
+    overflow: element.scrollHeight - element.clientHeight,
+    scrollbarVisible: element.querySelector(':scope > .os-scrollbar-vertical')?.classList.contains('os-scrollbar-visible'),
+  }))).toEqual({ offset: 0, overflow: 0, scrollbarVisible: false })
+  await watch.dispose()
 })
 
 test('narrow landscape Shorts keep the translated loading notice inside the player', async ({ app, page }) => {

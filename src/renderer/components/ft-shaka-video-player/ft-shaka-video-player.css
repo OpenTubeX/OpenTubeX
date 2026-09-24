@@ -5001,6 +5001,10 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 @media (orientation: landscape) and (height <= 600px) {
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow)) {
+    container: shorts-landscape-player / inline-size;
+  }
+
   :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) > .player) {
     object-fit: contain !important;
   }
@@ -5008,6 +5012,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) .shortsTopControls) {
     padding-block: 4px;
     padding-inline: 4px;
+    flex-wrap: wrap;
   }
 
   :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) .shortsTopControlsGroup) {
@@ -5015,14 +5020,25 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   }
 
   :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) .shortsTopControlsGroup:last-child) {
-    min-inline-size: 0;
-    flex-wrap: wrap;
-    justify-content: flex-end;
+    flex: none;
   }
 
   :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) .shortsTopControl) {
-    inline-size: 32px;
-    block-size: 32px;
+    inline-size: 42px;
+    block-size: 42px;
+  }
+
+  @media (height <= 360px) {
+    :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) .shortsTopControl) {
+      inline-size: 32px;
+      block-size: 32px;
+    }
+  }
+}
+
+@container shorts-landscape-player (width < 180px) {
+  :global(.shortsTopControls .shortsCaptionsControl) {
+    display: none;
   }
 }
 

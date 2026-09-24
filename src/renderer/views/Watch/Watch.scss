@@ -1528,6 +1528,48 @@
     background-color: #000;
   }
 
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError) {
+    overflow: visible;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError .errorContainer) {
+    inset-block: 0;
+    inset-inline: 50% auto;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: safe center;
+    inline-size: min(560px, calc(100vw - 200px));
+    padding: 8px;
+    overflow: hidden auto;
+    transform: translateX(-50%);
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError .errorWrapper) {
+    box-sizing: border-box;
+    inline-size: 100%;
+    flex: none;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError .errorContent) {
+    min-inline-size: 0;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError :is(.errorMessage, .errorActionButton)) {
+    overflow-wrap: anywhere;
+  }
+
+  @media (width < 600px) {
+    :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError .errorWrapper) {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError .errorIcon) {
+      font-size: 32px;
+    }
+  }
+
   :global(.capacitorTabs .videoLayout.shortsPlayerActive .streamPlaceholderOverlay) {
     flex-direction: column;
     text-align: center;
@@ -1625,6 +1667,22 @@
     inline-size: 42px;
     block-size: 42px;
     flex: none;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsSkeletonControls) {
+    padding: 4px;
+    flex-wrap: wrap;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsSkeletonControlGroup) {
+    gap: 2px;
+  }
+
+  @media (height <= 360px) {
+    :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsSkeletonControlGroup span) {
+      inline-size: 32px;
+      block-size: 32px;
+    }
   }
 }
 
