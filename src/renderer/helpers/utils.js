@@ -526,7 +526,10 @@ export async function pickFileWithPicker(
         startIn: startInDirectory,
         types: [{
           description: fileTypeDescription,
-          accept: acceptedTypes
+          accept: Object.fromEntries(Object.entries(acceptedTypes).map(([type, extensions]) => [
+            type,
+            Array.isArray(extensions) ? extensions : [extensions]
+          ]))
         }],
       })
 

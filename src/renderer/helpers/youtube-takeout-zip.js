@@ -1,6 +1,6 @@
 import { Unzip, UnzipInflate } from 'fflate'
 
-const textDecoder = new TextDecoder()
+const MAX_ENTRY_SIZE = 256 * 1024 * 1024
 
 export function classifyTakeoutEntry(path) {
   const parts = path.toLowerCase().split('/')
@@ -22,58 +22,108 @@ export function classifyTakeoutEntry(path) {
   return null
 }
 
-/** Read only supported Takeout entries, without inflating unrelated videos in the archive. */
-export async function readYouTubeTakeoutZip(file) {
-  const entries = []
+/** Drop compressed bytes for entries that are not selected. */
+class SkipDeflate {
+  static compression = 8
+
+  push(_chunk, final) {
+    if (final) { this.ondata(null, new Uint8Array(0), true) }
+  }
+}
+
+async function streamTakeoutZip(file, selectedTypes, onFound, onContent) {
+  const pending = []
   let failure
+
+  class SelectiveInflate {
+    static compression = 8
+
+    constructor(name, compressedSize, originalSize) {
+      this.decoder = selectedTypes.has(classifyTakeoutEntry(name))
+        ? new UnzipInflate(name, compressedSize, originalSize)
+        : new SkipDeflate()
+      this.decoder.ondata = (error, data, final) => this.ondata(error, data, final)
+    }
+
+    push(chunk, final) {
+      this.decoder.push(chunk, final)
+    }
+  }
 
   const unzip = new Unzip(entry => {
     const type = classifyTakeoutEntry(entry.name)
-    if (type === null) {
+    if (type !== null) { onFound({ type, path: entry.name }) }
+
+    if (type === null || !selectedTypes.has(type)) {
+      entry.ondata = () => {}
+      entry.start()
+      return
+    }
+    if (entry.originalSize > MAX_ENTRY_SIZE) {
+      failure = new Error(`Takeout entry is too large: ${entry.name}`)
       return
     }
 
-    const chunks = []
+    const decoder = new TextDecoder()
+    let content = ''
+    let size = 0
     entry.ondata = (error, chunk, final) => {
       if (error) {
         failure = error
         return
       }
-      chunks.push(chunk)
+      size += chunk.length
+      if (size > MAX_ENTRY_SIZE) {
+        failure = new Error(`Takeout entry is too large: ${entry.name}`)
+        return
+      }
+      content += decoder.decode(chunk, { stream: !final })
       if (final) {
-        const size = chunks.reduce((total, part) => total + part.length, 0)
-        const bytes = new Uint8Array(size)
-        let offset = 0
-        for (const part of chunks) {
-          bytes.set(part, offset)
-          offset += part.length
-        }
-        entries.push({ type, path: entry.name, content: textDecoder.decode(bytes) })
+        pending.push({ type, path: entry.name, content })
       }
     }
     entry.start()
   })
-  unzip.register(UnzipInflate)
+  unzip.register(SelectiveInflate)
 
+  const reader = file.stream().getReader()
   try {
-    const reader = file.stream().getReader()
     while (true) {
       const { value, done } = await reader.read()
       if (done) { break }
       unzip.push(value)
+      if (failure) { throw failure }
+      for (const entry of pending.splice(0)) {
+        await onContent(entry)
+      }
     }
     unzip.push(new Uint8Array(0), true)
-  } catch (error) {
-    failure = error
+    if (failure) { throw failure }
+    for (const entry of pending) {
+      await onContent(entry)
+    }
+  } finally {
+    await reader.cancel().catch(() => {})
+    reader.releaseLock()
   }
+}
 
-  if (failure) { throw failure }
+/** Discover supported paths without inflating their contents or unrelated videos. */
+export async function listYouTubeTakeoutZipEntries(file) {
+  const entries = []
+  await streamTakeoutZip(file, new Set(), entry => entries.push(entry), () => {})
   return entries
+}
+
+/** Import selected entries one at a time, bounding renderer memory. */
+export async function forEachSelectedTakeoutZipEntry(file, types, onEntry) {
+  await streamTakeoutZip(file, types, () => {}, onEntry)
 }
 
 export function parseTakeoutPlaylistCsv(content, filename) {
   const rows = content.replace(/^\uFEFF/, '').trim().split(/\r?\n/)
-  if (rows[0] !== 'Video ID,Playlist video creation timestamp') {
+  const header = rows[0].toLowerCase()
+  if (header !== 'video id,playlist video creation timestamp' && header !== '影片 id,播放清單影片的建立時間戳記') {
     return null
   }
   const videos = []
