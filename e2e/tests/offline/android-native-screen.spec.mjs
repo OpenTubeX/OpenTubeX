@@ -1196,10 +1196,17 @@ test('playing video keeps the quick speed bar at its dragged scroll position', a
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
   await expect.poll(() => bar.evaluate(element => element.scrollLeft)).toBeGreaterThan(60)
   await bar.evaluate(element => { element.scrollLeft = 120 })
-  await page.locator('.shaka-controls-button-panel .shaka-current-time').first().evaluate(element => {
-    element.textContent += ' '
+  await page.locator('.shaka-controls-button-panel .shaka-current-time').first().evaluate(async element => {
+    const panel = element.closest('.shaka-controls-button-panel')
+    await new Promise(resolve => {
+      const observer = new MutationObserver(() => {
+        observer.disconnect()
+        resolve()
+      })
+      observer.observe(panel, { attributes: true, attributeFilter: ['class'] })
+      element.textContent += ' '
+    })
   })
-  await page.waitForTimeout(100)
   expect(await bar.evaluate(element => element.scrollLeft)).toBeGreaterThan(100)
   await page.evaluate(() => window.nativeScreenTest.destroy())
 })
