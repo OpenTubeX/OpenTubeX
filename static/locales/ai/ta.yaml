@@ -179,8 +179,8 @@ Feed:
   Cancel Refresh: புதுப்பிப்பை ரத்துசெய்
   Next Auto Refresh: 'அடுத்த தானியக்கப் புதுப்பிப்பு: {date}'
 User Playlists:
-  Remove Unavailable Videos: "கிடைக்காத வீடியோக்களை அகற்று"
-  Remove Unavailable Videos Confirmation: "கிடைக்காத வீடியோக்களை அகற்றவா? கண்டறியப்பட்டது: {count}. சரிபார்க்க முடியவில்லை: {uncertain}. சரிபார்க்கப்படாத வீடியோக்கள் வைக்கப்படும்."
+  Remove Unavailable Videos: "கிடைக்காத காணொளிக்களை அகற்று"
+  Remove Unavailable Videos Confirmation: "கிடைக்காத காணொளிக்களை அகற்றவா? கண்டறியப்பட்டது: {count}. சரிபார்க்க முடியவில்லை: {uncertain}. சரிபார்க்கப்படாத காணொளிக்கள் வைக்கப்படும்."
   Add Missing Videos: "மூல இயக்கப்பட்டியலிலிருந்து விடுபட்ட காணொளிகளைச் சேர்"
   Source Playlist: "மூல இயக்கப்பட்டியல்"
   Save Playlist: "பிளேலிஸ்ட்டைச் சேமி"

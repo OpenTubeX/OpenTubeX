@@ -175,7 +175,7 @@ Feed:
   Next Auto Refresh: 'Ďalšie automatické obnovenie: {date}'
 User Playlists:
   Remove Unavailable Videos: "Odstráňte nedostupné videá"
-  Remove Unavailable Videos Confirmation: "Chcete odstrániť nedostupné videá? Nájdených: {count}. Nepodarilo sa skontrolovať: {uncertain}. Nezačiarknuté videá sa zachovajú."
+  Remove Unavailable Videos Confirmation: "Chcete odstrániť nedostupné videá? Nájdených: {count}. Nepodarilo sa skontrolovať: {uncertain}. Neskontrolované videá sa zachovajú."
   Add Missing Videos: "Pridať chýbajúce videá zo zdrojového zoznamu videí"
   Source Playlist: "Zdrojový zoznam videí"
   Save Playlist: "Uložiť playlist"

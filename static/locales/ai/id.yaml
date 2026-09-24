@@ -175,7 +175,7 @@ Feed:
   Next Auto Refresh: 'Pembaruan otomatis berikutnya: {date}'
 User Playlists:
   Remove Unavailable Videos: "Hapus video yang tidak tersedia"
-  Remove Unavailable Videos Confirmation: "Hapus video yang tidak tersedia? Ditemukan: {count}. Tidak dapat diperiksa: {uncertain}. Video yang tidak dicentang akan disimpan."
+  Remove Unavailable Videos Confirmation: "Hapus video yang tidak tersedia? Ditemukan: {count}. Tidak dapat diperiksa: {uncertain}. Video yang tidak dapat diperiksa akan disimpan."
   Add Missing Videos: "Tambahkan video yang belum ada dari playlist sumber"
   Source Playlist: "Playlist sumber"
   Save Playlist: "Simpan playlist"

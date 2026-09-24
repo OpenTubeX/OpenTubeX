@@ -177,7 +177,7 @@ Feed:
   Next Auto Refresh: 'Próxima atualização automática: {date}'
 User Playlists:
   Remove Unavailable Videos: "Remover vídeos indisponíveis"
-  Remove Unavailable Videos Confirmation: "Remover vídeos indisponíveis? Encontrado: {count}. Não foi possível verificar: {uncertain}. Os vídeos desmarcados serão mantidos."
+  Remove Unavailable Videos Confirmation: "Remover vídeos indisponíveis? Encontrados: {count}. Não foi possível verificar: {uncertain}. Os vídeos não verificados serão mantidos."
   Add Missing Videos: "Adicionar vídeos em falta a partir da lista de reprodução original"
   Source Playlist: "Lista de reprodução original"
   Save Playlist: "Guardar lista de reprodução"

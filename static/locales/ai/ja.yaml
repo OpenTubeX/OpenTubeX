@@ -175,7 +175,7 @@ Feed:
   Next Auto Refresh: '次回の自動更新: {date}'
 User Playlists:
   Remove Unavailable Videos: "利用できない動画を削除する"
-  Remove Unavailable Videos Confirmation: "利用できないビデオを削除しますか?見つかった数: {count}。チェックできませんでした: {uncertain}。チェックされていないビデオは保存されます。"
+  Remove Unavailable Videos Confirmation: "利用できない動画を削除しますか？ 見つかった数: {count}。確認できなかった数: {uncertain}。確認できなかった動画は保持されます。"
   Add Missing Videos: "コピー元の再生リストから不足している動画を追加"
   Source Playlist: "コピー元の再生リスト"
   Save Playlist: "再生リストを保存"

@@ -177,7 +177,7 @@ Feed:
   Next Auto Refresh: 'Næsta sjálfvirka endurnýjun: {date}'
 User Playlists:
   Remove Unavailable Videos: "Fjarlægðu ótiltæk myndbönd"
-  Remove Unavailable Videos Confirmation: "Fjarlægja ótiltæk vídeó? Fann: {count}. Gat ekki athugað: {uncertain}. Ómerkt myndbönd verða geymd."
+  Remove Unavailable Videos Confirmation: "Fjarlægja ótiltæk myndbönd? Fundin: {count}. Ekki tókst að athuga: {uncertain}. Myndbönd sem ekki voru athuguð verða varðveitt."
   Add Missing Videos: "Bæta við myndböndum sem vantar úr upprunalega spilunarlistanum"
   Source Playlist: "Upprunalegur spilunarlisti"
   Save Playlist: "Vista spilunarlista"

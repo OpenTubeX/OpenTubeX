@@ -186,8 +186,8 @@ Feed:
   Cancel Refresh: لغو تازه‌سازی
   Next Auto Refresh: 'تازه‌سازی خودکار بعدی: {date}'
 User Playlists:
-  Remove Unavailable Videos: "ویدیوهای در دسترس را حذف کنید"
-  Remove Unavailable Videos Confirmation: "ویدیوهای در دسترس حذف شوند؟ یافت شد: {count}. بررسی نشد: {uncertain}. ویدیوهای بدون علامت نگه داشته می شوند."
+  Remove Unavailable Videos: "ویدیوهای غیرقابل دسترس را حذف کنید"
+  Remove Unavailable Videos Confirmation: "ویدیوهای غیرقابل دسترس حذف شوند؟ یافت شد: {count}. بررسی ممکن نبود: {uncertain}. ویدیوهای بررسی‌نشده نگه داشته می‌شوند."
   Add Missing Videos: "افزودن ویدیوهای موجود در فهرست پخش منبع که در این فهرست نیستند"
   Source Playlist: "فهرست پخش منبع"
   Save Playlist: "ذخیره فهرست پخش"

@@ -177,7 +177,7 @@ Feed:
   Next Auto Refresh: 'Nästa automatiska uppdatering: {date}'
 User Playlists:
   Remove Unavailable Videos: "Ta bort otillgängliga videor"
-  Remove Unavailable Videos Confirmation: "Ta bort otillgängliga videor? Hittade: {count}. Kunde inte kontrollera: {uncertain}. Omarkerade videor kommer att behållas."
+  Remove Unavailable Videos Confirmation: "Ta bort otillgängliga videor? Hittade: {count}. Kunde inte kontrollera: {uncertain}. Okontrollerade videor kommer att behållas."
   Add Missing Videos: "Lägg till saknade videor från den ursprungliga spellistan"
   Source Playlist: "Ursprunglig spellista"
   Save Playlist: "Spara spellista"

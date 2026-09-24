@@ -174,7 +174,7 @@ Feed:
   Cancel Refresh: 取消重新整理
   Next Auto Refresh: '下次自動重新整理：{date}'
 User Playlists:
-  Remove Unavailable Videos: "刪除不可用的視頻"
+  Remove Unavailable Videos: "刪除不可用的影片"
   Remove Unavailable Videos Confirmation: "刪除不可用的影片？找到：{count}。無法檢查：{uncertain}。未檢查的影片將被保留。"
   Add Missing Videos: "從來源播放清單新增缺少的影片"
   Source Playlist: "來源播放清單"

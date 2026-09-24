@@ -204,7 +204,7 @@ Feed:
   Refresh Feed: Atnaujinti {subscriptionName}
 User Playlists:
   Remove Unavailable Videos: "Pašalinti nepasiekiamus vaizdo įrašus"
-  Remove Unavailable Videos Confirmation: "Pašalinti nepasiekiamus vaizdo įrašus? Rasta: {count}. Nepavyko patikrinti: {uncertain}. Nepažymėti vaizdo įrašai bus saugomi."
+  Remove Unavailable Videos Confirmation: "Pašalinti nepasiekiamus vaizdo įrašus? Rasta: {count}. Nepavyko patikrinti: {uncertain}. Nepatikrinti vaizdo įrašai bus išsaugoti."
   Add Missing Videos: "Pridėti trūkstamus vaizdo įrašus iš šaltinio grojaraščio"
   Source Playlist: "Šaltinio grojaraštis"
   Save Playlist: "Išsaugoti grojaraštį"

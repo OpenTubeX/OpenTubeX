@@ -177,7 +177,7 @@ Feed:
   Next Auto Refresh: 'Volgende automatische vernieuwing: {date}'
 User Playlists:
   Remove Unavailable Videos: "Verwijder niet-beschikbare video's"
-  Remove Unavailable Videos Confirmation: "Niet-beschikbare video's verwijderen? Gevonden: {count}. Kon niet controleren: {uncertain}. Niet-aangevinkte video's worden bewaard."
+  Remove Unavailable Videos Confirmation: "Niet-beschikbare video's verwijderen? Gevonden: {count}. Kon niet controleren: {uncertain}. Niet-gecontroleerde video's worden bewaard."
   Add Missing Videos: "Ontbrekende video’s uit de bronafspeellijst toevoegen"
   Source Playlist: "Bronafspeellijst"
   Save Playlist: "Afspeellijst opslaan"

@@ -177,7 +177,7 @@ Feed:
   Next Auto Refresh: 'Următoarea reîmprospătare automată: {date}'
 User Playlists:
   Remove Unavailable Videos: "Eliminați videoclipurile indisponibile"
-  Remove Unavailable Videos Confirmation: "Eliminați videoclipurile indisponibile? Găsit: {count}. Nu s-a putut verifica: {uncertain}. Videoclipurile nebifate vor fi păstrate."
+  Remove Unavailable Videos Confirmation: "Eliminați videoclipurile indisponibile? Găsite: {count}. Nu s-a putut verifica: {uncertain}. Videoclipurile neverificate vor fi păstrate."
   Add Missing Videos: "Adaugă videoclipurile lipsă din lista de redare sursă"
   Source Playlist: "Lista de redare sursă"
   Save Playlist: "Salvează lista de redare"

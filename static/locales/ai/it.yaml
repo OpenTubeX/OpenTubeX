@@ -175,7 +175,7 @@ Feed:
   Next Auto Refresh: 'Prossimo aggiornamento automatico: {date}'
 User Playlists:
   Remove Unavailable Videos: "Rimuovi i video non disponibili"
-  Remove Unavailable Videos Confirmation: "Rimuovere i video non disponibili? Trovato: {count}. Impossibile controllare: {uncertain}. I video non selezionati verranno conservati."
+  Remove Unavailable Videos Confirmation: "Rimuovere i video non disponibili? Trovati: {count}. Impossibile controllare: {uncertain}. I video non verificati verranno conservati."
   Add Missing Videos: "Aggiungi i video mancanti dalla playlist originale"
   Source Playlist: "Playlist originale"
   Save Playlist: "Salva playlist"

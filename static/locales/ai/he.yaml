@@ -177,7 +177,7 @@ Feed:
   Next Auto Refresh: 'הרענון האוטומטי הבא: {date}'
 User Playlists:
   Remove Unavailable Videos: "הסר סרטונים לא זמינים"
-  Remove Unavailable Videos Confirmation: "להסיר סרטונים לא זמינים? נמצא: {count}. לא ניתן לבדוק: {uncertain}. סרטונים לא מסומנים יישמרו."
+  Remove Unavailable Videos Confirmation: "להסיר סרטונים לא זמינים? נמצאו: {count}. לא ניתן לבדוק: {uncertain}. סרטונים שלא נבדקו יישמרו."
   Add Missing Videos: "הוספת סרטונים חסרים מרשימת ההשמעה המקורית"
   Source Playlist: "רשימת ההשמעה המקורית"
   Save Playlist: "שמירת הפלייליסט"

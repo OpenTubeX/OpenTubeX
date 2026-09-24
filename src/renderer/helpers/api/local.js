@@ -90,6 +90,16 @@ async function createInnertube({ withPlayer = false, location = undefined, safet
   }
 
   const fetch = fetchFunc ?? localApiFetch
+  let sessionFetch = fetch
+  if (signal) {
+    sessionFetch = (input, init) => {
+      const requestSignal = init?.signal ?? input?.signal
+      return fetch(input, {
+        ...init,
+        signal: requestSignal ? AbortSignal.any([signal, requestSignal]) : signal
+      })
+    }
+  }
 
   return await Innertube.create({
     // This setting is enabled by default and results in YouTube.js reusing the same session across different Innertube instances.
@@ -104,7 +114,7 @@ async function createInnertube({ withPlayer = false, location = undefined, safet
     client_type: clientType,
 
     // Use native HTTP in Capacitor without patching global fetch.
-    fetch: signal ? (input, init) => fetch(input, { ...init, signal }) : fetch,
+    fetch: sessionFetch,
     cache,
     generate_session_locally: !!generateSessionLocally
   })
