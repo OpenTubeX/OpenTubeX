@@ -22,11 +22,6 @@ const config = {
         include: path.join(__dirname, '../src/main/desktopShare.js'),
         parser: { createRequire: false },
       },
-      {
-        test: /\.js$/,
-        use: 'babel-loader',
-        exclude: /node_modules/,
-      },
     ],
     generator: {
       json: {
