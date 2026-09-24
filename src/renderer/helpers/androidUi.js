@@ -40,6 +40,16 @@ export function setAndroidAutoPictureInPicture(enabled, video) {
   }) ?? Promise.resolve()
 }
 
+export async function isAndroidLauncherReturnInProgress() {
+  try {
+    const state = await (AndroidUi?.isLauncherReturnInProgress() ?? Promise.resolve({ inProgress: false }))
+    return state.inProgress === true
+  } catch (error) {
+    console.warn('Could not check Android launcher return', error)
+    return false
+  }
+}
+
 /**
  * @param {{active: boolean, fullscreen: boolean, controlsShown: boolean}} state
  * @returns {boolean}

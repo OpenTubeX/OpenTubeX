@@ -40,6 +40,11 @@ public class AndroidPlaybackPlugin extends Plugin {
     private volatile String owner;
     private boolean activityVisible = true;
     private boolean pictureInPicture;
+    private final Runnable hideWhenStopped = () -> {
+        if (!activityVisible && !LauncherActivity.isReturningToApp() && session != null) {
+            session.setVisibility(false, false);
+        }
+    };
 
     @Override public void load() {
         active = new java.lang.ref.WeakReference<>(this);
@@ -182,7 +187,7 @@ public class AndroidPlaybackPlugin extends Plugin {
         if (plugin == null) return;
         plugin.pictureInPicture = enabled;
         if (plugin.screen != null) plugin.screen.setPictureInPicture(enabled);
-        if (plugin.session != null) plugin.session.setVisibility(plugin.activityVisible, plugin.activityVisible && enabled);
+        plugin.updatePlaybackVisibility();
     }
 
     @PluginMethod
@@ -617,22 +622,31 @@ public class AndroidPlaybackPlugin extends Plugin {
     @Override protected void handleOnStart() {
         mainHandler.post(() -> {
             activityVisible = true;
-            if (session != null) session.setVisibility(true, pictureInPicture);
+            updatePlaybackVisibility();
         });
     }
 
     @Override protected void handleOnStop() {
         mainHandler.post(() -> {
             activityVisible = false;
-            // An Activity remains started while its PiP surface is visible.
-            // A stopped PiP Activity is no longer visible either, for example
-            // when the screen locks while the window is still in PiP mode.
-            if (session != null) session.setVisibility(false, false);
+            updatePlaybackVisibility();
         });
+    }
+
+    private void updatePlaybackVisibility() {
+        mainHandler.removeCallbacks(hideWhenStopped);
+        if (activityVisible) {
+            if (session != null) session.setVisibility(true, pictureInPicture);
+        } else {
+            // The launcher briefly stops the PiP Activity before bringing its
+            // task back. Pause only if it remains stopped, such as on lock.
+            mainHandler.postDelayed(hideWhenStopped, 250);
+        }
     }
 
     @Override protected void handleOnDestroy() {
         mainHandler.post(() -> {
+            mainHandler.removeCallbacks(hideWhenStopped);
             frameEncoder.shutdown();
             spectrumExecutor.shutdown();
             closeScreen();

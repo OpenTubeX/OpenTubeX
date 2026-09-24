@@ -133,6 +133,7 @@ public class MainActivity extends BridgeActivity {
         // A PiP exit can happen while Chromium is suspended behind the lock
         // screen. Reconcile both layers with the Activity's current state.
         notifyPictureInPictureState(isInPictureInPictureMode());
+        LauncherActivity.finishReturn();
     }
 
     private void notifyPictureInPictureState(boolean active) {

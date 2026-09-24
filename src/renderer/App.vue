@@ -554,6 +554,7 @@ import { androidDynamicColors, getAndroidDynamicColors, onAndroidDynamicColorsCh
 import {
   exitAndroidApp,
   getAndroidHardwareKeyboardState,
+  isAndroidLauncherReturnInProgress,
   setAndroidPictureInPictureDocumentState,
   setAndroidSystemBarsBackground
 } from './helpers/androidUi'
@@ -4661,16 +4662,33 @@ async function enableCapacitorIntegrations() {
   const handleTaskRemoved = () => tabMediaCoordinator.pauseAll()
   window.addEventListener('opentubex:android-task-removed', handleTaskRemoved)
   let receivedAppState = false
+  let backgroundStateTimeout = null
+  let appStateVersion = 0
   const appStateHandle = await CapacitorApp.addListener('appStateChange', ({ isActive }) => {
     receivedAppState = true
+    const version = ++appStateVersion
     playbackScreenWake?.setAppActive(isActive)
+    clearTimeout(backgroundStateTimeout)
+    if (Capacitor.getPlatform() === 'android' && !isActive) {
+      // The launcher briefly stops the PiP Activity while returning to its
+      // existing task. Do not hide or pause playback for that handoff.
+      backgroundStateTimeout = setTimeout(async () => {
+        if (await isAndroidLauncherReturnInProgress()) return
+        const state = await CapacitorApp.getState().catch(() => ({ isActive: false }))
+        if (version !== appStateVersion || state.isActive) return
+        setAndroidAppVisible(false)
+        if (shouldPauseAndroidPlaybackOnAppStateChange(
+          false,
+          store.getters.getContinuePlaybackWhenScreenIsLocked
+        )) tabMediaCoordinator.pauseAll()
+      }, 250)
+      return
+    }
     setAndroidAppVisible(isActive)
     if (shouldPauseAndroidPlaybackOnAppStateChange(
       isActive,
       store.getters.getContinuePlaybackWhenScreenIsLocked
-    )) {
-      tabMediaCoordinator.pauseAll()
-    }
+    )) tabMediaCoordinator.pauseAll()
   })
   const appState = await CapacitorApp.getState()
   if (!receivedAppState) {
@@ -4681,6 +4699,7 @@ async function enableCapacitorIntegrations() {
   if (launch?.url) await handleYoutubeLink(launch.url)
 
   return () => {
+    clearTimeout(backgroundStateTimeout)
     stopShortcutUpdates()
     shortcutHandle.remove()
     backButtonHandle?.remove()

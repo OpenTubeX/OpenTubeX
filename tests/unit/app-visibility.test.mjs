@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFile } from 'node:fs/promises'
 import vm from 'node:vm'
-import { setImmediate } from 'node:timers/promises'
+import { setImmediate, setTimeout as delay } from 'node:timers/promises'
 
 import { isAppHidden, setAndroidAppVisible } from '../../src/renderer/helpers/appVisibility.js'
 import { resolveAndroidBackgroundPlaybackFormat } from '../../src/renderer/helpers/player/androidBackgroundPlayback.js'
@@ -63,6 +63,8 @@ for (const eventFirst of [false, true]) {
     let listener
     let pauses = 0
     let backPresses = 0
+    let nativeAppActive = true
+    let requestedInitialState = false
     const enable = vm.runInNewContext(`${integration}\nenableCapacitorIntegrations`, {
       window,
       Capacitor: { getPlatform: () => 'android' },
@@ -70,10 +72,18 @@ for (const eventFirst of [false, true]) {
       CapacitorApp: {
         addListener: async (name, callback) => {
           listeners.set(name, callback)
-          if (name === 'appStateChange') listener = callback
+          if (name === 'appStateChange') listener = ({ isActive }) => {
+            nativeAppActive = isActive
+            callback({ isActive })
+          }
           return { remove() { removedListeners.push(name) } }
         },
-        getState: () => { requestedState.resolve(); return initialState.promise },
+        getState: () => {
+          if (requestedInitialState) return Promise.resolve({ isActive: nativeAppActive })
+          requestedInitialState = true
+          requestedState.resolve()
+          return initialState.promise
+        },
         getLaunchUrl: async () => null,
       },
       initializeCapacitorLiveReminderActions: async () => () => {},
@@ -82,18 +92,33 @@ for (const eventFirst of [false, true]) {
       watch: () => () => {},
       locale: {},
       setAndroidAppVisible: visible => changes.push(visible),
+      isAndroidLauncherReturnInProgress: async () => !eventFirst,
       playbackScreenWake,
       shouldPauseAndroidPlaybackOnAppStateChange: active => !active,
       store: { getters: { getContinuePlaybackWhenScreenIsLocked: false } },
       tabMediaCoordinator: { pauseAll: () => { pauses++ } },
+      setTimeout,
+      clearTimeout,
     })
     const enabling = enable()
     await requestedState.promise
     if (eventFirst) listener({ isActive: false })
     initialState.resolve({ isActive: true })
     const cleanup = await enabling
-    assert.deepEqual(changes, eventFirst ? [false] : [true])
-    assert.equal(pauses, eventFirst ? 1 : 0)
+    assert.deepEqual(changes, eventFirst ? [] : [true])
+    if (!eventFirst) {
+      // Opening the icon while PiP is playing briefly backgrounds the Activity
+      // before bringing the existing task to the foreground again.
+      listener({ isActive: false })
+      await delay(350)
+      assert.equal(pauses, 0, 'a slow launcher return must not pause PiP')
+      listener({ isActive: true })
+      assert.ok(changes.every(Boolean), 'a launcher handoff must not hide the playing PiP view')
+    }
+    assert.equal(pauses, 0, 'a launcher handoff must not pause playing PiP')
+    if (eventFirst) await delay(350)
+    assert.equal(changes.includes(false), eventFirst, 'only a sustained background state becomes hidden')
+    assert.equal(pauses, eventFirst ? 1 : 0, 'a sustained background state still pauses')
     listeners.get('backButton')({ canGoBack: false })
     assert.equal(backPresses, 1, 'native back events reach the existing app navigation handler')
     await setImmediate()
@@ -133,6 +158,7 @@ test('Capacitor integrations do not register the Android back button on iOS', as
     initializeCapacitorLiveReminderActions: async () => () => {},
     addAndroidMediaSessionActionListener: async () => () => {},
     setAndroidAppVisible() {},
+    clearTimeout,
   })
 
   const cleanup = await enable()

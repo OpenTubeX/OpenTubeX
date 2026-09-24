@@ -13,6 +13,46 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class NativePlaybackReviewTest {
+    @Test public void launcherHandoffDoesNotPauseNativePictureInPicturePlayback() throws InterruptedException {
+        try (androidx.test.core.app.ActivityScenario<MainActivity> scenario =
+                androidx.test.core.app.ActivityScenario.launch(MainActivity.class)) {
+            final int[] pauses = {0};
+            scenario.onActivity(activity -> {
+                AndroidPlaybackPlugin plugin = (AndroidPlaybackPlugin) activity.getBridge().getPlugin("AndroidPlayback").getInstance();
+                NativePlaybackSession session = new NativePlaybackSession(new NativePlaybackSession.Playback() {
+                    @Override public void load(String source, long positionMs) {}
+                    @Override public void pause() { pauses[0]++; }
+                    @Override public void stop() {}
+                    @Override public void setVideoVisible(boolean visible) {}
+                });
+                session.setOwner("video-tab");
+                session.load("video-tab", "media-source", 0);
+                session.setContinueInBackground(false);
+                try {
+                    java.lang.reflect.Field field = AndroidPlaybackPlugin.class.getDeclaredField("session");
+                    field.setAccessible(true);
+                    field.set(plugin, session);
+                } catch (ReflectiveOperationException error) { throw new AssertionError(error); }
+                LauncherActivity.beginReturn();
+                plugin.handleOnStop();
+                activity.getWindow().getDecorView().post(() -> AndroidPlaybackPlugin.pictureInPictureChanged(false));
+            });
+            Thread.sleep(350);
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+            assertEquals("A slow launcher return must keep PiP playback running", 0, pauses[0]);
+            scenario.onActivity(activity -> {
+                ((AndroidPlaybackPlugin) activity.getBridge().getPlugin("AndroidPlayback").getInstance()).handleOnStart();
+                LauncherActivity.finishReturn();
+            });
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+            scenario.onActivity(activity -> ((AndroidPlaybackPlugin) activity.getBridge()
+                .getPlugin("AndroidPlayback").getInstance()).handleOnStop());
+            Thread.sleep(350);
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+            assertEquals("A sustained stop must still pause playback", 1, pauses[0]);
+        }
+    }
+
     @Test public void returningFromBackgroundReconcilesStalePictureInPictureState() {
         try (androidx.test.core.app.ActivityScenario<MainActivity> scenario =
                 androidx.test.core.app.ActivityScenario.launch(MainActivity.class)) {

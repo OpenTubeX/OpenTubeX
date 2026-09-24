@@ -55,6 +55,11 @@ public class AndroidUiPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void isLauncherReturnInProgress(PluginCall call) {
+        call.resolve(new JSObject().put("inProgress", LauncherActivity.isReturningToApp()));
+    }
+
+    @PluginMethod
     public void enterPictureInPicture(PluginCall call) {
         updateAspectRatio(call);
         getActivity().runOnUiThread(() -> {
