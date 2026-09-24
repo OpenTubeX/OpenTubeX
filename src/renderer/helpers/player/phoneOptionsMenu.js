@@ -159,7 +159,7 @@ export function setupPhoneOptionsMenu(menu, controls, t) {
     window.removeEventListener('resize', schedule)
     restoreHeader()
     if (dialog.contains(menu)) {
-      if (parent.querySelector('.shaka-overflow-menu')) menu.remove()
+      if (parent.querySelector(':scope > .shaka-overflow-menu')) menu.remove()
       else parent.append(menu)
     }
     dialog.remove()
