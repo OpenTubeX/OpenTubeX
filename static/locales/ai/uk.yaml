@@ -1383,6 +1383,31 @@ Video:
   Station: Станція
   Playlist:
     Unavailable videos are hidden: 1 недоступне відео приховано | {count} недоступні відео приховано | {count} недоступних відео приховано
+  External Media:
+    Dislikes: "дизлайк | дизлайки | дизлайків"
+    Reposts: "репост | репости | репостів"
+    Saves: "збереження | збереження | збережень"
+    Series: "Серіал"
+    Season: "Сезон"
+    Season Number: "Номер сезону"
+    Episode: "Епізод"
+    Episode Number: "Номер серії"
+    Track: "Музична доріжка"
+    Track Number: "Номер доріжки"
+    Artists: "Виконавці"
+    Album: "Альбом"
+    Genres: "Жанри"
+    Media Type: "Тип медіа"
+    Availability: "Доступність"
+    Age Limit: "Вікове обмеження"
+    Release Date: "Дата випуску"
+    Availability Values:
+      public: "Публічне"
+      private: "Приватне"
+      premium_only: "Лише для преміумкористувачів"
+      subscriber_only: "Лише для підписників"
+      needs_auth: "Потрібен вхід"
+      unlisted: "Не в списку"
 Playlist:
   Playlist Already Preloaded: "Усі відео з плейлиста вже попередньо завантажені"
   Playlist Preload Progress: "Попереднє завантаження відео: {completed} з {requested}"

@@ -161,22 +161,29 @@ public final class YtDlpPlugin extends Plugin {
                     }
                     String[] outputs = stdout.trim().split("\n");
                     JSONObject info = new JSONObject(outputs[0]);
-                    JSONArray formats = new JSONArray();
+                    JSONArray requests = new JSONArray();
                     for (String output : outputs) {
                         JSONObject storyboard = new JSONObject(output).optJSONObject("storyboard");
                         if (storyboard == null || !"mhtml".equals(storyboard.optString("protocol"))) continue;
                         JSONArray fragments = storyboard.optJSONArray("fragments");
                         if (fragments == null || fragments.length() == 0) continue;
-                        formats.put(storyboard);
+                        requests.put(storyboard);
                         break;
                     }
                     JSONArray mediaFormats = info.optJSONArray("formats");
                     if (mediaFormats != null) {
                         for (int index = 0; index < mediaFormats.length(); index++) {
-                            formats.put(mediaFormats.get(index));
+                            requests.put(mediaFormats.get(index));
                         }
                     }
-                    ExternalStreamRequestRegistry.shared().register(formats, extractedCookies);
+                    JSONObject subtitles = info.optJSONObject("requested_subtitles");
+                    if (subtitles != null) {
+                        for (java.util.Iterator<String> names = subtitles.keys(); names.hasNext();) {
+                            JSONObject subtitle = subtitles.optJSONObject(names.next());
+                            if (subtitle != null) requests.put(subtitle);
+                        }
+                    }
+                    ExternalStreamRequestRegistry.shared().register(requests, extractedCookies);
                 }
                 return new JSONObject().put("stdout", stdout);
             } finally {

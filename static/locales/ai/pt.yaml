@@ -1394,6 +1394,31 @@ Video:
   Station: Estação
   Playlist:
     Unavailable videos are hidden: 1 vídeo indisponível está oculto | {count} vídeos indisponíveis estão ocultos | {count} vídeos indisponíveis estão ocultos
+  External Media:
+    Dislikes: "Voto negativo | Votos negativos | Votos negativos"
+    Reposts: "Republicação | Republicações | Republicações"
+    Saves: "Guardado | Guardados | Guardados"
+    Series: "Série"
+    Season: "Temporada"
+    Season Number: "Número da temporada"
+    Episode: "Episódio"
+    Episode Number: "Número do episódio"
+    Track: "Faixa de música"
+    Track Number: "Número da faixa"
+    Artists: "Artistas"
+    Album: "Álbum"
+    Genres: "Géneros"
+    Media Type: "Tipo de conteúdo multimédia"
+    Availability: "Disponibilidade"
+    Age Limit: "Limite de idade"
+    Release Date: "Data de lançamento"
+    Availability Values:
+      public: "Público"
+      private: "Privado"
+      premium_only: "Apenas Premium"
+      subscriber_only: "Apenas subscritores"
+      needs_auth: "É necessário iniciar sessão"
+      unlisted: "Não listado"
 Playlist:
   Playlist Already Preloaded: "Todos os vídeos da lista já estão pré-carregados"
   Playlist Preload Progress: "A pré-carregar vídeos: {completed} de {requested}"

@@ -1429,6 +1429,31 @@ Video:
   Station: Станцыя
   Playlist:
     Unavailable videos are hidden: 1 недаступнае відэа схавана | {count} недаступныя відэа схаваныя | {count} недаступных відэа схавана
+  External Media:
+    Dislikes: "Дызлайк | Дызлайкі | Дызлайкаў"
+    Reposts: "Рэпост | Рэпосты | Рэпостаў"
+    Saves: "Захаванне | Захаванні | Захаванняў"
+    Series: "Серыя"
+    Season: "Сезон"
+    Season Number: "Нумар сезону"
+    Episode: "Эпізод"
+    Episode Number: "Нумар эпізоду"
+    Track: "Музычны трэк"
+    Track Number: "Нумар трэка"
+    Artists: "Выканаўцы"
+    Album: "Альбом"
+    Genres: "Жанры"
+    Media Type: "Тып носьбіта"
+    Availability: "Даступнасць"
+    Age Limit: "Узроставая мяжа"
+    Release Date: "Дата выпуску"
+    Availability Values:
+      public: "Публічны"
+      private: "Прыватны"
+      premium_only: "Толькі прэміум"
+      subscriber_only: "Толькі абаненты"
+      needs_auth: "Неабходна ўвайсці"
+      unlisted: "Не ў спісе"
 Playlist:
   Playlist Already Preloaded: "Усе відэа плэйліста ўжо папярэдне загружаны"
   Playlist Preload Progress: "Папярэдняя загрузка відэа: {completed} з {requested}"

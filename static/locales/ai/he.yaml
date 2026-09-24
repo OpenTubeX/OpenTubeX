@@ -1390,6 +1390,31 @@ Video:
   Station: תחנה
   Playlist:
     Unavailable videos are hidden: סרטון אחד שאינו זמין מוסתר | {count} סרטונים לא זמינים מוסתרים | {count} סרטונים לא זמינים מוסתרים
+  External Media:
+    Dislikes: "דיסלייק | דיסלייקים | דיסלייקים"
+    Reposts: "פרסום מחדש | פרסומים מחדש | פרסומים מחדש"
+    Saves: "שמירה | שמירות | שמירות"
+    Series: "סדרה"
+    Season: "עונה"
+    Season Number: "מספר עונה"
+    Episode: "פרק"
+    Episode Number: "מספר פרק"
+    Track: "רצועת מוזיקה"
+    Track Number: "מספר רצועה"
+    Artists: "אמנים"
+    Album: "אלבום"
+    Genres: "ז'אנרים"
+    Media Type: "סוג מדיה"
+    Availability: "זמינות"
+    Age Limit: "מגבלת גיל"
+    Release Date: "תאריך שחרור"
+    Availability Values:
+      public: "ציבורי"
+      private: "פרטי"
+      premium_only: "פרימיום בלבד"
+      subscriber_only: "מנויים בלבד"
+      needs_auth: "נדרשת כניסה"
+      unlisted: "לא מופיע"
 Playlist:
   Playlist Already Preloaded: "כל סרטוני הפלייליסט כבר נטענו מראש"
   Playlist Preload Progress: "טוען סרטונים מראש: {completed} מתוך {requested}"

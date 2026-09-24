@@ -1366,6 +1366,31 @@ Video:
   Station: Estazioa
   Playlist:
     Unavailable videos are hidden: Erabilgarri ez dagoen bideo 1 ezkutatuta dago | Erabilgarri ez dauden {count} bideo ezkutatuta daude
+  External Media:
+    Dislikes: "Desatsegitea | Desatsegiteak"
+    Reposts: "Berriro argitaratzea | Berriro argitaratzeak"
+    Saves: "Gordeketa | Gordeketak"
+    Series: "Seriea"
+    Season: "Denboraldia"
+    Season Number: "Denboraldi zenbakia"
+    Episode: "Atala"
+    Episode Number: "Atal zenbakia"
+    Track: "Musika pista"
+    Track Number: "Pista zenbakia"
+    Artists: "Artistak"
+    Album: "Albuma"
+    Genres: "Generoak"
+    Media Type: "Multimedia mota"
+    Availability: "Eskuragarritasuna"
+    Age Limit: "Adin muga"
+    Release Date: "Argitaratze data"
+    Availability Values:
+      public: "Publikoa"
+      private: "Pribatua"
+      premium_only: "Premium bakarrik"
+      subscriber_only: "Harpidedunentzat bakarrik"
+      needs_auth: "Saioa hasi behar da"
+      unlisted: "Zerrendatu gabeak"
 Playlist:
   Playlist Already Preloaded: "Erreprodukzio-zerrendako bideo guztiak aurrez kargatuta daude"
   Playlist Preload Progress: "Bideoak aurrez kargatzen: {completed}/{requested}"

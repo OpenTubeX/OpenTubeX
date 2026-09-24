@@ -1351,6 +1351,31 @@ Video:
       UpvoteSegment: Hlasovat pro
       DownvoteSegment: Hlasovat proti
       VoteFailed: Hlas pro SponsorBlock se nepodařilo odeslat.
+  External Media:
+    Dislikes: "Dislajk | Dislajky | Dislajků"
+    Reposts: "Repost | Reposty | Repostů"
+    Saves: "Uložení | Uložení | Uložení"
+    Series: "Série"
+    Season: "Sezóna"
+    Season Number: "Číslo sezóny"
+    Episode: "Epizoda"
+    Episode Number: "Číslo epizody"
+    Track: "Hudební skladba"
+    Track Number: "Číslo skladby"
+    Artists: "Umělci"
+    Album: "Album"
+    Genres: "Žánry"
+    Media Type: "Typ média"
+    Availability: "Dostupnost"
+    Age Limit: "Věkový limit"
+    Release Date: "Datum vydání"
+    Availability Values:
+      public: "Veřejné"
+      private: "Soukromé"
+      premium_only: "Pouze prémiové"
+      subscriber_only: "Pouze předplatitelé"
+      needs_auth: "Je vyžadováno přihlášení"
+      unlisted: "Neveřejné"
 Playlist:
   Playlist Already Preloaded: "Všechna videa v playlistu jsou již přednačtena"
   Playlist Preload Progress: "Přednačítání videí: {completed} z {requested}"

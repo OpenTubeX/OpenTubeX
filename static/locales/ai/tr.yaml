@@ -1351,6 +1351,31 @@ Video:
       UpvoteSegment: Olumlu oy ver
       DownvoteSegment: Olumsuz oy ver
       VoteFailed: SponsorBlock oyu gönderilemedi.
+  External Media:
+    Dislikes: "Beğenmeme | Beğenmeme"
+    Reposts: "Repost | Repost"
+    Saves: "Kaydetme | Kaydetme"
+    Series: "Seri"
+    Season: "Sezon"
+    Season Number: "Sezon numarası"
+    Episode: "Bölüm"
+    Episode Number: "Bölüm numarası"
+    Track: "Müzik parçası"
+    Track Number: "Parça numarası"
+    Artists: "Sanatçılar"
+    Album: "Albüm"
+    Genres: "Türler"
+    Media Type: "Ortam türü"
+    Availability: "Kullanılabilirlik"
+    Age Limit: "Yaş sınırı"
+    Release Date: "Yayın Tarihi"
+    Availability Values:
+      public: "Herkese açık"
+      private: "Özel"
+      premium_only: "Yalnızca PREMIUM"
+      subscriber_only: "Sadece aboneler"
+      needs_auth: "Oturum açma gerekli"
+      unlisted: "Listelenmemiş"
 Playlist:
   Playlist Already Preloaded: "Oynatma listesindeki tüm videolar zaten önceden yüklendi"
   Playlist Preload Progress: "Videolar önceden yükleniyor: {completed}/{requested}"

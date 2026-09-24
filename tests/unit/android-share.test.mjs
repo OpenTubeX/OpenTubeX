@@ -4,6 +4,11 @@ import test from 'node:test'
 import { computed, ref } from 'vue'
 import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '../../src/renderer/helpers/share.js'
 
+test('chapter timestamp is placed before an external URL fragment', () => {
+  assert.equal(appendTimestamp('https://media.example/watch?id=123#details', 42), 'https://media.example/watch?id=123&t=42#details')
+  assert.equal(appendTimestamp('https://media.example/watch#details?tab=1', 42), 'https://media.example/watch?t=42#details?tab=1')
+})
+
 const shareComponent = readFileSync(new URL('../../src/renderer/components/FtShareButton/FtShareButton.vue', import.meta.url), 'utf8')
 const setup = shareComponent.match(/<script setup>([\s\S]*?)<\/script>/)[1]
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')

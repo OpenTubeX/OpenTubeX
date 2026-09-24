@@ -2002,6 +2002,31 @@ Video:
   DRMProtected: DRM protected videos cannot be played in OpenTubeX, as they require proprietary, closed source components. If you want to watch this video please watch it on the official YouTube website in a DRM enabled web browser.
   External DRM Protected: DRM protected videos cannot be played in OpenTubeX, as they require proprietary, closed source components.
   Invalid Media URL: Invalid media URL
+  External Media:
+    Dislikes: dislike | dislikes
+    Reposts: repost | reposts
+    Saves: save | saves
+    Series: Series
+    Season: Season
+    Season Number: Season number
+    Episode: Episode
+    Episode Number: Episode number
+    Track: Track
+    Track Number: Track number
+    Artists: Artists
+    Album: Album
+    Genres: Genres
+    Media Type: Media type
+    Availability: Availability
+    Age Limit: Age limit
+    Release Date: Release date
+    Availability Values:
+      public: Public
+      private: Private
+      premium_only: Premium only
+      subscriber_only: Subscribers only
+      needs_auth: Sign-in required
+      unlisted: Unlisted
   Private: Private videos cannot be watched in OpenTubeX as they require Google login and ownership of the video.
   More Options: More Options
   Mark As Watched: Mark As Watched

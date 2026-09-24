@@ -1732,6 +1732,31 @@ Video:
   Station: Stotis
   Playlist:
     Unavailable videos are hidden: 1 nepasiekiamas vaizdo įrašas paslėptas | {count} nepasiekiami vaizdo įrašai paslėpti | {count} nepasiekiamų vaizdo įrašų paslėpta
+  External Media:
+    Dislikes: "Nepatinka | Nepatinka | Nepatinka"
+    Reposts: "Pakartotinis įrašas | Pakartotiniai įrašai | Pakartotinių įrašų"
+    Saves: "Išsaugojimas | Išsaugojimai | Išsaugojimų"
+    Series: "Serialas"
+    Season: "Sezonas"
+    Season Number: "Sezono numeris"
+    Episode: "Serija"
+    Episode Number: "Serijos numeris"
+    Track: "Muzikos takelis"
+    Track Number: "Takelio numeris"
+    Artists: "Atlikėjai"
+    Album: "Albumas"
+    Genres: "Žanrai"
+    Media Type: "Laikmenos tipas"
+    Availability: "Prieinamumas"
+    Age Limit: "Amžiaus riba"
+    Release Date: "Išleidimo data"
+    Availability Values:
+      public: "Vieša"
+      private: "Privatu"
+      premium_only: "Tik „Premium“"
+      subscriber_only: "Tik prenumeratoriams"
+      needs_auth: "Būtina prisijungti"
+      unlisted: "Neįtrauktas į sąrašą"
 Playlist:
   Playlist Already Preloaded: "Visi grojaraščio vaizdo įrašai jau įkelti iš anksto"
   Playlist Preload Progress: "Vaizdo įrašų išankstinis įkėlimas: {completed} iš {requested}"

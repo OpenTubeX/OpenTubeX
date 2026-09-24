@@ -1383,6 +1383,31 @@ Video:
   Station: محطة
   Playlist:
     Unavailable videos are hidden: تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء فيديو واحد غير متاح | تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء {count} من مقاطع الفيديو غير المتاحة
+  External Media:
+    Dislikes: "عدم الإعجاب | عدم إعجاب | عدم الإعجاب | عدم الإعجاب | عدم الإعجاب | عدم الإعجاب"
+    Reposts: "إعادة النشر | إعادة نشر | إعادة النشر | إعادة النشر | إعادة النشر | إعادة النشر"
+    Saves: "عمليات الحفظ | عملية حفظ | عمليات الحفظ | عمليات الحفظ | عمليات الحفظ | عمليات الحفظ"
+    Series: "السلسلة"
+    Season: "الموسم"
+    Season Number: "رقم الموسم"
+    Episode: "الحلقة"
+    Episode Number: "رقم الحلقة"
+    Track: "مسار موسيقي"
+    Track Number: "رقم المسار"
+    Artists: "الفنانون"
+    Album: "الألبوم"
+    Genres: "الأنواع"
+    Media Type: "نوع الوسائط"
+    Availability: "التوافر"
+    Age Limit: "الحد العمري"
+    Release Date: "تاريخ الإصدار"
+    Availability Values:
+      public: "عام"
+      private: "خاص"
+      premium_only: "بريميوم فقط"
+      subscriber_only: "المشتركون فقط"
+      needs_auth: "يلزم تسجيل الدخول"
+      unlisted: "غير مدرج"
 Playlist:
   Playlist Already Preloaded: "تم تحميل جميع فيديوهات قائمة التشغيل مسبقًا بالفعل"
   Playlist Preload Progress: "جارٍ تحميل الفيديوهات مسبقًا: {completed} من {requested}"

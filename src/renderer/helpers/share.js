@@ -141,6 +141,9 @@ export function transformOpenTubeXRouteUrl(routeWithQuery, toYouTube) {
  * @returns {string}
  */
 export function appendTimestamp(url, timestamp) {
-  const separator = url.includes('?') ? '&' : '?'
-  return `${url}${separator}t=${timestamp}`
+  const fragmentStart = url.indexOf('#')
+  const baseUrl = fragmentStart === -1 ? url : url.slice(0, fragmentStart)
+  const fragment = fragmentStart === -1 ? '' : url.slice(fragmentStart)
+  const separator = baseUrl.includes('?') ? '&' : '?'
+  return `${baseUrl}${separator}t=${timestamp}${fragment}`
 }

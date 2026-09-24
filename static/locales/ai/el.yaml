@@ -1388,6 +1388,31 @@ Video:
   Station: Σταθμός
   Playlist:
     Unavailable videos are hidden: 1 μη διαθέσιμο βίντεο είναι κρυμμένο | {count} μη διαθέσιμα βίντεο είναι κρυμμένα
+  External Media:
+    Dislikes: "Αρνητική ψήφος | Αρνητικές ψήφοι"
+    Reposts: "Αναδημοσίευση | Αναδημοσιεύσεις"
+    Saves: "Αποθήκευση | Αποθηκεύσεις"
+    Series: "Σειρά"
+    Season: "Σεζόν"
+    Season Number: "Αριθμός σεζόν"
+    Episode: "Επεισόδιο"
+    Episode Number: "Αριθμός επεισοδίου"
+    Track: "Μουσικό κομμάτι"
+    Track Number: "Αριθμός κομματιού"
+    Artists: "Καλλιτέχνες"
+    Album: "Άλμπουμ"
+    Genres: "Είδη"
+    Media Type: "Τύπος μέσου"
+    Availability: "Διαθεσιμότητα"
+    Age Limit: "Όριο ηλικίας"
+    Release Date: "Ημερομηνία κυκλοφορίας"
+    Availability Values:
+      public: "Δημόσιο"
+      private: "Ιδιωτικό"
+      premium_only: "Μόνο Premium"
+      subscriber_only: "Μόνο συνδρομητές"
+      needs_auth: "Απαιτείται σύνδεση"
+      unlisted: "Μη καταχωρημένο"
 Playlist:
   Playlist Already Preloaded: "Όλα τα βίντεο της λίστας αναπαραγωγής έχουν ήδη προφορτωθεί"
   Playlist Preload Progress: "Προφόρτωση βίντεο: {completed} από {requested}"

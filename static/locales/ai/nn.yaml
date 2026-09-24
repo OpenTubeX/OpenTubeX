@@ -1629,6 +1629,31 @@ Video:
   Station: Stasjon
   Playlist:
     Unavailable videos are hidden: 1 utilgjengeleg video er gøymd | {count} utilgjengelege videoar er gøymde
+  External Media:
+    Dislikes: "Misliking | Mislikingar"
+    Reposts: "Repost | Reposts"
+    Saves: "Lagring | Lagringar"
+    Series: "Serie"
+    Season: "Sesong"
+    Season Number: "Sesongnummer"
+    Episode: "Episode"
+    Episode Number: "Episodenummer"
+    Track: "Musikkspor"
+    Track Number: "Spornummer"
+    Artists: "Kunstnarar"
+    Album: "Album"
+    Genres: "Sjangrar"
+    Media Type: "Medietype"
+    Availability: "Tilgjengelegheit"
+    Age Limit: "Aldersgrense"
+    Release Date: "Utgjevingsdato"
+    Availability Values:
+      public: "Offentleg"
+      private: "Privat"
+      premium_only: "Berre Premium"
+      subscriber_only: "Berre abonnentar"
+      needs_auth: "Pålogging krevst"
+      unlisted: "Ikkje oppført"
 Playlist:
   Playlist Already Preloaded: "Alle videoane i spelelista er allereie førehandslasta"
   Playlist Preload Progress: "Førehandslastar videoar: {completed} av {requested}"

@@ -1423,6 +1423,31 @@ Video:
   Station: ایستگاه
   Playlist:
     Unavailable videos are hidden: ۱ ویدیوی در دسترس‌نبوده پنهان است | {count} ویدیوی در دسترس‌نبوده پنهان هستند
+  External Media:
+    Dislikes: "دیسلایک | دیسلایک‌ها"
+    Reposts: "بازنشر | بازنشرها"
+    Saves: "ذخیره | ذخیره‌ها"
+    Series: "سری"
+    Season: "فصل"
+    Season Number: "شماره فصل"
+    Episode: "قسمت"
+    Episode Number: "شماره قسمت"
+    Track: "آهنگ موسیقی"
+    Track Number: "شماره آهنگ"
+    Artists: "هنرمندان"
+    Album: "آلبوم"
+    Genres: "ژانرها"
+    Media Type: "نوع رسانه"
+    Availability: "در دسترس بودن"
+    Age Limit: "محدودیت سنی"
+    Release Date: "تاریخ انتشار"
+    Availability Values:
+      public: "عمومی"
+      private: "خصوصی"
+      premium_only: "فقط کاربران پریمیوم"
+      subscriber_only: "فقط مشترکین"
+      needs_auth: "ورود به سیستم الزامی است"
+      unlisted: "بدون لیست"
 Playlist:
   Playlist Already Preloaded: "همه ویدیوهای فهرست پخش از قبل پیش‌بارگذاری شده‌اند"
   Playlist Preload Progress: "در حال پیش‌بارگذاری ویدیوها: {completed} از {requested}"

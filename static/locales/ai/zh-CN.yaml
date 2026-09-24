@@ -1351,6 +1351,31 @@ Video:
       UpvoteSegment: 赞成
       DownvoteSegment: 反对
       VoteFailed: SponsorBlock 投票提交失败。
+  External Media:
+    Dislikes: "点踩"
+    Reposts: "转发"
+    Saves: "收藏"
+    Series: "系列"
+    Season: "季"
+    Season Number: "季数"
+    Episode: "剧集"
+    Episode Number: "剧集编号"
+    Track: "音乐曲目"
+    Track Number: "曲目编号"
+    Artists: "艺术家"
+    Album: "专辑"
+    Genres: "流派"
+    Media Type: "媒体类型"
+    Availability: "可用性"
+    Age Limit: "年龄限制"
+    Release Date: "发布日期"
+    Availability Values:
+      public: "公开"
+      private: "私人"
+      premium_only: "仅限高级版"
+      subscriber_only: "仅限订阅者"
+      needs_auth: "需要登录"
+      unlisted: "不公开列出的视频"
 Playlist:
   Playlist Already Preloaded: "播放列表中的所有视频均已预加载"
   Playlist Preload Progress: "正在预加载视频：{completed}/{requested}"

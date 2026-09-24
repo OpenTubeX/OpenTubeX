@@ -1742,6 +1742,31 @@ Video:
   Move Queue Item Up: "{title} nach oben verschieben"
   Move Queue Item Down: "{title} nach unten verschieben"
   Age Restricted Badge: Altersbeschränkt
+  External Media:
+    Dislikes: Dislike | Dislikes
+    Reposts: Repost | Reposts
+    Saves: Speicherung | Speicherungen
+    Series: Serie
+    Season: Staffel
+    Season Number: Staffelnummer
+    Episode: Folge
+    Episode Number: Folgennummer
+    Track: Titel
+    Track Number: Titelnummer
+    Artists: Künstler
+    Album: Album
+    Genres: Genres
+    Media Type: Medientyp
+    Availability: Verfügbarkeit
+    Age Limit: Altersgrenze
+    Release Date: Veröffentlichungsdatum
+    Availability Values:
+      public: Öffentlich
+      private: Privat
+      premium_only: Nur für Premium-Mitglieder
+      subscriber_only: Nur für Abonnenten
+      needs_auth: Anmeldung erforderlich
+      unlisted: Nicht gelistet
   Transcript:
     Title: Transkript
     Search: Transkript durchsuchen

@@ -2,9 +2,9 @@ import { historyRepairYtDlpArguments, historyRepairYtDlpError } from '../history
 import {
   buildYtDlpDownloadArguments, ID_REGEX, PLAYLIST_ID_REGEX, DOWNLOAD_TITLE_FILENAME_BYTE_LIMIT,
   SUBTITLE_FORMATS, MAX_LOCAL_PLAYLIST_VIDEOS, DENIED_CUSTOM_ARGS, AUTOMATIC_NUMBER_LIMITS,
-  splitArguments, automaticNumber,
+  splitArguments, automaticNumber, playbackSubtitleArguments,
 } from '../ytDlpArguments'
-import { EXTERNAL_PLAYBACK_FORMAT_SELECTOR, PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo, toFiniteNumber, toNonEmptyString, mapPlaybackFormat, mapPlaybackCaptions } from '../ytDlpMetadata'
+import { EXTERNAL_PLAYBACK_FORMAT_SELECTOR, PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo, toFiniteNumber, toNonEmptyString, mapPlaybackFormat, mapPlaybackCaptions, mapExternalPlaybackMetadata } from '../ytDlpMetadata'
 import { resolveYtDlpCreatorAvatarUrl } from './ytDlpCreatorAvatar'
 import { execFile, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
@@ -1540,7 +1540,7 @@ export async function handleYtDlpDownloadBinary(event, binary) {
  * @property {string} url
  * @property {string} language
  * @property {string} label
- * @property {'text/vtt'} mimeType
+ * @property {'text/vtt' | 'text/srt' | 'application/ttml+xml'} mimeType
  * @property {string} [id]
  * @property {string} [translationName]
  * @property {string} [originalLanguage]
@@ -1565,6 +1565,7 @@ export async function handleYtDlpDownloadBinary(event, binary) {
  * @property {boolean} isLive
  * @property {'is_live' | 'post_live' | 'was_live' | 'not_live' | 'is_upcoming' | null} liveStatus
  * @property {number | null} duration
+ * @property {ReturnType<typeof import('../ytDlpMetadata').mapExternalPlaybackMetadata>} externalMetadata
  * @property {string | null} hlsManifestUrl
  * @property {string | null} storyboardVtt
  * @property {YtDlpPlaybackCaption[]} captions
@@ -1732,13 +1733,7 @@ export async function handleYtDlpGetPlaybackInfo(
   ]
 
   if (includeSubtitles) {
-    args.push(
-      '--write-auto-subs',
-      '--sub-langs',
-      'all',
-      '--sub-format',
-      'vtt'
-    )
+    args.push(...playbackSubtitleArguments(isYouTubeVideo))
   }
 
   if (isYouTubeVideo && useDefaultClients !== true) {
@@ -1824,11 +1819,14 @@ export async function handleYtDlpGetPlaybackInfo(
     const storyboardFormat = info.storyboard?.protocol === 'mhtml'
       ? [{ ...info.storyboard, url: info.storyboard.fragments?.[0]?.url }]
       : []
-    const requestFormats = [...storyboardFormat, ...formats]
-    registerExternalStreamHeaders(event.sender, requestFormats)
-    registerExternalStreamCookies(event.sender, requestFormats, extractedCookies)
+    const subtitleRequests = info.requested_subtitles && typeof info.requested_subtitles === 'object'
+      ? Object.values(info.requested_subtitles).filter(subtitle => subtitle && typeof subtitle === 'object')
+      : []
+    const externalRequests = [...storyboardFormat, ...formats, ...subtitleRequests]
+    registerExternalStreamHeaders(event.sender, externalRequests)
+    registerExternalStreamCookies(event.sender, externalRequests, extractedCookies)
   }
-  const { captions, captionTranslations } = mapPlaybackCaptions(info.requested_subtitles)
+  const { captions, captionTranslations } = mapPlaybackCaptions(info.requested_subtitles, info.subtitles, !isYouTubeVideo)
   const creatorAvatarUrl = isYouTubeVideo
     ? null
     : await resolveYtDlpCreatorAvatarUrl(info, (url, options) => net.fetch(url, options))
@@ -1850,6 +1848,7 @@ export async function handleYtDlpGetPlaybackInfo(
     isLive: !!info.is_live,
     liveStatus: toNonEmptyString(info.live_status),
     duration: toFiniteNumber(info.duration),
+    externalMetadata: mapExternalPlaybackMetadata(info),
     hlsManifestUrl: toNonEmptyString(info.manifest_url) ??
       formats.find(format => format.protocol === 'm3u8_native' && format.manifest_url)?.manifest_url ??
       null,

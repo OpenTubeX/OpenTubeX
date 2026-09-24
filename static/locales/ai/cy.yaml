@@ -1373,6 +1373,31 @@ Video:
   Station: Gorsaf
   Playlist:
     Unavailable videos are hidden: Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae 1 fideo nad yw ar gael wedi'i guddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio
+  External Media:
+    Dislikes: "Ddim yn hoffi | Ddim yn hoffi | Ddim yn hoffi | Ddim yn hoffi | Ddim yn hoffi | Ddim yn hoffi"
+    Reposts: "Ail-bostiadau | Ail-bost | Ail-bostiadau | Ail-bostiadau | Ail-bostiadau | Ail-bostiadau"
+    Saves: "Cadwadau | Cadwad | Cadwadau | Cadwadau | Cadwadau | Cadwadau"
+    Series: "Cyfres"
+    Season: "Tymor"
+    Season Number: "Rhif y tymor"
+    Episode: "Pennod"
+    Episode Number: "Rhif pennod"
+    Track: "Trac cerddoriaeth"
+    Track Number: "Rhif y trac"
+    Artists: "Artistiaid"
+    Album: "Albwm"
+    Genres: "Genres"
+    Media Type: "Math o gyfrwng"
+    Availability: "Argaeledd"
+    Age Limit: "Terfyn oedran"
+    Release Date: "Dyddiad rhyddhau"
+    Availability Values:
+      public: "Cyhoeddus"
+      private: "Preifat"
+      premium_only: "Premiwm yn unig"
+      subscriber_only: "Tanysgrifwyr yn unig"
+      needs_auth: "Angen mewngofnodi"
+      unlisted: "Heb ei restru"
 Playlist:
   Playlist Already Preloaded: "Mae holl fideos y rhestr chwarae eisoes wedi'u rhaglwytho"
   Playlist Preload Progress: "Yn rhaglwytho fideos: {completed} o {requested}"

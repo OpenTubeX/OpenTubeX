@@ -48,8 +48,10 @@
       </div>
     </div>
 
-    <template v-else-if="source && info">
+    <template v-else-if="info">
       <FtShakaVideoPlayer
+        v-if="source"
+        ref="player"
         :key="loadGeneration"
         class="externalMediaPlayer"
         :manifest-src="source.manifestSrc"
@@ -62,10 +64,23 @@
         :thumbnail="thumbnail"
         :is-live="source.isLive"
         :storyboard-src="source.storyboardSrc"
+        :chapters="chapters"
+        :current-chapter-index="currentChapterIndex"
+        :chapters-src="chaptersSrc"
+        :sidebar-chapters-open="showChapters"
         :external-url="mediaUrl"
         playback-engine="yt-dlp"
         @error="playerErrorHandler"
+        @timeupdate="updateCurrentTime"
+        @chapters-overlay-change="showChapters = $event"
       />
+      <div
+        v-else
+        class="externalMediaState"
+        role="status"
+      >
+        {{ t('Video.Upcoming') }}
+      </div>
 
       <FtCard class="externalMediaDetails">
         <div class="externalMediaHeading">
@@ -81,12 +96,33 @@
             :external-url="mediaUrl"
           />
         </div>
+        <div
+          v-if="statusBadges.length"
+          class="externalMediaBadges"
+        >
+          <span
+            v-for="badge in statusBadges"
+            :key="badge"
+            class="externalMediaBadge"
+          >{{ badge }}</span>
+        </div>
         <FtInlineMetadata class="externalMediaMetrics">
           <span v-if="info.viewCount !== null">{{ formattedViewCount }} {{ t('Video.Views') }}</span>
+          <span v-if="metadata.concurrentViewCount !== null">{{ t('Global.Counts.Watching Count', { count: formattedConcurrentViewCount }, metadata.concurrentViewCount) }}</span>
           <time
-            v-if="uploadDate"
-            :datetime="uploadDate"
-          >{{ formattedUploadDate }}</time>
+            v-if="publishedDate"
+            :datetime="publishedDate"
+          >{{ publishedDateLabel }} {{ formattedPublishedDate }}</time>
+          <bdi v-if="metadata.categories.length"><strong>{{ t('Description.Video Category') }}</strong> {{ metadata.categories.join(', ') }}</bdi>
+        </FtInlineMetadata>
+        <FtInlineMetadata
+          v-if="engagement.length"
+          class="externalMediaMetrics"
+        >
+          <span
+            v-for="item in engagement"
+            :key="item.label"
+          >{{ item.text }}</span>
         </FtInlineMetadata>
         <div class="externalMediaCreator">
           <component
@@ -113,17 +149,61 @@
           >{{ hostname }}</a>
         </div>
       </FtCard>
+      <FtCard
+        v-if="metadataRows.length"
+        class="externalMediaExtra"
+      >
+        <h2>{{ t('Video.Metadata') }}</h2>
+        <dl>
+          <div
+            v-for="item in metadataRows"
+            :key="item.label"
+          >
+            <dt>{{ item.label }}</dt>
+            <dd dir="auto">
+              {{ item.value }}
+            </dd>
+          </div>
+        </dl>
+      </FtCard>
       <WatchVideoDescription
-        v-if="info.description"
+        v-if="info.description || metadata.tags.length || metadata.license"
         class="externalMediaDescription"
         :description="info.description"
+        :tags="metadata.tags"
+        :license="metadata.license"
+        @timestamp-event="seekTo"
       />
+      <FtCard
+        v-if="source && chapters.length && showChapters"
+        class="externalMediaChapters"
+      >
+        <div class="chaptersPanelHeader">
+          <h2>{{ t('Chapters.Chapters') }}</h2>
+          <button
+            type="button"
+            class="chaptersPanelClose"
+            :aria-label="t('Chapters.Close Chapters')"
+            :title="t('Chapters.Close Chapters')"
+            @click="showChapters = false"
+          >
+            <FtIcon :icon="['fas', 'xmark']" />
+          </button>
+        </div>
+        <WatchVideoChapters
+          :chapters="chapters"
+          :current-chapter-index="currentChapterIndex"
+          :fallback-thumbnail="thumbnail"
+          @timestamp-event="seekTo"
+          @copy-timestamp="copyChapterTimestamp"
+        />
+      </FtCard>
     </template>
   </main>
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
@@ -136,7 +216,9 @@ import FtRetryImage from '../../components/FtRetryImage.vue'
 import FtShareButton from '../../components/FtShareButton/FtShareButton.vue'
 import FtShakaVideoPlayer from '../../components/ft-shaka-video-player/ft-shaka-video-player.vue'
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
+import WatchVideoChapters from '../../components/WatchVideoChapters/WatchVideoChapters.vue'
 import { getExternalYtDlpPlaybackSource } from '../../helpers/player/ytDlpPlayback'
+import { buildChaptersVttFile, formatDurationAsTimestamp } from '../../helpers/utils'
 import { isExternalMediaUrl } from '../../helpers/externalMediaUrl'
 import { useTabAvatar, useTabTitle } from '../../tabs/TabContext'
 import store from '../../store/index'
@@ -150,7 +232,10 @@ const loading = ref(true)
 const errorMessage = ref('')
 const info = shallowRef(null)
 const source = shallowRef(null)
+const player = useTemplateRef('player')
 const mediaUrl = ref('')
+const currentTime = ref(0)
+const showChapters = ref(false)
 let loadGeneration = 0
 
 const hostname = computed(() => {
@@ -169,19 +254,119 @@ function safeWebUrl(value) {
   }
 }
 const thumbnail = computed(() => safeWebUrl(info.value?.thumbnail))
+const metadata = computed(() => info.value?.externalMetadata ?? {})
+const chapters = computed(() => (metadata.value.chapters ?? []).map(chapter => ({
+  ...chapter,
+  timestamp: formatDurationAsTimestamp(Math.floor(chapter.startSeconds))
+})))
+const currentChapterIndex = computed(() => chapters.value.findLastIndex(chapter => currentTime.value >= chapter.startSeconds))
+const chaptersSrc = computed(() => chapters.value.some(chapter => chapter.endSeconds !== null)
+  ? `data:text/vtt,${encodeURIComponent(buildChaptersVttFile(chapters.value.filter(chapter => chapter.endSeconds !== null)))}`
+  : '')
 const creatorName = computed(() => info.value?.channel || info.value?.uploader || '')
 const creatorUrl = computed(() => safeWebUrl(info.value?.channel ? info.value.channelUrl : info.value?.uploaderUrl))
 const creatorAvatarUrl = computed(() => safeWebUrl(info.value?.channel ? info.value.channelThumbnail : info.value?.uploaderThumbnail))
 const hideSharingActions = computed(() => store.getters.getHideSharingActions)
 const formattedViewCount = computed(() => new Intl.NumberFormat(locale.value).format(info.value?.viewCount ?? 0))
-const uploadDate = computed(() => {
-  const value = info.value?.uploadDate
+const formattedConcurrentViewCount = computed(() => new Intl.NumberFormat(locale.value).format(metadata.value.concurrentViewCount ?? 0))
+function parseYtDlpDate(value) {
   if (typeof value !== 'string' || !/^\d{8}$/.test(value)) return ''
   const date = new Date(`${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6)}T00:00:00Z`)
   return Number.isNaN(date.getTime()) ? '' : date.toISOString().slice(0, 10)
+}
+const publishedTimestamp = computed(() => {
+  const value = metadata.value.timestamp
+  return Number.isFinite(value) && Number.isFinite(new Date(value * 1000).getTime()) ? value : null
 })
-const formattedUploadDate = computed(() => new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(`${uploadDate.value}T00:00:00Z`)))
+const publishedDate = computed(() => {
+  if (publishedTimestamp.value !== null) return new Date(publishedTimestamp.value * 1000).toISOString()
+  return parseYtDlpDate(info.value?.uploadDate)
+})
+const formattedPublishedDate = computed(() => new Intl.DateTimeFormat(locale.value, {
+  dateStyle: 'medium',
+  ...(publishedTimestamp.value === null ? { timeZone: 'UTC' } : { timeStyle: 'short' })
+}).format(new Date(publishedDate.value)))
+const publishedDateLabel = computed(() => ['was_live', 'post_live'].includes(info.value?.liveStatus)
+  ? t('Video.Streamed on')
+  : t('Video.Published on'))
+const statusBadges = computed(() => {
+  const badges = []
+  if (info.value?.liveStatus === 'is_live') badges.push(t('Video.Live Now'))
+  if (info.value?.liveStatus === 'is_upcoming') badges.push(t('Video.Upcoming'))
+  if (metadata.value.availability === 'unlisted') badges.push(t('Video.Unlisted'))
+  if (metadata.value.ageLimit > 0) badges.push(t('Video.Age Restricted Badge'))
+  return badges
+})
+const numberFormat = computed(() => new Intl.NumberFormat(locale.value))
+function engagementCount(value, label) {
+  return `${numberFormat.value.format(value)} ${label}`
+}
+const engagement = computed(() => {
+  const counts = [
+    ['likeCount', value => t('Global.Counts.Like Count', { count: numberFormat.value.format(value) }, value)],
+    ['dislikeCount', value => engagementCount(value, t('Video.External Media.Dislikes', {}, value))],
+    ['commentCount', value => t('Global.Counts.Comment Count', { count: numberFormat.value.format(value) }, value)],
+    ['repostCount', value => engagementCount(value, t('Video.External Media.Reposts', {}, value))],
+    ['saveCount', value => engagementCount(value, t('Video.External Media.Saves', {}, value))]
+  ]
+  return counts.flatMap(([key, format]) => metadata.value[key] === null
+    ? []
+    : [{ label: key, text: format(metadata.value[key]) }])
+})
+const metadataRows = computed(() => {
+  const values = [
+    ['series', t('Video.External Media.Series')],
+    ['season', t('Video.External Media.Season')],
+    ['seasonNumber', t('Video.External Media.Season Number')],
+    ['episode', t('Video.External Media.Episode')],
+    ['episodeNumber', t('Video.External Media.Episode Number')],
+    ['track', t('Video.External Media.Track')],
+    ['trackNumber', t('Video.External Media.Track Number')],
+    ['artists', t('Video.External Media.Artists')],
+    ['album', t('Video.External Media.Album')],
+    ['genres', t('Video.External Media.Genres')],
+    ['mediaType', t('Video.External Media.Media Type')],
+    ['availability', t('Video.External Media.Availability')],
+    ['ageLimit', t('Video.External Media.Age Limit')]
+  ]
+  const availabilityLabels = {
+    public: t('Video.External Media.Availability Values.public'),
+    private: t('Video.External Media.Availability Values.private'),
+    premium_only: t('Video.External Media.Availability Values.premium_only'),
+    subscriber_only: t('Video.External Media.Availability Values.subscriber_only'),
+    needs_auth: t('Video.External Media.Availability Values.needs_auth'),
+    unlisted: t('Video.External Media.Availability Values.unlisted')
+  }
+  const rows = values.flatMap(([key, label]) => {
+    const value = metadata.value[key]
+    if (value === null || value === undefined || value === '' || (Array.isArray(value) && value.length === 0) || (key === 'ageLimit' && value === 0)) return []
+    const displayValue = key === 'availability' && availabilityLabels[value]
+      ? availabilityLabels[value]
+      : Array.isArray(value) ? value.join(', ') : value
+    return [{ label, value: displayValue }]
+  })
+  const releaseDate = metadata.value.releaseTimestamp !== null && metadata.value.releaseTimestamp !== undefined
+    ? new Date(metadata.value.releaseTimestamp * 1000)
+    : metadata.value.releaseDate ? new Date(`${parseYtDlpDate(metadata.value.releaseDate)}T00:00:00Z`) : null
+  if (releaseDate && !Number.isNaN(releaseDate.getTime())) {
+    const options = {
+      dateStyle: 'medium',
+      ...(metadata.value.releaseTimestamp !== null && metadata.value.releaseTimestamp !== undefined
+        ? { timeStyle: 'short' }
+        : { timeZone: 'UTC' })
+    }
+    rows.push({
+      label: t('Video.External Media.Release Date'),
+      value: new Intl.DateTimeFormat(locale.value, options).format(releaseDate)
+    })
+  }
+  return rows
+})
 const playerErrorHandler = ref(() => {})
+
+function updateCurrentTime(seconds) { currentTime.value = seconds }
+function seekTo(seconds) { player.value?.setCurrentTime(seconds) }
+function copyChapterTimestamp(seconds) { player.value?.copyChapterTimestamp(seconds) }
 
 function handlePlayerError(error) {
   if (loading.value || !source.value) return
@@ -200,6 +385,8 @@ async function loadMedia(url) {
   errorMessage.value = ''
   info.value = null
   source.value = null
+  currentTime.value = 0
+  showChapters.value = false
   setTabTitle('Watch')
 
   if (!isExternalMediaUrl(url)) {
@@ -350,6 +537,21 @@ onBeforeUnmount(() => { loadGeneration++ })
   justify-content: space-between;
 }
 
+.externalMediaBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.externalMediaBadge {
+  background-color: var(--secondary-card-bg-color);
+  border-radius: calc(5px * var(--ui-roundness));
+  font-size: 13px;
+  font-weight: 500;
+  padding-block: 2px;
+  padding-inline: 5px;
+}
+
 .externalMediaMetrics {
   color: var(--tertiary-text-color);
   font-size: 14px;
@@ -389,5 +591,76 @@ onBeforeUnmount(() => { loadGeneration++ })
 
 .externalMediaDescription {
   margin-block-start: 16px;
+}
+
+.externalMediaExtra,
+.externalMediaChapters {
+  margin-block-start: 16px;
+  padding: 16px;
+}
+
+.externalMediaExtra h2 {
+  font-size: 1.1rem;
+  margin-block: 0 12px;
+}
+
+.externalMediaExtra dl {
+  display: grid;
+  gap: 8px 24px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  margin: 0;
+}
+
+.externalMediaExtra dl > div {
+  min-inline-size: 0;
+}
+
+.externalMediaExtra dt {
+  color: var(--secondary-text-color);
+  font-size: 14px;
+}
+
+.externalMediaExtra dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.externalMediaChapters {
+  display: flex;
+  flex-direction: column;
+}
+
+.chaptersPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-block-end: 12px;
+}
+
+.chaptersPanelHeader h2 {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.chaptersPanelClose {
+  display: grid;
+  place-items: center;
+  inline-size: 36px;
+  block-size: 36px;
+  border: 0;
+  border-radius: 50%;
+  background-color: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.chaptersPanelClose:hover,
+.chaptersPanelClose:focus-visible {
+  background-color: var(--side-nav-hover-color);
+}
+
+.externalMediaChapters :deep(.chaptersWrapper) {
+  max-block-size: 360px;
 }
 </style>

@@ -1351,6 +1351,31 @@ Video:
       UpvoteSegment: Hlasovať za
       DownvoteSegment: Hlasovať proti
       VoteFailed: Hlas SponsorBlock sa nepodarilo odoslať.
+  External Media:
+    Dislikes: "Negatívne hodnotenie | Negatívne hodnotenia | Negatívnych hodnotení"
+    Reposts: "Opätovné zdieľanie | Opätovné zdieľania | Opätovných zdieľaní"
+    Saves: "Uloženie | Uloženia | Uložení"
+    Series: "Séria"
+    Season: "Sezóna"
+    Season Number: "Číslo sezóny"
+    Episode: "Epizóda"
+    Episode Number: "Číslo epizódy"
+    Track: "Hudobná skladba"
+    Track Number: "Číslo skladby"
+    Artists: "Umelci"
+    Album: "Album"
+    Genres: "Žánre"
+    Media Type: "Typ média"
+    Availability: "Dostupnosť"
+    Age Limit: "Veková hranica"
+    Release Date: "Dátum vydania"
+    Availability Values:
+      public: "Verejné"
+      private: "Súkromné"
+      premium_only: "Iba prémiové"
+      subscriber_only: "Iba predplatitelia"
+      needs_auth: "Vyžaduje sa prihlásenie"
+      unlisted: "Neuvedené"
 Playlist:
   Playlist Already Preloaded: "Všetky videá v playliste sú už predbežne načítané"
   Playlist Preload Progress: "Predbežné načítavanie videí: {completed} z {requested}"
