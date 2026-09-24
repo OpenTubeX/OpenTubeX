@@ -7,6 +7,12 @@ const VIDEO_FORMATS = ['mp4', 'mkv', 'webm']
 const VIDEO_CODECS = ['h264', 'h265', 'vp9', 'av1']
 const AUDIO_FORMATS = ['mp3', 'm4a', 'opus', 'flac']
 export const SUBTITLE_FORMATS = ['srt', 'vtt', 'ass', 'lrc']
+export function playbackImpersonationArguments(url) {
+  const hostname = new URL(url).hostname.toLowerCase()
+  return hostname === 'rumble.com' || hostname.endsWith('.rumble.com')
+    ? ['--impersonate', 'chrome']
+    : []
+}
 export function playbackSubtitleArguments(isYouTubeVideo) {
   return [
     ...(!isYouTubeVideo ? ['--write-subs'] : []),
