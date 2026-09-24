@@ -203,6 +203,8 @@ Feed:
   Next Auto Refresh: 'Kitas automatinis atnaujinimas: {date}'
   Refresh Feed: Atnaujinti {subscriptionName}
 User Playlists:
+  Remove Unavailable Videos: "Pašalinti nepasiekiamus vaizdo įrašus"
+  Remove Unavailable Videos Confirmation: "Pašalinti nepasiekiamus vaizdo įrašus? Rasta: {count}. Nepavyko patikrinti: {uncertain}. Nepažymėti vaizdo įrašai bus saugomi."
   Add Missing Videos: "Pridėti trūkstamus vaizdo įrašus iš šaltinio grojaraščio"
   Source Playlist: "Šaltinio grojaraštis"
   Save Playlist: "Išsaugoti grojaraštį"

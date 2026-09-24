@@ -178,6 +178,8 @@ Feed:
   Cancel Refresh: Annuller opdatering
   Next Auto Refresh: 'Næste automatiske opdatering: {date}'
 User Playlists:
+  Remove Unavailable Videos: "Fjern utilgængelige videoer"
+  Remove Unavailable Videos Confirmation: "Vil du fjerne utilgængelige videoer? Fundet: {count}. Kunne ikke kontrollere: {uncertain}. Ikke-markerede videoer vil blive bevaret."
   Add Missing Videos: "Tilføj manglende videoer fra den oprindelige afspilningsliste"
   Source Playlist: "Oprindelig afspilningsliste"
   Save Playlist: "Gem playliste"

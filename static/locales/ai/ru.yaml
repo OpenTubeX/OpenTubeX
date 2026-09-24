@@ -149,6 +149,8 @@ Feed:
   Cancel Refresh: Отменить обновление
   Next Auto Refresh: 'Следующее автоматическое обновление: {date}'
 User Playlists:
+  Remove Unavailable Videos: "Удалить недоступные видео"
+  Remove Unavailable Videos Confirmation: "Удалить недоступные видео? Найдено: {count}. Не удалось проверить: {uncertain}. Непроверенные видео будут сохранены."
   Add Missing Videos: "Добавить недостающие видео из исходного плейлиста"
   Source Playlist: "Исходный плейлист"
   Save Playlist: "Сохранить плейлист"

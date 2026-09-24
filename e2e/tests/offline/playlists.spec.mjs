@@ -430,6 +430,113 @@ test.describe('seeded playlists', () => {
   })
 })
 
+test.describe('playlist cleanup', () => {
+  const video = (videoId, playlistItemId) => ({
+    videoId,
+    playlistItemId,
+    title: videoId,
+    author: 'Test Channel',
+    authorId: 'UC-test-channel-id',
+    lengthSeconds: 60,
+    type: 'video',
+    timeAdded: Date.now(),
+  })
+  test.use({
+    seed: {
+      settings: {
+        backendPreference: 'invidious',
+        backendFallback: false,
+        defaultInvidiousInstance: 'https://playlist-cleanup.test',
+      },
+      playlists: [{
+        _id: 'cleanup',
+        playlistName: 'Cleanup test',
+        description: '',
+        sourcePlaylistId: 'source-playlist',
+        quickBookmarkIcon: 'clock',
+        protected: false,
+        createdAt: Date.now(),
+        lastUpdatedAt: Date.now(),
+        videos: [
+          video('dead0000000', 'dead-1'), video('live0000000', 'live-1'),
+          video('dead0000000', 'dead-2'), video('unknown00000', 'unknown-1'),
+        ],
+      }],
+      history: [{
+        _id: 'live0000000',
+        videoId: 'live0000000',
+        title: 'Watched video',
+        author: 'Test Channel',
+        authorId: 'UC-test-channel-id',
+        isWatched: true,
+        watchProgress: 60,
+        lengthSeconds: 60,
+        timeWatched: Date.now(),
+        type: 'video',
+      }],
+    }
+  })
+
+  test('removes confirmed unavailable entries, then watched entries, without changing history', async ({ page }) => {
+    await page.route('https://playlist-cleanup.test/api/v1/videos/**', route => {
+      const id = new URL(route.request().url()).pathname.split('/').at(-1)
+      if (id === 'dead0000000') return route.fulfill({ status: 404, json: { error: 'This video is unavailable' } })
+      if (id === 'unknown00000') return route.fulfill({ status: 503, json: { error: 'Instance unavailable' } })
+      return route.fulfill({ json: { videoId: id } })
+    })
+    await goTo(page, 'userplaylists')
+    await page.getByRole('link', { name: 'Cleanup test', exact: true }).click()
+
+    await page.getByTitle('Remove Unavailable Videos').click()
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toContainText('Found: 2')
+    await expect(dialog).toContainText('Could not check: 1')
+    await dialog.getByRole('button', { name: 'Yes, Delete' }).click()
+    await expect(page.getByText('dead0000000')).toHaveCount(0)
+
+    await page.getByTitle('Remove Watched Videos').click()
+    await expect(dialog).toContainText('remove 1 watched video')
+    await dialog.getByRole('button', { name: 'Yes, Delete' }).click()
+    await expect(page.getByText('live0000000')).toHaveCount(0)
+    const state = await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return {
+        ids: store.getters.getPlaylist('cleanup').videos.map(video => video.videoId),
+        watched: store.getters.getHistoryCacheById.live0000000?.isWatched,
+        sourcePlaylistId: store.getters.getPlaylist('cleanup').sourcePlaylistId,
+        quickBookmarkIcon: store.getters.getPlaylist('cleanup').quickBookmarkIcon,
+      }
+    })
+    expect(state).toEqual({
+      ids: ['unknown00000'],
+      watched: true,
+      sourcePlaylistId: 'source-playlist',
+      quickBookmarkIcon: 'clock',
+    })
+  })
+
+  test('checks private videos with the Local API and keeps videos whose check fails', async ({ page }) => {
+    await page.route('**/youtubei/v1/player*', route => {
+      const id = JSON.parse(route.request().postData()).videoId
+      if (id === 'dead0000000') return route.fulfill({ json: { playabilityStatus: { status: 'LOGIN_REQUIRED', reason: 'Private video' } } })
+      if (id === 'unknown00000') return route.fulfill({ status: 503, body: 'Service unavailable' })
+      return route.fulfill({ json: { videoDetails: { videoId: id }, playabilityStatus: { status: 'OK' } } })
+    })
+    await goTo(page, 'userplaylists')
+    await page.getByRole('link', { name: 'Cleanup test', exact: true }).click()
+    await dispatchStoreAction(page, 'updateBackendPreference', 'local')
+
+    await page.getByTitle('Remove Unavailable Videos').click()
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toContainText('Found: 2')
+    await expect(dialog).toContainText('Could not check: 1')
+    await dialog.getByRole('button', { name: 'Yes, Delete' }).click()
+    const ids = await page.evaluate(() => document.querySelector('#app').__vue_app__
+      .config.globalProperties.$store.getters.getPlaylist('cleanup').videos.map(video => video.videoId))
+    expect(ids).toEqual(['live0000000', 'unknown00000'])
+  })
+})
+
 test.describe('saved playlist metadata', () => {
   test.use({
     seed: {

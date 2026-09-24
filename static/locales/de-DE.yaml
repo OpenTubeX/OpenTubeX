@@ -206,6 +206,8 @@ User Playlists:
   Edit Playlist Info: Playlist-Infos bearbeiten
   Copy Playlist: Playlist kopieren
   Remove Watched Videos: Angesehene Videos entfernen
+  Remove Unavailable Videos: Nicht verfügbare Videos entfernen
+  Remove Unavailable Videos Confirmation: 'Nicht verfügbare Videos entfernen? Gefunden: {count}. Nicht überprüfbar: {uncertain}. Nicht überprüfte Videos bleiben erhalten.'
   Delete Playlist: Playlist löschen
   Are you sure you want to delete this playlist? This cannot be undone: Bist du sicher, dass du diese Playlist löschen möchtest? Dies kann nicht rückgängig gemacht werden.
   Sort By:

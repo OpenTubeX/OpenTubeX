@@ -176,6 +176,8 @@ Feed:
   Cancel Refresh: Yeniləməni ləğv et
   Next Auto Refresh: 'Növbəti avtomatik yeniləmə: {date}'
 User Playlists:
+  Remove Unavailable Videos: "Əlçatan olmayan videoları silin"
+  Remove Unavailable Videos Confirmation: "Remove unavailable videos? Tapıldı: {count}. Yoxlamaq mümkün olmadı: {uncertain}. Yoxlanılmamış videolar saxlanılacaq."
   Add Missing Videos: Çatışmayan videoları mənbə pleylistdən əlavə et
   Source Playlist: Mənbə pleylist
   Load More Playlists: Daha çox pleylist yüklə

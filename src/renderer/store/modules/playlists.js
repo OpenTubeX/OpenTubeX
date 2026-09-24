@@ -212,8 +212,10 @@ const actions = {
     try {
       await DBPlaylistHandlers.upsert(playlist)
       commit('upsertPlaylistToList', playlist)
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 

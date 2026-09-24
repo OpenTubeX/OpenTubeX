@@ -183,6 +183,8 @@ Feed:
   Cancel Refresh: 새로 고침 취소
   Next Auto Refresh: '다음 자동 새로 고침: {date}'
 User Playlists:
+  Remove Unavailable Videos: "사용할 수 없는 동영상 삭제"
+  Remove Unavailable Videos Confirmation: "사용할 수 없는 동영상을 삭제하시겠습니까? 발견: {count}. 확인할 수 없음: {uncertain}. 확인하지 않은 동영상은 보관됩니다."
   Add Missing Videos: "원본 재생목록에서 누락된 동영상 추가"
   Source Playlist: "원본 재생목록"
   Save Playlist: "재생목록 저장"

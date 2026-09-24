@@ -68,6 +68,8 @@ Trending:
   Unsupported Backend: Popularne treści wymagają lokalnego API. Wybierz lokalne API lub włącz zapasowy backend.
 Most Popular Feed Empty: Kanał „Najpopularniejsze” tej instancji Invidious jest pusty.
 User Playlists:
+  Remove Unavailable Videos: "Usuń niedostępne filmy"
+  Remove Unavailable Videos Confirmation: "Usunąć niedostępne filmy? Znaleziono: {count}. Nie można sprawdzić: {uncertain}. Niesprawdzone filmy zostaną zachowane."
   Add Missing Videos: "Dodaj brakujące filmy ze źródłowej playlisty"
   Source Playlist: "Źródłowa playlista"
   Save Playlist: "Zapisz playlistę"

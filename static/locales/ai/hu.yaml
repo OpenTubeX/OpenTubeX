@@ -174,6 +174,8 @@ Feed:
   Cancel Refresh: Frissítés megszakítása
   Next Auto Refresh: 'Következő automatikus frissítés: {date}'
 User Playlists:
+  Remove Unavailable Videos: "Távolítsa el a nem elérhető videókat"
+  Remove Unavailable Videos Confirmation: "Eltávolítja a nem elérhető videókat? Talált: {count}. Nem sikerült ellenőrizni: {uncertain}. A nem ellenőrzött videók megmaradnak."
   Add Missing Videos: "Hiányzó videók hozzáadása a forráslejátszási listából"
   Source Playlist: "Forráslejátszási lista"
   Save Playlist: "Lejátszási lista mentése"

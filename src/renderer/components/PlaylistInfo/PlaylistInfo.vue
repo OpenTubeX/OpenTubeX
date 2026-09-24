@@ -244,6 +244,17 @@
             @click="showRemoveVideosOnWatchPrompt = true"
           />
           <FtIconButton
+            v-if="!editMode && isUserPlaylist && videoCount > 0"
+            :title="deadVideoScanRunning
+              ? `${t('User Playlists.Cancel')} (${deadVideoProgress.checked}/${deadVideoProgress.total})`
+              : t('User Playlists.Remove Unavailable Videos')"
+            :icon="deadVideoScanRunning ? ['fas', 'sync'] : ['fas', 'link-slash']"
+            :spin="deadVideoScanRunning"
+            :aria-busy="deadVideoScanRunning"
+            theme="destructive"
+            @click="deadVideoScanRunning ? deadVideoScanController?.abort() : scanDeadVideos()"
+          />
+          <FtIconButton
             v-if="deletePlaylistButtonVisible"
             :disabled="markedAsQuickBookmarkTarget"
             :title="!markedAsQuickBookmarkTarget ? $t('User Playlists.Delete Playlist') : playlistDeletionDisabledLabel"
@@ -293,6 +304,15 @@
         :option-values="DELETE_PLAYLIST_PROMPT_VALUES"
         is-first-option-destructive
         @click="handleRemoveVideosOnWatchPromptAnswer"
+      />
+      <FtPrompt
+        v-if="showRemoveDeadVideosPrompt"
+        autosize
+        :label="t('User Playlists.Remove Unavailable Videos Confirmation', { count: deadVideoItemIds.size, uncertain: deadVideoProgress.uncertain })"
+        :option-names="deletePlaylistPromptNames"
+        :option-values="DELETE_PLAYLIST_PROMPT_VALUES"
+        is-first-option-destructive
+        @click="handleRemoveDeadVideosPromptAnswer"
       />
       <FtPrompt
         v-if="showRemoveDuplicateVideosPrompt"
@@ -353,6 +373,9 @@ import {
   deepCopy,
 } from '../../helpers/utils'
 import { getPlaylistSnapshot } from '../../helpers/api/playlist-snapshot'
+import { createLocalPlaylistAvailabilityChecker } from '../../helpers/api/local'
+import { getInvidiousPlaylistAvailability } from '../../helpers/api/invidious'
+import { findDeadPlaylistItems, isUnavailableInvidiousResponse, isUnavailablePlayerResponse } from '../../helpers/playlist-dead-videos'
 import { isHistoryEntryWatched } from '../../helpers/history'
 import { getQuickBookmarkIconValue } from '../../helpers/quickBookmarkIcons'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
@@ -473,6 +496,11 @@ const query = ref('')
 const editMode = ref(false)
 const showDeletePlaylistPrompt = ref(false)
 const showRemoveVideosOnWatchPrompt = ref(false)
+const showRemoveDeadVideosPrompt = ref(false)
+const deadVideoScanRunning = ref(false)
+const deadVideoProgress = ref({ checked: 0, total: 0, uncertain: 0 })
+const deadVideoItemIds = ref(new Set())
+let deadVideoScanController
 const showRemoveDuplicateVideosPrompt = ref(false)
 const showExportPrompt = ref(false)
 const showDownloadPrompt = ref(false)
@@ -643,6 +671,7 @@ const playlistPersistenceDisabled = computed(() => {
 
 watch(showDeletePlaylistPrompt, handlePromptToggle)
 watch(showRemoveVideosOnWatchPrompt, handlePromptToggle)
+watch(showRemoveDeadVideosPrompt, handlePromptToggle)
 watch(showExportPrompt, handlePromptToggle)
 watch(showDownloadPrompt, handlePromptToggle)
 watch(enableDownloads, (enabled) => {
@@ -999,6 +1028,65 @@ const removeDuplicateVideosPromptLabelText = computed(() => {
   )
 })
 
+async function scanDeadVideos() {
+  if (deadVideoScanRunning.value) return
+  const playlistId = props.id
+  const videos = [...selectedUserPlaylist.value.videos]
+  deadVideoScanController = new AbortController()
+  const signal = deadVideoScanController.signal
+  deadVideoScanRunning.value = true
+  deadVideoProgress.value = { checked: 0, total: new Set(videos.map(video => video.videoId)).size, uncertain: 0 }
+  try {
+    const useLocal = process.env.SUPPORTS_LOCAL_API && store.getters.getBackendPreference !== 'invidious'
+    const checkLocal = useLocal ? await createLocalPlaylistAvailabilityChecker(signal) : null
+    const result = await findDeadPlaylistItems(videos, async (videoId, scanSignal) => {
+      const timeoutSignal = AbortSignal.any([scanSignal, AbortSignal.timeout(20_000)])
+      if (checkLocal) {
+        const response = await checkLocal(videoId, timeoutSignal)
+        return isUnavailablePlayerResponse(response, videoId)
+      }
+      return isUnavailableInvidiousResponse(await getInvidiousPlaylistAvailability(videoId, timeoutSignal), videoId)
+    }, signal, progress => { deadVideoProgress.value = progress })
+    if (props.id !== playlistId) return
+    deadVideoItemIds.value = result.itemIds
+    if (result.itemIds.size > 0) {
+      showRemoveDeadVideosPrompt.value = true
+    } else {
+      showToast({
+        message: t('User Playlists.SinglePlaylistView.Toast["There were no videos to remove."]'),
+        icon: ['fas', 'check'],
+      })
+    }
+  } catch (error) {
+    if (!signal.aborted) {
+      console.error(error)
+      showToast({ message: t("User Playlists.SinglePlaylistView['This playlist could not be loaded.']"), icon: ['fas', 'circle-exclamation'] })
+    }
+  } finally {
+    if (deadVideoScanController?.signal === signal) {
+      deadVideoScanRunning.value = false
+      deadVideoScanController = null
+    }
+  }
+}
+
+async function handleRemoveDeadVideosPromptAnswer(option) {
+  showRemoveDeadVideosPrompt.value = false
+  if (option !== 'delete') return
+  const playlist = selectedUserPlaylist.value
+  const videos = playlist.videos.filter(video => !deadVideoItemIds.value.has(video.playlistItemId))
+  const removed = playlist.videos.length - videos.length
+  if (removed === 0) return
+  const saved = await store.dispatch('updatePlaylist', { ...playlist, videos })
+  showToast({
+    message: saved
+      ? t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', { videoCount: removed }, removed)
+      : t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
+    icon: saved ? ['fas', 'trash'] : ['fas', 'circle-exclamation'],
+  })
+  deadVideoItemIds.value = new Set()
+}
+
 /**
  * @param {'delete' | 'cancel' | null} option
  */
@@ -1026,14 +1114,11 @@ async function handleRemoveDuplicateVideosPromptAnswer(option) {
   }
 
   const playlist = {
-    playlistName: props.title,
-    protected: selectedUserPlaylist.value.protected,
-    description: props.description,
+    ...selectedUserPlaylist.value,
     videos: deepCopy(newVideoItems),
-    _id: props.id,
   }
   try {
-    await store.dispatch('updatePlaylist', playlist)
+    if (!await store.dispatch('updatePlaylist', playlist)) throw new Error('Could not update playlist')
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', {
         videoCount: removedVideosCount
@@ -1072,14 +1157,11 @@ async function handleRemoveVideosOnWatchPromptAnswer(option) {
   }
 
   const playlist = {
-    playlistName: props.title,
-    protected: selectedUserPlaylist.value.protected,
-    description: props.description,
+    ...selectedUserPlaylist.value,
     videos: deepCopy(videosToWatch),
-    _id: props.id
   }
   try {
-    await store.dispatch('updatePlaylist', playlist)
+    if (!await store.dispatch('updatePlaylist', playlist)) throw new Error('Could not update playlist')
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', {
         videoCount: removedVideosCount
@@ -1174,7 +1256,14 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  deadVideoScanController?.abort()
   document.removeEventListener('keydown', keyboardShortcutHandler)
+})
+
+watch(() => props.id, () => {
+  deadVideoScanController?.abort()
+  showRemoveDeadVideosPrompt.value = false
+  deadVideoItemIds.value = new Set()
 })
 
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)

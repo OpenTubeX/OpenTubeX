@@ -1907,10 +1907,25 @@ export async function getLocalHistoryMetadata(videoId, signal) {
     signal,
     fetchFunc: async (input, init) => checkHistoryRepairResponse(await localApiFetch(input, init)),
   })
-  const response = await innertube.actions.execute('/player', {
-    videoId,
-    contentCheckOk: true,
-    racyCheckOk: true,
+  return fetchPublicPlayerMetadata(innertube, videoId, signal)
+}
+
+/** Reuse one lightweight session while checking a playlist's video availability. */
+export async function createLocalPlaylistAvailabilityChecker(signal) {
+  const innertube = await createInnertube({
+    signal,
+    fetchFunc: async (input, init) => checkHistoryRepairResponse(await localApiFetch(input, init)),
   })
-  return response.data
+  return (videoId, requestSignal) => fetchPublicPlayerMetadata(innertube, videoId, requestSignal)
+}
+
+async function fetchPublicPlayerMetadata(innertube, videoId, signal) {
+  // Actions.execute does not pass a request signal through to HTTPClient.fetch.
+  const response = await innertube.session.http.fetch('/player', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ videoId, contentCheckOk: true, racyCheckOk: true }),
+    signal,
+  })
+  return response.json()
 }

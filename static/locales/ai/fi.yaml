@@ -176,6 +176,8 @@ Feed:
   Cancel Refresh: Peruuta päivitys
   Next Auto Refresh: 'Seuraava automaattinen päivitys: {date}'
 User Playlists:
+  Remove Unavailable Videos: "Poista videot, jotka eivät ole käytettävissä"
+  Remove Unavailable Videos Confirmation: "Poistetaanko videot, jotka eivät ole käytettävissä? Löytyi: {count}. Ei voitu tarkistaa: {uncertain}. Tarkistamattomat videot säilytetään."
   Add Missing Videos: "Lisää puuttuvat videot alkuperäisestä soittolistasta"
   Source Playlist: "Alkuperäinen soittolista"
   Save Playlist: "Tallenna soittolista"
