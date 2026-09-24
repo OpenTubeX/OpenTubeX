@@ -24,14 +24,29 @@ test('player controls share pill surfaces and the time display toggles together'
   const regular = group.locator('.shaka-current-time:not(.ft-playback-adjusted-time)')
   const adjusted = group.locator('.ft-playback-adjusted-time')
   await expect(adjusted).toBeVisible()
+  const regularType = await regular.evaluate(element => {
+    const style = getComputedStyle(element)
+    return { family: style.fontFamily, size: style.fontSize, weight: style.fontWeight, lineHeight: style.lineHeight, numeric: style.fontVariantNumeric, rendering: style.textRendering }
+  })
+  const adjustedType = await adjusted.evaluate(element => {
+    const style = getComputedStyle(element)
+    return { family: style.fontFamily, size: style.fontSize, weight: style.fontWeight, lineHeight: style.lineHeight, numeric: style.fontVariantNumeric, rendering: style.textRendering }
+  })
+  expect(adjustedType).toEqual(regularType)
+  expect(regularType.numeric).toBe('lining-nums tabular-nums')
+  expect(regularType.rendering).toBe('geometricprecision')
   await expect(group.locator('button')).toHaveCount(1)
   await expect(group.locator('.ft-control-glass')).toHaveCSS('backdrop-filter', /blur\(10px\)/)
   await expect(page.locator('.shaka-scrim-container')).toHaveCSS('background-image', 'none')
 
   const background = await group.evaluate(element => getComputedStyle(element).backgroundImage)
+  const glassBackground = await group.locator('.ft-control-glass').evaluate(element => getComputedStyle(element).backgroundImage)
   expect(background).not.toBe('none')
   await adjusted.hover()
-  await expect.poll(() => group.evaluate(element => getComputedStyle(element).backgroundImage)).not.toBe(background)
+  await expect.poll(() => group.locator('.ft-control-glass').evaluate(element => getComputedStyle(element).backgroundImage)).not.toBe(glassBackground)
+  const hoveredPillColor = await group.evaluate(element => getComputedStyle(element).getPropertyValue('--ft-control-pill-color').trim())
+  const rightPillColorOnHover = await page.locator('.shaka-controls-button-panel > .autoplay-toggle').evaluate(element => getComputedStyle(element).getPropertyValue('--ft-control-pill-color').trim())
+  expect(hoveredPillColor).toBe(rightPillColorOnHover)
 
   const initial = await regular.textContent()
   const initialAdjusted = await adjusted.textContent()
@@ -51,7 +66,7 @@ test('player controls share pill surfaces and the time display toggles together'
   await page.keyboard.press('Tab')
   await regular.focus()
   await expect.poll(() => regular.evaluate(element => element.matches(':focus-visible'))).toBe(true)
-  await expect.poll(() => group.evaluate(element => getComputedStyle(element).backgroundImage)).not.toBe(background)
+  await expect.poll(() => group.locator('.ft-control-glass').evaluate(element => getComputedStyle(element).backgroundImage)).not.toBe(glassBackground)
   await regular.evaluate(element => element.blur())
 
   const volumeGroup = page.locator('.ft-volume-control-group')
@@ -66,6 +81,15 @@ test('player controls share pill surfaces and the time display toggles together'
   const playWidth = await page.locator('.shaka-controls-button-panel > .shaka-play-button').evaluate(element => element.getBoundingClientRect().width)
   expect(Math.abs(collapsedVolume.width - playWidth)).toBeLessThan(1)
   expect(Math.abs(collapsedVolume.iconCenterOffset)).toBeLessThan(1)
+  const volumeGlyphOffset = await volumeGroup.evaluate(element => {
+    const svg = element.querySelector('.shaka-mute-button > .shaka-ui-icon')
+    const pill = element.getBoundingClientRect()
+    const icon = svg.getBoundingClientRect()
+    const glyph = svg.getBBox()
+    const viewBox = svg.viewBox.baseVal
+    return icon.left + (glyph.x + glyph.width / 2 - viewBox.x) * icon.width / viewBox.width - pill.left - 24
+  })
+  expect(Math.abs(volumeGlyphOffset)).toBeLessThan(1)
   const volumeIconWidth = await volumeGroup.locator('.shaka-mute-button > .shaka-ui-icon').evaluate(element => element.getBoundingClientRect().width)
   for (const playIcon of await page.locator('.shaka-controls-button-panel > .shaka-play-button > .shaka-ui-icon').all()) {
     const iconWidth = await playIcon.evaluate(element => element.getBoundingClientRect().width)
@@ -73,6 +97,12 @@ test('player controls share pill surfaces and the time display toggles together'
   }
   await page.locator('.shaka-mute-button').hover()
   await expect(volumeGroup.locator('.shaka-volume-bar-container')).toBeVisible()
+  const expandedIconOffset = await volumeGroup.evaluate(element => {
+    const group = element.getBoundingClientRect()
+    const icon = element.querySelector('.shaka-mute-button > .shaka-ui-icon').getBoundingClientRect()
+    return (icon.left + icon.right) / 2 - group.left - 24
+  })
+  expect(Math.abs(expandedIconOffset)).toBeLessThan(1)
   await expect.poll(() => volumeGroup.evaluate(element => getComputedStyle(element).backgroundImage)).not.toBe('none')
   const volumeIconGap = await volumeGroup.evaluate(element => {
     const icon = element.querySelector('.shaka-mute-button .shaka-ui-icon').getBoundingClientRect()
@@ -158,9 +188,58 @@ test('player controls share pill surfaces and the time display toggles together'
   }).toBeLessThan(1)
 })
 
+test('control glass stays blurred throughout the row fade', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+
+  const controls = page.locator('.shaka-controls-container')
+  const panel = controls.locator('.shaka-controls-button-panel')
+  const glass = panel.locator('.ft-time-display-group > .ft-control-glass')
+  await controls.evaluate(element => element.setAttribute('shown', 'true'))
+  await expect(glass).toHaveCSS('backdrop-filter', /blur\(10px\)/)
+
+  const fade = await controls.evaluate(async element => {
+    element.removeAttribute('shown')
+    await new Promise(resolve => setTimeout(resolve, 150))
+    const panel = element.querySelector('.shaka-controls-button-panel')
+    const glass = panel.querySelector('.ft-time-display-group > .ft-control-glass')
+    return {
+      panelOpacity: Number(getComputedStyle(panel).opacity),
+      glassOpacity: Number(getComputedStyle(glass).opacity),
+      glassBlur: getComputedStyle(glass).backdropFilter
+    }
+  })
+  expect(fade.panelOpacity).toBe(1)
+  expect(fade.glassOpacity).toBeGreaterThan(0)
+  expect(fade.glassOpacity).toBeLessThan(1)
+  expect(fade.glassBlur).toContain('blur(10px)')
+  await expect.poll(() => glass.evaluate(element => Number(getComputedStyle(element).opacity))).toBe(0)
+
+  const fadeIn = await controls.evaluate(async element => {
+    element.setAttribute('shown', 'true')
+    await new Promise(resolve => setTimeout(resolve, 150))
+    const panel = element.querySelector('.shaka-controls-button-panel')
+    const glass = panel.querySelector('.ft-time-display-group > .ft-control-glass')
+    return {
+      panelOpacity: Number(getComputedStyle(panel).opacity),
+      glassOpacity: Number(getComputedStyle(glass).opacity),
+      glassBlur: getComputedStyle(glass).backdropFilter
+    }
+  })
+  expect(fadeIn.panelOpacity).toBe(1)
+  expect(fadeIn.glassOpacity).toBeGreaterThan(0)
+  expect(fadeIn.glassOpacity).toBeLessThan(1)
+  expect(fadeIn.glassBlur).toContain('blur(10px)')
+  await expect.poll(() => glass.evaluate(element => Number(getComputedStyle(element).opacity))).toBe(1)
+  await expect(glass).toHaveCSS('backdrop-filter', /blur\(10px\)/)
+})
+
 test('volume pill collapses after dragging its slider and leaving', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  await page.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
 
   const volumeGroup = page.locator('.ft-volume-control-group')
   await volumeGroup.locator('.shaka-mute-button').hover()
@@ -190,12 +269,14 @@ test('volume pill collapses after dragging its slider and leaving', async ({ app
 
 test('wrapped volume button keeps its tooltip on hover and keyboard focus', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  await page.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
 
   const mute = page.locator('.ft-volume-control-group > .shaka-mute-button')
   await expect(page.locator('.shaka-controls-button-panel')).toHaveClass(/shaka-tooltips-on/)
   const expectTooltip = async () => {
-    const tooltip = await mute.evaluate(element => {
+    const readTooltip = () => mute.evaluate(element => {
       const style = getComputedStyle(element, '::after')
       return {
         label: element.getAttribute('aria-label'),
@@ -204,6 +285,8 @@ test('wrapped volume button keeps its tooltip on hover and keyboard focus', asyn
         background: style.backgroundColor
       }
     })
+    await expect.poll(async () => (await readTooltip()).content).toContain(await mute.getAttribute('aria-label'))
+    const tooltip = await readTooltip()
     expect(tooltip.content).toContain(tooltip.label)
     expect(tooltip.position).toBe('absolute')
     expect(tooltip.background).not.toBe('rgba(0, 0, 0, 0)')

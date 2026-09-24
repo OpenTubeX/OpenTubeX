@@ -93,6 +93,8 @@ test.describe('desktop quick playback speed bar', () => {
     await openMockedVideo(page)
     const bar = page.locator('.ft-quick-playback-rate-bar')
     await expect(bar).toBeVisible()
+    await page.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+    await expect(bar).toHaveCSS('backdrop-filter', /blur\(10px\)/)
     const surface = await bar.evaluate(element => {
       const style = getComputedStyle(element)
       const visibleButton = [...element.querySelectorAll('button')]
@@ -105,11 +107,29 @@ test.describe('desktop quick playback speed bar', () => {
         topInset: visibleButton.getBoundingClientRect().top - element.getBoundingClientRect().top
       }
     })
-    expect(surface.backgroundColor).toBe('rgba(0, 0, 0, 0.42)')
+    expect(surface.backgroundColor).toBe('rgba(0, 0, 0, 0.28)')
     expect(surface.backdropFilter).toContain('blur(10px)')
     expect(surface.boxShadow).not.toBe('none')
-    expect(surface.height).toBe(40)
-    expect(surface.topInset).toBeGreaterThanOrEqual(5)
+    expect(surface.height).toBe(34)
+    expect(surface.topInset).toBeGreaterThanOrEqual(4)
+    const currentRate = bar.locator('.ft-quick-playback-rate-button.is-current-rate')
+    await expect(currentRate).toHaveCSS('min-height', '26px')
+    await currentRate.hover()
+    await expect(currentRate).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.22)')
+    await expect(currentRate).toHaveCSS('background-image', /rgba\(255, 255, 255, 0.12\)/)
+  })
+
+  test('speed button hover does not stick on touchscreens', async ({ app, page }) => {
+    const session = await page.context().newCDPSession(page)
+    await session.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 })
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    const button = page.locator('.ft-quick-playback-rate-button:visible:not(.is-current-rate)').first()
+    await expect(button).toBeVisible()
+    expect(await page.evaluate(() => matchMedia('(hover: none)').matches)).toBe(true)
+    await button.hover()
+    await expect(button).toHaveCSS('background-image', 'none')
+    await session.detach()
   })
 })
 

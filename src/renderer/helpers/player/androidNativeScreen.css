@@ -72,26 +72,34 @@
   opacity: 0 !important;
 }
 
-/* The video is a native surface below the WebView, so backdrop-filter cannot
-   sample its pixels. Use a shaded glass surface with the same edge and depth. */
-[data-native-player-controls] :is(.ft-control-glass, .ft-right-control-glass, .ft-quick-playback-rate-bar),
-[data-native-player-screen] .fullscreenActions {
+/* The native video is below the WebView, so the small control pills use a
+   shaded surface where WebView backdrop sampling is unreliable. */
+[data-native-player-controls] :is(.ft-control-glass, .ft-right-control-glass, .ft-quick-playback-rate-bar) {
   background: linear-gradient(145deg, rgb(255 255 255 / 12%), rgb(255 255 255 / 3%)), rgb(0 0 0 / 42%);
   box-shadow: inset 0 1px rgb(255 255 255 / 20%), inset 0 0 0 1px rgb(255 255 255 / 8%), inset 0 -2px 8px rgb(0 0 0 / 18%);
   backdrop-filter: none;
+}
+
+/* Keep the dock's blur for WebView content and shade the separate native video
+   surface so sharp pixels do not show through its transparent background. */
+.ftVideoPlayer[data-native-player-screen] > .fullscreenActions {
+  background: linear-gradient(145deg, rgb(255 255 255 / 12%), rgb(255 255 255 / 3%)), rgb(0 0 0 / 42%);
+  box-shadow: inset 0 1px rgb(255 255 255 / 20%), inset 0 0 0 1px rgb(255 255 255 / 8%), inset 0 -2px 8px rgb(0 0 0 / 18%);
+  backdrop-filter: blur(6px);
 }
 
 /* The shared glass span draws the right pill. Button backgrounds underneath it
    would add a second, square-ended layer on the native video surface. */
 /* stylelint-disable-next-line selector-max-compound-selectors */
 [data-native-player-controls] .shaka-controls-button-panel > .shaka-spacer ~ button:not(:disabled) {
-  inline-size: 40px;
-  min-inline-size: 40px;
+  inline-size: 48px;
+  min-inline-size: 48px;
   background-image: none !important;
 }
 
 [data-native-player-controls] .ft-quick-playback-rate-bar {
   margin-inline-end: 8px;
+  background-color: rgb(0 0 0 / 28%);
 }
 
 /* Android moves the live texture above the page during mini-player motion.

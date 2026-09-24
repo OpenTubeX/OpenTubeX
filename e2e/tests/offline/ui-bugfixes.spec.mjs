@@ -1628,7 +1628,7 @@ test('Shorts top controls stay visible over white video content', async ({ page 
   await expect(actionDock).toHaveCSS('pointer-events', 'auto')
 })
 
-test('compact chapters button marks its open state', async ({ page }) => {
+test('compact chapters button keeps the same pill shade when opened', async ({ page }) => {
   await goTo(page, 'history')
   const playerStyles = await readFile(
     path.join(
@@ -1664,8 +1664,10 @@ test('compact chapters button marks its open state', async ({ page }) => {
 
   await expect(button).toBeVisible()
   await expect.poll(highlightColor).toBe('rgba(0, 0, 0, 0)')
+  const closedPillColor = await button.evaluate(element => getComputedStyle(element).getPropertyValue('--ft-control-pill-color').trim())
   await button.evaluate(element => element.classList.add('open'))
-  await expect.poll(highlightColor).toBe('rgba(255, 255, 255, 0.2)')
+  await expect.poll(highlightColor).toBe('rgba(0, 0, 0, 0)')
+  expect(await button.evaluate(element => getComputedStyle(element).getPropertyValue('--ft-control-pill-color').trim())).toBe(closedPillColor)
 })
 
 test.describe('autosized prompts', () => {

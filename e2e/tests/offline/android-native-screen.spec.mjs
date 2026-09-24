@@ -1095,6 +1095,7 @@ for (const fullscreen of [false, true]) {
         const computed = getComputedStyle(player.querySelector(selector))
         return {
           backgroundImage: computed.backgroundImage,
+          backgroundColor: computed.backgroundColor,
           boxShadow: computed.boxShadow,
           backdropFilter: computed.backdropFilter,
           height: player.querySelector(selector).getBoundingClientRect().height
@@ -1118,19 +1119,46 @@ for (const fullscreen of [false, true]) {
     for (const surface of [surfaces.speed, surfaces.time, surfaces.right, surfaces.actions].filter(Boolean)) {
       expect(surface.backgroundImage).not.toBe('none')
       expect(surface.boxShadow).not.toBe('none')
-      expect(surface.backdropFilter).toBe('none')
     }
+    if (fullscreen) expect(surfaces.actions.backdropFilter).toBe('blur(6px)')
     expect(surfaces.right.height).toBeCloseTo(surfaces.time.height, 0)
     expect(surfaces.speed.height).toBeCloseTo(surfaces.time.height, 0)
+    expect(surfaces.speed.backgroundColor).toBe('rgba(0, 0, 0, 0.28)')
     expect(surfaces.rightButtons.length).toBeGreaterThan(0)
     for (const button of surfaces.rightButtons) {
-      expect(button.width).toBeCloseTo(40, 0)
+      expect(button.width).toBeCloseTo(48, 0)
       expect(button.backgroundImage).toBe('none')
     }
     expect(surfaces.speedGap).toBeGreaterThanOrEqual(8)
     await page.evaluate(() => window.nativeScreenTest.destroy())
   })
 }
+
+test('native right control hover remains inside its pill', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await enableMobileInput(page)
+  await setWindowSize(app, page, { width: 740, height: 400 })
+  await openNativeScreen(page)
+  const button = page.locator('.shaka-controls-button-panel > .shaka-overflow-menu-button')
+  await expect(button).toBeVisible()
+  await button.hover()
+  const bounds = await button.evaluate(element => {
+    const highlight = element.querySelector('.ft-control-glass').getBoundingClientRect()
+    const pill = element.parentElement.querySelector('.ft-right-control-glass').getBoundingClientRect()
+    return { top: highlight.top - pill.top, bottom: highlight.bottom - pill.bottom, width: element.getBoundingClientRect().width }
+  })
+  expect(Math.abs(bounds.top)).toBeLessThan(1)
+  expect(Math.abs(bounds.bottom)).toBeLessThan(1)
+  expect(bounds.width).toBeGreaterThanOrEqual(48)
+  const session = await page.context().newCDPSession(page)
+  await session.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 })
+  expect(await page.evaluate(() => matchMedia('(hover: none)').matches)).toBe(true)
+  await button.hover()
+  await expect(button.locator('.ft-control-glass')).toHaveCSS('opacity', '0')
+  await session.detach()
+  await page.evaluate(() => window.nativeScreenTest.destroy())
+})
 
 for (const scale of [1, 1.25]) {
   test(`Android chapter title moves between toolbar and menu as space changes at scale ${scale}`, async ({ app, page }) => {
