@@ -6431,7 +6431,7 @@ export default defineComponent({
       cancelSponsorBlockSkipSchedule()
       clearAbRepeatBoundarySchedule()
       syncPlayPauseControlIcons()
-      emit('seeking')
+      emit('seeking', video.value?.currentTime ?? 0)
     }
 
     function handleAbRepeatSeeked() {

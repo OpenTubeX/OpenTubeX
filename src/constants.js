@@ -181,6 +181,7 @@ const IpcChannels = {
   YT_DLP_CANCEL_HISTORY_REPAIR: 'yt-dlp-cancel-history-repair',
   YT_DLP_GET_HISTORY_METADATA: 'yt-dlp-get-history-metadata',
   YT_DLP_GET_PLAYBACK_INFO: 'yt-dlp-get-playback-info',
+  TWITCH_CHAT_REPLAY_PAGE: 'twitch-chat-replay-page',
   YT_DLP_GET_RECOMMENDATIONS: 'yt-dlp-get-recommendations',
   YT_DLP_PLAYBACK_CACHE_GET: 'yt-dlp-playback-cache-get',
   YT_DLP_PLAYBACK_CACHE_SET: 'yt-dlp-playback-cache-set',

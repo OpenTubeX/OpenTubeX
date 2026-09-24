@@ -2,9 +2,194 @@ import { chmod, readFile, rm, writeFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import path from 'node:path'
 
-import { expect, repoRoot, sel, test } from '../../helpers/app.mjs'
+import { expect, repoRoot, sel, setWindowSize, test } from '../../helpers/app.mjs'
 import { activeTab, waitForPlayback } from '../../helpers/player.mjs'
 import { DEMO_MEDIA_PATH, DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
+
+async function prepareTwitchYtDlp(app, page, mediaUrl, live) {
+  const executable = path.join(app.userDataDir, `twitch-${live ? 'live' : 'replay'}-yt-dlp.sh`)
+  const response = JSON.stringify({
+    title: live ? 'A Twitch livestream' : 'A Twitch broadcast',
+    webpage_url: mediaUrl,
+    live_status: live ? 'is_live' : 'was_live',
+    ...(live ? {} : { duration: 30 }),
+    formats: [{
+      format_id: 'webm-360',
+      url: DEMO_MEDIA_URL,
+      protocol: 'https',
+      ext: 'webm',
+      vcodec: 'vp9',
+      acodec: 'opus',
+      width: 640,
+      height: 360,
+      tbr: 200
+    }]
+  })
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+    `printf '%s\\n' '${response}'`
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  await routeDemoMedia(page)
+  await page.evaluate(async ytDlpPath => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateYtDlpSource', 'system')
+    await store.dispatch('updateYtDlpPath', ytDlpPath)
+  }, executable)
+}
+
+test('Twitch replay uses the watch chat toggle and side panel', async ({ app, page, attachScreenshot }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  await setWindowSize(app, page, { width: 1800, height: 1000 })
+
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const externalMedia = page.locator(`${activeTab} .externalMedia`)
+  const toggle = externalMedia.locator('.externalMediaDetails').getByRole('button', { name: 'Close Live Chat Replay' })
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true')
+  await expect(externalMedia.locator('.twitchChat')).toBeVisible()
+  const playerBox = await externalMedia.locator('.externalMediaPlayer').boundingBox()
+  const chatBox = await externalMedia.locator('.twitchChat').boundingBox()
+  const infoBox = await externalMedia.locator('.externalMediaDetails').boundingBox()
+  expect(chatBox.x).toBeGreaterThan(playerBox.x + playerBox.width - 5)
+  expect(Math.abs(chatBox.y - playerBox.y)).toBeLessThan(12)
+  expect(Math.abs(infoBox.x - playerBox.x)).toBeLessThan(12)
+  expect(infoBox.width).toBeLessThanOrEqual(playerBox.width + 12)
+  expect(chatBox.height).toBeGreaterThan(playerBox.height * 0.8)
+  await attachScreenshot('Twitch chat normal layout')
+
+  await externalMedia.locator('.externalMediaPlayer .theatre-button').click()
+  const theatrePlayerBox = await externalMedia.locator('.externalMediaPlayer').boundingBox()
+  const theatreChatBox = await externalMedia.locator('.twitchChat').boundingBox()
+  expect(theatrePlayerBox.width).toBeGreaterThan(playerBox.width * 1.25)
+  expect(theatreChatBox.y).toBeGreaterThan(theatrePlayerBox.y + theatrePlayerBox.height - 5)
+  await attachScreenshot('Twitch chat theatre layout')
+  await externalMedia.locator('.externalMediaPlayer .theatre-button').click()
+
+  await toggle.click()
+  await expect(externalMedia.locator('.twitchChat')).toHaveCount(0)
+  const closedPlayerBox = await externalMedia.locator('.externalMediaPlayer').boundingBox()
+  expect(Math.abs(closedPlayerBox.width - theatrePlayerBox.width)).toBeLessThan(2)
+  const closedToggle = externalMedia.locator('.externalMediaDetails').getByRole('button', { name: 'Show Live Chat Replay' })
+  await expect(closedToggle).toHaveAttribute('aria-pressed', 'false')
+  await closedToggle.click()
+  await expect(externalMedia.locator('.twitchChat')).toBeVisible()
+  await externalMedia.locator('.twitchChat').getByRole('button', { name: 'Close Live Chat Replay' }).click()
+  await expect(externalMedia.locator('.twitchChat')).toHaveCount(0)
+  await expect(closedToggle).toHaveAttribute('aria-pressed', 'false')
+
+  await closedToggle.click()
+  await externalMedia.locator('.externalMediaPlayer .ftVideoPlayer').click({ position: { x: 20, y: 20 } })
+  await page.keyboard.press('s')
+  const fullscreenChatToggle = externalMedia.locator('.fullscreenLiveChatToggle')
+  await fullscreenChatToggle.click()
+  await expect(externalMedia.locator('.fullscreenLiveChatTarget .twitchChat')).toBeVisible()
+  await externalMedia.locator('.fullscreenLiveChatTarget .twitchChat').getByRole('button', { name: 'Close Live Chat Replay' }).click()
+  await expect(externalMedia.locator('.twitchChat')).toHaveCount(0)
+  await page.keyboard.press('s')
+})
+
+test('Twitch live chat scrolls like the YouTube chat panel', async ({ app, page, attachScreenshot }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  await setWindowSize(app, page, { width: 1800, height: 1000 })
+
+  const mediaUrl = 'https://www.twitch.tv/testchannel'
+  await prepareTwitchYtDlp(app, page, mediaUrl, true)
+  await page.evaluate(() => {
+    class MockTwitchSocket extends EventTarget {
+      constructor() {
+        super()
+        window.mockTwitchSocket = this
+        queueMicrotask(() => this.dispatchEvent(new Event('open')))
+      }
+
+      send() {}
+      close() {}
+    }
+    window.WebSocket = MockTwitchSocket
+  })
+
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const chat = page.locator(`${activeTab} .twitchChat`)
+  await expect(chat).toBeVisible()
+  await page.evaluate(() => {
+    const lines = Array.from({ length: 100 }, (_, index) =>
+      `@display-name=Viewer;id=message-${index};tmi-sent-ts=1700000000000 :viewer!viewer@viewer.tmi.twitch.tv PRIVMSG #testchannel :Test message ${index}`)
+    window.mockTwitchSocket.dispatchEvent(new MessageEvent('message', { data: `${lines.join('\r\n')}\r\n` }))
+  })
+  const scroller = chat.locator('.liveChatComments')
+  await expect(scroller.locator('.comment')).toHaveCount(100)
+  await expect(scroller.locator('.twitchChatAvatar')).toHaveCount(0)
+  expect(await scroller.locator('.chatContent').first().evaluate(element => getComputedStyle(element).fontSize)).toBe('12px')
+  await chat.getByRole('button', { name: 'Live chat settings' }).click()
+  await chat.getByText('Show timestamps').click()
+  await expect(scroller.locator('.liveChatTimestamp')).toHaveCount(100)
+  await chat.getByRole('button', { name: 'Live chat settings' }).click()
+  const scrollRange = await scroller.evaluate(element => element.scrollHeight - element.clientHeight)
+  expect(scrollRange).toBeGreaterThan(100)
+  await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(scrollRange - 20)
+  await scroller.hover()
+  await page.mouse.wheel(0, -300)
+  await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeLessThan(scrollRange - 20)
+  await expect(chat.getByRole('button', { name: 'Scroll to Bottom' })).toBeVisible()
+  const scrolledTop = await scroller.evaluate(element => element.scrollTop)
+  await page.evaluate(() => {
+    window.mockTwitchSocket.dispatchEvent(new MessageEvent('message', {
+      data: '@display-name=Viewer;id=message-100;tmi-sent-ts=1700000000000 :viewer!viewer@viewer.tmi.twitch.tv PRIVMSG #testchannel :New message\r\n'
+    }))
+  })
+  await expect(scroller.locator('.comment')).toHaveCount(101)
+  expect(Math.abs((await scroller.evaluate(element => element.scrollTop)) - scrolledTop)).toBeLessThan(2)
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await expect(page.locator('body')).toHaveClass(/\bdark\b/)
+  await attachScreenshot('Twitch live chat scrolled up')
+  await chat.getByRole('button', { name: 'Scroll to Bottom' }).click()
+  await expect.poll(() => scroller.evaluate(element => element.scrollHeight - element.clientHeight - element.scrollTop)).toBeLessThan(2)
+  await chat.getByRole('button', { name: 'Live chat settings' }).click()
+  await chat.getByText('Show timestamps').click()
+  await expect(scroller.locator('.liveChatTimestamp')).toHaveCount(0)
+  await expect.poll(() => scroller.evaluate(element => element.scrollHeight - element.clientHeight - element.scrollTop)).toBeLessThan(2)
+  await expect(scroller.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-visible/)
+
+  await setWindowSize(app, page, { width: 1500, height: 980 })
+  await page.evaluate(() => {
+    const longText = 'A long Twitch chat message with several words to wrap. '.repeat(8)
+    const lines = Array.from({ length: 20 }, (_, index) =>
+      `@display-name=Viewer;id=long-${index};tmi-sent-ts=1700000000000 :viewer!viewer@viewer.tmi.twitch.tv PRIVMSG #testchannel :${longText}`)
+    window.mockTwitchSocket.dispatchEvent(new MessageEvent('message', { data: `${lines.join('\r\n')}\r\n` }))
+  })
+  await expect(scroller.locator('.comment')).toHaveCount(121)
+  await expect.poll(() => scroller.evaluate(element => element.scrollHeight - element.clientHeight - element.scrollTop)).toBeLessThan(2)
+  const beforeReflowHeight = await scroller.locator('.liveChatCommentList').evaluate(element => element.scrollHeight)
+  await setWindowSize(app, page, { width: 1800, height: 1000 })
+  await expect.poll(() => scroller.locator('.liveChatCommentList').evaluate(element => element.scrollHeight))
+    .toBeLessThan(beforeReflowHeight)
+  await expect.poll(() => scroller.evaluate(element => element.scrollHeight - element.clientHeight - element.scrollTop)).toBeLessThan(2)
+  await expect(scroller.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-visible/)
+  await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+  await expect.poll(() => scroller.evaluate(element => element.scrollHeight - element.clientHeight - element.scrollTop)).toBeLessThan(2)
+  await expect(scroller.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-visible/)
+  await page.evaluate(() => window.ftElectron.setZoomFactor(1))
+
+  await page.locator(`${activeTab} .externalMediaPlayer .ftVideoPlayer`).click({ position: { x: 20, y: 20 } })
+  await page.keyboard.press('s')
+  await page.locator(`${activeTab} .fullscreenLiveChatToggle`).click()
+  const dockedChat = page.locator(`${activeTab} .fullscreenLiveChatTarget .twitchChat`)
+  await expect(dockedChat).toBeVisible()
+  const dockedScroller = dockedChat.locator('.liveChatComments')
+  expect(await dockedScroller.evaluate(element => element.scrollHeight - element.clientHeight)).toBeGreaterThan(100)
+  await dockedScroller.hover()
+  await page.mouse.wheel(0, -300)
+  await expect(dockedChat.getByRole('button', { name: 'Scroll to Bottom' })).toBeVisible()
+  await dockedChat.getByRole('button', { name: 'Scroll to Bottom' }).click()
+  await expect.poll(() => dockedScroller.evaluate(element => element.scrollHeight - element.clientHeight - element.scrollTop)).toBeLessThan(2)
+  await page.keyboard.press('s')
+})
 
 test('shows search for an unknown URL on the selected Invidious instance', async ({ page }) => {
   await page.evaluate(async () => {
@@ -286,7 +471,10 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await expect(player.locator('.fullscreenSponsorBlockToggle, .ft-shaka-sponsorblock-button')).toHaveCount(0)
   await expect(player.locator('.playerFullscreenTitleOverlay')).not.toHaveAttribute('role', 'button')
   await expect(player.locator('.theatre-button')).toHaveCount(0)
-  expect((await player.boundingBox()).width / (await externalMedia.boundingBox()).width).toBeGreaterThan(0.95)
+  const playerBox = await player.boundingBox()
+  const mediaBox = await externalMedia.boundingBox()
+  const expectedYouTubeWidth = Math.min(mediaBox.width, await page.evaluate(() => window.innerHeight * 0.8 * 1.78))
+  expect(Math.abs(playerBox.width - expectedYouTubeWidth)).toBeLessThan(2)
   const shareButton = externalMedia.getByRole('button', { name: 'Share Video' }).first()
   await shareButton.click()
   await expect(externalMedia.getByRole('button', { name: 'Copy Link', exact: true })).toBeVisible()
