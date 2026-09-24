@@ -4094,7 +4094,7 @@ export default defineComponent({
             title: this.videoTitle,
             author: this.channelName,
             authorId: this.channelId,
-            published: this.videoPublished,
+            published: this.videoPublished > 0 ? this.videoPublished : this.historyEntry?.published,
             description: this.videoDescription,
             viewCount: this.videoViewCount,
           }
