@@ -887,6 +887,10 @@ Settings:
     Add: Thêm
     Remove: Xóa
   Data Settings:
+    Import YouTube Takeout ZIP: "Nhập ZIP YouTube Takeout"
+    Select Takeout data: "Chọn dữ liệu cần nhập"
+    Import selected data: "Nhập dữ liệu đã chọn"
+    No supported Takeout data: "Không tìm thấy dữ liệu YouTube được hỗ trợ trong ZIP này."
     Data And Storage: Dữ liệu và bộ nhớ
     Profile Directory: Thư mục hồ sơ
     Open Profile Directory: Mở thư mục hồ sơ

@@ -881,6 +881,10 @@ Settings:
     Add: Dodaj
     Remove: Ukloni
   Data Settings:
+    Import YouTube Takeout ZIP: "Uvezi YouTube Takeout ZIP"
+    Select Takeout data: "Odaberite podatke za uvoz"
+    Import selected data: "Uvezi odabrane podatke"
+    No supported Takeout data: "U ovom ZIP-u nisu pronađeni podržani YouTube podaci."
     Data And Storage: Podaci i pohrana
     Profile Directory: Mapa profila
     Open Profile Directory: Otvori mapu profila

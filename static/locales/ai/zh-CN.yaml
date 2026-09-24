@@ -877,6 +877,10 @@ Settings:
     Show Bottom Right Actions Dock: 显示右下角操作栏
     Paused Interface Hide Delay: 暂停界面隐藏延迟
   Data Settings:
+    Import YouTube Takeout ZIP: "导入 YouTube Takeout ZIP"
+    Select Takeout data: "选择要导入的数据"
+    Import selected data: "导入所选数据"
+    No supported Takeout data: "此 ZIP 中未找到受支持的 YouTube 数据。"
     Data And Storage: 数据和存储
     Profile Directory: 配置文件文件夹
     Open Profile Directory: 打开配置文件文件夹

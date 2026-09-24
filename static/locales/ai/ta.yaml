@@ -891,6 +891,10 @@ Settings:
     Add: சேர்
     Remove: அகற்று
   Data Settings:
+    Import YouTube Takeout ZIP: "YouTube Takeout ZIP ஐ இறக்குமதி செய்"
+    Select Takeout data: "இறக்குமதி செய்ய வேண்டிய தரவைத் தேர்ந்தெடுக்கவும்"
+    Import selected data: "தேர்ந்தெடுத்த தரவை இறக்குமதி செய்"
+    No supported Takeout data: "இந்த ZIP இல் ஆதரிக்கப்படும் YouTube தரவு எதுவும் இல்லை."
     Data And Storage: தரவும் சேமிப்பகமும்
     Profile Directory: சுயவிவரக் கோப்புறை
     Open Profile Directory: சுயவிவரக் கோப்புறையைத் திற

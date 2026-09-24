@@ -892,6 +892,10 @@ Settings:
     Add: הוספה
     Remove: הסרה
   Data Settings:
+    Import YouTube Takeout ZIP: "ייבוא קובץ ZIP של YouTube Takeout"
+    Select Takeout data: "בחרו את הנתונים לייבוא"
+    Import selected data: "ייבוא הנתונים שנבחרו"
+    No supported Takeout data: "לא נמצאו נתוני YouTube נתמכים בקובץ ZIP זה."
     Data And Storage: נתונים ואחסון
     Profile Directory: תיקיית הפרופיל
     Open Profile Directory: פתיחת תיקיית הפרופיל

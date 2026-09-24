@@ -4,6 +4,17 @@
     hide-title
   >
     <h4 class="groupTitle">
+      {{ t('Settings.Data Settings.Import YouTube Takeout ZIP') }}
+    </h4>
+    <FtFlexBox class="box">
+      <FtButton
+        :label="t('Settings.Data Settings.Import YouTube Takeout ZIP')"
+        :icon="['fas', 'folder-open']"
+        :disabled="takeoutBusy"
+        @click="selectTakeoutZip"
+      />
+    </FtFlexBox>
+    <h4 class="groupTitle">
       {{ $t('Subscriptions.Subscriptions') }}
     </h4>
     <FtFlexBox class="box">
@@ -108,6 +119,32 @@
       />
     </FtFlexBox>
     <FtSettingsSubpage
+      :open="showTakeoutImport"
+      :title="t('Settings.Data Settings.Import YouTube Takeout ZIP')"
+      :icon="['fas', 'folder-open']"
+      @close="closeTakeoutImport"
+    >
+      <div
+        class="takeoutSelection"
+        :aria-busy="takeoutBusy"
+      >
+        <p>{{ takeoutFilename }}</p>
+        <p>{{ t('Settings.Data Settings.Select Takeout data') }}</p>
+        <FtCheckboxList
+          v-model="selectedTakeoutTypes"
+          :labels="takeoutLabels"
+          :values="takeoutTypes"
+        />
+        <FtButton
+          v-if="selectedTakeoutTypes.length > 0"
+          :label="t('Settings.Data Settings.Import selected data')"
+          :icon="['fas', 'folder-open']"
+          :disabled="takeoutBusy"
+          @click="importSelectedTakeoutData"
+        />
+      </div>
+    </FtSettingsSubpage>
+    <FtSettingsSubpage
       :open="showExportSubscriptionsPrompt"
       :title="t('Settings.Data Settings.Select Export Type')"
       :icon="['fas', 'file-download']"
@@ -159,10 +196,11 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, shallowRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
+import FtCheckboxList from '../FtCheckboxList/FtCheckboxList.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
@@ -179,6 +217,7 @@ import {
   deepCopy,
   escapeHTML,
   getTodayDateStrLocalTimezone,
+  pickFileWithPicker,
   readFileWithPicker,
   showToast,
   writeFileWithPicker,
@@ -193,6 +232,7 @@ import {
   isLibreTubeWatchHistoryBackup,
 } from '../../helpers/libretube'
 import { parseLineDelimitedJson } from '../../helpers/line-delimited-json'
+import { forEachSelectedTakeoutZipEntry, isSupportedTakeoutEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv } from '../../helpers/youtube-takeout-zip'
 import {
   DEFAULT_SEARCH_SETTINGS,
   mergeSearchHistoryEntries,
@@ -203,6 +243,116 @@ import {
 const IMPORT_DIRECTORY_ID = 'data-settings-import'
 const START_IN_DIRECTORY = 'downloads'
 const { t } = useI18n()
+
+const showTakeoutImport = ref(false)
+const takeoutBusy = ref(false)
+const takeoutFilename = ref('')
+const takeoutFile = shallowRef(null)
+const takeoutEntries = shallowRef([])
+const selectedTakeoutTypes = ref([])
+const takeoutTypes = computed(() => [...new Set(takeoutEntries.value.map(entry => entry.type))])
+const takeoutLabels = computed(() => takeoutTypes.value.map(type => {
+  return {
+    subscriptions: t('Subscriptions.Subscriptions'),
+    history: t('History.History'),
+    searchHistory: t('Settings.Data Settings.Search history'),
+    playlists: t('Playlists'),
+  }[type]
+}))
+
+function closeTakeoutImport() {
+  showTakeoutImport.value = false
+  takeoutFile.value = null
+  takeoutEntries.value = []
+  selectedTakeoutTypes.value = []
+}
+
+async function selectTakeoutZip() {
+  takeoutBusy.value = true
+  try {
+    const file = await pickFileWithPicker(
+      t('Settings.Data Settings.Import YouTube Takeout ZIP'),
+      { 'application/zip': '.zip' },
+      IMPORT_DIRECTORY_ID,
+      START_IN_DIRECTORY
+    )
+    if (file === null) { return }
+    const entries = await listYouTubeTakeoutZipEntries(file)
+    if (entries.length === 0) {
+      showToast({ message: t('Settings.Data Settings.No supported Takeout data'), icon: ['fas', 'circle-exclamation'] })
+      return
+    }
+    takeoutFilename.value = file.name
+    takeoutFile.value = file
+    takeoutEntries.value = entries
+    selectedTakeoutTypes.value = [...new Set(entries.map(entry => entry.type))]
+    showTakeoutImport.value = true
+  } catch (error) {
+    showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+  } finally {
+    takeoutBusy.value = false
+  }
+}
+
+async function importSelectedTakeoutData() {
+  takeoutBusy.value = true
+  const selected = new Set(selectedTakeoutTypes.value)
+  let importedPlaylists = false
+  const playlistNameCounts = new Map()
+  const reservedPlaylistNames = new Set(takeoutEntries.value
+    .filter(entry => entry.type === 'playlists' && selected.has('playlists'))
+    .map(entry => entry.path.split('/').at(-1).replace(/\.csv$/i, '')))
+  const allocatedPlaylistNames = new Set()
+  try {
+    await forEachSelectedTakeoutZipEntry(takeoutFile.value, selected, async entry => {
+      if (!isSupportedTakeoutEntry(entry)) {
+        showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${entry.path}`, icon: ['fas', 'circle-exclamation'] })
+        return
+      }
+      try {
+        if (entry.type === 'subscriptions') {
+          if (entry.path.toLowerCase().endsWith('.csv')) {
+            await importCsvYouTubeSubscriptions(entry.content)
+          } else if (entry.path.toLowerCase().endsWith('.opml')) {
+            await importOpmlYouTubeSubscriptions(entry.content)
+          } else {
+            await importYouTubeSubscriptions(JSON.parse(entry.content))
+          }
+        } else if (entry.type === 'history') {
+          await importYouTubeWatchHistory(JSON.parse(entry.content))
+        } else if (entry.type === 'searchHistory') {
+          await importYouTubeSearchHistory(JSON.parse(entry.content))
+        } else if (entry.type === 'playlists') {
+          const name = entry.path.split('/').at(-1).replace(/\.csv$/i, '')
+          const count = (playlistNameCounts.get(name) ?? 0) + 1
+          playlistNameCounts.set(name, count)
+          let playlistName = name
+          if (count > 1) {
+            let suffix = 2
+            while (reservedPlaylistNames.has(`${name} (${suffix})`) || allocatedPlaylistNames.has(`${name} (${suffix})`)) {
+              suffix++
+            }
+            playlistName = `${name} (${suffix})`
+          }
+          allocatedPlaylistNames.add(playlistName)
+          await importTakeoutPlaylist(entry, playlistName)
+          importedPlaylists = true
+        }
+      } catch (error) {
+        console.error('Unable to import Takeout entry', entry.path, error)
+        showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${entry.path}`, icon: ['fas', 'circle-exclamation'] })
+      }
+    })
+    if (importedPlaylists) {
+      showToast({ message: t('Settings.Data Settings.All playlists has been successfully imported'), icon: ['fas', 'bookmark'] })
+    }
+    closeTakeoutImport()
+  } catch (error) {
+    showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+  } finally {
+    takeoutBusy.value = false
+  }
+}
 
 function openProfileSettings() {
   store.dispatch('showSettingsWindow', 'profile')
@@ -340,14 +490,14 @@ async function importSubscriptions() {
   const { filename, content } = response
 
   if (filename.endsWith('.csv')) {
-    importCsvYouTubeSubscriptions(content)
+    await importCsvYouTubeSubscriptions(content)
   } else if (filename.endsWith('.db')) {
     const records = parseImportedLineDelimitedJson(content)
     if (records !== null) {
       importFreeTubeSubscriptions(records)
     }
   } else if (filename.endsWith('.opml') || filename.endsWith('.xml')) {
-    importOpmlYouTubeSubscriptions(content)
+    await importOpmlYouTubeSubscriptions(content)
   } else if (filename.endsWith('.json')) {
     const jsonContent = parseImportedJson(content, t('Settings.Data Settings.Invalid subscriptions file'))
     if (jsonContent === null) {
@@ -367,7 +517,7 @@ async function importSubscriptions() {
         importNewPipeSubscriptions(jsonContent)
         break
       case 'youtube':
-        importYouTubeSubscriptions(jsonContent)
+        await importYouTubeSubscriptions(jsonContent)
         break
       default:
         showToast({
@@ -397,7 +547,7 @@ function isChannelSubscribed(channelId, subscriptions) {
 }
 
 /**
- * @param {(progressOperation: ReturnType<typeof startProgressBarOperation>) => void} importSubscriptions
+ * @param {(progressOperation: ReturnType<typeof startProgressBarOperation>) => Promise<void> | void} importSubscriptions
  */
 function runWithDataImportProgress(importSubscriptions) {
   const progressOperation = startProgressBarOperation(store, {
@@ -406,9 +556,14 @@ function runWithDataImportProgress(importSubscriptions) {
     percentage: 0,
   })
   try {
-    importSubscriptions(progressOperation)
-  } finally {
+    const result = importSubscriptions(progressOperation)
+    if (result instanceof Promise) {
+      return result.finally(() => progressOperation.finish())
+    }
     progressOperation.finish()
+  } catch (error) {
+    progressOperation.finish()
+    throw error
   }
 }
 
@@ -569,7 +724,7 @@ function importFreeTubeSubscriptions(profileRecords) {
  * @param {string} textDecode
  */
 function importCsvYouTubeSubscriptions(textDecode) { // first row = header, last row = empty
-  runWithDataImportProgress(() => {
+  return runWithDataImportProgress(async () => {
     const youtubeSubscriptions = textDecode.split('\n').filter(sub => {
       return sub !== ''
     })
@@ -603,7 +758,7 @@ function importCsvYouTubeSubscriptions(textDecode) { // first row = header, last
     })
 
     primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(subscriptions)
-    store.dispatch('updateProfile', primaryProfile.value)
+    await store.dispatch('updateProfile', primaryProfile.value)
     showToast({
       message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
       icon: ['fas', 'rss'],
@@ -615,7 +770,7 @@ function importCsvYouTubeSubscriptions(textDecode) { // first row = header, last
  * @param {object} textDecode
  */
 function importYouTubeSubscriptions(textDecode) {
-  runWithDataImportProgress(progressOperation => {
+  return runWithDataImportProgress(async progressOperation => {
     const subscriptions = []
     let count = 0
 
@@ -643,7 +798,7 @@ function importYouTubeSubscriptions(textDecode) {
     })
 
     primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(subscriptions)
-    store.dispatch('updateProfile', primaryProfile.value)
+    await store.dispatch('updateProfile', primaryProfile.value)
     showToast({
       message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
       icon: ['fas', 'rss'],
@@ -687,7 +842,7 @@ function importOpmlYouTubeSubscriptions(data) {
     return
   }
 
-  runWithDataImportProgress(progressOperation => {
+  return runWithDataImportProgress(async progressOperation => {
     const subscriptions = []
 
     let count = 0
@@ -721,7 +876,7 @@ function importOpmlYouTubeSubscriptions(data) {
     })
 
     primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(subscriptions)
-    store.dispatch('updateProfile', primaryProfile.value)
+    await store.dispatch('updateProfile', primaryProfile.value)
     showToast({
       message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
       icon: ['fas', 'rss'],
@@ -1353,13 +1508,40 @@ async function exportYouTubeWatchHistory() {
 
 const allPlaylists = computed(() => store.getters.getAllPlaylists)
 
+async function importTakeoutPlaylist(entry, playlistName) {
+  const name = entry.path.split('/').at(-1)
+  const playlist = parseTakeoutPlaylistCsv(entry.content, name)
+  if (playlist === null) {
+    throw new Error('Invalid playlist CSV')
+  }
+  playlist.playlistName = playlistName
+
+  const existing = allPlaylists.value.find(item => item.playlistName === playlist.playlistName)
+  if (existing === undefined) {
+    await store.dispatch('addPlaylist', playlist)
+  } else {
+    const videos = deepCopy(existing.videos)
+    const known = new Set(videos.map(video => `${video.videoId}:${video.timeAdded}`))
+    for (const video of playlist.videos) {
+      const key = `${video.videoId}:${video.timeAdded}`
+      if (!known.has(key)) {
+        processToBeAddedPlaylistVideo(video)
+        videos.push(video)
+        known.add(key)
+      }
+    }
+    await store.dispatch('updatePlaylist', { _id: existing._id, playlistName: existing.playlistName, videos })
+  }
+}
+
 async function importPlaylists() {
   let response
   try {
     response = await readFileWithPicker(
       t('Settings.Data Settings.Playlist File'),
       {
-        'application/x-freetube-db': '.db'
+        'application/x-freetube-db': '.db',
+        'text/csv': '.csv',
       },
       IMPORT_DIRECTORY_ID,
       START_IN_DIRECTORY
@@ -1375,6 +1557,18 @@ async function importPlaylists() {
   }
 
   const data = response.content
+
+  if (response.filename.toLowerCase().endsWith('.csv')) {
+    const playlistName = response.filename.replace(/\.csv$/i, '')
+    try {
+      await importTakeoutPlaylist({ path: response.filename, content: data }, playlistName)
+      showToast({ message: t('Settings.Data Settings.All playlists has been successfully imported'), icon: ['fas', 'bookmark'] })
+    } catch (error) {
+      console.error('Unable to import Takeout playlist', response.filename, error)
+      showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${response.filename}`, icon: ['fas', 'circle-exclamation'] })
+    }
+    return
+  }
 
   let playlists
 

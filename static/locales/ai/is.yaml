@@ -881,6 +881,10 @@ Settings:
     Show Bottom Right Actions Dock: Sýna aðgerðastiku neðst til hægri
     Paused Interface Hide Delay: Töf áður en viðmót er falið í hléi
   Data Settings:
+    Import YouTube Takeout ZIP: "Flytja inn YouTube Takeout ZIP"
+    Select Takeout data: "Veldu gögnin sem á að flytja inn"
+    Import selected data: "Flytja inn valin gögn"
+    No supported Takeout data: "Engin studd YouTube-gögn fundust í þessari ZIP-skrá."
     Data And Storage: Gögn og geymsla
     Profile Directory: Mappa notandasniðs
     Open Profile Directory: Opna möppu notandasniðs

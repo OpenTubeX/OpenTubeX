@@ -47,6 +47,7 @@ updates:
       - dependency-name: "dbus-native"
       - dependency-name: "eld"
       - dependency-name: "entities"
+      - dependency-name: "fflate"
       - dependency-name: "font-list"
       - dependency-name: "node-gyp"
       - dependency-name: "overlayscrollbars"

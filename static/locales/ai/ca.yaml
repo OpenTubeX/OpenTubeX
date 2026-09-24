@@ -1180,6 +1180,10 @@ Settings:
     Add: Afegeix
     Remove: Elimina
   Data Settings:
+    Import YouTube Takeout ZIP: "Importa el ZIP de YouTube Takeout"
+    Select Takeout data: "Selecciona les dades que vols importar"
+    Import selected data: "Importa les dades seleccionades"
+    No supported Takeout data: "No s’han trobat dades de YouTube compatibles en aquest ZIP."
     Data And Storage: Dades i emmagatzematge
     Profile Directory: Directori del perfil
     Open Profile Directory: Obre el directori del perfil

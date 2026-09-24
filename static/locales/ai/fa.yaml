@@ -908,6 +908,10 @@ Settings:
     Add: افزودن
     Remove: حذف
   Data Settings:
+    Import YouTube Takeout ZIP: "درون‌ریزی فایل ZIP ‏YouTube Takeout"
+    Select Takeout data: "داده‌های مورد نظر برای درون‌ریزی را انتخاب کنید"
+    Import selected data: "درون‌ریزی داده‌های انتخاب‌شده"
+    No supported Takeout data: "هیچ دادهٔ پشتیبانی‌شده‌ای از YouTube در این ZIP پیدا نشد."
     Data And Storage: داده و فضای ذخیره‌سازی
     Profile Directory: پوشهٔ نمایه
     Open Profile Directory: بازکردن پوشهٔ نمایه

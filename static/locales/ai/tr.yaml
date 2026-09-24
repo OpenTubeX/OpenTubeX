@@ -877,6 +877,10 @@ Settings:
     Show Bottom Right Actions Dock: Sağ Alt İşlem Panelini Göster
     Paused Interface Hide Delay: Duraklatılmış Arayüzü Gizleme Gecikmesi
   Data Settings:
+    Import YouTube Takeout ZIP: "YouTube Takeout ZIP dosyasını içe aktar"
+    Select Takeout data: "İçe aktarılacak verileri seçin"
+    Import selected data: "Seçilen verileri içe aktar"
+    No supported Takeout data: "Bu ZIP dosyasında desteklenen YouTube verisi bulunamadı."
     Data And Storage: Veri ve Depolama
     Profile Directory: Profil dizini
     Open Profile Directory: Profil dizinini aç

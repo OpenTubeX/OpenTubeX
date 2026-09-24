@@ -877,6 +877,10 @@ Settings:
     Show Bottom Right Actions Dock: "Diskouez kael an oberoù en traoñ a-zehou"
     Paused Interface Hide Delay: "Dale a-raok kuzhat an etrefas en ehan"
   Data Settings:
+    Import YouTube Takeout ZIP: "Enporzhiañ ZIP YouTube Takeout"
+    Select Takeout data: "Diuzañ ar roadennoù da enporzhiañ"
+    Import selected data: "Enporzhiañ ar roadennoù diuzet"
+    No supported Takeout data: "N’eus bet kavet roadenn YouTube skoret ebet er ZIP-mañ."
     Data And Storage: "Roadennoù ha kadaviñ"
     Profile Directory: "Teuliad ar profil"
     Open Profile Directory: "Digeriñ teuliad ar profil"

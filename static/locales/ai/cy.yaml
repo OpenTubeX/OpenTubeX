@@ -881,6 +881,10 @@ Settings:
     Add: Ychwanegu
     Remove: Dileu
   Data Settings:
+    Import YouTube Takeout ZIP: "Mewnforio ZIP YouTube Takeout"
+    Select Takeout data: "Dewiswch y data i’w mewnforio"
+    Import selected data: "Mewnforio’r data a ddewiswyd"
+    No supported Takeout data: "Ni chanfuwyd data YouTube a gefnogir yn y ZIP hwn."
     Data And Storage: Data a storfa
     Profile Directory: Cyfeiriadur y proffil
     Open Profile Directory: Agor cyfeiriadur y proffil
