@@ -265,6 +265,7 @@ test('keeps protected media headers with a long external storyboard', async ({ a
   const receivedHeaders = []
   const siblingHeaders = []
   const storyboardHeaders = []
+  const redirectedStoryboardHeaders = []
   const server = createServer((request, response) => {
     if (request.url === '/foobar/ping') {
       siblingHeaders.push(request.headers)
@@ -273,6 +274,15 @@ test('keeps protected media headers with a long external storyboard', async ({ a
     }
     if (request.url === '/storyboard.jpg') {
       storyboardHeaders.push(request.headers)
+      response.writeHead(204).end()
+      return
+    }
+    if (request.url === '/storyboard/1.jpg') {
+      response.writeHead(302, { Location: '/foo/preview.jpg' }).end()
+      return
+    }
+    if (request.url === '/foo/preview.jpg') {
+      redirectedStoryboardHeaders.push(request.headers)
       response.writeHead(204).end()
       return
     }
@@ -331,7 +341,7 @@ test('keeps protected media headers with a long external storyboard', async ({ a
       'previous=""',
       'for argument in "$@"; do',
       '  if [ "$previous" = "--cookies" ]; then',
-      '    printf "127.0.0.1\\tFALSE\\t/foo\\tFALSE\\t4102444800\\tstream_session\\ttest-token\\n" > "$argument"',
+      '    printf "127.0.0.1\\tFALSE\\t/foo\\tFALSE\\t4102444800\\tstream_session\\ttest-token\\n127.0.0.1\\tFALSE\\t/storyboard.jpg\\tFALSE\\t4102444800\\tpreview_session\\ttest-token\\n" > "$argument"',
       '  fi',
       '  previous="$argument"',
       'done',
@@ -354,6 +364,10 @@ test('keeps protected media headers with a long external storyboard', async ({ a
     await page.evaluate(async url => { await fetch(url, { mode: 'no-cors' }) }, storyboardUrl)
     expect(storyboardHeaders.length).toBe(1)
     expect(storyboardHeaders[0].referer).toBe('https://www.tiktok.com/')
+    expect(storyboardHeaders[0].cookie).toBeUndefined()
+    await page.evaluate(async url => { await fetch(url, { mode: 'no-cors' }) }, `http://127.0.0.1:${server.address().port}/storyboard/1.jpg`)
+    expect(redirectedStoryboardHeaders.length).toBe(1)
+    expect(redirectedStoryboardHeaders[0].cookie).toBeUndefined()
     await page.evaluate(async url => { await fetch(url, { mode: 'no-cors' }) }, siblingUrl)
     expect(siblingHeaders.length).toBe(1)
     expect(siblingHeaders[0].cookie).toBeUndefined()

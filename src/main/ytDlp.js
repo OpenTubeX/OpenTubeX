@@ -51,7 +51,7 @@ function registerExternalStreamHeaders(webContents, formats) {
     const headers = Object.fromEntries(Object.entries(format.http_headers ?? {})
       .filter(([name, value]) => EXTERNAL_STREAM_HEADER_NAMES.has(name.toLowerCase()) &&
         typeof value === 'string' && !/[\r\n]/.test(value)))
-    if (Object.keys(headers).length === 0) continue
+    if (Object.keys(headers).length === 0 && format.protocol !== 'mhtml') continue
     const fragmentUrls = format.protocol === 'mhtml' && Array.isArray(format.fragments)
       ? format.fragments.map(fragment => fragment.url)
       : []
@@ -90,6 +90,14 @@ export function getYtDlpExternalStreamHeaders(webContents, requestUrl) {
     if (request.origin === base.origin && request.pathname.startsWith(base.pathname)) return headers
   }
   return null
+}
+
+export function isYtDlpStoryboardUrl(webContents, requestUrl) {
+  return externalStoryboardHeaders.get(webContents)?.has(requestUrl) ?? false
+}
+
+export function isYtDlpHttpStoryboardUrl(webContents, requestUrl) {
+  return requestUrl.startsWith('http:') && isYtDlpStoryboardUrl(webContents, requestUrl)
 }
 
 function registerExternalStreamCookies(webContents, formats, cookieFileContents) {
@@ -177,6 +185,7 @@ function registerExternalStreamCookies(webContents, formats, cookieFileContents)
 }
 
 export function getYtDlpExternalStreamCookieHeader(webContents, requestUrl) {
+  if (isYtDlpHttpStoryboardUrl(webContents, requestUrl)) return null
   const url = new URL(requestUrl)
   const cookies = externalStreamCookies.get(webContents)?.get(url.hostname)
   if (!cookies) return null

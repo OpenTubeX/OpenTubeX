@@ -51,7 +51,7 @@ import { brotliDecompress } from 'zlib'
 
 import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
-import { getYtDlpDownloadFile, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpControlDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetSubtitle, handleYtDlpGetPlaybackInfo, handleYtDlpGetHistoryMetadata, handleYtDlpCancelHistoryRepair, handleYtDlpGetRecommendations, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpQueueAction, handleYtDlpRemoveDownload, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
+import { isYtDlpStoryboardUrl, getYtDlpDownloadFile, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpControlDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetSubtitle, handleYtDlpGetPlaybackInfo, handleYtDlpGetHistoryMetadata, handleYtDlpCancelHistoryRepair, handleYtDlpGetRecommendations, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpQueueAction, handleYtDlpRemoveDownload, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
 import { applyYtDlpPlaybackCacheSettings, handleYtDlpPlaybackCacheClear, handleYtDlpPlaybackCacheDelete, handleYtDlpPlaybackCacheGet, handleYtDlpPlaybackCacheSet } from './ytDlpPlaybackCache'
 import { generatePoToken } from './poTokenGenerator'
 import { expandMultipleOnlyPluralMessages, selectPluralForm } from '../renderer/i18n/plurals'
@@ -2209,6 +2209,7 @@ function runApp() {
       types: ['xhr', 'media', 'image']
     }
     const rendererCors = new RendererCors()
+    const storyboardRequestIds = new Set()
     session.defaultSession.webRequest.onBeforeSendHeaders(onBeforeSendHeadersRequestFilter, (details, callback) => {
       // Capture the app's original Origin before the YouTube header adjustments.
       const originalOrigin = new Headers(details.requestHeaders).get('Origin')
@@ -2273,12 +2274,19 @@ function runApp() {
 
       if (webContents && isOpenTubeXUrl(webContents.getURL())) {
         Object.assign(requestHeaders, getYtDlpExternalStreamHeaders(webContents, url))
-        const streamCookies = getYtDlpExternalStreamCookieHeader(webContents, url)
-        if (streamCookies !== null) {
-          const names = new Set(streamCookies.split('; ').map(cookie => cookie.split('=')[0]))
-          const existing = (requestHeaders.Cookie ?? '').split('; ')
-            .filter(cookie => cookie && !names.has(cookie.split('=')[0]))
-          requestHeaders.Cookie = [...existing, streamCookies].join('; ')
+        if (isYtDlpStoryboardUrl(webContents, url)) storyboardRequestIds.add(details.id)
+        if (url.startsWith('http:') && storyboardRequestIds.has(details.id)) {
+          for (const name of Object.keys(requestHeaders)) {
+            if (name.toLowerCase() === 'cookie') delete requestHeaders[name]
+          }
+        } else {
+          const streamCookies = getYtDlpExternalStreamCookieHeader(webContents, url)
+          if (streamCookies !== null) {
+            const names = new Set(streamCookies.split('; ').map(cookie => cookie.split('=')[0]))
+            const existing = (requestHeaders.Cookie ?? '').split('; ')
+              .filter(cookie => cookie && !names.has(cookie.split('=')[0]))
+            requestHeaders.Cookie = [...existing, streamCookies].join('; ')
+          }
         }
       }
 
@@ -2306,8 +2314,14 @@ function runApp() {
       // eslint-disable-next-line n/no-callback-literal
       callback({ responseHeaders, ...rendererCors.allowResponse(details) })
     })
-    session.defaultSession.webRequest.onCompleted(httpRequestFilter, details => rendererCors.forgetRequest(details))
-    session.defaultSession.webRequest.onErrorOccurred(httpRequestFilter, details => rendererCors.forgetRequest(details))
+    session.defaultSession.webRequest.onCompleted(httpRequestFilter, details => {
+      rendererCors.forgetRequest(details)
+      storyboardRequestIds.delete(details.id)
+    })
+    session.defaultSession.webRequest.onErrorOccurred(httpRequestFilter, details => {
+      rendererCors.forgetRequest(details)
+      storyboardRequestIds.delete(details.id)
+    })
 
     protocol.handle('downloadmedia', async (request) => {
       if (!['GET', 'HEAD'].includes(request.method)) {

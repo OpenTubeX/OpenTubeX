@@ -67,7 +67,9 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
         if (!"GET".equals(request.getMethod()) && !"HEAD".equals(request.getMethod())) {
             return super.shouldInterceptRequest(view, request);
         }
-        if (streamHeaders != null) return interceptExternalStream(request, streamHeaders);
+        if (streamHeaders != null) {
+            return interceptExternalStream(request, streamHeaders, externalStreams.isHttpStoryboardUrl(url));
+        }
 
         HttpURLConnection connection = null;
         try {
@@ -122,10 +124,12 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
     }
 
     private WebResourceResponse interceptExternalStream(WebResourceRequest webRequest,
-                                                         Map<String, String> streamHeaders) {
+                                                         Map<String, String> streamHeaders,
+                                                         boolean stripCookies) {
         Request.Builder builder = new Request.Builder().url(webRequest.getUrl().toString())
             .method(webRequest.getMethod(), null);
         for (Map.Entry<String, String> header : webRequest.getRequestHeaders().entrySet()) {
+            if (stripCookies && "cookie".equalsIgnoreCase(header.getKey())) continue;
             builder.header(header.getKey(), header.getValue());
         }
         for (Map.Entry<String, String> header : streamHeaders.entrySet()) {

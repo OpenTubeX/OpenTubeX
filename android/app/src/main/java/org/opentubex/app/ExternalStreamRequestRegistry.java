@@ -99,13 +99,20 @@ final class ExternalStreamRequestRegistry {
         return source == null ? null : withCookies(source, url);
     }
 
+    synchronized boolean isHttpStoryboardUrl(URL url) {
+        return "http".equals(url.getProtocol()) && storyboardExact.containsKey(url.toString());
+    }
+
     synchronized Map<String, String> headersForRedirect(URL original, URL destination) {
         if (parseUrl(destination.toString()) == null) return null;
+        boolean stripCookies = storyboardExact.containsKey(original.toString()) && "http".equals(destination.getProtocol());
         Map<String, String> registered = sourceHeadersFor(destination);
-        if (registered != null) return withCookies(registered, destination);
+        if (registered != null) return stripCookies ? new HashMap<>(registered) : withCookies(registered, destination);
         Map<String, String> originalHeaders = sourceHeadersFor(original);
         if (originalHeaders == null) return null;
-        if (origin(original).equals(origin(destination))) return withCookies(originalHeaders, destination);
+        if (origin(original).equals(origin(destination))) {
+            return stripCookies ? new HashMap<>(originalHeaders) : withCookies(originalHeaders, destination);
+        }
         Map<String, String> safe = new HashMap<>();
         for (Map.Entry<String, String> header : originalHeaders.entrySet()) {
             if (Set.of("accept", "accept-language", "sec-fetch-mode", "user-agent")
@@ -128,6 +135,7 @@ final class ExternalStreamRequestRegistry {
 
     private Map<String, String> withCookies(Map<String, String> source, URL url) {
         Map<String, String> result = new HashMap<>(source);
+        if (isHttpStoryboardUrl(url)) return result;
         StringBuilder cookieHeader = new StringBuilder();
         long now = System.currentTimeMillis() / 1000;
         for (Cookie cookie : cookies) {
