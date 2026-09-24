@@ -125,8 +125,20 @@ test('landscape phone Shorts keep a portrait player and accessible controls', as
   expect(metadataBounds).not.toBeNull()
   expect(metadataBounds.y + metadataBounds.height).toBeLessThanOrEqual(playerBounds.y + playerBounds.height - 8)
   await page.locator('.shortsNextPreview').evaluate(element => element.remove())
+  await page.setViewportSize({ width: 915, height: 320 })
   await rail.evaluate(element => { element.scrollTop = element.scrollHeight })
   expect(await rail.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  const railClearance = await rail.evaluate(element => {
+    const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+    const buttons = element.querySelectorAll('button')
+    return {
+      scrollbarLeft: scrollbar.getBoundingClientRect().left,
+      buttonRight: Math.max(...Array.from(buttons, button => button.getBoundingClientRect().right)),
+    }
+  })
+  expect(railClearance.scrollbarLeft).toBeGreaterThanOrEqual(railClearance.buttonRight)
+  await expect(rail.locator('.shortsMetadataAction')).toBeHidden()
+  await page.setViewportSize({ width: 915, height: 412 })
   const soundBounds = await rail.locator('.shortsSoundThumbnail').boundingBox()
   expect(soundBounds).not.toBeNull()
   expect(soundBounds.y).toBeGreaterThanOrEqual(railBounds.y - 1)
@@ -205,6 +217,14 @@ test('landscape Shorts keep light-theme metadata clear of the player', async ({ 
     const [scaledPlayer, scaledMetadata] = await Promise.all([player.boundingBox(), metadata.boundingBox()])
     return scaledPlayer.x - scaledMetadata.x - scaledMetadata.width
   }).toBeGreaterThanOrEqual(8)
+})
+
+test('very narrow landscape Shorts keep the info action when the title has no room', async ({ app, page }) => {
+  await openShort({ app, page })
+  await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabs', 'capacitorTabletLayout'))
+  await page.setViewportSize({ width: 420, height: 320 })
+  await expect(page.locator('.shortsExternalTitle')).toBeHidden()
+  await expect(page.locator('.shortsMetadataAction')).toBeVisible()
 })
 
 test('narrow landscape Shorts keep the translated loading notice inside the player', async ({ app, page }) => {
