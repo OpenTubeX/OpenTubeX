@@ -368,7 +368,7 @@ for (const uiScale of [100, 125]) {
       expect(await page.evaluate(() => window.nativeMotionCalls.filter(call => call.endTransition).length)).toBe(2)
       await page.evaluate(() => window.nativeScreenTest.destroy())
     })
-    test('keeps page content behind the native scroll mini player', async ({ app, page }) => {
+    test('keeps page content opaque beneath the raised native scroll mini player', async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
       await openMockedVideo(page)
       await openNativeScreen(page, false)
@@ -414,7 +414,7 @@ for (const uiScale of [100, 125]) {
         return [...context.getImageData(Math.floor((bounds.x + bounds.width / 2) * scale),
           Math.floor((bounds.y + bounds.height / 2) * scale), 1, 1).data]
       }, { imageData: screenshot.toString('base64'), bounds })
-      expect(pixel[3], 'Page content must not paint inside the native video window').toBe(0)
+      expect(pixel[3], 'The raised native mini player must allow opaque page content beneath it').toBe(255)
       await page.evaluate(() => window.nativeScreenTest.destroy())
     })
     test('inline video transparency scrolls with the page before a bridge update', async ({ app, page }) => {
@@ -444,7 +444,7 @@ for (const uiScale of [100, 125]) {
       expect(alpha, 'The native video opening must move with page scrolling, even while JS geometry is delayed').toBe(0)
       await page.evaluate(() => window.nativeScreenTest.destroy())
     })
-    test('scroll handoff refreshes the mini-player clip before restoring shared controls', async ({ app, page }) => {
+    test('scroll handoff keeps the page opaque beneath the mini player before restoring shared controls', async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
       await openMockedVideo(page)
       await openNativeScreen(page, false)
@@ -479,12 +479,12 @@ for (const uiScale of [100, 125]) {
           shadowRetained,
           scrolled,
           restored: getComputedStyle(player.querySelector('.scrollMiniPlayerControls')).visibility,
-          occluded: context.isPointInPath(new Path2D(clip), bounds.x + bounds.width / 2 - origin.x,
+          pageFilledUnderNativeVideo: context.isPointInPath(new Path2D(clip), bounds.x + bounds.width / 2 - origin.x,
             bounds.y + bounds.height / 2 - origin.y, 'evenodd'),
           refreshedBeforeHandoff: calls[0].miniPlayer && calls[1].endScroll,
         }
       })
-      expect(result).toEqual({ duringScroll: 'visible', shadowRetained: true, scrolled: true, restored: 'visible', occluded: false, refreshedBeforeHandoff: true })
+      expect(result).toEqual({ duringScroll: 'visible', shadowRetained: true, scrolled: true, restored: 'visible', pageFilledUnderNativeVideo: true, refreshedBeforeHandoff: true })
       await page.evaluate(() => window.nativeScreenTest.destroy())
     })
     test('keeps a transparent rounded video window and an opaque themed page', async ({ app, page }) => {
@@ -1592,13 +1592,13 @@ for (const uiScale of [100, 125]) {
           expect(result.bounceCutouts).toBeLessThanOrEqual(2)
         }
         await expect.poll(() => page.evaluate(() => window.nativeLayoutTest.gestureActive)).toBe(false)
-        await expect.poll(() => page.evaluate(() => document.querySelector('[data-native-player-backdrop]').style.clipPath.match(/M /g)?.length)).toBe(2)
-        // Touch cancellation must restore the cutout and release native ownership.
+        await expect.poll(() => page.evaluate(() => document.querySelector('[data-native-player-backdrop]').style.clipPath.match(/M /g)?.length)).toBe(1)
+        // Touch cancellation must restore the full page clip and release native ownership.
         await player.locator(gesture === 'resize' ? '.scrollMiniResizeHandle' : '.scrollMiniDragHandle').dispatchEvent('pointerdown', { pointerId: 2, clientX: 300, clientY: 300 })
         await expect.poll(() => page.evaluate(() => window.nativeLayoutTest.gestureActive)).toBe(true)
         await page.evaluate(() => window.dispatchEvent(new PointerEvent('pointercancel', { pointerId: 2 })))
         await expect.poll(() => page.evaluate(() => window.nativeLayoutTest.gestureActive)).toBe(false)
-        await expect.poll(() => page.evaluate(() => document.querySelector('[data-native-player-backdrop]').style.clipPath.match(/M /g)?.length)).toBe(2)
+        await expect.poll(() => page.evaluate(() => document.querySelector('[data-native-player-backdrop]').style.clipPath.match(/M /g)?.length)).toBe(1)
         await expect.poll(async () => Math.abs((await player.boundingBox()).width - await page.evaluate(() => window.nativeLayoutTest.width))).toBeLessThan(1)
         await page.evaluate(() => window.nativeScreenTest.destroy())
       })

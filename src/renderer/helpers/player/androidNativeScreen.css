@@ -125,6 +125,7 @@
 
 [data-native-player-screen] .shaka-seek-bar-container {
   position: absolute;
+  z-index: 2;
   inset-block: auto calc(70px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
   inset-inline: 16px;
   inline-size: auto;
