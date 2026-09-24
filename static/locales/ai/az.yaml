@@ -1363,6 +1363,31 @@ Video:
       UpvoteSegment: Müsbət səs ver
       DownvoteSegment: Mənfi səs ver
       VoteFailed: SponsorBlock səsi göndərilə bilmədi.
+  External Media:
+    Dislikes: "Bəyənməmə"
+    Reposts: "Repostlar"
+    Saves: "Yadda saxlanma"
+    Series: "Silsilə"
+    Season: "Mövsüm"
+    Season Number: "Mövsüm nömrəsi"
+    Episode: "Epizod"
+    Episode Number: "Epizod nömrəsi"
+    Track: "Musiqi parçası"
+    Track Number: "Parça nömrəsi"
+    Artists: "Rəssamlar"
+    Album: "Albom"
+    Genres: "Janrlar"
+    Media Type: "Media növü"
+    Availability: "Mövcudluq"
+    Age Limit: "Yaş həddi"
+    Release Date: "Buraxılış tarixi"
+    Availability Values:
+      public: "İctimai"
+      private: "Məxfi"
+      premium_only: "Yalnız premium istifadəçilər"
+      subscriber_only: "Yalnız abunəçilər"
+      needs_auth: "Daxil olmaq tələb olunur"
+      unlisted: "Siyahıda olmayan"
 Playlist:
   Close Playlist: Pleylisti bağla
   Preload Playlist: Bütün videoları öncədən yüklə

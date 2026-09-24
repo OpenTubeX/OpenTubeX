@@ -1364,6 +1364,31 @@ Video:
   Station: Station
   Playlist:
     Unavailable videos are hidden: 1 otillgänglig video är dold | {count} otillgängliga videor är dolda
+  External Media:
+    Dislikes: "Ogillamarkeringar"
+    Reposts: "Återinlägg"
+    Saves: "Sparade objekt"
+    Series: "Serie"
+    Season: "Säsong"
+    Season Number: "Säsongsnummer"
+    Episode: "Avsnitt"
+    Episode Number: "Avsnittsnummer"
+    Track: "Musikspår"
+    Track Number: "Spårnummer"
+    Artists: "Artister"
+    Album: "Album"
+    Genres: "Genrer"
+    Media Type: "Medietyp"
+    Availability: "Tillgänglighet"
+    Age Limit: "Åldersgräns"
+    Release Date: "Utgivningsdatum"
+    Availability Values:
+      public: "Offentlig"
+      private: "Privat"
+      premium_only: "Endast Premium"
+      subscriber_only: "Endast prenumeranter"
+      needs_auth: "Inloggning krävs"
+      unlisted: "Olistad"
 Playlist:
   Playlist Already Preloaded: "Alla videor i spellistan är redan förladdade"
   Playlist Preload Progress: "Förladdar videor: {completed} av {requested}"

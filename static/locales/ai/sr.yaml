@@ -1412,6 +1412,31 @@ Video:
   Station: Станица
   Playlist:
     Unavailable videos are hidden: 1 недоступан видео-снимак је скривен | {count} недоступна видео-снимка су скривена | {count} недоступних видео-снимака је скривено
+  External Media:
+    Dislikes: "Негативне оцене"
+    Reposts: "Поновне објаве"
+    Saves: "Чувања"
+    Series: "Серија"
+    Season: "Сезона"
+    Season Number: "Број сезоне"
+    Episode: "Епизода"
+    Episode Number: "Број епизоде"
+    Track: "Музичка нумера"
+    Track Number: "Број нумере"
+    Artists: "Извођачи"
+    Album: "Албум"
+    Genres: "Жанрови"
+    Media Type: "Тип медија"
+    Availability: "Доступност"
+    Age Limit: "Старосна граница"
+    Release Date: "Датум издавања"
+    Availability Values:
+      public: "Јавно"
+      private: "Приватно"
+      premium_only: "Само премијум"
+      subscriber_only: "Само претплатници"
+      needs_auth: "Обавезна је пријава"
+      unlisted: "Није на листи"
 Playlist:
   Playlist Already Preloaded: "Сви видео снимци са плејлисте су већ претходно учитани"
   Playlist Preload Progress: "Претходно учитавање видео снимака: {completed} од {requested}"

@@ -1353,6 +1353,31 @@ Video:
       UpvoteSegment: 投贊成票
       DownvoteSegment: 投反對票
       VoteFailed: 無法提交 SponsorBlock 投票。
+  External Media:
+    Dislikes: "倒讚"
+    Reposts: "轉發"
+    Saves: "收藏"
+    Series: "系列"
+    Season: "季"
+    Season Number: "季數"
+    Episode: "集"
+    Episode Number: "劇集編號"
+    Track: "音樂曲目"
+    Track Number: "曲目編號"
+    Artists: "藝術家"
+    Album: "專輯"
+    Genres: "流派"
+    Media Type: "媒體類型"
+    Availability: "可用性"
+    Age Limit: "年齡限制"
+    Release Date: "發佈日期"
+    Availability Values:
+      public: "公開"
+      private: "私人"
+      premium_only: "僅限付費會員"
+      subscriber_only: "僅限訂閱者"
+      needs_auth: "需要登錄"
+      unlisted: "未公開"
 Playlist:
   Playlist Already Preloaded: "播放清單中的所有影片均已預載"
   Playlist Preload Progress: "正在預載影片：{completed}/{requested}"

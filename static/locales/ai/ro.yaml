@@ -1386,6 +1386,31 @@ Video:
   Station: Stație
   Playlist:
     Unavailable videos are hidden: 1 videoclip indisponibil este ascuns | {count} videoclipuri indisponibile sunt ascunse | {count} de videoclipuri indisponibile sunt ascunse
+  External Media:
+    Dislikes: "Aprecieri negative"
+    Reposts: "Repostări"
+    Saves: "Salvări"
+    Series: "Serie"
+    Season: "Sezon"
+    Season Number: "Numărul sezonului"
+    Episode: "Episod"
+    Episode Number: "Număr episod"
+    Track: "Piesă muzicală"
+    Track Number: "Număr pistă"
+    Artists: "Artiști"
+    Album: "Album"
+    Genres: "Genuri"
+    Media Type: "Tip suport"
+    Availability: "Disponibilitate"
+    Age Limit: "Limită de vârstă"
+    Release Date: "Data lansării"
+    Availability Values:
+      public: "Public"
+      private: "Privat"
+      premium_only: "Doar premium"
+      subscriber_only: "Numai abonații"
+      needs_auth: "Este necesară conectarea"
+      unlisted: "Nelistat"
 Playlist:
   Playlist Already Preloaded: "Toate videoclipurile din lista de redare sunt deja preîncărcate"
   Playlist Preload Progress: "Se preîncarcă videoclipurile: {completed} din {requested}"

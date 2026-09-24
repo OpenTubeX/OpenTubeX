@@ -1368,6 +1368,31 @@ Video:
   Station: Postaja
   Playlist:
     Unavailable videos are hidden: 1 nedostupan videozapis je skriven | {count} nedostupna videozapisa su skrivena | {count} nedostupnih videozapisa je skriveno
+  External Media:
+    Dislikes: "Nesviđanja"
+    Reposts: "Ponovne objave"
+    Saves: "Spremanja"
+    Series: "Serija"
+    Season: "Sezona"
+    Season Number: "Broj sezone"
+    Episode: "Epizoda"
+    Episode Number: "Broj epizode"
+    Track: "Glazbeni zapis"
+    Track Number: "Broj zapisa"
+    Artists: "Umjetnici"
+    Album: "Album"
+    Genres: "Žanrovi"
+    Media Type: "Vrsta medija"
+    Availability: "Dostupnost"
+    Age Limit: "Dobna granica"
+    Release Date: "Datum izdavanja"
+    Availability Values:
+      public: "Javno"
+      private: "Privatno"
+      premium_only: "Samo Premium"
+      subscriber_only: "Samo pretplatnici"
+      needs_auth: "Potrebna je prijava"
+      unlisted: "Nije javno navedeno"
 Playlist:
   Playlist Already Preloaded: "Svi videozapisi na popisu već su predučitani"
   Playlist Preload Progress: "Predučitavanje videozapisa: {completed} od {requested}"

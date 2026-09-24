@@ -4590,7 +4590,7 @@ export default defineComponent({
       }
 
       // Keep the control mounted when a panel can make theatre mode available.
-      if (!props.theatrePossible && props.chapters.length === 0 && !useSponsorBlock.value) {
+      if (props.externalUrl || (!props.theatrePossible && props.chapters.length === 0 && !useSponsorBlock.value)) {
         removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_theatre_mode')
       }
 
@@ -4789,7 +4789,7 @@ export default defineComponent({
      * @param {number} startSeconds
      */
     function copyChapterTimestamp(startSeconds) {
-      const videoUrl = appendTimestamp(getYoutubeVideoShareUrl(props.videoId), Math.floor(startSeconds))
+      const videoUrl = appendTimestamp(props.externalUrl || getYoutubeVideoShareUrl(props.videoId), Math.floor(startSeconds))
 
       copyToClipboard(videoUrl, {
         messageOnSuccess: t('Share.Timestamp Link Copied')
@@ -5215,7 +5215,10 @@ export default defineComponent({
 
       const chapter = props.chapters.find((candidate, index) => {
         return hoverTime >= candidate.startSeconds &&
-          (hoverTime < candidate.endSeconds || (index === props.chapters.length - 1 && hoverTime === candidate.endSeconds))
+          (candidate.endSeconds === null
+            ? (index === props.chapters.length - 1 || hoverTime < props.chapters[index + 1].startSeconds)
+            : hoverTime < candidate.endSeconds ||
+              (index === props.chapters.length - 1 && hoverTime === candidate.endSeconds))
       })
 
       if (!chapter) {

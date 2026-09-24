@@ -1351,6 +1351,31 @@ Video:
       UpvoteSegment: 高評価
       DownvoteSegment: 低評価
       VoteFailed: SponsorBlockの評価を送信できませんでした。
+  External Media:
+    Dislikes: "低評価"
+    Reposts: "再投稿"
+    Saves: "保存"
+    Series: "シリーズ"
+    Season: "シーズン"
+    Season Number: "シーズン番号"
+    Episode: "エピソード"
+    Episode Number: "エピソード番号"
+    Track: "ミュージックトラック"
+    Track Number: "トラック番号"
+    Artists: "アーティスト"
+    Album: "アルバム"
+    Genres: "ジャンル"
+    Media Type: "メディアタイプ"
+    Availability: "公開状況"
+    Age Limit: "年齢制限"
+    Release Date: "発売日"
+    Availability Values:
+      public: "公開"
+      private: "プライベート"
+      premium_only: "プレミアムのみ"
+      subscriber_only: "購読者のみ"
+      needs_auth: "サインインが必要です"
+      unlisted: "限定公開"
 Playlist:
   Playlist Already Preloaded: "プレイリストのすべての動画は先読み済みです"
   Playlist Preload Progress: "動画を先読み中: {requested} 本中 {completed} 本"

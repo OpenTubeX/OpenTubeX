@@ -1359,6 +1359,31 @@ Video:
   Station: Stasiun
   Playlist:
     Unavailable videos are hidden: '{count} video yang tidak tersedia disembunyikan'
+  External Media:
+    Dislikes: "Tidak suka"
+    Reposts: "Posting ulang"
+    Saves: "Simpanan"
+    Series: "Seri"
+    Season: "Musim"
+    Season Number: "Nomor musim"
+    Episode: "Episode"
+    Episode Number: "Nomor episode"
+    Track: "Lagu musik"
+    Track Number: "Nomor lagu"
+    Artists: "Seniman"
+    Album: "Album"
+    Genres: "Genre"
+    Media Type: "Jenis media"
+    Availability: "Ketersediaan"
+    Age Limit: "Batas usia"
+    Release Date: "Tanggal rilis"
+    Availability Values:
+      public: "Publik"
+      private: "Pribadi"
+      premium_only: "Premium saja"
+      subscriber_only: "Khusus pelanggan"
+      needs_auth: "Diperlukan masuk"
+      unlisted: "Tidak terdaftar"
 Playlist:
   Playlist Already Preloaded: "Semua video dalam daftar putar sudah dimuat sebelumnya"
   Playlist Preload Progress: "Memuat video terlebih dahulu: {completed} dari {requested}"

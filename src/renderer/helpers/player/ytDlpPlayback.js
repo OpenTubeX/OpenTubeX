@@ -163,6 +163,9 @@ export async function getExternalYtDlpPlaybackSource(url, useAuthentication = fa
   const storyboardSrc = isLive || !info.storyboardVtt
     ? null
     : `data:text/vtt;charset=utf-8,${encodeURIComponent(info.storyboardVtt)}`
+  if (info.liveStatus === 'is_upcoming' && info.formats.length === 0) {
+    return { info, source: null }
+  }
   const httpFormats = info.formats.filter(format =>
     ['http', 'https'].includes(format.protocol) &&
     format.url !== null &&

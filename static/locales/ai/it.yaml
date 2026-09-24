@@ -1351,6 +1351,31 @@ Video:
       UpvoteSegment: Voto positivo
       DownvoteSegment: Voto negativo
       VoteFailed: Impossibile inviare il voto a SponsorBlock.
+  External Media:
+    Dislikes: "Non mi piace"
+    Reposts: "Repost"
+    Saves: "Salvataggi"
+    Series: "Serie"
+    Season: "Stagione"
+    Season Number: "Numero stagione"
+    Episode: "Episodio"
+    Episode Number: "Numero episodio"
+    Track: "Traccia musicale"
+    Track Number: "Numero traccia"
+    Artists: "Artisti"
+    Album: "Album"
+    Genres: "Generi"
+    Media Type: "Tipo di supporto"
+    Availability: "Disponibilità"
+    Age Limit: "Limite di età"
+    Release Date: "Data di rilascio"
+    Availability Values:
+      public: "Pubblico"
+      private: "Privato"
+      premium_only: "Solo Premium"
+      subscriber_only: "Solo abbonati"
+      needs_auth: "Accesso obbligatorio"
+      unlisted: "Non elencato"
 Playlist:
   Playlist Already Preloaded: "Tutti i video della playlist sono già precaricati"
   Playlist Preload Progress: "Precaricamento video: {completed} di {requested}"

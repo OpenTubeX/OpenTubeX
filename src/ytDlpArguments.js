@@ -7,6 +7,13 @@ const VIDEO_FORMATS = ['mp4', 'mkv', 'webm']
 const VIDEO_CODECS = ['h264', 'h265', 'vp9', 'av1']
 const AUDIO_FORMATS = ['mp3', 'm4a', 'opus', 'flac']
 export const SUBTITLE_FORMATS = ['srt', 'vtt', 'ass', 'lrc']
+export function playbackSubtitleArguments(isYouTubeVideo) {
+  return [
+    ...(!isYouTubeVideo ? ['--write-subs'] : []),
+    '--write-auto-subs', '--sub-langs', 'all',
+    '--sub-format', isYouTubeVideo ? 'vtt' : 'vtt/srt/ttml/dfxp'
+  ]
+}
 const SPONSORBLOCK_CATEGORIES = ['sponsor', 'intro', 'outro', 'selfpromo', 'interaction', 'music_offtopic', 'preview', 'filler']
 // Keeps local-playlist URLs comfortably below Windows' process command-line limit.
 export const MAX_LOCAL_PLAYLIST_VIDEOS = 500

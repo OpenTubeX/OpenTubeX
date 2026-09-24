@@ -1358,6 +1358,31 @@ Video:
   Station: Станция
   Playlist:
     Unavailable videos are hidden: 1 недоступное видео скрыто | {count} недоступных видео скрыто | {count} недоступных видео скрыто
+  External Media:
+    Dislikes: "Дизлайки"
+    Reposts: "Репосты"
+    Saves: "Сохранения"
+    Series: "Серия"
+    Season: "Сезон"
+    Season Number: "Номер сезона"
+    Episode: "Эпизод"
+    Episode Number: "Номер эпизода"
+    Track: "Музыкальный трек"
+    Track Number: "Номер трека"
+    Artists: "Исполнители"
+    Album: "Альбом"
+    Genres: "Жанры"
+    Media Type: "Тип медиаконтента"
+    Availability: "Доступность"
+    Age Limit: "Возрастное ограничение"
+    Release Date: "Дата выпуска"
+    Availability Values:
+      public: "Публичный"
+      private: "Частный"
+      premium_only: "Только Premium"
+      subscriber_only: "Только подписчики"
+      needs_auth: "Требуется вход"
+      unlisted: "Отсутствует в списках"
 Playlist:
   Playlist Already Preloaded: "Все видео из плейлиста уже предварительно загружены"
   Playlist Preload Progress: "Предварительная загрузка видео: {completed} из {requested}"

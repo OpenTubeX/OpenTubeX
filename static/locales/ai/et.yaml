@@ -1353,6 +1353,31 @@ Video:
       UpvoteSegment: Anna poolthääl
       DownvoteSegment: Anna vastuhääl
       VoteFailed: SponsorBlocki hääle saatmine nurjus.
+  External Media:
+    Dislikes: "Ei meeldi"
+    Reposts: "Taaspostitused"
+    Saves: "Salvestamised"
+    Series: "Seeria"
+    Season: "Hooaeg"
+    Season Number: "Hooaja number"
+    Episode: "Episood"
+    Episode Number: "Episoodi number"
+    Track: "Muusikapala"
+    Track Number: "Raja number"
+    Artists: "Esitajad"
+    Album: "Album"
+    Genres: "Žanrid"
+    Media Type: "Meedia tüüp"
+    Availability: "Saadavus"
+    Age Limit: "Vanusepiirang"
+    Release Date: "Väljalaskekuupäev"
+    Availability Values:
+      public: "Avalik"
+      private: "Privaatne"
+      premium_only: "Ainult Premium"
+      subscriber_only: "Ainult tellijad"
+      needs_auth: "Vajalik on sisselogimine"
+      unlisted: "Registriväline"
 Playlist:
   Playlist Already Preloaded: "Kõik esitusloendi videod on juba eellaaditud"
   Playlist Preload Progress: "Videote eellaadimine: {completed}/{requested}"

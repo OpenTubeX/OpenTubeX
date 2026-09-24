@@ -35,8 +35,28 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
     description: 'A video from another site.',
     webpage_url: mediaUrl,
     view_count: 1234,
+    concurrent_view_count: 42,
+    like_count: 15,
+    dislike_count: 2,
+    comment_count: 4,
+    repost_count: 3,
+    save_count: 5,
+    series: 'Example series',
+    season_number: 2,
+    episode_number: 1,
+    artists: ['Example artist'],
+    album: 'Example album',
+    genres: ['Documentary'],
+    license: 'Creative Commons',
+    categories: ['Education'],
+    tags: ['example'],
+    availability: 'unlisted',
+    age_limit: 18,
+    media_type: 'episode',
+    chapters: [{ start_time: 5, title: 'Introduction' }, { title: 'Invalid chapter' }, { start_time: 10, title: 'Main segment' }],
     upload_date: '20260918',
-    duration: 30,
+    timestamp: 1789743600,
+    release_date: '20260919',
     formats: [{
       format_id: 'webm-360',
       url: DEMO_MEDIA_URL,
@@ -108,7 +128,21 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await expect(page.locator(`${activeTab} .externalMediaCreator img`)).toHaveAttribute('src', avatarUrl)
   await expect(page.locator(`${activeTab} .externalMediaCreator a`).first()).toHaveAttribute('href', 'https://videos.example.test/@creator')
   await expect(page.locator(`${activeTab} .externalMediaDescription`)).toContainText('A video from another site.')
+  await page.locator(`${activeTab} .externalMediaDescription`).getByRole('button', { name: '...more' }).click()
+  await expect(page.locator(`${activeTab} .externalMediaDescription`)).toContainText('Creative Commons')
+  await expect(page.locator(`${activeTab} .externalMediaDescription`)).toContainText('example')
   await expect(page.locator(`${activeTab} .externalMediaDescription`)).toBeVisible()
+  await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('15 likes')
+  await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('42 watching')
+  await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('2 dislikes')
+  await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('4 comments')
+  await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('3 reposts')
+  await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('5 saves')
+  await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('Education')
+  await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('Age restricted')
+  await expect(page.locator(`${activeTab} .externalMediaExtra`)).toContainText('Example series')
+  await expect(page.locator(`${activeTab} .externalMediaExtra`)).toContainText('Example album')
+  await expect(page.locator(`${activeTab} .externalMediaExtra`)).toContainText('Release date')
   await waitForPlayback(page)
   await page.locator(`${activeTab} .externalMediaPlayer`).getByRole('button', { name: 'Pause (k)' }).click()
   const externalMedia = page.locator(`${activeTab} .externalMedia`)
@@ -116,21 +150,49 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await player.hover()
   await player.locator('.shaka-seek-bar-container').hover({ position: { x: 120, y: 4 } })
   await expect(player.locator('.shaka-player-ui-thumbnail-image-container')).toBeVisible()
+  await player.locator('video.player').evaluate(video => {
+    video.currentTime = 0
+    video.dispatchEvent(new Event('timeupdate'))
+  })
+  const chaptersButton = player.locator('.shaka-controls-button-panel .ft-chapters-button')
+  await expect(externalMedia.locator('.externalMediaChapters')).toHaveCount(0)
+  await expect(chaptersButton).toHaveAttribute('aria-label', 'Open Chapters')
+  await expect(chaptersButton.locator('.ft-chapters-current-title')).toHaveText('Chapters')
+  await chaptersButton.click({ force: true })
+  await expect(externalMedia.locator('.externalMediaChapters')).toContainText('Main segment')
+  await expect(externalMedia.locator('.externalMediaChapters [aria-current="true"]')).toHaveCount(0)
+  await expect(chaptersButton).toHaveAttribute('aria-label', 'Close Chapters')
+  await externalMedia.locator('.externalMediaChapters').getByRole('button', { name: 'Close Chapters' }).click()
+  await expect(externalMedia.locator('.externalMediaChapters')).toHaveCount(0)
+  await expect(chaptersButton).toHaveAttribute('aria-label', 'Open Chapters')
+  await chaptersButton.click({ force: true })
+  await externalMedia.locator('.externalMediaChapters').getByRole('button', { name: /Main segment/ }).click()
+  await expect.poll(() => player.locator('video.player').evaluate(video => video.currentTime)).toBeGreaterThanOrEqual(10)
+  const seekBar = player.locator('.shaka-seek-bar-container')
+  await player.hover()
+  await seekBar.hover({ position: { x: Math.floor((await seekBar.boundingBox()).width * 0.8), y: 4 } })
+  await expect(player.locator('.ft-chapter-preview')).toHaveText('Main segment')
+  await expect(player.locator('.ft-chapter-preview')).toBeVisible()
+  await externalMedia.locator('.externalMediaChapters').getByRole('button', { name: 'Copy link at 0:10' }).click()
+  await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toBe(`${mediaUrl}?t=10`)
   await expect(player.locator('.fullscreenSponsorBlockToggle, .ft-shaka-sponsorblock-button')).toHaveCount(0)
   await expect(player.locator('.playerFullscreenTitleOverlay')).not.toHaveAttribute('role', 'button')
   await expect(player.locator('.theatre-button')).toHaveCount(0)
   expect((await player.boundingBox()).width / (await externalMedia.boundingBox()).width).toBeGreaterThan(0.95)
   const shareButton = externalMedia.getByRole('button', { name: 'Share Video' }).first()
   await shareButton.click()
-  await expect(externalMedia.getByRole('button', { name: 'Copy Link' })).toBeVisible()
+  await expect(externalMedia.getByRole('button', { name: 'Copy Link', exact: true })).toBeVisible()
   await expect(externalMedia.getByRole('button', { name: 'Copy Embed' })).toHaveCount(0)
-  await externalMedia.getByRole('button', { name: 'Copy Link' }).click()
+  await externalMedia.getByRole('button', { name: 'Copy Link', exact: true }).click()
   await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toBe(mediaUrl)
   expect(sponsorBlockRequests).toEqual([])
   await expect(page.locator(`${sel.activeTab} .tabAvatar`)).toBeVisible()
+  await expect(page.locator('.toast-holder .toast')).toHaveCount(0)
+  await expect.poll(() => page.locator(`${activeTab} .externalMediaCreator img`).evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
   for (const theme of ['dark', 'light']) {
     await page.emulateMedia({ colorScheme: theme })
     await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+    await externalMedia.evaluate(element => element.scrollIntoView({ block: 'start' }))
     const playerBounds = await page.locator(`${activeTab} .externalMediaPlayer video.player`).boundingBox()
     const descriptionBounds = await page.locator(`${activeTab} .externalMediaDescription`).boundingBox()
     const topNavBounds = await page.locator('.topNav').boundingBox()
@@ -160,9 +222,15 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await fullscreenShareDialog.getByRole('button', { name: 'Copy Link' }).click()
   await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toBe(mediaUrl)
   await page.keyboard.press('s')
+  await page.setViewportSize({ width: 375, height: 667 })
+  expect(await externalMedia.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true)
+  await page.setViewportSize({ width: 1280, height: 720 })
 
   const args = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
   expect(args).toContain(mediaUrl)
+  expect(args).toContain('--write-subs')
+  expect(args).toContain('--write-auto-subs')
+  expect(args[args.indexOf('--sub-format') + 1]).toBe('vtt/srt/ttml/dfxp')
   expect(args).not.toContain('--extractor-args')
   expect(args[args.indexOf('--format') + 1]).toBe('bestvideo*+bestaudio/best,mhtml')
 
@@ -177,6 +245,42 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await waitForPlayback(page)
   await page.locator(`${activeTab} .externalMediaPlayer`).getByRole('button', { name: 'Pause (k)' }).click()
   await expect(page.locator(`${sel.activeTab} .tabPageIcon`)).toBeVisible()
+})
+
+test('shows an upcoming external stream before formats are available', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+
+  const executable = path.join(app.userDataDir, 'upcoming-external-yt-dlp.sh')
+  const mediaUrl = 'https://videos.example.test/upcoming'
+  const response = JSON.stringify({
+    title: 'Upcoming stream',
+    live_status: 'is_upcoming',
+    release_timestamp: 1790870400,
+    channel: 'Example creator',
+    license: 'Creative Commons',
+    formats: []
+  })
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+    `printf '%s\\n' '${response}'`
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  await page.evaluate(async (ytDlpPath) => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateYtDlpSource', 'system')
+    await store.dispatch('updateYtDlpPath', ytDlpPath)
+  }, executable)
+
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page.locator(`${activeTab} .externalMediaDetails h1`)).toHaveText('Upcoming stream')
+  await expect(page.locator(`${activeTab} .externalMediaBadges`)).toContainText('Upcoming')
+  await expect(page.locator(`${activeTab} .externalMediaDetails`)).not.toContainText('Published on')
+  await expect(page.locator(`${activeTab} .externalMediaExtra`)).toContainText('Release date')
+  await expect(page.locator(`${activeTab} .externalMediaExtra`)).toContainText('1 Oct 2026')
+  await expect(page.locator(`${activeTab} .externalMediaDescription`)).toContainText('Creative Commons')
+  await expect(page.locator(`${activeTab} .externalMediaPlayer`)).toHaveCount(0)
 })
 
 test('shows a recoverable extraction error in the player area', async ({ app, page }, testInfo) => {
@@ -263,6 +367,7 @@ test('keeps protected media headers with a long external storyboard', async ({ a
 
   const media = await readFile(DEMO_MEDIA_PATH)
   const receivedHeaders = []
+  const captionHeaders = []
   const siblingHeaders = []
   const storyboardHeaders = []
   const redirectedStoryboardHeaders = []
@@ -286,13 +391,19 @@ test('keeps protected media headers with a long external storyboard', async ({ a
       response.writeHead(204).end()
       return
     }
-    receivedHeaders.push(request.headers)
+    if (request.url === '/foo/captions.vtt') captionHeaders.push(request.headers)
+    else receivedHeaders.push(request.headers)
     if (
       !request.headers.cookie?.includes('stream_session=test-token') ||
       request.headers.referer !== 'https://www.tiktok.com/' ||
       request.headers['user-agent'] !== 'yt-dlp-test-agent'
     ) {
       response.writeHead(403).end()
+      return
+    }
+    if (request.url === '/foo/captions.vtt') {
+      response.writeHead(200, { 'content-type': 'text/vtt' })
+        .end('WEBVTT\n\n00:00:00.000 --> 00:00:30.000\nCaption text\n')
       return
     }
     response.writeHead(200, {
@@ -306,10 +417,19 @@ test('keeps protected media headers with a long external storyboard', async ({ a
   try {
     const executable = path.join(app.userDataDir, 'external-media-cookie-stream.sh')
     const streamUrl = `http://127.0.0.1:${server.address().port}/foo/video.webm`
+    const captionUrl = `http://127.0.0.1:${server.address().port}/foo/captions.vtt`
     const siblingUrl = `http://127.0.0.1:${server.address().port}/foobar/ping`
     const storyboardUrl = `http://127.0.0.1:${server.address().port}/storyboard.jpg`
     const response = JSON.stringify({
       title: 'Cookie protected stream',
+      requested_subtitles: {
+        en: {
+          ext: 'vtt',
+          url: captionUrl,
+          http_headers: { Referer: 'https://www.tiktok.com/', 'User-Agent': 'yt-dlp-test-agent' }
+        }
+      },
+      subtitles: { en: [{ ext: 'vtt', url: captionUrl }] },
       formats: [{
         format_id: '360',
         url: streamUrl,
@@ -352,11 +472,13 @@ test('keeps protected media headers with a long external storyboard', async ({ a
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       await store.dispatch('updateYtDlpSource', 'system')
       await store.dispatch('updateYtDlpPath', ytDlpPath)
+      await store.dispatch('updateEnableSubtitlesByDefault', true)
     }, executable)
 
     await page.locator(sel.searchInput).fill('https://www.tiktok.com/@example/video/123')
     await page.locator(sel.searchInput).press('Enter')
     await waitForPlayback(page)
+    await expect.poll(() => captionHeaders.length).toBeGreaterThan(0)
     expect(receivedHeaders.length).toBeGreaterThan(0)
     expect(receivedHeaders.every(headers => headers.cookie?.includes('stream_session=test-token'))).toBe(true)
     expect(receivedHeaders.every(headers => headers.referer === 'https://www.tiktok.com/')).toBe(true)
@@ -368,6 +490,9 @@ test('keeps protected media headers with a long external storyboard', async ({ a
     await page.evaluate(async url => { await fetch(url, { mode: 'no-cors' }) }, `http://127.0.0.1:${server.address().port}/storyboard/1.jpg`)
     expect(redirectedStoryboardHeaders.length).toBe(1)
     expect(redirectedStoryboardHeaders[0].cookie).toBeUndefined()
+    expect(captionHeaders.every(headers => headers.cookie?.includes('stream_session=test-token'))).toBe(true)
+    expect(captionHeaders.every(headers => headers.referer === 'https://www.tiktok.com/')).toBe(true)
+    expect(captionHeaders.every(headers => headers['user-agent'] === 'yt-dlp-test-agent')).toBe(true)
     await page.evaluate(async url => { await fetch(url, { mode: 'no-cors' }) }, siblingUrl)
     expect(siblingHeaders.length).toBe(1)
     expect(siblingHeaders[0].cookie).toBeUndefined()

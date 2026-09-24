@@ -1372,6 +1372,31 @@ Video:
       VoteFailed: Ekki tókst að senda SponsorBlock-atkvæði.
   Playlist:
     Unavailable videos are hidden: 1 ótiltækt myndskeið er falið | {count} ótiltæk myndskeið eru falin
+  External Media:
+    Dislikes: "Neikvæð atkvæði"
+    Reposts: "Endurbirtingar"
+    Saves: "Vistanir"
+    Series: "Röð"
+    Season: "Þáttaröð"
+    Season Number: "Númer þáttaraðar"
+    Episode: "Þáttur"
+    Episode Number: "Númer þáttar"
+    Track: "Lag"
+    Track Number: "Laganúmer"
+    Artists: "Flytjendur"
+    Album: "Albúm"
+    Genres: "Tegundir"
+    Media Type: "Tegund margmiðlunarefnis"
+    Availability: "Framboð"
+    Age Limit: "Aldurstakmark"
+    Release Date: "Útgáfudagur"
+    Availability Values:
+      public: "Opinbert"
+      private: "Einka"
+      premium_only: "Aðeins fyrir úrvalsáskrifendur"
+      subscriber_only: "Aðeins áskrifendur"
+      needs_auth: "Innskráning er nauðsynleg"
+      unlisted: "Óskráð"
 Playlist:
   Playlist Already Preloaded: "Öll myndskeið spilunarlistans eru þegar forhlaðin"
   Playlist Preload Progress: "Forhleðsla myndskeiða: {completed} af {requested}"

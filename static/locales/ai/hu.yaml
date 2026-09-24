@@ -1351,6 +1351,31 @@ Video:
       UpvoteSegment: Pozitív szavazat
       DownvoteSegment: Negatív szavazat
       VoteFailed: Nem sikerült elküldeni a SponsorBlock-szavazatot.
+  External Media:
+    Dislikes: "Nemtetszések"
+    Reposts: "Újbóli bejegyzések"
+    Saves: "Mentések"
+    Series: "Sorozat"
+    Season: "Évad"
+    Season Number: "Évad száma"
+    Episode: "Epizód"
+    Episode Number: "Epizód száma"
+    Track: "Zeneszám"
+    Track Number: "Szám száma"
+    Artists: "Művészek"
+    Album: "Album"
+    Genres: "Műfajok"
+    Media Type: "Média típusa"
+    Availability: "Elérhetőség"
+    Age Limit: "Korhatár"
+    Release Date: "Kiadás dátuma"
+    Availability Values:
+      public: "Nyilvános"
+      private: "Privát"
+      premium_only: "Csak prémium"
+      subscriber_only: "Csak előfizetők"
+      needs_auth: "Bejelentkezés szükséges"
+      unlisted: "Listázatlan"
 Playlist:
   Playlist Already Preloaded: "A lejátszási lista összes videója már elő van töltve"
   Playlist Preload Progress: "Videók előtöltése: {completed}/{requested}"

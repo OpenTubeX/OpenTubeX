@@ -1829,6 +1829,31 @@ Video:
   Station: Estació
   Playlist:
     Unavailable videos are hidden: 1 vídeo no disponible està ocult | {count} vídeos no disponibles estan ocults | {count} vídeos no disponibles estan ocults
+  External Media:
+    Dislikes: "No m'agrada"
+    Reposts: "Reposts"
+    Saves: "desats"
+    Series: "Sèrie"
+    Season: "Temporada"
+    Season Number: "Número de temporada"
+    Episode: "Episodi"
+    Episode Number: "Número d'episodi"
+    Track: "Pista de música"
+    Track Number: "Número de pista"
+    Artists: "Artistes"
+    Album: "Àlbum"
+    Genres: "Gèneres"
+    Media Type: "Tipus de suport"
+    Availability: "Disponibilitat"
+    Age Limit: "Límit d'edat"
+    Release Date: "Data de llançament"
+    Availability Values:
+      public: "Públic"
+      private: "Privat"
+      premium_only: "Només Premium"
+      subscriber_only: "Només subscriptors"
+      needs_auth: "L'inici de sessió és obligatori"
+      unlisted: "Ocult"
 Playlist:
   Playlist Already Preloaded: "Tots els vídeos de la llista ja estan precarregats"
   Playlist Preload Progress: "S'estan precarregant vídeos: {completed} de {requested}"

@@ -5,8 +5,8 @@ import { normalizeYtDlpPlaybackCacheMaxEntrySize } from '../../ytDlpPlaybackCach
 import store from '../store/index'
 import { getDownloadTemplateOptions } from './downloadTemplates'
 import { normalizeAutomaticDownloadRule, parseAutomaticDownloadRules } from './automaticDownloadRules'
-import { buildYtDlpDownloadArguments } from '../../ytDlpArguments'
-import { EXTERNAL_PLAYBACK_FORMAT_SELECTOR, PLAYBACK_INFO_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo, mapPlaybackFormat, mapPlaybackCaptions, toFiniteNumber, toNonEmptyString } from '../../ytDlpMetadata'
+import { buildYtDlpDownloadArguments, playbackSubtitleArguments } from '../../ytDlpArguments'
+import { EXTERNAL_PLAYBACK_FORMAT_SELECTOR, PLAYBACK_INFO_OUTPUT_TEMPLATE, EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo, mapPlaybackFormat, mapPlaybackCaptions, mapExternalPlaybackMetadata, toFiniteNumber, toNonEmptyString } from '../../ytDlpMetadata'
 import { buildYtDlpStoryboardVtt } from '../../main/ytDlpStoryboard'
 import { isYouTubeSubtitleUrl } from '../../youtubeSubtitle'
 import { chooseAndroidDirectory } from './androidStorage'
@@ -130,8 +130,8 @@ const android = {
       } catch { return null }
     }
     try {
-      const args = ['--no-playlist', '--no-warnings', '--no-progress', '--socket-timeout', '15', '--ignore-no-formats-error', '--format', isYouTubeVideo ? 'sb0/sb1/sb2/sb3' : EXTERNAL_PLAYBACK_FORMAT_SELECTOR, '--print', PLAYBACK_INFO_OUTPUT_TEMPLATE]
-      if (includeSubtitles) args.push('--write-auto-subs', '--sub-langs', 'all', '--sub-format', 'vtt')
+      const args = ['--no-playlist', '--no-warnings', '--no-progress', '--socket-timeout', '15', '--ignore-no-formats-error', '--format', isYouTubeVideo ? 'sb0/sb1/sb2/sb3' : EXTERNAL_PLAYBACK_FORMAT_SELECTOR, '--print', isYouTubeVideo ? PLAYBACK_INFO_OUTPUT_TEMPLATE : EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE]
+      if (includeSubtitles) args.push(...playbackSubtitleArguments(isYouTubeVideo))
       if (isYouTubeVideo && !useDefaultClients) args.push('--extractor-args', useAuthentication ? 'youtube:player_client=default,web_safari' : 'youtube:player_client=default,web_embedded,-android_vr')
       args.push(isYouTubeVideo ? `https://www.youtube.com/watch?v=${videoId}` : videoId)
       const [info, binaries] = await Promise.all([extract(args, useAuthentication, !isYouTubeVideo, parseYtDlpPlaybackInfo), native.info()])
@@ -155,9 +155,10 @@ const android = {
         isLive: !!info.is_live,
         liveStatus: toNonEmptyString(info.live_status),
         duration: toFiniteNumber(info.duration),
+        externalMetadata: mapExternalPlaybackMetadata(info),
         hlsManifestUrl: toNonEmptyString(info.manifest_url) ?? formats.find(format => format.protocol === 'm3u8_native' && format.manifest_url)?.manifest_url ?? null,
         storyboardVtt: buildYtDlpStoryboardVtt([info.storyboard], toFiniteNumber(info.duration)),
-        ...mapPlaybackCaptions(info.requested_subtitles),
+        ...mapPlaybackCaptions(info.requested_subtitles, info.subtitles, !isYouTubeVideo),
         formats: formats.filter(format => format.protocol !== 'mhtml').map(mapPlaybackFormat),
       }
     } catch (error) {

@@ -1697,6 +1697,31 @@ Video:
   Station: 스테이션
   Playlist:
     Unavailable videos are hidden: 사용할 수 없는 동영상 {count}개가 숨겨졌습니다
+  External Media:
+    Dislikes: "싫어요"
+    Reposts: "리포스팅"
+    Saves: "저장"
+    Series: "시리즈"
+    Season: "시즌"
+    Season Number: "시즌 번호"
+    Episode: "에피소드"
+    Episode Number: "에피소드 번호"
+    Track: "음악 트랙"
+    Track Number: "트랙 번호"
+    Artists: "아티스트"
+    Album: "앨범"
+    Genres: "장르"
+    Media Type: "미디어 유형"
+    Availability: "공개 상태"
+    Age Limit: "나이 제한"
+    Release Date: "출시일"
+    Availability Values:
+      public: "공개"
+      private: "비공개"
+      premium_only: "프리미엄 전용"
+      subscriber_only: "구독자만"
+      needs_auth: "로그인 필요"
+      unlisted: "일부 공개"
 Playlist:
   Playlist Already Preloaded: "재생목록의 모든 동영상을 이미 미리 불러왔습니다"
   Playlist Preload Progress: "동영상 미리 불러오는 중: {requested}개 중 {completed}개"

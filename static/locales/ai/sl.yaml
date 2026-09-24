@@ -1807,6 +1807,31 @@ Video:
   Station: Postaja
   Playlist:
     Unavailable videos are hidden: 1 nedostopen videoposnetek je skrit | {count} nedostopna videoposnetka sta skrita | {count} nedostopni videoposnetki so skriti | {count} nedostopnih videoposnetkov je skritih
+  External Media:
+    Dislikes: "Negativne ocene"
+    Reposts: "Ponovne objave"
+    Saves: "Shranitve"
+    Series: "Serija"
+    Season: "Sezona"
+    Season Number: "Številka sezone"
+    Episode: "Epizoda"
+    Episode Number: "Številka epizode"
+    Track: "Glasbena skladba"
+    Track Number: "Številka skladbe"
+    Artists: "Izvajalci"
+    Album: "Album"
+    Genres: "Zvrsti"
+    Media Type: "Vrsta medija"
+    Availability: "Razpoložljivost"
+    Age Limit: "Starostna omejitev"
+    Release Date: "Datum izdaje"
+    Availability Values:
+      public: "Javno"
+      private: "Zasebno"
+      premium_only: "Samo Premium"
+      subscriber_only: "Samo za naročnike"
+      needs_auth: "Zahtevana je prijava"
+      unlisted: "Ni na seznamu"
 Playlist:
   Playlist Already Preloaded: "Vsi videoposnetki na seznamu so že prednaloženi"
   Playlist Preload Progress: "Prednalaganje videoposnetkov: {completed} od {requested}"

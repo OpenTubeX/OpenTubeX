@@ -694,6 +694,31 @@ Video:
       MuteActionType: Wycisz
       MutePrompt: Wyciszyć segment „{segmentCategory}”?
       SkipActionType: Pomiń
+  External Media:
+    Dislikes: "Niepolubienia"
+    Reposts: "Reposty"
+    Saves: "Zapisania"
+    Series: "Seria"
+    Season: "Sezon"
+    Season Number: "Numer sezonu"
+    Episode: "Odc."
+    Episode Number: "Numer odcinka"
+    Track: "Ścieżka muzyczna"
+    Track Number: "Numer utworu"
+    Artists: "Artyści"
+    Album: "Album"
+    Genres: "Gatunki"
+    Media Type: "Typ materiału"
+    Availability: "Dostępność"
+    Age Limit: "Granica wieku"
+    Release Date: "Data wydania"
+    Availability Values:
+      public: "Publiczne"
+      private: "Prywatny"
+      premium_only: "Tylko Premium"
+      subscriber_only: "Tylko subskrybenci"
+      needs_auth: "Wymagane logowanie"
+      unlisted: "Niepubliczny"
 Change Format:
   Local Video File: Lokalny plik filmu
   Local Audio File: Lokalny plik dźwiękowy

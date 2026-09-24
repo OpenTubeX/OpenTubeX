@@ -1399,6 +1399,31 @@ Video:
   Station: Station
   Playlist:
     Unavailable videos are hidden: 1 niet-beschikbare video is verborgen | {count} niet-beschikbare video's zijn verborgen
+  External Media:
+    Dislikes: "Dislikes"
+    Reposts: "Herplaatsingen"
+    Saves: "Opgeslagen items"
+    Series: "Serie"
+    Season: "Seizoen"
+    Season Number: "Seizoennummer"
+    Episode: "Aflevering"
+    Episode Number: "Afleveringsnummer"
+    Track: "Muzieknummer"
+    Track Number: "Tracknummer"
+    Artists: "Artiesten"
+    Album: "Album"
+    Genres: "Genres"
+    Media Type: "Mediatype"
+    Availability: "Beschikbaarheid"
+    Age Limit: "Leeftijdsgrens"
+    Release Date: "Releasedatum"
+    Availability Values:
+      public: "Openbaar"
+      private: "Privé"
+      premium_only: "Alleen premium"
+      subscriber_only: "Alleen abonnees"
+      needs_auth: "Inloggen vereist"
+      unlisted: "Verborgen"
 Playlist:
   Playlist Already Preloaded: "Alle video's in de afspeellijst zijn al vooraf geladen"
   Playlist Preload Progress: "Video's vooraf laden: {completed} van {requested}"

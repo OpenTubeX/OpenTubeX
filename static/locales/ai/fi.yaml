@@ -1388,6 +1388,31 @@ Video:
   Station: Asema
   Playlist:
     Unavailable videos are hidden: 1 video, joka ei ole saatavilla, on piilotettu | {count} videota, jotka eivät ole saatavilla, on piilotettu
+  External Media:
+    Dislikes: "Ei-tykkäykset"
+    Reposts: "Uudelleenjulkaisut"
+    Saves: "Tallennukset"
+    Series: "Sarja"
+    Season: "Kausi"
+    Season Number: "Kauden numero"
+    Episode: "Jakso"
+    Episode Number: "Jakson numero"
+    Track: "Musiikkikappale"
+    Track Number: "Raidan numero"
+    Artists: "Taiteilijat"
+    Album: "Albumi"
+    Genres: "Lajityypit"
+    Media Type: "Mediatyyppi"
+    Availability: "Saatavuus"
+    Age Limit: "Ikäraja"
+    Release Date: "Julkaisupäivä"
+    Availability Values:
+      public: "Julkinen"
+      private: "Yksityinen"
+      premium_only: "Vain Premium"
+      subscriber_only: "Vain tilaajat"
+      needs_auth: "Kirjautuminen vaaditaan"
+      unlisted: "Listaamaton"
 Playlist:
   Playlist Already Preloaded: "Kaikki soittolistan videot on jo esiladattu"
   Playlist Preload Progress: "Esiladataan videoita: {completed}/{requested}"

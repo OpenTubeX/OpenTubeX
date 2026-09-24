@@ -1418,6 +1418,31 @@ Video:
   Station: Station
   Playlist:
     Unavailable videos are hidden: 1 utilgængelig video er skjult | {count} utilgængelige videoer er skjult
+  External Media:
+    Dislikes: "Synes ikke godt om"
+    Reposts: "Genindlæg"
+    Saves: "Gemte"
+    Series: "Serier"
+    Season: "Sæson"
+    Season Number: "Sæsonnummer"
+    Episode: "Episode"
+    Episode Number: "Episodenummer"
+    Track: "Musiknummer"
+    Track Number: "Spornummer"
+    Artists: "Kunstnere"
+    Album: "Album"
+    Genres: "Genrer"
+    Media Type: "Medietype"
+    Availability: "Tilgængelighed"
+    Age Limit: "Aldersgrænse"
+    Release Date: "Udgivelsesdato"
+    Availability Values:
+      public: "Offentlig"
+      private: "Privat"
+      premium_only: "Kun Premium"
+      subscriber_only: "Kun abonnenter"
+      needs_auth: "Log ind er påkrævet"
+      unlisted: "Ikke opført"
 Playlist:
   Playlist Already Preloaded: "Alle videoer i playlisten er allerede forudindlæst"
   Playlist Preload Progress: "Forudindlæser videoer: {completed} af {requested}"

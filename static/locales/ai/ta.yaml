@@ -1393,6 +1393,31 @@ Video:
   Station: நிலையம்
   Playlist:
     Unavailable videos are hidden: கிடைக்காத 1 காணொளி மறைக்கப்பட்டுள்ளது | கிடைக்காத {count} காணொளிகள் மறைக்கப்பட்டுள்ளன
+  External Media:
+    Dislikes: "விருப்பமின்மைகள்"
+    Reposts: "மறுபதிவுகள்"
+    Saves: "சேவ்ஸ்"
+    Series: "தொடர்"
+    Season: "பருவம்"
+    Season Number: "பருவ எண்"
+    Episode: "பகுதி"
+    Episode Number: "பகுதி எண்"
+    Track: "மியூசிக் ட்ராக்"
+    Track Number: "ட்ராக் எண்"
+    Artists: "கலைஞர்கள்"
+    Album: "ஆல்பம்"
+    Genres: "வகைகள்"
+    Media Type: "மீடியா வகை"
+    Availability: "கிடைக்கும் தன்மை"
+    Age Limit: "வயது வரம்பு"
+    Release Date: "வெளியீட்டு தேதி"
+    Availability Values:
+      public: "பொது"
+      private: "தனிப்பட்டது"
+      premium_only: "பிரீமியம் மட்டும்"
+      subscriber_only: "சந்தாதாரர்கள் மட்டும்"
+      needs_auth: "உள்நுழைவு தேவை"
+      unlisted: "பட்டியலிடப்படாதது"
 Playlist:
   Playlist Already Preloaded: "பிளேலிஸ்ட்டின் அனைத்து காணொளிகளும் ஏற்கனவே முன்பே ஏற்றப்பட்டுள்ளன"
   Playlist Preload Progress: "காணொளிகளை முன்பே ஏற்றுகிறது: {requested} இல் {completed}"

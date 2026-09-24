@@ -1380,6 +1380,31 @@ Video:
   Station: Trạm
   Playlist:
     Unavailable videos are hidden: '{count} video không có sẵn đã bị ẩn'
+  External Media:
+    Dislikes: "Lượt không thích"
+    Reposts: "Lượt đăng lại"
+    Saves: "Lượt lưu"
+    Series: "Chuỗi"
+    Season: "Mùa"
+    Season Number: "Số mùa"
+    Episode: "Tập"
+    Episode Number: "Số tập"
+    Track: "Bài hát"
+    Track Number: "Số thứ tự bài hát"
+    Artists: "Nghệ sĩ"
+    Album: "Album"
+    Genres: "Thể loại"
+    Media Type: "Loại phương tiện"
+    Availability: "Tình trạng truy cập"
+    Age Limit: "Giới hạn độ tuổi"
+    Release Date: "Ngày phát hành"
+    Availability Values:
+      public: "Công khai"
+      private: "Riêng"
+      premium_only: "Chỉ áp dụng cho gói cao"
+      subscriber_only: "Chỉ dành cho người đăng ký"
+      needs_auth: "Yêu cầu đăng nhập"
+      unlisted: "Không liệt kê"
 Playlist:
   Playlist Already Preloaded: "Tất cả video trong danh sách phát đã được tải trước"
   Playlist Preload Progress: "Đang tải trước video: {completed}/{requested}"

@@ -1364,6 +1364,31 @@ Video:
   Station: Stasjon
   Playlist:
     Unavailable videos are hidden: 1 utilgjengelig video er skjult | {count} utilgjengelige videoer er skjult
+  External Media:
+    Dislikes: "Misliker"
+    Reposts: "Reposts"
+    Saves: "Lagringer"
+    Series: "Serie"
+    Season: "Sesong"
+    Season Number: "Sesongnummer"
+    Episode: "Episode"
+    Episode Number: "Episodenummer"
+    Track: "Musikkspor"
+    Track Number: "Spornummer"
+    Artists: "Kunstnere"
+    Album: "Album"
+    Genres: "Sjangere"
+    Media Type: "Medietype"
+    Availability: "Tilgjengelighet"
+    Age Limit: "Aldersgrense"
+    Release Date: "Utgivelsesdato"
+    Availability Values:
+      public: "Offentlig"
+      private: "Privat"
+      premium_only: "Kun Premium"
+      subscriber_only: "Kun abonnenter"
+      needs_auth: "Pålogging kreves"
+      unlisted: "Ikke oppført"
 Playlist:
   Playlist Already Preloaded: "Alle videoene i spillelisten er allerede forhåndslastet"
   Playlist Preload Progress: "Forhåndslaster videoer: {completed} av {requested}"
