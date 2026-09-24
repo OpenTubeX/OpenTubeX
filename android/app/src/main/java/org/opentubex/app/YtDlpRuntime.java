@@ -40,6 +40,19 @@ final class YtDlpRuntime {
         }
     }
 
+    static final class ErrorOutput {
+        final StringBuilder tail = new StringBuilder();
+        boolean timedOut;
+
+        void add(String line) {
+            if (hasTimedOutWarning(line)) timedOut = true;
+            tail.append(line).append('\n');
+            if (tail.length() > 65536) tail.delete(0, tail.length() - 65536);
+        }
+
+        String message() { return tail.toString().trim(); }
+    }
+
     static synchronized void initialize(Context context) throws Exception {
         if (initialized) return;
         YoutubeDL.getInstance().init(context);
@@ -90,7 +103,8 @@ final class YtDlpRuntime {
             running = new RunningProcess(command(context, command).start());
             RunningProcess current = running;
             if (id != null) PROCESSES.put(id, current);
-            StringBuilder output = new StringBuilder(), errors = new StringBuilder();
+            StringBuilder output = new StringBuilder();
+            ErrorOutput errors = new ErrorOutput();
             FutureTask<Void> stdout = new FutureTask<>(() -> {
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(current.process.getInputStream(), StandardCharsets.UTF_8))) {
                     String first = reader.readLine();
@@ -116,8 +130,7 @@ final class YtDlpRuntime {
                     String line;
                     while ((line = reader.readLine()) != null) {
                         if (progress != null) progress.accept(line);
-                        errors.append(line).append('\n');
-                        if (errors.length() > 65536) errors.delete(0, errors.length() - 65536);
+                        errors.add(line);
                     }
                 }
                 return null;
@@ -127,8 +140,8 @@ final class YtDlpRuntime {
             int exit = current.process.waitFor();
             stderr.get();
             stdout.get();
-            if (exit != 0) throw new IOException(errors.toString().trim());
-            if (rejectTimeoutWarnings && hasTimedOutWarning(errors.toString())) {
+            if (exit != 0) throw new IOException(errors.message());
+            if (rejectTimeoutWarnings && errors.timedOut) {
                 throw new IOException("yt-dlp playback extraction timed out");
             }
             completed = true;

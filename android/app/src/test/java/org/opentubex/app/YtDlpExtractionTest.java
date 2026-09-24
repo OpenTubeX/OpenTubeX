@@ -10,6 +10,15 @@ public class YtDlpExtractionTest {
         assertFalse(YtDlpRuntime.hasTimedOutWarning("WARNING: [youtube] video: Some formats are missing\n"));
     }
 
+    @Test public void remembersTimeoutWarningsAfterTrimmingStderr() {
+        YtDlpRuntime.ErrorOutput errors = new YtDlpRuntime.ErrorOutput();
+        errors.add("WARNING: [youtube] video: The read operation timed out");
+        for (int index = 0; index < 2000; index++) errors.add("Unrelated output after the timeout warning");
+
+        assertTrue(errors.timedOut);
+        assertFalse(errors.message().contains("timed out"));
+    }
+
     @Test public void timeoutStartsAfterWaitingForAnExtractionWorker() throws Exception {
         ExecutorService callers = Executors.newFixedThreadPool(3);
         CountDownLatch busy = new CountDownLatch(2);
