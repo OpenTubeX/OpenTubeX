@@ -19,7 +19,7 @@ export class FtPlaybackAdjustedTime extends shaka.ui.Element {
     this.video_ = controls.getVideo()
 
     /** @private */
-    this.timeElement_ = document.createElement('button')
+    this.timeElement_ = document.createElement('span')
     this.timeElement_.classList.add('ft-playback-adjusted-time', 'shaka-current-time')
     this.timeElement_.setAttribute('aria-hidden', 'true')
     this.parent.appendChild(this.timeElement_)
@@ -46,25 +46,10 @@ export class FtPlaybackAdjustedTime extends shaka.ui.Element {
     this.eventManager.listen(events, 'timeDisplaySettingsChanged', () => {
       this.updateAdjusted_()
     })
-    this.eventManager.listen(this.timeElement_, 'click', () => {
+    this.eventManager.listen(events, 'timeDisplayToggled', () => {
       this.showProgress_ = !this.showProgress_
       this.updateAdjusted_()
     })
-
-    const controlsContainer = this.controls.getControlsContainer()
-    if (controlsContainer) {
-      this.eventManager.listen(controlsContainer, 'click', (event) => {
-        const target = event.target
-        if (!(target instanceof Element)) {
-          return
-        }
-
-        if (target.closest('.shaka-current-time:not(.ft-playback-adjusted-time)')) {
-          this.showProgress_ = !this.showProgress_
-          this.updateAdjusted_()
-        }
-      })
-    }
 
     this.updateAdjusted_()
   }

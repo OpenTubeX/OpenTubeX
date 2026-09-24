@@ -5792,6 +5792,9 @@ export default defineComponent({
     /** @type {MutationObserver|null} */
     let controlPanelMutationObserver = null
 
+    /** @type {AbortController|null} */
+    let volumePointerListeners = null
+
     /** @type {MutationObserver|null} */
     let fullscreenControlsVisibilityObserver = null
     let androidStatusBarVisible = true
@@ -5875,6 +5878,22 @@ export default defineComponent({
       }
 
       controlPanel.classList.remove('ft-controls-measuring')
+
+      const rightGlass = controlPanel.querySelector(':scope > .ft-right-control-glass')
+      if (rightGlass instanceof HTMLElement) {
+        const rightButtons = [...controlPanel.querySelectorAll(':scope > .shaka-spacer ~ button:not(.shaka-hidden)')]
+          .filter(button => button.getClientRects().length > 0)
+        rightGlass.hidden = rightButtons.length === 0
+
+        if (rightButtons.length > 0) {
+          const panelBounds = controlPanel.getBoundingClientRect()
+          const firstBounds = rightButtons[0].getBoundingClientRect()
+          const lastBounds = rightButtons[rightButtons.length - 1].getBoundingClientRect()
+          const scale = controlPanel.clientWidth > 0 ? panelBounds.width / controlPanel.clientWidth : 1
+          rightGlass.style.left = `${(firstBounds.left - panelBounds.left) / scale}px`
+          rightGlass.style.width = `${(lastBounds.right - firstBounds.left) / scale}px`
+        }
+      }
     }
 
     /** @param {HTMLElement} controlPanel */
@@ -5899,10 +5918,54 @@ export default defineComponent({
     function setupAdaptiveControlPanelLayout() {
       controlPanelResizeObserver?.disconnect()
       controlPanelMutationObserver?.disconnect()
+      volumePointerListeners?.abort()
+      volumePointerListeners = null
 
       const controlPanel = container.value?.querySelector('.shaka-controls-button-panel')
       if (!(controlPanel instanceof HTMLElement)) {
         return
+      }
+
+      const muteButton = controlPanel.querySelector(':scope > .shaka-mute-button')
+      const volumeBar = controlPanel.querySelector(':scope > .shaka-volume-bar-container')
+
+      if (muteButton instanceof HTMLElement && volumeBar instanceof HTMLElement) {
+        const volumeGroup = document.createElement('div')
+        volumeGroup.classList.add('ft-volume-control-group')
+        muteButton.before(volumeGroup)
+        volumeGroup.append(muteButton, volumeBar)
+
+        let focusedByPointer = false
+        const blurPointerFocus = () => {
+          if (!focusedByPointer) return
+          if (volumeGroup.contains(document.activeElement)) {
+            document.activeElement.blur()
+          }
+          focusedByPointer = false
+        }
+        volumeGroup.addEventListener('pointerdown', () => {
+          focusedByPointer = true
+          volumePointerListeners?.abort()
+          volumePointerListeners = new AbortController()
+          window.addEventListener('pointerup', (event) => {
+            const bounds = volumeGroup.getBoundingClientRect()
+            if (event.clientX < bounds.left || event.clientX > bounds.right ||
+                event.clientY < bounds.top || event.clientY > bounds.bottom) {
+              blurPointerFocus()
+            }
+            volumePointerListeners?.abort()
+            volumePointerListeners = null
+          }, { signal: volumePointerListeners.signal })
+          window.addEventListener('pointercancel', () => {
+            blurPointerFocus()
+            volumePointerListeners?.abort()
+            volumePointerListeners = null
+          }, { signal: volumePointerListeners.signal })
+        })
+        volumeGroup.addEventListener('pointerleave', (event) => {
+          if (event.buttons === 0) blurPointerFocus()
+        })
+        volumeGroup.addEventListener('keydown', () => { focusedByPointer = false })
       }
 
       const regularTime = controlPanel.querySelector(':scope > .shaka-current-time:not(.ft-playback-adjusted-time)')
@@ -5913,6 +5976,33 @@ export default defineComponent({
         timeDisplayGroup.classList.add('ft-time-display-group')
         regularTime.before(timeDisplayGroup)
         timeDisplayGroup.append(regularTime, adjustedTime)
+        timeDisplayGroup.addEventListener('click', (event) => {
+          if (event.target !== regularTime) {
+            regularTime.click()
+            return
+          }
+
+          events.dispatchEvent(new CustomEvent('timeDisplayToggled'))
+        })
+      }
+
+      for (const control of controlPanel.querySelectorAll(':scope > button, :scope > .ft-volume-control-group, :scope > .ft-time-display-group')) {
+        if (control.querySelector(':scope > .ft-control-glass')) {
+          continue
+        }
+        const glass = document.createElement('span')
+        glass.classList.add('ft-control-glass')
+        glass.setAttribute('aria-hidden', 'true')
+        control.append(glass)
+      }
+
+      const spacer = controlPanel.querySelector(':scope > .shaka-spacer')
+      if (spacer instanceof HTMLElement && !controlPanel.querySelector(':scope > .ft-right-control-glass')) {
+        const rightGlass = document.createElement('span')
+        rightGlass.classList.add('ft-right-control-glass')
+        rightGlass.setAttribute('aria-hidden', 'true')
+        rightGlass.hidden = true
+        spacer.after(rightGlass)
       }
 
       controlPanelResizeObserver = new ResizeObserver(() => {
@@ -11318,6 +11408,9 @@ export default defineComponent({
         controlPanelMutationObserver.disconnect()
         controlPanelMutationObserver = null
       }
+
+      volumePointerListeners?.abort()
+      volumePointerListeners = null
 
       if (fullscreenControlsVisibilityObserver) {
         fullscreenControlsVisibilityObserver.disconnect()
