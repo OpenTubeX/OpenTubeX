@@ -72,7 +72,10 @@ export function updateAndroidMediaSession(state) {
   const operation = payload.playbackState === 'none'
     ? AndroidMediaSession.clear({ nativeOwner: payload.nativeOwner })
     : AndroidMediaSession.update({ state: payload })
-  operation.catch(error => console.error('Failed to update Android media controls', error))
+  operation.catch(error => {
+    if (lastSentPayload === payload) lastSentPayload = null
+    console.error('Failed to update Android media controls', error)
+  })
 }
 
 export async function addAndroidMediaSessionActionListener(listener) {
