@@ -1389,9 +1389,9 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 μη διαθέσιμο βίντεο είναι κρυμμένο | {count} μη διαθέσιμα βίντεο είναι κρυμμένα
   External Media:
-    Dislikes: "Αρνητικές ψήφοι"
-    Reposts: "Αναδημοσιεύσεις"
-    Saves: "Αποθηκεύσεις"
+    Dislikes: "Αρνητική ψήφος | Αρνητικές ψήφοι"
+    Reposts: "Αναδημοσίευση | Αναδημοσιεύσεις"
+    Saves: "Αποθήκευση | Αποθηκεύσεις"
     Series: "Σειρά"
     Season: "Σεζόν"
     Season Number: "Αριθμός σεζόν"

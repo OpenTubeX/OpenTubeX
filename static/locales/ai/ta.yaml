@@ -1394,9 +1394,9 @@ Video:
   Playlist:
     Unavailable videos are hidden: கிடைக்காத 1 காணொளி மறைக்கப்பட்டுள்ளது | கிடைக்காத {count} காணொளிகள் மறைக்கப்பட்டுள்ளன
   External Media:
-    Dislikes: "விருப்பமின்மைகள்"
-    Reposts: "மறுபதிவுகள்"
-    Saves: "சேவ்ஸ்"
+    Dislikes: "விருப்பமின்மை | விருப்பமின்மைகள்"
+    Reposts: "மறுபதிவு | மறுபதிவுகள்"
+    Saves: "சேமிப்பு | சேவ்ஸ்"
     Series: "தொடர்"
     Season: "பருவம்"
     Season Number: "பருவ எண்"

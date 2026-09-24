@@ -1351,9 +1351,9 @@ Video:
       DownvoteSegment: Voter contre
       VoteFailed: Échec de l’envoi du vote à SponsorBlock.
   External Media:
-    Dislikes: "Votes négatifs"
-    Reposts: "Republications"
-    Saves: "Enregistrements"
+    Dislikes: "Vote négatif | Votes négatifs | Votes négatifs"
+    Reposts: "Republication | Republications | Republications"
+    Saves: "Enregistrement | Enregistrements | Enregistrements"
     Series: "Série"
     Season: "Saison"
     Season Number: "Numéro de saison"

@@ -1352,9 +1352,9 @@ Video:
       DownvoteSegment: Negatív szavazat
       VoteFailed: Nem sikerült elküldeni a SponsorBlock-szavazatot.
   External Media:
-    Dislikes: "Nemtetszések"
-    Reposts: "Újbóli bejegyzések"
-    Saves: "Mentések"
+    Dislikes: "Nemtetszés | Nemtetszések"
+    Reposts: "Újbóli bejegyzés | Újbóli bejegyzések"
+    Saves: "Mentés | Mentések"
     Series: "Sorozat"
     Season: "Évad"
     Season Number: "Évad száma"

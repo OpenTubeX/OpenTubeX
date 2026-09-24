@@ -1400,9 +1400,9 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 niet-beschikbare video is verborgen | {count} niet-beschikbare video's zijn verborgen
   External Media:
-    Dislikes: "Dislikes"
-    Reposts: "Herplaatsingen"
-    Saves: "Opgeslagen items"
+    Dislikes: "Dislike | Dislikes"
+    Reposts: "Herplaatsing | Herplaatsingen"
+    Saves: "Opgeslagen item | Opgeslagen items"
     Series: "Serie"
     Season: "Seizoen"
     Season Number: "Seizoennummer"

@@ -1352,9 +1352,9 @@ Video:
       DownvoteSegment: Olumsuz oy ver
       VoteFailed: SponsorBlock oyu gönderilemedi.
   External Media:
-    Dislikes: "Beğenmeme"
-    Reposts: "Repostlar"
-    Saves: "Kaydetme"
+    Dislikes: "Beğenmeme | Beğenmeme"
+    Reposts: "Repost | Repostlar"
+    Saves: "Kaydetme | Kaydetme"
     Series: "Seri"
     Season: "Sezon"
     Season Number: "Sezon numarası"

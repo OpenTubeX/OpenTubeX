@@ -1733,9 +1733,9 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 nepasiekiamas vaizdo įrašas paslėptas | {count} nepasiekiami vaizdo įrašai paslėpti | {count} nepasiekiamų vaizdo įrašų paslėpta
   External Media:
-    Dislikes: "Nepatinka"
-    Reposts: "Pakartotiniai įrašai"
-    Saves: "Išsaugojimai"
+    Dislikes: "Nepatinka | Nepatinka | Nepatinka"
+    Reposts: "Pakartotinis įrašas | Pakartotiniai įrašai | Pakartotiniai įrašai"
+    Saves: "Išsaugojimas | Išsaugojimai | Išsaugojimai"
     Series: "Serialas"
     Season: "Sezonas"
     Season Number: "Sezono numeris"

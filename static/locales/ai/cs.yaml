@@ -1352,9 +1352,9 @@ Video:
       DownvoteSegment: Hlasovat proti
       VoteFailed: Hlas pro SponsorBlock se nepodařilo odeslat.
   External Media:
-    Dislikes: "Dislajků"
-    Reposts: "Reposty"
-    Saves: "Uložení"
+    Dislikes: "Dislajk | Dislajky | Dislajků"
+    Reposts: "Repost | Reposty | Repostů"
+    Saves: "Uložení | Uložení | Uložení"
     Series: "Série"
     Season: "Sezóna"
     Season Number: "Číslo sezóny"

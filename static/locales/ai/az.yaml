@@ -1364,9 +1364,9 @@ Video:
       DownvoteSegment: Mənfi səs ver
       VoteFailed: SponsorBlock səsi göndərilə bilmədi.
   External Media:
-    Dislikes: "Bəyənməmə"
-    Reposts: "Repostlar"
-    Saves: "Yadda saxlanma"
+    Dislikes: "Bəyənməmə | Bəyənməmə"
+    Reposts: "Repost | Repostlar"
+    Saves: "Yadda saxlanma | Yadda saxlanma"
     Series: "Silsilə"
     Season: "Mövsüm"
     Season Number: "Mövsüm nömrəsi"

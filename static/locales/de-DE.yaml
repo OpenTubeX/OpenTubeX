@@ -1743,9 +1743,9 @@ Video:
   Move Queue Item Down: "{title} nach unten verschieben"
   Age Restricted Badge: Altersbeschränkt
   External Media:
-    Dislikes: Dislikes
-    Reposts: Reposts
-    Saves: Speicherungen
+    Dislikes: Dislike | Dislikes
+    Reposts: Repost | Reposts
+    Saves: Speicherung | Speicherungen
     Series: Serie
     Season: Staffel
     Season Number: Staffelnummer

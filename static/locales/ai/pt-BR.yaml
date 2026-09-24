@@ -1352,9 +1352,9 @@ Video:
       DownvoteSegment: Voto negativo
       VoteFailed: Não foi possível enviar o voto ao SponsorBlock.
   External Media:
-    Dislikes: "Desgostos"
-    Reposts: "Republicações"
-    Saves: "Salvamentos"
+    Dislikes: "Desgosto | Desgostos | Desgostos"
+    Reposts: "Republicação | Republicações | Republicações"
+    Saves: "Salvamento | Salvamentos | Salvamentos"
     Series: "Série"
     Season: "Temporada"
     Season Number: "Número da temporada"

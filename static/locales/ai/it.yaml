@@ -1352,9 +1352,9 @@ Video:
       DownvoteSegment: Voto negativo
       VoteFailed: Impossibile inviare il voto a SponsorBlock.
   External Media:
-    Dislikes: "Non mi piace"
-    Reposts: "Repost"
-    Saves: "Salvataggi"
+    Dislikes: "Non mi piace | Non mi piace | Non mi piace"
+    Reposts: "Repost | Repost | Repost"
+    Saves: "Salvataggio | Salvataggi | Salvataggi"
     Series: "Serie"
     Season: "Stagione"
     Season Number: "Numero stagione"

@@ -1720,9 +1720,9 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 video no disponible está oculto | {count} videos no disponibles están ocultos | {count} videos no disponibles están ocultos
   External Media:
-    Dislikes: "No me gusta"
-    Reposts: "Reposts"
-    Saves: "Guardados"
+    Dislikes: "No me gusta | No me gusta | No me gusta"
+    Reposts: "Repost | Reposts | Reposts"
+    Saves: "Guardado | Guardados | Guardados"
     Series: "Serie"
     Season: "Temporada"
     Season Number: "Número de temporada"

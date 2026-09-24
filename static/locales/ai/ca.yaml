@@ -1830,9 +1830,9 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 vídeo no disponible està ocult | {count} vídeos no disponibles estan ocults | {count} vídeos no disponibles estan ocults
   External Media:
-    Dislikes: "No m'agrada"
-    Reposts: "Reposts"
-    Saves: "desats"
+    Dislikes: "No m'agrada | No m'agrada | No m'agrada"
+    Reposts: "Repost | Reposts | Reposts"
+    Saves: "Desat | desats | desats"
     Series: "Sèrie"
     Season: "Temporada"
     Season Number: "Número de temporada"

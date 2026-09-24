@@ -162,8 +162,9 @@ export function mapExternalPlaybackMetadata(info) {
       if (chapter === null || typeof chapter !== 'object') return []
       const startSeconds = toFiniteNumber(chapter.start_time)
       const next = chapters[index + 1]
+      const nextStartSeconds = next && typeof next === 'object' ? toFiniteNumber(next.start_time) : null
       const endSeconds = toFiniteNumber(chapter.end_time) ??
-        (next && typeof next === 'object' ? toFiniteNumber(next.start_time) : null) ?? duration
+        (startSeconds !== null && nextStartSeconds !== null && nextStartSeconds > startSeconds ? nextStartSeconds : null) ?? duration
       if (startSeconds === null || startSeconds < 0 || (endSeconds !== null && endSeconds <= startSeconds)) return []
       return [{ startSeconds, endSeconds, title: toNonEmptyString(chapter.title) ?? String(index + 1) }]
     })

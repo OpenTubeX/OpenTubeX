@@ -1419,9 +1419,9 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 utilgængelig video er skjult | {count} utilgængelige videoer er skjult
   External Media:
-    Dislikes: "Negative bedømmelser"
-    Reposts: "Genindlæg"
-    Saves: "Gemte"
+    Dislikes: "Negativ bedømmelse | Negative bedømmelser"
+    Reposts: "Genindlæg | Genindlæg"
+    Saves: "Gemt element | Gemte"
     Series: "Serier"
     Season: "Sæson"
     Season Number: "Sæsonnummer"

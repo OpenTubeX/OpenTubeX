@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { readFile } from 'node:fs/promises'
+import YAML from 'yaml'
+import { createI18n } from 'vue-i18n'
 import { buildYtDlpDownloadArguments, playbackSubtitleArguments } from '../../src/ytDlpArguments.js'
 import { EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_OUTPUT_TEMPLATE, mapExternalPlaybackMetadata, mapPlaybackCaptions, mapPlaybackFormat } from '../../src/ytDlpMetadata.js'
 
@@ -104,6 +107,21 @@ test('external metadata keeps optional counts, context, and chapter boundaries',
   assert.deepEqual(mapExternalPlaybackMetadata({
     chapters: [{ start_time: 5, title: 'Only chapter' }]
   }).chapters, [{ startSeconds: 5, endSeconds: null, title: 'Only chapter' }])
+  assert.deepEqual(mapExternalPlaybackMetadata({
+    duration: 30,
+    chapters: [{ start_time: 5, title: 'Valid' }, { start_time: -1, title: 'Invalid' }]
+  }).chapters, [{ startSeconds: 5, endSeconds: 30, title: 'Valid' }])
+})
+
+test('external engagement labels use singular and plural forms', async () => {
+  for (const locale of ['en-US', 'de-DE']) {
+    const messages = YAML.parse(await readFile(new URL(`../../static/locales/${locale}.yaml`, import.meta.url), 'utf8'))
+    const i18n = createI18n({ legacy: false, locale, messages: { [locale]: messages } })
+    for (const key of ['Dislikes', 'Reposts', 'Saves']) {
+      const path = `Video.External Media.${key}`
+      assert.notEqual(i18n.global.t(path, {}, 1), i18n.global.t(path, {}, 2), `${locale} ${key}`)
+    }
+  }
 })
 
 test('caption mapping distinguishes authored and automatic tracks', () => {

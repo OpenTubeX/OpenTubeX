@@ -1332,9 +1332,9 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 unavailable video is hidden | {count} unavailable videos are hidden
   External Media:
-    Dislikes: dislikes
-    Reposts: reposts
-    Saves: saves
+    Dislikes: "dislike | dislikes"
+    Reposts: "repost | reposts"
+    Saves: "save | saves"
     Series: Series
     Season: Season
     Season Number: Season number

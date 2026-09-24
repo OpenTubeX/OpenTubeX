@@ -1365,9 +1365,9 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 otillgänglig video är dold | {count} otillgängliga videor är dolda
   External Media:
-    Dislikes: "Ogillamarkeringar"
-    Reposts: "Återinlägg"
-    Saves: "Sparade objekt"
+    Dislikes: "Ogillamarkering | Ogillamarkeringar"
+    Reposts: "Återinlägg | Återinlägg"
+    Saves: "Sparat objekt | Sparade objekt"
     Series: "Serie"
     Season: "Säsong"
     Season Number: "Säsongsnummer"

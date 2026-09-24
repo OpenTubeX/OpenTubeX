@@ -1352,9 +1352,9 @@ Video:
       DownvoteSegment: Hlasovať proti
       VoteFailed: Hlas SponsorBlock sa nepodarilo odoslať.
   External Media:
-    Dislikes: "Negatívne hodnotenia"
-    Reposts: "Opätovné zdieľania"
-    Saves: "Uloženia"
+    Dislikes: "Negatívne hodnotenie | Negatívne hodnotenia | Negatívne hodnotenia"
+    Reposts: "Opätovné zdieľanie | Opätovné zdieľania | Opätovné zdieľania"
+    Saves: "Uloženie | Uloženia | Uloženia"
     Series: "Séria"
     Season: "Sezóna"
     Season Number: "Číslo sezóny"

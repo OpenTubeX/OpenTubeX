@@ -695,9 +695,9 @@ Video:
       MutePrompt: Wyciszyć segment „{segmentCategory}”?
       SkipActionType: Pomiń
   External Media:
-    Dislikes: "Niepolubienia"
-    Reposts: "Reposty"
-    Saves: "Zapisania"
+    Dislikes: "Niepolubienie | Niepolubienia | Niepolubień"
+    Reposts: "Repost | Reposty | Repostów"
+    Saves: "Zapisanie | Zapisania | Zapisań"
     Series: "Seria"
     Season: "Sezon"
     Season Number: "Numer sezonu"

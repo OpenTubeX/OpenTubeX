@@ -1359,9 +1359,9 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 недоступное видео скрыто | {count} недоступных видео скрыто | {count} недоступных видео скрыто
   External Media:
-    Dislikes: "Дизлайки"
-    Reposts: "Репосты"
-    Saves: "Сохранения"
+    Dislikes: "Дизлайк | Дизлайки | Дизлайков"
+    Reposts: "Репост | Репосты | Репостов"
+    Saves: "Сохранение | Сохранения | Сохранений"
     Series: "Сериал"
     Season: "Сезон"
     Season Number: "Номер сезона"

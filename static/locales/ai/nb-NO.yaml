@@ -1365,9 +1365,9 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 utilgjengelig video er skjult | {count} utilgjengelige videoer er skjult
   External Media:
-    Dislikes: "Misliker"
-    Reposts: "Videredelinger"
-    Saves: "Lagringer"
+    Dislikes: "Mislike | Misliker"
+    Reposts: "Videredeling | Videredelinger"
+    Saves: "Lagring | Lagringer"
     Series: "Serie"
     Season: "Sesong"
     Season Number: "Sesongnummer"

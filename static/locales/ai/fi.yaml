@@ -1389,9 +1389,9 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 video, joka ei ole saatavilla, on piilotettu | {count} videota, jotka eivät ole saatavilla, on piilotettu
   External Media:
-    Dislikes: "Ei-tykkäykset"
-    Reposts: "Uudelleenjulkaisut"
-    Saves: "Tallennukset"
+    Dislikes: "Ei-tykkäys | Ei-tykkäykset"
+    Reposts: "Uudelleenjulkaisu | Uudelleenjulkaisut"
+    Saves: "Tallennus | Tallennukset"
     Series: "Sarja"
     Season: "Kausi"
     Season Number: "Kauden numero"

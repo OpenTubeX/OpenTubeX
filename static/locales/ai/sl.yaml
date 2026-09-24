@@ -1808,9 +1808,9 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 nedostopen videoposnetek je skrit | {count} nedostopna videoposnetka sta skrita | {count} nedostopni videoposnetki so skriti | {count} nedostopnih videoposnetkov je skritih
   External Media:
-    Dislikes: "Negativne ocene"
-    Reposts: "Ponovne objave"
-    Saves: "Shranitve"
+    Dislikes: "Negativna ocena | Negativni oceni | Negativne ocene | Negativnih ocen"
+    Reposts: "Ponovna objava | Ponovni objavi | Ponovne objave | Ponovnih objav"
+    Saves: "Shranitev | Shranitvi | Shranitve | Shranitev"
     Series: "Serija"
     Season: "Sezona"
     Season Number: "Številka sezone"

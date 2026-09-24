@@ -1630,9 +1630,9 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 utilgjengeleg video er gøymd | {count} utilgjengelege videoar er gøymde
   External Media:
-    Dislikes: "Misliker"
-    Reposts: "Reposts"
-    Saves: "Lagringar"
+    Dislikes: "Misliking | Misliker"
+    Reposts: "Repost | Reposts"
+    Saves: "Lagring | Lagringar"
     Series: "Serie"
     Season: "Sesong"
     Season Number: "Sesongnummer"

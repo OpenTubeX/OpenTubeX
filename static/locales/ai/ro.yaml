@@ -1387,9 +1387,9 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 videoclip indisponibil este ascuns | {count} videoclipuri indisponibile sunt ascunse | {count} de videoclipuri indisponibile sunt ascunse
   External Media:
-    Dislikes: "Aprecieri negative"
-    Reposts: "Repostări"
-    Saves: "Salvări"
+    Dislikes: "Apreciere negativă | Aprecieri negative | Aprecieri negative"
+    Reposts: "Repostare | Repostări | Repostări"
+    Saves: "Salvare | Salvări | Salvări"
     Series: "Serie"
     Season: "Sezon"
     Season Number: "Numărul sezonului"

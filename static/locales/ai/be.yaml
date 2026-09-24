@@ -1430,9 +1430,9 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 недаступнае відэа схавана | {count} недаступныя відэа схаваныя | {count} недаступных відэа схавана
   External Media:
-    Dislikes: "Дызлайкі"
-    Reposts: "Рэпосты"
-    Saves: "Захаванні"
+    Dislikes: "Дызлайк | Дызлайкі | Дызлайкаў"
+    Reposts: "Рэпост | Рэпосты | Рэпостаў"
+    Saves: "Захаванне | Захаванні | Захаванняў"
     Series: "Серыя"
     Season: "Сезон"
     Season Number: "Нумар сезону"

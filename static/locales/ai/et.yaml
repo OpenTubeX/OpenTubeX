@@ -1354,9 +1354,9 @@ Video:
       DownvoteSegment: Anna vastuhääl
       VoteFailed: SponsorBlocki hääle saatmine nurjus.
   External Media:
-    Dislikes: "Ei meeldi"
-    Reposts: "Taaspostitused"
-    Saves: "Salvestamised"
+    Dislikes: "Ei meeldi | Ei meeldi"
+    Reposts: "Taaspostitus | Taaspostitused"
+    Saves: "Salvestamine | Salvestamised"
     Series: "Seeria"
     Season: "Hooaeg"
     Season Number: "Hooaja number"

@@ -2003,9 +2003,9 @@ Video:
   External DRM Protected: DRM protected videos cannot be played in OpenTubeX, as they require proprietary, closed source components.
   Invalid Media URL: Invalid media URL
   External Media:
-    Dislikes: dislikes
-    Reposts: reposts
-    Saves: saves
+    Dislikes: dislike | dislikes
+    Reposts: repost | reposts
+    Saves: save | saves
     Series: Series
     Season: Season
     Season Number: Season number

@@ -78,7 +78,7 @@ test('AI translation validation rejects keys already covered by human translatio
 })
 
 test('AI translation validation allows count-aware external metric labels', () => {
-  const source = { Video: { 'External Media': { Dislikes: 'dislikes', Reposts: 'reposts', Saves: 'saves' } } }
+  const source = { Video: { 'External Media': { Dislikes: 'dislike | dislikes', Reposts: 'repost | reposts', Saves: 'save | saves' } } }
   const overlay = { Video: { 'External Media': {
     Dislikes: 'дизлайк | дизлайки | дизлайків',
     Reposts: 'репост | репости | репостів',

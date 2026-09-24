@@ -1393,9 +1393,9 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 vídeo non dispoñible está oculto | {count} vídeos non dispoñibles están ocultos
   External Media:
-    Dislikes: "Desgustos"
-    Reposts: "Reposts"
-    Saves: "Gardados"
+    Dislikes: "Desgusto | Desgustos"
+    Reposts: "Repost | Reposts"
+    Saves: "Gardado | Gardados"
     Series: "Serie"
     Season: "Temporada"
     Season Number: "Número de temporada"

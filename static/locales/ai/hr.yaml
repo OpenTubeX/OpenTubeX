@@ -1369,9 +1369,9 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 nedostupan videozapis je skriven | {count} nedostupna videozapisa su skrivena | {count} nedostupnih videozapisa je skriveno
   External Media:
-    Dislikes: "Nesviđanja"
-    Reposts: "Ponovne objave"
-    Saves: "Spremanja"
+    Dislikes: "Nesviđanje | Nesviđanja | Nesviđanja"
+    Reposts: "Ponovna objava | Ponovne objave | Ponovne objave"
+    Saves: "Spremanje | Spremanja | Spremanja"
     Series: "Serija"
     Season: "Sezona"
     Season Number: "Broj sezone"

@@ -1365,9 +1365,9 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 недостъпен видеоклип е скрит | {count} недостъпни видеоклипа са скрити
   External Media:
-    Dislikes: "Нехаресвания"
-    Reposts: "Повторни публикации"
-    Saves: "Запазвания"
+    Dislikes: "Нехаресване | Нехаресвания"
+    Reposts: "Повторна публикация | Повторни публикации"
+    Saves: "Запазване | Запазвания"
     Series: "Сериал"
     Season: "Сезон"
     Season Number: "Номер на сезона"

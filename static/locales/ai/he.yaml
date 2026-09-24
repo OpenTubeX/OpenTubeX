@@ -1391,9 +1391,9 @@ Video:
   Playlist:
     Unavailable videos are hidden: סרטון אחד שאינו זמין מוסתר | {count} סרטונים לא זמינים מוסתרים | {count} סרטונים לא זמינים מוסתרים
   External Media:
-    Dislikes: "דיסלייקים"
-    Reposts: "פרסומים מחדש"
-    Saves: "שמירות"
+    Dislikes: "דיסלייק | דיסלייקים | דיסלייקים"
+    Reposts: "פרסום מחדש | פרסומים מחדש | פרסומים מחדש"
+    Saves: "שמירה | שמירות | שמירות"
     Series: "סדרה"
     Season: "עונה"
     Season Number: "מספר עונה"
