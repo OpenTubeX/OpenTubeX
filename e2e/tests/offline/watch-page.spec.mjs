@@ -85,6 +85,34 @@ async function expectSponsorBlockContentClamp(content, previousScrollTop) {
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
+test.describe('desktop quick playback speed bar', () => {
+  test.use({ seed: { settings: { ...WATCH_PAGE_SEED, useQuickPlaybackSpeedBar: true } } })
+
+  test('uses the shaded glass surface', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    const bar = page.locator('.ft-quick-playback-rate-bar')
+    await expect(bar).toBeVisible()
+    const surface = await bar.evaluate(element => {
+      const style = getComputedStyle(element)
+      const visibleButton = [...element.querySelectorAll('button')]
+        .find(button => button.getBoundingClientRect().height > 0)
+      return {
+        backgroundColor: style.backgroundColor,
+        backdropFilter: style.backdropFilter,
+        boxShadow: style.boxShadow,
+        height: element.getBoundingClientRect().height,
+        topInset: visibleButton.getBoundingClientRect().top - element.getBoundingClientRect().top
+      }
+    })
+    expect(surface.backgroundColor).toBe('rgba(0, 0, 0, 0.42)')
+    expect(surface.backdropFilter).toContain('blur(10px)')
+    expect(surface.boxShadow).not.toBe('none')
+    expect(surface.height).toBe(40)
+    expect(surface.topInset).toBeGreaterThanOrEqual(5)
+  })
+})
+
 async function observeUpNextHandoff(page) {
   await page.evaluate((activeTabSelector) => {
     window.__emptyUpNextRendered = false
