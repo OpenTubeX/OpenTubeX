@@ -88,6 +88,7 @@ android {
         debug.res.srcDirs = ['src/dev/res', new File(appIconOutput, 'android/dev/res')]
         nightly.res.srcDirs = ['src/debug/res', new File(appIconOutput, 'android/debug/res')]
         androidTest.assets.srcDirs += ['../../e2e/fixtures/media']
+        androidTest.assets.srcDirs += ['../../e2e/fixtures/player-scripts']
     }
     if (project.findProperty('testBuildType') == 'nightly') {
         sourceSets.androidTest {
