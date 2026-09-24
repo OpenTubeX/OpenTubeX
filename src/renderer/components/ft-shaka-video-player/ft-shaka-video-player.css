@@ -5054,12 +5054,12 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) .phonePlayerOptions[open]) {
     inset-block: 0 auto;
     inset-inline: calc(100% + 12px) auto;
-    inline-size: min(300px, calc(50vw - 50% - 96px));
+    inline-size: min(300px, calc(50vw - 50% - 108px));
     block-size: 100%;
     border-radius: 12px;
   }
 
-  @media (width < 700px) {
+  @media (width < 980px) {
     :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) .phonePlayerOptions[open]) {
       inset-inline: 50% auto;
       inline-size: min(320px, calc(100vw - 48px));

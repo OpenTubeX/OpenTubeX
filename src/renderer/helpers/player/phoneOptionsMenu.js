@@ -37,6 +37,7 @@ export function setupPhoneOptionsMenu(menu, controls, t) {
 
   function dismiss() {
     controls.hideSettingsMenus()
+    menu.classList.add('shaka-hidden')
     update()
   }
 
@@ -157,7 +158,10 @@ export function setupPhoneOptionsMenu(menu, controls, t) {
     query.removeEventListener('change', schedule)
     window.removeEventListener('resize', schedule)
     restoreHeader()
-    if (dialog.contains(menu)) parent.append(menu)
+    if (dialog.contains(menu)) {
+      if (parent.querySelector('.shaka-overflow-menu')) menu.remove()
+      else parent.append(menu)
+    }
     dialog.remove()
   }
 }

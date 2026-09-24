@@ -1,4 +1,4 @@
-import { test, expect, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, setWindowSize, sel } from '../../helpers/app.mjs'
 import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -62,6 +62,30 @@ test('landscape Shorts options use the space beside the narrow player', async ({
   })).toBe(true)
   await expect(dialog.locator('.shaka-overflow-menu')).toBeVisible()
 
+  await player.locator('video').evaluate(async video => {
+    video.pause()
+    await video.play()
+  })
+  await expect.poll(() => player.locator('video').evaluate(video => video.currentTime)).toBeGreaterThan(1)
+  await expect(dialog).toBeVisible()
+  const resumedBounds = await dialog.boundingBox()
+  expect(resumedBounds.width).toBeGreaterThanOrEqual(250)
+  expect(resumedBounds.x).toBeGreaterThanOrEqual(playerBounds.x + playerBounds.width + 8)
+
+  await page.setViewportSize({ width: 980, height: 600 })
+  const edgeBounds = await dialog.boundingBox()
+  const edgePlayerBounds = await player.boundingBox()
+  const edgeRailBounds = await page.locator('.shortsActionRail').boundingBox()
+  expect(edgeBounds.width).toBeGreaterThanOrEqual(250)
+  expect(edgeBounds.x).toBeGreaterThanOrEqual(edgePlayerBounds.x + edgePlayerBounds.width + 8)
+  expect(edgeBounds.x + edgeBounds.width).toBeLessThanOrEqual(edgeRailBounds.x - 8)
+
+  await page.setViewportSize({ width: 700, height: 600 })
+  const middleBounds = await dialog.boundingBox()
+  expect(middleBounds.width).toBeGreaterThanOrEqual(250)
+  expect(middleBounds.x).toBeGreaterThanOrEqual(8)
+  expect(middleBounds.x + middleBounds.width).toBeLessThanOrEqual(692)
+
   await page.setViewportSize({ width: 420, height: 320 })
   const compactBounds = await dialog.boundingBox()
   expect(compactBounds.width).toBeGreaterThanOrEqual(250)
@@ -75,6 +99,54 @@ test('landscape Shorts options use the space beside the narrow player', async ({
   const optionBounds = await lastOption.boundingBox()
   expect(optionBounds.y).toBeGreaterThanOrEqual(menuBounds.y - 1)
   expect(optionBounds.y + optionBounds.height).toBeLessThanOrEqual(menuBounds.y + menuBounds.height + 1)
+  await dialog.locator('.phonePlayerOptionsClose').click()
+  await expect(dialog).toBeHidden()
+})
+
+test('landscape Shorts options stay usable when playback finishes loading', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  let releaseMedia
+  const mediaGate = new Promise(resolve => { releaseMedia = resolve })
+  await page.route(/googlevideo\.com\/videoplayback/, async route => {
+    await mediaGate
+    await route.fallback()
+  })
+
+  try {
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page.locator('.ftVideoPlayer')).toBeVisible()
+    await setWindowSize(app, page, { width: 1026, height: 461 })
+    await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabs', 'capacitorTabletLayout'))
+    const watch = await page.evaluateHandle(findWatchComponent)
+    await watch.evaluate(async component => {
+      component.proxy.useCustomShortsPlayerForCurrentVideo = true
+      component.proxy.updateShortsPlayerState(30, [{ width: 360, height: 640 }])
+      await component.proxy.$nextTick()
+    })
+    await watch.dispose()
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    await player.locator('.shortsTopControlsGroup').last().locator('button').nth(-2).click({ force: true })
+    const dialog = page.locator('.phonePlayerOptions[open]')
+    await expect(dialog).toBeVisible()
+
+    releaseMedia()
+    await expect.poll(() => player.locator('video').evaluate(video => video.currentTime)).toBeGreaterThan(0)
+    await expect(dialog).toBeVisible()
+    await expect(player.locator('.shaka-overflow-menu')).toHaveCount(1)
+    const [playerBounds, dialogBounds] = await Promise.all([player.boundingBox(), dialog.boundingBox()])
+    expect(dialogBounds.width).toBeGreaterThanOrEqual(250)
+    expect(dialogBounds.x).toBeGreaterThanOrEqual(playerBounds.x + playerBounds.width + 8)
+    await dialog.locator('.phonePlayerOptionsClose').click()
+    await expect(dialog).toBeHidden()
+    await player.hover()
+    const playButton = player.locator('.shortsTopControlsGroup').first().locator('button').first()
+    await expect(playButton).toBeVisible()
+    await playButton.click({ timeout: 5000 })
+    await expect.poll(() => player.locator('video').evaluate(video => video.paused)).toBe(true)
+  } finally {
+    releaseMedia()
+  }
 })
 
 test('phone Shorts controls clear navigation and show quick speeds', async ({ app, page }) => {
