@@ -1495,6 +1495,106 @@
   block-size: 42px;
 }
 
+// Landscape phones cross the tablet tab-strip breakpoint, but still need the
+// compact Shorts controls when there is little vertical space.
+@media (orientation: landscape) and (height <= 600px) {
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea) {
+    --shorts-player-height: max(
+      0px,
+      calc(100dvh - var(--top-nav-sticky-offset) - var(--mobile-progress-bar-space) - 48px)
+    ) !important;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea .videoAreaMargin) {
+    grid-template-columns: minmax(0, 1fr);
+    column-gap: 0;
+    inline-size: 100%;
+    max-inline-size: 100%;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea .videoPlayer),
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsExternalMetadata),
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsNextPreview) {
+    grid-column: 1;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea .videoPlayer) {
+    background-color: #000;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsExternalMetadata) {
+    position: absolute;
+    z-index: 4;
+    inset-block: auto 16px;
+    inset-inline: 16px auto;
+    inline-size: min(35%, 360px);
+    padding: 0;
+    color: #fff;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive :is(.shortsExternalTitle, .shortsSkeletonTitle)) {
+    display: block;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsExternalTitleButton) {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsActionRail) {
+    position: absolute;
+    z-index: 5;
+    inset-block: 60px auto;
+    inset-inline: auto 8px;
+    box-sizing: border-box;
+    block-size: max(0px, calc(var(--shorts-player-height) - 68px));
+    inline-size: 48px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden auto;
+    overscroll-behavior: contain;
+    justify-content: safe flex-end;
+    gap: 8px;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsActionRail > :not(.os-scrollbar)) {
+    flex-shrink: 0;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive :is(
+    .shortsChannelRow,
+    .shortsSkeletonChannelRow,
+    .shortsFullscreenChannelRow,
+    .shortsAction:not(.shortsActionSkeleton) > span,
+    .shortsActionSkeleton > small,
+    .shortsSkeletonVolume
+  )) {
+    display: none;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsMetadataAction) {
+    display: flex;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsNavigation) {
+    position: static;
+    gap: 8px;
+    transform: none;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive :is(
+    .shortsActionSkeleton > span,
+    .shortsSkeletonSound,
+    .shortsSkeletonControlGroup span
+  )) {
+    inline-size: 42px;
+    block-size: 42px;
+    flex: none;
+  }
+}
+
 @keyframes shorts-transition-in {
   from {
     opacity: 0.7;

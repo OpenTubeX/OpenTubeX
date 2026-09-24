@@ -4624,6 +4624,12 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   flex: none;
 }
 
+@media (orientation: landscape) and (height <= 600px) {
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) > .player) {
+    object-fit: contain !important;
+  }
+}
+
 .ftVideoPlayer.shortsPlayer:is(:is(:fullscreen, [data-native-player-screen]), .fullWindow) > .player {
   object-fit: contain;
 }
