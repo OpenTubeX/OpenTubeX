@@ -211,6 +211,8 @@ test('wrapped volume button keeps its tooltip on hover and keyboard focus', asyn
 
   await mute.hover()
   await expectTooltip()
+  await page.mouse.move(1, 1)
+  await expect.poll(() => mute.evaluate(element => element.matches(':hover'))).toBe(false)
   await page.keyboard.press('Tab')
   await mute.focus()
   await expect.poll(() => mute.evaluate(element => element.matches(':focus-visible'))).toBe(true)
