@@ -16,6 +16,8 @@ const SUPPORTED_ACTIONS = new Set(ANDROID_MEDIA_SESSION_ACTIONS)
 const AndroidMediaSession = process.env.IS_CAPACITOR
   ? registerPlugin('AndroidMediaSession')
   : null
+let lastSentPayload = null
+let lastSentAt = 0
 
 function finiteOr(value, fallback) {
   const number = Number(value)
@@ -52,10 +54,21 @@ export function createAndroidMediaSessionState({
   }
 }
 
+export function shouldSendAndroidMediaSessionState(previous, next, elapsedMs) {
+  if (!next.nativeOwner || !previous?.nativeOwner || elapsedMs >= 1000) return true
+  return JSON.stringify({ ...previous, position: 0 }) !== JSON.stringify({ ...next, position: 0 })
+}
+
 export function updateAndroidMediaSession(state) {
   if (!AndroidMediaSession) return
 
   const payload = createAndroidMediaSessionState(state)
+  const now = performance.now()
+  // Native playback already updates the service's clock; avoid starting the
+  // service for every WebView position tick while retaining periodic recovery.
+  if (!shouldSendAndroidMediaSessionState(lastSentPayload, payload, now - lastSentAt)) return
+  lastSentPayload = payload
+  lastSentAt = now
   const operation = payload.playbackState === 'none'
     ? AndroidMediaSession.clear({ nativeOwner: payload.nativeOwner })
     : AndroidMediaSession.update({ state: payload })
