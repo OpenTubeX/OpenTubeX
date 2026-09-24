@@ -52,6 +52,7 @@ import { brotliDecompress } from 'zlib'
 import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
 import { handleTwitchChatReplayPage } from './twitchChat'
+import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
 import { isYtDlpStoryboardUrl, getYtDlpDownloadFile, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpControlDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetSubtitle, handleYtDlpGetPlaybackInfo, handleYtDlpGetHistoryMetadata, handleYtDlpCancelHistoryRepair, handleYtDlpGetRecommendations, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpQueueAction, handleYtDlpRemoveDownload, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
 import { applyYtDlpPlaybackCacheSettings, handleYtDlpPlaybackCacheClear, handleYtDlpPlaybackCacheDelete, handleYtDlpPlaybackCacheGet, handleYtDlpPlaybackCacheSet } from './ytDlpPlaybackCache'
 import { generatePoToken } from './poTokenGenerator'
@@ -2275,6 +2276,7 @@ function runApp() {
 
       if (webContents && isOpenTubeXUrl(webContents.getURL())) {
         Object.assign(requestHeaders, getYtDlpExternalStreamHeaders(webContents, url))
+        applyTwitchPlaylistOrigin(urlObj, requestHeaders)
         if (isYtDlpStoryboardUrl(webContents, url)) storyboardRequestIds.add(details.id)
         if (url.startsWith('http:') && storyboardRequestIds.has(details.id)) {
           for (const name of Object.keys(requestHeaders)) {
