@@ -812,6 +812,11 @@ test('fullscreen pinch zoom arms the fill point only after moving toward it', as
     .toBeCloseTo(geometry.fill, 3)
   await expect(player.locator('.valueChangeText')).toHaveText(`${Math.round(geometry.fill * 100)}%`)
   await expect(player.locator('.videoFillZoomEdges')).toHaveCount(0)
+
+  await setZoom(4)
+  await setPlayerFullscreen(page, false)
+  await expect.poll(() => video.evaluate(element => new DOMMatrix(getComputedStyle(element).transform).a))
+    .toBe(3)
 })
 
 test('the overflow menu can turn the zoom off again', async ({ app, page, attachScreenshot }) => {

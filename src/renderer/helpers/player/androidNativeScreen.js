@@ -316,7 +316,9 @@ export function createAndroidNativeScreen({ element, container, getController, g
     const signature = JSON.stringify(layout)
     // Transforms do not trigger ResizeObserver. Follow zoom transitions until
     // their final frame so native video matches the shared gesture geometry.
-    if ([container, element, ...menuElements].some(target => target.getAnimations().some(animation => animation.playState === 'running'))) scheduleLayout()
+    // The edge glow animates opacity only, so it cannot change native clipping.
+    const animatedElements = [container, element, ...menuElements.filter(menu => !menu.classList?.contains('videoFillZoomEdge'))]
+    if (animatedElements.some(target => target.getAnimations().some(animation => animation.playState === 'running'))) scheduleLayout()
     syncAmbientClip(bounds)
     syncInlineBackground(visible && !pageScrolling && (!gestureActive || !nativeMiniRaised))
     if (signature === lastLayout) return

@@ -100,7 +100,7 @@ export function resolveVideoZoomPinch({
   maximumZoom = VIDEO_ZOOM_LEVELS.at(-1),
 }) {
   const minimumZoom = VIDEO_ZOOM_LEVELS[0]
-  const zoom = Math.min(maximumZoom, Math.max(minimumZoom, startZoom * scale))
+  const zoom = Math.min(Math.max(maximumZoom, startZoom), Math.max(minimumZoom, startZoom * scale))
 
   const resolveAxis = (dimension, startOffsetValue, startFocalValue, focalValue) => {
     const startMaximumTranslation = dimension * (startZoom - 1) / 2

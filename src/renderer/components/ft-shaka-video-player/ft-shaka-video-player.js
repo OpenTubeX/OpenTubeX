@@ -3698,6 +3698,7 @@ export default defineComponent({
     // keeps its zoom level but starts centered again.
     watch(() => props.videoId, () => {
       recenterVideoZoom()
+      if (selectedVideoZoom.value > VIDEO_ZOOM_LEVELS.at(-1)) updateVideoZoom(VIDEO_ZOOM_LEVELS.at(-1))
     })
 
     function recenterVideoZoom() {
@@ -4020,7 +4021,7 @@ export default defineComponent({
         : gestureZoom
       if (finalZoom === fillZoom && !cancelled) recenterVideoZoom()
       updateVideoZoom(finalZoom)
-      if (!cancelled) showValueChange(formatVideoZoom(finalZoom), 'search')
+      if (!cancelled) showValueChange(formatVideoZoom(finalZoom), 'search', false, 0, false)
       videoZoomGestureZoom.value = null
       videoZoomPinchStart = null
       videoZoomPinching.value = false
@@ -10505,8 +10506,11 @@ export default defineComponent({
     }
 
     function fullscreenChangeHandler() {
-      if (process.env.IS_CAPACITOR && !isNativeFullscreenActive() && document.querySelector('.nativeFullscreenTransition')) return
       const fullscreen = isNativeFullscreenActive()
+      if (!fullscreen && selectedVideoZoom.value > VIDEO_ZOOM_LEVELS.at(-1)) {
+        updateVideoZoom(VIDEO_ZOOM_LEVELS.at(-1))
+      }
+      if (process.env.IS_CAPACITOR && !fullscreen && document.querySelector('.nativeFullscreenTransition')) return
       isFullscreen.value = fullscreen
       if (props.shortsPlayer) {
         resetShortsOverflowMenu()
@@ -11714,8 +11718,9 @@ export default defineComponent({
      * @param {ValueChangeIcon | ValueChangeIcon[]} icons - The icons to display.
      * @param {boolean} invertContentOrder - Whether to invert the order of the icon and message.
      * @param {number} seekSeconds - Accumulated seek offset, reset by other messages.
+     * @param {boolean} revealControls - Whether to also show the player controls.
      */
-    function showValueChange(message, icons = [], invertContentOrder = false, seekSeconds = 0) {
+    function showValueChange(message, icons = [], invertContentOrder = false, seekSeconds = 0, revealControls = true) {
       accumulatedSeekSeconds = seekSeconds
       valueChangeMessage.value = message
       valueChangeIcons.value = Array.isArray(icons) ? icons : [icons]
@@ -11731,7 +11736,7 @@ export default defineComponent({
         accumulatedSeekSeconds = 0
       }, 2000)
 
-      showOverlayControls()
+      if (revealControls) showOverlayControls()
     }
 
     return {

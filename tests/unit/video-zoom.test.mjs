@@ -108,3 +108,15 @@ test('pinch zoom can reach a portrait video fill scale beyond the menu presets',
     maximumZoom: 32 / 9,
   }).zoom, 32 / 9)
 })
+
+test('a new pinch keeps its starting scale even if it exceeds the current cap', () => {
+  assert.equal(resolveVideoZoomPinch({
+    startZoom: 6,
+    startOffset: { x: 0, y: 0 },
+    startFocal: { x: 0, y: 0 },
+    focal: { x: 0, y: 0 },
+    scale: 1,
+    size: { width: 400, height: 200 },
+    maximumZoom: 3,
+  }).zoom, 6)
+})
