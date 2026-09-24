@@ -1532,6 +1532,10 @@
     overflow: visible;
   }
 
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea .ftVideoPlayer.shortsPlayer:has(.phonePlayerOptions[open])) {
+    overflow: visible;
+  }
+
   :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError .errorContainer) {
     inset-block: 0;
     inset-inline: 50% auto;

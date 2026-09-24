@@ -5050,6 +5050,24 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   }
 }
 
+@media (orientation: landscape) and (height <= 600px) {
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) .phonePlayerOptions[open]) {
+    inset-block: 0 auto;
+    inset-inline: calc(100% + 12px) auto;
+    inline-size: min(300px, calc(50vw - 50% - 96px));
+    block-size: 100%;
+    border-radius: 12px;
+  }
+
+  @media (width < 700px) {
+    :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) .phonePlayerOptions[open]) {
+      inset-inline: 50% auto;
+      inline-size: min(320px, calc(100vw - 48px));
+      transform: translateX(-50%);
+    }
+  }
+}
+
 .ftVideoPlayer.shortsPlayer:is(:is(:fullscreen, [data-native-player-screen]), .fullWindow) > .player {
   object-fit: contain;
 }

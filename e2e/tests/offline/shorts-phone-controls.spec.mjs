@@ -40,6 +40,39 @@ test('phone Shorts options stay inside their menu dialog', async ({ app, page })
   expect(bounds.y + bounds.height).toBeLessThanOrEqual(frame.y + frame.height)
 })
 
+test('landscape Shorts options use the space beside the narrow player', async ({ app, page }) => {
+  await openShort({ app, page })
+  await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabs', 'capacitorTabletLayout'))
+  await page.setViewportSize({ width: 1026, height: 461 })
+  const player = page.locator('.ftVideoPlayer.shortsPlayer')
+  await player.locator('.shortsTopControlsGroup').last().locator('button').nth(-2).click({ force: true })
+  const dialog = page.locator('.phonePlayerOptions[open]')
+  await expect(dialog).toBeVisible()
+  const [playerBounds, dialogBounds, railBounds] = await Promise.all([
+    player.boundingBox(),
+    dialog.boundingBox(),
+    page.locator('.shortsActionRail').boundingBox(),
+  ])
+  expect(dialogBounds.width).toBeGreaterThanOrEqual(250)
+  expect(dialogBounds.x).toBeGreaterThanOrEqual(playerBounds.x + playerBounds.width + 8)
+  expect(dialogBounds.x + dialogBounds.width).toBeLessThanOrEqual(railBounds.x - 8)
+  await expect(dialog.locator('.shaka-overflow-menu')).toBeVisible()
+
+  await page.setViewportSize({ width: 420, height: 320 })
+  const compactBounds = await dialog.boundingBox()
+  expect(compactBounds.width).toBeGreaterThanOrEqual(250)
+  expect(compactBounds.x).toBeGreaterThanOrEqual(8)
+  expect(compactBounds.x + compactBounds.width).toBeLessThanOrEqual(412)
+  const menuBounds = await dialog.locator('.shaka-overflow-menu').boundingBox()
+  expect(menuBounds.x).toBeGreaterThanOrEqual(compactBounds.x)
+  expect(menuBounds.x + menuBounds.width).toBeLessThanOrEqual(compactBounds.x + compactBounds.width)
+  const lastOption = dialog.locator('.shaka-overflow-menu > button:visible').last()
+  await lastOption.scrollIntoViewIfNeeded()
+  const optionBounds = await lastOption.boundingBox()
+  expect(optionBounds.y).toBeGreaterThanOrEqual(menuBounds.y - 1)
+  expect(optionBounds.y + optionBounds.height).toBeLessThanOrEqual(menuBounds.y + menuBounds.height + 1)
+})
+
 test('phone Shorts controls clear navigation and show quick speeds', async ({ app, page }) => {
   await openShort({ app, page })
   await page.evaluate(() => {
