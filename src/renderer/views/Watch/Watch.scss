@@ -1612,6 +1612,11 @@
     transform: none;
   }
 
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsNavigationButton) {
+    inline-size: 42px;
+    block-size: 42px;
+  }
+
   :global(.capacitorTabs .videoLayout.shortsPlayerActive :is(
     .shortsActionSkeleton > span,
     .shortsSkeletonSound,

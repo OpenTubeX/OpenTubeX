@@ -219,6 +219,50 @@ test('landscape Shorts keep light-theme metadata clear of the player', async ({ 
   }).toBeGreaterThanOrEqual(8)
 })
 
+test('landscape Shorts keep every control inside the narrow player and action rail', async ({ app, page }) => {
+  await openShort({ app, page })
+  await page.evaluate(() => {
+    document.querySelector('.app').classList.add('capacitorTabs', 'capacitorTabletLayout')
+    document.documentElement.style.setProperty('--safe-area-inset-top', '27px')
+  })
+  await page.setViewportSize({ width: 1026, height: 461 })
+  await page.locator('.ftVideoPlayer.shortsPlayer video').evaluate(video => video.pause())
+  await expect(page.locator('.shortsTopControls')).toBeVisible()
+  await page.locator('.shortsTopControlsGroup').last().evaluate(group => {
+    const captions = document.createElement('button')
+    captions.className = 'shortsTopControl shortsCaptionsControl'
+    group.prepend(captions)
+  })
+  const playerBounds = await page.locator('.ftVideoPlayer.shortsPlayer').boundingBox()
+  for (const button of await page.locator('.shortsTopControls .shortsTopControl:visible').all()) {
+    const bounds = await button.boundingBox()
+    expect(bounds.x).toBeGreaterThanOrEqual(playerBounds.x - 1)
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(playerBounds.x + playerBounds.width + 1)
+  }
+  await page.setViewportSize({ width: 600, height: 320 })
+  const narrowPlayerBounds = await page.locator('.ftVideoPlayer.shortsPlayer').boundingBox()
+  for (const button of await page.locator('.shortsTopControls .shortsTopControl:visible').all()) {
+    const bounds = await button.boundingBox()
+    expect(bounds.x).toBeGreaterThanOrEqual(narrowPlayerBounds.x - 1)
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(narrowPlayerBounds.x + narrowPlayerBounds.width + 1)
+  }
+  await page.setViewportSize({ width: 1026, height: 461 })
+
+  const rail = page.locator('.shortsActionRail')
+  await rail.evaluate(element => {
+    const navigation = document.createElement('div')
+    navigation.className = 'shortsNavigation'
+    navigation.innerHTML = '<button class="shortsNavigationButton"></button><button class="shortsNavigationButton"></button>'
+    element.prepend(navigation)
+  })
+  const railBounds = await rail.boundingBox()
+  for (const button of await rail.locator('button:visible').all()) {
+    const bounds = await button.boundingBox()
+    expect(bounds.x).toBeGreaterThanOrEqual(railBounds.x - 1)
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(railBounds.x + railBounds.width + 1)
+  }
+})
+
 test('very narrow landscape Shorts keep the info action when the title has no room', async ({ app, page }) => {
   await openShort({ app, page })
   await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabs', 'capacitorTabletLayout'))

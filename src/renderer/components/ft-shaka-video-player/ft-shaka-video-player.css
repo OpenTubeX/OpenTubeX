@@ -5004,6 +5004,26 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) > .player) {
     object-fit: contain !important;
   }
+
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) .shortsTopControls) {
+    padding-block: 4px;
+    padding-inline: 4px;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) .shortsTopControlsGroup) {
+    gap: 2px;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) .shortsTopControlsGroup:last-child) {
+    min-inline-size: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) .shortsTopControl) {
+    inline-size: 32px;
+    block-size: 32px;
+  }
 }
 
 .ftVideoPlayer.shortsPlayer:is(:is(:fullscreen, [data-native-player-screen]), .fullWindow) > .player {
