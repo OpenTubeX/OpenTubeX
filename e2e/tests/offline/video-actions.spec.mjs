@@ -600,7 +600,7 @@ test.describe('video downloads', () => {
     const printIndex = passedArguments.indexOf('--print')
     expect(passedArguments[printIndex + 1]).toContain('fragments.0.fragment_count')
     expect(passedArguments[printIndex + 1]).toContain(
-      '"storyboard":%(.{protocol,width,height,fps,rows,columns,fragments})j'
+      '"storyboard":%(.{protocol,width,height,fps,rows,columns,fragments,http_headers})j'
     )
   })
 
