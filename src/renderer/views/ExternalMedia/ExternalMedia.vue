@@ -245,8 +245,9 @@ const mediaUrl = ref('')
 const currentTime = ref(0)
 const showChapters = ref(false)
 const attemptUsedCookies = ref(false)
+const drmError = ref(false)
 let loadGeneration = 0
-const canRetryWithCookies = computed(() => errorMessage.value && isExternalMediaUrl(mediaUrl.value) && !attemptUsedCookies.value &&
+const canRetryWithCookies = computed(() => errorMessage.value && !drmError.value && isExternalMediaUrl(mediaUrl.value) && !attemptUsedCookies.value &&
   hasConfiguredRestrictedPlaybackAuthentication(store.getters))
 
 const hostname = computed(() => {
@@ -381,7 +382,8 @@ function copyChapterTimestamp(seconds) { player.value?.copyChapterTimestamp(seco
 
 function handlePlayerError(error) {
   if (loading.value || !source.value) return
-  errorMessage.value = error?.code === 6001
+  drmError.value = error?.code === 6001
+  errorMessage.value = drmError.value
     ? t('Video.External DRM Protected')
     : error?.message ?? String(error)
 }
@@ -393,6 +395,7 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
   }
   mediaUrl.value = typeof url === 'string' ? url : ''
   attemptUsedCookies.value = useCookies
+  drmError.value = false
   loading.value = true
   errorMessage.value = ''
   info.value = null
