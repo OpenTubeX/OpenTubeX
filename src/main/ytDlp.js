@@ -1807,7 +1807,7 @@ export async function handleYtDlpGetPlaybackInfo(
     const storyboardFormat = info.storyboard?.protocol === 'mhtml'
       ? [{ ...info.storyboard, url: info.storyboard.fragments?.[0]?.url }]
       : []
-    const requestFormats = [...formats, ...storyboardFormat]
+    const requestFormats = [...storyboardFormat, ...formats]
     registerExternalStreamHeaders(event.sender, requestFormats)
     registerExternalStreamCookies(event.sender, requestFormats, extractedCookies)
   }

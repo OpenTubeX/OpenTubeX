@@ -161,8 +161,7 @@ public final class YtDlpPlugin extends Plugin {
                     }
                     String[] outputs = stdout.trim().split("\n");
                     JSONObject info = new JSONObject(outputs[0]);
-                    JSONArray formats = info.optJSONArray("formats") == null
-                        ? new JSONArray() : info.getJSONArray("formats");
+                    JSONArray formats = new JSONArray();
                     for (String output : outputs) {
                         JSONObject storyboard = new JSONObject(output).optJSONObject("storyboard");
                         if (storyboard == null || !"mhtml".equals(storyboard.optString("protocol"))) continue;
@@ -170,6 +169,12 @@ public final class YtDlpPlugin extends Plugin {
                         if (fragments == null || fragments.length() == 0) continue;
                         formats.put(storyboard);
                         break;
+                    }
+                    JSONArray mediaFormats = info.optJSONArray("formats");
+                    if (mediaFormats != null) {
+                        for (int index = 0; index < mediaFormats.length(); index++) {
+                            formats.put(mediaFormats.get(index));
+                        }
                     }
                     ExternalStreamRequestRegistry.shared().register(formats, extractedCookies);
                 }

@@ -258,7 +258,7 @@ test('plays a progressive external format when yt-dlp omits codec fields', async
   await waitForPlayback(page)
 })
 
-test('plays a TikTok stream that requires extraction cookies and format headers', async ({ app, page }) => {
+test('keeps protected media headers with a long external storyboard', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
 
   const media = await readFile(DEMO_MEDIA_PATH)
@@ -302,6 +302,22 @@ test('plays a TikTok stream that requires extraction cookies and format headers'
         http_headers: { Referer: 'https://www.tiktok.com/', 'User-Agent': 'yt-dlp-test-agent' }
       }]
     })
+    const storyboardResponse = JSON.stringify({
+      ...JSON.parse(response),
+      storyboard: {
+        protocol: 'mhtml',
+        width: 160,
+        height: 90,
+        fps: 1,
+        rows: 1,
+        columns: 1,
+        http_headers: { Referer: 'https://www.tiktok.com/' },
+        fragments: Array.from({ length: 300 }, (_, index) => ({
+          url: `http://127.0.0.1:${server.address().port}/storyboard/${index}.jpg`,
+          duration: 1
+        }))
+      }
+    })
     await writeFile(executable, [
       '#!/bin/sh',
       'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
@@ -312,7 +328,7 @@ test('plays a TikTok stream that requires extraction cookies and format headers'
       '  fi',
       '  previous="$argument"',
       'done',
-    `printf '%s\\n' '${response}'`
+    `printf '%s\\n' '${response}' '${storyboardResponse}'`
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
