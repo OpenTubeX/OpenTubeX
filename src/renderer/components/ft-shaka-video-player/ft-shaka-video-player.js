@@ -6435,7 +6435,7 @@ export default defineComponent({
       emit('seeking', video.value?.currentTime ?? 0)
     }
 
-    function handleAbRepeatSeeked() {
+    function handleSeeked() {
       checkAbRepeatBoundary(false)
       emit('seeked', video.value?.currentTime ?? 0)
     }
@@ -11911,7 +11911,7 @@ export default defineComponent({
       handleVideoResize,
       handleEnded,
       handleSeeking,
-      handleAbRepeatSeeked,
+      handleSeeked,
       handleAbRepeatDurationChange,
       updateVolume,
       handleTimeupdate,
