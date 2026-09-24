@@ -4,7 +4,7 @@ import {
   SUBTITLE_FORMATS, MAX_LOCAL_PLAYLIST_VIDEOS, DENIED_CUSTOM_ARGS, AUTOMATIC_NUMBER_LIMITS,
   splitArguments, automaticNumber,
 } from '../ytDlpArguments'
-import { PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE, toFiniteNumber, toNonEmptyString, mapPlaybackFormat, mapPlaybackCaptions } from '../ytDlpMetadata'
+import { EXTERNAL_PLAYBACK_FORMAT_SELECTOR, PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo, toFiniteNumber, toNonEmptyString, mapPlaybackFormat, mapPlaybackCaptions } from '../ytDlpMetadata'
 import { resolveYtDlpCreatorAvatarUrl } from './ytDlpCreatorAvatar'
 import { execFile, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
@@ -49,7 +49,10 @@ function registerExternalStreamHeaders(webContents, formats) {
       .filter(([name, value]) => EXTERNAL_STREAM_HEADER_NAMES.has(name.toLowerCase()) &&
         typeof value === 'string' && !/[\r\n]/.test(value)))
     if (Object.keys(headers).length === 0) continue
-    for (const candidate of [format.url, format.manifest_url]) {
+    const fragmentUrls = format.protocol === 'mhtml' && Array.isArray(format.fragments)
+      ? format.fragments.map(fragment => fragment.url)
+      : []
+    for (const candidate of [format.url, format.manifest_url, ...fragmentUrls]) {
       if (typeof candidate !== 'string' || !/^https?:\/\//.test(candidate)) continue
       let streamUrl
       try { streamUrl = new URL(candidate) } catch { continue }
@@ -57,7 +60,7 @@ function registerExternalStreamHeaders(webContents, formats) {
       existing.set(candidate, headers)
       if (existing.size > 256) existing.delete(existing.keys().next().value)
 
-      if (['m3u8', 'm3u8_native', 'dash', 'http_dash_segments'].includes(format.protocol)) {
+      if (['m3u8', 'm3u8_native', 'dash', 'http_dash_segments', 'mhtml'].includes(format.protocol)) {
         const scope = `${streamUrl.origin}${new URL('.', streamUrl).pathname}`
         manifestScopes.delete(scope)
         manifestScopes.set(scope, headers)
@@ -82,7 +85,13 @@ export function getYtDlpExternalStreamHeaders(webContents, requestUrl) {
 }
 
 function registerExternalStreamCookies(webContents, formats, cookieFileContents) {
-  const hosts = new Set(formats.flatMap(format => [format.url, format.manifest_url])
+  const hosts = new Set(formats.flatMap(format => [
+    format.url,
+    format.manifest_url,
+    ...(format.protocol === 'mhtml' && Array.isArray(format.fragments)
+      ? format.fragments.map(fragment => fragment.url)
+      : [])
+  ])
     .filter(url => typeof url === 'string')
     .map(url => {
       try {
@@ -1700,7 +1709,7 @@ export async function handleYtDlpGetPlaybackInfo(
     '15',
     '--ignore-no-formats-error',
     '--format',
-    isYouTubeVideo ? 'sb0/sb1/sb2/sb3' : 'bestvideo*+bestaudio/best',
+    isYouTubeVideo ? 'sb0/sb1/sb2/sb3' : EXTERNAL_PLAYBACK_FORMAT_SELECTOR,
     '--print',
     isYouTubeVideo ? PLAYBACK_INFO_OUTPUT_TEMPLATE : PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE
   ]
@@ -1788,15 +1797,19 @@ export async function handleYtDlpGetPlaybackInfo(
 
   let info
   try {
-    info = JSON.parse(stdout)
+    info = parseYtDlpPlaybackInfo(stdout)
   } catch {
     return { error: 'yt-dlp returned invalid JSON' }
   }
 
   const formats = Array.isArray(info.formats) ? info.formats : []
   if (!isYouTubeVideo) {
-    registerExternalStreamHeaders(event.sender, formats)
-    registerExternalStreamCookies(event.sender, formats, extractedCookies)
+    const storyboardFormat = info.storyboard?.protocol === 'mhtml'
+      ? [{ ...info.storyboard, url: info.storyboard.fragments?.[0]?.url }]
+      : []
+    const requestFormats = [...formats, ...storyboardFormat]
+    registerExternalStreamHeaders(event.sender, requestFormats)
+    registerExternalStreamCookies(event.sender, requestFormats, extractedCookies)
   }
   const { captions, captionTranslations } = mapPlaybackCaptions(info.requested_subtitles)
   const creatorAvatarUrl = isYouTubeVideo

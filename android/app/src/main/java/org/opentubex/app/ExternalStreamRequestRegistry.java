@@ -41,14 +41,24 @@ final class ExternalStreamRequestRegistry {
                     }
                 }
             }
-            for (String field : new String[] { "url", "manifest_url" }) {
-                String candidate = format.optString(field, "");
+            List<String> candidates = new ArrayList<>(List.of(format.optString("url", ""),
+                format.optString("manifest_url", "")));
+            if ("mhtml".equals(format.optString("protocol"))) {
+                JSONArray fragments = format.optJSONArray("fragments");
+                if (fragments != null) {
+                    for (int index = 0; index < fragments.length(); index++) {
+                        JSONObject fragment = fragments.optJSONObject(index);
+                        if (fragment != null) candidates.add(fragment.optString("url", ""));
+                    }
+                }
+            }
+            for (String candidate : candidates) {
                 URL url = parseUrl(candidate);
                 if (url == null) continue;
                 hosts.add(url.getHost().toLowerCase(Locale.ROOT));
                 putBounded(exact, candidate, Map.copyOf(headers));
                 String protocol = format.optString("protocol", "");
-                if (Set.of("m3u8", "m3u8_native", "dash", "http_dash_segments").contains(protocol)) {
+                if (Set.of("m3u8", "m3u8_native", "dash", "http_dash_segments", "mhtml").contains(protocol)) {
                     String path = url.getPath();
                     String scope = origin(url) + path.substring(0, path.lastIndexOf('/') + 1);
                     putBounded(manifestPaths, scope, Map.copyOf(headers));

@@ -160,6 +160,9 @@ export async function getExternalYtDlpPlaybackSource(url, useAuthentication = fa
   if ('error' in info) throw new Error(info.error === 'ENOENT' ? 'yt-dlp could not be found' : info.error)
 
   const isLive = info.isLive || info.liveStatus === 'is_live'
+  const storyboardSrc = isLive || !info.storyboardVtt
+    ? null
+    : `data:text/vtt;charset=utf-8,${encodeURIComponent(info.storyboardVtt)}`
   const httpFormats = info.formats.filter(format =>
     ['http', 'https'].includes(format.protocol) &&
     format.url !== null &&
@@ -201,7 +204,7 @@ export async function getExternalYtDlpPlaybackSource(url, useAuthentication = fa
         legacyFormats,
         captions: info.captions ?? [],
         captionTranslations: info.captionTranslations ?? [],
-        storyboardSrc: null,
+        storyboardSrc,
         isLive
       }
     }
@@ -220,7 +223,7 @@ export async function getExternalYtDlpPlaybackSource(url, useAuthentication = fa
         legacyFormats,
         captions: info.captions ?? [],
         captionTranslations: info.captionTranslations ?? [],
-        storyboardSrc: null,
+        storyboardSrc,
         isLive
       }
     }
@@ -238,7 +241,7 @@ export async function getExternalYtDlpPlaybackSource(url, useAuthentication = fa
         legacyFormats,
         captions: info.captions ?? [],
         captionTranslations: info.captionTranslations ?? [],
-        storyboardSrc: null,
+        storyboardSrc,
         isLive
       }
     }
@@ -256,7 +259,7 @@ export async function getExternalYtDlpPlaybackSource(url, useAuthentication = fa
         legacyFormats,
         captions: info.captions ?? [],
         captionTranslations: info.captionTranslations ?? [],
-        storyboardSrc: null,
+        storyboardSrc,
         isLive
       }
     }

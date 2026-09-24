@@ -6,7 +6,7 @@ import store from '../store/index'
 import { getDownloadTemplateOptions } from './downloadTemplates'
 import { normalizeAutomaticDownloadRule, parseAutomaticDownloadRules } from './automaticDownloadRules'
 import { buildYtDlpDownloadArguments } from '../../ytDlpArguments'
-import { PLAYBACK_INFO_OUTPUT_TEMPLATE, mapPlaybackFormat, mapPlaybackCaptions, toFiniteNumber, toNonEmptyString } from '../../ytDlpMetadata'
+import { EXTERNAL_PLAYBACK_FORMAT_SELECTOR, PLAYBACK_INFO_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo, mapPlaybackFormat, mapPlaybackCaptions, toFiniteNumber, toNonEmptyString } from '../../ytDlpMetadata'
 import { buildYtDlpStoryboardVtt } from '../../main/ytDlpStoryboard'
 import { isYouTubeSubtitleUrl } from '../../youtubeSubtitle'
 import { chooseAndroidDirectory } from './androidStorage'
@@ -50,13 +50,13 @@ function configuration() {
   }
 }
 
-async function extract(args, useAuthentication = false, externalMedia = false) {
+async function extract(args, useAuthentication = false, externalMedia = false, parse = JSON.parse) {
   const cookies = useAuthentication && store.getters.getYtDlpPlaybackAuthMode === 'file'
     ? store.getters.getYtDlpPlaybackCookiesPath
     : ''
   if (useAuthentication && !cookies) throw new Error('yt-dlp playback authentication is not configured')
   const { stdout } = await native.extract({ args, cookies, externalMedia })
-  return JSON.parse(stdout)
+  return parse(stdout)
 }
 
 function listen(event, callback) {
@@ -130,11 +130,11 @@ const android = {
       } catch { return null }
     }
     try {
-      const args = ['--no-playlist', '--no-warnings', '--no-progress', '--socket-timeout', '15', '--ignore-no-formats-error', '--format', isYouTubeVideo ? 'sb0/sb1/sb2/sb3' : 'bestvideo*+bestaudio/best', '--print', PLAYBACK_INFO_OUTPUT_TEMPLATE]
+      const args = ['--no-playlist', '--no-warnings', '--no-progress', '--socket-timeout', '15', '--ignore-no-formats-error', '--format', isYouTubeVideo ? 'sb0/sb1/sb2/sb3' : EXTERNAL_PLAYBACK_FORMAT_SELECTOR, '--print', PLAYBACK_INFO_OUTPUT_TEMPLATE]
       if (includeSubtitles) args.push('--write-auto-subs', '--sub-langs', 'all', '--sub-format', 'vtt')
       if (isYouTubeVideo && !useDefaultClients) args.push('--extractor-args', useAuthentication ? 'youtube:player_client=default,web_safari' : 'youtube:player_client=default,web_embedded,-android_vr')
       args.push(isYouTubeVideo ? `https://www.youtube.com/watch?v=${videoId}` : videoId)
-      const [info, binaries] = await Promise.all([extract(args, useAuthentication, !isYouTubeVideo), native.info()])
+      const [info, binaries] = await Promise.all([extract(args, useAuthentication, !isYouTubeVideo, parseYtDlpPlaybackInfo), native.info()])
       const formats = Array.isArray(info.formats) ? info.formats : []
       const creatorAvatarUrl = [info.channel_thumbnail, info.channel_avatar, info.uploader_thumbnail, info.uploader_avatar]
         .find(value => { try { return new URL(value).protocol === 'https:' } catch { return false } }) ?? null

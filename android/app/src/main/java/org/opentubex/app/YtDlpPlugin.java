@@ -159,9 +159,19 @@ public final class YtDlpPlugin extends Plugin {
                     try (InputStream input = new FileInputStream(cookieFile)) {
                         extractedCookies = new String(YtDlpFiles.read(input, 2 * 1024 * 1024), StandardCharsets.UTF_8);
                     }
-                    JSONObject info = new JSONObject(stdout);
-                    ExternalStreamRequestRegistry.shared().register(info.optJSONArray("formats") == null
-                        ? new JSONArray() : info.getJSONArray("formats"), extractedCookies);
+                    String[] outputs = stdout.trim().split("\n");
+                    JSONObject info = new JSONObject(outputs[0]);
+                    JSONArray formats = info.optJSONArray("formats") == null
+                        ? new JSONArray() : info.getJSONArray("formats");
+                    for (String output : outputs) {
+                        JSONObject storyboard = new JSONObject(output).optJSONObject("storyboard");
+                        if (storyboard == null || !"mhtml".equals(storyboard.optString("protocol"))) continue;
+                        JSONArray fragments = storyboard.optJSONArray("fragments");
+                        if (fragments == null || fragments.length() == 0) continue;
+                        formats.put(storyboard);
+                        break;
+                    }
+                    ExternalStreamRequestRegistry.shared().register(formats, extractedCookies);
                 }
                 return new JSONObject().put("stdout", stdout);
             } finally {

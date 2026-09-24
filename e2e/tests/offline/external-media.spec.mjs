@@ -26,6 +26,7 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   const mediaUrl = 'https://videos.example.test/episode-1'
   const nextMediaUrl = 'https://videos.example.test/episode-2'
   const avatarUrl = 'https://videos.example.test/creator-avatar.png'
+  const storyboardUrl = 'https://videos.example.test/storyboard.jpg'
   const response = JSON.stringify({
     title: 'An example episode',
     channel: 'Example creator',
@@ -57,11 +58,23 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
     uploader: 'Another creator',
     webpage_url: nextMediaUrl
   })
+  const storyboardResponse = JSON.stringify({
+    ...JSON.parse(response),
+    storyboard: {
+      protocol: 'mhtml',
+      width: 160,
+      height: 90,
+      fps: 1 / 30,
+      rows: 1,
+      columns: 1,
+      fragments: [{ url: storyboardUrl, duration: 30 }]
+    }
+  })
   await writeFile(executable, [
     '#!/bin/sh',
     'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
     `printf '%s\\n' "$@" > '${capturedArgs}'`,
-    `case "$*" in *episode-2*) printf '%s\\n' '${nextResponse}' ;; *) printf '%s\\n' '${response}' ;; esac`
+    `case "$*" in *episode-2*) printf '%s\\n' '${nextResponse}' ;; *) printf '%s\\n' '${response}' '${storyboardResponse}' ;; esac`
   ].join('\n'))
   await chmod(executable, 0o755)
   await routeDemoMedia(page)
@@ -69,6 +82,11 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
     contentType: 'image/png',
     headers: { 'access-control-allow-origin': '*' },
     body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUzZpk7I4HSAAAACklEQVQI12NgAAAAAgAB4iG8MwAAAABJRU5ErkJggg==', 'base64')
+  }))
+  await page.route(storyboardUrl, route => route.fulfill({
+    contentType: 'image/png',
+    headers: { 'access-control-allow-origin': '*' },
+    body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bAAAAA1BMVEUzZpk7I4HSAAAACklEQVQI12NgAAAAAgAB4iG8MwAAAABJRU5ErkJggg==', 'base64')
   }))
   await page.evaluate(async (ytDlpPath) => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -95,6 +113,9 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await page.locator(`${activeTab} .externalMediaPlayer`).getByRole('button', { name: 'Pause (k)' }).click()
   const externalMedia = page.locator(`${activeTab} .externalMedia`)
   const player = externalMedia.locator('.externalMediaPlayer')
+  await player.hover()
+  await player.locator('.shaka-seek-bar-container').hover({ position: { x: 120, y: 4 } })
+  await expect(player.locator('.shaka-player-ui-thumbnail-image-container')).toBeVisible()
   await expect(player.locator('.fullscreenSponsorBlockToggle, .ft-shaka-sponsorblock-button')).toHaveCount(0)
   await expect(player.locator('.playerFullscreenTitleOverlay')).not.toHaveAttribute('role', 'button')
   await expect(player.locator('.theatre-button')).toHaveCount(0)
@@ -143,7 +164,7 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   const args = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
   expect(args).toContain(mediaUrl)
   expect(args).not.toContain('--extractor-args')
-  expect(args[args.indexOf('--format') + 1]).toBe('bestvideo*+bestaudio/best')
+  expect(args[args.indexOf('--format') + 1]).toBe('bestvideo*+bestaudio/best,mhtml')
 
   await page.locator(sel.searchInput).fill(nextMediaUrl)
   await page.locator(sel.searchInput).press('Enter')
