@@ -4,6 +4,7 @@ const MAX_TWITCH_REPLAY_BYTES = 1_000_000
 export async function readTwitchReplayResponse(response) {
   const declaredLength = Number(response.headers.get('content-length'))
   if (declaredLength > MAX_TWITCH_REPLAY_BYTES) throw new Error('Twitch chat replay response is too large')
+  if (response.body === null) throw new Error('Twitch chat replay response has no body')
 
   const reader = response.body.getReader()
   const decoder = new TextDecoder()

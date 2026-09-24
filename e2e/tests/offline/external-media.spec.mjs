@@ -142,6 +142,43 @@ test('Twitch replay retries a failed page and refreshes once after seeking settl
   expect(await app.electronApp.evaluate(() => globalThis.twitchReplayRequests)).toBe(3)
 })
 
+test('Twitch replay continues past a page with no usable messages', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    ipcMain.removeHandler('twitch-chat-replay-page')
+    ipcMain.handle('twitch-chat-replay-page', async (_event, _videoId, position) => {
+      if (position !== 'next') await new Promise(resolve => setTimeout(resolve, 1000))
+      return {
+        data: {
+          video: {
+            comments: position === 'next'
+              ? {
+                  pageInfo: { hasNextPage: false },
+                  edges: [{
+                    cursor: 'last',
+                    node: {
+                      id: 'after-empty-page',
+                      contentOffsetSeconds: 0,
+                      commenter: { displayName: 'Viewer' },
+                      message: { fragments: [{ text: 'Chat after empty page' }] }
+                    }
+                  }]
+                }
+              : { pageInfo: { hasNextPage: true }, edges: [{ cursor: 'next', node: null }] }
+          }
+        }
+      }
+    })
+  })
+
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  await page.locator(`${activeTab} .externalMediaPlayer video`).evaluate(video => video.pause())
+  await expect(page.locator(`${activeTab} .twitchChat`).getByText('Chat after empty page')).toBeVisible()
+})
+
 test('Twitch live chat scrolls like the YouTube chat panel', async ({ app, page, attachScreenshot }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   await setWindowSize(app, page, { width: 1800, height: 1000 })

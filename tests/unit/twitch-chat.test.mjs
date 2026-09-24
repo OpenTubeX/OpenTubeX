@@ -53,3 +53,7 @@ test('limits replay responses even when their content length is missing', async 
   const valid = new Response(JSON.stringify([{ data: { video: null } }]))
   assert.deepEqual(await readTwitchReplayResponse(valid), { data: { video: null } })
 })
+
+test('rejects bodyless Twitch replay responses with a clear error', async () => {
+  await assert.rejects(readTwitchReplayResponse(new Response(null, { status: 204 })), /Twitch chat replay response has no body/)
+})

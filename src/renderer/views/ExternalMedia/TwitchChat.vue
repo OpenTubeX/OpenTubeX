@@ -332,7 +332,7 @@ async function fetchReplay() {
     const page = parseTwitchReplayPage(payload)
     addMessages(page.messages)
     cursor = page.cursor
-    fetchedUntil = page.messages.at(-1)?.offset ?? props.currentTime + 20
+    fetchedUntil = page.messages.at(-1)?.offset ?? props.currentTime
     exhausted = cursor === null
     errorMessage.value = ''
   } catch (error) {
