@@ -89,7 +89,7 @@ test('phone Shorts loading controls match the action rail', async ({ app, page }
   await watch.dispose()
 })
 
-test('landscape phone Shorts keep controls and loading circles inside the player', async ({ app, page }) => {
+test('landscape phone Shorts keep a portrait player and accessible controls', async ({ app, page }) => {
   await openShort({ app, page })
   await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabs', 'capacitorTabletLayout'))
   await page.setViewportSize({ width: 915, height: 412 })
@@ -103,12 +103,17 @@ test('landscape phone Shorts keep controls and loading circles inside the player
   expect(playerBounds).not.toBeNull()
   expect(railBounds).not.toBeNull()
   expect(controlsBounds).not.toBeNull()
-  expect(railBounds.x).toBeGreaterThanOrEqual(playerBounds.x)
-  expect(railBounds.x + railBounds.width).toBeLessThanOrEqual(playerBounds.x + playerBounds.width + 1)
+  expect(railBounds.x).toBeGreaterThanOrEqual(playerBounds.x + playerBounds.width + 8)
+  expect(railBounds.x + railBounds.width).toBeLessThanOrEqual(page.viewportSize().width)
   expect(railBounds.y + railBounds.height).toBeLessThanOrEqual(playerBounds.y + playerBounds.height + 1)
   expect(playerBounds.y + playerBounds.height).toBeLessThanOrEqual(page.viewportSize().height - 8)
   expect(controlsBounds.x).toBeGreaterThanOrEqual(playerBounds.x)
   expect(controlsBounds.x + controlsBounds.width).toBeLessThanOrEqual(playerBounds.x + playerBounds.width + 1)
+  const aspectRatio = await page.locator('.videoArea').evaluate(element => Number.parseFloat(getComputedStyle(element).getPropertyValue('--shorts-aspect-ratio')))
+  expect(playerBounds.width).toBeLessThanOrEqual(playerBounds.height * aspectRatio + 2)
+  const headerBounds = await page.locator('.topNav').boundingBox()
+  expect(railBounds.y).toBeGreaterThanOrEqual(headerBounds.y + headerBounds.height + 8)
+  expect(railBounds.y).toBeLessThanOrEqual(playerBounds.y + 16)
   await expect(page.locator('.shortsChannelRow')).toBeHidden()
   await expect(page.locator('.shortsExternalTitle')).toBeVisible()
   await page.locator('.videoAreaMargin').evaluate(element => {
@@ -145,6 +150,8 @@ test('landscape phone Shorts keep controls and loading circles inside the player
 
   const watch = await page.evaluateHandle(findWatchComponent)
   await watch.evaluate(component => { component.proxy.isLoading = true })
+  const placeholderBounds = await page.locator('.shortsPlayerPlaceholder').first().boundingBox()
+  expect(placeholderBounds.width).toBeLessThanOrEqual(placeholderBounds.height * aspectRatio + 2)
   const circles = page.locator('.shortsActionSkeleton > span')
   await expect(circles.first()).toBeVisible()
   for (const circle of await circles.all()) {
@@ -159,6 +166,26 @@ test('landscape phone Shorts keep controls and loading circles inside the player
   }
   await expect(page.locator('.shortsSkeletonChannelRow')).toBeHidden()
   await expect(page.locator('.shortsSkeletonTitle')).toBeVisible()
+  await watch.evaluate(component => {
+    component.proxy.isLoading = false
+    component.proxy.ytDlpStreamsPending = true
+  })
+  const streamPlaceholder = page.locator('.streamPlaceholder.shortsPlayerPlaceholder')
+  await expect(streamPlaceholder).toBeVisible()
+  const [streamBounds, noticeBounds] = await Promise.all([
+    streamPlaceholder.boundingBox(),
+    streamPlaceholder.locator('.streamPlaceholderOverlay').boundingBox(),
+  ])
+  expect(streamBounds.width).toBeLessThanOrEqual(streamBounds.height * aspectRatio + 2)
+  expect(noticeBounds.x).toBeGreaterThanOrEqual(streamBounds.x - 1)
+  expect(noticeBounds.x + noticeBounds.width).toBeLessThanOrEqual(streamBounds.x + streamBounds.width + 1)
+  expect(noticeBounds.y).toBeGreaterThanOrEqual(streamBounds.y - 1)
+  expect(noticeBounds.y + noticeBounds.height).toBeLessThanOrEqual(streamBounds.y + streamBounds.height + 1)
+  expect(await streamPlaceholder.locator('.streamPlaceholderText').evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+  await expect(streamPlaceholder.locator('.streamPlaceholderOverlay')).toHaveCSS('flex-direction', 'column')
+  await page.emulateMedia({ colorScheme: 'light' })
+  await expect(page.locator('body')).toHaveClass(/\blight\b/)
+  expect(await page.locator('.shortsExternalTitleButton').evaluate(element => getComputedStyle(element).color === getComputedStyle(document.body).color)).toBe(true)
   await watch.dispose()
 })
 
@@ -212,7 +239,7 @@ test('short phone screens can reach every Shorts rail action with navigation pre
 
   await rail.locator('.shortsNavigation').evaluate(element => element.remove())
   await expect.poll(() => rail.evaluate(element => element.scrollTop)).toBe(0)
-  expect(await rail.evaluate(element => element.scrollHeight - element.clientHeight)).toBeLessThanOrEqual(1)
+  await expect.poll(() => rail.evaluate(element => element.scrollHeight - element.clientHeight)).toBeLessThanOrEqual(1)
   expect((await rail.locator('.shortsAction').first().boundingBox()).y).toBeGreaterThanOrEqual(railBounds.y - 1)
 
   await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))

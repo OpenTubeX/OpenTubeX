@@ -1519,7 +1519,14 @@
   }
 
   :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea .videoPlayer) {
+    inline-size: min(100%, 600px, calc(var(--shorts-player-height) * var(--shorts-aspect-ratio)));
+    justify-self: center;
     background-color: #000;
+  }
+
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .streamPlaceholderOverlay) {
+    flex-direction: column;
+    text-align: center;
   }
 
   :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsExternalMetadata) {
@@ -1530,7 +1537,7 @@
     inset-inline: 16px auto;
     inline-size: min(35%, 360px);
     padding: 0;
-    color: #fff;
+    color: var(--primary-text-color);
     transform: translateY(-100%);
   }
 
@@ -1548,10 +1555,10 @@
   :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsActionRail) {
     position: absolute;
     z-index: 5;
-    inset-block: 60px auto;
+    inset-block: 12px auto;
     inset-inline: auto 8px;
     box-sizing: border-box;
-    block-size: max(0px, calc(var(--shorts-player-height) - 68px));
+    block-size: max(0px, calc(var(--shorts-player-height) - 20px));
     inline-size: 48px;
     margin: 0;
     padding: 0;
