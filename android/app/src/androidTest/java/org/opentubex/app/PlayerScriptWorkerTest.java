@@ -37,7 +37,7 @@ public class PlayerScriptWorkerTest {
             scenario.onActivity(activity -> view.set(activity.getBridge().getWebView()));
             WebView webView = view.get();
             awaitCondition(webView, "!!document.querySelector('#app')?.__vue_app__");
-            evaluate(webView, "window.playerFixture = " + JSONObject.quote(code));
+            evaluate(webView, "window.playerFixture = " + JSONObject.quote(code) + "; undefined");
             evaluate(webView, """
                 (async () => {
                     const worker = new Worker('/player-script-worker.js');
