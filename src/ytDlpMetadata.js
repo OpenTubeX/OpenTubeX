@@ -25,7 +25,7 @@ const PLAYBACK_FORMAT_OUTPUT_FIELDS = [
   // Every Post-Live-DVR fragment carries the total count, so one is enough.
   'fragments.0.fragment_count'
 ].join(',')
-function playbackInfoOutputTemplate(formatFields) {
+function playbackInfoOutputTemplate(formatFields, storyboardFields = 'protocol,width,height,fps,rows,columns,fragments,http_headers') {
   return [
     '{"title":%(title|null)j',
     ',"description":%(description|null)j',
@@ -50,7 +50,7 @@ function playbackInfoOutputTemplate(formatFields) {
   `,"formats":%(formats.:.{${formatFields}})j`,
   // Project the selected storyboard only, avoiding the much larger media
   // fragment arrays that can occur in the full formats list.
-  ',"storyboard":%(.{protocol,width,height,fps,rows,columns,fragments,http_headers})j}'
+  `,"storyboard":%(.{${storyboardFields}})j}`
   ].join('')
 }
 
@@ -58,7 +58,10 @@ export const PLAYBACK_INFO_OUTPUT_TEMPLATE = playbackInfoOutputTemplate(PLAYBACK
 export const EXTERNAL_PLAYBACK_FORMAT_SELECTOR = 'bestvideo*+bestaudio/best,mhtml'
 // Desktop keeps these scoped cookies in the main process; Android uses its
 // native cookie jar and must not return them to the WebView.
-export const PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE = playbackInfoOutputTemplate(`${PLAYBACK_FORMAT_OUTPUT_FIELDS},cookies`)
+export const PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE = playbackInfoOutputTemplate(
+  `${PLAYBACK_FORMAT_OUTPUT_FIELDS},cookies`,
+  'protocol,width,height,fps,rows,columns,fragments,http_headers,cookies'
+)
 
 /** yt-dlp prints one JSON line for the media and another when an image grid exists. */
 export function parseYtDlpPlaybackInfo(stdout) {

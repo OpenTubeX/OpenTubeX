@@ -2,7 +2,12 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { buildYtDlpStoryboardVtt } from '../../src/main/ytDlpStoryboard.js'
-import { parseYtDlpPlaybackInfo } from '../../src/ytDlpMetadata.js'
+import { PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo } from '../../src/ytDlpMetadata.js'
+
+test('only desktop playback projects storyboard cookies', () => {
+  assert.match(PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE, /storyboard.*http_headers,cookies/)
+  assert.doesNotMatch(PLAYBACK_INFO_OUTPUT_TEMPLATE, /storyboard.*http_headers,cookies/)
+})
 
 test('uses an external site storyboard without replacing the selected media metadata', () => {
   const media = { title: 'Twitch VOD', duration: 10, formats: [{ protocol: 'm3u8_native' }], storyboard: { protocol: 'm3u8_native' } }
