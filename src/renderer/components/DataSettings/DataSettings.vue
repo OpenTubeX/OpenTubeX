@@ -4,6 +4,17 @@
     hide-title
   >
     <h4 class="groupTitle">
+      {{ t('Settings.Data Settings.Import YouTube Takeout ZIP') }}
+    </h4>
+    <FtFlexBox class="box">
+      <FtButton
+        :label="t('Settings.Data Settings.Import YouTube Takeout ZIP')"
+        :icon="['fas', 'folder-open']"
+        :disabled="takeoutBusy"
+        @click="selectTakeoutZip"
+      />
+    </FtFlexBox>
+    <h4 class="groupTitle">
       {{ $t('Subscriptions.Subscriptions') }}
     </h4>
     <FtFlexBox class="box">
@@ -108,6 +119,32 @@
       />
     </FtFlexBox>
     <FtSettingsSubpage
+      :open="showTakeoutImport"
+      :title="t('Settings.Data Settings.Import YouTube Takeout ZIP')"
+      :icon="['fas', 'folder-open']"
+      @close="closeTakeoutImport"
+    >
+      <div
+        class="takeoutSelection"
+        :aria-busy="takeoutBusy"
+      >
+        <p>{{ takeoutFilename }}</p>
+        <p>{{ t('Settings.Data Settings.Select Takeout data') }}</p>
+        <FtCheckboxList
+          v-model="selectedTakeoutTypes"
+          :labels="takeoutLabels"
+          :values="takeoutTypes"
+        />
+        <FtButton
+          v-if="selectedTakeoutTypes.length > 0"
+          :label="t('Settings.Data Settings.Import selected data')"
+          :icon="['fas', 'folder-open']"
+          :disabled="takeoutBusy"
+          @click="importSelectedTakeoutData"
+        />
+      </div>
+    </FtSettingsSubpage>
+    <FtSettingsSubpage
       :open="showExportSubscriptionsPrompt"
       :title="t('Settings.Data Settings.Select Export Type')"
       :icon="['fas', 'file-download']"
@@ -159,10 +196,11 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, shallowRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
+import FtCheckboxList from '../FtCheckboxList/FtCheckboxList.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
@@ -179,6 +217,7 @@ import {
   deepCopy,
   escapeHTML,
   getTodayDateStrLocalTimezone,
+  pickFileWithPicker,
   readFileWithPicker,
   showToast,
   writeFileWithPicker,
@@ -193,6 +232,7 @@ import {
   isLibreTubeWatchHistoryBackup,
 } from '../../helpers/libretube'
 import { parseLineDelimitedJson } from '../../helpers/line-delimited-json'
+import { isSupportedTakeoutEntry, parseTakeoutPlaylistCsv, readYouTubeTakeoutZip } from '../../helpers/youtube-takeout-zip'
 import {
   DEFAULT_SEARCH_SETTINGS,
   mergeSearchHistoryEntries,
@@ -203,6 +243,99 @@ import {
 const IMPORT_DIRECTORY_ID = 'data-settings-import'
 const START_IN_DIRECTORY = 'downloads'
 const { t } = useI18n()
+
+const showTakeoutImport = ref(false)
+const takeoutBusy = ref(false)
+const takeoutFilename = ref('')
+const takeoutEntries = shallowRef([])
+const selectedTakeoutTypes = ref([])
+const takeoutTypes = computed(() => [...new Set(takeoutEntries.value.map(entry => entry.type))])
+const takeoutLabels = computed(() => takeoutTypes.value.map(type => {
+  return {
+    subscriptions: t('Subscriptions.Subscriptions'),
+    history: t('History.History'),
+    searchHistory: t('Settings.Data Settings.Search history'),
+    playlists: t('Playlists'),
+  }[type]
+}))
+
+function closeTakeoutImport() {
+  showTakeoutImport.value = false
+  takeoutEntries.value = []
+  selectedTakeoutTypes.value = []
+}
+
+async function selectTakeoutZip() {
+  takeoutBusy.value = true
+  try {
+    const file = await pickFileWithPicker(
+      t('Settings.Data Settings.Import YouTube Takeout ZIP'),
+      { 'application/zip': '.zip' },
+      IMPORT_DIRECTORY_ID,
+      START_IN_DIRECTORY
+    )
+    if (file === null) { return }
+    const entries = []
+    for (const entry of await readYouTubeTakeoutZip(file)) {
+      if (isSupportedTakeoutEntry(entry)) {
+        entries.push(entry)
+      } else {
+        showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${entry.path}`, icon: ['fas', 'circle-exclamation'] })
+      }
+    }
+    if (entries.length === 0) {
+      showToast({ message: t('Settings.Data Settings.No supported Takeout data'), icon: ['fas', 'circle-exclamation'] })
+      return
+    }
+    takeoutFilename.value = file.name
+    takeoutEntries.value = entries
+    selectedTakeoutTypes.value = [...new Set(entries.map(entry => entry.type))]
+    showTakeoutImport.value = true
+  } catch (error) {
+    showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+  } finally {
+    takeoutBusy.value = false
+  }
+}
+
+async function importSelectedTakeoutData() {
+  takeoutBusy.value = true
+  const selected = new Set(selectedTakeoutTypes.value)
+  let importedPlaylists = false
+  const playlistNameCounts = new Map()
+  for (const entry of takeoutEntries.value) {
+    if (!selected.has(entry.type)) { continue }
+    try {
+      if (entry.type === 'subscriptions') {
+        if (entry.path.toLowerCase().endsWith('.csv')) {
+          importCsvYouTubeSubscriptions(entry.content)
+        } else if (entry.path.toLowerCase().endsWith('.opml')) {
+          importOpmlYouTubeSubscriptions(entry.content)
+        } else {
+          importYouTubeSubscriptions(JSON.parse(entry.content))
+        }
+      } else if (entry.type === 'history') {
+        await importYouTubeWatchHistory(JSON.parse(entry.content))
+      } else if (entry.type === 'searchHistory') {
+        await importYouTubeSearchHistory(JSON.parse(entry.content))
+      } else if (entry.type === 'playlists') {
+        const name = entry.path.split('/').at(-1).replace(/\.csv$/i, '')
+        const count = (playlistNameCounts.get(name) ?? 0) + 1
+        playlistNameCounts.set(name, count)
+        await importTakeoutPlaylist(entry, count === 1 ? name : `${name} (${count})`)
+        importedPlaylists = true
+      }
+    } catch (error) {
+      console.error('Unable to import Takeout entry', entry.path, error)
+      showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${entry.path}`, icon: ['fas', 'circle-exclamation'] })
+    }
+  }
+  if (importedPlaylists) {
+    showToast({ message: t('Settings.Data Settings.All playlists has been successfully imported'), icon: ['fas', 'bookmark'] })
+  }
+  takeoutBusy.value = false
+  closeTakeoutImport()
+}
 
 function openProfileSettings() {
   store.dispatch('showSettingsWindow', 'profile')
@@ -1352,6 +1485,32 @@ async function exportYouTubeWatchHistory() {
 // #region playlists
 
 const allPlaylists = computed(() => store.getters.getAllPlaylists)
+
+async function importTakeoutPlaylist(entry, playlistName) {
+  const name = entry.path.split('/').at(-1)
+  const playlist = parseTakeoutPlaylistCsv(entry.content, name)
+  if (playlist === null) {
+    throw new Error('Invalid playlist CSV')
+  }
+  playlist.playlistName = playlistName
+
+  const existing = allPlaylists.value.find(item => item.playlistName === playlist.playlistName)
+  if (existing === undefined) {
+    await store.dispatch('addPlaylist', playlist)
+  } else {
+    const videos = deepCopy(existing.videos)
+    const known = new Set(videos.map(video => `${video.videoId}:${video.timeAdded}`))
+    for (const video of playlist.videos) {
+      const key = `${video.videoId}:${video.timeAdded}`
+      if (!known.has(key)) {
+        processToBeAddedPlaylistVideo(video)
+        videos.push(video)
+        known.add(key)
+      }
+    }
+    await store.dispatch('updatePlaylist', { _id: existing._id, playlistName: existing.playlistName, videos })
+  }
+}
 
 async function importPlaylists() {
   let response

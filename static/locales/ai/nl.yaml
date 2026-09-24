@@ -892,6 +892,10 @@ Settings:
     Add: Toevoegen
     Remove: Verwijderen
   Data Settings:
+    Import YouTube Takeout ZIP: "YouTube Takeout-ZIP importeren"
+    Select Takeout data: "Selecteer de gegevens om te importeren"
+    Import selected data: "Geselecteerde gegevens importeren"
+    No supported Takeout data: "Geen ondersteunde YouTube-gegevens gevonden in deze ZIP."
     Data And Storage: Gegevens en opslag
     Profile Directory: Profielmap
     Open Profile Directory: Profielmap openen

@@ -100,6 +100,7 @@
     "dbus-native": "^0.15.2",
     "dompurify": "^3.4.13",
     "eld": "^2.1.0",
+    "fflate": "^0.8.3",
     "font-list": "^2.1.0",
     "googlevideo": "^4.1.1",
     "marked": "^18.0.10",

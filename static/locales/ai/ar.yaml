@@ -887,6 +887,10 @@ Settings:
     Add: إضافة
     Remove: إزالة
   Data Settings:
+    Import YouTube Takeout ZIP: "استيراد ملف YouTube Takeout المضغوط"
+    Select Takeout data: "اختر البيانات التي تريد استيرادها"
+    Import selected data: "استيراد البيانات المحددة"
+    No supported Takeout data: "لم يتم العثور على بيانات YouTube مدعومة في هذا الملف المضغوط."
     Data And Storage: البيانات والتخزين
     Profile Directory: دليل الملف الشخصي
     Open Profile Directory: افتح دليل الملف الشخصي

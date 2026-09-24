@@ -883,6 +883,10 @@ Settings:
     Add: Adaugă
     Remove: Elimină
   Data Settings:
+    Import YouTube Takeout ZIP: "Importă ZIP YouTube Takeout"
+    Select Takeout data: "Selectează datele de importat"
+    Import selected data: "Importă datele selectate"
+    No supported Takeout data: "Nu s-au găsit date YouTube acceptate în acest ZIP."
     Data And Storage: Date și spațiu de stocare
     Profile Directory: Directorul profilului
     Open Profile Directory: Deschide directorul profilului

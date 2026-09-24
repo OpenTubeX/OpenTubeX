@@ -877,6 +877,10 @@ Settings:
     Show Bottom Right Actions Dock: Jobb alsó műveletsáv megjelenítése
     Paused Interface Hide Delay: Szüneteltetett kezelőfelület elrejtési késleltetése
   Data Settings:
+    Import YouTube Takeout ZIP: "YouTube Takeout ZIP importálása"
+    Select Takeout data: "Válaszd ki az importálandó adatokat"
+    Import selected data: "Kijelölt adatok importálása"
+    No supported Takeout data: "Ebben a ZIP-ben nem találhatók támogatott YouTube-adatok."
     Data And Storage: Adatok és tárhely
     Profile Directory: Profilmappa
     Open Profile Directory: Profilmappa megnyitása

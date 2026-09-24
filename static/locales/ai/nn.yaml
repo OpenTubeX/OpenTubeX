@@ -1024,6 +1024,10 @@ Settings:
     Add: Legg til
     Remove: Fjern
   Data Settings:
+    Import YouTube Takeout ZIP: "Importer YouTube Takeout-ZIP"
+    Select Takeout data: "Vel dataa som skal importerast"
+    Import selected data: "Importer valde data"
+    No supported Takeout data: "Fann ingen støtta YouTube-data i denne ZIP-fila."
     Data And Storage: Data og lagring
     Profile Directory: Profilmappe
     Open Profile Directory: Opna profilmappa

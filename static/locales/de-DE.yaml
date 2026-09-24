@@ -1074,6 +1074,10 @@ Settings:
     Cleanup Complete: Speicherbereinigung abgeschlossen
     Cleanup Failed: Speicherbereinigung fehlgeschlagen
   Data Settings:
+    Import YouTube Takeout ZIP: YouTube-Takeout-ZIP importieren
+    Select Takeout data: Zu importierende Daten auswählen
+    Import selected data: Ausgewählte Daten importieren
+    No supported Takeout data: In diesem ZIP wurden keine unterstützten YouTube-Daten gefunden.
     Profile Directory: Profilverzeichnis
     Open Profile Directory: Profilverzeichnis öffnen
     How do I import my subscriptions?: Wie importiere ich meine Abos?

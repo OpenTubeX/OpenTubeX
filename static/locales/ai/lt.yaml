@@ -1114,6 +1114,10 @@ Settings:
     Add: Pridėti
     Remove: Pašalinti
   Data Settings:
+    Import YouTube Takeout ZIP: "Importuoti YouTube Takeout ZIP"
+    Select Takeout data: "Pasirinkite importuojamus duomenis"
+    Import selected data: "Importuoti pasirinktus duomenis"
+    No supported Takeout data: "Šiame ZIP nerasta palaikomų YouTube duomenų."
     Data And Storage: Duomenys ir saugykla
     Profile Directory: Profilio aplankas
     Open Profile Directory: Atverti profilio aplanką

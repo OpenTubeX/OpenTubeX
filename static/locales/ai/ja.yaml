@@ -877,6 +877,10 @@ Settings:
     Show Bottom Right Actions Dock: 右下の操作ドックを表示
     Paused Interface Hide Delay: 一時停止中のインターフェースを隠すまでの時間
   Data Settings:
+    Import YouTube Takeout ZIP: "YouTube Takeout の ZIP をインポート"
+    Select Takeout data: "インポートするデータを選択"
+    Import selected data: "選択したデータをインポート"
+    No supported Takeout data: "この ZIP に対応する YouTube データが見つかりませんでした。"
     Data And Storage: データとストレージ
     Profile Directory: プロフィールディレクトリ
     Open Profile Directory: プロフィールディレクトリを開く

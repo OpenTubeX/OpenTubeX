@@ -502,9 +502,9 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
  * @param {{[key: string]: string | string[]}} acceptedTypes
  * @param {string} [rememberDirectoryId]
  * @param {'desktop' | 'documents' | 'downloads' | 'music' | 'pictures' | 'videos'} [startInDirectory]
- * @returns {Promise<{ content: string, filename: string } | null>}
+ * @returns {Promise<File | null>}
  */
-export async function readFileWithPicker(
+export async function pickFileWithPicker(
   fileTypeDescription,
   acceptedTypes,
   rememberDirectoryId,
@@ -575,10 +575,19 @@ export async function readFileWithPicker(
     file = fallbackFile
   }
 
-  return {
-    content: await file.text(),
-    filename: file.name
-  }
+  return file
+}
+
+/**
+ * @param {string} fileTypeDescription
+ * @param {{[key: string]: string | string[]}} acceptedTypes
+ * @param {string} [rememberDirectoryId]
+ * @param {'desktop' | 'documents' | 'downloads' | 'music' | 'pictures' | 'videos'} [startInDirectory]
+ * @returns {Promise<{ content: string, filename: string } | null>}
+ */
+export async function readFileWithPicker(fileTypeDescription, acceptedTypes, rememberDirectoryId, startInDirectory) {
+  const file = await pickFileWithPicker(fileTypeDescription, acceptedTypes, rememberDirectoryId, startInDirectory)
+  return file === null ? null : { content: await file.text(), filename: file.name }
 }
 
 /**

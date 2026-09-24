@@ -877,6 +877,10 @@ Settings:
     Show Bottom Right Actions Dock: Tampilkan Dok Tindakan Kanan Bawah
     Paused Interface Hide Delay: Jeda Sebelum Menyembunyikan Antarmuka yang Dijeda
   Data Settings:
+    Import YouTube Takeout ZIP: "Impor ZIP YouTube Takeout"
+    Select Takeout data: "Pilih data yang akan diimpor"
+    Import selected data: "Impor data yang dipilih"
+    No supported Takeout data: "Tidak ada data YouTube yang didukung dalam ZIP ini."
     Data And Storage: Data & Penyimpanan
     Profile Directory: Direktori profil
     Open Profile Directory: Buka direktori profil

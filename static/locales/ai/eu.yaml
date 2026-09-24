@@ -877,6 +877,10 @@ Settings:
     Show Bottom Right Actions Dock: Erakutsi ekintzen panela behean eskuinean
     Paused Interface Hide Delay: Pausatutako interfazea ezkutatzeko atzerapena
   Data Settings:
+    Import YouTube Takeout ZIP: "Inportatu YouTube Takeout ZIPa"
+    Select Takeout data: "Hautatu inportatu beharreko datuak"
+    Import selected data: "Inportatu hautatutako datuak"
+    No supported Takeout data: "Ez da aurkitu onartutako YouTube daturik ZIP honetan."
     Data And Storage: Datuak eta biltegiratzea
     Profile Directory: Profilaren direktorioa
     Open Profile Directory: Ireki profilaren direktorioa

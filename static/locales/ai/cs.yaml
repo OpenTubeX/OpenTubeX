@@ -877,6 +877,10 @@ Settings:
     Show Bottom Right Actions Dock: Zobrazovat panel akcí vpravo dole
     Paused Interface Hide Delay: Prodleva skrytí rozhraní při pozastavení
   Data Settings:
+    Import YouTube Takeout ZIP: "Importovat ZIP z YouTube Takeout"
+    Select Takeout data: "Vyberte data k importu"
+    Import selected data: "Importovat vybraná data"
+    No supported Takeout data: "V tomto ZIP nebyla nalezena podporovaná data YouTube."
     Data And Storage: Data a úložiště
     Profile Directory: Složka profilu
     Open Profile Directory: Otevřít složku profilu

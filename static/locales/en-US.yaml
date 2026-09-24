@@ -1454,6 +1454,10 @@ Settings:
     Add: Add
     Remove: Remove
   Data Settings:
+    Import YouTube Takeout ZIP: Import YouTube Takeout ZIP
+    Select Takeout data: Select the data to import
+    Import selected data: Import selected data
+    No supported Takeout data: No supported YouTube data was found in this ZIP.
     Data Settings: Data
     Data And Storage: Data & Storage
     Profile Directory: Profile directory

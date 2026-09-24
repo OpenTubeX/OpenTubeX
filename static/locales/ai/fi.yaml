@@ -892,6 +892,10 @@ Settings:
     Add: Lisää
     Remove: Poista
   Data Settings:
+    Import YouTube Takeout ZIP: "Tuo YouTube Takeout ZIP"
+    Select Takeout data: "Valitse tuotavat tiedot"
+    Import selected data: "Tuo valitut tiedot"
+    No supported Takeout data: "Tästä ZIP-tiedostosta ei löytynyt tuettuja YouTube-tietoja."
     Data And Storage: Tiedot ja tallennustila
     Profile Directory: Profiilikansio
     Open Profile Directory: Avaa profiilikansio

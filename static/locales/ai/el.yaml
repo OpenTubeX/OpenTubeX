@@ -892,6 +892,10 @@ Settings:
     Add: Προσθήκη
     Remove: Αφαίρεση
   Data Settings:
+    Import YouTube Takeout ZIP: "Εισαγωγή ZIP YouTube Takeout"
+    Select Takeout data: "Επιλέξτε τα δεδομένα προς εισαγωγή"
+    Import selected data: "Εισαγωγή επιλεγμένων δεδομένων"
+    No supported Takeout data: "Δεν βρέθηκαν υποστηριζόμενα δεδομένα YouTube σε αυτό το ZIP."
     Data And Storage: Δεδομένα και αποθηκευτικός χώρος
     Profile Directory: Κατάλογος προφίλ
     Open Profile Directory: Άνοιγμα καταλόγου προφίλ

@@ -415,6 +415,10 @@ Settings:
     Show Bottom Right Actions Dock: Pokazuj panel działań w prawym dolnym rogu
     Paused Interface Hide Delay: Opóźnienie ukrywania interfejsu po wstrzymaniu
   Data Settings:
+    Import YouTube Takeout ZIP: "Importuj ZIP z YouTube Takeout"
+    Select Takeout data: "Wybierz dane do importu"
+    Import selected data: "Importuj wybrane dane"
+    No supported Takeout data: "W tym ZIP nie znaleziono obsługiwanych danych YouTube."
     Data And Storage: Dane i pamięć
     Profile Directory: Katalog profilu
     Open Profile Directory: Otwórz katalog profilu

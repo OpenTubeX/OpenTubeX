@@ -887,6 +887,10 @@ Settings:
     Add: Додати
     Remove: Видалити
   Data Settings:
+    Import YouTube Takeout ZIP: "Імпортувати ZIP YouTube Takeout"
+    Select Takeout data: "Виберіть дані для імпорту"
+    Import selected data: "Імпортувати вибрані дані"
+    No supported Takeout data: "У цьому ZIP не знайдено підтримуваних даних YouTube."
     Data And Storage: Дані та сховище
     Profile Directory: Папка профілю
     Open Profile Directory: Відкрити папку профілю

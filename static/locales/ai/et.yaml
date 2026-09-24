@@ -877,6 +877,10 @@ Settings:
     Show Bottom Right Actions Dock: Kuva all paremal toiminguriba
     Paused Interface Hide Delay: Liidese peitmise viivitus pausi ajal
   Data Settings:
+    Import YouTube Takeout ZIP: "Impordi YouTube Takeouti ZIP"
+    Select Takeout data: "Vali imporditavad andmed"
+    Import selected data: "Impordi valitud andmed"
+    No supported Takeout data: "Sellest ZIP-failist ei leitud toetatud YouTube’i andmeid."
     Data And Storage: Andmed ja salvestusruum
     Profile Directory: Profiilikaust
     Open Profile Directory: Ava profiilikaust
