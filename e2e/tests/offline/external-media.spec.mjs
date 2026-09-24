@@ -313,7 +313,7 @@ test('keeps protected media headers with a long external storyboard', async ({ a
         columns: 1,
         http_headers: { Referer: 'https://www.tiktok.com/' },
         fragments: Array.from({ length: 300 }, (_, index) => ({
-          url: `http://127.0.0.1:${server.address().port}/storyboard/${index}.jpg`,
+          url: `http://127.0.0.1:${server.address().port}/${index === 0 ? 'storyboard.jpg' : `storyboard/${index}.jpg`}`,
           duration: 1
         }))
       }
@@ -347,6 +347,7 @@ test('keeps protected media headers with a long external storyboard', async ({ a
     await page.evaluate(async url => { await fetch(url, { mode: 'no-cors' }) }, siblingUrl)
     expect(siblingHeaders.length).toBe(1)
     expect(siblingHeaders[0].cookie).toBeUndefined()
+    expect(siblingHeaders[0].referer).not.toBe('https://www.tiktok.com/')
   } finally {
     server.closeAllConnections()
     await new Promise(resolve => server.close(resolve))

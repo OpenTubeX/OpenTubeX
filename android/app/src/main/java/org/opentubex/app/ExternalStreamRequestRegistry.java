@@ -58,7 +58,7 @@ final class ExternalStreamRequestRegistry {
                 hosts.add(url.getHost().toLowerCase(Locale.ROOT));
                 putBounded(exact, candidate, Map.copyOf(headers));
                 String protocol = format.optString("protocol", "");
-                if (Set.of("m3u8", "m3u8_native", "dash", "http_dash_segments", "mhtml").contains(protocol)) {
+                if (Set.of("m3u8", "m3u8_native", "dash", "http_dash_segments").contains(protocol)) {
                     String path = url.getPath();
                     String scope = origin(url) + path.substring(0, path.lastIndexOf('/') + 1);
                     putBounded(manifestPaths, scope, Map.copyOf(headers));

@@ -60,7 +60,7 @@ function registerExternalStreamHeaders(webContents, formats) {
       existing.set(candidate, headers)
       if (existing.size > 256) existing.delete(existing.keys().next().value)
 
-      if (['m3u8', 'm3u8_native', 'dash', 'http_dash_segments', 'mhtml'].includes(format.protocol)) {
+      if (['m3u8', 'm3u8_native', 'dash', 'http_dash_segments'].includes(format.protocol)) {
         const scope = `${streamUrl.origin}${new URL('.', streamUrl).pathname}`
         manifestScopes.delete(scope)
         manifestScopes.set(scope, headers)
