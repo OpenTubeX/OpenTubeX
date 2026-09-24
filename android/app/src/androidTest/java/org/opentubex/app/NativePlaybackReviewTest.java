@@ -40,8 +40,10 @@ public class NativePlaybackReviewTest {
                 } catch (ReflectiveOperationException error) { throw new AssertionError(error); }
                 LauncherActivity.beginReturn();
                 plugin.handleOnStop();
-                activity.getWindow().getDecorView().post(() -> AndroidPlaybackPlugin.pictureInPictureChanged(false));
-                activity.getWindow().getDecorView().postDelayed(delayedHideProcessed::countDown, 350);
+                activity.getWindow().getDecorView().post(() -> {
+                    AndroidPlaybackPlugin.pictureInPictureChanged(false);
+                    activity.getWindow().getDecorView().postDelayed(delayedHideProcessed::countDown, 350);
+                });
             });
             assertTrue("The delayed hide must run", delayedHideProcessed.await(3, TimeUnit.SECONDS));
             assertEquals("A slow launcher return must keep PiP playback running", 0, pauses.get());
