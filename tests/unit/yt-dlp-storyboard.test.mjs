@@ -2,6 +2,35 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { buildYtDlpStoryboardVtt } from '../../src/main/ytDlpStoryboard.js'
+import { PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo } from '../../src/ytDlpMetadata.js'
+
+test('only desktop playback projects storyboard cookies', () => {
+  assert.match(PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE, /storyboard.*http_headers,cookies/)
+  assert.doesNotMatch(PLAYBACK_INFO_OUTPUT_TEMPLATE, /storyboard.*http_headers,cookies/)
+})
+
+test('uses an external site storyboard without replacing the selected media metadata', () => {
+  const media = { title: 'Twitch VOD', duration: 10, formats: [{ protocol: 'm3u8_native' }], storyboard: { protocol: 'm3u8_native' } }
+  const storyboard = {
+    protocol: 'mhtml',
+    width: 160,
+    height: 90,
+    fps: 0.5,
+    rows: 2,
+    columns: 2,
+    fragments: [{ url: 'https://example.com/storyboard.jpg', duration: 8 }]
+  }
+  const info = parseYtDlpPlaybackInfo(`${JSON.stringify(media)}\n${JSON.stringify({ ...media, storyboard })}\n`)
+
+  assert.equal(info.title, media.title)
+  assert.deepEqual(info.formats, media.formats)
+  assert.match(buildYtDlpStoryboardVtt([info.storyboard], info.duration), /storyboard\.jpg#xywh=0,0,160,90/)
+})
+
+test('keeps external playback metadata when no storyboard is available', () => {
+  const info = { title: 'Video', formats: [{ protocol: 'https' }], storyboard: { protocol: 'https' } }
+  assert.deepEqual(parseYtDlpPlaybackInfo(`${JSON.stringify(info)}\n`), info)
+})
 
 test('builds seekbar thumbnails from the highest-resolution yt-dlp storyboard', () => {
   const formats = [

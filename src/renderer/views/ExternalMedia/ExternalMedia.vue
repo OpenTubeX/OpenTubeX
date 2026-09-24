@@ -61,6 +61,7 @@
         :title="info.title ?? ''"
         :thumbnail="thumbnail"
         :is-live="source.isLive"
+        :storyboard-src="source.storyboardSrc"
         :external-url="mediaUrl"
         playback-engine="yt-dlp"
         @error="playerErrorHandler"

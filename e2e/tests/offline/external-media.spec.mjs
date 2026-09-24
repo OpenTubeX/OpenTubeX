@@ -26,6 +26,7 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   const mediaUrl = 'https://videos.example.test/episode-1'
   const nextMediaUrl = 'https://videos.example.test/episode-2'
   const avatarUrl = 'https://videos.example.test/creator-avatar.png'
+  const storyboardUrl = 'https://videos.example.test/storyboard.jpg'
   const response = JSON.stringify({
     title: 'An example episode',
     channel: 'Example creator',
@@ -57,11 +58,23 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
     uploader: 'Another creator',
     webpage_url: nextMediaUrl
   })
+  const storyboardResponse = JSON.stringify({
+    ...JSON.parse(response),
+    storyboard: {
+      protocol: 'mhtml',
+      width: 160,
+      height: 90,
+      fps: 1 / 30,
+      rows: 1,
+      columns: 1,
+      fragments: [{ url: storyboardUrl, duration: 30 }]
+    }
+  })
   await writeFile(executable, [
     '#!/bin/sh',
     'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
     `printf '%s\\n' "$@" > '${capturedArgs}'`,
-    `case "$*" in *episode-2*) printf '%s\\n' '${nextResponse}' ;; *) printf '%s\\n' '${response}' ;; esac`
+    `case "$*" in *episode-2*) printf '%s\\n' '${nextResponse}' ;; *) printf '%s\\n' '${response}' '${storyboardResponse}' ;; esac`
   ].join('\n'))
   await chmod(executable, 0o755)
   await routeDemoMedia(page)
@@ -69,6 +82,11 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
     contentType: 'image/png',
     headers: { 'access-control-allow-origin': '*' },
     body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUzZpk7I4HSAAAACklEQVQI12NgAAAAAgAB4iG8MwAAAABJRU5ErkJggg==', 'base64')
+  }))
+  await page.route(storyboardUrl, route => route.fulfill({
+    contentType: 'image/png',
+    headers: { 'access-control-allow-origin': '*' },
+    body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bAAAAA1BMVEUzZpk7I4HSAAAACklEQVQI12NgAAAAAgAB4iG8MwAAAABJRU5ErkJggg==', 'base64')
   }))
   await page.evaluate(async (ytDlpPath) => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -95,6 +113,9 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await page.locator(`${activeTab} .externalMediaPlayer`).getByRole('button', { name: 'Pause (k)' }).click()
   const externalMedia = page.locator(`${activeTab} .externalMedia`)
   const player = externalMedia.locator('.externalMediaPlayer')
+  await player.hover()
+  await player.locator('.shaka-seek-bar-container').hover({ position: { x: 120, y: 4 } })
+  await expect(player.locator('.shaka-player-ui-thumbnail-image-container')).toBeVisible()
   await expect(player.locator('.fullscreenSponsorBlockToggle, .ft-shaka-sponsorblock-button')).toHaveCount(0)
   await expect(player.locator('.playerFullscreenTitleOverlay')).not.toHaveAttribute('role', 'button')
   await expect(player.locator('.theatre-button')).toHaveCount(0)
@@ -143,7 +164,7 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   const args = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
   expect(args).toContain(mediaUrl)
   expect(args).not.toContain('--extractor-args')
-  expect(args[args.indexOf('--format') + 1]).toBe('bestvideo*+bestaudio/best')
+  expect(args[args.indexOf('--format') + 1]).toBe('bestvideo*+bestaudio/best,mhtml')
 
   await page.locator(sel.searchInput).fill(nextMediaUrl)
   await page.locator(sel.searchInput).press('Enter')
@@ -237,15 +258,31 @@ test('plays a progressive external format when yt-dlp omits codec fields', async
   await waitForPlayback(page)
 })
 
-test('plays a TikTok stream that requires extraction cookies and format headers', async ({ app, page }) => {
+test('keeps protected media headers with a long external storyboard', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
 
   const media = await readFile(DEMO_MEDIA_PATH)
   const receivedHeaders = []
   const siblingHeaders = []
+  const storyboardHeaders = []
+  const redirectedStoryboardHeaders = []
   const server = createServer((request, response) => {
     if (request.url === '/foobar/ping') {
       siblingHeaders.push(request.headers)
+      response.writeHead(204).end()
+      return
+    }
+    if (request.url === '/storyboard.jpg') {
+      storyboardHeaders.push(request.headers)
+      response.writeHead(204).end()
+      return
+    }
+    if (request.url === '/storyboard/1.jpg') {
+      response.writeHead(302, { Location: '/foo/preview.jpg' }).end()
+      return
+    }
+    if (request.url === '/foo/preview.jpg') {
+      redirectedStoryboardHeaders.push(request.headers)
       response.writeHead(204).end()
       return
     }
@@ -270,6 +307,7 @@ test('plays a TikTok stream that requires extraction cookies and format headers'
     const executable = path.join(app.userDataDir, 'external-media-cookie-stream.sh')
     const streamUrl = `http://127.0.0.1:${server.address().port}/foo/video.webm`
     const siblingUrl = `http://127.0.0.1:${server.address().port}/foobar/ping`
+    const storyboardUrl = `http://127.0.0.1:${server.address().port}/storyboard.jpg`
     const response = JSON.stringify({
       title: 'Cookie protected stream',
       formats: [{
@@ -281,17 +319,33 @@ test('plays a TikTok stream that requires extraction cookies and format headers'
         http_headers: { Referer: 'https://www.tiktok.com/', 'User-Agent': 'yt-dlp-test-agent' }
       }]
     })
+    const storyboardResponse = JSON.stringify({
+      ...JSON.parse(response),
+      storyboard: {
+        protocol: 'mhtml',
+        width: 160,
+        height: 90,
+        fps: 1,
+        rows: 1,
+        columns: 1,
+        http_headers: { Referer: 'https://www.tiktok.com/' },
+        fragments: Array.from({ length: 300 }, (_, index) => ({
+          url: `http://127.0.0.1:${server.address().port}/${index === 0 ? 'storyboard.jpg' : `storyboard/${index}.jpg`}`,
+          duration: 1
+        }))
+      }
+    })
     await writeFile(executable, [
       '#!/bin/sh',
       'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
       'previous=""',
       'for argument in "$@"; do',
       '  if [ "$previous" = "--cookies" ]; then',
-      '    printf "127.0.0.1\\tFALSE\\t/foo\\tFALSE\\t4102444800\\tstream_session\\ttest-token\\n" > "$argument"',
+      '    printf "127.0.0.1\\tFALSE\\t/foo\\tFALSE\\t4102444800\\tstream_session\\ttest-token\\n127.0.0.1\\tFALSE\\t/storyboard.jpg\\tFALSE\\t4102444800\\tpreview_session\\ttest-token\\n" > "$argument"',
       '  fi',
       '  previous="$argument"',
       'done',
-    `printf '%s\\n' '${response}'`
+    `printf '%s\\n' '${response}' '${storyboardResponse}'`
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
@@ -307,9 +361,17 @@ test('plays a TikTok stream that requires extraction cookies and format headers'
     expect(receivedHeaders.every(headers => headers.cookie?.includes('stream_session=test-token'))).toBe(true)
     expect(receivedHeaders.every(headers => headers.referer === 'https://www.tiktok.com/')).toBe(true)
     expect(receivedHeaders.every(headers => headers['user-agent'] === 'yt-dlp-test-agent')).toBe(true)
+    await page.evaluate(async url => { await fetch(url, { mode: 'no-cors' }) }, storyboardUrl)
+    expect(storyboardHeaders.length).toBe(1)
+    expect(storyboardHeaders[0].referer).toBe('https://www.tiktok.com/')
+    expect(storyboardHeaders[0].cookie).toBeUndefined()
+    await page.evaluate(async url => { await fetch(url, { mode: 'no-cors' }) }, `http://127.0.0.1:${server.address().port}/storyboard/1.jpg`)
+    expect(redirectedStoryboardHeaders.length).toBe(1)
+    expect(redirectedStoryboardHeaders[0].cookie).toBeUndefined()
     await page.evaluate(async url => { await fetch(url, { mode: 'no-cors' }) }, siblingUrl)
     expect(siblingHeaders.length).toBe(1)
     expect(siblingHeaders[0].cookie).toBeUndefined()
+    expect(siblingHeaders[0].referer).not.toBe('https://www.tiktok.com/')
   } finally {
     server.closeAllConnections()
     await new Promise(resolve => server.close(resolve))

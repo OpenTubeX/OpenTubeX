@@ -25,7 +25,7 @@ const PLAYBACK_FORMAT_OUTPUT_FIELDS = [
   // Every Post-Live-DVR fragment carries the total count, so one is enough.
   'fragments.0.fragment_count'
 ].join(',')
-function playbackInfoOutputTemplate(formatFields) {
+function playbackInfoOutputTemplate(formatFields, storyboardFields = 'protocol,width,height,fps,rows,columns,fragments,http_headers') {
   return [
     '{"title":%(title|null)j',
     ',"description":%(description|null)j',
@@ -48,16 +48,30 @@ function playbackInfoOutputTemplate(formatFields) {
     ',"manifest_url":%(manifest_url|null)j',
     ',"requested_subtitles":%(requested_subtitles|null)j',
   `,"formats":%(formats.:.{${formatFields}})j`,
-  // Selecting sb0 keeps the complete high-resolution storyboard without
-  // retaining the much larger media-fragment arrays from every format.
-  ',"storyboard":%(.{protocol,width,height,fps,rows,columns,fragments})j}'
+  // Project the selected storyboard only, avoiding the much larger media
+  // fragment arrays that can occur in the full formats list.
+  `,"storyboard":%(.{${storyboardFields}})j}`
   ].join('')
 }
 
 export const PLAYBACK_INFO_OUTPUT_TEMPLATE = playbackInfoOutputTemplate(PLAYBACK_FORMAT_OUTPUT_FIELDS)
+export const EXTERNAL_PLAYBACK_FORMAT_SELECTOR = 'bestvideo*+bestaudio/best,mhtml'
 // Desktop keeps these scoped cookies in the main process; Android uses its
 // native cookie jar and must not return them to the WebView.
-export const PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE = playbackInfoOutputTemplate(`${PLAYBACK_FORMAT_OUTPUT_FIELDS},cookies`)
+export const PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE = playbackInfoOutputTemplate(
+  `${PLAYBACK_FORMAT_OUTPUT_FIELDS},cookies`,
+  'protocol,width,height,fps,rows,columns,fragments,http_headers,cookies'
+)
+
+/** yt-dlp prints one JSON line for the media and another when an image grid exists. */
+export function parseYtDlpPlaybackInfo(stdout) {
+  const [media, ...additional] = stdout.trim().split('\n').map(line => JSON.parse(line))
+  if (!media || typeof media !== 'object') throw new Error('yt-dlp returned invalid playback metadata')
+  const storyboard = [media, ...additional]
+    .find(info => info?.storyboard?.protocol === 'mhtml')?.storyboard
+  if (storyboard) media.storyboard = storyboard
+  return media
+}
 
 /**
  * @param {unknown} value

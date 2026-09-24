@@ -4,7 +4,7 @@ import {
   SUBTITLE_FORMATS, MAX_LOCAL_PLAYLIST_VIDEOS, DENIED_CUSTOM_ARGS, AUTOMATIC_NUMBER_LIMITS,
   splitArguments, automaticNumber,
 } from '../ytDlpArguments'
-import { PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE, toFiniteNumber, toNonEmptyString, mapPlaybackFormat, mapPlaybackCaptions } from '../ytDlpMetadata'
+import { EXTERNAL_PLAYBACK_FORMAT_SELECTOR, PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo, toFiniteNumber, toNonEmptyString, mapPlaybackFormat, mapPlaybackCaptions } from '../ytDlpMetadata'
 import { resolveYtDlpCreatorAvatarUrl } from './ytDlpCreatorAvatar'
 import { execFile, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
@@ -36,26 +36,35 @@ const execFileAsync = promisify(execFile)
 /** Cookies acquired while extracting external media stay in memory. */
 const externalStreamCookies = new WeakMap()
 const externalStreamHeaders = new WeakMap()
+const externalStoryboardHeaders = new WeakMap()
 const externalManifestHeaders = new WeakMap()
+const MAX_STORYBOARD_HEADER_URLS = 50_000
 const EXTERNAL_STREAM_HEADER_NAMES = new Set([
   'accept', 'accept-language', 'origin', 'referer', 'sec-fetch-mode', 'user-agent'
 ])
 
 function registerExternalStreamHeaders(webContents, formats) {
   const existing = externalStreamHeaders.get(webContents) ?? new Map()
+  const storyboards = externalStoryboardHeaders.get(webContents) ?? new Map()
   const manifestScopes = externalManifestHeaders.get(webContents) ?? new Map()
   for (const format of formats) {
     const headers = Object.fromEntries(Object.entries(format.http_headers ?? {})
       .filter(([name, value]) => EXTERNAL_STREAM_HEADER_NAMES.has(name.toLowerCase()) &&
         typeof value === 'string' && !/[\r\n]/.test(value)))
-    if (Object.keys(headers).length === 0) continue
-    for (const candidate of [format.url, format.manifest_url]) {
+    if (Object.keys(headers).length === 0 && format.protocol !== 'mhtml') continue
+    const fragmentUrls = format.protocol === 'mhtml' && Array.isArray(format.fragments)
+      ? format.fragments.map(fragment => fragment.url)
+      : []
+    for (const candidate of [format.url, format.manifest_url, ...fragmentUrls]) {
       if (typeof candidate !== 'string' || !/^https?:\/\//.test(candidate)) continue
       let streamUrl
       try { streamUrl = new URL(candidate) } catch { continue }
-      existing.delete(candidate)
-      existing.set(candidate, headers)
-      if (existing.size > 256) existing.delete(existing.keys().next().value)
+      const exact = format.protocol === 'mhtml' ? storyboards : existing
+      exact.delete(candidate)
+      exact.set(candidate, headers)
+      if (exact.size > (format.protocol === 'mhtml' ? MAX_STORYBOARD_HEADER_URLS : 256)) {
+        exact.delete(exact.keys().next().value)
+      }
 
       if (['m3u8', 'm3u8_native', 'dash', 'http_dash_segments'].includes(format.protocol)) {
         const scope = `${streamUrl.origin}${new URL('.', streamUrl).pathname}`
@@ -66,11 +75,13 @@ function registerExternalStreamHeaders(webContents, formats) {
     }
   }
   externalStreamHeaders.set(webContents, existing)
+  externalStoryboardHeaders.set(webContents, storyboards)
   externalManifestHeaders.set(webContents, manifestScopes)
 }
 
 export function getYtDlpExternalStreamHeaders(webContents, requestUrl) {
-  const exact = externalStreamHeaders.get(webContents)?.get(requestUrl)
+  const exact = externalStreamHeaders.get(webContents)?.get(requestUrl) ??
+    externalStoryboardHeaders.get(webContents)?.get(requestUrl)
   if (exact) return exact
 
   const request = new URL(requestUrl)
@@ -81,8 +92,22 @@ export function getYtDlpExternalStreamHeaders(webContents, requestUrl) {
   return null
 }
 
+export function isYtDlpStoryboardUrl(webContents, requestUrl) {
+  return externalStoryboardHeaders.get(webContents)?.has(requestUrl) ?? false
+}
+
+export function isYtDlpHttpStoryboardUrl(webContents, requestUrl) {
+  return requestUrl.startsWith('http:') && isYtDlpStoryboardUrl(webContents, requestUrl)
+}
+
 function registerExternalStreamCookies(webContents, formats, cookieFileContents) {
-  const hosts = new Set(formats.flatMap(format => [format.url, format.manifest_url])
+  const hosts = new Set(formats.flatMap(format => [
+    format.url,
+    format.manifest_url,
+    ...(format.protocol === 'mhtml' && Array.isArray(format.fragments)
+      ? format.fragments.map(fragment => fragment.url)
+      : [])
+  ])
     .filter(url => typeof url === 'string')
     .map(url => {
       try {
@@ -160,6 +185,7 @@ function registerExternalStreamCookies(webContents, formats, cookieFileContents)
 }
 
 export function getYtDlpExternalStreamCookieHeader(webContents, requestUrl) {
+  if (isYtDlpHttpStoryboardUrl(webContents, requestUrl)) return null
   const url = new URL(requestUrl)
   const cookies = externalStreamCookies.get(webContents)?.get(url.hostname)
   if (!cookies) return null
@@ -1700,7 +1726,7 @@ export async function handleYtDlpGetPlaybackInfo(
     '15',
     '--ignore-no-formats-error',
     '--format',
-    isYouTubeVideo ? 'sb0/sb1/sb2/sb3' : 'bestvideo*+bestaudio/best',
+    isYouTubeVideo ? 'sb0/sb1/sb2/sb3' : EXTERNAL_PLAYBACK_FORMAT_SELECTOR,
     '--print',
     isYouTubeVideo ? PLAYBACK_INFO_OUTPUT_TEMPLATE : PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE
   ]
@@ -1788,15 +1814,19 @@ export async function handleYtDlpGetPlaybackInfo(
 
   let info
   try {
-    info = JSON.parse(stdout)
+    info = parseYtDlpPlaybackInfo(stdout)
   } catch {
     return { error: 'yt-dlp returned invalid JSON' }
   }
 
   const formats = Array.isArray(info.formats) ? info.formats : []
   if (!isYouTubeVideo) {
-    registerExternalStreamHeaders(event.sender, formats)
-    registerExternalStreamCookies(event.sender, formats, extractedCookies)
+    const storyboardFormat = info.storyboard?.protocol === 'mhtml'
+      ? [{ ...info.storyboard, url: info.storyboard.fragments?.[0]?.url }]
+      : []
+    const requestFormats = [...storyboardFormat, ...formats]
+    registerExternalStreamHeaders(event.sender, requestFormats)
+    registerExternalStreamCookies(event.sender, requestFormats, extractedCookies)
   }
   const { captions, captionTranslations } = mapPlaybackCaptions(info.requested_subtitles)
   const creatorAvatarUrl = isYouTubeVideo
