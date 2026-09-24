@@ -13,7 +13,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class FullscreenSystemBarsTest {
     @Test
-    public void swipedSystemBarsRemainVisible() {
+    public void systemBarsUseDefaultSwipeBehavior() {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             scenario.onActivity(activity -> assertEquals(
                 WindowInsetsControllerCompat.BEHAVIOR_DEFAULT,
