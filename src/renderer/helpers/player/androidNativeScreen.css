@@ -99,7 +99,6 @@
 
 [data-native-player-controls] .ft-quick-playback-rate-bar {
   margin-inline-end: 8px;
-  background-color: rgb(0 0 0 / 28%);
 }
 
 /* Android moves the live texture above the page during mini-player motion.

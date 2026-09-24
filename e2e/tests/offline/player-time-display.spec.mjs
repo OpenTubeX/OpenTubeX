@@ -19,6 +19,7 @@ test('player controls share pill surfaces and the time display toggles together'
     element.playbackRate = 2
     element.pause()
   })
+  await expect(page.locator('.shaka-controls-button-panel > .shaka-play-button > .shaka-ui-icon:not(.ft-play-pause-morph-icon)')).toHaveCSS('opacity', '0')
 
   const group = page.locator('.ft-time-display-group')
   const regular = group.locator('.shaka-current-time:not(.ft-playback-adjusted-time)')

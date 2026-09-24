@@ -1634,12 +1634,12 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 /* stylelint-disable-next-line selector-max-compound-selectors */
 .ftVideoPlayer:not(.shortsPlayer, [data-native-player-controls]) :deep(.shaka-controls-button-panel > :is(button:not(.shaka-spacer ~ button), .ft-volume-control-group, .ft-time-display-group) > :not(.ft-control-glass)) {
-  opacity: var(--ft-controls-fade);
+  filter: opacity(var(--ft-controls-fade));
 }
 
 /* stylelint-disable-next-line selector-max-compound-selectors */
-.ftVideoPlayer:not(.shortsPlayer, [data-native-player-controls]) :deep(.shaka-controls-button-panel > .shaka-spacer ~ button) {
-  opacity: var(--ft-controls-fade);
+.ftVideoPlayer:not(.shortsPlayer, [data-native-player-controls]) :deep(.shaka-controls-button-panel > .shaka-spacer ~ button > :not(.ft-control-glass)) {
+  filter: opacity(var(--ft-controls-fade));
 }
 
 :deep(.shaka-controls-button-panel > button) {
@@ -1789,7 +1789,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 :deep(.shaka-controls-button-panel > .shaka-spacer ~ button:is(:active, :focus-visible)) {
-  --ft-control-item-hover-color: rgb(255 255 255 / 12%);
+  --ft-control-item-hover-color: rgb(255 255 255 / calc(12% * var(--ft-controls-fade)));
 }
 
 :deep(.shaka-spacer ~ button:is(:active, :focus-visible) > .ft-control-glass) {
@@ -1798,7 +1798,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 @media (hover: hover) {
   :deep(.shaka-controls-button-panel > .shaka-spacer ~ button:hover) {
-    --ft-control-item-hover-color: rgb(255 255 255 / 12%);
+    --ft-control-item-hover-color: rgb(255 255 255 / calc(12% * var(--ft-controls-fade)));
   }
 
   :deep(.shaka-spacer ~ button:hover > .ft-control-glass) {

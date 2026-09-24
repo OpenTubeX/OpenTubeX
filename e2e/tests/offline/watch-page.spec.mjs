@@ -123,7 +123,9 @@ test.describe('desktop quick playback speed bar', () => {
     const session = await page.context().newCDPSession(page)
     await session.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 })
     await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
+    const video = await openMockedVideo(page)
+    await video.evaluate(element => element.pause())
+    await page.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
     const button = page.locator('.ft-quick-playback-rate-button:visible:not(.is-current-rate)').first()
     await expect(button).toBeVisible()
     expect(await page.evaluate(() => matchMedia('(hover: none)').matches)).toBe(true)
@@ -760,7 +762,8 @@ test('updates boolean settings from the player options', async ({ app, page }) =
 
 test('marks the chapters player-option tile active while chapters are open', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
   await setWindowSize(app, page, { width: 480, height: 800 })
   await page.locator('.app').evaluate(element => {
     element.classList.add('capacitorTabs', 'capacitorPhoneLayout')
@@ -777,6 +780,7 @@ test('marks the chapters player-option tile active while chapters are open', asy
   })
 
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
   await player.getByRole('button', { name: 'More settings' }).click({ force: true })
   const chapters = player.locator('.shaka-overflow-menu .ft-chapters-button')
   await expect(chapters).toHaveAttribute('aria-expanded', 'false')

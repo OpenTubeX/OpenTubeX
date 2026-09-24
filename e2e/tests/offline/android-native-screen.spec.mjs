@@ -1123,7 +1123,7 @@ for (const fullscreen of [false, true]) {
     if (fullscreen) expect(surfaces.actions.backdropFilter).toBe('blur(6px)')
     expect(surfaces.right.height).toBeCloseTo(surfaces.time.height, 0)
     expect(surfaces.speed.height).toBeCloseTo(surfaces.time.height, 0)
-    expect(surfaces.speed.backgroundColor).toBe('rgba(0, 0, 0, 0.28)')
+    expect(surfaces.speed.backgroundColor).toBe(surfaces.time.backgroundColor)
     expect(surfaces.rightButtons.length).toBeGreaterThan(0)
     for (const button of surfaces.rightButtons) {
       expect(button.width).toBeCloseTo(48, 0)
