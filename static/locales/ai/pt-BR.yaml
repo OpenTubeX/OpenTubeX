@@ -1371,7 +1371,7 @@ Video:
     Release Date: "Data de lançamento"
     Availability Values:
       public: "Pública"
-      private: "Privado"
+      private: "Privada"
       premium_only: "Apenas Premium"
       subscriber_only: "Apenas assinantes"
       needs_auth: "Início de sessão obrigatório"

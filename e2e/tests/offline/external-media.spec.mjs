@@ -247,6 +247,52 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await expect(page.locator(`${sel.activeTab} .tabPageIcon`)).toBeVisible()
 })
 
+test('expands a metadata-only description card', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+
+  const executable = path.join(app.userDataDir, 'external-media-metadata-only.sh')
+  const mediaUrl = 'https://videos.example.test/metadata-only'
+  const response = JSON.stringify({
+    title: 'Metadata-only episode',
+    description: '',
+    dislike_count: 1,
+    repost_count: 5,
+    license: 'Creative Commons',
+    tags: ['documentary'],
+    formats: [{ format_id: 'webm', url: DEMO_MEDIA_URL, protocol: 'https', ext: 'webm', vcodec: 'vp9', acodec: 'opus' }]
+  })
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+    `printf '%s\\n' '${response}'`
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  await routeDemoMedia(page)
+  await page.evaluate(async ytDlpPath => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateYtDlpSource', 'system')
+    await store.dispatch('updateYtDlpPath', ytDlpPath)
+    await store.dispatch('updateUiScale', 95)
+  }, executable)
+
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  await waitForPlayback(page)
+  const description = page.locator(`${activeTab} .externalMediaDescription`)
+  await expect(description.getByRole('button', { name: '...more' })).toBeVisible()
+  await description.getByRole('button', { name: '...more' }).click()
+  await expect(description).toContainText('Creative Commons')
+  await description.getByRole('button', { name: 'Show less' }).click()
+  await expect(description).not.toContainText('Creative Commons')
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateUseAITranslationCompletions', true)
+    await store.dispatch('updateCurrentLocale', 'uk')
+  })
+  await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('1 дизлайк')
+  await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('5 репостів')
+})
+
 test('shows an upcoming external stream before formats are available', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
 
@@ -279,7 +325,9 @@ test('shows an upcoming external stream before formats are available', async ({ 
   await expect(page.locator(`${activeTab} .externalMediaDetails`)).not.toContainText('Published on')
   await expect(page.locator(`${activeTab} .externalMediaExtra`)).toContainText('Release date')
   await expect(page.locator(`${activeTab} .externalMediaExtra`)).toContainText('1 Oct 2026')
-  await expect(page.locator(`${activeTab} .externalMediaDescription`)).toContainText('Creative Commons')
+  const description = page.locator(`${activeTab} .externalMediaDescription`)
+  await description.getByRole('button', { name: '...more' }).click()
+  await expect(description).toContainText('Creative Commons')
   await expect(page.locator(`${activeTab} .externalMediaPlayer`)).toHaveCount(0)
 })
 

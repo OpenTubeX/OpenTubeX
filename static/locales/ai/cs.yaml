@@ -1352,7 +1352,7 @@ Video:
       DownvoteSegment: Hlasovat proti
       VoteFailed: Hlas pro SponsorBlock se nepodařilo odeslat.
   External Media:
-    Dislikes: "Nelíbí se"
+    Dislikes: "Dislajků"
     Reposts: "Reposty"
     Saves: "Uložení"
     Series: "Série"

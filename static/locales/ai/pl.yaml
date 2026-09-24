@@ -713,7 +713,7 @@ Video:
     Age Limit: "Granica wieku"
     Release Date: "Data wydania"
     Availability Values:
-      public: "Publiczne"
+      public: "Publiczny"
       private: "Prywatny"
       premium_only: "Tylko Premium"
       subscriber_only: "Tylko subskrybenci"

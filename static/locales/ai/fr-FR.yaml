@@ -1351,7 +1351,7 @@ Video:
       DownvoteSegment: Voter contre
       VoteFailed: Échec de l’envoi du vote à SponsorBlock.
   External Media:
-    Dislikes: "N'aime pas"
+    Dislikes: "Votes négatifs"
     Reposts: "Republications"
     Saves: "Enregistrements"
     Series: "Série"

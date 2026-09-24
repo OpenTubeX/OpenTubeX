@@ -1431,7 +1431,7 @@ Video:
     Unavailable videos are hidden: 1 недаступнае відэа схавана | {count} недаступныя відэа схаваныя | {count} недаступных відэа схавана
   External Media:
     Dislikes: "Дызлайкі"
-    Reposts: "РЭПОСТЫ"
+    Reposts: "Рэпосты"
     Saves: "Захаванні"
     Series: "Серыя"
     Season: "Сезон"
@@ -1440,7 +1440,7 @@ Video:
     Episode Number: "Нумар эпізоду"
     Track: "Музычны трэк"
     Track Number: "Нумар трэка"
-    Artists: "Мастакі"
+    Artists: "Выканаўцы"
     Album: "Альбом"
     Genres: "Жанры"
     Media Type: "Тып носьбіта"
@@ -1448,7 +1448,7 @@ Video:
     Age Limit: "Узроставая мяжа"
     Release Date: "Дата выпуску"
     Availability Values:
-      public: "Публічна"
+      public: "Публічны"
       private: "Прыватны"
       premium_only: "Толькі прэміум"
       subscriber_only: "Толькі абаненты"

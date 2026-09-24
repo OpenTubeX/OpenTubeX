@@ -16,6 +16,11 @@ const EXCLUDED_LOCALES = new Set([SOURCE_LOCALE, 'de-DE'])
 const PLURAL_SEPARATOR = ' | '
 const PLACEHOLDER_PATTERN = /\{[^{}]+\}/g
 const MULTIPLE_ONLY_PATHS = new Set(MULTIPLE_ONLY_PLURAL_PATHS.map(path => path.replaceAll('.', '\0')))
+// These count labels need inflection in some languages even though English has one form.
+const TRANSLATION_ONLY_PLURAL_PATHS = new Set([
+  'Video\0External Media\0Dislikes',
+  'Video\0External Media\0Reposts'
+])
 
 function readYaml(path) {
   return loadYaml(readFileSync(path, 'utf8')) ?? {}
@@ -192,7 +197,8 @@ function validateTranslation(locale, path, source, translation, errors) {
   const translatedForms = translation.split(PLURAL_SEPARATOR)
   const multipleOnly = MULTIPLE_ONLY_PATHS.has(path)
 
-  if (sourceForms.length === 1 && !multipleOnly) {
+  if (sourceForms.length === 1 && !multipleOnly &&
+    !(TRANSLATION_ONLY_PLURAL_PATHS.has(path) && translatedForms.length > 1)) {
     if (translatedForms.length !== 1) {
       errors.push(`${path}: source is not plural but translation has ${translatedForms.length} forms`)
       return

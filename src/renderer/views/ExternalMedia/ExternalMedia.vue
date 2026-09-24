@@ -172,7 +172,6 @@
         :description="info.description"
         :tags="metadata.tags"
         :license="metadata.license"
-        :always-expanded="!info.description"
         @timestamp-event="seekTo"
       />
       <FtCard
@@ -299,13 +298,16 @@ const statusBadges = computed(() => {
   return badges
 })
 const numberFormat = computed(() => new Intl.NumberFormat(locale.value))
+function engagementCount(value, label) {
+  return `${numberFormat.value.format(value)} ${label}`
+}
 const engagement = computed(() => {
   const counts = [
     ['likeCount', value => t('Global.Counts.Like Count', { count: numberFormat.value.format(value) }, value)],
-    ['dislikeCount', value => `${numberFormat.value.format(value)} ${t('Video.External Media.Dislikes')}`],
+    ['dislikeCount', value => engagementCount(value, t('Video.External Media.Dislikes', {}, value))],
     ['commentCount', value => t('Global.Counts.Comment Count', { count: numberFormat.value.format(value) }, value)],
-    ['repostCount', value => `${numberFormat.value.format(value)} ${t('Video.External Media.Reposts')}`],
-    ['saveCount', value => `${numberFormat.value.format(value)} ${t('Video.External Media.Saves')}`]
+    ['repostCount', value => engagementCount(value, t('Video.External Media.Reposts', {}, value))],
+    ['saveCount', value => engagementCount(value, t('Video.External Media.Saves', {}, value))]
   ]
   return counts.flatMap(([key, format]) => metadata.value[key] === null
     ? []

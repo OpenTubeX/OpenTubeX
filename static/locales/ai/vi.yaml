@@ -1401,7 +1401,7 @@ Video:
     Availability Values:
       public: "Công khai"
       private: "Riêng"
-      premium_only: "Chỉ áp dụng cho gói cao"
+      premium_only: "Chỉ dành cho người dùng Premium"
       subscriber_only: "Chỉ dành cho người đăng ký"
       needs_auth: "Yêu cầu đăng nhập"
       unlisted: "Không liệt kê"

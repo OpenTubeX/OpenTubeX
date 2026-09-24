@@ -1384,10 +1384,10 @@ Video:
   Playlist:
     Unavailable videos are hidden: 1 недоступне відео приховано | {count} недоступні відео приховано | {count} недоступних відео приховано
   External Media:
-    Dislikes: "Дизлайків"
-    Reposts: "Репости"
+    Dislikes: "дизлайк | дизлайки | дизлайків"
+    Reposts: "репост | репости | репостів"
     Saves: "Збереження"
-    Series: "Серія"
+    Series: "Серіал"
     Season: "Сезон"
     Season Number: "Номер сезону"
     Episode: "Епізод"
@@ -1402,9 +1402,9 @@ Video:
     Age Limit: "Вікове обмеження"
     Release Date: "Дата випуску"
     Availability Values:
-      public: "Публічний"
-      private: "Приватна"
-      premium_only: "Лише преміум-клас"
+      public: "Публічне"
+      private: "Приватне"
+      premium_only: "Лише для преміумкористувачів"
       subscriber_only: "Лише для підписників"
       needs_auth: "Потрібен вхід"
       unlisted: "Не в списку"

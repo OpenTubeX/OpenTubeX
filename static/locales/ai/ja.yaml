@@ -1368,7 +1368,7 @@ Video:
     Media Type: "メディアタイプ"
     Availability: "公開状況"
     Age Limit: "年齢制限"
-    Release Date: "発売日"
+    Release Date: "公開日"
     Availability Values:
       public: "公開"
       private: "プライベート"

@@ -7,6 +7,7 @@ import {
   cleanupOverlayText,
   validateOverlayMessages,
 } from '../../_scripts/aiTranslations.mjs'
+import { selectPluralForm } from '../../src/renderer/i18n/plurals.js'
 
 const execFileAsync = promisify(execFile)
 
@@ -74,6 +75,22 @@ test('AI translation validation rejects keys already covered by human translatio
   )
 
   assert.deepEqual(errors, ['Covered: already has a human translation in fr-FR'])
+})
+
+test('AI translation validation allows count-aware external metric labels', () => {
+  const source = { Video: { 'External Media': { Dislikes: 'dislikes', Reposts: 'reposts' } } }
+  const overlay = { Video: { 'External Media': {
+    Dislikes: 'дизлайк | дизлайки | дизлайків',
+    Reposts: 'репост | репости | репостів'
+  } } }
+
+  assert.deepEqual(validateOverlayMessages('uk', source, {}, overlay), [])
+  assert.equal(selectPluralForm('uk', overlay.Video['External Media'].Dislikes, 1), 'дизлайк')
+  assert.equal(selectPluralForm('uk', overlay.Video['External Media'].Dislikes, 2), 'дизлайки')
+  assert.equal(selectPluralForm('uk', overlay.Video['External Media'].Dislikes, 5), 'дизлайків')
+  assert.deepEqual(validateOverlayMessages('uk', { Label: 'label' }, {}, { Label: 'one | few | many' }), [
+    'Label: source is not plural but translation has 3 forms'
+  ])
 })
 
 test('AI translation overlays cover every missing active-locale key', async () => {

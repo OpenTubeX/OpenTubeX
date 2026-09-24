@@ -1376,7 +1376,7 @@ Video:
     Dislikes: "Neikvæð atkvæði"
     Reposts: "Endurbirtingar"
     Saves: "Vistanir"
-    Series: "Röð"
+    Series: "Sería"
     Season: "Þáttaröð"
     Season Number: "Númer þáttaraðar"
     Episode: "Þáttur"
@@ -1392,7 +1392,7 @@ Video:
     Release Date: "Útgáfudagur"
     Availability Values:
       public: "Opinbert"
-      private: "Einka"
+      private: "Einkamál"
       premium_only: "Aðeins fyrir úrvalsáskrifendur"
       subscriber_only: "Aðeins áskrifendur"
       needs_auth: "Innskráning er nauðsynleg"

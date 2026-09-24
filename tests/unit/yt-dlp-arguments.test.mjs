@@ -125,6 +125,14 @@ test('caption mapping distinguishes authored and automatic tracks', () => {
   assert.equal(mapPlaybackCaptions(http, null, true).captions.length, 1)
 })
 
+test('caption mapping rejects inherited MIME lookup keys', () => {
+  const captions = mapPlaybackCaptions({
+    en: { ext: 'constructor', url: 'https://example.test/caption' },
+    fr: { ext: 'toString', url: 'https://example.test/caption' }
+  })
+  assert.deepEqual(captions, { captions: [], captionTranslations: [] })
+})
+
 test('download phase hooks keep real downloads enabled and override custom progress templates', () => {
   const { args } = buildYtDlpDownloadArguments({
     videoId, mode: 'video', customArgs: '--progress-template "download:custom"'

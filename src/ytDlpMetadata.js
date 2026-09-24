@@ -225,7 +225,7 @@ export function mapPlaybackCaptions(requestedSubtitles, manualSubtitles = null, 
       ttml: 'application/ttml+xml',
       dfxp: 'application/ttml+xml'
     }[subtitle.ext]
-    if (!mimeType) continue
+    if (typeof mimeType !== 'string') continue
 
     const subtitleUrl = toNonEmptyString(subtitle.url)
     if (subtitleUrl === null) continue
