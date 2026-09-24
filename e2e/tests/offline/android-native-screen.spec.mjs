@@ -1083,6 +1083,55 @@ test('native screen retains caption and quick speed controls beneath settings', 
   await page.evaluate(() => window.nativeScreenTest.destroy())
 })
 
+for (const fullscreen of [false, true]) {
+  test(`native ${fullscreen ? 'fullscreen' : 'portrait'} controls use the glass surface`, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs'))
+    await openNativeScreen(page, fullscreen)
+
+    const surfaces = await page.locator('.ftVideoPlayer').evaluate((player, fullscreen) => {
+      const style = selector => {
+        const computed = getComputedStyle(player.querySelector(selector))
+        return {
+          backgroundImage: computed.backgroundImage,
+          boxShadow: computed.boxShadow,
+          backdropFilter: computed.backdropFilter,
+          height: player.querySelector(selector).getBoundingClientRect().height
+        }
+      }
+      return {
+        speed: style('.ft-quick-playback-rate-bar'),
+        time: style('.ft-time-display-group > .ft-control-glass'),
+        right: style('.ft-right-control-glass'),
+        actions: fullscreen ? style('.fullscreenActions') : null,
+        rightButtons: [...player.querySelectorAll('.shaka-controls-button-panel > .shaka-spacer ~ button')]
+          .filter(button => getComputedStyle(button).display !== 'none')
+          .map(button => ({
+            width: button.getBoundingClientRect().width,
+            backgroundImage: getComputedStyle(button).backgroundImage
+          })),
+        speedGap: player.querySelector('.shaka-overflow-menu-button').getBoundingClientRect().left -
+          player.querySelector('.ft-quick-playback-rate-bar').getBoundingClientRect().right
+      }
+    }, fullscreen)
+    for (const surface of [surfaces.speed, surfaces.time, surfaces.right, surfaces.actions].filter(Boolean)) {
+      expect(surface.backgroundImage).not.toBe('none')
+      expect(surface.boxShadow).not.toBe('none')
+      expect(surface.backdropFilter).toBe('none')
+    }
+    expect(surfaces.right.height).toBeCloseTo(surfaces.time.height, 0)
+    expect(surfaces.speed.height).toBeCloseTo(surfaces.time.height, 0)
+    expect(surfaces.rightButtons.length).toBeGreaterThan(0)
+    for (const button of surfaces.rightButtons) {
+      expect(button.width).toBeCloseTo(40, 0)
+      expect(button.backgroundImage).toBe('none')
+    }
+    expect(surfaces.speedGap).toBeGreaterThanOrEqual(8)
+    await page.evaluate(() => window.nativeScreenTest.destroy())
+  })
+}
+
 for (const scale of [1, 1.25]) {
   test(`Android chapter title moves between toolbar and menu as space changes at scale ${scale}`, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
