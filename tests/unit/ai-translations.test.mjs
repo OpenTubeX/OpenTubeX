@@ -78,16 +78,18 @@ test('AI translation validation rejects keys already covered by human translatio
 })
 
 test('AI translation validation allows count-aware external metric labels', () => {
-  const source = { Video: { 'External Media': { Dislikes: 'dislikes', Reposts: 'reposts' } } }
+  const source = { Video: { 'External Media': { Dislikes: 'dislikes', Reposts: 'reposts', Saves: 'saves' } } }
   const overlay = { Video: { 'External Media': {
     Dislikes: 'дизлайк | дизлайки | дизлайків',
-    Reposts: 'репост | репости | репостів'
+    Reposts: 'репост | репости | репостів',
+    Saves: 'збереження | збереження | збережень'
   } } }
 
   assert.deepEqual(validateOverlayMessages('uk', source, {}, overlay), [])
   assert.equal(selectPluralForm('uk', overlay.Video['External Media'].Dislikes, 1), 'дизлайк')
   assert.equal(selectPluralForm('uk', overlay.Video['External Media'].Dislikes, 2), 'дизлайки')
   assert.equal(selectPluralForm('uk', overlay.Video['External Media'].Dislikes, 5), 'дизлайків')
+  assert.equal(selectPluralForm('uk', overlay.Video['External Media'].Saves, 5), 'збережень')
   assert.deepEqual(validateOverlayMessages('uk', { Label: 'label' }, {}, { Label: 'one | few | many' }), [
     'Label: source is not plural but translation has 3 forms'
   ])

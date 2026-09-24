@@ -19,7 +19,8 @@ const MULTIPLE_ONLY_PATHS = new Set(MULTIPLE_ONLY_PLURAL_PATHS.map(path => path.
 // These count labels need inflection in some languages even though English has one form.
 const TRANSLATION_ONLY_PLURAL_PATHS = new Set([
   'Video\0External Media\0Dislikes',
-  'Video\0External Media\0Reposts'
+  'Video\0External Media\0Reposts',
+  'Video\0External Media\0Saves'
 ])
 
 function readYaml(path) {

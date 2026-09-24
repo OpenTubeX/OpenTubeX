@@ -169,6 +169,7 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await externalMedia.locator('.externalMediaChapters').getByRole('button', { name: /Main segment/ }).click()
   await expect.poll(() => player.locator('video.player').evaluate(video => video.currentTime)).toBeGreaterThanOrEqual(10)
   const seekBar = player.locator('.shaka-seek-bar-container')
+  await seekBar.evaluate(element => element.scrollIntoView({ block: 'center' }))
   await player.hover()
   await seekBar.hover({ position: { x: Math.floor((await seekBar.boundingBox()).width * 0.8), y: 4 } })
   await expect(player.locator('.ft-chapter-preview')).toHaveText('Main segment')
@@ -257,6 +258,7 @@ test('expands a metadata-only description card', async ({ app, page }) => {
     description: '',
     dislike_count: 1,
     repost_count: 5,
+    save_count: 5,
     license: 'Creative Commons',
     tags: ['documentary'],
     formats: [{ format_id: 'webm', url: DEMO_MEDIA_URL, protocol: 'https', ext: 'webm', vcodec: 'vp9', acodec: 'opus' }]
@@ -291,6 +293,7 @@ test('expands a metadata-only description card', async ({ app, page }) => {
   })
   await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('1 дизлайк')
   await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('5 репостів')
+  await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('5 збережень')
 })
 
 test('shows an upcoming external stream before formats are available', async ({ app, page }) => {
