@@ -13,10 +13,10 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class FullscreenSystemBarsTest {
     @Test
-    public void swipedSystemBarsAreTransient() {
+    public void swipedSystemBarsRemainVisible() {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             scenario.onActivity(activity -> assertEquals(
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE,
+                WindowInsetsControllerCompat.BEHAVIOR_DEFAULT,
                 WindowCompat.getInsetsController(activity.getWindow(), activity.getWindow().getDecorView())
                     .getSystemBarsBehavior()
             ));
