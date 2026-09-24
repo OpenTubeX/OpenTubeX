@@ -92,11 +92,19 @@ public class NativePlaybackScreenTest {
         }
     }
 
+    private ViewGroup videoFrame(NativePlaybackScreen screen) {
+        for (int index = 0; index < screen.getChildCount(); index++) {
+            View child = screen.getChildAt(index);
+            if (child instanceof androidx.media3.ui.AspectRatioFrameLayout) return (ViewGroup) child;
+        }
+        throw new AssertionError("Native video frame is missing");
+    }
+
     @Test public void inlinePlaybackKeepsTheNativeVideoBelowTheSharedWebControls() {
         withScreen((screen, controls, web, engine) -> {
             screen.setFullscreen(false);
             screen.setInlineVisible(true);
-            View videoFrame = screen.getChildAt(0);
+            View videoFrame = videoFrame(screen);
             assertEquals("Inline video must be drawn at its native cadence", 1f, videoFrame.getAlpha(), 0f);
             assertSame("Web controls must remain above the native video", screen, ((View) web.getParent()).getParent());
             assertTrue(screen.indexOfChild((View) web.getParent()) > screen.indexOfChild(videoFrame));
@@ -114,7 +122,7 @@ public class NativePlaybackScreenTest {
             screen.setFollowsPageScroll(true);
             screen.layoutVideo(0, 180, 400, 225, 1000);
             screen.layoutControls(0, 180, 400, 225, 1000);
-            frame[0] = screen.getChildAt(0);
+            frame[0] = videoFrame(screen);
             web.loadData("<html><body style='height:4000px'></body></html>", "text/html", "UTF-8");
         }, (screen, controls, web, engine) -> {
             web.scrollTo(0, 120);
@@ -137,7 +145,7 @@ public class NativePlaybackScreenTest {
             screen.setInlineVisible(true);
             screen.layoutVideo(200, 200, 400, 225, 1000);
             screen.setMiniPlayer(true, 12);
-            frame[0] = screen.getChildAt(0);
+            frame[0] = videoFrame(screen);
             web.loadData("<html><body style='height:4000px'></body></html>", "text/html", "UTF-8");
         }, (screen, controls, web, engine) -> {
             web.scrollTo(0, 120);
@@ -157,7 +165,7 @@ public class NativePlaybackScreenTest {
             assertEquals(0, engine.getPlayer().getVideoSize().height);
             screen.updateAspectRatio(new androidx.media3.common.VideoSize(640, 480));
             screen.updateAspectRatio(androidx.media3.common.VideoSize.UNKNOWN);
-            frame[0] = screen.getChildAt(0);
+            frame[0] = videoFrame(screen);
             screen.layoutVideo(0, 100, 400, 225, 400);
         }, (screen, controls, web, engine) -> {
             float renderedWidth = frame[0].getWidth() * frame[0].getScaleX();
@@ -207,12 +215,12 @@ public class NativePlaybackScreenTest {
             screen.setInlineVisible(true);
             screen.layoutVideo(0, 100, 400, 225, 400);
         }, (screen, controls, web, engine) -> {
-            View frame = screen.getChildAt(0);
+            View frame = videoFrame(screen);
             surfaceSize[0] = frame.getWidth();
             surfaceSize[1] = frame.getHeight();
             screen.layoutVideo(170, 350, 220, 123.75, 400);
         }, (screen, controls, web, engine) -> {
-            View frame = screen.getChildAt(0);
+            View frame = videoFrame(screen);
             assertEquals("Mini-player motion must scale the existing texture instead of reallocating it", surfaceSize[0], frame.getWidth());
             assertEquals(surfaceSize[1], frame.getHeight());
             assertEquals(220 * screen.getWidth() / 400f, frame.getWidth() * frame.getScaleX(), 1f);
@@ -224,7 +232,7 @@ public class NativePlaybackScreenTest {
             screen.setFullscreen(false);
             screen.setInlineVisible(true);
             screen.setControlsVisible(true);
-            ViewGroup frame = (ViewGroup) screen.getChildAt(0);
+            ViewGroup frame = (ViewGroup) videoFrame(screen);
             frame.setBackgroundColor(android.graphics.Color.MAGENTA);
             frame.getChildAt(0).setVisibility(View.INVISIBLE);
             web.setBackgroundColor(android.graphics.Color.RED);
@@ -271,7 +279,7 @@ public class NativePlaybackScreenTest {
             screen.setControlsVisible(false);
             screen.layoutVideo(200, 200, 400, 225, 1000);
             screen.setMiniPlayer(true, 12);
-            ViewGroup frame = (ViewGroup) screen.getChildAt(0);
+            ViewGroup frame = (ViewGroup) videoFrame(screen);
             frame.setBackgroundColor(android.graphics.Color.MAGENTA);
             frame.getChildAt(0).setVisibility(View.INVISIBLE);
             web.setBackgroundColor(android.graphics.Color.RED);
@@ -299,7 +307,7 @@ public class NativePlaybackScreenTest {
             screen.setControlsVisible(false);
             screen.layoutVideo(200, 200, 400, 225, 1000);
             screen.setMiniPlayer(!startInline, 12);
-            ViewGroup frame = (ViewGroup) screen.getChildAt(0);
+            ViewGroup frame = (ViewGroup) videoFrame(screen);
             frame.setBackgroundColor(android.graphics.Color.MAGENTA);
             frame.getChildAt(0).setVisibility(View.INVISIBLE);
             web.pageLoaded = new java.util.concurrent.CountDownLatch(1);
@@ -330,11 +338,10 @@ public class NativePlaybackScreenTest {
             screen.setControlsVisible(false);
             screen.layoutVideo(200, 200, 400, 225, 1000);
             screen.setMiniPlayer(true, 12);
-            ViewGroup frame = (ViewGroup) screen.getChildAt(0);
+            ViewGroup frame = (ViewGroup) videoFrame(screen);
             frame.setBackgroundColor(android.graphics.Color.MAGENTA);
             frame.getChildAt(0).setVisibility(View.INVISIBLE);
-            // Model a Chromium scroll frame painted before its transparent
-            // opening catches up. The native video must survive that frame.
+            // The native video must stay above a newly painted scroll frame.
             web.setBackgroundColor(android.graphics.Color.RED);
             long now = SystemClock.uptimeMillis();
             for (int index = 0; index < 2; index++) {
@@ -354,6 +361,64 @@ public class NativePlaybackScreenTest {
         });
     }
 
+    @Test public void stationaryMiniPlayerStaysAboveTheScrollingPage() {
+        withScreen((screen, controls, web, engine) -> {
+            screen.setFullscreen(false);
+            screen.setInlineVisible(true);
+            screen.setControlsVisible(false);
+            screen.layoutVideo(200, 200, 400, 225, 1000);
+            screen.setMiniPlayer(true, 12);
+            ViewGroup frame = (ViewGroup) videoFrame(screen);
+            frame.setBackgroundColor(android.graphics.Color.MAGENTA);
+            frame.getChildAt(0).setVisibility(View.INVISIBLE);
+            web.setBackgroundColor(android.graphics.Color.RED);
+            screen.setMiniControlsImage(miniControlsPng());
+            assertTrue("The fixed mini player must not rely on a cutout in the scrolling WebView",
+                screen.indexOfChild(frame) > screen.indexOfChild((View) web.getParent()));
+            assertMiniControlsAboveVideo(screen);
+        });
+    }
+
+    @Test public void textCaptionsRemainVisibleAboveThePageInMiniPlayer() {
+        withScreen((screen, controls, web, engine) -> {
+            screen.setFullscreen(false);
+            screen.setInlineVisible(true);
+            screen.setControlsVisible(false);
+            screen.layoutVideo(200, 200, 400, 225, 1000);
+            screen.setMiniPlayer(true, 12);
+            web.setBackgroundColor(android.graphics.Color.RED);
+            engine.setCaptionCues(java.util.Collections.singletonList(
+                new NativeCaptionTimeline.Entry(0, 10000, "Mini-player caption")), true);
+        }, (screen, controls, web, engine) -> {
+            assertTrue("Text captions must appear over the raised native mini player", brightPixels(screen) > 0);
+            engine.setCaptionsVisible(false);
+        }, (screen, controls, web, engine) -> {
+            assertEquals("Hiding captions must clear the mini-player subtitle view", 0, brightPixels(screen));
+        });
+    }
+
+    @Test public void leavingMiniPlayerWaitsForTheInlinePageOpening() {
+        View[] frame = new View[1];
+        withScreen((screen, controls, web, engine) -> {
+            screen.setFullscreen(false);
+            screen.setInlineVisible(true);
+            screen.layoutVideo(200, 200, 400, 225, 1000);
+            screen.setMiniPlayer(true, 12);
+            frame[0] = videoFrame(screen);
+            web.holdVisualState = true;
+            screen.setMiniPlayer(false, 0);
+            assertNotNull("The page opening must be ready before lowering the video", web.heldVisualState);
+            assertTrue(screen.indexOfChild(frame[0]) > screen.indexOfChild((View) web.getParent()));
+            web.heldVisualState.onComplete(web.heldVisualStateId);
+            android.graphics.Bitmap image = android.graphics.Bitmap.createBitmap(screen.getWidth(), screen.getHeight(), android.graphics.Bitmap.Config.ARGB_8888);
+            screen.draw(new android.graphics.Canvas(image));
+            image.recycle();
+        }, (screen, controls, web, engine) -> {
+            assertTrue("The inline WebView must own its controls after the opening is drawn",
+                screen.indexOfChild((View) web.getParent()) > screen.indexOfChild(frame[0]));
+        });
+    }
+
     @Test public void scrollingHandoffWaitsForDrawAndANewSwipeCancelsIt() {
         View[] frame = new View[1];
         withScreen((screen, controls, web, engine) -> {
@@ -362,7 +427,7 @@ public class NativePlaybackScreenTest {
             screen.setControlsVisible(false);
             screen.layoutVideo(200, 200, 400, 225, 1000);
             screen.setMiniPlayer(true, 12);
-            frame[0] = screen.getChildAt(0);
+            frame[0] = videoFrame(screen);
             swipePage(screen);
             web.holdVisualState = true;
             SystemClock.sleep(160);
@@ -384,18 +449,18 @@ public class NativePlaybackScreenTest {
             screen.draw(new android.graphics.Canvas(image));
             image.recycle();
         }, (screen, controls, web, engine) -> {
-            assertTrue("Settled scrolling must restore the shared mini-player controls", screen.indexOfChild((View) web.getParent()) > screen.indexOfChild(frame[0]));
+            assertTrue("Settled scrolling must keep the mini player above the scrolling page", screen.indexOfChild(frame[0]) > screen.indexOfChild((View) web.getParent()));
         });
     }
 
-    @Test public void draggingAndResizingKeepVideoAboveThePageUntilTheFinalClipDraws() {
+    @Test public void draggingAndResizingKeepVideoAboveThePageThroughTheFinalWebFrame() {
         ViewGroup[] frame = new ViewGroup[1];
         withScreen((screen, controls, web, engine) -> {
             screen.setFullscreen(false);
             screen.setInlineVisible(true);
             screen.setMiniPlayer(true, 12);
             screen.layoutVideo(200, 200, 400, 225, 1000);
-            frame[0] = (ViewGroup) screen.getChildAt(0);
+            frame[0] = (ViewGroup) videoFrame(screen);
             frame[0].setBackgroundColor(android.graphics.Color.MAGENTA);
             frame[0].getChildAt(0).setVisibility(View.INVISIBLE);
             web.setBackgroundColor(android.graphics.Color.RED);
@@ -431,19 +496,19 @@ public class NativePlaybackScreenTest {
             screen.draw(new android.graphics.Canvas(image));
             image.recycle();
         }, (screen, controls, web, engine) -> {
-            assertTrue("Releasing the resize must restore shared controls after the final draw", screen.indexOfChild((View) web.getParent()) > screen.indexOfChild(frame[0]));
+            assertTrue("Releasing the resize must keep the mini player above the page", screen.indexOfChild(frame[0]) > screen.indexOfChild((View) web.getParent()));
             assertEquals(250 * screen.getWidth() / 1000f, frame[0].getTranslationX(), 1);
         });
     }
 
-    @Test public void anAnimationCanTakeOverALiveGestureAndReturnBelowThePage() {
+    @Test public void anAnimationCanTakeOverALiveGestureAndKeepTheMiniPlayerAboveThePage() {
         View[] frame = new View[1];
         withScreen((screen, controls, web, engine) -> {
             screen.setFullscreen(false);
             screen.setInlineVisible(true);
             screen.setMiniPlayer(true, 12);
             screen.layoutVideo(200, 200, 400, 225, 1000);
-            frame[0] = screen.getChildAt(0);
+            frame[0] = videoFrame(screen);
             web.holdVisualState = true;
             screen.setGestureActive(true);
             screen.animateVideo(new double[] { 200, 200, 400, 225 }, new double[] { 100, 200, 400, 225, 1000 }, 0, 12, false, screen::finishVideoTransition);
@@ -454,7 +519,7 @@ public class NativePlaybackScreenTest {
             screen.draw(new android.graphics.Canvas(image));
             image.recycle();
         }, (screen, controls, web, engine) -> {
-            assertTrue(screen.indexOfChild((View) web.getParent()) > screen.indexOfChild(frame[0]));
+            assertTrue(screen.indexOfChild(frame[0]) > screen.indexOfChild((View) web.getParent()));
         });
     }
 
@@ -464,7 +529,7 @@ public class NativePlaybackScreenTest {
             screen.setInlineVisible(true);
             screen.layoutVideo(200, 200, 400, 225, 1000);
             screen.setMiniPlayer(true, 12);
-            ViewGroup frame = (ViewGroup) screen.getChildAt(0);
+            ViewGroup frame = (ViewGroup) videoFrame(screen);
             frame.setBackgroundColor(android.graphics.Color.MAGENTA);
             frame.getChildAt(0).setVisibility(View.INVISIBLE);
             if (mode.equals("resize")) {
@@ -708,7 +773,7 @@ public class NativePlaybackScreenTest {
             assertEquals("Player controls cannot cover the refresh indicator", android.graphics.Color.GREEN, bitmap.getPixel(500, 150));
             assertEquals("The remaining controls stay visible", android.graphics.Color.MAGENTA, bitmap.getPixel(800, 150));
 
-            screen.getChildAt(0).bringToFront();
+            videoFrame(screen).bringToFront();
             screen.draw(new android.graphics.Canvas(bitmap));
             assertEquals("Raising the native video cannot cover the indicator", android.graphics.Color.GREEN, bitmap.getPixel(500, 150));
 

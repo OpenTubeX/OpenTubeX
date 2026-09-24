@@ -266,7 +266,7 @@ final class NativePlaybackScreen extends FrameLayout implements TextureView.Surf
             postOnAnimation(() -> {
                 if (transitionSequence != sequence) return;
                 transitioning = false;
-                webOverlayHost.bringToFront();
+                if (miniPlayer) videoFrame.bringToFront(); else webOverlayHost.bringToFront();
                 controls.bringToFront();
                 refreshVideoLayout();
                 updatePresentation();
@@ -281,7 +281,7 @@ final class NativePlaybackScreen extends FrameLayout implements TextureView.Surf
             }
             return drawn;
         }
-        if (child == videoFrame && transitioning && !pictureInPicture) {
+        if (child == videoFrame && (transitioning || (miniPlayer && inlineVisible && !fullscreen)) && !pictureInPicture) {
             int save = canvas.save();
             clipMenus(canvas);
             android.graphics.Path clip = new android.graphics.Path();
@@ -385,7 +385,8 @@ final class NativePlaybackScreen extends FrameLayout implements TextureView.Surf
     private void updateSubtitleVisibility() {
         // Text captions use Watch's shared displayer and appearance settings.
         // PiP has no WebView overlay; bitmap captions also need native drawing.
-        subtitles.setVisibility(webOverlay == null || pictureInPicture || bitmapCaptions || transitioning ? View.VISIBLE : View.GONE);
+        subtitles.setVisibility(webOverlay == null || pictureInPicture || bitmapCaptions || transitioning ||
+            (miniPlayer && inlineVisible && !fullscreen) ? View.VISIBLE : View.GONE);
     }
 
     void setFollowsPageScroll(boolean enabled) {
@@ -393,14 +394,27 @@ final class NativePlaybackScreen extends FrameLayout implements TextureView.Surf
     }
 
     void setMiniPlayer(boolean enabled, float radius) {
+        boolean wasMiniPlayer = miniPlayer;
         miniPlayer = enabled;
         miniRadius = radius;
+        updateSubtitleVisibility();
+        if (enabled && !fullscreen && !pictureInPicture) {
+            if (videoBounds != null) updateScrollBounds();
+            videoFrame.bringToFront();
+            controls.bringToFront();
+            invalidate();
+        }
         if (!enabled) { setGestureActive(false); clearMiniControlsImage(); }
         if (!enabled && scrollingPage) {
             scrollingPage = false;
             pageTouchDown = false;
             removeCallbacks(pageScrollSettled);
             action.accept("scroll-end");
+            finishVideoTransition();
+        }
+        if (wasMiniPlayer && !enabled && !transitioning && webOverlay != null) {
+            // The inline page opening may still be waiting for a WebView frame.
+            transitioning = true;
             finishVideoTransition();
         }
     }
@@ -514,7 +528,7 @@ final class NativePlaybackScreen extends FrameLayout implements TextureView.Surf
         videoBounds = new double[] { x, y, width, height, viewportWidth };
         if (transitioning && !pictureInPicture && !((scrollingPage || gestureActive) && videoAnimation == null)) return;
         positionVideo(x, y + pageScrollDelta(viewportWidth), width, height, viewportWidth);
-        if ((scrollingPage || gestureActive) && videoAnimation == null) updateScrollBounds();
+        if ((scrollingPage || gestureActive || miniPlayer) && videoAnimation == null) updateScrollBounds();
     }
 
     private void positionVideo(double x, double y, double width, double height, double viewportWidth) {

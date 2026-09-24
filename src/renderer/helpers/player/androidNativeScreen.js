@@ -146,14 +146,18 @@ export function createAndroidNativeScreen({ element, container, getController, g
     const bounds = container.getBoundingClientRect()
     const scrolling = followsPageScroll()
     const origin = scrolling ? { x: -window.scrollX, y: -window.scrollY } : undefined
-    const clip = inlineClip(bounds, visible, origin)
+    // The detached mini player is fixed while the route scrolls. A cutout on
+    // that route would scroll away before a busy WebView can update its clip.
+    // Native draws the mini player above the complete page instead.
+    const clipVisible = visible && !container.classList.contains('scrollMiniPlayer')
+    const clip = inlineClip(bounds, clipVisible, origin)
     const pageHeight = scrolling ? `${Math.max(window.innerHeight, document.body.getBoundingClientRect().height)}px` : ''
     // Read both openings before changing either clip, so a resize does not
     // force another style/layout pass midway through measuring the page.
     const page = container.closest?.('#cross-tab-mini-player-layer')
       ? document.querySelector('.app > .flexBox')
       : null
-    const pageClip = page ? inlineClip(bounds, visible, page.getBoundingClientRect()) : ''
+    const pageClip = page ? inlineClip(bounds, clipVisible, page.getBoundingClientRect()) : ''
     document.documentElement.classList.toggle('nativePlaybackInline', true)
     document.documentElement.classList.toggle('nativePlaybackPageScroll', scrolling)
     if (inlineBackdrop.style.getPropertyValue('block-size') !== pageHeight) {
@@ -165,8 +169,8 @@ export function createAndroidNativeScreen({ element, container, getController, g
       inlineBackdrop.style.setProperty('clip-path', clip)
       lastInlineClip = clip
     }
-    // Floating native video sits below the WebView. Cut the route's content
-    // out too, while its teleported controls stay in the separate overlay layer.
+    // Inline video sits below the WebView, so cut out route content there too.
+    // The fixed mini player draws above the route with no cutout.
     if (page !== clippedPage) {
       clearPageClip()
       clippedPage = page
