@@ -100,6 +100,9 @@ test('landscape phone Shorts keep controls and loading circles inside the player
   const [playerBounds, railBounds, controlsBounds] = await Promise.all([
     player.boundingBox(), rail.boundingBox(), topControls.boundingBox(),
   ])
+  expect(playerBounds).not.toBeNull()
+  expect(railBounds).not.toBeNull()
+  expect(controlsBounds).not.toBeNull()
   expect(railBounds.x).toBeGreaterThanOrEqual(playerBounds.x)
   expect(railBounds.x + railBounds.width).toBeLessThanOrEqual(playerBounds.x + playerBounds.width + 1)
   expect(railBounds.y + railBounds.height).toBeLessThanOrEqual(playerBounds.y + playerBounds.height + 1)
@@ -108,9 +111,19 @@ test('landscape phone Shorts keep controls and loading circles inside the player
   expect(controlsBounds.x + controlsBounds.width).toBeLessThanOrEqual(playerBounds.x + playerBounds.width + 1)
   await expect(page.locator('.shortsChannelRow')).toBeHidden()
   await expect(page.locator('.shortsExternalTitle')).toBeVisible()
+  await page.locator('.videoAreaMargin').evaluate(element => {
+    const preview = document.createElement('button')
+    preview.className = 'shortsNextPreview'
+    element.append(preview)
+  })
+  const metadataBounds = await page.locator('.shortsExternalMetadata').boundingBox()
+  expect(metadataBounds).not.toBeNull()
+  expect(metadataBounds.y + metadataBounds.height).toBeLessThanOrEqual(playerBounds.y + playerBounds.height - 8)
+  await page.locator('.shortsNextPreview').evaluate(element => element.remove())
   await rail.evaluate(element => { element.scrollTop = element.scrollHeight })
   expect(await rail.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
   const soundBounds = await rail.locator('.shortsSoundThumbnail').boundingBox()
+  expect(soundBounds).not.toBeNull()
   expect(soundBounds.y).toBeGreaterThanOrEqual(railBounds.y - 1)
   expect(soundBounds.y + soundBounds.height).toBeLessThanOrEqual(railBounds.y + railBounds.height + 1)
 
@@ -136,15 +149,33 @@ test('landscape phone Shorts keep controls and loading circles inside the player
   await expect(circles.first()).toBeVisible()
   for (const circle of await circles.all()) {
     const bounds = await circle.boundingBox()
+    expect(bounds).not.toBeNull()
     expect(bounds.width).toBeCloseTo(bounds.height, 0)
   }
   for (const circle of await page.locator('.shortsSkeletonControlGroup span:visible').all()) {
     const bounds = await circle.boundingBox()
+    expect(bounds).not.toBeNull()
     expect(bounds.width).toBeCloseTo(bounds.height, 0)
   }
   await expect(page.locator('.shortsSkeletonChannelRow')).toBeHidden()
   await expect(page.locator('.shortsSkeletonTitle')).toBeVisible()
   await watch.dispose()
+})
+
+test('narrow landscape Shorts stay above the phone navigation', async ({ app, page }) => {
+  await openShort({ app, page })
+  await page.evaluate(() => {
+    document.querySelector('.app').classList.add('capacitorTabs', 'capacitorPhoneLayout')
+    document.querySelector('.app').classList.remove('topTabs', 'bottomTabs', 'verticalTabs')
+    document.documentElement.style.setProperty('--safe-area-inset-bottom', '24px')
+  })
+  await page.setViewportSize({ width: 600, height: 360 })
+  const player = page.locator('.ftVideoPlayer.shortsPlayer')
+  const navigation = page.locator('.sideNav')
+  const [playerBounds, navigationBounds] = await Promise.all([player.boundingBox(), navigation.boundingBox()])
+  expect(playerBounds).not.toBeNull()
+  expect(navigationBounds).not.toBeNull()
+  expect(playerBounds.y + playerBounds.height).toBeLessThanOrEqual(navigationBounds.y - 4)
 })
 
 test('short phone screens can reach every Shorts rail action with navigation present', async ({ app, page }) => {

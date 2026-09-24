@@ -1498,7 +1498,7 @@
 // Landscape phones cross the tablet tab-strip breakpoint, but still need the
 // compact Shorts controls when there is little vertical space.
 @media (orientation: landscape) and (height <= 600px) {
-  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea) {
+  :global(.capacitorTabletLayout .videoLayout.shortsPlayerActive .videoArea) {
     --shorts-player-height: max(
       0px,
       calc(100dvh - var(--top-nav-sticky-offset) - var(--mobile-progress-bar-space) - 48px)
@@ -1525,11 +1525,13 @@
   :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsExternalMetadata) {
     position: absolute;
     z-index: 4;
-    inset-block: auto 16px;
+    grid-row: 1;
+    inset-block: calc(var(--shorts-player-height) - 16px) auto;
     inset-inline: 16px auto;
     inline-size: min(35%, 360px);
     padding: 0;
     color: #fff;
+    transform: translateY(-100%);
   }
 
   :global(.capacitorTabs .videoLayout.shortsPlayerActive :is(.shortsExternalTitle, .shortsSkeletonTitle)) {
