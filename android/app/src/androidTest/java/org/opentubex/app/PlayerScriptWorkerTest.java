@@ -8,15 +8,84 @@ import android.webkit.WebView;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class PlayerScriptWorkerTest {
+    @Test
+    public void packagedWorkerDeciphersRealPlayerAndRecoversFromRecursion() throws Exception {
+        String code;
+        // AAPT expands .gz assets and removes their compression suffix.
+        try (InputStream input = InstrumentationRegistry.getInstrumentation()
+                .getContext().getAssets().open("7460dd14.js");
+                ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[8192];
+            int count;
+            while ((count = input.read(buffer)) != -1) output.write(buffer, 0, count);
+            code = output.toString("UTF-8");
+        }
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            AtomicReference<WebView> view = new AtomicReference<>();
+            scenario.onActivity(activity -> view.set(activity.getBridge().getWebView()));
+            WebView webView = view.get();
+            awaitCondition(webView, "!!document.querySelector('#app')?.__vue_app__");
+            evaluate(webView, "window.playerFixture = " + JSONObject.quote(code) + "; undefined");
+            evaluate(webView, """
+                (async () => {
+                    const worker = new Worker('/player-script-worker.js');
+                    const pending = new Map();
+                    let nextId = 0;
+                    const run = code => new Promise(resolve => {
+                        const id = ++nextId;
+                        pending.set(id, resolve);
+                        worker.postMessage({id, code});
+                    });
+                    worker.onmessage = ({data}) => {
+                        pending.get(data.id)?.(data);
+                        pending.delete(data.id);
+                    };
+                    worker.onerror = event => {
+                        for (const resolve of pending.values()) resolve({error: event.message});
+                        pending.clear();
+                    };
+                    try {
+                        const decoded = await Promise.all(Array.from({length: 12}, () => run(window.playerFixture)));
+                        const caught = await run('function f(){return f()} try {f()} catch(e){return e.message}');
+                        const uncaught = await run('function f(){return f()} f()');
+                        const recovered = await run(window.playerFixture);
+                        window.playerDecipherResult = {decoded, caught, uncaught, recovered};
+                    } finally {
+                        worker.terminate();
+                        delete window.playerFixture;
+                    }
+                })()
+                """);
+            awaitCondition(webView, "window.playerDecipherResult !== undefined");
+            JSONObject result = new JSONObject(evaluate(webView, "window.playerDecipherResult"));
+            JSONArray decoded = result.getJSONArray("decoded");
+            assertEquals(12, decoded.length());
+            for (int i = 0; i < decoded.length(); i++) assertDeciphered(decoded.getJSONObject(i));
+            assertEquals("stack overflow", result.getJSONObject("caught").getString("result"));
+            assertEquals("InternalError: stack overflow", result.getJSONObject("uncaught").getString("error"));
+            assertDeciphered(result.getJSONObject("recovered"));
+        }
+    }
+
+    private static void assertDeciphered(JSONObject response) throws Exception {
+        assertFalse(response.toString(), response.has("error"));
+        JSONObject value = response.getJSONObject("result");
+        assertEquals("mBzrJcW9e13", value.getString("n"));
+        assertEquals("76543210ZYXWVUTSRQPONMLKJIHGFEDcBAzyxwvutsrqponmlkjih", value.getString("sig"));
+    }
+
     @Test
     public void packagedWorkerInterpretsCodeWithoutWebViewAccess() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
