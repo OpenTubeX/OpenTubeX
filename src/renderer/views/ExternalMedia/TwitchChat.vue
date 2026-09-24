@@ -193,7 +193,8 @@ const props = defineProps({
   target: { type: Object, required: true },
   fullscreenOverlay: { type: Boolean, default: false },
   currentTime: { type: Number, default: 0 },
-  seekCount: { type: Number, default: 0 }
+  seekCount: { type: Number, default: 0 },
+  seeking: { type: Boolean, default: false }
 })
 
 const { t, locale } = useI18n()
@@ -207,9 +208,11 @@ const messages = ref([])
 const settingsMenuOpen = ref(false)
 const showScrollToBottom = ref(false)
 const scrollport = useTemplateRef('scrollport')
-const visibleMessages = computed(() => props.target.type === 'live'
-  ? messages.value
-  : messages.value.filter(message => message.offset <= props.currentTime).slice(-500))
+const visibleMessages = computed(() => {
+  if (props.target.type === 'live') return messages.value
+  if (props.seeking) return []
+  return messages.value.filter(message => message.offset <= props.currentTime).slice(-500)
+})
 
 let socket = null
 let retryTimer = null
@@ -322,13 +325,13 @@ function connect() {
 }
 
 async function fetchReplay() {
-  if (fetching || retryTimer || exhausted || stopped || fetchedUntil >= props.currentTime + 20) return
+  if (props.seeking || fetching || retryTimer || exhausted || stopped || fetchedUntil >= props.currentTime + 20) return
   fetching = true
   const generation = replayGeneration
   let failed = false
   try {
     const payload = await getTwitchReplayPage(props.target.id, cursor ?? Math.floor(props.currentTime))
-    if (generation !== replayGeneration || stopped) return
+    if (generation !== replayGeneration || stopped || props.seeking) return
     const page = parseTwitchReplayPage(payload)
     addMessages(page.messages)
     cursor = page.cursor

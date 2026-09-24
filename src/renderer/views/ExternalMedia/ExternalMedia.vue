@@ -87,7 +87,7 @@
             playback-engine="yt-dlp"
             @error="playerErrorHandler"
             @timeupdate="updateCurrentTime"
-            @seeking="currentTime = $event"
+            @seeking="handleSeeking"
             @seeked="handleSeeked"
             @fullscreen-live-chat-change="handleFullscreenLiveChatChange"
             @toggle-theatre-mode="useTheatreMode = !useTheatreMode"
@@ -243,6 +243,7 @@
               :target="twitchChatTarget"
               :current-time="currentTime"
               :seek-count="seekCount"
+              :seeking="seeking"
               :fullscreen-overlay="fullscreenLiveChatOpen"
               @close="closeChat"
             />
@@ -294,6 +295,7 @@ const showChapters = ref(false)
 const attemptUsedCookies = ref(false)
 const drmError = ref(false)
 const seekCount = ref(0)
+const seeking = ref(false)
 const chatOpen = ref(true)
 const useTheatreMode = ref(false)
 const windowWidth = ref(window.innerWidth)
@@ -342,11 +344,19 @@ function updateWindowWidth() {
   windowWidth.value = window.innerWidth
 }
 
+function handleSeeking(time) {
+  if (seekTimer !== null) clearTimeout(seekTimer)
+  seekTimer = null
+  seeking.value = true
+  currentTime.value = time
+}
+
 function handleSeeked(time) {
   currentTime.value = time
   if (seekTimer !== null) clearTimeout(seekTimer)
   seekTimer = setTimeout(() => {
     seekTimer = null
+    seeking.value = false
     seekCount.value++
   }, 150)
 }
@@ -500,6 +510,7 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
   currentTime.value = 0
   showChapters.value = false
   seekCount.value = 0
+  seeking.value = false
   chatOpen.value = true
   useTheatreMode.value = store.getters.getDefaultViewingMode === 'theatre'
   fullscreenLiveChatOpen.value = false

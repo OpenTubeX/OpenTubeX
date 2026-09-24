@@ -142,6 +142,56 @@ test('Twitch replay retries a failed page and refreshes once after seeking settl
   expect(await app.electronApp.evaluate(() => globalThis.twitchReplayRequests)).toBe(3)
 })
 
+test('Twitch replay waits for a seek to settle before fetching from the new position', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    globalThis.twitchReplayPositions = []
+    ipcMain.removeHandler('twitch-chat-replay-page')
+    ipcMain.handle('twitch-chat-replay-page', (_event, _videoId, position) => {
+      globalThis.twitchReplayPositions.push(position)
+      return {
+        data: {
+          video: {
+            comments: {
+              pageInfo: { hasNextPage: position !== 25 },
+              edges: [{
+                cursor: 'next',
+                node: {
+                  id: String(position),
+                  contentOffsetSeconds: position === 25 ? 25 : 21,
+                  commenter: { displayName: 'Viewer' },
+                  message: { fragments: [{ text: String(position) }] }
+                }
+              }]
+            }
+          }
+        }
+      }
+    })
+  })
+
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const video = page.locator(`${activeTab} .externalMediaPlayer video`)
+  await video.evaluate(element => element.pause())
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.twitchReplayPositions.length)).toBe(1)
+
+  await video.evaluate(element => {
+    element.addEventListener('seeked', event => event.stopImmediatePropagation(), { capture: true, once: true })
+    element.currentTime = 25
+    element.dispatchEvent(new Event('seeking'))
+  })
+  await page.waitForTimeout(300)
+  expect(await app.electronApp.evaluate(() => globalThis.twitchReplayPositions)).toHaveLength(1)
+  await expect(page.locator(`${activeTab} .twitchChat`).getByText('21')).toHaveCount(0)
+
+  await video.evaluate(element => element.dispatchEvent(new Event('seeked')))
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.twitchReplayPositions)).toEqual([0, 25])
+  await expect(page.locator(`${activeTab} .twitchChat`).getByText('25')).toBeVisible()
+})
+
 test('Twitch replay continues past a page with no usable messages', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const mediaUrl = 'https://www.twitch.tv/videos/123456789'
