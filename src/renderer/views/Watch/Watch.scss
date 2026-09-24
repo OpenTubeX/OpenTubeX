@@ -1512,6 +1512,10 @@
     max-inline-size: 100%;
   }
 
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea) {
+    --shorts-landscape-player-width: min(100%, 600px, calc(var(--shorts-player-height) * var(--shorts-aspect-ratio)));
+  }
+
   :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea .videoPlayer),
   :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsExternalMetadata),
   :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsNextPreview) {
@@ -1519,7 +1523,7 @@
   }
 
   :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoArea .videoPlayer) {
-    inline-size: min(100%, 600px, calc(var(--shorts-player-height) * var(--shorts-aspect-ratio)));
+    inline-size: var(--shorts-landscape-player-width);
     justify-self: center;
     background-color: #000;
   }
@@ -1529,13 +1533,17 @@
     text-align: center;
   }
 
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .streamPlaceholderText) {
+    overflow-wrap: anywhere;
+  }
+
   :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsExternalMetadata) {
     position: absolute;
     z-index: 4;
     grid-row: 1;
     inset-block: calc(var(--shorts-player-height) - 16px) auto;
     inset-inline: 16px auto;
-    inline-size: min(35%, 360px);
+    inline-size: min(35%, 360px, calc((100% - var(--shorts-landscape-player-width)) / 2 - 24px));
     padding: 0;
     color: var(--primary-text-color);
     transform: translateY(-100%);

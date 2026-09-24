@@ -189,6 +189,47 @@ test('landscape phone Shorts keep a portrait player and accessible controls', as
   await watch.dispose()
 })
 
+test('landscape Shorts keep light-theme metadata clear of the player', async ({ app, page }) => {
+  await openShort({ app, page })
+  await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabs', 'capacitorTabletLayout'))
+  await page.emulateMedia({ colorScheme: 'light' })
+  await expect(page.locator('body')).toHaveClass(/\blight\b/)
+  await page.setViewportSize({ width: 700, height: 540 })
+
+  const player = page.locator('.ftVideoPlayer.shortsPlayer')
+  const metadata = page.locator('.shortsExternalMetadata')
+  const [playerBounds, metadataBounds] = await Promise.all([player.boundingBox(), metadata.boundingBox()])
+  expect(metadataBounds.x + metadataBounds.width).toBeLessThanOrEqual(playerBounds.x - 8)
+  await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+  await expect.poll(async () => {
+    const [scaledPlayer, scaledMetadata] = await Promise.all([player.boundingBox(), metadata.boundingBox()])
+    return scaledPlayer.x - scaledMetadata.x - scaledMetadata.width
+  }).toBeGreaterThanOrEqual(8)
+})
+
+test('narrow landscape Shorts keep the translated loading notice inside the player', async ({ app, page }) => {
+  await openShort({ app, page })
+  await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabs', 'capacitorTabletLayout'))
+  await page.setViewportSize({ width: 600, height: 320 })
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate(component => { component.proxy.ytDlpStreamsPending = true })
+  const streamPlaceholder = page.locator('.streamPlaceholder.shortsPlayerPlaceholder')
+  await expect(streamPlaceholder).toBeVisible()
+  await streamPlaceholder.locator('.streamPlaceholderText').evaluate(element => {
+    element.textContent = 'Récupération des flux avec yt-dlp…'
+  })
+  const [streamBounds, noticeBounds] = await Promise.all([
+    streamPlaceholder.boundingBox(),
+    streamPlaceholder.locator('.streamPlaceholderOverlay').boundingBox(),
+  ])
+  expect(noticeBounds.x).toBeGreaterThanOrEqual(streamBounds.x)
+  expect(noticeBounds.x + noticeBounds.width).toBeLessThanOrEqual(streamBounds.x + streamBounds.width)
+  expect(noticeBounds.y).toBeGreaterThanOrEqual(streamBounds.y)
+  expect(noticeBounds.y + noticeBounds.height).toBeLessThanOrEqual(streamBounds.y + streamBounds.height)
+  expect(await streamPlaceholder.locator('.streamPlaceholderText').evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+  await watch.dispose()
+})
+
 test('narrow landscape Shorts stay above the phone navigation', async ({ app, page }) => {
   await openShort({ app, page })
   await page.evaluate(() => {
