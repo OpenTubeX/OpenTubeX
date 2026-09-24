@@ -93,6 +93,55 @@ test('Twitch replay uses the watch chat toggle and side panel', async ({ app, pa
   await page.keyboard.press('s')
 })
 
+test('Twitch replay retries a failed page and refreshes once after seeking settles', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    globalThis.twitchReplayRequests = 0
+    ipcMain.removeHandler('twitch-chat-replay-page')
+    ipcMain.handle('twitch-chat-replay-page', () => {
+      globalThis.twitchReplayRequests++
+      if (globalThis.twitchReplayRequests === 1) throw new Error('Temporary Twitch failure')
+      return {
+        data: {
+          video: {
+            comments: {
+              pageInfo: { hasNextPage: false },
+              edges: [{
+                cursor: 'last',
+                node: {
+                  id: 'recovered',
+                  contentOffsetSeconds: 0,
+                  commenter: { displayName: 'Viewer' },
+                  message: { fragments: [{ text: 'Recovered chat' }] }
+                }
+              }]
+            }
+          }
+        }
+      }
+    })
+  })
+
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page.locator(`${activeTab} .twitchChat`).getByText('Recovered chat')).toBeVisible({ timeout: 10_000 })
+  expect(await app.electronApp.evaluate(() => globalThis.twitchReplayRequests)).toBe(2)
+
+  await page.locator(`${activeTab} .externalMediaPlayer video`).evaluate(video => {
+    for (let index = 0; index < 3; index++) video.dispatchEvent(new Event('seeking'))
+  })
+  await page.waitForTimeout(300)
+  expect(await app.electronApp.evaluate(() => globalThis.twitchReplayRequests)).toBe(2)
+  await page.locator(`${activeTab} .externalMediaPlayer video`).evaluate(video => {
+    for (let index = 0; index < 3; index++) video.dispatchEvent(new Event('seeked'))
+  })
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.twitchReplayRequests)).toBe(3)
+  await page.waitForTimeout(300)
+  expect(await app.electronApp.evaluate(() => globalThis.twitchReplayRequests)).toBe(3)
+})
+
 test('Twitch live chat scrolls like the YouTube chat panel', async ({ app, page, attachScreenshot }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   await setWindowSize(app, page, { width: 1800, height: 1000 })

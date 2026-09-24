@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { getTwitchChatTarget, parseTwitchIrcMessage, parseTwitchReplayPage } from '../../src/renderer/views/ExternalMedia/twitchChat.js'
-import { createTwitchChatReplayRequest } from '../../src/twitchChatReplayRequest.js'
+import { createTwitchChatReplayRequest, readTwitchReplayResponse } from '../../src/twitchChatReplayRequest.js'
 
 test('detects only Twitch live channels and VODs', () => {
   assert.deepEqual(getTwitchChatTarget('https://www.twitch.tv/Example_1', true), { type: 'live', id: 'example_1' })
+  assert.deepEqual(getTwitchChatTarget('https://www.twitch.tv/xqc', true), { type: 'live', id: 'xqc' })
   assert.deepEqual(getTwitchChatTarget('https://www.twitch.tv/videos/12345', false), { type: 'replay', id: '12345' })
   assert.equal(getTwitchChatTarget('https://www.twitch.tv/Example_1', false), null)
   assert.equal(getTwitchChatTarget('https://twitch.tv.evil.test/Example_1', true), null)
@@ -38,4 +39,17 @@ test('uses one persisted query shape for replay offsets and cursors', () => {
   assert.equal(offset.variables.contentOffsetSeconds, 20)
   assert.equal(cursor.variables.cursor, 'next')
   assert.equal(offset.extensions.persistedQuery.sha256Hash, cursor.extensions.persistedQuery.sha256Hash)
+})
+
+test('limits replay responses even when their content length is missing', async () => {
+  const oversized = new Response(new ReadableStream({
+    start(controller) {
+      controller.enqueue(new Uint8Array(600_000))
+      controller.enqueue(new Uint8Array(600_000))
+      controller.close()
+    }
+  }))
+  await assert.rejects(readTwitchReplayResponse(oversized), /too large/)
+  const valid = new Response(JSON.stringify([{ data: { video: null } }]))
+  assert.deepEqual(await readTwitchReplayResponse(valid), { data: { video: null } })
 })

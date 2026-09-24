@@ -322,9 +322,10 @@ function connect() {
 }
 
 async function fetchReplay() {
-  if (fetching || exhausted || stopped || fetchedUntil >= props.currentTime + 20) return
+  if (fetching || retryTimer || exhausted || stopped || fetchedUntil >= props.currentTime + 20) return
   fetching = true
   const generation = replayGeneration
+  let failed = false
   try {
     const payload = await getTwitchReplayPage(props.target.id, cursor ?? Math.floor(props.currentTime))
     if (generation !== replayGeneration || stopped) return
@@ -338,16 +339,23 @@ async function fetchReplay() {
     if (generation === replayGeneration) {
       console.error('Twitch chat replay failed', error)
       errorMessage.value = t('Video["Live Chat is unavailable for this stream. It may have been disabled by the uploader."]')
-      exhausted = true
+      failed = true
     }
   } finally {
     fetching = false
     if (generation !== replayGeneration && !stopped) fetchReplay()
-    else if (cursor && !stopped && fetchedUntil < props.currentTime + 20) fetchReplay()
+    else if (failed && !stopped) {
+      retryTimer = setTimeout(() => {
+        retryTimer = null
+        fetchReplay()
+      }, 5000)
+    } else if (cursor && !stopped && fetchedUntil < props.currentTime + 20) fetchReplay()
   }
 }
 
 function resetReplay() {
+  if (retryTimer) clearTimeout(retryTimer)
+  retryTimer = null
   replayGeneration++
   messages.value = []
   stayAtEnd = true

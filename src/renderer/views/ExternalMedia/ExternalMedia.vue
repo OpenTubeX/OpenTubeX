@@ -87,7 +87,8 @@
             playback-engine="yt-dlp"
             @error="playerErrorHandler"
             @timeupdate="updateCurrentTime"
-            @seeking="currentTime = $event; seekCount++"
+            @seeking="currentTime = $event"
+            @seeked="handleSeeked"
             @fullscreen-live-chat-change="handleFullscreenLiveChatChange"
             @toggle-theatre-mode="useTheatreMode = !useTheatreMode"
             @chapters-overlay-change="showChapters = $event"
@@ -301,6 +302,7 @@ const fullscreenLiveChatTarget = shallowRef(null)
 let loadGeneration = 0
 const canRetryWithCookies = computed(() => errorMessage.value && !drmError.value && isExternalMediaUrl(mediaUrl.value) && !attemptUsedCookies.value &&
   hasConfiguredRestrictedPlaybackAuthentication(store.getters))
+let seekTimer = null
 
 const hostname = computed(() => {
   try {
@@ -338,6 +340,15 @@ function handleFullscreenLiveChatChange({ open, target }) {
 
 function updateWindowWidth() {
   windowWidth.value = window.innerWidth
+}
+
+function handleSeeked(time) {
+  currentTime.value = time
+  if (seekTimer !== null) clearTimeout(seekTimer)
+  seekTimer = setTimeout(() => {
+    seekTimer = null
+    seekCount.value++
+  }, 150)
 }
 
 onMounted(() => window.addEventListener('resize', updateWindowWidth))
@@ -473,6 +484,8 @@ function handlePlayerError(error) {
 }
 
 async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysUseCookies) {
+  if (seekTimer !== null) clearTimeout(seekTimer)
+  seekTimer = null
   const generation = ++loadGeneration
   playerErrorHandler.value = error => {
     if (generation === loadGeneration) handlePlayerError(error)
@@ -517,6 +530,7 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
 watch(() => route.query.url, url => loadMedia(url), { immediate: true })
 onBeforeUnmount(() => {
   loadGeneration++
+  if (seekTimer !== null) clearTimeout(seekTimer)
   window.removeEventListener('resize', updateWindowWidth)
 })
 </script>

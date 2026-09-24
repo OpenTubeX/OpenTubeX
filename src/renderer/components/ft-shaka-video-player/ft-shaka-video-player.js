@@ -598,6 +598,7 @@ export default defineComponent({
     'sponsorblock-info-change',
     'toggle-shorts-metadata',
     'seeking',
+    'seeked',
   ],
   setup: function (props, { emit, expose }) {
     const { locale, t } = useI18n()
@@ -6436,6 +6437,7 @@ export default defineComponent({
 
     function handleAbRepeatSeeked() {
       checkAbRepeatBoundary(false)
+      emit('seeked', video.value?.currentTime ?? 0)
     }
 
     function applyPendingPresentationModes() {

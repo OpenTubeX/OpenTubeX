@@ -6,7 +6,7 @@ export function getTwitchChatTarget(value, isLive) {
     if (parts[0] === 'videos' && /^\d+$/.test(parts[1]) && parts.length === 2) {
       return { type: 'replay', id: parts[1] }
     }
-    if (isLive && parts.length === 1 && /^[a-z\d_]{4,25}$/i.test(parts[0])) {
+    if (isLive && parts.length === 1 && /^[a-z\d_]{3,25}$/i.test(parts[0])) {
       return { type: 'live', id: parts[0].toLowerCase() }
     }
   } catch { /* A non-Twitch URL has no chat. */ }
