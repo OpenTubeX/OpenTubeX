@@ -1171,6 +1171,39 @@ test('native right control hover remains inside its pill', async ({ app, page })
   await page.evaluate(() => window.nativeScreenTest.destroy())
 })
 
+test('playing video keeps the quick speed bar at its dragged scroll position', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+  await enableMobileInput(page)
+  await setWindowSize(app, page, { width: 360, height: 780 })
+  await openNativeScreen(page)
+  const bar = page.locator('.ft-quick-playback-rate-bar')
+  await expect(bar).toBeVisible()
+  await expect.poll(() => bar.evaluate(element => element.scrollWidth - element.clientWidth)).toBeGreaterThan(80)
+  await video.evaluate(element => element.play())
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(1)
+  const bounds = await bar.boundingBox()
+  const cdp = await page.context().newCDPSession(page)
+  await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 })
+  const y = Math.round(bounds.y + bounds.height / 2)
+  const x = Math.round(bounds.x + bounds.width - 20)
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] })
+  for (let delta = 10; delta <= 100; delta += 10) {
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: x - delta, y }] })
+    await page.waitForTimeout(30)
+  }
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  await expect.poll(() => bar.evaluate(element => element.scrollLeft)).toBeGreaterThan(60)
+  await bar.evaluate(element => { element.scrollLeft = 120 })
+  await page.locator('.shaka-controls-button-panel .shaka-current-time').first().evaluate(element => {
+    element.textContent += ' '
+  })
+  await page.waitForTimeout(100)
+  expect(await bar.evaluate(element => element.scrollLeft)).toBeGreaterThan(100)
+  await page.evaluate(() => window.nativeScreenTest.destroy())
+})
+
 for (const scale of [1, 1.25]) {
   test(`Android chapter title moves between toolbar and menu as space changes at scale ${scale}`, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
