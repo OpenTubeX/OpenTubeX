@@ -36,13 +36,16 @@ const execFileAsync = promisify(execFile)
 /** Cookies acquired while extracting external media stay in memory. */
 const externalStreamCookies = new WeakMap()
 const externalStreamHeaders = new WeakMap()
+const externalStoryboardHeaders = new WeakMap()
 const externalManifestHeaders = new WeakMap()
+const MAX_STORYBOARD_HEADER_URLS = 50_000
 const EXTERNAL_STREAM_HEADER_NAMES = new Set([
   'accept', 'accept-language', 'origin', 'referer', 'sec-fetch-mode', 'user-agent'
 ])
 
 function registerExternalStreamHeaders(webContents, formats) {
   const existing = externalStreamHeaders.get(webContents) ?? new Map()
+  const storyboards = externalStoryboardHeaders.get(webContents) ?? new Map()
   const manifestScopes = externalManifestHeaders.get(webContents) ?? new Map()
   for (const format of formats) {
     const headers = Object.fromEntries(Object.entries(format.http_headers ?? {})
@@ -56,9 +59,12 @@ function registerExternalStreamHeaders(webContents, formats) {
       if (typeof candidate !== 'string' || !/^https?:\/\//.test(candidate)) continue
       let streamUrl
       try { streamUrl = new URL(candidate) } catch { continue }
-      existing.delete(candidate)
-      existing.set(candidate, headers)
-      if (existing.size > 256) existing.delete(existing.keys().next().value)
+      const exact = format.protocol === 'mhtml' ? storyboards : existing
+      exact.delete(candidate)
+      exact.set(candidate, headers)
+      if (exact.size > (format.protocol === 'mhtml' ? MAX_STORYBOARD_HEADER_URLS : 256)) {
+        exact.delete(exact.keys().next().value)
+      }
 
       if (['m3u8', 'm3u8_native', 'dash', 'http_dash_segments'].includes(format.protocol)) {
         const scope = `${streamUrl.origin}${new URL('.', streamUrl).pathname}`
@@ -69,11 +75,13 @@ function registerExternalStreamHeaders(webContents, formats) {
     }
   }
   externalStreamHeaders.set(webContents, existing)
+  externalStoryboardHeaders.set(webContents, storyboards)
   externalManifestHeaders.set(webContents, manifestScopes)
 }
 
 export function getYtDlpExternalStreamHeaders(webContents, requestUrl) {
-  const exact = externalStreamHeaders.get(webContents)?.get(requestUrl)
+  const exact = externalStreamHeaders.get(webContents)?.get(requestUrl) ??
+    externalStoryboardHeaders.get(webContents)?.get(requestUrl)
   if (exact) return exact
 
   const request = new URL(requestUrl)

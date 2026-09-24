@@ -19,6 +19,7 @@ final class ExternalStreamRequestRegistry {
         "accept", "accept-language", "origin", "referer", "sec-fetch-mode", "user-agent"
     );
     private final LinkedHashMap<String, Map<String, String>> exact = new LinkedHashMap<>();
+    private final LinkedHashMap<String, Map<String, String>> storyboardExact = new LinkedHashMap<>();
     private final LinkedHashMap<String, Map<String, String>> manifestPaths = new LinkedHashMap<>();
     private final List<Cookie> cookies = new ArrayList<>();
 
@@ -56,8 +57,12 @@ final class ExternalStreamRequestRegistry {
                 URL url = parseUrl(candidate);
                 if (url == null) continue;
                 hosts.add(url.getHost().toLowerCase(Locale.ROOT));
-                putBounded(exact, candidate, Map.copyOf(headers));
                 String protocol = format.optString("protocol", "");
+                if ("mhtml".equals(protocol)) {
+                    putBounded(storyboardExact, candidate, Map.copyOf(headers), 50_000);
+                } else {
+                    putBounded(exact, candidate, Map.copyOf(headers));
+                }
                 if (Set.of("m3u8", "m3u8_native", "dash", "http_dash_segments").contains(protocol)) {
                     String path = url.getPath();
                     String scope = origin(url) + path.substring(0, path.lastIndexOf('/') + 1);
@@ -111,6 +116,7 @@ final class ExternalStreamRequestRegistry {
 
     private Map<String, String> sourceHeadersFor(URL url) {
         Map<String, String> source = exact.get(url.toString());
+        if (source == null) source = storyboardExact.get(url.toString());
         if (source == null) {
             String requestPath = origin(url) + url.getPath();
             for (Map.Entry<String, Map<String, String>> entry : manifestPaths.entrySet()) {
@@ -162,9 +168,14 @@ final class ExternalStreamRequestRegistry {
 
     private static void putBounded(LinkedHashMap<String, Map<String, String>> map,
                                    String key, Map<String, String> value) {
+        putBounded(map, key, value, 256);
+    }
+
+    private static void putBounded(LinkedHashMap<String, Map<String, String>> map,
+                                   String key, Map<String, String> value, int limit) {
         map.remove(key);
         map.put(key, value);
-        if (map.size() > 256) map.remove(map.keySet().iterator().next());
+        if (map.size() > limit) map.remove(map.keySet().iterator().next());
     }
 
     private static final class Cookie {

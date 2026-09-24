@@ -264,9 +264,15 @@ test('keeps protected media headers with a long external storyboard', async ({ a
   const media = await readFile(DEMO_MEDIA_PATH)
   const receivedHeaders = []
   const siblingHeaders = []
+  const storyboardHeaders = []
   const server = createServer((request, response) => {
     if (request.url === '/foobar/ping') {
       siblingHeaders.push(request.headers)
+      response.writeHead(204).end()
+      return
+    }
+    if (request.url === '/storyboard.jpg') {
+      storyboardHeaders.push(request.headers)
       response.writeHead(204).end()
       return
     }
@@ -291,6 +297,7 @@ test('keeps protected media headers with a long external storyboard', async ({ a
     const executable = path.join(app.userDataDir, 'external-media-cookie-stream.sh')
     const streamUrl = `http://127.0.0.1:${server.address().port}/foo/video.webm`
     const siblingUrl = `http://127.0.0.1:${server.address().port}/foobar/ping`
+    const storyboardUrl = `http://127.0.0.1:${server.address().port}/storyboard.jpg`
     const response = JSON.stringify({
       title: 'Cookie protected stream',
       formats: [{
@@ -344,6 +351,9 @@ test('keeps protected media headers with a long external storyboard', async ({ a
     expect(receivedHeaders.every(headers => headers.cookie?.includes('stream_session=test-token'))).toBe(true)
     expect(receivedHeaders.every(headers => headers.referer === 'https://www.tiktok.com/')).toBe(true)
     expect(receivedHeaders.every(headers => headers['user-agent'] === 'yt-dlp-test-agent')).toBe(true)
+    await page.evaluate(async url => { await fetch(url, { mode: 'no-cors' }) }, storyboardUrl)
+    expect(storyboardHeaders.length).toBe(1)
+    expect(storyboardHeaders[0].referer).toBe('https://www.tiktok.com/')
     await page.evaluate(async url => { await fetch(url, { mode: 'no-cors' }) }, siblingUrl)
     expect(siblingHeaders.length).toBe(1)
     expect(siblingHeaders[0].cookie).toBeUndefined()
