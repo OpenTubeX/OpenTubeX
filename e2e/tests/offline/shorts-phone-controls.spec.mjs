@@ -56,6 +56,10 @@ test('landscape Shorts options use the space beside the narrow player', async ({
   expect(dialogBounds.width).toBeGreaterThanOrEqual(250)
   expect(dialogBounds.x).toBeGreaterThanOrEqual(playerBounds.x + playerBounds.width + 8)
   expect(dialogBounds.x + dialogBounds.width).toBeLessThanOrEqual(railBounds.x - 8)
+  expect(await dialog.evaluate(element => {
+    const bounds = element.getBoundingClientRect()
+    return element.contains(document.elementFromPoint(bounds.x + bounds.width / 2, bounds.y + 20))
+  })).toBe(true)
   await expect(dialog.locator('.shaka-overflow-menu')).toBeVisible()
 
   await page.setViewportSize({ width: 420, height: 320 })
