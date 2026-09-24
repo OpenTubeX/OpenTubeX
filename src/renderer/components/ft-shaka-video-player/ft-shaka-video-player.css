@@ -1958,6 +1958,26 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   position: relative;
 }
 
+:deep(.shaka-tooltips-on > .ft-volume-control-group > .shaka-mute-button:is(:hover, :focus-visible, :active)::after) {
+  content: attr(aria-label);
+  position: absolute;
+  bottom: 62px;
+  padding: 2px 10px;
+  border-radius: 2px;
+  background: rgb(0 0 0 / 50%);
+  color: #fff;
+  font-family: Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-transparency) {
+  :deep(.shaka-tooltips-on > .ft-volume-control-group > .shaka-mute-button:is(:hover, :focus-visible, :active)::after) {
+    background-color: rgb(0 0 0 / 90%);
+  }
+}
+
 :deep(.shaka-tooltips-on > .shaka-mute-button:hover::after),
 :deep(.shaka-tooltips-on > .shaka-mute-button:focus-visible::after),
 :deep(.shaka-tooltips-on > .shaka-mute-button:active::after),
@@ -4882,7 +4902,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 /* Touch can leave :hover on the last control tapped after the UI disappears. */
 @media (hover: none) {
-  :deep(.shaka-tooltips-on > :is(.shaka-tooltip, .shaka-tooltip-status):not(:focus-visible)::after) {
+  :deep(.shaka-tooltips-on > :is(.shaka-tooltip, .shaka-tooltip-status):not(:focus-visible)::after),
+  :deep(.shaka-tooltips-on > .ft-volume-control-group > .shaka-mute-button:not(:focus-visible)::after) {
     content: none;
   }
 }

@@ -187,3 +187,32 @@ test('volume pill collapses after dragging its slider and leaving', async ({ app
   await page.mouse.move(1, 1)
   await expect.poll(() => volumeGroup.locator('.shaka-volume-bar-container').evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThan(90)
 })
+
+test('wrapped volume button keeps its tooltip on hover and keyboard focus', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+
+  const mute = page.locator('.ft-volume-control-group > .shaka-mute-button')
+  await expect(page.locator('.shaka-controls-button-panel')).toHaveClass(/shaka-tooltips-on/)
+  const expectTooltip = async () => {
+    const tooltip = await mute.evaluate(element => {
+      const style = getComputedStyle(element, '::after')
+      return {
+        label: element.getAttribute('aria-label'),
+        content: style.content,
+        position: style.position,
+        background: style.backgroundColor
+      }
+    })
+    expect(tooltip.content).toContain(tooltip.label)
+    expect(tooltip.position).toBe('absolute')
+    expect(tooltip.background).not.toBe('rgba(0, 0, 0, 0)')
+  }
+
+  await mute.hover()
+  await expectTooltip()
+  await page.keyboard.press('Tab')
+  await mute.focus()
+  await expect.poll(() => mute.evaluate(element => element.matches(':focus-visible'))).toBe(true)
+  await expectTooltip()
+})
