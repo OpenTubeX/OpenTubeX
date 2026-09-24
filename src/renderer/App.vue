@@ -4666,7 +4666,8 @@ async function enableCapacitorIntegrations() {
   let appStateVersion = 0
   const appStateHandle = await CapacitorApp.addListener('appStateChange', ({ isActive }) => {
     receivedAppState = true
-    const version = ++appStateVersion
+    appStateVersion += 1
+    const version = appStateVersion
     playbackScreenWake?.setAppActive(isActive)
     clearTimeout(backgroundStateTimeout)
     if (Capacitor.getPlatform() === 'android' && !isActive) {
