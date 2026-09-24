@@ -397,7 +397,6 @@ final class NativePlaybackScreen extends FrameLayout implements TextureView.Surf
         boolean wasMiniPlayer = miniPlayer;
         miniPlayer = enabled;
         miniRadius = radius;
-        updateSubtitleVisibility();
         if (enabled && !fullscreen && !pictureInPicture) {
             if (videoBounds != null) updateScrollBounds();
             videoFrame.bringToFront();
@@ -417,6 +416,7 @@ final class NativePlaybackScreen extends FrameLayout implements TextureView.Surf
             transitioning = true;
             finishVideoTransition();
         }
+        updateSubtitleVisibility();
     }
 
     void setGestureActive(boolean enabled) {

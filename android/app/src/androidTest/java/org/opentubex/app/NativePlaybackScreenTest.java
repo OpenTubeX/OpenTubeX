@@ -397,6 +397,29 @@ public class NativePlaybackScreenTest {
         });
     }
 
+    @Test public void textCaptionsRemainVisibleDuringMiniPlayerExitHandoff() {
+        withScreen((screen, controls, web, engine) -> {
+            screen.setFullscreen(false);
+            screen.setInlineVisible(true);
+            screen.layoutVideo(200, 200, 400, 225, 1000);
+            screen.setMiniPlayer(true, 12);
+            engine.setCaptionCues(java.util.Collections.singletonList(
+                new NativeCaptionTimeline.Entry(0, 10000, "Handoff caption")), true);
+            web.holdVisualState = true;
+            screen.setMiniPlayer(false, 0);
+            assertNotNull(web.heldVisualState);
+            ViewGroup frame = videoFrame(screen);
+            for (int index = 0; index < frame.getChildCount(); index++) {
+                if (frame.getChildAt(index) instanceof androidx.media3.ui.SubtitleView) {
+                    assertEquals("Captions must stay above the raised video while the page opening is pending",
+                        View.VISIBLE, frame.getChildAt(index).getVisibility());
+                    return;
+                }
+            }
+            throw new AssertionError("Native subtitle view is missing");
+        });
+    }
+
     @Test public void leavingMiniPlayerWaitsForTheInlinePageOpening() {
         View[] frame = new View[1];
         withScreen((screen, controls, web, engine) -> {

@@ -28,6 +28,9 @@ export function createAndroidNativeScreen({ element, container, getController, g
   }, onError)
   let pageScrolling = false
   let gestureActive = false
+  let nativeMiniRaised = false
+  let miniRequested = false
+  let miniGeneration = 0
   let appChromeElements = []
   let globalMenuElements = []
   let globalElementsDirty = true
@@ -67,7 +70,7 @@ export function createAndroidNativeScreen({ element, container, getController, g
     transitioning = true
     // The native animator owns the moving video. Keep the WebView at the
     // destination, ready for the handoff once its final clip has been drawn.
-    syncInlineBackground(false)
+    if (!container.classList.contains('scrollMiniPlayer') || nativeMiniRaised) syncInlineBackground(false)
     const rect = ({ x, y, width, height }) => ({ x, y, width, height })
     const pageScroll = followsPageScroll()
     event.detail.finished = getController().layout({
@@ -149,7 +152,7 @@ export function createAndroidNativeScreen({ element, container, getController, g
     // The detached mini player is fixed while the route scrolls. A cutout on
     // that route would scroll away before a busy WebView can update its clip.
     // Native draws the mini player above the complete page instead.
-    const clipVisible = visible && !container.classList.contains('scrollMiniPlayer')
+    const clipVisible = visible && !(nativeMiniRaised && container.classList.contains('scrollMiniPlayer'))
     const clip = inlineClip(bounds, clipVisible, origin)
     const pageHeight = scrolling ? `${Math.max(window.innerHeight, document.body.getBoundingClientRect().height)}px` : ''
     // Read both openings before changing either clip, so a resize does not
@@ -306,15 +309,27 @@ export function createAndroidNativeScreen({ element, container, getController, g
         return bounds.width > 0 && bounds.height > 0
       })
     }
+    if (layout.miniPlayer !== miniRequested) {
+      miniRequested = layout.miniPlayer
+      miniGeneration++
+      if (!miniRequested) nativeMiniRaised = false
+    }
     const signature = JSON.stringify(layout)
     // Transforms do not trigger ResizeObserver. Follow zoom transitions until
     // their final frame so native video matches the shared gesture geometry.
     if ([container, element, ...menuElements].some(target => target.getAnimations().some(animation => animation.playState === 'running'))) scheduleLayout()
     syncAmbientClip(bounds)
-    syncInlineBackground(visible && !pageScrolling && !gestureActive)
+    syncInlineBackground(visible && !pageScrolling && (!gestureActive || !nativeMiniRaised))
     if (signature === lastLayout) return
     lastLayout = signature
-    getController()?.layout(layout).catch(onError)
+    const generation = miniGeneration
+    getController()?.layout(layout).then(() => {
+      if (!layout.miniPlayer || generation !== miniGeneration || nativeMiniRaised || !attached) return
+      // Native has raised the video. Only now may the WebView close its opening.
+      nativeMiniRaised = true
+      if (transitioning) syncInlineBackground(false)
+      else syncLayout()
+    }).catch(onError)
   }
   function scheduleLayout() {
     if ((open || attached) && frame === null) frame = requestAnimationFrame(syncLayout)
@@ -484,6 +499,9 @@ export function createAndroidNativeScreen({ element, container, getController, g
       endTransition()
       attached = false
       pageScrolling = false
+      miniGeneration++
+      miniRequested = false
+      nativeMiniRaised = false
       container.toggleAttribute('data-native-player-controls', false)
       container.toggleAttribute('data-native-player-scrolling', false)
       releaseInlineBackground()
@@ -497,6 +515,9 @@ export function createAndroidNativeScreen({ element, container, getController, g
       endTransition()
       attached = false
       pageScrolling = false
+      miniGeneration++
+      miniRequested = false
+      nativeMiniRaised = false
       container.toggleAttribute('data-native-player-controls', false)
       container.toggleAttribute('data-native-player-scrolling', false)
       releaseInlineBackground()
