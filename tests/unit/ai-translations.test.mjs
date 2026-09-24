@@ -111,7 +111,8 @@ test('external metric labels use the correct counted noun forms', async () => {
     ['lt', 'Saves', 10, 'Išsaugojimų'],
     ['lt', 'Reposts', 10, 'Pakartotinių įrašų'],
     ['ta', 'Saves', 2, 'சேமிப்புகள்'],
-    ['ar', 'Dislikes', 1, 'عدم إعجاب']
+    ['ar', 'Dislikes', 1, 'عدم إعجاب'],
+    ['tr', 'Reposts', 2, 'Repost']
   ]
   for (const [locale, key, count, expected] of cases) {
     const messages = YAML.parse(await readFile(new URL(`../../static/locales/ai/${locale}.yaml`, import.meta.url), 'utf8'))
