@@ -598,6 +598,7 @@ export default defineComponent({
     'sponsorblock-info-change',
     'toggle-shorts-metadata',
     'seeking',
+    'seeked',
   ],
   setup: function (props, { emit, expose }) {
     const { locale, t } = useI18n()
@@ -4590,7 +4591,7 @@ export default defineComponent({
       }
 
       // Keep the control mounted when a panel can make theatre mode available.
-      if (props.externalUrl || (!props.theatrePossible && props.chapters.length === 0 && !useSponsorBlock.value)) {
+      if (!props.liveChatAvailable && (props.externalUrl || (!props.theatrePossible && props.chapters.length === 0 && !useSponsorBlock.value))) {
         removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_theatre_mode')
       }
 
@@ -6431,11 +6432,12 @@ export default defineComponent({
       cancelSponsorBlockSkipSchedule()
       clearAbRepeatBoundarySchedule()
       syncPlayPauseControlIcons()
-      emit('seeking')
+      emit('seeking', video.value?.currentTime ?? 0)
     }
 
-    function handleAbRepeatSeeked() {
+    function handleSeeked() {
       checkAbRepeatBoundary(false)
+      emit('seeked', video.value?.currentTime ?? 0)
     }
 
     function applyPendingPresentationModes() {
@@ -11909,7 +11911,7 @@ export default defineComponent({
       handleVideoResize,
       handleEnded,
       handleSeeking,
-      handleAbRepeatSeeked,
+      handleSeeked,
       handleAbRepeatDurationChange,
       updateVolume,
       handleTimeupdate,

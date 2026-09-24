@@ -524,6 +524,8 @@ export default {
     )
   },
 
+  twitchChatReplayPage: (videoId, position) => ipcRenderer.invoke(IpcChannels.TWITCH_CHAT_REPLAY_PAGE, videoId, position),
+
   /**
    * @param {string} currentVideoId
    * @returns {Promise<import('../main/ytDlp').YtDlpRecommendation[] | { error: string } | null>}

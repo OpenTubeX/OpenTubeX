@@ -156,7 +156,7 @@
         @pause="handlePause"
         @ended="handleEnded"
         @seeking="handleSeeking"
-        @seeked="handleAbRepeatSeeked"
+        @seeked="handleSeeked"
         @canplay="handleCanPlay"
         @resize="handleVideoResize"
         @volumechange="updateVolume"

@@ -1,0 +1,24 @@
+.twitchChat {
+  block-size: 500px;
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
+  min-inline-size: 0;
+}
+
+.twitchChatInner {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-block-size: 0;
+}
+
+.liveChatComments {
+  block-size: auto;
+  flex: 1 1 auto;
+  min-block-size: 0;
+}
+
+.comment {
+  display: block;
+}

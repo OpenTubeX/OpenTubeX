@@ -56,161 +56,206 @@
     </div>
 
     <template v-else-if="info">
-      <FtShakaVideoPlayer
-        v-if="source"
-        ref="player"
-        :key="loadGeneration"
-        class="externalMediaPlayer"
-        :manifest-src="source.manifestSrc"
-        :manifest-mime-type="source.manifestMimeType"
-        :legacy-formats="source.legacyFormats"
-        :format="source.manifestSrc ? 'dash' : 'legacy'"
-        :captions="source.captions"
-        :caption-translations="source.captionTranslations"
-        :title="info.title ?? ''"
-        :thumbnail="thumbnail"
-        :is-live="source.isLive"
-        :storyboard-src="source.storyboardSrc"
-        :chapters="chapters"
-        :current-chapter-index="currentChapterIndex"
-        :chapters-src="chaptersSrc"
-        :sidebar-chapters-open="showChapters"
-        :external-url="mediaUrl"
-        playback-engine="yt-dlp"
-        @error="playerErrorHandler"
-        @timeupdate="updateCurrentTime"
-        @chapters-overlay-change="showChapters = $event"
-      />
       <div
-        v-else
-        class="externalMediaState"
-        role="status"
+        class="externalMediaLayout"
+        :class="{ useTheatreMode, noSidebar: !chatAvailable || !chatOpen }"
       >
-        {{ t('Video.Upcoming') }}
-      </div>
-
-      <FtCard class="externalMediaDetails">
-        <div class="externalMediaHeading">
-          <h1
-            class="videoTitle"
-            dir="auto"
-          >
-            {{ info.title || mediaUrl }}
-          </h1>
-          <FtShareButton
-            v-if="!hideSharingActions"
-            id=""
+        <div class="externalMediaVideo">
+          <FtShakaVideoPlayer
+            v-if="source"
+            ref="player"
+            :key="loadGeneration"
+            class="externalMediaPlayer"
+            :manifest-src="source.manifestSrc"
+            :manifest-mime-type="source.manifestMimeType"
+            :legacy-formats="source.legacyFormats"
+            :format="source.manifestSrc ? 'dash' : 'legacy'"
+            :captions="source.captions"
+            :caption-translations="source.captionTranslations"
+            :title="info.title ?? ''"
+            :thumbnail="thumbnail"
+            :is-live="source.isLive"
+            :storyboard-src="source.storyboardSrc"
+            :chapters="chapters"
+            :current-chapter-index="currentChapterIndex"
+            :chapters-src="chaptersSrc"
+            :sidebar-chapters-open="showChapters"
             :external-url="mediaUrl"
+            :live-chat-available="chatAvailable"
+            :theatre-possible="theatreTogglePossible"
+            :use-theatre-mode="useTheatreMode"
+            playback-engine="yt-dlp"
+            @error="playerErrorHandler"
+            @timeupdate="updateCurrentTime"
+            @seeking="handleSeeking"
+            @seeked="handleSeeked"
+            @fullscreen-live-chat-change="handleFullscreenLiveChatChange"
+            @toggle-theatre-mode="useTheatreMode = !useTheatreMode"
+            @chapters-overlay-change="showChapters = $event"
           />
-        </div>
-        <div
-          v-if="statusBadges.length"
-          class="externalMediaBadges"
-        >
-          <span
-            v-for="badge in statusBadges"
-            :key="badge"
-            class="externalMediaBadge"
-          >{{ badge }}</span>
-        </div>
-        <FtInlineMetadata class="externalMediaMetrics">
-          <span v-if="info.viewCount !== null">{{ formattedViewCount }} {{ t('Video.Views') }}</span>
-          <span v-if="metadata.concurrentViewCount !== null">{{ t('Global.Counts.Watching Count', { count: formattedConcurrentViewCount }, metadata.concurrentViewCount) }}</span>
-          <time
-            v-if="publishedDate"
-            :datetime="publishedDate"
-          >{{ publishedDateLabel }} {{ formattedPublishedDate }}</time>
-          <bdi v-if="metadata.categories.length"><strong>{{ t('Description.Video Category') }}</strong> {{ metadata.categories.join(', ') }}</bdi>
-        </FtInlineMetadata>
-        <FtInlineMetadata
-          v-if="engagement.length"
-          class="externalMediaMetrics"
-        >
-          <span
-            v-for="item in engagement"
-            :key="item.label"
-          >{{ item.text }}</span>
-        </FtInlineMetadata>
-        <div class="externalMediaCreator">
-          <component
-            :is="creatorUrl ? 'a' : 'span'"
-            v-if="creatorName"
-            class="externalMediaCreatorProfile"
-            :href="creatorUrl || undefined"
-            :target="creatorUrl ? '_blank' : undefined"
-            :rel="creatorUrl ? 'noopener noreferrer' : undefined"
-          >
-            <FtRetryImage
-              v-if="creatorAvatarUrl"
-              :src="creatorAvatarUrl"
-              class="externalMediaCreatorAvatar"
-              alt=""
-            />
-            <span dir="auto">{{ creatorName }}</span>
-          </component>
-          <a
-            class="externalMediaSiteLink"
-            :href="mediaUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-          >{{ hostname }}</a>
-        </div>
-      </FtCard>
-      <FtCard
-        v-if="metadataRows.length"
-        class="externalMediaExtra"
-      >
-        <h2>{{ t('Video.Metadata') }}</h2>
-        <dl>
           <div
-            v-for="item in metadataRows"
-            :key="item.label"
+            v-else
+            class="externalMediaState"
+            role="status"
           >
-            <dt>{{ item.label }}</dt>
-            <dd dir="auto">
-              {{ item.value }}
-            </dd>
+            {{ t('Video.Upcoming') }}
           </div>
-        </dl>
-      </FtCard>
-      <WatchVideoDescription
-        v-if="info.description || metadata.tags.length || metadata.license"
-        class="externalMediaDescription"
-        :description="info.description"
-        :tags="metadata.tags"
-        :license="metadata.license"
-        @timestamp-event="seekTo"
-      />
-      <FtCard
-        v-if="source && chapters.length && showChapters"
-        class="externalMediaChapters"
-      >
-        <div class="chaptersPanelHeader">
-          <h2>{{ t('Chapters.Chapters') }}</h2>
-          <button
-            type="button"
-            class="chaptersPanelClose"
-            :aria-label="t('Chapters.Close Chapters')"
-            :title="t('Chapters.Close Chapters')"
-            @click="showChapters = false"
-          >
-            <FtIcon :icon="['fas', 'xmark']" />
-          </button>
         </div>
-        <WatchVideoChapters
-          :chapters="chapters"
-          :current-chapter-index="currentChapterIndex"
-          :fallback-thumbnail="thumbnail"
-          @timestamp-event="seekTo"
-          @copy-timestamp="copyChapterTimestamp"
-        />
-      </FtCard>
+        <div class="externalMediaInfo">
+          <FtCard class="externalMediaDetails">
+            <div class="externalMediaHeading">
+              <h1
+                class="videoTitle"
+                dir="auto"
+              >
+                {{ info.title || mediaUrl }}
+              </h1>
+            </div>
+            <div
+              v-if="statusBadges.length"
+              class="externalMediaBadges"
+            >
+              <span
+                v-for="badge in statusBadges"
+                :key="badge"
+                class="externalMediaBadge"
+              >{{ badge }}</span>
+            </div>
+            <FtInlineMetadata class="externalMediaMetrics">
+              <span v-if="info.viewCount !== null">{{ formattedViewCount }} {{ t('Video.Views') }}</span>
+              <span v-if="metadata.concurrentViewCount !== null">{{ t('Global.Counts.Watching Count', { count: formattedConcurrentViewCount }, metadata.concurrentViewCount) }}</span>
+              <time
+                v-if="publishedDate"
+                :datetime="publishedDate"
+              >{{ publishedDateLabel }} {{ formattedPublishedDate }}</time>
+              <bdi v-if="metadata.categories.length"><strong>{{ t('Description.Video Category') }}</strong> {{ metadata.categories.join(', ') }}</bdi>
+            </FtInlineMetadata>
+            <FtInlineMetadata
+              v-if="engagement.length"
+              class="externalMediaMetrics"
+            >
+              <span
+                v-for="item in engagement"
+                :key="item.label"
+              >{{ item.text }}</span>
+            </FtInlineMetadata>
+            <div class="externalMediaCreator">
+              <component
+                :is="creatorUrl ? 'a' : 'span'"
+                v-if="creatorName"
+                class="externalMediaCreatorProfile"
+                :href="creatorUrl || undefined"
+                :target="creatorUrl ? '_blank' : undefined"
+                :rel="creatorUrl ? 'noopener noreferrer' : undefined"
+              >
+                <FtRetryImage
+                  v-if="creatorAvatarUrl"
+                  :src="creatorAvatarUrl"
+                  class="externalMediaCreatorAvatar"
+                  alt=""
+                />
+                <span dir="auto">{{ creatorName }}</span>
+              </component>
+              <a
+                class="externalMediaSiteLink"
+                :href="mediaUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+              >{{ hostname }}</a>
+              <div class="externalMediaActions">
+                <FtIconButton
+                  v-if="chatAvailable"
+                  :title="chatToggleTitle"
+                  :icon="['fas', 'message']"
+                  :theme="chatOpen ? 'secondary' : 'base'"
+                  :aria-pressed="chatOpen"
+                  @click="toggleChat"
+                />
+                <FtShareButton
+                  v-if="!hideSharingActions"
+                  id=""
+                  :external-url="mediaUrl"
+                />
+              </div>
+            </div>
+          </FtCard>
+          <FtCard
+            v-if="metadataRows.length"
+            class="externalMediaExtra"
+          >
+            <h2>{{ t('Video.Metadata') }}</h2>
+            <dl>
+              <div
+                v-for="item in metadataRows"
+                :key="item.label"
+              >
+                <dt>{{ item.label }}</dt>
+                <dd dir="auto">
+                  {{ item.value }}
+                </dd>
+              </div>
+            </dl>
+          </FtCard>
+          <WatchVideoDescription
+            v-if="info.description || metadata.tags.length || metadata.license"
+            class="externalMediaDescription"
+            :description="info.description"
+            :tags="metadata.tags"
+            :license="metadata.license"
+            @timestamp-event="seekTo"
+          />
+          <FtCard
+            v-if="source && chapters.length && showChapters"
+            class="externalMediaChapters"
+          >
+            <div class="chaptersPanelHeader">
+              <h2>{{ t('Chapters.Chapters') }}</h2>
+              <button
+                type="button"
+                class="chaptersPanelClose"
+                :aria-label="t('Chapters.Close Chapters')"
+                :title="t('Chapters.Close Chapters')"
+                @click="showChapters = false"
+              >
+                <FtIcon :icon="['fas', 'xmark']" />
+              </button>
+            </div>
+            <WatchVideoChapters
+              :chapters="chapters"
+              :current-chapter-index="currentChapterIndex"
+              :fallback-thumbnail="thumbnail"
+              @timestamp-event="seekTo"
+              @copy-timestamp="copyChapterTimestamp"
+            />
+          </FtCard>
+        </div>
+        <aside
+          v-if="chatAvailable && chatOpen"
+          class="externalMediaSidebar"
+        >
+          <Teleport
+            :to="fullscreenLiveChatTarget || 'body'"
+            :disabled="!fullscreenLiveChatOpen"
+          >
+            <TwitchChat
+              v-if="chatAvailable && chatOpen"
+              :key="`${twitchChatTarget.type}:${twitchChatTarget.id}`"
+              :target="twitchChatTarget"
+              :current-time="currentTime"
+              :seek-count="seekCount"
+              :seeking="seeking"
+              :fullscreen-overlay="fullscreenLiveChatOpen"
+              @close="closeChat"
+            />
+          </Teleport>
+        </aside>
+      </div>
     </template>
   </main>
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
@@ -218,12 +263,15 @@ import { FtIcon } from '@opentubex/icons'
 import FtButton from '../../components/FtButton/FtButton.vue'
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtInlineMetadata from '../../components/FtInlineMetadata/FtInlineMetadata.vue'
+import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtRetryImage from '../../components/FtRetryImage.vue'
 import FtShareButton from '../../components/FtShareButton/FtShareButton.vue'
 import FtShakaVideoPlayer from '../../components/ft-shaka-video-player/ft-shaka-video-player.vue'
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
 import WatchVideoChapters from '../../components/WatchVideoChapters/WatchVideoChapters.vue'
+import TwitchChat from './TwitchChat.vue'
+import { getTwitchChatTarget } from './twitchChat'
 import { getExternalYtDlpPlaybackSource } from '../../helpers/player/ytDlpPlayback'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { buildChaptersVttFile, formatDurationAsTimestamp } from '../../helpers/utils'
@@ -246,9 +294,17 @@ const currentTime = ref(0)
 const showChapters = ref(false)
 const attemptUsedCookies = ref(false)
 const drmError = ref(false)
+const seekCount = ref(0)
+const seeking = ref(false)
+const chatOpen = ref(true)
+const useTheatreMode = ref(false)
+const windowWidth = ref(window.innerWidth)
+const fullscreenLiveChatOpen = ref(false)
+const fullscreenLiveChatTarget = shallowRef(null)
 let loadGeneration = 0
 const canRetryWithCookies = computed(() => errorMessage.value && !drmError.value && isExternalMediaUrl(mediaUrl.value) && !attemptUsedCookies.value &&
   hasConfiguredRestrictedPlaybackAuthentication(store.getters))
+let seekTimer = null
 
 const hostname = computed(() => {
   try {
@@ -257,6 +313,55 @@ const hostname = computed(() => {
     return ''
   }
 })
+const twitchChatTarget = computed(() => info.value && source.value
+  ? getTwitchChatTarget(info.value.webpageUrl, source.value.isLive) ?? getTwitchChatTarget(mediaUrl.value, source.value.isLive)
+  : null)
+const chatAvailable = computed(() => twitchChatTarget.value && !(twitchChatTarget.value.type === 'replay'
+  ? store.getters.getHideLiveChatReplay
+  : store.getters.getHideLiveChat))
+const theatreTogglePossible = computed(() => windowWidth.value > 1350 && Boolean(chatAvailable.value && chatOpen.value))
+const chatToggleTitle = computed(() => twitchChatTarget.value?.type === 'replay'
+  ? chatOpen.value ? t('Video.Close Live Chat Replay') : t('Video.Show Live Chat Replay')
+  : chatOpen.value ? t('Video.Close Live Chat') : t('Video.Show Live Chat'))
+
+function closeChat() {
+  chatOpen.value = false
+  player.value?.closeFullscreenLiveChat()
+}
+
+function toggleChat() {
+  if (chatOpen.value) closeChat()
+  else chatOpen.value = true
+}
+
+function handleFullscreenLiveChatChange({ open, target }) {
+  fullscreenLiveChatTarget.value = open ? target : null
+  fullscreenLiveChatOpen.value = open && target !== null
+  if (fullscreenLiveChatOpen.value) chatOpen.value = true
+}
+
+function updateWindowWidth() {
+  windowWidth.value = window.innerWidth
+}
+
+function handleSeeking(time) {
+  if (seekTimer !== null) clearTimeout(seekTimer)
+  seekTimer = null
+  seeking.value = true
+  currentTime.value = time
+}
+
+function handleSeeked(time) {
+  currentTime.value = time
+  if (seekTimer !== null) clearTimeout(seekTimer)
+  seekTimer = setTimeout(() => {
+    seekTimer = null
+    seeking.value = false
+    seekCount.value++
+  }, 150)
+}
+
+onMounted(() => window.addEventListener('resize', updateWindowWidth))
 function safeWebUrl(value) {
   try {
     const url = new URL(value)
@@ -389,6 +494,8 @@ function handlePlayerError(error) {
 }
 
 async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysUseCookies) {
+  if (seekTimer !== null) clearTimeout(seekTimer)
+  seekTimer = null
   const generation = ++loadGeneration
   playerErrorHandler.value = error => {
     if (generation === loadGeneration) handlePlayerError(error)
@@ -402,6 +509,12 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
   source.value = null
   currentTime.value = 0
   showChapters.value = false
+  seekCount.value = 0
+  seeking.value = false
+  chatOpen.value = true
+  useTheatreMode.value = store.getters.getDefaultViewingMode === 'theatre'
+  fullscreenLiveChatOpen.value = false
+  fullscreenLiveChatTarget.value = null
   setTabTitle('Watch')
 
   if (!isExternalMediaUrl(url)) {
@@ -426,7 +539,11 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
 }
 
 watch(() => route.query.url, url => loadMedia(url), { immediate: true })
-onBeforeUnmount(() => { loadGeneration++ })
+onBeforeUnmount(() => {
+  loadGeneration++
+  if (seekTimer !== null) clearTimeout(seekTimer)
+  window.removeEventListener('resize', updateWindowWidth)
+})
 </script>
 
 <style scoped>
@@ -435,8 +552,71 @@ onBeforeUnmount(() => { loadGeneration++ })
   padding: 24px;
 }
 
+.externalMediaLayout {
+  align-items: start;
+  display: grid;
+  grid-template:
+    'video video sidebar' 0fr
+    'info info sidebar' auto / minmax(0, 1fr) minmax(0, 1fr) minmax(380px, 1fr);
+}
+
+.externalMediaVideo {
+  grid-area: video;
+  margin-block-end: 16px;
+  min-inline-size: 0;
+}
+
 .externalMediaPlayer {
   inline-size: 100%;
+  max-inline-size: calc(80vh * 1.78);
+  min-inline-size: 0;
+  margin-inline: auto;
+}
+
+.externalMediaInfo {
+  grid-area: info;
+  min-inline-size: 0;
+}
+
+.externalMediaSidebar {
+  grid-area: sidebar;
+  min-inline-size: 0;
+}
+
+.externalMediaSidebar :deep(.twitchChat) {
+  margin-block: 0 16px;
+  margin-inline: 8px;
+}
+
+@media (width <= 1350px) {
+  .externalMediaLayout {
+    grid-template:
+      'video video video' auto
+      'info info sidebar' auto / minmax(0, 1fr) minmax(0, 1fr) minmax(380px, 1fr);
+  }
+}
+
+@container route (width >= 1051px) {
+  .externalMediaLayout.useTheatreMode {
+    grid-template:
+      'video video video' auto
+      'info info sidebar' auto / minmax(0, 1fr) minmax(0, 1fr) minmax(380px, 1fr);
+  }
+}
+
+@container route (width <= 1050px) {
+  .externalMediaLayout {
+    grid-template:
+      'video' auto
+      'info' auto
+      'sidebar' auto / minmax(0, 1fr);
+  }
+}
+
+.externalMediaLayout.noSidebar {
+  grid-template:
+    'video' auto
+    'info' auto / minmax(0, 1fr);
 }
 
 .externalMediaState {
@@ -530,7 +710,7 @@ onBeforeUnmount(() => { loadGeneration++ })
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-block-start: 16px;
+  margin-block-start: 0;
   padding: 16px;
 }
 
@@ -574,6 +754,14 @@ onBeforeUnmount(() => { loadGeneration++ })
   display: flex;
   flex-wrap: wrap;
   gap: 4px 16px;
+}
+
+.externalMediaActions {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 4px;
+  margin-inline-start: auto;
 }
 
 .externalMediaCreatorProfile {
