@@ -236,6 +236,33 @@ test('control glass stays blurred throughout the row fade', async ({ app, page }
   await expect(glass).toHaveCSS('backdrop-filter', /blur\(10px\)/)
 })
 
+test('reduced motion hides control glass without a fade', async ({ app, page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+
+  const controls = page.locator('.shaka-controls-container')
+  const panel = controls.locator('.shaka-controls-button-panel')
+  const glass = panel.locator('.ft-time-display-group > .ft-control-glass')
+  await expect(page.locator('html')).toHaveAttribute('data-reduced-motion', 'reduce')
+  await controls.evaluate(element => element.setAttribute('shown', 'true'))
+  await expect(panel).toHaveCSS('transition-property', 'none')
+  await expect(glass).toHaveCSS('opacity', '1')
+
+  const hidden = await controls.evaluate(element => {
+    element.removeAttribute('shown')
+    const panel = element.querySelector('.shaka-controls-button-panel')
+    const glass = panel.querySelector('.ft-time-display-group > .ft-control-glass')
+    return {
+      transition: getComputedStyle(panel).transitionProperty,
+      visibility: getComputedStyle(panel).visibility,
+      glassOpacity: getComputedStyle(glass).opacity
+    }
+  })
+  expect(hidden).toEqual({ transition: 'none', visibility: 'hidden', glassOpacity: '0' })
+})
+
 test('volume pill collapses after dragging its slider and leaving', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
