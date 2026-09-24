@@ -927,9 +927,21 @@
           <span>{{ $t('Video.Player.Stats.Dropped Frames / Total Frames', stats.frames) }}</span>
         </template>
       </div>
+      <div
+        v-if="videoZoomPinching && videoFillZoomProximity > 0"
+        class="videoFillZoomEdges"
+        :class="{ videoFillZoomSnapReady }"
+        :style="{ opacity: videoFillZoomProximity }"
+        aria-hidden="true"
+      >
+        <span class="videoFillZoomEdge videoFillZoomEdgeTop" />
+        <span class="videoFillZoomEdge videoFillZoomEdgeRight" />
+        <span class="videoFillZoomEdge videoFillZoomEdgeBottom" />
+        <span class="videoFillZoomEdge videoFillZoomEdgeLeft" />
+      </div>
       <Transition name="fade">
         <div
-          v-if="showTemporaryPlaybackRateIndicator || showValueChangePopup"
+          v-if="videoZoomPinching || showTemporaryPlaybackRateIndicator || showValueChangePopup"
           class="valueChangePopup"
           :class="{
             'invert-content-order':
@@ -937,11 +949,11 @@
           }"
         >
           <span
-            v-if="showTemporaryPlaybackRateIndicator || valueChangeIcons.length > 0"
+            v-if="videoZoomPinching || showTemporaryPlaybackRateIndicator || valueChangeIcons.length > 0"
             class="valueChangeIcons"
           >
             <template
-              v-for="icon in showTemporaryPlaybackRateIndicator ? ['forward'] : valueChangeIcons"
+              v-for="icon in videoZoomPinching ? ['search'] : showTemporaryPlaybackRateIndicator ? ['forward'] : valueChangeIcons"
               :key="typeof icon === 'string' ? icon : icon.path"
             >
               <svg
@@ -960,7 +972,9 @@
             </template>
           </span>
           <span class="valueChangeText">{{
-            showTemporaryPlaybackRateIndicator
+            videoZoomPinching
+              ? formatVideoZoom(videoZoomGestureZoom)
+              : showTemporaryPlaybackRateIndicator
               ? temporaryPlaybackRateIndicatorMessage
               : valueChangeMessage
           }}</span>

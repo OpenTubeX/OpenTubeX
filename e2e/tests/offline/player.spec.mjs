@@ -31,6 +31,19 @@ async function openDemoVideo({ app, page }) {
   return await openMockedVideo(page)
 }
 
+async function getVideoFillGeometry(video) {
+  return video.evaluate(element => {
+    const player = element.closest('.ftVideoPlayer')
+    const fit = Math.min(element.clientWidth / element.videoWidth, element.clientHeight / element.videoHeight)
+    const fill = Math.max(
+      player.clientWidth / (element.videoWidth * fit),
+      player.clientHeight / (element.videoHeight * fit),
+    )
+    const bounds = player.getBoundingClientRect()
+    return { fill, x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 }
+  })
+}
+
 /** Scrolls the player out of view, which docks it as the scroll mini player. */
 function scrollBelowPlayer(player) {
   return player.evaluate(element => {
@@ -715,6 +728,90 @@ test('pinch zoom starts over the paused player controls without toggling playbac
 
   await player.locator('.shaka-big-buttons-container .shaka-play-button').click()
   await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
+})
+
+test('inline pinch zoom shows its value without a fill snap', async ({ app, page }) => {
+  const video = await openDemoVideo({ app, page })
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs'))
+  await player.evaluate(element => { element.style.height = '400px' })
+  const geometry = await getVideoFillGeometry(video)
+  expect(geometry.fill).toBeGreaterThan(1.1)
+  expect(geometry.fill).toBeLessThan(3)
+
+  const session = await page.context().newCDPSession(page)
+  const point = (offset, id) => ({ x: geometry.x + offset, y: geometry.y, id })
+  await session.send('Input.dispatchTouchEvent', {
+    type: 'touchStart', touchPoints: [point(-50, 1), point(50, 2)],
+  })
+  await expect(player.locator('.valueChangePopup')).toBeVisible()
+  await expect(player.locator('.valueChangeText')).toHaveText('100%')
+
+  const nearScale = geometry.fill - 0.04
+  await session.send('Input.dispatchTouchEvent', {
+    type: 'touchMove', touchPoints: [point(-50 * nearScale, 1), point(50 * nearScale, 2)],
+  })
+  await expect(player.locator('.videoFillZoomEdges')).toHaveCount(0)
+  await expect(player.locator('.valueChangeText')).toHaveText(`${Math.round(nearScale * 100)}%`)
+  await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  await session.detach()
+
+  await expect.poll(() => video.evaluate(element => new DOMMatrix(getComputedStyle(element).transform).a))
+    .toBeCloseTo(nearScale, 3)
+})
+
+test('fullscreen pinch zoom arms the fill point only after moving toward it', async ({ app, page }) => {
+  const video = await openDemoVideo({ app, page })
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs'))
+  await setPlayerFullscreen(page, true)
+  // Give the 16:9 fixture a taller frame so fullscreen has a distinct fill scale.
+  await video.evaluate(element => {
+    Object.defineProperty(element, 'videoHeight', { configurable: true, value: 480 })
+  })
+
+  const geometry = await getVideoFillGeometry(video)
+  expect(geometry.fill).toBeGreaterThan(1.1)
+  expect(geometry.fill).toBeLessThan(3)
+
+  const tabId = await player.getAttribute('data-tab-id')
+  const setZoom = (value) => page.evaluate(({ tabId, value }) => {
+    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      .commit('setTabVideoZoom', { tabId, value })
+  }, { tabId, value })
+  const nearScale = geometry.fill - 0.04
+  await setZoom(nearScale)
+  await expect.poll(() => video.evaluate(element => new DOMMatrix(getComputedStyle(element).transform).a))
+    .toBeCloseTo(nearScale, 3)
+
+  const session = await page.context().newCDPSession(page)
+  const point = (offset, id) => ({ x: geometry.x + offset, y: geometry.y, id })
+  await session.send('Input.dispatchTouchEvent', {
+    type: 'touchStart', touchPoints: [point(-50, 1), point(50, 2)],
+  })
+  await expect(player.locator('.videoFillZoomEdges')).toHaveCount(0)
+  await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  await expect.poll(() => video.evaluate(element => new DOMMatrix(getComputedStyle(element).transform).a))
+    .toBeCloseTo(nearScale, 3)
+
+  await setZoom(1)
+  await expect(video).toHaveCSS('transform', 'none')
+  await session.send('Input.dispatchTouchEvent', {
+    type: 'touchStart', touchPoints: [point(-50, 1), point(50, 2)],
+  })
+  await expect(player.locator('.valueChangeText')).toHaveText('100%')
+  await session.send('Input.dispatchTouchEvent', {
+    type: 'touchMove', touchPoints: [point(-50 * nearScale, 1), point(50 * nearScale, 2)],
+  })
+  await expect(player.locator('.videoFillZoomEdges')).toHaveClass(/videoFillZoomSnapReady/)
+  await expect(player.locator('.valueChangeText')).toHaveText(`${Math.round(nearScale * 100)}%`)
+  await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  await session.detach()
+
+  await expect.poll(() => video.evaluate(element => new DOMMatrix(getComputedStyle(element).transform).a))
+    .toBeCloseTo(geometry.fill, 3)
+  await expect(player.locator('.valueChangeText')).toHaveText(`${Math.round(geometry.fill * 100)}%`)
+  await expect(player.locator('.videoFillZoomEdges')).toHaveCount(0)
 })
 
 test('the overflow menu can turn the zoom off again', async ({ app, page, attachScreenshot }) => {

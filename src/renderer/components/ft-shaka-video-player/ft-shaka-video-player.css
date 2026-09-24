@@ -2163,6 +2163,68 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   user-select: text;
 }
 
+.videoFillZoomEdges {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.videoFillZoomEdge {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+
+.videoFillZoomEdgeTop,
+.videoFillZoomEdgeBottom {
+  inset-inline: 0;
+  block-size: 24px;
+}
+
+.videoFillZoomEdgeLeft,
+.videoFillZoomEdgeRight {
+  inset-block: 0;
+  inline-size: 24px;
+}
+
+.videoFillZoomEdgeTop {
+  inset-block-start: 0;
+  background: linear-gradient(to bottom, rgb(255 255 255 / 65%), transparent);
+}
+
+.videoFillZoomEdgeRight {
+  inset-inline-end: 0;
+  background: linear-gradient(to left, rgb(255 255 255 / 65%), transparent);
+}
+
+.videoFillZoomEdgeBottom {
+  inset-block-end: 0;
+  background: linear-gradient(to top, rgb(255 255 255 / 65%), transparent);
+}
+
+.videoFillZoomEdgeLeft {
+  inset-inline-start: 0;
+  background: linear-gradient(to right, rgb(255 255 255 / 65%), transparent);
+}
+
+.videoFillZoomSnapReady .videoFillZoomEdge {
+  animation: video-fill-zoom-ready 900ms ease-in-out infinite alternate;
+}
+
+@keyframes video-fill-zoom-ready {
+  to {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .videoFillZoomSnapReady .videoFillZoomEdge {
+    animation: none;
+  }
+}
+
 .valueChangePopup {
   position: absolute;
   top: clamp(16px, 5%, 32px);

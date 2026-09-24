@@ -248,7 +248,7 @@ export function createAndroidNativeScreen({ element, container, getController, g
       bounds.y + bounds.height > 0 && bounds.y < window.innerHeight &&
       container.checkVisibility?.({ checkOpacity: true, checkVisibilityCSS: true }) !== false
     // Notices need the same native clipping and touch priority as menus.
-    const playerMenus = [...container.querySelectorAll('.shaka-overflow-menu:not(.shaka-hidden), .shaka-settings-menu:not(.shaka-hidden), .shaka-sub-menu:not(.shaka-hidden), .shaka-context-menu:not(.shaka-hidden), .skippedSegmentsWrapper')]
+    const playerMenus = [...container.querySelectorAll('.shaka-overflow-menu:not(.shaka-hidden), .shaka-settings-menu:not(.shaka-hidden), .shaka-sub-menu:not(.shaka-hidden), .shaka-context-menu:not(.shaka-hidden), .skippedSegmentsWrapper, .valueChangePopup, .videoFillZoomEdge')]
     // Seek previews cover native buttons without becoming Back-dismissable menus.
     const seekPreviews = [...container.querySelectorAll('.shaka-player-ui-thumbnail-container')]
     const countdowns = [...container.querySelectorAll('.countdownProgress')]
