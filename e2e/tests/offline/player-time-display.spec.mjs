@@ -66,6 +66,11 @@ test('player controls share pill surfaces and the time display toggles together'
   const playWidth = await page.locator('.shaka-controls-button-panel > .shaka-play-button').evaluate(element => element.getBoundingClientRect().width)
   expect(Math.abs(collapsedVolume.width - playWidth)).toBeLessThan(1)
   expect(Math.abs(collapsedVolume.iconCenterOffset)).toBeLessThan(1)
+  const volumeIconWidth = await volumeGroup.locator('.shaka-mute-button > .shaka-ui-icon').evaluate(element => element.getBoundingClientRect().width)
+  for (const playIcon of await page.locator('.shaka-controls-button-panel > .shaka-play-button > .shaka-ui-icon').all()) {
+    const iconWidth = await playIcon.evaluate(element => element.getBoundingClientRect().width)
+    expect(Math.abs(iconWidth - volumeIconWidth)).toBeLessThan(1)
+  }
   await page.locator('.shaka-mute-button').hover()
   await expect(volumeGroup.locator('.shaka-volume-bar-container')).toBeVisible()
   await expect.poll(() => volumeGroup.evaluate(element => getComputedStyle(element).backgroundImage)).not.toBe('none')

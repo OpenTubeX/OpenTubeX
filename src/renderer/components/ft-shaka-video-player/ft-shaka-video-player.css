@@ -1915,6 +1915,10 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   position: relative;
 }
 
+:deep(.shaka-controls-button-panel > .shaka-play-button > .shaka-ui-icon) {
+  font-size: 24px;
+}
+
 :deep(.shaka-play-button:has(> .ft-play-pause-morph-icon) > .shaka-ui-icon:not(.ft-play-pause-morph-icon)) {
   opacity: 0;
 }
@@ -1925,6 +1929,10 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   inset-inline-start: 50%;
   pointer-events: none;
   transform: translate(-50%, -50%) scale(1.08);
+}
+
+:deep(.shaka-controls-button-panel > .shaka-play-button > .ft-play-pause-morph-icon) {
+  transform: translate(-50%, -50%);
 }
 
 :deep(
