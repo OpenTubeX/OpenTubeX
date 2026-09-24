@@ -96,8 +96,20 @@ export const PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE = playbackInfoOutputTemp
   'protocol,width,height,fps,rows,columns,fragments,http_headers,cookies'
 )
 
+export class YtDlpPlaybackTimeoutError extends Error {
+  constructor() {
+    super('yt-dlp playback extraction timed out')
+  }
+}
+
 /** yt-dlp prints one JSON line for the media and another when an image grid exists. */
-export function parseYtDlpPlaybackInfo(stdout) {
+export function parseYtDlpPlaybackInfo(stdout, stderr = '') {
+  // A client request can time out while yt-dlp still exits successfully with
+  // formats from other clients. That partial result must not be cached.
+  if (/^WARNING:.*(?:timed?\s*out|time-?out)/mi.test(stderr)) {
+    throw new YtDlpPlaybackTimeoutError()
+  }
+
   const [media, ...additional] = stdout.trim().split('\n').map(line => JSON.parse(line))
   if (!media || typeof media !== 'object') throw new Error('yt-dlp returned invalid playback metadata')
   const storyboard = [media, ...additional]

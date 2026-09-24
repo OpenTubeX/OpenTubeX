@@ -12,9 +12,11 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 
 /** Bundled executables stay in nativeLibraryDir, as required by Android's W^X policy. */
 final class YtDlpRuntime {
+    private static final Pattern TIMEOUT_WARNING = Pattern.compile("(?m)^WARNING:.*(?:timed?\\s*out|time-?out)", Pattern.CASE_INSENSITIVE);
     private static final ExecutorService EXTRACTORS = Executors.newFixedThreadPool(2);
     private static final ReentrantReadWriteLock INSTALL_LOCK = new ReentrantReadWriteLock();
     private static final Map<String, RunningProcess> PROCESSES = new ConcurrentHashMap<>();
@@ -65,6 +67,10 @@ final class YtDlpRuntime {
     }
 
     static String execute(Context context, List<String> args, String id, Consumer<String> progress) throws Exception {
+        return execute(context, args, id, progress, false);
+    }
+
+    static String execute(Context context, List<String> args, String id, Consumer<String> progress, boolean rejectTimeoutWarnings) throws Exception {
         initialize(context);
         INSTALL_LOCK.readLock().lockInterruptibly();
         RunningProcess running = null;
@@ -122,6 +128,9 @@ final class YtDlpRuntime {
             stderr.get();
             stdout.get();
             if (exit != 0) throw new IOException(errors.toString().trim());
+            if (rejectTimeoutWarnings && hasTimedOutWarning(errors.toString())) {
+                throw new IOException("yt-dlp playback extraction timed out");
+            }
             completed = true;
             return output.toString();
         } finally {
@@ -134,7 +143,15 @@ final class YtDlpRuntime {
     }
 
     static String extract(Context context, List<String> args) throws Exception {
-        return extract(() -> execute(context, args, null, null), 60, TimeUnit.SECONDS);
+        return extract(context, args, false);
+    }
+
+    static String extract(Context context, List<String> args, boolean rejectTimeoutWarnings) throws Exception {
+        return extract(() -> execute(context, args, null, null, rejectTimeoutWarnings), 60, TimeUnit.SECONDS);
+    }
+
+    static boolean hasTimedOutWarning(String stderr) {
+        return TIMEOUT_WARNING.matcher(stderr).find();
     }
 
     static String extract(Callable<String> operation, long timeout, TimeUnit unit) throws Exception {

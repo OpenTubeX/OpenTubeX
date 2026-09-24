@@ -161,7 +161,7 @@ function expectNoRenderErrors(errors) {
   expect(renderErrors, `Renderer errors:\n${errors.join('\n')}`).toEqual([])
 }
 
-test('an IP-blocked response still uses the configured yt-dlp extractor and title', async ({ app, page }) => {
+test('an IP-blocked response retries a timed-out yt-dlp extraction and recovers the title', async ({ app, page }) => {
   await mockBlockedVideo({
     app,
     page,
@@ -176,6 +176,9 @@ test('an IP-blocked response still uses the configured yt-dlp extractor and titl
     ipcMain.removeHandler('yt-dlp-get-playback-info')
     ipcMain.handle('yt-dlp-get-playback-info', () => {
       globalThis.__ipBlockedYtDlpCalls++
+      if (globalThis.__ipBlockedYtDlpCalls === 1) {
+        return { error: 'yt-dlp playback extraction timed out' }
+      }
       return {
         title: 'Title recovered by yt-dlp',
         isLive: false,
@@ -198,7 +201,7 @@ test('an IP-blocked response still uses the configured yt-dlp extractor and titl
 
   await expect.poll(() => app.electronApp.evaluate(
     () => globalThis.__ipBlockedYtDlpCalls
-  )).toBeGreaterThan(0)
+  )).toBeGreaterThan(1)
   const watchView = await watchViewHandle(page)
   await expect.poll(() => watchView.evaluate(view => ({
     title: view.videoTitle,

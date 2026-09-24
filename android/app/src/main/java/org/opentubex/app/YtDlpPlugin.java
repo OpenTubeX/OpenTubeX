@@ -152,7 +152,7 @@ public final class YtDlpPlugin extends Plugin {
                     args.addAll(asList("--cookies", temporaryCookies.getAbsolutePath()));
                 }
                 args.add("--simulate");
-                String stdout = YtDlpRuntime.extract(getContext(), args);
+                String stdout = YtDlpRuntime.extract(getContext(), args, call.getBoolean("rejectTimeoutWarnings", false));
                 if (externalMedia) {
                     File cookieFile = temporaryCookies == null ? new File(cookies) : temporaryCookies;
                     String extractedCookies;

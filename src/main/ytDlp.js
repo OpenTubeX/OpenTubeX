@@ -4,7 +4,7 @@ import {
   SUBTITLE_FORMATS, MAX_LOCAL_PLAYLIST_VIDEOS, DENIED_CUSTOM_ARGS, AUTOMATIC_NUMBER_LIMITS,
   splitArguments, automaticNumber, playbackImpersonationArguments, playbackSubtitleArguments,
 } from '../ytDlpArguments'
-import { EXTERNAL_PLAYBACK_FORMAT_SELECTOR, PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo, toFiniteNumber, toNonEmptyString, mapPlaybackFormat, mapPlaybackCaptions, mapExternalPlaybackMetadata } from '../ytDlpMetadata'
+import { EXTERNAL_PLAYBACK_FORMAT_SELECTOR, PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE, YtDlpPlaybackTimeoutError, parseYtDlpPlaybackInfo, toFiniteNumber, toNonEmptyString, mapPlaybackFormat, mapPlaybackCaptions, mapExternalPlaybackMetadata } from '../ytDlpMetadata'
 import { resolveYtDlpCreatorAvatarUrl } from './ytDlpCreatorAvatar'
 import { execFile, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
@@ -1721,7 +1721,6 @@ export async function handleYtDlpGetPlaybackInfo(
 
   const args = [
     '--no-playlist',
-    '--no-warnings',
     '--no-progress',
     '--socket-timeout',
     '15',
@@ -1776,6 +1775,7 @@ export async function handleYtDlpGetPlaybackInfo(
   args.push(mediaUrl)
 
   let stdout
+  let stderr
   let version
   let extractedCookies = ''
   try {
@@ -1791,6 +1791,7 @@ export async function handleYtDlpGetPlaybackInfo(
       getYtDlpVersion(executable)
     ])
     stdout = playbackInfo.stdout
+    stderr = playbackInfo.stderr
     version = resolvedVersion
     if (cookieFile !== null) extractedCookies = await readFile(cookieFile, 'utf8').catch(() => '')
   } catch (error) {
@@ -1811,9 +1812,13 @@ export async function handleYtDlpGetPlaybackInfo(
 
   let info
   try {
-    info = parseYtDlpPlaybackInfo(stdout)
-  } catch {
-    return { error: 'yt-dlp returned invalid JSON' }
+    info = parseYtDlpPlaybackInfo(stdout, stderr)
+  } catch (error) {
+    return {
+      error: error instanceof YtDlpPlaybackTimeoutError
+        ? error.message
+        : 'yt-dlp returned invalid JSON'
+    }
   }
 
   const formats = Array.isArray(info.formats) ? info.formats : []
