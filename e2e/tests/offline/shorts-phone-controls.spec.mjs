@@ -245,8 +245,10 @@ test('landscape Shorts keep every control inside the narrow player and action ra
   }
   await page.setViewportSize({ width: 600, height: 320 })
   const narrowPlayerBounds = await page.locator('.ftVideoPlayer.shortsPlayer').boundingBox()
-  for (const button of await page.locator('.shortsTopControls .shortsTopControl:visible').all()) {
-    const bounds = await button.boundingBox()
+  const narrowButtons = await page.locator('.shortsTopControls .shortsTopControl:visible').all()
+  const narrowLoadedControls = await Promise.all(narrowButtons.map(button => button.boundingBox()))
+  for (const bounds of narrowLoadedControls) {
+    expect(bounds.width).toBeGreaterThanOrEqual(42)
     expect(bounds.x).toBeGreaterThanOrEqual(narrowPlayerBounds.x - 1)
     expect(bounds.x + bounds.width).toBeLessThanOrEqual(narrowPlayerBounds.x + narrowPlayerBounds.width + 1)
     expect(bounds.y + bounds.height).toBeLessThanOrEqual(narrowPlayerBounds.y + narrowPlayerBounds.height + 1)
@@ -281,6 +283,13 @@ test('landscape Shorts keep every control inside the narrow player and action ra
   const skeletonControls = page.locator('.shortsSkeletonControlGroup span:visible')
   await expect(skeletonControls).toHaveCount(3)
   for (const [index, expected] of loadedControls.entries()) {
+    const bounds = await skeletonControls.nth(index).boundingBox()
+    expect(bounds.x).toBeCloseTo(expected.x, 0)
+    expect(bounds.y).toBeCloseTo(expected.y, 0)
+    expect(bounds.width).toBeCloseTo(expected.width, 0)
+  }
+  await page.setViewportSize({ width: 600, height: 320 })
+  for (const [index, expected] of narrowLoadedControls.entries()) {
     const bounds = await skeletonControls.nth(index).boundingBox()
     expect(bounds.x).toBeCloseTo(expected.x, 0)
     expect(bounds.y).toBeCloseTo(expected.y, 0)

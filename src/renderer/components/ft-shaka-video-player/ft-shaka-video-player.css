@@ -5028,17 +5028,25 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
     block-size: 42px;
   }
 
-  @media (height <= 360px) {
-    :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) .shortsTopControl) {
-      inline-size: 32px;
-      block-size: 32px;
-    }
-  }
 }
 
 @container shorts-landscape-player (width < 180px) {
   :global(.shortsTopControls .shortsCaptionsControl) {
     display: none;
+  }
+}
+
+@container shorts-landscape-player (width < 100px) {
+  :global(.shortsTopControls) {
+    align-items: center;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 2px;
+  }
+
+  :global(.shortsTopControlsGroup) {
+    flex-direction: column;
+    gap: 0;
   }
 }
 

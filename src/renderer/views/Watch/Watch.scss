@@ -1678,11 +1678,22 @@
     gap: 2px;
   }
 
-  @media (height <= 360px) {
-    :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsSkeletonControlGroup span) {
-      inline-size: 32px;
-      block-size: 32px;
-    }
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .shortsPlayerPlaceholder) {
+    container: shorts-landscape-player / inline-size;
+  }
+}
+
+@container shorts-landscape-player (width < 100px) {
+  :global(.shortsSkeletonControls) {
+    align-items: center;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 2px;
+  }
+
+  :global(.shortsSkeletonControlGroup) {
+    flex-direction: column;
+    gap: 0;
   }
 }
 
