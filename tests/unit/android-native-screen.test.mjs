@@ -7,7 +7,7 @@ import { overrideShakaMethods } from '../../src/renderer/helpers/player/override
 const source = (await readFile(new URL('../../src/renderer/helpers/player/androidNativeScreen.js', import.meta.url), 'utf8'))
   .replace(/^import .*\n/gm, '').replace('export function ', 'function ')
 
-async function fixture({ fullscreen = true, shorts = false, chrome = [], dialogs = [], suggestions = [], previews = [], deferTransitions = false, deferFullscreen = false, rotateFullscreen = false } = {}) {
+async function fixture({ fullscreen = true, shorts = false, mini = false, detached = false, chrome = [], dialogs = [], suggestions = [], previews = [], deferTransitions = false, deferMiniLayout = false, deferFullscreen = false, rotateFullscreen = false } = {}) {
   const snapshots = []
   const snapshotInvalidations = []
   let publishSnapshot
@@ -15,6 +15,7 @@ async function fixture({ fullscreen = true, shorts = false, chrome = [], dialogs
   const layouts = []
   const presentations = []
   const completeTransitions = []
+  const completeMiniLayouts = []
   const completeFullscreen = []
   const fullscreenEvents = []
   const readyEvents = []
@@ -30,11 +31,14 @@ async function fixture({ fullscreen = true, shorts = false, chrome = [], dialogs
   let poster = false
   let shortsPanelOpen = false
   let animating = false
+  let miniActive = mini
   let id = 0
   const bounds = { x: 0, y: 0, width: 640, height: 360 }
+  const page = { getBoundingClientRect: () => ({ x: 0, y: 0 }), setAttribute() {}, removeAttribute() {}, style: { getPropertyValue: () => '', setProperty(name, value) { styleWrites.push({ name, value }) }, removeProperty() {} } }
   const controlsElement = { hasAttribute: () => shown, getBoundingClientRect: () => bounds }
   const container = Object.assign(new EventTarget(), {
-    classList: { contains: name => (shorts && name === 'shortsPlayer') || (panel && ['fullscreenDockLayoutOpen', 'chaptersOverlayOpen'].includes(name)) },
+    closest: selector => detached && selector === '#cross-tab-mini-player-layer' ? {} : null,
+    classList: { contains: name => (shorts && name === 'shortsPlayer') || (miniActive && name === 'scrollMiniPlayer') || (panel && ['fullscreenDockLayoutOpen', 'chaptersOverlayOpen'].includes(name)) },
     contains: element => previews.includes(element),
     getBoundingClientRect: () => bounds,
     toggleAttribute() {},
@@ -55,12 +59,13 @@ async function fixture({ fullscreen = true, shorts = false, chrome = [], dialogs
     readyState: 4, getBoundingClientRect: () => bounds, getAnimations: () => [],
   })
   const shortsPanel = { checkVisibility: () => shortsPanelOpen, getAnimations: () => [], getBoundingClientRect: () => ({ x: 60, y: 100, width: 300, height: 400 }) }
-  const document = Object.assign(new EventTarget(), { body: { classList: { contains: () => false }, append() {}, getBoundingClientRect: () => ({ height: 2000 }) }, createElement: () => ({ setAttribute() {}, remove() {}, style: { getPropertyValue() { return '' }, setProperty(name, value) { styleWrites.push({ name, value }) } } }), elementFromPoint: () => null, querySelectorAll: selector => selector.includes('.topNav') ? chrome : selector.includes('dialog[open]') ? [...dialogs, ...(selector.includes('.ft-input-component .list') ? suggestions : []), ...(selector.includes('.shortsCommentsPanel') ? [shortsPanel] : [])] : [], querySelector: () => null, documentElement: { classList: { toggle() {} }, style: { getPropertyValue() { return '' }, setProperty(name, value) { styleWrites.push({ name, value }) }, removeProperty() {} } } })
+  const document = Object.assign(new EventTarget(), { body: { classList: { contains: () => false }, append() {}, getBoundingClientRect: () => ({ height: 2000 }) }, createElement: () => ({ setAttribute() {}, remove() {}, style: { getPropertyValue() { return '' }, setProperty(name, value) { styleWrites.push({ name, value }) } } }), elementFromPoint: () => null, querySelectorAll: selector => selector.includes('.topNav') ? chrome : selector.includes('dialog[open]') ? [...dialogs, ...(selector.includes('.ft-input-component .list') ? suggestions : []), ...(selector.includes('.shortsCommentsPanel') ? [shortsPanel] : [])] : [], querySelector: selector => detached && selector === '.app > .flexBox' ? page : null, documentElement: { classList: { toggle() {} }, style: { getPropertyValue() { return '' }, setProperty(name, value) { styleWrites.push({ name, value }) }, removeProperty() {} } } })
   document.addEventListener('nativefullscreenready', () => readyEvents.push(true))
   document.addEventListener('fullscreenchange', () => fullscreenEvents.push(presentations.length))
   class Observer {
     constructor(callback) { this.callback = callback; observers.push(this) }
     observe(target, options) { if (options) this.options = { attributeFilter: [...(this.options?.attributeFilter ?? []), ...options.attributeFilter] } }
+    unobserve() {}
     disconnect() {}
   }
   const create = vm.runInNewContext(`${source}\ncreateAndroidNativeScreen`, {
@@ -80,6 +85,7 @@ async function fixture({ fullscreen = true, shorts = false, chrome = [], dialogs
       if (deferFullscreen && value.fullscreen) await new Promise((resolve, reject) => completeFullscreen.push(Object.assign(resolve, { reject })))
     }, async hide() {}, async layout(value) {
       layouts.push(value)
+      if (deferMiniLayout && value.miniPlayer) await new Promise(resolve => completeMiniLayouts.push(resolve))
       if (deferTransitions && value.transition) await new Promise(resolve => completeTransitions.push(resolve))
     },
   }), getLocale: () => 'en-US', isFullscreenOnRotationEnabled: () => rotateFullscreen, onError: error => { throw error } })
@@ -90,13 +96,14 @@ async function fixture({ fullscreen = true, shorts = false, chrome = [], dialogs
   if (fullscreen) await screen.show()
   else await screen.attach()
   await flush()
-  return { document, readyEvents, snapshotInvalidations, snapshots, publishSnapshot, screen, container, layouts, presentations, completeTransitions, completeFullscreen, fullscreenEvents, bounds, observers, window, styleWrites, flush, change({ visible = shown, menuOpen = menu, panelOpen = panel, shortsOpen = shortsPanelOpen, containerAnimating = animating, endedRecommendations = recommendations, playbackEnded = ended, loadingPoster = poster }) {
+  return { document, readyEvents, snapshotInvalidations, snapshots, publishSnapshot, screen, container, layouts, presentations, completeTransitions, completeMiniLayouts, completeFullscreen, fullscreenEvents, bounds, observers, window, styleWrites, flush, change({ visible = shown, menuOpen = menu, panelOpen = panel, shortsOpen = shortsPanelOpen, containerAnimating = animating, endedRecommendations = recommendations, playbackEnded = ended, loadingPoster = poster, miniPlayer = miniActive }) {
     poster = loadingPoster
     shown = visible; menu = menuOpen; panel = panelOpen
     shortsPanelOpen = shortsOpen
     recommendations = endedRecommendations
     ended = playbackEnded
     animating = containerAnimating
+    miniActive = miniPlayer
     for (const observer of observers) observer.callback([{ type: 'attributes', attributeName: 'style', target: container }])
   } }
 }
@@ -144,6 +151,62 @@ test('fractional Android scrolling does not repaint an unchanged document cutout
   const clips = f.styleWrites.filter(write => write.name === 'clip-path')
   assert.equal(clips.length, 1)
   assert.ok(clips[0].value.includes('111.125'))
+  f.screen.destroy()
+})
+
+test('fixed mini player does not leave a cutout in the scrolling page', async () => {
+  const f = await fixture({ fullscreen: false, mini: true, detached: true })
+  const clips = f.styleWrites.filter(write => write.name === 'clip-path')
+  assert.equal(clips.length, 4, 'The backdrop and detached route must close their initial cutouts after native playback is raised')
+  assert.ok(clips.slice(-2).every(write => !write.value.includes(' Z M ')), 'A cutout on scrolling content moves away from the fixed mini player before JS can repaint it')
+  f.screen.destroy()
+})
+
+test('the mini-player cutout closes only after native playback has risen above the page', async () => {
+  const f = await fixture({ fullscreen: false, detached: true, deferMiniLayout: true })
+  f.styleWrites.length = 0
+  f.change({ miniPlayer: true })
+  await f.flush()
+  assert.ok(f.styleWrites.filter(write => write.name === 'clip-path').every(write => write.value.includes(' Z M ')))
+  f.completeMiniLayouts[0]()
+  await f.flush()
+  assert.ok(f.styleWrites.filter(write => write.name === 'clip-path').slice(-2).every(write => !write.value.includes(' Z M ')))
+  f.screen.destroy()
+})
+
+test('an older mini-player layout cannot close the cutout after its bounds change', async () => {
+  const f = await fixture({ fullscreen: false, detached: true, deferMiniLayout: true })
+  f.styleWrites.length = 0
+  f.change({ miniPlayer: true })
+  await f.flush()
+  f.bounds.x += 20
+  f.change({})
+  await f.flush()
+  assert.equal(f.completeMiniLayouts.length, 2)
+  f.completeMiniLayouts[0]()
+  await f.flush()
+  const clips = f.styleWrites.filter(write => write.name === 'clip-path')
+  assert.ok(clips.length > 0 && clips.every(write => write.value.includes(' Z M ')), 'The old native position must not close the page opening')
+  f.completeMiniLayouts[1]()
+  await f.flush()
+  assert.ok(f.styleWrites.filter(write => write.name === 'clip-path').slice(-2).every(write => !write.value.includes(' Z M ')))
+  f.screen.destroy()
+})
+
+test('an entering mini-player animation keeps the cutout until native playback is raised', async () => {
+  const f = await fixture({ fullscreen: false, detached: true, deferMiniLayout: true, deferTransitions: true })
+  f.styleWrites.length = 0
+  f.change({ miniPlayer: true })
+  const event = new Event('native-player-transition', { cancelable: true })
+  event.detail = { from: { x: 0, y: 100, width: 640, height: 360 }, to: { x: 300, y: 400, width: 300, height: 168.75 }, duration: 300 }
+  f.container.dispatchEvent(event)
+  assert.equal(event.defaultPrevented, true)
+  assert.ok(f.styleWrites.filter(write => write.name === 'clip-path').every(write => write.value.includes(' Z M ')))
+  f.completeMiniLayouts[0]()
+  await f.flush()
+  assert.ok(f.styleWrites.filter(write => write.name === 'clip-path').slice(-2).every(write => !write.value.includes(' Z M ')))
+  f.completeTransitions[0]()
+  await event.detail.finished
   f.screen.destroy()
 })
 
