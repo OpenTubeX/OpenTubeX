@@ -337,6 +337,9 @@ function cancelLoaderSettle() {
   position: absolute;
   inset: 0;
   z-index: 0;
+  /* Keep neighbors laid out for swiping without painting through short pages
+     or allowing their fixed-position children to show over the active tab. */
+  opacity: 0;
   overflow: hidden;
   pointer-events: none;
 }
