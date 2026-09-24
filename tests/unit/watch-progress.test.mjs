@@ -12,7 +12,7 @@ const { _saveWatchProgress, addToHistory } = runInNewContext(`({
 })`, { isHistoryEntryWatched })
 
 const playerSource = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-const seekingHandler = playerSource.slice(playerSource.indexOf('    function handleSeeking()'), playerSource.indexOf('    function handleAbRepeatSeeked()'))
+const seekingHandler = playerSource.slice(playerSource.indexOf('    function handleSeeking()'), playerSource.indexOf('    function handleSeeked()'))
 
 function fixture(existing = true) {
   const element = Object.assign(new EventTarget(), {
