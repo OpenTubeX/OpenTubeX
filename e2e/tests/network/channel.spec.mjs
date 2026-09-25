@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { sel } from '../../helpers/app.mjs'
-import { test, expect } from '../../helpers/innertube.mjs'
+import { test, expect, fixtureKey } from '../../helpers/innertube.mjs'
 
 // The official Blender channel.
 const CHANNEL_URL = 'https://www.youtube.com/channel/UCSMOQeBJ2RAnuFungnQOxLg'
@@ -12,12 +12,38 @@ test.describe('channel page', () => {
   test.use({ seed: { settings: { uiRoundness: 200, externalPlayer: 'mpv' } } })
 
   test('shows channel info and videos', async ({ page }) => {
+    let releaseVideos
+    const heldVideos = new Promise(resolve => { releaseVideos = resolve })
+    let videosRequested = false
+    const keyFor = request => fixtureKey(request.url(), request.postData())
+
+    await page.route(/\/youtubei\/v1\/browse/, async route => {
+      if (keyFor(route.request()) !== 'browse-43cf009333cb') {
+        return route.fallback()
+      }
+
+      videosRequested = true
+      await heldVideos
+      return route.fallback()
+    })
+
     await page.locator(sel.searchInput).fill(CHANNEL_URL)
     await page.locator(sel.searchInput).press('Enter')
 
     await expect(page).toHaveURL(/#\/channel\/UCSMOQeBJ2RAnuFungnQOxLg/)
     await expect(page.getByText('Blender').first()).toBeVisible({ timeout: 30_000 })
-    await expect(page.locator('.ft-list-video').first()).toBeVisible({ timeout: 30_000 })
+    try {
+      await expect.poll(() => videosRequested).toBe(true)
+      await page.getByRole('tab', { name: 'Shorts' }).click()
+      await expect(page.locator('#shortPanel .ft-list-video').first()).toBeVisible()
+      await page.getByRole('tab', { name: 'Videos' }).click()
+      await expect(page.locator('.elementList')).toHaveCount(0)
+      await expect(page.locator('[data-tab-loading-indicator]:not(.fullscreen)')).toBeVisible()
+      await expect(page.getByText('This channel does not currently have any videos')).toHaveCount(0)
+    } finally {
+      releaseVideos()
+    }
+    await expect(page.locator('#videoPanel .ft-list-video').first()).toBeVisible({ timeout: 30_000 })
     await expect(page.locator('body')).toHaveCSS('--ui-roundness', '2')
     await expect(page.locator('.channelDetails .bannerContainer')).toHaveCSS('border-top-left-radius', '16px')
     await expect(page.locator('.channelDetails .bannerContainer')).toHaveCSS('border-top-right-radius', '16px')
@@ -199,4 +225,156 @@ test.describe('channel page', () => {
     await expect(subscribeButton).toHaveText(/^\s*Subscribe/)
     await expect.poll(readSubscriptions).not.toContain(CHANNEL_ID)
   })
+})
+
+test.describe('channel route changes', () => {
+  test.use({ seed: { settings: { backendPreference: 'invidious', backendFallback: false } } })
+
+  test('keeps the latest sort loading when an older videos request finishes', async ({ page }) => {
+    const releaseRequests = new Map()
+    const videos = [1, 2].map(number => ({
+      videoId: `alpha00000${number}`,
+      title: `Video ${number}`,
+      author: 'Alpha',
+      authorId: CHANNEL_ID,
+      videoThumbnails: [],
+      lengthSeconds: 120,
+      viewCount: 10,
+      published: 1700000000
+    }))
+
+    await page.route(/^https:\/\/invidious\.test\/api\/v1\/channels\//, async route => {
+      const url = new URL(route.request().url())
+      if (url.pathname.endsWith('/videos')) {
+        const sort = url.searchParams.get('sort_by')
+        if (sort === 'newest' && !url.searchParams.has('continuation')) {
+          return route.fulfill({ json: { videos, continuation: 'next' } })
+        }
+        await new Promise(resolve => { releaseRequests.set(sort, resolve) })
+        return route.fulfill({ json: { videos: [] } })
+      }
+
+      return route.fulfill({
+        json: {
+          author: 'Alpha',
+          authorId: CHANNEL_ID,
+          authorThumbnails: [],
+          authorBanners: [],
+          subCount: 0,
+          totalViews: 0,
+          joined: 0,
+          description: '',
+          relatedChannels: [],
+          isFamilyFriendly: true,
+          tabs: ['videos']
+        }
+      })
+    })
+    await page.route(/^https:\/\/invidious\.test\/api\/v1\/resolveurl/, route => route.fulfill({
+      json: { pageType: 'WEB_PAGE_TYPE_CHANNEL', ucid: CHANNEL_ID }
+    }))
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setCurrentInvidiousInstance', 'https://invidious.test')
+    })
+
+    try {
+      await page.locator(sel.searchInput).fill(CHANNEL_URL)
+      await page.locator(sel.searchInput).press('Enter')
+      await expect(page).toHaveURL(new RegExp(`#/channel/${CHANNEL_ID}/videos$`))
+      await expect(page.locator('.select-container .select-text').first()).toBeVisible()
+      await expect.poll(() => releaseRequests.has('newest')).toBe(true)
+      await page.locator('.select-container .select-text').first().click()
+      await page.getByRole('option', { name: 'Most Popular' }).click()
+      await expect.poll(() => releaseRequests.has('popular')).toBe(true)
+
+      const oldResponse = page.waitForResponse(response => response.url().includes('continuation=next'))
+      releaseRequests.get('newest')()
+      await oldResponse
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+      await expect(page.locator('[data-tab-loading-indicator]:not(.fullscreen)')).toBeVisible()
+      await expect(page.getByText('This channel does not currently have any videos')).toHaveCount(0)
+    } finally {
+      for (const release of releaseRequests.values()) release()
+    }
+  })
+
+  for (const tab of ['videos', 'shorts']) {
+    test(`keeps the new channel loading when an older ${tab} request finishes`, async ({ page }) => {
+      const firstId = CHANNEL_ID
+      const secondId = 'UCfMJ2MchTSW2kWaT0kK94Yw'
+      const releaseVideos = new Map()
+      const emptyMessage = tab === 'videos'
+        ? 'This channel does not currently have any videos'
+        : 'This channel does not currently have any shorts'
+
+      await page.route(/^https:\/\/invidious\.test\/api\/v1\/channels\//, async route => {
+        const parts = new URL(route.request().url()).pathname.split('/')
+        const channelId = parts[4]
+
+        if (parts[5] === tab) {
+          await new Promise(resolve => { releaseVideos.set(channelId, resolve) })
+          return route.fulfill({ json: { videos: [] } })
+        }
+        if (parts[5] === 'videos') return route.fulfill({ json: { videos: [] } })
+
+        return route.fulfill({
+          json: {
+            author: channelId === firstId ? 'Alpha' : 'Beta',
+            authorId: channelId,
+            authorThumbnails: [],
+            authorBanners: [],
+            subCount: 0,
+            totalViews: 0,
+            joined: 0,
+            description: '',
+            relatedChannels: [],
+            isFamilyFriendly: true,
+            tabs: ['videos', 'shorts']
+          }
+        })
+      })
+      await page.route(/^https:\/\/invidious\.test\/api\/v1\/resolveurl/, route => route.fulfill({
+        json: {
+          pageType: 'WEB_PAGE_TYPE_CHANNEL',
+          ucid: route.request().url().includes(secondId) ? secondId : firstId
+        }
+      }))
+
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setCurrentInvidiousInstance', 'https://invidious.test')
+      })
+
+      try {
+        await page.locator(sel.searchInput).fill(CHANNEL_URL)
+        await page.locator(sel.searchInput).press('Enter')
+        await expect(page).toHaveURL(/#\/channel\//)
+        if (tab === 'shorts') await page.getByRole('tab', { name: 'Shorts' }).click()
+        await expect.poll(() => releaseVideos.has(firstId)).toBe(true)
+        await expect(page).toHaveURL(new RegExp(`#/channel/${firstId}/${tab}$`))
+        await expect(page.getByText('Alpha').first()).toBeVisible()
+
+        await page.locator(sel.searchInput).fill(`https://www.youtube.com/channel/${secondId}`)
+        await page.locator(sel.searchInput).press('Enter')
+        await expect(page).toHaveURL(new RegExp(`#/channel/${secondId}`))
+        if (tab === 'shorts') await page.getByRole('tab', { name: 'Shorts' }).click()
+        await expect.poll(() => releaseVideos.has(secondId)).toBe(true)
+        await expect(page.getByText('Beta').first()).toBeVisible()
+        await expect(page.locator('[data-tab-loading-indicator]:not(.fullscreen)')).toBeVisible()
+
+        const oldResponse = page.waitForResponse(response => response.url().includes(`/channels/${firstId}/${tab}`))
+        releaseVideos.get(firstId)()
+        await oldResponse
+        await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+
+        await expect(page.locator('[data-tab-loading-indicator]:not(.fullscreen)')).toBeVisible()
+        await expect(page.getByText(emptyMessage)).toHaveCount(0)
+      } finally {
+        for (const release of releaseVideos.values()) release()
+      }
+
+      await expect(page.getByText(emptyMessage)).toBeVisible()
+    })
+  }
 })
