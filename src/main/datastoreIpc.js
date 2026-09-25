@@ -121,22 +121,41 @@ const actionDataValidators = {
     [DBActions.GENERAL.DELETE]: isId
   },
   [IpcChannels.DB_SUBSCRIPTION_CACHE]: {
-    [DBActions.SUBSCRIPTION_CACHE.UPDATE_VIDEOS_BY_CHANNEL]: isFeedUpdate,
-    [DBActions.SUBSCRIPTION_CACHE.UPDATE_LIVE_STREAMS_BY_CHANNEL]: isFeedUpdate,
-    [DBActions.SUBSCRIPTION_CACHE.UPDATE_SHORTS_BY_CHANNEL]: isFeedUpdate,
+    [DBActions.SUBSCRIPTION_CACHE.UPDATE_VIDEOS_BY_CHANNEL]: data => isFeedUpdate(data, 'videoId'),
+    [DBActions.SUBSCRIPTION_CACHE.UPDATE_LIVE_STREAMS_BY_CHANNEL]: data => isFeedUpdate(data, 'videoId'),
+    [DBActions.SUBSCRIPTION_CACHE.UPDATE_SHORTS_BY_CHANNEL]: data => isFeedUpdate(data, 'videoId'),
     [DBActions.SUBSCRIPTION_CACHE.UPDATE_SHORTS_WITH_CHANNEL_PAGE_SHORTS_BY_CHANNEL]: data =>
-      isRecord(data) && isId(data.channelId) && Array.isArray(data.entries) && data.entries.every(isRecord),
-    [DBActions.SUBSCRIPTION_CACHE.UPDATE_COMMUNITY_POSTS_BY_CHANNEL]: isFeedUpdate,
-    [DBActions.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN]: data => isRecord(data) &&
-      isId(data.channelId) && isId(data.tab) && Array.isArray(data.entries) && data.entries.every(isRecord),
+      isRecord(data) && isId(data.channelId) && isFeedEntries(data.entries, 'videoId'),
+    [DBActions.SUBSCRIPTION_CACHE.UPDATE_COMMUNITY_POSTS_BY_CHANNEL]: data => isFeedUpdate(data, 'postId'),
+    [DBActions.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN]: isSeenUpdate,
     [DBActions.GENERAL.DELETE_MULTIPLE]: isIdArray
   }
 }
 
+/** @param {unknown} entries @param {'videoId' | 'postId'} idKey */
+function isFeedEntries(entries, idKey) {
+  return Array.isArray(entries) && entries.every(entry => isRecord(entry) && isId(entry[idKey]))
+}
+
+/** @param {unknown} timestamp */
+function isFeedTimestamp(timestamp) {
+  if (timestamp instanceof Date) return Number.isFinite(timestamp.getTime())
+  if (typeof timestamp !== 'string' && typeof timestamp !== 'number') return false
+  return Number.isFinite(new Date(timestamp).getTime())
+}
+
+/** @param {unknown} data @param {'videoId' | 'postId'} idKey */
+function isFeedUpdate(data, idKey) {
+  return isRecord(data) && isId(data.channelId) && isFeedEntries(data.entries, idKey) &&
+    isFeedTimestamp(data.timestamp)
+}
+
 /** @param {unknown} data */
-function isFeedUpdate(data) {
-  return isRecord(data) && isId(data.channelId) && Array.isArray(data.entries) && data.entries.every(isRecord) &&
-    data.timestamp !== undefined && data.timestamp !== null
+function isSeenUpdate(data) {
+  if (!isRecord(data) || !isId(data.channelId)) return false
+  if (data.tab === 'posts') return isFeedEntries(data.entries, 'postId')
+  return (data.tab === 'videos' || data.tab === 'live' || data.tab === 'shorts') &&
+    isFeedEntries(data.entries, 'videoId')
 }
 
 /** @param {string} channel @param {number} action @param {unknown} data */

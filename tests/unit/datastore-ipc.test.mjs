@@ -108,6 +108,32 @@ test('subscription cache does not broadcast rejected stale updates', async () =>
   assert.deepEqual(notifications, [])
 })
 
+test('subscription cache accepts Date timestamps and post IDs from renderer feeds', async () => {
+  const received = []
+  const { registrations, event } = setup({
+    subscriptionCache: {
+      updateVideosByChannelId: async (...args) => { received.push(args); return true },
+      updateCommunityPostsByChannelId: async (...args) => { received.push(args); return true },
+      markEntriesAsSeen: async (...args) => { received.push(args) }
+    }
+  })
+  const invoke = registrations.get(IpcChannels.DB_SUBSCRIPTION_CACHE)
+  const timestamp = new Date('2026-09-26T00:00:00.000Z')
+  await invoke(event, {
+    action: DBActions.SUBSCRIPTION_CACHE.UPDATE_VIDEOS_BY_CHANNEL,
+    data: { channelId: 'channel', entries: [{ videoId: 'video' }], timestamp }
+  })
+  await invoke(event, {
+    action: DBActions.SUBSCRIPTION_CACHE.UPDATE_COMMUNITY_POSTS_BY_CHANNEL,
+    data: { channelId: 'channel', entries: [{ postId: 'post' }], timestamp: timestamp.getTime() }
+  })
+  await invoke(event, {
+    action: DBActions.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN,
+    data: { channelId: 'channel', tab: 'posts', entries: [{ postId: 'post' }] }
+  })
+  assert.equal(received.length, 3)
+})
+
 test('property-based history actions reject malformed records before writing', async () => {
   let called = false
   const { registrations, event } = setup({
@@ -235,7 +261,25 @@ test('datastore write actions reject incomplete payloads before calling handlers
     [IpcChannels.DB_SUBSCRIPTION_CACHE, DBActions.SUBSCRIPTION_CACHE.UPDATE_VIDEOS_BY_CHANNEL, {
       channelId: 'channel', entries: [null], timestamp: 1
     }],
+    [IpcChannels.DB_SUBSCRIPTION_CACHE, DBActions.SUBSCRIPTION_CACHE.UPDATE_VIDEOS_BY_CHANNEL, {
+      channelId: 'channel', entries: [{ videoId: 'video' }], timestamp: {}
+    }],
+    [IpcChannels.DB_SUBSCRIPTION_CACHE, DBActions.SUBSCRIPTION_CACHE.UPDATE_VIDEOS_BY_CHANNEL, {
+      channelId: 'channel', entries: [{ videoId: 'video' }], timestamp: 'not-a-date'
+    }],
+    [IpcChannels.DB_SUBSCRIPTION_CACHE, DBActions.SUBSCRIPTION_CACHE.UPDATE_VIDEOS_BY_CHANNEL, {
+      channelId: 'channel', entries: [{}], timestamp: 1
+    }],
+    [IpcChannels.DB_SUBSCRIPTION_CACHE, DBActions.SUBSCRIPTION_CACHE.UPDATE_COMMUNITY_POSTS_BY_CHANNEL, {
+      channelId: 'channel', entries: [{ videoId: 'video' }], timestamp: 1
+    }],
+    [IpcChannels.DB_SUBSCRIPTION_CACHE, DBActions.SUBSCRIPTION_CACHE.UPDATE_SHORTS_WITH_CHANNEL_PAGE_SHORTS_BY_CHANNEL, {
+      channelId: 'channel', entries: [{}]
+    }],
     [IpcChannels.DB_SUBSCRIPTION_CACHE, DBActions.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN, { channelId: 'channel', entries: [] }],
+    [IpcChannels.DB_SUBSCRIPTION_CACHE, DBActions.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN, {
+      channelId: 'channel', tab: 'posts', entries: [{ videoId: 'video' }]
+    }],
     [IpcChannels.DB_SUBSCRIPTION_CACHE, DBActions.GENERAL.DELETE_MULTIPLE, null]
   ]
 
