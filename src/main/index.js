@@ -31,10 +31,8 @@ import { registerYtDlpFileDialogs } from './ytDlpFileDialogs'
 import { registerSystemInfoIpc } from './systemInfoIpc'
 import { createProxyController, registerProxyIpc } from './proxyController'
 import { createIpBlockRecoveryScriptRunner, registerIpBlockRecoveryIpc } from './ipBlockRecoveryIpc'
-import { applySyncServerUserAgent } from '../syncServerUserAgent'
 import * as baseHandlers from '../datastores/handlers/base'
 import { liveReminders } from '../datastores'
-import { extractExpiryTimestamp, ImageCache } from './ImageCache'
 import { existsSync } from 'fs'
 import asyncFs from 'fs/promises'
 import { promisify } from 'util'
@@ -44,17 +42,16 @@ import { brotliDecompress } from 'zlib'
 import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
 import { handleTwitchChatReplayPage } from './twitchChat'
-import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
 import { isYtDlpStoryboardUrl, getYtDlpDownloadFile, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpControlDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetSubtitle, handleYtDlpGetPlaybackInfo, handleYtDlpGetHistoryMetadata, handleYtDlpCancelHistoryRepair, handleYtDlpGetRecommendations, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpQueueAction, handleYtDlpRemoveDownload, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
 import { applyYtDlpPlaybackCacheSettings, handleYtDlpPlaybackCacheClear, handleYtDlpPlaybackCacheDelete, handleYtDlpPlaybackCacheGet, handleYtDlpPlaybackCacheSet } from './ytDlpPlaybackCache'
 import { generatePoToken } from './poTokenGenerator'
 import { expandMultipleOnlyPluralMessages, selectPluralForm } from '../renderer/i18n/plurals'
 import { composeLocaleMessages } from '../localeComposition'
-import { appendYouTubeTimeZonePreference, buildProxyUrl, DEFAULT_PROXY_SETTINGS, isOpenTubeXUrl } from './utils'
+import { buildProxyUrl, DEFAULT_PROXY_SETTINGS, isOpenTubeXUrl } from './utils'
 import { isInvidiousInstanceUrl } from './invidiousAuthorization'
 import { registerInvidiousAuthorizationIpc } from './invidiousAuthorizationIpc'
 import { registerRuntimeFlagsIpc } from './runtimeFlagsIpc'
-import { RendererCors } from './rendererCors'
+import { configureRequestNetworking } from './requestNetworking'
 import { TabManager } from './tabs/TabManager'
 import { tabPreviewStorage } from './tabs/TabPreviewStorage'
 import { setupTabsIPC } from './tabs/tabIpc'
@@ -1146,250 +1143,22 @@ function runApp() {
       })
     }
 
-    const fixedUserAgent = session.defaultSession.getUserAgent()
-      .split(' ')
-      .filter(part => !part.includes('Electron') && !part.includes(packageDetails.productName))
-      .join(' ')
-    session.defaultSession.setUserAgent(fixedUserAgent)
-
-    // Set CONSENT cookie on reasonable domains
-    const consentCookieDomains = [
-      'https://www.youtube.com',
-      'https://youtube.com'
-    ]
-    consentCookieDomains.forEach(url => {
-      session.defaultSession.cookies.set({
-        url: url,
-        name: 'CONSENT',
-        value: 'YES+',
-        sameSite: 'no_restriction'
-      })
-    })
-
-    session.defaultSession.cookies.set({
-      url: 'https://www.youtube.com',
-      name: 'SOCS',
-      value: 'CAI',
-      sameSite: 'no_restriction',
-    })
-
-    const onBeforeSendHeadersRequestFilter = {
-      urls: ['https://*/*', 'http://*/*'],
-      types: ['xhr', 'media', 'image']
-    }
-    const rendererCors = new RendererCors()
-    const storyboardRequestIds = new Set()
-    session.defaultSession.webRequest.onBeforeSendHeaders(onBeforeSendHeadersRequestFilter, (details, callback) => {
-      // Capture the app's original Origin before the YouTube header adjustments.
-      const originalOrigin = new Headers(details.requestHeaders).get('Origin')
-      let { requestHeaders } = details
-      const { url, webContents } = details
-      const urlObj = new URL(url)
-
-      if (webContents && isOpenTubeXUrl(webContents.getURL())) {
-        applySyncServerUserAgent(requestHeaders)
-      }
-
-      if (url.startsWith('https://www.youtube.com/youtubei/')) {
-        // make InnerTube requests work with the fetch function
-        // InnerTube rejects requests if the referer isn't YouTube or empty
-        requestHeaders.Referer = 'https://www.youtube.com/'
-        requestHeaders.Origin = 'https://www.youtube.com'
-
-        requestHeaders['Sec-Fetch-Site'] = 'same-origin'
-        requestHeaders['Sec-Fetch-Mode'] = 'same-origin'
-        requestHeaders['X-Youtube-Bootstrap-Logged-In'] = 'false'
-      } else if (
-        url.startsWith('https://www.youtube.com/watch') ||
-        (urlObj.hostname === 'www.youtube.com' && urlObj.pathname === '/')
-      ) {
-        delete requestHeaders.Referer
-        delete requestHeaders.Origin
-        requestHeaders['Sec-Fetch-Dest'] = 'document'
-        requestHeaders['Sec-Fetch-Mode'] = 'navigate'
-        requestHeaders['Sec-Fetch-Site'] = 'none'
-        requestHeaders['Sec-Fetch-User'] = '?1'
-        requestHeaders.Cookie = appendYouTubeTimeZonePreference(
-          requestHeaders.Cookie,
-          Intl.DateTimeFormat().resolvedOptions().timeZone
-        )
-      } else if (url === 'https://www.youtube.com/sw.js_data' || url.startsWith('https://www.youtube.com/api/timedtext')) {
-        requestHeaders.Referer = 'https://www.youtube.com/sw.js'
-        requestHeaders['Sec-Fetch-Site'] = 'same-origin'
-        requestHeaders['Sec-Fetch-Mode'] = 'same-origin'
-      } else if (
-        urlObj.origin.endsWith('.googleusercontent.com') ||
-        urlObj.origin.endsWith('.ggpht.com') ||
-        urlObj.origin.endsWith('.ytimg.com')
-      ) {
-        requestHeaders.Referer = 'https://www.youtube.com/'
-        requestHeaders.Origin = 'https://www.youtube.com'
-      } else if (urlObj.origin.endsWith('.googlevideo.com') && urlObj.pathname === '/videoplayback') {
-        requestHeaders.Referer = 'https://www.youtube.com/'
-        requestHeaders.Origin = 'https://www.youtube.com'
-
-        // YouTube doesn't send the Content-Type header for the media requests, so we shouldn't either
-        delete requestHeaders['Content-Type']
-      } else if (urlObj.origin === 'https://ipwho.is') {
-        // Fix the CORS error with the proxy test button
-        requestHeaders = {}
-      } else if (webContents) {
-        const invidiousAuthorization = invidiousAuthorizations.getForRequest(webContents.id, url)
-        if (invidiousAuthorization) requestHeaders.Authorization = invidiousAuthorization
-      }
-
-      if (webContents && isOpenTubeXUrl(webContents.getURL())) {
-        Object.assign(requestHeaders, getYtDlpExternalStreamHeaders(webContents, url))
-        applyTwitchPlaylistOrigin(urlObj, requestHeaders)
-        if (isYtDlpStoryboardUrl(webContents, url)) storyboardRequestIds.add(details.id)
-        if (url.startsWith('http:') && storyboardRequestIds.has(details.id)) {
-          for (const name of Object.keys(requestHeaders)) {
-            if (name.toLowerCase() === 'cookie') delete requestHeaders[name]
-          }
-        } else {
-          const streamCookies = getYtDlpExternalStreamCookieHeader(webContents, url)
-          if (streamCookies !== null) {
-            const names = new Set(streamCookies.split('; ').map(cookie => cookie.split('=')[0]))
-            const existing = (requestHeaders.Cookie ?? '').split('; ')
-              .filter(cookie => cookie && !names.has(cookie.split('=')[0]))
-            requestHeaders.Cookie = [...existing, streamCookies].join('; ')
-          }
-        }
-      }
-
-      rendererCors.rememberRequest({ ...details, requestHeaders }, originalOrigin)
-      // eslint-disable-next-line n/no-callback-literal
-      callback({ requestHeaders })
-    })
-
-    // when we create a real session on the watch page, youtube returns tracking cookies, which we definitely don't want
-    const httpRequestFilter = { urls: ['https://*/*', 'http://*/*'] }
-    session.defaultSession.webRequest.onHeadersReceived(httpRequestFilter, (details, callback) => {
-      const { url, responseHeaders } = details
-      if (responseHeaders && (
-        url === 'https://www.youtube.com/sw.js_data' ||
-        url === 'https://www.youtube.com/iframe_api' ||
-        url.startsWith('https://www.youtube.com/watch?')
-      )) {
-        delete responseHeaders['set-cookie']
-        delete responseHeaders['content-security-policy']
-        delete responseHeaders['cross-origin-opener-policy']
-        delete responseHeaders['report-to']
-        delete responseHeaders['reporting-endpoints']
-      }
-
-      // eslint-disable-next-line n/no-callback-literal
-      callback({ responseHeaders, ...rendererCors.allowResponse(details) })
-    })
-    session.defaultSession.webRequest.onCompleted(httpRequestFilter, details => {
-      rendererCors.forgetRequest(details)
-      storyboardRequestIds.delete(details.id)
-    })
-    session.defaultSession.webRequest.onErrorOccurred(httpRequestFilter, details => {
-      rendererCors.forgetRequest(details)
-      storyboardRequestIds.delete(details.id)
+    configureRequestNetworking({
+      session: session.defaultSession,
+      protocol,
+      net,
+      productName: packageDetails.productName,
+      replaceHttpCache,
+      invidiousAuthorizations,
+      getExternalStreamHeaders: getYtDlpExternalStreamHeaders,
+      getExternalStreamCookieHeader: getYtDlpExternalStreamCookieHeader,
+      isStoryboardUrl: isYtDlpStoryboardUrl
     })
 
     registerDownloadedMediaProtocol({
       protocol,
       getDownloadFile: getYtDlpDownloadFile
     })
-
-    if (replaceHttpCache) {
-      // in-memory image cache
-
-      const imageCache = new ImageCache()
-
-      protocol.handle('imagecache', (request) => {
-        const [requestUrl, rawWebContentsId] = request.url.split('#')
-
-        return new Promise((resolve, reject) => {
-          const url = decodeURIComponent(requestUrl.substring(13))
-          if (imageCache.has(url)) {
-            const cached = imageCache.get(url)
-
-            resolve(new Response(cached.data, {
-              headers: { 'content-type': cached.mimeType }
-            }))
-            return
-          }
-
-          let headers
-
-          if (rawWebContentsId) {
-            const invidiousAuthorization = invidiousAuthorizations.getForRequest(parseInt(rawWebContentsId), url)
-            if (invidiousAuthorization) headers = { Authorization: invidiousAuthorization }
-          }
-
-          const newRequest = net.request({
-            method: request.method,
-            url,
-            headers
-          })
-
-          // Electron doesn't allow certain headers to be set:
-          // https://www.electronjs.org/docs/latest/api/client-request#requestsetheadername-value
-          // also blacklist Origin and Referrer as we don't want to let YouTube know about them
-          const blacklistedHeaders = ['content-length', 'host', 'trailer', 'te', 'upgrade', 'cookie2', 'keep-alive', 'transfer-encoding', 'origin', 'referrer']
-
-          for (const header of Object.keys(request.headers)) {
-            if (!blacklistedHeaders.includes(header.toLowerCase())) {
-              newRequest.setHeader(header, request.headers[header])
-            }
-          }
-
-          newRequest.on('response', (response) => {
-            const chunks = []
-            response.on('data', (chunk) => {
-              chunks.push(chunk)
-            })
-
-            response.on('end', () => {
-              const data = Buffer.concat(chunks)
-
-              const expiryTimestamp = extractExpiryTimestamp(response.headers)
-              const mimeType = response.headers['content-type']
-
-              imageCache.add(url, mimeType, data, expiryTimestamp)
-
-              resolve(new Response(data, {
-                headers: { 'content-type': mimeType }
-              }))
-            })
-
-            response.on('error', (error) => {
-              console.error('image cache error', error)
-              reject(error)
-            })
-          })
-
-          newRequest.on('error', (err) => {
-            console.error(err)
-          })
-
-          newRequest.end()
-        })
-      })
-
-      const imageRequestFilter = { urls: ['https://*/*', 'http://*/*'], types: ['image'] }
-      session.defaultSession.webRequest.onBeforeRequest(imageRequestFilter, (details, callback) => {
-        // the requests made by the imagecache:// handler to fetch the image,
-        // are allowed through, as their resourceType is 'other'
-
-        let redirectURL = `imagecache://${encodeURIComponent(details.url)}`
-
-        if (details.webContents) {
-          redirectURL += `#${details.webContents.id}`
-        }
-
-        // eslint-disable-next-line n/no-callback-literal
-        callback({
-          redirectURL
-        })
-      })
-
-      // --- end of `if experimentsDisableDiskCache` ---
-    }
 
     const themeReady = (async () => {
       try {
