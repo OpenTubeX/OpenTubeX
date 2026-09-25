@@ -593,8 +593,8 @@ function playCompanionAudio() {
   }
   updateCompanionLoop()
   syncCompanionAudio(currentTime.value)
-  audio.play().catch(() => {
-    if (companionAudio.value === audio && audio.paused) pauseCompanionVideo()
+  audio.play().catch(error => {
+    if (error?.name !== 'AbortError' && companionAudio.value === audio && audio.paused) pauseCompanionVideo()
   })
 }
 
