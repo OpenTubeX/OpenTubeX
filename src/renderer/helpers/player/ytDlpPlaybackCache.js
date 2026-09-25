@@ -12,7 +12,7 @@ export function isYtDlpPlaybackSourceCacheable(
   expiryMarginMs = DEFAULT_EXPIRY_MARGIN_MS
 ) {
   const expiryTime = source.expiryDate instanceof Date ? source.expiryDate.getTime() : NaN
-  return !source.isLive && Number.isFinite(expiryTime) && now < expiryTime - expiryMarginMs
+  return !source.isLive && !source.incomplete && Number.isFinite(expiryTime) && now < expiryTime - expiryMarginMs
 }
 
 /**
@@ -66,6 +66,7 @@ export class YtDlpPlaybackSourceCache {
     if (
       entry === undefined ||
       entry.cacheKey !== cacheKey ||
+      entry.source.incomplete ||
       !Number.isFinite(expiryTime) ||
       this.now() >= expiryTime - this.expiryMarginMs
     ) {
@@ -115,6 +116,7 @@ export class YtDlpPlaybackSourceCache {
     if (
       entry === undefined ||
       entry.cacheKey !== cacheKey ||
+      entry.source.incomplete ||
       !Number.isFinite(expiryTime) ||
       this.now() >= expiryTime - this.expiryMarginMs
     ) {

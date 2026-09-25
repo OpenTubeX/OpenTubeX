@@ -1571,6 +1571,7 @@ export async function handleYtDlpDownloadBinary(event, binary) {
  * @property {YtDlpPlaybackCaption[]} captions
  * @property {YtDlpPlaybackCaption[]} captionTranslations
  * @property {YtDlpPlaybackFormat[]} formats
+ * @property {boolean} incomplete whether a final timeout warning may have omitted formats
  */
 
 /**
@@ -1721,7 +1722,6 @@ export async function handleYtDlpGetPlaybackInfo(
 
   const args = [
     '--no-playlist',
-    '--no-warnings',
     '--no-progress',
     '--socket-timeout',
     '15',
@@ -1776,6 +1776,7 @@ export async function handleYtDlpGetPlaybackInfo(
   args.push(mediaUrl)
 
   let stdout
+  let stderr
   let version
   let extractedCookies = ''
   try {
@@ -1791,6 +1792,7 @@ export async function handleYtDlpGetPlaybackInfo(
       getYtDlpVersion(executable)
     ])
     stdout = playbackInfo.stdout
+    stderr = playbackInfo.stderr
     version = resolvedVersion
     if (cookieFile !== null) extractedCookies = await readFile(cookieFile, 'utf8').catch(() => '')
   } catch (error) {
@@ -1811,7 +1813,7 @@ export async function handleYtDlpGetPlaybackInfo(
 
   let info
   try {
-    info = parseYtDlpPlaybackInfo(stdout)
+    info = parseYtDlpPlaybackInfo(stdout, stderr)
   } catch {
     return { error: 'yt-dlp returned invalid JSON' }
   }
@@ -1835,6 +1837,7 @@ export async function handleYtDlpGetPlaybackInfo(
 
   return {
     version,
+    incomplete: info.incomplete === true,
     title: toNonEmptyString(info.title),
     description: toNonEmptyString(info.description),
     uploader: toNonEmptyString(info.uploader),

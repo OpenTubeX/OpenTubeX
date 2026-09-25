@@ -9,12 +9,16 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 
 /** Bundled executables stay in nativeLibraryDir, as required by Android's W^X policy. */
 final class YtDlpRuntime {
+    private static final Pattern TIMEOUT_WARNING = Pattern.compile("(?m)^WARNING:.*(?:timed?\\s*out|time-?out)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern RETRY_WARNING = Pattern.compile("\\bRetrying \\(\\d+/\\d+\\)", Pattern.CASE_INSENSITIVE);
     private static final ExecutorService EXTRACTORS = Executors.newFixedThreadPool(2);
     private static final ReentrantReadWriteLock INSTALL_LOCK = new ReentrantReadWriteLock();
     private static final Map<String, RunningProcess> PROCESSES = new ConcurrentHashMap<>();
@@ -36,6 +40,19 @@ final class YtDlpRuntime {
             }
             process.destroy();
         }
+    }
+
+    static final class ErrorOutput {
+        final StringBuilder tail = new StringBuilder();
+        boolean timedOut;
+
+        void add(String line) {
+            if (hasTimedOutWarning(line)) timedOut = true;
+            tail.append(line).append('\n');
+            if (tail.length() > 65536) tail.delete(0, tail.length() - 65536);
+        }
+
+        String message() { return tail.toString().trim(); }
     }
 
     static synchronized void initialize(Context context) throws Exception {
@@ -65,6 +82,10 @@ final class YtDlpRuntime {
     }
 
     static String execute(Context context, List<String> args, String id, Consumer<String> progress) throws Exception {
+        return execute(context, args, id, progress, null);
+    }
+
+    static String execute(Context context, List<String> args, String id, Consumer<String> progress, AtomicBoolean incomplete) throws Exception {
         initialize(context);
         INSTALL_LOCK.readLock().lockInterruptibly();
         RunningProcess running = null;
@@ -84,7 +105,8 @@ final class YtDlpRuntime {
             running = new RunningProcess(command(context, command).start());
             RunningProcess current = running;
             if (id != null) PROCESSES.put(id, current);
-            StringBuilder output = new StringBuilder(), errors = new StringBuilder();
+            StringBuilder output = new StringBuilder();
+            ErrorOutput errors = new ErrorOutput();
             FutureTask<Void> stdout = new FutureTask<>(() -> {
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(current.process.getInputStream(), StandardCharsets.UTF_8))) {
                     String first = reader.readLine();
@@ -110,8 +132,7 @@ final class YtDlpRuntime {
                     String line;
                     while ((line = reader.readLine()) != null) {
                         if (progress != null) progress.accept(line);
-                        errors.append(line).append('\n');
-                        if (errors.length() > 65536) errors.delete(0, errors.length() - 65536);
+                        errors.add(line);
                     }
                 }
                 return null;
@@ -121,7 +142,8 @@ final class YtDlpRuntime {
             int exit = current.process.waitFor();
             stderr.get();
             stdout.get();
-            if (exit != 0) throw new IOException(errors.toString().trim());
+            if (exit != 0) throw new IOException(errors.message());
+            if (incomplete != null) incomplete.set(errors.timedOut);
             completed = true;
             return output.toString();
         } finally {
@@ -134,7 +156,15 @@ final class YtDlpRuntime {
     }
 
     static String extract(Context context, List<String> args) throws Exception {
-        return extract(() -> execute(context, args, null, null), 60, TimeUnit.SECONDS);
+        return extract(context, args, null);
+    }
+
+    static String extract(Context context, List<String> args, AtomicBoolean incomplete) throws Exception {
+        return extract(() -> execute(context, args, null, null, incomplete), 60, TimeUnit.SECONDS);
+    }
+
+    static boolean hasTimedOutWarning(String stderr) {
+        return TIMEOUT_WARNING.matcher(stderr).find() && !RETRY_WARNING.matcher(stderr).find();
     }
 
     static String extract(Callable<String> operation, long timeout, TimeUnit unit) throws Exception {

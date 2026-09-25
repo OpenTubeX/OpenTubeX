@@ -274,14 +274,15 @@ test('reports sources that cannot be cached as preload failures', async () => {
     ['live0000001', { isLive: true, expiryDate: new Date(Date.now() + 10 * 60 * 1000) }],
     ['noexpiry001', { isLive: false, expiryDate: null }],
     ['expired0001', { isLive: false, expiryDate: new Date(0) }],
+    ['partial0001', { isLive: false, incomplete: true, expiryDate: new Date(Date.now() + 10 * 60 * 1000) }],
     ['cached00001', source('cached00001')],
   ])
 
   assert.deepEqual(await preloadYtDlpPlaybackSources([...results.keys()], {
     loadSource: async videoId => results.get(videoId)
   }), {
-    requested: 4,
+    requested: 5,
     preloaded: 1,
-    failed: 3,
+    failed: 4,
   })
 })

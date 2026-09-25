@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 @CapacitorPlugin(name = "YtDlp")
@@ -152,7 +153,9 @@ public final class YtDlpPlugin extends Plugin {
                     args.addAll(asList("--cookies", temporaryCookies.getAbsolutePath()));
                 }
                 args.add("--simulate");
-                String stdout = YtDlpRuntime.extract(getContext(), args);
+                boolean detectTimeoutWarnings = call.getBoolean("detectTimeoutWarnings", false);
+                AtomicBoolean incomplete = new AtomicBoolean();
+                String stdout = YtDlpRuntime.extract(getContext(), args, detectTimeoutWarnings ? incomplete : null);
                 if (externalMedia) {
                     File cookieFile = temporaryCookies == null ? new File(cookies) : temporaryCookies;
                     String extractedCookies;
@@ -185,7 +188,7 @@ public final class YtDlpPlugin extends Plugin {
                     }
                     ExternalStreamRequestRegistry.shared().register(requests, extractedCookies);
                 }
-                return new JSONObject().put("stdout", stdout);
+                return new JSONObject().put("stdout", stdout).put("incomplete", incomplete.get());
             } finally {
                 if (temporaryCookies != null) temporaryCookies.delete();
             }

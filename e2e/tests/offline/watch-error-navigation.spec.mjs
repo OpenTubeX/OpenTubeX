@@ -1,5 +1,5 @@
 import crypto from 'node:crypto'
-import { readFile, readdir } from 'node:fs/promises'
+import { chmod, readFile, readdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { gunzipSync } from 'node:zlib'
 
@@ -161,7 +161,28 @@ function expectNoRenderErrors(errors) {
   expect(renderErrors, `Renderer errors:\n${errors.join('\n')}`).toEqual([])
 }
 
-test('an IP-blocked response still uses the configured yt-dlp extractor and title', async ({ app, page }) => {
+test('an IP-blocked response retries a timed-out yt-dlp extraction and recovers the title', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+
+  const executable = path.join(app.userDataDir, 'timeout-yt-dlp.sh')
+  const callsFile = path.join(app.userDataDir, 'timeout-yt-dlp-calls.txt')
+  const metadata = {
+    is_live: false,
+    live_status: 'not_live',
+    manifest_url: 'https://example.invalid/recovered.m3u8',
+    formats: [],
+    duration: 60
+  }
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+    `count=$(cat '${callsFile}' 2>/dev/null || printf 0)`,
+    'count=$((count + 1))',
+    `printf '%s' "$count" > '${callsFile}'`,
+    `if [ "$count" -eq 1 ]; then printf '%s\\n' 'WARNING: [youtube] The read operation timed out' >&2; printf '%s\\n' '${JSON.stringify({ ...metadata, title: 'Partial yt-dlp title' })}'; else printf '%s\\n' '${JSON.stringify({ ...metadata, title: 'Title recovered by yt-dlp' })}'; fi`
+  ].join('\n'))
+  await chmod(executable, 0o755)
+
   await mockBlockedVideo({
     app,
     page,
@@ -171,34 +192,18 @@ test('an IP-blocked response still uses the configured yt-dlp extractor and titl
     contentType: 'application/x-mpegURL',
     body: '#EXTM3U\n'
   }))
-  await app.electronApp.evaluate(({ ipcMain }) => {
-    globalThis.__ipBlockedYtDlpCalls = 0
-    ipcMain.removeHandler('yt-dlp-get-playback-info')
-    ipcMain.handle('yt-dlp-get-playback-info', () => {
-      globalThis.__ipBlockedYtDlpCalls++
-      return {
-        title: 'Title recovered by yt-dlp',
-        isLive: false,
-        liveStatus: 'not_live',
-        hlsManifestUrl: 'https://example.invalid/recovered.m3u8',
-        formats: [],
-        duration: 60,
-        version: 'test'
-      }
-    })
-  })
-  await page.evaluate(async () => {
+  await page.evaluate(async ytDlpPath => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateYtDlpSource', 'system')
+    await store.dispatch('updateYtDlpPath', ytDlpPath)
     await store.dispatch('updateVideoPlaybackEngine', 'yt-dlp')
-  })
+  }, executable)
 
   await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
   await page.locator(sel.searchInput).press('Enter')
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
 
-  await expect.poll(() => app.electronApp.evaluate(
-    () => globalThis.__ipBlockedYtDlpCalls
-  )).toBeGreaterThan(0)
+  await expect.poll(async () => Number(await readFile(callsFile, 'utf8').catch(() => '0'))).toBeGreaterThan(1)
   const watchView = await watchViewHandle(page)
   await expect.poll(() => watchView.evaluate(view => ({
     title: view.videoTitle,
@@ -211,6 +216,67 @@ test('an IP-blocked response still uses the configured yt-dlp extractor and titl
   await expect(page.locator('.infoArea .videoTitle')).toHaveText('Title recovered by yt-dlp')
   await expect(page.locator('.tabBar .tab.active')).toContainText('Title recovered by yt-dlp')
 })
+
+for (const { name, firstManifest, secondManifest, firstFormats } of [
+  {
+    name: 'selects playable formats when comparing incomplete sources',
+    firstManifest: 'https://example.invalid/first.m3u8',
+    secondManifest: 'https://example.invalid/second.m3u8',
+    firstFormats: [
+      { height: 360, url: 'https://example.invalid/first.m3u8', manifestUrl: 'https://example.invalid/first.m3u8' },
+      { height: 2160, url: null, manifestUrl: null }
+    ]
+  },
+  {
+    name: 'prefers an incomplete full live window over an incomplete limited window',
+    firstManifest: 'https://example.invalid/manifest_duration/30/first.m3u8',
+    secondManifest: 'https://example.invalid/playlist_type/DVR/second.m3u8',
+    firstFormats: [{ height: 360, url: 'https://example.invalid/manifest_duration/30/first.m3u8', manifestUrl: 'https://example.invalid/manifest_duration/30/first.m3u8' }]
+  }
+]) {
+  test(`an IP-blocked live stream ${name}`, async ({ app, page }) => {
+    const info = (hlsManifestUrl, formats) => ({
+      version: 'test',
+      title: 'Live video',
+      isLive: true,
+      liveStatus: 'is_live',
+      hlsManifestUrl,
+      formats: formats.map(format => ({ protocol: 'm3u8', ...format })),
+      duration: null,
+      storyboardVtt: null,
+      captions: [],
+      captionTranslations: [],
+      incomplete: true
+    })
+    const responses = [
+      info(firstManifest, firstFormats),
+      info(secondManifest, [{ height: 720, url: secondManifest, manifestUrl: secondManifest }]),
+      { error: 'yt-dlp timed out' }
+    ]
+
+    await mockBlockedVideo({ app, page })
+    await page.route('https://example.invalid/**', route => route.fulfill({
+      contentType: 'application/x-mpegURL',
+      body: '#EXTM3U\n'
+    }))
+    await app.electronApp.evaluate(({ ipcMain }, values) => {
+      let calls = 0
+      ipcMain.removeHandler('yt-dlp-get-playback-info')
+      ipcMain.handle('yt-dlp-get-playback-info', () => values[Math.min(calls++, values.length - 1)])
+    }, responses)
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateVideoPlaybackEngine', 'yt-dlp')
+    })
+
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+    await expect(page.getByRole('main')).not.toBeEmpty()
+    const watchView = await watchViewHandle(page)
+    await expect.poll(() => watchView.evaluate(view => view.manifestSrc)).toBe(secondManifest)
+  })
+}
 
 test('watch page IP-block error does not break later navigation', async ({ app, page }) => {
   const errors = captureRenderErrors(page)

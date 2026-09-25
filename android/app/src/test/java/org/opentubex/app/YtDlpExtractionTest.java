@@ -5,6 +5,21 @@ import java.util.concurrent.*;
 import static org.junit.Assert.*;
 
 public class YtDlpExtractionTest {
+    @Test public void recognizesPartialExtractionTimeoutWarnings() {
+        assertTrue(YtDlpRuntime.hasTimedOutWarning("WARNING: [youtube] video: Unable to download web client API page: The read operation timed out\n"));
+        assertFalse(YtDlpRuntime.hasTimedOutWarning("WARNING: [youtube] video: Some formats are missing\n"));
+        assertFalse(YtDlpRuntime.hasTimedOutWarning("WARNING: [youtube] video: The read operation timed out. Retrying (1/3)...\n"));
+    }
+
+    @Test public void remembersTimeoutWarningsAfterTrimmingStderr() {
+        YtDlpRuntime.ErrorOutput errors = new YtDlpRuntime.ErrorOutput();
+        errors.add("WARNING: [youtube] video: The read operation timed out");
+        for (int index = 0; index < 2000; index++) errors.add("Unrelated output after the timeout warning");
+
+        assertTrue(errors.timedOut);
+        assertFalse(errors.message().contains("timed out"));
+    }
+
     @Test public void timeoutStartsAfterWaitingForAnExtractionWorker() throws Exception {
         ExecutorService callers = Executors.newFixedThreadPool(3);
         CountDownLatch busy = new CountDownLatch(2);
