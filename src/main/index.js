@@ -52,6 +52,8 @@ import { expandMultipleOnlyPluralMessages, selectPluralForm } from '../renderer/
 import { composeLocaleMessages } from '../localeComposition'
 import { appendYouTubeTimeZonePreference, buildProxyUrl, DEFAULT_PROXY_SETTINGS, isOpenTubeXUrl } from './utils'
 import { isInvidiousInstanceUrl } from './invidiousAuthorization'
+import { registerInvidiousAuthorizationIpc } from './invidiousAuthorizationIpc'
+import { registerRuntimeFlagsIpc } from './runtimeFlagsIpc'
 import { RendererCors } from './rendererCors'
 import { TabManager } from './tabs/TabManager'
 import { tabPreviewStorage } from './tabs/TabPreviewStorage'
@@ -1232,11 +1234,8 @@ function runApp() {
         // Fix the CORS error with the proxy test button
         requestHeaders = {}
       } else if (webContents) {
-        const invidiousAuthorization = invidiousAuthorizations.get(webContents.id)
-
-        if (invidiousAuthorization && isInvidiousInstanceUrl(url, invidiousAuthorization.url)) {
-          requestHeaders.Authorization = invidiousAuthorization.authorization
-        }
+        const invidiousAuthorization = invidiousAuthorizations.getForRequest(webContents.id, url)
+        if (invidiousAuthorization) requestHeaders.Authorization = invidiousAuthorization
       }
 
       if (webContents && isOpenTubeXUrl(webContents.getURL())) {
@@ -1318,13 +1317,8 @@ function runApp() {
           let headers
 
           if (rawWebContentsId) {
-            const invidiousAuthorization = invidiousAuthorizations.get(parseInt(rawWebContentsId))
-
-            if (invidiousAuthorization && isInvidiousInstanceUrl(url, invidiousAuthorization.url)) {
-              headers = {
-                Authorization: invidiousAuthorization.authorization
-              }
-            }
+            const invidiousAuthorization = invidiousAuthorizations.getForRequest(parseInt(rawWebContentsId), url)
+            if (invidiousAuthorization) headers = { Authorization: invidiousAuthorization }
           }
 
           const newRequest = net.request({
@@ -2330,48 +2324,13 @@ function runApp() {
     platform: process.platform
   })
 
-  ipcMain.handle(IpcChannels.GET_REPLACE_HTTP_CACHE, (event) => {
-    if (isOpenTubeXUrl(event.senderFrame.url)) {
-      return replaceHttpCache
-    }
-  })
-
-  ipcMain.once(IpcChannels.TOGGLE_REPLACE_HTTP_CACHE, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
-    if (replaceHttpCache) {
-      await asyncFs.rm(REPLACE_HTTP_CACHE_PATH)
-    } else {
-      // create an empty file
-      const handle = await asyncFs.open(REPLACE_HTTP_CACHE_PATH, 'w')
-      await handle.close()
-    }
-
-    relaunch()
-  })
-
-  ipcMain.handle(IpcChannels.GET_DISABLE_HARDWARE_ACCELERATION, (event) => {
-    if (isOpenTubeXUrl(event.senderFrame.url)) {
-      return disableHardwareAcceleration
-    }
-  })
-
-  ipcMain.once(IpcChannels.TOGGLE_DISABLE_HARDWARE_ACCELERATION, async (event) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
-    if (disableHardwareAcceleration) {
-      await asyncFs.rm(DISABLE_HARDWARE_ACCELERATION_PATH)
-    } else {
-      // create an empty file
-      const handle = await asyncFs.open(DISABLE_HARDWARE_ACCELERATION_PATH, 'w')
-      await handle.close()
-    }
-
-    relaunch()
+  registerRuntimeFlagsIpc({
+    ipcMain,
+    isTrustedUrl: isOpenTubeXUrl,
+    replaceHttpCache: { enabled: replaceHttpCache, path: REPLACE_HTTP_CACHE_PATH },
+    disableHardwareAcceleration: { enabled: disableHardwareAcceleration, path: DISABLE_HARDWARE_ACCELERATION_PATH },
+    files: asyncFs,
+    relaunch
   })
 
   registerPlayerCacheIpc({
@@ -2388,19 +2347,10 @@ function runApp() {
     return await requestVoiceOverTranslation(payload)
   })
 
-  /** @type {Map<number, { url: string, authorization: string }>} */
-  const invidiousAuthorizations = new Map()
-
-  ipcMain.on(IpcChannels.SET_INVIDIOUS_AUTHORIZATION, (event, authorization, url) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return
-    }
-
-    if (!authorization) {
-      invidiousAuthorizations.delete(event.sender.id)
-    } else if (typeof authorization === 'string' && typeof url === 'string') {
-      invidiousAuthorizations.set(event.sender.id, { authorization, url })
-    }
+  const invidiousAuthorizations = registerInvidiousAuthorizationIpc({
+    ipcMain,
+    isTrustedUrl: isOpenTubeXUrl,
+    isInvidiousInstanceUrl
   })
 
   function updateThemeSource(baseTheme) {
@@ -2706,7 +2656,7 @@ function runApp() {
     webContents.once('destroyed', () => {
       contextMenuIpc.forget(webContents.id)
       forget(webContents.id)
-      invidiousAuthorizations.delete(webContents.id)
+      invidiousAuthorizations.forget(webContents.id)
     })
   })
 
