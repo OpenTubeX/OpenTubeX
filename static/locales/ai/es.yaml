@@ -166,8 +166,6 @@ Subscriptions:
   Show Combined View: Mostrar vista combinada
   Newest First: Más reciente primero
   Oldest First: Más antiguo primero
-  Posts:
-    RSS Message: YouTube no proporciona fuentes RSS para las publicaciones. Desactiva el ajuste "{rssSetting}" para ver las publicaciones o activa el ajuste "{hideSetting}" para ocultar esta pestaña.
 Trending:
   Load Error: No se pudo cargar Tendencias.
   Unsupported Backend: Tendencias requiere la API local. Selecciona la API local o activa la fuente alternativa del backend.
@@ -566,10 +564,6 @@ Settings:
         Outline: Contorno
         Drop Shadow: Sombra paralela
       Reset: Restablecer la apariencia de los subtítulos
-    Default Viewing Mode:
-      Full Window (Always On): Ventana completa (siempre activada)
-      Full Screen (Always On): Pantalla completa (siempre activada)
-      Tooltip: La mayoría de los modos de visualización predeterminados solo se aplican al inicio de cada sesión. Los cambios realizados durante la sesión se mantienen hasta que termine. Los modos siempre activados se aplican cada vez que cambias de vídeo, independientemente de los cambios realizados al ver el vídeo anterior.
     Auto Picture in Picture:
       Auto Picture in Picture: Activar automáticamente Imagen en imagen
       On Tab Change: Al cambiar de pestaña
@@ -882,8 +876,6 @@ Settings:
     Show Video Title: Mostrar título del vídeo
     Show Bottom Right Actions Dock: Mostrar panel de acciones inferior derecho
     Paused Interface Hide Delay: Retraso para ocultar la interfaz al pausar
-    Add: Añadir
-    Remove: Eliminar
   Data Settings:
     Import YouTube Takeout ZIP: "Importar ZIP de YouTube Takeout"
     Select Takeout data: "Selecciona los datos que quieres importar"
@@ -892,15 +884,10 @@ Settings:
     Data And Storage: Datos y almacenamiento
     Profile Directory: Directorio del perfil
     Open Profile Directory: Abrir directorio del perfil
-    Settings File: Archivo de ajustes
-    Import Settings: Importar ajustes
-    Export Settings: Exportar ajustes
     Settings Tooltip: Los ajustes específicos del sistema operativo o del usuario y los experimentales no se pueden exportar ni importar (p. ej., proxy, reproductor externo, carpeta de capturas...)
     Invalid JSON row, skipping item: JSON no válido en la fila {row}; se omitirá el elemento
-    All settings have been successfully imported: Todos los ajustes se han importado correctamente
     All settings have been successfully exported: Todos los ajustes se han exportado correctamente
     Setting object has insufficient data, skipping item: El objeto de ajuste no tiene datos suficientes; se omitirá el elemento
-    Unknown setting key: 'Clave de ajuste desconocida: {key}'
     Non-transferable setting key: 'Clave de ajuste no transferible: {key}'
     Import subscriptions formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), copia de seguridad de LibreTube o exportación de FreeTube (.json)'
     Import history formats: 'Formatos compatibles: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), copia de seguridad de LibreTube (.json)'
@@ -1126,7 +1113,6 @@ Profile:
   Use Initial: Usar inicial
   The selected image could not be loaded: No se pudo cargar la imagen seleccionada
   Theme Color: Color del tema
-  Go To Profile Manager: Ir al gestor de perfiles
 Channel:
   Subscription settings: Configuración de la suscripción
   Failed to save subscription settings: No se pudo guardar la configuración del canal
@@ -1139,7 +1125,6 @@ Channel:
   Channel Name Unavailable: Nombre del canal no disponible
   Search Result Types: Tipos de resultados de búsqueda
   All Results: Todo
-  View All: Ver todo
 Video:
   External DRM Protected: "Los vídeos restringidos con DRM no pueden reproducirse en OpenTubeX, dado que requieren componentes propietarios de fuente cerrada."
   Invalid Media URL: "URL de contenido multimedia no válida"
@@ -1166,8 +1151,6 @@ Video:
   Queue Item Cannot Move Down: No se puede bajar {title}. Ya está en la posición {total} de {total}.
   Metadata: Información del vídeo
   Close Metadata: Cerrar información del vídeo
-  Collapse Playlist: Contraer lista de reproducción
-  Expand Playlist: Expandir lista de reproducción
   Metadata Cache:
     Title History: Historial de títulos
     Thumbnail History: Historial de miniaturas
@@ -1221,7 +1204,6 @@ Video:
   Notification unavailable: Las notificaciones del sistema no están disponibles
   Scheduled video starting: El vídeo programado está empezando
   Live notification body: '{videoTitle} empieza ahora'
-  Premiere: Estreno
   AI: IA
   AI-generated content: Contenido generado por IA
   Collaborators: Colaboradores
@@ -1375,9 +1357,6 @@ Video:
       UpvoteSegment: Votar a favor
       DownvoteSegment: Votar en contra
       VoteFailed: No se pudo enviar el voto a SponsorBlock.
-  Station: Estación
-  Playlist:
-    Unavailable videos are hidden: 1 vídeo no disponible está oculto | {count} vídeos no disponibles están ocultos | {count} vídeos no disponibles están ocultos
   External Media:
     Dislikes: "No me gusta | No me gusta | No me gusta"
     Reposts: "Repost | Reposts | Reposts"
@@ -1412,7 +1391,6 @@ Playlist:
   Playlist Preload Complete: "Vídeos precargados: {count}."
   Playlist Preload Partial: "Se precargaron {preloaded} de {requested} vídeos. No se pudieron precargar {failed}."
   Playlist Preload Pagination Failed: "No se pudo cargar la lista completa, así que se canceló la precarga."
-  Unavailable videos are hidden: Los vídeos no disponibles están ocultos
 Change Format:
   Local Video File: Archivo de vídeo local
   Local Audio File: Archivo de audio local
@@ -1566,7 +1544,6 @@ Comments:
   Getting comment replies, please wait: Obteniendo respuestas al comentario; espera
   Reload Comments: Recargar comentarios
   Reply Count: 1 respuesta | {replyCount} respuestas | {replyCount} respuestas
-  Comments are turned off: Los comentarios están desactivados
   YouTube did not provide advertised replies: YouTube indicó que este comentario tiene respuestas, pero no las proporcionó. Es posible que se hayan eliminado u ocultado, por lo que se quitó el botón de respuesta.
   Pinned by you: Fijado por ti
   A reply is pinned: Hay una respuesta fijada
@@ -1852,9 +1829,6 @@ Downloads:
     Subtitles Format: Subtítulos - {format}
 Channels:
   Load More Channels: "Cargar más canales"
-Search Bar:
-  Open Search Container: Abrir el campo de búsqueda
-  Search: Buscar
 Theme Discovery:
   Discover Themes: "Descubrir temas"
   Refresh: "Actualizar"
