@@ -164,7 +164,7 @@ ManifestVersion: 1.12.0
     manifestDirectory: directory,
     release: {
       assets: [asset('x64', 'a'), asset('arm64', 'b')],
-      body: '## Fixed bugs\n\n- Fixed a bug.\n\n<img alt="image" src="bug.png">',
+      body: `## Fixed bugs\n\n- Fixed a bug.\n\n<img alt="image" src="bug.png">\n\n${'- Additional release note.\n'.repeat(700)}`,
       html_url: `https://github.com/OpenTubeX/OpenTubeX/releases/tag/v${VERSION}-beta`,
       published_at: '2026-08-27T10:00:00Z',
       tag_name: `v${VERSION}-beta`,
@@ -175,7 +175,11 @@ ManifestVersion: 1.12.0
   })
 
   assert.deepEqual(result.tags, ['electron', 'privacy', 'youtube'])
-  assert.equal(result.releaseNotes, 'Fixed bugs\n\n- Fixed a bug.')
+  assert(result.releaseNotes.length <= 10_000)
+  assert(result.releaseNotes.length > 9_000)
+  assert.match(result.releaseNotes, /^Fixed bugs\n\n- Fixed a bug\./)
+  assert.match(result.releaseNotes, /- Additional release note\.$/)
+  assert(!result.releaseNotes.includes('<img'))
 
   const installer = fs.readFileSync(path.join(directory, 'OpenTubeX.OpenTubeX.installer.yaml'), 'utf8')
   const locale = fs.readFileSync(path.join(directory, 'OpenTubeX.OpenTubeX.locale.en-US.yaml'), 'utf8')
