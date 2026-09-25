@@ -4,7 +4,7 @@ import test from 'node:test'
 import { DBActions, IpcChannels, PlaylistVideoAddResult, SyncEvents } from '../../src/constants.js'
 import { registerDatastoreIpc, requireSettingRecord } from '../../src/main/datastoreIpc.js'
 
-function setup(handlers = {}) {
+function setup (handlers = {}) {
   const registrations = new Map()
   const notifications = []
   const ipcMain = { handle: (channel, handler) => registrations.set(channel, handler) }
@@ -57,6 +57,20 @@ test('datastore IPC rejects untrusted frames before calling handlers', async () 
   }), undefined)
   assert.equal(called, false)
   assert.deepEqual(notifications, [])
+})
+
+test('datastore IPC rejects malformed request envelopes after checking the frame', async () => {
+  let called = false
+  const { registrations, event } = setup({
+    history: { find: async () => { called = true } }
+  })
+  const invoke = registrations.get(IpcChannels.DB_HISTORY)
+  await assert.rejects(invoke(event, null), /invalid datastore request/)
+  await assert.rejects(invoke(event, { action: 'find' }), /invalid datastore request/)
+  assert.equal(called, false)
+
+  event.senderFrame.url = 'https://example.com'
+  assert.equal(await invoke(event, null), undefined)
 })
 
 test('playlist video sync occurs only after a new video is added', async () => {

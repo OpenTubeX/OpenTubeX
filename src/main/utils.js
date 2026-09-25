@@ -6,6 +6,10 @@ export const DEFAULT_PROXY_SETTINGS = {
   port: '9050'
 }
 
+export function isValidVideoId(videoId) {
+  return typeof videoId === 'string' && /^[\w-]{11}$/.test(videoId)
+}
+
 const NON_PUBLIC_NETWORK_ADDRESSES = new BlockList()
 
 for (const [address, prefix, family] of [

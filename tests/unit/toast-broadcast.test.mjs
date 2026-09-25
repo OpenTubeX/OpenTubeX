@@ -2,29 +2,19 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
-
-const mainSource = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
-const listenerSource = mainSource.slice(
-  mainSource.indexOf('  ipcMain.on(IpcChannels.SHOW_TOAST,'),
-  mainSource.indexOf('  const isValidLiveReminderSender')
-)
+import { registerToastIpc } from '../../src/main/toastIpc.js'
 
 function fixture() {
   const sent = []
   let receive
-  vm.runInNewContext(listenerSource, {
+  registerToastIpc({
     ipcMain: { on: (_channel, handler) => { receive = handler } },
-    IpcChannels: { SHOW_TOAST: 'show-toast' },
-    isOpenTubeXUrl: url => url === 'app://opentubex',
-    BrowserWindow: {
-      getAllWindows: () => [1, 2].map(id => ({
-        webContents: {
-          isDestroyed: () => false,
-          getURL: () => 'app://opentubex',
-          send: (...args) => sent.push({ id, args }),
-        },
-      })),
-    },
+    isTrustedUrl: url => url === 'app://opentubex',
+    getWindows: () => [1, 2].map(id => ({ webContents: {
+      isDestroyed: () => false,
+      getURL: () => 'app://opentubex',
+      send: (...args) => sent.push({ id, args })
+    } }))
   })
   return { sent, receive }
 }

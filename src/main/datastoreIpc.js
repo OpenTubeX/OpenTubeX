@@ -1,6 +1,18 @@
 import { DBActions, IpcChannels, PlaylistVideoAddResult, SyncEvents } from '../constants.js'
 
 /** @typedef {{ _id: string, value?: unknown }} SettingRecord */
+/** @typedef {{ action: number, data?: unknown }} DatastoreIpcRequest */
+
+/**
+ * @param {unknown} payload
+ * @returns {DatastoreIpcRequest}
+ */
+export function requireDatastoreIpcRequest(payload) {
+  if (payload === null || typeof payload !== 'object' || Array.isArray(payload) || typeof payload.action !== 'number' || !Number.isInteger(payload.action)) {
+    throw new TypeError('invalid datastore request')
+  }
+  return /** @type {DatastoreIpcRequest} */ (payload)
+}
 
 /**
  * @param {unknown} data
@@ -40,10 +52,11 @@ export function requireSettingRecord(data) {
 export function registerDatastoreIpc({ ipcMain, handlers, isTrustedUrl, syncOtherWindows, getPlayingVideoIds }) {
   // *********** //
   // History
-  ipcMain.handle(IpcChannels.DB_HISTORY, async (event, { action, data }) => {
+  ipcMain.handle(IpcChannels.DB_HISTORY, async (event, payload) => {
     if (!isTrustedUrl(event.senderFrame.url)) {
       return
     }
+    const { action, data } = requireDatastoreIpcRequest(payload)
 
     try {
       switch (action) {
@@ -186,8 +199,9 @@ export function registerDatastoreIpc({ ipcMain, handlers, isTrustedUrl, syncOthe
 
   // *********** //
   // Recommendation learning
-  ipcMain.handle(IpcChannels.DB_RECOMMENDATIONS, async (event, { action, data }) => {
+  ipcMain.handle(IpcChannels.DB_RECOMMENDATIONS, async (event, payload) => {
     if (!isTrustedUrl(event.senderFrame.url)) return
+    const { action, data } = requireDatastoreIpcRequest(payload)
     let result
     if (action === DBActions.GENERAL.FIND) result = await handlers.recommendations.find()
     else if (action === DBActions.GENERAL.UPSERT) result = await handlers.recommendations.record(data)
@@ -199,10 +213,11 @@ export function registerDatastoreIpc({ ipcMain, handlers, isTrustedUrl, syncOthe
   })
 
   // Watch Stats
-  ipcMain.handle(IpcChannels.DB_WATCH_STATS, async (event, { action, data }) => {
+  ipcMain.handle(IpcChannels.DB_WATCH_STATS, async (event, payload) => {
     if (!isTrustedUrl(event.senderFrame.url)) {
       return
     }
+    const { action, data } = requireDatastoreIpcRequest(payload)
 
     try {
       switch (action) {
@@ -271,10 +286,11 @@ export function registerDatastoreIpc({ ipcMain, handlers, isTrustedUrl, syncOthe
 
   // *********** //
   // Profiles
-  ipcMain.handle(IpcChannels.DB_PROFILES, async (event, { action, data }) => {
+  ipcMain.handle(IpcChannels.DB_PROFILES, async (event, payload) => {
     if (!isTrustedUrl(event.senderFrame.url)) {
       return
     }
+    const { action, data } = requireDatastoreIpcRequest(payload)
 
     try {
       switch (action) {
@@ -362,10 +378,11 @@ export function registerDatastoreIpc({ ipcMain, handlers, isTrustedUrl, syncOthe
   // As such, only the currently used actions have synchronization implemented
   // The remaining should have it implemented only when playlists
   // get fully implemented into the app
-  ipcMain.handle(IpcChannels.DB_PLAYLISTS, async (event, { action, data }) => {
+  ipcMain.handle(IpcChannels.DB_PLAYLISTS, async (event, payload) => {
     if (!isTrustedUrl(event.senderFrame.url)) {
       return
     }
+    const { action, data } = requireDatastoreIpcRequest(payload)
 
     try {
       switch (action) {
@@ -478,10 +495,11 @@ export function registerDatastoreIpc({ ipcMain, handlers, isTrustedUrl, syncOthe
 
   // ************** //
   // Search History
-  ipcMain.handle(IpcChannels.DB_SEARCH_HISTORY, async (event, { action, data }) => {
+  ipcMain.handle(IpcChannels.DB_SEARCH_HISTORY, async (event, payload) => {
     if (!isTrustedUrl(event.senderFrame.url)) {
       return
     }
+    const { action, data } = requireDatastoreIpcRequest(payload)
 
     try {
       switch (action) {
@@ -537,10 +555,11 @@ export function registerDatastoreIpc({ ipcMain, handlers, isTrustedUrl, syncOthe
 
   // *********** //
   // Profiles
-  ipcMain.handle(IpcChannels.DB_SUBSCRIPTION_CACHE, async (event, { action, data }) => {
+  ipcMain.handle(IpcChannels.DB_SUBSCRIPTION_CACHE, async (event, payload) => {
     if (!isTrustedUrl(event.senderFrame.url)) {
       return
     }
+    const { action, data } = requireDatastoreIpcRequest(payload)
 
     try {
       switch (action) {
