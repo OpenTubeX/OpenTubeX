@@ -592,7 +592,7 @@ Settings:
       Prepare in Background: Mulai siapkan terjemahan sulih suara di latar belakang
       Background Preparation Tooltip: Mengirim ID, durasi, dan bahasa yang dipilih dari video saat ini ke layanan terjemahan segera setelah video yang didukung dimuat.
       Language: Bahasa terjemahan sulih suara
-      Supported Source Languages: 'Bahasa sumber yang didukung: Rusia, Inggris, Tionghoa, Korea, Lituania, Latvia, Arab, Prancis, Italia, Spanyol, Jerman, dan Jepang.'
+      Supported Source Languages: 'Bahasa sumber yang didukung: Rusia, Inggris, Tionghoa, Korea, Arab, Prancis, Italia, Spanyol, Jerman, dan Jepang.'
       Voice Volume: Volume suara terjemahan
       Original Volume: Volume audio asli
       Russian: Rusia

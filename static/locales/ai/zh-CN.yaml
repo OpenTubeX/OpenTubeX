@@ -592,7 +592,7 @@ Settings:
       Prepare in Background: 在后台开始准备旁白翻译
       Background Preparation Tooltip: 支持的视频加载后，立即将当前视频的 ID、时长和所选语言发送到翻译服务。
       Language: 旁白翻译语言
-      Supported Source Languages: '支持的源语言：俄语、英语、中文、韩语、立陶宛语、拉脱维亚语、阿拉伯语、法语、意大利语、西班牙语、德语和日语。'
+      Supported Source Languages: '支持的源语言：俄语、英语、中文、韩语、阿拉伯语、法语、意大利语、西班牙语、德语和日语。'
       Voice Volume: 翻译旁白音量
       Original Volume: 原始音频音量
       Russian: 俄语

@@ -592,7 +592,7 @@ Settings:
       Prepare in Background: Začít připravovat překlad dabingu na pozadí
       Background Preparation Tooltip: Jakmile se načte podporované video, odešle překladatelské službě jeho ID, délku a vybraný jazyk.
       Language: Jazyk překladu dabingu
-      Supported Source Languages: 'Podporované zdrojové jazyky: ruština, angličtina, čínština, korejština, litevština, lotyština, arabština, francouzština, italština, španělština, němčina a japonština.'
+      Supported Source Languages: 'Podporované zdrojové jazyky: ruština, angličtina, čínština, korejština, arabština, francouzština, italština, španělština, němčina a japonština.'
       Voice Volume: Hlasitost přeloženého hlasu
       Original Volume: Hlasitost původního zvuku
       Russian: Ruština

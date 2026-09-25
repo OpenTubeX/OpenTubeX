@@ -592,7 +592,7 @@ Settings:
       Prepare in Background: Alusta pealelugemisega tõlgete ettevalmistamist taustal
       Background Preparation Tooltip: Saadab toetatud video laadimisel kohe tõlketeenusele praeguse video ID, kestuse ja valitud keele.
       Language: Pealelugemisega tõlke keel
-      Supported Source Languages: 'Toetatud lähtekeeled: vene, inglise, hiina, korea, leedu, läti, araabia, prantsuse, itaalia, hispaania, saksa ja jaapani.'
+      Supported Source Languages: 'Toetatud lähtekeeled: vene, inglise, hiina, korea, araabia, prantsuse, itaalia, hispaania, saksa ja jaapani.'
       Voice Volume: Tõlgitud kõne helitugevus
       Original Volume: Algse heli helitugevus
       Russian: Vene

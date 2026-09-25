@@ -600,7 +600,7 @@ Settings:
       Prepare in Background: Comezar a preparar as traducións de voz en segundo plano
       Background Preparation Tooltip: Envía ao servizo de tradución o ID, a duración e o idioma seleccionado do vídeo actual en canto se carga un vídeo compatible.
       Language: Idioma da tradución de voz
-      Supported Source Languages: 'Idiomas de orixe compatibles: ruso, inglés, chinés, coreano, lituano, letón, árabe, francés, italiano, castelán, alemán e xaponés.'
+      Supported Source Languages: 'Idiomas de orixe compatibles: ruso, inglés, chinés, coreano, árabe, francés, italiano, castelán, alemán e xaponés.'
       Voice Volume: Volume da voz traducida
       Original Volume: Volume do son orixinal
       Russian: Ruso

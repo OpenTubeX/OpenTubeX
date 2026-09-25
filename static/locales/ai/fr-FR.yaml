@@ -592,7 +592,7 @@ Settings:
       Prepare in Background: Commencer à préparer les traductions vocales en arrière-plan
       Background Preparation Tooltip: Envoie l’identifiant de la vidéo actuelle, sa durée et la langue sélectionnée au service de traduction dès qu’une vidéo compatible est chargée.
       Language: Langue de la traduction vocale
-      Supported Source Languages: 'Langues sources prises en charge : russe, anglais, chinois, coréen, lituanien, letton, arabe, français, italien, espagnol, allemand et japonais.'
+      Supported Source Languages: 'Langues sources prises en charge : russe, anglais, chinois, coréen, arabe, français, italien, espagnol, allemand et japonais.'
       Voice Volume: Volume de la voix traduite
       Original Volume: Volume du son d’origine
       Russian: Russe
