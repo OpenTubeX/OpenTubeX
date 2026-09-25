@@ -1628,7 +1628,7 @@ test('Shorts top controls stay visible over white video content', async ({ page 
   await expect(actionDock).toHaveCSS('pointer-events', 'auto')
 })
 
-test('compact chapters button keeps the same pill shade when opened', async ({ page }) => {
+test('compact chapters button marks its open icon with the seekbar accent', async ({ page }) => {
   await goTo(page, 'history')
   const playerStyles = await readFile(
     path.join(
@@ -1650,7 +1650,9 @@ test('compact chapters button keeps the same pill shade when opened', async ({ p
     panel.style.inset = '300px auto auto 300px'
     panel.style.position = 'fixed'
     panel.style.zIndex = '10000'
+    panel.style.setProperty('--seekbar-played-color', 'rgb(12, 122, 145)')
     button.className = 'ft-chapters-button'
+    button.style.color = 'rgb(255, 255, 255)'
     icon.className = 'ft-chapters-icon'
     button.append(icon)
     panel.append(button)
@@ -1664,10 +1666,14 @@ test('compact chapters button keeps the same pill shade when opened', async ({ p
 
   await expect(button).toBeVisible()
   await expect.poll(highlightColor).toBe('rgba(0, 0, 0, 0)')
+  await expect(button.locator('.ft-chapters-icon')).toHaveCSS('color', 'rgb(255, 255, 255)')
   const closedPillColor = await button.evaluate(element => getComputedStyle(element).getPropertyValue('--ft-control-pill-color').trim())
   await button.evaluate(element => element.classList.add('open'))
   await expect.poll(highlightColor).toBe('rgba(0, 0, 0, 0)')
+  await expect(button.locator('.ft-chapters-icon')).toHaveCSS('color', 'rgb(12, 122, 145)')
   expect(await button.evaluate(element => getComputedStyle(element).getPropertyValue('--ft-control-pill-color').trim())).toBe(closedPillColor)
+  await button.evaluate(element => element.classList.remove('open'))
+  await expect(button.locator('.ft-chapters-icon')).toHaveCSS('color', 'rgb(255, 255, 255)')
 })
 
 test.describe('autosized prompts', () => {

@@ -1213,6 +1213,10 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   display: block;
 }
 
+:deep(.shaka-controls-button-panel > .ft-chapters-button.open .ft-chapters-icon) {
+  color: var(--seekbar-played-color, var(--primary-color));
+}
+
 :deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button .ft-chapters-current-title),
 :deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button .ft-chapters-chevron) {
   display: none;
