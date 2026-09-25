@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url'
 
 const PACKAGE_IDENTIFIER = 'OpenTubeX.OpenTubeX'
 const MAX_WINGET_TAGS = 16
+const MAX_WINGET_RELEASE_NOTES_LENGTH = 10_000
 
 function decodeHtml(value) {
   const namedEntities = {
@@ -133,12 +134,20 @@ export function cleanReleaseNotes(markdown) {
     .filter((line) => !/product\s*hunt/i.test(line))
     .filter((line) => !/^\s*https?:\/\/\S+\.(?:avif|gif|jpe?g|png|svg|webp)(?:\?\S*)?\s*$/i.test(line))
 
-  return lines
+  const cleaned = lines
     .join('\n')
     .replaceAll(/[ \t]+\n/g, '\n')
     .replaceAll(/(^\s*-\s.*)\n\n(?=\s*-\s)/gm, '$1\n')
     .replaceAll(/\n{3,}/g, '\n\n')
     .trim()
+
+  if (cleaned.length <= MAX_WINGET_RELEASE_NOTES_LENGTH) { return cleaned }
+
+  const lastLineEnd = cleaned.lastIndexOf('\n', MAX_WINGET_RELEASE_NOTES_LENGTH)
+  const end = lastLineEnd > MAX_WINGET_RELEASE_NOTES_LENGTH / 2
+    ? lastLineEnd
+    : MAX_WINGET_RELEASE_NOTES_LENGTH
+  return cleaned.slice(0, end).replace(/[\uD800-\uDBFF]$/, '').trimEnd()
 }
 
 function replaceScalar(manifest, key, value, { all = false } = {}) {
@@ -226,6 +235,7 @@ function validateLocaleManifest(manifest, { releaseNotes, releaseUrl, tags, vers
   assert.equal(scalar(manifest, 'PackageVersion'), version)
   assert.equal(scalar(manifest, 'PackageName'), 'OpenTubeX')
   assert.equal(scalar(manifest, 'ReleaseNotesUrl'), releaseUrl)
+  assert(releaseNotes.length <= MAX_WINGET_RELEASE_NOTES_LENGTH, 'Release notes exceed the WinGet schema limit')
   assert(!/<[^>]+>/.test(releaseNotes), 'Release notes still contain HTML')
   assert(!/!\[[^\]]*\]/.test(releaseNotes), 'Release notes still contain a Markdown image')
   assert(!/^\s*image\s*$/im.test(releaseNotes), 'Release notes still contain a stray image label')
