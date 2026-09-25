@@ -165,11 +165,11 @@ iOS support is planned. The first iOS builds will be downloadable `.ipa` files.
   <picture>
     <source media="(prefers-color-scheme: light)" srcset="https://snapcraft.io/en/light/install.svg">
     <source media="(prefers-color-scheme: dark)" srcset="https://snapcraft.io/en/dark/install.svg">
-    <img alt="Get it from the Snap Store" src="https://snapcraft.io/en/dark/install.svg">
+    <img alt="Get it from the Snap Store" src="https://snapcraft.io/en/dark/install.svg" align="middle">
   </picture>
 </a>
 <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/OpenTubeX/OpenTubeX">
-  <img alt="Get it on Obtainium" src="docs/badges/obtainium.png" width="180">
+  <img alt="Get it on Obtainium" src="docs/badges/obtainium.png" width="215" align="middle">
 </a>
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/opentubex.svg)](https://repology.org/project/opentubex/versions)
