@@ -57,6 +57,7 @@
 
     <template v-else-if="info">
       <div
+        ref="videoLayout"
         class="externalMediaLayout"
         :class="{ useTheatreMode, noSidebar: !chatAvailable || !chatOpen }"
       >
@@ -90,7 +91,7 @@
             @seeking="handleSeeking"
             @seeked="handleSeeked"
             @fullscreen-live-chat-change="handleFullscreenLiveChatChange"
-            @toggle-theatre-mode="useTheatreMode = !useTheatreMode"
+            @toggle-theatre-mode="toggleTheatreMode"
             @chapters-overlay-change="showChapters = $event"
           />
           <div
@@ -255,7 +256,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { FtIcon } from '@opentubex/icons'
@@ -273,6 +274,8 @@ import WatchVideoChapters from '../../components/WatchVideoChapters/WatchVideoCh
 import TwitchChat from './TwitchChat.vue'
 import { getTwitchChatTarget } from './twitchChat'
 import { getExternalYtDlpPlaybackSource } from '../../helpers/player/ytDlpPlayback'
+import { applyAnimationSpeed } from '../../helpers/animationSpeed'
+import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 import { buildChaptersVttFile, formatDurationAsTimestamp } from '../../helpers/utils'
 import { isExternalMediaUrl } from '../../helpers/externalMediaUrl'
@@ -289,6 +292,7 @@ const errorMessage = ref('')
 const info = shallowRef(null)
 const source = shallowRef(null)
 const player = useTemplateRef('player')
+const videoLayout = useTemplateRef('videoLayout')
 const mediaUrl = ref('')
 const currentTime = ref(0)
 const showChapters = ref(false)
@@ -298,6 +302,7 @@ const seekCount = ref(0)
 const seeking = ref(false)
 const chatOpen = ref(true)
 const useTheatreMode = ref(false)
+let theatreModeAnimations = []
 const windowWidth = ref(window.innerWidth)
 const fullscreenLiveChatOpen = ref(false)
 const fullscreenLiveChatTarget = shallowRef(null)
@@ -320,6 +325,43 @@ const chatAvailable = computed(() => twitchChatTarget.value && !(twitchChatTarge
   ? store.getters.getHideLiveChatReplay
   : store.getters.getHideLiveChat))
 const theatreTogglePossible = computed(() => windowWidth.value > 1350 && Boolean(chatAvailable.value && chatOpen.value))
+
+async function toggleTheatreMode() {
+  const elements = Array.from(videoLayout.value?.querySelectorAll('.externalMediaPlayer, .externalMediaInfo, .externalMediaSidebar') ?? [])
+  theatreModeAnimations.forEach(animation => animation.cancel())
+  theatreModeAnimations = []
+
+  if (isReducedMotionEnabled()) {
+    useTheatreMode.value = !useTheatreMode.value
+    return
+  }
+
+  const previousRects = elements.map(element => element.getBoundingClientRect())
+  useTheatreMode.value = !useTheatreMode.value
+  await nextTick()
+
+  theatreModeAnimations = elements.map((element, index) => {
+    const previousRect = previousRects[index]
+    const nextRect = element.getBoundingClientRect()
+    const isPlayer = element.classList.contains('externalMediaPlayer')
+    const scaleX = isPlayer ? previousRect.width / nextRect.width : 1
+    const scaleY = isPlayer ? previousRect.height / nextRect.height : 1
+    const animation = applyAnimationSpeed(element.animate([
+      {
+        transform: `translate(${previousRect.left - nextRect.left}px, ${previousRect.top - nextRect.top}px) scale(${scaleX}, ${scaleY})`,
+        transformOrigin: 'top left'
+      },
+      { transform: 'none', transformOrigin: 'top left' }
+    ], {
+      duration: 400,
+      easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+    }))
+    animation.addEventListener('finish', () => {
+      theatreModeAnimations = theatreModeAnimations.filter(item => item !== animation)
+    })
+    return animation
+  })
+}
 const chatToggleTitle = computed(() => twitchChatTarget.value?.type === 'replay'
   ? chatOpen.value ? t('Video.Close Live Chat Replay') : t('Video.Show Live Chat Replay')
   : chatOpen.value ? t('Video.Close Live Chat') : t('Video.Show Live Chat'))
@@ -515,7 +557,7 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
   useTheatreMode.value = store.getters.getDefaultViewingMode === 'theatre'
   fullscreenLiveChatOpen.value = false
   fullscreenLiveChatTarget.value = null
-  setTabTitle('Watch')
+  setTabTitle(hostname.value || 'Watch')
 
   if (!isExternalMediaUrl(url)) {
     errorMessage.value = t('Video.Invalid Media URL')
@@ -540,6 +582,7 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
 
 watch(() => route.query.url, url => loadMedia(url), { immediate: true })
 onBeforeUnmount(() => {
+  theatreModeAnimations.forEach(animation => animation.cancel())
   loadGeneration++
   if (seekTimer !== null) clearTimeout(seekTimer)
   window.removeEventListener('resize', updateWindowWidth)

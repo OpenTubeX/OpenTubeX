@@ -4559,7 +4559,7 @@ export default defineComponent({
         uiConfig.overflowMenuButtons = [
           ...(props.shortsPlayer ? ['ft_shorts_video_info'] : []),
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
-          'playback_rate',
+          ...(!isLive.value && !props.isLive ? ['playback_rate'] : []),
           'captions',
           'ft_audio_tracks',
           'ft_sleep_timer',
@@ -4613,7 +4613,7 @@ export default defineComponent({
         uiConfig.overflowMenuButtons.push(
           'ft_audio_tracks',
           'captions',
-          'playback_rate',
+          ...(!isLive.value && !props.isLive ? ['playback_rate'] : []),
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
           'ft_sleep_timer',
           'ft_skip_silence',

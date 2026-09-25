@@ -682,5 +682,24 @@
   "angle-right": {
     "ri": "arrow-right-s-line",
     "material": "keyboard-arrow-right-rounded"
-  }
+  },
+  "twitch": { "ri": "video-line", "material": "movie-outline", "simple": "twitch" },
+  "vimeo": { "ri": "video-line", "material": "movie-outline", "simple": "vimeo" },
+  "dailymotion": { "ri": "video-line", "material": "movie-outline", "simple": "dailymotion" },
+  "soundcloud": { "ri": "video-line", "material": "movie-outline", "simple": "soundcloud" },
+  "bandcamp": { "ri": "video-line", "material": "movie-outline", "simple": "bandcamp" },
+  "bilibili": { "ri": "video-line", "material": "movie-outline", "simple": "bilibili" },
+  "odysee": { "ri": "video-line", "material": "movie-outline", "simple": "odysee" },
+  "rumble": { "ri": "video-line", "material": "movie-outline", "simple": "rumble" },
+  "internetarchive": { "ri": "video-line", "material": "movie-outline", "simple": "internetarchive" },
+  "mixcloud": { "ri": "video-line", "material": "movie-outline", "simple": "mixcloud" },
+  "kick": { "ri": "video-line", "material": "movie-outline", "simple": "kick" },
+  "niconico": { "ri": "video-line", "material": "movie-outline", "simple": "niconico" },
+  "tiktok": { "ri": "video-line", "material": "movie-outline", "simple": "tiktok" },
+  "instagram": { "ri": "video-line", "material": "movie-outline", "simple": "instagram" },
+  "x": { "ri": "video-line", "material": "movie-outline", "simple": "x" },
+  "twitter": { "ri": "video-line", "material": "movie-outline", "simple": "twitter" },
+  "facebook": { "ri": "video-line", "material": "movie-outline", "simple": "facebook" },
+  "reddit": { "ri": "video-line", "material": "movie-outline", "simple": "reddit" },
+  "crunchyroll": { "ri": "video-line", "material": "movie-outline", "simple": "crunchyroll" }
 }
