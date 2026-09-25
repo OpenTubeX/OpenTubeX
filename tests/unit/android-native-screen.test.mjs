@@ -7,7 +7,7 @@ import { overrideShakaMethods } from '../../src/renderer/helpers/player/override
 const source = (await readFile(new URL('../../src/renderer/helpers/player/androidNativeScreen.js', import.meta.url), 'utf8'))
   .replace(/^import .*\n/gm, '').replace('export function ', 'function ')
 
-async function fixture({ fullscreen = true, shorts = false, mini = false, detached = false, chrome = [], dialogs = [], suggestions = [], previews = [], deferTransitions = false, deferMiniLayout = false, deferFullscreen = false, rotateFullscreen = false } = {}) {
+async function fixture({ fullscreen = true, shorts = false, mini = false, detached = false, chrome = [], dialogs = [], suggestions = [], previews = [], deferTransitions = false, deferMiniLayout = false, deferFullscreen = false, rotateFullscreen = false, edgeGlow = false } = {}) {
   const snapshots = []
   const snapshotInvalidations = []
   let publishSnapshot
@@ -36,6 +36,11 @@ async function fixture({ fullscreen = true, shorts = false, mini = false, detach
   const bounds = { x: 0, y: 0, width: 640, height: 360 }
   const page = { getBoundingClientRect: () => ({ x: 0, y: 0 }), setAttribute() {}, removeAttribute() {}, style: { getPropertyValue: () => '', setProperty(name, value) { styleWrites.push({ name, value }) }, removeProperty() {} } }
   const controlsElement = { hasAttribute: () => shown, getBoundingClientRect: () => bounds }
+  const edge = {
+    classList: { contains: name => name === 'videoFillZoomEdge' },
+    getAnimations: () => [{ playState: 'running' }],
+    getBoundingClientRect: () => ({ x: 0, y: 0, width: 640, height: 24 })
+  }
   const container = Object.assign(new EventTarget(), {
     closest: selector => detached && selector === '#cross-tab-mini-player-layer' ? {} : null,
     classList: { contains: name => (shorts && name === 'shortsPlayer') || (miniActive && name === 'scrollMiniPlayer') || (panel && ['fullscreenDockLayoutOpen', 'chaptersOverlayOpen'].includes(name)) },
@@ -45,6 +50,7 @@ async function fixture({ fullscreen = true, shorts = false, mini = false, detach
     getAnimations: () => animating ? [{ playState: 'running' }] : [],
     querySelectorAll(selector) {
       if (selector.includes('.shaka-player-ui-thumbnail-container')) return previews
+      if (edgeGlow && selector.includes('.videoFillZoomEdge')) return [edge]
       return menu && selector.includes('shaka-overflow-menu') ? [{ getAnimations: () => [], getBoundingClientRect: () => ({ x: 400, y: 100, width: 200, height: 240 }) }] : []
     },
     querySelector(selector) {
@@ -96,7 +102,7 @@ async function fixture({ fullscreen = true, shorts = false, mini = false, detach
   if (fullscreen) await screen.show()
   else await screen.attach()
   await flush()
-  return { document, readyEvents, snapshotInvalidations, snapshots, publishSnapshot, screen, container, layouts, presentations, completeTransitions, completeMiniLayouts, completeFullscreen, fullscreenEvents, bounds, observers, window, styleWrites, flush, change({ visible = shown, menuOpen = menu, panelOpen = panel, shortsOpen = shortsPanelOpen, containerAnimating = animating, endedRecommendations = recommendations, playbackEnded = ended, loadingPoster = poster, miniPlayer = miniActive }) {
+  return { document, readyEvents, snapshotInvalidations, snapshots, publishSnapshot, screen, container, layouts, presentations, completeTransitions, completeMiniLayouts, completeFullscreen, fullscreenEvents, bounds, observers, window, styleWrites, flush, pendingFrames: () => frames.size, change({ visible = shown, menuOpen = menu, panelOpen = panel, shortsOpen = shortsPanelOpen, containerAnimating = animating, endedRecommendations = recommendations, playbackEnded = ended, loadingPoster = poster, miniPlayer = miniActive }) {
     poster = loadingPoster
     shown = visible; menu = menuOpen; panel = panelOpen
     shortsPanelOpen = shortsOpen
@@ -107,6 +113,13 @@ async function fixture({ fullscreen = true, shorts = false, mini = false, detach
     for (const observer of observers) observer.callback([{ type: 'attributes', attributeName: 'style', target: container }])
   } }
 }
+
+test('animated fill edges clip the native video without polling unchanged geometry', async () => {
+  const f = await fixture({ edgeGlow: true })
+  assert.equal(f.layouts.at(-1).menus.length, 1)
+  assert.equal(f.pendingFrames(), 0)
+  f.screen.destroy()
+})
 
 test('Shorts use their top playback button without native center controls', async () => {
   const f = await fixture({ fullscreen: false, shorts: true })

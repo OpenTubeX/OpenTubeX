@@ -1,14 +1,14 @@
 /**
- * Zoom is a purely visual crop of the video surface, so the levels are the ones
- * that still leave a useful amount of the frame visible.
+ * Preset levels keep a useful amount of the frame visible. A gesture can reach
+ * farther when a narrow video needs more zoom to fill the display.
  */
 export const VIDEO_ZOOM_LEVELS = Object.freeze([1, 1.25, 1.5, 1.75, 2, 2.5, 3])
 
 export const DEFAULT_VIDEO_ZOOM = VIDEO_ZOOM_LEVELS[0]
+export const MAX_VIDEO_GESTURE_ZOOM = 8
 
 /**
- * Keeps continuous gesture values within the range offered by the preset
- * controls.
+ * Keeps continuous gesture values within the supported visual crop range.
  * @param {unknown} zoom
  * @returns {number}
  */
@@ -19,7 +19,7 @@ export function sanitizeVideoZoom(zoom) {
     return DEFAULT_VIDEO_ZOOM
   }
 
-  return Math.min(VIDEO_ZOOM_LEVELS.at(-1), Math.max(DEFAULT_VIDEO_ZOOM, value))
+  return Math.min(MAX_VIDEO_GESTURE_ZOOM, Math.max(DEFAULT_VIDEO_ZOOM, value))
 }
 
 /**
@@ -31,6 +31,7 @@ export function stepVideoZoom(zoom, direction) {
   const value = sanitizeVideoZoom(zoom)
 
   if (direction > 0) {
+    if (value >= VIDEO_ZOOM_LEVELS.at(-1)) return value
     return VIDEO_ZOOM_LEVELS.find(level => level > value) ?? VIDEO_ZOOM_LEVELS.at(-1)
   }
 
@@ -52,6 +53,40 @@ export function formatVideoZoom(zoom) {
 }
 
 /**
+ * The scale at which a contained video fills its visible player area.
+ * @param {{ width: number, height: number }} playerSize
+ * @param {{ width: number, height: number }} elementSize
+ * @param {{ width: number, height: number }} videoSize
+ * @returns {number | null}
+ */
+export function getVideoFillZoom(playerSize, elementSize, videoSize) {
+  if ([playerSize.width, playerSize.height, elementSize.width, elementSize.height, videoSize.width, videoSize.height]
+    .some(value => !Number.isFinite(value) || value <= 0)) return null
+
+  const fit = Math.min(elementSize.width / videoSize.width, elementSize.height / videoSize.height)
+  const fillZoom = Math.max(
+    playerSize.width / (videoSize.width * fit),
+    playerSize.height / (videoSize.height * fit),
+  )
+  return fillZoom > DEFAULT_VIDEO_ZOOM && fillZoom <= MAX_VIDEO_GESTURE_ZOOM ? fillZoom : null
+}
+
+/**
+ * Edge feedback starts before the narrower band that snaps on release.
+ * @param {number} zoom
+ * @param {number | null} fillZoom
+ * @returns {{ proximity: number, snap: boolean }}
+ */
+export function getVideoFillZoomProximity(zoom, fillZoom) {
+  if (fillZoom === null) return { proximity: 0, snap: false }
+  const distance = Math.abs(zoom - fillZoom)
+  return {
+    proximity: Math.max(0, 1 - distance / 0.1),
+    snap: distance <= 0.08,
+  }
+}
+
+/**
  * Resolves a two-finger zoom while keeping the content beneath the gesture's
  * focal point stationary. Focal coordinates are relative to the video centre.
  */
@@ -62,10 +97,10 @@ export function resolveVideoZoomPinch({
   focal,
   scale,
   size,
+  maximumZoom = VIDEO_ZOOM_LEVELS.at(-1),
 }) {
   const minimumZoom = VIDEO_ZOOM_LEVELS[0]
-  const maximumZoom = VIDEO_ZOOM_LEVELS.at(-1)
-  const zoom = Math.min(maximumZoom, Math.max(minimumZoom, startZoom * scale))
+  const zoom = Math.min(Math.max(maximumZoom, startZoom), Math.max(minimumZoom, startZoom * scale))
 
   const resolveAxis = (dimension, startOffsetValue, startFocalValue, focalValue) => {
     const startMaximumTranslation = dimension * (startZoom - 1) / 2

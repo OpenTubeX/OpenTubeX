@@ -108,9 +108,12 @@ import { getDashQualityFromDimensions } from '../../helpers/player/videoQuality'
 import {
   DEFAULT_VIDEO_ZOOM,
   formatVideoZoom,
+  getVideoFillZoom,
+  getVideoFillZoomProximity,
   resolveVideoZoomPinch,
   sanitizeVideoZoom,
   stepVideoZoom,
+  VIDEO_ZOOM_LEVELS,
 } from '../../helpers/player/videoZoom'
 import { shouldStartPaidPromotionTimer } from '../../helpers/player/paidPromotion'
 import { resolveSponsorBlockEnterTarget, resolveSponsorBlockEnterTargets } from '../../helpers/player/sponsorBlockShortcut'
@@ -3632,6 +3635,8 @@ export default defineComponent({
       return sanitizeVideoZoom(store.getters.getTabVideoZoom(mediaTabId))
     })
     const videoZoomGestureZoom = ref(null)
+    const videoFillZoomProximity = ref(0)
+    const videoFillZoomSnapReady = ref(false)
 
     const videoZoomPossible = computed(() => {
       // Audio only playback has no video surface to crop and the shorts player
@@ -3692,7 +3697,9 @@ export default defineComponent({
     // framing belongs to one specific video. A player reused for the next video
     // keeps its zoom level but starts centered again.
     watch(() => props.videoId, () => {
+      invalidateVideoZoomPinch()
       recenterVideoZoom()
+      if (selectedVideoZoom.value > VIDEO_ZOOM_LEVELS.at(-1)) updateVideoZoom(VIDEO_ZOOM_LEVELS.at(-1))
     })
 
     function recenterVideoZoom() {
@@ -3830,6 +3837,7 @@ export default defineComponent({
           const geometry = getVideoZoomGestureGeometry()
           if (geometry) {
             cancelMobileFullscreenGesture()
+            const fullscreen = isNativeFullscreenActive()
             videoZoomGestureZoom.value = geometry.zoom
             videoZoomOffset.x = geometry.offset.x
             videoZoomOffset.y = geometry.offset.y
@@ -3845,7 +3853,18 @@ export default defineComponent({
               currentFocal: focal,
               center: geometry.center,
               size: geometry.size,
+              videoId: props.videoId,
+              fullscreen,
+              fillZoom: fullscreen
+                ? getVideoFillZoom(
+                    { width: container.value.clientWidth, height: container.value.clientHeight },
+                    geometry.size,
+                    { width: video.value.videoWidth, height: video.value.videoHeight },
+                  )
+                : null,
             }
+            videoFillZoomProximity.value = 0
+            videoFillZoomSnapReady.value = false
             videoZoomPinching.value = true
             videoZoomSuppressClick = true
             for (const pointerId of videoZoomTouchPointers.keys()) {
@@ -3891,6 +3910,12 @@ export default defineComponent({
         videoZoomTouchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
       }
 
+      if (videoZoomPinchStart?.invalidated) {
+        event.preventDefault()
+        event.stopPropagation()
+        return
+      }
+
       if (videoZoomPinchStart && videoZoomTouchPointers.size >= 2) {
         const points = [...videoZoomTouchPointers.values()]
         const focal = {
@@ -3905,11 +3930,19 @@ export default defineComponent({
           focal,
           scale: distance / videoZoomPinchStart.distance,
           size: videoZoomPinchStart.size,
+          maximumZoom: Math.max(VIDEO_ZOOM_LEVELS.at(-1), videoZoomPinchStart.fillZoom ?? 0),
         })
         videoZoomGestureZoom.value = resolved.zoom
         videoZoomOffset.x = resolved.offset.x
         videoZoomOffset.y = resolved.offset.y
         videoZoomPinchStart.currentFocal = focal
+        const movingTowardFill = videoZoomPinchStart.fillZoom !== null &&
+          Math.abs(resolved.zoom - videoZoomPinchStart.zoom) >= 0.01 &&
+          Math.abs(resolved.zoom - videoZoomPinchStart.fillZoom) <
+            Math.abs(videoZoomPinchStart.zoom - videoZoomPinchStart.fillZoom)
+        const fill = getVideoFillZoomProximity(resolved.zoom, videoZoomPinchStart.fillZoom)
+        videoFillZoomProximity.value = movingTowardFill ? fill.proximity : 0
+        videoFillZoomSnapReady.value = movingTowardFill && fill.snap
         event.preventDefault()
         event.stopPropagation()
         return
@@ -3967,7 +4000,7 @@ export default defineComponent({
 
     /** @param {PointerEvent} event */
     function handleVideoZoomPointerCancel(event) {
-      if (endVideoZoomPinchPointer(event)) return
+      if (endVideoZoomPinchPointer(event, true)) return
       cancelMobileFullscreenGesture(event)
 
       if (!endVideoZoomPan(event)) {
@@ -3979,7 +4012,18 @@ export default defineComponent({
       videoZoomSuppressClick = false
     }
 
-    function endVideoZoomPinchPointer(event) {
+    function invalidateVideoZoomPinch() {
+      if (!videoZoomPinchStart || videoZoomPinchStart.invalidated) return
+      videoZoomPinchStart.invalidated = true
+      videoZoomOffset.x = videoZoomPinchStart.offset.x
+      videoZoomOffset.y = videoZoomPinchStart.offset.y
+      videoZoomGestureZoom.value = null
+      videoZoomPinching.value = false
+      videoFillZoomProximity.value = 0
+      videoFillZoomSnapReady.value = false
+    }
+
+    function endVideoZoomPinchPointer(event, cancelled = false) {
       if (!videoZoomTouchPointers.has(event.pointerId)) return false
 
       videoZoomTouchPointers.delete(event.pointerId)
@@ -3991,11 +4035,25 @@ export default defineComponent({
         container.value.releasePointerCapture(event.pointerId)
       }
 
+      const stale = videoZoomPinchStart.invalidated ||
+        videoZoomPinchStart.videoId !== props.videoId ||
+        videoZoomPinchStart.fullscreen !== isNativeFullscreenActive()
+      if (stale) invalidateVideoZoomPinch()
       const gestureZoom = videoZoomGestureZoom.value ?? videoZoomPinchStart.zoom
-      updateVideoZoom(gestureZoom)
+      const fillZoom = videoZoomPinchStart.fillZoom
+      const finalZoom = !cancelled && videoFillZoomSnapReady.value && fillZoom !== null
+        ? fillZoom
+        : gestureZoom
+      if (!stale) {
+        if (finalZoom === fillZoom && !cancelled) recenterVideoZoom()
+        updateVideoZoom(finalZoom)
+        if (!cancelled) showValueChange(formatVideoZoom(finalZoom), 'search', false, 0, false)
+      }
       videoZoomGestureZoom.value = null
       videoZoomPinchStart = null
       videoZoomPinching.value = false
+      videoFillZoomProximity.value = 0
+      videoFillZoomSnapReady.value = false
       videoZoomTouchPointers.clear()
       clearTimeout(videoZoomSuppressClickTimer)
       videoZoomSuppressClickTimer = setTimeout(() => {
@@ -10475,8 +10533,12 @@ export default defineComponent({
     }
 
     function fullscreenChangeHandler() {
-      if (process.env.IS_CAPACITOR && !isNativeFullscreenActive() && document.querySelector('.nativeFullscreenTransition')) return
       const fullscreen = isNativeFullscreenActive()
+      if (videoZoomPinchStart && videoZoomPinchStart.fullscreen !== fullscreen) invalidateVideoZoomPinch()
+      if (!fullscreen && selectedVideoZoom.value > VIDEO_ZOOM_LEVELS.at(-1)) {
+        updateVideoZoom(VIDEO_ZOOM_LEVELS.at(-1))
+      }
+      if (process.env.IS_CAPACITOR && !fullscreen && document.querySelector('.nativeFullscreenTransition')) return
       isFullscreen.value = fullscreen
       if (props.shortsPlayer) {
         resetShortsOverflowMenu()
@@ -11445,6 +11507,8 @@ export default defineComponent({
       videoZoomTouchPointers.clear()
       videoZoomPinchStart = null
       videoZoomGestureZoom.value = null
+      videoFillZoomProximity.value = 0
+      videoFillZoomSnapReady.value = false
       clearTimeout(videoZoomSuppressClickTimer)
 
       tabMediaCoordinator.setMiniPlayer(mediaTabId, false)
@@ -11682,8 +11746,9 @@ export default defineComponent({
      * @param {ValueChangeIcon | ValueChangeIcon[]} icons - The icons to display.
      * @param {boolean} invertContentOrder - Whether to invert the order of the icon and message.
      * @param {number} seekSeconds - Accumulated seek offset, reset by other messages.
+     * @param {boolean} revealControls - Whether to also show the player controls.
      */
-    function showValueChange(message, icons = [], invertContentOrder = false, seekSeconds = 0) {
+    function showValueChange(message, icons = [], invertContentOrder = false, seekSeconds = 0, revealControls = true) {
       accumulatedSeekSeconds = seekSeconds
       valueChangeMessage.value = message
       valueChangeIcons.value = Array.isArray(icons) ? icons : [icons]
@@ -11699,7 +11764,7 @@ export default defineComponent({
         accumulatedSeekSeconds = 0
       }, 2000)
 
-      showOverlayControls()
+      if (revealControls) showOverlayControls()
     }
 
     return {
@@ -11923,6 +11988,10 @@ export default defineComponent({
       videoZoomPossible,
       videoZoomPanning,
       videoZoomPinching,
+      videoZoomGestureZoom,
+      videoFillZoomProximity,
+      videoFillZoomSnapReady,
+      formatVideoZoom,
       videoZoomPanReady,
       handleVideoZoomPointerEnter,
       handleVideoZoomPointerLeave,
