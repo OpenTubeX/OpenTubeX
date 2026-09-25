@@ -131,6 +131,23 @@ test('release note cleanup removes reference-style linked badges', () => {
   )
 })
 
+test('release note cleanup stays within the WinGet schema limit', () => {
+  const bullet = '- A complete release note.\n'
+  const notes = cleanReleaseNotes(`## Highlights\n\n${bullet.repeat(500)}`)
+
+  assert(notes.length <= 10_000)
+  assert.match(notes, /- A complete release note\.$/)
+  assert(!notes.includes(bullet.repeat(500).trimEnd()))
+})
+
+test('release note cleanup keeps long single lines well formed', () => {
+  const notes = cleanReleaseNotes(`## Highlights\n\na${'🙂'.repeat(6_000)}`)
+
+  assert(notes.length <= 10_000)
+  assert(notes.length > 9_000)
+  assert(notes.isWellFormed())
+})
+
 test('manifest preparation applies release metadata and validates installers', (context) => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'winget-manifest-test-'))
   context.after(() => fs.rmSync(directory, { recursive: true }))
