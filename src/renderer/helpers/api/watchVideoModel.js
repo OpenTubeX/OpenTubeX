@@ -102,7 +102,7 @@ export function mapLocalWatchVideo(response, { videoId, avoidTranslation = false
       : localizedDescription?.text || basic.short_description,
     durationSeconds: basic.duration,
     published: isLive && !basic.is_live_content
-      ? basic.start_timestamp.getTime()
+      ? basic.start_timestamp?.getTime() ?? 0
       : Number.isFinite(published) ? published : 0,
     channel,
     subscriberCount,

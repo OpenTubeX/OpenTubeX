@@ -76,3 +76,14 @@ test('Local metadata tolerates a private response without watch panels', () => {
   assert.equal(metadata.title, 'Private video')
   assert.equal(metadata.channel.id, '')
 })
+
+test('private live metadata without a start time reaches the private-video handler', () => {
+  const metadata = mapLocalWatchVideo({
+    info: {
+      playability_status: { status: 'LOGIN_REQUIRED', error_screen: { reason: { text: 'Private video' } } },
+      basic_info: { title: 'Private live video', is_live: true, is_live_content: false },
+    },
+  }, { videoId: 'privateLive123' })
+  assert.equal(metadata.isLive, true)
+  assert.equal(metadata.published, 0)
+})
