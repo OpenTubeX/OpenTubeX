@@ -39,6 +39,35 @@ for (const uiScale of [100, 125]) {
   })
 }
 
+test('Capacitor player controls share the taller glass height and options menu depth', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await page.setViewportSize({ width: 375, height: 812 })
+  await page.locator('video').evaluate(video => video.pause())
+  await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs'))
+  await page.locator('.ftVideoPlayer .shaka-overflow-menu-button').click({ position: { x: 4, y: 28 } })
+  const player = page.locator('.ftVideoPlayer')
+  const menu = player.locator('.phonePlayerOptions[open]')
+  await expect(menu).toHaveCSS('backdrop-filter', /blur\(16px\)/)
+  await expect(menu).toHaveCSS('box-shadow', /inset/)
+  await page.setViewportSize({ width: 1280, height: 720 })
+  const panel = player.locator('.shaka-controls-button-panel')
+  await expect.poll(() => panel.locator('.ft-time-display-group > .ft-control-glass').evaluate(element => element.getBoundingClientRect().height)).toBe(40)
+  await expect(panel.locator('.ft-right-control-glass')).toHaveCSS('height', '40px')
+  await panel.evaluate(element => {
+    const speeds = document.createElement('div')
+    speeds.className = 'ft-quick-playback-rate-bar'
+    element.append(speeds)
+  })
+  await expect(panel.locator('.ft-chapters-button > .ft-control-glass')).toHaveCSS('height', '40px')
+  await expect(panel.locator('.ft-quick-playback-rate-bar')).toHaveCSS('height', '40px')
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', false))
+  await expect(player).toHaveClass(/classicPlayerControls/)
+  await expect(panel.locator('.ft-time-display-group > .ft-control-glass')).toBeHidden()
+  await expect(panel.locator('.ft-quick-playback-rate-bar')).toHaveCSS('height', '48px')
+  await expect(panel.locator('.shaka-overflow-menu-button')).toHaveCSS('background-image', 'none')
+})
+
 test('player pill hover clears after a touch moves away', async ({ app, page }) => {
   const session = await page.context().newCDPSession(page)
   await session.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 })

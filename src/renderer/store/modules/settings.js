@@ -482,6 +482,7 @@ const state = {
   animationSpeed: 100,
   showToastTimeoutIndicator: true,
   usePlayerMenuGrid: true,
+  useFrostedGlassPlayerUi: true,
   toastPosition: 'bottom-left',
   extraThumbnailAction: '',
   blurThumbnails: false,

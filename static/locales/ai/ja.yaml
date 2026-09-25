@@ -350,6 +350,7 @@ Settings:
     Invalid Engine: 名前と、%sを含む有効なHTTPまたはHTTPSの検索URLを入力してください。
     Engine Limit: カスタム検索エンジンは{count}件まで追加できます。
   Theme Settings:
+    Frosted Glass Player UI: "すりガラス風のプレーヤー UI"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato 淡いピンク"
       Catppuccin Macchiato Flamingo: "Catppuccin Macchiato 明るいピンク"

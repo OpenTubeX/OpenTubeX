@@ -772,6 +772,7 @@ export default defineComponent({
     let pausedInterfaceRevealTimeout = null
 
     const showPlayerControlsWhenPaused = computed(() => store.getters.getShowPlayerControlsWhenPaused)
+    const useFrostedGlassPlayerUi = computed(() => store.getters.getUseFrostedGlassPlayerUi)
     const showVideoTitleWhenPaused = computed(() => store.getters.getShowVideoTitleWhenPaused)
     const showFullscreenActionsWhenPaused = computed(() => store.getters.getShowFullscreenActionsWhenPaused)
     const playingInterfaceHideDelay = computed(() => store.getters.getPlayingInterfaceHideDelay)
@@ -11784,6 +11785,7 @@ export default defineComponent({
       closedCaptionsFilledIcon: shaka.ui.Enums.MaterialDesignSVGIcons.CLOSED_CAPTIONS,
       showPoster,
       showEndedScreen,
+      useFrostedGlassPlayerUi,
       endedRecommendations,
       blurThumbnails,
       showPaidPromotion,

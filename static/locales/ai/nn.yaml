@@ -373,6 +373,7 @@ Settings:
     Invalid Engine: Skriv inn eit namn og ei gyldig HTTP- eller HTTPS-søkjeadresse som inneheld %s.
     Engine Limit: Du kan leggje til opptil {count} eigne søkjemotorar.
   Theme Settings:
+    Frosted Glass Player UI: "Spelargrensesnitt med frosta glas"
     Move Downloads to App Header: Flytt nedlastingar til apphovudet
     Move Settings to App Header: Flytt innstillingar til apphovudet
     Hide Side Bar on Watch Pages: Gøym sidepanelet på videosider

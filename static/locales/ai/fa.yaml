@@ -367,6 +367,7 @@ Settings:
     Invalid Engine: نام و یک نشانی معتبر جست‌وجوی HTTP یا HTTPS حاوی %s وارد کنید.
     Engine Limit: می‌توانید حداکثر {count} موتور جست‌وجوی سفارشی بیفزایید.
   Theme Settings:
+    Frosted Glass Player UI: "رابط پخش‌کننده با جلوه شیشه مات"
     Move Downloads to App Header: انتقال بارگیری‌ها به سربرگ برنامه
     Move Settings to App Header: انتقال تنظیمات به سربرگ برنامه
     Hide Side Bar on Watch Pages: پنهان‌کردن نوار کناری در صفحه‌های پخش

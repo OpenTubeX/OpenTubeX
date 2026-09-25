@@ -16,6 +16,17 @@ const screenCss = await readFile(new URL('androidNativeScreen.css', helperRoot),
 
 test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, useQuickPlaybackSpeedBar: true } } })
 
+test('native playback gives the frosted options menu an opaque backing', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await page.addStyleTag({ content: screenCss })
+  const player = page.locator('.ftVideoPlayer')
+  await player.evaluate(element => element.setAttribute('data-native-player-controls', ''))
+  await page.locator('video').evaluate(video => video.pause())
+  await player.locator('.shaka-overflow-menu-button').click()
+  await expect(player.locator('.shaka-overflow-menu:not(.shaka-hidden)')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.78)')
+})
+
 async function openNativeScreen(page, fullscreen = true) {
   await page.addStyleTag({ content: screenCss })
   await page.addScriptTag({ content: `{const requestAnimationFrame = callback => window.requestAnimationFrame(time => { if (!window.holdNativeLayout) callback(time) });${overrideSource}\n${snapshotSource}\n${screenSource}\nwindow.createNativeScreenTest = createAndroidNativeScreen}` })

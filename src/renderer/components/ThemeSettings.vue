@@ -210,13 +210,11 @@
           @change="updateUsePlayerMenuGrid"
         />
         <FtToggleSwitch
-          v-if="usingElectron || IS_CAPACITOR"
-          :label="$t('Settings.Theme Settings.Use Fixed Tab Width')"
-          :tooltip="$t('Tooltips.Theme Settings.Use Fixed Tab Width')"
+          :label="$t('Settings.Theme Settings.Frosted Glass Player UI')"
           compact
-          :default-value="useFixedTabWidth"
-          setting-key="useFixedTabWidth"
-          @change="updateUseFixedTabWidth"
+          :default-value="useFrostedGlassPlayerUi"
+          setting-key="useFrostedGlassPlayerUi"
+          @change="store.dispatch('updateUseFrostedGlassPlayerUi', $event)"
         />
       </div>
       <div class="switchColumn">
@@ -264,6 +262,15 @@
           :default-value="showTabPreviews"
           setting-key="showTabPreviews"
           @change="updateShowTabPreviews"
+        />
+        <FtToggleSwitch
+          v-if="usingElectron || IS_CAPACITOR"
+          :label="$t('Settings.Theme Settings.Use Fixed Tab Width')"
+          :tooltip="$t('Tooltips.Theme Settings.Use Fixed Tab Width')"
+          compact
+          :default-value="useFixedTabWidth"
+          setting-key="useFixedTabWidth"
+          @change="updateUseFixedTabWidth"
         />
         <FtToggleSwitch
           v-if="!IS_CAPACITOR"
@@ -460,6 +467,7 @@ const { locale, t } = useI18n()
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const CAPACITOR_LAYOUT_MODE_VALUES = ['auto', 'phone', 'tablet']
 const capacitorLayoutMode = computed(() => store.getters.getCapacitorLayoutMode)
+const useFrostedGlassPlayerUi = computed(() => store.getters.getUseFrostedGlassPlayerUi)
 const capacitorLayoutModeNames = computed(() => [
   t('Settings.General Settings.Mobile Layout.Automatic'),
   t('Settings.General Settings.Mobile Layout.Phone'),

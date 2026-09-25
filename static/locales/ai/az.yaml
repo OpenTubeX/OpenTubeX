@@ -352,6 +352,7 @@ Settings:
     Invalid Engine: Ad və %s ehtiva edən düzgün HTTP və ya HTTPS axtarış URL-si daxil edin.
     Engine Limit: Ən çox {count} fərdi axtarış sistemi əlavə edə bilərsiniz.
   Theme Settings:
+    Frosted Glass Player UI: "Buzlu şüşə effektli pleyer interfeysi"
     Move Downloads to App Header: Yükləmələri tətbiqin başlığına köçür
     Move Settings to App Header: Tənzimləmələri tətbiqin başlığına köçür
     Hide Side Bar on Watch Pages: Baxış səhifələrində yan paneli gizlət

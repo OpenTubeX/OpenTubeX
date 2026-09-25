@@ -367,6 +367,7 @@ Settings:
     Invalid Engine: Увядзіце назву і дапушчальны URL пошуку HTTP або HTTPS, які змяшчае %s.
     Engine Limit: Можна дадаць не больш за {count} уласных пошукавых сістэм.
   Theme Settings:
+    Frosted Glass Player UI: "Інтэрфейс прайгравальніка з эфектам матавага шкла"
     Move Downloads to App Header: Перамясціць спампоўванні ў загаловак праграмы
     Move Settings to App Header: Перамясціць налады ў загаловак праграмы
     Hide Side Bar on Watch Pages: Хаваць бакавую панэль на старонках прагляду

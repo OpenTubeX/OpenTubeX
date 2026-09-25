@@ -354,6 +354,7 @@ Settings:
     Invalid Engine: Введіть назву й дійсну URL-адресу пошуку HTTP або HTTPS, яка містить %s.
     Engine Limit: Можна додати до {count} власних пошукових систем.
   Theme Settings:
+    Frosted Glass Player UI: "Інтерфейс програвача з ефектом матового скла"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Rosewater"
       Catppuccin Macchiato Flamingo: "Catppuccin Macchiato Flamingo"

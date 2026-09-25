@@ -352,6 +352,7 @@ Settings:
     Invalid Engine: Introduceți un nume și o adresă URL de căutare HTTP sau HTTPS validă, care conține %s.
     Engine Limit: Puteți adăuga până la {count} motoare de căutare personalizate.
   Theme Settings:
+    Frosted Glass Player UI: "Interfață de player cu efect de sticlă mată"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Apă de Trandafiri"
       Catppuccin Macchiato Flamingo: "Catppuccin Macchiato Flamingo"

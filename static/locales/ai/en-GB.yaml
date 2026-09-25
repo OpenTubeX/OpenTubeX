@@ -338,6 +338,7 @@ Settings:
     Invalid Engine: Enter a name and a valid HTTP or HTTPS search URL containing %s.
     Engine Limit: You can add up to {count} custom search engines.
   Theme Settings:
+    Frosted Glass Player UI: "Frosted glass player UI"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Rosewater"
       Catppuccin Macchiato Flamingo: "Catppuccin Macchiato Flamingo"

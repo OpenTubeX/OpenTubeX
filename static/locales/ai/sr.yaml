@@ -360,6 +360,7 @@ Settings:
     Invalid Engine: Унесите назив и важећи HTTP или HTTPS URL за претрагу који садржи %s.
     Engine Limit: Можете додати до {count} прилагођених претраживача.
   Theme Settings:
+    Frosted Glass Player UI: "Интерфејс плејера са ефектом мат стакла"
     Move Downloads to App Header: Премести преузимања у заглавље апликације
     Move Settings to App Header: Премести подешавања у заглавље апликације
     Hide Side Bar on Watch Pages: Сакриј бочну траку на страницама за гледање

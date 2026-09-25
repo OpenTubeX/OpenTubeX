@@ -446,6 +446,7 @@ Settings:
     Invalid Engine: 이름과 %s을(를) 포함하는 올바른 HTTP 또는 HTTPS 검색 URL을 입력하세요.
     Engine Limit: 사용자 지정 검색 엔진은 최대 {count}개까지 추가할 수 있습니다.
   Theme Settings:
+    Frosted Glass Player UI: "반투명 유리 효과 플레이어 UI"
     Move Downloads to App Header: 다운로드를 앱 헤더로 이동
     Move Settings to App Header: 설정을 앱 헤더로 이동
     Hide Side Bar on Watch Pages: 시청 페이지에서 사이드바 숨기기
