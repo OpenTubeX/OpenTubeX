@@ -480,7 +480,7 @@ test.describe('playlist cleanup', () => {
   test('removes confirmed unavailable entries, then watched entries, without changing history', async ({ page }) => {
     await page.route('https://playlist-cleanup.test/api/v1/videos/**', route => {
       const id = new URL(route.request().url()).pathname.split('/').at(-1)
-      if (id === 'dead0000000') return route.fulfill({ status: 404, json: { error: 'This video is unavailable' } })
+      if (id === 'dead0000000') return route.fulfill({ status: 404, json: { error: 'This video has been removed' } })
       if (id === 'unknown00000') return route.fulfill({ status: 503, json: { error: 'Instance unavailable' } })
       return route.fulfill({ json: { videoId: id } })
     })

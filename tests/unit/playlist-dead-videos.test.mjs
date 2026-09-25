@@ -7,13 +7,26 @@ import {
   isUnavailablePlayerResponse,
 } from '../../src/renderer/helpers/playlist-dead-videos.js'
 
-test('only explicit unavailable or private responses are treated as dead', () => {
+test('only deleted or private responses are treated as dead', () => {
   assert.equal(isUnavailablePlayerResponse({ playabilityStatus: { status: 'LOGIN_REQUIRED', reason: 'Private video' } }, 'a'), true)
-  assert.equal(isUnavailablePlayerResponse({ playabilityStatus: { status: 'ERROR', reason: 'Video unavailable' } }, 'a'), true)
+  assert.equal(isUnavailablePlayerResponse({ playabilityStatus: { status: 'ERROR', reason: 'This video has been deleted' } }, 'a'), true)
   assert.equal(isUnavailablePlayerResponse({ videoDetails: { videoId: 'a' }, playabilityStatus: { status: 'OK' } }, 'a'), false)
   assert.throws(() => isUnavailablePlayerResponse({ playabilityStatus: { status: 'LOGIN_REQUIRED', reason: 'Sign in to confirm you are not a bot' } }, 'a'))
-  assert.equal(isUnavailableInvidiousResponse({ error: 'This video is unavailable' }, 'a'), true)
+  assert.equal(isUnavailableInvidiousResponse({ error: 'This video has been removed' }, 'a'), true)
   assert.throws(() => isUnavailableInvidiousResponse({ error: 'Rate limited' }, 'a'))
+  assert.throws(() => isUnavailablePlayerResponse({ playabilityStatus: { status: 'ERROR', reason: 'This video is not available in your country' } }, 'a'))
+  assert.throws(() => isUnavailableInvidiousResponse({ error: 'This video is not available in your country' }, 'a'))
+  assert.throws(() => isUnavailablePlayerResponse({ playabilityStatus: { status: 'ERROR', reason: 'Video unavailable' } }, 'a'))
+  assert.throws(() => isUnavailableInvidiousResponse({ error: 'This video is unavailable' }, 'a'))
+})
+
+test('scan keeps geographically restricted videos', async () => {
+  const videos = [{ videoId: 'regional', playlistItemId: 'regional-item' }]
+  const result = await findDeadPlaylistItems(videos, async id => {
+    return isUnavailablePlayerResponse({ playabilityStatus: { status: 'ERROR', reason: 'This video is not available in your country' } }, id)
+  }, new AbortController().signal)
+  assert.deepEqual(result.itemIds, new Set())
+  assert.equal(result.uncertain, 1)
 })
 
 test('scan keeps uncertain videos and includes duplicate playlist entries', async () => {

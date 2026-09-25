@@ -1,4 +1,4 @@
-const unavailableReason = /(?:private video|video (?:is |has been )?(?:unavailable|deleted|removed)|video (?:is )?no longer available|video does not exist|this video is not available)/i
+const unavailableReason = /(?:\bprivate video\b|\bvideo is private\b|\bvideo (?:is |has been )?(?:deleted|removed)\b|\bvideo does not exist\b)/i
 
 export function isUnavailablePlayerResponse(response, videoId) {
   if (response?.videoDetails?.videoId === videoId && response?.playabilityStatus?.status === 'OK') return false
