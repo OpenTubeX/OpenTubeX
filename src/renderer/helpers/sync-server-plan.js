@@ -11,19 +11,19 @@
  * @returns {SyncStage[]}
  */
 export function getInitialSyncStages(settings, { encrypted, supportsSessions }) {
-  return [
-    ...(encrypted ? ['download'] : []),
-    ...(settings.syncServerSyncSubscriptions ? ['subscriptions'] : []),
-    ...(settings.syncServerSyncPlaylists ? ['playlists'] : []),
-    ...(settings.syncServerSyncPlaylists ? ['playlistBookmarks'] : []),
-    ...(settings.syncServerSyncHistory ? ['history'] : []),
-    ...(encrypted && settings.syncServerSyncWatchStats ? ['watchStats'] : []),
-    ...(settings.syncServerSyncProfiles ? ['profiles'] : []),
-    ...(supportsSessions && encrypted && settings.syncServerSyncSessions ? ['sessionsV2'] : []),
-    ...(encrypted && settings.syncServerSyncSettings ? ['settings'] : []),
-    ...(encrypted ? ['upload'] : []),
-    'finishing',
-  ]
+  /** @type {SyncStage[]} */
+  const stages = []
+  if (encrypted) stages.push('download')
+  if (settings.syncServerSyncSubscriptions) stages.push('subscriptions')
+  if (settings.syncServerSyncPlaylists) stages.push('playlists', 'playlistBookmarks')
+  if (settings.syncServerSyncHistory) stages.push('history')
+  if (encrypted && settings.syncServerSyncWatchStats) stages.push('watchStats')
+  if (settings.syncServerSyncProfiles) stages.push('profiles')
+  if (supportsSessions && encrypted && settings.syncServerSyncSessions) stages.push('sessionsV2')
+  if (encrypted && settings.syncServerSyncSettings) stages.push('settings')
+  if (encrypted) stages.push('upload')
+  stages.push('finishing')
+  return stages
 }
 
 const LEGACY_ENCRYPTED_COLLECTIONS = [
