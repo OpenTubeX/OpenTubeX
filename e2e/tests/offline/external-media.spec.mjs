@@ -49,6 +49,7 @@ test('Twitch replay uses the watch chat toggle and side panel', async ({ app, pa
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
   const externalMedia = page.locator(`${activeTab} .externalMedia`)
+  expect(await externalMedia.locator('.externalMediaPlayer video').evaluate(video => video.ui.getConfiguration().overflowMenuButtons)).toContain('playback_rate')
   const toggle = externalMedia.locator('.externalMediaDetails').getByRole('button', { name: 'Close Live Chat Replay' })
   await expect(toggle).toHaveAttribute('aria-pressed', 'true')
   await expect(externalMedia.locator('.twitchChat')).toBeVisible()
@@ -62,13 +63,16 @@ test('Twitch replay uses the watch chat toggle and side panel', async ({ app, pa
   expect(chatBox.height).toBeGreaterThan(playerBox.height * 0.8)
   await attachScreenshot('Twitch chat normal layout')
 
+  await externalMedia.locator('.externalMediaPlayer').hover()
   await externalMedia.locator('.externalMediaPlayer .theatre-button').click()
+  await externalMedia.locator('.externalMediaPlayer').evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
   const theatrePlayerBox = await externalMedia.locator('.externalMediaPlayer').boundingBox()
   const theatreChatBox = await externalMedia.locator('.twitchChat').boundingBox()
   expect(theatrePlayerBox.width).toBeGreaterThan(playerBox.width * 1.25)
   expect(theatreChatBox.y).toBeGreaterThan(theatrePlayerBox.y + theatrePlayerBox.height - 5)
   await attachScreenshot('Twitch chat theatre layout')
   await externalMedia.locator('.externalMediaPlayer .theatre-button').click()
+  await externalMedia.locator('.externalMediaPlayer').evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
 
   await toggle.click()
   await expect(externalMedia.locator('.twitchChat')).toHaveCount(0)
@@ -91,6 +95,144 @@ test('Twitch replay uses the watch chat toggle and side panel', async ({ app, pa
   await externalMedia.locator('.fullscreenLiveChatTarget .twitchChat').getByRole('button', { name: 'Close Live Chat Replay' }).click()
   await expect(externalMedia.locator('.twitchChat')).toHaveCount(0)
   await page.keyboard.press('s')
+})
+
+test('Twitch livestream omits playback speed from player options', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/testchannel'
+  await prepareTwitchYtDlp(app, page, mediaUrl, true)
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseQuickPlaybackSpeedBar', true))
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+
+  const player = page.locator(`${activeTab} .externalMediaPlayer`)
+  await expect(player.locator('.shaka-overflow-menu-button')).toBeVisible()
+  expect(await player.locator('video').evaluate(video => video.ui.getConfiguration().overflowMenuButtons)).not.toContain('playback_rate')
+  expect(await player.locator('video').evaluate(video => video.ui.getConfiguration().controlPanelElements)).not.toContain('ft_quick_playback_rate_bar')
+})
+
+test('failed external media keeps its site title after unloading', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const executable = path.join(app.userDataDir, 'failing-yt-dlp.sh')
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+    'printf "%s\\n" "Media unavailable" >&2',
+    'exit 1'
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  await page.evaluate(async ytDlpPath => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateYtDlpSource', 'system')
+    await store.dispatch('updateYtDlpPath', ytDlpPath)
+  }, executable)
+
+  await page.locator(sel.searchInput).fill('https://www.twitch.tv/unavailable')
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page.locator(`${activeTab} .externalMediaError`)).toBeVisible()
+  await page.locator(sel.newTabButton).click()
+  const tab = page.locator(sel.tabs).first()
+  await tab.click({ button: 'right' })
+  await page.getByRole('menuitem', { name: 'Unload Tab', exact: true }).click()
+  await expect(tab).toHaveClass(/unloaded/)
+  await expect(tab.locator('.tabTitleText')).toContainText('www.twitch.tv')
+})
+
+for (const iconPack of ['material', 'remix']) {
+  test.describe(`external platform tab icons with ${iconPack}`, () => {
+    test.use({ seed: { settings: { iconPack } } })
+
+    test('shows a bundled platform icon on an unloaded tab', async ({ page }, testInfo) => {
+      const tab = await page.evaluate(() => window.ftElectron.tabs.create({
+        route: '/external-media',
+        query: { url: 'https://www.twitch.tv/example' },
+        makeActive: false,
+        lazyLoad: true
+      }))
+      const icon = page.locator(`.tab[data-tab-id="${tab.id}"] .tabPageIcon`)
+      await expect(icon).toHaveAttribute('data-prefix', 'fab')
+      await expect(icon).toHaveAttribute('data-icon', 'twitch')
+      await expect(icon.locator('svg')).toBeVisible()
+      await testInfo.attach(`${iconPack} Twitch tab`, {
+        body: await page.locator(`.tab[data-tab-id="${tab.id}"]`).screenshot(),
+        contentType: 'image/png'
+      })
+    })
+  })
+}
+
+test('unknown external sites use their own favicon while unloaded', async ({ page }) => {
+  await page.route('https://media.example/favicon.ico', route => route.fulfill({
+    contentType: 'image/png',
+    body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64')
+  }))
+  const tab = await page.evaluate(() => window.ftElectron.tabs.create({
+    route: '/external-media',
+    query: { url: 'https://media.example/video' },
+    makeActive: false,
+    lazyLoad: true
+  }))
+  const tabElement = page.locator(`.tab[data-tab-id="${tab.id}"]`)
+  await expect(tabElement).toHaveClass(/unloaded/)
+  await expect(tabElement.locator('img.tabAvatar')).toHaveAttribute('src', 'https://media.example/favicon.ico')
+  await expect(tabElement.locator('img.tabAvatar')).toBeVisible()
+})
+
+test('unknown external sites use the web icon when no favicon is available', async ({ page }) => {
+  await page.route('https://media.example/favicon.ico', route => route.abort())
+  const tab = await page.evaluate(() => window.ftElectron.tabs.create({
+    route: '/external-media',
+    query: { url: 'https://media.example/video' },
+    makeActive: false,
+    lazyLoad: true
+  }))
+  const tabElement = page.locator(`.tab[data-tab-id="${tab.id}"]`)
+  await expect(tabElement).toHaveClass(/unloaded/)
+  await expect(tabElement.locator('.tabPageIcon')).toHaveAttribute('data-icon', 'globe')
+})
+
+test.describe('Twitch theater mode at 125% UI scale', () => {
+  test.use({ seed: { settings: { uiScale: 125 } } })
+
+  test('animates in both directions', async ({ app, page }) => {
+    test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+    await setWindowSize(app, page, { width: 1800, height: 1000 })
+    await page.evaluate(() => { document.documentElement.dataset.reducedMotion = 'no-preference' })
+    const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+    await prepareTwitchYtDlp(app, page, mediaUrl, false)
+    await page.locator(sel.searchInput).fill(mediaUrl)
+    await page.locator(sel.searchInput).press('Enter')
+
+    const player = page.locator(`${activeTab} .externalMediaPlayer`)
+    const theaterButton = player.locator('.theatre-button')
+    await expect(theaterButton).toBeVisible()
+    for (const enabled of [true, false]) {
+      await player.hover()
+      await theaterButton.click()
+      await expect(page.locator(`${activeTab} .externalMediaLayout`)).toHaveClass(enabled ? /useTheatreMode/ : /^(?!.*useTheatreMode)/)
+      expect(await player.evaluate(element => element.getAnimations().some(animation =>
+        animation.effect.getKeyframes().some(frame => frame.transform?.includes('scale('))
+      ))).toBe(true)
+      await player.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
+    }
+
+    const jump = await player.evaluate(async element => {
+      const button = element.querySelector('.theatre-button')
+      button.click()
+      await new Promise(resolve => setTimeout(resolve, 120))
+      const before = element.getBoundingClientRect()
+      button.click()
+      await new Promise(resolve => requestAnimationFrame(resolve))
+      const after = element.getBoundingClientRect()
+      return Math.max(
+        Math.abs(after.x - before.x),
+        Math.abs(after.y - before.y),
+        Math.abs(after.width - before.width),
+        Math.abs(after.height - before.height)
+      )
+    })
+    expect(jump).toBeLessThan(60)
+  })
 })
 
 test('Twitch replay retries a failed page and refreshes once after seeking settles', async ({ app, page }) => {
@@ -569,10 +711,10 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await expect(page.locator(`${activeTab} .externalMediaExtra`)).toContainText('Example album')
   await expect(page.locator(`${activeTab} .externalMediaExtra`)).toContainText('Release date')
   await waitForPlayback(page)
-  await page.locator(`${activeTab} .externalMediaPlayer`).getByRole('button', { name: 'Pause (k)' }).click()
   const externalMedia = page.locator(`${activeTab} .externalMedia`)
   const player = externalMedia.locator('.externalMediaPlayer')
   await player.hover()
+  await player.locator('video.player').evaluate(video => video.pause())
   await player.locator('.shaka-seek-bar-container').hover({ position: { x: 120, y: 4 } })
   await expect(player.locator('.shaka-player-ui-thumbnail-image-container')).toBeVisible()
   await player.locator('video.player').evaluate(video => {
@@ -675,8 +817,8 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
     return store.getters.getTabById(store.getters.getActiveTabId)?.avatarUrl
   })).toBeNull()
   await waitForPlayback(page)
-  await page.locator(`${activeTab} .externalMediaPlayer`).getByRole('button', { name: 'Pause (k)' }).click()
-  await expect(page.locator(`${sel.activeTab} .tabPageIcon`)).toBeVisible()
+  await page.locator(`${activeTab} .externalMediaPlayer video.player`).evaluate(video => video.pause())
+  await expect(page.locator(`${sel.activeTab} .tabAvatar, ${sel.activeTab} .tabPageIcon`)).toBeVisible()
 })
 
 test('expands a metadata-only description card', async ({ app, page }) => {
