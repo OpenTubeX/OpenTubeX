@@ -14,7 +14,7 @@ export function createLinkNavigationPlatform({ runtime, isMac }) {
   }
 
   return {
-    /** @param {PointerEvent} event @param {HTMLAnchorElement} link @param {string} appOrigin */
+    /** @param {PointerEvent} event @param {HTMLAnchorElement | null} link @param {string} appOrigin */
     internalLinkShortcut(event, link, appOrigin) {
       if (!isElectron || event.defaultPrevented || !link || link.origin !== appOrigin) return null
       const isMiddleClick = event.type === 'auxclick' && event.button === 1

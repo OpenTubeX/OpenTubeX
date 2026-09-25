@@ -12,11 +12,21 @@ test('watch video requests expose one application model for either provider', as
     mapInvidious: response => ({ title: response.title }),
   })
 
-  const local = await api.getWatchVideoInformation('one', 'local')
-  const invidious = await api.getWatchVideoInformation('two', 'invidious')
+  const local = await api.getWatchVideoInformation('one', 'local', {})
+  const invidious = await api.getWatchVideoInformation('two', 'invidious', { instanceUrl: 'https://invidious.example' })
   assert.deepEqual(local, { provider: 'local', metadata: { title: 'Local title' }, source: { info: { basic_info: { title: 'Local title' } } } })
   assert.deepEqual(invidious, { provider: 'invidious', metadata: { title: 'Invidious title' }, source: { title: 'Invidious title' } })
   assert.deepEqual(calls, [['local', 'one'], ['invidious', 'two']])
+})
+
+test('Invidious watch metadata requires an instance URL at the API boundary', async () => {
+  const api = createVideoApi({
+    loadLocal: async () => null,
+    loadInvidious: async () => ({ title: 'Video' }),
+    mapLocal: () => null,
+    mapInvidious: () => ({ title: 'Video' }),
+  })
+  await assert.rejects(api.getWatchVideoInformation('video', 'invidious', {}), TypeError)
 })
 
 test('watch video mapping propagates provider failures unchanged', async () => {
@@ -27,7 +37,7 @@ test('watch video mapping propagates provider failures unchanged', async () => {
     mapLocal: () => null,
     mapInvidious: () => null,
   })
-  await assert.rejects(api.getWatchVideoInformation('one', 'local'), error => error === failure)
+  await assert.rejects(api.getWatchVideoInformation('one', 'local', {}), error => error === failure)
 })
 
 test('Local and Invidious metadata share an application-facing shape', () => {

@@ -17,18 +17,18 @@ export function createSubscriptionRefreshState(store) {
     store.commit('setSubscriptionFeedRefreshProgress', percentage)
   }
 
-  /** @param {string | null} value */
-  function parseStorageProgress(value) {
-    if (value === null) return null
-    try {
-      const state = JSON.parse(value)
-      return { ...state, percentage: normalizeProgress(state.percentage) }
-    } catch {
-      return null
-    }
-  }
+  return { applyState, parseStorageProgress: parseSubscriptionRefreshProgress, normalizeProgress }
+}
 
-  return { applyState, parseStorageProgress, normalizeProgress }
+/** @param {string | null} value */
+export function parseSubscriptionRefreshProgress(value) {
+  if (value === null) return null
+  try {
+    const state = JSON.parse(value)
+    return { ...state, percentage: normalizeProgress(state.percentage) }
+  } catch {
+    return null
+  }
 }
 
 /** @param {number} percentage */

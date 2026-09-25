@@ -1,3 +1,5 @@
+import { parseSubscriptionRefreshProgress } from './subscriptionRefreshState.js'
+
 export const SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY = 'opentubex.subscriptionAutoRefresh.inProgress'
 
 /**
@@ -18,15 +20,7 @@ export function createSubscriptionRefreshPlatform({ runtime, storage, electron, 
 
   function readProgress() {
     try {
-      const value = storage.getItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY)
-      if (value === null) return null
-      const state = JSON.parse(value)
-      return {
-        ...state,
-        percentage: Number.isFinite(state.percentage)
-          ? Math.min(100, Math.max(0, state.percentage))
-          : 0,
-      }
+      return parseSubscriptionRefreshProgress(storage.getItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY))
     } catch {
       return null
     }

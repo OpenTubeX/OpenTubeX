@@ -1,12 +1,14 @@
 /** @typedef {'local' | 'invidious'} VideoProvider */
+/** @typedef {{avoidTranslation?: boolean, thumbnailPreference?: string}} LocalWatchOptions */
+/** @typedef {{instanceUrl: string, thumbnailPreference?: string}} InvidiousWatchOptions */
 
 /**
  * @template LocalVideo, InvidiousVideo, LocalMetadata, InvidiousMetadata
  * @typedef {{
  *   loadLocal: (videoId: string) => Promise<LocalVideo>,
  *   loadInvidious: (videoId: string) => Promise<InvidiousVideo>,
- *   mapLocal: (video: LocalVideo, options: object) => LocalMetadata,
- *   mapInvidious: (video: InvidiousVideo, options: object) => InvidiousMetadata,
+ *   mapLocal: (video: LocalVideo, options: LocalWatchOptions & {videoId: string}) => LocalMetadata,
+ *   mapInvidious: (video: InvidiousVideo, options: InvidiousWatchOptions & {videoId: string}) => InvidiousMetadata,
  * }} VideoProviderAdapters
  */
 
@@ -15,7 +17,8 @@
  * @typedef {{
  *   getVideoInformation: <Provider extends VideoProvider>(videoId: string, provider: Provider) =>
  *     Promise<Provider extends 'local' ? LocalVideo : InvidiousVideo>,
- *   getWatchVideoInformation: <Provider extends VideoProvider>(videoId: string, provider: Provider, options?: object) =>
+ *   getWatchVideoInformation: <Provider extends VideoProvider>(videoId: string, provider: Provider,
+ *     options: Provider extends 'local' ? LocalWatchOptions : InvidiousWatchOptions) =>
  *     Promise<{ provider: Provider, metadata: Provider extends 'local' ? LocalMetadata : InvidiousMetadata,
  *       source: Provider extends 'local' ? LocalVideo : InvidiousVideo }>,
  *   loadWatchMetadata: (preference: string, options: {
@@ -56,11 +59,14 @@ export function createVideoApi({ loadLocal, loadInvidious, mapLocal, mapInvidiou
       switch (provider) {
         case 'local': {
           const source = await loadLocal(videoId)
-          return { provider, metadata: mapLocal(source, options), source }
+          return { provider, metadata: mapLocal(source, { ...options, videoId }), source }
         }
         case 'invidious': {
+          if (typeof options.instanceUrl !== 'string' || options.instanceUrl.length === 0) {
+            throw new TypeError('Invidious instance URL is required')
+          }
           const source = await loadInvidious(videoId)
-          return { provider, metadata: mapInvidious(source, options), source }
+          return { provider, metadata: mapInvidious(source, { ...options, videoId }), source }
         }
         default: throw new Error(`Unknown video provider: ${provider}`)
       }
