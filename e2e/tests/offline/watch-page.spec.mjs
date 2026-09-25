@@ -6779,7 +6779,9 @@ test.describe('Shorts feed navigation', () => {
       }).observe(tab, { attributes: true, attributeFilter: ['class'] })
     })
 
-    await app.electronApp.evaluate(({ BrowserWindow, Menu }) => {
+    const browserWindow = await app.electronApp.browserWindow(page)
+    const browserWindowId = await browserWindow.evaluate(window => window.id)
+    await app.electronApp.evaluate(({ BrowserWindow, Menu }, windowId) => {
       const findMenuItem = (items, label) => {
         for (const item of items) {
           if (item.label === label) return item
@@ -6789,12 +6791,10 @@ test.describe('Shorts feed navigation', () => {
         return null
       }
       const menuItem = findMenuItem(Menu.getApplicationMenu()?.items ?? [], 'Next Tab')
-      const browserWindow = BrowserWindow.getFocusedWindow()
-      if (!menuItem || !browserWindow) {
-        throw new Error('Next Tab application-menu item was not found')
-      }
-      menuItem.click(undefined, browserWindow, undefined)
-    })
+      const targetWindow = BrowserWindow.fromId(windowId)
+      if (!menuItem || !targetWindow) throw new Error('Next Tab menu item or target window was not found')
+      menuItem.click(undefined, targetWindow, undefined)
+    }, browserWindowId)
     await expect(page.locator(sel.tabs)).toHaveCount(2)
     await page.waitForTimeout(5000)
     const loadingResult = await page.evaluate(() => ({

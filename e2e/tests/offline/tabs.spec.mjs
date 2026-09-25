@@ -2926,7 +2926,12 @@ test.describe('tab organizer', () => {
     await page.setViewportSize({ width: 1280, height: 800 })
 
     const ungroupedGroup = organizer.getByRole('heading', { name: 'Ungrouped', exact: true }).locator('../..')
-    await betaRow.dragTo(ungroupedGroup)
+    const ungroupDragData = await page.evaluateHandle(() => new DataTransfer())
+    await betaRow.dispatchEvent('dragstart', { dataTransfer: ungroupDragData })
+    await ungroupedGroup.dispatchEvent('dragenter', { dataTransfer: ungroupDragData })
+    await ungroupedGroup.dispatchEvent('dragover', { dataTransfer: ungroupDragData })
+    await ungroupedGroup.dispatchEvent('drop', { dataTransfer: ungroupDragData })
+    await betaRow.dispatchEvent('dragend', { dataTransfer: ungroupDragData })
     await expect.poll(() => page.evaluate(async (tabId) => {
       return (await window.ftElectron.tabs.getState()).tabs.find(tab => tab.id === tabId)?.groupId
     }, betaId)).toBeNull()

@@ -384,7 +384,7 @@ test.describe('tab group previews', () => {
     })
   }
 
-  test('uses channel avatars beside titles, handles failed images, and respects the icon setting', async ({ page }) => {
+  test('uses channel avatars beside titles, handles failed images, and respects the icon setting', async ({ app, page }) => {
     const { tabIds, groupId } = await createCollapsedPreviewGroup(page)
     const avatarTabId = await page.evaluate(async groupId => {
       const route = '/channel/UCgroupPreviewAvatar'
@@ -395,6 +395,9 @@ test.describe('tab group previews', () => {
       await window.ftElectron.tabs.setGroup([tab.id], groupId)
       return tab.id
     }, groupId)
+    const browserWindow = await app.electronApp.browserWindow(page)
+    await browserWindow.evaluate(window => window.focus())
+    await expect.poll(() => browserWindow.evaluate(window => window.isFocused())).toBe(true)
     await page.locator('.collapsedTabGroup').hover()
     const item = page.locator('.tabTooltipGridItem').filter({ hasText: 'Channel avatar' })
     const avatar = item.locator('.tabTooltipGridTitleAvatar')

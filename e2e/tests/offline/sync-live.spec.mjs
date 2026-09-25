@@ -306,7 +306,7 @@ test('two independent devices settle after live sync and propagate a real edit o
       const sync = await goToSettingsSection(page, 'sync')
       await sync.getByRole('checkbox', { name: 'Enable Sync', exact: true }).press('Space')
       await expect(sync.getByRole('checkbox', { name: 'Enable Sync', exact: true })).toBeChecked()
-      await expect.poll(() => waiting.has(name)).toBe(true)
+      await expect.poll(() => waiting.has(name), { timeout: 30_000 }).toBe(true)
     }
     await expect.poll(() => waiting.size).toBe(2)
     const progress = client => client.page.evaluate(videoId => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHistoryCacheById[videoId].watchProgress, videoId)

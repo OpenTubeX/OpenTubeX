@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { DBActions } from '../../../src/constants.js'
+import { DBActions, IpcChannels } from '../../../src/constants.js'
 import {
   test,
   expect,
@@ -456,13 +456,19 @@ test.describe('settings', () => {
     await expect(data.locator('.titleIcon')).toHaveAttribute('data-icon', 'box-archive')
   })
 
-  test('keeps the IP block recovery script last in expanded Proxy settings', async ({ page }) => {
+  test('keeps the IP block recovery script last in expanded Proxy settings', async ({ app, page }) => {
+    // This test checks layout; changing Electron's proxy can disconnect Playwright.
+    await app.electronApp.evaluate(({ ipcMain }, channel) => {
+      ipcMain.removeAllListeners(channel)
+    }, IpcChannels.ENABLE_PROXY)
+
     const advanced = await goToSettingsSection(page, 'advanced')
     const proxy = advanced.locator('.settingsSection').filter({
       has: page.getByRole('heading', { name: 'Proxy', exact: true })
     })
 
     await proxy.locator('label.switch-label').filter({ hasText: 'Enable Tor / Proxy' }).click()
+    await expect(proxy.getByRole('checkbox', { name: 'Enable Tor / Proxy' })).toBeChecked()
     const [testProxyBox, recoveryScriptBox] = await Promise.all([
       proxy.getByRole('button', { name: 'Test Proxy', exact: true }).boundingBox(),
       proxy.getByPlaceholder('IP Block Recovery Script Path').boundingBox()
@@ -3211,7 +3217,14 @@ test.describe('settings', () => {
     await expect(dialog.getByText('Pairing code expires at')).toBeVisible()
     expect(createdSession).toMatchObject({ version: 1, recipient_device_name: 'Travel laptop' })
     expect(createdSession.recipient_token_hash).toMatch(/^[\w-]{43}$/)
-    expect(JSON.stringify(createdSession)).not.toMatch(/privacy|passphrase|password|username|jwt/i)
+    expect(Object.keys(createdSession).sort()).toEqual([
+      'id',
+      'recipient_device_id',
+      'recipient_device_name',
+      'recipient_public_key',
+      'recipient_token_hash',
+      'version'
+    ])
 
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store

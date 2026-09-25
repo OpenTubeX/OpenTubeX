@@ -362,6 +362,12 @@ async function readPlaylist(app, id) {
   return records.filter((record) => record._id === id).at(-1)
 }
 
+async function focusWindow(app, page) {
+  const browserWindow = await app.electronApp.browserWindow(page)
+  await browserWindow.evaluate(window => window.focus())
+  await expect.poll(() => browserWindow.evaluate(window => window.isFocused())).toBe(true)
+}
+
 test.describe('rounded action popovers', () => {
   test.use({
     seed: {
@@ -393,6 +399,10 @@ test.describe('video downloads', () => {
         ytDlpFfmpegPath: '/bin/false'
       }
     }
+  })
+
+  test.beforeEach(async ({ app, page }) => {
+    await focusWindow(app, page)
   })
 
   test('sends plain download options over IPC', async ({ page }) => {
@@ -1315,6 +1325,7 @@ test.describe('video downloads', () => {
     await goTo(otherWindow, 'downloads')
 
     await page.bringToFront()
+    await focusWindow(app, page)
     await goTo(page, 'history')
     const video = page.locator('.ft-list-video').first()
     await video.hover()
