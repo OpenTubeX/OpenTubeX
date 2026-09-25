@@ -105,8 +105,8 @@ importers:
         specifier: ^4.1.2
         version: 4.1.2
       '@vot.js/core':
-        specifier: ^3.1.0
-        version: 3.1.0(typescript@6.0.3)
+        specifier: ^3.1.1
+        version: 3.1.1(typescript@6.0.3)
       autolinker:
         specifier: ^4.1.5
         version: 4.1.5
@@ -196,8 +196,8 @@ importers:
         specifier: ^1.2.10
         version: 1.2.10
       '@iconify-json/simple-icons':
-        specifier: ^1.2.96
-        version: 1.2.96
+        specifier: ^1.2.97
+        version: 1.2.97
       '@iconify/utils':
         specifier: ^3.1.5
         version: 3.1.7
@@ -692,8 +692,8 @@ packages:
   '@iconify-json/ri@1.2.10':
     resolution: {integrity: sha512-WWMhoncVVM+Xmu9T5fgu2lhYRrKTEWhKk3Com0KiM111EeEsRLiASjpsFKnC/SrB6covhUp95r2mH8tGxhgd5Q==}
 
-  '@iconify-json/simple-icons@1.2.96':
-    resolution: {integrity: sha512-/FmCYo/H5rIywTLV/P6OYsr0rg/31vuc8jYq0QnkOZl6m7PWIs+h5oAnSTT2cqRhOsMaKqbXcdkka6tnZ1WiUA==}
+  '@iconify-json/simple-icons@1.2.97':
+    resolution: {integrity: sha512-Z6PmM6jvWVU7rmLzqbxCLJA7SeqCnK6lMHXtjyzHPLZebwuoojBEcHHycppahDzEeN9xujRkrV5J8QpOhMyNrg==}
 
   '@iconify/types@2.0.0':
     resolution: {integrity: sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==}
@@ -1478,14 +1478,14 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@vot.js/core@3.1.0':
-    resolution: {integrity: sha512-bbcOdkVinshfq63ryp1oS+4CD9slmtJVKAKBB3qJ+Tb7Ve4I4WLOobMJgrh9YhB8dtg03Zly9X+YHVT+/bA8XQ==}
+  '@vot.js/core@3.1.1':
+    resolution: {integrity: sha512-GpGyo8ZFLivdElTLYnIyyoHt3gIpA4n3WhK1vYie4OxXkgEZNGDFEPShr5gacEyqijZufh3+syUnZk3Fxv3EHA==}
     engines: {node: '>=18'}
     peerDependencies:
       typescript: ^6.0.0
 
-  '@vot.js/shared@3.1.0':
-    resolution: {integrity: sha512-rjuPIPfh2vaZz4D6gB5xwVtM4VX3tmEUA7rESRuY2NJhi8llvKy4akhEyv/smyKKYFhyCQNS9d5PgJ8+Xr7DaA==}
+  '@vot.js/shared@3.1.1':
+    resolution: {integrity: sha512-MfP03Zf3Nwj37OhMnUur6BMDTxf3KJ1vXOffLixS7aslSGRoO3byt/TqmuNDvFqYs8X2p3CsQS7l3HcMqg20nA==}
     engines: {node: '>=18'}
     peerDependencies:
       typescript: ^6.0.0
@@ -5559,7 +5559,7 @@ snapshots:
     dependencies:
       '@iconify/types': 2.0.0
 
-  '@iconify-json/simple-icons@1.2.96':
+  '@iconify-json/simple-icons@1.2.97':
     dependencies:
       '@iconify/types': 2.0.0
 
@@ -6454,12 +6454,12 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.12.2':
     optional: true
 
-  '@vot.js/core@3.1.0(typescript@6.0.3)':
+  '@vot.js/core@3.1.1(typescript@6.0.3)':
     dependencies:
-      '@vot.js/shared': 3.1.0(typescript@6.0.3)
+      '@vot.js/shared': 3.1.1(typescript@6.0.3)
       typescript: 6.0.3
 
-  '@vot.js/shared@3.1.0(typescript@6.0.3)':
+  '@vot.js/shared@3.1.1(typescript@6.0.3)':
     dependencies:
       '@bufbuild/protobuf': 2.14.1
       typescript: 6.0.3
