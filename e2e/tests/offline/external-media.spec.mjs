@@ -6,10 +6,11 @@ import { expect, repoRoot, sel, setWindowSize, test } from '../../helpers/app.mj
 import { activeTab, waitForPlayback } from '../../helpers/player.mjs'
 import { DEMO_MEDIA_PATH, DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 
-async function prepareTwitchYtDlp(app, page, mediaUrl, live) {
+async function prepareTwitchYtDlp(app, page, mediaUrl, live, description = '') {
   const executable = path.join(app.userDataDir, `twitch-${live ? 'live' : 'replay'}-yt-dlp.sh`)
   const response = JSON.stringify({
     title: live ? 'A Twitch livestream' : 'A Twitch broadcast',
+    description,
     webpage_url: mediaUrl,
     live_status: live ? 'is_live' : 'was_live',
     ...(live ? {} : { duration: 30 }),
@@ -38,6 +39,29 @@ async function prepareTwitchYtDlp(app, page, mediaUrl, live) {
     await store.dispatch('updateYtDlpPath', ytDlpPath)
   }, executable)
 }
+
+test('external media cards are separated on phone layouts', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false, 'A Twitch broadcast description')
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const externalMedia = page.locator(`${activeTab} .externalMedia`)
+  await expect(externalMedia.locator('.externalMediaDescription')).toBeVisible()
+  await expect(externalMedia.locator('.twitchChat')).toBeVisible()
+
+  for (const scale of [1, 1.25]) {
+    await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+    await page.setViewportSize({ width: 375, height: 667 })
+    const cards = ['.externalMediaDetails', '.externalMediaDescription', '.twitchChat']
+    for (const [index, selector] of cards.entries()) {
+      if (index === 0) continue
+      const previous = await externalMedia.locator(cards[index - 1]).boundingBox()
+      const current = await externalMedia.locator(selector).boundingBox()
+      expect(current.y - previous.y - previous.height).toBeGreaterThanOrEqual(12)
+    }
+  }
+})
 
 test('Twitch replay uses the watch chat toggle and side panel', async ({ app, page, attachScreenshot }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
@@ -916,7 +940,7 @@ test('shows a recoverable extraction error in the player area', async ({ app, pa
     '#!/bin/sh',
     'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
     `while [ ! -f '${releaseGate}' ]; do sleep 0.1; done`,
-    'printf "%s\\n" "ERROR: [generic] Unable to download webpage: HTTP Error 503: Service Unavailable" >&2',
+    'printf "%s\\n" "ERROR: [generic] Unable to download webpage: HTTP Error 503: Service Unavailable. The handshake operation timed out (caused by TransportError: The handshake operation timed out)" >&2',
     'exit 1'
   ].join('\n'))
   await chmod(executable, 0o755)
@@ -934,7 +958,16 @@ test('shows a recoverable extraction error in the player area', async ({ app, pa
   const state = page.locator(`${activeTab} .externalMediaState`)
   await expect(state).toContainText('Fetching streams with yt-dlp…')
   await state.screenshot({ path: testInfo.outputPath('external-media-loading-dark.png') })
-  await writeFile(releaseGate, '')
+  await page.setViewportSize({ width: 375, height: 667 })
+  try {
+    for (const selector of ['.externalMediaLoading', '.externalMediaStateContent']) {
+      const bounds = await page.locator(`${activeTab} ${selector}`).boundingBox()
+      expect(bounds.x).toBeGreaterThanOrEqual(0)
+      expect(bounds.x + bounds.width).toBeLessThanOrEqual(375)
+    }
+  } finally {
+    await writeFile(releaseGate, '')
+  }
   await expect(state.locator('h1')).toHaveText('videos.example.test')
   await expect(state).toContainText('HTTP Error 503: Service Unavailable')
   for (const theme of ['dark', 'light']) {
@@ -943,8 +976,12 @@ test('shows a recoverable extraction error in the player area', async ({ app, pa
     await state.screenshot({ path: testInfo.outputPath(`external-media-error-${theme}.png`) })
   }
   await page.setViewportSize({ width: 375, height: 667 })
-  await expect(state.getByRole('button', { name: 'Retry' })).toBeInViewport()
   expect(await state.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true)
+  const errorBounds = await state.boundingBox()
+  const contentBounds = await state.locator('.externalMediaStateContent').boundingBox()
+  expect(contentBounds.y + contentBounds.height).toBeLessThanOrEqual(errorBounds.y + errorBounds.height + 2)
+  await state.getByRole('button', { name: 'Retry' }).scrollIntoViewIfNeeded()
+  await expect(state.getByRole('button', { name: 'Retry' })).toBeInViewport()
   await rm(releaseGate)
   await state.getByRole('button', { name: 'Retry' }).click()
   await expect(state).toContainText('Fetching streams with yt-dlp…')

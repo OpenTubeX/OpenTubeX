@@ -618,6 +618,8 @@ onBeforeUnmount(() => {
 }
 
 .externalMediaInfo {
+  display: grid;
+  gap: 16px;
   grid-area: info;
   min-inline-size: 0;
 }
@@ -650,10 +652,15 @@ onBeforeUnmount(() => {
 
 @container route (width <= 1050px) {
   .externalMediaLayout {
+    row-gap: 16px;
     grid-template:
       'video' auto
       'info' auto
       'sidebar' auto / minmax(0, 1fr);
+  }
+
+  .externalMediaVideo {
+    margin-block-end: 0;
   }
 }
 
@@ -746,7 +753,12 @@ onBeforeUnmount(() => {
 
 @media only screen and (width <= 680px) {
   .externalMediaState {
+    min-block-size: 0;
     padding: 20px;
+  }
+
+  .externalMediaError {
+    aspect-ratio: auto;
   }
 }
 
@@ -833,13 +845,8 @@ onBeforeUnmount(() => {
   overflow-wrap: anywhere;
 }
 
-.externalMediaDescription {
-  margin-block-start: 16px;
-}
-
 .externalMediaExtra,
 .externalMediaChapters {
-  margin-block-start: 16px;
   padding: 16px;
 }
 
