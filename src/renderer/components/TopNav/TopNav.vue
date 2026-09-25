@@ -17,6 +17,7 @@
           />
         </button>
         <FtIconButton
+          v-if="!isCapacitor"
           class="navIconButton navBackButton"
           :disabled="isArrowBackwardDisabled"
           :class="{ arrowDisabled: isArrowBackwardDisabled }"
@@ -217,6 +218,7 @@ const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
 ).APP.GENERAL)
 const router = useRouter()
 const route = useRoute()
+const isCapacitor = process.env.IS_CAPACITOR
 const usesLogicalTabs = process.env.IS_ELECTRON || process.env.IS_CAPACITOR
 const navigation = usesLogicalTabs ? getTabNavigationService() : null
 

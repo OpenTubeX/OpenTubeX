@@ -3,6 +3,7 @@ package org.opentubex.app;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.view.KeyEvent;
 import android.webkit.WebView;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -117,7 +118,7 @@ public class MobileAppearanceSettingsTest {
         """;
 
     @Test
-    public void enlargedPhoneHeaderKeepsBackAndBothShortcutsWithinViewport() throws Exception {
+    public void enlargedPhoneHeaderOmitsBackAndKeepsForwardWithinViewport() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             WebView view = webView(scenario);
             try {
@@ -133,8 +134,7 @@ public class MobileAppearanceSettingsTest {
                             return rect.width > 0 && rect.height > 0 &&
                                 getComputedStyle(element).visibility !== 'hidden';
                         };
-                        const back = document.querySelector('.navBackButton');
-                        if (!back || !visible(back)) return false;
+                        if (document.querySelector('.navBackButton')) return false;
                         const buttons = [...document.querySelectorAll('.topNav button')].filter(visible);
                         return buttons.length > 0 && buttons.every(button => {
                             const rect = button.getBoundingClientRect();
@@ -146,16 +146,19 @@ public class MobileAppearanceSettingsTest {
                     })()
                     """);
                 String route = "document.querySelector('#app').__vue_app__.config.globalProperties.$route.fullPath";
-                String backDisabled = "document.querySelector('.navBackButton button').getAttribute('aria-disabled') === 'true'";
+                String canGoBack = """
+                    (() => {
+                        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                        return store.getters.getTabHistoryState(store.getters.getPresentedTabId).canGoBack;
+                    })()
+                    """;
                 String expectedForwardRoute = null;
-                for (int entry = 0; entry < 10 && !"true".equals(evaluate(view, backDisabled)); entry++) {
+                for (int entry = 0; entry < 10 && "true".equals(evaluate(view, canGoBack)); entry++) {
                     expectedForwardRoute = evaluate(view, route);
-                    assertTrue("Back remains visible while navigating history", "true".equals(evaluate(view,
-                        "document.querySelector('.navBackButton button').getBoundingClientRect().width > 0")));
-                    evaluate(view, "document.querySelector('.navBackButton button').click()");
-                    awaitCondition(view, route + " !== " + expectedForwardRoute + " || " + backDisabled);
+                    InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK);
+                    awaitCondition(view, route + " !== " + expectedForwardRoute + " || !" + canGoBack);
                 }
-                assertEquals("Back is disabled at the earliest history entry", "true", evaluate(view, backDisabled));
+                assertEquals("Android Back reaches the earliest history entry", "false", evaluate(view, canGoBack));
                 assertTrue("The fixture has a forward history entry", expectedForwardRoute != null);
                 awaitCondition(view, """
                     (() => {

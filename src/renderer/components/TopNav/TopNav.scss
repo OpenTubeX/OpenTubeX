@@ -58,19 +58,6 @@
 
 // Keep optional header actions reachable on phones, including enlarged UI.
 @container top-nav (width < 400px) {
-  .app.capacitorTabs .navForwardButton {
-    display: none;
-  }
-
-  // Keep the enabled direction and its history menu reachable at the start of history.
-  .app.capacitorTabs .navBackButton.arrowDisabled:has(+ .navForwardButton:not(.arrowDisabled)) {
-    display: none;
-  }
-
-  .app.capacitorTabs .navBackButton.arrowDisabled + .navForwardButton:not(.arrowDisabled) {
-    display: block;
-  }
-
   .app.capacitorTabs .downloadsButton,
   .app.capacitorTabs .settingsButton,
   .app.capacitorTabs .minimizedUtilityButton {
