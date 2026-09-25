@@ -350,6 +350,7 @@ Settings:
     Invalid Engine: Skriv inn et navn og en gyldig HTTP- eller HTTPS-søke-URL som inneholder %s.
     Engine Limit: Du kan legge til opptil {count} egendefinerte søkemotorer.
   Theme Settings:
+    Frosted Glass Player UI: "Spillergrensesnitt med frostet glass"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin-Macchiato-rosévann"
       Catppuccin Macchiato Flamingo: "Catppuccin-Macchiato-flamingo"

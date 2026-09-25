@@ -371,6 +371,7 @@ Settings:
     Invalid Engine: Ingresá un nombre y una URL de búsqueda HTTP o HTTPS válida que contenga %s.
     Engine Limit: Podés agregar hasta {count} motores de búsqueda personalizados.
   Theme Settings:
+    Frosted Glass Player UI: "Interfaz del reproductor con efecto de vidrio esmerilado"
     Move Downloads to App Header: Mover Descargas al encabezado de la aplicación
     Move Settings to App Header: Mover Ajustes al encabezado de la aplicación
     Hide Side Bar on Watch Pages: Ocultar la barra lateral en las páginas de visualización

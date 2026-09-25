@@ -488,6 +488,7 @@ Settings:
     Invalid Engine: Introduïu un nom i un URL de cerca HTTP o HTTPS vàlid que contingui %s.
     Engine Limit: Podeu afegir fins a {count} motors de cerca personalitzats.
   Theme Settings:
+    Frosted Glass Player UI: "Interfície del reproductor amb efecte de vidre esmerilat"
     Move Downloads to App Header: Mou les baixades a la capçalera de l'aplicació
     Move Settings to App Header: Mou la configuració a la capçalera de l'aplicació
     Hide Side Bar on Watch Pages: Oculta la barra lateral a les pàgines de reproducció

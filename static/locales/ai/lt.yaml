@@ -471,6 +471,7 @@ Settings:
     Invalid Engine: Įveskite pavadinimą ir tinkamą HTTP arba HTTPS paieškos URL su %s.
     Engine Limit: Galite pridėti iki {count} pasirinktinių paieškos sistemų.
   Theme Settings:
+    Frosted Glass Player UI: "Grotuvo sąsaja su matinio stiklo efektu"
     Move Downloads to App Header: Atsisiuntimus perkelti į programos antraštę
     Move Settings to App Header: Nustatymus perkelti į programos antraštę
     Hide Side Bar on Watch Pages: Vaizdo įrašų puslapiuose slėpti šoninę juostą

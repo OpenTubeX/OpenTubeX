@@ -1,4 +1,4 @@
-import { test, expect } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -10,6 +10,35 @@ test.use({
       showPlaybackRateAdjustedTimestamp: true
     }
   }
+})
+
+test('Layout setting restores classic player controls and switches the active player live', async ({ app, page }) => {
+  const appearance = await goToSettingsSection(page, 'appearance')
+  const frosted = appearance.getByRole('checkbox', { name: 'Frosted glass player UI' })
+  await expect(frosted).toBeChecked()
+  await appearance.locator('[data-setting-key="useFrostedGlassPlayerUi"] label').click()
+  await expect(frosted).not.toBeChecked()
+  await page.getByRole('dialog', { name: 'Settings', exact: true }).getByRole('button', { name: 'Close', exact: true }).click()
+
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const player = page.locator('.ftVideoPlayer')
+  const glass = player.locator('.ft-time-display-group > .ft-control-glass')
+  await expect(player).toHaveClass(/classicPlayerControls/)
+  await expect(glass).toBeHidden()
+  await expect(player.locator('.ft-time-display-group')).toHaveCSS('background-image', 'none')
+  await expect(player.locator('.shaka-controls-button-panel > .ft-chapters-button')).toHaveCSS('background-image', 'none')
+  await expect.poll(() => player.locator('.shaka-controls-button-panel > .ft-chapters-button').evaluate(element => getComputedStyle(element, '::before').backgroundColor)).toBe('rgba(0, 0, 0, 0.16)')
+  await expect(player.locator('.shaka-scrim-container')).toHaveCSS('background-image', /linear-gradient/)
+  await player.locator('.shaka-overflow-menu-button').click({ force: true })
+  const menu = player.locator('.shaka-overflow-menu:not(.shaka-hidden)')
+  await expect(menu).toHaveCSS('backdrop-filter', 'none')
+  await expect(menu).toHaveCSS('background-color', 'rgba(28, 28, 28, 0.9)')
+
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', true))
+  await expect(player).not.toHaveClass(/classicPlayerControls/)
+  await expect(glass).toBeVisible()
+  await expect(menu).toHaveCSS('backdrop-filter', /blur\(16px\)/)
 })
 
 test('player controls share pill surfaces and the time display toggles together', async ({ app, page }) => {

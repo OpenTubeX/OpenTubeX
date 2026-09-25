@@ -352,6 +352,7 @@ Settings:
     Invalid Engine: Sláðu inn heiti og gilda HTTP- eða HTTPS-leitarslóð sem inniheldur %s.
     Engine Limit: Þú getur bætt við allt að {count} sérsniðnum leitarvélum.
   Theme Settings:
+    Frosted Glass Player UI: "Viðmót spilara með mattgleráhrifum"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato rósavatn"
       Catppuccin Macchiato Flamingo: "Catppuccin Macchiato flamingó"

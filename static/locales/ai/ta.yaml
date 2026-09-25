@@ -355,6 +355,7 @@ Settings:
     Invalid Engine: பெயரையும் %s உள்ள சரியான HTTP அல்லது HTTPS தேடல் URL-ஐயும் உள்ளிடவும்.
     Engine Limit: அதிகபட்சம் {count} தனிப்பயன் தேடுபொறிகளைச் சேர்க்கலாம்.
   Theme Settings:
+    Frosted Glass Player UI: "உறைபனி கண்ணாடி விளைவுள்ள பிளேயர் இடைமுகம்"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato ரோஸ் வாட்டர்"
       Catppuccin Macchiato Flamingo: "Catppuccin Macchiato ஃபிளமிங்கோ"

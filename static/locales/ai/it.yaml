@@ -350,6 +350,7 @@ Settings:
     Invalid Engine: Inserisci un nome e un URL di ricerca HTTP o HTTPS valido contenente %s.
     Engine Limit: Puoi aggiungere fino a {count} motori di ricerca personalizzati.
   Theme Settings:
+    Frosted Glass Player UI: "Interfaccia del lettore con effetto vetro smerigliato"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato acqua di rose"
       Catppuccin Macchiato Flamingo: "Catppuccin Macchiato fenicottero"

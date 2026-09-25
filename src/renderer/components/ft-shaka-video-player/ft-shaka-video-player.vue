@@ -71,6 +71,7 @@
       :aria-hidden="scrollMiniPlayerDismissed ? 'true' : undefined"
       :class="{
         autoQualityUnavailable: !autoQualitySupported,
+        classicPlayerControls: !useFrostedGlassPlayerUi,
         fullWindow: fullWindowEnabled,
         shortsPlayer,
         shortsPaused: shortsPaused && hasLoaded,

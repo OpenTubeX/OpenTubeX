@@ -138,6 +138,7 @@ Settings:
     Startup Behavior:
       Load landing page, keep other tabs unloaded: Wczytaj stronę startową, pozostaw inne karty niewczytane
   Theme Settings:
+    Frosted Glass Player UI: "Interfejs odtwarzacza z efektem matowego szkła"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Woda Różana"
       Catppuccin Macchiato Flamingo: "Catppuccin Macchiato Flaming"

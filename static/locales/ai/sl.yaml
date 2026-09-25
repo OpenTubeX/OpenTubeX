@@ -480,6 +480,7 @@ Settings:
     Invalid Engine: Vnesite ime in veljaven iskalni URL HTTP ali HTTPS, ki vsebuje %s.
     Engine Limit: Dodate lahko največ {count} iskalnikov po meri.
   Theme Settings:
+    Frosted Glass Player UI: "Vmesnik predvajalnika z učinkom motnega stekla"
     Move Downloads to App Header: Premakni prenose v glavo aplikacije
     Move Settings to App Header: Premakni nastavitve v glavo aplikacije
     Hide Side Bar on Watch Pages: Skrij stransko vrstico na straneh za ogled

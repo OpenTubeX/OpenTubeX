@@ -350,6 +350,7 @@ Settings:
     Invalid Engine: Masukkan nama dan URL pencarian HTTP atau HTTPS valid yang berisi %s.
     Engine Limit: Anda dapat menambahkan hingga {count} mesin pencari khusus.
   Theme Settings:
+    Frosted Glass Player UI: "Antarmuka pemutar dengan efek kaca buram"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Rosewater"
       Catppuccin Macchiato Flamingo: "Catppuccin Macchiato Flamingo"

@@ -350,6 +350,7 @@ Settings:
     Invalid Engine: 请输入名称以及包含 %s 的有效 HTTP 或 HTTPS 搜索 URL。
     Engine Limit: 最多可以添加 {count} 个自定义搜索引擎。
   Theme Settings:
+    Frosted Glass Player UI: "磨砂玻璃播放器界面"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato 玫瑰水"
       Catppuccin Macchiato Flamingo: "Catppuccin Macchiato Flamingo"

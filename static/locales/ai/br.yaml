@@ -350,6 +350,7 @@ Settings:
     Invalid Engine: "Lakait un anv hag un URL enklask HTTP pe HTTPS talvoudek ennañ %s."
     Engine Limit: "Gallout a rit ouzhpennañ betek {count} keflusker enklask personelaet."
   Theme Settings:
+    Frosted Glass Player UI: "Etrefas al lenner gant efed gwer skornet"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Roz sklaer"
       Catppuccin Macchiato Flamingo: "Catppuccin Macchiato Flammeg boutin"

@@ -350,6 +350,7 @@ Settings:
     Invalid Engine: Sisestage nimi ja sobiv HTTP- või HTTPS-otsingu URL, mis sisaldab %s.
     Engine Limit: Saate lisada kuni {count} kohandatud otsingumootorit.
   Theme Settings:
+    Frosted Glass Player UI: "Mattklaasi efektiga pleieri kasutajaliides"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Roosivesi"
       Catppuccin Macchiato Flamingo: "Catppuccin Macchiato Flamingo"

@@ -350,6 +350,7 @@ Settings:
     Invalid Engine: Idatzi izen bat eta %s duen baliozko HTTP edo HTTPS bilaketa-URL bat.
     Engine Limit: Gehienez {count} bilaketa-motor pertsonalizatu gehi ditzakezu.
   Theme Settings:
+    Frosted Glass Player UI: "Beira izoztu efektuko erreproduzitzailearen interfazea"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Kaputxino Macchiato urlarrosa"
       Catppuccin Macchiato Flamingo: "Kaputxino Macchiato flamingoa"

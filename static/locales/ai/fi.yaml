@@ -354,6 +354,7 @@ Settings:
     Invalid Engine: Anna nimi ja kelvollinen HTTP- tai HTTPS-hakuosoite, joka sisältää merkkijonon %s.
     Engine Limit: Voit lisätä enintään {count} mukautettua hakukonetta.
   Theme Settings:
+    Frosted Glass Player UI: "Soittimen huurrelasitehosteinen käyttöliittymä"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Rosewater -teema"
       Catppuccin Macchiato Flamingo: "Catppuccin Macchiato Flamingo -teema"

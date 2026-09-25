@@ -352,6 +352,7 @@ Settings:
     Invalid Engine: Rhowch enw ac URL chwilio HTTP neu HTTPS dilys sy'n cynnwys %s.
     Engine Limit: Gallwch ychwanegu hyd at {count} o beiriannau chwilio personol.
   Theme Settings:
+    Frosted Glass Player UI: "Rhyngwyneb chwaraewr gwydr barugog"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Rosewater"
       Catppuccin Macchiato Flamingo: "Catppuccin Macchiato Fflamingo"

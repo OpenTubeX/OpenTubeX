@@ -350,6 +350,7 @@ Settings:
     Invalid Engine: Adjon meg egy nevet és egy érvényes, %s elemet tartalmazó HTTP vagy HTTPS keresési URL-t.
     Engine Limit: Legfeljebb {count} egyéni keresőmotort adhat hozzá.
   Theme Settings:
+    Frosted Glass Player UI: "Deres üveg hatású lejátszófelület"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato rózsavíz"
       Catppuccin Macchiato Flamingo: "Catppuccin Macchiato flamingó"

@@ -354,6 +354,7 @@ Settings:
     Invalid Engine: Nhập tên và URL tìm kiếm HTTP hoặc HTTPS hợp lệ có chứa %s.
     Engine Limit: Bạn có thể thêm tối đa {count} công cụ tìm kiếm tùy chỉnh.
   Theme Settings:
+    Frosted Glass Player UI: "Giao diện trình phát với hiệu ứng kính mờ"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Rosewater Màu hoa hồng"
       Catppuccin Macchiato Flamingo: "Catppuccin Macchiato Flamingo Màu hồng hạc"
