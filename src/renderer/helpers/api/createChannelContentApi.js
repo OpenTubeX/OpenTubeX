@@ -13,7 +13,11 @@
  *   getReleases: () => Promise<LocalChannelPage>, getPodcasts: () => Promise<LocalChannelPage>,
  *   getCourses: () => Promise<LocalChannelPage>, getCommunity: () => Promise<LocalChannelPage>,
     search: (query: string) => Promise<LocalChannelPage>}} LocalChannelSession */
-/** @typedef {{provider: ChannelProvider, section: ChannelSection, data: LocalChannelPage | string}} ChannelCursor */
+/**
+ * @typedef {{provider: 'local', section: ChannelSection, kind: 'page', data: LocalChannelPage}
+ *   | {provider: 'local', section: 'releases', kind: 'artist', data: object}
+ *   | {provider: 'invidious', section: ChannelSection, data: string}} ChannelCursor
+ */
 /** @typedef {{items: ChannelItem[], cursor: ChannelCursor | null, canSort: boolean | null, notSearchable?: boolean}} ChannelPage */
 /** @typedef {{videos?: ChannelItem[], playlists?: ChannelItem[], posts?: ChannelItem[], continuation?: string | null}} InvidiousChannelPage */
 /**
@@ -64,7 +68,9 @@ export function createChannelContentApi(adapters) {
     getLocalSearchType, getInvidiousSearchType, mapImage,
   } = adapters
 
-  const cursorFor = (provider, section, data) => data ? { provider, section, data } : null
+  const localCursorFor = (section, data) => data ? { provider: 'local', section, kind: 'page', data } : null
+  const artistCursorFor = data => data ? { provider: 'local', section: 'releases', kind: 'artist', data } : null
+  const invidiousCursorFor = (section, data) => data ? { provider: 'invidious', section, data } : null
   const resolveProvider = preference => localAvailable && preference === 'local' ? 'local' : 'invidious'
   const getFallbackProvider = (provider, preference, enabled) => {
     if (!enabled || provider !== preference) return null
@@ -115,7 +121,7 @@ export function createChannelContentApi(adapters) {
           : ['playlists', 'releases', 'podcasts', 'courses'].includes(section)
               ? response.playlists
               : response.videos
-        return { items, cursor: cursorFor(provider, section, response.continuation), canSort: null }
+        return { items, cursor: invidiousCursorFor(section, response.continuation), canSort: null }
       }
 
       if (section === 'search') {
@@ -131,7 +137,7 @@ export function createChannelContentApi(adapters) {
             ...(item.type === 'Video' ? parseSearchVideo(item) : parseSearchPlaylist(item, id, channelName)),
             channelSearchResultType: getLocalSearchType(item),
           }))
-        return { items, cursor: result.has_continuation ? cursorFor(provider, section, result) : null, canSort: null }
+        return { items, cursor: result.has_continuation ? localCursorFor(section, result) : null, canSort: null }
       }
 
       if (section === 'releases' && artistTopic) {
@@ -139,7 +145,7 @@ export function createChannelContentApi(adapters) {
           ? await getArtistReleasesMore(channel, cursor.data)
           : await getArtistReleases(channel)
         if (!isCurrent()) return null
-        return { items: result.releases, cursor: cursorFor(provider, section, result.continuationData), canSort: null }
+        return { items: result.releases, cursor: artistCursorFor(result.continuationData), canSort: null }
       }
 
       let tab
@@ -205,7 +211,7 @@ export function createChannelContentApi(adapters) {
           : section === 'community'
             ? parsePosts(rawItems)
             : parsePlaylists(rawItems, id, channelName)
-      return { items, cursor: tab.has_continuation ? cursorFor(provider, section, tab) : null, canSort }
+      return { items, cursor: tab.has_continuation ? localCursorFor(section, tab) : null, canSort }
     },
   }
 }
