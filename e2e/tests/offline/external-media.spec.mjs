@@ -63,11 +63,37 @@ test('adds a web URL from Downloads and passes it to yt-dlp', async ({ app, page
   await urlPrompt.getByRole('textbox', { name: 'URL' }).fill('file:///tmp/video.mp4')
   await expect(urlPrompt.getByRole('button', { name: 'Next' })).toBeDisabled()
   await urlPrompt.getByRole('textbox', { name: 'URL' }).fill('https://vimeo.com/123456789')
-  await urlPrompt.getByRole('button', { name: 'Next' }).click()
+  await urlPrompt.getByRole('textbox', { name: 'URL' }).press('Enter')
   const options = page.getByRole('dialog', { name: 'https://vimeo.com/123456789' })
   await expect(options).toBeVisible()
   await options.getByRole('button', { name: 'Download', exact: true }).click()
   await expect.poll(() => readFile(argsFile, 'utf8').catch(() => '')).toContain('https://vimeo.com/123456789')
+  await options.getByRole('button', { name: 'Close', exact: true }).click()
+  await page.getByRole('button', { name: 'Add download' }).click()
+  await expect(page.getByRole('dialog', { name: 'Add download' }).getByRole('textbox', { name: 'URL' })).toBeEmpty()
+})
+
+test('offers in-app playback for YouTube URL downloads only', async ({ page }) => {
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    for (const [id, title, externalUrl, videoId] of [
+      [101, 'YouTube URL download', 'https://www.youtube.com/watch?v=jNQXAC9IVRw', 'jNQXAC9IVRw'],
+      [102, 'Other site download', 'https://vimeo.com/123456789', '123456789']
+    ]) {
+      store.commit('upsertYtDlpDownload', {
+        id,
+        title,
+        mode: 'video',
+        status: 'completed',
+        destination: '/tmp/example.mp4',
+        retryPayload: { externalUrl },
+        files: [{ videoId, path: '/tmp/example.mp4', available: true }]
+      })
+    }
+  })
+  await goTo(page, 'downloads')
+  await expect(page.locator('.downloadRow').filter({ hasText: 'YouTube URL download' }).getByRole('button', { name: 'Play download' })).toBeVisible()
+  await expect(page.locator('.downloadRow').filter({ hasText: 'Other site download' }).getByRole('button', { name: 'Play download' })).toHaveCount(0)
 })
 
 test('offers download options for external media', async ({ app, page }) => {

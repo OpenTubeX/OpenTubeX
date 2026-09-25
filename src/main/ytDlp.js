@@ -2305,7 +2305,7 @@ async function startYtDlpDownload(
   const isSingleVideo = typeof payload.videoId === 'string' && ID_REGEX.test(payload.videoId)
 
   const isExternalMedia = payload.externalUrl !== undefined
-  if (isExternalMedia && (!isYtDlpMediaUrl(payload.externalUrl) || payload.automatic === true || isRemotePlaylist || isSingleVideo || videoIds.length > 0)) {
+  if (isExternalMedia && (!isYtDlpMediaUrl(payload.externalUrl) || payload.automatic === true || payload.isPlaylist === true || isSingleVideo || videoIds.length > 0)) {
     return { error: 'invalid-media-url' }
   }
   if (!isExternalMedia && !isRemotePlaylist && !isSingleVideo && videoIds.length === 0) {

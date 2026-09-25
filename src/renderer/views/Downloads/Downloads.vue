@@ -137,7 +137,7 @@
           :value="downloadUrl"
           :maxlength="8192"
           @input="downloadUrl = $event"
-          @keydown.enter="openDownloadOptions"
+          @keydown.enter.prevent="openDownloadOptions"
         />
         <FtFlexBox>
           <FtButton

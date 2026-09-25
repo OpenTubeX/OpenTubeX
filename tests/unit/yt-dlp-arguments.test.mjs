@@ -34,6 +34,7 @@ test('external media downloads use their web URL without treating it as a YouTub
   }
   assert.throws(() => buildYtDlpDownloadArguments({ externalUrl, videoId, mode: 'video' }), /invalid-media-url/)
   assert.throws(() => buildYtDlpDownloadArguments({ externalUrl, mode: 'video', automatic: true }), /invalid-media-url/)
+  assert.throws(() => buildYtDlpDownloadArguments({ externalUrl, mode: 'video', isPlaylist: true }), /invalid-media-url/)
 })
 
 test('desktop and Android download options preserve format, subtitles, clipping, and metadata', () => {

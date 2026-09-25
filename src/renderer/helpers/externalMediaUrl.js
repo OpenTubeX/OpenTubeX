@@ -9,6 +9,16 @@ export function isExternalMediaUrl(value) {
   return isYtDlpMediaUrl(value)
 }
 
+function isYouTubeHostname(hostname) {
+  return hostname === 'youtu.be' || hostname === 'youtube.com' || hostname.endsWith('.youtube.com') ||
+    hostname === 'youtube-nocookie.com' || hostname.endsWith('.youtube-nocookie.com')
+}
+
+export function isYouTubeMediaUrl(value) {
+  if (!isExternalMediaUrl(value)) return false
+  return isYouTubeHostname(new URL(value).hostname.toLowerCase().replace(/\.$/, ''))
+}
+
 /**
  * Keep YouTube and the selected Invidious instance on their existing routes.
  * Other sites go straight to yt-dlp before the YouTube path parser can mistake
@@ -21,9 +31,7 @@ export function shouldOpenExternalMediaUrl(value, invidiousInstanceUrl = '') {
 
   const url = new URL(value)
   const hostname = url.hostname.toLowerCase().replace(/\.$/, '')
-  if (hostname === 'youtu.be' || hostname === 'youtube.com' || hostname.endsWith('.youtube.com') ||
-    hostname === 'youtube-nocookie.com' || hostname.endsWith('.youtube-nocookie.com') ||
-    hostname === 'redirect.invidious.io') return false
+  if (isYouTubeHostname(hostname) || hostname === 'redirect.invidious.io') return false
 
   try {
     const instance = new URL(invidiousInstanceUrl)

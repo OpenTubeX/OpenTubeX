@@ -97,7 +97,7 @@ export function buildYtDlpDownloadArguments(payload, globalArguments = '') {
   if (videoIds.length > MAX_LOCAL_PLAYLIST_VIDEOS) throw new Error('too-many-videos')
   const isRemotePlaylist = payload.isPlaylist === true && typeof payload.playlistId === 'string' && PLAYLIST_ID_REGEX.test(payload.playlistId)
   const externalUrl = payload.externalUrl
-  if (externalUrl !== undefined && (!isYtDlpMediaUrl(externalUrl) || isRemotePlaylist || ID_REGEX.test(payload.videoId ?? '') || videoIds.length > 0 || payload.automatic === true)) {
+  if (externalUrl !== undefined && (!isYtDlpMediaUrl(externalUrl) || payload.isPlaylist === true || ID_REGEX.test(payload.videoId ?? '') || videoIds.length > 0 || payload.automatic === true)) {
     throw new Error('invalid-media-url')
   }
   if (externalUrl === undefined && !isRemotePlaylist && !ID_REGEX.test(payload.videoId ?? '') && videoIds.length === 0) throw new Error('invalid-video-id')
