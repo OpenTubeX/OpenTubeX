@@ -29,7 +29,7 @@ endorsed by, maintained by, or supported by the FreeTube project.
     <picture>
       <source media="(prefers-color-scheme: light)" srcset="https://alternativeto.net/static/badges/badge-wide-light.svg">
       <source media="(prefers-color-scheme: dark)" srcset="https://alternativeto.net/static/badges/badge-wide-dark.svg">
-      <img alt="OpenTubeX on AlternativeTo" src="https://alternativeto.net/static/badges/badge-wide-dark.svg">
+      <img alt="OpenTubeX on AlternativeTo" src="https://alternativeto.net/static/badges/badge-wide-dark.svg" width="340">
     </picture>
   </a>
 </p>
