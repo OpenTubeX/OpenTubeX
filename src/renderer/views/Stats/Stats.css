@@ -51,6 +51,11 @@
   background-color: color-mix(in srgb, var(--primary-text-color) 5%, var(--card-bg-color));
 }
 
+.deviceSegmentTrack.compact {
+  grid-template-columns: repeat(var(--device-count), minmax(0, 1fr));
+  inline-size: 100%;
+}
+
 .deviceSegmentIndicator {
   position: absolute;
   inset-block: 4px;
@@ -74,6 +79,12 @@
   font: inherit;
   white-space: nowrap;
   cursor: pointer;
+}
+
+.compact .deviceSegment {
+  padding-inline: 6px;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .deviceSegmentIcon {

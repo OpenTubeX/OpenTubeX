@@ -21,6 +21,7 @@
           <div
             ref="deviceSegmentTrack"
             class="deviceSegmentTrack"
+            :class="{ compact: deviceValues.length <= 3 }"
             :style="{
               '--device-count': deviceValues.length,
               '--selected-index': deviceValues.indexOf(selectedDevice),

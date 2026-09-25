@@ -338,6 +338,17 @@ test.describe('synced watch stats', () => {
       const control = header.querySelector('.deviceSegments').getBoundingClientRect()
       return title.bottom <= control.top && control.right <= header.getBoundingClientRect().right + 1
     })).toBe(true)
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setSyncedWatchStats', store.getters.getSyncedWatchStats.map(device => ({
+        ...device,
+        deviceName: 'Pixel 8 Pro',
+      })))
+    })
+    await expect(selector.getByRole('button')).toHaveCount(3)
+    await expect.poll(() => selector.evaluate(element =>
+      element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+    await expect(selector.locator(':scope > .os-scrollbar-horizontal')).toHaveClass(/os-scrollbar-unusable/)
 
     watchStatsSupported = false
     await page.context().setOffline(false)
