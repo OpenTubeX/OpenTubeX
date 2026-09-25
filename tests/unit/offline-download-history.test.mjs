@@ -2,11 +2,12 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { runInNewContext } from 'node:vm'
+import { buildWatchHistoryEntry } from '../../src/renderer/views/Watch/watchHistoryPersistence.js'
 
 const source = await readFile(new URL('../../src/renderer/views/Watch/watchHistory.js', import.meta.url), 'utf8')
 const watchSource = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
 const methodsSource = source.slice(source.indexOf('export const watchHistoryMethods = ') + 'export const watchHistoryMethods = '.length)
-const { addToHistory } = runInNewContext(`(${methodsSource})`)
+const { addToHistory } = runInNewContext(`(${methodsSource})`, { buildWatchHistoryEntry })
 
 test('offline download playback preserves existing history metadata while updating progress', () => {
   const historyEntry = {

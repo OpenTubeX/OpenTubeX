@@ -87,6 +87,24 @@ test('Local metadata tolerates a private response without watch panels', () => {
   assert.equal(metadata.channel.id, '')
 })
 
+test('Local recommendations are normalized at the video API boundary', () => {
+  const recommendation = {
+    type: 'CompactMovie',
+    id: 'movie',
+    title: { text: 'Recommended movie' },
+    author: { name: 'Author', id: 'channel' },
+    duration: { seconds: 90 },
+  }
+  const metadata = mapLocalWatchVideo({
+    info: { basic_info: { title: 'Video', short_description: '', duration: 20 }, page: [], watch_next_feed: [recommendation] },
+  }, {
+    videoId: 'video',
+    parseRecommendation: video => ({ videoId: video.id, title: video.title.text }),
+  })
+  assert.equal(metadata.recommendedVideos[0].videoId, 'movie')
+  assert.equal(metadata.recommendedVideos[0].title, 'Recommended movie')
+})
+
 test('private live metadata without a start time reaches the private-video handler', () => {
   const metadata = mapLocalWatchVideo({
     info: {
@@ -96,4 +114,35 @@ test('private live metadata without a start time reaches the private-video handl
   }, { videoId: 'privateLive123' })
   assert.equal(metadata.isLive, true)
   assert.equal(metadata.published, 0)
+})
+
+test('Invidious recommendation dates are normalized at the video API boundary', () => {
+  const recommendations = [
+    { videoId: 'first', published: '2026-09-25T12:00:00.000Z' },
+    { videoId: 'second', published: 1234 },
+  ]
+  const metadata = mapInvidiousWatchVideo({
+    title: 'Video',
+    description: '',
+    lengthSeconds: 20,
+    viewCount: 1,
+    authorId: 'channel',
+    author: 'Author',
+    authorThumbnails: [],
+    videoThumbnails: [{ url: '/thumb.jpg' }],
+    subCountText: '',
+    published: 1,
+    liveNow: false,
+    isFamilyFriendly: true,
+    isListed: true,
+    recommendedVideos: recommendations,
+    captions: [{ url: '/api/v1/captions/video?label=English', label: 'English', language_code: 'en' }],
+  }, { videoId: 'video', instanceUrl: 'https://invidious.example' })
+  assert.deepEqual(metadata.recommendedVideos.map(({ published }) => published), [Date.parse(recommendations[0].published), 1234])
+  assert.deepEqual(metadata.captions, [{
+    url: 'https://invidious.example/api/v1/captions/video?label=English',
+    label: 'English',
+    language: 'en',
+    mimeType: 'text/vtt',
+  }])
 })

@@ -12,7 +12,6 @@ import {
   areLocalCommentsDisabled,
   mapLocalLegacyFormat,
   parseLocalEndscreen,
-  parseLocalWatchNextVideo,
 } from '../../helpers/api/local'
 import {
   getProxyUrl,
@@ -101,14 +100,8 @@ export const watchVideoMetadataMethods = {
       this.commentsDisabled = areLocalCommentsDisabled(result)
       const avoidTranslation = this.$store.getters.getAvoidTranslation !== 'disabled'
 
-      this.recommendedVideos = result.watch_next_feed
-        ?.filter((item) => {
-          return item.type === 'CompactVideo' || item.type === 'CompactMovie' ||
-              (item.type === 'LockupView' && (item.content_type === 'VIDEO' || item.content_type === 'STATION'))
-        })
-        .map(parseLocalWatchNextVideo).filter(_ => _)
-      // place watched recommended videos last
-        .sort(this.sortWatchedVideosLast) ?? []
+      // Place watched recommendations last after the API has normalized them.
+      this.recommendedVideos = metadata.recommendedVideos.sort(this.sortWatchedVideosLast)
 
       this.videoAnnotations = parseLocalEndscreen(result.endscreen)
       if (avoidTranslation) {
@@ -682,26 +675,14 @@ export const watchVideoMetadataMethods = {
         this.videoPublished = metadata.published
         this.videoDescription = metadata.description
         this.videoDescriptionHtml = result.descriptionHtml
-        const recommendedVideos = result.recommendedVideos
-        // Invidious recommendation timestamps can be ISO strings.
-        recommendedVideos.forEach((video) => {
-          if (typeof video.published === 'string') video.published = Date.parse(video.published)
-        })
-        this.recommendedVideos = recommendedVideos.sort(this.sortWatchedVideosLast)
+        this.recommendedVideos = metadata.recommendedVideos.sort(this.sortWatchedVideosLast)
         this.isLive = metadata.isLive
         this.isPremiere = metadata.isPremiere
         this.isFamilyFriendly = metadata.familyFriendly
         this.isPostLiveDvr = metadata.isPostLiveDvr
         this.isUnlisted = metadata.isUnlisted
 
-        this.captions = sortCaptions(result.captions.map(caption => {
-          return {
-            url: this.currentInvidiousInstanceUrl + caption.url,
-            label: caption.label,
-            language: caption.language_code,
-            mimeType: 'text/vtt'
-          }
-        }), this.preferredCaptionLocale)
+        this.captions = sortCaptions(metadata.captions, this.preferredCaptionLocale)
 
         if (!this.isLive && !this.isPostLiveDvr) {
           this.videoStoryboardSrc = `${this.currentInvidiousInstanceUrl}/api/v1/storyboards/${this.videoId}?height=90`

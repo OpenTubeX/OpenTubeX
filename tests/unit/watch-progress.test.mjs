@@ -3,11 +3,14 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { runInNewContext } from 'node:vm'
 import { isHistoryEntryWatched } from '../../src/history.js'
+import { buildWatchHistoryEntry, planWatchProgressSave } from '../../src/renderer/views/Watch/watchHistoryPersistence.js'
 import { attachAndroidMediaElement } from '../../src/renderer/helpers/player/androidMediaElement.js'
 
 const source = await readFile(new URL('../../src/renderer/views/Watch/watchHistory.js', import.meta.url), 'utf8')
 const methodsSource = source.slice(source.indexOf('export const watchHistoryMethods = ') + 'export const watchHistoryMethods = '.length)
-const { _saveWatchProgress, addToHistory } = runInNewContext(`(${methodsSource})`, { isHistoryEntryWatched })
+const { _saveWatchProgress, addToHistory } = runInNewContext(`(${methodsSource})`, {
+  isHistoryEntryWatched, buildWatchHistoryEntry, planWatchProgressSave,
+})
 
 const playerSource = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
 const seekingHandler = playerSource.slice(playerSource.indexOf('    function handleSeeking()'), playerSource.indexOf('    function handleSeeked()'))

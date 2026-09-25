@@ -1,4 +1,4 @@
-import { getLocalVideoInfo } from './local'
+import { getLocalVideoInfo, parseLocalWatchNextVideo } from './local'
 import { invidiousGetVideoInformation } from './invidious'
 import { createVideoApi } from './createVideoApi'
 import { mapLocalWatchVideo, mapInvidiousWatchVideo } from './watchVideoModel'
@@ -10,6 +10,9 @@ import { mapLocalWatchVideo, mapInvidiousWatchVideo } from './watchVideoModel'
 export const videoApi = createVideoApi({
   loadLocal: getLocalVideoInfo,
   loadInvidious: invidiousGetVideoInformation,
-  mapLocal: mapLocalWatchVideo,
+  mapLocal: (response, options) => mapLocalWatchVideo(response, {
+    ...options,
+    parseRecommendation: parseLocalWatchNextVideo,
+  }),
   mapInvidious: mapInvidiousWatchVideo,
 })

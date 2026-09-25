@@ -2932,26 +2932,9 @@ export default defineComponent({
 
       this.updateCurrentTime(currentSeconds)
 
-      if (
-        this.rememberHistory &&
-        this.customShortsPlayerActive &&
-        !this.shortsPlaybackCompleted &&
-        !this.isUpcoming &&
-        !this.isLive &&
-        this.videoLengthSeconds > 0 &&
-        // pause() queues a timeupdate before a subsequent seek's seeking event.
-        // That update already sees the new time, but is not played content.
-        this.$refs.player?.hasLoaded &&
-        !this.$refs.player.isPaused() &&
-        shortReachedEnd
-      ) {
-        this.shortsPlaybackCompleted = true
-        const watchProgress = this.watchedProgressSavingEnabled
-          ? this.videoLengthSeconds
-          : (this.historyEntry?.watchProgress ?? 0)
-
-        this.addToHistory(watchProgress, true)
-      }
+      // A pause can queue a time update before the seeking event. Completion
+      // still requires the player to have reached the end through playback.
+      this.markShortAsWatchedIfCompleted(shortReachedEnd)
 
       this.updateCurrentChapter(currentSeconds)
       this.$store.commit('setCurrentWatchTimestamp', {
@@ -3063,10 +3046,6 @@ export default defineComponent({
       this.shortsCompletionBlockedBySeek = true
       this.shortsPlaybackAfterSeekSeconds = 0
     },
-    clearPendingWatchTime() {
-      this.watchTimeLastTick = null
-      this.pendingWatchTimeByDate = {}
-    },
     trackRecommendationWatch(time) {
       if (!this.rememberHistory || !this.$store.getters.getEnableHomeRecommendations || this.isLoading || !this.$refs.player?.hasLoaded) {
         this.recommendationPlaybackSample = null
@@ -3118,51 +3097,6 @@ export default defineComponent({
       } catch (error) {
         console.error('Could not save recommendation learning', error)
       }
-    },
-    trackWatchTime() {
-      if (!this.rememberHistory || !this.enableWatchStats || this.$refs.player?.isPaused()) {
-        this.watchTimeLastTick = null
-        return
-      }
-
-      const now = Date.now()
-      if (this.watchTimeLastTick !== null) {
-        const elapsed = now - this.watchTimeLastTick
-
-        // Ignore suspended or heavily delayed timers instead of counting idle time.
-        if (elapsed > 0 && elapsed <= 5000) {
-          const watchedAt = new Date(now)
-          const date = [
-            watchedAt.getFullYear(),
-            String(watchedAt.getMonth() + 1).padStart(2, '0'),
-            String(watchedAt.getDate()).padStart(2, '0'),
-          ].join('-')
-
-          this.pendingWatchTimeByDate[date] = (this.pendingWatchTimeByDate[date] ?? 0) + elapsed
-        }
-      }
-
-      this.watchTimeLastTick = now
-
-      const pendingMilliseconds = Object.values(this.pendingWatchTimeByDate)
-        .reduce((total, milliseconds) => total + milliseconds, 0)
-
-      if (pendingMilliseconds >= 10000) {
-        this.flushWatchTime()
-      }
-    },
-    async flushWatchTime() {
-      const learning = this.flushRecommendationWatch()
-      this.watchTimeLastTick = null
-      const pending = this.pendingWatchTimeByDate
-      this.pendingWatchTimeByDate = {}
-
-      await Promise.all([learning, ...Object.entries(pending).map(([date, milliseconds]) => {
-        return this.$store.dispatch('recordWatchTime', {
-          date,
-          seconds: milliseconds / 1000,
-        })
-      })])
     },
     /**
      * Whether this tab is currently the presented one. Without a logical-tab

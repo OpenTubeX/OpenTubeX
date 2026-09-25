@@ -20,15 +20,17 @@ const { youtubeImageUrlToInvidious } = createInvidiousFeedParsers(() => '')
  *   isPostLiveDvr: boolean, isUnlisted: boolean, musicMediaType: string | null,
  *   collaborators: object[], summary: string[], games: object[], license: string | undefined,
  *   hasAiGeneratedContent: boolean,
+ *   recommendedVideos: object[], captions: object[],
  * }} WatchVideoMetadata
  */
 
 /**
  * @param {import('./videoApi').LocalVideoInformation} response
- * @param {{videoId: string, avoidTranslation?: boolean, thumbnailPreference?: string}} options
+ * @param {{videoId: string, avoidTranslation?: boolean, thumbnailPreference?: string,
+ *   parseRecommendation?: (video: object) => object | null}} options
  * @returns {WatchVideoMetadata}
  */
-export function mapLocalWatchVideo(response, { videoId, avoidTranslation = false, thumbnailPreference = '' }) {
+export function mapLocalWatchVideo(response, { videoId, avoidTranslation = false, thumbnailPreference = '', parseRecommendation = () => null }) {
   const result = response.info
   const basic = result.basic_info ?? {}
   const page = result.page ?? []
@@ -124,6 +126,11 @@ export function mapLocalWatchVideo(response, { videoId, avoidTranslation = false
     games: parseLocalVideoGames(result),
     license: result.secondary_info?.metadata?.rows.find(element => element.title?.text === 'License')?.contents[0]?.text,
     hasAiGeneratedContent: result.primary_info?.badges?.some(badge => badge.label === 'AI') ?? false,
+    recommendedVideos: result.watch_next_feed
+      ?.filter(item => item.type === 'CompactVideo' || item.type === 'CompactMovie' ||
+        (item.type === 'LockupView' && (item.content_type === 'VIDEO' || item.content_type === 'STATION')))
+      .map(parseRecommendation).filter(Boolean) ?? [],
+    captions: [],
   }
 }
 
@@ -172,5 +179,15 @@ export function mapInvidiousWatchVideo(result, { videoId, instanceUrl, thumbnail
     games: [],
     license: undefined,
     hasAiGeneratedContent: false,
+    recommendedVideos: (result.recommendedVideos ?? []).map(video => ({
+      ...video,
+      published: typeof video.published === 'string' ? Date.parse(video.published) : video.published,
+    })),
+    captions: (result.captions ?? []).map(caption => ({
+      url: instanceUrl + caption.url,
+      label: caption.label,
+      language: caption.language_code,
+      mimeType: 'text/vtt',
+    })),
   }
 }

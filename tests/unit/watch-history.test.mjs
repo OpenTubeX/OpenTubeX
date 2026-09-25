@@ -2,11 +2,15 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { runInNewContext } from 'node:vm'
-import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../src/history.js'
+import { isHistoryEntryWatched } from '../../src/history.js'
+import { buildWatchHistoryEntry, planWatchProgressSave, planWatchedCompletion, shouldKeepHistoryEntryAlive } from '../../src/renderer/views/Watch/watchHistoryPersistence.js'
 
 const source = await readFile(new URL('../../src/renderer/views/Watch/watchHistory.js', import.meta.url), 'utf8')
 const methodsSource = source.slice(source.indexOf('export const watchHistoryMethods = ') + 'export const watchHistoryMethods = '.length)
-const methods = runInNewContext(`(${methodsSource})`, { hasReachedWatchedThreshold, isHistoryEntryWatched })
+const methods = runInNewContext(`(${methodsSource})`, {
+  isHistoryEntryWatched,
+  buildWatchHistoryEntry, planWatchProgressSave, planWatchedCompletion, shouldKeepHistoryEntryAlive,
+})
 
 test('history retention refreshes an entry without writing disabled progress', () => {
   const entries = []
