@@ -147,10 +147,101 @@ test('playlist and subscription actions reject array payloads before writing', a
   })
   await assert.rejects(registrations.get(IpcChannels.DB_PLAYLISTS)(event, {
     action: DBActions.PLAYLISTS.UPSERT_VIDEO, data: []
-  }), /invalid datastore record/)
+  }), /invalid datastore/)
   await assert.rejects(registrations.get(IpcChannels.DB_SUBSCRIPTION_CACHE)(event, {
     action: DBActions.SUBSCRIPTION_CACHE.UPDATE_VIDEOS_BY_CHANNEL, data: []
-  }), /invalid datastore record/)
+  }), /invalid datastore/)
+  assert.equal(writes, 0)
+  assert.deepEqual(notifications, [])
+})
+
+test('valid datastore action payloads still reach their handlers', async () => {
+  const calls = []
+  const { registrations, event } = setup({
+    history: { updateSubscriptionState: async data => { calls.push(['history', data]); return { records: [] } } },
+    recommendations: { record: async data => { calls.push(['recommendations', data]); return {} } },
+    watchStats: { addWatchTime: async (date, seconds) => { calls.push(['watchStats', { date, seconds }]) } },
+    profiles: {
+      create: async data => { calls.push(['profiles.create', data]); return { _id: 'generated', ...data } },
+      addChannelToProfiles: async (channel, profileIds) => { calls.push(['profiles.addChannel', { channel, profileIds }]) }
+    },
+    searchHistory: { upsert: async data => { calls.push(['searchHistory', data]); return data } },
+    subscriptionCache: { updateVideosByChannelId: async (...args) => { calls.push(['subscriptionCache', args]); return true } }
+  })
+  const requests = [
+    [IpcChannels.DB_HISTORY, DBActions.HISTORY.UPDATE_SUBSCRIPTION_STATE, { records: [] }],
+    [IpcChannels.DB_RECOMMENDATIONS, DBActions.GENERAL.UPSERT, { epoch: 'epoch', video: { videoId: 'video' } }],
+    [IpcChannels.DB_WATCH_STATS, DBActions.WATCH_STATS.ADD_WATCH_TIME, { date: '2026-09-26', seconds: 1.5 }],
+    [IpcChannels.DB_PROFILES, DBActions.GENERAL.CREATE, { name: 'Profile', subscriptions: [] }],
+    [IpcChannels.DB_PROFILES, DBActions.PROFILES.ADD_CHANNEL, { channel: { id: 'channel' }, profileIds: [] }],
+    [IpcChannels.DB_SEARCH_HISTORY, DBActions.GENERAL.UPSERT, { query: 'query', lastUpdatedAt: 1 }],
+    [IpcChannels.DB_SUBSCRIPTION_CACHE, DBActions.SUBSCRIPTION_CACHE.UPDATE_VIDEOS_BY_CHANNEL, {
+      channelId: 'channel', entries: [], timestamp: '2026-09-26T00:00:00.000Z'
+    }]
+  ]
+
+  for (const [channel, action, data] of requests) {
+    await registrations.get(channel)(event, { action, data })
+  }
+  assert.equal(calls.length, requests.length)
+})
+
+test('datastore write actions reject incomplete payloads before calling handlers', async () => {
+  let writes = 0
+  const rejectUnexpectedWrite = new Proxy({}, {
+    get: () => () => { writes += 1 }
+  })
+  const { registrations, notifications, event } = setup({
+    history: rejectUnexpectedWrite,
+    recommendations: rejectUnexpectedWrite,
+    watchStats: rejectUnexpectedWrite,
+    profiles: rejectUnexpectedWrite,
+    playlists: rejectUnexpectedWrite,
+    searchHistory: rejectUnexpectedWrite,
+    subscriptionCache: rejectUnexpectedWrite
+  })
+  const invalidRequests = [
+    [IpcChannels.DB_HISTORY, DBActions.HISTORY.UPDATE_SUBSCRIPTION_STATE, { records: 'invalid' }],
+    [IpcChannels.DB_HISTORY, DBActions.HISTORY.UPDATE_SUBSCRIPTION_STATE, { metadata: [null] }],
+    [IpcChannels.DB_HISTORY, DBActions.GENERAL.UPSERT, undefined],
+    [IpcChannels.DB_HISTORY, DBActions.GENERAL.OVERWRITE, {}],
+    [IpcChannels.DB_HISTORY, DBActions.HISTORY.APPLY_SYNC_CHANGES, { insertions: [], updates: [] }],
+    [IpcChannels.DB_HISTORY, DBActions.HISTORY.UPDATE_PLAYLIST, { lastViewedPlaylistId: 'playlist' }],
+    [IpcChannels.DB_HISTORY, DBActions.GENERAL.DELETE, undefined],
+    [IpcChannels.DB_RECOMMENDATIONS, DBActions.GENERAL.UPSERT, undefined],
+    [IpcChannels.DB_RECOMMENDATIONS, DBActions.GENERAL.DELETE_MULTIPLE, null],
+    [IpcChannels.DB_WATCH_STATS, DBActions.WATCH_STATS.ADD_WATCH_TIME, { date: '2026-09-26' }],
+    [IpcChannels.DB_WATCH_STATS, DBActions.WATCH_STATS.ADJUST_HISTORICAL_WATCH_TIME, {}],
+    [IpcChannels.DB_PROFILES, DBActions.GENERAL.CREATE, undefined],
+    [IpcChannels.DB_PROFILES, DBActions.GENERAL.UPSERT, null],
+    [IpcChannels.DB_PROFILES, DBActions.PROFILES.ADD_CHANNEL, { channel: { id: 'channel' } }],
+    [IpcChannels.DB_PROFILES, DBActions.PROFILES.REMOVE_CHANNEL, { channelId: 'channel' }],
+    [IpcChannels.DB_PROFILES, DBActions.PROFILES.UPDATE_CHANNEL_SETTINGS, { channel: { id: 'channel' } }],
+    [IpcChannels.DB_PROFILES, DBActions.GENERAL.DELETE, undefined],
+    [IpcChannels.DB_PLAYLISTS, DBActions.GENERAL.CREATE, undefined],
+    [IpcChannels.DB_PLAYLISTS, DBActions.GENERAL.UPSERT, null],
+    [IpcChannels.DB_PLAYLISTS, DBActions.PLAYLISTS.UPSERT_VIDEO, { _id: 'playlist', lastUpdatedAt: 1 }],
+    [IpcChannels.DB_PLAYLISTS, DBActions.PLAYLISTS.UPSERT_VIDEOS, { _id: 'playlist', lastUpdatedAt: 1 }],
+    [IpcChannels.DB_PLAYLISTS, DBActions.PLAYLISTS.UPSERT_VIDEOS, { _id: 'playlist', lastUpdatedAt: 1, videos: [null] }],
+    [IpcChannels.DB_PLAYLISTS, DBActions.GENERAL.DELETE, undefined],
+    [IpcChannels.DB_PLAYLISTS, DBActions.PLAYLISTS.DELETE_VIDEO_ID, { _id: 'playlist', lastUpdatedAt: 1 }],
+    [IpcChannels.DB_PLAYLISTS, DBActions.PLAYLISTS.DELETE_VIDEO_IDS, { _id: 'playlist', lastUpdatedAt: 1 }],
+    [IpcChannels.DB_PLAYLISTS, DBActions.PLAYLISTS.DELETE_ALL_VIDEOS, undefined],
+    [IpcChannels.DB_PLAYLISTS, DBActions.GENERAL.DELETE_MULTIPLE, null],
+    [IpcChannels.DB_SEARCH_HISTORY, DBActions.GENERAL.UPSERT, undefined],
+    [IpcChannels.DB_SEARCH_HISTORY, DBActions.GENERAL.OVERWRITE, {}],
+    [IpcChannels.DB_SEARCH_HISTORY, DBActions.GENERAL.DELETE, undefined],
+    [IpcChannels.DB_SUBSCRIPTION_CACHE, DBActions.SUBSCRIPTION_CACHE.UPDATE_VIDEOS_BY_CHANNEL, { channelId: 'channel' }],
+    [IpcChannels.DB_SUBSCRIPTION_CACHE, DBActions.SUBSCRIPTION_CACHE.UPDATE_VIDEOS_BY_CHANNEL, {
+      channelId: 'channel', entries: [null], timestamp: 1
+    }],
+    [IpcChannels.DB_SUBSCRIPTION_CACHE, DBActions.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN, { channelId: 'channel', entries: [] }],
+    [IpcChannels.DB_SUBSCRIPTION_CACHE, DBActions.GENERAL.DELETE_MULTIPLE, null]
+  ]
+
+  for (const [channel, action, data] of invalidRequests) {
+    await assert.rejects(registrations.get(channel)(event, { action, data }), /invalid datastore/)
+  }
   assert.equal(writes, 0)
   assert.deepEqual(notifications, [])
 })

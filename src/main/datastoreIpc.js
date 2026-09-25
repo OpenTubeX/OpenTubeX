@@ -26,6 +26,125 @@ function requireDataRecord(data) {
   return data
 }
 
+/** @param {unknown} value @returns {value is Record<string, unknown>} */
+function isRecord(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+}
+
+/** @param {unknown} value @returns {value is string} */
+function isId(value) {
+  return typeof value === 'string' && value.length > 0
+}
+
+/** @param {unknown} value @returns {value is string[]} */
+function isIdArray(value) {
+  return Array.isArray(value) && value.every(isId)
+}
+
+/** @param {unknown} value */
+function isHistoryRecord(value) {
+  return isRecord(value) && isId(value.videoId)
+}
+
+/** @param {unknown} value */
+function isDocument(value) {
+  return isRecord(value) && isId(value._id)
+}
+
+/**
+ * The channel distinguishes action IDs shared by different datastores. Read
+ * actions are absent because they intentionally have no data payload.
+ * @type {Record<string, Record<number, (data: unknown) => boolean>>}
+ */
+const actionDataValidators = {
+  [IpcChannels.DB_HISTORY]: {
+    [DBActions.HISTORY.UPDATE_SUBSCRIPTION_STATE]: data => isRecord(data) &&
+      (data.records === undefined || (Array.isArray(data.records) && data.records.every(isHistoryRecord))) &&
+      (data.metadata === undefined || (Array.isArray(data.metadata) && data.metadata.every(isHistoryRecord))) &&
+      (data.unseenVideo === undefined || isHistoryRecord(data.unseenVideo)),
+    [DBActions.GENERAL.UPSERT]: isHistoryRecord,
+    [DBActions.GENERAL.OVERWRITE]: data => Array.isArray(data) && data.every(isHistoryRecord),
+    [DBActions.HISTORY.APPLY_SYNC_CHANGES]: data => isRecord(data) &&
+      Array.isArray(data.insertions) && data.insertions.every(isHistoryRecord) &&
+      Array.isArray(data.updates) && data.updates.every(isHistoryRecord) &&
+      isIdArray(data.deletions),
+    [DBActions.HISTORY.UPDATE_PLAYLIST]: data => isRecord(data) && isId(data.videoId),
+    [DBActions.GENERAL.DELETE]: isId
+  },
+  [IpcChannels.DB_RECOMMENDATIONS]: {
+    [DBActions.GENERAL.UPSERT]: data => isRecord(data) && isRecord(data.video) && isId(data.video.videoId),
+    [DBActions.GENERAL.DELETE_MULTIPLE]: isIdArray
+  },
+  [IpcChannels.DB_WATCH_STATS]: {
+    [DBActions.WATCH_STATS.ADD_WATCH_TIME]: data => isRecord(data) &&
+      typeof data.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(data.date) &&
+      typeof data.seconds === 'number' && Number.isFinite(data.seconds) && data.seconds > 0,
+    [DBActions.WATCH_STATS.ADJUST_HISTORICAL_WATCH_TIME]: data => isRecord(data) &&
+      Number.isFinite(Number(data.defaultSpeed)) && Number(data.defaultSpeed) > 0 &&
+      (data.channelPlaybackSpeeds === undefined || isRecord(data.channelPlaybackSpeeds))
+  },
+  [IpcChannels.DB_PROFILES]: {
+    [DBActions.GENERAL.CREATE]: isRecord,
+    [DBActions.GENERAL.UPSERT]: isDocument,
+    [DBActions.PROFILES.ADD_CHANNEL]: data => isRecord(data) && isRecord(data.channel) &&
+      isId(data.channel.id) && isIdArray(data.profileIds),
+    [DBActions.PROFILES.REMOVE_CHANNEL]: data => isRecord(data) &&
+      isId(data.channelId) && isIdArray(data.profileIds),
+    [DBActions.PROFILES.UPDATE_CHANNEL_SETTINGS]: data => isRecord(data) &&
+      isRecord(data.channel) && isId(data.channel.id) && isIdArray(data.profileIds),
+    [DBActions.GENERAL.DELETE]: isId
+  },
+  [IpcChannels.DB_PLAYLISTS]: {
+    [DBActions.GENERAL.CREATE]: data => isDocument(data) ||
+      (Array.isArray(data) && data.every(isDocument)),
+    [DBActions.GENERAL.UPSERT]: isDocument,
+    [DBActions.PLAYLISTS.UPSERT_VIDEO]: data => isRecord(data) && isId(data._id) &&
+      typeof data.lastUpdatedAt === 'number' && Number.isFinite(data.lastUpdatedAt) &&
+      isRecord(data.videoData) && isId(data.videoData.videoId),
+    [DBActions.PLAYLISTS.UPSERT_VIDEOS]: data => isRecord(data) && isId(data._id) &&
+      typeof data.lastUpdatedAt === 'number' && Number.isFinite(data.lastUpdatedAt) &&
+      Array.isArray(data.videos) && data.videos.every(isRecord),
+    [DBActions.GENERAL.DELETE]: isId,
+    [DBActions.PLAYLISTS.DELETE_VIDEO_ID]: data => isRecord(data) && isId(data._id) &&
+      typeof data.lastUpdatedAt === 'number' && Number.isFinite(data.lastUpdatedAt) &&
+      (isId(data.videoId) || isId(data.playlistItemId)),
+    [DBActions.PLAYLISTS.DELETE_VIDEO_IDS]: data => isRecord(data) && isId(data._id) &&
+      typeof data.lastUpdatedAt === 'number' && Number.isFinite(data.lastUpdatedAt) &&
+      isIdArray(data.playlistItemIds),
+    [DBActions.PLAYLISTS.DELETE_ALL_VIDEOS]: isId,
+    [DBActions.GENERAL.DELETE_MULTIPLE]: isIdArray
+  },
+  [IpcChannels.DB_SEARCH_HISTORY]: {
+    [DBActions.GENERAL.UPSERT]: data => isRecord(data) && (isId(data.query) || isId(data._id)) &&
+      typeof data.lastUpdatedAt === 'number' && Number.isFinite(data.lastUpdatedAt),
+    [DBActions.GENERAL.OVERWRITE]: data => Array.isArray(data) && data.every(isDocument),
+    [DBActions.GENERAL.DELETE]: isId
+  },
+  [IpcChannels.DB_SUBSCRIPTION_CACHE]: {
+    [DBActions.SUBSCRIPTION_CACHE.UPDATE_VIDEOS_BY_CHANNEL]: isFeedUpdate,
+    [DBActions.SUBSCRIPTION_CACHE.UPDATE_LIVE_STREAMS_BY_CHANNEL]: isFeedUpdate,
+    [DBActions.SUBSCRIPTION_CACHE.UPDATE_SHORTS_BY_CHANNEL]: isFeedUpdate,
+    [DBActions.SUBSCRIPTION_CACHE.UPDATE_SHORTS_WITH_CHANNEL_PAGE_SHORTS_BY_CHANNEL]: data =>
+      isRecord(data) && isId(data.channelId) && Array.isArray(data.entries) && data.entries.every(isRecord),
+    [DBActions.SUBSCRIPTION_CACHE.UPDATE_COMMUNITY_POSTS_BY_CHANNEL]: isFeedUpdate,
+    [DBActions.SUBSCRIPTION_CACHE.MARK_ENTRIES_AS_SEEN]: data => isRecord(data) &&
+      isId(data.channelId) && isId(data.tab) && Array.isArray(data.entries) && data.entries.every(isRecord),
+    [DBActions.GENERAL.DELETE_MULTIPLE]: isIdArray
+  }
+}
+
+/** @param {unknown} data */
+function isFeedUpdate(data) {
+  return isRecord(data) && isId(data.channelId) && Array.isArray(data.entries) && data.entries.every(isRecord) &&
+    data.timestamp !== undefined && data.timestamp !== null
+}
+
+/** @param {string} channel @param {number} action @param {unknown} data */
+function requireDatastoreActionData(channel, action, data) {
+  const validate = actionDataValidators[channel]?.[action]
+  if (validate && !validate(data)) throw new TypeError('invalid datastore action data')
+}
+
 /**
  * @param {unknown} data
  * @returns {SettingRecord}
@@ -68,6 +187,7 @@ export function registerDatastoreIpc({ ipcMain, handlers, isTrustedUrl, syncOthe
       return
     }
     const { action, data } = requireDatastoreIpcRequest(payload)
+    requireDatastoreActionData(IpcChannels.DB_HISTORY, action, data)
 
     try {
       switch (action) {
@@ -213,6 +333,7 @@ export function registerDatastoreIpc({ ipcMain, handlers, isTrustedUrl, syncOthe
   ipcMain.handle(IpcChannels.DB_RECOMMENDATIONS, async (event, payload) => {
     if (!isTrustedUrl(event.senderFrame.url)) return
     const { action, data } = requireDatastoreIpcRequest(payload)
+    requireDatastoreActionData(IpcChannels.DB_RECOMMENDATIONS, action, data)
     let result
     if (action === DBActions.GENERAL.FIND) result = await handlers.recommendations.find()
     else if (action === DBActions.GENERAL.UPSERT) result = await handlers.recommendations.record(data)
@@ -229,6 +350,7 @@ export function registerDatastoreIpc({ ipcMain, handlers, isTrustedUrl, syncOthe
       return
     }
     const { action, data } = requireDatastoreIpcRequest(payload)
+    requireDatastoreActionData(IpcChannels.DB_WATCH_STATS, action, data)
 
     try {
       switch (action) {
@@ -302,6 +424,7 @@ export function registerDatastoreIpc({ ipcMain, handlers, isTrustedUrl, syncOthe
       return
     }
     const { action, data } = requireDatastoreIpcRequest(payload)
+    requireDatastoreActionData(IpcChannels.DB_PROFILES, action, data)
 
     try {
       switch (action) {
@@ -394,6 +517,7 @@ export function registerDatastoreIpc({ ipcMain, handlers, isTrustedUrl, syncOthe
       return
     }
     const { action, data } = requireDatastoreIpcRequest(payload)
+    requireDatastoreActionData(IpcChannels.DB_PLAYLISTS, action, data)
 
     try {
       switch (action) {
@@ -511,6 +635,7 @@ export function registerDatastoreIpc({ ipcMain, handlers, isTrustedUrl, syncOthe
       return
     }
     const { action, data } = requireDatastoreIpcRequest(payload)
+    requireDatastoreActionData(IpcChannels.DB_SEARCH_HISTORY, action, data)
 
     try {
       switch (action) {
@@ -571,6 +696,7 @@ export function registerDatastoreIpc({ ipcMain, handlers, isTrustedUrl, syncOthe
       return
     }
     const { action, data } = requireDatastoreIpcRequest(payload)
+    requireDatastoreActionData(IpcChannels.DB_SUBSCRIPTION_CACHE, action, data)
 
     try {
       switch (action) {
