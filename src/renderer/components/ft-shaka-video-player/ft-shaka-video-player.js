@@ -3697,6 +3697,7 @@ export default defineComponent({
     // framing belongs to one specific video. A player reused for the next video
     // keeps its zoom level but starts centered again.
     watch(() => props.videoId, () => {
+      invalidateVideoZoomPinch()
       recenterVideoZoom()
       if (selectedVideoZoom.value > VIDEO_ZOOM_LEVELS.at(-1)) updateVideoZoom(VIDEO_ZOOM_LEVELS.at(-1))
     })
@@ -3836,6 +3837,7 @@ export default defineComponent({
           const geometry = getVideoZoomGestureGeometry()
           if (geometry) {
             cancelMobileFullscreenGesture()
+            const fullscreen = isNativeFullscreenActive()
             videoZoomGestureZoom.value = geometry.zoom
             videoZoomOffset.x = geometry.offset.x
             videoZoomOffset.y = geometry.offset.y
@@ -3851,7 +3853,9 @@ export default defineComponent({
               currentFocal: focal,
               center: geometry.center,
               size: geometry.size,
-              fillZoom: isNativeFullscreenActive()
+              videoId: props.videoId,
+              fullscreen,
+              fillZoom: fullscreen
                 ? getVideoFillZoom(
                     { width: container.value.clientWidth, height: container.value.clientHeight },
                     geometry.size,
@@ -3904,6 +3908,12 @@ export default defineComponent({
       }
       if (videoZoomTouchPointers.has(event.pointerId)) {
         videoZoomTouchPointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
+      }
+
+      if (videoZoomPinchStart?.invalidated) {
+        event.preventDefault()
+        event.stopPropagation()
+        return
       }
 
       if (videoZoomPinchStart && videoZoomTouchPointers.size >= 2) {
@@ -4002,6 +4012,17 @@ export default defineComponent({
       videoZoomSuppressClick = false
     }
 
+    function invalidateVideoZoomPinch() {
+      if (!videoZoomPinchStart || videoZoomPinchStart.invalidated) return
+      videoZoomPinchStart.invalidated = true
+      videoZoomOffset.x = videoZoomPinchStart.offset.x
+      videoZoomOffset.y = videoZoomPinchStart.offset.y
+      videoZoomGestureZoom.value = null
+      videoZoomPinching.value = false
+      videoFillZoomProximity.value = 0
+      videoFillZoomSnapReady.value = false
+    }
+
     function endVideoZoomPinchPointer(event, cancelled = false) {
       if (!videoZoomTouchPointers.has(event.pointerId)) return false
 
@@ -4014,14 +4035,20 @@ export default defineComponent({
         container.value.releasePointerCapture(event.pointerId)
       }
 
+      const stale = videoZoomPinchStart.invalidated ||
+        videoZoomPinchStart.videoId !== props.videoId ||
+        videoZoomPinchStart.fullscreen !== isNativeFullscreenActive()
+      if (stale) invalidateVideoZoomPinch()
       const gestureZoom = videoZoomGestureZoom.value ?? videoZoomPinchStart.zoom
       const fillZoom = videoZoomPinchStart.fillZoom
       const finalZoom = !cancelled && videoFillZoomSnapReady.value && fillZoom !== null
         ? fillZoom
         : gestureZoom
-      if (finalZoom === fillZoom && !cancelled) recenterVideoZoom()
-      updateVideoZoom(finalZoom)
-      if (!cancelled) showValueChange(formatVideoZoom(finalZoom), 'search', false, 0, false)
+      if (!stale) {
+        if (finalZoom === fillZoom && !cancelled) recenterVideoZoom()
+        updateVideoZoom(finalZoom)
+        if (!cancelled) showValueChange(formatVideoZoom(finalZoom), 'search', false, 0, false)
+      }
       videoZoomGestureZoom.value = null
       videoZoomPinchStart = null
       videoZoomPinching.value = false
@@ -10507,6 +10534,7 @@ export default defineComponent({
 
     function fullscreenChangeHandler() {
       const fullscreen = isNativeFullscreenActive()
+      if (videoZoomPinchStart && videoZoomPinchStart.fullscreen !== fullscreen) invalidateVideoZoomPinch()
       if (!fullscreen && selectedVideoZoom.value > VIDEO_ZOOM_LEVELS.at(-1)) {
         updateVideoZoom(VIDEO_ZOOM_LEVELS.at(-1))
       }

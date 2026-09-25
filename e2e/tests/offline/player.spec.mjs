@@ -819,6 +819,39 @@ test('fullscreen pinch zoom arms the fill point only after moving toward it', as
     .toBe(3)
 })
 
+test('exiting fullscreen during a pinch does not restore fullscreen zoom inline', async ({ app, page }) => {
+  const video = await openDemoVideo({ app, page })
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs'))
+  await setPlayerFullscreen(page, true)
+
+  const tabId = await player.getAttribute('data-tab-id')
+  await page.evaluate(({ tabId }) => {
+    document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      .commit('setTabVideoZoom', { tabId, value: 4 })
+  }, { tabId })
+  await expect.poll(() => video.evaluate(element => new DOMMatrix(getComputedStyle(element).transform).a)).toBe(4)
+
+  const bounds = await player.boundingBox()
+  const point = (offset, id) => ({ x: bounds.x + bounds.width / 2 + offset, y: bounds.y + bounds.height / 2, id })
+  const session = await page.context().newCDPSession(page)
+  await session.send('Input.dispatchTouchEvent', {
+    type: 'touchStart', touchPoints: [point(-50, 1), point(50, 2)],
+  })
+  await expect(player.locator('.valueChangeText')).toHaveText('400%')
+
+  await setPlayerFullscreen(page, false)
+  await expect.poll(() => video.evaluate(element => new DOMMatrix(getComputedStyle(element).transform).a)).toBe(3)
+  await expect(player.locator('.videoFillZoomEdges')).toHaveCount(0)
+  await session.send('Input.dispatchTouchEvent', {
+    type: 'touchMove', touchPoints: [point(-60, 1), point(60, 2)],
+  })
+  await expect.poll(() => video.evaluate(element => new DOMMatrix(getComputedStyle(element).transform).a)).toBe(3)
+  await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  await session.detach()
+  await expect.poll(() => video.evaluate(element => new DOMMatrix(getComputedStyle(element).transform).a)).toBe(3)
+})
+
 test('the overflow menu can turn the zoom off again', async ({ app, page, attachScreenshot }) => {
   const video = await openDemoVideo({ app, page })
 
