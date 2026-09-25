@@ -71,7 +71,7 @@ export async function sizeScreenshotWindow(app) {
 export async function openScreenshotSettings(page) {
   await goToSettingsSection(page, 'general')
   const dialog = page.locator('.settingsWindow')
-  await dialog.getByRole('button', { name: 'Maximize', exact: true }).click()
+  await dialog.getByRole('button', { name: 'Maximise', exact: true }).click()
   await expect(dialog).toHaveClass(/maximized/)
   await expect.poll(async () => {
     const { width, height } = await dialog.boundingBox()
