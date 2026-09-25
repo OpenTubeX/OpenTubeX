@@ -26,23 +26,19 @@ if (platform === 'darwin') {
 
   if (args[2] === 'arm64') {
     arch = Arch.arm64
-    buildRequests = [{
-      targets: Platform.WINDOWS.createTarget(['nsis'], arch),
-      config
-    }]
   } else {
     await prepareWindowsInterposer()
-    buildRequests = [
-      {
-        targets: Platform.WINDOWS.createTarget(['nsis'], arch),
-        config
-      },
-      {
-        targets: Platform.WINDOWS.createTarget(['zip', '7z'], arch),
-        config: withWindowsPortable(config)
-      }
-    ]
   }
+  buildRequests = [
+    {
+      targets: Platform.WINDOWS.createTarget(['nsis'], arch),
+      config
+    },
+    {
+      targets: Platform.WINDOWS.createTarget(['zip', '7z'], arch),
+      config: withWindowsPortable(config, arch === Arch.arm64 ? 'arm64' : 'x64')
+    }
+  ]
 } else if (platform === 'linux') {
   let arch = Arch.x64
 

@@ -370,6 +370,22 @@ jobs:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-setup-arm64.exe
         path: build/opentubex Setup ${{ steps.versionNumber.outputs.version }}.exe
 
+    - name: Upload Windows arm64 .zip Artifact
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-arm64')
+      with:
+        name: opentubex-${{ steps.versionNumber.outputs.version }}-win-arm64-portable.zip
+        path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64-win.zip
+        if-no-files-found: error
+
+    - name: Upload Windows arm64 .7z Artifact
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-arm64')
+      with:
+        name: opentubex-${{ steps.versionNumber.outputs.version }}-win-arm64-portable.7z
+        path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64-win.7z
+        if-no-files-found: error
+
     - name: Upload Mac x64 .dmg Artifact
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-x64')
