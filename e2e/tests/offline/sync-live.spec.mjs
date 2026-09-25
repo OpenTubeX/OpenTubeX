@@ -269,7 +269,7 @@ test('two independent devices settle after live sync and propagate a real edit o
       Object.assign(client, await launchApp(userDataDir))
       const { page } = client
       await page.context().route('**/*', abortUnmockedRequest)
-      await page.context().route('https://two-devices.example/**', async route => {
+      const routeSync = async route => {
         const request = route.request()
         const url = new URL(request.url())
         const path = url.pathname
@@ -299,7 +299,9 @@ test('two independent devices settle after live sync and propagate a real edit o
           wake()
         }
         return route.fulfill({ json: collections.get(collection) ?? { revision: 0, payload: null } })
-      })
+      }
+      await page.context().route('https://two-devices.example/**', routeSync)
+      await page.route('https://two-devices.example/**', routeSync)
       const tutorial = page.locator('.tutorialOverlay')
       await expect(tutorial).toBeVisible()
       await tutorial.locator('.tutorialActions').getByRole('button').last().click()
