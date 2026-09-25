@@ -4508,6 +4508,8 @@ export default defineComponent({
     })
 
     const uiConfig = computed(() => {
+      // A yt-dlp source can be live even when Shaka sees a finite media file.
+      const showPlaybackRateControls = !isLive.value && !props.isLive
       const controlPanelElements = [
         'ft_skip_previous',
         'play_pause',
@@ -4559,7 +4561,7 @@ export default defineComponent({
         uiConfig.overflowMenuButtons = [
           ...(props.shortsPlayer ? ['ft_shorts_video_info'] : []),
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
-          ...(!isLive.value && !props.isLive ? ['playback_rate'] : []),
+          ...(showPlaybackRateControls ? ['playback_rate'] : []),
           'captions',
           'ft_audio_tracks',
           'ft_sleep_timer',
@@ -4583,7 +4585,7 @@ export default defineComponent({
         elementList = uiConfig.overflowMenuButtons
 
         uiConfig.controlPanelElements.push(
-          ...((props.shortsPlayer || isCapacitorMobilePlayer()) && useQuickPlaybackSpeedBar.value && !isLive.value
+          ...((props.shortsPlayer || isCapacitorMobilePlayer()) && useQuickPlaybackSpeedBar.value && showPlaybackRateControls
             ? ['ft_quick_playback_rate_bar']
             : []),
           'ft_caption_toggle',
@@ -4593,7 +4595,7 @@ export default defineComponent({
         )
       } else {
         uiConfig.controlPanelElements.push(
-          ...(useQuickPlaybackSpeedBar.value && !isLive.value ? ['ft_quick_playback_rate_bar'] : []),
+          ...(useQuickPlaybackSpeedBar.value && showPlaybackRateControls ? ['ft_quick_playback_rate_bar'] : []),
           'ft_sponsorblock_open_menu',
           'ft_sponsorblock_clear',
           'ft_sponsorblock_start',
@@ -4613,7 +4615,7 @@ export default defineComponent({
         uiConfig.overflowMenuButtons.push(
           'ft_audio_tracks',
           'captions',
-          ...(!isLive.value && !props.isLive ? ['playback_rate'] : []),
+          ...(showPlaybackRateControls ? ['playback_rate'] : []),
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
           'ft_sleep_timer',
           'ft_skip_silence',

@@ -63,6 +63,7 @@ test('Twitch replay uses the watch chat toggle and side panel', async ({ app, pa
   expect(chatBox.height).toBeGreaterThan(playerBox.height * 0.8)
   await attachScreenshot('Twitch chat normal layout')
 
+  await externalMedia.locator('.externalMediaPlayer').hover()
   await externalMedia.locator('.externalMediaPlayer .theatre-button').click()
   await externalMedia.locator('.externalMediaPlayer').evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
   const theatrePlayerBox = await externalMedia.locator('.externalMediaPlayer').boundingBox()
@@ -100,12 +101,14 @@ test('Twitch livestream omits playback speed from player options', async ({ app,
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const mediaUrl = 'https://www.twitch.tv/testchannel'
   await prepareTwitchYtDlp(app, page, mediaUrl, true)
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseQuickPlaybackSpeedBar', true))
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
 
   const player = page.locator(`${activeTab} .externalMediaPlayer`)
   await expect(player.locator('.shaka-overflow-menu-button')).toBeVisible()
   expect(await player.locator('video').evaluate(video => video.ui.getConfiguration().overflowMenuButtons)).not.toContain('playback_rate')
+  expect(await player.locator('video').evaluate(video => video.ui.getConfiguration().controlPanelElements)).not.toContain('ft_quick_playback_rate_bar')
 })
 
 test('failed external media keeps its site title after unloading', async ({ app, page }) => {
@@ -204,6 +207,7 @@ test.describe('Twitch theater mode at 125% UI scale', () => {
     const theaterButton = player.locator('.theatre-button')
     await expect(theaterButton).toBeVisible()
     for (const enabled of [true, false]) {
+      await player.hover()
       await theaterButton.click()
       await expect(page.locator(`${activeTab} .externalMediaLayout`)).toHaveClass(enabled ? /useTheatreMode/ : /^(?!.*useTheatreMode)/)
       expect(await player.evaluate(element => element.getAnimations().some(animation =>
@@ -690,10 +694,10 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await expect(page.locator(`${activeTab} .externalMediaExtra`)).toContainText('Example album')
   await expect(page.locator(`${activeTab} .externalMediaExtra`)).toContainText('Release date')
   await waitForPlayback(page)
-  await page.locator(`${activeTab} .externalMediaPlayer`).getByRole('button', { name: 'Pause (k)' }).click()
   const externalMedia = page.locator(`${activeTab} .externalMedia`)
   const player = externalMedia.locator('.externalMediaPlayer')
   await player.hover()
+  await player.locator('video.player').evaluate(video => video.pause())
   await player.locator('.shaka-seek-bar-container').hover({ position: { x: 120, y: 4 } })
   await expect(player.locator('.shaka-player-ui-thumbnail-image-container')).toBeVisible()
   await player.locator('video.player').evaluate(video => {
@@ -796,8 +800,8 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
     return store.getters.getTabById(store.getters.getActiveTabId)?.avatarUrl
   })).toBeNull()
   await waitForPlayback(page)
-  await page.locator(`${activeTab} .externalMediaPlayer`).getByRole('button', { name: 'Pause (k)' }).click()
-  await expect(page.locator(`${sel.activeTab} .tabPageIcon`)).toBeVisible()
+  await page.locator(`${activeTab} .externalMediaPlayer video.player`).evaluate(video => video.pause())
+  await expect(page.locator(`${sel.activeTab} .tabAvatar, ${sel.activeTab} .tabPageIcon`)).toBeVisible()
 })
 
 test('expands a metadata-only description card', async ({ app, page }) => {
