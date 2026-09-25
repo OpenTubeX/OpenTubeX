@@ -80,7 +80,7 @@ import { registerContextMenuIpc } from './contextMenuIpc'
 import { resolveWindowBackground, resolveWindowBounds } from './windowConfiguration'
 import { attachWindowCloseLifecycle } from './windowCloseLifecycle'
 import { registerToastIpc } from './toastIpc'
-import { shouldAdvanceDockMediaSequence } from './dockMediaSession'
+import { createDockMediaSessionController } from './dockMediaSession'
 import { clearStorage, compactStorageDatabases, getStorageUsage } from './storage'
 import { registerStorageIpc } from './storageIpc'
 import { registerPlayerCacheIpc } from './playerCacheIpc'
@@ -170,9 +170,6 @@ function runApp() {
     getSelected: getSelectedCustomTheme
   } = createCustomThemeStore(path.join(app.getPath('userData'), CUSTOM_THEMES_DIRECTORY))
 
-  const dockMediaSessions = new Map()
-  const dockMediaTrackedWindowIds = new Set()
-  let dockMediaPlaySequence = 0
   let dockMediaLabels = {
     previous: 'Previous',
     play: 'Play',
@@ -181,36 +178,10 @@ function runApp() {
     newWindow: 'New Window'
   }
 
-  function getDockMediaSession() {
-    const sessions = Array.from(dockMediaSessions.values())
-      .filter(({ manager }) => !manager.browserWindow.isDestroyed())
-    const playingSessions = sessions.filter(({ playbackState }) => playbackState === 'playing')
-
-    if (playingSessions.length > 0) {
-      return playingSessions.reduce((latest, session) => (
-        session.lastPlayedAt > latest.lastPlayedAt ? session : latest
-      ))
-    }
-
-    const focusedSession = sessions.find(({ manager, hasMetadata }) => (
-      hasMetadata && manager.browserWindow.isFocused()
-    ))
-    if (focusedSession) {
-      return focusedSession
-    }
-
-    return sessions
-      .filter(({ hasMetadata }) => hasMetadata)
-      .sort((left, right) => right.updatedAt - left.updatedAt)[0] ?? null
-  }
-
-  function requestDockMediaAction(action) {
-    const session = getDockMediaSession()
-    if (!session || !session.actions.has(action)) {
-      return
-    }
-    session.manager.bridge.send(IpcChannels.TABS_REQUEST_MEDIA_SESSION_ACTION, action)
-  }
+  const dockMedia = createDockMediaSessionController({
+    onChange: updateDockMenu,
+    sendAction: (manager, action) => manager.bridge.send(IpcChannels.TABS_REQUEST_MEDIA_SESSION_ACTION, action)
+  })
 
   function updateDockMenu() {
     createTrayContextMenu()
@@ -232,39 +203,6 @@ function runApp() {
       }
     ])
     app.dock.setMenu(dockMenu)
-  }
-
-  function updateDockMediaSession(manager, state) {
-    const windowId = manager.browserWindow.id
-    const previous = dockMediaSessions.get(windowId)
-    const playbackState = ['playing', 'paused', 'none'].includes(state.playbackState)
-      ? state.playbackState
-      : 'none'
-    const shouldAdvanceSequence = shouldAdvanceDockMediaSequence(
-      playbackState,
-      state.playbackStarted
-    )
-    dockMediaSessions.set(windowId, {
-      manager,
-      playbackState,
-      hasMetadata: state.hasMetadata === true,
-      actions: new Set(Array.isArray(state.actions) ? state.actions : []),
-      lastPlayedAt: shouldAdvanceSequence
-        ? ++dockMediaPlaySequence
-        : previous?.lastPlayedAt ?? 0,
-      updatedAt: Date.now()
-    })
-
-    if (!dockMediaTrackedWindowIds.has(windowId)) {
-      dockMediaTrackedWindowIds.add(windowId)
-      manager.browserWindow.on('focus', updateDockMenu)
-      manager.browserWindow.once('closed', () => {
-        dockMediaSessions.delete(windowId)
-        dockMediaTrackedWindowIds.delete(windowId)
-        updateDockMenu()
-      })
-    }
-    updateDockMenu()
   }
 
   let backendPreference = 'local'
@@ -1490,7 +1428,7 @@ function runApp() {
           closeConfirmedWindowIds.add(browserWindow.id)
         }
       },
-      mediaSessionStateChanged: updateDockMediaSession
+      mediaSessionStateChanged: dockMedia.updateSession
     })
 
     // Reminder initialization is ordered with later reminder operations by the
@@ -1647,24 +1585,24 @@ function runApp() {
   }
 
   function createMediaMenuItems() {
-    const session = getDockMediaSession()
+    const session = dockMedia.getSession()
     const actions = session?.actions ?? new Set()
     const toggleAction = session?.playbackState === 'playing' ? 'pause' : 'play'
     return [
       {
         label: dockMediaLabels.previous,
         enabled: actions.has('previoustrack'),
-        click: () => requestDockMediaAction('previoustrack')
+        click: () => dockMedia.requestAction('previoustrack')
       },
       {
         label: toggleAction === 'pause' ? dockMediaLabels.pause : dockMediaLabels.play,
         enabled: actions.has(toggleAction),
-        click: () => requestDockMediaAction(toggleAction)
+        click: () => dockMedia.requestAction(toggleAction)
       },
       {
         label: dockMediaLabels.next,
         enabled: actions.has('nexttrack'),
-        click: () => requestDockMediaAction('nexttrack')
+        click: () => dockMedia.requestAction('nexttrack')
       }
     ]
   }

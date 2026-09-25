@@ -49,8 +49,10 @@ function fixture(platform = 'linux') {
     Tray, BrowserWindow: { getAllWindows: () => windows, getFocusedWindow: () => windows[0] },
     Menu: { buildFromTemplate: items => items },
     createWindow: () => new Window(), requestQuit: () => {},
-    getDockMediaSession: () => mediaSession,
-    requestDockMediaAction: action => mediaActions.push(action),
+    dockMedia: {
+      getSession: () => mediaSession,
+      requestAction: action => mediaActions.push(action),
+    },
     IpcChannels: { WINDOW_MINIMIZED_STATE: 'minimized' }, monitorsKdeWaylandWindowState: true, kdeWaylandWindowStateBackend: null,
     applyKdeWindowIdentity() {}, releaseKdeWindowIdentity() {},
     monitorKdeWaylandWindowState: options => { context.kdeCallback = options.onMinimizedState },
