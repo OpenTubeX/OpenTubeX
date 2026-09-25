@@ -938,6 +938,7 @@ test('the overflow menu can turn the zoom off again', async ({ app, page, attach
   // A narrow player folds Autoplay into the overflow menu.
   await player.evaluate(element => { element.style.width = '600px' })
   const autoplaySwitch = overflowMenu.locator('.autoplay-toggle > .ft-autoplay-switch')
+  await player.hover()
   await moreOptions.click()
   await expect(autoplaySwitch).toBeVisible()
   await expect(autoplaySwitch).toHaveCSS('margin-right', '0px')
