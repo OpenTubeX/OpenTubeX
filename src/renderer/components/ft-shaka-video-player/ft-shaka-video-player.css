@@ -2002,6 +2002,11 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   transform: translate(-50%, -50%) scale(1.08);
 }
 
+/* stylelint-disable-next-line selector-max-compound-selectors */
+.ftVideoPlayer:not(.classicPlayerControls) :deep(.shaka-controls-button-panel > .shaka-play-button > .ft-play-pause-morph-icon) {
+  transform: translate(-50%, -50%);
+}
+
 :deep(
   .shaka-play-button[data-ft-play-pause-state='replay'] > .shaka-ui-icon:not(.ft-play-pause-morph-icon)
 ) {

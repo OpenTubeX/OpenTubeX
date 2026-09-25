@@ -89,7 +89,7 @@ test('play and pause icons morph in both player themes', async ({ app, page }) =
       expect(animated.midpoint).not.toBe(animated.initial)
       expect(animated.midpoint).not.toBe(animated.final)
       expect(animated.size).toBe(frosted ? '24px' : '32px')
-      expect(animated.scale).toBeCloseTo(1.08, 2)
+      expect(animated.scale).toBeCloseTo(frosted ? 1 : 1.08, 2)
     }
   }
 })
