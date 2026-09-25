@@ -362,6 +362,8 @@ User Playlists:
   Copy Playlist: Copy Playlist
   Remove Duplicate Videos: Remove Duplicate Videos
   Remove Watched Videos: Remove Watched Videos
+  Remove Unavailable Videos: Remove Unavailable Videos
+  Remove Unavailable Videos Confirmation: 'Remove unavailable videos? Found: {count}. Could not check: {uncertain}. Unchecked videos will be kept.'
   Enable Quick Bookmark With This Playlist: Enable Quick Bookmark With This Playlist
   Quick Bookmark Enabled: Quick Bookmark Enabled
   Export Playlist: Export This Playlist

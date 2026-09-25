@@ -174,6 +174,8 @@ Feed:
   Cancel Refresh: Avbryt oppdatering
   Next Auto Refresh: 'Neste automatiske oppdatering: {date}'
 User Playlists:
+  Remove Unavailable Videos: "Fjern utilgjengelige videoer"
+  Remove Unavailable Videos Confirmation: "Vil du fjerne utilgjengelige videoer? Funnet: {count}. Kunne ikke sjekke: {uncertain}. Ukontrollerte videoer blir beholdt."
   Add Missing Videos: "Legg til manglende videoer fra den opprinnelige spillelisten"
   Source Playlist: "Opprinnelig spilleliste"
   Save Playlist: "Lagre spilleliste"

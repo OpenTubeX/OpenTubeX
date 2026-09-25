@@ -916,3 +916,12 @@ export async function getInvidiousHistoryMetadata(videoId, signal) {
   const response = checkHistoryRepairResponse(await invidiousFetch(`${getCurrentInstanceUrl()}/api/v1/videos/${videoId}?${params}`, signal))
   return response.json()
 }
+
+export async function getInvidiousPlaylistAvailability(videoId, signal) {
+  const response = await invidiousFetch(`${getCurrentInstanceUrl()}/api/v1/videos/${videoId}?fields=videoId`, signal)
+  // Server and rate-limit failures say nothing about the video itself.
+  if (!response.ok && ![403, 404, 410].includes(response.status)) {
+    throw new Error(`Availability check failed with HTTP ${response.status}`)
+  }
+  return await response.json()
+}

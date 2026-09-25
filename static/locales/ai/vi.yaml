@@ -176,6 +176,8 @@ Feed:
   Cancel Refresh: Hủy làm mới
   Next Auto Refresh: 'Lần tự động làm mới tiếp theo: {date}'
 User Playlists:
+  Remove Unavailable Videos: "Xóa video không có sẵn"
+  Remove Unavailable Videos Confirmation: "Xóa video không có sẵn? Đã tìm thấy: {count}. Không thể kiểm tra: {uncertain}. Các video không được kiểm tra sẽ được giữ lại."
   Add Missing Videos: "Thêm video còn thiếu từ danh sách phát nguồn"
   Source Playlist: "Danh sách phát nguồn"
   Save Playlist: "Lưu danh sách phát"

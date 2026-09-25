@@ -174,6 +174,8 @@ Feed:
   Cancel Refresh: 取消刷新
   Next Auto Refresh: '下次自动刷新：{date}'
 User Playlists:
+  Remove Unavailable Videos: "删除不可用的视频"
+  Remove Unavailable Videos Confirmation: "删除不可用的视频？找到：{count}。无法检查：{uncertain}。未检查的视频将被保留。"
   Add Missing Videos: "从来源播放列表添加缺少的视频"
   Source Playlist: "来源播放列表"
   Save Playlist: "保存播放列表"

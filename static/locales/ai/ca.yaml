@@ -220,6 +220,8 @@ Feed:
   Next Auto Refresh: 'Propera actualització automàtica: {date}'
   Refresh Feed: Actualitza {subscriptionName}
 User Playlists:
+  Remove Unavailable Videos: "Suprimeix els vídeos no disponibles"
+  Remove Unavailable Videos Confirmation: "Vols suprimir els vídeos no disponibles? Trobats: {count}. No s'han pogut comprovar: {uncertain}. Els vídeos no comprovats es mantindran."
   Add Missing Videos: "Afegeix els vídeos que falten de la llista de reproducció original"
   Source Playlist: "Llista de reproducció original"
   Save Playlist: "Desa la llista de reproducció"

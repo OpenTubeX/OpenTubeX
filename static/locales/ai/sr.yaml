@@ -178,6 +178,8 @@ Feed:
   Cancel Refresh: Откажи освежавање
   Next Auto Refresh: 'Следеће аутоматско освежавање: {date}'
 User Playlists:
+  Remove Unavailable Videos: "Уклоните недоступне видео снимке"
+  Remove Unavailable Videos Confirmation: "Уклоните недоступне видео снимке? Пронађено: {count}. Није могуће проверити: {uncertain}. Непроверени видео снимци ће бити сачувани."
   Add Missing Videos: "Додај видео-снимке који недостају из изворне плејлисте"
   Source Playlist: "Изворна плејлиста"
   Save Playlist: "Сачувај плејлисту"

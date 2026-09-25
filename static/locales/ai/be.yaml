@@ -182,6 +182,8 @@ Feed:
   Cancel Refresh: Скасаваць абнаўленне
   Next Auto Refresh: 'Наступнае аўтаабнаўленне: {date}'
 User Playlists:
+  Remove Unavailable Videos: "Выдаліць недаступныя відэа"
+  Remove Unavailable Videos Confirmation: "Выдаліць недаступныя відэа? Знойдзена: {count}. Не ўдалося праверыць: {uncertain}. Неправераныя відэа будуць захаваны."
   Add Missing Videos: "Дадаць адсутныя відэа з зыходнага плэйліста"
   Source Playlist: "Зыходны плэйліст"
   Save Playlist: "Захаваць плэйліст"

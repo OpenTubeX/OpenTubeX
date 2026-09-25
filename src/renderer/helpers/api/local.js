@@ -90,6 +90,16 @@ async function createInnertube({ withPlayer = false, location = undefined, safet
   }
 
   const fetch = fetchFunc ?? localApiFetch
+  let sessionFetch = fetch
+  if (signal) {
+    sessionFetch = (input, init) => {
+      const requestSignal = init?.signal ?? input?.signal
+      return fetch(input, {
+        ...init,
+        signal: requestSignal ? AbortSignal.any([signal, requestSignal]) : signal
+      })
+    }
+  }
 
   return await Innertube.create({
     // This setting is enabled by default and results in YouTube.js reusing the same session across different Innertube instances.
@@ -104,7 +114,7 @@ async function createInnertube({ withPlayer = false, location = undefined, safet
     client_type: clientType,
 
     // Use native HTTP in Capacitor without patching global fetch.
-    fetch: signal ? (input, init) => fetch(input, { ...init, signal }) : fetch,
+    fetch: sessionFetch,
     cache,
     generate_session_locally: !!generateSessionLocally
   })
@@ -1907,10 +1917,25 @@ export async function getLocalHistoryMetadata(videoId, signal) {
     signal,
     fetchFunc: async (input, init) => checkHistoryRepairResponse(await localApiFetch(input, init)),
   })
-  const response = await innertube.actions.execute('/player', {
-    videoId,
-    contentCheckOk: true,
-    racyCheckOk: true,
+  return fetchPublicPlayerMetadata(innertube, videoId, signal)
+}
+
+/** Reuse one lightweight session while checking a playlist's video availability. */
+export async function createLocalPlaylistAvailabilityChecker(signal) {
+  const innertube = await createInnertube({
+    signal,
+    fetchFunc: async (input, init) => checkHistoryRepairResponse(await localApiFetch(input, init)),
   })
-  return response.data
+  return (videoId, requestSignal) => fetchPublicPlayerMetadata(innertube, videoId, requestSignal)
+}
+
+async function fetchPublicPlayerMetadata(innertube, videoId, signal) {
+  // Actions.execute does not pass a request signal through to HTTPClient.fetch.
+  const response = await innertube.session.http.fetch('/player', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ videoId, contentCheckOk: true, racyCheckOk: true }),
+    signal,
+  })
+  return response.json()
 }

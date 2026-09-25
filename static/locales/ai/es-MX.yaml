@@ -183,6 +183,8 @@ Feed:
   Cancel Refresh: Cancelar actualización
   Next Auto Refresh: 'Próxima actualización automática: {date}'
 User Playlists:
+  Remove Unavailable Videos: "Eliminar videos no disponibles"
+  Remove Unavailable Videos Confirmation: "¿Eliminar videos no disponibles? Encontrados: {count}. No se pudo verificar: {uncertain}. Los videos no verificados se conservarán."
   Add Missing Videos: "Agregar videos que faltan desde la lista de reproducción original"
   Source Playlist: "Lista de reproducción original"
   Save Playlist: "Guardar lista de reproducción"

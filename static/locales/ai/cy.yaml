@@ -176,6 +176,8 @@ Feed:
   Cancel Refresh: Canslo'r adnewyddiad
   Next Auto Refresh: 'Adnewyddiad awtomatig nesaf: {date}'
 User Playlists:
+  Remove Unavailable Videos: "Dileu fideos nad ydynt ar gael"
+  Remove Unavailable Videos Confirmation: "Dileu fideos nad ydynt ar gael? Wedi dod o hyd: {count}. Methu gwirio: {uncertain}. Bydd fideos heb eu gwirio yn cael eu cadw."
   Add Missing Videos: "Ychwanegu fideos coll o’r rhestr chwarae wreiddiol"
   Source Playlist: "Rhestr chwarae wreiddiol"
   Save Playlist: "Cadw'r rhestr chwarae"

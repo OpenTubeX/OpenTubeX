@@ -176,6 +176,8 @@ Feed:
   Cancel Refresh: Ακύρωση ανανέωσης
   Next Auto Refresh: 'Επόμενη αυτόματη ανανέωση: {date}'
 User Playlists:
+  Remove Unavailable Videos: "Αφαίρεση μη διαθέσιμων βίντεο"
+  Remove Unavailable Videos Confirmation: "Να αφαιρεθούν τα μη διαθέσιμα βίντεο; Βρέθηκαν: {count}. Δεν ήταν δυνατός ο έλεγχος: {uncertain}. Τα βίντεο που δεν ελέγχθηκαν θα διατηρηθούν."
   Add Missing Videos: "Προσθήκη βίντεο που λείπουν από την αρχική λίστα αναπαραγωγής"
   Source Playlist: "Αρχική λίστα αναπαραγωγής"
   Save Playlist: "Αποθήκευση λίστας αναπαραγωγής"

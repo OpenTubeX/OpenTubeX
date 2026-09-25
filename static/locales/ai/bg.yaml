@@ -176,6 +176,8 @@ Feed:
   Cancel Refresh: Отмени обновяването
   Next Auto Refresh: 'Следващо автоматично обновяване: {date}'
 User Playlists:
+  Remove Unavailable Videos: "Премахване на недостъпни видеоклипове"
+  Remove Unavailable Videos Confirmation: "Премахване на недостъпни видеоклипове? Намерени: {count}. Неуспешна проверка: {uncertain}. Непроверените видеоклипове ще бъдат запазени."
   Add Missing Videos: "Добавяне на липсващи видеоклипове от изходния плейлист"
   Source Playlist: "Изходен плейлист"
   Save Playlist: "Запазване на плейлиста"
