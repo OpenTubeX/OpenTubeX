@@ -1090,6 +1090,39 @@ test('plays a progressive external format when yt-dlp omits codec fields', async
   await waitForPlayback(page)
 })
 
+test('plays a direct MP4 when yt-dlp omits codecs and dimensions', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+
+  const executable = path.join(app.userDataDir, 'external-media-direct-mp4.sh')
+  const streamUrl = 'https://media.example.test/video.mp4'
+  const response = JSON.stringify({
+    title: 'Direct MP4',
+    formats: [{ format_id: 'mp4', url: streamUrl, protocol: 'https', ext: 'mp4' }]
+  })
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+    `printf '%s\\n' '${response}'`
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  const media = Buffer.from((await readFile(path.join(repoRoot, 'e2e', 'fixtures', 'media', 'post-live-video.mp4.b64'), 'utf8')).replaceAll('\n', ''), 'base64')
+  await page.route(streamUrl, route => route.fulfill({
+    contentType: 'video/mp4',
+    headers: { 'content-length': String(media.length), 'accept-ranges': 'bytes' },
+    body: media
+  }))
+  await page.evaluate(async ytDlpPath => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateYtDlpSource', 'system')
+    await store.dispatch('updateYtDlpPath', ytDlpPath)
+  }, executable)
+
+  await page.locator(sel.searchInput).fill('https://media.example.test/video.mp4')
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page.locator(`${activeTab} .externalMediaPlayer`)).toBeVisible({ timeout: 20000 })
+  await waitForPlayback(page)
+})
+
 test('keeps protected media headers with a long external storyboard', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
 

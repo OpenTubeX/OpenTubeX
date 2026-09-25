@@ -291,7 +291,7 @@ function isAudioFormat(format) {
 /** Some extractors omit codec names for otherwise playable progressive video. */
 function isExternalProgressiveVideoFormat(format) {
   return format.vcodec === null && format.acodec === null &&
-    ['mp4', 'webm'].includes(format.ext) && (format.width !== null || format.height !== null)
+    ['mp4', 'webm'].includes(format.ext)
 }
 
 /**
