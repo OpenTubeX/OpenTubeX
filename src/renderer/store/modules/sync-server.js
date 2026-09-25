@@ -48,7 +48,7 @@ import { isSettingSyncEnabled } from './settings'
 import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../helpers/subscription-seen-videos'
 import { syncWatchStats } from '../../helpers/sync-watch-stats'
 import { MAIN_PROFILE_ID } from '../../../constants'
-import { getInitialSyncStages } from '../../helpers/sync-server-plan.js'
+import { getInitialSyncStages, planEncryptedSyncCollections } from '../../helpers/sync-server-plan.js'
 
 const EVENT_SYNC_DEBOUNCE_MS = 1500
 const EVENT_SYNC_DELAYS = {
@@ -57,13 +57,6 @@ const EVENT_SYNC_DELAYS = {
   watchStats: { delay: 30000, maxWait: 60000 },
 }
 const ENCRYPTED_SYNC_RETRIES = 3
-const LEGACY_ENCRYPTED_COLLECTIONS = [
-  'subscriptions',
-  'playlists',
-  'history',
-  'profiles',
-  'playlistBookmarks',
-]
 
 const collectionCache = new SyncCollectionCache()
 const liveConnection = new SyncLiveConnectionState(typeof navigator !== 'undefined' ? navigator.locks : null)
@@ -402,20 +395,11 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           : manifest.legacy_data
             ? await loadLegacySyncDocument(networkClient)
             : createEmptySyncDocument()
-        const uploadCollections = manifest.legacy_data || legacyEncrypted?.payload
-          ? Array.from(new Set([...enabledCollections, ...LEGACY_ENCRYPTED_COLLECTIONS]))
-          : enabledCollections
-        const hasLegacyPlaybackSpeeds = manifest.collections.some(
-          entry => entry.collection === 'playbackSpeeds'
-        )
-        const compatibilityCollections = [
-          ...(hasLegacyPlaybackSpeeds ? ['playbackSpeeds'] : []),
-          ...(enabledCollections.includes('sessionsV2') ? ['sessions'] : []),
-        ]
-        const downloadCollections = Array.from(new Set([
-          ...uploadCollections,
-          ...compatibilityCollections,
-        ]))
+        const { upload: uploadCollections, download: downloadCollections } = planEncryptedSyncCollections({
+          enabled: enabledCollections,
+          manifest,
+          hasLegacyEncryptedPayload: Boolean(legacyEncrypted?.payload),
+        })
         // A cursor also changes for our own uploads and device messages. Avoid
         // merging every collection again when its revision is already cached.
         if (remoteOnly && context.state.syncServerStatus !== 'error' && !manifest.legacy_data && !legacyEncrypted?.payload &&

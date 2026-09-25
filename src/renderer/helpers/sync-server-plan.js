@@ -25,3 +25,27 @@ export function getInitialSyncStages(settings, { encrypted, supportsSessions }) 
     'finishing',
   ]
 }
+
+const LEGACY_ENCRYPTED_COLLECTIONS = [
+  'subscriptions', 'playlists', 'history', 'profiles', 'playlistBookmarks'
+]
+
+/**
+ * @typedef {{legacy_data: boolean, collections: Array<{collection: string, revision: number}>}} EncryptedSyncManifest
+ */
+
+/** Select the collections needed to migrate or sync an encrypted document.
+ * @param {{enabled: string[], manifest: EncryptedSyncManifest, hasLegacyEncryptedPayload?: boolean}} options
+ * @returns {{upload: string[], download: string[]}}
+ */
+export function planEncryptedSyncCollections({ enabled, manifest, hasLegacyEncryptedPayload = false }) {
+  const migrating = manifest.legacy_data || hasLegacyEncryptedPayload
+  const upload = migrating
+    ? Array.from(new Set([...enabled, ...LEGACY_ENCRYPTED_COLLECTIONS]))
+    : enabled
+  const compatibility = [
+    ...(manifest.collections.some(entry => entry.collection === 'playbackSpeeds') ? ['playbackSpeeds'] : []),
+    ...(enabled.includes('sessionsV2') ? ['sessions'] : []),
+  ]
+  return { upload, download: Array.from(new Set([...upload, ...compatibility])) }
+}

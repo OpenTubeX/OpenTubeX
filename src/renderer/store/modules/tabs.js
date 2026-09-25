@@ -2,12 +2,11 @@ import packageDetails from '../../../../package.json'
 import { getTabPageIcon } from '../../tabs/tabPageIcon'
 import { DEFAULT_VIDEO_ZOOM } from '../../helpers/player/videoZoom'
 import { reconcilePendingTabOrder } from '../../tabs/pendingTabOrder'
+import { getTabHistoryState, reuseEqualSnapshot, reconcileSnapshotList, reconcileTab, normalizeRoute, cloneRoute, normalizeHistoryEntry, normalizeScroll } from '../../tabs/tabSessionModel.js'
 import { formatTabTitle } from '../../tabs/tabTitle'
 import { getCapacitorTabService } from '../../tabs/CapacitorTabService'
 
 const MAX_LOGICAL_HISTORY_ENTRIES = 100
-const NAV_HISTORY_DISPLAY_LIMIT = 15
-const HALF_NAV_HISTORY_DISPLAY_LIMIT = Math.trunc(NAV_HISTORY_DISPLAY_LIMIT / 2)
 
 const state = {
   tabs: [],
@@ -51,36 +50,7 @@ const getters = {
   getTabSkipSilence: (state) => (tabId) => state.skipSilenceByTabId[tabId] ?? false,
   getTabHistoryState: (state) => (tabId) => {
     const tab = state.tabs.find(candidate => candidate.id === tabId)
-    if (!tab) {
-      return { canGoBack: false, canGoForward: false, options: [] }
-    }
-
-    const historyLength = tab.history.length
-    let end
-    if (tab.historyIndex < HALF_NAV_HISTORY_DISPLAY_LIMIT) {
-      end = Math.min(historyLength - 1, NAV_HISTORY_DISPLAY_LIMIT - 1)
-    } else if (historyLength - tab.historyIndex < HALF_NAV_HISTORY_DISPLAY_LIMIT + 1) {
-      end = historyLength - 1
-    } else {
-      end = tab.historyIndex + HALF_NAV_HISTORY_DISPLAY_LIMIT
-    }
-
-    const options = []
-    for (let index = end; index >= Math.max(0, end + 1 - NAV_HISTORY_DISPLAY_LIMIT); index--) {
-      const entry = tab.history[index]
-      options.push({
-        label: entry.title || entry.route.fullPath,
-        value: index - tab.historyIndex,
-        active: index === tab.historyIndex,
-        icon: getTabPageIcon(entry)
-      })
-    }
-
-    return {
-      canGoBack: tab.historyIndex > 0,
-      canGoForward: tab.historyIndex < historyLength - 1,
-      options
-    }
+    return tab ? getTabHistoryState(tab, getTabPageIcon) : { canGoBack: false, canGoForward: false, options: [] }
   }
 }
 
@@ -100,7 +70,7 @@ const mutations = {
     }
     state.containerIds = reuseEqualSnapshot(state.containerIds, containerIds)
 
-    const reconciledTabs = incomingTabs.map(tab => reconcileTab(previousTabsById.get(tab.id), tab))
+    const reconciledTabs = incomingTabs.map(tab => reconcileTab(previousTabsById.get(tab.id), tab, stripDocumentTitle))
     const pendingOrderAcknowledged = payload.reorderRequestId === state.pendingTabOrderRequestId
     const reconciledOrder = reconcilePendingTabOrder(
       reconciledTabs,
@@ -450,224 +420,12 @@ const actions = {
   }
 }
 
-// Snapshots contain plain serializable data. Keep existing references when IPC
-// supplies equal values so unrelated metadata does not invalidate Vue consumers.
-function equalSnapshot(left, right) {
-  if (left === right) return true
-  if (left == null || right == null || typeof left !== 'object' || typeof right !== 'object') return false
-  if (Array.isArray(left) !== Array.isArray(right)) return false
-  const keys = Object.keys(right)
-  return Object.keys(left).length === keys.length && keys.every(key => (
-    Object.hasOwn(left, key) && equalSnapshot(left[key], right[key])
-  ))
-}
-
-function reuseEqualSnapshot(previous, incoming) {
-  return equalSnapshot(previous, incoming) ? previous : incoming
-}
-
-function reconcileSnapshotList(previous, incoming) {
-  const previousById = new Map(previous.map(item => [item.id, item]))
-  const items = (Array.isArray(incoming) ? incoming : []).map(item => (
-    reuseEqualSnapshot(previousById.get(item.id), item)
-  ))
-  return reuseEqualSnapshot(previous, items)
-}
-
-function reconcileTab(previous, incoming) {
-  if (!previous) {
-    return createRuntimeTab(incoming, normalizeRoute(incoming.route ?? routeFromUrl(incoming.url)))
-  }
-
-  let history = previous.history
-  let historyIndex = previous.historyIndex
-  let route = previous.route
-  let pendingReloadRoute = previous.pendingReloadRoute
-  let contentTitle = previous.contentTitle
-
-  // Ordinary incoming routes echo renderer-owned navigation and can be stale.
-  // A sync revision explicitly hands authority to the remote session instead.
-  if (
-    Number.isInteger(incoming.syncedNavigationRevision) &&
-    incoming.syncedNavigationRevision !== previous.syncedNavigationRevision
-  ) {
-    const incomingRoute = normalizeRoute(incoming.route ?? routeFromUrl(incoming.url))
-    const title = stripDocumentTitle(incoming.title || incomingRoute.fullPath)
-    const restored = restoredHistoryState(incoming, incomingRoute, title)
-    history = restored.history
-    historyIndex = restored.historyIndex
-    route = incomingRoute
-    pendingReloadRoute = null
-    contentTitle = title
-  } else if (incoming.loadState === 'unloaded' && previous.loadState !== 'unloaded') {
-    const currentEntry = normalizeHistoryEntry(history[historyIndex] ?? { route })
-    history = [currentEntry]
-    historyIndex = 0
-    route = currentEntry.route
-  }
-
-  return reuseEqualSnapshot(previous, {
-    ...previous,
-    ...incoming,
-    route,
-    history,
-    historyIndex,
-    pendingReloadRoute,
-    contentTitle,
-    refreshKey: incoming.refreshKey ?? previous.refreshKey ?? 0
-  })
-}
-
-function createRuntimeTab(incoming, route) {
-  const title = stripDocumentTitle(incoming.title || route.fullPath)
-  return {
-    ...incoming,
-    route,
-    ...restoredHistoryState(incoming, route, title),
-    pendingReloadRoute: null,
-    contentTitle: title,
-    refreshKey: incoming.refreshKey ?? 0
-  }
-}
-
-/**
- * Seed a new runtime tab's back/forward history from a persisted history
- * (restored tab sessions), falling back to a single entry for the current
- * route. The tab's live route and title stay authoritative for the current
- * entry, as persisted history can lag slightly behind them.
- */
-function restoredHistoryState(incoming, route, title) {
-  if (!Array.isArray(incoming.history) || incoming.history.length === 0) {
-    return {
-      history: [{ route: cloneRoute(route), title, scroll: { left: 0, top: 0 } }],
-      historyIndex: 0
-    }
-  }
-
-  const history = incoming.history.map(normalizeHistoryEntry)
-  const historyIndex = Number.isInteger(incoming.historyIndex)
-    ? Math.max(0, Math.min(incoming.historyIndex, history.length - 1))
-    : history.length - 1
-
-  const currentEntry = history[historyIndex]
-  if (currentEntry.route.fullPath !== route.fullPath) {
-    currentEntry.route = cloneRoute(route)
-  }
-  if (title) {
-    currentEntry.title = title
-  }
-
-  return { history, historyIndex }
-}
-
-export function normalizeRoute(route) {
-  const path = typeof route?.path === 'string' && route.path.length > 0
-    ? route.path
-    : '/'
-  const query = normalizeQuery(route?.query)
-  const hash = typeof route?.hash === 'string' ? route.hash : ''
-  const fullPath = typeof route?.fullPath === 'string' && route.fullPath.length > 0
-    ? route.fullPath
-    : buildFullPath(path, query, hash)
-
-  return {
-    name: typeof route?.name === 'string' ? route.name : null,
-    path: path.startsWith('/') ? path : `/${path}`,
-    params: normalizeQuery(route?.params),
-    query,
-    hash,
-    fullPath
-  }
-}
-
-export function cloneRoute(route) {
-  const normalized = normalizeRoute(route)
-  return {
-    ...normalized,
-    params: { ...normalized.params },
-    query: cloneQuery(normalized.query)
-  }
-}
-
-function normalizeHistoryEntry(entry) {
-  return {
-    route: cloneRoute(entry?.route),
-    title: typeof entry?.title === 'string' ? entry.title : entry?.route?.fullPath || '/',
-    titlePending: entry?.titlePending === true,
-    scroll: normalizeScroll(entry?.scroll)
-  }
-}
-
-function normalizeScroll(scroll) {
-  return {
-    left: Number.isFinite(scroll?.left) ? scroll.left : 0,
-    top: Number.isFinite(scroll?.top) ? scroll.top : 0
-  }
-}
-
-function normalizeQuery(query) {
-  if (!query || typeof query !== 'object') {
-    return {}
-  }
-
-  return Object.fromEntries(
-    Object.entries(query)
-      .filter(([, value]) => value != null)
-      .map(([key, value]) => [key, Array.isArray(value) ? value.map(String) : String(value)])
-  )
-}
-
-function cloneQuery(query) {
-  return Object.fromEntries(
-    Object.entries(query).map(([key, value]) => [key, Array.isArray(value) ? [...value] : value])
-  )
-}
-
-function buildFullPath(path, query, hash) {
-  const search = new URLSearchParams()
-  for (const [key, value] of Object.entries(query)) {
-    for (const item of Array.isArray(value) ? value : [value]) {
-      search.append(key, item)
-    }
-  }
-  const queryString = search.toString()
-  return `${path.startsWith('/') ? path : `/${path}`}${queryString ? `?${queryString}` : ''}${hash}`
-}
-
 function stripDocumentTitle(title) {
-  if (title === packageDetails.productName) {
-    return ''
-  }
+  if (title === packageDetails.productName) return ''
   return formatTabTitle(title)
 }
 
-function searchParamsToQuery(searchParams) {
-  const query = {}
-  for (const [key, value] of searchParams) {
-    if (key in query) {
-      const existing = query[key]
-      query[key] = Array.isArray(existing) ? [...existing, value] : [existing, value]
-    } else {
-      query[key] = value
-    }
-  }
-  return query
-}
-
-function routeFromUrl(url) {
-  try {
-    const parsed = new URL(url)
-    const hashRoute = parsed.hash.startsWith('#') ? parsed.hash.slice(1) : parsed.hash
-    const routeUrl = new URL(hashRoute || '/', parsed.origin)
-    return normalizeRoute({
-      path: routeUrl.pathname,
-      query: searchParamsToQuery(routeUrl.searchParams),
-      hash: routeUrl.hash
-    })
-  } catch {
-    return normalizeRoute({ path: '/' })
-  }
-}
+export { normalizeRoute, cloneRoute } from '../../tabs/tabSessionModel.js'
 
 export default {
   state,

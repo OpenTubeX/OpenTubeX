@@ -4,9 +4,11 @@ import vm from 'node:vm'
 import test from 'node:test'
 import { createStore } from 'vuex'
 import { reconcilePendingTabOrder } from '../../src/renderer/tabs/pendingTabOrder.js'
+import { getTabHistoryState, reuseEqualSnapshot, reconcileSnapshotList, reconcileTab, normalizeRoute, cloneRoute, normalizeHistoryEntry, normalizeScroll } from '../../src/renderer/tabs/tabSessionModel.js'
 
 const source = readFileSync(new URL('../../src/renderer/store/modules/tabs.js', import.meta.url), 'utf8')
   .replace(/^import .*\n/gm, '')
+  .replace(/^export \{.*\} from .*\n/gm, '')
   .replace(/^export default /m, 'const module = ')
   .replace(/^export /gm, '')
 
@@ -17,6 +19,14 @@ function createTabStore() {
     DEFAULT_VIDEO_ZOOM: 1,
     formatTabTitle: title => title,
     reconcilePendingTabOrder,
+    getTabHistoryState,
+    reuseEqualSnapshot,
+    reconcileSnapshotList,
+    reconcileTab,
+    normalizeRoute,
+    cloneRoute,
+    normalizeHistoryEntry,
+    normalizeScroll,
   })
   return createStore(module)
 }
