@@ -1828,7 +1828,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 /* stylelint-disable-next-line selector-max-compound-selectors */
-:deep(.shaka-controls-button-panel > button:nth-child(1 of .shaka-spacer ~ button:not(.shaka-hidden))) {
+.ftVideoPlayer:not(.classicPlayerControls) :deep(.shaka-controls-button-panel > button:nth-child(1 of .shaka-spacer ~ button:not(.shaka-hidden))) {
   border-start-start-radius: calc(999px * var(--ui-roundness));
   border-end-start-radius: calc(999px * var(--ui-roundness));
   background-image:
@@ -1842,7 +1842,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 /* stylelint-disable-next-line selector-max-compound-selectors */
-:deep(.shaka-controls-button-panel > button:nth-last-child(1 of .shaka-spacer ~ button:not(.shaka-hidden))) {
+.ftVideoPlayer:not(.classicPlayerControls) :deep(.shaka-controls-button-panel > button:nth-last-child(1 of .shaka-spacer ~ button:not(.shaka-hidden))) {
   border-start-end-radius: calc(999px * var(--ui-roundness));
   border-end-end-radius: calc(999px * var(--ui-roundness));
   background-image:
@@ -1856,7 +1856,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 /* stylelint-disable-next-line selector-max-compound-selectors */
-:deep(.shaka-controls-button-panel > button:nth-child(1 of .shaka-spacer ~ button:not(.shaka-hidden)):nth-last-child(1 of .shaka-spacer ~ button:not(.shaka-hidden))) {
+.ftVideoPlayer:not(.classicPlayerControls) :deep(.shaka-controls-button-panel > button:nth-child(1 of .shaka-spacer ~ button:not(.shaka-hidden)):nth-last-child(1 of .shaka-spacer ~ button:not(.shaka-hidden))) {
   background-image:
     radial-gradient(circle var(--ft-control-pill-radius) at right center, var(--ft-control-item-hover-color) 98%, transparent),
     linear-gradient(var(--ft-control-item-hover-color), var(--ft-control-item-hover-color)),
@@ -1985,7 +1985,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   position: relative;
 }
 
-:deep(.shaka-controls-button-panel > .shaka-play-button > .shaka-ui-icon) {
+/* stylelint-disable-next-line selector-max-compound-selectors */
+.ftVideoPlayer:not(.classicPlayerControls) :deep(.shaka-controls-button-panel > .shaka-play-button > .shaka-ui-icon) {
   font-size: 24px;
 }
 
@@ -2001,7 +2002,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   transform: translate(-50%, -50%) scale(1.08);
 }
 
-:deep(.shaka-controls-button-panel > .shaka-play-button > .ft-play-pause-morph-icon) {
+/* stylelint-disable-next-line selector-max-compound-selectors */
+.ftVideoPlayer:not(.classicPlayerControls) :deep(.shaka-controls-button-panel > .shaka-play-button > .ft-play-pause-morph-icon) {
   transform: translate(-50%, -50%);
 }
 

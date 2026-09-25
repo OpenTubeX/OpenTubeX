@@ -28,6 +28,13 @@ test('Layout setting restores classic player controls and switches the active pl
   await expect(glass).toBeHidden()
   await expect(player.locator('.ft-time-display-group')).toHaveCSS('background-image', 'none')
   await expect(player.locator('.shaka-controls-button-panel > .ft-chapters-button')).toHaveCSS('background-image', 'none')
+  const rightButtons = player.locator('.shaka-controls-button-panel > .shaka-spacer ~ button:not(.shaka-hidden)')
+  for (const button of await rightButtons.all()) {
+    await expect(button).toHaveCSS('background-image', 'none')
+  }
+  for (const icon of await player.locator('.shaka-controls-button-panel > .shaka-play-button > .shaka-ui-icon').all()) {
+    await expect(icon).toHaveCSS('font-size', '32px')
+  }
   await expect.poll(() => player.locator('.shaka-controls-button-panel > .ft-chapters-button').evaluate(element => getComputedStyle(element, '::before').backgroundColor)).toBe('rgba(0, 0, 0, 0.16)')
   await expect(player.locator('.shaka-scrim-container')).toHaveCSS('background-image', /linear-gradient/)
   await player.locator('.shaka-overflow-menu-button').click()
@@ -39,6 +46,52 @@ test('Layout setting restores classic player controls and switches the active pl
   await expect(player).not.toHaveClass(/classicPlayerControls/)
   await expect(glass).toBeVisible()
   await expect(menu).toHaveCSS('backdrop-filter', /blur\(16px\)/)
+  for (const icon of await player.locator('.shaka-controls-button-panel > .shaka-play-button > .shaka-ui-icon').all()) {
+    await expect(icon).toHaveCSS('font-size', '24px')
+  }
+})
+
+test('play and pause icons morph in both player themes', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  const player = page.locator('.ftVideoPlayer')
+
+  for (const frosted of [true, false]) {
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+    await expect(player).toHaveClass(frosted ? /^(?!.*classicPlayerControls)/ : /classicPlayerControls/)
+
+    for (const action of ['pause', 'play']) {
+      await player.hover({ position: { x: 100, y: 100 } })
+      await page.evaluate(() => {
+        const button = document.querySelector('.ftVideoPlayer .shaka-controls-button-panel > .shaka-play-button')
+        const icon = button.querySelector('.ft-play-pause-morph-icon')
+        const path = icon.querySelector('path')
+        const initial = getComputedStyle(path).d
+        const size = getComputedStyle(icon).fontSize
+        const scale = new DOMMatrix(getComputedStyle(icon).transform).a
+        window.__playMorphProbe = new Promise(resolve => {
+          const transition = new Promise(resolve => {
+            path.addEventListener('transitionrun', event => resolve(event.propertyName), { once: true })
+            setTimeout(() => resolve(null), 500)
+          })
+          transition.then(async property => {
+            await new Promise(resolve => setTimeout(resolve, 90))
+            const midpoint = getComputedStyle(path).d
+            await new Promise(resolve => setTimeout(resolve, 120))
+            resolve({ property, initial, midpoint, final: getComputedStyle(path).d, size, scale })
+          })
+        })
+      })
+      await player.locator('.shaka-controls-button-panel > .shaka-play-button').click({ force: true })
+      const animated = await page.evaluate(() => window.__playMorphProbe)
+      expect(animated.property).toBe('d')
+      await expect(video).toHaveJSProperty('paused', action === 'pause')
+      expect(animated.midpoint).not.toBe(animated.initial)
+      expect(animated.midpoint).not.toBe(animated.final)
+      expect(animated.size).toBe(frosted ? '24px' : '32px')
+      expect(animated.scale).toBeCloseTo(frosted ? 1 : 1.08, 2)
+    }
+  }
 })
 
 test('player controls share pill surfaces and the time display toggles together', async ({ app, page }) => {
@@ -120,11 +173,6 @@ test('player controls share pill surfaces and the time display toggles together'
     return icon.left + (glyph.x + glyph.width / 2 - viewBox.x) * icon.width / viewBox.width - pill.left - 24
   })
   expect(Math.abs(volumeGlyphOffset)).toBeLessThan(1)
-  const volumeIconWidth = await volumeGroup.locator('.shaka-mute-button > .shaka-ui-icon').evaluate(element => element.getBoundingClientRect().width)
-  for (const playIcon of await page.locator('.shaka-controls-button-panel > .shaka-play-button > .shaka-ui-icon').all()) {
-    const iconWidth = await playIcon.evaluate(element => element.getBoundingClientRect().width)
-    expect(Math.abs(iconWidth - volumeIconWidth)).toBeLessThan(1)
-  }
   await page.locator('.shaka-mute-button').hover()
   await expect(volumeGroup.locator('.shaka-volume-bar-container')).toBeVisible()
   const expandedIconOffset = await volumeGroup.evaluate(element => {
