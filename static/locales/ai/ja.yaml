@@ -592,7 +592,7 @@ Settings:
       Prepare in Background: バックグラウンドで吹き替え翻訳の準備を開始
       Background Preparation Tooltip: 対応動画が読み込まれると、その動画のID、長さ、選択した言語を翻訳サービスに送信します。
       Language: 吹き替え翻訳の言語
-      Supported Source Languages: '対応する原文言語: ロシア語、英語、中国語、韓国語、リトアニア語、ラトビア語、アラビア語、フランス語、イタリア語、スペイン語、ドイツ語、日本語。'
+      Supported Source Languages: '対応する原文言語: ロシア語、英語、中国語、韓国語、アラビア語、フランス語、イタリア語、スペイン語、ドイツ語、日本語。'
       Voice Volume: 翻訳音声の音量
       Original Volume: 元の音声の音量
       Russian: ロシア語

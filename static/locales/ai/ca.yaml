@@ -821,7 +821,7 @@ Settings:
       Prepare in Background: Comença a preparar les traduccions de veu en off en segon pla
       Background Preparation Tooltip: Envia l'ID, la durada i la llengua seleccionada del vídeo actual al servei de traducció tan bon punt es carrega un vídeo compatible.
       Language: Llengua de la traducció de veu en off
-      Supported Source Languages: "Llengües d'origen admeses: rus, anglès, xinès, coreà, lituà, letó, àrab, francès, italià, castellà, alemany i japonès."
+      Supported Source Languages: "Llengües d'origen admeses: rus, anglès, xinès, coreà, àrab, francès, italià, castellà, alemany i japonès."
       Voice Volume: Volum de la veu traduïda
       Original Volume: Volum de l'àudio original
       Russian: Rus

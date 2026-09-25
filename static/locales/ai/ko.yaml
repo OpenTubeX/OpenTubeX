@@ -761,7 +761,7 @@ Settings:
       Prepare in Background: 백그라운드에서 음성 번역 준비 시작
       Background Preparation Tooltip: 지원되는 동영상을 불러오면 즉시 현재 동영상의 ID, 재생 시간 및 선택한 언어를 번역 서비스로 전송합니다.
       Language: 음성 번역 언어
-      Supported Source Languages: '지원되는 원본 언어: 러시아어, 영어, 중국어, 한국어, 리투아니아어, 라트비아어, 아랍어, 프랑스어, 이탈리아어, 스페인어, 독일어 및 일본어.'
+      Supported Source Languages: '지원되는 원본 언어: 러시아어, 영어, 중국어, 한국어, 아랍어, 프랑스어, 이탈리아어, 스페인어, 독일어 및 일본어.'
       Voice Volume: 번역 음성 음량
       Original Volume: 원본 오디오 음량
       Russian: 러시아어

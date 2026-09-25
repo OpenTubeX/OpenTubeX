@@ -592,7 +592,7 @@ Settings:
       Prepare in Background: Seslendirme çevirilerini arka planda hazırlamaya başla
       Background Preparation Tooltip: Desteklenen bir video yüklenir yüklenmez geçerli videonun kimliğini, süresini ve seçili dili çeviri hizmetine gönderir.
       Language: Seslendirme çevirisi dili
-      Supported Source Languages: 'Desteklenen kaynak diller: Rusça, İngilizce, Çince, Korece, Litvanca, Letonca, Arapça, Fransızca, İtalyanca, İspanyolca, Almanca ve Japonca.'
+      Supported Source Languages: 'Desteklenen kaynak diller: Rusça, İngilizce, Çince, Korece, Arapça, Fransızca, İtalyanca, İspanyolca, Almanca ve Japonca.'
       Voice Volume: Çevrilmiş ses düzeyi
       Original Volume: Özgün ses düzeyi
       Russian: Rusça

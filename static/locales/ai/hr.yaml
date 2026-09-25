@@ -594,7 +594,7 @@ Settings:
       Prepare in Background: Započni pripremu glasovnih prijevoda u pozadini
       Background Preparation Tooltip: Šalje ID trenutačnog videozapisa, njegovo trajanje i odabrani jezik usluzi za prevođenje čim se učita podržani videozapis.
       Language: Jezik glasovnog prijevoda
-      Supported Source Languages: 'Podržani izvorni jezici: ruski, engleski, kineski, korejski, litavski, latvijski, arapski, francuski, talijanski, španjolski, njemački i japanski.'
+      Supported Source Languages: 'Podržani izvorni jezici: ruski, engleski, kineski, korejski, arapski, francuski, talijanski, španjolski, njemački i japanski.'
       Voice Volume: Glasnoća prevedenog glasa
       Original Volume: Glasnoća izvornog zvuka
       Russian: Ruski

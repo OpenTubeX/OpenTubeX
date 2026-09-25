@@ -600,7 +600,7 @@ Settings:
       Prepare in Background: Aloita päällepuhuttujen käännösten valmistelu taustalla
       Background Preparation Tooltip: Lähettää nykyisen videon tunnisteen, keston ja valitun kielen käännöspalveluun heti, kun tuettu video latautuu.
       Language: Päällepuhutun käännöksen kieli
-      Supported Source Languages: 'Tuetut lähdekielet: venäjä, englanti, kiina, korea, liettua, latvia, arabia, ranska, italia, espanja, saksa ja japani.'
+      Supported Source Languages: 'Tuetut lähdekielet: venäjä, englanti, kiina, korea, arabia, ranska, italia, espanja, saksa ja japani.'
       Voice Volume: Käännetyn puheen äänenvoimakkuus
       Original Volume: Alkuperäisen äänen voimakkuus
       Russian: Venäjä

@@ -579,7 +579,7 @@ Settings:
       Prepare in Background: Start preparing voice-over translations in the background
       Background Preparation Tooltip: Sends the current video's ID, duration, and selected language to the translation service as soon as a supported video loads.
       Language: Voice-over translation language
-      Supported Source Languages: 'Supported source languages: Russian, English, Chinese, Korean, Lithuanian, Latvian, Arabic, French, Italian, Spanish, German, and Japanese.'
+      Supported Source Languages: 'Supported source languages: Russian, English, Chinese, Korean, Arabic, French, Italian, Spanish, German, and Japanese.'
       Voice Volume: Translated voice volume
       Original Volume: Original audio volume
       Russian: Russian

@@ -594,7 +594,7 @@ Settings:
       Prepare in Background: Börja förbereda dubbningsöversättningar i bakgrunden
       Background Preparation Tooltip: Skickar den aktuella videons ID, längd och valt språk till översättningstjänsten så snart en video som stöds läses in.
       Language: Språk för dubbningsöversättning
-      Supported Source Languages: 'Källspråk som stöds: ryska, engelska, kinesiska, koreanska, litauiska, lettiska, arabiska, franska, italienska, spanska, tyska och japanska.'
+      Supported Source Languages: 'Källspråk som stöds: ryska, engelska, kinesiska, koreanska, arabiska, franska, italienska, spanska, tyska och japanska.'
       Voice Volume: Volym för den översatta rösten
       Original Volume: Volym för originalljudet
       Russian: Ryska

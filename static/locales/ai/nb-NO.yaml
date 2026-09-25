@@ -592,7 +592,7 @@ Settings:
       Prepare in Background: Klargjør taleoversettelser i bakgrunnen
       Background Preparation Tooltip: Sender ID-en og varigheten til den gjeldende videoen samt valgt språk til oversettelsestjenesten så snart en støttet video lastes inn.
       Language: Språk for taleoversettelse
-      Supported Source Languages: 'Støttede kildespråk: russisk, engelsk, kinesisk, koreansk, litauisk, latvisk, arabisk, fransk, italiensk, spansk, tysk og japansk.'
+      Supported Source Languages: 'Støttede kildespråk: russisk, engelsk, kinesisk, koreansk, arabisk, fransk, italiensk, spansk, tysk og japansk.'
       Voice Volume: Lydstyrke for oversatt tale
       Original Volume: Lydstyrke for originallyd
       Russian: Russisk

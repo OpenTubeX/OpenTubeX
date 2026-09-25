@@ -602,7 +602,7 @@ Settings:
       Prepare in Background: Começar a preparar traduções de voz em segundo plano
       Background Preparation Tooltip: Envia o ID, a duração e o idioma selecionado do vídeo atual para o serviço de tradução assim que é carregado um vídeo suportado.
       Language: Idioma da tradução de voz
-      Supported Source Languages: 'Idiomas de origem suportados: russo, inglês, chinês, coreano, lituano, letão, árabe, francês, italiano, espanhol, alemão e japonês.'
+      Supported Source Languages: 'Idiomas de origem suportados: russo, inglês, chinês, coreano, árabe, francês, italiano, espanhol, alemão e japonês.'
       Voice Volume: Volume da voz traduzida
       Original Volume: Volume do áudio original
       Russian: Russo

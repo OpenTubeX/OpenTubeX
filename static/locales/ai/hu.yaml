@@ -592,7 +592,7 @@ Settings:
       Prepare in Background: Szinkronfordítások előkészítése a háttérben
       Background Preparation Tooltip: A támogatott videók betöltésekor azonnal elküldi az aktuális videó azonosítóját, időtartamát és a kiválasztott nyelvet a fordítási szolgáltatásnak.
       Language: Szinkronfordítás nyelve
-      Supported Source Languages: 'Támogatott forrásnyelvek: orosz, angol, kínai, koreai, litván, lett, arab, francia, olasz, spanyol, német és japán.'
+      Supported Source Languages: 'Támogatott forrásnyelvek: orosz, angol, kínai, koreai, arab, francia, olasz, spanyol, német és japán.'
       Voice Volume: Fordított beszéd hangereje
       Original Volume: Eredeti hangsáv hangereje
       Russian: Orosz

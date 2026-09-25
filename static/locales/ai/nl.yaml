@@ -600,7 +600,7 @@ Settings:
       Prepare in Background: Voice-oververtalingen op de achtergrond voorbereiden
       Background Preparation Tooltip: Stuurt de ID, duur en geselecteerde taal van de huidige video naar de vertaaldienst zodra een ondersteunde video wordt geladen.
       Language: Taal voor voice-oververtaling
-      Supported Source Languages: 'Ondersteunde brontalen: Russisch, Engels, Chinees, Koreaans, Litouws, Lets, Arabisch, Frans, Italiaans, Spaans, Duits en Japans.'
+      Supported Source Languages: 'Ondersteunde brontalen: Russisch, Engels, Chinees, Koreaans, Arabisch, Frans, Italiaans, Spaans, Duits en Japans.'
       Voice Volume: Volume van vertaalde stem
       Original Volume: Volume van oorspronkelijke audio
       Russian: Russisch

@@ -592,7 +592,7 @@ Settings:
       Prepare in Background: 在背景開始準備配音翻譯
       Background Preparation Tooltip: 支援的影片載入後，立即將目前影片的 ID、片長及所選語言傳送至翻譯服務。
       Language: 配音翻譯語言
-      Supported Source Languages: '支援的來源語言：俄文、英文、中文、韓文、立陶宛文、拉脫維亞文、阿拉伯文、法文、義大利文、西班牙文、德文及日文。'
+      Supported Source Languages: '支援的來源語言：俄文、英文、中文、韓文、阿拉伯文、法文、義大利文、西班牙文、德文及日文。'
       Voice Volume: 翻譯語音音量
       Original Volume: 原始音訊音量
       Russian: 俄文
