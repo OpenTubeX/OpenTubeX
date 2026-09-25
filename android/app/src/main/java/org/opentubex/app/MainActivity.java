@@ -56,10 +56,10 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(SabrHttpPlugin.class);
         registerPlugin(VoiceOverHttpPlugin.class);
         super.onCreate(savedInstanceState);
-        // A swipe reveals hidden playback bars temporarily instead of leaving
-        // them visible until another player-controls transition.
+        // Keep swiped bars visible so a second swipe can open notifications.
+        // The player hides the status bar again with its controls.
         androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView())
-            .setSystemBarsBehavior(androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            .setSystemBarsBehavior(androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_DEFAULT);
         try {
             AppIconPlugin.updateTaskIcon(this);
         } catch (android.content.pm.PackageManager.NameNotFoundException | RuntimeException error) {
