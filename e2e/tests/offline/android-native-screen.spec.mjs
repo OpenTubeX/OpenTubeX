@@ -1184,6 +1184,7 @@ test('playing video keeps the quick speed bar at its dragged scroll position', a
   await video.evaluate(element => element.play())
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(1)
   const bounds = await bar.boundingBox()
+  expect(bounds, 'The quick speed bar must stay visible while playback advances').not.toBeNull()
   const cdp = await page.context().newCDPSession(page)
   await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 })
   const y = Math.round(bounds.y + bounds.height / 2)
