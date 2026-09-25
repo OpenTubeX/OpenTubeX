@@ -1549,6 +1549,10 @@
     transform: translateX(-50%);
   }
 
+  :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError .errorContainer:dir(rtl)) {
+    transform: translateX(50%);
+  }
+
   :global(.capacitorTabs .videoLayout.shortsPlayerActive .videoPlayerError .errorWrapper) {
     box-sizing: border-box;
     inline-size: 100%;

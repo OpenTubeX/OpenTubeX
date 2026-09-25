@@ -4815,6 +4815,7 @@ export default defineComponent({
           const controlsContainer = ui?.getControls().getControlsContainer()
           const menu = controlsContainer?.querySelector('.shaka-overflow-menu')
           if (menu?.classList.contains('shaka-hidden')) {
+            ui.getControls().showUI()
             controlsContainer.querySelector('.shaka-overflow-menu-button')?.click()
           }
         })

@@ -71,6 +71,10 @@ test('landscape Shorts options use the space beside the narrow player', async ({
   const resumedBounds = await dialog.boundingBox()
   expect(resumedBounds.width).toBeGreaterThanOrEqual(250)
   expect(resumedBounds.x).toBeGreaterThanOrEqual(playerBounds.x + playerBounds.width + 8)
+  await player.dispatchEvent('mouseleave')
+  await expect(player.locator('.shaka-controls-container')).not.toHaveAttribute('shown')
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseQuickPlaybackSpeedBar', false))
+  await expect(dialog.locator('.shaka-overflow-menu')).toBeVisible()
 
   await page.setViewportSize({ width: 980, height: 600 })
   const edgeBounds = await dialog.boundingBox()
@@ -94,6 +98,10 @@ test('landscape Shorts options use the space beside the narrow player', async ({
   const menuBounds = await dialog.locator('.shaka-overflow-menu').boundingBox()
   expect(menuBounds.x).toBeGreaterThanOrEqual(compactBounds.x)
   expect(menuBounds.x + menuBounds.width).toBeLessThanOrEqual(compactBounds.x + compactBounds.width)
+  await page.evaluate(() => { document.body.dir = 'rtl' })
+  const rtlBounds = await dialog.boundingBox()
+  const rtlPlayerBounds = await player.boundingBox()
+  expect(rtlBounds.x + rtlBounds.width / 2).toBeCloseTo(rtlPlayerBounds.x + rtlPlayerBounds.width / 2, 0)
   const lastOption = dialog.locator('.shaka-overflow-menu > button:visible').last()
   await lastOption.scrollIntoViewIfNeeded()
   const optionBounds = await lastOption.boundingBox()
@@ -454,6 +462,10 @@ test('landscape Shorts keep long playback errors and retry actions readable', as
     expect(bounds.x).toBeGreaterThanOrEqual(narrowContainerBounds.x - 1)
     expect(bounds.x + bounds.width).toBeLessThanOrEqual(narrowContainerBounds.x + narrowContainerBounds.width + 1)
   }
+  await page.evaluate(() => { document.body.dir = 'rtl' })
+  const rtlContainerBounds = await container.boundingBox()
+  const rtlPlayerBounds = await page.locator('.videoPlayerError').boundingBox()
+  expect(rtlContainerBounds.x + rtlContainerBounds.width / 2).toBeCloseTo(rtlPlayerBounds.x + rtlPlayerBounds.width / 2, 0)
   await page.setViewportSize({ width: 1026, height: 461 })
   await watch.evaluate(component => { component.proxy.errorMessage = 'Playback failed.' })
   await expect.poll(() => container.evaluate(element => ({

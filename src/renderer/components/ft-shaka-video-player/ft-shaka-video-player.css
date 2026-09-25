@@ -5065,6 +5065,10 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
       inline-size: min(320px, calc(100vw - 48px));
       transform: translateX(-50%);
     }
+
+    :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) .phonePlayerOptions[open]:dir(rtl)) {
+      transform: translateX(50%);
+    }
   }
 }
 
