@@ -388,20 +388,22 @@ async function handleActionIconChange() {
   // Only need to update icon if visible
   if (!props.showActionButton) { return }
 
+  const inputText = props.isSearch ? inputData.value.trim() : inputData.value
+
   if (!inputDataPresent.value && props.forceActionButtonIconName === null) {
     // Change back to default icon if text is blank
     actionButtonIconName.value = ['fas', 'search']
     return
   }
 
-  if (props.externalMediaNavigation && supportsYtDlp && shouldOpenExternalMediaUrl(inputData.value, store.getters.getCurrentInvidiousInstanceUrl)) {
+  if (props.externalMediaNavigation && supportsYtDlp && shouldOpenExternalMediaUrl(inputText, store.getters.getCurrentInvidiousInstanceUrl)) {
     if (props.forceActionButtonIconName === null) actionButtonIconName.value = ['fas', 'arrow-right']
     return
   }
 
   // Update action button icon according to input
   try {
-    const result = await store.dispatch('getYoutubeUrlInfo', inputData.value)
+    const result = await store.dispatch('getYoutubeUrlInfo', inputText)
 
     let isYoutubeLink = false
 
@@ -427,7 +429,7 @@ async function handleActionIconChange() {
 
     if (props.forceActionButtonIconName === null) {
       if (isYoutubeLink || (props.externalMediaNavigation && supportsYtDlp &&
-        shouldOpenExternalMediaUrl(inputData.value, store.getters.getCurrentInvidiousInstanceUrl))) {
+        shouldOpenExternalMediaUrl(inputText, store.getters.getCurrentInvidiousInstanceUrl))) {
         // Go to URL (i.e. Video/Playlist/Channel
         actionButtonIconName.value = ['fas', 'arrow-right']
       } else {

@@ -638,11 +638,12 @@ if (usesLogicalTabs) {
 }
 
 /**
- * @param {string} queryText
+ * @param {string} rawQueryText
  * @param {object | null} selectedSearchSettings
  * @returns {Promise<{ path: string, query?: object, searchQueryText: string }>}
  */
-async function getSearchDestination(queryText, selectedSearchSettings = null) {
+async function getSearchDestination(rawQueryText, selectedSearchSettings = null) {
+  const queryText = rawQueryText.trim()
   if (supportsYtDlp && shouldOpenExternalMediaUrl(queryText, store.getters.getCurrentInvidiousInstanceUrl)) {
     return {
       path: '/external-media',
