@@ -258,23 +258,15 @@ import AutoScrollWrapper from '../../components/AutoScrollWrapper/AutoScrollWrap
 
 import store from '../../store/index'
 
-import {
-  extractLocalCacheablePlaylistContinuation,
-  getLocalPlaylist,
-  getLocalPlaylistContinuation,
-  parseLocalPlaylistVideos,
-} from '../../helpers/api/local'
+import { contentApi } from '../../helpers/api/contentApi'
 import {
   debounce,
-  extractNumberFromString,
   getIconForSortPreference,
   getVideoThumbnailUrl,
   showToast,
   deepCopy,
   throttle,
 } from '../../helpers/utils'
-import { invidiousGetPlaylistInfo, youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
-import { hasMoreInvidiousPlaylistPages, mergeInvidiousPlaylistVideos } from '../../helpers/api/invidious-playlists'
 import { runRetryablePlaylistRequest } from '../../helpers/playlist-pagination'
 import { formatDate } from '../../helpers/dateFormat'
 import {
@@ -343,10 +335,7 @@ const tempShownPlaylistItems = ref(null)
 /** @type {Ref<VideoData>} draggedVideo */
 const draggedVideo = ref({ videoId: null, playlistItemId: null })
 const userPlaylistVisibleLimit = ref(100)
-/** @type {import('vue').ShallowRef<import('youtubei.js').YT.Playlist | null>} */
-const continuationData = shallowRef(null)
-/** @type {import('vue').Ref<number | null>} */
-const nextInvidiousPlaylistPage = ref(null)
+const playlistCursor = shallowRef(null)
 const isLoadingMore = ref(false)
 const nextPageError = ref('')
 const playlistInEditMode = ref(false)
@@ -474,10 +463,7 @@ const moreVideoDataAvailable = computed(() => {
   if (isUserPlaylistRequested.value) {
     return userPlaylistVisibleLimit.value < sometimesFilteredUserPlaylistItems.value.length
   }
-  if (infoSource.value === 'invidious') {
-    return nextInvidiousPlaylistPage.value !== null
-  }
-  return continuationData.value !== null
+  return playlistCursor.value !== null
 })
 
 const processedVideoSearchQuery = computed(() => videoSearchQuery.value.trim().toLowerCase())
@@ -494,11 +480,7 @@ const searchQueryTextPresent = computed(() => {
 const isUserPlaylistRequested = computed(() => route.query.playlistType === 'user')
 
 const playlistPreloadHasUnknownVideos = computed(() =>
-  !isUserPlaylistRequested.value && (
-    infoSource.value === 'invidious'
-      ? nextInvidiousPlaylistPage.value !== null
-      : continuationData.value !== null
-  )
+  !isUserPlaylistRequested.value && playlistCursor.value !== null
 )
 
 watch(
@@ -825,11 +807,7 @@ function getPlaylistInfo() {
       })
     }
   } else {
-    if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
-      return getPlaylistInvidious()
-    } else {
-      return getPlaylistLocal()
-    }
+    return getBackendPlaylist()
   }
 }
 
@@ -854,8 +832,7 @@ function resetState() {
   infoSource.value = 'local'
   showUnavailableVideosAlert.value = false
   playlistItems.value = []
-  continuationData.value = null
-  nextInvidiousPlaylistPage.value = null
+  playlistCursor.value = null
   isLoadingMore.value = false
   nextPageError.value = ''
   playlistError.value = ''
@@ -863,147 +840,65 @@ function resetState() {
   fetchedLocalPlaylistItemCount = 0
 }
 
-async function getPlaylistLocal() {
+async function getBackendPlaylist() {
   const requestGeneration = playlistRequestGeneration
   const requestedPlaylistId = playlistId.value
   const requestIsCurrent = () => requestGeneration === playlistRequestGeneration && requestedPlaylistId === playlistId.value
 
   try {
-    const result = await getLocalPlaylist(requestedPlaylistId)
-    if (!requestIsCurrent()) return
-
-    let channelName_
-
-    if (result.info.author) {
-      channelName_ = result.info.author.name
-    } else {
-      const subtitle = result.info.subtitle?.toString()
-      if (subtitle) {
-        const index = subtitle.lastIndexOf('•')
-        channelName_ = subtitle.substring(0, index).trim()
-      } else {
-        channelName_ = ''
-      }
-    }
-
-    const playlistItems_ = parseLocalPlaylistVideos(result.items)
-    fetchedLocalPlaylistItemCount = result.items.length
-
-    playlistTitle.value = result.info.title
-    playlistDescription.value = result.info.description ?? ''
-    firstVideoId.value = playlistItems_[0]?.videoId ?? ''
-    playlistThumbnail.value = result.info.thumbnails[0].url
-    viewCount.value = result.info.views.toLowerCase() === 'no views' ? 0 : extractNumberFromString(result.info.views)
-    videoCount.value = extractNumberFromString(result.info.total_items)
-    lastUpdated.value = result.info.last_updated ?? ''
-    lastUpdatedDate.value = null
-    channelName.value = channelName_ ?? ''
-    channelThumbnail.value = result.info.author?.best_thumbnail?.url ?? ''
-    channelId.value = result.info.author?.id
-    infoSource.value = 'local'
-    showUnavailableVideosAlert.value = result.menu?.items?.some((item) => item.text === 'Show unavailable videos')
-
-    store.dispatch('updateSubscriptionDetails', {
-      channelThumbnailUrl: channelThumbnail.value,
-      channelName: channelName_,
-      channelId: channelId.value
+    const result = await contentApi.getPlaylist({
+      id: requestedPlaylistId,
+      preference: backendPreference.value,
+      fallback: backendFallback.value,
+      isCurrent: requestIsCurrent,
+      onError: (_provider, error) => console.error(error),
+      onFallback: (from) => console.warn(from === 'local'
+        ? 'Falling back to Invidious API'
+        : 'Error getting data with Invidious, falling back to local backend'),
     })
-
-    playlistItems.value = playlistItems_
-
-    await refreshPlaylistBookmarkMetadata()
-    if (!requestIsCurrent()) return
-
-    let shouldGetNextPage = false
-    if (result.has_continuation) {
-      continuationData.value = result
-      shouldGetNextPage = playlistItems.value.length < 100 && fetchedLocalPlaylistItemCount < videoCount.value
-    }
-    // Fill the first page when unplayable entries were filtered out. The raw
-    // item count bounds automatic continuation loading to the playlist size.
-    if (shouldGetNextPage) {
-      getNextPageLocal()
-    }
-
-    updatePageTitle()
-
-    isLoading.value = false
-  } catch (err) {
-    if (!requestIsCurrent()) return
-
-    console.error(err)
-
-    if (backendPreference.value === 'local' && backendFallback.value) {
-      console.warn('Falling back to Invidious API')
-      return getPlaylistInvidious()
-    } else {
-      updatePageTitle()
-      isLoading.value = false
-      playlistError.value = t("User Playlists.SinglePlaylistView['This playlist could not be loaded.']")
-      playlistErrorRetryable.value = true
-    }
-  }
-}
-
-async function getPlaylistInvidious() {
-  const requestGeneration = playlistRequestGeneration
-  const requestedPlaylistId = playlistId.value
-  const requestIsCurrent = () => requestGeneration === playlistRequestGeneration && requestedPlaylistId === playlistId.value
-
-  try {
-    const result = await invidiousGetPlaylistInfo(requestedPlaylistId)
-    if (!requestIsCurrent()) return
+    if (!result || !requestIsCurrent()) return
 
     playlistTitle.value = result.title
     playlistDescription.value = result.description
-    firstVideoId.value = result.videos[0]?.videoId ?? ''
+    firstVideoId.value = result.firstVideoId
+    playlistThumbnail.value = result.thumbnail
     viewCount.value = result.viewCount
     videoCount.value = result.videoCount
-    channelName.value = result.author
-    const authorThumbnail = result.authorThumbnails.at(-1)?.url ?? null
-    channelThumbnail.value = youtubeImageUrlToInvidious(authorThumbnail, currentInvidiousInstanceUrl.value)
-    channelId.value = result.authorId
-    infoSource.value = 'invidious'
+    lastUpdated.value = result.lastUpdated
+    lastUpdatedDate.value = result.lastUpdatedDate
+    if (lastUpdatedDate.value !== null) updateLastUpdatedDate()
+    channelName.value = result.channelName
+    channelThumbnail.value = result.channelThumbnail
+    channelId.value = result.channelId
+    infoSource.value = result.provider
+    showUnavailableVideosAlert.value = result.showUnavailableVideosAlert
+    fetchedLocalPlaylistItemCount = result.fetchedCount
 
     store.dispatch('updateSubscriptionDetails', {
-      channelThumbnailUrl: authorThumbnail,
-      channelName: channelName.value,
-      channelId: channelId.value
+      channelThumbnailUrl: result.subscriptionThumbnail,
+      channelName: result.channelName,
+      channelId: result.channelId,
     })
-
-    lastUpdatedDate.value = result.updated == null ? null : new Date(result.updated * 1000)
-    updateLastUpdatedDate()
 
     playlistItems.value = result.videos
     await refreshPlaylistBookmarkMetadata()
     if (!requestIsCurrent()) return
-    const hasMorePages = hasMoreInvidiousPlaylistPages(
-      result.videoCount,
-      1,
-      result.videos.length,
-      result.pageVideoCount
-    )
-    nextInvidiousPlaylistPage.value = hasMorePages
-      ? 2
-      : null
+    playlistCursor.value = result.cursor
+
+    // Fill a Local first page when filtering unplayable entries left it short.
+    if (result.provider === 'local' && result.cursor && result.videos.length < 100 &&
+      fetchedLocalPlaylistItemCount < result.videoCount) {
+      getBackendPlaylistPage()
+    }
 
     updatePageTitle()
-
     isLoading.value = false
-  } catch (err) {
+  } catch {
     if (!requestIsCurrent()) return
-
-    console.error(err)
-
-    if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      console.warn('Error getting data with Invidious, falling back to local backend')
-      return getPlaylistLocal()
-    } else {
-      updatePageTitle()
-      isLoading.value = false
-      playlistError.value = t("User Playlists.SinglePlaylistView['This playlist could not be loaded.']")
-      playlistErrorRetryable.value = true
-    }
+    updatePageTitle()
+    isLoading.value = false
+    playlistError.value = t("User Playlists.SinglePlaylistView['This playlist could not be loaded.']")
+    playlistErrorRetryable.value = true
   }
 }
 
@@ -1100,9 +995,7 @@ function getPlaylistItemsWithDuration() {
 async function getNextPage() {
   if (isLoadingMore.value) return
 
-  if (process.env.SUPPORTS_LOCAL_API && infoSource.value === 'local') {
-    return await getNextPageLocal()
-  } else if (infoSource.value === 'user') {
+  if (infoSource.value === 'user') {
     // Stop users from spamming the load more button, by replacing it with a loading symbol until the newly added items are renderered
     isLoadingMore.value = true
 
@@ -1115,13 +1008,13 @@ async function getNextPage() {
 
       isLoadingMore.value = false
     })
-  } else if (infoSource.value === 'invidious') {
-    return await getNextPageInvidious()
+  } else {
+    return await getBackendPlaylistPage()
   }
 }
 
-async function getNextPageLocal() {
-  if (isLoadingMore.value || continuationData.value == null) return
+async function getBackendPlaylistPage() {
+  if (isLoadingMore.value || playlistCursor.value == null) return
 
   const requestGeneration = playlistRequestGeneration
   const requestedPlaylistId = playlistId.value
@@ -1131,81 +1024,34 @@ async function getNextPageLocal() {
     request: async () => {
       let shouldGetNextPage
       do {
-        shouldGetNextPage = false
-        const result = await getLocalPlaylistContinuation(continuationData.value)
+        const result = await contentApi.getPlaylistPage({
+          id: requestedPlaylistId,
+          cursor: playlistCursor.value,
+          videos: playlistItems.value,
+          videoCount: videoCount.value,
+        })
         if (!requestIsCurrent()) return
 
-        if (result) {
-          const parsedVideos = parseLocalPlaylistVideos(result.items)
-          fetchedLocalPlaylistItemCount += result.items.length
-          playlistItems.value = playlistItems.value.concat(parsedVideos)
-
-          if (result.has_continuation) {
-            continuationData.value = result
-
-            // Keep crossing pages that contain filtered entries until this page is
-            // full or every advertised playlist item has been fetched.
-            shouldGetNextPage = parsedVideos.length < 100 && fetchedLocalPlaylistItemCount < videoCount.value
-          } else {
-            continuationData.value = null
-          }
-        } else {
-          continuationData.value = null
+        fetchedLocalPlaylistItemCount += result.fetchedCount
+        playlistItems.value = result.replace
+          ? result.videos
+          : playlistItems.value.concat(result.videos)
+        if (result.provider === 'invidious') {
+          firstVideoId.value ||= playlistItems.value[0]?.videoId ?? ''
         }
+        playlistCursor.value = result.cursor
+
+        // Local pages can contain filtered entries. Continue until this page
+        // is full or every advertised playlist item has been fetched.
+        shouldGetNextPage = result.provider === 'local' && result.cursor !== null &&
+          result.videos.length < 100 && fetchedLocalPlaylistItemCount < videoCount.value
       } while (shouldGetNextPage)
     },
     setLoading: (loading) => {
-      if (requestIsCurrent()) {
-        isLoadingMore.value = loading
-      }
+      if (requestIsCurrent()) isLoadingMore.value = loading
     },
     setError: (error) => {
       if (!requestIsCurrent()) return
-
-      if (error == null) {
-        nextPageError.value = ''
-      } else {
-        console.error(error)
-        nextPageError.value = t("User Playlists.SinglePlaylistView['More videos could not be loaded.']")
-      }
-    },
-  })
-}
-
-async function getNextPageInvidious() {
-  if (isLoadingMore.value || nextInvidiousPlaylistPage.value == null) return
-
-  const requestGeneration = playlistRequestGeneration
-  const requestedPlaylistId = playlistId.value
-  const requestedPage = nextInvidiousPlaylistPage.value
-  const requestIsCurrent = () => requestGeneration === playlistRequestGeneration && requestedPlaylistId === playlistId.value
-
-  await runRetryablePlaylistRequest({
-    request: async () => {
-      const result = await invidiousGetPlaylistInfo(requestedPlaylistId, requestedPage)
-      if (!requestIsCurrent()) return
-
-      const mergedVideos = mergeInvidiousPlaylistVideos(playlistItems.value, result.videos)
-      playlistItems.value = mergedVideos
-      firstVideoId.value ||= mergedVideos[0]?.videoId ?? ''
-      const hasMorePages = hasMoreInvidiousPlaylistPages(
-        videoCount.value,
-        requestedPage,
-        mergedVideos.length,
-        result.pageVideoCount
-      )
-      nextInvidiousPlaylistPage.value = hasMorePages
-        ? requestedPage + 1
-        : null
-    },
-    setLoading: (loading) => {
-      if (requestIsCurrent()) {
-        isLoadingMore.value = loading
-      }
-    },
-    setError: (error) => {
-      if (!requestIsCurrent()) return
-
       if (error == null) {
         nextPageError.value = ''
       } else {
@@ -1657,9 +1503,7 @@ function cachePlaylistForWatchTransition(to) {
         channelName: channelName.value,
         channelId: channelId.value,
         items: sortedPlaylistItems.value,
-        continuationData: continuationData.value
-          ? extractLocalCacheablePlaylistContinuation(continuationData.value)
-          : null,
+        continuationData: contentApi.getCacheablePlaylistContinuation(playlistCursor.value),
       }
     })
   }

@@ -65,9 +65,8 @@ import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrapper.vue'
 import store from '../../store/index'
 import { useRoute } from 'vue-router'
-import { getHashtagLocal, parseLocalListVideo } from '../../helpers/api/local'
+import { contentApi } from '../../helpers/api/contentApi'
 import { showApiErrorToast, showToast } from '../../helpers/utils'
-import { getHashtagInvidious } from '../../helpers/api/invidious'
 import { useI18n } from 'vue-i18n'
 import { useTabTitle } from '../../tabs/TabContext'
 const { t } = useI18n()
@@ -76,11 +75,8 @@ const route = useRoute()
 const setTabTitle = useTabTitle()
 
 const hashtag = ref('')
-const hashtagContinuationData = shallowRef(null)
+const cursor = shallowRef(null)
 const videos = shallowRef([])
-/** @type {import('vue').Ref<'local' | 'invidious'>} */
-const apiUsed = ref('local')
-const pageNumber = ref(1)
 const isLoading = ref(true)
 const isLoadingMore = ref(false)
 const hasMoreResults = ref(false)
@@ -107,10 +103,8 @@ watch(() => route.params.hashtag, () => {
 function resetData() {
   isLoading.value = true
   hashtag.value = ''
-  hashtagContinuationData.value = null
+  cursor.value = null
   videos.value = []
-  apiUsed.value = 'local'
-  pageNumber.value = 1
   isLoadingMore.value = false
   hasMoreResults.value = false
 }
@@ -119,80 +113,47 @@ async function getHashtag() {
   // Hashtag pages only exist in lowercase, querying them with the casing used in
   // a video description (e.g. `#ShiorinSketch`) returns no videos at all
   hashtag.value = decodeURIComponent(route.params.hashtag).toLowerCase()
-  if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'local') {
-    await getLocalHashtag()
-  } else {
-    await getInvidiousHashtag()
-  }
+  await loadHashtagPage()
   setTabTitle(`#${hashtag.value}`)
 }
 
-/**
- * @param {number} page
- */
-async function getInvidiousHashtag(page = 1) {
+async function loadHashtagPage() {
   try {
-    const fetchedVideos = await getHashtagInvidious(hashtag.value, page)
+    const page = await contentApi.getHashtagPage({
+      hashtag: hashtag.value,
+      preference: backendPreference.value,
+      fallback: backendFallback.value,
+      cursor: cursor.value,
+      onError: showProviderError,
+      onFallback: showProviderFallback,
+    })
+    videos.value = videos.value.concat(page.videos)
+    cursor.value = page.cursor
+    hasMoreResults.value = page.hasMore
+  } catch {
+    // The service reports each attempted provider error before rejecting.
+  } finally {
     isLoading.value = false
-    apiUsed.value = 'invidious'
-    videos.value = videos.value.concat(fetchedVideos)
-    hasMoreResults.value = fetchedVideos.length > 0
-    pageNumber.value += 1
-  } catch (error) {
-    console.error(error)
-    const errorMessage = t('Invidious API Error (Click to copy)')
-    showApiErrorToast(errorMessage, error)
-    if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
-      resetData()
-      getLocalHashtag()
-    } else {
-      isLoading.value = false
-    }
   }
 }
 
-async function getLocalHashtag() {
-  try {
-    const hashtagData = await getHashtagLocal(hashtag.value)
-    videos.value = hashtagData.videos.map((video) => parseLocalListVideo(video)).filter(_ => _)
-    apiUsed.value = 'local'
-    hashtagContinuationData.value = hashtagData.has_continuation ? hashtagData : null
-    hasMoreResults.value = hashtagContinuationData.value !== null
-    isLoading.value = false
-  } catch (error) {
-    console.error(error)
-    const errorMessage = t('Local API Error (Click to copy)')
-    showApiErrorToast(errorMessage, error)
-    if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-      resetData()
-      getInvidiousHashtag()
-    } else {
-      isLoading.value = false
-    }
-  }
+function showProviderError(provider, error) {
+  console.error(error)
+  const message = provider === 'local'
+    ? t('Local API Error (Click to copy)')
+    : t('Invidious API Error (Click to copy)')
+  showApiErrorToast(message, error)
 }
 
-async function getLocalHashtagMore() {
-  try {
-    const continuation = await hashtagContinuationData.value.getContinuation()
-    const newVideos = continuation.videos.map((video) => parseLocalListVideo(video)).filter(_ => _)
-    hashtagContinuationData.value = continuation.has_continuation ? continuation : null
-    hasMoreResults.value = hashtagContinuationData.value !== null
-    videos.value = videos.value.concat(newVideos)
-  } catch (error) {
-    console.error(error)
-    const errorMessage = t('Local API Error (Click to copy)')
-    showApiErrorToast(errorMessage, error)
-    if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-      resetData()
-      getInvidiousHashtag()
-    } else {
-      isLoading.value = false
-    }
-  }
+function showProviderFallback(_from, to) {
+  const message = to === 'local'
+    ? t('Falling back to Local API')
+    : t('Falling back to Invidious API')
+  showToast({ message, icon: ['fas', 'exchange-alt'] })
+  videos.value = []
+  cursor.value = null
+  hasMoreResults.value = false
+  isLoading.value = true
 }
 
 async function handleFetchMore() {
@@ -202,11 +163,7 @@ async function handleFetchMore() {
 
   isLoadingMore.value = true
   try {
-    if (process.env.SUPPORTS_LOCAL_API && apiUsed.value === 'local') {
-      await getLocalHashtagMore()
-    } else if (apiUsed.value === 'invidious') {
-      await getInvidiousHashtag(pageNumber.value)
-    }
+    await loadHashtagPage()
   } finally {
     isLoadingMore.value = false
   }

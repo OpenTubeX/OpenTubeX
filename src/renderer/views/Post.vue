@@ -38,8 +38,7 @@ import CommentSection from '../components/CommentSection/CommentSection.vue'
 
 import store from '../store/index'
 
-import { getInvidiousCommunityPost } from '../helpers/api/invidious'
-import { getLocalCommunityPost } from '../helpers/api/local'
+import { contentApi } from '../helpers/api/contentApi'
 import { showApiErrorToast, showToast } from '../helpers/utils'
 import { useTabTitle } from '../tabs/TabContext'
 
@@ -79,11 +78,39 @@ async function loadPost() {
   post.value = null
   isLoading.value = true
 
-  if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
-    await loadDataInvidiousAsync()
-  } else {
-    await loadDataLocalAsync()
+  try {
+    const result = await contentApi.getPost({
+      id: id.value,
+      authorId: authorId.value,
+      preference: backendPreference.value,
+      fallback: backendFallback.value,
+      onError: showProviderError,
+      onFallback: showProviderFallback,
+    })
+    post.value = result.data
+    authorId.value = post.value.authorId
+    updateTitleAndRoute()
+  } catch {
+    isLoading.value = false
   }
+}
+
+function showProviderError(provider, error) {
+  console.error(error)
+  const message = provider === 'local'
+    ? t('Local API Error (Click to copy)')
+    : t('Invidious API Error (Click to copy)')
+  showApiErrorToast(message, error)
+}
+
+function showProviderFallback(_from, to) {
+  const message = to === 'local'
+    ? t('Falling back to Local API')
+    : t('Falling back to Invidious API')
+  showToast({
+    message,
+    icon: ['fas', 'exchange-alt'],
+  })
 }
 
 function updateTitleAndRoute() {
@@ -102,43 +129,6 @@ function updateTitleAndRoute() {
         authorId: authorId.value
       }
     })
-  }
-}
-
-async function loadDataLocalAsync() {
-  try {
-    post.value = await getLocalCommunityPost(id.value, authorId.value)
-    authorId.value = post.value.authorId
-    updateTitleAndRoute()
-  } catch (error) {
-    console.error(error)
-    const errorMessage = t('Local API Error (Click to copy)')
-    showApiErrorToast(errorMessage, error)
-    if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-      await loadDataInvidiousAsync()
-    } else {
-      isLoading.value = false
-    }
-  }
-}
-
-async function loadDataInvidiousAsync() {
-  try {
-    post.value = await getInvidiousCommunityPost(id.value, authorId.value)
-    authorId.value = post.value.authorId
-    updateTitleAndRoute()
-  } catch (error) {
-    console.error(error)
-    const errorMessage = t('Invidious API Error (Click to copy)')
-    showApiErrorToast(errorMessage, error)
-
-    if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
-      await loadDataLocalAsync()
-    } else {
-      isLoading.value = false
-    }
   }
 }
 
