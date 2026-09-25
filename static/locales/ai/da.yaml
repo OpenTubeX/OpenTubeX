@@ -945,6 +945,7 @@ Settings:
     Item Removed: "{device} fjernede {item} fra {setting}"
     Item Renamed: "{device} omdøbte {item} til {value}"
     Saved Playlists: "Gemte playlister"
+    No Feed Types: "Ingen"
     Open On Device: "Åbn på en anden enhed"
     Video Sent: "Video sendt. Offlineenheder modtager den, når de opretter forbindelse igen inden for 24 timer."
     Video Received: "Modtaget video: {title}"

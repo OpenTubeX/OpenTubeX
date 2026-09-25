@@ -1155,6 +1155,7 @@ Settings:
     Item Removed: "{device} pašalino {item} iš {setting}"
     Item Renamed: "{device} pervadino {item} į {value}"
     Saved Playlists: "Išsaugoti grojaraščiai"
+    No Feed Types: "Nėra"
     Open On Device: "Atverti kitame įrenginyje"
     Video Sent: "Vaizdo įrašas išsiųstas. Neprisijungę įrenginiai jį gaus prisijungę per 24 valandas."
     Video Received: "Gautas vaizdo įrašas: {title}"

@@ -905,6 +905,7 @@ Settings:
     Item Removed: "{device}, {item} öğesini {setting} listesinden kaldırdı"
     Item Renamed: "{device}, {item} adını {value} olarak değiştirdi"
     Saved Playlists: "Kaydedilen oynatma listeleri"
+    No Feed Types: "Yok"
     Open On Device: "Başka cihazda aç"
     Video Sent: "Video gönderildi. Çevrimdışı cihazlar 24 saat içinde yeniden bağlandıklarında alır."
     Video Received: "Alınan video: {title}"

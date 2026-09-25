@@ -905,6 +905,7 @@ Settings:
     Item Removed: "{device} odstránilo {item} z {setting}"
     Item Renamed: "{device} premenovalo {item} na {value}"
     Saved Playlists: "Uložené zoznamy skladieb"
+    No Feed Types: "Žiadne"
     Open On Device: "Otvoriť na inom zariadení"
     Video Sent: "Video odoslané. Offline zariadenia ho dostanú po pripojení do 24 hodín."
     Video Received: "Prijaté video: {title}"

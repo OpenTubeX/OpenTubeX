@@ -47,6 +47,7 @@ import {
 import { isSettingSyncEnabled } from './settings'
 import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../helpers/subscription-seen-videos'
 import { syncWatchStats } from '../../helpers/sync-watch-stats'
+import { MAIN_PROFILE_ID } from '../../../constants'
 
 const EVENT_SYNC_DEBOUNCE_MS = 1500
 const EVENT_SYNC_DELAYS = {
@@ -505,7 +506,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           for (let attempt = 0; attempt < ENCRYPTED_SYNC_RETRIES; attempt++) {
             const activity = createSyncActivity(
               collection, activityBefore, data, settings.syncServerDeviceId, settings.syncServerDeviceName,
-              [...(encryptedCollections.original.subscriptions ?? []), ...(client.document.subscriptions ?? [])]
+              [...(encryptedCollections.original.subscriptions ?? []), ...(client.document.subscriptions ?? []),
+                ...(rootState.profiles.profileList.find(profile => profile._id === MAIN_PROFILE_ID)?.subscriptions ?? [])]
             )
             const activityPayload = activity
               ? await encryptSyncDocument(

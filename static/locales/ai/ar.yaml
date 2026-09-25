@@ -922,6 +922,7 @@ Settings:
     Item Removed: "أزال {device} ‏{item} من {setting}"
     Item Renamed: "غيّر {device} اسم {item} إلى {value}"
     Saved Playlists: "قوائم التشغيل المحفوظة"
+    No Feed Types: "لا شيء"
     Open On Device: "فتح على جهاز آخر"
     Video Sent: "تم إرسال الفيديو. تستلمه الأجهزة غير المتصلة عند إعادة الاتصال خلال 24 ساعة."
     Video Received: "فيديو مستلم: {title}"

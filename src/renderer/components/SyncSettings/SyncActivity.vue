@@ -148,7 +148,7 @@ function displayActivityValue(entry) {
     return typeof entry.value === 'string' && entry.value
       // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
       ? entry.value.split(',').map(type => feedTypeLabels[type] ? t(feedTypeLabels[type]) : type).join(', ')
-      : t('Settings.Player Settings.Caption Appearance.Edge Style.None')
+      : t('Settings.Sync Settings.No Feed Types')
   }
   if (entry.detail === 'dailyVideoLimit') {
     if (entry.value === 'global') return t('Channel.Use global setting')
@@ -211,7 +211,7 @@ const visibleEntries = computed(() => (showAll.value ? entries.value : entries.v
     : entry.key === 'defaultCaptionSettings' && entry.detail
       ? `Settings.Player Settings.Caption Appearance.${entry.detail}`
       : null
-  if (entry.item && entry.key) labels.push(entry.item)
+  if (entry.item && entry.key && (entry.key !== 'customThemes' || entry.action === 'updated')) labels.push(entry.item)
   // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
   if (detailKey && te(detailKey)) labels.push(t(detailKey))
   const hasValue = entry.key && ['string', 'number', 'boolean'].includes(typeof entry.value)

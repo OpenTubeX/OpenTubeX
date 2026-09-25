@@ -924,6 +924,7 @@ Settings:
     Item Removed: "{device} đã xóa {item} khỏi {setting}"
     Item Renamed: "{device} đã đổi tên {item} thành {value}"
     Saved Playlists: "Danh sách phát đã lưu"
+    No Feed Types: "Không có"
     Open On Device: "Mở trên thiết bị khác"
     Video Sent: "Đã gửi video. Thiết bị ngoại tuyến sẽ nhận được khi kết nối lại trong vòng 24 giờ."
     Video Received: "Video đã nhận: {title}"

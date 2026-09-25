@@ -439,6 +439,7 @@ Settings:
     Item Removed: "{device} usunęło {item} z {setting}"
     Item Renamed: "{device} zmieniło nazwę {item} na {value}"
     Saved Playlists: "Zapisane playlisty"
+    No Feed Types: "Żaden"
     Open On Device: "Otwórz na innym urządzeniu"
     Video Sent: "Film wysłany. Urządzenia offline otrzymają go po ponownym połączeniu w ciągu 24 godzin."
     Video Received: "Odebrano film: {title}"

@@ -903,6 +903,7 @@ Settings:
     Item Removed: "{device} menghapus {item} dari {setting}"
     Item Renamed: "{device} mengganti nama {item} menjadi {value}"
     Saved Playlists: "Playlist tersimpan"
+    No Feed Types: "Tidak ada"
     Open On Device: "Buka di perangkat lain"
     Video Sent: "Video dikirim. Perangkat luring akan menerimanya saat terhubung kembali dalam 24 jam."
     Video Received: "Video diterima: {title}"

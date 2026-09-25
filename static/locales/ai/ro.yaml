@@ -918,6 +918,7 @@ Settings:
     Item Removed: "{device} a eliminat {item} din {setting}"
     Item Renamed: "{device} a redenumit {item} în {value}"
     Saved Playlists: "Liste de redare salvate"
+    No Feed Types: "Niciunul"
     Open On Device: "Deschide pe alt dispozitiv"
     Video Sent: "Videoclip trimis. Dispozitivele offline îl vor primi la reconectare în termen de 24 de ore."
     Video Received: "Videoclip primit: {title}"

@@ -911,6 +911,7 @@ Settings:
     Item Removed: "{device} fjarlægði {item} úr {setting}"
     Item Renamed: "{device} endurnefndi {item} sem {value}"
     Saved Playlists: "Vistaðir spilunarlistar"
+    No Feed Types: "Enginn"
     Open On Device: "Opna á öðru tæki"
     Video Sent: "Myndskeið sent. Ótengd tæki fá það þegar þau tengjast aftur innan 24 klukkustunda."
     Video Received: "Móttekið myndskeið: {title}"

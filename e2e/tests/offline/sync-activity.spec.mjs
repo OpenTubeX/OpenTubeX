@@ -50,6 +50,25 @@ for (const uiScale of [100, 125]) {
       await expect(activity.nth(2)).toContainText(/Laptop changed Screenshot [Ff]ormat to JPEG/)
     })
 
+    test('names custom themes once and describes an empty subscription feed', async ({ page }) => {
+      const sync = await goToSettingsSection(page, 'sync')
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setSyncServerToken', 'test-token')
+        store.commit('setSyncServerActivity', [
+          { id: 'theme', deviceName: 'Laptop', key: 'customThemes', action: 'added', item: 'Ocean', createdAt: Date.now() },
+          { id: 'removed-theme', deviceName: 'Laptop', key: 'customThemes', action: 'removed', item: 'Sunset', createdAt: Date.now() - 1 },
+          { id: 'feed', deviceName: 'Laptop', key: 'subscriptionChannelSettings', detail: 'feedTypes', item: 'Alpha', value: '', createdAt: Date.now() - 2 },
+        ])
+        store.commit('setSyncServerLiveSupported', true)
+        store.commit('setSyncServerEnabled', true)
+      })
+      const activity = sync.locator('.syncActivity .activityList li')
+      await expect(activity.nth(0).locator('p')).toHaveText(/Laptop added Ocean to Custom theme creator$/i)
+      await expect(activity.nth(1).locator('p')).toHaveText(/Laptop removed Sunset from Custom theme creator$/i)
+      await expect(activity.nth(2)).toContainText('No feed types')
+    })
+
     test('clamps after collapse and retains activity after a refresh error', async ({ page }) => {
       const sync = await goToSettingsSection(page, 'sync')
       await page.evaluate(() => {

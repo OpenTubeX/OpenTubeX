@@ -905,6 +905,7 @@ Settings:
     Item Removed: "{device} fjernet {item} fra {setting}"
     Item Renamed: "{device} endret navn på {item} til {value}"
     Saved Playlists: "Lagrede spillelister"
+    No Feed Types: "Ingen"
     Open On Device: "Åpne på en annen enhet"
     Video Sent: "Video sendt. Frakoblede enheter mottar den når de kobler til igjen innen 24 timer."
     Video Received: "Mottatt video: {title}"

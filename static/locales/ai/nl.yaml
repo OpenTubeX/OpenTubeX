@@ -927,6 +927,7 @@ Settings:
     Item Removed: "{device} heeft {item} verwijderd uit {setting}"
     Item Renamed: "{device} heeft {item} hernoemd naar {value}"
     Saved Playlists: "Opgeslagen afspeellijsten"
+    No Feed Types: "Geen"
     Open On Device: "Openen op een ander apparaat"
     Video Sent: "Video verzonden. Offline apparaten ontvangen deze als ze binnen 24 uur opnieuw verbinding maken."
     Video Received: "Video ontvangen: {title}"

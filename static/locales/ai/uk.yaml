@@ -924,6 +924,7 @@ Settings:
     Item Removed: "{device} вилучив {item} із {setting}"
     Item Renamed: "{device} перейменував {item} на {value}"
     Saved Playlists: "Збережені списки відтворення"
+    No Feed Types: "Немає"
     Open On Device: "Відкрити на іншому пристрої"
     Video Sent: "Відео надіслано. Пристрої поза мережею отримають його при підключенні протягом 24 годин."
     Video Received: "Отримано відео: {title}"

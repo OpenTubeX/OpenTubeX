@@ -907,6 +907,7 @@ Settings:
     Item Removed: "{device} uklonio je {item} iz {setting}"
     Item Renamed: "{device} preimenovao je {item} u {value}"
     Saved Playlists: "Spremljeni popisi za reprodukciju"
+    No Feed Types: "Ništa"
     Open On Device: "Otvori na drugom uređaju"
     Video Sent: "Videozapis je poslan. Izvanmrežni uređaji primit će ga pri ponovnom povezivanju unutar 24 sata."
     Video Received: "Primljen videozapis: {title}"

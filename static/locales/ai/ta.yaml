@@ -928,6 +928,7 @@ Settings:
     Item Removed: "{device} {item} என்பதை {setting} இலிருந்து நீக்கியது"
     Item Renamed: "{device} {item} என்பதன் பெயரை {value} என மாற்றியது"
     Saved Playlists: "சேமித்த பிளேலிஸ்ட்கள்"
+    No Feed Types: "ஏதுமில்லை"
     Open On Device: "வேறொரு சாதனத்தில் திற"
     Video Sent: "காணொளி அனுப்பப்பட்டது. இணையத்தில் இல்லாத சாதனங்கள் 24 மணி நேரத்திற்குள் மீண்டும் இணைந்தால் அதைப் பெறும்."
     Video Received: "பெறப்பட்ட காணொளி: {title}"

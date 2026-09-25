@@ -903,6 +903,7 @@ Settings:
     Item Removed: "{device} eemaldas {item} jaotisest {setting}"
     Item Renamed: "{device} nimetas {item} ümber nimega {value}"
     Saved Playlists: "Salvestatud esitusloendid"
+    No Feed Types: "Puudub"
     Open On Device: "Ava teises seadmes"
     Video Sent: "Video saadetud. Võrguühenduseta seadmed saavad selle uuesti ühendudes 24 tunni jooksul."
     Video Received: "Saadud video: {title}"

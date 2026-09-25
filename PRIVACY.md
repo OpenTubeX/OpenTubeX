@@ -1,6 +1,6 @@
 # Privacy and threat model
 
-Last updated: September 25, 2026
+Last updated: September 26, 2026
 
 This document covers the OpenTubeX desktop and Android apps where the described feature is available. Android stores the library in application storage and uses Android's storage picker for downloaded media; desktop profile paths and executable settings do not apply there.
 
@@ -19,7 +19,7 @@ With a compatible enhanced-privacy server, watch statistics are included in sync
 
 The public OpenTubeX sync service has a [separate privacy policy](https://github.com/OpenTubeX/sync-server/blob/main/PRIVACY.md). Other sync-server operators are responsible for their own notices and practices.
 
-On compatible servers, enhanced-privacy sync also uploads encrypted account activity, including changed setting keys, scalar values, and bounded details about subscriptions, playlists, profiles, saved playlists, channel preferences, caption appearance, and custom themes. Watch history and frequent playback changes are excluded. Full object values and strings longer than 128 bytes are omitted from activity. Opening a video on another device sends an encrypted request containing its video ID, title, and playback position. The OpenTubeX sync server retains up to 100 activity batches per account for 30 days and up to 100 pending device requests per account for 24 hours; acknowledged requests are deleted, and expired records are normally removed within one hour.
+On compatible servers, enhanced-privacy sync also uploads encrypted account activity, including changed setting keys, scalar values, and bounded details about subscriptions, playlists, profiles, saved playlists, channel preferences, caption appearance, and custom themes. Watch history and frequent playback changes are excluded. Full object values are omitted from activity. Item names and scalar setting strings longer than 128 bytes are also omitted. Opening a video on another device sends an encrypted request containing its video ID, title, and playback position. The OpenTubeX sync server retains up to 100 activity batches per account for 30 days and up to 100 pending device requests per account for 24 hours; acknowledged requests are deleted, and expired records are normally removed within one hour.
 
 ## Network exposure
 

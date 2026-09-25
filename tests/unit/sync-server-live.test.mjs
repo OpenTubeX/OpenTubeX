@@ -185,6 +185,15 @@ test('removing saved subscription preferences reports the restored defaults', ()
   ])
 })
 
+test('turning off the last subscription feed type records an empty choice', () => {
+  const key = 'subscriptionChannelSettings'
+  const before = [{ key, value: { first: { value: { feedTypes: ['videos'] } } } }]
+  const after = [{ key, value: { first: { value: { feedTypes: [] } } } }]
+  assert.deepEqual(createSyncActivity('settings', before, after, 'device', 'Laptop', [{ id: 'first', name: 'Alpha' }]).changes, [
+    { key, detail: 'feedTypes', item: 'Alpha', value: '' },
+  ])
+})
+
 test('subscription activity names additions and removals but ignores metadata refreshes', () => {
   const oldChannels = [{ id: 'a', name: 'Alpha', thumbnail: 'old' }, { id: 'b', name: 'Beta' }]
   const newChannels = [{ id: 'a', name: 'Alpha', thumbnail: 'new' }, { id: 'c', name: 'Gamma' }]

@@ -905,6 +905,7 @@ Settings:
     Item Removed: "{device}已從{setting}移除{item}"
     Item Renamed: "{device}已將{item}重新命名為{value}"
     Saved Playlists: "已儲存的播放清單"
+    No Feed Types: "無"
     Open On Device: "在其他裝置上開啟"
     Video Sent: "影片已傳送。離線裝置將在 24 小時內重新連線時收到。"
     Video Received: "收到影片：{title}"

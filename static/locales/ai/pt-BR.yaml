@@ -905,6 +905,7 @@ Settings:
     Item Removed: "{device} removeu {item} de {setting}"
     Item Renamed: "{device} renomeou {item} para {value}"
     Saved Playlists: "Playlists salvas"
+    No Feed Types: "Nenhum"
     Open On Device: "Abrir em outro dispositivo"
     Video Sent: "Vídeo enviado. Os dispositivos offline o receberão ao se reconectarem em até 24 horas."
     Video Received: "Vídeo recebido: {title}"

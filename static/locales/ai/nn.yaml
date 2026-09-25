@@ -1065,6 +1065,7 @@ Settings:
     Item Removed: "{device} fjerna {item} frå {setting}"
     Item Renamed: "{device} gav {item} nytt namn: {value}"
     Saved Playlists: "Lagra spelelister"
+    No Feed Types: "Ingen"
     Open On Device: "Opne på ei anna eining"
     Video Sent: "Video send. Fråkopla einingar får han når dei koplar til att innan 24 timar."
     Video Received: "Motteken video: {title}"

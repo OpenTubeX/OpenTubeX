@@ -903,6 +903,7 @@ Settings:
     Item Removed: "{device} eltávolította ezt: {item}, innen: {setting}"
     Item Renamed: "{device} átnevezte ezt: {item}, erre: {value}"
     Saved Playlists: "Mentett lejátszási listák"
+    No Feed Types: "Nincs"
     Open On Device: "Megnyitás másik eszközön"
     Video Sent: "Videó elküldve. Az offline eszközök 24 órán belüli újracsatlakozáskor kapják meg."
     Video Received: "Fogadott videó: {title}"

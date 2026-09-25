@@ -1190,6 +1190,7 @@ Settings:
     Item Removed: "{device} je odstranil {item} iz {setting}"
     Item Renamed: "{device} je preimenoval {item} v {value}"
     Saved Playlists: "Shranjeni seznami predvajanja"
+    No Feed Types: "Brez"
     Open On Device: "Odpri v drugi napravi"
     Video Sent: "Videoposnetek je poslan. Naprave brez povezave ga prejmejo ob ponovni povezavi v 24 urah."
     Video Received: "Prejeti videoposnetek: {title}"

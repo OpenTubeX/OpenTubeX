@@ -927,6 +927,7 @@ Settings:
     Item Removed: "Το {device} αφαίρεσε το {item} από το {setting}"
     Item Renamed: "Το {device} μετονόμασε το {item} σε {value}"
     Saved Playlists: "Αποθηκευμένες λίστες αναπαραγωγής"
+    No Feed Types: "Κανένα"
     Open On Device: "Άνοιγμα σε άλλη συσκευή"
     Video Sent: "Το βίντεο στάλθηκε. Οι συσκευές εκτός σύνδεσης θα το λάβουν όταν επανασυνδεθούν εντός 24 ωρών."
     Video Received: "Λήφθηκε βίντεο: {title}"

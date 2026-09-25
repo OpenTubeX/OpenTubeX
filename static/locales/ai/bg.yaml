@@ -907,6 +907,7 @@ Settings:
     Item Removed: "{device} премахна {item} от {setting}"
     Item Renamed: "{device} преименува {item} на {value}"
     Saved Playlists: "Запазени плейлисти"
+    No Feed Types: "Няма"
     Open On Device: "Отваряне на друго устройство"
     Video Sent: "Видеото е изпратено. Офлайн устройствата ще го получат при свързване в рамките на 24 часа."
     Video Received: "Получено видео: {title}"

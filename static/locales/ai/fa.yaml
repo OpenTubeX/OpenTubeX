@@ -949,6 +949,7 @@ Settings:
     Item Removed: "{device} مورد {item} را از {setting} حذف کرد"
     Item Renamed: "{device} نام {item} را به {value} تغییر داد"
     Saved Playlists: "فهرست‌های پخش ذخیره‌شده"
+    No Feed Types: "هیچ‌کدام"
     Open On Device: "باز کردن در دستگاه دیگر"
     Video Sent: "ویدیو ارسال شد. دستگاه‌های آفلاین هنگام اتصال دوباره در مدت ۲۴ ساعت آن را دریافت می‌کنند."
     Video Received: "ویدیوی دریافت‌شده: {title}"

@@ -903,6 +903,7 @@ Settings:
     Item Removed: "{device} が {item} を {setting} から削除しました"
     Item Renamed: "{device} が {item} の名前を {value} に変更しました"
     Saved Playlists: "保存した再生リスト"
+    No Feed Types: "なし"
     Open On Device: "別のデバイスで開く"
     Video Sent: "動画を送信しました。オフラインのデバイスは24時間以内に再接続すると受信できます。"
     Video Received: "受信した動画: {title}"

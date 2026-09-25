@@ -949,6 +949,7 @@ Settings:
     Item Removed: "{device} выдаліў {item} з {setting}"
     Item Renamed: "{device} перайменаваў {item} у {value}"
     Saved Playlists: "Захаваныя плэйлісты"
+    No Feed Types: "Няма"
     Open On Device: "Адкрыць на іншай прыладзе"
     Video Sent: "Відэа адпраўлена. Адключаныя прылады атрымаюць яго пры падключэнні на працягу 24 гадзін."
     Video Received: "Атрымана відэа: {title}"

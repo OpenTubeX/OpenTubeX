@@ -884,6 +884,7 @@ Settings:
     Item Removed: "{device} removed {item} from {setting}"
     Item Renamed: "{device} renamed {item} to {value}"
     Saved Playlists: "Saved playlists"
+    No Feed Types: "None"
     Open On Device: "Open on another device"
     Video Sent: "Video sent. Offline devices receive it when they reconnect, for up to 24 hours."
     Video Received: "Received video: {title}"
