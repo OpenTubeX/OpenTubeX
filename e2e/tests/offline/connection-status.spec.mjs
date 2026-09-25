@@ -63,12 +63,9 @@ for (const scale of [1, 1.25]) {
       store.commit('setTabBarPosition', 'left')
       document.querySelector('.app').requestFullscreen()
     })
-    await expect(page.locator(':fullscreen .connectionStatus')).toBeVisible()
-    await expect.poll(() => banner.evaluate(element => {
-      const bounds = element.getBoundingClientRect()
-      return Math.max(Math.abs(bounds.left), Math.abs(window.innerWidth - bounds.right))
-    })).toBeLessThan(1)
+    await expect(banner).toBeHidden()
     await page.evaluate(() => document.exitFullscreen())
+    await expect(banner).toBeVisible()
     await goTo(page, 'settings')
     await page.getByRole('button', { name: 'Maximize', exact: true }).click()
     await expect(page.locator('.settingsWindow')).toHaveClass(/maximized/)
@@ -223,7 +220,7 @@ for (const position of ['bottom-center', 'top-right']) {
   })
 }
 
-test('connection status shares space with progress and follows toasts into fullscreen', async ({ page }, testInfo) => {
+test('connection status shares space with progress and hides offline in fullscreen', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 480, height: 800 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.evaluate(() => {
@@ -250,14 +247,17 @@ test('connection status shares space with progress and follows toasts into fulls
   await page.screenshot({ path: testInfo.outputPath('offline-toast-spacing.png') })
   await page.evaluate(() => document.querySelector('.app').requestFullscreen())
   await expect(progress).toBeHidden()
-  await expect(page.locator(':fullscreen .connectionStatus')).toBeVisible()
-  await expect.poll(async () => {
-    const notification = await toast.boundingBox()
-    const status = await banner.boundingBox()
-    return status.y - notification.y - notification.height
-  }).toBeGreaterThanOrEqual(9)
+  await expect(banner).toBeHidden()
+  await expect(toast).toBeVisible()
   await page.evaluate(() => document.exitFullscreen())
   await expect(progress).toBeVisible()
+  await expect(banner).toBeVisible()
+  await page.evaluate(() => document.querySelector('.app').requestFullscreen())
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: true })
+    window.dispatchEvent(new Event('online'))
+  })
+  await expect(page.locator(':fullscreen .connectionStatus')).toHaveText('Back online')
 })
 
 test('a connected router without internet pauses requests and recovers without an OS network event', async ({ page }) => {
