@@ -1,4 +1,4 @@
-import { test, expect, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, setWindowSize, sel } from '../../helpers/app.mjs'
 import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -38,6 +38,129 @@ test('phone Shorts options stay inside their menu dialog', async ({ app, page })
   expect(bounds.x + bounds.width).toBeLessThanOrEqual(frame.x + frame.width)
   expect(bounds.y).toBeGreaterThanOrEqual(frame.y)
   expect(bounds.y + bounds.height).toBeLessThanOrEqual(frame.y + frame.height)
+})
+
+test('landscape Shorts options use the space beside the narrow player', async ({ app, page }) => {
+  await openShort({ app, page })
+  await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabs', 'capacitorTabletLayout'))
+  await page.setViewportSize({ width: 1026, height: 461 })
+  const player = page.locator('.ftVideoPlayer.shortsPlayer')
+  await player.locator('.shortsTopControlsGroup').last().locator('button').nth(-2).click({ force: true })
+  const dialog = page.locator('.phonePlayerOptions[open]')
+  await expect(dialog).toBeVisible()
+  const [playerBounds, dialogBounds, railBounds] = await Promise.all([
+    player.boundingBox(),
+    dialog.boundingBox(),
+    page.locator('.shortsActionRail').boundingBox(),
+  ])
+  expect(dialogBounds.width).toBeGreaterThanOrEqual(250)
+  expect(dialogBounds.x).toBeGreaterThanOrEqual(playerBounds.x + playerBounds.width + 8)
+  expect(dialogBounds.x + dialogBounds.width).toBeLessThanOrEqual(railBounds.x - 8)
+  expect(await dialog.evaluate(element => {
+    const bounds = element.getBoundingClientRect()
+    return element.contains(document.elementFromPoint(bounds.x + bounds.width / 2, bounds.y + 20))
+  })).toBe(true)
+  await expect(dialog.locator('.shaka-overflow-menu')).toBeVisible()
+
+  await player.locator('video').evaluate(async video => {
+    video.pause()
+    await video.play()
+  })
+  await expect.poll(() => player.locator('video').evaluate(video => video.currentTime)).toBeGreaterThan(1)
+  await expect(dialog).toBeVisible()
+  const resumedBounds = await dialog.boundingBox()
+  expect(resumedBounds.width).toBeGreaterThanOrEqual(250)
+  expect(resumedBounds.x).toBeGreaterThanOrEqual(playerBounds.x + playerBounds.width + 8)
+  await player.dispatchEvent('mouseleave')
+  await expect(player.locator('.shaka-controls-container')).not.toHaveAttribute('shown')
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseQuickPlaybackSpeedBar', false))
+  await expect(dialog.locator('.shaka-overflow-menu')).toBeVisible()
+
+  await page.setViewportSize({ width: 980, height: 600 })
+  const edgeBounds = await dialog.boundingBox()
+  const edgePlayerBounds = await player.boundingBox()
+  const edgeRailBounds = await page.locator('.shortsActionRail').boundingBox()
+  expect(edgeBounds.width).toBeGreaterThanOrEqual(250)
+  expect(edgeBounds.x).toBeGreaterThanOrEqual(edgePlayerBounds.x + edgePlayerBounds.width + 8)
+  expect(edgeBounds.x + edgeBounds.width).toBeLessThanOrEqual(edgeRailBounds.x - 8)
+
+  await page.setViewportSize({ width: 700, height: 600 })
+  const middleBounds = await dialog.boundingBox()
+  expect(middleBounds.width).toBeGreaterThanOrEqual(250)
+  expect(middleBounds.x).toBeGreaterThanOrEqual(8)
+  expect(middleBounds.x + middleBounds.width).toBeLessThanOrEqual(692)
+
+  await page.setViewportSize({ width: 420, height: 320 })
+  const compactBounds = await dialog.boundingBox()
+  expect(compactBounds.width).toBeGreaterThanOrEqual(250)
+  expect(compactBounds.x).toBeGreaterThanOrEqual(8)
+  expect(compactBounds.x + compactBounds.width).toBeLessThanOrEqual(412)
+  const menuBounds = await dialog.locator('.shaka-overflow-menu').boundingBox()
+  expect(menuBounds.x).toBeGreaterThanOrEqual(compactBounds.x)
+  expect(menuBounds.x + menuBounds.width).toBeLessThanOrEqual(compactBounds.x + compactBounds.width)
+  await page.evaluate(() => { document.body.dir = 'rtl' })
+  const rtlBounds = await dialog.boundingBox()
+  const rtlPlayerBounds = await player.boundingBox()
+  expect(rtlBounds.x + rtlBounds.width / 2).toBeCloseTo(rtlPlayerBounds.x + rtlPlayerBounds.width / 2, 0)
+  const lastOption = dialog.locator('.shaka-overflow-menu > button:visible').last()
+  await lastOption.scrollIntoViewIfNeeded()
+  const optionBounds = await lastOption.boundingBox()
+  expect(optionBounds.y).toBeGreaterThanOrEqual(menuBounds.y - 1)
+  expect(optionBounds.y + optionBounds.height).toBeLessThanOrEqual(menuBounds.y + menuBounds.height + 1)
+  await dialog.locator('.phonePlayerOptionsClose').click()
+  await expect(dialog).toBeHidden()
+})
+
+test('landscape Shorts options stay usable when playback finishes loading', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  let releaseMedia
+  const mediaGate = new Promise(resolve => { releaseMedia = resolve })
+  await page.route(/googlevideo\.com\/videoplayback/, async route => {
+    await mediaGate
+    await route.fallback()
+  })
+
+  try {
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page.locator('.ftVideoPlayer')).toBeVisible()
+    await setWindowSize(app, page, { width: 1026, height: 461 })
+    await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabs', 'capacitorTabletLayout'))
+    const watch = await page.evaluateHandle(findWatchComponent)
+    await watch.evaluate(async component => {
+      component.proxy.useCustomShortsPlayerForCurrentVideo = true
+      component.proxy.updateShortsPlayerState(30, [{ width: 360, height: 640 }])
+      await component.proxy.$nextTick()
+    })
+    await watch.dispose()
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    await player.locator('.shortsTopControlsGroup').last().locator('button').nth(-2).click({ force: true })
+    const dialog = page.locator('.phonePlayerOptions[open]')
+    await expect(dialog).toBeVisible()
+
+    releaseMedia()
+    await expect.poll(() => player.locator('video').evaluate(video => video.currentTime)).toBeGreaterThan(0)
+    await expect(dialog).toBeVisible()
+    await expect(player.locator('.shaka-overflow-menu')).toHaveCount(1)
+    const [playerBounds, dialogBounds] = await Promise.all([player.boundingBox(), dialog.boundingBox()])
+    expect(dialogBounds.width).toBeGreaterThanOrEqual(250)
+    expect(dialogBounds.x).toBeGreaterThanOrEqual(playerBounds.x + playerBounds.width + 8)
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUsePlayerMenuGrid', false))
+    await expect(dialog.locator('.shaka-overflow-menu')).toBeVisible()
+    await expect(player.locator('.shaka-overflow-menu')).toHaveCount(1)
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUsePlayerMenuGrid', true))
+    await expect(dialog.locator('.shaka-overflow-menu')).toBeVisible()
+    await expect(player.locator('.shaka-overflow-menu')).toHaveCount(1)
+    await dialog.locator('.phonePlayerOptionsClose').click()
+    await expect(dialog).toBeHidden()
+    await player.hover()
+    const playButton = player.locator('.shortsTopControlsGroup').first().locator('button').first()
+    await expect(playButton).toBeVisible()
+    await playButton.click({ timeout: 5000 })
+    await expect.poll(() => player.locator('video').evaluate(video => video.paused)).toBe(true)
+  } finally {
+    releaseMedia()
+  }
 })
 
 test('phone Shorts controls clear navigation and show quick speeds', async ({ app, page }) => {
@@ -89,7 +212,7 @@ test('phone Shorts loading controls match the action rail', async ({ app, page }
   await watch.dispose()
 })
 
-test('landscape phone Shorts keep controls and loading circles inside the player', async ({ app, page }) => {
+test('landscape phone Shorts keep a portrait player and accessible controls', async ({ app, page }) => {
   await openShort({ app, page })
   await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabs', 'capacitorTabletLayout'))
   await page.setViewportSize({ width: 915, height: 412 })
@@ -103,12 +226,17 @@ test('landscape phone Shorts keep controls and loading circles inside the player
   expect(playerBounds).not.toBeNull()
   expect(railBounds).not.toBeNull()
   expect(controlsBounds).not.toBeNull()
-  expect(railBounds.x).toBeGreaterThanOrEqual(playerBounds.x)
-  expect(railBounds.x + railBounds.width).toBeLessThanOrEqual(playerBounds.x + playerBounds.width + 1)
+  expect(railBounds.x).toBeGreaterThanOrEqual(playerBounds.x + playerBounds.width + 8)
+  expect(railBounds.x + railBounds.width).toBeLessThanOrEqual(page.viewportSize().width)
   expect(railBounds.y + railBounds.height).toBeLessThanOrEqual(playerBounds.y + playerBounds.height + 1)
   expect(playerBounds.y + playerBounds.height).toBeLessThanOrEqual(page.viewportSize().height - 8)
   expect(controlsBounds.x).toBeGreaterThanOrEqual(playerBounds.x)
   expect(controlsBounds.x + controlsBounds.width).toBeLessThanOrEqual(playerBounds.x + playerBounds.width + 1)
+  const aspectRatio = await page.locator('.videoArea').evaluate(element => Number.parseFloat(getComputedStyle(element).getPropertyValue('--shorts-aspect-ratio')))
+  expect(playerBounds.width).toBeLessThanOrEqual(playerBounds.height * aspectRatio + 2)
+  const headerBounds = await page.locator('.topNav').boundingBox()
+  expect(railBounds.y).toBeGreaterThanOrEqual(headerBounds.y + headerBounds.height + 8)
+  expect(railBounds.y).toBeLessThanOrEqual(playerBounds.y + 16)
   await expect(page.locator('.shortsChannelRow')).toBeHidden()
   await expect(page.locator('.shortsExternalTitle')).toBeVisible()
   await page.locator('.videoAreaMargin').evaluate(element => {
@@ -120,8 +248,20 @@ test('landscape phone Shorts keep controls and loading circles inside the player
   expect(metadataBounds).not.toBeNull()
   expect(metadataBounds.y + metadataBounds.height).toBeLessThanOrEqual(playerBounds.y + playerBounds.height - 8)
   await page.locator('.shortsNextPreview').evaluate(element => element.remove())
+  await page.setViewportSize({ width: 915, height: 320 })
   await rail.evaluate(element => { element.scrollTop = element.scrollHeight })
   expect(await rail.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  const railClearance = await rail.evaluate(element => {
+    const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+    const buttons = element.querySelectorAll('button')
+    return {
+      scrollbarLeft: scrollbar.getBoundingClientRect().left,
+      buttonRight: Math.max(...Array.from(buttons, button => button.getBoundingClientRect().right)),
+    }
+  })
+  expect(railClearance.scrollbarLeft).toBeGreaterThanOrEqual(railClearance.buttonRight)
+  await expect(rail.locator('.shortsMetadataAction')).toBeHidden()
+  await page.setViewportSize({ width: 915, height: 412 })
   const soundBounds = await rail.locator('.shortsSoundThumbnail').boundingBox()
   expect(soundBounds).not.toBeNull()
   expect(soundBounds.y).toBeGreaterThanOrEqual(railBounds.y - 1)
@@ -145,6 +285,8 @@ test('landscape phone Shorts keep controls and loading circles inside the player
 
   const watch = await page.evaluateHandle(findWatchComponent)
   await watch.evaluate(component => { component.proxy.isLoading = true })
+  const placeholderBounds = await page.locator('.shortsPlayerPlaceholder').first().boundingBox()
+  expect(placeholderBounds.width).toBeLessThanOrEqual(placeholderBounds.height * aspectRatio + 2)
   const circles = page.locator('.shortsActionSkeleton > span')
   await expect(circles.first()).toBeVisible()
   for (const circle of await circles.all()) {
@@ -159,6 +301,201 @@ test('landscape phone Shorts keep controls and loading circles inside the player
   }
   await expect(page.locator('.shortsSkeletonChannelRow')).toBeHidden()
   await expect(page.locator('.shortsSkeletonTitle')).toBeVisible()
+  await watch.evaluate(component => {
+    component.proxy.isLoading = false
+    component.proxy.ytDlpStreamsPending = true
+  })
+  const streamPlaceholder = page.locator('.streamPlaceholder.shortsPlayerPlaceholder')
+  await expect(streamPlaceholder).toBeVisible()
+  const [streamBounds, noticeBounds] = await Promise.all([
+    streamPlaceholder.boundingBox(),
+    streamPlaceholder.locator('.streamPlaceholderOverlay').boundingBox(),
+  ])
+  expect(streamBounds.width).toBeLessThanOrEqual(streamBounds.height * aspectRatio + 2)
+  expect(noticeBounds.x).toBeGreaterThanOrEqual(streamBounds.x - 1)
+  expect(noticeBounds.x + noticeBounds.width).toBeLessThanOrEqual(streamBounds.x + streamBounds.width + 1)
+  expect(noticeBounds.y).toBeGreaterThanOrEqual(streamBounds.y - 1)
+  expect(noticeBounds.y + noticeBounds.height).toBeLessThanOrEqual(streamBounds.y + streamBounds.height + 1)
+  expect(await streamPlaceholder.locator('.streamPlaceholderText').evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+  await expect(streamPlaceholder.locator('.streamPlaceholderOverlay')).toHaveCSS('flex-direction', 'column')
+  await page.emulateMedia({ colorScheme: 'light' })
+  await expect(page.locator('body')).toHaveClass(/\blight\b/)
+  expect(await page.locator('.shortsExternalTitleButton').evaluate(element => getComputedStyle(element).color === getComputedStyle(document.body).color)).toBe(true)
+  await watch.dispose()
+})
+
+test('landscape Shorts keep light-theme metadata clear of the player', async ({ app, page }) => {
+  await openShort({ app, page })
+  await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabs', 'capacitorTabletLayout'))
+  await page.emulateMedia({ colorScheme: 'light' })
+  await expect(page.locator('body')).toHaveClass(/\blight\b/)
+  await page.setViewportSize({ width: 700, height: 540 })
+
+  const player = page.locator('.ftVideoPlayer.shortsPlayer')
+  const metadata = page.locator('.shortsExternalMetadata')
+  const [playerBounds, metadataBounds] = await Promise.all([player.boundingBox(), metadata.boundingBox()])
+  expect(metadataBounds.x + metadataBounds.width).toBeLessThanOrEqual(playerBounds.x - 8)
+  await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+  await expect.poll(async () => {
+    const [scaledPlayer, scaledMetadata] = await Promise.all([player.boundingBox(), metadata.boundingBox()])
+    return scaledPlayer.x - scaledMetadata.x - scaledMetadata.width
+  }).toBeGreaterThanOrEqual(8)
+})
+
+test('landscape Shorts keep every control inside the narrow player and action rail', async ({ app, page }) => {
+  await openShort({ app, page })
+  await page.evaluate(() => {
+    document.querySelector('.app').classList.add('capacitorTabs', 'capacitorTabletLayout')
+    document.documentElement.style.setProperty('--safe-area-inset-top', '27px')
+  })
+  await page.setViewportSize({ width: 1026, height: 461 })
+  await page.locator('.ftVideoPlayer.shortsPlayer video').evaluate(video => video.pause())
+  await expect(page.locator('.shortsTopControls')).toBeVisible()
+  await page.locator('.shortsTopControlsGroup').last().evaluate(group => {
+    const captions = document.createElement('button')
+    captions.className = 'shortsTopControl shortsCaptionsControl'
+    group.prepend(captions)
+  })
+  const captions = page.locator('.shortsCaptionsControl')
+  await expect(captions).toBeHidden()
+  const playerBounds = await page.locator('.ftVideoPlayer.shortsPlayer').boundingBox()
+  for (const button of await page.locator('.shortsTopControls .shortsTopControl:visible').all()) {
+    const bounds = await button.boundingBox()
+    expect(bounds.width).toBeGreaterThanOrEqual(42)
+    expect(bounds.x).toBeGreaterThanOrEqual(playerBounds.x - 1)
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(playerBounds.x + playerBounds.width + 1)
+    expect(bounds.y + bounds.height).toBeLessThanOrEqual(playerBounds.y + playerBounds.height + 1)
+  }
+  await page.setViewportSize({ width: 600, height: 320 })
+  const narrowPlayerBounds = await page.locator('.ftVideoPlayer.shortsPlayer').boundingBox()
+  const narrowButtons = await page.locator('.shortsTopControls .shortsTopControl:visible').all()
+  const narrowLoadedControls = await Promise.all(narrowButtons.map(button => button.boundingBox()))
+  for (const bounds of narrowLoadedControls) {
+    expect(bounds.width).toBeGreaterThanOrEqual(42)
+    expect(bounds.x).toBeGreaterThanOrEqual(narrowPlayerBounds.x - 1)
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(narrowPlayerBounds.x + narrowPlayerBounds.width + 1)
+    expect(bounds.y + bounds.height).toBeLessThanOrEqual(narrowPlayerBounds.y + narrowPlayerBounds.height + 1)
+  }
+  await expect(captions).toBeHidden()
+  await page.setViewportSize({ width: 1026, height: 600 })
+  await expect(captions).toBeVisible()
+  await page.setViewportSize({ width: 1026, height: 461 })
+
+  const loadedButtons = [
+    page.locator('.shortsTopControlsGroup').first().locator('.shortsTopControl:visible').first(),
+    ...await page.locator('.shortsTopControlsGroup').last().locator('.shortsTopControl:visible').all(),
+  ]
+  const loadedControls = await Promise.all(loadedButtons.map(button => button.boundingBox()))
+
+  const rail = page.locator('.shortsActionRail')
+  await rail.evaluate(element => {
+    const navigation = document.createElement('div')
+    navigation.className = 'shortsNavigation'
+    navigation.innerHTML = '<button class="shortsNavigationButton"></button><button class="shortsNavigationButton"></button>'
+    element.prepend(navigation)
+  })
+  const railBounds = await rail.boundingBox()
+  for (const button of await rail.locator('button:visible').all()) {
+    const bounds = await button.boundingBox()
+    expect(bounds.x).toBeGreaterThanOrEqual(railBounds.x - 1)
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(railBounds.x + railBounds.width + 1)
+  }
+
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate(component => { component.proxy.isLoading = true })
+  const skeletonControls = page.locator('.shortsSkeletonControlGroup span:visible')
+  await expect(skeletonControls).toHaveCount(3)
+  for (const [index, expected] of loadedControls.entries()) {
+    const bounds = await skeletonControls.nth(index).boundingBox()
+    expect(bounds.x).toBeCloseTo(expected.x, 0)
+    expect(bounds.y).toBeCloseTo(expected.y, 0)
+    expect(bounds.width).toBeCloseTo(expected.width, 0)
+  }
+  await page.setViewportSize({ width: 600, height: 320 })
+  for (const [index, expected] of narrowLoadedControls.entries()) {
+    const bounds = await skeletonControls.nth(index).boundingBox()
+    expect(bounds.x).toBeCloseTo(expected.x, 0)
+    expect(bounds.y).toBeCloseTo(expected.y, 0)
+    expect(bounds.width).toBeCloseTo(expected.width, 0)
+  }
+  await watch.dispose()
+})
+
+test('very narrow landscape Shorts keep the info action when the title has no room', async ({ app, page }) => {
+  await openShort({ app, page })
+  await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabs', 'capacitorTabletLayout'))
+  await page.setViewportSize({ width: 420, height: 320 })
+  await expect(page.locator('.shortsExternalTitle')).toBeHidden()
+  await expect(page.locator('.shortsMetadataAction')).toBeVisible()
+})
+
+test('landscape Shorts keep long playback errors and retry actions readable', async ({ app, page }) => {
+  await openShort({ app, page })
+  await page.evaluate(() => {
+    document.querySelector('.app').classList.add('capacitorTabs', 'capacitorTabletLayout')
+    document.documentElement.style.setProperty('--safe-area-inset-top', '27px')
+  })
+  await page.setViewportSize({ width: 1026, height: 461 })
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate(component => {
+    component.proxy.errorMessage = 'TypeError: Aborted(Assertion failed in quickjs/quickjs.c: quickjs_gc_object_list) '.repeat(12)
+  })
+  const container = page.locator('.videoPlayerError .errorContainer')
+  await expect(container).toBeVisible()
+  const containerBounds = await container.boundingBox()
+  const railBounds = await page.locator('.shortsActionRail').boundingBox()
+  expect(containerBounds.x + containerBounds.width).toBeLessThanOrEqual(railBounds.x - 8)
+  for (const element of await container.locator('.errorMessage, .errorActionButton').all()) {
+    const bounds = await element.boundingBox()
+    expect(bounds.x).toBeGreaterThanOrEqual(containerBounds.x - 1)
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(containerBounds.x + containerBounds.width + 1)
+  }
+  await expect.poll(() => container.evaluate(element => getComputedStyle(element).overflowY)).toBe('auto')
+  await container.evaluate(element => { element.scrollTop = element.scrollHeight })
+  expect(await container.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  await page.setViewportSize({ width: 420, height: 320 })
+  const narrowContainerBounds = await container.boundingBox()
+  const narrowRailBounds = await page.locator('.shortsActionRail').boundingBox()
+  expect(narrowContainerBounds.x + narrowContainerBounds.width).toBeLessThanOrEqual(narrowRailBounds.x - 8)
+  for (const element of await container.locator('.errorMessage, .errorActionButton').all()) {
+    const bounds = await element.boundingBox()
+    expect(bounds.x).toBeGreaterThanOrEqual(narrowContainerBounds.x - 1)
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(narrowContainerBounds.x + narrowContainerBounds.width + 1)
+  }
+  await page.evaluate(() => { document.body.dir = 'rtl' })
+  const rtlContainerBounds = await container.boundingBox()
+  const rtlPlayerBounds = await page.locator('.videoPlayerError').boundingBox()
+  expect(rtlContainerBounds.x + rtlContainerBounds.width / 2).toBeCloseTo(rtlPlayerBounds.x + rtlPlayerBounds.width / 2, 0)
+  await page.setViewportSize({ width: 1026, height: 461 })
+  await watch.evaluate(component => { component.proxy.errorMessage = 'Playback failed.' })
+  await expect.poll(() => container.evaluate(element => ({
+    offset: element.scrollTop,
+    overflow: element.scrollHeight - element.clientHeight,
+    scrollbarVisible: element.querySelector(':scope > .os-scrollbar-vertical')?.classList.contains('os-scrollbar-visible'),
+  }))).toEqual({ offset: 0, overflow: 0, scrollbarVisible: false })
+  await watch.dispose()
+})
+
+test('narrow landscape Shorts keep the translated loading notice inside the player', async ({ app, page }) => {
+  await openShort({ app, page })
+  await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabs', 'capacitorTabletLayout'))
+  await page.setViewportSize({ width: 600, height: 320 })
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate(component => { component.proxy.ytDlpStreamsPending = true })
+  const streamPlaceholder = page.locator('.streamPlaceholder.shortsPlayerPlaceholder')
+  await expect(streamPlaceholder).toBeVisible()
+  await streamPlaceholder.locator('.streamPlaceholderText').evaluate(element => {
+    element.textContent = 'Récupération des flux avec yt-dlp…'
+  })
+  const [streamBounds, noticeBounds] = await Promise.all([
+    streamPlaceholder.boundingBox(),
+    streamPlaceholder.locator('.streamPlaceholderOverlay').boundingBox(),
+  ])
+  expect(noticeBounds.x).toBeGreaterThanOrEqual(streamBounds.x)
+  expect(noticeBounds.x + noticeBounds.width).toBeLessThanOrEqual(streamBounds.x + streamBounds.width)
+  expect(noticeBounds.y).toBeGreaterThanOrEqual(streamBounds.y)
+  expect(noticeBounds.y + noticeBounds.height).toBeLessThanOrEqual(streamBounds.y + streamBounds.height)
+  expect(await streamPlaceholder.locator('.streamPlaceholderText').evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
   await watch.dispose()
 })
 
@@ -212,7 +549,7 @@ test('short phone screens can reach every Shorts rail action with navigation pre
 
   await rail.locator('.shortsNavigation').evaluate(element => element.remove())
   await expect.poll(() => rail.evaluate(element => element.scrollTop)).toBe(0)
-  expect(await rail.evaluate(element => element.scrollHeight - element.clientHeight)).toBeLessThanOrEqual(1)
+  await expect.poll(() => rail.evaluate(element => element.scrollHeight - element.clientHeight)).toBeLessThanOrEqual(1)
   expect((await rail.locator('.shortsAction').first().boundingBox()).y).toBeGreaterThanOrEqual(railBounds.y - 1)
 
   await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))

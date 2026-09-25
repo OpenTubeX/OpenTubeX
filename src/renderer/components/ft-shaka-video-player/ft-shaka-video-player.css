@@ -5001,8 +5001,74 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 @media (orientation: landscape) and (height <= 600px) {
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow)) {
+    container: shorts-landscape-player / inline-size;
+  }
+
   :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) > .player) {
     object-fit: contain !important;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) .shortsTopControls) {
+    padding-block: 4px;
+    padding-inline: 4px;
+    flex-wrap: wrap;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) .shortsTopControlsGroup) {
+    gap: 2px;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) .shortsTopControlsGroup:last-child) {
+    flex: none;
+  }
+
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) .shortsTopControl) {
+    inline-size: 42px;
+    block-size: 42px;
+  }
+
+}
+
+@container shorts-landscape-player (width < 180px) {
+  :global(.shortsTopControls .shortsCaptionsControl) {
+    display: none;
+  }
+}
+
+@container shorts-landscape-player (width < 100px) {
+  :global(.shortsTopControls) {
+    align-items: center;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 2px;
+  }
+
+  :global(.shortsTopControlsGroup) {
+    flex-direction: column;
+    gap: 0;
+  }
+}
+
+@media (orientation: landscape) and (height <= 600px) {
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) .phonePlayerOptions[open]) {
+    inset-block: 0 auto;
+    inset-inline: calc(100% + 12px) auto;
+    inline-size: min(300px, calc(50vw - 50% - 108px));
+    block-size: 100%;
+    border-radius: 12px;
+  }
+
+  @media (width < 980px) {
+    :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) .phonePlayerOptions[open]) {
+      inset-inline: 50% auto;
+      inline-size: min(320px, calc(100vw - 48px));
+      transform: translateX(-50%);
+    }
+
+    :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:is(:fullscreen, [data-native-player-screen]), .fullWindow) .phonePlayerOptions[open]:dir(rtl)) {
+      transform: translateX(50%);
+    }
   }
 }
 

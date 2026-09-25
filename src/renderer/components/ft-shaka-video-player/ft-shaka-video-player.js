@@ -4738,6 +4738,8 @@ export default defineComponent({
         return
       }
 
+      const reopenPhoneOptions = !firstTime && !!container.value?.querySelector('.phonePlayerOptions[open]')
+
       if (firstTime) {
         /** @type {shaka.extern.UIConfiguration} */
         const firstTimeConfig = {
@@ -4806,6 +4808,17 @@ export default defineComponent({
         // rebuilds every control element from.
         reRegisterOwnElements()
         ui.configure(uiConfig.value)
+      }
+
+      if (reopenPhoneOptions) {
+        requestAnimationFrame(() => {
+          const controlsContainer = ui?.getControls().getControlsContainer()
+          const menu = controlsContainer?.querySelector('.shaka-overflow-menu')
+          if (menu?.classList.contains('shaka-hidden')) {
+            ui.getControls().showUI()
+            controlsContainer.querySelector('.shaka-overflow-menu-button')?.click()
+          }
+        })
       }
 
       // Shaka recreates its media-session handlers on configure. Re-apply the
