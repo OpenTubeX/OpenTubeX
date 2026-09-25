@@ -1,3 +1,5 @@
+import { BUILTIN_BASE_THEME_VALUES, BUILTIN_BASE_THEME_TRANSLATION_KEYS } from '../../constants.js'
+
 // Stable setting keys map to the same translation keys used by their controls.
 export const SYNC_SETTING_LABELS = {
   aiVideoSummaryMode: 'Settings.Distraction Free Settings.AI Video Summaries',
@@ -27,6 +29,7 @@ export const SYNC_SETTING_LABELS = {
   autoplayPlaylists: 'Settings.Player Settings.Autoplay Playlists',
   autoplayVideos: 'Settings.Player Settings.Autoplay Videos',
   avoidTranslation: 'Settings.General Settings.Avoid translation.Avoid translation',
+  backendPreference: 'Settings.General Settings.Preferred API Backend.Preferred API Backend',
   backendFallback: 'Settings.General Settings.Fallback to Non-Preferred Backend on Failure',
   barColor: 'Settings.Theme Settings.Match Top Bar with Main Color',
   baseTheme: 'Settings.Theme Settings.Base Theme.Base Theme',
@@ -373,4 +376,111 @@ export const SYNC_SETTING_LABELS = {
   ytDlpPreloadEnabled: 'Settings.Player Settings.Preload Upcoming Videos',
   ytDlpSelectedTemplate: 'Settings.Download Settings.Template Source',
   ytDlpSubtitleUseCookies: 'Settings.External Software Settings.Use cookies for subtitles'
+}
+
+const general = 'Settings.General Settings.'
+const player = 'Settings.Player Settings.'
+const theme = 'Settings.Theme Settings.'
+const privacy = 'Settings.Privacy Settings.'
+
+const baseThemes = {
+  ...Object.fromEntries(BUILTIN_BASE_THEME_VALUES.map((value, index) =>
+    [value, `${theme}Base Theme.${BUILTIN_BASE_THEME_TRANSLATION_KEYS[index]}`])),
+  dynamic: `${theme}Base Theme.Dynamic colors`,
+}
+
+// Match the choices shown in Settings so saved choice codes remain readable in activity.
+export const SYNC_SETTING_VALUE_LABELS = {
+  aiVideoSummaryMode: { hide: 'Settings.Distraction Free Settings.Hide', collapsed: 'Settings.Distraction Free Settings.Collapsed', expanded: 'Settings.Distraction Free Settings.Expanded' },
+  appFont: { system: `${theme}Font.System Default` },
+  avoidTranslation: { disabled: `${general}Avoid translation.Disabled`, watch_only: `${general}Avoid translation.Watch Only`, entire_app: `${general}Avoid translation.Entire App` },
+  backendPreference: { local: `${general}Preferred API Backend.Local API`, invidious: `${general}Preferred API Backend.Invidious API` },
+  baseTheme: baseThemes,
+  capacitorLayoutMode: { auto: `${general}Mobile Layout.Automatic`, phone: `${general}Mobile Layout.Phone`, tablet: `${general}Mobile Layout.Tablet` },
+  currentLocale: { system: `${general}System Default` },
+  dateFormat: { locale: `${general}Language Default` },
+  defaultQuality: Object.fromEntries(['2160', '1440', '1080', '720', '480', '360', '240', '144', 'auto'].map(value =>
+    [value, `${player}Default Quality.${value === '2160' ? '4k' : value === 'auto' ? 'Auto' : `${value}p`}`])),
+  defaultVideoFormat: { dash: `${player}Default Video Format.Dash Formats`, legacy: `${player}Default Video Format.Legacy Formats`, audio: `${player}Default Video Format.Audio Formats` },
+  defaultViewingMode: {
+    default: `${general}Thumbnail Preference.Default`,
+    theatre: `${player}Default Viewing Mode.Theater`,
+    fullwindow: 'Video.Player.Full Window',
+    fullwindow_always_on: `${player}Default Viewing Mode.Full Window (Always On)`,
+    fullscreen: `${player}Default Viewing Mode.Full Screen`,
+    fullscreen_always_on: `${player}Default Viewing Mode.Full Screen (Always On)`,
+    pip: `${player}Default Viewing Mode.Picture in Picture`,
+    external_player: 'Settings.External Player Settings.External Player',
+  },
+  externalLinkHandling: { '': `${general}External Link Handling.Open Link`, openLinkAfterPrompt: `${general}External Link Handling.Ask Before Opening Link`, doNothing: `${general}External Link Handling.No Action` },
+  extraThumbnailAction: {
+    '': `${general}Extra Thumbnail Action Button.None`,
+    history: `${general}Extra Thumbnail Action Button.Mark as Watched`,
+    markAsFullySeen: 'Video.Mark As Fully Watched',
+    copyYoutube: `${general}Extra Thumbnail Action Button.Copy YouTube Link`,
+    openYoutube: `${general}Extra Thumbnail Action Button.Open in YouTube`,
+    download: 'Downloads.Download Video',
+  },
+  iconPack: { material: `${theme}Icon Pack.Material Symbols`, remix: `${theme}Icon Pack.Remix Icon` },
+  landingPage: {
+    home: 'Home Page.Home',
+    subscriptions: 'Subscriptions.Subscriptions',
+    subscribedchannels: 'Channels.Title',
+    trending: 'Trending.Trending',
+    popular: 'Most Popular',
+    userplaylists: 'User Playlists.Your Playlists',
+    history: 'History.History',
+    stats: 'Stats.Stats',
+  },
+  listType: { grid: `${general}Video View Type.Grid`, list: `${general}Video View Type.List` },
+  mobileLeftSwipeAction: { disabled: `${player}Swipe Gestures.Disabled`, brightness: `${player}Swipe Gestures.Brightness`, volume: `${player}Swipe Gestures.Volume`, speed: `${player}Playback Speed` },
+  mobileRightSwipeAction: { disabled: `${player}Swipe Gestures.Disabled`, brightness: `${player}Swipe Gestures.Brightness`, volume: `${player}Swipe Gestures.Volume`, speed: `${player}Playback Speed` },
+  newSubscriptionFeedSortBy: { newest: 'Subscriptions.Newest First', oldest: 'Subscriptions.Oldest First' },
+  newSubscriptionFeedView: { combined: 'Subscriptions.Show Combined View', tabbed: 'Subscriptions.Show Tabbed View' },
+  newTabPosition: { end: `${general}New Tab Position.At the end`, afterCurrent: `${general}New Tab Position.After current tab`, afterCurrentInOrder: `${general}New Tab Position.After current tab in opened order` },
+  playlistViewType: { grid: `${general}Video View Type.Grid`, list: `${general}Video View Type.List` },
+  reducedMotion: { system: `${general}Reduced Motion.System`, on: `${general}Reduced Motion.Force On`, off: `${general}Reduced Motion.Force Off` },
+  screenshotMode: { prompt_folder: `${player}Screenshot.Modes.Ask Path`, default_folder: `${player}Screenshot.Modes.Save To Folder`, clipboard: `${player}Screenshot.Modes.Clipboard` },
+  startupBehavior: {
+    loadAllTabs: `${general}Startup Behavior.Load all tabs`,
+    restoreTabLoadState: `${general}Startup Behavior.Load previously loaded tabs`,
+    loadLastActiveTab: `${general}Startup Behavior.Load last active tab`,
+    loadLandingPage: `${general}Startup Behavior.Load landing page, keep other tabs unloaded`,
+    emptySession: `${general}Startup Behavior.Start with an empty session`,
+  },
+  systemDarkTheme: baseThemes,
+  systemLightTheme: baseThemes,
+  tabBarPosition: { top: `${theme}Tab Layout.Horizontal Top`, bottom: `${theme}Tab Layout.Horizontal Bottom`, left: `${theme}Tab Layout.Vertical Left`, right: `${theme}Tab Layout.Vertical Right` },
+  tabCloseFocus: { lastActiveTab: `${general}Tab Close Focus.Last active tab`, nextTab: `${general}Tab Close Focus.Next tab in tab order`, previousTab: `${general}Tab Close Focus.Previous tab in tab order` },
+  thumbnailPreference: { '': `${general}Thumbnail Preference.Default`, start: `${general}Thumbnail Preference.Beginning`, middle: `${general}Thumbnail Preference.Middle`, end: `${general}Thumbnail Preference.End`, hidden: `${general}Thumbnail Preference.Hidden`, blur: `${general}Thumbnail Preference.Blur` },
+  timeFormat: { locale: `${general}Language Default` },
+  toastPosition: Object.fromEntries(['bottom-left', 'bottom-center', 'bottom-right', 'top-left', 'top-center', 'top-right'].map(value =>
+    [value, `${theme}Toast Position.${value.split('-').map(part => part[0].toUpperCase() + part.slice(1)).join(' ')}`])),
+  userHistorySortBy: { latest_played_first: 'History.DateNewestHistory', earliest_played_first: 'History.DateOldestHistory' },
+  userPlaylistsSortBy: {
+    name_ascending: 'User Playlists.Sort By.NameAscending',
+    name_descending: 'User Playlists.Sort By.NameDescending',
+    latest_created_first: 'User Playlists.Sort By.LatestCreatedFirst',
+    earliest_created_first: 'User Playlists.Sort By.EarliestCreatedFirst',
+    latest_updated_first: 'User Playlists.Sort By.LatestUpdatedFirst',
+    earliest_updated_first: 'User Playlists.Sort By.EarliestUpdatedFirst',
+    latest_played_first: 'User Playlists.Sort By.LatestPlayedFirst',
+    earliest_played_first: 'User Playlists.Sort By.EarliestPlayedFirst',
+  },
+  userPlaylistSortOrder: {
+    date_added_descending: 'Playlist.Sort By.DateAddedNewest',
+    date_added_ascending: 'Playlist.Sort By.DateAddedOldest',
+    published_descending: 'Playlist.Sort By.PublishedNewest',
+    published_ascending: 'Playlist.Sort By.PublishedOldest',
+    author_ascending: 'Playlist.Sort By.AuthorAscending',
+    author_descending: 'Playlist.Sort By.AuthorDescending',
+    video_title_ascending: 'Playlist.Sort By.VideoTitleAscending',
+    video_title_descending: 'Playlist.Sort By.VideoTitleDescending',
+    video_duration_ascending: 'Playlist.Sort By.VideoDurationAscending',
+    video_duration_descending: 'Playlist.Sort By.VideoDurationDescending',
+    custom: 'Playlist.Sort By.Custom',
+  },
+  videoPlaybackEngine: { 'yt-dlp': `${general}Stream Extraction Method.yt-dlp`, 'built-in': `${general}Stream Extraction Method.Built-in` },
+  voiceOverTranslationLanguage: { en: `${player}Voice-over Translation.English`, ru: `${player}Voice-over Translation.Russian`, kk: `${player}Voice-over Translation.Kazakh` },
+  watchedProgressSavingMode: { auto: `${privacy}Watched Progress Saving Mode.Modes.Auto`, 'semi-auto': `${privacy}Watched Progress Saving Mode.Modes.Semi-auto`, never: `${privacy}Watched Progress Saving Mode.Modes.Never` },
 }

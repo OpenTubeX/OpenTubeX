@@ -63,6 +63,9 @@
             </button>
             <span v-else>{{ entry.setting }}</span>
           </template>
+          <template #item>
+            {{ entry.item }}
+          </template>
           <template #value>
             {{ entry.displayValue }}
           </template>
@@ -99,7 +102,7 @@ import { Translation as I18nT, useI18n } from 'vue-i18n'
 import store from '../../store'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
-import { SYNC_SETTING_LABELS } from '../../helpers/sync-setting-labels'
+import { SYNC_SETTING_LABELS, SYNC_SETTING_VALUE_LABELS } from '../../helpers/sync-setting-labels'
 
 import { settingsSearchNavigationKey } from '../../helpers/settingsSearch'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
@@ -120,7 +123,81 @@ const collectionLabels = {
   subscriptions: 'Subscriptions.Subscriptions',
   playlists: 'Playlists',
   profiles: 'Settings.Sync Settings.Profiles',
-  playlistBookmarks: 'Playlists',
+  playlistBookmarks: 'Settings.Sync Settings.Saved Playlists',
+  settings: 'Settings.Settings',
+}
+const detailLabels = {
+  feedTypes: 'Channel.Show in subscription feed',
+  dailyVideoLimit: 'Channel.Videos per day',
+  showMembersOnly: 'Search Listing.Label.Members Only',
+}
+const feedTypeLabels = {
+  videos: 'Global.Videos', shorts: 'Global.Shorts', live: 'Global.Live', posts: 'Global.Posts',
+}
+
+function displayIntlName(value, type) {
+  try {
+    return new Intl.DisplayNames(locale.value, { type }).of(value) || value
+  } catch {
+    return value
+  }
+}
+
+function displayActivityValue(entry) {
+  if (entry.detail === 'feedTypes') {
+    return typeof entry.value === 'string' && entry.value
+      // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
+      ? entry.value.split(',').map(type => feedTypeLabels[type] ? t(feedTypeLabels[type]) : type).join(', ')
+      : t('Settings.Player Settings.Caption Appearance.Edge Style.None')
+  }
+  if (entry.detail === 'dailyVideoLimit') {
+    if (entry.value === 'global') return t('Channel.Use global setting')
+    if (entry.value === 'unlimited') return t('Channel.Unlimited')
+  }
+  if (entry.key === 'defaultCaptionSettings') {
+    if (['Background Opacity', 'Vertical Position', 'Font Size'].includes(entry.detail) &&
+        typeof entry.value === 'number') return `${Math.round(entry.value * 100)}%`
+    if (entry.detail === 'Edge Style.Edge Style') {
+      const name = { none: 'None', outline: 'Outline', dropShadow: 'Drop Shadow' }[entry.value]
+      // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
+      if (name) return t(`Settings.Player Settings.Caption Appearance.Edge Style.${name}`)
+    }
+    if (entry.detail === 'Anchor.Anchor' && typeof entry.value === 'string') {
+      const name = entry.value.split('-').map(part => part[0].toUpperCase() + part.slice(1)).join(' ')
+      // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
+      return t(`Settings.Player Settings.Caption Appearance.Anchor.${name}`)
+    }
+  }
+  if (typeof entry.value === 'string') {
+    const valueKey = SYNC_SETTING_VALUE_LABELS[entry.key]?.[entry.value]
+    // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
+    if (valueKey && te(valueKey)) return t(valueKey)
+    if (entry.key === 'statsWeekStartsOn' && /^[0-6]$/.test(entry.value)) {
+      return new Intl.DateTimeFormat(locale.value, { weekday: 'long', timeZone: 'UTC' })
+        .format(new Date(Date.UTC(2023, 0, Number(entry.value) + 1)))
+    }
+    if (['subscriptionFeedAutoRefreshInterval', 'subscriptionShortsAutoRefreshInterval',
+      'subscriptionLiveAutoRefreshInterval', 'subscriptionPostsAutoRefreshInterval'].includes(entry.key)) {
+      if (entry.value === '0') return t('Settings.General Settings.Avoid translation.Disabled')
+      const minutes = Number(entry.value) / 60000
+      if ([30, 60, 120, 240, 360, 480].includes(minutes)) {
+        return new Intl.NumberFormat(locale.value, { style: 'unit', unit: minutes === 30 ? 'minute' : 'hour', unitDisplay: 'short' })
+          .format(minutes === 30 ? minutes : minutes / 60)
+      }
+    }
+    if (entry.key === 'screenshotFormat') return { png: 'PNG', jpeg: 'JPEG', webp: 'WebP' }[entry.value] || entry.value
+    if (entry.key === 'currentLocale' && entry.value) {
+      return displayIntlName(entry.value, 'language')
+    }
+    if (entry.key === 'region' && entry.value) {
+      return displayIntlName(entry.value, 'region')
+    }
+    if (['baseTheme', 'systemLightTheme', 'systemDarkTheme'].includes(entry.key) && entry.value.startsWith('custom:')) {
+      return store.getters.getCustomThemes.find(theme => `custom:${theme.id}` === entry.value)?.name ||
+        t('Settings.Theme Settings.Base Theme.Custom')
+    }
+  }
+  return typeof entry.value === 'boolean' ? (entry.value ? t('Yes') : t('No')) : String(entry.value)
 }
 
 const visibleEntries = computed(() => (showAll.value ? entries.value : entries.value.slice(0, 3)).map(entry => {
@@ -128,13 +205,31 @@ const visibleEntries = computed(() => (showAll.value ? entries.value : entries.v
   const labels = (Array.isArray(labelKey) ? labelKey : [labelKey])
     // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
     .filter(key => key && te(key)).map(key => t(key))
+  const target = entry.key ? navigation?.find(labels, entry.key) : null
+  const detailKey = entry.key === 'subscriptionChannelSettings'
+    ? detailLabels[entry.detail]
+    : entry.key === 'defaultCaptionSettings' && entry.detail
+      ? `Settings.Player Settings.Caption Appearance.${entry.detail}`
+      : null
+  if (entry.item && entry.key) labels.push(entry.item)
+  // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
+  if (detailKey && te(detailKey)) labels.push(t(detailKey))
   const hasValue = entry.key && ['string', 'number', 'boolean'].includes(typeof entry.value)
+  const messageKey = entry.action === 'added'
+    ? 'Settings.Sync Settings.Item Added'
+    : entry.action === 'removed'
+      ? 'Settings.Sync Settings.Item Removed'
+      : entry.action === 'renamed'
+        ? 'Settings.Sync Settings.Item Renamed'
+        : hasValue ? 'Settings.Sync Settings.Setting Changed' : 'Settings.Sync Settings.Item Updated'
+  const setting = entry.parent || [labels.join(' · '),
+    entry.action === 'updated' && !entry.key ? entry.item : null].filter(Boolean).join(' · ')
   return {
     ...entry,
-    setting: labels.join(' · ') || entry.key || entry.collection,
-    target: entry.key ? navigation?.find(labels, entry.key) : null,
-    messageKey: hasValue ? 'Settings.Sync Settings.Setting Changed' : 'Settings.Sync Settings.Item Updated',
-    displayValue: typeof entry.value === 'boolean' ? (entry.value ? t('Yes') : t('No')) : String(entry.value),
+    setting: setting || entry.key || entry.collection,
+    target,
+    messageKey,
+    displayValue: displayActivityValue(entry),
   }
 }))
 

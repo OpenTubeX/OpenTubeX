@@ -504,7 +504,8 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           let activityBefore = encryptedCollections.original[collection]
           for (let attempt = 0; attempt < ENCRYPTED_SYNC_RETRIES; attempt++) {
             const activity = createSyncActivity(
-              collection, activityBefore, data, settings.syncServerDeviceId, settings.syncServerDeviceName
+              collection, activityBefore, data, settings.syncServerDeviceId, settings.syncServerDeviceName,
+              [...(encryptedCollections.original.subscriptions ?? []), ...(client.document.subscriptions ?? [])]
             )
             const activityPayload = activity
               ? await encryptSyncDocument(
