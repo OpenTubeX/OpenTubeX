@@ -120,6 +120,25 @@ test('property-based history actions reject malformed records before writing', a
   assert.equal(called, false)
 })
 
+test('watch progress requires a video ID and finite position before writing', async () => {
+  let called = false
+  const { registrations, notifications, event } = setup({
+    history: { updateWatchProgress: async () => { called = true } }
+  })
+  const invoke = registrations.get(IpcChannels.DB_HISTORY)
+  for (const data of [
+    { videoId: '', watchProgress: 2 },
+    { videoId: 'video', watchProgress: Infinity },
+    { videoId: 'video', watchProgress: '2' }
+  ]) {
+    await assert.rejects(invoke(event, {
+      action: DBActions.HISTORY.UPDATE_WATCH_PROGRESS, data
+    }), /invalid watch progress record/)
+  }
+  assert.equal(called, false)
+  assert.deepEqual(notifications, [])
+})
+
 test('playlist and subscription actions reject array payloads before writing', async () => {
   let writes = 0
   const { registrations, notifications, event } = setup({

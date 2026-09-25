@@ -2,6 +2,7 @@ import { DBActions, IpcChannels, PlaylistVideoAddResult, SyncEvents } from '../c
 
 /** @typedef {{ _id: string, value?: unknown }} SettingRecord */
 /** @typedef {{ action: number, data?: unknown }} DatastoreIpcRequest */
+/** @typedef {{ videoId: string, watchProgress: number }} WatchProgressRecord */
 
 /**
  * @param {unknown} payload
@@ -36,6 +37,16 @@ export function requireSettingRecord(data) {
   const record = data
   if (typeof record._id !== 'string') throw new TypeError('invalid settings record')
   return /** @type {SettingRecord} */ (record)
+}
+
+/** @param {unknown} data @returns {WatchProgressRecord} */
+export function requireWatchProgressRecord(data) {
+  requireDataRecord(data)
+  if (typeof data.videoId !== 'string' || data.videoId.length === 0 ||
+      typeof data.watchProgress !== 'number' || !Number.isFinite(data.watchProgress)) {
+    throw new TypeError('invalid watch progress record')
+  }
+  return /** @type {WatchProgressRecord} */ (data)
 }
 
 /**
@@ -110,7 +121,7 @@ export function registerDatastoreIpc({ ipcMain, handlers, isTrustedUrl, syncOthe
           return null
 
         case DBActions.HISTORY.UPDATE_WATCH_PROGRESS:
-          requireDataRecord(data)
+          requireWatchProgressRecord(data)
           await handlers.history.updateWatchProgress(data.videoId, data.watchProgress)
           syncOtherWindows(
             IpcChannels.SYNC_HISTORY,
