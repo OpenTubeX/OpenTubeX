@@ -231,7 +231,6 @@ test.describe('channel route changes', () => {
   test.use({ seed: { settings: { backendPreference: 'invidious', backendFallback: false } } })
 
   test('keeps the latest sort loading when an older videos request finishes', async ({ page }) => {
-    const releaseRequests = new Map()
     const videos = [1, 2].map(number => ({
       videoId: `alpha00000${number}`,
       title: `Video ${number}`,
@@ -244,16 +243,6 @@ test.describe('channel route changes', () => {
     }))
 
     await page.route(/^https:\/\/invidious\.test\/api\/v1\/channels\//, async route => {
-      const url = new URL(route.request().url())
-      if (url.pathname.endsWith('/videos')) {
-        const sort = url.searchParams.get('sort_by')
-        if (sort === 'newest' && !url.searchParams.has('continuation')) {
-          return route.fulfill({ json: { videos, continuation: 'next' } })
-        }
-        await new Promise(resolve => { releaseRequests.set(sort, resolve) })
-        return route.fulfill({ json: { videos: [] } })
-      }
-
       return route.fulfill({
         json: {
           author: 'Alpha',
@@ -273,29 +262,43 @@ test.describe('channel route changes', () => {
     await page.route(/^https:\/\/invidious\.test\/api\/v1\/resolveurl/, route => route.fulfill({
       json: { pageType: 'WEB_PAGE_TYPE_CHANNEL', ucid: CHANNEL_ID }
     }))
-    await page.evaluate(() => {
+    await page.evaluate((videos) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       store.commit('setCurrentInvidiousInstance', 'https://invidious.test')
-    })
+
+      // Resolve video fetches in the renderer so the two completions can be
+      // ordered without Chromium queuing one intercepted network request.
+      const originalFetch = window.fetch.bind(window)
+      window.releaseChannelResponses = {}
+      window.fetch = (...args) => {
+        const url = new URL(args[0] instanceof Request ? args[0].url : args[0])
+        if (!url.pathname.endsWith('/videos')) return originalFetch(...args)
+        const sort = url.searchParams.get('sort_by')
+        if (sort === 'newest' && !url.searchParams.has('continuation')) {
+          return Promise.resolve(Response.json({ videos, continuation: 'next' }))
+        }
+        return new Promise(resolve => {
+          window.releaseChannelResponses[sort] = () => resolve(Response.json({ videos: [] }))
+        })
+      }
+    }, videos)
 
     try {
       await page.locator(sel.searchInput).fill(CHANNEL_URL)
       await page.locator(sel.searchInput).press('Enter')
       await expect(page).toHaveURL(new RegExp(`#/channel/${CHANNEL_ID}/videos$`))
       await expect(page.locator('.select-container .select-text').first()).toBeVisible()
-      await expect.poll(() => releaseRequests.has('newest')).toBe(true)
+      await expect.poll(() => page.evaluate(() => typeof window.releaseChannelResponses.newest === 'function')).toBe(true)
       await page.locator('.select-container .select-text').first().click()
       await page.getByRole('option', { name: 'Most Popular' }).click()
-      await expect.poll(() => releaseRequests.has('popular')).toBe(true)
+      await expect.poll(() => page.evaluate(() => typeof window.releaseChannelResponses.popular === 'function')).toBe(true)
 
-      const oldResponse = page.waitForResponse(response => response.url().includes('continuation=next'))
-      releaseRequests.get('newest')()
-      await oldResponse
+      await page.evaluate(() => window.releaseChannelResponses.newest())
       await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
       await expect(page.locator('[data-tab-loading-indicator]:not(.fullscreen)')).toBeVisible()
       await expect(page.getByText('This channel does not currently have any videos')).toHaveCount(0)
     } finally {
-      for (const release of releaseRequests.values()) release()
+      await page.evaluate(() => Object.values(window.releaseChannelResponses).forEach(release => release()))
     }
   })
 
