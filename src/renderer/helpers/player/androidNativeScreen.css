@@ -173,11 +173,11 @@
 }
 
 /* Native video is composited below the WebView and cannot be sampled by blur. */
-[data-native-player-controls]:not(.classicPlayerControls) .shaka-overflow-menu:not(.phonePlayerOptions > *),
-[data-native-player-controls]:not(.classicPlayerControls) .phonePlayerOptions[open] {
+/* stylelint-disable-next-line selector-max-compound-selectors */
+.ftVideoPlayer[data-native-player-controls]:not(.classicPlayerControls) .shaka-controls-container .shaka-overflow-menu:not(.phonePlayerOptions > *),
+.ftVideoPlayer[data-native-player-controls]:not(.classicPlayerControls) .phonePlayerOptions[open] {
   background: linear-gradient(145deg, rgb(255 255 255 / 12%), rgb(255 255 255 / 3%)), rgb(0 0 0 / 78%);
 }
-
 
 /* Chapters use their desktop title when it fits, otherwise the settings tile. */
 .ftVideoPlayer[data-native-player-controls] .shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button {

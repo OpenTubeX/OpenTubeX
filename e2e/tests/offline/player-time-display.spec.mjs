@@ -30,7 +30,7 @@ test('Layout setting restores classic player controls and switches the active pl
   await expect(player.locator('.shaka-controls-button-panel > .ft-chapters-button')).toHaveCSS('background-image', 'none')
   await expect.poll(() => player.locator('.shaka-controls-button-panel > .ft-chapters-button').evaluate(element => getComputedStyle(element, '::before').backgroundColor)).toBe('rgba(0, 0, 0, 0.16)')
   await expect(player.locator('.shaka-scrim-container')).toHaveCSS('background-image', /linear-gradient/)
-  await player.locator('.shaka-overflow-menu-button').click({ force: true })
+  await player.locator('.shaka-overflow-menu-button').click()
   const menu = player.locator('.shaka-overflow-menu:not(.shaka-hidden)')
   await expect(menu).toHaveCSS('backdrop-filter', 'none')
   await expect(menu).toHaveCSS('background-color', 'rgba(28, 28, 28, 0.9)')
