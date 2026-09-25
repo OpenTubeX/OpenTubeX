@@ -1449,6 +1449,50 @@ test('plays an H.264 MP4 when yt-dlp supplies short codec names', async ({ app, 
   await waitForPlayback(page)
 })
 
+test('plays an audio-only SoundCloud HLS stream', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+
+  const mediaUrl = 'https://soundcloud.com/davidloehlein/superar'
+  const playlistUrl = 'https://audio.example.test/playlist.m3u8'
+  const segmentUrl = 'https://audio.example.test/segment.mp3'
+  const executable = path.join(app.userDataDir, 'soundcloud-yt-dlp.sh')
+  const response = JSON.stringify({
+    title: 'Superar',
+    duration: 4,
+    webpage_url: mediaUrl,
+    formats: [
+      { format_id: 'hls_mp3_1_0', url: playlistUrl, protocol: 'm3u8_native', ext: 'mp3', vcodec: 'none', acodec: 'mp3' },
+      { format_id: 'http_mp3_1_0', url: segmentUrl, protocol: 'http', ext: 'mp3', vcodec: 'none', acodec: 'mp3' }
+    ]
+  })
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+    `printf '%s\\n' '${response}'`
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  await page.route(playlistUrl, route => route.fulfill({
+    contentType: 'application/x-mpegurl',
+    body: '#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-TARGETDURATION:4\n#EXT-X-MEDIA-SEQUENCE:0\n#EXTINF:4,\nsegment.mp3\n#EXT-X-ENDLIST\n'
+  }))
+  await page.route(segmentUrl, async route => route.fulfill({
+    contentType: 'audio/mpeg',
+    body: await readFile(path.join(repoRoot, 'e2e', 'fixtures', 'media', 'demo-audio.mp3'))
+  }))
+  await page.evaluate(async ytDlpPath => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateYtDlpSource', 'system')
+    await store.dispatch('updateYtDlpPath', ytDlpPath)
+  }, executable)
+
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  await waitForPlayback(page)
+  const player = page.locator(`${activeTab} .externalMediaPlayer`)
+  await expect(player.locator('video')).toHaveClass(/audioOnly/)
+  await expect(page.locator(`${activeTab} .externalMediaError`)).toHaveCount(0)
+})
+
 test('does not show an audio-only player when a video site blocks its video streams', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
 

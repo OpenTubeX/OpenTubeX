@@ -70,7 +70,7 @@
             :manifest-src="source.manifestSrc"
             :manifest-mime-type="source.manifestMimeType"
             :legacy-formats="source.legacyFormats"
-            :format="source.manifestSrc ? 'dash' : 'legacy'"
+            :format="playerFormat"
             :captions="source.captions"
             :caption-translations="source.captionTranslations"
             :title="info.title ?? ''"
@@ -306,6 +306,12 @@ const loading = ref(true)
 const errorMessage = ref('')
 const info = shallowRef(null)
 const source = shallowRef(null)
+const playerFormat = computed(() => {
+  if (!source.value?.manifestSrc) return 'legacy'
+  return info.value?.formats.length > 0 && info.value.formats.every(format => format.vcodec === 'none')
+    ? 'audio'
+    : 'dash'
+})
 const player = useTemplateRef('player')
 const videoLayout = useTemplateRef('videoLayout')
 const mediaUrl = ref('')
