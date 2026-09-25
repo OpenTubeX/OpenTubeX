@@ -107,10 +107,12 @@ export function createDiscoveryApi(providers) {
     getTrending: getTrendingLocal,
     getPopular: getPopularInvidious,
 
+    /** @param {boolean} localAvailable @param {DiscoveryProvider} preference @param {boolean} fallbackEnabled */
     supportsTrending(localAvailable, preference, fallbackEnabled) {
       return localAvailable && (fallbackEnabled || preference === 'local')
     },
 
+    /** @param {string | null} originalUrl @param {DiscoveryProvider} preference @param {string} instanceUrl */
     formatSubscriptionThumbnail(originalUrl, preference, instanceUrl) {
       if (typeof originalUrl !== 'string' || originalUrl === '') return null
       let url = originalUrl.startsWith('//') ? `https:${originalUrl}` : originalUrl
