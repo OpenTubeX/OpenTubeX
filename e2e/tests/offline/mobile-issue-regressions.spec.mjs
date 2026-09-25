@@ -148,7 +148,7 @@ test.describe('translated download actions', () => {
         })
         await store.dispatch('showSettingsWindow', 'downloads')
       }, scale)
-      const clear = page.locator('.downloadHeaderActions button')
+      const clear = page.locator('.downloadHeaderActions button').filter({ hasText: 'Fehlgeschlagene, abgebrochene, übersprungene und fehlende Einträge entfernen' })
       await expect(clear).toHaveText('Fehlgeschlagene, abgebrochene, übersprungene und fehlende Einträge entfernen')
       for (const width of [375, 480, 850]) {
         if (width !== 375) await setWindowSize(app, page, { width, height: width === 480 ? 851 : 850 })

@@ -3921,6 +3921,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
+  padding-inline: 0;
 }
 
 :deep(.ft-controls-stack-times > .ft-time-display-group > .shaka-current-time) {

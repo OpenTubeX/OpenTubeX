@@ -94,6 +94,7 @@ for (const uiScale of [100, 95]) {
     await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] })
     for (const distance of [30, 60, 90, 120, 150, 180]) {
       await session.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...point, y: point.y - distance }] })
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)))
     }
     await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
     await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(50)
