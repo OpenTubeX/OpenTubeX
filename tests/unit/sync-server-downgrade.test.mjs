@@ -29,6 +29,7 @@ function withoutImports (source) {
 }
 
 const helperSource = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
+const runnerSource = await readFile(new URL('../../src/renderer/helpers/sync-server-runner.js', import.meta.url), 'utf8')
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
 
 function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'] } = {}) {
@@ -117,6 +118,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
   const helper = vm.createContext({ ...common })
   vm.runInContext(withoutImports(helperSource) + '\nglobalThis.exports = { SyncServerClient, syncSubscriptions, syncSettings, syncHistory, syncPlaylists, syncPlaylistBookmarks, normalizeSyncServerUrl };', helper)
   const store = vm.createContext({ ...common, ...helper.exports, getSavedOtherDeviceSessions: () => [] })
+  vm.runInContext(withoutImports(runnerSource), store)
   vm.runInContext(withoutImports(storeSource).replace('export default { state, getters, actions, mutations }', 'globalThis.exports = { state, actions, mutations }'), store)
   const context = {
     rootState: {
@@ -933,6 +935,20 @@ test('live checks retry failed local uploads before clearing the sync error', as
   assert.equal(f.context.state.syncServerStatus, 'success')
   assert.equal(f.context.state.syncServerError, '')
   assert.equal(JSON.parse(f.settings.syncServerSnapshot).settings.autoplayVideos.value, false)
+})
+
+test('failed encrypted upload leaves the saved snapshot intact and clears progress', async () => {
+  const f = fixture({}, {
+    encrypted: true,
+    respond: (url, options) => url.endsWith('/encrypted_sync/subscriptions') && options.method === 'PUT'
+      ? new Response('Upload unavailable', { status: 503 })
+      : undefined,
+  })
+  await assert.rejects(f.actions.syncWithSyncServer(f.context), /Upload unavailable/)
+  assert.equal(f.settings.syncServerSnapshot, '{}')
+  assert.equal(f.context.state.syncServerStatus, 'error')
+  assert.equal(f.context.state.syncServerProgress, null)
+  assert.equal(f.dispatched.some(([action]) => action === 'updateSyncServerSnapshot'), false)
 })
 
 for (const [scenario, desktopKeys, phoneKeys] of [
