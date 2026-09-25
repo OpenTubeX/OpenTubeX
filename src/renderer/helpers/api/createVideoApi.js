@@ -15,19 +15,19 @@
 /**
  * @template LocalVideo, InvidiousVideo, LocalMetadata, InvidiousMetadata
  * @typedef {{
- *   getVideoInformation: <Provider extends VideoProvider>(videoId: string, provider: Provider) =>
- *     Promise<Provider extends 'local' ? LocalVideo : InvidiousVideo>,
- *   getWatchVideoInformation: <Provider extends VideoProvider>(videoId: string, provider: Provider,
- *     options: Provider extends 'local' ? LocalWatchOptions : InvidiousWatchOptions) =>
- *     Promise<{ provider: Provider, metadata: Provider extends 'local' ? LocalMetadata : InvidiousMetadata,
- *       source: Provider extends 'local' ? LocalVideo : InvidiousVideo }>,
+ *   getVideoInformation: ((videoId: string, provider: 'local') => Promise<LocalVideo>) &
+ *     ((videoId: string, provider: 'invidious') => Promise<InvidiousVideo>),
+ *   getWatchVideoInformation: ((videoId: string, provider: 'local', options?: LocalWatchOptions) =>
+ *     Promise<{provider: 'local', metadata: LocalMetadata, source: LocalVideo}>) &
+ *     ((videoId: string, provider: 'invidious', options: InvidiousWatchOptions) =>
+ *     Promise<{provider: 'invidious', metadata: InvidiousMetadata, source: InvidiousVideo}>),
  *   loadWatchMetadata: (preference: string, options: {
  *     loadLocal: () => Promise<unknown>, loadInvidious: () => Promise<unknown>,
  *     localAvailable?: boolean, defaultProvider?: VideoProvider | null,
  *     failedProvider?: VideoProvider, error?: unknown, fallbackEnabled?: boolean,
  *     onFallback?: (from: VideoProvider, to: VideoProvider, error: unknown) => void,
  *     onNoProvider?: () => Promise<unknown> | void,
- *   }) => Promise<unknown> | undefined,
+ *   }) => Promise<unknown> | void,
  *   resolveProvider: (preference: string, options?: {
  *     localAvailable?: boolean,
  *     defaultProvider?: VideoProvider | null,
@@ -47,30 +47,62 @@
  * @returns {VideoApi<LocalVideo, InvidiousVideo, LocalMetadata, InvidiousMetadata>}
  */
 export function createVideoApi({ loadLocal, loadInvidious, mapLocal, mapInvidious }) {
+  /**
+   * @overload
+   * @param {string} videoId
+   * @param {'local'} provider
+   * @returns {Promise<LocalVideo>}
+   */
+  /**
+   * @overload
+   * @param {string} videoId
+   * @param {'invidious'} provider
+   * @returns {Promise<InvidiousVideo>}
+   */
+  /** @param {string} videoId @param {VideoProvider} provider */
+  function getVideoInformation(videoId, provider) {
+    switch (provider) {
+      case 'local': return loadLocal(videoId)
+      case 'invidious': return loadInvidious(videoId)
+      default: throw new Error(`Unknown video provider: ${provider}`)
+    }
+  }
+
+  /**
+   * @overload
+   * @param {string} videoId
+   * @param {'local'} provider
+   * @param {LocalWatchOptions} [options]
+   * @returns {Promise<{provider: 'local', metadata: LocalMetadata, source: LocalVideo}>}
+   */
+  /**
+   * @overload
+   * @param {string} videoId
+   * @param {'invidious'} provider
+   * @param {InvidiousWatchOptions} options
+   * @returns {Promise<{provider: 'invidious', metadata: InvidiousMetadata, source: InvidiousVideo}>}
+   */
+  /** @param {string} videoId @param {VideoProvider} provider @param {LocalWatchOptions | InvidiousWatchOptions} [options] */
+  async function getWatchVideoInformation(videoId, provider, options = {}) {
+    switch (provider) {
+      case 'local': {
+        const source = await loadLocal(videoId)
+        return { provider, metadata: mapLocal(source, { ...options, videoId }), source }
+      }
+      case 'invidious': {
+        if (!('instanceUrl' in options) || typeof options.instanceUrl !== 'string' || options.instanceUrl.length === 0) {
+          throw new TypeError('Invidious instance URL is required')
+        }
+        const source = await loadInvidious(videoId)
+        return { provider, metadata: mapInvidious(source, { ...options, videoId }), source }
+      }
+      default: throw new Error(`Unknown video provider: ${provider}`)
+    }
+  }
+
   return {
-    getVideoInformation(videoId, provider) {
-      switch (provider) {
-        case 'local': return loadLocal(videoId)
-        case 'invidious': return loadInvidious(videoId)
-        default: throw new Error(`Unknown video provider: ${provider}`)
-      }
-    },
-    async getWatchVideoInformation(videoId, provider, options = {}) {
-      switch (provider) {
-        case 'local': {
-          const source = await loadLocal(videoId)
-          return { provider, metadata: mapLocal(source, { ...options, videoId }), source }
-        }
-        case 'invidious': {
-          if (typeof options.instanceUrl !== 'string' || options.instanceUrl.length === 0) {
-            throw new TypeError('Invidious instance URL is required')
-          }
-          const source = await loadInvidious(videoId)
-          return { provider, metadata: mapInvidious(source, { ...options, videoId }), source }
-        }
-        default: throw new Error(`Unknown video provider: ${provider}`)
-      }
-    },
+    getVideoInformation,
+    getWatchVideoInformation,
     loadWatchMetadata(preference, {
       loadLocal,
       loadInvidious,
