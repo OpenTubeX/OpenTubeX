@@ -80,9 +80,9 @@ def prepare(source, destination, *, release=False, max_abi_mib=75, max_universal
         if total > limit:
             raise ValueError(f"{path.name}: {total:.2f} MiB exceeds the {limit} MiB size budget")
         if release:
-            # Preserve the existing universal filename used by release consumers.
+            # Keep the universal APK without an architecture suffix.
             suffix = "" if abi == "universal" else f"-{abi}"
-            name = f"org.opentubex.app-{version}-alpha{suffix}.apk"
+            name = f"org.opentubex.app-{version}-beta{suffix}.apk"
         else:
             name = f"opentubex-{version}-android-{abi}.apk"
         rows.append((path, name, sizes, total))

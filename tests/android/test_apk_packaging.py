@@ -53,14 +53,14 @@ class ApkPackagingTest(unittest.TestCase):
         for abi in apks.ABIS | {"universal"}:
             self.assertIn(f"opentubex-0.34.0-nightly-1234-android-{abi}.apk", report)
 
-    def test_preserves_universal_release_filename(self):
+    def test_names_release_apks_beta(self):
         self.metadata["applicationId"] = "org.opentubex.app"
         for element in self.metadata["elements"]:
             element["versionName"] = "0.34.0"
         self.write_metadata()
         apks.prepare(self.source, self.output, release=True)
-        self.assertTrue((self.output / "org.opentubex.app-0.34.0-alpha.apk").exists())
-        self.assertTrue((self.output / "org.opentubex.app-0.34.0-alpha-arm64-v8a.apk").exists())
+        self.assertTrue((self.output / "org.opentubex.app-0.34.0-beta.apk").exists())
+        self.assertTrue((self.output / "org.opentubex.app-0.34.0-beta-arm64-v8a.apk").exists())
 
     def test_rejects_incomplete_set_before_copying(self):
         self.metadata["elements"].pop()

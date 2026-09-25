@@ -20,7 +20,7 @@ test('the Obtainium nightly link allows architecture APKs and the universal fall
   for (const abi of ['arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64', 'universal']) {
     assert.ok(filter.test(`opentubex-0.34.0-nightly-1234-android-${abi}.apk`), abi)
   }
-  assert.ok(!filter.test('org.opentubex.app-0.34.0-alpha-arm64-v8a.apk'))
+  assert.ok(!filter.test('org.opentubex.app-0.34.0-beta-arm64-v8a.apk'))
   assert.ok(!filter.test('opentubex-0.34.0-nightly-1234-android-arm64-v8a.apk.sha256'))
   assert.equal(settings.autoApkFilterByArch, true)
 })
@@ -177,7 +177,7 @@ test('stable releases attach only production APKs', async (t) => {
   const nightlySource = join(directory, 'android-nightly-apks')
   await mkdir(nightlySource)
   const names = ['', '-arm64-v8a', '-armeabi-v7a', '-x86', '-x86_64'].map(
-    suffix => `org.opentubex.app-0.34.0-alpha${suffix}.apk`
+    suffix => `org.opentubex.app-0.34.0-beta${suffix}.apk`
   )
   for (const name of names) await writeFile(join(source, name), name)
   const nightlyNames = ['universal', 'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'].map(

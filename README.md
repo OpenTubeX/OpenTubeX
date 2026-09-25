@@ -132,8 +132,8 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 ## 📦 Download Links
 ### Official Downloads
 
-> [!CAUTION]
-> Stable OpenTubeX releases currently support Windows 10 and later, macOS 12 and above, and various Linux distributions. Mobile builds are an early preview and may have incomplete features.
+> [!NOTE]
+> OpenTubeX supports Windows 10 and later, macOS 12 and above, various Linux distributions, and Android 8.0 and later. Features may differ between desktop and Android.
 
 * [GitHub Releases](https://github.com/OpenTubeX/OpenTubeX/releases)
 * [OpenTubeX Website](https://opentubex.org/downloads/)
@@ -146,7 +146,7 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 * Snap: [Snap Store](https://snapcraft.io/opentubex) (`sudo snap install opentubex --beta`), [installation instructions](https://snap.opentubex.org/), and [source code](https://github.com/OpenTubeX/snap)
 * Nix / NixOS / macOS: [Official Nix flake](https://github.com/OpenTubeX/nix) (`nix profile install github:OpenTubeX/nix`, with flakes enabled), supporting x86_64 and ARM64. See the [installation instructions](https://opentubex.org/downloads/#install-nix).
 * Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/opentubex-bin/)
-* Android preview: requires Android 8.0 or newer (API 26). Current APKs compile and target Android 16 (API 36). Install and update through the [OpenTubeX F-Droid repository](https://fdroid.opentubex.org/) or [Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/OpenTubeX/OpenTubeX).
+* Android: requires Android 8.0 or newer (API 26). Current APKs compile and target Android 16 (API 36). Install and update through the [OpenTubeX F-Droid repository](https://fdroid.opentubex.org/) or [Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/OpenTubeX/OpenTubeX).
 
 To update a Homebrew installation, run `brew update` followed by `brew upgrade --cask opentubex`. Both Apple Silicon and Intel Macs are supported. If macOS blocks the first launch, allow OpenTubeX in **System Settings → Privacy & Security**.
 
