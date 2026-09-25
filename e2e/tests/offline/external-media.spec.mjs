@@ -66,7 +66,13 @@ test('adds a web URL from Downloads and passes it to yt-dlp', async ({ app, page
   await urlPrompt.getByRole('textbox', { name: 'URL' }).press('Enter')
   const options = page.getByRole('dialog', { name: 'https://vimeo.com/123456789' })
   await expect(options).toBeVisible()
-  await options.getByRole('button', { name: 'Download', exact: true }).click()
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0].focus()
+  })
+  await expect.poll(() => app.electronApp.evaluate(({ BrowserWindow }) =>
+    BrowserWindow.getAllWindows()[0].isFocused())).toBe(true)
+  await options.getByRole('button', { name: 'Download', exact: true }).focus()
+  await options.getByRole('button', { name: 'Download', exact: true }).press('Enter')
   await expect.poll(() => readFile(argsFile, 'utf8').catch(() => '')).toContain('https://vimeo.com/123456789')
   await options.getByRole('button', { name: 'Close', exact: true }).click()
   await page.getByRole('button', { name: 'Add download' }).click()
@@ -1654,6 +1660,24 @@ test('plays both streams when an external clip has separate audio and codec-free
   const audio = page.locator(`${activeTab} .externalMediaCompanionAudio`)
   await expect.poll(() => video.evaluate(element => element.videoWidth).catch(() => 0), { timeout: 20000 }).toBeGreaterThan(0)
   await expect.poll(() => audio.evaluate(element => element.currentTime > 0 && !element.paused).catch(() => false), { timeout: 20000 }).toBe(true)
+  await video.evaluate(element => {
+    Object.defineProperty(element, 'duration', { configurable: true, value: 4 })
+  })
+  await audio.evaluate(element => {
+    Object.defineProperty(element, 'duration', { configurable: true, value: 4 })
+    element.dispatchEvent(new Event('loadedmetadata'))
+  })
+  await expect(video).toHaveJSProperty('loop', true)
+  await video.evaluate(element => {
+    Object.defineProperty(element, 'duration', { configurable: true, value: NaN })
+  })
+  await audio.evaluate(element => {
+    Object.defineProperty(element, 'duration', { configurable: true, value: NaN })
+    element.dispatchEvent(new Event('loadedmetadata'))
+  })
+  await expect(video).toHaveJSProperty('loop', true)
+  await video.evaluate(element => { delete element.duration })
+  await audio.evaluate(element => { delete element.duration })
   await audio.evaluate(async element => { element.currentTime = 0; await element.play() })
   await video.evaluate(element => element.dispatchEvent(new Event('waiting')))
   await expect.poll(() => audio.evaluate(element => element.paused), { timeout: 1000 }).toBe(true)
@@ -1662,6 +1686,13 @@ test('plays both streams when an external clip has separate audio and codec-free
   await expect.poll(() => audio.evaluate(element => element.currentTime > 2.5 && !element.paused).catch(() => false), { timeout: 20000 }).toBe(true)
   await expect(video).toHaveJSProperty('loop', true)
   await expect.poll(() => video.evaluate(element => !element.paused)).toBe(true)
+  await expect.poll(() => audio.evaluate(element => element.currentTime > 1 && element.currentTime < 3), { timeout: 10000 }).toBe(true)
+  const audioBeforeSeek = await audio.evaluate(element => element.currentTime)
+  await video.evaluate(element => { element.currentTime = 0.5 })
+  await expect.poll(() => video.evaluate(element => element.currentTime), { timeout: 5000 }).toBeGreaterThan(0.4)
+  expect(await audio.evaluate(element => element.currentTime)).toBeGreaterThan(audioBeforeSeek - 0.25)
+  await expect.poll(() => audio.evaluate(element => element.currentTime < 1 && !element.paused), { timeout: 10000 }).toBe(true)
+  await expect(video).toHaveJSProperty('paused', false)
   await video.evaluate(element => element.pause())
   await expect.poll(() => audio.evaluate(element => element.paused)).toBe(true)
   await video.evaluate(element => element.play())
@@ -1689,6 +1720,63 @@ test('plays both streams when an external clip has separate audio and codec-free
   await audio.evaluate(element => { element.play = () => Promise.reject(new DOMException('Autoplay blocked', 'NotAllowedError')) })
   await video.evaluate(element => element.play())
   await expect.poll(() => video.evaluate(element => element.paused), { timeout: 1000 }).toBe(true)
+})
+
+test('uses companion audio only for a selected video-only legacy format', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+
+  const executable = path.join(app.userDataDir, 'external-media-mixed-formats.sh')
+  const videoUrl = 'https://coub.example.test/video.mp4'
+  const audioUrl = 'https://coub.example.test/audio.m4a'
+  const response = JSON.stringify({
+    title: 'Mixed formats',
+    formats: [
+      { format_id: 'audio', url: audioUrl, protocol: 'https', ext: 'm4a', vcodec: 'none', acodec: 'mp4a.40.2' },
+      { format_id: 'muxed', url: DEMO_MEDIA_URL, protocol: 'https', ext: 'webm', vcodec: 'vp9', acodec: 'opus', width: 640, height: 360, tbr: 100 },
+      { format_id: 'video', url: videoUrl, protocol: 'https', ext: 'mp4', acodec: 'none', width: 1280, height: 720, tbr: 200 }
+    ]
+  })
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+    `printf '%s\\n' '${response}'`
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  await routeDemoMedia(page)
+  const videoBytes = Buffer.from((await readFile(path.join(repoRoot, 'e2e/fixtures/media/post-live-video.mp4.b64'), 'utf8')).replaceAll('\n', ''), 'base64')
+  const audioBytes = Buffer.from((await readFile(path.join(repoRoot, 'e2e/fixtures/media/post-live-long-audio.m4a.b64'), 'utf8')).replaceAll('\n', ''), 'base64')
+  await page.route(videoUrl, route => route.fulfill({ contentType: 'video/mp4', body: videoBytes }))
+  await page.route(audioUrl, route => route.fulfill({ contentType: 'audio/mp4', body: audioBytes }))
+  await page.evaluate(async ytDlpPath => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateYtDlpSource', 'system')
+    await store.dispatch('updateYtDlpPath', ytDlpPath)
+  }, executable)
+
+  await page.locator(sel.searchInput).fill('https://coub.com/view/mixed')
+  await page.locator(sel.searchInput).press('Enter')
+  const player = page.locator(`${activeTab} .externalMediaPlayer`)
+  const video = player.locator('video')
+  const audio = page.locator(`${activeTab} .externalMediaCompanionAudio`)
+  const selectedQuality = player.locator('.legacy-quality-button').first()
+  await expect(selectedQuality).toHaveAttribute('shaka-status', '720p', { timeout: 20000 })
+  await expect.poll(() => audio.evaluate(element => !element.paused && element.currentTime > 0)).toBe(true)
+  await player.locator('.legacy-qualities .legacy-resolution').filter({ hasText: '360p' }).first().evaluate(element => element.click())
+  await expect(selectedQuality).toHaveAttribute('shaka-status', '360p')
+  await expect.poll(() => video.evaluate(element => !element.paused && element.readyState >= 2)).toBe(true)
+  await video.evaluate(async element => { element.pause(); await element.play() })
+  await audio.evaluate(element => {
+    element.originalPlay = element.play
+    element.playCalls = 0
+    element.play = () => { element.playCalls++; return Promise.resolve() }
+  })
+  await video.evaluate(element => element.dispatchEvent(new Event('playing')))
+  await expect(audio).toHaveJSProperty('playCalls', 0)
+  await expect.poll(() => audio.evaluate(element => element.paused)).toBe(true)
+  await audio.evaluate(element => { element.play = element.originalPlay })
+  await player.locator('.legacy-qualities .legacy-resolution').filter({ hasText: '720p' }).first().evaluate(element => element.click())
+  await expect(selectedQuality).toHaveAttribute('shaka-status', '720p')
+  await expect.poll(() => audio.evaluate(element => !element.paused)).toBe(true)
 })
 
 for (const [name, videoCodec] of [

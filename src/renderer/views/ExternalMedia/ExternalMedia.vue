@@ -87,6 +87,7 @@
               :use-theatre-mode="useTheatreMode"
               playback-engine="yt-dlp"
               @error="playerErrorHandler"
+              @legacy-format-selected="setCompanionFormat"
               @play="playCompanionAudio"
               @playing="playCompanionAudio"
               @pause="pauseCompanionAudio"
@@ -111,7 +112,7 @@
               hidden
               aria-hidden="true"
               @loadedmetadata="updateCompanionLoop"
-              @ended="pauseCompanionVideo"
+              @ended="handleCompanionAudioEnded"
             />
           </template>
           <div
@@ -328,6 +329,7 @@ const info = shallowRef(null)
 const source = shallowRef(null)
 const player = useTemplateRef('player')
 const companionAudio = useTemplateRef('companionAudio')
+const companionAudioNeeded = ref(false)
 const videoLayout = useTemplateRef('videoLayout')
 const mediaUrl = ref('')
 const currentTime = ref(0)
@@ -356,6 +358,7 @@ const hostname = computed(() => {
     return ''
   }
 })
+const isCoub = computed(() => hostname.value === 'coub.com' || hostname.value.endsWith('.coub.com'))
 const twitchChatTarget = computed(() => info.value && source.value
   ? getTwitchChatTarget(info.value.webpageUrl, source.value.isLive) ?? getTwitchChatTarget(mediaUrl.value, source.value.isLive)
   : null)
@@ -566,7 +569,8 @@ const playerErrorHandler = ref(() => {})
 
 function syncCompanionAudio(time) {
   const audio = companionAudio.value
-  if (audio && !getCompanionVideo()?.loop && Number.isFinite(time) && Math.abs(audio.currentTime - time) > 0.5) {
+  // A looping Coub video has its own timeline; seeking it must not restart the soundtrack.
+  if (audio && companionAudioNeeded.value && !getCompanionVideo()?.loop && Number.isFinite(time) && Math.abs(audio.currentTime - time) > 0.5) {
     audio.currentTime = time
   }
 }
@@ -578,14 +582,34 @@ function getCompanionVideo() {
 function updateCompanionLoop() {
   const video = getCompanionVideo()
   const audio = companionAudio.value
-  if (video && audio && Number.isFinite(video.duration) && Number.isFinite(audio.duration)) {
-    video.loop = audio.duration > video.duration + 0.5
+  if (!video || !audio) return
+  video.loop = companionAudioNeeded.value && (isCoub.value ||
+    (Number.isFinite(video.duration) && Number.isFinite(audio.duration) && audio.duration > video.duration + 0.5))
+  audio.loop = companionAudioNeeded.value && isCoub.value
+}
+
+function setCompanionFormat(format) {
+  companionAudioNeeded.value = Boolean(source.value?.separateAudioUrl && format.requiresSeparateAudio)
+  if (!companionAudioNeeded.value) pauseCompanionAudio()
+  updateCompanionLoop()
+}
+
+function handleCompanionAudioEnded() {
+  if (!companionAudioNeeded.value) return
+  if (!isCoub.value) {
+    pauseCompanionVideo()
+    return
+  }
+  const audio = companionAudio.value
+  if (audio && !getCompanionVideo()?.paused) {
+    audio.currentTime = 0
+    playCompanionAudio()
   }
 }
 
 function playCompanionAudio() {
   const audio = companionAudio.value
-  if (!audio) return
+  if (!audio || !companionAudioNeeded.value) return
   const video = getCompanionVideo()
   if (video) {
     audio.volume = video.muted ? 0 : video.volume
@@ -626,6 +650,7 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
   if (seekTimer !== null) clearTimeout(seekTimer)
   seekTimer = null
   const generation = ++loadGeneration
+  companionAudioNeeded.value = false
   playerErrorHandler.value = error => {
     if (generation === loadGeneration) handlePlayerError(error)
   }

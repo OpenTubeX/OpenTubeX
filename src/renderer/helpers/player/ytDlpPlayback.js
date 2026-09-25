@@ -497,6 +497,7 @@ function mapYtDlpLegacyFormat(format) {
     height: format.height,
     width: format.width,
     url: format.url,
+    requiresSeparateAudio: format.acodec === 'none',
     availableAt: format.availableAt
   }
 }
