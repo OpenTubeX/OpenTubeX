@@ -24,6 +24,15 @@ endorsed by, maintained by, or supported by the FreeTube project.
     <img alt="Matrix" src="https://img.shields.io/badge/Matrix-%23opentubex-black?logo=matrix&logoColor=white" />
   </a>
 </p>
+<p align="center">
+  <a href="https://alternativeto.net/software/opentubex/about/?utm_source=badge&amp;utm_medium=referral">
+    <picture>
+      <source media="(prefers-color-scheme: light)" srcset="https://alternativeto.net/static/badges/badge-wide-light.svg">
+      <source media="(prefers-color-scheme: dark)" srcset="https://alternativeto.net/static/badges/badge-wide-dark.svg">
+      <img alt="OpenTubeX on AlternativeTo" src="https://alternativeto.net/static/badges/badge-wide-dark.svg">
+    </picture>
+  </a>
+</p>
 
 <hr>
 <p align="center"><a href="#screenshots">Screenshots</a> &bull; <a href="#features">Features</a> &bull; <a href="#how-does-it-work">How does it work?</a> &bull; <a href="#download-links">Download Links</a> &bull; <a href="#contributing">Contributing</a> &bull; <a href="#localization">Localization</a> &bull; <a href="#contact">Contact</a> &bull; <a href="#license">License</a></p>
@@ -145,12 +154,23 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 * Flatpak: [OpenTubeX remote](https://flatpak.opentubex.org/), [Flatpark](https://flatpark.org/apps/org.opentubex.OpenTubeX/), and [source code](https://github.com/OpenTubeX/flatpak)
 * Snap: [Snap Store](https://snapcraft.io/opentubex) (`sudo snap install opentubex --beta`), [installation instructions](https://snap.opentubex.org/), and [source code](https://github.com/OpenTubeX/snap)
 * Nix / NixOS / macOS: [Official Nix flake](https://github.com/OpenTubeX/nix) (`nix profile install github:OpenTubeX/nix`, with flakes enabled), supporting x86_64 and ARM64. See the [installation instructions](https://opentubex.org/downloads/#install-nix).
-* Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/opentubex-bin/)
+* Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/opentubex-bin/) [![AUR version](https://img.shields.io/aur/version/opentubex-bin?label=AUR)](https://aur.archlinux.org/packages/opentubex-bin/)
 * Android: requires Android 8.0 or newer (API 26). Current APKs compile and target Android 16 (API 36). Install and update through the [OpenTubeX F-Droid repository](https://fdroid.opentubex.org/) or [Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/OpenTubeX/OpenTubeX).
 
 To update a Homebrew installation, run `brew update` followed by `brew upgrade --cask opentubex`. Both Apple Silicon and Intel Macs are supported. If macOS blocks the first launch, allow OpenTubeX in **System Settings → Privacy & Security**.
 
 iOS support is planned. The first iOS builds will be downloadable `.ipa` files.
+
+<a href="https://snapcraft.io/opentubex">
+  <picture>
+    <source media="(prefers-color-scheme: light)" srcset="https://snapcraft.io/en/light/install.svg">
+    <source media="(prefers-color-scheme: dark)" srcset="https://snapcraft.io/en/dark/install.svg">
+    <img alt="Get it from the Snap Store" src="https://snapcraft.io/en/dark/install.svg">
+  </picture>
+</a>
+<a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/OpenTubeX/OpenTubeX">
+  <img alt="Get it on Obtainium" src="docs/badges/obtainium.png" width="180">
+</a>
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/opentubex.svg)](https://repology.org/project/opentubex/versions)
 <br />
