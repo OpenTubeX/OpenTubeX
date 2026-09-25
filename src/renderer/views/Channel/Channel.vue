@@ -372,6 +372,7 @@ const { isTabPresented } = useTabContext()
 let skipRouteChangeWatcherOnce = false
 let pendingTabRoute = null
 let isReplacingTabRoute = false
+let channelRouteGeneration = 0
 let autoRefreshOnSortByChangeEnabled = false
 /** @type {import('youtubei.js').YT.Channel|null} */
 let channelInstance = null
@@ -609,6 +610,7 @@ watch(route, () => {
     skipRouteChangeWatcherOnce = false
     return
   }
+  channelRouteGeneration += 1
   isLoading.value = true
 
   if (route.query.url) {
@@ -1202,6 +1204,7 @@ watch(videoSortBy, () => {
 })
 
 async function getChannelVideosLocal() {
+  const requestGeneration = channelRouteGeneration
   setElementListLoading('videos', true)
   const expectedId = id.value
 
@@ -1214,7 +1217,7 @@ async function getChannelVideosLocal() {
       const playlistId = getChannelPlaylistId(id.value, 'videos', videoSortBy.value)
       const playlist = await getLocalPlaylist(playlistId)
 
-      if (expectedId !== id.value) {
+      if (requestGeneration !== channelRouteGeneration || expectedId !== id.value) {
         return
       }
 
@@ -1223,8 +1226,14 @@ async function getChannelVideosLocal() {
       setElementListLoading('videos', false)
     } else {
       await ensureChannelInstance()
+      if (requestGeneration !== channelRouteGeneration || expectedId !== id.value) {
+        return
+      }
 
       let videosTab = await channelInstance.getVideos()
+      if (requestGeneration !== channelRouteGeneration || expectedId !== id.value) {
+        return
+      }
 
       showVideoSortBy.value = videosTab.filters.length > 1
 
@@ -1233,7 +1242,7 @@ async function getChannelVideosLocal() {
         videosTab = await videosTab.applyFilter(videosTab.filters[index])
       }
 
-      if (expectedId !== id.value) {
+      if (requestGeneration !== channelRouteGeneration || expectedId !== id.value) {
         return
       }
 
@@ -1249,6 +1258,9 @@ async function getChannelVideosLocal() {
       })
     }
   } catch (err) {
+    if (requestGeneration !== channelRouteGeneration) {
+      return
+    }
     setElementListLoading('videos', false)
     if (isArtistTopicChannel.value && err.message === 'The playlist does not exist.') {
       // If this artist topic channel doesn't have any videos, ignore the error.
@@ -1299,6 +1311,7 @@ async function getChannelVideosLocalMore() {
  * @param {boolean} sortByChanged
  */
 async function channelInvidiousVideos(sortByChanged = false) {
+  const requestGeneration = channelRouteGeneration
   if (sortByChanged) {
     videoContinuationData.value = null
   }
@@ -1312,6 +1325,9 @@ async function channelInvidiousVideos(sortByChanged = false) {
 
   try {
     const response = await getInvidiousChannelVideos(id.value, videoSortBy.value, videoContinuationData.value)
+    if (requestGeneration !== channelRouteGeneration) {
+      return
+    }
     if (more) {
       latestVideos.value = latestVideos.value.concat(response.videos)
     } else {
@@ -1327,6 +1343,9 @@ async function channelInvidiousVideos(sortByChanged = false) {
       })
     }
   } catch (err) {
+    if (requestGeneration !== channelRouteGeneration) {
+      return
+    }
     setElementListLoading('videos', false)
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
