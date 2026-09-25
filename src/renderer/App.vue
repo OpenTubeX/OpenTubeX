@@ -573,6 +573,8 @@ import {
   resolveMobileContextLinkCopyUrl,
 } from './helpers/mobileLinkActions'
 import { createLinkNavigationPlatform } from './helpers/appLinkNavigationPlatform.js'
+import { createAppUrlNavigation } from './helpers/appUrlNavigation.js'
+import { createAppTabShortcuts } from './helpers/appTabShortcuts.js'
 import { startProgressBarOperation } from './helpers/progressBar'
 import { initializePlatformInfo, isLinuxWayland, supportsAutoPictureInPictureMinimize } from './helpers/platform'
 import { revealStartupSplash } from './helpers/startupSplash'
@@ -697,6 +699,17 @@ if (usesLogicalTabs) {
   provide(routerKey, navigation.createPresentedRouterFacade())
 }
 const { locale, t, tm } = useI18n()
+const appUrlNavigation = createAppUrlNavigation({
+  getUrlInfo: href => store.dispatch('getYoutubeUrlInfo', href),
+  openInternalPath,
+  navigateTab: (tabId, location) => navigation.push(tabId, location),
+  showUnknownUrl: () => showToast({
+    message: t('Unknown YouTube url type, cannot be opened in app'),
+    icon: ['fas', 'circle-exclamation'],
+  }),
+  isElectron,
+})
+const handleYoutubeLink = appUrlNavigation.openYoutubeLink
 initializePlatformInfo()
 
 const tabContainers = computed(() => {
@@ -2305,6 +2318,26 @@ function handleGamepadBack() {
   goHistoryFromCommandPalette(-1)
 }
 
+const tabShortcuts = isElectron
+  ? createAppTabShortcuts({
+      shortcuts: KeyboardShortcuts.APP.GENERAL,
+      matchesShortcut: matchesKeyboardShortcut,
+      isTypingTarget,
+      tabs: () => store.state.tabs.tabs,
+      routePath: () => route.path,
+      activateTab: id => store.dispatch('activateTab', id),
+      cycleLayout: cycleTabLayout,
+      createTab: () => store.dispatch('createTab', { makeActive: true }),
+      restoreClosedWindow: () => window.ftElectron.reopenClosedWindow(),
+      restoreClosedTab: () => store.dispatch('restoreClosedTab'),
+      closeTabs: closeShortcutTabs,
+      closeWindow: () => window.close(),
+      cycleSwitcher: cycleTabSwitcher,
+      tabIdsToReload: getShortcutTabIds,
+      reloadTab: prepareAndReloadTab,
+    })
+  : null
+
 /**
  * @param {KeyboardEvent} event
  */
@@ -2399,87 +2432,7 @@ function handleKeyboardShortcuts(event) {
     store.dispatch('showOutlines')
   }
 
-  // Tab keyboard shortcuts (Electron only)
-  if (process.env.IS_ELECTRON) {
-    // Ctrl+1..9: Switch to tab by number
-    if (matchesKeyboardShortcut(event, shortcuts.SWITCH_TO_TAB)) {
-      if (!isTypingTarget(event.target)) {
-        const index = parseInt(event.key, 10) - 1
-        const tabs = store.state.tabs.tabs
-        if (index < tabs.length) {
-          event.preventDefault()
-          store.dispatch('activateTab', tabs[index].id)
-          return
-        }
-      }
-    }
-
-    // F1: Toggle between horizontal and vertical tabs
-    if (matchesKeyboardShortcut(event, shortcuts.TOGGLE_TAB_ORIENTATION) && !isTypingTarget(event.target)) {
-      event.preventDefault()
-      cycleTabLayout()
-      return
-    }
-
-    // Ctrl+T: New tab
-    if (matchesKeyboardShortcut(event, shortcuts.NEW_TAB)) {
-      event.preventDefault()
-      store.dispatch('createTab', { makeActive: true })
-      return
-    }
-
-    if (matchesKeyboardShortcut(event, shortcuts.RESTORE_CLOSED_WINDOW)) {
-      event.preventDefault()
-      window.ftElectron.reopenClosedWindow()
-      return
-    }
-
-    // Ctrl+Shift+T: Restore closed tab
-    if (matchesKeyboardShortcut(event, shortcuts.RESTORE_CLOSED_TAB)) {
-      event.preventDefault()
-      store.dispatch('restoreClosedTab')
-      return
-    }
-
-    // Ctrl+W: Close tab (handled in menu, but also here for robustness)
-    if (matchesKeyboardShortcut(event, shortcuts.CLOSE_TAB)) {
-      event.preventDefault()
-      closeShortcutTabs().then((hasRemainingTabs) => {
-        if (!hasRemainingTabs) {
-          window.close()
-        }
-      })
-      return
-    }
-
-    // Ctrl+Tab: Next tab
-    if (matchesKeyboardShortcut(event, shortcuts.NEXT_TAB)) {
-      event.preventDefault()
-      cycleTabSwitcher(1)
-      return
-    }
-
-    // Ctrl+Shift+Tab: Previous tab
-    if (matchesKeyboardShortcut(event, shortcuts.PREV_TAB)) {
-      event.preventDefault()
-      cycleTabSwitcher(-1)
-      return
-    }
-
-    // Reload tab unless the current view handles refresh itself
-    if ([shortcuts.RELOAD_TAB, shortcuts.RELOAD_TAB_ALT]
-      .some(shortcut => matchesKeyboardShortcut(event, shortcut))) {
-      const tabIds = getShortcutTabIds()
-      if (tabIds.length === 1 && route.path.startsWith('/subscriptions')) {
-        event.preventDefault()
-        return
-      }
-      event.preventDefault()
-      for (const tabId of tabIds) {
-        prepareAndReloadTab(tabId)
-      }
-    }
-  }
+  tabShortcuts?.handle(event)
 }
 
 /**
@@ -3332,143 +3285,6 @@ function handleLinkClick(event, link) {
     })
   } else {
     handleExternalLink(href)
-  }
-}
-
-async function handleYoutubeLink(href, {
-  doCreateNewWindow = false,
-  doCreateNewTab = false,
-  isMiddleClick = false,
-  tabId = null
-} = {}) {
-  const result = await store.dispatch('getYoutubeUrlInfo', href)
-  // Middle clicks should open tabs in background (not make them active)
-  const makeActive = !isMiddleClick
-  const openPath = (options) => {
-    if (isElectron && tabId && !options.doCreateNewWindow && !options.doCreateNewTab) {
-      return navigation.push(tabId, { path: options.path, query: options.query })
-    }
-    return openInternalPath(options)
-  }
-
-  switch (result.urlType) {
-    case 'video': {
-      const { videoId, timestamp, playlistId, commentId, isShort } = result
-
-      const query = {}
-      if (isShort) {
-        query.short = 'true'
-      }
-      if (timestamp) {
-        query.timestamp = timestamp
-      }
-      if (playlistId && playlistId.length > 0) {
-        query.playlistId = playlistId
-      }
-      if (commentId) {
-        query.commentId = commentId
-      }
-
-      openPath({
-        path: `/watch/${videoId}`,
-        query,
-        doCreateNewWindow,
-        doCreateNewTab,
-        makeActive
-      })
-      break
-    }
-
-    case 'playlist': {
-      const { playlistId, query } = result
-
-      openPath({
-        path: `/playlist/${playlistId}`,
-        query,
-        doCreateNewWindow,
-        doCreateNewTab,
-        makeActive
-      })
-      break
-    }
-
-    case 'search': {
-      const { searchQuery, query } = result
-
-      openPath({
-        path: `/search/${encodeURIComponent(searchQuery)}`,
-        query,
-        doCreateNewWindow,
-        doCreateNewTab,
-        makeActive,
-        searchQueryText: searchQuery
-      })
-      break
-    }
-
-    case 'hashtag': {
-      const { hashtag } = result
-      openPath({
-        path: `/hashtag/${encodeURIComponent(hashtag)}`,
-        doCreateNewWindow,
-        doCreateNewTab,
-        makeActive
-      })
-      break
-    }
-
-    case 'post': {
-      const { postId, query } = result
-
-      openPath({
-        path: `/post/${postId}`,
-        query,
-        doCreateNewWindow,
-        doCreateNewTab,
-        makeActive
-      })
-      break
-    }
-
-    case 'channel': {
-      const { channelId, subPath, url } = result
-
-      openPath({
-        path: `/channel/${channelId}/${subPath}`,
-        doCreateNewWindow,
-        doCreateNewTab,
-        makeActive,
-        query: {
-          url
-        }
-      })
-      break
-    }
-
-    case 'trending':
-    case 'subscriptions':
-    case 'history':
-    case 'userplaylists':
-      openPath({
-        path: `/${result.urlType}`,
-        doCreateNewWindow,
-        doCreateNewTab,
-        makeActive
-      })
-      break
-
-    case 'invalid_url': {
-      // Do nothing
-      break
-    }
-
-    default: {
-      // Unknown URL type
-      showToast({
-        message: t('Unknown YouTube url type, cannot be opened in app'),
-        icon: ['fas', 'circle-exclamation'],
-      })
-    }
   }
 }
 
