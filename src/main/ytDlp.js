@@ -2352,7 +2352,7 @@ async function startYtDlpDownload(
   const { args: downloadArgs, truncatesLongTitles } = buildYtDlpDownloadArguments(payload)
   args.push('--paths', downloadFolder, ...downloadArgs)
 
-  if (((await settings._findOne('ytDlpPlaybackAlwaysUseCookies'))?.value === true ||
+  if (!isExternalMedia && ((await settings._findOne('ytDlpPlaybackAlwaysUseCookies'))?.value === true ||
     (await settings._findOne('ytDlpDownloadUseCookies'))?.value === true) &&
     (await settings._findOne('ytDlpPlaybackAuthMode'))?.value !== 'none') {
     const authenticationError = await pushYtDlpPlaybackAuthenticationArguments(args)
