@@ -32,7 +32,7 @@ for (const android of [false, true]) {
           DOWNLOADED_MEDIA_MIME_TYPES: { mp4: 'video/mp4' },
           getConnectionState: () => 'offline',
           initializeNetworkRecovery: () => ({ ready: Promise.resolve(false) }),
-          videoApi: { getVideoInformation: pendingMetadata },
+          videoApi: { getWatchVideoInformation: pendingMetadata },
         })
         const watch = {
           ...methods,
@@ -80,7 +80,7 @@ for (const backend of ['Local', 'Invidious']) {
     })`, {
       getConnectionState: () => 'online',
       initializeNetworkRecovery: () => ({ ready: Promise.resolve(true) }),
-      videoApi: { getVideoInformation: pendingMetadata },
+      videoApi: { getWatchVideoInformation: pendingMetadata },
     })
     let localLoads = 0
     const watch = {
@@ -90,6 +90,7 @@ for (const backend of ['Local', 'Invidious']) {
       isLoading: true,
       videoLoadGeneration: 0,
       tabRoute: { params: { id: 'downloaded1' } },
+      $store: { getters: { getAvoidTranslation: 'disabled' } },
       finishDownloadedPlaybackWithoutMetadata() { localLoads++; this.isLoading = false; this.localFilePlayback = true; return true },
       isCurrentVideoLoad(generation) { return generation === this.videoLoadGeneration },
     }

@@ -1,7 +1,5 @@
-import { parseLocalVideoSummary } from '../../helpers/video-summary.js'
 import { initializeNetworkRecovery, getConnectionState } from '../../helpers/networkRecovery'
 import { Utils, YTNodes } from 'youtubei.js'
-import { parseLocalVideoGames } from '../../helpers/video-games'
 import {
   formatDurationAsTimestamp,
   formatNumber,
@@ -13,16 +11,12 @@ import {
 import {
   areLocalCommentsDisabled,
   mapLocalLegacyFormat,
-  parseLocalSubscriberCount,
   parseLocalEndscreen,
-  parseLocalVideoCollaborators,
-  parseLocalTextRuns,
   parseLocalWatchNextVideo,
 } from '../../helpers/api/local'
 import {
   getProxyUrl,
   mapInvidiousLegacyFormat,
-  youtubeImageUrlToInvidious,
 } from '../../helpers/api/invidious'
 import { videoApi } from '../../helpers/api/videoApi'
 import {
@@ -36,9 +30,11 @@ import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 // The component owns presentation state; these methods load provider metadata into it.
 export const watchVideoMetadataMethods = {
   loadVideoInformation: function (loadGeneration, options = {}) {
-    const provider = videoApi.resolveProvider(this.backendPreference, options)
-    if (provider === 'local') return this.getVideoInformationLocal(loadGeneration)
-    if (provider === 'invidious') this.getVideoInformationInvidious(loadGeneration)
+    return videoApi.loadWatchMetadata(this.backendPreference, {
+      ...options,
+      loadLocal: () => this.getVideoInformationLocal(loadGeneration),
+      loadInvidious: () => this.getVideoInformationInvidious(loadGeneration),
+    })
   },
 
   getVideoInformationLocal: async function (loadGeneration = ++this.videoLoadGeneration) {
@@ -52,7 +48,11 @@ export const watchVideoMetadataMethods = {
     if (getConnectionState() === 'offline' && this.finishDownloadedPlaybackWithoutMetadata()) return
 
     try {
-      const videoInfo = await videoApi.getVideoInformation(videoId, 'local')
+      const { metadata, source: videoInfo } = await videoApi.getWatchVideoInformation(videoId, 'local', {
+        videoId,
+        avoidTranslation: this.$store.getters.getAvoidTranslation !== 'disabled',
+        thumbnailPreference: this.thumbnailPreference,
+      })
       if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
 
       const {
@@ -61,13 +61,11 @@ export const watchVideoMetadataMethods = {
         clientInfo,
         adEndTimeUnixMs,
         paidPromotionDurationMs,
-        isPremiere,
         watchPageIpBlocked,
-        musicMediaType,
         androidLiveHlsManifestUrl,
       } = videoInfo
 
-      this.musicMediaType = musicMediaType
+      this.musicMediaType = metadata.musicMediaType
 
       if (watchPageIpBlocked) {
         this.ipBlockDetectedInCurrentChain = true
@@ -99,7 +97,7 @@ export const watchVideoMetadataMethods = {
       this.hasPaidPromotion = paidPromotionDurationMs !== null
       this.paidPromotionDurationMs = paidPromotionDurationMs ?? 10000
 
-      this.isFamilyFriendly = result.basic_info.is_family_safe
+      this.isFamilyFriendly = metadata.familyFriendly
       this.commentsDisabled = areLocalCommentsDisabled(result)
       const avoidTranslation = this.$store.getters.getAvoidTranslation !== 'disabled'
 
@@ -147,26 +145,9 @@ export const watchVideoMetadataMethods = {
         return
       }
 
-      this.videoSummary = parseLocalVideoSummary(result)
+      this.videoSummary = metadata.summary
 
-      // YouTube can omit the main watch panels while retaining metadata in the description panel.
-      /** @type {import('youtubei.js').YTNodes.StructuredDescriptionContent | undefined} */
-      const structuredDescription = result.page[1]?.engagement_panels
-        ?.find(panel => panel.panel_identifier === 'engagement-panel-structured-description')?.content
-      const titleHeader = structuredDescription?.items?.find(item => item.is(YTNodes.VideoTitleHeaderView))
-      const descriptionHeader = structuredDescription?.items?.find(item => item.is(YTNodes.VideoDescriptionHeader))
-      const descriptionChannel = structuredDescription?.items?.find(item => item.is(YTNodes.VideoDescriptionInfocardsSection))
-      const descriptionBody = structuredDescription?.items?.find(item => item.is(YTNodes.ExpandableVideoDescriptionBody))
-      const localizedDescription = result.secondary_info?.description?.text?.trim()
-        ? result.secondary_info.description
-        : descriptionBody?.attributed_description_body_text
-
-      if (avoidTranslation) {
-        this.videoTitle = result.basic_info.title?.trim() ?? ''
-      } else {
-        // extract localised title first and fall back to the not localised one
-        this.videoTitle = result.primary_info?.title?.text?.trim() || titleHeader?.video_title.text?.trim() || descriptionHeader?.title.text?.trim() || result.basic_info.title?.trim() || ''
-      }
+      this.videoTitle = metadata.title
       this.hasResolvedVideoTitle = this.videoTitle.length > 0
       if (!this.hasResolvedVideoTitle) {
         // Reuse the cache and in-flight request used by original-language list titles.
@@ -177,122 +158,51 @@ export const watchVideoMetadataMethods = {
           this.updateTitle()
         })
       }
-      const localizedViews = result.primary_info?.view_count?.text || descriptionHeader?.views.text
-      const viewCount = Number.isFinite(result.basic_info.view_count)
-        ? result.basic_info.view_count
-        : localizedViews?.toLowerCase() === 'no views'
-          ? 0
-          : parseLocalSubscriberCount(localizedViews ?? '')
-      this.videoViewCount = Number.isFinite(viewCount) ? viewCount : null
-      this.license = result.secondary_info?.metadata?.rows.find(element => element.title?.text === 'License')?.contents[0]?.text
-      this.videoGames = parseLocalVideoGames(result)
-
-      this.channelCollaborators = parseLocalVideoCollaborators(result)
-      const primaryCollaborator = this.channelCollaborators[0]
-      const ownerAuthor = result.secondary_info?.owner?.author
-      // YouTube.js uses N/A for an owner whose identifying fields were omitted.
-      const ownerChannelId = ownerAuthor?.id !== 'N/A' ? ownerAuthor?.id : undefined
-      const ownerChannelName = ownerAuthor?.name !== 'N/A' ? ownerAuthor?.name : undefined
-
-      this.channelId = result.basic_info.channel_id ?? ownerChannelId ?? primaryCollaborator?.id ?? descriptionHeader?.channel_navigation_endpoint?.payload?.browseId ?? ''
-      this.channelName = result.basic_info.author ?? ownerChannelName ?? primaryCollaborator?.name ?? descriptionHeader?.channel.text ?? ''
-      this.channelThumbnail = primaryCollaborator?.thumbnail ?? ownerAuthor?.best_thumbnail?.url ?? descriptionHeader?.channel_thumbnail[0]?.url ?? descriptionChannel?.channel_avatar[0]?.url ?? ''
+      this.videoViewCount = metadata.viewCount
+      this.license = metadata.license
+      this.videoGames = metadata.games
+      this.channelCollaborators = metadata.collaborators
+      this.channelId = metadata.channel.id
+      this.channelName = metadata.channel.name
+      this.channelThumbnail = metadata.channel.thumbnail
       this.$store.commit('setVideoAvatar', {
         videoId: this.videoId,
         avatar: this.channelThumbnail
       })
       this.setTabAvatar(this.channelThumbnail)
-
-      this.videoCategory = result.basic_info.category ?? ''
-      this.videoTags = result.basic_info.keywords ?? []
+      this.videoCategory = metadata.category
+      this.videoTags = metadata.tags
       this.videoGenreIsMusic = this.videoCategory === 'Music'
-
       this.updateSubscriptionDetails({
         channelThumbnailUrl: this.channelThumbnail.length === 0 ? null : this.channelThumbnail,
         channelName: this.channelName,
         channelId: this.channelId
       })
-
       this.initializePlaybackRate()
       this.initializeVideoQuality()
-
-      let published
-      if (result.page[0]?.microformat?.publish_date) {
-        // `result.page[0].microformat.publish_date` example value: `2023-08-12T08:59:59-07:00`
-        published = Date.parse(result.page[0].microformat.publish_date)
-      } else {
-        // text date Jan 1, 2000, not as accurate but better than nothing
-        published = Date.parse(result.primary_info?.published?.text || descriptionHeader?.publish_date.text)
-      }
-      this.videoPublished = Number.isFinite(published) ? published : 0
-
-      if (avoidTranslation) {
-        this.videoDescription = result.basic_info.short_description
-      } else if (localizedDescription?.runs) {
-        try {
-          this.videoDescription = parseLocalTextRuns(localizedDescription.runs)
-        } catch (error) {
-          console.error('Failed to extract the localised description, falling back to the standard one.', error, JSON.stringify(localizedDescription.runs))
-          this.videoDescription = result.basic_info.short_description
-        }
-      } else {
-        this.videoDescription = result.basic_info.short_description
-      }
-
-      switch (this.thumbnailPreference) {
-        case 'start':
-          this.thumbnail = `https://i.ytimg.com/vi/${this.videoId}/maxres1.jpg`
-          break
-        case 'middle':
-          this.thumbnail = `https://i.ytimg.com/vi/${this.videoId}/maxres2.jpg`
-          break
-        case 'end':
-          this.thumbnail = `https://i.ytimg.com/vi/${this.videoId}/maxres3.jpg`
-          break
-        default:
-          this.thumbnail = result.basic_info.thumbnail?.[0].url ?? `https://i.ytimg.com/vi/${this.videoId}/maxresdefault.jpg`
-          break
-      }
+      this.videoPublished = metadata.published
+      this.videoDescription = metadata.description
+      this.thumbnail = metadata.thumbnail
 
       if (this.hideVideoLikesAndDislikes) {
         this.videoLikeCount = null
         this.videoDislikeCount = null
       } else {
-        // Watch HTML and the WEB session use English for numeric metadata.
-        const descriptionLikes = descriptionHeader?.factoids.find(item => item.is(YTNodes.Factoid) && item.label.text === 'Likes')
-        const likeCount = Number.isFinite(result.basic_info.like_count)
-          ? result.basic_info.like_count
-          : parseLocalSubscriberCount(descriptionLikes?.accessibility_text ?? descriptionLikes?.value.text ?? '')
-        this.videoLikeCount = isNaN(likeCount) ? 0 : likeCount
-
-        // YouTube doesn't return dislikes anymore
-        this.videoDislikeCount = null
-
-        if (this.useReturnYouTubeDislikes) {
-          this.fetchVideoDislikes()
-        }
+        this.videoLikeCount = metadata.likeCount
+        this.videoDislikeCount = metadata.dislikeCount
+        if (this.useReturnYouTubeDislikes) this.fetchVideoDislikes()
       }
 
-      this.isLive = !!result.basic_info.is_live
-      this.isUpcoming = !!result.basic_info.is_upcoming
-      this.isLiveContent = !!result.basic_info.is_live_content
-      this.isPremiere = isPremiere === true
-      this.isPostLiveDvr = !!result.basic_info.is_post_live_dvr
-      this.isUnlisted = !!result.basic_info.is_unlisted
-      this.hasAiGeneratedContent = result.primary_info?.badges?.some(badge => badge.label === 'AI') ?? false
-
-      if (this.isLive && !this.isLiveContent) {
-        this.videoPublished = result.basic_info.start_timestamp.getTime()
-      }
-
-      const subscriberCountText = result.secondary_info?.owner?.subscriber_count?.text?.trim() || descriptionChannel?.section_subtitle.text
-      const subCount = parseLocalSubscriberCount(subscriberCountText ?? '')
-
-      if (!isNaN(subCount)) {
-        this.channelSubscriptionCountText = formatNumber(subCount, subCount >= 10000 ? { notation: 'compact' } : undefined)
-      } else {
-        this.channelSubscriptionCountText = ''
-      }
+      this.isLive = metadata.isLive
+      this.isUpcoming = metadata.isUpcoming
+      this.isLiveContent = metadata.isLiveContent
+      this.isPremiere = metadata.isPremiere
+      this.isPostLiveDvr = metadata.isPostLiveDvr
+      this.isUnlisted = metadata.isUnlisted
+      this.hasAiGeneratedContent = metadata.hasAiGeneratedContent
+      this.channelSubscriptionCountText = Number.isFinite(metadata.subscriberCount)
+        ? formatNumber(metadata.subscriberCount, metadata.subscriberCount >= 10000 ? { notation: 'compact' } : undefined)
+        : ''
 
       let chapters = []
       let chaptersKind = 'chapters'
@@ -331,10 +241,7 @@ export const watchVideoMetadataMethods = {
             }
             chaptersKind = 'keyMoments'
           } else {
-            const chapterDescription = avoidTranslation
-              ? result.basic_info.short_description
-              : localizedDescription?.text || result.basic_info.short_description
-            chapters = this.extractChaptersFromDescription(chapterDescription ?? '')
+            chapters = this.extractChaptersFromDescription(metadata.chapterDescription ?? '')
           }
         }
 
@@ -689,32 +596,27 @@ export const watchVideoMetadataMethods = {
       }
 
       console.error(handledError)
-      if (videoApi.getFallbackProvider('local', {
-        preferredProvider: this.backendPreference,
+      await videoApi.loadWatchMetadata(this.backendPreference, {
+        failedProvider: 'local',
+        error: handledError,
         localAvailable: process.env.SUPPORTS_LOCAL_API,
         fallbackEnabled: this.backendFallback,
-        error: handledError,
-      }) === 'invidious') {
-        const errorMessage = this.t('Local API Error (Click to copy)')
-        showApiErrorToast(errorMessage, handledError, this.showTabToast)
-        this.showTabToast({ message: this.t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-        this.getVideoInformationInvidious(loadGeneration)
-      } else {
-        const didReload = await this.runIpBlockRecoveryScriptAndReload()
-        if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
-        if (didReload) {
-          return
-        }
-
-        if (this.finishDownloadedPlaybackWithoutMetadata()) return
-
-        this.isLoading = false
-
-        if (!this.thumbnail) {
-          this.thumbnail = this.getUnavailableVideoThumbnail()
-        }
-        this.errorMessage = handledError.message || handledError.toString()
-      }
+        loadLocal: () => this.getVideoInformationLocal(loadGeneration),
+        loadInvidious: () => this.getVideoInformationInvidious(loadGeneration),
+        onFallback: () => {
+          const errorMessage = this.t('Local API Error (Click to copy)')
+          showApiErrorToast(errorMessage, handledError, this.showTabToast)
+          this.showTabToast({ message: this.t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+        },
+        onNoProvider: async () => {
+          const didReload = await this.runIpBlockRecoveryScriptAndReload()
+          if (!this.isCurrentVideoLoad(loadGeneration, videoId) || didReload) return
+          if (this.finishDownloadedPlaybackWithoutMetadata()) return
+          this.isLoading = false
+          if (!this.thumbnail) this.thumbnail = this.getUnavailableVideoThumbnail()
+          this.errorMessage = handledError.message || handledError.toString()
+        },
+      })
     }
   },
 
@@ -728,83 +630,69 @@ export const watchVideoMetadataMethods = {
     if (!this.isCurrentVideoLoad(loadGeneration, videoId)) return
     if (getConnectionState() === 'offline' && this.finishDownloadedPlaybackWithoutMetadata()) return
 
-    videoApi.getVideoInformation(videoId, 'invidious')
-      .then(async result => {
+    videoApi.getWatchVideoInformation(videoId, 'invidious', {
+      videoId,
+      instanceUrl: this.currentInvidiousInstanceUrl,
+      thumbnailPreference: this.thumbnailPreference,
+    })
+      .then(async ({ metadata, source: result }) => {
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
 
         if (result.error) {
           throw new Error(result.error)
         }
 
-        this.videoTitle = result.title
+        this.videoTitle = metadata.title
         this.hasResolvedVideoTitle = this.videoTitle.length > 0
-        this.videoViewCount = result.viewCount
+        this.videoViewCount = metadata.viewCount
         this.hasPaidPromotion = result.paid
-
-        const subCount = parseLocalSubscriberCount(result.subCountText)
-        if (!isNaN(subCount)) {
-          this.channelSubscriptionCountText = formatNumber(subCount, subCount >= 10000 ? { notation: 'compact' } : undefined)
-        } else {
-          this.channelSubscriptionCountText = ''
-        }
+        this.channelSubscriptionCountText = Number.isFinite(metadata.subscriberCount)
+          ? formatNumber(metadata.subscriberCount, metadata.subscriberCount >= 10000 ? { notation: 'compact' } : undefined)
+          : ''
 
         if (this.hideVideoLikesAndDislikes) {
           this.videoLikeCount = null
           this.videoDislikeCount = null
         } else {
-          this.videoLikeCount = result.likeCount
-          this.videoDislikeCount = result.dislikeCount
-
-          if (this.useReturnYouTubeDislikes) {
-            this.fetchVideoDislikes()
-          }
+          this.videoLikeCount = metadata.likeCount
+          this.videoDislikeCount = metadata.dislikeCount
+          if (this.useReturnYouTubeDislikes) this.fetchVideoDislikes()
         }
 
-        this.videoCategory = result.genre ?? ''
-        this.videoTags = result.keywords ?? []
+        this.videoCategory = metadata.category
+        this.videoTags = metadata.tags
         this.videoGenreIsMusic = this.videoCategory === 'Music'
-        this.musicMediaType = result.musicMediaType
-
-        this.channelId = result.authorId
-        this.channelName = result.author
-        this.channelCollaborators = []
-        const channelThumb = result.authorThumbnails.at(-1)
-        this.channelThumbnail = channelThumb ? youtubeImageUrlToInvidious(channelThumb.url, this.currentInvidiousInstanceUrl) : ''
+        this.musicMediaType = metadata.musicMediaType
+        this.channelId = metadata.channel.id
+        this.channelName = metadata.channel.name
+        this.channelCollaborators = metadata.collaborators
+        this.channelThumbnail = metadata.channel.thumbnail
         this.$store.commit('setVideoAvatar', {
           videoId: this.videoId,
           avatar: this.channelThumbnail
         })
         this.setTabAvatar(this.channelThumbnail)
         this.updateSubscriptionDetails({
-          channelThumbnailUrl: channelThumb?.url,
-          channelName: result.author,
-          channelId: result.authorId
+          channelThumbnailUrl: metadata.channel.originalThumbnail || undefined,
+          channelName: this.channelName,
+          channelId: this.channelId
         })
-
         this.initializePlaybackRate()
         this.initializeVideoQuality()
-
-        this.videoPublished = result.published * 1000
-        this.videoDescription = result.description ?? ''
+        this.videoPublished = metadata.published
+        this.videoDescription = metadata.description
         this.videoDescriptionHtml = result.descriptionHtml
         const recommendedVideos = result.recommendedVideos
-
-        // The recommended videos currently use yyyy-mm-ddThh:mm:ss for the published timestamp
-        // whereas the rest of the API uses unix timestamps, correct that here
+        // Invidious recommendation timestamps can be ISO strings.
         recommendedVideos.forEach((video) => {
-          if (typeof video.published === 'string') {
-            video.published = Date.parse(video.published)
-          }
+          if (typeof video.published === 'string') video.published = Date.parse(video.published)
         })
-
-        // place watched recommended videos last
         this.recommendedVideos = recommendedVideos.sort(this.sortWatchedVideosLast)
-
-        this.isLive = result.liveNow
-        this.isPremiere = this.isLive && result.premiereTimestamp > 0
-        this.isFamilyFriendly = result.isFamilyFriendly
-        this.isPostLiveDvr = !!result.isPostLiveDvr
-        this.isUnlisted = !result.isListed
+        this.isLive = metadata.isLive
+        this.isPremiere = metadata.isPremiere
+        this.isFamilyFriendly = metadata.familyFriendly
+        this.isPostLiveDvr = metadata.isPostLiveDvr
+        this.isUnlisted = metadata.isUnlisted
 
         this.captions = sortCaptions(result.captions.map(caption => {
           return {
@@ -819,20 +707,7 @@ export const watchVideoMetadataMethods = {
           this.videoStoryboardSrc = `${this.currentInvidiousInstanceUrl}/api/v1/storyboards/${this.videoId}?height=90`
         }
 
-        switch (this.thumbnailPreference) {
-          case 'start':
-            this.thumbnail = `${this.currentInvidiousInstanceUrl}/vi/${this.videoId}/maxres1.jpg`
-            break
-          case 'middle':
-            this.thumbnail = `${this.currentInvidiousInstanceUrl}/vi/${this.videoId}/maxres2.jpg`
-            break
-          case 'end':
-            this.thumbnail = `${this.currentInvidiousInstanceUrl}/vi/${this.videoId}/maxres3.jpg`
-            break
-          default:
-            this.thumbnail = new URL(result.videoThumbnails[0].url, this.currentInvidiousInstanceUrl).toString()
-            break
-        }
+        this.thumbnail = metadata.thumbnail
 
         let chapters = []
         if (!this.hideChapters) {
@@ -938,39 +813,35 @@ export const watchVideoMetadataMethods = {
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
 
         console.error(err)
-        if (videoApi.getFallbackProvider('invidious', {
-          preferredProvider: this.backendPreference,
+        videoApi.loadWatchMetadata(this.backendPreference, {
+          failedProvider: 'invidious',
+          error: err,
           localAvailable: process.env.SUPPORTS_LOCAL_API,
           fallbackEnabled: this.backendFallback,
-        }) === 'local') {
-          const errorMessage = this.t('Invidious API Error (Click to copy)')
-          showApiErrorToast(errorMessage, err, this.showTabToast)
-          this.showTabToast({ message: this.t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
-          this.getVideoInformationLocal(loadGeneration)
-        } else {
-          const restrictedPlaybackError = this.getRestrictedPlaybackErrorType(err.message || err.toString())
-          if (restrictedPlaybackError !== null) {
+          loadLocal: () => this.getVideoInformationLocal(loadGeneration),
+          loadInvidious: () => this.getVideoInformationInvidious(loadGeneration),
+          onFallback: () => {
+            const errorMessage = this.t('Invidious API Error (Click to copy)')
+            showApiErrorToast(errorMessage, err, this.showTabToast)
+            this.showTabToast({ message: this.t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
+          },
+          onNoProvider: async () => {
+            const restrictedPlaybackError = this.getRestrictedPlaybackErrorType(err.message || err.toString())
+            if (restrictedPlaybackError !== null) {
+              this.isLoading = false
+              this.thumbnail ||= this.getUnavailableVideoThumbnail()
+              this.setRestrictedPlaybackError(restrictedPlaybackError)
+              return
+            }
+
+            const didReload = await this.runIpBlockRecoveryScriptAndReload()
+            if (!this.isCurrentVideoLoad(loadGeneration, videoId) || didReload) return
+            if (this.finishDownloadedPlaybackWithoutMetadata()) return
             this.isLoading = false
-            this.thumbnail ||= this.getUnavailableVideoThumbnail()
-            this.setRestrictedPlaybackError(restrictedPlaybackError)
-            return
-          }
-
-          const didReload = await this.runIpBlockRecoveryScriptAndReload()
-          if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
-          if (didReload) {
-            return
-          }
-
-          if (this.finishDownloadedPlaybackWithoutMetadata()) return
-
-          this.isLoading = false
-
-          if (!this.thumbnail) {
-            this.thumbnail = this.getUnavailableVideoThumbnail()
-          }
-          this.errorMessage = err.message || err.toString()
-        }
+            if (!this.thumbnail) this.thumbnail = this.getUnavailableVideoThumbnail()
+            this.errorMessage = err.message || err.toString()
+          },
+        })
       })
   },
 }

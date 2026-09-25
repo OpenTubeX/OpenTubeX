@@ -7,7 +7,12 @@ import { createVideoApi } from '../../src/renderer/helpers/api/createVideoApi.js
 const source = await readFile(new URL('../../src/renderer/views/Watch/watchVideoMetadata.js', import.meta.url), 'utf8')
 const start = source.indexOf('  loadVideoInformation:')
 const end = source.indexOf('\n  },', start)
-const videoApi = createVideoApi({ loadLocal: async () => null, loadInvidious: async () => null })
+const videoApi = createVideoApi({
+  loadLocal: async () => null,
+  loadInvidious: async () => null,
+  mapLocal: video => video,
+  mapInvidious: video => video,
+})
 const loadVideoInformation = runInNewContext(`({${source.slice(start, end)}\n} }).loadVideoInformation`, { videoApi })
 
 test('reload awaits the selected Local loader', async () => {

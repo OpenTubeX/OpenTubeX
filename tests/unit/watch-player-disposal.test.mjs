@@ -4,8 +4,9 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
+const lifecycleSource = await readFile(new URL('../../src/renderer/views/Watch/watchPlayerLifecycle.js', import.meta.url), 'utf8')
 const cleanup = source.slice(source.indexOf('    async cleanupWatchRuntime()'), source.indexOf('\n    async reloadView(')).trim().replace(/,$/, '')
-const destroy = source.slice(source.indexOf('    destroyPlayer: async function'), source.indexOf('\n    isSabrVideoStream()')).trim().replace(/,$/, '')
+const destroy = lifecycleSource.slice(lifecycleSource.indexOf('  destroyPlayer: async function'), lifecycleSource.indexOf('\n  isSabrVideoStream()')).trim().replace(/,$/, '')
 
 test('closing a watch tab releases its player even when saving progress finishes after unmount', async () => {
   let finishSave

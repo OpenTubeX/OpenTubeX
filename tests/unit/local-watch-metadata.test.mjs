@@ -9,6 +9,7 @@ const { parseLocalSubscriberCount, parseLocalTextRuns } = createLocalFeedParsers
 import { parseLocalVideoSummary } from '../../src/renderer/helpers/video-summary.js'
 import { parseLocalVideoGames } from '../../src/renderer/helpers/video-games.js'
 import { parseLocalVideoCollaborators } from '../../src/renderer/helpers/video-collaborators.js'
+import { mapLocalWatchVideo } from '../../src/renderer/helpers/api/watchVideoModel.js'
 
 const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
 const metadataSource = await readFile(new URL('../../src/renderer/views/Watch/watchVideoMetadata.js', import.meta.url), 'utf8')
@@ -24,7 +25,13 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
   const dependencies = {
     initializeNetworkRecovery: () => ({ ready: Promise.resolve() }),
     getConnectionState: () => 'online',
-    videoApi: { getVideoInformation: async () => ({ info, paidPromotionDurationMs: null }) },
+    videoApi: {
+      getWatchVideoInformation: async (videoId, provider, settings) => {
+        const source = { info, paidPromotionDurationMs: null }
+        return { provider, metadata: mapLocalWatchVideo(source, settings), source }
+      },
+      getFallbackProvider: () => null,
+    },
     getOembedTitle: options.getOembedTitle ?? (async () => null),
     areLocalCommentsDisabled: () => true,
     parseLocalEndscreen: () => [],

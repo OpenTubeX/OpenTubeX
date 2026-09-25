@@ -43,8 +43,8 @@ test('retains encoder padding differences and matching AV1 streams', () => {
 })
 
 test('the built-in DASH path excludes stale video using youtubei.js filter semantics', async () => {
-  const source = readFileSync(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
-  const method = source.match(/createLocalDashManifest: (async function \(videoInfo, includeThumbnails = false\) \{[\s\S]*?\n    \}),/)[1]
+  const source = readFileSync(new URL('../../src/renderer/views/Watch/watchPlaybackSources.js', import.meta.url), 'utf8')
+  const method = source.match(/createLocalDashManifest: (async function \(videoInfo, includeThumbnails = false\) \{[\s\S]*?\n  \}),/)[1]
   const createManifest = new Function('getCompatibleAdaptiveFormats', `return (${method})`)(getCompatibleAdaptiveFormats)
   const streamingData = { adaptive_formats: [
     format(140, 11570386, 'mp4a.40.2'), format(135, 11570336), format(397, 11594326, 'av01.0.04M.08')
