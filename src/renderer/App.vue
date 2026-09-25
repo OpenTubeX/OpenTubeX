@@ -520,7 +520,6 @@ import '@fontsource-variable/plus-jakarta-sans'
 import FtRetryImage from './components/FtRetryImage.vue'
 import { initializeAndroidYtDlp, ytDlp } from './helpers/ytDlp'
 import { parseAutomaticDownloadRules } from './helpers/automaticDownloadRules'
-import { isAppHidden } from './helpers/appVisibility.js'
 import { FtIcon } from '@opentubex/icons'
 import { Capacitor, SystemBars, SystemBarsStyle } from '@capacitor/core'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from './helpers/overlayScrollbars'
@@ -573,6 +572,7 @@ import {
   resolveExternalLinkAction,
   resolveMobileContextLinkCopyUrl,
 } from './helpers/mobileLinkActions'
+import { createLinkNavigationPlatform } from './helpers/appLinkNavigationPlatform.js'
 import { startProgressBarOperation } from './helpers/progressBar'
 import { initializePlatformInfo, isLinuxWayland, supportsAutoPictureInPictureMinimize } from './helpers/platform'
 import { revealStartupSplash } from './helpers/startupSplash'
@@ -584,37 +584,20 @@ import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog } from '.
 import { copyToClipboard, openExternalLink, openInternalPath, shareLink, showApiErrorToast, showToast } from './helpers/utils'
 import { openNotificationSettings } from './helpers/capacitorUi'
 import {
-  acknowledgeAndroidSubscriptionRefreshResult,
   addAndroidSubscriptionRefreshCancelledListener,
   configureAndroidSubscriptionRefresh,
-  getNextAndroidSubscriptionRefreshResult,
   requestAndroidSubscriptionRefreshNotificationPermission,
   startAndroidSubscriptionRefresh,
   updateAndroidSubscriptionRefresh
 } from './helpers/androidSubscriptionRefresh'
 import {
-  AndroidSubscriptionRefreshPayloadError,
   createAndroidSubscriptionRefreshConfiguration,
   createSubscriptionRefreshStartGuard,
-  normalizeAndroidSubscriptionRefreshPayload,
-  processAndroidSubscriptionRefreshChannelResult
 } from './helpers/androidSubscriptionRefreshData'
-import { shouldHideMembersOnlyContent } from './helpers/restricted-playback'
-import { normalizeLocalSubscriptionFeed } from './helpers/api/local'
-import { normalizeInvidiousSubscriptionFeed } from './helpers/api/invidious'
-import { classifyRequestFailure, formatRequestDiagnostic } from './helpers/api/requestDiagnostics'
-import { reconcileFetchedSubscriptionEntries } from './helpers/subscription-entries'
-import { parseSubscriptionRss } from './helpers/api/feed-rss'
+import { classifyRequestFailure } from './helpers/api/requestDiagnostics'
 import {
-  enrichSubscriptionRssEntries,
-  enrichSubscriptionShortDates,
   cancelSubscriptionRefresh,
   requestSubscriptionRefreshCancellation,
-  refreshSubscriptionLiveFromRemote,
-  refreshSubscriptionPostsFromRemote,
-  refreshSubscriptionShortsFromRemote,
-  refreshSubscriptionVideosFromRemote,
-  SUBSCRIPTION_REFRESH_CANCEL_STORAGE_KEY,
   SUBSCRIPTION_REFRESH_CANCELLED_EVENT,
   SUBSCRIPTION_REFRESH_COMPLETED_EVENT,
   SUBSCRIPTION_REFRESH_FINISHED_EVENT,
@@ -655,8 +638,11 @@ import { preloadResolvedRoute, preloadUtilityRoutes } from './router/index'
 import { initializeCapacitorPullToRefresh } from './helpers/capacitorPullToRefresh'
 import { enableCapacitorIntegrations } from './helpers/capacitorIntegrations.js'
 import { createAppAppearanceController } from './helpers/appAppearance.js'
-import { createSubscriptionRefreshStorage } from './helpers/subscriptionRefreshStorage.js'
-import { resolveSubscriptionRefreshCapabilities } from './helpers/subscriptionRefreshCapabilities.js'
+import { initializeApplicationData, loadPersistentApplicationData } from './helpers/appDataInitialization.js'
+import { createSubscriptionRefreshPlatform } from './helpers/subscriptionRefreshPlatform.js'
+import { createSubscriptionRefreshState } from './helpers/subscriptionRefreshState.js'
+import { createSubscriptionBackgroundReconciler } from './helpers/subscriptionBackgroundReconciler.js'
+import { createSubscriptionAutoRefreshScheduler, subscriptionAutoRefreshTabs } from './helpers/subscriptionAutoRefreshScheduler.js'
 import { createManagedExternalSoftwareController, MANAGED_TOOLS_UPDATE_PREVIEW_EVENT, resolveManagedToolsCapabilities } from './helpers/managedExternalSoftware.js'
 
 const SettingsWindow = defineAsyncComponent(() => import('./views/Settings/Settings.vue'))
@@ -673,7 +659,35 @@ const router = useRouter()
 const availableRoutePaths = new Set(router.getRoutes().map(candidate => candidate.path))
 const isElectron = process.env.IS_ELECTRON
 const isCapacitor = process.env.IS_CAPACITOR
-const subscriptionRefreshCapabilities = resolveSubscriptionRefreshCapabilities({ isElectron, isCapacitor })
+const linkNavigationPlatform = createLinkNavigationPlatform({
+  runtime: isElectron ? 'electron' : 'web',
+  isMac: process.platform === 'darwin',
+})
+const subscriptionRefreshPlatform = createSubscriptionRefreshPlatform({
+  runtime: isElectron
+    ? 'electron'
+    : isCapacitor
+      ? 'android'
+      : 'web',
+  storage: localStorage,
+  electron: isElectron ? window.ftElectron.subscriptionAutoRefresh : undefined,
+  electronTabs: isElectron ? window.ftElectron.tabs : undefined,
+  locks: navigator.locks,
+  lockName: SUBSCRIPTION_REFRESH_LOCK_NAME,
+  android: isCapacitor
+    ? {
+        start: startAndroidSubscriptionRefresh,
+        update: updateAndroidSubscriptionRefresh,
+        configure: configureAndroidSubscriptionRefresh,
+        requestPermission: requestAndroidSubscriptionRefreshNotificationPermission,
+      }
+    : undefined,
+})
+const {
+  applyState: applySubscriptionAutoRefreshState,
+  parseStorageProgress: getSubscriptionRefreshProgressState,
+  normalizeProgress: normalizeSubscriptionRefreshProgress,
+} = createSubscriptionRefreshState(store)
 const usesLogicalTabs = isElectron || isCapacitor
 const navigation = usesLogicalTabs ? getTabNavigationService() : null
 const capacitorTabService = isCapacitor
@@ -1095,36 +1109,37 @@ watch(() => mobileContextLink.value !== null || mobileContextActions.value !== n
 const tabOrganizerOpen = ref(false)
 const showAndroidExitPrompt = ref(false)
 const settingsSearchTarget = ref(null)
-const subscriptionAutoRefreshTimers = {
-  videos: null,
-  shorts: null,
-  live: null,
-  posts: null
-}
 const HISTORY_CLEANUP_INTERVAL = 60 * 60 * 1000
-const SUBSCRIPTION_AUTO_REFRESH_FAILURE_RETRY_INTERVAL = 60 * 1000
-const SUBSCRIPTION_AUTO_REFRESH_LOCK_RETRY_INTERVAL = 1000
-const LEGACY_SUBSCRIPTION_AUTO_REFRESH_STORAGE_KEY_PREFIX = 'opentubex.subscriptionAutoRefresh.'
-const SUBSCRIPTION_AUTO_REFRESH_COMPLETION_STORAGE_KEY_PREFIX = 'opentubex.subscriptionAutoRefresh.completed.'
-const SUBSCRIPTION_AUTO_REFRESH_DEADLINE_STORAGE_KEY_PREFIX = 'opentubex.subscriptionAutoRefresh.deadline.'
-const SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY = 'opentubex.subscriptionAutoRefresh.inProgress'
 let historyCleanupTimer = null
-const subscriptionAutoRefreshTabs = ['videos', 'shorts', 'live', 'posts']
 const {
-  getSubscriptionAutoRefreshStorageKey,
-  setStoredSubscriptionAutoRefreshTimestamp,
-  getStoredSubscriptionTabNextAutoRefreshTimestamp,
-  migrateLegacySubscriptionAutoRefreshDeadlines,
-  setStoredSubscriptionTabNextAutoRefreshTimestamp,
-  getStoredSubscriptionTabLastRefreshTimestamp,
-  parseSubscriptionAutoRefreshStorageKey,
-} = createSubscriptionRefreshStorage({
+  clearSubscriptionFeedAutoRefreshTimer,
+  refreshOverdueSubscriptionFeeds,
+  handleSubscriptionAutoRefreshVisibilityChange,
+  synchronizeSubscriptionRefreshInProgress,
+  handleSubscriptionRefreshCancelled,
+  handleSubscriptionRefreshCompleted,
+  handleSubscriptionAutoRefreshStorage,
+} = createSubscriptionAutoRefreshScheduler({
+  store,
+  t,
+  dataReady,
+  activeSubscriptionProfileId,
+  subscriptionCacheReady,
+  subscriptionFeedAutoRefreshInterval,
+  subscriptionShortsAutoRefreshInterval,
+  subscriptionLiveAutoRefreshInterval,
+  subscriptionPostsAutoRefreshInterval,
+  hideSubscriptionsVideos,
+  hideSubscriptionsShorts,
+  hideSubscriptionsLive,
+  hideSubscriptionsPosts,
+  subscriptionRefreshPlatform,
+  reconcileAndroidSubscriptionRefreshResults: () => reconcileAndroidSubscriptionRefreshResults(),
+  applySubscriptionAutoRefreshState,
+  getSubscriptionRefreshProgressState,
+  canReconcileBackground: isElectron || isCapacitor,
   storage: localStorage,
-  getProfiles: () => store.getters.getProfileList,
-  tabs: subscriptionAutoRefreshTabs,
-  legacyPrefix: LEGACY_SUBSCRIPTION_AUTO_REFRESH_STORAGE_KEY_PREFIX,
-  deadlinePrefix: SUBSCRIPTION_AUTO_REFRESH_DEADLINE_STORAGE_KEY_PREFIX,
-  completionPrefix: SUBSCRIPTION_AUTO_REFRESH_COMPLETION_STORAGE_KEY_PREFIX,
+  navigatorObject: navigator,
 })
 let removeSubscriptionAutoRefreshActiveChangedListener = null
 let removeSubscriptionAutoRefreshCancelListener = null
@@ -1192,10 +1207,6 @@ function cancelUtilityRoutePreload() {
   }
   utilityRoutePreloadId = null
 }
-const pendingSubscriptionAutoRefreshes = []
-const pendingSubscriptionAutoRefreshKeys = new Set()
-const cancelledSubscriptionAutoRefreshKeys = new Set()
-let processingSubscriptionAutoRefreshes = false
 let tabSwitcherPreviewRequestId = 0
 let findbarMatches = []
 const findbarStateByTabId = new Map()
@@ -1281,62 +1292,51 @@ onMounted(async () => {
     onNavigate: () => store.dispatch('showOutlines'),
     onPlayPause: handleGamepadPlayPause,
   })
-  let tabsReady = Promise.resolve()
+  let desktopTabsReady = Promise.resolve()
   if (isElectron || isCapacitor) {
     removeYtDlpBinaryUpdatedListener = ytDlp.addYtDlpBinaryUpdatedListener(invalidateAllYtDlpPlaybackSources)
   }
 
   if (isElectron) {
     window.addEventListener(MANAGED_TOOLS_UPDATE_PREVIEW_EVENT, previewManagedExternalSoftwareUpdatePrompt)
-    tabsReady = store.dispatch('initializeTabs').then((removeListener) => {
+    desktopTabsReady = store.dispatch('initializeTabs').then((removeListener) => {
       removeTabsStateListener = removeListener
       window.ftElectron.tabs.rendererReady()
     })
   }
 
-  const settingsReady = store.dispatch('grabUserSettings').then(async tutorialState => {
-    if (isCapacitor) {
-      await store.dispatch('loadAndroidProxySettings').catch(() => {
-        showToast({
-          message: t('Settings.Proxy Settings["Error getting network information. Is your proxy configured properly?"]'),
-          icon: ['fas', 'circle-exclamation'],
-        })
-      })
-    }
-    removeInternetConnectivitySettingsListener = store.watch(
-      () => store.getters.getInternetConnectivityChecks,
-      enabled => initializeNetworkRecovery().setInternetChecksEnabled(enabled),
-      { immediate: true, flush: 'sync' }
-    )
-    removeAndroidYtDlpSettingsListener = initializeAndroidYtDlp()
-    return tutorialState
-  })
   if (isCapacitor) {
-    tabsReady = settingsReady.then(() => capacitorTabService.initialize(route))
     removeCapacitorTabPreviews = initializeCapacitorTabPreviews(store)
   }
-  const customThemesReady = loadCustomThemes().catch((error) => {
-    console.error('Failed to load custom theme:', error)
-    return []
+  const { startupReady, profilesReady } = initializeApplicationData({
+    store,
+    loadTabs: settingsReady => isCapacitor
+      ? settingsReady.then(() => capacitorTabService.initialize(route))
+      : desktopTabsReady,
+    afterSettings: async () => {
+      if (isCapacitor) {
+        await store.dispatch('loadAndroidProxySettings').catch(() => {
+          showToast({
+            message: t('Settings.Proxy Settings["Error getting network information. Is your proxy configured properly?"]'),
+            icon: ['fas', 'circle-exclamation'],
+          })
+        })
+      }
+      removeInternetConnectivitySettingsListener = store.watch(
+        () => store.getters.getInternetConnectivityChecks,
+        enabled => initializeNetworkRecovery().setInternetChecksEnabled(enabled),
+        { immediate: true, flush: 'sync' }
+      )
+      removeAndroidYtDlpSettingsListener = initializeAndroidYtDlp()
+    },
+    loadThemes: loadCustomThemes,
+    preloadInitialRoute: () => {
+      const initialRoute = usesLogicalTabs ? store.getters.getActiveTab?.route : route
+      if (initialRoute) return preloadResolvedRoute(router.resolve(initialRoute.fullPath))
+    },
+    allChannelsLabel: t('Profile.All Channels'),
   })
-  const invidiousInstancesReady = store.dispatch('fetchInvidiousInstancesFromFile')
-  const profilesReady = settingsReady.then(() => (
-    store.dispatch('grabAllProfiles', t('Profile.All Channels'))
-  ))
-  tabsReady.then(() => {
-    const initialRoute = usesLogicalTabs ? store.getters.getActiveTab?.route : route
-    if (initialRoute) {
-      return preloadResolvedRoute(router.resolve(initialRoute.fullPath))
-    }
-  }).catch(error => {
-    console.error('Failed to preload the initial route', error)
-  })
-  const [tutorialState, themes] = await Promise.all([
-    settingsReady,
-    customThemesReady,
-    invidiousInstancesReady,
-    tabsReady,
-  ])
+  const { tutorialState, themes } = await startupReady
   const lastUsedVersion = getLastUsedVersion(tutorialState.lastUsedVersion)
   const showAutoSyncNotice = shouldShowAutoSyncNotice(lastUsedVersion, store.state.settings)
   if (tutorialState.landingPageToInitialize !== null) {
@@ -1386,12 +1386,7 @@ onMounted(async () => {
       await setLastUsedVersion(packageDetails.version)
     }
 
-    const syncDataReady = Promise.all([
-      store.dispatch('grabHistory'),
-      store.dispatch('grabAllPlaylists'),
-      store.dispatch('grabAllSubscriptions'),
-    ])
-    store.dispatch('grabSearchHistoryEntries')
+    const syncDataReady = loadPersistentApplicationData(store)
 
     // YouTube links have to be caught in both builds, otherwise the browser
     // navigates away from the app instead of opening the linked video,
@@ -1413,10 +1408,6 @@ onMounted(async () => {
     }
 
     await syncDataReady
-    store.dispatch('initializeSyncServer').catch(error => {
-      console.error('Initial sync server sync failed', error)
-    })
-
     dataReady.value = true
 
     if (isCapacitor) {
@@ -1686,30 +1677,6 @@ function scheduleHistoryCleanup(days) {
   }, HISTORY_CLEANUP_INTERVAL)
 }
 
-watch([dataReady, activeSubscriptionProfileId], ([ready, profileId]) => {
-  clearSubscriptionFeedAutoRefreshTimer()
-  if (ready && profileId) {
-    migrateLegacySubscriptionAutoRefreshDeadlines()
-    synchronizeSubscriptionAutoRefreshProfile(profileId)
-  }
-})
-
-watch([subscriptionFeedAutoRefreshInterval, hideSubscriptionsVideos], () => {
-  resetSubscriptionTabAutoRefreshForAllProfiles('videos')
-})
-
-watch([subscriptionShortsAutoRefreshInterval, hideSubscriptionsShorts], () => {
-  resetSubscriptionTabAutoRefreshForAllProfiles('shorts')
-})
-
-watch([subscriptionLiveAutoRefreshInterval, hideSubscriptionsLive], () => {
-  resetSubscriptionTabAutoRefreshForAllProfiles('live')
-})
-
-watch([subscriptionPostsAutoRefreshInterval, hideSubscriptionsPosts], () => {
-  resetSubscriptionTabAutoRefreshForAllProfiles('posts')
-})
-
 const androidSubscriptionRefreshConfiguration = computed(() => {
   if ((!isCapacitor && !isElectron) || !dataReady.value) return null
 
@@ -1746,17 +1713,11 @@ const androidSubscriptionRefreshConfiguration = computed(() => {
 watch(androidSubscriptionRefreshConfiguration, async configuration => {
   if (configuration === null) return
   try {
-    if (isElectron) {
-      await window.ftElectron.subscriptionAutoRefresh.configureBackground({
-        ...configuration, enabled: enableClosedAppSubscriptionRefresh.value
-      })
-      return
-    }
-    await configureAndroidSubscriptionRefresh(configuration)
-    if (Object.values(configuration.intervals).some(interval => interval > 0)) {
-      const denied = await requestAndroidSubscriptionRefreshNotificationPermission()
-      if (denied) showAndroidSubscriptionRefreshNotificationWarning()
-    }
+    const denied = await subscriptionRefreshPlatform.configureBackground(
+      configuration,
+      enableClosedAppSubscriptionRefresh.value
+    )
+    if (denied) showAndroidSubscriptionRefreshNotificationWarning()
   } catch (error) {
     console.error('Failed to configure closed-app subscription refreshes', error)
   }
@@ -1769,418 +1730,12 @@ watch([dataReady, subscriptionCacheReady], ([ready, cacheReady]) => {
 })
 
 /**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function resetSubscriptionTabAutoRefreshForAllProfiles(tab) {
-  if (!dataReady.value) {
-    return
-  }
-
-  const interval = parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
-  const enabled = isSubscriptionTabAutoRefreshEnabled(tab)
-  const timestamp = enabled ? Date.now() + interval : null
-
-  for (const profile of store.getters.getProfileList) {
-    setStoredSubscriptionTabNextAutoRefreshTimestamp(profile._id, tab, timestamp)
-  }
-
-  const profileId = activeSubscriptionProfileId.value
-  if (profileId) {
-    scheduleSubscriptionTabAutoRefresh(tab, profileId, timestamp)
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {string} profileId
- * @param {number | null} [scheduledTimestamp]
- */
-function scheduleSubscriptionTabAutoRefresh(tab, profileId, scheduledTimestamp) {
-  clearSubscriptionTabAutoRefreshTimer(tab)
-
-  if (!dataReady.value || profileId !== activeSubscriptionProfileId.value) {
-    return
-  }
-
-  if (!isSubscriptionTabAutoRefreshEnabled(tab)) {
-    setSubscriptionTabNextAutoRefreshTimestamp(tab, profileId, null)
-    return
-  }
-
-  const interval = parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
-  const now = Date.now()
-  const storedTimestamp = scheduledTimestamp === undefined
-    ? getStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab)
-    : scheduledTimestamp
-  const nextAutoRefreshTimestamp = storedTimestamp ?? now + interval
-
-  setSubscriptionTabNextAutoRefreshTimestamp(tab, profileId, nextAutoRefreshTimestamp)
-  subscriptionAutoRefreshTimers[tab] = setTimeout(() => {
-    subscriptionAutoRefreshTimers[tab] = null
-    enqueueSubscriptionAutoRefresh(tab, profileId)
-  }, Math.max(0, nextAutoRefreshTimestamp - now))
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {string} profileId
- */
-function enqueueSubscriptionAutoRefresh(tab, profileId) {
-  const key = `${profileId}:${tab}`
-  if (pendingSubscriptionAutoRefreshKeys.has(key)) {
-    return
-  }
-
-  pendingSubscriptionAutoRefreshKeys.add(key)
-  pendingSubscriptionAutoRefreshes.push({ tab, profileId, key })
-  processPendingSubscriptionAutoRefreshes()
-}
-
-async function processPendingSubscriptionAutoRefreshes() {
-  if (processingSubscriptionAutoRefreshes) {
-    return
-  }
-
-  processingSubscriptionAutoRefreshes = true
-  try {
-    while (pendingSubscriptionAutoRefreshes.length > 0) {
-      const { tab, profileId, key } = pendingSubscriptionAutoRefreshes.shift()
-
-      try {
-        if (
-          profileId !== activeSubscriptionProfileId.value ||
-          !isSubscriptionTabAutoRefreshEnabled(tab) ||
-          navigator.onLine === false ||
-          isAppHidden()
-        ) {
-          continue
-        }
-
-        if (process.env.IS_ELECTRON && !await window.ftElectron.tabs.isActive()) {
-          continue
-        }
-
-        const storedTimestamp = getStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab)
-        if (storedTimestamp !== null && storedTimestamp > Date.now()) {
-          scheduleSubscriptionTabAutoRefresh(tab, profileId, storedTimestamp)
-          continue
-        }
-
-        if (isElectron || isCapacitor) {
-          await reconcileAndroidSubscriptionRefreshResults()
-          const refreshedTimestamp = getStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab)
-          if (refreshedTimestamp !== null && refreshedTimestamp > Date.now()) {
-            scheduleSubscriptionTabAutoRefresh(tab, profileId, refreshedTimestamp)
-            continue
-          }
-        }
-        cancelledSubscriptionAutoRefreshKeys.delete(key)
-        const result = await getSubscriptionTabRefreshHandler(tab)({
-          t,
-          showStartToast: true
-        })
-        const wasCancelled = cancelledSubscriptionAutoRefreshKeys.delete(key)
-
-        if (result === null) {
-          if (wasCancelled) {
-            scheduleSubscriptionTabAutoRefresh(tab, profileId, Date.now() + getSubscriptionTabAutoRefreshInterval(tab))
-          } else {
-            scheduleSubscriptionTabAutoRefreshLockRetry(tab, profileId)
-          }
-        }
-      } catch (error) {
-        cancelledSubscriptionAutoRefreshKeys.delete(key)
-        console.error(`Failed to auto refresh subscription ${tab}`, error)
-        scheduleSubscriptionTabAutoRefreshRetry(
-          tab,
-          profileId,
-          SUBSCRIPTION_AUTO_REFRESH_FAILURE_RETRY_INTERVAL
-        )
-      } finally {
-        pendingSubscriptionAutoRefreshKeys.delete(key)
-      }
-    }
-  } finally {
-    processingSubscriptionAutoRefreshes = false
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {string} profileId
- */
-function scheduleSubscriptionTabAutoRefreshLockRetry(tab, profileId) {
-  scheduleSubscriptionTabAutoRefreshRetry(tab, profileId, SUBSCRIPTION_AUTO_REFRESH_LOCK_RETRY_INTERVAL)
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {string} profileId
- * @param {number} delay
- */
-function scheduleSubscriptionTabAutoRefreshRetry(tab, profileId, delay) {
-  if (profileId !== activeSubscriptionProfileId.value) {
-    return
-  }
-
-  clearSubscriptionTabAutoRefreshTimer(tab)
-  subscriptionAutoRefreshTimers[tab] = setTimeout(() => {
-    subscriptionAutoRefreshTimers[tab] = null
-    enqueueSubscriptionAutoRefresh(tab, profileId)
-  }, delay)
-}
-
-function refreshOverdueSubscriptionFeeds() {
-  const profileId = activeSubscriptionProfileId.value
-  if (!dataReady.value || !profileId) {
-    return
-  }
-
-  for (const tab of subscriptionAutoRefreshTabs) {
-    const timestamp = getStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab)
-    if (timestamp !== null && timestamp <= Date.now() && isSubscriptionTabAutoRefreshEnabled(tab)) {
-      enqueueSubscriptionAutoRefresh(tab, profileId)
-    } else {
-      scheduleSubscriptionTabAutoRefresh(tab, profileId, timestamp)
-    }
-  }
-}
-
-async function handleSubscriptionAutoRefreshVisibilityChange() {
-  if (!isAppHidden()) {
-    synchronizeSubscriptionRefreshInProgress()
-    if ((isCapacitor || isElectron) && subscriptionCacheReady.value) {
-      await reconcileAndroidSubscriptionRefreshResults()
-    }
-    refreshOverdueSubscriptionFeeds()
-  }
-}
-
-async function synchronizeSubscriptionRefreshInProgress() {
-  try {
-    let state
-    if (process.env.IS_ELECTRON) {
-      state = await window.ftElectron.subscriptionAutoRefresh.isInProgress()
-    } else if (navigator.locks) {
-      const { held } = await navigator.locks.query()
-      const inProgress = held.some(lock => lock.name === SUBSCRIPTION_REFRESH_LOCK_NAME)
-      if (!inProgress) {
-        localStorage.removeItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY)
-      }
-      const progressState = inProgress ? getStoredSubscriptionRefreshProgressState() : null
-      state = {
-        inProgress,
-        percentage: progressState?.percentage ?? 0,
-        tab: progressState?.tab ?? null
-      }
-    } else {
-      const progressState = getStoredSubscriptionRefreshProgressState()
-      state = {
-        inProgress: progressState !== null,
-        percentage: progressState?.percentage ?? 0,
-        tab: progressState?.tab ?? null
-      }
-    }
-
-    applySubscriptionAutoRefreshState(state)
-  } catch {
-    // Live start/finish events still keep the common path synchronized.
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function getSubscriptionAutoRefreshInterval(tab) {
-  switch (tab) {
-    case 'shorts':
-      return subscriptionShortsAutoRefreshInterval
-    case 'live':
-      return subscriptionLiveAutoRefreshInterval
-    case 'posts':
-      return subscriptionPostsAutoRefreshInterval
-    default:
-      return subscriptionFeedAutoRefreshInterval
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function getSubscriptionTabRefreshHandler(tab) {
-  switch (tab) {
-    case 'shorts':
-      return refreshSubscriptionShortsFromRemote
-    case 'live':
-      return refreshSubscriptionLiveFromRemote
-    case 'posts':
-      return refreshSubscriptionPostsFromRemote
-    default:
-      return refreshSubscriptionVideosFromRemote
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function getSubscriptionTabAutoRefreshInterval(tab) {
-  return parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function isSubscriptionTabAutoRefreshEnabled(tab) {
-  const interval = getSubscriptionTabAutoRefreshInterval(tab)
-
-  return (
-    dataReady.value &&
-    !isSubscriptionTabHidden(tab) &&
-    !Number.isNaN(interval) &&
-    interval > 0
-  )
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function isSubscriptionTabHidden(tab) {
-  switch (tab) {
-    case 'shorts':
-      return hideSubscriptionsShorts.value
-    case 'live':
-      return hideSubscriptionsLive.value
-    case 'posts':
-      return hideSubscriptionsPosts.value
-    default:
-      return hideSubscriptionsVideos.value
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {string} profileId
- * @param {number | null} timestamp
- */
-function setSubscriptionTabNextAutoRefreshTimestamp(tab, profileId, timestamp) {
-  setStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab, timestamp)
-
-  if (profileId === activeSubscriptionProfileId.value) {
-    commitSubscriptionTabNextAutoRefreshTimestamp(tab, timestamp)
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {number | null} timestamp
- */
-function commitSubscriptionTabNextAutoRefreshTimestamp(tab, timestamp) {
-  switch (tab) {
-    case 'shorts':
-      store.commit('setSubscriptionShortsNextAutoRefreshTimestamp', timestamp)
-      break
-    case 'live':
-      store.commit('setSubscriptionLiveNextAutoRefreshTimestamp', timestamp)
-      break
-    case 'posts':
-      store.commit('setSubscriptionPostsNextAutoRefreshTimestamp', timestamp)
-      break
-    default:
-      store.commit('setSubscriptionFeedNextAutoRefreshTimestamp', timestamp)
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {number | null} timestamp
- */
-function commitSubscriptionTabLastRefreshTimestamp(tab, timestamp) {
-  switch (tab) {
-    case 'shorts':
-      store.commit('setSubscriptionShortsLastRefreshTimestamp', timestamp)
-      break
-    case 'live':
-      store.commit('setSubscriptionLiveLastRefreshTimestamp', timestamp)
-      break
-    case 'posts':
-      store.commit('setSubscriptionPostsLastRefreshTimestamp', timestamp)
-      break
-    default:
-      store.commit('setSubscriptionFeedLastRefreshTimestamp', timestamp)
-  }
-}
-
-/**
- * @param {string} profileId
- */
-function synchronizeSubscriptionAutoRefreshProfile(profileId) {
-  for (const tab of subscriptionAutoRefreshTabs) {
-    commitSubscriptionTabLastRefreshTimestamp(
-      tab,
-      getStoredSubscriptionTabLastRefreshTimestamp(profileId, tab)
-    )
-    scheduleSubscriptionTabAutoRefresh(tab, profileId)
-  }
-}
-
-/**
- * @param {CustomEvent<{tab: 'videos' | 'shorts' | 'live' | 'posts', profileId: string}>} event
- */
-function handleSubscriptionRefreshCancelled(event) {
-  const { tab, profileId } = event.detail
-  if (
-    profileId !== activeSubscriptionProfileId.value ||
-    !subscriptionAutoRefreshTabs.includes(tab)
-  ) {
-    return
-  }
-
-  cancelledSubscriptionAutoRefreshKeys.add(`${profileId}:${tab}`)
-}
-
-/**
- * @param {CustomEvent<{tab: 'videos' | 'shorts' | 'live' | 'posts', profileId: string, timestamp: number}>} event
- */
-function handleSubscriptionRefreshCompleted(event) {
-  const { tab, profileId, timestamp } = event.detail
-  if (
-    !subscriptionAutoRefreshTabs.includes(tab) ||
-    typeof profileId !== 'string' ||
-    !Number.isFinite(timestamp) ||
-    timestamp < getStoredSubscriptionTabLastRefreshTimestamp(profileId, tab)
-  ) {
-    return
-  }
-
-  if (isElectron) {
-    window.ftElectron.subscriptionAutoRefresh.backgroundCompleted({ profileId, feedType: tab, timestamp }).catch(console.error)
-  }
-  setStoredSubscriptionAutoRefreshTimestamp(
-    getSubscriptionAutoRefreshStorageKey(
-      SUBSCRIPTION_AUTO_REFRESH_COMPLETION_STORAGE_KEY_PREFIX,
-      profileId,
-      tab
-    ),
-    timestamp
-  )
-
-  const interval = parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
-  const nextTimestamp = isSubscriptionTabAutoRefreshEnabled(tab) ? timestamp + interval : null
-  setStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab, nextTimestamp)
-
-  if (profileId === activeSubscriptionProfileId.value) {
-    commitSubscriptionTabLastRefreshTimestamp(tab, timestamp)
-    scheduleSubscriptionTabAutoRefresh(tab, profileId, nextTimestamp)
-  }
-}
-
-/**
  * @param {CustomEvent<{tab: string, profileId: string, refreshId: number}>} event
  */
 async function handleSubscriptionRefreshStarted(event) {
   const isCurrentStart = subscriptionRefreshStartGuard.begin()
-  if (subscriptionRefreshCapabilities.androidNotifications) {
-    const { acquired, notificationsDenied } = await startAndroidSubscriptionRefresh(
+  if (isCapacitor) {
+    const { acquired, notificationsDenied } = await subscriptionRefreshPlatform.startNotification(
       event.detail.refreshId,
       getSubscriptionRefreshNotificationTitle(event.detail.tab),
       t('Feed.Cancel Refresh')
@@ -2191,16 +1746,7 @@ async function handleSubscriptionRefreshStarted(event) {
       cancelSubscriptionRefresh()
     }
   }
-  if (subscriptionRefreshCapabilities.storageBroadcast) {
-    try {
-      localStorage.setItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY, JSON.stringify({
-        ...event.detail,
-        percentage: 0
-      }))
-    } catch {
-      // The owner still has its renderer-local progress state.
-    }
-  }
+  subscriptionRefreshPlatform.publishStarted(event.detail)
   applySubscriptionAutoRefreshState({
     inProgress: true,
     percentage: 0,
@@ -2236,27 +1782,7 @@ function handleSubscriptionRefreshProgress(event) {
   const percentage = normalizeSubscriptionRefreshProgress(event.detail.percentage)
   store.commit('setSubscriptionFeedRefreshProgress', percentage)
 
-  if (subscriptionRefreshCapabilities.androidNotifications) {
-    updateAndroidSubscriptionRefresh(event.detail.refreshId, percentage)
-  }
-
-  if (subscriptionRefreshCapabilities.electronProgress) {
-    window.ftElectron.subscriptionAutoRefresh.setProgress(
-      event.detail.ownerTabId ?? store.getters.getActiveTabId,
-      percentage
-    )
-    return
-  }
-
-  try {
-    const progressState = getStoredSubscriptionRefreshProgressState() ?? {}
-    localStorage.setItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY, JSON.stringify({
-      ...progressState,
-      percentage
-    }))
-  } catch {
-    // The owner still has its renderer-local progress state.
-  }
+  subscriptionRefreshPlatform.publishProgress(event.detail, percentage, store.getters.getActiveTabId)
 }
 
 /**
@@ -2264,13 +1790,7 @@ function handleSubscriptionRefreshProgress(event) {
  */
 function handleSubscriptionRefreshFinished(event) {
   subscriptionRefreshStartGuard.finish()
-  if (subscriptionRefreshCapabilities.storageBroadcast) {
-    try {
-      localStorage.removeItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY)
-    } catch {
-      // The owner still clears its renderer-local progress state.
-    }
-  }
+  subscriptionRefreshPlatform.publishFinished()
   applySubscriptionAutoRefreshState({ inProgress: false, percentage: 0 })
 }
 
@@ -2287,287 +1807,15 @@ function getSubscriptionRefreshNotificationTitle(tab) {
   }
 }
 
-let reconcilingAndroidSubscriptionRefreshResults = null
-
-function reconcileAndroidSubscriptionRefreshResults() {
-  if (reconcilingAndroidSubscriptionRefreshResults) return reconcilingAndroidSubscriptionRefreshResults
-  const importing = isElectron
-    ? navigator.locks.request('opentubex-background-subscription-import', importAndroidSubscriptionRefreshResults)
-    : importAndroidSubscriptionRefreshResults()
-  reconcilingAndroidSubscriptionRefreshResults = importing.finally(() => {
-    reconcilingAndroidSubscriptionRefreshResults = null
-  })
-  return reconcilingAndroidSubscriptionRefreshResults
-}
-
-async function importAndroidSubscriptionRefreshResults() {
-  try {
-    while (true) {
-      const result = await getNextAndroidSubscriptionRefreshResult()
-      if (result === null) return
-
-      if (
-        typeof result.id !== 'string' ||
-        typeof result.profileId !== 'string' ||
-        !subscriptionAutoRefreshTabs.includes(result.feedType)
-      ) {
-        await acknowledgeAndroidSubscriptionRefreshResult(result.id)
-        continue
-      }
-
-      if (result.kind === 'channel') {
-        await processAndroidSubscriptionRefreshChannelResult(
-          result,
-          reconcileAndroidSubscriptionRefreshChannelResult,
-          acknowledgeAndroidSubscriptionRefreshResult
-        )
-        continue
-      } else if (result.kind === 'completion' && store.getters.profileById(result.profileId)) {
-        handleSubscriptionRefreshCompleted({
-          detail: {
-            tab: result.feedType,
-            profileId: result.profileId,
-            timestamp: Number(result.timestamp) || Date.now()
-          }
-        })
-      } else if (
-        result.kind === 'failure' &&
-        result.diagnostic &&
-        store.getters.profileById(result.profileId)
-      ) {
-        const diagnostic = formatRequestDiagnostic(result.diagnostic)
-        console.error(`Closed-app subscription refresh request failed: ${diagnostic}`)
-        showApiErrorToast(store.getters.getBackendPreference === 'local' ? t('Local API Error (Click to copy)') : t('Invidious API Error (Click to copy)'), diagnostic)
-      }
-
-      await acknowledgeAndroidSubscriptionRefreshResult(result.id)
-    }
-  } catch (error) {
-    console.error('Failed to reconcile closed-app subscription refresh data', error)
-  }
-}
-
-async function reconcileAndroidSubscriptionRefreshChannelResult(result) {
-  if (
-    typeof result.channelId !== 'string' ||
-    !store.getters.getSubscribedChannelIdSet.has(result.channelId)
-  ) {
-    return
-  }
-
-  const feedType = result.feedType
-  const timestamp = new Date(Number(result.timestamp) || Date.now())
-  const config = getAndroidSubscriptionCacheConfig(feedType)
-  const previousCache = config.getCache()[result.channelId]
-  if (previousCache?.timestamp > timestamp) return
-  let entries = result.payload?.backgroundFormat === 'entries'
-    ? result.payload.entries
-    : result.payload?.backgroundFormat === 'rss'
-      ? (() => {
-          try { return parseSubscriptionRss(result.payload.text, result.channelId).videos } catch (error) {
-            throw new AndroidSubscriptionRefreshPayloadError(error)
-          }
-        })()
-      : normalizeAndroidSubscriptionRefreshPayload(
-          result.payload?.backgroundFormat?.startsWith('local')
-            ? (type, payload, id) => normalizeLocalSubscriptionFeed(type, payload, id, timestamp.getTime())
-            : normalizeInvidiousSubscriptionFeed,
-          feedType,
-          result.payload,
-          result.channelId
-        )
-  if (!Array.isArray(entries)) throw new AndroidSubscriptionRefreshPayloadError(new Error('Invalid saved entries'))
-  entries = entries.filter(entry => !shouldHideMembersOnlyContent(entry.isMembersOnly, store.getters))
-  if (feedType !== 'posts') {
-    const channel = store.getters.getSubscribedChannelsById.get(result.channelId)
-    const cachedThumbnails = new Map((previousCache?.videos ?? []).map(video => [video.videoId, video.thumbnailUrl]))
-    for (const entry of entries) {
-      if (!entry.author || entry.author === 'N/A') entry.author = channel?.name
-      if (!entry.authorId || entry.authorId === 'N/A') entry.authorId = result.channelId
-      if (feedType === 'shorts') {
-        entry.isShort = true
-        // RSS has no selected portrait image; keep the last known Shorts thumbnail.
-        entry.thumbnailUrl ||= cachedThumbnails.get(entry.videoId)
-      }
-    }
-  }
-  if (feedType === 'shorts') entries = await enrichSubscriptionShortDates(entries, result.channelId)
-  entries = await enrichSubscriptionRssEntries(entries)
-  const reconciledEntries = reconcileFetchedSubscriptionEntries(
-    entries,
-    previousCache?.[config.entriesKey],
-    config.idKey,
-    previousCache?.timestamp,
-    feedType === 'posts' ? undefined : store.getters.getHistoryCacheById
-  )
-
-  const applied = await store.dispatch(config.action, {
-    channelId: result.channelId,
-    [config.entriesKey]: reconciledEntries,
-    timestamp
-  })
-  if (applied === false) return
-
-  const committedTimestamp = config.getCache()[result.channelId]?.timestamp
-  if (!(committedTimestamp instanceof Date) || committedTimestamp.getTime() < timestamp.getTime()) {
-    throw new Error(`The ${feedType} cache write did not complete`)
-  }
-}
-
-function getAndroidSubscriptionCacheConfig(feedType) {
-  switch (feedType) {
-    case 'shorts':
-      return {
-        action: 'updateSubscriptionShortsCacheByChannel',
-        entriesKey: 'videos',
-        idKey: 'videoId',
-        getCache: () => store.getters.getShortsCache
-      }
-    case 'live':
-      return {
-        action: 'updateSubscriptionLiveCacheByChannel',
-        entriesKey: 'videos',
-        idKey: 'videoId',
-        getCache: () => store.getters.getLiveCache
-      }
-    case 'posts':
-      return {
-        action: 'updateSubscriptionPostsCacheByChannel',
-        entriesKey: 'posts',
-        idKey: 'postId',
-        getCache: () => store.getters.getPostsCache
-      }
-    default:
-      return {
-        action: 'updateSubscriptionVideosCacheByChannel',
-        entriesKey: 'videos',
-        idKey: 'videoId',
-        getCache: () => store.getters.getVideoCache
-      }
-  }
-}
-
-/**
- * @param {StorageEvent} event
- */
-function handleSubscriptionAutoRefreshStorage(event) {
-  if (subscriptionRefreshCapabilities.storageBroadcast && event.key === SUBSCRIPTION_REFRESH_CANCEL_STORAGE_KEY) {
-    if (event.newValue !== null) {
-      cancelSubscriptionRefresh()
-    }
-    return
-  }
-
-  if (subscriptionRefreshCapabilities.storageBroadcast && event.key === SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY) {
-    const state = getSubscriptionRefreshProgressState(event.newValue)
-    applySubscriptionAutoRefreshState({
-      inProgress: state !== null,
-      percentage: state?.percentage ?? 0,
-      tab: state?.tab ?? null
-    })
-    return
-  }
-
-  const deadline = parseSubscriptionAutoRefreshStorageKey(
-    event.key,
-    SUBSCRIPTION_AUTO_REFRESH_DEADLINE_STORAGE_KEY_PREFIX
-  )
-  if (deadline && deadline.profileId === activeSubscriptionProfileId.value) {
-    const timestamp = Number(event.newValue)
-    if (event.newValue === null || !Number.isFinite(timestamp) || timestamp <= 0) {
-      clearSubscriptionTabAutoRefreshTimer(deadline.tab)
-      commitSubscriptionTabNextAutoRefreshTimestamp(deadline.tab, null)
-    } else {
-      scheduleSubscriptionTabAutoRefresh(deadline.tab, deadline.profileId, timestamp)
-    }
-    return
-  }
-
-  const completion = parseSubscriptionAutoRefreshStorageKey(
-    event.key,
-    SUBSCRIPTION_AUTO_REFRESH_COMPLETION_STORAGE_KEY_PREFIX
-  )
-  if (completion && completion.profileId === activeSubscriptionProfileId.value) {
-    const timestamp = Number(event.newValue)
-    commitSubscriptionTabLastRefreshTimestamp(
-      completion.tab,
-      Number.isFinite(timestamp) && timestamp > 0 ? timestamp : null
-    )
-  }
-}
-
-/**
- * @param {{inProgress: boolean, percentage: number, tab?: string | null}} state
- */
-function applySubscriptionAutoRefreshState(state) {
-  const wasInProgress = store.getters.getSubscriptionFeedRefreshInProgress
-  const previousTab = store.getters.getSubscriptionFeedRefreshTab
-  const nextTab = state.inProgress ? state.tab ?? null : null
-  let percentage = normalizeSubscriptionRefreshProgress(state.percentage)
-
-  // The refresh owner updates progress locally before the main process broadcasts
-  // it to every renderer. An older broadcast can therefore arrive after a newer
-  // local update, so keep progress monotonic for the duration of this refresh.
-  if (state.inProgress && wasInProgress && nextTab === previousTab) {
-    percentage = Math.max(store.getters.getSubscriptionFeedRefreshProgress, percentage)
-  }
-
-  store.commit('setSubscriptionFeedRefreshInProgress', state.inProgress)
-  store.commit('setSubscriptionFeedRefreshTab', nextTab)
-  store.commit('setSubscriptionFeedRefreshProgress', percentage)
-}
-
-/**
- * @param {number} percentage
- */
-function normalizeSubscriptionRefreshProgress(percentage) {
-  return Number.isFinite(percentage) ? Math.min(100, Math.max(0, percentage)) : 0
-}
-
-function getStoredSubscriptionRefreshProgressState() {
-  try {
-    return getSubscriptionRefreshProgressState(
-      localStorage.getItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY)
-    )
-  } catch {
-    return null
-  }
-}
-
-/**
- * @param {string | null} value
- * @returns {{percentage: number, tab?: string} | null}
- */
-function getSubscriptionRefreshProgressState(value) {
-  if (value === null) {
-    return null
-  }
-
-  try {
-    const state = JSON.parse(value)
-    return {
-      ...state,
-      percentage: normalizeSubscriptionRefreshProgress(state.percentage)
-    }
-  } catch {
-    return null
-  }
-}
-
-function clearSubscriptionFeedAutoRefreshTimer() {
-  clearSubscriptionTabAutoRefreshTimer('videos')
-  clearSubscriptionTabAutoRefreshTimer('shorts')
-  clearSubscriptionTabAutoRefreshTimer('live')
-  clearSubscriptionTabAutoRefreshTimer('posts')
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function clearSubscriptionTabAutoRefreshTimer(tab) {
-  clearTimeout(subscriptionAutoRefreshTimers[tab])
-  subscriptionAutoRefreshTimers[tab] = null
-}
+const { reconcileResults: reconcileAndroidSubscriptionRefreshResults } = createSubscriptionBackgroundReconciler({
+  store,
+  locks: isElectron ? navigator.locks : null,
+  onCompleted: detail => handleSubscriptionRefreshCompleted({ detail }),
+  onFailure: diagnostic => {
+    console.error(`Closed-app subscription refresh request failed: ${diagnostic}`)
+    showApiErrorToast(store.getters.getBackendPreference === 'local' ? t('Local API Error (Click to copy)') : t('Invidious API Error (Click to copy)'), diagnostic)
+  },
+})
 
 /** @type {import('vue').ComputedRef<string>} */
 const baseTheme = computed(() => store.getters.getBaseTheme)
@@ -3888,31 +3136,17 @@ function isExternalLink(link) {
  * @param {HTMLAnchorElement | null} link
  */
 function handleInternalLinkShortcut(event, link) {
-  if (!process.env.IS_ELECTRON || event.defaultPrevented || link === null || isExternalLink(link)) {
-    return false
-  }
-
-  const isMiddleClick = event.type === 'auxclick' && event.button === 1
-  const ctrlOrCmdPressed = process.platform === 'darwin' ? event.metaKey : event.ctrlKey
-  const isCtrlOrCmdClick = event.type === 'click' && event.button === 0 && ctrlOrCmdPressed && !event.altKey
-  if (!isMiddleClick && !isCtrlOrCmdClick) {
-    return false
-  }
-
-  const hashRoute = new URL(link.href).hash.slice(1)
-  if (!hashRoute.startsWith('/')) {
-    return false
-  }
-
-  const destination = router.resolve(hashRoute)
+  const shortcut = linkNavigationPlatform.internalLinkShortcut(event, link, window.location.origin)
+  if (shortcut === null) return false
+  const destination = router.resolve(shortcut.hashRoute)
   event.preventDefault()
   openInternalPath({
     path: destination.path,
     query: destination.query,
     title: link.dataset.tabTitle || undefined,
-    doCreateNewWindow: event.shiftKey,
-    doCreateNewTab: !event.shiftKey,
-    makeActive: isCtrlOrCmdClick
+    doCreateNewWindow: shortcut.doCreateNewWindow,
+    doCreateNewTab: shortcut.doCreateNewTab,
+    makeActive: shortcut.makeActive
   })
   return true
 }
@@ -4047,12 +3281,13 @@ function handleAuxClick(event) {
   // double dispatch seen with mousedown/mouseup for these buttons.
   // The web build has no logical tabs and the browser's own history still
   // works there, so those buttons are left alone.
-  if (process.env.IS_ELECTRON && (event.button === 3 || event.button === 4)) {
+  const historyOffset = linkNavigationPlatform.mouseHistoryOffset(event)
+  if (historyOffset !== null) {
     event.preventDefault()
 
     const tabId = activeTabId.value
     if (tabId != null) {
-      navigation.go(tabId, event.button === 3 ? -1 : 1)
+      navigation.go(tabId, historyOffset)
     }
   }
 }
@@ -4087,15 +3322,7 @@ function handleLinkClick(event, link) {
   const youtubeUrlPattern = /^https?:\/\/((www\.|m\.)?youtube\.com(\/embed)?|youtu\.be)\/(?!.*live_chat).*$/
   const isYoutubeLink = youtubeUrlPattern.test(href)
 
-  // Determine if we should open in new tab or new window.
-  // `process.platform` is `undefined` in the web build, where the app can be
-  // opened from any OS, so both modifiers count there.
-  const ctrlOrCmdPressed = process.env.IS_ELECTRON
-    ? ((process.platform !== 'darwin' && event.ctrlKey) || (process.platform === 'darwin' && event.metaKey))
-    : (event.ctrlKey || event.metaKey)
-  const isMiddleClick = event.type === 'auxclick' && event.button === 1
-  const doCreateNewTab = ctrlOrCmdPressed || isMiddleClick
-  const doCreateNewWindow = event.shiftKey
+  const { doCreateNewTab, doCreateNewWindow, isMiddleClick } = linkNavigationPlatform.linkDisposition(event)
 
   if (isYoutubeLink) {
     handleYoutubeLink(href, {
