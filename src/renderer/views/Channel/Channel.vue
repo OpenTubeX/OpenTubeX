@@ -382,6 +382,7 @@ let mayContainContentFromOtherChannels = false
 
 const isLoading = ref(true)
 const elementListLoadingTabs = ref({})
+const elementListRequestIds = {}
 const isSearchTabLoading = ref(false)
 const isFetchMoreLoading = ref(false)
 const currentTab = ref('videos')
@@ -389,6 +390,19 @@ const isElementListLoading = computed(() => !!elementListLoadingTabs.value[curre
 
 function setElementListLoading(tab, loading) {
   elementListLoadingTabs.value[tab] = loading
+}
+
+function startElementListRequest(tab) {
+  elementListRequestIds[tab] = (elementListRequestIds[tab] || 0) + 1
+  return currentElementListRequest(tab)
+}
+
+function currentElementListRequest(tab) {
+  const requestId = elementListRequestIds[tab]
+  const routeGeneration = channelRouteGeneration
+  const channelId = id.value
+  return () => requestId === elementListRequestIds[tab] &&
+    routeGeneration === channelRouteGeneration && channelId === id.value
 }
 
 const isCurrentTabLoading = computed(() => {
@@ -1204,9 +1218,8 @@ watch(videoSortBy, () => {
 })
 
 async function getChannelVideosLocal() {
-  const requestGeneration = channelRouteGeneration
+  const isCurrentRequest = startElementListRequest('videos')
   setElementListLoading('videos', true)
-  const expectedId = id.value
 
   try {
     if (isArtistTopicChannel.value) {
@@ -1217,7 +1230,7 @@ async function getChannelVideosLocal() {
       const playlistId = getChannelPlaylistId(id.value, 'videos', videoSortBy.value)
       const playlist = await getLocalPlaylist(playlistId)
 
-      if (requestGeneration !== channelRouteGeneration || expectedId !== id.value) {
+      if (!isCurrentRequest()) {
         return
       }
 
@@ -1226,12 +1239,12 @@ async function getChannelVideosLocal() {
       setElementListLoading('videos', false)
     } else {
       await ensureChannelInstance()
-      if (requestGeneration !== channelRouteGeneration || expectedId !== id.value) {
+      if (!isCurrentRequest()) {
         return
       }
 
       let videosTab = await channelInstance.getVideos()
-      if (requestGeneration !== channelRouteGeneration || expectedId !== id.value) {
+      if (!isCurrentRequest()) {
         return
       }
 
@@ -1242,7 +1255,7 @@ async function getChannelVideosLocal() {
         videosTab = await videosTab.applyFilter(videosTab.filters[index])
       }
 
-      if (requestGeneration !== channelRouteGeneration || expectedId !== id.value) {
+      if (!isCurrentRequest()) {
         return
       }
 
@@ -1258,7 +1271,7 @@ async function getChannelVideosLocal() {
       })
     }
   } catch (err) {
-    if (requestGeneration !== channelRouteGeneration) {
+    if (!isCurrentRequest()) {
       return
     }
     setElementListLoading('videos', false)
@@ -1280,10 +1293,12 @@ async function getChannelVideosLocal() {
 }
 
 async function getChannelVideosLocalMore() {
+  const isCurrentRequest = currentElementListRequest('videos')
   try {
     if (isArtistTopicChannel.value) {
       /** @type {import('youtubei.js').YT.Playlist} */
       const continuation = await getLocalPlaylistContinuation(videoContinuationData.value)
+      if (!isCurrentRequest()) return
 
       if (continuation) {
         latestVideos.value = latestVideos.value.concat(parseLocalPlaylistVideos(continuation.items))
@@ -1296,11 +1311,13 @@ async function getChannelVideosLocalMore() {
        * @type {import('youtubei.js').YT.ChannelListContinuation|import('youtubei.js').YT.FilteredChannelList}
        */
       const continuation = await videoContinuationData.value.getContinuation()
+      if (!isCurrentRequest()) return
 
       latestVideos.value = latestVideos.value.concat(parseLocalChannelVideos(continuation.videos, id.value, channelName.value))
       videoContinuationData.value = continuation.has_continuation ? continuation : null
     }
   } catch (err) {
+    if (!isCurrentRequest()) return
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -1311,7 +1328,7 @@ async function getChannelVideosLocalMore() {
  * @param {boolean} sortByChanged
  */
 async function channelInvidiousVideos(sortByChanged = false) {
-  const requestGeneration = channelRouteGeneration
+  const isCurrentRequest = startElementListRequest('videos')
   if (sortByChanged) {
     videoContinuationData.value = null
   }
@@ -1325,7 +1342,7 @@ async function channelInvidiousVideos(sortByChanged = false) {
 
   try {
     const response = await getInvidiousChannelVideos(id.value, videoSortBy.value, videoContinuationData.value)
-    if (requestGeneration !== channelRouteGeneration) {
+    if (!isCurrentRequest()) {
       return
     }
     if (more) {
@@ -1343,7 +1360,7 @@ async function channelInvidiousVideos(sortByChanged = false) {
       })
     }
   } catch (err) {
-    if (requestGeneration !== channelRouteGeneration) {
+    if (!isCurrentRequest()) {
       return
     }
     setElementListLoading('videos', false)
@@ -1377,13 +1394,15 @@ watch(shortSortBy, () => {
 })
 
 async function getChannelShortsLocal() {
+  const isCurrentRequest = startElementListRequest('shorts')
   setElementListLoading('shorts', true)
-  const expectedId = id.value
 
   try {
     await ensureChannelInstance()
+    if (!isCurrentRequest()) return
 
     let shortsTab = await channelInstance.getShorts()
+    if (!isCurrentRequest()) return
 
     showShortSortBy.value = shortsTab.filters.length > 1
 
@@ -1392,7 +1411,7 @@ async function getChannelShortsLocal() {
       shortsTab = await shortsTab.applyFilter(shortsTab.filters[index])
     }
 
-    if (expectedId !== id.value) {
+    if (!isCurrentRequest()) {
       return
     }
 
@@ -1418,6 +1437,7 @@ async function getChannelShortsLocal() {
       })
     }
   } catch (err) {
+    if (!isCurrentRequest()) return
     setElementListLoading('shorts', false)
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
@@ -1432,11 +1452,13 @@ async function getChannelShortsLocal() {
 }
 
 async function getChannelShortsLocalMore() {
+  const isCurrentRequest = currentElementListRequest('shorts')
   try {
     /**
      * @type {import('youtubei.js').YT.ChannelListContinuation|import('youtubei.js').YT.FilteredChannelList}
      */
     const continuation = await shortContinuationData.value.getContinuation()
+    if (!isCurrentRequest()) return
 
     let parsedShorts
 
@@ -1449,6 +1471,7 @@ async function getChannelShortsLocalMore() {
     latestShorts.value = latestShorts.value.concat(parsedShorts)
     shortContinuationData.value = continuation.has_continuation ? continuation : null
   } catch (err) {
+    if (!isCurrentRequest()) return
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -1459,6 +1482,7 @@ async function getChannelShortsLocalMore() {
  * @param {boolean} sortByChanged
  */
 async function channelInvidiousShorts(sortByChanged = false) {
+  const isCurrentRequest = startElementListRequest('shorts')
   if (sortByChanged) {
     shortContinuationData.value = null
   }
@@ -1472,6 +1496,7 @@ async function channelInvidiousShorts(sortByChanged = false) {
 
   try {
     const response = await getInvidiousChannelShorts(id.value, shortSortBy.value, shortContinuationData.value)
+    if (!isCurrentRequest()) return
     if (more) {
       latestShorts.value = latestShorts.value.concat(response.videos)
     } else {
@@ -1491,6 +1516,7 @@ async function channelInvidiousShorts(sortByChanged = false) {
       })
     }
   } catch (err) {
+    if (!isCurrentRequest()) return
     setElementListLoading('shorts', false)
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
@@ -1518,13 +1544,15 @@ watch(liveSortBy, () => {
 })
 
 async function getChannelLiveLocal() {
+  const isCurrentRequest = startElementListRequest('live')
   setElementListLoading('live', true)
-  const expectedId = id.value
 
   try {
     await ensureChannelInstance()
+    if (!isCurrentRequest()) return
 
     let liveTab = await channelInstance.getLiveStreams()
+    if (!isCurrentRequest()) return
 
     showLiveSortBy.value = liveTab.filters.length > 1
 
@@ -1533,7 +1561,7 @@ async function getChannelLiveLocal() {
       liveTab = await liveTab.applyFilter(liveTab.filters[index])
     }
 
-    if (expectedId !== id.value) {
+    if (!isCurrentRequest()) {
       return
     }
 
@@ -1543,6 +1571,7 @@ async function getChannelLiveLocal() {
     let videos = liveTab.videos
     while (videos.length === 0 && liveTab.has_continuation) {
       liveTab = await liveTab.getContinuation()
+      if (!isCurrentRequest()) return
       videos = liveTab.videos
     }
 
@@ -1557,6 +1586,7 @@ async function getChannelLiveLocal() {
       })
     }
   } catch (err) {
+    if (!isCurrentRequest()) return
     setElementListLoading('live', false)
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
@@ -1571,15 +1601,18 @@ async function getChannelLiveLocal() {
 }
 
 async function getChannelLiveLocalMore() {
+  const isCurrentRequest = currentElementListRequest('live')
   try {
     /**
      * @type {import('youtubei.js').YT.ChannelListContinuation|import('youtubei.js').YT.FilteredChannelList}
      */
     const continuation = await liveContinuationData.value.getContinuation()
+    if (!isCurrentRequest()) return
 
     latestLive.value = latestLive.value.concat(parseLocalChannelVideos(continuation.videos, id.value, channelName.value))
     liveContinuationData.value = continuation.has_continuation ? continuation : null
   } catch (err) {
+    if (!isCurrentRequest()) return
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -1590,6 +1623,7 @@ async function getChannelLiveLocalMore() {
  * @param {boolean} sortByChanged
  */
 async function channelInvidiousLive(sortByChanged) {
+  const isCurrentRequest = startElementListRequest('live')
   if (sortByChanged) {
     liveContinuationData.value = null
   }
@@ -1603,6 +1637,7 @@ async function channelInvidiousLive(sortByChanged) {
 
   try {
     const response = await getInvidiousChannelLive(id.value, liveSortBy.value, liveContinuationData.value)
+    if (!isCurrentRequest()) return
     if (more) {
       latestLive.value = latestLive.value.concat(response.videos)
     } else {
@@ -1618,6 +1653,7 @@ async function channelInvidiousLive(sortByChanged) {
       })
     }
   } catch (err) {
+    if (!isCurrentRequest()) return
     setElementListLoading('live', false)
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
@@ -1645,13 +1681,15 @@ watch(playlistSortBy, () => {
 })
 
 async function getChannelPlaylistsLocal() {
+  const isCurrentRequest = startElementListRequest('playlists')
   setElementListLoading('playlists', true)
-  const expectedId = id.value
 
   try {
     await ensureChannelInstance()
+    if (!isCurrentRequest()) return
 
     let playlistsTab = await channelInstance.getPlaylists()
+    if (!isCurrentRequest()) return
 
     // some channels have more categories of playlists than just "Created Playlists" e.g. https://www.youtube.com/channel/UCez-2shYlHQY3LfILBuDYqQ
     // for the moment we just want the "Created Playlists" category that has all playlists in it
@@ -1667,6 +1705,7 @@ async function getChannelPlaylistsLocal() {
       }).title
 
       playlistsTab = await playlistsTab.applyContentTypeFilter(createdPlaylistsFilter)
+      if (!isCurrentRequest()) return
     }
 
     // YouTube seems to allow the playlists tab to be sorted even if it only has one playlist
@@ -1678,7 +1717,7 @@ async function getChannelPlaylistsLocal() {
       playlistsTab = await playlistsTab.applySort(playlistsTab.sort_filters[index])
     }
 
-    if (expectedId !== id.value) {
+    if (!isCurrentRequest()) {
       return
     }
 
@@ -1686,6 +1725,7 @@ async function getChannelPlaylistsLocal() {
     playlistContinuationData.value = playlistsTab.has_continuation ? playlistsTab : null
     setElementListLoading('playlists', false)
   } catch (err) {
+    if (!isCurrentRequest()) return
     setElementListLoading('playlists', false)
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
@@ -1700,16 +1740,19 @@ async function getChannelPlaylistsLocal() {
 }
 
 async function getChannelPlaylistsLocalMore() {
+  const isCurrentRequest = currentElementListRequest('playlists')
   try {
     /**
      * @type {import('youtubei.js').YT.ChannelListContinuation}
      */
     const continuation = await playlistContinuationData.value.getContinuation()
+    if (!isCurrentRequest()) return
 
     const parsedPlaylists = continuation.playlists.map(playlist => parseLocalListPlaylist(playlist, id.value, channelName.value))
     latestPlaylists.value = latestPlaylists.value.concat(parsedPlaylists)
     playlistContinuationData.value = continuation.has_continuation ? continuation : null
   } catch (err) {
+    if (!isCurrentRequest()) return
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -1717,14 +1760,17 @@ async function getChannelPlaylistsLocalMore() {
 }
 
 async function getPlaylistsInvidious() {
+  const isCurrentRequest = startElementListRequest('playlists')
   setElementListLoading('playlists', true)
 
   try {
     const response = await getInvidiousChannelPlaylists(id.value, playlistSortBy.value)
+    if (!isCurrentRequest()) return
     playlistContinuationData.value = response.continuation || null
     latestPlaylists.value = response.playlists
     setElementListLoading('playlists', false)
   } catch (err) {
+    if (!isCurrentRequest()) return
     setElementListLoading('playlists', false)
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
@@ -1739,12 +1785,15 @@ async function getPlaylistsInvidious() {
 }
 
 async function getPlaylistsInvidiousMore() {
+  const isCurrentRequest = currentElementListRequest('playlists')
   try {
     const response = await getInvidiousChannelPlaylists(id.value, playlistSortBy.value, playlistContinuationData.value)
+    if (!isCurrentRequest()) return
     playlistContinuationData.value = response.continuation || null
     latestPlaylists.value = latestPlaylists.value.concat(response.playlists)
     setElementListLoading('playlists', false)
   } catch (err) {
+    if (!isCurrentRequest()) return
     console.error(err)
 
     const errorMessage = t('Invidious API Error (Click to copy)')
@@ -1756,15 +1805,16 @@ const latestReleases = shallowRef([])
 const releaseContinuationData = shallowRef(null)
 
 async function getChannelReleasesLocal() {
+  const isCurrentRequest = startElementListRequest('releases')
   setElementListLoading('releases', true)
-  const expectedId = id.value
 
   try {
     await ensureChannelInstance()
+    if (!isCurrentRequest()) return
     if (isArtistTopicChannel.value) {
       const { releases, continuationData } = await getLocalArtistTopicChannelReleases(channelInstance)
 
-      if (expectedId !== id.value) {
+      if (!isCurrentRequest()) {
         return
       }
 
@@ -1773,7 +1823,7 @@ async function getChannelReleasesLocal() {
     } else {
       const releaseTab = await channelInstance.getReleases()
 
-      if (expectedId !== id.value) {
+      if (!isCurrentRequest()) {
         return
       }
 
@@ -1783,6 +1833,7 @@ async function getChannelReleasesLocal() {
 
     setElementListLoading('releases', false)
   } catch (err) {
+    if (!isCurrentRequest()) return
     setElementListLoading('releases', false)
     console.error(err)
 
@@ -1799,13 +1850,16 @@ async function getChannelReleasesLocal() {
 }
 
 async function getChannelReleasesLocalMore() {
+  const isCurrentRequest = currentElementListRequest('releases')
   try {
     if (isArtistTopicChannel.value) {
       await ensureChannelInstance()
+      if (!isCurrentRequest()) return
 
       const { releases, continuationData } = await getLocalArtistTopicChannelReleasesContinuation(
         channelInstance, releaseContinuationData.value
       )
+      if (!isCurrentRequest()) return
 
       latestReleases.value = latestReleases.value.concat(releases)
       releaseContinuationData.value = continuationData
@@ -1814,12 +1868,14 @@ async function getChannelReleasesLocalMore() {
        * @type {import('youtubei.js').YT.ChannelListContinuation}
        */
       const continuation = await releaseContinuationData.value.getContinuation()
+      if (!isCurrentRequest()) return
 
       const parsedReleases = continuation.playlists.map(playlist => parseLocalListPlaylist(playlist, id.value, channelName.value))
       latestReleases.value = latestReleases.value.concat(parsedReleases)
       releaseContinuationData.value = continuation.has_continuation ? continuation : null
     }
   } catch (err) {
+    if (!isCurrentRequest()) return
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -1827,14 +1883,17 @@ async function getChannelReleasesLocalMore() {
 }
 
 async function channelInvidiousReleases() {
+  const isCurrentRequest = startElementListRequest('releases')
   setElementListLoading('releases', true)
 
   try {
     const response = await getInvidiousChannelReleases(id.value)
+    if (!isCurrentRequest()) return
     releaseContinuationData.value = response.continuation || null
     latestReleases.value = response.playlists
     setElementListLoading('releases', false)
   } catch (err) {
+    if (!isCurrentRequest()) return
     setElementListLoading('releases', false)
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
@@ -1849,12 +1908,15 @@ async function channelInvidiousReleases() {
 }
 
 async function channelInvidiousReleasesMore() {
+  const isCurrentRequest = currentElementListRequest('releases')
   try {
     const response = await getInvidiousChannelReleases(id.value, releaseContinuationData.value)
+    if (!isCurrentRequest()) return
     releaseContinuationData.value = response.continuation || null
     latestReleases.value = latestReleases.value.concat(response.playlists)
     setElementListLoading('releases', false)
   } catch (err) {
+    if (!isCurrentRequest()) return
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -1865,15 +1927,16 @@ const latestPodcasts = shallowRef([])
 const podcastContinuationData = shallowRef(null)
 
 async function getChannelPodcastsLocal() {
+  const isCurrentRequest = startElementListRequest('podcasts')
   setElementListLoading('podcasts', true)
-  const expectedId = id.value
 
   try {
     await ensureChannelInstance()
+    if (!isCurrentRequest()) return
 
     const podcastTab = await channelInstance.getPodcasts()
 
-    if (expectedId !== id.value) {
+    if (!isCurrentRequest()) {
       return
     }
 
@@ -1881,6 +1944,7 @@ async function getChannelPodcastsLocal() {
     podcastContinuationData.value = podcastTab.has_continuation ? podcastTab : null
     setElementListLoading('podcasts', false)
   } catch (err) {
+    if (!isCurrentRequest()) return
     setElementListLoading('podcasts', false)
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
@@ -1895,16 +1959,19 @@ async function getChannelPodcastsLocal() {
 }
 
 async function getChannelPodcastsLocalMore() {
+  const isCurrentRequest = currentElementListRequest('podcasts')
   try {
     /**
      * @type {import('youtubei.js').YT.ChannelListContinuation}
      */
     const continuation = await podcastContinuationData.value.getContinuation()
+    if (!isCurrentRequest()) return
 
     const parsedPodcasts = continuation.playlists.map(playlist => parseLocalListPlaylist(playlist, id.value, channelName.value))
     latestPodcasts.value = latestPodcasts.value.concat(parsedPodcasts)
     podcastContinuationData.value = continuation.has_continuation ? continuation : null
   } catch (err) {
+    if (!isCurrentRequest()) return
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -1912,14 +1979,17 @@ async function getChannelPodcastsLocalMore() {
 }
 
 async function channelInvidiousPodcasts() {
+  const isCurrentRequest = startElementListRequest('podcasts')
   setElementListLoading('podcasts', true)
 
   try {
     const response = await getInvidiousChannelPodcasts(id.value)
+    if (!isCurrentRequest()) return
     podcastContinuationData.value = response.continuation || null
     latestPodcasts.value = response.playlists
     setElementListLoading('podcasts', false)
   } catch (err) {
+    if (!isCurrentRequest()) return
     setElementListLoading('podcasts', false)
     console.error(err)
 
@@ -1936,12 +2006,15 @@ async function channelInvidiousPodcasts() {
 }
 
 async function channelInvidiousPodcastsMore() {
+  const isCurrentRequest = currentElementListRequest('podcasts')
   try {
     const response = await getInvidiousChannelPodcasts(id.value, podcastContinuationData.value)
+    if (!isCurrentRequest()) return
     podcastContinuationData.value = response.continuation || null
     latestPodcasts.value = latestPodcasts.value.concat(response.playlists)
     setElementListLoading('podcasts', false)
   } catch (err) {
+    if (!isCurrentRequest()) return
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -1952,15 +2025,16 @@ const latestCourses = shallowRef([])
 const coursesContinuationData = shallowRef(null)
 
 async function getChannelCoursesLocal() {
+  const isCurrentRequest = startElementListRequest('courses')
   setElementListLoading('courses', true)
-  const expectedId = id.value
 
   try {
     await ensureChannelInstance()
+    if (!isCurrentRequest()) return
 
     const coursesTab = await channelInstance.getCourses()
 
-    if (expectedId !== id.value) {
+    if (!isCurrentRequest()) {
       return
     }
 
@@ -1968,6 +2042,7 @@ async function getChannelCoursesLocal() {
     coursesContinuationData.value = coursesTab.has_continuation ? coursesTab : null
     setElementListLoading('courses', false)
   } catch (err) {
+    if (!isCurrentRequest()) return
     setElementListLoading('courses', false)
     console.error(err)
 
@@ -1984,16 +2059,19 @@ async function getChannelCoursesLocal() {
 }
 
 async function getChannelCoursesLocalMore() {
+  const isCurrentRequest = currentElementListRequest('courses')
   try {
     /**
      * @type {import('youtubei.js').YT.ChannelListContinuation}
      */
     const continuation = await coursesContinuationData.value.getContinuation()
+    if (!isCurrentRequest()) return
 
     const parsedCourses = continuation.playlists.map(playlist => parseLocalListPlaylist(playlist, id.value, channelName.value))
     latestCourses.value = latestCourses.value.concat(parsedCourses)
     coursesContinuationData.value = continuation.has_continuation ? continuation : null
   } catch (err) {
+    if (!isCurrentRequest()) return
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -2001,14 +2079,17 @@ async function getChannelCoursesLocalMore() {
 }
 
 async function channelInvidiousCourses() {
+  const isCurrentRequest = startElementListRequest('courses')
   setElementListLoading('courses', true)
 
   try {
     const response = await getInvidiousChannelCourses(id.value)
+    if (!isCurrentRequest()) return
     coursesContinuationData.value = response.continuation || null
     latestCourses.value = response.playlists
     setElementListLoading('courses', false)
   } catch (err) {
+    if (!isCurrentRequest()) return
     setElementListLoading('courses', false)
     console.error(err)
 
@@ -2025,12 +2106,15 @@ async function channelInvidiousCourses() {
 }
 
 async function channelInvidiousCoursesMore() {
+  const isCurrentRequest = currentElementListRequest('courses')
   try {
     const response = await getInvidiousChannelCourses(id.value, coursesContinuationData.value)
+    if (!isCurrentRequest()) return
     coursesContinuationData.value = response.continuation || null
     latestCourses.value = latestCourses.value.concat(response.playlists)
     setElementListLoading('courses', false)
   } catch (err) {
+    if (!isCurrentRequest()) return
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -2041,17 +2125,18 @@ const latestCommunityPosts = shallowRef([])
 const communityContinuationData = shallowRef(null)
 
 async function getCommunityPostsLocal() {
+  const isCurrentRequest = startElementListRequest('community')
   setElementListLoading('community', true)
-  const expectedId = id.value
 
   try {
     await ensureChannelInstance()
+    if (!isCurrentRequest()) return
 
     /**
      * @type {import('youtubei.js').YT.Channel|import('youtubei.js').YT.ChannelListContinuation}
      */
     let communityTab = await channelInstance.getCommunity()
-    if (expectedId !== id.value) {
+    if (!isCurrentRequest()) {
       return
     }
 
@@ -2061,6 +2146,7 @@ async function getCommunityPostsLocal() {
     let posts = communityTab.posts
     while (posts.length === 0 && communityTab.has_continuation) {
       communityTab = await communityTab.getContinuation()
+      if (!isCurrentRequest()) return
       posts = communityTab.posts
     }
 
@@ -2075,6 +2161,7 @@ async function getCommunityPostsLocal() {
       })
     }
   } catch (err) {
+    if (!isCurrentRequest()) return
     setElementListLoading('community', false)
     console.error(err)
 
@@ -2091,23 +2178,27 @@ async function getCommunityPostsLocal() {
 }
 
 async function getCommunityPostsLocalMore() {
+  const isCurrentRequest = currentElementListRequest('community')
   try {
     /**
      * @type {import('youtubei.js').YT.ChannelListContinuation}
      */
     let continuation = await communityContinuationData.value.getContinuation()
+    if (!isCurrentRequest()) return
 
     // work around YouTube bug where it will return a bunch of responses with only continuations in them
     // e.g. https://www.youtube.com/@TheLinuxEXP/community
     let posts = continuation.posts
     while (posts.length === 0 && continuation.has_continuation) {
       continuation = await continuation.getContinuation()
+      if (!isCurrentRequest()) return
       posts = continuation.posts
     }
 
     latestCommunityPosts.value = latestCommunityPosts.value.concat(parseLocalCommunityPosts(posts))
     communityContinuationData.value = continuation.has_continuation ? continuation : null
   } catch (err) {
+    if (!isCurrentRequest()) return
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -2115,6 +2206,7 @@ async function getCommunityPostsLocalMore() {
 }
 
 async function getCommunityPostsInvidious() {
+  const isCurrentRequest = startElementListRequest('community')
   const more = !isNullOrEmpty(communityContinuationData.value)
   if (!more) {
     setElementListLoading('community', true)
@@ -2122,6 +2214,7 @@ async function getCommunityPostsInvidious() {
 
   try {
     const { posts, continuation } = await invidiousGetCommunityPosts(id.value, communityContinuationData.value)
+    if (!isCurrentRequest()) return
     if (more) {
       latestCommunityPosts.value = latestCommunityPosts.value.concat(posts)
     } else {
@@ -2137,6 +2230,7 @@ async function getCommunityPostsInvidious() {
       })
     }
   } catch (err) {
+    if (!isCurrentRequest()) return
     setElementListLoading('community', false)
     console.error(err)
 
