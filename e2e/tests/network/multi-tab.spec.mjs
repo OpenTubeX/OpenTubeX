@@ -80,7 +80,8 @@ test.describe('automatic picture-in-picture', () => {
   test.use({
     seed: {
       settings: {
-        autoPictureInPictureTriggers: ['tab', 'minimize', 'blur']
+        autoPictureInPictureTriggers: ['tab', 'minimize', 'blur'],
+        keepPlayingOnNavigation: false
       }
     }
   })

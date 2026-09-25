@@ -175,6 +175,7 @@
       ref="commentsContentWrapper"
       v-overlay-scrollbars
       class="commentsContentWrapper"
+      @scroll.passive="rememberFullscreenScroll"
     >
       <h4
         v-if="canPerformInitialCommentLoading"
@@ -748,15 +749,15 @@ let fullscreenScrollTop = 0
 let highlightedTargetGeneration = 0
 const MAX_HIGHLIGHTED_REPLY_PAGES = 20
 
-watch(() => props.fullscreenOverlay, (fullscreenOverlay, wasFullscreenOverlay) => {
-  if (wasFullscreenOverlay) {
-    fullscreenScrollTop = commentsContentWrapper.value?.scrollTop ?? 0
-  }
+function rememberFullscreenScroll(event) {
+  if (props.fullscreenOverlay) fullscreenScrollTop = event.target.scrollTop
+}
 
+watch(() => props.fullscreenOverlay, (fullscreenOverlay) => {
   if (fullscreenOverlay) {
     nextTick(() => {
       if (commentsContentWrapper.value != null) {
-        commentsContentWrapper.value.scrollTop = fullscreenScrollTop
+        restoreOverlayScrollTop(commentsContentWrapper.value, fullscreenScrollTop)
       }
     })
   }
