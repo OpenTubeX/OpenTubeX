@@ -4,7 +4,7 @@ import test from 'node:test'
 import { DBActions, IpcChannels, SyncEvents } from '../../src/constants.js'
 import { registerSettingsIpc } from '../../src/main/settingsIpc.js'
 
-function setup() {
+function setup () {
   const handlers = new Map()
   const mutations = []
   const broadcasts = []
@@ -58,4 +58,12 @@ test('settings IPC merges seen videos and synchronizes the resulting record', as
     event: SyncEvents.GENERAL.UPSERT,
     data: { _id: 'subscriptionSeenVideos', value: ['a'] }
   }]])
+})
+
+test('settings IPC validates the request envelope after trusting its sender', async () => {
+  const { handler, mutations } = setup()
+  await assert.rejects(handler(event, null), /invalid datastore request/)
+  await assert.rejects(handler(event, { action: 'find' }), /invalid datastore request/)
+  assert.equal(await handler({ senderFrame: { url: 'https://example.com' } }, null), undefined)
+  assert.deepEqual(mutations, [])
 })

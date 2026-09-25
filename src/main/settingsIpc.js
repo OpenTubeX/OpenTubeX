@@ -1,9 +1,8 @@
 import { DBActions, IpcChannels, SyncEvents } from '../constants.js'
-import { requireSettingRecord } from './datastoreIpc.js'
+import { requireDatastoreIpcRequest, requireSettingRecord } from './datastoreIpc.js'
 
 /**
  * @typedef {{ _id: string, value?: unknown }} SettingRecord
- * @typedef {{ action: string, data?: unknown }} SettingsIpcRequest
  * @typedef {{
  *   ipcMain: Pick<import('electron').IpcMain, 'handle'>,
  *   settings: typeof import('../datastores/handlers/base').settings,
@@ -15,8 +14,9 @@ import { requireSettingRecord } from './datastoreIpc.js'
 
 /** @param {SettingsIpcDependencies} dependencies */
 export function registerSettingsIpc({ ipcMain, settings, isTrustedUrl, syncOtherWindows, onSettingUpsert }) {
-  ipcMain.handle(IpcChannels.DB_SETTINGS, async (event, /** @type {SettingsIpcRequest} */ { action, data }) => {
+  ipcMain.handle(IpcChannels.DB_SETTINGS, async (event, payload) => {
     if (!isTrustedUrl(event.senderFrame.url)) return
+    const { action, data } = requireDatastoreIpcRequest(payload)
 
     try {
       switch (action) {
