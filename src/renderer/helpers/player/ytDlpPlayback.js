@@ -787,9 +787,9 @@ async function loadYtDlpPlaybackSource(
       continue
     }
 
-    const deferIncompleteSource = source => {
+    const deferIncompleteSource = (source, playableFormats) => {
       if (!info.incomplete) return false
-      const height = info.formats.reduce((max, format) => Math.max(max, format.height ?? 0), 0)
+      const height = playableFormats.reduce((max, format) => Math.max(max, format.height ?? 0), 0)
       if (height > incompleteSourceHeight) {
         incompleteSource = source
         incompleteSourceHeight = height
@@ -837,7 +837,7 @@ async function loadYtDlpPlaybackSource(
           version: info.version
         }
 
-        if (deferIncompleteSource(source)) continue
+        if (deferIncompleteSource(source, localFormats)) continue
         await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, source)
         return source
       }
@@ -875,7 +875,7 @@ async function loadYtDlpPlaybackSource(
           version: info.version
         }
 
-        if (deferIncompleteSource(source)) continue
+        if (deferIncompleteSource(source, [...localFormats, ...legacyFormats])) continue
         await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, source)
         return source
       }
@@ -918,7 +918,10 @@ async function loadYtDlpPlaybackSource(
         continue
       }
 
-      if (deferIncompleteSource(source)) continue
+      const manifestFormats = info.formats.filter(format =>
+        format.url === info.hlsManifestUrl || format.manifestUrl === info.hlsManifestUrl
+      )
+      if (deferIncompleteSource(source, [...manifestFormats, ...source.legacyFormats])) continue
       await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, source)
       return source
     }
@@ -944,7 +947,7 @@ async function loadYtDlpPlaybackSource(
           version: info.version
         }
 
-        if (deferIncompleteSource(source)) continue
+        if (deferIncompleteSource(source, legacyFormats)) continue
         await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, source)
         return source
       }
@@ -953,12 +956,16 @@ async function loadYtDlpPlaybackSource(
     extractionError = new Error('yt-dlp did not return any playable formats')
   }
 
-  if (limitedLiveSource !== null) {
+  if (limitedLiveSource !== null && !limitedLiveSource.incomplete) {
     return limitedLiveSource
   }
 
   if (incompleteSource !== null) {
     return incompleteSource
+  }
+
+  if (limitedLiveSource !== null) {
+    return limitedLiveSource
   }
 
   if (cachedSource !== null) {
