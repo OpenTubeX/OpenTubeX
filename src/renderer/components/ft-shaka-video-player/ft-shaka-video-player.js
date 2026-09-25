@@ -568,7 +568,9 @@ export default defineComponent({
     'loaded',
     'ended',
     'play',
+    'playing',
     'pause',
+    'waiting',
     'timeupdate',
     'terminal-outro-started',
     'toggle-autoplay',
@@ -6421,12 +6423,14 @@ export default defineComponent({
       if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
         window.ftElectron.tabs.setPlaybackState('playing', tabId)
       }
+      emit('playing')
     }
 
     function handleWaiting() {
       if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
         window.ftElectron.tabs.setPlaybackState('waiting', tabId)
       }
+      emit('waiting')
     }
 
     function handlePause() {
