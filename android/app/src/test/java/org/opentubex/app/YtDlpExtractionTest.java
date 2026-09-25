@@ -8,6 +8,7 @@ public class YtDlpExtractionTest {
     @Test public void recognizesPartialExtractionTimeoutWarnings() {
         assertTrue(YtDlpRuntime.hasTimedOutWarning("WARNING: [youtube] video: Unable to download web client API page: The read operation timed out\n"));
         assertFalse(YtDlpRuntime.hasTimedOutWarning("WARNING: [youtube] video: Some formats are missing\n"));
+        assertFalse(YtDlpRuntime.hasTimedOutWarning("WARNING: [youtube] video: The read operation timed out. Retrying (1/3)...\n"));
     }
 
     @Test public void remembersTimeoutWarningsAfterTrimmingStderr() {

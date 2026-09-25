@@ -75,6 +75,16 @@ test('does not cache sources without a safely usable expiry', () => {
   assert.equal(cache.get('near-expiry', 'settings'), null)
 })
 
+test('does not cache a playable source from incomplete extraction', () => {
+  const cache = new YtDlpPlaybackSourceCache({ now: () => 0 })
+  assert.equal(cache.set('partial', 'settings', {
+    ...source(new Date(1000000)),
+    isLive: false,
+    incomplete: true
+  }), false)
+  assert.equal(cache.get('partial', 'settings'), null)
+})
+
 test('evicts the least recently used source at the size limit', () => {
   const cache = new YtDlpPlaybackSourceCache({ maxEntries: 2, now: () => 0 })
   const first = source(new Date(1000000))

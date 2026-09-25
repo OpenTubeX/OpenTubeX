@@ -16,6 +16,7 @@ import { getEarliestYtDlpFormatExpiry, YtDlpPlaybackSourceCache } from './ytDlpP
  * @property {MANIFEST_TYPE_DASH | MANIFEST_TYPE_HLS} manifestMimeType
  * @property {any[]} legacyFormats
  * @property {Date | null} expiryDate
+ * @property {boolean} incomplete whether a timeout may have omitted formats
  * @property {string | null} title
  * @property {boolean} isLive
  * @property {number | null} duration
@@ -751,6 +752,8 @@ async function loadYtDlpPlaybackSource(
 
   let extractionError = null
   let limitedLiveSource = null
+  let incompleteSource = null
+  let incompleteSourceHeight = -1
 
   // A fresh extraction with the same default clients can return working URLs after
   // an immediately preceding extraction returned URLs that respond with 403. Give
@@ -784,6 +787,16 @@ async function loadYtDlpPlaybackSource(
       continue
     }
 
+    const deferIncompleteSource = source => {
+      if (!info.incomplete) return false
+      const height = info.formats.reduce((max, format) => Math.max(max, format.height ?? 0), 0)
+      if (height > incompleteSourceHeight) {
+        incompleteSource = source
+        incompleteSourceHeight = height
+      }
+      return true
+    }
+
     const isLive = info.isLive || info.liveStatus === 'is_live'
     const postLiveDvrFormats = info.liveStatus === 'post_live'
       ? info.formats.filter(isPostLiveDvrSegmentedFormat)
@@ -811,6 +824,7 @@ async function loadYtDlpPlaybackSource(
           manifestMimeType: MANIFEST_TYPE_DASH,
           legacyFormats: [],
           expiryDate: getEarliestYtDlpFormatExpiry(postLiveDvrFormats),
+          incomplete: info.incomplete === true,
           title: info.title,
           isLive: false,
           duration,
@@ -823,6 +837,7 @@ async function loadYtDlpPlaybackSource(
           version: info.version
         }
 
+        if (deferIncompleteSource(source)) continue
         await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, source)
         return source
       }
@@ -847,6 +862,7 @@ async function loadYtDlpPlaybackSource(
           manifestMimeType: MANIFEST_TYPE_DASH,
           legacyFormats,
           expiryDate: getEarliestYtDlpFormatExpiry(adaptiveFormats),
+          incomplete: info.incomplete === true,
           title: info.title,
           isLive: false,
           duration: info.duration,
@@ -859,6 +875,7 @@ async function loadYtDlpPlaybackSource(
           version: info.version
         }
 
+        if (deferIncompleteSource(source)) continue
         await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, source)
         return source
       }
@@ -875,6 +892,7 @@ async function loadYtDlpPlaybackSource(
         expiryDate: getEarliestYtDlpFormatExpiry(
           info.formats.filter(format => format.url !== null)
         ),
+        incomplete: info.incomplete === true,
         title: info.title,
         isLive,
         duration: info.duration,
@@ -900,6 +918,7 @@ async function loadYtDlpPlaybackSource(
         continue
       }
 
+      if (deferIncompleteSource(source)) continue
       await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, source)
       return source
     }
@@ -912,6 +931,7 @@ async function loadYtDlpPlaybackSource(
           manifestMimeType: MANIFEST_TYPE_DASH,
           legacyFormats,
           expiryDate: getEarliestYtDlpFormatExpiry(legacyHttpFormats),
+          incomplete: info.incomplete === true,
           title: info.title,
           isLive: false,
           duration: info.duration,
@@ -924,6 +944,7 @@ async function loadYtDlpPlaybackSource(
           version: info.version
         }
 
+        if (deferIncompleteSource(source)) continue
         await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, source)
         return source
       }
@@ -934,6 +955,10 @@ async function loadYtDlpPlaybackSource(
 
   if (limitedLiveSource !== null) {
     return limitedLiveSource
+  }
+
+  if (incompleteSource !== null) {
+    return incompleteSource
   }
 
   if (cachedSource !== null) {

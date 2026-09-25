@@ -50,13 +50,15 @@ function configuration() {
   }
 }
 
-async function extract(args, useAuthentication = false, externalMedia = false, parse = JSON.parse, rejectTimeoutWarnings = false) {
+async function extract(args, useAuthentication = false, externalMedia = false, parse = JSON.parse, detectTimeoutWarnings = false) {
   const cookies = useAuthentication && store.getters.getYtDlpPlaybackAuthMode === 'file'
     ? store.getters.getYtDlpPlaybackCookiesPath
     : ''
   if (useAuthentication && !cookies) throw new Error('yt-dlp playback authentication is not configured')
-  const { stdout } = await native.extract({ args, cookies, externalMedia, rejectTimeoutWarnings })
-  return parse(stdout)
+  const { stdout, incomplete } = await native.extract({ args, cookies, externalMedia, detectTimeoutWarnings })
+  const info = parse(stdout)
+  if (detectTimeoutWarnings) info.incomplete = incomplete === true
+  return info
 }
 
 function listen(event, callback) {
@@ -140,6 +142,7 @@ const android = {
         .find(value => { try { return new URL(value).protocol === 'https:' } catch { return false } }) ?? null
       return {
         version: binaries.ytDlp.version,
+        incomplete: info.incomplete === true,
         title: toNonEmptyString(info.title),
         description: toNonEmptyString(info.description),
         uploader: toNonEmptyString(info.uploader),

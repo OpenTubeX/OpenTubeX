@@ -1,5 +1,5 @@
 import crypto from 'node:crypto'
-import { readFile, readdir } from 'node:fs/promises'
+import { chmod, readFile, readdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { gunzipSync } from 'node:zlib'
 
@@ -162,6 +162,27 @@ function expectNoRenderErrors(errors) {
 }
 
 test('an IP-blocked response retries a timed-out yt-dlp extraction and recovers the title', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+
+  const executable = path.join(app.userDataDir, 'timeout-yt-dlp.sh')
+  const callsFile = path.join(app.userDataDir, 'timeout-yt-dlp-calls.txt')
+  const metadata = {
+    is_live: false,
+    live_status: 'not_live',
+    manifest_url: 'https://example.invalid/recovered.m3u8',
+    formats: [],
+    duration: 60
+  }
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+    `count=$(cat '${callsFile}' 2>/dev/null || printf 0)`,
+    'count=$((count + 1))',
+    `printf '%s' "$count" > '${callsFile}'`,
+    `if [ "$count" -eq 1 ]; then printf '%s\\n' 'WARNING: [youtube] The read operation timed out' >&2; printf '%s\\n' '${JSON.stringify({ ...metadata, title: 'Partial yt-dlp title' })}'; else printf '%s\\n' '${JSON.stringify({ ...metadata, title: 'Title recovered by yt-dlp' })}'; fi`
+  ].join('\n'))
+  await chmod(executable, 0o755)
+
   await mockBlockedVideo({
     app,
     page,
@@ -171,37 +192,18 @@ test('an IP-blocked response retries a timed-out yt-dlp extraction and recovers 
     contentType: 'application/x-mpegURL',
     body: '#EXTM3U\n'
   }))
-  await app.electronApp.evaluate(({ ipcMain }) => {
-    globalThis.__ipBlockedYtDlpCalls = 0
-    ipcMain.removeHandler('yt-dlp-get-playback-info')
-    ipcMain.handle('yt-dlp-get-playback-info', () => {
-      globalThis.__ipBlockedYtDlpCalls++
-      if (globalThis.__ipBlockedYtDlpCalls === 1) {
-        return { error: 'yt-dlp playback extraction timed out' }
-      }
-      return {
-        title: 'Title recovered by yt-dlp',
-        isLive: false,
-        liveStatus: 'not_live',
-        hlsManifestUrl: 'https://example.invalid/recovered.m3u8',
-        formats: [],
-        duration: 60,
-        version: 'test'
-      }
-    })
-  })
-  await page.evaluate(async () => {
+  await page.evaluate(async ytDlpPath => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateYtDlpSource', 'system')
+    await store.dispatch('updateYtDlpPath', ytDlpPath)
     await store.dispatch('updateVideoPlaybackEngine', 'yt-dlp')
-  })
+  }, executable)
 
   await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
   await page.locator(sel.searchInput).press('Enter')
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
 
-  await expect.poll(() => app.electronApp.evaluate(
-    () => globalThis.__ipBlockedYtDlpCalls
-  )).toBeGreaterThan(1)
+  await expect.poll(async () => Number(await readFile(callsFile, 'utf8').catch(() => '0'))).toBeGreaterThan(1)
   const watchView = await watchViewHandle(page)
   await expect.poll(() => watchView.evaluate(view => ({
     title: view.videoTitle,

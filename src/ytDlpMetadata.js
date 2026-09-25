@@ -96,22 +96,16 @@ export const PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE = playbackInfoOutputTemp
   'protocol,width,height,fps,rows,columns,fragments,http_headers,cookies'
 )
 
-export class YtDlpPlaybackTimeoutError extends Error {
-  constructor() {
-    super('yt-dlp playback extraction timed out')
-  }
-}
-
 /** yt-dlp prints one JSON line for the media and another when an image grid exists. */
 export function parseYtDlpPlaybackInfo(stdout, stderr = '') {
-  // A client request can time out while yt-dlp still exits successfully with
-  // formats from other clients. That partial result must not be cached.
-  if (/^WARNING:.*(?:timed?\s*out|time-?out)/mi.test(stderr)) {
-    throw new YtDlpPlaybackTimeoutError()
-  }
-
   const [media, ...additional] = stdout.trim().split('\n').map(line => JSON.parse(line))
   if (!media || typeof media !== 'object') throw new Error('yt-dlp returned invalid playback metadata')
+  // A final client timeout can leave formats from other clients in the output.
+  // Retry warnings are historical when yt-dlp subsequently exits successfully.
+  const timeoutWarnings = stderr.match(/^WARNING:.*(?:timed?\s*out|time-?out).*$/gmi) ?? []
+  if (timeoutWarnings.some(warning => !/\bRetrying \(\d+\/\d+\)/i.test(warning))) {
+    media.incomplete = true
+  }
   const storyboard = [media, ...additional]
     .find(info => info?.storyboard?.protocol === 'mhtml')?.storyboard
   if (storyboard) media.storyboard = storyboard

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { buildYtDlpStoryboardVtt } from '../../src/main/ytDlpStoryboard.js'
-import { PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE, YtDlpPlaybackTimeoutError, parseYtDlpPlaybackInfo } from '../../src/ytDlpMetadata.js'
+import { PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo } from '../../src/ytDlpMetadata.js'
 
 test('only desktop playback projects storyboard cookies', () => {
   assert.match(PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE, /storyboard.*http_headers,cookies/)
@@ -36,11 +36,15 @@ test('rejects partial playback metadata after a yt-dlp request timeout', () => {
   const partial = { title: 'Video', formats: [{ protocol: 'https', height: 360 }] }
   const stderr = 'WARNING: [youtube] abc123: Unable to download web client API page: The read operation timed out'
 
-  assert.throws(
-    () => parseYtDlpPlaybackInfo(`${JSON.stringify(partial)}\n`, stderr),
-    YtDlpPlaybackTimeoutError
-  )
+  assert.deepEqual(parseYtDlpPlaybackInfo(`${JSON.stringify(partial)}\n`, stderr), { ...partial, incomplete: true })
   assert.deepEqual(parseYtDlpPlaybackInfo(`${JSON.stringify(partial)}\n`, ''), partial)
+})
+
+test('accepts metadata after a yt-dlp timeout that was retried successfully', () => {
+  const complete = { title: 'Video', formats: [{ protocol: 'https', height: 1080 }] }
+  const stderr = 'WARNING: [youtube] abc123: The read operation timed out. Retrying (1/3)...'
+
+  assert.deepEqual(parseYtDlpPlaybackInfo(`${JSON.stringify(complete)}\n`, stderr), complete)
 })
 
 test('builds seekbar thumbnails from the highest-resolution yt-dlp storyboard', () => {
