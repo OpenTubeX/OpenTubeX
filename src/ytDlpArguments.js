@@ -7,6 +7,15 @@ const VIDEO_FORMATS = ['mp4', 'mkv', 'webm']
 const VIDEO_CODECS = ['h264', 'h265', 'vp9', 'av1']
 const AUDIO_FORMATS = ['mp3', 'm4a', 'opus', 'flac']
 export const SUBTITLE_FORMATS = ['srt', 'vtt', 'ass', 'lrc']
+export function isYtDlpMediaUrl(value) {
+  if (typeof value !== 'string' || value.length > 8192 || /\s/.test(value)) return false
+  try {
+    const url = new URL(value)
+    return ['http:', 'https:'].includes(url.protocol) && !url.username && !url.password
+  } catch {
+    return false
+  }
+}
 export function playbackImpersonationArguments(url) {
   const hostname = new URL(url).hostname.toLowerCase()
   return hostname === 'rumble.com' || hostname.endsWith('.rumble.com')
@@ -87,7 +96,11 @@ export function buildYtDlpDownloadArguments(payload, globalArguments = '') {
   if (!Array.isArray(videoIds) || videoIds.some(id => typeof id !== 'string' || !ID_REGEX.test(id))) throw new Error('invalid-video-ids')
   if (videoIds.length > MAX_LOCAL_PLAYLIST_VIDEOS) throw new Error('too-many-videos')
   const isRemotePlaylist = payload.isPlaylist === true && typeof payload.playlistId === 'string' && PLAYLIST_ID_REGEX.test(payload.playlistId)
-  if (!isRemotePlaylist && !ID_REGEX.test(payload.videoId ?? '') && videoIds.length === 0) throw new Error('invalid-video-id')
+  const externalUrl = payload.externalUrl
+  if (externalUrl !== undefined && (!isYtDlpMediaUrl(externalUrl) || payload.isPlaylist === true || ID_REGEX.test(payload.videoId ?? '') || videoIds.length > 0 || payload.automatic === true)) {
+    throw new Error('invalid-media-url')
+  }
+  if (externalUrl === undefined && !isRemotePlaylist && !ID_REGEX.test(payload.videoId ?? '') && videoIds.length === 0) throw new Error('invalid-video-id')
   const subtitlesOnly = payload.mode === 'subtitles'
   const subtitleFormat = SUBTITLE_FORMATS.includes(payload.subtitleFormat) ? payload.subtitleFormat : ''
   const customArgs = splitArguments(payload.customArgs || '')
@@ -235,7 +248,9 @@ export function buildYtDlpDownloadArguments(payload, globalArguments = '') {
     '--progress-template', 'postprocess:__OPENTUBEX_PROCESSING__'
   )
 
-  if (isRemotePlaylist) {
+  if (externalUrl !== undefined) {
+    args.push(new URL(externalUrl).href)
+  } else if (isRemotePlaylist) {
     args.push(`https://www.youtube.com/playlist?list=${payload.playlistId}`)
   } else if (videoIds.length > 0) {
     args.push(...videoIds.map(videoId => `https://www.youtube.com/watch?v=${videoId}`))

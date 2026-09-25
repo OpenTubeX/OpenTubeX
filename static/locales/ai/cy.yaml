@@ -1743,6 +1743,7 @@ CommandPalette:
     Download Finished: Nid yw'r lawrlwythiad hwn yn rhedeg mwyach
     Video: Agorwch fideo yn gyntaf
 Downloads:
+  Add Download: Ychwanegu lawrlwythiad
   Preparing: Yn paratoi…
   Export Failed: "Methu cadw’r ffeil a lawrlwythwyd. Dewiswch ffolder lawrlwytho y gellir ysgrifennu ynddi a rhowch gynnig arall arni."
   Remove File Permanently Warning: "Bydd hyn yn dileu \"{title}\" yn barhaol."

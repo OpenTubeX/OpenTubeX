@@ -1716,6 +1716,7 @@ CommandPalette:
     Download Finished: Ce téléchargement n’est plus en cours
     Video: Ouvrez d’abord une vidéo
 Downloads:
+  Add Download: Ajouter un téléchargement
   Preparing: Préparation…
   Export Failed: "Impossible d’enregistrer le fichier téléchargé. Choisissez un dossier de téléchargement accessible en écriture et réessayez."
   Remove File Permanently Warning: "Cette action supprimera définitivement « {title} »."

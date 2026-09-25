@@ -1717,6 +1717,7 @@ CommandPalette:
     Download Finished: 此下载已停止运行
     Video: 请先打开一个视频
 Downloads:
+  Add Download: 添加下载
   Preparing: 正在准备…
   Export Failed: "无法保存已下载的文件。请选择有写入权限的下载文件夹，然后重试。"
   Remove File Permanently Warning: "这将永久删除“{title}”。"

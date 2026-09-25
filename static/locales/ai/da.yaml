@@ -1797,6 +1797,7 @@ CommandPalette:
     Download Finished: Denne download kører ikke længere
     Video: Åbn en video først
 Downloads:
+  Add Download: Tilføj download
   Preparing: Forbereder…
   Export Failed: "Den downloadede fil kunne ikke gemmes. Vælg en downloadmappe med skriveadgang, og prøv igen."
   Remove File Permanently Warning: "Dette sletter \"{title}\" permanent."

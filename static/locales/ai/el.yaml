@@ -1760,6 +1760,7 @@ CommandPalette:
     Download Finished: Αυτή η λήψη δεν εκτελείται πλέον
     Video: Ανοίξτε πρώτα ένα βίντεο
 Downloads:
+  Add Download: Προσθήκη λήψης
   Preparing: Προετοιμασία…
   Export Failed: "Δεν ήταν δυνατή η αποθήκευση του ληφθέντος αρχείου. Επιλέξτε έναν φάκελο λήψεων με δικαίωμα εγγραφής και δοκιμάστε ξανά."
   Remove File Permanently Warning: "Αυτό θα διαγράψει οριστικά το «{title}»."

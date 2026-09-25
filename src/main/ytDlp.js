@@ -2,7 +2,7 @@ import { historyRepairYtDlpArguments, historyRepairYtDlpError } from '../history
 import {
   buildYtDlpDownloadArguments, ID_REGEX, PLAYLIST_ID_REGEX, DOWNLOAD_TITLE_FILENAME_BYTE_LIMIT,
   SUBTITLE_FORMATS, MAX_LOCAL_PLAYLIST_VIDEOS, DENIED_CUSTOM_ARGS, AUTOMATIC_NUMBER_LIMITS,
-  splitArguments, automaticNumber, playbackImpersonationArguments, playbackSubtitleArguments,
+  splitArguments, automaticNumber, playbackImpersonationArguments, playbackSubtitleArguments, isYtDlpMediaUrl,
 } from '../ytDlpArguments'
 import { EXTERNAL_PLAYBACK_FORMAT_SELECTOR, PLAYBACK_INFO_OUTPUT_TEMPLATE, PLAYBACK_INFO_WITH_COOKIES_OUTPUT_TEMPLATE, parseYtDlpPlaybackInfo, toFiniteNumber, toNonEmptyString, mapPlaybackFormat, mapPlaybackCaptions, mapExternalPlaybackMetadata } from '../ytDlpMetadata'
 import { resolveYtDlpCreatorAvatarUrl } from './ytDlpCreatorAvatar'
@@ -219,6 +219,7 @@ function takeGetInfoAbortSignal(key) {
 /**
  * @typedef YtDlpDownloadPayload
  * @property {string} videoId
+ * @property {string} [externalUrl] web media URL to download instead of a YouTube video ID
  * @property {string[]} [videoIds]
  * @property {string} [playlistId]
  * @property {string} [playlistKey] stable playlist identity used only by the renderer
@@ -2303,7 +2304,11 @@ async function startYtDlpDownload(
     PLAYLIST_ID_REGEX.test(payload.playlistId)
   const isSingleVideo = typeof payload.videoId === 'string' && ID_REGEX.test(payload.videoId)
 
-  if (!isRemotePlaylist && !isSingleVideo && videoIds.length === 0) {
+  const isExternalMedia = payload.externalUrl !== undefined
+  if (isExternalMedia && (!isYtDlpMediaUrl(payload.externalUrl) || payload.automatic === true || payload.isPlaylist === true || isSingleVideo || videoIds.length > 0)) {
+    return { error: 'invalid-media-url' }
+  }
+  if (!isExternalMedia && !isRemotePlaylist && !isSingleVideo && videoIds.length === 0) {
     return null
   }
 
@@ -2347,7 +2352,7 @@ async function startYtDlpDownload(
   const { args: downloadArgs, truncatesLongTitles } = buildYtDlpDownloadArguments(payload)
   args.push('--paths', downloadFolder, ...downloadArgs)
 
-  if (((await settings._findOne('ytDlpPlaybackAlwaysUseCookies'))?.value === true ||
+  if (!isExternalMedia && ((await settings._findOne('ytDlpPlaybackAlwaysUseCookies'))?.value === true ||
     (await settings._findOne('ytDlpDownloadUseCookies'))?.value === true) &&
     (await settings._findOne('ytDlpPlaybackAuthMode'))?.value !== 'none') {
     const authenticationError = await pushYtDlpPlaybackAuthenticationArguments(args)
@@ -2577,7 +2582,7 @@ async function startYtDlpDownload(
           status.titleTruncated ||= truncatesLongTitles &&
             Buffer.byteLength(title, 'utf8') > DOWNLOAD_TITLE_FILENAME_BYTE_LIMIT
         }
-        if (videoId === status.videoId) {
+        if (videoId === status.videoId || (isExternalMedia && status.videoId === '')) {
           if (typeof title === 'string' && title !== '') {
             status.title = title.slice(0, 255)
           }

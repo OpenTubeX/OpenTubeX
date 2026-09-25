@@ -1766,6 +1766,7 @@ CommandPalette:
     Download Finished: Esta descarga já não está em curso
     Video: Abra primeiro um vídeo
 Downloads:
+  Add Download: Adicionar descarga
   Preparing: A preparar…
   Export Failed: "Não foi possível guardar o ficheiro transferido. Escolhe uma pasta de transferências com permissão de escrita e tenta novamente."
   Remove File Permanently Warning: "Isto eliminará \"{title}\" permanentemente."

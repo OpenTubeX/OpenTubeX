@@ -25,12 +25,19 @@
   margin: 0;
 }
 
+.addDownloadPrompt {
+  display: grid;
+  gap: 20px;
+  min-inline-size: min(420px, 75vw);
+}
+
 .downloadHeaderActions {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   justify-content: flex-end;
+  margin-inline-start: auto;
   min-inline-size: 0;
   max-inline-size: 100%;
 }

@@ -142,6 +142,27 @@ public class YtDlpDownloadsTest {
         } finally { folder.delete(); YtDlpFiles.deleteTree(root); }
     }
 
+    @Test public void externalDownloadsDoNotUseConfiguredCookies() throws Exception {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        File state = new File(context.getCacheDir(), "yt-dlp-external-cookies-" + UUID.randomUUID());
+        state.mkdirs();
+        DocumentFile folder = tree(context).createDirectory(UUID.randomUUID().toString());
+        assertNotNull(folder);
+        String folderUri = DocumentsContract.buildTreeDocumentUri(InstrumentationRegistry.getInstrumentation().getContext().getPackageName() + ".documents", DocumentsContract.getDocumentId(folder.getUri())).toString();
+        grant(context, Uri.parse(folderUri));
+        try {
+            YtDlpDownloads queue = new YtDlpDownloads(context, state, () -> {});
+            JSONObject config = new JSONObject().put("enabled", true).put("folder", folderUri)
+                .put("useCookies", true).put("cookies", "/private/session.txt");
+            JSONObject payload = new JSONObject().put("mode", "video").put("externalUrl", "http://example.org/video.mp4");
+            JSONArray args = new JSONArray(asList("--output", "%(id)s.%(ext)s", "http://example.org/video.mp4"));
+            queue.add(payload, args, config, -1);
+            JSONObject record = queue.list().getJSONObject(0);
+            assertFalse(record.optBoolean("useCookies"));
+            assertEquals("", record.optString("cookies"));
+        } finally { folder.delete(); YtDlpFiles.deleteTree(state); }
+    }
+
     @Test public void savedCookiesAreUsedOnlyWhenDownloadsOptInAndSurviveQueueRestart() throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         File cookies = new File(context.getNoBackupFilesDir(), "yt-dlp-cookies.txt");

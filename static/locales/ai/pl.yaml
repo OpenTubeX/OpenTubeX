@@ -929,6 +929,7 @@ CommandPalette:
     Download Finished: To pobieranie nie jest już uruchomione
     Video: Najpierw otwórz film
 Downloads:
+  Add Download: Dodaj pobieranie
   Preparing: Przygotowywanie…
   Export Failed: "Nie udało się zapisać pobranego pliku. Wybierz folder pobierania z uprawnieniami do zapisu i spróbuj ponownie."
   Remove File Permanently Warning: "Spowoduje to trwałe usunięcie „{title}”."

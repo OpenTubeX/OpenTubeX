@@ -1799,6 +1799,7 @@ CommandPalette:
     Download Finished: این بارگیری دیگر در حال اجرا نیست
     Video: ابتدا ویدیویی باز کنید
 Downloads:
+  Add Download: افزودن دانلود
   Preparing: در حال آماده‌سازی…
   Export Failed: "ذخیرهٔ فایل دانلودشده ممکن نشد. پوشه‌ای با اجازهٔ نوشتن برای دانلودها انتخاب کنید و دوباره تلاش کنید."
   Remove File Permanently Warning: "این کار «{title}» را برای همیشه حذف می‌کند."

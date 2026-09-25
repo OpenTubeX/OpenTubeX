@@ -152,8 +152,9 @@ final class YtDlpDownloads {
         record.put("id", id).put("retryPayload", new JSONObject(payload.toString())).put("automatic", payload.optBoolean("automatic"));
         record.put("args", args).put("folder", folder).put("status", paused ? "paused" : "queued");
         // Validate at execution so missing sessions also leave a visible failed automatic download.
-        record.put("useCookies", config.optBoolean("useCookies"))
-            .put("cookies", config.optBoolean("useCookies") ? config.optString("cookies") : "");
+        boolean useCookies = !payload.has("externalUrl") && config.optBoolean("useCookies");
+        record.put("useCookies", useCookies)
+            .put("cookies", useCookies ? config.optString("cookies") : "");
         record.put("queuePosition", position).put("percent", 0).put("speed", JSONObject.NULL).put("eta", JSONObject.NULL);
         record.put("errorMessage", JSONObject.NULL).put("started", false);
         if (!record.has("destinations")) record.put("destinations", new JSONArray()).put("files", new JSONArray());

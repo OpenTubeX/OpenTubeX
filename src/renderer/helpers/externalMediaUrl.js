@@ -1,17 +1,22 @@
+import { isYtDlpMediaUrl } from '../../ytDlpArguments.js'
+
 /**
  * URLs entered in the search bar may be handed to yt-dlp for media extraction.
  * Keep this limited to web URLs, with no embedded credentials.
  * @param {unknown} value
  */
 export function isExternalMediaUrl(value) {
-  if (typeof value !== 'string' || value.length > 8192) return false
+  return isYtDlpMediaUrl(value)
+}
 
-  try {
-    const url = new URL(value)
-    return ['http:', 'https:'].includes(url.protocol) && !url.username && !url.password
-  } catch {
-    return false
-  }
+function isYouTubeHostname(hostname) {
+  return hostname === 'youtu.be' || hostname === 'youtube.com' || hostname.endsWith('.youtube.com') ||
+    hostname === 'youtube-nocookie.com' || hostname.endsWith('.youtube-nocookie.com')
+}
+
+export function isYouTubeMediaUrl(value) {
+  if (!isExternalMediaUrl(value)) return false
+  return isYouTubeHostname(new URL(value).hostname.toLowerCase().replace(/\.$/, ''))
 }
 
 /**
@@ -26,9 +31,7 @@ export function shouldOpenExternalMediaUrl(value, invidiousInstanceUrl = '') {
 
   const url = new URL(value)
   const hostname = url.hostname.toLowerCase().replace(/\.$/, '')
-  if (hostname === 'youtu.be' || hostname === 'youtube.com' || hostname.endsWith('.youtube.com') ||
-    hostname === 'youtube-nocookie.com' || hostname.endsWith('.youtube-nocookie.com') ||
-    hostname === 'redirect.invidious.io') return false
+  if (isYouTubeHostname(hostname) || hostname === 'redirect.invidious.io') return false
 
   try {
     const instance = new URL(invidiousInstanceUrl)

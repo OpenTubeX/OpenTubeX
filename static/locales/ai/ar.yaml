@@ -1738,6 +1738,7 @@ CommandPalette:
     Download Finished: لم يعد هذا التنزيل قيد التشغيل
     Video: افتح الفيديو أولاً
 Downloads:
+  Add Download: إضافة تنزيل
   Preparing: جارٍ التحضير…
   Export Failed: "تعذر حفظ الملف الذي تم تنزيله. اختر مجلد تنزيلات يمكن الكتابة فيه وحاول مجددًا."
   Remove File Permanently Warning: "سيؤدي هذا إلى حذف \"{title}\" نهائيًا."

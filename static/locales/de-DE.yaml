@@ -2843,6 +2843,7 @@ CommandPalette:
     Download Finished: Dieser Download läuft nicht mehr
     Video: Öffne zuerst ein Video
 Downloads:
+  Add Download: Download hinzufügen
   Preparing: Vorbereitung läuft…
   Export Failed: "Die heruntergeladene Datei konnte nicht gespeichert werden. Wähle einen beschreibbaren Downloadordner und versuche es erneut."
   Remove File Permanently Warning: "„{title}“ wird dauerhaft gelöscht."

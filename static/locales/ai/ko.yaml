@@ -2166,6 +2166,7 @@ CommandPalette:
     Download Finished: 이 다운로드는 더 이상 실행 중이 아닙니다
     Video: 먼저 동영상을 여세요
 Downloads:
+  Add Download: 다운로드 추가
   Preparing: 준비 중…
   Export Failed: "다운로드한 파일을 저장할 수 없습니다. 쓰기 가능한 다운로드 폴더를 선택하고 다시 시도하세요."
   Remove File Permanently Warning: "\"{title}\"을(를) 영구적으로 삭제합니다."

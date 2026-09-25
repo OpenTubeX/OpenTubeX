@@ -22,6 +22,21 @@ test('playback subtitle options include authored tracks for external media', () 
   assert.deepEqual(playbackSubtitleArguments(false), ['--write-subs', '--write-auto-subs', '--sub-langs', 'all', '--sub-format', 'vtt/srt/ttml/dfxp'])
 })
 
+test('external media downloads use their web URL without treating it as a YouTube ID', () => {
+  const externalUrl = 'https://vimeo.com/123456789'
+  const args = buildYtDlpDownloadArguments({ externalUrl, mode: 'video' }).args
+  assert.equal(args.at(-1), externalUrl)
+  assert.ok(args.includes('--no-playlist'))
+  assert.equal(buildYtDlpDownloadArguments({ externalUrl: 'HTTPS://VIMEO.COM/123456789', mode: 'video' }).args.at(-1), externalUrl)
+
+  for (const invalidUrl of ['file:///tmp/video.mp4', 'https://user:pass@example.com/video', 'https://example.com/a b', 'https://example.com/'.padEnd(8200, 'a')]) {
+    assert.throws(() => buildYtDlpDownloadArguments({ externalUrl: invalidUrl, mode: 'video' }), /invalid-media-url/)
+  }
+  assert.throws(() => buildYtDlpDownloadArguments({ externalUrl, videoId, mode: 'video' }), /invalid-media-url/)
+  assert.throws(() => buildYtDlpDownloadArguments({ externalUrl, mode: 'video', automatic: true }), /invalid-media-url/)
+  assert.throws(() => buildYtDlpDownloadArguments({ externalUrl, mode: 'video', isPlaylist: true }), /invalid-media-url/)
+})
+
 test('desktop and Android download options preserve format, subtitles, clipping, and metadata', () => {
   const { args, truncatesLongTitles } = buildYtDlpDownloadArguments({
     videoId, mode: 'video', quality: '1080', videoCodec: 'h264', videoFormat: 'mp4',
