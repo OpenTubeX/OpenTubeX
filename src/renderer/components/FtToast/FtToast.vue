@@ -57,7 +57,7 @@
       </div>
     </div>
     <div
-      v-if="connectionState !== 'online'"
+      v-if="connectionState !== 'online' && !(fullscreenTarget && connectionState === 'offline')"
       ref="connectionHolder"
       class="connection-status-holder"
       :class="tabBarToastClasses"
