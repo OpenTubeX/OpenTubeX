@@ -577,6 +577,17 @@ test('shows search for an unknown URL on the selected Invidious instance', async
   await expect(page).toHaveURL(/#\/search\//)
 })
 
+test('opens a pasted external media URL with trailing whitespace', async ({ page }) => {
+  const mediaUrl = 'https://www.instagram.com/reel/example/?stkn=sample'
+  await page.locator(sel.searchInput).fill(`${mediaUrl} `)
+  await expect(page.locator('.topNav .searchInput .inputAction .buttonIcon'))
+    .toHaveAttribute('data-icon', 'arrow-right')
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page).toHaveURL(/#\/external-media\?url=/)
+  const hash = new URL(page.url()).hash
+  expect(new URLSearchParams(hash.slice(hash.indexOf('?') + 1)).get('url')).toBe(mediaUrl)
+})
+
 test('impersonates Chrome when extracting Rumble playback', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
 
