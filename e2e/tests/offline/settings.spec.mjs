@@ -2916,7 +2916,7 @@ test.describe('settings', () => {
     await page.locator('.settingsMenu [data-section="appearance"]').click()
 
     const slider = page.getByRole('slider', { name: /Tab Width/ })
-    const fixedWidthToggle = page.locator('.switchColumnGrid > .switchColumn').first()
+    const fixedWidthToggle = page.getByRole('dialog', { name: 'Settings' })
       .locator('label.switch-label')
       .filter({ hasText: 'Use Fixed Tab Width in Horizontal Mode' })
     await expect(fixedWidthToggle).toHaveCount(1)
