@@ -1180,7 +1180,7 @@ test('playing video keeps the quick speed bar at its dragged scroll position', a
   await openNativeScreen(page)
   const bar = page.locator('.ft-quick-playback-rate-bar')
   await expect(bar).toBeVisible()
-  await expect.poll(() => bar.evaluate(element => element.scrollWidth - element.clientWidth)).toBeGreaterThan(80)
+  await expect.poll(() => bar.evaluate(element => element.scrollWidth - element.clientWidth)).toBeGreaterThan(120)
   await video.evaluate(element => element.play())
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(1)
   const bounds = await bar.boundingBox()
