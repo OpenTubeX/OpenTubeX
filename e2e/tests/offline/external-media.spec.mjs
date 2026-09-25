@@ -298,8 +298,7 @@ test.describe('Twitch theater mode at 125% UI scale', () => {
     const theaterButton = player.locator('.theatre-button')
     await expect(theaterButton).toBeVisible()
     for (const enabled of [true, false]) {
-      await player.hover()
-      await theaterButton.click()
+      await theaterButton.press('Enter')
       await expect(page.locator(`${activeTab} .externalMediaLayout`)).toHaveClass(enabled ? /useTheatreMode/ : /^(?!.*useTheatreMode)/)
       expect(await player.evaluate(element => element.getAnimations().some(animation =>
         animation.effect.getKeyframes().some(frame => frame.transform?.includes('scale('))
