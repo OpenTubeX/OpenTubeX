@@ -215,6 +215,23 @@ test.describe('Twitch theater mode at 125% UI scale', () => {
       ))).toBe(true)
       await player.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
     }
+
+    const jump = await player.evaluate(async element => {
+      const button = element.querySelector('.theatre-button')
+      button.click()
+      await new Promise(resolve => setTimeout(resolve, 120))
+      const before = element.getBoundingClientRect()
+      button.click()
+      await new Promise(resolve => requestAnimationFrame(resolve))
+      const after = element.getBoundingClientRect()
+      return Math.max(
+        Math.abs(after.x - before.x),
+        Math.abs(after.y - before.y),
+        Math.abs(after.width - before.width),
+        Math.abs(after.height - before.height)
+      )
+    })
+    expect(jump).toBeLessThan(60)
   })
 })
 

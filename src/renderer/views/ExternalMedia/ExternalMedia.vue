@@ -328,15 +328,16 @@ const theatreTogglePossible = computed(() => windowWidth.value > 1350 && Boolean
 
 async function toggleTheatreMode() {
   const elements = Array.from(videoLayout.value?.querySelectorAll('.externalMediaPlayer, .externalMediaInfo, .externalMediaSidebar') ?? [])
+  const reducedMotion = isReducedMotionEnabled()
+  const previousRects = reducedMotion ? [] : elements.map(element => element.getBoundingClientRect())
   theatreModeAnimations.forEach(animation => animation.cancel())
   theatreModeAnimations = []
 
-  if (isReducedMotionEnabled()) {
+  if (reducedMotion) {
     useTheatreMode.value = !useTheatreMode.value
     return
   }
 
-  const previousRects = elements.map(element => element.getBoundingClientRect())
   useTheatreMode.value = !useTheatreMode.value
   await nextTick()
 
