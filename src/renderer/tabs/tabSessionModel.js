@@ -43,20 +43,30 @@ export function getTabHistoryState(tab, getPageIcon) {
 
 // Snapshots contain plain serializable data. Keep existing references when IPC
 // supplies equal values so unrelated metadata does not invalidate Vue consumers.
+/** @param {unknown} left @param {unknown} right @returns {boolean} */
 function equalSnapshot(left, right) {
   if (left === right) return true
   if (left == null || right == null || typeof left !== 'object' || typeof right !== 'object') return false
   if (Array.isArray(left) !== Array.isArray(right)) return false
-  const keys = Object.keys(right)
-  return Object.keys(left).length === keys.length && keys.every(key => (
-    Object.hasOwn(left, key) && equalSnapshot(left[key], right[key])
+  const leftRecord = /** @type {Record<string, unknown>} */ (left)
+  const rightRecord = /** @type {Record<string, unknown>} */ (right)
+  const keys = Object.keys(rightRecord)
+  return Object.keys(leftRecord).length === keys.length && keys.every(key => (
+    Object.hasOwn(leftRecord, key) && equalSnapshot(leftRecord[key], rightRecord[key])
   ))
 }
 
+/**
+ * @template T
+ * @param {T | null | undefined} previous
+ * @param {T} incoming
+ * @returns {T}
+ */
 export function reuseEqualSnapshot(previous, incoming) {
-  return equalSnapshot(previous, incoming) ? previous : incoming
+  return equalSnapshot(previous, incoming) ? /** @type {T} */ (previous) : incoming
 }
 
+/** @param {TabSessionSnapshot[]} previous @param {TabSessionSnapshot[]} incoming @returns {TabSessionSnapshot[]} */
 export function reconcileSnapshotList(previous, incoming) {
   const previousById = new Map(previous.map(item => [item.id, item]))
   const items = (Array.isArray(incoming) ? incoming : []).map(item => (
@@ -115,6 +125,7 @@ export function reconcileTab(previous, incoming, formatTitle) {
   })
 }
 
+/** @param {TabSessionSnapshot} incoming @param {TabRoute} route @param {(title: string) => string} formatTitle @returns {RuntimeTab} */
 function createRuntimeTab(incoming, route, formatTitle) {
   const title = formatTitle(incoming.title || route.fullPath)
   return {
@@ -133,6 +144,12 @@ function createRuntimeTab(incoming, route, formatTitle) {
  * route. The tab's live route and title stay authoritative for the current
  * entry, as persisted history can lag slightly behind them.
  */
+/**
+ * @param {TabSessionSnapshot} incoming
+ * @param {TabRoute} route
+ * @param {string} title
+ * @returns {{history: TabHistoryEntry[], historyIndex: number}}
+ */
 function restoredHistoryState(incoming, route, title) {
   if (!Array.isArray(incoming.history) || incoming.history.length === 0) {
     return {
@@ -142,7 +159,7 @@ function restoredHistoryState(incoming, route, title) {
   }
 
   const history = incoming.history.map(normalizeHistoryEntry)
-  const historyIndex = Number.isInteger(incoming.historyIndex)
+  const historyIndex = typeof incoming.historyIndex === 'number' && Number.isInteger(incoming.historyIndex)
     ? Math.max(0, Math.min(incoming.historyIndex, history.length - 1))
     : history.length - 1
 
@@ -192,6 +209,7 @@ export function cloneRoute(route) {
   }
 }
 
+/** @param {Partial<TabHistoryEntry> | null | undefined} entry @returns {TabHistoryEntry} */
 export function normalizeHistoryEntry(entry) {
   return {
     route: cloneRoute(entry?.route),
@@ -201,13 +219,15 @@ export function normalizeHistoryEntry(entry) {
   }
 }
 
+/** @param {Partial<{left: number, top: number}> | null | undefined} scroll @returns {{left: number, top: number}} */
 export function normalizeScroll(scroll) {
   return {
-    left: Number.isFinite(scroll?.left) ? scroll.left : 0,
-    top: Number.isFinite(scroll?.top) ? scroll.top : 0
+    left: typeof scroll?.left === 'number' && Number.isFinite(scroll.left) ? scroll.left : 0,
+    top: typeof scroll?.top === 'number' && Number.isFinite(scroll.top) ? scroll.top : 0
   }
 }
 
+/** @param {unknown} query @returns {Record<string, string | string[]>} */
 function normalizeQuery(query) {
   if (!query || typeof query !== 'object') {
     return {}
@@ -220,12 +240,14 @@ function normalizeQuery(query) {
   )
 }
 
+/** @param {Record<string, string | string[]>} query @returns {Record<string, string | string[]>} */
 function cloneQuery(query) {
   return Object.fromEntries(
     Object.entries(query).map(([key, value]) => [key, Array.isArray(value) ? [...value] : value])
   )
 }
 
+/** @param {string} path @param {Record<string, string | string[]>} query @param {string} hash @returns {string} */
 function buildFullPath(path, query, hash) {
   const search = new URLSearchParams()
   for (const [key, value] of Object.entries(query)) {
@@ -237,7 +259,9 @@ function buildFullPath(path, query, hash) {
   return `${path.startsWith('/') ? path : `/${path}`}${queryString ? `?${queryString}` : ''}${hash}`
 }
 
+/** @param {URLSearchParams} searchParams @returns {Record<string, string | string[]>} */
 function searchParamsToQuery(searchParams) {
+  /** @type {Record<string, string | string[]>} */
   const query = {}
   for (const [key, value] of searchParams) {
     if (key in query) {
@@ -250,8 +274,10 @@ function searchParamsToQuery(searchParams) {
   return query
 }
 
+/** @param {string | undefined} url @returns {TabRoute} */
 function routeFromUrl(url) {
   try {
+    if (typeof url !== 'string') return normalizeRoute({ path: '/' })
     const parsed = new URL(url)
     const hashRoute = parsed.hash.startsWith('#') ? parsed.hash.slice(1) : parsed.hash
     const routeUrl = new URL(hashRoute || '/', parsed.origin)
