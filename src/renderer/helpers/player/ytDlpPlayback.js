@@ -19,6 +19,8 @@ import { getEarliestYtDlpFormatExpiry, YtDlpPlaybackSourceCache } from './ytDlpP
  * @property {boolean} incomplete whether a timeout may have omitted formats
  * @property {string | null} title
  * @property {boolean} isLive
+ * @property {boolean} [audioOnly] whether an external manifest has no video formats
+ * @property {string | null} [separateAudioUrl] audio supplied separately from an external video file
  * @property {number | null} duration
  * @property {string | null} storyboardSrc
  * @property {import('../../../main/ytDlp').YtDlpPlaybackCaption[]} captions
@@ -167,6 +169,9 @@ export async function getExternalYtDlpPlaybackSource(url, useAuthentication = fa
   if (info.liveStatus === 'is_upcoming' && info.formats.length === 0) {
     return { info, source: null }
   }
+  const audioOnly = !info.formats.some(format =>
+    isVideoFormat(format) || isExternalProgressiveVideoFormat(format)
+  )
   const httpFormats = info.formats.filter(format =>
     ['http', 'https'].includes(format.protocol) &&
     format.url !== null &&
@@ -209,7 +214,8 @@ export async function getExternalYtDlpPlaybackSource(url, useAuthentication = fa
         captions: info.captions ?? [],
         captionTranslations: info.captionTranslations ?? [],
         storyboardSrc,
-        isLive
+        isLive,
+        audioOnly
       }
     }
   }
@@ -228,7 +234,8 @@ export async function getExternalYtDlpPlaybackSource(url, useAuthentication = fa
         captions: info.captions ?? [],
         captionTranslations: info.captionTranslations ?? [],
         storyboardSrc,
-        isLive
+        isLive,
+        audioOnly
       }
     }
   }
@@ -254,13 +261,34 @@ export async function getExternalYtDlpPlaybackSource(url, useAuthentication = fa
   if (legacyFormats.length === 0) {
     legacyFormats = await convertLegacyFormats(h265Formats.filter(format => isAudioFormat(format)))
   }
+  if (legacyFormats.length === 0) {
+    legacyFormats = await convertLegacyFormats(preferredHttpFormats.filter(format =>
+      isVideoFormat(format) && !isAudioFormat(format)
+    ))
+  }
   if (legacyFormats.length > 0) {
+    const videoOnlyUrls = new Set(preferredHttpFormats.filter(format =>
+      format.acodec === 'none' && (isVideoFormat(format) || isExternalProgressiveVideoFormat(format))
+    ).map(format => format.url))
+    let separateAudioUrl = null
+    if (legacyFormats.some(format => videoOnlyUrls.has(format.url))) {
+      const audioFormats = preferredHttpFormats.filter(format =>
+        format.vcodec === 'none' && isAudioFormat(format)
+      ).toSorted((a, b) => (b.bitrate ?? 0) - (a.bitrate ?? 0))
+      for (const format of audioFormats) {
+        if (await waitForYtDlpFormatAvailability(format) && await probeYtDlpUrl(format.url)) {
+          separateAudioUrl = format.url
+          break
+        }
+      }
+    }
     return {
       info,
       source: {
         manifestSrc: null,
         manifestMimeType: MANIFEST_TYPE_DASH,
         legacyFormats,
+        separateAudioUrl,
         captions: info.captions ?? [],
         captionTranslations: info.captionTranslations ?? [],
         storyboardSrc,
@@ -290,7 +318,7 @@ function isAudioFormat(format) {
 
 /** Some extractors omit codec names for otherwise playable progressive video. */
 function isExternalProgressiveVideoFormat(format) {
-  return format.vcodec === null && format.acodec === null &&
+  return format.vcodec === null && (format.acodec === null || format.acodec === 'none') &&
     ['mp4', 'webm'].includes(format.ext)
 }
 
