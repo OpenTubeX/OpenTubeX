@@ -380,10 +380,15 @@ let apiUsed = ''
 let mayContainContentFromOtherChannels = false
 
 const isLoading = ref(true)
-const isElementListLoading = ref(false)
+const elementListLoadingTabs = ref({})
 const isSearchTabLoading = ref(false)
 const isFetchMoreLoading = ref(false)
 const currentTab = ref('videos')
+const isElementListLoading = computed(() => !!elementListLoadingTabs.value[currentTab.value])
+
+function setElementListLoading(tab, loading) {
+  elementListLoadingTabs.value[tab] = loading
+}
 
 const isCurrentTabLoading = computed(() => {
   return currentTab.value === 'search' ? isSearchTabLoading.value : isElementListLoading.value
@@ -616,6 +621,7 @@ watch(route, () => {
 
   id.value = route.params.id
   searchPage = 1
+  elementListLoadingTabs.value = {}
   relatedChannels.value = []
   latestVideos.value = []
   latestShorts.value = []
@@ -966,7 +972,7 @@ async function getChannelAboutLocal() {
 const homeData = shallowRef([])
 
 function getChannelHomeLocal() {
-  isElementListLoading.value = true
+  setElementListLoading('home', true)
   const expectedId = id.value
 
   try {
@@ -1028,8 +1034,9 @@ function getChannelHomeLocal() {
     }
     relatedChannels.value = relatedChannels_
 
-    isElementListLoading.value = false
+    setElementListLoading('home', false)
   } catch (err) {
+    setElementListLoading('home', false)
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -1183,7 +1190,7 @@ const filteredLive = computed(() => {
 watch(videoSortBy, () => {
   if (!autoRefreshOnSortByChangeEnabled) { return }
 
-  isElementListLoading.value = true
+  setElementListLoading('videos', true)
   latestVideos.value = []
   videoContinuationData.value = null
 
@@ -1195,7 +1202,7 @@ watch(videoSortBy, () => {
 })
 
 async function getChannelVideosLocal() {
-  isElementListLoading.value = true
+  setElementListLoading('videos', true)
   const expectedId = id.value
 
   try {
@@ -1213,7 +1220,7 @@ async function getChannelVideosLocal() {
 
       latestVideos.value = parseLocalPlaylistVideos(playlist.items)
       videoContinuationData.value = playlist.has_continuation ? playlist : null
-      isElementListLoading.value = false
+      setElementListLoading('videos', false)
     } else {
       await ensureChannelInstance()
 
@@ -1232,7 +1239,7 @@ async function getChannelVideosLocal() {
 
       latestVideos.value = parseLocalChannelVideos(videosTab.videos, id.value, channelName.value)
       videoContinuationData.value = videosTab.has_continuation ? videosTab : null
-      isElementListLoading.value = false
+      setElementListLoading('videos', false)
     }
 
     if (isSubscribedInAnyProfile.value && latestVideos.value.length > 0 && videoSortBy.value === 'newest') {
@@ -1242,6 +1249,7 @@ async function getChannelVideosLocal() {
       })
     }
   } catch (err) {
+    setElementListLoading('videos', false)
     if (isArtistTopicChannel.value && err.message === 'The playlist does not exist.') {
       // If this artist topic channel doesn't have any videos, ignore the error.
       return
@@ -1299,7 +1307,7 @@ async function channelInvidiousVideos(sortByChanged = false) {
   if (videoContinuationData.value) {
     more = true
   } else {
-    isElementListLoading.value = true
+    setElementListLoading('videos', true)
   }
 
   try {
@@ -1310,7 +1318,7 @@ async function channelInvidiousVideos(sortByChanged = false) {
       latestVideos.value = response.videos
     }
     videoContinuationData.value = response.continuation || null
-    isElementListLoading.value = false
+    setElementListLoading('videos', false)
 
     if (isSubscribedInAnyProfile.value && !more && latestVideos.value.length > 0 && videoSortBy.value === 'newest') {
       store.dispatch('updateSubscriptionVideosCacheByChannel', {
@@ -1319,6 +1327,7 @@ async function channelInvidiousVideos(sortByChanged = false) {
       })
     }
   } catch (err) {
+    setElementListLoading('videos', false)
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -1337,7 +1346,7 @@ watch(filteredShorts, shorts => {
 watch(shortSortBy, () => {
   if (!autoRefreshOnSortByChangeEnabled) { return }
 
-  isElementListLoading.value = true
+  setElementListLoading('shorts', true)
   latestShorts.value = []
   shortContinuationData.value = null
 
@@ -1349,7 +1358,7 @@ watch(shortSortBy, () => {
 })
 
 async function getChannelShortsLocal() {
-  isElementListLoading.value = true
+  setElementListLoading('shorts', true)
   const expectedId = id.value
 
   try {
@@ -1378,7 +1387,7 @@ async function getChannelShortsLocal() {
 
     latestShorts.value = parsedShorts
     shortContinuationData.value = shortsTab.has_continuation ? shortsTab : null
-    isElementListLoading.value = false
+    setElementListLoading('shorts', false)
 
     if (isSubscribedInAnyProfile.value && latestShorts.value.length > 0 && shortSortBy.value === 'newest') {
       // As the shorts tab API response doesn't include the published dates,
@@ -1390,6 +1399,7 @@ async function getChannelShortsLocal() {
       })
     }
   } catch (err) {
+    setElementListLoading('shorts', false)
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -1438,7 +1448,7 @@ async function channelInvidiousShorts(sortByChanged = false) {
   if (shortContinuationData.value) {
     more = true
   } else {
-    isElementListLoading.value = true
+    setElementListLoading('shorts', true)
   }
 
   try {
@@ -1449,7 +1459,7 @@ async function channelInvidiousShorts(sortByChanged = false) {
       latestShorts.value = response.videos
     }
     shortContinuationData.value = response.continuation || null
-    isElementListLoading.value = false
+    setElementListLoading('shorts', false)
 
     if (isSubscribedInAnyProfile.value && !more && latestShorts.value.length > 0 && shortSortBy.value === 'newest') {
       // As the shorts tab API response doesn't include the published dates,
@@ -1462,6 +1472,7 @@ async function channelInvidiousShorts(sortByChanged = false) {
       })
     }
   } catch (err) {
+    setElementListLoading('shorts', false)
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -1476,7 +1487,7 @@ const liveSortBy = ref('newest')
 watch(liveSortBy, () => {
   if (!autoRefreshOnSortByChangeEnabled) { return }
 
-  isElementListLoading.value = true
+  setElementListLoading('live', true)
   latestLive.value = []
   liveContinuationData.value = null
 
@@ -1488,7 +1499,7 @@ watch(liveSortBy, () => {
 })
 
 async function getChannelLiveLocal() {
-  isElementListLoading.value = true
+  setElementListLoading('live', true)
   const expectedId = id.value
 
   try {
@@ -1518,7 +1529,7 @@ async function getChannelLiveLocal() {
 
     latestLive.value = parseLocalChannelVideos(videos, id.value, channelName.value)
     liveContinuationData.value = liveTab.has_continuation ? liveTab : null
-    isElementListLoading.value = false
+    setElementListLoading('live', false)
 
     if (isSubscribedInAnyProfile.value && latestLive.value.length > 0 && liveSortBy.value === 'newest') {
       store.dispatch('updateSubscriptionLiveCacheByChannel', {
@@ -1527,6 +1538,7 @@ async function getChannelLiveLocal() {
       })
     }
   } catch (err) {
+    setElementListLoading('live', false)
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -1567,7 +1579,7 @@ async function channelInvidiousLive(sortByChanged) {
   if (liveContinuationData.value) {
     more = true
   } else {
-    isElementListLoading.value = true
+    setElementListLoading('live', true)
   }
 
   try {
@@ -1578,7 +1590,7 @@ async function channelInvidiousLive(sortByChanged) {
       latestLive.value = response.videos
     }
     liveContinuationData.value = response.continuation || null
-    isElementListLoading.value = false
+    setElementListLoading('live', false)
 
     if (isSubscribedInAnyProfile.value && !more && latestLive.value.length > 0 && liveSortBy.value === 'newest') {
       store.dispatch('updateSubscriptionLiveCacheByChannel', {
@@ -1587,6 +1599,7 @@ async function channelInvidiousLive(sortByChanged) {
       })
     }
   } catch (err) {
+    setElementListLoading('live', false)
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -1601,7 +1614,7 @@ const playlistSortBy = ref('newest')
 watch(playlistSortBy, () => {
   if (!autoRefreshOnSortByChangeEnabled) { return }
 
-  isElementListLoading.value = true
+  setElementListLoading('playlists', true)
   latestPlaylists.value = []
   playlistContinuationData.value = null
 
@@ -1613,6 +1626,7 @@ watch(playlistSortBy, () => {
 })
 
 async function getChannelPlaylistsLocal() {
+  setElementListLoading('playlists', true)
   const expectedId = id.value
 
   try {
@@ -1651,8 +1665,9 @@ async function getChannelPlaylistsLocal() {
 
     latestPlaylists.value = playlistsTab.playlists.map(playlist => parseLocalListPlaylist(playlist, id.value, channelName.value))
     playlistContinuationData.value = playlistsTab.has_continuation ? playlistsTab : null
-    isElementListLoading.value = false
+    setElementListLoading('playlists', false)
   } catch (err) {
+    setElementListLoading('playlists', false)
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -1683,14 +1698,15 @@ async function getChannelPlaylistsLocalMore() {
 }
 
 async function getPlaylistsInvidious() {
-  isElementListLoading.value = true
+  setElementListLoading('playlists', true)
 
   try {
     const response = await getInvidiousChannelPlaylists(id.value, playlistSortBy.value)
     playlistContinuationData.value = response.continuation || null
     latestPlaylists.value = response.playlists
-    isElementListLoading.value = false
+    setElementListLoading('playlists', false)
   } catch (err) {
+    setElementListLoading('playlists', false)
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -1708,7 +1724,7 @@ async function getPlaylistsInvidiousMore() {
     const response = await getInvidiousChannelPlaylists(id.value, playlistSortBy.value, playlistContinuationData.value)
     playlistContinuationData.value = response.continuation || null
     latestPlaylists.value = latestPlaylists.value.concat(response.playlists)
-    isElementListLoading.value = false
+    setElementListLoading('playlists', false)
   } catch (err) {
     console.error(err)
 
@@ -1721,7 +1737,7 @@ const latestReleases = shallowRef([])
 const releaseContinuationData = shallowRef(null)
 
 async function getChannelReleasesLocal() {
-  isElementListLoading.value = true
+  setElementListLoading('releases', true)
   const expectedId = id.value
 
   try {
@@ -1746,8 +1762,9 @@ async function getChannelReleasesLocal() {
       releaseContinuationData.value = releaseTab.has_continuation ? releaseTab : null
     }
 
-    isElementListLoading.value = false
+    setElementListLoading('releases', false)
   } catch (err) {
+    setElementListLoading('releases', false)
     console.error(err)
 
     const errorMessage = t('Local API Error (Click to copy)')
@@ -1791,14 +1808,15 @@ async function getChannelReleasesLocalMore() {
 }
 
 async function channelInvidiousReleases() {
-  isElementListLoading.value = true
+  setElementListLoading('releases', true)
 
   try {
     const response = await getInvidiousChannelReleases(id.value)
     releaseContinuationData.value = response.continuation || null
     latestReleases.value = response.playlists
-    isElementListLoading.value = false
+    setElementListLoading('releases', false)
   } catch (err) {
+    setElementListLoading('releases', false)
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -1816,7 +1834,7 @@ async function channelInvidiousReleasesMore() {
     const response = await getInvidiousChannelReleases(id.value, releaseContinuationData.value)
     releaseContinuationData.value = response.continuation || null
     latestReleases.value = latestReleases.value.concat(response.playlists)
-    isElementListLoading.value = false
+    setElementListLoading('releases', false)
   } catch (err) {
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
@@ -1828,7 +1846,7 @@ const latestPodcasts = shallowRef([])
 const podcastContinuationData = shallowRef(null)
 
 async function getChannelPodcastsLocal() {
-  isElementListLoading.value = true
+  setElementListLoading('podcasts', true)
   const expectedId = id.value
 
   try {
@@ -1842,8 +1860,9 @@ async function getChannelPodcastsLocal() {
 
     latestPodcasts.value = podcastTab.playlists.map(playlist => parseLocalListPlaylist(playlist, id.value, channelName.value))
     podcastContinuationData.value = podcastTab.has_continuation ? podcastTab : null
-    isElementListLoading.value = false
+    setElementListLoading('podcasts', false)
   } catch (err) {
+    setElementListLoading('podcasts', false)
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
@@ -1874,14 +1893,15 @@ async function getChannelPodcastsLocalMore() {
 }
 
 async function channelInvidiousPodcasts() {
-  isElementListLoading.value = true
+  setElementListLoading('podcasts', true)
 
   try {
     const response = await getInvidiousChannelPodcasts(id.value)
     podcastContinuationData.value = response.continuation || null
     latestPodcasts.value = response.playlists
-    isElementListLoading.value = false
+    setElementListLoading('podcasts', false)
   } catch (err) {
+    setElementListLoading('podcasts', false)
     console.error(err)
 
     const errorMessage = t('Invidious API Error (Click to copy)')
@@ -1901,7 +1921,7 @@ async function channelInvidiousPodcastsMore() {
     const response = await getInvidiousChannelPodcasts(id.value, podcastContinuationData.value)
     podcastContinuationData.value = response.continuation || null
     latestPodcasts.value = latestPodcasts.value.concat(response.playlists)
-    isElementListLoading.value = false
+    setElementListLoading('podcasts', false)
   } catch (err) {
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
@@ -1913,7 +1933,7 @@ const latestCourses = shallowRef([])
 const coursesContinuationData = shallowRef(null)
 
 async function getChannelCoursesLocal() {
-  isElementListLoading.value = true
+  setElementListLoading('courses', true)
   const expectedId = id.value
 
   try {
@@ -1927,8 +1947,9 @@ async function getChannelCoursesLocal() {
 
     latestCourses.value = coursesTab.playlists.map(playlist => parseLocalListPlaylist(playlist, id.value, channelName.value))
     coursesContinuationData.value = coursesTab.has_continuation ? coursesTab : null
-    isElementListLoading.value = false
+    setElementListLoading('courses', false)
   } catch (err) {
+    setElementListLoading('courses', false)
     console.error(err)
 
     const errorMessage = t('Local API Error (Click to copy)')
@@ -1961,14 +1982,15 @@ async function getChannelCoursesLocalMore() {
 }
 
 async function channelInvidiousCourses() {
-  isElementListLoading.value = true
+  setElementListLoading('courses', true)
 
   try {
     const response = await getInvidiousChannelCourses(id.value)
     coursesContinuationData.value = response.continuation || null
     latestCourses.value = response.playlists
-    isElementListLoading.value = false
+    setElementListLoading('courses', false)
   } catch (err) {
+    setElementListLoading('courses', false)
     console.error(err)
 
     const errorMessage = t('Invidious API Error (Click to copy)')
@@ -1988,7 +2010,7 @@ async function channelInvidiousCoursesMore() {
     const response = await getInvidiousChannelCourses(id.value, coursesContinuationData.value)
     coursesContinuationData.value = response.continuation || null
     latestCourses.value = latestCourses.value.concat(response.playlists)
-    isElementListLoading.value = false
+    setElementListLoading('courses', false)
   } catch (err) {
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
@@ -2000,6 +2022,7 @@ const latestCommunityPosts = shallowRef([])
 const communityContinuationData = shallowRef(null)
 
 async function getCommunityPostsLocal() {
+  setElementListLoading('community', true)
   const expectedId = id.value
 
   try {
@@ -2024,6 +2047,7 @@ async function getCommunityPostsLocal() {
 
     latestCommunityPosts.value = parseLocalCommunityPosts(posts)
     communityContinuationData.value = communityTab.has_continuation ? communityTab : null
+    setElementListLoading('community', false)
 
     if (latestCommunityPosts.value.length > 0) {
       store.dispatch('updateSubscriptionPostsCacheByChannel', {
@@ -2032,6 +2056,7 @@ async function getCommunityPostsLocal() {
       })
     }
   } catch (err) {
+    setElementListLoading('community', false)
     console.error(err)
 
     const errorMessage = t('Local API Error (Click to copy)')
@@ -2072,6 +2097,9 @@ async function getCommunityPostsLocalMore() {
 
 async function getCommunityPostsInvidious() {
   const more = !isNullOrEmpty(communityContinuationData.value)
+  if (!more) {
+    setElementListLoading('community', true)
+  }
 
   try {
     const { posts, continuation } = await invidiousGetCommunityPosts(id.value, communityContinuationData.value)
@@ -2081,6 +2109,7 @@ async function getCommunityPostsInvidious() {
       latestCommunityPosts.value = posts
     }
     communityContinuationData.value = continuation
+    setElementListLoading('community', false)
 
     if (isSubscribedInAnyProfile.value && !more && latestCommunityPosts.value.length > 0) {
       store.dispatch('updateSubscriptionPostsCacheByChannel', {
@@ -2089,6 +2118,7 @@ async function getCommunityPostsInvidious() {
       })
     }
   } catch (err) {
+    setElementListLoading('community', false)
     console.error(err)
 
     const errorMessage = t('Invidious API Error (Click to copy)')

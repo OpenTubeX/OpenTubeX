@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { sel } from '../../helpers/app.mjs'
-import { test, expect } from '../../helpers/innertube.mjs'
+import { test, expect, fixtureKey } from '../../helpers/innertube.mjs'
 
 // The official Blender channel.
 const CHANNEL_URL = 'https://www.youtube.com/channel/UCSMOQeBJ2RAnuFungnQOxLg'
@@ -12,12 +12,38 @@ test.describe('channel page', () => {
   test.use({ seed: { settings: { uiRoundness: 200, externalPlayer: 'mpv' } } })
 
   test('shows channel info and videos', async ({ page }) => {
+    let releaseVideos
+    const heldVideos = new Promise(resolve => { releaseVideos = resolve })
+    let videosRequested = false
+    const keyFor = request => fixtureKey(request.url(), request.postData())
+
+    await page.route(/\/youtubei\/v1\/browse/, async route => {
+      if (keyFor(route.request()) !== 'browse-43cf009333cb') {
+        return route.fallback()
+      }
+
+      videosRequested = true
+      await heldVideos
+      return route.fallback()
+    })
+
     await page.locator(sel.searchInput).fill(CHANNEL_URL)
     await page.locator(sel.searchInput).press('Enter')
 
     await expect(page).toHaveURL(/#\/channel\/UCSMOQeBJ2RAnuFungnQOxLg/)
     await expect(page.getByText('Blender').first()).toBeVisible({ timeout: 30_000 })
-    await expect(page.locator('.ft-list-video').first()).toBeVisible({ timeout: 30_000 })
+    try {
+      await expect.poll(() => videosRequested).toBe(true)
+      await page.getByRole('tab', { name: 'Shorts' }).click()
+      await expect(page.locator('#shortPanel .ft-list-video').first()).toBeVisible()
+      await page.getByRole('tab', { name: 'Videos' }).click()
+      await expect(page.locator('.elementList')).toHaveCount(0)
+      await expect(page.locator('[data-tab-loading-indicator]:not(.fullscreen)')).toBeVisible()
+      await expect(page.getByText('This channel does not currently have any videos')).toHaveCount(0)
+    } finally {
+      releaseVideos()
+    }
+    await expect(page.locator('#videoPanel .ft-list-video').first()).toBeVisible({ timeout: 30_000 })
     await expect(page.locator('body')).toHaveCSS('--ui-roundness', '2')
     await expect(page.locator('.channelDetails .bannerContainer')).toHaveCSS('border-top-left-radius', '16px')
     await expect(page.locator('.channelDetails .bannerContainer')).toHaveCSS('border-top-right-radius', '16px')
