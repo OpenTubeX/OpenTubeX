@@ -9,7 +9,8 @@ Requests such as "implement issue #X" authorize local changes, not a PR. Open a 
 ## Documentation
 
 - Do not create new documentation files, feature writeups, implementation notes, plans, or task summaries unless the user explicitly requests them. Put change explanations and validation details in the PR description. Update existing documentation only when the change makes it inaccurate.
-- For user-facing changes, check the current user documentation in `OpenTubeX/opentubex.github.io`. If the change affects documented behavior, interface labels, steps, or screenshots, ask the user to approve updating the affected guides and screenshots in a separate website PR. Wait for approval before making the website changes or creating the PR. If approved, make the updates as part of the same task and link the application and website PRs when both exist. Do not add unrelated documentation.
+- Check the current user documentation in `OpenTubeX/opentubex.github.io` when a change could invalidate an existing guide. Ask for a separate website PR only when you identify a specific passage, step, or screenshot that becomes materially inaccurate or misleading; name the affected guide and explain the mismatch in the request. New features do not require documentation just because they are new. Minor UI, wording, layout, or styling changes do not require updates while users can still follow the guide; screenshots need not match every cosmetic detail. If no concrete correction is needed, continue without asking about a website PR.
+- When a concrete documentation correction is needed, wait for approval before making website changes or creating the separate website PR, unless the user has already authorized those updates. If approved, make the updates as part of the same task and link the application and website PRs when both exist. Limit updates to the identified inaccuracies; do not add unrelated documentation.
 
 ## Testing
 
