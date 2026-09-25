@@ -4,6 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 import { createAppShortcuts, getAppShortcutPath } from '../../src/renderer/helpers/appShortcuts.js'
+import { enableCapacitorIntegrations } from '../../src/renderer/helpers/capacitorIntegrations.js'
 import { resolveMobileContextLinkCopyUrl } from '../../src/renderer/helpers/mobileLinkActions.js'
 
 const pages = ['subscriptions', 'userplaylists', 'history', 'downloads']
@@ -34,9 +35,6 @@ test('unknown shortcut IDs cannot navigate to arbitrary routes', () => {
 })
 
 test('retained startup clicks and running-app clicks navigate and update localized shortcuts', async () => {
-  const source = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
-  const start = source.indexOf('async function enableCapacitorIntegrations() {')
-  const integration = source.slice(start, source.indexOf('\nconst windowTitle', start))
   const listeners = new Map()
   const paths = []
   const youtubeLinks = []
@@ -46,7 +44,7 @@ test('retained startup clicks and running-app clicks navigate and update localiz
   let updateLocale
   let stopped = false
   const locale = { value: 'en-US' }
-  const enable = vm.runInNewContext(`${integration}\nenableCapacitorIntegrations`, {
+  const runtime = {
     window: new EventTarget(),
     Capacitor: { getPlatform: () => 'android' },
     handleAndroidBack() {},
@@ -96,8 +94,12 @@ test('retained startup clicks and running-app clicks navigate and update localiz
       paths.push(path)
     },
     handleYoutubeLink: url => { youtubeLinks.push(url) },
-  })
-  const cleanup = await enable()
+  }
+  const cleanup = await enableCapacitorIntegrations({
+    appWindow: runtime.window, locale, t: runtime.t, store: runtime.store,
+    handleAndroidBack: runtime.handleAndroidBack, handleYoutubeLink: runtime.handleYoutubeLink,
+    openInternalPath: runtime.openInternalPath,
+  }, runtime)
   assert.deepEqual(wakeStates, [true])
   assert.deepEqual(paths, ['/subscriptions'])
   for (const page of pages.slice(1)) {

@@ -4,7 +4,14 @@ import test from 'node:test'
 import { runInNewContext } from 'node:vm'
 
 const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
+const metadataSource = await readFile(new URL('../../src/renderer/views/Watch/watchVideoMetadata.js', import.meta.url), 'utf8')
+const downloadSource = await readFile(new URL('../../src/renderer/views/Watch/watchDownloadPlayback.js', import.meta.url), 'utf8')
 function method(name, next) {
+  if (name.startsWith('getVideoInformation') || ['applyDownloadedPlaybackSource', 'finishDownloadedPlaybackWithoutMetadata'].includes(name)) {
+    const content = name.startsWith('getVideoInformation') ? metadataSource : downloadSource
+    const start = content.indexOf(`  ${name}:`)
+    return content.slice(start, content.indexOf('\n  },', start) + '\n  },'.length)
+  }
   return source.slice(source.indexOf(`    ${name}:`), source.indexOf(`    ${next}`))
 }
 
@@ -18,15 +25,14 @@ for (const android of [false, true]) {
           ${method('applyDownloadedPlaybackSource', 'cacheOnlinePlaybackSource')}
           ${method('finishDownloadedPlaybackWithoutMetadata', 'onMountedDependOnLocalStateLoading()')}
           ${method('getVideoInformationLocal', 'getVideoInformationInvidious')}
-          ${method('getVideoInformationInvidious', 'async runIpBlockRecoveryScriptAndReload()')}
+          ${method('getVideoInformationInvidious', '}')}
         })`, {
           process: { env: { IS_CAPACITOR: android } },
           Capacitor: { convertFileSrc: path => `https://localhost/_capacitor_file_${path}` },
           DOWNLOADED_MEDIA_MIME_TYPES: { mp4: 'video/mp4' },
           getConnectionState: () => 'offline',
           initializeNetworkRecovery: () => ({ ready: Promise.resolve(false) }),
-          getLocalVideoInfo: pendingMetadata,
-          invidiousGetVideoInformation: pendingMetadata,
+          videoApi: { getVideoInformation: pendingMetadata },
         })
         const watch = {
           ...methods,
@@ -69,13 +75,12 @@ for (const backend of ['Local', 'Invidious']) {
     const pendingMetadata = () => { requests++; metadataStarted(); return new Promise(resolve => { resolveMetadata = resolve }) }
     const methods = runInNewContext(`({
       ${method('getVideoInformationLocal', 'getVideoInformationInvidious')}
-      ${method('getVideoInformationInvidious', 'async runIpBlockRecoveryScriptAndReload()')}
+      ${method('getVideoInformationInvidious', '}')}
       ${source.slice(source.indexOf('    handleDownloadConnectionChange('), source.indexOf('    updateAndroidBackgroundPlaybackFormat()'))}
     })`, {
       getConnectionState: () => 'online',
       initializeNetworkRecovery: () => ({ ready: Promise.resolve(true) }),
-      getLocalVideoInfo: pendingMetadata,
-      invidiousGetVideoInformation: pendingMetadata,
+      videoApi: { getVideoInformation: pendingMetadata },
     })
     let localLoads = 0
     const watch = {

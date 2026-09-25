@@ -5,11 +5,9 @@ import { runInNewContext } from 'node:vm'
 import { isHistoryEntryWatched } from '../../src/history.js'
 import { attachAndroidMediaElement } from '../../src/renderer/helpers/player/androidMediaElement.js'
 
-const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
-const { _saveWatchProgress, addToHistory } = runInNewContext(`({
-  ${source.slice(source.indexOf('    _saveWatchProgress()'), source.indexOf('    fetchVideoDislikes:'))}
-  ${source.slice(source.indexOf('    addToHistory:'), source.indexOf('    keepHistoryEntryAlive('))}
-})`, { isHistoryEntryWatched })
+const source = await readFile(new URL('../../src/renderer/views/Watch/watchHistory.js', import.meta.url), 'utf8')
+const methodsSource = source.slice(source.indexOf('export const watchHistoryMethods = ') + 'export const watchHistoryMethods = '.length)
+const { _saveWatchProgress, addToHistory } = runInNewContext(`(${methodsSource})`, { isHistoryEntryWatched })
 
 const playerSource = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
 const seekingHandler = playerSource.slice(playerSource.indexOf('    function handleSeeking()'), playerSource.indexOf('    function handleSeeked()'))

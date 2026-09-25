@@ -1,7 +1,17 @@
 /**
+ * @template Value
+ * @typedef {{
+ *   read: () => Value,
+ *   commit: (value: Value) => void,
+ *   persist: (value: Value) => Promise<unknown>
+ * }} SettingUpdatePort
+ */
+
+/**
  * Runs setting writes in order while dropping queued values that have already
  * been superseded. The callback can check whether an in-flight write is still
  * current before committing its result.
+ * @returns {<Result>(settingId: string, update: (isLatest: () => boolean) => Promise<Result>) => Promise<Result | undefined>}
  */
 export function createSettingUpdateQueue() {
   const latestUpdates = new Map()
@@ -34,6 +44,7 @@ export function createSettingUpdateQueue() {
 /**
  * Publishes list edits immediately so the next edit starts from the intended
  * value. Failed writes restore the last persisted value, unless superseded.
+ * @returns {<Value>(settingId: string, value: Value, port: SettingUpdatePort<Value>) => Promise<void>}
  */
 export function createOptimisticSettingUpdater() {
   const runUpdate = createSettingUpdateQueue()

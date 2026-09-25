@@ -520,12 +520,8 @@ import '@fontsource-variable/plus-jakarta-sans'
 import FtRetryImage from './components/FtRetryImage.vue'
 import { initializeAndroidYtDlp, ytDlp } from './helpers/ytDlp'
 import { parseAutomaticDownloadRules } from './helpers/automaticDownloadRules'
-import { isAppHidden, setAndroidAppVisible } from './helpers/appVisibility.js'
-import { createAppShortcuts, getAppShortcutPath } from './helpers/appShortcuts'
-import { AppShortcuts } from '@capawesome/capacitor-app-shortcuts'
-import { playbackScreenWake } from './helpers/playbackScreenWake'
+import { isAppHidden } from './helpers/appVisibility.js'
 import { FtIcon } from '@opentubex/icons'
-import { App as CapacitorApp } from '@capacitor/app'
 import { Capacitor, SystemBars, SystemBarsStyle } from '@capacitor/core'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from './helpers/overlayScrollbars'
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, unref, useId, useTemplateRef, watch } from 'vue'
@@ -554,7 +550,6 @@ import { androidDynamicColors, getAndroidDynamicColors, onAndroidDynamicColorsCh
 import {
   exitAndroidApp,
   getAndroidHardwareKeyboardState,
-  isAndroidLauncherReturnInProgress,
   setAndroidPictureInPictureDocumentState,
   setAndroidSystemBarsBackground
 } from './helpers/androidUi'
@@ -588,11 +583,6 @@ import {
 import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog } from './helpers/releaseUpdates'
 import { copyToClipboard, openExternalLink, openInternalPath, shareLink, showApiErrorToast, showToast } from './helpers/utils'
 import { openNotificationSettings } from './helpers/capacitorUi'
-import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
-import {
-  addAndroidMediaSessionActionListener,
-  shouldPauseAndroidPlaybackOnAppStateChange,
-} from './helpers/androidMediaSession'
 import {
   acknowledgeAndroidSubscriptionRefreshResult,
   addAndroidSubscriptionRefreshCancelledListener,
@@ -659,11 +649,15 @@ import { invalidateAllYtDlpPlaybackSources } from './helpers/player/ytDlpPlaybac
 import { getTabNavigationService } from './tabs/TabNavigationService'
 import { initializeCapacitorTabPreviews } from './tabs/capacitorTabPreviews'
 import { initializeCapacitorTabService } from './tabs/CapacitorTabService'
-import { tabMediaCoordinator } from './tabs/TabMediaCoordinator'
 import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
 import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from './tabs/tabPreview'
 import { preloadResolvedRoute, preloadUtilityRoutes } from './router/index'
 import { initializeCapacitorPullToRefresh } from './helpers/capacitorPullToRefresh'
+import { enableCapacitorIntegrations } from './helpers/capacitorIntegrations.js'
+import { createAppAppearanceController } from './helpers/appAppearance.js'
+import { createSubscriptionRefreshStorage } from './helpers/subscriptionRefreshStorage.js'
+import { resolveSubscriptionRefreshCapabilities } from './helpers/subscriptionRefreshCapabilities.js'
+import { createManagedExternalSoftwareController, MANAGED_TOOLS_UPDATE_PREVIEW_EVENT, resolveManagedToolsCapabilities } from './helpers/managedExternalSoftware.js'
 
 const SettingsWindow = defineAsyncComponent(() => import('./views/Settings/Settings.vue'))
 const FtPlaylistAddVideoPrompt = defineAsyncComponent(() => import('./components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue'))
@@ -679,6 +673,7 @@ const router = useRouter()
 const availableRoutePaths = new Set(router.getRoutes().map(candidate => candidate.path))
 const isElectron = process.env.IS_ELECTRON
 const isCapacitor = process.env.IS_CAPACITOR
+const subscriptionRefreshCapabilities = resolveSubscriptionRefreshCapabilities({ isElectron, isCapacitor })
 const usesLogicalTabs = isElectron || isCapacitor
 const navigation = usesLogicalTabs ? getTabNavigationService() : null
 const capacitorTabService = isCapacitor
@@ -1115,6 +1110,22 @@ const SUBSCRIPTION_AUTO_REFRESH_DEADLINE_STORAGE_KEY_PREFIX = 'opentubex.subscri
 const SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY = 'opentubex.subscriptionAutoRefresh.inProgress'
 let historyCleanupTimer = null
 const subscriptionAutoRefreshTabs = ['videos', 'shorts', 'live', 'posts']
+const {
+  getSubscriptionAutoRefreshStorageKey,
+  setStoredSubscriptionAutoRefreshTimestamp,
+  getStoredSubscriptionTabNextAutoRefreshTimestamp,
+  migrateLegacySubscriptionAutoRefreshDeadlines,
+  setStoredSubscriptionTabNextAutoRefreshTimestamp,
+  getStoredSubscriptionTabLastRefreshTimestamp,
+  parseSubscriptionAutoRefreshStorageKey,
+} = createSubscriptionRefreshStorage({
+  storage: localStorage,
+  getProfiles: () => store.getters.getProfileList,
+  tabs: subscriptionAutoRefreshTabs,
+  legacyPrefix: LEGACY_SUBSCRIPTION_AUTO_REFRESH_STORAGE_KEY_PREFIX,
+  deadlinePrefix: SUBSCRIPTION_AUTO_REFRESH_DEADLINE_STORAGE_KEY_PREFIX,
+  completionPrefix: SUBSCRIPTION_AUTO_REFRESH_COMPLETION_STORAGE_KEY_PREFIX,
+})
 let removeSubscriptionAutoRefreshActiveChangedListener = null
 let removeSubscriptionAutoRefreshCancelListener = null
 let removeSubscriptionAutoRefreshStateChangedListener = null
@@ -1208,264 +1219,20 @@ const tabSwitcherSelectedTabId = computed(() => {
   return tab ? `tab-switcher-option-${tab.id}` : undefined
 })
 
-/**
- * Falls back to OpenTubeX-managed external software when the configured system
- * executables are unavailable. Selected managed executables are updated when
- * automatic updates are enabled or the user accepts an available update.
- * @param {('yt-dlp' | 'ffmpeg')[] | null} requestedUpdates
- */
-async function initializeManagedExternalSoftware(requestedUpdates = null) {
-  if (!isElectron && !isCapacitor) {
-    return
-  }
-
-  const recovery = initializeNetworkRecovery()
-  // Native tool downloads do not pass through the renderer fetch wrapper.
-  // Wait before displaying download progress or checking for updates.
-  await recovery.run('managed-tools', async () => {})
-
-  const info = await ytDlp.ytDlpGetInfo()
-  if (info === null) {
-    return
-  }
-
-  /** @type {('yt-dlp' | 'ffmpeg' | 'ffprobe')[]} */
-  const missingBinaries = []
-  /** @type {('yt-dlp' | 'ffmpeg')[]} */
-  const binariesToUpdate = []
-
-  if (!info.ytDlp.available) {
-    missingBinaries.push('yt-dlp')
-  }
-  if (!info.ffmpeg.available) {
-    missingBinaries.push('ffmpeg')
-  }
-  if (!info.ffprobe.available) {
-    missingBinaries.push('ffprobe')
-  }
-
-  const updateMode = store.getters.getExternalSoftwareUpdateMode
-  const automaticUpdates = updateMode === 'automatic'
-  let missingManagedBinaries = missingBinaries
-  if (!automaticUpdates && missingBinaries.length > 0) {
-    const managedInfo = await ytDlp.ytDlpGetInfo({
-      ytDlpSource: 'managed',
-      ytDlpPath: '',
-      ffmpegSource: 'managed',
-      ffmpegPath: ''
-    })
-    if (managedInfo !== null) {
-      missingManagedBinaries = missingBinaries.filter(binary => {
-        if (binary === 'yt-dlp') {
-          return !managedInfo.ytDlp.available
-        }
-        return binary === 'ffmpeg' ? !managedInfo.ffmpeg.available : !managedInfo.ffprobe.available
-      })
-    }
-  }
-
-  if (missingManagedBinaries.includes('yt-dlp') ||
-    ((isCapacitor || store.getters.getYtDlpSource === 'managed') &&
-      (automaticUpdates || requestedUpdates?.includes('yt-dlp')))) {
-    binariesToUpdate.push('yt-dlp')
-  }
-  if (missingManagedBinaries.includes('ffmpeg') || missingManagedBinaries.includes('ffprobe') ||
-    (!isCapacitor && store.getters.getYtDlpFfmpegSource === 'managed' &&
-      (automaticUpdates || requestedUpdates?.includes('ffmpeg')))) {
-    binariesToUpdate.push('ffmpeg')
-  }
-
-  const settingUpdates = []
-  if (missingBinaries.includes('yt-dlp') && store.getters.getYtDlpSource !== 'managed') {
-    settingUpdates.push(store.dispatch('updateYtDlpSource', 'managed'))
-  }
-  if ((missingBinaries.includes('ffmpeg') || missingBinaries.includes('ffprobe')) &&
-    store.getters.getYtDlpFfmpegSource !== 'managed') {
-    settingUpdates.push(store.dispatch('updateYtDlpFfmpegSource', 'managed'))
-  }
-  await Promise.all(settingUpdates)
-
-  if (binariesToUpdate.length === 0) {
-    if (updateMode === 'ask' && requestedUpdates === null) {
-      await notifyAboutManagedExternalSoftwareUpdates([])
-    }
-    return
-  }
-
-  await recovery.run('managed-tools', async () => {})
-
-  let downloadStarted = missingManagedBinaries.length > 0
-  let toolProgressPercentage = 0
-  let progressOperation = null
-
-  function showToolProgress(message) {
-    const progress = {
-      icon: ['fas', 'download'],
-      message,
-      percentage: toolProgressPercentage,
-    }
-    if (progressOperation === null) {
-      progressOperation = startProgressBarOperation(store, progress)
-    } else {
-      progressOperation.update(progress)
-    }
-  }
-
-  if (downloadStarted) {
-    const tools = binariesToUpdate.join(' and ')
-    const message = t('Settings.Download Settings.Managed Tools Download Started Template', { tools })
-    if (showProgressStartToast.value) {
-      showToast({ message, icon: ['fas', 'download'] })
-    }
-    showToolProgress(message)
-  }
-
-  const progressByBinary = Object.fromEntries(
-    binariesToUpdate.map(binary => [binary, 0])
-  )
-  const removeProgressListener = ytDlp.addYtDlpBinaryDownloadProgressListener(({ binary, percent, inProgress }) => {
-    if (!binariesToUpdate.includes(binary) || !inProgress || percent === null) {
-      return
-    }
-
-    if (!downloadStarted) {
-      downloadStarted = true
-      const tools = binariesToUpdate.join(' and ')
-      const message = t('Settings.Download Settings.Managed Tools Update Started Template', { tools })
-      if (showProgressStartToast.value) {
-        showToast({ message, icon: ['fas', 'download'] })
-      }
-      showToolProgress(message)
-    }
-
-    progressByBinary[binary] = Math.max(progressByBinary[binary] ?? 0, percent)
-    const percentages = Object.values(progressByBinary)
-    const combinedPercentage = percentages.reduce((sum, value) => sum + value, 0) / percentages.length
-    toolProgressPercentage = Math.max(toolProgressPercentage, combinedPercentage)
-    progressOperation.update({ percentage: toolProgressPercentage })
-  })
-
-  try {
-    const results = await Promise.all(binariesToUpdate.map(async binary => {
-      try {
-        const result = await recovery.run('managed-tools', async () => {
-          const result = await ytDlp.ytDlpDownloadBinary(binary)
-          if (result === null || 'error' in result) {
-            throw new Error(result?.error ?? '')
-          }
-          return result
-        }, {
-          isNetworkError: async error => {
-            const failure = classifyRequestFailure(error)
-            return failure === 'network' || (failure === 'api' && !await recovery.checkConnection())
-          },
-        })
-        return { binary, result }
-      } catch (error) {
-        return { binary, result: { error: String(error) } }
-      }
-    }))
-    const failures = results.filter(({ result }) => result === null || 'error' in result)
-    const updatedBinaries = results
-      .filter(({ result }) => result !== null && 'version' in result && result.updated)
-      .map(({ binary }) => binary)
-
-    if (failures.length === 0 && updatedBinaries.length > 0) {
-      toolProgressPercentage = 100
-      progressOperation?.update({ percentage: toolProgressPercentage })
-      const updatedTools = updatedBinaries.join(' and ')
-      showToast({
-        message: missingManagedBinaries.length > 0
-          ? t('Settings.Download Settings.Managed Tools Download Finished Template', { tools: updatedTools })
-          : t('Settings.Download Settings.Managed Tools Update Finished Template', { tools: updatedTools }),
-        icon: ['fas', 'check'],
-      })
-    } else {
-      if (failures.length > 0) {
-        const errors = failures.map(({ binary, result }) => `${binary}: ${result?.error ?? ''}`).join('; ')
-        showToast({
-          message: t('Settings.Download Settings.Managed Tools Download Error Template', { errors }),
-          icon: ['fas', 'circle-exclamation'],
-        })
-      }
-    }
-  } finally {
-    removeProgressListener()
-    progressOperation?.finish()
-  }
-
-  if (updateMode === 'ask' && requestedUpdates === null) {
-    await notifyAboutManagedExternalSoftwareUpdates(missingManagedBinaries)
-  }
-}
-
-/**
- * Checks installed managed tools and offers an explicit update action.
- * @param {('yt-dlp' | 'ffmpeg' | 'ffprobe')[]} binariesInstalledThisRun
- */
-async function notifyAboutManagedExternalSoftwareUpdates(binariesInstalledThisRun) {
-  await initializeNetworkRecovery().run('managed-tools', async () => {})
-  const candidates = []
-  if ((isCapacitor || store.getters.getYtDlpSource === 'managed') && !binariesInstalledThisRun.includes('yt-dlp')) {
-    candidates.push('yt-dlp')
-  }
-  if (!isCapacitor && store.getters.getYtDlpFfmpegSource === 'managed' &&
-    !binariesInstalledThisRun.includes('ffmpeg') && !binariesInstalledThisRun.includes('ffprobe')) {
-    candidates.push('ffmpeg')
-  }
-
-  const checks = await Promise.all(candidates.map(async binary => {
-    const result = await ytDlp.ytDlpCheckBinaryUpdate(binary)
-    if (result !== null && 'error' in result) {
-      console.warn(`Checking for a managed ${binary} update failed`, result.error)
-    }
-    return result?.available === true ? binary : null
-  }))
-  const availableUpdates = checks.filter(binary => binary !== null)
-  if (availableUpdates.length === 0) {
-    return
-  }
-
-  showManagedExternalSoftwareUpdatePrompt(availableUpdates)
-}
-
-/**
- * @param {('yt-dlp' | 'ffmpeg')[]} availableUpdates
- */
-function showManagedExternalSoftwareUpdatePrompt(availableUpdates) {
-  showToast({
-    message: t('Settings.Download Settings.Managed Tools Update Available Template', {
-      tools: availableUpdates.join(' and ')
-    }),
-    time: Infinity,
-    icon: ['fas', 'download'],
-    buttons: [
-      { label: t('Cancel') },
-      {
-        label: t('Settings.Download Settings.Update Managed Tools'),
-        primary: true,
-        action: () => {
-          initializeManagedExternalSoftware(availableUpdates)
-            .catch(error => console.error('Failed to update managed external software', error))
-        }
-      }
-    ]
-  })
-}
-
-const MANAGED_TOOLS_UPDATE_PREVIEW_EVENT = 'opentubex:preview-managed-tools-update'
-
-/**
- * Allows the real actionable update prompt to be previewed from DevTools.
- * @param {Event} event
- */
-function previewManagedExternalSoftwareUpdatePrompt(event) {
-  const detail = event instanceof CustomEvent ? event.detail : null
-  const availableUpdates = Array.isArray(detail)
-    ? detail.filter(binary => binary === 'yt-dlp' || binary === 'ffmpeg')
-    : []
-  showManagedExternalSoftwareUpdatePrompt(availableUpdates.length > 0 ? [...new Set(availableUpdates)] : ['yt-dlp'])
-}
+const {
+  initializeManagedExternalSoftware,
+  previewManagedExternalSoftwareUpdatePrompt,
+} = createManagedExternalSoftwareController({
+  capabilities: resolveManagedToolsCapabilities({ isElectron, isCapacitor }),
+  store,
+  ytDlp,
+  t,
+  showProgressStartToast,
+  initializeNetworkRecovery,
+  classifyRequestFailure,
+  startProgressBarOperation,
+  showToast,
+})
 
 async function initializeTutorial(hasExistingInstallation, lastUsedVersion, persistedAudience) {
   try {
@@ -1640,7 +1407,9 @@ onMounted(async () => {
       removeConfirmMultipleTabsActionListener = window.ftElectron.tabs
         .onConfirmMultipleAction(handleConfirmMultipleTabsActionRequest)
     } else if (isCapacitor) {
-      removeCapacitorIntegrationListeners = await enableCapacitorIntegrations()
+      removeCapacitorIntegrationListeners = await enableCapacitorIntegrations({
+        appWindow: window, locale, t, store, handleAndroidBack, handleYoutubeLink, openInternalPath,
+      })
     }
 
     await syncDataReady
@@ -2342,110 +2111,6 @@ function commitSubscriptionTabLastRefreshTimestamp(tab, timestamp) {
 }
 
 /**
- * @param {string} prefix
- * @param {string} profileId
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function getSubscriptionAutoRefreshStorageKey(prefix, profileId, tab) {
-  return `${prefix}${encodeURIComponent(profileId)}/${tab}`
-}
-
-/**
- * @param {string} key
- */
-function getStoredSubscriptionAutoRefreshTimestamp(key) {
-  try {
-    const timestamp = Number(localStorage.getItem(key))
-    return Number.isFinite(timestamp) && timestamp > 0 ? timestamp : null
-  } catch {
-    return null
-  }
-}
-
-/**
- * @param {string} key
- * @param {number | null} timestamp
- */
-function setStoredSubscriptionAutoRefreshTimestamp(key, timestamp) {
-  try {
-    if (timestamp === null) {
-      localStorage.removeItem(key)
-    } else {
-      localStorage.setItem(key, String(timestamp))
-    }
-  } catch {
-    // Auto refresh still works for the current session when storage is unavailable.
-  }
-}
-
-/**
- * @param {string} profileId
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function getStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab) {
-  const key = getSubscriptionAutoRefreshStorageKey(
-    SUBSCRIPTION_AUTO_REFRESH_DEADLINE_STORAGE_KEY_PREFIX,
-    profileId,
-    tab
-  )
-  const timestamp = getStoredSubscriptionAutoRefreshTimestamp(key)
-  return timestamp
-}
-
-function migrateLegacySubscriptionAutoRefreshDeadlines() {
-  for (const tab of subscriptionAutoRefreshTabs) {
-    const legacyKey = `${LEGACY_SUBSCRIPTION_AUTO_REFRESH_STORAGE_KEY_PREFIX}${tab}`
-    const legacyTimestamp = getStoredSubscriptionAutoRefreshTimestamp(legacyKey)
-    if (legacyTimestamp === null) {
-      continue
-    }
-
-    for (const profile of store.getters.getProfileList) {
-      const profileKey = getSubscriptionAutoRefreshStorageKey(
-        SUBSCRIPTION_AUTO_REFRESH_DEADLINE_STORAGE_KEY_PREFIX,
-        profile._id,
-        tab
-      )
-      if (getStoredSubscriptionAutoRefreshTimestamp(profileKey) === null) {
-        setStoredSubscriptionAutoRefreshTimestamp(profileKey, legacyTimestamp)
-      }
-    }
-
-    setStoredSubscriptionAutoRefreshTimestamp(legacyKey, null)
-  }
-}
-
-/**
- * @param {string} profileId
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {number | null} timestamp
- */
-function setStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab, timestamp) {
-  setStoredSubscriptionAutoRefreshTimestamp(
-    getSubscriptionAutoRefreshStorageKey(
-      SUBSCRIPTION_AUTO_REFRESH_DEADLINE_STORAGE_KEY_PREFIX,
-      profileId,
-      tab
-    ),
-    timestamp
-  )
-}
-
-/**
- * @param {string} profileId
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function getStoredSubscriptionTabLastRefreshTimestamp(profileId, tab) {
-  return getStoredSubscriptionAutoRefreshTimestamp(
-    getSubscriptionAutoRefreshStorageKey(
-      SUBSCRIPTION_AUTO_REFRESH_COMPLETION_STORAGE_KEY_PREFIX,
-      profileId,
-      tab
-    )
-  )
-}
-
-/**
  * @param {string} profileId
  */
 function synchronizeSubscriptionAutoRefreshProfile(profileId) {
@@ -2514,7 +2179,7 @@ function handleSubscriptionRefreshCompleted(event) {
  */
 async function handleSubscriptionRefreshStarted(event) {
   const isCurrentStart = subscriptionRefreshStartGuard.begin()
-  if (isCapacitor) {
+  if (subscriptionRefreshCapabilities.androidNotifications) {
     const { acquired, notificationsDenied } = await startAndroidSubscriptionRefresh(
       event.detail.refreshId,
       getSubscriptionRefreshNotificationTitle(event.detail.tab),
@@ -2526,7 +2191,7 @@ async function handleSubscriptionRefreshStarted(event) {
       cancelSubscriptionRefresh()
     }
   }
-  if (!process.env.IS_ELECTRON) {
+  if (subscriptionRefreshCapabilities.storageBroadcast) {
     try {
       localStorage.setItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY, JSON.stringify({
         ...event.detail,
@@ -2571,11 +2236,11 @@ function handleSubscriptionRefreshProgress(event) {
   const percentage = normalizeSubscriptionRefreshProgress(event.detail.percentage)
   store.commit('setSubscriptionFeedRefreshProgress', percentage)
 
-  if (isCapacitor) {
+  if (subscriptionRefreshCapabilities.androidNotifications) {
     updateAndroidSubscriptionRefresh(event.detail.refreshId, percentage)
   }
 
-  if (process.env.IS_ELECTRON) {
+  if (subscriptionRefreshCapabilities.electronProgress) {
     window.ftElectron.subscriptionAutoRefresh.setProgress(
       event.detail.ownerTabId ?? store.getters.getActiveTabId,
       percentage
@@ -2599,7 +2264,7 @@ function handleSubscriptionRefreshProgress(event) {
  */
 function handleSubscriptionRefreshFinished(event) {
   subscriptionRefreshStartGuard.finish()
-  if (!process.env.IS_ELECTRON) {
+  if (subscriptionRefreshCapabilities.storageBroadcast) {
     try {
       localStorage.removeItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY)
     } catch {
@@ -2786,14 +2451,14 @@ function getAndroidSubscriptionCacheConfig(feedType) {
  * @param {StorageEvent} event
  */
 function handleSubscriptionAutoRefreshStorage(event) {
-  if (!process.env.IS_ELECTRON && event.key === SUBSCRIPTION_REFRESH_CANCEL_STORAGE_KEY) {
+  if (subscriptionRefreshCapabilities.storageBroadcast && event.key === SUBSCRIPTION_REFRESH_CANCEL_STORAGE_KEY) {
     if (event.newValue !== null) {
       cancelSubscriptionRefresh()
     }
     return
   }
 
-  if (!process.env.IS_ELECTRON && event.key === SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY) {
+  if (subscriptionRefreshCapabilities.storageBroadcast && event.key === SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY) {
     const state = getSubscriptionRefreshProgressState(event.newValue)
     applySubscriptionAutoRefreshState({
       inProgress: state !== null,
@@ -2889,32 +2554,6 @@ function getSubscriptionRefreshProgressState(value) {
   }
 }
 
-/**
- * @param {string | null} key
- * @param {string} prefix
- * @returns {{profileId: string, tab: 'videos' | 'shorts' | 'live' | 'posts'} | null}
- */
-function parseSubscriptionAutoRefreshStorageKey(key, prefix) {
-  if (!key?.startsWith(prefix)) {
-    return null
-  }
-
-  const separatorIndex = key.lastIndexOf('/')
-  const tab = key.slice(separatorIndex + 1)
-  if (separatorIndex < prefix.length || !subscriptionAutoRefreshTabs.includes(tab)) {
-    return null
-  }
-
-  try {
-    return {
-      profileId: decodeURIComponent(key.slice(prefix.length, separatorIndex)),
-      tab
-    }
-  } catch {
-    return null
-  }
-}
-
 function clearSubscriptionFeedAutoRefreshTimer() {
   clearSubscriptionTabAutoRefreshTimer('videos')
   clearSubscriptionTabAutoRefreshTimer('shorts')
@@ -2945,6 +2584,25 @@ let removeCustomThemeListener = () => {}
 const systemColorScheme = window.matchMedia('(prefers-color-scheme: dark)')
 const systemUsesDarkTheme = ref(systemColorScheme.matches)
 systemColorScheme.addEventListener('change', handleSystemColorSchemeChange)
+
+/** @type {import('vue').ComputedRef<string>} */
+const mainColor = computed(() => store.getters.getMainColor)
+/** @type {import('vue').ComputedRef<string>} */
+const secColor = computed(() => store.getters.getSecColor)
+
+const { updateTheme, sanitizeAppearanceSettings } = createAppAppearanceController({
+  store,
+  baseTheme,
+  systemUsesDarkTheme,
+  mainColor,
+  secColor,
+  applyThemeToDocument,
+  refreshTrayIcon,
+  updateSystemBarsStyle,
+  resolveSystemThemeSettings,
+  resolveBaseTheme,
+  resolveColor,
+})
 
 if (isCapacitor) {
   let dynamicColorsListener
@@ -2977,14 +2635,7 @@ watch(appFont, updateAppFont)
 watch(() => store.getters.getSystemLightTheme, updateTheme)
 watch(() => store.getters.getSystemDarkTheme, updateTheme)
 
-/** @type {import('vue').ComputedRef<string>} */
-const mainColor = computed(() => store.getters.getMainColor)
-
 watch(mainColor, updateTheme)
-
-/** @type {import('vue').ComputedRef<string>} */
-const secColor = computed(() => store.getters.getSecColor)
-
 watch(secColor, updateTheme)
 
 /** @type {import('vue').ComputedRef<number>} */
@@ -3011,18 +2662,6 @@ function refreshTrayIcon() {
   }
 }
 
-function updateTheme() {
-  const effectiveTheme = baseTheme.value === 'system'
-    ? (systemUsesDarkTheme.value ? store.getters.getSystemDarkTheme : store.getters.getSystemLightTheme)
-    : baseTheme.value
-  const customThemes = store.getters.getCustomThemes
-  const customTheme = customThemes.find(theme => `custom:${theme.id}` === effectiveTheme) ??
-    (effectiveTheme === 'custom' ? customThemes[0] : null) ?? null
-  applyThemeToDocument(effectiveTheme, mainColor.value, secColor.value, customTheme)
-  if (store.getters.getTrayIconPreset === 'theme') refreshTrayIcon()
-  updateSystemBarsStyle()
-}
-
 function updateSystemBarsStyle() {
   if (!Capacitor.isNativePlatform() || !Capacitor.isPluginAvailable('SystemBars')) return
 
@@ -3045,23 +2684,6 @@ function updateAppFont() {
     '--app-font-family',
     getAppFontFamily(appFont.value)
   )
-}
-
-async function sanitizeAppearanceSettings(customThemes) {
-  const systemThemes = resolveSystemThemeSettings({
-    systemLightTheme: store.getters.getSystemLightTheme,
-    systemDarkTheme: store.getters.getSystemDarkTheme,
-  }, customThemes)
-  const settings = [
-    ['BaseTheme', resolveBaseTheme(store.getters.getBaseTheme, 'system', customThemes)],
-    ['SystemLightTheme', systemThemes.systemLightTheme],
-    ['SystemDarkTheme', systemThemes.systemDarkTheme],
-    ['MainColor', resolveColor(store.getters.getMainColor, 'Red')],
-    ['SecColor', resolveColor(store.getters.getSecColor, 'Blue')],
-  ]
-
-  await Promise.all(settings.map(([name, value]) =>
-    store.getters[`get${name}`] === value ? null : store.dispatch(`update${name}`, value)))
 }
 
 function handleSystemColorSchemeChange(event) {
@@ -4629,95 +4251,6 @@ function enableOpenUrl() {
       handleYoutubeLink(url, { tabId })
     }
   })
-}
-
-async function enableCapacitorIntegrations() {
-  const backButtonHandle = Capacitor.getPlatform() === 'android'
-    ? await CapacitorApp.addListener('backButton', handleAndroidBack)
-    : null
-  const urlHandle = await CapacitorApp.addListener('appUrlOpen', ({ url }) => {
-    if (url) handleYoutubeLink(url)
-  })
-  const shortcutHandle = await AppShortcuts.addListener('click', async ({ shortcutId }) => {
-    const path = getAppShortcutPath(shortcutId)
-    if (!path) return
-    await store.dispatch('hideSettingsWindow')
-    await openInternalPath({ path })
-  })
-  const stopShortcutUpdates = watch(locale, () => {
-    const shortcuts = createAppShortcuts({
-      subscriptions: t('Subscriptions.Subscriptions'),
-      userplaylists: t('Playlists'),
-      history: t('History.History'),
-      downloads: t('Settings.Download Settings.Download Settings'),
-    })
-    AppShortcuts.set({ shortcuts }).catch(error => console.error('Failed to update app shortcuts', error))
-  }, { immediate: true })
-  const removeReminderActions = await initializeCapacitorLiveReminderActions((videoId) => {
-    handleYoutubeLink(`https://www.youtube.com/watch?v=${videoId}`)
-  })
-  const removeMediaActions = await addAndroidMediaSessionActionListener(({ action, ...details }) => {
-    tabMediaCoordinator.dispatchAction(action, details)
-  })
-  const handleTaskRemoved = () => tabMediaCoordinator.pauseAll()
-  window.addEventListener('opentubex:android-task-removed', handleTaskRemoved)
-  let receivedAppState = false
-  let backgroundStateTimeout = null
-  let appStateVersion = 0
-  const appStateHandle = await CapacitorApp.addListener('appStateChange', ({ isActive }) => {
-    receivedAppState = true
-    appStateVersion += 1
-    const version = appStateVersion
-    playbackScreenWake?.setAppActive(isActive)
-    clearTimeout(backgroundStateTimeout)
-    if (Capacitor.getPlatform() === 'android' && !isActive) {
-      // The launcher briefly stops the PiP Activity while returning to its
-      // existing task. Do not hide or pause playback for that handoff.
-      const checkBackgroundState = async () => {
-        if (await isAndroidLauncherReturnInProgress()) {
-          if (version === appStateVersion) {
-            backgroundStateTimeout = setTimeout(checkBackgroundState, 10_000)
-          }
-          return
-        }
-        const state = await CapacitorApp.getState().catch(() => ({ isActive: false }))
-        if (version !== appStateVersion || state.isActive) return
-        setAndroidAppVisible(false)
-        if (shouldPauseAndroidPlaybackOnAppStateChange(
-          false,
-          store.getters.getContinuePlaybackWhenScreenIsLocked
-        )) tabMediaCoordinator.pauseAll()
-      }
-      backgroundStateTimeout = setTimeout(checkBackgroundState, 250)
-      return
-    }
-    setAndroidAppVisible(isActive)
-    if (shouldPauseAndroidPlaybackOnAppStateChange(
-      isActive,
-      store.getters.getContinuePlaybackWhenScreenIsLocked
-    )) tabMediaCoordinator.pauseAll()
-  })
-  const appState = await CapacitorApp.getState()
-  if (!receivedAppState) {
-    playbackScreenWake?.setAppActive(appState.isActive)
-    setAndroidAppVisible(appState.isActive)
-  }
-  const launch = await CapacitorApp.getLaunchUrl()
-  if (launch?.url) await handleYoutubeLink(launch.url)
-
-  return () => {
-    clearTimeout(backgroundStateTimeout)
-    stopShortcutUpdates()
-    shortcutHandle.remove()
-    backButtonHandle?.remove()
-    urlHandle.remove()
-    appStateHandle.remove()
-    window.removeEventListener('opentubex:android-task-removed', handleTaskRemoved)
-    playbackScreenWake?.setAppActive(false)
-    setAndroidAppVisible(null)
-    removeReminderActions()
-    removeMediaActions()
-  }
 }
 
 const windowTitle = computed(() => {

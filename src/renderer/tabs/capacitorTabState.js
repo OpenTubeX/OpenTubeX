@@ -1,5 +1,19 @@
 const MAX_CLOSED_CAPACITOR_TABS = 10
 
+/**
+ * @typedef {{ name: string | null, path: string, fullPath: string, params: Record<string, string | string[]>, query: Record<string, string | string[]>, hash: string }} CapacitorTabRoute
+ * @typedef {{ route: CapacitorTabRoute, title: string, titlePending?: boolean, scroll: { left: number, top: number } }} CapacitorTabHistoryEntry
+ * @typedef {'loaded' | 'mounting' | 'unloading' | 'unloaded'} CapacitorTabLoadState
+ * @typedef {{ id: string, title: string, isPinned: boolean, placementOpenerTabId?: string | null, loadState: CapacitorTabLoadState, mountRevision: number, refreshKey: number, isLoading: boolean, isPlaying?: boolean, route: CapacitorTabRoute, history: CapacitorTabHistoryEntry[], historyIndex: number }} CapacitorTab
+ * @typedef {{ tabs: CapacitorTab[], closedTabs: CapacitorTab[], activeTabId: string, selectionRevision: number }} CapacitorTabSession
+ */
+
+/**
+ * @param {Partial<CapacitorTabRoute>} route
+ * @param {string} [title]
+ * @param {string} [id]
+ * @returns {CapacitorTab}
+ */
 export function createCapacitorTab(route, title = '', id = window.crypto.randomUUID()) {
   const normalizedRoute = normalizeRoute(route)
   const resolvedTitle = typeof title === 'string' && title.length > 0
@@ -24,6 +38,14 @@ export function createCapacitorTab(route, title = '', id = window.crypto.randomU
   }
 }
 
+/**
+ * Validate persisted session data at the storage boundary and restore runtime state.
+ * @param {unknown} value
+ * @param {Partial<CapacitorTabRoute>} currentRoute
+ * @param {() => string} [createId]
+ * @param {boolean} [rememberHistory]
+ * @returns {CapacitorTabSession}
+ */
 export function restoreCapacitorTabSession(value, currentRoute, createId = () => window.crypto.randomUUID(), rememberHistory = true) {
   const seenIds = new Set()
   const tabs = Array.isArray(value?.tabs)
@@ -251,6 +273,10 @@ export function moveCapacitorTab(session, tabId, targetIndex) {
   return { ...session, tabs: tabs.map(tab => ({ ...tab, placementOpenerTabId: null })) }
 }
 
+/**
+ * @param {CapacitorTabSession} session
+ * @param {string} [presentedTabId]
+ */
 export function toRuntimeTabState(session, presentedTabId = session.activeTabId) {
   return {
     tabs: session.tabs.map(tab => ({

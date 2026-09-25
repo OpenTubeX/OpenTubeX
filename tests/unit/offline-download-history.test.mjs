@@ -3,10 +3,10 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { runInNewContext } from 'node:vm'
 
-const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
-const { addToHistory } = runInNewContext(`({
-  ${source.slice(source.indexOf('    addToHistory:'), source.indexOf('    keepHistoryEntryAlive('))}
-})`)
+const source = await readFile(new URL('../../src/renderer/views/Watch/watchHistory.js', import.meta.url), 'utf8')
+const watchSource = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
+const methodsSource = source.slice(source.indexOf('export const watchHistoryMethods = ') + 'export const watchHistoryMethods = '.length)
+const { addToHistory } = runInNewContext(`(${methodsSource})`)
 
 test('offline download playback preserves existing history metadata while updating progress', () => {
   const historyEntry = {
@@ -67,7 +67,7 @@ test('failed metadata loading preserves a previously known publication date', ()
 test('offline download metadata does not create a false metadata cache observation', async () => {
   let updates = 0
   const { updateVideoMetadataCache } = runInNewContext(`({
-    ${source.slice(source.indexOf('    async updateVideoMetadataCache()'), source.indexOf('    clearLiveReminderStartTimer()'))}
+    ${watchSource.slice(watchSource.indexOf('    async updateVideoMetadataCache()'), watchSource.indexOf('    clearLiveReminderStartTimer()'))}
   })`, {
     window: { ftElectron: { videoMetadataCache: { update: async () => { updates++ } } } },
   })

@@ -48,6 +48,7 @@ import { isSettingSyncEnabled } from './settings'
 import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../helpers/subscription-seen-videos'
 import { syncWatchStats } from '../../helpers/sync-watch-stats'
 import { MAIN_PROFILE_ID } from '../../../constants'
+import { getInitialSyncStages } from '../../helpers/sync-server-plan.js'
 
 const EVENT_SYNC_DEBOUNCE_MS = 1500
 const EVENT_SYNC_DELAYS = {
@@ -206,25 +207,10 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     commit,
     dispatch: (...args) => dispatchRemoteSyncAction(dispatch, ...args),
   }
-  const stages = [
-    ...(encrypted ? ['download'] : []),
-    ...(settings.syncServerSyncSubscriptions ? ['subscriptions'] : []),
-    ...(settings.syncServerSyncPlaylists ? ['playlists'] : []),
-    ...(settings.syncServerSyncPlaylists ? ['playlistBookmarks'] : []),
-    ...(settings.syncServerSyncHistory ? ['history'] : []),
-    ...(encrypted && settings.syncServerSyncWatchStats ? ['watchStats'] : []),
-    ...(settings.syncServerSyncProfiles ? ['profiles'] : []),
-    ...((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
-      encrypted &&
-      settings.syncServerSyncSessions
-      ? ['sessionsV2']
-      : []),
-    ...(encrypted && settings.syncServerSyncSettings
-      ? ['settings']
-      : []),
-    ...(encrypted ? ['upload'] : []),
-    'finishing',
-  ]
+  const stages = getInitialSyncStages(settings, {
+    encrypted,
+    supportsSessions: Boolean(process.env.IS_ELECTRON || process.env.IS_CAPACITOR)
+  })
   let completedStages = 0
   let progressStarted = false
 

@@ -1,13 +1,59 @@
 import assert from 'node:assert/strict'
-import { readFile } from 'node:fs/promises'
-import vm from 'node:vm'
 import test from 'node:test'
 import { classifyRequestFailure } from '../../src/renderer/helpers/api/requestDiagnostics.js'
 import { createNetworkRecovery } from '../../src/renderer/helpers/networkRecovery.js'
+import { createManagedExternalSoftwareController, resolveManagedToolsCapabilities } from '../../src/renderer/helpers/managedExternalSoftware.js'
 
-const source = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
-const initializeSource = source.slice(source.indexOf('async function initializeManagedExternalSoftware('), source.indexOf('/**\n * Checks installed managed tools'))
 const flush = async () => { for (let i = 0; i < 100; i++) await Promise.resolve() }
+
+test('managed tool capabilities match the runtime that owns the native binaries', () => {
+  assert.deepEqual(resolveManagedToolsCapabilities({ isElectron: true, isCapacitor: false }), {
+    supportsManagedTools: true,
+    requiresManagedYtDlp: false,
+    supportsManagedFfmpeg: true,
+  })
+  assert.deepEqual(resolveManagedToolsCapabilities({ isElectron: false, isCapacitor: true }), {
+    supportsManagedTools: true,
+    requiresManagedYtDlp: true,
+    supportsManagedFfmpeg: false,
+  })
+  assert.deepEqual(resolveManagedToolsCapabilities({ isElectron: false, isCapacitor: false }), {
+    supportsManagedTools: false,
+    requiresManagedYtDlp: false,
+    supportsManagedFfmpeg: false,
+  })
+})
+
+for (const platform of [
+  { isElectron: true, isCapacitor: false, expected: ['yt-dlp', 'ffmpeg'] },
+  { isElectron: false, isCapacitor: true, expected: ['yt-dlp'] },
+]) {
+  test(`${platform.isElectron ? 'Electron' : 'Android'} checks only binaries it can manage`, async () => {
+    const checked = []
+    const controller = createManagedExternalSoftwareController({
+      capabilities: resolveManagedToolsCapabilities(platform),
+      store: { getters: {
+        getExternalSoftwareUpdateMode: 'ask',
+        getYtDlpSource: 'managed',
+        getYtDlpFfmpegSource: 'managed',
+      } },
+      ytDlp: {
+        ytDlpGetInfo: async () => ({
+          ytDlp: { available: true }, ffmpeg: { available: true }, ffprobe: { available: true },
+        }),
+        ytDlpCheckBinaryUpdate: async binary => { checked.push(binary); return { available: false } },
+      },
+      t: key => key,
+      showProgressStartToast: { value: false },
+      initializeNetworkRecovery: () => ({ run: async (_key, task) => task() }),
+      classifyRequestFailure: () => null,
+      startProgressBarOperation: () => { throw new Error('No download expected') },
+      showToast: () => { throw new Error('No update prompt expected') },
+    })
+    await controller.initializeManagedExternalSoftware()
+    assert.deepEqual(checked, platform.expected)
+  })
+}
 
 function setup(t, online, checkInternet) {
   t.mock.timers.enable({ apis: ['setTimeout'] })
@@ -16,7 +62,7 @@ function setup(t, online, checkInternet) {
   t.after(() => recovery.dispose())
   const calls = []
   const toasts = []
-  const context = vm.createContext({
+  const context = {
     isElectron: false, isCapacitor: true,
     initializeNetworkRecovery: () => recovery,
     classifyRequestFailure,
@@ -32,8 +78,16 @@ function setup(t, online, checkInternet) {
     t: key => key,
     showToast: toast => toasts.push(toast),
     startProgressBarOperation: () => ({ update() {}, finish() {} }),
-  })
-  vm.runInContext(initializeSource, context)
+  }
+  context.initializeManagedExternalSoftware = createManagedExternalSoftwareController({
+    capabilities: resolveManagedToolsCapabilities(context),
+    store: context.store, ytDlp: context.ytDlp, t: context.t,
+    showProgressStartToast: context.showProgressStartToast,
+    initializeNetworkRecovery: context.initializeNetworkRecovery,
+    classifyRequestFailure: context.classifyRequestFailure,
+    startProgressBarOperation: context.startProgressBarOperation,
+    showToast: context.showToast,
+  }).initializeManagedExternalSoftware
   return { calls, toasts, context, connect(value) { online = value; events.dispatchEvent(new Event(value ? 'online' : 'offline')) } }
 }
 
