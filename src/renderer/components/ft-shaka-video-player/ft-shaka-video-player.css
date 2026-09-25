@@ -3818,6 +3818,10 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   transition: gap 200ms ease;
 }
 
+:deep(.shaka-controls-button-panel > .ft-chapters-button + .ft-shaka-highlight-button) {
+  margin-inline-start: 2px;
+}
+
 :deep(.ft-shaka-highlight-button .shaka-ui-icon) {
   flex: 0 0 auto;
   font-size: 26px;
@@ -3867,7 +3871,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   block-size: 48px;
   min-inline-size: 0;
   padding-block: 0;
-  padding-inline: 6px;
+  padding-inline: 8px;
   border-radius: calc(999px * var(--ui-roundness));
   background-position: left center, center, right center;
   background-size: var(--ft-control-pill-radius) var(--ft-control-pill-size), calc(100% - var(--ft-control-pill-size)) var(--ft-control-pill-size), var(--ft-control-pill-radius) var(--ft-control-pill-size);
@@ -3900,6 +3904,10 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   white-space: nowrap;
 }
 
+.ftVideoPlayer:not(.classicPlayerControls) :deep(.ft-time-display-group > .shaka-current-time) {
+  font-size: 13px;
+}
+
 :deep(.ft-controls-stack-times > .shaka-spacer) {
   min-inline-size: 0;
   padding: 0;
@@ -3913,7 +3921,6 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  padding-inline: 0;
 }
 
 :deep(.ft-controls-stack-times > .ft-time-display-group > .shaka-current-time) {
@@ -3944,7 +3951,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   justify-content: flex-start;
   gap: 3px;
   max-width: min(70vw, 640px);
-  margin-inline-end: 2px;
+  margin-inline-end: 0;
   overflow-x: auto;
   border-radius: calc(999px * var(--ui-roundness));
   background: linear-gradient(145deg, rgb(255 255 255 / 12%), rgb(255 255 255 / 3%)), rgb(0 0 0 / 28%);
