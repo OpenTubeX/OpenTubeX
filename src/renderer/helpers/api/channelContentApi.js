@@ -1,9 +1,10 @@
 import {
   getLocalChannel, getLocalChannelId, getLocalArtistTopicChannelReleases,
   getLocalArtistTopicChannelReleasesContinuation, parseLocalChannelShorts,
-  parseLocalChannelVideos, parseLocalListPlaylist, parseLocalCommunityPosts,
-  parseLocalListVideo,
+  parseLocalChannelVideos, parseLocalChannelHeader, parseLocalSubscriberCount,
+  parseLocalListPlaylist, parseLocalCommunityPosts, parseLocalListVideo,
 } from './local'
+import { YTNodes } from 'youtubei.js'
 import {
   getInvidiousChannelLive, getInvidiousChannelPlaylists, getInvidiousChannelPodcasts,
   getInvidiousChannelReleases, getInvidiousChannelCourses, getInvidiousChannelShorts,
@@ -29,6 +30,16 @@ export const channelContentApi = createChannelContentApi({
   getInvidiousId: invidiousGetChannelId,
   getLocalChannel,
   getInvidiousChannel: invidiousGetChannelInfo,
+  parseLocalHeader: parseLocalChannelHeader,
+  parseSubscriberCount: parseLocalSubscriberCount,
+  getAgeGate: channel => {
+    if (!channel.memo.has('ChannelAgeGate')) return null
+    const ageGate = channel.memo.get('ChannelAgeGate')[0]
+    return { name: ageGate.channel_title, thumbnail: ageGate.avatar[0].url }
+  },
+  mayContainOtherChannels: channel =>
+    !!channel.header?.is(YTNodes.CarouselHeader, YTNodes.InteractiveTabbedHeader) ||
+    !!(channel.header?.is(YTNodes.PageHeader) && channel.header.content?.animated_image),
   parseShorts: parseLocalChannelShorts,
   parseVideos: parseLocalChannelVideos,
   parsePlaylists: (playlists, id, name) => playlists.map(playlist => parseLocalListPlaylist(playlist, id, name)),

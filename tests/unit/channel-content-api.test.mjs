@@ -9,6 +9,18 @@ function makeApi (overrides = {}) {
     getInvidiousId: async () => 'remote-id',
     getLocalChannel: async () => ({ id: 'local-channel' }),
     getInvidiousChannel: async () => ({ id: 'remote-channel' }),
+    parseLocalHeader: () => ({
+      id: 'local-id',
+      name: 'Local creator',
+      thumbnailUrl: '//local/avatar',
+      bannerUrl: 'local/banner',
+      tags: ['music', 'music'],
+      subscriberText: '100',
+    }),
+    parseSubscriberCount: text => Number(text),
+    getAgeGate: () => null,
+    mayContainOtherChannels: () => false,
+    mapImage: url => url,
     parseShorts: videos => videos,
     parseVideos: videos => videos,
     parsePlaylists: playlists => playlists,
@@ -33,22 +45,132 @@ test('channel API selects one provider for ID and info requests', async () => {
   assert.equal(api.getFallbackProvider('invidious', 'invidious', true), null)
 })
 
+test('channel API normalizes Local overview capabilities and metadata', async () => {
+  const api = makeApi({
+    getLocalChannel: async () => ({
+      metadata: { is_family_safe: true },
+      tabs: ['Videos'],
+      has_about: true,
+      has_videos: true,
+      has_shorts: true,
+      has_home: false,
+      has_search: true,
+    }),
+  })
+  const result = await api.getOverview({ id: 'channel', provider: 'local' })
+  assert.equal(result.name, 'Local creator')
+  assert.equal(result.thumbnail, 'https://local/avatar')
+  assert.equal(result.subscriberCount, 100)
+  assert.deepEqual(result.tags, ['music'])
+  assert.deepEqual(result.availableTabs, ['about', 'videos', 'shorts'])
+  assert.equal(result.aboutPending, true)
+  assert.equal(result.showSearchBar, true)
+})
+
+test('channel API reuses the current Local channel session', async () => {
+  let requests = 0
+  const api = makeApi({ getLocalChannel: async () => { requests++; throw Error('unexpected fetch') } })
+  const result = await api.getOverview({
+    id: 'channel',
+    provider: 'local',
+    existingChannel: { metadata: {}, tabs: ['Videos'], has_videos: true },
+  })
+  assert.equal(result.provider, 'local')
+  assert.equal(requests, 0)
+})
+
+test('channel API returns an age gate before parsing the Local header', async () => {
+  const api = makeApi({
+    getAgeGate: () => ({ name: 'Restricted', thumbnail: 'age.jpg' }),
+    parseLocalHeader: () => { throw Error('header should not be parsed') },
+  })
+  const result = await api.getOverview({ id: 'channel', provider: 'local' })
+  assert.equal(result.kind, 'age-gate')
+  assert.equal(result.name, 'Restricted')
+})
+
+test('channel API normalizes Invidious overview metadata and related channels', async () => {
+  const api = makeApi({
+    getInvidiousChannel: async () => ({
+      author: 'Remote creator',
+      authorId: 'remote-id',
+      isFamilyFriendly: true,
+      subCount: 50,
+      authorThumbnails: [{ url: 'avatar' }],
+      description: 'Description',
+      totalViews: 1000,
+      joined: 10,
+      relatedChannels: [{
+        author: 'Related', authorId: 'related-id', authorThumbnails: [{ url: 'related-avatar' }],
+      }],
+      authorBanners: [{ url: 'banner' }],
+      tabs: ['videos', 'playlists', 'about'],
+    }),
+    mapImage: url => `proxy:${url}`,
+  })
+  const result = await api.getOverview({ id: 'channel', provider: 'invidious' })
+  assert.equal(result.name, 'Remote creator')
+  assert.equal(result.routeId, 'remote-id')
+  assert.equal(result.thumbnail, 'proxy:avatar')
+  assert.deepEqual(result.relatedChannels, [{ name: 'Related', id: 'related-id', thumbnailUrl: 'proxy:related-avatar' }])
+  assert.deepEqual(result.availableTabs, ['videos', 'playlists', 'about'])
+})
+
 test('channel API owns overview selection and a single fallback handoff', async () => {
-  const api = makeApi()
   const calls = []
-  const loadLocal = async () => { calls.push('local'); return 'local' }
-  const loadInvidious = async () => { calls.push('invidious'); return 'invidious' }
-  const handlers = {
+  const api = makeApi({
+    getLocalChannel: async () => { calls.push('local'); throw Error('offline') },
+    getInvidiousChannel: async () => {
+      calls.push('invidious')
+      return { author: 'Remote', authorId: 'id', authorThumbnails: [], relatedChannels: [], tabs: [] }
+    },
+  })
+  const result = await api.loadOverview({
+    id: 'channel',
     preference: 'local',
     fallback: true,
-    loadLocal,
-    loadInvidious,
+    onSelected: provider => calls.push(`selected:${provider}`),
+    onError: provider => calls.push(`error:${provider}`),
     onFallback: (from, to) => calls.push(`${from}:${to}`),
-  }
-  assert.equal(await api.loadOverview(handlers), 'local')
-  assert.equal(await api.loadOverview({ ...handlers, failedProvider: 'local' }), 'invidious')
-  assert.equal(await api.loadOverview({ ...handlers, failedProvider: 'invidious' }), null)
-  assert.deepEqual(calls, ['local', 'local:invidious', 'invidious'])
+  })
+  assert.equal(result.provider, 'invidious')
+  assert.deepEqual(calls, [
+    'selected:local', 'local', 'error:local', 'local:invidious',
+    'selected:invidious', 'invidious',
+  ])
+})
+
+test('channel API reports both provider failures without retrying either provider', async () => {
+  const calls = []
+  const failure = Error('second provider failed')
+  const api = makeApi({
+    getLocalChannel: async () => { calls.push('local'); throw Error('first provider failed') },
+    getInvidiousChannel: async () => { calls.push('invidious'); throw failure },
+  })
+  await assert.rejects(api.loadOverview({
+    id: 'channel',
+    preference: 'local',
+    fallback: true,
+    onError: provider => calls.push(`error:${provider}`),
+  }), error => error === failure)
+  assert.deepEqual(calls, ['local', 'error:local', 'invidious', 'error:invidious'])
+})
+
+test('channel API discards a stale overview before reporting an error or fallback', async () => {
+  const calls = []
+  const api = makeApi({
+    getLocalChannel: async () => { throw Error('stale request') },
+  })
+  const result = await api.loadOverview({
+    id: 'channel',
+    preference: 'local',
+    fallback: true,
+    isCurrent: () => false,
+    onError: () => calls.push('error'),
+    onFallback: () => calls.push('fallback'),
+  })
+  assert.equal(result, null)
+  assert.deepEqual(calls, [])
 })
 
 test('channel API normalizes Local shorts and their continuation', async () => {

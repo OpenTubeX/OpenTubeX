@@ -325,8 +325,6 @@ import {
 } from '../../helpers/utils'
 import { isNullOrEmpty } from '../../helpers/strings'
 import {
-  parseLocalChannelHeader,
-  parseLocalSubscriberCount,
   parseChannelHomeTab
 } from '../../helpers/api/local'
 import { useTabAvatar, useTabContext, useTabTitle } from '../../tabs/TabContext'
@@ -730,184 +728,148 @@ async function ensureChannelInstance() {
 
 /** @param {'local' | 'invidious'} [failedProvider] */
 async function loadChannelOverview(failedProvider) {
-  return channelContentApi.loadOverview({
-    preference: backendPreference.value,
-    fallback: backendFallback.value,
-    failedProvider,
-    loadLocal: getChannelLocal,
-    loadInvidious: getChannelInfoInvidious,
-    onFallback: (_from, to) => {
-      const message = to === 'local'
-        ? t('Falling back to Local API')
-        : t('Falling back to Invidious API')
-      showToast({ message, icon: ['fas', 'exchange-alt'] })
-    },
-    onNoProvider: () => { isLoading.value = false },
-  })
-}
-
-async function getChannelLocal() {
-  apiUsed = 'local'
-  isLoading.value = true
   const expectedId = id.value
+  isLoading.value = true
+  let overview
 
   try {
-    await ensureChannelInstance()
+    overview = await channelContentApi.loadOverview({
+      id: expectedId,
+      preference: backendPreference.value,
+      fallback: backendFallback.value,
+      failedProvider,
+      subscriptionName: subscriptionInfo.value?.name,
+      subscriptionThumbnail: subscriptionInfo.value?.thumbnail,
+      instanceUrl: currentInvidiousInstanceUrl.value,
+      existingChannel: channelInstance,
+      isCurrent: () => expectedId === id.value,
+      onSelected: provider => {
+        apiUsed = provider
+        if (provider === 'invidious') channelInstance = null
+      },
+      onError: (provider, error) => {
+        if (provider === 'invidious') setErrorMessage(error)
+        console.error(error)
+        const message = provider === 'local'
+          ? t('Local API Error (Click to copy)')
+          : t('Invidious API Error (Click to copy)')
+        showApiErrorToast(message, error)
+      },
+      onFallback: (_from, to) => {
+        const message = to === 'local'
+          ? t('Falling back to Local API')
+          : t('Falling back to Invidious API')
+        showToast({ message, icon: ['fas', 'exchange-alt'] })
+      },
+      onNoProvider: () => { isLoading.value = false },
+    })
+    if (!overview || expectedId !== id.value) return
 
-    // Bail out if the channel changed while we were resolving this instance, so a
-    // delayed response can't update the tab title (including the age-gate branch).
-    if (expectedId !== id.value) {
+    apiUsed = overview.provider
+    channelInstance = overview.channel
+
+    if (overview.kind === 'alert') {
+      setErrorMessage(overview.message)
       return
     }
-
-    let channelName_
-    let channelThumbnailUrl
-
-    if (channelInstance.alert) {
-      setErrorMessage(channelInstance.alert)
-      return
-    } else if (channelInstance.memo.has('ChannelAgeGate')) {
-      /** @type {import('youtubei.js').YTNodes.ChannelAgeGate} */
-      const ageGate = channelInstance.memo.get('ChannelAgeGate')[0]
-
-      channelName_ = ageGate.channel_title
-      channelThumbnailUrl = ageGate.avatar[0].url
-
-      channelName.value = channelName_
-      thumbnailUrl.value = channelThumbnailUrl
-
-      store.dispatch('updateSubscriptionDetails', { channelThumbnailUrl, channelName: channelName_, channelId: id.value })
-
+    if (overview.kind === 'age-gate') {
+      channelName.value = overview.name
+      thumbnailUrl.value = overview.thumbnail
+      store.dispatch('updateSubscriptionDetails', {
+        channelThumbnailUrl: overview.thumbnail,
+        channelName: overview.name,
+        channelId: expectedId,
+      })
       setErrorMessage(t('Channel["This channel is age-restricted and currently cannot be viewed in OpenTubeX."]'), true)
       return
     }
 
     errorMessage.value = ''
-
-    const parsedHeader = parseLocalChannelHeader(channelInstance)
-
-    const channelId = parsedHeader.id ?? id.value
-    const subscriberText = parsedHeader.subscriberText ?? null
-    let tags_ = parsedHeader.tags
-
-    channelThumbnailUrl = parsedHeader.thumbnailUrl ?? subscriptionInfo.value?.thumbnail
-    channelName_ = parsedHeader.name ?? subscriptionInfo.value?.name
-
-    if (channelThumbnailUrl?.startsWith('//')) {
-      channelThumbnailUrl = `https:${channelThumbnailUrl}`
+    if (overview.routeId !== null) id.value = overview.routeId
+    channelName.value = overview.name
+    thumbnailUrl.value = overview.thumbnail
+    bannerUrl.value = overview.banner
+    isFamilyFriendly.value = overview.familyFriendly
+    subCount.value = overview.subscriberCount
+    if (overview.provider === 'local') {
+      isArtistTopicChannel.value = overview.artistTopic
+      mayContainContentFromOtherChannels = overview.mayContainOtherChannels
+      tags.value = overview.tags
     }
 
-    channelName.value = channelName_
-    thumbnailUrl.value = channelThumbnailUrl
-    bannerUrl.value = parsedHeader.bannerUrl ?? null
-    isFamilyFriendly.value = !!channelInstance.metadata.is_family_safe
-    isArtistTopicChannel.value = channelName_.endsWith('- Topic') && !!channelInstance.metadata.music_artist_name
-
-    mayContainContentFromOtherChannels = isArtistTopicChannel.value ||
-      !!channelInstance.header?.is(YTNodes.CarouselHeader, YTNodes.InteractiveTabbedHeader) ||
-      !!(channelInstance.header?.is(YTNodes.PageHeader) && channelInstance.header.content?.animated_image)
-
-    if (channelInstance.metadata.tags) {
-      tags_.push(...channelInstance.metadata.tags)
-    }
-
-    // deduplicate tags
-    // a Set can only ever contain unique elements,
-    // so this is an easy way to get rid of duplicates
-    if (tags_.length > 0) {
-      tags_ = Array.from(new Set(tags_))
-    }
-    tags.value = tags_
-
-    if (subscriberText) {
-      const subCount_ = parseLocalSubscriberCount(subscriberText)
-
-      if (isNaN(subCount_)) {
-        subCount.value = null
-      } else {
-        subCount.value = subCount_
-      }
-    } else {
-      subCount.value = null
-    }
-
-    store.dispatch('updateSubscriptionDetails', { channelThumbnailUrl, channelName: channelName_, channelId })
-
-    if (channelInstance.has_about) {
-      getChannelAboutLocal()
-    } else {
-      description.value = ''
-      viewCount.value = null
-      videoCount.value = null
-      joined.value = 0
-      location.value = null
-    }
-    const tabs = ['about']
-
-    // we'll count it as home page if it's not video. This will help us support some special channels
-    if ((channelInstance.has_home || channelInstance.tabs[0] !== 'Videos')) {
-      if (!hideChannelHome.value) {
-        tabs.push('home')
-      }
-      // we still parse the home page so we can set related channels
-      getChannelHomeLocal()
-    }
-
-    if (channelInstance.has_videos || isArtistTopicChannel.value) {
-      tabs.push('videos')
-      getChannelVideosLocal()
-    }
-
-    if (!hideChannelShorts.value && channelInstance.has_shorts) {
-      tabs.push('shorts')
-      getChannelShortsLocal()
-    }
-
-    if (channelInstance.has_live_streams) {
-      tabs.push('live')
-      getChannelLiveLocal()
-    }
-
-    if (!hideChannelPodcasts.value && channelInstance.has_podcasts) {
-      tabs.push('podcasts')
-      getChannelPodcastsLocal()
-    }
-
-    if (!hideChannelReleases.value && (channelInstance.has_releases || isArtistTopicChannel.value)) {
-      tabs.push('releases')
-      getChannelReleasesLocal()
-    }
-
-    if (!hideChannelCourses.value && channelInstance.has_courses) {
-      tabs.push('courses')
-      getChannelCoursesLocal()
-    }
-
-    if (!hideChannelPlaylists.value) {
-      if (channelInstance.has_playlists) {
-        tabs.push('playlists')
-        getChannelPlaylistsLocal()
-      }
-    }
-
-    if (!hideChannelCommunity.value && channelInstance.has_community) {
-      tabs.push('community')
-      getCommunityPostsLocal()
-    }
-
-    channelTabs.value = SUPPORTED_CHANNEL_TABS.filter(tab => {
-      return tabs.includes(tab)
+    store.dispatch('updateSubscriptionDetails', {
+      channelThumbnailUrl: overview.subscriptionThumbnail,
+      channelName: overview.name,
+      channelId: overview.id,
     })
 
-    currentTab.value = currentOrFirstTab(route.params.currentTab)
-    showSearchBar.value = channelInstance.has_search
+    if (overview.aboutPending) {
+      getChannelAboutLocal()
+    } else {
+      description.value = overview.description === null ? '' : autolinker.link(overview.description)
+      viewCount.value = overview.viewCount
+      videoCount.value = overview.videoCount
+      joined.value = overview.joined
+      if (overview.provider === 'local') location.value = overview.location
+    }
+    if (overview.relatedChannels !== null) relatedChannels.value = overview.relatedChannels
+    if (overview.homePending) getChannelHomeLocal()
 
+    const hiddenLocalTabs = {
+      home: hideChannelHome.value,
+      shorts: hideChannelShorts.value,
+      podcasts: hideChannelPodcasts.value,
+      releases: hideChannelReleases.value,
+      courses: hideChannelCourses.value,
+      playlists: hideChannelPlaylists.value,
+      community: hideChannelCommunity.value,
+    }
+    const visibleTabs = overview.provider === 'local'
+      ? overview.availableTabs.filter(tab => !hiddenLocalTabs[tab])
+      : overview.availableTabs
+    const applyTabs = () => {
+      channelTabs.value = SUPPORTED_CHANNEL_TABS.filter(tab => visibleTabs.includes(tab))
+      currentTab.value = currentOrFirstTab(route.params.currentTab)
+      if (overview.showSearchBar !== null) showSearchBar.value = overview.showSearchBar
+    }
+    if (overview.provider === 'invidious') applyTabs()
+
+    const loaders = overview.provider === 'local'
+      ? {
+          videos: getChannelVideosLocal,
+          shorts: getChannelShortsLocal,
+          live: getChannelLiveLocal,
+          podcasts: getChannelPodcastsLocal,
+          releases: getChannelReleasesLocal,
+          courses: getChannelCoursesLocal,
+          playlists: getChannelPlaylistsLocal,
+          community: getCommunityPostsLocal,
+        }
+      : {
+          videos: channelInvidiousVideos,
+          shorts: channelInvidiousShorts,
+          live: channelInvidiousLive,
+          podcasts: channelInvidiousPodcasts,
+          releases: channelInvidiousReleases,
+          courses: channelInvidiousCourses,
+          playlists: getPlaylistsInvidious,
+          community: getCommunityPostsInvidious,
+        }
+    for (const tab of overview.availableTabs.filter(tab => !hiddenLocalTabs[tab])) loaders[tab]?.()
+    if (overview.provider === 'local') applyTabs()
     isLoading.value = false
-  } catch (err) {
-    console.error(err)
-    const errorMessage = t('Local API Error (Click to copy)')
-    showApiErrorToast(errorMessage, err)
-    return loadChannelOverview('local')
+  } catch (error) {
+    if (expectedId !== id.value && overview?.routeId !== id.value) return
+    if (overview) {
+      if (overview.provider === 'invidious') setErrorMessage(error)
+      console.error(error)
+      const message = overview.provider === 'local'
+        ? t('Local API Error (Click to copy)')
+        : t('Invidious API Error (Click to copy)')
+      showApiErrorToast(message, error)
+      return loadChannelOverview(overview.provider)
+    }
+    isLoading.value = false
   }
 }
 
@@ -1019,103 +981,6 @@ function getChannelHomeLocal() {
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
-  }
-}
-
-async function getChannelInfoInvidious() {
-  isLoading.value = true
-  apiUsed = 'invidious'
-  channelInstance = null
-
-  const expectedId = id.value
-  try {
-    const response = await channelContentApi.getInfo(id.value, 'invidious')
-
-    if (expectedId !== id.value) {
-      return
-    }
-
-    const channelName_ = response.author
-    const channelId = response.authorId
-    channelName.value = channelName_
-    id.value = channelId
-    isFamilyFriendly.value = response.isFamilyFriendly
-    subCount.value = response.subCount
-    const thumbnail = response.authorThumbnails.at(-1)?.url ?? null
-    thumbnailUrl.value = channelContentApi.mapImage(thumbnail, currentInvidiousInstanceUrl.value)
-    store.dispatch('updateSubscriptionDetails', { channelThumbnailUrl: thumbnail, channelName: channelName_, channelId })
-    description.value = autolinker.link(response.description)
-    viewCount.value = response.totalViews
-    videoCount.value = null
-    joined.value = response.joined * 1000
-    relatedChannels.value = response.relatedChannels.map((channel) => {
-      const thumbnailUrl = channel.authorThumbnails.at(-1)?.url ?? null
-
-      return {
-        name: channel.author,
-        id: channel.authorId,
-        thumbnailUrl: channelContentApi.mapImage(thumbnailUrl, currentInvidiousInstanceUrl.value)
-      }
-    })
-
-    if (Array.isArray(response.authorBanners) && response.authorBanners.length > 0) {
-      bannerUrl.value = channelContentApi.mapImage(response.authorBanners[0].url, currentInvidiousInstanceUrl.value)
-    } else {
-      bannerUrl.value = null
-    }
-
-    errorMessage.value = ''
-
-    // some channels only have a few tabs
-    // here are all possible values: home, videos, shorts, streams, playlists, community, channels, about
-
-    channelTabs.value = SUPPORTED_CHANNEL_TABS.filter(tab => {
-      return response.tabs.includes(tab) && tab !== 'home'
-    })
-
-    currentTab.value = currentOrFirstTab(route.params.currentTab)
-
-    if (response.tabs.includes('videos')) {
-      channelInvidiousVideos()
-    }
-
-    if (!hideChannelShorts.value && response.tabs.includes('shorts')) {
-      channelInvidiousShorts()
-    }
-
-    if (response.tabs.includes('live')) {
-      channelInvidiousLive()
-    }
-
-    if (!hideChannelPodcasts.value && response.tabs.includes('podcasts')) {
-      channelInvidiousPodcasts()
-    }
-
-    if (!hideChannelReleases.value && response.tabs.includes('releases')) {
-      channelInvidiousReleases()
-    }
-
-    if (!hideChannelCourses.value && response.tabs.includes('courses')) {
-      channelInvidiousCourses()
-    }
-
-    if (!hideChannelPlaylists.value && response.tabs.includes('playlists')) {
-      getPlaylistsInvidious()
-    }
-
-    if (!hideChannelCommunity.value && response.tabs.includes('community')) {
-      getCommunityPostsInvidious()
-    }
-
-    isLoading.value = false
-  } catch (err) {
-    setErrorMessage(err)
-    console.error(err)
-
-    const errorMessage = t('Invidious API Error (Click to copy)')
-    showApiErrorToast(errorMessage, err)
-
-    return loadChannelOverview('invidious')
   }
 }
 
