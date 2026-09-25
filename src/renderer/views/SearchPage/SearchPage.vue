@@ -80,6 +80,7 @@ const searchSettings = ref({})
 const searchPage = ref(1)
 /** @type {import('vue').ShallowRef<import('youtubei.js').YT.Search | string | null>} */
 const nextPageRef = shallowRef(null)
+/** @type {import('vue').ShallowRef<import('../../helpers/api/createDiscoveryApi.js').DiscoveryItem[]>} */
 const shownResults = shallowRef([])
 
 const query = ref('')
@@ -321,7 +322,7 @@ function replaceShownResults(history) {
 }
 
 /**
- * @param {any[]} results
+ * @param {import('../../helpers/api/createDiscoveryApi.js').DiscoveryItem[]} results
  */
 function updateSubscriptionDetails(results) {
   /** @type {Set<string>} */

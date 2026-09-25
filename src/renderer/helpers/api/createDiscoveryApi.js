@@ -1,13 +1,26 @@
 /** @typedef {'local' | 'invidious'} DiscoveryProvider */
+/**
+ * @typedef {{
+ *   type?: string, dataSource?: string, videoId?: string, id?: string,
+ *   authorId?: string, name?: string, author?: string, thumbnail?: string,
+ *   authorThumbnails?: Array<{url: string}>, [key: string]: unknown
+ * }} DiscoveryItem
+ */
+/** @typedef {{prioritize: string, time: string, type: string, duration: string, features: string[]}} DiscoverySearchSettings */
+/** @typedef {{results: DiscoveryItem[], continuationData: unknown}} LocalDiscoveryPage */
+/**
+ * @typedef {{provider: DiscoveryProvider, items: DiscoveryItem[], continuation: unknown,
+ *   cacheableContinuation: unknown, nextPage: number, hasMore: boolean}} DiscoverySearchPage
+ */
 
 /**
  * @typedef {{
- *   searchLocal: (query: string, settings: object, safetyMode: boolean) => Promise<{ results: unknown[], continuationData: unknown }>,
- *   continueLocal: (continuation: unknown) => Promise<{ results: unknown[], continuationData: unknown }>,
+ *   searchLocal: (query: string, settings: DiscoverySearchSettings, safetyMode: boolean) => Promise<LocalDiscoveryPage>,
+ *   continueLocal: (continuation: unknown) => Promise<LocalDiscoveryPage>,
  *   cacheLocalContinuation: (continuation: unknown) => unknown,
- *   searchInvidious: (query: string, page: number, settings: object) => Promise<unknown[] | null>,
- *   getTrendingLocal: (region: string, category: string) => Promise<unknown[]>,
- *   getPopularInvidious: () => Promise<unknown[]>,
+ *   searchInvidious: (query: string, page: number, settings: DiscoverySearchSettings) => Promise<DiscoveryItem[] | null>,
+ *   getTrendingLocal: (region: string, category: string) => Promise<DiscoveryItem[]>,
+ *   getPopularInvidious: () => Promise<DiscoveryItem[]>,
  *   getChannelLocal: (id: string) => Promise<{ thumbnailUrl: string } | null>,
  *   getChannelInvidious: (id: string) => Promise<{ authorThumbnails: { url: string }[] }>,
  *   youtubeImageToInvidious: (url: string, instance: string) => string,
@@ -17,7 +30,7 @@
 
 /**
  * @typedef {{
- *   query: string, searchSettings: object, safetyMode: boolean,
+ *   query: string, searchSettings: DiscoverySearchSettings, safetyMode: boolean,
  *   preference: DiscoveryProvider, provider?: DiscoveryProvider,
  *   continuation?: unknown, page?: number, fallbackEnabled?: boolean,
  *   localAvailable?: boolean,
@@ -39,6 +52,7 @@ export function createDiscoveryApi(providers) {
   /**
    * @param {DiscoveryProvider} provider
    * @param {DiscoverySearchOptions} options
+   * @returns {Promise<DiscoverySearchPage | null>}
    */
   async function searchProvider(provider, options) {
     const { query, searchSettings, safetyMode, continuation, page = 1 } = options
