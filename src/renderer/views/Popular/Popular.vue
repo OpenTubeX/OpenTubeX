@@ -53,7 +53,7 @@ import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtRefreshWidget from '../../components/FtRefreshWidget/FtRefreshWidget.vue'
 import store from '../../store/index'
 
-import { getInvidiousPopularFeed } from '../../helpers/api/invidious'
+import { discoveryApi } from '../../helpers/api/discoveryApi'
 import { getRelativeTimeFromDate, showApiErrorToast } from '../../helpers/utils'
 import { useI18n } from 'vue-i18n'
 import { KeyboardShortcuts } from '../../../constants'
@@ -99,7 +99,7 @@ async function fetchPopularInfo() {
   hasLoaded.value = false
 
   try {
-    const items = await getInvidiousPopularFeed()
+    const items = await discoveryApi.getPopular()
 
     store.commit('setLastPopularRefreshTimestamp', new Date())
     shownResults.value = items

@@ -62,12 +62,7 @@ import {
   showApiErrorToast,
   showToast,
 } from '../../helpers/utils'
-import {
-  extractLocalCacheableSearchContinuation,
-  getLocalSearchContinuation,
-  getLocalSearchResults
-} from '../../helpers/api/local'
-import { getInvidiousSearchResults } from '../../helpers/api/invidious'
+import { discoveryApi } from '../../helpers/api/discoveryApi'
 import { SEARCH_CHAR_LIMIT } from '../../../constants'
 import { useTabContext, useTabTitle } from '../../tabs/TabContext'
 
@@ -212,13 +207,8 @@ function checkSearchCache(payload) {
     hasMoreResults.value = true
     searchSettings.value = payload.searchSettings
 
-    switch (backendPreference.value) {
-      case 'local':
-        performSearchLocal(payload)
-        break
-      case 'invidious':
-        performSearchInvidious(payload, { resetSearchPage: true })
-        break
+    if (backendPreference.value === 'local' || backendPreference.value === 'invidious') {
+      performSearch(payload, { resetInvidiousPage: true })
     }
   }
 
@@ -227,142 +217,70 @@ function checkSearchCache(payload) {
   }
 }
 
-async function performSearchLocal(payload) {
-  isLoading.value = true
-
-  try {
-    const { results, continuationData } = await getLocalSearchResults(
-      payload.query,
-      payload.searchSettings,
-      showFamilyFriendlyOnly.value
-    )
-
-    apiUsed.value = 'local'
-
-    shownResults.value = results
-    nextPageRef.value = continuationData
-    hasMoreResults.value = results.length > 0 && continuationData != null
-
-    isLoading.value = false
-
-    const historyPayload = {
-      query: payload.query,
-      data: shownResults.value,
-      searchSettings: searchSettings.value,
-      nextPageRef: nextPageRef.value ? extractLocalCacheableSearchContinuation(nextPageRef.value) : null,
-      hasMoreResults: hasMoreResults.value,
-      apiUsed: apiUsed.value
-    }
-
-    store.commit('addToSessionSearchHistory', historyPayload)
-
-    updateSubscriptionDetails(results)
-  } catch (err) {
-    console.error(err)
-
-    const errorMessage = t('Local API Error (Click to copy)')
-    showApiErrorToast(errorMessage, err)
-
-    if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-      await performSearchInvidious(payload)
-    } else {
-      isLoading.value = false
-    }
-  }
+function showSearchProviderError(provider, error) {
+  console.error(error)
+  const errorMessage = provider === 'local'
+    ? t('Local API Error (Click to copy)')
+    : t('Invidious API Error (Click to copy)')
+  showApiErrorToast(errorMessage, error)
 }
 
-async function getNextpageLocal(payload) {
-  try {
-    const { results, continuationData } = await getLocalSearchContinuation(payload.options.nextPageRef)
-
-    nextPageRef.value = continuationData
-    hasMoreResults.value = results.length > 0 && continuationData != null
-
-    apiUsed.value = 'local'
-
-    shownResults.value = shownResults.value.concat(results)
-    const historyPayload = {
-      query: payload.query,
-      data: shownResults.value,
-      searchSettings: searchSettings.value,
-      nextPageRef: nextPageRef.value ? extractLocalCacheableSearchContinuation(nextPageRef.value) : null,
-      hasMoreResults: hasMoreResults.value,
-      apiUsed: apiUsed.value
-    }
-
-    store.commit('addToSessionSearchHistory', historyPayload)
-
-    updateSubscriptionDetails(results)
-  } catch (err) {
-    console.error(err)
-
-    const errorMessage = t('Local API Error (Click to copy)')
-    showApiErrorToast(errorMessage, err)
-
-    if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-      await performSearchInvidious(payload)
-    } else {
-      isLoading.value = false
-    }
-  }
+function showSearchFallback(from) {
+  const message = from === 'local'
+    ? t('Falling back to Invidious API')
+    : t('Falling back to Local API')
+  showToast({ message, icon: ['fas', 'exchange-alt'] })
 }
 
-async function performSearchInvidious(payload, options = { resetSearchPage: false }) {
-  if (options.resetSearchPage) {
+async function performSearch(payload, { next = false, resetInvidiousPage = false } = {}) {
+  if (resetInvidiousPage && backendPreference.value === 'invidious') {
     searchPage.value = 1
   }
-
-  if (searchPage.value === 1) {
+  if (!next || (apiUsed.value === 'invidious' && searchPage.value === 1)) {
     isLoading.value = true
   }
 
   try {
-    const results = await getInvidiousSearchResults(payload.query, searchPage.value, payload.searchSettings)
-    if (!results) {
-      return
-    }
+    const result = await discoveryApi.search({
+      query: payload.query,
+      searchSettings: payload.searchSettings,
+      safetyMode: showFamilyFriendlyOnly.value,
+      preference: backendPreference.value,
+      provider: next ? apiUsed.value : backendPreference.value,
+      continuation: next && apiUsed.value === 'local' ? nextPageRef.value : null,
+      page: searchPage.value,
+      fallbackEnabled: backendFallback.value,
+      localAvailable: process.env.SUPPORTS_LOCAL_API,
+      onProviderError: showSearchProviderError,
+      onFallback: showSearchFallback,
+    })
+    if (!result) return
 
-    hasMoreResults.value = results.length > 0
-
-    apiUsed.value = 'invidious'
-
-    if (searchPage.value !== 1) {
-      shownResults.value = shownResults.value.concat(results)
-    } else {
-      shownResults.value = results
-    }
-
+    const append = next && result.provider === apiUsed.value && (
+      result.provider === 'local' || searchPage.value !== 1
+    )
+    apiUsed.value = result.provider
+    shownResults.value = append ? shownResults.value.concat(result.items) : result.items
+    nextPageRef.value = result.continuation
+    searchPage.value = result.nextPage
+    hasMoreResults.value = result.hasMore
     isLoading.value = false
-
-    searchPage.value++
 
     const historyPayload = {
       query: payload.query,
       data: shownResults.value,
       searchSettings: searchSettings.value,
-      searchPage: searchPage.value,
       hasMoreResults: hasMoreResults.value,
-      apiUsed: apiUsed.value
+      apiUsed: apiUsed.value,
+      ...(result.provider === 'local'
+        ? { nextPageRef: result.cacheableContinuation }
+        : { searchPage: searchPage.value }),
     }
 
     store.commit('addToSessionSearchHistory', historyPayload)
-
-    updateSubscriptionDetails(results)
-  } catch (err) {
-    console.error(err)
-
-    const errorMessage = t('Invidious API Error (Click to copy)')
-    showApiErrorToast(errorMessage, err)
-
-    if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
-      await performSearchLocal(payload)
-    } else {
-      isLoading.value = false
-      // TODO: Show toast with error message
-    }
+    updateSubscriptionDetails(result.items)
+  } catch {
+    isLoading.value = false
   }
 }
 
@@ -371,32 +289,16 @@ async function nextPage() {
     return
   }
 
-  const payload = {
-    query: processedQuery.value,
-    searchSettings: searchSettings.value,
-    options: {
-      nextPageRef: nextPageRef.value
-    }
+  if (apiUsed.value === 'local' && nextPageRef.value === null) {
+    showToast({ message: t('Search Filters.There are no more results for this search'), icon: ['fas', 'search'] })
+    return
   }
 
-  if (apiUsed.value === 'local') {
-    if (nextPageRef.value !== null) {
-      isLoadingMore.value = true
-      try {
-        await getNextpageLocal(payload)
-      } finally {
-        isLoadingMore.value = false
-      }
-    } else {
-      showToast({ message: t('Search Filters.There are no more results for this search'), icon: ['fas', 'search'] })
-    }
-  } else {
-    isLoadingMore.value = true
-    try {
-      await performSearchInvidious(payload)
-    } finally {
-      isLoadingMore.value = false
-    }
+  isLoadingMore.value = true
+  try {
+    await performSearch({ query: processedQuery.value, searchSettings: searchSettings.value }, { next: true })
+  } finally {
+    isLoadingMore.value = false
   }
 }
 
