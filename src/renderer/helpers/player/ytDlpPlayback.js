@@ -169,8 +169,8 @@ export async function getExternalYtDlpPlaybackSource(url, useAuthentication = fa
   if (info.liveStatus === 'is_upcoming' && info.formats.length === 0) {
     return { info, source: null }
   }
-  const audioOnly = !info.formats.some(format =>
-    isVideoFormat(format) || isExternalProgressiveVideoFormat(format)
+  const audioOnly = info.formats.length > 0 && info.formats.every(format =>
+    format.vcodec === 'none' && isAudioFormat(format)
   )
   const httpFormats = info.formats.filter(format =>
     ['http', 'https'].includes(format.protocol) &&

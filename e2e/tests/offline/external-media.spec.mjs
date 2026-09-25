@@ -1666,41 +1666,50 @@ test('plays both streams when an external clip has separate audio and codec-free
   await expect.poll(() => audio.evaluate(element => element.paused)).toBe(true)
   await video.evaluate(element => element.play())
   await expect.poll(() => audio.evaluate(element => !element.paused)).toBe(true)
+  await video.evaluate(element => element.pause())
+  await expect.poll(() => audio.evaluate(element => element.paused)).toBe(true)
+  await audio.evaluate(element => { element.play = () => Promise.reject(new DOMException('Autoplay blocked', 'NotAllowedError')) })
+  await video.evaluate(element => element.play())
+  await expect.poll(() => video.evaluate(element => element.paused), { timeout: 1000 }).toBe(true)
 })
 
-test('uses a playable HLS variant when the master playlist is blocked', async ({ app, page }) => {
-  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+for (const [name, videoCodec] of [
+  ['uses a playable HLS variant when the master playlist is blocked', 'avc1.64001f'],
+  ['keeps HLS video enabled when its codec metadata is missing', undefined]
+]) {
+  test(name, async ({ app, page }) => {
+    test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
 
-  const executable = path.join(app.userDataDir, 'external-media-hls-variant.sh')
-  const masterUrl = 'https://hls.example.test/master.m3u8'
-  const variantUrl = 'https://hls.example.test/1080.m3u8'
-  const segmentUrl = 'https://hls.example.test/segment.mp4'
-  const response = JSON.stringify({
-    title: 'Example HLS video',
-    manifest_url: masterUrl,
-    formats: [{
-      format_id: 'hls-1080',
-      url: variantUrl,
+    const executable = path.join(app.userDataDir, 'external-media-hls-variant.sh')
+    const masterUrl = 'https://hls.example.test/master.m3u8'
+    const variantUrl = 'https://hls.example.test/1080.m3u8'
+    const segmentUrl = 'https://hls.example.test/segment.mp4'
+    const response = JSON.stringify({
+      title: 'Example HLS video',
       manifest_url: masterUrl,
-      protocol: 'm3u8_native',
-      ext: 'mp4',
-      vcodec: 'avc1.64001f',
-      acodec: 'mp4a.40.2',
-      width: 1920,
-      height: 1080
-    }]
-  })
-  await writeFile(executable, [
-    '#!/bin/sh',
-    'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
-    `printf '%s\\n' '${response}'`
-  ].join('\n'))
-  await chmod(executable, 0o755)
-  await page.route(masterUrl, route => route.fulfill({ status: 403 }))
-  await page.route(variantUrl, route => route.fulfill({
-    status: 200,
-    contentType: 'application/vnd.apple.mpegurl',
-    body: `#EXTM3U
+      formats: [{
+        format_id: 'hls-1080',
+        url: variantUrl,
+        manifest_url: masterUrl,
+        protocol: 'm3u8_native',
+        ext: 'mp4',
+        vcodec: videoCodec,
+        acodec: 'mp4a.40.2',
+        width: 1920,
+        height: 1080
+      }]
+    })
+    await writeFile(executable, [
+      '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+      `printf '%s\\n' '${response}'`
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.route(masterUrl, route => route.fulfill({ status: 403 }))
+    await page.route(variantUrl, route => route.fulfill({
+      status: 200,
+      contentType: 'application/vnd.apple.mpegurl',
+      body: `#EXTM3U
 #EXT-X-TARGETDURATION:2
 #EXT-X-VERSION:7
 #EXT-X-MEDIA-SEQUENCE:0
@@ -1710,31 +1719,33 @@ test('uses a playable HLS variant when the master playlist is blocked', async ({
 ${segmentUrl}
 #EXT-X-ENDLIST
 `
-  }))
-  await page.route(segmentUrl, async route => route.fulfill({
-    contentType: 'video/mp4',
-    body: await readFile(path.join(repoRoot, 'e2e/fixtures/media/hls-1080.mp4'))
-  }))
-  await page.evaluate(async (ytDlpPath) => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-    await store.dispatch('updateYtDlpSource', 'system')
-    await store.dispatch('updateYtDlpPath', ytDlpPath)
-  }, executable)
+    }))
+    await page.route(segmentUrl, async route => route.fulfill({
+      contentType: 'video/mp4',
+      body: await readFile(path.join(repoRoot, 'e2e/fixtures/media/hls-1080.mp4'))
+    }))
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpSource', 'system')
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
 
-  const variantRequested = page.waitForRequest(variantUrl)
-  await page.locator(sel.searchInput).fill('https://www.dailymotion.com/video/example')
-  await page.locator(sel.searchInput).press('Enter')
-  await variantRequested
-  await expect.poll(async () => {
-    const diagnostic = page.locator(`${activeTab} .externalMediaDiagnostic`)
-    if (await diagnostic.count()) return await diagnostic.textContent()
-    const player = page.locator(`${activeTab} .externalMediaPlayer`)
-    const playbackTime = await player.count()
-      ? await player.evaluate(el => el.querySelector('video')?.currentTime ?? 0)
-      : 0
-    return playbackTime > 0.2 ? 'playing' : 'pending'
-  }, { timeout: 8_000 }).toBe('playing')
-})
+    const variantRequested = page.waitForRequest(variantUrl)
+    await page.locator(sel.searchInput).fill('https://www.dailymotion.com/video/example')
+    await page.locator(sel.searchInput).press('Enter')
+    await variantRequested
+    await expect(page.locator(`${activeTab} .externalMediaPlayer video`)).not.toHaveClass(/audioOnly/)
+    await expect.poll(async () => {
+      const diagnostic = page.locator(`${activeTab} .externalMediaDiagnostic`)
+      if (await diagnostic.count()) return await diagnostic.textContent()
+      const player = page.locator(`${activeTab} .externalMediaPlayer`)
+      const playbackTime = await player.count()
+        ? await player.evaluate(el => el.querySelector('video')?.currentTime ?? 0)
+        : 0
+      return playbackTime > 0.2 ? 'playing' : 'pending'
+    }, { timeout: 8_000 }).toBe('playing')
+  })
+}
 
 test('passes yt-dlp headers to HLS media segments', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
