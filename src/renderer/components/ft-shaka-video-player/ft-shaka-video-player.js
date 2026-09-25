@@ -5944,6 +5944,9 @@ export default defineComponent({
         return
       }
 
+      // Measuring briefly widens the scrollable bar and clamps its offset.
+      const quickRateBar = controlPanel.querySelector('.ft-quick-playback-rate-bar')
+      const quickRateBarScrollLeft = quickRateBar?.scrollLeft
       controlPanel.classList.add('ft-controls-measuring')
       controlPanel.classList.remove(...controlPanelCompactClasses)
 
@@ -5956,6 +5959,9 @@ export default defineComponent({
       }
 
       controlPanel.classList.remove('ft-controls-measuring')
+      if (quickRateBar && quickRateBarScrollLeft !== undefined) {
+        quickRateBar.scrollLeft = quickRateBarScrollLeft
+      }
 
       const rightGlass = controlPanel.querySelector(':scope > .ft-right-control-glass')
       if (rightGlass instanceof HTMLElement) {
