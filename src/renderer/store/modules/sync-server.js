@@ -49,6 +49,7 @@ import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../hel
 import { syncWatchStats } from '../../helpers/sync-watch-stats'
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { getInitialSyncStages, planEncryptedSyncCollections } from '../../helpers/sync-server-plan.js'
+import { appendSyncActivityEntries, getNextSyncEventCursor, parseSyncEvents, pruneSyncActivity } from '../../helpers/sync-server-events.js'
 
 const EVENT_SYNC_DEBOUNCE_MS = 1500
 const EVENT_SYNC_DELAYS = {
@@ -681,17 +682,16 @@ const actions = {
     const stillCurrent = () => rootState.settings.syncServerEnabled &&
       rootState.settings.syncServerToken === settings.syncServerToken && !client.cancelled
     const refresh = async () => {
-      const events = await client.getSyncEvents(eventsSince)
+      const response = await client.getSyncEvents(eventsSince)
       if (!stillCurrent()) return
-      if (!Array.isArray(events)) throw new Error('Invalid sync events')
-      const activity = [...state.syncServerActivity]
+      const events = parseSyncEvents(response)
+      let activity = [...state.syncServerActivity]
       let nextEventsSince = eventsSince
       for (const event of events) {
         if (!stillCurrent()) return
-        if (typeof event.id !== 'string') continue
         // Discarded broadcast entries need not be fetched again. Device requests
         // stay outside this cursor and remain pending until acknowledged.
-        if (event.recipient === '' && event.id > nextEventsSince) nextEventsSince = event.id
+        nextEventsSince = getNextSyncEventCursor(nextEventsSince, event)
         if (event.expires_at <= Date.now()) continue
         let value
         try {
@@ -702,18 +702,7 @@ const actions = {
         }
         if (!stillCurrent()) return
         if (event.recipient === '') {
-          if (value?.version === 1 && value.type === 'activity' && Array.isArray(value.changes) &&
-              typeof value.deviceName === 'string') {
-            for (const [index, change] of value.changes.slice(0, 500).entries()) {
-              if (!change || (typeof change.key !== 'string' && typeof change.collection !== 'string')) continue
-              const id = `${event.id}:${index}`
-              if (!activity.some(entry => entry.id === id)) {
-                activity.push({
-                  ...change, id, deviceName: value.deviceName, createdAt: event.created_at,
-                })
-              }
-            }
-          }
+          activity = appendSyncActivityEntries(activity, event, value)
         } else if (event.recipient === settings.syncServerDeviceId &&
             (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
             !(process.env.IS_CAPACITOR && isAppHidden())) {
@@ -738,9 +727,7 @@ const actions = {
         }
       }
       if (stillCurrent()) {
-        commit('setSyncServerActivity', activity
-          .filter(entry => entry.createdAt > Date.now() - 30 * 24 * 60 * 60 * 1000)
-          .sort((a, b) => b.createdAt - a.createdAt || b.id.localeCompare(a.id)).slice(0, 200))
+        commit('setSyncServerActivity', pruneSyncActivity(activity))
         eventsSince = nextEventsSince
       }
     }

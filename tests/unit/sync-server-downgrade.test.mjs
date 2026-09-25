@@ -15,6 +15,7 @@ import * as privacy from '../../src/renderer/helpers/sync-server-privacy.js'
 import { dispatchRemoteSyncAction, isRecentSync, isSyncReasonEnabled } from '../../src/renderer/helpers/sync-server-scheduling.js'
 import { createSyncServerRequestHeaders } from '../../src/renderer/helpers/sync-server-request.js'
 import { getInitialSyncStages, planEncryptedSyncCollections } from '../../src/renderer/helpers/sync-server-plan.js'
+import * as syncEvents from '../../src/renderer/helpers/sync-server-events.js'
 import { mergeSubscriptionSeenPosts } from '../../src/subscriptionSeenPosts.js'
 import { mergeSubscriptionSeenVideos } from '../../src/subscriptionSeenVideos.js'
 import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from '../../src/renderer/helpers/subscription-seen-videos.js'
@@ -69,6 +70,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     isSyncReasonEnabled,
     getInitialSyncStages,
     planEncryptedSyncCollections,
+    ...syncEvents,
     getConnectionState: () => network.state,
     navigator: { get onLine() { return network.online },
       ...(deferLock ? { locks: { request: (name, callback) => Promise.resolve().then(callback) } } : {}) },
