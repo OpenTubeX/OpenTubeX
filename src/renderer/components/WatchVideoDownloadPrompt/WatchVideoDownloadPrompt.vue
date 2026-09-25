@@ -374,6 +374,7 @@ import { downloadErrorMessage } from '../../helpers/downloadErrors'
 
 const props = defineProps({
   videoId: { type: String, default: '' },
+  externalUrl: { type: String, default: '' },
   videoIds: { type: Array, default: () => [] },
   playlistId: { type: String, default: '' },
   playlistKey: { type: String, default: '' },
@@ -591,6 +592,7 @@ function deleteTemplate() {
 }
 
 function matchesDownload(download) {
+  if (props.externalUrl) return download.retryPayload?.externalUrl === props.externalUrl
   if (!props.isPlaylist) return download.videoId === props.videoId
   return props.playlistKey !== '' && download.playlistKey === props.playlistKey
 }
@@ -614,6 +616,7 @@ async function startDownload() {
   const result = await ytDlp.ytDlpDownload({
     ...normalizeOptions(options),
     videoId: props.videoId,
+    ...(props.externalUrl ? { externalUrl: props.externalUrl } : {}),
     videoIds: [...props.videoIds],
     playlistId: props.playlistId,
     playlistKey: props.playlistKey,

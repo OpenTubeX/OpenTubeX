@@ -1750,6 +1750,7 @@ CommandPalette:
     Download Finished: Lượt tải này không còn chạy
     Video: Hãy mở một video trước
 Downloads:
+  Add Download: Thêm lượt tải xuống
   Preparing: Đang chuẩn bị…
   Export Failed: "Không thể lưu tệp đã tải xuống. Hãy chọn thư mục tải xuống có quyền ghi và thử lại."
   Remove File Permanently Warning: "Thao tác này sẽ xóa vĩnh viễn \"{title}\"."

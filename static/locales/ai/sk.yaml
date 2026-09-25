@@ -1717,6 +1717,7 @@ CommandPalette:
     Download Finished: Toto sťahovanie už neprebieha
     Video: Najprv otvorte video
 Downloads:
+  Add Download: Pridať stiahnutie
   Preparing: Príprava…
   Export Failed: "Stiahnutý súbor sa nepodarilo uložiť. Vyberte priečinok na sťahovanie s oprávnením na zápis a skúste to znova."
   Remove File Permanently Warning: "Týmto natrvalo odstránite „{title}“."

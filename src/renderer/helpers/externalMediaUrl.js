@@ -1,17 +1,12 @@
+import { isYtDlpMediaUrl } from '../../ytDlpArguments.js'
+
 /**
  * URLs entered in the search bar may be handed to yt-dlp for media extraction.
  * Keep this limited to web URLs, with no embedded credentials.
  * @param {unknown} value
  */
 export function isExternalMediaUrl(value) {
-  if (typeof value !== 'string' || value.length > 8192) return false
-
-  try {
-    const url = new URL(value)
-    return ['http:', 'https:'].includes(url.protocol) && !url.username && !url.password
-  } catch {
-    return false
-  }
+  return isYtDlpMediaUrl(value)
 }
 
 /**

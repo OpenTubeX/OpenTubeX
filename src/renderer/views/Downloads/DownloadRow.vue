@@ -218,6 +218,7 @@ const canAccessFiles = computed(() => (
   props.download.availability !== 'missing'
 ))
 const canPlay = computed(() => (
+  !props.download.retryPayload?.externalUrl &&
   (props.download.status === 'completed' || (process.env.IS_CAPACITOR && props.download.status === 'failed')) &&
   ['video', 'audio'].includes(props.download.mode) &&
   Array.isArray(props.download.files) &&

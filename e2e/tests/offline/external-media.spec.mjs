@@ -2,7 +2,7 @@ import { chmod, readFile, rm, writeFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import path from 'node:path'
 
-import { expect, repoRoot, sel, setWindowSize, test } from '../../helpers/app.mjs'
+import { expect, goTo, repoRoot, sel, setWindowSize, test } from '../../helpers/app.mjs'
 import { activeTab, waitForPlayback } from '../../helpers/player.mjs'
 import { DEMO_MEDIA_PATH, DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 
@@ -39,6 +39,47 @@ async function prepareTwitchYtDlp(app, page, mediaUrl, live, description = '') {
     await store.dispatch('updateYtDlpPath', ytDlpPath)
   }, executable)
 }
+
+test('adds a web URL from Downloads and passes it to yt-dlp', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const executable = path.join(app.userDataDir, 'external-download-yt-dlp.sh')
+  const argsFile = path.join(app.userDataDir, 'external-download-args.txt')
+  await writeFile(executable, [
+    '#!/bin/sh',
+    `printf '%s\\n' "$@" > '${argsFile}'`
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  await page.evaluate(async ({ ytDlpPath, folder }) => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateYtDlpSource', 'system')
+    await store.dispatch('updateYtDlpPath', ytDlpPath)
+    await store.dispatch('updateYtDlpFfmpegSource', 'system')
+    await store.dispatch('updateYtDlpDownloadFolderPath', folder)
+  }, { ytDlpPath: executable, folder: app.userDataDir })
+  await goTo(page, 'downloads')
+  await page.getByRole('button', { name: 'Add download' }).click()
+  const urlPrompt = page.getByRole('dialog', { name: 'Add download' })
+  await expect(urlPrompt).toBeVisible()
+  await urlPrompt.getByRole('textbox', { name: 'URL' }).fill('file:///tmp/video.mp4')
+  await expect(urlPrompt.getByRole('button', { name: 'Next' })).toBeDisabled()
+  await urlPrompt.getByRole('textbox', { name: 'URL' }).fill('https://vimeo.com/123456789')
+  await urlPrompt.getByRole('button', { name: 'Next' }).click()
+  const options = page.getByRole('dialog', { name: 'https://vimeo.com/123456789' })
+  await expect(options).toBeVisible()
+  await options.getByRole('button', { name: 'Download', exact: true }).click()
+  await expect.poll(() => readFile(argsFile, 'utf8').catch(() => '')).toContain('https://vimeo.com/123456789')
+})
+
+test('offers download options for external media', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const externalMedia = page.locator(`${activeTab} .externalMedia`)
+  await externalMedia.getByRole('button', { name: 'Download Video' }).click()
+  await expect(page.getByRole('dialog', { name: 'A Twitch broadcast' })).toBeVisible()
+})
 
 test('external media cards are separated on phone layouts', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')

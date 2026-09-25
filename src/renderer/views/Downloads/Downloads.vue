@@ -1,13 +1,19 @@
 <template>
   <div class="downloadsPage">
     <div
-      v-if="downloads.length > 0"
+      v-if="downloads.length > 0 || enableDownloads"
       class="downloadsHeader"
     >
-      <p>
+      <p v-if="downloads.length > 0">
         {{ t('Downloads.Total Size', { size: formattedTotalSize }) }}
       </p>
       <div class="downloadHeaderActions">
+        <FtButton
+          v-if="enableDownloads"
+          :label="t('Downloads.Add Download')"
+          :icon="['fas', 'plus']"
+          @click="showUrlPrompt = true"
+        />
         <FtButton
           v-if="pausableDownloads.length > 0"
           :label="t('Downloads.Pause All')"
@@ -117,6 +123,47 @@
       <p>{{ t('Downloads.No Downloads Description') }}</p>
     </div>
     <FtPrompt
+      v-if="showUrlPrompt && enableDownloads"
+      autosize
+      :label="t('Downloads.Add Download')"
+      @click="showUrlPrompt = false"
+    >
+      <div class="addDownloadPrompt">
+        <FtInput
+          input-type="url"
+          placeholder="URL"
+          :show-label="true"
+          :show-action-button="false"
+          :value="downloadUrl"
+          :maxlength="8192"
+          @input="downloadUrl = $event"
+          @keydown.enter="openDownloadOptions"
+        />
+        <FtFlexBox>
+          <FtButton
+            :label="t('Video.Next')"
+            :icon="['fas', 'arrow-right']"
+            :disabled="!validDownloadUrl"
+            @click="openDownloadOptions"
+          />
+          <FtButton
+            :label="t('Cancel')"
+            :icon="['fas', 'xmark']"
+            :text-color="null"
+            :background-color="null"
+            @click="showUrlPrompt = false"
+          />
+        </FtFlexBox>
+      </div>
+    </FtPrompt>
+    <WatchVideoDownloadPrompt
+      v-if="enableDownloads && selectedDownloadUrl"
+      :key="selectedDownloadUrl"
+      :external-url="selectedDownloadUrl"
+      :title="selectedDownloadUrl"
+      @close="selectedDownloadUrl = ''"
+    />
+    <FtPrompt
       v-if="pendingRemoval !== null"
       autosize
       :label="t('Downloads.Remove File Confirmation')"
@@ -137,7 +184,11 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import DownloadRow from './DownloadRow.vue'
 import FtButton from '../../components/FtButton/FtButton.vue'
+import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
+import FtInput from '../../components/FtInput/FtInput.vue'
 import FtPrompt from '../../components/FtPrompt/FtPrompt.vue'
+import WatchVideoDownloadPrompt from '../../components/WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
+import { isYtDlpMediaUrl } from '../../../ytDlpArguments'
 import store from '../../store/index'
 import { formatBytes } from '../../helpers/fileSize'
 import { showToast } from '../../helpers/utils'
@@ -146,6 +197,11 @@ const { t } = useI18n()
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const router = useRouter()
 const pendingRemoval = ref(null)
+const showUrlPrompt = ref(false)
+const downloadUrl = ref('')
+const selectedDownloadUrl = ref('')
+const enableDownloads = computed(() => store.getters.getEnableDownloads)
+const validDownloadUrl = computed(() => isYtDlpMediaUrl(downloadUrl.value.trim()))
 const retryingDownloadIds = ref([])
 const downloads = computed(() => Object.values(store.getters.getYtDlpDownloads).sort((a, b) => b.id - a.id))
 const activeDownloads = computed(() => downloads.value.filter(download => (
@@ -168,6 +224,20 @@ const clearableDownloads = computed(() => downloads.value.filter(download => (
 )))
 const totalSizeBytes = computed(() => downloads.value.reduce((total, download) => total + (download.sizeBytes ?? 0), 0))
 const formattedTotalSize = computed(() => formatBytes(totalSizeBytes.value))
+
+function openDownloadOptions() {
+  if (!validDownloadUrl.value) return
+  selectedDownloadUrl.value = downloadUrl.value.trim()
+  showUrlPrompt.value = false
+  downloadUrl.value = ''
+}
+
+watch(enableDownloads, enabled => {
+  if (!enabled) {
+    showUrlPrompt.value = false
+    selectedDownloadUrl.value = ''
+  }
+})
 
 async function refreshDownloads() {
   const records = await ytDlp.ytDlpListDownloads()

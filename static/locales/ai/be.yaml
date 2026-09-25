@@ -1808,6 +1808,7 @@ CommandPalette:
     Download Finished: Гэтае спампоўванне больш не выконваецца
     Video: Спачатку адкрыйце відэа
 Downloads:
+  Add Download: Дадаць спампоўку
   Preparing: Падрыхтоўка…
   Export Failed: "Не ўдалося захаваць спампаваны файл. Выберыце папку спамповак з дазволам на запіс і паўтарыце спробу."
   Remove File Permanently Warning: "«{title}» будзе выдалена назаўсёды."

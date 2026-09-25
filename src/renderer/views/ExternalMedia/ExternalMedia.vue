@@ -165,6 +165,12 @@
               >{{ hostname }}</a>
               <div class="externalMediaActions">
                 <FtIconButton
+                  v-if="enableDownloads && source"
+                  :title="t('Downloads.Download Video')"
+                  :icon="['fas', 'download']"
+                  @click="showDownloadPrompt = true"
+                />
+                <FtIconButton
                   v-if="chatAvailable"
                   :title="chatToggleTitle"
                   :icon="['fas', 'message']"
@@ -252,6 +258,14 @@
         </aside>
       </div>
     </template>
+    <WatchVideoDownloadPrompt
+      v-if="enableDownloads && showDownloadPrompt"
+      :key="mediaUrl"
+      :external-url="mediaUrl"
+      :title="info?.title || mediaUrl"
+      :thumbnail="thumbnail"
+      @close="showDownloadPrompt = false"
+    />
   </main>
 </template>
 
@@ -271,6 +285,7 @@ import FtShareButton from '../../components/FtShareButton/FtShareButton.vue'
 import FtShakaVideoPlayer from '../../components/ft-shaka-video-player/ft-shaka-video-player.vue'
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
 import WatchVideoChapters from '../../components/WatchVideoChapters/WatchVideoChapters.vue'
+import WatchVideoDownloadPrompt from '../../components/WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 import TwitchChat from './TwitchChat.vue'
 import { getTwitchChatTarget } from './twitchChat'
 import { getExternalYtDlpPlaybackSource } from '../../helpers/player/ytDlpPlayback'
@@ -296,6 +311,8 @@ const videoLayout = useTemplateRef('videoLayout')
 const mediaUrl = ref('')
 const currentTime = ref(0)
 const showChapters = ref(false)
+const showDownloadPrompt = ref(false)
+const enableDownloads = computed(() => store.getters.getEnableDownloads)
 const attemptUsedCookies = ref(false)
 const drmError = ref(false)
 const seekCount = ref(0)
@@ -537,6 +554,7 @@ function handlePlayerError(error) {
 }
 
 async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysUseCookies) {
+  showDownloadPrompt.value = false
   if (seekTimer !== null) clearTimeout(seekTimer)
   seekTimer = null
   const generation = ++loadGeneration
@@ -582,6 +600,7 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
 }
 
 watch(() => route.query.url, url => loadMedia(url), { immediate: true })
+watch(enableDownloads, enabled => { if (!enabled) showDownloadPrompt.value = false })
 onBeforeUnmount(() => {
   theatreModeAnimations.forEach(animation => animation.cancel())
   loadGeneration++

@@ -1762,6 +1762,7 @@ CommandPalette:
     Download Finished: ההורדה הזו כבר לא פעילה
     Video: יש לפתוח תחילה סרטון
 Downloads:
+  Add Download: הוספת הורדה
   Preparing: בהכנה…
   Export Failed: "לא ניתן לשמור את הקובץ שהורד. יש לבחור תיקיית הורדות עם הרשאת כתיבה ולנסות שוב."
   Remove File Permanently Warning: "פעולה זו תמחק את \"{title}\" לצמיתות."
