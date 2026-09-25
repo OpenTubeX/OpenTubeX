@@ -232,14 +232,23 @@ test.describe('channel route changes', () => {
 
   test('keeps the latest sort loading when an older videos request finishes', async ({ page }) => {
     const releaseRequests = new Map()
-    let newestRequests = 0
+    const videos = [1, 2].map(number => ({
+      videoId: `alpha00000${number}`,
+      title: `Video ${number}`,
+      author: 'Alpha',
+      authorId: CHANNEL_ID,
+      videoThumbnails: [],
+      lengthSeconds: 120,
+      viewCount: 10,
+      published: 1700000000
+    }))
 
     await page.route(/^https:\/\/invidious\.test\/api\/v1\/channels\//, async route => {
       const url = new URL(route.request().url())
       if (url.pathname.endsWith('/videos')) {
         const sort = url.searchParams.get('sort_by')
-        if (sort === 'newest' && newestRequests++ === 0) {
-          return route.fulfill({ json: { videos: [], continuation: 'next' } })
+        if (sort === 'newest' && !url.searchParams.has('continuation')) {
+          return route.fulfill({ json: { videos, continuation: 'next' } })
         }
         await new Promise(resolve => { releaseRequests.set(sort, resolve) })
         return route.fulfill({ json: { videos: [] } })
@@ -273,21 +282,14 @@ test.describe('channel route changes', () => {
       await page.locator(sel.searchInput).fill(CHANNEL_URL)
       await page.locator(sel.searchInput).press('Enter')
       await expect(page).toHaveURL(new RegExp(`#/channel/${CHANNEL_ID}/videos$`))
-      const sort = page.locator('.select-container .nativeSelect').first()
-      await expect(sort).toHaveValue('newest')
-      await sort.evaluate(element => {
-        element.value = 'popular'
-        element.dispatchEvent(new Event('change', { bubbles: true }))
-      })
-      await expect.poll(() => releaseRequests.has('popular')).toBe(true)
-      await sort.evaluate(element => {
-        element.value = 'newest'
-        element.dispatchEvent(new Event('change', { bubbles: true }))
-      })
+      await expect(page.locator('.select-container .select-text').first()).toBeVisible()
       await expect.poll(() => releaseRequests.has('newest')).toBe(true)
+      await page.locator('.select-container .select-text').first().click()
+      await page.getByRole('option', { name: 'Most Popular' }).click()
+      await expect.poll(() => releaseRequests.has('popular')).toBe(true)
 
-      const oldResponse = page.waitForResponse(response => response.url().includes('sort_by=popular'))
-      releaseRequests.get('popular')()
+      const oldResponse = page.waitForResponse(response => response.url().includes('continuation=next'))
+      releaseRequests.get('newest')()
       await oldResponse
       await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
       await expect(page.locator('[data-tab-loading-indicator]:not(.fullscreen)')).toBeVisible()
