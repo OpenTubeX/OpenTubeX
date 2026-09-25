@@ -568,7 +568,9 @@ export default defineComponent({
     'loaded',
     'ended',
     'play',
+    'playing',
     'pause',
+    'waiting',
     'timeupdate',
     'terminal-outro-started',
     'toggle-autoplay',
@@ -580,6 +582,7 @@ export default defineComponent({
     'save-channel-playback-speed',
     'video-quality-updated',
     'video-quality-user-set',
+    'legacy-format-selected',
     'subtitles-state-updated',
     'subtitles-state-user-set',
     'volume-updated',
@@ -6421,12 +6424,14 @@ export default defineComponent({
       if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
         window.ftElectron.tabs.setPlaybackState('playing', tabId)
       }
+      emit('playing')
     }
 
     function handleWaiting() {
       if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
         window.ftElectron.tabs.setPlaybackState('waiting', tabId)
       }
+      emit('waiting')
     }
 
     function handlePause() {
@@ -8607,6 +8612,7 @@ export default defineComponent({
         }
 
         activeLegacyFormat.value = event.detail.format
+        emit('legacy-format-selected', format)
         const quality = getQualityFromDimensions(format.width, format.height)
 
         // Only remember the quality when the user picked it themselves. The legacy formats top out

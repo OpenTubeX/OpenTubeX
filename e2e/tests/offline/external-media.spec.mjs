@@ -66,7 +66,13 @@ test('adds a web URL from Downloads and passes it to yt-dlp', async ({ app, page
   await urlPrompt.getByRole('textbox', { name: 'URL' }).press('Enter')
   const options = page.getByRole('dialog', { name: 'https://vimeo.com/123456789' })
   await expect(options).toBeVisible()
-  await options.getByRole('button', { name: 'Download', exact: true }).click()
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0].focus()
+  })
+  await expect.poll(() => app.electronApp.evaluate(({ BrowserWindow }) =>
+    BrowserWindow.getAllWindows()[0].isFocused())).toBe(true)
+  await options.getByRole('button', { name: 'Download', exact: true }).focus()
+  await options.getByRole('button', { name: 'Download', exact: true }).press('Enter')
   await expect.poll(() => readFile(argsFile, 'utf8').catch(() => '')).toContain('https://vimeo.com/123456789')
   await options.getByRole('button', { name: 'Close', exact: true }).click()
   await page.getByRole('button', { name: 'Add download' }).click()
@@ -298,8 +304,7 @@ test.describe('Twitch theater mode at 125% UI scale', () => {
     const theaterButton = player.locator('.theatre-button')
     await expect(theaterButton).toBeVisible()
     for (const enabled of [true, false]) {
-      await player.hover()
-      await theaterButton.click()
+      await theaterButton.press('Enter')
       await expect(page.locator(`${activeTab} .externalMediaLayout`)).toHaveClass(enabled ? /useTheatreMode/ : /^(?!.*useTheatreMode)/)
       expect(await player.evaluate(element => element.getAnimations().some(animation =>
         animation.effect.getKeyframes().some(frame => frame.transform?.includes('scale('))
@@ -1090,6 +1095,45 @@ test('plays a progressive external format when yt-dlp omits codec fields', async
   await waitForPlayback(page)
 })
 
+for (const [name, mediaUrl, format] of [
+  ['a direct MP4 without codecs or dimensions', 'https://media.example.test/video.mp4', { format_id: 'mp4', ext: 'mp4' }],
+  ['an Instagram video-only MP4', 'https://www.instagram.com/reel/example/', { format_id: 'dash-video', ext: 'mp4', vcodec: 'avc1.64001F', acodec: 'none', width: 720, height: 1280 }],
+  ['a Streamable MP4 without an audio codec', 'https://streamable.com/example', { format_id: 'mp4', ext: 'mp4', vcodec: 'h264', width: 1280, height: 720 }]
+]) {
+  test(`plays ${name}`, async ({ app, page }) => {
+    test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+
+    const executable = path.join(app.userDataDir, 'external-media-direct-mp4.sh')
+    const streamUrl = 'https://media.example.test/video.mp4'
+    const response = JSON.stringify({
+      title: name,
+      formats: [{ ...format, url: streamUrl, protocol: 'https' }]
+    })
+    await writeFile(executable, [
+      '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+      `printf '%s\\n' '${response}'`
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    const media = Buffer.from((await readFile(path.join(repoRoot, 'e2e', 'fixtures', 'media', 'post-live-video.mp4.b64'), 'utf8')).replaceAll('\n', ''), 'base64')
+    await page.route(streamUrl, route => route.fulfill({
+      contentType: 'video/mp4',
+      headers: { 'content-length': String(media.length), 'accept-ranges': 'bytes' },
+      body: media
+    }))
+    await page.evaluate(async ytDlpPath => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpSource', 'system')
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    await page.locator(sel.searchInput).fill(mediaUrl)
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page.locator(`${activeTab} .externalMediaPlayer`)).toBeVisible({ timeout: 20000 })
+    await waitForPlayback(page)
+  })
+}
+
 test('keeps protected media headers with a long external storyboard', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
 
@@ -1449,6 +1493,50 @@ test('plays an H.264 MP4 when yt-dlp supplies short codec names', async ({ app, 
   await waitForPlayback(page)
 })
 
+test('plays an audio-only SoundCloud HLS stream', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+
+  const mediaUrl = 'https://soundcloud.com/davidloehlein/superar'
+  const playlistUrl = 'https://audio.example.test/playlist.m3u8'
+  const segmentUrl = 'https://audio.example.test/segment.mp3'
+  const executable = path.join(app.userDataDir, 'soundcloud-yt-dlp.sh')
+  const response = JSON.stringify({
+    title: 'Superar',
+    duration: 4,
+    webpage_url: mediaUrl,
+    formats: [
+      { format_id: 'hls_mp3_1_0', url: playlistUrl, protocol: 'm3u8_native', ext: 'mp3', vcodec: 'none', acodec: 'mp3' },
+      { format_id: 'http_mp3_1_0', url: segmentUrl, protocol: 'http', ext: 'mp3', vcodec: 'none', acodec: 'mp3' }
+    ]
+  })
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+    `printf '%s\\n' '${response}'`
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  await page.route(playlistUrl, route => route.fulfill({
+    contentType: 'application/x-mpegurl',
+    body: '#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-TARGETDURATION:4\n#EXT-X-MEDIA-SEQUENCE:0\n#EXTINF:4,\nsegment.mp3\n#EXT-X-ENDLIST\n'
+  }))
+  await page.route(segmentUrl, async route => route.fulfill({
+    contentType: 'audio/mpeg',
+    body: await readFile(path.join(repoRoot, 'e2e', 'fixtures', 'media', 'demo-audio.mp3'))
+  }))
+  await page.evaluate(async ytDlpPath => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateYtDlpSource', 'system')
+    await store.dispatch('updateYtDlpPath', ytDlpPath)
+  }, executable)
+
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  await waitForPlayback(page)
+  const player = page.locator(`${activeTab} .externalMediaPlayer`)
+  await expect(player.locator('video')).toHaveClass(/audioOnly/)
+  await expect(page.locator(`${activeTab} .externalMediaError`)).toHaveCount(0)
+})
+
 test('does not show an audio-only player when a video site blocks its video streams', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
 
@@ -1480,26 +1568,22 @@ test('does not show an audio-only player when a video site blocks its video stre
   await expect(page.locator(`${activeTab} .externalMediaPlayer`)).toHaveCount(0)
 })
 
-test('uses a playable HLS variant when the master playlist is blocked', async ({ app, page }) => {
+test('plays an audio-only HLS stream from external media', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
 
-  const executable = path.join(app.userDataDir, 'external-media-hls-variant.sh')
-  const masterUrl = 'https://hls.example.test/master.m3u8'
-  const variantUrl = 'https://hls.example.test/1080.m3u8'
-  const segmentUrl = 'https://hls.example.test/segment.mp4'
+  const executable = path.join(app.userDataDir, 'external-media-audio-hls.sh')
+  const manifestUrl = 'https://audio.example.test/playlist.m3u8'
+  const segmentUrl = 'https://audio.example.test/segment.m4a'
   const response = JSON.stringify({
-    title: 'Example HLS video',
-    manifest_url: masterUrl,
+    title: 'Example audio show',
     formats: [{
-      format_id: 'hls-1080',
-      url: variantUrl,
-      manifest_url: masterUrl,
+      format_id: 'hls-audio',
+      url: manifestUrl,
+      manifest_url: manifestUrl,
       protocol: 'm3u8_native',
       ext: 'mp4',
-      vcodec: 'avc1.64001f',
-      acodec: 'mp4a.40.2',
-      width: 1920,
-      height: 1080
+      vcodec: 'none',
+      acodec: 'mp4a.40.2'
     }]
   })
   await writeFile(executable, [
@@ -1508,9 +1592,8 @@ test('uses a playable HLS variant when the master playlist is blocked', async ({
     `printf '%s\\n' '${response}'`
   ].join('\n'))
   await chmod(executable, 0o755)
-  await page.route(masterUrl, route => route.fulfill({ status: 403 }))
-  await page.route(variantUrl, route => route.fulfill({
-    status: 200,
+  const media = Buffer.from((await readFile(path.join(repoRoot, 'e2e/fixtures/media/post-live-audio.m4a.b64'), 'utf8')).replaceAll('\n', ''), 'base64')
+  await page.route(manifestUrl, route => route.fulfill({
     contentType: 'application/vnd.apple.mpegurl',
     body: `#EXTM3U
 #EXT-X-TARGETDURATION:2
@@ -1523,30 +1606,252 @@ ${segmentUrl}
 #EXT-X-ENDLIST
 `
   }))
-  await page.route(segmentUrl, async route => route.fulfill({
-    contentType: 'video/mp4',
-    body: await readFile(path.join(repoRoot, 'e2e/fixtures/media/hls-1080.mp4'))
-  }))
-  await page.evaluate(async (ytDlpPath) => {
+  await page.route(segmentUrl, route => route.fulfill({ contentType: 'audio/mp4', body: media }))
+  await page.evaluate(async ytDlpPath => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     await store.dispatch('updateYtDlpSource', 'system')
     await store.dispatch('updateYtDlpPath', ytDlpPath)
   }, executable)
 
-  const variantRequested = page.waitForRequest(variantUrl)
-  await page.locator(sel.searchInput).fill('https://www.dailymotion.com/video/example')
+  await page.locator(sel.searchInput).fill('https://www.mixcloud.com/example/show/')
   await page.locator(sel.searchInput).press('Enter')
-  await variantRequested
   await expect.poll(async () => {
     const diagnostic = page.locator(`${activeTab} .externalMediaDiagnostic`)
     if (await diagnostic.count()) return await diagnostic.textContent()
-    const player = page.locator(`${activeTab} .externalMediaPlayer`)
-    const playbackTime = await player.count()
-      ? await player.evaluate(el => el.querySelector('video')?.currentTime ?? 0)
-      : 0
-    return playbackTime > 0.2 ? 'playing' : 'pending'
-  }, { timeout: 8_000 }).toBe('playing')
+    const video = page.locator(`${activeTab} .externalMediaPlayer video`)
+    return await video.count() && await video.evaluate(element => element.currentTime > 0)
+      ? 'playing'
+      : 'pending'
+  }, { timeout: 20000 }).toBe('playing')
 })
+
+test('plays both streams when an external clip has separate audio and codec-free video', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+
+  const executable = path.join(app.userDataDir, 'external-media-separate-tracks.sh')
+  const videoUrl = 'https://coub.example.test/video.mp4'
+  const audioUrl = 'https://coub.example.test/audio.m4a'
+  const response = JSON.stringify({
+    title: 'Example clip',
+    formats: [
+      { format_id: 'audio', url: audioUrl, protocol: 'https', ext: 'm4a', vcodec: 'none', acodec: 'mp4a.40.2' },
+      { format_id: 'video', url: videoUrl, protocol: 'https', ext: 'mp4', acodec: 'none' }
+    ]
+  })
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+    `printf '%s\\n' '${response}'`
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  const videoBytes = Buffer.from((await readFile(path.join(repoRoot, 'e2e/fixtures/media/post-live-video.mp4.b64'), 'utf8')).replaceAll('\n', ''), 'base64')
+  const audioBytes = Buffer.from((await readFile(path.join(repoRoot, 'e2e/fixtures/media/post-live-long-audio.m4a.b64'), 'utf8')).replaceAll('\n', ''), 'base64')
+  await page.route(videoUrl, route => route.fulfill({ contentType: 'video/mp4', body: videoBytes }))
+  await page.route(audioUrl, route => route.fulfill({ contentType: 'audio/mp4', body: audioBytes }))
+  await page.evaluate(async ytDlpPath => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateYtDlpSource', 'system')
+    await store.dispatch('updateYtDlpPath', ytDlpPath)
+  }, executable)
+
+  await page.locator(sel.searchInput).fill('https://coub.com/view/example')
+  await page.locator(sel.searchInput).press('Enter')
+  const video = page.locator(`${activeTab} .externalMediaPlayer video`)
+  const audio = page.locator(`${activeTab} .externalMediaCompanionAudio`)
+  await expect.poll(() => video.evaluate(element => element.videoWidth).catch(() => 0), { timeout: 20000 }).toBeGreaterThan(0)
+  await expect.poll(() => audio.evaluate(element => element.currentTime > 0 && !element.paused).catch(() => false), { timeout: 20000 }).toBe(true)
+  await video.evaluate(element => {
+    Object.defineProperty(element, 'duration', { configurable: true, value: 4 })
+  })
+  await audio.evaluate(element => {
+    Object.defineProperty(element, 'duration', { configurable: true, value: 4 })
+    element.dispatchEvent(new Event('loadedmetadata'))
+  })
+  await expect(video).toHaveJSProperty('loop', true)
+  await video.evaluate(element => {
+    Object.defineProperty(element, 'duration', { configurable: true, value: NaN })
+  })
+  await audio.evaluate(element => {
+    Object.defineProperty(element, 'duration', { configurable: true, value: NaN })
+    element.dispatchEvent(new Event('loadedmetadata'))
+  })
+  await expect(video).toHaveJSProperty('loop', true)
+  await video.evaluate(element => { delete element.duration })
+  await audio.evaluate(element => { delete element.duration })
+  await audio.evaluate(async element => { element.currentTime = 0; await element.play() })
+  await video.evaluate(element => element.dispatchEvent(new Event('waiting')))
+  await expect.poll(() => audio.evaluate(element => element.paused), { timeout: 1000 }).toBe(true)
+  await video.evaluate(element => element.dispatchEvent(new Event('playing')))
+  await expect.poll(() => audio.evaluate(element => !element.paused)).toBe(true)
+  await expect.poll(() => audio.evaluate(element => element.currentTime > 2.5 && !element.paused).catch(() => false), { timeout: 20000 }).toBe(true)
+  await expect(video).toHaveJSProperty('loop', true)
+  await expect.poll(() => video.evaluate(element => !element.paused)).toBe(true)
+  await expect.poll(() => audio.evaluate(element => element.currentTime > 1 && element.currentTime < 3), { timeout: 10000 }).toBe(true)
+  const audioBeforeSeek = await audio.evaluate(element => element.currentTime)
+  await video.evaluate(element => { element.currentTime = 0.5 })
+  await expect.poll(() => video.evaluate(element => element.currentTime), { timeout: 5000 }).toBeGreaterThan(0.4)
+  expect(await audio.evaluate(element => element.currentTime)).toBeGreaterThan(audioBeforeSeek - 0.25)
+  await expect.poll(() => audio.evaluate(element => element.currentTime < 1 && !element.paused), { timeout: 10000 }).toBe(true)
+  await expect(video).toHaveJSProperty('paused', false)
+  await video.evaluate(element => element.pause())
+  await expect.poll(() => audio.evaluate(element => element.paused)).toBe(true)
+  await video.evaluate(element => element.play())
+  await expect.poll(() => audio.evaluate(element => !element.paused)).toBe(true)
+  await video.evaluate(element => element.pause())
+  await expect.poll(() => audio.evaluate(element => element.paused)).toBe(true)
+  await audio.evaluate(element => {
+    element.play = () => {
+      HTMLMediaElement.prototype.play.call(element).catch(() => {})
+      element.pendingPlay = new Promise((_resolve, reject) => {
+        element.addEventListener('pause', () => reject(new DOMException('Playback interrupted', 'AbortError')), { once: true })
+      })
+      return element.pendingPlay
+    }
+  })
+  await video.evaluate(element => element.play())
+  await expect.poll(() => audio.evaluate(element => !element.paused)).toBe(true)
+  await video.evaluate(element => element.dispatchEvent(new Event('waiting')))
+  await audio.evaluate(async element => {
+    try { await element.pendingPlay } catch { /* the buffering pause interrupted play */ }
+    await new Promise(resolve => setTimeout(resolve, 0))
+  })
+  await expect(video).toHaveJSProperty('paused', false)
+  await video.evaluate(element => element.pause())
+  await audio.evaluate(element => { element.play = () => Promise.reject(new DOMException('Autoplay blocked', 'NotAllowedError')) })
+  await video.evaluate(element => element.play())
+  await expect.poll(() => video.evaluate(element => element.paused), { timeout: 1000 }).toBe(true)
+})
+
+test('uses companion audio only for a selected video-only legacy format', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+
+  const executable = path.join(app.userDataDir, 'external-media-mixed-formats.sh')
+  const videoUrl = 'https://coub.example.test/video.mp4'
+  const audioUrl = 'https://coub.example.test/audio.m4a'
+  const response = JSON.stringify({
+    title: 'Mixed formats',
+    formats: [
+      { format_id: 'audio', url: audioUrl, protocol: 'https', ext: 'm4a', vcodec: 'none', acodec: 'mp4a.40.2' },
+      { format_id: 'muxed', url: DEMO_MEDIA_URL, protocol: 'https', ext: 'webm', vcodec: 'vp9', acodec: 'opus', width: 640, height: 360, tbr: 100 },
+      { format_id: 'video', url: videoUrl, protocol: 'https', ext: 'mp4', acodec: 'none', width: 1280, height: 720, tbr: 200 }
+    ]
+  })
+  await writeFile(executable, [
+    '#!/bin/sh',
+    'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+    `printf '%s\\n' '${response}'`
+  ].join('\n'))
+  await chmod(executable, 0o755)
+  await routeDemoMedia(page)
+  const videoBytes = Buffer.from((await readFile(path.join(repoRoot, 'e2e/fixtures/media/post-live-video.mp4.b64'), 'utf8')).replaceAll('\n', ''), 'base64')
+  const audioBytes = Buffer.from((await readFile(path.join(repoRoot, 'e2e/fixtures/media/post-live-long-audio.m4a.b64'), 'utf8')).replaceAll('\n', ''), 'base64')
+  await page.route(videoUrl, route => route.fulfill({ contentType: 'video/mp4', body: videoBytes }))
+  await page.route(audioUrl, route => route.fulfill({ contentType: 'audio/mp4', body: audioBytes }))
+  await page.evaluate(async ytDlpPath => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateYtDlpSource', 'system')
+    await store.dispatch('updateYtDlpPath', ytDlpPath)
+  }, executable)
+
+  await page.locator(sel.searchInput).fill('https://coub.com/view/mixed')
+  await page.locator(sel.searchInput).press('Enter')
+  const player = page.locator(`${activeTab} .externalMediaPlayer`)
+  const video = player.locator('video')
+  const audio = page.locator(`${activeTab} .externalMediaCompanionAudio`)
+  const selectedQuality = player.locator('.legacy-quality-button').first()
+  await expect(selectedQuality).toHaveAttribute('shaka-status', '720p', { timeout: 20000 })
+  await expect.poll(() => audio.evaluate(element => !element.paused && element.currentTime > 0)).toBe(true)
+  await player.locator('.legacy-qualities .legacy-resolution').filter({ hasText: '360p' }).first().evaluate(element => element.click())
+  await expect(selectedQuality).toHaveAttribute('shaka-status', '360p')
+  await expect.poll(() => video.evaluate(element => !element.paused && element.readyState >= 2)).toBe(true)
+  await video.evaluate(async element => { element.pause(); await element.play() })
+  await audio.evaluate(element => {
+    element.originalPlay = element.play
+    element.playCalls = 0
+    element.play = () => { element.playCalls++; return Promise.resolve() }
+  })
+  await video.evaluate(element => element.dispatchEvent(new Event('playing')))
+  await expect(audio).toHaveJSProperty('playCalls', 0)
+  await expect.poll(() => audio.evaluate(element => element.paused)).toBe(true)
+  await audio.evaluate(element => { element.play = element.originalPlay })
+  await player.locator('.legacy-qualities .legacy-resolution').filter({ hasText: '720p' }).first().evaluate(element => element.click())
+  await expect(selectedQuality).toHaveAttribute('shaka-status', '720p')
+  await expect.poll(() => audio.evaluate(element => !element.paused)).toBe(true)
+})
+
+for (const [name, videoCodec] of [
+  ['uses a playable HLS variant when the master playlist is blocked', 'avc1.64001f'],
+  ['keeps HLS video enabled when its codec metadata is missing', undefined]
+]) {
+  test(name, async ({ app, page }) => {
+    test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+
+    const executable = path.join(app.userDataDir, 'external-media-hls-variant.sh')
+    const masterUrl = 'https://hls.example.test/master.m3u8'
+    const variantUrl = 'https://hls.example.test/1080.m3u8'
+    const segmentUrl = 'https://hls.example.test/segment.mp4'
+    const response = JSON.stringify({
+      title: 'Example HLS video',
+      manifest_url: masterUrl,
+      formats: [{
+        format_id: 'hls-1080',
+        url: variantUrl,
+        manifest_url: masterUrl,
+        protocol: 'm3u8_native',
+        ext: 'mp4',
+        vcodec: videoCodec,
+        acodec: 'mp4a.40.2',
+        width: 1920,
+        height: 1080
+      }]
+    })
+    await writeFile(executable, [
+      '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+      `printf '%s\\n' '${response}'`
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.route(masterUrl, route => route.fulfill({ status: 403 }))
+    await page.route(variantUrl, route => route.fulfill({
+      status: 200,
+      contentType: 'application/vnd.apple.mpegurl',
+      body: `#EXTM3U
+#EXT-X-TARGETDURATION:2
+#EXT-X-VERSION:7
+#EXT-X-MEDIA-SEQUENCE:0
+#EXT-X-PLAYLIST-TYPE:VOD
+#EXT-X-MAP:URI="${segmentUrl}"
+#EXTINF:2,
+${segmentUrl}
+#EXT-X-ENDLIST
+`
+    }))
+    await page.route(segmentUrl, async route => route.fulfill({
+      contentType: 'video/mp4',
+      body: await readFile(path.join(repoRoot, 'e2e/fixtures/media/hls-1080.mp4'))
+    }))
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpSource', 'system')
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    const variantRequested = page.waitForRequest(variantUrl)
+    await page.locator(sel.searchInput).fill('https://www.dailymotion.com/video/example')
+    await page.locator(sel.searchInput).press('Enter')
+    await variantRequested
+    await expect(page.locator(`${activeTab} .externalMediaPlayer video`)).not.toHaveClass(/audioOnly/)
+    await expect.poll(async () => {
+      const diagnostic = page.locator(`${activeTab} .externalMediaDiagnostic`)
+      if (await diagnostic.count()) return await diagnostic.textContent()
+      const player = page.locator(`${activeTab} .externalMediaPlayer`)
+      const playbackTime = await player.count()
+        ? await player.evaluate(el => el.querySelector('video')?.currentTime ?? 0)
+        : 0
+      return playbackTime > 0.2 ? 'playing' : 'pending'
+    }, { timeout: 8_000 }).toBe('playing')
+  })
+}
 
 test('passes yt-dlp headers to HLS media segments', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')

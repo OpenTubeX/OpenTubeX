@@ -62,38 +62,59 @@
         :class="{ useTheatreMode, noSidebar: !chatAvailable || !chatOpen }"
       >
         <div class="externalMediaVideo">
-          <FtShakaVideoPlayer
-            v-if="source"
-            ref="player"
-            :key="loadGeneration"
-            class="externalMediaPlayer"
-            :manifest-src="source.manifestSrc"
-            :manifest-mime-type="source.manifestMimeType"
-            :legacy-formats="source.legacyFormats"
-            :format="source.manifestSrc ? 'dash' : 'legacy'"
-            :captions="source.captions"
-            :caption-translations="source.captionTranslations"
-            :title="info.title ?? ''"
-            :thumbnail="thumbnail"
-            :is-live="source.isLive"
-            :storyboard-src="source.storyboardSrc"
-            :chapters="chapters"
-            :current-chapter-index="currentChapterIndex"
-            :chapters-src="chaptersSrc"
-            :sidebar-chapters-open="showChapters"
-            :external-url="mediaUrl"
-            :live-chat-available="chatAvailable"
-            :theatre-possible="theatreTogglePossible"
-            :use-theatre-mode="useTheatreMode"
-            playback-engine="yt-dlp"
-            @error="playerErrorHandler"
-            @timeupdate="updateCurrentTime"
-            @seeking="handleSeeking"
-            @seeked="handleSeeked"
-            @fullscreen-live-chat-change="handleFullscreenLiveChatChange"
-            @toggle-theatre-mode="toggleTheatreMode"
-            @chapters-overlay-change="showChapters = $event"
-          />
+          <template v-if="source">
+            <FtShakaVideoPlayer
+              ref="player"
+              :key="loadGeneration"
+              class="externalMediaPlayer"
+              :manifest-src="source.manifestSrc"
+              :manifest-mime-type="source.manifestMimeType"
+              :legacy-formats="source.legacyFormats"
+              :format="source.manifestSrc ? (source.audioOnly ? 'audio' : 'dash') : 'legacy'"
+              :captions="source.captions"
+              :caption-translations="source.captionTranslations"
+              :title="info.title ?? ''"
+              :thumbnail="thumbnail"
+              :is-live="source.isLive"
+              :storyboard-src="source.storyboardSrc"
+              :chapters="chapters"
+              :current-chapter-index="currentChapterIndex"
+              :chapters-src="chaptersSrc"
+              :sidebar-chapters-open="showChapters"
+              :external-url="mediaUrl"
+              :live-chat-available="chatAvailable"
+              :theatre-possible="theatreTogglePossible"
+              :use-theatre-mode="useTheatreMode"
+              playback-engine="yt-dlp"
+              @error="playerErrorHandler"
+              @legacy-format-selected="setCompanionFormat"
+              @play="playCompanionAudio"
+              @playing="playCompanionAudio"
+              @pause="pauseCompanionAudio"
+              @waiting="pauseCompanionAudio"
+              @ended="pauseCompanionAudio"
+              @volume-updated="setCompanionVolume"
+              @playback-rate-updated="setCompanionPlaybackRate"
+              @timeupdate="updateCurrentTime"
+              @seeking="handleSeeking"
+              @seeked="handleSeeked"
+              @fullscreen-live-chat-change="handleFullscreenLiveChatChange"
+              @toggle-theatre-mode="toggleTheatreMode"
+              @chapters-overlay-change="showChapters = $event"
+            />
+            <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
+            <audio
+              v-if="source.separateAudioUrl"
+              ref="companionAudio"
+              class="externalMediaCompanionAudio"
+              :src="source.separateAudioUrl"
+              preload="auto"
+              hidden
+              aria-hidden="true"
+              @loadedmetadata="updateCompanionLoop"
+              @ended="handleCompanionAudioEnded"
+            />
+          </template>
           <div
             v-else
             class="externalMediaState"
@@ -307,6 +328,8 @@ const errorMessage = ref('')
 const info = shallowRef(null)
 const source = shallowRef(null)
 const player = useTemplateRef('player')
+const companionAudio = useTemplateRef('companionAudio')
+const companionAudioNeeded = ref(false)
 const videoLayout = useTemplateRef('videoLayout')
 const mediaUrl = ref('')
 const currentTime = ref(0)
@@ -335,6 +358,7 @@ const hostname = computed(() => {
     return ''
   }
 })
+const isCoub = computed(() => hostname.value === 'coub.com' || hostname.value.endsWith('.coub.com'))
 const twitchChatTarget = computed(() => info.value && source.value
   ? getTwitchChatTarget(info.value.webpageUrl, source.value.isLive) ?? getTwitchChatTarget(mediaUrl.value, source.value.isLive)
   : null)
@@ -409,10 +433,12 @@ function handleSeeking(time) {
   seekTimer = null
   seeking.value = true
   currentTime.value = time
+  syncCompanionAudio(time)
 }
 
 function handleSeeked(time) {
   currentTime.value = time
+  syncCompanionAudio(time)
   if (seekTimer !== null) clearTimeout(seekTimer)
   seekTimer = setTimeout(() => {
     seekTimer = null
@@ -541,7 +567,73 @@ const metadataRows = computed(() => {
 })
 const playerErrorHandler = ref(() => {})
 
-function updateCurrentTime(seconds) { currentTime.value = seconds }
+function syncCompanionAudio(time) {
+  const audio = companionAudio.value
+  // A looping Coub video has its own timeline; seeking it must not restart the soundtrack.
+  if (audio && companionAudioNeeded.value && !getCompanionVideo()?.loop && Number.isFinite(time) && Math.abs(audio.currentTime - time) > 0.5) {
+    audio.currentTime = time
+  }
+}
+
+function getCompanionVideo() {
+  return videoLayout.value?.querySelector('.externalMediaPlayer video')
+}
+
+function updateCompanionLoop() {
+  const video = getCompanionVideo()
+  const audio = companionAudio.value
+  if (!video || !audio) return
+  video.loop = companionAudioNeeded.value && (isCoub.value ||
+    (Number.isFinite(video.duration) && Number.isFinite(audio.duration) && audio.duration > video.duration + 0.5))
+  audio.loop = companionAudioNeeded.value && isCoub.value
+}
+
+function setCompanionFormat(format) {
+  companionAudioNeeded.value = Boolean(source.value?.separateAudioUrl && format.requiresSeparateAudio)
+  if (!companionAudioNeeded.value) pauseCompanionAudio()
+  updateCompanionLoop()
+}
+
+function handleCompanionAudioEnded() {
+  if (!companionAudioNeeded.value) return
+  if (!isCoub.value) {
+    pauseCompanionVideo()
+    return
+  }
+  const audio = companionAudio.value
+  if (audio && !getCompanionVideo()?.paused) {
+    audio.currentTime = 0
+    playCompanionAudio()
+  }
+}
+
+function playCompanionAudio() {
+  const audio = companionAudio.value
+  if (!audio || !companionAudioNeeded.value) return
+  const video = getCompanionVideo()
+  if (video) {
+    audio.volume = video.muted ? 0 : video.volume
+    audio.playbackRate = video.playbackRate
+  }
+  updateCompanionLoop()
+  syncCompanionAudio(currentTime.value)
+  audio.play().catch(error => {
+    if (error?.name !== 'AbortError' && companionAudio.value === audio && audio.paused) pauseCompanionVideo()
+  })
+}
+
+function pauseCompanionAudio() { companionAudio.value?.pause() }
+function pauseCompanionVideo() { getCompanionVideo()?.pause() }
+function setCompanionVolume(volume) {
+  if (companionAudio.value) companionAudio.value.volume = volume
+}
+function setCompanionPlaybackRate(rate) {
+  if (companionAudio.value) companionAudio.value.playbackRate = rate
+}
+function updateCurrentTime(seconds) {
+  currentTime.value = seconds
+  syncCompanionAudio(seconds)
+}
 function seekTo(seconds) { player.value?.setCurrentTime(seconds) }
 function copyChapterTimestamp(seconds) { player.value?.copyChapterTimestamp(seconds) }
 
@@ -558,6 +650,7 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
   if (seekTimer !== null) clearTimeout(seekTimer)
   seekTimer = null
   const generation = ++loadGeneration
+  companionAudioNeeded.value = false
   playerErrorHandler.value = error => {
     if (generation === loadGeneration) handlePlayerError(error)
   }

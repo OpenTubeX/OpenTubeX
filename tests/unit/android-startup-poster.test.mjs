@@ -26,7 +26,7 @@ test('native startup shows the poster outside the SABR countdown until a frame i
 
 test('native playing notification cannot dismiss the poster before the first frame', () => {
   const body = script.match(/function handlePlaying\(\) \{([\s\S]*?)\n    function handleWaiting/)[1]
-  const context = { hasPlaybackPosition: { value: false }, showPoster: { value: true }, useNativePlayback: true, startPaidPromotionTimer() {}, process: { env: { IS_CAPACITOR: true } } }
+  const context = { hasPlaybackPosition: { value: false }, showPoster: { value: true }, useNativePlayback: true, startPaidPromotionTimer() {}, emit() {}, process: { env: { IS_CAPACITOR: true } } }
   vm.runInNewContext(`function handlePlaying() {${body}; handlePlaying()`, context)
   assert.equal(context.showPoster.value, true)
 })
