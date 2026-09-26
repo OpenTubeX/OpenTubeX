@@ -11730,6 +11730,7 @@ export default defineComponent({
       isFullscreen,
       hasLoaded,
       hasPlaybackPosition,
+      scrollMiniPlayerActive,
 
       isPaused,
       play,
