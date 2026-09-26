@@ -170,6 +170,8 @@ for (const landscape of [false, true]) {
       window.scrollTo(0, document.body.scrollHeight)
     })
     await expect(page.locator('.ftVideoPlayer')).toHaveClass(/(?:^|\s)scrollMiniPlayer(?:\s|$)/)
+    const watch = await watchViewHandle(page)
+    expect(await watch.evaluate(vm => vm.$refs.player.scrollMiniPlayerActive)).toBe(true)
     await page.locator('.videoOptions').getByRole('button', { name: /transcript/i }).evaluate(button => button.click())
     const sheet = page.locator('.mobileSheet[open]')
     await expect(sheet).toBeVisible()
