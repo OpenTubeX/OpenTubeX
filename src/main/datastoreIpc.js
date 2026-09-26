@@ -69,6 +69,9 @@ const actionDataValidators = {
       Array.isArray(data.updates) && data.updates.every(isHistoryRecord) &&
       isIdArray(data.deletions),
     [DBActions.HISTORY.UPDATE_PLAYLIST]: data => isRecord(data) && isId(data.videoId),
+    [DBActions.HISTORY.UNSET_PLAYLIST_FOR_VIDEOS]: data => isRecord(data) &&
+      isIdArray(data.videoIds) && isId(data.lastViewedPlaylistId),
+    [DBActions.HISTORY.UNSET_PLAYLISTS]: isIdArray,
     [DBActions.GENERAL.DELETE]: isId
   },
   [IpcChannels.DB_RECOMMENDATIONS]: {
@@ -183,7 +186,7 @@ export function requireSettingRecord(data) {
 export function requireWatchProgressRecord(data) {
   requireDataRecord(data)
   if (typeof data.videoId !== 'string' || data.videoId.length === 0 ||
-      typeof data.watchProgress !== 'number' || !Number.isFinite(data.watchProgress)) {
+      typeof data.watchProgress !== 'number' || !Number.isFinite(data.watchProgress) || data.watchProgress < 0) {
     throw new TypeError('invalid watch progress record')
   }
   return /** @type {WatchProgressRecord} */ (data)

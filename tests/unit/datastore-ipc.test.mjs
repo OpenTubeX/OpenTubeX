@@ -116,6 +116,26 @@ test('playlist video sync occurs only after a new video is added', async () => {
   assert.equal(notifications.length, 1)
 })
 
+test('playlist unlink actions preserve their history updates and broadcasts', async () => {
+  const calls = []
+  const { registrations, notifications, event } = setup({
+    history: {
+      unsetLastViewedPlaylistForVideos: async (...args) => calls.push(['videos', ...args]),
+      unsetLastViewedPlaylists: async ids => calls.push(['playlists', ids])
+    }
+  })
+  const invoke = registrations.get(IpcChannels.DB_HISTORY)
+  const videos = { videoIds: ['video'], lastViewedPlaylistId: 'playlist' }
+  const playlists = ['playlist']
+  await invoke(event, { action: DBActions.HISTORY.UNSET_PLAYLIST_FOR_VIDEOS, data: videos })
+  await invoke(event, { action: DBActions.HISTORY.UNSET_PLAYLISTS, data: playlists })
+  assert.deepEqual(calls, [['videos', ['video'], 'playlist'], ['playlists', playlists]])
+  assert.deepEqual(notifications, [
+    [IpcChannels.SYNC_HISTORY, event, { event: SyncEvents.HISTORY.UNSET_PLAYLIST_FOR_VIDEOS, data: videos }],
+    [IpcChannels.SYNC_HISTORY, event, { event: SyncEvents.HISTORY.UNSET_PLAYLISTS, data: playlists }]
+  ])
+})
+
 test('subscription cache does not broadcast rejected stale updates', async () => {
   const { registrations, notifications, event } = setup({
     subscriptionCache: { updateVideosByChannelId: async () => false }
@@ -175,7 +195,8 @@ test('watch progress requires a video ID and finite position before writing', as
   for (const data of [
     { videoId: '', watchProgress: 2 },
     { videoId: 'video', watchProgress: Infinity },
-    { videoId: 'video', watchProgress: '2' }
+    { videoId: 'video', watchProgress: '2' },
+    { videoId: 'video', watchProgress: -1 }
   ]) {
     await assert.rejects(invoke(event, {
       action: DBActions.HISTORY.UPDATE_WATCH_PROGRESS, data
@@ -183,6 +204,12 @@ test('watch progress requires a video ID and finite position before writing', as
   }
   assert.equal(called, false)
   assert.deepEqual(notifications, [])
+
+  await invoke(event, {
+    action: DBActions.HISTORY.UPDATE_WATCH_PROGRESS,
+    data: { videoId: 'video', watchProgress: 0 }
+  })
+  assert.equal(called, true)
 })
 
 test('playlist and subscription actions reject array payloads before writing', async () => {
@@ -253,6 +280,9 @@ test('datastore write actions reject incomplete payloads before calling handlers
     [IpcChannels.DB_HISTORY, DBActions.GENERAL.OVERWRITE, {}],
     [IpcChannels.DB_HISTORY, DBActions.HISTORY.APPLY_SYNC_CHANGES, { insertions: [], updates: [] }],
     [IpcChannels.DB_HISTORY, DBActions.HISTORY.UPDATE_PLAYLIST, { lastViewedPlaylistId: 'playlist' }],
+    [IpcChannels.DB_HISTORY, DBActions.HISTORY.UNSET_PLAYLIST_FOR_VIDEOS, { videoIds: 'video', lastViewedPlaylistId: 'playlist' }],
+    [IpcChannels.DB_HISTORY, DBActions.HISTORY.UNSET_PLAYLIST_FOR_VIDEOS, { videoIds: ['video'], lastViewedPlaylistId: null }],
+    [IpcChannels.DB_HISTORY, DBActions.HISTORY.UNSET_PLAYLISTS, 'playlist'],
     [IpcChannels.DB_HISTORY, DBActions.GENERAL.DELETE, undefined],
     [IpcChannels.DB_RECOMMENDATIONS, DBActions.GENERAL.UPSERT, undefined],
     [IpcChannels.DB_RECOMMENDATIONS, DBActions.GENERAL.DELETE_MULTIPLE, null],

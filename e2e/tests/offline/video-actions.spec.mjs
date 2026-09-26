@@ -1905,6 +1905,39 @@ test.describe('list video actions', () => {
     }).toBe(0)
   })
 
+  test('unlinking playlists clears history in other windows', async ({ app, page }) => {
+    await goTo(page, 'history')
+    const dispatch = (window, action, payload) => window.evaluate(async ([action, payload]) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch(action, payload)
+    }, [action, payload])
+    const playlistId = window => window.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getHistoryCacheById.eeeeeeeeeee?.lastViewedPlaylistId
+    })
+    const link = () => dispatch(page, 'updateLastViewedPlaylist', {
+      videoId: 'eeeeeeeeeee',
+      lastViewedPlaylistId: 'favorites',
+      lastViewedPlaylistType: 'user',
+      lastViewedPlaylistItemId: 'item'
+    })
+
+    await link()
+    const otherWindow = await openNewWindowFromTabBar(app, page)
+    await waitForAppReady(otherWindow)
+    await expect.poll(() => playlistId(otherWindow)).toBe('favorites')
+
+    await dispatch(page, 'unsetLastViewedPlaylistForVideos', {
+      videoIds: ['eeeeeeeeeee'], lastViewedPlaylistId: 'favorites'
+    })
+    await expect.poll(() => playlistId(otherWindow)).toBeUndefined()
+
+    await link()
+    await expect.poll(() => playlistId(otherWindow)).toBe('favorites')
+    await dispatch(page, 'unsetLastViewedPlaylists', ['favorites'])
+    await expect.poll(() => playlistId(otherWindow)).toBeUndefined()
+  })
+
   test('rapidly clicking a playlist row does not add duplicate entries', async ({ app, page }) => {
     await goTo(page, 'history')
 
