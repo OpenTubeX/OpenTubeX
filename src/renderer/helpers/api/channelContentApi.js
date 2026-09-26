@@ -12,6 +12,7 @@ import {
   searchInvidiousChannel, youtubeImageUrlToInvidious,
 } from './invidious'
 import { createChannelContentApi } from './createChannelContentApi'
+import { contentApi } from './contentApi'
 import { getInvidiousChannelSearchResultType, getLocalChannelSearchResultType } from '../../views/Channel/channel-search'
 
 const sectionLoaders = {
@@ -53,4 +54,5 @@ export const channelContentApi = createChannelContentApi({
   getLocalSearchType: getLocalChannelSearchResultType,
   getInvidiousSearchType: getInvidiousChannelSearchResultType,
   mapImage: youtubeImageUrlToInvidious,
+  getVideosPage: options => contentApi.getChannelVideosPage(options),
 })

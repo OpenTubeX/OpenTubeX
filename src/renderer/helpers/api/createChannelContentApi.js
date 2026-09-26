@@ -57,6 +57,11 @@
  *   getLocalSearchType: (item: ChannelItem) => string,
  *   getInvidiousSearchType: (item: ChannelItem) => string,
  *   mapImage: (url: string | null, instanceUrl?: string) => string | null,
+ *   getVideosPage: (options: {id: string, channelName?: string, provider: ChannelProvider,
+ *     channel?: LocalChannelSession | null, artistTopic: boolean, sort: string,
+ *     sortValues: string[], cursor: ChannelVideoCursor | null,
+ *     isCurrent: () => boolean}) => Promise<{videos: ChannelItem[], cursor: ChannelVideoCursor | null,
+ *       canSort: boolean | null} | null>,
  * }} ChannelContentAdapters
  */
 /**
@@ -65,6 +70,18 @@
  *   sort?: string, sortValues?: string[], artistTopic?: boolean,
  *   mayContainOtherChannels?: boolean, query?: string, hidePlaylists?: boolean,
  *   isCurrent?: () => boolean}} ChannelPageOptions
+ */
+/** @typedef {Omit<ChannelPageOptions, 'provider'> & {preference: string, provider?: ChannelProvider,
+ *   fallback?: boolean, more?: boolean, onError?: (provider: ChannelProvider, error: unknown) => void,
+ *   onFallback?: (from: ChannelProvider, to: ChannelProvider) => void,
+ *   onOverviewFallback?: (from: ChannelProvider) => void}} ChannelLoadPageOptions
+ */
+/** @typedef {{provider: ChannelProvider, [key: string]: unknown}} ChannelVideoCursor */
+/** @typedef {{id: string, preference: string, provider?: ChannelProvider, fallback?: boolean,
+ *   more?: boolean, channel?: LocalChannelSession | null, channelName?: string,
+ *   artistTopic?: boolean, sort: string, sortValues?: string[], cursor?: ChannelVideoCursor | null,
+ *   isCurrent?: () => boolean, onError?: (provider: ChannelProvider, error: unknown) => void,
+ *   onOverviewFallback?: (from: ChannelProvider) => void}} ChannelVideosLoadOptions
  */
 /** @typedef {{id: string, provider: ChannelProvider, subscriptionName?: string,
     subscriptionThumbnail?: string, instanceUrl?: string,
@@ -90,7 +107,7 @@ export function createChannelContentApi(adapters) {
     parseShorts, parseVideos, parsePlaylists, parsePosts,
     getInvidiousSection, getArtistReleases, getArtistReleasesMore,
     parseSearchVideo, parseSearchPlaylist, getInvidiousSearch,
-    getLocalSearchType, getInvidiousSearchType, mapImage,
+    getLocalSearchType, getInvidiousSearchType, mapImage, getVideosPage,
   } = adapters
 
   /** @param {ChannelSection} section @param {LocalChannelPage | null | undefined} data @returns {ChannelCursor | null} */
@@ -249,6 +266,77 @@ export function createChannelContentApi(adapters) {
       return provider === 'local' ? getLocalChannel(id) : getInvidiousChannel(id)
     },
     mapImage,
+    /** @param {ChannelVideosLoadOptions} options */
+    async loadVideosPage({
+      id, preference, provider: currentProvider, more = false,
+      channel, channelName, artistTopic = false, sort, sortValues = [], cursor = null,
+      isCurrent = () => true, onError, onOverviewFallback,
+    }) {
+      const provider = cursor?.provider ?? currentProvider ?? resolveProvider(preference)
+      try {
+        const session = provider === 'local' && !artistTopic ? channel ?? await getLocalChannel(id) : channel
+        if (!isCurrent()) return null
+        const page = await getVideosPage({
+          id, channelName, provider, channel: session, artistTopic, sort, sortValues, cursor, isCurrent,
+        })
+        return page && isCurrent() ? { ...page, provider, channel: session ?? null } : null
+      } catch (error) {
+        if (!isCurrent()) return null
+        if (!more && provider === 'local' && artistTopic && error instanceof Error && error.message === 'The playlist does not exist.') {
+          return null
+        }
+        onError?.(provider, error)
+        if (!more && provider === 'local' && onOverviewFallback) {
+          onOverviewFallback(provider)
+          return null
+        }
+        throw error
+      }
+    },
+    /** @param {ChannelLoadPageOptions} options */
+    async loadPage({
+      section, id, preference, provider: currentProvider, fallback = false, more = false,
+      channel, cursor = null, isCurrent = () => true, onError, onFallback, onOverviewFallback,
+      ...pageOptions
+    }) {
+      const provider = cursor?.provider ?? currentProvider ?? resolveProvider(preference)
+      /** @param {ChannelProvider} selected */
+      const request = async selected => {
+        const session = selected === 'local' ? channel ?? await getLocalChannel(id) : undefined
+        if (!isCurrent()) return null
+        const page = await api.getPage({
+          ...pageOptions,
+          section,
+          id,
+          provider: selected,
+          channel: session,
+          cursor: selected === provider ? cursor : null,
+          isCurrent,
+        })
+        return page && isCurrent() ? { ...page, provider: selected, channel: session ?? null } : null
+      }
+      try {
+        return await request(provider)
+      } catch (error) {
+        if (!isCurrent()) return null
+        onError?.(provider, error)
+        if (!more && provider === 'local' && onOverviewFallback) {
+          onOverviewFallback(provider)
+          return null
+        }
+        const alternate = !more ? getFallbackProvider(provider, preference, fallback) : null
+        if (alternate === null) throw error
+        if (onOverviewFallback) throw error
+        onFallback?.(provider, alternate)
+        try {
+          return await request(alternate)
+        } catch (fallbackError) {
+          if (!isCurrent()) return null
+          onError?.(alternate, fallbackError)
+          throw fallbackError
+        }
+      }
+    },
     /** @param {ChannelPageOptions} options @returns {Promise<ChannelPage | null>} */
     async getPage({
       section, provider, id, channel, channelName, cursor = null, sort = 'newest', sortValues = [],

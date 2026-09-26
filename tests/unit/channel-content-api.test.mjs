@@ -33,6 +33,7 @@ function makeApi (overrides = {}) {
     getInvidiousSearch: async () => [],
     getLocalSearchType: () => 'video',
     getInvidiousSearchType: () => 'video',
+    getVideosPage: async () => ({ videos: [{ videoId: 'video' }], cursor: null, canSort: null }),
     ...overrides,
   })
 }
@@ -173,6 +174,181 @@ test('channel API discards a stale overview before reporting an error or fallbac
   assert.deepEqual(calls, [])
 })
 
+test('channel API loads a section from the selected provider and falls back once', async () => {
+  const calls = []
+  const api = makeApi({
+    getLocalChannel: async () => ({ getCommunity: async () => { calls.push('local'); throw Error('offline') } }),
+    getInvidiousSection: async () => { calls.push('invidious'); return { posts: [{ id: 'remote' }] } },
+  })
+  const result = await api.loadPage({
+    section: 'community',
+    id: 'channel',
+    preference: 'local',
+    fallback: true,
+    onError: provider => calls.push(`error:${provider}`),
+    onFallback: (from, to) => calls.push(`${from}:${to}`),
+  })
+  assert.equal(result.provider, 'invidious')
+  assert.deepEqual(result.items, [{ id: 'remote' }])
+  assert.deepEqual(calls, ['local', 'error:local', 'local:invidious', 'invidious'])
+})
+
+test('channel API keeps continuation on its provider without fallback', async () => {
+  const calls = []
+  const api = makeApi({
+    getInvidiousSection: async () => { calls.push('invidious'); throw Error('page failed') },
+    getLocalChannel: async () => { calls.push('local'); throw Error('must not run') },
+  })
+  await assert.rejects(api.loadPage({
+    section: 'community',
+    id: 'channel',
+    preference: 'local',
+    fallback: true,
+    cursor: { provider: 'invidious', section: 'community', data: 'next' },
+    more: true,
+    onError: provider => calls.push(`error:${provider}`),
+  }), /page failed/)
+  assert.deepEqual(calls, ['invidious', 'error:invidious'])
+})
+
+test('channel API ignores a stale search failure without reporting or falling back', async () => {
+  const calls = []
+  let current = true
+  const api = makeApi({
+    getInvidiousSearch: async () => {
+      current = false
+      throw Error('stale search')
+    },
+    getLocalChannel: async () => { calls.push('local'); throw Error('must not run') },
+  })
+  const result = await api.loadPage({
+    section: 'search',
+    id: 'channel',
+    preference: 'invidious',
+    fallback: true,
+    isCurrent: () => current,
+    onError: provider => calls.push(`error:${provider}`),
+    onFallback: () => calls.push('fallback'),
+  })
+  assert.equal(result, null)
+  assert.deepEqual(calls, [])
+})
+
+test('channel API fetches a Local session before loading a section', async () => {
+  const calls = []
+  const api = makeApi({
+    getLocalChannel: async () => {
+      calls.push('session')
+      return { getCommunity: async () => { calls.push('community'); return { posts: [{ id: 'post' }] } } }
+    },
+  })
+  const result = await api.loadPage({ section: 'community', id: 'channel', preference: 'local' })
+  assert.deepEqual(result.items, [{ id: 'post' }])
+  assert.deepEqual(calls, ['session', 'community'])
+})
+
+test('channel API delegates Local stream fallback to the overview once', async () => {
+  const calls = []
+  const api = makeApi({
+    getLocalChannel: async () => ({ getShorts: async () => { throw Error('offline') } }),
+    getInvidiousSection: async () => { calls.push('invidious'); return { videos: [] } },
+  })
+  const result = await api.loadPage({
+    section: 'shorts',
+    id: 'channel',
+    preference: 'local',
+    fallback: true,
+    onOverviewFallback: provider => calls.push(`overview:${provider}`),
+  })
+  assert.equal(result, null)
+  assert.deepEqual(calls, ['overview:local'])
+})
+
+test('channel API reports an initial Local stream failure to the overview without a fallback provider', async () => {
+  const calls = []
+  const api = makeApi({
+    getLocalChannel: async () => ({ getLiveStreams: async () => { throw Error('offline') } }),
+  })
+  const result = await api.loadPage({
+    section: 'live',
+    id: 'channel',
+    preference: 'local',
+    fallback: false,
+    onError: provider => calls.push(`error:${provider}`),
+    onOverviewFallback: provider => calls.push(`overview:${provider}`),
+  })
+  assert.equal(result, null)
+  assert.deepEqual(calls, ['error:local', 'overview:local'])
+})
+
+test('channel API delegates Local video failure to overview and leaves More on its provider', async () => {
+  const calls = []
+  const api = makeApi({
+    getLocalChannel: async () => ({ id: 'session' }),
+    getVideosPage: async ({ provider }) => { calls.push(provider); throw Error('offline') },
+  })
+  const initial = await api.loadVideosPage({
+    id: 'channel',
+    preference: 'local',
+    fallback: true,
+    sort: 'newest',
+    onOverviewFallback: provider => calls.push(`overview:${provider}`),
+  })
+  assert.equal(initial, null)
+  await assert.rejects(api.loadVideosPage({
+    id: 'channel',
+    preference: 'local',
+    fallback: true,
+    provider: 'invidious',
+    more: true,
+    cursor: { provider: 'invidious', data: 'next' },
+    sort: 'newest',
+  }), /offline/)
+  assert.deepEqual(calls, ['local', 'overview:local', 'invidious'])
+})
+
+test('channel API reports an initial Local video failure to the overview without a fallback provider', async () => {
+  const calls = []
+  const api = makeApi({
+    getVideosPage: async () => { throw Error('offline') },
+  })
+  const result = await api.loadVideosPage({
+    id: 'channel',
+    preference: 'local',
+    fallback: false,
+    sort: 'newest',
+    onError: provider => calls.push(`error:${provider}`),
+    onOverviewFallback: provider => calls.push(`overview:${provider}`),
+  })
+  assert.equal(result, null)
+  assert.deepEqual(calls, ['error:local', 'overview:local'])
+})
+
+test('channel API only suppresses missing artist playlists on the first page', async () => {
+  const calls = []
+  const api = makeApi({
+    getVideosPage: async () => { throw Error('The playlist does not exist.') },
+  })
+  const first = await api.loadVideosPage({
+    id: 'channel',
+    preference: 'local',
+    artistTopic: true,
+    sort: 'newest',
+    onError: provider => calls.push(provider),
+  })
+  assert.equal(first, null)
+  await assert.rejects(api.loadVideosPage({
+    id: 'channel',
+    preference: 'local',
+    artistTopic: true,
+    sort: 'newest',
+    more: true,
+    cursor: { provider: 'local', data: 'next' },
+    onError: provider => calls.push(provider),
+  }), /The playlist does not exist\./)
+  assert.deepEqual(calls, ['local'])
+})
+
 test('channel API normalizes Local shorts and their continuation', async () => {
   const next = { videos: [{ videoId: 'two' }], has_continuation: false }
   const first = {
@@ -248,4 +424,39 @@ test('channel API maps Local search results and continuation', async () => {
   })
   assert.deepEqual(result.items, [{ type: 'Video', videoId: 'one', channelSearchResultType: 'video' }])
   assert.equal(result.cursor, null)
+})
+
+test('channel API falls back from Invidious search to Local search once', async () => {
+  const calls = []
+  const api = makeApi({
+    getInvidiousSearch: async () => { calls.push('invidious'); throw Error('offline') },
+    getLocalChannel: async () => ({
+      has_search: true,
+      search: async () => {
+        calls.push('local')
+        return {
+          current_tab: {
+            content: {
+              contents: [{
+                type: 'ItemSection',
+                contents: [{ type: 'Video', videoId: 'one' }],
+              }],
+            },
+          },
+          has_continuation: false,
+        }
+      },
+    }),
+  })
+  const result = await api.loadPage({
+    section: 'search',
+    id: 'channel',
+    preference: 'invidious',
+    fallback: true,
+    query: 'test',
+    onFallback: (from, to) => calls.push(`${from}:${to}`),
+  })
+  assert.equal(result.provider, 'local')
+  assert.deepEqual(result.items, [{ type: 'Video', videoId: 'one', channelSearchResultType: 'video' }])
+  assert.deepEqual(calls, ['invidious', 'invidious:local', 'local'])
 })
