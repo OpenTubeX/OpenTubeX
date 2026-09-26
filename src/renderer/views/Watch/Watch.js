@@ -188,6 +188,9 @@ export default defineComponent({
   provide() {
     return {
       phonePanelPlayer: () => this.$refs.player?.$refs.container,
+      phonePanelInlinePlayer: () => this.$refs.player?.scrollMiniPlayerActive
+        ? this.$refs.player.$refs.scrollMiniPlaceholder
+        : this.$refs.player?.$refs.container,
       expandPhonePanel: () => {
         const player = this.$refs.player
         if (!player || player.isPaused()) return null
@@ -197,12 +200,6 @@ export default defineComponent({
           if (this.$refs.player === player && this.videoId === videoId && this.isTabPresented) {
             player.play()?.catch(() => {})
           }
-        }
-      },
-      preparePhonePanel: async () => {
-        if (this.$refs.player?.scrollMiniPlayerActive) {
-          this.$refs.player.restoreInlinePlayer()
-          await this.$nextTick()
         }
       }
     }
