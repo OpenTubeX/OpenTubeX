@@ -12,8 +12,8 @@ function bytesToBase64(bytes) {
 }
 
 /**
- * Prepares a SABR protobuf request in Android, then streams its response from
- * a same-origin URL intercepted by the WebView client. Video response bytes
+ * Prepares a SABR protobuf request natively, then streams its response from
+ * a same-origin URL intercepted by the WebView. Video response bytes
  * therefore never cross the Capacitor bridge.
  * @param {string} url
  * @param {RequestInit} init
@@ -54,7 +54,7 @@ export async function capacitorSabrFetch(url, init) {
   let response
   try {
     response = await fetch(
-      `${location.origin}/_opentubex_sabr/${encodeURIComponent(requestId)}`,
+      `/_opentubex_sabr/${encodeURIComponent(requestId)}`,
       { signal: init.signal }
     )
   } catch (error) {

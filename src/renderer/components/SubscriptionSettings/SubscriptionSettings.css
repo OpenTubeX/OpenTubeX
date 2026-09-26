@@ -1,3 +1,27 @@
+.switchColumn :deep(.select) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 45px;
+  row-gap: 6px;
+}
+
+.switchColumn :deep(.select > *) {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.switchColumn :deep(.select .select-label) {
+  position: static;
+  grid-row: 1;
+}
+
+.switchColumn :deep(.select .select-label-text),
+.switchColumn :deep(.select .select-placeholder) {
+  white-space: normal;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
 .onlyShowLatestFromChannelNumber {
   inline-size: calc(100% - 44px);
   padding-inline-start: 44px;

@@ -20,7 +20,7 @@ async function metadataUserAgent(t) {
   return userAgent
 }
 
-function load(prepare) {
+function load(prepare, overrides = {}) {
   return vm.runInNewContext(`${source}\ncapacitorSabrFetch`, {
     registerPlugin: () => ({ prepare, abort: async () => {} }),
     createAbortError,
@@ -28,8 +28,20 @@ function load(prepare) {
     Uint8Array, Headers, Response, ReadableStream, btoa,
     location: { origin: 'https://localhost' },
     fetch: async () => new Response(Uint8Array.of(1, 2, 3)),
+    ...overrides,
   })
 }
+
+test('SABR transport resolves against the WebView even with an opaque URL origin', async () => {
+  let requested
+  const fetchSabr = load(async () => ({ requestId: 'ios-request' }), {
+    location: { origin: 'null' },
+    fetch: async url => { requested = url; return new Response('stream') },
+  })
+  const response = await fetchSabr('https://example.googlevideo.com/videoplayback', { body: Uint8Array.of(1) })
+  await response.text()
+  assert.equal(requested, '/_opentubex_sabr/ios-request')
+})
 
 test('Android SABR uses the same browser identity as its YouTube metadata request', async t => {
   const userAgent = await metadataUserAgent(t)

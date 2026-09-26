@@ -57,6 +57,7 @@ export function findSettingsSearchTab(match) {
 }
 
 function getSettingsSearchSourceValues(source, options) {
+  if (options.isIos && ['external-software', 'download', 'yt-dlp-streaming', 'proxy'].includes(source.type)) return []
   if (source.subpage === 'quick-playback-speed' && !options.store.getters.getUseQuickPlaybackSpeedBar) return []
   if (source.electronOnly && !options.usingElectron && !(options.isCapacitor && (source.capacitorSupported || ['external-software', 'download', 'yt-dlp-streaming'].includes(source.type)))) return []
   return flattenSettingsSearchMessageValues(
@@ -85,12 +86,19 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     store,
     usingElectron,
     isCapacitor = false,
+    isIos = false,
     supportsLocalApi,
     isLinuxWayland,
     supportsAutoPictureInPictureMinimize = !isLinuxWayland,
     systemUsesDarkTheme,
   } = options
   const [group, item] = path
+
+  if (isIos && (
+    (sectionType === 'general' && ['Stream Extraction Method', 'Swipe to refresh'].includes(group)) ||
+    (sectionType === 'subscription' && group === 'Refresh Subscriptions While App Is Closed') ||
+    (sectionType === 'player' && group === 'Voice-over Translation')
+  )) return false
 
   if (sectionType === 'player' && group === 'Screenshot') {
     if (item === 'Enable') return true

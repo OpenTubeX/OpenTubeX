@@ -104,7 +104,7 @@ async function getRequestBody(input, init) {
  * inactivity on Android, defaulting to 30 seconds so stalled requests release
  * the subscription queue. signal still limits the JavaScript wait.
  * @param {RequestInfo | URL} input
- * @param {RequestInit & { nativeTimeoutMs?: number }} [init]
+ * @param {RequestInit & { nativeTimeoutMs?: number, allowHttp?: boolean }} [init]
  * @returns {Promise<Response>}
  */
 export async function capacitorHttpFetch(input, init = undefined) {
@@ -118,7 +118,7 @@ async function nativeHttpFetch(input, init) {
 
   const url = new URL(inputRequest?.url ?? input.toString())
 
-  if (url.protocol !== 'https:') {
+  if (url.protocol !== 'https:' && !(init?.allowHttp && url.protocol === 'http:')) {
     throw new TypeError('Capacitor local API requests require HTTPS')
   }
 

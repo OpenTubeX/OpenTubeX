@@ -127,7 +127,7 @@
       v-if="IS_CAPACITOR || usingElectron"
       class="appIconActions"
     >
-      <AppIconSettings v-if="IS_CAPACITOR" />
+      <AppIconSettings v-if="IS_CAPACITOR && !IS_IOS" />
       <TrayIconSettings v-if="usingElectron" />
     </FtFlexBox>
     <ThemeDiscovery
@@ -464,6 +464,7 @@ import { CAPACITOR_UI_SCALE_MIN, CAPACITOR_UI_SCALE_MAX } from '../helpers/capac
 import { DEFAULT_APP_FONT, getAppFontFamily, normalizeAppFont, SYSTEM_APP_FONT } from '../helpers/appFont'
 
 const { locale, t } = useI18n()
+const IS_IOS = !!process.env.IS_IOS
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const CAPACITOR_LAYOUT_MODE_VALUES = ['auto', 'phone', 'tablet']
 const capacitorLayoutMode = computed(() => store.getters.getCapacitorLayoutMode)

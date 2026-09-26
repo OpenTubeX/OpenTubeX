@@ -14,7 +14,7 @@ export const ANDROID_MEDIA_SESSION_ACTIONS = [
 const SUPPORTED_ACTIONS = new Set(ANDROID_MEDIA_SESSION_ACTIONS)
 
 const AndroidMediaSession = process.env.IS_CAPACITOR
-  ? registerPlugin('AndroidMediaSession')
+  ? registerPlugin(process.env.IS_IOS ? 'IOSMediaSession' : 'AndroidMediaSession')
   : null
 let lastSentPayload = null
 let lastSentAt = 0

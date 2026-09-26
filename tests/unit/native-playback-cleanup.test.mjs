@@ -27,7 +27,7 @@ function fixture(native = true) {
   } : null }
   const context = vm.createContext({
     player, localPlayer: player, controls: {}, mediaTabId: 'video',
-    nativePlaybackCleanup: null, screenWakeBinding: null, sponsorBlockRequestGeneration: 0,
+    iosFullscreenCleanup: null, nativePlaybackCleanup: null, screenWakeBinding: null, sponsorBlockRequestGeneration: 0,
     repeatStatsTracker: null, repeatStatsLoopObserver: null,
     clearSabrBackoffTimer() {},
     store: { getters: reactive({ getContinuePlaybackWhenScreenIsLocked: true }) },
@@ -85,3 +85,18 @@ test('unmount is safe without initialized native playback', () => {
     f.scope.stop()
   }
 })
+
+for (const lifecycle of [['unmount'], ['destroy', 'unmount']]) {
+  test(`iOS fullscreen controls restore once on ${lifecycle.join(' then ')}`, () => {
+    const f = fixture(false)
+    let restored = 0
+    f.context.iosFullscreenCleanup = () => { restored++ }
+    try {
+      for (const step of lifecycle) f[step]()
+      assert.equal(restored, 1)
+      assert.equal(f.context.iosFullscreenCleanup, null)
+    } finally {
+      f.scope.stop()
+    }
+  })
+}

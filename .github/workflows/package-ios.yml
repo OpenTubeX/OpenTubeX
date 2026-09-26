@@ -1,0 +1,82 @@
+name: Package iOS IPA
+
+on:
+  workflow_call:
+    inputs:
+      snapshot:
+        description: Include the development or RC build number in the version
+        type: boolean
+        default: false
+    outputs:
+      artifact-name:
+        description: Unsigned IPA artifact and filename
+        value: ${{ jobs.archive.outputs.artifact-name }}
+
+permissions:
+  contents: read
+cache-mode: none
+
+jobs:
+  archive:
+    name: Build unsigned iOS IPA
+    runs-on: macos-15
+    timeout-minutes: 30
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.2.app/Contents/Developer
+    outputs:
+      artifact-name: ${{ steps.package.outputs.name }}
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: 24.x
+        package-manager-cache: false
+    - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      with:
+        version: 11
+        cache: false
+    - run: pnpm run ci
+    - name: Set package version
+      id: package
+      env:
+        SNAPSHOT: ${{ inputs.snapshot }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        version="$(jq --raw-output .version package.json)"
+        lower_case_ref="$(printf '%s' "$GITHUB_REF" | tr '[:upper:]' '[:lower:]')"
+        if [[ "$SNAPSHOT" == true ]]; then
+          if [[ "$lower_case_ref" == *development* ]]; then
+            version="${version}-nightly-${GITHUB_RUN_NUMBER}"
+          elif [[ "$lower_case_ref" == *rc* ]]; then
+            version="${version}-RC-${GITHUB_RUN_NUMBER}"
+          fi
+        fi
+        package_json="$(jq --arg version "$version" '.version = $version' package.json)"
+        printf '%s\n' "$package_json" > package.json
+        printf 'name=opentubex-%s-ios-unsigned.ipa\n' "$version" >> "$GITHUB_OUTPUT"
+    - run: pnpm run capacitor:sync:ios
+    - name: Archive and package without Apple signing credentials
+      env:
+        IPA_NAME: ${{ steps.package.outputs.name }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        xcodebuild -project ios/App/App.xcodeproj -scheme App \
+          -configuration Release -destination 'generic/platform=iOS' \
+          -archivePath ios/OpenTubeX.xcarchive \
+          CURRENT_PROJECT_VERSION="$(git rev-list --count HEAD)" \
+          CODE_SIGNING_ALLOWED=NO archive
+        mkdir -p ios/Payload
+        ditto ios/OpenTubeX.xcarchive/Products/Applications/App.app ios/Payload/App.app
+        cd ios
+        ditto -c -k --keepParent Payload "$IPA_NAME"
+    - name: Upload unsigned IPA
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: ${{ steps.package.outputs.name }}
+        path: ios/${{ steps.package.outputs.name }}
+        if-no-files-found: error

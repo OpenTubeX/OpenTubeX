@@ -1,6 +1,7 @@
 import { Capacitor, registerPlugin, SystemBarType, SystemBars } from '@capacitor/core'
 
-const AndroidUi = process.env.IS_CAPACITOR ? registerPlugin('AndroidUi') : null
+const AndroidUi = process.env.IS_CAPACITOR && !process.env.IS_IOS ? registerPlugin('AndroidUi') : null
+const IOSUi = process.env.IS_CAPACITOR && process.env.IS_IOS ? registerPlugin('IOSUi') : null
 const ANDROID_PICTURE_IN_PICTURE_TARGET_ATTRIBUTE = 'data-android-picture-in-picture-target'
 
 function videoDimensions(video) {
@@ -77,7 +78,7 @@ export function restartAndroidApp() {
 }
 
 export async function getAndroidHardwareKeyboardState() {
-  const result = await (AndroidUi?.getHardwareKeyboardState() ?? Promise.resolve({ attached: false }))
+  const result = await ((IOSUi ?? AndroidUi)?.getHardwareKeyboardState() ?? Promise.resolve({ attached: false }))
   return result.attached === true
 }
 

@@ -31,6 +31,13 @@ test('native playing notification cannot dismiss the poster before the first fra
   assert.equal(context.showPoster.value, true)
 })
 
+test('iOS WebKit playback dismisses the poster when a frame starts playing', () => {
+  const body = script.match(/function handlePlaying\(\) \{([\s\S]*?)\n    function handleWaiting/)[1]
+  const context = { hasPlaybackPosition: { value: false }, showPoster: { value: true }, startPaidPromotionTimer() {}, emit() {}, process: { env: { IS_CAPACITOR: true, IS_IOS: true } } }
+  vm.runInNewContext(`function handlePlaying() {${body}; handlePlaying()`, context)
+  assert.equal(context.showPoster.value, false)
+})
+
 test('poster event bindings reveal the first frame and restore the poster for another load', () => {
   const bindings = source.match(/@firstframe="[^"]+"/)[0] + ' ' + source.match(/@emptied="[^"]+"/)[0]
   const renderEvents = Vue.compile(`<video ${bindings} />`)

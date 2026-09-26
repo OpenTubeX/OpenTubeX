@@ -1,3 +1,4 @@
+import { normalizeCommentFetchResponse } from './local-comment-response'
 import { createLocalFeedParsers } from './local-feed-parsers'
 import { ClientType, Constants, Innertube, Mixins, Parser, Platform, Player, Session, UniversalCache, Utils, YT, YTNodes } from 'youtubei.js'
 import Autolinker from 'autolinker'
@@ -1041,7 +1042,10 @@ export { parseLocalVideoCollaborators } from '../video-collaborators'
  * @param {string | undefined} commentId
  */
 export async function getLocalComments(id, sortBy = undefined, commentId = undefined) {
-  const innertube = await createInnertube({ generateSessionLocally: false })
+  const innertube = await createInnertube({
+    generateSessionLocally: false,
+    fetchFunc: async (input, init) => normalizeCommentFetchResponse(await localApiFetch(input, init))
+  })
   return innertube.getComments(id, sortBy, commentId)
 }
 

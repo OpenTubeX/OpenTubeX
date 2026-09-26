@@ -40,3 +40,23 @@ test('background format stays untouched when playback should not continue', () =
     assert.equal(resolveAndroidBackgroundPlaybackFormat({ hidden: true, ...input }), null)
   }
 })
+
+test('iOS backgrounding preserves the video source used by Picture in Picture', async () => {
+  const { readFile } = await import('node:fs/promises')
+  const { default: vm } = await import('node:vm')
+  const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
+  const method = source.match(/updateAndroidBackgroundPlaybackFormat\(\) \{[\s\S]*?\n    \},/)[0]
+  for (const ios of [true, false]) {
+    const watch = {
+      $refs: { player: { isNativePlayback: () => false, isPaused: () => false } },
+      $store: { getters: { getContinuePlaybackWhenScreenIsLocked: true } },
+      activeFormat: 'dash', audioFormatAvailable: true, androidBackgroundRestoreFormat: null,
+    }
+    vm.runInNewContext(`Object.assign(watch, {${method}}); watch.updateAndroidBackgroundPlaybackFormat()`, {
+      watch, process: { env: { IS_CAPACITOR: true, IS_IOS: ios } },
+      isAppHidden: () => true, resolveAndroidBackgroundPlaybackFormat,
+    })
+    assert.equal(watch.activeFormat, ios ? 'dash' : 'audio')
+    assert.equal(watch.androidBackgroundRestoreFormat, ios ? null : 'dash')
+  }
+})

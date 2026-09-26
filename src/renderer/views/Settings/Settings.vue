@@ -656,6 +656,7 @@ const settingsSearchableValues = computed(() => createSettingsSearchIndex({
   store,
   usingElectron: USING_ELECTRON,
   isCapacitor: IS_CAPACITOR,
+  isIos: !!process.env.IS_IOS,
   supportsLocalApi: SUPPORTS_LOCAL_API,
   isMac: IS_MAC,
   isLinuxWayland: isLinuxWayland.value,
@@ -843,7 +844,7 @@ function handleMounted() {
   nextTick(observeProfileManager)
   nextTick(observeStandaloneContent)
   nextTick(() => {
-    const initialFocus = isNarrowLayout.value
+    const initialFocus = isNarrowLayout.value || (IS_CAPACITOR && !props.hardwareKeyboardAttached)
       ? settingsCloseButtonRef.value
       : settingsSearchInputRef.value ?? settingsCloseButtonRef.value
     initialFocus?.focus()

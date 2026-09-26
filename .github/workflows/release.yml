@@ -354,9 +354,47 @@ jobs:
         files: release-assets/*
         fail_on_unmatched_files: true
 
+  ios:
+    name: Build iOS IPA
+    permissions:
+      contents: read
+    uses: ./.github/workflows/package-ios.yml
+
+  upload-ios:
+    name: Attach iOS IPA to release
+    needs: ios
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - name: Download iOS IPA
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      with:
+        name: ${{ needs.ios.outputs.artifact-name }}
+        path: release-assets
+    - name: Resolve release tag
+      id: release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
+        echo "tag=$tag" >> "$GITHUB_OUTPUT"
+    - name: Upload iOS release asset
+      uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        tag_name: ${{ steps.release.outputs.tag }}
+        draft: true
+        files: release-assets/*.ipa
+        fail_on_unmatched_files: true
+
   publish-release:
     name: Publish draft release
-    needs: build
+    needs: [build, upload-ios]
     runs-on: ubuntu-latest
 
     permissions:

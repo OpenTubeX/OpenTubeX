@@ -328,6 +328,7 @@ $watched-transition-duration: 0.5s;
       flex-wrap: wrap;
       font-size: 14px;
       grid-area: infoLine;
+      min-inline-size: 0;
       margin-block-start: 5px;
       overflow-clip-margin: 2px;
       overflow-x: clip;

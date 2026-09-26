@@ -3,7 +3,7 @@
 </p>
 
 OpenTubeX is an open-source, highly customizable, privacy-focused YouTube client.
-It is available for Windows 10 and later, macOS 12 and later, and Linux. There are also early WIP Android builds and iOS support is planned.
+It is available for Windows 10 and later, macOS 12 and later, and Linux. Android builds and experimental iOS/iPadOS builds are also available.
 
 It originated as a fork of [FreeTube](https://github.com/FreeTubeApp/FreeTube)
 and is independently developed and supported. It is not affiliated with,
@@ -142,7 +142,7 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 ### Official Downloads
 
 > [!NOTE]
-> OpenTubeX supports Windows 10 and later, macOS 12 and above, various Linux distributions, and Android 8.0 and later. Features may differ between desktop and Android.
+> OpenTubeX supports Windows 10 and later, macOS 12 and above, various Linux distributions, Android 8.0 and later, and experimental iOS/iPadOS 17.4 and later. Features differ between platforms.
 
 * [GitHub Releases](https://github.com/OpenTubeX/OpenTubeX/releases)
 * [OpenTubeX Website](https://opentubex.org/downloads/)
@@ -159,7 +159,19 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 
 To update a Homebrew installation, run `brew update` followed by `brew upgrade --cask opentubex`. Both Apple Silicon and Intel Macs are supported. If macOS blocks the first launch, allow OpenTubeX in **System Settings → Privacy & Security**.
 
-iOS support is planned. The first iOS builds will be downloadable `.ipa` files.
+### iOS / iPadOS (experimental)
+
+Requires iOS/iPadOS 17.4 or newer. Download the unsigned `opentubex-<version>-ios-unsigned.ipa` from [GitHub Releases](https://github.com/OpenTubeX/OpenTubeX/releases). The installer signs it with your Apple Account; opening the IPA in Files alone does not install it.
+
+* **SideStore — recommended for regular use:** follow the [official setup guide](https://docs.sidestore.io/docs/installation/prerequisites), then import the OpenTubeX IPA in SideStore. A computer is needed for initial setup, but subsequent refreshes run on the device using SideStore's local VPN. Free Apple Accounts still require refreshing **within seven days**; refresh both SideStore and OpenTubeX before they expire. A computer may be needed again if the pairing file expires or SideStore stops opening. This is the recommended refresh workflow, but OpenTubeX has so far been tested with iloader.
+* **iloader — tested with OpenTubeX on a physical iPad:** install [iloader](https://iloader.app/) on Linux, macOS, or Windows, connect and trust your device, sign in with your Apple Account, and import the IPA. With a free account, reconnect to the computer and install it again before the seven-day signature expires. When updating, use the same Apple Account and install over the existing app to retain its data.
+* **AltStore Classic:** another option, but refreshing still requires [AltServer on a computer](https://faq.altstore.io/altstore-classic/altserver), over Wi-Fi or USB. AltStore PAL is a different distribution method and cannot install this arbitrary IPA.
+
+After signing, trust your developer account under **Settings → General → VPN & Device Management** and enable **Settings → Privacy & Security → Developer Mode**, restarting when prompted. Free accounts allow three active sideloaded apps, including SideStore or AltStore. A paid Apple Developer membership permits longer signing periods, but is not required.
+
+The iOS port has been tested on a physical iPad for playback, fullscreen, touch menus, and settings. Broader device coverage remains in progress; see [#1279](https://github.com/OpenTubeX/OpenTubeX/issues/1279). Downloads, authenticated playback, translated audio, app-managed proxies, alternate icons, and closed-app subscription refresh are currently unavailable on iOS.
+
+To build from source, use macOS with Xcode 26.2, run `pnpm run ci` and `pnpm run capacitor:sync:ios`, then open `ios/App/App.xcodeproj`. Simulator builds need no Apple Account; device builds need signing. The build workflow provides unsigned IPA artifacts, and release workflows attach them to releases.
 
 <a href="https://snapcraft.io/opentubex">
   <picture>

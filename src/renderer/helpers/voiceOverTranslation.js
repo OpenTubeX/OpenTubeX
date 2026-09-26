@@ -3,7 +3,7 @@ export async function requestVoiceOverTranslation(payload) {
   if (process.env.IS_ELECTRON) {
     return window.ftElectron.requestVoiceOverTranslation(payload)
   }
-  if (process.env.IS_CAPACITOR) {
+  if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
     const { requestCapacitorVoiceOverTranslation } = await import('./api/capacitor-voice-over.js')
     return requestCapacitorVoiceOverTranslation(payload)
   }

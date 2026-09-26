@@ -10,7 +10,7 @@ import { createSyncServerRequestHeaders } from '../../src/renderer/helpers/sync-
 import * as errors from '../../src/renderer/helpers/sync-server-errors.js'
 import { createAbortError } from '../../src/renderer/helpers/api/requestErrors.js'
 
-async function loadClient(env, version, requests, nativeRequest, browserRequest) {
+async function loadClient(env, version, requests, nativeRequest, browserRequest, serverUrl = 'https://sync.example') {
   const context = vm.createContext({
     ...errors,
     withNetworkRecovery,
@@ -39,7 +39,7 @@ async function loadClient(env, version, requests, nativeRequest, browserRequest)
       .replace(/^export /gm, '')
     vm.runInContext(source, context)
   }
-  return vm.runInContext('new SyncServerClient("https://sync.example")', context)
+  return vm.runInContext(`new SyncServerClient(${JSON.stringify(serverUrl)})`, context)
 }
 
 for (const [operation, run] of [
@@ -252,3 +252,11 @@ for (const payload of ['encrypted', 'a'.repeat(4 * 1024 * 1024)]) {
     assert.equal(client.requestControllers.size, 0)
   })
 }
+
+test('Capacitor sync can use an explicitly configured HTTP local server', async () => {
+  const requests = []
+  const client = await loadClient({ IS_CAPACITOR: true }, '0.34.0', requests, undefined, undefined, 'http://127.0.0.1:18879')
+  await client.health()
+  assert.equal(requests.length, 1)
+  assert.equal(requests[0].url, 'http://127.0.0.1:18879/health')
+})

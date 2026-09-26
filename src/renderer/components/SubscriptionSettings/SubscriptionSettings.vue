@@ -13,7 +13,7 @@
           @change="updateFetchSubscriptionsAutomatically"
         />
         <FtToggleSwitch
-          v-if="IS_CAPACITOR || IS_ELECTRON"
+          v-if="(IS_CAPACITOR && !IS_IOS) || IS_ELECTRON"
           :label="$t('Settings.Subscription Settings.Refresh Subscriptions While App Is Closed')"
           :default-value="enableClosedAppSubscriptionRefresh"
           setting-key="enableClosedAppSubscriptionRefresh"
@@ -142,6 +142,7 @@ import SubscriptionChannelSettings from '../SubscriptionChannelSettings/Subscrip
 import store from '../../store/index'
 
 const { t } = useI18n()
+const IS_IOS = !!process.env.IS_IOS
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const IS_ELECTRON = !!process.env.IS_ELECTRON
 

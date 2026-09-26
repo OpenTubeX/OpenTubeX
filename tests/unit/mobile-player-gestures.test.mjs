@@ -12,7 +12,7 @@ class ElementStub {
   closest(selectors) { return this.selector && selectors.includes(this.selector) ? this : null }
 }
 
-function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = true, mobile = true, mini = false, shorts = false, height = 200.5, nativeReplay = false, minimize = false } = {}) {
+function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = true, mobile = true, mini = false, shorts = false, height = 200.5, nativeReplay = false, minimize = false, fullscreen = () => false } = {}) {
   t.mock.method(globalThis, 'setTimeout', setTimeout)
   const previous = { document: globalThis.document, window: globalThis.window, Element: globalThis.Element }
   globalThis.Element = ElementStub
@@ -34,7 +34,7 @@ function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = t
       gestures = useMobileFullscreenGestures({
         getContainer: () => container,
         getControls: () => ({ getControlsContainer: () => ({ hasAttribute: () => false }), anySettingsMenusAreOpen: () => false, getConfig: () => ({ tapSeekDistance: 0 }), showUI: () => calls.push('show') }),
-        isFullscreenActive: () => false,
+        isFullscreenActive: fullscreen,
         isFullscreenMetadataShown: () => false,
         isFullscreenSwipeEnabled: () => fullscreenSwipe,
         isPlaybackEnded: () => false,
@@ -339,4 +339,16 @@ test('a rejected scroll-mini-player restore never enters fullscreen or retains c
   assert.equal(g.finishMobileFullscreenGesture(event(210, 180)), false)
   assert.equal(calls.includes('fullscreen'), false)
   assert.equal(captures.size, 0)
+})
+
+
+test('does not reenter fullscreen when iPadOS already exited during a downward swipe', async t => {
+  let fullscreen = true
+  const { gestures: g, event, calls } = fixture(t, { fullscreen: () => fullscreen })
+  g.startMobileFullscreenGesture(event(210, 50))
+  g.moveMobileFullscreenGesture(event(210, 150))
+  fullscreen = false
+  g.finishMobileFullscreenGesture(event(210, 150))
+  await new Promise(resolve => setTimeout(resolve, 10))
+  assert.deepEqual(calls, [])
 })

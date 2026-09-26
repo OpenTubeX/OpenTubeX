@@ -17,7 +17,7 @@ function setup(t, online, checkInternet) {
   const calls = []
   const toasts = []
   const context = vm.createContext({
-    isElectron: false, isCapacitor: true,
+    isElectron: false, isCapacitor: true, supportsYtDlp: true,
     initializeNetworkRecovery: () => recovery,
     classifyRequestFailure,
     getConnectionState: () => recovery.state,
@@ -36,6 +36,15 @@ function setup(t, online, checkInternet) {
   vm.runInContext(initializeSource, context)
   return { calls, toasts, context, connect(value) { online = value; events.dispatchEvent(new Event(value ? 'online' : 'offline')) } }
 }
+
+test('iOS startup skips unsupported managed tools without network probes or toasts', async t => {
+  const app = setup(t, true, async () => { assert.fail('Unexpected connectivity probe') })
+  app.context.supportsYtDlp = false
+  app.context.ytDlp.ytDlpGetInfo = async () => { assert.fail('Unexpected managed tool access') }
+  await app.context.initializeManagedExternalSoftware()
+  assert.deepEqual(app.calls, [])
+  assert.deepEqual(app.toasts, [])
+})
 
 test('Android startup defers missing managed tools without progress or error toasts while offline, then resumes', async t => {
   const app = setup(t, false)

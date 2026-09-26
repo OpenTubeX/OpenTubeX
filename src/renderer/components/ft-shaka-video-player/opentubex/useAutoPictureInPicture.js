@@ -115,7 +115,7 @@ export function useAutoPictureInPicture({
   }
 
   function updateAutoPip() {
-    if (process.env.IS_CAPACITOR) {
+    if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
       const videoElement = video.value
       const isPresented = isAndroidPictureInPictureTarget.value
       const enabled = resolveAndroidAutoPictureInPictureUpdate(
@@ -259,7 +259,7 @@ export function useAutoPictureInPicture({
 
   function setupAutoPictureInPicture() {
     autoPictureInPictureTornDown = false
-    if (process.env.IS_CAPACITOR) {
+    if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
       video.value?.addEventListener('play', updateAutoPip)
       video.value?.addEventListener('pause', updateAutoPip)
       video.value?.addEventListener('ended', updateAutoPip)
@@ -313,7 +313,7 @@ export function useAutoPictureInPicture({
 
   function teardownAutoPictureInPicture() {
     autoPictureInPictureTornDown = true
-    if (process.env.IS_CAPACITOR) {
+    if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
       video.value?.removeEventListener('play', updateAutoPip)
       video.value?.removeEventListener('pause', updateAutoPip)
       video.value?.removeEventListener('ended', updateAutoPip)

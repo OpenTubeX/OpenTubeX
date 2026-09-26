@@ -220,7 +220,7 @@ import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 
 import FtMobileSheet from '../FtMobileSheet/FtMobileSheet.vue'
-import { usePhoneLayout } from '../../composables/usePhoneLayout'
+import { PHONE_LAYOUT_QUERY, usePhoneLayout } from '../../composables/usePhoneLayout'
 
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
 import FtPerformanceImpact from '../FtPerformanceImpact/FtPerformanceImpact.vue'
@@ -310,7 +310,9 @@ const selectButton = useTemplateRef('selectButton')
 const dropdown = useTemplateRef('dropdown')
 const options = useTemplateRef('options')
 
-const phoneLayout = usePhoneLayout()
+const phoneLayout = usePhoneLayout(process.env.IS_CAPACITOR
+  ? `(any-pointer: coarse), ${PHONE_LAYOUT_QUERY}`
+  : PHONE_LAYOUT_QUERY)
 const search = ref('')
 const filteredOptions = computed(() => props.selectNames
   .map((name, index) => ({ name, index }))

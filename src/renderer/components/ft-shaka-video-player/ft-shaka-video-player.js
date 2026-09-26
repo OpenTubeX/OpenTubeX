@@ -9,6 +9,9 @@ import { computed, defineComponent, inject, nextTick, onBeforeUnmount, onMounted
 import FtPaidPromotionBadge from '../FtPaidPromotionBadge/FtPaidPromotionBadge.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import shaka from 'shaka-player'
+import { registerPlugin } from '@capacitor/core'
+import { bindIosFullscreen } from '../../helpers/player/iosFullscreen'
+import { createIOSMediaTransport } from '../../helpers/player/iosMediaTransport'
 import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
@@ -216,6 +219,12 @@ let liveCustomControlPlayers = 0
 
 const RequestType = shaka.net.NetworkingEngine.RequestType
 const AdvancedRequestType = shaka.net.NetworkingEngine.AdvancedRequestType
+
+if (process.env.IS_IOS) {
+  shaka.net.NetworkingEngine.registerScheme('https',
+    createIOSMediaTransport(shaka, registerPlugin('SabrHttp')),
+    shaka.net.NetworkingEngine.PluginPriority.APPLICATION, true)
+}
 const TrackLabelFormat = shaka.ui.Overlay.TrackLabelFormat
 const CaptionPositionArea = shaka.config.PositionArea
 const { Severity: ErrorSeverity, Category: ErrorCategory, Code: ErrorCode } = shaka.util.Error
@@ -730,6 +739,7 @@ export default defineComponent({
     /** @type {shaka.ui.Overlay|null} */
     let ui = null
     let nativePlaybackCleanup = null
+    let iosFullscreenCleanup = null
     let screenWakeBinding = null
 
     // Set when a UI reconfigure is requested while the player is not loaded, so
@@ -1198,7 +1208,7 @@ export default defineComponent({
       return Number.isFinite(volume) ? Math.min(1, Math.max(0, volume)) : 0.1
     })
     const voiceOverTranslationAvailable = computed(() => {
-      return !props.offline && (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
+      return !props.offline && (process.env.IS_ELECTRON || (process.env.IS_CAPACITOR && !process.env.IS_IOS)) &&
         useVoiceOverTranslationSetting.value &&
         props.videoId !== '' &&
         !isLive.value
@@ -1621,7 +1631,7 @@ export default defineComponent({
 
     watch(enterFullscreenOnDisplayRotate, (newValue) => {
       ui.configure({
-        enableFullscreenOnRotation: !process.env.IS_CAPACITOR && newValue
+        enableFullscreenOnRotation: (!process.env.IS_CAPACITOR || process.env.IS_IOS) && newValue
       })
     })
 
@@ -4551,7 +4561,7 @@ export default defineComponent({
 
       /** @type {string[]} */
       let elementList
-      const pictureInPictureElement = process.env.IS_CAPACITOR
+      const pictureInPictureElement = process.env.IS_CAPACITOR && !process.env.IS_IOS
         ? 'ft_android_picture_in_picture'
         : 'picture_in_picture'
 
@@ -4782,7 +4792,7 @@ export default defineComponent({
 
           // these have their own watchers
           bigButtons: displayVideoPlayButton.value || isCapacitorMobilePlayer() ? ['play_pause'] : [],
-          enableFullscreenOnRotation: !process.env.IS_CAPACITOR && enterFullscreenOnDisplayRotate.value,
+          enableFullscreenOnRotation: (!process.env.IS_CAPACITOR || process.env.IS_IOS) && enterFullscreenOnDisplayRotate.value,
           playbackRates: playbackRates.value,
           tapSeekDistance: defaultSkipInterval.value,
 
@@ -6126,7 +6136,7 @@ export default defineComponent({
       const visible = shouldShowAndroidStatusBar({
         active: isActiveTab.value,
         fullscreen: isNativeFullscreenActive(),
-        controlsShown: controlsContainer?.hasAttribute('shown') === true,
+        controlsShown: !process.env.IS_IOS && controlsContainer?.hasAttribute('shown') === true,
       })
       if (visible === androidStatusBarVisible) return
 
@@ -6418,7 +6428,7 @@ export default defineComponent({
       // a later blur-triggered PiP transition.
       // Media3 can start its playback clock before rendering the first frame.
       // Native playback dismisses the overlay through its firstframe event.
-      if (!process.env.IS_CAPACITOR) showPoster.value = false
+      if (!process.env.IS_CAPACITOR || process.env.IS_IOS) showPoster.value = false
       startPaidPromotionTimer()
 
       if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
@@ -6919,6 +6929,9 @@ export default defineComponent({
     })
     function handleMobileAdjustmentsVisibility() {
       mobileAdjustmentsVisible.value = !isAppHidden()
+      if (process.env.IS_IOS && !mobileAdjustmentsVisible.value && !store.getters.getContinuePlaybackWhenScreenIsLocked) {
+        video.value?.pause()
+      }
     }
     onMounted(() => document.addEventListener('visibilitychange', handleMobileAdjustmentsVisibility))
     onBeforeUnmount(() => {
@@ -7226,7 +7239,7 @@ export default defineComponent({
     }
 
     function ensureSabrStream() {
-      if (process.env.IS_CAPACITOR || !process.env.SUPPORTS_LOCAL_API || sabrStream || !props.sabrData) return
+      if ((process.env.IS_CAPACITOR && !process.env.IS_IOS) || !process.env.SUPPORTS_LOCAL_API || sabrStream || !props.sabrData) return
 
       sabrStream = /** @__NOINLINE__ */ setupSabrScheme(props.sabrData, () => player, () => sabrManifest, playerWidth, playerHeight)
       sabrAbortController = new AbortController()
@@ -8509,6 +8522,8 @@ export default defineComponent({
           updateOverlayScrollbars(document.body)
         }
 
+        if (process.env.IS_IOS) document.dispatchEvent(new Event('fullscreenchange'))
+
         if (previousRect === null) {
           return
         }
@@ -8554,7 +8569,7 @@ export default defineComponent({
     }
 
     function registerAndroidPictureInPictureButton() {
-      if (!process.env.IS_CAPACITOR) return
+      if (!process.env.IS_CAPACITOR || process.env.IS_IOS) return
 
       events.addEventListener('enterAndroidPictureInPicture', () => {
         enterAndroidPictureInPicture(video.value).catch(error => {
@@ -10708,7 +10723,7 @@ export default defineComponent({
 
       await initializeActiveTab()
 
-      const localPlayer = process.env.IS_CAPACITOR
+      const localPlayer = process.env.IS_CAPACITOR && !process.env.IS_IOS
         ? createAndroidPlayer(videoElement, container.value, () => ({
             presented: isActiveTab.value || isCrossTabMiniPlayerPresented.value,
             vrCanvas: vrCanvas.value,
@@ -10752,6 +10767,12 @@ export default defineComponent({
       }
 
       const controls = ui.getControls()
+      if (process.env.IS_IOS) {
+        iosFullscreenCleanup = bindIosFullscreen(controls, {
+          isEnabled: () => fullWindowEnabled.value,
+          setEnabled: enabled => events.dispatchEvent(new CustomEvent('setFullWindow', { detail: enabled })),
+        })
+      }
       player = controls.getPlayer()
       if (player.nativePlayback) {
         player.nativePlayback.bindControls(controls)
@@ -10819,7 +10840,7 @@ export default defineComponent({
       registerAbRepeatControl()
 
       registerTheatreModeButton()
-      if (!process.env.IS_CAPACITOR) registerFullWindowButton()
+      if (!process.env.IS_CAPACITOR || process.env.IS_IOS) registerFullWindowButton()
       registerAndroidPictureInPictureButton()
       registerShortsVideoInfoButton()
 
@@ -11421,6 +11442,8 @@ export default defineComponent({
       sponsorBlockRequestGeneration++
       screenWakeBinding?.destroy()
       screenWakeBinding = null
+      iosFullscreenCleanup?.()
+      iosFullscreenCleanup = null
       nativePlaybackCleanup?.()
       nativePlaybackCleanup = null
       clearTimeout(paidPromotionTimer)
@@ -11633,6 +11656,8 @@ export default defineComponent({
       repeatStatsLoopObserver?.disconnect()
       screenWakeBinding?.destroy()
       screenWakeBinding = null
+      iosFullscreenCleanup?.()
+      iosFullscreenCleanup = null
       nativePlaybackCleanup?.()
       nativePlaybackCleanup = null
       ignoreErrors = true
@@ -11797,7 +11822,7 @@ export default defineComponent({
 
     return {
       hasLoaded,
-      useNativePlayback: process.env.IS_CAPACITOR,
+      useNativePlayback: process.env.IS_CAPACITOR && !process.env.IS_IOS,
       videoLayoutReady,
       shortsPaused,
       playbackEnded,
