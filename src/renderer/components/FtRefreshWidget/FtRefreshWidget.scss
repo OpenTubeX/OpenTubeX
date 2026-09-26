@@ -138,9 +138,7 @@
     border-inline-start: none;
   }
 
-  .floatingRefreshSection.embedded.subscriptionsHeaderRefreshWidget,
-  .floatingRefreshSection.embedded.subscriptionsHeaderRefreshWidget.sideNavOpen,
-  .floatingRefreshSection.embedded.subscriptionsHeaderRefreshWidget.hideLabelsSideBar {
+  .floatingRefreshSection.embedded.subscriptionsHeaderRefreshWidget:not(:has(> .lastRefreshTimestamp)) {
     display: contents;
   }
 
@@ -149,12 +147,6 @@
   .floatingRefreshSection.embedded.hideLabelsSideBar {
     inline-size: 100%;
     justify-content: space-between;
-  }
-
-  .floatingRefreshSection.embedded.subscriptionsHeaderRefreshWidget > .lastRefreshTimestamp {
-    flex: 1 0 100%;
-    order: 1;
-    text-align: start;
   }
 
   .floatingRefreshSection.embedded.subscriptionsHeaderRefreshWidget .refreshActions {
@@ -174,6 +166,36 @@
 
     .lastRefreshTimestamp {
       text-align: start;
+    }
+  }
+
+  .floatingRefreshSection.embedded.subscriptionsHeaderRefreshWidget:has(> .lastRefreshTimestamp) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+
+    .refreshActions {
+      display: contents;
+    }
+
+    > .lastRefreshTimestamp {
+      grid-column: 1;
+      grid-row: 1;
+      text-align: start;
+    }
+
+    .nextAutoRefreshTimestamp {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .refreshButton {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    &:has(.nextAutoRefreshTimestamp) .refreshButton {
+      grid-row: 1 / span var(--refresh-button-row-span, 2);
     }
   }
 }

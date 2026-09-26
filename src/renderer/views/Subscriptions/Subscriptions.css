@@ -380,6 +380,23 @@
     inline-size: 100%;
   }
 
+  .headerActions .headerRefreshWidget:has(> .lastRefreshTimestamp) {
+    flex-basis: 100%;
+    inline-size: 100%;
+  }
+
+  .headerActions.hasAutoRefreshStatus:has(> .markAllSeenButton) {
+    --refresh-button-row-span: 3;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 12px;
+  }
+
+  .headerActions.hasAutoRefreshStatus:has(> .markAllSeenButton) .headerRefreshWidget {
+    display: contents;
+  }
+
   .headerActions .headerSortSelect {
     flex-basis: 0;
   }
@@ -401,6 +418,12 @@
   .markAllSeenButton {
     min-block-size: 36px;
     order: 2;
+  }
+
+  .headerActions.hasAutoRefreshStatus:has(> .markAllSeenButton) .markAllSeenButton {
+    grid-column: 1;
+    grid-row: 3;
+    justify-self: start;
   }
 
   .newFeedTabs {
