@@ -76,6 +76,8 @@ const actionDataValidators = {
     [DBActions.GENERAL.DELETE_MULTIPLE]: isIdArray
   },
   [IpcChannels.DB_WATCH_STATS]: {
+    [DBActions.WATCH_STATS.MERGE_BACKUP]: data => isRecord(data) && Array.isArray(data.records) &&
+      (data.adjustment === null || isRecord(data.adjustment)),
     [DBActions.WATCH_STATS.ADD_WATCH_TIME]: data => isRecord(data) &&
       typeof data.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(data.date) &&
       typeof data.seconds === 'number' && Number.isFinite(data.seconds) && data.seconds > 0,

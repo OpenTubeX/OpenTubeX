@@ -59,6 +59,26 @@ test('datastore IPC rejects untrusted frames before calling handlers', async () 
   assert.deepEqual(notifications, [])
 })
 
+test('watch stats backup merge reaches the handler and broadcasts its result', async () => {
+  const backup = { records: [{ date: '2026-09-26', seconds: 12 }], adjustment: null }
+  const merged = { records: backup.records, adjustment: null }
+  const calls = []
+  const { registrations, notifications, event } = setup({
+    watchStats: { mergeBackup: async data => { calls.push(data); return merged } }
+  })
+
+  assert.deepEqual(await registrations.get(IpcChannels.DB_WATCH_STATS)(event, {
+    action: DBActions.WATCH_STATS.MERGE_BACKUP,
+    data: backup
+  }), merged)
+  assert.deepEqual(calls, [backup])
+  assert.deepEqual(notifications, [[
+    IpcChannels.SYNC_WATCH_STATS,
+    event,
+    { event: SyncEvents.GENERAL.OVERWRITE, data: merged }
+  ]])
+})
+
 test('datastore IPC rejects malformed request envelopes after checking the frame', async () => {
   let called = false
   const { registrations, event } = setup({
@@ -236,6 +256,7 @@ test('datastore write actions reject incomplete payloads before calling handlers
     [IpcChannels.DB_HISTORY, DBActions.GENERAL.DELETE, undefined],
     [IpcChannels.DB_RECOMMENDATIONS, DBActions.GENERAL.UPSERT, undefined],
     [IpcChannels.DB_RECOMMENDATIONS, DBActions.GENERAL.DELETE_MULTIPLE, null],
+    [IpcChannels.DB_WATCH_STATS, DBActions.WATCH_STATS.MERGE_BACKUP, { records: null, adjustment: null }],
     [IpcChannels.DB_WATCH_STATS, DBActions.WATCH_STATS.ADD_WATCH_TIME, { date: '2026-09-26' }],
     [IpcChannels.DB_WATCH_STATS, DBActions.WATCH_STATS.ADJUST_HISTORICAL_WATCH_TIME, {}],
     [IpcChannels.DB_PROFILES, DBActions.GENERAL.CREATE, undefined],
