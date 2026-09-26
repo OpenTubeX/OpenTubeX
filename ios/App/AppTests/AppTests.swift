@@ -734,7 +734,8 @@ final class AppTests: XCTestCase {
         try await wait("!!document.querySelector('.settingsMenu')")
         for scale in [75, 100, 150] {
             _ = try await webView.callAsyncJavaScript("await testStore.dispatch('updateUiScale', scale)", arguments: ["scale": scale], in: nil, contentWorld: .page)
-            try await wait("Math.abs(visualViewport.scale - \(Double(scale) / 100)) < 0.02")
+            // WebKit can report the new scale before innerWidth catches up with the layout viewport.
+            try await wait("Math.abs(visualViewport.scale - \(Double(scale) / 100)) < 0.02 && Math.abs(innerWidth - document.documentElement.clientWidth) <= 1")
             let overflow = try await evaluate("document.documentElement.scrollWidth > innerWidth + 1") as? Bool
             XCTAssertEqual(overflow, false, "Horizontal overflow at \(scale)%")
             let attachment = XCTAttachment(image: try await webView.takeSnapshot(configuration: nil))
