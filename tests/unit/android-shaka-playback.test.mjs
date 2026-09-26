@@ -52,10 +52,12 @@ test('Android phone uses the central Shaka play button without a duplicate in th
   assert.ok(start !== -1 && end !== -1)
   const expression = `${source.slice(start, end + '\n      ]'.length)}\ncontrolPanelElements`
   const controls = mobile => vm.runInNewContext(expression, {
-    isCapacitorMobilePlayer: () => mobile,
+    mobile,
     onlyUseOverFlowMenu: { value: true },
     props: { shortsPlayer: false, chapters: [] },
   })
   assert.equal(controls(true).includes('play_pause'), false)
+  assert.equal(controls(true).includes('ft_skip_previous'), false)
+  assert.equal(controls(true).includes('ft_skip_next'), false)
   assert.equal(controls(false).includes('play_pause'), true)
 })
