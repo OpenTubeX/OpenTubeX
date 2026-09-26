@@ -3337,15 +3337,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   flex-wrap: wrap;
   align-items: baseline;
   align-content: flex-start;
-  gap: 2px 5px;
-}
-
-
-.fullscreenMetadataTarget :deep(.publishedTimeAgo::before),
-.fullscreenMetadataTarget :deep(.videoViews::before),
-.fullscreenMetadataTarget :deep(.videoCategory::before) {
-  content: '•';
-  margin-inline-end: 5px;
+  gap: 2px 0.75em;
 }
 
 .fullscreenMetadataTarget :deep(.profileRow) {
@@ -3809,6 +3801,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 :deep(.ft-shaka-highlight-button) {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   width: auto;
   min-width: 0;

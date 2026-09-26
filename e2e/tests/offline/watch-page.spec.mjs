@@ -4522,6 +4522,37 @@ test.describe('watch page', () => {
     await handle.hover()
   })
 
+  test('fullscreen metadata separators stay between wrapped items', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await setPlayerFullscreen(page, true)
+    await page.locator('.playerFullscreenTitleOverlay').click({ force: true })
+
+    const metadata = page.locator('.fullscreenMetadataOverlay.open .datePublishedAndViewCount')
+    await expect(metadata).toBeVisible()
+    await metadata.evaluate(element => { element.style.inlineSize = '160px' })
+    const separator = metadata.locator('.videoViews')
+    await expect(separator).toBeVisible()
+    for (const zoomFactor of [1, 1.25]) {
+      await page.evaluate(value => window.ftElectron.setZoomFactor(value), zoomFactor)
+      const geometry = await separator.evaluate(element => {
+        const before = getComputedStyle(element, '::before')
+        const rect = element.getBoundingClientRect()
+        const previous = element.previousElementSibling.getBoundingClientRect()
+        return {
+          content: before.content,
+          left: rect.left,
+          wrapped: rect.top > previous.top,
+          separatorLeft: rect.left + parseFloat(before.left),
+          separatorWidth: parseFloat(before.width)
+        }
+      })
+      expect(geometry.wrapped).toBe(true)
+      expect(geometry.content).toBe('""')
+      expect(geometry.separatorLeft + geometry.separatorWidth).toBeLessThan(geometry.left)
+    }
+  })
+
   test('fullscreen comments scrollbar reaches the dock bottom', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
