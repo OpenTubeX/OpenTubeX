@@ -5,6 +5,12 @@ import AppShortcutsPlugin
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
+    func sceneWillResignActive(_ scene: UIScene) {
+        // Visibility events arrive after WebKit may have suspended inline video.
+        (window?.rootViewController as? OpenTubeXViewController)?.bridge?.triggerJSEvent(
+            eventName: "opentubex:prepare-background", target: "window")
+    }
+
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = scene as? UIWindowScene else { return }
 

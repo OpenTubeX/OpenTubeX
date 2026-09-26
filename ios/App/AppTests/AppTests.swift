@@ -6,6 +6,20 @@ import Network
 
 @MainActor
 final class AppTests: XCTestCase {
+    func testBackgroundPreparationEvent() async throws {
+        try await openApplication()
+        _ = try await evaluate("""
+            window.iosPreparedForBackground = false;
+            window.addEventListener('opentubex:prepare-background', () => {
+                window.iosPreparedForBackground = true;
+            }, { once: true });
+            """)
+        let scene = try XCTUnwrap(webView.window?.windowScene)
+        let delegate = try XCTUnwrap(scene.delegate as? SceneDelegate)
+        delegate.sceneWillResignActive(scene)
+        try await wait("window.iosPreparedForBackground === true")
+    }
+
     func testMediaRequestOrigins() throws {
         XCTAssertTrue(IOSNetwork.isMediaURL(try XCTUnwrap(URL(string: "https://rr1.googlevideo.com/videoplayback"))))
         for address in ["http://rr1.googlevideo.com/videoplayback", "https://googlevideo.com.attacker.invalid/", "https://notgooglevideo.com/", "https://user:password@rr1.googlevideo.com/"] {

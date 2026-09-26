@@ -248,7 +248,7 @@
       </div>
     </div>
     <FtFlexBox
-      v-if="IS_CAPACITOR && !IS_IOS"
+      v-if="IS_CAPACITOR"
       class="autoPictureInPictureSettings"
     >
       <FtToggleSwitch
@@ -663,7 +663,6 @@ const QUICK_PLAYBACK_SPEED_LIMIT = 14
 
 /** @type {boolean} */
 const USING_ELECTRON = process.env.IS_ELECTRON
-const IS_IOS = !!process.env.IS_IOS
 const IS_CAPACITOR = process.env.IS_CAPACITOR
 const MOBILE_SWIPE_ACTION_VALUES = ['disabled', 'brightness', 'volume', 'speed']
 const MOBILE_SWIPE_ACTION_ICONS = {
