@@ -131,6 +131,7 @@ const state = {
   syncServerHistorySupported: null,
   syncServerWatchStatsSupported: null,
   syncServerLiveRemindersSupported: null,
+  syncServerLiveRemindersPending: false,
   syncServerSessionExpired: false,
   syncServerOtherDeviceSessions: [],
   syncServerDevices: {},
@@ -340,9 +341,14 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
           const reminders = await syncLiveReminders(targetClient, previous.liveReminders)
           if (reminders === null) {
             skippedCollections.add('liveReminders')
+            if ('liveReminders' in previous) next.liveReminders = previous.liveReminders
+            else delete next.liveReminders
+            delete result.liveReminders
+            commit('setSyncServerLiveRemindersPending', true)
           } else {
             next.liveReminders = reminders
             result.liveReminders = reminders.length
+            commit('setSyncServerLiveRemindersPending', false)
           }
         }
         break
@@ -398,6 +404,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     const liveRemindersSupported = encrypted && capabilities.live_reminders === 1
     commit('setSyncServerLiveRemindersSupported', liveRemindersSupported)
     if (!liveRemindersSupported) {
+      commit('setSyncServerLiveRemindersPending', false)
       const index = stages.indexOf('liveReminders')
       if (index !== -1) stages.splice(index, 1)
     }
@@ -587,6 +594,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
               } else {
                 await applyCollection(collection, retryClient)
               }
+              if (skippedCollections.has(collection)) break
               revision = remote.revision
               data = retryClient.document[collection]
             }
@@ -731,6 +739,7 @@ const actions = {
     commit('setSyncServerLiveSupported', false)
     commit('setSyncServerWatchStatsSupported', null)
     commit('setSyncServerLiveRemindersSupported', null)
+    commit('setSyncServerLiveRemindersPending', false)
     commit('setSyncedWatchStats', [])
     clearSyncServerDevices(commit)
     if (rootState.settings.syncServerToken) await dispatch('initializeSyncServer')
@@ -1320,11 +1329,13 @@ const actions = {
         const connected = await liveConnection.isConnected()
         if (signal.aborted || !rootState.settings.syncServerEnabled || !rootState.settings.syncServerAutoSync ||
             !rootState.settings.syncServerToken || isSyncServerOffline()) return
-        // Live notifications replace periodic downloads, but a failed local
-        // upload still needs a retry even if no remote change arrives.
-        const retryFailedUpload = rootState.syncServer.syncServerStatus === 'error'
-        if (!connected || retryFailedUpload) {
-          await dispatch('syncWithSyncServer', { skipIfRecent: !retryFailedUpload, automatic: true })
+        // Live notifications replace periodic downloads, but failed uploads
+        // and reminders awaiting permission still need a retry.
+        const retryPending = rootState.syncServer.syncServerStatus === 'error' ||
+          (rootState.syncServer.syncServerLiveRemindersPending &&
+            isSyncReasonEnabled(rootState.settings, 'liveReminders'))
+        if (!connected || retryPending) {
+          await dispatch('syncWithSyncServer', { skipIfRecent: !retryPending, automatic: true })
         }
       } catch (error) {
         console.error('Sync server automatic sync failed', error)
@@ -1377,6 +1388,7 @@ const actions = {
     commit('setSyncServerLiveSupported', false)
     commit('setSyncServerWatchStatsSupported', null)
     commit('setSyncServerLiveRemindersSupported', null)
+    commit('setSyncServerLiveRemindersPending', false)
     commit('setSyncedWatchStats', [])
     clearSyncServerDevices(commit)
     await dispatch('updateSyncServerToken', token, { root: true })
@@ -1498,6 +1510,9 @@ const mutations = {
   },
   setSyncServerLiveRemindersSupported(state, supported) {
     state.syncServerLiveRemindersSupported = supported
+  },
+  setSyncServerLiveRemindersPending(state, pending) {
+    state.syncServerLiveRemindersPending = pending
   },
   setSyncServerSessionExpired(state, expired) {
     state.syncServerSessionExpired = expired

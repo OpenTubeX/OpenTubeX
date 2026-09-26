@@ -1,5 +1,6 @@
 import * as bookmarks from '../../src/renderer/helpers/playlist-bookmarks.js'
 import * as syncLive from '../../src/renderer/helpers/sync-server-live.js'
+import { syncLiveReminders } from '../../src/renderer/helpers/sync-live-reminders.js'
 import * as subscriptionSettingsSync from '../../src/renderer/helpers/subscription-settings-sync.js'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
@@ -29,7 +30,7 @@ function withoutImports (source) {
 const helperSource = await readFile(new URL('../../src/renderer/helpers/sync-server.js', import.meta.url), 'utf8')
 const storeSource = await readFile(new URL('../../src/renderer/store/modules/sync-server.js', import.meta.url), 'utf8')
 
-function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'] } = {}) {
+function fixture (overrides = {}, { encrypted = false, respond, connectionState = 'online', online = true, browser = false, deferLock = false, syncableSettingKeys = ['channelPlaybackSpeeds'], reminderService, connected = false, timer } = {}) {
   const connectionEvents = new EventTarget()
   const network = { state: connectionState, online }
   const requests = []
@@ -52,6 +53,10 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
   }
   const common = {
     ...syncLive,
+    ...(reminderService ? {
+      syncLiveReminders: (client, previous) => syncLiveReminders(client, previous, reminderService),
+      SyncLiveConnectionState: class { async isConnected() { return connected } setConnected() {} },
+    } : {}),
     ...bookmarks,
     ...subscriptionSettingsSync,
     ...errors,
@@ -66,6 +71,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     dispatchRemoteSyncAction,
     isRecentSync,
     isSyncReasonEnabled,
+    AUTO_SYNC_INTERVAL_MS: 5 * 60 * 1000,
     getConnectionState: () => network.state,
     navigator: { get onLine() { return network.online },
       ...(deferLock ? { locks: { request: (name, callback) => Promise.resolve().then(callback) } } : {}) },
@@ -76,12 +82,12 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
     Headers,
     Response,
     AbortController,
-    setTimeout,
+    setTimeout: timer ?? setTimeout,
     clearTimeout,
     structuredClone,
     TextEncoder,
     TextDecoder,
-    process: { env: {} },
+    process: { env: { IS_ELECTRON: Boolean(reminderService) } },
     packageDetails: { version: 'test' },
     MAIN_PROFILE_ID: 'main',
     deepCopy: structuredClone,
@@ -116,6 +122,7 @@ function fixture (overrides = {}, { encrypted = false, respond, connectionState 
   const context = {
     rootState: {
       settings,
+      syncServer: store.exports.state,
       history: { historyCacheSorted: [] },
       playlists: { playlists: [] },
       utils: { customThemes: [] },
@@ -910,6 +917,113 @@ test('bookmark upload conflicts persist the merged baseline and local bookmarks'
   assert.deepEqual(uploaded.map(item => item.playlist.id).sort(), ['local', 'remote'])
   assert.deepEqual(JSON.parse(f.settings.syncServerSnapshot).playlistBookmarks.sort(), ['local', 'remote'])
   assert.deepEqual(Array.from(f.settings.playlistBookmarks, item => item.playlist.id).sort(), ['local', 'remote'])
+})
+
+test('automatic sync retries reminders after notification permission becomes available', async () => {
+  const reminder = {
+    videoId: 'abcdefghijk',
+    startTimestamp: Date.now() + 60_000,
+    notificationTitle: 'Starting soon',
+    notificationBody: 'Open stream',
+  }
+  const local = []
+  let permissionGranted = false
+  let attempts = 0
+  let tick
+  const reminderService = {
+    list: async () => local,
+    schedule: async record => {
+      attempts++
+      if (!permissionGranted) return false
+      local.push(record)
+      return true
+    },
+    cancel: async () => {},
+  }
+  const f = fixture({ syncServerSyncSubscriptions: false, syncServerSyncLiveReminders: true }, {
+    encrypted: true,
+    reminderService,
+    connected: true,
+    timer: callback => { tick = callback },
+    respond: async (url) => {
+      if (url.endsWith('/health')) return { capabilities: { encrypted_sync: 1, live_sync: 1, live_reminders: 1 } }
+      if (url.endsWith('/encrypted_sync')) return { collections: [{ collection: 'liveReminders', revision: 1 }], legacy_data: false }
+      if (url.endsWith('/encrypted_sync/liveReminders')) return {
+        revision: 1,
+        payload: await privacy.encryptSyncDocument([reminder], f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt),
+      }
+    },
+  })
+  await f.actions.syncWithSyncServer(f.context)
+  assert.equal(f.context.state.syncServerStatus, 'success')
+  assert.equal(f.context.state.syncServerLiveRemindersPending, true)
+  assert.equal(attempts, 1)
+  f.actions.startSyncServerAutoSync(f.context)
+  permissionGranted = true
+  await tick()
+  assert.equal(attempts, 2)
+  assert.equal(f.context.state.syncServerLiveRemindersPending, false)
+  assert.deepEqual(JSON.parse(f.settings.syncServerSnapshot).liveReminders, [reminder])
+})
+
+test('a skipped reminder merge after a 409 keeps the prior snapshot and does not retry upload', async () => {
+  const localReminder = {
+    videoId: 'abcdefghijk',
+    startTimestamp: Date.now() + 60_000,
+    notificationTitle: 'Local stream',
+    notificationBody: 'Open local stream',
+  }
+  const remoteReminder = { ...localReminder, videoId: 'lmnopqrstuv', notificationTitle: 'Remote stream' }
+  let uploads = 0
+  let permissionGranted = false
+  let uploaded
+  const local = [localReminder]
+  const reminderService = {
+    list: async () => local,
+    schedule: async record => {
+      if (!permissionGranted) return false
+      local.push(record)
+      return true
+    },
+    cancel: async () => {},
+  }
+  const f = fixture({
+    syncServerSyncSubscriptions: false,
+    syncServerSyncLiveReminders: true,
+    syncServerSnapshot: JSON.stringify({ liveReminders: [] }),
+  }, {
+    encrypted: true,
+    reminderService,
+    respond: async (url, options) => {
+      if (url.endsWith('/health')) return { capabilities: { encrypted_sync: 1, live_sync: 1, live_reminders: 1 } }
+      if (url.endsWith('/encrypted_sync')) return {
+        collections: uploads > 0 ? [{ collection: 'liveReminders', revision: 1 }] : [],
+        legacy_data: false,
+      }
+      if (url.endsWith('/encrypted_sync/liveReminders')) {
+        if (options.method === 'PUT') {
+          uploads++
+          if (uploads > 1) uploaded = await privacy.decryptSyncDocument(JSON.parse(options.body).payload, f.settings.syncServerPrivacyKey)
+          return uploads === 1 ? new Response('{}', { status: 409 }) : { revision: 2 }
+        }
+        return uploads === 0 ? { revision: 0, payload: null } : {
+          revision: 1,
+          payload: await privacy.encryptSyncDocument([remoteReminder], f.settings.syncServerPrivacyKey, f.settings.syncServerPrivacySalt),
+        }
+      }
+    },
+  })
+  await f.actions.syncWithSyncServer(f.context)
+  assert.equal(uploads, 1)
+  assert.equal(f.context.state.syncServerLiveRemindersPending, true)
+  assert.deepEqual(JSON.parse(f.settings.syncServerSnapshot).liveReminders, [])
+  permissionGranted = true
+  await f.actions.syncWithSyncServer(f.context)
+  assert.equal(uploads, 2)
+  assert.equal(f.context.state.syncServerLiveRemindersPending, false)
+  assert.deepEqual(uploaded.map(record => record.videoId), [localReminder.videoId, remoteReminder.videoId])
+  assert.deepEqual(JSON.parse(f.settings.syncServerSnapshot).liveReminders.map(record => record.videoId),
+    [localReminder.videoId, remoteReminder.videoId])
 })
 
 test('live checks retry failed local uploads before clearing the sync error', async () => {
