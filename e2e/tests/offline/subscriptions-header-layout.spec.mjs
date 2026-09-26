@@ -215,12 +215,13 @@ test.describe('subscriptions header layout', () => {
       const updated = document.querySelector('.headerRefreshWidget > .lastRefreshTimestamp').getBoundingClientRect()
       const refresh = document.querySelector('.headerRefreshWidget .refreshButton').getBoundingClientRect()
       const next = document.querySelector('.headerRefreshWidget .nextAutoRefreshTimestamp').getBoundingClientRect()
+      const mark = document.querySelector('.markAllSeenButton').getBoundingClientRect()
       const header = document.querySelector('.subscriptionsHeader').getBoundingClientRect()
-      return { updated, refresh, next, header }
+      return { updated, refresh, next, mark, header }
     })
     expect(Math.abs(
       (refreshStatusLayout.refresh.top + refreshStatusLayout.refresh.bottom) / 2 -
-      (refreshStatusLayout.updated.top + refreshStatusLayout.next.bottom) / 2
+      (refreshStatusLayout.updated.top + refreshStatusLayout.mark.bottom) / 2
     )).toBeLessThanOrEqual(2)
     expect(refreshStatusLayout.refresh.left).toBeGreaterThanOrEqual(refreshStatusLayout.updated.right)
     expect(refreshStatusLayout.refresh.right).toBeLessThanOrEqual(refreshStatusLayout.header.right)
@@ -247,6 +248,19 @@ test.describe('subscriptions header layout', () => {
     await expect(markAllSeen.locator('.markAllSeenLabel')).toBeVisible()
     await expect(page.getByText(/Next auto refresh:/)).toBeVisible()
     await attachScreenshot('dark landscape mobile subscription refresh status')
+
+    await markAllSeen.click()
+    await expect(markAllSeen).toBeHidden()
+    const withoutMarkLayout = await page.evaluate(() => {
+      const updated = document.querySelector('.headerRefreshWidget > .lastRefreshTimestamp').getBoundingClientRect()
+      const next = document.querySelector('.headerRefreshWidget .nextAutoRefreshTimestamp').getBoundingClientRect()
+      const refresh = document.querySelector('.headerRefreshWidget .refreshButton').getBoundingClientRect()
+      return { updated, next, refresh }
+    })
+    expect(Math.abs(
+      (withoutMarkLayout.refresh.top + withoutMarkLayout.refresh.bottom) / 2 -
+      (withoutMarkLayout.updated.top + withoutMarkLayout.next.bottom) / 2
+    )).toBeLessThanOrEqual(2)
   })
 
   test('keeps the New feed sort control wide until its row needs to shrink', async ({ app, page, attachScreenshot }) => {

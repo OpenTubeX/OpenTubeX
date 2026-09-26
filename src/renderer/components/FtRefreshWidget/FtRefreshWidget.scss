@@ -195,7 +195,7 @@
     }
 
     &:has(.nextAutoRefreshTimestamp) .refreshButton {
-      grid-row: 1 / span 2;
+      grid-row: 1 / span var(--refresh-button-row-span, 2);
     }
   }
 }

@@ -189,6 +189,7 @@
             <div
               v-if="currentTabPanel !== null"
               class="headerActions"
+              :class="{ hasAutoRefreshStatus: currentTabPanel.lastRefreshTimestamp && currentTabPanel.nextAutoRefreshTimestamp }"
             >
               <FtIconButton
                 v-if="currentTab === 'new'"
