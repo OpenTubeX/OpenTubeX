@@ -155,15 +155,13 @@ test('keeps landscape player options within the player in list and grid modes', 
   await expect(sheet).toBeVisible()
   await expect.poll(async () => {
     const bounds = await sheet.boundingBox()
-    const player = await page.locator('.ftVideoPlayer').boundingBox()
-    const toolbar = await page.locator('.topNav').boundingBox()
     const header = await sheet.locator('.mobileSheetHeader').boundingBox()
-    return player.y >= toolbar.y + toolbar.height - 1 && bounds.y >= player.y + player.height - 1 && bounds.height >= header.height + 48
+    return bounds.y < 5 && bounds.height >= header.height + 48
   }).toBe(true)
 })
 
 for (const landscape of [false, true]) {
-  test(`restores the inline video before opening a panel from the mini player in ${landscape ? 'landscape' : 'portrait'}`, async ({ app, page }) => {
+  test(`opens a panel at the inline video position from the mini player in ${landscape ? 'landscape' : 'portrait'}`, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page, { captionTranslations: true })
     await openMockedVideo(page)
     await setWindowSize(app, page, landscape ? { width: 1000, height: 480 } : { width: 480, height: 800 })
@@ -171,21 +169,42 @@ for (const landscape of [false, true]) {
       await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateScrollMiniPlayerEnabled', true)
       window.scrollTo(0, document.body.scrollHeight)
     })
-    await expect(page.locator('.ftVideoPlayer')).toHaveClass(/scrollMiniPlayer/)
-    await page.locator('.videoOptions').getByRole('button', { name: /transcript/i }).click()
+    await expect(page.locator('.ftVideoPlayer')).toHaveClass(/(?:^|\s)scrollMiniPlayer(?:\s|$)/)
+    await page.locator('.videoOptions').getByRole('button', { name: /transcript/i }).evaluate(button => button.click())
     const sheet = page.locator('.mobileSheet[open]')
     await expect(sheet).toBeVisible()
-    await expect(page.locator('.ftVideoPlayer')).not.toHaveClass(/scrollMiniPlayer/)
-    // Android can restore an old page offset after returning the player.
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await expect(page.locator('.ftVideoPlayer')).toHaveClass(/(?:^|\s)scrollMiniPlayer(?:\s|$)/)
     await expect.poll(async () => {
-      const player = await page.locator('.ftVideoPlayer').boundingBox()
+      const inlinePlayer = await page.locator('.scrollMiniPlaceholder').boundingBox()
       const panel = await sheet.boundingBox()
-      const toolbar = await page.locator('.topNav').boundingBox()
-      return player.y >= toolbar.y + toolbar.height - 1 && (landscape
+      return landscape
         ? panel.y < 5 && panel.height >= 475
-        : panel.y >= player.y + player.height - 1)
+        : Math.abs(panel.y - Math.max(0, inlinePlayer.y + inlinePlayer.height)) < 2
     }).toBe(true)
+  })
+}
+
+for (const zoom of [1, 0.95]) {
+  test(`opens comments from a mini player at the inline video position at ${zoom} UI scale`, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await setWindowSize(app, page, { width: 480, height: 800 })
+    await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
+    await page.evaluate(async () => {
+      await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateScrollMiniPlayerEnabled', true)
+      window.scrollTo(0, document.body.scrollHeight)
+    })
+    const player = page.locator('.ftVideoPlayer')
+    await expect(player).toHaveClass(/(?:^|\s)scrollMiniPlayer(?:\s|$)/)
+    await page.locator('.phoneCommentsButton').evaluate(button => button.click())
+    const sheet = page.locator('.dockedSheet[open]')
+    await expect(sheet).toBeVisible()
+    await expect(player).toHaveClass(/(?:^|\s)scrollMiniPlayer(?:\s|$)/)
+    await expect.poll(async () => {
+      const inlinePlayer = await page.locator('.scrollMiniPlaceholder').boundingBox()
+      const panel = await sheet.boundingBox()
+      return Math.abs(panel.y - Math.max(0, inlinePlayer.y + inlinePlayer.height))
+    }).toBeLessThan(2)
   })
 }
 
