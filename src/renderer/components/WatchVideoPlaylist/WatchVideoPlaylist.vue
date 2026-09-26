@@ -588,23 +588,6 @@ watch([() => props.videoId, () => props.playlistItemId], () => {
   expectedAutoSkipItem = null
 }, { flush: 'post' })
 
-watch(
-  [() => props.autoSkipUnavailable, isLoading, () => props.watchViewLoading, nextVideo],
-  ([shouldSkip, playlistLoading, watchViewLoading, nextItem]) => {
-    if (!shouldSkip || playlistLoading || watchViewLoading) return
-
-    const currentKey = props.playlistItemId || props.videoId
-    const nextKey = playlistItemKey(nextItem)
-    if (!nextKey || nextKey === currentKey || skippedUnavailableItems.has(currentKey) ||
-      skippedUnavailableItems.has(nextKey) || !canPlayNextVideo.value) return
-
-    skippedUnavailableItems.add(currentKey)
-    expectedAutoSkipItem = nextKey
-    playNextVideo()
-  },
-  { flush: 'post' }
-)
-
 watch(() => props.playlistItemId, () => {
   prevVideoBeforeDeletion.value = null
 })
@@ -1381,6 +1364,23 @@ const skipAvailability = computed(() => {
 const canPlayNextVideo = computed(() => skipAvailability.value.canPlayNext)
 
 const canPlayPreviousVideo = computed(() => skipAvailability.value.canPlayPrevious)
+
+watch(
+  [() => props.autoSkipUnavailable, isLoading, () => props.watchViewLoading, nextVideo, canPlayNextVideo],
+  ([shouldSkip, playlistLoading, watchViewLoading, nextItem, canPlayNext]) => {
+    if (!shouldSkip || playlistLoading || watchViewLoading || !canPlayNext) return
+
+    const currentKey = props.playlistItemId || props.videoId
+    const nextKey = playlistItemKey(nextItem)
+    if (!nextKey || nextKey === currentKey || skippedUnavailableItems.has(currentKey) ||
+      skippedUnavailableItems.has(nextKey)) return
+
+    skippedUnavailableItems.add(currentKey)
+    expectedAutoSkipItem = nextKey
+    playNextVideo()
+  },
+  { flush: 'post' }
+)
 
 // The watch view owns the skip actions, as it also knows about the watch queue
 watch([canPlayNextVideo, canPlayPreviousVideo], ([canPlayNext, canPlayPrevious]) => {

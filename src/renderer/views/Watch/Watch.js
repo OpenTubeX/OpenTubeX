@@ -3780,6 +3780,7 @@ export default defineComponent({
             }
 
             if (/\bprivate video\b|\bvideo is private\b/i.test(err.message || err.toString())) {
+              if (this.finishDownloadedPlaybackWithoutMetadata()) return
               this.isLoading = false
               this.thumbnail ||= this.getUnavailableVideoThumbnail()
               this.setNonRetryablePlaybackError('private')
