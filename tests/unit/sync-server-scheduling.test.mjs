@@ -21,6 +21,7 @@ function settings (overrides = {}) {
     syncServerSyncSubscriptions: false,
     syncServerSyncPlaylists: false,
     syncServerSyncHistory: false,
+    syncServerSyncLiveReminders: false,
     syncServerSyncProfiles: false,
     syncServerSyncSessions: false,
     syncServerSyncSettings: false,
@@ -55,12 +56,15 @@ test('only schedules changes for enabled collections', () => {
 })
 
 test('requires enhanced privacy and the collection toggle for private collections', () => {
+  assert.equal(isSyncReasonEnabled(settings({ syncServerSyncLiveReminders: true }), 'liveReminders'), true)
+  assert.equal(isSyncReasonEnabled(settings({ syncServerSyncLiveReminders: true }), 'automatic'), true)
   assert.equal(isSyncReasonEnabled(settings({ syncServerSyncSettings: true }), 'settings'), true)
   assert.equal(isSyncReasonEnabled(settings({ syncServerSyncSessions: true }), 'sessions'), true)
   assert.equal(isSyncReasonEnabled(settings({
     syncServerPrivacyMode: 'legacy',
     syncServerSyncSettings: true,
     syncServerSyncSessions: true,
+    syncServerSyncLiveReminders: true,
   }), 'automatic'), false)
 })
 

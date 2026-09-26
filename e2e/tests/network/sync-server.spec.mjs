@@ -738,6 +738,9 @@ test.describe('OpenTubeX sync server', () => {
         : []),
       ...(capabilities.watch_stats === 1
         ? [{ collection: 'watchStats', revision: 1, payload: null }]
+        : []),
+      ...(capabilities.live_reminders === 1
+        ? [{ collection: 'liveReminders', revision: 1, payload: null }]
         : [])
     ]
     expect(encryptedUploadBodies).toHaveLength(expectedUploads.length)

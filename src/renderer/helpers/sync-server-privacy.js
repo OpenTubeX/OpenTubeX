@@ -202,6 +202,7 @@ export function createEmptySyncDocument() {
     playlists: [],
     history: [],
     watchStats: [],
+    liveReminders: [],
     seenVideos: [],
     seenPosts: [],
     playbackSpeeds: [],
@@ -270,6 +271,7 @@ export class EncryptedSyncAdapter {
     this.document.playlists ??= []
     this.document.history ??= []
     this.document.watchStats ??= []
+    this.document.liveReminders ??= []
     this.document.seenVideos ??= []
     this.document.seenPosts ??= []
     this.document.playbackSpeeds ??= []
@@ -335,6 +337,8 @@ export class EncryptedSyncAdapter {
   async getWatchHistory() { return structuredClone(this.document.history) }
   async getWatchStats() { return structuredClone(this.document.watchStats) }
   async putWatchStats(value) { this.document.watchStats = structuredClone(value) }
+  async getLiveReminders() { return structuredClone(this.document.liveReminders) }
+  async putLiveReminders(value) { this.document.liveReminders = structuredClone(value) }
 
   async getSeenVideos() { return structuredClone(this.document.seenVideos) }
 
