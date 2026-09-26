@@ -160,6 +160,7 @@
           :shorts-phone-panels="shortsPhonePanelsEnabled"
           :shorts-metadata-open="shortsMetadataOpen"
           :shorts-aspect-ratio="videoAspectRatio"
+          :video-aspect-ratio="videoAspectRatio"
           class="videoPlayer"
           @error="handlePlayerError"
           @loaded="handleVideoLoaded"

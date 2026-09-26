@@ -14,7 +14,11 @@ for (const players of [1, 2]) {
   test(`Lights Off factory cleanup with ${players} mounted player(s)`, () => {
     const factory = { create() {} }
     const entries = new Map([['ft_lights_off', factory]])
-    const registry = { registerElement: (name, value) => entries.set(name, value) }
+    const bigEntries = new Map([['ft_skip_previous', factory], ['ft_skip_next', factory]])
+    const registry = {
+      registerElement: (name, value) => entries.set(name, value),
+      registerBigElement: (name, value) => bigEntries.set(name, value)
+    }
     const context = vm.createContext({
       removeAbRepeatContext: null,
       removeLoopButtonContext: null,
@@ -28,5 +32,7 @@ for (const players of [1, 2]) {
     })
     vm.runInContext(`${cleanup}\ncleanUpCustomPlayerControls()`, context)
     assert.equal(entries.get('ft_lights_off'), players === 1 ? null : factory)
+    assert.equal(bigEntries.get('ft_skip_previous'), players === 1 ? null : factory)
+    assert.equal(bigEntries.get('ft_skip_next'), players === 1 ? null : factory)
   })
 }

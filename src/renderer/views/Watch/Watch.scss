@@ -1391,6 +1391,29 @@
   }
 }
 
+/* The Android fullscreen element contains the whole watch layout. Keep the
+   player over it even before Vue applies its fullWindow class. */
+:global(.capacitorTabs .videoLayout:not(.shortsPlayerActive):fullscreen) {
+  overflow: hidden;
+  background: #000;
+}
+
+:global(.capacitorTabs .videoLayout:not(.shortsPlayerActive):fullscreen .videoArea .videoPlayer) {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  inline-size: 100%;
+  block-size: 100%;
+  max-inline-size: none;
+  margin: 0;
+}
+
+:global(.capacitorTabs .videoLayout:not(.shortsPlayerActive):fullscreen .videoArea .videoPlayer .ftVideoPlayer) {
+  inline-size: 100%;
+  block-size: 100%;
+  aspect-ratio: auto;
+}
+
 :global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsActionRail) {
   position: relative;
   grid-column: 1;

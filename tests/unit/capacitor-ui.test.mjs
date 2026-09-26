@@ -8,7 +8,8 @@ const source = (await readFile(new URL('../../src/renderer/helpers/capacitorUi.j
   .replace(/^export /gm, '')
 
 function loadUi(platform, ScreenOrientation, SettingsLauncher) {
-  return vm.runInNewContext(`${source}\n({ setFullscreenOrientation, openNotificationSettings })`, {
+  const exports = '{ getFullscreenAspectRatio, setFullscreenOrientation, openNotificationSettings }'
+  return vm.runInNewContext(`${source}\n(${exports})`, {
     Capacitor: { isNativePlatform: () => platform !== 'web' },
     OrientationType: { LANDSCAPE: 'landscape' },
     ScreenOrientation,
@@ -99,4 +100,26 @@ test('fullscreen waits for video dimensions before rotating', async () => {
   assert.deepEqual(calls, [])
   await ui.setFullscreenOrientation(true, { videoWidth: 1920, videoHeight: 1080 })
   assert.deepEqual(calls, ['landscape'])
+})
+
+test('fullscreen uses the known aspect ratio before video dimensions arrive', async () => {
+  const calls = []
+  const ui = loadUi('android', {
+    lock: async ({ type }) => calls.push(type), unlock: async () => calls.push('unlock'),
+  })
+  const loadingVideo = { videoWidth: 0, videoHeight: 0 }
+
+  await ui.setFullscreenOrientation(true, loadingVideo, true, 16 / 9)
+  await ui.setFullscreenOrientation(true, loadingVideo, true, 9 / 16)
+  await ui.setFullscreenOrientation(false, loadingVideo, true, 16 / 9)
+
+  assert.deepEqual(calls, ['landscape', 'unlock', 'unlock'])
+})
+
+test('fullscreen only infers an aspect ratio for known Shorts', () => {
+  const { getFullscreenAspectRatio } = loadUi('android')
+  assert.equal(getFullscreenAspectRatio(16 / 9, false), 16 / 9)
+  assert.equal(getFullscreenAspectRatio(9 / 16, false), 9 / 16)
+  assert.equal(getFullscreenAspectRatio(null, false), null)
+  assert.equal(getFullscreenAspectRatio(null, true), 9 / 16)
 })
