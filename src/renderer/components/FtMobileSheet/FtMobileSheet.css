@@ -26,6 +26,23 @@
   overscroll-behavior: contain;
 }
 
+.mobileSheet[open].compactSheet {
+  inset-block: var(--phone-viewport-top, 0) calc(100dvh - var(--phone-viewport-top, 0) - var(--phone-viewport-height, 100dvh));
+  inline-size: min(calc(100% - 40px), 400px);
+  max-inline-size: calc(100% - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 32px);
+  block-size: fit-content;
+  max-block-size: calc(var(--phone-viewport-height, 100dvh) - var(--safe-area-inset-top, env(safe-area-inset-top, 0px)) - var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) - 32px);
+  margin: auto;
+  padding-block: 0;
+  padding-inline: 0;
+  border-radius: calc(24px * var(--ui-roundness));
+  box-shadow: 0 12px 32px rgb(0 0 0 / 28%);
+}
+
+.compactSheet::backdrop {
+  background: rgb(0 0 0 / 55%);
+}
+
 .mobileSheetHeader {
   display: flex;
   align-items: center;
@@ -45,6 +62,18 @@
   font-size: 1.1rem;
   line-height: 1.3;
   overflow-wrap: anywhere;
+}
+
+.compactSheet .mobileSheetHeader {
+  min-block-size: 0;
+  padding-block: 24px 8px;
+  padding-inline: 24px;
+  border: 0;
+}
+
+.compactSheet .mobileSheetHeader h2 {
+  font-size: 1.25rem;
+  font-weight: 500;
 }
 
 .mobileSheetHeader > :deep(button) {

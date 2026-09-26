@@ -365,7 +365,35 @@ test.describe('default appearance', () => {
     }
   })
 
-  test('fits and scrolls the app font picker in a narrow phone layout', async ({ page }) => {
+  test('centers short phone pickers and dismisses them from the backdrop', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 700 })
+    await goToSettingsSection(page, 'theme')
+    const iconPack = page.getByRole('combobox', { name: 'Icon Pack' })
+    await iconPack.click()
+
+    const sheet = page.locator('.mobileSheet.compactSheet[open]')
+    const options = sheet.getByRole('option')
+    await expect(options).toHaveCount(2)
+    await expect(options.filter({ has: page.locator('.optionRadio') })).toHaveCount(2)
+    await expect(options.filter({ has: page.locator('.optionRadio') }).first()).toHaveAttribute('aria-selected', 'true')
+    await expect.poll(() => sheet.evaluate(dialog => {
+      const bounds = dialog.getBoundingClientRect()
+      return bounds.width < innerWidth && bounds.height < innerHeight &&
+        Math.abs(bounds.x + bounds.width / 2 - innerWidth / 2) <= 1 &&
+        Math.abs(bounds.y + bounds.height / 2 - innerHeight / 2) <= 1
+    })).toBe(true)
+
+    await page.mouse.click(5, 5)
+    await expect(sheet).toHaveCount(0)
+    await expect(iconPack).toHaveAttribute('aria-expanded', 'false')
+
+    await iconPack.click()
+    await sheet.getByRole('option', { name: 'Remix Icon' }).click()
+    await expect(sheet).toHaveCount(0)
+    await expect(iconPack).toHaveText('Remix Icon')
+  })
+
+  test('fits and scrolls the app font picker in a narrow phone dialog', async ({ page }) => {
     await page.setViewportSize({ width: 600, height: 320 })
     await goToSettingsSection(page, 'theme')
     const appFont = page.getByRole('combobox', { name: 'App font' })
@@ -373,18 +401,32 @@ test.describe('default appearance', () => {
 
     const fontDropdown = page.locator(`#${await appFont.getAttribute('aria-controls')}`)
     const sheet = page.locator('.mobileSheet[open]').filter({ has: fontDropdown })
-    await expect(sheet).toBeVisible()
+    await expect(sheet).toHaveClass(/compactSheet/)
     await expect(fontDropdown).toHaveClass(/phonePicker/)
+    await expect(fontDropdown).toBeFocused()
     await expect(fontDropdown).toHaveAttribute('data-overlayscrollbars-viewport')
+    const scrollbar = fontDropdown.locator(':scope > .os-scrollbar-vertical')
     await expect.poll(() => fontDropdown.evaluate(menu => {
       const bounds = menu.getBoundingClientRect()
       return bounds.left >= 0 && bounds.right <= innerWidth &&
         bounds.top >= 0 && bounds.bottom <= innerHeight && menu.scrollWidth <= menu.clientWidth
     })).toBe(true)
     await expect.poll(() => fontDropdown.evaluate(menu => menu.scrollHeight - menu.clientHeight)).toBeGreaterThan(0)
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
     await fontDropdown.evaluate(menu => { menu.scrollTop = menu.scrollHeight })
     await expect.poll(() => fontDropdown.evaluate(menu => menu.scrollTop)).toBeGreaterThan(0)
     await expect(fontDropdown.getByRole('option').last()).toBeInViewport()
+
+    await sheet.locator('.pickerSearch').fill('Geist')
+    await expect(fontDropdown.getByRole('option')).toHaveCount(1)
+    await expect.poll(() => fontDropdown.evaluate(menu =>
+      menu.scrollTop <= 1 && menu.scrollHeight <= menu.clientHeight + 1
+    )).toBe(true)
+    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+    await sheet.locator('.pickerSearch').fill('')
+    await expect.poll(() => fontDropdown.getByRole('option').count()).toBeGreaterThan(1)
+    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+    await fontDropdown.evaluate(menu => { menu.scrollTop = menu.scrollHeight })
 
     await page.setViewportSize({ width: 600, height: 480 })
     await expect.poll(() => fontDropdown.evaluate(menu => {
@@ -392,7 +434,12 @@ test.describe('default appearance', () => {
       const padding = Number.parseFloat(getComputedStyle(menu).paddingBottom)
       return Math.abs(lastOption.bottom + padding - menu.getBoundingClientRect().bottom)
     })).toBeLessThanOrEqual(1)
-    await sheet.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
+    await expect.poll(() => scrollbar.evaluate(element => {
+      const track = element.querySelector('.os-scrollbar-track').getBoundingClientRect()
+      const thumb = element.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+      return Math.abs(track.bottom - thumb.bottom)
+    })).toBeLessThanOrEqual(1)
+    await page.keyboard.press('Escape')
     await expect(sheet).toHaveCount(0)
     await expect(appFont).toHaveAttribute('aria-expanded', 'false')
   })

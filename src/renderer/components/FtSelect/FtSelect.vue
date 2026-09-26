@@ -123,6 +123,7 @@
         :enabled="phoneLayout"
         :open="dropdownShown"
         :title="placeholder"
+        :compact="phoneLayout"
         @closed="dropdownShown = false; dropdownRendered = false"
         @close="closeDropdown"
       >
@@ -134,6 +135,8 @@
           :aria-label="$t('Search Bar.Search')"
           :placeholder="$t('Search Bar.Search')"
         >
+        <!-- Start on the listbox so a long picker does not summon the Android keyboard. -->
+        <!-- eslint-disable vuejs-accessibility/no-autofocus -->
         <ul
           v-if="dropdownRendered"
           :id="`${id}-listbox`"
@@ -143,6 +146,7 @@
           :class="[dropdownPlacement, { phonePicker: phoneLayout }]"
           role="listbox"
           tabindex="-1"
+          :autofocus="phoneLayout"
           :aria-labelledby="`${id}-label`"
           :style="phoneLayout ? null : dropdownStyle"
           @pointerdown="handleDropdownPointerDown"
@@ -182,6 +186,11 @@
               @click="selectOption(index)"
               @keydown.enter.space.prevent="selectOption(index)"
             >
+              <span
+                v-if="phoneLayout"
+                class="optionRadio"
+                aria-hidden="true"
+              />
               <FtIcon
                 v-if="optionIcons[index]"
                 :icon="optionIcons[index]"
@@ -202,14 +211,10 @@
                   :value="selectValues[index]"
                 >{{ name }}</slot>
               </span>
-              <FtIcon
-                v-if="phoneLayout && selectValues[index] === value"
-                :icon="['fas', 'check']"
-                aria-hidden="true"
-              />
             </li>
           </template>
         </ul>
+        <!-- eslint-enable vuejs-accessibility/no-autofocus -->
       </FtMobileSheet>
     </Teleport>
   </div>
@@ -501,7 +506,10 @@ function moveActiveIndex(offset) {
 }
 
 function scrollActiveOptionIntoView() {
-  nextTick(() => options.value?.[activeIndex.value]?.scrollIntoView({ block: 'nearest' }))
+  nextTick(() => {
+    const visibleIndex = filteredOptions.value.findIndex(option => option.index === activeIndex.value)
+    options.value?.[visibleIndex]?.scrollIntoView({ block: 'nearest' })
+  })
 }
 
 /**
