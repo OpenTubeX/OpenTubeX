@@ -526,6 +526,7 @@ Settings:
         Destructive pressed: Deštruktívna akcia pri stlačení
         Text and icons on destructive actions: Text a ikony deštruktívnych akcií
   Player Settings:
+    Skip Unavailable Playlist Videos: "Preskakovať nedostupné videá v zoznamoch skladieb"
     Lights Off: Zhasnúť
     Show Lights Off Toggle: Zobraziť prepínač zhasnutia
     Swipe Gestures:

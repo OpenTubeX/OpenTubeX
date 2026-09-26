@@ -302,6 +302,10 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  autoSkipUnavailable: {
+    type: Boolean,
+    default: false,
+  },
   fullscreenOverlay: {
     type: Boolean,
     default: false,
@@ -334,6 +338,8 @@ const playlistTitle = ref('')
 const playlistTotalVideoCount = ref(0)
 const playlistItems = shallowRef([])
 const randomizedPlaylistItems = shallowRef([])
+const skippedUnavailableItems = new Set()
+let expectedAutoSkipItem = null
 /** @import { VideoData } from '../../helpers/dragAndDrop' */
 /** @type {import('vue').Ref<VideoData>} */
 const draggedVideo = ref({ videoId: null, playlistItemId: null })
@@ -567,6 +573,21 @@ watch(() => props.videoId, (newId, oldId) => {
   }
 })
 
+function playlistItemKey(item) {
+  return item?.playlistItemId || item?.videoId || null
+}
+
+function resetUnavailableSkipChain() {
+  skippedUnavailableItems.clear()
+  expectedAutoSkipItem = null
+}
+
+watch([() => props.videoId, () => props.playlistItemId], () => {
+  const currentKey = props.playlistItemId || props.videoId
+  if (expectedAutoSkipItem !== currentKey) resetUnavailableSkipChain()
+  expectedAutoSkipItem = null
+}, { flush: 'post' })
+
 watch(() => props.playlistItemId, () => {
   prevVideoBeforeDeletion.value = null
 })
@@ -594,6 +615,7 @@ if (isTabPresented != null) {
 }
 
 watch(() => props.playlistId, () => {
+  resetUnavailableSkipChain()
   reversePlaylist.value = storedReversePlaylist.value
 
   if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
@@ -1343,6 +1365,23 @@ const canPlayNextVideo = computed(() => skipAvailability.value.canPlayNext)
 
 const canPlayPreviousVideo = computed(() => skipAvailability.value.canPlayPrevious)
 
+watch(
+  [() => props.autoSkipUnavailable, isLoading, () => props.watchViewLoading, nextVideo, canPlayNextVideo],
+  ([shouldSkip, playlistLoading, watchViewLoading, nextItem, canPlayNext]) => {
+    if (!shouldSkip || playlistLoading || watchViewLoading || !canPlayNext) return
+
+    const currentKey = props.playlistItemId || props.videoId
+    const nextKey = playlistItemKey(nextItem)
+    if (!nextKey || nextKey === currentKey || skippedUnavailableItems.has(currentKey) ||
+      skippedUnavailableItems.has(nextKey)) return
+
+    skippedUnavailableItems.add(currentKey)
+    expectedAutoSkipItem = nextKey
+    playNextVideo()
+  },
+  { flush: 'post' }
+)
+
 // The watch view owns the skip actions, as it also knows about the watch queue
 watch([canPlayNextVideo, canPlayPreviousVideo], ([canPlayNext, canPlayPrevious]) => {
   emit('skip-availability-change', { canPlayNext, canPlayPrevious })
@@ -1354,6 +1393,7 @@ defineExpose({
   restoreScrollTop,
   setScrollTop,
   playNextVideo,
+  resetUnavailableSkipChain,
   playPreviousVideo,
   nextVideo,
   shouldStopDueToPlaylistEnd,

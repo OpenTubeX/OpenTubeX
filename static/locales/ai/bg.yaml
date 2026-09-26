@@ -528,6 +528,7 @@ Settings:
         Destructive pressed: Опасно действие при натискане
         Text and icons on destructive actions: Текст и икони върху опасните действия
   Player Settings:
+    Skip Unavailable Playlist Videos: "Пропускане на недостъпните видеоклипове в плейлистите"
     Lights Off: Изгасване на светлините
     Show Lights Off Toggle: Показване на превключвателя за изгасване на светлините
     Swipe Gestures:

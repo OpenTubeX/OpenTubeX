@@ -782,6 +782,7 @@ Settings:
     Autoplay Videos: Videos automatisch starten
     Proxy Videos Through Invidious: Videos durch Invidious leiten
     Autoplay Playlists: Videos in Playlist automatisch abspielen
+    Skip Unavailable Playlist Videos: Nicht verfügbare Playlist-Videos überspringen
     Caption Appearance:
       Caption Appearance: Untertiteldarstellung
       Captions: Untertitel

@@ -528,6 +528,7 @@ Settings:
         Destructive pressed: Acțiune distructivă la apăsare
         Text and icons on destructive actions: Text și pictograme pentru acțiunile distructive
   Player Settings:
+    Skip Unavailable Playlist Videos: "Omite videoclipurile indisponibile din listele de redare"
     Lights Off: Stinge luminile
     Show Lights Off Toggle: Afișează comutatorul pentru stingerea luminilor
     Swipe Gestures:

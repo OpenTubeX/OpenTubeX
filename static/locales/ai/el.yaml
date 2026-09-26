@@ -530,6 +530,7 @@ Settings:
         Destructive pressed: Καταστροφική ενέργεια κατά το πάτημα
         Text and icons on destructive actions: Κείμενο και εικονίδια καταστροφικών ενεργειών
   Player Settings:
+    Skip Unavailable Playlist Videos: "Παράλειψη μη διαθέσιμων βίντεο σε λίστες αναπαραγωγής"
     Lights Off: Σβήσιμο φώτων
     Show Lights Off Toggle: Εμφάνιση διακόπτη σβησίματος φώτων
     Swipe Gestures:

@@ -503,6 +503,7 @@ Settings:
         Destructive pressed: Опасное действие при нажатии
         Text and icons on destructive actions: Текст и значки опасных действий
   Player Settings:
+    Skip Unavailable Playlist Videos: "Пропускать недоступные видео в плейлистах"
     Lights Off: Выключить свет
     Show Lights Off Toggle: Показывать переключатель выключения света
     Swipe Gestures:

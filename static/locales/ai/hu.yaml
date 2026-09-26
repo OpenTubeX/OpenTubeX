@@ -526,6 +526,7 @@ Settings:
         Destructive pressed: Törlő művelet lenyomáskor
         Text and icons on destructive actions: Törlő műveletek szövege és ikonjai
   Player Settings:
+    Skip Unavailable Playlist Videos: "Nem elérhető videók kihagyása a lejátszási listákban"
     Lights Off: Fények lekapcsolása
     Show Lights Off Toggle: Fények lekapcsolása kapcsolójának megjelenítése
     Swipe Gestures:

@@ -526,6 +526,7 @@ Settings:
         Destructive pressed: Tindakan destruktif saat ditekan
         Text and icons on destructive actions: Teks dan ikon pada tindakan destruktif
   Player Settings:
+    Skip Unavailable Playlist Videos: "Lewati video yang tidak tersedia dalam daftar putar"
     Lights Off: Matikan lampu
     Show Lights Off Toggle: Tampilkan tombol matikan lampu
     Swipe Gestures:
