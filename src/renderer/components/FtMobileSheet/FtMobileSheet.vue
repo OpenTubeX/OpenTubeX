@@ -6,14 +6,14 @@
     <dialog
       ref="dialog"
       class="mobileSheet"
-      :class="{ dockedSheet: docked, mobileSheetEnabled: enabled }"
+      :class="{ dockedSheet: docked, compactSheet: compact && enabled, mobileSheetEnabled: enabled }"
       :style="sheetStyle"
       :role="enabled ? null : 'presentation'"
       :aria-label="enabled ? title : null"
       @cancel.prevent="dismiss"
       @keydown.esc.prevent.stop="dismiss"
       @pointerdown.stop
-      @click="enabled && $event.stopPropagation()"
+      @click="handleClick"
       @dblclick.stop
       @touchstart.stop
       @touchend.stop
@@ -70,6 +70,7 @@ const props = defineProps({
   open: { type: Boolean, default: true },
   title: { type: String, required: true },
   back: { type: Boolean, default: false },
+  compact: { type: Boolean, default: false },
   belowPlayer: { type: Boolean, default: false }
 })
 const emit = defineEmits(['close', 'back', 'closed', 'suspend', 'resume'])
@@ -310,6 +311,11 @@ function cancelDrag() {
 
 function dismiss() {
   emit(props.back ? 'back' : 'close')
+}
+
+function handleClick(event) {
+  if (props.enabled && props.compact && event.target === dialog.value) dismiss()
+  if (props.enabled) event.stopPropagation()
 }
 
 function release(preservePresentation = false) {

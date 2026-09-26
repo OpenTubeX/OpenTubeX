@@ -373,12 +373,13 @@
 .selectDropdown.phonePicker {
   position: relative;
   inset: auto;
-  flex: 1;
+  flex: 0 1 auto;
   min-block-size: 0;
   max-block-size: none;
   inline-size: auto;
   margin: 0;
-  padding: 8px;
+  padding-block: 8px 16px;
+  padding-inline: 12px;
   border: 0;
   border-radius: 0;
   box-shadow: none;
@@ -387,11 +388,52 @@
 .phonePicker .selectOption {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 20px;
   box-sizing: border-box;
   min-block-size: var(--phone-touch-target, 48px);
-  padding: 12px;
+  padding-block: 12px;
+  padding-inline: 16px;
   white-space: normal;
+}
+
+.phonePicker .selectOption.selected::after {
+  display: none;
+}
+
+.phonePicker .selectOption.active:not(:hover, :focus-visible) {
+  color: inherit;
+}
+
+.phonePicker .selectOption.active:not(:hover, :focus-visible)::before {
+  background: transparent;
+}
+
+.phonePicker .selectOption:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: -2px;
+}
+
+.optionRadio {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  flex: 0 0 22px;
+  inline-size: 22px;
+  block-size: 22px;
+  border: 2px solid var(--secondary-text-color);
+  border-radius: 50%;
+}
+
+.phonePicker .selectOption.selected .optionRadio {
+  border-color: var(--accent-color);
+}
+
+.phonePicker .selectOption.selected .optionRadio::after {
+  content: '';
+  inline-size: 10px;
+  block-size: 10px;
+  border-radius: 50%;
+  background: var(--accent-color);
 }
 
 .phonePicker .optionName {
