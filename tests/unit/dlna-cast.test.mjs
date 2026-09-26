@@ -4,11 +4,11 @@ import test from 'node:test'
 
 import { createMediaServer, parseDlnaDevice, sendAvTransport } from '../../src/main/dlnaCast.js'
 
-function listen(server) {
+function listen (server) {
   return new Promise(resolve => server.listen(0, '127.0.0.1', () => resolve(server.address().port)))
 }
 
-function close(server) {
+function close (server) {
   server.closeAllConnections()
   return new Promise(resolve => server.close(resolve))
 }
@@ -90,4 +90,39 @@ test('serves MP4 byte ranges only to the selected device and token', async t => 
   assert.equal(response.status, 206)
   assert.equal(response.headers.get('content-range'), 'bytes 2-5/10')
   assert.equal(await response.text(), 'cdef')
+})
+
+test('follows media redirects without forwarding credentials to another origin', async t => {
+  let redirectedHeaders
+  const destination = createServer((request, response) => {
+    redirectedHeaders = request.headers
+    response.writeHead(206, {
+      'content-range': 'bytes 2-5/10',
+      'content-length': 4
+    }).end('cdef')
+  })
+  const destinationPort = await listen(destination)
+  t.after(() => close(destination))
+
+  const source = createServer((request, response) => {
+    response.writeHead(302, { location: `http://127.0.0.1:${destinationPort}/video` }).end()
+  })
+  const sourcePort = await listen(source)
+  t.after(() => close(source))
+
+  const proxy = createMediaServer(`http://127.0.0.1:${sourcePort}/video`, '127.0.0.1', 'secret', {
+    Cookie: 'private=cookie',
+    Authorization: 'Bearer private'
+  })
+  const proxyPort = await listen(proxy)
+  t.after(() => close(proxy))
+
+  const response = await fetch(`http://127.0.0.1:${proxyPort}/secret/video.mp4`, {
+    headers: { Range: 'bytes=2-5' }
+  })
+  assert.equal(response.status, 206)
+  assert.equal(await response.text(), 'cdef')
+  assert.equal(redirectedHeaders.range, 'bytes=2-5')
+  assert.equal(redirectedHeaders.cookie, undefined)
+  assert.equal(redirectedHeaders.authorization, undefined)
 })

@@ -25,12 +25,13 @@ async function close (server) {
   await new Promise(resolve => server.close(resolve))
 }
 
-test('discovers a local renderer and plays a ranged MP4 through the proxy', { timeout: 15_000 }, async t => {
+test('discovers a local renderer and plays a ranged MP4 through the proxy', { timeout: 20_000 }, async t => {
   const actions = []
   const upstreamRanges = []
   let mediaUri
   let mediaStatus
   let mediaBytes
+  let failPlay = false
 
   const upstream = createServer((request, response) => {
     upstreamRanges.push(request.headers.range)
@@ -60,6 +61,10 @@ test('discovers a local renderer and plays a ranged MP4 through the proxy', { ti
       mediaUri = body.match(/<CurrentURI>([^<]+)<\/CurrentURI>/)?.[1]
     }
     if (action === 'Play') {
+      if (failPlay) {
+        response.writeHead(500).end()
+        return
+      }
       const media = await fetch(mediaUri, { headers: { Range: 'bytes=2-5' } })
       mediaStatus = media.status
       mediaBytes = await media.text()
@@ -91,6 +96,8 @@ test('discovers a local renderer and plays a ranged MP4 through the proxy', { ti
   const devices = await discoverDlnaDevices()
   const device = devices.find(item => item.name === DEVICE_NAME)
   assert.ok(device, 'the local renderer was not discovered')
+  ssdp.removeAllListeners('message')
+  await discoverDlnaDevices()
   const cast = await startDlnaCast(42, {
     deviceId: device.id,
     mediaUrl: `http://127.0.0.1:${upstreamPort}/video.mp4`,
@@ -112,4 +119,13 @@ test('discovers a local renderer and plays a ranged MP4 through the proxy', { ti
   assert.match(secondCast.error ?? '', /already casting/i)
   assert.equal(await stopDlnaCast(42, cast.castId), true)
   assert.deepEqual(actions, ['SetAVTransportURI', 'Play', 'Seek', 'Stop'])
+
+  failPlay = true
+  const failedCast = await startDlnaCast(42, {
+    deviceId: device.id,
+    mediaUrl: `http://127.0.0.1:${upstreamPort}/video.mp4`,
+    title: 'Failed Play'
+  })
+  assert.match(failedCast.error ?? '', /Play failed with HTTP 500/)
+  assert.deepEqual(actions.slice(-3), ['SetAVTransportURI', 'Play', 'Stop'])
 })

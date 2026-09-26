@@ -127,11 +127,10 @@ export async function discoverDlnaDevices() {
       return null
     }
   }))
-  discoveredDevices.clear()
   for (const device of devices) {
     if (device) discoveredDevices.set(device.id, device)
   }
-  return [...discoveredDevices.values()].map(({ id, name }) => ({ id, name }))
+  return devices.filter(Boolean).map(({ id, name }) => ({ id, name }))
 }
 
 export async function sendAvTransport(device, action, fields) {
@@ -176,18 +175,38 @@ export function createMediaServer(mediaUrl, deviceAddress, token, upstreamHeader
     try {
       const controller = new AbortController()
       const timeout = setTimeout(() => controller.abort(), 10_000)
-      const upstream = await fetch(mediaUrl, {
-        method: request.method,
-        headers: { ...upstreamHeaders, ...(request.headers.range ? { Range: request.headers.range } : {}) },
-        signal: controller.signal,
-        redirect: 'error'
-      }).finally(() => clearTimeout(timeout))
-      const headers = { 'content-type': 'video/mp4', 'transfermode.dlna.org': 'Streaming' }
+      const headers = new Headers(upstreamHeaders)
+      if (request.headers.range) headers.set('Range', request.headers.range)
+      let upstream
+      let url = new URL(mediaUrl)
+      try {
+        for (let redirects = 0; ; redirects++) {
+          upstream = await fetch(url, {
+            method: request.method,
+            headers,
+            signal: controller.signal,
+            redirect: 'manual'
+          })
+          const location = upstream.headers.get('location')
+          if (![301, 302, 303, 307, 308].includes(upstream.status) || !location) break
+          if (redirects >= 5) throw new Error('Too many media redirects')
+          const nextUrl = new URL(location, url)
+          if (!['http:', 'https:'].includes(nextUrl.protocol)) throw new Error('Unsupported media redirect')
+          if (nextUrl.origin !== url.origin) {
+            for (const name of ['Authorization', 'Cookie', 'Host', 'Proxy-Authorization']) headers.delete(name)
+          }
+          await upstream.body?.cancel()
+          url = nextUrl
+        }
+      } finally {
+        clearTimeout(timeout)
+      }
+      const responseHeaders = { 'content-type': 'video/mp4', 'transfermode.dlna.org': 'Streaming' }
       for (const name of ['content-length', 'content-range', 'accept-ranges']) {
         const value = upstream.headers.get(name)
-        if (value) headers[name] = value
+        if (value) responseHeaders[name] = value
       }
-      response.writeHead(upstream.status, headers)
+      response.writeHead(upstream.status, responseHeaders)
       if (request.method === 'HEAD' || !upstream.body) {
         await upstream.body?.cancel()
         response.end()
@@ -228,6 +247,7 @@ export async function startDlnaCast(ownerId, payload, upstreamHeaders = {}) {
 
   const token = randomBytes(24).toString('hex')
   const server = createMediaServer(url.href, device.address, token, upstreamHeaders)
+  let didSetUri = false
   try {
     const localAddress = await chooseLocalAddress(device.address)
     await new Promise((resolve, reject) => {
@@ -244,6 +264,7 @@ export async function startDlnaCast(ownerId, payload, upstreamHeaders = {}) {
       CurrentURI: mediaAddress,
       CurrentURIMetaData: metadata
     })
+    didSetUri = true
     await sendAvTransport(device, 'Play', { InstanceID: 0, Speed: 1 })
     const castId = randomBytes(16).toString('hex')
     activeCast = { ownerId, castId, device, server }
@@ -258,6 +279,9 @@ export async function startDlnaCast(ownerId, payload, upstreamHeaders = {}) {
     }
     return { castId, deviceName: device.name }
   } catch (error) {
+    if (didSetUri) {
+      try { await sendAvTransport(device, 'Stop', { InstanceID: 0 }) } catch { /* Preserve the startup error. */ }
+    }
     if (server.listening) server.close()
     return { error: error.message }
   } finally {
