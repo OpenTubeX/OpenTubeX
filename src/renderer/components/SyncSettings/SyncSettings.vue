@@ -780,12 +780,12 @@ function setAutoSync(enabled) {
   store.dispatch('setSyncServerAutoSync', enabled)
 }
 
-function setSharedTabs(enabled) {
+async function setSharedTabs(enabled) {
   if (enabled) {
     showSharedTabsPrompt.value = true
     return
   }
-  store.dispatch('updateSyncServerSharedTabs', false)
+  await store.dispatch('updateSyncServerSharedTabs', false)
   store.dispatch('scheduleSyncServer', 'sessions')
 }
 
