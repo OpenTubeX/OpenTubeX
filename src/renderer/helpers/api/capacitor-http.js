@@ -1,4 +1,4 @@
-import { CapacitorHttp } from '@capacitor/core'
+import { CapacitorHttp, registerPlugin } from '@capacitor/core'
 
 import { withNetworkRecovery } from '../networkRecovery.js'
 import { createAbortError } from './requestErrors.js'
@@ -20,19 +20,23 @@ const MAX_AVATAR_BYTES = 2 * 1024 * 1024
 const MAX_AVATAR_BASE64_LENGTH = Math.ceil(MAX_AVATAR_BYTES / 3) * 4
 const DNS_RETRY_DELAYS_MS = [150, 500]
 const DEFAULT_NATIVE_TIMEOUT_MS = 30_000
+const IOSHttp = process.env.IS_IOS ? registerPlugin('IOSHttp') : null
 const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308])
 
 /**
  * @param {Promise<import('@capacitor/core').HttpResponse>} request
  * @param {AbortSignal | undefined} signal
+ * @param {(() => void) | undefined} abortNative
  */
-function waitForRequest(request, signal) {
+function waitForRequest(request, signal, abortNative) {
   if (!signal) return request
-  if (signal.aborted) return Promise.reject(createAbortError())
-
   return new Promise((resolve, reject) => {
-    const onAbort = () => reject(createAbortError())
-    signal.addEventListener('abort', onAbort, { once: true })
+    const onAbort = () => {
+      abortNative?.()
+      reject(createAbortError())
+    }
+    if (signal.aborted) onAbort()
+    else signal.addEventListener('abort', onAbort, { once: true })
 
     request.then(
       (response) => {
@@ -67,6 +71,12 @@ function waitForRetry(delay, signal) {
 async function requestWithDnsRetry(options, signal) {
   for (let attempt = 0; ; attempt++) {
     try {
+      if (signal?.aborted) throw createAbortError()
+      if (IOSHttp) {
+        const requestId = crypto.randomUUID()
+        return await waitForRequest(IOSHttp.request({ ...options, requestId }), signal,
+          () => { IOSHttp.abort({ requestId }).catch(() => {}) })
+      }
       return await waitForRequest(CapacitorHttp.request(options), signal)
     } catch (error) {
       if (error?.code !== 'UnknownHostException' || attempt >= DNS_RETRY_DELAYS_MS.length) {
@@ -102,7 +112,8 @@ async function getRequestBody(input, init) {
  * WebView so their response bodies are streamed instead of copied through the
  * JavaScript bridge as base64. nativeTimeoutMs bounds connection and read
  * inactivity on Android, defaulting to 30 seconds so stalled requests release
- * the subscription queue. signal still limits the JavaScript wait.
+ * the subscription queue. On iOS, signal also cancels the native task; on
+ * Android it limits the JavaScript wait.
  * @param {RequestInfo | URL} input
  * @param {RequestInit & { nativeTimeoutMs?: number, allowHttp?: boolean }} [init]
  * @returns {Promise<Response>}

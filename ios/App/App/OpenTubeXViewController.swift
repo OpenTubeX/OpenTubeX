@@ -33,6 +33,7 @@ class OpenTubeXViewController: CAPBridgeViewController {
     override func capacitorDidLoad() {
         bridge?.registerPluginInstance(PoTokenPlugin())
         bridge?.registerPluginInstance(SabrHttpPlugin())
+        bridge?.registerPluginInstance(IOSHttpPlugin())
         bridge?.registerPluginInstance(IOSStoragePlugin())
         bridge?.registerPluginInstance(IOSMediaSessionPlugin())
         bridge?.registerPluginInstance(ScreenshotPlugin())

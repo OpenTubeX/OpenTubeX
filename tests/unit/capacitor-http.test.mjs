@@ -242,12 +242,14 @@ test('rejects invalid native avatar responses', async () => {
   }
 })
 
-async function loadNativeHttp(request) {
+async function loadNativeHttp(request, ios = null) {
   const source = (await readFile(new URL('../../src/renderer/helpers/api/capacitor-http.js', import.meta.url), 'utf8'))
     .replace(/^import .* from .*\n/gm, '')
     .replace(/^export /gm, '')
   const context = vm.createContext({
     CapacitorHttp: { request },
+    process: { env: { IS_IOS: ios !== null } },
+    registerPlugin: () => ios, crypto: globalThis.crypto,
     withNetworkRecovery: (input, init, task) => task(init?.signal ?? (input instanceof Request ? input.signal : undefined)),
     createAbortError, Request, Response, Headers, URL, URLSearchParams, setTimeout, clearTimeout,
   })
@@ -324,3 +326,46 @@ for (const timeoutOption of ['connectTimeout', 'readTimeout']) {
     }
   })
 }
+
+
+test('iOS abort cancels the native API request as well as its JavaScript wait', async () => {
+  const requests = []
+  const cancelled = []
+  const request = options => { requests.push(options); return new Promise(() => {}) }
+  const fetchNative = await loadNativeHttp(request, {
+    request,
+    abort: async options => { cancelled.push(options.requestId) },
+  })
+  const controller = new AbortController()
+  const pending = fetchNative('https://www.youtube.com', { signal: controller.signal })
+  const rejected = assert.rejects(pending, { name: 'AbortError' })
+  await Promise.resolve()
+  assert.equal(requests.length, 1)
+  controller.abort()
+  await rejected
+  assert.equal(cancelled.length, 1)
+  assert.equal(typeof requests[0].requestId, 'string')
+  assert.equal(cancelled[0], requests[0].requestId)
+})
+
+
+test('iOS does not cancel completed requests or launch requests aborted while reading the body', async () => {
+  const requests = []
+  const cancelled = []
+  const request = async options => {
+    requests.push(options)
+    return { status: 200, data: 'ok', headers: {}, url: options.url }
+  }
+  const fetchNative = await loadNativeHttp(request, {
+    request, abort: async options => { cancelled.push(options.requestId) },
+  })
+  const complete = new AbortController()
+  assert.equal(await (await fetchNative('https://www.youtube.com', { signal: complete.signal })).text(), 'ok')
+  complete.abort()
+  assert.equal(cancelled.length, 0)
+  const early = new AbortController()
+  const pending = fetchNative('https://www.youtube.com', { signal: early.signal, body: 'fixture', method: 'POST' })
+  early.abort()
+  await assert.rejects(pending, { name: 'AbortError' })
+  assert.equal(requests.length, 1)
+})
