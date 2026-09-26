@@ -39,6 +39,7 @@ export function useCapacitorTabActions({
   const selecting = ref(false)
   const selectedTabIds = ref(new Set())
   const closingTabs = ref(false)
+  const runningSelectionAction = ref(false)
   watch(tabs, () => {
     selectedTabIds.value = new Set([...selectedTabIds.value].filter(id => tabs.value.some(tab => tab.id === id)))
   })
@@ -133,6 +134,36 @@ export function useCapacitorTabActions({
 
   async function closeSelectedTabs() {
     await closeTabIds([...selectedTabIds.value])
+  }
+
+  const selectedTabs = computed(() => tabs.value.filter(tab => selectedTabIds.value.has(tab.id)))
+  const canPinSelectedTabs = computed(() => selectedTabs.value.some(tab => !tab.isPinned))
+  const canUnpinSelectedTabs = computed(() => selectedTabs.value.some(tab => tab.isPinned))
+  const canLoadSelectedTabs = computed(() => selectedTabs.value.some(tab => tab.loadState === 'unloaded'))
+  const canUnloadSelectedTabs = computed(() => selectedTabs.value.some(tab =>
+    !['unloaded', 'unloading', 'mounting'].includes(tab.loadState) && tabs.value.length > 1
+  ))
+
+  async function runSelectedTabAction(action) {
+    if (runningSelectionAction.value || closingTabs.value) return
+    runningSelectionAction.value = true
+    try {
+      const service = getCapacitorTabService()
+      const ids = selectedTabs.value.map(tab => tab.id)
+      for (const id of ids) {
+        const tab = tabs.value.find(candidate => candidate.id === id)
+        if (!tab) continue
+        if (action === 'pin' && !tab.isPinned) service.setPinned(id, true)
+        if (action === 'unpin' && tab.isPinned) service.setPinned(id, false)
+        if (action === 'load' && tab.loadState === 'unloaded') service.loadTab(id)
+        if (action === 'unload' && !['unloaded', 'unloading', 'mounting'].includes(tab.loadState)) {
+          await service.unloadTab(id)
+        }
+        if (action === 'reload') await service.reloadTab(id)
+      }
+    } finally {
+      runningSelectionAction.value = false
+    }
   }
 
   async function activateTab(tabId) {
@@ -231,12 +262,18 @@ export function useCapacitorTabActions({
     selecting,
     selectedTabIds,
     closingTabs,
+    runningSelectionAction,
+    canPinSelectedTabs,
+    canUnpinSelectedTabs,
+    canLoadSelectedTabs,
+    canUnloadSelectedTabs,
     clearSelection,
     toggleTabSelection,
     selectActionTab,
     relatedTabIds,
     closeRelatedTabs,
     closeSelectedTabs,
+    runSelectedTabAction,
     actionTab,
     actionTabYoutubeUrl,
     activateTab,
