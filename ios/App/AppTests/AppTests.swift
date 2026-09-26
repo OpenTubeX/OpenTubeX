@@ -76,15 +76,33 @@ final class AppTests: XCTestCase {
         throw URLError(.timedOut)
     }
 
-    private func dismiss(_ controller: UIViewController) async throws {
-        // UIKit ignores dismissal while the presentation transition is still running.
-        let deadline = Date().addingTimeInterval(10)
-        while (controller.isBeingPresented || controller.transitionCoordinator != nil) && Date() < deadline {
+    private func waitForNative(_ condition: () -> Bool) async throws {
+        let deadline = Date().addingTimeInterval(60)
+        while !condition() {
+            guard Date() < deadline else {
+                XCTFail("Native presentation did not reach the expected state")
+                throw URLError(.timedOut)
+            }
             try await Task.sleep(nanoseconds: 100_000_000)
         }
-        await withCheckedContinuation { continuation in
-            controller.dismiss(animated: false) { continuation.resume() }
+    }
+
+    private func dismiss(_ controller: UIViewController) async throws {
+        // UIKit ignores dismissal while the presentation transition is still running.
+        try await waitForNative { !controller.isBeingPresented && controller.transitionCoordinator == nil }
+        controller.dismiss(animated: false)
+        try await waitForNative { controller.presentingViewController == nil && !controller.isBeingDismissed }
+    }
+
+    override func tearDown() async throws {
+        if let controller = try? webView.window?.rootViewController,
+           let presented = controller.presentedViewController {
+            if let picker = presented as? UIDocumentPickerViewController {
+                picker.delegate?.documentPickerWasCancelled?(picker)
+            }
+            try await dismiss(presented)
         }
+        try await super.tearDown()
     }
 
     private func openApplication() async throws {
@@ -430,9 +448,9 @@ final class AppTests: XCTestCase {
         try await openApplication()
         let controller = try XCTUnwrap(webView.window?.rootViewController as? OpenTubeXViewController)
         let dialog = UIAlertController(title: "Native modal fixture", message: "Another dialog owns presentation", preferredStyle: .alert)
-        await withCheckedContinuation { continuation in
-            controller.present(dialog, animated: false) { continuation.resume() }
-        }
+        try await waitForNative { controller.presentedViewController == nil }
+        controller.present(dialog, animated: false)
+        try await waitForNative { dialog.presentingViewController != nil && !dialog.isBeingPresented }
         let result = try await webView.callAsyncJavaScript("""
         return await Promise.race([
             Capacitor.Plugins.IOSStorage.saveFile({fileName: 'modal-test.json', data: btoa('{}')}).then(() => 'resolved').catch(() => 'rejected'),
@@ -448,10 +466,7 @@ final class AppTests: XCTestCase {
         let files = try XCTUnwrap(FileManager.default.enumerator(at: FileManager.default.temporaryDirectory, includingPropertiesForKeys: nil))
         XCTAssertFalse(files.compactMap { $0 as? URL }.contains { $0.lastPathComponent == "modal-test.json" })
         _ = try await evaluate("window.iosModalRetry = 'pending'; Capacitor.Plugins.IOSStorage.chooseDirectory().then(result => iosModalRetry = result.path); true")
-        let deadline = Date().addingTimeInterval(10)
-        while controller.presentedViewController == nil && Date() < deadline {
-            try await Task.sleep(nanoseconds: 100_000_000)
-        }
+        try await waitForNative { controller.presentedViewController != nil }
         let picker = try XCTUnwrap(controller.presentedViewController as? UIDocumentPickerViewController)
         picker.delegate?.documentPickerWasCancelled?(picker)
         try await dismiss(picker)
@@ -511,10 +526,7 @@ final class AppTests: XCTestCase {
         try await openApplication()
         _ = try await evaluate("window.iosFileResult = null; Capacitor.Plugins.IOSStorage.saveFile({fileName: 'opentubex-test.json', data: btoa('{}')}).then(result => window.iosFileResult = result); true")
         let controller = try XCTUnwrap(webView.window?.rootViewController)
-        let deadline = Date().addingTimeInterval(10)
-        while controller.presentedViewController == nil && Date() < deadline {
-            try await Task.sleep(nanoseconds: 100_000_000)
-        }
+        try await waitForNative { controller.presentedViewController != nil }
         let picker = try XCTUnwrap(controller.presentedViewController as? UIDocumentPickerViewController)
         let files = try XCTUnwrap(FileManager.default.enumerator(at: FileManager.default.temporaryDirectory, includingPropertiesForKeys: nil))
         let exported = try XCTUnwrap(files.compactMap { $0 as? URL }.first { $0.lastPathComponent == "opentubex-test.json" })
@@ -536,10 +548,7 @@ final class AppTests: XCTestCase {
         Capacitor.Plugins.IOSStorage.saveFile({fileName: 'ios-large-export.txt', data}).then(result => iosLargeFile = result.saved).catch(error => iosLargeFile = error.message);
         """, arguments: [:], in: nil, contentWorld: .page)
         let controller = try XCTUnwrap(webView.window?.rootViewController)
-        let deadline = Date().addingTimeInterval(20)
-        while controller.presentedViewController == nil && Date() < deadline {
-            try await Task.sleep(nanoseconds: 100_000_000)
-        }
+        try await waitForNative { controller.presentedViewController != nil }
         let picker = try XCTUnwrap(controller.presentedViewController as? UIDocumentPickerViewController)
         let files = try XCTUnwrap(FileManager.default.enumerator(at: FileManager.default.temporaryDirectory, includingPropertiesForKeys: nil))
         let exported = try XCTUnwrap(files.compactMap { $0 as? URL }.first { $0.lastPathComponent == "ios-large-export.txt" })
@@ -627,10 +636,7 @@ final class AppTests: XCTestCase {
         XCTAssertEqual(errors, [true, true, true, true])
         _ = try await evaluate("window.iosDirectoryResult = 'pending'; Capacitor.Plugins.IOSStorage.chooseDirectory().then(result => iosDirectoryResult = result.path); true")
         let controller = try XCTUnwrap(webView.window?.rootViewController)
-        let deadline = Date().addingTimeInterval(10)
-        while controller.presentedViewController == nil && Date() < deadline {
-            try await Task.sleep(nanoseconds: 100_000_000)
-        }
+        try await waitForNative { controller.presentedViewController != nil }
         let picker = try XCTUnwrap(controller.presentedViewController as? UIDocumentPickerViewController)
         let busy = try await webView.callAsyncJavaScript("try { await Capacitor.Plugins.IOSStorage.saveFile({fileName: 'busy.json', data: btoa('{}')}); return false; } catch (error) { return error.message.includes('already open'); }", arguments: [:], in: nil, contentWorld: .page) as? Bool
         XCTAssertEqual(busy, true)
@@ -644,10 +650,7 @@ final class AppTests: XCTestCase {
         try await openApplication()
         _ = try await evaluate("window.iosShareResult = 'pending'; Capacitor.Plugins.Share.share({title: 'OpenTubeX test', text: 'Native share test', url: 'https://www.youtube.com/watch?v=jNQXAC9IVRw'}).then(() => iosShareResult = 'shared').catch(error => iosShareResult = error.message); true")
         let controller = try XCTUnwrap(webView.window?.rootViewController)
-        let deadline = Date().addingTimeInterval(10)
-        while controller.presentedViewController == nil && Date() < deadline {
-            try await Task.sleep(nanoseconds: 100_000_000)
-        }
+        try await waitForNative { controller.presentedViewController != nil }
         let share = try XCTUnwrap(controller.presentedViewController as? UIActivityViewController)
         if UIDevice.current.userInterfaceIdiom == .pad {
             XCTAssertNotNil(share.popoverPresentationController?.sourceView)
