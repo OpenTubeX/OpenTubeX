@@ -1346,6 +1346,9 @@ Settings:
     Reloading video after IP block recovery: Ponovno nalaganje videoposnetka po obnovitvi zaradi blokade IP-ja
     Failed to select IP block recovery script: Skripta za obnovitev po blokadi IP-ja ni bilo mogoče izbrati
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "Izključeni kanali"
+      Tooltip: "Vnesite ID kanala, da se segmenti SponsorBlock v njegovih videoposnetkih ne bodo preskakovali. ID se mora natančno ujemati in razlikuje velike in male črke."
     SponsorBlock Settings: SponsorBlock
     Enable SponsorBlock: Omogoči SponsorBlock
     Enable SponsorBlock Submission: Omogoči prispevanje v SponsorBlock

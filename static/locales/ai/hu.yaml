@@ -1058,6 +1058,9 @@ Settings:
     Reloading video after IP block recovery: Videó újratöltése az IP-tiltás helyreállítása után
     Failed to select IP block recovery script: Nem sikerült kiválasztani az IP-tiltás helyreállító parancsfájlját
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "Kizárt csatornák"
+      Tooltip: "Adj meg egy csatornaazonosítót, hogy a SponsorBlock ne ugorja át a szegmenseket a videóiban. Az azonosítónak pontosan egyeznie kell, a kis- és nagybetűkkel együtt."
     Enable SponsorBlock Submission: SponsorBlock-beküldések engedélyezése
     SponsorBlock Private User ID (optional): Privát SponsorBlock felhasználói azonosító (nem kötelező)
     SponsorBlock Private User ID Tooltip: Illessze be a böngészőbővítményből a privát SponsorBlock felhasználói azonosítót. Hagyja üresen az alkalmazás által létrehozott azonosító használatához.

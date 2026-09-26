@@ -1058,6 +1058,9 @@ Settings:
     Reloading video after IP block recovery: Bideoa berriro kargatzen IP blokeoa berreskuratu ondoren
     Failed to select IP block recovery script: Ezin izan da IP blokeoa berreskuratzeko scripta hautatu
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "Salbuetsitako kanalak"
+      Tooltip: "Sartu kanalaren IDa haren bideoetan SponsorBlock segmentuak ez saltatzeko. IDak bat etorri behar du zehazki, maiuskulak eta minuskulak bereizita."
     Enable SponsorBlock Submission: Gaitu SponsorBlock-era bidaltzea
     SponsorBlock Private User ID (optional): SponsorBlock erabiltzaile-ID pribatua (aukerakoa)
     SponsorBlock Private User ID Tooltip: Itsatsi arakatzailearen hedapeneko SponsorBlock erabiltzaile-ID pribatua. Utzi hutsik aplikazioak sortutako ID bat erabiltzeko.

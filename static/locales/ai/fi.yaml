@@ -1082,6 +1082,9 @@ Settings:
     Reloading video after IP block recovery: Ladataan video uudelleen IP-eston palautuksen jälkeen
     Failed to select IP block recovery script: IP-eston palautuskomentosarjan valitseminen epäonnistui
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "Poissuljetut kanavat"
+      Tooltip: "Anna kanavan tunnus, jotta SponsorBlock-jaksoja ei ohiteta sen videoissa. Tunnuksen on vastattava täsmälleen, kirjainkoko mukaan lukien."
     Enable SponsorBlock Submission: Ota SponsorBlock-ilmoitusten lähetys käyttöön
     SponsorBlock Private User ID (optional): SponsorBlockin yksityinen käyttäjätunnus (valinnainen)
     SponsorBlock Private User ID Tooltip: Liitä selainlaajennuksen yksityinen SponsorBlock-käyttäjätunnus. Jätä kenttä tyhjäksi, jos haluat käyttää sovelluksen luomaa tunnusta.

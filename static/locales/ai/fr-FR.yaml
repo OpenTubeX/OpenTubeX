@@ -1058,6 +1058,9 @@ Settings:
     Reloading video after IP block recovery: Rechargement de la vidéo après la récupération du blocage d’IP
     Failed to select IP block recovery script: Échec de la sélection du script de récupération après blocage d’IP
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "Chaînes exclues"
+      Tooltip: "Saisissez l’identifiant d’une chaîne pour empêcher le saut des segments SponsorBlock dans ses vidéos. L’identifiant doit correspondre exactement, en respectant la casse."
     Enable SponsorBlock Submission: Activer l’envoi à SponsorBlock
     SponsorBlock Private User ID (optional): Identifiant utilisateur SponsorBlock privé (facultatif)
     SponsorBlock Private User ID Tooltip: Collez l’identifiant utilisateur SponsorBlock privé fourni par l’extension de navigateur. Laissez ce champ vide pour utiliser un identifiant généré par l’application.

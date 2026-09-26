@@ -1082,6 +1082,9 @@ Settings:
     Reloading video after IP block recovery: Επαναφόρτωση βίντεο μετά την αποκατάσταση αποκλεισμού IP
     Failed to select IP block recovery script: Απέτυχε η επιλογή δέσμης ενεργειών αποκατάστασης αποκλεισμού IP
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "Εξαιρούμενα κανάλια"
+      Tooltip: "Εισαγάγετε αναγνωριστικό καναλιού ώστε να μην παραλείπονται τα τμήματα SponsorBlock στα βίντεό του. Πρέπει να ταιριάζει ακριβώς, με διάκριση πεζών και κεφαλαίων."
     Enable SponsorBlock Submission: Ενεργοποίηση υποβολών SponsorBlock
     SponsorBlock Private User ID (optional): Ιδιωτικό αναγνωριστικό χρήστη SponsorBlock (προαιρετικό)
     SponsorBlock Private User ID Tooltip: Επικολλήστε το ιδιωτικό αναγνωριστικό χρήστη SponsorBlock από την επέκταση προγράμματος περιήγησης. Αφήστε το κενό για να χρησιμοποιηθεί αναγνωριστικό που δημιουργεί η εφαρμογή.

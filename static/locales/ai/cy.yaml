@@ -1062,6 +1062,9 @@ Settings:
     Reloading video after IP block recovery: Wrthi'n ail-lwytho'r fideo ar ôl adfer o rwystr IP
     Failed to select IP block recovery script: Methodd dewis y sgript adfer ar ôl rhwystr IP
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "Sianeli wedi’u heithrio"
+      Tooltip: "Rhowch ID sianel i atal hepgor segmentau SponsorBlock yn ei fideos. Rhaid i’r ID gyfateb yn union ac mae priflythrennau’n cyfrif."
     Enable SponsorBlock Submission: Galluogi cyflwyno i SponsorBlock
     SponsorBlock Private User ID (optional): ID defnyddiwr preifat SponsorBlock (dewisol)
     SponsorBlock Private User ID Tooltip: Gludwch yr ID defnyddiwr preifat SponsorBlock o estyniad y porwr. Gadewch hwn yn wag i ddefnyddio ID a gynhyrchir gan yr ap.

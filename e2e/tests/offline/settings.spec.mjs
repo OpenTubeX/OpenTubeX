@@ -1002,6 +1002,25 @@ test.describe('settings', () => {
     await expectControlsInsideCategories()
   })
 
+  test('edits the SponsorBlock channel whitelist shared with the player', async ({ page }) => {
+    const addOns = await goToSettingsSection(page, 'add-ons')
+    const channelId = 'UC0000000000000000000000'
+    await page.evaluate(async id => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateUseSponsorBlock', true)
+      await store.dispatch('updateSponsorBlockChannelWhitelist', [id])
+    }, channelId)
+
+    const channels = addOns.locator('.ft-input-tags-component').filter({ hasText: 'Excluded Channels' })
+    await expect(channels.locator('.name')).toHaveText(channelId)
+    await channels.getByRole('button', { name: 'Remove' }).click()
+    await expect(channels.locator('.name')).toHaveCount(0)
+    expect(await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getSponsorBlockChannelWhitelist
+    })).toEqual([])
+  })
+
   test('vertically centers switch tracks with long labels and setting indicators', async ({ app, page }) => {
     await setWindowSize(app, page, { width: 480, height: 800 })
     const addOns = await goToSettingsSection(page, 'add-ons')

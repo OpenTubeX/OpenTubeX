@@ -1734,6 +1734,9 @@ Settings:
       Do Nothing: Do Nothing
     Category Color: Category Color
     Custom Color: Custom color
+    Excluded Channels:
+      Excluded Channels: Excluded Channels
+      Tooltip: Enter a channel ID to prevent SponsorBlock segments from being skipped in videos from that channel. The ID must match exactly and is case sensitive.
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Enable Return YouTube Dislike

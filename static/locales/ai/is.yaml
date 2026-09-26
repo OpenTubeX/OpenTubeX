@@ -1066,6 +1066,9 @@ Settings:
     Reloading video after IP block recovery: Endurhleð myndbandi eftir endurheimt úr IP-lokun
     Failed to select IP block recovery script: Ekki tókst að velja endurheimtarskriftu fyrir IP-lokun
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "Undanskildar rásir"
+      Tooltip: "Sláðu inn auðkenni rásar til að koma í veg fyrir að SponsorBlock-hlutum sé sleppt í myndskeiðum hennar. Auðkennið verður að passa nákvæmlega og há- og lágstafir skipta máli."
     Enable SponsorBlock Submission: Virkja innsendingar til SponsorBlock
     SponsorBlock Private User ID (optional): Einkaauðkenni SponsorBlock-notanda (valfrjálst)
     SponsorBlock Private User ID Tooltip: Límdu einkaauðkenni SponsorBlock-notandans úr vafraviðbótinni. Skildu reitinn eftir auðan til að nota auðkenni sem forritið býr til.

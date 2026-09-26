@@ -1081,6 +1081,9 @@ Settings:
     Reloading video after IP block recovery: IP தடுப்பு மீட்புக்குப் பிறகு காணொளி மீண்டும் ஏற்றப்படுகிறது
     Failed to select IP block recovery script: IP தடுப்பு மீட்பு நிரலாக்கத்தைத் தேர்ந்தெடுக்க முடியவில்லை
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "விலக்கப்பட்ட சேனல்கள்"
+      Tooltip: "அந்தச் சேனலின் காணொளிகளில் SponsorBlock பகுதிகள் தவிர்க்கப்படாமல் இருக்க சேனல் ID-ஐ உள்ளிடவும். ID எழுத்து வடிவத்துடன் துல்லியமாகப் பொருந்த வேண்டும்."
     Enable SponsorBlock Submission: SponsorBlock சமர்ப்பிப்பை இயக்கு
     SponsorBlock Private User ID (optional): SponsorBlock தனிப்பட்ட பயனர் ID (விருப்பத்தேர்வு)
     SponsorBlock Private User ID Tooltip: உலாவி நீட்சியிலிருந்து தனிப்பட்ட SponsorBlock பயனர் ID-ஐ ஒட்டவும். செயலி உருவாக்கிய ID-ஐப் பயன்படுத்த இதைக் காலியாக விடவும்.

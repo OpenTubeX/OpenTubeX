@@ -1058,6 +1058,9 @@ Settings:
     Reloading video after IP block recovery: IP 封鎖復原後正在重新載入影片
     Failed to select IP block recovery script: 無法選取 IP 封鎖復原指令碼
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "排除的頻道"
+      Tooltip: "輸入頻道 ID，讓該頻道影片中的 SponsorBlock 片段不被略過。ID 必須完全相符，且區分大小寫。"
     Enable SponsorBlock Submission: 啟用 SponsorBlock 提交功能
     SponsorBlock Private User ID (optional): SponsorBlock 私人使用者 ID（選填）
     SponsorBlock Private User ID Tooltip: 貼上瀏覽器擴充功能中的 SponsorBlock 私人使用者 ID。留空即可使用應用程式產生的 ID。

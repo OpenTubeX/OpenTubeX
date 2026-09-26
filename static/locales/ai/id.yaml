@@ -1058,6 +1058,9 @@ Settings:
     Reloading video after IP block recovery: Memuat ulang video setelah pemulihan blokir IP
     Failed to select IP block recovery script: Gagal memilih skrip pemulihan blokir IP
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "Saluran yang dikecualikan"
+      Tooltip: "Masukkan ID saluran agar segmen SponsorBlock di videonya tidak dilewati. ID harus sama persis dan peka huruf besar-kecil."
     Enable SponsorBlock Submission: Aktifkan Pengiriman SponsorBlock
     SponsorBlock Private User ID (optional): ID Pengguna Pribadi SponsorBlock (opsional)
     SponsorBlock Private User ID Tooltip: Tempel ID pengguna pribadi SponsorBlock dari ekstensi peramban. Biarkan kosong untuk menggunakan ID yang dibuat aplikasi.

@@ -601,6 +601,9 @@ Settings:
     UseDeArrowTitles: DeArrow Video Başlıklarını Kullan
     UseDeArrowThumbnails: Önizleme görselleri için DeArrow kullan
     'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': DeArrow Önizleme Görseli Oluşturucu API URL'si (Öntanımlı https://dearrow-thumb.ajay.app)
+    Excluded Channels:
+      Excluded Channels: Hariç Tutulan Kanallar
+      Tooltip: SponsorBlock özelliğinin devre dışı bırakılması için bir kanal kimliği girin. Bu kanaldaki videolardaki sponsor bölümleri atlanmayacaktır. Girilen kanal kimliği tam olarak eşleşmelidir ve büyük/küçük harf duyarlıdır.
   External Player Settings:
     Custom External Player Arguments: Özel Harici Oynatıcı Argümanları
     Custom External Player Executable: Özel Harici Oynatıcı Çalıştırılabilir Dosyası

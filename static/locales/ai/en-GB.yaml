@@ -1039,6 +1039,9 @@ Settings:
     Reloading video after IP block recovery: Reloading video after IP block recovery
     Failed to select IP block recovery script: Failed to select IP block recovery script
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "Excluded channels"
+      Tooltip: "Enter a channel ID to stop SponsorBlock skipping segments in its videos. IDs must match exactly and are case-sensitive."
     Enable SponsorBlock Submission: Enable SponsorBlock Submission
     SponsorBlock Private User ID (optional): SponsorBlock Private User ID (optional)
     SponsorBlock Private User ID Tooltip: Paste the private SponsorBlock user ID from the browser extension. Leave this empty to use an app-generated ID.

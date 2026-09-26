@@ -1061,6 +1061,9 @@ Settings:
     Reloading video after IP block recovery: IP blokundan bərpadan sonra video yenidən yüklənir
     Failed to select IP block recovery script: IP blokundan bərpa skriptini seçmək alınmadı
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "İstisna edilən kanallar"
+      Tooltip: "Videolarında SponsorBlock seqmentlərinin ötürülməməsi üçün kanal ID-si daxil edin. ID tam uyğun olmalıdır və böyük-kiçik hərflərə həssasdır."
     Enable SponsorBlock Submission: SponsorBlock göndərişlərini aktivləşdir
     SponsorBlock Private User ID (optional): SponsorBlock məxfi istifadəçi ID-si (istəyə bağlı)
     SponsorBlock Private User ID Tooltip: Brauzer əlavəsindən məxfi SponsorBlock istifadəçi ID-sini yapışdırın. Tətbiqin yaratdığı ID-dən istifadə etmək üçün boş buraxın.

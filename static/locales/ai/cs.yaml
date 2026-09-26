@@ -1058,6 +1058,9 @@ Settings:
     Reloading video after IP block recovery: Opětovné načítání videa po obnovení z blokování IP adresy
     Failed to select IP block recovery script: Skript pro obnovení po blokování IP adresy se nepodařilo vybrat
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "Vyloučené kanály"
+      Tooltip: "Zadejte ID kanálu, aby se v jeho videích nepřeskakovaly segmenty SponsorBlock. ID se musí přesně shodovat a rozlišují se velká a malá písmena."
     Enable SponsorBlock Submission: Povolit odesílání do SponsorBlock
     SponsorBlock Private User ID (optional): Soukromé ID uživatele SponsorBlock (volitelné)
     SponsorBlock Private User ID Tooltip: Vložte soukromé ID uživatele SponsorBlock z rozšíření prohlížeče. Chcete-li používat ID vytvořené aplikací, ponechte pole prázdné.

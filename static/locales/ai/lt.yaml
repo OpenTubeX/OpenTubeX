@@ -1313,6 +1313,9 @@ Settings:
     Reloading video after IP block recovery: Po IP blokavimo atkūrimo vaizdo įrašas įkeliamas iš naujo
     Failed to select IP block recovery script: Nepavyko pasirinkti IP blokavimo atkūrimo scenarijaus
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "Neįtraukti kanalai"
+      Tooltip: "Įveskite kanalo ID, kad jo vaizdo įrašuose nebūtų praleidžiami SponsorBlock segmentai. ID turi tiksliai sutapti, atsižvelgiant į raidžių dydį."
     Enable SponsorBlock Submission: Leisti teikti duomenis „SponsorBlock“
     SponsorBlock Private User ID (optional): Privatus „SponsorBlock“ naudotojo ID (nebūtina)
     SponsorBlock Private User ID Tooltip: Įklijuokite privatų „SponsorBlock“ naudotojo ID iš naršyklės plėtinio. Jei norite naudoti programėlės sugeneruotą ID, palikite tuščią.

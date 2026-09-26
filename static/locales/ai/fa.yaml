@@ -1104,6 +1104,9 @@ Settings:
     Reloading video after IP block recovery: در حال بارگیری دوبارهٔ ویدیو پس از بازیابی مسدودشدن IP
     Failed to select IP block recovery script: انتخاب اسکریپت بازیابی مسدودشدن IP ناموفق بود
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "کانال‌های مستثنا"
+      Tooltip: "شناسهٔ کانالی را وارد کنید تا بخش‌های SponsorBlock در ویدیوهای آن رد نشوند. شناسه باید دقیقاً یکسان باشد و به بزرگی و کوچکی حروف حساس است."
     Enable SponsorBlock Submission: فعال‌کردن ارسال به SponsorBlock
     SponsorBlock Private User ID (optional): شناسهٔ خصوصی کاربر SponsorBlock (اختیاری)
     SponsorBlock Private User ID Tooltip: شناسهٔ خصوصی کاربر SponsorBlock را از افزونهٔ مرورگر جای‌گذاری کنید. برای استفاده از شناسهٔ ساخته‌شده توسط برنامه، این قسمت را خالی بگذارید.

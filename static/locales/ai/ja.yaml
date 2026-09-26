@@ -1058,6 +1058,9 @@ Settings:
     Reloading video after IP block recovery: IPブロックの復旧後に動画を再読み込み中
     Failed to select IP block recovery script: IPブロック復旧スクリプトを選択できませんでした
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "除外するチャンネル"
+      Tooltip: "このチャンネルの動画で SponsorBlock の区間をスキップしないように、チャンネル ID を入力してください。ID は大文字と小文字を区別して完全一致する必要があります。"
     Enable SponsorBlock Submission: SponsorBlockへの送信を有効化
     SponsorBlock Private User ID (optional): SponsorBlockの非公開ユーザーID（任意）
     SponsorBlock Private User ID Tooltip: ブラウザー拡張機能の非公開SponsorBlockユーザーIDを貼り付けてください。空欄にすると、アプリが生成したIDを使用します。

@@ -1243,6 +1243,9 @@ Settings:
     Reloading video after IP block recovery: Video wird nach IP-Block-Wiederherstellung neu geladen
     Failed to select IP block recovery script: Auswahl der IP-Block-Wiederherstellungsskriptdatei fehlgeschlagen
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: Ausgenommene Kanäle
+      Tooltip: Gib eine Kanal-ID ein, damit SponsorBlock-Segmente in Videos dieses Kanals nicht übersprungen werden. Die ID muss exakt übereinstimmen; Groß- und Kleinschreibung wird unterschieden.
     Notify when sponsor segment is skipped: Hinweis nach dem Überspringen eines Segments anzeigen
     Skip notification timeout: Timeout für Benachrichtigung bei Überspringen
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock-API-URL (Standard ist https://sponsor.ajay.app)

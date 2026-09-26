@@ -1082,6 +1082,9 @@ Settings:
     Reloading video after IP block recovery: הסרטון נטען מחדש לאחר התאוששות מחסימת IP
     Failed to select IP block recovery script: בחירת סקריפט ההתאוששות מחסימת IP נכשלה
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "ערוצים מוחרגים"
+      Tooltip: "יש להזין מזהה ערוץ כדי למנוע דילוג על מקטעי SponsorBlock בסרטונים שלו. המזהה חייב להתאים בדיוק, כולל אותיות גדולות וקטנות."
     Enable SponsorBlock Submission: הפעלת שליחה ל-SponsorBlock
     SponsorBlock Private User ID (optional): מזהה משתמש פרטי של SponsorBlock (לא חובה)
     SponsorBlock Private User ID Tooltip: הדביקו את מזהה המשתמש הפרטי של SponsorBlock מהרחבת הדפדפן. השאירו שדה זה ריק כדי להשתמש במזהה שיצרה האפליקציה.

@@ -541,6 +541,9 @@ Settings:
     Open All Tabs Confirmation: "Otworzyć wszystkie karty?"
     Server Update Required: "Zaktualizuj ten serwer, aby obsługiwał szyfrowaną synchronizację w czasie rzeczywistym."
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "Wykluczone kanały"
+      Tooltip: "Wpisz identyfikator kanału, aby segmenty SponsorBlock w jego filmach nie były pomijane. Identyfikator musi dokładnie pasować, z uwzględnieniem wielkości liter."
     Reveal Generated User ID: Pokaż wygenerowany identyfikator użytkownika
     Custom Color: Własny kolor
   Password Dialog:

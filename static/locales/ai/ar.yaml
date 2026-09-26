@@ -1077,6 +1077,9 @@ Settings:
     Reloading video after IP block recovery: إعادة تحميل الفيديو بعد استرداد حظر IP
     Failed to select IP block recovery script: فشل في تحديد البرنامج النصي لاسترداد حظر IP
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "القنوات المستثناة"
+      Tooltip: "أدخل معرّف قناة لمنع تخطي مقاطع SponsorBlock في فيديوهاتها. يجب أن يطابق المعرّف تمامًا، مع مراعاة حالة الأحرف."
     Enable SponsorBlock Submission: تمكين تقديم SponsorBlock
     SponsorBlock Private User ID (optional): معرف المستخدم الخاص لـ SponsorBlock (اختياري)
     SponsorBlock Private User ID Tooltip: الصق معرف مستخدم SponsorBlock الخاص من ملحق المتصفح. اترك هذا الحقل فارغًا لاستخدام المعرف الذي أنشأه التطبيق.

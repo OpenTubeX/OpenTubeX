@@ -1296,6 +1296,9 @@ Settings:
     Reloading video after IP block recovery: IP 차단 복구 후 동영상 다시 불러오는 중
     Failed to select IP block recovery script: IP 차단 복구 스크립트를 선택하지 못했습니다
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "제외된 채널"
+      Tooltip: "해당 채널의 동영상에서 SponsorBlock 구간을 건너뛰지 않으려면 채널 ID를 입력하세요. ID는 대소문자를 구분하여 정확히 일치해야 합니다."
     Enable SponsorBlock Submission: SponsorBlock 제출 활성화
     SponsorBlock Private User ID (optional): SponsorBlock 비공개 사용자 ID (선택 사항)
     SponsorBlock Private User ID Tooltip: 브라우저 확장 프로그램의 비공개 SponsorBlock 사용자 ID를 붙여 넣으세요. 앱에서 생성한 ID를 사용하려면 비워 두세요.

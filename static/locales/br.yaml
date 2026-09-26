@@ -21,7 +21,7 @@ Zoom out: 'Zoum bihanaat'
 Toggle fullscreen: 'Tremen e skramm leun'
 Window: 'Prenestr'
 Minimize: 'Izekaat'
-Close: 'Seriñ'
+Close: 'Serriñ'
 Back: 'Distreiñ'
 Forward: 'War-raok'
 Open New Window: 'Digeriñ ur prenestr nevez'
@@ -77,7 +77,7 @@ Search Filters:
     Prioritize: Prioriziñ
     Popularity: Dre vrud
   Time:
-    Time: 'Padelezh'
+    Time: 'Deiziad'
     Any Time: 'A-holl-viskoaz'
     Today: 'Hiziv'
     This Week: 'Ar sizhun-mañ'
@@ -681,6 +681,9 @@ Settings:
       Prompt To Skip: 'Kinnig da laoskel a-gostez'
       Do Nothing: 'Ober netra'
     Category Color: 'Liv ar rummad'
+    Excluded Channels:
+      Excluded Channels: Chadennoù ezlakaet
+      Tooltip: Lakait ID ur chadenn evit diweredekaat SponsorBlock. Ne vo ket tremenet hebiou ar bruderezh evit ar chadenn-mañ. Ret eo d'an ID bezañ klot ha ret eo doujañ d'ar pennlizherennoù.
   Parental Control Settings:
     Parental Control Settings: 'Kontroll ar gerent'
     Hide Unsubscribe Button: 'Kuzhat ar bouton digoumanantiñ'
@@ -955,6 +958,7 @@ Video:
   Station: Roll videoioù war-eeun
   Playlist:
     Unavailable videos are hidden: 1 video dihergez a zo kuzhet | {count} video dihergez a zo kuzhet
+  Premiere: Rakskignañ
 Playlist:
   #& About
   Playlist: 'Roll-videoioù'

@@ -1077,6 +1077,9 @@ Settings:
     Reloading video after IP block recovery: Đang tải lại video sau khi khôi phục từ lỗi chặn IP
     Failed to select IP block recovery script: Không thể chọn tập lệnh khôi phục khi bị chặn IP
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "Kênh được loại trừ"
+      Tooltip: "Nhập ID kênh để ngăn bỏ qua các đoạn SponsorBlock trong video của kênh đó. ID phải khớp chính xác và phân biệt chữ hoa, chữ thường."
     Enable SponsorBlock Submission: Bật gửi dữ liệu lên SponsorBlock
     SponsorBlock Private User ID (optional): ID người dùng riêng tư SponsorBlock (không bắt buộc)
     SponsorBlock Private User ID Tooltip: Dán ID người dùng riêng tư SponsorBlock từ tiện ích trình duyệt. Để trống để dùng ID do ứng dụng tạo.

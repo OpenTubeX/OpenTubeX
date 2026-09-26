@@ -1223,6 +1223,9 @@ Settings:
     Reloading video after IP block recovery: Lastar videoen på nytt etter gjenoppretting frå IP-blokkering
     Failed to select IP block recovery script: Klarte ikkje å velja skriptet for gjenoppretting etter IP-blokkering
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "Unntatte kanalar"
+      Tooltip: "Skriv inn ein kanal-ID for å hindre at SponsorBlock-segment vert hoppa over i videoane til kanalen. ID-en må samsvare nøyaktig og skil mellom store og små bokstavar."
     Enable SponsorBlock Submission: Slå på innsending til SponsorBlock
     SponsorBlock Private User ID (optional): Privat SponsorBlock-brukar-ID (valfritt)
     SponsorBlock Private User ID Tooltip: Lim inn den private SponsorBlock-brukar-ID-en frå nettlesarutvidinga. La feltet stå tomt for å bruka ein ID som appen har laga.

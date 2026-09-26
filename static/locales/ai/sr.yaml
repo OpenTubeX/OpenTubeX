@@ -1099,6 +1099,9 @@ Settings:
     Reloading video after IP block recovery: Поновно учитавање видео-снимка после опоравка од IP блокаде
     Failed to select IP block recovery script: Избор скрипте за опоравак од IP блокаде није успео
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "Изузети канали"
+      Tooltip: "Унесите ID канала да се SponsorBlock сегменти не прескачу у његовим видео-снимцима. ID мора да се подудара тачно и разликује велика и мала слова."
     Enable SponsorBlock Submission: Омогући слање у SponsorBlock
     SponsorBlock Private User ID (optional): Приватни SponsorBlock кориснички ID (опционално)
     SponsorBlock Private User ID Tooltip: Налепите приватни SponsorBlock кориснички ID из проширења прегледача. Оставите празно да бисте користили ID који је направила апликација.

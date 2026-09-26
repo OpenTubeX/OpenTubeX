@@ -66,6 +66,23 @@
           @blur="handleUpdateSponsorBlockUrl"
         />
       </FtFlexBox>
+      <FtFlexBox>
+        <FtInputTags
+          :label="t('Settings.SponsorBlock Settings.Excluded Channels.Excluded Channels')"
+          :tag-name-placeholder="t('Settings.Distraction Free Settings.Hide Channels Placeholder')"
+          :tag-list="sponsorBlockChannelTags"
+          :tooltip="t('Settings.SponsorBlock Settings.Excluded Channels.Tooltip')"
+          :validate-tag-name="checkYoutubeChannelId"
+          :find-tag-info="findChannelTagInfoWrapper"
+          :are-channel-tags="true"
+          :show-tags="showSponsorBlockChannels"
+          @invalid-name="handleInvalidChannel"
+          @error-find-tag-info="handleChannelAPIError"
+          @change="handleSponsorBlockChannelWhitelist"
+          @already-exists="handleChannelsExists"
+          @toggle-show-tags="showSponsorBlockChannels = !showSponsorBlockChannels"
+        />
+      </FtFlexBox>
       <FtFlexBox
         v-if="useSponsorBlock && sponsorBlockEnableSubmission"
       >
@@ -162,12 +179,15 @@ import FtSlider from './FtSlider/FtSlider.vue'
 import FtFlexBox from './ft-flex-box/ft-flex-box.vue'
 import FtSponsorBlockCategory from './FtSponsorBlockCategory/FtSponsorBlockCategory.vue'
 import FtTooltip from './FtTooltip/FtTooltip.vue'
+import FtInputTags from './FtInputTags/FtInputTags.vue'
 
 import store from '../store/index'
-import { copyToClipboard } from '../helpers/utils'
+import { copyToClipboard, showToast } from '../helpers/utils'
+import { checkYoutubeChannelId, findChannelTagInfo } from '../helpers/channels.js'
 
 const { t } = useI18n()
 const showGeneratedSponsorBlockUserId = ref(false)
+const showSponsorBlockChannels = ref(true)
 
 const CATEGORIES = [
   'sponsor',
@@ -214,6 +234,29 @@ const deArrowThumbnailGeneratorUrl = computed(() => store.getters.getDeArrowThum
 
 const sponsorBlockUrlInputRef = useTemplateRef('sponsorBlockUrlInput')
 const deArrowThumbnailGeneratorUrlRef = useTemplateRef('deArrowThumbnailGeneratorUrl')
+
+const sponsorBlockChannelTags = computed(() => {
+  const whitelist = store.getters.getSponsorBlockChannelWhitelist
+  return Array.isArray(whitelist) ? whitelist.map(name => ({ id: name, name })) : []
+})
+
+/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
+const backendPreference = computed(() => store.getters.getBackendPreference)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const backendFallback = computed(() => store.getters.getBackendFallback)
+
+const backendOptions = computed(() => ({
+  preference: backendPreference.value,
+  fallback: backendFallback.value
+}))
+
+/**
+ * @param {{ name: string }[]} value
+ */
+function handleSponsorBlockChannelWhitelist(value) {
+  store.dispatch('updateSponsorBlockChannelWhitelist', value.map(tag => tag.name))
+}
 
 /**
  * @param {boolean} value
@@ -298,6 +341,18 @@ function handleUpdateDeArrowThumbnailGeneratorUrl(value) {
   }
 }
 
+function handleInvalidChannel() {
+  showToast(t('Settings.Distraction Free Settings.Hide Channels Invalid'))
+}
+
+function handleChannelAPIError() {
+  showToast(t('Settings.Distraction Free Settings.Hide Channels API Error'))
+}
+
+function handleChannelsExists() {
+  showToast(t('Settings.Distraction Free Settings.Hide Channels Already Exists'))
+}
+
 /**
  * @param {string} url
  */
@@ -305,6 +360,13 @@ function cleanupUrl(url) {
   return url
     .replace(/\/+$/, '')
     .replace(/\/api$/, '')
+}
+
+/**
+ * @param {string} text
+ */
+async function findChannelTagInfoWrapper(text) {
+  return await findChannelTagInfo(text, backendOptions.value)
 }
 </script>
 

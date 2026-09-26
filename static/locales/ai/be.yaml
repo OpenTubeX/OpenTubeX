@@ -1106,6 +1106,9 @@ Settings:
     Reloading video after IP block recovery: Перазагрузка відэа пасля аднаўлення ад блакавання IP
     Failed to select IP block recovery script: Не ўдалося выбраць сцэнарый аднаўлення пасля блакавання IP
   SponsorBlock Settings:
+    Excluded Channels:
+      Excluded Channels: "Выключаныя каналы"
+      Tooltip: "Увядзіце ID канала, каб сегменты SponsorBlock у яго відэа не прапускаліся. ID павінен дакладна супадаць з улікам рэгістра."
     Enable SponsorBlock Submission: Уключыць адпраўленне даных у SponsorBlock
     SponsorBlock Private User ID (optional): Прыватны ідэнтыфікатар карыстальніка SponsorBlock (неабавязкова)
     SponsorBlock Private User ID Tooltip: Устаўце прыватны ідэнтыфікатар карыстальніка SponsorBlock з пашырэння браўзера. Пакіньце поле пустым, каб выкарыстоўваць ідэнтыфікатар, створаны праграмай.
