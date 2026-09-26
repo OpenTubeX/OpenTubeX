@@ -79,7 +79,7 @@ let locked = false
 let previousFocus = null
 
 const getPlayer = inject('phonePanelPlayer', null)
-const preparePanel = inject('preparePhonePanel', null)
+const getInlinePlayer = inject('phonePanelInlinePlayer', null)
 const expandPanel = inject('expandPhonePanel', null)
 const landscape = usePhoneLayout('(orientation: landscape)')
 const expanded = ref(false)
@@ -134,6 +134,7 @@ const sheetStyle = computed(() => {
   }
 })
 let resize
+let observedInlinePlayer = null
 let drag = null
 let animation
 let closing = false
@@ -148,17 +149,20 @@ function restorePlayback() {
 
 function measurePlayer() {
   if (!docked.value || !props.open || suspended.value) return
-  const player = getPlayer?.()
+  const player = getInlinePlayer?.() ?? getPlayer?.()
   if (!player) return
-  let bounds = player.getBoundingClientRect()
-  const toolbarBottom = document.querySelector('.topNav')?.getBoundingClientRect().bottom ?? 0
-  // Fullscreen restoration and focus can restore a late page scroll offset.
-  if (bounds.top < toolbarBottom - 1) {
-    window.scrollBy({ top: bounds.top - toolbarBottom, behavior: 'instant' })
-    bounds = player.getBoundingClientRect()
-  }
-  sheetTop.value = Math.max(0, bounds.bottom)
+  sheetTop.value = Math.max(0, player.getBoundingClientRect().bottom)
 }
+
+function observeInlinePlayer(inlinePlayer = getInlinePlayer?.()) {
+  if (!resize || !dialog.value?.open || !docked.value || inlinePlayer === observedInlinePlayer) return
+  const player = getPlayer?.()
+  if (observedInlinePlayer && observedInlinePlayer !== player) resize.unobserve(observedInlinePlayer)
+  observedInlinePlayer = inlinePlayer
+  if (inlinePlayer && inlinePlayer !== player) resize.observe(inlinePlayer)
+  measurePlayer()
+}
+watch(() => getInlinePlayer?.(), observeInlinePlayer, { flush: 'post' })
 
 watch([dialog, () => props.enabled, () => props.open, docked, fullscreenElement, suspended], async ([element, enabled, open], previous) => {
   const sequence = ++openingSequence
@@ -194,20 +198,7 @@ watch([dialog, () => props.enabled, () => props.open, docked, fullscreenElement,
     previousFocus = document.activeElement
     if (docked.value) {
       const player = getPlayer?.()
-      player?.setAttribute('data-phone-panel-video', '')
-      await preparePanel?.()
-      if (sequence !== openingSequence || !docked.value || suspended.value || !props.enabled || !props.open || dialog.value !== element) {
-        player?.removeAttribute('data-phone-panel-video')
-        return
-      }
-      // Restore the video before opening a panel from an action farther down the page.
-      if (player) {
-        const bounds = player.getBoundingClientRect()
-        const toolbarBottom = document.querySelector('.topNav')?.getBoundingClientRect().bottom ?? 0
-        if (bounds.top < toolbarBottom || bounds.bottom > innerHeight - 120) {
-          window.scrollBy({ top: bounds.top - toolbarBottom, behavior: 'instant' })
-        }
-      }
+      if (!player?.classList.contains('scrollMiniPlayer')) player?.setAttribute('data-phone-panel-video', '')
       if (!presentationSuspended) {
         expanded.value = landscape.value || shortsPlayer.value
       }
@@ -219,6 +210,7 @@ watch([dialog, () => props.enabled, () => props.open, docked, fullscreenElement,
       ], { duration: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 220, easing: 'ease-out' }))
       resize = new ResizeObserver(measurePlayer)
       if (player) resize.observe(player)
+      observeInlinePlayer()
       window.addEventListener('resize', measurePlayer)
       window.addEventListener('scroll', measurePlayer, { capture: true, passive: true })
       window.visualViewport?.addEventListener('resize', measurePlayer)
@@ -328,6 +320,8 @@ function release(preservePresentation = false) {
   const anotherPanelOpen = document.querySelector('.dockedSheet[open]') !== null
   if (!anotherPanelOpen) getPlayer?.()?.removeAttribute('data-phone-panel-video')
   resize?.disconnect()
+  resize = null
+  observedInlinePlayer = null
   window.removeEventListener('resize', measurePlayer)
   window.removeEventListener('scroll', measurePlayer, true)
   window.visualViewport?.removeEventListener('resize', measurePlayer)
