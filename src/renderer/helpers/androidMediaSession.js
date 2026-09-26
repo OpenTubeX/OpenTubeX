@@ -33,14 +33,12 @@ export function createAndroidMediaSessionState({
   metadata = null,
   positionState = null,
   actionHandlers = {},
-  nativeOwner = null,
 } = {}) {
   const duration = Math.max(0, finiteOr(positionState?.duration, 0))
   const position = Math.min(duration, Math.max(0, finiteOr(positionState?.position, 0)))
   const playbackRate = Math.max(0, finiteOr(positionState?.playbackRate, 1))
 
   return {
-    ...(typeof nativeOwner === 'string' && nativeOwner ? { nativeOwner } : {}),
     playbackState: ['playing', 'paused'].includes(playbackState) ? playbackState : 'none',
     title: typeof metadata?.title === 'string' ? metadata.title : '',
     artist: typeof metadata?.artist === 'string' ? metadata.artist : '',
@@ -55,7 +53,7 @@ export function createAndroidMediaSessionState({
 }
 
 export function shouldSendAndroidMediaSessionState(previous, next, elapsedMs) {
-  if (!next.nativeOwner || !previous?.nativeOwner || elapsedMs >= 1000) return true
+  if (!previous || elapsedMs >= 1000) return true
   return JSON.stringify({ ...previous, position: 0 }) !== JSON.stringify({ ...next, position: 0 })
 }
 
@@ -64,13 +62,12 @@ export function updateAndroidMediaSession(state) {
 
   const payload = createAndroidMediaSessionState(state)
   const now = performance.now()
-  // Native playback already updates the service's clock; avoid starting the
-  // service for every WebView position tick while retaining periodic recovery.
+  // The session's playback rate advances its position between updates.
   if (!shouldSendAndroidMediaSessionState(lastSentPayload, payload, now - lastSentAt)) return
   lastSentPayload = payload
   lastSentAt = now
   const operation = payload.playbackState === 'none'
-    ? AndroidMediaSession.clear({ nativeOwner: payload.nativeOwner })
+    ? AndroidMediaSession.clear()
     : AndroidMediaSession.update({ state: payload })
   operation.catch(error => {
     if (lastSentPayload === payload) lastSentPayload = null

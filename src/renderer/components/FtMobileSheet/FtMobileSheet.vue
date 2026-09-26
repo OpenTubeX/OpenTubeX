@@ -110,10 +110,10 @@ function updatePresentation() {
     observedPlayer = player
     if (player) {
       presentationObserver = new MutationObserver(updatePresentation)
-      presentationObserver.observe(player, { attributes: true, attributeFilter: ['class', 'data-native-player-screen'] })
+      presentationObserver.observe(player, { attributes: true, attributeFilter: ['class'] })
     }
   }
-  playerCoversWindow.value = player?.matches('[data-native-player-screen], .fullWindow') ?? false
+  playerCoversWindow.value = player?.classList.contains('fullWindow') ?? false
   shortsPlayer.value = player?.classList.contains('shortsPlayer') ?? false
 }
 updatePresentation()
@@ -152,7 +152,7 @@ function measurePlayer() {
   if (!player) return
   let bounds = player.getBoundingClientRect()
   const toolbarBottom = document.querySelector('.topNav')?.getBoundingClientRect().bottom ?? 0
-  // Native player restoration and focus can restore a late page scroll offset.
+  // Fullscreen restoration and focus can restore a late page scroll offset.
   if (bounds.top < toolbarBottom - 1) {
     window.scrollBy({ top: bounds.top - toolbarBottom, behavior: 'instant' })
     bounds = player.getBoundingClientRect()

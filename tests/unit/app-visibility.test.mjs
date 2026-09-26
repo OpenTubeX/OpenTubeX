@@ -5,7 +5,6 @@ import vm from 'node:vm'
 import { setImmediate, setTimeout as delay } from 'node:timers/promises'
 
 import { isAppHidden, setAndroidAppVisible } from '../../src/renderer/helpers/appVisibility.js'
-import { resolveAndroidBackgroundPlaybackFormat } from '../../src/renderer/helpers/player/androidBackgroundPlayback.js'
 import { createPlaybackScreenWake } from '../../src/renderer/helpers/playbackScreenWake.js'
 
 test('Android background playback follows Home even when Chromium stays visible for a refresh', () => {
@@ -19,10 +18,6 @@ test('Android background playback follows Home even when Chromium stays visible 
     setAndroidAppVisible(true)
     setAndroidAppVisible(false)
     assert.equal(isAppHidden(), true)
-    assert.deepEqual(resolveAndroidBackgroundPlaybackFormat({
-      hidden: isAppHidden(), continuePlayback: true, activeFormat: 'dash',
-      audioFormatAvailable: true, paused: false
-    }), { activeFormat: 'audio', restoreFormat: 'dash' })
 
     // Releasing the refresh changes Chromium visibility too, but the activity
     // remains hidden. Returning to the app must still publish a resume event.

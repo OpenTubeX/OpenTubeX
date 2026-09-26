@@ -17,7 +17,6 @@ function fixture({ reducedMotion = false, available = true, restoring = false, f
   let destination = null
   const frames = new Map()
   const animations = []
-  const events = []
   const style = { removeProperty(key) { delete this[key.replace(/-([a-z])/g, (_, c) => c.toUpperCase())] } }
   const from = restoring
     ? { x: 172.25, y: 570.75, width: 210.5, height: 118.40625 }
@@ -27,7 +26,6 @@ function fixture({ reducedMotion = false, available = true, restoring = false, f
     style, offsetHeight: 219.65625,
     setAttribute() {}, removeAttribute() {},
     getBoundingClientRect() { reads++; return from },
-    dispatchEvent(event) { events.push(event.detail) },
   } }
   const methods = vm.runInNewContext(`${dragSource}\n({ beginScrollMiniPlayerDrag, moveScrollMiniPlayerDrag, finishScrollMiniPlayerDrag, cancelScrollMiniPlayerDrag })`, {
     container,
@@ -63,7 +61,6 @@ function fixture({ reducedMotion = false, available = true, restoring = false, f
     reanchorScrollMiniPlayerRect: rect => rect,
     requestAnimationFrame(callback) { frames.set(1, callback); return 1 },
     cancelAnimationFrame(id) { frames.delete(id) },
-    CustomEvent: class { constructor(name, { detail }) { this.detail = detail } },
     activateScrollMiniPlayer() { activated = true },
     deactivateScrollMiniPlayer() { deactivated = true },
     updateScrollMiniPlayer() {},
@@ -73,7 +70,7 @@ function fixture({ reducedMotion = false, available = true, restoring = false, f
     animateScrollMiniPlayerLayout: (...args) => { animations.push(args) },
     console,
   })
-  return { methods, style, frames, events, animations, stash, progress: () => previewProgress, destination: () => destination, reads: () => reads, navigations: () => navigations, activated: () => activated, deactivated: () => deactivated }
+  return { methods, style, frames, animations, stash, progress: () => previewProgress, destination: () => destination, reads: () => reads, navigations: () => navigations, activated: () => activated, deactivated: () => deactivated }
 }
 
 test('drag batches pointer samples into one transform without reading layout per move', () => {
@@ -86,7 +83,6 @@ test('drag batches pointer samples into one transform without reading layout per
   assert.match(f.style.transform, /^translate\([\d.]+px, [\d.]+px\) scale\(0\.\d+, 0\.\d+\)$/)
   assert.equal(f.reads(), 1)
   assert.equal(f.progress(), 1)
-  assert.equal(f.events[0], true)
 })
 
 test('cancellation removes pending frames and restores the original player without navigation', async () => {
@@ -103,7 +99,6 @@ test('cancellation removes pending frames and restores the original player witho
   assert.equal(f.style.transform, undefined)
   assert.equal(f.style.willChange, undefined)
   assert.equal(f.navigations(), 0)
-  assert.equal(f.events.at(-1), false)
   assert.equal(f.animations.length, 0)
 })
 
@@ -128,7 +123,6 @@ test('failed preview handoff still clears inline drag state', async () => {
   await assert.rejects(f.methods.finishScrollMiniPlayerDrag(true), /handoff failed/)
   assert.equal(f.style.transform, undefined)
   assert.equal(f.style.willChange, undefined)
-  assert.equal(f.events.at(-1), false)
   assert.equal(f.methods.beginScrollMiniPlayerDrag(), true)
 })
 
@@ -136,7 +130,6 @@ test('unavailable playback does not capture a drag', () => {
   const f = fixture({ available: false })
   assert.equal(f.methods.beginScrollMiniPlayerDrag(), false)
   assert.equal(f.reads(), 0)
-  assert.equal(f.events.length, 0)
 })
 
 test('navigation can hide the watch view without losing the drag handoff dimensions', () => {
@@ -170,7 +163,6 @@ for (const commit of [true, false]) {
     await f.methods.finishScrollMiniPlayerDrag(commit)
     assert.equal(f.deactivated(), commit)
     assert.equal(f.style.transform, undefined)
-    assert.equal(f.events.at(-1), false)
   })
 }
 

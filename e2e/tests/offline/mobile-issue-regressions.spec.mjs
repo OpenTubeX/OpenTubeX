@@ -60,16 +60,12 @@ for (const scale of [1, 1.25]) {
     await page.locator('.sideNav').evaluate(element => element.classList.add('scrollHidden'))
     await expect.poll(gap).toBeCloseTo(6, 0)
     // Overlay layouts must cancel the hidden-nav transform, including reduced motion.
-    for (const kind of ['sheet', 'settings', 'fullscreen']) {
+    for (const kind of ['sheet', 'settings']) {
       await page.evaluate(kind => {
         const overlay = document.createElement('div')
         overlay.id = 'connection-overlay-test'
         if (kind === 'sheet') { overlay.className = 'mobileSheet'; overlay.setAttribute('open', '') }
         if (kind === 'settings') overlay.className = 'settingsWindow maximized'
-        if (kind === 'fullscreen') {
-          overlay.setAttribute('data-native-player-screen', '')
-          overlay.append(document.querySelector('.connection-status-holder'))
-        }
         document.querySelector('.app').append(overlay)
       }, kind)
       await expect.poll(gap).toBeCloseTo(6, 0)

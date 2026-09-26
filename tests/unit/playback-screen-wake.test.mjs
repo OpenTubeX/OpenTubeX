@@ -5,7 +5,6 @@ import { readFile } from 'node:fs/promises'
 import vm from 'node:vm'
 import { effectScope, nextTick, reactive, ref, watch } from 'vue'
 import { createPlaybackScreenWake, playbackScreenWake } from '../../src/renderer/helpers/playbackScreenWake.js'
-import { attachAndroidMediaElement } from '../../src/renderer/helpers/player/androidMediaElement.js'
 
 function fixture(plugin) {
   const calls = []
@@ -14,18 +13,24 @@ function fixture(plugin) {
     async allowSleep() { calls.push('sleep') },
   })
   const element = Object.assign(new EventTarget(), {
-    style: {}, volume: 1, muted: false, playbackRate: 1, defaultPlaybackRate: 1, loop: false, pause() {},
+    paused: true, ended: false,
+    pause() { this.paused = true; this.dispatchEvent(new Event('pause')) },
+    async play() { this.paused = false; this.dispatchEvent(new Event('playing')) },
   })
-  const media = attachAndroidMediaElement(element, {
-    command: async () => {}, load: async () => {}, onError: assert.fail,
-  })
+  const media = {
+    update(state) {
+      element.paused = state.paused
+      element.ended = state.ended
+      element.dispatchEvent(new Event(state.ended ? 'ended' : state.paused ? 'pause' : 'playing'))
+    }
+  }
   let presentedVideo = true
   const binding = wake.bindVideo(element, () => presentedVideo)
   const playing = { paused: false, playing: true, ready: true, ended: false, position: 0, duration: 100 }
   return { wake, calls, element, media, binding, playing, present(value) { presentedVideo = value; binding.update() } }
 }
 
-test('native foreground video prevents sleep, pauses release it, and resumed playback reacquires it', async () => {
+test('foreground video prevents sleep, pauses release it, and resumed playback reacquires it', async () => {
   const f = fixture()
   f.wake.setAppActive(true)
   f.media.update(f.playing)

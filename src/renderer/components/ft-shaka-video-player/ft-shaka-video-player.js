@@ -2,8 +2,6 @@ import { setupPhoneOptionsMenu } from '../../helpers/player/phoneOptionsMenu'
 import { chooseAndroidDirectory } from '../../helpers/androidStorage'
 import { isAppHidden } from '../../helpers/appVisibility.js'
 import { playbackScreenWake } from '../../helpers/playbackScreenWake'
-import { capturePlayerFrame } from '../../helpers/player/capturePlayerFrame'
-import { createAndroidPlayer } from '../../helpers/player/androidPlayer'
 import { createRepeatStatsTracker } from '../../helpers/player/repeatStats'
 import { computed, defineComponent, inject, nextTick, onBeforeUnmount, onMounted, onUnmounted, reactive, ref, shallowRef, watch } from 'vue'
 import FtPaidPromotionBadge from '../FtPaidPromotionBadge/FtPaidPromotionBadge.vue'
@@ -671,6 +669,7 @@ export default defineComponent({
       thumbnail: getRecommendationThumbnail(video.videoId)
     })))
     const showPoster = ref(true)
+    const showAndroidPoster = computed(() => process.env.IS_CAPACITOR && showPoster.value)
     const showPaidPromotion = ref(false)
     let paidPromotionTimer = null
 
@@ -743,7 +742,6 @@ export default defineComponent({
 
     /** @type {shaka.ui.Overlay|null} */
     let ui = null
-    let nativePlaybackCleanup = null
     let iosFullscreenCleanup = null
     let screenWakeBinding = null
 
@@ -781,6 +779,8 @@ export default defineComponent({
     // Reactive mirror of the native fullscreen state, so the template can
     // decide where the chapters render (in-player panel vs the watch sidebar).
     const isFullscreen = ref(false)
+    const androidFullscreenHostActive = ref(false)
+    let androidFullscreenHost = null
     const playerPaused = ref(true)
     const pausedInterfaceRevealed = ref(false)
     const shakaControlsShown = ref(false)
@@ -1290,7 +1290,6 @@ export default defineComponent({
     let fullWindowListenerReady = false
     let startInFullwindow = props.startInFullwindow
     let startInFullscreen = props.startInFullscreen
-    let restoringNativeFullscreen = false
     let startInPip = props.startInPip
     let restoreChapters = props.startWithChapters
     let restoreFullscreenMetadata = props.startWithFullscreenMetadata
@@ -1642,7 +1641,7 @@ export default defineComponent({
 
     watch(rotateFullscreenToLandscape, (enabled) => {
       if (!isNativeFullscreenActive()) return
-      setFullscreenOrientation(true, video.value, enabled && !player?.nativePlayback?.isFullscreenFromRotation()).catch(() => {})
+      setFullscreenOrientation(true, video.value, enabled).catch(() => {})
     })
 
     /** @type {import('vue').ComputedRef<number>} */
@@ -4531,7 +4530,7 @@ export default defineComponent({
       const showPlaybackRateControls = !isLive.value && !props.isLive
       const controlPanelElements = [
         'ft_skip_previous',
-        'play_pause',
+        ...(!isCapacitorMobilePlayer() ? ['play_pause'] : []),
         'ft_skip_next',
         ...(!isCapacitorMobilePlayer() ? ['mute', 'volume'] : []),
         'time_and_duration',
@@ -4798,6 +4797,7 @@ export default defineComponent({
           // these have their own watchers
           bigButtons: displayVideoPlayButton.value || isCapacitorMobilePlayer() ? ['play_pause'] : [],
           enableFullscreenOnRotation: (!process.env.IS_CAPACITOR || process.env.IS_IOS) && enterFullscreenOnDisplayRotate.value,
+          fullScreenElement: androidFullscreenHost ?? container.value,
           playbackRates: playbackRates.value,
           tapSeekDistance: defaultSkipInterval.value,
 
@@ -6432,9 +6432,7 @@ export default defineComponent({
       // surface while detaching it into native PiP on Windows. Once a real
       // frame is available the poster is no longer needed, so remove it before
       // a later blur-triggered PiP transition.
-      // Media3 can start its playback clock before rendering the first frame.
-      // Native playback dismisses the overlay through its firstframe event.
-      if (!process.env.IS_CAPACITOR || process.env.IS_IOS) showPoster.value = false
+      showPoster.value = false
       startPaidPromotionTimer()
 
       if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
@@ -6554,12 +6552,8 @@ export default defineComponent({
         events.dispatchEvent(new CustomEvent('setFullWindow', { detail: true }))
       }
 
-      if (startInFullscreen && hasLoaded.value && player?.nativePlayback && !restoringNativeFullscreen) {
-        const nativePlayback = player.nativePlayback
-        restoringNativeFullscreen = true
-        nativePlayback.show().then(() => {
-          if (nativePlayback.isScreenOpen()) startInFullscreen = false
-        }).catch(error => console.error('Unable to restore native fullscreen', error)).finally(() => { restoringNativeFullscreen = false })
+      if (startInFullscreen && hasLoaded.value && process.env.IS_CAPACITOR) {
+        if (androidFullscreenHostActive.value) startInFullscreen = false
       } else if (startInFullscreen && hasLoaded.value && process.env.IS_ELECTRON) {
         startInFullscreen = false
         window.ftElectron.requestFullscreen(tabId)
@@ -6593,13 +6587,11 @@ export default defineComponent({
       updateScrollMiniVideoAspectRatio()
       updateScrollMiniPlayer()
 
-      // Native dimensions can arrive after canplay, including when fullscreen
-      // was entered while waiting for the first media segment.
       if (isActiveTab.value && isNativeFullscreenActive()) {
         setFullscreenOrientation(
           true,
           video.value,
-          rotateFullscreenToLandscape.value && !player?.nativePlayback?.isFullscreenFromRotation()
+          rotateFullscreenToLandscape.value
         ).catch(() => {})
       }
     }
@@ -7248,7 +7240,7 @@ export default defineComponent({
     }
 
     function ensureSabrStream() {
-      if ((process.env.IS_CAPACITOR && !process.env.IS_IOS) || !process.env.SUPPORTS_LOCAL_API || sabrStream || !props.sabrData) return
+      if (!process.env.SUPPORTS_LOCAL_API || sabrStream || !props.sabrData) return
 
       sabrStream = /** @__NOINLINE__ */ setupSabrScheme(props.sabrData, () => player, () => sabrManifest, playerWidth, playerHeight)
       sabrAbortController = new AbortController()
@@ -7659,7 +7651,7 @@ export default defineComponent({
       canvas.width = width
       canvas.height = height
       try {
-        canvas.getContext('2d').drawImage(await capturePlayerFrame(video_, width, height), 0, 0)
+        canvas.getContext('2d').drawImage(video_, 0, 0)
       } catch (error) {
         showToast({ message: t('Screenshot Error', { error: error.message }), icon: ['fas', 'circle-exclamation'] })
         return
@@ -10604,11 +10596,11 @@ export default defineComponent({
 
     function fullscreenChangeHandler() {
       const fullscreen = isNativeFullscreenActive()
+      androidFullscreenHostActive.value = !!androidFullscreenHost && document.fullscreenElement === androidFullscreenHost
       if (videoZoomPinchStart && videoZoomPinchStart.fullscreen !== fullscreen) invalidateVideoZoomPinch()
       if (!fullscreen && selectedVideoZoom.value > VIDEO_ZOOM_LEVELS.at(-1)) {
         updateVideoZoom(VIDEO_ZOOM_LEVELS.at(-1))
       }
-      if (process.env.IS_CAPACITOR && !fullscreen && document.querySelector('.nativeFullscreenTransition')) return
       isFullscreen.value = fullscreen
       if (props.shortsPlayer) {
         resetShortsOverflowMenu()
@@ -10623,7 +10615,7 @@ export default defineComponent({
       setFullscreenOrientation(
         fullscreen,
         video.value,
-        rotateFullscreenToLandscape.value && !player?.nativePlayback?.isFullscreenFromRotation()
+        rotateFullscreenToLandscape.value
       ).catch(() => {})
       syncAndroidStatusBarVisibility()
 
@@ -10741,6 +10733,13 @@ export default defineComponent({
     // #region setup
     onMounted(async () => {
       const videoElement = video.value
+      if (process.env.IS_CAPACITOR) {
+        // The Watch view survives video changes, so its fullscreen element can
+        // remain mounted while the Shaka player is replaced.
+        androidFullscreenHost = container.value.closest('.videoLayout')
+        androidFullscreenHostActive.value = !!androidFullscreenHost && document.fullscreenElement === androidFullscreenHost
+        isFullscreen.value = androidFullscreenHostActive.value
+      }
 
       screenWakeBinding = playbackScreenWake?.bindVideo(videoElement, () =>
         !audioPlayerMode.value && !scrollMiniPlayerDismissed.value && (isActiveTab.value || isCrossTabMiniPlayerPresented.value)
@@ -10750,26 +10749,7 @@ export default defineComponent({
 
       await initializeActiveTab()
 
-      const localPlayer = process.env.IS_CAPACITOR && !process.env.IS_IOS
-        ? createAndroidPlayer(videoElement, container.value, () => ({
-            presented: isActiveTab.value || isCrossTabMiniPlayerPresented.value,
-            vrCanvas: vrCanvas.value,
-            sabrData: props.sabrData,
-            captions: props.captions,
-            videoDimensions: props.legacyFormats.find(format => format.width > 0 && format.height > 0),
-            audioOnly: props.format === 'audio',
-            skipSilence: skipSilence.value,
-            continueInBackground: store.getters.getContinuePlaybackWhenScreenIsLocked,
-            seekSeconds: defaultSkipInterval.value,
-            scaleSeekWithRate: seekIntervalMultiplyByPlaybackRate.value,
-            fullscreenOnRotation: enterFullscreenOnDisplayRotate.value,
-            locale: locale.value,
-            metadata: { title: props.title, artist: props.artist, artwork: props.thumbnail },
-            onOwnerChange: owner => tabMediaCoordinator.setNativeOwner(mediaTabId, owner),
-            onReload: () => emit('player-reload-requested', getSabrReloadState()),
-            onBackoff: ({ backoffMs }) => startSabrBackoffTimer(backoffMs),
-          }))
-        : new shaka.Player()
+      const localPlayer = new shaka.Player()
 
       ui = new shaka.ui.Overlay(
         localPlayer,
@@ -10801,19 +10781,6 @@ export default defineComponent({
         })
       }
       player = controls.getPlayer()
-      if (player.nativePlayback) {
-        player.nativePlayback.bindControls(controls)
-        const removeOwnershipListener = tabMediaCoordinator.subscribeOwnership(mediaTabId, active => {
-          localPlayer.nativePlayback.setPresented(active).catch(error => handleError(error, 'native playback ownership'))
-        })
-        const stopBackgroundWatch = watch(() => store.getters.getContinuePlaybackWhenScreenIsLocked, enabled => {
-          localPlayer.nativePlayback.setContinueInBackground(enabled)?.catch(error => handleError(error, 'native background preference'))
-        })
-        const stopSeekWatch = watch([defaultSkipInterval, seekIntervalMultiplyByPlaybackRate], ([seconds, scaleWithRate]) => {
-          localPlayer.nativePlayback.setSeekPreferences(seconds, scaleWithRate)?.catch(error => handleError(error, 'native seek preference'))
-        })
-        nativePlaybackCleanup = () => { removeOwnershipListener(); stopBackgroundWatch(); stopSeekWatch() }
-      }
       wrapTextTrackSelection()
       player.addEventListener('textchanged', syncShortsCaptionsEnabled)
 
@@ -11471,8 +11438,6 @@ export default defineComponent({
       screenWakeBinding = null
       iosFullscreenCleanup?.()
       iosFullscreenCleanup = null
-      nativePlaybackCleanup?.()
-      nativePlaybackCleanup = null
       clearTimeout(paidPromotionTimer)
       if (fullscreenDockLayoutFrame !== null) {
         cancelAnimationFrame(fullscreenDockLayoutFrame)
@@ -11685,8 +11650,6 @@ export default defineComponent({
       screenWakeBinding = null
       iosFullscreenCleanup?.()
       iosFullscreenCleanup = null
-      nativePlaybackCleanup?.()
-      nativePlaybackCleanup = null
       ignoreErrors = true
       cancelPendingVolumeUserSet()
       cancelSponsorBlockSkipSchedule()
@@ -11737,7 +11700,6 @@ export default defineComponent({
         }
 
         // destroying the ui also destroys the player
-        await player?.nativePlayback?.hide().catch(() => {})
         await ui.destroy()
         ui = null
         player = null
@@ -11765,11 +11727,6 @@ export default defineComponent({
     }
 
     expose({
-      isNativePlayback: () => !!player?.nativePlayback,
-      cancelPendingFullscreen() {
-        startInFullscreen = false
-        player?.nativePlayback?.hide().catch(() => {})
-      },
       isFullscreen,
       hasLoaded,
       hasPlaybackPosition,
@@ -11849,7 +11806,7 @@ export default defineComponent({
 
     return {
       hasLoaded,
-      useNativePlayback: process.env.IS_CAPACITOR && !process.env.IS_IOS,
+      androidFullscreenHostActive,
       videoLayoutReady,
       shortsPaused,
       playbackEnded,
@@ -11861,6 +11818,7 @@ export default defineComponent({
       closedCaptionsOutlinedIcon: CLOSED_CAPTIONS_OUTLINED,
       closedCaptionsFilledIcon: shaka.ui.Enums.MaterialDesignSVGIcons.CLOSED_CAPTIONS,
       showPoster,
+      showAndroidPoster,
       showEndedScreen,
       useFrostedGlassPlayerUi,
       endedRecommendations,

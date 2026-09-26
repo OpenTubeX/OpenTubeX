@@ -27,7 +27,7 @@ import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
-/** One HTTP proxy for Chromium, URLConnection, Media3 and child processes.
+/** One HTTP proxy for Chromium, URLConnection and child processes.
  * Upstream connections never fall back to direct, including failed handshakes.
  */
 final class AndroidProxyRelay implements AutoCloseable {

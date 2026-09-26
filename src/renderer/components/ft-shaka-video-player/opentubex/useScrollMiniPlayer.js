@@ -146,7 +146,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   let scrollMiniScrollFrame = null
 
   // Cache geometry once. Pointer moves only write a compositor transform, at
-  // most once per frame; the native screen observes the same moving bounds.
+  // most once per frame.
   const scrollMiniPlayerDragStyle = ref(null)
   let inlineDrag = null
   let inlineDragFrame = null
@@ -194,7 +194,6 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     element.style.transformOrigin = 'top left'
     element.style.willChange = 'transform'
     element.setAttribute('data-inline-mini-drag', '')
-    element.dispatchEvent(new CustomEvent('native-player-gesture', { detail: true }))
     return true
   }
 
@@ -270,7 +269,6 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     element.style.removeProperty('will-change')
     element.style.removeProperty('border-radius')
     element.removeAttribute('data-inline-mini-drag')
-    element.dispatchEvent(new CustomEvent('native-player-gesture', { detail: false }))
   }
 
   async function finishScrollMiniPlayerDrag(commit) {
@@ -631,22 +629,15 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     )
   }
 
-  function syncNativeMiniPlayerGesture() {
-    const active = ['drag', 'resize'].includes(scrollMiniPointerSession?.type) || scrollMiniBounceCancel !== null
-    container.value?.dispatchEvent(new CustomEvent('native-player-gesture', { detail: active }))
-  }
-
   function cancelScrollMiniPlayerBounce() {
     if (!scrollMiniBounceCancel) return
 
     scrollMiniBounceCancel()
     scrollMiniBounceCancel = null
-    syncNativeMiniPlayerGesture()
   }
 
-  function cancelScrollMiniPlayerLayoutAnimation(replacingNative = false) {
+  function cancelScrollMiniPlayerLayoutAnimation() {
     scrollMiniLayoutAnimationSequence++
-    if (!replacingNative) container.value?.dispatchEvent(new CustomEvent('native-player-transition', { detail: null }))
     scrollMiniLayoutAnimation?.cancel()
     scrollMiniLayoutAnimation = null
     scrollMiniPlayerAnimating.value = false
@@ -675,22 +666,6 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
       return
     }
 
-    const nativeMotion = new CustomEvent('native-player-transition', {
-      cancelable: true,
-      detail: {
-        from: previousRect,
-        to: nextRect,
-        duration: SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS / getAnimationSpeedMultiplier(store.getters.getAnimationSpeed),
-        finished: null
-      }
-    })
-    playerContainer.dispatchEvent(nativeMotion)
-    if (nativeMotion.defaultPrevented) {
-      await nativeMotion.detail.finished
-      if (scrollMiniLayoutAnimationSequence === sequence) scrollMiniPlayerAnimating.value = false
-      return
-    }
-
     const animation = applyAnimationSpeed(playerContainer.animate([
       {
         transform: `translate(${previousRect.left - nextRect.left}px, ${previousRect.top - nextRect.top}px) scale(${previousRect.width / nextRect.width}, ${previousRect.height / nextRect.height})`,
@@ -716,7 +691,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
 
   function animateScrollMiniPlayerRectChange(update) {
     const previousRect = container.value?.getBoundingClientRect()
-    cancelScrollMiniPlayerLayoutAnimation(!!previousRect && !isReducedMotionEnabled())
+    cancelScrollMiniPlayerLayoutAnimation()
     update()
 
     if (!previousRect || isReducedMotionEnabled()) return
@@ -841,7 +816,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     lastKnownInlinePlayerHeight = layoutHeight
     scrollMiniPlaceholderHeight.value = placeholderHeight
 
-    cancelScrollMiniPlayerLayoutAnimation(shouldAnimate)
+    cancelScrollMiniPlayerLayoutAnimation()
     const animationSequence = scrollMiniLayoutAnimationSequence
     scrollMiniPlayerAnimating.value = previousRect !== null
 
@@ -893,7 +868,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     const shouldAnimate = animate && playerContainer !== null && !isReducedMotionEnabled()
     const previousRect = shouldAnimate ? playerContainer.getBoundingClientRect() : null
 
-    cancelScrollMiniPlayerLayoutAnimation(shouldAnimate)
+    cancelScrollMiniPlayerLayoutAnimation()
     const animationSequence = scrollMiniLayoutAnimationSequence
     scrollMiniPlayerAnimating.value = previousRect !== null
 
@@ -1155,7 +1130,6 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   function endScrollMiniPointerSession() {
     if (scrollMiniPointerSession?.type === 'volume') scheduleScrollMiniVolumeHide()
     scrollMiniPointerSession = null
-    syncNativeMiniPlayerGesture()
     document.body.classList.remove('scroll-mini-player-grabbing')
     window.removeEventListener('pointerup', handleScrollMiniVolumePointerUpWindow)
     window.removeEventListener('pointercancel', handleScrollMiniVolumePointerUpWindow)
@@ -1249,7 +1223,6 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
           () => {
             applyScrollMiniPlayerRect(clampScrollMiniPlayerRect(targetRect, scrollMiniVideoAspectRatio.value), true)
             scrollMiniBounceCancel = null
-            syncNativeMiniPlayerGesture()
           }
         )
       } else {
@@ -1299,7 +1272,6 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
       startRect: { ...scrollMiniPlayerRect.value },
     }
 
-    syncNativeMiniPlayerGesture()
     document.body.classList.add('scroll-mini-player-grabbing')
     window.addEventListener('pointermove', handleScrollMiniPointerMoveWindow)
     window.addEventListener('pointerup', handleScrollMiniPointerUpWindow)
@@ -1322,7 +1294,6 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
       startRect: { ...scrollMiniPlayerRect.value },
     }
 
-    syncNativeMiniPlayerGesture()
     document.body.classList.add('scroll-mini-player-grabbing')
     window.addEventListener('pointermove', handleScrollMiniPointerMoveWindow)
     window.addEventListener('pointerup', handleScrollMiniPointerUpWindow)

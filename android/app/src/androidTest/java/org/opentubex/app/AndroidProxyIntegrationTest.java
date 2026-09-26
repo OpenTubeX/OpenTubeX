@@ -6,7 +6,6 @@ import android.content.Context;
 import android.net.http.SslCertificate;
 import android.net.http.SslError;
 import android.webkit.SslErrorHandler;
-import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -26,14 +25,10 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
-import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import androidx.test.platform.app.InstrumentationRegistry;
-import androidx.media3.datasource.DataSpec;
-import androidx.media3.datasource.DefaultHttpDataSource;
-import android.net.Uri;
 import org.json.JSONObject;
 import org.junit.Test;
 import java.net.HttpURLConnection;
@@ -278,7 +273,7 @@ public class AndroidProxyIntegrationTest {
         });
     }
 
-    @Test public void nativeHttpAndMedia3ReadSuccessfulResponsesThroughForwardingProxy() throws Exception {
+    @Test public void nativeHttpReadsSuccessfulResponsesThroughForwardingProxy() throws Exception {
         try (ForwardingProxy proxy = new ForwardingProxy()) {
             proxy.configure();
             for (String path : List.of(ForwardingProxy.LOCAL, ForwardingProxy.INVIDIOUS)) {
@@ -296,23 +291,6 @@ public class AndroidProxyIntegrationTest {
                     }
                     proxy.assertForwarded(path);
                 } finally { request.disconnect(); }
-            }
-            SSLSocketFactory previous = HttpsURLConnection.getDefaultSSLSocketFactory();
-            DefaultHttpDataSource source = new DefaultHttpDataSource.Factory()
-                .setConnectTimeoutMs(3000).setReadTimeoutMs(3000).createDataSource();
-            try {
-                // Media3 creates its own URLConnection; restore the test-only trust immediately after reading.
-                HttpsURLConnection.setDefaultSSLSocketFactory(proxy.tls.getSocketFactory());
-                assertEquals(proxy.media.length, source.open(new DataSpec(Uri.parse(ForwardingProxy.BASE + "/demo.webm"))));
-                ByteArrayOutputStream downloaded = new ByteArrayOutputStream();
-                byte[] bytes = new byte[8192];
-                int count;
-                while ((count = source.read(bytes, 0, bytes.length)) != -1) downloaded.write(bytes, 0, count);
-                assertArrayEquals(proxy.media, downloaded.toByteArray());
-                proxy.assertForwarded("/demo.webm");
-            } finally {
-                source.close();
-                HttpsURLConnection.setDefaultSSLSocketFactory(previous);
             }
         }
     }
@@ -381,7 +359,7 @@ public class AndroidProxyIntegrationTest {
         } finally { YtDlpFiles.deleteTree(directory); }
     }
 
-    @Test public void nativeHttpAndMedia3UseProxyWithoutResolvingDestination() throws Exception {
+    @Test public void nativeHttpUsesProxyWithoutResolvingDestination() throws Exception {
         AndroidProxy.ready().get(10, TimeUnit.SECONDS);
         try (RecordingProxy proxy = new RecordingProxy()) {
             proxy.configure();
@@ -390,14 +368,6 @@ public class AndroidProxyIntegrationTest {
             connection.setReadTimeout(3000);
             try { assertThrows(Exception.class, connection::getInputStream); }
             finally { connection.disconnect(); }
-            proxy.assertContacted();
-        }
-        try (RecordingProxy proxy = new RecordingProxy()) {
-            proxy.configure();
-            DefaultHttpDataSource source = new DefaultHttpDataSource.Factory()
-                .setConnectTimeoutMs(3000).setReadTimeoutMs(3000).createDataSource();
-            try { assertThrows(Exception.class, () -> source.open(new DataSpec(Uri.parse(TARGET)))); }
-            finally { source.close(); }
             proxy.assertContacted();
         }
     }

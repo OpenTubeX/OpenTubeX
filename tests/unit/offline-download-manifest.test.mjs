@@ -4,7 +4,7 @@ import test from 'node:test'
 import { runInNewContext } from 'node:vm'
 
 const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
-const connectionHandler = source.slice(source.indexOf('    handleDownloadConnectionChange('), source.indexOf('    updateAndroidBackgroundPlaybackFormat()'))
+const connectionHandler = source.slice(source.indexOf('    handleDownloadConnectionChange('), source.indexOf('    handleUpcomingPlaylistVideosChange('))
 
 for (const expression of ['createLocalDashManifest(result, true)', 'createLocalDashManifest(result)', 'createInvidiousDashManifest(result)']) {
   test(`late ${expression} does not replace downloaded audio after connection loss`, async () => {

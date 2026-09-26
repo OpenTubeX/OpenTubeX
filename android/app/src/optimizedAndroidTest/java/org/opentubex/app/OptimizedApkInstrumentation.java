@@ -93,21 +93,13 @@ public class OptimizedApkInstrumentation extends Instrumentation {
                 "-of", "default=noprint_wrappers=1:nokey=1", converted.getPath()).trim()) > 0, "FFprobe reads converted audio");
             report("Runtimes passed");
 
-            JSONObject owner = new JSONObject().put("owner", "optimized-apk-test");
-            call(web, "AndroidPlayback", "setOwner", owner);
             try {
-                call(web, "AndroidPlayback", "loadSource", new JSONObject(owner.toString())
-                    .put("source", fixture.toURI().toString()).put("mimeType", "video/webm").put("play", true));
-                call(web, "AndroidPlayback", "show", new JSONObject(owner.toString()).put("locale", "en-US"));
-                long deadline = SystemClock.elapsedRealtime() + 15000;
-                JSONObject state;
-                do {
-                    state = call(web, "AndroidPlayback", "getState", owner);
-                    if (state.optDouble("position", 0) > 0) break;
-                    Thread.sleep(100);
-                } while (SystemClock.elapsedRealtime() < deadline);
-                check(state.optDouble("position", 0) > 0, "Native playback advances: " + state);
-            } finally { call(web, "AndroidPlayback", "release", owner); }
+                evaluate(web, "(() => { const video = document.createElement('video'); " +
+                    "video.id = 'optimized-video'; video.muted = true; " +
+                    "video.src = Capacitor.convertFileSrc(" + JSONObject.quote(fixture.getAbsolutePath()) + "); " +
+                    "document.body.append(video); video.play(); })()");
+                await(web, "document.querySelector('#optimized-video')?.currentTime > 0.25");
+            } finally { evaluate(web, "document.querySelector('#optimized-video')?.remove()"); }
             report("Playback passed");
 
             JSONObject refresh = call(web, "SubscriptionRefresh", "start", new JSONObject()

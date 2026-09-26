@@ -20,7 +20,6 @@ public class PullToRefreshLayout extends SwipeRefreshLayout {
     private float startX;
     private float startY;
     private JSObject refreshContext;
-    private OnRefreshListener refreshListener;
 
     public PullToRefreshLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -40,98 +39,6 @@ public class PullToRefreshLayout extends SwipeRefreshLayout {
 
     public JSObject getRefreshContext() {
         return refreshContext;
-    }
-
-    @Override
-    public void setOnRefreshListener(OnRefreshListener listener) {
-        refreshListener = listener;
-        super.setOnRefreshListener(listener);
-    }
-
-    /** Keep the original host in place for native playback's window/inset measurements. */
-    PullToRefreshLayout wrapPlaybackOverlay(WebView view) {
-        gesture++;
-        allowed = false;
-        refreshContext = null;
-        setRefreshing(false);
-        // The empty host no longer draws animation frames. Reset its indicator
-        // immediately so it cannot reappear when the WebView returns.
-        setEnabled(false);
-        setEnabled(configured);
-        PullToRefreshLayout overlay = new PullToRefreshLayout(getContext(), null);
-        overlay.addView(view, new android.view.ViewGroup.LayoutParams(-1, -1));
-        overlay.configure(view, configured);
-        overlay.setOnRefreshListener(refreshListener);
-        return overlay;
-    }
-
-    @Override
-    public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        // SwipeRefreshLayout caches its target after removal. The empty page host
-        // must not measure a WebView now owned by the native playback overlay.
-        if (webView != null && webView.getParent() != this) {
-            setMeasuredDimension(getDefaultSize(getSuggestedMinimumWidth(), widthMeasureSpec),
-                getDefaultSize(getSuggestedMinimumHeight(), heightMeasureSpec));
-            return;
-        }
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        if (webView == null || webView.getParent() == this) {
-            super.onLayout(changed, left, top, right, bottom);
-        }
-    }
-
-    @Override
-    protected void dispatchDraw(android.graphics.Canvas canvas) {
-        // The indicator's cached drawing index also belongs to the old child list.
-        if (webView == null || webView.getParent() == this) super.dispatchDraw(canvas);
-    }
-
-    @Override
-    protected int getChildDrawingOrder(int childCount, int drawingPosition) {
-        // Autofill also queries this order on the empty host, outside dispatchDraw.
-        // AndroidX still caches the indicator's index from before WebView removal.
-        if (webView != null && webView.getParent() != this) return drawingPosition;
-        return super.getChildDrawingOrder(childCount, drawingPosition);
-    }
-
-    @Override
-    protected boolean drawChild(android.graphics.Canvas canvas, android.view.View child, long drawingTime) {
-        // Native playback draws the indicator last, above its separate video and controls.
-        if (getParent() instanceof NativePlaybackScreen && child != webView) return false;
-        return super.drawChild(canvas, child, drawingTime);
-    }
-
-    @Override
-    public void onDescendantInvalidated(android.view.View child, android.view.View target) {
-        super.onDescendantInvalidated(child, target);
-        if (child != webView && getParent() instanceof NativePlaybackScreen) {
-            // The indicator is recorded in the playback screen's display list,
-            // so changes to it must invalidate that screen as well as this host.
-            ((android.view.View) getParent()).invalidate();
-        }
-    }
-
-    void drawRefreshIndicator(android.graphics.Canvas canvas, long drawingTime) {
-        if (getVisibility() != VISIBLE || getAlpha() == 0) return;
-        int save = canvas.save();
-        canvas.translate(getLeft(), getTop());
-        canvas.clipRect(0, 0, getWidth(), getHeight());
-        // SwipeRefreshLayout owns one other child: its animated refresh indicator.
-        for (int i = 0; i < getChildCount(); i++) {
-            android.view.View child = getChildAt(i);
-            if (child != webView && child.getVisibility() == VISIBLE) {
-                // Moving the draw out of dispatchDraw also moves responsibility
-                // for scheduling animation frames and their completion callbacks.
-                if (super.drawChild(canvas, child, drawingTime)) {
-                    ((android.view.View) getParent()).postInvalidateOnAnimation();
-                }
-            }
-        }
-        canvas.restoreToCount(save);
     }
 
     @Override

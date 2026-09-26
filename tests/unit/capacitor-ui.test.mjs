@@ -90,11 +90,13 @@ test('native orientation and settings failures reach the caller', async () => {
   await assert.rejects(ui.openNotificationSettings(), error)
 })
 
-test('fullscreen rotates during SABR backoff using known stream dimensions before the first frame', async () => {
+test('fullscreen waits for video dimensions before rotating', async () => {
   const calls = []
   const ui = loadUi('android', {
     lock: async ({ type }) => calls.push(type), unlock: async () => calls.push('unlock'),
   })
-  await ui.setFullscreenOrientation(true, { videoWidth: 0, videoHeight: 0, nativePlayback: { getVideoDimensions: () => ({ videoWidth: 1920, videoHeight: 1080 }) } })
+  await ui.setFullscreenOrientation(true, { videoWidth: 0, videoHeight: 0 })
+  assert.deepEqual(calls, [])
+  await ui.setFullscreenOrientation(true, { videoWidth: 1920, videoHeight: 1080 })
   assert.deepEqual(calls, ['landscape'])
 })

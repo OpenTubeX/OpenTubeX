@@ -1,4 +1,3 @@
-import { beginAndroidFullscreenTransition } from '../../helpers/player/androidFullscreenTransition'
 import { parseLocalVideoSummary } from '../../helpers/video-summary.js'
 import WatchVideoSummary from '../../components/WatchVideoSummary/WatchVideoSummary.vue'
 import FtPhonePanel from '../../components/FtPhonePanel/FtPhonePanel.vue'
@@ -6,9 +5,9 @@ import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { connectionEvents, initializeNetworkRecovery, getConnectionState } from '../../helpers/networkRecovery'
 import { ytDlp } from '../../helpers/ytDlp'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
-import { isAppHidden } from '../../helpers/appVisibility.js'
 import { sampleRecommendationPlayback } from '../../../recommendation-learning'
 import { defineComponent } from 'vue'
+import { Capacitor } from '@capacitor/core'
 import { useRoute, useRouter } from 'vue-router'
 import { mapActions } from 'vuex'
 import shaka from 'shaka-player'
@@ -53,7 +52,6 @@ import {
   getCachedOembedTitle,
   getOembedTitle,
   getShortThumbnailUrl,
-  getVideoThumbnailUrl,
   openInternalPath,
   showApiErrorToast,
   showToast,
@@ -99,7 +97,6 @@ import {
   selectYtDlpPreloadVideoIds,
 } from '../../helpers/player/ytDlpPlaybackPreload'
 import { getMusicTrackArtist, MUSIC_MEDIA_TYPE } from '../../helpers/player/musicMediaType'
-import { resolveAndroidBackgroundPlaybackFormat } from '../../helpers/player/androidBackgroundPlayback'
 import { getCompatibleAdaptiveFormats } from '../../helpers/player/compatibleAdaptiveFormats'
 import { selectSponsorBlockFullVideoLabel } from '../../helpers/player/sponsorBlockFullVideo'
 import {
@@ -241,8 +238,6 @@ export default defineComponent({
     return {
       mobilePanel: null,
       startNextVideoInFullscreen: false,
-      finishNativeFullscreenTransition: null,
-      fullscreenTransitionCancelled: false,
       startNextVideoInFullwindow: false,
       startNextVideoInPip: false,
       nextVideoAutoPictureInPictureState: null,
@@ -310,7 +305,6 @@ export default defineComponent({
       /** @type {'dash' | 'audio' | 'legacy'} */
       activeFormat: 'legacy',
       /** @type {'dash' | 'legacy' | null} */
-      androidBackgroundRestoreFormat: null,
       localFilePlayback: false,
       isOffline: getConnectionState() === 'offline',
       thumbnail: '',
@@ -1185,7 +1179,6 @@ export default defineComponent({
     },
     errorMessage(error) {
       if (error) {
-        this.finishNativeFullscreenTransition?.()
         if (process.env.IS_ELECTRON) {
           window.ftElectron?.tabs?.setPlaybackState('failed', this.tabId)
         }
@@ -1234,7 +1227,6 @@ export default defineComponent({
           this.hasBeenPresented = true
         } else {
           this.mobilePanel = null
-          this.finishNativeFullscreenTransition?.()
         }
       }
     },
@@ -1319,7 +1311,6 @@ export default defineComponent({
     connectionEvents.addEventListener('change', this.handleDownloadConnectionChange)
     this.isOffline = getConnectionState() === 'offline'
     document.addEventListener('keydown', this.handleShortsNavigationKeydown, true)
-    document.addEventListener('visibilitychange', this.updateAndroidBackgroundPlaybackFormat)
     window.addEventListener('resize', this.updateShortsViewportHeight)
     window.addEventListener('resize', this.updateTheatreLayoutAvailability)
     window.addEventListener('scroll', this.handleShortsWindowScroll, { passive: true })
@@ -1350,10 +1341,8 @@ export default defineComponent({
     if (isOverlayScrollTopOutOfBounds(rail, contentEnd)) clampOverlayScrollTop(rail, contentEnd)
   },
   beforeUnmount: function () {
-    this.finishNativeFullscreenTransition?.()
     connectionEvents.removeEventListener('change', this.handleDownloadConnectionChange)
     document.removeEventListener('keydown', this.handleShortsNavigationKeydown, true)
-    document.removeEventListener('visibilitychange', this.updateAndroidBackgroundPlaybackFormat)
     window.removeEventListener('resize', this.updateShortsViewportHeight)
     window.removeEventListener('resize', this.updateTheatreLayoutAvailability)
     window.removeEventListener('scroll', this.handleShortsWindowScroll)
@@ -1419,23 +1408,6 @@ export default defineComponent({
         this.videoLoadGeneration++
       }
     },
-    updateAndroidBackgroundPlaybackFormat() {
-      if (!process.env.IS_CAPACITOR || process.env.IS_IOS || this.$refs.player?.isNativePlayback?.()) return
-
-      const change = resolveAndroidBackgroundPlaybackFormat({
-        hidden: isAppHidden(),
-        continuePlayback: this.$store.getters.getContinuePlaybackWhenScreenIsLocked,
-        activeFormat: this.activeFormat,
-        audioFormatAvailable: this.audioFormatAvailable,
-        paused: this.$refs.player?.isPaused() ?? true,
-        restoreFormat: this.androidBackgroundRestoreFormat,
-      })
-      if (change === null) return
-
-      this.androidBackgroundRestoreFormat = change.restoreFormat
-      this.activeFormat = change.activeFormat
-    },
-
     handleUpcomingPlaylistVideosChange(videos) {
       this.upcomingPlaylistVideos = Array.isArray(videos) ? videos : []
     },
@@ -2021,7 +1993,6 @@ export default defineComponent({
     },
 
     async cleanupWatchRuntime() {
-      this.finishNativeFullscreenTransition?.()
       // Closing a tab unmounts Watch while progress persistence is pending.
       const player = this.$refs.player
       this.$store.commit('setCurrentWatchTimestamp', { tabId: this.tabId, value: null })
@@ -2031,7 +2002,7 @@ export default defineComponent({
       this.deactivateWatchRuntime()
 
       if (player) {
-        await this.destroyPlayer(player, false)
+        await this.destroyPlayer(player)
       }
     },
 
@@ -2192,7 +2163,6 @@ export default defineComponent({
       this.manifestSrc = null
       this.manifestMimeType = MANIFEST_TYPE_DASH
       this.sabrData = null
-      this.androidBackgroundRestoreFormat = null
       this.activePlaybackEngine = 'built-in'
       this.activePlaybackEngineVersion = null
       this.onlinePlaybackSource = null
@@ -2259,8 +2229,9 @@ export default defineComponent({
 
       this.cacheOnlinePlaybackSource()
       this.sabrData = null
-      // Android uses the native player, which reads content URIs directly.
-      const url = process.env.IS_CAPACITOR ? file.path : `downloadmedia://file/${downloadId}/${this.videoId}`
+      const url = process.env.IS_CAPACITOR
+        ? Capacitor.convertFileSrc(file.path)
+        : `downloadmedia://file/${downloadId}/${this.videoId}`
       if (download.mode === 'audio') {
         this.manifestSrc = url
         this.manifestMimeType = mimeType
@@ -4322,7 +4293,6 @@ export default defineComponent({
     },
     handleVideoPlay() {
       this.$refs.watchVideoPlaylist?.resetUnavailableSkipChain()
-      if (isAppHidden()) this.updateAndroidBackgroundPlaybackFormat()
     },
     handlePlayerSeeking() {
       this.liveChatSeekRequest = { seconds: this.$refs.player.getCurrentTime() }
@@ -6265,24 +6235,11 @@ export default defineComponent({
       this.currentVideoQuality = this.getDefaultVideoQuality()
     },
 
-    destroyPlayer: async function(player = this.$refs.player, preserveFullscreen = true) {
-      if (process.env.IS_CAPACITOR && preserveFullscreen && player.isFullscreen) {
-        this.finishNativeFullscreenTransition?.()
-        this.fullscreenTransitionCancelled = false
-        const nextVideoId = this.tabRoute.params.id
-        const thumbnail = !nextVideoId || nextVideoId === this.videoId
-          ? this.thumbnail
-          : getVideoThumbnailUrl(nextVideoId, this.backendPreference, this.currentInvidiousInstanceUrl, this.thumbnailPreference)
-        this.finishNativeFullscreenTransition = beginAndroidFullscreenTransition(this.t('Video.Fetching Streams'), thumbnail, () => {
-          this.fullscreenTransitionCancelled = true
-          this.startNextVideoInFullscreen = false
-          this.$refs.player?.cancelPendingFullscreen()
-        })
-      }
+    destroyPlayer: async function(player = this.$refs.player) {
       this.playerTeardownInProgress = true
       try {
         const uiState = await player.destroyPlayer()
-        this.startNextVideoInFullscreen = uiState.startNextVideoInFullscreen && !this.fullscreenTransitionCancelled
+        this.startNextVideoInFullscreen = uiState.startNextVideoInFullscreen
         this.startNextVideoInFullwindow = uiState.startNextVideoInFullwindow
         this.startNextVideoInPip = uiState.startNextVideoInPip
         this.nextVideoAutoPictureInPictureState = uiState.autoPictureInPictureState

@@ -77,7 +77,7 @@ for (const existing of [false, true]) {
 
 test('disconnecting dismisses network panels through their cleanup methods', () => {
   const start = source.indexOf('    handleDownloadConnectionChange({ detail }) {')
-  const end = source.indexOf('\n    updateAndroidBackgroundPlaybackFormat()', start)
+  const end = source.indexOf('\n    handleUpcomingPlaylistVideosChange(', start)
   const handle = vm.runInNewContext(`({ ${source.slice(start, end)} }).handleDownloadConnectionChange`)
   const closed = []
   const watch = {

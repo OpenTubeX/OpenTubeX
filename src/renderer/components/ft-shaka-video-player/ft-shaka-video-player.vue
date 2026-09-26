@@ -52,7 +52,7 @@
     <!-- eslint-disable vue/html-indent -->
     <Teleport
       to="#cross-tab-mini-player-layer"
-      :disabled="!scrollMiniPlayerDragStyle && !scrollMiniPlayerDetached && !(useNativePlayback && scrollMiniPlayerActive)"
+      :disabled="!scrollMiniPlayerDragStyle && !scrollMiniPlayerDetached"
     >
     <!-- Keep controls visibility out of :class: Vue would erase Shaka's
          no-cursor class when the controls time out.
@@ -72,7 +72,7 @@
       :class="{
         autoQualityUnavailable: !autoQualitySupported,
         classicPlayerControls: !useFrostedGlassPlayerUi,
-        fullWindow: fullWindowEnabled,
+        fullWindow: fullWindowEnabled || androidFullscreenHostActive,
         shortsPlayer,
         shortsPaused: shortsPaused && hasLoaded,
         sixteenByNine: (audioPlayerMode || forceAspectRatio || (!shortsPlayer && !videoLayoutReady)) &&
@@ -141,7 +141,7 @@
       <video
         ref="video"
         class="player"
-        :class="{ audioOnly: format === 'audio', musicAudioTrack, nativePlayer: useNativePlayback }"
+        :class="{ audioOnly: format === 'audio', musicAudioTrack }"
         :style="videoZoomStyle"
         preload="auto"
         crossorigin="anonymous"
@@ -151,8 +151,6 @@
         :poster="!audioPlayerMode && showPoster ? thumbnail : null"
         @play="handlePlay"
         @playing="handlePlaying"
-        @firstframe="showPoster = false"
-        @emptied="showPoster = true"
         @waiting="handleWaiting"
         @pause="handlePause"
         @ended="handleEnded"
@@ -213,9 +211,8 @@
           </nav>
         </div>
       </template>
-      <!-- Native playback hides the video element, including its poster. -->
       <div
-        v-if="(showCountdownOverlay || (useNativePlayback && showPoster)) && !audioPlayerMode && thumbnail"
+        v-if="(showCountdownOverlay || showAndroidPoster) && !audioPlayerMode && thumbnail"
         class="countdownPoster"
         aria-hidden="true"
       >
@@ -1399,7 +1396,7 @@
           />
         </button>
         <div
-          v-if="!useNativePlayback && !scrollMiniPlayerStashed"
+          v-if="!scrollMiniPlayerStashed"
           class="scrollMiniVolume"
           :class="{ isExpanded: scrollMiniVolumeExpanded }"
           @mouseenter="handleScrollMiniVolumeMouseEnter"
