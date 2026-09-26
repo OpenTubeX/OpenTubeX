@@ -880,6 +880,7 @@ export function registerContextMenuIpc({
   }
 
   ipcMain.handle(IpcChannels.CONTEXT_MENU_OPEN, async (event, /** @type {ContextMenuOpenPayload} */ rawParameters = {}) => {
+    if (!event.senderFrame || !isTrustedUrl(event.senderFrame.url)) return
     const webContents = event.sender
     const sessionId = ++contextMenuSessionId
     latestContextMenuRequests.set(webContents.id, sessionId)
@@ -926,6 +927,7 @@ export function registerContextMenuIpc({
   })
 
   ipcMain.handle(IpcChannels.CONTEXT_MENU_EXECUTE, async (event, /** @type {ContextMenuExecutePayload} */ payload) => {
+    if (!event.senderFrame || !isTrustedUrl(event.senderFrame.url)) return
     const session = contextMenuSessions.get(event.sender.id)
     if (!session || payload?.sessionId !== session.sessionId) return
 
