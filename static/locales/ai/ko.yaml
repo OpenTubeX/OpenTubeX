@@ -1185,7 +1185,7 @@ Settings:
     Privacy Policy: 이 서버의 개인 정보 처리 방침
     Enhanced Privacy Enabled: 강화된 개인 정보 보호가 활성화되었습니다. 서버에는 암호화된 동기화 데이터만 저장됩니다.
     Enhanced Privacy Unsupported: 경고. 이 서버는 강화된 개인 정보 보호를 지원하지 않습니다. 동기화된 데이터를 서버 운영자가 볼 수 있습니다.
-    Description: 'OpenTubeX 또는 LibreTube 동기화 서버와 구독, 프로필, 재생목록, 시청 기록 및 지원되는 설정을 동기화합니다. 명시적으로 공유하지 않는 한 데스크톱과 모바일 탭은 따로 유지됩니다. LibreTube 서버는 일부 동기화 기능을 지원하지 않을 수 있습니다.'
+    Description: 'OpenTubeX 또는 LibreTube 동기화 서버와 구독, 프로필, 재생목록, 시청 기록 및 지원되는 설정을 동기화합니다. LibreTube 서버는 일부 동기화 기능을 지원하지 않을 수 있습니다.'
     Server URL: 서버 URL
     Checking Server: 동기화 서버 확인 중…
     Server Unavailable: 이 동기화 서버에 연결할 수 없습니다. URL을 확인하고 다시 시도하세요.
@@ -1267,7 +1267,7 @@ Settings:
     Data Loss Warning: 서버 상태에 따라 이전에 동기화된 {collection} 항목 {previous}개 중 {deleted}개가 삭제됩니다. 서버 이전이나 초기화에 실패한 경우일 수 있습니다. 의도한 삭제이며 백업이 있는 경우에만 계속하세요.
     Confirm Data Loss: 삭제하고 계속
     Use Shared Tabs: '기기 간에 하나의 탭 모음 공유'
-    Shared Tabs Warning: '공유 탭은 연결된 기기의 현재 탭 모음을 대체합니다. 데스크톱과 모바일 탭을 따로 유지하려면 이 옵션을 끄세요.'
+    Shared Tabs Warning: '이 기기에 열려 있는 탭이 공유 탭 모음이 됩니다. 다른 기기는 동기화할 때 열려 있는 탭을 이 모음으로 대체하며, 서로 다른 기기의 탭은 합쳐지지 않습니다.'
     Tabs From Other Devices: '다른 기기의 탭'
     Device Tab Session: '{platform} · 탭 {count}개'
     Mobile Device: '모바일'

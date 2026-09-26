@@ -950,7 +950,7 @@ Settings:
     Privacy Policy: A kiszolgáló adatvédelmi irányelvei
     Enhanced Privacy Enabled: A fokozott adatvédelem be van kapcsolva. A kiszolgáló csak titkosított szinkronizálási adatokat tárol.
     Enhanced Privacy Unsupported: Figyelmeztetés — ez a kiszolgáló nem támogatja a fokozott adatvédelmet. A szinkronizált adatokat a kiszolgáló üzemeltetője láthatja.
-    Description: 'Szinkronizáld a feliratkozásokat, profilokat, lejátszási listákat, megtekintési előzményeket és támogatott beállításokat egy OpenTubeX- vagy LibreTube-szinkronizálási kiszolgálóval. Az asztali és mobilos lapok külön maradnak, hacsak kifejezetten meg nem osztod őket. Előfordulhat, hogy a LibreTube-kiszolgálók nem támogatnak minden szinkronizálási funkciót.'
+    Description: 'Szinkronizáld a feliratkozásokat, profilokat, lejátszási listákat, megtekintési előzményeket és támogatott beállításokat egy OpenTubeX- vagy LibreTube-szinkronizálási kiszolgálóval. Előfordulhat, hogy a LibreTube-kiszolgálók nem támogatnak minden szinkronizálási funkciót.'
     Server URL: Kiszolgáló URL-je
     Checking Server: Szinkronizálási kiszolgáló ellenőrzése…
     Server Unavailable: Nem lehet kapcsolódni ehhez a szinkronizálási kiszolgálóhoz. Ellenőrizze az URL-t, majd próbálja újra.
@@ -1032,7 +1032,7 @@ Settings:
     Data Loss Warning: A kiszolgáló állapota {deleted} elemet törölne a korábban szinkronizált {previous} {collection} elemből. Ez sikertelen kiszolgáló-migrációra vagy alaphelyzetbe állításra utalhat. Csak akkor folytassa, ha a törlés szándékos, és rendelkezik biztonsági másolattal.
     Confirm Data Loss: Törlés és folytatás
     Use Shared Tabs: 'Egy közös lapkészlet használata minden eszközön'
-    Shared Tabs Warning: 'A megosztott lapok lecserélik a csatlakoztatott eszközök jelenlegi lapkészletét. Hagyd kikapcsolva, ha külön szeretnéd tartani az asztali és mobilos lapokat.'
+    Shared Tabs Warning: 'Az ezen az eszközön nyitott lapok alkotják majd a megosztott készletet. A többi eszköz szinkronizáláskor erre a készletre cseréli a nyitott lapjait; a különböző eszközök lapjai nem egyesülnek.'
     Tabs From Other Devices: 'Más eszközök lapjai'
     Device Tab Session: '{platform} · {count} lap'
     Mobile Device: 'Mobil'

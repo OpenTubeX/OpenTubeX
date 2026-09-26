@@ -950,7 +950,7 @@ Settings:
     Privacy Policy: Zerbitzari honen pribatutasun-politika
     Enhanced Privacy Enabled: Pribatutasun hobetua gaituta dago. Zerbitzariak sinkronizatutako datu zifratuak soilik gordetzen ditu.
     Enhanced Privacy Unsupported: Abisua. Zerbitzari honek ez du pribatutasun hobetua onartzen. Sinkronizatutako datuak zerbitzariaren operadoreak ikus ditzake.
-    Description: 'Sinkronizatu harpidetzak, profilak, erreprodukzio-zerrendak, ikustaldien historia eta onartutako ezarpenak OpenTubeX edo LibreTube sinkronizazio-zerbitzari batekin. Mahaigaineko eta mugikorreko fitxak bereizita mantenduko dira berariaz partekatzen ez badituzu. Baliteke LibreTube zerbitzariek sinkronizazio-eginbide guztiak ez onartzea.'
+    Description: 'Sinkronizatu harpidetzak, profilak, erreprodukzio-zerrendak, ikustaldien historia eta onartutako ezarpenak OpenTubeX edo LibreTube sinkronizazio-zerbitzari batekin. Baliteke LibreTube zerbitzariek sinkronizazio-eginbide guztiak ez onartzea.'
     Server URL: Zerbitzariaren URLa
     Checking Server: Sinkronizazio-zerbitzaria egiaztatzen…
     Server Unavailable: Ezin da sinkronizazio-zerbitzari honekin konektatu. Egiaztatu URLa eta saiatu berriro.
@@ -1032,7 +1032,7 @@ Settings:
     Data Loss Warning: Zerbitzariaren egoerak aurretik sinkronizatutako {previous} {collection} elementuetatik {deleted} ezabatuko lituzke. Baliteke zerbitzariaren migrazio edo berrezarpen batek huts egin izana. Jarraitu ezabaketa nahita egiten ari bazara eta babeskopia bat baduzu soilik.
     Confirm Data Loss: Ezabatu eta jarraitu
     Use Shared Tabs: 'Erabili partekatutako fitxa multzo bakarra gailu guztietan'
-    Shared Tabs Warning: 'Partekatutako fitxek uneko fitxa multzoa ordezten dute konektatutako gailuetan. Mantendu hau desaktibatuta mahaigaineko eta mugikorreko fitxak bereizita gordetzeko.'
+    Shared Tabs Warning: 'Gailu honetan irekita dauden fitxak multzo partekatua bihurtuko dira. Beste gailuek sinkronizatzean beren fitxa irekiak multzo horrekin ordeztuko dituzte; gailu desberdinetako fitxak ez dira bateratuko.'
     Tabs From Other Devices: 'Beste gailuetako fitxak'
     Device Tab Session: '{platform} · {count} fitxa'
     Mobile Device: 'Mugikorra'

@@ -523,7 +523,7 @@ Settings:
     Pairing Approved: Sparowanie urządzeń zostało zatwierdzone
     Sync failed: "Synchronizacja nie powiodła się: {error}"
     Use Shared Tabs: 'Używaj jednego wspólnego zestawu kart na wszystkich urządzeniach'
-    Shared Tabs Warning: 'Udostępnione karty zastępują bieżący zestaw na połączonych urządzeniach. Pozostaw tę opcję wyłączoną, aby zachować oddzielne karty na komputerze i urządzeniu mobilnym.'
+    Shared Tabs Warning: 'Karty otwarte na tym urządzeniu staną się wspólnym zestawem. Pozostałe urządzenia podczas synchronizacji zastąpią nim swoje otwarte karty; karty z różnych urządzeń nie zostaną połączone.'
     Tabs From Other Devices: 'Karty z innych urządzeń'
     Device Tab Session: '{platform} · karty: {count}'
     Mobile Device: 'Urządzenie mobilne'

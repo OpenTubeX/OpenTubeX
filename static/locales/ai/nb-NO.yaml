@@ -952,7 +952,7 @@ Settings:
     Privacy Policy: Personvernerklæring for denne serveren
     Enhanced Privacy Enabled: Utvidet personvern er slått på. Serveren lagrer bare krypterte synkroniseringsdata.
     Enhanced Privacy Unsupported: Advarsel. Denne serveren støtter ikke utvidet personvern. De synkroniserte dataene er synlige for den som driver serveren.
-    Description: 'Synkroniser abonnementer, profiler, spillelister, seerhistorikk og støttede innstillinger med en OpenTubeX- eller LibreTube-synkroniseringsserver. Faner på datamaskin og mobil holdes adskilt med mindre du uttrykkelig deler dem. LibreTube-servere støtter kanskje ikke alle synkroniseringsfunksjoner.'
+    Description: 'Synkroniser abonnementer, profiler, spillelister, seerhistorikk og støttede innstillinger med en OpenTubeX- eller LibreTube-synkroniseringsserver. LibreTube-servere støtter kanskje ikke alle synkroniseringsfunksjoner.'
     Server URL: Server-URL
     Checking Server: Kontrollerer synkroniseringsserveren…
     Server Unavailable: Kan ikke koble til denne synkroniseringsserveren. Kontroller URL-en og prøv på nytt.
@@ -1034,7 +1034,7 @@ Settings:
     Data Loss Warning: Tilstanden på serveren vil slette {deleted} av {previous} tidligere synkroniserte elementer i {collection}. Dette kan tyde på en mislykket servermigrering eller tilbakestilling. Fortsett bare hvis slettingen er tilsiktet og du har en sikkerhetskopi.
     Confirm Data Loss: Slett og fortsett
     Use Shared Tabs: 'Bruk ett delt fanesett på tvers av enheter'
-    Shared Tabs Warning: 'Delte faner erstatter det gjeldende fanesettet på tilkoblede enheter. La dette være avslått for å beholde separate faner på datamaskin og mobil.'
+    Shared Tabs Warning: 'De åpne fanene på denne enheten blir det delte fanesettet. Andre enheter erstatter sine åpne faner med dette settet når de synkroniserer; faner fra ulike enheter slås ikke sammen.'
     Tabs From Other Devices: 'Faner fra andre enheter'
     Device Tab Session: '{platform} · {count} faner'
     Mobile Device: 'Mobil'

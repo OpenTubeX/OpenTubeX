@@ -950,7 +950,7 @@ Settings:
     Privacy Policy: Informativa sulla privacy di questo server
     Enhanced Privacy Enabled: La privacy avanzata è abilitata. Il server memorizza solo dati di sincronizzazione cifrati.
     Enhanced Privacy Unsupported: Avviso — questo server non supporta la privacy avanzata. I dati sincronizzati sono visibili al suo gestore.
-    Description: 'Sincronizza iscrizioni, profili, playlist, cronologia di visualizzazione e impostazioni supportate con un server di sincronizzazione OpenTubeX o LibreTube. Le schede su computer e dispositivi mobili rimangono separate a meno che tu non scelga esplicitamente di condividerle. I server LibreTube potrebbero non supportare tutte le funzioni di sincronizzazione.'
+    Description: 'Sincronizza iscrizioni, profili, playlist, cronologia di visualizzazione e impostazioni supportate con un server di sincronizzazione OpenTubeX o LibreTube. I server LibreTube potrebbero non supportare tutte le funzioni di sincronizzazione.'
     Server URL: URL del server
     Checking Server: Controllo del server di sincronizzazione…
     Server Unavailable: Impossibile connettersi a questo server di sincronizzazione. Controlla l'URL e riprova.
@@ -1032,7 +1032,7 @@ Settings:
     Data Loss Warning: Lo stato del server eliminerebbe {deleted} dei {previous} elementi di {collection} sincronizzati in precedenza. Potrebbe indicare una migrazione o un ripristino del server non riuscito. Continua solo se l'eliminazione è intenzionale e disponi di un backup.
     Confirm Data Loss: Elimina e continua
     Use Shared Tabs: 'Usa un unico gruppo di schede condiviso tra i dispositivi'
-    Shared Tabs Warning: 'Le schede condivise sostituiscono il gruppo attuale sui dispositivi connessi. Lascia disattivata questa opzione per mantenere separate le schede su computer e dispositivi mobili.'
+    Shared Tabs Warning: 'Le schede aperte su questo dispositivo diventano il gruppo condiviso. Quando si sincronizzano, gli altri dispositivi sostituiscono le proprie schede aperte con questo gruppo; le schede di dispositivi diversi non vengono unite.'
     Tabs From Other Devices: 'Schede da altri dispositivi'
     Device Tab Session: '{platform} · {count} schede'
     Mobile Device: 'Dispositivo mobile'

@@ -1123,7 +1123,7 @@ Settings:
     Privacy Policy: Política de privacidad de este servidor
     Enhanced Privacy Enabled: La privacidad mejorada está activada. El servidor solo guarda datos de sincronización cifrados.
     Enhanced Privacy Unsupported: 'Advertencia: este servidor no admite la privacidad mejorada. Su operador puede ver los datos sincronizados.'
-    Description: 'Sincroniza suscripciones, perfiles, listas de reproducción, historial de reproducciones y ajustes compatibles con un servidor de sincronización de OpenTubeX o LibreTube. Las pestañas de escritorio y del celular permanecen separadas a menos que decidas compartirlas. Es posible que los servidores de LibreTube no admitan todas las funciones de sincronización.'
+    Description: 'Sincroniza suscripciones, perfiles, listas de reproducción, historial de reproducciones y ajustes compatibles con un servidor de sincronización de OpenTubeX o LibreTube. Es posible que los servidores de LibreTube no admitan todas las funciones de sincronización.'
     Server URL: URL del servidor
     Checking Server: Comprobando el servidor de sincronización…
     Server Unavailable: No se pudo conectar a este servidor de sincronización. Comprueba la URL y vuelve a intentarlo.
@@ -1205,7 +1205,7 @@ Settings:
     Data Loss Warning: El estado del servidor eliminaría {deleted} de {previous} elementos de {collection} sincronizados anteriormente. Esto puede indicar que una migración o un restablecimiento del servidor ha fallado. Continúa solo si quieres eliminar esos datos y tienes una copia de seguridad.
     Confirm Data Loss: Eliminar y continuar
     Use Shared Tabs: 'Usar un solo conjunto de pestañas compartido entre dispositivos'
-    Shared Tabs Warning: 'Las pestañas compartidas reemplazan el conjunto actual en los dispositivos conectados. Mantén esto desactivado para conservar pestañas separadas en el escritorio y el celular.'
+    Shared Tabs Warning: 'Las pestañas abiertas en este dispositivo se convierten en el conjunto compartido. Al sincronizarse, los demás dispositivos reemplazan sus pestañas abiertas con este conjunto; las pestañas de distintos dispositivos no se combinan.'
     Tabs From Other Devices: 'Pestañas de otros dispositivos'
     Device Tab Session: '{platform} · {count} pestañas'
     Mobile Device: 'Celular'

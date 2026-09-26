@@ -951,7 +951,7 @@ Settings:
     Privacy Policy: 此伺服器的隱私權政策
     Enhanced Privacy Enabled: 已啟用加強隱私保護。伺服器只會儲存加密的同步資料。
     Enhanced Privacy Unsupported: 警告 — 此伺服器不支援加強隱私保護。伺服器營運者可查看同步的資料。
-    Description: '透過 OpenTubeX 或 LibreTube 同步伺服器同步訂閱、個人檔案、播放清單、觀看記錄及支援的設定。除非您明確選擇共用，否則桌面版與行動版的分頁會保持獨立。LibreTube 伺服器可能不支援所有同步功能。'
+    Description: '透過 OpenTubeX 或 LibreTube 同步伺服器同步訂閱、個人檔案、播放清單、觀看記錄及支援的設定。LibreTube 伺服器可能不支援所有同步功能。'
     Server URL: 伺服器 URL
     Checking Server: 正在檢查同步伺服器…
     Server Unavailable: 無法連線至此同步伺服器。請檢查 URL 後再試一次。
@@ -1032,7 +1032,7 @@ Settings:
     Data Loss Warning: 伺服器目前的狀態會刪除先前同步的 {previous} 個 {collection} 項目中的 {deleted} 個。這可能表示伺服器移轉或重設失敗。只有在您確定要刪除且已有備份時才可繼續。
     Confirm Data Loss: 刪除並繼續
     Use Shared Tabs: '在各裝置上使用同一組共用分頁'
-    Shared Tabs Warning: '共用分頁會取代已連線裝置上的目前分頁組。關閉此選項可讓桌面版與行動版的分頁保持獨立。'
+    Shared Tabs Warning: '此裝置上開啟的分頁會成為共用分頁組。其他裝置同步時會以這組分頁取代其目前開啟的分頁；不同裝置的分頁不會合併。'
     Tabs From Other Devices: '其他裝置的分頁'
     Device Tab Session: '{platform} · {count} 個分頁'
     Mobile Device: '行動裝置'

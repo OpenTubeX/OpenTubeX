@@ -189,7 +189,7 @@
           <FtToggleSwitch
             v-if="sessionsSupported && syncSessionsEnabled"
             :label="t('Settings.Sync Settings.Use Shared Tabs')"
-            :default-value="sharedTabsEnabled"
+            :default-value="sharedTabsEnabled || showSharedTabsPrompt"
             :disabled="busy"
             compact
             @change="setSharedTabs"
@@ -202,12 +202,6 @@
             @change="store.dispatch('updateSyncServerSyncSettings', $event)"
           />
         </FtFlexBox>
-        <p
-          v-if="sessionsSupported && syncSessionsEnabled && sharedTabsEnabled"
-          class="compatibilityWarning"
-        >
-          {{ t('Settings.Sync Settings.Shared Tabs Warning') }}
-        </p>
         <p
           v-if="lastSyncLabel"
           class="lastSync"
@@ -303,6 +297,27 @@
           @click="authenticate('register')"
         />
       </FtFlexBox>
+      <FtPrompt
+        v-if="showSharedTabsPrompt"
+        :label="t('Settings.Sync Settings.Use Shared Tabs')"
+        theme="readable-width"
+        @click="showSharedTabsPrompt = false"
+      >
+        <p>{{ t('Settings.Sync Settings.Shared Tabs Warning') }}</p>
+        <FtFlexBox class="actions">
+          <FtButton
+            :label="t('Cancel')"
+            :icon="['fas', 'xmark']"
+            @click="showSharedTabsPrompt = false"
+          />
+          <FtButton
+            :label="t('Settings.Sync Settings.Use Shared Tabs')"
+            theme="destructive"
+            :icon="['fas', 'layer-group']"
+            @click="confirmSharedTabs"
+          />
+        </FtFlexBox>
+      </FtPrompt>
       <FtPrompt
         v-if="dataLossWarning"
         :label="t('Settings.Sync Settings.Data Loss Confirmation')"
@@ -505,6 +520,8 @@ const serverCheckError = ref('')
 const localError = ref('')
 const authenticating = ref(false)
 const showDeleteAccountPrompt = ref(false)
+const showSharedTabsPrompt = ref(false)
+let sharedTabsUpdateGeneration = 0
 const deleteAccountPassword = ref('')
 const deleteAccountError = ref('')
 const accountActionBusy = ref(false)
@@ -765,7 +782,22 @@ function setAutoSync(enabled) {
 }
 
 async function setSharedTabs(enabled) {
-  await store.dispatch('updateSyncServerSharedTabs', enabled)
+  if (enabled) {
+    showSharedTabsPrompt.value = true
+    return
+  }
+  const generation = ++sharedTabsUpdateGeneration
+  await store.dispatch('updateSyncServerSharedTabs', false)
+  if (generation !== sharedTabsUpdateGeneration) return
+  store.dispatch('scheduleSyncServer', 'sessions')
+}
+
+async function confirmSharedTabs() {
+  if (busy.value) return
+  const generation = ++sharedTabsUpdateGeneration
+  await store.dispatch('updateSyncServerSharedTabs', true)
+  if (generation !== sharedTabsUpdateGeneration) return
+  showSharedTabsPrompt.value = false
   store.dispatch('scheduleSyncServer', 'sessions')
 }
 

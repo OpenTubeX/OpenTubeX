@@ -964,7 +964,7 @@ Settings:
     Privacy Policy: Politica de confidențialitate a acestui server
     Enhanced Privacy Enabled: Confidențialitatea sporită este activată. Serverul stochează numai date de sincronizare criptate.
     Enhanced Privacy Unsupported: Avertisment — acest server nu acceptă confidențialitatea sporită. Datele sincronizate sunt vizibile operatorului său.
-    Description: 'Sincronizați abonamentele, profilurile, listele de redare, istoricul vizionărilor și setările acceptate cu un server de sincronizare OpenTubeX sau LibreTube. Filele de pe desktop și mobil rămân separate dacă nu le partajați în mod explicit. Este posibil ca serverele LibreTube să nu accepte toate funcțiile de sincronizare.'
+    Description: 'Sincronizați abonamentele, profilurile, listele de redare, istoricul vizionărilor și setările acceptate cu un server de sincronizare OpenTubeX sau LibreTube. Este posibil ca serverele LibreTube să nu accepte toate funcțiile de sincronizare.'
     Server URL: Adresa URL a serverului
     Checking Server: Se verifică serverul de sincronizare…
     Server Unavailable: Conectarea la acest server de sincronizare nu a reușit. Verificați adresa URL și încercați din nou.
@@ -1045,7 +1045,7 @@ Settings:
     Data Loss Warning: Starea serverului ar șterge {deleted} din cele {previous} elemente {collection} sincronizate anterior. Acest lucru poate indica o migrare sau resetare nereușită a serverului. Continuați numai dacă ștergerea este intenționată și aveți o copie de rezervă.
     Confirm Data Loss: Șterge și continuă
     Use Shared Tabs: 'Folosește un singur set de file partajat între dispozitive'
-    Shared Tabs Warning: 'Filele partajate înlocuiesc setul curent pe dispozitivele conectate. Păstrați opțiunea dezactivată pentru a menține separate filele de pe desktop și mobil.'
+    Shared Tabs Warning: 'Filele deschise pe acest dispozitiv devin setul partajat. Celelalte dispozitive își înlocuiesc filele deschise cu acest set când se sincronizează; filele de pe dispozitive diferite nu sunt combinate.'
     Tabs From Other Devices: 'File de pe alte dispozitive'
     Device Tab Session: '{platform} · {count} file'
     Mobile Device: 'Mobil'

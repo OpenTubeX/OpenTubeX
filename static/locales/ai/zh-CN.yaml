@@ -951,7 +951,7 @@ Settings:
     Privacy Policy: 此服务器的隐私政策
     Enhanced Privacy Enabled: 已启用增强隐私保护。服务器仅存储加密的同步数据。
     Enhanced Privacy Unsupported: 警告：此服务器不支持增强隐私保护，服务器运营者可以查看同步的数据。
-    Description: '通过 OpenTubeX 或 LibreTube 同步服务器同步订阅、个人资料、播放列表、观看历史记录及支持的设置。除非您明确选择共享，否则桌面端和移动端的标签页会保持独立。LibreTube 服务器可能不支持所有同步功能。'
+    Description: '通过 OpenTubeX 或 LibreTube 同步服务器同步订阅、个人资料、播放列表、观看历史记录及支持的设置。LibreTube 服务器可能不支持所有同步功能。'
     Server URL: 服务器 URL
     Checking Server: 正在检查同步服务器…
     Server Unavailable: 无法连接到此同步服务器。请检查 URL 后重试。
@@ -1032,7 +1032,7 @@ Settings:
     Data Loss Warning: 服务器状态会删除之前同步的 {previous} 个 {collection} 项目中的 {deleted} 个。这可能表示服务器迁移失败或服务器已重置。仅当您有备份且确实要删除这些项目时才继续。
     Confirm Data Loss: 删除并继续
     Use Shared Tabs: '在各设备上使用同一组共享标签页'
-    Shared Tabs Warning: '共享标签页会替换已连接设备上的当前标签页组。关闭此选项可让桌面端和移动端的标签页保持独立。'
+    Shared Tabs Warning: '此设备上打开的标签页将成为共享标签页组。其他设备同步时会用这组标签页替换其当前打开的标签页；不同设备的标签页不会合并。'
     Tabs From Other Devices: '其他设备的标签页'
     Device Tab Session: '{platform} · {count} 个标签页'
     Mobile Device: '移动设备'

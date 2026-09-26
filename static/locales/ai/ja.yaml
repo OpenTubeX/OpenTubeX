@@ -950,7 +950,7 @@ Settings:
     Privacy Policy: このサーバーのプライバシーポリシー
     Enhanced Privacy Enabled: 強化プライバシーが有効です。サーバーには暗号化された同期データのみ保存されます。
     Enhanced Privacy Unsupported: '警告: このサーバーは強化プライバシーに対応していません。同期データはサーバーの運営者が閲覧できます。'
-    Description: 'OpenTubeX または LibreTube の同期サーバーと、登録チャンネル、プロフィール、再生リスト、視聴履歴、対応する設定を同期します。明示的に共有しない限り、デスクトップとモバイルのタブは別々に保持されます。LibreTube サーバーでは一部の同期機能を利用できない場合があります。'
+    Description: 'OpenTubeX または LibreTube の同期サーバーと、登録チャンネル、プロフィール、再生リスト、視聴履歴、対応する設定を同期します。LibreTube サーバーでは一部の同期機能を利用できない場合があります。'
     Server URL: サーバーURL
     Checking Server: 同期サーバーを確認中…
     Server Unavailable: この同期サーバーに接続できません。URLを確認して再試行してください。
@@ -1032,7 +1032,7 @@ Settings:
     Data Loss Warning: サーバーの状態に合わせると、以前に同期した{collection}の{previous}件中{deleted}件が削除されます。サーバーの移行失敗やリセットが原因の可能性があります。意図した削除であり、バックアップがある場合のみ続行してください。
     Confirm Data Loss: 削除して続行
     Use Shared Tabs: 'すべてのデバイスで1つのタブセットを共有する'
-    Shared Tabs Warning: '共有タブを有効にすると、接続済みデバイスの現在のタブセットが置き換えられます。デスクトップとモバイルのタブを分けておくには無効にしてください。'
+    Shared Tabs Warning: 'このデバイスで開いているタブが共有タブセットになります。他のデバイスは同期時に開いているタブをこのセットで置き換えます。異なるデバイスのタブは統合されません。'
     Tabs From Other Devices: '他のデバイスのタブ'
     Device Tab Session: '{platform} · {count} 個のタブ'
     Mobile Device: 'モバイル'

@@ -950,7 +950,7 @@ Settings:
     Privacy Policy: Politique de confidentialité de ce serveur
     Enhanced Privacy Enabled: La confidentialité renforcée est activée. Le serveur ne stocke que des données de synchronisation chiffrées.
     Enhanced Privacy Unsupported: Avertissement — ce serveur ne prend pas en charge la confidentialité renforcée. Les données synchronisées sont visibles par son opérateur.
-    Description: 'Synchronisez les abonnements, profils, playlists, historique de visionnage et paramètres compatibles avec un serveur de synchronisation OpenTubeX ou LibreTube. Les onglets sur ordinateur et mobile restent séparés sauf si vous choisissez explicitement de les partager. Les serveurs LibreTube peuvent ne pas prendre en charge toutes les fonctions de synchronisation.'
+    Description: 'Synchronisez les abonnements, profils, playlists, historique de visionnage et paramètres compatibles avec un serveur de synchronisation OpenTubeX ou LibreTube. Les serveurs LibreTube peuvent ne pas prendre en charge toutes les fonctions de synchronisation.'
     Server URL: URL du serveur
     Checking Server: Vérification du serveur de synchronisation…
     Server Unavailable: Impossible de se connecter à ce serveur de synchronisation. Vérifiez l’URL et réessayez.
@@ -1032,7 +1032,7 @@ Settings:
     Data Loss Warning: L’état du serveur supprimerait {deleted} éléments sur {previous} de la collection {collection} précédemment synchronisés. Cela peut indiquer l’échec d’une migration ou la réinitialisation du serveur. Ne continuez que si cette suppression est volontaire et si vous disposez d’une sauvegarde.
     Confirm Data Loss: Supprimer et continuer
     Use Shared Tabs: 'Utiliser un seul ensemble d’onglets partagé entre les appareils'
-    Shared Tabs Warning: 'Les onglets partagés remplacent l’ensemble actuel sur les appareils connectés. Laissez cette option désactivée pour conserver des onglets distincts sur ordinateur et mobile.'
+    Shared Tabs Warning: 'Les onglets ouverts sur cet appareil deviennent l’ensemble partagé. Lors de la synchronisation, les autres appareils remplacent leurs onglets ouverts par cet ensemble ; les onglets des différents appareils ne sont pas fusionnés.'
     Tabs From Other Devices: 'Onglets d’autres appareils'
     Device Tab Session: '{platform} · {count} onglets'
     Mobile Device: 'Mobile'

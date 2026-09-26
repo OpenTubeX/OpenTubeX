@@ -950,7 +950,7 @@ Settings:
     Privacy Policy: Selle serveri privaatsuspoliitika
     Enhanced Privacy Enabled: Täiustatud privaatsus on lubatud. Server salvestab ainult krüptitud sünkroonimisandmeid.
     Enhanced Privacy Unsupported: Hoiatus — see server ei toeta täiustatud privaatsust. Sünkroonitud andmed on serveri haldajale nähtavad.
-    Description: 'Sünkrooni tellimused, profiilid, esitusloendid, vaatamisajalugu ja toetatud seaded OpenTubeXi või LibreTube’i sünkroonimisserveriga. Arvuti ja mobiilseadme vahelehed jäävad eraldi, kui sa neid otseselt ei jaga. LibreTube’i serverid ei pruugi kõiki sünkroonimisfunktsioone toetada.'
+    Description: 'Sünkrooni tellimused, profiilid, esitusloendid, vaatamisajalugu ja toetatud seaded OpenTubeXi või LibreTube’i sünkroonimisserveriga. LibreTube’i serverid ei pruugi kõiki sünkroonimisfunktsioone toetada.'
     Server URL: Serveri URL
     Checking Server: Sünkroonimisserveri kontrollimine…
     Server Unavailable: Selle sünkroonimisserveriga ei saa ühendust luua. Kontrollige URL-i ja proovige uuesti.
@@ -1032,7 +1032,7 @@ Settings:
     Data Loss Warning: Serveri olek kustutaks varem sünkroonitud kogu {collection} üksustest {deleted}/{previous}. See võib viidata serveri nurjunud migreerimisele või lähtestamisele. Jätkake ainult siis, kui kustutamine on tahtlik ja teil on varukoopia.
     Confirm Data Loss: Kustuta ja jätka
     Use Shared Tabs: 'Kasuta seadmetes üht jagatud vahelehtede komplekti'
-    Shared Tabs Warning: 'Jagatud vahelehed asendavad ühendatud seadmete praeguse vahelehtede komplekti. Hoia see väljas, et arvuti ja mobiilseadme vahelehed jääksid eraldi.'
+    Shared Tabs Warning: 'Selles seadmes avatud vahekaardid saavad ühiseks vahekaartide kogumiks. Teised seadmed asendavad sünkroonimisel oma avatud vahekaardid selle kogumikuga; eri seadmete vahekaarte ei ühendata.'
     Tabs From Other Devices: 'Teiste seadmete vahelehed'
     Device Tab Session: '{platform} · {count} vahelehte'
     Mobile Device: 'Mobiilseade'

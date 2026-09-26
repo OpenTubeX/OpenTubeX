@@ -950,7 +950,7 @@ Settings:
     Privacy Policy: Kebijakan privasi server ini
     Enhanced Privacy Enabled: Privasi tingkat lanjut aktif. Server hanya menyimpan data sinkronisasi terenkripsi.
     Enhanced Privacy Unsupported: 'Peringatan: server ini tidak mendukung privasi tingkat lanjut. Data yang disinkronkan dapat dilihat oleh operatornya.'
-    Description: 'Sinkronkan langganan, profil, daftar putar, histori tontonan, dan pengaturan yang didukung dengan server sinkronisasi OpenTubeX atau LibreTube. Tab desktop dan seluler tetap terpisah kecuali Anda membagikannya secara khusus. Server LibreTube mungkin tidak mendukung semua fitur sinkronisasi.'
+    Description: 'Sinkronkan langganan, profil, daftar putar, histori tontonan, dan pengaturan yang didukung dengan server sinkronisasi OpenTubeX atau LibreTube. Server LibreTube mungkin tidak mendukung semua fitur sinkronisasi.'
     Server URL: URL Server
     Checking Server: Memeriksa server sinkronisasi…
     Server Unavailable: Tidak dapat terhubung ke server sinkronisasi ini. Periksa URL lalu coba lagi.
@@ -1032,7 +1032,7 @@ Settings:
     Data Loss Warning: Status server akan menghapus {deleted} dari {previous} item {collection} yang sebelumnya disinkronkan. Hal ini dapat menandakan migrasi server gagal atau server diatur ulang. Lanjutkan hanya jika penghapusan ini disengaja dan Anda memiliki cadangan.
     Confirm Data Loss: Hapus dan lanjutkan
     Use Shared Tabs: 'Gunakan satu kumpulan tab bersama di semua perangkat'
-    Shared Tabs Warning: 'Tab bersama menggantikan kumpulan tab saat ini pada perangkat yang terhubung. Biarkan ini nonaktif untuk mempertahankan tab desktop dan seluler yang terpisah.'
+    Shared Tabs Warning: 'Tab yang terbuka di perangkat ini menjadi kumpulan bersama. Saat perangkat lain disinkronkan, tab mereka yang terbuka diganti dengan kumpulan ini; tab dari perangkat berbeda tidak digabungkan.'
     Tabs From Other Devices: 'Tab dari perangkat lain'
     Device Tab Session: '{platform} · {count} tab'
     Mobile Device: 'Seluler'
