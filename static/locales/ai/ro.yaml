@@ -892,7 +892,6 @@ Settings:
     Backup description: "Salvați profilurile, listele de redare, istoricul, statisticile și setările transferabile într-un singur fișier ZIP. Importul le îmbină cu datele deja existente pe acest dispozitiv."
     Select backup data: "Selectați datele de importat"
     Profiles and subscriptions: "Profiluri și abonamente"
-    Watch statistics: "Statistici"
     Backup exported: "Copie de rezervă exportată cu succes"
     Backup imported: "Copie de rezervă importată cu succes"
     Import YouTube Takeout ZIP: "Importă ZIP YouTube Takeout"

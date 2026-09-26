@@ -278,7 +278,7 @@ import {
   isLibreTubeWatchHistoryBackup,
 } from '../../helpers/libretube'
 import { parseLineDelimitedJson } from '../../helpers/line-delimited-json'
-import { BACKUP_SECTIONS, createUnifiedBackup, mergeBackupPlaylist, mergeBackupProfile, mergeBackupWatchStatsAdjustment, readUnifiedBackup } from '../../helpers/unifiedBackup'
+import { BACKUP_SECTIONS, createUnifiedBackup, mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile, readUnifiedBackup } from '../../helpers/unifiedBackup'
 import { compactAllDatastores, DBHistoryHandlers, DBPlaylistHandlers, DBProfileHandlers, DBSearchHistoryHandlers, DBWatchStatsHandlers } from '../../../datastores/handlers/index'
 import { forEachSelectedTakeoutZipEntry, isSupportedTakeoutEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv } from '../../helpers/youtube-takeout-zip'
 import {
@@ -302,7 +302,7 @@ const backupLabels = computed(() => [
   t('Playlists'),
   t('History.History'),
   t('Settings.Data Settings.Search history'),
-  t('Settings.Data Settings.Watch statistics'),
+  t('Home Page.Watch statistics'),
 ])
 
 function closeBackupImport() {
@@ -370,30 +370,22 @@ async function importUnifiedBackup() {
       const currentPlaylists = new Map((await DBPlaylistHandlers.find()).map(playlist => [playlist._id, playlist]))
       for (const playlist of data.playlists) {
         const merged = mergeBackupPlaylist(currentPlaylists.get(playlist._id), playlist)
-        await DBPlaylistHandlers.upsert(merged)
-        store.commit('upsertPlaylistToList', merged)
+        if (await store.dispatch('updatePlaylist', merged) !== true) throw new Error('Could not restore playlist')
       }
     }
     if (selected.has('history')) {
-      const records = new Map([
-        ...historyCacheSorted.value.map(record => [record.videoId, record]),
-        ...data.history.map(record => [record.videoId, record]),
-      ])
+      const records = new Map((await DBHistoryHandlers.find()).map(record => [record.videoId, record]))
+      for (const imported of data.history) {
+        records.set(imported.videoId, mergeBackupHistoryRecord(records.get(imported.videoId), imported))
+      }
       if (await store.dispatch('overwriteHistory', records) !== true) throw new Error('Could not restore history')
     }
     if (selected.has('searchHistory')) {
-      const entries = mergeSearchHistoryEntries(searchHistoryEntries.value, data.searchHistory)
+      const entries = mergeSearchHistoryEntries(await DBSearchHistoryHandlers.find(), data.searchHistory)
       if (await store.dispatch('overwriteSearchHistory', entries) !== true) throw new Error('Could not restore search history')
     }
     if (selected.has('watchStats')) {
-      const [currentStats, currentAdjustment] = await Promise.all([
-        DBWatchStatsHandlers.find(), DBWatchStatsHandlers.getHistoricalAdjustment(),
-      ])
-      const records = [...new Map([...currentStats, ...data.watchStats.records].map(record => [record.date, record])).values()]
-      const adjustment = mergeBackupWatchStatsAdjustment(
-        currentStats, currentAdjustment, data.watchStats.records, data.watchStats.adjustment
-      )
-      await DBWatchStatsHandlers.overwrite({ records, adjustment })
+      await DBWatchStatsHandlers.mergeBackup(data.watchStats)
       await store.dispatch('grabWatchStats')
     }
     if (selected.has('settings')) await applyImportedSettings(data.settings)

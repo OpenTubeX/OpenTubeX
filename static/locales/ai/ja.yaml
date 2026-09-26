@@ -886,7 +886,6 @@ Settings:
     Backup description: "プロフィール、プレイリスト、履歴、統計、引き継げる設定を1つのZIPファイルに保存します。インポートすると、この端末の既存データと統合されます。"
     Select backup data: "インポートするデータを選択"
     Profiles and subscriptions: "プロフィールとサブスクリプション"
-    Watch statistics: "統計"
     Backup exported: "バックアップが正常にエクスポートされました"
     Backup imported: "バックアップが正常にインポートされました"
     Import YouTube Takeout ZIP: "YouTube Takeout の ZIP をインポート"

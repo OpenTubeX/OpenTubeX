@@ -901,7 +901,6 @@ Settings:
     Backup description: "Tallenna profiilit, soittolistat, historia, tilastot ja siirrettävät asetukset yhteen ZIP-TIEDOSTOON. Tuonti yhdistää ne tällä laitteella jo oleviin tietoihin."
     Select backup data: "Valitse tuotavat tiedot"
     Profiles and subscriptions: "Profiilit ja tilaukset"
-    Watch statistics: "Tilastot"
     Backup exported: "Varmuuskopion vienti onnistui"
     Backup imported: "Varmuuskopion tuonti onnistui"
     Import YouTube Takeout ZIP: "Tuo YouTube Takeout ZIP"

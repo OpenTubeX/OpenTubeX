@@ -112,8 +112,8 @@ class WatchStats {
     return dbWatchStats(DBActions.GENERAL.FIND)
   }
 
-  static overwrite(backup) {
-    return dbWatchStats(DBActions.GENERAL.OVERWRITE, backup)
+  static mergeBackup(backup) {
+    return dbWatchStats(DBActions.WATCH_STATS.MERGE_BACKUP, backup)
   }
 
   static addWatchTime(date, seconds) {

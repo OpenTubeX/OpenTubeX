@@ -1142,14 +1142,13 @@ Settings:
     Add: Dodaj
     Remove: Odstrani
   Data Settings:
-    Complete backup: "Dokončajte varnostno kopiranje"
+    Complete backup: "Celotna varnostna kopija"
     Import backup: "Uvozi varnostno kopijo"
     Export backup: "Izvozi varnostno kopijo"
     Backup description: "Shranite profile, sezname predvajanja, zgodovino, statistiko in prenosljive nastavitve v eno datoteko ZIP. Uvažanje jih združi s podatki, ki so že na tej napravi."
     Select backup data: "Izberite podatke za uvoz"
     Profiles and subscriptions: "Profili in naročnine"
-    Watch statistics: "Statistika"
-    Backup exported: "Varnostno kopiranje uspešno izvoženo"
+    Backup exported: "Varnostna kopija je bila uspešno izvožena"
     Backup imported: "Varnostna kopija je bila uspešno uvožena"
     Import YouTube Takeout ZIP: "Uvozi ZIP YouTube Takeout"
     Select Takeout data: "Izberite podatke za uvoz"

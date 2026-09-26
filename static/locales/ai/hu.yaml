@@ -880,15 +880,14 @@ Settings:
     Show Bottom Right Actions Dock: Jobb alsó műveletsáv megjelenítése
     Paused Interface Hide Delay: Szüneteltetett kezelőfelület elrejtési késleltetése
   Data Settings:
-    Complete backup: "Biztonsági mentés befejezése"
+    Complete backup: "Teljes biztonsági mentés"
     Import backup: "Biztonsági mentés importálása"
     Export backup: "Biztonsági mentés exportálása"
-    Backup description: "Profilok, lejátszási listák, előzmények, statisztikák és átruházható beállítások mentése egyetlen ZIP-FÁJLBA. Az importálás egyesíti őket az eszközön már meglévő adatokkal."
+    Backup description: "Mentse a profilokat, lejátszási listákat, előzményeket, statisztikákat és átvihető beállításokat egyetlen ZIP-fájlba. Az importálás egyesíti ezeket az eszközön már meglévő adatokkal."
     Select backup data: "Válassza ki az importálni kívánt adatokat"
-    Profiles and subscriptions: "Profilok és előfizetések"
-    Watch statistics: "Statisztika"
+    Profiles and subscriptions: "Profilok és feliratkozások"
     Backup exported: "A biztonsági mentés exportálása sikeres volt"
-    Backup imported: "Mentés importálása sikeres"
+    Backup imported: "A biztonsági mentés importálása sikeres volt"
     Import YouTube Takeout ZIP: "YouTube Takeout ZIP importálása"
     Select Takeout data: "Válassza ki az importálandó adatokat"
     Import selected data: "Kijelölt adatok importálása"

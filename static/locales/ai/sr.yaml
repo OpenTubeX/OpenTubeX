@@ -904,13 +904,12 @@ Settings:
     Add: Додај
     Remove: Уклони
   Data Settings:
-    Complete backup: "Dovršite rezervnu kopi"
-    Import backup: "Uvezi rezervnu kopi"
+    Complete backup: "Potpuna rezervna kopija"
+    Import backup: "Uvezi rezervnu kopiju"
     Export backup: "Izvezite rezervnu kopiju"
     Backup description: "Sačuvajte profile, plejliste, istoriju, statistiku i prenosiva podešavanja u jednoj ZIP datoteci. Uvoz ih spaja sa podacima koji su već na ovom uređaju."
     Select backup data: "Izaberite podatke za uvoz"
     Profiles and subscriptions: "Profili i pretplate"
-    Watch statistics: "Статистика"
     Backup exported: "Rezervna kopija je uspešno izvezena"
     Backup imported: "Rezervna kopija je uspešno uvezena"
     Import YouTube Takeout ZIP: "Увези ZIP YouTube Takeout"

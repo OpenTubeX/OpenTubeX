@@ -5179,10 +5179,11 @@ function runApp() {
         case DBActions.GENERAL.FIND:
           return await baseHandlers.watchStats.find()
 
-        case DBActions.GENERAL.OVERWRITE:
-          await baseHandlers.watchStats.overwrite(data)
-          syncOtherWindows(IpcChannels.SYNC_WATCH_STATS, event, { event: SyncEvents.GENERAL.OVERWRITE, data })
-          return null
+        case DBActions.WATCH_STATS.MERGE_BACKUP: {
+          const merged = await baseHandlers.watchStats.mergeBackup(data)
+          syncOtherWindows(IpcChannels.SYNC_WATCH_STATS, event, { event: SyncEvents.GENERAL.OVERWRITE, data: merged })
+          return merged
+        }
 
         case DBActions.WATCH_STATS.ADD_WATCH_TIME:
           await baseHandlers.watchStats.addWatchTime(data.date, data.seconds)

@@ -886,7 +886,6 @@ Settings:
     Backup description: "Profilleri, çalma listelerini, geçmişi, istatistikleri ve aktarılabilir ayarları tek bir ZIP dosyasına kaydedin. İçe aktarma, bunları bu cihazda zaten bulunan verilerle birleştirir."
     Select backup data: "İçe aktarılacak verileri seçin"
     Profiles and subscriptions: "Profiller ve abonelikler"
-    Watch statistics: "İstatistikler"
     Backup exported: "Yedekleme başarıyla dışa aktarıldı"
     Backup imported: "Yedekleme başarıyla içe aktarıldı"
     Import YouTube Takeout ZIP: "YouTube Takeout ZIP dosyasını içe aktar"

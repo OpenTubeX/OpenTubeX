@@ -880,13 +880,12 @@ Settings:
     Show Bottom Right Actions Dock: Mostrar barra de ações no canto inferior direito
     Paused Interface Hide Delay: Atraso até ocultar a interface durante a pausa
   Data Settings:
-    Complete backup: "Cópia de segurança completa"
-    Import backup: "Importar cópia de segurança"
+    Complete backup: "Backup completo"
+    Import backup: "Importar backup"
     Export backup: "Exportar backup"
-    Backup description: "Guarde perfis, listas de reprodução, histórico, estatísticas e definições transferíveis num ficheiro ZIP. A importação os mescla com os dados que já estão neste dispositivo."
-    Select backup data: "Seleccione os dados a importar"
-    Profiles and subscriptions: "Perfis e assinaturas"
-    Watch statistics: "Estatísticas"
+    Backup description: "Salve perfis, playlists, histórico, estatísticas e configurações transferíveis em um arquivo ZIP. A importação combina esses dados com os que já estão neste dispositivo."
+    Select backup data: "Selecione os dados para importar"
+    Profiles and subscriptions: "Perfis e inscrições"
     Backup exported: "Backup exportado com sucesso"
     Backup imported: "Backup importado com sucesso"
     Import YouTube Takeout ZIP: "Importar ZIP do YouTube Takeout"

@@ -884,15 +884,14 @@ Settings:
     Add: Ychwanegu
     Remove: Dileu
   Data Settings:
-    Complete backup: "Cwblhau'r copi wrth gefn"
+    Complete backup: "Copi wrth gefn cyflawn"
     Import backup: "Mewnforio copi wrth gefn"
     Export backup: "Allforio copi wrth gefn"
     Backup description: "Cadw proffiliau, rhestri chwarae, hanes, ystadegau, a gosodiadau trosglwyddadwy mewn un ffeil ZIP. Mae mewnforio yn eu cyfuno â data eisoes ar y ddyfais hon."
     Select backup data: "Dewiswch y data i'w fewnforio"
     Profiles and subscriptions: "Proffiliau a thanysgrifiadau"
-    Watch statistics: "Ystadegau"
-    Backup exported: "Copi - wrth - gefn wedi ei allforio'n llwyddiannus"
-    Backup imported: "Mewnforiwyd copïau wrth gefn yn llwyddiannus"
+    Backup exported: "Mae'r copi wrth gefn wedi'i allforio'n llwyddiannus"
+    Backup imported: "Mae'r copi wrth gefn wedi'i fewnforio'n llwyddiannus"
     Import YouTube Takeout ZIP: "Mewnforio ZIP YouTube Takeout"
     Select Takeout data: "Dewiswch y data i’w mewnforio"
     Import selected data: "Mewnforio’r data a ddewiswyd"

@@ -901,7 +901,6 @@ Settings:
     Backup description: "Αποθηκεύστε προφίλ, λίστες αναπαραγωγής, ιστορικό, στατιστικά στοιχεία και μεταβιβάσιμες ρυθμίσεις σε ένα αρχείο ZIP. Η εισαγωγή τους συγχωνεύει με δεδομένα που υπάρχουν ήδη σε αυτήν τη συσκευή."
     Select backup data: "Επιλέξτε τα δεδομένα για εισαγωγή"
     Profiles and subscriptions: "Προφίλ και συνδρομές"
-    Watch statistics: "Στατιστικά"
     Backup exported: "Επιτυχής εξαγωγή αντιγράφου ασφαλείας"
     Backup imported: "Το αντίγραφο ασφαλείας εισήχθη με επιτυχία"
     Import YouTube Takeout ZIP: "Εισαγωγή ZIP YouTube Takeout"

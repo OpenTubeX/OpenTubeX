@@ -886,7 +886,6 @@ Settings:
     Backup description: "Salvesta profiilid, esitusloendid, ajalugu, statistika ja ülekantavad seaded ühte ZIP-FAILI. Importimine ühendab need selles seadmes juba olevate andmetega."
     Select backup data: "Vali imporditavad andmed"
     Profiles and subscriptions: "Profiilid ja tellimused"
-    Watch statistics: "Statistika"
     Backup exported: "Varunduse eksportimine õnnestus"
     Backup imported: "Varunduse importimine õnnestus"
     Import YouTube Takeout ZIP: "Impordi YouTube Takeouti ZIP"

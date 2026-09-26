@@ -886,7 +886,6 @@ Settings:
     Backup description: "将个人资料、播放列表、历史记录、统计数据和可迁移的设置保存到一个 ZIP 文件中。导入时会与本设备上的现有数据合并。"
     Select backup data: "选择要导入的数据"
     Profiles and subscriptions: "个人资料和订阅"
-    Watch statistics: "统计信息"
     Backup exported: "备份导出成功"
     Backup imported: "备份导入成功"
     Import YouTube Takeout ZIP: "导入 YouTube Takeout ZIP"

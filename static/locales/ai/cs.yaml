@@ -880,13 +880,12 @@ Settings:
     Show Bottom Right Actions Dock: Zobrazovat panel akcí vpravo dole
     Paused Interface Hide Delay: Prodleva skrytí rozhraní při pozastavení
   Data Settings:
-    Complete backup: "Dokončit zálohování"
+    Complete backup: "Úplná záloha"
     Import backup: "Importovat zálohu"
     Export backup: "Exportovat zálohu"
     Backup description: "Uložte profily, seznamy skladeb, historii, statistiky a přenositelná nastavení do jednoho souboru ZIP. Při importu se sloučí s daty, která jsou již v tomto zařízení."
     Select backup data: "Vyberte data, která chcete importovat"
-    Profiles and subscriptions: "Profily a předplatné"
-    Watch statistics: "Statistiky"
+    Profiles and subscriptions: "Profily a odběry"
     Backup exported: "Zálohování úspěšně exportováno"
     Backup imported: "Záloha úspěšně importována"
     Import YouTube Takeout ZIP: "Importovat ZIP z YouTube Takeout"

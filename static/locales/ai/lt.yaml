@@ -1123,7 +1123,6 @@ Settings:
     Backup description: "Išsaugokite profilius, grojaraščius, istoriją, statistiką ir perkeliamus nustatymus viename ZIP faile. Importuojant jie sujungiami su šiame įrenginyje jau esančiais duomenimis."
     Select backup data: "Pasirinkite norimus importuoti duomenis"
     Profiles and subscriptions: "Profiliai ir prenumeratos"
-    Watch statistics: "Statistika"
     Backup exported: "Atsarginė kopija sėkmingai eksportuota"
     Backup imported: "Atsarginė kopija sėkmingai importuota"
     Import YouTube Takeout ZIP: "Importuoti YouTube Takeout ZIP"

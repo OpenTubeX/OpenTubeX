@@ -1083,7 +1083,6 @@ Settings:
     Backup description: Profile, Playlists, Verlauf, Statistiken und übertragbare Einstellungen in einer ZIP-Datei sichern. Beim Import werden sie mit den vorhandenen Daten zusammengeführt.
     Select backup data: Zu importierende Daten auswählen
     Profiles and subscriptions: Profile und Abonnements
-    Watch statistics: Wiedergabestatistiken
     Backup exported: Sicherung erfolgreich exportiert
     Backup imported: Sicherung erfolgreich importiert
     Import YouTube Takeout ZIP: YouTube-Takeout-ZIP importieren

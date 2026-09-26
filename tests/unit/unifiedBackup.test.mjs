@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { strToU8, zipSync } from 'fflate'
 
-import { BACKUP_SECTIONS, createUnifiedBackup, mergeBackupPlaylist, mergeBackupProfile, mergeBackupWatchStatsAdjustment, readUnifiedBackup } from '../../src/renderer/helpers/unifiedBackup.js'
+import { BACKUP_SECTIONS, createUnifiedBackup, mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile, mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, readUnifiedBackup } from '../../src/renderer/helpers/unifiedBackup.js'
 
 const data = {
   settings: { theme: 'dark' },
@@ -58,4 +58,16 @@ test('clears a conflicting adjustment when both sets contain watch-time estimate
   assert.equal(mergeBackupWatchStatsAdjustment(estimated, { defaultSpeed: 2 }, estimated, null), null)
   assert.deepEqual(mergeBackupWatchStatsAdjustment(estimated, { defaultSpeed: 2 }, estimated, { defaultSpeed: 2 }), { defaultSpeed: 2 })
   assert.deepEqual(mergeBackupWatchStatsAdjustment(estimated, { defaultSpeed: 2 }, [], null), { defaultSpeed: 2 })
+})
+
+test('older backups cannot reduce watch progress or daily watch time', () => {
+  const currentHistory = { videoId: 'abcdefghijk', timeWatched: 20, watchProgress: 90, isWatched: true, title: 'Latest' }
+  const olderHistory = { videoId: 'abcdefghijk', timeWatched: 10, watchProgress: 30, isWatched: false, title: 'Old' }
+  assert.deepEqual(mergeBackupHistoryRecord(currentHistory, olderHistory), currentHistory)
+  assert.deepEqual(mergeBackupHistoryRecord(olderHistory, currentHistory), currentHistory)
+
+  const currentStats = { date: '2026-09-26', seconds: 90 }
+  const olderStats = { date: '2026-09-26', seconds: 30 }
+  assert.deepEqual(mergeBackupWatchStatsRecord(currentStats, olderStats), currentStats)
+  assert.deepEqual(mergeBackupWatchStatsRecord(olderStats, currentStats), currentStats)
 })

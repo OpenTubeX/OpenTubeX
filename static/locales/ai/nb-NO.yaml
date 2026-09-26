@@ -882,14 +882,13 @@ Settings:
     Add: Legg til
     Remove: Fjern
   Data Settings:
-    Complete backup: "Fullfør sikkerhetskopiering"
+    Complete backup: "Komplett sikkerhetskopi"
     Import backup: "Importer sikkerhetskopi"
     Export backup: "Eksporter sikkerhetskopi"
     Backup description: "Lagre profiler, spillelister, historikk, statistikk og overførbare innstillinger i én ZIP-fil. Importering fletter dem med data som allerede finnes på denne enheten."
     Select backup data: "Velg dataene som skal importeres"
     Profiles and subscriptions: "Profiler og abonnementer"
-    Watch statistics: "Statistikk"
-    Backup exported: "Sikkerhetskopiering eksportert"
+    Backup exported: "Sikkerhetskopien ble eksportert"
     Backup imported: "Sikkerhetskopien ble importert"
     Import YouTube Takeout ZIP: "Importer YouTube Takeout-ZIP"
     Select Takeout data: "Velg dataene som skal importeres"

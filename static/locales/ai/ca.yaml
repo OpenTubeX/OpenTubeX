@@ -1184,12 +1184,11 @@ Settings:
     Remove: Elimina
   Data Settings:
     Complete backup: "Còpia de seguretat completa"
-    Import backup: "Importar còpia de segure"
-    Export backup: "Exportar còpia de segure"
+    Import backup: "Importar còpia de seguretat"
+    Export backup: "Exportar còpia de seguretat"
     Backup description: "Desa els perfils, les llistes de reproducció, l'historial, les estadístiques i la configuració transferible en un sol fitxer ZIP. La importació els fusiona amb dades que ja estan en aquest dispositiu."
     Select backup data: "Selecciona les dades que vols importar"
     Profiles and subscriptions: "Perfils i subscripcions"
-    Watch statistics: "Estadístiques"
     Backup exported: "La còpia de seguretat s'ha exportat correctament"
     Backup imported: "La còpia de seguretat s'ha importat"
     Import YouTube Takeout ZIP: "Importa el ZIP de YouTube Takeout"

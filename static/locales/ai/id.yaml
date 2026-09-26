@@ -886,7 +886,6 @@ Settings:
     Backup description: "Simpan profil, daftar putar, riwayat, statistik, dan pengaturan yang dapat ditransfer dalam satu file ZIP. Mengimpor menggabungkannya dengan data yang sudah ada di perangkat ini."
     Select backup data: "Pilih data yang akan diimpor"
     Profiles and subscriptions: "Profil dan langganan"
-    Watch statistics: "Statistik"
     Backup exported: "Cadangan berhasil diekspor"
     Backup imported: "Cadangan berhasil diimpor"
     Import YouTube Takeout ZIP: "Impor ZIP YouTube Takeout"

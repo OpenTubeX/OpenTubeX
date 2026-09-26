@@ -886,7 +886,6 @@ Settings:
     Backup description: "Gorde profilak, erreprodukzio-zerrendak, historia, estatistikak eta transferi daitezkeen ezarpenak ZIP fitxategi bakar batean. Inportatzean, gailu honetan dagoeneko dauden datuekin bat egiten dira."
     Select backup data: "Hautatu inportatzeko datuak"
     Profiles and subscriptions: "Profilak eta harpidetzak"
-    Watch statistics: "Estatistikak"
     Backup exported: "Babeskopia behar bezala esportatu da"
     Backup imported: "Babeskopia behar bezala inportatu da"
     Import YouTube Takeout ZIP: "Inportatu YouTube Takeout ZIPa"

@@ -420,11 +420,10 @@ Settings:
   Data Settings:
     Complete backup: "Pełna kopia zapasowa"
     Import backup: "Importuj kopię zapasową"
-    Export backup: "Kopia zapasowa eksportu"
+    Export backup: "Eksportuj kopię zapasową"
     Backup description: "Zapisz profile, listy odtwarzania, historię, statystyki i ustawienia do przeniesienia w jednym pliku ZIP. Importowanie łączy je z danymi już znajdującymi się na tym urządzeniu."
     Select backup data: "Wybierz dane do zaimportowania"
     Profiles and subscriptions: "Profile i subskrypcje"
-    Watch statistics: "Statystyki oglądania"
     Backup exported: "Pomyślnie wyeksportowano kopię zapasową"
     Backup imported: "Pomyślnie zaimportowano kopię zapasową"
     Import YouTube Takeout ZIP: "Importuj ZIP z YouTube Takeout"

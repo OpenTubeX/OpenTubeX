@@ -890,7 +890,6 @@ Settings:
     Backup description: "Запазете профилите, плейлистите, историята, статистиката и настройките за прехвърляне в един ZIP файл. Импортирането ги обединява с данни, които вече са на това устройство."
     Select backup data: "Изберете данните за импортиране"
     Profiles and subscriptions: "Профили и абонаменти"
-    Watch statistics: "Статистика"
     Backup exported: "Архивирането е експортирано успешно"
     Backup imported: "Архивирането е импортирано успешно"
     Import YouTube Takeout ZIP: "Импортиране на ZIP от YouTube Takeout"
