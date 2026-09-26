@@ -28,6 +28,19 @@ function setup(t, options = {}) {
       return true
     },
     async activateTab(id) { calls.push(['activate', id]) },
+    setPinned(id, pinned) {
+      calls.push(['pin', id, pinned])
+      tabs.value = tabs.value.map(tab => tab.id === id ? { ...tab, isPinned: pinned } : tab)
+    },
+    loadTab(id) {
+      calls.push(['load', id])
+      tabs.value = tabs.value.map(tab => tab.id === id ? { ...tab, loadState: 'mounting' } : tab)
+    },
+    async unloadTab(id) {
+      calls.push(['unload', id])
+      tabs.value = tabs.value.map(tab => tab.id === id ? { ...tab, loadState: 'unloaded' } : tab)
+    },
+    async reloadTab(id) { calls.push(['reload', id]) },
   }
   const context = vm.createContext({
     computed, nextTick, ref, watch,
@@ -115,6 +128,53 @@ test('close selection closes exactly the selected tabs and clears selection', as
   assert.deepEqual(tabs.value.map(tab => tab.id), ['pinned', 'middle'])
   assert.deepEqual(calls, [['close', 'first'], ['close', 'last'], ['afterClose']])
   assert.equal(actions.selecting.value, false)
+})
+
+test('selection actions change only eligible selected tabs', async t => {
+  const { actions, tabs, calls } = setup(t)
+  tabs.value = tabs.value.map(tab => ({
+    ...tab,
+    loadState: tab.id === 'first' ? 'unloaded' : 'loaded',
+  }))
+  actions.toggleTabSelection('pinned')
+  actions.toggleTabSelection('first')
+  actions.toggleTabSelection('middle')
+  assert.equal(actions.canPinSelectedTabs.value, true)
+  assert.equal(actions.canUnpinSelectedTabs.value, true)
+  assert.equal(actions.canLoadSelectedTabs.value, true)
+  assert.equal(actions.canUnloadSelectedTabs.value, true)
+
+  await actions.runSelectedTabAction('pin')
+  await actions.runSelectedTabAction('unpin')
+  await actions.runSelectedTabAction('load')
+  await actions.runSelectedTabAction('unload')
+  await actions.runSelectedTabAction('reload')
+
+  assert.deepEqual(calls, [
+    ['pin', 'first', true], ['pin', 'middle', true],
+    ['pin', 'pinned', false], ['pin', 'first', false], ['pin', 'middle', false],
+    ['load', 'first'],
+    ['unload', 'pinned'], ['unload', 'middle'],
+    ['reload', 'pinned'], ['reload', 'first'], ['reload', 'middle'],
+  ])
+  assert.deepEqual([...actions.selectedTabIds.value], ['pinned', 'first', 'middle'])
+})
+
+test('a running selection action rejects a second action and releases the busy state', async t => {
+  const { actions, service, calls } = setup(t)
+  actions.toggleTabSelection('first')
+  let finish
+  service.reloadTab = id => new Promise(resolve => {
+    calls.push(['reload', id])
+    finish = resolve
+  })
+  const pending = actions.runSelectedTabAction('reload')
+  assert.equal(actions.runningSelectionAction.value, true)
+  await actions.runSelectedTabAction('pin')
+  finish()
+  await pending
+  assert.deepEqual(calls, [['reload', 'first']])
+  assert.equal(actions.runningSelectionAction.value, false)
 })
 
 test('closing every selected tab leaves a fresh landing tab instead of exiting', async t => {
