@@ -60,6 +60,11 @@ test('portrait Shorts actions open phone sheets instead of side panels', async (
   await expect(page.locator('.shortsAuxPanelOpen')).toHaveCount(0)
   await page.locator('.dockedSheet[open] .mobileSheetHeader').getByRole('button', { name: 'Close' }).click()
   await expect(page.locator('.dockedSheet[open]')).toHaveCount(0)
+  await sponsorAction.evaluate(button => button.click())
+  await expect(page.locator('.dockedSheet[open]')).toBeVisible()
+  await watch.evaluate(vm => vm.$store.dispatch('updateUseSponsorBlock', false))
+  await expect(page.locator('.dockedSheet[open]')).toHaveCount(0)
+  expect(await watch.evaluate(vm => vm.mobilePanel)).toBeNull()
 
   await watch.evaluate(vm => {
     vm.videoChapters = [{ title: 'Chapter one', timestamp: '0:00', startSeconds: 0 }]

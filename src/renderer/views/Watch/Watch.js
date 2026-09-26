@@ -1781,6 +1781,7 @@ export default defineComponent({
       if (!open && this.showSidebarSponsorBlock) {
         this.sidebarPanelLeaving = true
       }
+      if (!open && this.mobilePanel === 'sponsorBlock') this.mobilePanel = null
       this.showSidebarSponsorBlock = open
       this.sponsorBlockInfoLoading = loading
       this.sponsorBlockInfoPendingUuid = pendingUuid
