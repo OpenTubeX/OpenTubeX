@@ -29,7 +29,7 @@ import { isSettingSyncEnabled } from '../store/modules/settings'
 import { syncSubscriptionSeenVideos, syncSubscriptionSeenPosts } from './subscription-seen-videos'
 import { syncWatchStats } from './sync-watch-stats'
 import { getInitialSyncStages, planEncryptedSyncCollections } from './sync-server-plan.js'
-import { MAIN_PROFILE_ID } from '../constants'
+import { MAIN_PROFILE_ID } from '../../constants'
 
 /**
  * Keep the store's client lifecycle and mutations outside the protocol runner.
