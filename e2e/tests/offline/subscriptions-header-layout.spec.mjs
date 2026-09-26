@@ -184,20 +184,47 @@ test.describe('subscriptions header layout', () => {
     await expect(page.locator('.headerRefreshWidget .nextAutoRefreshTimestamp')).toHaveCount(0)
     await attachScreenshot('portrait mobile New feed action')
 
+    await page.locator('[data-subscription-feed-tab="videos"]').click()
+    await expect(page.getByText(/Videos feed last updated:/)).toBeVisible()
+    await expect(page.locator('.headerRefreshWidget .nextAutoRefreshTimestamp')).toHaveCount(0)
+    const initialRefreshLayout = await page.evaluate(() => {
+      const timestamp = document.querySelector('.headerRefreshWidget > .lastRefreshTimestamp')
+      const updated = timestamp.getBoundingClientRect()
+      const refresh = document.querySelector('.headerRefreshWidget .refreshButton').getBoundingClientRect()
+      const header = document.querySelector('.subscriptionsHeader')
+      const text = document.createRange()
+      text.selectNodeContents(timestamp)
+      return {
+        sameRow: refresh.top < updated.bottom && refresh.bottom > updated.top && refresh.left >= updated.right,
+        textStart: text.getBoundingClientRect().left,
+        contentStart: header.getBoundingClientRect().left + parseFloat(getComputedStyle(header).paddingInlineStart)
+      }
+    })
+    expect(initialRefreshLayout.sameRow).toBe(true)
+    expect(Math.abs(initialRefreshLayout.textStart - initialRefreshLayout.contentStart)).toBeLessThanOrEqual(2)
+
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       store.commit('setSubscriptionFeedAutoRefreshInterval', String(60 * 60 * 1000))
       store.commit('setSubscriptionFeedNextAutoRefreshTimestamp', Date.now() + 60 * 60 * 1000)
     })
-    await page.locator('[data-subscription-feed-tab="videos"]').click()
 
     await expect(page.getByText(/Videos feed last updated:/)).toBeVisible()
     await expect(page.getByText(/Next auto refresh:/)).toBeVisible()
-    expect(await page.evaluate(() => {
-      const markRect = document.querySelector('.markAllSeenButton').getBoundingClientRect()
-      const refreshRect = document.querySelector('.refreshButton').getBoundingClientRect()
-      return refreshRect.top < markRect.bottom && refreshRect.bottom > markRect.top
-    })).toBe(true)
+    const refreshStatusLayout = await page.evaluate(() => {
+      const updated = document.querySelector('.headerRefreshWidget > .lastRefreshTimestamp').getBoundingClientRect()
+      const refresh = document.querySelector('.headerRefreshWidget .refreshButton').getBoundingClientRect()
+      const next = document.querySelector('.headerRefreshWidget .nextAutoRefreshTimestamp').getBoundingClientRect()
+      const header = document.querySelector('.subscriptionsHeader').getBoundingClientRect()
+      return { updated, refresh, next, header }
+    })
+    expect(Math.abs(
+      (refreshStatusLayout.refresh.top + refreshStatusLayout.refresh.bottom) / 2 -
+      (refreshStatusLayout.updated.top + refreshStatusLayout.next.bottom) / 2
+    )).toBeLessThanOrEqual(2)
+    expect(refreshStatusLayout.refresh.left).toBeGreaterThanOrEqual(refreshStatusLayout.updated.right)
+    expect(refreshStatusLayout.refresh.right).toBeLessThanOrEqual(refreshStatusLayout.header.right)
+    expect(refreshStatusLayout.next.top).toBeGreaterThanOrEqual(refreshStatusLayout.updated.bottom)
     await expect.poll(() => page.evaluate(() => {
       return document.documentElement.scrollWidth - document.documentElement.clientWidth
     })).toBeLessThanOrEqual(2)

@@ -380,6 +380,11 @@
     inline-size: 100%;
   }
 
+  .headerActions .headerRefreshWidget:has(> .lastRefreshTimestamp) {
+    flex-basis: 100%;
+    inline-size: 100%;
+  }
+
   .headerActions .headerSortSelect {
     flex-basis: 0;
   }
