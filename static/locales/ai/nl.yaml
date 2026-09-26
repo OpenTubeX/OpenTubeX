@@ -1273,6 +1273,12 @@ Video:
   Sponsor Block category short:
     filler: Uitweidingen
   Player:
+    DLNA:
+      Cast: "Casten naar een DLNA-apparaat"
+      Stop: "Stoppen met casten"
+      No Devices: "Geen DLNA-apparaten gevonden"
+      No MP4 Source: "Geen compatibele MP4-stream voor deze video"
+      Error: "Kan de video niet casten"
     Repeat Stats:
       Repeat Stats: Herhaalstatistieken
       Looping: Herhalen ingeschakeld

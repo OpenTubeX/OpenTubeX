@@ -1269,6 +1269,12 @@ Video:
     music offtopic: Contido non musical
     filler: Digresións
   Player:
+    DLNA:
+      Cast: "Transmitir a un dispositivo DLNA"
+      Stop: "Deter a transmisión"
+      No Devices: "Non se atoparon dispositivos DLNA"
+      No MP4 Source: "Non hai un fluxo MP4 compatible para este vídeo"
+      Error: "Non se puido transmitir o vídeo"
     Repeat Stats:
       Repeat Stats: Estatísticas de repetición
       Looping: En bucle

@@ -1243,6 +1243,12 @@ Video:
     music offtopic: Musiqisiz hissə
     filler: Mövzudan kənar söhbətlər
   Player:
+    DLNA:
+      Cast: "DLNA cihazına yayımla"
+      Stop: "Yayımı dayandır"
+      No Devices: "DLNA cihazı tapılmadı"
+      No MP4 Source: "Bu video üçün uyğun MP4 axını yoxdur"
+      Error: "Videonu yayımlamaq mümkün olmadı"
     Voice-over Translation:
       Start: Tərcümə et
       Cancel: Ləğv et

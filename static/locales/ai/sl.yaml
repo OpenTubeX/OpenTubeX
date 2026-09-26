@@ -1653,6 +1653,12 @@ Video:
       shuffling playlists: naključno predvajanje seznamov predvajanja
       looping playlists: ponavljanje seznamov predvajanja
   Player:
+    DLNA:
+      Cast: "Predvajaj v napravi DLNA"
+      Stop: "Ustavi predvajanje na napravi"
+      No Devices: "Ni najdenih naprav DLNA"
+      No MP4 Source: "Za ta videoposnetek ni združljivega toka MP4"
+      Error: "Videoposnetka ni bilo mogoče predvajati na napravi"
     Repeat Stats:
       Repeat Stats: Statistika ponavljanja
       Looping: Ponavljanje vklopljeno

@@ -51,6 +51,7 @@ import { brotliDecompress } from 'zlib'
 
 import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
+import { discoverDlnaDevices, startDlnaCast, stopDlnaCast } from './dlnaCast'
 import { handleTwitchChatReplayPage } from './twitchChat'
 import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
 import { isYtDlpStoryboardUrl, getYtDlpDownloadFile, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpControlDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetSubtitle, handleYtDlpGetPlaybackInfo, handleYtDlpGetHistoryMetadata, handleYtDlpCancelHistoryRepair, handleYtDlpGetRecommendations, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpQueueAction, handleYtDlpRemoveDownload, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
@@ -4551,6 +4552,47 @@ function runApp() {
   })
 
   ipcMain.on(IpcChannels.OPEN_IN_EXTERNAL_PLAYER, handleOpenInExternalPlayer)
+  ipcMain.handle(IpcChannels.DLNA_DISCOVER, event => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) return []
+    return discoverDlnaDevices()
+  })
+  const dlnaOwners = new WeakSet()
+  ipcMain.handle(IpcChannels.DLNA_START, async (event, payload) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) {
+      return { error: 'Casting requires an active OpenTubeX window' }
+    }
+    const mediaUrl = payload?.mediaUrl
+    let headers = {}
+    if (typeof mediaUrl === 'string' && /^https?:\/\//.test(mediaUrl)) {
+      try {
+        const url = new URL(mediaUrl)
+        if (url.hostname.endsWith('.googlevideo.com') && url.pathname === '/videoplayback') {
+          headers = { Referer: 'https://www.youtube.com/', Origin: 'https://www.youtube.com' }
+        }
+        const invidiousAuthorization = invidiousAuthorizations.get(event.sender.id)
+        if (invidiousAuthorization && isInvidiousInstanceUrl(mediaUrl, invidiousAuthorization.url)) {
+          headers.Authorization = invidiousAuthorization.authorization
+        }
+        Object.assign(headers, getYtDlpExternalStreamHeaders(event.sender, mediaUrl))
+        const cookies = getYtDlpExternalStreamCookieHeader(event.sender, mediaUrl)
+        if (cookies !== null) headers.Cookie = cookies
+      } catch { /* startDlnaCast reports an invalid URL. */ }
+    }
+    const result = await startDlnaCast(event.sender.id, payload, headers)
+    if (result.castId) {
+      if (event.sender.isDestroyed()) {
+        stopDlnaCast(event.sender.id).catch(console.error)
+      } else if (!dlnaOwners.has(event.sender)) {
+        dlnaOwners.add(event.sender)
+        event.sender.once('destroyed', () => stopDlnaCast(event.sender.id).catch(console.error))
+      }
+    }
+    return result
+  })
+  ipcMain.handle(IpcChannels.DLNA_STOP, (event, castId) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof castId !== 'string') return false
+    return stopDlnaCast(event.sender.id, castId)
+  })
 
   ipcMain.handle(IpcChannels.YT_DLP_DOWNLOAD, (event, payload, retryDownloadId) => {
     const automaticDownloadAuthorized = subscriptionAutoRefreshOwner?.webContents.id === event.sender.id &&
@@ -5636,6 +5678,7 @@ function runApp() {
     }
 
     isQuitting = true
+    stopDlnaCast().catch(error => console.error('Failed to stop DLNA casting', error))
     backgroundSubscriptions.stop()
     if (tray) { tray.destroy(); tray = null }
   })

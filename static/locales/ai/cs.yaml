@@ -1231,6 +1231,12 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Záznam živého chatu je zapnutý. Zprávy se zde budou zobrazovat během přehrávání videa.
   Premiere started: Probíhá premiéra. Začala {timeAgo}
   Player:
+    DLNA:
+      Cast: "Odeslat do zařízení DLNA"
+      Stop: "Ukončit přehrávání na zařízení"
+      No Devices: "Nebyla nalezena žádná zařízení DLNA"
+      No MP4 Source: "Pro toto video není dostupný kompatibilní stream MP4"
+      Error: "Video se nepodařilo odeslat"
     Repeat Stats:
       Repeat Stats: Statistiky opakování
       Looping: Smyčka zapnuta

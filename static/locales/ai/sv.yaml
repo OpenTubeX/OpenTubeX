@@ -1241,6 +1241,12 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Repris av livechatten är aktiverad. Chattmeddelanden visas här medan videon spelas upp.
   Premiere started: Premiären pågår. Startade {timeAgo}
   Player:
+    DLNA:
+      Cast: "Casta till en DLNA-enhet"
+      Stop: "Sluta casta"
+      No Devices: "Inga DLNA-enheter hittades"
+      No MP4 Source: "Ingen kompatibel MP4-ström för den här videon"
+      Error: "Det gick inte att casta videon"
     Repeat Stats:
       Repeat Stats: Upprepningsstatistik
       Looping: Upprepning på

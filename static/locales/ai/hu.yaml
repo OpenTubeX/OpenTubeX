@@ -1231,6 +1231,12 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Az élő csevegés visszajátszása be van kapcsolva.  A csevegés üzenetei a videó lejátszása közben itt jelennek meg.
   Premiere started: A premier folyamatban van, {timeAgo} kezdődött
   Player:
+    DLNA:
+      Cast: "Átküldés DLNA-eszközre"
+      Stop: "Átküldés leállítása"
+      No Devices: "Nem található DLNA-eszköz"
+      No MP4 Source: "Ehhez a videóhoz nincs kompatibilis MP4-adatfolyam"
+      Error: "Nem sikerült átküldeni a videót"
     Repeat Stats:
       Repeat Stats: Ismétlési statisztikák
       Looping: Ismétlés bekapcsolva

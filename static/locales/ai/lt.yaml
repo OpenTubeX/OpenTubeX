@@ -1578,6 +1578,12 @@ Video:
     music offtopic: Ne muzika
     filler: Nukrypimai
   Player:
+    DLNA:
+      Cast: "Transliuoti į DLNA įrenginį"
+      Stop: "Sustabdyti transliaciją"
+      No Devices: "DLNA įrenginių nerasta"
+      No MP4 Source: "Šiam vaizdo įrašui nėra suderinamo MP4 srauto"
+      Error: "Nepavyko transliuoti vaizdo įrašo"
     Repeat Stats:
       Repeat Stats: Kartojimo statistika
       Looping: Kartojimas įjungtas

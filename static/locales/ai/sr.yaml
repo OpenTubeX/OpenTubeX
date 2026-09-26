@@ -1286,6 +1286,12 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Снимак ћаскања уживо је укључен. Поруке ће се приказивати овде током репродукције видео-снимка.
   Premiere started: Премијера је у току. Почела је {timeAgo}
   Player:
+    DLNA:
+      Cast: "Емитуј на DLNA уређај"
+      Stop: "Заустави емитовање"
+      No Devices: "Нема пронађених DLNA уређаја"
+      No MP4 Source: "Нема компатибилног MP4 тока за овај видео"
+      Error: "Видео није могуће емитовати"
     Repeat Stats:
       Repeat Stats: Статистика понављања
       Looping: Понављање укључено

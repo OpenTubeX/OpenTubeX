@@ -1268,6 +1268,12 @@ Video:
   Sponsor Block category short:
     filler: தொடர்பற்றவை
   Player:
+    DLNA:
+      Cast: "DLNA சாதனத்திற்கு ஒளிபரப்பு"
+      Stop: "ஒளிபரப்பை நிறுத்து"
+      No Devices: "DLNA சாதனங்கள் எதுவும் கிடைக்கவில்லை"
+      No MP4 Source: "இந்தக் காணொளிக்கு இணக்கமான MP4 ஓடை இல்லை"
+      Error: "காணொளியை ஒளிபரப்ப முடியவில்லை"
     Repeat Stats:
       Repeat Stats: மீளியக்கப் புள்ளிவிவரங்கள்
       Looping: மீளியக்கம் செயலில்

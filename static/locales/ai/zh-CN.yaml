@@ -1231,6 +1231,12 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: 已启用实时聊天回放。视频播放时，聊天消息会显示在这里。
   Premiere started: 首映正在进行，开始时间：{timeAgo}
   Player:
+    DLNA:
+      Cast: "投放到 DLNA 设备"
+      Stop: "停止投放"
+      No Devices: "未找到 DLNA 设备"
+      No MP4 Source: "此视频没有兼容的 MP4 流"
+      Error: "无法投放视频"
     Repeat Stats:
       Repeat Stats: 循环统计
       Looping: 循环中

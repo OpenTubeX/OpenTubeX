@@ -1885,6 +1885,12 @@ Video:
   Hide Channel: Kanal ausblenden
   More Options: Weitere Optionen
   Player:
+    DLNA:
+      Cast: Auf ein DLNA-Gerät übertragen
+      Stop: Übertragung beenden
+      No Devices: Keine DLNA-Geräte gefunden
+      No MP4 Source: Kein kompatibler MP4-Stream für dieses Video verfügbar
+      Error: Das Video konnte nicht übertragen werden
     Repeat Stats:
       Repeat Stats: Wiederholungsstatistik
       Looping: Schleife aktiv

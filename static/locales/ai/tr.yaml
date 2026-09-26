@@ -1231,6 +1231,12 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Canlı sohbet tekrarı etkin. Video oynatıldıkça sohbet mesajları burada görünecek.
   Premiere started: İlk gösterim sürüyor. {timeAgo} başladı
   Player:
+    DLNA:
+      Cast: "DLNA cihazına yayınla"
+      Stop: "Yayını durdur"
+      No Devices: "DLNA cihazı bulunamadı"
+      No MP4 Source: "Bu video için uyumlu MP4 akışı yok"
+      Error: "Video yayınlanamadı"
     Repeat Stats:
       Repeat Stats: Tekrar istatistikleri
       Looping: Döngü açık

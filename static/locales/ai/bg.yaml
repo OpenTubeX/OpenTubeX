@@ -1241,6 +1241,12 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Повторението на чата на живо е включено. Съобщенията от чата ще се показват тук при възпроизвеждането на видеоклипа.
   Premiere started: Премиерата е в ход. Започна {timeAgo}
   Player:
+    DLNA:
+      Cast: "Предаване към DLNA устройство"
+      Stop: "Спиране на предаването"
+      No Devices: "Няма намерени DLNA устройства"
+      No MP4 Source: "Няма съвместим MP4 поток за това видео"
+      Error: "Видеото не можа да се предаде"
     Repeat Stats:
       Repeat Stats: Статистика на повторенията
       Looping: Повтаряне

@@ -1260,6 +1260,12 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Reluarea chatului în direct este activată. Mesajele vor apărea aici pe măsură ce se redă videoclipul.
   Premiere started: Premiera este în curs. A început {timeAgo}
   Player:
+    DLNA:
+      Cast: "Transmite pe un dispozitiv DLNA"
+      Stop: "Oprește transmiterea"
+      No Devices: "Nu s-au găsit dispozitive DLNA"
+      No MP4 Source: "Nu există un flux MP4 compatibil pentru acest videoclip"
+      Error: "Videoclipul nu a putut fi transmis"
     Repeat Stats:
       Repeat Stats: Statistici de repetare
       Looping: Repetare activă

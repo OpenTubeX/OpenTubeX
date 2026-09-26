@@ -1543,6 +1543,12 @@ Video:
     Show Original Details: 원본 정보 표시
     Show Modified Details: 수정된 정보 표시
   Player:
+    DLNA:
+      Cast: "DLNA 기기로 전송"
+      Stop: "전송 중지"
+      No Devices: "DLNA 기기를 찾을 수 없습니다"
+      No MP4 Source: "이 동영상에 호환되는 MP4 스트림이 없습니다"
+      Error: "동영상을 전송할 수 없습니다"
     Repeat Stats:
       Repeat Stats: 반복 통계
       Looping: 반복 중

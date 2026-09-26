@@ -369,6 +369,16 @@ export default {
     }
   },
 
+  dlna: {
+    discover: () => navigator.userActivation.isActive
+      ? ipcRenderer.invoke(IpcChannels.DLNA_DISCOVER)
+      : Promise.resolve([]),
+    start: payload => navigator.userActivation.isActive
+      ? ipcRenderer.invoke(IpcChannels.DLNA_START, payload)
+      : Promise.resolve({ error: 'Casting requires a user action' }),
+    stop: castId => ipcRenderer.invoke(IpcChannels.DLNA_STOP, castId)
+  },
+
   /**
    * @param {(
    *   externalPlayer: string,

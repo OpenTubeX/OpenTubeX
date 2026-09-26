@@ -1245,6 +1245,12 @@ Video:
   Sponsor Block category short:
     filler: Digresije
   Player:
+    DLNA:
+      Cast: "Prijenos na DLNA uređaj"
+      Stop: "Zaustavi prijenos"
+      No Devices: "Nisu pronađeni DLNA uređaji"
+      No MP4 Source: "Nema kompatibilnog MP4 toka za ovaj videozapis"
+      Error: "Videozapis nije moguće prenijeti"
     Repeat Stats:
       Repeat Stats: Statistika ponavljanja
       Looping: Ponavljanje uključeno

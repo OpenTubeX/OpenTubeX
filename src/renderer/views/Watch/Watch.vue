@@ -198,6 +198,17 @@
           @sponsorblock-info-change="handleSponsorBlockInfoChange"
           @toggle-shorts-metadata="toggleShortsMetadata"
         >
+          <template
+            v-if="isElectron && !customShortsPlayerActive && !localFilePlayback"
+            #dlna-cast
+          >
+            <WatchDlnaCast
+              :key="videoId"
+              :formats="legacyFormats"
+              :title="videoTitle"
+              :get-player="() => $refs.player"
+            />
+          </template>
           <template #shorts-fullscreen-metadata>
             <div class="shortsFullscreenMetadataContent">
               <FtPaidPromotionBadge

@@ -294,7 +294,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['click', 'disabled-click'])
+const emit = defineEmits(['click', 'disabled-click', 'dropdown-open'])
 
 const LONG_CLICK_BOUNDARY_MS = 500
 
@@ -391,6 +391,7 @@ function handleIconClick(e, isRightOrLongClick = false) {
         : null
     }
     dropdownShown.value = !dropdownShown.value
+    if (dropdownShown.value) emit('dropdown-open')
     if (dropdownShown.value && !useModal.value && !ownsPhoneSheet.value) {
       // wait until the dropdown is visible
       // then focus it so we can hide it automatically when it loses focus
