@@ -66,7 +66,7 @@
           @blur="handleUpdateSponsorBlockUrl"
         />
       </FtFlexBox>
-      <FtFlexBox>
+      <FtFlexBox class="sponsorBlockExcludedChannels">
         <FtInputTags
           :label="t('Settings.SponsorBlock Settings.Excluded Channels.Excluded Channels')"
           :tag-name-placeholder="t('Settings.Distraction Free Settings.Hide Channels Placeholder')"
@@ -167,7 +167,7 @@
 </template>
 
 <script setup>
-import { computed, ref, useTemplateRef } from 'vue'
+import { computed, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from './FtButton/FtButton.vue'
@@ -235,10 +235,18 @@ const deArrowThumbnailGeneratorUrl = computed(() => store.getters.getDeArrowThum
 const sponsorBlockUrlInputRef = useTemplateRef('sponsorBlockUrlInput')
 const deArrowThumbnailGeneratorUrlRef = useTemplateRef('deArrowThumbnailGeneratorUrl')
 
-const sponsorBlockChannelTags = computed(() => {
-  const whitelist = store.getters.getSponsorBlockChannelWhitelist
-  return Array.isArray(whitelist) ? whitelist.map(name => ({ id: name, name })) : []
-})
+const sponsorBlockChannelWhitelist = computed(() => store.getters.getSponsorBlockChannelWhitelist)
+const sponsorBlockChannelInfo = ref({})
+const requestedChannelIds = new Set()
+const sponsorBlockChannelTags = computed(() => (
+  Array.isArray(sponsorBlockChannelWhitelist.value)
+    ? sponsorBlockChannelWhitelist.value.map(name => ({
+        id: name,
+        name,
+        ...sponsorBlockChannelInfo.value[name]
+      }))
+    : []
+))
 
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
 const backendPreference = computed(() => store.getters.getBackendPreference)
@@ -255,6 +263,15 @@ const backendOptions = computed(() => ({
  * @param {{ name: string }[]} value
  */
 function handleSponsorBlockChannelWhitelist(value) {
+  for (const tag of value) {
+    if (tag.preferredName || tag.icon) {
+      sponsorBlockChannelInfo.value[tag.name] = {
+        preferredName: tag.preferredName,
+        icon: tag.icon,
+        iconHref: tag.iconHref
+      }
+    }
+  }
   store.dispatch('updateSponsorBlockChannelWhitelist', value.map(tag => tag.name))
 }
 
@@ -368,9 +385,29 @@ function cleanupUrl(url) {
 async function findChannelTagInfoWrapper(text) {
   return await findChannelTagInfo(text, backendOptions.value)
 }
+
+watch([sponsorBlockChannelWhitelist, showSponsorBlockChannels, backendOptions], ([ids, showTags]) => {
+  if (!showTags || !Array.isArray(ids)) return
+
+  for (const id of ids) {
+    if (requestedChannelIds.has(id) || sponsorBlockChannelInfo.value[id]) continue
+    requestedChannelIds.add(id)
+    findChannelTagInfoWrapper(id).then(({ preferredName, icon, iconHref }) => {
+      if (preferredName || icon) {
+        sponsorBlockChannelInfo.value[id] = { preferredName, icon, iconHref }
+      }
+    }).finally(() => {
+      requestedChannelIds.delete(id)
+    })
+  }
+}, { immediate: true })
 </script>
 
 <style scoped>
+.sponsorBlockExcludedChannels {
+  margin-block-end: 16px;
+}
+
 .sponsorBlockUserIdSection {
   display: flex;
   flex-direction: column;
