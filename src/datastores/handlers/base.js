@@ -431,8 +431,18 @@ class WatchStats {
       const adjustment = mergeBackupWatchStatsAdjustment(
         retainedCurrent, currentAdjustment, retainedImported, backup.adjustment
       )
-      await db.watchStats.removeAsync({ date: { $exists: true } }, { multi: true })
-      if (records.length > 0) await db.watchStats.insertAsync(records)
+      const currentByDate = new Map(currentRecords.map(record => [record.date, record]))
+      for (const record of records) {
+        const current = currentByDate.get(record.date)
+        if (record === current) continue
+        const withoutImportedId = { ...record }
+        delete withoutImportedId._id
+        await db.watchStats.updateAsync(
+          { date: record.date },
+          current ? { ...withoutImportedId, _id: current._id } : withoutImportedId,
+          { upsert: true }
+        )
+      }
       await db.watchStats.updateAsync(
         { _id: this.migrationId },
         { _id: this.migrationId, completedAt: Date.now(), hadEstimates: records.some(record => record.historyEstimateApplied === true), adjustment },

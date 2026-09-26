@@ -33,6 +33,14 @@ test('rejects an incomplete archive before restoring data', async () => {
 test('rejects malformed records before restoring data', async () => {
   const malformed = { ...data, playlists: [{ _id: 'broken', videos: [] }] }
   await assert.rejects(readUnifiedBackup(createUnifiedBackup(malformed)), /Invalid backup playlists/)
+  await assert.rejects(readUnifiedBackup(createUnifiedBackup({
+    ...data,
+    profiles: [{ _id: 'broken', name: 'Broken', subscriptions: [null] }],
+  })), /Invalid backup profiles/)
+  await assert.rejects(readUnifiedBackup(createUnifiedBackup({
+    ...data,
+    playlists: [{ _id: 'broken', playlistName: 'Broken', videos: [null] }],
+  })), /Invalid backup playlists/)
 })
 
 test('rejects backup versions the importer cannot read', async () => {
