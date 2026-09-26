@@ -895,7 +895,7 @@ Settings:
     Add: הוספה
     Remove: הסרה
   Data Settings:
-    Complete backup: "השלמת הגיבוי"
+    Complete backup: "גיבוי מלא"
     Import backup: "ייבוא גיבוי"
     Export backup: "ייצוא גיבוי"
     Backup description: "שמור פרופילים, פלייליסטים, היסטוריה, סטטיסטיקות והגדרות הניתנות להעברה בקובץ ZIP אחד. הייבוא ממזג אותם עם נתונים שכבר נמצאים במכשיר זה."

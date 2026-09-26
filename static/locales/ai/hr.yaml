@@ -884,7 +884,7 @@ Settings:
     Add: Dodaj
     Remove: Ukloni
   Data Settings:
-    Complete backup: "Dovrši sigurnosno kopiranje"
+    Complete backup: "Potpuna sigurnosna kopija"
     Import backup: "Uvezi sigurnosnu kopiju"
     Export backup: "Izvezite sigurnosnu kopiju"
     Backup description: "Spremite profile, popise za reprodukciju, povijest, statistiku i prenosive postavke u jednu ZIP datoteku. Uvoz ih spaja s podacima koji su već na ovom uređaju."

@@ -7,7 +7,7 @@ import { createRecommendationStore } from '../recommendations'
 import { mergeSubscriptionSeenVideos, parseSubscriptionSeenVideos, nextSubscriptionSeenTimestamp } from '../../subscriptionSeenVideos'
 import { preserveSubscriptionSeenEntries, subscriptionFeedField } from '../../subscriptionFeedState'
 import { mergeSubscriptionSeenPosts, parseSubscriptionSeenPosts } from '../../subscriptionSeenPosts'
-import { mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord } from '../../renderer/helpers/unifiedBackup'
+import { mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, validateBackupWatchStats } from '../../renderer/helpers/unifiedBackup'
 
 const recommendations = createRecommendationStore(db.recommendations)
 
@@ -418,6 +418,7 @@ class WatchStats {
   }
 
   static mergeBackup(backup) {
+    validateBackupWatchStats(backup)
     return this.runWrite(async () => {
       const currentRecords = await this.find()
       const currentAdjustment = await this.getHistoricalAdjustment()

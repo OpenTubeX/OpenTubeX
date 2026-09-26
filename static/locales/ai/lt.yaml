@@ -1117,7 +1117,7 @@ Settings:
     Add: Pridėti
     Remove: Pašalinti
   Data Settings:
-    Complete backup: "Užbaigti atsarginę kopiją"
+    Complete backup: "Pilna atsarginė kopija"
     Import backup: "Importuoti atsarginę kopiją"
     Export backup: "Eksportuoti atsarginę kopiją"
     Backup description: "Išsaugokite profilius, grojaraščius, istoriją, statistiką ir perkeliamus nustatymus viename ZIP faile. Importuojant jie sujungiami su šiame įrenginyje jau esančiais duomenimis."

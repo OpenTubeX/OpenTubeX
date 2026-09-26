@@ -21,7 +21,7 @@ export function mergeBackupPlaylist(current, imported) {
       : saved.videoId === video.videoId && saved.timeAdded === video.timeAdded)
     if (!exists) videos.push(video)
   }
-  return { ...current, ...imported, videos }
+  return { ...current, ...imported, protected: current.protected, videos }
 }
 
 export function mergeBackupHistoryRecord(current, imported) {
@@ -120,6 +120,15 @@ export async function readUnifiedBackup(file) {
   return { manifest, data }
 }
 
+export function validateBackupWatchStats(backup) {
+  const plainObject = value => value !== null && typeof value === 'object' && !Array.isArray(value) && Object.getPrototypeOf(value) === Object.prototype
+  if (!plainObject(backup) || !Array.isArray(backup.records) ||
+    !backup.records.every(record => plainObject(record) && /^\d{4}-\d{2}-\d{2}$/.test(record.date) && Number.isFinite(record.seconds) && record.seconds >= 0) ||
+    (backup.adjustment !== null && !plainObject(backup.adjustment))) {
+    throw new Error('Invalid backup watchStats')
+  }
+}
+
 export function validateUnifiedBackup(data) {
   const object = value => value !== null && typeof value === 'object' && !Array.isArray(value)
   if (!object(data.settings) || Object.keys(data.settings).some(key => key === '__proto__')) throw new Error('Invalid backup settings')
@@ -128,15 +137,9 @@ export function validateUnifiedBackup(data) {
     playlists: record => object(record) && typeof record._id === 'string' && typeof record.playlistName === 'string' && Array.isArray(record.videos) && record.videos.every(video => object(video) && typeof video.videoId === 'string'),
     history: record => object(record) && typeof record.videoId === 'string' && Number.isFinite(record.timeWatched) && record.timeWatched >= 0 && (record.watchProgress === undefined || (Number.isFinite(record.watchProgress) && record.watchProgress >= 0)),
     searchHistory: record => object(record) && typeof record._id === 'string' && typeof record.query === 'string',
-    watchStats: record => object(record) && /^\d{4}-\d{2}-\d{2}$/.test(record.date) && Number.isFinite(record.seconds) && record.seconds >= 0,
   }
   for (const [section, valid] of Object.entries(sections)) {
-    if (section === 'watchStats') continue
     if (!Array.isArray(data[section]) || !data[section].every(valid)) throw new Error(`Invalid backup ${section}`)
   }
-  if (!object(data.watchStats) || !Array.isArray(data.watchStats.records) ||
-    !data.watchStats.records.every(sections.watchStats) ||
-    (data.watchStats.adjustment !== null && !object(data.watchStats.adjustment))) {
-    throw new Error('Invalid backup watchStats')
-  }
+  validateBackupWatchStats(data.watchStats)
 }

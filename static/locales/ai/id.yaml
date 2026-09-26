@@ -880,7 +880,7 @@ Settings:
     Show Bottom Right Actions Dock: Tampilkan Dok Tindakan Kanan Bawah
     Paused Interface Hide Delay: Jeda Sebelum Menyembunyikan Antarmuka yang Dijeda
   Data Settings:
-    Complete backup: "Selesaikan pencadangan"
+    Complete backup: "Cadangan lengkap"
     Import backup: "Impor cadangan"
     Export backup: "Ekspor cadangan"
     Backup description: "Simpan profil, daftar putar, riwayat, statistik, dan pengaturan yang dapat ditransfer dalam satu file ZIP. Mengimpor menggabungkannya dengan data yang sudah ada di perangkat ini."

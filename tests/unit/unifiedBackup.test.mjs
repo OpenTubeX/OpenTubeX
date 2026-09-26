@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { strToU8, zipSync } from 'fflate'
 
-import { BACKUP_SECTIONS, createUnifiedBackup, mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile, mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, readUnifiedBackup } from '../../src/renderer/helpers/unifiedBackup.js'
+import { BACKUP_SECTIONS, createUnifiedBackup, mergeBackupHistoryRecord, mergeBackupPlaylist, mergeBackupProfile, mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, readUnifiedBackup, validateBackupWatchStats } from '../../src/renderer/helpers/unifiedBackup.js'
 
 const data = {
   settings: { theme: 'dark' },
@@ -50,6 +50,14 @@ test('rejects non-finite history timestamps and progress', async () => {
   await assert.rejects(readUnifiedBackup(new Blob([zipSync(files)])), /Invalid backup history/)
 })
 
+test('rejects malformed watch statistics before a datastore write', () => {
+  assert.throws(() => validateBackupWatchStats({ records: null, adjustment: null }), /Invalid backup watchStats/)
+  assert.throws(() => validateBackupWatchStats({ records: [{ date: 'bad', seconds: 42 }], adjustment: null }), /Invalid backup watchStats/)
+  assert.throws(() => validateBackupWatchStats({ records: [{ date: '2026-09-26', seconds: -1 }], adjustment: null }), /Invalid backup watchStats/)
+  assert.throws(() => validateBackupWatchStats({ records: [], adjustment: [] }), /Invalid backup watchStats/)
+  assert.doesNotThrow(() => validateBackupWatchStats(data.watchStats))
+})
+
 test('rejects backup versions the importer cannot read', async () => {
   const files = Object.fromEntries(BACKUP_SECTIONS.map(section => [`${section}.json`, strToU8(JSON.stringify(data[section]))]))
   files['manifest.json'] = strToU8('{"format":"opentubex-backup","version":2}')
@@ -66,6 +74,10 @@ test('merges subscriptions and playlist videos without dropping local entries', 
   const merged = mergeBackupPlaylist(currentPlaylist, incomingPlaylist)
   assert.deepEqual(merged.videos.map(video => video.videoId), ['local', 'imported'])
   assert.deepEqual(mergeBackupPlaylist(merged, incomingPlaylist).videos, merged.videos)
+
+  const protectedLocal = { ...currentPlaylist, protected: true }
+  const unprotectedImport = { ...incomingPlaylist, protected: false }
+  assert.equal(mergeBackupPlaylist(protectedLocal, unprotectedImport).protected, true)
 })
 
 test('clears a conflicting adjustment when both sets contain watch-time estimates', () => {

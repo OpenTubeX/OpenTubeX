@@ -890,7 +890,7 @@ Settings:
     Add: Thêm
     Remove: Xóa
   Data Settings:
-    Complete backup: "Hoàn tất sao lưu"
+    Complete backup: "Bản sao lưu đầy đủ"
     Import backup: "Nhập bản sao lưu"
     Export backup: "Xuất bản sao lưu"
     Backup description: "Lưu hồ sơ, danh sách phát, lịch sử, số liệu thống kê và cài đặt có thể chuyển nhượng trong một tệp ZIP. Nhập kết hợp chúng với dữ liệu đã có trên thiết bị này."
