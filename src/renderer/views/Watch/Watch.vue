@@ -914,6 +914,7 @@
         <FtPhonePanel
           :enabled="phonePanelsEnabled"
           :open="mobilePanel === 'description'"
+          class="phoneDescriptionPanel"
           :title="$t('Description.Title')"
           @close="mobilePanel = null"
         >

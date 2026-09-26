@@ -160,10 +160,11 @@ test('phone panel content remains rendered through its close animation', async (
   const watch = await watchViewHandle(page)
   await watch.evaluate(vm => vm.openPhonePanel('description'))
   const sheet = page.locator('.mobileSheet[open]')
+  const descriptionHost = page.locator('.phoneDescriptionPanel:not(.hiddenPanel)')
   await sheet.getByRole('button', { name: 'Close', exact: true }).click()
-  await expect(page.locator('.phonePanelHost:not(.hiddenPanel)')).toHaveCount(1)
+  await expect(descriptionHost).toHaveCount(1)
   await expect(sheet).toHaveCount(0)
-  await expect(page.locator('.phonePanelHost:not(.hiddenPanel)')).toHaveCount(0)
+  await expect(descriptionHost).toHaveCount(0)
 })
 
 test('phone transcript language menu stays inside the viewport', async ({ app, page }) => {

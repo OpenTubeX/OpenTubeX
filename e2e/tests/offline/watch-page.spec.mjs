@@ -2116,16 +2116,15 @@ test.describe('Shorts transcript navigation', () => {
 
       const player = page.locator('.ftVideoPlayer.shortsPlayer')
       const rail = page.locator('.shortsActionRail')
-      const commentsPanel = page.locator('.shortsCommentsPanel')
       await expect(player).toBeVisible()
       await expect(rail).toBeVisible()
       await page.locator('.shortsCommentsAction .iconButton').click()
-      await expect(commentsPanel).toHaveClass(/shortsCommentsPanelOpen/)
+      await expect(page.getByRole('dialog', { name: 'Comments' })).toBeVisible()
 
       const geometry = await page.evaluate(() => {
         const playerBounds = document.querySelector('.ftVideoPlayer.shortsPlayer').getBoundingClientRect()
         const railBounds = document.querySelector('.shortsActionRail').getBoundingClientRect()
-        const commentsBounds = document.querySelector('.shortsCommentsPanel').getBoundingClientRect()
+        const commentsBounds = document.querySelector('.mobileSheet[open]').getBoundingClientRect()
         const actionLabels = [...document.querySelectorAll('.shortsAction > span')]
         return {
           commentsLeft: commentsBounds.left,
