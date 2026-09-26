@@ -237,6 +237,7 @@ Settings:
       Bundled Fonts: Dołączone czcionki
       System Fonts: Czcionki systemowe
   Player Settings:
+    Skip Unavailable Playlist Videos: "Pomijaj niedostępne filmy na playlistach"
     Lights Off: Zgaś światło
     Show Lights Off Toggle: Pokaż przełącznik gaszenia światła
     Swipe Gestures:

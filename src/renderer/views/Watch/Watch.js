@@ -467,6 +467,7 @@ export default defineComponent({
       restrictedPlaybackError: null,
       /** @type {'private' | 'drm' | null} */
       nonRetryablePlaybackError: null,
+      skipUnavailablePlaylistVideo: false,
       videoGenreIsMusic: false,
       /** @type {(typeof MUSIC_MEDIA_TYPE)[keyof typeof MUSIC_MEDIA_TYPE]} */
       musicMediaType: MUSIC_MEDIA_TYPE.UNKNOWN,
@@ -2175,6 +2176,7 @@ export default defineComponent({
       this.customErrorIcon = null
       this.restrictedPlaybackError = null
       this.nonRetryablePlaybackError = null
+      this.skipUnavailablePlaylistVideo = false
       this.videoGenreIsMusic = false
       this.musicMediaType = MUSIC_MEDIA_TYPE.UNKNOWN
       this.streamingDataExpiryDate = null
@@ -2718,6 +2720,7 @@ export default defineComponent({
         ? this.t('Video.MembersOnly')
         : this.t('Video.AgeRestricted')
       this.customErrorIcon = type === 'members' ? ['fas', 'money-check-dollar'] : null
+      this.skipUnavailablePlaylistVideo = type === 'members' && !this.hasConfiguredRestrictedPlaybackAuthentication
 
       if (this.hasConfiguredRestrictedPlaybackAuthentication) {
         this.tryCachedRestrictedPlayback(type).catch(error => {
@@ -2735,6 +2738,7 @@ export default defineComponent({
       this.errorMessage = type === 'private'
         ? this.t('Video.Private')
         : this.t('Video.DRMProtected')
+      this.skipUnavailablePlaylistVideo = type === 'private'
     },
 
     getRestrictedPlaybackErrorType: function (message) {
@@ -2787,6 +2791,7 @@ export default defineComponent({
         this.playbackEngineFallbackTarget = null
       } else {
         this.playbackEngineFallbackTarget = previousFallbackTarget
+        this.skipUnavailablePlaylistVideo = restrictedPlaybackError === 'members'
       }
     },
 
@@ -3774,6 +3779,13 @@ export default defineComponent({
               return
             }
 
+            if (/\bprivate video\b|\bvideo is private\b/i.test(err.message || err.toString())) {
+              this.isLoading = false
+              this.thumbnail ||= this.getUnavailableVideoThumbnail()
+              this.setNonRetryablePlaybackError('private')
+              return
+            }
+
             const didReload = await this.runIpBlockRecoveryScriptAndReload()
             if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
             if (didReload) {
@@ -4260,6 +4272,7 @@ export default defineComponent({
       this.handleWatchProgressAutoSaveWhenProgressEnabled()
     },
     handleVideoPlay() {
+      this.$refs.watchVideoPlaylist?.resetUnavailableSkipChain()
       if (isAppHidden()) this.updateAndroidBackgroundPlaybackFormat()
     },
     handlePlayerSeeking() {

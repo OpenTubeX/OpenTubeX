@@ -530,6 +530,7 @@ Settings:
         Destructive pressed: Poistava toiminto painettaessa
         Text and icons on destructive actions: Poistavien toimintojen teksti ja kuvakkeet
   Player Settings:
+    Skip Unavailable Playlist Videos: "Ohita soittolistojen videot, joita ei voi toistaa"
     Lights Off: Valot pois
     Show Lights Off Toggle: Näytä valojen sammutuskytkin
     Swipe Gestures:

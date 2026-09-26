@@ -526,6 +526,7 @@ Settings:
         Destructive pressed: Acción destructiva al pulsarla
         Text and icons on destructive actions: Texto e iconos de las acciones destructivas
   Player Settings:
+    Skip Unavailable Playlist Videos: "Omitir vídeos no disponibles en listas de reproducción"
     Lights Off: Luces apagadas
     Show Lights Off Toggle: Mostrar interruptor para apagar las luces
     Swipe Gestures:

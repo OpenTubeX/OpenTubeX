@@ -2448,6 +2448,54 @@ async function measureSponsorBlockSkipStartTime(app, page, { rendererLoad = fals
 }
 
 test.describe('watch page', () => {
+  test('skips known unavailable playlist videos when enabled and stops at the end', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+
+    const watchView = await watchViewHandle(page)
+    await watchView.evaluate(async view => {
+      view.$store.commit('addPlaylist', {
+        _id: 'ft-playlist--skip-test',
+        playlistName: 'Skip test',
+        videos: [
+          { videoId: 'jNQXAC9IVRw', playlistItemId: 'first', title: 'First' },
+          { videoId: 'dQw4w9WgXcQ', playlistItemId: 'second', title: 'Second' },
+          { videoId: '9bZkp7q19f0', playlistItemId: 'third', title: 'Third' },
+        ]
+      })
+      await view.$store.dispatch('updateUserPlaylistSortOrder', 'custom')
+      await view.$store.dispatch('updateAutoplayVideos', false)
+      if (view.$store.getters.getSkipUnavailablePlaylistVideos !== true) {
+        throw new Error('Skipping unavailable playlist videos should be enabled by default')
+      }
+      await view.$store.dispatch('updateSkipUnavailablePlaylistVideos', false)
+      await view.tabRouter.push({
+        path: '/watch/jNQXAC9IVRw',
+        query: { playlistId: 'ft-playlist--skip-test', playlistType: 'user', playlistItemId: 'first' }
+      })
+    })
+    await expect.poll(() => watchView.evaluate(view => view.watchingPlaylist && !!view.$refs.watchVideoPlaylist)).toBe(true)
+    await page.locator(`${activeTab} .watchVideoPlaylist`).getByRole('button', { name: 'Loop Playlist' }).click()
+
+    await watchView.evaluate(view => view.setNonRetryablePlaybackError('private'))
+    await expect(page).toHaveURL(/playlistItemId=first/)
+
+    await watchView.evaluate(async view => {
+      await view.$store.dispatch('updateSkipUnavailablePlaylistVideos', true)
+    })
+    await expect(page).toHaveURL(/watch\/dQw4w9WgXcQ.*playlistItemId=second/)
+    await expect.poll(() => watchView.evaluate(view => !view.isLoading)).toBe(true)
+
+    await watchView.evaluate(view => view.setRestrictedPlaybackError('members'))
+    await expect(page).toHaveURL(/watch\/9bZkp7q19f0.*playlistItemId=third/)
+    await expect.poll(() => watchView.evaluate(view => !view.isLoading)).toBe(true)
+
+    await watchView.evaluate(view => view.setNonRetryablePlaybackError('private'))
+    await expect.poll(() => watchView.evaluate(view => view.$refs.watchVideoPlaylist.getState().loop)).toBe(true)
+    await page.waitForTimeout(500)
+    await expect(page).toHaveURL(/watch\/9bZkp7q19f0.*playlistItemId=third/)
+  })
+
   test('keeps private and DRM errors ineligible for extraction retry after locale changes', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)

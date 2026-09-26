@@ -1135,6 +1135,7 @@
           v-show="!isLoading"
           ref="watchVideoPlaylist"
           :watch-view-loading="isLoading"
+          :auto-skip-unavailable="skipUnavailablePlaylistVideo && $store.getters.getSkipUnavailablePlaylistVideos"
           :playlist-id="playlistId"
           :playlist-type="playlistType"
           :video-id="videoId"

@@ -127,6 +127,13 @@
           @change="updateAutoplayPlaylists"
         />
         <FtToggleSwitch
+          :label="t('Settings.Player Settings.Skip Unavailable Playlist Videos')"
+          :compact="true"
+          :default-value="skipUnavailablePlaylistVideos"
+          setting-key="skipUnavailablePlaylistVideos"
+          @change="updateSkipUnavailablePlaylistVideos"
+        />
+        <FtToggleSwitch
           :label="t('Settings.Player Settings.Autoplay Videos')"
           :compact="true"
           :default-value="autoplayVideos"
@@ -789,11 +796,17 @@ const hideRecommendedVideos = computed(() => store.getters.getHideRecommendedVid
 /** @type {import('vue').ComputedRef<boolean>} */
 const autoplayPlaylists = computed(() => store.getters.getAutoplayPlaylists)
 
+const skipUnavailablePlaylistVideos = computed(() => store.getters.getSkipUnavailablePlaylistVideos)
+
 /**
  * @param {boolean} value
  */
 function updateAutoplayPlaylists(value) {
   store.dispatch('updateAutoplayPlaylists', value)
+}
+
+function updateSkipUnavailablePlaylistVideos(value) {
+  store.dispatch('updateSkipUnavailablePlaylistVideos', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

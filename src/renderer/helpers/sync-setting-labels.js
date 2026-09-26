@@ -27,6 +27,7 @@ export const SYNC_SETTING_LABELS = {
     'Settings.Channel Settings.Auto Update Volume'
   ],
   autoplayPlaylists: 'Settings.Player Settings.Autoplay Playlists',
+  skipUnavailablePlaylistVideos: 'Settings.Player Settings.Skip Unavailable Playlist Videos',
   autoplayVideos: 'Settings.Player Settings.Autoplay Videos',
   avoidTranslation: 'Settings.General Settings.Avoid translation.Avoid translation',
   backendPreference: 'Settings.General Settings.Preferred API Backend.Preferred API Backend',

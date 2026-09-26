@@ -530,6 +530,7 @@ Settings:
         Destructive pressed: الضغط المدمر
         Text and icons on destructive actions: النص والأيقونات على الإجراءات المدمرة
   Player Settings:
+    Skip Unavailable Playlist Videos: "تخطي الفيديوهات غير المتاحة في قوائم التشغيل"
     Lights Off: إطفاء الأنوار
     Show Lights Off Toggle: إظهار مفتاح إطفاء الأنوار
     Swipe Gestures:

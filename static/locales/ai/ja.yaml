@@ -526,6 +526,7 @@ Settings:
         Destructive pressed: 破壊的な操作の押下時
         Text and icons on destructive actions: 破壊的な操作上のテキストとアイコン
   Player Settings:
+    Skip Unavailable Playlist Videos: "再生リスト内の視聴できない動画をスキップ"
     Lights Off: 照明を消す
     Show Lights Off Toggle: 照明を消す切り替えを表示
     Swipe Gestures:

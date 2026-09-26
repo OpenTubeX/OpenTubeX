@@ -526,6 +526,7 @@ Settings:
         Destructive pressed: 危险操作按下状态
         Text and icons on destructive actions: 危险操作的文本和图标
   Player Settings:
+    Skip Unavailable Playlist Videos: "跳过播放列表中无法播放的视频"
     Lights Off: 关灯
     Show Lights Off Toggle: 显示关灯开关
     Swipe Gestures:

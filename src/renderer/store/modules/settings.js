@@ -219,6 +219,7 @@ const state = {
   alwaysShowScrollbars: false,
   autoOpenChapters: false,
   autoplayPlaylists: true,
+  skipUnavailablePlaylistVideos: true,
   autoplayVideos: true,
   // Combinable triggers for automatically entering Picture-in-Picture: 'tab', 'minimize', 'blur'
   autoPictureInPictureTriggers: [],
