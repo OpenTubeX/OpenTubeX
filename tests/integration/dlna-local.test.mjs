@@ -75,12 +75,21 @@ test('discovers a local renderer and plays a ranged MP4 through the proxy', { ti
   t.after(() => close(renderer))
 
   const ssdp = createSocket({ type: 'udp4', reuseAddr: true })
-  await new Promise((resolve, reject) => {
-    ssdp.once('error', reject)
-    ssdp.bind(1900, '0.0.0.0', resolve)
-  })
+  try {
+    await new Promise((resolve, reject) => {
+      ssdp.once('error', reject)
+      ssdp.bind(1900, '0.0.0.0', () => {
+        ssdp.removeListener('error', reject)
+        resolve()
+      })
+    })
+    ssdp.addMembership('239.255.255.250')
+  } catch (error) {
+    try { ssdp.close() } catch { /* Binding may have already closed the socket. */ }
+    t.skip(`SSDP unavailable: ${error.message}`)
+    return
+  }
   t.after(() => ssdp.close())
-  ssdp.addMembership('239.255.255.250')
   ssdp.on('message', (message, remote) => {
     if (!message.toString().includes('M-SEARCH')) return
     const response = [
