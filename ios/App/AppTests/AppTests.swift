@@ -445,18 +445,26 @@ final class AppTests: XCTestCase {
 
     func testTouchSearchDismissal() async throws {
         try await openApplication()
+        _ = try await webView.callAsyncJavaScript("await testStore.dispatch('hideSettingsWindow')", arguments: [:], in: nil, contentWorld: .page)
+        try await wait("!document.querySelector('.settingsWindow')")
         _ = try await webView.callAsyncJavaScript("await testRouter.push('/subscriptions')", arguments: [:], in: nil, contentWorld: .page)
+        // Phone layouts keep the input hidden until the search button is tapped.
+        _ = try await evaluate("if (!document.querySelector('.topNav input').getClientRects().length) document.querySelector('.navSearchButton').click(); true")
+        try await wait("document.querySelector('.topNav input').getClientRects().length > 0")
         _ = try await evaluate("document.querySelector('.topNav input').focus(); true")
         try await wait("document.activeElement?.matches('.topNav input') === true")
         _ = try await evaluate("document.querySelector('.routerView').dispatchEvent(new PointerEvent('pointerdown', {bubbles: true, pointerType: 'touch'})); true")
-        try await wait("document.activeElement?.matches('.topNav input') === false && !document.querySelector('.topNav .options')")
+        try await wait("document.activeElement?.matches('.topNav input') === false && !document.querySelector('.topNav .options .list')")
     }
 
     func testTouchSettingsControls() async throws {
         try await openApplication()
+        _ = try await webView.callAsyncJavaScript("await testStore.dispatch('hideSettingsWindow')", arguments: [:], in: nil, contentWorld: .page)
+        try await wait("!document.querySelector('.settingsWindow')")
         _ = try await evaluate("window.dispatchEvent(Object.assign(new Event('opentubex:hardware-keyboard'), {attached: false})); true")
         _ = try await webView.callAsyncJavaScript("testStore.commit('setSettingsWindowSection', 'general'); await testStore.dispatch('showSettingsWindow')", arguments: [:], in: nil, contentWorld: .page)
         try await wait("!!document.querySelector('.settingsWindow .select-text')")
+        try await wait("document.activeElement?.matches('.settingsCloseButton') === true")
         let searchFocused = try await evaluate("document.activeElement?.matches('input, textarea')") as? Bool
         XCTAssertEqual(searchFocused, false)
         let transparentSwitches = try await evaluate("Array.from(document.querySelectorAll('.settingsWindow .switch-input')).every(input => getComputedStyle(input).backgroundColor === 'rgba(0, 0, 0, 0)')") as? Bool
