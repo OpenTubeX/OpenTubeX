@@ -42,7 +42,6 @@
         </slot>
         <slot name="actions" />
         <button
-          v-if="!compact"
           type="button"
           :aria-label="$t('Close')"
           @click="emit('close')"

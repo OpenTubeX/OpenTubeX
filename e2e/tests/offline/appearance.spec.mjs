@@ -393,6 +393,20 @@ test.describe('default appearance', () => {
     await expect(iconPack).toHaveText('Remix Icon')
   })
 
+  test('keeps a Close action when a phone picker search has no results', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 700 })
+    await goToSettingsSection(page, 'theme')
+    const appFont = page.getByRole('combobox', { name: 'App font' })
+    await appFont.click()
+
+    const sheet = page.locator('.mobileSheet.compactSheet[open]')
+    await sheet.locator('.pickerSearch').fill('no-such-font-xyz')
+    await expect(sheet.getByRole('option')).toHaveCount(0)
+    await sheet.getByRole('button', { name: 'Close' }).click()
+    await expect(sheet).toHaveCount(0)
+    await expect(appFont).toHaveAttribute('aria-expanded', 'false')
+  })
+
   test('fits and scrolls the app font picker in a narrow phone dialog', async ({ page }) => {
     await page.setViewportSize({ width: 600, height: 320 })
     await goToSettingsSection(page, 'theme')
