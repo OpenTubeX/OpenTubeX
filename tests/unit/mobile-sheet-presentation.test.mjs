@@ -12,6 +12,7 @@ function mountSheet(t, expandPanel = null) {
   const cleanup = []
   const landscape = ref(false)
   const observed = []
+  const activeObservers = new Set()
   let resizeCallback = null
   const props = reactive({ enabled: true, open: false, belowPlayer: true })
   const player = Object.assign(new EventTarget(), {
@@ -25,6 +26,7 @@ function mountSheet(t, expandPanel = null) {
     getBoundingClientRect: () => ({ top: 50, bottom: 300 })
   })
   const inlinePlayer = { getBoundingClientRect: () => ({ top: 50, bottom: 300 }) }
+  const inlineElement = shallowRef(inlinePlayer)
   const element = {
     open: false, style: {},
     getBoundingClientRect: () => ({ top: 300, height: 500 }),
@@ -44,15 +46,16 @@ function mountSheet(t, expandPanel = null) {
     defineProps: () => props, defineEmits: () => (...args) => events.push(args),
     useTemplateRef: () => dialog, usePhoneLayout: () => landscape,
     inject: name => name === 'phonePanelPlayer' ? () => player
-      : name === 'phonePanelInlinePlayer' ? () => inlinePlayer
+      : name === 'phonePanelInlinePlayer' ? () => inlineElement.value
         : name === 'expandPhonePanel' ? expandPanel : null,
     performance,
     onBeforeUnmount: callback => cleanup.push(callback), onUpdated() {},
     MutationObserver: class { observe() {} disconnect() {} },
     ResizeObserver: class {
       constructor(callback) { resizeCallback = callback }
-      observe(element) { observed.push(element) }
-      disconnect() {}
+      observe(element) { observed.push(element); activeObservers.add(element) }
+      unobserve(element) { activeObservers.delete(element) }
+      disconnect() { activeObservers.clear() }
     },
     applyAnimationSpeed: animation => animation, lockBodyScroll() {}, unlockBodyScroll() {},
     matchMedia: () => ({ matches: true }), getComputedStyle: () => ({ transform: 'none', opacity: 1 })
@@ -60,7 +63,7 @@ function mountSheet(t, expandPanel = null) {
   scope.run(() => vm.runInNewContext(source + '\nglobalThis.state = { expanded, updatePresentation, sheetStyle, startDrag, moveDrag, endDrag };', context))
   const unmount = () => { cleanup.splice(0).forEach(callback => callback()); scope.stop() }
   t.after(unmount)
-  return { ...context, element, player, inlinePlayer, props, landscape, observed, events, unmount,
+  return { ...context, element, player, inlinePlayer, inlineElement, props, landscape, observed, activeObservers, events, unmount,
     resize() { resizeCallback?.() },
     async settle() { await nextTick(); await nextTick(); await nextTick() }
   }
@@ -78,6 +81,25 @@ test('a sheet opened over a mini player uses the original video position', async
   inlineBottom = 120
   sheet.resize()
   assert.equal(sheet.state.sheetStyle.value.insetBlockStart, 'max(var(--app-safe-area-inset-top, 0px), 120px)')
+})
+
+test('an open sheet observes the inline placeholder when the player switches to mini mode', async t => {
+  const sheet = mountSheet(t)
+  sheet.inlinePlayer.getBoundingClientRect = () => ({ top: 0, bottom: 120 })
+  sheet.inlineElement.value = sheet.player
+  sheet.props.open = true
+  await sheet.settle()
+  assert.equal(sheet.activeObservers.has(sheet.inlinePlayer), false)
+
+  sheet.inlineElement.value = sheet.inlinePlayer
+  await sheet.settle()
+  assert.equal(sheet.activeObservers.has(sheet.inlinePlayer), true)
+  assert.equal(sheet.state.sheetStyle.value.insetBlockStart, 'max(var(--app-safe-area-inset-top, 0px), 120px)')
+
+  sheet.inlineElement.value = sheet.player
+  await sheet.settle()
+  assert.equal(sheet.activeObservers.has(sheet.inlinePlayer), false)
+  assert.equal(sheet.state.sheetStyle.value.insetBlockStart, 'max(var(--app-safe-area-inset-top, 0px), 300px)')
 })
 
 test('a Shorts sheet opens at 70% height in portrait and cannot collapse below the player', async t => {
