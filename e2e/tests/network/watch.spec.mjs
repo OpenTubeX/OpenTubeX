@@ -1689,7 +1689,7 @@ test.describe('custom Shorts player', () => {
     await expect(video).toHaveCSS('object-fit', 'cover')
     await expect(player.locator('.shortsTopControl').first()).toHaveCSS(
       'backdrop-filter',
-      /blur\(8px\)/
+      /blur\(10px\)/
     )
     expect(await player.evaluate(element => {
       return element.ui.getConfiguration().doubleClickForFullscreen
