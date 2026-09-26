@@ -4526,7 +4526,7 @@ test.describe('watch page', () => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     await setPlayerFullscreen(page, true)
-    await page.locator('.playerFullscreenTitleOverlay').click({ force: true })
+    await page.locator('.playerFullscreenTitleOverlay').click()
 
     const metadata = page.locator('.fullscreenMetadataOverlay.open .datePublishedAndViewCount')
     await expect(metadata).toBeVisible()
