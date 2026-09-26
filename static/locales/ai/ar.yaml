@@ -890,6 +890,15 @@ Settings:
     Add: إضافة
     Remove: إزالة
   Data Settings:
+    Complete backup: "نسخة احتياطية كاملة"
+    Import backup: "استيراد نسخة احتياطية"
+    Export backup: "تصدير النسخ الاحتياطي"
+    Backup description: "احفظ الملفات الشخصية وقوائم التشغيل والسجل والإحصاءات والإعدادات القابلة للتحويل في ملف مضغوط واحد. يؤدي استيرادها إلى دمجها مع البيانات الموجودة بالفعل على هذا الجهاز."
+    Select backup data: "تحديد البيانات المراد استيرادها"
+    Profiles and subscriptions: "الملفات الشخصية والاشتراكات"
+    Watch statistics: "احصائيات"
+    Backup exported: "تم تصدير النسخة الاحتياطية بنجاح"
+    Backup imported: "تم استيراد النسخة الاحتياطية بنجاح"
     Import YouTube Takeout ZIP: "استيراد ملف YouTube Takeout المضغوط"
     Select Takeout data: "اختر البيانات التي تريد استيرادها"
     Import selected data: "استيراد البيانات المحددة"

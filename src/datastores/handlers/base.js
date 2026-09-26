@@ -410,6 +410,17 @@ class WatchStats {
     return db.watchStats.findAsync({ date: { $exists: true } }).sort({ date: 1 })
   }
 
+  static async overwrite({ records, adjustment }) {
+    await db.watchStats.removeAsync({ date: { $exists: true } }, { multi: true })
+    if (records.length > 0) await db.watchStats.insertAsync(records)
+    await db.watchStats.updateAsync(
+      { _id: this.migrationId },
+      { _id: this.migrationId, completedAt: Date.now(), hadEstimates: records.some(record => record.historyEstimateApplied === true), adjustment },
+      { upsert: true }
+    )
+    this.migrationPromise = null
+  }
+
   static addWatchTime(date, seconds) {
     return db.watchStats.updateAsync(
       { date },

@@ -1077,6 +1077,15 @@ Settings:
     Cleanup Complete: Speicherbereinigung abgeschlossen
     Cleanup Failed: Speicherbereinigung fehlgeschlagen
   Data Settings:
+    Complete backup: Vollständige Sicherung
+    Import backup: Sicherung importieren
+    Export backup: Sicherung exportieren
+    Backup description: Profile, Playlists, Verlauf, Statistiken und übertragbare Einstellungen in einer ZIP-Datei sichern. Beim Import werden sie mit den vorhandenen Daten zusammengeführt.
+    Select backup data: Zu importierende Daten auswählen
+    Profiles and subscriptions: Profile und Abonnements
+    Watch statistics: Wiedergabestatistiken
+    Backup exported: Sicherung erfolgreich exportiert
+    Backup imported: Sicherung erfolgreich importiert
     Import YouTube Takeout ZIP: YouTube-Takeout-ZIP importieren
     Select Takeout data: Zu importierende Daten auswählen
     Import selected data: Ausgewählte Daten importieren

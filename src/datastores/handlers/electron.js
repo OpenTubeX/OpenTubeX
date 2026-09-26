@@ -112,6 +112,10 @@ class WatchStats {
     return dbWatchStats(DBActions.GENERAL.FIND)
   }
 
+  static overwrite(backup) {
+    return dbWatchStats(DBActions.GENERAL.OVERWRITE, backup)
+  }
+
   static addWatchTime(date, seconds) {
     return dbWatchStats(
       DBActions.WATCH_STATS.ADD_WATCH_TIME,

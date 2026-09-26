@@ -4,6 +4,26 @@
     hide-title
   >
     <h4 class="groupTitle">
+      {{ t('Settings.Data Settings.Complete backup') }}
+    </h4>
+    <FtFlexBox class="box">
+      <FtButton
+        :label="t('Settings.Data Settings.Import backup')"
+        :icon="['fas', 'folder-open']"
+        :disabled="backupBusy"
+        @click="selectUnifiedBackup"
+      />
+      <FtButton
+        :label="t('Settings.Data Settings.Export backup')"
+        :icon="['fas', 'file-download']"
+        :disabled="backupBusy"
+        @click="exportUnifiedBackup"
+      />
+    </FtFlexBox>
+    <p class="importFormatsHint">
+      {{ t('Settings.Data Settings.Backup description') }}
+    </p>
+    <h4 class="groupTitle">
       {{ t('Settings.Data Settings.Import YouTube Takeout ZIP') }}
     </h4>
     <FtFlexBox class="box">
@@ -39,7 +59,7 @@
     </p>
     <FtFlexBox>
       <p>
-        <a href="https://docs.freetubeapp.io/usage/importing-subscriptions/">
+        <a href="https://opentubex.org/docs/importing/">
           {{ $t("Settings.Data Settings.How do I import my subscriptions?") }}
         </a>
       </p>
@@ -119,13 +139,39 @@
       />
     </FtFlexBox>
     <FtSettingsSubpage
+      :open="showBackupImport"
+      :title="t('Settings.Data Settings.Import backup')"
+      :icon="['fas', 'folder-open']"
+      @close="closeBackupImport"
+    >
+      <div
+        class="takeoutSelection"
+        :aria-busy="backupBusy"
+      >
+        <p>{{ backupFilename }}</p>
+        <p>{{ t('Settings.Data Settings.Select backup data') }}</p>
+        <FtCheckboxList
+          v-model="selectedBackupSections"
+          :labels="backupLabels"
+          :values="BACKUP_SECTIONS"
+        />
+        <FtButton
+          v-if="selectedBackupSections.length > 0"
+          :label="t('Settings.Data Settings.Import selected data')"
+          :icon="['fas', 'folder-open']"
+          :disabled="backupBusy"
+          @click="importUnifiedBackup"
+        />
+      </div>
+    </FtSettingsSubpage>
+    <FtSettingsSubpage
       :open="showTakeoutImport"
       :title="t('Settings.Data Settings.Import YouTube Takeout ZIP')"
       :icon="['fas', 'folder-open']"
       @close="closeTakeoutImport"
     >
       <div
-        class="takeoutSelection"
+        class="takeoutSelection takeoutSelectionCentered"
         :aria-busy="takeoutBusy"
       >
         <p>{{ takeoutFilename }}</p>
@@ -232,6 +278,8 @@ import {
   isLibreTubeWatchHistoryBackup,
 } from '../../helpers/libretube'
 import { parseLineDelimitedJson } from '../../helpers/line-delimited-json'
+import { BACKUP_SECTIONS, createUnifiedBackup, mergeBackupPlaylist, mergeBackupProfile, mergeBackupWatchStatsAdjustment, readUnifiedBackup } from '../../helpers/unifiedBackup'
+import { compactAllDatastores, DBHistoryHandlers, DBPlaylistHandlers, DBProfileHandlers, DBSearchHistoryHandlers, DBWatchStatsHandlers } from '../../../datastores/handlers/index'
 import { forEachSelectedTakeoutZipEntry, isSupportedTakeoutEntry, listYouTubeTakeoutZipEntries, parseTakeoutPlaylistCsv } from '../../helpers/youtube-takeout-zip'
 import {
   DEFAULT_SEARCH_SETTINGS,
@@ -243,6 +291,124 @@ import {
 const IMPORT_DIRECTORY_ID = 'data-settings-import'
 const START_IN_DIRECTORY = 'downloads'
 const { t } = useI18n()
+const backupBusy = ref(false)
+const showBackupImport = ref(false)
+const backupFilename = ref('')
+const backupData = shallowRef(null)
+const selectedBackupSections = ref([...BACKUP_SECTIONS])
+const backupLabels = computed(() => [
+  t('Settings.Settings'),
+  t('Settings.Data Settings.Profiles and subscriptions'),
+  t('Playlists'),
+  t('History.History'),
+  t('Settings.Data Settings.Search history'),
+  t('Settings.Data Settings.Watch statistics'),
+])
+
+function closeBackupImport() {
+  showBackupImport.value = false
+  backupData.value = null
+}
+
+async function exportUnifiedBackup() {
+  backupBusy.value = true
+  try {
+    const [profiles, playlists, history, searchHistory, watchStatsRecords, watchStatsAdjustment] = await Promise.all([
+      DBProfileHandlers.find(), DBPlaylistHandlers.find(), DBHistoryHandlers.find(),
+      DBSearchHistoryHandlers.find(), DBWatchStatsHandlers.find(), DBWatchStatsHandlers.getHistoricalAdjustment(),
+    ])
+    const data = {
+      settings: deepCopy(transferableSettings.value),
+      profiles,
+      playlists,
+      history,
+      searchHistory,
+      watchStats: { records: watchStatsRecords, adjustment: watchStatsAdjustment },
+    }
+    await promptAndWriteToFile(
+      `opentubex-backup-${getTodayDateStrLocalTimezone()}.zip`, createUnifiedBackup(data),
+      t('Settings.Data Settings.Complete backup'), 'application/zip', '.zip',
+      t('Settings.Data Settings.Backup exported')
+    )
+  } catch (error) {
+    showToast({ message: `${t('Settings.Data Settings.Unable to write file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+  } finally {
+    backupBusy.value = false
+  }
+}
+
+async function selectUnifiedBackup() {
+  backupBusy.value = true
+  try {
+    const file = await pickFileWithPicker(t('Settings.Data Settings.Complete backup'), { 'application/zip': '.zip' }, IMPORT_DIRECTORY_ID, START_IN_DIRECTORY)
+    if (file === null) return
+    const { data } = await readUnifiedBackup(file)
+    backupFilename.value = file.name
+    backupData.value = data
+    selectedBackupSections.value = [...BACKUP_SECTIONS]
+    showBackupImport.value = true
+  } catch (error) {
+    showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+  } finally {
+    backupBusy.value = false
+  }
+}
+
+async function importUnifiedBackup() {
+  backupBusy.value = true
+  const selected = new Set(selectedBackupSections.value)
+  const data = backupData.value
+  try {
+    if (selected.has('profiles')) {
+      const currentProfiles = new Map((await DBProfileHandlers.find()).map(profile => [profile._id, profile]))
+      for (const profile of data.profiles) {
+        await DBProfileHandlers.upsert(mergeBackupProfile(currentProfiles.get(profile._id), profile))
+      }
+      await store.dispatch('grabAllProfiles')
+    }
+    if (selected.has('playlists')) {
+      const currentPlaylists = new Map((await DBPlaylistHandlers.find()).map(playlist => [playlist._id, playlist]))
+      for (const playlist of data.playlists) {
+        const merged = mergeBackupPlaylist(currentPlaylists.get(playlist._id), playlist)
+        await DBPlaylistHandlers.upsert(merged)
+        store.commit('upsertPlaylistToList', merged)
+      }
+    }
+    if (selected.has('history')) {
+      const records = new Map([
+        ...historyCacheSorted.value.map(record => [record.videoId, record]),
+        ...data.history.map(record => [record.videoId, record]),
+      ])
+      if (await store.dispatch('overwriteHistory', records) !== true) throw new Error('Could not restore history')
+    }
+    if (selected.has('searchHistory')) {
+      const entries = mergeSearchHistoryEntries(searchHistoryEntries.value, data.searchHistory)
+      if (await store.dispatch('overwriteSearchHistory', entries) !== true) throw new Error('Could not restore search history')
+    }
+    if (selected.has('watchStats')) {
+      const [currentStats, currentAdjustment] = await Promise.all([
+        DBWatchStatsHandlers.find(), DBWatchStatsHandlers.getHistoricalAdjustment(),
+      ])
+      const records = [...new Map([...currentStats, ...data.watchStats.records].map(record => [record.date, record])).values()]
+      const adjustment = mergeBackupWatchStatsAdjustment(
+        currentStats, currentAdjustment, data.watchStats.records, data.watchStats.adjustment
+      )
+      await DBWatchStatsHandlers.overwrite({ records, adjustment })
+      await store.dispatch('grabWatchStats')
+    }
+    if (selected.has('settings')) await applyImportedSettings(data.settings)
+    const compaction = await compactAllDatastores().catch(() => false)
+    closeBackupImport()
+    showToast({ message: t('Settings.Data Settings.Backup imported'), icon: ['fas', 'check'] })
+    if (compaction !== true && (!Array.isArray(compaction) || compaction.some(result => result.status === 'rejected'))) {
+      showToast({ message: t('Settings.Storage Settings.Cleanup Failed'), icon: ['fas', 'circle-exclamation'] })
+    }
+  } catch (error) {
+    showToast({ message: `${t('Settings.Data Settings.Unable to read file')}: ${error}`, icon: ['fas', 'circle-exclamation'] })
+  } finally {
+    backupBusy.value = false
+  }
+}
 
 const showTakeoutImport = ref(false)
 const takeoutBusy = ref(false)
@@ -2051,6 +2217,15 @@ async function importSettings() {
     )
   }
 
+  await applyImportedSettings(importedSettings)
+
+  showToast({
+    message: t('Settings.Data Settings.All settings have been successfully imported'),
+    icon: ['fas', 'sliders-h'],
+  })
+}
+
+async function applyImportedSettings(importedSettings) {
   importedSettings = migrateLegacySettings(importedSettings)
 
   const currentTransferableSettings = transferableSettings.value
@@ -2079,11 +2254,6 @@ async function importSettings() {
     const updaterId = defaultUpdaterId(importedKey)
     await store.dispatch(updaterId, importedValue)
   }
-
-  showToast({
-    message: t('Settings.Data Settings.All settings have been successfully imported'),
-    icon: ['fas', 'sliders-h'],
-  })
 }
 
 async function exportSettings() {

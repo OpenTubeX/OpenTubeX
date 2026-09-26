@@ -1457,6 +1457,15 @@ Settings:
     Add: Add
     Remove: Remove
   Data Settings:
+    Complete backup: Complete backup
+    Import backup: Import backup
+    Export backup: Export backup
+    Backup description: Save profiles, playlists, history, statistics, and transferable settings in one ZIP file. Importing merges them with data already on this device.
+    Select backup data: Select the data to import
+    Profiles and subscriptions: Profiles and subscriptions
+    Watch statistics: Watch statistics
+    Backup exported: Backup exported successfully
+    Backup imported: Backup imported successfully
     Import YouTube Takeout ZIP: Import YouTube Takeout ZIP
     Select Takeout data: Select the data to import
     Import selected data: Import selected data

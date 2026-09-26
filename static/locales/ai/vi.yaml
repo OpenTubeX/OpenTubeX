@@ -890,6 +890,15 @@ Settings:
     Add: Thêm
     Remove: Xóa
   Data Settings:
+    Complete backup: "Hoàn tất sao lưu"
+    Import backup: "Nhập bản sao lưu"
+    Export backup: "Xuất bản sao lưu"
+    Backup description: "Lưu hồ sơ, danh sách phát, lịch sử, số liệu thống kê và cài đặt có thể chuyển nhượng trong một tệp ZIP. Nhập kết hợp chúng với dữ liệu đã có trên thiết bị này."
+    Select backup data: "Chọn dữ liệu để nhập"
+    Profiles and subscriptions: "Hồ sơ và đăng ký"
+    Watch statistics: "Thống kê"
+    Backup exported: "Đã xuất bản sao lưu thành công"
+    Backup imported: "Đã nhập bản sao lưu thành công"
     Import YouTube Takeout ZIP: "Nhập ZIP YouTube Takeout"
     Select Takeout data: "Chọn dữ liệu cần nhập"
     Import selected data: "Nhập dữ liệu đã chọn"

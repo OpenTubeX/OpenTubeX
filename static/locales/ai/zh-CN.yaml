@@ -880,6 +880,15 @@ Settings:
     Show Bottom Right Actions Dock: 显示右下角操作栏
     Paused Interface Hide Delay: 暂停界面隐藏延迟
   Data Settings:
+    Complete backup: "完整备份"
+    Import backup: "导入备份"
+    Export backup: "导出备份"
+    Backup description: "将个人资料、播放列表、历史记录、统计数据和可迁移的设置保存到一个 ZIP 文件中。导入时会与本设备上的现有数据合并。"
+    Select backup data: "选择要导入的数据"
+    Profiles and subscriptions: "个人资料和订阅"
+    Watch statistics: "统计信息"
+    Backup exported: "备份导出成功"
+    Backup imported: "备份导入成功"
     Import YouTube Takeout ZIP: "导入 YouTube Takeout ZIP"
     Select Takeout data: "选择要导入的数据"
     Import selected data: "导入所选数据"

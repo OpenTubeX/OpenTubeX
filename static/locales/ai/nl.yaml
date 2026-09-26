@@ -895,6 +895,15 @@ Settings:
     Add: Toevoegen
     Remove: Verwijderen
   Data Settings:
+    Complete backup: "Volledige back-up"
+    Import backup: "Back-up importeren"
+    Export backup: "Back-up exporteren"
+    Backup description: "Sla profielen, afspeellijsten, geschiedenis, statistieken en overdraagbare instellingen op in één ZIP-BESTAND. Door ze te importeren, worden ze samengevoegd met gegevens die al op dit apparaat staan."
+    Select backup data: "Selecteer de gegevens om te importeren"
+    Profiles and subscriptions: "Profielen en abonnementen"
+    Watch statistics: "Statistieken"
+    Backup exported: "Back-up succesvol geëxporteerd"
+    Backup imported: "Back-up succesvol geïmporteerd"
     Import YouTube Takeout ZIP: "YouTube Takeout-ZIP importeren"
     Select Takeout data: "Selecteer de gegevens om te importeren"
     Import selected data: "Geselecteerde gegevens importeren"

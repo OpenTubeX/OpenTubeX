@@ -211,6 +211,6 @@ export async function clearStorage(category) {
 }
 
 export async function compactStorageDatabases() {
-  await baseHandlers.compactAllDatastores()
-  return true
+  const results = await baseHandlers.compactAllDatastores()
+  return results.every(result => result.status === 'fulfilled')
 }

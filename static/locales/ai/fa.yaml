@@ -911,6 +911,15 @@ Settings:
     Add: افزودن
     Remove: حذف
   Data Settings:
+    Complete backup: "پشتیبان‌گیری کامل"
+    Import backup: "وارد کردن نسخه پشتیبان"
+    Export backup: "پشتیبان گیری را صادر کنید"
+    Backup description: "پروفایل‌ها، لیست‌های پخش، تاریخچه، آمار و تنظیمات قابل انتقال را در یک فایل زیپ ذخیره کنید. وارد کردن آنها، آنها را با داده‌های موجود در این دستگاه ادغام می‌کند."
+    Select backup data: "داده‌ها را برای وارد کردن انتخاب کنید"
+    Profiles and subscriptions: "پروفایل‌ها و اشتراک‌ها"
+    Watch statistics: "آمار"
+    Backup exported: "پشتیبان با موفقیت صادر شد"
+    Backup imported: "پشتیبان با موفقیت وارد شد"
     Import YouTube Takeout ZIP: "درون‌ریزی فایل ZIP ‏YouTube Takeout"
     Select Takeout data: "داده‌های مورد نظر برای درون‌ریزی را انتخاب کنید"
     Import selected data: "درون‌ریزی داده‌های انتخاب‌شده"

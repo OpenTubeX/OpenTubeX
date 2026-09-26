@@ -1524,6 +1524,11 @@ const customActions = {
 
       window.ftElectron.handleSyncWatchStats((event, data) => {
         switch (event) {
+          case SyncEvents.GENERAL.OVERWRITE:
+            commit('setWatchStats', data.records)
+            commit('setHasHistoricalWatchTimeEstimate', data.records.some(record => record.historyEstimateApplied === true))
+            commit('setHistoricalWatchTimePlaybackSpeed', data.adjustment?.defaultSpeed ?? null)
+            break
           case SyncEvents.WATCH_STATS.ADD_WATCH_TIME:
             commit('addWatchTime', data)
             break

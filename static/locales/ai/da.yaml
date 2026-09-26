@@ -907,6 +907,15 @@ Settings:
     Add: Tilføj
     Remove: Fjern
   Data Settings:
+    Complete backup: "Fuldfør backup"
+    Import backup: "Importér sikkerhedskopi"
+    Export backup: "Eksportér backup"
+    Backup description: "Gem profiler, afspilningslister, historik, statistik og overførbare indstillinger i en ZIP-FIL. Import fletter dem med data, der allerede er på denne enhed."
+    Select backup data: "Vælg de data, der skal importeres"
+    Profiles and subscriptions: "Profiler og abonnementer"
+    Watch statistics: "Statistik"
+    Backup exported: "Sikkerhedskopi eksporteret med succes"
+    Backup imported: "Sikkerhedskopi blev importeret"
     Import YouTube Takeout ZIP: "Importér YouTube Takeout-ZIP"
     Select Takeout data: "Vælg de data, der skal importeres"
     Import selected data: "Importér valgte data"

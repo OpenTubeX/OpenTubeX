@@ -890,6 +890,15 @@ Settings:
     Add: Додати
     Remove: Видалити
   Data Settings:
+    Complete backup: "Повне резервне копіювання"
+    Import backup: "Імпортувати резервну копі"
+    Export backup: "Експортувати резервну ко"
+    Backup description: "Зберігайте профілі, списки відтворення, історію, статистику та налаштування, які можна передавати, в одному zip-файлі. Імпорт об 'єднує їх з даними, які вже є на цьому пристрої."
+    Select backup data: "Виберіть дані для імпорту"
+    Profiles and subscriptions: "Профілі та підписки"
+    Watch statistics: "Статистика"
+    Backup exported: "Резервну копію успішно експортовано"
+    Backup imported: "Резервну копію успішно імпорто"
     Import YouTube Takeout ZIP: "Імпортувати ZIP YouTube Takeout"
     Select Takeout data: "Виберіть дані для імпорту"
     Import selected data: "Імпортувати вибрані дані"

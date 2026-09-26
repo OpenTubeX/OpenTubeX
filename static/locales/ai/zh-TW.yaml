@@ -880,6 +880,15 @@ Settings:
     Show Bottom Right Actions Dock: 顯示右下角操作列
     Paused Interface Hide Delay: 暫停介面的隱藏延遲
   Data Settings:
+    Complete backup: "完整備份"
+    Import backup: "匯入備份"
+    Export backup: "匯出備份"
+    Backup description: "將個人檔案、播放清單、觀看紀錄、統計資料和可轉移的設定儲存於單一 ZIP 檔案。匯入時會與此裝置上的現有資料合併。"
+    Select backup data: "選擇要匯入的資料"
+    Profiles and subscriptions: "個人檔案與訂閱內容"
+    Watch statistics: "觀看統計"
+    Backup exported: "備份已成功匯出"
+    Backup imported: "備份已成功匯入"
     Import YouTube Takeout ZIP: "匯入 YouTube Takeout ZIP"
     Select Takeout data: "選取要匯入的資料"
     Import selected data: "匯入所選資料"
