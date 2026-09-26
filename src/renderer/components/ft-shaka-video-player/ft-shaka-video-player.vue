@@ -479,7 +479,7 @@
           :aria-label="$t('Playlist.Playlist')"
           :title="$t('Playlist.Playlist')"
           :aria-expanded="String(showFullscreenPlaylist)"
-          @click="setFullscreenPlaylist(!showFullscreenPlaylist)"
+          @click="shortsPhonePanels ? requestShortsPhonePanel('playlist') : setFullscreenPlaylist(!showFullscreenPlaylist)"
         >
           <FtIcon :icon="['fas', 'list']" />
         </button>
@@ -491,7 +491,7 @@
           :aria-label="$t('Video.Live Chat')"
           :title="$t('Video.Live Chat')"
           :aria-expanded="String(showFullscreenLiveChat)"
-          @click="setFullscreenLiveChat(!showFullscreenLiveChat)"
+          @click="shortsPhonePanels ? requestShortsPhonePanel('chat') : setFullscreenLiveChat(!showFullscreenLiveChat)"
         >
           <FtIcon :icon="['fas', 'message']" />
         </button>
@@ -503,7 +503,7 @@
           :aria-label="$t('Comments.Comments')"
           :title="$t('Comments.Comments')"
           :aria-expanded="String(showFullscreenComments)"
-          @click="setFullscreenComments(!showFullscreenComments)"
+          @click="shortsPhonePanels ? requestShortsPhonePanel('comments') : setFullscreenComments(!showFullscreenComments)"
         >
           <FtIcon :icon="['fas', 'comment']" />
         </button>

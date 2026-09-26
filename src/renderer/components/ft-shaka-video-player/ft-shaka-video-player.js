@@ -391,6 +391,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    shortsPhonePanels: {
+      type: Boolean,
+      default: false
+    },
     shortsMetadataOpen: {
       type: Boolean,
       default: false
@@ -612,6 +616,7 @@ export default defineComponent({
     'chapter-thumbnails-change',
     'sponsorblock-info-change',
     'toggle-shorts-metadata',
+    'open-phone-panel',
     'seeking',
     'seeked',
   ],
@@ -5497,7 +5502,8 @@ export default defineComponent({
             }
             rememberFullscreenTitleClick(event)
           }
-          setFullscreenMetadata(!showFullscreenMetadata.value)
+          if (props.shortsPhonePanels) requestShortsPhonePanel('metadata')
+          else setFullscreenMetadata(!showFullscreenMetadata.value)
         }
         fullscreenTitleOverlay.addEventListener('click', toggleFullscreenMetadata)
         fullscreenTitleOverlay.addEventListener('keydown', (event) => {
@@ -8087,6 +8093,10 @@ export default defineComponent({
         }
 
         const shouldOpen = event.detail && props.chapters.length > 0
+        if (shouldOpen && props.shortsPhonePanels) {
+          requestShortsPhonePanel('chapters')
+          return
+        }
 
         if (!isNativeFullscreenActive() && !fullWindowEnabled.value) {
           if (shouldOpen) ui?.getControls().hideSettingsMenus()
@@ -8132,6 +8142,12 @@ export default defineComponent({
         open,
         target: fullscreenCommentsOverlay.value
       })
+    }
+
+    function requestShortsPhonePanel(panel) {
+      if (isNativeFullscreenActive()) ui?.getControls().toggleFullScreen()
+      if (fullWindowEnabled.value) events.dispatchEvent(new CustomEvent('setFullWindow', { detail: false }))
+      emit('open-phone-panel', panel)
     }
 
     function setFullscreenLiveChat(shouldOpen) {
@@ -8196,6 +8212,10 @@ export default defineComponent({
     }
 
     function toggleFullscreenTranscript() {
+      if (props.shortsPhonePanels) {
+        requestShortsPhonePanel('transcript')
+        return
+      }
       const shouldOpen = !showFullscreenTranscript.value
 
       if (shouldOpen !== props.transcriptOpen) {
@@ -8220,6 +8240,10 @@ export default defineComponent({
     }
 
     function toggleFullscreenSponsorBlock() {
+      if (props.shortsPhonePanels) {
+        requestShortsPhonePanel('sponsorBlock')
+        return
+      }
       const shouldOpen = !showFullscreenSponsorBlock.value
 
       if (shouldOpen !== sponsorBlockInfoOpen.value) {
@@ -8319,7 +8343,7 @@ export default defineComponent({
     })
 
     watch(() => props.shortsMetadataOpen, open => {
-      if (!props.shortsPlayer) {
+      if (!props.shortsPlayer || props.shortsPhonePanels) {
         return
       }
 
@@ -11934,6 +11958,7 @@ export default defineComponent({
       showFullscreenComments,
       closeFullscreenComments,
       setFullscreenComments,
+      requestShortsPhonePanel,
       fullscreenLiveChatOverlay,
       fullscreenLiveChatTarget,
       showFullscreenLiveChat,

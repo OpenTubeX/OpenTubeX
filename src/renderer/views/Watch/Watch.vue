@@ -157,6 +157,7 @@
           :suppress-autoplay-after-sabr-reload="suppressAutoplayAfterSabrReload"
           :sabr-reload-state="sabrReloadState"
           :shorts-player="customShortsPlayerActive"
+          :shorts-phone-panels="shortsPhonePanelsEnabled"
           :shorts-metadata-open="shortsMetadataOpen"
           :shorts-aspect-ratio="videoAspectRatio"
           class="videoPlayer"
@@ -197,6 +198,7 @@
           @chapter-thumbnails-change="handleChapterThumbnailsChange"
           @sponsorblock-info-change="handleSponsorBlockInfoChange"
           @toggle-shorts-metadata="toggleShortsMetadata"
+          @open-phone-panel="openShortsPhonePanel"
         >
           <template
             v-if="isElectron && !customShortsPlayerActive && !localFilePlayback"
@@ -498,12 +500,12 @@
           <div
             v-if="!isLoading && commentsAvailable"
             class="shortsAction shortsComponentAction shortsCommentsAction"
-            :class="{ active: shortsCommentsPanelOpen }"
+            :class="{ active: shortsCommentsOpen }"
           >
             <FtIconButton
               :title="shortsCommentsText"
               :icon="['fas', 'comment-alt']"
-              :aria-pressed="shortsCommentsPanelOpen"
+              :aria-pressed="shortsCommentsOpen"
               theme="base"
               @click="toggleShortsComments"
             />
@@ -610,156 +612,163 @@
         class="shortsCommentsPanel"
         :class="{ shortsCommentsPanelOpen }"
       />
-      <div
-        v-if="customShortsPlayerActive"
-        class="shortsAuxPanel"
-        :class="{ shortsAuxPanelOpen }"
+      <FtPhonePanel
+        :enabled="shortsPhonePanelsEnabled"
+        :open="mobilePanel === 'metadata'"
+        :title="$t('Video.Metadata')"
+        @close="closeShortsPhonePanel"
       >
         <div
-          v-if="shortsMetadataOpen"
-          class="shortsAuxPanelHeader"
+          v-if="customShortsPlayerActive"
+          class="shortsAuxPanel"
+          :class="{ shortsAuxPanelOpen, shortsPhoneSheetContent: shortsPhonePanelsEnabled }"
         >
-          <h2>
-            <ft-icon :icon="['fas', 'circle-info']" />
-            {{ $t('Video.Metadata') }}
-          </h2>
-          <button
-            type="button"
-            class="shortsAuxPanelClose"
-            :aria-label="$t('Video.Close Metadata')"
-            :title="$t('Video.Close Metadata')"
-            @click="toggleShortsMetadata"
-          >
-            <ft-icon :icon="['fas', 'xmark']" />
-          </button>
-        </div>
-        <div
-          ref="shortsAuxPanelTarget"
-          v-overlay-scrollbars
-          class="shortsAuxPanelTarget"
-        >
-          <watch-video-info
-            v-if="shortsMetadataOpen && !isLoading"
-            :id="videoId"
-            :title="videoTitle"
-            :channel-id="channelId"
-            :channel-name="channelName"
-            :channel-thumbnail="channelThumbnail"
-            :channel-collaborators="channelCollaborators"
-            :published="videoPublished"
-            :premiere-date="premiereDate"
-            :subscription-count-text="channelSubscriptionCountText"
-            :offline="isOffline"
-            :like-count="videoLikeCount"
-            :dislike-count="videoDislikeCount"
-            :category="videoCategory"
-            :view-count="videoViewCount"
-            :get-timestamp="getTimestamp"
-            :is-live-content="isLiveContent"
-            :is-live="isLive"
-            :is-upcoming="isUpcoming"
-            :playlist-id="playlistId"
-            :get-playlist-state="getPlaylistState"
-            :length-seconds="videoLengthSeconds"
-            :video-thumbnail="thumbnail"
-            :metadata-history="videoMetadataHistory"
-            :in-user-playlist="!!selectedUserPlaylist"
-            :is-unlisted="isUnlisted"
-            :is-age-restricted="isFamilyFriendly === false"
-            :has-ai-generated-content="hasAiGeneratedContent"
-            :sponsor-block-full-video-category="sponsorBlockFullVideoCategory"
-            :active-format="activeFormat"
-            :playback-engine="activePlaybackEngine"
-            :playback-engine-version="activePlaybackEngineVersion"
-            :playback-engine-selection="playbackEngineSelection"
-            :stream-type="playbackStreamType"
-            :dash-available="dashFormatAvailable"
-            :legacy-available="legacyFormatAvailable"
-            :audio-available="audioFormatAvailable"
-            :local-file-playback="localFilePlayback"
-            :local-playback-downloads="localPlaybackDownloads"
-            :can-save-watched-progress="canSaveWatchProgress"
-            :current-playback-rate="currentPlaybackRate"
-            :current-video-quality="currentVideoQuality"
-            :current-subtitles-state="currentSubtitlesState"
-            :current-volume="currentVolume"
-            :sponsor-block-panel-open="showSidebarSponsorBlock"
-            :transcript-open="phonePanelsEnabled ? mobilePanel === 'transcript' : showTranscript"
-            :transcript-available="transcriptAvailable"
-            channel-setting-dropdown-portal
-            hide-share-button
-            hide-playlist-actions
-            hide-fullscreen-dock-actions
-            class="watchVideo"
-            @change-format="handleFormatChange"
-            @change-playback-engine="handlePlaybackEngineChange"
-            @use-local-source="useLocalPlaybackSource"
-            @use-online-source="useOnlinePlaybackSource"
-            @pause-player="pausePlayer"
-            @save-watched-progress="handleWatchProgressManualSave"
-            @save-channel-playback-speed="handleChannelPlaybackSpeedManualSave"
-            @save-channel-video-quality="handleChannelVideoQualityManualSave"
-            @save-channel-subtitles-state="handleChannelSubtitlesStateManualSave"
-            @save-channel-volume="handleChannelVolumeManualSave"
-          />
-          <watch-video-description
-            v-if="shortsMetadataOpen && !isLoading && !hideVideoDescription"
-            :description="videoDescription"
-            :description-html="videoDescriptionHtml"
-            :tags="videoTags"
-            :license="license"
-            :games="videoGames"
-            always-expanded
-            class="watchVideo"
-            @timestamp-event="changeTimestamp"
-          />
-          <WatchVideoSummary
-            v-if="shortsMetadataOpen && !isLoading && aiVideoSummaryMode !== 'hide' && videoSummary.length"
-            :key="videoId"
-            :paragraphs="videoSummary"
-            :expanded="aiVideoSummaryMode === 'expanded'"
-            class="watchVideo"
-            @toggle="clampShortsAuxPanelScroll"
-          />
-          <watch-video-sponsor-block
-            v-if="showSidebarSponsorBlock && !isLoading"
-            class="watchVideoSideBar watchVideoSponsorBlock"
-            :loading="sponsorBlockInfoLoading"
-            :pending-uuid="sponsorBlockInfoPendingUuid"
-            :segments="sponsorBlockInfoSegments"
-            :submission-enabled="sponsorBlockInfoSubmissionEnabled"
-            :contribution-stats="sponsorBlockContributionStats"
-            :contribution-stats-error="sponsorBlockContributionStatsError"
-            :contribution-stats-loaded="sponsorBlockContributionStatsLoaded"
-            :contribution-stats-loading="sponsorBlockContributionStatsLoading"
-            :auto-skip-disabled="sponsorBlockAutoSkipTemporarilyDisabled"
-            :channel-whitelisted="isSponsorBlockChannelWhitelisted"
-            :can-whitelist-channel="Boolean(channelId)"
-            :current-time="currentTime"
-            @close="closeSidebarSponsorBlock"
-            @refresh="refreshSponsorBlockInfo"
-            @skip="skipSponsorBlockInfoSegment"
-            @auto-skip-change="handleSponsorBlockAutoSkipToggle"
-            @channel-whitelist-change="handleSponsorBlockChannelWhitelistToggle"
-            @vote="voteOnSponsorBlockInfoSegment"
-          />
-          <watch-video-transcript
-            v-if="showTranscript && transcriptAvailable && !isLoading && !isLive && !isUpcoming"
-            :captions="captions"
-            :current-time="currentTime"
-            :preferred-caption-index="preferredTranscriptCaptionIndex"
-            :video-title="videoTitle"
-            class="watchVideoSideBar watchVideoTranscript"
-            @close="closeTranscript"
-            @timestamp-event="playTranscriptSegment"
-          />
           <div
-            ref="shortsAuxPanelContentEnd"
-            class="shortsAuxPanelContentEnd"
-            aria-hidden="true"
-          />
+            v-if="shortsMetadataOpen && !shortsPhonePanelsEnabled"
+            class="shortsAuxPanelHeader"
+          >
+            <h2>
+              <ft-icon :icon="['fas', 'circle-info']" />
+              {{ $t('Video.Metadata') }}
+            </h2>
+            <button
+              type="button"
+              class="shortsAuxPanelClose"
+              :aria-label="$t('Video.Close Metadata')"
+              :title="$t('Video.Close Metadata')"
+              @click="toggleShortsMetadata"
+            >
+              <ft-icon :icon="['fas', 'xmark']" />
+            </button>
+          </div>
+          <div
+            ref="shortsAuxPanelTarget"
+            v-overlay-scrollbars="!shortsPhonePanelsEnabled"
+            class="shortsAuxPanelTarget"
+          >
+            <watch-video-info
+              v-if="shortsMetadataOpen && !isLoading"
+              :id="videoId"
+              :title="videoTitle"
+              :channel-id="channelId"
+              :channel-name="channelName"
+              :channel-thumbnail="channelThumbnail"
+              :channel-collaborators="channelCollaborators"
+              :published="videoPublished"
+              :premiere-date="premiereDate"
+              :subscription-count-text="channelSubscriptionCountText"
+              :offline="isOffline"
+              :like-count="videoLikeCount"
+              :dislike-count="videoDislikeCount"
+              :category="videoCategory"
+              :view-count="videoViewCount"
+              :get-timestamp="getTimestamp"
+              :is-live-content="isLiveContent"
+              :is-live="isLive"
+              :is-upcoming="isUpcoming"
+              :playlist-id="playlistId"
+              :get-playlist-state="getPlaylistState"
+              :length-seconds="videoLengthSeconds"
+              :video-thumbnail="thumbnail"
+              :metadata-history="videoMetadataHistory"
+              :in-user-playlist="!!selectedUserPlaylist"
+              :is-unlisted="isUnlisted"
+              :is-age-restricted="isFamilyFriendly === false"
+              :has-ai-generated-content="hasAiGeneratedContent"
+              :sponsor-block-full-video-category="sponsorBlockFullVideoCategory"
+              :active-format="activeFormat"
+              :playback-engine="activePlaybackEngine"
+              :playback-engine-version="activePlaybackEngineVersion"
+              :playback-engine-selection="playbackEngineSelection"
+              :stream-type="playbackStreamType"
+              :dash-available="dashFormatAvailable"
+              :legacy-available="legacyFormatAvailable"
+              :audio-available="audioFormatAvailable"
+              :local-file-playback="localFilePlayback"
+              :local-playback-downloads="localPlaybackDownloads"
+              :can-save-watched-progress="canSaveWatchProgress"
+              :current-playback-rate="currentPlaybackRate"
+              :current-video-quality="currentVideoQuality"
+              :current-subtitles-state="currentSubtitlesState"
+              :current-volume="currentVolume"
+              :sponsor-block-panel-open="showSidebarSponsorBlock"
+              :transcript-open="phonePanelsEnabled ? mobilePanel === 'transcript' : showTranscript"
+              :transcript-available="transcriptAvailable"
+              channel-setting-dropdown-portal
+              hide-share-button
+              hide-playlist-actions
+              hide-fullscreen-dock-actions
+              class="watchVideo"
+              @change-format="handleFormatChange"
+              @change-playback-engine="handlePlaybackEngineChange"
+              @use-local-source="useLocalPlaybackSource"
+              @use-online-source="useOnlinePlaybackSource"
+              @pause-player="pausePlayer"
+              @save-watched-progress="handleWatchProgressManualSave"
+              @save-channel-playback-speed="handleChannelPlaybackSpeedManualSave"
+              @save-channel-video-quality="handleChannelVideoQualityManualSave"
+              @save-channel-subtitles-state="handleChannelSubtitlesStateManualSave"
+              @save-channel-volume="handleChannelVolumeManualSave"
+            />
+            <watch-video-description
+              v-if="shortsMetadataOpen && !isLoading && !hideVideoDescription"
+              :description="videoDescription"
+              :description-html="videoDescriptionHtml"
+              :tags="videoTags"
+              :license="license"
+              :games="videoGames"
+              always-expanded
+              class="watchVideo"
+              @timestamp-event="changeTimestamp"
+            />
+            <WatchVideoSummary
+              v-if="shortsMetadataOpen && !isLoading && aiVideoSummaryMode !== 'hide' && videoSummary.length"
+              :key="videoId"
+              :paragraphs="videoSummary"
+              :expanded="aiVideoSummaryMode === 'expanded'"
+              class="watchVideo"
+              @toggle="clampShortsAuxPanelScroll"
+            />
+            <watch-video-sponsor-block
+              v-if="showSidebarSponsorBlock && !isLoading && !shortsPhonePanelsEnabled"
+              class="watchVideoSideBar watchVideoSponsorBlock"
+              :loading="sponsorBlockInfoLoading"
+              :pending-uuid="sponsorBlockInfoPendingUuid"
+              :segments="sponsorBlockInfoSegments"
+              :submission-enabled="sponsorBlockInfoSubmissionEnabled"
+              :contribution-stats="sponsorBlockContributionStats"
+              :contribution-stats-error="sponsorBlockContributionStatsError"
+              :contribution-stats-loaded="sponsorBlockContributionStatsLoaded"
+              :contribution-stats-loading="sponsorBlockContributionStatsLoading"
+              :auto-skip-disabled="sponsorBlockAutoSkipTemporarilyDisabled"
+              :channel-whitelisted="isSponsorBlockChannelWhitelisted"
+              :can-whitelist-channel="Boolean(channelId)"
+              :current-time="currentTime"
+              @close="closeSidebarSponsorBlock"
+              @refresh="refreshSponsorBlockInfo"
+              @skip="skipSponsorBlockInfoSegment"
+              @auto-skip-change="handleSponsorBlockAutoSkipToggle"
+              @channel-whitelist-change="handleSponsorBlockChannelWhitelistToggle"
+              @vote="voteOnSponsorBlockInfoSegment"
+            />
+            <watch-video-transcript
+              v-if="showTranscript && transcriptAvailable && !isLoading && !isLive && !isUpcoming && !shortsPhonePanelsEnabled"
+              :captions="captions"
+              :current-time="currentTime"
+              :preferred-caption-index="preferredTranscriptCaptionIndex"
+              :video-title="videoTitle"
+              class="watchVideoSideBar watchVideoTranscript"
+              @close="closeTranscript"
+              @timestamp-event="playTranscriptSegment"
+            />
+            <div
+              ref="shortsAuxPanelContentEnd"
+              class="shortsAuxPanelContentEnd"
+              aria-hidden="true"
+            />
+          </div>
         </div>
-      </div>
+      </FtPhonePanel>
     </div>
     <ft-age-restricted
       v-if="(!isLoading && isFamilyFriendly === false && showFamilyFriendlyOnly)"
@@ -983,7 +992,7 @@
         </div>
       </div>
       <FtPhonePanel
-        :enabled="phonePanelsEnabled"
+        :enabled="phonePanelsEnabled || shortsPhonePanelsEnabled"
         :open="mobilePanel === 'chapters'"
         fill
         :title="videoChaptersKind === 'keyMoments' ? $t('Chapters.Key Moments') : $t('Chapters.Chapters')"
@@ -1026,44 +1035,53 @@
       </FtPhonePanel>
       <Teleport
         :to="fullscreenSponsorBlockTarget || 'body'"
-        :disabled="!fullscreenSponsorBlockOpen"
+        :disabled="!fullscreenSponsorBlockOpen || shortsPhonePanelsEnabled"
       >
-        <transition
-          name="sidebar-panel"
-          @before-leave="handleSidebarPanelBeforeLeave"
-          @after-leave="handleSidebarPanelAfterLeave"
-          @leave-cancelled="handleSidebarPanelAfterLeave"
+        <FtPhonePanel
+          :enabled="shortsPhonePanelsEnabled"
+          :open="mobilePanel === 'sponsorBlock'"
+          :title="$t('Settings.SponsorBlock Settings.SponsorBlock Settings')"
+          fill
+          custom-header
+          @close="closeShortsPhonePanel"
         >
-          <watch-video-sponsor-block
-            v-if="showSidebarSponsorBlock && !isLoading && (!customShortsPlayerActive || fullscreenSponsorBlockOpen)"
-            class="watchVideoSideBar watchVideoSponsorBlock"
-            :loading="sponsorBlockInfoLoading"
-            :pending-uuid="sponsorBlockInfoPendingUuid"
-            :segments="sponsorBlockInfoSegments"
-            :submission-enabled="sponsorBlockInfoSubmissionEnabled"
-            :contribution-stats="sponsorBlockContributionStats"
-            :contribution-stats-error="sponsorBlockContributionStatsError"
-            :contribution-stats-loaded="sponsorBlockContributionStatsLoaded"
-            :contribution-stats-loading="sponsorBlockContributionStatsLoading"
-            :auto-skip-disabled="sponsorBlockAutoSkipTemporarilyDisabled"
-            :channel-whitelisted="isSponsorBlockChannelWhitelisted"
-            :can-whitelist-channel="Boolean(channelId)"
-            :current-time="currentTime"
-            @close="closeSidebarSponsorBlock"
-            @refresh="refreshSponsorBlockInfo"
-            @skip="skipSponsorBlockInfoSegment"
-            @auto-skip-change="handleSponsorBlockAutoSkipToggle"
-            @channel-whitelist-change="handleSponsorBlockChannelWhitelistToggle"
-            @vote="voteOnSponsorBlockInfoSegment"
-          />
-        </transition>
+          <transition
+            name="sidebar-panel"
+            @before-leave="handleSidebarPanelBeforeLeave"
+            @after-leave="handleSidebarPanelAfterLeave"
+            @leave-cancelled="handleSidebarPanelAfterLeave"
+          >
+            <watch-video-sponsor-block
+              v-if="showSidebarSponsorBlock && !isLoading && (!customShortsPlayerActive || fullscreenSponsorBlockOpen || shortsPhonePanelsEnabled)"
+              class="watchVideoSideBar watchVideoSponsorBlock"
+              :loading="sponsorBlockInfoLoading"
+              :pending-uuid="sponsorBlockInfoPendingUuid"
+              :segments="sponsorBlockInfoSegments"
+              :submission-enabled="sponsorBlockInfoSubmissionEnabled"
+              :contribution-stats="sponsorBlockContributionStats"
+              :contribution-stats-error="sponsorBlockContributionStatsError"
+              :contribution-stats-loaded="sponsorBlockContributionStatsLoaded"
+              :contribution-stats-loading="sponsorBlockContributionStatsLoading"
+              :auto-skip-disabled="sponsorBlockAutoSkipTemporarilyDisabled"
+              :channel-whitelisted="isSponsorBlockChannelWhitelisted"
+              :can-whitelist-channel="Boolean(channelId)"
+              :current-time="currentTime"
+              @close="closeSidebarSponsorBlock"
+              @refresh="refreshSponsorBlockInfo"
+              @skip="skipSponsorBlockInfoSegment"
+              @auto-skip-change="handleSponsorBlockAutoSkipToggle"
+              @channel-whitelist-change="handleSponsorBlockChannelWhitelistToggle"
+              @vote="voteOnSponsorBlockInfoSegment"
+            />
+          </transition>
+        </FtPhonePanel>
       </Teleport>
       <Teleport
         :to="fullscreenTranscriptTarget || 'body'"
-        :disabled="!fullscreenTranscriptOpen"
+        :disabled="!fullscreenTranscriptOpen || shortsPhonePanelsEnabled"
       >
         <FtPhonePanel
-          :enabled="phonePanelsEnabled"
+          :enabled="phonePanelsEnabled || shortsPhonePanelsEnabled"
           :open="mobilePanel === 'transcript'"
           custom-header
           :title="$t('Video.Transcript.Title')"
@@ -1077,7 +1095,7 @@
             @leave-cancelled="handleSidebarPanelAfterLeave"
           >
             <watch-video-transcript
-              v-if="showTranscript && transcriptAvailable && !isLoading && !isLive && !isUpcoming && (!customShortsPlayerActive || fullscreenTranscriptOpen)"
+              v-if="showTranscript && transcriptAvailable && !isLoading && !isLive && !isUpcoming && (!customShortsPlayerActive || fullscreenTranscriptOpen || shortsPhonePanelsEnabled)"
               :captions="captions"
               :current-time="currentTime"
               :preferred-caption-index="preferredTranscriptCaptionIndex"
@@ -1092,10 +1110,10 @@
       </Teleport>
       <Teleport
         :to="fullscreenLiveChatTarget || 'body'"
-        :disabled="!fullscreenLiveChatOpen"
+        :disabled="!fullscreenLiveChatOpen || shortsPhonePanelsEnabled"
       >
         <FtPhonePanel
-          :enabled="phonePanelsEnabled"
+          :enabled="phonePanelsEnabled || shortsPhonePanelsEnabled"
           :open="mobilePanel === 'chat'"
           custom-header
           :title="liveChatIsReplay ? $t('Video.Live Chat Replay') : $t('Video.Live Chat')"
@@ -1139,27 +1157,35 @@
       </FtPhonePanel>
       <Teleport
         :to="fullscreenPlaylistTarget || 'body'"
-        :disabled="!fullscreenPlaylistOpen"
+        :disabled="!fullscreenPlaylistOpen || shortsPhonePanelsEnabled"
       >
-        <watch-video-playlist
-          v-if="watchingPlaylist"
-          v-show="!isLoading"
-          ref="watchVideoPlaylist"
-          :watch-view-loading="isLoading"
-          :auto-skip-unavailable="skipUnavailablePlaylistVideo && $store.getters.getSkipUnavailablePlaylistVideos"
-          :playlist-id="playlistId"
-          :playlist-type="playlistType"
-          :video-id="videoId"
-          :playlist-item-id="playlistItemId"
-          :download-id="typeof tabRoute.query.downloadId === 'string' ? tabRoute.query.downloadId : ''"
-          :fullscreen-overlay="fullscreenPlaylistOpen"
-          class="watchVideoSideBar watchVideoPlaylist resizablePlaylist"
-          :class="{ theatrePlaylist: useTheatreMode }"
-          @close="closeFullscreenPlaylist"
-          @pause-player="pausePlayer"
-          @skip-availability-change="handlePlaylistSkipAvailabilityChange"
-          @upcoming-videos-change="handleUpcomingPlaylistVideosChange"
-        />
+        <FtPhonePanel
+          :enabled="shortsPhonePanelsEnabled"
+          :open="mobilePanel === 'playlist'"
+          :title="$t('Playlist.Playlist')"
+          fill
+          @close="closeShortsPhonePanel"
+        >
+          <watch-video-playlist
+            v-if="watchingPlaylist"
+            v-show="!isLoading"
+            ref="watchVideoPlaylist"
+            :watch-view-loading="isLoading"
+            :auto-skip-unavailable="skipUnavailablePlaylistVideo && $store.getters.getSkipUnavailablePlaylistVideos"
+            :playlist-id="playlistId"
+            :playlist-type="playlistType"
+            :video-id="videoId"
+            :playlist-item-id="playlistItemId"
+            :download-id="typeof tabRoute.query.downloadId === 'string' ? tabRoute.query.downloadId : ''"
+            :fullscreen-overlay="fullscreenPlaylistOpen"
+            class="watchVideoSideBar watchVideoPlaylist resizablePlaylist"
+            :class="{ theatrePlaylist: useTheatreMode }"
+            @close="closeFullscreenPlaylist"
+            @pause-player="pausePlayer"
+            @skip-availability-change="handlePlaylistSkipAvailabilityChange"
+            @upcoming-videos-change="handleUpcomingPlaylistVideosChange"
+          />
+        </FtPhonePanel>
       </Teleport>
       <watch-video-recommendations
         v-if="!isLoading && !isOffline && !hideRecommendedVideos && (!localFilePlayback || recommendedVideos.length > 0)"
@@ -1179,15 +1205,15 @@
     >
       <Teleport
         :to="fullscreenCommentsTarget || (shortsCommentsOpen ? $refs.shortsCommentsTarget : null) || 'body'"
-        :disabled="!fullscreenCommentsOpen && !shortsCommentsOpen"
+        :disabled="shortsPhonePanelsEnabled || (!fullscreenCommentsOpen && !shortsCommentsOpen)"
       >
         <FtPhonePanel
-          :enabled="phonePanelsEnabled"
+          :enabled="phonePanelsEnabled || shortsPhonePanelsEnabled"
           :open="mobilePanel === 'comments'"
           fill
           custom-header
           :title="$t('Comments.Comments')"
-          @close="mobilePanel = null"
+          @close="shortsPhonePanelsEnabled ? closeShortsPhonePanel() : mobilePanel = null"
         >
           <CommentSection
             v-if="!isLoading && commentsAvailable"
@@ -1197,7 +1223,7 @@
             :channel-thumbnail="channelThumbnail"
             :channel-name="channelName"
             :comments-disabled="commentsDisabled"
-            :fullscreen-overlay="fullscreenCommentsOpen || shortsCommentsOpen"
+            :fullscreen-overlay="fullscreenCommentsOpen || (shortsCommentsOpen && !shortsPhonePanelsEnabled)"
             :highlighted-comment-id="tabRoute.query.commentId"
             @close-comments="closeFullscreenComments"
             @timestamp-event="changeTimestamp"

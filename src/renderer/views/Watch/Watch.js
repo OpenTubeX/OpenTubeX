@@ -224,6 +224,7 @@ export default defineComponent({
       t,
       isElectron: process.env.IS_ELECTRON,
       phoneLayout: usePhoneLayout(),
+      portraitLayout: usePhoneLayout('(orientation: portrait)'),
       currentLocale: locale,
       tabId,
       isTabPresented,
@@ -516,6 +517,9 @@ export default defineComponent({
     phonePanelsEnabled() {
       return this.phoneLayout && !this.customShortsPlayerActive && !this.fullscreenMetadataOpen &&
         !this.fullscreenCommentsOpen && !this.fullscreenTranscriptOpen && !this.fullscreenLiveChatOpen
+    },
+    shortsPhonePanelsEnabled() {
+      return this.phoneLayout && this.portraitLayout && this.customShortsPlayerActive
     },
     musicPlayerArtist: function () {
       return this.musicMediaType === MUSIC_MEDIA_TYPE.AUDIO_TRACK
@@ -818,15 +822,15 @@ export default defineComponent({
       ) ?? ''
     },
     shortsCommentsPanelOpen: function () {
-      return this.shortsCommentsOpen && !this.fullscreenCommentsOpen
+      return this.shortsCommentsOpen && !this.fullscreenCommentsOpen && !this.shortsPhonePanelsEnabled
     },
     shortsCommentsText: function () {
-      return this.shortsCommentsPanelOpen
+      return this.shortsCommentsOpen
         ? this.$t('Comments.Hide Comments')
         : this.$t('Comments.Show Comments')
     },
     shortsAuxPanelOpen: function () {
-      return this.customShortsPlayerActive && (
+      return this.customShortsPlayerActive && !this.shortsPhonePanelsEnabled && (
         this.shortsMetadataOpen ||
         this.showTranscript ||
         this.showSidebarSponsorBlock
@@ -1381,6 +1385,24 @@ export default defineComponent({
       if (panel === 'transcript') this.showTranscript = true
       if (panel === 'chat') this.liveChatOpen = true
     },
+    openShortsPhonePanel(panel) {
+      if (!this.shortsPhonePanelsEnabled) return
+      this.shortsMetadataOpen = false
+      this.shortsCommentsOpen = false
+      if (panel !== 'transcript') this.showTranscript = false
+      if (panel !== 'sponsorBlock' && this.showSidebarSponsorBlock) this.closeSidebarSponsorBlock()
+      if (panel === 'sponsorBlock' && !this.showSidebarSponsorBlock) this.$refs.player?.toggleSponsorBlockInfo()
+      this.openPhonePanel(panel)
+      if (panel === 'comments') this.shortsCommentsOpen = true
+      if (panel === 'metadata') this.shortsMetadataOpen = true
+    },
+    closeShortsPhonePanel() {
+      if (this.mobilePanel === 'sponsorBlock') this.closeSidebarSponsorBlock()
+      if (this.mobilePanel === 'transcript') this.closeTranscript()
+      this.shortsMetadataOpen = false
+      this.shortsCommentsOpen = false
+      this.mobilePanel = null
+    },
     handleDownloadConnectionChange({ detail }) {
       const chatWasOpen = this.showLiveChat || this.fullscreenLiveChatOpen || this.mobilePanel === 'chat'
       this.isOffline = detail === 'offline'
@@ -1759,6 +1781,7 @@ export default defineComponent({
       if (!open && this.showSidebarSponsorBlock) {
         this.sidebarPanelLeaving = true
       }
+      if (!open && this.mobilePanel === 'sponsorBlock') this.mobilePanel = null
       this.showSidebarSponsorBlock = open
       this.sponsorBlockInfoLoading = loading
       this.sponsorBlockInfoPendingUuid = pendingUuid
@@ -1780,9 +1803,15 @@ export default defineComponent({
       }
     },
     closeSidebarSponsorBlock() {
+      if (this.mobilePanel === 'sponsorBlock') this.mobilePanel = null
       this.$refs.player?.closeSponsorBlockInfo()
     },
     toggleSponsorBlockInfo() {
+      if (this.shortsPhonePanelsEnabled) {
+        if (this.mobilePanel === 'sponsorBlock') this.closeShortsPhonePanel()
+        else this.openShortsPhonePanel('sponsorBlock')
+        return
+      }
       if (this.customShortsPlayerActive && !this.showSidebarSponsorBlock) {
         this.resetShortsAuxPanelScroll()
         this.shortsMetadataOpen = false
@@ -1794,6 +1823,11 @@ export default defineComponent({
       this.$refs.player?.toggleSponsorBlockInfo()
     },
     toggleTranscript() {
+      if (this.shortsPhonePanelsEnabled) {
+        if (this.mobilePanel === 'transcript') this.closeShortsPhonePanel()
+        else this.openShortsPhonePanel('transcript')
+        return
+      }
       if (this.phonePanelsEnabled) {
         this.openPhonePanel('transcript')
         return
@@ -1834,6 +1868,11 @@ export default defineComponent({
       this.shortsCommentsOpen = false
     },
     toggleShortsMetadata() {
+      if (this.shortsPhonePanelsEnabled) {
+        if (this.mobilePanel === 'metadata') this.closeShortsPhonePanel()
+        else this.openShortsPhonePanel('metadata')
+        return
+      }
       const shouldOpen = !this.shortsMetadataOpen
       if (shouldOpen) {
         this.resetShortsAuxPanelScroll()
@@ -1881,6 +1920,7 @@ export default defineComponent({
       this.sidebarPanelLeaving = false
     },
     closeFullscreenPlaylist() {
+      if (this.mobilePanel === 'playlist') this.mobilePanel = null
       this.$refs.player?.closeFullscreenPlaylist()
     },
     refreshSponsorBlockInfo() {
@@ -2674,6 +2714,11 @@ export default defineComponent({
     },
 
     toggleShortsComments: function () {
+      if (this.shortsPhonePanelsEnabled) {
+        if (this.mobilePanel === 'comments') this.closeShortsPhonePanel()
+        else this.openShortsPhonePanel('comments')
+        return
+      }
       if (this.shortsCommentsPanelOpen) {
         this.shortsCommentsOpen = false
         return
