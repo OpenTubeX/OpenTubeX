@@ -1171,6 +1171,30 @@ test('native right control hover remains inside its pill', async ({ app, page })
   await page.evaluate(() => window.nativeScreenTest.destroy())
 })
 
+test('collapsed SponsorBlock highlight icon is centered in its pill', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await enableMobileInput(page)
+  await setWindowSize(app, page, { width: 740, height: 400 })
+  await openNativeScreen(page)
+
+  const button = page.locator('.ft-shaka-highlight-button')
+  await button.evaluate(element => {
+    element.classList.remove('shaka-hidden')
+    element.classList.add('ft-shaka-highlight-button-collapsed')
+  })
+  for (const zoomFactor of [1, 1.25]) {
+    await page.evaluate(value => window.ftElectron.setZoomFactor(value), zoomFactor)
+    const offset = await button.evaluate(element => {
+      const buttonBounds = element.getBoundingClientRect()
+      const iconBounds = element.querySelector('.shaka-ui-icon').getBoundingClientRect()
+      return (iconBounds.left + iconBounds.right - buttonBounds.left - buttonBounds.right) / 2
+    })
+    expect(Math.abs(offset)).toBeLessThanOrEqual(1)
+  }
+  await page.evaluate(() => window.nativeScreenTest.destroy())
+})
+
 test('playing video keeps the quick speed bar at its dragged scroll position', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
