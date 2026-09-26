@@ -103,7 +103,12 @@
     <CapacitorTabSelectionControls
       v-if="selecting"
       :count="selectedTabIds.size"
-      :busy="closingTabs"
+      :busy="closingTabs || runningSelectionAction"
+      :can-pin="canPinSelectedTabs"
+      :can-unpin="canUnpinSelectedTabs"
+      :can-load="canLoadSelectedTabs"
+      :can-unload="canUnloadSelectedTabs"
+      @action="runSelectedTabAction"
       @close="closeSelectedTabs"
       @cancel="clearSelection"
     />
@@ -175,12 +180,18 @@ const {
   selecting,
   selectedTabIds,
   closingTabs,
+  runningSelectionAction,
+  canPinSelectedTabs,
+  canUnpinSelectedTabs,
+  canLoadSelectedTabs,
+  canUnloadSelectedTabs,
   clearSelection,
   toggleTabSelection,
   selectActionTab,
   relatedTabIds,
   closeRelatedTabs,
   closeSelectedTabs,
+  runSelectedTabAction,
   actionTab,
   actionTabYoutubeUrl,
   activateTab,
