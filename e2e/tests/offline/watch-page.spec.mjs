@@ -1531,6 +1531,8 @@ test('shows the restricted playback setup hint and loads yt-dlp subtitles after 
   const moreOptions = player.getByRole('button', { name: 'More settings' })
   await moreOptions.click()
   await player.locator('.shaka-overflow-menu').getByRole('button', { name: 'Captions' }).click()
+  await expect(player).toBeVisible()
+  await expect(player.locator('.dlnaCastControl')).toBeHidden()
   await player.locator('.shaka-text-languages').getByRole('button', { name: 'Auto-translate' }).click()
   await player.locator('.ft-caption-translation-options').getByRole('button', { name: 'German' }).click()
   await expect.poll(() => player.evaluate(element => {
