@@ -1,38 +1,44 @@
 <template>
   <section class="sponsorBlockPanel">
-    <header class="sponsorBlockHeader">
-      <div class="sponsorBlockHeading">
-        <span
-          class="sponsorBlockShield"
-          aria-hidden="true"
-        >
-          <ft-icon :icon="['fas', 'shield-halved']" />
-        </span>
-        <h3>{{ $t('Settings.SponsorBlock Settings.SponsorBlock Settings') }}</h3>
-      </div>
-      <div class="sponsorBlockHeaderActions">
-        <button
-          type="button"
-          :disabled="loading || (submissionEnabled && contributionStatsLoading)"
-          :aria-label="$t('Video.Player.SponsorBlock.RefreshInfo')"
-          :title="$t('Video.Player.SponsorBlock.RefreshInfo')"
-          @click="$emit('refresh')"
-        >
-          <ft-icon
-            :icon="['fas', 'sync']"
-            :spin="loading || (submissionEnabled && contributionStatsLoading)"
-          />
-        </button>
-        <button
-          type="button"
-          :aria-label="$t('Close')"
-          :title="$t('Close')"
-          @click="$emit('close')"
-        >
-          <ft-icon :icon="['fas', 'xmark']" />
-        </button>
-      </div>
-    </header>
+    <Teleport
+      :to="phonePanelHeader || 'body'"
+      :disabled="!phonePanelHeader"
+    >
+      <header class="sponsorBlockHeader">
+        <div class="sponsorBlockHeading">
+          <span
+            class="sponsorBlockShield"
+            aria-hidden="true"
+          >
+            <ft-icon :icon="['fas', 'shield-halved']" />
+          </span>
+          <h3>{{ $t('Settings.SponsorBlock Settings.SponsorBlock Settings') }}</h3>
+        </div>
+        <div class="sponsorBlockHeaderActions">
+          <button
+            type="button"
+            :disabled="loading || (submissionEnabled && contributionStatsLoading)"
+            :aria-label="$t('Video.Player.SponsorBlock.RefreshInfo')"
+            :title="$t('Video.Player.SponsorBlock.RefreshInfo')"
+            @click="$emit('refresh')"
+          >
+            <ft-icon
+              :icon="['fas', 'sync']"
+              :spin="loading || (submissionEnabled && contributionStatsLoading)"
+            />
+          </button>
+          <button
+            v-if="!phonePanelHeader"
+            type="button"
+            :aria-label="$t('Close')"
+            :title="$t('Close')"
+            @click="$emit('close')"
+          >
+            <ft-icon :icon="['fas', 'xmark']" />
+          </button>
+        </div>
+      </header>
+    </Teleport>
     <div
       ref="contentScroller"
       v-overlay-scrollbars
@@ -268,7 +274,7 @@
 </template>
 
 <script setup>
-import { nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { inject, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { isSponsorBlockFullVideoSegment } from '../../helpers/player/sponsorBlockFullVideo'
 import { formatNumber } from '../../helpers/utils'
@@ -305,6 +311,7 @@ defineEmits(['auto-skip-change', 'channel-whitelist-change', 'close', 'refresh',
 
 const selectedUuid = ref(null)
 const { t } = useI18n()
+const phonePanelHeader = inject('phonePanelHeader', null)
 const contentScroller = useTemplateRef('contentScroller')
 const contentEnd = useTemplateRef('contentEnd')
 let clampFrame = null

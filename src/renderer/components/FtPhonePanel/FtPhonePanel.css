@@ -44,6 +44,7 @@
 .fillPanel :deep(.phoneCommentCard),
 .fillPanel :deep(.watchQueue),
 .fillPanel :deep(.transcriptCard),
+.fillPanel :deep(.watchVideoSponsorBlock),
 .fillPanel :deep(.phoneLiveChat),
 .fillPanel :deep(.phoneLiveChat > .relative) {
   display: flex;
@@ -56,6 +57,7 @@
 .fillPanel :deep(.chaptersWrapper),
 .fillPanel :deep(.queueItems),
 .fillPanel :deep(.transcriptSegments),
+.fillPanel :deep(.sponsorBlockContent),
 .fillPanel :deep(.liveChatComments) {
   flex: 1;
   min-block-size: 0;
@@ -64,6 +66,10 @@
 
 .fillPanel :deep(.liveChatComments) {
   block-size: auto !important;
+}
+
+.fillPanel :deep(.watchVideoSponsorBlock) {
+  max-block-size: none;
 }
 
 .phonePanelContent :deep(.chaptersPanelHeader) {
@@ -76,6 +82,7 @@
 }
 
 .phonePanelHeaderContent :deep(.transcriptHeader),
+.phonePanelHeaderContent :deep(.sponsorBlockHeader),
 .phonePanelHeaderContent :deep(.queueHeader),
 .phonePanelHeaderContent :deep(.titleContainer),
 .phonePanelHeaderContent :deep(.commentsTitle) {
@@ -114,6 +121,10 @@
 
 .phonePanelHeaderContent :deep(.transcriptHeaderActions) {
   gap: 0;
+}
+
+.phonePanelHeaderContent :deep(.sponsorBlockHeader) {
+  border: 0;
 }
 
 .phonePanelHeaderContent :deep(.transcriptLanguageMenu) {

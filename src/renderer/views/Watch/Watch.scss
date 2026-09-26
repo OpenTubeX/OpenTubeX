@@ -1921,3 +1921,15 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+:global(.phonePanelContent .shortsPhoneSheetContent) {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  overflow: visible;
+  background: transparent;
+}
+
+:global(.phonePanelContent .shortsPhoneSheetContent .shortsAuxPanelTarget) {
+  overflow: visible;
+}

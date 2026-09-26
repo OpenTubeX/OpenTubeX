@@ -121,12 +121,17 @@ watch([dialog, () => props.open], updatePresentation, { flush: 'post' })
 onUpdated(updatePresentation)
 document.addEventListener('fullscreenchange', updatePresentation)
 const sheetTop = ref(0)
-const sheetStyle = computed(() => docked.value
-  ? {
-      insetBlockStart: `max(var(--app-safe-area-inset-top, 0px), ${visibleTop.value}px)`,
-      blockSize: `calc(var(--phone-viewport-height, 100dvh) - max(var(--app-safe-area-inset-top, 0px), ${visibleTop.value}px))`
-    }
-  : null)
+const sheetStyle = computed(() => {
+  if (!docked.value) return null
+  const top = shortsPlayer.value && !landscape.value && expanded.value
+    ? `calc(var(--phone-viewport-height, 100dvh) * 0.3 + ${Math.min(0, dragOffset.value)}px)`
+    : `${visibleTop.value}px`
+  const inset = `max(var(--app-safe-area-inset-top, 0px), ${top})`
+  return {
+    insetBlockStart: inset,
+    blockSize: `calc(var(--phone-viewport-height, 100dvh) - ${inset})`
+  }
+})
 let resize
 let drag = null
 let animation
@@ -204,7 +209,6 @@ watch([dialog, () => props.enabled, () => props.open, docked, fullscreenElement,
       }
       if (!presentationSuspended) {
         expanded.value = landscape.value || shortsPlayer.value
-        if (shortsPlayer.value) resumePlayback = expandPanel?.()
       }
       measurePlayer()
       element.show()

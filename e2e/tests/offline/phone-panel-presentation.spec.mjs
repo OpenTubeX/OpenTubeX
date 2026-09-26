@@ -1,8 +1,84 @@
-import { test, expect, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, setPlayerFullscreen, setWindowSize } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 test.use({ seed: { settings: { animationSpeed: 0, videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
+
+test('portrait Shorts actions open phone sheets instead of side panels', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page, { captionVideoIds: ['jNQXAC9IVRw'] })
+  await openMockedVideo(page)
+  await setWindowSize(app, page, { width: 480, height: 800 })
+  const watch = await watchViewHandle(page)
+  await watch.evaluate(async vm => {
+    vm.useCustomShortsPlayerForCurrentVideo = true
+    vm.updateShortsPlayerState(30, [{ width: 360, height: 640 }])
+    await vm.$nextTick()
+  })
+  await expect(page.locator('.ftVideoPlayer')).toHaveClass(/shortsPlayer/)
+  expect(await watch.evaluate(vm => ({
+    phoneLayout: vm.phoneLayout,
+    portraitLayout: vm.portraitLayout,
+    shortsPhonePanelsEnabled: vm.shortsPhonePanelsEnabled
+  }))).toEqual({ phoneLayout: true, portraitLayout: true, shortsPhonePanelsEnabled: true })
+  const video = page.locator('.ftVideoPlayer video')
+  await expect(video).toHaveJSProperty('paused', false)
+
+  for (const [action, title] of [
+    ['.shortsExternalTitleButton', 'Video information'],
+    ['.shortsCommentsAction button', 'Comments'],
+    ['.shortsComponentAction button[title="Show transcript"]', 'Transcript']
+  ]) {
+    // Electron keeps its desktop side navigation over the title at this width.
+    await page.locator(action).evaluate(button => button.click())
+    const sheet = page.locator('.dockedSheet[open]')
+    await expect(sheet).toBeVisible()
+    await expect(video).toHaveJSProperty('paused', false)
+    if (title === 'Video information') {
+      await expect(sheet.locator('.shortsAuxPanelTarget')).toHaveCSS('overflow-y', 'visible')
+    }
+    await expect.poll(async () => {
+      const { top, height } = await sheet.evaluate(el => el.getBoundingClientRect())
+      return height / (top + height)
+    }).toBeGreaterThan(0.68)
+    await expect.poll(async () => {
+      const { top, height } = await sheet.evaluate(el => el.getBoundingClientRect())
+      return height / (top + height)
+    }).toBeLessThan(0.72)
+    await expect(sheet.locator('.mobileSheetHeader')).toContainText(title)
+    await expect(page.locator('.shortsAuxPanelOpen, .shortsCommentsPanelOpen')).toHaveCount(0)
+    await sheet.locator('.mobileSheetHeader').getByRole('button', { name: 'Close' }).click()
+    await expect(sheet).toHaveCount(0)
+  }
+
+  await watch.evaluate(vm => vm.$store.dispatch('updateUseSponsorBlock', true))
+  const sponsorAction = page.locator('.shortsComponentAction button[title="Open SponsorBlock info"]')
+  await expect(sponsorAction).toHaveCount(1)
+  await sponsorAction.evaluate(button => button.click())
+  await expect(page.locator('.dockedSheet[open]')).toBeVisible()
+  await expect(video).toHaveJSProperty('paused', false)
+  await expect(page.locator('.dockedSheet[open] .mobileSheetHeader .sponsorBlockHeader')).toHaveCount(1)
+  await expect(page.locator('.shortsAuxPanelOpen')).toHaveCount(0)
+  await page.locator('.dockedSheet[open] .mobileSheetHeader').getByRole('button', { name: 'Close' }).click()
+  await expect(page.locator('.dockedSheet[open]')).toHaveCount(0)
+
+  await watch.evaluate(vm => {
+    vm.videoChapters = [{ title: 'Chapter one', timestamp: '0:00', startSeconds: 0 }]
+    vm.openShortsPhonePanel('chapters')
+  })
+  const chaptersSheet = page.locator('.dockedSheet[open]')
+  await expect(chaptersSheet).toBeVisible()
+  await expect(chaptersSheet).toContainText('Chapter one')
+  await expect(video).toHaveJSProperty('paused', false)
+  await chaptersSheet.locator('.mobileSheetHeader').getByRole('button', { name: 'Close' }).click()
+  await expect(chaptersSheet).toHaveCount(0)
+  expect(await watch.evaluate(vm => vm.showSidebarChapters)).toBe(false)
+
+  await setPlayerFullscreen(page, true)
+  await page.locator('.playerFullscreenTitleOverlay').evaluate(title => title.click())
+  await expect.poll(() => page.locator('.ftVideoPlayer').evaluate(player => document.fullscreenElement === player)).toBe(false)
+  await expect(page.locator('.dockedSheet[open]')).toBeVisible()
+  await expect(page.locator('.fullscreenMetadataOverlay.open')).toHaveCount(0)
+})
 
 for (const zoom of [1, 0.95]) {
   for (const mode of ['native', 'browser', 'pip']) {
