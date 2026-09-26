@@ -950,7 +950,7 @@ Settings:
     Privacy Policy: "Reolenn brevezded ar servijer-mañ"
     Enhanced Privacy Enabled: "Gweredekaet eo ar prevezded kreñvaet. Roadennoù goubredañ sifret hepken a vez kadavet gant ar servijer."
     Enhanced Privacy Unsupported: "Diwallit: ar servijer-mañ ne skor ket ar prevezded kreñvaet. Gallout a ra e verour gwelet ar roadennoù goubredet."
-    Description: 'Goubredit ar c’houmanantoù, ar profiloù, ar rolloù-lenn, istor ar selladennoù hag an arventennoù skoret gant ur servijer goubredañ OpenTubeX pe LibreTube. Disparti e chom ivinelloù an urzhiataer hag ar pellgomzer nemet ma rannit anezho. Marteze ne skor ket servijerioù LibreTube an holl arc’hwelioù goubredañ.'
+    Description: 'Goubredit ar c’houmanantoù, ar profiloù, ar rolloù-lenn, istor ar selladennoù hag an arventennoù skoret gant ur servijer goubredañ OpenTubeX pe LibreTube. Marteze ne skor ket servijerioù LibreTube an holl arc’hwelioù goubredañ.'
     Server URL: "URL ar servijer"
     Checking Server: "O wiriañ ar servijer goubredañ…"
     Server Unavailable: "N'eus ket bet gallet kennaskañ ouzh ar servijer goubredañ-mañ. Gwiriit an URL ha klaskit en-dro."
@@ -1032,7 +1032,7 @@ Settings:
     Data Loss Warning: "Stad ar servijer a zilamfe {deleted} diwar {previous} elfenn {collection} bet goubredet a-raok. Gallout a ra talvezout eo c'hwitet un treuzkas pe un adderaouekaat ar servijer. Kendalc'hit hepken ma fell deoc'h dilemel anezho hag ez eus un eiladenn-gwarediñ ganeoc'h."
     Confirm Data Loss: "Dilemel ha kenderc'hel"
     Use Shared Tabs: 'Arverañ an hevelep strollad ivinelloù war an holl drevnadoù'
-    Shared Tabs Warning: 'Erlec’hiañ a ra an ivinelloù rannet ar strollad a-vremañ war an drevnadoù kennasket. Lezit an dra-mañ lazhet evit mirout ivinelloù disparti war urzhiataer ha pellgomzer.'
+    Shared Tabs Warning: 'An ivinelloù digor war an trevnad-mañ a zeu da vezañ an hollad rannet. Pa vez sinkronet an trevnadoù all, e vez erlec’hiet o ivinelloù digor gant an hollad-se; ne vez ket kendeuzet ivinelloù an trevnadoù disheñvel.'
     Tabs From Other Devices: 'Ivinelloù eus trevnadoù all'
     Device Tab Session: '{platform} · {count} ivinell'
     Mobile Device: 'Pellgomzer'

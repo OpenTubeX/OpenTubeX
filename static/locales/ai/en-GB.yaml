@@ -931,7 +931,7 @@ Settings:
     Privacy Policy: Privacy policy for this server
     Enhanced Privacy Enabled: Enhanced privacy is enabled. The server stores only encrypted sync data.
     Enhanced Privacy Unsupported: Warning — this server does not support enhanced privacy. Synced data is visible to its operator.
-    Description: 'Synchronise subscriptions, profiles, playlists, watch history, and supported settings with an OpenTubeX or LibreTube sync server. Desktop and mobile tabs stay separate unless you explicitly share them. LibreTube servers may not support every sync feature.'
+    Description: 'Synchronise subscriptions, profiles, playlists, watch history, and supported settings with an OpenTubeX or LibreTube sync server. LibreTube servers may not support every sync feature.'
     Server URL: Server URL
     Checking Server: Checking sync server…
     Server Unavailable: Unable to connect to this sync server. Check the URL and try again.
@@ -1013,7 +1013,7 @@ Settings:
     Data Loss Warning: The server state would delete {deleted} of {previous} previously synced {collection} items. This can indicate a failed server migration or reset. Continue only if this deletion is intentional and you have a backup.
     Confirm Data Loss: Delete and continue
     Use Shared Tabs: 'Use one shared tab set across devices'
-    Shared Tabs Warning: 'Shared tabs replace the current tab set on connected devices. Keep this off to preserve separate desktop and mobile tabs.'
+    Shared Tabs Warning: 'The open tabs on this device become the shared set. Other devices replace their open tabs with this set when they sync; tabs from different devices are not combined.'
     Tabs From Other Devices: 'Tabs from other devices'
     Device Tab Session: '{platform} · {count} tabs'
     Mobile Device: 'Mobile'

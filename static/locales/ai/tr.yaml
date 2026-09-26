@@ -951,7 +951,7 @@ Settings:
     Privacy Policy: Bu sunucunun gizlilik politikası
     Enhanced Privacy Enabled: Gelişmiş gizlilik etkin. Sunucu yalnızca şifrelenmiş eşitleme verilerini saklar.
     Enhanced Privacy Unsupported: 'Uyarı: Bu sunucu gelişmiş gizliliği desteklemiyor. Eşitlenen veriler sunucu işletmecisi tarafından görülebilir.'
-    Description: 'Abonelikleri, profilleri, oynatma listelerini, izleme geçmişini ve desteklenen ayarları bir OpenTubeX veya LibreTube eşitleme sunucusuyla eşitleyin. Açıkça paylaşmadığınız sürece masaüstü ve mobil sekmeler ayrı kalır. LibreTube sunucuları tüm eşitleme özelliklerini desteklemeyebilir.'
+    Description: 'Abonelikleri, profilleri, oynatma listelerini, izleme geçmişini ve desteklenen ayarları bir OpenTubeX veya LibreTube eşitleme sunucusuyla eşitleyin. LibreTube sunucuları tüm eşitleme özelliklerini desteklemeyebilir.'
     Server URL: Sunucu URL'si
     Checking Server: Eşitleme sunucusu denetleniyor…
     Server Unavailable: Bu eşitleme sunucusuna bağlanılamadı. URL'yi denetleyip yeniden deneyin.
@@ -1032,7 +1032,7 @@ Settings:
     Data Loss Warning: Sunucunun durumu, daha önce eşitlenen {previous} {collection} öğesinden {deleted} tanesini silecek. Bu durum, başarısız bir sunucu geçişine veya sıfırlamasına işaret edebilir. Yalnızca silme işlemi bilerek yapılıyorsa ve yedeğiniz varsa devam edin.
     Confirm Data Loss: Sil ve devam et
     Use Shared Tabs: 'Cihazlar arasında tek bir ortak sekme grubu kullan'
-    Shared Tabs Warning: 'Ortak sekmeler, bağlı cihazlardaki mevcut sekme grubunun yerini alır. Masaüstü ve mobil sekmeleri ayrı tutmak için bunu kapalı bırakın.'
+    Shared Tabs Warning: 'Bu cihazda açık olan sekmeler paylaşılan küme olur. Diğer cihazlar eşitlendiklerinde açık sekmelerini bu kümeyle değiştirir; farklı cihazların sekmeleri birleştirilmez.'
     Tabs From Other Devices: 'Diğer cihazlardaki sekmeler'
     Device Tab Session: '{platform} · {count} sekme'
     Mobile Device: 'Mobil'

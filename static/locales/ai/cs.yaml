@@ -950,7 +950,7 @@ Settings:
     Privacy Policy: Zásady ochrany soukromí tohoto serveru
     Enhanced Privacy Enabled: Rozšířená ochrana soukromí je zapnutá. Server ukládá pouze šifrovaná synchronizovaná data.
     Enhanced Privacy Unsupported: Varování. Tento server nepodporuje rozšířenou ochranu soukromí. Jeho provozovatel může synchronizovaná data zobrazit.
-    Description: 'Synchronizujte odběry, profily, playlisty, historii sledování a podporovaná nastavení se synchronizačním serverem OpenTubeX nebo LibreTube. Karty na počítači a mobilu zůstanou oddělené, pokud je výslovně nesdílíte. Servery LibreTube nemusí podporovat všechny funkce synchronizace.'
+    Description: 'Synchronizujte odběry, profily, playlisty, historii sledování a podporovaná nastavení se synchronizačním serverem OpenTubeX nebo LibreTube. Servery LibreTube nemusí podporovat všechny funkce synchronizace.'
     Server URL: Adresa URL serveru
     Checking Server: Kontrola synchronizačního serveru…
     Server Unavailable: K tomuto synchronizačnímu serveru se nelze připojit. Zkontrolujte adresu URL a zkuste to znovu.
@@ -1032,7 +1032,7 @@ Settings:
     Data Loss Warning: Stav serveru by smazal {deleted} z {previous} dříve synchronizovaných položek kolekce {collection}. Může to znamenat, že se nezdařil převod nebo obnovení serveru. Pokračujte jen v případě, že je smazání záměrné a máte zálohu.
     Confirm Data Loss: Smazat a pokračovat
     Use Shared Tabs: 'Používat jednu sdílenou sadu karet na všech zařízeních'
-    Shared Tabs Warning: 'Sdílené karty nahradí aktuální sadu karet na připojených zařízeních. Nechte tuto možnost vypnutou, chcete-li zachovat oddělené karty na počítači a mobilu.'
+    Shared Tabs Warning: 'Otevřené karty v tomto zařízení se stanou sdílenou sadou. Ostatní zařízení při synchronizaci nahradí své otevřené karty touto sadou; karty z různých zařízení se nesloučí.'
     Tabs From Other Devices: 'Karty z jiných zařízení'
     Device Tab Session: '{platform} · karet: {count}'
     Mobile Device: 'Mobil'

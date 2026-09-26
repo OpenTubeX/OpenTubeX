@@ -5758,6 +5758,40 @@ test.describe('tabs from other synced devices', () => {
     }
   })
 
+  test('confirms before replacing other devices’ tabs with this device tab set', async ({ page }) => {
+    await page.route('https://sync.opentubex.org/**', route => route.fulfill({
+      json: { status: 'ok', capabilities: { encrypted_sync: 1 } }
+    }))
+    const section = await goToSettingsSection(page, 'sync')
+    const toggle = section.getByRole('checkbox', { name: 'Use one shared tab set across devices' })
+    const toggleLabel = section.locator('label.switch-label')
+      .filter({ hasText: 'Use one shared tab set across devices' })
+    await expect(toggle).not.toBeChecked()
+    await toggleLabel.click()
+
+    const dialog = page.getByRole('dialog', { name: 'Use one shared tab set across devices' })
+    await expect(dialog).toContainText('The open tabs on this device become the shared set.')
+    await expect(dialog).toContainText('tabs from different devices are not combined')
+    await dialog.getByRole('button', { name: 'Cancel' }).click()
+    await expect(dialog).toHaveCount(0)
+    await expect(toggle).not.toBeChecked()
+
+    await toggleLabel.click()
+    await dialog.getByRole('button', { name: 'Use one shared tab set across devices' }).click()
+    await expect(dialog).toHaveCount(0)
+    await expect(toggle).toBeChecked()
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.state.settings.syncServerSharedTabs
+    })).toBe(true)
+    await toggleLabel.click()
+    await expect(dialog).toHaveCount(0)
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.state.settings.syncServerSharedTabs
+    })).toBe(false)
+  })
+
   test('keeps synced tab sets in the tab organizer instead of settings', async ({ page }) => {
     await page.route('https://sync.opentubex.org/**', route => route.fulfill({
       json: { status: 'ok', capabilities: {} }

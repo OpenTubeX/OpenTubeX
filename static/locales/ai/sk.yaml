@@ -951,7 +951,7 @@ Settings:
     Privacy Policy: Zásady ochrany súkromia tohto servera
     Enhanced Privacy Enabled: Rozšírená ochrana súkromia je zapnutá. Server uchováva len zašifrované synchronizované údaje.
     Enhanced Privacy Unsupported: 'Upozornenie: tento server nepodporuje rozšírenú ochranu súkromia. Prevádzkovateľ servera môže vidieť synchronizované údaje.'
-    Description: 'Synchronizujte odbery, profily, playlisty, históriu pozerania a podporované nastavenia so synchronizačným serverom OpenTubeX alebo LibreTube. Karty v počítači a mobile zostanú oddelené, pokiaľ ich výslovne nezdieľate. Servery LibreTube nemusia podporovať všetky funkcie synchronizácie.'
+    Description: 'Synchronizujte odbery, profily, playlisty, históriu pozerania a podporované nastavenia so synchronizačným serverom OpenTubeX alebo LibreTube. Servery LibreTube nemusia podporovať všetky funkcie synchronizácie.'
     Server URL: Adresa URL servera
     Checking Server: Kontroluje sa synchronizačný server…
     Server Unavailable: K tomuto synchronizačnému serveru sa nepodarilo pripojiť. Skontrolujte adresu URL a skúste to znova.
@@ -1032,7 +1032,7 @@ Settings:
     Data Loss Warning: Stav servera by odstránil {deleted} z {previous} predtým synchronizovaných položiek v kolekcii {collection}. Môže to znamenať neúspešnú migráciu alebo obnovenie servera. Pokračujte, len ak chcete tieto údaje odstrániť a máte zálohu.
     Confirm Data Loss: Odstrániť a pokračovať
     Use Shared Tabs: 'Používať jednu zdieľanú súpravu kariet vo všetkých zariadeniach'
-    Shared Tabs Warning: 'Zdieľané karty nahradia aktuálnu súpravu na pripojených zariadeniach. Nechajte túto možnosť vypnutú, ak chcete zachovať oddelené karty v počítači a mobile.'
+    Shared Tabs Warning: 'Otvorené karty v tomto zariadení sa stanú spoločnou sadou. Ostatné zariadenia pri synchronizácii nahradia svoje otvorené karty touto sadou; karty z rôznych zariadení sa nezlúčia.'
     Tabs From Other Devices: 'Karty z iných zariadení'
     Device Tab Session: '{platform} · kariet: {count}'
     Mobile Device: 'Mobil'

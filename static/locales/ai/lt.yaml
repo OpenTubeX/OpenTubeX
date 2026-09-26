@@ -1202,7 +1202,7 @@ Settings:
     Privacy Policy: Šio serverio privatumo politika
     Enhanced Privacy Enabled: Sustiprintas privatumas įjungtas. Serveryje saugomi tik užšifruoti sinchronizavimo duomenys.
     Enhanced Privacy Unsupported: Įspėjimas — šis serveris nepalaiko sustiprinto privatumo. Sinchronizuojamus duomenis gali matyti jo operatorius.
-    Description: 'Sinchronizuokite prenumeratas, profilius, grojaraščius, žiūrėjimo istoriją ir palaikomus nustatymus su „OpenTubeX“ arba „LibreTube“ sinchronizavimo serveriu. Kompiuterio ir mobiliojo įrenginio kortelės lieka atskiros, nebent aiškiai jas bendrinate. „LibreTube“ serveriai gali nepalaikyti visų sinchronizavimo funkcijų.'
+    Description: 'Sinchronizuokite prenumeratas, profilius, grojaraščius, žiūrėjimo istoriją ir palaikomus nustatymus su „OpenTubeX“ arba „LibreTube“ sinchronizavimo serveriu. „LibreTube“ serveriai gali nepalaikyti visų sinchronizavimo funkcijų.'
     Server URL: Serverio URL
     Checking Server: Tikrinamas sinchronizavimo serveris…
     Server Unavailable: Nepavyko prisijungti prie šio sinchronizavimo serverio. Patikrinkite URL ir bandykite dar kartą.
@@ -1284,7 +1284,7 @@ Settings:
     Data Loss Warning: Pagal serverio būseną būtų ištrinta {deleted} iš {previous} anksčiau sinchronizuotų rinkinio „{collection}“ elementų. Tai gali reikšti nepavykusį serverio perkėlimą arba atkūrimą. Tęskite tik jei šiuos duomenis ketinate ištrinti ir turite atsarginę kopiją.
     Confirm Data Loss: Ištrinti ir tęsti
     Use Shared Tabs: 'Naudoti vieną bendrą kortelių rinkinį visuose įrenginiuose'
-    Shared Tabs Warning: 'Bendros kortelės pakeičia dabartinį rinkinį prijungtuose įrenginiuose. Palikite išjungta, jei norite išsaugoti atskiras kompiuterio ir mobiliojo įrenginio korteles.'
+    Shared Tabs Warning: 'Šiame įrenginyje atvertos kortelės taps bendru rinkiniu. Sinchronizuojant kiti įrenginiai pakeis savo atvertas korteles šiuo rinkiniu; skirtingų įrenginių kortelės nesujungiamos.'
     Tabs From Other Devices: 'Kortelės iš kitų įrenginių'
     Device Tab Session: '{platform} · {count} kortelės'
     Mobile Device: 'Mobilusis įrenginys'

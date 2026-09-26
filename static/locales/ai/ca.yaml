@@ -1271,7 +1271,7 @@ Settings:
     Privacy Policy: Política de privadesa d'aquest servidor
     Enhanced Privacy Enabled: La privadesa millorada està activada. El servidor només desa dades de sincronització xifrades.
     Enhanced Privacy Unsupported: 'Avís: aquest servidor no admet la privadesa millorada. L''operador pot veure les dades sincronitzades.'
-    Description: 'Sincronitza les subscripcions, els perfils, les llistes de reproducció, l’historial de visualitzacions i els ajusts compatibles amb un servidor de sincronització d’OpenTubeX o LibreTube. Les pestanyes de l’ordinador i del mòbil es mantenen separades tret que les comparteixis explícitament. És possible que els servidors de LibreTube no admetin totes les funcions de sincronització.'
+    Description: 'Sincronitza les subscripcions, els perfils, les llistes de reproducció, l’historial de visualitzacions i els ajusts compatibles amb un servidor de sincronització d’OpenTubeX o LibreTube. És possible que els servidors de LibreTube no admetin totes les funcions de sincronització.'
     Server URL: URL del servidor
     Checking Server: S'està comprovant el servidor de sincronització…
     Server Unavailable: No s'ha pogut connectar a aquest servidor de sincronització. Comproveu l'URL i torneu-ho a provar.
@@ -1353,7 +1353,7 @@ Settings:
     Data Loss Warning: L'estat del servidor suprimiria {deleted} dels {previous} elements de {collection} sincronitzats anteriorment. Això pot indicar una migració o un restabliment fallits del servidor. Continueu només si voleu fer aquesta supressió i teniu una còpia de seguretat.
     Confirm Data Loss: Suprimeix i continua
     Use Shared Tabs: 'Utilitza un únic conjunt de pestanyes compartit entre dispositius'
-    Shared Tabs Warning: 'Les pestanyes compartides substitueixen el conjunt actual als dispositius connectats. Mantén aquesta opció desactivada per conservar separades les pestanyes de l’ordinador i del mòbil.'
+    Shared Tabs Warning: 'Les pestanyes obertes en aquest dispositiu es converteixen en el conjunt compartit. Quan se sincronitzin, els altres dispositius substituiran les seves pestanyes obertes per aquest conjunt; les pestanyes de dispositius diferents no es combinaran.'
     Tabs From Other Devices: 'Pestanyes d’altres dispositius'
     Device Tab Session: '{platform} · {count} pestanyes'
     Mobile Device: 'Mòbil'

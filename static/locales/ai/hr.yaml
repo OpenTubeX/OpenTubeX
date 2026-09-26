@@ -954,7 +954,7 @@ Settings:
     Privacy Policy: Pravila o privatnosti ovog poslužitelja
     Enhanced Privacy Enabled: Poboljšana privatnost je omogućena. Poslužitelj pohranjuje samo šifrirane podatke sinkronizacije.
     Enhanced Privacy Unsupported: Upozorenje — ovaj poslužitelj ne podržava poboljšanu privatnost. Sinkronizirani podaci vidljivi su njegovu administratoru.
-    Description: 'Sinkronizirajte pretplate, profile, popise za reprodukciju, povijest gledanja i podržane postavke s OpenTubeX ili LibreTube poslužiteljem za sinkronizaciju. Kartice na računalu i mobilnom uređaju ostaju odvojene osim ako ih izričito ne podijelite. LibreTube poslužitelji možda ne podržavaju sve značajke sinkronizacije.'
+    Description: 'Sinkronizirajte pretplate, profile, popise za reprodukciju, povijest gledanja i podržane postavke s OpenTubeX ili LibreTube poslužiteljem za sinkronizaciju. LibreTube poslužitelji možda ne podržavaju sve značajke sinkronizacije.'
     Server URL: URL poslužitelja
     Checking Server: Provjera poslužitelja za sinkronizaciju…
     Server Unavailable: Povezivanje s ovim poslužiteljem za sinkronizaciju nije moguće. Provjerite URL i pokušajte ponovno.
@@ -1036,7 +1036,7 @@ Settings:
     Data Loss Warning: Stanje poslužitelja izbrisalo bi {deleted} od {previous} prethodno sinkroniziranih stavki zbirke {collection}. To može upućivati na neuspjelu migraciju ili ponovno postavljanje poslužitelja. Nastavite samo ako namjerno želite izbrisati te podatke i imate sigurnosnu kopiju.
     Confirm Data Loss: Izbriši i nastavi
     Use Shared Tabs: 'Upotrebljavaj jedan zajednički skup kartica na svim uređajima'
-    Shared Tabs Warning: 'Dijeljene kartice zamjenjuju trenutačni skup kartica na povezanim uređajima. Ostavite ovo isključeno da biste zadržali odvojene kartice na računalu i mobilnom uređaju.'
+    Shared Tabs Warning: 'Otvorene kartice na ovom uređaju postaju zajednički skup. Drugi uređaji pri sinkronizaciji zamjenjuju svoje otvorene kartice tim skupom; kartice s različitih uređaja ne spajaju se.'
     Tabs From Other Devices: 'Kartice s drugih uređaja'
     Device Tab Session: '{platform} · {count} kartica'
     Mobile Device: 'Mobilni uređaj'

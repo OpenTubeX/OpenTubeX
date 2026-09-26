@@ -955,7 +955,7 @@ Settings:
     Privacy Policy: Integritetspolicy för den här servern
     Enhanced Privacy Enabled: Förstärkt integritet är aktiverad. Servern lagrar endast krypterade synkroniseringsdata.
     Enhanced Privacy Unsupported: Varning! Den här servern stöder inte förstärkt integritet. Synkroniserade data är synliga för serveroperatören.
-    Description: 'Synkronisera prenumerationer, profiler, spellistor, visningshistorik och inställningar som stöds med en synkroniseringsserver för OpenTubeX eller LibreTube. Flikar på dator och mobil hålls åtskilda om du inte uttryckligen delar dem. LibreTube-servrar stöder kanske inte alla synkroniseringsfunktioner.'
+    Description: 'Synkronisera prenumerationer, profiler, spellistor, visningshistorik och inställningar som stöds med en synkroniseringsserver för OpenTubeX eller LibreTube. LibreTube-servrar stöder kanske inte alla synkroniseringsfunktioner.'
     Server URL: Server-URL
     Checking Server: Kontrollerar synkroniseringsservern…
     Server Unavailable: Det gick inte att ansluta till synkroniseringsservern. Kontrollera URL:en och försök igen.
@@ -1036,7 +1036,7 @@ Settings:
     Data Loss Warning: Serverstatusen skulle ta bort {deleted} av {previous} tidigare synkroniserade objekt i {collection}. Det kan tyda på en misslyckad servermigrering eller återställning. Fortsätt endast om borttagningen är avsiktlig och du har en säkerhetskopia.
     Confirm Data Loss: Ta bort och fortsätt
     Use Shared Tabs: 'Använd en gemensam uppsättning flikar på alla enheter'
-    Shared Tabs Warning: 'Delade flikar ersätter den aktuella uppsättningen på anslutna enheter. Låt detta vara avstängt för att behålla separata flikar på dator och mobil.'
+    Shared Tabs Warning: 'De öppna flikarna på den här enheten blir den delade uppsättningen. Andra enheter ersätter sina öppna flikar med den när de synkroniseras; flikar från olika enheter slås inte ihop.'
     Tabs From Other Devices: 'Flikar från andra enheter'
     Device Tab Session: '{platform} · {count} flikar'
     Mobile Device: 'Mobil'

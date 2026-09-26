@@ -1112,7 +1112,7 @@ Settings:
     Privacy Policy: Personvernerklæring for denne tenaren
     Enhanced Privacy Enabled: Styrkt personvern er slått på. Tenaren lagrar berre krypterte synkroniseringsdata.
     Enhanced Privacy Unsupported: Åtvaring — denne tenaren støttar ikkje styrkt personvern. Den som driv tenaren, kan sjå dei synkroniserte dataa.
-    Description: 'Synkroniser abonnement, profilar, spelelister, sjåarhistorikk og støtta innstillingar med ein OpenTubeX- eller LibreTube-synkroniseringstenar. Faner på datamaskin og mobil blir haldne frå kvarandre med mindre du uttrykkjeleg deler dei. LibreTube-tenarar støttar kanskje ikkje alle synkroniseringsfunksjonar.'
+    Description: 'Synkroniser abonnement, profilar, spelelister, sjåarhistorikk og støtta innstillingar med ein OpenTubeX- eller LibreTube-synkroniseringstenar. LibreTube-tenarar støttar kanskje ikkje alle synkroniseringsfunksjonar.'
     Server URL: Tenaradresse
     Checking Server: Kontrollerer synkroniseringstenaren …
     Server Unavailable: Klarte ikkje å kopla til denne synkroniseringstenaren. Kontroller adressa og prøv på nytt.
@@ -1194,7 +1194,7 @@ Settings:
     Data Loss Warning: Tilstanden på tenaren vil sletta {deleted} av {previous} tidlegare synkroniserte element i {collection}. Dette kan tyda på at ei tenarflytting eller nullstilling mislykkast. Hald berre fram dersom slettinga er tilsikta og du har ein tryggleikskopi.
     Confirm Data Loss: Slett og hald fram
     Use Shared Tabs: 'Bruk eitt delt fanesett på tvers av einingar'
-    Shared Tabs Warning: 'Delte faner erstattar det gjeldande fanesettet på tilkopla einingar. La dette vere avslått for å halde faner på datamaskin og mobil frå kvarandre.'
+    Shared Tabs Warning: 'Dei opne fanene på denne eininga blir det delte fanesettet. Andre einingar erstattar dei opne fanene sine med dette settet når dei synkroniserer; faner frå ulike einingar blir ikkje slått saman.'
     Tabs From Other Devices: 'Faner frå andre einingar'
     Device Tab Session: '{platform} · {count} faner'
     Mobile Device: 'Mobil'

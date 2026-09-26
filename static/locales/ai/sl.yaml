@@ -1236,7 +1236,7 @@ Settings:
     Privacy Policy: Pravilnik o zasebnosti tega strežnika
     Enhanced Privacy Enabled: Izboljšana zasebnost je omogočena. Strežnik hrani samo šifrirane sinhronizirane podatke.
     Enhanced Privacy Unsupported: Opozorilo — ta strežnik ne podpira izboljšane zasebnosti. Sinhronizirani podatki so vidni njegovemu upravljavcu.
-    Description: 'Sinhronizirajte naročnine, profile, sezname predvajanja, zgodovino ogledov in podprte nastavitve s sinhronizacijskim strežnikom OpenTubeX ali LibreTube. Zavihki v računalniku in mobilni napravi ostanejo ločeni, razen če jih izrecno delite. Strežniki LibreTube morda ne podpirajo vseh funkcij sinhronizacije.'
+    Description: 'Sinhronizirajte naročnine, profile, sezname predvajanja, zgodovino ogledov in podprte nastavitve s sinhronizacijskim strežnikom OpenTubeX ali LibreTube. Strežniki LibreTube morda ne podpirajo vseh funkcij sinhronizacije.'
     Server URL: URL strežnika
     Checking Server: Preverjanje sinhronizacijskega strežnika …
     Server Unavailable: Povezava s tem sinhronizacijskim strežnikom ni mogoča. Preverite URL in poskusite znova.
@@ -1317,7 +1317,7 @@ Settings:
     Data Loss Warning: Stanje strežnika bi izbrisalo {deleted} od {previous} prej sinhroniziranih elementov zbirke {collection}. To lahko pomeni, da selitev ali ponastavitev strežnika ni uspela. Nadaljujte samo, če je ta izbris nameren in imate varnostno kopijo.
     Confirm Data Loss: Izbriši in nadaljuj
     Use Shared Tabs: 'Uporabi en skupni nabor zavihkov v vseh napravah'
-    Shared Tabs Warning: 'Skupni zavihki nadomestijo trenutni nabor v povezanih napravah. Pustite to izklopljeno, da ohranite ločene zavihke v računalniku in mobilni napravi.'
+    Shared Tabs Warning: 'Odprti zavihki v tej napravi postanejo skupni nabor. Druge naprave pri sinhronizaciji z njim zamenjajo svoje odprte zavihke; zavihki iz različnih naprav se ne združijo.'
     Tabs From Other Devices: 'Zavihki iz drugih naprav'
     Device Tab Session: '{platform} · {count} zavihkov'
     Mobile Device: 'Mobilna naprava'

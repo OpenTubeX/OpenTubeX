@@ -1510,8 +1510,8 @@ Settings:
       sichtbar.
     Description: >-
       Synchronisiere Abos, Profile, Wiedergabelisten, Wiedergabeverlauf und unterstützte Einstellungen mit einem
-      OpenTubeX- oder LibreTube-Synchronisierungsserver. Desktop- und Mobil-Tabs bleiben getrennt, sofern du sie nicht
-      ausdrücklich teilst. LibreTube-Server unterstützen möglicherweise nicht alle Synchronisierungsfunktionen.
+      OpenTubeX- oder LibreTube-Synchronisierungsserver. LibreTube-Server unterstützen möglicherweise nicht alle
+      Synchronisierungsfunktionen.
     Server URL: Server-URL
     Checking Server: Synchronisierungsserver wird überprüft…
     Server Unavailable: Verbindung zu diesem Synchronisierungsserver fehlgeschlagen. Überprüfe die URL und versuche es erneut.
@@ -1603,7 +1603,7 @@ Settings:
     Profiles: Profile
     Open Tabs: Offene Tabs und Sitzung
     Use Shared Tabs: Einen gemeinsamen Tab-Satz auf allen Geräten verwenden
-    Shared Tabs Warning: Gemeinsame Tabs ersetzen den aktuellen Tab-Satz auf verbundenen Geräten. Lass dies deaktiviert, um Desktop- und Mobil-Tabs getrennt zu halten.
+    Shared Tabs Warning: Die auf diesem Gerät geöffneten Tabs werden zum gemeinsamen Tab-Satz. Andere Geräte ersetzen ihre geöffneten Tabs bei der Synchronisierung durch diesen Satz; die Tab-Sätze verschiedener Geräte werden nicht zusammengeführt.
     Tabs From Other Devices: Tabs von anderen Geräten
     Device Tab Session: '{platform} · {count} Tabs'
     Mobile Device: Mobilgerät

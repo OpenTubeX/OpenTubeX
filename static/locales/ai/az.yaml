@@ -923,7 +923,7 @@ Settings:
     Privacy Policy: Bu serverin məxfilik siyasəti
     Enhanced Privacy Enabled: Təkmilləşdirilmiş məxfilik aktivdir. Server yalnız şifrələnmiş sinxronizasiya məlumatlarını saxlayır.
     Enhanced Privacy Unsupported: Xəbərdarlıq — bu server təkmilləşdirilmiş məxfiliyi dəstəkləmir. Sinxronlaşdırılan məlumatlar serverin operatoruna görünür.
-    Description: Abunəlikləri, profilləri, pleylistləri, baxış tarixçəsini və dəstəklənən tənzimləmələri OpenTubeX və ya LibreTube sinxronizasiya serveri ilə sinxronlaşdırın. Açıq şəkildə paylaşmadığınız müddətdə masaüstü və mobil vərəqlər ayrı qalır. LibreTube serverləri bütün sinxronizasiya funksiyalarını dəstəkləməyə bilər.
+    Description: 'Abunəlikləri, profilləri, pleylistləri, baxış tarixçəsini və dəstəklənən tənzimləmələri OpenTubeX və ya LibreTube sinxronizasiya serveri ilə sinxronlaşdırın. LibreTube serverləri bütün sinxronizasiya funksiyalarını dəstəkləməyə bilər.'
     Server URL: Server URL-i
     Checking Server: Sinxronizasiya serveri yoxlanılır…
     Server Unavailable: Bu sinxronizasiya serverinə qoşulmaq mümkün olmadı. URL-i yoxlayıb yenidən cəhd edin.
@@ -1013,7 +1013,7 @@ Settings:
     Profiles: Profillər
     Open Tabs: Açıq vərəqlər və sessiya
     Use Shared Tabs: Cihazlar arasında vahid ortaq vərəq dəstindən istifadə et
-    Shared Tabs Warning: Ortaq vərəqlər qoşulmuş cihazlardakı cari vərəq dəstini əvəz edir. Masaüstü və mobil vərəqləri ayrı saxlamaq üçün bunu söndürülmüş saxlayın.
+    Shared Tabs Warning: 'Bu cihazda açıq olan vərəqlər ortaq dəstə çevrilir. Digər cihazlar sinxronizasiya zamanı açıq vərəqlərini bu dəstlə əvəz edir; müxtəlif cihazlardakı vərəqlər birləşdirilmir.'
     Tabs From Other Devices: Digər cihazlardakı vərəqlər
     Device Tab Session: '{platform} · {count} vərəq'
     Mobile Device: Mobil

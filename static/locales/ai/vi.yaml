@@ -970,7 +970,7 @@ Settings:
     Privacy Policy: Chính sách riêng tư của máy chủ này
     Enhanced Privacy Enabled: Đã bật quyền riêng tư nâng cao. Máy chủ chỉ lưu dữ liệu đồng bộ đã mã hóa.
     Enhanced Privacy Unsupported: Cảnh báo — máy chủ này không hỗ trợ quyền riêng tư nâng cao. Đơn vị vận hành có thể xem dữ liệu đã đồng bộ.
-    Description: 'Đồng bộ gói đăng ký, hồ sơ, danh sách phát, lịch sử xem và các cài đặt được hỗ trợ với máy chủ đồng bộ OpenTubeX hoặc LibreTube. Các thẻ trên máy tính và thiết bị di động được giữ riêng trừ khi bạn chủ động chia sẻ chúng. Máy chủ LibreTube có thể không hỗ trợ mọi tính năng đồng bộ.'
+    Description: 'Đồng bộ gói đăng ký, hồ sơ, danh sách phát, lịch sử xem và các cài đặt được hỗ trợ với máy chủ đồng bộ OpenTubeX hoặc LibreTube. Máy chủ LibreTube có thể không hỗ trợ mọi tính năng đồng bộ.'
     Server URL: URL máy chủ
     Checking Server: Đang kiểm tra máy chủ đồng bộ…
     Server Unavailable: Không thể kết nối với máy chủ đồng bộ này. Hãy kiểm tra URL rồi thử lại.
@@ -1051,7 +1051,7 @@ Settings:
     Data Loss Warning: Trạng thái máy chủ sẽ xóa {deleted} trong số {previous} mục {collection} đã đồng bộ trước đó. Điều này có thể cho thấy quá trình di chuyển hoặc đặt lại máy chủ đã lỗi. Chỉ tiếp tục nếu bạn chủ ý xóa và đã có bản sao lưu.
     Confirm Data Loss: Xóa và tiếp tục
     Use Shared Tabs: 'Dùng một bộ thẻ chung trên các thiết bị'
-    Shared Tabs Warning: 'Các thẻ dùng chung sẽ thay thế bộ thẻ hiện tại trên thiết bị đã kết nối. Hãy tắt tùy chọn này để giữ riêng thẻ trên máy tính và thiết bị di động.'
+    Shared Tabs Warning: 'Các thẻ đang mở trên thiết bị này sẽ trở thành bộ thẻ dùng chung. Khi đồng bộ hóa, các thiết bị khác sẽ thay thế thẻ đang mở bằng bộ thẻ này; thẻ từ các thiết bị khác nhau không được gộp lại.'
     Tabs From Other Devices: 'Thẻ từ thiết bị khác'
     Device Tab Session: '{platform} · {count} thẻ'
     Mobile Device: 'Di động'

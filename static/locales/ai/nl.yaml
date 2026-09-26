@@ -974,7 +974,7 @@ Settings:
     Privacy Policy: Privacybeleid van deze server
     Enhanced Privacy Enabled: Verbeterde privacy is ingeschakeld. De server bewaart alleen versleutelde synchronisatiegegevens.
     Enhanced Privacy Unsupported: Waarschuwing. Deze server ondersteunt geen verbeterde privacy. De beheerder kan gesynchroniseerde gegevens bekijken.
-    Description: 'Synchroniseer abonnementen, profielen, afspeellijsten, kijkgeschiedenis en ondersteunde instellingen met een OpenTubeX- of LibreTube-synchronisatieserver. Tabbladen op desktop en mobiel blijven gescheiden, tenzij je ze uitdrukkelijk deelt. LibreTube-servers ondersteunen mogelijk niet alle synchronisatiefuncties.'
+    Description: 'Synchroniseer abonnementen, profielen, afspeellijsten, kijkgeschiedenis en ondersteunde instellingen met een OpenTubeX- of LibreTube-synchronisatieserver. LibreTube-servers ondersteunen mogelijk niet alle synchronisatiefuncties.'
     Server URL: Server-URL
     Checking Server: Synchronisatieserver controleren…
     Server Unavailable: Kan geen verbinding maken met deze synchronisatieserver. Controleer de URL en probeer het opnieuw.
@@ -1056,7 +1056,7 @@ Settings:
     Data Loss Warning: De serverstatus zou {deleted} van de {previous} eerder gesynchroniseerde items uit {collection} verwijderen. Dit kan wijzen op een mislukte servermigratie of reset. Ga alleen door als deze verwijdering de bedoeling is en je een back-up hebt.
     Confirm Data Loss: Verwijderen en doorgaan
     Use Shared Tabs: 'Eén gedeelde set tabbladen op alle apparaten gebruiken'
-    Shared Tabs Warning: 'Gedeelde tabbladen vervangen de huidige set op verbonden apparaten. Laat dit uitgeschakeld om desktop- en mobiele tabbladen gescheiden te houden.'
+    Shared Tabs Warning: 'De geopende tabbladen op dit apparaat worden de gedeelde set. Andere apparaten vervangen hun geopende tabbladen door deze set wanneer ze synchroniseren; tabbladen van verschillende apparaten worden niet samengevoegd.'
     Tabs From Other Devices: 'Tabbladen van andere apparaten'
     Device Tab Session: '{platform} · {count} tabbladen'
     Mobile Device: 'Mobiel'

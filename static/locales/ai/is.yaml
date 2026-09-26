@@ -958,7 +958,7 @@ Settings:
     Privacy Policy: Persónuverndarstefna þessa þjóns
     Enhanced Privacy Enabled: Aukin persónuvernd er virk. Þjónninn geymir aðeins dulkóðuð samstillingargögn.
     Enhanced Privacy Unsupported: Viðvörun. Þessi þjónn styður ekki aukna persónuvernd. Rekstraraðili hans getur séð samstillt gögn.
-    Description: 'Samstilltu áskriftir, notandasnið, spilunarlista, áhorfsferil og studdar stillingar við OpenTubeX- eða LibreTube-samstillingarþjón. Flipar á tölvu og fartæki haldast aðskildir nema þú deilir þeim sérstaklega. LibreTube-þjónar styðja hugsanlega ekki alla samstillingareiginleika.'
+    Description: 'Samstilltu áskriftir, notandasnið, spilunarlista, áhorfsferil og studdar stillingar við OpenTubeX- eða LibreTube-samstillingarþjón. LibreTube-þjónar styðja hugsanlega ekki alla samstillingareiginleika.'
     Server URL: Vefslóð þjóns
     Checking Server: Athuga samstillingarþjón…
     Server Unavailable: Ekki tókst að tengjast þessum samstillingarþjóni. Athugaðu vefslóðina og reyndu aftur.
@@ -1040,7 +1040,7 @@ Settings:
     Data Loss Warning: Staða þjónsins myndi eyða {deleted} af {previous} atriðum í {collection} sem áður voru samstillt. Þetta getur bent til þess að gagnaflutningur þjónsins hafi mistekist eða hann hafi verið endurstilltur. Haltu aðeins áfram ef eyðingin er fyrirhuguð og þú átt öryggisafrit.
     Confirm Data Loss: Eyða og halda áfram
     Use Shared Tabs: 'Nota eitt sameiginlegt flipasafn í öllum tækjum'
-    Shared Tabs Warning: 'Sameiginlegir flipar koma í stað núverandi flipasafns í tengdum tækjum. Hafðu þetta óvirkt til að halda tölvu- og farsímaflipum aðskildum.'
+    Shared Tabs Warning: 'Opnir flipar á þessu tæki verða sameiginlega flipasafnið. Önnur tæki skipta út opnum flipum sínum fyrir þetta safn þegar þau samstillast; flipum frá mismunandi tækjum er ekki slegið saman.'
     Tabs From Other Devices: 'Flipar úr öðrum tækjum'
     Device Tab Session: '{platform} · {count} flipar'
     Mobile Device: 'Fartæki'
