@@ -10,6 +10,7 @@
   }
 }
 
-:global(.ftVideoPlayer[data-submenu-opened='true'] .dlnaCastControl) {
+:global(.ftVideoPlayer[data-submenu-opened='true'] .dlnaCastControl),
+:global(.ftVideoPlayer:has(.phonePlayerOptions[open]) .dlnaCastControl) {
   display: none;
 }

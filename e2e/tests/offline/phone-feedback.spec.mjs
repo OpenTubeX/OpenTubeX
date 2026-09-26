@@ -4,12 +4,12 @@ import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 test.use({ seed: { settings: { quickSettings: ['appFont', 'baseTheme'], videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
 
-test('keeps the selected font checkmark at the end of the row', async ({ app, page }) => {
+test('keeps the selected font radio at the start of the row', async ({ app, page }) => {
   await setWindowSize(app, page, { width: 480, height: 800 })
   await page.locator('.profileTrigger').click()
   await page.locator('.quickSettingsMenu .select').first().getByRole('combobox').click()
   const row = page.locator('dialog[open]').last().getByRole('option', { selected: true })
-  const gap = await row.evaluate(element => element.getBoundingClientRect().right - element.querySelector('svg:last-child').getBoundingClientRect().right)
+  const gap = await row.evaluate(element => element.querySelector('.optionRadio').getBoundingClientRect().left - element.getBoundingClientRect().left)
   expect(gap).toBeLessThan(25)
 })
 
@@ -402,6 +402,7 @@ test('phone player menus have a fixed close control and equal centered tiles', a
     const dialog = page.locator('.phonePlayerOptions[open]')
     const close = dialog.getByRole('button', { name: 'Close', exact: true })
     await expect(close).toBeVisible()
+    await expect(page.locator('.dlnaCastControl')).toBeHidden()
     if (grid) {
       const sizes = await dialog.locator('.shaka-overflow-menu > button:visible').evaluateAll(buttons => buttons.map(el => el.getBoundingClientRect().toJSON()))
       expect(Math.max(...sizes.map(x => x.height)) - Math.min(...sizes.map(x => x.height))).toBeLessThan(2)
@@ -417,6 +418,7 @@ test('phone player menus have a fixed close control and equal centered tiles', a
     await expect(close).toBeInViewport()
     await close.click()
     await expect(dialog).toHaveCount(0)
+    await expect(page.locator('.dlnaCastControl')).toBeVisible()
   }
 })
 
