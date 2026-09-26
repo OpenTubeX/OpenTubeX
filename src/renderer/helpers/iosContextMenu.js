@@ -49,7 +49,10 @@ export function installIosContextMenu(document) {
   function suppress(event) {
     if (dispatching) return
     cancel()
-    if (openedTarget?.contains(event.target)) {
+    const keyboardClick = event.type === 'click' && event.detail === 0 && !event.pointerType
+    const suppressClick = !keyboardClick && openedTarget?.contains(event.target)
+    if (event.type === 'click') openedTarget = null
+    if (suppressClick) {
       event.preventDefault()
       event.stopImmediatePropagation()
     }

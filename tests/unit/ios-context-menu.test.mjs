@@ -68,3 +68,15 @@ test('mouse input does not synthesize a touch menu and disposal removes listener
   dispose()
   assert.equal(listeners.size, 0)
 })
+
+for (const releaseClick of [true, false]) {
+  test(`keyboard activation works after a long press ${releaseClick ? 'with' : 'without'} a release click`, t => {
+    const { send } = fixture(t)
+    send('pointerdown')
+    t.mock.timers.tick(500)
+    send('pointerup')
+    if (releaseClick) assert.equal(send('click', { detail: 1 }).prevented, true)
+    assert.notEqual(send('click', { detail: 0, pointerType: '' }).prevented, true)
+    assert.notEqual(send('click', { detail: 0, pointerType: '' }).prevented, true)
+  })
+}

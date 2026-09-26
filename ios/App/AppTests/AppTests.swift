@@ -20,6 +20,24 @@ final class AppTests: XCTestCase {
         try await wait("window.iosPreparedForBackground === true")
     }
 
+    func testStorageUsageDoesNotDoubleCountCache() async throws {
+        try await openApplication()
+        func usage() async throws -> [String: Double] {
+            let value = try await webView.callAsyncJavaScript("return await Capacitor.Plugins.IOSStorage.getUsage()", arguments: [:], in: nil, contentWorld: .page)
+            return try XCTUnwrap(value as? [String: Double])
+        }
+        let before = try await usage()
+        let directory = try XCTUnwrap(FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first)
+        let file = directory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: file) }
+        let size = 8 * 1024 * 1024
+        try Data(repeating: 42, count: size).write(to: file)
+        let after = try await usage()
+        XCTAssertEqual(try XCTUnwrap(after["cacheBytes"]) - XCTUnwrap(before["cacheBytes"]), Double(size), accuracy: 1024 * 1024)
+        XCTAssertEqual(try XCTUnwrap(after["appDataBytes"]) - XCTUnwrap(before["appDataBytes"]), 0, accuracy: 1024 * 1024)
+    }
+
     func testMediaRequestOrigins() throws {
         XCTAssertTrue(IOSNetwork.isMediaURL(try XCTUnwrap(URL(string: "https://rr1.googlevideo.com/videoplayback"))))
         for address in ["http://rr1.googlevideo.com/videoplayback", "https://googlevideo.com.attacker.invalid/", "https://notgooglevideo.com/", "https://user:password@rr1.googlevideo.com/"] {

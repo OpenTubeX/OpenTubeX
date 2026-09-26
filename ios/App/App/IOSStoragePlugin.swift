@@ -102,8 +102,11 @@ public class IOSStoragePlugin: CAPPlugin, CAPBridgedPlugin, UIDocumentPickerDele
                     return total + (values?.isRegularFile == true ? Int64(values?.fileSize ?? 0) : 0)
                 }
             }
-            call.resolve(["appDataBytes": bytes(manager.urls(for: .libraryDirectory, in: .userDomainMask).first) + bytes(manager.urls(for: .documentDirectory, in: .userDomainMask).first),
-                          "cacheBytes": bytes(manager.urls(for: .cachesDirectory, in: .userDomainMask).first)])
+            let cache = bytes(manager.urls(for: .cachesDirectory, in: .userDomainMask).first)
+            let library = bytes(manager.urls(for: .libraryDirectory, in: .userDomainMask).first)
+            let documents = bytes(manager.urls(for: .documentDirectory, in: .userDomainMask).first)
+            call.resolve(["appDataBytes": max(0, library - cache) + documents,
+                          "cacheBytes": cache])
         }
     }
 
