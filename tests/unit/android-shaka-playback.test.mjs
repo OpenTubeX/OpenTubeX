@@ -61,3 +61,52 @@ test('Android phone uses the central Shaka play button without a duplicate in th
   assert.equal(controls(true).includes('ft_skip_next'), false)
   assert.equal(controls(false).includes('play_pause'), true)
 })
+
+test('Android restores orientation if fullscreen entry fails after rotation starts', async () => {
+  const start = source.indexOf('    function handleFullscreenButtonClick(event) {')
+  const end = source.indexOf('\n    const mobileAdjustmentsVisible', start)
+  assert.ok(start !== -1 && end !== -1)
+  const calls = []
+  let afterEntry
+  const context = {
+    process: { env: { IS_CAPACITOR: true, IS_IOS: false } },
+    document: { fullscreenElement: null },
+    isActiveTab: { value: true },
+    isNativeFullscreenActive: () => false,
+    setFullscreenOrientation: async fullscreen => { calls.push(fullscreen) },
+    video: { value: { videoWidth: 0, videoHeight: 0 } },
+    rotateFullscreenToLandscape: { value: true },
+    fullscreenAspectRatio: { value: 16 / 9 },
+    suppressPanelTransitions: () => {},
+    handleScrollMiniFullscreenButtonClick: () => {},
+    setTimeout: callback => { afterEntry = callback },
+  }
+  vm.runInNewContext(`${source.slice(start, end)}\nhandleFullscreenButtonClick({})`, context)
+  await Promise.resolve()
+  assert.deepEqual(calls, [true])
+  assert.equal(typeof afterEntry, 'function')
+  context.document.fullscreenElement = {}
+  await afterEntry()
+  assert.deepEqual(calls, [true])
+  context.document.fullscreenElement = null
+  await afterEntry()
+  assert.deepEqual(calls, [true, false])
+})
+
+test('Android rechecks fullscreen orientation when metadata aspect ratio arrives', async () => {
+  const start = source.indexOf('    watch([rotateFullscreenToLandscape, fullscreenAspectRatio],')
+  const end = source.indexOf('\n    /** @type', start)
+  assert.ok(start !== -1 && end !== -1)
+  const calls = []
+  let onChange
+  vm.runInNewContext(source.slice(start, end), {
+    watch: (_sources, callback) => { onChange = callback },
+    rotateFullscreenToLandscape: { value: true },
+    fullscreenAspectRatio: { value: 16 / 9 },
+    isNativeFullscreenActive: () => true,
+    video: { value: { videoWidth: 0, videoHeight: 0 } },
+    setFullscreenOrientation: async (_fullscreen, _video, _enabled, ratio) => { calls.push(ratio) },
+  })
+  await onChange([true, 16 / 9])
+  assert.deepEqual(calls, [16 / 9])
+})

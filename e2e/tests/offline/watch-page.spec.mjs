@@ -1456,10 +1456,16 @@ test('Android fullscreen host keeps watch cards behind the player', async ({ app
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
 
-  await page.evaluate(async () => {
+  await page.evaluate(() => {
     document.body.classList.add('capacitorTabs')
-    await document.querySelector('.videoLayout').requestFullscreen()
+    const host = document.querySelector('.videoLayout')
+    host.addEventListener('click', event => {
+      event.stopImmediatePropagation()
+      host.requestFullscreen()
+    }, { once: true, capture: true })
   })
+  await page.locator('.videoLayout').click({ position: { x: 8, y: 8 } })
+  await expect.poll(() => page.evaluate(() => document.fullscreenElement?.classList.contains('videoLayout'))).toBe(true)
 
   await expect.poll(() => page.evaluate(() => {
     const card = document.querySelector('.infoArea .watchVideoInfo')

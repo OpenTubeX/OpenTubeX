@@ -1642,7 +1642,7 @@ export default defineComponent({
       })
     })
 
-    watch(rotateFullscreenToLandscape, (enabled) => {
+    watch([rotateFullscreenToLandscape, fullscreenAspectRatio], ([enabled]) => {
       if (!isNativeFullscreenActive()) return
       setFullscreenOrientation(true, video.value, enabled, fullscreenAspectRatio.value).catch(() => {})
     })
@@ -6926,9 +6926,18 @@ export default defineComponent({
     })
 
     function handleFullscreenButtonClick(event) {
-      if (process.env.IS_CAPACITOR && isActiveTab.value && !isNativeFullscreenActive()) {
+      if (process.env.IS_CAPACITOR && !process.env.IS_IOS && isActiveTab.value && !isNativeFullscreenActive()) {
         // Begin rotating on the user action, before Shaka changes the fullscreen element.
-        setFullscreenOrientation(true, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value).catch(() => {})
+        setFullscreenOrientation(true, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value)
+          .then(() => {
+            // Fullscreen can be rejected after the orientation request succeeds.
+            setTimeout(() => {
+              if (!document.fullscreenElement) {
+                setFullscreenOrientation(false, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value).catch(() => {})
+              }
+            }, 1000)
+          })
+          .catch(() => {})
         suppressPanelTransitions(500)
       }
       handleScrollMiniFullscreenButtonClick(event)
