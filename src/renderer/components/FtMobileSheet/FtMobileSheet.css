@@ -129,12 +129,12 @@
 }
 
 @media (height <= 600px) {
-  :global([data-phone-panel-video]:not(:fullscreen, .fullWindow, [data-native-player-screen])) {
+  :global([data-phone-panel-video]:not(:fullscreen, .fullWindow)) {
     inline-size: 100%;
     max-block-size: 45dvh;
   }
 
-  :global([data-phone-panel-video]:not(:fullscreen, .fullWindow, [data-native-player-screen]) video) {
+  :global([data-phone-panel-video]:not(:fullscreen, .fullWindow) video) {
     min-block-size: 0;
     object-fit: contain;
   }

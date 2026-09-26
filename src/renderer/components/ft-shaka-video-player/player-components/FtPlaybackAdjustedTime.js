@@ -39,10 +39,6 @@ export class FtPlaybackAdjustedTime extends shaka.ui.Element {
     this.eventManager.listen(this.video_, 'ratechange', () => {
       this.updateAdjusted_()
     })
-    this.eventManager.listen(this.video_, 'timeupdate', () => {
-      // Native controls remain visible independently of Shaka's control timer.
-      if (this.video_.nativePlayback) this.updateAdjusted_()
-    })
     this.eventManager.listen(events, 'timeDisplaySettingsChanged', () => {
       this.updateAdjusted_()
     })

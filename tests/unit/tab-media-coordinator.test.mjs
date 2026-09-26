@@ -15,85 +15,62 @@ function enableCapacitorMode(t) {
   })
 }
 
-test('coalesces rapid ownership changes and delivers changes made by listeners', async t => {
+test('Android keeps the playing WebView tab as media owner while browsing another tab', t => {
   enableCapacitorMode(t)
-  const states = []
+  const actions = []
   t.after(() => {
-    tabMediaCoordinator.unregister('coalesced-first')
-    tabMediaCoordinator.unregister('coalesced-second')
+    tabMediaCoordinator.unregister('playing-video')
+    tabMediaCoordinator.unregister('history-tab')
     tabMediaCoordinator.setPresented(null)
   })
-  tabMediaCoordinator.subscribeOwnership('coalesced-first', active => states.push(active))
-  tabMediaCoordinator.subscribeOwnership('coalesced-second', () => {})
-  tabMediaCoordinator.setPresented('coalesced-first')
-  await new Promise(resolve => setImmediate(resolve))
-  states.length = 0
-
-  tabMediaCoordinator.setMiniPlayer('coalesced-second', true)
-  tabMediaCoordinator.setMiniPlayer('coalesced-first', true)
-  tabMediaCoordinator.setMiniPlayer('coalesced-second', true)
-  await new Promise(resolve => setImmediate(resolve))
-  assert.deepEqual(states, [false])
-
-  let redirect = false
-  tabMediaCoordinator.subscribeOwnership('coalesced-second', active => {
-    if (!active && redirect) tabMediaCoordinator.setMiniPlayer('coalesced-second', true)
-  })
-  redirect = true
-  states.length = 0
-  tabMediaCoordinator.setMiniPlayer('coalesced-first', true)
-  await new Promise(resolve => setImmediate(resolve))
-  assert.deepEqual(states, [true, false])
+  tabMediaCoordinator.setPresented('playing-video')
+  tabMediaCoordinator.setActionHandlers('playing-video', 'player', { pause: () => actions.push('pause') })
+  tabMediaCoordinator.setPlaybackState('playing-video', 'playing')
+  tabMediaCoordinator.setPresented('history-tab')
+  tabMediaCoordinator.dispatchAction('pause')
+  assert.deepEqual(actions, ['pause'])
 })
 
-test('native acquisition follows the presented tab and the detached mini player', async t => {
+test('starting another Android video pauses the previous player', t => {
   enableCapacitorMode(t)
-  const states = { first: [], second: [] }
-  t.after(() => {
-    tabMediaCoordinator.unregister('native-first')
-    tabMediaCoordinator.unregister('native-second')
-    tabMediaCoordinator.setPresented(null)
-  })
-  tabMediaCoordinator.setPresented('native-first')
-  tabMediaCoordinator.subscribeOwnership('native-first', active => states.first.push(active))
-  tabMediaCoordinator.subscribeOwnership('native-second', active => states.second.push(active))
-  assert.equal(states.first.at(-1), true)
-  assert.equal(states.second.at(-1), false)
-  tabMediaCoordinator.setMiniPlayer('native-first', true)
-  tabMediaCoordinator.setPresented('native-second')
-  await new Promise(resolve => setImmediate(resolve))
-  assert.equal(states.first.at(-1), true)
-  assert.equal(states.second.at(-1), false)
-  tabMediaCoordinator.setMiniPlayer('native-first', false)
-  await new Promise(resolve => setImmediate(resolve))
-  assert.equal(states.first.at(-1), false)
-  assert.equal(states.second.at(-1), true)
-})
-
-test('keeps the native playback owner across non-video tabs without a mini player', async t => {
-  enableCapacitorMode(t)
-  const notifications = []
   const pauses = []
   t.after(() => {
-    tabMediaCoordinator.unregister('background-native-video')
+    tabMediaCoordinator.unregister('first-video')
+    tabMediaCoordinator.unregister('second-video')
     tabMediaCoordinator.setPresented(null)
   })
-  tabMediaCoordinator.setPresented('background-native-video')
-  tabMediaCoordinator.subscribeOwnership('background-native-video', active => notifications.push(active))
-  tabMediaCoordinator.setNativeOwner('background-native-video', 'native-session')
-  tabMediaCoordinator.setActionHandlers('background-native-video', 'player', { pause: () => pauses.push(true) })
-  tabMediaCoordinator.setPlaybackState('background-native-video', 'playing')
-  await new Promise(resolve => setImmediate(resolve))
-  notifications.length = 0
-  tabMediaCoordinator.setPresented('history-without-video')
-  await new Promise(resolve => setImmediate(resolve))
-  assert.deepEqual(pauses, [])
-  assert.deepEqual(notifications, [])
+  tabMediaCoordinator.setPresented('first-video')
+  tabMediaCoordinator.setActionHandlers('first-video', 'player', { pause: () => pauses.push('first') })
+  tabMediaCoordinator.setPlaybackState('first-video', 'playing')
+  tabMediaCoordinator.setPresented('second-video')
+  tabMediaCoordinator.setPlaybackState('second-video', 'playing')
+  assert.deepEqual(pauses, ['first'])
+})
+
+test('new Android playback takes media controls from an older mini player', t => {
+  enableCapacitorMode(t)
+  const actions = []
+  t.after(() => {
+    tabMediaCoordinator.setMiniPlayer('old-mini', false)
+    tabMediaCoordinator.unregister('old-mini')
+    tabMediaCoordinator.unregister('new-video')
+    tabMediaCoordinator.setPresented(null)
+  })
+
+  tabMediaCoordinator.setPresented('old-mini')
+  tabMediaCoordinator.setActionHandlers('old-mini', 'player', {
+    pause: () => actions.push('old')
+  })
+  tabMediaCoordinator.setPlaybackState('old-mini', 'playing')
+  tabMediaCoordinator.setMiniPlayer('old-mini', true)
+  tabMediaCoordinator.setPresented('new-video')
+  tabMediaCoordinator.setActionHandlers('new-video', 'player', {
+    pause: () => actions.push('new')
+  })
+  tabMediaCoordinator.setPlaybackState('new-video', 'playing')
+
   tabMediaCoordinator.dispatchAction('pause')
-  assert.deepEqual(pauses, [true], 'Media actions still reach the background native session')
-  tabMediaCoordinator.setPresented('background-native-video')
-  await new Promise(resolve => setImmediate(resolve))
-  assert.deepEqual(notifications, [], 'Returning does not reload or reacquire the native player')
+  assert.deepEqual(actions, ['old', 'new'])
 })
 
 test('keeps Android media controls on a detached cross-tab mini player', async (t) => {
@@ -136,7 +113,7 @@ test('keeps Android media controls on a detached cross-tab mini player', async (
   assert.deepEqual(actions, ['pause'])
 })
 
-test('pauses an outgoing Android player that has no visible mini player', async (t) => {
+test('keeps an outgoing Android player playing while browsing another tab', async (t) => {
   enableCapacitorMode(t)
   const actions = []
   t.after(() => {
@@ -153,7 +130,7 @@ test('pauses an outgoing Android player that has no visible mini player', async 
   tabMediaCoordinator.setPresented('empty-tab')
   await Promise.resolve()
 
-  assert.deepEqual(actions, ['pause'])
+  assert.deepEqual(actions, [])
 })
 
 test('releases Android media ownership when a mini player is torn down', async (t) => {
@@ -356,7 +333,7 @@ test('passes native seek details to the presented player', (t) => {
   assert.deepEqual(dispatched, [42])
 })
 
-test('Capacitor never routes media actions to a background tab', (t) => {
+test('Capacitor routes media actions to the playing background tab', (t) => {
   const originalCapacitor = process.env.IS_CAPACITOR
   process.env.IS_CAPACITOR = 'true'
   let plays = 0
@@ -375,7 +352,7 @@ test('Capacitor never routes media actions to a background tab', (t) => {
   tabMediaCoordinator.setPresented('presented-plain-tab')
   tabMediaCoordinator.dispatchAction('play')
 
-  assert.equal(plays, 0)
+  assert.equal(plays, 1)
 })
 
 test('pauses every playing tab when Android background playback is disabled', (t) => {

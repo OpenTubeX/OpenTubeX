@@ -120,33 +120,6 @@ test('repeat stats wrap below the player at fractional UI scale and stay out of 
   await expect(stats).toBeVisible()
 })
 
-test('repeat stats observe Android loop toggles and automatic seek completion', async ({ app, page }) => {
-  await openVideo(app, page)
-  const mediaSource = await readFile(new URL('../../../src/renderer/helpers/player/androidMediaElement.js', import.meta.url), 'utf8')
-  await page.addScriptTag({ content: mediaSource.replace('export function ', 'function ') })
-  await page.evaluate(() => {
-    const video = document.querySelector('.ftVideoPlayer video')
-    window.repeatNativeMedia = window.attachAndroidMediaElement(video, {
-      command: async () => {}, load: async () => {}, onError: error => { throw error }
-    })
-    window.repeatNativeMedia.update({ position: 29.8, duration: 30, paused: true, playing: false, ready: true })
-  })
-  await toggleLoop(page)
-  const stats = page.locator('.repeatStats')
-  await expect(stats).toBeVisible()
-  await page.evaluate(() => {
-    window.repeatNativeMedia.update({ position: 29.8, paused: false, playing: true })
-  })
-  await page.waitForTimeout(220)
-  await page.evaluate(() => {
-    window.repeatNativeMedia.update({ position: 0, event: 'seeked' })
-  })
-  await expect(stats.locator('.repeatStatsCount')).toHaveText('1')
-  await toggleLoop(page)
-  await expect(stats).toHaveCount(0)
-  await page.evaluate(() => window.repeatNativeMedia.detach())
-})
-
 test('repeat stats reserve space below Shorts without covering the following content', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/jNQXAC9IVRw')

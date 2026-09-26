@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Set;
 
 public class AndroidMediaSessionService extends Service {
-    private static java.lang.ref.WeakReference<AndroidMediaSessionService> activeService = new java.lang.ref.WeakReference<>(null);
     static final String ACTION_UPDATE = "org.opentubex.app.media.UPDATE";
     static final String ACTION_STOP = "org.opentubex.app.media.STOP";
     static final String EXTRA_STATE = "state";
@@ -52,7 +51,6 @@ public class AndroidMediaSessionService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        activeService = new java.lang.ref.WeakReference<>(this);
         OpenTubeXNotificationChannels.createAll(this);
         mediaSession = new MediaSession(this, "OpenTubeX");
         mediaSession.setFlags(
@@ -142,15 +140,6 @@ public class AndroidMediaSessionService extends Service {
 
         try {
             JSONObject nextState = new JSONObject(serializedState);
-            if (!AndroidPlaybackPlugin.acceptsMediaOwner(nextState.optString("nativeOwner", ""))) {
-                if (currentState == null) {
-                    // Even an obsolete start must acknowledge foreground startup
-                    // before stopping, or Android terminates the entire process.
-                    startForeground(NOTIFICATION_ID, buildNotification(nextState, java.util.Collections.emptySet()));
-                    stopSelf(startId);
-                } else applyState(currentState, startId);
-                return START_NOT_STICKY;
-            }
             currentState = nextState;
             mediaSession.setActive(true);
             applyState(currentState, startId);
@@ -172,7 +161,6 @@ public class AndroidMediaSessionService extends Service {
         }
 
         Set<String> actions = readActions(state.optJSONArray("actions"));
-        AndroidPlaybackPlugin.updateQueueActions(state.optString("nativeOwner", ""), actions);
         long durationMs = secondsToMillis(state.optDouble("duration", 0));
         long positionMs = Math.min(durationMs, secondsToMillis(state.optDouble("position", 0)));
         float playbackRate = (float) Math.max(0, state.optDouble("playbackRate", 1));
@@ -201,6 +189,7 @@ public class AndroidMediaSessionService extends Service {
         int nativeState = "playing".equals(playbackState)
             ? PlaybackState.STATE_PLAYING
             : PlaybackState.STATE_PAUSED;
+        SubscriptionRefreshWebView.setPlaybackActive(nativeState == PlaybackState.STATE_PLAYING);
         if (nativeState == PlaybackState.STATE_PLAYING) {
             mainHandler.removeCallbacks(releasePlaybackWakeLock);
             if (!playbackWakeLock.isHeld()) playbackWakeLock.acquire();
@@ -223,34 +212,6 @@ public class AndroidMediaSessionService extends Service {
         if (startId != 0 || !nextNotificationSignature.equals(notificationSignature)) {
             startForeground(NOTIFICATION_ID, buildNotification(state, actions));
             notificationSignature = nextNotificationSignature;
-        }
-    }
-
-    static void updateNativeState(com.getcapacitor.JSObject state) {
-        AndroidMediaSessionService service = activeService.get();
-        if (service == null || service.currentState == null) return;
-        String owner = service.currentState.optString("nativeOwner", "");
-        if (owner.isEmpty() || !owner.equals(state.optString("owner"))) return;
-        if ("ended".equals(state.optString("event")) || "error".equals(state.optString("event"))) {
-            service.stopPlaybackService();
-            return;
-        }
-        try {
-            service.currentState.put("position", state.optDouble("position", 0));
-            service.currentState.put("duration", state.optDouble("duration", 0));
-            service.currentState.put("playbackRate", state.optDouble("playbackRate", 1));
-            service.currentState.put("playbackState", state.optBoolean("paused", true) ? "paused" : "playing");
-            service.applyState(service.currentState);
-        } catch (JSONException ignored) {
-            service.stopPlaybackService();
-        }
-    }
-
-    static void clearNativeOwner(String owner) {
-        AndroidMediaSessionService service = activeService.get();
-        if (service != null && service.currentState != null && owner != null && !owner.isEmpty() &&
-            owner.equals(service.currentState.optString("nativeOwner", ""))) {
-            service.stopPlaybackService();
         }
     }
 
@@ -418,9 +379,8 @@ public class AndroidMediaSessionService extends Service {
     }
 
     private void stopPlaybackService(int startId) {
-        String nativeOwner = currentState == null ? "" : currentState.optString("nativeOwner", "");
         currentState = null;
-        AndroidPlaybackPlugin.pauseOwner(nativeOwner);
+        SubscriptionRefreshWebView.setPlaybackActive(false);
         artworkUrl = "";
         artwork = null;
         artworkLoader.cancel();
@@ -437,10 +397,8 @@ public class AndroidMediaSessionService extends Service {
 
     @Override
     public void onDestroy() {
-        String nativeOwner = currentState == null ? "" : currentState.optString("nativeOwner", "");
         currentState = null;
-        AndroidPlaybackPlugin.pauseOwner(nativeOwner);
-        if (activeService.get() == this) activeService.clear();
+        SubscriptionRefreshWebView.setPlaybackActive(false);
         artworkUrl = "";
         artworkLoader.close();
         mainHandler.removeCallbacks(releasePlaybackWakeLock);

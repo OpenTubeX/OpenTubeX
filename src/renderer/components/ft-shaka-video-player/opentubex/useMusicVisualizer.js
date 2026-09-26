@@ -35,7 +35,6 @@ export function useMusicVisualizer({ active, video, sourceKey }) {
   let frequencyData = null
   let lastFrameTime = 0
   let hasLoggedVisualizerError = false
-  let nativeSpectrumPending = false
 
   function logVisualizerError(error) {
     if (!hasLoggedVisualizerError) {
@@ -158,8 +157,7 @@ export function useMusicVisualizer({ active, video, sourceKey }) {
   function drawFrame(timestamp) {
     animationFrame = null
 
-    const native = video.value?.nativePlayback
-    if (!canDraw() || (!analyser && !native) || !frequencyData) {
+    if (!canDraw() || !analyser || !frequencyData) {
       stopDrawing()
       return
     }
@@ -176,18 +174,7 @@ export function useMusicVisualizer({ active, video, sourceKey }) {
       return
     }
 
-    if (native) {
-      if (!nativeSpectrumPending) {
-        nativeSpectrumPending = true
-        const target = frequencyData
-        runVisualizerTask(native.getAudioSpectrum().then(({ bins }) => {
-          if (target !== frequencyData || !canDraw()) return
-          for (let index = 0; index < target.length; index++) {
-            target[index] = Math.round(target[index] * 0.82 + (bins[index] ?? 0) * 0.18)
-          }
-        }).finally(() => { nativeSpectrumPending = false }))
-      }
-    } else analyser.getByteFrequencyData(frequencyData)
+    analyser.getByteFrequencyData(frequencyData)
     context.clearRect(0, 0, canvas.width, canvas.height)
 
     const barCount = Math.min(48, frequencyData.length)
@@ -255,12 +242,6 @@ export function useMusicVisualizer({ active, video, sourceKey }) {
 
   async function startDrawing() {
     if (!canDraw()) {
-      return
-    }
-
-    if (video.value?.nativePlayback) {
-      frequencyData ??= new Uint8Array(FFT_SIZE / 2)
-      if (animationFrame === null) animationFrame = requestAnimationFrame(drawFrame)
       return
     }
 

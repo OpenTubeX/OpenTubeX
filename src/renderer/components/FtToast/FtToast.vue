@@ -313,8 +313,7 @@ const toastProgressRadius = computed(() => 12 * store.getters.getUiRoundness / 1
 const toastProgressLineWidth = computed(() => Math.min(4, Math.max(2, 2 * store.getters.getUiRoundness / 100)))
 
 function updateFullscreenTarget() {
-  // Android's native player uses a fixed container instead of browser fullscreen.
-  fullscreenTarget.value = document.fullscreenElement || document.querySelector('[data-native-player-screen]')
+  fullscreenTarget.value = document.fullscreenElement
 }
 
 /**

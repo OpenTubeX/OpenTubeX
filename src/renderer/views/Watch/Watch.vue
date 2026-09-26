@@ -164,9 +164,9 @@
           @error="handlePlayerError"
           @loaded="handleVideoLoaded"
           @timeupdate="handleTimeUpdate"
+          @play="handleVideoPlay"
           @terminal-outro-started="handleTerminalOutroStarted"
           @ended="handlePlayerEnded"
-          @play="handleVideoPlay"
           @pause="handleVideoPause"
           @seeking="handlePlayerSeeking"
           @toggle-theatre-mode="toggleTheatreMode"
@@ -914,6 +914,7 @@
         <FtPhonePanel
           :enabled="phonePanelsEnabled"
           :open="mobilePanel === 'description'"
+          class="phoneDescriptionPanel"
           :title="$t('Description.Title')"
           @close="mobilePanel = null"
         >

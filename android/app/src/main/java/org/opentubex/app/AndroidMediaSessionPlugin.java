@@ -48,7 +48,7 @@ public class AndroidMediaSessionPlugin extends Plugin {
         }
 
         mainHandler.post(() -> {
-            if (activePlugin.get() != this || !AndroidPlaybackPlugin.acceptsMediaOwner(state.optString("nativeOwner", ""))) {
+            if (activePlugin.get() != this) {
                 call.resolve();
                 return;
             }
@@ -67,19 +67,16 @@ public class AndroidMediaSessionPlugin extends Plugin {
     @PluginMethod
     public void clear(PluginCall call) {
         mainHandler.post(() -> {
-            if (AndroidPlaybackPlugin.acceptsMediaOwner(call.getString("nativeOwner", ""))) {
-                try {
-                    // Deliver the stop after pending updates have acknowledged their
-                    // foreground starts. stopService() can kill an unstarted service.
-                    getContext().startService(new Intent(getContext(), AndroidMediaSessionService.class)
-                        .setAction(AndroidMediaSessionService.ACTION_UPDATE)
-                        .putExtra(AndroidMediaSessionService.EXTRA_STATE, new JSObject()
-                            .put("nativeOwner", call.getString("nativeOwner", ""))
-                            .put("playbackState", "none").toString()));
-                } catch (IllegalStateException | SecurityException error) {
-                    call.reject("Android did not allow clearing the playback service", error);
-                    return;
-                }
+            try {
+                // Deliver the stop after pending updates have acknowledged their
+                // foreground starts. stopService() can kill an unstarted service.
+                getContext().startService(new Intent(getContext(), AndroidMediaSessionService.class)
+                    .setAction(AndroidMediaSessionService.ACTION_UPDATE)
+                    .putExtra(AndroidMediaSessionService.EXTRA_STATE, new JSObject()
+                        .put("playbackState", "none").toString()));
+            } catch (IllegalStateException | SecurityException error) {
+                call.reject("Android did not allow clearing the playback service", error);
+                return;
             }
             call.resolve();
         });
@@ -93,8 +90,6 @@ public class AndroidMediaSessionPlugin extends Plugin {
         if (!AndroidMediaActions.isSupported(action)) {
             return;
         }
-        if (AndroidPlaybackPlugin.handleAction(action, seekTime, seekOffset)) return;
-
         AndroidMediaSessionPlugin plugin = activePlugin.get();
         if (plugin == null) {
             return;

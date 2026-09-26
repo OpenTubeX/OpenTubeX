@@ -21,7 +21,7 @@ for (const android of [false, true]) {
           ${method('getVideoInformationInvidious', 'async runIpBlockRecoveryScriptAndReload()')}
         })`, {
           process: { env: { IS_CAPACITOR: android } },
-          Capacitor: { convertFileSrc: path => `https://localhost/_capacitor_file_${path}` },
+          Capacitor: { convertFileSrc: path => path.replace('content:/', 'https://localhost/_capacitor_content_') },
           DOWNLOADED_MEDIA_MIME_TYPES: { mp4: 'video/mp4' },
           getConnectionState: () => 'offline',
           initializeNetworkRecovery: () => ({ ready: Promise.resolve(false) }),
@@ -53,7 +53,7 @@ for (const android of [false, true]) {
         assert.equal(watch.videoTitle, 'Offline video')
         assert.equal(watch.videoLengthSeconds, 42)
         const url = mode === 'audio' ? watch.manifestSrc : watch.legacyFormats[0].url
-        assert.equal(url, android ? 'content://downloads/document/1' : 'downloadmedia://file/1/downloaded1')
+        assert.equal(url, android ? 'https://localhost/_capacitor_content_/downloads/document/1' : 'downloadmedia://file/1/downloaded1')
         assert.equal(requests, 0)
       })
     }
@@ -70,7 +70,7 @@ for (const backend of ['Local', 'Invidious']) {
     const methods = runInNewContext(`({
       ${method('getVideoInformationLocal', 'getVideoInformationInvidious')}
       ${method('getVideoInformationInvidious', 'async runIpBlockRecoveryScriptAndReload()')}
-      ${source.slice(source.indexOf('    handleDownloadConnectionChange('), source.indexOf('    updateAndroidBackgroundPlaybackFormat()'))}
+      ${source.slice(source.indexOf('    handleDownloadConnectionChange('), source.indexOf('    handleUpcomingPlaylistVideosChange('))}
     })`, {
       getConnectionState: () => 'online',
       initializeNetworkRecovery: () => ({ ready: Promise.resolve(true) }),

@@ -340,7 +340,7 @@ watch(dropdownShown, (shown) => {
 
 function syncFullscreenDropdownTarget() {
   const target = fullscreenDropdownTarget.value
-  if (target && !target.matches(':fullscreen, [data-native-player-screen], .fullWindow')) {
+  if (target && !target.matches(':fullscreen, .fullWindow')) {
     handleDropdownEscape()
   }
 }
@@ -353,7 +353,7 @@ watch(fullscreenDropdownTarget, (target) => {
   fullscreenTargetObserver = new MutationObserver(syncFullscreenDropdownTarget)
   fullscreenTargetObserver.observe(target, {
     attributes: true,
-    attributeFilter: ['class', 'data-native-player-screen']
+    attributeFilter: ['class']
   })
   document.addEventListener('fullscreenchange', syncFullscreenDropdownTarget)
 })
@@ -387,7 +387,7 @@ function handleIconClick(e, isRightOrLongClick = false) {
     (props.forceDropdown || props.dropdownOptions.length > 0)) {
     if (!dropdownShown.value) {
       fullscreenDropdownTarget.value = props.dropdownModalOnMobile
-        ? ftIconButton.value?.closest(':fullscreen, [data-native-player-screen], .fullWindow') ?? null
+        ? ftIconButton.value?.closest(':fullscreen, .fullWindow') ?? null
         : null
     }
     dropdownShown.value = !dropdownShown.value

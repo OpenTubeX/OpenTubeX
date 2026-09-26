@@ -11,7 +11,7 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 public class PullToRefreshPlugin extends Plugin {
     private PullToRefreshLayout layout;
     private final Runnable finishTimeout = () -> {
-        if (layout != null) currentLayout().setRefreshing(false);
+        if (layout != null) layout.setRefreshing(false);
     };
 
     @Override
@@ -19,9 +19,9 @@ public class PullToRefreshPlugin extends Plugin {
         getActivity().runOnUiThread(() -> {
             layout = (PullToRefreshLayout) getBridge().getWebView().getParent();
             layout.setOnRefreshListener(() -> {
-                JSObject context = currentLayout().getRefreshContext();
+                JSObject context = layout.getRefreshContext();
                 if (context == null) {
-                    currentLayout().setRefreshing(false);
+                    layout.setRefreshing(false);
                     return;
                 }
                 // A renderer crash must not leave a permanent native spinner.
@@ -32,19 +32,10 @@ public class PullToRefreshPlugin extends Plugin {
         });
     }
 
-    private PullToRefreshLayout currentLayout() {
-        // Native playback temporarily hosts the WebView in its own refresh layout.
-        android.view.ViewParent parent = getBridge().getWebView().getParent();
-        return parent instanceof PullToRefreshLayout ? (PullToRefreshLayout) parent : layout;
-    }
-
     @PluginMethod
     public void setEnabled(PluginCall call) {
         getActivity().runOnUiThread(() -> {
             layout.configure(getBridge().getWebView(), call.getBoolean("enabled", false));
-            if (currentLayout() != layout) {
-                currentLayout().configure(getBridge().getWebView(), call.getBoolean("enabled", false));
-            }
             call.resolve();
         });
     }
@@ -53,7 +44,7 @@ public class PullToRefreshPlugin extends Plugin {
     public void finish(PluginCall call) {
         getActivity().runOnUiThread(() -> {
             layout.removeCallbacks(finishTimeout);
-            currentLayout().setRefreshing(false);
+            layout.setRefreshing(false);
             call.resolve();
         });
     }
@@ -62,7 +53,7 @@ public class PullToRefreshPlugin extends Plugin {
     protected void handleOnPause() {
         if (layout != null) {
             layout.removeCallbacks(finishTimeout);
-            currentLayout().setRefreshing(false);
+            layout.setRefreshing(false);
         }
     }
 
@@ -72,10 +63,6 @@ public class PullToRefreshPlugin extends Plugin {
             layout.removeCallbacks(finishTimeout);
             layout.configure(getBridge().getWebView(), false);
             layout.setOnRefreshListener(null);
-            if (currentLayout() != layout) {
-                currentLayout().configure(getBridge().getWebView(), false);
-                currentLayout().setOnRefreshListener(null);
-            }
         }
     }
 }

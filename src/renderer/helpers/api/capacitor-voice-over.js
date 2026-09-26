@@ -5,7 +5,7 @@ const VoiceOverHttp = registerPlugin('VoiceOverHttp')
 
 /**
  * VOT exchanges small protobuf messages. Keep their bytes intact across the
- * native bridge; translated audio itself streams through the native player.
+ * native bridge; translated audio streams through the WebView player.
  * @param {RequestInfo | URL} input
  * @param {RequestInit} [init]
  * @returns {Promise<Response>}

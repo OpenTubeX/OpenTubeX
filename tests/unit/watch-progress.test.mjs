@@ -3,7 +3,6 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { runInNewContext } from 'node:vm'
 import { isHistoryEntryWatched } from '../../src/history.js'
-import { attachAndroidMediaElement } from '../../src/renderer/helpers/player/androidMediaElement.js'
 
 const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
 const { _saveWatchProgress, addToHistory } = runInNewContext(`({
@@ -16,10 +15,7 @@ const seekingHandler = playerSource.slice(playerSource.indexOf('    function han
 
 function fixture(existing = true) {
   const element = Object.assign(new EventTarget(), {
-    style: {}, volume: 1, muted: false, playbackRate: 1, defaultPlaybackRate: 1, loop: false, pause() {},
-  })
-  const media = attachAndroidMediaElement(element, {
-    command: async () => {}, load: async () => {}, onError: assert.fail, now: () => 0,
+    currentTime: 11 * 3600,
   })
   const hasPlaybackPosition = { value: false }
   const handleSeeking = runInNewContext(`${seekingHandler}; handleSeeking`, {
@@ -40,15 +36,14 @@ function fixture(existing = true) {
     addToHistory, updateHistory: payload => Object.assign(history, payload),
     updateWatchProgress: payload => Object.assign(history, payload),
   }
-  return { element, media, player, history, view, save: () => _saveWatchProgress.call(view) }
+  return { element, player, history, view, save: () => _saveWatchProgress.call(view) }
 }
 
 for (const target of [0, 4 * 3600, 12 * 3600]) {
-  test(`saves a seek to ${target} before the first native segment finishes loading`, () => {
+  test(`saves a seek to ${target} before the player finishes loading`, () => {
     const f = fixture()
-    f.media.update({ duration: 52991, position: 11 * 3600, ready: false, buffering: true })
     f.element.currentTime = target
-    f.media.update({ position: 11 * 3600, ready: false, buffering: true })
+    f.element.dispatchEvent(new Event('seeking'))
     assert.equal(f.element.currentTime, target)
     assert.equal(f.player.hasLoaded, false)
     f.save()
@@ -81,6 +76,7 @@ for (const reason of ['teardown', 'background', 'never presented', 'not ready'])
 test('a seek before the first load creates a complete new history entry', () => {
   const f = fixture(false)
   f.element.currentTime = 14400
+  f.element.dispatchEvent(new Event('seeking'))
   f.save()
   assert.equal(f.history.watchProgress, 14400)
   assert.equal(f.history.title, 'Long video')

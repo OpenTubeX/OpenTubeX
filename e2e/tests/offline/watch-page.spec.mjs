@@ -139,6 +139,27 @@ test('casts a complete MP4 stream to a discovered DLNA device and returns to loc
 test.describe('desktop quick playback speed bar', () => {
   test.use({ seed: { settings: { ...WATCH_PAGE_SEED, useQuickPlaybackSpeedBar: true } } })
 
+  test('quick speeds fade in step with the bottom controls', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    const result = await page.evaluate(async () => {
+      const controls = document.querySelector('.shaka-controls-container')
+      const panel = controls.querySelector('.shaka-controls-button-panel')
+      const bar = panel.querySelector('.ft-quick-playback-rate-bar')
+      controls.setAttribute('shown', 'true')
+      await new Promise(resolve => setTimeout(resolve, 750))
+      controls.removeAttribute('shown')
+      await new Promise(resolve => setTimeout(resolve, 180))
+      return {
+        panelFade: Number(getComputedStyle(panel).getPropertyValue('--ft-controls-fade')),
+        barOpacity: Number(getComputedStyle(bar).opacity)
+      }
+    })
+    expect(result.panelFade).toBeGreaterThan(0.1)
+    expect(result.panelFade).toBeLessThan(0.9)
+    expect(result.barOpacity - result.panelFade).toBeLessThan(0.05)
+  })
+
   test('uses the shaded glass surface', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
@@ -184,6 +205,36 @@ test.describe('desktop quick playback speed bar', () => {
     await expect(button).toHaveCSS('background-image', 'none')
     await session.detach()
   })
+})
+
+test('right control pill fades with its icons in both directions', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const result = await page.evaluate(async () => {
+    const controls = document.querySelector('.shaka-controls-container')
+    const panel = controls.querySelector('.shaka-controls-button-panel')
+    const pill = panel.querySelector('.ft-right-control-glass')
+    const snapshot = () => ({
+      panelFade: Number(getComputedStyle(panel).getPropertyValue('--ft-controls-fade')),
+      pillOpacity: Number(getComputedStyle(pill).opacity)
+    })
+    controls.setAttribute('casting', 'true')
+    panel.style.transition = 'none'
+    panel.style.setProperty('--ft-controls-fade', '0')
+    await new Promise(resolve => setTimeout(resolve, 150))
+    panel.style.setProperty('--ft-controls-fade', '0.5')
+    await new Promise(resolve => setTimeout(resolve, 30))
+    const appearing = snapshot()
+    panel.style.setProperty('--ft-controls-fade', '1')
+    await new Promise(resolve => setTimeout(resolve, 150))
+    panel.style.setProperty('--ft-controls-fade', '0.5')
+    await new Promise(resolve => setTimeout(resolve, 30))
+    return { appearing, disappearing: snapshot() }
+  })
+  for (const state of [result.appearing, result.disappearing]) {
+    expect(state.panelFade).toBe(0.5)
+    expect(Math.abs(state.pillOpacity - state.panelFade)).toBeLessThan(0.05)
+  }
 })
 
 async function observeUpNextHandoff(page) {
@@ -2065,16 +2116,15 @@ test.describe('Shorts transcript navigation', () => {
 
       const player = page.locator('.ftVideoPlayer.shortsPlayer')
       const rail = page.locator('.shortsActionRail')
-      const commentsPanel = page.locator('.shortsCommentsPanel')
       await expect(player).toBeVisible()
       await expect(rail).toBeVisible()
       await page.locator('.shortsCommentsAction .iconButton').click()
-      await expect(commentsPanel).toHaveClass(/shortsCommentsPanelOpen/)
+      await expect(page.getByRole('dialog', { name: 'Comments' })).toBeVisible()
 
       const geometry = await page.evaluate(() => {
         const playerBounds = document.querySelector('.ftVideoPlayer.shortsPlayer').getBoundingClientRect()
         const railBounds = document.querySelector('.shortsActionRail').getBoundingClientRect()
-        const commentsBounds = document.querySelector('.shortsCommentsPanel').getBoundingClientRect()
+        const commentsBounds = document.querySelector('.mobileSheet[open]').getBoundingClientRect()
         const actionLabels = [...document.querySelectorAll('.shortsAction > span')]
         return {
           commentsLeft: commentsBounds.left,

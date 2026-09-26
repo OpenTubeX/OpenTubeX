@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { Capacitor } from '@capacitor/core'
-import { attachAndroidMediaElement } from '../../src/renderer/helpers/player/androidMediaElement.js'
 
 // Register the plugins against a native bridge so their real proxies call our mocks.
 globalThis.androidBridge = {}
@@ -121,19 +120,16 @@ for (const playback of [
   { name: 'loading', ready: false },
   { name: 'audio-only', ready: true, width: 0, height: 0 },
 ]) {
-  test(`watch previews retain the native window screenshot during ${playback.name} playback`, async t => {
-    // Android's DOM video carries native playback state and layout, but never
-    // contains a decoded frame that CanvasRenderingContext2D can draw.
+  test(`watch previews use the window screenshot during ${playback.name} playback`, async t => {
     const video = Object.assign(new EventTarget(), {
       style: {},
+      paused: playback.paused ?? true,
+      readyState: playback.ready ? 4 : 0,
+      videoWidth: playback.width ?? 0,
+      videoHeight: playback.height ?? 0,
       pause() {},
       getBoundingClientRect: () => ({ left: 0, top: 56, bottom: 267, width: 375, height: 211 }),
     })
-    const media = attachAndroidMediaElement(video, {
-      command: async () => {}, load: async () => {}, onError: assert.fail,
-    })
-    t.after(() => media.detach())
-    media.update(playback)
     const state = setup(t, { videos: [video] })
     state.tab.route.fullPath = '/watch/test-video'
 

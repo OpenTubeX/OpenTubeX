@@ -15,8 +15,10 @@ function mountSheet(t, expandPanel = null) {
   const player = Object.assign(new EventTarget(), {
     coversWindow: false,
     shorts: false,
-    classList: { contains(name) { return name === 'shortsPlayer' && player.shorts } },
-    matches() { return this.coversWindow },
+    classList: { contains(name) {
+      return (name === 'shortsPlayer' && player.shorts) ||
+        (name === 'fullWindow' && player.coversWindow)
+    } },
     setAttribute() {}, removeAttribute() {},
     getBoundingClientRect: () => ({ top: 50, bottom: 300 })
   })
@@ -137,7 +139,7 @@ test('opening a regular video sheet in landscape keeps playback running', async 
   assert.equal(pauses, 0)
 })
 
-for (const mode of ['native', 'browser', 'fullwindow']) {
+for (const mode of ['browser', 'fullwindow']) {
   test(`an open below-player sheet hides during ${mode} fullscreen and returns below the player`, async t => {
     const sheet = mountSheet(t)
     sheet.props.open = true

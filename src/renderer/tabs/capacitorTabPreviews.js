@@ -47,7 +47,7 @@ export function initializeCapacitorTabPreviews(store) {
     cache.prune(store.getters.getTabs)
     schedule()
   }, { immediate: true, flush: 'sync' })
-  // Native playback can become ready after the route's initial screenshot.
+  // Video can become ready after the route's initial screenshot.
   // Refresh that cached image before a slow organizer capture needs it.
   const contentEvents = ['scroll', 'loadeddata', 'playing', 'seeked']
   for (const event of contentEvents) document.addEventListener(event, schedule, true)

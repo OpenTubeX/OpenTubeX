@@ -51,7 +51,6 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(PullToRefreshPlugin.class);
         registerPlugin(AndroidStoragePlugin.class);
         registerPlugin(AndroidMediaSessionPlugin.class);
-        registerPlugin(AndroidPlaybackPlugin.class);
         registerPlugin(SubscriptionRefreshPlugin.class);
         registerPlugin(SabrHttpPlugin.class);
         registerPlugin(VoiceOverHttpPlugin.class);
@@ -75,19 +74,6 @@ public class MainActivity extends BridgeActivity {
         OpenTubeXNotificationChannels.createAll(this);
         inputManager = (InputManager) getSystemService(INPUT_SERVICE);
         inputManager.registerInputDeviceListener(inputDeviceListener, null);
-        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                if (AndroidPlaybackPlugin.handleBack()) return;
-                // Capacitor App owns ordinary navigation and app dismissal.
-                setEnabled(false);
-                try {
-                    getOnBackPressedDispatcher().onBackPressed();
-                } finally {
-                    setEnabled(true);
-                }
-            }
-        });
     }
 
     @Override
@@ -100,7 +86,6 @@ public class MainActivity extends BridgeActivity {
                 // Dismiss playback with the task, but let subscription requests and
                 // their database writes finish before destroying the Capacitor bridge.
                 bridge.triggerWindowJSEvent("opentubex:android-task-removed");
-                ((AndroidPlaybackPlugin) bridge.getPlugin("AndroidPlayback").getInstance()).handleOnDestroy();
                 ((AndroidMediaSessionPlugin) bridge.getPlugin("AndroidMediaSession").getInstance()).handleOnDestroy();
                 bridge = null;
             }
@@ -137,7 +122,6 @@ public class MainActivity extends BridgeActivity {
     }
 
     private void notifyPictureInPictureState(boolean active) {
-        AndroidPlaybackPlugin.pictureInPictureChanged(active);
         getBridge().triggerWindowJSEvent(
             "opentubex:android-pip",
             "{\"active\":" + active + "}"
