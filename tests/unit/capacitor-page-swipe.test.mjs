@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { findLoadedSwipeTab, shouldFinishPageSwipe } from '../../src/renderer/helpers/capacitorPageSwipe.js'
+import { findSwipeTab, shouldFinishPageSwipe } from '../../src/renderer/helpers/capacitorPageSwipe.js'
 
-test('swiping skips unloaded tabs and stops at the loaded edge', () => {
+test('swiping visits adjacent unloaded and mounting tabs without skipping', () => {
   const tabs = [
     { id: 'first', loadState: 'loaded' },
     { id: 'unloaded', loadState: 'unloaded' },
@@ -11,10 +11,10 @@ test('swiping skips unloaded tabs and stops at the loaded edge', () => {
     { id: 'last', loadState: 'loaded' }
   ]
 
-  assert.equal(findLoadedSwipeTab(tabs, 'first', 1)?.id, 'last')
-  assert.equal(findLoadedSwipeTab(tabs, 'last', -1)?.id, 'first')
-  assert.equal(findLoadedSwipeTab(tabs, 'last', 1), null)
-  assert.equal(findLoadedSwipeTab(tabs, 'unloaded', 1), null)
+  assert.equal(findSwipeTab(tabs, 'first', 1)?.id, 'unloaded')
+  assert.equal(findSwipeTab(tabs, 'last', -1)?.id, 'mounting')
+  assert.equal(findSwipeTab(tabs, 'last', 1), null)
+  assert.equal(findSwipeTab(tabs, 'unloaded', 1), null)
 })
 
 test('page swipe settles on distance or a deliberate fling', () => {
