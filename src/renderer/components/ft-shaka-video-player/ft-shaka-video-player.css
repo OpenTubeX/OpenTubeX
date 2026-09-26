@@ -338,6 +338,22 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   backdrop-filter: none;
 }
 
+.shortsVolumeControl:is(:hover, :focus-within) {
+  background-color: rgb(0 0 0 / 44%);
+}
+
+.ftVideoPlayer.shortsPlayer:not(.classicPlayerControls) .shortsTopControlsGroup > .shortsTopControl,
+.ftVideoPlayer.shortsPlayer:not(.classicPlayerControls) .shortsVolumeControl {
+  background: linear-gradient(145deg, rgb(255 255 255 / 12%), rgb(255 255 255 / 3%)), rgb(0 0 0 / 42%);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 28%), inset 0 1px rgb(255 255 255 / 24%), inset 0 0 0 1px rgb(255 255 255 / 16%), inset 0 -2px 8px rgb(0 0 0 / 22%);
+  backdrop-filter: blur(10px) saturate(1.15);
+}
+
+.ftVideoPlayer.shortsPlayer:not(.classicPlayerControls) .shortsTopControlsGroup > .shortsTopControl:is(:hover, :focus-visible, .active),
+.ftVideoPlayer.shortsPlayer:not(.classicPlayerControls) .shortsVolumeControl:is(:hover, :focus-within) {
+  background: linear-gradient(rgb(255 255 255 / 12%), rgb(255 255 255 / 12%)), linear-gradient(145deg, rgb(255 255 255 / 12%), rgb(255 255 255 / 3%)), rgb(0 0 0 / 42%);
+}
+
 .shortsVolumeSlider {
   inline-size: 0;
   margin-inline: 0;
@@ -345,10 +361,6 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   accent-color: #fff;
   cursor: pointer;
   transition: inline-size 160ms ease, margin-inline 160ms ease, opacity 120ms ease;
-}
-
-.shortsVolumeControl:is(:hover, :focus-within) {
-  background-color: rgb(0 0 0 / 44%);
 }
 
 .shortsCaptionsControl {
@@ -445,8 +457,6 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   padding-block: 2px;
   padding-inline: 6px;
   border-radius: calc(999px * var(--ui-roundness));
-  background-color: rgb(0 0 0 / 32%);
-  backdrop-filter: blur(8px) saturate(120%);
   pointer-events: auto;
 }
 
