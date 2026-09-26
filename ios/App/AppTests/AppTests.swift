@@ -278,6 +278,14 @@ final class AppTests: XCTestCase {
     }
 
     func testHTTPErrorRedirectHeadersAndRecovery() async throws {
+        try await verifyHTTPErrorRedirectHeadersAndRecovery(plugin: "CapacitorHttp")
+    }
+
+    func testCancellableHTTPErrorRedirectHeadersAndRecovery() async throws {
+        try await verifyHTTPErrorRedirectHeadersAndRecovery(plugin: "IOSHttp")
+    }
+
+    private func verifyHTTPErrorRedirectHeadersAndRecovery(plugin: String) async throws {
         try await openApplication()
         _ = try await webView.callAsyncJavaScript("await testRouter.push('/subscriptions')", arguments: [:], in: nil, contentWorld: .page)
         let listener = try NWListener(using: .tcp, on: .any)
@@ -333,7 +341,8 @@ final class AppTests: XCTestCase {
         await fulfillment(of: [ready], timeout: 10)
         let port = try XCTUnwrap(listener.port).rawValue
         let result = try await webView.callAsyncJavaScript("""
-        const request = path => Capacitor.Plugins.CapacitorHttp.request({
+        const nativeRequest = options => Capacitor.Plugins[plugin].request({...options, requestId: crypto.randomUUID()});
+        const request = path => nativeRequest({
             url: base + path, method: 'GET', responseType: 'text',
             headers: {'X-OpenTubeX-Test': 'retained'}, connectTimeout: 3000, readTimeout: 3000
         });
@@ -344,11 +353,11 @@ final class AppTests: XCTestCase {
         const recovered = await request('/echo');
         await request('/set-cookie');
         const cookie = await request('/cookie');
-        const cross = await Capacitor.Plugins.CapacitorHttp.request({url: base + '/cross-redirect', method: 'GET', responseType: 'text', headers: {Authorization: 'Bearer simulator-fixture'}});
-        const noRedirect = await Capacitor.Plugins.CapacitorHttp.request({url: base + '/redirect', method: 'GET', disableRedirects: true});
+        const cross = await nativeRequest({url: base + '/cross-redirect', method: 'GET', responseType: 'text', headers: {Authorization: 'Bearer simulator-fixture'}});
+        const noRedirect = await nativeRequest({url: base + '/redirect', method: 'GET', disableRedirects: true});
         let timeoutError = '';
         const began = Date.now();
-        try { await Capacitor.Plugins.CapacitorHttp.request({url: base + '/slow', method: 'GET', connectTimeout: 500, readTimeout: 500}); }
+        try { await nativeRequest({url: base + '/slow', method: 'GET', connectTimeout: 500, readTimeout: 500}); }
         catch (error) { timeoutError = error.message; }
         const elapsed = Date.now() - began;
         await Capacitor.Plugins.CapacitorCookies.deleteCookie({url: base, key: 'opentubex-ios-test'});
@@ -357,7 +366,7 @@ final class AppTests: XCTestCase {
             timeoutError, elapsed, afterTimeout: afterTimeout.status, emptyStatus: empty.status, emptyBody: empty.data,
             redirectStatus: redirected.status, redirectBody: redirected.data,
             disconnected, recoveredStatus: recovered.status, recoveredBody: recovered.data};
-        """, arguments: ["base": "http://127.0.0.1:\(port)"], in: nil, contentWorld: .page) as? [String: Any]
+        """, arguments: ["base": "http://127.0.0.1:\(port)", "plugin": plugin], in: nil, contentWorld: .page) as? [String: Any]
         XCTAssertEqual(result?["emptyStatus"] as? Int, 503)
         XCTAssertEqual(result?["emptyBody"] as? String, "")
         XCTAssertEqual(result?["redirectStatus"] as? Int, 200)
@@ -422,6 +431,123 @@ final class AppTests: XCTestCase {
             try await wait("iosCancelResult === 'cancelled'", timeout: 10)
             await fulfillment(of: [closed], timeout: 10)
         }
+    }
+
+    func testAPICancellationClosesNativeConnection() async throws {
+        try await openApplication()
+        _ = try await webView.callAsyncJavaScript("await testRouter.push('/subscriptions')", arguments: [:], in: nil, contentWorld: .page)
+        for immediate in [false, true] {
+            let listener = try NWListener(using: .tcp, on: .any)
+            let ready = expectation(description: "Cancellation server ready")
+            let started = immediate ? nil : expectation(description: "Partial response sent")
+            let closed = immediate ? nil : expectation(description: "Native transport closed connection")
+            listener.stateUpdateHandler = { state in
+                if case .ready = state { ready.fulfill() }
+            }
+            listener.newConnectionHandler = { connection in
+                connection.start(queue: .global())
+                connection.receive(minimumIncompleteLength: 1, maximumLength: 8192) { data, _, _, _ in
+                    if String(data: data ?? Data(), encoding: .utf8)?.contains("/recover ") == true {
+                        connection.send(content: Data("HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\nok".utf8), completion: .contentProcessed { _ in connection.cancel() })
+                        return
+                    }
+                    let response = "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: 10000\r\nConnection: close\r\n\r\nabc"
+                    connection.send(content: Data(response.utf8), completion: .contentProcessed { _ in
+                        started?.fulfill()
+                        connection.receive(minimumIncompleteLength: 1, maximumLength: 8192) { _, _, complete, error in
+                            if complete || error != nil { closed?.fulfill() }
+                            connection.cancel()
+                        }
+                    })
+                }
+            }
+            listener.start(queue: .global())
+            defer { listener.cancel() }
+            await fulfillment(of: [ready], timeout: 10)
+            let port = try XCTUnwrap(listener.port).rawValue
+            let id = UUID().uuidString
+            _ = try await webView.callAsyncJavaScript("""
+            window.iosCancelResult = 'pending';
+            Capacitor.Plugins.IOSHttp.request({requestId: id, url, method: 'GET', responseType: 'text'})
+                .then(() => iosCancelResult = 'completed')
+                .catch(() => iosCancelResult = 'cancelled');
+            if (immediate) await Capacitor.Plugins.IOSHttp.abort({requestId: id});
+            """, arguments: ["id": id, "url": "http://127.0.0.1:\(port)/api", "immediate": immediate], in: nil, contentWorld: .page)
+            if !immediate {
+                await fulfillment(of: [try XCTUnwrap(started)], timeout: 10)
+                _ = try await webView.callAsyncJavaScript("await Capacitor.Plugins.IOSHttp.abort({requestId: id})", arguments: ["id": id], in: nil, contentWorld: .page)
+            }
+            try await wait("iosCancelResult === 'cancelled'", timeout: 10)
+            if !immediate { await fulfillment(of: [try XCTUnwrap(closed)], timeout: 10) }
+            // A cancelled task must not poison the next request's URLSession.
+            let recovered = try await webView.callAsyncJavaScript("""
+            return await Capacitor.Plugins.IOSHttp.request({requestId: crypto.randomUUID(), url, method: 'GET'});
+            """, arguments: ["url": "http://127.0.0.1:\(port)/recover"], in: nil, contentWorld: .page) as? [String: Any]
+            XCTAssertEqual(recovered?["data"] as? String, "ok")
+        }
+    }
+
+    func testInvidiousBrowsing() async throws {
+        try await openApplication()
+        let listener = try NWListener(using: .tcp, on: .any)
+        let ready = expectation(description: "Invidious fixture ready")
+        listener.stateUpdateHandler = { if case .ready = $0 { ready.fulfill() } }
+        listener.newConnectionHandler = { connection in
+            connection.start(queue: .global())
+            connection.receive(minimumIncompleteLength: 1, maximumLength: 16384) { data, _, _, _ in
+                let path = String(data: data ?? Data(), encoding: .utf8)?.components(separatedBy: " ").dropFirst().first ?? ""
+                let base = "http://127.0.0.1:\(listener.port!.rawValue)"
+                let image: [[String: Any]] = [["url": base + "/image", "width": 176, "height": 176]]
+                let video: [String: Any] = ["type": "video", "title": "iOS Invidious fixture", "videoId": "jNQXAC9IVRw",
+                    "author": "iOS fixture channel", "authorId": "UCaaaaaaaaaaaaaaaaaaaaaa", "authorUrl": "/channel/UCaaaaaaaaaaaaaaaaaaaaaa",
+                    "videoThumbnails": image, "description": "", "viewCount": 10, "lengthSeconds": 19, "published": 1_700_000_000,
+                    "publishedText": "2 years ago", "liveNow": false, "isUpcoming": false]
+                let json: Any
+                if path.hasPrefix("/api/v1/search") {
+                    json = [video]
+                } else if path.hasPrefix("/api/v1/channels") {
+                    json = ["author": "iOS fixture channel", "authorId": "UCaaaaaaaaaaaaaaaaaaaaaa", "authorBanners": [],
+                        "authorThumbnails": image, "subCount": 1, "totalViews": 2, "joined": 1_700_000_000,
+                        "autoGenerated": false, "isFamilyFriendly": true, "description": "Fixture channel description", "descriptionHtml": "",
+                        "allowedRegions": [], "tabs": [], "latestVideos": [], "relatedChannels": []] as [String: Any]
+                } else if path.hasPrefix("/api/v1/playlists") {
+                    json = ["title": "iOS fixture playlist", "playlistId": "PLaaaaaaaaaaaaaaaaaaaaaa", "author": "iOS fixture channel",
+                        "authorId": "UCaaaaaaaaaaaaaaaaaaaaaa", "authorThumbnails": image, "description": "", "descriptionHtml": "",
+                        "videoCount": 0, "viewCount": 0, "updated": 1_756_000_000, "videos": []] as [String: Any]
+                } else { json = [] }
+                let isImage = path == "/image"
+                let body = isImage ? Data("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"176\" height=\"176\"><rect width=\"176\" height=\"176\" fill=\"green\"/></svg>".utf8) : (try! JSONSerialization.data(withJSONObject: json))
+                let header = "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: *\r\nContent-Type: \(isImage ? "image/svg+xml" : "application/json")\r\nContent-Length: \(body.count)\r\nConnection: close\r\n\r\n"
+                connection.send(content: Data(header.utf8) + body, completion: .contentProcessed { _ in connection.cancel() })
+            }
+        }
+        listener.start(queue: .global())
+        defer { listener.cancel() }
+        await fulfillment(of: [ready], timeout: 10)
+        let base = "http://127.0.0.1:\(try XCTUnwrap(listener.port).rawValue)"
+        _ = try await webView.callAsyncJavaScript("""
+        window.invidiousBefore = {backend: testStore.getters.getBackendPreference, instance: testStore.getters.getDefaultInvidiousInstance};
+        await testStore.dispatch('hideSettingsWindow');
+        await testStore.dispatch('updateDefaultInvidiousInstance', base);
+        await testStore.dispatch('updateBackendPreference', 'invidious');
+        await testRouter.push('/search/ios-invidious-fixture');
+        """, arguments: ["base": base], in: nil, contentWorld: .page)
+        do {
+            try await wait("document.body.innerText.includes('iOS Invidious fixture')", timeout: 20)
+            _ = try await webView.callAsyncJavaScript("await testRouter.push('/channel/UCaaaaaaaaaaaaaaaaaaaaaa')", arguments: [:], in: nil, contentWorld: .page)
+            try await wait("document.querySelector('.channelDetails .name')?.textContent.includes('iOS fixture channel') === true", timeout: 20)
+            try await wait("document.querySelector('.channelDetails img.thumbnail')?.naturalWidth > 0", timeout: 20)
+            _ = try await webView.callAsyncJavaScript("await testRouter.push('/playlist/PLaaaaaaaaaaaaaaaaaaaaaa')", arguments: [:], in: nil, contentWorld: .page)
+            try await wait("document.querySelector('.playlistTitle')?.textContent.includes('iOS fixture playlist') === true", timeout: 20)
+        } catch {
+            _ = try? await webView.callAsyncJavaScript("await testStore.dispatch('updateBackendPreference', invidiousBefore.backend); await testStore.dispatch('updateDefaultInvidiousInstance', invidiousBefore.instance)", arguments: [:], in: nil, contentWorld: .page)
+            throw error
+        }
+        _ = try await webView.callAsyncJavaScript("""
+        await testStore.dispatch('updateBackendPreference', invidiousBefore.backend);
+        await testStore.dispatch('updateDefaultInvidiousInstance', invidiousBefore.instance);
+        await testRouter.push('/subscriptions');
+        """, arguments: [:], in: nil, contentWorld: .page)
     }
 
     func testClipboardAndSceneShortcuts() async throws {
@@ -608,7 +734,8 @@ final class AppTests: XCTestCase {
         try await wait("!!document.querySelector('.settingsMenu')")
         for scale in [75, 100, 150] {
             _ = try await webView.callAsyncJavaScript("await testStore.dispatch('updateUiScale', scale)", arguments: ["scale": scale], in: nil, contentWorld: .page)
-            try await wait("Math.abs(visualViewport.scale - \(Double(scale) / 100)) < 0.02")
+            // WebKit can report the new scale before innerWidth catches up with the layout viewport.
+            try await wait("Math.abs(visualViewport.scale - \(Double(scale) / 100)) < 0.02 && Math.abs(innerWidth - document.documentElement.clientWidth) <= 1")
             let overflow = try await evaluate("document.documentElement.scrollWidth > innerWidth + 1") as? Bool
             XCTAssertEqual(overflow, false, "Horizontal overflow at \(scale)%")
             let attachment = XCTAttachment(image: try await webView.takeSnapshot(configuration: nil))

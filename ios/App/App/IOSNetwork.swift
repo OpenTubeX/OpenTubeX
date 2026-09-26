@@ -144,3 +144,69 @@ public class SabrHttpPlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 }
+
+
+// Small API requests need native cancellation too. Keep Capacitor's request and
+// response semantics, but retain each task until it finishes or is cancelled.
+@objc(IOSHttpPlugin)
+public class IOSHttpPlugin: CAPPlugin, CAPBridgedPlugin {
+    public let identifier = "IOSHttpPlugin"
+    public let jsName = "IOSHttp"
+    public let pluginMethods: [CAPPluginMethod] = ["request", "abort"].map {
+        CAPPluginMethod(name: $0, returnType: CAPPluginReturnPromise)
+    }
+    private var tasks: [String: URLSessionDataTask] = [:]
+
+    @objc func request(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            guard let id = call.getString("requestId"), !id.isEmpty, self.tasks[id] == nil,
+                  let raw = call.getString("url"), let url = URL(string: raw),
+                  ["https", "http"].contains(url.scheme), url.host != nil else {
+                call.reject("Invalid API request")
+                return
+            }
+            let request = CapacitorUrlRequest(url, method: call.getString("method") ?? "GET")
+            request.setRequestHeaders(call.getObject("headers") ?? [:])
+            request.setTimeout((call.getDouble("connectTimeout") ?? 30_000) / 1000)
+            do {
+                if let data = call.getString("data") { try request.setRequestBody(data) }
+            } catch {
+                call.reject(error.localizedDescription)
+                return
+            }
+            // Each request owns its session so completion never invalidates
+            // other concurrent API requests. Default cookie storage is shared.
+            let session = URLSession(configuration: .default,
+                                     delegate: call.getBool("disableRedirects") == true ? request : nil,
+                                     delegateQueue: nil)
+            let task = session.dataTask(with: request.getUrlRequest()) { [weak self] data, response, error in
+                session.finishTasksAndInvalidate()
+                DispatchQueue.main.async {
+                    self?.tasks.removeValue(forKey: id)
+                    if let error {
+                        call.reject(error.localizedDescription, (error as NSError).domain, error)
+                    } else if let response = response as? HTTPURLResponse {
+                        HttpRequestHandler.setCookiesFromResponse(response, self?.bridge?.config)
+                        call.resolve(HttpRequestHandler.buildResponse(data, response,
+                            responseType: ResponseType(string: call.getString("responseType"))))
+                    } else {
+                        call.reject("Missing HTTP response")
+                    }
+                }
+            }
+            self.tasks[id] = task
+            task.resume()
+        }
+    }
+
+    @objc func abort(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            if let id = call.getString("requestId") { self.tasks[id]?.cancel() }
+            call.resolve()
+        }
+    }
+
+    deinit {
+        for task in tasks.values { task.cancel() }
+    }
+}

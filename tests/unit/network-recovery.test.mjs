@@ -106,6 +106,7 @@ async function loadAppNetwork(t, fetch, nativeRequest, options = {}) {
   window.fetch = fetch
   const context = vm.createContext({
     createInternetConnectivity, createInternetProbe, options, window, navigator: { onLine: true }, location: { href: 'https://localhost/', origin: 'https://localhost' },
+    process: { env: { IS_IOS: false } },
     classifyRequestFailure, createAbortError, CapacitorHttp: { request: nativeRequest },
     AbortController, AbortSignal, DOMException, EventTarget, CustomEvent, Request, Response, Headers, URL, URLSearchParams, setTimeout, clearTimeout,
   })
