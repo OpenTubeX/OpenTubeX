@@ -1,5 +1,6 @@
 import { areJsonValuesEqual } from './jsonValues.js'
 import { normalizeSubscriptionChannelSettings } from './subscription-channels.js'
+import { parseCaptionSettings } from './player/caption-settings.js'
 
 // Decrypted collections are cached only for this renderer session. A new account,
 // key, or token starts with an empty cache; snapshots remain merge baselines.
@@ -42,6 +43,175 @@ const NOISY_ACTIVITY_SETTINGS = new Set([
   'channelPlaybackSpeeds', 'channelVolumes', 'channelSubtitlesStates', 'channelVideoQualities',
   'playlistReverseStates', 'sponsorBlockDraftSegmentsByVideoId',
 ])
+// A bounded batch stays below the server's encrypted-event size limit on large imports.
+const MAX_ACTIVITY_CHANGES = 64
+const MAX_ACTIVITY_TEXT_BYTES = 128
+
+function activityText(value) {
+  return typeof value === 'string' && value.length > 0 &&
+    new TextEncoder().encode(value).length <= MAX_ACTIVITY_TEXT_BYTES
+    ? value
+    : null
+}
+
+function byId(entries, getId) {
+  return new Map((Array.isArray(entries) ? entries : [])
+    .map(entry => [getId(entry), entry]).filter(([id]) => typeof id === 'string' && id.length > 0))
+}
+
+function addSummary(changes, field, name) {
+  if (changes.some(change => change[field] === name && !change.action && !change.detail)) return
+  changes.push(field === 'key' ? { key: name, value: null } : { collection: name })
+}
+
+function sameItemsReordered(before, after) {
+  const oldIds = [...before.keys()]
+  const newIds = [...after.keys()]
+  return oldIds.length === newIds.length &&
+    oldIds.some((id, index) => id !== newIds[index]) &&
+    oldIds.every(id => after.has(id))
+}
+
+function describeCollectionChanges(collection, before, after, changes, channelNames) {
+  const id = collection === 'subscriptions'
+    ? entry => entry?.id
+    : collection === 'playlistBookmarks'
+      ? entry => entry?.playlist?.id
+      : entry => entry?.playlist?.id ?? entry?.group?.id
+  const oldItems = byId(before, id)
+  const newItems = byId(after, id)
+  const title = entry => activityText(collection === 'subscriptions'
+    ? entry?.name
+    : collection === 'playlistBookmarks'
+      ? entry?.playlist?.title
+      : entry?.playlist?.title ?? entry?.group?.title)
+  const add = (action, item, parent) => {
+    if (item) changes.push({ collection, action, item, ...(parent ? { parent } : {}) })
+    else addSummary(changes, 'collection', collection)
+  }
+
+  for (const [itemId, entry] of oldItems) {
+    if (!newItems.has(itemId)) add('removed', title(entry))
+  }
+  for (const [itemId, entry] of newItems) {
+    if (!oldItems.has(itemId)) add('added', title(entry))
+  }
+  for (const [itemId, current] of newItems) {
+    const previous = oldItems.get(itemId)
+    if (!previous) continue
+    const oldTitle = title(previous)
+    const newTitle = title(current)
+    if (oldTitle !== newTitle && oldTitle && newTitle) {
+      changes.push({ collection, action: 'renamed', item: oldTitle, value: newTitle })
+    } else if (oldTitle !== newTitle) {
+      addSummary(changes, 'collection', collection)
+    }
+    if (collection === 'playlists') {
+      const parent = newTitle
+      const oldVideos = byId(previous.videos, video => video?.id)
+      const newVideos = byId(current.videos, video => video?.id)
+      for (const [videoId, video] of oldVideos) {
+        if (!newVideos.has(videoId)) add('removed', activityText(video?.title), parent)
+      }
+      for (const [videoId, video] of newVideos) {
+        if (!oldVideos.has(videoId)) add('added', activityText(video?.title), parent)
+      }
+      if (previous.playlist?.description !== current.playlist?.description || sameItemsReordered(oldVideos, newVideos)) {
+        if (newTitle) changes.push({ collection, action: 'updated', item: newTitle })
+        else addSummary(changes, 'collection', collection)
+      }
+    } else if (collection === 'profiles') {
+      const parent = newTitle
+      const oldChannels = byId(previous.channels, channel => channel?.id)
+      const newChannels = byId(current.channels, channel => channel?.id)
+      for (const [channelId, channel] of oldChannels) {
+        if (!newChannels.has(channelId)) add('removed', activityText(channel?.name) ?? channelNames.get(channelId), parent)
+      }
+      for (const [channelId, channel] of newChannels) {
+        if (!oldChannels.has(channelId)) add('added', activityText(channel?.name) ?? channelNames.get(channelId), parent)
+      }
+      if (previous.group?.bg_color !== current.group?.bg_color ||
+          previous.group?.text_color !== current.group?.text_color ||
+          sameItemsReordered(oldChannels, newChannels)) {
+        if (newTitle) changes.push({ collection, action: 'updated', item: newTitle })
+        else addSummary(changes, 'collection', collection)
+      }
+    }
+  }
+}
+
+const CAPTION_DETAIL_KEYS = {
+  textColor: 'Text Color',
+  backgroundColor: 'Background Color',
+  backgroundOpacity: 'Background Opacity',
+  fontScale: 'Font Size',
+  verticalPosition: 'Vertical Position',
+  anchor: 'Anchor.Anchor',
+  edgeStyle: 'Edge Style.Edge Style',
+  edgeColor: 'Edge Color',
+}
+
+function describeSubscriptionSettings(before, after, changes, channelNames) {
+  const oldChannels = before ?? {}
+  const currentChannels = after ?? {}
+  for (const id of new Set([...Object.keys(oldChannels), ...Object.keys(currentChannels)])) {
+    const previous = normalizeSubscriptionChannelSettings(oldChannels[id]?.value)
+    const current = normalizeSubscriptionChannelSettings(currentChannels[id]?.value)
+    if (areJsonValuesEqual(previous, current)) continue
+    const channel = channelNames.get(id)
+    if (!channel) { addSummary(changes, 'key', 'subscriptionChannelSettings'); continue }
+    for (const detail of ['feedTypes', 'dailyVideoLimit', 'showMembersOnly']) {
+      if (areJsonValuesEqual(previous[detail], current[detail])) continue
+      const value = detail === 'feedTypes'
+        ? current.feedTypes.join(',')
+        : detail === 'dailyVideoLimit'
+          ? current.dailyVideoLimit === undefined
+            ? 'global'
+            : current.dailyVideoLimit === null ? 'unlimited' : current.dailyVideoLimit
+          : current.showMembersOnly
+      changes.push({ key: 'subscriptionChannelSettings', detail, item: channel, value })
+    }
+  }
+}
+
+function describeCaptionSettings(before, after, changes) {
+  const previous = parseCaptionSettings(before)
+  const current = parseCaptionSettings(after)
+  for (const [detail, label] of Object.entries(CAPTION_DETAIL_KEYS)) {
+    if (previous[detail] !== current[detail]) {
+      changes.push({ key: 'defaultCaptionSettings', detail: label, value: current[detail] })
+    }
+  }
+}
+
+function describeCustomThemes(before, after, changes) {
+  const previous = byId(before, theme => theme?.id)
+  const current = byId(after, theme => theme?.id)
+  const add = (action, name) => {
+    if (name) changes.push({ key: 'customThemes', action, item: name })
+    else addSummary(changes, 'key', 'customThemes')
+  }
+  for (const [id, theme] of previous) {
+    if (!current.has(id)) add('removed', activityText(theme.name))
+  }
+  for (const [id, theme] of current) {
+    if (!previous.has(id)) add('added', activityText(theme.name))
+  }
+  for (const [id, theme] of current) {
+    const old = previous.get(id)
+    if (!old) continue
+    const oldName = activityText(old.name)
+    const newName = activityText(theme.name)
+    if (oldName !== newName && oldName && newName) {
+      changes.push({ key: 'customThemes', action: 'renamed', item: oldName, value: newName })
+    } else if (oldName !== newName) {
+      addSummary(changes, 'key', 'customThemes')
+    }
+    if (!areJsonValuesEqual({ ...old, name: null }, { ...theme, name: null })) {
+      add('updated', newName)
+    }
+  }
+}
 
 function subscriptionPreferences(value) {
   return Object.fromEntries(Object.entries(value ?? {}).flatMap(([id, entry]) => {
@@ -50,9 +220,10 @@ function subscriptionPreferences(value) {
   }))
 }
 
-export function createSyncActivity(collection, before, after, deviceId, deviceName) {
+export function createSyncActivity(collection, before, after, deviceId, deviceName, subscriptions = []) {
   if (['history', 'seenVideos', 'seenPosts', 'sessions', 'sessionsV2'].includes(collection)) return null
   const changes = []
+  const channelNames = new Map(subscriptions.map(channel => [channel.id, activityText(channel.name)]))
   if (collection === 'settings') {
     const previous = new Map((before ?? []).map(entry => [entry.key, entry.value]))
     for (const entry of after ?? []) {
@@ -62,6 +233,18 @@ export function createSyncActivity(collection, before, after, deviceId, deviceNa
       if (entry.key === 'subscriptionChannelSettings' && areJsonValuesEqual(
         subscriptionPreferences(previous.get(entry.key)), subscriptionPreferences(entry.value)
       )) continue
+      if (entry.key === 'subscriptionChannelSettings') {
+        describeSubscriptionSettings(previous.get(entry.key), entry.value, changes, channelNames)
+        continue
+      }
+      if (entry.key === 'defaultCaptionSettings') {
+        describeCaptionSettings(previous.get(entry.key), entry.value, changes)
+        continue
+      }
+      if (entry.key === 'customThemes') {
+        describeCustomThemes(previous.get(entry.key), entry.value, changes)
+        continue
+      }
       const value = entry.value
       // Large JSON-backed settings get an update entry rather than filling the
       // activity feed with configuration data or exceeding its payload limit.
@@ -71,7 +254,10 @@ export function createSyncActivity(collection, before, after, deviceId, deviceNa
     }
   } else if (['subscriptions', 'playlists', 'profiles', 'playlistBookmarks'].includes(collection) &&
       JSON.stringify(before) !== JSON.stringify(after)) {
-    changes.push({ collection })
+    describeCollectionChanges(collection, before, after, changes, channelNames)
+  }
+  if (changes.length > MAX_ACTIVITY_CHANGES) {
+    changes.splice(MAX_ACTIVITY_CHANGES - 1, Infinity, { collection: collection === 'settings' ? 'settings' : collection })
   }
   return changes.length ? { version: 1, type: 'activity', deviceId, deviceName, changes } : null
 }

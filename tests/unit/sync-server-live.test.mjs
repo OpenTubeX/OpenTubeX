@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises'
 import YAML from 'yaml'
 import { createI18n } from 'vue-i18n'
 import { SyncCollectionCache, createSyncActivity, validateDeviceRequest, watchSyncChanges } from '../../src/renderer/helpers/sync-server-live.js'
-import { SYNC_SETTING_LABELS } from '../../src/renderer/helpers/sync-setting-labels.js'
+import { SYNC_SETTING_LABELS, SYNC_SETTING_VALUE_LABELS } from '../../src/renderer/helpers/sync-setting-labels.js'
 
 test('cached collections are immutable, revision-specific and isolated between accounts and keys', () => {
   const cache = new SyncCollectionCache()
@@ -43,6 +43,11 @@ test('known setting labels resolve to existing English and German translations',
     for (const [key, paths] of Object.entries(SYNC_SETTING_LABELS)) {
       for (const path of Array.isArray(paths) ? paths : [paths]) assert.ok(i18n.global.te(path), `${locale} ${key}: ${path}`)
     }
+    for (const [key, choices] of Object.entries(SYNC_SETTING_VALUE_LABELS)) {
+      for (const [value, path] of Object.entries(choices)) assert.ok(i18n.global.te(path), `${locale} ${key}=${value}: ${path}`)
+    }
+    assert.equal(i18n.global.t(SYNC_SETTING_VALUE_LABELS.tabCloseFocus.nextTab),
+      locale === 'en-US' ? 'Next tab in tab order' : 'Nächster Tab in der Tab-Reihenfolge')
   }
 })
 
@@ -163,6 +168,141 @@ test('subscription settings activity ignores default additions and timestamps bu
   const after = [{ key, value: { first: { value: defaults, updatedAt: 2 }, second: { value: defaults, updatedAt: 2 } } }]
   assert.equal(createSyncActivity('settings', before, after, 'device', 'Laptop'), null)
   after[0].value.first.value = { ...defaults, dailyVideoLimit: 3 }
-  assert.deepEqual(createSyncActivity('settings', before, after, 'device', 'Laptop').changes, [{ key, value: null }])
+  assert.deepEqual(createSyncActivity('settings', before, after, 'device', 'Laptop', [{ id: 'first', name: 'First channel' }]).changes, [
+    { key, detail: 'dailyVideoLimit', item: 'First channel', value: 3 },
+  ])
   assert.equal(SYNC_SETTING_LABELS[key], 'Channel.Subscription settings')
+})
+
+test('removing saved subscription preferences reports the restored defaults', () => {
+  const key = 'subscriptionChannelSettings'
+  const before = [{ key, value: { first: { value: { feedTypes: ['videos'], dailyVideoLimit: 3, showMembersOnly: true } } } }]
+  const after = [{ key, value: {} }]
+  assert.deepEqual(createSyncActivity('settings', before, after, 'device', 'Laptop', [{ id: 'first', name: 'Alpha' }]).changes, [
+    { key, detail: 'feedTypes', item: 'Alpha', value: 'videos,shorts,live,posts' },
+    { key, detail: 'dailyVideoLimit', item: 'Alpha', value: 'global' },
+    { key, detail: 'showMembersOnly', item: 'Alpha', value: false },
+  ])
+})
+
+test('turning off the last subscription feed type records an empty choice', () => {
+  const key = 'subscriptionChannelSettings'
+  const before = [{ key, value: { first: { value: { feedTypes: ['videos'] } } } }]
+  const after = [{ key, value: { first: { value: { feedTypes: [] } } } }]
+  assert.deepEqual(createSyncActivity('settings', before, after, 'device', 'Laptop', [{ id: 'first', name: 'Alpha' }]).changes, [
+    { key, detail: 'feedTypes', item: 'Alpha', value: '' },
+  ])
+})
+
+test('subscription activity names additions and removals but ignores metadata refreshes', () => {
+  const oldChannels = [{ id: 'a', name: 'Alpha', thumbnail: 'old' }, { id: 'b', name: 'Beta' }]
+  const newChannels = [{ id: 'a', name: 'Alpha', thumbnail: 'new' }, { id: 'c', name: 'Gamma' }]
+  assert.deepEqual(createSyncActivity('subscriptions', oldChannels, newChannels, 'device', 'Laptop').changes, [
+    { collection: 'subscriptions', action: 'removed', item: 'Beta' },
+    { collection: 'subscriptions', action: 'added', item: 'Gamma' },
+  ])
+  assert.equal(createSyncActivity('subscriptions', oldChannels, [{ ...oldChannels[0], thumbnail: 'new' }, oldChannels[1]], 'device', 'Laptop'), null)
+})
+
+test('playlist activity describes playlists, video membership and metadata changes', () => {
+  const before = [
+    { playlist: { id: 'one', title: 'Old name', description: '' }, videos: [{ id: 'video-a', title: 'Video A' }] },
+    { playlist: { id: 'gone', title: 'Gone' }, videos: [] },
+  ]
+  const after = [
+    { playlist: { id: 'one', title: 'New name', description: 'Updated' }, videos: [{ id: 'video-b', title: 'Video B' }] },
+    { playlist: { id: 'new', title: 'New playlist' }, videos: [] },
+  ]
+  assert.deepEqual(createSyncActivity('playlists', before, after, 'device', 'Laptop').changes, [
+    { collection: 'playlists', action: 'removed', item: 'Gone' },
+    { collection: 'playlists', action: 'added', item: 'New playlist' },
+    { collection: 'playlists', action: 'renamed', item: 'Old name', value: 'New name' },
+    { collection: 'playlists', action: 'removed', item: 'Video A', parent: 'New name' },
+    { collection: 'playlists', action: 'added', item: 'Video B', parent: 'New name' },
+    { collection: 'playlists', action: 'updated', item: 'New name' },
+  ])
+})
+
+test('playlist and profile reorder activity is retained', () => {
+  const videos = [{ id: 'a', title: 'Alpha' }, { id: 'b', title: 'Beta' }]
+  const playlist = { playlist: { id: 'one', title: 'Favorites' }, videos }
+  assert.deepEqual(createSyncActivity('playlists', [playlist], [{ ...playlist, videos: videos.toReversed() }], 'device', 'Laptop').changes, [
+    { collection: 'playlists', action: 'updated', item: 'Favorites' },
+  ])
+  const profile = { group: { id: 'one', title: 'News' }, channels: videos }
+  assert.deepEqual(createSyncActivity('profiles', [profile], [{ ...profile, channels: videos.toReversed() }], 'device', 'Laptop').changes, [
+    { collection: 'profiles', action: 'updated', item: 'News' },
+  ])
+})
+
+test('profile activity describes profile and channel membership changes', () => {
+  const before = [{ group: { id: 'one', title: 'News', bg_color: '#000' }, channels: [{ id: 'a', name: 'Alpha' }] }]
+  const after = [
+    { group: { id: 'one', title: 'Current news', bg_color: '#fff' }, channels: [{ id: 'b' }] },
+    { group: { id: 'two', title: 'Music' }, channels: [] },
+  ]
+  assert.deepEqual(createSyncActivity('profiles', before, after, 'device', 'Laptop', [{ id: 'b', name: 'Beta' }]).changes, [
+    { collection: 'profiles', action: 'added', item: 'Music' },
+    { collection: 'profiles', action: 'renamed', item: 'News', value: 'Current news' },
+    { collection: 'profiles', action: 'removed', item: 'Alpha', parent: 'Current news' },
+    { collection: 'profiles', action: 'added', item: 'Beta', parent: 'Current news' },
+    { collection: 'profiles', action: 'updated', item: 'Current news' },
+  ])
+})
+
+test('saved playlist activity distinguishes bookmarks from playlist edits', () => {
+  const bookmark = (id, title) => ({ playlist: { id, title } })
+  assert.deepEqual(createSyncActivity('playlistBookmarks', [bookmark('a', 'Alpha')], [bookmark('b', 'Beta')], 'device', 'Laptop').changes, [
+    { collection: 'playlistBookmarks', action: 'removed', item: 'Alpha' },
+    { collection: 'playlistBookmarks', action: 'added', item: 'Beta' },
+  ])
+})
+
+test('complex setting activity describes each channel preference and caption field', () => {
+  const key = 'subscriptionChannelSettings'
+  const before = [{ key, value: { a: { value: { feedTypes: ['videos'], dailyVideoLimit: 1 } } } }]
+  const after = [{ key, value: { a: { value: { feedTypes: ['shorts'], dailyVideoLimit: null, showMembersOnly: true } } } }]
+  assert.deepEqual(createSyncActivity('settings', before, after, 'device', 'Laptop', [{ id: 'a', name: 'Alpha' }]).changes, [
+    { key, detail: 'feedTypes', item: 'Alpha', value: 'shorts' },
+    { key, detail: 'dailyVideoLimit', item: 'Alpha', value: 'unlimited' },
+    { key, detail: 'showMembersOnly', item: 'Alpha', value: true },
+  ])
+  assert.deepEqual(createSyncActivity('settings',
+    [{ key: 'defaultCaptionSettings', value: { fontScale: 1, edgeStyle: 'none' } }],
+    [{ key: 'defaultCaptionSettings', value: { fontScale: 1.5, edgeStyle: 'outline' } }],
+    'device', 'Laptop').changes, [
+    { key: 'defaultCaptionSettings', detail: 'Font Size', value: 1.5 },
+    { key: 'defaultCaptionSettings', detail: 'Edge Style.Edge Style', value: 'outline' },
+  ])
+})
+
+test('custom theme activity names additions, removals, renames and edits without color payloads', () => {
+  const oldThemes = [
+    { id: 'one', name: 'Old', colors: { primary: '#111111' } },
+    { id: 'gone', name: 'Gone', colors: {} },
+  ]
+  const newThemes = [
+    { id: 'one', name: 'New', colors: { primary: '#222222' } },
+    { id: 'added', name: 'Added', colors: {} },
+  ]
+  assert.deepEqual(createSyncActivity('settings',
+    [{ key: 'customThemes', value: oldThemes }], [{ key: 'customThemes', value: newThemes }],
+    'device', 'Laptop').changes, [
+    { key: 'customThemes', action: 'removed', item: 'Gone' },
+    { key: 'customThemes', action: 'added', item: 'Added' },
+    { key: 'customThemes', action: 'renamed', item: 'Old', value: 'New' },
+    { key: 'customThemes', action: 'updated', item: 'New' },
+  ])
+})
+
+test('activity bounds large imports and omits long item names', () => {
+  const channels = Array.from({ length: 200 }, (_, index) => ({ id: String(index), name: `Channel ${index}` }))
+  const activity = createSyncActivity('subscriptions', [], channels, 'device', 'Laptop')
+  assert.equal(activity.changes.length, 64)
+  assert.deepEqual(activity.changes.at(-1), { collection: 'subscriptions' })
+  const long = createSyncActivity('subscriptions', [], [
+    { id: 'long', name: 'a'.repeat(129) },
+    { id: 'also-long', name: 'b'.repeat(129) },
+  ], 'device', 'Laptop')
+  assert.deepEqual(long.changes, [{ collection: 'subscriptions' }])
 })
