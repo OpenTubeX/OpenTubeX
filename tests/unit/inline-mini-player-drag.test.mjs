@@ -7,13 +7,15 @@ import { getScrollMiniInlineLayoutHeight } from '../../src/renderer/helpers/scro
 const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/useScrollMiniPlayer.js', import.meta.url), 'utf8')
 const dragSource = source.slice(source.indexOf('  let inlineDrag ='), source.indexOf('  function updateScrollMiniVideoAspectRatio'))
 
-function fixture({ reducedMotion = false, available = true, restoring = false, finishRejects = false } = {}) {
+function fixture({ reducedMotion = false, available = true, restoring = false, finishRejects = false, activationSucceeds = true } = {}) {
   let reads = 0
   let navigations = 0
   let previewProgress = 0
   let activated = false
   let deactivated = false
+  let haptics = 0
   const stash = { value: 'left' }
+  const scrollMiniPlayerActive = { value: restoring }
   let destination = null
   const frames = new Map()
   const animations = []
@@ -48,7 +50,7 @@ function fixture({ reducedMotion = false, available = true, restoring = false, f
     scrollMiniPlaceholder: { value: { getBoundingClientRect: () => ({ left: 0, top: 80, width: 390, height: 219.375 }) } },
     scrollMiniPlaceholderHeight: { value: 0 },
     scrollMiniPlayerDragStyle: { value: null },
-    scrollMiniPlayerActive: { value: restoring },
+    scrollMiniPlayerActive,
     scrollMiniVideoAspectRatio: { value: 16 / 9 },
     canUseScrollMiniPlayerBase: () => available,
     cancelScrollMiniPlayerLayoutAnimation() {},
@@ -61,8 +63,9 @@ function fixture({ reducedMotion = false, available = true, restoring = false, f
     reanchorScrollMiniPlayerRect: rect => rect,
     requestAnimationFrame(callback) { frames.set(1, callback); return 1 },
     cancelAnimationFrame(id) { frames.delete(id) },
-    activateScrollMiniPlayer() { activated = true },
-    deactivateScrollMiniPlayer() { deactivated = true },
+    activateScrollMiniPlayer() { activated = true; scrollMiniPlayerActive.value = activationSucceeds },
+    deactivateScrollMiniPlayer() { deactivated = true; scrollMiniPlayerActive.value = false },
+    lightHaptic() { haptics++ },
     updateScrollMiniPlayer() {},
     isReducedMotionEnabled: () => reducedMotion,
     scrollMiniPlayerAnimating: { value: false },
@@ -70,7 +73,7 @@ function fixture({ reducedMotion = false, available = true, restoring = false, f
     animateScrollMiniPlayerLayout: (...args) => { animations.push(args) },
     console,
   })
-  return { methods, style, frames, animations, stash, progress: () => previewProgress, destination: () => destination, reads: () => reads, navigations: () => navigations, activated: () => activated, deactivated: () => deactivated }
+  return { methods, style, frames, animations, stash, progress: () => previewProgress, destination: () => destination, reads: () => reads, navigations: () => navigations, activated: () => activated, deactivated: () => deactivated, haptics: () => haptics }
 }
 
 test('drag batches pointer samples into one transform without reading layout per move', () => {
@@ -100,6 +103,7 @@ test('cancellation removes pending frames and restores the original player witho
   assert.equal(f.style.willChange, undefined)
   assert.equal(f.navigations(), 0)
   assert.equal(f.animations.length, 0)
+  assert.equal(f.haptics(), 0)
 })
 
 test('committing minimizes once and reduced motion skips the release animation', async () => {
@@ -110,6 +114,7 @@ test('committing minimizes once and reduced motion skips the release animation',
   await f.methods.finishScrollMiniPlayerDrag(true)
   assert.equal(f.navigations(), 1)
   assert.equal(f.activated(), true)
+  assert.equal(f.haptics(), 1)
   assert.equal(f.stash.value, null)
   assert.equal(f.destination().left, 172.25)
   assert.equal(f.animations.length, 0)
@@ -124,6 +129,13 @@ test('failed preview handoff still clears inline drag state', async () => {
   assert.equal(f.style.transform, undefined)
   assert.equal(f.style.willChange, undefined)
   assert.equal(f.methods.beginScrollMiniPlayerDrag(), true)
+})
+
+test('a dock attempt that cannot activate the mini player has no haptic', async () => {
+  const f = fixture({ reducedMotion: true, activationSucceeds: false })
+  f.methods.beginScrollMiniPlayerDrag()
+  await f.methods.finishScrollMiniPlayerDrag(true)
+  assert.equal(f.haptics(), 0)
 })
 
 test('unavailable playback does not capture a drag', () => {
@@ -162,6 +174,7 @@ for (const commit of [true, false]) {
     assert.equal(f.progress(), 1 - 24 / 490.75)
     await f.methods.finishScrollMiniPlayerDrag(commit)
     assert.equal(f.deactivated(), commit)
+    assert.equal(f.haptics(), Number(commit))
     assert.equal(f.style.transform, undefined)
   })
 }

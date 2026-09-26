@@ -12,6 +12,7 @@ import {
   unregisterCrossTabMiniPlayer,
 } from '../../../helpers/crossTabMiniPlayer'
 import { isReducedMotionEnabled } from '../../../helpers/reducedMotion'
+import { lightHaptic } from '../../../helpers/mobileHaptics.js'
 import { getCapacitorTabService } from '../../../tabs/CapacitorTabService'
 import { watchNavigationKey } from '../../../tabs/TabContext'
 import {
@@ -288,11 +289,13 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
       if (inlineDrag !== drag || !container.value) return
       if (drag.restoring && commit) {
         deactivateScrollMiniPlayer()
+        if (!scrollMiniPlayerActive.value) lightHaptic()
       } else if (commit && watchNavigation.detached.value) {
         activateScrollMiniPlayer(false)
         scrollMiniPlayerStashedSide.value = null
         scrollMiniPlayerRestoreRect = null
         applyScrollMiniPlayerRect(drag.to, false, true)
+        if (scrollMiniPlayerActive.value) lightHaptic()
       }
     } finally {
       if (inlineDrag === drag) {

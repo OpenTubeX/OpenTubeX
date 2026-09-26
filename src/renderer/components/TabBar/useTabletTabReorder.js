@@ -1,5 +1,6 @@
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 
+import { lightHaptic } from '../../helpers/mobileHaptics.js'
 import { getCapacitorTabService } from '../../tabs/CapacitorTabService'
 import { buildShiftedTabIds, computeTabOffsets, getTabIndexShift } from './tabReorder'
 
@@ -79,6 +80,7 @@ export function useTabletTabReorder({ tabs, viewport, openActions, closeActions,
       suppressClick.value = true
       target.setPointerCapture(event.pointerId)
       openActions(tabId)
+      lightHaptic()
     }, 400)
   }
 
@@ -148,7 +150,7 @@ export function useTabletTabReorder({ tabs, viewport, openActions, closeActions,
     dropTimer = setTimeout(() => {
       const { tabId, sourceIndex, targetIndex } = session
       reset()
-      if (targetIndex !== sourceIndex) getCapacitorTabService().moveTab(tabId, targetIndex)
+      if (targetIndex !== sourceIndex && getCapacitorTabService().moveTab(tabId, targetIndex)) lightHaptic()
       releaseClickSuppression()
     }, reducedMotion ? 0 : 160)
   }

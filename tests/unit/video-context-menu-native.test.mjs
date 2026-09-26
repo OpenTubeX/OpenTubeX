@@ -16,6 +16,7 @@ function openMenu ({ playlist = false, electron = false, capacitor = false, medi
   const dispatched = []
   const listeners = []
   const mobileMenus = []
+  const haptics = []
   const target = {
     closest: selector => selector === 'img, video' && media ? target : null,
     getBoundingClientRect: () => ({ left: 10, bottom: 30 })
@@ -54,11 +55,12 @@ function openMenu ({ playlist = false, electron = false, capacitor = false, medi
     videoMenuOptions: { value: [{ label: 'Play Next', value: 'playNext', icon: ['fas', 'step-forward'] }] },
     mobileThumbnailActions: { value: [] },
     openMobileContextActions: menu => mobileMenus.push(menu),
+    lightHaptic: () => { if (capacitor) haptics.push('impact') },
     videoContextMenuItems: { value: [{ label: 'Play Next', icon: ['fas', 'step-forward'], quickAction: true }] },
     event
   }
   vm.runInNewContext(playlist ? playlistHandler + '\nopenPlaylistContextMenu(event)' : handler + '\nopenVideoContextMenu(event)', context)
-  return { event, dispatched, listeners, mobileMenus }
+  return { event, dispatched, listeners, mobileMenus, haptics }
 }
 
 for (const capacitor of [false, true]) {
@@ -93,13 +95,14 @@ test('ordinary card targets retain the video menu, including with a selection el
 for (const platform of [{}, { capacitor: true }, { electron: true }]) {
   for (const target of ['media', 'selected']) {
     test(`touch hold uses the shared bottom menu for ${target} on ${JSON.stringify(platform)}`, () => {
-      const { event, dispatched, mobileMenus } = openMenu({ ...platform, [target]: true, touch: true })
+      const { event, dispatched, mobileMenus, haptics } = openMenu({ ...platform, [target]: true, touch: true })
       assert.equal(event.defaultPrevented, true)
       assert.equal(event.propagationStopped, true)
       assert.equal(dispatched.length, 0)
       assert.equal(mobileMenus.length, 1)
       assert.equal(mobileMenus[0].title, 'Test video')
       assert.equal(mobileMenus[0].actions.value[0].label, 'Play Next')
+      assert.equal(haptics.length, platform.capacitor ? 1 : 0)
     })
   }
 }

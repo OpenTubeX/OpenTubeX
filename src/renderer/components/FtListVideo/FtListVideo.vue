@@ -406,6 +406,7 @@
 import { getSyncServerDeviceIcon } from '../../helpers/sync-server-sessions'
 import FtInlineMetadata from '../FtInlineMetadata/FtInlineMetadata.vue'
 import { useContextMenuHold } from '../../composables/useContextMenuHold'
+import { lightHaptic } from '../../helpers/mobileHaptics'
 import { PHONE_LAYOUT_QUERY, usePhoneLayout } from '../../composables/usePhoneLayout'
 import FtRetryImage from '../FtRetryImage.vue'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
@@ -1393,6 +1394,7 @@ function openVideoContextMenu(event) {
       actions: videoContextMenuItems,
       thumbnailActions: mobileThumbnailActions
     })
+    lightHaptic()
     return
   }
 

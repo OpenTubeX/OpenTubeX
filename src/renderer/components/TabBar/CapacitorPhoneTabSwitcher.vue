@@ -370,6 +370,7 @@ import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
 import { shouldCloseSwipedTab } from '../../helpers/capacitorTabSwipe'
+import { lightHaptic } from '../../helpers/mobileHaptics'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { formatDeviceSessionLabel, shouldShowOtherDeviceSessions } from '../../helpers/sync-sessions'
 import { showToast } from '../../helpers/utils'
@@ -749,6 +750,7 @@ function startTabGesture(event, tabId) {
     drag.ready = true
     target?.setPointerCapture(event.pointerId)
     openTabActions(tabId)
+    lightHaptic()
   }, 400)
 
   const tab = tabs.value.find(candidate => candidate.id === tabId)
@@ -803,7 +805,7 @@ function finishTabGesture(event) {
       dropTimer = window.setTimeout(() => {
         dropTimer = null
         if (dragRects[targetIndex].id !== tabId) {
-          getCapacitorTabService().moveTab(tabId, targetIndex)
+          if (getCapacitorTabService().moveTab(tabId, targetIndex)) lightHaptic()
         }
         resetTabDrag()
         scheduleSwipeReset()

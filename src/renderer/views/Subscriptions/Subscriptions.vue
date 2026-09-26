@@ -370,6 +370,7 @@ import SubscriptionsShorts from '../../components/SubscriptionsShorts.vue'
 import SubscriptionsPosts from '../../components/SubscriptionPosts/SubscriptionsPosts.vue'
 
 import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
+import { lightHaptic } from '../../helpers/mobileHaptics'
 import { getIconForSortPreference } from '../../helpers/utils'
 import store from '../../store/index'
 import { useTabContext, useTabLifecycle } from '../../tabs/TabContext'
@@ -406,6 +407,7 @@ function startFeedTabHold(event) {
     y: event.clientY,
     timer: setTimeout(() => {
       cancelFeedTabHold()
+      lightHaptic()
       tab.dispatchEvent(new PointerEvent('contextmenu', {
         bubbles: true,
         cancelable: true,
