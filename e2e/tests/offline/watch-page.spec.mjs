@@ -151,6 +151,25 @@ test('casts a complete MP4 stream to a discovered DLNA device and returns to loc
   await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
 })
 
+test('hides the DLNA action while the playback source is pending', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const view = await watchViewHandle(page)
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowDlnaCastButton', true))
+  const castButton = page.getByRole('button', { name: 'Cast to a DLNA device' })
+  await expect(castButton).toBeVisible()
+
+  await view.evaluate(async view => {
+    view.ytDlpStreamsPending = true
+    await view.$nextTick()
+  })
+  await expect(page.locator('.ftVideoPlayer')).toHaveCount(0)
+  await expect(castButton).toHaveCount(0)
+
+  await view.evaluate(view => { view.ytDlpStreamsPending = false })
+  await expect(castButton).toBeVisible()
+})
+
 test.describe('desktop quick playback speed bar', () => {
   test.use({ seed: { settings: { ...WATCH_PAGE_SEED, useQuickPlaybackSpeedBar: true } } })
 

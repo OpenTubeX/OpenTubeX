@@ -853,7 +853,7 @@
           @toggle-live-chat="toggleLiveChat"
         >
           <template
-            v-if="isElectron && $store.getters.getShowDlnaCastButton && !customShortsPlayerActive && !localFilePlayback && !isUpcoming && !errorMessage"
+            v-if="playerReady && isElectron && $store.getters.getShowDlnaCastButton && !customShortsPlayerActive && !localFilePlayback && !isUpcoming && !errorMessage"
             #cast-action
           >
             <WatchDlnaCast
