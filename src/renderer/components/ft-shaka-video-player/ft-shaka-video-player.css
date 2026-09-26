@@ -2026,6 +2026,17 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   d: path('M6.45 5.48 10.15 5.48 10.15 18.52 6.45 18.52ZM13.85 5.48 17.55 5.48 17.55 18.52 13.85 18.52Z');
 }
 
+/* WebKit does not support CSS path morphing. Keep Shaka's stateful icon. */
+@supports not (d: path('M0 0L1 1')) {
+  :deep(.shaka-play-button:has(> .ft-play-pause-morph-icon) > .shaka-ui-icon:not(.ft-play-pause-morph-icon)) {
+    opacity: 1;
+  }
+
+  :deep(.shaka-play-button > .ft-play-pause-morph-icon) {
+    display: none;
+  }
+}
+
 :deep(.shaka-mute-button) {
   position: relative;
 }

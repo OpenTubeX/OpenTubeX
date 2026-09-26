@@ -168,3 +168,23 @@ test('desktop save dialogs still write and close their file stream', async () =>
   assert.equal(await save('theme.json', '{}', 'JSON', 'application/json', '.json'), true)
   assert.deepEqual(writes, ['{}', 'closed'])
 })
+
+const pickSource = source.match(/export async function pickFileWithPicker\([\s\S]*?^\}/m)[0].replace('export ', '')
+const readSource = source.match(/export async function readFileWithPicker\([\s\S]*?^\}/m)[0].replace('export ', '')
+
+test('iOS can select exported database files whose extension WebKit does not recognize', async () => {
+  const file = { name: 'history.db', text: async () => '{"videoId":"fixture"}\n' }
+  let accept
+  const read = vm.runInNewContext(`${pickSource}\n${readSource}\nreadFileWithPicker`, {
+    process: { env: { IS_IOS: true } },
+    window: { addEventListener() {} },
+    document: { createElement: () => ({
+      files: [file],
+      click() { accept = this.accept; this.onchange() },
+    }) },
+  })
+  const result = await read('History', { 'application/x-freetube-db': '.db', 'application/json': '.json' })
+  assert.equal(accept, '')
+  assert.equal(result.filename, file.name)
+  assert.equal(result.content, await file.text())
+})

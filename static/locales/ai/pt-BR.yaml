@@ -989,7 +989,7 @@ Settings:
     Pairing Code Match Hint: Confirme apenas se este código corresponder ao código apresentado no dispositivo existente.
     Pairing Codes Match: Os códigos correspondem
     Pairing Approval Code Hint: Mantenha esta janela aberta e compare este código com o do novo dispositivo. O novo dispositivo não deve continuar se os códigos forem diferentes.
-    Pairing Scan Hint: Leia o código de emparelhamento apresentado no dispositivo que está a adicionar.
+    Pairing Scan Hint: Escaneie o código de pareamento exibido no dispositivo que você está adicionando.
     Enter Pairing Code: Introduzir código manualmente
     Pairing Code Entry Hint: Cole o código de emparelhamento apresentado no dispositivo que está a adicionar.
     Check Pairing Code: Verificar código

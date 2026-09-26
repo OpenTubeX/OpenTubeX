@@ -1,0 +1,88 @@
+name: iOS and iPadOS
+
+on:
+  pull_request:
+    branches: [ master, development, '**-RC' ]
+  workflow_dispatch:
+    inputs:
+      playback:
+        description: Test live YouTube search and playback (requires network access)
+        type: boolean
+        default: false
+
+permissions: {}
+cache-mode: none
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  simulator:
+    runs-on: macos-15
+    timeout-minutes: 40
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.2.app/Contents/Developer
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        device: [ iPhone, iPad ]
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: 24.x
+        package-manager-cache: false
+    - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      with:
+        version: 11
+        cache: false
+    - run: pnpm run ci
+    - run: pnpm run capacitor:sync:ios
+    - name: Select an installed simulator
+      env:
+        DEVICE_FAMILY: ${{ matrix.device }}
+      run: |
+        python3 - <<'PY'
+        import json, os, subprocess
+        data = json.loads(subprocess.check_output(['xcrun', 'simctl', 'list', 'devices', 'available', '--json']))
+        devices = [device for runtime, group in data['devices'].items() if '.iOS-' in runtime
+                   for device in group if device['name'].startswith(os.environ['DEVICE_FAMILY'])]
+        if not devices:
+            raise SystemExit('No matching iOS simulator installed')
+        with open(os.environ['GITHUB_ENV'], 'a') as output:
+            output.write('SIMULATOR_ID=' + devices[-1]['udid'] + '\n')
+        PY
+    - name: Build and test without Apple credentials
+      env:
+        TEST_PLAYBACK: ${{ inputs.playback || 'false' }}
+      run: |
+        args=()
+        if [ "$TEST_PLAYBACK" != true ]; then
+          args+=(-skip-testing:AppTests/AppTests/testApplicationAndDirectPlayback -skip-testing:AppTests/AppTests/testSustainedPlayback -skip-testing:AppTests/AppTests/testPlaybackTabTeardown)
+        fi
+        xcodebuild -project ios/App/App.xcodeproj -scheme App \
+          -destination "platform=iOS Simulator,id=$SIMULATOR_ID" \
+          -derivedDataPath ios/DerivedData -resultBundlePath ios/TestResults \
+          "${args[@]}" \
+          CODE_SIGN_IDENTITY=- test
+    - name: Preserve simulator test results
+      if: always()
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: ios-${{ matrix.device }}-tests
+        path: ios/TestResults.xcresult
+        if-no-files-found: ignore
+
+  device:
+    name: Package device IPA
+    needs: simulator
+    permissions:
+      contents: read
+    uses: ./.github/workflows/package-ios.yml
+    with:
+      snapshot: true

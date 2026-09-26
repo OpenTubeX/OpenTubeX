@@ -50,6 +50,7 @@ test('mobile startup waits for saved settings before restoring tabs', async () =
   const { tabsReady } = vm.runInNewContext(`${initialization}; ({ tabsReady })`, {
     isElectron: false,
     isCapacitor: true,
+    supportsYtDlp: true,
     route: {},
     ytDlp: { addYtDlpBinaryUpdatedListener: () => {} },
     invalidateAllYtDlpPlaybackSources: () => {},

@@ -4,6 +4,7 @@ import { computed, inject, watch } from 'vue'
 import store from '../../../store/index'
 import { watchNavigationKey } from '../../../tabs/TabContext'
 import { setAndroidAutoPictureInPicture } from '../../../helpers/androidUi'
+import { bindIosAutoPictureInPicture } from '../../../helpers/player/iosAutoPictureInPicture'
 import {
   applyFocusState,
   applyMinimizedState,
@@ -72,6 +73,7 @@ export function useAutoPictureInPicture({
     focused: document.hasFocus()
   })
   let stopActiveTabWatch = null
+  let removeIosBackgroundListener = null
   let removeMinimizedListener = null
   let removeFocusedListener = null
   let blurTriggerRecheckTimeout = null
@@ -115,7 +117,9 @@ export function useAutoPictureInPicture({
   }
 
   function updateAutoPip() {
-    if (process.env.IS_CAPACITOR) {
+    // UIKit initiates iOS PiP before WebKit's visibility events arrive.
+    if (process.env.IS_IOS) return
+    if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
       const videoElement = video.value
       const isPresented = isAndroidPictureInPictureTarget.value
       const enabled = resolveAndroidAutoPictureInPictureUpdate(
@@ -259,7 +263,13 @@ export function useAutoPictureInPicture({
 
   function setupAutoPictureInPicture() {
     autoPictureInPictureTornDown = false
-    if (process.env.IS_CAPACITOR) {
+    if (process.env.IS_IOS) {
+      removeIosBackgroundListener = bindIosAutoPictureInPicture({
+        getVideo: () => video.value,
+        isEnabled: () => androidAutoPictureInPicture.value &&
+          isAndroidPictureInPictureTarget.value && props.format !== 'audio'
+      })
+    } else if (process.env.IS_CAPACITOR) {
       video.value?.addEventListener('play', updateAutoPip)
       video.value?.addEventListener('pause', updateAutoPip)
       video.value?.addEventListener('ended', updateAutoPip)
@@ -313,7 +323,10 @@ export function useAutoPictureInPicture({
 
   function teardownAutoPictureInPicture() {
     autoPictureInPictureTornDown = true
-    if (process.env.IS_CAPACITOR) {
+    if (process.env.IS_IOS) {
+      removeIosBackgroundListener?.()
+      removeIosBackgroundListener = null
+    } else if (process.env.IS_CAPACITOR) {
       video.value?.removeEventListener('play', updateAutoPip)
       video.value?.removeEventListener('pause', updateAutoPip)
       video.value?.removeEventListener('ended', updateAutoPip)

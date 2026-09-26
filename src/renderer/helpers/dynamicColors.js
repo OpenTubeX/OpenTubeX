@@ -2,7 +2,7 @@ import { ref } from 'vue'
 import { registerPlugin } from '@capacitor/core'
 import { CUSTOM_THEME_COLORS, hexColorToRgbComponents } from '../../customTheme.js'
 
-const AndroidDynamicColors = process.env.IS_CAPACITOR ? registerPlugin('AndroidDynamicColors') : null
+const AndroidDynamicColors = process.env.IS_CAPACITOR && !process.env.IS_IOS ? registerPlugin('AndroidDynamicColors') : null
 
 export function getAndroidDynamicColors() {
   return AndroidDynamicColors?.getColors() ?? Promise.resolve({ supported: false })

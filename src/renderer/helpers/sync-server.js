@@ -56,6 +56,8 @@ function syncServerFetch(input, init, timeoutMs) {
         ...init,
         // Encrypted transfers may outlast the native client's 30-second default.
         nativeTimeoutMs: timeoutMs,
+        // The user may explicitly configure an HTTP server on their local network.
+        allowHttp: true,
         headers: applySyncServerUserAgent(Object.fromEntries(new Headers(init.headers))),
       })
     : fetch(input, init)

@@ -6,10 +6,12 @@ function fixture() {
   const visualViewport = Object.assign(new EventTarget(), { width: 400, scale: 1 })
   const window = Object.assign(new EventTarget(), { visualViewport })
   const changes = []
+  const properties = new Map()
   const scale = createCapacitorUiScale(window, {
+    documentElement: { style: { setProperty: (name, value) => properties.set(name, value) } },
     querySelector: () => ({ setAttribute: (_, value) => changes.push(value) }),
   })
-  return { scale, visualViewport, changes, window }
+  return { scale, visualViewport, changes, window, properties }
 }
 
 test('UI scale resizes the layout viewport and remains stable after fractional resize events', () => {
@@ -37,4 +39,13 @@ test('UI scale follows rotation and window resizing without reacting to keyboard
   visualViewport.width = 320
   window.dispatchEvent(new Event('resize'))
   assert.equal(changes.length, count)
+})
+
+test('safe-area CSS receives the actual fractional viewport scale', () => {
+  const { scale, properties } = fixture()
+  scale.setScale(150)
+  assert.equal(Number(properties.get('--capacitor-ui-scale')), 400 / 267)
+  scale.setScale(75)
+  assert.equal(Number(properties.get('--capacitor-ui-scale')), 400 / 533)
+  scale.dispose()
 })

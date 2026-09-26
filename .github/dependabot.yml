@@ -19,6 +19,7 @@ updates:
       - dependency-name: "@capacitor/core"
       - dependency-name: "@capacitor/device"
       - dependency-name: "@capacitor/filesystem"
+      - dependency-name: "@capacitor/ios"
       - dependency-name: "@capacitor/local-notifications"
       - dependency-name: "@capacitor/share"
       - dependency-name: "@capawesome/capacitor-app-shortcuts"

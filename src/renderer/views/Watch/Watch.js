@@ -1398,7 +1398,7 @@ export default defineComponent({
       }
     },
     updateAndroidBackgroundPlaybackFormat() {
-      if (!process.env.IS_CAPACITOR || this.$refs.player?.isNativePlayback?.()) return
+      if (!process.env.IS_CAPACITOR || process.env.IS_IOS || this.$refs.player?.isNativePlayback?.()) return
 
       const change = resolveAndroidBackgroundPlaybackFormat({
         hidden: isAppHidden(),

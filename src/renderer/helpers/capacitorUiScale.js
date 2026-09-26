@@ -20,6 +20,7 @@ export function createCapacitorUiScale(window, document) {
     const content = `width=${width}, initial-scale=${zoom}, viewport-fit=cover`
     if (content === lastContent) return
     lastContent = content
+    document.documentElement.style.setProperty('--capacitor-ui-scale', String(zoom))
     viewport.setAttribute('content', content)
   }
 

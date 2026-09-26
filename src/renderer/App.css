@@ -5,6 +5,8 @@
 
 .app {
   --app-safe-area-inset-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0));
+  --app-safe-area-inset-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0));
+  --app-safe-area-inset-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0));
   --top-nav-height: 60px;
   --progress-bar-height: 6px;
 
@@ -20,6 +22,18 @@
   font-family: var(--app-font-family);
   block-size: 100%;
   padding-block-start: var(--app-safe-area-inset-top);
+}
+
+.app.capacitorTabs {
+  padding-inline: var(--app-safe-area-inset-left) var(--app-safe-area-inset-right);
+}
+
+@media only screen and (width <= 680px) {
+  .app.capacitorTabs :deep(.topNav),
+  .app.capacitorTabs :deep(.sideNav) {
+    inset-inline: var(--app-safe-area-inset-left) var(--app-safe-area-inset-right);
+    inline-size: auto;
+  }
 }
 
 /* Keep the edge-to-edge status-bar inset opaque. The app itself scrolls, so
@@ -873,4 +887,24 @@
 
 .mobileThumbnailActionRow button[aria-checked='true'] {
   color: var(--primary-color);
+}
+
+
+/* These touch targets open app menus; Safari's selection/callout competes
+   with the hold gesture, including on descendants of a nonselectable tab. */
+.app.capacitorTabs :deep(a[href], .ft-list-video, .ft-list-playlist, [data-subscription-feed-tab], [data-new-feed-tab], .capacitorTabletTabTarget),
+.app.capacitorTabs :deep(:is(a[href], .ft-list-video, .ft-list-playlist, [data-subscription-feed-tab], [data-new-feed-tab], .capacitorTabletTabTarget) *) {
+  -webkit-touch-callout: none;
+
+  /* Safari still requires this prefix for touch selection suppression. */
+  /* stylelint-disable-next-line property-no-vendor-prefix */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Match the native Android player: the center owns play/pause, while the
+   toolbar retains replay when recommendations cover the center at the end. */
+/* stylelint-disable-next-line selector-max-compound-selectors */
+.app.capacitorTabs :deep(.ftVideoPlayer:not(:has(.endedScreen)) .shaka-controls-button-panel > .shaka-play-button) {
+  display: none !important;
 }

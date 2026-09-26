@@ -551,7 +551,11 @@ export async function pickFileWithPicker(
 
       const fileInput = document.createElement('input')
       fileInput.type = 'file'
-      fileInput.accept = joinedExtensions
+      // WebKit's native picker cannot identify our line-delimited JSON .db files.
+      // Let iOS select them; importers still validate the filename and contents.
+      fileInput.accept = process.env.IS_IOS && Object.values(acceptedTypes).flat().includes('.db')
+        ? ''
+        : joinedExtensions
       fileInput.onchange = () => {
         resolve(fileInput.files[0])
         fileInput.onchange = null

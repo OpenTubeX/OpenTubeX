@@ -510,6 +510,7 @@
 </template>
 
 <script setup>
+import { installIosContextMenu } from './helpers/iosContextMenu'
 import '@fontsource-variable/geist'
 import '@fontsource-variable/figtree'
 import '@fontsource-variable/source-sans-3'
@@ -519,6 +520,7 @@ import '@fontsource-variable/manrope'
 import '@fontsource-variable/plus-jakarta-sans'
 import FtRetryImage from './components/FtRetryImage.vue'
 import { initializeAndroidYtDlp, ytDlp } from './helpers/ytDlp'
+import { supportsYtDlp } from './helpers/ytDlpCapabilities'
 import { parseAutomaticDownloadRules } from './helpers/automaticDownloadRules'
 import { isAppHidden, setAndroidAppVisible } from './helpers/appVisibility.js'
 import { createAppShortcuts, getAppShortcutPath } from './helpers/appShortcuts'
@@ -1215,7 +1217,7 @@ const tabSwitcherSelectedTabId = computed(() => {
  * @param {('yt-dlp' | 'ffmpeg')[] | null} requestedUpdates
  */
 async function initializeManagedExternalSoftware(requestedUpdates = null) {
-  if (!isElectron && !isCapacitor) {
+  if (!supportsYtDlp) {
     return
   }
 
@@ -1507,6 +1509,7 @@ async function completeTutorial() {
 }
 
 let removeInternetConnectivitySettingsListener = null
+let removeIosContextMenu = null
 
 onMounted(async () => {
   removeGamepadNavigation = initializeGamepadNavigation({
@@ -1515,7 +1518,7 @@ onMounted(async () => {
     onPlayPause: handleGamepadPlayPause,
   })
   let tabsReady = Promise.resolve()
-  if (isElectron || isCapacitor) {
+  if (supportsYtDlp) {
     removeYtDlpBinaryUpdatedListener = ytDlp.addYtDlpBinaryUpdatedListener(invalidateAllYtDlpPlaybackSources)
   }
 
@@ -1730,6 +1733,7 @@ onMounted(async () => {
   if (isCapacitor) {
     window.addEventListener('opentubex:android-pip', handleAndroidPictureInPictureChange)
     window.addEventListener('opentubex:hardware-keyboard', handleHardwareKeyboardChange)
+    if (process.env.IS_IOS) removeIosContextMenu = installIosContextMenu(document)
     document.addEventListener('contextmenu', handleMobileLinkContextMenu, true)
     hardwareKeyboardAttached.value = await getAndroidHardwareKeyboardState()
   }
@@ -1798,6 +1802,7 @@ onBeforeUnmount(() => {
   window.removeEventListener(OPEN_TAB_ORGANIZER_EVENT, openTabOrganizer)
   window.removeEventListener('opentubex:android-pip', handleAndroidPictureInPictureChange)
   window.removeEventListener('opentubex:hardware-keyboard', handleHardwareKeyboardChange)
+  removeIosContextMenu?.()
   document.removeEventListener('contextmenu', handleMobileLinkContextMenu, true)
   document.removeEventListener('keyup', handleKeyboardShortcutKeyup)
   document.removeEventListener('mousedown', handleMouseDown)
@@ -1942,7 +1947,7 @@ watch([subscriptionPostsAutoRefreshInterval, hideSubscriptionsPosts], () => {
 })
 
 const androidSubscriptionRefreshConfiguration = computed(() => {
-  if ((!isCapacitor && !isElectron) || !dataReady.value) return null
+  if (process.env.IS_IOS || (!isCapacitor && !isElectron) || !dataReady.value) return null
 
   return createAndroidSubscriptionRefreshConfiguration({
     profiles: store.getters.getProfileList,
@@ -2937,7 +2942,7 @@ watch(() => store.getters.getUiScale, value => {
   capacitorUiScale?.setScale(value)
   document.documentElement.style.setProperty('--phone-touch-target', `${Math.max(48, 4800 / value)}px`)
 }, { immediate: true })
-onBeforeUnmount(setupPhoneViewport(window, document, isCapacitor))
+onBeforeUnmount(setupPhoneViewport(window, document, isCapacitor && !process.env.IS_IOS))
 onBeforeUnmount(() => capacitorUiScale?.dispose())
 
 const appFont = computed(() => store.getters.getAppFont)
@@ -4632,11 +4637,17 @@ function enableOpenUrl() {
 }
 
 async function enableCapacitorIntegrations() {
+  const openUrl = url => {
+    if (!url) return
+    // iOS URL handling can remove the embedded protocol's colon.
+    const target = url.replace(/^opentubex:(?:\/\/)?/, '').replace(/^(https?)\/\//, '$1://')
+    return handleYoutubeLink(target)
+  }
   const backButtonHandle = Capacitor.getPlatform() === 'android'
     ? await CapacitorApp.addListener('backButton', handleAndroidBack)
     : null
   const urlHandle = await CapacitorApp.addListener('appUrlOpen', ({ url }) => {
-    if (url) handleYoutubeLink(url)
+    openUrl(url)
   })
   const shortcutHandle = await AppShortcuts.addListener('click', async ({ shortcutId }) => {
     const path = getAppShortcutPath(shortcutId)
@@ -4651,7 +4662,7 @@ async function enableCapacitorIntegrations() {
       history: t('History.History'),
       downloads: t('Settings.Download Settings.Download Settings'),
     })
-    AppShortcuts.set({ shortcuts }).catch(error => console.error('Failed to update app shortcuts', error))
+    AppShortcuts.set({ shortcuts: supportsYtDlp ? shortcuts : shortcuts.filter(shortcut => shortcut.id !== 'downloads') }).catch(error => console.error('Failed to update app shortcuts', error))
   }, { immediate: true })
   const removeReminderActions = await initializeCapacitorLiveReminderActions((videoId) => {
     handleYoutubeLink(`https://www.youtube.com/watch?v=${videoId}`)
@@ -4703,7 +4714,7 @@ async function enableCapacitorIntegrations() {
     setAndroidAppVisible(appState.isActive)
   }
   const launch = await CapacitorApp.getLaunchUrl()
-  if (launch?.url) await handleYoutubeLink(launch.url)
+  await openUrl(launch?.url)
 
   return () => {
     clearTimeout(backgroundStateTimeout)

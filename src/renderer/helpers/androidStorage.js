@@ -1,10 +1,13 @@
 import { registerPlugin } from '@capacitor/core'
 import { blobToDataUrl } from './fileData'
 
-const AndroidStorage = process.env.IS_CAPACITOR ? registerPlugin('AndroidStorage') : null
+const AndroidStorage = process.env.IS_CAPACITOR ? registerPlugin(process.env.IS_IOS ? 'IOSStorage' : 'AndroidStorage') : null
 
 /** Display external-storage document IDs as paths without changing the saved URI. */
 export function displayAndroidPath(path) {
+  if (process.env.IS_IOS && path) {
+    try { return JSON.parse(path).name || path } catch { return path }
+  }
   if (!path?.startsWith('content://com.android.externalstorage.documents/')) return path
   try {
     const url = new URL(path)

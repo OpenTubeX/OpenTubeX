@@ -123,3 +123,29 @@ test('activity navigation focuses its new target even when a previous highlight 
   await navigation.open({ section: 'playback', match: { label: 'Second setting' } })
   assert.deepEqual(focused, ['first', 'second'])
 })
+
+test('opening touch settings focuses the close button without raising the software keyboard', () => {
+  for (const [capacitor, keyboard, narrow, expected] of [
+    [true, false, false, 'close'],
+    [true, false, true, 'close'],
+    [true, true, false, 'search'],
+    [false, false, false, 'search']
+  ]) {
+    const focused = []
+    const focus = name => ({ value: { focus: () => focused.push(name) } })
+    vm.runInNewContext(`${componentFunction('handleMounted')}; handleMounted()`, {
+      IS_CAPACITOR: capacitor,
+      props: { hardwareKeyboardAttached: keyboard },
+      unlocked: ref(false),
+      store: { getters: { getSettingsPassword: '' } },
+      updateNarrowLayout() {}, handleResize() {}, setInitialSection() {},
+      nextTick: callback => callback(),
+      observeProfileManager() {}, observeStandaloneContent() {},
+      settingsWindowRef: ref(null), windowBounds: ref({ width: 1080 }),
+      isNarrowLayout: ref(narrow),
+      settingsCloseButtonRef: focus('close'), settingsSearchInputRef: focus('search'),
+      settingsResizeObserver: {}, observationScheduled: false
+    })
+    assert.deepEqual(focused, [expected])
+  }
+})

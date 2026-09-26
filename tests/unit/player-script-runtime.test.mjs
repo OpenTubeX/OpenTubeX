@@ -71,6 +71,11 @@ test('interrupts infinite loops and excessive allocation and remains usable', as
   assert.equal(await evaluatePlayerCode('return 42'), 42)
 })
 
+test('bounds recursion before exhausting the host WebAssembly stack', async () => {
+  await assert.rejects(evaluatePlayerCode('function recurse() { return 1 + recurse() } return recurse()'), /InternalError: stack overflow/)
+  assert.equal(await evaluatePlayerCode('return 42'), 42)
+})
+
 test('deciphers archived YouTube player data identically to the previous evaluator', async () => {
   const source = gunzipSync(readFileSync(new URL('../../e2e/fixtures/innertube/shared/shared-99c4a5c04897.gz', import.meta.url))).toString()
   const player = await Player.create(undefined, async () => new Response(source), undefined, 'fixture')
@@ -175,4 +180,24 @@ test('keeps stack exhaustion catchable inside player scripts', async () => {
 test('reports uncaught stack exhaustion without aborting runtime cleanup', async () => {
   await assert.rejects(evaluatePlayerCode('function recurse() { return recurse() } recurse()'), /InternalError: stack overflow/)
   assert.equal(await evaluatePlayerCode('return 42'), 42)
+})
+
+test('preserves evaluation errors when runtime cleanup also fails', async () => {
+  const source = readFileSync(new URL('../../src/renderer/helpers/api/player-script-runtime.js', import.meta.url), 'utf8')
+    .replace(/^import .*$/gm, '').replace('export async function', 'async function')
+  const runtime = {
+    alive: true,
+    setMemoryLimit() {}, setMaxStackSize() {}, setInterruptHandler() {},
+    dispose() { throw new Error('cleanup failed') },
+    newContext: () => ({
+      alive: true,
+      evalCode() { throw new Error('evaluation failed') },
+      dispose() {},
+    }),
+  }
+  const evaluate = vm.runInNewContext(`${source}; evaluatePlayerCode`, {
+    variant: {},
+    newQuickJSWASMModuleFromVariant: async () => ({ newRuntime: () => runtime }),
+  })
+  await assert.rejects(evaluate('return 42'), /evaluation failed/)
 })

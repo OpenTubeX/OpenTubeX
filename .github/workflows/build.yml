@@ -543,9 +543,18 @@ jobs:
         path: android-apks/opentubex-${{ steps.apk.outputs.version }}-android-universal.apk
         if-no-files-found: error
 
+  ios:
+    name: Build iOS IPA
+    if: github.repository == 'OpenTubeX/OpenTubeX' || github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/package-ios.yml
+    with:
+      snapshot: true
+
   publish-nightly:
     name: Publish nightly release
-    needs: [build, android]
+    needs: [build, android, ios]
     if: github.event_name == 'workflow_dispatch' && inputs.publishNightly && github.ref == 'refs/heads/development'
     runs-on: ubuntu-latest
 

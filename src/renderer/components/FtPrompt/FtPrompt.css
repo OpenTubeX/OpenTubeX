@@ -129,8 +129,8 @@
   .prompt {
     block-size: var(--phone-viewport-height, 100dvh);
     inset-block-start: var(--phone-viewport-top, 0);
-    padding-block: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-bottom));
-    padding-inline: max(8px, env(safe-area-inset-left)) max(8px, env(safe-area-inset-right));
+    padding-block: max(8px, var(--safe-area-inset-top, env(safe-area-inset-top))) max(8px, var(--safe-area-inset-bottom, env(safe-area-inset-bottom)));
+    padding-inline: max(8px, var(--safe-area-inset-left, env(safe-area-inset-left))) max(8px, var(--safe-area-inset-right, env(safe-area-inset-right)));
   }
 
   .promptCard.autosize,

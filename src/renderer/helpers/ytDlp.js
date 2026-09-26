@@ -11,7 +11,7 @@ import { buildYtDlpStoryboardVtt } from '../../main/ytDlpStoryboard'
 import { isYouTubeSubtitleUrl } from '../../youtubeSubtitle'
 import { chooseAndroidDirectory } from './androidStorage'
 
-const native = process.env.IS_CAPACITOR ? registerPlugin('YtDlp') : null
+const native = process.env.IS_CAPACITOR && !process.env.IS_IOS ? registerPlugin('YtDlp') : null
 
 function configuration() {
   const rules = {}
@@ -62,6 +62,7 @@ async function extract(args, useAuthentication = false, externalMedia = false, p
 }
 
 function listen(event, callback) {
+  if (!native) return () => {}
   const handle = native.addListener(event, callback)
   return () => { handle.then(listener => listener.remove()) }
 }

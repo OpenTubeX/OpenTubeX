@@ -139,7 +139,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, reactive, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
@@ -592,6 +592,26 @@ function updateSelectedOptionIndex(index) {
   // Update displayed value
   searchState.keyboardSelectedOptionIndex = searchState.selectedOption
 }
+
+function handleOutsideTouch(event) {
+  const input = inputRef.value
+  if (event.pointerType !== 'touch' || document.activeElement !== input || input.closest('.ft-input-component').contains(event.target)) return
+  // iOS can retain focus after dismissing the keyboard, then consume player
+  // taps to reopen it. Clear focus before those taps reach the player.
+  searchState.isPointerInList = false
+  searchState.showOptions = false
+  input.blur()
+}
+
+// Scrollbar setup restores focus while suppressing focus events. Keep this
+// listener for the component lifetime instead of relying on focus/blur pairs.
+onMounted(() => {
+  if (process.env.IS_IOS) document.addEventListener('pointerdown', handleOutsideTouch, true)
+})
+
+onBeforeUnmount(() => {
+  if (process.env.IS_IOS) document.removeEventListener('pointerdown', handleOutsideTouch, true)
+})
 
 function handleInputBlur() {
   if (!searchState.isPointerInList) {

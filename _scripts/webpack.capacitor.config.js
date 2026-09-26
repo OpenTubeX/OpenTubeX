@@ -22,7 +22,11 @@ config.plugins.push(new webpack.NormalModuleReplacementPlugin(/^\.\/storage\.js$
 // VOT uses window.crypto in WebViews; its Node fallback must stay out of this bundle.
 new webpack.IgnorePlugin({ resourceRegExp: /^node:crypto$/ }))
 // These document-wide selectors must not invalidate desktop playback layout.
-config.entry.web = [config.entry.web, path.join(__dirname, '../src/renderer/helpers/player/androidNativeScreen.css')]
+if (process.env.CAPACITOR_PLATFORM !== 'ios') {
+  config.entry.web = [config.entry.web, path.join(__dirname, '../src/renderer/helpers/player/androidNativeScreen.css')]
+} else {
+  config.entry.web = [config.entry.web, path.join(__dirname, '../src/renderer/helpers/iosSafeArea.css')]
+}
 botGuardConfig.name = 'capacitorBotGuardScript'
 botGuardConfig.output.path = path.join(__dirname, '../dist/capacitor')
 

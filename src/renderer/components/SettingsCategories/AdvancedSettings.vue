@@ -15,6 +15,6 @@ import ExternalSoftwareSettings from '../ExternalSoftwareSettings.vue'
 import GeneralSettings from '../GeneralSettings/GeneralSettings.vue'
 import ProxySettings from '../ProxySettings/ProxySettings.vue'
 
-const IS_CAPACITOR = !!process.env.IS_CAPACITOR
+const IS_CAPACITOR = !!process.env.IS_CAPACITOR && !process.env.IS_IOS
 const USING_ELECTRON = !!process.env.IS_ELECTRON
 </script>

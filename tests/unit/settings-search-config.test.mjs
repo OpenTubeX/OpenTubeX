@@ -21,6 +21,22 @@ const locale = loadYaml(await readFile(
 ))
 const getAtPath = (value, path) => path.split('.').reduce((nested, key) => nested?.[key], value)
 
+test('iOS settings search omits unavailable native services', () => {
+  const index = createSettingsSearchIndex({
+    sections: ['general', 'appearance', 'advanced', 'add-ons', 'subscriptions'].map(type => ({ type, title: type, description: '' })),
+    tm: path => getAtPath(locale, path),
+    store: { getters: {} },
+    isCapacitor: true,
+    isIos: true,
+    usingElectron: false,
+  })
+  const labels = [...index.values()].flat().map(entry => entry.label)
+  for (const label of ['Swipe to refresh', 'Stream Extraction Method', 'Refresh Subscriptions While App Is Closed', 'Use Proxy', 'Voice-over Translation']) {
+    assert.equal(labels.includes(label), false, label)
+  }
+  assert.equal(labels.includes('Mobile layout'), true)
+})
+
 test('swipe to refresh is searchable in mobile general settings only', () => {
   for (const isCapacitor of [true, false]) {
     const entries = createSettingsSearchIndex({

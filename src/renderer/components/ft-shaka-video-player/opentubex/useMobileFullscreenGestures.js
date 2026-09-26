@@ -311,7 +311,7 @@ export function useMobileFullscreenGestures({
       mobileFullscreenSettleTimer = null
       mobileFullscreenSwipeOffset.value = 0
       mobileFullscreenSwipeSettling.value = false
-      if (shouldToggle) togglePlayerFullScreen()
+      if (shouldToggle && isFullscreenActive() === wasFullscreen) togglePlayerFullScreen()
     }, settleDuration)
   }
 

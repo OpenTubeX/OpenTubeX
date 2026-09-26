@@ -31,12 +31,14 @@ export async function evaluatePlayerCode(code, { timeoutMs = 5000, memoryLimitBy
     let context
     let result
     let trapped = false
+    let evaluationFailed = false
     try {
       context = runtime.newContext()
       // youtubei.js supplies a function body, including its final return statement.
       result = context.unwrapResult(context.evalCode(`(function () {\n${code}\n})()`))
       return context.dump(result)
     } catch (error) {
+      evaluationFailed = true
       const hostStackOverflow = error instanceof RangeError && /Maximum call stack size exceeded/i.test(error.message)
       if (hostStackOverflow || error instanceof WebAssembly.RuntimeError) {
         // A host trap bypasses QuickJS's exception unwinding. Calling its cleanup
@@ -56,10 +58,18 @@ export async function evaluatePlayerCode(code, { timeoutMs = 5000, memoryLimitBy
     } finally {
       if (!trapped) {
         // QuickJS may need to allocate while releasing objects after an OOM.
-        runtime.setMemoryLimit(-1)
-        result?.dispose()
-        context?.dispose()
-        runtime.dispose()
+        try {
+          runtime.setMemoryLimit(-1)
+          result?.dispose()
+          context?.dispose()
+          runtime.dispose()
+        } catch (error) {
+          // Preserve the evaluation failure when cleanup also fails.
+          modulePromise = undefined
+          // Only replace a successful return, never the original evaluation error.
+          // eslint-disable-next-line no-unsafe-finally
+          if (!evaluationFailed) throw error
+        }
       }
     }
   }

@@ -11,6 +11,6 @@ import RydSettings from '../RydSettings.vue'
 import SponsorBlockSettings from '../SponsorBlockSettings.vue'
 import VoiceOverTranslationSettings from '../VoiceOverTranslationSettings.vue'
 
-const IS_CAPACITOR = !!process.env.IS_CAPACITOR
+const IS_CAPACITOR = !!process.env.IS_CAPACITOR && !process.env.IS_IOS
 const USING_ELECTRON = !!process.env.IS_ELECTRON
 </script>

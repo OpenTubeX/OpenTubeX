@@ -49,6 +49,7 @@ test('retained startup clicks and running-app clicks navigate and update localiz
   const enable = vm.runInNewContext(`${integration}\nenableCapacitorIntegrations`, {
     window: new EventTarget(),
     Capacitor: { getPlatform: () => 'android' },
+    supportsYtDlp: true,
     handleAndroidBack() {},
     CapacitorApp: {
       addListener: async (name, callback) => {
@@ -56,7 +57,7 @@ test('retained startup clicks and running-app clicks navigate and update localiz
         return { remove: () => listeners.delete(name) }
       },
       getState: async () => ({ isActive: true }),
-      getLaunchUrl: async () => null,
+      getLaunchUrl: async () => ({ url: 'opentubex://https//www.youtube.com/feed/history' }),
     },
     AppShortcuts: {
       addListener: async (name, callback) => {
@@ -107,7 +108,9 @@ test('retained startup clicks and running-app clicks navigate and update localiz
   await listeners.get('click')({ shortcutId: 'settings' })
   assert.deepEqual(paths, pages.map(page => `/${page}`))
   listeners.get('appUrlOpen')({ url: 'https://youtu.be/123' })
-  assert.deepEqual(youtubeLinks, ['https://youtu.be/123'])
+  listeners.get('appUrlOpen')({ url: 'opentubex://https://www.youtube.com/watch?v=jNQXAC9IVRw' })
+  listeners.get('appUrlOpen')({ url: 'opentubex://https//www.youtube.com/feed/subscriptions' })
+  assert.deepEqual(youtubeLinks, ['https://www.youtube.com/feed/history', 'https://youtu.be/123', 'https://www.youtube.com/watch?v=jNQXAC9IVRw', 'https://www.youtube.com/feed/subscriptions'])
   assert.equal(updates[0][2].title, 'en-US:History.History')
   locale.value = 'de-DE'
   updateLocale()

@@ -114,7 +114,7 @@
         @change="updateHideToTrayOnMinimize"
       />
       <FtToggleSwitch
-        v-if="mode === 'general' && IS_CAPACITOR"
+        v-if="mode === 'general' && IS_CAPACITOR && !IS_IOS"
         :label="t('Settings.General Settings.Swipe to refresh')"
         :default-value="enablePullToRefresh"
         setting-key="enablePullToRefresh"
@@ -411,6 +411,7 @@ import {
 } from '../../helpers/dateFormat'
 
 const USING_ELECTRON = !!process.env.IS_ELECTRON
+const IS_IOS = !!process.env.IS_IOS
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const enablePullToRefresh = computed(() => store.getters.getEnablePullToRefresh)
 const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
