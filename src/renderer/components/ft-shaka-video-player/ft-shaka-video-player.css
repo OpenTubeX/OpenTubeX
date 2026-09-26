@@ -4632,6 +4632,12 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   pointer-events: none;
 }
 
+/* Inline video zoom must not move Android's native surface away from these controls. */
+.ftVideoPlayer.scrollMiniPlayer .player.nativePlayer {
+  transform: none !important;
+  transition: none;
+}
+
 .scrollMiniPlayerControls {
   position: absolute;
   inset: 0;
