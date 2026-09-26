@@ -163,9 +163,12 @@ function displayActivityValue(entry) {
       if (name) return t(`Settings.Player Settings.Caption Appearance.Edge Style.${name}`)
     }
     if (entry.detail === 'Anchor.Anchor' && typeof entry.value === 'string') {
-      const name = entry.value.split('-').map(part => part[0].toUpperCase() + part.slice(1)).join(' ')
-      // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
-      return t(`Settings.Player Settings.Caption Appearance.Anchor.${name}`)
+      if (/^(top|bottom)-(left|center|right)$/.test(entry.value)) {
+        const name = entry.value.split('-').map(part => part[0].toUpperCase() + part.slice(1)).join(' ')
+        const key = `Settings.Player Settings.Caption Appearance.Anchor.${name}`
+        // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
+        if (te(key)) return t(key)
+      }
     }
   }
   if (typeof entry.value === 'string') {

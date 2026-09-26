@@ -909,7 +909,7 @@ Settings:
     Item Removed: "{device} tog bort {item} från {setting}"
     Item Renamed: "{device} bytte namn på {item} till {value}"
     Saved Playlists: "Sparade spellistor"
-    No Feed Types: "Ingen"
+    No Feed Types: "Inga flödestyper"
     Open On Device: "Öppna på en annan enhet"
     Video Sent: "Videon har skickats. Offlineenheter tar emot den när de ansluter igen inom 24 timmar."
     Video Received: "Mottagen video: {title}"

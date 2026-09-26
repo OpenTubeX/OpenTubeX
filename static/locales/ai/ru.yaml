@@ -896,7 +896,7 @@ Settings:
     Setting Changed: "{device} изменило {setting} на {value}"
     Item Updated: "{device} обновило {setting}"
     Item Added: "{device} добавило {item} в {setting}"
-    Item Removed: "{device} удалило {item} из {setting}"
+    Item Removed: "{device} удалило {item} ({setting})"
     Item Renamed: "{device} переименовало {item} в {value}"
     Saved Playlists: "Сохранённые плейлисты"
     No Feed Types: "Нет"

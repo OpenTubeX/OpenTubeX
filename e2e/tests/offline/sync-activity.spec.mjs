@@ -50,6 +50,22 @@ for (const uiScale of [100, 125]) {
       await expect(activity.nth(2)).toContainText(/Laptop changed Screenshot [Ff]ormat to JPEG/)
     })
 
+    test('keeps malformed caption anchors readable', async ({ page }) => {
+      const sync = await goToSettingsSection(page, 'sync')
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setSyncServerToken', 'test-token')
+        store.commit('setSyncServerActivity', [
+          { id: 'anchor', deviceName: 'Laptop', key: 'defaultCaptionSettings', detail: 'Anchor.Anchor', value: 'top-', createdAt: Date.now() },
+          { id: 'known-anchor', deviceName: 'Laptop', key: 'defaultCaptionSettings', detail: 'Anchor.Anchor', value: 'bottom-right', createdAt: Date.now() - 1 },
+          { id: 'unknown-anchor', deviceName: 'Laptop', key: 'defaultCaptionSettings', detail: 'Anchor.Anchor', value: 'diagonal', createdAt: Date.now() - 2 },
+        ])
+        store.commit('setSyncServerLiveSupported', true)
+        store.commit('setSyncServerEnabled', true)
+      })
+      await expect(sync.locator('.syncActivity .activityList li')).toContainText(['top-', 'Bottom Right', 'diagonal'])
+    })
+
     test('names custom themes once and describes an empty subscription feed', async ({ page }) => {
       const sync = await goToSettingsSection(page, 'sync')
       await page.evaluate(() => {

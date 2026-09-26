@@ -941,7 +941,7 @@ Settings:
     Setting Changed: "{device} је променио {setting} на {value}"
     Item Updated: "{device} је ажурирао {setting}"
     Item Added: "{device} је додао {item} у {setting}"
-    Item Removed: "{device} је уклонио {item} из {setting}"
+    Item Removed: "{device} је уклонио {item} ({setting})"
     Item Renamed: "{device} је преименовао {item} у {value}"
     Saved Playlists: "Сачуване плејлисте"
     No Feed Types: "Ништа"
