@@ -526,6 +526,7 @@ Settings:
         Destructive pressed: Destruktiv handling ved trykk
         Text and icons on destructive actions: Tekst og ikoner på destruktive handlinger
   Player Settings:
+    Show DLNA Cast Button: "Vis DLNA-strømmeknapp"
     Skip Unavailable Playlist Videos: "Hopp over utilgjengelige videoer i spillelister"
     Lights Off: Slå av lyset
     Show Lights Off Toggle: Vis bryteren for å slå av lyset

@@ -528,6 +528,7 @@ Settings:
         Destructive pressed: Eyðandi aðgerð þegar ýtt er
         Text and icons on destructive actions: Texti og tákn á eyðandi aðgerðum
   Player Settings:
+    Show DLNA Cast Button: "Sýna DLNA-útsendingarhnapp"
     Skip Unavailable Playlist Videos: "Sleppa óaðgengilegum myndskeiðum í spilunarlistum"
     Lights Off: Slökkva ljósin
     Show Lights Off Toggle: Sýna rofa til að slökkva ljósin

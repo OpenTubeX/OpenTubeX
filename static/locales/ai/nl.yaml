@@ -530,6 +530,7 @@ Settings:
         Destructive pressed: Verwijderactie bij indrukken
         Text and icons on destructive actions: Tekst en pictogrammen bij verwijderacties
   Player Settings:
+    Show DLNA Cast Button: "DLNA-castknop tonen"
     Skip Unavailable Playlist Videos: "Niet-beschikbare video's in afspeellijsten overslaan"
     Lights Off: Lichten uit
     Show Lights Off Toggle: Schakelaar voor 'Lichten uit' tonen

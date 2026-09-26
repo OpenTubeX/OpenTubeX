@@ -526,6 +526,7 @@ Settings:
         Destructive pressed: Basılı yıkıcı işlem
         Text and icons on destructive actions: Yıkıcı işlemlerdeki metin ve simgeler
   Player Settings:
+    Show DLNA Cast Button: "DLNA yayın düğmesini göster"
     Skip Unavailable Playlist Videos: "Oynatma listelerindeki kullanılamayan videoları atla"
     Lights Off: Işıkları kapat
     Show Lights Off Toggle: Işıkları kapatma düğmesini göster

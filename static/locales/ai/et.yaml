@@ -526,6 +526,7 @@ Settings:
         Destructive pressed: Pöördumatu toiming vajutamisel
         Text and icons on destructive actions: Pöördumatute toimingute tekst ja ikoonid
   Player Settings:
+    Show DLNA Cast Button: "Kuva DLNA edastamise nupp"
     Skip Unavailable Playlist Videos: "Jäta esitusloendis kättesaamatud videod vahele"
     Lights Off: Tuled välja
     Show Lights Off Toggle: Näita tulede väljalülitamise lülitit

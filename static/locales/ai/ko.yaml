@@ -685,6 +685,7 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    Show DLNA Cast Button: "DLNA 전송 버튼 표시"
     Skip Unavailable Playlist Videos: "재생목록에서 볼 수 없는 동영상 건너뛰기"
     Lights Off: 조명 끄기
     Show Lights Off Toggle: 조명 끄기 토글 표시

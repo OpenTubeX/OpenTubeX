@@ -530,6 +530,7 @@ Settings:
         Destructive pressed: Acción destrutiva premida
         Text and icons on destructive actions: Texto e iconas das accións destrutivas
   Player Settings:
+    Show DLNA Cast Button: "Mostrar o botón de transmisión DLNA"
     Skip Unavailable Playlist Videos: "Omitir vídeos non dispoñibles nas listas de reprodución"
     Lights Off: Luces apagadas
     Show Lights Off Toggle: Amosar o interruptor para apagar as luces

@@ -530,6 +530,7 @@ Settings:
         Destructive pressed: Натиснута небезпечна дія
         Text and icons on destructive actions: Текст і піктограми небезпечних дій
   Player Settings:
+    Show DLNA Cast Button: "Показувати кнопку трансляції DLNA"
     Skip Unavailable Playlist Videos: "Пропускати недоступні відео в списках відтворення"
     Lights Off: Вимкнути світло
     Show Lights Off Toggle: Показувати перемикач вимкнення світла

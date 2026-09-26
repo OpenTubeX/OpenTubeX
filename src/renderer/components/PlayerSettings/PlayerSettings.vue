@@ -54,6 +54,14 @@
           @change="updateEnableSkipSilenceByDefault"
         />
         <FtToggleSwitch
+          v-if="USING_ELECTRON"
+          :label="t('Settings.Player Settings.Show DLNA Cast Button')"
+          :compact="true"
+          :default-value="showDlnaCastButton"
+          setting-key="showDlnaCastButton"
+          @change="store.dispatch('updateShowDlnaCastButton', $event)"
+        />
+        <FtToggleSwitch
           :label="t('Settings.Player Settings.Enable Video Zoom')"
           :compact="true"
           :default-value="enableVideoZoom"
@@ -712,6 +720,7 @@ function updateRememberVolume(value) {
 const showLightsOffToggle = computed(() => store.getters.getShowLightsOffToggle)
 
 const showSkipSilenceButton = computed(() => store.getters.getShowSkipSilenceButton)
+const showDlnaCastButton = computed(() => store.getters.getShowDlnaCastButton)
 
 /**
  * @param {boolean} value

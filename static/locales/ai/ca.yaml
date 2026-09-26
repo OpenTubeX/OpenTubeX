@@ -743,6 +743,7 @@ Settings:
       Everforest Light Blue: Everforest Light Blue
       Everforest Light Purple: Everforest Light Purple
   Player Settings:
+    Show DLNA Cast Button: "Mostra el botó de transmissió DLNA"
     Skip Unavailable Playlist Videos: "Omet els vídeos no disponibles de les llistes de reproducció"
     Lights Off: Llums apagats
     Show Lights Off Toggle: Mostra el commutador per apagar els llums
