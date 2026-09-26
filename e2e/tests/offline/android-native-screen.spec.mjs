@@ -1760,6 +1760,47 @@ for (const uiScale of [100, 125]) {
 }
 
 for (const uiScale of [100, 125]) {
+  test.describe(`zoomed native mini player at ${uiScale}% UI scale`, () => {
+    test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, uiScale } } })
+    test('keeps video inside its controls frame', async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      await openMockedVideo(page)
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateScrollMiniPlayerEnabled', true))
+      await openNativeScreen(page, false)
+      const player = page.locator('.ftVideoPlayer')
+      await player.locator('video').evaluate(video => {
+        video.classList.add('nativePlayer')
+        video.style.transform = 'scale(1.6) translate(22%, 0)'
+      })
+      await expect.poll(() => player.evaluate(element =>
+        element.querySelector('video').getBoundingClientRect().width / element.getBoundingClientRect().width
+      )).toBeGreaterThan(1.5)
+      await player.evaluate(element => window.scrollTo(0, scrollY + element.getBoundingClientRect().bottom + 200))
+      await expect(player).toHaveClass(/scrollMiniPlayer/)
+      await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+      const geometry = await player.evaluate(element => {
+        const frame = element.getBoundingClientRect()
+        const video = element.querySelector('video').getBoundingClientRect()
+        const controls = element.querySelector('.scrollMiniPlayerControls').getBoundingClientRect()
+        const pause = element.querySelector('.scrollMiniPlayPause').getBoundingClientRect()
+        return { frame, video, controls, pause, native: window.nativeLayoutTest }
+      })
+      expect(geometry.video.x).toBeCloseTo(geometry.frame.x, 0)
+      expect(geometry.video.y).toBeCloseTo(geometry.frame.y, 0)
+      expect(geometry.video.width).toBeCloseTo(geometry.frame.width, 0)
+      expect(geometry.video.height).toBeCloseTo(geometry.frame.height, 0)
+      expect(geometry.controls.width).toBeCloseTo(geometry.frame.width, 0)
+      expect(geometry.pause.x + geometry.pause.width / 2).toBeCloseTo(geometry.frame.x + geometry.frame.width / 2, 0)
+      expect(geometry.native.x).toBeCloseTo(geometry.frame.x, 0)
+      expect(geometry.native.y).toBeCloseTo(geometry.frame.y, 0)
+      expect(geometry.native.width).toBeCloseTo(geometry.frame.width, 0)
+      expect(geometry.native.height).toBeCloseTo(geometry.frame.height, 0)
+      await page.evaluate(() => window.nativeScreenTest.destroy())
+    })
+  })
+}
+
+for (const uiScale of [100, 125]) {
   test.describe(`mini-player touch target at ${uiScale}%`, () => {
     test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, uiScale, ambientMode: false } } })
     test('touch resizing has a larger target without jumping at the grab point', async ({ app, page }) => {
