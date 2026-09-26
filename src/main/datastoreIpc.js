@@ -42,6 +42,13 @@ function isIdArray(value) {
 }
 
 /** @param {unknown} value */
+function isCalendarDate(value) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const date = new Date(value)
+  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value
+}
+
+/** @param {unknown} value */
 function isHistoryRecord(value) {
   return isRecord(value) && isId(value.videoId)
 }
@@ -82,7 +89,7 @@ const actionDataValidators = {
     [DBActions.WATCH_STATS.MERGE_BACKUP]: data => isRecord(data) && Array.isArray(data.records) &&
       (data.adjustment === null || isRecord(data.adjustment)),
     [DBActions.WATCH_STATS.ADD_WATCH_TIME]: data => isRecord(data) &&
-      typeof data.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(data.date) &&
+      isCalendarDate(data.date) &&
       typeof data.seconds === 'number' && Number.isFinite(data.seconds) && data.seconds > 0,
     [DBActions.WATCH_STATS.ADJUST_HISTORICAL_WATCH_TIME]: data => isRecord(data) &&
       Number.isFinite(Number(data.defaultSpeed)) && Number(data.defaultSpeed) > 0 &&
