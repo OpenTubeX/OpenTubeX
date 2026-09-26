@@ -563,9 +563,9 @@ const showSettingsShortcut = computed(() => (
 ))
 
 const quickSettings = computed(() => store.getters.getQuickSettings)
-const quickSettingCatalog = computed(() => createQuickSettingCatalog(t, USING_ELECTRON, process.env.IS_CAPACITOR))
+const quickSettingCatalog = computed(() => createQuickSettingCatalog(t, USING_ELECTRON, process.env.IS_CAPACITOR, process.env.IS_IOS))
 const quickSettingSectionDefinitions = computed(() => new Map(
-  createQuickSettingSections(t, USING_ELECTRON, process.env.IS_CAPACITOR).map(section => [section.id, section])
+  createQuickSettingSections(t, USING_ELECTRON, process.env.IS_CAPACITOR, process.env.IS_IOS).map(section => [section.id, section])
 ))
 const orderedQuickSettingSections = computed(() => {
   const catalogById = new Map(quickSettingCatalog.value.map(setting => [setting.id, setting]))
