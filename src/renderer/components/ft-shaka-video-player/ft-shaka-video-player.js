@@ -6521,6 +6521,9 @@ export default defineComponent({
     }
 
     function handleSeeked() {
+      if (video.value?.ended) {
+        syncPlayPauseControlIcons()
+      }
       checkAbRepeatBoundary(false)
       emit('seeked', video.value?.currentTime ?? 0)
     }

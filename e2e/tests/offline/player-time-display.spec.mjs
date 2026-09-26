@@ -94,6 +94,23 @@ test('play and pause icons morph in both player themes', async ({ app, page }) =
   }
 })
 
+test('paused video shows replay after seeking to the end with End', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  await expect(video).toHaveJSProperty('paused', true)
+
+  await page.keyboard.press('End')
+
+  const playButton = page.locator('.ftVideoPlayer .shaka-controls-button-panel > .shaka-play-button')
+  await expect(video).toHaveJSProperty('ended', true)
+  await expect(playButton).toHaveAttribute('data-ft-play-pause-state', 'replay')
+
+  await playButton.click({ force: true })
+  await expect(video).toHaveJSProperty('paused', false)
+  await expect(playButton).toHaveAttribute('data-ft-play-pause-state', 'pause')
+})
+
 test('player controls share pill surfaces and the time display toggles together', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
