@@ -114,6 +114,21 @@ test('casts a complete MP4 stream to a discovered DLNA device and returns to loc
   })
 
   const castButton = page.getByRole('button', { name: 'Cast to a DLNA device' })
+  await expect(castButton).toHaveCount(0)
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowDlnaCastButton', true))
+  await expect(castButton).toBeVisible()
+  await expect(page.locator('.videoOptions .dlnaCastControl')).toBeVisible()
+  await expect(page.locator('.ftVideoPlayer .dlnaCastControl')).toHaveCount(0)
+  await expect(castButton.locator('[data-icon="cast"]')).toBeVisible()
+  const playerBottom = await page.locator('.ftVideoPlayer').evaluate(element => element.getBoundingClientRect().bottom)
+  const castTop = await castButton.evaluate(element => element.getBoundingClientRect().top)
+  expect(castTop).toBeGreaterThan(playerBottom)
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', 125))
+  await expect.poll(async () => {
+    const videoBottom = await page.locator('.ftVideoPlayer').evaluate(element => element.getBoundingClientRect().bottom)
+    const buttonTop = await castButton.evaluate(element => element.getBoundingClientRect().top)
+    return buttonTop > videoBottom
+  }).toBe(true)
   await castButton.click()
   await page.getByRole('option', { name: 'Living room TV' }).click()
   await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
@@ -134,6 +149,25 @@ test('casts a complete MP4 stream to a discovered DLNA device and returns to loc
   await castButton.click()
   await page.getByRole('option', { name: 'Stop casting' }).click()
   await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
+})
+
+test('hides the DLNA action while the playback source is pending', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const view = await watchViewHandle(page)
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowDlnaCastButton', true))
+  const castButton = page.getByRole('button', { name: 'Cast to a DLNA device' })
+  await expect(castButton).toBeVisible()
+
+  await view.evaluate(async view => {
+    view.ytDlpStreamsPending = true
+    await view.$nextTick()
+  })
+  await expect(page.locator('.ftVideoPlayer')).toHaveCount(0)
+  await expect(castButton).toHaveCount(0)
+
+  await view.evaluate(view => { view.ytDlpStreamsPending = false })
+  await expect(castButton).toBeVisible()
 })
 
 test.describe('desktop quick playback speed bar', () => {
@@ -1583,7 +1617,7 @@ test('shows the restricted playback setup hint and loads yt-dlp subtitles after 
   await moreOptions.click()
   await player.locator('.shaka-overflow-menu').getByRole('button', { name: 'Captions' }).click()
   await expect(player).toBeVisible()
-  await expect(player.locator('.dlnaCastControl')).toBeHidden()
+  await expect(player.locator('.dlnaCastControl')).toHaveCount(0)
   await player.locator('.shaka-text-languages').getByRole('button', { name: 'Auto-translate' }).click()
   await player.locator('.ft-caption-translation-options').getByRole('button', { name: 'German' }).click()
   await expect.poll(() => player.evaluate(element => {

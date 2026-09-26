@@ -526,6 +526,7 @@ Settings:
         Destructive pressed: Ekintza suntsitzailea sakatzean
         Text and icons on destructive actions: Ekintza suntsitzaileetako testua eta ikonoak
   Player Settings:
+    Show DLNA Cast Button: "Erakutsi DLNA igorpen-botoia"
     Skip Unavailable Playlist Videos: "Saltatu erabilgarri ez dauden bideoak erreprodukzio-zerrendetan"
     Lights Off: Argiak itzali
     Show Lights Off Toggle: Erakutsi argiak itzaltzeko etengailua

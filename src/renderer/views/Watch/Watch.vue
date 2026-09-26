@@ -200,17 +200,6 @@
           @toggle-shorts-metadata="toggleShortsMetadata"
           @open-phone-panel="openShortsPhonePanel"
         >
-          <template
-            v-if="isElectron && !customShortsPlayerActive && !localFilePlayback"
-            #dlna-cast
-          >
-            <WatchDlnaCast
-              :key="videoId"
-              :formats="legacyFormats"
-              :title="videoTitle"
-              :get-player="() => $refs.player"
-            />
-          </template>
           <template #shorts-fullscreen-metadata>
             <div class="shortsFullscreenMetadataContent">
               <FtPaidPromotionBadge
@@ -862,7 +851,19 @@
           @toggle-sponsorblock-info="toggleSponsorBlockInfo"
           @toggle-transcript="toggleTranscript"
           @toggle-live-chat="toggleLiveChat"
-        />
+        >
+          <template
+            v-if="playerReady && isElectron && $store.getters.getShowDlnaCastButton && !customShortsPlayerActive && !localFilePlayback && !isUpcoming && !errorMessage"
+            #cast-action
+          >
+            <WatchDlnaCast
+              :key="videoId"
+              :formats="legacyFormats"
+              :title="videoTitle"
+              :get-player="() => $refs.player"
+            />
+          </template>
+        </watch-video-info>
         <button
           v-if="phonePanelsEnabled && $store.getters.getNextQueuedVideo && !isLoading"
           type="button"

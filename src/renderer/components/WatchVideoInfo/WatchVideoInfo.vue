@@ -176,6 +176,7 @@
       </div>
       <div class="videoOptions">
         <span class="videoOptionsMobileRow">
+          <slot name="cast-action" />
           <FtIconButton
             v-if="showPlaylists && !isUpcoming && !hidePlaylistActions"
             :title="t('User Playlists.Add to Playlist')"

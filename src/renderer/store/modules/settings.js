@@ -528,6 +528,7 @@ const state = {
   enableVideoZoom: true,
   showLightsOffToggle: false,
   showSkipSilenceButton: false,
+  showDlnaCastButton: false,
   enableSkipSilenceByDefault: false,
   useVoiceOverTranslation: false,
   voiceOverTranslationPrepareInBackground: false,

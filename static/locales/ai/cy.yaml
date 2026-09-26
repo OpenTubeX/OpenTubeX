@@ -528,6 +528,7 @@ Settings:
         Destructive pressed: Gweithred ddinistriol wedi'i gwasgu
         Text and icons on destructive actions: Testun ac eiconau ar weithredoedd dinistriol
   Player Settings:
+    Show DLNA Cast Button: "Dangos botwm castio DLNA"
     Skip Unavailable Playlist Videos: "Hepgor fideos nad ydynt ar gael mewn rhestri chwarae"
     Lights Off: Diffodd y goleuadau
     Show Lights Off Toggle: Dangos togl diffodd y goleuadau

@@ -528,6 +528,7 @@ Settings:
         Destructive pressed: Nedtryckt destruktiv åtgärd
         Text and icons on destructive actions: Text och ikoner på destruktiva åtgärder
   Player Settings:
+    Show DLNA Cast Button: "Visa DLNA-castknapp"
     Skip Unavailable Playlist Videos: "Hoppa över otillgängliga videor i spellistor"
     Lights Off: Släck ljuset
     Show Lights Off Toggle: Visa reglage för att släcka ljuset

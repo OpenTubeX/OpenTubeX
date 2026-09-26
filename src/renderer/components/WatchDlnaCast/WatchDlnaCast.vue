@@ -3,11 +3,11 @@
     ref="button"
     class="dlnaCastControl shaka-no-propagation"
     :title="castId ? `${t('Video.Player.DLNA.Cast')} (${deviceName})` : t('Video.Player.DLNA.Cast')"
-    :icon="['fas', 'devices']"
+    :icon="['fas', 'cast']"
     :aria-pressed="Boolean(castId)"
     :dropdown-options="options"
     :force-dropdown="true"
-    dropdown-position-x="left"
+    dropdown-position-x="right"
     @dropdown-open="refreshDevices"
     @click="handleChoice"
   />
@@ -56,7 +56,7 @@ const options = computed(() => {
     items.push(...devices.value.map(device => ({
       label: device.name,
       value: device.id,
-      icon: ['fas', 'devices'],
+      icon: ['fas', 'cast'],
       active: device.name === deviceName.value && Boolean(castId.value),
       disabled: busy.value || Boolean(castId.value)
     })))
@@ -75,7 +75,7 @@ async function refreshDevices() {
     const results = await window.ftElectron.dlna.discover()
     if (!disposed) devices.value = results
   } catch {
-    if (!disposed) showToast({ message: t('Video.Player.DLNA.Error'), icon: ['fas', 'devices'] })
+    if (!disposed) showToast({ message: t('Video.Player.DLNA.Error'), icon: ['fas', 'cast'] })
   } finally {
     loading.value = false
   }
@@ -128,7 +128,7 @@ async function handleChoice(choice) {
   } catch (error) {
     if (!disposed) {
       console.error('DLNA casting failed', error)
-      showToast({ message: t('Video.Player.DLNA.Error'), icon: ['fas', 'devices'] })
+      showToast({ message: t('Video.Player.DLNA.Error'), icon: ['fas', 'cast'] })
     }
   } finally {
     busy.value = false
@@ -140,5 +140,3 @@ onBeforeUnmount(() => {
   stopCasting(false).catch(console.error)
 })
 </script>
-
-<style scoped src="./WatchDlnaCast.scss" lang="scss" />

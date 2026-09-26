@@ -526,6 +526,7 @@ Settings:
         Destructive pressed: 危險操作的按下狀態
         Text and icons on destructive actions: 危險操作上的文字與圖示
   Player Settings:
+    Show DLNA Cast Button: "顯示 DLNA 投放按鈕"
     Skip Unavailable Playlist Videos: "略過播放清單中無法播放的影片"
     Lights Off: 關燈
     Show Lights Off Toggle: 顯示關燈開關

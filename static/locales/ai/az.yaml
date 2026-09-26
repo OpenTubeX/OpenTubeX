@@ -528,6 +528,7 @@ Settings:
         Destructive pressed: Silinmə elementi basıldıqda
         Text and icons on destructive actions: Silinmə əməliyyatlarında mətn və nişanlar
   Player Settings:
+    Show DLNA Cast Button: "DLNA yayım düyməsini göstər"
     Skip Unavailable Playlist Videos: "Pleylistdə əlçatan olmayan videoları keç"
     Lights Off: İşıqları söndür
     Show Lights Off Toggle: İşıqları söndürmə keçidini göstər

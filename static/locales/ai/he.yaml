@@ -530,6 +530,7 @@ Settings:
         Destructive pressed: פעולה הרסנית בלחיצה
         Text and icons on destructive actions: טקסט וסמלים בפעולות הרסניות
   Player Settings:
+    Show DLNA Cast Button: "הצגת לחצן שידור DLNA"
     Skip Unavailable Playlist Videos: "דילוג על סרטונים לא זמינים ברשימות השמעה"
     Lights Off: כיבוי אורות
     Show Lights Off Toggle: הצגת מתג לכיבוי האורות

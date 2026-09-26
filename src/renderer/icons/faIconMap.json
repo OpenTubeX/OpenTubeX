@@ -75,6 +75,10 @@
     "ri": "calendar-line",
     "material": "calendar-month-outline"
   },
+  "cast": {
+    "ri": "cast-line",
+    "material": "cast-outline-rounded"
+  },
   "chart-line": {
     "ri": "line-chart-line",
     "material": "show-chart-rounded"

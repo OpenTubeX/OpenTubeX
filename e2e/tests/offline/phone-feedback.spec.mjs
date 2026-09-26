@@ -412,6 +412,7 @@ test('comments fill the card width and keep their scrollbar at the panel edge', 
 })
 
 test('phone player menus have a fixed close control and equal centered tiles', async ({ app, page }) => {
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowDlnaCastButton', true))
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   await setWindowSize(app, page, { width: 1000, height: 480 })
@@ -421,7 +422,7 @@ test('phone player menus have a fixed close control and equal centered tiles', a
     const dialog = page.locator('.phonePlayerOptions[open]')
     const close = dialog.getByRole('button', { name: 'Close', exact: true })
     await expect(close).toBeVisible()
-    await expect(page.locator('.dlnaCastControl')).toBeHidden()
+    await expect(page.locator('.videoOptions .dlnaCastControl')).toBeVisible()
     if (grid) {
       const sizes = await dialog.locator('.shaka-overflow-menu > button:visible').evaluateAll(buttons => buttons.map(el => el.getBoundingClientRect().toJSON()))
       expect(Math.max(...sizes.map(x => x.height)) - Math.min(...sizes.map(x => x.height))).toBeLessThan(2)

@@ -526,6 +526,7 @@ Settings:
         Destructive pressed: Destruktivní akce při stisknutí
         Text and icons on destructive actions: Text a ikony destruktivních akcí
   Player Settings:
+    Show DLNA Cast Button: "Zobrazit tlačítko vysílání DLNA"
     Skip Unavailable Playlist Videos: "Přeskakovat nedostupná videa v playlistech"
     Lights Off: Zhasnout
     Show Lights Off Toggle: Zobrazit přepínač zhasnutí

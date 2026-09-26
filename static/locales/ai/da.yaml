@@ -541,6 +541,7 @@ Settings:
       Catppuccin Latte Mauve: Catppuccin Latte Mauve
       Catppuccin Latte Red: Catppuccin Latte Red
   Player Settings:
+    Show DLNA Cast Button: "Vis DLNA-castknap"
     Skip Unavailable Playlist Videos: "Spring utilgængelige videoer over i afspilningslister"
     Lights Off: Sluk lyset
     Show Lights Off Toggle: Vis kontakt til at slukke lyset

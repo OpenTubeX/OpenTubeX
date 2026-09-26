@@ -530,6 +530,7 @@ Settings:
         Destructive pressed: Thao tác xóa khi nhấn
         Text and icons on destructive actions: Chữ và biểu tượng trên thao tác xóa
   Player Settings:
+    Show DLNA Cast Button: "Hiển thị nút truyền DLNA"
     Skip Unavailable Playlist Videos: "Bỏ qua video không khả dụng trong danh sách phát"
     Lights Off: Tắt đèn
     Show Lights Off Toggle: Hiển thị nút bật/tắt đèn
