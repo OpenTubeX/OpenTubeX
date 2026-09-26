@@ -22,6 +22,13 @@
       :route="resolvedRoute"
       :presented="isPresented"
     />
+    <div
+      v-if="isCapacitor && isSwipeTarget && !initialized"
+      class="pageSwipePlaceholder"
+    >
+      <CapacitorTabPreview :tab="tab" />
+      <span dir="auto">{{ formatTabTitle(tab.contentTitle || tab.title || tab.route.fullPath) }}</span>
+    </div>
     <KeepAlive
       include="AboutRoute"
       :max="1"
@@ -51,6 +58,7 @@ import {
 } from 'vue'
 import { routeLocationKey, routerKey } from 'vue-router'
 import TabWatchContent from './TabWatchContent.vue'
+import CapacitorTabPreview from '../TabBar/CapacitorTabPreview.vue'
 
 import store from '../../store/index'
 import { resolveRouteComponent } from '../../router/index'
@@ -59,6 +67,7 @@ import { getCapacitorTabService } from '../../tabs/CapacitorTabService'
 import { tabLifecycleService } from '../../tabs/TabLifecycleService'
 import { tabRuntimeRegistry } from '../../tabs/TabRuntimeRegistry'
 import { tabIdKey, tabLifecycleKey, tabPresentedKey } from '../../tabs/TabContext'
+import { formatTabTitle } from '../../tabs/tabTitle'
 
 const TAB_LOADER_SELECTOR = '[data-tab-loading-indicator]'
 const TAB_LOADER_LOADING_SOURCE = 'loader'
@@ -347,6 +356,26 @@ function cancelLoaderSettle() {
 .pageSwipeFrom,
 .pageSwipeTo {
   background-color: var(--bg-color);
+}
+
+.pageSwipePlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-block-size: calc(100dvh - var(--top-nav-height) - var(--app-safe-area-inset-top) - var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+  gap: 16px;
+  padding: 24px;
+  color: var(--primary-text-color);
+  font-size: 20px;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.pageSwipePlaceholder :deep(.capacitorTabPreview) {
+  max-inline-size: 320px;
+  border-radius: calc(12px * var(--ui-roundness));
 }
 
 .pageSwipeFrom {
