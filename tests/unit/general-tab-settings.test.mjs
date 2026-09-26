@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
-import vm from 'node:vm'
 import { compile, createSSRApp, h } from 'vue'
 import { renderToString } from 'vue/server-renderer'
+import { initializeApplicationData } from '../../src/renderer/helpers/appDataInitialization.js'
 
 const source = await readFile(new URL('../../src/renderer/components/GeneralSettings/GeneralSettings.vue', import.meta.url), 'utf8')
 const keys = ['landingPage', 'newTabPosition', 'tabCloseFocus', 'startupBehavior']
@@ -40,34 +40,25 @@ for (const [platform, USING_ELECTRON, IS_CAPACITOR] of [
 }
 
 test('mobile startup waits for saved settings before restoring tabs', async () => {
-  const app = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
-  const start = app.indexOf('  let tabsReady = Promise.resolve()')
-  const initialization = app.slice(start, app.indexOf('  const customThemesReady =', start))
   let finishSettings
   const settingsReady = new Promise(resolve => { finishSettings = resolve })
   let restored = false
   const connectivityChoices = []
-  const { tabsReady } = vm.runInNewContext(`${initialization}; ({ tabsReady })`, {
-    isElectron: false,
-    isCapacitor: true,
-    route: {},
-    ytDlp: { addYtDlpBinaryUpdatedListener: () => {} },
-    invalidateAllYtDlpPlaybackSources: () => {},
+  const { startupReady } = initializeApplicationData({
     store: {
-      dispatch: () => settingsReady,
-      getters: { getInternetConnectivityChecks: false },
-      watch(getter, callback) { callback(getter()); return () => {} },
+      dispatch: action => action === 'grabUserSettings' ? settingsReady : Promise.resolve({}),
     },
-    initializeNetworkRecovery: () => ({ setInternetChecksEnabled: value => connectivityChoices.push(value) }),
-    initializeAndroidYtDlp: () => {},
-    initializeCapacitorTabPreviews: () => {},
-    capacitorTabService: { initialize: async () => { restored = true } },
+    loadTabs: ready => ready.then(() => { restored = true }),
+    afterSettings: async () => { connectivityChoices.push(false) },
+    loadThemes: async () => [],
+    preloadInitialRoute: async () => {},
+    allChannelsLabel: 'All Channels',
   })
   await Promise.resolve()
   assert.equal(restored, false)
   assert.deepEqual(connectivityChoices, [])
   finishSettings({})
-  await tabsReady
+  await startupReady
   assert.equal(restored, true)
   assert.deepEqual(connectivityChoices, [false])
 })

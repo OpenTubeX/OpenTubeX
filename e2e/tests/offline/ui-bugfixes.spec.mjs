@@ -1107,10 +1107,9 @@ test('keeps Android player notices and end cards clear of visible controls', asy
   await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
   await page.evaluate(async () => {
     document.documentElement.style.setProperty('--safe-area-inset-bottom', '24px')
-    const app = document.querySelector('.app')
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     await store.dispatch('updateShowFullscreenActionsWhenPaused', true)
-    app.classList.add('capacitorTabs')
+    document.body.classList.add('capacitorTabs')
   })
   const watchComponent = await page.evaluateHandle(findWatchComponent)
   await page.locator('.full-window-button').first().dispatchEvent('click')
@@ -1375,7 +1374,7 @@ test('keeps Android player notices and end cards clear of visible controls', asy
   await expect(notice).toHaveCSS('bottom', /.+/)
   await expect.poll(noticeBottom).toBeLessThan(raisedNoticeBottom - 40)
 
-  await page.locator('.app').evaluate(element => element.classList.remove('capacitorTabs'))
+  await page.locator('body').evaluate(element => element.classList.remove('capacitorTabs'))
   await watchComponent.evaluate(async (component) => {
     component.proxy.$refs.player.$.setupState.fullWindowEnabled = true
     await component.proxy.$nextTick()

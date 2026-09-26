@@ -9,10 +9,12 @@ const { parseLocalSubscriberCount, parseLocalTextRuns } = createLocalFeedParsers
 import { parseLocalVideoSummary } from '../../src/renderer/helpers/video-summary.js'
 import { parseLocalVideoGames } from '../../src/renderer/helpers/video-games.js'
 import { parseLocalVideoCollaborators } from '../../src/renderer/helpers/video-collaborators.js'
+import { mapLocalWatchVideo } from '../../src/renderer/helpers/api/watchVideoModel.js'
 
 const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
-const start = source.indexOf('    getVideoInformationLocal:')
-const end = source.indexOf('\n    },', start)
+const metadataSource = await readFile(new URL('../../src/renderer/views/Watch/watchVideoMetadata.js', import.meta.url), 'utf8')
+const start = metadataSource.indexOf('  getVideoInformationLocal:')
+const end = metadataSource.indexOf('\n  },', start)
 const chapterStart = source.indexOf('    extractChaptersFromDescription:')
 const chapterEnd = source.indexOf('\n    },', chapterStart)
 const extractChaptersFromDescription = compileFunction(`return ({${source.slice(chapterStart, chapterEnd)}\n} }).extractChaptersFromDescription`)()
@@ -23,7 +25,13 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
   const dependencies = {
     initializeNetworkRecovery: () => ({ ready: Promise.resolve() }),
     getConnectionState: () => 'online',
-    getLocalVideoInfo: async () => ({ info, paidPromotionDurationMs: null }),
+    videoApi: {
+      getWatchVideoInformation: async (videoId, provider, settings) => {
+        const source = { info, paidPromotionDurationMs: null }
+        return { provider, metadata: mapLocalWatchVideo(source, settings), source }
+      },
+      getFallbackProvider: () => null,
+    },
     getOembedTitle: options.getOembedTitle ?? (async () => null),
     areLocalCommentsDisabled: () => true,
     parseLocalEndscreen: () => [],
@@ -37,7 +45,7 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
     formatNumber: String,
     console: { error: error => errors.push(String(error)) },
   }
-  const load = compileFunction(`return ({${source.slice(start, end)}\n} }).getVideoInformationLocal`, Object.keys(dependencies))(...Object.values(dependencies))
+  const load = compileFunction(`return ({${metadataSource.slice(start, end)}\n} }).getVideoInformationLocal`, Object.keys(dependencies))(...Object.values(dependencies))
   let completed = false
   const watch = {
     restrictedPlaybackError: null,

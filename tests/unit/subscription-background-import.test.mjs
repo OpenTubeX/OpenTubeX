@@ -4,10 +4,12 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 const source = readFileSync(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
-function section(start, end) {
-  let offset = source.indexOf(start)
-  if (source.slice(offset - 6, offset) === 'async ') offset -= 6
-  return source.slice(offset, source.indexOf(end, offset))
+const backgroundSource = readFileSync(new URL('../../src/renderer/helpers/subscriptionBackgroundReconciler.js', import.meta.url), 'utf8')
+const schedulerSource = readFileSync(new URL('../../src/renderer/helpers/subscriptionAutoRefreshScheduler.js', import.meta.url), 'utf8')
+function section(start, end, content = source) {
+  let offset = content.indexOf(start)
+  if (content.slice(offset - 6, offset) === 'async ') offset -= 6
+  return content.slice(offset, content.indexOf(end, offset))
 }
 
 test('concurrent background imports wait for the existing cache import', async () => {
@@ -15,10 +17,10 @@ test('concurrent background imports wait for the existing cache import', async (
   let requests = 0
   const blocked = new Promise(resolve => { finish = resolve })
   const context = vm.createContext({
-    console, isElectron: false,
+    console, locks: null, store: {},
     getNextAndroidSubscriptionRefreshResult: async () => { requests++; await blocked; return null }
   })
-  vm.runInContext(section('let reconcilingAndroidSubscriptionRefreshResults', 'async function reconcileAndroidSubscriptionRefreshChannelResult'), context)
+  vm.runInContext(section('let reconcilingAndroidSubscriptionRefreshResults', 'async function reconcileAndroidSubscriptionRefreshChannelResult', backgroundSource), context)
   const first = context.reconcileAndroidSubscriptionRefreshResults()
   let secondFinished = false
   const second = context.reconcileAndroidSubscriptionRefreshResults().then(() => { secondFinished = true })
@@ -32,15 +34,14 @@ test('concurrent background imports wait for the existing cache import', async (
 test('restoring an Electron window imports completed background results', async () => {
   const calls = []
   const context = vm.createContext({
-    isElectron: true,
-    isCapacitor: false,
+    canReconcileBackground: true,
     subscriptionCacheReady: { value: true },
     isAppHidden: () => false,
     synchronizeSubscriptionRefreshInProgress: () => {},
     reconcileAndroidSubscriptionRefreshResults: async () => { calls.push('import') },
     refreshOverdueSubscriptionFeeds: () => { calls.push('schedule') }
   })
-  vm.runInContext(section('function handleSubscriptionAutoRefreshVisibilityChange', 'async function synchronizeSubscriptionRefreshInProgress'), context)
+  vm.runInContext(section('function handleSubscriptionAutoRefreshVisibilityChange', 'async function synchronizeSubscriptionRefreshInProgress', schedulerSource), context)
   await context.handleSubscriptionAutoRefreshVisibilityChange()
   assert.deepEqual(calls, ['import', 'schedule'])
 })
@@ -50,8 +51,8 @@ test('an imported background completion prevents an unnecessary foreground refre
   let deadline = 0
   const context = vm.createContext({
     console, process: { env: { IS_ELECTRON: true } }, navigator: { onLine: true },
-    window: { ftElectron: { tabs: { isActive: async () => true } } },
-    isElectron: true, isCapacitor: false,
+    subscriptionRefreshPlatform: { isActive: async () => true },
+    canReconcileBackground: true,
     processingSubscriptionAutoRefreshes: false,
     pendingSubscriptionAutoRefreshes: [{ tab: 'videos', profileId: 'all', key: 'all:videos' }],
     pendingSubscriptionAutoRefreshKeys: new Set(['all:videos']),
@@ -65,7 +66,7 @@ test('an imported background completion prevents an unnecessary foreground refre
     getSubscriptionTabRefreshHandler: () => async () => { calls.push('refresh'); return [] },
     t: value => value
   })
-  vm.runInContext(section('async function processPendingSubscriptionAutoRefreshes', '/**\n * @param {\'videos\' | \'shorts\' | \'live\' | \'posts\'} tab\n * @param {string} profileId\n */\nfunction scheduleSubscriptionTabAutoRefreshLockRetry'), context)
+  vm.runInContext(section('async function processPendingSubscriptionAutoRefreshes', 'function scheduleSubscriptionTabAutoRefreshLockRetry', schedulerSource), context)
   await context.processPendingSubscriptionAutoRefreshes()
   assert.deepEqual(calls, ['schedule'])
 })
@@ -88,7 +89,7 @@ test('background playlist imports restore missing authors and keep explicit byli
     enrichSubscriptionShortDates: async entries => entries.map(entry => ({ ...entry, published: 123456 })),
     reconcileFetchedSubscriptionEntries: entries => entries
   })
-  vm.runInContext(section('async function reconcileAndroidSubscriptionRefreshChannelResult', 'function getAndroidSubscriptionCacheConfig'), context)
+  vm.runInContext(section('async function reconcileAndroidSubscriptionRefreshChannelResult', 'function getAndroidSubscriptionCacheConfig', backgroundSource), context)
   await context.reconcileAndroidSubscriptionRefreshChannelResult({
     channelId: 'UCchannel', feedType: 'shorts', timestamp: Date.now(),
     payload: { backgroundFormat: 'entries', entries: [
@@ -122,10 +123,10 @@ test('separate Electron renderers serialize background result imports', async ()
   } }
   const contexts = [0, 1].map(() => {
     const context = vm.createContext({
-      console, isElectron: true, navigator: { locks },
+      console, locks, store: {},
       getNextAndroidSubscriptionRefreshResult: async () => { requests++; await blocked; return null }
     })
-    vm.runInContext(section('let reconcilingAndroidSubscriptionRefreshResults', 'async function reconcileAndroidSubscriptionRefreshChannelResult'), context)
+    vm.runInContext(section('let reconcilingAndroidSubscriptionRefreshResults', 'async function reconcileAndroidSubscriptionRefreshChannelResult', backgroundSource), context)
     return context
   })
   const imports = contexts.map(context => context.reconcileAndroidSubscriptionRefreshResults())

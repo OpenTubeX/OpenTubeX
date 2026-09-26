@@ -1176,7 +1176,7 @@ test.describe('watch page', () => {
     await expect(title).toHaveAttribute('aria-expanded', 'false')
   })
 
-  test('full-window mode locks the page scroll position', async ({ page }) => {
+  test('full-window mode locks the page scroll position', async ({ app, page }) => {
     await openVideo(page)
     await expect(page.locator('.videoLayout')).toBeVisible()
 
@@ -1217,6 +1217,13 @@ test.describe('watch page', () => {
 
     await page.keyboard.press('s')
     await expect(page.locator('.ftVideoPlayer')).toHaveClass(/fullWindow/)
+    const browserWindow = await app.electronApp.browserWindow(page)
+    await browserWindow.evaluate(window => window.focus())
+    await expect.poll(() => browserWindow.evaluate(window => window.isFocused())).toBe(true)
+    await page.locator('.ftVideoPlayer video').evaluate(async video => {
+      video.currentTime = 0
+      await video.play()
+    })
     await page.locator('.ftVideoPlayer').hover()
     await page.getByRole('button', { name: /enter picture-in-picture/i }).click()
     await expect.poll(() => page.evaluate(() => document.pictureInPictureElement !== null)).toBe(true)

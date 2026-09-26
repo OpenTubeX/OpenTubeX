@@ -4,6 +4,7 @@ import path from 'node:path'
 import { test, expect, expectScrollAtRenderedEnd, goToSettingsSection, latestSettings, setWindowSize } from '../../helpers/app.mjs'
 import { DEFAULT_QUICK_SETTINGS } from '../../../src/renderer/helpers/quickSettings.js'
 import { DEFAULT_CUSTOM_THEME } from '../../../src/customTheme.js'
+import { IpcChannels } from '../../../src/constants.js'
 
 const ALL_QUICK_SETTINGS = [
   ...DEFAULT_QUICK_SETTINGS,
@@ -753,6 +754,13 @@ test.describe('customizable quick settings', () => {
     await iconPack.click()
     await page.getByRole('option', { name: 'Remix Icon' }).click()
     await expect(iconPack).toContainText('Remix Icon')
+    // Keep Playwright's connection intact while checking the selected proxy.
+    await app.electronApp.evaluate(({ ipcMain, session }, channel) => {
+      ipcMain.removeAllListeners(channel)
+      ipcMain.on(channel, (_event, url) => {
+        session.defaultSession.setProxy({ proxyRules: url })
+      })
+    }, IpcChannels.ENABLE_PROXY)
     await menu.locator('label.switch-label').filter({ hasText: 'Enable Tor / Proxy' }).click()
     await expect.poll(() => app.electronApp.evaluate(async ({ BrowserWindow }) => {
       return BrowserWindow.getAllWindows()[0].webContents.session.resolveProxy('https://example.com')

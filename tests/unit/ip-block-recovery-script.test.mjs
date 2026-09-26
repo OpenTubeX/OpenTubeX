@@ -1,28 +1,25 @@
 import assert from 'node:assert/strict'
 import { EventEmitter } from 'node:events'
-import { readFile, mkdtemp, writeFile, rm, stat } from 'node:fs/promises'
+import { mkdtemp, writeFile, rm, stat } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import cp from 'node:child_process'
 import test from 'node:test'
-import { runInNewContext } from 'node:vm'
-
-const source = await readFile(new URL('../../src/main/index.js', import.meta.url), 'utf8')
-const start = source.indexOf('  async function executeIpBlockRecoveryScript(')
-const end = source.indexOf('  const ipBlockRecoveryScriptCooldownMs', start)
-assert.ok(start > 0 && end > start)
+import { IpcChannels } from '../../src/constants.js'
+import { createIpBlockRecoveryScriptRunner, registerIpBlockRecoveryIpc } from '../../src/main/ipBlockRecoveryIpc.js'
 
 function loadRunner(platform, spawn, fileStat = async () => ({ isFile: () => true })) {
   let savedPath
-  const execute = runInNewContext(`(${source.slice(start, end).trim()})`, {
+  const execute = createIpBlockRecoveryScriptRunner({
     path: platform === 'win32' ? path.win32 : path.posix,
-    process: { platform, env: { SystemRoot: 'C:\\Windows' } },
-    cp: { spawn },
-    asyncFs: { stat: fileStat },
-    baseHandlers: { settings: { _findOne: async (key) => {
+    platform,
+    systemRoot: 'C:\\Windows',
+    spawn,
+    stat: fileStat,
+    settings: { _findOne: async (key) => {
       assert.equal(key, 'videoIpBlockScriptPath')
       return { value: savedPath }
-    } } }
+    } }
   })
   return (scriptPath, configuredPath = scriptPath) => {
     savedPath = configuredPath
@@ -95,4 +92,47 @@ test('only executes the recovery script configured in saved settings', async () 
   assert.equal(calls.length, 0)
   await run('/saved/recovery.sh', '/saved/recovery.sh')
   assert.equal(calls[0].command, '/saved/recovery.sh')
+})
+
+test('recovery IPC shares one active attempt and ignores untrusted callers', async () => {
+  const handlers = new Map()
+  let release
+  let runs = 0
+  const recovery = registerIpBlockRecoveryIpc({
+    ipcMain: { handle: (channel, handler) => handlers.set(channel, handler) },
+    isTrustedUrl: url => url === 'app://bundle/index.html',
+    executeScript: () => { runs += 1; return new Promise(resolve => { release = resolve }) },
+    cooldownMs: 0
+  })
+  const trusted = { senderFrame: { url: 'app://bundle/index.html' } }
+  const untrusted = { senderFrame: { url: 'https://example.com' } }
+  assert.equal(handlers.get(IpcChannels.START_IP_BLOCK_RECOVERY_SCRIPT)(untrusted, '/recover.sh'), false)
+  assert.equal(handlers.get(IpcChannels.START_IP_BLOCK_RECOVERY_SCRIPT)(trusted, '/recover.sh'), true)
+  assert.equal(handlers.get(IpcChannels.START_IP_BLOCK_RECOVERY_SCRIPT)(trusted, '/recover.sh'), false)
+  assert.equal(runs, 1)
+  const pending = handlers.get(IpcChannels.EXECUTE_IP_BLOCK_RECOVERY_SCRIPT)(trusted, '/recover.sh')
+  release({ exitCode: 0 })
+  assert.deepEqual(await pending, { exitCode: 0 })
+  assert.equal(await handlers.get(IpcChannels.WAIT_FOR_IP_BLOCK_RECOVERY_SCRIPT)(trusted), undefined)
+  assert.equal(runs, 1)
+  assert.ok(recovery.getActivePromise())
+})
+
+test('recovery IPC chooses a script file with the platform filter', async () => {
+  const handlers = new Map()
+  let options
+  registerIpBlockRecoveryIpc({
+    ipcMain: { handle: (channel, handler) => handlers.set(channel, handler) },
+    isTrustedUrl: url => url === 'app://bundle/index.html',
+    executeScript: async () => {},
+    app: { getPath: () => '/home/user' },
+    BrowserWindow: { fromWebContents: () => null },
+    dialog: { showOpenDialog: async value => { options = value; return { canceled: false, filePaths: ['/scripts/recover.sh'] } } },
+    platform: 'linux'
+  })
+  const choose = handlers.get(IpcChannels.CHOOSE_IP_BLOCK_RECOVERY_SCRIPT)
+  assert.equal(await choose({ senderFrame: { url: 'https://example.com' } }, '/tmp'), undefined)
+  assert.equal(await choose({ senderFrame: { url: 'app://bundle/index.html' }, sender: {} }), '/scripts/recover.sh')
+  assert.equal(options.defaultPath, '/home/user')
+  assert.deepEqual(options.filters[0], { name: 'Shell Script Files', extensions: ['sh'] })
 })

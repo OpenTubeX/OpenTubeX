@@ -520,12 +520,7 @@ import '@fontsource-variable/plus-jakarta-sans'
 import FtRetryImage from './components/FtRetryImage.vue'
 import { initializeAndroidYtDlp, ytDlp } from './helpers/ytDlp'
 import { parseAutomaticDownloadRules } from './helpers/automaticDownloadRules'
-import { isAppHidden, setAndroidAppVisible } from './helpers/appVisibility.js'
-import { createAppShortcuts, getAppShortcutPath } from './helpers/appShortcuts'
-import { AppShortcuts } from '@capawesome/capacitor-app-shortcuts'
-import { playbackScreenWake } from './helpers/playbackScreenWake'
 import { FtIcon } from '@opentubex/icons'
-import { App as CapacitorApp } from '@capacitor/app'
 import { Capacitor, SystemBars, SystemBarsStyle } from '@capacitor/core'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from './helpers/overlayScrollbars'
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, unref, useId, useTemplateRef, watch } from 'vue'
@@ -554,7 +549,6 @@ import { androidDynamicColors, getAndroidDynamicColors, onAndroidDynamicColorsCh
 import {
   exitAndroidApp,
   getAndroidHardwareKeyboardState,
-  isAndroidLauncherReturnInProgress,
   setAndroidPictureInPictureDocumentState,
   setAndroidSystemBarsBackground
 } from './helpers/androidUi'
@@ -578,6 +572,10 @@ import {
   resolveExternalLinkAction,
   resolveMobileContextLinkCopyUrl,
 } from './helpers/mobileLinkActions'
+import { createLinkNavigationPlatform } from './helpers/appLinkNavigationPlatform.js'
+import { createAppUrlNavigation } from './helpers/appUrlNavigation.js'
+import { createAppTabShortcuts } from './helpers/appTabShortcuts.js'
+import { createFindbarSearch } from './helpers/findbarSearch.js'
 import { startProgressBarOperation } from './helpers/progressBar'
 import { initializePlatformInfo, isLinuxWayland, supportsAutoPictureInPictureMinimize } from './helpers/platform'
 import { revealStartupSplash } from './helpers/startupSplash'
@@ -588,43 +586,21 @@ import {
 import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog } from './helpers/releaseUpdates'
 import { copyToClipboard, openExternalLink, openInternalPath, shareLink, showApiErrorToast, showToast } from './helpers/utils'
 import { openNotificationSettings } from './helpers/capacitorUi'
-import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
 import {
-  addAndroidMediaSessionActionListener,
-  shouldPauseAndroidPlaybackOnAppStateChange,
-} from './helpers/androidMediaSession'
-import {
-  acknowledgeAndroidSubscriptionRefreshResult,
   addAndroidSubscriptionRefreshCancelledListener,
   configureAndroidSubscriptionRefresh,
-  getNextAndroidSubscriptionRefreshResult,
   requestAndroidSubscriptionRefreshNotificationPermission,
   startAndroidSubscriptionRefresh,
   updateAndroidSubscriptionRefresh
 } from './helpers/androidSubscriptionRefresh'
 import {
-  AndroidSubscriptionRefreshPayloadError,
   createAndroidSubscriptionRefreshConfiguration,
   createSubscriptionRefreshStartGuard,
-  normalizeAndroidSubscriptionRefreshPayload,
-  processAndroidSubscriptionRefreshChannelResult
 } from './helpers/androidSubscriptionRefreshData'
-import { shouldHideMembersOnlyContent } from './helpers/restricted-playback'
-import { normalizeLocalSubscriptionFeed } from './helpers/api/local'
-import { normalizeInvidiousSubscriptionFeed } from './helpers/api/invidious'
-import { classifyRequestFailure, formatRequestDiagnostic } from './helpers/api/requestDiagnostics'
-import { reconcileFetchedSubscriptionEntries } from './helpers/subscription-entries'
-import { parseSubscriptionRss } from './helpers/api/feed-rss'
+import { classifyRequestFailure } from './helpers/api/requestDiagnostics'
 import {
-  enrichSubscriptionRssEntries,
-  enrichSubscriptionShortDates,
   cancelSubscriptionRefresh,
   requestSubscriptionRefreshCancellation,
-  refreshSubscriptionLiveFromRemote,
-  refreshSubscriptionPostsFromRemote,
-  refreshSubscriptionShortsFromRemote,
-  refreshSubscriptionVideosFromRemote,
-  SUBSCRIPTION_REFRESH_CANCEL_STORAGE_KEY,
   SUBSCRIPTION_REFRESH_CANCELLED_EVENT,
   SUBSCRIPTION_REFRESH_COMPLETED_EVENT,
   SUBSCRIPTION_REFRESH_FINISHED_EVENT,
@@ -659,11 +635,18 @@ import { invalidateAllYtDlpPlaybackSources } from './helpers/player/ytDlpPlaybac
 import { getTabNavigationService } from './tabs/TabNavigationService'
 import { initializeCapacitorTabPreviews } from './tabs/capacitorTabPreviews'
 import { initializeCapacitorTabService } from './tabs/CapacitorTabService'
-import { tabMediaCoordinator } from './tabs/TabMediaCoordinator'
 import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
 import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from './tabs/tabPreview'
 import { preloadResolvedRoute, preloadUtilityRoutes } from './router/index'
 import { initializeCapacitorPullToRefresh } from './helpers/capacitorPullToRefresh'
+import { enableCapacitorIntegrations } from './helpers/capacitorIntegrations.js'
+import { createAppAppearanceController } from './helpers/appAppearance.js'
+import { initializeApplicationData, loadPersistentApplicationData } from './helpers/appDataInitialization.js'
+import { createSubscriptionRefreshPlatform } from './helpers/subscriptionRefreshPlatform.js'
+import { createSubscriptionRefreshState } from './helpers/subscriptionRefreshState.js'
+import { createSubscriptionBackgroundReconciler } from './helpers/subscriptionBackgroundReconciler.js'
+import { createSubscriptionAutoRefreshScheduler, subscriptionAutoRefreshTabs } from './helpers/subscriptionAutoRefreshScheduler.js'
+import { createManagedExternalSoftwareController, MANAGED_TOOLS_UPDATE_PREVIEW_EVENT, resolveManagedToolsCapabilities } from './helpers/managedExternalSoftware.js'
 
 const SettingsWindow = defineAsyncComponent(() => import('./views/Settings/Settings.vue'))
 const FtPlaylistAddVideoPrompt = defineAsyncComponent(() => import('./components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue'))
@@ -679,6 +662,35 @@ const router = useRouter()
 const availableRoutePaths = new Set(router.getRoutes().map(candidate => candidate.path))
 const isElectron = process.env.IS_ELECTRON
 const isCapacitor = process.env.IS_CAPACITOR
+const linkNavigationPlatform = createLinkNavigationPlatform({
+  runtime: isElectron ? 'electron' : 'web',
+  isMac: process.platform === 'darwin',
+})
+const subscriptionRefreshPlatform = createSubscriptionRefreshPlatform({
+  runtime: isElectron
+    ? 'electron'
+    : isCapacitor
+      ? 'android'
+      : 'web',
+  storage: localStorage,
+  electron: isElectron ? window.ftElectron.subscriptionAutoRefresh : undefined,
+  electronTabs: isElectron ? window.ftElectron.tabs : undefined,
+  locks: navigator.locks,
+  lockName: SUBSCRIPTION_REFRESH_LOCK_NAME,
+  android: isCapacitor
+    ? {
+        start: startAndroidSubscriptionRefresh,
+        update: updateAndroidSubscriptionRefresh,
+        configure: configureAndroidSubscriptionRefresh,
+        requestPermission: requestAndroidSubscriptionRefreshNotificationPermission,
+      }
+    : undefined,
+})
+const {
+  applyState: applySubscriptionAutoRefreshState,
+  parseStorageProgress: getSubscriptionRefreshProgressState,
+  normalizeProgress: normalizeSubscriptionRefreshProgress,
+} = createSubscriptionRefreshState(store)
 const usesLogicalTabs = isElectron || isCapacitor
 const navigation = usesLogicalTabs ? getTabNavigationService() : null
 const capacitorTabService = isCapacitor
@@ -688,6 +700,17 @@ if (usesLogicalTabs) {
   provide(routerKey, navigation.createPresentedRouterFacade())
 }
 const { locale, t, tm } = useI18n()
+const appUrlNavigation = createAppUrlNavigation({
+  getUrlInfo: href => store.dispatch('getYoutubeUrlInfo', href),
+  openInternalPath,
+  navigateTab: (tabId, location) => navigation.push(tabId, location),
+  showUnknownUrl: () => showToast({
+    message: t('Unknown YouTube url type, cannot be opened in app'),
+    icon: ['fas', 'circle-exclamation'],
+  }),
+  isElectron,
+})
+const handleYoutubeLink = appUrlNavigation.openYoutubeLink
 initializePlatformInfo()
 
 const tabContainers = computed(() => {
@@ -999,6 +1022,15 @@ const findbarQuery = ref('')
 const findbarMatchIndex = ref(0)
 const findbarMatchCount = ref(0)
 const findbarInputRef = useTemplateRef('findbarInputRef')
+const findbarSearch = createFindbarSearch({
+  document,
+  view: window,
+  getRoot: () => tabRuntimeRegistry.getRoot(presentedTabId.value),
+  onMatchChange: (index, count) => {
+    findbarMatchIndex.value = index
+    findbarMatchCount.value = count
+  },
+})
 const tabSwitcherVisible = ref(false)
 const tabSwitcherSelectedIndex = ref(-1)
 const tabSwitcherPreviewUrls = ref({})
@@ -1100,21 +1132,38 @@ watch(() => mobileContextLink.value !== null || mobileContextActions.value !== n
 const tabOrganizerOpen = ref(false)
 const showAndroidExitPrompt = ref(false)
 const settingsSearchTarget = ref(null)
-const subscriptionAutoRefreshTimers = {
-  videos: null,
-  shorts: null,
-  live: null,
-  posts: null
-}
 const HISTORY_CLEANUP_INTERVAL = 60 * 60 * 1000
-const SUBSCRIPTION_AUTO_REFRESH_FAILURE_RETRY_INTERVAL = 60 * 1000
-const SUBSCRIPTION_AUTO_REFRESH_LOCK_RETRY_INTERVAL = 1000
-const LEGACY_SUBSCRIPTION_AUTO_REFRESH_STORAGE_KEY_PREFIX = 'opentubex.subscriptionAutoRefresh.'
-const SUBSCRIPTION_AUTO_REFRESH_COMPLETION_STORAGE_KEY_PREFIX = 'opentubex.subscriptionAutoRefresh.completed.'
-const SUBSCRIPTION_AUTO_REFRESH_DEADLINE_STORAGE_KEY_PREFIX = 'opentubex.subscriptionAutoRefresh.deadline.'
-const SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY = 'opentubex.subscriptionAutoRefresh.inProgress'
 let historyCleanupTimer = null
-const subscriptionAutoRefreshTabs = ['videos', 'shorts', 'live', 'posts']
+const {
+  clearSubscriptionFeedAutoRefreshTimer,
+  refreshOverdueSubscriptionFeeds,
+  handleSubscriptionAutoRefreshVisibilityChange,
+  synchronizeSubscriptionRefreshInProgress,
+  handleSubscriptionRefreshCancelled,
+  handleSubscriptionRefreshCompleted,
+  handleSubscriptionAutoRefreshStorage,
+} = createSubscriptionAutoRefreshScheduler({
+  store,
+  t,
+  dataReady,
+  activeSubscriptionProfileId,
+  subscriptionCacheReady,
+  subscriptionFeedAutoRefreshInterval,
+  subscriptionShortsAutoRefreshInterval,
+  subscriptionLiveAutoRefreshInterval,
+  subscriptionPostsAutoRefreshInterval,
+  hideSubscriptionsVideos,
+  hideSubscriptionsShorts,
+  hideSubscriptionsLive,
+  hideSubscriptionsPosts,
+  subscriptionRefreshPlatform,
+  reconcileAndroidSubscriptionRefreshResults: () => reconcileAndroidSubscriptionRefreshResults(),
+  applySubscriptionAutoRefreshState,
+  getSubscriptionRefreshProgressState,
+  canReconcileBackground: isElectron || isCapacitor,
+  storage: localStorage,
+  navigatorObject: navigator,
+})
 let removeSubscriptionAutoRefreshActiveChangedListener = null
 let removeSubscriptionAutoRefreshCancelListener = null
 let removeSubscriptionAutoRefreshStateChangedListener = null
@@ -1181,12 +1230,7 @@ function cancelUtilityRoutePreload() {
   }
   utilityRoutePreloadId = null
 }
-const pendingSubscriptionAutoRefreshes = []
-const pendingSubscriptionAutoRefreshKeys = new Set()
-const cancelledSubscriptionAutoRefreshKeys = new Set()
-let processingSubscriptionAutoRefreshes = false
 let tabSwitcherPreviewRequestId = 0
-let findbarMatches = []
 const findbarStateByTabId = new Map()
 
 const tabSwitcherTabs = computed(() => store.getters.getTabs)
@@ -1208,264 +1252,20 @@ const tabSwitcherSelectedTabId = computed(() => {
   return tab ? `tab-switcher-option-${tab.id}` : undefined
 })
 
-/**
- * Falls back to OpenTubeX-managed external software when the configured system
- * executables are unavailable. Selected managed executables are updated when
- * automatic updates are enabled or the user accepts an available update.
- * @param {('yt-dlp' | 'ffmpeg')[] | null} requestedUpdates
- */
-async function initializeManagedExternalSoftware(requestedUpdates = null) {
-  if (!isElectron && !isCapacitor) {
-    return
-  }
-
-  const recovery = initializeNetworkRecovery()
-  // Native tool downloads do not pass through the renderer fetch wrapper.
-  // Wait before displaying download progress or checking for updates.
-  await recovery.run('managed-tools', async () => {})
-
-  const info = await ytDlp.ytDlpGetInfo()
-  if (info === null) {
-    return
-  }
-
-  /** @type {('yt-dlp' | 'ffmpeg' | 'ffprobe')[]} */
-  const missingBinaries = []
-  /** @type {('yt-dlp' | 'ffmpeg')[]} */
-  const binariesToUpdate = []
-
-  if (!info.ytDlp.available) {
-    missingBinaries.push('yt-dlp')
-  }
-  if (!info.ffmpeg.available) {
-    missingBinaries.push('ffmpeg')
-  }
-  if (!info.ffprobe.available) {
-    missingBinaries.push('ffprobe')
-  }
-
-  const updateMode = store.getters.getExternalSoftwareUpdateMode
-  const automaticUpdates = updateMode === 'automatic'
-  let missingManagedBinaries = missingBinaries
-  if (!automaticUpdates && missingBinaries.length > 0) {
-    const managedInfo = await ytDlp.ytDlpGetInfo({
-      ytDlpSource: 'managed',
-      ytDlpPath: '',
-      ffmpegSource: 'managed',
-      ffmpegPath: ''
-    })
-    if (managedInfo !== null) {
-      missingManagedBinaries = missingBinaries.filter(binary => {
-        if (binary === 'yt-dlp') {
-          return !managedInfo.ytDlp.available
-        }
-        return binary === 'ffmpeg' ? !managedInfo.ffmpeg.available : !managedInfo.ffprobe.available
-      })
-    }
-  }
-
-  if (missingManagedBinaries.includes('yt-dlp') ||
-    ((isCapacitor || store.getters.getYtDlpSource === 'managed') &&
-      (automaticUpdates || requestedUpdates?.includes('yt-dlp')))) {
-    binariesToUpdate.push('yt-dlp')
-  }
-  if (missingManagedBinaries.includes('ffmpeg') || missingManagedBinaries.includes('ffprobe') ||
-    (!isCapacitor && store.getters.getYtDlpFfmpegSource === 'managed' &&
-      (automaticUpdates || requestedUpdates?.includes('ffmpeg')))) {
-    binariesToUpdate.push('ffmpeg')
-  }
-
-  const settingUpdates = []
-  if (missingBinaries.includes('yt-dlp') && store.getters.getYtDlpSource !== 'managed') {
-    settingUpdates.push(store.dispatch('updateYtDlpSource', 'managed'))
-  }
-  if ((missingBinaries.includes('ffmpeg') || missingBinaries.includes('ffprobe')) &&
-    store.getters.getYtDlpFfmpegSource !== 'managed') {
-    settingUpdates.push(store.dispatch('updateYtDlpFfmpegSource', 'managed'))
-  }
-  await Promise.all(settingUpdates)
-
-  if (binariesToUpdate.length === 0) {
-    if (updateMode === 'ask' && requestedUpdates === null) {
-      await notifyAboutManagedExternalSoftwareUpdates([])
-    }
-    return
-  }
-
-  await recovery.run('managed-tools', async () => {})
-
-  let downloadStarted = missingManagedBinaries.length > 0
-  let toolProgressPercentage = 0
-  let progressOperation = null
-
-  function showToolProgress(message) {
-    const progress = {
-      icon: ['fas', 'download'],
-      message,
-      percentage: toolProgressPercentage,
-    }
-    if (progressOperation === null) {
-      progressOperation = startProgressBarOperation(store, progress)
-    } else {
-      progressOperation.update(progress)
-    }
-  }
-
-  if (downloadStarted) {
-    const tools = binariesToUpdate.join(' and ')
-    const message = t('Settings.Download Settings.Managed Tools Download Started Template', { tools })
-    if (showProgressStartToast.value) {
-      showToast({ message, icon: ['fas', 'download'] })
-    }
-    showToolProgress(message)
-  }
-
-  const progressByBinary = Object.fromEntries(
-    binariesToUpdate.map(binary => [binary, 0])
-  )
-  const removeProgressListener = ytDlp.addYtDlpBinaryDownloadProgressListener(({ binary, percent, inProgress }) => {
-    if (!binariesToUpdate.includes(binary) || !inProgress || percent === null) {
-      return
-    }
-
-    if (!downloadStarted) {
-      downloadStarted = true
-      const tools = binariesToUpdate.join(' and ')
-      const message = t('Settings.Download Settings.Managed Tools Update Started Template', { tools })
-      if (showProgressStartToast.value) {
-        showToast({ message, icon: ['fas', 'download'] })
-      }
-      showToolProgress(message)
-    }
-
-    progressByBinary[binary] = Math.max(progressByBinary[binary] ?? 0, percent)
-    const percentages = Object.values(progressByBinary)
-    const combinedPercentage = percentages.reduce((sum, value) => sum + value, 0) / percentages.length
-    toolProgressPercentage = Math.max(toolProgressPercentage, combinedPercentage)
-    progressOperation.update({ percentage: toolProgressPercentage })
-  })
-
-  try {
-    const results = await Promise.all(binariesToUpdate.map(async binary => {
-      try {
-        const result = await recovery.run('managed-tools', async () => {
-          const result = await ytDlp.ytDlpDownloadBinary(binary)
-          if (result === null || 'error' in result) {
-            throw new Error(result?.error ?? '')
-          }
-          return result
-        }, {
-          isNetworkError: async error => {
-            const failure = classifyRequestFailure(error)
-            return failure === 'network' || (failure === 'api' && !await recovery.checkConnection())
-          },
-        })
-        return { binary, result }
-      } catch (error) {
-        return { binary, result: { error: String(error) } }
-      }
-    }))
-    const failures = results.filter(({ result }) => result === null || 'error' in result)
-    const updatedBinaries = results
-      .filter(({ result }) => result !== null && 'version' in result && result.updated)
-      .map(({ binary }) => binary)
-
-    if (failures.length === 0 && updatedBinaries.length > 0) {
-      toolProgressPercentage = 100
-      progressOperation?.update({ percentage: toolProgressPercentage })
-      const updatedTools = updatedBinaries.join(' and ')
-      showToast({
-        message: missingManagedBinaries.length > 0
-          ? t('Settings.Download Settings.Managed Tools Download Finished Template', { tools: updatedTools })
-          : t('Settings.Download Settings.Managed Tools Update Finished Template', { tools: updatedTools }),
-        icon: ['fas', 'check'],
-      })
-    } else {
-      if (failures.length > 0) {
-        const errors = failures.map(({ binary, result }) => `${binary}: ${result?.error ?? ''}`).join('; ')
-        showToast({
-          message: t('Settings.Download Settings.Managed Tools Download Error Template', { errors }),
-          icon: ['fas', 'circle-exclamation'],
-        })
-      }
-    }
-  } finally {
-    removeProgressListener()
-    progressOperation?.finish()
-  }
-
-  if (updateMode === 'ask' && requestedUpdates === null) {
-    await notifyAboutManagedExternalSoftwareUpdates(missingManagedBinaries)
-  }
-}
-
-/**
- * Checks installed managed tools and offers an explicit update action.
- * @param {('yt-dlp' | 'ffmpeg' | 'ffprobe')[]} binariesInstalledThisRun
- */
-async function notifyAboutManagedExternalSoftwareUpdates(binariesInstalledThisRun) {
-  await initializeNetworkRecovery().run('managed-tools', async () => {})
-  const candidates = []
-  if ((isCapacitor || store.getters.getYtDlpSource === 'managed') && !binariesInstalledThisRun.includes('yt-dlp')) {
-    candidates.push('yt-dlp')
-  }
-  if (!isCapacitor && store.getters.getYtDlpFfmpegSource === 'managed' &&
-    !binariesInstalledThisRun.includes('ffmpeg') && !binariesInstalledThisRun.includes('ffprobe')) {
-    candidates.push('ffmpeg')
-  }
-
-  const checks = await Promise.all(candidates.map(async binary => {
-    const result = await ytDlp.ytDlpCheckBinaryUpdate(binary)
-    if (result !== null && 'error' in result) {
-      console.warn(`Checking for a managed ${binary} update failed`, result.error)
-    }
-    return result?.available === true ? binary : null
-  }))
-  const availableUpdates = checks.filter(binary => binary !== null)
-  if (availableUpdates.length === 0) {
-    return
-  }
-
-  showManagedExternalSoftwareUpdatePrompt(availableUpdates)
-}
-
-/**
- * @param {('yt-dlp' | 'ffmpeg')[]} availableUpdates
- */
-function showManagedExternalSoftwareUpdatePrompt(availableUpdates) {
-  showToast({
-    message: t('Settings.Download Settings.Managed Tools Update Available Template', {
-      tools: availableUpdates.join(' and ')
-    }),
-    time: Infinity,
-    icon: ['fas', 'download'],
-    buttons: [
-      { label: t('Cancel') },
-      {
-        label: t('Settings.Download Settings.Update Managed Tools'),
-        primary: true,
-        action: () => {
-          initializeManagedExternalSoftware(availableUpdates)
-            .catch(error => console.error('Failed to update managed external software', error))
-        }
-      }
-    ]
-  })
-}
-
-const MANAGED_TOOLS_UPDATE_PREVIEW_EVENT = 'opentubex:preview-managed-tools-update'
-
-/**
- * Allows the real actionable update prompt to be previewed from DevTools.
- * @param {Event} event
- */
-function previewManagedExternalSoftwareUpdatePrompt(event) {
-  const detail = event instanceof CustomEvent ? event.detail : null
-  const availableUpdates = Array.isArray(detail)
-    ? detail.filter(binary => binary === 'yt-dlp' || binary === 'ffmpeg')
-    : []
-  showManagedExternalSoftwareUpdatePrompt(availableUpdates.length > 0 ? [...new Set(availableUpdates)] : ['yt-dlp'])
-}
+const {
+  initializeManagedExternalSoftware,
+  previewManagedExternalSoftwareUpdatePrompt,
+} = createManagedExternalSoftwareController({
+  capabilities: resolveManagedToolsCapabilities({ isElectron, isCapacitor }),
+  store,
+  ytDlp,
+  t,
+  showProgressStartToast,
+  initializeNetworkRecovery,
+  classifyRequestFailure,
+  startProgressBarOperation,
+  showToast,
+})
 
 async function initializeTutorial(hasExistingInstallation, lastUsedVersion, persistedAudience) {
   try {
@@ -1514,62 +1314,51 @@ onMounted(async () => {
     onNavigate: () => store.dispatch('showOutlines'),
     onPlayPause: handleGamepadPlayPause,
   })
-  let tabsReady = Promise.resolve()
+  let desktopTabsReady = Promise.resolve()
   if (isElectron || isCapacitor) {
     removeYtDlpBinaryUpdatedListener = ytDlp.addYtDlpBinaryUpdatedListener(invalidateAllYtDlpPlaybackSources)
   }
 
   if (isElectron) {
     window.addEventListener(MANAGED_TOOLS_UPDATE_PREVIEW_EVENT, previewManagedExternalSoftwareUpdatePrompt)
-    tabsReady = store.dispatch('initializeTabs').then((removeListener) => {
+    desktopTabsReady = store.dispatch('initializeTabs').then((removeListener) => {
       removeTabsStateListener = removeListener
       window.ftElectron.tabs.rendererReady()
     })
   }
 
-  const settingsReady = store.dispatch('grabUserSettings').then(async tutorialState => {
-    if (isCapacitor) {
-      await store.dispatch('loadAndroidProxySettings').catch(() => {
-        showToast({
-          message: t('Settings.Proxy Settings["Error getting network information. Is your proxy configured properly?"]'),
-          icon: ['fas', 'circle-exclamation'],
-        })
-      })
-    }
-    removeInternetConnectivitySettingsListener = store.watch(
-      () => store.getters.getInternetConnectivityChecks,
-      enabled => initializeNetworkRecovery().setInternetChecksEnabled(enabled),
-      { immediate: true, flush: 'sync' }
-    )
-    removeAndroidYtDlpSettingsListener = initializeAndroidYtDlp()
-    return tutorialState
-  })
   if (isCapacitor) {
-    tabsReady = settingsReady.then(() => capacitorTabService.initialize(route))
     removeCapacitorTabPreviews = initializeCapacitorTabPreviews(store)
   }
-  const customThemesReady = loadCustomThemes().catch((error) => {
-    console.error('Failed to load custom theme:', error)
-    return []
+  const { startupReady, profilesReady } = initializeApplicationData({
+    store,
+    loadTabs: settingsReady => isCapacitor
+      ? settingsReady.then(() => capacitorTabService.initialize(route))
+      : desktopTabsReady,
+    afterSettings: async () => {
+      if (isCapacitor) {
+        await store.dispatch('loadAndroidProxySettings').catch(() => {
+          showToast({
+            message: t('Settings.Proxy Settings["Error getting network information. Is your proxy configured properly?"]'),
+            icon: ['fas', 'circle-exclamation'],
+          })
+        })
+      }
+      removeInternetConnectivitySettingsListener = store.watch(
+        () => store.getters.getInternetConnectivityChecks,
+        enabled => initializeNetworkRecovery().setInternetChecksEnabled(enabled),
+        { immediate: true, flush: 'sync' }
+      )
+      removeAndroidYtDlpSettingsListener = initializeAndroidYtDlp()
+    },
+    loadThemes: loadCustomThemes,
+    preloadInitialRoute: () => {
+      const initialRoute = usesLogicalTabs ? store.getters.getActiveTab?.route : route
+      if (initialRoute) return preloadResolvedRoute(router.resolve(initialRoute.fullPath))
+    },
+    allChannelsLabel: t('Profile.All Channels'),
   })
-  const invidiousInstancesReady = store.dispatch('fetchInvidiousInstancesFromFile')
-  const profilesReady = settingsReady.then(() => (
-    store.dispatch('grabAllProfiles', t('Profile.All Channels'))
-  ))
-  tabsReady.then(() => {
-    const initialRoute = usesLogicalTabs ? store.getters.getActiveTab?.route : route
-    if (initialRoute) {
-      return preloadResolvedRoute(router.resolve(initialRoute.fullPath))
-    }
-  }).catch(error => {
-    console.error('Failed to preload the initial route', error)
-  })
-  const [tutorialState, themes] = await Promise.all([
-    settingsReady,
-    customThemesReady,
-    invidiousInstancesReady,
-    tabsReady,
-  ])
+  const { tutorialState, themes } = await startupReady
   const lastUsedVersion = getLastUsedVersion(tutorialState.lastUsedVersion)
   const showAutoSyncNotice = shouldShowAutoSyncNotice(lastUsedVersion, store.state.settings)
   if (tutorialState.landingPageToInitialize !== null) {
@@ -1619,12 +1408,7 @@ onMounted(async () => {
       await setLastUsedVersion(packageDetails.version)
     }
 
-    const syncDataReady = Promise.all([
-      store.dispatch('grabHistory'),
-      store.dispatch('grabAllPlaylists'),
-      store.dispatch('grabAllSubscriptions'),
-    ])
-    store.dispatch('grabSearchHistoryEntries')
+    const syncDataReady = loadPersistentApplicationData(store)
 
     // YouTube links have to be caught in both builds, otherwise the browser
     // navigates away from the app instead of opening the linked video,
@@ -1640,14 +1424,12 @@ onMounted(async () => {
       removeConfirmMultipleTabsActionListener = window.ftElectron.tabs
         .onConfirmMultipleAction(handleConfirmMultipleTabsActionRequest)
     } else if (isCapacitor) {
-      removeCapacitorIntegrationListeners = await enableCapacitorIntegrations()
+      removeCapacitorIntegrationListeners = await enableCapacitorIntegrations({
+        appWindow: window, locale, t, store, handleAndroidBack, handleYoutubeLink, openInternalPath,
+      })
     }
 
     await syncDataReady
-    store.dispatch('initializeSyncServer').catch(error => {
-      console.error('Initial sync server sync failed', error)
-    })
-
     dataReady.value = true
 
     if (isCapacitor) {
@@ -1883,7 +1665,7 @@ watch(presentedTabId, async (tabId, previousTabId) => {
     })
   }
 
-  clearFindbarHighlights()
+  findbarSearch.clear()
   const state = findbarStateByTabId.get(tabId) ?? {
     visible: false,
     query: '',
@@ -1891,13 +1673,10 @@ watch(presentedTabId, async (tabId, previousTabId) => {
   }
   findbarVisible.value = state.visible
   findbarQuery.value = state.query
-  findbarMatchIndex.value = 0
-  findbarMatchCount.value = 0
-
   if (state.visible && state.query.trim().length > 0) {
     await nextTick()
-    highlightFindbarMatches(state.query.trim())
-    selectFindbarMatch(state.matchIndex)
+    findbarSearch.search(state.query)
+    findbarSearch.select(state.matchIndex)
   }
 })
 
@@ -1916,30 +1695,6 @@ function scheduleHistoryCleanup(days) {
     store.dispatch('removeHistoryOlderThan', parsedDays)
   }, HISTORY_CLEANUP_INTERVAL)
 }
-
-watch([dataReady, activeSubscriptionProfileId], ([ready, profileId]) => {
-  clearSubscriptionFeedAutoRefreshTimer()
-  if (ready && profileId) {
-    migrateLegacySubscriptionAutoRefreshDeadlines()
-    synchronizeSubscriptionAutoRefreshProfile(profileId)
-  }
-})
-
-watch([subscriptionFeedAutoRefreshInterval, hideSubscriptionsVideos], () => {
-  resetSubscriptionTabAutoRefreshForAllProfiles('videos')
-})
-
-watch([subscriptionShortsAutoRefreshInterval, hideSubscriptionsShorts], () => {
-  resetSubscriptionTabAutoRefreshForAllProfiles('shorts')
-})
-
-watch([subscriptionLiveAutoRefreshInterval, hideSubscriptionsLive], () => {
-  resetSubscriptionTabAutoRefreshForAllProfiles('live')
-})
-
-watch([subscriptionPostsAutoRefreshInterval, hideSubscriptionsPosts], () => {
-  resetSubscriptionTabAutoRefreshForAllProfiles('posts')
-})
 
 const androidSubscriptionRefreshConfiguration = computed(() => {
   if ((!isCapacitor && !isElectron) || !dataReady.value) return null
@@ -1977,17 +1732,11 @@ const androidSubscriptionRefreshConfiguration = computed(() => {
 watch(androidSubscriptionRefreshConfiguration, async configuration => {
   if (configuration === null) return
   try {
-    if (isElectron) {
-      await window.ftElectron.subscriptionAutoRefresh.configureBackground({
-        ...configuration, enabled: enableClosedAppSubscriptionRefresh.value
-      })
-      return
-    }
-    await configureAndroidSubscriptionRefresh(configuration)
-    if (Object.values(configuration.intervals).some(interval => interval > 0)) {
-      const denied = await requestAndroidSubscriptionRefreshNotificationPermission()
-      if (denied) showAndroidSubscriptionRefreshNotificationWarning()
-    }
+    const denied = await subscriptionRefreshPlatform.configureBackground(
+      configuration,
+      enableClosedAppSubscriptionRefresh.value
+    )
+    if (denied) showAndroidSubscriptionRefreshNotificationWarning()
   } catch (error) {
     console.error('Failed to configure closed-app subscription refreshes', error)
   }
@@ -2000,522 +1749,12 @@ watch([dataReady, subscriptionCacheReady], ([ready, cacheReady]) => {
 })
 
 /**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function resetSubscriptionTabAutoRefreshForAllProfiles(tab) {
-  if (!dataReady.value) {
-    return
-  }
-
-  const interval = parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
-  const enabled = isSubscriptionTabAutoRefreshEnabled(tab)
-  const timestamp = enabled ? Date.now() + interval : null
-
-  for (const profile of store.getters.getProfileList) {
-    setStoredSubscriptionTabNextAutoRefreshTimestamp(profile._id, tab, timestamp)
-  }
-
-  const profileId = activeSubscriptionProfileId.value
-  if (profileId) {
-    scheduleSubscriptionTabAutoRefresh(tab, profileId, timestamp)
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {string} profileId
- * @param {number | null} [scheduledTimestamp]
- */
-function scheduleSubscriptionTabAutoRefresh(tab, profileId, scheduledTimestamp) {
-  clearSubscriptionTabAutoRefreshTimer(tab)
-
-  if (!dataReady.value || profileId !== activeSubscriptionProfileId.value) {
-    return
-  }
-
-  if (!isSubscriptionTabAutoRefreshEnabled(tab)) {
-    setSubscriptionTabNextAutoRefreshTimestamp(tab, profileId, null)
-    return
-  }
-
-  const interval = parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
-  const now = Date.now()
-  const storedTimestamp = scheduledTimestamp === undefined
-    ? getStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab)
-    : scheduledTimestamp
-  const nextAutoRefreshTimestamp = storedTimestamp ?? now + interval
-
-  setSubscriptionTabNextAutoRefreshTimestamp(tab, profileId, nextAutoRefreshTimestamp)
-  subscriptionAutoRefreshTimers[tab] = setTimeout(() => {
-    subscriptionAutoRefreshTimers[tab] = null
-    enqueueSubscriptionAutoRefresh(tab, profileId)
-  }, Math.max(0, nextAutoRefreshTimestamp - now))
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {string} profileId
- */
-function enqueueSubscriptionAutoRefresh(tab, profileId) {
-  const key = `${profileId}:${tab}`
-  if (pendingSubscriptionAutoRefreshKeys.has(key)) {
-    return
-  }
-
-  pendingSubscriptionAutoRefreshKeys.add(key)
-  pendingSubscriptionAutoRefreshes.push({ tab, profileId, key })
-  processPendingSubscriptionAutoRefreshes()
-}
-
-async function processPendingSubscriptionAutoRefreshes() {
-  if (processingSubscriptionAutoRefreshes) {
-    return
-  }
-
-  processingSubscriptionAutoRefreshes = true
-  try {
-    while (pendingSubscriptionAutoRefreshes.length > 0) {
-      const { tab, profileId, key } = pendingSubscriptionAutoRefreshes.shift()
-
-      try {
-        if (
-          profileId !== activeSubscriptionProfileId.value ||
-          !isSubscriptionTabAutoRefreshEnabled(tab) ||
-          navigator.onLine === false ||
-          isAppHidden()
-        ) {
-          continue
-        }
-
-        if (process.env.IS_ELECTRON && !await window.ftElectron.tabs.isActive()) {
-          continue
-        }
-
-        const storedTimestamp = getStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab)
-        if (storedTimestamp !== null && storedTimestamp > Date.now()) {
-          scheduleSubscriptionTabAutoRefresh(tab, profileId, storedTimestamp)
-          continue
-        }
-
-        if (isElectron || isCapacitor) {
-          await reconcileAndroidSubscriptionRefreshResults()
-          const refreshedTimestamp = getStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab)
-          if (refreshedTimestamp !== null && refreshedTimestamp > Date.now()) {
-            scheduleSubscriptionTabAutoRefresh(tab, profileId, refreshedTimestamp)
-            continue
-          }
-        }
-        cancelledSubscriptionAutoRefreshKeys.delete(key)
-        const result = await getSubscriptionTabRefreshHandler(tab)({
-          t,
-          showStartToast: true
-        })
-        const wasCancelled = cancelledSubscriptionAutoRefreshKeys.delete(key)
-
-        if (result === null) {
-          if (wasCancelled) {
-            scheduleSubscriptionTabAutoRefresh(tab, profileId, Date.now() + getSubscriptionTabAutoRefreshInterval(tab))
-          } else {
-            scheduleSubscriptionTabAutoRefreshLockRetry(tab, profileId)
-          }
-        }
-      } catch (error) {
-        cancelledSubscriptionAutoRefreshKeys.delete(key)
-        console.error(`Failed to auto refresh subscription ${tab}`, error)
-        scheduleSubscriptionTabAutoRefreshRetry(
-          tab,
-          profileId,
-          SUBSCRIPTION_AUTO_REFRESH_FAILURE_RETRY_INTERVAL
-        )
-      } finally {
-        pendingSubscriptionAutoRefreshKeys.delete(key)
-      }
-    }
-  } finally {
-    processingSubscriptionAutoRefreshes = false
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {string} profileId
- */
-function scheduleSubscriptionTabAutoRefreshLockRetry(tab, profileId) {
-  scheduleSubscriptionTabAutoRefreshRetry(tab, profileId, SUBSCRIPTION_AUTO_REFRESH_LOCK_RETRY_INTERVAL)
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {string} profileId
- * @param {number} delay
- */
-function scheduleSubscriptionTabAutoRefreshRetry(tab, profileId, delay) {
-  if (profileId !== activeSubscriptionProfileId.value) {
-    return
-  }
-
-  clearSubscriptionTabAutoRefreshTimer(tab)
-  subscriptionAutoRefreshTimers[tab] = setTimeout(() => {
-    subscriptionAutoRefreshTimers[tab] = null
-    enqueueSubscriptionAutoRefresh(tab, profileId)
-  }, delay)
-}
-
-function refreshOverdueSubscriptionFeeds() {
-  const profileId = activeSubscriptionProfileId.value
-  if (!dataReady.value || !profileId) {
-    return
-  }
-
-  for (const tab of subscriptionAutoRefreshTabs) {
-    const timestamp = getStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab)
-    if (timestamp !== null && timestamp <= Date.now() && isSubscriptionTabAutoRefreshEnabled(tab)) {
-      enqueueSubscriptionAutoRefresh(tab, profileId)
-    } else {
-      scheduleSubscriptionTabAutoRefresh(tab, profileId, timestamp)
-    }
-  }
-}
-
-async function handleSubscriptionAutoRefreshVisibilityChange() {
-  if (!isAppHidden()) {
-    synchronizeSubscriptionRefreshInProgress()
-    if ((isCapacitor || isElectron) && subscriptionCacheReady.value) {
-      await reconcileAndroidSubscriptionRefreshResults()
-    }
-    refreshOverdueSubscriptionFeeds()
-  }
-}
-
-async function synchronizeSubscriptionRefreshInProgress() {
-  try {
-    let state
-    if (process.env.IS_ELECTRON) {
-      state = await window.ftElectron.subscriptionAutoRefresh.isInProgress()
-    } else if (navigator.locks) {
-      const { held } = await navigator.locks.query()
-      const inProgress = held.some(lock => lock.name === SUBSCRIPTION_REFRESH_LOCK_NAME)
-      if (!inProgress) {
-        localStorage.removeItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY)
-      }
-      const progressState = inProgress ? getStoredSubscriptionRefreshProgressState() : null
-      state = {
-        inProgress,
-        percentage: progressState?.percentage ?? 0,
-        tab: progressState?.tab ?? null
-      }
-    } else {
-      const progressState = getStoredSubscriptionRefreshProgressState()
-      state = {
-        inProgress: progressState !== null,
-        percentage: progressState?.percentage ?? 0,
-        tab: progressState?.tab ?? null
-      }
-    }
-
-    applySubscriptionAutoRefreshState(state)
-  } catch {
-    // Live start/finish events still keep the common path synchronized.
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function getSubscriptionAutoRefreshInterval(tab) {
-  switch (tab) {
-    case 'shorts':
-      return subscriptionShortsAutoRefreshInterval
-    case 'live':
-      return subscriptionLiveAutoRefreshInterval
-    case 'posts':
-      return subscriptionPostsAutoRefreshInterval
-    default:
-      return subscriptionFeedAutoRefreshInterval
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function getSubscriptionTabRefreshHandler(tab) {
-  switch (tab) {
-    case 'shorts':
-      return refreshSubscriptionShortsFromRemote
-    case 'live':
-      return refreshSubscriptionLiveFromRemote
-    case 'posts':
-      return refreshSubscriptionPostsFromRemote
-    default:
-      return refreshSubscriptionVideosFromRemote
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function getSubscriptionTabAutoRefreshInterval(tab) {
-  return parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function isSubscriptionTabAutoRefreshEnabled(tab) {
-  const interval = getSubscriptionTabAutoRefreshInterval(tab)
-
-  return (
-    dataReady.value &&
-    !isSubscriptionTabHidden(tab) &&
-    !Number.isNaN(interval) &&
-    interval > 0
-  )
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function isSubscriptionTabHidden(tab) {
-  switch (tab) {
-    case 'shorts':
-      return hideSubscriptionsShorts.value
-    case 'live':
-      return hideSubscriptionsLive.value
-    case 'posts':
-      return hideSubscriptionsPosts.value
-    default:
-      return hideSubscriptionsVideos.value
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {string} profileId
- * @param {number | null} timestamp
- */
-function setSubscriptionTabNextAutoRefreshTimestamp(tab, profileId, timestamp) {
-  setStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab, timestamp)
-
-  if (profileId === activeSubscriptionProfileId.value) {
-    commitSubscriptionTabNextAutoRefreshTimestamp(tab, timestamp)
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {number | null} timestamp
- */
-function commitSubscriptionTabNextAutoRefreshTimestamp(tab, timestamp) {
-  switch (tab) {
-    case 'shorts':
-      store.commit('setSubscriptionShortsNextAutoRefreshTimestamp', timestamp)
-      break
-    case 'live':
-      store.commit('setSubscriptionLiveNextAutoRefreshTimestamp', timestamp)
-      break
-    case 'posts':
-      store.commit('setSubscriptionPostsNextAutoRefreshTimestamp', timestamp)
-      break
-    default:
-      store.commit('setSubscriptionFeedNextAutoRefreshTimestamp', timestamp)
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {number | null} timestamp
- */
-function commitSubscriptionTabLastRefreshTimestamp(tab, timestamp) {
-  switch (tab) {
-    case 'shorts':
-      store.commit('setSubscriptionShortsLastRefreshTimestamp', timestamp)
-      break
-    case 'live':
-      store.commit('setSubscriptionLiveLastRefreshTimestamp', timestamp)
-      break
-    case 'posts':
-      store.commit('setSubscriptionPostsLastRefreshTimestamp', timestamp)
-      break
-    default:
-      store.commit('setSubscriptionFeedLastRefreshTimestamp', timestamp)
-  }
-}
-
-/**
- * @param {string} prefix
- * @param {string} profileId
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function getSubscriptionAutoRefreshStorageKey(prefix, profileId, tab) {
-  return `${prefix}${encodeURIComponent(profileId)}/${tab}`
-}
-
-/**
- * @param {string} key
- */
-function getStoredSubscriptionAutoRefreshTimestamp(key) {
-  try {
-    const timestamp = Number(localStorage.getItem(key))
-    return Number.isFinite(timestamp) && timestamp > 0 ? timestamp : null
-  } catch {
-    return null
-  }
-}
-
-/**
- * @param {string} key
- * @param {number | null} timestamp
- */
-function setStoredSubscriptionAutoRefreshTimestamp(key, timestamp) {
-  try {
-    if (timestamp === null) {
-      localStorage.removeItem(key)
-    } else {
-      localStorage.setItem(key, String(timestamp))
-    }
-  } catch {
-    // Auto refresh still works for the current session when storage is unavailable.
-  }
-}
-
-/**
- * @param {string} profileId
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function getStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab) {
-  const key = getSubscriptionAutoRefreshStorageKey(
-    SUBSCRIPTION_AUTO_REFRESH_DEADLINE_STORAGE_KEY_PREFIX,
-    profileId,
-    tab
-  )
-  const timestamp = getStoredSubscriptionAutoRefreshTimestamp(key)
-  return timestamp
-}
-
-function migrateLegacySubscriptionAutoRefreshDeadlines() {
-  for (const tab of subscriptionAutoRefreshTabs) {
-    const legacyKey = `${LEGACY_SUBSCRIPTION_AUTO_REFRESH_STORAGE_KEY_PREFIX}${tab}`
-    const legacyTimestamp = getStoredSubscriptionAutoRefreshTimestamp(legacyKey)
-    if (legacyTimestamp === null) {
-      continue
-    }
-
-    for (const profile of store.getters.getProfileList) {
-      const profileKey = getSubscriptionAutoRefreshStorageKey(
-        SUBSCRIPTION_AUTO_REFRESH_DEADLINE_STORAGE_KEY_PREFIX,
-        profile._id,
-        tab
-      )
-      if (getStoredSubscriptionAutoRefreshTimestamp(profileKey) === null) {
-        setStoredSubscriptionAutoRefreshTimestamp(profileKey, legacyTimestamp)
-      }
-    }
-
-    setStoredSubscriptionAutoRefreshTimestamp(legacyKey, null)
-  }
-}
-
-/**
- * @param {string} profileId
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {number | null} timestamp
- */
-function setStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab, timestamp) {
-  setStoredSubscriptionAutoRefreshTimestamp(
-    getSubscriptionAutoRefreshStorageKey(
-      SUBSCRIPTION_AUTO_REFRESH_DEADLINE_STORAGE_KEY_PREFIX,
-      profileId,
-      tab
-    ),
-    timestamp
-  )
-}
-
-/**
- * @param {string} profileId
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function getStoredSubscriptionTabLastRefreshTimestamp(profileId, tab) {
-  return getStoredSubscriptionAutoRefreshTimestamp(
-    getSubscriptionAutoRefreshStorageKey(
-      SUBSCRIPTION_AUTO_REFRESH_COMPLETION_STORAGE_KEY_PREFIX,
-      profileId,
-      tab
-    )
-  )
-}
-
-/**
- * @param {string} profileId
- */
-function synchronizeSubscriptionAutoRefreshProfile(profileId) {
-  for (const tab of subscriptionAutoRefreshTabs) {
-    commitSubscriptionTabLastRefreshTimestamp(
-      tab,
-      getStoredSubscriptionTabLastRefreshTimestamp(profileId, tab)
-    )
-    scheduleSubscriptionTabAutoRefresh(tab, profileId)
-  }
-}
-
-/**
- * @param {CustomEvent<{tab: 'videos' | 'shorts' | 'live' | 'posts', profileId: string}>} event
- */
-function handleSubscriptionRefreshCancelled(event) {
-  const { tab, profileId } = event.detail
-  if (
-    profileId !== activeSubscriptionProfileId.value ||
-    !subscriptionAutoRefreshTabs.includes(tab)
-  ) {
-    return
-  }
-
-  cancelledSubscriptionAutoRefreshKeys.add(`${profileId}:${tab}`)
-}
-
-/**
- * @param {CustomEvent<{tab: 'videos' | 'shorts' | 'live' | 'posts', profileId: string, timestamp: number}>} event
- */
-function handleSubscriptionRefreshCompleted(event) {
-  const { tab, profileId, timestamp } = event.detail
-  if (
-    !subscriptionAutoRefreshTabs.includes(tab) ||
-    typeof profileId !== 'string' ||
-    !Number.isFinite(timestamp) ||
-    timestamp < getStoredSubscriptionTabLastRefreshTimestamp(profileId, tab)
-  ) {
-    return
-  }
-
-  if (isElectron) {
-    window.ftElectron.subscriptionAutoRefresh.backgroundCompleted({ profileId, feedType: tab, timestamp }).catch(console.error)
-  }
-  setStoredSubscriptionAutoRefreshTimestamp(
-    getSubscriptionAutoRefreshStorageKey(
-      SUBSCRIPTION_AUTO_REFRESH_COMPLETION_STORAGE_KEY_PREFIX,
-      profileId,
-      tab
-    ),
-    timestamp
-  )
-
-  const interval = parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
-  const nextTimestamp = isSubscriptionTabAutoRefreshEnabled(tab) ? timestamp + interval : null
-  setStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab, nextTimestamp)
-
-  if (profileId === activeSubscriptionProfileId.value) {
-    commitSubscriptionTabLastRefreshTimestamp(tab, timestamp)
-    scheduleSubscriptionTabAutoRefresh(tab, profileId, nextTimestamp)
-  }
-}
-
-/**
  * @param {CustomEvent<{tab: string, profileId: string, refreshId: number}>} event
  */
 async function handleSubscriptionRefreshStarted(event) {
   const isCurrentStart = subscriptionRefreshStartGuard.begin()
   if (isCapacitor) {
-    const { acquired, notificationsDenied } = await startAndroidSubscriptionRefresh(
+    const { acquired, notificationsDenied } = await subscriptionRefreshPlatform.startNotification(
       event.detail.refreshId,
       getSubscriptionRefreshNotificationTitle(event.detail.tab),
       t('Feed.Cancel Refresh')
@@ -2526,16 +1765,7 @@ async function handleSubscriptionRefreshStarted(event) {
       cancelSubscriptionRefresh()
     }
   }
-  if (!process.env.IS_ELECTRON) {
-    try {
-      localStorage.setItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY, JSON.stringify({
-        ...event.detail,
-        percentage: 0
-      }))
-    } catch {
-      // The owner still has its renderer-local progress state.
-    }
-  }
+  subscriptionRefreshPlatform.publishStarted(event.detail)
   applySubscriptionAutoRefreshState({
     inProgress: true,
     percentage: 0,
@@ -2571,27 +1801,7 @@ function handleSubscriptionRefreshProgress(event) {
   const percentage = normalizeSubscriptionRefreshProgress(event.detail.percentage)
   store.commit('setSubscriptionFeedRefreshProgress', percentage)
 
-  if (isCapacitor) {
-    updateAndroidSubscriptionRefresh(event.detail.refreshId, percentage)
-  }
-
-  if (process.env.IS_ELECTRON) {
-    window.ftElectron.subscriptionAutoRefresh.setProgress(
-      event.detail.ownerTabId ?? store.getters.getActiveTabId,
-      percentage
-    )
-    return
-  }
-
-  try {
-    const progressState = getStoredSubscriptionRefreshProgressState() ?? {}
-    localStorage.setItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY, JSON.stringify({
-      ...progressState,
-      percentage
-    }))
-  } catch {
-    // The owner still has its renderer-local progress state.
-  }
+  subscriptionRefreshPlatform.publishProgress(event.detail, percentage, store.getters.getActiveTabId)
 }
 
 /**
@@ -2599,13 +1809,7 @@ function handleSubscriptionRefreshProgress(event) {
  */
 function handleSubscriptionRefreshFinished(event) {
   subscriptionRefreshStartGuard.finish()
-  if (!process.env.IS_ELECTRON) {
-    try {
-      localStorage.removeItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY)
-    } catch {
-      // The owner still clears its renderer-local progress state.
-    }
-  }
+  subscriptionRefreshPlatform.publishFinished()
   applySubscriptionAutoRefreshState({ inProgress: false, percentage: 0 })
 }
 
@@ -2622,313 +1826,15 @@ function getSubscriptionRefreshNotificationTitle(tab) {
   }
 }
 
-let reconcilingAndroidSubscriptionRefreshResults = null
-
-function reconcileAndroidSubscriptionRefreshResults() {
-  if (reconcilingAndroidSubscriptionRefreshResults) return reconcilingAndroidSubscriptionRefreshResults
-  const importing = isElectron
-    ? navigator.locks.request('opentubex-background-subscription-import', importAndroidSubscriptionRefreshResults)
-    : importAndroidSubscriptionRefreshResults()
-  reconcilingAndroidSubscriptionRefreshResults = importing.finally(() => {
-    reconcilingAndroidSubscriptionRefreshResults = null
-  })
-  return reconcilingAndroidSubscriptionRefreshResults
-}
-
-async function importAndroidSubscriptionRefreshResults() {
-  try {
-    while (true) {
-      const result = await getNextAndroidSubscriptionRefreshResult()
-      if (result === null) return
-
-      if (
-        typeof result.id !== 'string' ||
-        typeof result.profileId !== 'string' ||
-        !subscriptionAutoRefreshTabs.includes(result.feedType)
-      ) {
-        await acknowledgeAndroidSubscriptionRefreshResult(result.id)
-        continue
-      }
-
-      if (result.kind === 'channel') {
-        await processAndroidSubscriptionRefreshChannelResult(
-          result,
-          reconcileAndroidSubscriptionRefreshChannelResult,
-          acknowledgeAndroidSubscriptionRefreshResult
-        )
-        continue
-      } else if (result.kind === 'completion' && store.getters.profileById(result.profileId)) {
-        handleSubscriptionRefreshCompleted({
-          detail: {
-            tab: result.feedType,
-            profileId: result.profileId,
-            timestamp: Number(result.timestamp) || Date.now()
-          }
-        })
-      } else if (
-        result.kind === 'failure' &&
-        result.diagnostic &&
-        store.getters.profileById(result.profileId)
-      ) {
-        const diagnostic = formatRequestDiagnostic(result.diagnostic)
-        console.error(`Closed-app subscription refresh request failed: ${diagnostic}`)
-        showApiErrorToast(store.getters.getBackendPreference === 'local' ? t('Local API Error (Click to copy)') : t('Invidious API Error (Click to copy)'), diagnostic)
-      }
-
-      await acknowledgeAndroidSubscriptionRefreshResult(result.id)
-    }
-  } catch (error) {
-    console.error('Failed to reconcile closed-app subscription refresh data', error)
-  }
-}
-
-async function reconcileAndroidSubscriptionRefreshChannelResult(result) {
-  if (
-    typeof result.channelId !== 'string' ||
-    !store.getters.getSubscribedChannelIdSet.has(result.channelId)
-  ) {
-    return
-  }
-
-  const feedType = result.feedType
-  const timestamp = new Date(Number(result.timestamp) || Date.now())
-  const config = getAndroidSubscriptionCacheConfig(feedType)
-  const previousCache = config.getCache()[result.channelId]
-  if (previousCache?.timestamp > timestamp) return
-  let entries = result.payload?.backgroundFormat === 'entries'
-    ? result.payload.entries
-    : result.payload?.backgroundFormat === 'rss'
-      ? (() => {
-          try { return parseSubscriptionRss(result.payload.text, result.channelId).videos } catch (error) {
-            throw new AndroidSubscriptionRefreshPayloadError(error)
-          }
-        })()
-      : normalizeAndroidSubscriptionRefreshPayload(
-          result.payload?.backgroundFormat?.startsWith('local')
-            ? (type, payload, id) => normalizeLocalSubscriptionFeed(type, payload, id, timestamp.getTime())
-            : normalizeInvidiousSubscriptionFeed,
-          feedType,
-          result.payload,
-          result.channelId
-        )
-  if (!Array.isArray(entries)) throw new AndroidSubscriptionRefreshPayloadError(new Error('Invalid saved entries'))
-  entries = entries.filter(entry => !shouldHideMembersOnlyContent(entry.isMembersOnly, store.getters))
-  if (feedType !== 'posts') {
-    const channel = store.getters.getSubscribedChannelsById.get(result.channelId)
-    const cachedThumbnails = new Map((previousCache?.videos ?? []).map(video => [video.videoId, video.thumbnailUrl]))
-    for (const entry of entries) {
-      if (!entry.author || entry.author === 'N/A') entry.author = channel?.name
-      if (!entry.authorId || entry.authorId === 'N/A') entry.authorId = result.channelId
-      if (feedType === 'shorts') {
-        entry.isShort = true
-        // RSS has no selected portrait image; keep the last known Shorts thumbnail.
-        entry.thumbnailUrl ||= cachedThumbnails.get(entry.videoId)
-      }
-    }
-  }
-  if (feedType === 'shorts') entries = await enrichSubscriptionShortDates(entries, result.channelId)
-  entries = await enrichSubscriptionRssEntries(entries)
-  const reconciledEntries = reconcileFetchedSubscriptionEntries(
-    entries,
-    previousCache?.[config.entriesKey],
-    config.idKey,
-    previousCache?.timestamp,
-    feedType === 'posts' ? undefined : store.getters.getHistoryCacheById
-  )
-
-  const applied = await store.dispatch(config.action, {
-    channelId: result.channelId,
-    [config.entriesKey]: reconciledEntries,
-    timestamp
-  })
-  if (applied === false) return
-
-  const committedTimestamp = config.getCache()[result.channelId]?.timestamp
-  if (!(committedTimestamp instanceof Date) || committedTimestamp.getTime() < timestamp.getTime()) {
-    throw new Error(`The ${feedType} cache write did not complete`)
-  }
-}
-
-function getAndroidSubscriptionCacheConfig(feedType) {
-  switch (feedType) {
-    case 'shorts':
-      return {
-        action: 'updateSubscriptionShortsCacheByChannel',
-        entriesKey: 'videos',
-        idKey: 'videoId',
-        getCache: () => store.getters.getShortsCache
-      }
-    case 'live':
-      return {
-        action: 'updateSubscriptionLiveCacheByChannel',
-        entriesKey: 'videos',
-        idKey: 'videoId',
-        getCache: () => store.getters.getLiveCache
-      }
-    case 'posts':
-      return {
-        action: 'updateSubscriptionPostsCacheByChannel',
-        entriesKey: 'posts',
-        idKey: 'postId',
-        getCache: () => store.getters.getPostsCache
-      }
-    default:
-      return {
-        action: 'updateSubscriptionVideosCacheByChannel',
-        entriesKey: 'videos',
-        idKey: 'videoId',
-        getCache: () => store.getters.getVideoCache
-      }
-  }
-}
-
-/**
- * @param {StorageEvent} event
- */
-function handleSubscriptionAutoRefreshStorage(event) {
-  if (!process.env.IS_ELECTRON && event.key === SUBSCRIPTION_REFRESH_CANCEL_STORAGE_KEY) {
-    if (event.newValue !== null) {
-      cancelSubscriptionRefresh()
-    }
-    return
-  }
-
-  if (!process.env.IS_ELECTRON && event.key === SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY) {
-    const state = getSubscriptionRefreshProgressState(event.newValue)
-    applySubscriptionAutoRefreshState({
-      inProgress: state !== null,
-      percentage: state?.percentage ?? 0,
-      tab: state?.tab ?? null
-    })
-    return
-  }
-
-  const deadline = parseSubscriptionAutoRefreshStorageKey(
-    event.key,
-    SUBSCRIPTION_AUTO_REFRESH_DEADLINE_STORAGE_KEY_PREFIX
-  )
-  if (deadline && deadline.profileId === activeSubscriptionProfileId.value) {
-    const timestamp = Number(event.newValue)
-    if (event.newValue === null || !Number.isFinite(timestamp) || timestamp <= 0) {
-      clearSubscriptionTabAutoRefreshTimer(deadline.tab)
-      commitSubscriptionTabNextAutoRefreshTimestamp(deadline.tab, null)
-    } else {
-      scheduleSubscriptionTabAutoRefresh(deadline.tab, deadline.profileId, timestamp)
-    }
-    return
-  }
-
-  const completion = parseSubscriptionAutoRefreshStorageKey(
-    event.key,
-    SUBSCRIPTION_AUTO_REFRESH_COMPLETION_STORAGE_KEY_PREFIX
-  )
-  if (completion && completion.profileId === activeSubscriptionProfileId.value) {
-    const timestamp = Number(event.newValue)
-    commitSubscriptionTabLastRefreshTimestamp(
-      completion.tab,
-      Number.isFinite(timestamp) && timestamp > 0 ? timestamp : null
-    )
-  }
-}
-
-/**
- * @param {{inProgress: boolean, percentage: number, tab?: string | null}} state
- */
-function applySubscriptionAutoRefreshState(state) {
-  const wasInProgress = store.getters.getSubscriptionFeedRefreshInProgress
-  const previousTab = store.getters.getSubscriptionFeedRefreshTab
-  const nextTab = state.inProgress ? state.tab ?? null : null
-  let percentage = normalizeSubscriptionRefreshProgress(state.percentage)
-
-  // The refresh owner updates progress locally before the main process broadcasts
-  // it to every renderer. An older broadcast can therefore arrive after a newer
-  // local update, so keep progress monotonic for the duration of this refresh.
-  if (state.inProgress && wasInProgress && nextTab === previousTab) {
-    percentage = Math.max(store.getters.getSubscriptionFeedRefreshProgress, percentage)
-  }
-
-  store.commit('setSubscriptionFeedRefreshInProgress', state.inProgress)
-  store.commit('setSubscriptionFeedRefreshTab', nextTab)
-  store.commit('setSubscriptionFeedRefreshProgress', percentage)
-}
-
-/**
- * @param {number} percentage
- */
-function normalizeSubscriptionRefreshProgress(percentage) {
-  return Number.isFinite(percentage) ? Math.min(100, Math.max(0, percentage)) : 0
-}
-
-function getStoredSubscriptionRefreshProgressState() {
-  try {
-    return getSubscriptionRefreshProgressState(
-      localStorage.getItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY)
-    )
-  } catch {
-    return null
-  }
-}
-
-/**
- * @param {string | null} value
- * @returns {{percentage: number, tab?: string} | null}
- */
-function getSubscriptionRefreshProgressState(value) {
-  if (value === null) {
-    return null
-  }
-
-  try {
-    const state = JSON.parse(value)
-    return {
-      ...state,
-      percentage: normalizeSubscriptionRefreshProgress(state.percentage)
-    }
-  } catch {
-    return null
-  }
-}
-
-/**
- * @param {string | null} key
- * @param {string} prefix
- * @returns {{profileId: string, tab: 'videos' | 'shorts' | 'live' | 'posts'} | null}
- */
-function parseSubscriptionAutoRefreshStorageKey(key, prefix) {
-  if (!key?.startsWith(prefix)) {
-    return null
-  }
-
-  const separatorIndex = key.lastIndexOf('/')
-  const tab = key.slice(separatorIndex + 1)
-  if (separatorIndex < prefix.length || !subscriptionAutoRefreshTabs.includes(tab)) {
-    return null
-  }
-
-  try {
-    return {
-      profileId: decodeURIComponent(key.slice(prefix.length, separatorIndex)),
-      tab
-    }
-  } catch {
-    return null
-  }
-}
-
-function clearSubscriptionFeedAutoRefreshTimer() {
-  clearSubscriptionTabAutoRefreshTimer('videos')
-  clearSubscriptionTabAutoRefreshTimer('shorts')
-  clearSubscriptionTabAutoRefreshTimer('live')
-  clearSubscriptionTabAutoRefreshTimer('posts')
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
-function clearSubscriptionTabAutoRefreshTimer(tab) {
-  clearTimeout(subscriptionAutoRefreshTimers[tab])
-  subscriptionAutoRefreshTimers[tab] = null
-}
+const { reconcileResults: reconcileAndroidSubscriptionRefreshResults } = createSubscriptionBackgroundReconciler({
+  store,
+  locks: isElectron ? navigator.locks : null,
+  onCompleted: detail => handleSubscriptionRefreshCompleted({ detail }),
+  onFailure: diagnostic => {
+    console.error(`Closed-app subscription refresh request failed: ${diagnostic}`)
+    showApiErrorToast(store.getters.getBackendPreference === 'local' ? t('Local API Error (Click to copy)') : t('Invidious API Error (Click to copy)'), diagnostic)
+  },
+})
 
 /** @type {import('vue').ComputedRef<string>} */
 const baseTheme = computed(() => store.getters.getBaseTheme)
@@ -2945,6 +1851,25 @@ let removeCustomThemeListener = () => {}
 const systemColorScheme = window.matchMedia('(prefers-color-scheme: dark)')
 const systemUsesDarkTheme = ref(systemColorScheme.matches)
 systemColorScheme.addEventListener('change', handleSystemColorSchemeChange)
+
+/** @type {import('vue').ComputedRef<string>} */
+const mainColor = computed(() => store.getters.getMainColor)
+/** @type {import('vue').ComputedRef<string>} */
+const secColor = computed(() => store.getters.getSecColor)
+
+const { updateTheme, sanitizeAppearanceSettings } = createAppAppearanceController({
+  store,
+  baseTheme,
+  systemUsesDarkTheme,
+  mainColor,
+  secColor,
+  applyThemeToDocument,
+  refreshTrayIcon,
+  updateSystemBarsStyle,
+  resolveSystemThemeSettings,
+  resolveBaseTheme,
+  resolveColor,
+})
 
 if (isCapacitor) {
   let dynamicColorsListener
@@ -2977,14 +1902,7 @@ watch(appFont, updateAppFont)
 watch(() => store.getters.getSystemLightTheme, updateTheme)
 watch(() => store.getters.getSystemDarkTheme, updateTheme)
 
-/** @type {import('vue').ComputedRef<string>} */
-const mainColor = computed(() => store.getters.getMainColor)
-
 watch(mainColor, updateTheme)
-
-/** @type {import('vue').ComputedRef<string>} */
-const secColor = computed(() => store.getters.getSecColor)
-
 watch(secColor, updateTheme)
 
 /** @type {import('vue').ComputedRef<number>} */
@@ -3011,18 +1929,6 @@ function refreshTrayIcon() {
   }
 }
 
-function updateTheme() {
-  const effectiveTheme = baseTheme.value === 'system'
-    ? (systemUsesDarkTheme.value ? store.getters.getSystemDarkTheme : store.getters.getSystemLightTheme)
-    : baseTheme.value
-  const customThemes = store.getters.getCustomThemes
-  const customTheme = customThemes.find(theme => `custom:${theme.id}` === effectiveTheme) ??
-    (effectiveTheme === 'custom' ? customThemes[0] : null) ?? null
-  applyThemeToDocument(effectiveTheme, mainColor.value, secColor.value, customTheme)
-  if (store.getters.getTrayIconPreset === 'theme') refreshTrayIcon()
-  updateSystemBarsStyle()
-}
-
 function updateSystemBarsStyle() {
   if (!Capacitor.isNativePlatform() || !Capacitor.isPluginAvailable('SystemBars')) return
 
@@ -3045,23 +1951,6 @@ function updateAppFont() {
     '--app-font-family',
     getAppFontFamily(appFont.value)
   )
-}
-
-async function sanitizeAppearanceSettings(customThemes) {
-  const systemThemes = resolveSystemThemeSettings({
-    systemLightTheme: store.getters.getSystemLightTheme,
-    systemDarkTheme: store.getters.getSystemDarkTheme,
-  }, customThemes)
-  const settings = [
-    ['BaseTheme', resolveBaseTheme(store.getters.getBaseTheme, 'system', customThemes)],
-    ['SystemLightTheme', systemThemes.systemLightTheme],
-    ['SystemDarkTheme', systemThemes.systemDarkTheme],
-    ['MainColor', resolveColor(store.getters.getMainColor, 'Red')],
-    ['SecColor', resolveColor(store.getters.getSecColor, 'Blue')],
-  ]
-
-  await Promise.all(settings.map(([name, value]) =>
-    store.getters[`get${name}`] === value ? null : store.dispatch(`update${name}`, value)))
 }
 
 function handleSystemColorSchemeChange(event) {
@@ -3435,6 +2324,26 @@ function handleGamepadBack() {
   goHistoryFromCommandPalette(-1)
 }
 
+const tabShortcuts = isElectron
+  ? createAppTabShortcuts({
+      shortcuts: KeyboardShortcuts.APP.GENERAL,
+      matchesShortcut: matchesKeyboardShortcut,
+      isTypingTarget,
+      tabs: () => store.state.tabs.tabs,
+      routePath: () => route.path,
+      activateTab: id => store.dispatch('activateTab', id),
+      cycleLayout: cycleTabLayout,
+      createTab: () => store.dispatch('createTab', { makeActive: true }),
+      restoreClosedWindow: () => window.ftElectron.reopenClosedWindow(),
+      restoreClosedTab: () => store.dispatch('restoreClosedTab'),
+      closeTabs: closeShortcutTabs,
+      closeWindow: () => window.close(),
+      cycleSwitcher: cycleTabSwitcher,
+      tabIdsToReload: getShortcutTabIds,
+      reloadTab: prepareAndReloadTab,
+    })
+  : null
+
 /**
  * @param {KeyboardEvent} event
  */
@@ -3529,87 +2438,7 @@ function handleKeyboardShortcuts(event) {
     store.dispatch('showOutlines')
   }
 
-  // Tab keyboard shortcuts (Electron only)
-  if (process.env.IS_ELECTRON) {
-    // Ctrl+1..9: Switch to tab by number
-    if (matchesKeyboardShortcut(event, shortcuts.SWITCH_TO_TAB)) {
-      if (!isTypingTarget(event.target)) {
-        const index = parseInt(event.key, 10) - 1
-        const tabs = store.state.tabs.tabs
-        if (index < tabs.length) {
-          event.preventDefault()
-          store.dispatch('activateTab', tabs[index].id)
-          return
-        }
-      }
-    }
-
-    // F1: Toggle between horizontal and vertical tabs
-    if (matchesKeyboardShortcut(event, shortcuts.TOGGLE_TAB_ORIENTATION) && !isTypingTarget(event.target)) {
-      event.preventDefault()
-      cycleTabLayout()
-      return
-    }
-
-    // Ctrl+T: New tab
-    if (matchesKeyboardShortcut(event, shortcuts.NEW_TAB)) {
-      event.preventDefault()
-      store.dispatch('createTab', { makeActive: true })
-      return
-    }
-
-    if (matchesKeyboardShortcut(event, shortcuts.RESTORE_CLOSED_WINDOW)) {
-      event.preventDefault()
-      window.ftElectron.reopenClosedWindow()
-      return
-    }
-
-    // Ctrl+Shift+T: Restore closed tab
-    if (matchesKeyboardShortcut(event, shortcuts.RESTORE_CLOSED_TAB)) {
-      event.preventDefault()
-      store.dispatch('restoreClosedTab')
-      return
-    }
-
-    // Ctrl+W: Close tab (handled in menu, but also here for robustness)
-    if (matchesKeyboardShortcut(event, shortcuts.CLOSE_TAB)) {
-      event.preventDefault()
-      closeShortcutTabs().then((hasRemainingTabs) => {
-        if (!hasRemainingTabs) {
-          window.close()
-        }
-      })
-      return
-    }
-
-    // Ctrl+Tab: Next tab
-    if (matchesKeyboardShortcut(event, shortcuts.NEXT_TAB)) {
-      event.preventDefault()
-      cycleTabSwitcher(1)
-      return
-    }
-
-    // Ctrl+Shift+Tab: Previous tab
-    if (matchesKeyboardShortcut(event, shortcuts.PREV_TAB)) {
-      event.preventDefault()
-      cycleTabSwitcher(-1)
-      return
-    }
-
-    // Reload tab unless the current view handles refresh itself
-    if ([shortcuts.RELOAD_TAB, shortcuts.RELOAD_TAB_ALT]
-      .some(shortcut => matchesKeyboardShortcut(event, shortcut))) {
-      const tabIds = getShortcutTabIds()
-      if (tabIds.length === 1 && route.path.startsWith('/subscriptions')) {
-        event.preventDefault()
-        return
-      }
-      event.preventDefault()
-      for (const tabId of tabIds) {
-        prepareAndReloadTab(tabId)
-      }
-    }
-  }
+  tabShortcuts?.handle(event)
 }
 
 /**
@@ -3678,9 +2507,7 @@ function openFindbar() {
 
 function closeFindbar() {
   findbarVisible.value = false
-  findbarMatchIndex.value = 0
-  findbarMatchCount.value = 0
-  clearFindbarHighlights()
+  findbarSearch.clear()
 }
 
 /**
@@ -3689,167 +2516,19 @@ function closeFindbar() {
 function findInPage(backwards = null) {
   const query = findbarQuery.value.trim()
   if (query.length === 0) {
-    findbarMatchIndex.value = 0
-    findbarMatchCount.value = 0
-    clearFindbarHighlights()
+    findbarSearch.clear()
     return
   }
 
   const input = findbarInputRef.value
   const selectionStart = input?.selectionStart ?? query.length
   const selectionEnd = input?.selectionEnd ?? query.length
-  const isNavigation = typeof backwards === 'boolean'
-  const direction = backwards === true ? -1 : 1
-
-  if (!isNavigation || findbarMatches.length === 0) {
-    highlightFindbarMatches(query)
-  } else {
-    selectFindbarMatch(findbarMatchIndex.value - 1 + direction)
-  }
+  findbarSearch.find(query, backwards)
 
   requestAnimationFrame(() => {
     input?.focus()
     input?.setSelectionRange(selectionStart, selectionEnd)
   })
-}
-
-/**
- * @param {string} query
- */
-function highlightFindbarMatches(query) {
-  clearFindbarHighlights()
-
-  const walker = document.createTreeWalker(
-    tabRuntimeRegistry.getRoot(presentedTabId.value) ?? document.body,
-    NodeFilter.SHOW_TEXT,
-    {
-      acceptNode: (node) => {
-        if (
-          isFindbarTextNode(node) ||
-          isNonSearchableTextNode(node) ||
-          isHiddenTextNode(node)
-        ) {
-          return NodeFilter.FILTER_REJECT
-        }
-
-        return NodeFilter.FILTER_ACCEPT
-      }
-    }
-  )
-  const normalizedQuery = query.toLocaleLowerCase()
-  const ranges = []
-
-  while (walker.nextNode()) {
-    const node = walker.currentNode
-    const text = node.textContent ?? ''
-    const normalizedText = text.toLocaleLowerCase()
-    let index = normalizedText.indexOf(normalizedQuery)
-
-    while (index !== -1) {
-      ranges.push({
-        node,
-        start: index,
-        end: index + normalizedQuery.length
-      })
-      index = normalizedText.indexOf(normalizedQuery, index + normalizedQuery.length)
-    }
-  }
-
-  const matches = ranges.map((rangeInfo) => {
-    const range = document.createRange()
-    range.setStart(rangeInfo.node, rangeInfo.start)
-    range.setEnd(rangeInfo.node, rangeInfo.end)
-    return range
-  })
-
-  findbarMatches = matches
-  findbarMatchCount.value = matches.length
-  paintFindbarHighlights()
-  selectFindbarMatch(matches.length > 0 ? 0 : -1)
-}
-
-function clearFindbarHighlights() {
-  window.CSS.highlights.delete('findbarmatch')
-  window.CSS.highlights.delete('findbarmatchcurrent')
-  findbarMatches = []
-}
-
-function paintFindbarHighlights() {
-  const highlight = new window.Highlight(...findbarMatches)
-  highlight.priority = 0
-  window.CSS.highlights.set('findbarmatch', highlight)
-}
-
-/**
- * @param {number} index
- */
-function selectFindbarMatch(index) {
-  const matches = findbarMatches
-  if (matches.length === 0) {
-    findbarMatchIndex.value = 0
-    findbarMatchCount.value = 0
-    return
-  }
-
-  const nextIndex = (index + matches.length) % matches.length
-  const currentMatch = matches[nextIndex]
-  const currentHighlight = new window.Highlight(currentMatch)
-  currentHighlight.priority = 1
-
-  window.CSS.highlights.set('findbarmatchcurrent', currentHighlight)
-  scrollFindbarMatchIntoView(currentMatch)
-
-  findbarMatchIndex.value = nextIndex + 1
-  findbarMatchCount.value = matches.length
-}
-
-/**
- * @param {Range} match
- */
-function scrollFindbarMatchIntoView(match) {
-  const rect = match.getBoundingClientRect()
-  if (rect.width === 0 && rect.height === 0) {
-    return
-  }
-
-  const targetBlockCenter = rect.top + rect.height / 2
-  const viewportBlockCenter = window.innerHeight / 2
-  window.scrollBy({
-    top: targetBlockCenter - viewportBlockCenter,
-    behavior: 'smooth'
-  })
-}
-
-/**
- * @param {Node} node
- * @returns {boolean}
- */
-function isFindbarTextNode(node) {
-  return node.parentElement?.closest('.findbar') != null
-}
-
-/**
- * @param {Node} node
- * @returns {boolean}
- */
-function isNonSearchableTextNode(node) {
-  return node.parentElement?.closest('datalist, input, option, optgroup, script, select, style, template, textarea') != null
-}
-
-/**
- * @param {Node} node
- * @returns {boolean}
- */
-function isHiddenTextNode(node) {
-  const element = node.parentElement
-  if (element == null) {
-    return true
-  }
-
-  const style = window.getComputedStyle(element)
-  return style.display === 'none' ||
-    style.visibility === 'hidden' ||
-    element.closest('[aria-hidden="true"]') != null
 }
 
 /**
@@ -4266,31 +2945,17 @@ function isExternalLink(link) {
  * @param {HTMLAnchorElement | null} link
  */
 function handleInternalLinkShortcut(event, link) {
-  if (!process.env.IS_ELECTRON || event.defaultPrevented || link === null || isExternalLink(link)) {
-    return false
-  }
-
-  const isMiddleClick = event.type === 'auxclick' && event.button === 1
-  const ctrlOrCmdPressed = process.platform === 'darwin' ? event.metaKey : event.ctrlKey
-  const isCtrlOrCmdClick = event.type === 'click' && event.button === 0 && ctrlOrCmdPressed && !event.altKey
-  if (!isMiddleClick && !isCtrlOrCmdClick) {
-    return false
-  }
-
-  const hashRoute = new URL(link.href).hash.slice(1)
-  if (!hashRoute.startsWith('/')) {
-    return false
-  }
-
-  const destination = router.resolve(hashRoute)
+  const shortcut = linkNavigationPlatform.internalLinkShortcut(event, link, window.location.origin)
+  if (shortcut === null) return false
+  const destination = router.resolve(shortcut.hashRoute)
   event.preventDefault()
   openInternalPath({
     path: destination.path,
     query: destination.query,
     title: link.dataset.tabTitle || undefined,
-    doCreateNewWindow: event.shiftKey,
-    doCreateNewTab: !event.shiftKey,
-    makeActive: isCtrlOrCmdClick
+    doCreateNewWindow: shortcut.doCreateNewWindow,
+    doCreateNewTab: shortcut.doCreateNewTab,
+    makeActive: shortcut.makeActive
   })
   return true
 }
@@ -4425,12 +3090,13 @@ function handleAuxClick(event) {
   // double dispatch seen with mousedown/mouseup for these buttons.
   // The web build has no logical tabs and the browser's own history still
   // works there, so those buttons are left alone.
-  if (process.env.IS_ELECTRON && (event.button === 3 || event.button === 4)) {
+  const historyOffset = linkNavigationPlatform.mouseHistoryOffset(event)
+  if (historyOffset !== null) {
     event.preventDefault()
 
     const tabId = activeTabId.value
     if (tabId != null) {
-      navigation.go(tabId, event.button === 3 ? -1 : 1)
+      navigation.go(tabId, historyOffset)
     }
   }
 }
@@ -4465,15 +3131,7 @@ function handleLinkClick(event, link) {
   const youtubeUrlPattern = /^https?:\/\/((www\.|m\.)?youtube\.com(\/embed)?|youtu\.be)\/(?!.*live_chat).*$/
   const isYoutubeLink = youtubeUrlPattern.test(href)
 
-  // Determine if we should open in new tab or new window.
-  // `process.platform` is `undefined` in the web build, where the app can be
-  // opened from any OS, so both modifiers count there.
-  const ctrlOrCmdPressed = process.env.IS_ELECTRON
-    ? ((process.platform !== 'darwin' && event.ctrlKey) || (process.platform === 'darwin' && event.metaKey))
-    : (event.ctrlKey || event.metaKey)
-  const isMiddleClick = event.type === 'auxclick' && event.button === 1
-  const doCreateNewTab = ctrlOrCmdPressed || isMiddleClick
-  const doCreateNewWindow = event.shiftKey
+  const { doCreateNewTab, doCreateNewWindow, isMiddleClick } = linkNavigationPlatform.linkDisposition(event)
 
   if (isYoutubeLink) {
     handleYoutubeLink(href, {
@@ -4486,238 +3144,12 @@ function handleLinkClick(event, link) {
   }
 }
 
-async function handleYoutubeLink(href, {
-  doCreateNewWindow = false,
-  doCreateNewTab = false,
-  isMiddleClick = false,
-  tabId = null
-} = {}) {
-  const result = await store.dispatch('getYoutubeUrlInfo', href)
-  // Middle clicks should open tabs in background (not make them active)
-  const makeActive = !isMiddleClick
-  const openPath = (options) => {
-    if (isElectron && tabId && !options.doCreateNewWindow && !options.doCreateNewTab) {
-      return navigation.push(tabId, { path: options.path, query: options.query })
-    }
-    return openInternalPath(options)
-  }
-
-  switch (result.urlType) {
-    case 'video': {
-      const { videoId, timestamp, playlistId, commentId, isShort } = result
-
-      const query = {}
-      if (isShort) {
-        query.short = 'true'
-      }
-      if (timestamp) {
-        query.timestamp = timestamp
-      }
-      if (playlistId && playlistId.length > 0) {
-        query.playlistId = playlistId
-      }
-      if (commentId) {
-        query.commentId = commentId
-      }
-
-      openPath({
-        path: `/watch/${videoId}`,
-        query,
-        doCreateNewWindow,
-        doCreateNewTab,
-        makeActive
-      })
-      break
-    }
-
-    case 'playlist': {
-      const { playlistId, query } = result
-
-      openPath({
-        path: `/playlist/${playlistId}`,
-        query,
-        doCreateNewWindow,
-        doCreateNewTab,
-        makeActive
-      })
-      break
-    }
-
-    case 'search': {
-      const { searchQuery, query } = result
-
-      openPath({
-        path: `/search/${encodeURIComponent(searchQuery)}`,
-        query,
-        doCreateNewWindow,
-        doCreateNewTab,
-        makeActive,
-        searchQueryText: searchQuery
-      })
-      break
-    }
-
-    case 'hashtag': {
-      const { hashtag } = result
-      openPath({
-        path: `/hashtag/${encodeURIComponent(hashtag)}`,
-        doCreateNewWindow,
-        doCreateNewTab,
-        makeActive
-      })
-      break
-    }
-
-    case 'post': {
-      const { postId, query } = result
-
-      openPath({
-        path: `/post/${postId}`,
-        query,
-        doCreateNewWindow,
-        doCreateNewTab,
-        makeActive
-      })
-      break
-    }
-
-    case 'channel': {
-      const { channelId, subPath, url } = result
-
-      openPath({
-        path: `/channel/${channelId}/${subPath}`,
-        doCreateNewWindow,
-        doCreateNewTab,
-        makeActive,
-        query: {
-          url
-        }
-      })
-      break
-    }
-
-    case 'trending':
-    case 'subscriptions':
-    case 'history':
-    case 'userplaylists':
-      openPath({
-        path: `/${result.urlType}`,
-        doCreateNewWindow,
-        doCreateNewTab,
-        makeActive
-      })
-      break
-
-    case 'invalid_url': {
-      // Do nothing
-      break
-    }
-
-    default: {
-      // Unknown URL type
-      showToast({
-        message: t('Unknown YouTube url type, cannot be opened in app'),
-        icon: ['fas', 'circle-exclamation'],
-      })
-    }
-  }
-}
-
 function enableOpenUrl() {
   return window.ftElectron.handleOpenUrl((url, tabId) => {
     if (url) {
       handleYoutubeLink(url, { tabId })
     }
   })
-}
-
-async function enableCapacitorIntegrations() {
-  const backButtonHandle = Capacitor.getPlatform() === 'android'
-    ? await CapacitorApp.addListener('backButton', handleAndroidBack)
-    : null
-  const urlHandle = await CapacitorApp.addListener('appUrlOpen', ({ url }) => {
-    if (url) handleYoutubeLink(url)
-  })
-  const shortcutHandle = await AppShortcuts.addListener('click', async ({ shortcutId }) => {
-    const path = getAppShortcutPath(shortcutId)
-    if (!path) return
-    await store.dispatch('hideSettingsWindow')
-    await openInternalPath({ path })
-  })
-  const stopShortcutUpdates = watch(locale, () => {
-    const shortcuts = createAppShortcuts({
-      subscriptions: t('Subscriptions.Subscriptions'),
-      userplaylists: t('Playlists'),
-      history: t('History.History'),
-      downloads: t('Settings.Download Settings.Download Settings'),
-    })
-    AppShortcuts.set({ shortcuts }).catch(error => console.error('Failed to update app shortcuts', error))
-  }, { immediate: true })
-  const removeReminderActions = await initializeCapacitorLiveReminderActions((videoId) => {
-    handleYoutubeLink(`https://www.youtube.com/watch?v=${videoId}`)
-  })
-  const removeMediaActions = await addAndroidMediaSessionActionListener(({ action, ...details }) => {
-    tabMediaCoordinator.dispatchAction(action, details)
-  })
-  const handleTaskRemoved = () => tabMediaCoordinator.pauseAll()
-  window.addEventListener('opentubex:android-task-removed', handleTaskRemoved)
-  let receivedAppState = false
-  let backgroundStateTimeout = null
-  let appStateVersion = 0
-  const appStateHandle = await CapacitorApp.addListener('appStateChange', ({ isActive }) => {
-    receivedAppState = true
-    appStateVersion += 1
-    const version = appStateVersion
-    playbackScreenWake?.setAppActive(isActive)
-    clearTimeout(backgroundStateTimeout)
-    if (Capacitor.getPlatform() === 'android' && !isActive) {
-      // The launcher briefly stops the PiP Activity while returning to its
-      // existing task. Do not hide or pause playback for that handoff.
-      const checkBackgroundState = async () => {
-        if (await isAndroidLauncherReturnInProgress()) {
-          if (version === appStateVersion) {
-            backgroundStateTimeout = setTimeout(checkBackgroundState, 10_000)
-          }
-          return
-        }
-        const state = await CapacitorApp.getState().catch(() => ({ isActive: false }))
-        if (version !== appStateVersion || state.isActive) return
-        setAndroidAppVisible(false)
-        if (shouldPauseAndroidPlaybackOnAppStateChange(
-          false,
-          store.getters.getContinuePlaybackWhenScreenIsLocked
-        )) tabMediaCoordinator.pauseAll()
-      }
-      backgroundStateTimeout = setTimeout(checkBackgroundState, 250)
-      return
-    }
-    setAndroidAppVisible(isActive)
-    if (shouldPauseAndroidPlaybackOnAppStateChange(
-      isActive,
-      store.getters.getContinuePlaybackWhenScreenIsLocked
-    )) tabMediaCoordinator.pauseAll()
-  })
-  const appState = await CapacitorApp.getState()
-  if (!receivedAppState) {
-    playbackScreenWake?.setAppActive(appState.isActive)
-    setAndroidAppVisible(appState.isActive)
-  }
-  const launch = await CapacitorApp.getLaunchUrl()
-  if (launch?.url) await handleYoutubeLink(launch.url)
-
-  return () => {
-    clearTimeout(backgroundStateTimeout)
-    stopShortcutUpdates()
-    shortcutHandle.remove()
-    backButtonHandle?.remove()
-    urlHandle.remove()
-    appStateHandle.remove()
-    window.removeEventListener('opentubex:android-task-removed', handleTaskRemoved)
-    playbackScreenWake?.setAppActive(false)
-    setAndroidAppVisible(null)
-    removeReminderActions()
-    removeMediaActions()
-  }
 }
 
 const windowTitle = computed(() => {

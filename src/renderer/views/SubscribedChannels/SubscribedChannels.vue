@@ -109,8 +109,7 @@ import FtCard from '../../components/ft-card/ft-card.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import FtInput from '../../components/FtInput/FtInput.vue'
 import FtSubscribeButton from '../../components/FtSubscribeButton/FtSubscribeButton.vue'
-import { invidiousGetChannelInfo, youtubeImageUrlToInvidious, invidiousImageUrlToInvidious } from '../../helpers/api/invidious'
-import { getLocalChannel, parseLocalChannelHeader } from '../../helpers/api/local'
+import { discoveryApi } from '../../helpers/api/discoveryApi'
 import { useListPagination } from '../../composables/useListPagination'
 import { ctrlFHandler } from '../../helpers/utils'
 import { useI18n } from 'vue-i18n'
@@ -120,12 +119,6 @@ const route = useRoute()
 const router = useRouter()
 const { locale } = useI18n()
 
-const re = {
-  url: /(.+=\w)\d+(.+)/,
-  ivToYt: /^.+ggpht\/(.+)/
-}
-const ytBaseURL = 'https://yt3.ggpht.com'
-const thumbnailSize = 176
 const channelsPerPage = 50
 let errorCount = 0
 
@@ -201,34 +194,7 @@ function filterChannels() {
 }
 
 function thumbnailURL(originalURL) {
-  // Imported subscriptions can carry anything here, including non-strings.
-  if (typeof originalURL !== 'string' || originalURL === '') { return null }
-  let newURL = originalURL
-  // Sometimes relative protocol URLs are passed in
-  if (originalURL.startsWith('//')) {
-    newURL = `https:${originalURL}`
-  }
-  // Subscriptions imported from other apps can carry an unusable thumbnail,
-  // which used to throw here and take the whole page render down with it.
-  let hostname
-  try {
-    hostname = new URL(newURL).hostname
-  } catch {
-    return null
-  }
-  if (hostname === 'yt3.ggpht.com' || hostname === 'yt3.googleusercontent.com') {
-    if (backendPreference.value === 'invidious') { // YT to IV
-      newURL = youtubeImageUrlToInvidious(newURL, currentInvidiousInstanceUrl.value)
-    }
-  } else {
-    if (backendPreference.value === 'local') { // IV to YT
-      newURL = newURL.replace(re.ivToYt, `${ytBaseURL}/$1`)
-    } else { // IV to IV
-      newURL = invidiousImageUrlToInvidious(newURL, currentInvidiousInstanceUrl.value)
-    }
-  }
-
-  return newURL.replace(re.url, `$1${thumbnailSize}$2`)
+  return discoveryApi.formatSubscriptionThumbnail(originalURL, backendPreference.value, currentInvidiousInstanceUrl.value)
 }
 
 function hasUsableThumbnail(originalURL) {
@@ -247,30 +213,19 @@ function handleThumbnailError(channel) {
 
 function updateThumbnail(channel) {
   errorCount += 1
-  if (backendPreference.value === 'local') {
-    // avoid too many concurrent requests
-    setTimeout(() => {
-      getLocalChannel(channel.id).then(response => {
-        if (!response.alert) {
-          store.dispatch('updateSubscriptionDetails', {
-            channelThumbnailUrl: thumbnailURL(parseLocalChannelHeader(response).thumbnailUrl),
-            channelName: channel.name,
-            channelId: channel.id
-          })
-        }
-      })
-    }, errorCount * 500)
-  } else {
-    setTimeout(() => {
-      invidiousGetChannelInfo(channel.id).then(response => {
+  const provider = backendPreference.value
+  // Avoid too many concurrent requests.
+  setTimeout(() => {
+    discoveryApi.getSubscriptionChannelThumbnail(channel.id, provider).then(url => {
+      if (url !== null) {
         store.dispatch('updateSubscriptionDetails', {
-          channelThumbnailUrl: thumbnailURL(response.authorThumbnails[0].url),
+          channelThumbnailUrl: thumbnailURL(url),
           channelName: channel.name,
           channelId: channel.id
         })
-      })
-    }, errorCount * 500)
-  }
+      }
+    })
+  }, errorCount * 500)
 }
 
 function handleQueryChange(val) {

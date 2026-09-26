@@ -132,7 +132,7 @@ import { useTabContext } from '../../tabs/TabContext'
 
 import { getRelativeTimeFromDate, showApiErrorToast } from '../../helpers/utils'
 import { useTabToast } from '../../composables/useTabToast'
-import { getLocalTrending } from '../../helpers/api/local'
+import { discoveryApi } from '../../helpers/api/discoveryApi'
 import { KeyboardShortcuts } from '../../../constants'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
 import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
@@ -181,7 +181,7 @@ const currentTabStorageKey = tabId ? `Trending/${tabId}/currentTab` : 'Trending/
 const currentTab = ref('gaming')
 
 const isBackendSupported = computed(() => {
-  return process.env.SUPPORTS_LOCAL_API && (backendFallback.value || backendPreference.value === 'local')
+  return discoveryApi.supportsTrending(process.env.SUPPORTS_LOCAL_API, backendPreference.value, backendFallback.value)
 })
 
 const currentErrorMessage = computed(() => {
@@ -236,7 +236,7 @@ async function getTrendingInfoLocal(category) {
   errorMessages.value[category] = null
 
   try {
-    const results = await getLocalTrending(region.value, category)
+    const results = await discoveryApi.getTrending(region.value, category)
 
     store.commit('setTrendingCache', { value: results, page: category })
     store.commit('setLastTrendingRefreshTimestamp', { page: category, timestamp: new Date() })

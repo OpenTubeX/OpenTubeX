@@ -4,18 +4,19 @@ import test from 'node:test'
 import { runInNewContext } from 'node:vm'
 
 const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
+const metadataSource = await readFile(new URL('../../src/renderer/views/Watch/watchVideoMetadata.js', import.meta.url), 'utf8')
 const connectionHandler = source.slice(source.indexOf('    handleDownloadConnectionChange('), source.indexOf('    updateAndroidBackgroundPlaybackFormat()'))
 
 for (const expression of ['createLocalDashManifest(result, true)', 'createLocalDashManifest(result)', 'createInvidiousDashManifest(result)']) {
   test(`late ${expression} does not replace downloaded audio after connection loss`, async () => {
-    const awaitIndex = source.indexOf(`await this.${expression}`)
+    const awaitIndex = metadataSource.indexOf(`await this.${expression}`)
     assert.notEqual(awaitIndex, -1)
-    const start = source.lastIndexOf('\n', awaitIndex) + 1
-    const end = source.indexOf('this.manifestMimeType = MANIFEST_TYPE_DASH', awaitIndex) + 'this.manifestMimeType = MANIFEST_TYPE_DASH'.length
+    const start = metadataSource.lastIndexOf('\n', awaitIndex) + 1
+    const end = metadataSource.indexOf('this.manifestMimeType = MANIFEST_TYPE_DASH', awaitIndex) + 'this.manifestMimeType = MANIFEST_TYPE_DASH'.length
     const { load, handleDownloadConnectionChange } = runInNewContext(`({
       ${connectionHandler}
       async load(loadGeneration, videoId) {
-        ${source.slice(start, end)}
+        ${metadataSource.slice(start, end)}
       }
     })`, { result: {}, MANIFEST_TYPE_DASH: 'application/dash+xml' })
     let resolveManifest
@@ -48,13 +49,13 @@ for (const expression of ['createLocalDashManifest(result, true)', 'createLocalD
 }
 
 test('a stale failed DVR manifest does not fall back to an online source', async () => {
-  const awaitIndex = source.indexOf('await this.createLocalDashManifest(result, true)')
-  const start = source.lastIndexOf('try {', awaitIndex)
-  const end = source.indexOf('          if (useRemoteManifest)', awaitIndex)
+  const awaitIndex = metadataSource.indexOf('await this.createLocalDashManifest(result, true)')
+  const start = metadataSource.lastIndexOf('try {', awaitIndex)
+  const end = metadataSource.indexOf('        if (useRemoteManifest)', awaitIndex)
   const { load } = runInNewContext(`({
     async load(loadGeneration, videoId) {
       let useRemoteManifest = true
-      ${source.slice(start, end).replace(/\s*}\s*}\s*$/, '')}
+      ${metadataSource.slice(start, end).replace(/\s*}\s*}\s*$/, '')}
       return useRemoteManifest
     }
   })`, { result: {}, MANIFEST_TYPE_DASH: 'application/dash+xml', console: { error() {} } })
@@ -73,9 +74,9 @@ test('a stale failed DVR manifest does not fall back to an online source', async
 
 for (const backend of ['Local', 'Invidious']) {
   test(`late ${backend} recovery completion does not restart downloaded playback`, async () => {
-    const loaderStart = source.indexOf(`    getVideoInformation${backend}:`)
-    const loaderEnd = source.indexOf(backend === 'Local' ? '    getVideoInformationInvidious:' : '    async runIpBlockRecoveryScriptAndReload()', loaderStart)
-    const loader = source.slice(loaderStart, loaderEnd)
+    const loaderStart = metadataSource.indexOf(`  getVideoInformation${backend}:`)
+    const loaderEnd = metadataSource.indexOf(backend === 'Local' ? '  getVideoInformationInvidious:' : '\n}', loaderStart)
+    const loader = metadataSource.slice(loaderStart, loaderEnd)
     const start = loader.lastIndexOf('const didReload = await this.runIpBlockRecoveryScriptAndReload()')
     const end = loader.indexOf('if (this.finishDownloadedPlaybackWithoutMetadata()) return', start) + 'if (this.finishDownloadedPlaybackWithoutMetadata()) return'.length
     const { recover, handleDownloadConnectionChange } = runInNewContext(`({

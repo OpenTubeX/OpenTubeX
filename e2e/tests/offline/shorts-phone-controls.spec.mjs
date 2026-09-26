@@ -560,6 +560,8 @@ test('short phone screens can reach every Shorts rail action with navigation pre
 test('medium-width Shorts retain their player height without bottom tabs', async ({ app, page }) => {
   await openShort({ app, page })
   await setWindowSize(app, page, { width: 720, height: 820 })
+  await expect.poll(() => page.evaluate(() => window.innerHeight)).toBe(820)
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
   const player = page.locator('.videoLayout.shortsPlayerActive .videoPlayer')
   const baseline = await player.boundingBox()
   await page.evaluate(() => document.querySelector('.app').classList.add('capacitorPhoneLayout', 'capacitorTabs'))

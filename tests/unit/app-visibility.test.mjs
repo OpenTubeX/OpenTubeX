@@ -1,12 +1,11 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { readFile } from 'node:fs/promises'
-import vm from 'node:vm'
 import { setImmediate, setTimeout as delay } from 'node:timers/promises'
 
 import { isAppHidden, setAndroidAppVisible } from '../../src/renderer/helpers/appVisibility.js'
 import { resolveAndroidBackgroundPlaybackFormat } from '../../src/renderer/helpers/player/androidBackgroundPlayback.js'
 import { createPlaybackScreenWake } from '../../src/renderer/helpers/playbackScreenWake.js'
+import { enableCapacitorIntegrations } from '../../src/renderer/helpers/capacitorIntegrations.js'
 
 test('Android background playback follows Home even when Chromium stays visible for a refresh', () => {
   const originalDocument = globalThis.document
@@ -45,9 +44,6 @@ test('Android background playback follows Home even when Chromium stays visible 
 
 for (const eventFirst of [false, true]) {
   test(`Android initial visibility preserves ${eventFirst ? 'a newer app-state event' : 'the initial snapshot without an event'}`, async () => {
-    const source = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
-    const start = source.indexOf('async function enableCapacitorIntegrations() {')
-    const integration = source.slice(start, source.indexOf('\nconst windowTitle', start))
     const initialState = Promise.withResolvers()
     const requestedState = Promise.withResolvers()
     const changes = []
@@ -65,7 +61,7 @@ for (const eventFirst of [false, true]) {
     let backPresses = 0
     let nativeAppActive = true
     let requestedInitialState = false
-    const enable = vm.runInNewContext(`${integration}\nenableCapacitorIntegrations`, {
+    const runtime = {
       window,
       Capacitor: { getPlatform: () => 'android' },
       handleAndroidBack: () => { backPresses++ },
@@ -99,8 +95,8 @@ for (const eventFirst of [false, true]) {
       tabMediaCoordinator: { pauseAll: () => { pauses++ } },
       setTimeout,
       clearTimeout,
-    })
-    const enabling = enable()
+    }
+    const enabling = enableCapacitorIntegrations(integrationApp(runtime), runtime)
     await requestedState.promise
     if (eventFirst) listener({ isActive: false })
     initialState.resolve({ isActive: true })
@@ -136,11 +132,8 @@ for (const eventFirst of [false, true]) {
 }
 
 test('Capacitor integrations do not register the Android back button on iOS', async () => {
-  const source = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
-  const start = source.indexOf('async function enableCapacitorIntegrations() {')
-  const integration = source.slice(start, source.indexOf('\nconst windowTitle', start))
   const listeners = []
-  const enable = vm.runInNewContext(`${integration}\nenableCapacitorIntegrations`, {
+  const runtime = {
     window: new EventTarget(),
     Capacitor: { getPlatform: () => 'ios' },
     playbackScreenWake: createPlaybackScreenWake({ async keepAwake() {}, async allowSleep() {} }),
@@ -159,9 +152,21 @@ test('Capacitor integrations do not register the Android back button on iOS', as
     addAndroidMediaSessionActionListener: async () => () => {},
     setAndroidAppVisible() {},
     clearTimeout,
-  })
+  }
 
-  const cleanup = await enable()
+  const cleanup = await enableCapacitorIntegrations(integrationApp(runtime), runtime)
   assert.ok(!listeners.includes('backButton'))
   cleanup()
 })
+
+function integrationApp(runtime) {
+  return {
+    appWindow: runtime.window,
+    locale: runtime.locale,
+    t: runtime.t,
+    store: runtime.store,
+    handleAndroidBack: runtime.handleAndroidBack,
+    handleYoutubeLink: runtime.handleYoutubeLink,
+    openInternalPath: runtime.openInternalPath,
+  }
+}

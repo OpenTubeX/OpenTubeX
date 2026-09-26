@@ -55,6 +55,7 @@ import {
   normalizeNavigationItems,
 } from '../../../navigationItems.js'
 import { migrateStoredAiVideoSummarySetting, migrateSyncServerUrl } from '../../helpers/settings-migrations.js'
+import { getLocaleLoadSequence, resolveLocalePreference } from '../../helpers/settingLocaleSelection.js'
 
 const CHANNEL_SETTINGS_SYNC_MIGRATION_SETTING = 'channelSettingsSyncMigration'
 const TUTORIAL_STATE_SETTING_IDS = new Set([
@@ -624,68 +625,15 @@ const sideEffectHandlers = {
 
   currentLocale: async ({ dispatch }, value) => {
     const fallbackLocale = 'en-US'
-
-    let targetLocale = value
-    if (value === 'system') {
-      const systemLocaleName = (await getSystemLocale()).replace('_', '-') // ex: en-US
-      const systemLocaleSplit = systemLocaleName.split('-') // ex: en
-      const targetLocaleOptions = allLocales.filter((locale) => {
-        // filter out other languages
-        const localeLang = locale.split('-')[0]
-        return localeLang.includes(systemLocaleSplit[0])
-      }).sort((aLocaleName, bLocaleName) => {
-        const aLocale = aLocaleName.split('-') // ex: [en, US]
-        const bLocale = bLocaleName.split('-')
-
-        if (aLocaleName === systemLocaleName) { // country & language match, prefer a
-          return -1
-        } else if (bLocaleName === systemLocaleName) { // country & language match, prefer b
-          return 1
-        } else if (aLocale.length === 1) { // no country code for a, prefer a
-          return -1
-        } else if (bLocale.length === 1) { // no country code for b, prefer b
-          return 1
-        } else { // a & b have different country code from system, sort alphabetically
-          return aLocaleName.localeCompare(bLocaleName)
-        }
-      })
-
-      if (targetLocaleOptions.length > 0) {
-        targetLocale = targetLocaleOptions[0]
-      } else {
-        // Go back to default value if locale is unavailable
-        targetLocale = fallbackLocale
-        // Translating this string isn't necessary
-        // because the user will always see it in the default locale
-        // (in this case, English (US))
-        showToast({ message: `Locale not found, defaulting to ${fallbackLocale}`, icon: ['fas', 'circle-exclamation'] })
-      }
+    const systemLocale = value === 'system' ? await getSystemLocale() : ''
+    const { locale: targetLocale, unavailable } = resolveLocalePreference(value, systemLocale, allLocales)
+    if (unavailable) {
+      // This message is shown in the default locale when no translation is available.
+      showToast({ message: `Locale not found, defaulting to ${fallbackLocale}`, icon: ['fas', 'circle-exclamation'] })
     }
 
     // Always finish loading the English fallback before the app is ready.
-    const loadPromises = [loadLocale(fallbackLocale)]
-
-    // "es" is used as a fallback for "es-AR" and "es-MX"
-    if (targetLocale === 'es-AR' || targetLocale === 'es-MX') {
-      loadPromises.push(
-        loadLocale('es')
-      )
-    }
-
-    // "pt" is used as a fallback for "pt-PT" and "pt-BR"
-    if (targetLocale === 'pt-PT' || targetLocale === 'pt-BR') {
-      loadPromises.push(
-        loadLocale('pt')
-      )
-    }
-
-    if (targetLocale !== fallbackLocale) {
-      loadPromises.push(
-        loadLocale(targetLocale)
-      )
-    }
-
-    await Promise.allSettled(loadPromises)
+    await Promise.allSettled(getLocaleLoadSequence(targetLocale).map(loadLocale))
 
     i18n.global.locale.value = targetLocale
     await dispatch('getRegionData', targetLocale)
@@ -1498,6 +1446,14 @@ const customActions = {
 
           case SyncEvents.HISTORY.UPDATE_PLAYLIST:
             commit('updateRecordLastViewedPlaylistIdInHistoryCache', data)
+            break
+
+          case SyncEvents.HISTORY.UNSET_PLAYLIST_FOR_VIDEOS:
+            commit('unsetRecordsLastViewedPlaylistIdInHistoryCache', data)
+            break
+
+          case SyncEvents.HISTORY.UNSET_PLAYLISTS:
+            commit('unsetRecordsLastViewedPlaylistIdsInHistoryCache', data)
             break
 
           case SyncEvents.HISTORY.APPLY_SYNC_CHANGES:

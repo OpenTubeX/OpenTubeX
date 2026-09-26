@@ -362,6 +362,12 @@ async function readPlaylist(app, id) {
   return records.filter((record) => record._id === id).at(-1)
 }
 
+async function focusWindow(app, page) {
+  const browserWindow = await app.electronApp.browserWindow(page)
+  await browserWindow.evaluate(window => window.focus())
+  await expect.poll(() => browserWindow.evaluate(window => window.isFocused())).toBe(true)
+}
+
 test.describe('rounded action popovers', () => {
   test.use({
     seed: {
@@ -393,6 +399,10 @@ test.describe('video downloads', () => {
         ytDlpFfmpegPath: '/bin/false'
       }
     }
+  })
+
+  test.beforeEach(async ({ app, page }) => {
+    await focusWindow(app, page)
   })
 
   test('sends plain download options over IPC', async ({ page }) => {
@@ -1315,6 +1325,7 @@ test.describe('video downloads', () => {
     await goTo(otherWindow, 'downloads')
 
     await page.bringToFront()
+    await focusWindow(app, page)
     await goTo(page, 'history')
     const video = page.locator('.ft-list-video').first()
     await video.hover()
@@ -1892,6 +1903,39 @@ test.describe('list video actions', () => {
       const favorites = await readPlaylist(app, 'favorites')
       return favorites?.videos?.length
     }).toBe(0)
+  })
+
+  test('unlinking playlists clears history in other windows', async ({ app, page }) => {
+    await goTo(page, 'history')
+    const dispatch = (window, action, payload) => window.evaluate(async ([action, payload]) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch(action, payload)
+    }, [action, payload])
+    const playlistId = window => window.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getHistoryCacheById.eeeeeeeeeee?.lastViewedPlaylistId
+    })
+    const link = () => dispatch(page, 'updateLastViewedPlaylist', {
+      videoId: 'eeeeeeeeeee',
+      lastViewedPlaylistId: 'favorites',
+      lastViewedPlaylistType: 'user',
+      lastViewedPlaylistItemId: 'item'
+    })
+
+    await link()
+    const otherWindow = await openNewWindowFromTabBar(app, page)
+    await waitForAppReady(otherWindow)
+    await expect.poll(() => playlistId(otherWindow)).toBe('favorites')
+
+    await dispatch(page, 'unsetLastViewedPlaylistForVideos', {
+      videoIds: ['eeeeeeeeeee'], lastViewedPlaylistId: 'favorites'
+    })
+    await expect.poll(() => playlistId(otherWindow)).toBeUndefined()
+
+    await link()
+    await expect.poll(() => playlistId(otherWindow)).toBe('favorites')
+    await dispatch(page, 'unsetLastViewedPlaylists', ['favorites'])
+    await expect.poll(() => playlistId(otherWindow)).toBeUndefined()
   })
 
   test('rapidly clicking a playlist row does not add duplicate entries', async ({ app, page }) => {

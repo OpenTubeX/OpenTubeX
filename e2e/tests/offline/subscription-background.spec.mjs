@@ -71,16 +71,11 @@ for (const windowAction of ['destroy', 'hide']) {
 }
 
 test('turning off background refresh makes closing the last window quit', async ({ app, page }) => {
+  await expect.poll(() => app.electronApp.evaluate(({ app }) => app.getAppMetrics().some(process => process.name === 'Subscription refresh'))).toBe(true)
   await page.evaluate(async () => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     await store.dispatch('updateEnableClosedAppSubscriptionRefresh', false)
   })
-  // Wait for the settings watcher and its native configuration handshake.
-  await page.evaluate(() => window.ftElectron.subscriptionAutoRefresh.configureBackground({ enabled: false, profiles: [], intervals: {}, requests: {} }))
-  await expect.poll(() => app.electronApp.evaluate(({ app }) => app.getAppMetrics().some(process => process.name === 'Subscription refresh'))).toBe(false)
-  await page.evaluate(() => window.ftElectron.subscriptionAutoRefresh.configureBackground({ enabled: true, profiles: [], intervals: {}, requests: {} }))
-  await expect.poll(() => app.electronApp.evaluate(({ app }) => app.getAppMetrics().some(process => process.name === 'Subscription refresh'))).toBe(true)
-  await page.evaluate(() => window.ftElectron.subscriptionAutoRefresh.configureBackground({ enabled: false, profiles: [], intervals: {}, requests: {} }))
   await expect.poll(() => app.electronApp.evaluate(({ app }) => app.getAppMetrics().some(process => process.name === 'Subscription refresh'))).toBe(false)
   const closed = app.electronApp.waitForEvent('close')
   await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].close())

@@ -21,7 +21,12 @@ for (const zoom of [1, 0.95]) {
       // bounds match. Compare both the bounds and the painted background.
       const buttons = tutorial.locator('.tutorialActions .btn')
       await expect(buttons).toHaveCount(2)
-      const metrics = await buttons.evaluateAll(elements => elements.map(element => {
+      await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+      await buttons.evaluateAll(async elements => {
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        await Promise.all(elements.flatMap(element => element.getAnimations()).map(animation => animation.finished))
+      })
+      const readMetrics = () => buttons.evaluateAll(elements => elements.map(element => {
         const style = getComputedStyle(element)
         const bounds = element.getBoundingClientRect()
         const borderBlends = style.borderTopColor === style.backgroundColor ||
@@ -32,6 +37,11 @@ for (const zoom of [1, 0.95]) {
           visibleHeight: bounds.height - (borderBlends ? 0 : borderHeight)
         }
       }))
+      await expect.poll(async () => {
+        const [neutral, colored] = await readMetrics()
+        return Math.abs(neutral.visibleHeight - colored.visibleHeight)
+      }).toBeLessThan(0.05)
+      const metrics = await readMetrics()
       expect(metrics[0].height).toBeCloseTo(metrics[1].height, 1)
       expect(metrics[0].visibleHeight).toBeCloseTo(metrics[1].visibleHeight, 1)
       await testInfo.attach(`Tutorial buttons in ${theme} theme at ${zoom} scale`, {
