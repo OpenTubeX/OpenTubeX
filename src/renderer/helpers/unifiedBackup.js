@@ -126,7 +126,7 @@ export function validateUnifiedBackup(data) {
   const sections = {
     profiles: record => object(record) && typeof record._id === 'string' && (typeof record.name === 'string' || record.name === null) && Array.isArray(record.subscriptions) && record.subscriptions.every(channel => object(channel) && typeof channel.id === 'string'),
     playlists: record => object(record) && typeof record._id === 'string' && typeof record.playlistName === 'string' && Array.isArray(record.videos) && record.videos.every(video => object(video) && typeof video.videoId === 'string'),
-    history: record => object(record) && typeof record.videoId === 'string' && typeof record.timeWatched === 'number',
+    history: record => object(record) && typeof record.videoId === 'string' && Number.isFinite(record.timeWatched) && record.timeWatched >= 0 && (record.watchProgress === undefined || (Number.isFinite(record.watchProgress) && record.watchProgress >= 0)),
     searchHistory: record => object(record) && typeof record._id === 'string' && typeof record.query === 'string',
     watchStats: record => object(record) && /^\d{4}-\d{2}-\d{2}$/.test(record.date) && Number.isFinite(record.seconds) && record.seconds >= 0,
   }

@@ -43,6 +43,13 @@ test('rejects malformed records before restoring data', async () => {
   })), /Invalid backup playlists/)
 })
 
+test('rejects non-finite history timestamps and progress', async () => {
+  const files = Object.fromEntries(BACKUP_SECTIONS.map(section => [`${section}.json`, strToU8(JSON.stringify(data[section]))]))
+  files['manifest.json'] = strToU8('{"format":"opentubex-backup","version":1}')
+  files['history.json'] = strToU8('[{"videoId":"abcdefghijk","timeWatched":1e400,"watchProgress":1e400}]')
+  await assert.rejects(readUnifiedBackup(new Blob([zipSync(files)])), /Invalid backup history/)
+})
+
 test('rejects backup versions the importer cannot read', async () => {
   const files = Object.fromEntries(BACKUP_SECTIONS.map(section => [`${section}.json`, strToU8(JSON.stringify(data[section]))]))
   files['manifest.json'] = strToU8('{"format":"opentubex-backup","version":2}')
