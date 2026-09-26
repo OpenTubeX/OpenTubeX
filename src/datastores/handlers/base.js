@@ -7,6 +7,7 @@ import { createRecommendationStore } from '../recommendations'
 import { mergeSubscriptionSeenVideos, parseSubscriptionSeenVideos, nextSubscriptionSeenTimestamp } from '../../subscriptionSeenVideos'
 import { preserveSubscriptionSeenEntries, subscriptionFeedField } from '../../subscriptionFeedState'
 import { mergeSubscriptionSeenPosts, parseSubscriptionSeenPosts } from '../../subscriptionSeenPosts'
+import { mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, validateBackupWatchStats } from '../../renderer/helpers/unifiedBackup'
 
 const recommendations = createRecommendationStore(db.recommendations)
 
@@ -405,20 +406,67 @@ class History {
 class WatchStats {
   static migrationId = 'history-watch-time-v1'
   static defaultChannelKey = '__default__'
+  static pendingWrite = Promise.resolve()
+
+  static runWrite(operation) {
+    this.pendingWrite = this.pendingWrite.catch(() => {}).then(operation)
+    return this.pendingWrite
+  }
 
   static find() {
     return db.watchStats.findAsync({ date: { $exists: true } }).sort({ date: 1 })
   }
 
+  static mergeBackup(backup) {
+    validateBackupWatchStats(backup)
+    return this.runWrite(async () => {
+      const currentRecords = await this.find()
+      const currentAdjustment = await this.getHistoricalAdjustment()
+      const byDate = new Map(currentRecords.map(record => [record.date, record]))
+      for (const imported of backup.records) {
+        byDate.set(imported.date, mergeBackupWatchStatsRecord(byDate.get(imported.date), imported))
+      }
+      const records = [...byDate.values()]
+      const retainedCurrent = currentRecords.filter(record => byDate.get(record.date) === record)
+      const retainedImported = backup.records.filter(record => byDate.get(record.date) === record)
+      const adjustment = mergeBackupWatchStatsAdjustment(
+        retainedCurrent, currentAdjustment, retainedImported, backup.adjustment
+      )
+      const currentByDate = new Map(currentRecords.map(record => [record.date, record]))
+      for (const record of records) {
+        const current = currentByDate.get(record.date)
+        if (record === current) continue
+        const withoutImportedId = { ...record }
+        delete withoutImportedId._id
+        await db.watchStats.updateAsync(
+          { date: record.date },
+          current ? { ...withoutImportedId, _id: current._id } : withoutImportedId,
+          { upsert: true }
+        )
+      }
+      await db.watchStats.updateAsync(
+        { _id: this.migrationId },
+        { _id: this.migrationId, completedAt: Date.now(), hadEstimates: records.some(record => record.historyEstimateApplied === true), adjustment },
+        { upsert: true }
+      )
+      this.migrationPromise = null
+      return { records, adjustment }
+    })
+  }
+
   static addWatchTime(date, seconds) {
-    return db.watchStats.updateAsync(
+    return this.runWrite(() => db.watchStats.updateAsync(
       { date },
       { $inc: { seconds }, $set: { date } },
       { upsert: true }
-    )
+    ))
   }
 
-  static async addHistoricalWatchTime(date, secondsByChannel) {
+  static addHistoricalWatchTime(date, secondsByChannel) {
+    return this.runWrite(() => this._addHistoricalWatchTime(date, secondsByChannel))
+  }
+
+  static async _addHistoricalWatchTime(date, secondsByChannel) {
     const existingRecord = await db.watchStats.findOneAsync({ date })
     if (existingRecord?.historyEstimateApplied) { return true }
 
@@ -489,7 +537,11 @@ class WatchStats {
     return estimatesByDate
   }
 
-  static async adjustHistoricalWatchTime(defaultSpeed, channelPlaybackSpeeds = {}) {
+  static adjustHistoricalWatchTime(defaultSpeed, channelPlaybackSpeeds = {}) {
+    return this.runWrite(() => this._adjustHistoricalWatchTime(defaultSpeed, channelPlaybackSpeeds))
+  }
+
+  static async _adjustHistoricalWatchTime(defaultSpeed, channelPlaybackSpeeds = {}) {
     const normalizedDefaultSpeed = Number(defaultSpeed)
     if (!Number.isFinite(normalizedDefaultSpeed) || normalizedDefaultSpeed <= 0) {
       throw new Error('watch stats: invalid historical playback speed')
@@ -554,7 +606,11 @@ class WatchStats {
     return { records: await this.find(), ...adjustment }
   }
 
-  static async deleteAll() {
+  static deleteAll() {
+    return this.runWrite(() => this._deleteAll())
+  }
+
+  static async _deleteAll() {
     await db.watchStats.removeAsync({ date: { $exists: true } }, { multi: true })
     await db.watchStats.updateAsync(
       { _id: this.migrationId },
@@ -565,7 +621,7 @@ class WatchStats {
   }
 
   static migrateHistory() {
-    this.migrationPromise ??= this._migrateHistory()
+    this.migrationPromise ??= this.runWrite(() => this._migrateHistory())
     return this.migrationPromise
   }
 
@@ -579,7 +635,7 @@ class WatchStats {
 
     let hadEstimates = false
     for (const [date, secondsByChannel] of secondsByDate) {
-      const imported = await this.addHistoricalWatchTime(date, secondsByChannel)
+      const imported = await this._addHistoricalWatchTime(date, secondsByChannel)
       hadEstimates ||= imported
     }
 

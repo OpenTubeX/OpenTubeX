@@ -1027,6 +1027,14 @@ Settings:
     Add: Legg til
     Remove: Fjern
   Data Settings:
+    Complete backup: "Fullstendig tryggleikskopi"
+    Import backup: "Importer tryggleikskopi"
+    Export backup: "Eksporter tryggleikskopi"
+    Backup description: "Lagre profilar, spelelister, historikk, statistikk og overførbare innstillingar i éi ZIP-fil. Importeringa flettar dei saman med data som allereie finst på denne eininga."
+    Select backup data: "Vel dataa som skal importerast"
+    Profiles and subscriptions: "Profilar og abonnement"
+    Backup exported: "Tryggleikskopien vart eksportert"
+    Backup imported: "Tryggleikskopien vart importert"
     Import YouTube Takeout ZIP: "Importer YouTube Takeout-ZIP"
     Select Takeout data: "Vel dataa som skal importerast"
     Import selected data: "Importer valde data"

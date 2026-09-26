@@ -884,6 +884,14 @@ Settings:
     Show Bottom Right Actions Dock: Sýna aðgerðastiku neðst til hægri
     Paused Interface Hide Delay: Töf áður en viðmót er falið í hléi
   Data Settings:
+    Complete backup: "Fullt öryggisafrit"
+    Import backup: "Flytja inn öryggisafrit"
+    Export backup: "Flytja út öryggisafrit"
+    Backup description: "Vistaðu notandasnið, spilunarlista, sögu, tölfræði og yfirfæranlegar stillingar í einni ZIP-skrá. Innflutningur sameinar þau gögnum sem þegar eru í þessu tæki."
+    Select backup data: "Veldu gögnin sem á að flytja inn"
+    Profiles and subscriptions: "Notandasnið og áskriftir"
+    Backup exported: "Afritun hefur verið flutt út"
+    Backup imported: "Afritun innflutt"
     Import YouTube Takeout ZIP: "Flytja inn YouTube Takeout ZIP"
     Select Takeout data: "Veldu gögnin sem á að flytja inn"
     Import selected data: "Flytja inn valin gögn"

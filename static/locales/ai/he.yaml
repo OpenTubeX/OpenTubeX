@@ -895,6 +895,14 @@ Settings:
     Add: הוספה
     Remove: הסרה
   Data Settings:
+    Complete backup: "גיבוי מלא"
+    Import backup: "ייבוא גיבוי"
+    Export backup: "ייצוא גיבוי"
+    Backup description: "שמור פרופילים, פלייליסטים, היסטוריה, סטטיסטיקות והגדרות הניתנות להעברה בקובץ ZIP אחד. הייבוא ממזג אותם עם נתונים שכבר נמצאים במכשיר זה."
+    Select backup data: "בחר את הנתונים לייבוא"
+    Profiles and subscriptions: "פרופילים ומנויים"
+    Backup exported: "הגיבוי יוצא בהצלחה"
+    Backup imported: "הגיבוי יובא בהצלחה"
     Import YouTube Takeout ZIP: "ייבוא קובץ ZIP של YouTube Takeout"
     Select Takeout data: "בחרו את הנתונים לייבוא"
     Import selected data: "ייבוא הנתונים שנבחרו"

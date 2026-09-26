@@ -880,6 +880,14 @@ Settings:
     Show Bottom Right Actions Dock: 右下の操作ドックを表示
     Paused Interface Hide Delay: 一時停止中のインターフェースを隠すまでの時間
   Data Settings:
+    Complete backup: "完全なバックアップ"
+    Import backup: "バックアップをインポート"
+    Export backup: "バックアップをエクスポート"
+    Backup description: "プロフィール、プレイリスト、履歴、統計、引き継げる設定を1つのZIPファイルに保存します。インポートすると、この端末の既存データと統合されます。"
+    Select backup data: "インポートするデータを選択"
+    Profiles and subscriptions: "プロフィールとサブスクリプション"
+    Backup exported: "バックアップが正常にエクスポートされました"
+    Backup imported: "バックアップが正常にインポートされました"
     Import YouTube Takeout ZIP: "YouTube Takeout の ZIP をインポート"
     Select Takeout data: "インポートするデータを選択"
     Import selected data: "選択したデータをインポート"

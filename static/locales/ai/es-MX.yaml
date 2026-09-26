@@ -1035,6 +1035,14 @@ Settings:
     Add: Agregar
     Remove: Eliminar
   Data Settings:
+    Complete backup: "Copia de seguridad completa"
+    Import backup: "Importar copia de seguridad"
+    Export backup: "Exportar copia de seguridad"
+    Backup description: "Guarda perfiles, listas de reproducción, historial, estadísticas y configuraciones transferibles en un archivo ZIP. La importación los fusiona con los datos que ya están en este dispositivo."
+    Select backup data: "Selecciona los datos a importar"
+    Profiles and subscriptions: "Perfiles y suscripciones"
+    Backup exported: "Copia de seguridad exportada con éxito"
+    Backup imported: "Copia de seguridad importada con éxito"
     Import YouTube Takeout ZIP: "Importar ZIP de YouTube Takeout"
     Select Takeout data: "Selecciona los datos que quieres importar"
     Import selected data: "Importar datos seleccionados"

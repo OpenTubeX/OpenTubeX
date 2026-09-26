@@ -72,8 +72,10 @@ const actions = {
 
       await DBSearchHistoryHandlers.overwrite(historyItems)
       commit('setSearchHistoryEntries', historyItems)
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+      return false
     }
   },
 

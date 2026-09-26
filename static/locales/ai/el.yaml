@@ -895,6 +895,14 @@ Settings:
     Add: Προσθήκη
     Remove: Αφαίρεση
   Data Settings:
+    Complete backup: "Ολοκλήρωση αντιγράφου ασφαλείας"
+    Import backup: "Εισαγωγή αντιγράφου ασφαλείας"
+    Export backup: "Εξαγωγή αντιγράφου ασφαλείας"
+    Backup description: "Αποθηκεύστε προφίλ, λίστες αναπαραγωγής, ιστορικό, στατιστικά στοιχεία και μεταβιβάσιμες ρυθμίσεις σε ένα αρχείο ZIP. Η εισαγωγή τους συγχωνεύει με δεδομένα που υπάρχουν ήδη σε αυτήν τη συσκευή."
+    Select backup data: "Επιλέξτε τα δεδομένα για εισαγωγή"
+    Profiles and subscriptions: "Προφίλ και συνδρομές"
+    Backup exported: "Επιτυχής εξαγωγή αντιγράφου ασφαλείας"
+    Backup imported: "Το αντίγραφο ασφαλείας εισήχθη με επιτυχία"
     Import YouTube Takeout ZIP: "Εισαγωγή ZIP YouTube Takeout"
     Select Takeout data: "Επιλέξτε τα δεδομένα προς εισαγωγή"
     Import selected data: "Εισαγωγή επιλεγμένων δεδομένων"

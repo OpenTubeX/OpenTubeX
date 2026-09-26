@@ -880,6 +880,14 @@ Settings:
     Show Bottom Right Actions Dock: Tampilkan Dok Tindakan Kanan Bawah
     Paused Interface Hide Delay: Jeda Sebelum Menyembunyikan Antarmuka yang Dijeda
   Data Settings:
+    Complete backup: "Cadangan lengkap"
+    Import backup: "Impor cadangan"
+    Export backup: "Ekspor cadangan"
+    Backup description: "Simpan profil, daftar putar, riwayat, statistik, dan pengaturan yang dapat ditransfer dalam satu file ZIP. Mengimpor menggabungkannya dengan data yang sudah ada di perangkat ini."
+    Select backup data: "Pilih data yang akan diimpor"
+    Profiles and subscriptions: "Profil dan langganan"
+    Backup exported: "Cadangan berhasil diekspor"
+    Backup imported: "Cadangan berhasil diimpor"
     Import YouTube Takeout ZIP: "Impor ZIP YouTube Takeout"
     Select Takeout data: "Pilih data yang akan diimpor"
     Import selected data: "Impor data yang dipilih"

@@ -4,8 +4,8 @@ test('shows icons on data actions and vertically centers export choices', async 
   const dataSection = await goToSettingsSection(page, 'data')
   const actionButtons = dataSection.locator('.ft-flex-box.box > .btn')
 
-  await expect(actionButtons).toHaveCount(12)
-  await expect.poll(() => actionButtons.locator(':scope > .ft-icon').count()).toBe(12)
+  await expect(actionButtons).toHaveCount(14)
+  await expect.poll(() => actionButtons.locator(':scope > .ft-icon').count()).toBe(14)
 
   await dataSection.getByRole('button', { name: /Export Subscriptions/i }).click()
   const exportChoices = page.locator('.settingsSubpageContent .exportTypeButtons')
@@ -28,6 +28,48 @@ test('shows icons on data actions and vertically centers export choices', async 
   await expect.poll(() => exportChoices.getByRole('button').evaluateAll(buttons => (
     buttons.length > 0 && buttons.every(button => button.querySelector('.ft-icon'))
   ))).toBe(true)
+})
+
+test('exports and imports search history through the unified ZIP', async ({ page }) => {
+  const dataSection = await goToSettingsSection(page, 'data')
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateSearchHistoryEntry', { _id: 'backup-query', query: 'backup query', lastUpdatedAt: Date.now() })
+    await store.dispatch('recordWatchTime', { date: '2026-09-26', seconds: 42 })
+    window.backupArchive = null
+    window.showSaveFilePicker = async () => ({
+      createWritable: async () => ({
+        write: async blob => { window.backupArchive = blob },
+        close: async () => {},
+      }),
+    })
+  })
+
+  await dataSection.getByRole('button', { name: 'Export backup' }).click()
+  await expect.poll(() => page.evaluate(() => window.backupArchive?.size ?? 0)).toBeGreaterThan(0)
+
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('removeSearchHistoryEntry', 'backup-query')
+    await store.dispatch('clearWatchStats')
+    window.showOpenFilePicker = async () => [{
+      getFile: async () => new File([window.backupArchive], 'opentubex-backup.zip', { type: 'application/zip' }),
+    }]
+  })
+  await dataSection.getByRole('button', { name: 'Import backup' }).click()
+  const subpage = page.locator('.settingsSubpageContent', { hasText: 'Select the data to import' })
+  await expect(subpage.getByText('opentubex-backup.zip')).toBeVisible()
+  await subpage.getByRole('button', { name: 'Import selected data' }).click()
+
+  await expect.poll(() => page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return store.getters.getSearchHistoryEntries.some(entry => entry.query === 'backup query')
+  })).toBe(true)
+  await expect.poll(() => page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return store.getters.getWatchSecondsByDate['2026-09-26']
+  })).toBe(42)
+  await expect(page.locator('.toast', { hasText: 'Backup imported successfully' })).toBeVisible()
 })
 
 test('opens the profile directory in the file manager', async ({ app }) => {

@@ -1100,6 +1100,14 @@ Settings:
     Add: 추가
     Remove: 제거
   Data Settings:
+    Complete backup: "전체 백업"
+    Import backup: "백업 가져오기"
+    Export backup: "백업 내보내기"
+    Backup description: "프로필, 재생 목록, 기록, 통계 및 전송 가능한 설정을 하나의 ZIP 파일에 저장합니다. 가져오기를 하면 이미 이 장치에 있는 데이터와 병합됩니다."
+    Select backup data: "가져올 데이터 선택"
+    Profiles and subscriptions: "프로필 및 구독"
+    Backup exported: "백업을 성공적으로 내보냈습니다"
+    Backup imported: "백업을 성공적으로 가져왔습니다"
     Import YouTube Takeout ZIP: "YouTube Takeout ZIP 가져오기"
     Select Takeout data: "가져올 데이터 선택"
     Import selected data: "선택한 데이터 가져오기"

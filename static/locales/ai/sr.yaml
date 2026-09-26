@@ -904,6 +904,14 @@ Settings:
     Add: Додај
     Remove: Уклони
   Data Settings:
+    Complete backup: "Потпуна резервна копија"
+    Import backup: "Увези резервну копију"
+    Export backup: "Извези резервну копију"
+    Backup description: "Сачувајте профиле, плејлисте, историју, статистику и преносива подешавања у једној ZIP датотеци. Увоз их спаја са подацима који су већ на овом уређају."
+    Select backup data: "Изаберите податке за увоз"
+    Profiles and subscriptions: "Профили и претплате"
+    Backup exported: "Резервна копија је успешно извезена"
+    Backup imported: "Резервна копија је успешно увезена"
     Import YouTube Takeout ZIP: "Увези ZIP YouTube Takeout"
     Select Takeout data: "Изаберите податке за увоз"
     Import selected data: "Увези изабране податке"

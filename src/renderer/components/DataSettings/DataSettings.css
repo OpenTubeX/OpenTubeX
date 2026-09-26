@@ -31,3 +31,13 @@
   margin: 0;
   overflow-wrap: anywhere;
 }
+
+.takeoutSelectionCentered {
+  align-items: center;
+  margin-block: auto;
+  text-align: center;
+}
+
+.takeoutSelectionCentered .pure-checkbox {
+  text-align: start;
+}

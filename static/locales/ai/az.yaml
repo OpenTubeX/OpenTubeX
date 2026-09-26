@@ -882,6 +882,14 @@ Settings:
     Show Bottom Right Actions Dock: Aşağı sağdakı əməliyyat panelini göstər
     Paused Interface Hide Delay: Fasilə interfeysinin gizlənmə gecikməsi
   Data Settings:
+    Complete backup: "Tam ehtiyat nüsxəsi"
+    Import backup: "Ehtiyat nüsxəni idxal et"
+    Export backup: "Ehtiyat nüsxəni ixrac et"
+    Backup description: "Profilləri, çalğı siyahılarını, tarixçəni, statistikanı və ötürülə bilən parametrləri bir ZIP faylında saxlayın. İdxal onları bu cihazda artıq mövcud olan məlumatlarla birləşdirir."
+    Select backup data: "İdxal etmək üçün məlumatları seçin"
+    Profiles and subscriptions: "Profillər və abunəliklər"
+    Backup exported: "Ehtiyat nüsxə uğurla ixrac edildi"
+    Backup imported: "Ehtiyat nüsxə uğurla idxal edildi"
     Import YouTube Takeout ZIP: "YouTube Takeout ZIP faylını idxal et"
     Select Takeout data: "İdxal ediləcək məlumatları seçin"
     Import selected data: "Seçilmiş məlumatları idxal et"

@@ -36,8 +36,15 @@ test('imports selected data from a YouTube Takeout ZIP in one step', async ({ pa
   }, [...archive])
 
   await dataSection.getByRole('button', { name: 'Import YouTube Takeout ZIP' }).click()
-  const selection = page.locator('.takeoutSelection')
+  const selection = page.locator('.takeoutSelectionCentered')
   await expect(selection.getByRole('checkbox')).toHaveCount(4)
+  await expect.poll(() => selection.evaluate(element => {
+    const content = element.closest('.settingsSubpageContent').getBoundingClientRect()
+    const selected = element.getBoundingClientRect()
+    const offsetX = Math.abs((selected.left + selected.right - content.left - content.right) / 2)
+    const offsetY = Math.abs((selected.top + selected.bottom - content.top - content.bottom) / 2)
+    return Math.max(offsetX, offsetY)
+  })).toBeLessThanOrEqual(1)
   await selection.getByText('Search history', { exact: true }).click()
   await expect(selection.getByRole('checkbox', { name: /Search history/i })).not.toBeChecked()
   await selection.getByRole('button', { name: 'Import selected data' }).click()
