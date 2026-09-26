@@ -1032,7 +1032,7 @@ Settings:
     Data Loss Warning: Serveri olek kustutaks varem sünkroonitud kogu {collection} üksustest {deleted}/{previous}. See võib viidata serveri nurjunud migreerimisele või lähtestamisele. Jätkake ainult siis, kui kustutamine on tahtlik ja teil on varukoopia.
     Confirm Data Loss: Kustuta ja jätka
     Use Shared Tabs: 'Kasuta seadmetes üht jagatud vahelehtede komplekti'
-    Shared Tabs Warning: 'Selles seadmes avatud vahelehed saavad ühiseks vahelehtede kogumiks. Teised seadmed asendavad sünkroonimisel oma avatud vahelehed selle kogumikuga; eri seadmete vahelehti ei ühendata.'
+    Shared Tabs Warning: 'Selles seadmes avatud vahekaardid saavad ühiseks vahekaartide kogumiks. Teised seadmed asendavad sünkroonimisel oma avatud vahekaardid selle kogumikuga; eri seadmete vahekaarte ei ühendata.'
     Tabs From Other Devices: 'Teiste seadmete vahelehed'
     Device Tab Session: '{platform} · {count} vahelehte'
     Mobile Device: 'Mobiilseade'

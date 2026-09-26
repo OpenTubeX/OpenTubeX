@@ -1032,7 +1032,7 @@ Settings:
     Data Loss Warning: L’état du serveur supprimerait {deleted} éléments sur {previous} de la collection {collection} précédemment synchronisés. Cela peut indiquer l’échec d’une migration ou la réinitialisation du serveur. Ne continuez que si cette suppression est volontaire et si vous disposez d’une sauvegarde.
     Confirm Data Loss: Supprimer et continuer
     Use Shared Tabs: 'Utiliser un seul ensemble d’onglets partagé entre les appareils'
-    Shared Tabs Warning: 'Les onglets ouverts sur cet appareil deviennent le jeu partagé. Lors de la synchronisation, les autres appareils remplacent leurs onglets ouverts par ce jeu ; les onglets des différents appareils ne sont pas fusionnés.'
+    Shared Tabs Warning: 'Les onglets ouverts sur cet appareil deviennent l’ensemble partagé. Lors de la synchronisation, les autres appareils remplacent leurs onglets ouverts par cet ensemble ; les onglets des différents appareils ne sont pas fusionnés.'
     Tabs From Other Devices: 'Onglets d’autres appareils'
     Device Tab Session: '{platform} · {count} onglets'
     Mobile Device: 'Mobile'
