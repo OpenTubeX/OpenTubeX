@@ -38,6 +38,33 @@
   --center-play-button-max-size: 64px;
 }
 
+/* Keep play/pause centered even when only one adjacent video is available. */
+:global(.capacitorTabs .ftVideoPlayer:not(.shortsPlayer) .shaka-big-buttons-container) {
+  display: grid;
+  grid-template-columns: 48px 64px 48px;
+  column-gap: 8px;
+  place-content: center;
+}
+
+:global(.capacitorTabs .shaka-big-buttons-container > .skip-previous-button) {
+  grid-column: 1;
+}
+
+:global(.capacitorTabs .shaka-big-buttons-container > .shaka-play-button.shaka-tooltip) {
+  grid-column: 2;
+  inline-size: 64px;
+  block-size: 64px;
+}
+
+:global(.capacitorTabs .shaka-big-buttons-container > .skip-next-button) {
+  grid-column: 3;
+}
+
+:global(.capacitorTabs .shaka-big-buttons-container > .ft-shaka-skip-button) {
+  inline-size: 48px;
+  block-size: 48px;
+}
+
 .player {
   width: 100%;
 

@@ -85,7 +85,7 @@ import {
   removeOverlayScrollbars,
   updateOverlayScrollbars,
 } from '../../helpers/overlayScrollbars'
-import { setFullscreenOrientation } from '../../helpers/capacitorUi'
+import { getFullscreenAspectRatio, setFullscreenOrientation } from '../../helpers/capacitorUi'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import {
   enterAndroidPictureInPicture,
@@ -398,6 +398,10 @@ export default defineComponent({
       default: false
     },
     shortsAspectRatio: {
+      type: Number,
+      default: null
+    },
+    videoAspectRatio: {
       type: Number,
       default: null
     },
@@ -1559,12 +1563,6 @@ export default defineComponent({
       })
     }
 
-    watch(displayVideoPlayButton, (newValue) => {
-      ui.configure({
-        bigButtons: newValue || isCapacitorMobilePlayer() ? ['play_pause'] : []
-      })
-    })
-
     /** @type {import('vue').ComputedRef<number>} */
     const defaultSkipInterval = computed(() => {
       return store.getters.getDefaultSkipInterval
@@ -1629,6 +1627,11 @@ export default defineComponent({
       return store.getters.getRotateFullscreenToLandscape
     })
 
+    const fullscreenAspectRatio = computed(() => {
+      if (props.format === 'audio') return null
+      return getFullscreenAspectRatio(props.videoAspectRatio, props.shortsPlayer)
+    })
+
     const enableMobileFullscreenSwipe = computed(() => {
       return store.getters.getEnableMobileFullscreenSwipe
     })
@@ -1641,7 +1644,7 @@ export default defineComponent({
 
     watch(rotateFullscreenToLandscape, (enabled) => {
       if (!isNativeFullscreenActive()) return
-      setFullscreenOrientation(true, video.value, enabled).catch(() => {})
+      setFullscreenOrientation(true, video.value, enabled, fullscreenAspectRatio.value).catch(() => {})
     })
 
     /** @type {import('vue').ComputedRef<number>} */
@@ -4525,17 +4528,24 @@ export default defineComponent({
       return elements
     })
 
+    function getBigButtons(showPlayButton, mobile) {
+      if (!mobile) return showPlayButton ? ['play_pause'] : []
+      return [
+        ...(props.canSkipPrevious ? ['ft_skip_previous'] : []),
+        'play_pause',
+        ...(props.canSkipNext ? ['ft_skip_next'] : [])
+      ]
+    }
+
     const uiConfig = computed(() => {
       // A yt-dlp source can be live even when Shaka sees a finite media file.
       const showPlaybackRateControls = !isLive.value && !props.isLive
+      const mobile = isCapacitorMobilePlayer()
       const controlPanelElements = [
-        'ft_skip_previous',
-        ...(!isCapacitorMobilePlayer() ? ['play_pause'] : []),
-        'ft_skip_next',
-        ...(!isCapacitorMobilePlayer() ? ['mute', 'volume'] : []),
+        ...(!mobile ? ['ft_skip_previous', 'play_pause', 'ft_skip_next', 'mute', 'volume'] : []),
         'time_and_duration',
         'ft_playback_adjusted_time',
-        ...((!onlyUseOverFlowMenu.value || isCapacitorMobilePlayer()) && !props.shortsPlayer && props.chapters.length > 0
+        ...((!onlyUseOverFlowMenu.value || mobile) && !props.shortsPlayer && props.chapters.length > 0
           ? ['ft_chapters']
           : []),
         'ft_sponsorblock_highlight',
@@ -4545,14 +4555,15 @@ export default defineComponent({
       /** @type {shaka.extern.UIConfiguration} */
       const uiConfig = {
         controlPanelElements: controlPanelElements,
+        bigButtons: getBigButtons(displayVideoPlayButton.value, mobile),
         topControlPanelElements: [],
         overflowMenuButtons: [],
         contextMenuElements: contextMenuElements.value,
-        customContextMenu: !isCapacitorMobilePlayer(),
+        customContextMenu: !mobile,
         // Shorts have interactive controls over nearly the entire video
         // surface. Do not let Shaka interpret rapid control clicks as a
         // request to enter fullscreen.
-        doubleClickForFullscreen: !props.shortsPlayer && !isCapacitorMobilePlayer(),
+        doubleClickForFullscreen: !props.shortsPlayer && !mobile,
 
         // only set this to label when we actually have labels, so that the warning doesn't show up
         // about it being set to labels, but that the audio tracks don't have labels
@@ -4603,11 +4614,11 @@ export default defineComponent({
         elementList = uiConfig.overflowMenuButtons
 
         uiConfig.controlPanelElements.push(
-          ...((props.shortsPlayer || isCapacitorMobilePlayer()) && useQuickPlaybackSpeedBar.value && showPlaybackRateControls
+          ...((props.shortsPlayer || mobile) && useQuickPlaybackSpeedBar.value && showPlaybackRateControls
             ? ['ft_quick_playback_rate_bar']
             : []),
           'ft_caption_toggle',
-          ...(isCapacitorMobilePlayer() && !props.shortsPlayer ? [pictureInPictureElement] : []),
+          ...(mobile && !props.shortsPlayer ? [pictureInPictureElement] : []),
           'overflow_menu',
           'fullscreen'
         )
@@ -4795,7 +4806,6 @@ export default defineComponent({
           },
 
           // these have their own watchers
-          bigButtons: displayVideoPlayButton.value || isCapacitorMobilePlayer() ? ['play_pause'] : [],
           enableFullscreenOnRotation: (!process.env.IS_CAPACITOR || process.env.IS_IOS) && enterFullscreenOnDisplayRotate.value,
           fullScreenElement: androidFullscreenHost ?? container.value,
           playbackRates: playbackRates.value,
@@ -6591,7 +6601,8 @@ export default defineComponent({
         setFullscreenOrientation(
           true,
           video.value,
-          rotateFullscreenToLandscape.value
+          rotateFullscreenToLandscape.value,
+          fullscreenAspectRatio.value
         ).catch(() => {})
       }
     }
@@ -6854,7 +6865,7 @@ export default defineComponent({
       cancelScrollMiniPlayerDrag,
       deactivateScrollMiniPlayer,
       dismissCrossTabMiniPlayer,
-      handleFullscreenButtonClick,
+      handleFullscreenButtonClick: handleScrollMiniFullscreenButtonClick,
       handleScrollMiniControlsPointerMove,
       handleScrollMiniDragPointerDown,
       handleScrollMiniPlayerEnter,
@@ -6912,6 +6923,15 @@ export default defineComponent({
       tabId,
       video,
     })
+
+    function handleFullscreenButtonClick(event) {
+      if (process.env.IS_CAPACITOR && isActiveTab.value && !isNativeFullscreenActive()) {
+        // Begin rotating on the user action, before Shaka changes the fullscreen element.
+        setFullscreenOrientation(true, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value).catch(() => {})
+        suppressPanelTransitions(500)
+      }
+      handleScrollMiniFullscreenButtonClick(event)
+    }
 
     const mobileAdjustmentsVisible = ref(!isAppHidden())
     const mobileFullscreenBrightnessActive = computed(() => process.env.IS_CAPACITOR &&
@@ -7753,6 +7773,8 @@ export default defineComponent({
      * @type {[typeof shakaControls | typeof shakaOverflowMenu | typeof shakaContextMenu, string, shaka.extern.IUIElement.Factory][]}
      */
     const ownElementRegistrations = []
+    /** @type {[string, shaka.extern.IUIElement.Factory][]} */
+    const ownBigElementRegistrations = []
 
     /**
      * @param {typeof shakaControls | typeof shakaOverflowMenu | typeof shakaContextMenu} registry
@@ -7764,9 +7786,17 @@ export default defineComponent({
       registry.registerElement(name, factory)
     }
 
+    function registerOwnBigElement(name, factory) {
+      ownBigElementRegistrations.push([name, factory])
+      shakaControls.registerBigElement(name, factory)
+    }
+
     function reRegisterOwnElements() {
       for (const [registry, name, factory] of ownElementRegistrations) {
         registry.registerElement(name, factory)
+      }
+      for (const [name, factory] of ownBigElementRegistrations) {
+        shakaControls.registerBigElement(name, factory)
       }
     }
 
@@ -9121,6 +9151,7 @@ export default defineComponent({
       }
 
       registerOwnElement(shakaControls, 'ft_skip_next', new SkipNextButtonFactory())
+      registerOwnBigElement('ft_skip_next', new SkipNextButtonFactory())
       registerOwnElement(shakaOverflowMenu, 'ft_skip_next', new SkipNextButtonFactory())
 
       // skip to previous video button
@@ -9135,6 +9166,7 @@ export default defineComponent({
       }
 
       registerOwnElement(shakaControls, 'ft_skip_previous', new SkipPreviousButtonFactory())
+      registerOwnBigElement('ft_skip_previous', new SkipPreviousButtonFactory())
       registerOwnElement(shakaOverflowMenu, 'ft_skip_previous', new SkipPreviousButtonFactory())
     }
 
@@ -9293,6 +9325,10 @@ export default defineComponent({
 
       shakaControls.registerElement('ft_skip_previous', null)
       shakaOverflowMenu.registerElement('ft_skip_previous', null)
+      shakaControls.registerElement('ft_skip_next', null)
+      shakaOverflowMenu.registerElement('ft_skip_next', null)
+      shakaControls.registerBigElement('ft_skip_previous', null)
+      shakaControls.registerBigElement('ft_skip_next', null)
 
       shakaControls.registerElement('ft_playback_adjusted_time', null)
       shakaControls.registerElement('ft_quick_playback_rate_bar', null)
@@ -10605,7 +10641,7 @@ export default defineComponent({
       if (props.shortsPlayer) {
         resetShortsOverflowMenu()
       }
-      suppressPanelTransitions(100)
+      suppressPanelTransitions(process.env.IS_CAPACITOR ? 500 : 100)
       syncChapterOverlayButton()
 
       if (!isActiveTab.value) {
@@ -10615,7 +10651,8 @@ export default defineComponent({
       setFullscreenOrientation(
         fullscreen,
         video.value,
-        rotateFullscreenToLandscape.value
+        rotateFullscreenToLandscape.value,
+        fullscreenAspectRatio.value
       ).catch(() => {})
       syncAndroidStatusBarVisibility()
 
