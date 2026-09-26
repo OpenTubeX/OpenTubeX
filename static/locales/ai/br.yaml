@@ -1241,6 +1241,12 @@ Video:
     music offtopic: "N'eo ket sonerezh"
     filler: "Dihanadennoù"
   Player:
+    DLNA:
+      Cast: "Skignañ war un trevnad DLNA"
+      Stop: "Paouez da skignañ"
+      No Devices: "N’eus bet kavet trevnad DLNA ebet"
+      No MP4 Source: "N’eus red MP4 kenglotus ebet evit ar video-mañ"
+      Error: "N’eo ket bet gallet skignañ ar video"
     Repeat Stats:
       Repeat Stats: Stadegoù an adlenn
       Looping: Adlenn oberiant

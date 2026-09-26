@@ -85,6 +85,57 @@ async function expectSponsorBlockContentClamp(content, previousScrollTop) {
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
+test('casts a complete MP4 stream to a discovered DLNA device and returns to local playback', async ({ app, page }) => {
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    globalThis.__dlnaCalls = []
+    ipcMain.removeHandler('dlna-discover')
+    ipcMain.removeHandler('dlna-start')
+    ipcMain.removeHandler('dlna-stop')
+    ipcMain.handle('dlna-discover', () => [{ id: 'living-room', name: 'Living room TV' }])
+    ipcMain.handle('dlna-start', (_event, payload) => {
+      globalThis.__dlnaCalls.push({ action: 'start', payload })
+      return { castId: 'test-cast', deviceName: 'Living room TV' }
+    })
+    ipcMain.handle('dlna-stop', (_event, castId) => {
+      globalThis.__dlnaCalls.push({ action: 'stop', castId })
+      return true
+    })
+  })
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  const view = await watchViewHandle(page)
+  await view.evaluate(view => {
+    view.legacyFormats = [{
+      url: 'https://example.test/video.mp4',
+      mimeType: 'video/mp4',
+      qualityLabel: '360p',
+      height: 360
+    }]
+  })
+
+  const castButton = page.getByRole('button', { name: 'Cast to a DLNA device' })
+  await castButton.click()
+  await page.getByRole('option', { name: 'Living room TV' }).click()
+  await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
+  const calls = await app.electronApp.evaluate(() => globalThis.__dlnaCalls)
+  expect(calls[0].action).toBe('start')
+  expect(calls[0].payload.mediaUrl).toBe('https://example.test/video.mp4')
+
+  await castButton.click()
+  await page.getByRole('option', { name: 'Stop casting' }).click()
+  await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
+  expect(await app.electronApp.evaluate(() => globalThis.__dlnaCalls.at(-1))).toEqual({
+    action: 'stop', castId: 'test-cast'
+  })
+
+  await video.evaluate(element => element.pause())
+  await castButton.click()
+  await page.getByRole('option', { name: 'Living room TV' }).click()
+  await castButton.click()
+  await page.getByRole('option', { name: 'Stop casting' }).click()
+  await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
+})
+
 test.describe('desktop quick playback speed bar', () => {
   test.use({ seed: { settings: { ...WATCH_PAGE_SEED, useQuickPlaybackSpeedBar: true } } })
 
@@ -1480,6 +1531,8 @@ test('shows the restricted playback setup hint and loads yt-dlp subtitles after 
   const moreOptions = player.getByRole('button', { name: 'More settings' })
   await moreOptions.click()
   await player.locator('.shaka-overflow-menu').getByRole('button', { name: 'Captions' }).click()
+  await expect(player).toBeVisible()
+  await expect(player.locator('.dlnaCastControl')).toBeHidden()
   await player.locator('.shaka-text-languages').getByRole('button', { name: 'Auto-translate' }).click()
   await player.locator('.ft-caption-translation-options').getByRole('button', { name: 'German' }).click()
   await expect.poll(() => player.evaluate(element => {

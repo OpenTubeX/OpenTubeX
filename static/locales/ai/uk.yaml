@@ -1260,6 +1260,12 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Повтор чату наживо ввімкнено.  Повідомлення чату з’являтимуться тут під час відтворення відео.
   Premiere started: Прем’єра триває. Почалася {timeAgo}
   Player:
+    DLNA:
+      Cast: "Транслювати на пристрій DLNA"
+      Stop: "Зупинити трансляцію"
+      No Devices: "Пристроїв DLNA не знайдено"
+      No MP4 Source: "Для цього відео немає сумісного потоку MP4"
+      Error: "Не вдалося транслювати відео"
     Repeat Stats:
       Repeat Stats: Статистика повторів
       Looping: Повтор увімкнено

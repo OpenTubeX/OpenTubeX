@@ -1303,6 +1303,12 @@ Video:
     music offtopic: Не музыка
     filler: Адступленні
   Player:
+    DLNA:
+      Cast: "Трансляваць на прыладу DLNA"
+      Stop: "Спыніць трансляцыю"
+      No Devices: "Прылады DLNA не знойдзены"
+      No MP4 Source: "Для гэтага відэа няма сумяшчальнага патоку MP4"
+      Error: "Не ўдалося трансляваць відэа"
     Repeat Stats:
       Repeat Stats: Статыстыка паўтораў
       Looping: Паўтор уключаны

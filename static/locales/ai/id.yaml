@@ -1236,6 +1236,12 @@ Video:
   Sponsor Block category:
     hook: Pembuka/Sapaan
   Player:
+    DLNA:
+      Cast: "Transmisikan ke perangkat DLNA"
+      Stop: "Hentikan transmisi"
+      No Devices: "Tidak ada perangkat DLNA yang ditemukan"
+      No MP4 Source: "Tidak ada aliran MP4 yang kompatibel untuk video ini"
+      Error: "Video tidak dapat ditransmisikan"
     Repeat Stats:
       Repeat Stats: Statistik pengulangan
       Looping: Pengulangan aktif

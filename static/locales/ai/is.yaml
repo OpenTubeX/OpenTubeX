@@ -1250,6 +1250,12 @@ Video:
     music offtopic: Ekki tónlist
     filler: Útúrdúrar
   Player:
+    DLNA:
+      Cast: "Senda í DLNA-tæki"
+      Stop: "Stöðva útsendingu"
+      No Devices: "Engin DLNA-tæki fundust"
+      No MP4 Source: "Enginn samhæfur MP4-straumur er til fyrir þetta myndskeið"
+      Error: "Ekki tókst að senda myndskeiðið"
     Repeat Stats:
       Repeat Stats: Tölfræði endurtekninga
       Looping: Endurtekning virk

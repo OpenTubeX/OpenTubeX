@@ -1675,6 +1675,12 @@ Video:
       shuffling playlists: barrejar llistes de reproducció
       looping playlists: reproduir llistes de reproducció en bucle
   Player:
+    DLNA:
+      Cast: "Envia a un dispositiu DLNA"
+      Stop: "Atura la transmissió"
+      No Devices: "No s’ha trobat cap dispositiu DLNA"
+      No MP4 Source: "No hi ha cap flux MP4 compatible per a aquest vídeo"
+      Error: "No s’ha pogut transmetre el vídeo"
     Repeat Stats:
       Repeat Stats: Estadístiques de repetició
       Looping: En bucle

@@ -1257,6 +1257,12 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Đã bật bản phát lại trò chuyện trực tiếp. Tin nhắn trò chuyện sẽ xuất hiện ở đây khi video phát.
   Premiere started: Đang công chiếu. Bắt đầu {timeAgo}
   Player:
+    DLNA:
+      Cast: "Truyền tới thiết bị DLNA"
+      Stop: "Dừng truyền"
+      No Devices: "Không tìm thấy thiết bị DLNA"
+      No MP4 Source: "Không có luồng MP4 tương thích cho video này"
+      Error: "Không thể truyền video"
     Repeat Stats:
       Repeat Stats: Thống kê lặp lại
       Looping: Đang lặp

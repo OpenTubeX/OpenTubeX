@@ -659,6 +659,12 @@ Video:
   All Messages: Wszystkie wiadomości
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Powtórka czatu na żywo jest włączona. Wiadomości będą pojawiać się tutaj podczas odtwarzania filmu.
   Player:
+    DLNA:
+      Cast: "Przesyłaj na urządzenie DLNA"
+      Stop: "Zatrzymaj przesyłanie"
+      No Devices: "Nie znaleziono urządzeń DLNA"
+      No MP4 Source: "Brak zgodnego strumienia MP4 dla tego filmu"
+      Error: "Nie udało się przesłać filmu"
     Repeat Stats:
       Repeat Stats: Statystyki powtarzania
       Looping: Zapętlanie włączone

@@ -168,6 +168,7 @@
         @enterpictureinpicture="handleEnterPictureInPicture"
         @leavepictureinpicture="handleLeavePictureInPicture"
       />
+      <slot name="dlna-cast" />
       <template v-if="showEndedScreen">
         <div
           class="endedPoster"

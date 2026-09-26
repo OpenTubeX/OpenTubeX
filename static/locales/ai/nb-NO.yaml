@@ -1241,6 +1241,12 @@ Video:
   Sponsor Block category short:
     filler: Avsporinger
   Player:
+    DLNA:
+      Cast: "Strøm til en DLNA-enhet"
+      Stop: "Stopp strømming"
+      No Devices: "Fant ingen DLNA-enheter"
+      No MP4 Source: "Ingen kompatibel MP4-strøm for denne videoen"
+      Error: "Kunne ikke strømme videoen"
     Repeat Stats:
       Repeat Stats: Gjentakelsesstatistikk
       Looping: Gjentakelse på

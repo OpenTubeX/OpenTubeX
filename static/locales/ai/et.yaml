@@ -1233,6 +1233,12 @@ Video:
   Sponsor Block category:
     hook: Sissejuhatus/tervitus
   Player:
+    DLNA:
+      Cast: "Edasta DLNA-seadmesse"
+      Stop: "Lõpeta edastamine"
+      No Devices: "DLNA-seadmeid ei leitud"
+      No MP4 Source: "Selle video jaoks pole ühilduvat MP4-voogu"
+      Error: "Video edastamine ebaõnnestus"
     Repeat Stats:
       Repeat Stats: Korduste statistika
       Looping: Kordus sees

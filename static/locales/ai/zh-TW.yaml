@@ -1233,6 +1233,12 @@ Video:
   Sponsor Block category:
     hook: 開場／問候
   Player:
+    DLNA:
+      Cast: "投放到 DLNA 裝置"
+      Stop: "停止投放"
+      No Devices: "找不到 DLNA 裝置"
+      No MP4 Source: "此影片沒有相容的 MP4 串流"
+      Error: "無法投放影片"
     Repeat Stats:
       Repeat Stats: 循環統計
       Looping: 循環中

@@ -1,0 +1,15 @@
+.dlnaCastControl {
+  inset-block-start: 12px;
+  inset-inline-end: 12px;
+  position: absolute;
+  z-index: 12;
+
+  :deep(.iconButton) {
+    background: rgb(0 0 0 / 70%);
+    color: #fff;
+  }
+}
+
+:global(.ftVideoPlayer[data-submenu-opened='true'] .dlnaCastControl) {
+  display: none;
+}

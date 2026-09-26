@@ -1243,6 +1243,12 @@ Video:
     music offtopic: Musikaz bestelakoa
     filler: Gaitik kanpokoak
   Player:
+    DLNA:
+      Cast: "Igorri DLNA gailu batera"
+      Stop: "Gelditu igorpena"
+      No Devices: "Ez da DLNA gailurik aurkitu"
+      No MP4 Source: "Ez dago MP4 korronte bateragarririk bideo honetarako"
+      Error: "Ezin izan da bideoa igorri"
     Repeat Stats:
       Repeat Stats: Errepikapenen estatistikak
       Looping: Begiztan

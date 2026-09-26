@@ -1292,6 +1292,12 @@ Video:
   Sponsor Block category:
     hook: Introduktion/hilsen
   Player:
+    DLNA:
+      Cast: "Cast til en DLNA-enhed"
+      Stop: "Stop casting"
+      No Devices: "Ingen DLNA-enheder fundet"
+      No MP4 Source: "Ingen kompatibel MP4-stream til denne video"
+      Error: "Videoen kunne ikke castes"
     Repeat Stats:
       Repeat Stats: Gentagelsesstatistik
       Looping: Gentagelse slået til

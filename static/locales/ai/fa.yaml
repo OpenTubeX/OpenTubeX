@@ -1297,6 +1297,12 @@ Video:
     interaction: یادآوری تعامل
     filler: حاشیه‌روی
   Player:
+    DLNA:
+      Cast: "پخش در دستگاه DLNA"
+      Stop: "توقف پخش"
+      No Devices: "هیچ دستگاه DLNA پیدا نشد"
+      No MP4 Source: "جریان MP4 سازگاری برای این ویدیو وجود ندارد"
+      Error: "پخش ویدیو در دستگاه ممکن نشد"
     Repeat Stats:
       Repeat Stats: آمار تکرار
       Looping: تکرار فعال است

@@ -1208,6 +1208,12 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Live chat replay is enabled.  Chat messages will appear here as the video plays.
   Premiere started: Premiere in progress. Started {timeAgo}
   Player:
+    DLNA:
+      Cast: "Cast to a DLNA device"
+      Stop: "Stop casting"
+      No Devices: "No DLNA devices found"
+      No MP4 Source: "No compatible MP4 stream for this video"
+      Error: "Could not cast the video"
     Repeat Stats:
       Repeat Stats: Repeat stats
       Looping: Looping

@@ -1250,6 +1250,12 @@ Video:
     music offtopic: Heb fod yn gerddoriaeth
     filler: Gwyriadau
   Player:
+    DLNA:
+      Cast: "Darlledu i ddyfais DLNA"
+      Stop: "Rhoi’r gorau i ddarlledu"
+      No Devices: "Heb ganfod dyfeisiau DLNA"
+      No MP4 Source: "Nid oes ffrwd MP4 gydnaws ar gyfer y fideo hwn"
+      Error: "Methu darlledu’r fideo"
     Repeat Stats:
       Repeat Stats: Ystadegau ailadrodd
       Looping: Ailadrodd ymlaen

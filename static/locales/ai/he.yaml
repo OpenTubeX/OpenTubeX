@@ -1267,6 +1267,12 @@ Video:
   Sponsor Block category:
     hook: פתיח/ברכות
   Player:
+    DLNA:
+      Cast: "שידור למכשיר DLNA"
+      Stop: "הפסקת השידור"
+      No Devices: "לא נמצאו מכשירי DLNA"
+      No MP4 Source: "אין זרם MP4 תואם לסרטון הזה"
+      Error: "לא ניתן לשדר את הסרטון"
     Repeat Stats:
       Repeat Stats: נתוני חזרה
       Looping: חזרה פעילה

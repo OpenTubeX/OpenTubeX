@@ -161,6 +161,9 @@ const IpcChannels = {
 
   OPEN_IN_EXTERNAL_PLAYER: 'open-in-external-player',
   OPEN_IN_EXTERNAL_PLAYER_RESULT: 'open-in-external-player-result',
+  DLNA_DISCOVER: 'dlna-discover',
+  DLNA_START: 'dlna-start',
+  DLNA_STOP: 'dlna-stop',
 
   YT_DLP_DOWNLOAD: 'yt-dlp-download',
   YT_DLP_CANCEL_DOWNLOAD: 'yt-dlp-cancel-download',

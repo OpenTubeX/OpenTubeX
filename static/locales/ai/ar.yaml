@@ -1260,6 +1260,12 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: تم تمكين إعادة تشغيل الدردشة المباشرة.  ستظهر رسائل الدردشة هنا أثناء تشغيل الفيديو.
   Premiere started: العرض الأول قيد التقدم. بدأ {timeAgo}
   Player:
+    DLNA:
+      Cast: "البث إلى جهاز DLNA"
+      Stop: "إيقاف البث"
+      No Devices: "لم يتم العثور على أجهزة DLNA"
+      No MP4 Source: "لا يتوفر بث MP4 متوافق لهذا الفيديو"
+      Error: "تعذر بث الفيديو"
     Repeat Stats:
       Repeat Stats: إحصاءات التكرار
       Looping: التكرار مفعّل

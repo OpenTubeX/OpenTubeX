@@ -14,6 +14,7 @@ import { mapActions } from 'vuex'
 import shaka from 'shaka-player'
 import { Utils, YTNodes } from 'youtubei.js'
 import FtShakaVideoPlayer from '../../components/ft-shaka-video-player/ft-shaka-video-player.vue'
+import WatchDlnaCast from '../../components/WatchDlnaCast/WatchDlnaCast.vue'
 import WatchVideoInfo from '../../components/WatchVideoInfo/WatchVideoInfo.vue'
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
 import WatchVideoTranscript from '../../components/WatchVideoTranscript/WatchVideoTranscript.vue'
@@ -166,6 +167,7 @@ export default defineComponent({
     FtRetryImage,
     FtPhonePanel,
     'ft-shaka-video-player': FtShakaVideoPlayer,
+    WatchDlnaCast,
     'watch-video-info': WatchVideoInfo,
     'watch-video-description': WatchVideoDescription,
     WatchVideoSummary,
@@ -220,6 +222,7 @@ export default defineComponent({
 
     return {
       t,
+      isElectron: process.env.IS_ELECTRON,
       phoneLayout: usePhoneLayout(),
       currentLocale: locale,
       tabId,

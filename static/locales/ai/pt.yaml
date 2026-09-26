@@ -1268,6 +1268,12 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: A repetição da conversa em direto está ativada. As mensagens aparecem aqui à medida que o vídeo é reproduzido.
   Premiere started: Estreia em curso. Começou {timeAgo}
   Player:
+    DLNA:
+      Cast: "Transmitir para um dispositivo DLNA"
+      Stop: "Parar transmissão"
+      No Devices: "Nenhum dispositivo DLNA encontrado"
+      No MP4 Source: "Não há um fluxo MP4 compatível para este vídeo"
+      Error: "Não foi possível transmitir o vídeo"
     Repeat Stats:
       Repeat Stats: Estatísticas de repetição
       Looping: Em repetição

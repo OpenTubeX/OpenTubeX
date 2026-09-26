@@ -1265,6 +1265,12 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Η επανάληψη ζωντανής συνομιλίας είναι ενεργοποιημένη. Τα μηνύματα θα εμφανίζονται εδώ κατά την αναπαραγωγή του βίντεο.
   Premiere started: Η πρεμιέρα βρίσκεται σε εξέλιξη. Ξεκίνησε {timeAgo}
   Player:
+    DLNA:
+      Cast: "Μετάδοση σε συσκευή DLNA"
+      Stop: "Διακοπή μετάδοσης"
+      No Devices: "Δεν βρέθηκαν συσκευές DLNA"
+      No MP4 Source: "Δεν υπάρχει συμβατή ροή MP4 για αυτό το βίντεο"
+      Error: "Δεν ήταν δυνατή η μετάδοση του βίντεο"
     Repeat Stats:
       Repeat Stats: Στατιστικά επανάληψης
       Looping: Επανάληψη ενεργή

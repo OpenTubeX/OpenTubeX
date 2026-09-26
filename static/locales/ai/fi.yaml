@@ -1265,6 +1265,12 @@ Video:
   Live chat replay is enabled. Chat messages will appear here as the video plays.: Livechatin tallenne on käytössä.  Chat-viestit näkyvät tässä videon toiston aikana.
   Premiere started: Ensi-ilta on käynnissä. Alkoi {timeAgo}
   Player:
+    DLNA:
+      Cast: "Lähetä DLNA-laitteeseen"
+      Stop: "Lopeta lähetys"
+      No Devices: "DLNA-laitteita ei löytynyt"
+      No MP4 Source: "Tälle videolle ei ole yhteensopivaa MP4-suoratoistoa"
+      Error: "Videon lähetys epäonnistui"
     Repeat Stats:
       Repeat Stats: Toistotilastot
       Looping: Jatkuva toisto
