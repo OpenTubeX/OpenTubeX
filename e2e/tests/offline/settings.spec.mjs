@@ -5792,6 +5792,50 @@ test.describe('tabs from other synced devices', () => {
     })).toBe(false)
   })
 
+  test('does not schedule sync for a superseded shared-tab choice', async ({ page }) => {
+    await page.route('https://sync.opentubex.org/**', route => route.fulfill({
+      json: { status: 'ok', capabilities: { encrypted_sync: 1 } }
+    }))
+    const section = await goToSettingsSection(page, 'sync')
+    const toggle = section.getByRole('checkbox', { name: 'Use one shared tab set across devices' })
+    const toggleLabel = section.locator('label.switch-label')
+      .filter({ hasText: 'Use one shared tab set across devices' })
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setSyncServerSharedTabs', true)
+      const dispatch = store.dispatch.bind(store)
+      window.sharedTabUpdates = []
+      window.sharedTabSyncSchedules = []
+      store.dispatch = (action, ...args) => {
+        if (action === 'updateSyncServerSharedTabs') {
+          return new Promise(resolve => window.sharedTabUpdates.push({ enabled: args[0], resolve }))
+        }
+        if (action === 'scheduleSyncServer') {
+          window.sharedTabSyncSchedules.push(args[0])
+          return Promise.resolve()
+        }
+        return dispatch(action, ...args)
+      }
+    })
+    await expect(toggle).toBeChecked()
+    await toggleLabel.click()
+    await toggleLabel.click()
+    const dialog = page.getByRole('dialog', { name: 'Use one shared tab set across devices' })
+    await dialog.getByRole('button', { name: 'Use one shared tab set across devices' }).click()
+    await expect.poll(() => page.evaluate(() => window.sharedTabUpdates.map(update => update.enabled)))
+      .toEqual([false, true])
+
+    await page.evaluate(async () => {
+      window.sharedTabUpdates[0].resolve()
+      await new Promise(resolve => setTimeout(resolve, 0))
+    })
+    await expect.poll(() => page.evaluate(() => window.sharedTabSyncSchedules)).toEqual([])
+    await page.evaluate(() => {
+      window.sharedTabUpdates[1].resolve()
+    })
+    await expect.poll(() => page.evaluate(() => window.sharedTabSyncSchedules)).toEqual(['sessions'])
+  })
+
   test('keeps synced tab sets in the tab organizer instead of settings', async ({ page }) => {
     await page.route('https://sync.opentubex.org/**', route => route.fulfill({
       json: { status: 'ok', capabilities: {} }

@@ -521,6 +521,7 @@ const localError = ref('')
 const authenticating = ref(false)
 const showDeleteAccountPrompt = ref(false)
 const showSharedTabsPrompt = ref(false)
+let sharedTabsUpdateGeneration = 0
 const deleteAccountPassword = ref('')
 const deleteAccountError = ref('')
 const accountActionBusy = ref(false)
@@ -785,13 +786,17 @@ async function setSharedTabs(enabled) {
     showSharedTabsPrompt.value = true
     return
   }
+  const generation = ++sharedTabsUpdateGeneration
   await store.dispatch('updateSyncServerSharedTabs', false)
+  if (generation !== sharedTabsUpdateGeneration) return
   store.dispatch('scheduleSyncServer', 'sessions')
 }
 
 async function confirmSharedTabs() {
   if (busy.value) return
+  const generation = ++sharedTabsUpdateGeneration
   await store.dispatch('updateSyncServerSharedTabs', true)
+  if (generation !== sharedTabsUpdateGeneration) return
   showSharedTabsPrompt.value = false
   store.dispatch('scheduleSyncServer', 'sessions')
 }
