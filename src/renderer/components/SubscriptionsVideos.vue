@@ -42,9 +42,14 @@ import {
   refreshSubscriptionVideosFromRemote,
   updateVideoListAfterProcessing
 } from '../helpers/subscriptions'
-import { getSubscriptionsForFeed } from '../helpers/subscription-channels'
+import {
+  getSubscriptionsForFeed,
+  MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES
+} from '../helpers/subscription-channels'
+import { useTabContext } from '../tabs/TabContext'
 
 const { locale, t } = useI18n()
+const { isTabPresented } = useTabContext()
 const tabUi = useTemplateRef('tabUi')
 useKeepAliveEffectScope()
 
@@ -91,7 +96,18 @@ const cacheEntriesForAllActiveProfileChannels = computed(() => {
   return entries
 })
 
+const isLargeCachedFeed = computed(() => {
+  let count = 0
+  for (const entry of cacheEntriesForAllActiveProfileChannels.value) {
+    count += entry.videos?.length ?? 0
+    if (count > MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES) return true
+  }
+  return false
+})
+
 const nextUpcomingPremiereTimestamp = computed(() => {
+  if (isTabPresented?.value === false ||
+      (store.getters.getSubscriptionFeedRefreshInProgress && isLargeCachedFeed.value)) return null
   // Cache refreshes can introduce a new upcoming premiere while this component
   // remains mounted. Read the timestamp so this scan reruns after each refresh.
   const refreshTimestamp = store.getters.getSubscriptionFeedLastRefreshTimestamp
@@ -328,22 +344,30 @@ function loadVideosFromCacheForAllActiveProfileChannels() {
   isLoading.value = false
 }
 
-// Show the channels that have been fetched so far, instead of waiting for the
-// whole refresh to finish
+// Show fetched channels during smaller refreshes. Large cached feeds update
+// when the refresh finishes to avoid repeatedly sorting the whole list.
+let deferredChannelUpdates = false
 useSubscriptionChannelUpdates('videos', () => {
-  if (subscriptionCacheReady.value) {
-    loadVideosFromCacheForAllActiveProfileChannels()
+  // Rebuilding and sorting tens of thousands of cached entries after every
+  // channel response can make the refresh itself slower than the requests.
+  // Keep the cached feed visible and publish the final list when it finishes.
+  if (!subscriptionCacheReady.value) return
+  if (store.getters.getSubscriptionFeedRefreshInProgress && isLargeCachedFeed.value) {
+    deferredChannelUpdates = true
+    return
   }
+  loadVideosFromCacheForAllActiveProfileChannels()
+  deferredChannelUpdates = false
 })
 
 async function loadVideosForSubscriptionsFromRemote() {
+  const wasShowingCache = !isLoading.value && videoList.value.length > 0
   isLoading.value = true
   attemptedFetch.value = true
   errorChannels.value = []
 
-  // Whatever is cached is shown right away, the refresh then replaces it
-  // channel by channel
-  if (subscriptionCacheReady.value && cacheEntriesForAllActiveProfileChannels.value.length > 0) {
+  // Show cached entries before fetching if the list is not already rendered.
+  if (!wasShowingCache && subscriptionCacheReady.value && cacheEntriesForAllActiveProfileChannels.value.length > 0) {
     loadVideosFromCacheForAllActiveProfileChannels()
   }
 
@@ -353,11 +377,21 @@ async function loadVideosForSubscriptionsFromRemote() {
       errorChannels: errorChannels.value
     })
     if (refreshedVideos !== null) {
-      loadVideosFromCacheForAllActiveProfileChannels()
+      if (isTabPresented?.value !== false) {
+        loadVideosFromCacheForAllActiveProfileChannels()
+        deferredChannelUpdates = false
+      }
       lastRemoteRefreshSuccessTimestamp.value = store.getters.getSubscriptionFeedLastRefreshTimestamp
     }
   } finally {
-    isLoading.value = false
+    try {
+      if (deferredChannelUpdates && isTabPresented?.value !== false) {
+        loadVideosFromCacheForAllActiveProfileChannels()
+        deferredChannelUpdates = false
+      }
+    } finally {
+      isLoading.value = false
+    }
   }
 }
 

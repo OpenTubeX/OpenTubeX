@@ -1,4 +1,5 @@
 import { abortUnmockedRequest, test, expect, goTo, sel } from '../../helpers/app.mjs'
+import { largeSubscriptionsSeed } from '../../performance/subscriptions.mjs'
 
 const HOUR = 3_600_000
 const now = Date.now()
@@ -320,10 +321,14 @@ test.describe('subscription refresh performance with many tabs', () => {
       settings: {
         ...commonSettings,
         startupBehavior: 'restoreTabLoadState',
-        reducedMotion: 'off'
+        reducedMotion: 'off',
+        subscriptionSeenVideos: JSON.stringify(Array.from({ length: 1880 }, (_, index) => ({
+          videoId: `video-${Math.floor(index / 2)}-${index % 2}`,
+          seenAt: Date.now()
+        })))
       },
       profiles: [profileWith(channelCount)],
-      subscriptionCache: Array.from({ length: channelCount }, (_, index) => cachedChannel(index)),
+      subscriptionCache: largeSubscriptionsSeed.subscriptionCache,
       tabSessions: [{
         _id: 'perf-window-session',
         value: {
@@ -342,7 +347,7 @@ test.describe('subscription refresh performance with many tabs', () => {
     }
   })
 
-  test('keeps the renderer responsive while refreshing a large profile', async ({ app, page }, testInfo) => {
+  async function checkLargeProfileRefresh({ app, page }, testInfo, background) {
     test.setTimeout(120_000)
     let fulfilledFeedCount = 0
     await routeFeeds(page, () => 0, (index) => {
@@ -351,7 +356,7 @@ test.describe('subscription refresh performance with many tabs', () => {
     })
     await expect(page.locator(sel.tabs)).toHaveCount(tabCount)
     await expect(page.locator(`${sel.tabs}:not(.unloaded)`)).toHaveCount(loadedTabCount)
-    await expect(page.getByText('Cached video 0', { exact: true })).toBeVisible({ timeout: 30_000 })
+    await expect(page.getByText('Video 0-0', { exact: true })).toBeVisible({ timeout: 30_000 })
 
     const profileUpdate = await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -425,6 +430,7 @@ test.describe('subscription refresh performance with many tabs', () => {
           taskObserver.disconnect()
           return {
             elapsed: performance.now() - startedAt,
+            completedAt,
             longestFrame,
             longFrames,
             longestTask: Math.max(0, ...longTasks.map(task => task.duration)),
@@ -438,10 +444,16 @@ test.describe('subscription refresh performance with many tabs', () => {
       button.click()
     })
 
-    const cancelRefresh = page.getByRole('button', { name: 'Cancel refresh' })
-    await expect(cancelRefresh).toBeVisible()
-    await expect(cancelRefresh).toHaveCount(0, { timeout: 90_000 })
-    expect(fulfilledFeedCount).toBe(channelCount)
+    if (background) {
+      await page.locator(sel.tabs).nth(1).click()
+      await expect.poll(() => fulfilledFeedCount, { timeout: 90_000 }).toBe(channelCount)
+      await page.locator(sel.tabs).first().click()
+    } else {
+      const cancelRefresh = page.getByRole('button', { name: 'Cancel refresh' })
+      await expect(cancelRefresh).toBeVisible()
+      await expect(cancelRefresh).toHaveCount(0, { timeout: 90_000 })
+      expect(fulfilledFeedCount).toBe(channelCount)
+    }
     await expect(page.getByText('Fresh video 0', { exact: true })).toBeVisible()
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)))
 
@@ -459,10 +471,37 @@ test.describe('subscription refresh performance with many tabs', () => {
     })
 
     expect(profileUpdate, JSON.stringify(metrics)).toBeLessThan(50)
-    // A single long-task duration can include runner preemption. Total blocking
-    // time tolerates that jitter while still catching repeated or larger stalls.
-    expect(timing.totalBlockingTime, JSON.stringify(metrics)).toBeLessThan(100)
-    expect(timing.elapsed).toBeLessThan(10_000)
+    // Mounting and publishing a 33k-entry feed can each take one longer task.
+    // Repeated blocking during the channel fetches is the reported regression.
+    const steadyBlockingTime = timing.longTasks
+      .filter(task => task.at >= 1000 && task.at < timing.completedAt - 250)
+      .reduce((total, task) => total + Math.max(0, task.duration - 50), 0)
+    expect(steadyBlockingTime, JSON.stringify(metrics)).toBeLessThan(1000)
+    expect(timing.totalBlockingTime, JSON.stringify(metrics)).toBeLessThan(1000)
+    expect(timing.completedAt).not.toBeNull()
+    expect(timing.completedAt, JSON.stringify(metrics)).toBeLessThan(15_000)
+  }
+
+  for (const background of [false, true]) {
+    test(`keeps the renderer responsive while refreshing a large profile ${background ? 'in a background tab' : 'on screen'}`, ({ app, page }, testInfo) =>
+      checkLargeProfileRefresh({ app, page }, testInfo, background))
+  }
+
+  test('shows channels fetched before a large refresh is cancelled', async ({ page }) => {
+    test.setTimeout(120_000)
+    await routeFeeds(page, index => index === 0 ? 0 : 8_000)
+    await expect(page.getByText('Video 0-0', { exact: true })).toBeVisible({ timeout: 30_000 })
+
+    const firstChannelUpdated = page.evaluate(() => new Promise(resolve => {
+      window.addEventListener('opentubex-subscription-refresh-channel', event => {
+        if (event.detail.tab === 'videos') resolve()
+      }, { once: true })
+    }))
+    await page.getByRole('button', { name: /Refresh Videos/ }).click()
+    await firstChannelUpdated
+    await page.getByRole('button', { name: 'Cancel refresh' }).click()
+    await expect(page.getByRole('button', { name: 'Cancel refresh' })).toHaveCount(0)
+    await expect(page.getByText('Fresh video 0', { exact: true })).toBeVisible()
   })
 })
 
