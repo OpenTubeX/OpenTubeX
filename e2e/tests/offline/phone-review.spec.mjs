@@ -159,6 +159,20 @@ test('description preview shows metadata without description text', async ({ app
       .toBeLessThanOrEqual(itemBounds.height + 2)
     expect(await preview.locator('.descriptionScroll').evaluate(element => element.clientHeight))
       .toBeLessThan(150)
+    const morePosition = await preview.evaluate(element => {
+      const card = element.getBoundingClientRect()
+      const scroll = element.querySelector('.descriptionScroll').getBoundingClientRect()
+      const more = element.querySelector(':scope > .descriptionStatus').getBoundingClientRect()
+      return {
+        clearOfPreview: more.top >= scroll.bottom - 1,
+        bottomGap: card.bottom - more.bottom,
+        rightGap: card.right - more.right,
+      }
+    })
+    expect(morePosition.clearOfPreview, JSON.stringify(morePosition)).toBe(true)
+    expect(morePosition.bottomGap).toBeGreaterThanOrEqual(0)
+    expect(morePosition.bottomGap).toBeLessThanOrEqual(20)
+    expect(morePosition.rightGap).toBeLessThanOrEqual(20)
   }
 
   await preview.getByRole('button', { name: '...more', exact: true }).click()

@@ -357,18 +357,22 @@ function updateDescriptionLayout() {
 
 let descriptionResizeObserver = null
 
+function observeDescriptionElements() {
+  descriptionResizeObserver?.disconnect()
+  if (descriptionScroll.value) {
+    descriptionResizeObserver?.observe(descriptionScroll.value)
+  }
+  const descriptionCardElement = descriptionCard.value?.$el
+  if (descriptionCardElement) {
+    descriptionResizeObserver?.observe(descriptionCardElement)
+  }
+}
+
 onMounted(() => {
   measureDescription()
 
   descriptionResizeObserver = new ResizeObserver(updateDescriptionLayout)
-  if (descriptionScroll.value) {
-    descriptionResizeObserver.observe(descriptionScroll.value)
-  }
-
-  const descriptionCardElement = descriptionCard.value?.$el
-  if (descriptionCardElement) {
-    descriptionResizeObserver.observe(descriptionCardElement)
-  }
+  observeDescriptionElements()
 
   nextTick(updateDescriptionLayout)
 })
@@ -376,7 +380,12 @@ onMounted(() => {
 onBeforeUnmount(() => descriptionResizeObserver?.disconnect())
 
 watch(isExpanded, () => nextTick(updateDescriptionLayout))
-watch([() => props.tags, () => props.games, () => props.license], () => nextTick(updateDescriptionLayout), { deep: true })
+watch([() => props.tags, () => props.games, () => props.license], async () => {
+  await nextTick()
+  observeDescriptionElements()
+  measureDescription()
+  updateDescriptionLayout()
+}, { deep: true })
 
 watch(() => props.alwaysExpanded, (alwaysExpanded, wasAlwaysExpanded) => {
   if (!alwaysExpanded && wasAlwaysExpanded) {

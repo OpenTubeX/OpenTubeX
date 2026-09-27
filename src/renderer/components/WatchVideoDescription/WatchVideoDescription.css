@@ -79,6 +79,7 @@
 
 .videoDescription.short {
   cursor: pointer;
+  padding-block-end: calc(16px + 1lh);
 }
 
 .descriptionStatus,
@@ -92,7 +93,7 @@
 .videoDescription.short .descriptionStatus {
   position: absolute;
   z-index: 1;
-  inset-block-end: calc(1lh + 12px);
+  inset-block-end: 8px;
   padding-block: 2px;
   inset-inline-end: 16px;
   backdrop-filter: var(--card-bg-blur, none);

@@ -4071,7 +4071,8 @@ test.describe('watch page', () => {
       )
     }, await copyButton.elementHandle())
 
-    await description.evaluate(element => { element.style.height = '70px' })
+    // Force the absolute controls together despite the collapsed card's reserved footer.
+    await description.evaluate(element => { element.style.height = '0px' })
     await expect(expandControl).toHaveClass(/avoidCopyButton/)
     expect(await controlsOverlap()).toBe(false)
 
@@ -4081,7 +4082,7 @@ test.describe('watch page', () => {
 
     await description.evaluate(element => {
       element.dir = 'rtl'
-      element.style.height = '70px'
+      element.style.height = '0px'
     })
     await expect(expandControl).toHaveClass(/avoidCopyButton/)
     expect(await controlsOverlap()).toBe(false)
@@ -4262,6 +4263,50 @@ test.describe('watch page', () => {
     await card.locator('.descriptionScroll > .descriptionStatus').click()
     await expect(card).toHaveClass(/short/)
     await expect(card.locator('.license')).toHaveText('Creative Commons Attribution license (reuse allowed)')
+    await watchComponent.dispose()
+  })
+
+  test('shows description controls when metadata arrives after an empty mount', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    const card = page.locator(`${activeTab} .videoDescription`)
+
+    for (const metadata of [
+      { videoTags: Array.from({ length: 80 }, (_, index) => `tag-${index}`), videoGames: [], license: null },
+      { videoTags: [], videoGames: Array.from({ length: 40 }, (_, index) => ({ title: `Game ${index}` })), license: null },
+      { videoTags: [], videoGames: [], license: 'Creative Commons license '.repeat(100) },
+    ]) {
+      await watchComponent.evaluate(async component => {
+        const view = component.proxy
+        view.isLoading = true
+        await view.$nextTick()
+        view.videoDescription = ''
+        view.videoDescriptionHtml = ''
+        view.videoTags = []
+        view.videoGames = []
+        view.license = null
+        view.isLoading = false
+        await view.$nextTick()
+      })
+      await expect(card).toHaveCount(0)
+
+      await watchComponent.evaluate(async (component, metadata) => {
+        const view = component.proxy
+        view.videoTags = metadata.videoTags
+        view.videoGames = metadata.videoGames
+        view.license = metadata.license
+        await view.$nextTick()
+      }, metadata)
+      await expect(card).toHaveClass(/short/)
+      await expect(card.locator(':scope > .descriptionStatus')).toBeVisible()
+      await expect.poll(() => card.locator('.descriptionScroll').evaluate(element => element.scrollHeight - element.clientHeight))
+        .toBeGreaterThan(0)
+      await card.locator(':scope > .descriptionStatus').click()
+      await expect(card).not.toHaveClass(/short/)
+    }
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1))
     await watchComponent.dispose()
   })
 
