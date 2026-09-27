@@ -4,6 +4,7 @@ import { promisify } from 'node:util'
 import { readFile } from 'node:fs/promises'
 import vm from 'node:vm'
 import test from 'node:test'
+import { computed, nextTick, ref, watch } from 'vue'
 
 async function helper(name, exports, ios = true) {
   const registrations = []
@@ -160,6 +161,55 @@ test('silence shortcut preserves iOS preferences and toggles them on other platf
       assert.equal(preference, ios ? initial : !initial)
       assert.deepEqual(updates, ios ? [] : [!initial])
       assert.deepEqual(messages, ios ? [] : [initial ? 'OFF' : 'ON'])
+    }
+  }
+})
+
+test('iOS rotation fullscreen stays off during PiP and background transitions', async () => {
+  const source = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
+  const declaration = source.match(/const fullscreenOnRotationEnabled = computed\(\(\) => \{[\s\S]*?\n    \}\)/)?.[0] ?? ''
+  const rotationWatch = source.match(/watch\((?:enterFullscreenOnDisplayRotate|fullscreenOnRotationEnabled), \(newValue\) => \{[\s\S]*?\n    \}(?:, \{ flush: 'sync' \})?\)/)?.[0]
+  const initialConfig = source.match(/enableFullscreenOnRotation: ([^\n]+),\n          fullScreenElement/)?.[1]
+  assert.ok(rotationWatch)
+  assert.ok(initialConfig)
+  for (const platform of ['ios', 'android', 'desktop']) {
+    const preference = ref(true)
+    const pip = ref(false)
+    const visible = ref(true)
+    let enabled
+    const context = vm.createContext({
+      process: { env: { IS_IOS: platform === 'ios', IS_CAPACITOR: platform !== 'desktop' } },
+      enterFullscreenOnDisplayRotate: preference,
+      pictureInPictureActive: pip,
+      mobileAdjustmentsVisible: visible,
+      computed, watch,
+      ui: { configure: options => { enabled = options.enableFullscreenOnRotation } },
+    })
+    vm.runInContext(declaration, context)
+    enabled = vm.runInContext(initialConfig, context)
+    const stop = vm.runInContext(rotationWatch, context)
+    try {
+      assert.equal(enabled, platform !== 'android')
+      pip.value = true
+      await nextTick()
+      assert.equal(enabled, platform === 'desktop', `${platform}: PiP must survive orientation changes`)
+      visible.value = false
+      pip.value = false
+      await nextTick()
+      assert.equal(enabled, platform === 'desktop', `${platform}: leaving PiP while hidden must not enable fullscreen`)
+      visible.value = true
+      await nextTick()
+      assert.equal(enabled, platform !== 'android', `${platform}: restore foreground rotation`)
+      preference.value = false
+      await nextTick()
+      assert.equal(enabled, false)
+      pip.value = true
+      preference.value = true
+      await nextTick()
+      assert.equal(enabled, platform === 'desktop', `${platform}: changing preference during PiP`)
+      assert.equal(vm.runInContext(initialConfig, context), platform === 'desktop', `${platform}: initial configuration during PiP`)
+    } finally {
+      stop()
     }
   }
 })

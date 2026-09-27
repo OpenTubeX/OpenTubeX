@@ -64,7 +64,7 @@ test('Android phone uses the central Shaka play button without a duplicate in th
 
 test('Android restores orientation if fullscreen entry fails after rotation starts', async () => {
   const start = source.indexOf('    function handleFullscreenButtonClick(event) {')
-  const end = source.indexOf('\n    const mobileAdjustmentsVisible', start)
+  const end = source.indexOf('\n    const mobileFullscreenBrightnessActive', start)
   assert.ok(start !== -1 && end !== -1)
   const calls = []
   let afterEntry
@@ -96,7 +96,7 @@ test('Android restores orientation if fullscreen entry fails after rotation star
 
 test('Android ignores fullscreen recovery from an earlier entry attempt', async () => {
   const start = source.indexOf('    function handleFullscreenButtonClick(event) {')
-  const end = source.indexOf('\n    const mobileAdjustmentsVisible', start)
+  const end = source.indexOf('\n    const mobileFullscreenBrightnessActive', start)
   assert.ok(start !== -1 && end !== -1)
   const calls = []
   const recoveryTimers = []

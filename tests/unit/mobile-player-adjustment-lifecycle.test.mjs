@@ -7,8 +7,10 @@ import { isAppHidden, setAndroidAppVisible } from '../../src/renderer/helpers/ap
 import { createMobilePlayerAdjustments } from '../../src/renderer/helpers/mobilePlayerAdjustments.js'
 
 const source = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
-const start = source.indexOf('    const mobileAdjustmentsVisible =')
-const lifecycle = source.slice(start, source.indexOf('\n    watch(scrollMiniPlayerDetached', start))
+const visibilityState = source.match(/const mobileAdjustmentsVisible = ref\([^\n]+/)?.[0]
+assert.ok(visibilityState)
+const start = source.indexOf('    const mobileFullscreenBrightnessActive =')
+const lifecycle = `${visibilityState}\n${source.slice(start, source.indexOf('\n    watch(scrollMiniPlayerDetached', start))}`
 
 test('fullscreen brightness follows Android visibility when Chromium remains visible', async t => {
   const previousDocument = globalThis.document

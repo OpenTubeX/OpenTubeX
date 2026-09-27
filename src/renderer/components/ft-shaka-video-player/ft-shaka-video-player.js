@@ -796,6 +796,8 @@ export default defineComponent({
     // Reactive mirror of the native fullscreen state, so the template can
     // decide where the chapters render (in-player panel vs the watch sidebar).
     const isFullscreen = ref(false)
+    const pictureInPictureActive = ref(false)
+    const mobileAdjustmentsVisible = ref(!isAppHidden())
     const androidFullscreenHostActive = ref(false)
     let androidFullscreenHost = null
     const playerPaused = ref(true)
@@ -1650,11 +1652,16 @@ export default defineComponent({
       return store.getters.getEnableMobileFullscreenSwipe
     })
 
-    watch(enterFullscreenOnDisplayRotate, (newValue) => {
-      ui.configure({
-        enableFullscreenOnRotation: (!process.env.IS_CAPACITOR || process.env.IS_IOS) && newValue
-      })
+    const fullscreenOnRotationEnabled = computed(() => {
+      // iOS can emit an orientation change while moving to Home. Shaka exits
+      // PiP before entering fullscreen, so only allow rotation while inline.
+      return (!process.env.IS_CAPACITOR || process.env.IS_IOS) && enterFullscreenOnDisplayRotate.value &&
+        (!process.env.IS_IOS || (mobileAdjustmentsVisible.value && !pictureInPictureActive.value))
     })
+
+    watch(fullscreenOnRotationEnabled, (newValue) => {
+      ui?.configure({ enableFullscreenOnRotation: newValue })
+    }, { flush: 'sync' })
 
     watch([rotateFullscreenToLandscape, fullscreenAspectRatio], ([enabled]) => {
       if (!isNativeFullscreenActive()) return
@@ -4820,7 +4827,7 @@ export default defineComponent({
           },
 
           // these have their own watchers
-          enableFullscreenOnRotation: (!process.env.IS_CAPACITOR || process.env.IS_IOS) && enterFullscreenOnDisplayRotate.value,
+          enableFullscreenOnRotation: fullscreenOnRotationEnabled.value,
           fullScreenElement: androidFullscreenHost ?? container.value,
           playbackRates: playbackRates.value,
           tapSeekDistance: defaultSkipInterval.value,
@@ -6859,7 +6866,6 @@ export default defineComponent({
     const videoElementHeight = ref(0)
     /** Height of the video element in CSS pixels, used to scale the captions with the player. */
     const videoElementLayoutHeight = ref(0)
-    const pictureInPictureActive = ref(false)
 
     const captionPlayerVariables = computed(() => {
       return getCaptionPlayerVariables(videoElementLayoutHeight.value)
@@ -6962,7 +6968,6 @@ export default defineComponent({
       handleScrollMiniFullscreenButtonClick(event)
     }
 
-    const mobileAdjustmentsVisible = ref(!isAppHidden())
     const mobileFullscreenBrightnessActive = computed(() => process.env.IS_CAPACITOR &&
       isActiveTab.value && !scrollMiniPlayerActive.value && mobileAdjustmentsVisible.value &&
       isFullscreen.value && store.getters.getMobileFullscreenBrightness)
