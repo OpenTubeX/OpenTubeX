@@ -11,6 +11,7 @@ import i18n from '../../../i18n/index'
 /**
  * @typedef {object} QuickPlaybackRateBarContext
  * @property {() => QuickPlaybackRateOption[]} getPlaybackRateOptions
+ * @property {() => number | null} getDisplayedPlaybackRate
  * @property {() => number | null} getSavedChannelPlaybackRate
  * @property {() => boolean} getCanSaveChannelPlaybackSpeed
  * @property {EventTarget} events
@@ -109,9 +110,6 @@ export class QuickPlaybackRateBar extends shaka.ui.Element {
 
       button.addEventListener('click', () => {
         this.setPlaybackRate_(speed)
-        quickPlaybackRateBarContexts.get(this.controls)?.events.dispatchEvent(new CustomEvent('quickPlaybackRateUserSet', {
-          detail: speed
-        }))
       })
 
       this.rateButtons_.push({ speed, button })
@@ -164,7 +162,7 @@ export class QuickPlaybackRateBar extends shaka.ui.Element {
   /** @private */
   updateButtonStates_() {
     const context = quickPlaybackRateBarContexts.get(this.controls)
-    const currentRate = this.player.getPlaybackRate?.() ?? this.video.playbackRate
+    const currentRate = context?.getDisplayedPlaybackRate?.() ?? this.player.getPlaybackRate?.() ?? this.video.playbackRate
     const savedRate = context?.getSavedChannelPlaybackRate() ?? null
     const canSave = context?.getCanSaveChannelPlaybackSpeed() ?? false
 
@@ -205,6 +203,10 @@ export class QuickPlaybackRateBar extends shaka.ui.Element {
    */
   setPlaybackRate_(rate) {
     this.player.trickPlay(rate, false)
+    quickPlaybackRateBarContexts.get(this.controls)?.events.dispatchEvent(new CustomEvent('quickPlaybackRateUserSet', {
+      detail: rate
+    }))
+    this.updateButtonStates_()
   }
 
   /**

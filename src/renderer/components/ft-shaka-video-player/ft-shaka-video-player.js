@@ -9225,6 +9225,9 @@ export default defineComponent({
         removeQuickPlaybackRateBarContext?.()
         removeQuickPlaybackRateBarContext = setQuickPlaybackRateBarContext(controls, {
           getPlaybackRateOptions: () => quickPlaybackSpeedBarOptions.value,
+          getDisplayedPlaybackRate: () => hasLoaded.value
+            ? getCurrentPlaybackRate()
+            : pendingPlaybackRateRestore ?? getInitialPlaybackRate(),
           getSavedChannelPlaybackRate: () => savedChannelPlaybackRate.value,
           getCanSaveChannelPlaybackSpeed: () => canManuallySaveChannelPlaybackRate.value,
           events
