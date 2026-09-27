@@ -7,7 +7,7 @@
     <div
       v-show="isWatchRoute || previewStyle"
       ref="watchRoot"
-      :class="{ watchDragPreview: previewStyle }"
+      :class="{ watchDragPreview: previewStyle, watchRestorePreview: previewStyle && previewRestoring }"
       :style="previewStyle"
       :inert="!isWatchRoute"
       :aria-hidden="String(!isWatchRoute)"
@@ -209,8 +209,18 @@ function updateMinimizePreview(progress) {
 async function finishMinimizePreview(commit) {
   if (previewRestoring) {
     if (commit && !disposed) {
-      await navigation.push(props.tabId, watchRoute.value.fullPath)
+      const browsingScroll = previewScroll
       window.scrollTo({ left: 0, top: 0, behavior: 'instant' })
+      try {
+        await navigation.push(props.tabId, watchRoute.value.fullPath)
+      } finally {
+        if (isWatchRoute.value) {
+          const historyIndex = store.getters.getTabById(props.tabId).historyIndex - 1
+          store.commit('setHistoryEntryScroll', { tabId: props.tabId, historyIndex, scroll: browsingScroll })
+        } else {
+          window.scrollTo({ ...browsingScroll, behavior: 'instant' })
+        }
+      }
     }
     return
   }
@@ -304,7 +314,10 @@ onBeforeUnmount(() => {
   z-index: 100;
   pointer-events: none;
   overflow: clip;
-  background: var(--bg-color);
   will-change: opacity;
+}
+
+.watchRestorePreview {
+  background: var(--bg-color);
 }
 </style>

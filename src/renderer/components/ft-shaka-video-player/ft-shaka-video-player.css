@@ -5221,7 +5221,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   height: var(--mobile-mini-height) !important;
   margin: 0 !important;
   z-index: 150;
-  background: color-mix(in srgb, #000 var(--mobile-mini-black-percent), var(--card-bg-color));
+  background: transparent;
   border-radius: 0 !important;
   transform: none !important;
   translate: none !important;
@@ -5235,15 +5235,16 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 :global(.app .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar[data-mobile-mini-morph] > .player) {
   position: absolute !important;
   inset: var(--mobile-mini-video-top) auto auto var(--mobile-mini-video-left) !important;
-  width: var(--mobile-mini-video-width) !important;
-  height: var(--mobile-mini-video-height) !important;
+  width: var(--mobile-mini-video-base-width) !important;
+  height: var(--mobile-mini-video-base-height) !important;
   min-width: 0 !important;
   max-width: none !important;
   min-height: 0 !important;
   max-height: none !important;
   margin: 0 !important;
   object-fit: contain !important;
-  transform: none !important;
+  transform: scale(var(--mobile-mini-video-scale)) !important;
+  transform-origin: top left;
   transition: none !important;
 }
 /* stylelint-enable no-descending-specificity */

@@ -32,6 +32,7 @@ function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabl
   const hostBounds = { left: 0, top: 60.25, width: 412.25 }
   const tabBounds = { left: 0, top: 60.25, width: 412.25 }
   const listeners = new Map()
+  let savedBrowsingScroll = null
   const viewport = {
     scrollX: 0, scrollY: 20, innerHeight: 800,
     scrollTo(position) { this.lastScroll = position; this.scrollX = position.left; this.scrollY = position.top },
@@ -58,7 +59,7 @@ function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabl
     useTemplateRef: name => name === 'watchRoot' ? ref(previewRoot) : name === 'previewHost' ? ref({ getBoundingClientRect: () => hostBounds, closest: () => ({ getBoundingClientRect: () => tabBounds }) }) : ref(mounted ? { $refs: { player: { hasLoaded: loaded, isPaused: () => video.paused } }, querySelector: () => null } : null),
     provide: (key, value) => provides.set(key, value),
     onBeforeUnmount: callback => unmount.push(callback),
-    store: { getters },
+    store: { getters, commit: (_name, payload) => { savedBrowsingScroll = payload.scroll } },
     resolveRouteComponent: () => ({}),
     getTabNavigationService: () => ({ createRouterFacade: () => ({}), setTitle: (...args) => titles.push(args), back: () => navigate(props.route.path === '/subscriptions' ? '/watch/video' : previous), forward: () => navigate('/watch/video'), push: (_id, path) => navigate(path) }),
     tabLifecycleService: { register: (_id, hooks) => { lifecycle = hooks; return () => {} } },
@@ -78,6 +79,7 @@ function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabl
   return {
     props, getters, provides, lifecycle, previewRoot, previewStyle, hostBounds, tabBounds, viewport, listeners, titles, updateTitle,
     disposals: () => disposals,
+    savedBrowsingScroll: () => savedBrowsingScroll,
     navigate
   }
 }
@@ -270,6 +272,7 @@ test('returning from the mini player restores Watch at the top without a second 
   await navigation.finishMinimizePreview(true)
   assert.equal(mounted.viewport.scrollY, 0)
   assert.equal(mounted.viewport.lastScroll.behavior, 'instant')
+  assert.equal(mounted.savedBrowsingScroll().top, 300.125)
 })
 
 for (const commit of [true, false]) {

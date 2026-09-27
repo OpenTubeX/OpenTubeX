@@ -304,11 +304,16 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     style.setProperty('--mobile-mini-top', `${interpolate(from.top, to.top)}px`)
     style.setProperty('--mobile-mini-width', `${interpolate(from.width, to.width)}px`)
     style.setProperty('--mobile-mini-height', `${interpolate(from.height, to.height)}px`)
-    style.setProperty('--mobile-mini-video-left', `${interpolate(videoFrom.left, videoTo.left)}px`)
-    style.setProperty('--mobile-mini-video-top', `${interpolate(videoFrom.top, videoTo.top)}px`)
-    style.setProperty('--mobile-mini-video-width', `${interpolate(videoFrom.width, videoTo.width)}px`)
-    style.setProperty('--mobile-mini-video-height', `${interpolate(videoFrom.height, videoTo.height)}px`)
-    style.setProperty('--mobile-mini-black-percent', `${100 * (restoring ? progress : 1 - progress)}%`)
+    const videoWidth = interpolate(videoFrom.width, videoTo.width)
+    const videoHeight = interpolate(videoFrom.height, videoTo.height)
+    const videoScale = Math.min(videoWidth / videoFrom.width, videoHeight / videoFrom.height)
+    style.setProperty('--mobile-mini-video-base-width', `${videoFrom.width}px`)
+    style.setProperty('--mobile-mini-video-base-height', `${videoFrom.height}px`)
+    const videoLeft = interpolate(videoFrom.left, videoTo.left) + (videoWidth - videoFrom.width * videoScale) / 2
+    const videoTop = interpolate(videoFrom.top, videoTo.top) + (videoHeight - videoFrom.height * videoScale) / 2
+    style.setProperty('--mobile-mini-video-left', `${videoLeft}px`)
+    style.setProperty('--mobile-mini-video-top', `${videoTop}px`)
+    style.setProperty('--mobile-mini-video-scale', String(videoScale))
     const opacity = restoring
       ? Math.max(0, 1 - progress / 0.5)
       : Math.min(1, Math.max(0, (progress - 0.2) / 0.4))
@@ -321,8 +326,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     element.removeAttribute('data-mobile-mini-morph')
     for (const name of [
       '--mobile-mini-left', '--mobile-mini-top', '--mobile-mini-width', '--mobile-mini-height',
-      '--mobile-mini-video-left', '--mobile-mini-video-top', '--mobile-mini-video-width',
-      '--mobile-mini-video-height', '--mobile-mini-black-percent'
+      '--mobile-mini-video-left', '--mobile-mini-video-top', '--mobile-mini-video-base-width',
+      '--mobile-mini-video-base-height', '--mobile-mini-video-scale'
     ]) element.style.removeProperty(name)
   }
 
@@ -427,13 +432,12 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       if (inlineDrag !== drag || !container.value) return
       // Navigation and layout changes happen behind the completed preview, after
       // the video has reached the same endpoint as the normal mini-player motion.
-      // Restore the inline layout while the drag still holds the video in the
-      // top-level layer. Otherwise the Watch route briefly repositions the
-      // active bar, then starts a second layout animation from below the page.
-      if (drag.restoring && commit) deactivateScrollMiniPlayer()
+      // Keep the bar active until navigation succeeds. The drag holds the video
+      // in its top-level layer while the Watch route changes behind it.
       await watchNavigation.finishMinimizePreview(commit)
       restored = drag.restoring && commit && !watchNavigation.detached.value
       if (inlineDrag !== drag || !container.value) return
+      if (restored) deactivateScrollMiniPlayer()
       if (drag.restoring && commit) {
         if (!scrollMiniPlayerActive.value) lightHaptic()
       } else if (commit && watchNavigation.detached.value) {

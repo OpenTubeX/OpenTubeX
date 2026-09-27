@@ -80,6 +80,8 @@ test('mobile bar details fade at the destination during both swipe directions', 
     })
     await touch('touchMove', { ...down, y: down.y + distance })
     await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
+    await expect(player).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    await expect(page.locator('.watchDragPreview')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
     const details = page.locator('.mobileMiniBarDetails')
     const chevron = page.locator('.mobileMiniBarReturn')
     await expect(details).toHaveCount(1)

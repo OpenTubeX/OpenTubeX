@@ -137,11 +137,13 @@ test('failed preview handoff still clears inline drag state', async () => {
   assert.equal(f.methods.beginScrollMiniPlayerDrag(), true)
 })
 
-test('failed Watch restore refreshes the retained mini player', async () => {
+test('failed Watch restore keeps the retained mini player active', async () => {
   const f = fixture({ restoring: true, reducedMotion: true, finishRejects: true })
   f.methods.beginScrollMiniPlayerDrag(true)
   await assert.rejects(f.methods.finishScrollMiniPlayerDrag(true), /handoff failed/)
-  assert.equal(f.deactivated(), true)
+  assert.equal(f.deactivated(), false)
+  assert.equal(f.activated(), false)
+  assert.equal(f.stash.value, 'left')
   assert.equal(f.updates(), 1)
 })
 
@@ -262,6 +264,84 @@ test('return button uses the same preview and continuous path as an upward swipe
     getCapacitorTabService: () => ({ activateTab: () => calls.push('activate') })
   })
   assert.equal(JSON.stringify(calls), JSON.stringify([['begin', true], ['finish', true]]))
+})
+
+test('Watch return resets browsing scroll before revealing the Watch route', async () => {
+  const watchSource = readFileSync(new URL('../../src/renderer/components/TabContent/TabWatchContent.vue', import.meta.url), 'utf8')
+  const finishSource = watchSource.slice(watchSource.indexOf('async function finishMinimizePreview('), watchSource.indexOf('function clearMinimizePreview('))
+  const window = {
+    scrollY: 420,
+    scrollTo() { this.scrollY = 0 }
+  }
+  let scrollAtNavigation = null
+  const browsingEntry = { scroll: { left: 0, top: 420 } }
+  const tab = { historyIndex: 0, history: [browsingEntry] }
+  const isWatchRoute = { value: false }
+  await vm.runInNewContext(`${finishSource}\nfinishMinimizePreview(true)`, {
+    previewRestoring: true,
+    previewScroll: { left: 0, top: 420 },
+    disposed: false,
+    navigation: { push: async () => {
+      scrollAtNavigation = window.scrollY
+      browsingEntry.scroll = { left: 0, top: window.scrollY }
+      tab.history.push({ scroll: { left: 0, top: 0 } })
+      tab.historyIndex = 1
+      isWatchRoute.value = true
+    } },
+    props: { tabId: 'watch' },
+    watchRoute: { value: { fullPath: '/watch/demo' } },
+    isWatchRoute,
+    store: {
+      getters: { getTabById: () => tab },
+      commit: (_mutation, { historyIndex, scroll }) => { tab.history[historyIndex].scroll = scroll }
+    },
+    window
+  })
+  assert.equal(scrollAtNavigation, 0)
+  assert.equal(browsingEntry.scroll.top, 420)
+})
+
+test('failed Watch return keeps the browsing scroll position', async () => {
+  const watchSource = readFileSync(new URL('../../src/renderer/components/TabContent/TabWatchContent.vue', import.meta.url), 'utf8')
+  const finishSource = watchSource.slice(watchSource.indexOf('async function finishMinimizePreview('), watchSource.indexOf('function clearMinimizePreview('))
+  const window = {
+    scrollY: 420,
+    scrollTo({ top }) { this.scrollY = top }
+  }
+  await assert.rejects(vm.runInNewContext(`${finishSource}\nfinishMinimizePreview(true)`, {
+    previewRestoring: true,
+    previewScroll: { left: 0, top: 420 },
+    disposed: false,
+    navigation: { push: async () => { throw new Error('Navigation failed') } },
+    props: { tabId: 'watch' },
+    watchRoute: { value: { fullPath: '/watch/demo' } },
+    isWatchRoute: { value: false },
+    window
+  }))
+  assert.equal(window.scrollY, 420)
+})
+
+test('mobile Watch return preview stays at the final viewport position while browsing is scrolled', () => {
+  const watchSource = readFileSync(new URL('../../src/renderer/components/TabContent/TabWatchContent.vue', import.meta.url), 'utf8')
+  const beginSource = watchSource.slice(watchSource.indexOf('function beginRestorePreview('), watchSource.indexOf('function updatePreviewPosition('))
+  const previewStyle = { value: null }
+  const previewHost = { value: {
+    getBoundingClientRect: () => ({ left: 0, top: -240, width: 390 }),
+    closest: () => ({ getBoundingClientRect: () => ({ left: 0, top: -240, width: 390 }) })
+  } }
+  const started = vm.runInNewContext(`${beginSource}\nbeginRestorePreview()`, {
+    previewActive: { value: false },
+    detached: { value: true },
+    previewHost,
+    previewStyle,
+    watchRoot: { value: { style: {}, firstElementChild: { style: {} } } },
+    updatePreviewPosition() {},
+    document: { querySelector: () => ({}) },
+    window: { scrollX: 0, scrollY: 300, innerHeight: 800, addEventListener() {} }
+  })
+  assert.equal(started, true)
+  assert.equal(-240 + Number.parseFloat(previewStyle.value.top), 60)
+  assert.equal(previewStyle.value.height, '740px')
 })
 
 for (const navigatedAway of [false, true]) {
