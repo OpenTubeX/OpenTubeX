@@ -663,6 +663,137 @@ final class AppTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: exported.path))
     }
 
+    private func openDataSettings() async throws {
+        try await openApplication()
+        _ = try await webView.callAsyncJavaScript("for (const video of document.querySelectorAll('video')) video.pause(); await testRouter.push('/subscriptions'); testStore.commit('setSettingsWindowSection', 'data'); await testStore.dispatch('showSettingsWindow')", arguments: [:], in: nil, contentWorld: .page)
+        try await wait("Array.from(document.querySelectorAll('.settingsWindow button')).some(button => button.textContent.trim() === 'Import Settings')")
+    }
+
+    private func importFixture(_ data: Data, name: String, action: String) async throws {
+        // Exercise WebKit's file-input path and the real importer. Native picker
+        // presentation and cancellation are covered separately.
+        _ = try await webView.callAsyncJavaScript("""
+        const originalClick = HTMLInputElement.prototype.click;
+        HTMLInputElement.prototype.click = function () {
+            if (this.type !== 'file') return originalClick.call(this);
+            HTMLInputElement.prototype.click = originalClick;
+            const transfer = new DataTransfer();
+            transfer.items.add(new File([Uint8Array.from(atob(data), c => c.charCodeAt(0))], name));
+            this.files = transfer.files;
+            this.dispatchEvent(new Event('change'));
+            window.dispatchEvent(new Event('focus'));
+        };
+        try {
+            const button = Array.from(document.querySelectorAll('.settingsWindow button')).find(button => button.textContent.trim() === action);
+            if (!button) throw new Error('Import button missing: ' + action);
+            button.click();
+        } finally {
+            HTMLInputElement.prototype.click = originalClick;
+        }
+        """, arguments: ["data": data.base64EncodedString(), "name": name, "action": action], in: nil, contentWorld: .page)
+    }
+
+    func testSettingsFileImportValidation() async throws {
+        try await openDataSettings()
+        let original = try await evaluate("testStore.getters.getRememberHistory") as? Bool ?? true
+        do {
+            _ = try await webView.callAsyncJavaScript("await testStore.dispatch('updateRememberHistory', true)", arguments: [:], in: nil, contentWorld: .page)
+            let mixed = "\n{broken\n{\"_id\":\"rememberHistory\",\"value\":false}\nnull\n"
+            try await importFixture(Data(mixed.utf8), name: "settings.db", action: "Import Settings")
+            try await wait("testStore.getters.getRememberHistory === false && Array.from(document.querySelectorAll('.toast')).some(toast => toast.textContent.includes('Invalid JSON at row 2'))")
+            try await importFixture(Data("\u{FEFF}{\"rememberHistory\":true}".utf8), name: "settings.json", action: "Import Settings")
+            try await wait("testStore.getters.getRememberHistory === true")
+            try await wait("!Array.from(document.querySelectorAll('.toast')).some(toast => toast.textContent.includes('All settings have been successfully imported'))")
+            try await importFixture(Data("{\"_id\":\"rememberHistory\"}".utf8), name: "invalid.db", action: "Import Settings")
+            try await wait("Array.from(document.querySelectorAll('.toast')).some(toast => toast.textContent.includes('Unable to read file'))")
+            let unchanged = try await evaluate("testStore.getters.getRememberHistory === true && !Array.from(document.querySelectorAll('.toast')).some(toast => toast.textContent.includes('All settings have been successfully imported'))") as? Bool
+            XCTAssertEqual(unchanged, true)
+        } catch {
+            _ = try? await webView.callAsyncJavaScript("await testStore.dispatch('updateRememberHistory', original); await testStore.dispatch('hideSettingsWindow')", arguments: ["original": original], in: nil, contentWorld: .page)
+            throw error
+        }
+        _ = try await webView.callAsyncJavaScript("await testStore.dispatch('updateRememberHistory', original); await testStore.dispatch('hideSettingsWindow')", arguments: ["original": original], in: nil, contentWorld: .page)
+    }
+
+    func testUnifiedBackupNativeExportAndWebKitImport() async throws {
+        try await openDataSettings()
+        let id = "ios-backup-" + UUID().uuidString
+        let videoId = String(UUID().uuidString.prefix(11))
+        let originalHistorySetting = try await evaluate("testStore.getters.getRememberHistory") as? Bool ?? true
+        let arguments: [String: Any] = ["id": id, "videoId": videoId]
+        func cleanup() async {
+            _ = try? await webView.callAsyncJavaScript("""
+            await testStore.dispatch('removeProfile', id);
+            await testStore.dispatch('removePlaylist', id);
+            await testStore.dispatch('removeFromHistory', videoId);
+            for (const entry of testStore.getters.getSearchHistoryEntries.filter(entry => entry.query === 'Backup Grüße 日本語 ' + id)) {
+                await testStore.dispatch('removeSearchHistoryEntry', entry._id);
+            }
+            await testStore.dispatch('hideSettingsWindow');
+            """, arguments: arguments, in: nil, contentWorld: .page)
+            _ = try? await webView.callAsyncJavaScript("await testStore.dispatch('updateRememberHistory', original)", arguments: ["original": originalHistorySetting], in: nil, contentWorld: .page)
+        }
+        do {
+            _ = try await webView.callAsyncJavaScript("""
+            const video = {videoId, title: 'Backup Grüße 日本語', author: 'Fixture', authorId: 'UCaaaaaaaaaaaaaaaaaaaaaa',
+                published: Date.now(), lengthSeconds: 100, watchProgress: 37.25, isLive: false, isWatched: false, timeWatched: Date.now(), type: 'video'};
+            await testStore.dispatch('createProfile', {_id: id, name: 'Backup Grüße 日本語', bgColor: '#112233', subscriptions: [{id: video.authorId, name: 'Fixture channel', thumbnail: ''}]});
+            await testStore.dispatch('addPlaylist', {_id: id, playlistName: 'Backup Grüße 日本語', description: 'Native backup fixture', videos: [video]});
+            await testStore.dispatch('updateHistory', video);
+            await testStore.dispatch('updateSearchHistoryEntry', {_id: id, query: 'Backup Grüße 日本語 ' + id, lastUpdatedAt: Date.now()});
+            await testStore.dispatch('updateRememberHistory', false);
+            Array.from(document.querySelectorAll('.settingsWindow button')).find(button => button.textContent.trim() === 'Export backup').click();
+            """, arguments: arguments, in: nil, contentWorld: .page)
+            let controller = try XCTUnwrap(webView.window?.rootViewController)
+            try await waitForNative { controller.presentedViewController != nil }
+            let picker = try XCTUnwrap(controller.presentedViewController as? UIDocumentPickerViewController)
+            let files = try XCTUnwrap(FileManager.default.enumerator(at: FileManager.default.temporaryDirectory, includingPropertiesForKeys: nil))
+            let exported = try XCTUnwrap(files.compactMap { $0 as? URL }.first { $0.lastPathComponent.hasPrefix("opentubex-backup-") && $0.pathExtension == "zip" })
+            let archive = try Data(contentsOf: exported)
+            XCTAssertEqual(Array(archive.prefix(4)), [0x50, 0x4b, 0x03, 0x04])
+            picker.delegate?.documentPickerWasCancelled?(picker)
+            try await dismiss(picker)
+            XCTAssertFalse(FileManager.default.fileExists(atPath: exported.path))
+            _ = try await webView.callAsyncJavaScript("""
+            await testStore.dispatch('removeProfile', id);
+            await testStore.dispatch('removePlaylist', id);
+            await testStore.dispatch('removeFromHistory', videoId);
+            await testStore.dispatch('removeSearchHistoryEntry', id);
+            await testStore.dispatch('updateRememberHistory', true);
+            """, arguments: arguments, in: nil, contentWorld: .page)
+            let removed = try await webView.callAsyncJavaScript("""
+            return !testStore.getters.getProfileList.some(profile => profile._id === id)
+                && !testStore.getters.getPlaylist(id)
+                && !testStore.getters.getHistoryCacheById[videoId]
+                && !testStore.getters.getSearchHistoryEntries.some(entry => entry.query === 'Backup Grüße 日本語 ' + id)
+                && testStore.getters.getRememberHistory === true;
+            """, arguments: arguments, in: nil, contentWorld: .page) as? Bool
+            XCTAssertEqual(removed, true, "Fixtures must be absent before testing restoration")
+            try await importFixture(archive, name: "native-backup.zip", action: "Import backup")
+            try await wait("Array.from(document.querySelectorAll('.settingsSubpageContent button')).some(button => button.textContent.trim() === 'Import selected data')")
+            _ = try await evaluate("Array.from(document.querySelectorAll('.settingsSubpageContent button')).find(button => button.textContent.trim() === 'Import selected data').click(); true")
+            try await wait("Array.from(document.querySelectorAll('.toast')).some(toast => toast.textContent.includes('Backup imported successfully'))")
+            let restored = try await webView.callAsyncJavaScript("""
+            const profile = testStore.getters.getProfileList.find(profile => profile._id === id);
+            return {profile: profile?.name, subscription: profile?.subscriptions[0]?.id,
+                playlist: testStore.getters.getPlaylist(id)?.videos[0]?.videoId,
+                progress: testStore.getters.getHistoryCacheById[videoId]?.watchProgress,
+                search: testStore.getters.getSearchHistoryEntries.some(entry => entry.query === 'Backup Grüße 日本語 ' + id),
+                rememberHistory: testStore.getters.getRememberHistory};
+            """, arguments: arguments, in: nil, contentWorld: .page) as? [String: Any]
+            XCTAssertEqual(restored?["profile"] as? String, "Backup Grüße 日本語")
+            XCTAssertEqual(restored?["subscription"] as? String, "UCaaaaaaaaaaaaaaaaaaaaaa")
+            XCTAssertEqual(restored?["playlist"] as? String, videoId)
+            XCTAssertEqual(restored?["progress"] as? Double, 37.25)
+            XCTAssertEqual(restored?["search"] as? Bool, true)
+            XCTAssertEqual(restored?["rememberHistory"] as? Bool, false)
+        } catch {
+            await cleanup()
+            throw error
+        }
+        await cleanup()
+    }
+
     func testLargeFileExportAndCleanup() async throws {
         try await openApplication()
         _ = try await webView.callAsyncJavaScript("""
