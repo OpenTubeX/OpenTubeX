@@ -173,6 +173,20 @@ test('hides the DLNA action while the playback source is pending', async ({ app,
 test.describe('desktop quick playback speed bar', () => {
   test.use({ seed: { settings: { ...WATCH_PAGE_SEED, useQuickPlaybackSpeedBar: true } } })
 
+  test('follows later player speed changes after a quick speed selection', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    const bar = page.locator('.ft-quick-playback-rate-bar')
+    const firstSpeed = bar.locator('[data-rate="1.25"]')
+    const nextSpeed = bar.locator('[data-rate="1.5"]')
+
+    await firstSpeed.dispatchEvent('click')
+    await expect(firstSpeed).toHaveClass(/is-current-rate/)
+    await video.evaluate(element => { element.playbackRate = 1.5 })
+    await expect(nextSpeed).toHaveClass(/is-current-rate/)
+    await expect(firstSpeed).not.toHaveClass(/is-current-rate/)
+  })
+
   test('quick speeds fade in step with the bottom controls', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
