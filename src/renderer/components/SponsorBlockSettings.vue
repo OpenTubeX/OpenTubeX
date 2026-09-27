@@ -25,7 +25,7 @@
       />
     </FtFlexBox>
     <template
-      v-if="useSponsorBlock || useDeArrowTitles || useDeArrowThumbnails"
+      v-if="showSponsorBlockChannelControl"
     >
       <FtFlexBox
         v-if="useSponsorBlock"
@@ -229,6 +229,10 @@ const useDeArrowTitles = computed(() => store.getters.getUseDeArrowTitles)
 /** @type {import('vue').ComputedRef<boolean>} */
 const useDeArrowThumbnails = computed(() => store.getters.getUseDeArrowThumbnails)
 
+const showSponsorBlockChannelControl = computed(() => (
+  useSponsorBlock.value || useDeArrowTitles.value || useDeArrowThumbnails.value
+))
+
 /** @type {import('vue').ComputedRef<string>} */
 const deArrowThumbnailGeneratorUrl = computed(() => store.getters.getDeArrowThumbnailGeneratorUrl)
 
@@ -388,7 +392,8 @@ async function findChannelTagInfoWrapper(text) {
 }
 
 function shouldResolveChannel(id) {
-  return showSponsorBlockChannels.value &&
+  return showSponsorBlockChannelControl.value &&
+    showSponsorBlockChannels.value &&
     Array.isArray(sponsorBlockChannelWhitelist.value) &&
     sponsorBlockChannelWhitelist.value.includes(id) &&
     !sponsorBlockChannelInfo.value[id]
@@ -417,9 +422,9 @@ async function resolveChannelInfo(id, options, revision) {
   }
 }
 
-watch([sponsorBlockChannelWhitelist, showSponsorBlockChannels, backendOptions], ([ids, showTags, options]) => {
+watch([sponsorBlockChannelWhitelist, showSponsorBlockChannels, backendOptions, showSponsorBlockChannelControl], ([ids, showTags, options, showControl]) => {
   const revision = ++lookupRevision
-  if (!showTags || !Array.isArray(ids)) return
+  if (!showControl || !showTags || !Array.isArray(ids)) return
 
   for (const id of ids) {
     if (shouldResolveChannel(id)) resolveChannelInfo(id, options, revision)
