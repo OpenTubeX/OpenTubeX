@@ -32,6 +32,8 @@ function fixture({ reducedMotion = false, available = true, restoring = false, f
   const methods = vm.runInNewContext(`${dragSource}\n({ beginScrollMiniPlayerDrag, moveScrollMiniPlayerDrag, finishScrollMiniPlayerDrag, cancelScrollMiniPlayerDrag })`, {
     process: { env: { IS_CAPACITOR: false } },
     container,
+    video: { value: { getBoundingClientRect: () => from } },
+    usesMobileMiniBar: () => false,
     performance: { now: () => 0 },
     SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS: 300,
     getAnimationSpeedMultiplier: () => 1,

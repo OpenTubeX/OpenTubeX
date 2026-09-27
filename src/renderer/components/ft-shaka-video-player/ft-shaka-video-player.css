@@ -4674,7 +4674,6 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   border-top: 1px solid var(--secondary-text-color);
   background: var(--card-bg-color);
   box-shadow: 0 -4px 18px rgb(0 0 0 / 20%);
-  touch-action: auto;
 }
 
 :global(.app.capacitorPhoneLayout .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar) {
@@ -5174,6 +5173,48 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   object-fit: contain !important;
   transform: none !important;
 }
+
+.ftVideoPlayer[data-mobile-mini-morph],
+:global(.app.capacitorPhoneLayout .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar[data-mobile-mini-morph]) {
+  position: fixed !important;
+  left: var(--mobile-mini-left) !important;
+  top: var(--mobile-mini-top) !important;
+  bottom: auto !important;
+  width: var(--mobile-mini-width) !important;
+  height: var(--mobile-mini-height) !important;
+  margin: 0 !important;
+  z-index: 150;
+  background: color-mix(in srgb, #000 var(--mobile-mini-black-percent), var(--card-bg-color));
+  border-radius: 0 !important;
+  transform: none !important;
+  translate: none !important;
+  transition: none !important;
+  overflow: clip;
+}
+
+.ftVideoPlayer[data-mobile-mini-morph] > .mobileMiniBarDetails,
+.ftVideoPlayer[data-mobile-mini-morph] > .mobileMiniBarReturn {
+  opacity: var(--mobile-mini-bar-opacity);
+}
+
+/* The moving video must override every settled player layout. */
+/* stylelint-disable no-descending-specificity */
+.ftVideoPlayer[data-mobile-mini-morph] > .player,
+:global(.app .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar[data-mobile-mini-morph] > .player) {
+  position: absolute !important;
+  inset: var(--mobile-mini-video-top) auto auto var(--mobile-mini-video-left) !important;
+  width: var(--mobile-mini-video-width) !important;
+  height: var(--mobile-mini-video-height) !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 0 !important;
+  object-fit: contain !important;
+  transform: none !important;
+  transition: none !important;
+}
+/* stylelint-enable no-descending-specificity */
 
 @media (orientation: landscape) and (height <= 600px) {
   :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow)) {

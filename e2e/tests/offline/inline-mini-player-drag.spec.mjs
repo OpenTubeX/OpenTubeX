@@ -4,24 +4,62 @@ import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, enableVideoZoom: false, enableMobileFullscreenSwipe: false } } })
 
-async function enableMobileTouch(app, page) {
+async function enableMobileTouch(app, page, phone = true) {
   await setWindowSize(app, page, { width: 480, height: 850 })
-  await page.evaluate(() => {
+  await page.evaluate(phone => {
     Object.defineProperty(navigator, 'maxTouchPoints', { configurable: true, get: () => 5 })
     const app = document.querySelector('.app')
-    const mobile = () => { if (!app.classList.contains('capacitorTabs')) app.classList.add('capacitorTabs') }
+    const mobile = () => {
+      if (!app.classList.contains('capacitorTabs')) app.classList.add('capacitorTabs')
+      if (phone && !app.classList.contains('capacitorPhoneLayout')) app.classList.add('capacitorPhoneLayout')
+    }
     new MutationObserver(mobile).observe(app, { attributeFilter: ['class'] })
     mobile()
-  })
+    const player = document.querySelector('.ftVideoPlayer')
+    const bar = () => {
+      if (player.classList.contains('scrollMiniPlayer') && !player.classList.contains('mobileMiniBar')) {
+        player.classList.add('mobileMiniBar')
+      }
+    }
+    new MutationObserver(bar).observe(player, { attributeFilter: ['class'] })
+    bar()
+  }, phone)
 }
 
-async function openMobilePlayer(app, page) {
+async function openMobilePlayer(app, page, phone = true) {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
   await video.evaluate(element => element.pause())
-  await enableMobileTouch(app, page)
+  await enableMobileTouch(app, page, phone)
   return page.locator('.ftVideoPlayer')
 }
+
+test('tablet swipe docks toward the bottom bar', async ({ app, page }) => {
+  const player = await openMobilePlayer(app, page, false)
+  await page.evaluate(() => {
+    const player = document.querySelector('.ftVideoPlayer')
+    new MutationObserver(() => {
+      const top = player.style.getPropertyValue('--mobile-mini-top')
+      if (top) window.lastMiniMorphTop = Number.parseFloat(top)
+    }).observe(player, { attributes: true, attributeFilter: ['style'] })
+  })
+  const bounds = await player.boundingBox()
+  const start = { x: bounds.x + bounds.width / 2, y: bounds.y + 100 }
+  const cdp = await page.context().newCDPSession(page)
+  try {
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] })
+    for (const distance of [20, 40, 60, 80, 100]) {
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...start, y: start.y + distance }] })
+      await page.waitForTimeout(30)
+    }
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    const targetTop = await page.evaluate(() => window.lastMiniMorphTop)
+    expect(targetTop).toBeGreaterThan(bounds.y + 100)
+  } finally {
+    await cdp.detach()
+  }
+})
 
 test('Shorts overflow is clipped while dragging into the mini player', async ({ app, page }) => {
   const player = await openMobilePlayer(app, page)
@@ -166,4 +204,68 @@ test.describe('a restored Watch tab', () => {
       await cdp.detach()
     }
   })
+})
+test('video keeps its shape while dragging into a shorter player', async ({ app, page }) => {
+  const player = await openMobilePlayer(app, page)
+  await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+  await player.evaluate(element => { element.style.height = '480px' })
+  await page.evaluate(() => {
+    document.querySelector('.sideNav').classList.add('scrollHidden')
+    document.body.style.setProperty('--connection-status-height', '38px')
+    const player = document.querySelector('.ftVideoPlayer')
+    window.lastMiniMorphTop = null
+    new MutationObserver(() => {
+      if (player.hasAttribute('data-mobile-mini-morph')) {
+        const top = player.style.getPropertyValue('--mobile-mini-top')
+        if (top) window.lastMiniMorphTop = Number.parseFloat(top)
+      }
+    }).observe(player, { attributes: true, attributeFilter: ['style'] })
+  })
+  const video = player.locator('video').first()
+  const distortion = () => video.evaluate(element => {
+    const rect = element.getBoundingClientRect()
+    return Math.abs((rect.width / rect.height) / (element.offsetWidth / element.offsetHeight) - 1)
+  })
+  const bounds = await player.boundingBox()
+  const point = { x: bounds.x + bounds.width / 2, y: bounds.y + 100 }
+  const cdp = await page.context().newCDPSession(page)
+  try {
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] })
+    for (const distance of [20, 40, 60, 80, 100]) {
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...point, y: point.y + distance }] })
+      await page.waitForTimeout(30)
+    }
+    await expect(player).toHaveAttribute('data-inline-mini-drag', '')
+    expect(await distortion()).toBeLessThan(0.03)
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    // Electron keeps its desktop rect even with mobile classes; match the native bar size.
+    await player.evaluate(element => {
+      element.style.left = '0px'
+      element.style.width = `${window.innerWidth}px`
+      element.style.height = '76px'
+    })
+    await page.waitForTimeout(300)
+    const barBounds = await player.boundingBox()
+    const morphTop = await page.evaluate(() => window.lastMiniMorphTop)
+    expect(morphTop).toBeLessThan(await page.evaluate(() => window.innerHeight))
+    expect(Math.abs(barBounds.y - morphTop)).toBeLessThan(2)
+    await player.evaluate(element => element.classList.add('mobileMiniBar'))
+    await expect(player).toHaveCSS('touch-action', 'none')
+
+    const miniBounds = await player.boundingBox()
+    const restorePoint = { x: miniBounds.x + miniBounds.width / 2, y: miniBounds.y + miniBounds.height / 2 }
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [restorePoint] })
+    for (const distance of [20, 40, 60, 80, 100]) {
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...restorePoint, y: restorePoint.y - distance }] })
+      await page.waitForTimeout(30)
+    }
+    await expect(player).toHaveAttribute('data-inline-mini-drag', '')
+    await expect(player).toHaveCSS('translate', 'none')
+    await expect.poll(async () => (await player.boundingBox()).height).toBeGreaterThan(100)
+    expect(await distortion()).toBeLessThan(0.03)
+  } finally {
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }).catch(() => {})
+    await cdp.detach()
+  }
 })
