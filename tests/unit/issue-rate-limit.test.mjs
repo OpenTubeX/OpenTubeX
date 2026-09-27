@@ -42,14 +42,16 @@ test('exempts maintainers and bots from the issue limit', () => {
   assert.equal(isExempt({ user: { id: 1, login: 'reporter', type: 'User' }, author_association: 'NONE' }), false)
 })
 
-test('closes only the fourth and later issues in a rolling day', () => {
-  const issues = [101, 102, 103, 104].map(number => ({
+test('allows 15 issues in a rolling day and closes the 16th', () => {
+  const issues = Array.from({ length: 16 }, (_, index) => ({
     ...current,
-    number,
+    number: 101 + index,
     user: { id: 1, login: 'reporter', type: 'User' },
-    created_at: `2026-09-27T0${number - 101}:00:00Z`
+    created_at: `2026-09-27T00:${String(index).padStart(2, '0')}:00Z`
   }))
-  assert.deepEqual(issues.map(issue => isExcessIssue(issues, issue)), [false, false, false, true])
+  assert.deepEqual(issues.map(issue => isExcessIssue(issues, issue)), [
+    ...Array(15).fill(false), true
+  ])
 })
 
 test('closes an excess issue before triage can run', t => {
@@ -60,10 +62,10 @@ test('closes an excess issue before triage can run', t => {
     user: { id: 1, login: 'reporter', type: 'User' },
     author_association: 'NONE'
   }
-  const earlier = [101, 102, 103].map(number => ({
+  const earlier = Array.from({ length: 15 }, (_, index) => ({
     ...issue,
-    number,
-    created_at: `2026-09-27T0${number - 101}:00:00Z`
+    number: 80 + index,
+    created_at: `2026-09-27T11:${String(index).padStart(2, '0')}:00Z`
   }))
   const eventPath = join(directory, 'event.json')
   const outputPath = join(directory, 'output')

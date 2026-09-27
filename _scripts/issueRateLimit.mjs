@@ -3,7 +3,7 @@ import { pathToFileURL } from 'node:url'
 
 import { eligibleAuthor, github } from './issueTriageCommon.mjs'
 
-const MAX_ISSUES = 3
+const MAX_ISSUES = 15
 const WINDOW_MS = 24 * 60 * 60 * 1000
 const EXEMPT_ASSOCIATIONS = new Set(['OWNER', 'MEMBER', 'COLLABORATOR'])
 
