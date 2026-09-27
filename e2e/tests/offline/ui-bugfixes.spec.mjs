@@ -924,6 +924,44 @@ test('tablet tabs autosize by default and reuse the fixed tab width setting', as
   ))).toEqual([140, 140])
 })
 
+for (const pack of ['material', 'remix']) {
+  test(`tablet tab glyphs align with their labels in ${pack}`, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 1330, height: 870 })
+    await page.evaluate(async pack => {
+      const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+      await store.dispatch('updateIconPack', pack)
+    }, pack)
+    const homeIcon = page.locator(`.ft-icon[data-icon="house"][data-icon-pack="${pack}"]`).first()
+    await expect(homeIcon.locator('svg')).toBeAttached()
+    const iconMarkup = await homeIcon.evaluate(element => element.outerHTML)
+    const styles = await readFile(path.join(repoRoot, 'src/renderer/components/TabBar/CapacitorTabletTabBar.css'), 'utf8')
+    await page.addStyleTag({
+      content: styles.replaceAll(/:deep\(((?:[^()]|\([^()]*\))*)\)/g, '$1')
+    })
+    await page.evaluate(iconMarkup => {
+      const bar = document.createElement('div')
+      bar.className = 'capacitorTabletTabBar'
+      bar.style.cssText = 'position:fixed;top:120px;left:0;z-index:10000'
+      bar.innerHTML = `<div class="capacitorTabletTab"><button class="capacitorTabletTabTarget">
+        <span class="capacitorTabletTabIcon">${iconMarkup}</span>
+        <span class="capacitorTabletTabTitle">Home</span>
+      </button></div>`
+      document.body.append(bar)
+    }, iconMarkup)
+
+    for (const scale of [0.75, 1, 1.25, 1.5]) {
+      await page.evaluate(scale => window.ftElectron.setZoomFactor(scale), scale)
+      const target = page.locator('.capacitorTabletTabTarget')
+      await expect(target).toBeVisible()
+      await expect.poll(() => target.evaluate(element => {
+        const glyph = element.querySelector('.ft-icon__glyph').getBoundingClientRect()
+        const title = element.querySelector('.capacitorTabletTabTitle').getBoundingClientRect()
+        return Math.abs(glyph.y + glyph.height / 2 - title.y - title.height / 2)
+      }), { message: `Glyph and title centers at ${scale * 100}%` }).toBeLessThan(0.5)
+    }
+  })
+}
+
 test('keeps the tablet main-card top gutter compact on narrow layouts', async ({ app, page }) => {
   await setWindowSize(app, page, { width: 480, height: 800 })
   const appStyles = await readFile(path.join(repoRoot, 'src/renderer/App.css'), 'utf8')

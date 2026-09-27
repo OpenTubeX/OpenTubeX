@@ -166,7 +166,8 @@
 }
 
 .capacitorTabletTabIcon :deep(.ft-icon) {
-  display: block;
+  display: grid;
+  place-items: center;
   inline-size: 18px;
   block-size: 18px;
 }
