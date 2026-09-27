@@ -14,6 +14,11 @@
   padding-inline: 16px;
 }
 
+.videoDescription.short .descriptionScroll {
+  max-block-size: 4lh;
+  overflow-y: clip;
+}
+
 .videoDescription.alwaysExpanded .descriptionScroll {
   max-block-size: none;
   overflow: visible;
@@ -131,10 +136,19 @@
 }
 
 .videoDescription.short .description {
-  /* Keep room for the expand control when only tags or games are available. */
+  /* Measure overflow in the text separately from the collapsed card. */
   min-block-size: 1lh;
   max-block-size: 4lh;
   overflow: hidden;
+}
+
+.videoDescription.short .description:empty {
+  min-block-size: 0;
+  margin-block: 0;
+}
+
+.descriptionContentEnd {
+  display: block;
 }
 
 .license {

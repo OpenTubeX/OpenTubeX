@@ -47,12 +47,12 @@
         @click="expandDescriptionWithClick"
       />
       <bdi
-        v-if="license && isExpanded"
+        v-if="license"
         class="license"
       >
         {{ license }}
       </bdi>
-      <template v-if="games.length > 0 && isExpanded">
+      <template v-if="games.length > 0">
         <h3 class="gamesHeading">
           {{ $t("Description.Games") }}
         </h3>
@@ -86,7 +86,7 @@
         </ul>
       </template>
       <div
-        v-if="tags.length > 0 && isExpanded"
+        v-if="tags.length > 0"
         class="videoTags"
       >
         <strong>{{ t('Description.Video Tags') }}</strong>
@@ -128,6 +128,11 @@
       >
         {{ $t("Description.Collapse Description") }}
       </span>
+      <span
+        ref="descriptionContentEnd"
+        class="descriptionContentEnd"
+        aria-hidden="true"
+      />
     </div>
   </FtCard>
 </template>
@@ -141,6 +146,7 @@ import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 
 import { linkifyDescription, linkifyHashtagsAndHandles } from '../../helpers/descriptionLinks'
 import { copyToClipboard } from '../../helpers/utils'
+import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { useTabContext } from '../../tabs/TabContext'
 
 import store from '../../store/index'
@@ -180,6 +186,7 @@ const { t } = useI18n()
 let shownDescription = ''
 let descriptionText = props.description
 const descriptionScroll = useTemplateRef('descriptionScroll')
+const descriptionContentEnd = useTemplateRef('descriptionContentEnd')
 const descriptionContainer = useTemplateRef('descriptionContainer')
 const descriptionCard = useTemplateRef('descriptionCard')
 const descriptionCopyButton = useTemplateRef('descriptionCopyButton')
@@ -264,7 +271,7 @@ function expandDescription() {
  * Enables user to collapse contents of description
  */
 function collapseDescription() {
-  descriptionScroll.value.scrollTop = 0
+  restoreOverlayScrollTop(descriptionScroll.value, 0)
   showFullDescription.value = false
 }
 
@@ -303,7 +310,11 @@ function measureDescription() {
   }
 
   const descriptionElem = descriptionContainer.value?.$el
-  if (!descriptionElem || (descriptionElem.clientHeight === 0 && descriptionElem.scrollHeight === 0)) {
+  const hasMetadata = props.tags.length > 0 || props.games.length > 0 || Boolean(props.license)
+  if (!descriptionElem || (
+    descriptionElem.clientHeight === 0 && descriptionElem.scrollHeight === 0 &&
+    (!hasMetadata || !descriptionCard.value?.$el?.clientHeight)
+  )) {
     return
   }
 
@@ -337,6 +348,9 @@ function updateExpandControlPosition() {
 }
 
 function updateDescriptionLayout() {
+  if (showControls.value && isExpanded.value && descriptionScroll.value && descriptionContentEnd.value) {
+    clampOverlayScrollTop(descriptionScroll.value, descriptionContentEnd.value)
+  }
   updateDescriptionFadeState()
   updateExpandControlPosition()
 }
@@ -362,6 +376,7 @@ onMounted(() => {
 onBeforeUnmount(() => descriptionResizeObserver?.disconnect())
 
 watch(isExpanded, () => nextTick(updateDescriptionLayout))
+watch([() => props.tags, () => props.games, () => props.license], () => nextTick(updateDescriptionLayout), { deep: true })
 
 watch(() => props.alwaysExpanded, (alwaysExpanded, wasAlwaysExpanded) => {
   if (!alwaysExpanded && wasAlwaysExpanded) {
