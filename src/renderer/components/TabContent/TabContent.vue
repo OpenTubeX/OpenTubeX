@@ -253,6 +253,8 @@ watch(
   { immediate: true }
 )
 
+watch(isWatchRoute, scheduleLoaderUpdate)
+
 onMounted(() => {
   if (tabContentRef.value) {
     removeRootRegistration = tabRuntimeRegistry.registerRoot(props.tab.id, tabContentRef.value)
@@ -314,8 +316,14 @@ function scheduleLoaderUpdate() {
   })
 }
 
+function hasCurrentPageLoader() {
+  // Watch tabs keep a browsing page mounted beneath the video.
+  const currentPage = tabContentRef.value?.querySelector(isWatchRoute.value ? '.watchPreviewHost' : '.routerView')
+  return currentPage?.querySelector(TAB_LOADER_SELECTOR) != null
+}
+
 function updateLoaderState() {
-  if (tabContentRef.value?.querySelector(TAB_LOADER_SELECTOR) != null) {
+  if (hasCurrentPageLoader()) {
     cancelLoaderSettle()
     navigation.setLoadingSource(props.tab.id, TAB_LOADER_LOADING_SOURCE, true)
     return
@@ -331,7 +339,7 @@ function updateLoaderState() {
 
 function settleLoaderState() {
   loaderSettleTimeoutId = null
-  if (tabContentRef.value?.querySelector(TAB_LOADER_SELECTOR) != null) {
+  if (hasCurrentPageLoader()) {
     navigation.setLoadingSource(props.tab.id, TAB_LOADER_LOADING_SOURCE, true)
     return
   }

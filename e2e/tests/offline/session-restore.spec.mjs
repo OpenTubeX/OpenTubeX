@@ -433,6 +433,57 @@ test.describe('restored watch tab startup priority', () => {
   })
 })
 
+test.describe('subscriptions refresh with restored watch tabs', () => {
+  const watchTabIds = ['restored-watch-one', 'restored-watch-two']
+
+  test.use({
+    seed: {
+      settings: { startupBehavior: 'restoreTabLoadState', fetchSubscriptionsAutomatically: false },
+      tabSessions: [{
+        _id: 'e2e-window-session',
+        value: {
+          tabs: [
+            ...watchTabIds.map(id => ({
+              id,
+              url: `app://bundle/index.html#/watch/${id}`,
+              title: id,
+              isUnloaded: false
+            })),
+            {
+              id: SUBSCRIPTIONS_TAB_ID,
+              url: 'app://bundle/index.html#/subscriptions',
+              title: 'Subscriptions',
+              isUnloaded: false
+            }
+          ],
+          activeTabId: SUBSCRIPTIONS_TAB_ID
+        }
+      }]
+    }
+  })
+
+  test('keeps loaded watch tabs idle while subscriptions refreshes', async ({ page }) => {
+    await expect.poll(async () => page.evaluate(async ids => {
+      const state = await window.ftElectron.tabs.getState()
+      return ids.every(id => {
+        const tab = state.tabs.find(tab => tab.id === id)
+        return tab?.loadState === 'loaded' && !tab.isLoading
+      })
+    }, watchTabIds)).toBe(true)
+
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setSubscriptionFeedRefreshTab', 'videos')
+      store.commit('setSubscriptionFeedRefreshInProgress', true)
+    })
+    await expect.poll(() => page.locator(`[data-tab-id="${watchTabIds[0]}"] .browsingBehindWatch [data-tab-loading-indicator]`).count()).toBeGreaterThan(0)
+    await expect.poll(async () => page.evaluate(async ids => {
+      const state = await window.ftElectron.tabs.getState()
+      return ids.map(id => state.tabs.find(tab => tab.id === id)?.isLoading)
+    }, [...watchTabIds, SUBSCRIPTIONS_TAB_ID])).toEqual([false, false, true])
+  })
+})
+
 for (const existingLanding of [false, true]) {
   test.describe(`landing-page startup ${existingLanding ? 'reuses' : 'creates'} a tab`, () => {
     test.use({
