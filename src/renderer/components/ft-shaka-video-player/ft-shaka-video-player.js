@@ -6925,14 +6925,16 @@ export default defineComponent({
       video,
     })
 
+    let fullscreenEntryAttempt = 0
     function handleFullscreenButtonClick(event) {
       if (process.env.IS_CAPACITOR && !process.env.IS_IOS && isActiveTab.value && !isNativeFullscreenActive()) {
+        const attempt = ++fullscreenEntryAttempt
         // Begin rotating on the user action, before Shaka changes the fullscreen element.
         setFullscreenOrientation(true, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value)
           .then(() => {
             // Fullscreen can be rejected after the orientation request succeeds.
             setTimeout(() => {
-              if (!document.fullscreenElement) {
+              if (attempt === fullscreenEntryAttempt && !document.fullscreenElement) {
                 setFullscreenOrientation(false, video.value, rotateFullscreenToLandscape.value, fullscreenAspectRatio.value).catch(() => {})
               }
             }, 1000)

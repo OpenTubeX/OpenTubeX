@@ -71,6 +71,7 @@ test('Android restores orientation if fullscreen entry fails after rotation star
   const context = {
     process: { env: { IS_CAPACITOR: true, IS_IOS: false } },
     document: { fullscreenElement: null },
+    fullscreenEntryAttempt: 0,
     isActiveTab: { value: true },
     isNativeFullscreenActive: () => false,
     setFullscreenOrientation: async fullscreen => { calls.push(fullscreen) },
@@ -91,6 +92,36 @@ test('Android restores orientation if fullscreen entry fails after rotation star
   context.document.fullscreenElement = null
   await afterEntry()
   assert.deepEqual(calls, [true, false])
+})
+
+test('Android ignores fullscreen recovery from an earlier entry attempt', async () => {
+  const start = source.indexOf('    function handleFullscreenButtonClick(event) {')
+  const end = source.indexOf('\n    const mobileAdjustmentsVisible', start)
+  assert.ok(start !== -1 && end !== -1)
+  const calls = []
+  const recoveryTimers = []
+  const context = {
+    process: { env: { IS_CAPACITOR: true, IS_IOS: false } },
+    document: { fullscreenElement: null },
+    fullscreenEntryAttempt: 0,
+    isActiveTab: { value: true },
+    isNativeFullscreenActive: () => false,
+    setFullscreenOrientation: async fullscreen => { calls.push(fullscreen) },
+    video: { value: { videoWidth: 0, videoHeight: 0 } },
+    rotateFullscreenToLandscape: { value: true },
+    fullscreenAspectRatio: { value: 16 / 9 },
+    suppressPanelTransitions: () => {},
+    handleScrollMiniFullscreenButtonClick: () => {},
+    setTimeout: callback => { recoveryTimers.push(callback) },
+  }
+  vm.runInNewContext(`${source.slice(start, end)}\nhandleFullscreenButtonClick({}); handleFullscreenButtonClick({})`, context)
+  await Promise.resolve()
+  assert.deepEqual(calls, [true, true])
+  assert.equal(recoveryTimers.length, 2)
+  recoveryTimers[0]()
+  assert.deepEqual(calls, [true, true])
+  recoveryTimers[1]()
+  assert.deepEqual(calls, [true, true, false])
 })
 
 test('Android rechecks fullscreen orientation when metadata aspect ratio arrives', async () => {
