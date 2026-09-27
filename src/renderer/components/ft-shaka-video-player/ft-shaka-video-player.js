@@ -1473,11 +1473,12 @@ export default defineComponent({
     }
 
     const skipSilence = computed(() => {
-      return store.getters.getTabSkipSilence(mediaTabId)
+      // WebKit media-source audio produces zero analysis samples on iOS.
+      return !process.env.IS_IOS && store.getters.getTabSkipSilence(mediaTabId)
     })
 
     const showSkipSilenceButton = computed(() => {
-      return store.getters.getShowSkipSilenceButton
+      return !process.env.IS_IOS && store.getters.getShowSkipSilenceButton
     })
 
     const silenceSkipping = useSilenceSkipping({

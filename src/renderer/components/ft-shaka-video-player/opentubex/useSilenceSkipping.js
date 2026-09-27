@@ -493,7 +493,7 @@ export function useSilenceSkipping({ available, enabled, isLive, video, setCurre
    * @param {CapturedStream} stream
    */
   function setupSegmentAnalysis(streamId, stream) {
-    if (!stream.initData || !MediaSource.isTypeSupported(stream.contentType)) {
+    if (!stream.initData || !globalThis.MediaSource?.isTypeSupported(stream.contentType)) {
       destroyAnalysisPipeline()
       return
     }

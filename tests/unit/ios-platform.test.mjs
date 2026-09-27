@@ -111,3 +111,28 @@ test('iOS webpack configuration loads with the current shared build rules', asyn
     assert.deepEqual(configs.map(config => config.name), ['capacitor', 'capacitorBotGuardScript'])
   `], { cwd: new URL('../../', import.meta.url) })
 })
+
+test('iOS ignores imported silence skipping preferences while other platforms retain them', async () => {
+  const source = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
+  const settings = await readFile(new URL('../../src/renderer/components/PlayerSettings/PlayerSettings.vue', import.meta.url), 'utf8')
+  for (const ios of [true, false]) {
+    for (const enabled of [true, false]) {
+      const context = vm.createContext({
+        process: { env: { IS_IOS: ios } },
+        computed: fn => ({ value: fn() }),
+        mediaTabId: 'test-tab',
+        store: { getters: { getTabSkipSilence: () => enabled, getShowSkipSilenceButton: enabled } },
+      })
+      for (const name of ['skipSilence', 'showSkipSilenceButton']) {
+        const declaration = source.match(new RegExp(`const ${name} = computed\\(\\(\\) => \\{[\\s\\S]*?\\n    \\}\\)`))?.[0]
+        assert.ok(declaration)
+        assert.equal(vm.runInContext(`${declaration}; ${name}.value`, context), !ios && enabled)
+      }
+    }
+  }
+  for (const key of ['showSkipSilenceButton', 'enableSkipSilenceByDefault']) {
+    const toggle = settings.match(new RegExp(`<FtToggleSwitch\\s[^>]*setting-key="${key}"[^>]*>`))?.[0]
+    assert.ok(toggle)
+    assert.match(toggle, /v-if="!IS_IOS"/)
+  }
+})

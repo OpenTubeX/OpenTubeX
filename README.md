@@ -161,6 +161,7 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
   * **iloader.** OpenTubeX has been tested with [iloader](https://iloader.app/) on a physical iPad. Install iloader on Linux, macOS, or Windows. Connect and trust your device, sign in with your Apple Account, and import the IPA. With a free account, reconnect to the computer and reinstall before the seven-day signature expires. For updates, use the same Apple Account and install over the existing app to keep its data.
   * **AltStore Classic.** You can also use AltStore Classic, but refreshing requires [AltServer on a computer](https://faq.altstore.io/altstore-classic/altserver), over Wi-Fi or USB. AltStore PAL uses a different distribution method and cannot install this IPA.
   * **After signing.** Trust your developer account under **Settings → General → VPN & Device Management** and enable **Settings → Privacy & Security → Developer Mode**. Restart when prompted. A free Apple Account allows three active sideloaded apps, including SideStore or AltStore. A paid Apple Developer membership allows longer signing periods but is optional.
+  * **Player limitation.** Silence skipping is unavailable on iOS/iPadOS because WebKit does not reliably provide decoded streaming audio to its analyser.
 
 To update a Homebrew installation, run `brew update` followed by `brew upgrade --cask opentubex`. Both Apple Silicon and Intel Macs are supported. If macOS blocks the first launch, allow OpenTubeX in **System Settings → Privacy & Security**.
 
