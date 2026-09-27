@@ -18,7 +18,7 @@
 .card {
   box-sizing: border-box;
   inline-size: 100%;
-  max-inline-size: 92vw;
+  max-inline-size: 92dvw;
   margin-block: 0 60px;
   margin-inline: auto;
 }
