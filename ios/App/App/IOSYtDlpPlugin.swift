@@ -302,8 +302,19 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
     @objc func download(_ call: CAPPluginCall) {
         if onMain({ self.download(call) }) { return }
         guard let payload = call.getObject("payload") as? [String: Any],
-              let mode = payload["mode"] as? String, ["video", "audio", "subtitles"].contains(mode),
-              configuration["enabled"] as? Bool == true else {
+              let mode = payload["mode"] as? String, ["video", "audio", "subtitles"].contains(mode) else {
+            call.resolve(["error": "downloads-disabled"])
+            return
+        }
+        if let raw = payload["externalUrl"] {
+            guard let external = raw as? String, external.count <= 8192,
+                  let url = URL(string: external), ["http", "https"].contains(url.scheme ?? ""),
+                  url.host != nil, url.user == nil, url.password == nil else {
+                call.resolve(["error": "INVALID_MEDIA_URL"])
+                return
+            }
+        }
+        guard configuration["enabled"] as? Bool == true else {
             call.resolve(["error": "downloads-disabled"])
             return
         }

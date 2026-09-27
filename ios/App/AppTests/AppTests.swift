@@ -245,6 +245,20 @@ final class AppTests: XCTestCase {
         XCTAssertEqual(remaining, 0)
     }
 
+    func testYtDlpRejectsUnsafeDownloadURL() async throws {
+        try await openApplication()
+        _ = try await webView.callAsyncJavaScript(
+            "await Capacitor.Plugins.YtDlp.configure({configuration: {enabled: true}})",
+            arguments: [:], in: nil, contentWorld: .page)
+        for url in ["file:///etc/passwd", "ftp://example.org/video", "http://user:pass@example.org/video",
+                    "https://example.org/" + String(repeating: "a", count: 8192)] {
+            let result = try await webView.callAsyncJavaScript(
+                "return await Capacitor.Plugins.YtDlp.download({payload: {mode: 'video', externalUrl: url}})",
+                arguments: ["url": url], in: nil, contentWorld: .page) as? [String: Any]
+            XCTAssertEqual(result?["error"] as? String, "INVALID_MEDIA_URL")
+        }
+    }
+
     func testYtDlpFixtureDownload() async throws {
         try await openApplication()
         let fixtureURL = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "fixture", withExtension: "mp4"))

@@ -47,6 +47,16 @@ class FakeYoutubeDL:
         return 0
 
 
+class FinishedYoutubeDL(FakeYoutubeDL):
+    def download(self, urls):
+        result = super().download(urls)
+        self.options['progress_hooks'][0]({
+            'status': 'finished', 'downloaded_bytes': 100, 'total_bytes': 100,
+            'speed': 1000, 'eta': 0,
+        })
+        return result
+
+
 class IOSYtDlpPythonTest(unittest.TestCase):
     def test_version_uses_bundled_package(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -102,6 +112,22 @@ class IOSYtDlpPythonTest(unittest.TestCase):
             }
             result = bridge._download(request)
             self.assertEqual(result['files'], ['Fixture [abc].mp4'])
+
+    @patch.object(bridge.yt_dlp, 'YoutubeDL', FinishedYoutubeDL)
+    def test_processing_progress_clears_transfer_metrics(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            request = {
+                'payload': {'mode': 'video', 'externalUrl': 'https://example.org/video'},
+                'staging': str(root / 'stage'),
+                'progressFile': str(root / 'stage' / 'progress.json'),
+                'controlFile': str(root / 'stage' / 'control'),
+            }
+            bridge._download(request)
+            progress = json.loads(Path(request['progressFile']).read_text())
+            self.assertEqual(progress, {
+                'status': 'processing', 'percent': 0, 'speed': None, 'eta': None,
+            })
 
 
 if __name__ == '__main__':

@@ -88,10 +88,11 @@ def _download(request):
             raise yt_dlp.utils.DownloadError('Download interrupted')
         total = progress.get('total_bytes') or progress.get('total_bytes_estimate') or 0
         value = progress.get('downloaded_bytes') or 0
-        status = progress.get('status')
-        data = {'status': 'processing' if status == 'finished' else 'downloading',
-                'percent': min(100, value * 100 / total) if total else 0,
-                'speed': progress.get('speed'), 'eta': progress.get('eta')}
+        processing = progress.get('status') == 'finished'
+        data = {'status': 'processing' if processing else 'downloading',
+                'percent': 0 if processing or not total else min(100, value * 100 / total),
+                'speed': None if processing else progress.get('speed'),
+                'eta': None if processing else progress.get('eta')}
         progress_file.write_text(json.dumps(data), encoding='utf-8')
 
     mode = payload.get('mode', 'video')

@@ -17,8 +17,10 @@ test('download errors retain third-party diagnostic details', () => {
 test('iOS native download failures use existing localized messages', () => {
   const translations = {
     'Downloads.Download Failed': 'Download fehlgeschlagen',
-    'Downloads.Export Failed': 'Die heruntergeladene Datei konnte nicht gespeichert werden.'
+    'Downloads.Export Failed': 'Die heruntergeladene Datei konnte nicht gespeichert werden.',
+    'Video.Invalid Media URL': 'Ungültige Medien-URL'
   }
   assert.equal(downloadErrorMessage('IOS_DOWNLOAD_FAILED', key => translations[key]), translations['Downloads.Download Failed'])
   assert.equal(downloadErrorMessage('DOWNLOAD_EXPORT_FAILED', key => translations[key]), translations['Downloads.Export Failed'])
+  assert.equal(downloadErrorMessage('INVALID_MEDIA_URL', key => translations[key]), translations['Video.Invalid Media URL'])
 })
