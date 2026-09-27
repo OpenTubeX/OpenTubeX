@@ -35,6 +35,7 @@ test('disabled fullscreen and zoom gestures allow upward scrolling and downward 
   const player = await openMobilePlayer(app, page)
   await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
   const bounds = await player.boundingBox()
+  expect(bounds).not.toBeNull()
   const cdp = await page.context().newCDPSession(page)
   const point = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
   try {
@@ -55,6 +56,7 @@ test('disabled fullscreen and zoom gestures allow upward scrolling and downward 
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
     const restored = await player.boundingBox()
+    expect(restored).not.toBeNull()
     const start = { x: restored.x + restored.width / 2, y: restored.y + restored.height / 2 }
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] })
     for (const distance of [16, 32, 64, 100]) {
@@ -73,6 +75,7 @@ test('disabled fullscreen and zoom gestures allow upward scrolling and downward 
 test('first downward dock keeps the player moving without a long frame', async ({ app, page }) => {
   const player = await openMobilePlayer(app, page)
   const bounds = await player.boundingBox()
+  expect(bounds).not.toBeNull()
   const cdp = await page.context().newCDPSession(page)
   const start = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
   try {
@@ -145,6 +148,7 @@ test.describe('a restored Watch tab', () => {
     await enableMobileTouch(app, page)
     await expect(watchTab.locator('.browsingBehindWatch.subscriptionsPage')).toHaveCount(1)
     const bounds = await player.boundingBox()
+    expect(bounds).not.toBeNull()
     const cdp = await page.context().newCDPSession(page)
     const start = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
     try {
