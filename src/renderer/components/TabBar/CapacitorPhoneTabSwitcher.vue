@@ -178,6 +178,11 @@
                   >
                     <CapacitorTabPreview :tab="tab" />
                     <span class="capacitorPhoneTabTitle">
+                      <span
+                        v-if="tab.isLoading"
+                        class="tabLoadingDot"
+                        aria-hidden="true"
+                      />
                       <span dir="auto">{{ tabTitle(tab) }}</span>
                     </span>
                   </button>
@@ -1063,3 +1068,5 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped src="./CapacitorPhoneTabSwitcher.css" />
+
+<style scoped src="./TabLoadingDot.css" />
