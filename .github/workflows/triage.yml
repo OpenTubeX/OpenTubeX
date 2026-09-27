@@ -1,0 +1,75 @@
+name: Issue Triage
+
+on:
+  workflow_dispatch:
+  issues:
+    types: [opened, reopened]
+  schedule:
+    - cron: '*/30 * * * *'
+
+permissions: {}
+
+concurrency:
+  group: issue-triage-${{ github.event.issue.number || github.event_name }}
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  triage:
+    if: >-
+      github.event_name == 'issues' &&
+      github.repository == 'OpenTubeX/OpenTubeX' &&
+      github.event.issue.user.login != 'D3SOX' &&
+      github.event.issue.user.type != 'Bot' &&
+      !endsWith(github.event.issue.user.login, '[bot]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Limit frequent issue creation
+        id: limit
+        run: node _scripts/issueRateLimit.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Triage issue
+        if: steps.limit.outputs.allowed == 'true'
+        run: node _scripts/issueTriage.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+  rate-limit-sweep:
+    if: github.event_name == 'schedule' && github.repository == 'OpenTubeX/OpenTubeX'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: node _scripts/issueRateLimit.mjs --sweep
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  backfill:
+    if: github.event_name == 'workflow_dispatch' && github.repository == 'OpenTubeX/OpenTubeX'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: node _scripts/issueTriage.mjs --backfill
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
