@@ -107,6 +107,8 @@ test('mobile bar details fade at the destination during both swipe directions', 
     const barTop = bar.y
     await touch('touchMove', { ...up, y: up.y - distance / 2 })
     await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
+    await expect(player).toHaveCSS('border-top-width', '0px')
+    await expect(player).toHaveCSS('box-shadow', 'none')
     await expect.poll(() => details.evaluate(element => Number(getComputedStyle(element).opacity))).toBeLessThan(0.5)
     expect(Math.abs((await details.boundingBox()).y - barTop)).toBeLessThan(2)
     expect(Math.abs((await chevron.boundingBox()).y - barTop)).toBeLessThan(2)

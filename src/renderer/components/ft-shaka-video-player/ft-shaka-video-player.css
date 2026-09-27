@@ -5232,7 +5232,9 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   margin: 0 !important;
   z-index: 150;
   background: transparent;
+  border-top: 0 !important;
   border-radius: 0 !important;
+  box-shadow: none !important;
   transform: none !important;
   translate: none !important;
   transition: none !important;
