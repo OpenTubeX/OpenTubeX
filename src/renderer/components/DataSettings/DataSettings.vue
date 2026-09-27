@@ -145,7 +145,7 @@
       @close="closeBackupImport"
     >
       <div
-        class="takeoutSelection"
+        class="takeoutSelection takeoutSelectionCentered"
         :aria-busy="backupBusy"
       >
         <p>{{ backupFilename }}</p>

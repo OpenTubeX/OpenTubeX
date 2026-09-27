@@ -59,6 +59,13 @@ test('exports and imports search history through the unified ZIP', async ({ page
   await dataSection.getByRole('button', { name: 'Import backup' }).click()
   const subpage = page.locator('.settingsSubpageContent', { hasText: 'Select the data to import' })
   await expect(subpage.getByText('opentubex-backup.zip')).toBeVisible()
+  await expect.poll(() => subpage.locator('.takeoutSelection').evaluate(element => {
+    const content = element.closest('.settingsSubpageContent').getBoundingClientRect()
+    const selection = element.getBoundingClientRect()
+    const offsetX = Math.abs((selection.left + selection.right - content.left - content.right) / 2)
+    const offsetY = Math.abs((selection.top + selection.bottom - content.top - content.bottom) / 2)
+    return Math.max(offsetX, offsetY)
+  })).toBeLessThanOrEqual(1)
   await subpage.getByRole('button', { name: 'Import selected data' }).click()
 
   await expect.poll(() => page.evaluate(() => {
