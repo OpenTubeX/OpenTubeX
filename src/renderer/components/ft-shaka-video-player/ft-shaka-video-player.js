@@ -10,6 +10,7 @@ import FtSelect from '../FtSelect/FtSelect.vue'
 import shaka from 'shaka-player'
 import { registerPlugin } from '@capacitor/core'
 import { bindIosFullscreen } from '../../helpers/player/iosFullscreen'
+import { bindIosNativeCaptions } from '../../helpers/player/iosNativeCaptions'
 import { createIOSMediaTransport } from '../../helpers/player/iosMediaTransport'
 import { useI18n } from 'vue-i18n'
 
@@ -757,6 +758,7 @@ export default defineComponent({
     /** @type {shaka.ui.Overlay|null} */
     let ui = null
     let iosFullscreenCleanup = null
+    let iosCaptionsCleanup = null
     let screenWakeBinding = null
 
     // Set when a UI reconfigure is requested while the player is not loaded, so
@@ -10842,6 +10844,7 @@ export default defineComponent({
 
       const controls = ui.getControls()
       if (process.env.IS_IOS) {
+        iosCaptionsCleanup = bindIosNativeCaptions(videoElement)
         iosFullscreenCleanup = bindIosFullscreen(controls, {
           isEnabled: () => fullWindowEnabled.value,
           setEnabled: enabled => events.dispatchEvent(new CustomEvent('setFullWindow', { detail: enabled })),
@@ -11505,6 +11508,8 @@ export default defineComponent({
       screenWakeBinding = null
       iosFullscreenCleanup?.()
       iosFullscreenCleanup = null
+      iosCaptionsCleanup?.()
+      iosCaptionsCleanup = null
       clearTimeout(paidPromotionTimer)
       if (fullscreenDockLayoutFrame !== null) {
         cancelAnimationFrame(fullscreenDockLayoutFrame)
@@ -11717,6 +11722,8 @@ export default defineComponent({
       screenWakeBinding = null
       iosFullscreenCleanup?.()
       iosFullscreenCleanup = null
+      iosCaptionsCleanup?.()
+      iosCaptionsCleanup = null
       ignoreErrors = true
       cancelPendingVolumeUserSet()
       cancelSponsorBlockSkipSchedule()
