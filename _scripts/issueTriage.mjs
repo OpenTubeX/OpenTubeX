@@ -83,7 +83,7 @@ export async function assess(issue) {
 
   const request = {
     model: 'gpt-6-luna',
-    reasoning: { effort: 'none' },
+    reasoning: { effort: 'low' },
     store: false,
     instructions,
     input,

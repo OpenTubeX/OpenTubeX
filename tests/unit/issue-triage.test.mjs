@@ -84,8 +84,11 @@ test('triage retries a response that exhausted its output tokens', async t => {
   const originalFetch = globalThis.fetch
   t.after(() => { globalThis.fetch = originalFetch })
   const budgets = []
+  const efforts = []
   globalThis.fetch = async (_, options) => {
-    budgets.push(JSON.parse(options.body).max_output_tokens)
+    const request = JSON.parse(options.body)
+    budgets.push(request.max_output_tokens)
+    efforts.push(request.reasoning.effort)
     return {
       ok: true,
       json: async () => budgets.length === 1
@@ -99,4 +102,5 @@ test('triage retries a response that exhausted its output tokens', async t => {
   const issue = { title: 'Report', body: '', comments: { nodes: [] } }
   assert.deepEqual(await assess(issue), { labels: ['bug'], reply: 'none' })
   assert.deepEqual(budgets, [250, 1000])
+  assert.deepEqual(efforts, ['low', 'low'])
 })
