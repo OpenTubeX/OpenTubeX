@@ -80,8 +80,6 @@ def _download(request):
     folder.mkdir(parents=True, exist_ok=True)
     progress_file = Path(request['progressFile'])
     control_file = Path(request['controlFile'])
-    if control_file.exists():
-        control_file.unlink()
 
     def report(progress):
         if control_file.exists():

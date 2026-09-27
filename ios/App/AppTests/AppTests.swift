@@ -219,16 +219,34 @@ final class AppTests: XCTestCase {
         XCTAssertEqual(third?["status"] as? String, "queued")
         XCTAssertLessThan(try XCTUnwrap(third?["queuePosition"] as? Int),
                           try XCTUnwrap(second?["queuePosition"] as? Int))
-        for id in ids {
-            _ = try await webView.callAsyncJavaScript(
-                "return await Capacitor.Plugins.YtDlp.control({id, action: 'cancel'})",
-                arguments: ["id": id], in: nil, contentWorld: .page)
-        }
+        let thirdStage = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("yt-dlp-downloads/\(ids[2])", isDirectory: true)
+        try FileManager.default.createDirectory(at: thirdStage, withIntermediateDirectories: true)
+        let staleProgress = thirdStage.appendingPathComponent("progress.json")
+        try Data(#"{"status":"downloading","percent":90,"speed":42,"eta":5}"#.utf8).write(to: staleProgress)
+        _ = try await webView.callAsyncJavaScript(
+            "return await Capacitor.Plugins.YtDlp.control({id, action: 'cancel'})",
+            arguments: ["id": ids[0]], in: nil, contentWorld: .page)
         connectionLock.lock()
         let openConnections = connections
         connectionLock.unlock()
         openConnections.forEach { $0.cancel() }
         listener.cancel()
+        var thirdStatus = "queued"
+        for _ in 0..<80 {
+            thirdStatus = try await webView.callAsyncJavaScript(
+                "return (await Capacitor.Plugins.YtDlp.list()).downloads.find(record => record.id === id)?.status",
+                arguments: ["id": ids[2]], in: nil, contentWorld: .page) as? String ?? "missing"
+            if thirdStatus != "queued" { break }
+            try await Task.sleep(nanoseconds: 250_000_000)
+        }
+        XCTAssertNotEqual(thirdStatus, "queued")
+        XCTAssertFalse(FileManager.default.fileExists(atPath: staleProgress.path))
+        for id in ids {
+            _ = try await webView.callAsyncJavaScript(
+                "return await Capacitor.Plugins.YtDlp.control({id, action: 'cancel'})",
+                arguments: ["id": id], in: nil, contentWorld: .page)
+        }
         for _ in 0..<80 {
             _ = try await webView.callAsyncJavaScript(
                 "return await Capacitor.Plugins.YtDlp.clear({ids})",

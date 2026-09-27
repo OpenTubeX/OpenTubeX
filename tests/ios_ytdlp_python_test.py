@@ -129,6 +129,24 @@ class IOSYtDlpPythonTest(unittest.TestCase):
                 'status': 'processing', 'percent': 0, 'speed': None, 'eta': None,
             })
 
+    @patch.object(bridge.yt_dlp, 'YoutubeDL', FakeYoutubeDL)
+    def test_cancel_before_worker_starts_is_preserved(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            staging = root / 'stage'
+            staging.mkdir()
+            control = staging / 'control'
+            control.touch()
+            request = {
+                'payload': {'mode': 'video', 'externalUrl': 'https://example.org/video'},
+                'staging': str(staging),
+                'progressFile': str(staging / 'progress.json'),
+                'controlFile': str(control),
+            }
+            with self.assertRaises(bridge.yt_dlp.utils.DownloadError):
+                bridge._download(request)
+            self.assertTrue(control.exists())
+
 
 if __name__ == '__main__':
     unittest.main()

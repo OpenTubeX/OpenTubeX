@@ -347,7 +347,11 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
         let staging = folder(for: id)
         try? FileManager.default.createDirectory(at: staging, withIntermediateDirectories: true)
         try? FileManager.default.removeItem(at: controlFile(for: id))
+        try? FileManager.default.removeItem(at: progressFile(for: id))
         records[id]?["status"] = "preparing"
+        records[id]?["percent"] = 0
+        records[id]?["speed"] = NSNull()
+        records[id]?["eta"] = NSNull()
         records[id]?["started"] = true
         publish(id)
         IOSYtDlpRuntime.run(["operation": "download", "payload": payload,
