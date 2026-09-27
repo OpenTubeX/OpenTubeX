@@ -37,7 +37,13 @@ const { QuickPlaybackRateBar, setQuickPlaybackRateBarContext } = vm.runInNewCont
     h: (component, props) => ({ component, props }),
     render() {},
     Fragment: {},
-    FtIcon: {}
+    FtIcon: {},
+    CustomEvent: class {
+      constructor(type, { detail } = {}) {
+        this.type = type
+        this.detail = detail
+      }
+    }
   }
 )
 
@@ -63,6 +69,40 @@ test('quick speed action switches between saving and removal as current and save
   savedRate = null
   bar.updateButtonStates_()
   assert.equal(bar.saveButton_.dataset.remove, 'false')
+})
+
+test('quick speed highlight follows the selected rate while the player is loading', () => {
+  let selectedRate = 1.25
+  const selected = new Set()
+  const bar = Object.create(QuickPlaybackRateBar.prototype)
+  bar.controls = {}
+  bar.player = { getPlaybackRate: () => 1, trickPlay() {} }
+  bar.saveButton_ = { dataset: {}, classList: { add() {}, remove() {} } }
+  bar.rateButtons_ = [1, 1.25, 1.5].map(speed => ({
+    speed,
+    button: {
+      classList: { toggle(name, active) {
+        if (name === 'is-current-rate') {
+          if (active) selected.add(speed)
+          else selected.delete(speed)
+        }
+      } }
+    }
+  }))
+  setQuickPlaybackRateBarContext(bar.controls, {
+    getDisplayedPlaybackRate: () => selectedRate,
+    getSavedChannelPlaybackRate: () => null,
+    getCanSaveChannelPlaybackSpeed: () => false,
+    events: { dispatchEvent(event) {
+      if (event.type === 'quickPlaybackRateUserSet') selectedRate = event.detail
+    } }
+  })
+
+  bar.updateButtonStates_()
+  assert.deepEqual([...selected], [1.25], 'show the default speed before media loads')
+
+  bar.setPlaybackRate_(1.5)
+  assert.deepEqual([...selected], [1.5], 'move the highlight after choosing another speed')
 })
 
 test('removal does not overwrite malformed collections or collections without the channel', async () => {
