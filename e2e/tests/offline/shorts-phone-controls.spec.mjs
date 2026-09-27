@@ -566,13 +566,14 @@ test('medium-width Shorts retain their player height without bottom tabs', async
   await expect.poll(async () => (await player.boundingBox()).height).toBeCloseTo(baseline.height, 0)
 })
 
-test('Shorts playlist sheet opens maximized', async ({ app, page }) => {
+test('Shorts playlist sheet opens over the lower 70% of the screen', async ({ app, page }) => {
   await openShort({ app, page })
   await page.locator('.shortsActionRail .shortsAction').filter({ hasText: 'Add to Playlist' }).locator('button').first().click()
   const sheet = page.locator('.dockedSheet[open]')
   await expect(sheet).toBeVisible()
-  await expect.poll(async () => (await sheet.boundingBox()).y).toBeLessThanOrEqual(1)
-  expect((await sheet.boundingBox()).height).toBeGreaterThanOrEqual(790)
+  const viewportHeight = await page.evaluate(() => window.innerHeight)
+  await expect.poll(async () => (await sheet.boundingBox()).y).toBeCloseTo(viewportHeight * 0.3, 0)
+  expect((await sheet.boundingBox()).height).toBeGreaterThanOrEqual(viewportHeight * 0.7 - 1)
 })
 
 test('phone Shorts opens video information from the rail without a bottom title', async ({ app, page }) => {
@@ -587,8 +588,9 @@ test('phone Shorts opens video information from the rail without a bottom title'
   await expect(information).toBeVisible()
   await information.click()
   await expect(information).toHaveAttribute('aria-expanded', 'true')
-  await expect(page.locator('.shortsAuxPanel.shortsAuxPanelOpen')).toBeVisible()
-  await expect(page.locator('.shortsAuxPanelHeader')).toContainText(await information.getAttribute('title'))
+  const dialog = page.getByRole('dialog', { name: 'Video information' })
+  await expect(dialog).toBeVisible()
+  await expect(dialog.getByRole('heading', { name: 'Video information' })).toBeVisible()
 
   const watch = await page.evaluateHandle(findWatchComponent)
   await watch.evaluate(instance => { instance.proxy.isLoading = true })

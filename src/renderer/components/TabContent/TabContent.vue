@@ -119,6 +119,7 @@ const routerFacade = navigation.createRouterFacade(props.tab.id)
 const routeFullPath = computed(() => props.tab.route?.fullPath || '/')
 const resolvedRoute = computed(() => navigation.resolve(routeFullPath.value))
 const isWatchRoute = computed(() => resolvedRoute.value.path.startsWith('/watch/'))
+const isBrowsingPresented = computed(() => isPresented.value && !isWatchRoute.value)
 // Keep the page beneath Watch ready so a dock gesture can reveal it without
 // mounting a route while the video is moving.
 function getBrowsingRoute(route) {
@@ -136,10 +137,10 @@ const injectedRoute = reactive({})
 const resolvedComponent = computed(() => browsingRoute.value && resolveRouteComponent(browsingRoute.value))
 
 provide(tabIdKey, props.tab.id)
-provide(tabPresentedKey, isPresented)
+provide(tabPresentedKey, isBrowsingPresented)
 provide(tabLifecycleKey, tabLifecycleService)
 provide('tabId', props.tab.id)
-provide('isTabActive', isPresented)
+provide('isTabActive', isBrowsingPresented)
 provide('tabRoute', injectedRoute)
 provide(routeLocationKey, injectedRoute)
 provide(routerKey, routerFacade)

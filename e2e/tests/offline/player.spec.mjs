@@ -1280,7 +1280,7 @@ test('uses mobile surface taps for controls and keeps an on-video play button', 
   const playButtons = player.locator('.shaka-big-buttons-container .shaka-play-button')
 
   await expect(playButtons).toHaveCount(1)
-  await expect(player.locator('.shaka-controls-button-panel .shaka-play-button')).toBeVisible()
+  await expect(player.locator('.shaka-controls-button-panel .shaka-play-button')).toBeHidden()
   await expect(player.locator('.shaka-controls-button-panel .shaka-pip-button')).toBeVisible()
   await expect(player.locator('.shaka-settings-menu .shaka-pip-button')).toHaveCount(0)
   await expect(player.locator('.shaka-mute-button, .shaka-volume-bar-container')).toHaveCount(0)
@@ -1297,30 +1297,27 @@ test('uses mobile surface taps for controls and keeps an on-video play button', 
     const clientY = bounds.y + bounds.height * 0.42
     const currentPointerId = pointerId++
 
-    await surface.dispatchEvent('pointerdown', {
-      button: 0,
-      clientX,
-      clientY,
-      isPrimary: true,
-      pointerId: currentPointerId,
-      pointerType: 'touch'
-    })
-    await surface.dispatchEvent('touchstart', {
-      touches: [{ clientX, clientY, identifier: currentPointerId }]
-    })
-    await surface.dispatchEvent('pointerup', {
-      button: 0,
-      clientX,
-      clientY,
-      isPrimary: true,
-      pointerId: currentPointerId,
-      pointerType: 'touch'
-    })
-
-    return await surface.evaluate(element => !element.dispatchEvent(new TouchEvent('touchend', {
-      bubbles: true,
-      cancelable: true
-    })))
+    return await surface.evaluate((element, { clientX, clientY, pointerId }) => {
+      const pointer = {
+        bubbles: true,
+        cancelable: true,
+        button: 0,
+        clientX,
+        clientY,
+        isPrimary: true,
+        pointerId,
+        pointerType: 'touch'
+      }
+      element.dispatchEvent(new PointerEvent('pointerdown', pointer))
+      element.dispatchEvent(new TouchEvent('touchstart', {
+        bubbles: true,
+        touches: [new Touch({ identifier: pointerId, target: element, clientX, clientY })]
+      }))
+      element.dispatchEvent(new PointerEvent('pointerup', pointer))
+      return !element.dispatchEvent(new TouchEvent('touchend', {
+        bubbles: true, cancelable: true
+      }))
+    }, { clientX, clientY, pointerId: currentPointerId })
   }
 
   expect(await tapPlayer()).toBe(true)

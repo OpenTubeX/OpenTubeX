@@ -639,7 +639,11 @@ async function resetScrollAfterRefresh(refreshedTab) {
   }
 
   if (usesLogicalTabs && tabId) {
-    getTabNavigationService().resetScroll(tabId)
+    // Watch can keep this feed mounted behind the player. A refresh there
+    // must not erase the Watch history entry's scroll position.
+    if (store.getters.getTabById(tabId)?.route.path === route.path) {
+      getTabNavigationService().resetScroll(tabId)
+    }
   } else {
     window.scrollTo({ left: 0, top: 0, behavior: 'instant' })
   }
