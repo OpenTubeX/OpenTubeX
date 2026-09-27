@@ -39,7 +39,8 @@ class OpenTubeXViewController: CAPBridgeViewController {
         bridge?.registerPluginInstance(ScreenshotPlugin())
         bridge?.registerPluginInstance(IOSUiPlugin())
         do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback, options: [.allowAirPlay])
+            // Playback supports AirPlay by default; explicit allowAirPlay requires playAndRecord.
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback)
         } catch { NSLog("Could not configure playback audio session: %@", error.localizedDescription) }
     }
 

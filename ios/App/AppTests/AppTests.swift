@@ -1,4 +1,5 @@
 import XCTest
+import AVFoundation
 import WebKit
 import MediaPlayer
 import Network
@@ -6,6 +7,22 @@ import Network
 
 @MainActor
 final class AppTests: XCTestCase {
+    func testPlaybackAudioSessionConfiguration() throws {
+        let session = AVAudioSession.sharedInstance()
+        let category = session.category
+        let mode = session.mode
+        let options = session.categoryOptions
+        defer { try? session.setCategory(category, mode: mode, options: options) }
+        try session.setCategory(.ambient)
+
+        OpenTubeXViewController().capacitorDidLoad()
+
+        XCTAssertEqual(session.category, .playback)
+        XCTAssertEqual(session.mode, .moviePlayback)
+        XCTAssertFalse(session.categoryOptions.contains(.allowAirPlay),
+                       "Explicit allowAirPlay is valid only with playAndRecord; playback supports AirPlay by default")
+    }
+
     func testTabletTabAccessibility() async throws {
         try await openApplication()
         let role = try await evaluate("document.querySelector('.capacitorTabletTabs')?.getAttribute('role')") as? String
