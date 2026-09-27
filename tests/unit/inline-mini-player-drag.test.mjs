@@ -55,6 +55,7 @@ function fixture({ reducedMotion = false, available = true, restoring = false, f
     scrollMiniPlaceholder: { value: { getBoundingClientRect: () => ({ left: 0, top: 80, width: 390, height: 219.375 }) } },
     scrollMiniPlaceholderHeight: { value: 0 },
     scrollMiniPlayerDragStyle: { value: null },
+    mobileMiniBarOverlayStyle: { value: null },
     scrollMiniPlayerActive,
     scrollMiniVideoAspectRatio: { value: 16 / 9 },
     canUseScrollMiniPlayerBase: () => available,

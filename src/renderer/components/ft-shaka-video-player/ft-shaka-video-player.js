@@ -772,6 +772,7 @@ export default defineComponent({
 
     /** @type {import('vue').Ref<HTMLDivElement | null>} */
     const container = ref(null)
+    const mobileMiniBarOverlay = ref(null)
 
     /** @type {import('vue').Ref<HTMLVideoElement | null>} */
     const video = ref(null)
@@ -6870,6 +6871,8 @@ export default defineComponent({
     }
     const {
       scrollMiniPlayerDragStyle,
+      mobileMiniBar,
+      mobileMiniBarOverlayStyle,
       beginScrollMiniPlayerDrag,
       moveScrollMiniPlayerDrag,
       finishScrollMiniPlayerDrag,
@@ -6926,6 +6929,7 @@ export default defineComponent({
       updateScrollMiniVolume,
     } = useScrollMiniPlayer({
       container,
+      mobileMiniBarOverlay,
       fullWindowEnabled,
       getUi: () => ui,
       isActiveTab,
@@ -11919,6 +11923,7 @@ export default defineComponent({
       showCaptionAppearanceSample,
       isActiveTab,
       container,
+      mobileMiniBarOverlay,
       video,
       voiceOverTranslationState: voiceOverTranslation.state,
       vrCanvas,
@@ -12112,7 +12117,8 @@ export default defineComponent({
       temporaryPlaybackRateIndicatorMessage,
 
       scrollMiniPlayerActive,
-      mobileMiniBar: Boolean(process.env.IS_CAPACITOR),
+      mobileMiniBar,
+      mobileMiniBarOverlayStyle,
       scrollMiniPlayerAnimating,
       scrollMiniPlayerDetached,
       scrollMiniPlayerDismissed,

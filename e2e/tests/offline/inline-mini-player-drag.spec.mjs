@@ -61,6 +61,112 @@ test('tablet swipe docks toward the bottom bar', async ({ app, page }) => {
   }
 })
 
+test('mobile bar details fade at the destination during both swipe directions', async ({ app, page }) => {
+  const player = await openMobilePlayer(app, page)
+  const cdp = await page.context().newCDPSession(page)
+  const touch = (type, point) => cdp.send('Input.dispatchTouchEvent', {
+    type,
+    touchPoints: point ? [point] : []
+  })
+  try {
+    const watch = await player.boundingBox()
+    const down = { x: watch.x + watch.width / 2, y: watch.y + 100 }
+    await touch('touchStart', down)
+    await touch('touchMove', { ...down, y: down.y + 30 })
+    await page.waitForTimeout(40)
+    const distance = await player.evaluate(element => {
+      const targetTop = window.innerHeight - 76
+      return Math.max(150, (targetTop - element.getBoundingClientRect().top) / 2)
+    })
+    await touch('touchMove', { ...down, y: down.y + distance })
+    await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
+    const details = page.locator('.mobileMiniBarDetails')
+    const chevron = page.locator('.mobileMiniBarReturn')
+    await expect(details).toHaveCount(1)
+    await expect.poll(() => details.evaluate(element => Number(getComputedStyle(element).opacity))).toBeGreaterThan(0.5)
+    await expect.poll(() => chevron.evaluate(element => Number(getComputedStyle(element).opacity))).toBeGreaterThan(0.5)
+    await touch('touchEnd')
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await player.evaluate(element => {
+      element.style.left = '0px'
+      element.style.width = `${window.innerWidth}px`
+      element.style.height = '76px'
+    })
+    await page.waitForTimeout(300)
+    const bar = await player.boundingBox()
+    const up = { x: bar.x + 60, y: bar.y + bar.height / 2 }
+    await touch('touchStart', up)
+    for (const step of [20, 40, 80]) {
+      await touch('touchMove', { ...up, y: up.y - step })
+      await page.waitForTimeout(30)
+    }
+    const barTop = bar.y
+    await touch('touchMove', { ...up, y: up.y - distance / 2 })
+    await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
+    await expect.poll(() => details.evaluate(element => Number(getComputedStyle(element).opacity))).toBeLessThan(0.5)
+    expect(Math.abs((await details.boundingBox()).y - barTop)).toBeLessThan(2)
+    expect(Math.abs((await chevron.boundingBox()).y - barTop)).toBeLessThan(2)
+    await touch('touchEnd')
+  } finally {
+    await cdp.detach()
+  }
+})
+
+test('scroll docking fades the details at the bottom bar position', async ({ app, page }) => {
+  const player = await openMobilePlayer(app, page)
+  await page.evaluate(() => {
+    const element = document.querySelector('.ftVideoPlayer')
+    window.mobileBarMorphSamples = []
+    new MutationObserver(() => {
+      if (!element.hasAttribute('data-mobile-mini-morph')) return
+      const overlay = document.querySelector('.mobileMiniBarOverlay')
+      if (!overlay) return
+      window.mobileBarMorphSamples.push({
+        playerTop: element.getBoundingClientRect().top,
+        barTop: overlay.getBoundingClientRect().top,
+        opacity: Number(getComputedStyle(overlay.querySelector('.mobileMiniBarDetails')).opacity)
+      })
+    }).observe(element, { attributes: true, attributeFilter: ['style'] })
+    const spacer = document.createElement('div')
+    spacer.style.height = '2000px'
+    document.body.append(spacer)
+    window.scrollTo(0, 1200)
+  })
+  await expect(player).toHaveClass(/scrollMiniPlayer/)
+  await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+  const samples = await page.evaluate(() => window.mobileBarMorphSamples)
+  expect(samples.length).toBeGreaterThan(3)
+  const first = samples[0]
+  const last = samples.at(-1)
+  const middle = samples.find(sample => {
+    const progress = (sample.playerTop - first.playerTop) / (last.playerTop - first.playerTop)
+    return progress >= 0.48 && progress <= 0.6
+  })
+  expect(middle).toBeDefined()
+  expect(middle.opacity).toBeGreaterThan(0.5)
+  const visible = samples.filter(sample => sample.opacity > 0)
+  expect(Math.max(...visible.map(sample => sample.barTop)) - Math.min(...visible.map(sample => sample.barTop))).toBeLessThan(2)
+
+  await page.evaluate(() => {
+    window.mobileBarMorphSamples = []
+    window.scrollTo(0, 0)
+  })
+  await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+  await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+  const restoring = await page.evaluate(() => window.mobileBarMorphSamples)
+  expect(restoring.length).toBeGreaterThan(3)
+  const restoreStart = restoring[0]
+  const restoreEnd = restoring.at(-1)
+  const restoreMiddle = restoring.find(sample => {
+    const progress = (restoreStart.playerTop - sample.playerTop) / (restoreStart.playerTop - restoreEnd.playerTop)
+    return progress >= 0.48 && progress <= 0.6
+  })
+  expect(restoreMiddle).toBeDefined()
+  expect(restoreMiddle.opacity).toBeLessThan(0.5)
+  const restoreVisible = restoring.filter(sample => sample.opacity > 0)
+  expect(Math.max(...restoreVisible.map(sample => sample.barTop)) - Math.min(...restoreVisible.map(sample => sample.barTop))).toBeLessThan(2)
+})
+
 test('Shorts overflow is clipped while dragging into the mini player', async ({ app, page }) => {
   const player = await openMobilePlayer(app, page)
   await player.evaluate(element => element.classList.add('shortsPlayer'))

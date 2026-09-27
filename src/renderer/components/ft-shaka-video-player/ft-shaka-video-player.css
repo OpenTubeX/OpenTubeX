@@ -4711,8 +4711,35 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   padding-block-end: 76px;
 }
 
-.ftVideoPlayer.mobileMiniBar > :not(.player, .mobileMiniBarDetails, .mobileMiniBarReturn) {
+.ftVideoPlayer.mobileMiniBar > :not(.player, .mobileMiniBarOverlay) {
   display: none !important;
+}
+
+.mobileMiniBarOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.mobileMiniBarMorphOverlay {
+  position: fixed;
+  inset: auto;
+  z-index: 151;
+  pointer-events: none;
+
+  --mobile-mini-bar-opacity: 0;
+}
+
+.mobileMiniBarRestoring {
+  --mobile-mini-bar-opacity: 1;
+}
+
+.mobileMiniBarMorphOverlay::before {
+  position: absolute;
+  inset: 0 0 0 120px;
+  background: linear-gradient(to right, transparent, var(--card-bg-color) 8px);
+  opacity: var(--mobile-mini-bar-opacity);
+  content: '';
 }
 
 .mobileMiniBarDetails {
@@ -4776,10 +4803,20 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   color: var(--primary-text-color);
   font-size: 24px;
   cursor: pointer;
+  pointer-events: auto;
 }
 
 .mobileMiniBarReturn:active {
   background: color-mix(in srgb, var(--primary-text-color) 12%, var(--card-bg-color));
+}
+
+.mobileMiniBarMorphOverlay > .mobileMiniBarDetails,
+.mobileMiniBarMorphOverlay > .mobileMiniBarReturn {
+  opacity: var(--mobile-mini-bar-opacity);
+}
+
+.mobileMiniBarMorphOverlay > .mobileMiniBarReturn {
+  pointer-events: none;
 }
 
 .scrollMiniPlayerControls {
@@ -5190,11 +5227,6 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   translate: none !important;
   transition: none !important;
   overflow: clip;
-}
-
-.ftVideoPlayer[data-mobile-mini-morph] > .mobileMiniBarDetails,
-.ftVideoPlayer[data-mobile-mini-morph] > .mobileMiniBarReturn {
-  opacity: var(--mobile-mini-bar-opacity);
 }
 
 /* The moving video must override every settled player layout. */
