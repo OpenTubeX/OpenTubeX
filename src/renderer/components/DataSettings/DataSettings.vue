@@ -2188,28 +2188,41 @@ async function importSettings() {
     return
   }
 
-  const content = response.content.trim()
+  const content = response.content
   let importedSettings
+  let rows
   try {
-    importedSettings = JSON.parse(content)
+    importedSettings = JSON.parse(content.trim())
   } catch {
-    importedSettings = Object.fromEntries(
-      content.split('\n').map((rawEntry) => {
-        const entry = JSON.parse(rawEntry)
-        if (typeof entry._id !== 'string' || !Object.hasOwn(entry, 'value')) {
-          showToast({
-            message: t('Settings.Data Settings.Setting object has insufficient data, skipping item'),
-            icon: ['fas', 'circle-exclamation'],
-          })
-          console.error('Missing keys:', entry)
-          return []
-        }
-        return [entry._id, entry.value]
-      }).filter((entry) => entry.length > 0)
-    )
+    rows = parseImportedLineDelimitedJson(content)
   }
 
-  await applyImportedSettings(importedSettings)
+  // A database containing one row is also valid JSON. Treat it like the
+  // rows of a multi-setting export, not a settings object with _id/value keys.
+  if (isJsonObject(importedSettings) && Object.hasOwn(importedSettings, '_id')) {
+    rows = [importedSettings]
+  }
+  if (rows) {
+    importedSettings = Object.fromEntries(rows.filter((entry) => {
+      if (isJsonObject(entry) && typeof entry._id === 'string' && Object.hasOwn(entry, 'value')) {
+        return true
+      }
+      showToast({
+        message: t('Settings.Data Settings.Setting object has insufficient data, skipping item'),
+        icon: ['fas', 'circle-exclamation'],
+      })
+      return false
+    }).map(entry => [entry._id, entry.value]))
+  }
+  if (!isJsonObject(importedSettings) || Object.keys(importedSettings).length === 0) {
+    showToast({
+      message: t('Settings.Data Settings.Unable to read file'),
+      icon: ['fas', 'circle-exclamation'],
+    })
+    return
+  }
+
+  if (!await applyImportedSettings(importedSettings)) return
 
   showToast({
     message: t('Settings.Data Settings.All settings have been successfully imported'),
@@ -2222,6 +2235,7 @@ async function applyImportedSettings(importedSettings) {
 
   const currentTransferableSettings = transferableSettings.value
   const currentSettings = store.state.settings
+  let acceptedSettings = 0
 
   for (const [importedKey, importedValue] of Object.entries(importedSettings)) {
     if (!Object.hasOwn(currentSettings, importedKey)) {
@@ -2236,6 +2250,7 @@ async function applyImportedSettings(importedSettings) {
       continue
     }
 
+    acceptedSettings++
     const currentValue = currentTransferableSettings[importedKey]
     const areValuesEqual = currentValue === importedValue ||
       (typeof importedValue === 'object' && JSON.stringify(currentValue) === JSON.stringify(importedValue))
@@ -2246,6 +2261,7 @@ async function applyImportedSettings(importedSettings) {
     const updaterId = defaultUpdaterId(importedKey)
     await store.dispatch(updaterId, importedValue)
   }
+  return acceptedSettings > 0
 }
 
 async function exportSettings() {

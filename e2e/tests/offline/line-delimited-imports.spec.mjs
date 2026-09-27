@@ -78,6 +78,44 @@ function searchRecord(_id, lastUpdatedAt) {
   return { _id, lastUpdatedAt }
 }
 
+test('line-delimited settings keep valid rows around a malformed row', async ({ page }) => {
+  const pageErrors = []
+  page.on('pageerror', error => pageErrors.push(error.message))
+  const dataSection = await goToSettingsSection(page, 'data')
+  await mockImportFile(page, 'settings.db', lineDelimitedFixture(
+    { _id: 'uiScale', value: 125 },
+    { _id: 'rememberHistory', value: false }
+  ))
+  await dataSection.getByRole('button', { name: 'Import Settings', exact: true }).click()
+  await expectRowError(page)
+  await expect.poll(() => page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return [store.getters.getUiScale, store.getters.getRememberHistory]
+  })).toEqual([125, false])
+  expect(pageErrors).toEqual([])
+})
+
+test('a one-row settings database applies the saved setting', async ({ page }) => {
+  const dataSection = await goToSettingsSection(page, 'data')
+  await mockImportFile(page, 'settings.db', JSON.stringify({ _id: 'uiScale', value: 125 }))
+  await dataSection.getByRole('button', { name: 'Import Settings', exact: true }).click()
+  await expect.poll(() => page.evaluate(() => (
+    document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getUiScale
+  ))).toBe(125)
+  await expect(page.locator('.toast', { hasText: 'All settings have been successfully imported' })).toBeVisible()
+})
+
+test('invalid settings import reports the source row without announcing success', async ({ page }) => {
+  const pageErrors = []
+  page.on('pageerror', error => pageErrors.push(error.message))
+  const dataSection = await goToSettingsSection(page, 'data')
+  await mockImportFile(page, 'settings.db', ' \t \r\n{"broken":')
+  await dataSection.getByRole('button', { name: 'Import Settings', exact: true }).click()
+  await expect(page.locator('.toast', { hasText: 'Invalid JSON at row 2, skipping item' })).toBeVisible()
+  await expect(page.locator('.toast', { hasText: 'All settings have been successfully imported' })).toHaveCount(0)
+  expect(pageErrors).toEqual([])
+})
+
 test('line-delimited subscriptions keep valid rows around a malformed row', async ({ page }) => {
   const pageErrors = []
   page.on('pageerror', error => pageErrors.push(error.message))
