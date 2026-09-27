@@ -22,6 +22,12 @@ test('portrait, square, unknown, and inline videos keep the user display orienta
   assert.equal(shouldRotateFullscreenToLandscape(false, { videoWidth: 1920, videoHeight: 1080 }), false)
 })
 
+test('fullscreen uses metadata until the video reports its own dimensions', () => {
+  assert.equal(shouldRotateFullscreenToLandscape(true, { videoWidth: 0, videoHeight: 0 }, true, 16 / 9), true)
+  assert.equal(shouldRotateFullscreenToLandscape(true, { videoWidth: 0, videoHeight: 0 }, true, 9 / 16), false)
+  assert.equal(shouldRotateFullscreenToLandscape(true, { videoWidth: 1080, videoHeight: 1920 }, true, 16 / 9), false)
+})
+
 test('fullscreen hides the Android status bar only while player controls are hidden', () => {
   assert.equal(shouldShowAndroidStatusBar({ active: true, fullscreen: true, controlsShown: false }), false)
   assert.equal(shouldShowAndroidStatusBar({ active: true, fullscreen: true, controlsShown: true }), true)

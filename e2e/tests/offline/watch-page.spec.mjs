@@ -1452,6 +1452,97 @@ test.describe('fullscreen ambient mode', () => {
   })
 })
 
+test('Android fullscreen host keeps watch cards behind the player', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+
+  await page.evaluate(() => {
+    document.body.classList.add('capacitorTabs')
+    const host = document.querySelector('.videoLayout')
+    host.addEventListener('click', event => {
+      event.stopImmediatePropagation()
+      host.requestFullscreen()
+    }, { once: true, capture: true })
+  })
+  await page.locator('.videoLayout').click({ position: { x: 8, y: 8 } })
+  await expect.poll(() => page.evaluate(() => document.fullscreenElement?.classList.contains('videoLayout'))).toBe(true)
+
+  await expect.poll(() => page.evaluate(() => {
+    const card = document.querySelector('.infoArea .watchVideoInfo')
+    const bounds = card.getBoundingClientRect()
+    const element = document.elementFromPoint(bounds.left + 100, bounds.top + 100)
+    return Boolean(element?.closest('.ftVideoPlayer'))
+  })).toBe(true)
+})
+
+test('mobile skip buttons flank the centered play button', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await setWindowSize(app, page, { width: 450, height: 850 })
+  await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs', 'capacitorPhoneLayout'))
+
+  const view = await watchViewHandle(page)
+  await view.evaluate(async component => {
+    component.$store.commit('addPlaylist', {
+      _id: 'ft-playlist--mobile-skip-test',
+      playlistName: 'Mobile skip test',
+      videos: [
+        { videoId: 'dQw4w9WgXcQ', playlistItemId: 'first', title: 'First' },
+        { videoId: 'jNQXAC9IVRw', playlistItemId: 'middle', title: 'Middle' },
+        { videoId: '9bZkp7q19f0', playlistItemId: 'last', title: 'Last' },
+      ]
+    })
+    await component.$store.dispatch('updateUserPlaylistSortOrder', 'custom')
+    await component.tabRouter.push({
+      path: '/watch/jNQXAC9IVRw',
+      query: { playlistId: 'ft-playlist--mobile-skip-test', playlistType: 'user', playlistItemId: 'middle' }
+    })
+  })
+  await expect.poll(() => view.evaluate(component => component.canSkipToPreviousVideo && component.canSkipToNextVideo)).toBe(true)
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  const buttons = player.locator('.shaka-big-buttons-container')
+  await player.hover()
+
+  for (const zoom of [1, 0.95]) {
+    await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
+    await expect(buttons.locator(':scope > button')).toHaveCount(3)
+    await expect(player.locator('.shaka-controls-button-panel > .ft-shaka-skip-button')).toHaveCount(0)
+    const bounds = await buttons.evaluate(container => [...container.querySelectorAll(':scope > button')].map(button => {
+      const { x, y, width, height } = button.getBoundingClientRect()
+      return { x, y, width, height }
+    }))
+    expect(bounds[0].width).toBeCloseTo(48, 0)
+    expect(bounds[2].width).toBeCloseTo(48, 0)
+    expect(bounds[0].height).toBeCloseTo(48, 0)
+    expect(bounds[2].height).toBeCloseTo(48, 0)
+    expect(bounds[1].width).toBeGreaterThanOrEqual(64)
+    expect(Math.abs(bounds[1].width - bounds[1].height)).toBeLessThan(1)
+    expect(bounds[0].x + bounds[0].width).toBeLessThan(bounds[1].x)
+    expect(bounds[1].x + bounds[1].width).toBeLessThan(bounds[2].x)
+    expect(Math.abs(bounds[0].y + bounds[0].height / 2 - (bounds[1].y + bounds[1].height / 2))).toBeLessThan(1)
+    expect(Math.abs(bounds[2].y + bounds[2].height / 2 - (bounds[1].y + bounds[1].height / 2))).toBeLessThan(1)
+  }
+
+  const playCenter = await buttons.locator('.shaka-play-button').evaluate(button => {
+    const bounds = button.getBoundingClientRect()
+    return bounds.x + bounds.width / 2
+  })
+  await view.evaluate(async component => {
+    await component.tabRouter.push({
+      path: '/watch/dQw4w9WgXcQ',
+      query: { playlistId: 'ft-playlist--mobile-skip-test', playlistType: 'user', playlistItemId: 'first' }
+    })
+  })
+  await expect.poll(() => view.evaluate(component => !component.canSkipToPreviousVideo && component.canSkipToNextVideo)).toBe(true)
+  await expect(buttons.locator(':scope > button')).toHaveCount(2)
+  expect(await buttons.locator('.shaka-play-button').evaluate(button => {
+    const bounds = button.getBoundingClientRect()
+    return bounds.x + bounds.width / 2
+  })).toBeCloseTo(playCenter, 1)
+
+  await view.dispose()
+})
+
 test('shows the restricted playback setup hint and loads yt-dlp subtitles after an authenticated retry', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await page.route('https://example.invalid/restricted-en.vtt', route => route.fulfill({
