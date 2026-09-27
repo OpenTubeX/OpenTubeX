@@ -45,6 +45,7 @@ const previewActive = ref(false)
 const previewStyle = shallowRef(null)
 let previewScroll = null
 let previewOrigin = null
+let previewViewport = null
 let previewRestoring = false
 const watchView = useTemplateRef('watchView')
 // Freeze the watch route while browsing, so its route watchers do not reload
@@ -141,6 +142,7 @@ async function minimize() {
 function beginMinimizePreview() {
   if (previewActive.value) return
   previewRestoring = false
+  previewViewport = null
   previewScroll = { left: window.scrollX, top: window.scrollY }
   const bounds = watchRoot.value.getBoundingClientRect()
   // Use an explicit positioned host: Chromium versions disagree on whether
@@ -172,6 +174,7 @@ function beginRestorePreview() {
     left: window.scrollX + targetBounds.left - parentBounds.left,
     top: window.scrollY + targetBounds.top - parentBounds.top
   }
+  previewViewport = { left: targetBounds.left, top: targetBounds.top }
   previewStyle.value = {
     left: `${previewOrigin.left}px`,
     top: `${previewOrigin.top}px`,
@@ -188,9 +191,21 @@ function beginRestorePreview() {
 function updatePreviewPosition() {
   const root = watchRoot.value
   if (!root || !previewOrigin) return
+  if (previewRestoring && previewViewport) {
+    const bounds = root.getBoundingClientRect()
+    root.style.left = `${(Number.parseFloat(root.style.left) || 0) + previewViewport.left - bounds.left}px`
+    root.style.top = `${(Number.parseFloat(root.style.top) || 0) + previewViewport.top - bounds.top}px`
+    return
+  }
   root.style.left = `${previewOrigin.left + window.scrollX - previewScroll.left}px`
   root.style.top = `${previewOrigin.top + window.scrollY - previewScroll.top}px`
 }
+
+watch(isWatchRoute, () => {
+  // The retained Watch host moves when the browsing route is replaced. Keep
+  // its visible preview in place until the player returns to its inline layout.
+  if (previewRestoring && previewActive.value) updatePreviewPosition()
+}, { flush: 'post' })
 
 function updateMinimizePreview(progress) {
   const root = watchRoot.value
@@ -234,6 +249,7 @@ async function finishMinimizePreview(commit) {
 function clearMinimizePreview() {
   previewActive.value = false
   previewStyle.value = null
+  previewViewport = null
   watchRoot.value?.style.removeProperty('opacity')
   watchRoot.value?.firstElementChild.style.removeProperty('opacity')
   window.removeEventListener('scroll', updatePreviewPosition)

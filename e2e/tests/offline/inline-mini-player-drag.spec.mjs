@@ -69,6 +69,7 @@ test('mobile bar details fade at the destination during both swipe directions', 
     touchPoints: point ? [point] : []
   })
   try {
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
     const watch = await player.boundingBox()
     const down = { x: watch.x + watch.width / 2, y: watch.y + 100 }
     await touch('touchStart', down)
@@ -112,7 +113,32 @@ test('mobile bar details fade at the destination during both swipe directions', 
     await expect.poll(() => details.evaluate(element => Number(getComputedStyle(element).opacity))).toBeLessThan(0.5)
     expect(Math.abs((await details.boundingBox()).y - barTop)).toBeLessThan(2)
     expect(Math.abs((await chevron.boundingBox()).y - barTop)).toBeLessThan(2)
+    await page.evaluate(() => {
+      const element = document.querySelector('.ftVideoPlayer')
+      const watchRoot = document.querySelector('.watchPreviewHost > div')
+      window.mobileRestoreFrames = []
+      let doneAt = null
+      const sample = () => {
+        window.mobileRestoreFrames.push({
+          watchTop: watchRoot.getBoundingClientRect().top,
+          morph: element.hasAttribute('data-mobile-mini-morph'),
+          route: location.hash
+        })
+        if (location.hash.startsWith('#/watch/') && !element.hasAttribute('data-mobile-mini-morph')) {
+          doneAt ??= performance.now() + 200
+        }
+        if (doneAt === null || performance.now() < doneAt) requestAnimationFrame(sample)
+      }
+      requestAnimationFrame(sample)
+    })
+    await touch('touchMove', { ...up, y: up.y - 530 })
     await touch('touchEnd')
+    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+    await expect.poll(() => page.evaluate(() => window.mobileRestoreFrames.length)).toBeGreaterThan(4)
+    const frames = await page.evaluate(() => window.mobileRestoreFrames)
+    const atWatch = frames.filter(frame => frame.morph && frame.route.startsWith('#/watch/'))
+    expect(atWatch.length).toBeGreaterThan(0)
+    expect(atWatch.every(frame => Math.abs(frame.watchTop - watch.y) < 3)).toBe(true)
   } finally {
     await cdp.detach()
   }
