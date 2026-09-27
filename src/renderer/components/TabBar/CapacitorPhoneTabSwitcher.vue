@@ -417,6 +417,7 @@ const syncedTabsContentRef = useTemplateRef('syncedTabsContentRef')
 const tabs = computed(() => store.getters.getTabs)
 const closedTabs = computed(() => store.getters.getClosedTabs)
 const activeTabId = computed(() => store.getters.getActiveTabId)
+const presentedTabId = computed(() => store.getters.getPresentedTabId)
 const syncEnabled = computed(() => store.getters.getSyncServerEnabled)
 const syncConnected = computed(() => store.getters.getSyncServerToken !== '')
 const syncSessionsEnabled = computed(() => store.getters.getSyncServerSyncSessions)
@@ -526,6 +527,7 @@ const {
   toggleActionTabPinned,
 } = useCapacitorTabActions({
   tabs,
+  presentedTabId,
   afterSelect: tabId => {
     dialogRef.value?.querySelector(`[data-tab-id="${CSS.escape(tabId)}"]`)?.focus({ preventScroll: true })
   },

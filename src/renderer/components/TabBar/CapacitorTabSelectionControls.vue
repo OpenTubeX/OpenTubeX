@@ -1,11 +1,16 @@
 <template>
-  <div class="capacitorTabSelectionControls">
+  <div
+    ref="controlsRoot"
+    class="capacitorTabSelectionControls"
+    tabindex="-1"
+    @keydown.esc="onEscape"
+  >
     <button
+      ref="moreButton"
       type="button"
       :disabled="busy || count === 0"
       :aria-expanded="showActions"
-      aria-haspopup="true"
-      @click="showActions = !showActions"
+      @click="showActions ? closeActions() : showActions = true"
     >
       <FtIcon
         :icon="['fas', 'ellipsis-h']"
@@ -41,7 +46,6 @@
       class="capacitorTabSelectionMenu"
       role="group"
       :aria-label="t('More')"
-      @keydown.esc.stop.prevent="showActions = false"
     >
       <button
         v-for="action in actions"
@@ -62,7 +66,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
@@ -76,6 +80,8 @@ const props = defineProps({
 const emit = defineEmits(['close', 'cancel', 'action'])
 const { t } = useI18n()
 const showActions = ref(false)
+const moreButton = useTemplateRef('moreButton')
+const controlsRoot = useTemplateRef('controlsRoot')
 const actions = computed(() => [
   { name: 'pin', label: t('Context Menu.Pin Tabs'), icon: 'thumbtack', enabled: props.canPin },
   { name: 'unpin', label: t('Context Menu.Unpin Tabs'), icon: 'thumbtack-slash', enabled: props.canUnpin },
@@ -84,9 +90,23 @@ const actions = computed(() => [
   { name: 'reload', label: t('Context Menu.Reload Tabs'), icon: 'sync', enabled: props.count > 0 },
 ])
 
-function run(action) {
+async function closeActions() {
   showActions.value = false
+  await nextTick()
+  const target = moreButton.value?.disabled ? controlsRoot.value : moreButton.value
+  target?.focus({ preventScroll: true })
+}
+
+function onEscape(event) {
+  if (!showActions.value) return
+  event.stopPropagation()
+  event.preventDefault()
+  closeActions()
+}
+
+async function run(action) {
   emit('action', action)
+  await closeActions()
 }
 </script>
 

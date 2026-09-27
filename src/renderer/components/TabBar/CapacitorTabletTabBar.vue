@@ -172,6 +172,7 @@ const promptId = useId()
 const tabsViewportRef = useTemplateRef('tabsViewportRef')
 const tabs = computed(() => store.getters.getTabs)
 const activeTabId = computed(() => store.getters.getActiveTabId)
+const presentedTabId = computed(() => store.getters.getPresentedTabId)
 const showTabIcons = computed(() => store.getters.getShowTabIcons)
 const fixedTabWidthStyle = computed(() => store.getters.getUseFixedTabWidth
   ? { '--fixed-tab-width': `${normalizeFixedTabWidth(store.getters.getFixedTabWidth)}px` }
@@ -211,6 +212,7 @@ const {
   toggleActionTabPinned,
 } = useCapacitorTabActions({
   tabs,
+  presentedTabId,
   afterSelect: tabId => {
     tabsViewportRef.value?.querySelector(`[data-tab-id="${CSS.escape(tabId)}"]`)?.focus({ preventScroll: true })
   },
