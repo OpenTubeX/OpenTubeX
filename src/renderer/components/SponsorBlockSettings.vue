@@ -238,6 +238,7 @@ const deArrowThumbnailGeneratorUrlRef = useTemplateRef('deArrowThumbnailGenerato
 const sponsorBlockChannelWhitelist = computed(() => store.getters.getSponsorBlockChannelWhitelist)
 const sponsorBlockChannelInfo = ref({})
 const requestedChannelIds = new Set()
+let lookupRevision = 0
 const sponsorBlockChannelTags = computed(() => (
   Array.isArray(sponsorBlockChannelWhitelist.value)
     ? sponsorBlockChannelWhitelist.value.map(name => ({
@@ -386,19 +387,42 @@ async function findChannelTagInfoWrapper(text) {
   return await findChannelTagInfo(text, backendOptions.value)
 }
 
-watch([sponsorBlockChannelWhitelist, showSponsorBlockChannels, backendOptions], ([ids, showTags]) => {
+function shouldResolveChannel(id) {
+  return showSponsorBlockChannels.value &&
+    Array.isArray(sponsorBlockChannelWhitelist.value) &&
+    sponsorBlockChannelWhitelist.value.includes(id) &&
+    !sponsorBlockChannelInfo.value[id]
+}
+
+async function resolveChannelInfo(id, options, revision) {
+  if (requestedChannelIds.has(id)) return
+  requestedChannelIds.add(id)
+
+  try {
+    const { preferredName, icon, iconHref } = await findChannelTagInfo(id, options)
+    const currentOptions = backendOptions.value
+    if (Array.isArray(sponsorBlockChannelWhitelist.value) &&
+      sponsorBlockChannelWhitelist.value.includes(id) &&
+      !sponsorBlockChannelInfo.value[id] &&
+      currentOptions.preference === options.preference &&
+      currentOptions.fallback === options.fallback &&
+      (preferredName || icon)) {
+      sponsorBlockChannelInfo.value[id] = { preferredName, icon, iconHref }
+    }
+  } finally {
+    requestedChannelIds.delete(id)
+    if (revision !== lookupRevision && shouldResolveChannel(id)) {
+      resolveChannelInfo(id, backendOptions.value, lookupRevision)
+    }
+  }
+}
+
+watch([sponsorBlockChannelWhitelist, showSponsorBlockChannels, backendOptions], ([ids, showTags, options]) => {
+  const revision = ++lookupRevision
   if (!showTags || !Array.isArray(ids)) return
 
   for (const id of ids) {
-    if (requestedChannelIds.has(id) || sponsorBlockChannelInfo.value[id]) continue
-    requestedChannelIds.add(id)
-    findChannelTagInfoWrapper(id).then(({ preferredName, icon, iconHref }) => {
-      if (preferredName || icon) {
-        sponsorBlockChannelInfo.value[id] = { preferredName, icon, iconHref }
-      }
-    }).finally(() => {
-      requestedChannelIds.delete(id)
-    })
+    if (shouldResolveChannel(id)) resolveChannelInfo(id, options, revision)
   }
 }, { immediate: true })
 </script>
