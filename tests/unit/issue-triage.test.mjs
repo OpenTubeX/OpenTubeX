@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  assess,
   backfillCandidates,
   hasBotReaction,
   shouldReply,
@@ -56,4 +57,21 @@ test('only the Actions bot eyes reaction marks an issue as triaged', () => {
   assert.equal(hasBotReaction([{ content: 'eyes', user: { login: 'reporter' } }]), false)
   assert.equal(hasBotReaction([{ content: '+1', user: { login: 'github-actions[bot]' } }]), false)
   assert.equal(hasBotReaction([{ content: 'eyes', user: { login: 'github-actions[bot]' } }]), true)
+})
+
+test('triage uses the final structured output when the response has multiple messages', async t => {
+  const originalFetch = globalThis.fetch
+  t.after(() => { globalThis.fetch = originalFetch })
+  globalThis.fetch = async () => ({
+    ok: true,
+    json: async () => ({
+      status: 'completed',
+      output: [
+        { content: [{ type: 'output_text', text: '{"labels":["bug"],"reply":"none"}' }] },
+        { content: [{ type: 'output_text', text: '{"labels":["question"],"reply":"version"}' }] }
+      ]
+    })
+  })
+  const issue = { title: 'Report', body: '', comments: { nodes: [] } }
+  assert.deepEqual(await assess(issue), { labels: ['question'], reply: 'version' })
 })

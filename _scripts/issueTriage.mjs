@@ -67,7 +67,7 @@ function issueContent(issue) {
   })
 }
 
-async function assess(issue) {
+export async function assess(issue) {
   const input = JSON.stringify({
     issue: { title: issue.title, body: issue.body },
     recentComments: issue.comments.nodes.map(({ body, author }) => ({
@@ -123,7 +123,8 @@ async function assess(issue) {
   const result = await response.json()
   if (result.status !== 'completed') throw new Error('OpenAI response was incomplete')
   const output = result.output.flatMap(item => item.content || [])
-    .filter(item => item.type === 'output_text').map(item => item.text).join('')
+    .filter(item => item.type === 'output_text').at(-1)?.text
+  if (!output) throw new Error('OpenAI response had no output text')
   return validateDecision(JSON.parse(output))
 }
 
