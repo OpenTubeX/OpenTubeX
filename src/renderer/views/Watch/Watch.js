@@ -6,7 +6,7 @@ import { connectionEvents, initializeNetworkRecovery, getConnectionState } from 
 import { ytDlp } from '../../helpers/ytDlp'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { sampleRecommendationPlayback } from '../../../recommendation-learning'
-import { defineComponent, onBeforeUnmount } from 'vue'
+import { defineComponent } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import { useRoute, useRouter } from 'vue-router'
 import { mapActions } from 'vuex'
@@ -96,7 +96,6 @@ import {
   preloadYtDlpPlaybackSources,
   selectYtDlpPreloadVideoIds,
 } from '../../helpers/player/ytDlpPlaybackPreload'
-import { createIosPlayerHandoff } from '../../helpers/player/iosPlayerHandoff'
 import { getMusicTrackArtist, MUSIC_MEDIA_TYPE } from '../../helpers/player/musicMediaType'
 import { getCompatibleAdaptiveFormats } from '../../helpers/player/compatibleAdaptiveFormats'
 import { selectSponsorBlockFullVideoLabel } from '../../helpers/player/sponsorBlockFullVideo'
@@ -214,10 +213,6 @@ export default defineComponent({
     const setTabAvatar = useTabAvatar()
     const showTabToast = useTabToast()
     const relativeTimeNow = useRelativeTimeClock()
-    const playerHandoff = createIosPlayerHandoff({
-      isEnabled: () => process.env.IS_IOS && (isTabPresented?.value ?? true),
-    })
-    onBeforeUnmount(playerHandoff.dispose)
 
     return {
       t,
@@ -233,9 +228,7 @@ export default defineComponent({
       setTabTitle,
       setTabAvatar,
       showTabToast,
-      relativeTimeNow,
-      leavePlayer: playerHandoff.leave,
-      isIOS: process.env.IS_IOS,
+      relativeTimeNow
     }
   },
   data: function () {
@@ -371,7 +364,6 @@ export default defineComponent({
        */
       onlinePlaybackSource: null,
       playbackSourceKey: 0,
-      playerMountKey: 0,
       localPlaybackDownloadId: null,
       sabrPlaybackLoaded: false,
       /** @type {{
@@ -1153,10 +1145,6 @@ export default defineComponent({
         : this.manifestSrc !== null
     },
 
-    showShakaPlayer() {
-      return this.playerReady && (!this.isUpcoming || this.playabilityStatus === 'OK') && !this.errorMessage
-    },
-
     canSaveWatchProgress() {
       if (this.isUpcoming || this.isLive) { return false }
 
@@ -1264,9 +1252,6 @@ export default defineComponent({
         return
       }
       await this.reloadView()
-    },
-    showShakaPlayer(visible) {
-      if (visible) this.playerMountKey++
     },
     userPlaylistsReady() {
       this.onMountedDependOnLocalStateLoading()
