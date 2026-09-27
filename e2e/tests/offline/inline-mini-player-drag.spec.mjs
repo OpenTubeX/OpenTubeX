@@ -29,6 +29,7 @@ test('Shorts overflow is clipped while dragging into the mini player', async ({ 
 
 test('disabled fullscreen and zoom gestures allow upward scrolling and downward docking', async ({ app, page }) => {
   const player = await openMobilePlayer(app, page)
+  await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
   const bounds = await player.boundingBox()
   const cdp = await page.context().newCDPSession(page)
   const point = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
@@ -56,9 +57,77 @@ test('disabled fullscreen and zoom gestures allow upward scrolling and downward 
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...start, y: start.y + distance }] })
       await page.waitForTimeout(30)
     }
+    await expect(page.locator('.browsingBehindWatch')).toHaveCount(1)
+    await expect(page.locator('.watchDragPreview')).toHaveCount(1)
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
     await expect(player).toHaveClass(/scrollMiniPlayer/)
   } finally {
     await cdp.detach()
   }
+})
+
+test('first downward dock keeps the player moving without a long frame', async ({ app, page }) => {
+  const player = await openMobilePlayer(app, page)
+  const bounds = await player.boundingBox()
+  const cdp = await page.context().newCDPSession(page)
+  const start = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
+  try {
+    await page.evaluate(() => {
+      window.__dragFrames = []
+      let last = performance.now()
+      const sample = now => {
+        window.__dragFrames.push(now - last)
+        last = now
+        if (window.__dragFrames.length < 50) requestAnimationFrame(sample)
+      }
+      requestAnimationFrame(sample)
+    })
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] })
+    for (const distance of [16, 32, 64, 100]) {
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...start, y: start.y + distance }] })
+      await page.waitForTimeout(30)
+    }
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    const worstFrame = await page.evaluate(() => Math.max(...window.__dragFrames.slice(0, 12)))
+    expect(worstFrame).toBeLessThan(80)
+  } finally {
+    await cdp.detach()
+  }
+})
+
+test.describe('a restored Watch tab', () => {
+  test.use({
+    seed: {
+      settings: {
+        videoPlaybackEngine: 'built-in',
+        ytDlpPlaybackEngineDefaultMigration: true,
+        startupBehavior: 'restoreTabLoadState'
+      },
+      tabSessions: [{
+        _id: 'e2e-window-session',
+        value: {
+          tabs: [
+            { id: 'browse', url: 'app://bundle/index.html#/subscriptions', title: 'Subscriptions', isUnloaded: false },
+            {
+              id: 'watch',
+              url: 'app://bundle/index.html#/watch/jNQXAC9IVRw',
+              title: 'Saved video',
+              isUnloaded: true,
+              history: [{ route: { path: '/watch/jNQXAC9IVRw' }, title: 'Saved video', scroll: { left: 0, top: 0 } }],
+              historyIndex: 0
+            }
+          ],
+          activeTabId: 'browse'
+        }
+      }]
+    }
+  })
+
+  test('prepares the subscriptions page before the first dock preview', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.locator('.tab[data-tab-id="watch"]').click()
+    await expect(page.locator('.tabContent[data-tab-id="watch"] .watchPreviewHost .ftVideoPlayer')).toBeVisible({ timeout: 30_000 })
+    await expect(page.locator('.tabContent[data-tab-id="watch"] .browsingBehindWatch.subscriptionsPage')).toHaveCount(1)
+  })
 })

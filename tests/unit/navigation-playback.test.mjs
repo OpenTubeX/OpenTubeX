@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import vm from 'node:vm'
 import test from 'node:test'
 import { computed, effectScope, nextTick, reactive, ref, shallowRef, watch } from 'vue'
+import { getPreviousBrowsingRoute } from '../../src/renderer/tabs/playerDockDestination.js'
 
 const source = (await readFile(new URL('../../src/renderer/components/TabContent/TabWatchContent.vue', import.meta.url), 'utf8'))
   .split('<script setup>')[1].split('</script>')[0].replace(/^import .*$/gm, '')
@@ -59,7 +60,7 @@ function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabl
     resolveRouteComponent: () => ({}),
     getTabNavigationService: () => ({ createRouterFacade: () => ({}), setTitle: (...args) => titles.push(args), back: () => navigate(props.route.path === '/subscriptions' ? '/watch/video' : previous), forward: () => navigate('/watch/video'), push: (_id, path) => navigate(path) }),
     tabLifecycleService: { register: (_id, hooks) => { lifecycle = hooks; return () => {} } },
-    tabLifecycleKey: 'lifecycle', tabPresentedKey: 'presented', watchNavigationKey: 'navigation',
+    tabLifecycleKey: 'lifecycle', tabPresentedKey: 'presented', watchNavigationKey: 'navigation', getPreviousBrowsingRoute,
     routeLocationKey: 'route', routerKey: 'router', console
   }))
   const updateTitle = vm.runInNewContext(`${titleSource}; useTabTitle()`, {
@@ -191,12 +192,12 @@ for (const previous of [null, '/watch/other']) {
 
 
 for (const commit of [false, true]) {
-  test(`drag reveals the browsing page before release and ${commit ? 'commits' : 'cancels'}`, async t => {
+  test(`drag keeps navigation idle until release and ${commit ? 'commits' : 'cancels'}`, async t => {
     const mounted = mountWatch(t, { paused: true, enabled: false })
     const navigation = mounted.provides.get('navigation')
     navigation.beginMinimizePreview()
     await new Promise(resolve => setImmediate(resolve))
-    assert.equal(mounted.props.route.path, '/history')
+    assert.equal(mounted.props.route.path, '/watch/video')
     assert.equal(mounted.provides.get('presented').value, true, 'The gesture keeps the player presented')
     assert.equal(mounted.disposals(), 0)
     navigation.updateMinimizePreview(0.5)
@@ -276,7 +277,7 @@ for (const commit of [true, false]) {
     navigation.beginMinimizePreview()
     await new Promise(resolve => setImmediate(resolve))
     assert.equal(mounted.disposals(), 0)
-    assert.equal(navigation.detached.value, true)
+    assert.equal(navigation.detached.value, false)
     await navigation.finishMinimizePreview(commit)
     navigation.clearMinimizePreview()
     assert.equal(mounted.disposals(), 0)

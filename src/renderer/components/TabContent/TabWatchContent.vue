@@ -2,6 +2,7 @@
   <div
     ref="previewHost"
     class="watchPreviewHost"
+    :class="{ watchRouteActive: isWatchRoute, watchPreviewing: previewActive }"
   >
     <div
       v-show="isWatchRoute || previewStyle"
@@ -29,6 +30,7 @@ import { resolveRouteComponent } from '../../router/index'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { tabLifecycleService } from '../../tabs/TabLifecycleService'
 import { tabLifecycleKey, tabPresentedKey, watchNavigationKey } from '../../tabs/TabContext'
+import { getPreviousBrowsingRoute } from '../../tabs/playerDockDestination'
 
 const props = defineProps({
   tabId: { type: String, required: true },
@@ -41,8 +43,6 @@ const watchRoot = useTemplateRef('watchRoot')
 const previewHost = useTemplateRef('previewHost')
 const previewActive = ref(false)
 const previewStyle = shallowRef(null)
-let previewNavigation = null
-let previewUsedBack = false
 let previewScroll = null
 let previewOrigin = null
 let previewRestoring = false
@@ -130,9 +130,7 @@ provide(routerKey, watchRouter)
 async function minimize() {
   minimized.value = true
   const tab = store.getters.getTabById(props.tabId)
-  const previous = tab?.history[tab.historyIndex - 1]?.route
-  previewUsedBack = Boolean(previous && !previous.path.startsWith('/watch/'))
-  if (previewUsedBack) {
+  if (getPreviousBrowsingRoute(tab)) {
     await navigation.back(props.tabId)
   } else {
     await navigation.push(props.tabId, '/subscriptions')
@@ -160,9 +158,6 @@ function beginMinimizePreview() {
   }
   window.addEventListener('scroll', updatePreviewPosition, { passive: true })
   previewActive.value = true
-  previewNavigation = minimize().catch(error => {
-    console.error('Unable to preview previous page', error)
-  })
 }
 
 function beginRestorePreview() {
@@ -216,17 +211,15 @@ async function finishMinimizePreview(commit) {
     }
     return
   }
-  await previewNavigation
-  if (!commit && !isWatchRoute.value && !disposed) {
-    if (previewUsedBack) await navigation.forward(props.tabId)
-    else await navigation.back(props.tabId)
-    window.scrollTo({ ...previewScroll, behavior: 'instant' })
+  if (commit && !disposed) {
+    await minimize().catch(error => {
+      console.error('Unable to dock player', error)
+    })
   }
 }
 
 function clearMinimizePreview() {
   previewActive.value = false
-  previewNavigation = null
   previewStyle.value = null
   watchRoot.value?.style.removeProperty('opacity')
   watchRoot.value?.firstElementChild.style.removeProperty('opacity')
@@ -296,6 +289,11 @@ onBeforeUnmount(() => {
 <style scoped>
 .watchPreviewHost {
   position: relative;
+  z-index: 1;
+}
+
+.watchRouteActive:not(.watchPreviewing) {
+  background: var(--bg-color);
 }
 
 .watchDragPreview {

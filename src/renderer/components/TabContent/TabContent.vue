@@ -15,13 +15,6 @@
     :inert="!isPresented"
     :aria-hidden="String(!isPresented)"
   >
-    <TabWatchContent
-      v-if="initialized"
-      :key="tab.refreshKey || 0"
-      :tab-id="tab.id"
-      :route="resolvedRoute"
-      :presented="isPresented"
-    />
     <div
       v-if="isCapacitor && isSwipeTarget && !initialized"
       class="pageSwipePlaceholder"
@@ -35,11 +28,21 @@
     >
       <component
         :is="resolvedComponent"
-        v-if="initialized && resolvedComponent && !resolvedRoute.path.startsWith('/watch/')"
+        v-if="initialized && resolvedComponent"
         :key="resolvedComponentKey"
         class="routerView"
+        :class="{ browsingBehindWatch: isWatchRoute }"
+        :inert="isWatchRoute"
+        :aria-hidden="String(isWatchRoute)"
       />
     </KeepAlive>
+    <TabWatchContent
+      v-if="initialized"
+      :key="tab.refreshKey || 0"
+      :tab-id="tab.id"
+      :route="resolvedRoute"
+      :presented="isPresented"
+    />
   </div>
 </template>
 
@@ -53,6 +56,7 @@ import {
   provide,
   reactive,
   ref,
+  shallowRef,
   useTemplateRef,
   watch
 } from 'vue'
@@ -68,6 +72,7 @@ import { tabLifecycleService } from '../../tabs/TabLifecycleService'
 import { tabRuntimeRegistry } from '../../tabs/TabRuntimeRegistry'
 import { tabIdKey, tabLifecycleKey, tabPresentedKey } from '../../tabs/TabContext'
 import { formatTabTitle } from '../../tabs/tabTitle'
+import { getPreviousBrowsingRoute } from '../../tabs/playerDockDestination'
 
 const TAB_LOADER_SELECTOR = '[data-tab-loading-indicator]'
 const TAB_LOADER_LOADING_SOURCE = 'loader'
@@ -113,14 +118,22 @@ const routerFacade = navigation.createRouterFacade(props.tab.id)
 // every deep route watcher in the mounted page.
 const routeFullPath = computed(() => props.tab.route?.fullPath || '/')
 const resolvedRoute = computed(() => navigation.resolve(routeFullPath.value))
+const isWatchRoute = computed(() => resolvedRoute.value.path.startsWith('/watch/'))
+// Keep the page beneath Watch ready so a dock gesture can reveal it without
+// mounting a route while the video is moving.
+function getBrowsingRoute(route) {
+  if (!route.path.startsWith('/watch/')) return route
+  return navigation.resolve(getPreviousBrowsingRoute(props.tab) || '/subscriptions')
+}
+const browsingRoute = shallowRef(getBrowsingRoute(resolvedRoute.value))
 const resolvedComponentKey = computed(() => {
   const refreshKey = props.tab.refreshKey || 0
-  return CACHED_ROUTE_NAMES.has(resolvedRoute.value.name)
-    ? `${resolvedRoute.value.name}:${refreshKey}`
+  return CACHED_ROUTE_NAMES.has(browsingRoute.value?.name)
+    ? `${browsingRoute.value.name}:${refreshKey}`
     : refreshKey
 })
 const injectedRoute = reactive({})
-const resolvedComponent = computed(() => resolveRouteComponent(resolvedRoute.value))
+const resolvedComponent = computed(() => browsingRoute.value && resolveRouteComponent(browsingRoute.value))
 
 provide(tabIdKey, props.tab.id)
 provide(tabPresentedKey, isPresented)
@@ -132,12 +145,15 @@ provide(routeLocationKey, injectedRoute)
 provide(routerKey, routerFacade)
 
 watch(resolvedRoute, (route) => {
+  const browsing = getBrowsingRoute(route)
+  if (browsingRoute.value.fullPath !== browsing.fullPath) browsingRoute.value = browsing
+  if (injectedRoute.fullPath === browsing.fullPath) return
   for (const key of Object.keys(injectedRoute)) {
-    if (!(key in route)) {
+    if (!(key in browsing)) {
       delete injectedRoute[key]
     }
   }
-  Object.assign(injectedRoute, route)
+  Object.assign(injectedRoute, browsing)
 }, { immediate: true })
 
 let removeRootRegistration = null
@@ -332,8 +348,17 @@ function cancelLoaderSettle() {
 
 <style scoped>
 .tabContent {
+  position: relative;
   min-inline-size: 0;
   inline-size: 100%;
+}
+
+.browsingBehindWatch {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  inline-size: 100%;
+  pointer-events: none;
 }
 
 .pageSwipePresented {
