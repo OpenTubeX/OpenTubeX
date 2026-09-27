@@ -770,7 +770,7 @@ final class AppTests: XCTestCase {
     func testYtDlpPersistenceAfterRelaunch() async throws {
         try await openApplication()
         let id = UserDefaults.standard.integer(forKey: "iosYtDlpPersistenceTestId")
-        XCTAssertGreaterThan(id, 0, "Run the seed test in a separate xcodebuild invocation first")
+        try XCTSkipIf(id == 0, "Run the seed test in a separate xcodebuild invocation first")
         let listed = try await webView.callAsyncJavaScript(
             "return await Capacitor.Plugins.YtDlp.list()", arguments: [:], in: nil, contentWorld: .page) as? [String: Any]
         let record = (listed?["downloads"] as? [[String: Any]])?.first(where: { $0["id"] as? Int == id })
