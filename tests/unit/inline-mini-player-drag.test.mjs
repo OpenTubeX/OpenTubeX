@@ -14,6 +14,7 @@ function fixture({ reducedMotion = false, available = true, restoring = false, f
   let activated = false
   let deactivated = false
   let haptics = 0
+  let updates = 0
   const stash = { value: 'left' }
   const scrollMiniPlayerActive = { value: restoring }
   let destination = null
@@ -46,6 +47,7 @@ function fixture({ reducedMotion = false, available = true, restoring = false, f
       async finishMinimizePreview(commit) {
         if (finishRejects) throw new Error('handoff failed')
         if (!commit) navigations--
+        if (restoring && commit) this.detached.value = false
       },
       clearMinimizePreview() {},
     },
@@ -69,14 +71,14 @@ function fixture({ reducedMotion = false, available = true, restoring = false, f
     activateScrollMiniPlayer() { activated = true; scrollMiniPlayerActive.value = activationSucceeds },
     deactivateScrollMiniPlayer() { deactivated = true; scrollMiniPlayerActive.value = false },
     lightHaptic() { haptics++ },
-    updateScrollMiniPlayer() {},
+    updateScrollMiniPlayer() { updates++ },
     isReducedMotionEnabled: () => reducedMotion,
     scrollMiniPlayerAnimating: { value: false },
     scrollMiniLayoutAnimationSequence: 0,
     animateScrollMiniPlayerLayout: (...args) => { animations.push(args) },
     console,
   })
-  return { methods, style, frames, animations, stash, progress: () => previewProgress, destination: () => destination, reads: () => reads, navigations: () => navigations, activated: () => activated, deactivated: () => deactivated, haptics: () => haptics }
+  return { methods, style, frames, animations, stash, progress: () => previewProgress, destination: () => destination, reads: () => reads, navigations: () => navigations, activated: () => activated, deactivated: () => deactivated, haptics: () => haptics, updates: () => updates }
 }
 
 test('drag batches pointer samples into one transform without reading layout per move', () => {
@@ -134,6 +136,14 @@ test('failed preview handoff still clears inline drag state', async () => {
   assert.equal(f.methods.beginScrollMiniPlayerDrag(), true)
 })
 
+test('failed Watch restore refreshes the retained mini player', async () => {
+  const f = fixture({ restoring: true, reducedMotion: true, finishRejects: true })
+  f.methods.beginScrollMiniPlayerDrag(true)
+  await assert.rejects(f.methods.finishScrollMiniPlayerDrag(true), /handoff failed/)
+  assert.equal(f.deactivated(), true)
+  assert.equal(f.updates(), 1)
+})
+
 test('a dock attempt that cannot activate the mini player has no haptic', async () => {
   const f = fixture({ reducedMotion: true, activationSucceeds: false })
   f.methods.beginScrollMiniPlayerDrag()
@@ -179,6 +189,7 @@ for (const commit of [true, false]) {
     assert.equal(f.deactivated(), commit)
     assert.equal(f.haptics(), Number(commit))
     assert.equal(f.style.transform, undefined)
+    assert.equal(f.updates(), Number(!commit))
   })
 }
 

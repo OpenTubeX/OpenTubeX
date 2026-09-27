@@ -395,6 +395,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   async function finishScrollMiniPlayerDrag(commit) {
     if (!inlineDrag || inlineDrag.finishing) return
     const drag = inlineDrag
+    let restored = false
     drag.finishing = true
     await drag.ready
     if (inlineDrag !== drag || !container.value) return
@@ -405,10 +406,14 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
       if (inlineDrag !== drag || !container.value) return
       // Navigation and layout changes happen behind the completed preview, after
       // the video has reached the same endpoint as the normal mini-player motion.
+      // Restore the inline layout while the drag still holds the video in the
+      // top-level layer. Otherwise the Watch route briefly repositions the
+      // active bar, then starts a second layout animation from below the page.
+      if (drag.restoring && commit) deactivateScrollMiniPlayer()
       await watchNavigation.finishMinimizePreview(commit)
+      restored = drag.restoring && commit && !watchNavigation.detached.value
       if (inlineDrag !== drag || !container.value) return
       if (drag.restoring && commit) {
-        deactivateScrollMiniPlayer()
         if (!scrollMiniPlayerActive.value) lightHaptic()
       } else if (commit && watchNavigation.detached.value) {
         activateScrollMiniPlayer(false)
@@ -429,7 +434,10 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
           releaseMobileMiniBarTransition(element)
         }
         cancelScrollMiniPlayerDrag()
-        updateScrollMiniPlayer({ animateActivation: false })
+        // Watch is already inline after a committed restore. Its retained
+        // layout briefly reports the old anchor position during navigation;
+        // probing it here would dock the video again for one frame.
+        if (!restored) updateScrollMiniPlayer({ animateActivation: false })
       }
     }
   }

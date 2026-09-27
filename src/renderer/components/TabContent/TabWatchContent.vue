@@ -165,15 +165,18 @@ function beginRestorePreview() {
   previewRestoring = true
   previewScroll = { left: window.scrollX, top: window.scrollY }
   const parentBounds = previewHost.value.getBoundingClientRect()
+  const targetBounds = document.querySelector('.app.capacitorTabs')
+    ? previewHost.value.closest('.tabContent')?.getBoundingClientRect() ?? parentBounds
+    : parentBounds
   previewOrigin = {
-    left: window.scrollX,
-    top: window.scrollY
+    left: window.scrollX + targetBounds.left - parentBounds.left,
+    top: window.scrollY + targetBounds.top - parentBounds.top
   }
   previewStyle.value = {
     left: `${previewOrigin.left}px`,
     top: `${previewOrigin.top}px`,
-    width: `${parentBounds.width}px`,
-    height: `${window.innerHeight - parentBounds.top - window.scrollY}px`
+    width: `${targetBounds.width}px`,
+    height: `${window.innerHeight - targetBounds.top - window.scrollY}px`
   }
   watchRoot.value.style.opacity = '0'
   watchRoot.value.firstElementChild.style.opacity = '0'

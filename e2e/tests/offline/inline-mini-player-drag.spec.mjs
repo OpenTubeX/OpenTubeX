@@ -252,6 +252,15 @@ test('video keeps its shape while dragging into a shorter player', async ({ app,
     expect(Math.abs(barBounds.y - morphTop)).toBeLessThan(2)
     await player.evaluate(element => element.classList.add('mobileMiniBar'))
     await expect(player).toHaveCSS('touch-action', 'none')
+    await player.evaluate(element => {
+      window.lastRestoreMorphTop = null
+      new MutationObserver(() => {
+        if (element.hasAttribute('data-mobile-mini-morph')) {
+          const top = element.style.getPropertyValue('--mobile-mini-top')
+          if (top) window.lastRestoreMorphTop = Number.parseFloat(top)
+        }
+      }).observe(element, { attributes: true, attributeFilter: ['style'] })
+    })
 
     const miniBounds = await player.boundingBox()
     const restorePoint = { x: miniBounds.x + miniBounds.width / 2, y: miniBounds.y + miniBounds.height / 2 }
@@ -264,6 +273,23 @@ test('video keeps its shape while dragging into a shorter player', async ({ app,
     await expect(player).toHaveCSS('translate', 'none')
     await expect.poll(async () => (await player.boundingBox()).height).toBeGreaterThan(100)
     expect(await distortion()).toBeLessThan(0.03)
+    await player.evaluate(element => {
+      window.restoreTops = []
+      window.restoreTopTimer = setInterval(() => {
+        window.restoreTops.push(element.getBoundingClientRect().top)
+      }, 16)
+    })
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+    await expect(page).toHaveURL(/#\/watch\//)
+    await page.waitForTimeout(400)
+    const restoreTops = await page.evaluate(() => {
+      clearInterval(window.restoreTopTimer)
+      return window.restoreTops
+    })
+    expect(restoreTops.length).toBeGreaterThan(0)
+    expect(Math.max(...restoreTops)).toBeLessThan(await page.evaluate(() => innerHeight))
+    const restoreTop = await page.evaluate(() => window.lastRestoreMorphTop)
+    expect(Math.abs((await player.boundingBox()).y - restoreTop)).toBeLessThan(2)
   } finally {
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }).catch(() => {})
     await cdp.detach()
