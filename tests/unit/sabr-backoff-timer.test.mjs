@@ -47,3 +47,31 @@ test('late SABR callbacks cannot start a countdown after playback ends', () => {
   assert.equal(f.remaining.value, 0)
   assert.equal(f.intervals.size, 0)
 })
+
+test('destroying the player aborts SABR backoff before waiting for Shaka', async () => {
+  const start = source.indexOf('    async function destroyPlayer() {')
+  const destroySource = source.slice(start, source.indexOf('\n    expose({', start))
+  const calls = []
+  const noop = () => {}
+  const context = {
+    clearSabrBackoffTimer: noop, repeatStatsTracker: null, repeatStatsLoopObserver: null,
+    screenWakeBinding: null, iosFullscreenCleanup: null, ignoreErrors: false,
+    cancelPendingVolumeUserSet: noop, cancelSponsorBlockSkipSchedule: noop,
+    hasLoaded: { value: true }, hasPlaybackPosition: { value: true },
+    video: { value: null }, showPoster: { value: false }, nextTick: async () => {},
+    ui: {
+      getControls: () => null,
+      async destroy() {
+        calls.push('shaka')
+        assert.deepEqual(calls, ['sabr', 'abort', 'shaka'])
+      },
+    },
+    player: null, process: { env: { SUPPORTS_LOCAL_API: true } },
+    sabrStream: { cleanup: () => calls.push('sabr') },
+    sabrAbortController: { abort: () => calls.push('abort') },
+    container: { value: null },
+  }
+  const destroyPlayer = vm.runInNewContext(`${destroySource}\ndestroyPlayer`, context)
+  await destroyPlayer()
+  assert.deepEqual(calls, ['sabr', 'abort', 'shaka'])
+})

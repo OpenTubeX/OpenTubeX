@@ -11702,6 +11702,11 @@ export default defineComponent({
       ignoreErrors = true
       cancelPendingVolumeUserSet()
       cancelSponsorBlockSkipSchedule()
+      // Shaka may wait for active requests while destroying the player.
+      if (process.env.SUPPORTS_LOCAL_API && sabrStream) {
+        sabrStream.cleanup()
+        sabrAbortController?.abort()
+      }
       // The media element can emit one final timeupdate while Shaka is being
       // destroyed, after its internal manifest has already been cleared.
       hasLoaded.value = false
@@ -11755,11 +11760,6 @@ export default defineComponent({
       } else if (player) {
         await player.destroy()
         player = null
-      }
-
-      if (process.env.SUPPORTS_LOCAL_API && sabrStream) {
-        sabrStream.cleanup()
-        sabrAbortController?.abort()
       }
 
       // shaka-player doesn't clear these itself, which prevents shaka.ui.Overlay from being garbage collected
