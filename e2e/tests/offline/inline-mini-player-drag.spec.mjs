@@ -241,6 +241,7 @@ test('disabled fullscreen and zoom gestures allow upward scrolling and downward 
     }
     await expect(page.locator('.browsingBehindWatch')).toHaveCount(1)
     await expect(page.locator('.watchDragPreview')).toHaveCount(1)
+    await expect(page.locator('.browsingBehindWatch')).toBeVisible()
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
     await expect(player).toHaveClass(/scrollMiniPlayer/)
   } finally {

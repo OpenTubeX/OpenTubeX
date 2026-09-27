@@ -85,6 +85,25 @@ async function expectSponsorBlockContentClamp(content, previousScrollTop) {
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
+test('connection loss keeps the previous page covered while Watch is scrolled', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const tab = page.locator('.tabContent[aria-hidden="false"]')
+  const previousPage = tab.locator('.browsingBehindWatch')
+  await expect(previousPage).toHaveCount(1)
+
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+    window.dispatchEvent(new Event('offline'))
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' })
+  })
+
+  await expect(page.locator('.connectionStatus')).toBeVisible()
+  await expect(page.locator('.watchPreviewHost')).toBeVisible()
+  await expect(previousPage).toBeHidden({ timeout: 2000 })
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+})
+
 test('casts a complete MP4 stream to a discovered DLNA device and returns to local playback', async ({ app, page }) => {
   await app.electronApp.evaluate(({ ipcMain }) => {
     globalThis.__dlnaCalls = []
