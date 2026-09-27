@@ -132,6 +132,7 @@
             <component
               :is="enableChannelLinks ? 'RouterLink' : 'div'"
               :to="`/channel/${channelId}`"
+              :aria-label="enableChannelLinks ? channelName : null"
               @click="handleChannelLinkClick"
               @auxclick="handleChannelLinkClick"
             >

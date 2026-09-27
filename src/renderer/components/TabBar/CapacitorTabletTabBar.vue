@@ -13,7 +13,7 @@
     >
       <div
         class="capacitorTabletTabs"
-        role="tablist"
+        role="group"
         tabindex="-1"
         :aria-label="t('Tab Organizer.Title')"
         @keydown="handleTabListKeydown"
@@ -41,9 +41,8 @@
           <button
             type="button"
             class="capacitorTabletTabTarget"
-            role="tab"
             :data-tab-id="tab.id"
-            :aria-selected="tab.id === activeTabId"
+            :aria-pressed="tab.id === activeTabId"
             :aria-label="tabAriaLabel(tab)"
             :tabindex="tab.id === activeTabId ? 0 : -1"
             :title="tabTitle(tab)"
@@ -258,7 +257,7 @@ function handleTabListKeydown(event) {
 
 async function focusActiveTab() {
   await nextTick()
-  const activeTab = tabsViewportRef.value?.querySelector('[role="tab"][aria-selected="true"]')
+  const activeTab = tabsViewportRef.value?.querySelector('.capacitorTabletTabTarget[aria-pressed="true"]')
   activeTab?.focus({ preventScroll: true })
   activeTab?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
 }
@@ -272,7 +271,7 @@ function clampTabsScroll() {
 watch(activeTabId, async () => {
   await nextTick()
   tabsViewportRef.value
-    ?.querySelector('[role="tab"][aria-selected="true"]')
+    ?.querySelector('.capacitorTabletTabTarget[aria-pressed="true"]')
     ?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
 })
 

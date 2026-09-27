@@ -2500,3 +2500,46 @@ for (const zoom of [1, 0.95]) {
     await expect(menu.getByRole('menuitem', { name: 'Close Tabs', exact: true })).toBeVisible()
   })
 }
+
+test('Watch image links have accessible names and unused ad controls stay hidden', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const uploader = page.locator('.profileRow a').filter({ has: page.locator('.channelThumbnail') })
+  await expect(uploader).toHaveAccessibleName(/\S/)
+  const thumbnail = page.locator('.ft-list-video .thumbnailLink').first()
+  await expect(thumbnail).toHaveAccessibleName(/\S/)
+  const commentAvatar = page.locator('.comment a').filter({ has: page.locator('.commentThumbnail') }).first()
+  await expect(commentAvatar).toHaveAccessibleName(/\S/)
+  const adInfo = page.locator('.shaka-ad-info').first()
+  await expect(adInfo).toHaveCount(1)
+  await expect(adInfo).toBeHidden()
+})
+
+for (const theme of ['light', 'dark']) {
+  test(`sync privacy status keeps readable text in ${theme} mode`, async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.evaluate(async theme => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateBaseTheme', theme)
+      store.commit('setSyncServerEnabled', true)
+      store.commit('setSyncServerToken', 'accessibility-test-token')
+      store.commit('setSyncServerPrivacyMode', 'enhanced')
+      store.commit('setSettingsWindowSection', 'sync')
+    }, theme)
+    const status = page.locator('.privacyStatus')
+    await expect(status).toBeVisible()
+    const colors = await status.evaluate(element => ({
+      text: getComputedStyle(element).color,
+      expected: getComputedStyle(element).getPropertyValue('--primary-text-color').trim(),
+    }))
+    const expected = await page.evaluate(color => {
+      const element = document.createElement('span')
+      element.style.color = color
+      document.body.append(element)
+      const result = getComputedStyle(element).color
+      element.remove()
+      return result
+    }, colors.expected)
+    expect(colors.text).toBe(expected)
+  })
+}

@@ -235,6 +235,7 @@
           <component
             :is="enableChannelLinks ? 'router-link' : 'div'"
             :to="`/channel/${comment.authorLink}`"
+            :aria-label="enableChannelLinks ? comment.author : null"
             tabindex="-1"
           >
             <!-- Hide comment photo only if it isn't the video uploader -->

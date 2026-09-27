@@ -6,6 +6,16 @@ import Network
 
 @MainActor
 final class AppTests: XCTestCase {
+    func testTabletTabAccessibility() async throws {
+        try await openApplication()
+        let role = try await evaluate("document.querySelector('.capacitorTabletTabs')?.getAttribute('role')") as? String
+        XCTAssertEqual(role, "group")
+        let active = try await evaluate("document.querySelectorAll('.capacitorTabletTabTarget[aria-pressed=true]').length") as? Int
+        XCTAssertEqual(active, 1)
+        let named = try await evaluate("Array.from(document.querySelectorAll('.capacitorTabletTabTarget, .capacitorTabletTabClose')).every(el=>el.getAttribute('aria-label')?.trim())") as? Bool
+        XCTAssertEqual(named, true)
+    }
+
     func testBackgroundPreparationEvent() async throws {
         try await openApplication()
         _ = try await evaluate("""
@@ -534,6 +544,9 @@ final class AppTests: XCTestCase {
         """, arguments: ["base": base], in: nil, contentWorld: .page)
         do {
             try await wait("document.body.innerText.includes('iOS Invidious fixture')", timeout: 20)
+            let thumbnailLabel = try await evaluate("document.querySelector('.ft-list-video .thumbnailLink')?.getAttribute('aria-label')") as? String
+            XCTAssertEqual(thumbnailLabel, "iOS Invidious fixture")
+
             _ = try await webView.callAsyncJavaScript("await testRouter.push('/channel/UCaaaaaaaaaaaaaaaaaaaaaa')", arguments: [:], in: nil, contentWorld: .page)
             try await wait("document.querySelector('.channelDetails .name')?.textContent.includes('iOS fixture channel') === true", timeout: 20)
             try await wait("document.querySelector('.channelDetails img.thumbnail')?.naturalWidth > 0", timeout: 20)

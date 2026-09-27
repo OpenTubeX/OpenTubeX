@@ -5590,3 +5590,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   box-shadow: none;
   backdrop-filter: none;
 }
+
+/* Shaka creates this unused ad control alongside the playback time display. */
+:deep(.shaka-ad-info) {
+  display: none !important;
+}

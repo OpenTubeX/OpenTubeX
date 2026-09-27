@@ -35,6 +35,7 @@
         class="thumbnailLink"
         tabindex="-1"
         :to="watchVideoRouterLink"
+        :aria-label="title"
         @click="handleWatchPageLinkClick"
         @auxclick="handleWatchPageLinkClick"
         @pointerenter="startThumbnailPreview"
