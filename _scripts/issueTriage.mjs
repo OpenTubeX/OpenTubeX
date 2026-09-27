@@ -127,12 +127,34 @@ async function assess(issue) {
   return validateDecision(JSON.parse(output))
 }
 
-async function main() {
-  if (!process.env.OPENAI_API_KEY) throw new Error('Missing OPENAI_API_KEY secret')
-  const event = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'))
-  if (!eligibleAuthor(event.issue?.user)) return
-  const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/')
-  const number = event.issue.number
+export function backfillCandidates(issues) {
+  return issues.filter(issue => !issue.pull_request && eligibleAuthor(issue.user))
+}
+
+export function hasBotReaction(reactions) {
+  return reactions.some(reaction => reaction.content === 'eyes' &&
+    reaction.user?.login?.toLowerCase() === 'github-actions[bot]')
+}
+
+function isTriaged(owner, repo, number) {
+  for (let page = 1; ; page++) {
+    const reactions = github(`repos/${owner}/${repo}/issues/${number}/reactions?content=eyes&per_page=100&page=${page}`)
+    if (hasBotReaction(reactions)) return true
+    if (reactions.length < 100) return false
+  }
+}
+
+function openIssueNumbers(owner, repo) {
+  const numbers = []
+  for (let page = 1; ; page++) {
+    const issues = github(`repos/${owner}/${repo}/issues?state=open&per_page=100&page=${page}`)
+    numbers.push(...backfillCandidates(issues).map(issue => issue.number))
+    if (issues.length < 100) return numbers
+  }
+}
+
+async function triageIssue(owner, repo, number, backfill = false) {
+  if (backfill && isTriaged(owner, repo, number)) return
   const issue = readIssue(owner, repo, number)
   if (issue.state !== 'OPEN' || !eligibleAuthor(issue.author)) return
   const decision = await assess(issue)
@@ -143,6 +165,7 @@ async function main() {
     console.log('Issue changed during triage; skipped')
     return
   }
+  if (backfill && isTriaged(owner, repo, number)) return
   const missingLabels = decision.labels.filter(label =>
     !current.labels.nodes.some(existing => existing.name === label))
   if (missingLabels.length) {
@@ -153,7 +176,30 @@ async function main() {
   if (reply && shouldReply(current.comments.nodes, reply)) {
     github(`repos/${owner}/${repo}/issues/${number}/comments`, 'POST', { body: reply })
   }
+  github(`repos/${owner}/${repo}/issues/${number}/reactions`, 'POST', { content: 'eyes' })
   console.log(`Triaged issue #${number}`)
+}
+
+async function main() {
+  if (!process.env.OPENAI_API_KEY) throw new Error('Missing OPENAI_API_KEY secret')
+  const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/')
+  if (process.argv.includes('--backfill')) {
+    let failures = 0
+    for (const number of openIssueNumbers(owner, repo)) {
+      try {
+        await triageIssue(owner, repo, number, true)
+      } catch (error) {
+        failures++
+        console.error(`Issue #${number}: ${error.message}`)
+      }
+    }
+    if (failures) throw new Error(`Could not triage ${failures} issues`)
+    return
+  }
+
+  const event = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'))
+  if (!eligibleAuthor(event.issue?.user)) return
+  await triageIssue(owner, repo, event.issue.number)
 }
 
 export function shouldReply(comments, reply) {

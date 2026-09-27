@@ -2,6 +2,8 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  backfillCandidates,
+  hasBotReaction,
   shouldReply,
   validateDecision
 } from '../../_scripts/issueTriage.mjs'
@@ -38,4 +40,20 @@ test('triage avoids repeated or intrusive replies', () => {
     body: 'Automated response',
     author: { login: 'actions[bot]', __typename: 'Bot' }
   }], reply), false)
+})
+
+test('manual backfill excludes pull requests, D3SOX, and bots', () => {
+  const issues = [
+    { number: 1, user: { login: 'reporter', type: 'User' } },
+    { number: 2, user: { login: 'reporter', type: 'User' }, pull_request: {} },
+    { number: 3, user: { login: 'D3SOX', type: 'User' } },
+    { number: 4, user: { login: 'dependabot[bot]', type: 'Bot' } }
+  ]
+  assert.deepEqual(backfillCandidates(issues).map(issue => issue.number), [1])
+})
+
+test('only the Actions bot eyes reaction marks an issue as triaged', () => {
+  assert.equal(hasBotReaction([{ content: 'eyes', user: { login: 'reporter' } }]), false)
+  assert.equal(hasBotReaction([{ content: '+1', user: { login: 'github-actions[bot]' } }]), false)
+  assert.equal(hasBotReaction([{ content: 'eyes', user: { login: 'github-actions[bot]' } }]), true)
 })

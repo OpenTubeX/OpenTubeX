@@ -1,6 +1,7 @@
 name: Issue Triage
 
 on:
+  workflow_dispatch:
   issues:
     types: [opened, reopened]
   schedule:
@@ -9,7 +10,7 @@ on:
 permissions: {}
 
 concurrency:
-  group: issue-triage-${{ github.event.issue.number }}
+  group: issue-triage-${{ github.event.issue.number || github.event_name }}
   cancel-in-progress: false
 
 jobs:
@@ -55,3 +56,19 @@ jobs:
       - run: node _scripts/issueRateLimit.mjs --sweep
         env:
           GH_TOKEN: ${{ github.token }}
+
+  backfill:
+    if: github.event_name == 'workflow_dispatch' && github.repository == 'OpenTubeX/OpenTubeX'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: node _scripts/issueTriage.mjs --backfill
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
