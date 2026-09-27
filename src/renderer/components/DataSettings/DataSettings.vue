@@ -59,7 +59,10 @@
     </p>
     <FtFlexBox>
       <p>
-        <a href="https://opentubex.org/docs/importing/">
+        <a
+          class="importHelpLink"
+          href="https://opentubex.org/docs/importing/"
+        >
           {{ $t("Settings.Data Settings.How do I import my subscriptions?") }}
         </a>
       </p>

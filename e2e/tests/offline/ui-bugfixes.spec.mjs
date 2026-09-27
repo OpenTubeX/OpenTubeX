@@ -2544,3 +2544,40 @@ for (const theme of ['light', 'dark']) {
     expect(colors.text).toBe(expected)
   })
 }
+
+for (const theme of ['light', 'dark']) {
+  test(`Data Settings import help meets text contrast in ${theme} mode`, async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.evaluate(async theme => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateBaseTheme', theme)
+      await store.dispatch('updateSecColor', 'Blue')
+      store.commit('setSettingsWindowSection', 'data')
+    }, theme)
+    const link = page.locator('.settingsWindow a[href="https://opentubex.org/docs/importing/"]')
+    await expect(link).toBeVisible()
+    const contrast = await link.evaluate(element => {
+      const channels = value => value.match(/[\d.]+/g).map(Number)
+      const luminance = rgb => rgb.slice(0, 3)
+        .map(channel => channel / 255)
+        .map(channel => channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4)
+        .reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0)
+      let ancestor = element
+      let background
+      while (ancestor) {
+        const color = channels(getComputedStyle(ancestor).backgroundColor)
+        if (color.length === 3 || color[3] === 1) {
+          background = color
+          break
+        }
+        ancestor = ancestor.parentElement
+      }
+      if (!background) throw new Error('Missing opaque background')
+      const foreground = luminance(channels(getComputedStyle(element).color))
+      const backdrop = luminance(background)
+      return (Math.max(foreground, backdrop) + 0.05) / (Math.min(foreground, backdrop) + 0.05)
+    })
+    expect(contrast).toBeGreaterThanOrEqual(4.5)
+    await expect(link).toHaveCSS('text-decoration-line', 'underline')
+  })
+}
