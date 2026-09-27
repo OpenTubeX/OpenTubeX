@@ -1,5 +1,5 @@
 import { test, expect, setWindowSize } from '../../helpers/app.mjs'
-import { openMockedVideo } from '../../helpers/player.mjs'
+import { openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, enableVideoZoom: false, enableMobileFullscreenSwipe: false } } })
@@ -183,6 +183,7 @@ test.describe('a restored Watch tab', () => {
     const watchTab = page.locator('.tabContent[data-tab-id="watch"]')
     const player = watchTab.locator('.ftVideoPlayer')
     await expect(player).toBeVisible({ timeout: 30_000 })
+    await waitForPlayback(page)
     await enableMobileTouch(app, page)
     await expect(watchTab.locator('.browsingBehindWatch.subscriptionsPage')).toHaveCount(1)
     const bounds = await player.boundingBox()
