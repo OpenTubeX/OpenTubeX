@@ -153,6 +153,15 @@ export function useCapacitorTabActions({
     try {
       const service = getCapacitorTabService()
       const ids = selectedTabs.value.map(tab => tab.id)
+      if (action === 'unload' && selectedTabs.value.some(canUnloadTab)) {
+        const unselectedTabs = tabs.value.filter(tab => !ids.includes(tab.id))
+        if (unselectedTabs.length === 0) {
+          if (!await service.createTab()) return
+        } else if (tabs.value.some(tab => tab.isActive && ids.includes(tab.id) && canUnloadTab(tab))) {
+          const landing = unselectedTabs.find(tab => tab.loadState === 'loaded') ?? unselectedTabs[0]
+          if (!await service.activateTab(landing.id)) return
+        }
+      }
       for (const id of ids) {
         const tab = tabs.value.find(candidate => candidate.id === id)
         if (!tab) continue

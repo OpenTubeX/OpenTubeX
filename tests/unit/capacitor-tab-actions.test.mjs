@@ -19,7 +19,7 @@ function setup(t, options = {}) {
   const service = {
     async createTab() {
       calls.push(['create'])
-      tabs.value = [...tabs.value, { id: 'landing' }]
+      tabs.value = [...tabs.value, { id: 'landing', loadState: 'loaded', isActive: true }]
       return 'landing'
     },
     async closeTab(id) {
@@ -27,7 +27,10 @@ function setup(t, options = {}) {
       tabs.value = tabs.value.filter(tab => tab.id !== id)
       return true
     },
-    async activateTab(id) { calls.push(['activate', id]) },
+    async activateTab(id) {
+      calls.push(['activate', id])
+      return true
+    },
     setPinned(id, pinned) {
       calls.push(['pin', id, pinned])
       tabs.value = tabs.value.map(tab => tab.id === id ? { ...tab, isPinned: pinned } : tab)
@@ -191,7 +194,36 @@ test('bulk unload skips a presented tab that is no longer active', async t => {
   actions.toggleTabSelection('middle')
   assert.equal(actions.canUnloadSelectedTabs.value, true)
   await actions.runSelectedTabAction('unload')
-  assert.deepEqual(calls, [['unload', 'middle']])
+  assert.deepEqual(calls, [['activate', 'pinned'], ['unload', 'middle']])
+})
+
+test('unloading every selected tab creates an unselected landing tab first', async t => {
+  const { actions, tabs, calls } = setup(t)
+  tabs.value = tabs.value.slice(0, 2).map(tab => ({
+    ...tab,
+    loadState: 'loaded',
+    isActive: tab.id === 'pinned',
+  }))
+  tabs.value.forEach(tab => actions.toggleTabSelection(tab.id))
+  await actions.runSelectedTabAction('unload')
+  assert.deepEqual(calls, [['create'], ['unload', 'pinned'], ['unload', 'first']])
+  assert.deepEqual([...actions.selectedTabIds.value], ['pinned', 'first'])
+  assert.equal(tabs.value.find(tab => tab.id === 'landing')?.loadState, 'loaded')
+  assert.ok(tabs.value.filter(tab => actions.selectedTabIds.value.has(tab.id))
+    .every(tab => tab.loadState === 'unloaded'))
+})
+
+test('bulk unload activates an unselected tab before unloading the active selection', async t => {
+  const { actions, tabs, calls } = setup(t)
+  tabs.value = tabs.value.map(tab => ({
+    ...tab,
+    loadState: 'loaded',
+    isActive: tab.id === 'first',
+  }))
+  actions.toggleTabSelection('first')
+  actions.toggleTabSelection('middle')
+  await actions.runSelectedTabAction('unload')
+  assert.deepEqual(calls, [['activate', 'pinned'], ['unload', 'first'], ['unload', 'middle']])
 })
 
 for (const action of ['unload', 'reload']) {
