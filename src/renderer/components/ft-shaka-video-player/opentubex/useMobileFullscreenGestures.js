@@ -1,4 +1,5 @@
 import { computed, onUnmounted, ref } from 'vue'
+import { lightHaptic } from '../../../helpers/mobileHaptics.js'
 
 export function isCapacitorMobilePlayer() {
   return document.querySelector('.app')?.classList.contains('capacitorTabs') === true
@@ -311,7 +312,11 @@ export function useMobileFullscreenGestures({
       mobileFullscreenSettleTimer = null
       mobileFullscreenSwipeOffset.value = 0
       mobileFullscreenSwipeSettling.value = false
-      if (shouldToggle && isFullscreenActive() === wasFullscreen) togglePlayerFullScreen()
+      if (shouldToggle && isFullscreenActive() === wasFullscreen) {
+        Promise.resolve(togglePlayerFullScreen()).then(() => {
+          if (isFullscreenActive() !== wasFullscreen) lightHaptic()
+        }).catch(error => console.warn('Fullscreen gesture failed', error))
+      }
     }, settleDuration)
   }
 
@@ -381,7 +386,9 @@ export function useMobileFullscreenGestures({
       now - lastMobileSideTap.time <= doubleTapWindow
     lastMobileSideTap = { direction, time: now }
     if (doubleTap) {
-      showMobileSeekFeedback(seekOnDoubleTap(direction * seekDistance))
+      const seconds = seekOnDoubleTap(direction * seekDistance)
+      if (seconds) lightHaptic()
+      showMobileSeekFeedback(seconds)
       return
     }
 

@@ -108,6 +108,7 @@
 
 <script setup>
 import { useContextMenuHold } from '../../composables/useContextMenuHold'
+import { lightHaptic } from '../../helpers/mobileHaptics'
 import FtRetryImage from '../FtRetryImage.vue'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { FtIcon } from '@opentubex/icons'
@@ -217,6 +218,7 @@ function openPlaylistContextMenu(event) {
   if (event.pointerType === 'touch') {
     suppressMenuHoldClick()
     openMobileContextActions({ title: titleForDisplay.value, actions: playlistMenuItems })
+    lightHaptic()
     return
   }
   const bounds = event.target.getBoundingClientRect()

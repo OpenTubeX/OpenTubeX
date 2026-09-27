@@ -5117,8 +5117,9 @@ export default defineComponent({
         if (!canSeek()) return 0
         const multiplier = seekIntervalMultiplyByPlaybackRate.value ? getCurrentPlaybackRate() : 1
         const distance = seconds * multiplier
+        const startTime = video.value.currentTime
         seekBySeconds(distance, true, false, false)
-        return distance
+        return video.value.currentTime - startTime
       },
       getSwipeAction: side => process.env.IS_CAPACITOR
         ? store.getters[side === 'left' ? 'getMobileLeftSwipeAction' : 'getMobileRightSwipeAction']
