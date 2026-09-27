@@ -5207,7 +5207,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   margin: 0 !important;
   border-radius: calc(4px * var(--ui-roundness));
   background: #000;
-  object-fit: contain !important;
+  object-fit: cover !important;
   transform: none !important;
 }
 
@@ -5242,7 +5242,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   min-height: 0 !important;
   max-height: none !important;
   margin: 0 !important;
-  object-fit: contain !important;
+  object-fit: cover !important;
   transform: scale(var(--mobile-mini-video-scale)) !important;
   transform-origin: top left;
   transition: none !important;

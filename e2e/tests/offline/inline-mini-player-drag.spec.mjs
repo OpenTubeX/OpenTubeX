@@ -82,6 +82,7 @@ test('mobile bar details fade at the destination during both swipe directions', 
     await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
     await expect(player).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
     await expect(page.locator('.watchDragPreview')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    await expect(player.locator('video').first()).toHaveCSS('object-fit', 'cover')
     const details = page.locator('.mobileMiniBarDetails')
     const chevron = page.locator('.mobileMiniBarReturn')
     await expect(details).toHaveCount(1)
@@ -89,6 +90,7 @@ test('mobile bar details fade at the destination during both swipe directions', 
     await expect.poll(() => chevron.evaluate(element => Number(getComputedStyle(element).opacity))).toBeGreaterThan(0.5)
     await touch('touchEnd')
     await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect(player.locator('video').first()).toHaveCSS('object-fit', 'cover')
     await player.evaluate(element => {
       element.style.left = '0px'
       element.style.width = `${window.innerWidth}px`
