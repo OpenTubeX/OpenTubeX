@@ -13,7 +13,12 @@ export function createCapacitorUiScale(window, document) {
 
   function apply() {
     if (!viewport || !window.visualViewport) return
-    const baseWidth = Math.round(window.visualViewport.width * window.visualViewport.scale)
+    // WebKit can retain a stale visualViewport.scale after PiP returns while
+    // reporting an unscaled width. The window width stays independent of zoom.
+    const windowWidth = window.outerWidth
+    const baseWidth = Math.round(Number.isFinite(windowWidth) && windowWidth > 0
+      ? windowWidth
+      : window.visualViewport.width * window.visualViewport.scale)
     if (baseWidth <= 0) return
     const width = Math.max(1, Math.round(baseWidth * 100 / scale))
     const zoom = baseWidth / width

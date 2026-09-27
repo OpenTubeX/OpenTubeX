@@ -49,3 +49,22 @@ test('safe-area CSS receives the actual fractional viewport scale', () => {
   assert.equal(Number(properties.get('--capacitor-ui-scale')), 400 / 533)
   scale.dispose()
 })
+
+test('PiP return does not multiply the window width by a stale WebKit zoom', () => {
+  const { scale, visualViewport, changes, window } = fixture()
+  window.outerWidth = 1080
+  Object.assign(visualViewport, { width: 1080, scale: 1 })
+  scale.setScale(100)
+  assert.equal(changes.at(-1), 'width=1080, initial-scale=1, viewport-fit=cover')
+  Object.assign(visualViewport, { width: 1080, scale: 2.0186915397644043 })
+  visualViewport.dispatchEvent(new Event('resize'))
+  assert.equal(changes.at(-1), 'width=1080, initial-scale=1, viewport-fit=cover')
+  scale.setScale(75)
+  assert.equal(changes.at(-1), 'width=1440, initial-scale=0.75, viewport-fit=cover')
+  scale.setScale(150)
+  assert.equal(changes.at(-1), 'width=720, initial-scale=1.5, viewport-fit=cover')
+  window.outerWidth = 810
+  window.dispatchEvent(new Event('resize'))
+  assert.equal(changes.at(-1), 'width=540, initial-scale=1.5, viewport-fit=cover')
+  scale.dispose()
+})
