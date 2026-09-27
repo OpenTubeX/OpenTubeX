@@ -89,6 +89,7 @@ test('first downward dock keeps the player moving without a long frame', async (
     }
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
     await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect.poll(() => page.evaluate(() => window.__dragFrames.length)).toBeGreaterThanOrEqual(12)
     const worstFrame = await page.evaluate(() => Math.max(...window.__dragFrames.slice(0, 12)))
     expect(worstFrame).toBeLessThan(80)
   } finally {
