@@ -180,7 +180,8 @@ test.describe('desktop quick playback speed bar', () => {
     const firstSpeed = bar.locator('[data-rate="1.25"]')
     const nextSpeed = bar.locator('[data-rate="1.5"]')
 
-    await firstSpeed.dispatchEvent('click')
+    await page.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
+    await firstSpeed.click()
     await expect(firstSpeed).toHaveClass(/is-current-rate/)
     await video.evaluate(element => { element.playbackRate = 1.5 })
     await expect(nextSpeed).toHaveClass(/is-current-rate/)
