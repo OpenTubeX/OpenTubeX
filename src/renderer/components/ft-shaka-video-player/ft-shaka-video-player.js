@@ -5,6 +5,7 @@ import { playbackScreenWake } from '../../helpers/playbackScreenWake'
 import { createRepeatStatsTracker } from '../../helpers/player/repeatStats'
 import { computed, defineComponent, inject, nextTick, onBeforeUnmount, onMounted, onUnmounted, reactive, ref, shallowRef, watch } from 'vue'
 import FtPaidPromotionBadge from '../FtPaidPromotionBadge/FtPaidPromotionBadge.vue'
+import FtRetryImage from '../FtRetryImage.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import shaka from 'shaka-player'
 import { registerPlugin } from '@capacitor/core'
@@ -263,6 +264,7 @@ export default defineComponent({
   components: {
     LightsOffOverlay,
     FtPaidPromotionBadge,
+    FtRetryImage,
     FtSelect,
     FtShareButton,
     FtIconButton,
@@ -369,6 +371,14 @@ export default defineComponent({
       default: ''
     },
     title: {
+      type: String,
+      default: ''
+    },
+    channelName: {
+      type: String,
+      default: ''
+    },
+    channelThumbnail: {
       type: String,
       default: ''
     },
@@ -12102,6 +12112,7 @@ export default defineComponent({
       temporaryPlaybackRateIndicatorMessage,
 
       scrollMiniPlayerActive,
+      mobileMiniBar: Boolean(process.env.IS_CAPACITOR),
       scrollMiniPlayerAnimating,
       scrollMiniPlayerDetached,
       scrollMiniPlayerDismissed,

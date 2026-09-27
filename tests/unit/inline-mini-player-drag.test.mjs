@@ -30,6 +30,7 @@ function fixture({ reducedMotion = false, available = true, restoring = false, f
     getBoundingClientRect() { reads++; return from },
   } }
   const methods = vm.runInNewContext(`${dragSource}\n({ beginScrollMiniPlayerDrag, moveScrollMiniPlayerDrag, finishScrollMiniPlayerDrag, cancelScrollMiniPlayerDrag })`, {
+    process: { env: { IS_CAPACITOR: false } },
     container,
     performance: { now: () => 0 },
     SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS: 300,

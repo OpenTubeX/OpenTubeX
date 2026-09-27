@@ -79,6 +79,7 @@
           !fullWindowEnabled && !scrollMiniPlayerActive,
         musicAudioPlayer: audioPlayerMode,
         scrollMiniPlayer: scrollMiniPlayerActive,
+        mobileMiniBar: mobileMiniBar && scrollMiniPlayerActive,
         scrollMiniPlayerStashed,
         scrollMiniPlayerStashedRight: scrollMiniPlayerStashedSide === 'right',
         scrollMiniPlayerAnimating,
@@ -1332,6 +1333,38 @@
           </div>
         </div>
       </div>
+      <div
+        v-if="scrollMiniPlayerActive && mobileMiniBar"
+        class="mobileMiniBarDetails"
+      >
+        <span
+          class="mobileMiniBarTitle"
+          dir="auto"
+        >{{ title }}</span>
+        <span class="mobileMiniBarUploader">
+          <FtRetryImage
+            v-if="channelThumbnail"
+            class="mobileMiniBarAvatar"
+            :src="channelThumbnail"
+            alt=""
+          />
+          <span dir="auto">{{ channelName }}</span>
+        </span>
+      </div>
+      <button
+        v-if="scrollMiniPlayerActive && mobileMiniBar"
+        type="button"
+        class="mobileMiniBarReturn"
+        :aria-label="scrollMiniPlayerDetached
+          ? $t('Video.Player.Scroll Mini Player.Return to Video Tab')
+          : $t('Video.Player.Scroll Mini Player.Back to Top')"
+        @click.stop.prevent="scrollMiniScrollToTop"
+      >
+        <ft-icon
+          :icon="['fas', 'angle-up']"
+          aria-hidden="true"
+        />
+      </button>
       <div
         v-if="scrollMiniPlayerActive"
         class="scrollMiniPlayerControls"

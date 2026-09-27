@@ -24,6 +24,8 @@ import {
   getResizeHandleCorner,
   getSavedScrollMiniPlayerRect,
   getViewportInsets,
+  getViewportWidth,
+  MARGIN,
   getScrollMiniInlineLayoutHeight,
   getScrollMiniPlayerStashSide,
   getStashedScrollMiniPlayerRect,
@@ -104,6 +106,19 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   }
 
   const scrollMiniPlayerStyle = computed(() => scrollMiniPlayerRectToStyle(scrollMiniPlayerRect.value))
+
+  function getMobileMiniBarRect() {
+    const insets = getViewportInsets()
+    const height = 76
+    return {
+      left: 0,
+      top: window.innerHeight - height - Math.max(0, insets.bottom - MARGIN),
+      width: getViewportWidth(),
+      height,
+      dock: 'left',
+    }
+  }
+
   const scrollMiniPlayerDetached = computed(() => {
     return scrollMiniPlayerActive.value &&
       !isActiveTab.value &&
@@ -161,9 +176,11 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     updateScrollMiniVideoAspectRatio()
     const from = element.getBoundingClientRect()
     const saved = getSavedScrollMiniPlayerRect('tab')
-    const to = clampScrollMiniPlayerRect(saved
-      ? reanchorScrollMiniPlayerRect(saved, scrollMiniVideoAspectRatio.value)
-      : getDefaultScrollMiniPlayerRect(scrollMiniVideoAspectRatio.value), scrollMiniVideoAspectRatio.value)
+    const to = process.env.IS_CAPACITOR
+      ? getMobileMiniBarRect()
+      : clampScrollMiniPlayerRect(saved
+          ? reanchorScrollMiniPlayerRect(saved, scrollMiniVideoAspectRatio.value)
+          : getDefaultScrollMiniPlayerRect(scrollMiniVideoAspectRatio.value), scrollMiniVideoAspectRatio.value)
     inlineDrag = { from, to, y: 0, progress: 0, restoring }
     if (!restoring) scrollMiniPlaceholderHeight.value = from.height
     scrollMiniPlayerDragStyle.value = {
@@ -294,7 +311,11 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
         activateScrollMiniPlayer(false)
         scrollMiniPlayerStashedSide.value = null
         scrollMiniPlayerRestoreRect = null
-        applyScrollMiniPlayerRect(drag.to, false, true)
+        if (process.env.IS_CAPACITOR) {
+          scrollMiniPlayerRect.value = getMobileMiniBarRect()
+        } else {
+          applyScrollMiniPlayerRect(drag.to, false, true)
+        }
         if (scrollMiniPlayerActive.value) lightHaptic()
       }
     } finally {
@@ -313,7 +334,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
 
     scrollMiniVideoAspectRatio.value = videoElement.videoWidth / videoElement.videoHeight
 
-    if (scrollMiniPlayerActive.value) {
+    if (scrollMiniPlayerActive.value && !process.env.IS_CAPACITOR) {
       // Resizing to the video's aspect ratio is not the user moving the player,
       // so it must not turn a temporarily clamped position into its anchor.
       if (scrollMiniPlayerStashed.value) {
@@ -845,6 +866,10 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   }
 
   function restoreScrollMiniPlayerPosition() {
+    if (process.env.IS_CAPACITOR) {
+      scrollMiniPlayerRect.value = getMobileMiniBarRect()
+      return
+    }
     const savedRect = getSavedScrollMiniPlayerRect(isActiveTab.value ? 'scroll' : 'tab')
     applyScrollMiniPlayerRect(
       savedRect
@@ -971,6 +996,10 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
    */
   function resnapScrollMiniPlayerToEdge() {
     if (!scrollMiniPlayerActive.value) return
+    if (process.env.IS_CAPACITOR) {
+      scrollMiniPlayerRect.value = getMobileMiniBarRect()
+      return
+    }
     // Only a drag/resize is positioning the player; a volume session must not
     // block re-docking, since its pointer-up path never snaps.
     if (scrollMiniPointerSession?.type === 'drag' || scrollMiniPointerSession?.type === 'resize') return

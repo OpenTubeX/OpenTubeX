@@ -756,7 +756,6 @@ body:has(.app > .progressBar) {
 }
 
 body:has(.app.capacitorPhoneLayout) {
-  --connection-navigation-inset: 60px;
   --mobile-toast-inset: 43px;
 }
 
