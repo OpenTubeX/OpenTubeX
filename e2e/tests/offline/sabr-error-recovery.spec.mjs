@@ -1,4 +1,4 @@
-import { goTo, setPlayerFullscreen, test, expect } from '../../helpers/app.mjs'
+import { goTo, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import {
   mockPlayableWatchPage,
@@ -702,6 +702,52 @@ for (const zoom of [1, 1.25]) {
     })
   }
 }
+
+test('mobile countdown stays above the center play button and lets taps through', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.locator('.app').evaluate(element => {
+    const applyMobileClass = () => element.classList.add('capacitorTabs')
+    new MutationObserver(() => {
+      if (!element.classList.contains('capacitorTabs')) applyMobileClass()
+    }).observe(element, { attributeFilter: ['class'] })
+    applyMobileClass()
+  })
+  await openMockedVideo(page)
+  await setWindowSize(app, page, { width: 450, height: 850 })
+
+  const watchView = await watchViewHandle(page)
+  await watchView.evaluate(async view => {
+    view.isLoading = true
+    await view.$nextTick()
+    view.adEndTimeUnixMs = Date.now() + 20_000
+    view.isLoading = false
+  })
+
+  const player = page.locator('.ftVideoPlayer')
+  const countdown = player.locator('.countdownOverlay')
+  const centerButton = player.locator('.shaka-big-buttons-container .shaka-play-button')
+  await player.hover()
+  await expect(countdown).toBeVisible()
+  await expect(centerButton).toBeVisible()
+
+  const overlap = await countdown.evaluate((overlay, button) => {
+    const { left, top, width, height } = button.getBoundingClientRect()
+    const x = left + width / 2
+    const y = top + height / 2
+    overlay.style.pointerEvents = 'auto'
+    const visualTarget = document.elementFromPoint(x, y)
+    overlay.style.removeProperty('pointer-events')
+    const tapTarget = document.elementFromPoint(x, y)
+    return {
+      countdownAboveButton: overlay.contains(visualTarget),
+      tapReachesButton: button.contains(tapTarget)
+    }
+  }, await centerButton.elementHandle())
+
+  expect(overlap).toEqual({ countdownAboveButton: true, tapReachesButton: true })
+  await centerButton.click()
+  await expect.poll(() => player.locator('video').evaluate(video => video.paused)).toBe(true)
+})
 
 test('yt-dlp recovery remounts only the player and preserves playback state', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
