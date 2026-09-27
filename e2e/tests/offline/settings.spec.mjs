@@ -1029,6 +1029,177 @@ test.describe('settings', () => {
     })).toEqual([])
   })
 
+  test('shows saved SponsorBlock channels with names and avatars above the next setting', async ({ page }) => {
+    const channelId = 'UC0000000000000000000000'
+    const avatar = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><circle cx="24" cy="24" r="24" fill="#7056a8"/><text x="24" y="31" text-anchor="middle" fill="white" font-size="20">EC</text></svg>')
+    await page.route(`**/api/v1/channels/${channelId}*`, route => route.fulfill({
+      json: { author: 'Example Channel', authorThumbnails: [{ url: avatar }], tabs: [] }
+    }))
+    await goTo(page, 'settings')
+    await page.evaluate(async id => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateBackendPreference', 'invidious')
+      await store.dispatch('updateUseSponsorBlock', true)
+      await store.dispatch('updateSponsorBlockEnableSubmission', true)
+      await store.dispatch('updateSponsorBlockChannelWhitelist', [id])
+    }, channelId)
+
+    const addOns = await goToSettingsSection(page, 'add-ons')
+    const channels = addOns.locator('.ft-input-tags-component').filter({ hasText: 'Excluded Channels' })
+    await expect(channels.locator('.name')).toHaveText('Example Channel')
+    await expect(channels.locator('.tag-icon')).toHaveAttribute('src', avatar)
+    await expect.poll(() => channels.locator('.tag-icon').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateUiScale', 95)
+    })
+
+    const gap = await channels.evaluate(element => {
+      const nextSetting = element.closest('.ft-flex-box').nextElementSibling
+      return nextSetting.getBoundingClientRect().top - element.getBoundingClientRect().bottom
+    })
+    expect(gap).toBeGreaterThanOrEqual(12)
+    expect(await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getSponsorBlockChannelWhitelist
+    })).toEqual([channelId])
+  })
+
+  test('loads saved SponsorBlock channel details only while the control is visible', async ({ page }) => {
+    const channelId = 'UC0000000000000000000000'
+    let lookups = 0
+    await page.route(`**/api/v1/channels/${channelId}*`, route => {
+      lookups++
+      return route.fulfill({ json: { author: 'Example Channel', authorThumbnails: [{ url: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>' }], tabs: [] } })
+    })
+    await goTo(page, 'settings')
+    await page.evaluate(async id => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateBackendPreference', 'invidious')
+      await store.dispatch('updateUseSponsorBlock', false)
+      await store.dispatch('updateUseDeArrowTitles', false)
+      await store.dispatch('updateUseDeArrowThumbnails', false)
+      await store.dispatch('updateSponsorBlockChannelWhitelist', [id])
+    }, channelId)
+
+    const addOns = await goToSettingsSection(page, 'add-ons')
+    const channels = addOns.locator('.ft-input-tags-component').filter({ hasText: 'Excluded Channels' })
+    await expect(channels).toHaveCount(0)
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+    expect(lookups).toBe(0)
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateUseSponsorBlock', true)
+    })
+    await expect(channels.locator('.name')).toHaveText('Example Channel')
+    expect(lookups).toBe(1)
+  })
+
+  test('retries an unresolved SponsorBlock channel when its tags are shown again', async ({ page }) => {
+    const channelId = 'UC0000000000000000000000'
+    let lookups = 0
+    const firstLookupFailed = page.waitForEvent('console', message => (
+      message.type() === 'error' && message.text().includes('Temporary channel lookup failure')
+    ))
+    await page.route(`**/api/v1/channels/${channelId}*`, route => {
+      lookups++
+      return route.fulfill({
+        json: lookups === 1
+          ? { error: 'Temporary channel lookup failure' }
+          : { author: 'Example Channel', authorThumbnails: [{ url: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>' }], tabs: [] }
+      })
+    })
+    await goTo(page, 'settings')
+    await page.evaluate(async id => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateBackendPreference', 'invidious')
+      await store.dispatch('updateUseSponsorBlock', true)
+      await store.dispatch('updateSponsorBlockChannelWhitelist', [id])
+    }, channelId)
+
+    const addOns = await goToSettingsSection(page, 'add-ons')
+    const channels = addOns.locator('.ft-input-tags-component').filter({ hasText: 'Excluded Channels' })
+    await firstLookupFailed
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)))
+    await expect(channels.locator('.name')).toHaveText(channelId)
+    await channels.getByRole('checkbox', { name: 'Show Added Items' }).uncheck()
+    await channels.getByRole('checkbox', { name: 'Show Added Items' }).check()
+    await expect(channels.locator('.name')).toHaveText('Example Channel')
+    expect(lookups).toBe(2)
+  })
+
+  test('retries a SponsorBlock lookup when tags are reopened while it is pending', async ({ page }) => {
+    const channelId = 'UC0000000000000000000000'
+    let lookups = 0
+    let finishFirstLookup
+    const firstLookupPending = new Promise(resolve => { finishFirstLookup = resolve })
+    await page.route(`**/api/v1/channels/${channelId}*`, async route => {
+      lookups++
+      if (lookups === 1) await firstLookupPending
+      await route.fulfill({
+        json: lookups === 1
+          ? { error: 'This channel does not exist.' }
+          : { author: 'Example Channel', authorThumbnails: [{ url: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>' }], tabs: [] }
+      })
+    })
+    await goTo(page, 'settings')
+    await page.evaluate(async id => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateBackendPreference', 'invidious')
+      await store.dispatch('updateUseSponsorBlock', true)
+      await store.dispatch('updateSponsorBlockChannelWhitelist', [id])
+    }, channelId)
+
+    const addOns = await goToSettingsSection(page, 'add-ons')
+    const channels = addOns.locator('.ft-input-tags-component').filter({ hasText: 'Excluded Channels' })
+    await expect.poll(() => lookups).toBe(1)
+    await channels.getByRole('checkbox', { name: 'Show Added Items' }).uncheck()
+    await channels.getByRole('checkbox', { name: 'Show Added Items' }).check()
+    expect(lookups).toBe(1)
+    finishFirstLookup()
+    await expect(channels.locator('.name')).toHaveText('Example Channel')
+    expect(lookups).toBe(2)
+  })
+
+  test('uses current backend options when a saved channel lookup finishes', async ({ page }) => {
+    const channelId = 'UC0000000000000000000000'
+    let lookups = 0
+    let finishFirstLookup
+    const firstLookupPending = new Promise(resolve => { finishFirstLookup = resolve })
+    await page.route(`**/api/v1/channels/${channelId}*`, async route => {
+      const lookup = ++lookups
+      if (lookup === 1) await firstLookupPending
+      await route.fulfill({
+        json: {
+          author: lookup === 1 ? 'Old Backend Channel' : 'Current Backend Channel',
+          authorThumbnails: [{ url: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>' }],
+          tabs: []
+        }
+      })
+    })
+    await goTo(page, 'settings')
+    await page.evaluate(async id => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateBackendPreference', 'invidious')
+      await store.dispatch('updateBackendFallback', false)
+      await store.dispatch('updateUseSponsorBlock', true)
+      await store.dispatch('updateSponsorBlockChannelWhitelist', [id])
+    }, channelId)
+
+    const addOns = await goToSettingsSection(page, 'add-ons')
+    const channels = addOns.locator('.ft-input-tags-component').filter({ hasText: 'Excluded Channels' })
+    await expect.poll(() => lookups).toBe(1)
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateBackendFallback', true)
+    })
+    finishFirstLookup()
+    await expect(channels.locator('.name')).toHaveText('Current Backend Channel')
+    expect(lookups).toBe(2)
+  })
+
   test('vertically centers switch tracks with long labels and setting indicators', async ({ app, page }) => {
     await setWindowSize(app, page, { width: 480, height: 800 })
     const addOns = await goToSettingsSection(page, 'add-ons')
