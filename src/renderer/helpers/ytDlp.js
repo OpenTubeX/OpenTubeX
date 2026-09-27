@@ -11,7 +11,7 @@ import { buildYtDlpStoryboardVtt } from '../../main/ytDlpStoryboard'
 import { isYouTubeSubtitleUrl } from '../../youtubeSubtitle'
 import { chooseAndroidDirectory } from './androidStorage'
 
-const native = process.env.IS_CAPACITOR && !process.env.IS_IOS ? registerPlugin('YtDlp') : null
+const native = process.env.IS_CAPACITOR ? registerPlugin('YtDlp') : null
 
 function configuration() {
   const rules = {}
@@ -69,11 +69,12 @@ function listen(event, callback) {
 
 let removeSettingsProgressListener = null
 
-const android = {
+const capacitor = {
+  isBundledIosRuntime: !!process.env.IS_IOS,
   async ytDlpDownload(payload, retryDownloadId) {
     try {
       if (!store.getters.getEnableDownloads) return { error: 'downloads-disabled' }
-      if (!payload.automatic) {
+      if (!payload.automatic && !process.env.IS_IOS) {
         const permission = await LocalNotifications.checkPermissions()
         if (permission.display === 'prompt' || permission.display === 'prompt-with-rationale') await LocalNotifications.requestPermissions()
       }
@@ -89,6 +90,7 @@ const android = {
   ytDlpListDownloads: () => native.list().then(result => result.downloads),
   ytDlpClearDownloads: ids => native.clear({ ids }).then(result => result.ok),
   ytDlpOpenDownload: id => native.open({ id }).then(result => result.ok),
+  ytDlpPlayDownload: (id, path) => native.play({ id, path }).then(result => result.ok),
   ytDlpRemoveDownload: id => native.remove({ id }).then(result => result.ok),
   handleYtDlpDownloadStatus: callback => listen('downloadStatus', callback),
   handleYtDlpDownloadsRemoved: callback => listen('downloadsRemoved', result => callback(result.ids)),
@@ -138,7 +140,21 @@ const android = {
       if (isYouTubeVideo && !useDefaultClients) args.push('--extractor-args', useAuthentication ? 'youtube:player_client=default,web_safari' : 'youtube:player_client=default,web_embedded,-android_vr')
       args.push(isYouTubeVideo ? `https://www.youtube.com/watch?v=${videoId}` : videoId)
       const [info, binaries] = await Promise.all([extract(args, useAuthentication, !isYouTubeVideo, parseYtDlpPlaybackInfo, true), native.info()])
-      const formats = Array.isArray(info.formats) ? info.formats : []
+      let formats = Array.isArray(info.formats) ? info.formats : []
+      if (process.env.IS_IOS && !isYouTubeVideo) {
+        // WebKit cannot fetch many third-party streams through CORS. Stream the
+        // progressive formats with yt-dlp's headers through our native scheme.
+        const hlsManifestUrl = info.manifest_url ?? formats.find(format =>
+          ['m3u8', 'm3u8_native'].includes(format.protocol) && format.manifest_url
+        )?.manifest_url
+        formats = formats.filter(format => format.protocol === 'https' && format.url)
+        const subtitles = Object.values(info.requested_subtitles ?? {}).filter(subtitle => subtitle?.url?.startsWith('https://'))
+        const requests = [...formats, ...subtitles]
+        const { urls } = await native.registerMedia({ formats: requests })
+        requests.forEach((entry, index) => { entry.url = urls[index] })
+        info.manifest_url = hlsManifestUrl ?? null
+        info.storyboard = null
+      }
       const creatorAvatarUrl = [info.channel_thumbnail, info.channel_avatar, info.uploader_thumbnail, info.uploader_avatar]
         .find(value => { try { return new URL(value).protocol === 'https:' } catch { return false } }) ?? null
       return {
@@ -191,11 +207,11 @@ const android = {
   ytDlpPlaybackCacheClear: () => native.cache({ action: 'clear' }),
 }
 
-export function initializeAndroidYtDlp() {
+export function initializeCapacitorYtDlp() {
   if (!native) return () => {}
   return store.watch(() => JSON.stringify(configuration()), value => {
-    native.configure({ configuration: JSON.parse(value) }).catch(error => console.error('Could not configure Android downloads', error))
+    native.configure({ configuration: JSON.parse(value) }).catch(error => console.error('Could not configure mobile downloads', error))
   }, { immediate: true })
 }
 
-export const ytDlp = process.env.IS_CAPACITOR ? android : window.ftElectron
+export const ytDlp = process.env.IS_CAPACITOR ? capacitor : window.ftElectron

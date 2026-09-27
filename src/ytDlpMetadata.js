@@ -243,7 +243,9 @@ export function mapPlaybackCaptions(requestedSubtitles, manualSubtitles = null, 
     } catch {
       continue
     }
-    if (url.protocol !== 'https:' && !(allowHttp && url.protocol === 'http:')) continue
+    if (url.protocol !== 'https:' && !(allowHttp && url.protocol === 'http:') &&
+      !(allowHttp && url.protocol === 'capacitor:' && url.hostname === 'localhost' &&
+        url.pathname.startsWith('/_opentubex_media/'))) continue
 
     const sourceLanguage = toNonEmptyString(url.searchParams.get('lang'))
     const rawTargetLanguage = toNonEmptyString(url.searchParams.get('tlang'))

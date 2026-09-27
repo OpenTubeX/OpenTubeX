@@ -3,6 +3,8 @@ import AVFoundation
 import WebKit
 import MediaPlayer
 import Network
+import AVFoundation
+import AVKit
 @testable import App
 
 @MainActor
@@ -139,7 +141,7 @@ final class AppTests: XCTestCase {
         try await wait("!!document.querySelector('#app .app')")
         let platform = try await evaluate("Capacitor.getPlatform()") as? String
         XCTAssertEqual(platform, "ios")
-        let plugin = try await evaluate("Capacitor.isPluginAvailable('PoToken') && Capacitor.isPluginAvailable('SabrHttp') && Capacitor.isPluginAvailable('IOSStorage')") as? Bool
+        let plugin = try await evaluate("Capacitor.isPluginAvailable('PoToken') && Capacitor.isPluginAvailable('SabrHttp') && Capacitor.isPluginAvailable('IOSStorage') && Capacitor.isPluginAvailable('YtDlp')") as? Bool
         XCTAssertEqual(plugin, true)
         // Dismiss the first-run tutorial through its real controls if present.
         _ = try await evaluate("Array.from(document.querySelectorAll('button')).find(b => /^(Skip|Überspringen)$/.test(b.innerText.trim()))?.click(); true")
@@ -147,6 +149,8 @@ final class AppTests: XCTestCase {
 
     func testApplicationOffline() async throws {
         try await openApplication()
+        let ytDlpAvailable = try await webView.callAsyncJavaScript("return (await Capacitor.Plugins.YtDlp.info()).ytDlp.available", arguments: [:], in: nil, contentWorld: .page) as? Bool
+        XCTAssertEqual(ytDlpAvailable, true)
         _ = try await webView.callAsyncJavaScript("await testStore.dispatch('updateRememberHistory', false)", arguments: [:], in: nil, contentWorld: .page)
         _ = try await evaluate("testRouter.push('/subscriptions'); localStorage.setItem('ios-test-persistence', 'retained'); true")
         let cleared = try await webView.callAsyncJavaScript("return (await Capacitor.Plugins.IOSStorage.clearCache()).cleared", arguments: [:], in: nil, contentWorld: .page) as? Bool
@@ -164,6 +168,603 @@ final class AppTests: XCTestCase {
         attachment.name = "iOS subscriptions"
         attachment.lifetime = .keepAlways
         add(attachment)
+    }
+
+    func testYtDlpQueueReordering() async throws {
+        try await openApplication()
+        let listener = try NWListener(using: .tcp, on: .any)
+        let ready = expectation(description: "Queue fixture server ready")
+        let connectionLock = NSLock()
+        var connections: [NWConnection] = []
+        listener.stateUpdateHandler = { state in if case .ready = state { ready.fulfill() } }
+        listener.newConnectionHandler = { connection in
+            connectionLock.lock()
+            connections.append(connection)
+            connectionLock.unlock()
+            connection.start(queue: .global())
+        }
+        listener.start(queue: .global())
+        defer { listener.cancel() }
+        await fulfillment(of: [ready], timeout: 10)
+
+        let folder = try XCTUnwrap(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first)
+            .appendingPathComponent("yt-dlp-queue", isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let bookmark = try folder.bookmarkData(options: .minimalBookmark, includingResourceValuesForKeys: nil, relativeTo: nil)
+        let reference = try JSONSerialization.data(withJSONObject: ["name": folder.lastPathComponent,
+                                                                     "bookmark": bookmark.base64EncodedString()])
+        _ = try await webView.callAsyncJavaScript(
+            "await Capacitor.Plugins.YtDlp.configure({configuration})",
+            arguments: ["configuration": ["enabled": true, "folder": String(decoding: reference, as: UTF8.self), "concurrency": 1]],
+            in: nil, contentWorld: .page)
+        let url = "http://127.0.0.1:\(try XCTUnwrap(listener.port).rawValue)/blocked.mp4"
+        var ids: [Int] = []
+        for index in 1...3 {
+            let started = try await webView.callAsyncJavaScript(
+                "return await Capacitor.Plugins.YtDlp.download({payload: {mode: 'video', externalUrl: url, title: 'Queue fixture ' + index}})",
+                arguments: ["url": url, "index": index], in: nil, contentWorld: .page) as? [String: Any]
+            ids.append(try XCTUnwrap(started?["id"] as? Int))
+        }
+        let moved = try await webView.callAsyncJavaScript(
+            "return (await Capacitor.Plugins.YtDlp.control({id, action: 'move', value: -1})).ok",
+            arguments: ["id": ids[2]], in: nil, contentWorld: .page) as? Bool
+        XCTAssertEqual(moved, true)
+        let listed = try await webView.callAsyncJavaScript(
+            "return await Capacitor.Plugins.YtDlp.list()", arguments: [:], in: nil, contentWorld: .page) as? [String: Any]
+        let records = listed?["downloads"] as? [[String: Any]] ?? []
+        let second = records.first(where: { $0["id"] as? Int == ids[1] })
+        let third = records.first(where: { $0["id"] as? Int == ids[2] })
+        XCTAssertEqual(second?["status"] as? String, "queued")
+        XCTAssertEqual(third?["status"] as? String, "queued")
+        XCTAssertLessThan(try XCTUnwrap(third?["queuePosition"] as? Int),
+                          try XCTUnwrap(second?["queuePosition"] as? Int))
+        for id in ids {
+            _ = try await webView.callAsyncJavaScript(
+                "return await Capacitor.Plugins.YtDlp.control({id, action: 'cancel'})",
+                arguments: ["id": id], in: nil, contentWorld: .page)
+        }
+        connectionLock.lock()
+        let openConnections = connections
+        connectionLock.unlock()
+        openConnections.forEach { $0.cancel() }
+        listener.cancel()
+        for _ in 0..<80 {
+            _ = try await webView.callAsyncJavaScript(
+                "return await Capacitor.Plugins.YtDlp.clear({ids})",
+                arguments: ["ids": ids], in: nil, contentWorld: .page)
+            let remaining = try await webView.callAsyncJavaScript(
+                "return (await Capacitor.Plugins.YtDlp.list()).downloads.filter(record => ids.includes(record.id)).length",
+                arguments: ["ids": ids], in: nil, contentWorld: .page) as? Int
+            if remaining == 0 { break }
+            try await Task.sleep(nanoseconds: 250_000_000)
+        }
+        let remaining = try await webView.callAsyncJavaScript(
+            "return (await Capacitor.Plugins.YtDlp.list()).downloads.filter(record => ids.includes(record.id)).length",
+            arguments: ["ids": ids], in: nil, contentWorld: .page) as? Int
+        XCTAssertEqual(remaining, 0)
+    }
+
+    func testYtDlpFixtureDownload() async throws {
+        try await openApplication()
+        let fixtureURL = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "fixture", withExtension: "mp4"))
+        let media = try Data(contentsOf: fixtureURL)
+        let listener = try NWListener(using: .tcp, on: .any)
+        let ready = expectation(description: "yt-dlp fixture server ready")
+        listener.stateUpdateHandler = { state in
+            if case .ready = state { ready.fulfill() }
+        }
+        listener.newConnectionHandler = { connection in
+            connection.start(queue: .global())
+            func receive(_ buffered: Data) {
+                connection.receive(minimumIncompleteLength: 1, maximumLength: 8192) { data, _, complete, error in
+                    var request = buffered
+                    if let data { request.append(data) }
+                    guard let header = String(data: request, encoding: .utf8), header.contains("\r\n\r\n") else {
+                        if complete || error != nil || request.count > 16384 { connection.cancel() }
+                        else { receive(request) }
+                        return
+                    }
+                    let isHead = header.hasPrefix("HEAD ")
+                    let response = "HTTP/1.1 200 OK\r\nContent-Type: video/mp4\r\nContent-Length: \(media.count)\r\nAccept-Ranges: bytes\r\nConnection: close\r\n\r\n"
+                    connection.send(content: Data(response.utf8) + (isHead ? Data() : media),
+                                    completion: .contentProcessed { _ in connection.cancel() })
+                }
+            }
+            receive(Data())
+        }
+        listener.start(queue: .global())
+        defer { listener.cancel() }
+        await fulfillment(of: [ready], timeout: 10)
+        let url = "http://127.0.0.1:\(try XCTUnwrap(listener.port).rawValue)/fixture.mp4"
+
+        let extracted = try await webView.callAsyncJavaScript(
+            "return await Capacitor.Plugins.YtDlp.extract({args: [url]})",
+            arguments: ["url": url], in: nil, contentWorld: .page) as? [String: Any]
+        let stdout = try XCTUnwrap(extracted?["stdout"] as? String)
+        let info = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(stdout.utf8)) as? [String: Any])
+        XCTAssertTrue((info["formats"] as? [[String: Any]])?.contains(where: { $0["ext"] as? String == "mp4" }) == true)
+
+        let folder = try XCTUnwrap(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first)
+            .appendingPathComponent("yt-dlp-fixture", isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let bookmark = try folder.bookmarkData(options: .minimalBookmark, includingResourceValuesForKeys: nil, relativeTo: nil)
+        let reference = try JSONSerialization.data(withJSONObject: ["name": folder.lastPathComponent,
+                                                                     "bookmark": bookmark.base64EncodedString()])
+        let configuration: [String: Any] = ["enabled": true, "folder": String(decoding: reference, as: UTF8.self), "concurrency": 1]
+        _ = try await webView.callAsyncJavaScript(
+            "await Capacitor.Plugins.YtDlp.configure({configuration})",
+            arguments: ["configuration": configuration], in: nil, contentWorld: .page)
+        let started = try await webView.callAsyncJavaScript(
+            "return await Capacitor.Plugins.YtDlp.download({payload: {mode: 'video', externalUrl: url, title: 'Fixture'}})",
+            arguments: ["url": url], in: nil, contentWorld: .page) as? [String: Any]
+        let id = try XCTUnwrap(started?["id"] as? Int, String(describing: started))
+        var record: [String: Any] = [:]
+        for _ in 0..<120 {
+            let listed = try await webView.callAsyncJavaScript(
+                "return await Capacitor.Plugins.YtDlp.list()", arguments: [:], in: nil, contentWorld: .page) as? [String: Any]
+            record = (listed?["downloads"] as? [[String: Any]])?.first(where: { $0["id"] as? Int == id }) ?? [:]
+            if ["completed", "failed", "cancelled"].contains(record["status"] as? String ?? "") { break }
+            try await Task.sleep(nanoseconds: 500_000_000)
+        }
+        XCTAssertEqual(record["status"] as? String, "completed", String(describing: record))
+        let destination = try XCTUnwrap(record["destination"] as? String)
+        XCTAssertEqual(try Data(contentsOf: URL(fileURLWithPath: destination)), media)
+        XCTAssertNotNil(UserDefaults.standard.data(forKey: "iosYtDlpDownloads"))
+        listener.cancel()
+        let offlineAsset = AVURLAsset(url: URL(fileURLWithPath: destination))
+        let offlineVideoTracks = try await offlineAsset.loadTracks(withMediaType: .video)
+        XCTAssertEqual(offlineVideoTracks.count, 1)
+        let offlinePlayer = AVPlayer(url: URL(fileURLWithPath: destination))
+        offlinePlayer.play()
+        for _ in 0..<40 {
+            if offlinePlayer.currentTime().seconds > 0.1 { break }
+            try await Task.sleep(nanoseconds: 250_000_000)
+        }
+        XCTAssertGreaterThan(offlinePlayer.currentTime().seconds, 0.1)
+        offlinePlayer.pause()
+        let opened = try await webView.callAsyncJavaScript(
+            "return (await Capacitor.Plugins.YtDlp.open({id})).ok",
+            arguments: ["id": id], in: nil, contentWorld: .page) as? Bool
+        XCTAssertEqual(opened, true)
+        let controller = try XCTUnwrap(webView.window?.rootViewController)
+        try await waitForNative { controller.presentedViewController is UIActivityViewController }
+        if let activity = controller.presentedViewController { try await dismiss(activity) }
+        let played = try await webView.callAsyncJavaScript(
+            "return (await Capacitor.Plugins.YtDlp.play({id})).ok",
+            arguments: ["id": id], in: nil, contentWorld: .page) as? Bool
+        XCTAssertEqual(played, true)
+        try await waitForNative { controller.presentedViewController is AVPlayerViewController }
+        let player = try XCTUnwrap(controller.presentedViewController as? AVPlayerViewController)
+        for _ in 0..<40 {
+            if player.player?.currentTime().seconds ?? 0 > 0.1 { break }
+            try await Task.sleep(nanoseconds: 250_000_000)
+        }
+        XCTAssertGreaterThan(player.player?.currentTime().seconds ?? 0, 0.1)
+        try await dismiss(player)
+        _ = try await webView.callAsyncJavaScript("await testStore.dispatch('showSettingsWindow', 'downloads')", arguments: [:], in: nil, contentWorld: .page)
+        let playButton = "Array.from(document.querySelectorAll('.downloadRow')).find(row => row.querySelector('h3')?.textContent.trim() === 'Fixture')?.querySelector('button[title=\"Play download\"], button[title=\"Download wiedergeben\"]')"
+        try await wait("(() => { const button = \(playButton); if (!button) return false; const rect = button.getBoundingClientRect(); return rect.width > 0 && rect.height > 0 && rect.left < innerWidth && rect.right > 0 && rect.top < innerHeight && rect.bottom > 0 && getComputedStyle(button).visibility === 'visible' && Number(getComputedStyle(button.closest('.settingsWindow')).opacity) > 0.9; })()")
+        let attachment = XCTAttachment(image: try await webView.takeSnapshot(configuration: nil))
+        attachment.name = "iOS completed download with Play action"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+        _ = try await evaluate("(\(playButton)).click(); true")
+        try await waitForNative { controller.presentedViewController is AVPlayerViewController }
+        if let player = controller.presentedViewController { try await dismiss(player) }
+
+        try FileManager.default.removeItem(atPath: destination)
+        let missing = try await webView.callAsyncJavaScript(
+            "return await Capacitor.Plugins.YtDlp.list()", arguments: [:], in: nil, contentWorld: .page) as? [String: Any]
+        let missingRecord = (missing?["downloads"] as? [[String: Any]])?.first(where: { $0["id"] as? Int == id })
+        XCTAssertEqual(missingRecord?["availability"] as? String, "missing")
+        XCTAssertEqual((missingRecord?["files"] as? [[String: Any]])?.first?["available"] as? Bool, false)
+        let missingPlayback = try await webView.callAsyncJavaScript(
+            "return (await Capacitor.Plugins.YtDlp.play({id})).ok",
+            arguments: ["id": id], in: nil, contentWorld: .page) as? Bool
+        XCTAssertEqual(missingPlayback, false)
+        let removed = try await webView.callAsyncJavaScript(
+            "return (await Capacitor.Plugins.YtDlp.remove({id})).ok",
+            arguments: ["id": id], in: nil, contentWorld: .page) as? Bool
+        XCTAssertEqual(removed, true)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: destination))
+    }
+
+    func testYtDlpCancellationAndRetry() async throws {
+        try await openApplication()
+        let media = Data(repeating: 42, count: 2 * 1024 * 1024)
+        let listener = try NWListener(using: .tcp, on: .any)
+        let ready = expectation(description: "Slow yt-dlp fixture ready")
+        let lock = NSLock()
+        var requestCount = 0
+        var offline = true
+        listener.stateUpdateHandler = { state in
+            if case .ready = state { ready.fulfill() }
+        }
+        listener.newConnectionHandler = { connection in
+            connection.start(queue: .global())
+            func receive(_ buffered: Data) {
+                connection.receive(minimumIncompleteLength: 1, maximumLength: 8192) { data, _, complete, error in
+                    var request = buffered
+                    if let data { request.append(data) }
+                    guard let header = String(data: request, encoding: .utf8), header.contains("\r\n\r\n") else {
+                        if complete || error != nil || request.count > 16384 { connection.cancel() }
+                        else { receive(request) }
+                        return
+                    }
+                    lock.lock()
+                    requestCount += 1
+                    let slow = requestCount == 2
+                    let unavailable = offline && header.contains(" /offline.mp4 ")
+                    lock.unlock()
+                    if unavailable {
+                        let response = "HTTP/1.1 503 Service Unavailable\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
+                        connection.send(content: Data(response.utf8), completion: .contentProcessed { _ in connection.cancel() })
+                        return
+                    }
+                    let headers = "HTTP/1.1 200 OK\r\nContent-Type: video/mp4\r\nContent-Length: \(media.count)\r\nConnection: close\r\n\r\n"
+                    func sendChunk(_ offset: Int) {
+                        guard offset < media.count else { connection.cancel(); return }
+                        let end = min(offset + 16 * 1024, media.count)
+                        connection.send(content: media.subdata(in: offset..<end), completion: .contentProcessed { error in
+                            if error != nil { connection.cancel(); return }
+                            DispatchQueue.global().asyncAfter(deadline: .now() + 0.05) { sendChunk(end) }
+                        })
+                    }
+                    connection.send(content: Data(headers.utf8), completion: .contentProcessed { error in
+                        if error != nil { connection.cancel() }
+                        else if slow { sendChunk(0) }
+                        else { connection.send(content: media, completion: .contentProcessed { _ in connection.cancel() }) }
+                    })
+                }
+            }
+            receive(Data())
+        }
+        listener.start(queue: .global())
+        defer { listener.cancel() }
+        await fulfillment(of: [ready], timeout: 10)
+        let url = "http://127.0.0.1:\(try XCTUnwrap(listener.port).rawValue)/slow.mp4"
+        let folder = try XCTUnwrap(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first)
+            .appendingPathComponent("yt-dlp-cancel-fixture", isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let bookmark = try folder.bookmarkData(options: .minimalBookmark, includingResourceValuesForKeys: nil, relativeTo: nil)
+        let reference = try JSONSerialization.data(withJSONObject: ["name": folder.lastPathComponent,
+                                                                     "bookmark": bookmark.base64EncodedString()])
+        _ = try await webView.callAsyncJavaScript(
+            "await Capacitor.Plugins.YtDlp.configure({configuration})",
+            arguments: ["configuration": ["enabled": true, "folder": String(decoding: reference, as: UTF8.self), "concurrency": 1]],
+            in: nil, contentWorld: .page)
+        let payload: [String: Any] = ["mode": "video", "externalUrl": url, "title": "Slow fixture"]
+        let started = try await webView.callAsyncJavaScript(
+            "return await Capacitor.Plugins.YtDlp.download({payload})",
+            arguments: ["payload": payload], in: nil, contentWorld: .page) as? [String: Any]
+        let id = try XCTUnwrap(started?["id"] as? Int, String(describing: started))
+
+        var record: [String: Any] = [:]
+        for _ in 0..<120 {
+            let listed = try await webView.callAsyncJavaScript(
+                "return await Capacitor.Plugins.YtDlp.list()", arguments: [:], in: nil, contentWorld: .page) as? [String: Any]
+            record = (listed?["downloads"] as? [[String: Any]])?.first(where: { $0["id"] as? Int == id }) ?? [:]
+            if (record["percent"] as? Double ?? 0) > 0 { break }
+            if ["completed", "failed"].contains(record["status"] as? String ?? "") { break }
+            try await Task.sleep(nanoseconds: 250_000_000)
+        }
+        XCTAssertEqual(record["status"] as? String, "downloading", String(describing: record))
+        XCTAssertGreaterThan(record["percent"] as? Double ?? 0, 0)
+        let scene = try XCTUnwrap(webView.window?.windowScene)
+        (scene.delegate as? SceneDelegate)?.sceneWillResignActive(scene)
+        let cancelled = try await webView.callAsyncJavaScript(
+            "return (await Capacitor.Plugins.YtDlp.control({id, action: 'cancel'})).ok",
+            arguments: ["id": id], in: nil, contentWorld: .page) as? Bool
+        XCTAssertEqual(cancelled, true)
+        let staging = try XCTUnwrap(FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first)
+            .appendingPathComponent("yt-dlp-downloads/\(id)")
+        for _ in 0..<80 {
+            if !FileManager.default.fileExists(atPath: staging.path) { break }
+            try await Task.sleep(nanoseconds: 250_000_000)
+        }
+        XCTAssertFalse(FileManager.default.fileExists(atPath: staging.path))
+        let retry = try await webView.callAsyncJavaScript(
+            "return await Capacitor.Plugins.YtDlp.download({payload, retryDownloadId: id})",
+            arguments: ["payload": payload, "id": id], in: nil, contentWorld: .page) as? [String: Any]
+        XCTAssertEqual(retry?["id"] as? Int, id, String(describing: retry))
+        for _ in 0..<120 {
+            let listed = try await webView.callAsyncJavaScript(
+                "return await Capacitor.Plugins.YtDlp.list()", arguments: [:], in: nil, contentWorld: .page) as? [String: Any]
+            record = (listed?["downloads"] as? [[String: Any]])?.first(where: { $0["id"] as? Int == id }) ?? [:]
+            if ["completed", "failed"].contains(record["status"] as? String ?? "") { break }
+            try await Task.sleep(nanoseconds: 250_000_000)
+        }
+        XCTAssertEqual(record["status"] as? String, "completed", String(describing: record))
+        let destination = try XCTUnwrap(record["destination"] as? String)
+        XCTAssertEqual(try Data(contentsOf: URL(fileURLWithPath: destination)).count, media.count)
+        _ = try await webView.callAsyncJavaScript(
+            "return await Capacitor.Plugins.YtDlp.remove({id})", arguments: ["id": id], in: nil, contentWorld: .page)
+
+        let offlinePayload: [String: Any] = ["mode": "video", "externalUrl": "http://127.0.0.1:\(try XCTUnwrap(listener.port).rawValue)/offline.mp4", "title": "Recovering fixture"]
+        let failedStart = try await webView.callAsyncJavaScript(
+            "return await Capacitor.Plugins.YtDlp.download({payload})",
+            arguments: ["payload": offlinePayload], in: nil, contentWorld: .page) as? [String: Any]
+        let failedId = try XCTUnwrap(failedStart?["id"] as? Int, String(describing: failedStart))
+        for _ in 0..<80 {
+            let listed = try await webView.callAsyncJavaScript(
+                "return await Capacitor.Plugins.YtDlp.list()", arguments: [:], in: nil, contentWorld: .page) as? [String: Any]
+            record = (listed?["downloads"] as? [[String: Any]])?.first(where: { $0["id"] as? Int == failedId }) ?? [:]
+            if record["status"] as? String == "failed" { break }
+            try await Task.sleep(nanoseconds: 250_000_000)
+        }
+        XCTAssertEqual(record["status"] as? String, "failed", String(describing: record))
+        XCTAssertFalse((record["errorMessage"] as? String ?? "").isEmpty)
+        lock.lock(); offline = false; lock.unlock()
+        let recovered = try await webView.callAsyncJavaScript(
+            "return await Capacitor.Plugins.YtDlp.download({payload, retryDownloadId: id})",
+            arguments: ["payload": offlinePayload, "id": failedId], in: nil, contentWorld: .page) as? [String: Any]
+        XCTAssertEqual(recovered?["id"] as? Int, failedId, String(describing: recovered))
+        for _ in 0..<120 {
+            let listed = try await webView.callAsyncJavaScript(
+                "return await Capacitor.Plugins.YtDlp.list()", arguments: [:], in: nil, contentWorld: .page) as? [String: Any]
+            record = (listed?["downloads"] as? [[String: Any]])?.first(where: { $0["id"] as? Int == failedId }) ?? [:]
+            if ["completed", "failed"].contains(record["status"] as? String ?? "") { break }
+            try await Task.sleep(nanoseconds: 250_000_000)
+        }
+        XCTAssertEqual(record["status"] as? String, "completed", String(describing: record))
+        _ = try await webView.callAsyncJavaScript(
+            "return await Capacitor.Plugins.YtDlp.remove({id})", arguments: ["id": failedId], in: nil, contentWorld: .page)
+
+        listener.cancel()
+        let lostPayload: [String: Any] = ["mode": "video", "externalUrl": url.replacingOccurrences(of: "/slow.mp4", with: "/lost.mp4"),
+                                          "title": "Disconnected fixture"]
+        let lostStart = try await webView.callAsyncJavaScript(
+            "return await Capacitor.Plugins.YtDlp.download({payload})",
+            arguments: ["payload": lostPayload], in: nil, contentWorld: .page) as? [String: Any]
+        let lostId = try XCTUnwrap(lostStart?["id"] as? Int)
+        for _ in 0..<120 {
+            let listed = try await webView.callAsyncJavaScript(
+                "return await Capacitor.Plugins.YtDlp.list()", arguments: [:], in: nil, contentWorld: .page) as? [String: Any]
+            record = (listed?["downloads"] as? [[String: Any]])?.first(where: { $0["id"] as? Int == lostId }) ?? [:]
+            if record["status"] as? String == "failed" { break }
+            try await Task.sleep(nanoseconds: 250_000_000)
+        }
+        XCTAssertEqual(record["status"] as? String, "failed", String(describing: record))
+        XCTAssertFalse((record["errorMessage"] as? String ?? "").isEmpty)
+        _ = try await webView.callAsyncJavaScript(
+            "return await Capacitor.Plugins.YtDlp.remove({id})", arguments: ["id": lostId], in: nil, contentWorld: .page)
+    }
+
+    func testYtDlpLiveExternalPlayback() async throws {
+        try await openApplication()
+        let mediaURL = "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+        _ = try await webView.callAsyncJavaScript(
+            "await testRouter.push({path: '/external-media', query: {url}})",
+            arguments: ["url": mediaURL], in: nil, contentWorld: .page)
+        try await wait("!!document.querySelector('video')", timeout: 90)
+        try await wait("document.querySelector('video')?.readyState >= 2", timeout: 90)
+        _ = try await evaluate("document.querySelector('video').play(); true")
+        try await wait("document.querySelector('video').currentTime > 1", timeout: 30)
+        let attachment = XCTAttachment(image: try await webView.takeSnapshot(configuration: nil))
+        attachment.name = "iOS external yt-dlp playback"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+
+    func testYtDlpConcurrentPlaybackAndDownload() async throws {
+        try await openApplication()
+        let body = Data(repeating: 42, count: 4 * 1024 * 1024)
+        let listener = try NWListener(using: .tcp, on: .any)
+        let ready = expectation(description: "Concurrent download server ready")
+        listener.stateUpdateHandler = { state in if case .ready = state { ready.fulfill() } }
+        listener.newConnectionHandler = { connection in
+            connection.start(queue: .global())
+            connection.receive(minimumIncompleteLength: 1, maximumLength: 8192) { data, _, _, _ in
+                guard let request = data.flatMap({ String(data: $0, encoding: .utf8) }) else {
+                    connection.cancel(); return
+                }
+                let headers = "HTTP/1.1 200 OK\r\nContent-Type: video/mp4\r\nContent-Length: \(body.count)\r\nConnection: close\r\n\r\n"
+                if request.hasPrefix("HEAD ") {
+                    connection.send(content: Data(headers.utf8), completion: .contentProcessed { _ in connection.cancel() })
+                    return
+                }
+                func send(_ offset: Int) {
+                    guard offset < body.count else { connection.cancel(); return }
+                    let end = min(offset + 16 * 1024, body.count)
+                    connection.send(content: body.subdata(in: offset..<end), completion: .contentProcessed { error in
+                        if error != nil { connection.cancel(); return }
+                        DispatchQueue.global().asyncAfter(deadline: .now() + 0.04) { send(end) }
+                    })
+                }
+                connection.send(content: Data(headers.utf8), completion: .contentProcessed { error in
+                    if error != nil { connection.cancel() } else { send(0) }
+                })
+            }
+        }
+        listener.start(queue: .global())
+        defer { listener.cancel() }
+        await fulfillment(of: [ready], timeout: 10)
+        let folder = try XCTUnwrap(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first)
+            .appendingPathComponent("yt-dlp-concurrent", isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let bookmark = try folder.bookmarkData(options: .minimalBookmark, includingResourceValuesForKeys: nil, relativeTo: nil)
+        let reference = try JSONSerialization.data(withJSONObject: ["name": folder.lastPathComponent,
+                                                                     "bookmark": bookmark.base64EncodedString()])
+        _ = try await webView.callAsyncJavaScript(
+            "await Capacitor.Plugins.YtDlp.configure({configuration})",
+            arguments: ["configuration": ["enabled": true, "folder": String(decoding: reference, as: UTF8.self), "concurrency": 1]],
+            in: nil, contentWorld: .page)
+        let url = "http://127.0.0.1:\(try XCTUnwrap(listener.port).rawValue)/slow.mp4"
+        let started = try await webView.callAsyncJavaScript(
+            "return await Capacitor.Plugins.YtDlp.download({payload: {mode: 'video', externalUrl: url, title: 'Concurrent fixture'}})",
+            arguments: ["url": url], in: nil, contentWorld: .page) as? [String: Any]
+        let id = try XCTUnwrap(started?["id"] as? Int)
+        try await wait("!!document.querySelector('#app')")
+        let mediaURL = "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+        _ = try await webView.callAsyncJavaScript(
+            "await testRouter.push({path: '/external-media', query: {url}})",
+            arguments: ["url": mediaURL], in: nil, contentWorld: .page)
+        try await wait("document.querySelector('video')?.readyState >= 2", timeout: 90)
+        _ = try await evaluate("document.querySelector('video').play(); true")
+        try await wait("document.querySelector('video').currentTime > 1", timeout: 30)
+        let listed = try await webView.callAsyncJavaScript(
+            "return await Capacitor.Plugins.YtDlp.list()", arguments: [:], in: nil, contentWorld: .page) as? [String: Any]
+        let record = (listed?["downloads"] as? [[String: Any]])?.first(where: { $0["id"] as? Int == id })
+        XCTAssertEqual(record?["status"] as? String, "downloading", String(describing: record))
+        XCTAssertGreaterThan(record?["percent"] as? Double ?? 0, 0)
+        _ = try await webView.callAsyncJavaScript(
+            "return await Capacitor.Plugins.YtDlp.control({id, action: 'cancel'})",
+            arguments: ["id": id], in: nil, contentWorld: .page)
+    }
+
+    func testYtDlpLiveYouTubeDownload() async throws {
+        try await openApplication()
+        let videoId = "jNQXAC9IVRw"
+        let mediaURL = "https://www.youtube.com/watch?v=\(videoId)"
+        let extracted = try await webView.callAsyncJavaScript(
+            "return await Capacitor.Plugins.YtDlp.extract({args: [url]})",
+            arguments: ["url": mediaURL], in: nil, contentWorld: .page) as? [String: Any]
+        let stdout = try XCTUnwrap(extracted?["stdout"] as? String)
+        let info = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(stdout.utf8)) as? [String: Any])
+        XCTAssertFalse((info["formats"] as? [[String: Any]] ?? []).isEmpty)
+        let formatSummary = (info["formats"] as? [[String: Any]] ?? []).map {
+            "\($0["format_id"] ?? "?"):\($0["ext"] ?? "?"):\($0["vcodec"] ?? "?"):\($0["acodec"] ?? "?")"
+        }
+        print("YouTube formats: \(formatSummary.joined(separator: ", "))")
+
+        let folder = try XCTUnwrap(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first)
+            .appendingPathComponent("yt-dlp-live", isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let bookmark = try folder.bookmarkData(options: .minimalBookmark, includingResourceValuesForKeys: nil, relativeTo: nil)
+        let reference = try JSONSerialization.data(withJSONObject: ["name": folder.lastPathComponent,
+                                                                     "bookmark": bookmark.base64EncodedString()])
+        _ = try await webView.callAsyncJavaScript(
+            "await Capacitor.Plugins.YtDlp.configure({configuration})",
+            arguments: ["configuration": ["enabled": true, "folder": String(decoding: reference, as: UTF8.self), "concurrency": 1]],
+            in: nil, contentWorld: .page)
+        let started = try await webView.callAsyncJavaScript(
+            "return await Capacitor.Plugins.YtDlp.download({payload: {mode: 'video', videoId, title: 'Me at the zoo'}})",
+            arguments: ["videoId": videoId], in: nil, contentWorld: .page) as? [String: Any]
+        let id = try XCTUnwrap(started?["id"] as? Int, String(describing: started))
+        var record: [String: Any] = [:]
+        for _ in 0..<360 {
+            let listed = try await webView.callAsyncJavaScript(
+                "return await Capacitor.Plugins.YtDlp.list()", arguments: [:], in: nil, contentWorld: .page) as? [String: Any]
+            record = (listed?["downloads"] as? [[String: Any]])?.first(where: { $0["id"] as? Int == id }) ?? [:]
+            if ["completed", "failed", "cancelled"].contains(record["status"] as? String ?? "") { break }
+            try await Task.sleep(nanoseconds: 500_000_000)
+        }
+        XCTAssertEqual(record["status"] as? String, "completed", String(describing: record))
+        let destination = try XCTUnwrap(record["destination"] as? String)
+        let size = try XCTUnwrap(FileManager.default.attributesOfItem(atPath: destination)[.size] as? Int)
+        XCTAssertGreaterThan(size, 100_000)
+        let mergedAsset = AVURLAsset(url: URL(fileURLWithPath: destination))
+        let mergedVideoTracks = try await mergedAsset.loadTracks(withMediaType: .video)
+        let mergedAudioTracks = try await mergedAsset.loadTracks(withMediaType: .audio)
+        XCTAssertEqual(mergedVideoTracks.count, 1)
+        XCTAssertEqual(mergedAudioTracks.count, 1)
+        let removed = try await webView.callAsyncJavaScript(
+            "return (await Capacitor.Plugins.YtDlp.remove({id})).ok",
+            arguments: ["id": id], in: nil, contentWorld: .page) as? Bool
+        XCTAssertEqual(removed, true)
+
+        let audioStart = try await webView.callAsyncJavaScript(
+            "return await Capacitor.Plugins.YtDlp.download({payload: {mode: 'audio', videoId, title: 'Me at the zoo audio'}})",
+            arguments: ["videoId": videoId], in: nil, contentWorld: .page) as? [String: Any]
+        let audioId = try XCTUnwrap(audioStart?["id"] as? Int)
+        var audioRecord: [String: Any] = [:]
+        for _ in 0..<240 {
+            let listed = try await webView.callAsyncJavaScript(
+                "return await Capacitor.Plugins.YtDlp.list()", arguments: [:], in: nil, contentWorld: .page) as? [String: Any]
+            audioRecord = (listed?["downloads"] as? [[String: Any]])?.first(where: { $0["id"] as? Int == audioId }) ?? [:]
+            if ["completed", "failed"].contains(audioRecord["status"] as? String ?? "") { break }
+            try await Task.sleep(nanoseconds: 250_000_000)
+        }
+        XCTAssertEqual(audioRecord["status"] as? String, "completed", String(describing: audioRecord))
+        let audioPath = try XCTUnwrap(audioRecord["destination"] as? String)
+        XCTAssertEqual(URL(fileURLWithPath: audioPath).pathExtension, "m4a")
+        let audioAsset = AVURLAsset(url: URL(fileURLWithPath: audioPath))
+        let audioTracks = try await audioAsset.loadTracks(withMediaType: .audio)
+        XCTAssertEqual(audioTracks.count, 1)
+        let played = try await webView.callAsyncJavaScript(
+            "return (await Capacitor.Plugins.YtDlp.play({id})).ok",
+            arguments: ["id": audioId], in: nil, contentWorld: .page) as? Bool
+        XCTAssertEqual(played, true)
+        let controller = try XCTUnwrap(webView.window?.rootViewController)
+        try await waitForNative { controller.presentedViewController is AVPlayerViewController }
+        let audioPlayer = try XCTUnwrap(controller.presentedViewController as? AVPlayerViewController)
+        for _ in 0..<40 {
+            if audioPlayer.player?.currentTime().seconds ?? 0 > 0.1 { break }
+            try await Task.sleep(nanoseconds: 250_000_000)
+        }
+        XCTAssertGreaterThan(audioPlayer.player?.currentTime().seconds ?? 0, 0.1)
+        try await dismiss(audioPlayer)
+        _ = try await webView.callAsyncJavaScript(
+            "return await Capacitor.Plugins.YtDlp.remove({id})",
+            arguments: ["id": audioId], in: nil, contentWorld: .page)
+    }
+
+    func testYtDlpPersistenceSeed() async throws {
+        try await openApplication()
+        let folder = try XCTUnwrap(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first)
+            .appendingPathComponent("yt-dlp-persistence", isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let bookmark = try folder.bookmarkData(options: .minimalBookmark, includingResourceValuesForKeys: nil, relativeTo: nil)
+        let reference = try JSONSerialization.data(withJSONObject: ["name": folder.lastPathComponent,
+                                                                     "bookmark": bookmark.base64EncodedString()])
+        _ = try await webView.callAsyncJavaScript(
+            "await Capacitor.Plugins.YtDlp.configure({configuration})",
+            arguments: ["configuration": ["enabled": true, "folder": String(decoding: reference, as: UTF8.self), "concurrency": 1]],
+            in: nil, contentWorld: .page)
+        let started = try await webView.callAsyncJavaScript(
+            "return await Capacitor.Plugins.YtDlp.download({payload: {mode: 'video', externalUrl: url, title: 'Persistence fixture'}})",
+            arguments: ["url": "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"],
+            in: nil, contentWorld: .page) as? [String: Any]
+        let id = try XCTUnwrap(started?["id"] as? Int)
+        var record: [String: Any] = [:]
+        for _ in 0..<120 {
+            let listed = try await webView.callAsyncJavaScript(
+                "return await Capacitor.Plugins.YtDlp.list()", arguments: [:], in: nil, contentWorld: .page) as? [String: Any]
+            record = (listed?["downloads"] as? [[String: Any]])?.first(where: { $0["id"] as? Int == id }) ?? [:]
+            if ["completed", "failed"].contains(record["status"] as? String ?? "") { break }
+            try await Task.sleep(nanoseconds: 250_000_000)
+        }
+        XCTAssertEqual(record["status"] as? String, "completed", String(describing: record))
+        let destination = try XCTUnwrap(record["destination"] as? String)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: destination))
+        UserDefaults.standard.set(id, forKey: "iosYtDlpPersistenceTestId")
+    }
+
+    func testYtDlpPersistenceAfterRelaunch() async throws {
+        try await openApplication()
+        let id = UserDefaults.standard.integer(forKey: "iosYtDlpPersistenceTestId")
+        XCTAssertGreaterThan(id, 0, "Run the seed test in a separate xcodebuild invocation first")
+        let listed = try await webView.callAsyncJavaScript(
+            "return await Capacitor.Plugins.YtDlp.list()", arguments: [:], in: nil, contentWorld: .page) as? [String: Any]
+        let record = (listed?["downloads"] as? [[String: Any]])?.first(where: { $0["id"] as? Int == id })
+        XCTAssertEqual(record?["status"] as? String, "completed", String(describing: record))
+        let destination = try XCTUnwrap(record?["destination"] as? String)
+        let asset = AVURLAsset(url: URL(fileURLWithPath: destination))
+        let videoTracks = try await asset.loadTracks(withMediaType: .video)
+        XCTAssertEqual(videoTracks.count, 1)
+        let played = try await webView.callAsyncJavaScript(
+            "return (await Capacitor.Plugins.YtDlp.play({id})).ok",
+            arguments: ["id": id], in: nil, contentWorld: .page) as? Bool
+        XCTAssertEqual(played, true)
+        let controller = try XCTUnwrap(webView.window?.rootViewController)
+        try await waitForNative { controller.presentedViewController is AVPlayerViewController }
+        let player = try XCTUnwrap(controller.presentedViewController as? AVPlayerViewController)
+        for _ in 0..<40 {
+            if player.player?.currentTime().seconds ?? 0 > 0.1 { break }
+            try await Task.sleep(nanoseconds: 250_000_000)
+        }
+        XCTAssertGreaterThan(player.player?.currentTime().seconds ?? 0, 0.1)
+        try await dismiss(player)
+        _ = try await webView.callAsyncJavaScript(
+            "return await Capacitor.Plugins.YtDlp.remove({id})", arguments: ["id": id], in: nil, contentWorld: .page)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: destination))
+        UserDefaults.standard.removeObject(forKey: "iosYtDlpPersistenceTestId")
+        try? FileManager.default.removeItem(at: URL(fileURLWithPath: destination).deletingLastPathComponent())
     }
 
     func testUserRecordsSurviveReloadAndCacheClear() async throws {
@@ -589,8 +1190,12 @@ final class AppTests: XCTestCase {
         XCTAssertEqual(UIPasteboard.general.string, "OpenTubeX Grüße 日本語")
         let scene = try XCTUnwrap(webView.window?.windowScene)
         let delegate = try XCTUnwrap(scene.delegate as? SceneDelegate)
+        for _ in 0..<20 {
+            if (UIApplication.shared.shortcutItems ?? []).contains(where: { $0.type == "downloads" }) { break }
+            try await Task.sleep(nanoseconds: 100_000_000)
+        }
         let shortcuts = UIApplication.shared.shortcutItems ?? []
-        XCTAssertFalse(shortcuts.contains { $0.type == "downloads" })
+        XCTAssertTrue(shortcuts.contains { $0.type == "downloads" })
         for type in ["history", "userplaylists", "subscriptions"] {
             let shortcut = try XCTUnwrap(shortcuts.first { $0.type == type })
             var handled = false

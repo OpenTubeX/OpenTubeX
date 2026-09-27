@@ -10,6 +10,7 @@ final class IOSNetwork: NSObject, URLSessionDataDelegate {
         return host == "googlevideo.com" || host.hasSuffix(".googlevideo.com")
     }
     private var prepared: [String: URLRequest] = [:]
+    private var external: [String: URLRequest] = [:]
     private var transfers: [Int: WKURLSchemeTask] = [:]
     private var tasks: [ObjectIdentifier: URLSessionDataTask] = [:]
     private lazy var session: URLSession = {
@@ -28,6 +29,15 @@ final class IOSNetwork: NSObject, URLSessionDataDelegate {
         return id
     }
 
+    func prepareExternal(_ request: URLRequest) -> String {
+        let id = UUID().uuidString
+        external[id] = request
+        DispatchQueue.main.asyncAfter(deadline: .now() + 7200) { [weak self] in
+            self?.external.removeValue(forKey: id)
+        }
+        return id
+    }
+
     func abort(_ id: String) {
         prepared.removeValue(forKey: id)
         for task in Array(tasks.values) where task.taskDescription == id {
@@ -41,12 +51,15 @@ final class IOSNetwork: NSObject, URLSessionDataDelegate {
 
     func start(_ target: WKURLSchemeTask) {
         guard let id = target.request.url?.lastPathComponent,
-              let request = prepared.removeValue(forKey: id) else {
+              var request = prepared.removeValue(forKey: id) ?? external[id] else {
             target.didFailWithError(URLError(.resourceUnavailable))
             return
         }
+        if external[id] != nil, let range = target.request.value(forHTTPHeaderField: "Range") {
+            request.setValue(range, forHTTPHeaderField: "Range")
+        }
         let task = session.dataTask(with: request)
-        task.taskDescription = id
+        task.taskDescription = external[id] == nil ? id : "media:\(id)"
         transfers[task.taskIdentifier] = target
         tasks[ObjectIdentifier(target)] = task
         task.resume()
@@ -68,8 +81,12 @@ final class IOSNetwork: NSObject, URLSessionDataDelegate {
         }
         var headers = [String: String]()
         for (key, value) in http.allHeaderFields { headers[String(describing: key)] = String(describing: value) }
-        // URLSession has already decompressed the body.
-        headers = headers.filter { !["content-encoding", "content-length", "transfer-encoding"].contains($0.key.lowercased()) }
+        // SABR may be decompressed by URLSession. External media requests use
+        // identity encoding so their original byte length and ranges survive.
+        let removed = dataTask.taskDescription?.hasPrefix("media:") == true
+            ? ["content-encoding", "transfer-encoding"]
+            : ["content-encoding", "content-length", "transfer-encoding"]
+        headers = headers.filter { !removed.contains($0.key.lowercased()) }
         headers["Cache-Control"] = "no-store"
         headers["X-OpenTubeX-Media-URL"] = response.url?.absoluteString
         if let result = HTTPURLResponse(url: url, statusCode: http.statusCode, httpVersion: "HTTP/1.1", headerFields: headers) {
@@ -84,7 +101,13 @@ final class IOSNetwork: NSObject, URLSessionDataDelegate {
 
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
                     newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
-        completionHandler(request.url.map(Self.isMediaURL) == true ? request : nil)
+        let externalMedia = task.taskDescription?.hasPrefix("media:") == true
+        let allowed = request.url.map { url in
+            externalMedia
+                ? url.scheme == "https" && url.user == nil && url.password == nil
+                : Self.isMediaURL(url)
+        } == true
+        completionHandler(allowed ? request : nil)
     }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
@@ -98,7 +121,8 @@ final class IOSAssetHandler: NSObject, WKURLSchemeHandler {
     private let assets: WKURLSchemeHandler
     init(assets: WKURLSchemeHandler) { self.assets = assets }
     private func isTransfer(_ task: WKURLSchemeTask) -> Bool {
-        task.request.url?.path.hasPrefix("/_opentubex_sabr/") == true
+        task.request.url?.path.hasPrefix("/_opentubex_sabr/") == true ||
+            task.request.url?.path.hasPrefix("/_opentubex_media/") == true
     }
     func webView(_ webView: WKWebView, start task: WKURLSchemeTask) {
         if isTransfer(task) { IOSNetwork.shared.start(task) } else { assets.webView(webView, start: task) }

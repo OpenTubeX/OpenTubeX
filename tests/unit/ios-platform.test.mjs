@@ -63,6 +63,7 @@ test('iOS media controls and file operations dispatch to their own native servic
 test('iOS folder preferences display the selected name instead of bookmark data', async () => {
   const storage = await helper('androidStorage', ['displayAndroidPath'])
   assert.equal(storage.displayAndroidPath(JSON.stringify({ name: 'Screenshots', bookmark: 'private-bookmark' })), 'Screenshots')
+  assert.equal(storage.displayAndroidPath('/private/var/mobile/Containers/Data/Application/ABC/Documents/Downloads/fixture.mp4'), 'Downloads/fixture.mp4')
   assert.equal(storage.displayAndroidPath(''), '')
 })
 

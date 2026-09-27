@@ -41,3 +41,7 @@ dist-e2e/
 
 # Local Windows share addon output
 _scripts/windows-share/build/
+
+# Generated iOS Python runtime and bundled yt-dlp wheel
+ios/App/Python.xcframework/
+ios/App/python-packages/
