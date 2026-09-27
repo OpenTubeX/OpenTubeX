@@ -546,6 +546,52 @@ test.describe('subscriptions header layout', () => {
     }
   })
 
+  test('truncates a long feed tab label within its tab', async ({ app, page }) => {
+    await goTo(page, 'subscriptions')
+    await setWindowWidth(app, page, 375)
+
+    const label = page.locator('[data-subscription-feed-tab="videos"] .tabLabel')
+    await label.evaluate(element => {
+      const longName = 'Extremely long translated subscription videos feed label'
+      element.dataset.label = longName
+      element.querySelector('span').textContent = longName
+    })
+
+    const layout = await label.evaluate(element => {
+      const text = element.querySelector('span')
+      const tab = element.closest('[data-subscription-feed-tab]')
+      return {
+        labelRight: element.getBoundingClientRect().right,
+        tabRight: tab.getBoundingClientRect().right,
+        textWidth: text.clientWidth,
+        fullTextWidth: text.scrollWidth
+      }
+    })
+
+    expect(layout.labelRight).toBeLessThanOrEqual(layout.tabRight)
+    expect(layout.fullTextWidth).toBeGreaterThan(layout.textWidth)
+  })
+
+  test('keeps the feed tabs usable on one row at 200% zoom', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(2)
+    })
+    await goTo(page, 'subscriptions')
+    await setWindowWidth(app, page, 375)
+
+    const layout = await page.evaluate(() => {
+      const container = document.querySelector('.tabs').getBoundingClientRect()
+      const tabs = [...document.querySelectorAll('[data-subscription-feed-tab]')]
+        .map(tab => tab.getBoundingClientRect())
+      return { container, tabs }
+    })
+
+    expect(layout.tabs).toHaveLength(5)
+    expect(Math.max(...layout.tabs.map(tab => tab.top)) - Math.min(...layout.tabs.map(tab => tab.top))).toBeLessThan(1)
+    expect(layout.tabs.every(tab => tab.width >= 24)).toBe(true)
+    expect(layout.tabs.every(tab => tab.left >= layout.container.left - 1 && tab.right <= layout.container.right + 1)).toBe(true)
+  })
+
   test('saves vertical space compared to the two line layout', async ({ app, page }) => {
     await goTo(page, 'subscriptions')
 
