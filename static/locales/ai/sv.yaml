@@ -1497,6 +1497,7 @@ Context Menu:
   Load Tabs: Läs in flikar
   Unload Tab: Frigör flik
   Unload Tabs: Frigör flikar
+  Unload Tabs Failed: "Det gick inte att ta bort de valda flikarna från minnet."
   Move Tab to Window: Flytta flik till fönster
   Move Tabs to Window: Flytta flikar till fönster
   Open in a New Tab: Öppna i ny flik

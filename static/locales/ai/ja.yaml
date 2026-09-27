@@ -1486,6 +1486,7 @@ Context Menu:
   Load Tabs: タブを読み込む
   Unload Tab: タブを解放
   Unload Tabs: タブを解放
+  Unload Tabs Failed: "選択したタブをアンロードできませんでした。"
   Move Tab to Window: タブをウィンドウに移動
   Move Tabs to Window: タブをウィンドウに移動
   Open in a New Tab: 新しいタブで開く

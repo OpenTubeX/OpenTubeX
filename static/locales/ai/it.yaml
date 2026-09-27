@@ -1486,6 +1486,7 @@ Context Menu:
   Load Tabs: Carica schede
   Unload Tab: Scarica scheda dalla memoria
   Unload Tabs: Scarica schede dalla memoria
+  Unload Tabs Failed: "Impossibile scaricare le schede selezionate."
   Move Tab to Window: Sposta scheda nella finestra
   Move Tabs to Window: Sposta schede nella finestra
   Open in a New Tab: Apri in una nuova scheda

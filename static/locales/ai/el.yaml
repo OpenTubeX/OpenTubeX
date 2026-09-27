@@ -1524,6 +1524,7 @@ Context Menu:
   Load Tabs: Φόρτωση καρτελών
   Unload Tab: Αποφόρτωση καρτέλας
   Unload Tabs: Αποφόρτωση καρτελών
+  Unload Tabs Failed: "Δεν ήταν δυνατή η αποφόρτωση των επιλεγμένων καρτελών."
   Move Tab to Window: Μετακίνηση καρτέλας σε παράθυρο
   Move Tabs to Window: Μετακίνηση καρτελών σε παράθυρο
   Open in a New Tab: Άνοιγμα σε νέα καρτέλα

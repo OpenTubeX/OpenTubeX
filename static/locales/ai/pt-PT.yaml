@@ -1516,6 +1516,7 @@ Context Menu:
   Load Tabs: Carregar separadores
   Unload Tab: Descarregar separador
   Unload Tabs: Descarregar separadores
+  Unload Tabs Failed: "Não foi possível descarregar os separadores selecionados."
   Move Tab to Window: Mover separador para a janela
   Move Tabs to Window: Mover separadores para a janela
   Open in a New Tab: Abrir num novo separador

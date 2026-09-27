@@ -1485,6 +1485,7 @@ Context Menu:
   Load Tabs: Charger les onglets
   Unload Tab: Décharger l’onglet
   Unload Tabs: Décharger les onglets
+  Unload Tabs Failed: "Impossible de décharger les onglets sélectionnés."
   Move Tab to Window: Déplacer l’onglet vers une fenêtre
   Move Tabs to Window: Déplacer les onglets vers une fenêtre
   Open in a New Tab: Ouvrir dans un nouvel onglet

@@ -1779,6 +1779,7 @@ Context Menu:
   Load Tabs: Last inn fanene
   Unload Tab: Last ut fana
   Unload Tabs: Last ut fanene
+  Unload Tabs Failed: "Kunne ikkje fjerne dei valde fanene frå minnet."
   Move Tab to Window: Flytt fana til eit vindauge
   Move Tabs to Window: Flytt fanene til eit vindauge
   Open in a New Tab: Opna i ei ny fane

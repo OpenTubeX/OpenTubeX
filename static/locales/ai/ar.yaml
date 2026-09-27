@@ -1519,6 +1519,7 @@ Context Menu:
   Load Tabs: تحميل علامات التبويب
   Unload Tab: تفريغ علامة التبويب
   Unload Tabs: تفريغ علامات التبويب
+  Unload Tabs Failed: "تعذّر إلغاء تحميل علامات التبويب المحددة."
   Move Tab to Window: نقل علامة التبويب إلى النافذة
   Move Tabs to Window: نقل علامات التبويب إلى النافذة
   Open in a New Tab: افتح في علامة تبويب جديدة

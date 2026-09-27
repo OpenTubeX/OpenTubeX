@@ -1524,6 +1524,7 @@ Context Menu:
   Load Tabs: Lataa välilehdet
   Unload Tab: Poista välilehti muistista
   Unload Tabs: Poista välilehdet muistista
+  Unload Tabs Failed: "Valittuja välilehti ei voitu poistaa muistista."
   Move Tab to Window: Siirrä välilehti ikkunaan
   Move Tabs to Window: Siirrä välilehdet ikkunaan
   Open in a New Tab: Avaa uudessa välilehdessä

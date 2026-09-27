@@ -1494,6 +1494,7 @@ Context Menu:
   Load Tabs: Загрузить вкладки
   Unload Tab: Выгрузить вкладку
   Unload Tabs: Выгрузить вкладки
+  Unload Tabs Failed: "Не удалось выгрузить выбранные вкладки."
   Move Tab to Window: Переместить вкладку в окно
   Move Tabs to Window: Переместить вкладки в окно
   Open in a New Tab: Открыть в новой вкладке

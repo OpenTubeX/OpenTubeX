@@ -2,7 +2,7 @@ import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { isShareableOpenTubeXRoute, transformOpenTubeXRouteUrl } from '../../helpers/share'
-import { copyToClipboard } from '../../helpers/utils'
+import { copyToClipboard, showToast } from '../../helpers/utils'
 import { getCapacitorTabService } from '../../tabs/CapacitorTabService'
 import { formatTabTitle } from '../../tabs/tabTitle'
 
@@ -21,6 +21,7 @@ const noop = () => {}
  * @param {() => void | Promise<void>} [options.afterDuplicate]
  * @param {() => void} [options.beforeOpenActions]
  * @param {() => void} [options.afterCloseActions]
+ * @param {import('vue').ComputedRef<string | null>} [options.presentedTabId]
  * @param {boolean} [options.stopContextMenuPropagation]
  */
 export function useCapacitorTabActions({
@@ -33,12 +34,14 @@ export function useCapacitorTabActions({
   afterDuplicate = noop,
   beforeOpenActions = noop,
   afterCloseActions = noop,
+  presentedTabId = null,
   stopContextMenuPropagation = false,
 }) {
   const { t } = useI18n()
   const selecting = ref(false)
   const selectedTabIds = ref(new Set())
   const closingTabs = ref(false)
+  const runningSelectionAction = ref(false)
   watch(tabs, () => {
     selectedTabIds.value = new Set([...selectedTabIds.value].filter(id => tabs.value.some(tab => tab.id === id)))
   })
@@ -133,6 +136,62 @@ export function useCapacitorTabActions({
 
   async function closeSelectedTabs() {
     await closeTabIds([...selectedTabIds.value])
+  }
+
+  const selectedTabs = computed(() => tabs.value.filter(tab => selectedTabIds.value.has(tab.id)))
+  const canPinSelectedTabs = computed(() => selectedTabs.value.some(tab => !tab.isPinned))
+  const canUnpinSelectedTabs = computed(() => selectedTabs.value.some(tab => tab.isPinned))
+  const canLoadSelectedTabs = computed(() => selectedTabs.value.some(tab => tab.loadState === 'unloaded'))
+  const canUnloadTab = tab => tabs.value.length > 1 &&
+    !['unloaded', 'unloading', 'mounting'].includes(tab.loadState) &&
+    !(presentedTabId?.value === tab.id && !tab.isActive)
+  const canUnloadSelectedTabs = computed(() => selectedTabs.value.some(canUnloadTab))
+
+  async function runSelectedTabAction(action) {
+    if (runningSelectionAction.value || closingTabs.value) return
+    runningSelectionAction.value = true
+    try {
+      const service = getCapacitorTabService()
+      const ids = selectedTabs.value.map(tab => tab.id)
+      if (action === 'unload' && selectedTabs.value.some(canUnloadTab)) {
+        const unselectedTabs = tabs.value.filter(tab => !ids.includes(tab.id))
+        let landingReady = true
+        if (unselectedTabs.length === 0) {
+          landingReady = await service.createTab()
+        } else if (tabs.value.some(tab => tab.isActive && ids.includes(tab.id) && canUnloadTab(tab))) {
+          const landing = unselectedTabs.find(tab => tab.loadState === 'loaded') ?? unselectedTabs[0]
+          landingReady = await service.activateTab(landing.id)
+        }
+        if (!landingReady) {
+          showToast({
+            message: t('Context Menu.Unload Tabs Failed'),
+            icon: ['fas', 'circle-exclamation'],
+          })
+          return
+        }
+      }
+      for (const id of ids) {
+        const tab = tabs.value.find(candidate => candidate.id === id)
+        if (!tab) continue
+        if (action === 'pin' && !tab.isPinned) service.setPinned(id, true)
+        if (action === 'unpin' && tab.isPinned) service.setPinned(id, false)
+        if (action === 'load' && tab.loadState === 'unloaded') service.loadTab(id)
+        if ((action === 'unload' && canUnloadTab(tab)) || action === 'reload') {
+          try {
+            if (action === 'unload') await service.unloadTab(id)
+            else await service.reloadTab(id)
+          } catch (error) {
+            const label = action === 'unload' ? t('Context Menu.Unload Tabs') : t('Context Menu.Reload Tabs')
+            showToast({
+              message: `${label}: ${error?.message ?? String(error)}`,
+              icon: ['fas', 'circle-exclamation'],
+            })
+          }
+        }
+      }
+    } finally {
+      runningSelectionAction.value = false
+    }
   }
 
   async function activateTab(tabId) {
@@ -231,12 +290,18 @@ export function useCapacitorTabActions({
     selecting,
     selectedTabIds,
     closingTabs,
+    runningSelectionAction,
+    canPinSelectedTabs,
+    canUnpinSelectedTabs,
+    canLoadSelectedTabs,
+    canUnloadSelectedTabs,
     clearSelection,
     toggleTabSelection,
     selectActionTab,
     relatedTabIds,
     closeRelatedTabs,
     closeSelectedTabs,
+    runSelectedTabAction,
     actionTab,
     actionTabYoutubeUrl,
     activateTab,

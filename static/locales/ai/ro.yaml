@@ -1523,6 +1523,7 @@ Context Menu:
   Load Tabs: Încarcă filele
   Unload Tab: Descarcă fila din memorie
   Unload Tabs: Descarcă filele din memorie
+  Unload Tabs Failed: "Filele selectate nu au putut fi descărcate."
   Move Tab to Window: Mută fila în fereastră
   Move Tabs to Window: Mută filele în fereastră
   Open in a New Tab: Deschide într-o filă nouă

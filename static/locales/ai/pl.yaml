@@ -778,6 +778,7 @@ Context Menu:
   Manage Tab Groups…: Zarządzaj grupami kart…
   Search With: Wyszukaj za pomocą {engine}
   Search With Multiple: Wyszukaj za pomocą...
+  Unload Tabs Failed: "Nie udało się zwolnić wybranych kart z pamięci."
 Tab Organizer:
   Icon Labels:
     Podcast: 'Podcast'

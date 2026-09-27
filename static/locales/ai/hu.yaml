@@ -1486,6 +1486,7 @@ Context Menu:
   Load Tabs: Lapok betöltése
   Unload Tab: Lap kiürítése
   Unload Tabs: Lapok kiürítése
+  Unload Tabs Failed: "Nem sikerült eltávolítani a kijelölt lapokat a memóriából."
   Move Tab to Window: Lap áthelyezése ablakba
   Move Tabs to Window: Lapok áthelyezése ablakba
   Open in a New Tab: Megnyitás új lapon

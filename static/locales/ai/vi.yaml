@@ -1516,6 +1516,7 @@ Context Menu:
   Load Tabs: Tải các thẻ
   Unload Tab: Dỡ thẻ
   Unload Tabs: Dỡ các thẻ
+  Unload Tabs Failed: "Không thể giải phóng các thẻ đã chọn khỏi bộ nhớ."
   Move Tab to Window: Chuyển thẻ sang cửa sổ
   Move Tabs to Window: Chuyển các thẻ sang cửa sổ
   Open in a New Tab: Mở trong thẻ mới

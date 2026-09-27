@@ -1486,6 +1486,7 @@ Context Menu:
   Load Tabs: Načítať karty
   Unload Tab: Uvoľniť kartu
   Unload Tabs: Uvoľniť karty
+  Unload Tabs Failed: "Nepodarilo sa uvoľniť vybrané karty z pamäte."
   Move Tab to Window: Presunúť kartu do okna
   Move Tabs to Window: Presunúť karty do okna
   Open in a New Tab: Otvoriť na novej karte

@@ -19,7 +19,7 @@ function setup(t, options = {}) {
   const service = {
     async createTab() {
       calls.push(['create'])
-      tabs.value = [...tabs.value, { id: 'landing' }]
+      tabs.value = [...tabs.value, { id: 'landing', loadState: 'loaded', isActive: true }]
       return 'landing'
     },
     async closeTab(id) {
@@ -27,12 +27,29 @@ function setup(t, options = {}) {
       tabs.value = tabs.value.filter(tab => tab.id !== id)
       return true
     },
-    async activateTab(id) { calls.push(['activate', id]) },
+    async activateTab(id) {
+      calls.push(['activate', id])
+      return true
+    },
+    setPinned(id, pinned) {
+      calls.push(['pin', id, pinned])
+      tabs.value = tabs.value.map(tab => tab.id === id ? { ...tab, isPinned: pinned } : tab)
+    },
+    loadTab(id) {
+      calls.push(['load', id])
+      tabs.value = tabs.value.map(tab => tab.id === id ? { ...tab, loadState: 'mounting' } : tab)
+    },
+    async unloadTab(id) {
+      calls.push(['unload', id])
+      tabs.value = tabs.value.map(tab => tab.id === id ? { ...tab, loadState: 'unloaded' } : tab)
+    },
+    async reloadTab(id) { calls.push(['reload', id]) },
   }
   const context = vm.createContext({
     computed, nextTick, ref, watch,
     useI18n: () => ({ t: key => key }),
     getCapacitorTabService: () => service,
+    showToast: toast => calls.push(['toast', toast.message]),
   })
   vm.runInContext(source, context)
   const scope = effectScope()
@@ -116,6 +133,154 @@ test('close selection closes exactly the selected tabs and clears selection', as
   assert.deepEqual(calls, [['close', 'first'], ['close', 'last'], ['afterClose']])
   assert.equal(actions.selecting.value, false)
 })
+
+test('selection actions change only eligible selected tabs', async t => {
+  const { actions, tabs, calls } = setup(t)
+  tabs.value = tabs.value.map(tab => ({
+    ...tab,
+    loadState: tab.id === 'first' ? 'unloaded' : 'loaded',
+  }))
+  actions.toggleTabSelection('pinned')
+  actions.toggleTabSelection('first')
+  actions.toggleTabSelection('middle')
+  assert.equal(actions.canPinSelectedTabs.value, true)
+  assert.equal(actions.canUnpinSelectedTabs.value, true)
+  assert.equal(actions.canLoadSelectedTabs.value, true)
+  assert.equal(actions.canUnloadSelectedTabs.value, true)
+
+  await actions.runSelectedTabAction('pin')
+  await actions.runSelectedTabAction('unpin')
+  await actions.runSelectedTabAction('load')
+  await actions.runSelectedTabAction('unload')
+  await actions.runSelectedTabAction('reload')
+
+  assert.deepEqual(calls, [
+    ['pin', 'first', true], ['pin', 'middle', true],
+    ['pin', 'pinned', false], ['pin', 'first', false], ['pin', 'middle', false],
+    ['load', 'first'],
+    ['unload', 'pinned'], ['unload', 'middle'],
+    ['reload', 'pinned'], ['reload', 'first'], ['reload', 'middle'],
+  ])
+  assert.deepEqual([...actions.selectedTabIds.value], ['pinned', 'first', 'middle'])
+})
+
+test('a running selection action rejects a second action and releases the busy state', async t => {
+  const { actions, service, calls } = setup(t)
+  actions.toggleTabSelection('first')
+  let finish
+  service.reloadTab = id => new Promise(resolve => {
+    calls.push(['reload', id])
+    finish = resolve
+  })
+  const pending = actions.runSelectedTabAction('reload')
+  assert.equal(actions.runningSelectionAction.value, true)
+  await actions.runSelectedTabAction('pin')
+  finish()
+  await pending
+  assert.deepEqual(calls, [['reload', 'first']])
+  assert.equal(actions.runningSelectionAction.value, false)
+})
+
+test('bulk unload skips a presented tab that is no longer active', async t => {
+  const presentedTabId = ref('first')
+  const { actions, tabs, calls } = setup(t, { presentedTabId })
+  tabs.value = tabs.value.map(tab => ({
+    ...tab,
+    loadState: 'loaded',
+    isActive: tab.id === 'middle',
+  }))
+  actions.toggleTabSelection('first')
+  assert.equal(actions.canUnloadSelectedTabs.value, false)
+  actions.toggleTabSelection('middle')
+  assert.equal(actions.canUnloadSelectedTabs.value, true)
+  await actions.runSelectedTabAction('unload')
+  assert.deepEqual(calls, [['activate', 'pinned'], ['unload', 'middle']])
+})
+
+test('unloading every selected tab creates an unselected landing tab first', async t => {
+  const { actions, tabs, calls } = setup(t)
+  tabs.value = tabs.value.slice(0, 2).map(tab => ({
+    ...tab,
+    loadState: 'loaded',
+    isActive: tab.id === 'pinned',
+  }))
+  tabs.value.forEach(tab => actions.toggleTabSelection(tab.id))
+  await actions.runSelectedTabAction('unload')
+  assert.deepEqual(calls, [['create'], ['unload', 'pinned'], ['unload', 'first']])
+  assert.deepEqual([...actions.selectedTabIds.value], ['pinned', 'first'])
+  assert.equal(tabs.value.find(tab => tab.id === 'landing')?.loadState, 'loaded')
+  assert.ok(tabs.value.filter(tab => actions.selectedTabIds.value.has(tab.id))
+    .every(tab => tab.loadState === 'unloaded'))
+})
+
+test('bulk unload activates an unselected tab before unloading the active selection', async t => {
+  const { actions, tabs, calls } = setup(t)
+  tabs.value = tabs.value.map(tab => ({
+    ...tab,
+    loadState: 'loaded',
+    isActive: tab.id === 'first',
+  }))
+  actions.toggleTabSelection('first')
+  actions.toggleTabSelection('middle')
+  await actions.runSelectedTabAction('unload')
+  assert.deepEqual(calls, [['activate', 'pinned'], ['unload', 'first'], ['unload', 'middle']])
+})
+
+test('bulk unload reports a failed landing-tab creation', async t => {
+  const { actions, tabs, service, calls } = setup(t)
+  tabs.value = tabs.value.slice(0, 2).map(tab => ({ ...tab, loadState: 'loaded' }))
+  tabs.value.forEach(tab => actions.toggleTabSelection(tab.id))
+  service.createTab = async () => {
+    calls.push(['create'])
+    return null
+  }
+  await actions.runSelectedTabAction('unload')
+  assert.deepEqual(calls, [
+    ['create'],
+    ['toast', 'Context Menu.Unload Tabs Failed'],
+  ])
+  assert.equal(actions.runningSelectionAction.value, false)
+})
+
+test('bulk unload reports a failed replacement-tab activation', async t => {
+  const { actions, tabs, service, calls } = setup(t)
+  tabs.value = tabs.value.map(tab => ({
+    ...tab,
+    loadState: 'loaded',
+    isActive: tab.id === 'first',
+  }))
+  actions.toggleTabSelection('first')
+  service.activateTab = async id => {
+    calls.push(['activate', id])
+    return false
+  }
+  await actions.runSelectedTabAction('unload')
+  assert.deepEqual(calls, [
+    ['activate', 'pinned'],
+    ['toast', 'Context Menu.Unload Tabs Failed'],
+  ])
+  assert.equal(actions.runningSelectionAction.value, false)
+})
+
+for (const action of ['unload', 'reload']) {
+  test(`a rejected bulk ${action} reports the failure and continues`, async t => {
+    const { actions, service, calls } = setup(t)
+    actions.toggleTabSelection('first')
+    actions.toggleTabSelection('middle')
+    service[`${action}Tab`] = async id => {
+      calls.push([action, id])
+      if (id === 'first') throw new Error('tab failed')
+      return true
+    }
+    await actions.runSelectedTabAction(action)
+    assert.deepEqual(calls, [
+      [action, 'first'],
+      ['toast', `Context Menu.${action === 'unload' ? 'Unload' : 'Reload'} Tabs: tab failed`],
+      [action, 'middle'],
+    ])
+    assert.equal(actions.runningSelectionAction.value, false)
+  })
+}
 
 test('closing every selected tab leaves a fresh landing tab instead of exiting', async t => {
   const { actions, tabs, calls } = setup(t)
@@ -210,4 +375,44 @@ test('an unavailable close submenu keeps keyboard focus on its Back button', asy
   vm.runInContext(method, context)
   await context.setCloseMenu(true)
   assert.equal(focused, true)
+})
+
+test('closing the bulk action menu restores focus after Escape and while an action runs', async () => {
+  const component = await readFile(new URL('../../src/renderer/components/TabBar/CapacitorTabSelectionControls.vue', import.meta.url), 'utf8')
+  const start = component.indexOf('async function closeActions(')
+  assert.ok(start >= 0)
+  const focused = []
+  const props = { busy: false }
+  const context = vm.createContext({
+    showActions: { value: true },
+    moreButton: { value: { get disabled() { return props.busy }, focus() { focused.push('more') } } },
+    controlsRoot: { value: { focus() { focused.push('controls') } } },
+    nextTick: async () => {},
+    emit(event, action) {
+      assert.equal(event, 'action')
+      assert.equal(action, 'unload')
+      props.busy = true
+    },
+  })
+  vm.runInContext(component.slice(start, component.indexOf('</script>', start)), context)
+  const escapeCalls = []
+  context.onEscape({
+    stopPropagation: () => escapeCalls.push('stop'),
+    preventDefault: () => escapeCalls.push('prevent'),
+  })
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(context.showActions.value, false)
+  assert.deepEqual(focused, ['more'])
+  assert.deepEqual(escapeCalls, ['stop', 'prevent'])
+
+  context.onEscape({
+    stopPropagation: () => escapeCalls.push('unexpected stop'),
+    preventDefault: () => escapeCalls.push('unexpected prevent'),
+  })
+  assert.deepEqual(escapeCalls, ['stop', 'prevent'])
+
+  context.showActions.value = true
+  await context.run('unload')
+  assert.equal(context.showActions.value, false)
+  assert.deepEqual(focused, ['more', 'controls'])
 })

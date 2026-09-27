@@ -1483,6 +1483,7 @@ Context Menu:
   Load Tabs: Sekmeleri Yükle
   Unload Tab: Sekmeyi Bellekten Kaldır
   Unload Tabs: Sekmeleri Bellekten Kaldır
+  Unload Tabs Failed: "Seçili sekmeler bellekten kaldırılamadı."
   Move Tab to Window: Sekmeyi Pencereye Taşı
   Move Tabs to Window: Sekmeleri Pencereye Taşı
   Open in a New Tab: Yeni Sekmede Aç

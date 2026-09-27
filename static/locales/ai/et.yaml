@@ -1485,6 +1485,7 @@ Context Menu:
   Load Tabs: Laadi vahekaardid
   Unload Tab: Laadi vahekaart mälust välja
   Unload Tabs: Laadi vahekaardid mälust välja
+  Unload Tabs Failed: "Valitud vahekaarte ei õnnestunud mälust eemaldada."
   Move Tab to Window: Teisalda vahekaart aknasse
   Move Tabs to Window: Teisalda vahekaardid aknasse
   Open in a New Tab: Ava uuel vahekaardil

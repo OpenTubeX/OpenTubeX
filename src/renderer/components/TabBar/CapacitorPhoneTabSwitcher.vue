@@ -85,7 +85,12 @@
             <CapacitorTabSelectionControls
               v-if="selecting"
               :count="selectedTabIds.size"
-              :busy="closingTabs"
+              :busy="closingTabs || runningSelectionAction"
+              :can-pin="canPinSelectedTabs"
+              :can-unpin="canUnpinSelectedTabs"
+              :can-load="canLoadSelectedTabs"
+              :can-unload="canUnloadSelectedTabs"
+              @action="runSelectedTabAction"
               @close="closeSelectedTabs"
               @cancel="clearSelection"
             />
@@ -412,6 +417,7 @@ const syncedTabsContentRef = useTemplateRef('syncedTabsContentRef')
 const tabs = computed(() => store.getters.getTabs)
 const closedTabs = computed(() => store.getters.getClosedTabs)
 const activeTabId = computed(() => store.getters.getActiveTabId)
+const presentedTabId = computed(() => store.getters.getPresentedTabId)
 const syncEnabled = computed(() => store.getters.getSyncServerEnabled)
 const syncConnected = computed(() => store.getters.getSyncServerToken !== '')
 const syncSessionsEnabled = computed(() => store.getters.getSyncServerSyncSessions)
@@ -490,12 +496,18 @@ const {
   selecting,
   selectedTabIds,
   closingTabs,
+  runningSelectionAction,
+  canPinSelectedTabs,
+  canUnpinSelectedTabs,
+  canLoadSelectedTabs,
+  canUnloadSelectedTabs,
   clearSelection,
   toggleTabSelection,
   selectActionTab,
   relatedTabIds,
   closeRelatedTabs,
   closeSelectedTabs,
+  runSelectedTabAction,
   actionTab,
   actionTabYoutubeUrl,
   activateTab: activateTabAction,
@@ -515,6 +527,7 @@ const {
   toggleActionTabPinned,
 } = useCapacitorTabActions({
   tabs,
+  presentedTabId,
   afterSelect: tabId => {
     dialogRef.value?.querySelector(`[data-tab-id="${CSS.escape(tabId)}"]`)?.focus({ preventScroll: true })
   },

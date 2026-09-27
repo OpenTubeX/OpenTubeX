@@ -2727,6 +2727,7 @@ Context Menu:
   Load Tabs: Tabs laden
   Unload Tab: Tab entladen
   Unload Tabs: Tabs entladen
+  Unload Tabs Failed: Die ausgewählten Tabs konnten nicht entladen werden.
   Move Tab to Window: Tab in Fenster verschieben
   Move Tabs to Window: Tabs in Fenster verschieben
   Open in a New Tab: In neuem Tab öffnen

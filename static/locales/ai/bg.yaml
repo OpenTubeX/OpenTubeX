@@ -1500,6 +1500,7 @@ Context Menu:
   Load Tabs: Зареждане на разделите
   Unload Tab: Освобождаване на раздела
   Unload Tabs: Освобождаване на разделите
+  Unload Tabs Failed: "Избраните раздели не можаха да бъдат разтоварени."
   Move Tab to Window: Преместване на раздела в прозорец
   Move Tabs to Window: Преместване на разделите в прозорец
   Open in a New Tab: Отваряне в нов раздел

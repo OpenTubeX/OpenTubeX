@@ -1528,6 +1528,7 @@ Context Menu:
   Load Tabs: Cargar as lapelas
   Unload Tab: Descargar a lapela
   Unload Tabs: Descargar as lapelas
+  Unload Tabs Failed: "Non se puideron descargar as lapelas seleccionadas."
   Move Tab to Window: Mover a lapela a unha xanela
   Move Tabs to Window: Mover as lapelas a unha xanela
   Open in a New Tab: Abrir nunha lapela nova

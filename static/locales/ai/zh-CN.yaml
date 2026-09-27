@@ -1483,6 +1483,7 @@ Context Menu:
   Load Tabs: 加载标签页
   Unload Tab: 卸载标签页
   Unload Tabs: 卸载标签页
+  Unload Tabs Failed: "无法卸载所选标签页。"
   Move Tab to Window: 将标签页移至窗口
   Move Tabs to Window: 将标签页移至窗口
   Open in a New Tab: 在新标签页中打开

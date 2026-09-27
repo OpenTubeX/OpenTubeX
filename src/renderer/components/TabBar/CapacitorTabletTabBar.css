@@ -23,6 +23,10 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+.capacitorTabletTabBar:has(.capacitorTabSelectionControls) {
+  overflow: visible;
+}
+
 .capacitorTabletTabsViewport {
   flex: 1 1 auto;
   min-inline-size: 0;
