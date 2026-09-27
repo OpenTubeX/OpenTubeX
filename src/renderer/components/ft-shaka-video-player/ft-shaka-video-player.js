@@ -5,6 +5,7 @@ import { playbackScreenWake } from '../../helpers/playbackScreenWake'
 import { createRepeatStatsTracker } from '../../helpers/player/repeatStats'
 import { computed, defineComponent, inject, nextTick, onBeforeUnmount, onMounted, onUnmounted, reactive, ref, shallowRef, watch } from 'vue'
 import FtPaidPromotionBadge from '../FtPaidPromotionBadge/FtPaidPromotionBadge.vue'
+import FtRetryImage from '../FtRetryImage.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import shaka from 'shaka-player'
 import { registerPlugin } from '@capacitor/core'
@@ -263,6 +264,7 @@ export default defineComponent({
   components: {
     LightsOffOverlay,
     FtPaidPromotionBadge,
+    FtRetryImage,
     FtSelect,
     FtShareButton,
     FtIconButton,
@@ -369,6 +371,14 @@ export default defineComponent({
       default: ''
     },
     title: {
+      type: String,
+      default: ''
+    },
+    channelName: {
+      type: String,
+      default: ''
+    },
+    channelThumbnail: {
       type: String,
       default: ''
     },
@@ -762,6 +772,7 @@ export default defineComponent({
 
     /** @type {import('vue').Ref<HTMLDivElement | null>} */
     const container = ref(null)
+    const mobileMiniBarOverlay = ref(null)
 
     /** @type {import('vue').Ref<HTMLVideoElement | null>} */
     const video = ref(null)
@@ -6860,6 +6871,8 @@ export default defineComponent({
     }
     const {
       scrollMiniPlayerDragStyle,
+      mobileMiniBar,
+      mobileMiniBarOverlayStyle,
       beginScrollMiniPlayerDrag,
       moveScrollMiniPlayerDrag,
       finishScrollMiniPlayerDrag,
@@ -6916,6 +6929,7 @@ export default defineComponent({
       updateScrollMiniVolume,
     } = useScrollMiniPlayer({
       container,
+      mobileMiniBarOverlay,
       fullWindowEnabled,
       getUi: () => ui,
       isActiveTab,
@@ -11909,6 +11923,7 @@ export default defineComponent({
       showCaptionAppearanceSample,
       isActiveTab,
       container,
+      mobileMiniBarOverlay,
       video,
       voiceOverTranslationState: voiceOverTranslation.state,
       vrCanvas,
@@ -12102,6 +12117,8 @@ export default defineComponent({
       temporaryPlaybackRateIndicatorMessage,
 
       scrollMiniPlayerActive,
+      mobileMiniBar,
+      mobileMiniBarOverlayStyle,
       scrollMiniPlayerAnimating,
       scrollMiniPlayerDetached,
       scrollMiniPlayerDismissed,

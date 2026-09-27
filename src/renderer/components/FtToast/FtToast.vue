@@ -578,6 +578,10 @@ watch(connectionHolder, element => {
   connectionResizeObserver.observe(element)
 })
 
+watch(connectionHeight, height => {
+  document.body.style.setProperty('--connection-status-height', `${height}px`)
+}, { immediate: true })
+
 // Keep ordinary toasts clear of the progress message.
 watch(persistentHolder, element => {
   persistentHolderResizeObserver?.disconnect()
@@ -638,6 +642,7 @@ onBeforeUnmount(() => {
   stopProgressToastPointerTracking()
   persistentHolderResizeObserver?.disconnect()
   connectionResizeObserver?.disconnect()
+  document.body.style.removeProperty('--connection-status-height')
   connectionEvents.removeEventListener('change', updateConnectionState)
   frontToastResizeObserver?.disconnect()
   toastListObserver?.disconnect()

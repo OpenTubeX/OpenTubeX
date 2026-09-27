@@ -79,6 +79,7 @@
           !fullWindowEnabled && !scrollMiniPlayerActive,
         musicAudioPlayer: audioPlayerMode,
         scrollMiniPlayer: scrollMiniPlayerActive,
+        mobileMiniBar: mobileMiniBar && scrollMiniPlayerActive,
         scrollMiniPlayerStashed,
         scrollMiniPlayerStashedRight: scrollMiniPlayerStashedSide === 'right',
         scrollMiniPlayerAnimating,
@@ -1332,6 +1333,53 @@
           </div>
         </div>
       </div>
+      <Teleport
+        to="#cross-tab-mini-player-layer"
+        :disabled="!scrollMiniPlayerDragStyle && !scrollMiniPlayerAnimating"
+      >
+        <div
+          v-if="mobileMiniBar && (scrollMiniPlayerActive || scrollMiniPlayerDragStyle || scrollMiniPlayerAnimating)"
+          ref="mobileMiniBarOverlay"
+          class="mobileMiniBarOverlay"
+          :class="{
+            mobileMiniBarMorphOverlay: scrollMiniPlayerDragStyle || scrollMiniPlayerAnimating,
+            mobileMiniBarRestoring: scrollMiniPlayerDragStyle
+              ? scrollMiniPlayerActive
+              : scrollMiniPlayerAnimating && !scrollMiniPlayerActive
+          }"
+          :style="mobileMiniBarOverlayStyle"
+        >
+          <div class="mobileMiniBarDetails">
+            <span
+              class="mobileMiniBarTitle"
+              dir="auto"
+            >{{ title }}</span>
+            <span class="mobileMiniBarUploader">
+              <FtRetryImage
+                v-if="channelThumbnail"
+                class="mobileMiniBarAvatar"
+                :src="channelThumbnail"
+                alt=""
+              />
+              <span dir="auto">{{ channelName }}</span>
+            </span>
+          </div>
+          <button
+            type="button"
+            class="mobileMiniBarReturn"
+            :disabled="Boolean(scrollMiniPlayerDragStyle || scrollMiniPlayerAnimating)"
+            :aria-label="scrollMiniPlayerDetached
+              ? $t('Video.Player.Scroll Mini Player.Return to Video Tab')
+              : $t('Video.Player.Scroll Mini Player.Back to Top')"
+            @click.stop.prevent="scrollMiniScrollToTop"
+          >
+            <ft-icon
+              :icon="['fas', 'angle-up']"
+              aria-hidden="true"
+            />
+          </button>
+        </div>
+      </Teleport>
       <div
         v-if="scrollMiniPlayerActive"
         class="scrollMiniPlayerControls"

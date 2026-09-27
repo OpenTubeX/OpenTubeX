@@ -11,7 +11,7 @@ const source = (await readFile(new URL('../../src/renderer/components/TabContent
 const titleSource = (await readFile(new URL('../../src/renderer/tabs/TabContext.js', import.meta.url), 'utf8'))
   .replace(/^import .*$/gm, '').replace(/^export /gm, '')
 
-function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabled = true, previous = '/history', loaded = hasLoaded } = {}) {
+function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabled = true, previous = '/history', loaded = hasLoaded, mobile = false } = {}) {
   const route = { path: '/watch/video', fullPath: '/watch/video', params: { id: 'video' } }
   const props = reactive({ tabId: 'tab', route, presented: true })
   const getters = reactive({ getKeepPlayingOnNavigation: enabled, getTabById: () => ({ historyIndex: previous ? 1 : 0, history: previous ? [{ route: { path: previous } }] : [] }) })
@@ -30,7 +30,9 @@ function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabl
     }
   }
   const hostBounds = { left: 0, top: 60.25, width: 412.25 }
+  const tabBounds = { left: 0, top: 60.25, width: 412.25 }
   const listeners = new Map()
+  let savedBrowsingScroll = null
   const viewport = {
     scrollX: 0, scrollY: 20, innerHeight: 800,
     scrollTo(position) { this.lastScroll = position; this.scrollX = position.left; this.scrollY = position.top },
@@ -49,14 +51,15 @@ function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabl
   const previewStyle = scope.run(() => vm.runInNewContext(`${source}\npreviewStyle`, {
     computed, nextTick, reactive, ref, shallowRef, watch,
     window: viewport,
+    document: { querySelector: selector => selector === '.app.capacitorTabs' && mobile ? {} : null },
     isReducedMotionEnabled: () => true,
     defineProps: () => props,
     // The native scroll mini player lives outside the watch view's DOM tree.
     // Its component reference must remain usable without a DOM video descendant.
-    useTemplateRef: name => name === 'watchRoot' ? ref(previewRoot) : name === 'previewHost' ? ref({ getBoundingClientRect: () => hostBounds }) : ref(mounted ? { $refs: { player: { hasLoaded: loaded, isPaused: () => video.paused } }, querySelector: () => null } : null),
+    useTemplateRef: name => name === 'watchRoot' ? ref(previewRoot) : name === 'previewHost' ? ref({ getBoundingClientRect: () => hostBounds, closest: () => ({ getBoundingClientRect: () => tabBounds }) }) : ref(mounted ? { $refs: { player: { hasLoaded: loaded, isPaused: () => video.paused } }, querySelector: () => null } : null),
     provide: (key, value) => provides.set(key, value),
     onBeforeUnmount: callback => unmount.push(callback),
-    store: { getters },
+    store: { getters, commit: (_name, payload) => { savedBrowsingScroll = payload.scroll } },
     resolveRouteComponent: () => ({}),
     getTabNavigationService: () => ({ createRouterFacade: () => ({}), setTitle: (...args) => titles.push(args), back: () => navigate(props.route.path === '/subscriptions' ? '/watch/video' : previous), forward: () => navigate('/watch/video'), push: (_id, path) => navigate(path) }),
     tabLifecycleService: { register: (_id, hooks) => { lifecycle = hooks; return () => {} } },
@@ -74,8 +77,9 @@ function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabl
     scope.stop()
   })
   return {
-    props, getters, provides, lifecycle, previewRoot, previewStyle, hostBounds, viewport, listeners, titles, updateTitle,
+    props, getters, provides, lifecycle, previewRoot, previewStyle, hostBounds, tabBounds, viewport, listeners, titles, updateTitle,
     disposals: () => disposals,
+    savedBrowsingScroll: () => savedBrowsingScroll,
     navigate
   }
 }
@@ -268,6 +272,7 @@ test('returning from the mini player restores Watch at the top without a second 
   await navigation.finishMinimizePreview(true)
   assert.equal(mounted.viewport.scrollY, 0)
   assert.equal(mounted.viewport.lastScroll.behavior, 'instant')
+  assert.equal(mounted.savedBrowsingScroll().top, 300.125)
 })
 
 for (const commit of [true, false]) {
@@ -321,4 +326,16 @@ test('restoring after resizing uses the current Watch host geometry', async t =>
   assert.equal(mounted.previewStyle.value.width, '800.5px')
   assert.equal(mounted.previewStyle.value.top, '220px')
   assert.equal(mounted.previewStyle.value.height, '519.75px')
+})
+
+test('mobile restore aligns the retained Watch view with its tab', async t => {
+  const mounted = mountWatch(t, { mobile: true })
+  const navigation = mounted.provides.get('navigation')
+  await navigation.minimize()
+  mounted.hostBounds.top = 452.125
+  mounted.viewport.scrollY = 0
+  navigation.beginRestorePreview()
+  assert.equal(mounted.previewStyle.value.top, '-391.875px')
+  assert.equal(mounted.previewStyle.value.width, '412.25px')
+  assert.equal(mounted.previewStyle.value.height, '739.75px')
 })

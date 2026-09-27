@@ -110,6 +110,8 @@
           :chapters-kind="videoChaptersKind"
           :chapters-src="chaptersSrc"
           :title="videoTitle"
+          :channel-name="channelName"
+          :channel-thumbnail="channelThumbnail"
           :artist="musicPlayerArtist"
           :music-media-type="musicMediaType"
           :theatre-possible="theatreTogglePossible"

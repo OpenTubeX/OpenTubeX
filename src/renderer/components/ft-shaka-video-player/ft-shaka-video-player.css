@@ -4668,6 +4668,157 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   pointer-events: none;
 }
 
+.ftVideoPlayer.scrollMiniPlayer.mobileMiniBar {
+  box-sizing: border-box;
+  border-radius: 0;
+  border-top: 1px solid var(--secondary-text-color);
+  background: var(--card-bg-color);
+  box-shadow: 0 -4px 18px rgb(0 0 0 / 20%);
+}
+
+:global(.app.capacitorPhoneLayout .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar) {
+  top: auto !important;
+  bottom: calc(
+    var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) +
+    var(--connection-progress-inset, 0px) +
+    var(--connection-status-height, 0px)
+  );
+  transition: translate 280ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (width <= 680px) {
+  :global(.app.capacitorPhoneLayout .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar) {
+    bottom: calc(
+      var(--mobile-nav-height) +
+      var(--connection-progress-inset, 0px) +
+      var(--connection-status-height, 0px)
+    );
+  }
+
+  :global(.app.capacitorPhoneLayout:has(.sideNav.scrollHidden):not(:has(.sideNav :focus-visible)) .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar) {
+    translate: 0 var(--mobile-nav-height);
+    transition: translate 220ms cubic-bezier(0.4, 0, 1, 1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(.app.capacitorPhoneLayout .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar) {
+    transition: none;
+  }
+}
+
+:global(.app.capacitorTabs:has(.mobileMiniBar) > .routerView) {
+  padding-block-end: 76px;
+}
+
+.ftVideoPlayer.mobileMiniBar > :not(.player, .mobileMiniBarOverlay) {
+  display: none !important;
+}
+
+.mobileMiniBarOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.mobileMiniBarMorphOverlay {
+  position: fixed;
+  inset: auto;
+  z-index: 151;
+  pointer-events: none;
+
+  --mobile-mini-bar-opacity: 0;
+}
+
+.mobileMiniBarRestoring {
+  --mobile-mini-bar-opacity: 1;
+}
+
+.mobileMiniBarMorphOverlay::before {
+  position: absolute;
+  inset: 0 0 0 120px;
+  background: linear-gradient(to right, transparent, var(--card-bg-color) 8px);
+  opacity: var(--mobile-mini-bar-opacity);
+  content: '';
+}
+
+.mobileMiniBarDetails {
+  position: absolute;
+  inset-block: 0;
+  left: 128px;
+  right: 56px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-inline-size: 0;
+  color: var(--primary-text-color);
+  direction: ltr;
+  pointer-events: none;
+}
+
+.mobileMiniBarTitle,
+.mobileMiniBarUploader {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobileMiniBarTitle {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.mobileMiniBarUploader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-block-start: 4px;
+  color: var(--secondary-text-color);
+  font-size: 12px;
+}
+
+.mobileMiniBarUploader > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobileMiniBarAvatar {
+  inline-size: 18px;
+  block-size: 18px;
+  flex: none;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.mobileMiniBarReturn {
+  position: absolute;
+  inset-block: 0;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  inline-size: 48px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--primary-text-color);
+  font-size: 24px;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.mobileMiniBarReturn:active {
+  background: color-mix(in srgb, var(--primary-text-color) 12%, var(--card-bg-color));
+}
+
+.mobileMiniBarMorphOverlay > .mobileMiniBarDetails,
+.mobileMiniBarMorphOverlay > .mobileMiniBarReturn {
+  opacity: var(--mobile-mini-bar-opacity);
+}
+
+.mobileMiniBarMorphOverlay > .mobileMiniBarReturn {
+  pointer-events: none;
+}
+
 .scrollMiniPlayerControls {
   position: absolute;
   inset: 0;
@@ -5042,6 +5193,61 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   transform: none !important;
   flex: none;
 }
+
+.ftVideoPlayer.scrollMiniPlayer.mobileMiniBar > .player {
+  position: absolute !important;
+  inset: 6px auto 6px 8px !important;
+  box-sizing: border-box;
+  inline-size: 112px !important;
+  min-inline-size: 112px;
+  max-inline-size: 112px;
+  block-size: 63px !important;
+  min-block-size: 63px;
+  max-block-size: 63px;
+  margin: 0 !important;
+  border-radius: calc(4px * var(--ui-roundness));
+  background: #000;
+  object-fit: contain !important;
+  transform: none !important;
+}
+
+.ftVideoPlayer[data-mobile-mini-morph],
+:global(.app.capacitorPhoneLayout .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar[data-mobile-mini-morph]) {
+  position: fixed !important;
+  left: var(--mobile-mini-left) !important;
+  top: var(--mobile-mini-top) !important;
+  bottom: auto !important;
+  width: var(--mobile-mini-width) !important;
+  height: var(--mobile-mini-height) !important;
+  margin: 0 !important;
+  z-index: 150;
+  background: transparent;
+  border-radius: 0 !important;
+  transform: none !important;
+  translate: none !important;
+  transition: none !important;
+  overflow: clip;
+}
+
+/* The moving video must override every settled player layout. */
+/* stylelint-disable no-descending-specificity */
+.ftVideoPlayer[data-mobile-mini-morph] > .player,
+:global(.app .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar[data-mobile-mini-morph] > .player) {
+  position: absolute !important;
+  inset: var(--mobile-mini-video-top) auto auto var(--mobile-mini-video-left) !important;
+  width: var(--mobile-mini-video-base-width) !important;
+  height: var(--mobile-mini-video-base-height) !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 0 !important;
+  object-fit: contain !important;
+  transform: scale(var(--mobile-mini-video-scale)) !important;
+  transform-origin: top left;
+  transition: none !important;
+}
+/* stylelint-enable no-descending-specificity */
 
 @media (orientation: landscape) and (height <= 600px) {
   :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow)) {

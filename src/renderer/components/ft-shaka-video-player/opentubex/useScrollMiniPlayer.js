@@ -24,6 +24,8 @@ import {
   getResizeHandleCorner,
   getSavedScrollMiniPlayerRect,
   getViewportInsets,
+  getViewportWidth,
+  MARGIN,
   getScrollMiniInlineLayoutHeight,
   getScrollMiniPlayerStashSide,
   getStashedScrollMiniPlayerRect,
@@ -59,6 +61,7 @@ const SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS = 300
  *
  * @param {{
  *   container: import('vue').Ref<HTMLDivElement | null>,
+ *   mobileMiniBarOverlay: import('vue').Ref<HTMLDivElement | null>,
  *   fullWindowEnabled: import('vue').Ref<boolean>,
  *   getUi: () => import('shaka-player').ui.Overlay | null,
  *   isActiveTab: import('vue').ComputedRef<boolean>,
@@ -68,7 +71,7 @@ const SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS = 300
  *   video: import('vue').Ref<HTMLVideoElement | null>
  * }} options
  */
-export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isActiveTab, pictureInPictureActive, props, tabId = null, video }) {
+export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindowEnabled, getUi, isActiveTab, pictureInPictureActive, props, tabId = null, video }) {
   const watchNavigation = inject(watchNavigationKey, null)
   const scrollMiniVideoAspectRatio = ref(DEFAULT_ASPECT_RATIO)
   const scrollMiniPlayerEnabled = computed(() => store.getters.getScrollMiniPlayerEnabled)
@@ -104,6 +107,64 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   }
 
   const scrollMiniPlayerStyle = computed(() => scrollMiniPlayerRectToStyle(scrollMiniPlayerRect.value))
+
+  function usesMobileMiniBar() {
+    return Boolean(process.env.IS_CAPACITOR || document.querySelector('.app.capacitorTabs'))
+  }
+
+  function getMobileMiniBarRect() {
+    const insets = getViewportInsets()
+    const height = 76
+    return {
+      left: 0,
+      top: window.innerHeight - height - Math.max(0, insets.bottom - MARGIN),
+      width: getViewportWidth(),
+      height,
+      dock: 'left',
+    }
+  }
+
+  function measureMobileMiniBar() {
+    const layer = document.getElementById('cross-tab-mini-player-layer')
+    if (!layer) return null
+    // The Watch view lives inside a size container, which changes the containing
+    // block for fixed children. Measure in the same layer as the settled bar.
+    const element = container.value.cloneNode(false)
+    const videoElement = video.value.cloneNode(false)
+    const { top, width, height } = getMobileMiniBarRect()
+    element.classList.add('scrollMiniPlayer', 'mobileMiniBar')
+    element.removeAttribute('id')
+    element.removeAttribute('style')
+    videoElement.removeAttribute('id')
+    videoElement.removeAttribute('src')
+    videoElement.removeAttribute('poster')
+    element.append(videoElement)
+    element.style.setProperty('transition', 'none', 'important')
+    // Leaving Watch resets hidden navigation, so dock above the visible nav.
+    element.style.setProperty('translate', 'none', 'important')
+    Object.assign(element.style, {
+      position: 'fixed', left: '0px', top: `${top}px`, width: `${width}px`, height: `${height}px`, margin: '0px'
+    })
+    layer.append(element)
+    const bounds = element.getBoundingClientRect()
+    const videoBounds = videoElement.getBoundingClientRect()
+    element.remove()
+    return {
+      rect: {
+        left: bounds.left,
+        top: bounds.top,
+        width: bounds.width,
+        height: bounds.height
+      },
+      video: {
+        left: videoBounds.left - bounds.left,
+        top: videoBounds.top - bounds.top,
+        width: videoBounds.width,
+        height: videoBounds.height
+      }
+    }
+  }
+
   const scrollMiniPlayerDetached = computed(() => {
     return scrollMiniPlayerActive.value &&
       !isActiveTab.value &&
@@ -149,8 +210,20 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   // Cache geometry once. Pointer moves only write a compositor transform, at
   // most once per frame.
   const scrollMiniPlayerDragStyle = ref(null)
+  const mobileMiniBarOverlayStyle = ref(null)
+  const mobileMiniBar = computed(() => Boolean(process.env.IS_CAPACITOR ||
+    ((scrollMiniPlayerActive.value || scrollMiniPlayerAnimating.value || scrollMiniPlayerDragStyle.value) && usesMobileMiniBar())))
   let inlineDrag = null
   let inlineDragFrame = null
+
+  function positionMobileMiniBarOverlay(bar) {
+    mobileMiniBarOverlayStyle.value = {
+      left: `${bar.left}px`,
+      top: `${bar.top}px`,
+      width: `${bar.width}px`,
+      height: `${bar.height}px`
+    }
+  }
 
   function beginScrollMiniPlayerDrag(restoring = false) {
     const element = container.value
@@ -161,10 +234,31 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     updateScrollMiniVideoAspectRatio()
     const from = element.getBoundingClientRect()
     const saved = getSavedScrollMiniPlayerRect('tab')
-    const to = clampScrollMiniPlayerRect(saved
-      ? reanchorScrollMiniPlayerRect(saved, scrollMiniVideoAspectRatio.value)
-      : getDefaultScrollMiniPlayerRect(scrollMiniVideoAspectRatio.value), scrollMiniVideoAspectRatio.value)
-    inlineDrag = { from, to, y: 0, progress: 0, restoring }
+    const videoRect = video.value.getBoundingClientRect()
+    const mobileBar = usesMobileMiniBar() && !restoring ? measureMobileMiniBar() : null
+    if (usesMobileMiniBar() && !restoring && !mobileBar) return false
+    const to = usesMobileMiniBar()
+      ? (mobileBar?.rect ?? getMobileMiniBarRect())
+      : clampScrollMiniPlayerRect(saved
+          ? reanchorScrollMiniPlayerRect(saved, scrollMiniVideoAspectRatio.value)
+          : getDefaultScrollMiniPlayerRect(scrollMiniVideoAspectRatio.value), scrollMiniVideoAspectRatio.value)
+    inlineDrag = {
+      from,
+      to,
+      y: 0,
+      progress: 0,
+      restoring,
+      videoTo: mobileBar?.video,
+      videoFrom: {
+        left: videoRect.left - from.left,
+        top: videoRect.top - from.top,
+        width: videoRect.width,
+        height: videoRect.height
+      }
+    }
+    if (usesMobileMiniBar()) {
+      positionMobileMiniBarOverlay(restoring ? from : to)
+    }
     if (!restoring) scrollMiniPlaceholderHeight.value = from.height
     scrollMiniPlayerDragStyle.value = {
       position: 'fixed',
@@ -179,6 +273,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
       if (!watchNavigation.beginRestorePreview()) {
         inlineDrag = null
         scrollMiniPlayerDragStyle.value = null
+        mobileMiniBarOverlayStyle.value = null
         return false
       }
       const drag = inlineDrag
@@ -195,7 +290,49 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     element.style.transformOrigin = 'top left'
     element.style.willChange = 'transform'
     element.setAttribute('data-inline-mini-drag', '')
+    if (usesMobileMiniBar()) renderInlineDragProgress(0)
     return true
+  }
+
+  function renderMobileMiniMorph(from, to, videoFrom, videoTo, progress, restoring) {
+    const element = container.value
+    if (!element) return
+    const interpolate = (start, end) => start + (end - start) * progress
+    const style = element.style
+    element.setAttribute('data-mobile-mini-morph', '')
+    style.setProperty('--mobile-mini-left', `${interpolate(from.left, to.left)}px`)
+    style.setProperty('--mobile-mini-top', `${interpolate(from.top, to.top)}px`)
+    style.setProperty('--mobile-mini-width', `${interpolate(from.width, to.width)}px`)
+    style.setProperty('--mobile-mini-height', `${interpolate(from.height, to.height)}px`)
+    const videoWidth = interpolate(videoFrom.width, videoTo.width)
+    const videoHeight = interpolate(videoFrom.height, videoTo.height)
+    const videoScale = Math.min(videoWidth / videoFrom.width, videoHeight / videoFrom.height)
+    style.setProperty('--mobile-mini-video-base-width', `${videoFrom.width}px`)
+    style.setProperty('--mobile-mini-video-base-height', `${videoFrom.height}px`)
+    const videoLeft = interpolate(videoFrom.left, videoTo.left) + (videoWidth - videoFrom.width * videoScale) / 2
+    const videoTop = interpolate(videoFrom.top, videoTo.top) + (videoHeight - videoFrom.height * videoScale) / 2
+    style.setProperty('--mobile-mini-video-left', `${videoLeft}px`)
+    style.setProperty('--mobile-mini-video-top', `${videoTop}px`)
+    style.setProperty('--mobile-mini-video-scale', String(videoScale))
+    const opacity = restoring
+      ? Math.max(0, 1 - progress / 0.5)
+      : Math.min(1, Math.max(0, (progress - 0.2) / 0.4))
+    mobileMiniBarOverlay.value?.style.setProperty('--mobile-mini-bar-opacity', String(opacity))
+  }
+
+  function clearMobileMiniMorph() {
+    const element = container.value
+    if (!element) return
+    element.removeAttribute('data-mobile-mini-morph')
+    for (const name of [
+      '--mobile-mini-left', '--mobile-mini-top', '--mobile-mini-width', '--mobile-mini-height',
+      '--mobile-mini-video-left', '--mobile-mini-video-top', '--mobile-mini-video-base-width',
+      '--mobile-mini-video-base-height', '--mobile-mini-video-scale'
+    ]) element.style.removeProperty(name)
+  }
+
+  function releaseMobileMiniBarTransition(element) {
+    requestAnimationFrame(() => element.style.removeProperty('transition'))
   }
 
   function getInlineDragDistance(drag) {
@@ -212,9 +349,16 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     const scaleX = 1 + (to.width / from.width - 1) * progress
     const scaleY = 1 + (to.height / from.height - 1) * progress
     const roundness = Math.min(1, (restoring ? 1 - progress : progress) * 5)
-    const style = container.value.style
-    style.transform = `translate(${x}px, ${y}px) scale(${scaleX}, ${scaleY})`
-    style.borderRadius = `calc(10px * var(--ui-roundness) * ${roundness})`
+    if (usesMobileMiniBar()) {
+      const videoTo = restoring
+        ? { left: 0, top: 0, width: to.width, height: to.height }
+        : inlineDrag.videoTo
+      renderMobileMiniMorph(from, to, inlineDrag.videoFrom, videoTo, progress, restoring)
+    } else {
+      const style = container.value.style
+      style.transform = `translate(${x}px, ${y}px) scale(${scaleX}, ${scaleY})`
+      style.borderRadius = `calc(10px * var(--ui-roundness) * ${roundness})`
+    }
   }
 
   function renderScrollMiniPlayerDrag() {
@@ -261,6 +405,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     inlineDrag?.resolveSettle?.()
     inlineDrag = null
     scrollMiniPlayerDragStyle.value = null
+    mobileMiniBarOverlayStyle.value = null
     watchNavigation?.clearMinimizePreview()
     if (!scrollMiniPlayerActive.value) scrollMiniPlaceholderHeight.value = 0
     const element = container.value
@@ -270,11 +415,13 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     element.style.removeProperty('will-change')
     element.style.removeProperty('border-radius')
     element.removeAttribute('data-inline-mini-drag')
+    clearMobileMiniMorph()
   }
 
   async function finishScrollMiniPlayerDrag(commit) {
     if (!inlineDrag || inlineDrag.finishing) return
     const drag = inlineDrag
+    let restored = false
     drag.finishing = true
     await drag.ready
     if (inlineDrag !== drag || !container.value) return
@@ -285,22 +432,37 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
       if (inlineDrag !== drag || !container.value) return
       // Navigation and layout changes happen behind the completed preview, after
       // the video has reached the same endpoint as the normal mini-player motion.
+      // Keep the bar active until navigation succeeds. The drag holds the video
+      // in its top-level layer while the Watch route changes behind it.
       await watchNavigation.finishMinimizePreview(commit)
+      restored = drag.restoring && commit && !watchNavigation.detached.value
       if (inlineDrag !== drag || !container.value) return
+      if (restored) deactivateScrollMiniPlayer()
       if (drag.restoring && commit) {
-        deactivateScrollMiniPlayer()
         if (!scrollMiniPlayerActive.value) lightHaptic()
       } else if (commit && watchNavigation.detached.value) {
         activateScrollMiniPlayer(false)
         scrollMiniPlayerStashedSide.value = null
         scrollMiniPlayerRestoreRect = null
-        applyScrollMiniPlayerRect(drag.to, false, true)
+        if (usesMobileMiniBar()) {
+          scrollMiniPlayerRect.value = getMobileMiniBarRect()
+        } else {
+          applyScrollMiniPlayerRect(drag.to, false, true)
+        }
         if (scrollMiniPlayerActive.value) lightHaptic()
       }
     } finally {
       if (inlineDrag === drag) {
+        if (commit && !drag.restoring && scrollMiniPlayerActive.value && usesMobileMiniBar()) {
+          const element = container.value
+          element.style.setProperty('transition', 'none', 'important')
+          releaseMobileMiniBarTransition(element)
+        }
         cancelScrollMiniPlayerDrag()
-        updateScrollMiniPlayer({ animateActivation: false })
+        // Watch is already inline after a committed restore. Its retained
+        // layout briefly reports the old anchor position during navigation;
+        // probing it here would dock the video again for one frame.
+        if (!restored) updateScrollMiniPlayer({ animateActivation: false })
       }
     }
   }
@@ -313,7 +475,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
 
     scrollMiniVideoAspectRatio.value = videoElement.videoWidth / videoElement.videoHeight
 
-    if (scrollMiniPlayerActive.value) {
+    if (scrollMiniPlayerActive.value && !process.env.IS_CAPACITOR) {
       // Resizing to the video's aspect ratio is not the user moving the player,
       // so it must not turn a temporarily clamped position into its anchor.
       if (scrollMiniPlayerStashed.value) {
@@ -644,6 +806,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     scrollMiniLayoutAnimation?.cancel()
     scrollMiniLayoutAnimation = null
     scrollMiniPlayerAnimating.value = false
+    mobileMiniBarOverlayStyle.value = null
   }
 
   /**
@@ -652,8 +815,9 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
    * @param {DOMRect} previousRect
    * @param {boolean} expectedActive
    * @param {number} sequence
+   * @param {DOMRect | null} [previousVideoRect]
    */
-  async function animateScrollMiniPlayerLayout(previousRect, expectedActive, sequence) {
+  async function animateScrollMiniPlayerLayout(previousRect, expectedActive, sequence, previousVideoRect = null) {
     const playerContainer = container.value
     if (!playerContainer) return
 
@@ -666,6 +830,54 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     const nextRect = playerContainer.getBoundingClientRect()
     if (nextRect.width === 0 || nextRect.height === 0) {
       scrollMiniPlayerAnimating.value = false
+      mobileMiniBarOverlayStyle.value = null
+      return
+    }
+
+    if (usesMobileMiniBar() && previousVideoRect && video.value) {
+      positionMobileMiniBarOverlay(expectedActive ? nextRect : previousRect)
+      const nextVideoRect = video.value.getBoundingClientRect()
+      const videoFrom = {
+        left: previousVideoRect.left - previousRect.left,
+        top: previousVideoRect.top - previousRect.top,
+        width: previousVideoRect.width,
+        height: previousVideoRect.height
+      }
+      const videoTo = {
+        left: nextVideoRect.left - nextRect.left,
+        top: nextVideoRect.top - nextRect.top,
+        width: nextVideoRect.width,
+        height: nextVideoRect.height
+      }
+      const duration = SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS /
+        getAnimationSpeedMultiplier(store.getters.getAnimationSpeed)
+      const started = performance.now()
+      let frameId = null
+      const animation = {
+        cancel() {
+          if (frameId !== null) cancelAnimationFrame(frameId)
+          clearMobileMiniMorph()
+          playerContainer.style.removeProperty('transition')
+        }
+      }
+      const frame = now => {
+        if (scrollMiniLayoutAnimation !== animation) return
+        const time = Math.min(1, Math.max(0, (now - started) / duration))
+        const progress = time * time * (3 - 2 * time)
+        renderMobileMiniMorph(previousRect, nextRect, videoFrom, videoTo, progress, !expectedActive)
+        if (time < 1) {
+          frameId = requestAnimationFrame(frame)
+        } else {
+          scrollMiniLayoutAnimation = null
+          clearMobileMiniMorph()
+          scrollMiniPlayerAnimating.value = false
+          mobileMiniBarOverlayStyle.value = null
+          releaseMobileMiniBarTransition(playerContainer)
+        }
+      }
+      scrollMiniLayoutAnimation = animation
+      renderMobileMiniMorph(previousRect, nextRect, videoFrom, videoTo, 0, !expectedActive)
+      frameId = requestAnimationFrame(frame)
       return
     }
 
@@ -801,6 +1013,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     if (!playerContainer) return
     const shouldAnimate = animate && !isReducedMotionEnabled()
     const previousRect = shouldAnimate ? playerContainer.getBoundingClientRect() : null
+    const previousVideoRect = previousRect ? video.value?.getBoundingClientRect() : null
 
     const layoutHeight = getScrollMiniPlaceholderLayoutHeight()
     if (layoutHeight < SCROLL_MINI_MIN_INLINE_LAYOUT_HEIGHT) {
@@ -823,6 +1036,8 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     const animationSequence = scrollMiniLayoutAnimationSequence
     scrollMiniPlayerAnimating.value = previousRect !== null
 
+    if (usesMobileMiniBar()) playerContainer.style.setProperty('transition', 'none', 'important')
+
     scrollMiniPlayerActive.value = true
     updateScrollMiniVideoAspectRatio()
     restoreScrollMiniPlayerPosition()
@@ -837,14 +1052,21 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     nextTick(() => {
       updateScrollMiniVolumeBarFill()
       updateScrollMiniDragHandleContrast(true)
+      if (usesMobileMiniBar() && !previousRect && !inlineDrag) {
+        releaseMobileMiniBarTransition(playerContainer)
+      }
     })
 
     if (previousRect) {
-      animateScrollMiniPlayerLayout(previousRect, true, animationSequence)
+      animateScrollMiniPlayerLayout(previousRect, true, animationSequence, previousVideoRect)
     }
   }
 
   function restoreScrollMiniPlayerPosition() {
+    if (process.env.IS_CAPACITOR) {
+      scrollMiniPlayerRect.value = getMobileMiniBarRect()
+      return
+    }
     const savedRect = getSavedScrollMiniPlayerRect(isActiveTab.value ? 'scroll' : 'tab')
     applyScrollMiniPlayerRect(
       savedRect
@@ -870,9 +1092,11 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     const playerContainer = container.value
     const shouldAnimate = animate && playerContainer !== null && !isReducedMotionEnabled()
     const previousRect = shouldAnimate ? playerContainer.getBoundingClientRect() : null
+    const previousVideoRect = previousRect ? video.value?.getBoundingClientRect() : null
 
     cancelScrollMiniPlayerLayoutAnimation()
     const animationSequence = scrollMiniLayoutAnimationSequence
+    if (previousRect && usesMobileMiniBar()) positionMobileMiniBarOverlay(previousRect)
     scrollMiniPlayerAnimating.value = previousRect !== null
 
     scrollMiniPlayerActive.value = false
@@ -890,7 +1114,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     scrollMiniVolumeExpanded.value = false
 
     if (previousRect) {
-      animateScrollMiniPlayerLayout(previousRect, false, animationSequence)
+      animateScrollMiniPlayerLayout(previousRect, false, animationSequence, previousVideoRect)
     }
   }
 
@@ -971,6 +1195,10 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
    */
   function resnapScrollMiniPlayerToEdge() {
     if (!scrollMiniPlayerActive.value) return
+    if (process.env.IS_CAPACITOR) {
+      scrollMiniPlayerRect.value = getMobileMiniBarRect()
+      return
+    }
     // Only a drag/resize is positioning the player; a volume session must not
     // block re-docking, since its pointer-up path never snaps.
     if (scrollMiniPointerSession?.type === 'drag' || scrollMiniPointerSession?.type === 'resize') return
@@ -1394,6 +1622,8 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
 
   return {
     scrollMiniPlayerDragStyle,
+    mobileMiniBar,
+    mobileMiniBarOverlayStyle,
     beginScrollMiniPlayerDrag,
     moveScrollMiniPlayerDrag,
     finishScrollMiniPlayerDrag,
