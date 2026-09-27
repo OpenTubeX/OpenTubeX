@@ -116,22 +116,67 @@ test('description preview exposes links and a separate expansion control', async
   await expect(page.locator('.mobileSheet[open]')).toContainText('Description')
 })
 
-test('description metadata remains reachable without description text', async ({ app, page }) => {
+test('description preview shows metadata without description text', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   await setWindowSize(app, page, { width: 480, height: 800 })
   const watch = await watchViewHandle(page)
-  await watch.evaluate(async vm => {
-    vm.videoDescription = ''
-    vm.videoDescriptionHtml = ''
-    vm.videoTags = ['metadata-tag']
-    await vm.$nextTick()
-  })
+  const preview = page.locator('.phoneDescriptionPreview')
+  for (const metadata of [
+    { videoTags: ['metadata-tag', ...Array.from({ length: 20 }, (_, index) => `tag-${index}`)], videoGames: [] },
+    { videoTags: [], videoGames: [{ title: 'Example game', subtitle: '2026' }] },
+  ]) {
+    await watch.evaluate(async (vm, metadata) => {
+      vm.isLoading = true
+      await vm.$nextTick()
+      vm.videoDescription = ''
+      vm.videoDescriptionHtml = ''
+      vm.videoTags = metadata.videoTags
+      vm.videoGames = metadata.videoGames
+      vm.isLoading = false
+      await vm.$nextTick()
+    }, metadata)
 
-  await page.locator('.phoneDescriptionPreview')
-    .getByRole('button', { name: '...more', exact: true })
-    .click()
-  await expect(page.locator('.mobileSheet[open]')).toContainText('metadata-tag')
+    const heading = preview.locator(metadata.videoTags.length ? '.videoTags strong' : '.gamesHeading')
+    await expect(heading).toBeVisible()
+    expect(await heading.evaluate(element => {
+      const headingTop = element.getBoundingClientRect().top
+      const viewport = element.closest('.descriptionScroll').getBoundingClientRect()
+      return headingTop >= viewport.top - 1 && headingTop < viewport.bottom
+    })).toBe(true)
+    const firstItem = preview.locator(metadata.videoTags.length ? '.videoTagLink' : '.gameTitle').first()
+    const itemBounds = await firstItem.evaluate(element => {
+      const item = element.getBoundingClientRect()
+      const viewport = element.closest('.descriptionScroll').getBoundingClientRect()
+      return {
+        top: item.top - viewport.top,
+        bottom: item.bottom - viewport.top,
+        height: viewport.height,
+      }
+    })
+    expect(itemBounds.top, metadata.videoTags.length ? 'first tag' : 'game title').toBeGreaterThanOrEqual(-1)
+    expect(itemBounds.bottom, JSON.stringify(itemBounds))
+      .toBeLessThanOrEqual(itemBounds.height + 2)
+    expect(await preview.locator('.descriptionScroll').evaluate(element => element.clientHeight))
+      .toBeLessThan(150)
+    const morePosition = await preview.evaluate(element => {
+      const card = element.getBoundingClientRect()
+      const scroll = element.querySelector('.descriptionScroll').getBoundingClientRect()
+      const more = element.querySelector(':scope > .descriptionStatus').getBoundingClientRect()
+      return {
+        clearOfPreview: more.top >= scroll.bottom - 1,
+        bottomGap: card.bottom - more.bottom,
+        rightGap: card.right - more.right,
+      }
+    })
+    expect(morePosition.clearOfPreview, JSON.stringify(morePosition)).toBe(true)
+    expect(morePosition.bottomGap).toBeGreaterThanOrEqual(0)
+    expect(morePosition.bottomGap).toBeLessThanOrEqual(20)
+    expect(morePosition.rightGap).toBeLessThanOrEqual(20)
+  }
+
+  await preview.getByRole('button', { name: '...more', exact: true }).click()
+  await expect(page.locator('.mobileSheet[open]')).toContainText('Example game')
 })
 
 test('phone comments keep their inset and hide unavailable visibility actions', async ({ app, page }) => {

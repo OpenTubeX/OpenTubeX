@@ -910,6 +910,7 @@
           :description="videoDescription"
           :description-html="videoDescriptionHtml"
           :tags="videoTags"
+          :license="license"
           :games="videoGames"
           preview-only
           class="watchVideo phoneDescriptionPreview"

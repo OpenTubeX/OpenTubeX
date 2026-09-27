@@ -14,6 +14,11 @@
   padding-inline: 16px;
 }
 
+.videoDescription.short .descriptionScroll {
+  max-block-size: 4lh;
+  overflow-y: clip;
+}
+
 .videoDescription.alwaysExpanded .descriptionScroll {
   max-block-size: none;
   overflow: visible;
@@ -74,6 +79,7 @@
 
 .videoDescription.short {
   cursor: pointer;
+  padding-block-end: calc(16px + 1lh);
 }
 
 .descriptionStatus,
@@ -87,7 +93,7 @@
 .videoDescription.short .descriptionStatus {
   position: absolute;
   z-index: 1;
-  inset-block-end: calc(1lh + 12px);
+  inset-block-end: 8px;
   padding-block: 2px;
   inset-inline-end: 16px;
   backdrop-filter: var(--card-bg-blur, none);
@@ -131,10 +137,19 @@
 }
 
 .videoDescription.short .description {
-  /* Keep room for the expand control when only tags or games are available. */
+  /* Measure overflow in the text separately from the collapsed card. */
   min-block-size: 1lh;
   max-block-size: 4lh;
   overflow: hidden;
+}
+
+.videoDescription.short .description:empty {
+  min-block-size: 0;
+  margin-block: 0;
+}
+
+.descriptionContentEnd {
+  display: block;
 }
 
 .license {
