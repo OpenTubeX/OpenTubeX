@@ -1,11 +1,7 @@
-export function findLoadedSwipeTab(tabs, activeTabId, direction) {
+export function findSwipeTab(tabs, activeTabId, direction) {
   const index = tabs.findIndex(tab => tab.id === activeTabId)
   if (index < 0 || !tabs[index] || tabs[index].loadState !== 'loaded') return null
-
-  for (let next = index + direction; next >= 0 && next < tabs.length; next += direction) {
-    if (tabs[next].loadState === 'loaded') return tabs[next]
-  }
-  return null
+  return tabs[index + direction] ?? null
 }
 
 export function shouldFinishPageSwipe(distance, width, elapsed) {

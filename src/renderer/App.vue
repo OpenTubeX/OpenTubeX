@@ -641,7 +641,7 @@ import { getAppFontFamily } from './helpers/appFont'
 import { setupPhoneViewport } from './helpers/phoneViewport'
 import { createCapacitorUiScale } from './helpers/capacitorUiScale'
 import { usesCapacitorTabletLayout } from './helpers/capacitorLayout'
-import { findLoadedSwipeTab, shouldFinishPageSwipe } from './helpers/capacitorPageSwipe'
+import { findSwipeTab, shouldFinishPageSwipe } from './helpers/capacitorPageSwipe'
 import { getTabAccentColor } from './constants/tabColors'
 import { getThumbnailListStyles } from './constants/thumbnailSize'
 import {
@@ -703,7 +703,7 @@ const selectionRevision = computed(() => store.state.tabs.selectionRevision)
 const pageSwipeNeighborIds = computed(() => {
   if (!isCapacitor || activeTabId.value !== presentedTabId.value) return []
   return [-1, 1]
-    .map(direction => findLoadedSwipeTab(store.getters.getTabs, presentedTabId.value, direction)?.id)
+    .map(direction => findSwipeTab(store.getters.getTabs, presentedTabId.value, direction)?.id)
     .filter(Boolean)
 })
 
@@ -746,7 +746,7 @@ function movePageSwipe(event) {
   }
 
   const direction = distance < 0 ? 1 : -1
-  const target = findLoadedSwipeTab(store.getters.getTabs, pointer.fromId, direction)
+  const target = findSwipeTab(store.getters.getTabs, pointer.fromId, direction)
   pageSwipe.value = target
     ? {
         fromId: pointer.fromId,
@@ -767,7 +767,7 @@ async function finishPageSwipe(event, cancelled = false) {
   if (!swipe) return
 
   const commit = !cancelled && shouldFinishPageSwipe(swipe.offset, swipe.width, event.timeStamp - pointer.time) &&
-    findLoadedSwipeTab(store.getters.getTabs, swipe.fromId, swipe.direction)?.id === swipe.toId
+    findSwipeTab(store.getters.getTabs, swipe.fromId, swipe.direction)?.id === swipe.toId
   const reducedMotion = document.documentElement.dataset.reducedMotion === 'reduce' ||
     window.matchMedia('(prefers-reduced-motion: reduce)').matches
   if (!reducedMotion) {
@@ -806,7 +806,7 @@ async function finishPageSwipe(event, cancelled = false) {
   if (pageSwipe.value !== settledSwipe) return
   try {
     if (commit && activeTabId.value === swipe.fromId && presentedTabId.value === swipe.fromId &&
-        findLoadedSwipeTab(store.getters.getTabs, swipe.fromId, swipe.direction)?.id === swipe.toId) {
+        findSwipeTab(store.getters.getTabs, swipe.fromId, swipe.direction)?.id === swipe.toId) {
       await capacitorTabService.activateTab(swipe.toId)
     }
   } finally {
