@@ -156,22 +156,15 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 * Nix / NixOS / macOS: [Official Nix flake](https://github.com/OpenTubeX/nix) (`nix profile install github:OpenTubeX/nix`, with flakes enabled), supporting x86_64 and ARM64. See the [installation instructions](https://opentubex.org/downloads/#install-nix).
 * Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/opentubex-bin/) [![AUR version](https://img.shields.io/aur/version/opentubex-bin?label=AUR)](https://aur.archlinux.org/packages/opentubex-bin/)
 * Android: requires Android 8.0 or newer (API 26). Current APKs compile and target Android 16 (API 36). Install and update through the [OpenTubeX F-Droid repository](https://fdroid.opentubex.org/) or [Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/OpenTubeX/OpenTubeX).
+* iOS / iPadOS (experimental): requires 17.4 or later. Download the unsigned `opentubex-<version>-ios-unsigned.ipa` from [GitHub Releases](https://github.com/OpenTubeX/OpenTubeX/releases). Sign and install it with your Apple Account using one of the tools below. Opening the IPA in Files does not install it.
+
+  * **SideStore.** SideStore is recommended for regular use because it can refresh apps on the device through its local VPN. Follow the [official setup guide](https://docs.sidestore.io/docs/installation/prerequisites), then import the OpenTubeX IPA. Initial setup needs a computer. With a free Apple Account, refresh both SideStore and OpenTubeX within seven days, before either expires. You may need the computer again if the pairing file expires or SideStore stops opening.
+  * **iloader.** OpenTubeX has been tested with [iloader](https://iloader.app/) on a physical iPad. Install iloader on Linux, macOS, or Windows. Connect and trust your device, sign in with your Apple Account, and import the IPA. With a free account, reconnect to the computer and reinstall before the seven-day signature expires. For updates, use the same Apple Account and install over the existing app to keep its data.
+  * **AltStore Classic.** You can also use AltStore Classic, but refreshing requires [AltServer on a computer](https://faq.altstore.io/altstore-classic/altserver), over Wi-Fi or USB. AltStore PAL uses a different distribution method and cannot install this IPA.
+
+  After signing, trust your developer account under **Settings → General → VPN & Device Management** and enable **Settings → Privacy & Security → Developer Mode**. Restart when prompted. A free Apple Account allows three active sideloaded apps, including SideStore or AltStore. A paid Apple Developer membership allows longer signing periods but is optional.
 
 To update a Homebrew installation, run `brew update` followed by `brew upgrade --cask opentubex`. Both Apple Silicon and Intel Macs are supported. If macOS blocks the first launch, allow OpenTubeX in **System Settings → Privacy & Security**.
-
-### iOS / iPadOS (experimental)
-
-Requires iOS/iPadOS 17.4 or newer. Download the unsigned `opentubex-<version>-ios-unsigned.ipa` from [GitHub Releases](https://github.com/OpenTubeX/OpenTubeX/releases). The installer signs it with your Apple Account; opening the IPA in Files alone does not install it.
-
-* **SideStore — recommended for regular use:** follow the [official setup guide](https://docs.sidestore.io/docs/installation/prerequisites), then import the OpenTubeX IPA in SideStore. A computer is needed for initial setup, but subsequent refreshes run on the device using SideStore's local VPN. Free Apple Accounts still require refreshing **within seven days**; refresh both SideStore and OpenTubeX before they expire. A computer may be needed again if the pairing file expires or SideStore stops opening. This is the recommended refresh workflow, but OpenTubeX has so far been tested with iloader.
-* **iloader — tested with OpenTubeX on a physical iPad:** install [iloader](https://iloader.app/) on Linux, macOS, or Windows, connect and trust your device, sign in with your Apple Account, and import the IPA. With a free account, reconnect to the computer and install it again before the seven-day signature expires. When updating, use the same Apple Account and install over the existing app to retain its data.
-* **AltStore Classic:** another option, but refreshing still requires [AltServer on a computer](https://faq.altstore.io/altstore-classic/altserver), over Wi-Fi or USB. AltStore PAL is a different distribution method and cannot install this arbitrary IPA.
-
-After signing, trust your developer account under **Settings → General → VPN & Device Management** and enable **Settings → Privacy & Security → Developer Mode**, restarting when prompted. Free accounts allow three active sideloaded apps, including SideStore or AltStore. A paid Apple Developer membership permits longer signing periods, but is not required.
-
-The iOS port has been tested on a physical iPad for playback, fullscreen, touch menus, and settings. Broader device coverage remains in progress; see [#1279](https://github.com/OpenTubeX/OpenTubeX/issues/1279). Downloads, authenticated playback, translated audio, app-managed proxies, alternate icons, and closed-app subscription refresh are currently unavailable on iOS.
-
-To build from source, use macOS with Xcode 26.2, run `pnpm run ci` and `pnpm run capacitor:sync:ios`, then open `ios/App/App.xcodeproj`. Simulator builds need no Apple Account; device builds need signing. The build workflow provides unsigned IPA artifacts, and release workflows attach them to releases.
 
 <a href="https://snapcraft.io/opentubex">
   <picture>
