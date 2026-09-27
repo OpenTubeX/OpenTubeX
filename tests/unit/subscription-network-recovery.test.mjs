@@ -310,11 +310,11 @@ test('going offline during backoff stops probes until an online event', async t 
 })
 
 for (const feed of ['Videos', 'Shorts', 'Live']) {
-  test(`mobile ${feed} RSS refresh uses native HTTP when WebView CORS blocks YouTube`, async () => {
+  test(`mobile ${feed} RSS refresh uses native HTTP when WebView CORS blocks YouTube`, { timeout: 5000 }, async () => {
     const app = createRefresh({ feed, webCors: true })
     const refresh = app.refresh({ t: key => key })
     try {
-      await settle()
+      await refresh
       assert.equal(app.writes.filter(write => write.key.endsWith('CacheByChannel')).length, 20)
       assert.equal(app.toasts.length, 0)
       assert.deepEqual(app.events, ['completed', 'finished'])
