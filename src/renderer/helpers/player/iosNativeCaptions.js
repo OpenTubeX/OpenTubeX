@@ -22,10 +22,13 @@ export function bindIosNativeCaptions(video) {
     track?.dispatchEvent(new Event('cuechange'))
   }
 
+  syncCues()
   video.addEventListener('timeupdate', syncCues)
   video.addEventListener('seeked', syncCues)
+  video.textTracks.addEventListener('change', syncCues)
   return () => {
     video.removeEventListener('timeupdate', syncCues)
     video.removeEventListener('seeked', syncCues)
+    video.textTracks.removeEventListener('change', syncCues)
   }
 }

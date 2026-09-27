@@ -10145,6 +10145,7 @@ export default defineComponent({
           break
         }
         case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.TOGGLE_SKIP_SILENCE): {
+          if (process.env.IS_IOS) break
           event.preventDefault()
           const enabled = !skipSilence.value
           updateSkipSilence(enabled)
