@@ -1482,10 +1482,23 @@ test('mobile skip buttons flank the centered play button', async ({ app, page })
   await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs', 'capacitorPhoneLayout'))
 
   const view = await watchViewHandle(page)
-  await view.evaluate(component => {
-    component.$refs.player.$.props.canSkipPrevious = true
-    component.$refs.player.$.props.canSkipNext = true
+  await view.evaluate(async component => {
+    component.$store.commit('addPlaylist', {
+      _id: 'ft-playlist--mobile-skip-test',
+      playlistName: 'Mobile skip test',
+      videos: [
+        { videoId: 'dQw4w9WgXcQ', playlistItemId: 'first', title: 'First' },
+        { videoId: 'jNQXAC9IVRw', playlistItemId: 'middle', title: 'Middle' },
+        { videoId: '9bZkp7q19f0', playlistItemId: 'last', title: 'Last' },
+      ]
+    })
+    await component.$store.dispatch('updateUserPlaylistSortOrder', 'custom')
+    await component.tabRouter.push({
+      path: '/watch/jNQXAC9IVRw',
+      query: { playlistId: 'ft-playlist--mobile-skip-test', playlistType: 'user', playlistItemId: 'middle' }
+    })
   })
+  await expect.poll(() => view.evaluate(component => component.canSkipToPreviousVideo && component.canSkipToNextVideo)).toBe(true)
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
   const buttons = player.locator('.shaka-big-buttons-container')
   await player.hover()
@@ -1514,10 +1527,13 @@ test('mobile skip buttons flank the centered play button', async ({ app, page })
     const bounds = button.getBoundingClientRect()
     return bounds.x + bounds.width / 2
   })
-  await view.evaluate(component => {
-    component.$refs.player.$.props.canSkipPrevious = false
-    component.$refs.player.$.props.canSkipNext = true
+  await view.evaluate(async component => {
+    await component.tabRouter.push({
+      path: '/watch/dQw4w9WgXcQ',
+      query: { playlistId: 'ft-playlist--mobile-skip-test', playlistType: 'user', playlistItemId: 'first' }
+    })
   })
+  await expect.poll(() => view.evaluate(component => !component.canSkipToPreviousVideo && component.canSkipToNextVideo)).toBe(true)
   await expect(buttons.locator(':scope > button')).toHaveCount(2)
   expect(await buttons.locator('.shaka-play-button').evaluate(button => {
     const bounds = button.getBoundingClientRect()
