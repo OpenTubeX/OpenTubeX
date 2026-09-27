@@ -1847,6 +1847,7 @@ Context Menu:
   Load Tabs: 탭 불러오기
   Unload Tab: 탭 언로드
   Unload Tabs: 탭 언로드
+  Unload Tabs Failed: "선택한 탭을 언로드하지 못했습니다."
   Move Tab to Window: 탭을 창으로 이동
   Move Tabs to Window: 탭을 창으로 이동
   Open in a New Tab: 새 탭에서 열기

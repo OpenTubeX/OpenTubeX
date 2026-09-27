@@ -1526,6 +1526,7 @@ Context Menu:
   Load Tabs: טעינת הכרטיסיות
   Unload Tab: פריקת הכרטיסייה
   Unload Tabs: פריקת הכרטיסיות
+  Unload Tabs Failed: "לא ניתן לפרוק את הכרטיסיות שנבחרו."
   Move Tab to Window: העברת הכרטיסייה לחלון
   Move Tabs to Window: העברת הכרטיסיות לחלון
   Open in a New Tab: פתיחה בכרטיסייה חדשה

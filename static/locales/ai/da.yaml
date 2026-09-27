@@ -1555,6 +1555,7 @@ Context Menu:
   Load Tabs: Indlæs faner
   Unload Tab: Frigør fane
   Unload Tabs: Frigør faner
+  Unload Tabs Failed: "De valgte faner kunne ikke fjernes fra hukommelsen."
   Move Tab to Window: Flyt fane til vindue
   Move Tabs to Window: Flyt faner til vindue
   Open in a New Tab: Åbn i en ny fane

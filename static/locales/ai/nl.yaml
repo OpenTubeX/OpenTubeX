@@ -1535,6 +1535,7 @@ Context Menu:
   Load Tabs: Tabbladen laden
   Unload Tab: Tabblad uit geheugen verwijderen
   Unload Tabs: Tabbladen uit geheugen verwijderen
+  Unload Tabs Failed: "De geselecteerde tabbladen konden niet uit het geheugen worden verwijderd."
   Move Tab to Window: Tabblad naar venster verplaatsen
   Move Tabs to Window: Tabbladen naar venster verplaatsen
   Open in a New Tab: Openen in nieuw tabblad

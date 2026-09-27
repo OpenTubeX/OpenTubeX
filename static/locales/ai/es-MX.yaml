@@ -1815,6 +1815,7 @@ Context Menu:
   Load Tabs: Cargar pestañas
   Unload Tab: Descargar pestaña de la memoria
   Unload Tabs: Descargar pestañas de la memoria
+  Unload Tabs Failed: "No se pudieron descargar las pestañas seleccionadas."
   Move Tab to Window: Mover pestaña a una ventana
   Move Tabs to Window: Mover pestañas a una ventana
   Open in a New Tab: Abrir en una pestaña nueva

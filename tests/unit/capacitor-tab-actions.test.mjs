@@ -226,6 +226,42 @@ test('bulk unload activates an unselected tab before unloading the active select
   assert.deepEqual(calls, [['activate', 'pinned'], ['unload', 'first'], ['unload', 'middle']])
 })
 
+test('bulk unload reports a failed landing-tab creation', async t => {
+  const { actions, tabs, service, calls } = setup(t)
+  tabs.value = tabs.value.slice(0, 2).map(tab => ({ ...tab, loadState: 'loaded' }))
+  tabs.value.forEach(tab => actions.toggleTabSelection(tab.id))
+  service.createTab = async () => {
+    calls.push(['create'])
+    return null
+  }
+  await actions.runSelectedTabAction('unload')
+  assert.deepEqual(calls, [
+    ['create'],
+    ['toast', 'Context Menu.Unload Tabs Failed'],
+  ])
+  assert.equal(actions.runningSelectionAction.value, false)
+})
+
+test('bulk unload reports a failed replacement-tab activation', async t => {
+  const { actions, tabs, service, calls } = setup(t)
+  tabs.value = tabs.value.map(tab => ({
+    ...tab,
+    loadState: 'loaded',
+    isActive: tab.id === 'first',
+  }))
+  actions.toggleTabSelection('first')
+  service.activateTab = async id => {
+    calls.push(['activate', id])
+    return false
+  }
+  await actions.runSelectedTabAction('unload')
+  assert.deepEqual(calls, [
+    ['activate', 'pinned'],
+    ['toast', 'Context Menu.Unload Tabs Failed'],
+  ])
+  assert.equal(actions.runningSelectionAction.value, false)
+})
+
 for (const action of ['unload', 'reload']) {
   test(`a rejected bulk ${action} reports the failure and continues`, async t => {
     const { actions, service, calls } = setup(t)

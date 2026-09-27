@@ -1960,6 +1960,7 @@ Context Menu:
   Load Tabs: Naloži zavihke
   Unload Tab: Razbremeni zavihek
   Unload Tabs: Razbremeni zavihke
+  Unload Tabs Failed: "Izbranih zavihkov ni bilo mogoče odstraniti iz pomnilnika."
   Move Tab to Window: Premakni zavihek v okno
   Move Tabs to Window: Premakni zavihke v okno
   Open in a New Tab: Odpri v novem zavihku

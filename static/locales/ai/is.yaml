@@ -1507,6 +1507,7 @@ Context Menu:
   Load Tabs: Hlaða flipa
   Unload Tab: Losa flipa úr minni
   Unload Tabs: Losa flipa úr minni
+  Unload Tabs Failed: "Ekki tókst að fjarlægja valda flipa úr minni."
   Move Tab to Window: Færa flipa í glugga
   Move Tabs to Window: Færa flipa í glugga
   Open in a New Tab: Opna í nýjum flipa

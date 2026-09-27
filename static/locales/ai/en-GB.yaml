@@ -1467,6 +1467,7 @@ Context Menu:
   Load Tabs: Load Tabs
   Unload Tab: Unload Tab
   Unload Tabs: Unload Tabs
+  Unload Tabs Failed: "Could not unload the selected tabs."
   Move Tab to Window: Move Tab to Window
   Move Tabs to Window: Move Tabs to Window
   Open in a New Tab: Open in a New Tab

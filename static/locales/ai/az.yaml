@@ -1498,6 +1498,7 @@ Context Menu:
   Load Tabs: Vərəqləri yüklə
   Unload Tab: Vərəqni yaddaşdan boşalt
   Unload Tabs: Vərəqləri yaddaşdan boşalt
+  Unload Tabs Failed: "Seçilmiş vərəqləri yaddaşdan çıxarmaq mümkün olmadı."
   Move Tab to Window: Vərəqni pəncərəyə köçür
   Move Tabs to Window: Vərəqləri pəncərəyə köçür
   Open in a New Tab: Yeni vərəqdə aç

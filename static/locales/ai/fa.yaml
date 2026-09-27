@@ -1560,6 +1560,7 @@ Context Menu:
   Load Tabs: بارگیری زبانه‌ها
   Unload Tab: خارج کردن زبانه از حافظه
   Unload Tabs: خارج کردن زبانه‌ها از حافظه
+  Unload Tabs Failed: "بارگذاری‌زدایی زبانه‌های انتخاب‌شده ممکن نشد."
   Move Tab to Window: انتقال زبانه به پنجره
   Move Tabs to Window: انتقال زبانه‌ها به پنجره
   Open in a New Tab: باز کردن در زبانهٔ جدید

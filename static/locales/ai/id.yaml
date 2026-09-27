@@ -1494,6 +1494,7 @@ Context Menu:
   Load Tabs: Muat Tab
   Unload Tab: Bongkar Tab dari Memori
   Unload Tabs: Bongkar Tab dari Memori
+  Unload Tabs Failed: "Tab yang dipilih tidak dapat dilepas dari memori."
   Move Tab to Window: Pindahkan Tab ke Jendela
   Move Tabs to Window: Pindahkan Tab ke Jendela
   Open in a New Tab: Buka di Tab Baru

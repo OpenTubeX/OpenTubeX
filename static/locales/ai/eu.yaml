@@ -1501,6 +1501,7 @@ Context Menu:
   Load Tabs: Kargatu fitxak
   Unload Tab: Kendu fitxa memoriatik
   Unload Tabs: Kendu fitxak memoriatik
+  Unload Tabs Failed: "Ezin izan dira hautatutako fitxak memoriatik kendu."
   Move Tab to Window: Eraman fitxa leihora
   Move Tabs to Window: Eraman fitxak leihora
   Open in a New Tab: Ireki fitxa berri batean

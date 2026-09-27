@@ -1488,6 +1488,7 @@ Context Menu:
   Load Tabs: 載入分頁
   Unload Tab: 卸載分頁
   Unload Tabs: 卸載分頁
+  Unload Tabs Failed: "無法卸載所選分頁。"
   Move Tab to Window: 將分頁移至視窗
   Move Tabs to Window: 將分頁移至視窗
   Open in a New Tab: 在新分頁開啟

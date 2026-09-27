@@ -1509,6 +1509,7 @@ Context Menu:
   Load Tabs: Llwytho tabiau
   Unload Tab: Dadlwytho'r tab
   Unload Tabs: Dadlwytho tabiau
+  Unload Tabs Failed: "Methu dadlwytho'r tabiau a ddewiswyd."
   Move Tab to Window: Symud y tab i ffenestr
   Move Tabs to Window: Symud tabiau i ffenestr
   Open in a New Tab: Agor mewn tab newydd

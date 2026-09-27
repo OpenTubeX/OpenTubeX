@@ -1504,6 +1504,7 @@ Context Menu:
   Load Tabs: Učitaj kartice
   Unload Tab: Ukloni karticu iz memorije
   Unload Tabs: Ukloni kartice iz memorije
+  Unload Tabs Failed: "Odabrane kartice nije bilo moguće ukloniti iz memorije."
   Move Tab to Window: Premjesti karticu u prozor
   Move Tabs to Window: Premjesti kartice u prozor
   Open in a New Tab: Otvori u novoj kartici

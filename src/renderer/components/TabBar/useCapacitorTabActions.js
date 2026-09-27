@@ -155,11 +155,19 @@ export function useCapacitorTabActions({
       const ids = selectedTabs.value.map(tab => tab.id)
       if (action === 'unload' && selectedTabs.value.some(canUnloadTab)) {
         const unselectedTabs = tabs.value.filter(tab => !ids.includes(tab.id))
+        let landingReady = true
         if (unselectedTabs.length === 0) {
-          if (!await service.createTab()) return
+          landingReady = await service.createTab()
         } else if (tabs.value.some(tab => tab.isActive && ids.includes(tab.id) && canUnloadTab(tab))) {
           const landing = unselectedTabs.find(tab => tab.loadState === 'loaded') ?? unselectedTabs[0]
-          if (!await service.activateTab(landing.id)) return
+          landingReady = await service.activateTab(landing.id)
+        }
+        if (!landingReady) {
+          showToast({
+            message: t('Context Menu.Unload Tabs Failed'),
+            icon: ['fas', 'circle-exclamation'],
+          })
+          return
         }
       }
       for (const id of ids) {

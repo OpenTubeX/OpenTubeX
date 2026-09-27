@@ -1519,6 +1519,7 @@ Context Menu:
   Load Tabs: Завантажити вкладки
   Unload Tab: Вивантажити вкладку
   Unload Tabs: Вивантажити вкладки
+  Unload Tabs Failed: "Не вдалося вивантажити вибрані вкладки."
   Move Tab to Window: Перемістити вкладку до вікна
   Move Tabs to Window: Перемістити вкладки до вікна
   Open in a New Tab: Відкрити в новій вкладці

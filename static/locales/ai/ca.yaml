@@ -1985,6 +1985,7 @@ Context Menu:
   Load Tabs: Carrega les pestanyes
   Unload Tab: Descarrega la pestanya
   Unload Tabs: Descarrega les pestanyes
+  Unload Tabs Failed: "No s'han pogut descarregar les pestanyes seleccionades."
   Move Tab to Window: Mou la pestanya a una finestra
   Move Tabs to Window: Mou les pestanyes a una finestra
   Open in a New Tab: Obre en una pestanya nova

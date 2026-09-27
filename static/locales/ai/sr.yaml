@@ -1549,6 +1549,7 @@ Context Menu:
   Load Tabs: Учитај картице
   Unload Tab: Уклони картицу из меморије
   Unload Tabs: Уклони картице из меморије
+  Unload Tabs Failed: "Изабране картице није могуће уклонити из меморије."
   Move Tab to Window: Премести картицу у прозор
   Move Tabs to Window: Премести картице у прозор
   Open in a New Tab: Отвори у новој картици

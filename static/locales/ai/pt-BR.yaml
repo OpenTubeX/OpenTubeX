@@ -1486,6 +1486,7 @@ Context Menu:
   Load Tabs: Carregar guias
   Unload Tab: Baixar guia
   Unload Tabs: Baixar guias
+  Unload Tabs Failed: "Não foi possível descarregar as abas selecionadas."
   Move Tab to Window: Mover guia para a janela
   Move Tabs to Window: Mover guias para a janela
   Open in a New Tab: Abrir numa nova guia
