@@ -40,7 +40,7 @@
 }
 
 .select.containsTooltip > .selectSearchHighlightFrame {
-  inset-inline-end: -30px;
+  inset-inline-end: -32px;
 }
 
 .select-text {
@@ -292,7 +292,7 @@
 
 /* active state */
 .select-text ~ .select-label {
-  color: var(--accent-color);
+  color: var(--primary-text-color);
   inset-block-start: -20px;
   transition: 0.2s ease all;
   font-size: 14px;
@@ -347,7 +347,7 @@
   }
 
   .select.containsTooltip {
-    inline-size: calc(100% - 28px);
+    inline-size: calc(100% - 32px);
   }
 }
 
