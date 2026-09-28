@@ -239,7 +239,10 @@ async function answerFromSource(issue, content, key) {
       signal: AbortSignal.timeout(90000)
     })
   })
-  if (!response.ok) throw new Error(`OpenAI answer request failed: HTTP ${response.status}`)
+  if (!response.ok) {
+    const error = await response.json().catch(() => null)
+    throw new Error(`OpenAI answer request failed: HTTP ${response.status}: ${error?.error?.message || 'unknown reason'}`)
+  }
   const result = await response.json()
   if (result.status !== 'completed') throw new Error(`OpenAI answer response was ${result.status}`)
   const output = result.output.flatMap(item => item.content || [])
@@ -327,8 +330,13 @@ async function main() {
   if (process.argv.includes('--backfill')) {
     const reassess = process.argv.includes('--reassess')
     const dryRun = process.argv.includes('--dry-run')
+    const selectedNumber = process.env.TRIAGE_NUMBER
+    if (selectedNumber && (!/^\d+$/.test(selectedNumber) || Number(selectedNumber) < 1)) {
+      throw new Error('Invalid TRIAGE_NUMBER')
+    }
     let failures = 0
-    for (const number of openIssueNumbers(owner, repo)) {
+    const numbers = selectedNumber ? [Number(selectedNumber)] : openIssueNumbers(owner, repo)
+    for (const number of numbers) {
       try {
         await triageIssue(owner, repo, number, { backfill: true, reassess, dryRun })
       } catch (error) {

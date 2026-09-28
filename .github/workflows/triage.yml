@@ -11,6 +11,9 @@ on:
         description: Preview decisions without writing to issues
         type: boolean
         default: false
+      number:
+        description: Optional single open issue number
+        type: string
   issues:
     types: [opened, reopened]
   issue_comment:
@@ -87,3 +90,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          TRIAGE_NUMBER: ${{ inputs.number }}
