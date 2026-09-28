@@ -39,8 +39,9 @@ test('tablet swipe docks toward the bottom bar', async ({ app, page }) => {
   await page.evaluate(() => {
     const player = document.querySelector('.ftVideoPlayer')
     new MutationObserver(() => {
-      const top = player.style.getPropertyValue('--mobile-mini-top')
-      if (top) window.lastMiniMorphTop = Number.parseFloat(top)
+      if (player.hasAttribute('data-mobile-mini-morph')) {
+        window.lastMiniMorphTop = player.getBoundingClientRect().top
+      }
     }).observe(player, { attributes: true, attributeFilter: ['style'] })
   })
   const bounds = await player.boundingBox()
@@ -59,6 +60,42 @@ test('tablet swipe docks toward the bottom bar', async ({ app, page }) => {
   } finally {
     await cdp.detach()
   }
+})
+
+test('bottom bar can close a video retained after leaving Watch', async ({ app, page }) => {
+  const player = await openMobilePlayer(app, page)
+  const bounds = await player.boundingBox()
+  const start = { x: bounds.x + bounds.width / 2, y: bounds.y + 100 }
+  const cdp = await page.context().newCDPSession(page)
+  try {
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] })
+    for (const distance of [20, 40, 60, 80, 100]) {
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...start, y: start.y + distance }] })
+      await page.waitForTimeout(30)
+    }
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect(page).not.toHaveURL(/#\/watch\//)
+    await page.getByRole('button', { name: 'Hide mini player' }).last().click()
+    await expect(page.locator('.mobileMiniBarOverlay')).toHaveCount(0)
+    await expect(page.locator('.ftVideoPlayer.scrollMiniPlayer')).toHaveCount(0)
+  } finally {
+    await cdp.detach()
+  }
+})
+
+test('bottom bar disappears when its video is hidden on another tab', async ({ app, page }) => {
+  const player = await openMobilePlayer(app, page)
+  await player.locator('video').first().evaluate(element => element.play())
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    .dispatch('updateScrollMiniPlayerOnAllTabs', true))
+  await page.locator('.tabBar .newTabButton').click()
+  await expect(player).toHaveClass(/scrollMiniPlayer/)
+  const overlay = page.locator('.mobileMiniBarOverlay')
+  await expect(overlay).toBeVisible()
+  await overlay.getByRole('button', { name: 'Hide mini player' }).click()
+  await expect(player).toHaveClass(/scrollMiniPlayerDismissed/)
+  await expect(overlay).toHaveCount(0)
 })
 
 test('mobile bar details fade at the destination during both swipe directions', async ({ app, page }) => {
@@ -356,8 +393,7 @@ test('video keeps its shape while dragging into a shorter player', async ({ app,
     window.lastMiniMorphTop = null
     new MutationObserver(() => {
       if (player.hasAttribute('data-mobile-mini-morph')) {
-        const top = player.style.getPropertyValue('--mobile-mini-top')
-        if (top) window.lastMiniMorphTop = Number.parseFloat(top)
+        window.lastMiniMorphTop = player.getBoundingClientRect().top
       }
     }).observe(player, { attributes: true, attributeFilter: ['style'] })
   })
@@ -396,8 +432,7 @@ test('video keeps its shape while dragging into a shorter player', async ({ app,
       window.lastRestoreMorphTop = null
       new MutationObserver(() => {
         if (element.hasAttribute('data-mobile-mini-morph')) {
-          const top = element.style.getPropertyValue('--mobile-mini-top')
-          if (top) window.lastRestoreMorphTop = Number.parseFloat(top)
+          window.lastRestoreMorphTop = element.getBoundingClientRect().top
         }
       }).observe(element, { attributes: true, attributeFilter: ['style'] })
     })
