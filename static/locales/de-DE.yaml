@@ -1247,6 +1247,7 @@ Settings:
     Excluded Channels:
       Excluded Channels: Ausgenommene Kanäle
       Tooltip: Gib eine Kanal-ID ein, damit SponsorBlock-Segmente in Videos dieses Kanals nicht übersprungen werden. Die ID muss exakt übereinstimmen; Groß- und Kleinschreibung wird unterschieden.
+      Disabled Message: Einige Kanäle wurden anhand ihrer ID ausgeschlossen und werden nicht verarbeitet. Die Funktion ist gesperrt, während diese IDs aktualisiert werden.
     Notify when sponsor segment is skipped: Hinweis nach dem Überspringen eines Segments anzeigen
     Skip notification timeout: Timeout für Benachrichtigung bei Überspringen
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock-API-URL (Standard ist https://sponsor.ajay.app)
@@ -2149,6 +2150,8 @@ Video:
   Station: Station
   Playlist:
     Unavailable videos are hidden: 1 nicht verfügbares Video ist ausgeblendet | {count} nicht verfügbare Videos sind ausgeblendet
+  Enable SponsorBlock on Channel: SponsorBlock auf Kanal aktivieren
+  Disable SponsorBlock on Channel: SponsorBlock auf Kanal deaktivieren
 Playlist:
   #& About
   Close Playlist: Playlist schließen
@@ -3077,3 +3080,5 @@ Tray:
 Tray Icon:
   Title: "Tray-Symbol"
   Follow App Theme: "App-Design folgen"
+SponsorBlock Disabled on Channel: SponsorBlock auf {channel} deaktiviert
+SponsorBlock Enabled on Channel: SponsorBlock auf {channel} aktiviert
