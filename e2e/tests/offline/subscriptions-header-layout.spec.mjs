@@ -437,6 +437,40 @@ test.describe('subscriptions header layout', () => {
     expect(refreshWidget.top).toBeLessThan(tabs.bottom)
   })
 
+  for (const uiScale of [100, 95]) {
+    test(`centers the refresh status and button on the tabs when they share a tablet row at ${uiScale}% scale`, async ({ app, page }) => {
+      await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
+        BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale / 100)
+      }, uiScale)
+      await goTo(page, 'subscriptions')
+      await setWindowWidth(app, page, 1200)
+      await expect(page.locator('.subscriptionsHeader')).not.toHaveClass(/singleRow/)
+
+      const layout = await page.evaluate(() => {
+        const center = selector => {
+          const rect = document.querySelector(selector).getBoundingClientRect()
+          return (rect.top + rect.bottom) / 2
+        }
+        const timestamp = document.querySelector('.headerRefreshWidget > .lastRefreshTimestamp')
+        const text = document.createRange()
+        text.selectNodeContents(timestamp)
+        return {
+          tabs: center('.tabs'),
+          timestamp: center('.headerRefreshWidget > .lastRefreshTimestamp'),
+          refresh: center('.headerRefreshWidget .refreshButton'),
+          timestampLines: text.getClientRects().length,
+          tabsBottom: document.querySelector('.tabs').getBoundingClientRect().bottom,
+          timestampTop: timestamp.getBoundingClientRect().top
+        }
+      })
+
+      expect(layout.timestampLines).toBe(1)
+      expect(layout.timestampTop).toBeLessThan(layout.tabsBottom)
+      expect(Math.abs(layout.timestamp - layout.tabs)).toBeLessThanOrEqual(2)
+      expect(Math.abs(layout.refresh - layout.tabs)).toBeLessThanOrEqual(2)
+    })
+  }
+
   test('moves the controls below the tabs before the tabs wrap', async ({ app, page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
     await expect(page.locator('.subscriptionsHeader')).toHaveClass(/singleRow/)
