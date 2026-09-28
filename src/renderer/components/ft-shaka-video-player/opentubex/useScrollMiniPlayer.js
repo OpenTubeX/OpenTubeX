@@ -308,22 +308,25 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       style.setProperty('--mobile-mini-top', `${from.top}px`)
       style.setProperty('--mobile-mini-width', `${from.width}px`)
       style.setProperty('--mobile-mini-height', `${from.height}px`)
+      style.setProperty('--mobile-mini-video-base-left', `${videoFrom.left}px`)
+      style.setProperty('--mobile-mini-video-base-top', `${videoFrom.top}px`)
       style.setProperty('--mobile-mini-video-base-width', `${videoFrom.width}px`)
       style.setProperty('--mobile-mini-video-base-height', `${videoFrom.height}px`)
       element.setAttribute('data-mobile-mini-morph', '')
     }
-    const x = (to.left - from.left) * progress
-    const y = (to.top - from.top) * progress
-    const scaleX = interpolate(1, to.width / from.width)
-    const scaleY = interpolate(1, to.height / from.height)
-    style.setProperty('transform', `translate(${x}px, ${y}px) scale(${scaleX}, ${scaleY})`, 'important')
     const videoWidth = interpolate(videoFrom.width, videoTo.width)
     const videoHeight = interpolate(videoFrom.height, videoTo.height)
-    const videoScale = Math.min(videoWidth / videoFrom.width, videoHeight / videoFrom.height)
-    const videoLeft = interpolate(videoFrom.left, videoTo.left) + (videoWidth - videoFrom.width * videoScale) / 2
-    const videoTop = interpolate(videoFrom.top, videoTo.top) + (videoHeight - videoFrom.height * videoScale) / 2
-    video.value?.style.setProperty('--mobile-mini-video-transform',
-      `translate(${videoLeft / scaleX}px, ${videoTop / scaleY}px) scale(${videoScale / scaleX}, ${videoScale / scaleY})`)
+    const videoScale = Math.max(videoWidth / videoFrom.width, videoHeight / videoFrom.height)
+    const videoLeft = interpolate(from.left + videoFrom.left, to.left + videoTo.left) +
+      (videoWidth - videoFrom.width * videoScale) / 2
+    const videoTop = interpolate(from.top + videoFrom.top, to.top + videoTo.top) +
+      (videoHeight - videoFrom.height * videoScale) / 2
+    const x = videoLeft - from.left - videoFrom.left * videoScale
+    const y = videoTop - from.top - videoFrom.top * videoScale
+    style.setProperty('transform', `translate(${x}px, ${y}px) scale(${videoScale})`, 'important')
+    const cropX = Math.max(0, (videoFrom.width * videoScale - videoWidth) / (2 * videoScale))
+    const cropY = Math.max(0, (videoFrom.height * videoScale - videoHeight) / (2 * videoScale))
+    video.value?.style.setProperty('--mobile-mini-video-clip', `inset(${cropY}px ${cropX}px)`)
     const opacity = restoring
       ? Math.max(0, 1 - progress / 0.5)
       : Math.min(1, Math.max(0, (progress - 0.2) / 0.4))
@@ -335,9 +338,10 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     if (!element) return
     element.removeAttribute('data-mobile-mini-morph')
     element.style.removeProperty('transform')
-    video.value?.style.removeProperty('--mobile-mini-video-transform')
+    video.value?.style.removeProperty('--mobile-mini-video-clip')
     for (const name of [
       '--mobile-mini-left', '--mobile-mini-top', '--mobile-mini-width', '--mobile-mini-height',
+      '--mobile-mini-video-base-left', '--mobile-mini-video-base-top',
       '--mobile-mini-video-base-width', '--mobile-mini-video-base-height'
     ]) element.style.removeProperty(name)
   }

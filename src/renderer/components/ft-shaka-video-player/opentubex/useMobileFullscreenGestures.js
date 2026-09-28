@@ -60,7 +60,7 @@ export function useMobileFullscreenGestures({
   }
 
   function isSwipeControlTarget(target) {
-    return target instanceof Element && target.closest('.shaka-controls-button-panel, .shaka-play-button, .scrollMiniPlayPause, .scrollMiniPointerLayer') !== null
+    return target instanceof Element && target.closest('.shaka-controls-button-panel, .shaka-play-button, .scrollMiniPlayPause, .scrollMiniPointerLayer, .mobileMiniBarThumbnailReturn') !== null
   }
 
   function startMobileFullscreenGesture(event) {
@@ -255,7 +255,18 @@ export function useMobileFullscreenGestures({
       miniPlayerDrag.finish(gesture.distance >= 64)
       return true
     }
-    if (gesture.restoring) return false
+    if (gesture.restoring) {
+      const thumbnail = event.target instanceof Element && event.target.closest('.mobileMiniBarThumbnailReturn')
+      if (thumbnail && performance.now() - gesture.startTime <= 450 &&
+        Math.hypot(event.clientX - gesture.startX, event.clientY - gesture.startY) <= 12) {
+        mobileControlSuppressClickUntil = performance.now() + 350
+        event.preventDefault()
+        event.stopImmediatePropagation()
+        miniPlayerDrag.returnToVideo()
+        return true
+      }
+      return false
+    }
     if (gesture.adjusting) {
       adjustments.finish()
       const container = getContainer()

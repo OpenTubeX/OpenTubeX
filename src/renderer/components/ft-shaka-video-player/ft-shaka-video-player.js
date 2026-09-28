@@ -5153,6 +5153,7 @@ export default defineComponent({
         move: (x, y) => moveScrollMiniPlayerDrag(x, y),
         finish: commit => finishScrollMiniPlayerDrag(commit),
         cancel: () => cancelScrollMiniPlayerDrag(),
+        returnToVideo: () => scrollMiniScrollToTop(),
       },
       setFullscreenMetadata,
       setShowUiOnPaused,
