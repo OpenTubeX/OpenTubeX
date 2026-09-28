@@ -165,12 +165,6 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
   * **After signing.** Trust your developer account under **Settings → General → VPN & Device Management** and enable **Settings → Privacy & Security → Developer Mode**. Restart when prompted. A free Apple Account allows three active sideloaded apps, including SideStore or AltStore. A paid Apple Developer membership allows longer signing periods but is optional.
   * **Player limitation.** Silence skipping is unavailable on iOS/iPadOS because WebKit does not reliably provide decoded streaming audio to its analyser.
 
-To update a Homebrew installation, run `brew update` followed by `brew upgrade --cask opentubex`. Both Apple Silicon and Intel Macs are supported. If macOS blocks the first launch, allow OpenTubeX in **System Settings → Privacy & Security**.
-
-iOS bundles Python and yt-dlp for local stream extraction and downloads. Downloads save to a folder selected in Files and run while the app is open; completed compatible media can play in the app's native player. YouTube video downloads combine compatible H.264 video and M4A audio tracks on-device without FFmpeg. Authenticated playback, translated audio, app-managed proxies, alternate icons, and closed-app subscription refresh are currently unavailable on iOS.
-
-To build the iOS app from source, use macOS with Xcode 26.2, GitHub CLI authenticated with `gh auth login` or `GH_TOKEN`, and Python pip. Run `pnpm run ci` and `pnpm run capacitor:sync:ios`, then open `ios/App/App.xcodeproj`. The sync command downloads a pinned iOS Python runtime and yt-dlp wheels. Simulator builds need no Apple Account; device builds need signing. The build workflow provides unsigned IPA artifacts, and release workflows attach them to releases.
-
 <a href="https://snapcraft.io/opentubex">
   <picture>
     <source media="(prefers-color-scheme: light)" srcset="https://snapcraft.io/en/light/install.svg">
