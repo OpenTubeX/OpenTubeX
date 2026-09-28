@@ -844,7 +844,7 @@ async function chooseBrowserProfilePath() {
 <style scoped>
 .externalSoftwareTools {
   --external-software-select-gutter: 70px;
-  --external-software-help-width: 28px;
+  --external-software-help-width: 32px;
 
   align-items: stretch;
   display: grid;
@@ -1034,7 +1034,7 @@ async function chooseBrowserProfilePath() {
 
 @container settings-content (width <= 460px) {
   .externalSoftwareTools {
-    --external-software-select-gutter: 28px;
+    --external-software-select-gutter: 32px;
   }
 
   .externalSoftwareTool {

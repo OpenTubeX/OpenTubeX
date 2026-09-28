@@ -2606,7 +2606,7 @@ for (const theme of ['light', 'dark']) {
       link.textContent = 'Description link'
       document.querySelector('.description').append(link)
     })
-    for (const selector of ['.capacitorTabletTabTitle', '.description a[href="https://example.com/contrast-test"]', '.commentTitleAction', '.commentReplyContinuationButton']) {
+    for (const selector of ['.capacitorTabletTabTitle', '.description a[href="https://example.com/contrast-test"]', '.commentTitleAction', '.commentReplyContinuationButton', '.commentHeader .select-label']) {
       const element = page.locator(selector).first()
       await expect(element).toBeAttached()
       const ratio = await element.evaluate(element => {
