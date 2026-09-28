@@ -4258,6 +4258,80 @@ test.describe('watch page', () => {
     await watchComponent.dispose()
   })
 
+  test('preserves collapsed card height with short metadata', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await watchComponent.evaluate(async component => {
+      const view = component.proxy
+      view.isLoading = true
+      await view.$nextTick()
+      view.videoDescription = ''
+      view.videoDescriptionHtml = ''
+      view.videoTags = ['tag']
+      view.videoGames = []
+      view.license = null
+      view.isLoading = false
+      await view.$nextTick()
+    })
+
+    const card = page.locator(`${activeTab} .videoDescription`)
+    for (const scale of [1, 1.25]) {
+      await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+      await expect(card).toHaveClass(/short/)
+      const layout = await card.evaluate(element => {
+        const scroll = element.querySelector('.descriptionScroll')
+        const line = document.createElement('span')
+        line.style.position = 'absolute'
+        line.style.height = '1lh'
+        scroll.append(line)
+        const lineHeight = line.getBoundingClientRect().height
+        line.remove()
+        return {
+          footerHeight: element.getBoundingClientRect().bottom -
+            element.querySelector('.descriptionContentEnd').getBoundingClientRect().top,
+          lineHeight,
+        }
+      })
+      expect(layout.footerHeight).toBeCloseTo(16 + layout.lineHeight, 0)
+    }
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1))
+    await watchComponent.dispose()
+  })
+
+  test('keeps the four-line description expansion threshold', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    const card = page.locator(`${activeTab} .videoDescription`)
+
+    for (const scale of [1, 1.25]) {
+      await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+      for (const lineCount of [4, 5]) {
+        await watchComponent.evaluate(async (component, lineCount) => {
+          const view = component.proxy
+          view.isLoading = true
+          await view.$nextTick()
+          view.videoDescription = Array.from({ length: lineCount }, (_, index) => `Line ${index + 1}`).join('\n')
+          view.videoDescriptionHtml = ''
+          view.videoTags = []
+          view.videoGames = []
+          view.license = null
+          view.isLoading = false
+          await view.$nextTick()
+        }, lineCount)
+        if (lineCount === 4) {
+          await expect(card).not.toHaveClass(/short/)
+        } else {
+          await expect(card).toHaveClass(/short/)
+          await expect(card.locator(':scope > .descriptionStatus')).toBeVisible()
+        }
+      }
+    }
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1))
+    await watchComponent.dispose()
+  })
+
   test('fades collapsed description content at the bottom of the card', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
@@ -4281,15 +4355,34 @@ test.describe('watch page', () => {
       await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
       await expect(card).toContainClass('short')
       const layout = await scroller.evaluate(element => {
-        const card = element.closest('.videoDescription').getBoundingClientRect()
+        const cardElement = element.closest('.videoDescription')
+        const card = cardElement.getBoundingClientRect()
         const viewport = element.getBoundingClientRect()
         const more = element.parentElement.querySelector(':scope > .descriptionStatus').getBoundingClientRect()
+        const line = document.createElement('span')
+        line.style.display = 'block'
+        line.style.height = '1lh'
+        element.append(line)
+        const lineHeight = line.getBoundingClientRect().height
+        line.remove()
+        const description = element.querySelector('.description')
+        element.style.maxBlockSize = '4lh'
+        description.style.maxBlockSize = '4lh'
+        cardElement.style.paddingBlockEnd = 'calc(16px + 1lh)'
+        const previousCardHeight = cardElement.getBoundingClientRect().height
+        element.style.removeProperty('max-block-size')
+        description.style.removeProperty('max-block-size')
+        cardElement.style.removeProperty('padding-block-end')
         return {
           bottomGap: card.bottom - viewport.bottom,
           moreOverlapsContent: more.top < viewport.bottom,
           mask: getComputedStyle(element).maskImage,
+          visibleLines: viewport.height / lineHeight,
+          heightDifference: card.height - previousCardHeight,
         }
       })
+      expect(layout.visibleLines).toBeCloseTo(5, 1)
+      expect(layout.heightDifference).toBeCloseTo(0, 0)
       expect(layout.bottomGap).toBeGreaterThanOrEqual(0)
       expect(layout.bottomGap).toBeLessThanOrEqual(24)
       expect(layout.moreOverlapsContent).toBe(true)
