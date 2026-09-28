@@ -71,6 +71,8 @@ let removeSettingsProgressListener = null
 
 const capacitor = {
   isBundledIosRuntime: !!process.env.IS_IOS,
+  ytDlpRegisterTwitchVod: urls => native.registerTwitchVod({ urls }),
+  ytDlpUnregisterTwitchVod: id => native.unregisterTwitchVod({ id }),
   async ytDlpDownload(payload, retryDownloadId) {
     try {
       if (!store.getters.getEnableDownloads) return { error: 'downloads-disabled' }
