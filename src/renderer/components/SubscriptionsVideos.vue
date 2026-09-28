@@ -352,7 +352,8 @@ useSubscriptionChannelUpdates('videos', () => {
   // channel response can make the refresh itself slower than the requests.
   // Keep the cached feed visible and publish the final list when it finishes.
   if (!subscriptionCacheReady.value) return
-  if (store.getters.getSubscriptionFeedRefreshInProgress && isLargeCachedFeed.value) {
+  if (store.getters.getSubscriptionFeedRefreshInProgress &&
+    (isLargeCachedFeed.value || deferredChannelUpdates)) {
     deferredChannelUpdates = true
     return
   }

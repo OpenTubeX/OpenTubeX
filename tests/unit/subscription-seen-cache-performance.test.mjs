@@ -3,6 +3,21 @@ import test from 'node:test'
 import { computed, reactive, ref } from 'vue'
 import { applySubscriptionSeenVideosToCache } from '../../src/renderer/helpers/subscription-seen-videos.js'
 
+test('looking up one cached channel does not scan every channel with seen marks', () => {
+  let reads = 0
+  const cache = reactive(Object.fromEntries(Array.from({ length: 100 }, (_, channel) => [channel, {
+    videos: Array.from({ length: 36 }, (_, video) => ({
+      get videoId() { reads++; return `${channel}-${video}` },
+      isNewInSubscriptionFeed: true
+    }))
+  }])))
+  const feed = computed(() => applySubscriptionSeenVideosToCache(cache, '[{"videoId":"0-0","seenAt":1000}]'))
+
+  assert.equal(feed.value[0].videos[0].isNewInSubscriptionFeed, false)
+  assert.ok(reads <= 40, `one channel lookup read ${reads} entries`)
+  assert.equal(Object.keys(feed.value).length, 100)
+})
+
 test('refreshing a channel does not rescan seen state in unchanged channels', () => {
   let reads = 0
   const cache = reactive(Object.fromEntries(Array.from({ length: 933 }, (_, channel) => [channel, {
