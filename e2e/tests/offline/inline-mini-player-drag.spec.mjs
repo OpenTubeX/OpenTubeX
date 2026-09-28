@@ -394,7 +394,10 @@ test('video keeps its shape while dragging into a shorter player', async ({ app,
     window.lastMiniMorphTop = null
     new MutationObserver(() => {
       if (player.hasAttribute('data-mobile-mini-morph')) {
-        window.lastMiniMorphTop = player.getBoundingClientRect().top
+        const video = player.querySelector('video')
+        const crop = Number.parseFloat(getComputedStyle(video).clipPath.slice(6)) || 0
+        const scale = new DOMMatrixReadOnly(getComputedStyle(player).transform).d
+        window.lastMiniMorphTop = video.getBoundingClientRect().top + crop * scale
       }
     }).observe(player, { attributes: true, attributeFilter: ['style'] })
   })
@@ -423,17 +426,20 @@ test('video keeps its shape while dragging into a shorter player', async ({ app,
       element.style.height = '76px'
     })
     await page.waitForTimeout(300)
-    const barBounds = await player.boundingBox()
     const morphTop = await page.evaluate(() => window.lastMiniMorphTop)
     expect(morphTop).toBeLessThan(await page.evaluate(() => window.innerHeight))
-    expect(Math.abs(barBounds.y - morphTop)).toBeLessThan(2)
+    const barVideo = await video.boundingBox()
+    expect(Math.abs(barVideo.y - morphTop)).toBeLessThan(2)
     await player.evaluate(element => element.classList.add('mobileMiniBar'))
     await expect(player).toHaveCSS('touch-action', 'none')
     await player.evaluate(element => {
       window.lastRestoreMorphTop = null
       new MutationObserver(() => {
         if (element.hasAttribute('data-mobile-mini-morph')) {
-          window.lastRestoreMorphTop = element.getBoundingClientRect().top
+          const video = element.querySelector('video')
+          const crop = Number.parseFloat(getComputedStyle(video).clipPath.slice(6)) || 0
+          const scale = new DOMMatrixReadOnly(getComputedStyle(element).transform).d
+          window.lastRestoreMorphTop = video.getBoundingClientRect().top + crop * scale
         }
       }).observe(element, { attributes: true, attributeFilter: ['style'] })
     })
@@ -465,7 +471,60 @@ test('video keeps its shape while dragging into a shorter player', async ({ app,
     expect(restoreTops.length).toBeGreaterThan(0)
     expect(Math.max(...restoreTops)).toBeLessThan(await page.evaluate(() => innerHeight))
     const restoreTop = await page.evaluate(() => window.lastRestoreMorphTop)
-    expect(Math.abs((await player.boundingBox()).y - restoreTop)).toBeLessThan(2)
+    expect(Math.abs((await video.boundingBox()).y - restoreTop)).toBeLessThan(2)
+  } finally {
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }).catch(() => {})
+    await cdp.detach()
+  }
+})
+
+test('mobile video moves to the bottom bar without stretching its player', async ({ app, page }) => {
+  const player = await openMobilePlayer(app, page)
+  const bounds = await player.boundingBox()
+  const start = { x: bounds.x + bounds.width / 2, y: bounds.y + 100 }
+  const cdp = await page.context().newCDPSession(page)
+  try {
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] })
+    await cdp.send('Input.dispatchTouchEvent', {
+      type: 'touchMove', touchPoints: [{ ...start, y: start.y + 100 }]
+    })
+    await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
+    const scale = await player.evaluate(element => {
+      const matrix = new DOMMatrixReadOnly(getComputedStyle(element).transform)
+      return { x: matrix.a, y: matrix.d }
+    })
+    expect(Math.abs(scale.x - scale.y)).toBeLessThan(0.01)
+  } finally {
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+    await cdp.detach()
+  }
+})
+
+test('tapping the bottom bar video returns to Watch', async ({ app, page }) => {
+  const player = await openMobilePlayer(app, page)
+  const bounds = await player.boundingBox()
+  const start = { x: bounds.x + bounds.width / 2, y: bounds.y + 100 }
+  const cdp = await page.context().newCDPSession(page)
+  try {
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] })
+    await cdp.send('Input.dispatchTouchEvent', {
+      type: 'touchMove', touchPoints: [{ ...start, y: start.y + 100 }]
+    })
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+    await expect(page).not.toHaveURL(/#\/watch\//)
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect(player).not.toHaveAttribute('data-mobile-mini-morph', '')
+    const thumbnail = player.locator('.mobileMiniBarThumbnailReturn')
+    await expect(thumbnail).toBeEnabled()
+    const video = await thumbnail.boundingBox()
+    expect(await page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.classList.contains('mobileMiniBarThumbnailReturn'), {
+      x: video.x + video.width / 2, y: video.y + video.height / 2
+    })).toBe(true)
+    await cdp.send('Input.dispatchTouchEvent', {
+      type: 'touchStart', touchPoints: [{ x: video.x + video.width / 2, y: video.y + video.height / 2 }]
+    })
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+    await expect(page).toHaveURL(/#\/watch\//)
   } finally {
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }).catch(() => {})
     await cdp.detach()

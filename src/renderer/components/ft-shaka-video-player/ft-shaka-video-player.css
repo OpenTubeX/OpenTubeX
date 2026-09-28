@@ -4731,6 +4731,18 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   pointer-events: none;
 }
 
+.mobileMiniBarThumbnailReturn {
+  position: absolute;
+  z-index: 1;
+  inset: 6px auto 6px 8px;
+  inline-size: 112px;
+  border: 0;
+  border-radius: calc(4px * var(--ui-roundness));
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
 .mobileMiniBarMorphOverlay {
   position: fixed;
   inset: auto;
@@ -5260,7 +5272,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 .ftVideoPlayer[data-mobile-mini-morph] > .player,
 :global(.app .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar[data-mobile-mini-morph] > .player) {
   position: absolute !important;
-  inset: 0 auto auto 0 !important;
+  inset: var(--mobile-mini-video-base-top) auto auto var(--mobile-mini-video-base-left) !important;
   width: var(--mobile-mini-video-base-width) !important;
   height: var(--mobile-mini-video-base-height) !important;
   min-width: 0 !important;
@@ -5269,10 +5281,9 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   max-height: none !important;
   margin: 0 !important;
   object-fit: cover !important;
-  transform: var(--mobile-mini-video-transform) !important;
-  transform-origin: top left;
+  transform: none !important;
+  clip-path: var(--mobile-mini-video-clip);
   transition: none !important;
-  will-change: transform;
 }
 /* stylelint-enable no-descending-specificity */
 
