@@ -1,6 +1,8 @@
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
+import java.nio.file.Files
+import java.nio.file.FileSystems
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.compress.utils.SeekableInMemoryByteChannel
@@ -20,8 +22,13 @@ buildscript {
 
 // Keep the downloaded dependency intact. Gradle caches this derived AAR and
 // invalidates it when the dependency or transformation changes.
+interface RuntimePackerParameters extends TransformParameters {
+    @Input
+    Property<String> getPackerVersion()
+}
+
 @CacheableTransform
-abstract class TrimPythonRuntime implements TransformAction<TransformParameters.None> {
+abstract class PackNativeRuntime implements TransformAction<RuntimePackerParameters> {
     @InputArtifact
     @PathSensitive(PathSensitivity.NAME_ONLY)
     abstract Provider<FileSystemLocation> getInputArtifact()
@@ -29,10 +36,11 @@ abstract class TrimPythonRuntime implements TransformAction<TransformParameters.
     void transform(TransformOutputs outputs) {
         File input = inputArtifact.get().asFile
         new ZipFile(input).withCloseable { archive ->
-            def pythonEntries = archive.entries().findAll {
-                it.name.startsWith('jni/') && it.name.endsWith('/libpython.zip.so')
+            def runtimeEntries = archive.entries().findAll {
+                it.name.startsWith('jni/') &&
+                    (it.name.endsWith('/libpython.zip.so') || it.name.endsWith('/libffmpeg.zip.so'))
             }
-            if (pythonEntries.isEmpty()) {
+            if (runtimeEntries.isEmpty()) {
                 outputs.file(input)
                 return
             }
@@ -42,8 +50,9 @@ abstract class TrimPythonRuntime implements TransformAction<TransformParameters.
                     copy.time = 0
                     output.putNextEntry(copy)
                     archive.getInputStream(entry).withCloseable { content ->
-                        if (pythonEntries.any { it.name == entry.name }) {
-                            output.write(TrimPythonRuntime.trimPython(content))
+                        if (runtimeEntries.any { it.name == entry.name }) {
+                            output.write(PackNativeRuntime.repackRuntime(content,
+                                entry.name.endsWith('/libpython.zip.so'), parameters.packerVersion.get() != 'none'))
                         } else {
                             content.transferTo(output)
                         }
@@ -54,18 +63,64 @@ abstract class TrimPythonRuntime implements TransformAction<TransformParameters.
         }
     }
 
-    static byte[] trimPython(InputStream input) {
-        def buffer = new ByteArrayOutputStream()
-        new ZipArchiveOutputStream(buffer).withCloseable { output ->
+    static byte[] repackRuntime(InputStream input, boolean python, boolean optimized) {
+        byte[] source = input.readAllBytes()
+        if (!optimized) return copyRuntime(source, python)
+        File staging = Files.createTempDirectory('opentubex-runtime-').toFile()
+        try {
             // Read the central directory: local ZIP headers omit Unix modes.
             new org.apache.commons.compress.archivers.zip.ZipFile(
-                new SeekableInMemoryByteChannel(input.readAllBytes())
+                new SeekableInMemoryByteChannel(source)
             ).withCloseable { archive ->
-                archive.entries.each { entry ->
+                archive.entries.each { ZipArchiveEntry entry ->
                     // QuickJS executes via libqjs.so. This static archive is
                     // only needed when linking a new executable at build time.
-                    if (entry.name == 'usr/lib/quickjs/libquickjs.a') return
-                    // Preserve Unix modes and symlinks in the runtime archive.
+                    if (python && entry.name == 'usr/lib/quickjs/libquickjs.a') return
+                    File target = new File(staging, entry.name)
+                    if (!target.canonicalPath.startsWith(staging.canonicalPath + File.separator)) {
+                        throw new GradleException("Unsafe runtime path: ${entry.name}")
+                    }
+                    if (entry.isDirectory()) {
+                        target.mkdirs()
+                    } else {
+                        target.parentFile.mkdirs()
+                        if (entry.isUnixSymlink()) {
+                            def link = archive.getInputStream(entry).withCloseable {
+                                new String(it.readAllBytes(), 'UTF-8')
+                            }
+                            Files.createSymbolicLink(target.toPath(), new File(link).toPath())
+                        } else {
+                            archive.getInputStream(entry).withCloseable { content ->
+                                Files.copy(content, target.toPath())
+                            }
+                            Files.setAttribute(target.toPath(), 'unix:mode', entry.unixMode & 0777)
+                        }
+                    }
+                }
+            }
+            File packed = new File(staging, 'runtime.zip')
+            def command = ['7z', 'a', '-tzip', '-mm=Deflate', '-mx=9', '-mfb=258',
+                '-mpass=5', '-snl', '-mtm=off', '-bd', packed.absolutePath, 'usr']
+            def process = new ProcessBuilder(command).directory(staging)
+                .redirectErrorStream(true).start()
+            String log = new String(process.inputStream.readAllBytes(), 'UTF-8')
+            if (process.waitFor() != 0) {
+                throw new GradleException("7z failed to pack the native runtime:\n${log}")
+            }
+            return packed.bytes
+        } finally {
+            staging.deleteDir()
+        }
+    }
+
+    static byte[] copyRuntime(byte[] source, boolean python) {
+        def buffer = new ByteArrayOutputStream()
+        new ZipArchiveOutputStream(buffer).withCloseable { output ->
+            new org.apache.commons.compress.archivers.zip.ZipFile(
+                new SeekableInMemoryByteChannel(source)
+            ).withCloseable { archive ->
+                archive.entries.each { ZipArchiveEntry entry ->
+                    if (python && entry.name == 'usr/lib/quickjs/libquickjs.a') return
                     output.putArchiveEntry(new ZipArchiveEntry(entry))
                     archive.getInputStream(entry).withCloseable { it.transferTo(output) }
                     output.closeArchiveEntry()
@@ -76,12 +131,26 @@ abstract class TrimPythonRuntime implements TransformAction<TransformParameters.
     }
 }
 
-def trimmedRuntime = Attribute.of('org.opentubex.trimmedPythonRuntime', Boolean)
+def availablePackerVersion = 'none'
+if (FileSystems.default.supportedFileAttributeViews().contains('posix')) {
+    try {
+        def process = new ProcessBuilder('7z', 'i').redirectErrorStream(true).start()
+        def output = new String(process.inputStream.readAllBytes(), 'UTF-8')
+        if (process.waitFor() == 0) {
+            availablePackerVersion = output.readLines().find { it.startsWith('7-Zip') } ?: 'none'
+        }
+    } catch (IOException ignored) {
+        // Keep regular Android builds working where 7z is unavailable.
+    }
+}
+
+def trimmedRuntime = Attribute.of('org.opentubex.packedNativeRuntime', Boolean)
 dependencies {
     artifactTypes.maybeCreate('aar').attributes.attribute(trimmedRuntime, false)
-    registerTransform(TrimPythonRuntime) {
+    registerTransform(PackNativeRuntime) {
         from.attribute(trimmedRuntime, false)
         to.attribute(trimmedRuntime, true)
+        parameters { packerVersion.set(availablePackerVersion) }
     }
 }
 configurations.configureEach {
