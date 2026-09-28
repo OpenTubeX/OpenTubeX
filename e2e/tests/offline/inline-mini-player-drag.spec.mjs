@@ -65,13 +65,14 @@ test('tablet swipe docks toward the bottom bar', async ({ app, page }) => {
 test('bottom bar can close a video retained after leaving Watch', async ({ app, page }) => {
   const player = await openMobilePlayer(app, page)
   const bounds = await player.boundingBox()
+  expect(bounds).not.toBeNull()
   const start = { x: bounds.x + bounds.width / 2, y: bounds.y + 100 }
   const cdp = await page.context().newCDPSession(page)
   try {
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] })
     for (const distance of [20, 40, 60, 80, 100]) {
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...start, y: start.y + distance }] })
-      await page.waitForTimeout(30)
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)))
     }
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
     await expect(player).toHaveClass(/scrollMiniPlayer/)
