@@ -5150,9 +5150,9 @@ export default defineComponent({
       const { Code } = shaka.util.Error
 
       if (error.code === Code.HTTP_ERROR) {
-        if (error.data[1]?.message === 'Failed to fetch' && !navigator.onLine) {
-          // Internet connection was lost, do nothing on our side as
-          // shaka-player will keep trying until the internet connection returns and resume playback automatically when it does
+        if (!navigator.onLine) {
+          // WebKit and native transports use different error messages. Keep
+          // the current stream: Shaka retries it on the window online event.
           return
         }
 

@@ -10496,6 +10496,10 @@ export default defineComponent({
         return
       }
 
+      // Shaka retries the retained stream on reconnect. Do not mark an offline
+      // transport failure as a terminal error or suppress its future errors.
+      if (error.code === ErrorCode.HTTP_ERROR && !navigator.onLine) return
+
       logShakaError(error, context, props.videoId, details)
 
       // Caption loading can also fail with MANIFEST errors (e.g. 4033).
