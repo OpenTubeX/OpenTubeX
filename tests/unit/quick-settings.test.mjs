@@ -112,3 +112,9 @@ test('UI Scale and proxy are available in Android quick settings but not the web
   assert.ok(!web.some(setting => setting.id === 'uiScale'))
   assert.ok(!web.some(setting => setting.id === 'useProxy'))
 })
+
+test('iOS quick settings do not offer the unavailable proxy toggle', () => {
+  const ios = createQuickSettingSections(key => key, false, true, true).flatMap(section => section.settings)
+  assert.ok(ios.some(setting => setting.id === 'uiScale'))
+  assert.ok(!ios.some(setting => setting.id === 'useProxy'))
+})
