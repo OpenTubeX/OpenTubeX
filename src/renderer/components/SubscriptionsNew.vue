@@ -28,6 +28,7 @@
         <FtElementList
           :data="newShorts"
           subscription-feed-type="shorts"
+          :render-all-items-lazily="isElectron"
           stable-item-keys
           :youtube-style-shorts="useCustomShortsPlayer"
           :use-channels-hidden-preference="false"
@@ -43,6 +44,7 @@
         <FtElementList
           :data="newLive"
           subscription-feed-type="live"
+          :render-all-items-lazily="isElectron"
           stable-item-keys
           :use-channels-hidden-preference="false"
         />
@@ -57,6 +59,7 @@
         <FtElementList
           :data="newPosts"
           subscription-feed-type="posts"
+          :render-all-items-lazily="isElectron"
           display="list"
           stable-item-keys
           :use-channels-hidden-preference="false"
@@ -100,6 +103,7 @@ const props = defineProps({
 })
 
 const { t } = useI18n()
+const isElectron = process.env.IS_ELECTRON
 useKeepAliveEffectScope()
 const {
   activeSubscriptionIds,
