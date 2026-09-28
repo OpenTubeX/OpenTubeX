@@ -26,6 +26,7 @@
 A12790000000000000000001 /* AppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A12790000000000000000002; };
 B0C0DE000000000000000010 /* fixture.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = B0C0DE000000000000000011 /* fixture.mp4 */; };
 B0C0DE000000000000000014 /* fixture.m4a in Resources */ = {isa = PBXBuildFile; fileRef = B0C0DE000000000000000013 /* fixture.m4a */; };
+B0C0DE000000000000000016 /* fragmented-duration.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = B0C0DE000000000000000015 /* fragmented-duration.mp4 */; };
 A12790000000000000000022 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A12790000000000000000021; };
 A12790000000000000000032 = {isa = PBXBuildFile; fileRef = A12790000000000000000031; };
 /* End PBXBuildFile section */
@@ -63,6 +64,7 @@ A12790000000000000000032 = {isa = PBXBuildFile; fileRef = A127900000000000000000
 A12790000000000000000002 /* AppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTests.swift; sourceTree = "<group>"; };
 B0C0DE000000000000000011 /* fixture.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = fixture.mp4; sourceTree = "<group>"; };
 B0C0DE000000000000000013 /* fixture.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = fixture.m4a; sourceTree = "<group>"; };
+B0C0DE000000000000000015 /* fragmented-duration.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "fragmented-duration.mp4"; sourceTree = "<group>"; };
 A12790000000000000000003 /* AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = AppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 A12790000000000000000021 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -124,7 +126,7 @@ A12790000000000000000021,
 			path = App;
 			sourceTree = "<group>";
 		};
-A12790000000000000000004 /* AppTests */ = {isa = PBXGroup; children = (A12790000000000000000002, B0C0DE000000000000000011 /* fixture.mp4 */, B0C0DE000000000000000013 /* fixture.m4a */,); path = AppTests; sourceTree = "<group>"; };
+A12790000000000000000004 /* AppTests */ = {isa = PBXGroup; children = (A12790000000000000000002, B0C0DE000000000000000011 /* fixture.mp4 */, B0C0DE000000000000000013 /* fixture.m4a */, B0C0DE000000000000000015 /* fragmented-duration.mp4 */,); path = AppTests; sourceTree = "<group>"; };
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -249,7 +251,7 @@ A12790000000000000000031 = {isa = PBXVariantGroup; children = (A1279100000000000
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-B0C0DE000000000000000012 /* Test Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (B0C0DE000000000000000010 /* fixture.mp4 in Resources */, B0C0DE000000000000000014 /* fixture.m4a in Resources */,); runOnlyForDeploymentPostprocessing = 0; };
+B0C0DE000000000000000012 /* Test Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (B0C0DE000000000000000010 /* fixture.mp4 in Resources */, B0C0DE000000000000000014 /* fixture.m4a in Resources */, B0C0DE000000000000000016 /* fragmented-duration.mp4 in Resources */,); runOnlyForDeploymentPostprocessing = 0; };
 		504EC3021FED79650016851F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;

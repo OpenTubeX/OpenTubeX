@@ -122,6 +122,33 @@ final class AppTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: root.appendingPathComponent("output/secret.mp4").path))
     }
 
+    func testYtDlpMergeUsesSampleDurationForFragmentedTracks() async throws {
+        // A two-second synthetic fragmented MP4 with populated initialization
+        // durations. AVFoundation counts that duration again when reading fragments.
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("yt-dlp-duration-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let video = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "fragmented-duration", withExtension: "mp4"))
+        let audio = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "fixture", withExtension: "m4a"))
+        try FileManager.default.copyItem(at: video, to: root.appendingPathComponent("video.mp4"))
+        try FileManager.default.copyItem(at: audio, to: root.appendingPathComponent("audio.m4a"))
+        let value: [String: Any] = ["merges": [["video": "video.mp4", "audio": "audio.m4a", "output": "merged.mp4"]]]
+        let _: [String: Any] = try await withCheckedThrowingContinuation { continuation in
+            IOSYtDlpMerger.run(value, in: root) { continuation.resume(with: $0) }
+        }
+        let asset = AVURLAsset(url: root.appendingPathComponent("merged.mp4"))
+        let duration = try await asset.load(.duration)
+        XCTAssertEqual(duration.seconds, 2, accuracy: 0.05)
+        let videoTracks = try await asset.loadTracks(withMediaType: .video)
+        let audioTracks = try await asset.loadTracks(withMediaType: .audio)
+        let videoTrack = try XCTUnwrap(videoTracks.first)
+        let audioTrack = try XCTUnwrap(audioTracks.first)
+        let videoRange = try await videoTrack.load(.timeRange)
+        let audioRange = try await audioTrack.load(.timeRange)
+        XCTAssertEqual(videoRange.duration.seconds, 2, accuracy: 0.05)
+        XCTAssertEqual(audioRange.duration.seconds, 2, accuracy: 0.05)
+    }
+
     func testYtDlpMergeReplacesStaleOutputOnRetry() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent("yt-dlp-merge-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)

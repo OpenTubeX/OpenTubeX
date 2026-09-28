@@ -76,6 +76,39 @@ private enum IOSYtDlpRuntime {
 }
 
 enum IOSYtDlpMerger {
+    private static func sampleEndTime(in asset: AVAsset, track: AVAssetTrack) throws -> CMTime {
+        // Fragmented MP4 initialization durations can be counted twice by
+        // AVFoundation. Read sample timing without loading or decoding media data.
+        let reader = try AVAssetReader(asset: asset)
+        let output = AVAssetReaderSampleReferenceOutput(track: track)
+        guard reader.canAdd(output) else {
+            throw NSError(domain: "IOSYtDlp", code: 13,
+                          userInfo: [NSLocalizedDescriptionKey: "Could not read downloaded video timing"])
+        }
+        reader.add(output)
+        guard reader.startReading() else {
+            throw reader.error ?? NSError(domain: "IOSYtDlp", code: 13)
+        }
+        defer { if reader.status == .reading { reader.cancelReading() } }
+        var end = CMTime.zero
+        while let sample = output.copyNextSampleBuffer() {
+            // Boundary markers have no samples and may carry the inflated end time.
+            guard CMSampleBufferGetNumSamples(sample) > 0 else { continue }
+            let start = CMSampleBufferGetOutputPresentationTimeStamp(sample)
+            let duration = CMSampleBufferGetOutputDuration(sample)
+            guard start.isNumeric, duration.isNumeric, duration >= .zero else {
+                throw NSError(domain: "IOSYtDlp", code: 13,
+                              userInfo: [NSLocalizedDescriptionKey: "Invalid downloaded video timing"])
+            }
+            end = CMTimeMaximum(end, CMTimeAdd(start, duration))
+        }
+        guard reader.status == .completed, end > .zero else {
+            throw reader.error ?? NSError(domain: "IOSYtDlp", code: 13,
+                                           userInfo: [NSLocalizedDescriptionKey: "Downloaded video has no readable samples"])
+        }
+        return end
+    }
+
     static func run(_ value: [String: Any], in folder: URL,
                     completion: @escaping (Result<[String: Any], Error>) -> Void) {
         guard let merges = value["merges"] as? [[String: String]] else {
@@ -113,7 +146,7 @@ enum IOSYtDlpMerger {
                                                                                preferredTrackID: kCMPersistentTrackID_Invalid) else {
                         throw NSError(domain: "IOSYtDlp", code: 10, userInfo: [NSLocalizedDescriptionKey: "Could not combine media tracks"])
                     }
-                    let videoDuration = try await videoAsset.load(.duration)
+                    let videoDuration = try sampleEndTime(in: videoAsset, track: videoTrack)
                     let audioDuration = try await audioAsset.load(.duration)
                     try compositionVideo.insertTimeRange(CMTimeRange(start: .zero, duration: videoDuration),
                                                          of: videoTrack, at: .zero)
