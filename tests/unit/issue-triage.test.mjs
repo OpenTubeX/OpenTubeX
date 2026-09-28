@@ -135,6 +135,7 @@ test('triage answers an existing-feature request from verified documentation', a
     readSource: async () => '### Watch queue\n\nQueue videos from their three-dot menus, then manage and drag to reorder them in a side panel on the watch page.'
   })
   assert.equal(requests.length, 2)
+  assert.equal(Object.hasOwn(requests[1], 'signal'), false)
   assert.equal(result.reply, 'answer')
   assert.deepEqual(result.labels, ['enhancement'])
   assert.match(result.answer, /Add to Queue/)

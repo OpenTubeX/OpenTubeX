@@ -235,9 +235,9 @@ async function answerFromSource(issue, content, key) {
             additionalProperties: false
           }
         }
-      },
-      signal: AbortSignal.timeout(90000)
-    })
+      }
+    }),
+    signal: AbortSignal.timeout(90000)
   })
   if (!response.ok) {
     const error = await response.json().catch(() => null)
