@@ -52,7 +52,7 @@ import { brotliDecompress } from 'zlib'
 import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
 import { discoverDlnaDevices, startDlnaCast, stopDlnaCast } from './dlnaCast'
-import { handleTwitchChatReplayPage } from './twitchChat'
+import { handleTwitchChatReplayPage, handleTwitchSubOnlyVod } from './twitchChat'
 import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
 import { isYtDlpStoryboardUrl, getYtDlpDownloadFile, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpControlDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetSubtitle, handleYtDlpGetPlaybackInfo, handleYtDlpGetHistoryMetadata, handleYtDlpCancelHistoryRepair, handleYtDlpGetRecommendations, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpQueueAction, handleYtDlpRemoveDownload, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
 import { applyYtDlpPlaybackCacheSettings, handleYtDlpPlaybackCacheClear, handleYtDlpPlaybackCacheDelete, handleYtDlpPlaybackCacheGet, handleYtDlpPlaybackCacheSet } from './ytDlpPlaybackCache'
@@ -118,6 +118,7 @@ Options:
 }
 
 function runApp() {
+  let deferredDatastoresStarted = false
   /** @type {Set<string>} */
   const ALLOWED_RENDERER_FILES = process.env.NODE_ENV === 'production'
     // __FREETUBE_ALLOWED_PATHS__ is replaced by the injectAllowedPaths.mjs script
@@ -2918,6 +2919,12 @@ function runApp() {
             height: 800
           }
     })
+    newWindow.once('show', () => {
+      if (deferredDatastoresStarted) return
+      deferredDatastoresStarted = true
+      // Give the native splash its first frame before parsing the larger stores.
+      setImmediate(() => { baseHandlers.loadDeferredDatastores() })
+    })
     const kdeWindowIdentity = monitorsKdeWaylandWindowState
       ? `\u2063${newWindow.id.toString(2).replaceAll('0', '\u200b').replaceAll('1', '\u200c')}`
       : ''
@@ -4615,6 +4622,7 @@ function runApp() {
   ipcMain.handle(IpcChannels.YT_DLP_GET_HISTORY_METADATA, handleYtDlpGetHistoryMetadata)
   ipcMain.handle(IpcChannels.YT_DLP_GET_PLAYBACK_INFO, handleYtDlpGetPlaybackInfo)
   ipcMain.handle(IpcChannels.TWITCH_CHAT_REPLAY_PAGE, handleTwitchChatReplayPage)
+  ipcMain.handle(IpcChannels.TWITCH_SUB_ONLY_VOD, handleTwitchSubOnlyVod)
   ipcMain.handle(IpcChannels.YT_DLP_GET_RECOMMENDATIONS, handleYtDlpGetRecommendations)
   ipcMain.handle(IpcChannels.YT_DLP_PLAYBACK_CACHE_GET, handleYtDlpPlaybackCacheGet)
   ipcMain.handle(IpcChannels.YT_DLP_PLAYBACK_CACHE_SET, handleYtDlpPlaybackCacheSet)

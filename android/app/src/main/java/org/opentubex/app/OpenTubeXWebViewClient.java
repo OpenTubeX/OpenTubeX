@@ -68,7 +68,8 @@ public class OpenTubeXWebViewClient extends BridgeWebViewClient {
             return super.shouldInterceptRequest(view, request);
         }
         if (streamHeaders != null) {
-            return interceptExternalStream(request, streamHeaders, externalStreams.isHttpStoryboardUrl(url));
+            return interceptExternalStream(request, streamHeaders,
+                externalStreams.isHttpStoryboardUrl(url) || externalStreams.isTwitchVodPath(url));
         }
 
         HttpURLConnection connection = null;

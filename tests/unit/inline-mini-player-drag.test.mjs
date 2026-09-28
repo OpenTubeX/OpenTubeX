@@ -32,7 +32,7 @@ test('mobile morph keeps player and video layout fixed between animation frames'
   writes.length = 0
   render(from, to, videoFrom, videoTo, 0.5, false)
   assert.deepEqual(writes.map(([name]) => name).sort(), [
-    '--mobile-mini-video-transform', 'transform'
+    '--mobile-mini-video-clip', 'transform'
   ])
 })
 

@@ -1352,6 +1352,16 @@
           }"
           :style="mobileMiniBarOverlayStyle"
         >
+          <button
+            v-if="scrollMiniPlayerActive"
+            type="button"
+            class="mobileMiniBarThumbnailReturn"
+            :disabled="Boolean(scrollMiniPlayerDragStyle || scrollMiniPlayerAnimating)"
+            :aria-label="scrollMiniPlayerDetached
+              ? $t('Video.Player.Scroll Mini Player.Return to Video Tab')
+              : $t('Video.Player.Scroll Mini Player.Back to Top')"
+            @click.stop.prevent="scrollMiniScrollToTop"
+          />
           <div class="mobileMiniBarDetails">
             <span
               class="mobileMiniBarTitle"

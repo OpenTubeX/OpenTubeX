@@ -290,6 +290,10 @@ export default defineComponent({
       type: String,
       required: true
     },
+    twitchSubOnlyVod: {
+      type: Boolean,
+      default: false
+    },
     /**
      * Which engine provided the streams, as yt-dlp's manifests need a few
      * accommodations that must not change the behaviour for the built-in one.
@@ -1509,6 +1513,14 @@ export default defineComponent({
       if (type === RequestType.SEGMENT) {
         silenceSkipping.handleSegmentResponse(response, context)
       }
+    }
+
+    /** @type {shaka.extern.ResponseFilter} */
+    function twitchSubOnlyVodResponseFilter(type, response, context) {
+      if (type !== RequestType.MANIFEST || context?.type !== AdvancedRequestType.MEDIA_PLAYLIST) return
+      const manifest = new TextDecoder().decode(response.data)
+      const patched = manifest.replaceAll('-unmuted', '-muted')
+      if (patched !== manifest) response.data = new TextEncoder().encode(patched).buffer
     }
 
     const captionSettings = computed(() => parseCaptionSettings(store.getters.getDefaultCaptionSettings))
@@ -5165,6 +5177,7 @@ export default defineComponent({
         move: (x, y) => moveScrollMiniPlayerDrag(x, y),
         finish: commit => finishScrollMiniPlayerDrag(commit),
         cancel: () => cancelScrollMiniPlayerDrag(),
+        returnToVideo: () => scrollMiniScrollToTop(),
       },
       setFullscreenMetadata,
       setShowUiOnPaused,
@@ -10940,6 +10953,9 @@ export default defineComponent({
       if (process.env.SUPPORTS_LOCAL_API) {
         player.getNetworkingEngine().registerRequestFilter(requestFilter)
         player.getNetworkingEngine().registerResponseFilter(responseFilter)
+      }
+      if (props.twitchSubOnlyVod) {
+        player.getNetworkingEngine().registerResponseFilter(twitchSubOnlyVodResponseFilter)
       }
       if (process.env.IS_ELECTRON) {
         player.getNetworkingEngine().registerRequestFilter(async (_type, request) => {

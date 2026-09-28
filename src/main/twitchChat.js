@@ -1,6 +1,12 @@
 import { net } from 'electron'
 import { isOpenTubeXUrl } from './utils'
 import { createTwitchChatReplayRequest, readTwitchReplayResponse, TWITCH_CHAT_CLIENT_ID } from '../twitchChatReplayRequest'
+import { fetchTwitchSubOnlyVod } from '../twitchSubOnlyVod'
+
+export async function handleTwitchSubOnlyVod(event, videoId) {
+  if (!isOpenTubeXUrl(event.senderFrame.url) || typeof videoId !== 'string' || !/^\d{1,20}$/.test(videoId)) return null
+  return fetchTwitchSubOnlyVod(videoId, (url, options) => net.fetch(url, options))
+}
 
 export async function handleTwitchChatReplayPage(event, videoId, position) {
   if (!isOpenTubeXUrl(event.senderFrame.url) || !/^\d{1,20}$/.test(videoId)) return null

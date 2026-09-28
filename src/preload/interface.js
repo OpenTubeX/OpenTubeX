@@ -535,6 +535,7 @@ export default {
   },
 
   twitchChatReplayPage: (videoId, position) => ipcRenderer.invoke(IpcChannels.TWITCH_CHAT_REPLAY_PAGE, videoId, position),
+  twitchSubOnlyVod: videoId => ipcRenderer.invoke(IpcChannels.TWITCH_SUB_ONLY_VOD, videoId),
 
   /**
    * @param {string} currentVideoId
