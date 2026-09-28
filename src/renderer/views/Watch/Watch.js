@@ -2900,7 +2900,12 @@ export default defineComponent({
       if (getConnectionState() === 'offline' && this.finishDownloadedPlaybackWithoutMetadata()) return
 
       try {
-        const videoInfo = await getLocalVideoInfo(videoId)
+        const videoInfo = await getLocalVideoInfo(videoId, {
+          // Metadata extraction can outlive a playback engine switch. Decide
+          // when the token is needed, after the preceding network requests.
+          shouldGeneratePoToken: () => this.isCurrentVideoLoad(loadGeneration, videoId) &&
+            (!process.env.IS_CAPACITOR || !this.isYtDlpPlaybackRequested())
+        })
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
 
         const {

@@ -206,14 +206,18 @@ export function parseStreamByteRanges(buffer, isWebm) {
  */
 export async function probeStreamByteRanges(url, isWebm) {
   let requestedBytes = INITIAL_PROBE_BYTES
+  const nativeMedia = url.startsWith('capacitor://localhost/_opentubex_media/')
 
   for (let attempt = 0; attempt < MAX_PROBE_ATTEMPTS; attempt++) {
     // YouTube's own range parameter is used instead of a Range header,
-    // the same way the player's request filter does it.
+    // the same way the player's request filter does it. The iOS media proxy
+    // forwards Range headers, while its opaque URL has no CDN query string.
     // Every format is probed at once, so a request that never completes would
     // stall the whole extraction rather than just dropping this one format.
-    const response = await fetch(`${url}&range=0-${requestedBytes - 1}`, {
-      signal: AbortSignal.timeout(PROBE_TIMEOUT)
+    const end = requestedBytes - 1
+    const response = await fetch(nativeMedia ? url : `${url}&range=0-${end}`, {
+      signal: AbortSignal.timeout(PROBE_TIMEOUT),
+      ...(nativeMedia ? { headers: { Range: `bytes=0-${end}` } } : {})
     })
 
     if (!response.ok) {

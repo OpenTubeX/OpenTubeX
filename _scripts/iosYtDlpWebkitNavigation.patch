@@ -1,0 +1,32 @@
+--- a/yt_dlp_plugins/webkit_jsi/lib/api.py
++++ b/yt_dlp_plugins/webkit_jsi/lib/api.py
+@@ -521,6 +521,16 @@
+         usrcontctlr_commcbdct: dict[int, COMM_CBTYPE] = {}
+         class PFC_WVHandler:
+             @staticmethod
++            def webView0_decidePolicyForNavigationAction1_decisionHandler2(
++                this: CRet.Py_PVoid, sel: CRet.Py_PVoid, rp_webview: CRet.Py_PVoid,
++                rp_action: CRet.Py_PVoid, rp_decisionhandler: CRet.Py_PVoid
++            ) -> None:
++                # Challenge scripts run in an isolated WebView. Navigation can
++                # trigger a YouTube Universal Link and leave the host app.
++                decisionhandler = cast(rp_decisionhandler or 0, POINTER(ObjCBlock)).contents
++                decisionhandler.as_pycb(None, c_long)(0)  # WKNavigationActionPolicyCancel
++
++            @staticmethod
+             def webView0_didFinishNavigation1(this: CRet.Py_PVoid, sel: CRet.Py_PVoid, rp_webview: CRet.Py_PVoid, rp_navi: CRet.Py_PVoid) -> None:
+                 pa.logger.trace(f'Callback: [(PyForeignClass_WebViewHandler){this} webView: {rp_webview} didFinishNavigation: {rp_navi}]')
+                 if cb := navi_cbdct.get(rp_navi or 0):
+@@ -572,5 +582,12 @@
+         meth_list: PyNeApple.METH_LIST_TYPE = (
+             (
++                pa.sel_registerName(b'webView:decidePolicyForNavigationAction:decisionHandler:'),
++                CFUNCTYPE(
++                    None,
++                    c_void_p, c_void_p, c_void_p, c_void_p, c_void_p)(
++                        PFC_WVHandler.webView0_decidePolicyForNavigationAction1_decisionHandler2),
++                b'v@:@@@?',
++            ), (
+                 pa.sel_registerName(b'webView:didFinishNavigation:'),
+                 CFUNCTYPE(
+                     None,

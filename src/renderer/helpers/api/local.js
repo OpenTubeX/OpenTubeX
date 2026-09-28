@@ -606,6 +606,7 @@ async function resolveMusicMediaType(playerResponse, actions, videoId) {
 
 /**
  * @param {string} id
+ * @param {{ shouldGeneratePoToken?: () => boolean }} [options]
  * @returns {Promise<{
  *   info: import('youtubei.js').YT.VideoInfo,
  *   poToken: string | undefined,
@@ -623,7 +624,7 @@ async function resolveMusicMediaType(playerResponse, actions, videoId) {
  *   musicMediaType: import('../player/musicMediaType').MusicMediaType
  * }>}
  */
-export async function getLocalVideoInfo(id) {
+export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true } = {}) {
   let responseTime
   let paidPromotionDurationMs = null
   let isPremiere
@@ -697,7 +698,8 @@ export async function getLocalVideoInfo(id) {
   // based on the videoId
   let contentPoToken
 
-  if ((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && !watchPageIpBlocked) {
+  if ((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) &&
+      !watchPageIpBlocked && shouldGeneratePoToken()) {
     try {
       contentPoToken = await generateContentPoToken(
         id,
@@ -900,8 +902,10 @@ export async function getLocalVideoInfo(id) {
     for (const captionTrack of info.captions.caption_tracks) {
       const url = new URL(captionTrack.base_url)
 
-      url.searchParams.set('potc', '1')
-      url.searchParams.set('pot', contentPoToken)
+      if (contentPoToken) {
+        url.searchParams.set('potc', '1')
+        url.searchParams.set('pot', contentPoToken)
+      }
       url.searchParams.set('c', clientName)
 
       // Remove &xosf=1 as it adds `position:63% line:0%` to the subtitle lines
@@ -1094,14 +1098,14 @@ async function decipherFormats(formats, player) {
 /**
  * @param {string} url
  * @param {import('youtubei.js').Player} player
- * @param {string} poToken
+ * @param {string | undefined} poToken
  * @param {boolean} isDash
  */
 async function decipherManifestUrl(url, player, poToken, isDash) {
   const urlObject = new URL(url)
 
   if (urlObject.searchParams.size > 0) {
-    urlObject.searchParams.set('pot', poToken)
+    if (poToken) urlObject.searchParams.set('pot', poToken)
 
     if (isDash) {
       urlObject.searchParams.set('mpd_version', '7')
@@ -1135,7 +1139,7 @@ async function decipherManifestUrl(url, player, poToken, isDash) {
   }
 
   decipheredUrlObject.search = ''
-  decipheredUrlObject.pathname += `/pot/${encodeURIComponent(poToken)}`
+  if (poToken) decipheredUrlObject.pathname += `/pot/${encodeURIComponent(poToken)}`
 
   if (isDash) {
     decipheredUrlObject.pathname += '/mpd_version/7'

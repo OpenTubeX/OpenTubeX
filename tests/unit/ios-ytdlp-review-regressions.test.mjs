@@ -7,6 +7,32 @@ import { mapPlaybackCaptions } from '../../src/ytDlpMetadata.js'
 
 const read = path => readFile(new URL(`../../${path}`, import.meta.url), 'utf8')
 
+test('iOS media byte-range probes send a Range header through the native proxy', async () => {
+  const source = await read('src/renderer/helpers/player/streamByteRanges.js')
+  const start = source.indexOf('export async function probeStreamByteRanges(')
+  const requests = []
+  const context = vm.createContext({
+    AbortSignal,
+    INITIAL_PROBE_BYTES: 16 * 1024,
+    MAX_PROBE_ATTEMPTS: 3,
+    PROBE_TIMEOUT: 10_000,
+    fetch: async (url, options) => {
+      requests.push({ url, options })
+      return { ok: false, status: 416, statusText: 'fixture' }
+    },
+  })
+  vm.runInContext(`${source.slice(start).replace('export ', '')}\nglobalThis.probe = probeStreamByteRanges`, context)
+
+  const mediaUrl = 'capacitor://localhost/_opentubex_media/fixture'
+  await assert.rejects(context.probe(mediaUrl, false), /416 fixture/)
+  assert.equal(requests[0].url, mediaUrl)
+  assert.equal(requests[0].options.headers.Range, 'bytes=0-16383')
+
+  await assert.rejects(context.probe('https://rr.googlevideo.com/videoplayback?token=fixture', false), /416 fixture/)
+  assert.equal(requests[1].url, 'https://rr.googlevideo.com/videoplayback?token=fixture&range=0-16383')
+  assert.equal(requests[1].options.headers, undefined)
+})
+
 test('iOS does not select an HLS manifest rejected by every probe', async () => {
   const source = await read('src/renderer/helpers/player/ytDlpPlayback.js')
   const start = source.indexOf('export async function getExternalYtDlpPlaybackSource(')

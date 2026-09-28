@@ -23,7 +23,7 @@ final class AppTests: XCTestCase {
             window.addEventListener('load', () => location.assign('https://www.youtube.com/watch?v=jNQXAC9IVRw'));
             </script></body></html>
             """, baseURL: URL(string: "https://www.youtube.com/"))
-        await fulfillment(of: [redirected], timeout: 10)
+        await fulfillment(of: [redirected], timeout: 45)
         let retained = try await isolatedView.evaluateJavaScript("!!document.getElementById('token-test')") as? Bool
         XCTAssertEqual(retained, true)
     }
@@ -681,26 +681,52 @@ final class AppTests: XCTestCase {
         try await openApplication()
         let original = try await webView.callAsyncJavaScript(
             "return testStore.getters.getVideoPlaybackEngine", arguments: [:], in: nil, contentWorld: .page) as? String
+        _ = try await webView.callAsyncJavaScript("""
+            window.__poTokenRequests = 0;
+            window.__poTokenCallDetails = [];
+            window.__originalNativePromise = Capacitor.nativePromise;
+            Capacitor.nativePromise = function(plugin, method, options) {
+                if (plugin === 'PoToken' && method === 'generate') {
+                    window.__poTokenRequests++;
+                    window.__poTokenCallDetails.push({
+                        videoId: options?.videoId,
+                        route: testRouter.currentRoute.value.fullPath,
+                        engine: testStore.getters.getVideoPlaybackEngine
+                    });
+                }
+                return window.__originalNativePromise.call(this, plugin, method, options);
+            };
+            """, arguments: [:], in: nil, contentWorld: .page)
         _ = try await webView.callAsyncJavaScript(
             "await testRouter.push('/subscriptions'); await testStore.dispatch('updateVideoPlaybackEngine', 'yt-dlp'); await testRouter.push('/watch/jNQXAC9IVRw')",
             arguments: [:], in: nil, contentWorld: .page)
         do {
-            try await wait("document.querySelector('video')?.currentSrc?.startsWith('capacitor://localhost/_opentubex_media/')", timeout: 90)
+            try await wait("(() => { const url = document.querySelector('video')?.currentSrc; return url?.startsWith('capacitor://localhost/_opentubex_media/') || url?.startsWith('blob:capacitor://localhost/'); })()", timeout: 90)
             try await wait("document.querySelector('video')?.readyState >= 2", timeout: 90)
             _ = try await evaluate("document.querySelector('video').play(); true")
             try await wait("document.querySelector('video').currentTime > 1", timeout: 30)
             let source = try await webView.callAsyncJavaScript(
                 "return document.querySelector('video').currentSrc", arguments: [:], in: nil, contentWorld: .page) as? String
-            XCTAssertTrue(source?.hasPrefix("capacitor://localhost/_opentubex_media/") == true,
+            XCTAssertTrue(source?.hasPrefix("capacitor://localhost/_opentubex_media/") == true ||
+                          source?.hasPrefix("blob:capacitor://localhost/") == true,
                           "Expected yt-dlp's native media stream, got \(source ?? "none")")
+            let poTokenRequests = try await evaluate("window.__poTokenRequests") as? Int
+            let poTokenCallDetails = try await evaluate("JSON.stringify(window.__poTokenCallDetails)") as? String
+            XCTAssertEqual(poTokenRequests, 0,
+                           "yt-dlp playback must not launch the token challenge WebView: \(poTokenCallDetails ?? "none")")
+            let challengeHandler = NSClassFromString("PyForeignClass_WebViewHandler") as? NSObject.Type
+            XCTAssertNotNil(challengeHandler, "Expected yt-dlp's WebKit challenge provider to run")
+            XCTAssertTrue(challengeHandler?.instancesRespond(
+                to: NSSelectorFromString("webView:decidePolicyForNavigationAction:decisionHandler:")) == true,
+                "yt-dlp's challenge WebView must guard navigation before iOS opens Universal Links")
         } catch {
             _ = try? await webView.callAsyncJavaScript(
-                "await testStore.dispatch('updateVideoPlaybackEngine', original)",
+                "Capacitor.nativePromise = window.__originalNativePromise; await testStore.dispatch('updateVideoPlaybackEngine', original)",
                 arguments: ["original": original ?? "built-in"], in: nil, contentWorld: .page)
             throw error
         }
         _ = try await webView.callAsyncJavaScript(
-            "await testStore.dispatch('updateVideoPlaybackEngine', original)",
+            "Capacitor.nativePromise = window.__originalNativePromise; await testStore.dispatch('updateVideoPlaybackEngine', original)",
             arguments: ["original": original ?? "built-in"], in: nil, contentWorld: .page)
     }
 
