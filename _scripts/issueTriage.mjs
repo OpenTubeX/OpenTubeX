@@ -256,7 +256,7 @@ async function answerFromSource(issue, content, key) {
   if (!answer.answer || !answer.evidence) return null
   if (answer.answer.trim().split(/\s+/).length > 60 ||
     answer.answer.includes('http') ||
-    /\b(?:does not establish|do not establish|cannot confirm|can't confirm|may help|not documented|unclear whether)\b/i.test(answer.answer) ||
+    /\b(?:does not|do not|doesn['’]t|don['’]t|cannot|can't|can’t) (?:establish|specify|confirm)|\b(?:may help|not documented|unclear whether)\b/i.test(answer.answer) ||
     answer.evidence.trim().length < 20 ||
     !content.replace(/\s+/g, ' ').includes(answer.evidence.replace(/\s+/g, ' '))) {
     console.log('Triage answer failed validation')
@@ -307,7 +307,7 @@ async function triageIssue(owner, repo, number, { backfill = false, reassess = f
   const missingLabels = decision.labels.filter(label =>
     !current.labels.nodes.some(existing => existing.name === label))
   const reply = decision.reply === 'answer' ? decision.answer : replies[decision.reply]
-  const publishReply = reply && shouldReply(current.comments.nodes, reply)
+  const publishReply = reply && shouldReply(current.comments.nodes, reply, { backfill })
   if (dryRun) {
     console.log(`Preview issue #${number}: ${JSON.stringify({ labels: missingLabels, reply: publishReply ? reply : null })}`)
     return
@@ -354,10 +354,11 @@ async function main() {
   await triageIssue(owner, repo, event.issue.number)
 }
 
-export function shouldReply(comments, reply) {
+export function shouldReply(comments, reply, { backfill = false } = {}) {
   const last = comments.at(-1)
   return !comments.some(comment => comment.body === reply ||
     (comment.body?.startsWith('> [!NOTE]') && comment.body.endsWith(`\n\n${reply}`))) &&
+    (!backfill || !comments.some(comment => ['OWNER', 'MEMBER', 'COLLABORATOR'].includes(comment.authorAssociation))) &&
     !last?.author?.login?.toLowerCase().endsWith('[bot]') &&
     last?.author?.__typename !== 'Bot' &&
     !['OWNER', 'MEMBER', 'COLLABORATOR'].includes(last?.authorAssociation)

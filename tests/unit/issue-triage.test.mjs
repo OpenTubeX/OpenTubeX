@@ -48,6 +48,12 @@ test('triage avoids repeated or intrusive replies', () => {
     body: 'Automated response',
     author: { login: 'actions[bot]', __typename: 'Bot' }
   }], reply), false)
+  const discussedIssue = [
+    { body: 'Maintainer answer', authorAssociation: 'MEMBER', author: { login: 'maintainer' } },
+    { body: 'Another idea', authorAssociation: 'CONTRIBUTOR', author: { login: 'reporter' } }
+  ]
+  assert.equal(shouldReply(discussedIssue, reply), true)
+  assert.equal(shouldReply(discussedIssue, reply, { backfill: true }), false)
 })
 
 test('manual backfill excludes pull requests, D3SOX, and bots', () => {
@@ -202,7 +208,7 @@ test('triage rejects caveats that do not answer the requested feature', async t 
     const output = calls === 1
       ? { labels: ['enhancement'], reply: 'answer', source: 'extra-features' }
       : {
-          answer: 'The docs do not establish whether tabs can replace the title bar.',
+          answer: 'The source doesn’t specify whether tabs can replace the title bar.',
           evidence: 'Tabs can appear at the top of the application window.'
         }
     return { ok: true, json: async () => ({
