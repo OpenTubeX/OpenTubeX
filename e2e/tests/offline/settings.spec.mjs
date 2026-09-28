@@ -3572,18 +3572,18 @@ test.describe('settings', () => {
       return Math.max(...centers) - Math.min(...centers)
     }
 
-    expect(await centerDifference()).toBeLessThanOrEqual(3)
+    await expect.poll(centerDifference).toBeLessThanOrEqual(3)
     for (const viewport of [
       { width: 375, height: 667 },
       { width: 667, height: 375 },
     ]) {
       await page.setViewportSize(viewport)
-      expect(await centerDifference()).toBeLessThanOrEqual(3)
+      await expect.poll(centerDifference).toBeLessThanOrEqual(3)
     }
 
     await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
     await page.setViewportSize({ width: 667, height: 375 })
-    expect(await centerDifference()).toBeLessThanOrEqual(3)
+    await expect.poll(centerDifference).toBeLessThanOrEqual(3)
   })
 
   test('keeps the current icon pack when another pack fails to load', async ({ page }) => {
