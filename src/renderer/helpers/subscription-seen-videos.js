@@ -29,15 +29,28 @@ function applySubscriptionSeenEntriesToCache(cache, seenEntries, entriesKey, idK
   const byId = selectors ? selectors.index.value : indexSeenEntries()
   if (byId.size === 0) return cache
 
+  if (selectors) {
+    if (!selectors.view) {
+      selectors.view = new Proxy(cache, {
+        get(target, channelId) {
+          const cached = Reflect.get(target, channelId)
+          if (!cached?.[entriesKey]) return cached
+          if (!isReactive(cached)) return applySeenEntriesToChannel(cached, selectors.index.value, entriesKey, idKey)
+          let channel = selectors.channels.get(cached)
+          if (!channel) {
+            channel = computed(() => applySeenEntriesToChannel(cached, selectors.index.value, entriesKey, idKey))
+            selectors.channels.set(cached, channel)
+          }
+          return channel.value
+        }
+      })
+    }
+    return selectors.view
+  }
+
   return Object.fromEntries(Object.entries(cache).map(([channelId, cached]) => {
     if (!cached?.[entriesKey]) return [channelId, cached]
-    if (!selectors || !isReactive(cached)) return [channelId, applySeenEntriesToChannel(cached, byId, entriesKey, idKey)]
-    let channel = selectors.channels.get(cached)
-    if (!channel) {
-      channel = computed(() => applySeenEntriesToChannel(cached, selectors.index.value, entriesKey, idKey))
-      selectors.channels.set(cached, channel)
-    }
-    return [channelId, channel.value]
+    return [channelId, applySeenEntriesToChannel(cached, byId, entriesKey, idKey)]
   }))
 }
 

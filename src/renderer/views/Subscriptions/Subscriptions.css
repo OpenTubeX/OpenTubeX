@@ -169,7 +169,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-block: 10px -3px;
+  margin-block: 4px;
 }
 
 .tabs {
@@ -226,7 +226,7 @@
 }
 
 .subscriptionsHeader.singleRow .tabsRow {
-  margin-block-start: 0;
+  margin-block: 0;
 }
 
 .subscriptionsHeader.singleRow .headerActions {
@@ -356,18 +356,48 @@
 
   .headerRow {
     align-items: flex-start;
+    row-gap: 0;
   }
 
   .pageTitle {
     inline-size: 100%;
   }
 
-  .tabs {
-    gap: 4px;
+  .tabsRow {
+    margin-block: 0;
+  }
+
+  .subscriptionsHeader:not(.singleRow) .tabs {
+    flex: 1 1 auto;
+    inline-size: 100%;
+    flex-wrap: nowrap;
+    gap: 0;
   }
 
   .tab {
-    padding-inline: 10px;
+    flex: 1 1 0;
+    min-inline-size: 0;
+    min-block-size: 44px;
+    padding-block: 4px;
+    padding-inline: 4px;
+    font-size: 0.9em;
+  }
+
+  .tabsIndicator:not(.newFeedTabsIndicator) {
+    margin-block-start: -8px;
+  }
+
+  .tabLabel {
+    grid-template-columns: minmax(0, 1fr);
+    min-inline-size: 0;
+    max-inline-size: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .tabLabel > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .feedTabsControlsRow {
@@ -428,5 +458,11 @@
 
   .newFeedTabs {
     gap: 4px;
+  }
+}
+
+@media only screen and (width <= 480px) {
+  .tabs .subscriptionIcon {
+    display: none;
   }
 }

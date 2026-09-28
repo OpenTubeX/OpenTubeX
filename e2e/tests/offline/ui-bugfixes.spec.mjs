@@ -1590,7 +1590,7 @@ test('Shorts top controls stay visible over white video content', async ({ page 
   await expect(control).toHaveCSS('backdrop-filter', 'blur(10px) saturate(1.15)')
   await control.evaluate(element => element.classList.add('active'))
   await expect(control).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.42)')
-  await expect(control).toHaveCSS('background-image', /linear-gradient/)
+  await expect(control).toHaveCSS('background-image', /linear-gradient.*linear-gradient/)
 
   const volume = page.locator('.shortsVolumeControl')
   const volumeButton = volume.locator('.shortsTopControl')

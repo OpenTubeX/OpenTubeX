@@ -3,6 +3,40 @@ import { Capacitor, registerPlugin, SystemBarType, SystemBars } from '@capacitor
 const AndroidUi = process.env.IS_CAPACITOR && !process.env.IS_IOS ? registerPlugin('AndroidUi') : null
 const IOSUi = process.env.IS_CAPACITOR && process.env.IS_IOS ? registerPlugin('IOSUi') : null
 const ANDROID_PICTURE_IN_PICTURE_TARGET_ATTRIBUTE = 'data-android-picture-in-picture-target'
+const displayRotationCallbacks = new Set()
+let displayRotationHandle = null
+let displayRotationTask = Promise.resolve()
+
+function reconcileDisplayRotationListener() {
+  displayRotationTask = displayRotationTask.then(async () => {
+    if (displayRotationCallbacks.size && !displayRotationHandle) {
+      displayRotationHandle = await AndroidUi.addListener('displayRotation', ({ landscape }) => {
+        for (const callback of displayRotationCallbacks) callback(landscape)
+      })
+      try {
+        await AndroidUi.setDisplayRotationListening({ enabled: true })
+      } catch (error) {
+        await displayRotationHandle.remove()
+        displayRotationHandle = null
+        throw error
+      }
+    } else if (!displayRotationCallbacks.size && displayRotationHandle) {
+      await AndroidUi.setDisplayRotationListening({ enabled: false })
+      await displayRotationHandle.remove()
+      displayRotationHandle = null
+    }
+  }).catch(error => console.warn('Could not observe Android display rotation', error))
+}
+
+export function observeAndroidDisplayRotation(callback) {
+  if (!AndroidUi) return () => {}
+  displayRotationCallbacks.add(callback)
+  reconcileDisplayRotationListener()
+  return () => {
+    displayRotationCallbacks.delete(callback)
+    reconcileDisplayRotationListener()
+  }
+}
 
 function videoDimensions(video) {
   return {
@@ -59,14 +93,22 @@ export function shouldShowAndroidStatusBar({ active, fullscreen, controlsShown }
   return !active || !fullscreen || controlsShown
 }
 
-export function setAndroidStatusBarVisible(visible) {
+function setAndroidSystemBarVisible(bar, visible) {
   if (!Capacitor.isNativePlatform() || !Capacitor.isPluginAvailable('SystemBars')) {
     return Promise.resolve()
   }
 
   return visible
-    ? SystemBars.show({ bar: SystemBarType.StatusBar })
-    : SystemBars.hide({ bar: SystemBarType.StatusBar })
+    ? SystemBars.show({ bar })
+    : SystemBars.hide({ bar })
+}
+
+export function setAndroidStatusBarVisible(visible) {
+  return setAndroidSystemBarVisible(SystemBarType.StatusBar, visible)
+}
+
+export function setAndroidNavigationBarVisible(visible) {
+  return setAndroidSystemBarVisible(SystemBarType.NavigationBar, visible)
 }
 
 export function exitAndroidApp() {

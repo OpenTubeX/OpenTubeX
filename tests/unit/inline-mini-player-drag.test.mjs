@@ -7,6 +7,35 @@ import { getScrollMiniInlineLayoutHeight } from '../../src/renderer/helpers/scro
 const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/useScrollMiniPlayer.js', import.meta.url), 'utf8')
 const dragSource = source.slice(source.indexOf('  let inlineDrag ='), source.indexOf('  function updateScrollMiniVideoAspectRatio'))
 
+test('mobile morph keeps player and video layout fixed between animation frames', () => {
+  const writes = []
+  const style = {
+    setProperty(name, value) { writes.push([name, value]) },
+    removeProperty() {},
+  }
+  const videoStyle = { setProperty(name, value) { writes.push([name, value]) } }
+  const attributes = new Set()
+  const render = vm.runInNewContext(`${source.slice(source.indexOf('  function renderMobileMiniMorph('), source.indexOf('  function clearMobileMiniMorph('))}\nrenderMobileMiniMorph`, {
+    container: { value: {
+      style,
+      hasAttribute: name => attributes.has(name),
+      setAttribute: name => attributes.add(name),
+    } },
+    video: { value: { style: videoStyle } },
+    mobileMiniBarOverlay: { value: { style: { setProperty() {} } } },
+  })
+  const from = { left: 8, top: 80, width: 400, height: 225 }
+  const to = { left: 0, top: 700, width: 400, height: 76 }
+  const videoFrom = { left: 0, top: 0, width: 400, height: 225 }
+  const videoTo = { left: 8, top: 6, width: 112, height: 63 }
+  render(from, to, videoFrom, videoTo, 0, false)
+  writes.length = 0
+  render(from, to, videoFrom, videoTo, 0.5, false)
+  assert.deepEqual(writes.map(([name]) => name).sort(), [
+    '--mobile-mini-video-transform', 'transform'
+  ])
+})
+
 function fixture({ reducedMotion = false, available = true, restoring = false, finishRejects = false, activationSucceeds = true } = {}) {
   let reads = 0
   let navigations = 0
@@ -33,7 +62,7 @@ function fixture({ reducedMotion = false, available = true, restoring = false, f
   const methods = vm.runInNewContext(`${dragSource}\n({ beginScrollMiniPlayerDrag, moveScrollMiniPlayerDrag, finishScrollMiniPlayerDrag, cancelScrollMiniPlayerDrag })`, {
     process: { env: { IS_CAPACITOR: false } },
     container,
-    video: { value: { getBoundingClientRect: () => from } },
+    video: { value: { getBoundingClientRect: () => from, style: { removeProperty() {} } } },
     usesMobileMiniBar: () => false,
     performance: { now: () => 0 },
     SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS: 300,

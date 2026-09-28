@@ -244,6 +244,7 @@
 .capacitorPhoneTabTitle {
   display: flex;
   align-items: center;
+  gap: 6px;
   align-self: stretch;
   min-inline-size: 0;
   block-size: 2.7em;
@@ -255,7 +256,7 @@
   overflow-wrap: anywhere;
 }
 
-.capacitorPhoneTabTitle > span {
+.capacitorPhoneTabTitle > span[dir] {
   display: -webkit-box;
   overflow: hidden;
   -webkit-box-orient: vertical;
