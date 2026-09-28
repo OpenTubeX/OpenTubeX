@@ -8,6 +8,43 @@ import AVKit
 
 @MainActor
 final class AppTests: XCTestCase {
+    func testYtDlpRuntimeLoadsBundledCertificates() async throws {
+        try await openApplication()
+        let available = try await webView.callAsyncJavaScript("return (await Capacitor.Plugins.YtDlp.info()).ytDlp.available",
+                                                             arguments: [:], in: nil, contentWorld: .page) as? Bool
+        XCTAssertEqual(available, true)
+        let certificates = Bundle.main.bundleURL.appendingPathComponent("python-packages/certifi/cacert.pem")
+        XCTAssertTrue(FileManager.default.fileExists(atPath: certificates.path))
+        XCTAssertEqual(getenv("SSL_CERT_FILE").map { String(cString: $0) }, certificates.path)
+    }
+
+    func testDownloadsSettingSurvivesCategorySwitch() async throws {
+        try await openApplication()
+        let saved = try await webView.callAsyncJavaScript(
+            "return testStore.state.settings.enableDownloads", arguments: [:], in: nil, contentWorld: .page) as? Bool
+        let original = try XCTUnwrap(saved)
+        _ = try await webView.callAsyncJavaScript(
+            "await testStore.dispatch('updateEnableDownloads', false); await testRouter.push('/settings')",
+            arguments: [:], in: nil, contentWorld: .page)
+        try await wait("!!document.querySelector('.settingsMenu button[data-section=download]')")
+        _ = try await evaluate("document.querySelector('.settingsMenu button[data-section=download]').click(); true")
+        let toggle = ".section[data-section=download] [data-setting-key=enableDownloads] input"
+        try await wait("!!document.querySelector('\(toggle)')")
+        let initiallyEnabled = try await evaluate("document.querySelector('\(toggle)').checked") as? Bool
+        XCTAssertEqual(initiallyEnabled, false)
+        _ = try await evaluate("document.querySelector('\(toggle)').click(); true")
+        try await wait("document.querySelector('\(toggle)')?.checked === true")
+        try await wait("testStore.getters.getEnableDownloads === true")
+        _ = try await evaluate("document.querySelector('.settingsMenu button[data-section=appearance]').click(); true")
+        try await wait("!!document.querySelector('.section[data-section=appearance]')")
+        _ = try await evaluate("document.querySelector('.settingsMenu button[data-section=download]').click(); true")
+        try await wait("!!document.querySelector('\(toggle)')")
+        let retained = try await evaluate("document.querySelector('\(toggle)').checked") as? Bool
+        XCTAssertEqual(retained, true)
+        _ = try await webView.callAsyncJavaScript("await testStore.dispatch('updateEnableDownloads', original)",
+                                                arguments: ["original": original], in: nil, contentWorld: .page)
+    }
+
     func testPlaybackAudioSessionConfiguration() throws {
         let session = AVAudioSession.sharedInstance()
         let category = session.category

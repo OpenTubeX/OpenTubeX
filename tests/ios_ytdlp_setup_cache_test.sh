@@ -18,8 +18,9 @@ cat > "$fixture/bin/python3" <<'PYTHON'
 if [[ "$1" == '-m' ]]; then
   printf 'download\n' >> "$IOS_SETUP_TEST_CALLS"
 else
-  mkdir -p "$3/yt_dlp" "$3/yt_dlp_ejs" "$3/yt_dlp_plugins/extractor"
+  mkdir -p "$3/yt_dlp" "$3/yt_dlp_ejs" "$3/yt_dlp_plugins/extractor" "$3/certifi"
   touch "$3/yt_dlp_plugins/extractor/webkit_jsi.py"
+  touch "$3/certifi/cacert.pem"
 fi
 PYTHON
 chmod +x "$fixture/bin/python3"
@@ -27,9 +28,14 @@ chmod +x "$fixture/bin/python3"
 export IOS_SETUP_TEST_CALLS="$fixture/calls"
 PATH="$fixture/bin:$PATH" bash "$fixture/_scripts/setupIosYtDlp.sh"
 [[ "$(cat "$IOS_SETUP_TEST_CALLS")" == download ]]
-[[ "$(cat "$fixture/ios/App/python-packages/.pins")" == 'yt-dlp==2026.8.19 yt-dlp-ejs==0.8.0 yt-dlp-apple-webkit-jsi==0.1.1' ]]
+[[ "$(cat "$fixture/ios/App/python-packages/.pins")" == 'yt-dlp==2026.8.19 yt-dlp-ejs==0.8.0 yt-dlp-apple-webkit-jsi==0.1.1 certifi==2026.7.22' ]]
+[[ -f "$fixture/ios/App/python-packages/certifi/cacert.pem" ]]
 PATH="$fixture/bin:$PATH" bash "$fixture/_scripts/setupIosYtDlp.sh"
 [[ "$(wc -l < "$IOS_SETUP_TEST_CALLS")" == 1 ]]
+rm "$fixture/ios/App/python-packages/certifi/cacert.pem"
+PATH="$fixture/bin:$PATH" bash "$fixture/_scripts/setupIosYtDlp.sh"
+[[ "$(wc -l < "$IOS_SETUP_TEST_CALLS")" == 2 ]]
+[[ -f "$fixture/ios/App/python-packages/certifi/cacert.pem" ]]
 
 cat > "$fixture/bin/gh" <<'GH'
 #!/usr/bin/env bash
@@ -43,4 +49,4 @@ chmod +x "$fixture/bin/gh"
 printf 'obsolete release' > "$fixture/ios/App/Python.xcframework/.opentubex-release-tag"
 PATH="$fixture/bin:$PATH" bash "$fixture/_scripts/setupIosYtDlp.sh"
 [[ "$(cat "$fixture/ios/App/Python.xcframework/.opentubex-release-tag")" == '3.14-b11' ]]
-[[ "$(wc -l < "$IOS_SETUP_TEST_CALLS")" == 2 ]]
+[[ "$(wc -l < "$IOS_SETUP_TEST_CALLS")" == 3 ]]

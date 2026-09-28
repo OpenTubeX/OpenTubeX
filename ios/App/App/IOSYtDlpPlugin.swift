@@ -59,9 +59,15 @@ private enum IOSYtDlpRuntime {
         }
         let standard = library.appendingPathComponent(version)
         let packages = Bundle.main.bundleURL.appendingPathComponent("python-packages")
+        let certificates = packages.appendingPathComponent("certifi/cacert.pem")
+        guard FileManager.default.fileExists(atPath: certificates.path) else {
+            throw NSError(domain: "IOSYtDlp", code: 5,
+                          userInfo: [NSLocalizedDescriptionKey: "Bundled certificates are missing"])
+        }
         setenv("PYTHONHOME", root.path, 1)
         setenv("PYTHONPATH", [packages.path, standard.path,
                               standard.appendingPathComponent("lib-dynload").path].joined(separator: ":"), 1)
+        setenv("SSL_CERT_FILE", certificates.path, 1)
         setenv("XDG_CACHE_HOME", FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].path, 1)
         pyInitialize()
         _ = pySaveThread()

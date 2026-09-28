@@ -1,4 +1,7 @@
 import json
+import os
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -58,6 +61,24 @@ class FinishedYoutubeDL(FakeYoutubeDL):
 
 
 class IOSYtDlpPythonTest(unittest.TestCase):
+    def test_bundled_ytdlp_has_trusted_roots_without_system_ca(self):
+        packages = Path(__file__).resolve().parents[1] / 'ios/App/python-packages'
+        environment = os.environ.copy()
+        environment.update({
+            'PYTHONPATH': str(packages),
+            'SSL_CERT_FILE': '/nonexistent/opentubex-ca.pem',
+            'SSL_CERT_DIR': '/nonexistent/opentubex-ca-dir',
+        })
+        result = subprocess.run([sys.executable, '-S', '-c', '''
+import ssl
+from yt_dlp.networking._helper import ssl_load_certs
+context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+ssl_load_certs(context)
+print(context.cert_store_stats()['x509_ca'])
+'''], env=environment, capture_output=True, text=True, timeout=10)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertGreater(int(result.stdout.strip()), 0, result.stderr)
+
     def test_version_uses_bundled_package(self):
         with tempfile.TemporaryDirectory() as temp:
             request = Path(temp) / 'request.json'
