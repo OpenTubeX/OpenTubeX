@@ -164,12 +164,12 @@ test('description preview shows metadata without description text', async ({ app
       const scroll = element.querySelector('.descriptionScroll').getBoundingClientRect()
       const more = element.querySelector(':scope > .descriptionStatus').getBoundingClientRect()
       return {
-        clearOfPreview: more.top >= scroll.bottom - 1,
+        overlapsPreview: more.top < scroll.bottom,
         bottomGap: card.bottom - more.bottom,
         rightGap: card.right - more.right,
       }
     })
-    expect(morePosition.clearOfPreview, JSON.stringify(morePosition)).toBe(true)
+    expect(morePosition.overlapsPreview, JSON.stringify(morePosition)).toBe(true)
     expect(morePosition.bottomGap).toBeGreaterThanOrEqual(0)
     expect(morePosition.bottomGap).toBeLessThanOrEqual(20)
     expect(morePosition.rightGap).toBeLessThanOrEqual(20)

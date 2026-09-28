@@ -4258,6 +4258,49 @@ test.describe('watch page', () => {
     await watchComponent.dispose()
   })
 
+  test('fades collapsed description content at the bottom of the card', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await watchComponent.evaluate(async component => {
+      const view = component.proxy
+      view.isLoading = true
+      await view.$nextTick()
+      view.videoDescription = Array(12).fill('A long description line').join('\n')
+      view.videoDescriptionHtml = ''
+      view.videoTags = []
+      view.videoGames = []
+      view.license = null
+      view.isLoading = false
+      await view.$nextTick()
+    })
+
+    const card = page.locator(`${activeTab} .videoDescription`)
+    const scroller = card.locator('.descriptionScroll')
+    for (const scale of [1, 1.25]) {
+      await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+      await expect(card).toContainClass('short')
+      const layout = await scroller.evaluate(element => {
+        const card = element.closest('.videoDescription').getBoundingClientRect()
+        const viewport = element.getBoundingClientRect()
+        const more = element.parentElement.querySelector(':scope > .descriptionStatus').getBoundingClientRect()
+        return {
+          bottomGap: card.bottom - viewport.bottom,
+          moreOverlapsContent: more.top < viewport.bottom,
+          mask: getComputedStyle(element).maskImage,
+        }
+      })
+      expect(layout.bottomGap).toBeGreaterThanOrEqual(0)
+      expect(layout.bottomGap).toBeLessThanOrEqual(24)
+      expect(layout.moreOverlapsContent).toBe(true)
+      expect(layout.mask).toMatch(
+        /^linear-gradient\((?:to bottom, )?rgb\(0, 0, 0\) calc\(100% - 16px\), (?:transparent|rgba\(0, 0, 0, 0\))\)$/
+      )
+    }
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1))
+    await watchComponent.dispose()
+  })
+
   test('keeps license-only descriptions accessible and collapsible', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)

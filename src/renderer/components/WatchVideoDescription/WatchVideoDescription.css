@@ -17,6 +17,7 @@
 .videoDescription.short .descriptionScroll {
   max-block-size: 4lh;
   overflow-y: clip;
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 16px), transparent);
 }
 
 .videoDescription.alwaysExpanded .descriptionScroll {
@@ -79,7 +80,6 @@
 
 .videoDescription.short {
   cursor: pointer;
-  padding-block-end: calc(16px + 1lh);
 }
 
 .descriptionStatus,
