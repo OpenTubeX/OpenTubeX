@@ -1353,4 +1353,20 @@ test.describe('large combined new feed', () => {
     expect(metrics.afterReturning).toBeLessThan(40)
     await expect(panel.getByText('New video 0', { exact: true })).toBeVisible()
   })
+
+  test('keeps visible video cards mounted when switching feed tabs', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    const videosTab = page.locator('[data-subscription-feed-tab="videos"]')
+    await videosTab.click()
+    const firstCard = page.locator('#subscriptionsPanel:not(.newFeed) .ft-list-video').first()
+    await expect(firstCard).toBeVisible()
+    await firstCard.evaluate(element => { window.originalVideoCard = element })
+
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await expect(page.locator('#subscriptionsPanel.newFeed')).toBeVisible()
+    await page.waitForTimeout(200)
+    await videosTab.click()
+    await expect(firstCard).toBeVisible()
+    expect(await firstCard.evaluate(element => element === window.originalVideoCard)).toBe(true)
+  })
 })

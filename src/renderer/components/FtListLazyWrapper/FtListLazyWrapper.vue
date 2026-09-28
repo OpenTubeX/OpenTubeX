@@ -69,7 +69,7 @@
 
 <script setup>
 import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
-import { observeWindowedListItem } from '../../helpers/windowedList.js'
+import { observeWindowedListItem, WINDOWED_LIST_OVERSCAN_PX } from '../../helpers/windowedList.js'
 
 import { handleDragAndDrop } from '../../helpers/dragAndDrop'
 
@@ -312,7 +312,16 @@ if (windowed) {
       unmount: height => { shellHeight.value = height; visible.value = false },
       isMounted: () => visible.value,
       isProtected: () => {
-        return props.isVideoDragging || element.contains(document.activeElement) ||
+        let nearViewport = false
+        if (deferWindowing) {
+          if (!element.isConnected) return true
+          // KeepAlive can report an old intersection as a feed tab reattaches.
+          const bounds = element.getBoundingClientRect()
+          nearViewport = bounds.bottom > -WINDOWED_LIST_OVERSCAN_PX &&
+            bounds.top < window.innerHeight + WINDOWED_LIST_OVERSCAN_PX
+        }
+        return nearViewport || props.isVideoDragging ||
+          element.contains(document.activeElement) ||
           !!element.querySelector('[aria-expanded="true"], [role="dialog"], [contenteditable="true"]')
       },
     })

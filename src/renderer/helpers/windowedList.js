@@ -1,5 +1,7 @@
 // Share observers across cards. Only the cheap shells stay mounted outside the
 // overscan region; measured fractional heights keep the scroll range stable.
+export const WINDOWED_LIST_OVERSCAN_PX = 800
+
 export function createListWindow({ IntersectionObserver: Intersection, ResizeObserver: Resize, requestAnimationFrame: frame, cancelAnimationFrame: cancel } = globalThis) {
   const items = new Map()
   const releases = new Set()
@@ -45,7 +47,7 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
       if (item.near) item.mount()
       else item.release()
     }
-  }, { rootMargin: '800px 0px' })
+  }, { rootMargin: `${WINDOWED_LIST_OVERSCAN_PX}px 0px` })
   const resize = new Resize(entries => {
     for (const entry of entries) {
       const item = items.get(entry.target)
