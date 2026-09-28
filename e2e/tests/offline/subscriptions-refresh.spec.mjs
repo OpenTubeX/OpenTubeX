@@ -422,6 +422,7 @@ test.describe('subscription refresh performance with many tabs', () => {
       window.addEventListener('opentubex-subscription-refresh-completed', refreshCompleted)
       animationFrame = requestAnimationFrame(sampleFrame)
       window.__subscriptionRefreshPerformance = {
+        get completedAt() { return completedAt },
         stop: () => {
           cancelAnimationFrame(animationFrame)
           window.removeEventListener('opentubex-subscription-refresh-channel', channelRefreshed)
@@ -454,6 +455,9 @@ test.describe('subscription refresh performance with many tabs', () => {
       await expect(cancelRefresh).toHaveCount(0, { timeout: 90_000 })
       expect(fulfilledFeedCount).toBe(channelCount)
     }
+    await expect.poll(() => page.evaluate(() => window.__subscriptionRefreshPerformance.completedAt), {
+      timeout: 90_000
+    }).not.toBeNull()
     await expect(page.getByText('Fresh video 0', { exact: true })).toBeVisible()
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)))
 

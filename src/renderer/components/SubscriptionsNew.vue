@@ -134,8 +134,11 @@ const getCurrentContentByCategory = () => getNewSubscriptionFeedEntries({
   ...contentOptions.value
 })
 const newContentByCategory = computed(() => cachedContentDuringLargeRefresh.value ?? getCurrentContentByCategory())
-const watchedHistoryState = computed(() => store.getters.getHistoryCacheSorted
-  .map(({ videoId, isWatched }) => `${videoId}:${isWatched === true}`).join(','))
+const watchedHistoryState = computed(() => {
+  if (cachedContentDuringLargeRefresh.value === null) return null
+  return store.getters.getHistoryCacheSorted
+    .map(({ videoId, isWatched }) => `${videoId}:${isWatched === true}`).join(',')
+})
 
 watch(() => store.getters.getSubscriptionFeedRefreshInProgress, refreshing => {
   if (!refreshing) {
@@ -162,7 +165,6 @@ watch(() => store.getters.getSubscriptionFeedRefreshInProgress, refreshing => {
 // choices should still affect the list while a large refresh is running.
 watch([
   contentOptions,
-  watchedHistoryState,
   () => store.getters.getSubscriptionSeenVideos,
   () => store.getters.getSubscriptionSeenPosts,
   () => [
@@ -174,6 +176,12 @@ watch([
   ].join(',')
 ], () => {
   if (cachedContentDuringLargeRefresh.value !== null) {
+    cachedContentDuringLargeRefresh.value = getCurrentContentByCategory()
+  }
+})
+
+watch(watchedHistoryState, (current, previous) => {
+  if (current !== null && previous !== null) {
     cachedContentDuringLargeRefresh.value = getCurrentContentByCategory()
   }
 })
