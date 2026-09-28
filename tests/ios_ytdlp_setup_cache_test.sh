@@ -9,6 +9,7 @@ mkdir -p "$fixture/_scripts" "$fixture/bin" \
   "$fixture/ios/App/python-packages/yt_dlp_ejs" \
   "$fixture/ios/App/python-packages/yt_dlp_plugins/extractor"
 cp "$(dirname "$0")/../_scripts/setupIosYtDlp.sh" "$fixture/_scripts/setupIosYtDlp.sh"
+cp "$(dirname "$0")/../_scripts/iosYtDlpWebkitNavigation.patch" "$fixture/_scripts/"
 printf '3.14-b11' > "$fixture/ios/App/Python.xcframework/.opentubex-release-tag"
 touch "$fixture/ios/App/python-packages/yt_dlp_plugins/extractor/webkit_jsi.py"
 printf 'obsolete pins' > "$fixture/ios/App/python-packages/.pins"
@@ -25,10 +26,17 @@ fi
 PYTHON
 chmod +x "$fixture/bin/python3"
 
+cat > "$fixture/bin/patch" <<'PATCH'
+#!/usr/bin/env bash
+cat > /dev/null
+PATCH
+chmod +x "$fixture/bin/patch"
+
 export IOS_SETUP_TEST_CALLS="$fixture/calls"
 PATH="$fixture/bin:$PATH" bash "$fixture/_scripts/setupIosYtDlp.sh"
 [[ "$(cat "$IOS_SETUP_TEST_CALLS")" == download ]]
-[[ "$(cat "$fixture/ios/App/python-packages/.pins")" == 'yt-dlp==2026.8.19 yt-dlp-ejs==0.8.0 yt-dlp-apple-webkit-jsi==0.1.1 certifi==2026.7.22' ]]
+patch_sha="$(shasum -a 256 "$fixture/_scripts/iosYtDlpWebkitNavigation.patch" | cut -d' ' -f1)"
+[[ "$(cat "$fixture/ios/App/python-packages/.pins")" == "yt-dlp==2026.8.19 yt-dlp-ejs==0.8.0 yt-dlp-apple-webkit-jsi==0.1.1 certifi==2026.7.22 $patch_sha" ]]
 [[ -f "$fixture/ios/App/python-packages/certifi/cacert.pem" ]]
 PATH="$fixture/bin:$PATH" bash "$fixture/_scripts/setupIosYtDlp.sh"
 [[ "$(wc -l < "$IOS_SETUP_TEST_CALLS")" == 1 ]]

@@ -75,7 +75,7 @@ private enum IOSYtDlpRuntime {
     }
 }
 
-private enum IOSYtDlpMerger {
+enum IOSYtDlpMerger {
     static func run(_ value: [String: Any], in folder: URL,
                     completion: @escaping (Result<[String: Any], Error>) -> Void) {
         guard let merges = value["merges"] as? [[String: String]] else {
@@ -116,6 +116,9 @@ private enum IOSYtDlpMerger {
                     compositionVideo.preferredTransform = try await videoTrack.load(.preferredTransform)
                     guard let exporter = AVAssetExportSession(asset: composition, presetName: AVAssetExportPresetPassthrough) else {
                         throw NSError(domain: "IOSYtDlp", code: 11, userInfo: [NSLocalizedDescriptionKey: "Media export is unavailable"])
+                    }
+                    if FileManager.default.fileExists(atPath: outputURL.path) {
+                        try FileManager.default.removeItem(at: outputURL)
                     }
                     exporter.outputURL = outputURL
                     exporter.outputFileType = .mp4

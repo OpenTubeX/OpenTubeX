@@ -122,6 +122,32 @@ final class AppTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: root.appendingPathComponent("output/secret.mp4").path))
     }
 
+    func testYtDlpMergeReplacesStaleOutputOnRetry() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("yt-dlp-merge-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let video = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "fixture", withExtension: "mp4"))
+        let audio = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "fixture", withExtension: "m4a"))
+        try FileManager.default.copyItem(at: video, to: root.appendingPathComponent("video.mp4"))
+        try FileManager.default.copyItem(at: audio, to: root.appendingPathComponent("audio.m4a"))
+        let output = root.appendingPathComponent("merged.mp4")
+        try Data("stale".utf8).write(to: output)
+
+        let value: [String: Any] = ["merges": [["video": "video.mp4", "audio": "audio.m4a", "output": "merged.mp4"]]]
+        let result: [String: Any] = try await withCheckedThrowingContinuation { continuation in
+            IOSYtDlpMerger.run(value, in: root) { continuation.resume(with: $0) }
+        }
+
+        XCTAssertEqual(result["files"] as? [String], ["merged.mp4"])
+        let asset = AVURLAsset(url: output)
+        let videoTracks = try await asset.loadTracks(withMediaType: .video)
+        let audioTracks = try await asset.loadTracks(withMediaType: .audio)
+        XCTAssertEqual(videoTracks.count, 1)
+        XCTAssertEqual(audioTracks.count, 1)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: root.appendingPathComponent("video.mp4").path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: root.appendingPathComponent("audio.m4a").path))
+    }
+
     func testBackgroundPreparationEvent() async throws {
         try await openApplication()
         _ = try await evaluate("""
