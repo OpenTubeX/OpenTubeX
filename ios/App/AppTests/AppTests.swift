@@ -8,6 +8,26 @@ import AVKit
 
 @MainActor
 final class AppTests: XCTestCase {
+    func testPoTokenWebViewKeepsYouTubeNavigationInsideApp() async throws {
+        let redirected = expectation(description: "Blocked navigation to a YouTube watch page")
+        let guardDelegate = RecordingPoTokenNavigationGuard { url, policy in
+            if url.path == "/watch" {
+                XCTAssertEqual(policy, .cancel)
+                redirected.fulfill()
+            }
+        }
+        let isolatedView = WKWebView(frame: .zero)
+        isolatedView.navigationDelegate = guardDelegate
+        isolatedView.loadHTMLString("""
+            <html><body id="token-test"><script>
+            window.addEventListener('load', () => location.assign('https://www.youtube.com/watch?v=jNQXAC9IVRw'));
+            </script></body></html>
+            """, baseURL: URL(string: "https://www.youtube.com/"))
+        await fulfillment(of: [redirected], timeout: 10)
+        let retained = try await isolatedView.evaluateJavaScript("!!document.getElementById('token-test')") as? Bool
+        XCTAssertEqual(retained, true)
+    }
+
     func testYtDlpRuntimeLoadsBundledCertificates() async throws {
         try await openApplication()
         let available = try await webView.callAsyncJavaScript("return (await Capacitor.Plugins.YtDlp.info()).ytDlp.available",
@@ -662,9 +682,10 @@ final class AppTests: XCTestCase {
         let original = try await webView.callAsyncJavaScript(
             "return testStore.getters.getVideoPlaybackEngine", arguments: [:], in: nil, contentWorld: .page) as? String
         _ = try await webView.callAsyncJavaScript(
-            "await testStore.dispatch('updateVideoPlaybackEngine', 'yt-dlp'); await testRouter.push('/watch/jNQXAC9IVRw')",
+            "await testRouter.push('/subscriptions'); await testStore.dispatch('updateVideoPlaybackEngine', 'yt-dlp'); await testRouter.push('/watch/jNQXAC9IVRw')",
             arguments: [:], in: nil, contentWorld: .page)
         do {
+            try await wait("document.querySelector('video')?.currentSrc?.startsWith('capacitor://localhost/_opentubex_media/')", timeout: 90)
             try await wait("document.querySelector('video')?.readyState >= 2", timeout: 90)
             _ = try await evaluate("document.querySelector('video').play(); true")
             try await wait("document.querySelector('video').currentTime > 1", timeout: 30)
@@ -1803,5 +1824,22 @@ final class AppTests: XCTestCase {
             throw error
         }
         _ = try await webView.callAsyncJavaScript("await testStore.dispatch('updateDefaultQuality', quality)", arguments: ["quality": quality], in: nil, contentWorld: .page)
+    }
+}
+
+private final class RecordingPoTokenNavigationGuard: PoTokenNavigationGuard {
+    private let didDecide: (URL, WKNavigationActionPolicy) -> Void
+
+    init(didDecide: @escaping (URL, WKNavigationActionPolicy) -> Void) {
+        self.didDecide = didDecide
+        super.init()
+    }
+
+    override func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
+                          decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        super.webView(webView, decidePolicyFor: navigationAction) { [didDecide] policy in
+            if let url = navigationAction.request.url { didDecide(url, policy) }
+            decisionHandler(policy)
+        }
     }
 }
