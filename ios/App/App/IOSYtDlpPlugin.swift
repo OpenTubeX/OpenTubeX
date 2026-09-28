@@ -524,8 +524,10 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
         switch action {
         case "pause", "cancel":
             guard ["queued", "preparing", "downloading", "processing"].contains(status) else { return false }
-            if running.contains(id) { try? Data().write(to: controlFile(for: id)) }
-            records[id]?["status"] = action == "pause" && running.contains(id) ? "pausing" : action == "pause" ? "paused" : "cancelled"
+            let active = running.contains(id)
+            if active { try? Data().write(to: controlFile(for: id)) }
+            records[id]?["status"] = action == "pause" && active ? "pausing" : action == "pause" ? "paused" : "cancelled"
+            if action == "cancel" && !active { try? FileManager.default.removeItem(at: folder(for: id)) }
         case "resume":
             guard status == "paused" else { return false }
             records[id]?["status"] = "queued"
