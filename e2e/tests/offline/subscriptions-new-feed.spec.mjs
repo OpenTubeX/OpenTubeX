@@ -182,20 +182,16 @@ test.describe('new subscriptions feed', () => {
     await expect(page.getByText('New short', { exact: true })).toBeVisible()
     await expect(page.getByText('New video', { exact: true })).toHaveCount(0)
 
-    await page.waitForTimeout(400)
-    const indicatorAlignment = await page.evaluate(() => {
+    await expect.poll(() => page.evaluate(() => {
       const indicator = document.querySelector('.newFeedTabsIndicator').getBoundingClientRect()
       const tab = document.querySelector('[data-new-feed-tab="shorts"]').getBoundingClientRect()
 
-      return {
-        x: Math.abs(indicator.x - tab.x),
-        width: Math.abs(indicator.width - tab.width),
-        top: Math.abs(indicator.top - tab.bottom)
-      }
-    })
-    expect(indicatorAlignment.x).toBeLessThan(2)
-    expect(indicatorAlignment.width).toBeLessThan(2)
-    expect(indicatorAlignment.top).toBeLessThan(2)
+      return Math.max(
+        Math.abs(indicator.x - tab.x),
+        Math.abs(indicator.width - tab.width),
+        Math.abs(indicator.top - tab.bottom)
+      )
+    })).toBeLessThan(2)
 
     await shortsTab.focus()
     await shortsTab.press('ArrowRight')
@@ -485,6 +481,8 @@ test.describe('new subscriptions feed', () => {
       await page.getByRole('menuitem', { name: 'Mark As Unseen', exact: true }).click()
       await expect(card.locator('.newContentDot')).toBeVisible()
       await page.locator('[data-subscription-feed-tab="all"]').click()
+      const section = page.locator('.mediaSection')
+      await (tab === 'live' ? section.last() : section.first()).scrollIntoViewIfNeeded()
       await expect(card).toBeVisible()
     })
   }
