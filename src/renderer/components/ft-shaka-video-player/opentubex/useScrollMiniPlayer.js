@@ -326,7 +326,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     style.setProperty('transform', `translate(${x}px, ${y}px) scale(${videoScale})`, 'important')
     const cropX = Math.max(0, (videoFrom.width * videoScale - videoWidth) / (2 * videoScale))
     const cropY = Math.max(0, (videoFrom.height * videoScale - videoHeight) / (2 * videoScale))
-    video.value?.style.setProperty('--mobile-mini-video-clip', `inset(${cropY}px ${cropX}px)`)
+    style.setProperty('--mobile-mini-video-clip', `inset(${cropY}px ${cropX}px)`)
     const opacity = restoring
       ? Math.max(0, 1 - progress / 0.5)
       : Math.min(1, Math.max(0, (progress - 0.2) / 0.4))
@@ -338,7 +338,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     if (!element) return
     element.removeAttribute('data-mobile-mini-morph')
     element.style.removeProperty('transform')
-    video.value?.style.removeProperty('--mobile-mini-video-clip')
+    element.style.removeProperty('--mobile-mini-video-clip')
     for (const name of [
       '--mobile-mini-left', '--mobile-mini-top', '--mobile-mini-width', '--mobile-mini-height',
       '--mobile-mini-video-base-left', '--mobile-mini-video-base-top',
