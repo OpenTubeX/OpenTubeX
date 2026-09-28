@@ -145,9 +145,6 @@ const capacitor = {
       if (process.env.IS_IOS) {
         // WebKit cannot fetch yt-dlp's media URLs through CORS, including
         // YouTube's googlevideo streams. Use the native scheme for HTTP media.
-        const hlsManifestUrl = info.manifest_url ?? formats.find(format =>
-          ['m3u8', 'm3u8_native'].includes(format.protocol) && format.manifest_url
-        )?.manifest_url
         if (!isYouTubeVideo) formats = formats.filter(format => format.protocol === 'https' && format.url)
         const httpFormats = formats.filter(format => format.protocol === 'https' && format.url)
         const subtitles = Object.values(info.requested_subtitles ?? {}).filter(subtitle => subtitle?.url?.startsWith('https://'))
@@ -161,7 +158,9 @@ const capacitor = {
           caption.url = registeredUrls.get(caption.url) ?? caption.url
         }
         if (!isYouTubeVideo) {
-          info.manifest_url = hlsManifestUrl ?? null
+          // External HLS segments may reject WebKit CORS requests, and this
+          // native proxy only covers registered progressive formats.
+          info.manifest_url = null
           info.storyboard = null
         }
       }

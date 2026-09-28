@@ -57,6 +57,41 @@ test('iOS does not select an HLS manifest rejected by every probe', async () => 
   await assert.rejects(context.load('https://example.test/watch'), /stream URLs could not be accessed/)
 })
 
+test('iOS excludes external HLS manifests whose segments cannot use native transport', async () => {
+  const source = await read('src/renderer/helpers/ytDlp.js')
+  const start = source.indexOf('  async ytDlpGetPlaybackInfo(')
+  const end = source.indexOf('  async ytDlpGetRecommendations(', start)
+  const manifest = 'https://external.test/master.m3u8'
+  const context = vm.createContext({
+    process: { env: { IS_IOS: true } },
+    URL,
+    native: {
+      info: async () => ({ ytDlp: { version: 'fixture' } }),
+      registerMedia: async ({ formats }) => ({ urls: formats.map((_, index) => `capacitor://localhost/_opentubex_media/${index}`) }),
+    },
+    extract: async () => ({
+      manifest_url: manifest,
+      formats: [{ protocol: 'm3u8_native', url: manifest, manifest_url: manifest }],
+    }),
+    playbackSubtitleArguments: () => [],
+    EXTERNAL_PLAYBACK_FORMAT_SELECTOR: 'best',
+    EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE: '',
+    PLAYBACK_INFO_OUTPUT_TEMPLATE: '',
+    parseYtDlpPlaybackInfo: value => value,
+    mapPlaybackCaptions: () => ({ captions: [], captionTranslations: [] }),
+    mapExternalPlaybackMetadata: () => null,
+    mapPlaybackFormat: value => value,
+    buildYtDlpStoryboardVtt: () => null,
+    toNonEmptyString: value => typeof value === 'string' && value.length > 0 ? value : null,
+    toFiniteNumber: value => Number.isFinite(value) ? value : null,
+  })
+  vm.runInContext(`globalThis.load = ({${source.slice(start, end)}}).ytDlpGetPlaybackInfo`, context)
+  const result = await context.load('https://external.test/watch')
+  assert.equal(result.error, undefined, result.error)
+  assert.equal(result.hlsManifestUrl, null)
+  assert.equal(result.formats.length, 0)
+})
+
 test('iOS native subtitle registration retains translated and authored track identities', async () => {
   const source = await read('src/renderer/helpers/ytDlp.js')
   const start = source.indexOf('  async ytDlpGetPlaybackInfo(')
