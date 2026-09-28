@@ -142,23 +142,28 @@ const capacitor = {
       const [info, binaries] = await Promise.all([extract(args, useAuthentication, !isYouTubeVideo, parseYtDlpPlaybackInfo, true), native.info()])
       const playbackCaptions = mapPlaybackCaptions(info.requested_subtitles, info.subtitles, !isYouTubeVideo)
       let formats = Array.isArray(info.formats) ? info.formats : []
-      if (process.env.IS_IOS && !isYouTubeVideo) {
-        // WebKit cannot fetch many third-party streams through CORS. Stream the
-        // progressive formats with yt-dlp's headers through our native scheme.
+      if (process.env.IS_IOS) {
+        // WebKit cannot fetch yt-dlp's media URLs through CORS, including
+        // YouTube's googlevideo streams. Use the native scheme for HTTP media.
         const hlsManifestUrl = info.manifest_url ?? formats.find(format =>
           ['m3u8', 'm3u8_native'].includes(format.protocol) && format.manifest_url
         )?.manifest_url
-        formats = formats.filter(format => format.protocol === 'https' && format.url)
+        if (!isYouTubeVideo) formats = formats.filter(format => format.protocol === 'https' && format.url)
+        const httpFormats = formats.filter(format => format.protocol === 'https' && format.url)
         const subtitles = Object.values(info.requested_subtitles ?? {}).filter(subtitle => subtitle?.url?.startsWith('https://'))
-        const requests = [...formats, ...subtitles]
+        const requests = [...httpFormats, ...subtitles]
         const { urls } = await native.registerMedia({ formats: requests })
         const registeredUrls = new Map(requests.map((entry, index) => [new URL(entry.url).toString(), urls[index]]))
-        requests.forEach((entry, index) => { entry.url = urls[index] })
+        formats = formats.map(format => format.protocol === 'https' && format.url
+          ? { ...format, url: registeredUrls.get(new URL(format.url).toString()) ?? format.url }
+          : format)
         for (const caption of [...playbackCaptions.captions, ...playbackCaptions.captionTranslations]) {
           caption.url = registeredUrls.get(caption.url) ?? caption.url
         }
-        info.manifest_url = hlsManifestUrl ?? null
-        info.storyboard = null
+        if (!isYouTubeVideo) {
+          info.manifest_url = hlsManifestUrl ?? null
+          info.storyboard = null
+        }
       }
       const creatorAvatarUrl = [info.channel_thumbnail, info.channel_avatar, info.uploader_thumbnail, info.uploader_avatar]
         .find(value => { try { return new URL(value).protocol === 'https:' } catch { return false } }) ?? null

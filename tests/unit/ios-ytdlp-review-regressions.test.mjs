@@ -73,6 +73,51 @@ test('iOS native subtitle registration retains translated and authored track ide
   assert.match(result.captionTranslations[0].url, /^capacitor:\/\/localhost\//)
 })
 
+test('iOS routes YouTube playback formats through the native media bridge', async () => {
+  const source = await read('src/renderer/helpers/ytDlp.js')
+  const start = source.indexOf('  async ytDlpGetPlaybackInfo(')
+  const end = source.indexOf('  async ytDlpGetRecommendations(', start)
+  const format = {
+    format_id: '140',
+    protocol: 'https',
+    url: 'https://rr1.googlevideo.com/videoplayback?expire=2000000000',
+    http_headers: { 'User-Agent': 'yt-dlp fixture' },
+    acodec: 'mp4a.40.2',
+    vcodec: 'none',
+  }
+  const registered = []
+  const context = vm.createContext({
+    process: { env: { IS_IOS: true } },
+    URL,
+    native: {
+      info: async () => ({ ytDlp: { version: 'fixture' } }),
+      registerMedia: async ({ formats }) => {
+        registered.push(...formats)
+        return { urls: formats.map((_, index) => `capacitor://localhost/_opentubex_media/${index}`) }
+      },
+    },
+    extract: async () => ({ formats: [format] }),
+    playbackSubtitleArguments: () => [],
+    EXTERNAL_PLAYBACK_FORMAT_SELECTOR: 'best',
+    EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE: '',
+    PLAYBACK_INFO_OUTPUT_TEMPLATE: '',
+    parseYtDlpPlaybackInfo: value => value,
+    mapPlaybackCaptions: () => ({ captions: [], captionTranslations: [] }),
+    mapExternalPlaybackMetadata: () => null,
+    mapPlaybackFormat: value => value,
+    buildYtDlpStoryboardVtt: () => null,
+    toNonEmptyString: value => typeof value === 'string' && value.length > 0 ? value : null,
+    toFiniteNumber: value => Number.isFinite(value) ? value : null,
+  })
+  vm.runInContext(`globalThis.load = ({${source.slice(start, end)}}).ytDlpGetPlaybackInfo`, context)
+  const result = await context.load('jNQXAC9IVRw')
+  assert.equal(result.error, undefined, result.error)
+  assert.equal(registered.length, 1)
+  assert.equal(registered[0].url, format.url)
+  assert.equal(registered[0].http_headers['User-Agent'], 'yt-dlp fixture')
+  assert.equal(result.formats[0].url, 'capacitor://localhost/_opentubex_media/0')
+})
+
 test('iOS download Play shows the existing toast when native playback rejects', async () => {
   const source = await read('src/renderer/views/Downloads/Downloads.vue')
   const start = source.indexOf('async function playDownload(download) {')

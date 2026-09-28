@@ -69,7 +69,7 @@ jobs:
       run: |
         args=(-skip-testing:AppTests/AppTests/testYtDlpPersistenceSeed -skip-testing:AppTests/AppTests/testYtDlpPersistenceAfterRelaunch)
         if [ "$TEST_PLAYBACK" != true ]; then
-          args+=(-skip-testing:AppTests/AppTests/testApplicationAndDirectPlayback -skip-testing:AppTests/AppTests/testSustainedPlayback -skip-testing:AppTests/AppTests/testPlaybackTabTeardown -skip-testing:AppTests/AppTests/testYtDlpLiveExternalPlayback -skip-testing:AppTests/AppTests/testYtDlpLiveYouTubeDownload -skip-testing:AppTests/AppTests/testYtDlpConcurrentPlaybackAndDownload)
+          args+=(-skip-testing:AppTests/AppTests/testApplicationAndDirectPlayback -skip-testing:AppTests/AppTests/testSustainedPlayback -skip-testing:AppTests/AppTests/testPlaybackTabTeardown -skip-testing:AppTests/AppTests/testYtDlpLiveExternalPlayback -skip-testing:AppTests/AppTests/testYtDlpLiveYouTubePlayback -skip-testing:AppTests/AppTests/testYtDlpLiveYouTubeDownload -skip-testing:AppTests/AppTests/testYtDlpConcurrentPlaybackAndDownload)
         fi
         xcodebuild -project ios/App/App.xcodeproj -scheme App \
           -destination "platform=iOS Simulator,id=$SIMULATOR_ID" \

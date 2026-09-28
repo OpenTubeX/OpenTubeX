@@ -657,6 +657,32 @@ final class AppTests: XCTestCase {
         add(attachment)
     }
 
+    func testYtDlpLiveYouTubePlayback() async throws {
+        try await openApplication()
+        let original = try await webView.callAsyncJavaScript(
+            "return testStore.getters.getVideoPlaybackEngine", arguments: [:], in: nil, contentWorld: .page) as? String
+        _ = try await webView.callAsyncJavaScript(
+            "await testStore.dispatch('updateVideoPlaybackEngine', 'yt-dlp'); await testRouter.push('/watch/jNQXAC9IVRw')",
+            arguments: [:], in: nil, contentWorld: .page)
+        do {
+            try await wait("document.querySelector('video')?.readyState >= 2", timeout: 90)
+            _ = try await evaluate("document.querySelector('video').play(); true")
+            try await wait("document.querySelector('video').currentTime > 1", timeout: 30)
+            let source = try await webView.callAsyncJavaScript(
+                "return document.querySelector('video').currentSrc", arguments: [:], in: nil, contentWorld: .page) as? String
+            XCTAssertTrue(source?.hasPrefix("capacitor://localhost/_opentubex_media/") == true,
+                          "Expected yt-dlp's native media stream, got \(source ?? "none")")
+        } catch {
+            _ = try? await webView.callAsyncJavaScript(
+                "await testStore.dispatch('updateVideoPlaybackEngine', original)",
+                arguments: ["original": original ?? "built-in"], in: nil, contentWorld: .page)
+            throw error
+        }
+        _ = try await webView.callAsyncJavaScript(
+            "await testStore.dispatch('updateVideoPlaybackEngine', original)",
+            arguments: ["original": original ?? "built-in"], in: nil, contentWorld: .page)
+    }
+
     func testYtDlpConcurrentPlaybackAndDownload() async throws {
         try await openApplication()
         let body = Data(repeating: 42, count: 4 * 1024 * 1024)
