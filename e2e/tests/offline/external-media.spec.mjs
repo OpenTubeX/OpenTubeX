@@ -207,7 +207,12 @@ test('plays a Twitch VOD when yt-dlp reports subscriber-only access', async ({ a
   }, executable)
 
   const variantUrl = 'https://vod.example.test/720p60/index-dvr.m3u8'
+  const initUrl = 'https://vod.example.test/720p60/init.mp4'
   const mutedUrl = 'https://vod.example.test/720p60/segment-muted.mp4'
+  const fixture = await readFile(path.join(repoRoot, 'e2e/fixtures/media/hls-1080.mp4'))
+  const fragmentStart = fixture.indexOf(Buffer.from('moof')) - 4
+  expect(fragmentStart).toBeGreaterThan(0)
+  let mutedSegmentRequested = false
   await app.electronApp.evaluate(({ ipcMain }) => {
     ipcMain.removeHandler('twitch-sub-only-vod')
     ipcMain.handle('twitch-sub-only-vod', (_event, id) => ({
@@ -218,27 +223,41 @@ test('plays a Twitch VOD when yt-dlp reports subscriber-only access', async ({ a
   })
   await page.route(variantUrl, route => route.fulfill({
     contentType: 'application/vnd.apple.mpegurl',
+    headers: { 'Access-Control-Allow-Origin': '*' },
     body: `#EXTM3U
 #EXT-X-TARGETDURATION:2
 #EXT-X-VERSION:7
 #EXT-X-MEDIA-SEQUENCE:0
 #EXT-X-PLAYLIST-TYPE:VOD
-#EXT-X-MAP:URI="${mutedUrl}"
+#EXT-X-MAP:URI="${initUrl}"
 #EXTINF:2,
 https://vod.example.test/720p60/segment-unmuted.mp4
 #EXT-X-ENDLIST
 `
   }))
-  await page.route(mutedUrl, async route => route.fulfill({
+  await page.route(initUrl, route => route.fulfill({
     contentType: 'video/mp4',
-    body: await readFile(path.join(repoRoot, 'e2e/fixtures/media/hls-1080.mp4'))
+    headers: { 'Access-Control-Allow-Origin': '*' },
+    body: fixture.subarray(0, fragmentStart)
   }))
-  await page.route('https://vod.example.test/720p60/segment-unmuted.mp4', route => route.fulfill({ status: 403 }))
+  await page.route(mutedUrl, route => {
+    mutedSegmentRequested = true
+    return route.fulfill({
+      contentType: 'video/mp4',
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: fixture.subarray(fragmentStart)
+    })
+  })
+  await page.route('https://vod.example.test/720p60/segment-unmuted.mp4', route => route.fulfill({
+    status: 403,
+    headers: { 'Access-Control-Allow-Origin': '*' }
+  }))
 
   await page.locator(sel.searchInput).fill('https://www.twitch.tv/videos/123456789')
   await page.locator(sel.searchInput).press('Enter')
   await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('Subscriber archive')
   await expect(page.locator(`${activeTab} .externalMediaDetails`).getByRole('button', { name: 'Download Video' })).toHaveCount(0)
+  await expect.poll(() => mutedSegmentRequested).toBe(true)
   await expect.poll(async () => {
     const diagnostic = page.locator(`${activeTab} .externalMediaDiagnostic`)
     if (await diagnostic.count()) return await diagnostic.textContent()

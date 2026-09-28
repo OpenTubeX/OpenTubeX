@@ -195,8 +195,12 @@ public final class YtDlpPlugin extends Plugin {
         });
     }
     @PluginMethod public void registerTwitchVod(PluginCall call) {
+        run(call, () -> new JSONObject().put("id",
+            ExternalStreamRequestRegistry.shared().registerTwitchVod(call.getArray("urls"))));
+    }
+    @PluginMethod public void unregisterTwitchVod(PluginCall call) {
         run(call, () -> {
-            ExternalStreamRequestRegistry.shared().registerTwitchVod(call.getArray("urls"));
+            ExternalStreamRequestRegistry.shared().unregisterTwitchVod(call.getString("id", ""));
             return new JSONObject();
         });
     }

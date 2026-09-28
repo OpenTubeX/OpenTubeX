@@ -23,6 +23,8 @@ import { mapExternalPlaybackMetadata } from '../../../ytDlpMetadata'
  * @property {string | null} title
  * @property {boolean} isLive
  * @property {boolean} [audioOnly] whether an external manifest has no video formats
+ * @property {boolean} [twitchSubOnlyVod]
+ * @property {string | null} [twitchVodRegistrationId]
  * @property {string | null} [separateAudioUrl] audio supplied separately from an external video file
  * @property {number | null} duration
  * @property {string | null} storyboardSrc
@@ -319,8 +321,10 @@ export async function getExternalYtDlpPlaybackSource(url, useAuthentication = fa
       if (!result) throw error
 
       const { playlist, video } = result
+      let twitchVodRegistrationId = null
       if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
-        await ytDlp.ytDlpRegisterTwitchVod(playlist.split('\n').filter(line => line.startsWith('https://')))
+        const registration = await ytDlp.ytDlpRegisterTwitchVod(playlist.split('\n').filter(line => line.startsWith('https://')))
+        twitchVodRegistrationId = registration.id
       }
       const owner = video.owner
       return {
@@ -353,13 +357,21 @@ export async function getExternalYtDlpPlaybackSource(url, useAuthentication = fa
           captionTranslations: [],
           storyboardSrc: null,
           isLive: false,
-          twitchSubOnlyVod: true
+          twitchSubOnlyVod: true,
+          twitchVodRegistrationId
         }
       }
     } catch {
       throw error
     }
   }
+}
+
+export function releaseTwitchVodRegistration(source) {
+  if (!source?.twitchVodRegistrationId) return
+  ytDlp.ytDlpUnregisterTwitchVod(source.twitchVodRegistrationId).catch(error => {
+    console.warn('Could not unregister Twitch VOD playback', error)
+  })
 }
 
 /**

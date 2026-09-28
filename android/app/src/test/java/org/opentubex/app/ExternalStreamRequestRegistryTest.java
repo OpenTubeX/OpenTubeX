@@ -13,9 +13,10 @@ public class ExternalStreamRequestRegistryTest {
         String url = "https://cdn.cloudfront.net/archive-key/360p30/index-dvr.m3u8";
         registry.register(new JSONArray().put(new JSONObject().put("url", url).put("protocol", "m3u8_native")),
             "cdn.cloudfront.net\tFALSE\t/\tTRUE\t0\tsession\tsecret\n");
-        registry.registerTwitchVod(new JSONArray().put(url));
+        String registration = registry.registerTwitchVod(new JSONArray().put(url));
 
         assertTrue(registry.headersFor(new URL(url)).isEmpty());
+        assertTrue(registry.isTwitchVodPath(new URL(url)));
         assertTrue(registry.headersFor(new URL("https://cdn.cloudfront.net/archive-key/360p30/segment.ts")).isEmpty());
         assertTrue(registry.headersForRedirect(new URL(url),
             new URL("https://cdn.cloudfront.net/archive-key/360p30/redirected.ts")).isEmpty());
@@ -23,6 +24,10 @@ public class ExternalStreamRequestRegistryTest {
             new URL("https://cdn.cloudfront.net/other-key/redirected.ts")).isEmpty());
         assertNull(registry.headersFor(new URL("https://cdn.cloudfront.net/archive-key/720p60/segment.ts")));
         assertNull(registry.headersFor(new URL("https://cdn.cloudfront.net/other-key/360p30/segment.ts")));
+
+        registry.unregisterTwitchVod(registration);
+        assertEquals("session=secret", registry.headersFor(new URL(url)).get("Cookie"));
+        assertEquals("session=secret", registry.headersFor(new URL("https://cdn.cloudfront.net/archive-key/360p30/segment.ts")).get("Cookie"));
     }
 
     @Test public void rejectsUntrustedTwitchVodCdnUrls() {
@@ -35,6 +40,25 @@ public class ExternalStreamRequestRegistryTest {
         }) {
             assertThrows(IllegalArgumentException.class, () -> registry.registerTwitchVod(new JSONArray().put(url)));
         }
+    }
+
+    @Test public void rejectsTheWholeTwitchRegistrationBeforeAddingAnyPrefixes() throws Exception {
+        ExternalStreamRequestRegistry registry = new ExternalStreamRequestRegistry();
+        String valid = "https://cdn.cloudfront.net/archive-key/360p30/index-dvr.m3u8";
+        assertThrows(IllegalArgumentException.class, () -> registry.registerTwitchVod(new JSONArray()
+            .put(valid).put("https://localhost/archive-key/720p60/index-dvr.m3u8")));
+        assertNull(registry.headersFor(new URL(valid)));
+    }
+
+    @Test public void keepsASharedTwitchPathUntilItsLastPlayerCloses() throws Exception {
+        ExternalStreamRequestRegistry registry = new ExternalStreamRequestRegistry();
+        String url = "https://cdn.cloudfront.net/archive-key/360p30/index-dvr.m3u8";
+        String first = registry.registerTwitchVod(new JSONArray().put(url));
+        String second = registry.registerTwitchVod(new JSONArray().put(url));
+        registry.unregisterTwitchVod(first);
+        assertTrue(registry.isTwitchVodPath(new URL(url)));
+        registry.unregisterTwitchVod(second);
+        assertFalse(registry.isTwitchVodPath(new URL(url)));
     }
 
     @Test public void ignoresHeaderAndCookieValuesThatOkHttpCannotSend() throws Exception {

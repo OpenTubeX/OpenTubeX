@@ -45,6 +45,18 @@ test('rejects an unsafe preview URL before fetching a quality', async () => {
 })
 
 test('reads an MP4 highlight codec from its playlist init segment', async () => {
+  const box = (type, data) => {
+    const result = Buffer.alloc(8 + data.length)
+    result.writeUInt32BE(result.length)
+    result.write(type, 4, 4, 'ascii')
+    data.copy(result, 8)
+    return result
+  }
+  const init = (type, profile, compatibility, level) => {
+    const config = Buffer.from([1, profile, compatibility, 0, 0, 0, 0xb0, 0, 0, 0, 0, 0, level])
+    const sample = box(type, Buffer.concat([Buffer.alloc(78), box('hvcC', config)]))
+    return box('stsd', Buffer.concat([Buffer.alloc(4), Buffer.from([0, 0, 0, 1]), sample]))
+  }
   const requested = []
   const fetcher = async url => {
     requested.push(url)
@@ -52,15 +64,17 @@ test('reads an MP4 highlight codec from its playlist init segment', async () => 
       broadcastType: 'HIGHLIGHT',
       seekPreviewsURL: 'https://example.cloudfront.net/archive-key/storyboards/1.jpg'
     } } })
-    if (url.endsWith('/360p30/highlight-12345.m3u8')) {
+    if (url.endsWith('/360p30/highlight-12345.m3u8') || url.endsWith('/720p60/highlight-12345.m3u8')) {
       return new Response('#EXTM3U\n#EXT-X-MAP:URI="init-0.mp4"\n#EXTINF:4,\nsegment-0.mp4\n')
     }
-    if (url.endsWith('/360p30/init-0.mp4')) return new Response('...hev1...')
+    if (url.endsWith('/360p30/init-0.mp4')) return new Response(init('hvc1', 1, 0x60, 93))
+    if (url.endsWith('/720p60/init-0.mp4')) return new Response(init('hev1', 2, 0x40, 120))
     return new Response('', { status: 404 })
   }
 
   const result = await fetchTwitchSubOnlyVod('12345', fetcher)
-  assert.match(result.playlist, /CODECS="hev1\.1\.6\.L93\.B0,mp4a\.40\.2"/)
+  assert.match(result.playlist, /CODECS="hvc1\.1\.6\.L93\.B0,mp4a\.40\.2"/)
+  assert.match(result.playlist, /CODECS="hev1\.2\.2\.L120\.B0,mp4a\.40\.2"/)
   assert.match(result.playlist, /\/360p30\/highlight-12345\.m3u8/)
   assert.ok(requested.includes('https://example.cloudfront.net/archive-key/360p30/init-0.mp4'))
 })

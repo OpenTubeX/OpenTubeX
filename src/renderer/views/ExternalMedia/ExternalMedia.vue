@@ -310,7 +310,7 @@ import WatchVideoChapters from '../../components/WatchVideoChapters/WatchVideoCh
 import WatchVideoDownloadPrompt from '../../components/WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 import TwitchChat from './TwitchChat.vue'
 import { getTwitchChatTarget } from './twitchChat'
-import { getExternalYtDlpPlaybackSource } from '../../helpers/player/ytDlpPlayback'
+import { getExternalYtDlpPlaybackSource, releaseTwitchVodRegistration } from '../../helpers/player/ytDlpPlayback'
 import { applyAnimationSpeed } from '../../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
@@ -647,6 +647,7 @@ function handlePlayerError(error) {
 }
 
 async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysUseCookies) {
+  releaseTwitchVodRegistration(source.value)
   showDownloadPrompt.value = false
   if (seekTimer !== null) clearTimeout(seekTimer)
   seekTimer = null
@@ -680,7 +681,10 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
 
   try {
     const result = await getExternalYtDlpPlaybackSource(url, useCookies)
-    if (generation !== loadGeneration) return
+    if (generation !== loadGeneration) {
+      releaseTwitchVodRegistration(result.source)
+      return
+    }
     info.value = result.info
     source.value = result.source
     setTabTitle(result.info.title || hostname.value)
@@ -696,6 +700,7 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
 watch(() => route.query.url, url => loadMedia(url), { immediate: true })
 watch(enableDownloads, enabled => { if (!enabled) showDownloadPrompt.value = false })
 onBeforeUnmount(() => {
+  releaseTwitchVodRegistration(source.value)
   theatreModeAnimations.forEach(animation => animation.cancel())
   loadGeneration++
   if (seekTimer !== null) clearTimeout(seekTimer)

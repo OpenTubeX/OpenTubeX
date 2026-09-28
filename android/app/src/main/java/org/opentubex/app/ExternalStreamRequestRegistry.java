@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /** Keeps yt-dlp's stream credentials in native memory instead of exposing them to the WebView. */
 final class ExternalStreamRequestRegistry {
@@ -21,7 +22,7 @@ final class ExternalStreamRequestRegistry {
     private final LinkedHashMap<String, Map<String, String>> exact = new LinkedHashMap<>();
     private final LinkedHashMap<String, Map<String, String>> storyboardExact = new LinkedHashMap<>();
     private final LinkedHashMap<String, Map<String, String>> manifestPaths = new LinkedHashMap<>();
-    private final LinkedHashMap<String, Map<String, String>> twitchVodPaths = new LinkedHashMap<>();
+    private final LinkedHashMap<String, Set<String>> twitchVodRegistrations = new LinkedHashMap<>();
     private final List<Cookie> cookies = new ArrayList<>();
 
     static ExternalStreamRequestRegistry shared() { return SHARED; }
@@ -101,10 +102,11 @@ final class ExternalStreamRequestRegistry {
         return source == null ? null : withCookies(source, url);
     }
 
-    synchronized void registerTwitchVod(JSONArray urls) {
-        if (urls == null || urls.length() == 0 || urls.length() > 7) {
+    synchronized String registerTwitchVod(JSONArray urls) {
+        if (urls == null || urls.length() == 0 || urls.length() > 7 || twitchVodRegistrations.size() >= 256) {
             throw new IllegalArgumentException("Invalid Twitch VOD qualities");
         }
+        Set<String> paths = new HashSet<>();
         for (int index = 0; index < urls.length(); index++) {
             URL url = parseUrl(urls.optString(index, ""));
             if (url == null || !"https".equals(url.getProtocol()) || url.getUserInfo() != null ||
@@ -114,14 +116,23 @@ final class ExternalStreamRequestRegistry {
                 throw new IllegalArgumentException("Invalid Twitch VOD quality URL");
             }
             String path = url.getPath();
-            putBounded(twitchVodPaths, origin(url) + path.substring(0, path.lastIndexOf('/') + 1), Map.of());
+            paths.add(origin(url) + path.substring(0, path.lastIndexOf('/') + 1));
         }
+        String registration = UUID.randomUUID().toString();
+        twitchVodRegistrations.put(registration, paths);
+        return registration;
     }
 
-    private boolean isTwitchVodPath(URL url) {
+    synchronized void unregisterTwitchVod(String registration) {
+        twitchVodRegistrations.remove(registration);
+    }
+
+    synchronized boolean isTwitchVodPath(URL url) {
         String requestPath = origin(url) + url.getPath();
-        for (String prefix : twitchVodPaths.keySet()) {
-            if (requestPath.startsWith(prefix)) return true;
+        for (Set<String> paths : twitchVodRegistrations.values()) {
+            for (String prefix : paths) {
+                if (requestPath.startsWith(prefix)) return true;
+            }
         }
         return false;
     }

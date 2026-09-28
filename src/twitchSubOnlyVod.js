@@ -41,6 +41,50 @@ function getVodPath(video, videoId) {
   return quality => `/${key}/${quality}/index-dvr.m3u8`
 }
 
+function codecFromMp4Init(bytes) {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)
+  const typeAt = offset => String.fromCharCode(...bytes.subarray(offset, offset + 4))
+  for (let stsd = 4; stsd + 20 <= bytes.length; stsd++) {
+    if (typeAt(stsd) !== 'stsd') continue
+    const size = view.getUint32(stsd - 4)
+    if (size < 24 || stsd - 4 + size > bytes.length) continue
+    let entry = stsd + 12
+    const entryCount = view.getUint32(stsd + 8)
+    for (let index = 0; index < entryCount && entry + 8 <= stsd - 4 + size; index++) {
+      const entrySize = view.getUint32(entry)
+      if (entrySize < 86 || entry + entrySize > stsd - 4 + size) break
+      const codec = typeAt(entry + 4)
+      for (let child = entry + 86; child + 8 <= entry + entrySize;) {
+        const childSize = view.getUint32(child)
+        if (childSize < 8 || child + childSize > entry + entrySize) break
+        const data = child + 8
+        if (codec === 'avc1' && typeAt(child + 4) === 'avcC' && childSize >= 12) {
+          return `avc1.${Array.from(bytes.subarray(data + 1, data + 4), byte => byte.toString(16).padStart(2, '0')).join('').toUpperCase()}`
+        }
+        if (['hvc1', 'hev1'].includes(codec) && typeAt(child + 4) === 'hvcC' && childSize >= 21 && bytes[data] === 1) {
+          const profile = `${['', 'A', 'B', 'C'][bytes[data + 1] >> 6]}${bytes[data + 1] & 31}`
+          let compatibility = view.getUint32(data + 2)
+          let reversed = 0
+          for (let bit = 0; bit < 32; bit++) {
+            reversed = (reversed << 1) | (compatibility & 1)
+            compatibility >>>= 1
+          }
+          const constraints = Array.from(bytes.subarray(data + 6, data + 12))
+          while (constraints.at(-1) === 0) constraints.pop()
+          const constraintSuffix = constraints.length
+            ? `.${constraints.map(byte => byte.toString(16).padStart(2, '0').toUpperCase()).join('.')}`
+            : ''
+          const tier = bytes[data + 1] & 0x20 ? 'H' : 'L'
+          return `${codec}.${profile}.${(reversed >>> 0).toString(16).toUpperCase()}.${tier}${bytes[data + 12]}${constraintSuffix}`
+        }
+        child += childSize
+      }
+      entry += entrySize
+    }
+  }
+  return null
+}
+
 async function probeQuality(url, fetcher) {
   try {
     const response = await fetcher(url, {
@@ -58,12 +102,11 @@ async function probeQuality(url, fetcher) {
       if (initUrl.origin !== new URL(url).origin) return null
       const init = await fetcher(initUrl.href, {
         headers: { Range: 'bytes=0-4095' },
+        responseType: 'arraybuffer',
         signal: AbortSignal.timeout(10_000)
       })
       if (!init.ok) return null
-      const header = await init.text()
-      if (header.includes('hev1') || header.includes('hvc1')) return 'hev1.1.6.L93.B0'
-      if (header.includes('avc1')) return 'avc1.4D001E'
+      return codecFromMp4Init(new Uint8Array(await init.arrayBuffer()))
     }
   } catch { /* This quality is unavailable. */ }
   return null
