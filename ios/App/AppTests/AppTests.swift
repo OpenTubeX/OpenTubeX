@@ -699,6 +699,9 @@ final class AppTests: XCTestCase {
             "await Capacitor.Plugins.YtDlp.configure({configuration})",
             arguments: ["configuration": ["enabled": true, "folder": String(decoding: reference, as: UTF8.self), "concurrency": 1]],
             in: nil, contentWorld: .page)
+        _ = try await webView.callAsyncJavaScript(
+            "window.iosProcessingEvents = []; window.iosProcessingListener = await Capacitor.Plugins.YtDlp.addListener('downloadStatus', record => { if (record.status === 'processing') iosProcessingEvents.push(record) })",
+            arguments: [:], in: nil, contentWorld: .page)
         let started = try await webView.callAsyncJavaScript(
             "return await Capacitor.Plugins.YtDlp.download({payload: {mode: 'video', videoId, title: 'Me at the zoo'}})",
             arguments: ["videoId": videoId], in: nil, contentWorld: .page) as? [String: Any]
@@ -712,6 +715,13 @@ final class AppTests: XCTestCase {
             try await Task.sleep(nanoseconds: 500_000_000)
         }
         XCTAssertEqual(record["status"] as? String, "completed", String(describing: record))
+        let processing = try await webView.callAsyncJavaScript(
+            "return iosProcessingEvents.find(record => record.id === id)",
+            arguments: ["id": id], in: nil, contentWorld: .page) as? [String: Any]
+        XCTAssertEqual(processing?["percent"] as? Double, 0)
+        XCTAssertTrue(processing?["speed"] is NSNull)
+        XCTAssertTrue(processing?["eta"] is NSNull)
+        _ = try await webView.callAsyncJavaScript("await iosProcessingListener.remove()", arguments: [:], in: nil, contentWorld: .page)
         let destination = try XCTUnwrap(record["destination"] as? String)
         let size = try XCTUnwrap(FileManager.default.attributesOfItem(atPath: destination)[.size] as? Int)
         XCTAssertGreaterThan(size, 100_000)

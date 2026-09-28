@@ -389,8 +389,21 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
                              "controlFile": controlFile(for: id).path]) { [weak self] result in
             switch result {
             case .success(let value):
-                IOSYtDlpMerger.run(value, in: staging) { merged in
-                    DispatchQueue.main.async { self?.finish(id, result: merged) }
+                DispatchQueue.main.async { [weak self] in
+                    guard let self else { return }
+                    if ["pausing", "cancelled"].contains(self.records[id]?["status"] as? String ?? "") {
+                        self.finish(id, result: .success(value))
+                        return
+                    }
+                    try? FileManager.default.removeItem(at: self.progressFile(for: id))
+                    self.records[id]?["status"] = "processing"
+                    self.records[id]?["percent"] = 0
+                    self.records[id]?["speed"] = NSNull()
+                    self.records[id]?["eta"] = NSNull()
+                    self.publish(id)
+                    IOSYtDlpMerger.run(value, in: staging) { [weak self] merged in
+                        DispatchQueue.main.async { self?.finish(id, result: merged) }
+                    }
                 }
             case .failure:
                 DispatchQueue.main.async { self?.finish(id, result: result) }
