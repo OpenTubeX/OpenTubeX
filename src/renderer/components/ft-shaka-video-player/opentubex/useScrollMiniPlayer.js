@@ -213,6 +213,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   const mobileMiniBarOverlayStyle = ref(null)
   const mobileMiniBar = computed(() => Boolean(process.env.IS_CAPACITOR ||
     ((scrollMiniPlayerActive.value || scrollMiniPlayerAnimating.value || scrollMiniPlayerDragStyle.value) && usesMobileMiniBar())))
+  const mobileMiniBarCanDismiss = computed(() => scrollMiniPlayerActive.value &&
+    (scrollMiniPlayerDetached.value || Boolean(watchNavigation?.detached.value)))
   let inlineDrag = null
   let inlineDragFrame = null
 
@@ -299,21 +301,29 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     if (!element) return
     const interpolate = (start, end) => start + (end - start) * progress
     const style = element.style
-    element.setAttribute('data-mobile-mini-morph', '')
-    style.setProperty('--mobile-mini-left', `${interpolate(from.left, to.left)}px`)
-    style.setProperty('--mobile-mini-top', `${interpolate(from.top, to.top)}px`)
-    style.setProperty('--mobile-mini-width', `${interpolate(from.width, to.width)}px`)
-    style.setProperty('--mobile-mini-height', `${interpolate(from.height, to.height)}px`)
+    if (!element.hasAttribute('data-mobile-mini-morph')) {
+      // Fix both layout boxes before the first frame. Android WebView otherwise
+      // resizes the video surface and lays out the player on every frame.
+      style.setProperty('--mobile-mini-left', `${from.left}px`)
+      style.setProperty('--mobile-mini-top', `${from.top}px`)
+      style.setProperty('--mobile-mini-width', `${from.width}px`)
+      style.setProperty('--mobile-mini-height', `${from.height}px`)
+      style.setProperty('--mobile-mini-video-base-width', `${videoFrom.width}px`)
+      style.setProperty('--mobile-mini-video-base-height', `${videoFrom.height}px`)
+      element.setAttribute('data-mobile-mini-morph', '')
+    }
+    const x = (to.left - from.left) * progress
+    const y = (to.top - from.top) * progress
+    const scaleX = interpolate(1, to.width / from.width)
+    const scaleY = interpolate(1, to.height / from.height)
+    style.setProperty('transform', `translate(${x}px, ${y}px) scale(${scaleX}, ${scaleY})`, 'important')
     const videoWidth = interpolate(videoFrom.width, videoTo.width)
     const videoHeight = interpolate(videoFrom.height, videoTo.height)
     const videoScale = Math.min(videoWidth / videoFrom.width, videoHeight / videoFrom.height)
-    style.setProperty('--mobile-mini-video-base-width', `${videoFrom.width}px`)
-    style.setProperty('--mobile-mini-video-base-height', `${videoFrom.height}px`)
     const videoLeft = interpolate(videoFrom.left, videoTo.left) + (videoWidth - videoFrom.width * videoScale) / 2
     const videoTop = interpolate(videoFrom.top, videoTo.top) + (videoHeight - videoFrom.height * videoScale) / 2
-    style.setProperty('--mobile-mini-video-left', `${videoLeft}px`)
-    style.setProperty('--mobile-mini-video-top', `${videoTop}px`)
-    style.setProperty('--mobile-mini-video-scale', String(videoScale))
+    video.value?.style.setProperty('--mobile-mini-video-transform',
+      `translate(${videoLeft / scaleX}px, ${videoTop / scaleY}px) scale(${videoScale / scaleX}, ${videoScale / scaleY})`)
     const opacity = restoring
       ? Math.max(0, 1 - progress / 0.5)
       : Math.min(1, Math.max(0, (progress - 0.2) / 0.4))
@@ -324,10 +334,11 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     const element = container.value
     if (!element) return
     element.removeAttribute('data-mobile-mini-morph')
+    element.style.removeProperty('transform')
+    video.value?.style.removeProperty('--mobile-mini-video-transform')
     for (const name of [
       '--mobile-mini-left', '--mobile-mini-top', '--mobile-mini-width', '--mobile-mini-height',
-      '--mobile-mini-video-left', '--mobile-mini-video-top', '--mobile-mini-video-base-width',
-      '--mobile-mini-video-base-height', '--mobile-mini-video-scale'
+      '--mobile-mini-video-base-width', '--mobile-mini-video-base-height'
     ]) element.style.removeProperty(name)
   }
 
@@ -344,17 +355,17 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     inlineDrag.progress = progress
     const fade = Math.min(1, progress * getInlineDragDistance(inlineDrag) / 96)
     watchNavigation.updateMinimizePreview(restoring ? 1 - progress : fade)
-    const x = (to.left - from.x) * progress
-    const y = (to.top - from.y) * progress
-    const scaleX = 1 + (to.width / from.width - 1) * progress
-    const scaleY = 1 + (to.height / from.height - 1) * progress
-    const roundness = Math.min(1, (restoring ? 1 - progress : progress) * 5)
     if (usesMobileMiniBar()) {
       const videoTo = restoring
         ? { left: 0, top: 0, width: to.width, height: to.height }
         : inlineDrag.videoTo
       renderMobileMiniMorph(from, to, inlineDrag.videoFrom, videoTo, progress, restoring)
     } else {
+      const x = (to.left - from.x) * progress
+      const y = (to.top - from.y) * progress
+      const scaleX = 1 + (to.width / from.width - 1) * progress
+      const scaleY = 1 + (to.height / from.height - 1) * progress
+      const roundness = Math.min(1, (restoring ? 1 - progress : progress) * 5)
       const style = container.value.style
       style.transform = `translate(${x}px, ${y}px) scale(${scaleX}, ${scaleY})`
       style.borderRadius = `calc(10px * var(--ui-roundness) * ${roundness})`
@@ -1271,7 +1282,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     event?.preventDefault()
     event?.stopPropagation()
 
-    if (!scrollMiniPlayerDetached.value) return
+    if (!scrollMiniPlayerDetached.value && !(usesMobileMiniBar() && watchNavigation?.detached.value)) return
 
     if (watchNavigation?.detached.value) {
       watchNavigation.dismiss()
@@ -1623,6 +1634,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   return {
     scrollMiniPlayerDragStyle,
     mobileMiniBar,
+    mobileMiniBarCanDismiss,
     mobileMiniBarOverlayStyle,
     beginScrollMiniPlayerDrag,
     moveScrollMiniPlayerDrag,

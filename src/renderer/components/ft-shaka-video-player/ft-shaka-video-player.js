@@ -6874,6 +6874,7 @@ export default defineComponent({
     const {
       scrollMiniPlayerDragStyle,
       mobileMiniBar,
+      mobileMiniBarCanDismiss,
       mobileMiniBarOverlayStyle,
       beginScrollMiniPlayerDrag,
       moveScrollMiniPlayerDrag,
@@ -12180,6 +12181,7 @@ export default defineComponent({
 
       scrollMiniPlayerActive,
       mobileMiniBar,
+      mobileMiniBarCanDismiss,
       mobileMiniBarOverlayStyle,
       scrollMiniPlayerAnimating,
       scrollMiniPlayerDetached,

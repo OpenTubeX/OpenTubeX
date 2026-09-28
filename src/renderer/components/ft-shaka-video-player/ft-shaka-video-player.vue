@@ -1338,11 +1338,13 @@
         :disabled="!scrollMiniPlayerDragStyle && !scrollMiniPlayerAnimating"
       >
         <div
-          v-if="mobileMiniBar && (scrollMiniPlayerActive || scrollMiniPlayerDragStyle || scrollMiniPlayerAnimating)"
+          v-if="mobileMiniBar && !scrollMiniPlayerDismissed &&
+            (scrollMiniPlayerActive || scrollMiniPlayerDragStyle || scrollMiniPlayerAnimating)"
           ref="mobileMiniBarOverlay"
           class="mobileMiniBarOverlay"
           :class="{
             mobileMiniBarMorphOverlay: scrollMiniPlayerDragStyle || scrollMiniPlayerAnimating,
+            mobileMiniBarDismissible: mobileMiniBarCanDismiss,
             mobileMiniBarRestoring: scrollMiniPlayerDragStyle
               ? scrollMiniPlayerActive
               : scrollMiniPlayerAnimating && !scrollMiniPlayerActive
@@ -1375,6 +1377,19 @@
           >
             <ft-icon
               :icon="['fas', 'angle-up']"
+              aria-hidden="true"
+            />
+          </button>
+          <button
+            v-if="mobileMiniBarCanDismiss"
+            type="button"
+            class="mobileMiniBarDismiss"
+            :disabled="Boolean(scrollMiniPlayerDragStyle || scrollMiniPlayerAnimating)"
+            :aria-label="$t('Video.Player.Scroll Mini Player.Hide')"
+            @click.stop.prevent="dismissCrossTabMiniPlayer"
+          >
+            <ft-icon
+              :icon="['fas', 'times']"
               aria-hidden="true"
             />
           </button>
