@@ -86,9 +86,15 @@ enum IOSYtDlpMerger {
             do {
                 var files: [String] = []
                 for merge in merges {
+                    let root = folder.standardizedFileURL.resolvingSymlinksInPath()
                     guard let videoName = merge["video"], let audioName = merge["audio"],
                           let outputName = merge["output"],
-                          [videoName, audioName, outputName].allSatisfy({ URL(fileURLWithPath: $0).lastPathComponent == $0 }) else {
+                          [videoName, audioName, outputName].allSatisfy({ name in
+                              !name.isEmpty && name != "." && name != ".." &&
+                                  URL(fileURLWithPath: name).lastPathComponent == name &&
+                                  folder.appendingPathComponent(name).standardizedFileURL
+                                      .resolvingSymlinksInPath().deletingLastPathComponent() == root
+                          }) else {
                         throw NSError(domain: "IOSYtDlp", code: 8, userInfo: [NSLocalizedDescriptionKey: "Invalid media track names"])
                     }
                     let videoURL = folder.appendingPathComponent(videoName)

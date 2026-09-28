@@ -148,6 +148,27 @@ final class AppTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: root.appendingPathComponent("audio.m4a").path))
     }
 
+    func testYtDlpMergeRejectsParentOutput() async throws {
+        let sandbox = FileManager.default.temporaryDirectory.appendingPathComponent("yt-dlp-merge-unsafe-\(UUID().uuidString)")
+        let staging = sandbox.appendingPathComponent("job")
+        let sibling = sandbox.appendingPathComponent("other-job/marker")
+        try FileManager.default.createDirectory(at: staging, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: sibling.deletingLastPathComponent(), withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: sandbox) }
+        try Data("retained".utf8).write(to: sibling)
+        let video = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "fixture", withExtension: "mp4"))
+        let audio = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "fixture", withExtension: "m4a"))
+        try FileManager.default.copyItem(at: video, to: staging.appendingPathComponent("video.mp4"))
+        try FileManager.default.copyItem(at: audio, to: staging.appendingPathComponent("audio.m4a"))
+
+        let value: [String: Any] = ["merges": [["video": "video.mp4", "audio": "audio.m4a", "output": ".."]]]
+        let result: Result<[String: Any], Error> = await withCheckedContinuation { continuation in
+            IOSYtDlpMerger.run(value, in: staging) { continuation.resume(returning: $0) }
+        }
+        if case .success = result { XCTFail("Parent output was accepted") }
+        XCTAssertEqual(try Data(contentsOf: sibling), Data("retained".utf8))
+    }
+
     func testBackgroundPreparationEvent() async throws {
         try await openApplication()
         _ = try await evaluate("""
