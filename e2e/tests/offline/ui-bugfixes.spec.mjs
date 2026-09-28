@@ -2581,3 +2581,72 @@ for (const theme of ['light', 'dark']) {
     await expect(link).toHaveCSS('text-decoration-line', 'underline')
   })
 }
+
+for (const theme of ['light', 'dark']) {
+  test(`tablet labels and watch links retain text contrast in ${theme} mode`, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await page.evaluate(async theme => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateBaseTheme', theme)
+      await store.dispatch('updateSecColor', 'Blue')
+    }, theme)
+    const styles = await readFile(path.join(repoRoot, 'src/renderer/components/TabBar/CapacitorTabletTabBar.css'), 'utf8')
+    await page.addStyleTag({ content: styles.replaceAll(/:deep\(((?:[^()]|\([^()]*\))*)\)/g, '$1') })
+    // Electron does not mount the native tablet bar. Exercise its stylesheet
+    // with the same unloaded-tab markup, including the target's opacity.
+    await page.evaluate(() => {
+      const bar = document.createElement('div')
+      bar.className = 'capacitorTabletTabBar'
+      bar.style.cssText = 'display:flex;position:fixed;top:0;z-index:10000'
+      bar.innerHTML = '<div class="capacitorTabletTab unloaded"><button class="capacitorTabletTabTarget"><span class="capacitorTabletTabTitle">Home</span></button></div>'
+      document.body.append(bar)
+      const link = document.createElement('a')
+      link.href = 'https://example.com/contrast-test'
+      link.textContent = 'Description link'
+      document.querySelector('.description').append(link)
+    })
+    for (const selector of ['.capacitorTabletTabTitle', '.description a[href="https://example.com/contrast-test"]', '.commentTitleAction', '.commentReplyContinuationButton']) {
+      const element = page.locator(selector).first()
+      await expect(element).toBeAttached()
+      const ratio = await element.evaluate(element => {
+        const rgb = value => value.match(/[\d.]+/g).slice(0, 3).map(Number)
+        const luminance = color => color.map(value => value / 255)
+          .map(value => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
+          .reduce((sum, value, index) => sum + value * [0.2126, 0.7152, 0.0722][index], 0)
+        let opacity = 1
+        let background
+        for (let parent = element; parent; parent = parent.parentElement) {
+          const style = getComputedStyle(parent)
+          opacity *= Number(style.opacity)
+          if (!background && style.backgroundColor !== 'rgba(0, 0, 0, 0)') background = rgb(style.backgroundColor)
+        }
+        if (!background) throw new Error('Missing opaque background')
+        const foreground = rgb(getComputedStyle(element).color).map((value, index) => value * opacity + background[index] * (1 - opacity))
+        const values = [luminance(foreground), luminance(background)].sort((a, b) => a - b)
+        return (values[1] + 0.05) / (values[0] + 0.05)
+      })
+      expect.soft(ratio, selector).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+}
+
+test('Settings help buttons provide a 24 CSS pixel target at fractional scale', async ({ app, page }) => {
+  await goTo(page, 'settings')
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateUiScale', 125)
+    store.commit('setSettingsWindowSection', 'general')
+  })
+  await setWindowSize(app, page, { width: 1080, height: 810 })
+  const buttons = page.locator('.settingsWindow .tooltip > button')
+  await expect(buttons.first()).toBeVisible()
+  const sizes = await buttons.evaluateAll(buttons => buttons.map(button => {
+    const { width, height } = button.getBoundingClientRect()
+    return { width, height }
+  }))
+  for (const size of sizes) {
+    expect.soft(size.width).toBeGreaterThanOrEqual(24)
+    expect.soft(size.height).toBeGreaterThanOrEqual(24)
+  }
+})

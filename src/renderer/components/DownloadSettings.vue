@@ -30,6 +30,7 @@
       <FtInput
         :placeholder="t('Settings.Download Settings.Download Folder')"
         :show-action-button="true"
+        :action-button-label="t('Settings.Download Settings.Choose Download Folder')"
         :allow-action-button-when-empty="true"
         :force-action-button-icon-name="['fas', 'folder-open']"
         :show-label="true"
