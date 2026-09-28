@@ -69,6 +69,7 @@
               class="externalMediaPlayer"
               :manifest-src="source.manifestSrc"
               :manifest-mime-type="source.manifestMimeType"
+              :twitch-sub-only-vod="source.twitchSubOnlyVod === true"
               :legacy-formats="source.legacyFormats"
               :format="source.manifestSrc ? (source.audioOnly ? 'audio' : 'dash') : 'legacy'"
               :captions="source.captions"
@@ -186,7 +187,7 @@
               >{{ hostname }}</a>
               <div class="externalMediaActions">
                 <FtIconButton
-                  v-if="enableDownloads && source"
+                  v-if="enableDownloads && source && !source.twitchSubOnlyVod"
                   :title="t('Downloads.Download Video')"
                   :icon="['fas', 'download']"
                   @click="showDownloadPrompt = true"

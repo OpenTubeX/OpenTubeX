@@ -21,6 +21,7 @@ final class ExternalStreamRequestRegistry {
     private final LinkedHashMap<String, Map<String, String>> exact = new LinkedHashMap<>();
     private final LinkedHashMap<String, Map<String, String>> storyboardExact = new LinkedHashMap<>();
     private final LinkedHashMap<String, Map<String, String>> manifestPaths = new LinkedHashMap<>();
+    private final LinkedHashMap<String, Map<String, String>> twitchVodPaths = new LinkedHashMap<>();
     private final List<Cookie> cookies = new ArrayList<>();
 
     static ExternalStreamRequestRegistry shared() { return SHARED; }
@@ -95,8 +96,34 @@ final class ExternalStreamRequestRegistry {
     }
 
     synchronized Map<String, String> headersFor(URL url) {
+        if (isTwitchVodPath(url)) return Map.of();
         Map<String, String> source = sourceHeadersFor(url);
         return source == null ? null : withCookies(source, url);
+    }
+
+    synchronized void registerTwitchVod(JSONArray urls) {
+        if (urls == null || urls.length() == 0 || urls.length() > 7) {
+            throw new IllegalArgumentException("Invalid Twitch VOD qualities");
+        }
+        for (int index = 0; index < urls.length(); index++) {
+            URL url = parseUrl(urls.optString(index, ""));
+            if (url == null || !"https".equals(url.getProtocol()) || url.getUserInfo() != null ||
+                url.getPort() != -1 || url.getQuery() != null || url.getRef() != null ||
+                !url.getHost().matches("(?:[A-Za-z0-9-]+\\.)+(?:cloudfront\\.net|jtvnw\\.net|ttvnw\\.net|twitch\\.tv)") ||
+                !url.getPath().matches("/.+/(?:chunked|1440p60|1080p60|720p60|480p30|360p30|160p30)/(?:index-dvr|highlight-[0-9]{1,20})\\.m3u8")) {
+                throw new IllegalArgumentException("Invalid Twitch VOD quality URL");
+            }
+            String path = url.getPath();
+            putBounded(twitchVodPaths, origin(url) + path.substring(0, path.lastIndexOf('/') + 1), Map.of());
+        }
+    }
+
+    private boolean isTwitchVodPath(URL url) {
+        String requestPath = origin(url) + url.getPath();
+        for (String prefix : twitchVodPaths.keySet()) {
+            if (requestPath.startsWith(prefix)) return true;
+        }
+        return false;
     }
 
     synchronized boolean isHttpStoryboardUrl(URL url) {
@@ -105,6 +132,7 @@ final class ExternalStreamRequestRegistry {
 
     synchronized Map<String, String> headersForRedirect(URL original, URL destination) {
         if (parseUrl(destination.toString()) == null) return null;
+        if (isTwitchVodPath(original) || isTwitchVodPath(destination)) return Map.of();
         boolean stripCookies = storyboardExact.containsKey(original.toString()) && "http".equals(destination.getProtocol());
         Map<String, String> registered = sourceHeadersFor(destination);
         if (registered != null) return stripCookies ? new HashMap<>(registered) : withCookies(registered, destination);
@@ -122,6 +150,7 @@ final class ExternalStreamRequestRegistry {
     }
 
     private Map<String, String> sourceHeadersFor(URL url) {
+        if (isTwitchVodPath(url)) return Map.of();
         Map<String, String> source = exact.get(url.toString());
         if (source == null) source = storyboardExact.get(url.toString());
         if (source == null) {

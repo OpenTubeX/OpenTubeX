@@ -194,6 +194,58 @@ test('Twitch replay uses the watch chat toggle and side panel', async ({ app, pa
   await page.keyboard.press('s')
 })
 
+test('plays a Twitch VOD when yt-dlp reports subscriber-only access', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+
+  const executable = path.join(app.userDataDir, 'twitch-subscriber-yt-dlp.sh')
+  await writeFile(executable, '#!/bin/sh\nif [ "$1" = "--version" ]; then echo 2026.09.01; exit; fi\necho "subscriber-only content" >&2\nexit 1\n')
+  await chmod(executable, 0o755)
+  await page.evaluate(async ytDlpPath => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateYtDlpSource', 'system')
+    await store.dispatch('updateYtDlpPath', ytDlpPath)
+  }, executable)
+
+  const variantUrl = 'https://vod.example.test/720p60/index-dvr.m3u8'
+  const mutedUrl = 'https://vod.example.test/720p60/segment-muted.mp4'
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    ipcMain.removeHandler('twitch-sub-only-vod')
+    ipcMain.handle('twitch-sub-only-vod', (_event, id) => ({
+      playlist: '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=5040000,CODECS="avc1.64001f",RESOLUTION=1920x1080,FRAME-RATE=30\nhttps://vod.example.test/720p60/index-dvr.m3u8\n',
+      video: { title: 'Subscriber archive', duration: 2, owner: { login: 'example' } },
+      id
+    }))
+  })
+  await page.route(variantUrl, route => route.fulfill({
+    contentType: 'application/vnd.apple.mpegurl',
+    body: `#EXTM3U
+#EXT-X-TARGETDURATION:2
+#EXT-X-VERSION:7
+#EXT-X-MEDIA-SEQUENCE:0
+#EXT-X-PLAYLIST-TYPE:VOD
+#EXT-X-MAP:URI="${mutedUrl}"
+#EXTINF:2,
+https://vod.example.test/720p60/segment-unmuted.mp4
+#EXT-X-ENDLIST
+`
+  }))
+  await page.route(mutedUrl, async route => route.fulfill({
+    contentType: 'video/mp4',
+    body: await readFile(path.join(repoRoot, 'e2e/fixtures/media/hls-1080.mp4'))
+  }))
+  await page.route('https://vod.example.test/720p60/segment-unmuted.mp4', route => route.fulfill({ status: 403 }))
+
+  await page.locator(sel.searchInput).fill('https://www.twitch.tv/videos/123456789')
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page.locator(`${activeTab} .externalMediaDetails`)).toContainText('Subscriber archive')
+  await expect(page.locator(`${activeTab} .externalMediaDetails`).getByRole('button', { name: 'Download Video' })).toHaveCount(0)
+  await expect.poll(async () => {
+    const diagnostic = page.locator(`${activeTab} .externalMediaDiagnostic`)
+    if (await diagnostic.count()) return await diagnostic.textContent()
+    return await page.locator(`${activeTab} .externalMediaPlayer video`).evaluate(video => video.currentTime > 0.2 ? 'playing' : 'pending')
+  }, { timeout: 10_000 }).toBe('playing')
+})
+
 test('Twitch livestream omits playback speed from player options', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const mediaUrl = 'https://www.twitch.tv/testchannel'

@@ -8,6 +8,35 @@ import java.util.Map;
 import static org.junit.Assert.*;
 
 public class ExternalStreamRequestRegistryTest {
+    @Test public void scopesTwitchVodCorsProxyToValidatedQualityPathsWithoutCookies() throws Exception {
+        ExternalStreamRequestRegistry registry = new ExternalStreamRequestRegistry();
+        String url = "https://cdn.cloudfront.net/archive-key/360p30/index-dvr.m3u8";
+        registry.register(new JSONArray().put(new JSONObject().put("url", url).put("protocol", "m3u8_native")),
+            "cdn.cloudfront.net\tFALSE\t/\tTRUE\t0\tsession\tsecret\n");
+        registry.registerTwitchVod(new JSONArray().put(url));
+
+        assertTrue(registry.headersFor(new URL(url)).isEmpty());
+        assertTrue(registry.headersFor(new URL("https://cdn.cloudfront.net/archive-key/360p30/segment.ts")).isEmpty());
+        assertTrue(registry.headersForRedirect(new URL(url),
+            new URL("https://cdn.cloudfront.net/archive-key/360p30/redirected.ts")).isEmpty());
+        assertTrue(registry.headersForRedirect(new URL(url),
+            new URL("https://cdn.cloudfront.net/other-key/redirected.ts")).isEmpty());
+        assertNull(registry.headersFor(new URL("https://cdn.cloudfront.net/archive-key/720p60/segment.ts")));
+        assertNull(registry.headersFor(new URL("https://cdn.cloudfront.net/other-key/360p30/segment.ts")));
+    }
+
+    @Test public void rejectsUntrustedTwitchVodCdnUrls() {
+        ExternalStreamRequestRegistry registry = new ExternalStreamRequestRegistry();
+        for (String url : new String[] {
+            "https://localhost/archive-key/360p30/index-dvr.m3u8",
+            "http://cdn.cloudfront.net/archive-key/360p30/index-dvr.m3u8",
+            "https://cdn.cloudfront.net.evil.test/archive-key/360p30/index-dvr.m3u8",
+            "https://cdn.cloudfront.net/archive-key/360p30/other.m3u8"
+        }) {
+            assertThrows(IllegalArgumentException.class, () -> registry.registerTwitchVod(new JSONArray().put(url)));
+        }
+    }
+
     @Test public void ignoresHeaderAndCookieValuesThatOkHttpCannotSend() throws Exception {
         ExternalStreamRequestRegistry registry = new ExternalStreamRequestRegistry();
         registry.register(new JSONArray().put(new JSONObject()
