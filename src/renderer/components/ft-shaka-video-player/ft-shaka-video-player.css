@@ -4721,7 +4721,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   padding-block-end: 76px;
 }
 
-.ftVideoPlayer.mobileMiniBar > :not(.player, .mobileMiniBarOverlay) {
+.ftVideoPlayer.mobileMiniBar > :not(.player, .countdownPoster, .mobileMiniBarOverlay) {
   display: none !important;
 }
 
@@ -5228,7 +5228,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   flex: none;
 }
 
-.ftVideoPlayer.scrollMiniPlayer.mobileMiniBar > .player {
+.ftVideoPlayer.scrollMiniPlayer.mobileMiniBar > :is(.player, .countdownPoster) {
   position: absolute !important;
   inset: 6px auto 6px 8px !important;
   box-sizing: border-box;
@@ -5243,6 +5243,14 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   background: #000;
   object-fit: cover !important;
   transform: none !important;
+}
+
+.ftVideoPlayer.scrollMiniPlayer.mobileMiniBar > .countdownPoster {
+  overflow: hidden;
+}
+
+.ftVideoPlayer.scrollMiniPlayer.mobileMiniBar > .countdownPoster img {
+  object-fit: cover;
 }
 
 .ftVideoPlayer[data-mobile-mini-morph],
@@ -5270,7 +5278,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 /* The moving video must override every settled player layout. */
 /* stylelint-disable no-descending-specificity */
 .ftVideoPlayer[data-mobile-mini-morph] > .player,
-:global(.app .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar[data-mobile-mini-morph] > .player) {
+.ftVideoPlayer[data-mobile-mini-morph] > .countdownPoster,
+:global(.app .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar[data-mobile-mini-morph] > :is(.player, .countdownPoster)) {
   position: absolute !important;
   inset: var(--mobile-mini-video-base-top) auto auto var(--mobile-mini-video-base-left) !important;
   width: var(--mobile-mini-video-base-width) !important;
