@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
   issues:
     types: [opened, reopened]
+  issue_comment:
+    types: [created]
   schedule:
     - cron: '*/30 * * * *'
 
@@ -17,11 +19,14 @@ concurrency:
 jobs:
   triage:
     if: >-
-      github.event_name == 'issues' &&
+      (github.event_name == 'issues' || github.event_name == 'issue_comment') &&
       github.repository == 'OpenTubeX/OpenTubeX' &&
+      !github.event.issue.pull_request &&
       github.event.issue.user.login != 'D3SOX' &&
       github.event.issue.user.type != 'Bot' &&
-      !endsWith(github.event.issue.user.login, '[bot]')
+      !endsWith(github.event.issue.user.login, '[bot]') &&
+      github.event.sender.type != 'Bot' &&
+      github.event.sender.login != 'D3SOX'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
