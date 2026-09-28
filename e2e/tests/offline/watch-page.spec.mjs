@@ -4279,7 +4279,7 @@ test.describe('watch page', () => {
     const scroller = card.locator('.descriptionScroll')
     for (const scale of [1, 1.25]) {
       await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
-      await expect(card).toHaveClass(/short/)
+      await expect(card).toContainClass('short')
       const layout = await scroller.evaluate(element => {
         const card = element.closest('.videoDescription').getBoundingClientRect()
         const viewport = element.getBoundingClientRect()
