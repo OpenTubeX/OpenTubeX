@@ -382,7 +382,7 @@ test.describe('tab bar', () => {
   test('uses one utility window for Settings and Downloads', async ({ page }) => {
     const routeBeforeOpening = page.url()
     await goTo(page, 'settings')
-    expect(await page.locator(`${sel.activeTab} .loadingDot`).count()).toBe(0)
+    await expect(page.locator(`${sel.activeTab} .tabLoadingDot`)).toHaveCount(0)
     await expect(page.locator(sel.activeTab).locator('[data-icon="rss"]')).toBeVisible()
     await expect(page.locator('.settingsWindow')).toHaveCount(1)
 
@@ -435,7 +435,7 @@ test.describe('tab bar', () => {
         for (const tab of document.querySelectorAll('.tab')) {
           window.__watchTabIconStates.push({
             id: tab.dataset.tabId,
-            loading: tab.querySelector('.loadingDot') != null,
+            loading: tab.querySelector('.tabLoadingDot') != null,
             avatar: tab.querySelector('.tabAvatar') != null
           })
         }
@@ -455,8 +455,8 @@ test.describe('tab bar', () => {
     }, { videoId })
 
     const tab = page.locator(`.tab[data-tab-id="${watchTab.id}"]`)
-    await expect(tab.locator('.loadingDot')).toBeVisible()
-    await expect(tab.locator('.loadingDot')).toHaveCount(0)
+    await expect(tab.locator('.tabLoadingDot')).toBeVisible()
+    await expect(tab.locator('.tabLoadingDot')).toHaveCount(0)
     await expect.poll(() => page.evaluate(tabId => (
       window.__watchTabIconStates.some(state => state.id === tabId && !state.loading && state.avatar)
     ), watchTab.id)).toBe(true)

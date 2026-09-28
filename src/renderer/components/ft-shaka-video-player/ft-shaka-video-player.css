@@ -4766,6 +4766,10 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   pointer-events: none;
 }
 
+.mobileMiniBarDismissible .mobileMiniBarDetails {
+  right: 108px;
+}
+
 .mobileMiniBarTitle,
 .mobileMiniBarUploader {
   overflow: hidden;
@@ -4800,7 +4804,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   object-fit: cover;
 }
 
-.mobileMiniBarReturn {
+.mobileMiniBarReturn,
+.mobileMiniBarDismiss {
   position: absolute;
   inset-block: 0;
   right: 4px;
@@ -4816,16 +4821,23 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   pointer-events: auto;
 }
 
-.mobileMiniBarReturn:active {
+.mobileMiniBarDismissible .mobileMiniBarReturn {
+  right: 56px;
+}
+
+.mobileMiniBarReturn:active,
+.mobileMiniBarDismiss:active {
   background: color-mix(in srgb, var(--primary-text-color) 12%, var(--card-bg-color));
 }
 
 .mobileMiniBarMorphOverlay > .mobileMiniBarDetails,
-.mobileMiniBarMorphOverlay > .mobileMiniBarReturn {
+.mobileMiniBarMorphOverlay > .mobileMiniBarReturn,
+.mobileMiniBarMorphOverlay > .mobileMiniBarDismiss {
   opacity: var(--mobile-mini-bar-opacity);
 }
 
-.mobileMiniBarMorphOverlay > .mobileMiniBarReturn {
+.mobileMiniBarMorphOverlay > .mobileMiniBarReturn,
+.mobileMiniBarMorphOverlay > .mobileMiniBarDismiss {
   pointer-events: none;
 }
 
@@ -5236,9 +5248,11 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   border-radius: 0 !important;
   box-shadow: none !important;
   transform: none !important;
+  transform-origin: top left;
   translate: none !important;
   transition: none !important;
   overflow: clip;
+  will-change: transform;
 }
 
 /* The moving video must override every settled player layout. */
@@ -5246,7 +5260,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 .ftVideoPlayer[data-mobile-mini-morph] > .player,
 :global(.app .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar[data-mobile-mini-morph] > .player) {
   position: absolute !important;
-  inset: var(--mobile-mini-video-top) auto auto var(--mobile-mini-video-left) !important;
+  inset: 0 auto auto 0 !important;
   width: var(--mobile-mini-video-base-width) !important;
   height: var(--mobile-mini-video-base-height) !important;
   min-width: 0 !important;
@@ -5255,9 +5269,10 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   max-height: none !important;
   margin: 0 !important;
   object-fit: cover !important;
-  transform: scale(var(--mobile-mini-video-scale)) !important;
+  transform: var(--mobile-mini-video-transform) !important;
   transform-origin: top left;
   transition: none !important;
+  will-change: transform;
 }
 /* stylelint-enable no-descending-specificity */
 

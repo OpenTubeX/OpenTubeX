@@ -368,6 +368,11 @@ function cancelLoaderSettle() {
   z-index: 0;
   inline-size: 100%;
   pointer-events: none;
+  visibility: hidden;
+}
+
+.tabContent:has(.watchPreviewing) .browsingBehindWatch {
+  visibility: visible;
 }
 
 .pageSwipePresented {

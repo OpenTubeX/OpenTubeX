@@ -87,10 +87,12 @@ import {
   removeOverlayScrollbars,
   updateOverlayScrollbars,
 } from '../../helpers/overlayScrollbars'
-import { getFullscreenAspectRatio, setFullscreenOrientation } from '../../helpers/capacitorUi'
+import { getFullscreenAspectRatio, setAndroidDisplayOrientation, setFullscreenOrientation } from '../../helpers/capacitorUi'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import {
   enterAndroidPictureInPicture,
+  observeAndroidDisplayRotation,
+  setAndroidNavigationBarVisible,
   setAndroidStatusBarVisible,
   shouldShowAndroidStatusBar,
 } from '../../helpers/androidUi'
@@ -6175,7 +6177,7 @@ export default defineComponent({
       shakaControlsShown.value = controlsContainer?.hasAttribute('shown') === true
       const visible = shouldShowAndroidStatusBar({
         active: isActiveTab.value,
-        fullscreen: isNativeFullscreenActive(),
+        fullscreen: isNativeFullscreenActive() || androidRotationFullscreen,
         controlsShown: !process.env.IS_IOS && controlsContainer?.hasAttribute('shown') === true,
       })
       if (visible === androidStatusBarVisible) return
@@ -6883,6 +6885,7 @@ export default defineComponent({
     const {
       scrollMiniPlayerDragStyle,
       mobileMiniBar,
+      mobileMiniBarCanDismiss,
       mobileMiniBarOverlayStyle,
       beginScrollMiniPlayerDrag,
       moveScrollMiniPlayerDrag,
@@ -6950,8 +6953,66 @@ export default defineComponent({
       video,
     })
 
+    let androidRotationFullscreen = false
+
+    function exitAndroidRotationFullscreen() {
+      if (!androidRotationFullscreen) return
+      androidRotationFullscreen = false
+      if (fullWindowEnabled.value) events.dispatchEvent(new CustomEvent('setFullWindow', { detail: false }))
+      if (androidFullscreenHost?.matches(':popover-open')) androidFullscreenHost.hidePopover()
+      androidFullscreenHost?.removeAttribute('popover')
+      setAndroidDisplayOrientation(false).catch(() => {})
+      setAndroidNavigationBarVisible(true).catch(() => {})
+      syncAndroidStatusBarVisibility()
+    }
+
+    function handleAndroidRotationPopoverToggle(event) {
+      if (event.newState === 'closed') exitAndroidRotationFullscreen()
+    }
+
+    function handleAndroidDisplayRotation(landscape) {
+      if (!isActiveTab.value || !ui || !fullWindowListenerReady) return
+      if (!landscape) {
+        if (androidRotationFullscreen) exitAndroidRotationFullscreen()
+        else if (isNativeFullscreenActive()) {
+          document.exitFullscreen().catch(() => {})
+          setAndroidDisplayOrientation(false).catch(() => {})
+        }
+        return
+      }
+      if (!video.value?.readyState || pictureInPictureActive.value) return
+      if (androidRotationFullscreen || isNativeFullscreenActive() || !androidFullscreenHost) return
+      androidFullscreenHost.setAttribute('popover', 'manual')
+      androidFullscreenHost.showPopover()
+      androidRotationFullscreen = true
+      events.dispatchEvent(new CustomEvent('setFullWindow', { detail: true }))
+      setAndroidDisplayOrientation(true).catch(() => {})
+      setAndroidNavigationBarVisible(false).catch(() => {})
+      syncAndroidStatusBarVisibility()
+    }
+
+    let stopAndroidDisplayRotation = () => {}
+    watch([enterFullscreenOnDisplayRotate, isActiveTab], ([enabled, active]) => {
+      stopAndroidDisplayRotation()
+      if (!enabled || !active) exitAndroidRotationFullscreen()
+      stopAndroidDisplayRotation = enabled && active && process.env.IS_CAPACITOR && !process.env.IS_IOS
+        ? observeAndroidDisplayRotation(handleAndroidDisplayRotation)
+        : () => {}
+    }, { immediate: true })
+    onBeforeUnmount(() => {
+      stopAndroidDisplayRotation()
+      exitAndroidRotationFullscreen()
+      androidFullscreenHost?.removeEventListener('toggle', handleAndroidRotationPopoverToggle)
+    })
+
     let fullscreenEntryAttempt = 0
     function handleFullscreenButtonClick(event) {
+      if (androidRotationFullscreen) {
+        event.preventDefault()
+        event.stopImmediatePropagation()
+        exitAndroidRotationFullscreen()
+        return
+      }
       if (process.env.IS_CAPACITOR && !process.env.IS_IOS && isActiveTab.value && !isNativeFullscreenActive()) {
         const attempt = ++fullscreenEntryAttempt
         // Begin rotating on the user action, before Shaka changes the fullscreen element.
@@ -8436,6 +8497,7 @@ export default defineComponent({
     })
 
     watch(fullWindowEnabled, enabled => {
+      if (!enabled && androidRotationFullscreen) exitAndroidRotationFullscreen()
       if (!enabled && !isNativeFullscreenActive()) {
         rememberDockedPanels()
         closeFullscreenMetadata()
@@ -10814,6 +10876,7 @@ export default defineComponent({
         // The Watch view survives video changes, so its fullscreen element can
         // remain mounted while the Shaka player is replaced.
         androidFullscreenHost = container.value.closest('.videoLayout')
+        androidFullscreenHost?.addEventListener('toggle', handleAndroidRotationPopoverToggle)
         androidFullscreenHostActive.value = !!androidFullscreenHost && document.fullscreenElement === androidFullscreenHost
         isFullscreen.value = androidFullscreenHostActive.value
       }
@@ -10912,7 +10975,7 @@ export default defineComponent({
       registerAbRepeatControl()
 
       registerTheatreModeButton()
-      if (!process.env.IS_CAPACITOR || process.env.IS_IOS) registerFullWindowButton()
+      registerFullWindowButton()
       registerAndroidPictureInPictureButton()
       registerShortsVideoInfoButton()
 
@@ -12134,6 +12197,7 @@ export default defineComponent({
 
       scrollMiniPlayerActive,
       mobileMiniBar,
+      mobileMiniBarCanDismiss,
       mobileMiniBarOverlayStyle,
       scrollMiniPlayerAnimating,
       scrollMiniPlayerDetached,

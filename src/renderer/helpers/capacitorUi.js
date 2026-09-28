@@ -18,6 +18,12 @@ export function shouldRotateFullscreenToLandscape(fullscreen, video, enabled = t
   )
 }
 
+function setLandscapeOrientation(landscape) {
+  return landscape
+    ? ScreenOrientation.lock({ type: OrientationType.LANDSCAPE })
+    : ScreenOrientation.unlock()
+}
+
 export async function setFullscreenOrientation(fullscreen, video, enabled = true, aspectRatio = null) {
   if (!Capacitor.isNativePlatform()) return
 
@@ -25,9 +31,11 @@ export async function setFullscreenOrientation(fullscreen, video, enabled = true
   // until the new dimensions arrive unless metadata already has its aspect ratio.
   if (fullscreen && enabled && !(video?.videoWidth > 0 && video?.videoHeight > 0) && !(aspectRatio > 0)) return
 
-  return shouldRotateFullscreenToLandscape(fullscreen, video, enabled, aspectRatio)
-    ? ScreenOrientation.lock({ type: OrientationType.LANDSCAPE })
-    : ScreenOrientation.unlock()
+  return setLandscapeOrientation(shouldRotateFullscreenToLandscape(fullscreen, video, enabled, aspectRatio))
+}
+
+export function setAndroidDisplayOrientation(landscape) {
+  return setLandscapeOrientation(landscape)
 }
 
 export async function openNotificationSettings() {

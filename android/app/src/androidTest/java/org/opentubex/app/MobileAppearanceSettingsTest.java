@@ -3,6 +3,9 @@ package org.opentubex.app;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.os.SystemClock;
+import android.view.InputDevice;
+import android.view.MotionEvent;
 import android.webkit.WebView;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -17,6 +20,117 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class MobileAppearanceSettingsTest {
+    @Test
+    public void tappingBesideNestedScrollbarHandleDoesNotScroll() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            WebView view = webView(scenario);
+            try {
+                prepare(view);
+                evaluate(view, """
+                    (() => {
+                        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                        window.__scrollbarTouchWidth = store.getters.getScrollbarThumbWidth;
+                        store.commit('setScrollbarThumbWidth', 4);
+                    })()
+                    """);
+                evaluate(view, "document.querySelector('.profileTrigger').click()");
+                evaluate(view, """
+                    (() => {
+                        const spacer = document.createElement('div');
+                        spacer.id = 'scrollbar-touch-test-spacer';
+                        spacer.style.height = '1200px';
+                        document.querySelector('.quickSettingsContent').prepend(spacer);
+                    })()
+                    """);
+                awaitCondition(view, """
+                    (() => {
+                        const bar = document.querySelector('.quickSettingsScroll .os-scrollbar-vertical.os-scrollbar-visible');
+                        return !!bar && bar.querySelector('.os-scrollbar-handle').getBoundingClientRect().height <
+                            bar.querySelector('.os-scrollbar-track').getBoundingClientRect().height / 2;
+                    })()
+                    """);
+                Thread.sleep(500);
+                String idleOffset = evaluate(view, "String(document.querySelector('.quickSettingsScroll').scrollTop)");
+                Thread.sleep(300);
+                assertEquals("The panel is idle before the touch", idleOffset,
+                    evaluate(view, "String(document.querySelector('.quickSettingsScroll').scrollTop)"));
+                JSONObject geometry = json(view, """
+                    (() => {
+                        const viewport = document.querySelector('.quickSettingsScroll');
+                        const track = viewport.querySelector('.os-scrollbar-vertical .os-scrollbar-track').getBoundingClientRect();
+                        const handle = viewport.querySelector('.os-scrollbar-vertical .os-scrollbar-handle').getBoundingClientRect();
+                        const y = handle.top - track.top > 25 ? track.top + 15 : track.bottom - 15;
+                        return {
+                            x: track.x + track.width / 2, tapY: y,
+                            handleTop: handle.top, handleBottom: handle.bottom,
+                            viewportWidth: innerWidth, trackTop: track.top, trackBottom: track.bottom
+                        };
+                    })()
+                    """);
+                assertTrue("Tap is outside the handle: " + geometry,
+                    geometry.getDouble("tapY") < geometry.getDouble("handleTop") - 5 ||
+                        geometry.getDouble("tapY") > geometry.getDouble("handleBottom") + 5);
+                String initialOffset = evaluate(view, "String(document.querySelector('.quickSettingsScroll').scrollTop)");
+                double initialScrollTop = Double.parseDouble((String) new JSONTokener(initialOffset).nextValue());
+                String tapTarget = evaluate(view, "document.elementFromPoint(" + geometry.getDouble("x") + ", " +
+                    geometry.getDouble("tapY") + ")?.className");
+                String handleTarget = evaluate(view, "document.elementFromPoint(" + geometry.getDouble("x") + ", " +
+                    (geometry.getDouble("handleTop") + geometry.getDouble("handleBottom")) / 2 + ")?.className");
+                assertTrue("The handle must remain draggable: " + handleTarget,
+                    handleTarget.contains("os-scrollbar-handle"));
+                assertTrue("Track touches should reach the content: " + tapTarget,
+                    !tapTarget.contains("os-scrollbar"));
+                float[] screenPoint = new float[2];
+                float[] handlePoint = new float[2];
+                float[] dragPoint = new float[2];
+                scenario.onActivity(activity -> {
+                    int[] origin = new int[2];
+                    view.getLocationOnScreen(origin);
+                    double scale = view.getWidth() / geometry.optDouble("viewportWidth");
+                    screenPoint[0] = origin[0] + (float) (geometry.optDouble("x") * scale);
+                    screenPoint[1] = origin[1] + (float) (geometry.optDouble("tapY") * scale);
+                    handlePoint[0] = screenPoint[0];
+                    handlePoint[1] = origin[1] + (float) ((geometry.optDouble("handleTop") +
+                        geometry.optDouble("handleBottom")) / 2 * scale);
+                    dragPoint[0] = handlePoint[0];
+                    double roomAbove = geometry.optDouble("handleTop") - geometry.optDouble("trackTop");
+                    double roomBelow = geometry.optDouble("trackBottom") - geometry.optDouble("handleBottom");
+                    double direction = roomBelow > roomAbove ? 1 : -1;
+                    dragPoint[1] = handlePoint[1] + (float) (direction * 40 * scale);
+                });
+                long downTime = SystemClock.uptimeMillis();
+                for (int action : new int[] {MotionEvent.ACTION_DOWN, MotionEvent.ACTION_UP}) {
+                    touch(downTime, action, screenPoint[0], screenPoint[1]);
+                    if (action != MotionEvent.ACTION_UP) Thread.sleep(40);
+                }
+                Thread.sleep(300);
+                assertEquals("Tapping the scrollbar track must not jump the panel (target: " + tapTarget + ")", initialOffset,
+                    evaluate(view, "String(document.querySelector('.quickSettingsScroll').scrollTop)"));
+                downTime = SystemClock.uptimeMillis();
+                for (int action : new int[] {MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE, MotionEvent.ACTION_UP}) {
+                    float[] target = action == MotionEvent.ACTION_DOWN ? handlePoint : dragPoint;
+                    touch(downTime, action, target[0], target[1]);
+                    if (action != MotionEvent.ACTION_UP) Thread.sleep(40);
+                }
+                awaitCondition(view, "Math.abs(document.querySelector('.quickSettingsScroll').scrollTop - " +
+                    initialScrollTop + ") > 10");
+            } finally {
+                evaluate(view, """
+                    (() => {
+                        document.querySelector('#scrollbar-touch-test-spacer')?.remove();
+                        if (window.__scrollbarTouchWidth !== undefined) {
+                            document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit(
+                                'setScrollbarThumbWidth', window.__scrollbarTouchWidth
+                            );
+                            delete window.__scrollbarTouchWidth;
+                        }
+                    })()
+                    """);
+                restore(view);
+            }
+        }
+    }
+
     @Test
     public void bottomNavigationFollowsPageScrollAtDifferentScales() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
@@ -307,6 +421,23 @@ public class MobileAppearanceSettingsTest {
             android.provider.Settings.Secure.putString(context.getContentResolver(), setting, originalPalette);
             automation.dropShellPermissionIdentity();
         }
+    }
+
+    private static void touch(long downTime, int action, float x, float y) {
+        MotionEvent.PointerProperties properties = new MotionEvent.PointerProperties();
+        properties.id = 0;
+        properties.toolType = MotionEvent.TOOL_TYPE_FINGER;
+        MotionEvent.PointerCoords coordinates = new MotionEvent.PointerCoords();
+        coordinates.x = x;
+        coordinates.y = y;
+        coordinates.pressure = 1;
+        coordinates.size = 1;
+        MotionEvent event = MotionEvent.obtain(downTime, SystemClock.uptimeMillis(), action,
+            1, new MotionEvent.PointerProperties[] {properties},
+            new MotionEvent.PointerCoords[] {coordinates}, 0, 0, 1, 1, 0, 0,
+            InputDevice.SOURCE_TOUCHSCREEN, 0);
+        InstrumentationRegistry.getInstrumentation().sendPointerSync(event);
+        event.recycle();
     }
 
     private static WebView webView(ActivityScenario<MainActivity> scenario) throws Exception {

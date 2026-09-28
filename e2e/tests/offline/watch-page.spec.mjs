@@ -85,6 +85,25 @@ async function expectSponsorBlockContentClamp(content, previousScrollTop) {
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
+test('connection loss keeps the previous page covered while Watch is scrolled', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const tab = page.locator('.tabContent[aria-hidden="false"]')
+  const previousPage = tab.locator('.browsingBehindWatch')
+  await expect(previousPage).toHaveCount(1)
+
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+    window.dispatchEvent(new Event('offline'))
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' })
+  })
+
+  await expect(page.locator('.connectionStatus')).toBeVisible()
+  await expect(page.locator('.watchPreviewHost')).toBeVisible()
+  await expect(previousPage).toBeHidden({ timeout: 2000 })
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+})
+
 test('casts a complete MP4 stream to a discovered DLNA device and returns to local playback', async ({ app, page }) => {
   await app.electronApp.evaluate(({ ipcMain }) => {
     globalThis.__dlnaCalls = []
@@ -2365,7 +2384,7 @@ test('a background watch tab stays loading until its cached avatar is ready', as
       for (const tab of document.querySelectorAll('.tab')) {
         window.__backgroundWatchIconStates.push({
           id: tab.dataset.tabId,
-          loading: tab.querySelector('.loadingDot') != null,
+          loading: tab.querySelector('.tabLoadingDot') != null,
           avatar: tab.querySelector('.tabAvatar') != null,
           pageIcon: tab.querySelector('.tabPageIcon') != null
         })
@@ -2385,7 +2404,7 @@ test('a background watch tab stays loading until its cached avatar is ready', as
   }))
   const tab = page.locator(`.tab[data-tab-id="${watchTab.id}"]`)
 
-  await expect(tab.locator('.loadingDot')).toBeVisible()
+  await expect(tab.locator('.tabLoadingDot')).toBeVisible()
   const avatarCached = await page.evaluate(async tabId => {
     const avatarBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUzZpk7I4HSAAAACklEQVQI12NgAAAAAgAB4iG8MwAAAABJRU5ErkJggg=='
     const avatarBytes = Uint8Array.from(atob(avatarBase64), character => character.charCodeAt(0))
@@ -2396,7 +2415,7 @@ test('a background watch tab stays loading until its cached avatar is ready', as
     )
   }, watchTab.id)
   expect(avatarCached).toBe(true)
-  await expect(tab.locator('.loadingDot')).toHaveCount(0)
+  await expect(tab.locator('.tabLoadingDot')).toHaveCount(0)
   await expect.poll(() => page.evaluate(tabId => (
     window.__backgroundWatchIconStates.some(state => state.id === tabId && !state.loading && state.avatar)
   ), watchTab.id)).toBe(true)
@@ -4234,6 +4253,49 @@ test.describe('watch page', () => {
         await expect(card.locator('.videoTagLink')).toHaveText(['first tag', 'second tag'])
         await expect(card.locator('.gameTitle')).toHaveText('Grand Theft Auto VI')
       }
+    }
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1))
+    await watchComponent.dispose()
+  })
+
+  test('fades collapsed description content at the bottom of the card', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await watchComponent.evaluate(async component => {
+      const view = component.proxy
+      view.isLoading = true
+      await view.$nextTick()
+      view.videoDescription = Array(12).fill('A long description line').join('\n')
+      view.videoDescriptionHtml = ''
+      view.videoTags = []
+      view.videoGames = []
+      view.license = null
+      view.isLoading = false
+      await view.$nextTick()
+    })
+
+    const card = page.locator(`${activeTab} .videoDescription`)
+    const scroller = card.locator('.descriptionScroll')
+    for (const scale of [1, 1.25]) {
+      await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+      await expect(card).toContainClass('short')
+      const layout = await scroller.evaluate(element => {
+        const card = element.closest('.videoDescription').getBoundingClientRect()
+        const viewport = element.getBoundingClientRect()
+        const more = element.parentElement.querySelector(':scope > .descriptionStatus').getBoundingClientRect()
+        return {
+          bottomGap: card.bottom - viewport.bottom,
+          moreOverlapsContent: more.top < viewport.bottom,
+          mask: getComputedStyle(element).maskImage,
+        }
+      })
+      expect(layout.bottomGap).toBeGreaterThanOrEqual(0)
+      expect(layout.bottomGap).toBeLessThanOrEqual(24)
+      expect(layout.moreOverlapsContent).toBe(true)
+      expect(layout.mask).toMatch(
+        /^linear-gradient\((?:to bottom, )?rgb\(0, 0, 0\) calc\(100% - 16px\), (?:transparent|rgba\(0, 0, 0, 0\))\)$/
+      )
     }
     await page.evaluate(() => window.ftElectron.setZoomFactor(1))
     await watchComponent.dispose()

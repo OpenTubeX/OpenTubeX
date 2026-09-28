@@ -15,7 +15,7 @@ const CORE_QUICK_SETTINGS = [
   ['hideComments', 'content', 'Settings.Distraction Free Settings.Hide Comments', { control: 'toggle', icon: ['fas', 'comment'] }],
   ['currentLocale', 'language', 'Settings.General Settings.Locale Preference', { control: 'select', icon: ['fas', 'language'] }],
   ['region', 'language', 'Settings.General Settings.Region for Trending', { control: 'select', icon: ['fas', 'globe'] }],
-  ['useProxy', 'advanced', 'Settings.Proxy Settings.Enable Tor / Proxy', { control: 'toggle', electronOnly: true, capacitorSupported: true, icon: ['fas', 'globe'] }],
+  ['useProxy', 'advanced', 'Settings.Proxy Settings.Enable Tor / Proxy', { control: 'toggle', electronOnly: true, capacitorSupported: true, iosUnsupported: true, icon: ['fas', 'globe'] }],
 ]
 
 export const BASIC_QUICK_SETTING_DEFINITIONS = Object.freeze([
@@ -138,9 +138,10 @@ const SECTION_DEFINITIONS = Object.freeze({
   }),
 })
 
-export function createQuickSettingCatalog(t, usingElectron, isCapacitor = false) {
+export function createQuickSettingCatalog(t, usingElectron, isCapacitor = false, isIos = false) {
   return QUICK_SETTING_DEFINITIONS
-    .filter(definition => !definition.electronOnly || usingElectron || (isCapacitor && definition.capacitorSupported))
+    .filter(definition => (!definition.electronOnly || usingElectron || (isCapacitor && definition.capacitorSupported)) &&
+      (!definition.iosUnsupported || !isIos))
     .map(definition => ({
       ...definition,
       // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
@@ -148,10 +149,10 @@ export function createQuickSettingCatalog(t, usingElectron, isCapacitor = false)
     }))
 }
 
-export function createQuickSettingSections(t, usingElectron, isCapacitor = false) {
+export function createQuickSettingSections(t, usingElectron, isCapacitor = false, isIos = false) {
   const sections = new Map()
 
-  for (const definition of createQuickSettingCatalog(t, usingElectron, isCapacitor)) {
+  for (const definition of createQuickSettingCatalog(t, usingElectron, isCapacitor, isIos)) {
     if (!sections.has(definition.section)) {
       const sectionDefinition = SECTION_DEFINITIONS[definition.section]
       sections.set(definition.section, {

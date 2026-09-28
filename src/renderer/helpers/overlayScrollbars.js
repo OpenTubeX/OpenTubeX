@@ -37,9 +37,10 @@ function scrollbarOptions(initialization) {
       // 'move' hides the scrollbars once the pointer has been still for
       // `autoHideDelay` and brings them back as soon as it moves again.
       autoHide: store.getters.getAlwaysShowScrollbars ? 'never' : 'move',
-      // Matches how the native scrollbars behaved: clicking the track jumps
-      // straight to that position instead of paging towards it.
-      clickScroll: true
+      // Track taps on a phone are easy to trigger while using nearby content.
+      // Keep desktop track clicks, but let mobile touches reach the content;
+      // the handle remains draggable on both platforms.
+      clickScroll: !process.env.IS_CAPACITOR
     }
   }
 

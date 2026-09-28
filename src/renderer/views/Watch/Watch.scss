@@ -1393,12 +1393,24 @@
 
 /* The Android fullscreen element contains the whole watch layout. Keep the
    player over it even before Vue applies its fullWindow class. */
-:global(.capacitorTabs .videoLayout:not(.shortsPlayerActive):fullscreen) {
+:global(.capacitorTabs .videoLayout:not(.shortsPlayerActive):is(:fullscreen, :popover-open)) {
   overflow: hidden;
   background: #000;
 }
 
-:global(.capacitorTabs .videoLayout:not(.shortsPlayerActive):fullscreen .videoArea .videoPlayer) {
+:global(.capacitorTabs .videoLayout:popover-open) {
+  position: fixed;
+  inset: 0;
+  inline-size: 100vw;
+  block-size: 100vh;
+  max-inline-size: none;
+  max-block-size: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+:global(.capacitorTabs .videoLayout:not(.shortsPlayerActive):is(:fullscreen, :popover-open) .videoArea .videoPlayer) {
   position: fixed;
   inset: 0;
   z-index: 4;
@@ -1408,7 +1420,7 @@
   margin: 0;
 }
 
-:global(.capacitorTabs .videoLayout:not(.shortsPlayerActive):fullscreen .videoArea .videoPlayer .ftVideoPlayer) {
+:global(.capacitorTabs .videoLayout:not(.shortsPlayerActive):is(:fullscreen, :popover-open) .videoArea .videoPlayer .ftVideoPlayer) {
   inline-size: 100%;
   block-size: 100%;
   aspect-ratio: auto;

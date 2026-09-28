@@ -69,6 +69,7 @@ test('Android restores orientation if fullscreen entry fails after rotation star
   const calls = []
   let afterEntry
   const context = {
+    androidRotationFullscreen: false,
     process: { env: { IS_CAPACITOR: true, IS_IOS: false } },
     document: { fullscreenElement: null },
     fullscreenEntryAttempt: 0,
@@ -94,6 +95,43 @@ test('Android restores orientation if fullscreen entry fails after rotation star
   assert.deepEqual(calls, [true, false])
 })
 
+test('Android opens an immersive player on physical rotation with system auto-rotate off', () => {
+  const start = source.indexOf('    let androidRotationFullscreen = false')
+  const end = source.indexOf('\n    let stopAndroidDisplayRotation', start)
+  assert.ok(start !== -1 && end !== -1, 'Android must handle physical rotation independently of screen.orientation')
+
+  const calls = []
+  let popoverOpen = false
+  const fullWindowEnabled = { value: false }
+  const context = {
+    fullWindowEnabled,
+    isActiveTab: { value: true },
+    video: { value: { readyState: 4 } },
+    ui: { getControls: () => ({}) },
+    fullWindowListenerReady: true,
+    androidFullscreenHost: {
+      setAttribute: () => {},
+      removeAttribute: () => {},
+      showPopover: () => { popoverOpen = true },
+      hidePopover: () => { popoverOpen = false },
+      matches: () => popoverOpen,
+    },
+    events: { dispatchEvent: event => {
+      fullWindowEnabled.value = event.detail
+      calls.push(event.detail)
+    } },
+    CustomEvent: class { constructor(_name, options) { this.detail = options.detail } },
+    setAndroidDisplayOrientation: async landscape => { calls.push(`orientation:${landscape}`) },
+    setAndroidNavigationBarVisible: async visible => { calls.push(`navigation:${visible}`) },
+    syncAndroidStatusBarVisibility: () => {},
+    isNativeFullscreenActive: () => false,
+    pictureInPictureActive: { value: false },
+  }
+  vm.runInNewContext(`${source.slice(start, end)}\nhandleAndroidDisplayRotation(true); video.value.readyState = 0; handleAndroidDisplayRotation(false)`, context)
+  assert.deepEqual(calls, [true, 'orientation:true', 'navigation:false', false, 'orientation:false', 'navigation:true'])
+  assert.equal(popoverOpen, false)
+})
+
 test('Android ignores fullscreen recovery from an earlier entry attempt', async () => {
   const start = source.indexOf('    function handleFullscreenButtonClick(event) {')
   const end = source.indexOf('\n    const mobileFullscreenBrightnessActive', start)
@@ -101,6 +139,7 @@ test('Android ignores fullscreen recovery from an earlier entry attempt', async 
   const calls = []
   const recoveryTimers = []
   const context = {
+    androidRotationFullscreen: false,
     process: { env: { IS_CAPACITOR: true, IS_IOS: false } },
     document: { fullscreenElement: null },
     fullscreenEntryAttempt: 0,

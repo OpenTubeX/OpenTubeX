@@ -963,9 +963,11 @@ test('expands a metadata-only description card', async ({ app, page }) => {
   const description = page.locator(`${activeTab} .externalMediaDescription`)
   await expect(description.getByRole('button', { name: '...more' })).toBeVisible()
   await description.getByRole('button', { name: '...more' }).click()
+  await expect(description).not.toHaveClass(/\bshort\b/)
   await expect(description).toContainText('Creative Commons')
   await description.getByRole('button', { name: 'Show less' }).click()
-  await expect(description).not.toContainText('Creative Commons')
+  await expect(description).toHaveClass(/\bshort\b/)
+  await expect(description.getByRole('button', { name: '...more' })).toBeVisible()
   await page.evaluate(async () => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     await store.dispatch('updateUseAITranslationCompletions', true)

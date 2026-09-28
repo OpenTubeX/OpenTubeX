@@ -21,6 +21,60 @@ public class MobileTabSelectionTest {
     private static final String STORE = "document.querySelector('#app').__vue_app__.config.globalProperties.$store";
 
     @Test
+    public void loadingDotAppearsInPhoneOrganizerAndTabletTabs() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            AtomicReference<WebView> reference = new AtomicReference<>();
+            scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
+            WebView view = reference.get();
+            await(view, "!!document.querySelector('.capacitorPhoneTabSwitcherButton') && " +
+                STORE + ".getters.getActiveTab?.loadState === 'loaded'");
+            await(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || " +
+                "!!document.querySelector('.tutorialActions button')");
+            evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
+            await(view, "!document.querySelector('.tutorialOverlay')");
+            evaluate(view, "window.loadingDotOriginalLayout = " + STORE + ".getters.getCapacitorLayoutMode");
+            try {
+                for (String layout : new String[] {"phone", "tablet"}) {
+                    evaluate(view, STORE + ".commit('setCapacitorLayoutMode', '" + layout + "')");
+                    if (layout.equals("phone")) {
+                        evaluate(view, "document.querySelector('.capacitorPhoneTabSwitcherButton').click()");
+                    }
+                    String row = layout.equals("phone") ? ".capacitorPhoneTabRow" : ".capacitorTabletTab";
+                    await(view, "!!document.querySelector('" + row + "')");
+                    evaluate(view, """
+                        (() => {
+                            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                            window.loadingDotOriginalState = { ...store.state.tabs, tabs: store.state.tabs.tabs.map(tab => ({ ...tab })) };
+                            store.commit('setTabsState', {
+                                ...store.state.tabs,
+                                tabs: store.state.tabs.tabs.map((tab, index) => index === 0 ? { ...tab, isLoading: true } : tab)
+                            });
+                        })();
+                        """);
+                    await(view, "!!document.querySelector('" + row + " .tabLoadingDot')");
+                    assertEquals("Loading dot follows the motion preference in " + layout + " layout", "true",
+                        evaluate(view, "(() => { const dot = document.querySelector('" + row +
+                            " .tabLoadingDot'); const style = getComputedStyle(dot);" +
+                            "const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches || " +
+                            "document.documentElement.getAttribute('data-reduced-motion') === 'reduce';" +
+                            "return style.display !== 'none' && style.width === '6px' && " +
+                            "(reducedMotion ? style.animationName === 'none' : style.animationName !== 'none'); })()"));
+                    evaluate(view, STORE + ".commit('setTabsState', window.loadingDotOriginalState)");
+                    await(view, "!document.querySelector('" + row + " .tabLoadingDot')");
+                    if (layout.equals("phone")) {
+                        evaluate(view, "document.querySelector('.capacitorPhoneTabHeaderButton:last-of-type').click()");
+                    }
+                }
+            } finally {
+                evaluate(view, "if (window.loadingDotOriginalState) " + STORE +
+                    ".commit('setTabsState', window.loadingDotOriginalState);" +
+                    STORE + ".commit('setCapacitorLayoutMode', window.loadingDotOriginalLayout);" +
+                    "delete window.loadingDotOriginalState; delete window.loadingDotOriginalLayout");
+            }
+        }
+    }
+
+    @Test
     public void fastAppBarSwipeAnimatesTheIncomingTabBeforeSelectionChanges() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             AtomicReference<WebView> reference = new AtomicReference<>();
