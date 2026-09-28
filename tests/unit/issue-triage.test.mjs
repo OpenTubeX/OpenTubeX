@@ -192,3 +192,28 @@ test('triage stays silent when a proposed answer lacks source evidence', async t
   assert.equal(result.answer, null)
   assert.deepEqual(result.labels, ['enhancement'])
 })
+
+test('triage rejects caveats that do not answer the requested feature', async t => {
+  const originalFetch = globalThis.fetch
+  t.after(() => { globalThis.fetch = originalFetch })
+  let calls = 0
+  globalThis.fetch = async () => {
+    calls++
+    const output = calls === 1
+      ? { labels: ['enhancement'], reply: 'answer', source: 'extra-features' }
+      : {
+          answer: 'The docs do not establish whether tabs can replace the title bar.',
+          evidence: 'Tabs can appear at the top of the application window.'
+        }
+    return { ok: true, json: async () => ({
+      status: 'completed',
+      output: [{ content: [{ type: 'output_text', text: JSON.stringify(output) }] }]
+    }) }
+  }
+  const issue = { title: 'Replace the title bar with tabs', body: '', comments: { nodes: [] } }
+  const result = await assess(issue, {
+    readSource: async () => '### Tabs\nTabs can appear at the top of the application window.'
+  })
+  assert.equal(calls, 2)
+  assert.equal(result.answer, null)
+})
