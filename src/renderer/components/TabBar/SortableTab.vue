@@ -41,7 +41,7 @@
           />
           <span
             v-if="tab.isLoading"
-            class="loadingDot"
+            class="tabLoadingDot"
             aria-hidden="true"
           />
           <FtIcon
@@ -407,34 +407,6 @@ watch(tabAvatarUrl, (avatarUrl) => {
   pointer-events: none;
 }
 
-.loadingDot {
-  display: inline-block;
-  inline-size: 6px;
-  block-size: 6px;
-  flex: 0 0 6px;
-  border-radius: 50%;
-  background-color: var(--accent-color, var(--primary-text-color));
-  animation: tab-loading-pulse 0.9s ease-in-out infinite;
-  vertical-align: middle;
-}
-
-@keyframes tab-loading-pulse {
-  0% {
-    transform: scale(0.7);
-    opacity: 0.5;
-  }
-
-  50% {
-    transform: scale(1);
-    opacity: 1;
-  }
-
-  100% {
-    transform: scale(0.7);
-    opacity: 0.5;
-  }
-}
-
 .playingIcon {
   font-size: 8px;
   color: var(--accent-color, var(--primary-text-color));
@@ -497,3 +469,5 @@ watch(tabAvatarUrl, (avatarUrl) => {
 }
 
 </style>
+
+<style scoped src="./TabLoadingDot.css" />

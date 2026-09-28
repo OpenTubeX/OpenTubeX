@@ -51,11 +51,16 @@
             @keydown="handleTabTargetKeydown($event, tab.id)"
           >
             <span
-              v-if="showTabIcons"
+              v-if="tab.isLoading || showTabIcons"
               class="capacitorTabletTabIcon"
             >
+              <span
+                v-if="tab.isLoading"
+                class="tabLoadingDot"
+                aria-hidden="true"
+              />
               <FtRetryImage
-                v-if="getTabAvatarUrl(tab)"
+                v-else-if="getTabAvatarUrl(tab)"
                 :src="getTabAvatarUrl(tab)"
                 class="capacitorTabletTabAvatar"
                 alt=""
@@ -312,3 +317,5 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped src="./CapacitorTabletTabBar.css" />
+
+<style scoped src="./TabLoadingDot.css" />
