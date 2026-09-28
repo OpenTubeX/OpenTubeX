@@ -118,6 +118,7 @@ Options:
 }
 
 function runApp() {
+  let deferredDatastoresStarted = false
   /** @type {Set<string>} */
   const ALLOWED_RENDERER_FILES = process.env.NODE_ENV === 'production'
     // __FREETUBE_ALLOWED_PATHS__ is replaced by the injectAllowedPaths.mjs script
@@ -2917,6 +2918,12 @@ function runApp() {
             width: 1200,
             height: 800
           }
+    })
+    newWindow.once('show', () => {
+      if (deferredDatastoresStarted) return
+      deferredDatastoresStarted = true
+      // Give the native splash its first frame before parsing the larger stores.
+      setImmediate(() => { baseHandlers.loadDeferredDatastores() })
     })
     const kdeWindowIdentity = monitorsKdeWaylandWindowState
       ? `\u2063${newWindow.id.toString(2).replaceAll('0', '\u200b').replaceAll('1', '\u200c')}`

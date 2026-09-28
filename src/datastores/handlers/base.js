@@ -654,7 +654,8 @@ class Profiles {
     return db.profiles.insertAsync(profile)
   }
 
-  static find() {
+  static async find() {
+    await loadProfilesDatastore()
     return db.profiles.findAsync({})
   }
 
@@ -1012,17 +1013,29 @@ class TabSession {
   }
 }
 
+let profilesLoadPromise
+
+function loadProfilesDatastore() {
+  profilesLoadPromise ??= db.profiles.loadDatabaseAsync()
+  return profilesLoadPromise
+}
+
 function loadDatastores() {
   return Promise.allSettled([
     db.settings.loadDatabaseAsync(),
+    db.tabSession.loadDatabaseAsync(),
+  ])
+}
+
+function loadDeferredDatastores() {
+  return Promise.allSettled([
     db.history.loadDatabaseAsync(),
     db.watchStats.loadDatabaseAsync(),
     db.recommendations.loadDatabaseAsync(),
-    db.profiles.loadDatabaseAsync(),
+    loadProfilesDatastore(),
     db.playlists.loadDatabaseAsync(),
     db.searchHistory.loadDatabaseAsync(),
     db.subscriptionCache.loadDatabaseAsync(),
-    db.tabSession.loadDatabaseAsync(),
     db.liveReminders.loadDatabaseAsync(),
     db.videoMetadataCache.loadDatabaseAsync(),
   ])
@@ -1057,5 +1070,6 @@ export {
   TabSession as tabSession,
 
   loadDatastores,
+  loadDeferredDatastores,
   compactAllDatastores,
 }
