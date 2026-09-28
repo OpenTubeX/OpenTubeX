@@ -347,7 +347,7 @@ test.describe('subscription refresh performance with many tabs', () => {
     }
   })
 
-  async function checkLargeProfileRefresh({ app, page }, testInfo, background) {
+  async function checkLargeProfileRefresh({ app, page }, testInfo, background, throttled = false) {
     test.setTimeout(120_000)
     let fulfilledFeedCount = 0
     await routeFeeds(page, () => 0, (index) => {
@@ -375,6 +375,8 @@ test.describe('subscription refresh performance with many tabs', () => {
         .reduce((total, metric) => total + metric.memory.workingSetSize, 0)
     })
     const memoryBefore = await rendererWorkingSet()
+    const cdp = throttled ? await page.context().newCDPSession(page) : null
+    if (cdp) await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 })
 
     await page.getByRole('button', { name: /Refresh Videos/ }).evaluate(button => {
       const startedAt = performance.now()
@@ -462,6 +464,7 @@ test.describe('subscription refresh performance with many tabs', () => {
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)))
 
     const timing = await page.evaluate(() => window.__subscriptionRefreshPerformance.stop())
+    if (cdp) await cdp.detach()
     const memoryAfter = await rendererWorkingSet()
     const metrics = {
       ...timing,
@@ -480,16 +483,21 @@ test.describe('subscription refresh performance with many tabs', () => {
     const steadyBlockingTime = timing.longTasks
       .filter(task => task.at >= 1000 && task.at < timing.completedAt - 250)
       .reduce((total, task) => total + Math.max(0, task.duration - 50), 0)
-    expect(steadyBlockingTime, JSON.stringify(metrics)).toBeLessThan(700)
-    expect(timing.totalBlockingTime, JSON.stringify(metrics)).toBeLessThan(1000)
+    expect(steadyBlockingTime, JSON.stringify(metrics)).toBeLessThan(throttled ? 1500 : 700)
     expect(timing.completedAt).not.toBeNull()
-    expect(timing.completedAt, JSON.stringify(metrics)).toBeLessThan(15_000)
+    if (!throttled) {
+      expect(timing.totalBlockingTime, JSON.stringify(metrics)).toBeLessThan(1000)
+      expect(timing.completedAt, JSON.stringify(metrics)).toBeLessThan(15_000)
+    }
   }
 
   for (const background of [false, true]) {
     test(`keeps the renderer responsive while refreshing a large profile ${background ? 'in a background tab' : 'on screen'}`, ({ app, page }, testInfo) =>
       checkLargeProfileRefresh({ app, page }, testInfo, background))
   }
+
+  test('keeps the renderer responsive while refreshing a large profile on a slower CPU', ({ app, page }, testInfo) =>
+    checkLargeProfileRefresh({ app, page }, testInfo, false, true))
 
   test('shows channels fetched before a large refresh is cancelled', async ({ page }) => {
     test.setTimeout(120_000)
