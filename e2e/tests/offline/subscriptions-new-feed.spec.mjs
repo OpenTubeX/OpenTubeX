@@ -129,6 +129,7 @@ test.describe('new subscriptions feed', () => {
     await expect(page.getByRole('heading', { name: 'Posts', exact: true })).toBeVisible()
     await expect(page.getByText('New video', { exact: true })).toHaveCount(1)
     await expect(page.getByText('New short', { exact: true })).toBeVisible()
+    await page.locator('.mediaSection').last().scrollIntoViewIfNeeded()
     await expect(page.getByText('New live stream', { exact: true })).toBeVisible()
     await page.locator('.postsSection').scrollIntoViewIfNeeded()
     await expect(page.getByText('New community post', { exact: true })).toBeVisible()

@@ -2,7 +2,7 @@
   <div
     v-if="showResult"
     ref="shell"
-    v-observe-visibility="windowed || visible ? false : {
+    v-observe-visibility="(windowed && !deferWindowing) || windowItemObserved || visible ? false : {
       callback: onVisibilityChanged
     }"
     :style="!visible && shellHeight ? { blockSize: `${shellHeight}px` } : undefined"
@@ -300,24 +300,35 @@ const showResult = computed(() => {
 const visible = ref(props.firstScreen)
 // Community cards contain expandable text/media whose local state must survive scrolling.
 const windowed = (process.env.IS_CAPACITOR || process.env.IS_ELECTRON) && finalDataType.value !== 'community'
+const deferWindowing = process.env.IS_ELECTRON
 const shell = useTemplateRef('shell')
 const shellHeight = ref(0)
+const windowItemObserved = ref(false)
 let windowItem
 if (windowed) {
+  function startWindowing(element) {
+    windowItem = observeWindowedListItem(element, {
+      mount: () => { visible.value = true },
+      unmount: height => { shellHeight.value = height; visible.value = false },
+      isMounted: () => visible.value,
+      isProtected: () => {
+        return props.isVideoDragging || element.contains(document.activeElement) ||
+          !!element.querySelector('[aria-expanded="true"], [role="dialog"], [contenteditable="true"]')
+      },
+    })
+    windowItemObserved.value = true
+  }
   watch(shell, element => {
     windowItem?.dispose()
-    windowItem = element
-      ? observeWindowedListItem(element, {
-          mount: () => { visible.value = true },
-          unmount: height => { shellHeight.value = height; visible.value = false },
-          isMounted: () => visible.value,
-          isProtected: () => {
-            return props.isVideoDragging || element.contains(document.activeElement) ||
-              !!element.querySelector('[aria-expanded="true"], [role="dialog"], [contenteditable="true"]')
-          },
-        })
-      : null
+    windowItem = null
+    windowItemObserved.value = false
+    if (element && (!deferWindowing || visible.value)) startWindowing(element)
   }, { flush: 'post' })
+  if (deferWindowing) {
+    watch(visible, isVisible => {
+      if (isVisible && shell.value && !windowItem) startWindowing(shell.value)
+    }, { flush: 'post' })
+  }
   watch(() => [props.data, props.layout, props.appearance], () => windowItem?.refresh(), { flush: 'post' })
   onBeforeUnmount(() => windowItem?.dispose())
 }
