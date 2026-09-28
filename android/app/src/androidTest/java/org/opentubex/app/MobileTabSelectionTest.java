@@ -28,6 +28,8 @@ public class MobileTabSelectionTest {
             WebView view = reference.get();
             await(view, "!!document.querySelector('.capacitorPhoneTabSwitcherButton') && " +
                 STORE + ".getters.getActiveTab?.loadState === 'loaded'");
+            await(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || " +
+                "!!document.querySelector('.tutorialActions button')");
             evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
             await(view, "!document.querySelector('.tutorialOverlay')");
             evaluate(view, "window.loadingDotOriginalLayout = " + STORE + ".getters.getCapacitorLayoutMode");
@@ -50,11 +52,13 @@ public class MobileTabSelectionTest {
                         })();
                         """);
                     await(view, "!!document.querySelector('" + row + " .tabLoadingDot')");
-                    assertEquals("Loading dot is visible and animated in " + layout + " layout", "true",
+                    assertEquals("Loading dot follows the motion preference in " + layout + " layout", "true",
                         evaluate(view, "(() => { const dot = document.querySelector('" + row +
                             " .tabLoadingDot'); const style = getComputedStyle(dot);" +
+                            "const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches || " +
+                            "document.documentElement.getAttribute('data-reduced-motion') === 'reduce';" +
                             "return style.display !== 'none' && style.width === '6px' && " +
-                            "style.animationName !== 'none'; })()"));
+                            "(reducedMotion ? style.animationName === 'none' : style.animationName !== 'none'); })()"));
                     evaluate(view, STORE + ".commit('setTabsState', window.loadingDotOriginalState)");
                     await(view, "!document.querySelector('" + row + " .tabLoadingDot')");
                     if (layout.equals("phone")) {
