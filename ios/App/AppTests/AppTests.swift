@@ -3,7 +3,6 @@ import AVFoundation
 import WebKit
 import MediaPlayer
 import Network
-import AVFoundation
 import AVKit
 @testable import App
 
@@ -33,6 +32,23 @@ final class AppTests: XCTestCase {
         XCTAssertEqual(active, 1)
         let named = try await evaluate("Array.from(document.querySelectorAll('.capacitorTabletTabTarget, .capacitorTabletTabClose')).every(el=>el.getAttribute('aria-label')?.trim())") as? Bool
         XCTAssertEqual(named, true)
+    }
+
+    func testYtDlpExportRollsBackEarlierFilesOnFailure() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("yt-dlp-export-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("stage")
+        let destination = root.appendingPathComponent("destination")
+        try FileManager.default.createDirectory(at: staging, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: destination, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        try Data("first".utf8).write(to: staging.appendingPathComponent("first.mp4"))
+        let existing = destination.appendingPathComponent("first.mp4")
+        try Data("existing".utf8).write(to: existing)
+
+        XCTAssertThrowsError(try IOSYtDlpExporter.copy(["first.mp4", "missing.mp4"], from: staging,
+                                                         to: destination, videoId: "fixture"))
+        XCTAssertEqual(try Data(contentsOf: existing), Data("existing".utf8))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: destination.appendingPathComponent("first (2).mp4").path))
     }
 
     func testBackgroundPreparationEvent() async throws {

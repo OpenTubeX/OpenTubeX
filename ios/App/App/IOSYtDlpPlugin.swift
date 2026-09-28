@@ -130,6 +130,36 @@ private enum IOSYtDlpMerger {
     }
 }
 
+enum IOSYtDlpExporter {
+    static func copy(_ names: [String], from staging: URL, to target: URL, videoId: String) throws
+        -> (destinations: [String], files: [[String: Any]], sizeBytes: Int64) {
+        var destinations: [String] = []
+        var files: [[String: Any]] = []
+        var size: Int64 = 0
+        do {
+            for name in names {
+                let source = staging.appendingPathComponent(name)
+                var destination = target.appendingPathComponent(name)
+                var duplicate = 2
+                while FileManager.default.fileExists(atPath: destination.path) {
+                    let suffix = source.pathExtension.isEmpty ? "" : ".\(source.pathExtension)"
+                    destination = target.appendingPathComponent("\(source.deletingPathExtension().lastPathComponent) (\(duplicate))\(suffix)")
+                    duplicate += 1
+                }
+                try FileManager.default.copyItem(at: source, to: destination)
+                size += Int64((try? source.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
+                destinations.append(destination.path)
+                files.append(["path": destination.path, "videoId": videoId,
+                              "extension": destination.pathExtension, "available": true])
+            }
+        } catch {
+            for path in destinations { try? FileManager.default.removeItem(atPath: path) }
+            throw error
+        }
+        return (destinations, files, size)
+    }
+}
+
 private final class IOSScopedPlayerController: AVPlayerViewController {
     var releaseFile: (() -> Void)?
 
@@ -416,28 +446,12 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
                 throw NSError(domain: "IOSYtDlp", code: 7, userInfo: [NSLocalizedDescriptionKey: "The download folder is unavailable"])
             }
             defer { target.stopAccessingSecurityScopedResource() }
-            var destinations: [String] = []
-            var files: [[String: Any]] = []
-            var size: Int64 = 0
-            for name in names {
-                let source = folder(for: id).appendingPathComponent(name)
-                var destination = target.appendingPathComponent(name)
-                var duplicate = 2
-                while FileManager.default.fileExists(atPath: destination.path) {
-                    let suffix = source.pathExtension.isEmpty ? "" : ".\(source.pathExtension)"
-                    destination = target.appendingPathComponent("\(source.deletingPathExtension().lastPathComponent) (\(duplicate))\(suffix)")
-                    duplicate += 1
-                }
-                try FileManager.default.copyItem(at: source, to: destination)
-                size += Int64((try? source.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0)
-                destinations.append(destination.path)
-                files.append(["path": destination.path, "videoId": records[id]?["videoId"] ?? "",
-                              "extension": destination.pathExtension, "available": true])
-            }
-            records[id]?["destination"] = destinations.last
-            records[id]?["destinations"] = destinations
-            records[id]?["files"] = files
-            records[id]?["sizeBytes"] = size
+            let exported = try IOSYtDlpExporter.copy(names, from: folder(for: id), to: target,
+                                                      videoId: records[id]?["videoId"] as? String ?? "")
+            records[id]?["destination"] = exported.destinations.last
+            records[id]?["destinations"] = exported.destinations
+            records[id]?["files"] = exported.files
+            records[id]?["sizeBytes"] = exported.sizeBytes
             records[id]?["percent"] = 100
             records[id]?["status"] = "completed"
             try? FileManager.default.removeItem(at: folder(for: id))
