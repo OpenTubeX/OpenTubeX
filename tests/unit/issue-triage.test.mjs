@@ -125,7 +125,8 @@ test('triage answers an existing-feature request from verified documentation', a
       ? { labels: ['enhancement'], reply: 'answer', source: 'extra-features' }
       : {
           answer: 'Open the video menu and choose Add to Queue. Manage the queue in the watch page side panel.',
-          evidence: 'Queue videos from their three-dot menus, then manage and drag to reorder them in a side panel on the watch page.'
+          evidence: 'Queue videos from their three-dot menus, then manage and drag to reorder them in a side panel on the watch page.',
+          supported: true
         }
     return { ok: true, json: async () => ({
       status: 'completed',
@@ -158,7 +159,8 @@ test('feature templates check existing support even when the first decision requ
       ? { labels: ['enhancement'], reply: 'none', source: 'none' }
       : {
           answer: 'Open the video menu and choose Add to Queue.',
-          evidence: 'Queue videos from their three-dot menus, then manage and drag to reorder them in a side panel on the watch page.'
+          evidence: 'Queue videos from their three-dot menus, then manage and drag to reorder them in a side panel on the watch page.',
+          supported: true
         }
     return { ok: true, json: async () => ({
       status: 'completed',
@@ -186,7 +188,7 @@ test('triage stays silent when a proposed answer lacks source evidence', async t
     calls++
     const output = calls === 1
       ? { labels: ['enhancement'], reply: 'answer', source: 'extra-features' }
-      : { answer: 'OpenTubeX has a queue.', evidence: 'This claim is absent from the guide.' }
+      : { answer: 'OpenTubeX has a queue.', evidence: 'This claim is absent from the guide.', supported: true }
     return { ok: true, json: async () => ({
       status: 'completed',
       output: [{ content: [{ type: 'output_text', text: JSON.stringify(output) }] }]
@@ -209,7 +211,8 @@ test('triage rejects caveats that do not answer the requested feature', async t 
       ? { labels: ['enhancement'], reply: 'answer', source: 'extra-features' }
       : {
           answer: 'The source doesn’t specify whether tabs can replace the title bar.',
-          evidence: 'Tabs can appear at the top of the application window.'
+          evidence: 'Tabs can appear at the top of the application window.',
+          supported: true
         }
     return { ok: true, json: async () => ({
       status: 'completed',
@@ -219,6 +222,36 @@ test('triage rejects caveats that do not answer the requested feature', async t 
   const issue = { title: 'Replace the title bar with tabs', body: '', comments: { nodes: [] } }
   const result = await assess(issue, {
     readSource: async () => '### Tabs\nTabs can appear at the top of the application window.'
+  })
+  assert.equal(calls, 2)
+  assert.equal(result.answer, null)
+})
+
+test('triage leaves rejected feature-request alternatives to a maintainer', async t => {
+  const originalFetch = globalThis.fetch
+  t.after(() => { globalThis.fetch = originalFetch })
+  let calls = 0
+  globalThis.fetch = async () => {
+    calls++
+    const output = calls === 1
+      ? { labels: ['enhancement'], reply: 'answer', source: 'providers' }
+      : {
+          answer: 'Disable fallback in Advanced settings.',
+          evidence: 'Search settings for fallback, review the setting, and disable it if you need to control which provider receives requests.',
+          supported: false
+        }
+    return { ok: true, json: async () => ({
+      status: 'completed',
+      output: [{ content: [{ type: 'output_text', text: JSON.stringify(output) }] }]
+    }) }
+  }
+  const issue = {
+    title: 'Show a warning when falling back to the direct extractor',
+    body: 'Disabling fallback was considered, but I want a visible notification.',
+    comments: { nodes: [] }
+  }
+  const result = await assess(issue, {
+    readSource: async () => 'Search settings for fallback, review the setting, and disable it if you need to control which provider receives requests.'
   })
   assert.equal(calls, 2)
   assert.equal(result.answer, null)
