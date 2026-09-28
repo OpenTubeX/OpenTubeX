@@ -11,12 +11,20 @@ final class IOSNetwork: NSObject, URLSessionDataDelegate {
     }
     private var prepared: [String: URLRequest] = [:]
     private var external: [String: URLRequest] = [:]
-    private var transfers: [Int: WKURLSchemeTask] = [:]
+    private var transfers: [ObjectIdentifier: WKURLSchemeTask] = [:]
     private var tasks: [ObjectIdentifier: URLSessionDataTask] = [:]
     private lazy var session: URLSession = {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.timeoutIntervalForRequest = 30
         configuration.timeoutIntervalForResource = 120
+        return URLSession(configuration: configuration, delegate: self, delegateQueue: .main)
+    }()
+
+    // A media response can remain active for the duration of a long video.
+    // Keep the idle timeout, but use URLSession's default resource lifetime.
+    private lazy var mediaSession: URLSession = {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.timeoutIntervalForRequest = 30
         return URLSession(configuration: configuration, delegate: self, delegateQueue: .main)
     }()
 
@@ -41,7 +49,7 @@ final class IOSNetwork: NSObject, URLSessionDataDelegate {
     func abort(_ id: String) {
         prepared.removeValue(forKey: id)
         for task in Array(tasks.values) where task.taskDescription == id {
-            if let target = transfers.removeValue(forKey: task.taskIdentifier) {
+            if let target = transfers.removeValue(forKey: ObjectIdentifier(task)) {
                 tasks.removeValue(forKey: ObjectIdentifier(target))
                 target.didFailWithError(URLError(.cancelled))
             }
@@ -58,23 +66,23 @@ final class IOSNetwork: NSObject, URLSessionDataDelegate {
         if external[id] != nil, let range = target.request.value(forHTTPHeaderField: "Range") {
             request.setValue(range, forHTTPHeaderField: "Range")
         }
-        let task = session.dataTask(with: request)
+        let task = (external[id] == nil ? session : mediaSession).dataTask(with: request)
         task.taskDescription = external[id] == nil ? id : "media:\(id)"
-        transfers[task.taskIdentifier] = target
+        transfers[ObjectIdentifier(task)] = target
         tasks[ObjectIdentifier(target)] = task
         task.resume()
     }
 
     func stop(_ target: WKURLSchemeTask) {
         guard let task = tasks.removeValue(forKey: ObjectIdentifier(target)) else { return }
-        transfers.removeValue(forKey: task.taskIdentifier)
+        transfers.removeValue(forKey: ObjectIdentifier(task))
         task.cancel()
     }
 
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask,
                     didReceive response: URLResponse,
                     completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
-        guard let target = transfers[dataTask.taskIdentifier], let url = target.request.url,
+        guard let target = transfers[ObjectIdentifier(dataTask)], let url = target.request.url,
               let http = response as? HTTPURLResponse else {
             completionHandler(.cancel)
             return
@@ -96,7 +104,7 @@ final class IOSNetwork: NSObject, URLSessionDataDelegate {
     }
 
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-        transfers[dataTask.taskIdentifier]?.didReceive(data)
+        transfers[ObjectIdentifier(dataTask)]?.didReceive(data)
     }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
@@ -111,7 +119,7 @@ final class IOSNetwork: NSObject, URLSessionDataDelegate {
     }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        guard let target = transfers.removeValue(forKey: task.taskIdentifier) else { return }
+        guard let target = transfers.removeValue(forKey: ObjectIdentifier(task)) else { return }
         tasks.removeValue(forKey: ObjectIdentifier(target))
         if let error = error { target.didFailWithError(error) } else { target.didFinish() }
     }

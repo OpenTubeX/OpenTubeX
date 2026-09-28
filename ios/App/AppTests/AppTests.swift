@@ -8,6 +8,155 @@ import AVKit
 
 @MainActor
 final class AppTests: XCTestCase {
+    private func loopbackServer(_ handle: @escaping (String, NWConnection) -> Void) async throws -> NWListener {
+        let listener = try NWListener(using: .tcp, on: .any)
+        let ready = expectation(description: "Loopback server ready")
+        listener.stateUpdateHandler = { if case .ready = $0 { ready.fulfill() } }
+        listener.newConnectionHandler = { connection in
+            connection.start(queue: .global())
+            func receive(_ buffered: Data) {
+                connection.receive(minimumIncompleteLength: 1, maximumLength: 8192) { data, _, complete, error in
+                    let request = buffered + (data ?? Data())
+                    if let header = String(data: request, encoding: .utf8), header.contains("\r\n\r\n") {
+                        handle(header, connection)
+                    } else if complete || error != nil || request.count > 16384 { connection.cancel() }
+                    else { receive(request) }
+                }
+            }
+            receive(Data())
+        }
+        listener.start(queue: .global())
+        await fulfillment(of: [ready], timeout: 10)
+        return listener
+    }
+
+    func testExternalMediaOutlivesSabrResourceTimeout() async throws {
+        let listener = try await loopbackServer { header, connection in
+            let long = header.contains(" /long ")
+            let response = "HTTP/1.1 200 OK\r\nContent-Length: \(long ? 64 : 5)\r\nConnection: close\r\n\r\n"
+            func send(_ index: Int) {
+                guard index < 64 else { connection.cancel(); return }
+                connection.send(content: Data([UInt8(index)]), completion: .contentProcessed { error in
+                    if error != nil { connection.cancel(); return }
+                    DispatchQueue.global().asyncAfter(deadline: .now() + 2) { send(index + 1) }
+                })
+            }
+            connection.send(content: Data(response.utf8), completion: .contentProcessed { _ in
+                if long { send(0) }
+                else { connection.send(content: Data("short".utf8), completion: .contentProcessed { _ in connection.cancel() }) }
+            })
+        }
+        defer { listener.cancel() }
+        let base = "http://127.0.0.1:\(try XCTUnwrap(listener.port).rawValue)"
+        let network = IOSNetwork()
+        let mediaID = network.prepareExternal(URLRequest(url: try XCTUnwrap(URL(string: base + "/long"))))
+        let sabrID = network.prepare(URLRequest(url: try XCTUnwrap(URL(string: base + "/short"))))
+        let mediaDone = expectation(description: "Media completes beyond two minutes")
+        let sabrDone = expectation(description: "Concurrent SABR task completes independently")
+        let media = RecordingSchemeTask(url: try XCTUnwrap(URL(string: "capacitor://localhost/_opentubex_media/\(mediaID)")), done: mediaDone)
+        let sabr = RecordingSchemeTask(url: try XCTUnwrap(URL(string: "capacitor://localhost/_opentubex_sabr/\(sabrID)")), done: sabrDone)
+        defer { network.stop(media); network.stop(sabr) }
+        network.start(media)
+        network.start(sabr)
+        await fulfillment(of: [sabrDone, mediaDone], timeout: 145)
+        XCTAssertNil(sabr.error)
+        XCTAssertEqual(sabr.data, Data("short".utf8))
+        XCTAssertNil(media.error)
+        XCTAssertEqual(media.data, Data((0..<64).map(UInt8.init)))
+    }
+
+    func testAPIReadTimeoutAllowsContinuouslyArrivingData() async throws {
+        try await openApplication()
+        let listener = try await loopbackServer { _, connection in
+            let header = "HTTP/1.1 200 OK\r\nContent-Length: 12\r\nConnection: close\r\n\r\n"
+            func send(_ count: Int) {
+                guard count < 12 else { connection.cancel(); return }
+                connection.send(content: Data("x".utf8), completion: .contentProcessed { error in
+                    if error != nil { connection.cancel(); return }
+                    DispatchQueue.global().asyncAfter(deadline: .now() + 0.2) { send(count + 1) }
+                })
+            }
+            connection.send(content: Data(header.utf8), completion: .contentProcessed { _ in send(0) })
+        }
+        defer { listener.cancel() }
+        let result = try await webView.callAsyncJavaScript("""
+            return await Capacitor.Plugins.IOSHttp.request({requestId: crypto.randomUUID(), url,
+                method: 'GET', responseType: 'text', connectTimeout: 500, readTimeout: 500});
+            """, arguments: ["url": "http://127.0.0.1:\(try XCTUnwrap(listener.port).rawValue)/trickle"], in: nil, contentWorld: .page) as? [String: Any]
+        XCTAssertEqual(result?["status"] as? Int, 200)
+        XCTAssertEqual(result?["data"] as? String, String(repeating: "x", count: 12))
+    }
+
+    func testYtDlpExportRemainsResponsiveAndRollsBackCancellation() async throws {
+        try await verifyExportInterruption("cancel")
+    }
+
+    func testYtDlpExportPausePreservesStagingAndResumes() async throws {
+        try await verifyExportInterruption("pause")
+    }
+
+    private func verifyExportInterruption(_ action: String) async throws {
+        try await openApplication()
+        let media = try Data(contentsOf: XCTUnwrap(Bundle(for: Self.self).url(forResource: "fixture", withExtension: "mp4")))
+        let listener = try await loopbackServer { header, connection in
+            let response = "HTTP/1.1 200 OK\r\nContent-Type: video/mp4\r\nContent-Length: \(media.count)\r\nConnection: close\r\n\r\n"
+            connection.send(content: Data(response.utf8) + (header.hasPrefix("HEAD ") ? Data() : media),
+                            completion: .contentProcessed { _ in connection.cancel() })
+        }
+        defer { listener.cancel() }
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("export-cancel-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let originalFile = folder.appendingPathComponent("keep.mp4")
+        try Data("original".utf8).write(to: originalFile)
+        let bookmark = try folder.bookmarkData(options: .minimalBookmark, includingResourceValuesForKeys: nil, relativeTo: nil)
+        let reference = String(decoding: try JSONSerialization.data(withJSONObject: ["name": folder.lastPathComponent, "bookmark": bookmark.base64EncodedString()]), as: UTF8.self)
+        let copied = expectation(description: "Export copy reached")
+        let release = DispatchSemaphore(value: 0)
+        let observer = BlockingCopyObserver(target: folder, reached: copied, release: release)
+        let oldDelegate = FileManager.default.delegate
+        FileManager.default.delegate = observer
+        defer { release.signal(); FileManager.default.delegate = oldDelegate }
+        _ = try await webView.callAsyncJavaScript("await Capacitor.Plugins.YtDlp.configure({configuration:{enabled:true,folder,concurrency:1}})", arguments: ["folder": reference], in: nil, contentWorld: .page)
+        let response = try await webView.callAsyncJavaScript("return await Capacitor.Plugins.YtDlp.download({payload:{mode:'video',externalUrl:url,title:'Export cancellation regression'}})", arguments: ["url": "http://127.0.0.1:\(try XCTUnwrap(listener.port).rawValue)/fixture.mp4"], in: nil, contentWorld: .page) as? [String: Any]
+        let id = try XCTUnwrap(response?["id"] as? Int)
+        await fulfillment(of: [copied], timeout: 15)
+        XCTAssertFalse(observer.onMain, "A slow File Provider copy must not block the main thread")
+        let cancelled = try await webView.callAsyncJavaScript("return await Promise.race([Capacitor.Plugins.YtDlp.control({id,action}),new Promise(resolve=>setTimeout(()=>resolve({ok:false}),1000))])", arguments: ["id": id, "action": action], in: nil, contentWorld: .page) as? [String: Any]
+        XCTAssertEqual(cancelled?["ok"] as? Bool, true)
+        release.signal()
+        var status: String?
+        for _ in 0..<60 {
+            status = try await webView.callAsyncJavaScript("return (await Capacitor.Plugins.YtDlp.list()).downloads.find(d=>d.id===id)?.status", arguments: ["id": id], in: nil, contentWorld: .page) as? String
+            if status == (action == "pause" ? "paused" : "cancelled") { break }
+            try await Task.sleep(nanoseconds: 100_000_000)
+        }
+        XCTAssertEqual(status, action == "pause" ? "paused" : "cancelled")
+        FileManager.default.delegate = oldDelegate
+        if action == "pause" {
+            XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: folder.path), ["keep.mp4"])
+            let resumed = try await webView.callAsyncJavaScript("return (await Capacitor.Plugins.YtDlp.control({id,action:'resume'})).ok", arguments: ["id": id], in: nil, contentWorld: .page) as? Bool
+            XCTAssertEqual(resumed, true)
+            var destination: String?
+            for _ in 0..<100 {
+                destination = try await webView.callAsyncJavaScript("return (await Capacitor.Plugins.YtDlp.list()).downloads.find(d=>d.id===id && d.status==='completed')?.destination ?? null", arguments: ["id": id], in: nil, contentWorld: .page) as? String
+                if destination != nil { break }
+                try await Task.sleep(nanoseconds: 100_000_000)
+            }
+            XCTAssertEqual(try Data(contentsOf: URL(fileURLWithPath: XCTUnwrap(destination))), media)
+            _ = try await webView.callAsyncJavaScript("return await Capacitor.Plugins.YtDlp.remove({id})", arguments: ["id": id], in: nil, contentWorld: .page)
+        }
+        var removed = false
+        for _ in 0..<60 {
+            removed = try await webView.callAsyncJavaScript("await Capacitor.Plugins.YtDlp.clear({ids:[id]}); return !(await Capacitor.Plugins.YtDlp.list()).downloads.some(d=>d.id===id)", arguments: ["id": id], in: nil, contentWorld: .page) as? Bool == true
+            if removed { break }
+            try await Task.sleep(nanoseconds: 100_000_000)
+        }
+        XCTAssertTrue(removed, "Export cleanup must release the running job")
+        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: folder.path), ["keep.mp4"])
+        XCTAssertEqual(try Data(contentsOf: originalFile), Data("original".utf8))
+    }
+
     func testPoTokenWebViewKeepsYouTubeNavigationInsideApp() async throws {
         let redirected = expectation(description: "Blocked navigation to a YouTube watch page")
         let guardDelegate = RecordingPoTokenNavigationGuard { url, policy in
@@ -1990,5 +2139,37 @@ private final class RecordingPoTokenNavigationGuard: PoTokenNavigationGuard {
             if let url = navigationAction.request.url { didDecide(url, policy) }
             decisionHandler(policy)
         }
+    }
+}
+
+private final class RecordingSchemeTask: NSObject, WKURLSchemeTask {
+    let request: URLRequest
+    let done: XCTestExpectation
+    var data = Data()
+    var error: Error?
+    init(url: URL, done: XCTestExpectation) { self.request = URLRequest(url: url); self.done = done }
+    func didReceive(_ response: URLResponse) {}
+    func didReceive(_ bytes: Data) { data.append(bytes) }
+    func didFinish() { done.fulfill() }
+    func didFailWithError(_ error: Error) { self.error = error; done.fulfill() }
+}
+
+private final class BlockingCopyObserver: NSObject, FileManagerDelegate {
+    let target: URL
+    let reached: XCTestExpectation
+    let release: DispatchSemaphore
+    private let lock = NSLock()
+    private var copiedOnMain = false
+    var onMain: Bool { lock.lock(); defer { lock.unlock() }; return copiedOnMain }
+    init(target: URL, reached: XCTestExpectation, release: DispatchSemaphore) {
+        self.target = target; self.reached = reached; self.release = release
+    }
+    func fileManager(_ fileManager: FileManager, shouldCopyItemAt srcURL: URL, to dstURL: URL) -> Bool {
+        if dstURL.deletingLastPathComponent().standardizedFileURL == target.standardizedFileURL {
+            lock.lock(); copiedOnMain = Thread.isMainThread; lock.unlock()
+            reached.fulfill()
+            if !Thread.isMainThread { _ = release.wait(timeout: .now() + 10) }
+        }
+        return true
     }
 }

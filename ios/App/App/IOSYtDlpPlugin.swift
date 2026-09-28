@@ -238,6 +238,7 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
         "info", "extract", "registerMedia", "download", "list", "configure", "control", "queue", "clear", "remove", "open", "play", "cache", "checkUpdate", "update"
     ].map { CAPPluginMethod(name: $0, returnType: CAPPluginReturnPromise) }
 
+    private let exports = DispatchQueue(label: "org.opentubex.ytdlp.export", qos: .userInitiated)
     private var records: [Int: [String: Any]] = [:]
     private var nextId = 0
     private var running: Set<Int> = []
@@ -424,7 +425,7 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
     private func startNext() {
         let limit = min(2, max(1, configuration["concurrency"] as? Int ?? 1))
         guard running.count < limit,
-              let id = queueIDs(with: ["queued"]).first,
+              let id = queueIDs(with: ["queued"]).first(where: { !running.contains($0) }),
               let payload = records[id]?["retryPayload"] as? [String: Any] else { return }
         running.insert(id)
         let staging = folder(for: id)
@@ -492,47 +493,67 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     private func finish(_ id: Int, result: Result<[String: Any], Error>) {
-        defer { running.remove(id); startNext() }
-        let interrupted = records[id]?["status"] as? String == "pausing"
-        if interrupted {
-            records[id]?["status"] = "paused"
-            publish(id)
-            return
-        }
-        if records[id]?["status"] as? String == "cancelled" {
-            try? FileManager.default.removeItem(at: folder(for: id))
-            return
-        }
-        do {
-            let value = try result.get()
-            let names = value["files"] as? [String] ?? []
-            if names.isEmpty { throw NSError(domain: "IOSYtDlp", code: 6, userInfo: [NSLocalizedDescriptionKey: "No file was downloaded"]) }
-            let target = try directory(records[id]?["folder"] as? String ?? "")
-            guard target.startAccessingSecurityScopedResource() else {
-                throw NSError(domain: "IOSYtDlp", code: 7, userInfo: [NSLocalizedDescriptionKey: "The download folder is unavailable"])
+        let staging = folder(for: id)
+        let reference = records[id]?["folder"] as? String ?? ""
+        let videoId = records[id]?["videoId"] as? String ?? ""
+        let interrupted = ["pausing", "cancelled"].contains(records[id]?["status"] as? String ?? "")
+        // Serialize exports so concurrent downloads cannot select the same name.
+        // Keep the job running until rollback and staging cleanup have finished.
+        exports.async {
+            var failure: Error?
+            var completed = false
+            if !interrupted {
+                do {
+                    let value = try result.get()
+                    let names = value["files"] as? [String] ?? []
+                    if names.isEmpty { throw NSError(domain: "IOSYtDlp", code: 6, userInfo: [NSLocalizedDescriptionKey: "No file was downloaded"]) }
+                    let target = try self.directory(reference)
+                    guard target.startAccessingSecurityScopedResource() else {
+                        throw NSError(domain: "IOSYtDlp", code: 7, userInfo: [NSLocalizedDescriptionKey: "The download folder is unavailable"])
+                    }
+                    defer { target.stopAccessingSecurityScopedResource() }
+                    let exported = try IOSYtDlpExporter.copy(names, from: staging, to: target, videoId: videoId)
+                    DispatchQueue.main.sync {
+                        guard self.records[id]?["status"] as? String == "processing" else { return }
+                        self.records[id]?["destination"] = exported.destinations.last
+                        self.records[id]?["destinations"] = exported.destinations
+                        self.records[id]?["files"] = exported.files
+                        self.records[id]?["sizeBytes"] = exported.sizeBytes
+                        self.records[id]?["percent"] = 100
+                        self.records[id]?["status"] = "completed"
+                        completed = true
+                    }
+                    if !completed {
+                        for path in exported.destinations { try? FileManager.default.removeItem(atPath: path) }
+                    }
+                } catch { failure = error }
             }
-            defer { target.stopAccessingSecurityScopedResource() }
-            let exported = try IOSYtDlpExporter.copy(names, from: folder(for: id), to: target,
-                                                      videoId: records[id]?["videoId"] as? String ?? "")
-            records[id]?["destination"] = exported.destinations.last
-            records[id]?["destinations"] = exported.destinations
-            records[id]?["files"] = exported.files
-            records[id]?["sizeBytes"] = exported.sizeBytes
-            records[id]?["percent"] = 100
-            records[id]?["status"] = "completed"
-            try? FileManager.default.removeItem(at: folder(for: id))
-        } catch {
-            records[id]?["status"] = "failed"
-            let native = error as NSError
-            if native.domain == "IOSYtDlp" && native.code == 7 {
-                records[id]?["errorMessage"] = "DOWNLOAD_EXPORT_FAILED"
-            } else if native.domain == "IOSYtDlp" && [1, 2, 4, 6, 8, 9, 10, 11, 12].contains(native.code) {
-                records[id]?["errorMessage"] = "IOS_DOWNLOAD_FAILED"
-            } else {
-                records[id]?["errorMessage"] = error.localizedDescription
+            let cancelled = DispatchQueue.main.sync {
+                let status = self.records[id]?["status"] as? String
+                if status == "cancelled" { return true }
+                if status != "pausing", let error = failure {
+                    self.records[id]?["status"] = "failed"
+                    let native = error as NSError
+                    if native.domain == "IOSYtDlp" && native.code == 7 {
+                        self.records[id]?["errorMessage"] = "DOWNLOAD_EXPORT_FAILED"
+                    } else if native.domain == "IOSYtDlp" && [1, 2, 4, 6, 8, 9, 10, 11, 12].contains(native.code) {
+                        self.records[id]?["errorMessage"] = "IOS_DOWNLOAD_FAILED"
+                    } else {
+                        self.records[id]?["errorMessage"] = error.localizedDescription
+                    }
+                }
+                return false
+            }
+            if completed || cancelled { try? FileManager.default.removeItem(at: staging) }
+            DispatchQueue.main.async {
+                if self.records[id]?["status"] as? String == "pausing" {
+                    self.records[id]?["status"] = "paused"
+                }
+                self.running.remove(id)
+                self.publish(id)
+                self.startNext()
             }
         }
-        publish(id)
     }
 
     @objc func list(_ call: CAPPluginCall) {
