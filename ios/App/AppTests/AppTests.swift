@@ -51,6 +51,20 @@ final class AppTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: destination.appendingPathComponent("first (2).mp4").path))
     }
 
+    func testYtDlpExportRejectsEscapingFilename() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("yt-dlp-export-\(UUID().uuidString)")
+        let staging = root.appendingPathComponent("input/stage")
+        let destination = root.appendingPathComponent("output/folder")
+        try FileManager.default.createDirectory(at: staging, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: destination, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        try Data("private".utf8).write(to: root.appendingPathComponent("input/secret.mp4"))
+
+        XCTAssertThrowsError(try IOSYtDlpExporter.copy(["../secret.mp4"], from: staging,
+                                                         to: destination, videoId: "fixture"))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: root.appendingPathComponent("output/secret.mp4").path))
+    }
+
     func testBackgroundPreparationEvent() async throws {
         try await openApplication()
         _ = try await evaluate("""

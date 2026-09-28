@@ -138,6 +138,11 @@ enum IOSYtDlpExporter {
         var size: Int64 = 0
         do {
             for name in names {
+                guard !name.isEmpty, name != ".", name != "..",
+                      URL(fileURLWithPath: name).lastPathComponent == name else {
+                    throw NSError(domain: "IOSYtDlp", code: 8,
+                                  userInfo: [NSLocalizedDescriptionKey: "Invalid downloaded file name"])
+                }
                 let source = staging.appendingPathComponent(name)
                 var destination = target.appendingPathComponent(name)
                 var duplicate = 2
