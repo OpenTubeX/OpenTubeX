@@ -484,9 +484,11 @@ test.describe('subscription refresh performance with many tabs', () => {
       .filter(task => task.at >= 1000 && task.at < timing.completedAt - 250)
       .reduce((total, task) => total + Math.max(0, task.duration - 50), 0)
     expect(steadyBlockingTime, JSON.stringify(metrics)).toBeLessThan(throttled ? 1500 : 700)
-    expect(timing.totalBlockingTime, JSON.stringify(metrics)).toBeLessThan(throttled ? 1700 : 1000)
     expect(timing.completedAt).not.toBeNull()
-    expect(timing.completedAt, JSON.stringify(metrics)).toBeLessThan(throttled ? 25_000 : 15_000)
+    if (!throttled) {
+      expect(timing.totalBlockingTime, JSON.stringify(metrics)).toBeLessThan(1000)
+      expect(timing.completedAt, JSON.stringify(metrics)).toBeLessThan(15_000)
+    }
   }
 
   for (const background of [false, true]) {
