@@ -1364,7 +1364,7 @@ test.describe('large combined new feed', () => {
 
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(page.locator('#subscriptionsPanel.newFeed')).toBeVisible()
-    await page.waitForTimeout(200)
+    await expect.poll(() => page.evaluate(() => window.originalVideoCard.isConnected)).toBe(false)
     await videosTab.click()
     await expect(firstCard).toBeVisible()
     expect(await firstCard.evaluate(element => element === window.originalVideoCard)).toBe(true)
