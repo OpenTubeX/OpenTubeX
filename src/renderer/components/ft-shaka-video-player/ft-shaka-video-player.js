@@ -226,6 +226,8 @@ if (process.env.IS_IOS) {
   shaka.net.NetworkingEngine.registerScheme('https',
     createIOSMediaTransport(shaka, registerPlugin('SabrHttp')),
     shaka.net.NetworkingEngine.PluginPriority.APPLICATION, true)
+  shaka.net.NetworkingEngine.registerScheme('capacitor', shaka.net.HttpFetchPlugin.parse,
+    shaka.net.NetworkingEngine.PluginPriority.APPLICATION, true)
 }
 const TrackLabelFormat = shaka.ui.Overlay.TrackLabelFormat
 const CaptionPositionArea = shaka.config.PositionArea

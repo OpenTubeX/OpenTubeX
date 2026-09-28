@@ -53,7 +53,7 @@
     "pack:capacitor": "webpack --mode=production --config-node-env=production --config _scripts/webpack.capacitor.config.js",
     "pack:ios": "webpack --mode=production --config-node-env=production --config _scripts/webpack.ios.config.js",
     "capacitor:sync:android": "pnpm run pack:capacitor && cap sync android",
-    "capacitor:sync:ios": "pnpm run pack:ios && cap sync ios && node _scripts/prepareIos.mjs",
+    "capacitor:sync:ios": "bash _scripts/setupIosYtDlp.sh && pnpm run pack:ios && cap sync ios && node _scripts/prepareIos.mjs",
     "pack:botGuardScript": "webpack --config _scripts/webpack.botGuardScript.config.js",
     "checkforbadtemplates": "node _scripts/findMissingTemplates.mjs",
     "test:e2e:pack": "pnpm run \"/^test:e2e:pack:(main|renderer|preload|botGuardScript)$/\" && node _scripts/injectAllowedPaths.mjs dist-e2e",

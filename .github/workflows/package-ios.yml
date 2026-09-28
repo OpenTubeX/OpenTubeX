@@ -38,6 +38,9 @@ jobs:
       with:
         version: 11
         cache: false
+    - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+      with:
+        python-version: '3.14'
     - run: pnpm run ci
     - name: Set package version
       id: package
@@ -59,6 +62,8 @@ jobs:
         printf '%s\n' "$package_json" > package.json
         printf 'name=opentubex-%s-ios-unsigned.ipa\n' "$version" >> "$GITHUB_OUTPUT"
     - run: pnpm run capacitor:sync:ios
+      env:
+        GH_TOKEN: ${{ github.token }}
     - name: Archive and package without Apple signing credentials
       env:
         IPA_NAME: ${{ steps.package.outputs.name }}

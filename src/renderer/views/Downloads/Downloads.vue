@@ -191,6 +191,7 @@ import WatchVideoDownloadPrompt from '../../components/WatchVideoDownloadPrompt/
 import { isYtDlpMediaUrl } from '../../../ytDlpArguments'
 import store from '../../store/index'
 import { formatBytes } from '../../helpers/fileSize'
+import { isPlayableDownloadFile } from '../../helpers/downloadPlayback'
 import { showToast } from '../../helpers/utils'
 
 const { t } = useI18n()
@@ -283,9 +284,16 @@ async function openDownload(id) {
 }
 async function playDownload(download) {
   const refreshedDownload = (await refreshDownloads()).find(record => record.id === download.id)
-  const firstFile = refreshedDownload?.files?.find(file => file.available)
+  const firstFile = refreshedDownload?.files?.find(file => file.available && isPlayableDownloadFile(file))
   if (!firstFile) {
     showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+
+  if (process.env.IS_IOS) {
+    if (!await ytDlp.ytDlpPlayDownload(download.id, firstFile.path).catch(() => false)) {
+      showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
+    }
     return
   }
 

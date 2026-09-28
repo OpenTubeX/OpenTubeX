@@ -165,6 +165,9 @@ test('caption mapping distinguishes authored and automatic tracks', () => {
   const http = { en: { ext: 'vtt', url: 'http://example.test/en.vtt' } }
   assert.equal(mapPlaybackCaptions(http).captions.length, 0)
   assert.equal(mapPlaybackCaptions(http, null, true).captions.length, 1)
+  const proxied = { en: { ext: 'vtt', url: 'capacitor://localhost/_opentubex_media/caption' } }
+  assert.equal(mapPlaybackCaptions(proxied, null, true).captions[0].url, proxied.en.url)
+  assert.equal(mapPlaybackCaptions(proxied).captions.length, 0)
 })
 
 test('caption mapping rejects inherited MIME lookup keys', () => {

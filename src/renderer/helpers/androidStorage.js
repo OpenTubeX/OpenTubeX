@@ -6,7 +6,9 @@ const AndroidStorage = process.env.IS_CAPACITOR ? registerPlugin(process.env.IS_
 /** Display external-storage document IDs as paths without changing the saved URI. */
 export function displayAndroidPath(path) {
   if (process.env.IS_IOS && path) {
-    try { return JSON.parse(path).name || path } catch { return path }
+    try { return JSON.parse(path).name || path } catch {
+      return path.startsWith('/') ? path.split('/').slice(-2).join('/') : path
+    }
   }
   if (!path?.startsWith('content://com.android.externalstorage.documents/')) return path
   try {

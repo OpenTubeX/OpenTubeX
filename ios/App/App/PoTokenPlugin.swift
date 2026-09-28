@@ -22,6 +22,7 @@ private final class TokenJob: NSObject, WKScriptMessageHandler, URLSessionTaskDe
     private let call: CAPPluginCall
     private let completion: () -> Void
     private var webView: WKWebView?
+    private let navigationGuard = PoTokenNavigationGuard()
     private var finished = false
     private lazy var session = URLSession(configuration: .ephemeral, delegate: self, delegateQueue: .main)
 
@@ -78,6 +79,7 @@ private final class TokenJob: NSObject, WKScriptMessageHandler, URLSessionTaskDe
             let execution = prelude + script + ";\(source[range])(...\(encoded)).then(token => window.webkit.messageHandlers.token.postMessage({token})).catch(error => window.webkit.messageHandlers.token.postMessage({error:String(error)}));"
             configuration.userContentController.addUserScript(WKUserScript(source: execution, injectionTime: .atDocumentEnd, forMainFrameOnly: true))
             let view = WKWebView(frame: .zero, configuration: configuration)
+            view.navigationDelegate = navigationGuard
             webView = view
             // The challenge expects the YouTube origin; all fetches pass the
             // native allowlist and this document has no Capacitor bridge.
@@ -135,5 +137,30 @@ private final class TokenJob: NSObject, WKScriptMessageHandler, URLSessionTaskDe
         webView?.configuration.userContentController.removeAllScriptMessageHandlers()
         webView = nil
         completion()
+    }
+}
+
+// BotGuard uses the YouTube origin, but its network requests go through the
+// native allowlist above. A document redirect must never hand a watch URL to
+// the installed YouTube app or replace the isolated challenge document.
+class PoTokenNavigationGuard: NSObject, WKNavigationDelegate {
+    private var initialDocumentAllowed = false
+
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
+                 decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        if navigationAction.targetFrame?.isMainFrame == false {
+            decisionHandler(.allow)
+            return
+        }
+        let url = navigationAction.request.url
+        // loadHTMLString uses its base URL for the initial document action.
+        // Allow that one action, then reject every top-level redirect.
+        if !initialDocumentAllowed, url?.scheme == "https", url?.host == "www.youtube.com",
+           url?.path == "/", url?.query == nil {
+            initialDocumentAllowed = true
+            decisionHandler(.allow)
+            return
+        }
+        decisionHandler(.cancel)
     }
 }

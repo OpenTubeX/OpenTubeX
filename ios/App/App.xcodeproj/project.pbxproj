@@ -20,10 +20,27 @@
 		742C997910E5852D79525ECA /* PoTokenPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19303607D33FE53213C0CEA2 /* PoTokenPlugin.swift */; };
 		0873A0054DE9E10F6B8C085D /* IOSMediaSessionPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53CB956AC6BC8F43DC1864E /* IOSMediaSessionPlugin.swift */; };
 		5B13C50093778C69ADEF041E /* IOSStoragePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFFEF58AE86EE85681F8C5CC /* IOSStoragePlugin.swift */; };
+		B0C0DE000000000000000001 /* IOSYtDlpPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C0DE000000000000000002 /* IOSYtDlpPlugin.swift */; };
+		B0C0DE000000000000000003 /* Python.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = B0C0DE000000000000000004 /* Python.xcframework */; };
+		B0C0DE000000000000000005 /* Python.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B0C0DE000000000000000004 /* Python.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 A12790000000000000000001 /* AppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A12790000000000000000002; };
+B0C0DE000000000000000010 /* fixture.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = B0C0DE000000000000000011 /* fixture.mp4 */; };
+B0C0DE000000000000000014 /* fixture.m4a in Resources */ = {isa = PBXBuildFile; fileRef = B0C0DE000000000000000013 /* fixture.m4a */; };
 A12790000000000000000022 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A12790000000000000000021; };
 A12790000000000000000032 = {isa = PBXBuildFile; fileRef = A12790000000000000000031; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		B0C0DE000000000000000006 /* Embed Python */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (B0C0DE000000000000000005 /* Python.xcframework in Embed Frameworks */,);
+			name = "Embed Python";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
@@ -41,7 +58,11 @@ A12790000000000000000032 = {isa = PBXBuildFile; fileRef = A127900000000000000000
 		19303607D33FE53213C0CEA2 /* PoTokenPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoTokenPlugin.swift; sourceTree = "<group>"; };
 		A53CB956AC6BC8F43DC1864E /* IOSMediaSessionPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOSMediaSessionPlugin.swift; sourceTree = "<group>"; };
 		EFFEF58AE86EE85681F8C5CC /* IOSStoragePlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOSStoragePlugin.swift; sourceTree = "<group>"; };
+		B0C0DE000000000000000002 /* IOSYtDlpPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOSYtDlpPlugin.swift; sourceTree = "<group>"; };
+		B0C0DE000000000000000004 /* Python.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Python.xcframework; sourceTree = "<group>"; };
 A12790000000000000000002 /* AppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTests.swift; sourceTree = "<group>"; };
+B0C0DE000000000000000011 /* fixture.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = fixture.mp4; sourceTree = "<group>"; };
+B0C0DE000000000000000013 /* fixture.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = fixture.m4a; sourceTree = "<group>"; };
 A12790000000000000000003 /* AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = AppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 A12790000000000000000021 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -52,6 +73,7 @@ A12790000000000000000021 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; 
 			buildActionMask = 2147483647;
 			files = (
 				4D22ABE92AF431CB00220026 /* CapApp-SPM in Frameworks */,
+				B0C0DE000000000000000003 /* Python.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -63,6 +85,7 @@ A12790000000000000000008 = {isa = PBXFrameworksBuildPhase; buildActionMask = 214
 			isa = PBXGroup;
 			children = (
 				958DCC722DB07C7200EA8C5F /* debug.xcconfig */,
+				B0C0DE000000000000000004 /* Python.xcframework */,
 				504EC3061FED79650016851F /* App */,
  A12790000000000000000004 /* AppTests */,
 				504EC3051FED79650016851F /* Products */,
@@ -83,6 +106,7 @@ A12790000000000000000008 = {isa = PBXFrameworksBuildPhase; buildActionMask = 214
 			children = (
 				9582B6822FE993A50072D4E8 /* SceneDelegate.swift */,
 				EFFEF58AE86EE85681F8C5CC /* IOSStoragePlugin.swift */,
+				B0C0DE000000000000000002 /* IOSYtDlpPlugin.swift */,
 				A53CB956AC6BC8F43DC1864E /* IOSMediaSessionPlugin.swift */,
 				19303607D33FE53213C0CEA2 /* PoTokenPlugin.swift */,
 				CA8B617445A864BB922881E6 /* IOSNetwork.swift */,
@@ -100,7 +124,7 @@ A12790000000000000000021,
 			path = App;
 			sourceTree = "<group>";
 		};
-A12790000000000000000004 /* AppTests */ = {isa = PBXGroup; children = (A12790000000000000000002,); path = AppTests; sourceTree = "<group>"; };
+A12790000000000000000004 /* AppTests */ = {isa = PBXGroup; children = (A12790000000000000000002, B0C0DE000000000000000011 /* fixture.mp4 */, B0C0DE000000000000000013 /* fixture.m4a */,); path = AppTests; sourceTree = "<group>"; };
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -111,6 +135,8 @@ A12790000000000000000004 /* AppTests */ = {isa = PBXGroup; children = (A12790000
 				504EC3001FED79650016851F /* Sources */,
 				504EC3011FED79650016851F /* Frameworks */,
 				504EC3021FED79650016851F /* Resources */,
+				B0C0DE000000000000000006 /* Embed Python */,
+				B0C0DE000000000000000007 /* Install Python */,
 			);
 			buildRules = (
 			);
@@ -124,7 +150,7 @@ A12790000000000000000004 /* AppTests */ = {isa = PBXGroup; children = (A12790000
 			productReference = 504EC3041FED79650016851F /* App.app */;
 			productType = "com.apple.product-type.application";
 		};
-A12790000000000000000005 /* AppTests */ = {isa = PBXNativeTarget; buildConfigurationList = A12790000000000000000006; buildPhases = (A12790000000000000000007, A12790000000000000000008,); buildRules = (); dependencies = (A12790000000000000000009,); name = AppTests; productName = AppTests; productReference = A12790000000000000000003; productType = "com.apple.product-type.bundle.unit-test"; };
+A12790000000000000000005 /* AppTests */ = {isa = PBXNativeTarget; buildConfigurationList = A12790000000000000000006; buildPhases = (A12790000000000000000007, A12790000000000000000008, B0C0DE000000000000000012,); buildRules = (); dependencies = (A12790000000000000000009,); name = AppTests; productName = AppTests; productReference = A12790000000000000000003; productType = "com.apple.product-type.bundle.unit-test"; };
 /* End PBXNativeTarget section */
 
 /* Begin PBXContainerItemProxy section */
@@ -223,6 +249,7 @@ A12790000000000000000031 = {isa = PBXVariantGroup; children = (A1279100000000000
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+B0C0DE000000000000000012 /* Test Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (B0C0DE000000000000000010 /* fixture.mp4 in Resources */, B0C0DE000000000000000014 /* fixture.m4a in Resources */,); runOnlyForDeploymentPostprocessing = 0; };
 		504EC3021FED79650016851F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -239,6 +266,21 @@ A12790000000000000000022,
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		B0C0DE000000000000000007 /* Install Python */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = ();
+			inputPaths = ();
+			name = "Install Python";
+			outputPaths = ();
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "bash \"$PROJECT_DIR/../../_scripts/installIosPython.sh\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		504EC3001FED79650016851F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -247,6 +289,7 @@ A12790000000000000000022,
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 				9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */,
 				5B13C50093778C69ADEF041E /* IOSStoragePlugin.swift in Sources */,
+				B0C0DE000000000000000001 /* IOSYtDlpPlugin.swift in Sources */,
 				0873A0054DE9E10F6B8C085D /* IOSMediaSessionPlugin.swift in Sources */,
 				742C997910E5852D79525ECA /* PoTokenPlugin.swift in Sources */,
 				360CE579A61E6545D4B4085A /* IOSNetwork.swift in Sources */,

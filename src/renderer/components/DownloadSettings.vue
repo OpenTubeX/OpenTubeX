@@ -20,8 +20,8 @@
         :icon="['fas', 'download']"
         @click="openDownloads"
       />
-      <DownloadTemplateSettings />
-      <AutomaticDownloadSettings />
+      <DownloadTemplateSettings v-if="!isIos" />
+      <AutomaticDownloadSettings v-if="!isIos" />
     </FtFlexBox>
     <FtFlexBox
       v-if="enableDownloads"
@@ -41,6 +41,7 @@
         @click="chooseDownloadFolder"
       />
       <FtInput
+        v-if="!isIos"
         :placeholder="t('Settings.Download Settings.Global Additional yt-dlp Arguments')"
         :show-action-button="false"
         :show-label="true"
@@ -50,7 +51,7 @@
       />
     </FtFlexBox>
     <FtFlexBox
-      v-if="enableDownloads"
+      v-if="enableDownloads && !isIos"
       class="downloadQueueInputs settingsFlexStart460px"
     >
       <FtSelect
@@ -92,6 +93,7 @@ import DownloadTemplateSettings from './DownloadTemplateSettings/DownloadTemplat
 
 import store from '../store/index'
 const isCapacitor = process.env.IS_CAPACITOR
+const isIos = process.env.IS_IOS
 
 const { t } = useI18n()
 

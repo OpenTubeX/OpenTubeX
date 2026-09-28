@@ -1,0 +1,198 @@
+import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
+import test from 'node:test'
+import vm from 'node:vm'
+
+import { mapPlaybackCaptions } from '../../src/ytDlpMetadata.js'
+
+const read = path => readFile(new URL(`../../${path}`, import.meta.url), 'utf8')
+
+test('iOS media byte-range probes send a Range header through the native proxy', async () => {
+  const source = await read('src/renderer/helpers/player/streamByteRanges.js')
+  const start = source.indexOf('export async function probeStreamByteRanges(')
+  const requests = []
+  const context = vm.createContext({
+    AbortSignal,
+    INITIAL_PROBE_BYTES: 16 * 1024,
+    MAX_PROBE_ATTEMPTS: 3,
+    PROBE_TIMEOUT: 10_000,
+    fetch: async (url, options) => {
+      requests.push({ url, options })
+      return { ok: false, status: 416, statusText: 'fixture' }
+    },
+  })
+  vm.runInContext(`${source.slice(start).replace('export ', '')}\nglobalThis.probe = probeStreamByteRanges`, context)
+
+  const mediaUrl = 'capacitor://localhost/_opentubex_media/fixture'
+  await assert.rejects(context.probe(mediaUrl, false), /416 fixture/)
+  assert.equal(requests[0].url, mediaUrl)
+  assert.equal(requests[0].options.headers.Range, 'bytes=0-16383')
+
+  await assert.rejects(context.probe('https://rr.googlevideo.com/videoplayback?token=fixture', false), /416 fixture/)
+  assert.equal(requests[1].url, 'https://rr.googlevideo.com/videoplayback?token=fixture&range=0-16383')
+  assert.equal(requests[1].options.headers, undefined)
+})
+
+test('iOS does not select an HLS manifest rejected by every probe', async () => {
+  const source = await read('src/renderer/helpers/player/ytDlpPlayback.js')
+  const start = source.indexOf('export async function getExternalYtDlpPlaybackSource(')
+  const end = source.indexOf('/**\n * @param {YtDlpPlaybackFormat} format', start)
+  const context = vm.createContext({
+    process: { env: { IS_IOS: true } },
+    ytDlp: { ytDlpGetPlaybackInfo: async () => ({
+      formats: [{ protocol: 'm3u8', url: 'https://example.test/broken.m3u8', manifestUrl: 'https://example.test/broken.m3u8' }],
+      hlsManifestUrl: 'https://example.test/broken.m3u8',
+      isLive: true,
+    }) },
+    isAudioFormat: () => false,
+    isVideoFormat: () => true,
+    isExternalProgressiveVideoFormat: () => false,
+    convertLegacyFormats: async () => [],
+    convertAdaptiveFormats: async () => [],
+    getCompatibleAdaptiveFormats: () => [],
+    probeYtDlpHlsManifest: async () => false,
+    MANIFEST_TYPE_HLS: 'application/x-mpegurl',
+  })
+  vm.runInContext(`${source.slice(start, end).replace('export ', '')}\nglobalThis.load = getExternalYtDlpPlaybackSource`, context)
+  await assert.rejects(context.load('https://example.test/watch'), /stream URLs could not be accessed/)
+})
+
+test('iOS excludes external HLS manifests whose segments cannot use native transport', async () => {
+  const source = await read('src/renderer/helpers/ytDlp.js')
+  const start = source.indexOf('  async ytDlpGetPlaybackInfo(')
+  const end = source.indexOf('  async ytDlpGetRecommendations(', start)
+  const manifest = 'https://external.test/master.m3u8'
+  const context = vm.createContext({
+    process: { env: { IS_IOS: true } },
+    URL,
+    native: {
+      info: async () => ({ ytDlp: { version: 'fixture' } }),
+      registerMedia: async ({ formats }) => ({ urls: formats.map((_, index) => `capacitor://localhost/_opentubex_media/${index}`) }),
+    },
+    extract: async () => ({
+      manifest_url: manifest,
+      formats: [{ protocol: 'm3u8_native', url: manifest, manifest_url: manifest }],
+    }),
+    playbackSubtitleArguments: () => [],
+    EXTERNAL_PLAYBACK_FORMAT_SELECTOR: 'best',
+    EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE: '',
+    PLAYBACK_INFO_OUTPUT_TEMPLATE: '',
+    parseYtDlpPlaybackInfo: value => value,
+    mapPlaybackCaptions: () => ({ captions: [], captionTranslations: [] }),
+    mapExternalPlaybackMetadata: () => null,
+    mapPlaybackFormat: value => value,
+    buildYtDlpStoryboardVtt: () => null,
+    toNonEmptyString: value => typeof value === 'string' && value.length > 0 ? value : null,
+    toFiniteNumber: value => Number.isFinite(value) ? value : null,
+  })
+  vm.runInContext(`globalThis.load = ({${source.slice(start, end)}}).ytDlpGetPlaybackInfo`, context)
+  const result = await context.load('https://external.test/watch')
+  assert.equal(result.error, undefined, result.error)
+  assert.equal(result.hlsManifestUrl, null)
+  assert.equal(result.formats.length, 0)
+})
+
+test('iOS native subtitle registration retains translated and authored track identities', async () => {
+  const source = await read('src/renderer/helpers/ytDlp.js')
+  const start = source.indexOf('  async ytDlpGetPlaybackInfo(')
+  const end = source.indexOf('  async ytDlpGetRecommendations(', start)
+  const original = 'https://www.youtube.com/api/timedtext?lang=en'
+  const translated = `${original}&tlang=de`
+  const context = vm.createContext({
+    process: { env: { IS_IOS: true } },
+    URL,
+    native: {
+      info: async () => ({ ytDlp: { version: 'fixture' } }),
+      registerMedia: async ({ formats }) => ({ urls: formats.map((_, index) => `capacitor://localhost/_opentubex_media/${index}`) }),
+    },
+    extract: async () => ({
+      requested_subtitles: {
+        en: { ext: 'vtt', url: original, name: 'English' },
+        de: { ext: 'vtt', url: translated, name: 'German' },
+      },
+      subtitles: { en: [{ ext: 'vtt', url: original }] },
+      formats: [],
+    }),
+    playbackSubtitleArguments: () => [],
+    EXTERNAL_PLAYBACK_FORMAT_SELECTOR: 'best',
+    EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE: '',
+    PLAYBACK_INFO_OUTPUT_TEMPLATE: '',
+    parseYtDlpPlaybackInfo: value => value,
+    mapPlaybackCaptions,
+    mapExternalPlaybackMetadata: () => null,
+    mapPlaybackFormat: value => value,
+    buildYtDlpStoryboardVtt: () => null,
+    toNonEmptyString: value => typeof value === 'string' && value.length > 0 ? value : null,
+    toFiniteNumber: value => Number.isFinite(value) ? value : null,
+  })
+  vm.runInContext(`globalThis.load = ({${source.slice(start, end)}}).ytDlpGetPlaybackInfo`, context)
+  const result = await context.load('https://example.test/watch')
+  assert.equal(result.error, undefined, result.error)
+  assert.equal(result.captions[0].isAutoGenerated, false)
+  assert.equal(result.captionTranslations[0].language, 'de')
+  assert.equal(result.captionTranslations[0].originalLanguage, 'en')
+  assert.match(result.captionTranslations[0].url, /^capacitor:\/\/localhost\//)
+})
+
+test('iOS routes YouTube playback formats through the native media bridge', async () => {
+  const source = await read('src/renderer/helpers/ytDlp.js')
+  const start = source.indexOf('  async ytDlpGetPlaybackInfo(')
+  const end = source.indexOf('  async ytDlpGetRecommendations(', start)
+  const format = {
+    format_id: '140',
+    protocol: 'https',
+    url: 'https://rr1.googlevideo.com/videoplayback?expire=2000000000',
+    http_headers: { 'User-Agent': 'yt-dlp fixture' },
+    acodec: 'mp4a.40.2',
+    vcodec: 'none',
+  }
+  const registered = []
+  const context = vm.createContext({
+    process: { env: { IS_IOS: true } },
+    URL,
+    native: {
+      info: async () => ({ ytDlp: { version: 'fixture' } }),
+      registerMedia: async ({ formats }) => {
+        registered.push(...formats)
+        return { urls: formats.map((_, index) => `capacitor://localhost/_opentubex_media/${index}`) }
+      },
+    },
+    extract: async () => ({ formats: [format] }),
+    playbackSubtitleArguments: () => [],
+    EXTERNAL_PLAYBACK_FORMAT_SELECTOR: 'best',
+    EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE: '',
+    PLAYBACK_INFO_OUTPUT_TEMPLATE: '',
+    parseYtDlpPlaybackInfo: value => value,
+    mapPlaybackCaptions: () => ({ captions: [], captionTranslations: [] }),
+    mapExternalPlaybackMetadata: () => null,
+    mapPlaybackFormat: value => value,
+    buildYtDlpStoryboardVtt: () => null,
+    toNonEmptyString: value => typeof value === 'string' && value.length > 0 ? value : null,
+    toFiniteNumber: value => Number.isFinite(value) ? value : null,
+  })
+  vm.runInContext(`globalThis.load = ({${source.slice(start, end)}}).ytDlpGetPlaybackInfo`, context)
+  const result = await context.load('jNQXAC9IVRw')
+  assert.equal(result.error, undefined, result.error)
+  assert.equal(registered.length, 1)
+  assert.equal(registered[0].url, format.url)
+  assert.equal(registered[0].http_headers['User-Agent'], 'yt-dlp fixture')
+  assert.equal(result.formats[0].url, 'capacitor://localhost/_opentubex_media/0')
+})
+
+test('iOS download Play shows the existing toast when native playback rejects', async () => {
+  const source = await read('src/renderer/views/Downloads/Downloads.vue')
+  const start = source.indexOf('async function playDownload(download) {')
+  const end = source.indexOf('async function retryDownload(download) {', start)
+  const messages = []
+  const context = vm.createContext({
+    process: { env: { IS_IOS: true } },
+    refreshDownloads: async () => [{ id: 1, files: [{ available: true, path: '/fixture.mp4' }] }],
+    isPlayableDownloadFile: () => true,
+    ytDlp: { ytDlpPlayDownload: async () => { throw new Error('Native playback failed') } },
+    showToast: value => messages.push(value.message),
+    t: value => value,
+  })
+  vm.runInContext(`${source.slice(start, end)}\nglobalThis.play = playDownload`, context)
+  await context.play({ id: 1 })
+  assert.deepEqual(messages, ['Downloads.File Not Found'])
+})

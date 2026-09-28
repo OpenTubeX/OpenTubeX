@@ -35,6 +35,7 @@ class OpenTubeXViewController: CAPBridgeViewController {
         bridge?.registerPluginInstance(SabrHttpPlugin())
         bridge?.registerPluginInstance(IOSHttpPlugin())
         bridge?.registerPluginInstance(IOSStoragePlugin())
+        bridge?.registerPluginInstance(IOSYtDlpPlugin())
         bridge?.registerPluginInstance(IOSMediaSessionPlugin())
         bridge?.registerPluginInstance(ScreenshotPlugin())
         bridge?.registerPluginInstance(IOSUiPlugin())
