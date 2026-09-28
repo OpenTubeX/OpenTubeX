@@ -3,7 +3,25 @@
 export function createListWindow({ IntersectionObserver: Intersection, ResizeObserver: Resize, requestAnimationFrame: frame, cancelAnimationFrame: cancel } = globalThis) {
   const items = new Map()
   const releases = new Set()
+  const widthRemeasures = new Set()
   let releaseFrame = null
+  let remeasureFrame = null
+  function scheduleWidthRemeasure(item) {
+    widthRemeasures.add(item)
+    if (remeasureFrame !== null) return
+    remeasureFrame = frame(remeasureWidths)
+  }
+  function remeasureWidths() {
+    remeasureFrame = null
+    // Rebuilding every distant card in one frame stalls large desktop feeds.
+    let count = 0
+    for (const item of widthRemeasures) {
+      widthRemeasures.delete(item)
+      if (items.has(item.element) && !item.near && !item.isMounted()) item.refresh()
+      if (++count === 2) break
+    }
+    if (widthRemeasures.size) remeasureFrame = frame(remeasureWidths)
+  }
   function scheduleRelease(item) {
     releases.add(item)
     if (releaseFrame !== null) return
@@ -36,7 +54,7 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
       const height = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height
       const resized = item.width !== null && Math.abs(width - item.width) > 0.01
       item.width = width
-      if (resized && !item.isMounted() && item.height > 0) item.refresh()
+      if (resized && !item.isMounted() && item.height > 0) scheduleWidthRemeasure(item)
       else if (item.isMounted()) {
         item.height = height
         if (!item.near) item.release()
@@ -55,6 +73,7 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
         height: 0,
         isMounted,
         mount() {
+          widthRemeasures.delete(item)
           releases.delete(item)
           clearTimeout(retry)
           retry = null
@@ -79,6 +98,7 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
           }
         },
         dispose() {
+          widthRemeasures.delete(item)
           releases.delete(item)
           clearTimeout(retry)
           intersection.unobserve(element)
@@ -100,9 +120,12 @@ export function createListWindow({ IntersectionObserver: Intersection, ResizeObs
     },
     disconnect() {
       cancel(releaseFrame)
+      cancel(remeasureFrame)
       releaseFrame = null
+      remeasureFrame = null
       for (const item of items.values()) item.dispose()
       releases.clear()
+      widthRemeasures.clear()
       intersection.disconnect()
       resize.disconnect()
     },

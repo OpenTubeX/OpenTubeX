@@ -130,6 +130,7 @@ test.describe('new subscriptions feed', () => {
     await expect(page.getByText('New video', { exact: true })).toHaveCount(1)
     await expect(page.getByText('New short', { exact: true })).toBeVisible()
     await expect(page.getByText('New live stream', { exact: true })).toBeVisible()
+    await page.locator('.postsSection').scrollIntoViewIfNeeded()
     await expect(page.getByText('New community post', { exact: true })).toBeVisible()
     await expect(page.getByText('Watched new video', { exact: true })).toHaveCount(0)
     await expect(page.getByText('Previously seen video', { exact: true })).toHaveCount(0)
@@ -940,6 +941,8 @@ test.describe('new feed settings and seen state', () => {
     await page.keyboard.press('Escape')
     await page.locator('[data-subscription-feed-tab="all"]').click()
 
+    await page.locator('.postsSection').scrollIntoViewIfNeeded()
+    await expect(post).toBeVisible()
     await post.getByRole('button', { name: /^More options$/i }).click()
     await page.getByRole('option', { name: 'Mark As Seen', exact: true }).focus()
     await page.keyboard.press('Enter')
@@ -1039,6 +1042,7 @@ test.describe('new feed settings and seen state', () => {
     await page.locator('[data-subscription-feed-tab="all"]').click()
 
     const newPost = page.locator('.ft-list-post').filter({ hasText: 'New community post' })
+    await page.locator('.postsSection').scrollIntoViewIfNeeded()
     await expect(newPost).toBeVisible()
     await newPost.locator('.commentsLink').click()
     await expect(page).toHaveURL(/#\/post\/new-post-1/)
@@ -1278,5 +1282,74 @@ test.describe('large new feed refresh', () => {
     await page.getByRole('button', { name: 'No', exact: true }).click()
     await expect(page.getByRole('heading', { name: 'Refresh all subscription feeds?' })).toHaveCount(0)
     await expect(page.getByText('There is no new content.')).toBeVisible()
+  })
+})
+
+test.describe('large combined new feed', () => {
+  test.use({
+    seed: {
+      settings: { ...commonSettings, newSubscriptionFeedView: 'combined', uiScale: 95 },
+      profiles: [profile()],
+      subscriptionCache: [{
+        _id: CHANNEL_ID,
+        videos: Array.from({ length: 120 }, (_, index) => video(
+          `new-video-${index}`, `New video ${index}`, now - index * HOUR,
+          { isNewInSubscriptionFeed: true }
+        )),
+        videosTimestamp: new Date(now).toISOString(),
+        shorts: Array.from({ length: 24 }, (_, index) => video(
+          `new-short-${index}`, `New short ${index}`, now - index * HOUR,
+          { isNewInSubscriptionFeed: true }
+        )),
+        shortsTimestamp: new Date(now).toISOString(),
+        liveStreams: [newLive],
+        liveStreamsTimestamp: new Date(now).toISOString(),
+        communityPosts: [post('new-post-below-feed', 'New post below feed', now)],
+        communityPostsTimestamp: new Date(now).toISOString()
+      }]
+    }
+  })
+
+  test('mounts cards in later sections when scrolled into view', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    const feed = page.locator('.tabContent[aria-hidden="false"] #subscriptionsPanel.newFeed')
+    await expect(feed.getByText('New video 0', { exact: true })).toBeVisible()
+    await expect(feed.locator('.mediaSection')).toHaveCount(2)
+    await expect(feed.locator('.postsSection')).toHaveCount(1)
+    await expect(feed.locator('.mediaSection .ft-list-video, .postsSection .ft-list-post')).toHaveCount(0)
+
+    const shorts = feed.locator('.mediaSection').first()
+    await shorts.scrollIntoViewIfNeeded()
+    await expect(shorts.getByText('New short 0', { exact: true })).toBeVisible()
+  })
+
+  test('releases distant video cards after scrolling through the feed', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="videos"]').click()
+    const panel = page.locator('.tabContent[aria-hidden="false"] #subscriptionsPanel:not(.newFeed)')
+    await expect(panel.getByText('New video 0', { exact: true })).toBeVisible()
+
+    const metrics = await page.evaluate(async () => {
+      const scroller = document.scrollingElement
+      const cards = () => document.querySelectorAll(
+        '.tabContent[aria-hidden="false"] #subscriptionsPanel:not(.newFeed) .ft-list-video'
+      ).length
+      let steps = 0
+      for (let y = 0; y < scroller.scrollHeight - innerHeight && steps < 200; y += 350, steps++) {
+        scroller.scrollTo(0, y)
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+      }
+      const reachedLastVideo = [...document.querySelectorAll(
+        '.tabContent[aria-hidden="false"] #subscriptionsPanel:not(.newFeed) .ft-list-video'
+      )].some(card => card.textContent.includes('New video 99'))
+      scroller.scrollTo(0, 0)
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+      return { afterReturning: cards(), reachedLastVideo, steps }
+    })
+    expect(metrics.steps).toBeGreaterThan(5)
+    expect(metrics.reachedLastVideo).toBe(true)
+    expect(metrics.afterReturning).toBeLessThan(40)
+    await expect(panel.getByText('New video 0', { exact: true })).toBeVisible()
   })
 })

@@ -299,7 +299,7 @@ const showResult = computed(() => {
 
 const visible = ref(props.firstScreen)
 // Community cards contain expandable text/media whose local state must survive scrolling.
-const windowed = process.env.IS_CAPACITOR && finalDataType.value !== 'community'
+const windowed = (process.env.IS_CAPACITOR || process.env.IS_ELECTRON) && finalDataType.value !== 'community'
 const shell = useTemplateRef('shell')
 const shellHeight = ref(0)
 let windowItem
