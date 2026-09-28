@@ -8,9 +8,15 @@
 
 /* Leave a touch-scroll area below the inline iOS player and app navigation. */
 .capacitorTabs .ftVideoPlayer:not(:fullscreen, .fullWindow, .scrollMiniPlayer, .shortsPlayer) {
+  --inline-player-max-height: max(180px, calc(100svh - var(--top-nav-sticky-offset) - var(--mobile-progress-bar-space) - 160px));
+
   /* Definite width prevents the startup aspect ratio from narrowing the box. */
   inline-size: 100%;
-  max-block-size: max(180px, calc(100svh - var(--top-nav-sticky-offset) - var(--mobile-progress-bar-space) - 160px));
+
+  /* Limit both axes together so the height cap does not leave side bars. */
+  max-inline-size: calc(var(--inline-player-max-height) * var(--inline-player-aspect-ratio, 16 / 9));
+  max-block-size: var(--inline-player-max-height);
+  margin-inline: auto;
 }
 
 .capacitorTabs .ftVideoPlayer:not(:fullscreen, .fullWindow, .scrollMiniPlayer, .shortsPlayer) > .player {

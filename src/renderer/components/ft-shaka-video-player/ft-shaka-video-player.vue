@@ -113,6 +113,7 @@
       :style="[
         captionCssVariables,
         captionPlayerVariables,
+        { '--inline-player-aspect-ratio': audioPlayerMode || forceAspectRatio ? 16 / 9 : (annotationVideoAspectRatio ?? 16 / 9) },
         scrollMiniPlayerActive ? scrollMiniPlayerStyle : undefined,
         scrollMiniPlayerDragStyle,
         mobileFullscreenSwipeStyle,
