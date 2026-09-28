@@ -104,7 +104,7 @@ async function getRequestBody(input, init) {
  * inactivity on Android, defaulting to 30 seconds so stalled requests release
  * the subscription queue. signal still limits the JavaScript wait.
  * @param {RequestInfo | URL} input
- * @param {RequestInit & { nativeTimeoutMs?: number, allowHttp?: boolean }} [init]
+ * @param {RequestInit & { nativeTimeoutMs?: number, allowHttp?: boolean, responseType?: 'arraybuffer' }} [init]
  * @returns {Promise<Response>}
  */
 export async function capacitorHttpFetch(input, init = undefined) {
@@ -135,7 +135,7 @@ async function nativeHttpFetch(input, init) {
     method: init?.method ?? inputRequest?.method ?? 'GET',
     headers: Object.fromEntries(headers),
     data: await getRequestBody(input, init),
-    responseType: 'text',
+    responseType: init?.responseType ?? 'text',
     disableRedirects: redirect !== 'follow',
     connectTimeout: init?.nativeTimeoutMs ?? DEFAULT_NATIVE_TIMEOUT_MS,
     readTimeout: init?.nativeTimeoutMs ?? DEFAULT_NATIVE_TIMEOUT_MS,
@@ -147,9 +147,11 @@ async function nativeHttpFetch(input, init) {
 
   const responseBody = nativeResponse.status === 204 || nativeResponse.status === 205 || nativeResponse.status === 304
     ? null
-    : typeof nativeResponse.data === 'string'
-      ? nativeResponse.data
-      : JSON.stringify(nativeResponse.data)
+    : init?.responseType === 'arraybuffer' && typeof nativeResponse.data === 'string'
+      ? Uint8Array.from(atob(nativeResponse.data), character => character.charCodeAt(0))
+      : typeof nativeResponse.data === 'string'
+        ? nativeResponse.data
+        : JSON.stringify(nativeResponse.data)
 
   const response = new Response(responseBody, {
     status: nativeResponse.status,

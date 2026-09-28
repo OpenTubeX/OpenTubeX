@@ -7,6 +7,9 @@ import { getCompatibleAdaptiveFormats } from './compatibleAdaptiveFormats'
 import { generateAudioTrackField } from '../api/local'
 import { waitForYtDlpFormatAvailability } from './ytDlpFormatAvailability'
 import { getEarliestYtDlpFormatExpiry, YtDlpPlaybackSourceCache } from './ytDlpPlaybackCache'
+import { capacitorHttpFetch } from '../api/capacitor-http'
+import { fetchTwitchSubOnlyVod, getTwitchVodId } from '../../../twitchSubOnlyVod'
+import { mapExternalPlaybackMetadata } from '../../../ytDlpMetadata'
 
 /** @typedef {import('../../../main/ytDlp').YtDlpPlaybackFormat} YtDlpPlaybackFormat */
 
@@ -20,6 +23,8 @@ import { getEarliestYtDlpFormatExpiry, YtDlpPlaybackSourceCache } from './ytDlpP
  * @property {string | null} title
  * @property {boolean} isLive
  * @property {boolean} [audioOnly] whether an external manifest has no video formats
+ * @property {boolean} [twitchSubOnlyVod]
+ * @property {string | null} [twitchVodRegistrationId]
  * @property {string | null} [separateAudioUrl] audio supplied separately from an external video file
  * @property {number | null} duration
  * @property {string | null} storyboardSrc
@@ -157,7 +162,7 @@ export function invalidateAllYtDlpPlaybackSources() {
  * @param {string} url
  * @param {boolean} useAuthentication
  */
-export async function getExternalYtDlpPlaybackSource(url, useAuthentication = false) {
+async function getExternalYtDlpPlaybackSourceFromYtDlp(url, useAuthentication) {
   const info = await ytDlp.ytDlpGetPlaybackInfo(url, true, useAuthentication)
   if (info === null) throw new Error('yt-dlp is not available')
   if ('error' in info) throw new Error(info.error === 'ENOENT' ? 'yt-dlp could not be found' : info.error)
@@ -300,6 +305,73 @@ export async function getExternalYtDlpPlaybackSource(url, useAuthentication = fa
   throw new Error(info.formats.length > 0
     ? 'yt-dlp returned formats, but their stream URLs could not be accessed by the player'
     : 'yt-dlp did not return any playable formats')
+}
+
+export async function getExternalYtDlpPlaybackSource(url, useAuthentication = false) {
+  try {
+    return await getExternalYtDlpPlaybackSourceFromYtDlp(url, useAuthentication)
+  } catch (error) {
+    const videoId = getTwitchVodId(url)
+    if (videoId === null) throw error
+
+    try {
+      const result = process.env.IS_CAPACITOR
+        ? await fetchTwitchSubOnlyVod(videoId, capacitorHttpFetch)
+        : await window.ftElectron.twitchSubOnlyVod(videoId)
+      if (!result) throw error
+
+      const { playlist, video } = result
+      let twitchVodRegistrationId = null
+      if (process.env.IS_CAPACITOR && !process.env.IS_IOS) {
+        const registration = await ytDlp.ytDlpRegisterTwitchVod(playlist.split('\n').filter(line => line.startsWith('https://')))
+        twitchVodRegistrationId = registration.id
+      }
+      const owner = video.owner
+      return {
+        info: {
+          title: video.title,
+          description: video.description,
+          uploader: owner?.displayName ?? owner?.login ?? null,
+          uploaderUrl: owner?.login ? `https://www.twitch.tv/${owner.login}` : null,
+          uploaderThumbnail: owner?.profileImageURL ?? null,
+          channel: null,
+          channelUrl: null,
+          channelThumbnail: null,
+          thumbnail: video.thumbnail,
+          webpageUrl: url,
+          viewCount: video.viewCount,
+          uploadDate: null,
+          isLive: false,
+          liveStatus: 'was_live',
+          duration: video.duration,
+          externalMetadata: mapExternalPlaybackMetadata({ timestamp: video.createdAt ? Date.parse(video.createdAt) / 1000 : null }),
+          captions: [],
+          captionTranslations: [],
+          formats: []
+        },
+        source: {
+          manifestSrc: `data:${MANIFEST_TYPE_HLS};charset=UTF-8,${encodeURIComponent(playlist)}`,
+          manifestMimeType: MANIFEST_TYPE_HLS,
+          legacyFormats: [],
+          captions: [],
+          captionTranslations: [],
+          storyboardSrc: null,
+          isLive: false,
+          twitchSubOnlyVod: true,
+          twitchVodRegistrationId
+        }
+      }
+    } catch {
+      throw error
+    }
+  }
+}
+
+export function releaseTwitchVodRegistration(source) {
+  if (!source?.twitchVodRegistrationId) return
+  ytDlp.ytDlpUnregisterTwitchVod(source.twitchVodRegistrationId).catch(error => {
+    console.warn('Could not unregister Twitch VOD playback', error)
+  })
 }
 
 /**

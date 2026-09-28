@@ -70,6 +70,8 @@ function listen(event, callback) {
 let removeSettingsProgressListener = null
 
 const android = {
+  ytDlpRegisterTwitchVod: urls => native.registerTwitchVod({ urls }),
+  ytDlpUnregisterTwitchVod: id => native.unregisterTwitchVod({ id }),
   async ytDlpDownload(payload, retryDownloadId) {
     try {
       if (!store.getters.getEnableDownloads) return { error: 'downloads-disabled' }
