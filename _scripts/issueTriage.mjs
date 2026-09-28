@@ -287,8 +287,8 @@ function openIssueNumbers(owner, repo) {
   }
 }
 
-async function triageIssue(owner, repo, number, backfill = false) {
-  if (backfill && isTriaged(owner, repo, number)) return
+async function triageIssue(owner, repo, number, { backfill = false, reassess = false, dryRun = false } = {}) {
+  if (backfill && !reassess && isTriaged(owner, repo, number)) return
   const issue = readIssue(owner, repo, number)
   if (issue.state !== 'OPEN' || !eligibleAuthor(issue.author)) return
   const decision = await assess(issue)
@@ -299,15 +299,20 @@ async function triageIssue(owner, repo, number, backfill = false) {
     console.log('Issue changed during triage; skipped')
     return
   }
-  if (backfill && isTriaged(owner, repo, number)) return
+  if (backfill && !reassess && isTriaged(owner, repo, number)) return
   const missingLabels = decision.labels.filter(label =>
     !current.labels.nodes.some(existing => existing.name === label))
+  const reply = decision.reply === 'answer' ? decision.answer : replies[decision.reply]
+  const publishReply = reply && shouldReply(current.comments.nodes, reply)
+  if (dryRun) {
+    console.log(`Preview issue #${number}: ${JSON.stringify({ labels: missingLabels, reply: publishReply ? reply : null })}`)
+    return
+  }
   if (missingLabels.length) {
     github(`repos/${owner}/${repo}/issues/${number}/labels`, 'POST', { labels: missingLabels })
   }
 
-  const reply = decision.reply === 'answer' ? decision.answer : replies[decision.reply]
-  if (reply && shouldReply(current.comments.nodes, reply)) {
+  if (publishReply) {
     github(`repos/${owner}/${repo}/issues/${number}/comments`, 'POST', { body: formatReply(reply) })
   }
   if (!isTriaged(owner, repo, number)) {
@@ -320,10 +325,12 @@ async function main() {
   if (!process.env.OPENAI_API_KEY) throw new Error('Missing OPENAI_API_KEY secret')
   const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/')
   if (process.argv.includes('--backfill')) {
+    const reassess = process.argv.includes('--reassess')
+    const dryRun = process.argv.includes('--dry-run')
     let failures = 0
     for (const number of openIssueNumbers(owner, repo)) {
       try {
-        await triageIssue(owner, repo, number, true)
+        await triageIssue(owner, repo, number, { backfill: true, reassess, dryRun })
       } catch (error) {
         failures++
         console.error(`Issue #${number}: ${error.message}`)

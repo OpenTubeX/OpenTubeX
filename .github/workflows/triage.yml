@@ -2,6 +2,15 @@ name: Issue Triage
 
 on:
   workflow_dispatch:
+    inputs:
+      reassess:
+        description: Reassess open issues already marked as triaged
+        type: boolean
+        default: false
+      dry_run:
+        description: Preview decisions without writing to issues
+        type: boolean
+        default: false
   issues:
     types: [opened, reopened]
   issue_comment:
@@ -74,7 +83,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - run: node _scripts/issueTriage.mjs --backfill
+      - run: node _scripts/issueTriage.mjs --backfill ${{ inputs.reassess && '--reassess' || '' }} ${{ inputs.dry_run && '--dry-run' || '' }}
         env:
           GH_TOKEN: ${{ github.token }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
