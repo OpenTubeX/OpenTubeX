@@ -35,7 +35,7 @@ test('iOS media byte-range probes send a Range header through the native proxy',
 
 test('iOS does not select an HLS manifest rejected by every probe', async () => {
   const source = await read('src/renderer/helpers/player/ytDlpPlayback.js')
-  const start = source.indexOf('export async function getExternalYtDlpPlaybackSource(')
+  const start = source.indexOf('async function getExternalYtDlpPlaybackSourceFromYtDlp(')
   const end = source.indexOf('/**\n * @param {YtDlpPlaybackFormat} format', start)
   const context = vm.createContext({
     process: { env: { IS_IOS: true } },
@@ -44,6 +44,7 @@ test('iOS does not select an HLS manifest rejected by every probe', async () => 
       hlsManifestUrl: 'https://example.test/broken.m3u8',
       isLive: true,
     }) },
+    getTwitchVodId: () => null,
     isAudioFormat: () => false,
     isVideoFormat: () => true,
     isExternalProgressiveVideoFormat: () => false,
@@ -53,7 +54,7 @@ test('iOS does not select an HLS manifest rejected by every probe', async () => 
     probeYtDlpHlsManifest: async () => false,
     MANIFEST_TYPE_HLS: 'application/x-mpegurl',
   })
-  vm.runInContext(`${source.slice(start, end).replace('export ', '')}\nglobalThis.load = getExternalYtDlpPlaybackSource`, context)
+  vm.runInContext(`${source.slice(start, end).replaceAll(/^export /gm, '')}\nglobalThis.load = getExternalYtDlpPlaybackSource`, context)
   await assert.rejects(context.load('https://example.test/watch'), /stream URLs could not be accessed/)
 })
 

@@ -23,3 +23,8 @@
   max-block-size: inherit;
   object-fit: contain;
 }
+
+/* Match neutral button text on other platforms instead of iOS link blue. */
+.btn {
+  color: ButtonText;
+}

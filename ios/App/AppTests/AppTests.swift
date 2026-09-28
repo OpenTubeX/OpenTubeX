@@ -65,6 +65,46 @@ final class AppTests: XCTestCase {
                                                 arguments: ["original": original], in: nil, contentWorld: .page)
     }
 
+    func testDownloadCancelUsesNeutralButtonText() async throws {
+        try await openApplication()
+        let saved = try await evaluate("({enabled: testStore.getters.getEnableDownloads, theme: testStore.getters.getBaseTheme})")
+        let original = try XCTUnwrap(saved as? [String: Any])
+        let cleanup = "await testStore.dispatch('hideSettingsWindow'); await testStore.dispatch('updateEnableDownloads', original.enabled); await testStore.dispatch('updateBaseTheme', original.theme)"
+        do {
+            _ = try await webView.callAsyncJavaScript("await testStore.dispatch('updateEnableDownloads', true); await testStore.dispatch('showSettingsWindow', 'downloads')", arguments: [:], in: nil, contentWorld: .page)
+            try await wait("!!document.querySelector('.downloadHeaderActions .btn')")
+            _ = try await evaluate("document.querySelector('.downloadHeaderActions .btn').click(); true")
+            try await wait("document.querySelectorAll('.addDownloadPrompt .btn').length === 2")
+            for theme in ["light", "dark"] {
+                _ = try await webView.callAsyncJavaScript("await testStore.dispatch('updateBaseTheme', theme)", arguments: ["theme": theme], in: nil, contentWorld: .page)
+                try await wait("document.body.classList.contains('\(theme)')")
+                let result = try await evaluate("""
+                    (() => {
+                        const buttons = document.querySelectorAll('.addDownloadPrompt .btn');
+                        const cancel = buttons[1];
+                        const reference = document.createElement('button');
+                        reference.style.color = 'ButtonText';
+                        reference.style.visibility = 'hidden';
+                        document.body.append(reference);
+                        const expected = getComputedStyle(reference).color;
+                        reference.remove();
+                        return {text: getComputedStyle(cancel).color,
+                                icon: getComputedStyle(cancel.querySelector('svg')).color, expected};
+                    })()
+                    """)
+                let colors = try XCTUnwrap(result as? [String: String])
+                XCTAssertEqual(colors["text"], colors["expected"], "Neutral Cancel text in \(theme)")
+                XCTAssertEqual(colors["icon"], colors["expected"], "Neutral Cancel icon in \(theme)")
+            }
+            _ = try await evaluate("document.querySelectorAll('.addDownloadPrompt .btn')[1].click(); true")
+            try await wait("!document.querySelector('.addDownloadPrompt')")
+        } catch {
+            _ = try? await webView.callAsyncJavaScript(cleanup, arguments: ["original": original], in: nil, contentWorld: .page)
+            throw error
+        }
+        _ = try await webView.callAsyncJavaScript(cleanup, arguments: ["original": original], in: nil, contentWorld: .page)
+    }
+
     func testPlaybackAudioSessionConfiguration() throws {
         let session = AVAudioSession.sharedInstance()
         let category = session.category
