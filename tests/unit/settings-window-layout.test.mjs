@@ -46,9 +46,16 @@ function assertMaximized(settings) {
   assert.equal(settings.isWindowMaximized.value, true)
   assert.equal(settings.windowStyle.value.left, '0')
   assert.equal(settings.windowStyle.value.top, 'var(--app-safe-area-inset-top, 0px)')
-  assert.equal(settings.windowStyle.value.inlineSize, '100vw')
+  assert.equal(settings.windowStyle.value.inlineSize, '100%')
   assert.equal(settings.windowStyle.value.blockSize, 'calc(100dvh - var(--app-safe-area-inset-top, 0px))')
 }
+
+test('maximized settings do not retain a stale WebKit viewport-unit width cap', async () => {
+  const css = await readFile(new URL('../../src/renderer/views/Settings/Settings.css', import.meta.url), 'utf8')
+  const maximized = css.match(/\.settingsWindow\.maximized\s*\{([^}]+)\}/)?.[1]
+  assert.ok(maximized)
+  assert.match(maximized, /max-inline-size:\s*100%;/)
+})
 
 test('mobile settings open maximized on landscape phones and tablets', () => {
   for (const width of [375, 844, 1024, 1366, 1092.8]) {

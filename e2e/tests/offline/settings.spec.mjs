@@ -2410,6 +2410,26 @@ test.describe('settings', () => {
     expect(bounds.x + bounds.width).toBeLessThanOrEqual(340)
   })
 
+  for (const zoom of [0.75, 1, 1.25, 1.5]) {
+    test(`maximized settings fill the viewport after resize and reopen at ${zoom} scale`, async ({ page }) => {
+      await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
+      for (const width of [1080, 535, 810, 1080]) {
+        await page.setViewportSize({ width, height: 800 })
+        await goTo(page, 'settings')
+        const settingsWindow = page.locator('.settingsWindow')
+        const maximize = settingsWindow.getByRole('button', { name: 'Maximize', exact: true })
+        if (await maximize.isVisible()) await maximize.click()
+        await expect(settingsWindow).toHaveClass(/maximized/)
+        await expect.poll(() => settingsWindow.evaluate(element => {
+          const bounds = element.getBoundingClientRect()
+          return Math.max(Math.abs(bounds.left), Math.abs(bounds.width - document.documentElement.clientWidth))
+        })).toBeLessThan(1)
+        await settingsWindow.getByRole('button', { name: 'Close', exact: true }).click()
+        await expect(settingsWindow).toBeHidden()
+      }
+    })
+  }
+
   test('keeps narrow settings maximized below the status bar after viewport height changes', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 800 })
     await page.evaluate(() => {
