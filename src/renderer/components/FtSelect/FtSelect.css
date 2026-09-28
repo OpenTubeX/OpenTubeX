@@ -302,6 +302,7 @@
 .select-bar {
   position: relative;
   display: block;
+  pointer-events: none;
 }
 
 .select-bar::before,

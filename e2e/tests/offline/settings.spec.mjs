@@ -307,6 +307,14 @@ test.describe('settings search highlights', () => {
     await expectSubscriptionRefreshIntervalSelectHighlight(page)
   })
 
+  test('opens the videos auto refresh interval setting', async ({ page }) => {
+    const settings = await goToSettingsSection(page, 'subscription')
+    const interval = settings.getByRole('combobox', { name: 'Videos Auto Refresh Interval' })
+    await interval.click()
+    await expect(interval).toHaveAttribute('aria-expanded', 'true')
+    await expect(page.getByRole('listbox', { name: 'Videos Auto Refresh Interval' })).toBeVisible()
+  })
+
   test.describe('at 95% UI scale', () => {
     test.use({ seed: { settings: { currentLocale: 'en-US', uiScale: 95 } } })
 
