@@ -371,6 +371,12 @@ function cancelLoaderSettle() {
   visibility: hidden;
 }
 
+/* Keep positioned items in the browsing page below the returning Watch preview. */
+.tabContent:has(.watchPreviewing) > .routerView:not(.browsingBehindWatch) {
+  position: relative;
+  z-index: 0;
+}
+
 .tabContent:has(.watchPreviewing) .browsingBehindWatch {
   visibility: visible;
 }

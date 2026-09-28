@@ -1,6 +1,6 @@
 import { test, expect, setWindowSize } from '../../helpers/app.mjs'
 import { openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
-import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+import { mockPlayableWatchPage, watchHistoryEntry } from '../../helpers/watch.mjs'
 
 test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, enableVideoZoom: false, enableMobileFullscreenSwipe: false } } })
 
@@ -33,6 +33,91 @@ async function openMobilePlayer(app, page, phone = true) {
   await enableMobileTouch(app, page, phone)
   return page.locator('.ftVideoPlayer')
 }
+
+test.describe('history progress during mobile restore', () => {
+  test.use({
+    seed: {
+      settings: {
+        videoPlaybackEngine: 'built-in',
+        ytDlpPlaybackEngineDefaultMigration: true,
+        enableVideoZoom: false,
+        enableMobileFullscreenSwipe: false,
+        landingPage: 'history',
+        baseTheme: 'light'
+      },
+      history: [
+        watchHistoryEntry,
+        { ...watchHistoryEntry, _id: 'abcdefghijk', videoId: 'abcdefghijk', title: 'Second watched video', timeWatched: Date.now() - 1000 }
+      ]
+    }
+  })
+
+  test('watch preview covers history progress while the upward drag is held', async ({ app, page }) => {
+    const player = await openMobilePlayer(app, page)
+    const progress = page.locator('.watchedProgressBar').last()
+    const cdp = await page.context().newCDPSession(page)
+    const touch = (type, point) => cdp.send('Input.dispatchTouchEvent', {
+      type, touchPoints: point ? [point] : []
+    })
+    try {
+      const full = await player.boundingBox()
+      const down = { x: full.x + full.width / 2, y: full.y + 100 }
+      await touch('touchStart', down)
+      for (const distance of [20, 40, 60, 80, 100]) {
+        await touch('touchMove', { ...down, y: down.y + distance })
+        await page.waitForTimeout(30)
+      }
+      await touch('touchEnd')
+      await expect(player).toHaveClass(/scrollMiniPlayer/)
+      await expect(progress).toBeVisible()
+      await player.evaluate(element => {
+        element.style.left = '0px'
+        element.style.width = `${window.innerWidth}px`
+        element.style.height = '76px'
+      })
+      await page.waitForTimeout(300)
+      const bar = await player.boundingBox()
+      const up = { x: bar.x + 60, y: bar.y + bar.height / 2 }
+      await touch('touchStart', up)
+      for (const distance of [20, 40, 80, 200, 350]) {
+        await touch('touchMove', { ...up, y: up.y - distance })
+        await page.waitForTimeout(30)
+      }
+      await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
+      const preview = page.locator('.watchDragPreview')
+      await expect.poll(() => preview.evaluate(element => Number(getComputedStyle(element).opacity))).toBe(1)
+      const stroke = await progress.boundingBox()
+      const sample = await page.screenshot({
+        clip: {
+          x: Math.floor(stroke.x) + 5,
+          y: Math.floor(stroke.y + stroke.height) - 3,
+          width: 60,
+          height: 5
+        }
+      })
+      const visibleProgressPixels = await page.evaluate(async base64 => {
+        const image = new Image()
+        image.src = `data:image/png;base64,${base64}`
+        await image.decode()
+        const canvas = document.createElement('canvas')
+        canvas.width = image.width
+        canvas.height = image.height
+        const context = canvas.getContext('2d')
+        context.drawImage(image, 0, 0)
+        const pixels = context.getImageData(0, 0, image.width, image.height).data
+        let red = 0
+        for (let i = 0; i < pixels.length; i += 4) {
+          if (pixels[i] > 150 && pixels[i + 1] < 120 && pixels[i + 2] < 120) red++
+        }
+        return red
+      }, sample.toString('base64'))
+      expect(visibleProgressPixels).toBe(0)
+    } finally {
+      await touch('touchEnd').catch(() => {})
+      await cdp.detach()
+    }
+  })
+})
 
 test('tablet swipe docks toward the bottom bar', async ({ app, page }) => {
   const player = await openMobilePlayer(app, page, false)
