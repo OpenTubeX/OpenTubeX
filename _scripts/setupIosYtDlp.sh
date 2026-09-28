@@ -6,17 +6,25 @@ runtime="$root/ios/App/Python.xcframework"
 packages="$root/ios/App/python-packages"
 scratch="$(mktemp -d)"
 trap 'rm -rf "$scratch"' EXIT
+release_tag=3.14-b11
+runtime_stamp="$runtime/.opentubex-release-tag"
+pins=('yt-dlp==2026.8.19' 'yt-dlp-ejs==0.8.0' 'yt-dlp-apple-webkit-jsi==0.1.1')
+package_stamp="$packages/.pins"
 
-if [[ ! -d "$runtime" ]]; then
-  gh release download 3.14-b11 --repo beeware/Python-Apple-support \
+if [[ ! -d "$runtime" || "$(cat "$runtime_stamp" 2>/dev/null || true)" != "$release_tag" ]]; then
+  gh release download "$release_tag" --repo beeware/Python-Apple-support \
     --pattern 'Python-3.14-iOS-support.b11.tar.gz' --dir "$scratch"
   tar -xzf "$scratch/Python-3.14-iOS-support.b11.tar.gz" -C "$scratch"
+  rm -rf "$runtime"
   mv "$scratch/Python.xcframework" "$runtime"
+  printf '%s' "$release_tag" > "$runtime_stamp"
 fi
 
-if [[ ! -d "$packages/yt_dlp" || ! -d "$packages/yt_dlp_ejs" || ! -f "$packages/yt_dlp_plugins/extractor/webkit_jsi.py" ]]; then
-  python3 -m pip download --only-binary=:all: --no-deps --dest "$scratch" \
-    'yt-dlp==2026.8.19' 'yt-dlp-ejs==0.8.0' 'yt-dlp-apple-webkit-jsi==0.1.1'
+if [[ "$(cat "$package_stamp" 2>/dev/null || true)" != "${pins[*]}" ||
+      ! -d "$packages/yt_dlp" || ! -d "$packages/yt_dlp_ejs" ||
+      ! -f "$packages/yt_dlp_plugins/extractor/webkit_jsi.py" ]]; then
+  python3 -m pip download --only-binary=:all: --no-deps --dest "$scratch" "${pins[@]}"
+  rm -rf "$packages"
   mkdir -p "$packages"
   python3 - "$scratch" "$packages" <<'PY'
 from pathlib import Path
@@ -27,4 +35,5 @@ for wheel in Path(sys.argv[1]).glob('*.whl'):
     with ZipFile(wheel) as archive:
         archive.extractall(sys.argv[2])
 PY
+  printf '%s' "${pins[*]}" > "$package_stamp"
 fi

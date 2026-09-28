@@ -224,9 +224,18 @@ final class AppTests: XCTestCase {
         try FileManager.default.createDirectory(at: thirdStage, withIntermediateDirectories: true)
         let staleProgress = thirdStage.appendingPathComponent("progress.json")
         try Data(#"{"status":"downloading","percent":90,"speed":42,"eta":5}"#.utf8).write(to: staleProgress)
+        let firstStage = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("yt-dlp-downloads/\(ids[0])", isDirectory: true)
+        let firstProgress = firstStage.appendingPathComponent("progress.json")
+        try Data(#"{"status":"downloading","percent":25,"speed":42,"eta":5}"#.utf8).write(to: firstProgress)
         _ = try await webView.callAsyncJavaScript(
             "return await Capacitor.Plugins.YtDlp.control({id, action: 'cancel'})",
             arguments: ["id": ids[0]], in: nil, contentWorld: .page)
+        try await Task.sleep(nanoseconds: 850_000_000)
+        let cancelledStatus = try await webView.callAsyncJavaScript(
+            "return (await Capacitor.Plugins.YtDlp.list()).downloads.find(record => record.id === id)?.status",
+            arguments: ["id": ids[0]], in: nil, contentWorld: .page) as? String
+        XCTAssertEqual(cancelledStatus, "cancelled")
         connectionLock.lock()
         let openConnections = connections
         connectionLock.unlock()

@@ -291,7 +291,7 @@ async function playDownload(download) {
   }
 
   if (process.env.IS_IOS) {
-    if (!await ytDlp.ytDlpPlayDownload(download.id, firstFile.path)) {
+    if (!await ytDlp.ytDlpPlayDownload(download.id, firstFile.path).catch(() => false)) {
       showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
     }
     return

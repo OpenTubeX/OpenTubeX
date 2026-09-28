@@ -38,7 +38,8 @@ def _extract(request):
         'skip_download': True,
         'writesubtitles': '--write-subs' in args,
         'writeautomaticsub': '--write-auto-subs' in args,
-        'subtitleslangs': [_option(args, '--sub-langs', 'all')],
+        'subtitleslangs': [language.strip() for language in
+                           _option(args, '--sub-langs', 'all').split(',') if language.strip()],
         'subtitlesformat': _option(args, '--sub-format', 'vtt'),
         'quiet': True,
         'no_warnings': True,

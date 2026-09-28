@@ -297,22 +297,6 @@ export async function getExternalYtDlpPlaybackSource(url, useAuthentication = fa
     }
   }
 
-  if (process.env.IS_IOS && hlsUrls.size > 0) {
-    return {
-      info,
-      source: {
-        manifestSrc: hlsUrls.values().next().value,
-        manifestMimeType: MANIFEST_TYPE_HLS,
-        legacyFormats: [],
-        captions: info.captions ?? [],
-        captionTranslations: info.captionTranslations ?? [],
-        storyboardSrc,
-        isLive,
-        audioOnly
-      }
-    }
-  }
-
   throw new Error(info.formats.length > 0
     ? 'yt-dlp returned formats, but their stream URLs could not be accessed by the player'
     : 'yt-dlp did not return any playable formats')

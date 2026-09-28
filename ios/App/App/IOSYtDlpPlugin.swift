@@ -381,6 +381,7 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
 
     private func refreshProgress() {
         for id in running {
+            if ["pausing", "paused", "cancelled"].contains(records[id]?["status"] as? String ?? "") { continue }
             guard let data = try? Data(contentsOf: progressFile(for: id)),
                   let progress = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { continue }
             let previous = records[id]?["percent"] as? Double ?? 0

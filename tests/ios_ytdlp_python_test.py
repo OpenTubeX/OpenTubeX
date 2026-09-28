@@ -80,6 +80,11 @@ class IOSYtDlpPythonTest(unittest.TestCase):
         self.assertTrue(FakeYoutubeDL.last_options['writeautomaticsub'])
 
     @patch.object(bridge.yt_dlp, 'YoutubeDL', FakeYoutubeDL)
+    def test_extract_splits_requested_subtitle_languages(self):
+        bridge._extract({'args': ['--sub-langs', 'en, de, ,fr', 'https://example.org/video']})
+        self.assertEqual(FakeYoutubeDL.last_options['subtitleslangs'], ['en', 'de', 'fr'])
+
+    @patch.object(bridge.yt_dlp, 'YoutubeDL', FakeYoutubeDL)
     def test_download_reports_progress_and_saved_file(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

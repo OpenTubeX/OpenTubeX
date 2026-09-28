@@ -140,6 +140,7 @@ const capacitor = {
       if (isYouTubeVideo && !useDefaultClients) args.push('--extractor-args', useAuthentication ? 'youtube:player_client=default,web_safari' : 'youtube:player_client=default,web_embedded,-android_vr')
       args.push(isYouTubeVideo ? `https://www.youtube.com/watch?v=${videoId}` : videoId)
       const [info, binaries] = await Promise.all([extract(args, useAuthentication, !isYouTubeVideo, parseYtDlpPlaybackInfo, true), native.info()])
+      const playbackCaptions = mapPlaybackCaptions(info.requested_subtitles, info.subtitles, !isYouTubeVideo)
       let formats = Array.isArray(info.formats) ? info.formats : []
       if (process.env.IS_IOS && !isYouTubeVideo) {
         // WebKit cannot fetch many third-party streams through CORS. Stream the
@@ -151,7 +152,11 @@ const capacitor = {
         const subtitles = Object.values(info.requested_subtitles ?? {}).filter(subtitle => subtitle?.url?.startsWith('https://'))
         const requests = [...formats, ...subtitles]
         const { urls } = await native.registerMedia({ formats: requests })
+        const registeredUrls = new Map(requests.map((entry, index) => [new URL(entry.url).toString(), urls[index]]))
         requests.forEach((entry, index) => { entry.url = urls[index] })
+        for (const caption of [...playbackCaptions.captions, ...playbackCaptions.captionTranslations]) {
+          caption.url = registeredUrls.get(caption.url) ?? caption.url
+        }
         info.manifest_url = hlsManifestUrl ?? null
         info.storyboard = null
       }
@@ -178,7 +183,7 @@ const capacitor = {
         externalMetadata: mapExternalPlaybackMetadata(info),
         hlsManifestUrl: toNonEmptyString(info.manifest_url) ?? formats.find(format => format.protocol === 'm3u8_native' && format.manifest_url)?.manifest_url ?? null,
         storyboardVtt: buildYtDlpStoryboardVtt([info.storyboard], toFiniteNumber(info.duration)),
-        ...mapPlaybackCaptions(info.requested_subtitles, info.subtitles, !isYouTubeVideo),
+        ...playbackCaptions,
         formats: formats.filter(format => format.protocol !== 'mhtml').map(mapPlaybackFormat),
       }
     } catch (error) {
