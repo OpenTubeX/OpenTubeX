@@ -4293,8 +4293,9 @@ test.describe('watch page', () => {
       expect(layout.bottomGap).toBeGreaterThanOrEqual(0)
       expect(layout.bottomGap).toBeLessThanOrEqual(24)
       expect(layout.moreOverlapsContent).toBe(true)
-      expect(layout.mask).toContain('linear-gradient')
-      expect(layout.mask).toMatch(/transparent|rgba\(0, 0, 0, 0\)/)
+      expect(layout.mask).toMatch(
+        /^linear-gradient\((?:to bottom, )?rgb\(0, 0, 0\) calc\(100% - 16px\), (?:transparent|rgba\(0, 0, 0, 0\))\)$/
+      )
     }
     await page.evaluate(() => window.ftElectron.setZoomFactor(1))
     await watchComponent.dispose()
