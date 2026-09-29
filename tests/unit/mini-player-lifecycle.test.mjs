@@ -17,10 +17,12 @@ function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPl
   const window = new EventTarget()
   window.setTimeout = t.mock.fn(setTimeout)
   const isActiveTab = ref(true)
+  const isPlayerSuspended = ref(false)
+  const minimized = ref(false)
   const video = ref({ paused: false, ended: false, volume: 1, currentTime: 120, play() { this.paused = false; this.ended = false }, pause() { this.paused = true } })
   const rect = { left: 10, top: 10, width: 360, height: 202 }
   const create = vm.runInNewContext(`${source}; useScrollMiniPlayer`, {
-    ...coordinator, computed, ref, watch, inject: () => ({ detached: ref(navigatedAway), tabPresented: ref(true), minimized: ref(false), clearMinimizePreview() {} }), watchNavigationKey: Symbol(),
+    ...coordinator, computed, ref, watch, inject: () => ({ detached: ref(navigatedAway), tabPresented: ref(true), minimized, clearMinimizePreview() {} }), watchNavigationKey: Symbol(),
     nextTick() {}, window, clearTimeout, process: { env: { IS_CAPACITOR: false } },
     document: { body: { classList: { remove() {} } } },
     store: { getters: reactive({ getAutoPictureInPictureTriggers: [], getKeepPlayingOnNavigation: keepPlaying, getScrollMiniPlayerOnAllTabs: true }) },
@@ -42,7 +44,7 @@ function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPl
   })
   const player = scope.run(() => create({
     container: ref(null), fullWindowEnabled: ref(false), getUi: () => null,
-    isActiveTab, pictureInPictureActive: ref(false), props: reactive({ format: 'video', videoId: 'video' }),
+    isActiveTab, isPlayerSuspended, pictureInPictureActive: ref(false), props: reactive({ format: 'video', videoId: 'video' }),
     video
   }))
   player.scrollMiniPlayerActive.value = true
@@ -52,8 +54,19 @@ function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPl
     isActiveTab.value = false
   }
   t.after(() => { player.teardownScrollMiniPlayer(); scope.stop() })
-  return { player, window, isActiveTab, video }
+  return { player, window, isActiveTab, isPlayerSuspended, minimized, video }
 }
+
+test('a suspended Short cannot own the mini player even when its watch view is minimized', t => {
+  const { player, video, isActiveTab, isPlayerSuspended, minimized } = mountMiniPlayer(t)
+  video.value.paused = true
+  minimized.value = true
+  isPlayerSuspended.value = true
+  isActiveTab.value = false
+  player.updateScrollMiniPlayer()
+  assert.equal(coordinator.hasCrossTabMiniPlayerOwner(), false)
+  assert.equal(player.scrollMiniPlayerActive.value, false)
+})
 
 test('tab changes end held volume gestures and hide the expanded control', t => {
   const { player, window, isActiveTab } = mountMiniPlayer(t)
@@ -89,7 +102,7 @@ test('the ended event keeps an eligible detached mini player and reveals replay'
   const handler = playerSource.slice(playerSource.indexOf('    function handleEnded() {'), playerSource.indexOf('    function handleSeeking() {'))
   const noop = () => {}
   vm.runInNewContext(`${handler}; handleEnded()`, {
-    ...player, clearSabrBackoffTimer: noop, abRepeatEnabled: ref(false),
+    ...player, clearSabrBackoffTimer: noop, abRepeatEnabled: ref(false), shortsNavigationSuspended: ref(false),
     setShowUiOnPaused: noop, shortsPaused: ref(false), playbackEnded: ref(false), autoplayCanceled: ref(false),
     syncPlayPauseControlIcons: noop, isCapacitorMobilePlayer: () => false,
     sleepTimer: { pauseCountdown: noop, consumeEndOfVideo: () => false },

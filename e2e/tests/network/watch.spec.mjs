@@ -1466,6 +1466,64 @@ test.describe('custom Shorts player', () => {
     }
   })
 
+  test('keeps a previous Short buffered when navigating back', async ({ page }) => {
+    await page.route(/\/youtubei\/v1\/reel\/reel_item_watch/, route => route.fulfill({ json: {} }))
+    await page.evaluate(() => {
+      document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUseSponsorBlock', false)
+    })
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/w1WKmSqwM8I')
+    await page.locator(sel.searchInput).press('Enter')
+
+    const firstPlayer = page.locator('.ftVideoPlayer.shortsPlayer')
+    const errorMessage = page.locator('.errorMessage')
+    await expect(firstPlayer.or(errorMessage)).toBeVisible({ timeout: 30_000 })
+    if (await errorMessage.isVisible()) {
+      test.skip(true, `First Short unavailable: ${await errorMessage.textContent()}`)
+    }
+
+    const firstVideo = await waitForPlaybackOrSkip(test, page)
+    await firstVideo.evaluate(async element => {
+      element.pause()
+      element.currentTime = Math.min(3, element.duration / 2)
+      if (element.seeking) {
+        await new Promise(resolve => element.addEventListener('seeked', resolve, { once: true }))
+      }
+      window.__retainedShortVideo = element
+    })
+    const previousTime = await firstVideo.evaluate(element => element.currentTime)
+
+    await page.locator('.shortsNavigationButton').last().click()
+    await expect(page).toHaveURL(/#\/watch\/RZ6PG5QATg4/)
+    await expect(firstPlayer.or(errorMessage)).toBeVisible({ timeout: 30_000 })
+    if (await errorMessage.isVisible()) {
+      test.skip(true, `Second Short unavailable: ${await errorMessage.textContent()}`)
+    }
+
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await expect.poll(() => watchComponent.evaluate(component =>
+      Date.now() >= component.proxy.shortsNavigationLockedUntil
+    )).toBe(true)
+    await page.locator('.shortsNavigationButton').first().click()
+    await expect(page).toHaveURL(/#\/watch\/w1WKmSqwM8I/)
+    await expect(firstPlayer).toBeVisible({ timeout: 30_000 })
+    const retained = await firstPlayer.locator('video').evaluate(element => ({
+      sameElement: element === window.__retainedShortVideo,
+      currentTime: element.currentTime,
+      bufferedRanges: element.buffered.length,
+      paused: element.paused,
+    }))
+    expect(retained.sameElement).toBe(true)
+    expect(retained.currentTime).toBeCloseTo(previousTime, 0)
+    expect(retained.bufferedRanges).toBeGreaterThan(0)
+    expect(retained.paused).toBe(true)
+    const restoredState = await watchComponent.evaluate(component => ({
+      loaded: component.proxy.videoPlayerLoaded,
+      currentTime: component.proxy.currentTime,
+    }))
+    expect(restoredState.loaded).toBe(true)
+    expect(restoredState.currentTime).toBeCloseTo(previousTime, 0)
+  })
+
   test('pausing exposes loaded player state to the template', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'no recorded fixtures for this Short')
     await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/w1WKmSqwM8I')

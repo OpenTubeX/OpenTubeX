@@ -3,7 +3,7 @@ import { chooseAndroidDirectory } from '../../helpers/androidStorage'
 import { isAppHidden } from '../../helpers/appVisibility.js'
 import { playbackScreenWake } from '../../helpers/playbackScreenWake'
 import { createRepeatStatsTracker } from '../../helpers/player/repeatStats'
-import { computed, defineComponent, inject, nextTick, onBeforeUnmount, onMounted, onUnmounted, reactive, ref, shallowRef, watch } from 'vue'
+import { computed, defineComponent, inject, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, onUnmounted, reactive, ref, shallowRef, watch } from 'vue'
 import FtPaidPromotionBadge from '../FtPaidPromotionBadge/FtPaidPromotionBadge.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
@@ -646,6 +646,9 @@ export default defineComponent({
     const { locale, t } = useI18n()
     const hardwareKeyboardAttached = inject('hardwareKeyboardAttached', ref(!process.env.IS_CAPACITOR))
     const { tabId, isTabPresented } = useTabContext()
+    const shortsNavigationSuspended = ref(false)
+    let suspendedShortsError = null
+    const playerIsPresented = computed(() => !shortsNavigationSuspended.value && (isTabPresented?.value ?? true))
     const mediaTabId = tabId ?? 'web'
     const lightsOff = computed(() => store.getters.getTabLightsOff(mediaTabId))
     const showLightsOffToggle = computed(() => store.getters.getShowLightsOffToggle)
@@ -1407,7 +1410,7 @@ export default defineComponent({
       props,
       video,
       tabId,
-      isTabPresented,
+      isTabPresented: playerIsPresented,
       isCrossTabMiniPlayerPresented,
       isPictureInPictureRestorePending: () => startInPip,
       initialState: props.autoPictureInPictureState,
@@ -6485,6 +6488,10 @@ export default defineComponent({
     }
 
     function handlePlay() {
+      if (shortsNavigationSuspended.value) {
+        video.value.pause()
+        return
+      }
       if (!temporaryPlaybackRateActive) setShowUiOnPaused(true)
       playerPaused.value = false
       clearPausedInterfaceReveal()
@@ -6524,6 +6531,7 @@ export default defineComponent({
     }
 
     function handlePlaying() {
+      if (shortsNavigationSuspended.value) return
       hasPlaybackPosition.value = true
       // Chromium can briefly paint a video's poster across the compositor
       // surface while detaching it into native PiP on Windows. Once a real
@@ -6539,6 +6547,7 @@ export default defineComponent({
     }
 
     function handleWaiting() {
+      if (shortsNavigationSuspended.value) return
       if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
         window.ftElectron.tabs.setPlaybackState('waiting', tabId)
       }
@@ -6546,6 +6555,7 @@ export default defineComponent({
     }
 
     function handlePause() {
+      if (shortsNavigationSuspended.value) return
       if (!preserveControlsOnTemporaryPause) setShowUiOnPaused(true)
       preserveControlsOnTemporaryPause = false
       playerPaused.value = true
@@ -6578,6 +6588,7 @@ export default defineComponent({
     }
 
     function handleEnded() {
+      if (shortsNavigationSuspended.value) return
       clearSabrBackoffTimer({ refreshPreview: true })
       const sleepTimerEnded = sleepTimer.consumeEndOfVideo()
       if (!sleepTimerEnded && abRepeatEnabled.value && hasValidAbRepeatRange()) {
@@ -6623,6 +6634,7 @@ export default defineComponent({
     }
 
     function handleSeeking() {
+      if (shortsNavigationSuspended.value) return
       hasPlaybackPosition.value = true
       playbackEnded.value = false
       sleepTimer.checkChapterBoundary()
@@ -6633,6 +6645,7 @@ export default defineComponent({
     }
 
     function handleSeeked() {
+      if (shortsNavigationSuspended.value) return
       if (video.value?.ended) {
         syncPlayPauseControlIcons()
       }
@@ -6796,6 +6809,7 @@ export default defineComponent({
     }
 
     function handleTimeupdate() {
+      if (shortsNavigationSuspended.value) return
       if (video.value) {
         if (sleepTimer.checkChapterBoundary()) return
         checkAbRepeatBoundary()
@@ -7012,6 +7026,7 @@ export default defineComponent({
       fullWindowEnabled,
       getUi: () => ui,
       isActiveTab,
+      isPlayerSuspended: shortsNavigationSuspended,
       pictureInPictureActive,
       props,
       tabId,
@@ -10584,6 +10599,13 @@ export default defineComponent({
         error.category !== shaka.util.Error.Category.TEXT &&
         !(error.code === shaka.util.Error.Code.BAD_HTTP_STATUS && error.data[0].startsWith('https://www.youtube.com/api/timedtext'))
       ) {
+        // Retained Shorts can finish requests after navigation. Recover only
+        // when that player is presented again; caption failures stay optional.
+        if (shortsNavigationSuspended.value) {
+          suspendedShortsError = { error, context, details }
+          return
+        }
+
         // don't react to multiple consecutive errors, otherwise we don't give the format fallback from the previous error a chance to work
         ignoreErrors = true
 
@@ -11673,15 +11695,17 @@ export default defineComponent({
       fullWindowAnimation?.cancel()
       hasLoaded.value = false
       hasPlaybackPosition.value = false
-      closeFullscreenMetadata()
-      closeFullscreenTranscript()
-      closeFullscreenSponsorBlock()
-      closeFullscreenLiveChat()
-      closeFullscreenComments()
-      closeFullscreenPlaylist()
-      if (document.body.dataset.playerFullWindowOwner === mediaTabId) {
-        delete document.body.dataset.playerFullWindowOwner
-        document.body.classList.remove('playerFullWindow')
+      if (!shortsNavigationSuspended.value) {
+        closeFullscreenMetadata()
+        closeFullscreenTranscript()
+        closeFullscreenSponsorBlock()
+        closeFullscreenLiveChat()
+        closeFullscreenComments()
+        closeFullscreenPlaylist()
+        if (document.body.dataset.playerFullWindowOwner === mediaTabId) {
+          delete document.body.dataset.playerFullWindowOwner
+          document.body.classList.remove('playerFullWindow')
+        }
       }
 
       document.removeEventListener('keydown', keyboardShortcutHandler)
@@ -11781,13 +11805,15 @@ export default defineComponent({
       videoFillZoomSnapReady.value = false
       clearTimeout(videoZoomSuppressClickTimer)
 
-      tabMediaCoordinator.setMiniPlayer(mediaTabId, false)
-      tabMediaCoordinator.setActionHandlers(mediaTabId, 'player', {})
-      tabMediaCoordinator.setPlaybackState(mediaTabId, 'none')
+      if (!shortsNavigationSuspended.value) {
+        tabMediaCoordinator.setMiniPlayer(mediaTabId, false)
+        tabMediaCoordinator.setActionHandlers(mediaTabId, 'player', {})
+        tabMediaCoordinator.setPlaybackState(mediaTabId, 'none')
 
-      // Clear tab playback state indicator when player is destroyed
-      if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
-        window.ftElectron.tabs.setPlaybackState('none', tabId)
+        // Clear tab playback state indicator when the active player is destroyed.
+        if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
+          window.ftElectron.tabs.setPlaybackState('none', tabId)
+        }
       }
 
       skippedSponsorBlockSegments.value.forEach(segment => clearTimeout(segment.timeoutId))
@@ -11798,11 +11824,57 @@ export default defineComponent({
 
       window.removeEventListener('online', onlineHandler)
       window.removeEventListener('offline', offlineHandler)
+      if (ui || player) {
+        destroyPlayer().catch(error => {
+          console.warn('Could not release an evicted Short player', error)
+        })
+      }
     })
 
     // #endregion tear down
 
     // #region functions used by the watch page
+
+    let resumeShortsAfterActivation = false
+
+    function suspendForShortsNavigation() {
+      if (!props.shortsPlayer || shortsNavigationSuspended.value || !video.value) return
+      resumeShortsAfterActivation = !video.value.paused
+      video.value.pause()
+      shortsNavigationSuspended.value = true
+      sleepTimer.pauseCountdown()
+      cancelSponsorBlockSkipSchedule()
+      clearAbRepeatBoundarySchedule()
+      tabMediaCoordinator.setActionHandlers(mediaTabId, 'player', {})
+      tabMediaCoordinator.setPlaybackState(mediaTabId, 'none')
+    }
+
+    onDeactivated(suspendForShortsNavigation)
+    onActivated(() => {
+      if (!shortsNavigationSuspended.value) return
+      shortsNavigationSuspended.value = false
+      const resume = resumeShortsAfterActivation
+      resumeShortsAfterActivation = false
+      registerMediaSessionHandlers()
+      if (suspendedShortsError) {
+        const { error, context, details } = suspendedShortsError
+        suspendedShortsError = null
+        handleError(error, context, details)
+        return
+      }
+      emit('loaded', {
+        duration: video.value.duration,
+        width: video.value.videoWidth,
+        height: video.value.videoHeight
+      })
+      handleTimeupdate()
+      handlePause()
+      if (resume && isTabPresented?.value !== false) {
+        video.value?.play().catch(error => {
+          console.warn('Could not resume retained Short', error)
+        })
+      }
+    })
 
     function isPaused() {
       return video.value.paused
@@ -11964,6 +12036,7 @@ export default defineComponent({
       isPaused,
       play,
       pause,
+      suspendForShortsNavigation,
       getCurrentTime,
       setCurrentTime,
       getSabrReloadState,

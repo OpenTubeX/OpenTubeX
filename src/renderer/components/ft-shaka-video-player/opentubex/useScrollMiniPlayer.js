@@ -65,14 +65,16 @@ const SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS = 300
  *   fullWindowEnabled: import('vue').Ref<boolean>,
  *   getUi: () => import('shaka-player').ui.Overlay | null,
  *   isActiveTab: import('vue').ComputedRef<boolean>,
+ *   isPlayerSuspended?: import('vue').Ref<boolean> | null,
  *   pictureInPictureActive: import('vue').Ref<boolean>,
  *   props: { format: string, videoId: string },
  *   tabId?: string | null,
  *   video: import('vue').Ref<HTMLVideoElement | null>
  * }} options
  */
-export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindowEnabled, getUi, isActiveTab, pictureInPictureActive, props, tabId = null, video }) {
+export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindowEnabled, getUi, isActiveTab, isPlayerSuspended = null, pictureInPictureActive, props, tabId = null, video }) {
   const watchNavigation = inject(watchNavigationKey, null)
+  const playerSuspended = computed(() => isPlayerSuspended?.value === true)
   const scrollMiniVideoAspectRatio = ref(DEFAULT_ASPECT_RATIO)
   const scrollMiniPlayerEnabled = computed(() => store.getters.getScrollMiniPlayerEnabled)
   const scrollMiniPlayerOnAllTabs = computed(() => watchNavigation?.minimized?.value || store.getters.getKeepPlayingOnNavigation || store.getters.getScrollMiniPlayerOnAllTabs)
@@ -738,6 +740,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   }
 
   function canUseScrollMiniPlayerBase() {
+    if (playerSuspended.value) return false
     if (container.value?.hasAttribute('data-phone-panel-video')) return false
     if (props.format === 'audio') return false
     if (fullWindowEnabled.value) return false
@@ -1583,7 +1586,12 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     }
   })
 
-  watch(isActiveTab, (active) => {
+  watch([isActiveTab, playerSuspended], ([active, suspended]) => {
+    if (suspended) {
+      unregisterCrossTabMiniPlayer(crossTabMiniPlayerCandidate)
+      deactivateScrollMiniPlayer()
+      return
+    }
     if (scrollMiniPlayerActive.value && !inlineDrag) {
       // A tab switch can change modes without deactivating the mini player.
       // Cancel unfinished gestures so they cannot overwrite the new mode's position.
