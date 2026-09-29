@@ -469,6 +469,49 @@ test('Twitch replay retries a failed page and refreshes once after seeking settl
   expect(await app.electronApp.evaluate(() => globalThis.twitchReplayRequests)).toBe(3)
 })
 
+test('Twitch replay keeps loading chat when cursor requests fail integrity checks', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    globalThis.twitchReplayPositions = []
+    ipcMain.removeHandler('twitch-chat-replay-page')
+    ipcMain.handle('twitch-chat-replay-page', (_event, _videoId, position) => {
+      globalThis.twitchReplayPositions.push(position)
+      if (typeof position === 'string') throw new Error('failed integrity check')
+      const node = (id, offset, text) => ({
+        cursor: 'opaque',
+        node: {
+          id,
+          contentOffsetSeconds: offset,
+          commenter: { displayName: 'Viewer' },
+          message: { fragments: [{ text }] }
+        }
+      })
+      return {
+        data: {
+          video: {
+            comments: {
+              pageInfo: { hasNextPage: position === 0 },
+              edges: position === 0
+                ? [node('boundary', 0, 'Boundary chat')]
+                : [node('boundary', 0, 'Boundary chat'), node('after', 0, 'After boundary')]
+            }
+          }
+        }
+      }
+    })
+  })
+
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const chat = page.locator(`${activeTab} .twitchChat`)
+  await expect(chat.getByText('After boundary')).toBeVisible()
+  await expect(chat.getByText('Boundary chat')).toHaveCount(1)
+  await expect(chat.getByText('Live Chat is unavailable for this stream.')).toHaveCount(0)
+  expect(await app.electronApp.evaluate(() => globalThis.twitchReplayPositions)).toEqual([0, 1])
+})
+
 test('Twitch replay waits for a seek to settle before fetching from the new position', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const mediaUrl = 'https://www.twitch.tv/videos/123456789'
@@ -526,11 +569,11 @@ test('Twitch replay continues past a page with no usable messages', async ({ app
   await app.electronApp.evaluate(({ ipcMain }) => {
     ipcMain.removeHandler('twitch-chat-replay-page')
     ipcMain.handle('twitch-chat-replay-page', async (_event, _videoId, position) => {
-      if (position !== 'next') await new Promise(resolve => setTimeout(resolve, 1000))
+      if (position !== 1) await new Promise(resolve => setTimeout(resolve, 1000))
       return {
         data: {
           video: {
-            comments: position === 'next'
+            comments: position === 1
               ? {
                   pageInfo: { hasNextPage: false },
                   edges: [{
