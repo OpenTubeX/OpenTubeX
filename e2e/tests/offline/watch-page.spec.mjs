@@ -3976,6 +3976,15 @@ test.describe('watch page', () => {
     await expect(liveChatComments.locator(':scope > .os-scrollbar-vertical'))
       .toHaveClass(/os-scrollbar-unusable/)
 
+    await page.keyboard.press('Control+t')
+    await expect(page.locator('.tabBar .tab')).toHaveCount(2)
+    await page.locator('.tabBar .tab').first().click()
+    await expect.poll(() => page.evaluate(() => document.fullscreenElement === null)).toBe(true)
+    await expect(page.locator(`${activeTab} .fullscreenLiveChatOverlay`)).toBeHidden()
+    await expect(replay).toBeVisible()
+
+    await setPlayerFullscreen(page, true)
+    await expect(fullscreenChat).toBeVisible()
     await fullscreenLiveChatToggle.click({ force: true })
     await expect(fullscreenChat).toHaveCount(0)
     await setPlayerFullscreen(page, false)
