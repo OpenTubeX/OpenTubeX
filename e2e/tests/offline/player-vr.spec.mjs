@@ -120,21 +120,17 @@ test('uses panoramic HLS for a YouTube mesh video', async ({ app, page }) => {
     window.__vrTrickPlayCalls = []
     shakaPlayer.trickPlay = (...args) => window.__vrTrickPlayCalls.push(args)
   })
-  await surface.dispatchEvent('pointerdown', {
-    button: 0,
-    isPrimary: true,
-    pointerId: 1,
-    pointerType: 'mouse'
-  })
-  await page.waitForTimeout(750)
-  expect(await page.evaluate(() => window.__vrTrickPlayCalls)).toEqual([])
-  await surface.dispatchEvent('pointerup', { pointerId: 1, pointerType: 'mouse' })
-
   const bounds = await surface.boundingBox()
   const point = { x: bounds.x + bounds.width * 0.2, y: bounds.y + bounds.height * 0.2 }
+  await page.clock.install()
+  await page.mouse.move(point.x, point.y)
+  await page.mouse.down()
+  await page.clock.fastForward(750)
+  expect(await page.evaluate(() => window.__vrTrickPlayCalls)).toEqual([])
+  await page.mouse.up()
+
   const cursorAtPoint = () => page.evaluate(({ x, y }) =>
     getComputedStyle(document.elementFromPoint(x, y)).cursor, point)
-  await page.mouse.move(point.x, point.y)
   await expect.poll(cursorAtPoint).toBe('grab')
   await page.mouse.down()
   await expect.poll(cursorAtPoint).toBe('grabbing')
