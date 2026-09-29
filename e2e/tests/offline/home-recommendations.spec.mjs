@@ -253,8 +253,8 @@ test('opts in before requesting candidates and shows only unseen matching videos
   const cards = section.locator('.recommendationFeed .ft-list-video')
   await expect(cards).toHaveCount(2)
   for (const candidate of [channelCandidate, searchCandidate]) {
-    await expect(section.getByRole('link', { name: new RegExp(candidate.title) })).toBeVisible()
-    await expect(section.getByRole('link', { name: new RegExp(candidate.title) }))
+    await expect(section.locator('a.title').filter({ hasText: new RegExp(candidate.title) })).toBeVisible()
+    await expect(section.locator('a.title').filter({ hasText: new RegExp(candidate.title) }))
       .toHaveAttribute('href', `#/watch/${candidate.videoId}`)
   }
   for (const candidate of excludedCandidates) {
@@ -305,21 +305,21 @@ test('reuses recommendations when revisiting Home and bypasses the cache with Re
   await setEnabled(page, true)
   await expectBothSources(backend)
   await backend.settled()
-  await expect(recommendations(page).getByRole('link', { name: /Linux desktop shortcuts/ })).toBeVisible()
+  await expect(recommendations(page).locator('a.title').filter({ hasText: /Linux desktop shortcuts/ })).toBeVisible()
 
   const requestCount = backend.requests.length
   backend.channelVideos = [video('recfresh001', 'Linux desktop fresh results')]
   backend.searchVideos = []
   await goTo(page, 'history')
   await goTo(page, 'home')
-  await expect(recommendations(page).getByRole('link', { name: /Linux desktop shortcuts/ })).toBeVisible()
+  await expect(recommendations(page).locator('a.title').filter({ hasText: /Linux desktop shortcuts/ })).toBeVisible()
   await renderTurn(page)
   expect(backend.requests).toHaveLength(requestCount)
 
   await recommendations(page).getByRole('button', { name: REFRESH, exact: true }).click()
   await expectBothSources(backend, requestCount)
   await backend.settled()
-  await expect(recommendations(page).getByRole('link', { name: /Linux desktop fresh results/ })).toBeVisible()
+  await expect(recommendations(page).locator('a.title').filter({ hasText: /Linux desktop fresh results/ })).toBeVisible()
   await expect(recommendations(page).locator('.recommendationFeed .ft-list-video')).toHaveCount(1)
 })
 
@@ -369,7 +369,7 @@ test.describe('history clearing with saved recommendation seeds', () => {
     expect(backend.requests).toHaveLength(requestCount)
     await section.getByRole('button', { name: REFRESH, exact: true }).click()
     await backend.settled()
-    await expect(section.getByRole('link', { name: /Linux desktop fresh results/ })).toBeVisible()
+    await expect(section.locator('a.title').filter({ hasText: /Linux desktop fresh results/ })).toBeVisible()
   })
 })
 
@@ -516,7 +516,7 @@ test('keeps the loaded feed stable while loading more and when cancelling that l
     await expect(titles).toHaveText(originalTitles)
     release()
     await backend.settled()
-    await expect(section.getByRole('link', { name: /Linux desktop extra suggestions/ })).toBeVisible()
+    await expect(section.locator('a.title').filter({ hasText: /Linux desktop extra suggestions/ })).toBeVisible()
     const loadedTitles = await titles.allTextContents()
 
     release = backend.holdResponses()
@@ -564,7 +564,7 @@ test('hiding through Customize invalidates pending results and stops requests un
 
     await customizer.getByText('Recommended for you', { exact: true }).click()
     await expectBothSources(backend, requestCount)
-    await expect(recommendations(page).getByRole('link', { name: /Linux desktop shortcuts/ })).toBeVisible()
+    await expect(recommendations(page).locator('a.title').filter({ hasText: /Linux desktop shortcuts/ })).toBeVisible()
   } finally {
     release()
   }
@@ -613,8 +613,8 @@ test.describe('Home in a background tab', () => {
       await expect(page).toHaveURL(/#\/home$/)
       await expectBothSources(backend, 3)
       await backend.settled()
-      await expect(recommendations(page).getByRole('link', { name: /Linux desktop fresh results/ })).toBeVisible()
-      await expect(recommendations(page).getByRole('link', { name: /Linux desktop shortcuts/ })).toHaveCount(0)
+      await expect(recommendations(page).locator('a.title').filter({ hasText: /Linux desktop fresh results/ })).toBeVisible()
+      await expect(recommendations(page).locator('a.title').filter({ hasText: /Linux desktop shortcuts/ })).toHaveCount(0)
     } finally {
       release()
     }
@@ -635,7 +635,7 @@ test.describe('watch-page recommendations hidden', () => {
 
     await setEnabled(page, true)
     await backend.settled()
-    await expect(section.getByRole('link', { name: /Linux desktop shortcuts/ })).toBeVisible()
+    await expect(section.locator('a.title').filter({ hasText: /Linux desktop shortcuts/ })).toBeVisible()
     const watchRecommendationsHidden = () => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getHideRecommendedVideos)
     expect(await watchRecommendationsHidden()).toBe(true)
 
@@ -728,7 +728,7 @@ test.describe('without watch history', () => {
     page = relaunched.page
     await mockCandidates(page)
     await goTo(page, 'home')
-    await expect(recommendations(page).getByRole('link', { name: /Linux desktop shortcuts/ })).toBeVisible()
+    await expect(recommendations(page).locator('a.title').filter({ hasText: /Linux desktop shortcuts/ })).toBeVisible()
   })
 
   test('keeps the feed when disliking its last positive seed until refresh', async ({ page }) => {
@@ -797,8 +797,8 @@ for (const failedSources of [['channel', 'search', 'related'], ['channel']]) {
       await expect(section.getByRole('status')).toHaveText(UNAVAILABLE)
       await expect(section.locator('.recommendationFeed')).toHaveCount(0)
     } else {
-      await expect(section.getByRole('link', { name: /Linux desktop themes/ })).toBeVisible()
-      await expect(section.getByRole('link', { name: /Linux desktop shortcuts/ })).toHaveCount(0)
+      await expect(section.locator('a.title').filter({ hasText: /Linux desktop themes/ })).toBeVisible()
+      await expect(section.locator('a.title').filter({ hasText: /Linux desktop shortcuts/ })).toHaveCount(0)
       await expect(section.getByText(UNAVAILABLE, { exact: true })).toHaveCount(0)
     }
 
@@ -808,8 +808,8 @@ for (const failedSources of [['channel', 'search', 'related'], ['channel']]) {
     await expectBothSources(backend, requestCount)
     await backend.settled()
     await expect(section.getByText(UNAVAILABLE, { exact: true })).toHaveCount(0)
-    await expect(section.getByRole('link', { name: /Linux desktop shortcuts/ })).toBeVisible()
-    await expect(section.getByRole('link', { name: /Linux desktop themes/ })).toBeVisible()
+    await expect(section.locator('a.title').filter({ hasText: /Linux desktop shortcuts/ })).toBeVisible()
+    await expect(section.locator('a.title').filter({ hasText: /Linux desktop themes/ })).toBeVisible()
   })
 }
 
@@ -852,7 +852,7 @@ for (const change of ['clearing history', 'disabling recommendations']) {
         await expect(recommendations(page).locator('.recommendationFeed')).toHaveCount(0)
         releaseFresh()
         await backend.settled()
-        await expect(recommendations(page).getByRole('link', { name: /Linux desktop fresh results/ })).toBeVisible()
+        await expect(recommendations(page).locator('a.title').filter({ hasText: /Linux desktop fresh results/ })).toBeVisible()
         await expect(recommendations(page).locator('.recommendationFeed .ft-list-video')).toHaveCount(1)
       } finally {
         releaseFresh()
@@ -871,7 +871,7 @@ test('discovers related videos without title overlap and explains their origin',
   await goTo(page, 'home')
   await setEnabled(page, true)
   await backend.settled()
-  await expect(recommendations(page).getByRole('link', { name: /A tour of KDE Plasma/ })).toBeVisible()
+  await expect(recommendations(page).locator('a.title').filter({ hasText: /A tour of KDE Plasma/ })).toBeVisible()
   await expect(recommendations(page).getByText('Related to Linux desktop customization', { exact: true })).toBeVisible()
   const relatedRequests = backend.requests.filter(request => request.source === 'related')
   expect(relatedRequests.length).toBeGreaterThan(0)
@@ -883,9 +883,9 @@ test('learns from feedback across restarts and lets the user reset recommendatio
   await goTo(page, 'home')
   await setEnabled(page, true)
   const section = recommendations(page)
-  await expect(section.getByRole('link', { name: /Linux desktop shortcuts/ })).toBeVisible()
+  await expect(section.locator('a.title').filter({ hasText: /Linux desktop shortcuts/ })).toBeVisible()
   await section.getByRole('button', { name: 'Not interested: Linux desktop shortcuts', exact: true }).click()
-  await expect(section.getByRole('link', { name: /Linux desktop shortcuts/ })).toBeVisible()
+  await expect(section.locator('a.title').filter({ hasText: /Linux desktop shortcuts/ })).toBeVisible()
   await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store
     .getters.getRecommendationRecords.find(record => record.videoId === 'recchan0001')?.feedback)).toBe('dismiss')
 
@@ -894,10 +894,10 @@ test('learns from feedback across restarts and lets the user reset recommendatio
   await mockCandidates(page)
   await goTo(page, 'home')
   await expect(recommendations(page).getByRole('button', { name: 'Enable recommendations', exact: true })).toHaveCount(0)
-  await expect(recommendations(page).getByRole('link', { name: /Linux desktop themes/ })).toBeVisible()
-  await expect(recommendations(page).getByRole('link', { name: /Linux desktop shortcuts/ })).toHaveCount(0)
+  await expect(recommendations(page).locator('a.title').filter({ hasText: /Linux desktop themes/ })).toBeVisible()
+  await expect(recommendations(page).locator('a.title').filter({ hasText: /Linux desktop shortcuts/ })).toHaveCount(0)
   await chooseRecommendationOption(page, 'Reset recommendations')
-  await expect(recommendations(page).getByRole('link', { name: /Linux desktop shortcuts/ })).toBeVisible()
+  await expect(recommendations(page).locator('a.title').filter({ hasText: /Linux desktop shortcuts/ })).toBeVisible()
   await clearHistory(page)
   await expectNoHistory(page)
   await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getRecommendationRecords.length)).toBe(0)
@@ -924,7 +924,7 @@ test('records real grid impressions once per feed and supports positive and chan
   await expect(hideChannel).toHaveAttribute('title', 'Hide this channel: Discovery Channel')
   await expect(hideChannel).toHaveAccessibleName('Hide this channel: Discovery Channel')
   await hideChannel.click()
-  await expect(section.getByRole('link', { name: /Linux desktop themes/ })).toHaveCount(0)
+  await expect(section.locator('a.title').filter({ hasText: /Linux desktop themes/ })).toHaveCount(0)
   await expect.poll(async () => (await getRecord('recsrch0001'))?.feedback).toBe('blockChannel')
 })
 
@@ -1000,7 +1000,7 @@ test('keeps disliked videos visible until refresh and switches the filled thumb'
   await negative.click()
   await expect(negative).toHaveAttribute('aria-pressed', 'true')
   await section.getByRole('button', { name: REFRESH, exact: true }).click()
-  await expect(section.getByRole('link', { name: /Linux desktop shortcuts/ })).toHaveCount(0)
+  await expect(section.locator('a.title').filter({ hasText: /Linux desktop shortcuts/ })).toHaveCount(0)
 })
 
 for (const avoidTranslation of ['entire_app', 'disabled', 'watch_only']) {
@@ -1043,7 +1043,7 @@ test.describe('saved-video cold start', () => {
     await goTo(page, 'home')
     await setEnabled(page, true)
     await expectBothSources(backend)
-    await expect(recommendations(page).getByRole('link', { name: /Linux desktop shortcuts/ })).toBeVisible()
+    await expect(recommendations(page).locator('a.title').filter({ hasText: /Linux desktop shortcuts/ })).toBeVisible()
     await expect(recommendations(page).getByRole('combobox', { name: 'Discovery', exact: true })).toHaveCount(0)
     await recommendations(page).locator('.recommendationOptions .iconButton').click()
     await page.getByRole('radio', { name: 'Explore', exact: true }).check()
@@ -1066,13 +1066,13 @@ test('syncs feedback and resets across windows even before the second window loa
   })
   await expect.poll(async () => (await state(second)).feedback).toBe('dismiss')
   await goTo(second, 'home')
-  await expect(recommendations(second).getByRole('link', { name: /Linux desktop themes/ })).toBeVisible()
-  await expect(recommendations(second).getByRole('link', { name: /Linux desktop shortcuts/ })).toHaveCount(0)
+  await expect(recommendations(second).locator('a.title').filter({ hasText: /Linux desktop themes/ })).toBeVisible()
+  await expect(recommendations(second).locator('a.title').filter({ hasText: /Linux desktop shortcuts/ })).toHaveCount(0)
   const oldEpoch = (await state(page)).epoch
   await chooseRecommendationOption(second, 'Reset recommendations')
   await expect.poll(async () => (await state(page)).epoch).not.toBe(oldEpoch)
   await expect.poll(async () => (await state(page)).feedback).toBe(null)
-  await expect(recommendations(page).getByRole('link', { name: /Linux desktop shortcuts/ })).toBeVisible()
+  await expect(recommendations(page).locator('a.title').filter({ hasText: /Linux desktop shortcuts/ })).toBeVisible()
 })
 
 test.describe('local related discovery', () => {
@@ -1242,7 +1242,7 @@ test('moves the explanation into a keyboard-accessible tooltip after enabling', 
   await expect(section.getByRole('checkbox', { name: 'Enable recommendations', exact: true })).toHaveCount(0)
   await expect(section.locator('.recommendationInfo')).toHaveCount(0)
   await setEnabled(page, true)
-  await expect(section.getByRole('link', { name: /Linux desktop shortcuts/ })).toBeVisible()
+  await expect(section.locator('a.title').filter({ hasText: /Linux desktop shortcuts/ })).toBeVisible()
   await expect(section.locator('.recommendationIntroduction')).toHaveCount(0)
   await expect(section.getByRole('button', { name: 'Enable recommendations', exact: true })).toHaveCount(0)
   const info = section.locator('.recommendationInfo button')
@@ -1276,7 +1276,7 @@ test('provides a custom discovery selector and separate actions with keyboard na
   await goTo(page, 'home')
   await setEnabled(page, true)
   const section = recommendations(page)
-  await expect(section.getByRole('link', { name: /Linux desktop shortcuts/ })).toBeVisible()
+  await expect(section.locator('a.title').filter({ hasText: /Linux desktop shortcuts/ })).toBeVisible()
   await expect(section.locator('.recommendationControls')).toHaveCount(0)
   await expect(section.getByRole('button', { name: 'Reset recommendations', exact: true })).toHaveCount(0)
   const menu = section.locator('.recommendationOptions .iconButton')
@@ -1401,6 +1401,6 @@ for (const subscriptions of [{ invalid: true }, [null, { id: CHANNEL_ID }]]) {
     }, subscriptions)
     await goTo(page, 'home')
     await setEnabled(page, true)
-    await expect(recommendations(page).getByRole('link', { name: /Linux desktop shortcuts/ })).toBeVisible()
+    await expect(recommendations(page).locator('a.title').filter({ hasText: /Linux desktop shortcuts/ })).toBeVisible()
   })
 }
