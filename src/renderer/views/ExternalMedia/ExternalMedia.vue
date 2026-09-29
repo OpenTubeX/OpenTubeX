@@ -77,6 +77,7 @@
               :title="info.title ?? ''"
               :thumbnail="thumbnail"
               :is-live="source.isLive"
+              :current-playback-rate="defaultPlaybackRate"
               :storyboard-src="source.storyboardSrc"
               :chapters="chapters"
               :current-chapter-index="currentChapterIndex"
@@ -337,6 +338,7 @@ const currentTime = ref(0)
 const showChapters = ref(false)
 const showDownloadPrompt = ref(false)
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
+const defaultPlaybackRate = computed(() => store.getters.getDefaultPlayback)
 const attemptUsedCookies = ref(false)
 const drmError = ref(false)
 const seekCount = ref(0)

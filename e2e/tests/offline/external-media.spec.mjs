@@ -269,7 +269,11 @@ test('Twitch livestream omits playback speed from player options', async ({ app,
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const mediaUrl = 'https://www.twitch.tv/testchannel'
   await prepareTwitchYtDlp(app, page, mediaUrl, true)
-  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseQuickPlaybackSpeedBar', true))
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateUseQuickPlaybackSpeedBar', true)
+    await store.dispatch('updateDefaultPlayback', 1.5)
+  })
   await page.locator(sel.searchInput).fill(mediaUrl)
   await page.locator(sel.searchInput).press('Enter')
 
@@ -277,6 +281,20 @@ test('Twitch livestream omits playback speed from player options', async ({ app,
   await expect(player.locator('.shaka-overflow-menu-button')).toBeVisible()
   expect(await player.locator('video').evaluate(video => video.ui.getConfiguration().overflowMenuButtons)).not.toContain('playback_rate')
   expect(await player.locator('video').evaluate(video => video.ui.getConfiguration().controlPanelElements)).not.toContain('ft_quick_playback_rate_bar')
+  expect(await player.locator('video').evaluate(video => video.playbackRate)).toBe(1)
+})
+
+test('external media starts at the default playback speed', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateDefaultPlayback', 1.5))
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+
+  const video = page.locator(`${activeTab} .externalMediaPlayer video`)
+  await waitForPlayback(page)
+  await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.5)
 })
 
 test('failed external media keeps its site title after unloading', async ({ app, page }) => {
