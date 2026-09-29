@@ -357,18 +357,6 @@
       border-radius: calc(12px * var(--ui-roundness));
     }
 
-    .videoArea .videoAreaMargin:has(.repeatStats) {
-      grid-template-rows: auto auto auto;
-    }
-
-    .videoArea .videoPlayer:has(.repeatStats) {
-      block-size: auto;
-
-      :deep(.ftVideoPlayer:not(:fullscreen, .fullWindow, .scrollMiniPlayer)) {
-        block-size: var(--shorts-player-height);
-      }
-    }
-
     .videoArea :deep(.ftVideoPlayer),
     .videoArea .videoPlayer:has(.errorContainer) {
       overflow: hidden;
@@ -760,12 +748,6 @@
       inline-size: 48px;
       block-size: 48px;
       border-radius: 50%;
-    }
-
-    .shortsActionSkeleton small {
-      inline-size: 52px;
-      block-size: 8px;
-      border-radius: 4px;
     }
 
     .shortsSkeletonSound {
@@ -1507,7 +1489,6 @@
 }
 
 :global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsAction:not(.shortsActionSkeleton) > span),
-:global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsActionSkeleton > small),
 :global(.capacitorPhoneLayout .videoLayout.shortsPlayerActive .shortsSkeletonVolume) {
   display: none;
 }
@@ -1685,7 +1666,6 @@
     .shortsSkeletonChannelRow,
     .shortsFullscreenChannelRow,
     .shortsAction:not(.shortsActionSkeleton) > span,
-    .shortsActionSkeleton > small,
     .shortsSkeletonVolume
   )) {
     display: none;

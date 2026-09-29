@@ -478,7 +478,6 @@
               class="shortsAction shortsActionSkeleton"
             >
               <span class="ft-shimmer" />
-              <small class="ft-shimmer" />
             </div>
             <span class="shortsSkeletonSound ft-shimmer" />
           </template>
