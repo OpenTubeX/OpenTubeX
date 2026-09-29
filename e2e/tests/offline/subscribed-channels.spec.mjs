@@ -33,6 +33,23 @@ test.use({
 })
 
 test.describe('subscribed channels', () => {
+  test('hides channels from both sidebar and subscribed-channel links', async ({ page }) => {
+    await goTo(page, 'subscribedchannels')
+
+    const beta = page.locator('.channel', { hasText: 'Beta Channel' })
+    await beta.locator('.thumbnailContainer').click({ button: 'right' })
+    const menu = page.getByRole('menu', { name: 'Context menu', exact: true })
+    await menu.getByRole('menuitem', { name: /^Hide channel$/i }).click()
+    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getChannelsHiddenParsed))
+      .toContainEqual({ name: 'UCbbbbbbbbbbbbbbbbbbbbbb', preferredName: 'Beta Channel' })
+
+    const alpha = page.locator('.navChannel[title="Alpha Channel"]')
+    await alpha.click({ button: 'right' })
+    await menu.getByRole('menuitem', { name: /^Hide channel$/i }).click()
+    await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getChannelsHiddenParsed))
+      .toContainEqual({ name: 'UCaaaaaaaaaaaaaaaaaaaaaa', preferredName: 'Alpha Channel' })
+  })
+
   test('lists seeded subscriptions and filters them', async ({ page }) => {
     await goTo(page, 'subscribedchannels')
 

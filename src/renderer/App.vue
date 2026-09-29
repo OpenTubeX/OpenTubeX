@@ -589,6 +589,7 @@ import {
 } from './helpers/progressPresentation'
 import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog } from './helpers/releaseUpdates'
 import { copyToClipboard, isUnloadedBackgroundTabClick, openExternalLink, openInternalPath, shareLink, showApiErrorToast, showToast } from './helpers/utils'
+import { getChannelLinkDetails, getChannelLinkMenuItems } from './helpers/channel-context-menu'
 import { openNotificationSettings } from './helpers/capacitorUi'
 import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
 import {
@@ -4322,7 +4323,10 @@ async function handleMobileLinkContextMenu(event) {
 
   event.preventDefault()
   event.stopPropagation()
-  mobileContextActions.value = null
+  const channel = getChannelLinkDetails(link)
+  mobileContextActions.value = channel
+    ? { title: channel.name, actions: getChannelLinkMenuItems(channel, t) }
+    : null
   mobileContextLink.value = link
   await nextTick()
   mobileLinkActionsRef.value?.focus({ preventScroll: true })
