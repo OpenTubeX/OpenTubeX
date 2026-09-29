@@ -3852,6 +3852,9 @@ export default defineComponent({
     // Teleporting the player releases Chromium's pointer capture. Keep the
     // active stream on window so a fast swipe can finish outside the player.
     const playerPointerIds = new Set()
+    let vrClickPointerId = null
+    let vrClickStart = { x: 0, y: 0 }
+    let vrClickDragged = false
     function trackPlayerPointer(event) {
       playerPointerIds.add(event.pointerId)
       window.addEventListener('pointermove', handlePlayerPointerMove, true)
@@ -3859,11 +3862,19 @@ export default defineComponent({
       window.addEventListener('pointercancel', handlePlayerPointerEnd, true)
     }
     function handlePlayerPointerMove(event) {
+      if (event.pointerId === vrClickPointerId &&
+        Math.hypot(event.clientX - vrClickStart.x, event.clientY - vrClickStart.y) > 8) {
+        vrClickDragged = true
+      }
       if (playerPointerIds.has(event.pointerId)) handleVideoZoomPointerMove(event)
     }
     function handlePlayerPointerEnd(event) {
       if (!playerPointerIds.has(event.pointerId)) return
       playerPointerIds.delete(event.pointerId)
+      if (event.type === 'pointercancel' && event.pointerId === vrClickPointerId) {
+        vrClickPointerId = null
+        vrClickDragged = false
+      }
       if (!playerPointerIds.size) clearPlayerPointers()
       if (event.type === 'pointercancel') handleVideoZoomPointerCancel(event)
       else handleVideoZoomPointerUp(event)
@@ -3879,6 +3890,11 @@ export default defineComponent({
     /** @param {PointerEvent} event */
     function handleVideoZoomPointerDown(event) {
       trackPlayerPointer(event)
+      if (useVrMode.value && event.button === 0 && event.isPrimary && isPlayerSurfaceTarget(event.target)) {
+        vrClickPointerId = event.pointerId
+        vrClickStart = { x: event.clientX, y: event.clientY }
+        vrClickDragged = false
+      }
       if (event.pointerType === 'touch' && !event.isPrimary && temporaryPlaybackRatePointerId !== null) {
         temporaryPlaybackRatePointerCancelled = true
         finishTemporaryPlaybackRateHold(TEMPORARY_PLAYBACK_RATE_POINTER_SOURCE)
@@ -5207,6 +5223,7 @@ export default defineComponent({
         !event.isPrimary ||
         event.ctrlKey ||
         event.metaKey ||
+        useVrMode.value ||
         !holdToDoublePlaybackSpeed.value ||
         temporaryPlaybackRatePointerId !== null ||
         !isPlayerSurfaceTarget(event.target)
@@ -5297,6 +5314,23 @@ export default defineComponent({
       suppressTemporaryPlaybackRateClick = false
       event.preventDefault()
       event.stopImmediatePropagation()
+    }
+
+    /** @param {MouseEvent} event */
+    function handleVrSurfaceClick(event) {
+      if (!useVrMode.value || !isPlayerSurfaceTarget(event.target)) return
+
+      const dragged = vrClickDragged
+      vrClickPointerId = null
+      vrClickDragged = false
+      if (dragged) return
+
+      // Shaka skips its usual surface play/pause handler while VR is active.
+      if (video.value.paused) {
+        video.value.play()
+      } else {
+        video.value.pause()
+      }
     }
 
     /**
@@ -5510,12 +5544,14 @@ export default defineComponent({
       controlsContainer.removeEventListener('pointerdown', handleTemporaryPlaybackRatePointerDown, true)
       controlsContainer.removeEventListener('pointerleave', handleTemporaryPlaybackRatePointerLeave)
       controlsContainer.removeEventListener('click', handleTemporaryPlaybackRateClick, true)
+      controlsContainer.removeEventListener('click', handleVrSurfaceClick, true)
       controlsContainer.removeEventListener('mousedown', handleFullscreenTitleMouseDown, true)
       controlsContainer.removeEventListener('dblclick', handleControlsContainerDoubleClick, true)
 
       controlsContainer.addEventListener('pointerdown', handleTemporaryPlaybackRatePointerDown, true)
       controlsContainer.addEventListener('pointerleave', handleTemporaryPlaybackRatePointerLeave)
       controlsContainer.addEventListener('click', handleTemporaryPlaybackRateClick, true)
+      controlsContainer.addEventListener('click', handleVrSurfaceClick, true)
       controlsContainer.addEventListener('mousedown', handleFullscreenTitleMouseDown, true)
       controlsContainer.addEventListener('dblclick', handleControlsContainerDoubleClick, true)
 
@@ -11979,6 +12015,7 @@ export default defineComponent({
 
     return {
       hasLoaded,
+      useVrMode,
       androidFullscreenHostActive,
       videoLayoutReady,
       shortsPaused,

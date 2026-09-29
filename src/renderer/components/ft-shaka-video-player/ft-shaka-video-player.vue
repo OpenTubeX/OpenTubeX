@@ -104,6 +104,7 @@
         videoZoomPanning,
         videoZoomPinching,
         videoZoomTouchEnabled: videoZoomPossible,
+        vrMode: useVrMode,
         playerPaused: playerPaused && hasLoaded,
         pausedInterfaceRevealed,
         hidePlayerControlsWhenPaused: !showPlayerControlsWhenPaused,

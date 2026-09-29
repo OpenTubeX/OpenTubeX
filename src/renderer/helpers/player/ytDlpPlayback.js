@@ -22,6 +22,7 @@ import { mapExternalPlaybackMetadata } from '../../../ytDlpMetadata'
  * @property {boolean} incomplete whether a timeout may have omitted formats
  * @property {string | null} title
  * @property {boolean} isLive
+ * @property {'EQUIRECTANGULAR' | null} [vrProjection]
  * @property {boolean} [audioOnly] whether an external manifest has no video formats
  * @property {boolean} [twitchSubOnlyVod]
  * @property {string | null} [twitchVodRegistrationId]
@@ -137,11 +138,11 @@ function hasLimitedLiveDvrWindow(url) {
  * Ensures playback-error recovery extracts fresh signed stream URLs.
  * @param {string} videoId
  */
-export function invalidateYtDlpPlaybackSource(videoId) {
+export async function invalidateYtDlpPlaybackSource(videoId) {
   if (playbackSourceCache.delete(videoId)) {
     notifyPlaybackSourceCacheChanged()
   }
-  ytDlp.ytDlpPlaybackCacheDelete(videoId).catch(error => {
+  await ytDlp.ytDlpPlaybackCacheDelete(videoId).catch(error => {
     console.warn('Could not remove an entry from the persistent yt-dlp playback cache', error)
   })
 }
@@ -928,6 +929,7 @@ async function loadYtDlpPlaybackSource(
           incomplete: info.incomplete === true,
           title: info.title,
           isLive: false,
+          vrProjection: null,
           duration,
           storyboardSrc: info.storyboardVtt === null
             ? null
@@ -945,8 +947,14 @@ async function loadYtDlpPlaybackSource(
     }
 
     const httpFormats = info.formats.filter(format => format.protocol === 'https' && format.url !== null)
+    // YouTube's direct mesh streams need their embedded projection mesh to be
+    // rendered correctly. Its HLS rendition is a panorama that Shaka can show
+    // with the existing equirectangular VR renderer.
+    const preferVrHls = !isLive && info.hlsManifestUrl !== null &&
+      info.formats.some(format => isVideoFormat(format) && format.formatNote?.includes('mesh'))
     const legacyHttpFormats = httpFormats.filter(format => isVideoFormat(format) && isAudioFormat(format))
     const legacyFormatsPromise = convertLegacyFormats(legacyHttpFormats)
+    let deferredDashSource = null
 
     // live streams are only available as HLS, which is what makes rewinding within
     // the DVR window possible
@@ -966,6 +974,7 @@ async function loadYtDlpPlaybackSource(
           incomplete: info.incomplete === true,
           title: info.title,
           isLive: false,
+          vrProjection: null,
           duration: info.duration,
           storyboardSrc: info.storyboardVtt === null
             ? null
@@ -977,8 +986,12 @@ async function loadYtDlpPlaybackSource(
         }
 
         if (deferIncompleteSource(source, [...localFormats, ...legacyFormats])) continue
-        await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, source)
-        return source
+        if (preferVrHls) {
+          deferredDashSource = source
+        } else {
+          await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, source)
+          return source
+        }
       }
     }
 
@@ -996,6 +1009,7 @@ async function loadYtDlpPlaybackSource(
         incomplete: info.incomplete === true,
         title: info.title,
         isLive,
+        vrProjection: preferVrHls ? 'EQUIRECTANGULAR' : null,
         duration: info.duration,
         storyboardSrc: info.storyboardVtt === null
           ? null
@@ -1027,6 +1041,11 @@ async function loadYtDlpPlaybackSource(
       return source
     }
 
+    if (deferredDashSource !== null) {
+      await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, deferredDashSource)
+      return deferredDashSource
+    }
+
     if (!isLive) {
       const legacyFormats = await legacyFormatsPromise
       if (legacyFormats.length > 0) {
@@ -1038,6 +1057,7 @@ async function loadYtDlpPlaybackSource(
           incomplete: info.incomplete === true,
           title: info.title,
           isLive: false,
+          vrProjection: null,
           duration: info.duration,
           storyboardSrc: info.storyboardVtt === null
             ? null

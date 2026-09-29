@@ -3492,8 +3492,11 @@ export default defineComponent({
             this.videoStoryboardSrc = this.createLocalStoryboardUrls(storyboard)
           }
 
-          if (!metadataOnly && this.restrictedPlaybackError === null && result.streaming_data?.adaptive_formats.length > 0) {
-            this.vrProjection = result.streaming_data.adaptive_formats
+          if (!metadataOnly && this.restrictedPlaybackError === null && result.streaming_data) {
+            this.vrProjection = [
+              ...(result.streaming_data.adaptive_formats ?? []),
+              ...(result.streaming_data.formats ?? [])
+            ]
               .find(format => {
                 return format.has_video &&
                   typeof format.projection_type === 'string' &&
@@ -3501,6 +3504,12 @@ export default defineComponent({
               })
               ?.projection_type ?? null
 
+            if (this.vrProjection === 'MESH' && supportsYtDlp && this.videoPlaybackEngine === 'built-in') {
+              this.playbackEngineFallbackTarget = 'yt-dlp'
+            }
+          }
+
+          if (!metadataOnly && this.restrictedPlaybackError === null && result.streaming_data?.adaptive_formats.length > 0) {
             if (
               poToken &&
               videoInfo.info.streaming_data?.server_abr_streaming_url &&
@@ -3801,7 +3810,7 @@ export default defineComponent({
               }
             }
 
-            this.vrProjection = result.adaptiveFormats
+            this.vrProjection = [...result.adaptiveFormats, ...result.formatStreams]
               .find(stream => {
                 return typeof stream.projectionType === 'string' &&
                   stream.projectionType !== 'RECTANGULAR'
@@ -3809,6 +3818,10 @@ export default defineComponent({
               ?.projectionType ?? null
 
             if (!metadataOnly) {
+              if (this.vrProjection === 'MESH' && supportsYtDlp && this.videoPlaybackEngine === 'built-in') {
+                this.playbackEngineFallbackTarget = 'yt-dlp'
+              }
+
               const manifestSrc = await this.createInvidiousDashManifest(result)
               if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
               this.manifestSrc = manifestSrc
@@ -4832,6 +4845,7 @@ export default defineComponent({
       this.sabrData = source.sabrData
       this.legacyFormats = source.legacyFormats
       this.streamingDataExpiryDate = source.streamingDataExpiryDate
+      this.vrProjection = source.vrProjection
       this.activePlaybackEngine = 'built-in'
       this.activePlaybackEngineVersion = null
       this.errorMessage = null
@@ -5451,6 +5465,7 @@ export default defineComponent({
         this.sabrData = source.sabrData
         this.legacyFormats = source.legacyFormats
         this.streamingDataExpiryDate = source.streamingDataExpiryDate
+        this.vrProjection = source.vrProjection
         this.activePlaybackEngine = 'built-in'
         this.activePlaybackEngineVersion = null
 
@@ -5651,20 +5666,33 @@ export default defineComponent({
       cachedOnly = false
     ) {
       let source
+      const onDefaultClientsFallback = () => {
+        if (
+          this.isCurrentVideoLoad(loadGeneration, videoId) &&
+          playbackEngineSwitchGeneration === this.playbackEngineSwitchGeneration &&
+          !this.ytDlpDefaultClientsFallbackToastShown
+        ) {
+          this.ytDlpDefaultClientsFallbackToastShown = true
+          this.showTabToast({
+            message: this.t('Change Format.yt-dlp Default Clients Fallback'),
+            icon: ['fas', 'exchange-alt'],
+          })
+        }
+      }
       try {
-        source = await getYtDlpPlaybackSource(videoId, this.ytDlpPlaybackCacheKey, () => {
-          if (
-            this.isCurrentVideoLoad(loadGeneration, videoId) &&
-            playbackEngineSwitchGeneration === this.playbackEngineSwitchGeneration &&
-            !this.ytDlpDefaultClientsFallbackToastShown
-          ) {
-            this.ytDlpDefaultClientsFallbackToastShown = true
-            this.showTabToast({
-              message: this.t('Change Format.yt-dlp Default Clients Fallback'),
-              icon: ['fas', 'exchange-alt'],
-            })
-          }
-        }, useAuthentication, cachedOnly, this.captions.length === 0)
+        source = await getYtDlpPlaybackSource(
+          videoId, this.ytDlpPlaybackCacheKey, onDefaultClientsFallback,
+          useAuthentication, cachedOnly, this.captions.length === 0
+        )
+        if (source !== null && source.vrProjection === undefined && this.vrProjection === 'MESH' && !cachedOnly) {
+          // Older cached sources predate 360° playback and can retain a mesh
+          // DASH stream even when a panoramic HLS rendition is available.
+          await invalidateYtDlpPlaybackSource(videoId)
+          source = await getYtDlpPlaybackSource(
+            videoId, this.ytDlpPlaybackCacheKey, onDefaultClientsFallback,
+            useAuthentication, false, this.captions.length === 0
+          )
+        }
       } catch (error) {
         if (
           !this.isCurrentVideoLoad(loadGeneration, videoId) ||
@@ -5697,13 +5725,18 @@ export default defineComponent({
           manifestMimeType: this.manifestMimeType,
           sabrData: this.sabrData,
           legacyFormats: this.legacyFormats,
-          streamingDataExpiryDate: this.streamingDataExpiryDate
+          streamingDataExpiryDate: this.streamingDataExpiryDate,
+          vrProjection: this.vrProjection
         }
       }
 
       this.manifestSrc = source.manifestSrc
       this.manifestMimeType = source.manifestMimeType
       this.legacyFormats = source.legacyFormats
+      this.vrProjection = source.vrProjection ?? this.vrProjection
+      if (source.vrProjection === 'EQUIRECTANGULAR') {
+        this.activeFormat = 'dash'
+      }
       this.isLive = source.isLive
       if (Number.isFinite(source.duration) && source.duration > 0) {
         this.videoLengthSeconds = source.duration

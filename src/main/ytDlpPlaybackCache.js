@@ -116,6 +116,9 @@ function isValidEntry(entry) {
     )) &&
     (source.duration == null || (Number.isFinite(source.duration) && source.duration > 0)) &&
     (source.subtitlesIncluded === undefined || typeof source.subtitlesIncluded === 'boolean') &&
+    (source.vrProjection === undefined || source.vrProjection === null || (
+      hasHlsManifest && source.vrProjection === 'EQUIRECTANGULAR'
+    )) &&
     (source.title === null || typeof source.title === 'string')
 }
 
@@ -203,6 +206,7 @@ export async function handleYtDlpPlaybackCacheSet(event, videoId, cacheKey, expi
           storyboardSrc: source.storyboardSrc,
           duration: source.duration,
           isLive: source.isLive,
+          vrProjection: source.vrProjection,
           version: source.version
         }
   }

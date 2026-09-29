@@ -240,6 +240,14 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   cursor: grabbing;
 }
 
+.ftVideoPlayer.vrMode :deep(.shaka-controls-container) {
+  cursor: grab;
+}
+
+.ftVideoPlayer.vrMode :deep(.shaka-controls-container:active) {
+  cursor: grabbing;
+}
+
 .paidPromotionOverlay {
   position: absolute;
   z-index: 4;
