@@ -204,6 +204,66 @@ test('DLNA cast button is opt in from Player Settings', async ({ page }) => {
   await expect(toggle).toBeChecked()
 })
 
+test('flows Player switches across balanced rows when some are unavailable', async ({ page }) => {
+  await page.evaluate(() => {
+    localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
+      x: 40,
+      y: 40,
+      width: 1400,
+      height: 900
+    }))
+  })
+  const playback = await goToSettingsSection(page, 'playback')
+  const switches = playback.locator('.playerSwitchGrid .switch-ctn')
+  await switches.first().evaluate(element => {
+    for (const toggle of Array.from(element.parentElement.children).slice(0, 4)) {
+      toggle.style.display = 'none'
+    }
+  })
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return store.dispatch('updateUiScale', 95)
+  })
+
+  for (const direction of ['ltr', 'rtl']) {
+    await page.evaluate(value => { document.documentElement.dir = value }, direction)
+    const layout = await playback.locator('.playerSwitchGrid').evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      const direction = getComputedStyle(element).direction
+      const switches = Array.from(element.querySelectorAll('.switch-ctn'))
+        .filter(toggle => getComputedStyle(toggle).display !== 'none')
+        .map(toggle => toggle.getBoundingClientRect())
+      const midpoint = bounds.left + bounds.width / 2
+      const column = switches.map(rect => {
+        const atInlineStart = direction === 'rtl'
+          ? rect.left > midpoint
+          : rect.left < midpoint
+        return atInlineStart ? 0 : 1
+      })
+      const bottoms = [0, 1].map(index => Math.max(...switches
+        .filter((_, switchIndex) => column[switchIndex] === index)
+        .map(rect => rect.bottom)))
+      return { column, bottomDifference: Math.abs(bottoms[0] - bottoms[1]), rowHeight: switches[0].height }
+    })
+
+    expect(layout.column, direction).toEqual(layout.column.map((_, index) => index % 2))
+    expect(layout.bottomDifference, direction).toBeLessThanOrEqual(layout.rowHeight + 1)
+  }
+
+  await playback.evaluate(element => { element.parentElement.style.inlineSize = '600px' })
+  const narrowLayout = await playback.locator('.playerSwitchGrid').evaluate(element => {
+    const positions = Array.from(element.querySelectorAll('.switch-ctn'))
+      .filter(toggle => getComputedStyle(toggle).display !== 'none')
+      .map(toggle => toggle.getBoundingClientRect().left)
+    return {
+      gridColumns: getComputedStyle(element).gridTemplateColumns.split(' ').length,
+      leftDifference: Math.max(...positions) - Math.min(...positions)
+    }
+  })
+  expect(narrowLayout.gridColumns).toBe(1)
+  expect(narrowLayout.leftDifference).toBeLessThanOrEqual(10)
+})
+
 test.describe('AI translation completions', () => {
   const englishLabel = 'Fill missing translations with AI-generated ones'
   const generatedLabel = 'ترجمة اختبار بالذكاء الاصطناعي'
@@ -1434,8 +1494,7 @@ test.describe('settings', () => {
     })
 
     async function expectControlsAligned() {
-      const firstToggles = playerSettings.locator('.switchColumn').first()
-        .locator(':scope > .switch-ctn')
+      const firstToggles = playerSettings.locator('.playerSwitchGrid > .switch-ctn')
       await expect(firstToggles.first()).toBeVisible()
       const toggleLabelLeftEdges = await firstToggles.evaluateAll(elements => elements.slice(0, 3)
         .map(element => element.querySelector('.switch-label-text').getBoundingClientRect().left))
