@@ -3,259 +3,255 @@
     v-bind="$attrs"
     :title="t('Settings.Player Settings.Player Settings')"
   >
-    <div class="switchColumnGrid playerSwitchGrid">
-      <div class="switchColumn">
-        <FtToggleSwitch
-          :label="t('Settings.Player Settings.Turn on Subtitles by Default')"
-          :compact="true"
-          :default-value="enableSubtitlesByDefault"
-          setting-key="enableSubtitlesByDefault"
-          @change="updateEnableSubtitlesByDefault"
-        />
-        <FtToggleSwitch
-          v-if="!IS_CAPACITOR"
-          :label="t('Settings.Player Settings.Scroll Volume Over Video Player')"
-          :compact="true"
-          :disabled="videoSkipMouseScroll"
-          :default-value="videoVolumeMouseScroll"
-          setting-key="videoVolumeMouseScroll"
-          @change="updateVideoVolumeMouseScroll"
-        />
-        <FtToggleSwitch
-          v-if="!IS_CAPACITOR"
-          :label="t('Settings.Player Settings.Remember Volume')"
-          :compact="true"
-          :default-value="rememberVolume"
-          setting-key="rememberVolume"
-          @change="updateRememberVolume"
-        />
-        <FtToggleSwitch
-          :label="t('Settings.Player Settings.Show Lights Off Toggle')"
-          :compact="true"
-          :default-value="showLightsOffToggle"
-          setting-key="showLightsOffToggle"
-          @change="store.dispatch('updateShowLightsOffToggle', $event)"
-        />
-        <FtToggleSwitch
-          v-if="!IS_IOS"
-          :label="t('Settings.Player Settings.Show Skip Silence Toggle')"
-          :compact="true"
-          :default-value="showSkipSilenceButton"
-          setting-key="showSkipSilenceButton"
-          :tooltip="t('Tooltips.Player Settings.Show Skip Silence Toggle')"
-          @change="updateShowSkipSilenceButton"
-        />
-        <FtToggleSwitch
-          v-if="!IS_IOS"
-          :label="t('Settings.Player Settings.Enable Skip Silence by Default')"
-          :compact="true"
-          :disabled="!showSkipSilenceButton"
-          :default-value="enableSkipSilenceByDefault"
-          setting-key="enableSkipSilenceByDefault"
-          :tooltip="t('Tooltips.Player Settings.Enable Skip Silence by Default')"
-          @change="updateEnableSkipSilenceByDefault"
-        />
-        <FtToggleSwitch
-          v-if="USING_ELECTRON"
-          :label="t('Settings.Player Settings.Show DLNA Cast Button')"
-          :compact="true"
-          :default-value="showDlnaCastButton"
-          setting-key="showDlnaCastButton"
-          @change="store.dispatch('updateShowDlnaCastButton', $event)"
-        />
-        <FtToggleSwitch
-          :label="t('Settings.Player Settings.Enable Video Zoom')"
-          :compact="true"
-          :default-value="enableVideoZoom"
-          setting-key="enableVideoZoom"
-          :tooltip="t('Tooltips.Player Settings.Enable Video Zoom')"
-          @change="updateEnableVideoZoom"
-        />
-        <FtToggleSwitch
-          :label="t('Settings.Player Settings.Hold to Double Playback Speed')"
-          :compact="true"
-          :default-value="holdToDoublePlaybackSpeed"
-          setting-key="holdToDoublePlaybackSpeed"
-          :tooltip="t('Tooltips.Player Settings.Hold to Double Playback Speed')"
-          @change="updateHoldToDoublePlaybackSpeed"
-        />
-        <FtToggleSwitch
-          :label="t('Settings.Player Settings.Scroll Playback Rate Over Video Player')"
-          :compact="true"
-          :default-value="videoPlaybackRateMouseScroll"
-          setting-key="videoPlaybackRateMouseScroll"
-          :tooltip="t('Tooltips.Player Settings.Scroll Playback Rate Over Video Player')"
-          @change="updateVideoPlaybackRateMouseScroll"
-        />
-        <FtToggleSwitch
-          :label="t('Settings.Player Settings.Skip by Scrolling Over Video Player')"
-          :compact="true"
-          :disabled="videoVolumeMouseScroll"
-          :default-value="videoSkipMouseScroll"
-          setting-key="videoSkipMouseScroll"
-          :tooltip="t('Tooltips.Player Settings.Skip by Scrolling Over Video Player')"
-          @change="updateVideoSkipMouseScroll"
-        />
-        <FtToggleSwitch
-          :label="t('Settings.Player Settings.Multiply Seek Interval by Playback Rate')"
-          :compact="true"
-          :default-value="seekIntervalMultiplyByPlaybackRate"
-          setting-key="seekIntervalMultiplyByPlaybackRate"
-          :tooltip="t('Tooltips.Player Settings.Multiply Seek Interval by Playback Rate')"
-          @change="updateSeekIntervalMultiplyByPlaybackRate"
-        />
-        <FtToggleSwitch
-          :label="t('Global.Ambient Mode')"
-          :compact="true"
-          :default-value="ambientMode"
-          setting-key="ambientMode"
-          :tooltip="t('Tooltips.Player Settings.Ambient Mode')"
-          @change="updateAmbientMode"
-        />
-        <FtToggleSwitch
-          :label="t('Settings.Player Settings.Music Visualizer')"
-          :compact="true"
-          :default-value="musicVisualizer"
-          setting-key="musicVisualizer"
-          @change="updateMusicVisualizer"
-        />
-      </div>
-      <div class="switchColumn">
-        <FtToggleSwitch
-          :label="t('Settings.Player Settings.Play Next Video')"
-          :compact="true"
-          :disabled="hideRecommendedVideos"
-          :default-value="playNextVideo"
-          setting-key="playNextVideo"
-          @change="updatePlayNextVideo"
-        />
-        <FtToggleSwitch
-          :label="t('Settings.Player Settings.Autoplay Playlists')"
-          :compact="true"
-          :default-value="autoplayPlaylists"
-          setting-key="autoplayPlaylists"
-          @change="updateAutoplayPlaylists"
-        />
-        <FtToggleSwitch
-          :label="t('Settings.Player Settings.Skip Unavailable Playlist Videos')"
-          :compact="true"
-          :default-value="skipUnavailablePlaylistVideos"
-          setting-key="skipUnavailablePlaylistVideos"
-          @change="updateSkipUnavailablePlaylistVideos"
-        />
-        <FtToggleSwitch
-          :label="t('Settings.Player Settings.Autoplay Videos')"
-          :compact="true"
-          :default-value="autoplayVideos"
-          setting-key="autoplayVideos"
-          @change="updateAutoplayVideos"
-        />
-        <FtToggleSwitch
-          :label="t('Settings.Player Settings.Use YouTube-style Shorts')"
-          :compact="true"
-          :default-value="useCustomShortsPlayer"
-          setting-key="useCustomShortsPlayer"
-          :tooltip="t('Tooltips.Player Settings.Use YouTube-style Shorts')"
-          @change="updateUseCustomShortsPlayer"
-        />
-        <FtToggleSwitch
-          :label="t('Settings.Player Settings.Loop Shorts')"
-          :compact="true"
-          :disabled="!useCustomShortsPlayer"
-          :default-value="loopShorts"
-          setting-key="loopShorts"
-          :tooltip="t('Tooltips.Player Settings.Loop Shorts')"
-          @change="updateLoopShorts"
-        />
-        <FtToggleSwitch
-          v-if="!IS_CAPACITOR"
-          :label="t('Settings.Player Settings.Automatically Open Chapters')"
-          :compact="true"
-          :default-value="autoOpenChapters"
-          setting-key="autoOpenChapters"
-          @change="updateAutoOpenChapters"
-        />
-        <FtToggleSwitch
-          v-if="!IS_CAPACITOR"
-          :label="t('Settings.Player Settings.Display Play Button In Video Player')"
-          :compact="true"
-          :default-value="displayVideoPlayButton"
-          setting-key="displayVideoPlayButton"
-          @change="updateDisplayVideoPlayButton"
-        />
-        <FtToggleSwitch
-          :label="t('Settings.Player Settings.Enter Fullscreen on Display Rotate')"
-          :compact="true"
-          :default-value="enterFullscreenOnDisplayRotate"
-          setting-key="enterFullscreenOnDisplayRotate"
-          @change="updateEnterFullscreenOnDisplayRotate"
-        />
-        <FtToggleSwitch
-          v-if="IS_CAPACITOR"
-          :label="t('Settings.Player Settings.Rotate Wide Videos to Landscape in Fullscreen')"
-          :compact="true"
-          :default-value="rotateFullscreenToLandscape"
-          setting-key="rotateFullscreenToLandscape"
-          @change="updateRotateFullscreenToLandscape"
-        />
-        <FtToggleSwitch
-          v-if="IS_CAPACITOR"
-          :label="t('Settings.Player Settings.Swipe Up or Down to Enter or Exit Fullscreen')"
-          :compact="true"
-          :default-value="enableMobileFullscreenSwipe"
-          setting-key="enableMobileFullscreenSwipe"
-          @change="updateEnableMobileFullscreenSwipe"
-        />
-        <FtToggleSwitch
-          v-if="IS_CAPACITOR"
-          :label="t('Settings.Player Settings.Continue Playback When Screen Is Locked')"
-          :compact="true"
-          :default-value="continuePlaybackWhenScreenIsLocked"
-          setting-key="continuePlaybackWhenScreenIsLocked"
-          :tooltip="t('Tooltips.Player Settings.Continue Playback When Screen Is Locked')"
-          @change="updateContinuePlaybackWhenScreenIsLocked"
-        />
-        <FtToggleSwitch
-          v-if="IS_CAPACITOR"
-          :label="t('Settings.Player Settings.Swipe Gestures.Fullscreen Brightness')"
-          :compact="true"
-          :default-value="store.getters.getMobileFullscreenBrightness"
-          setting-key="mobileFullscreenBrightness"
-          @change="store.dispatch('updateMobileFullscreenBrightness', $event)"
-        />
-        <FtToggleSwitch
-          :label="t('Settings.Player Settings.Show Playback Rate Adjusted Timestamp')"
-          :compact="true"
-          :default-value="showPlaybackRateAdjustedTimestamp"
-          setting-key="showPlaybackRateAdjustedTimestamp"
-          :tooltip="t('Tooltips.Player Settings.Show Playback Rate Adjusted Timestamp')"
-          @change="updateShowPlaybackRateAdjustedTimestamp"
-        />
-        <FtToggleSwitch
-          :label="t('Settings.Player Settings.Scroll Mini Player.When Scrolling Down')"
-          :compact="true"
-          :default-value="scrollMiniPlayerEnabled"
-          setting-key="scrollMiniPlayerEnabled"
-          @change="updateScrollMiniPlayerEnabled"
-        />
-        <FtToggleSwitch
-          v-if="USING_ELECTRON || IS_CAPACITOR"
-          :label="t('Settings.Player Settings.Scroll Mini Player.On All Tabs')"
-          :compact="true"
-          :default-value="scrollMiniPlayerOnAllTabs"
-          :disabled="autoPictureInPictureTriggers.includes('tab') || store.getters.getKeepPlayingOnNavigation"
-          setting-key="scrollMiniPlayerOnAllTabs"
-          @change="updateScrollMiniPlayerOnAllTabs"
-        />
-        <FtToggleSwitch
-          v-if="USING_ELECTRON || IS_CAPACITOR"
-          :label="t('Settings.Player Settings.Scroll Mini Player.On Navigation')"
-          :compact="true"
-          :default-value="store.getters.getKeepPlayingOnNavigation"
-          setting-key="keepPlayingOnNavigation"
-          @change="store.dispatch('updateKeepPlayingOnNavigation', $event)"
-        />
-      </div>
+    <div class="playerSwitchGrid switchFlowGrid">
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Turn on Subtitles by Default')"
+        :compact="true"
+        :default-value="enableSubtitlesByDefault"
+        setting-key="enableSubtitlesByDefault"
+        @change="updateEnableSubtitlesByDefault"
+      />
+      <FtToggleSwitch
+        v-if="!IS_CAPACITOR"
+        :label="t('Settings.Player Settings.Scroll Volume Over Video Player')"
+        :compact="true"
+        :disabled="videoSkipMouseScroll"
+        :default-value="videoVolumeMouseScroll"
+        setting-key="videoVolumeMouseScroll"
+        @change="updateVideoVolumeMouseScroll"
+      />
+      <FtToggleSwitch
+        v-if="!IS_CAPACITOR"
+        :label="t('Settings.Player Settings.Remember Volume')"
+        :compact="true"
+        :default-value="rememberVolume"
+        setting-key="rememberVolume"
+        @change="updateRememberVolume"
+      />
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Show Lights Off Toggle')"
+        :compact="true"
+        :default-value="showLightsOffToggle"
+        setting-key="showLightsOffToggle"
+        @change="store.dispatch('updateShowLightsOffToggle', $event)"
+      />
+      <FtToggleSwitch
+        v-if="!IS_IOS"
+        :label="t('Settings.Player Settings.Show Skip Silence Toggle')"
+        :compact="true"
+        :default-value="showSkipSilenceButton"
+        setting-key="showSkipSilenceButton"
+        :tooltip="t('Tooltips.Player Settings.Show Skip Silence Toggle')"
+        @change="updateShowSkipSilenceButton"
+      />
+      <FtToggleSwitch
+        v-if="!IS_IOS"
+        :label="t('Settings.Player Settings.Enable Skip Silence by Default')"
+        :compact="true"
+        :disabled="!showSkipSilenceButton"
+        :default-value="enableSkipSilenceByDefault"
+        setting-key="enableSkipSilenceByDefault"
+        :tooltip="t('Tooltips.Player Settings.Enable Skip Silence by Default')"
+        @change="updateEnableSkipSilenceByDefault"
+      />
+      <FtToggleSwitch
+        v-if="USING_ELECTRON"
+        :label="t('Settings.Player Settings.Show DLNA Cast Button')"
+        :compact="true"
+        :default-value="showDlnaCastButton"
+        setting-key="showDlnaCastButton"
+        @change="store.dispatch('updateShowDlnaCastButton', $event)"
+      />
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Enable Video Zoom')"
+        :compact="true"
+        :default-value="enableVideoZoom"
+        setting-key="enableVideoZoom"
+        :tooltip="t('Tooltips.Player Settings.Enable Video Zoom')"
+        @change="updateEnableVideoZoom"
+      />
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Hold to Double Playback Speed')"
+        :compact="true"
+        :default-value="holdToDoublePlaybackSpeed"
+        setting-key="holdToDoublePlaybackSpeed"
+        :tooltip="t('Tooltips.Player Settings.Hold to Double Playback Speed')"
+        @change="updateHoldToDoublePlaybackSpeed"
+      />
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Scroll Playback Rate Over Video Player')"
+        :compact="true"
+        :default-value="videoPlaybackRateMouseScroll"
+        setting-key="videoPlaybackRateMouseScroll"
+        :tooltip="t('Tooltips.Player Settings.Scroll Playback Rate Over Video Player')"
+        @change="updateVideoPlaybackRateMouseScroll"
+      />
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Skip by Scrolling Over Video Player')"
+        :compact="true"
+        :disabled="videoVolumeMouseScroll"
+        :default-value="videoSkipMouseScroll"
+        setting-key="videoSkipMouseScroll"
+        :tooltip="t('Tooltips.Player Settings.Skip by Scrolling Over Video Player')"
+        @change="updateVideoSkipMouseScroll"
+      />
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Multiply Seek Interval by Playback Rate')"
+        :compact="true"
+        :default-value="seekIntervalMultiplyByPlaybackRate"
+        setting-key="seekIntervalMultiplyByPlaybackRate"
+        :tooltip="t('Tooltips.Player Settings.Multiply Seek Interval by Playback Rate')"
+        @change="updateSeekIntervalMultiplyByPlaybackRate"
+      />
+      <FtToggleSwitch
+        :label="t('Global.Ambient Mode')"
+        :compact="true"
+        :default-value="ambientMode"
+        setting-key="ambientMode"
+        :tooltip="t('Tooltips.Player Settings.Ambient Mode')"
+        @change="updateAmbientMode"
+      />
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Music Visualizer')"
+        :compact="true"
+        :default-value="musicVisualizer"
+        setting-key="musicVisualizer"
+        @change="updateMusicVisualizer"
+      />
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Play Next Video')"
+        :compact="true"
+        :disabled="hideRecommendedVideos"
+        :default-value="playNextVideo"
+        setting-key="playNextVideo"
+        @change="updatePlayNextVideo"
+      />
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Autoplay Playlists')"
+        :compact="true"
+        :default-value="autoplayPlaylists"
+        setting-key="autoplayPlaylists"
+        @change="updateAutoplayPlaylists"
+      />
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Skip Unavailable Playlist Videos')"
+        :compact="true"
+        :default-value="skipUnavailablePlaylistVideos"
+        setting-key="skipUnavailablePlaylistVideos"
+        @change="updateSkipUnavailablePlaylistVideos"
+      />
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Autoplay Videos')"
+        :compact="true"
+        :default-value="autoplayVideos"
+        setting-key="autoplayVideos"
+        @change="updateAutoplayVideos"
+      />
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Use YouTube-style Shorts')"
+        :compact="true"
+        :default-value="useCustomShortsPlayer"
+        setting-key="useCustomShortsPlayer"
+        :tooltip="t('Tooltips.Player Settings.Use YouTube-style Shorts')"
+        @change="updateUseCustomShortsPlayer"
+      />
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Loop Shorts')"
+        :compact="true"
+        :disabled="!useCustomShortsPlayer"
+        :default-value="loopShorts"
+        setting-key="loopShorts"
+        :tooltip="t('Tooltips.Player Settings.Loop Shorts')"
+        @change="updateLoopShorts"
+      />
+      <FtToggleSwitch
+        v-if="!IS_CAPACITOR"
+        :label="t('Settings.Player Settings.Automatically Open Chapters')"
+        :compact="true"
+        :default-value="autoOpenChapters"
+        setting-key="autoOpenChapters"
+        @change="updateAutoOpenChapters"
+      />
+      <FtToggleSwitch
+        v-if="!IS_CAPACITOR"
+        :label="t('Settings.Player Settings.Display Play Button In Video Player')"
+        :compact="true"
+        :default-value="displayVideoPlayButton"
+        setting-key="displayVideoPlayButton"
+        @change="updateDisplayVideoPlayButton"
+      />
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Enter Fullscreen on Display Rotate')"
+        :compact="true"
+        :default-value="enterFullscreenOnDisplayRotate"
+        setting-key="enterFullscreenOnDisplayRotate"
+        @change="updateEnterFullscreenOnDisplayRotate"
+      />
+      <FtToggleSwitch
+        v-if="IS_CAPACITOR"
+        :label="t('Settings.Player Settings.Rotate Wide Videos to Landscape in Fullscreen')"
+        :compact="true"
+        :default-value="rotateFullscreenToLandscape"
+        setting-key="rotateFullscreenToLandscape"
+        @change="updateRotateFullscreenToLandscape"
+      />
+      <FtToggleSwitch
+        v-if="IS_CAPACITOR"
+        :label="t('Settings.Player Settings.Swipe Up or Down to Enter or Exit Fullscreen')"
+        :compact="true"
+        :default-value="enableMobileFullscreenSwipe"
+        setting-key="enableMobileFullscreenSwipe"
+        @change="updateEnableMobileFullscreenSwipe"
+      />
+      <FtToggleSwitch
+        v-if="IS_CAPACITOR"
+        :label="t('Settings.Player Settings.Continue Playback When Screen Is Locked')"
+        :compact="true"
+        :default-value="continuePlaybackWhenScreenIsLocked"
+        setting-key="continuePlaybackWhenScreenIsLocked"
+        :tooltip="t('Tooltips.Player Settings.Continue Playback When Screen Is Locked')"
+        @change="updateContinuePlaybackWhenScreenIsLocked"
+      />
+      <FtToggleSwitch
+        v-if="IS_CAPACITOR"
+        :label="t('Settings.Player Settings.Swipe Gestures.Fullscreen Brightness')"
+        :compact="true"
+        :default-value="store.getters.getMobileFullscreenBrightness"
+        setting-key="mobileFullscreenBrightness"
+        @change="store.dispatch('updateMobileFullscreenBrightness', $event)"
+      />
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Show Playback Rate Adjusted Timestamp')"
+        :compact="true"
+        :default-value="showPlaybackRateAdjustedTimestamp"
+        setting-key="showPlaybackRateAdjustedTimestamp"
+        :tooltip="t('Tooltips.Player Settings.Show Playback Rate Adjusted Timestamp')"
+        @change="updateShowPlaybackRateAdjustedTimestamp"
+      />
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Scroll Mini Player.When Scrolling Down')"
+        :compact="true"
+        :default-value="scrollMiniPlayerEnabled"
+        setting-key="scrollMiniPlayerEnabled"
+        @change="updateScrollMiniPlayerEnabled"
+      />
+      <FtToggleSwitch
+        v-if="USING_ELECTRON || IS_CAPACITOR"
+        :label="t('Settings.Player Settings.Scroll Mini Player.On All Tabs')"
+        :compact="true"
+        :default-value="scrollMiniPlayerOnAllTabs"
+        :disabled="autoPictureInPictureTriggers.includes('tab') || store.getters.getKeepPlayingOnNavigation"
+        setting-key="scrollMiniPlayerOnAllTabs"
+        @change="updateScrollMiniPlayerOnAllTabs"
+      />
+      <FtToggleSwitch
+        v-if="USING_ELECTRON || IS_CAPACITOR"
+        :label="t('Settings.Player Settings.Scroll Mini Player.On Navigation')"
+        :compact="true"
+        :default-value="store.getters.getKeepPlayingOnNavigation"
+        setting-key="keepPlayingOnNavigation"
+        @change="store.dispatch('updateKeepPlayingOnNavigation', $event)"
+      />
     </div>
     <FtFlexBox
       v-if="IS_CAPACITOR"

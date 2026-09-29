@@ -2,10 +2,21 @@
   margin-block: 1rem;
 }
 
+.playerSwitchGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 24px;
+}
+
 @container settings-content (width <= 680px) {
-  .playerSwitchGrid .switchColumn {
-    align-items: stretch;
+  .playerSwitchGrid {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+
+  .playerSwitchGrid :deep(.switch-ctn) {
     inline-size: min(100%, 294px);
+    margin-inline: auto;
   }
 
   .playerSelectGrid {
@@ -36,7 +47,7 @@
 
 @media only screen and (width <= 680px) {
   @container settings-content (width <= 680px) {
-    .playerSwitchGrid .switchColumn {
+    .playerSwitchGrid :deep(.switch-ctn) {
       inline-size: 100%;
     }
 
