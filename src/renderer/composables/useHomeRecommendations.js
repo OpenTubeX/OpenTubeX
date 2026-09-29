@@ -55,8 +55,8 @@ export function useHomeRecommendations(visible) {
       !isVideoHiddenByPreferences(video, {
         hideLiveStreams: store.getters.getHideLiveStreams,
         hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
-        hiddenChannelNames: store.getters.getChannelsHiddenNames,
-        forbiddenTitles: store.getters.getForbiddenTitlesParsed,
+        hiddenChannelNames: store.getters.getActiveChannelsHiddenNames,
+        forbiddenTitles: store.getters.getActiveForbiddenTitles,
       })
   }
   function makeProfile() {
@@ -227,6 +227,7 @@ export function useHomeRecommendations(visible) {
       initialized = available.value
     })
   watch(exploration, () => rerank())
+  watch(() => store.getters.getEnableBlockLists, () => rerank())
   onBeforeUnmount(cancelRequest)
   return {
     enabled,

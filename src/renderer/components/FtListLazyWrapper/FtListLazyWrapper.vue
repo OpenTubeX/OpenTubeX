@@ -227,13 +227,13 @@ const channelsHiddenNames = computed(() => {
   // Some component users like channel view will have this disabled
   if (!props.useChannelsHiddenPreference) { return EMPTY_SET }
 
-  return store.getters.getChannelsHiddenNames
+  return store.getters.getActiveChannelsHiddenNames
 })
 
 /** @type {import('vue').ComputedRef<string[]>} */
 const forbiddenTitles = computed(() => {
   if (!props.hideForbiddenTitles) { return [] }
-  return store.getters.getForbiddenTitlesParsed
+  return store.getters.getActiveForbiddenTitles
 })
 
 const showResult = computed(() => {

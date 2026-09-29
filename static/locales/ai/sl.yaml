@@ -1093,6 +1093,7 @@ Settings:
     To: Na
     Confirm Before Unsubscribing: Zahtevaj potrditev pred odjavo
   Distraction Free Settings:
+    Enable Block Lists: "Omogoči sezname blokiranih"
     AI Video Summaries: Povzetki videoposnetkov z UI
     Hide: Skrij
     Collapsed: Strnjeni

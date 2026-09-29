@@ -44,7 +44,11 @@ const tabUi = useTemplateRef('tabUi')
 useKeepAliveEffectScope()
 
 const isLoading = ref(true)
-const postList = shallowRef([])
+const allPosts = shallowRef([])
+const postList = computed(() => {
+  const forbiddenTitles = store.getters.getActiveForbiddenTitles
+  return allPosts.value.filter(post => !forbiddenTitles.some(text => post.author.toLowerCase().includes(text)))
+})
 const errorChannels = ref([])
 const attemptedFetch = ref(false)
 /** @type {import('vue').Ref<number | null>} */
@@ -242,16 +246,14 @@ function loadPostsFromCacheSometimes() {
 }
 
 function loadPostsFromCacheForAllActiveProfileChannels() {
-  const forbiddenTitles = store.getters.getForbiddenTitlesParsed
   const postList_ = cacheEntriesForAllActiveProfileChannels.value
     .flatMap(cacheEntry => cacheEntry.posts ?? [])
-    .filter(post => !forbiddenTitles.some(text => post.author.toLowerCase().includes(text)))
 
   postList_.sort((a, b) => {
     return b.publishedTime - a.publishedTime
   })
 
-  postList.value = postList_
+  allPosts.value = postList_
   isLoading.value = false
 }
 

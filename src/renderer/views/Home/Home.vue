@@ -652,7 +652,7 @@ const newSubscriptionContent = computed(() => getNewSubscriptionFeedEntries({
   historyCacheById: store.getters.getHistoryCacheById,
   hideLiveStreams: store.getters.getHideLiveStreams,
   hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
-  forbiddenTitles: store.getters.getForbiddenTitlesParsed,
+  forbiddenTitles: store.getters.getActiveForbiddenTitles,
   onlyShowLatestFromChannel: store.getters.getOnlyShowLatestFromChannel,
   onlyShowLatestFromChannelNumber: store.getters.getOnlyShowLatestFromChannelNumber,
   restrictedPlaybackConfigured: hasConfiguredRestrictedPlaybackAuthentication(store.getters),

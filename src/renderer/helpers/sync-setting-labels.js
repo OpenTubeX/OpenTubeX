@@ -53,6 +53,7 @@ export const SYNC_SETTING_LABELS = {
     'Settings.Channel Settings.Enable Volume'
   ],
   channelsHidden: 'Settings.Distraction Free Settings.Hide Channels',
+  enableBlockLists: 'Settings.Distraction Free Settings.Enable Block Lists',
   checkForUpdates: 'Settings.General Settings.Check for Updates',
   commentTranslationIgnoredLanguages: 'Settings.General Settings.Comment Translation.Never Translate',
   confirmCloseApp: 'Settings.General Settings.Confirmation Options.Closing App',

@@ -843,6 +843,7 @@ Settings:
     Posts Auto Refresh Interval: Интервал автообновления публикаций
     Refresh Subscriptions While App Is Closed: "Обновлять подписки, когда приложение закрыто"
   Distraction Free Settings:
+    Enable Block Lists: "Включить списки блокировки"
     AI Video Summaries: Сводки видео от ИИ
     Hide: Скрывать
     Collapsed: Свёрнутые

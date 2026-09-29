@@ -864,6 +864,7 @@ Settings:
     Posts Auto Refresh Interval: Bil milli sjálfvirkra uppfærslna færslna
     Refresh Subscriptions While App Is Closed: "Uppfæra áskriftir þegar forritið er lokað"
   Distraction Free Settings:
+    Enable Block Lists: "Virkja blokkunarlista"
     AI Video Summaries: Myndbandsyfirlit gervigreindar
     Hide: Fela
     Collapsed: Samanbrotin

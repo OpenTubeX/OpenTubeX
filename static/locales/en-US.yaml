@@ -1432,6 +1432,7 @@ Settings:
     Hide End-Screen Annotations: Hide End-Screen Annotations
     Hide Paid Promotion Badge: Hide Paid Promotion Badge
     Hide Channels: Hide Videos From Channels
+    Enable Block Lists: Enable block lists
     Hide Channels Disabled Message: Some channels were blocked using ID and weren't processed. Feature is blocked while those IDs are updating
     Hide Channels Placeholder: Channel ID
     Hide Channels Invalid: Channel ID provided was invalid

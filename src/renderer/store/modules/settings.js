@@ -343,6 +343,7 @@ const state = {
   hideFeaturedChannels: false,
   channelsHidden: '[]',
   forbiddenTitles: '[]',
+  enableBlockLists: true,
   showAddedChannelsHidden: true,
   showAddedForbiddenTitles: true,
   hideVideoDescription: false,
@@ -947,9 +948,21 @@ const customGetters = {
     return new Set(getters.getChannelsHiddenParsed.map((ch) => ch.name))
   },
 
+  getActiveChannelsHidden: (state, getters) => {
+    return state.enableBlockLists ? getters.getChannelsHiddenParsed : []
+  },
+
+  getActiveChannelsHiddenNames: (state, getters) => {
+    return state.enableBlockLists ? getters.getChannelsHiddenNames : new Set()
+  },
+
   /** Lowercased for case-insensitive matching */
   getForbiddenTitlesParsed: (state) => {
     return JSON.parse(state.forbiddenTitles).map((title) => title.toLowerCase())
+  },
+
+  getActiveForbiddenTitles: (state, getters) => {
+    return state.enableBlockLists ? getters.getForbiddenTitlesParsed : []
   },
 
   getTransferableSettings: (state) => {

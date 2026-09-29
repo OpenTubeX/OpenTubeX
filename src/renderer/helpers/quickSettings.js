@@ -13,6 +13,7 @@ const CORE_QUICK_SETTINGS = [
   ['playlistViewType', 'content', 'Settings.General Settings.Playlist View Type.Playlist View Type', { control: 'select', icon: ['fas', 'list'] }],
   ['hideRecommendedVideos', 'content', 'Settings.Distraction Free Settings.Hide Recommended Videos', { control: 'toggle', icon: ['fas', 'eye-slash'] }],
   ['hideComments', 'content', 'Settings.Distraction Free Settings.Hide Comments', { control: 'toggle', icon: ['fas', 'comment'] }],
+  ['enableBlockLists', 'content', 'Settings.Distraction Free Settings.Enable Block Lists', { control: 'toggle', icon: ['fas', 'eye-slash'] }],
   ['currentLocale', 'language', 'Settings.General Settings.Locale Preference', { control: 'select', icon: ['fas', 'language'] }],
   ['region', 'language', 'Settings.General Settings.Region for Trending', { control: 'select', icon: ['fas', 'globe'] }],
   ['useProxy', 'advanced', 'Settings.Proxy Settings.Enable Tor / Proxy', { control: 'toggle', electronOnly: true, capacitorSupported: true, iosUnsupported: true, icon: ['fas', 'globe'] }],

@@ -868,6 +868,7 @@ Settings:
     Posts Auto Refresh Interval: Khoảng tự động làm mới bài đăng
     Refresh Subscriptions While App Is Closed: "Làm mới đăng ký khi ứng dụng đã đóng"
   Distraction Free Settings:
+    Enable Block Lists: "Bật danh sách chặn"
     AI Video Summaries: Bản tóm tắt video bằng AI
     Hide: Ẩn
     Collapsed: Thu gọn

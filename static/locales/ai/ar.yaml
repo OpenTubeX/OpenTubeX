@@ -868,6 +868,7 @@ Settings:
     Posts Auto Refresh Interval: المشاركات الفاصل الزمني للتحديث التلقائي
     Refresh Subscriptions While App Is Closed: "تحديث الاشتراكات أثناء إغلاق التطبيق"
   Distraction Free Settings:
+    Enable Block Lists: "تفعيل قوائم الحظر"
     AI Video Summaries: ملخصات الفيديو بالذكاء الاصطناعي
     Hide: إخفاء
     Collapsed: مطوية
