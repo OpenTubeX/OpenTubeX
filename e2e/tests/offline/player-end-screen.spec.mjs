@@ -69,6 +69,26 @@ test('restores the poster and hides annotations at the end, then clears it on se
   await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
 })
 
+test('hides only end-screen recommendations when the focused setting is enabled', async ({ app, page }) => {
+  const { video, watch } = await openVideo({ app, page })
+  await watch.evaluate(async component => {
+    await component.proxy.$store.dispatch('updateHideRecommendedVideos', false)
+    component.proxy.recommendedVideos = [{ videoId: 'video000000', title: 'Next video', type: 'video' }]
+  })
+  await endVideo(video)
+  await expect(page.locator('.endedRecommendation')).toHaveCount(1)
+  await expect(page.locator('.watchVideoRecommendations')).toBeVisible()
+
+  await watch.evaluate(component => component.proxy.$store.dispatch('updateHideEndScreenRecommendations', true))
+  await expect(page.locator('.endedRecommendations')).toHaveCount(0)
+  await expect(page.locator('.watchVideoRecommendations')).toBeVisible()
+  await expect(page.locator('.endedPoster')).toBeVisible()
+  await expect(page.locator('.videoAnnotations')).toHaveCount(0)
+
+  await watch.evaluate(component => component.proxy.$store.dispatch('updateHideEndScreenRecommendations', false))
+  await expect(page.locator('.endedRecommendation')).toHaveCount(1)
+})
+
 test('shows recommended thumbnails over a darkened poster with working keyboard navigation', async ({ app, page, attachScreenshot }) => {
   const { video, watch } = await openVideo({ app, page })
   await watch.evaluate(async component => {

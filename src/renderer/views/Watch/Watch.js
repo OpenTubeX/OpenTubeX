@@ -1015,6 +1015,9 @@ export default defineComponent({
     hideRecommendedVideos: function () {
       return this.$store.getters.getHideRecommendedVideos
     },
+    hideEndScreenRecommendations: function () {
+      return this.$store.getters.getHideEndScreenRecommendations
+    },
     hideEndScreenAnnotations: function () {
       return this.$store.getters.getHideEndScreenAnnotations
     },
@@ -1122,7 +1125,7 @@ export default defineComponent({
       return this.$store.getters.getPlaylist(this.playlistId)
     },
     endScreenRecommendations: function () {
-      if (this.isOffline || this.hideRecommendedVideos) return []
+      if (this.isOffline || this.hideRecommendedVideos || this.hideEndScreenRecommendations) return []
       return this.recommendedVideos.filter(video =>
         video.videoId && video.videoId !== this.videoId &&
         !this.isHiddenVideo(this.forbiddenTitles, this.channelsHidden, video)
