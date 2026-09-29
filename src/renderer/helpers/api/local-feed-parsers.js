@@ -658,7 +658,8 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
     switch (lockupView.content_type) {
       case 'ALBUM':
       case 'PLAYLIST':
-      case 'PODCAST': {
+      case 'PODCAST':
+      case 'SHOW': {
         const thumbnailOverlayBadgeView = lockupView.content_image.primary_thumbnail.overlays
           .find(overlay => overlay.is(YTNodes.ThumbnailOverlayBadgeView))
 
@@ -677,6 +678,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
           channelId = maybeChannelText.endpoint.payload.browseId
         }
 
+        const isShow = lockupView.content_type === 'SHOW'
         return {
           type: 'playlist',
           dataSource: 'local',
@@ -685,7 +687,8 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
           thumbnail: lockupView.content_image.primary_thumbnail.image[0].url,
           channelName,
           channelId,
-          videoCount: extractNumberFromString(thumbnailOverlayBadgeView.badges[0].text)
+          videoCount: isShow ? undefined : extractNumberFromString(thumbnailOverlayBadgeView.badges[0].text),
+          ...(isShow ? { itemCountText: thumbnailOverlayBadgeView.badges[0].text } : {})
         }
       }
       case 'SHORT':
