@@ -31,6 +31,48 @@ test('reads an AVTransport endpoint from a MediaRenderer description', () => {
   assert.equal(parseDlnaDevice(description.replace('/upnp/control', 'http://television.local:8000/upnp/control'),
     'http://192.168.1.7:8000/device.xml', '192.168.1.7').controlUrl,
   'http://192.168.1.7:8000/upnp/control')
+  assert.equal(parseDlnaDevice(description.replace('/upnp/control', 'control'),
+    'http://192.168.1.7:8000/descriptions/device.xml', '192.168.1.7').controlUrl,
+  'http://192.168.1.7:8000/descriptions/control')
+})
+
+test('resolves AVTransport URLs against the advertised URLBase', () => {
+  for (const [base, control, expected] of [
+    ['http://192.168.1.7:1400/upnp/', 'control/transport', 'http://192.168.1.7:1400/upnp/control/transport'],
+    ['http://television.local:1400/upnp/', 'control/transport', 'http://192.168.1.7:1400/upnp/control/transport'],
+    ['http://192.168.1.7:1400/upnp', 'control/transport', 'http://192.168.1.7:1400/control/transport'],
+    ['http://192.168.1.7:1400/upnp/', '/control', 'http://192.168.1.7:1400/control'],
+    ['http://192.168.1.7:1400/upnp/', 'http://192.168.1.7:1500/control', 'http://192.168.1.7:1500/control'],
+  ]) {
+    const description = `<d:root xmlns:d="urn:schemas-upnp-org:device-1-0">
+      <d:URLBase>${base}</d:URLBase><d:device>
+        <d:deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</d:deviceType>
+        <d:friendlyName>TV</d:friendlyName><d:serviceList><d:service>
+          <d:serviceType>urn:schemas-upnp-org:service:AVTransport:1</d:serviceType>
+          <d:controlURL>${control}</d:controlURL>
+        </d:service></d:serviceList></d:device></d:root>`
+    assert.equal(parseDlnaDevice(description, 'http://192.168.1.7:8000/device.xml', '192.168.1.7')?.controlUrl,
+      expected, `${base} + ${control}`)
+  }
+})
+
+test('rejects invalid URLBase and foreign IP control endpoints', () => {
+  for (const [base, control] of [
+    ['http://192.168.1.8:1400/upnp/', 'control'],
+    ['https://192.168.1.7:1400/upnp/', 'control'],
+    ['invalid URL', 'control'],
+    ['http://192.168.1.7:1400/upnp/', 'http://192.168.1.8/control'],
+  ]) {
+    const description = `<root xmlns="urn:schemas-upnp-org:device-1-0">
+      <URLBase>${base}</URLBase><device>
+        <deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType>
+        <friendlyName>TV</friendlyName><serviceList><service>
+          <serviceType>urn:schemas-upnp-org:service:AVTransport:1</serviceType>
+          <controlURL>${control}</controlURL>
+        </service></serviceList></device></root>`
+    assert.equal(parseDlnaDevice(description, 'http://192.168.1.7:8000/device.xml', '192.168.1.7'),
+      null, `${base} + ${control}`)
+  }
 })
 
 test('sends escaped media metadata in a SOAP AVTransport request', async t => {

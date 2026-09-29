@@ -183,8 +183,6 @@ const props = defineProps({
 const emit = defineEmits(['timestamp-event', 'expand'])
 const { t } = useI18n()
 
-let shownDescription = ''
-let descriptionText = props.description
 const descriptionScroll = useTemplateRef('descriptionScroll')
 const descriptionContentEnd = useTemplateRef('descriptionContentEnd')
 const descriptionContainer = useTemplateRef('descriptionContainer')
@@ -197,30 +195,31 @@ const descriptionFadeTop = ref(false)
 const copyButtonOverlapsExpandControl = ref(false)
 const isExpanded = computed(() => !props.previewOnly && (props.alwaysExpanded || showFullDescription.value))
 
-if (props.descriptionHtml !== '') {
-  const parsed = parseDescriptionHtml(props.descriptionHtml)
+const descriptionContent = computed(() => {
+  let shownDescription = ''
+  let descriptionText = props.description
+  if (props.descriptionHtml !== '') {
+    const parsed = parseDescriptionHtml(props.descriptionHtml)
 
-  // the invidious API returns emtpy html elements when the description is empty
-  // so we need to parse it to see if there is any meaningful text in the html
-  // or if it's just empty html elements e.g. `<p></p>`
+    // Invidious can return empty HTML elements such as `<p></p>`.
+    const testDiv = document.createElement('div')
+    testDiv.innerHTML = parsed
 
-  const testDiv = document.createElement('div')
-  testDiv.innerHTML = parsed
-
-  if (!/^\s*$/.test(testDiv.innerText)) {
-    descriptionText ||= testDiv.innerText
-    shownDescription = linkifyHashtagsAndHandles(parsed)
-  }
-} else {
-  if (!/^\s*$/.test(props.description)) {
+    if (!/^\s*$/.test(testDiv.innerText)) {
+      descriptionText ||= testDiv.innerText
+      shownDescription = linkifyHashtagsAndHandles(parsed)
+    }
+  } else if (!/^\s*$/.test(props.description)) {
     shownDescription = linkifyDescription(props.description)
   }
-}
+  return { html: shownDescription, text: descriptionText }
+})
+const shownDescription = computed(() => descriptionContent.value.html)
 
 const processedShownDescription = computed(() => {
-  if (shownDescription === '') { return shownDescription }
+  if (shownDescription.value === '') { return '' }
 
-  return processDescriptionHtml(shownDescription, linkTabIndex.value)
+  return processDescriptionHtml(shownDescription.value, linkTabIndex.value)
 })
 
 const linkTabIndex = computed(() => {
@@ -244,7 +243,7 @@ function onTimestamp(timestamp) {
 }
 
 async function copyDescription() {
-  await copyToClipboard(descriptionText, {
+  await copyToClipboard(descriptionContent.value.text, {
     messageOnSuccess: t('Description.Description Copied')
   })
 }
@@ -384,6 +383,14 @@ onMounted(() => {
 onBeforeUnmount(() => descriptionResizeObserver?.disconnect())
 
 watch(isExpanded, () => nextTick(updateDescriptionLayout))
+watch(shownDescription, async () => {
+  // Metadata can arrive after offline playback has already mounted the card.
+  if (!showControls.value) hasMeasured = false
+  await nextTick()
+  observeDescriptionElements()
+  measureDescription()
+  updateDescriptionLayout()
+})
 watch([() => props.tags, () => props.games, () => props.license], async () => {
   await nextTick()
   observeDescriptionElements()

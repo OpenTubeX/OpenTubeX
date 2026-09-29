@@ -29,6 +29,7 @@ export function parseDlnaDevice(description, location, address) {
   const parser = sax.parser(true, { trim: true })
   const stack = []
   let name = ''
+  let baseUrl = ''
   let isRenderer = false
   let service = null
   let transport = null
@@ -42,6 +43,7 @@ export function parseDlnaDevice(description, location, address) {
   parser.oncdata = text => { if (stack.length > 0) stack.at(-1).text += text }
   parser.onclosetag = () => {
     const element = stack.pop()
+    if (element.name === 'URLBase' && stack.length === 1 && stack[0].name === 'root') baseUrl = element.text.trim()
     if (element.name === 'friendlyName' && !name) name = element.text.trim()
     if (element.name === 'deviceType' && /:device:MediaRenderer:\d+$/.test(element.text.trim())) isRenderer = true
     if (service && element.name === 'serviceType') service.type = element.text.trim()
@@ -57,7 +59,9 @@ export function parseDlnaDevice(description, location, address) {
   try {
     parser.write(description).close()
     if (!isRenderer || !transport || !name) return null
-    const control = new URL(transport.controlUrl, location)
+    const base = new URL(baseUrl || location)
+    if (base.protocol !== 'http:' || (isIP(base.hostname) && base.hostname !== address)) return null
+    const control = new URL(transport.controlUrl, base)
     if (control.protocol !== 'http:' || (isIP(control.hostname) && control.hostname !== address)) return null
     control.hostname = address
     return {

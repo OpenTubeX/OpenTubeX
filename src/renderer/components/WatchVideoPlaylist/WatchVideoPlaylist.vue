@@ -557,7 +557,8 @@ watch(selectedUserPlaylistLastUpdatedAt, () => {
 
 watch(() => props.videoId, (newId, oldId) => {
   // Check if next video is from the shuffled list or if the user clicked a different video
-  if (shuffleEnabled.value) {
+  // Automatic skips retain one order until playback succeeds or every entry has failed.
+  if (shuffleEnabled.value && expectedAutoSkipItem !== (props.playlistItemId || newId)) {
     const newVideoIndex = randomizedPlaylistItems.value.findIndex((item) => {
       return item.videoId === newId
     })
@@ -953,7 +954,7 @@ function playNextVideo() {
 
     showToast({ message: t('Playing Next Video'), icon: ['fas', 'step-forward'] })
 
-    if (doShufflePlaylistItems) {
+    if (doShufflePlaylistItems && expectedAutoSkipItem === null) {
       shufflePlaylistItems()
     }
   } else {
