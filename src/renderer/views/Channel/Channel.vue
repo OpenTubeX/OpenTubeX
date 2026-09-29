@@ -1697,6 +1697,10 @@ watch(playlistSortBy, () => {
   }
 })
 
+function parseChannelPlaylists(playlists) {
+  return playlists.map(playlist => parseLocalListPlaylist(playlist, id.value, channelName.value)).filter(Boolean)
+}
+
 async function getChannelPlaylistsLocal() {
   const isCurrentRequest = startElementListRequest('playlists')
   setElementListLoading('playlists', true)
@@ -1738,7 +1742,7 @@ async function getChannelPlaylistsLocal() {
       return
     }
 
-    latestPlaylists.value = playlistsTab.playlists.map(playlist => parseLocalListPlaylist(playlist, id.value, channelName.value))
+    latestPlaylists.value = parseChannelPlaylists(playlistsTab.playlists)
     playlistContinuationData.value = playlistsTab.has_continuation ? playlistsTab : null
     setElementListLoading('playlists', false)
   } catch (err) {
@@ -1765,7 +1769,7 @@ async function getChannelPlaylistsLocalMore() {
     const continuation = await playlistContinuationData.value.getContinuation()
     if (!isCurrentRequest()) return
 
-    const parsedPlaylists = continuation.playlists.map(playlist => parseLocalListPlaylist(playlist, id.value, channelName.value))
+    const parsedPlaylists = parseChannelPlaylists(continuation.playlists)
     latestPlaylists.value = latestPlaylists.value.concat(parsedPlaylists)
     playlistContinuationData.value = continuation.has_continuation ? continuation : null
   } catch (err) {

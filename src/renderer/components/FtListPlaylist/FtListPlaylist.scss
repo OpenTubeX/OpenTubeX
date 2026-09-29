@@ -8,3 +8,14 @@
   align-items: flex-start;
   display: flex;
 }
+
+.ft-list-item .videoThumbnail .videoCountContainer.hasCountText {
+  font-size: 14px;
+  inline-size: max-content;
+  min-inline-size: 60px;
+
+  .inner {
+    padding-inline: 8px;
+    white-space: nowrap;
+  }
+}

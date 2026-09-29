@@ -7,9 +7,31 @@ import { test, expect, fixtureKey } from '../../helpers/innertube.mjs'
 // The official Blender channel.
 const CHANNEL_URL = 'https://www.youtube.com/channel/UCSMOQeBJ2RAnuFungnQOxLg'
 const CHANNEL_ID = 'UCSMOQeBJ2RAnuFungnQOxLg'
+const GLITCH_CHANNEL_URL = 'https://www.youtube.com/channel/UCn_FAXem2-e3HQvmK-mOH4g'
 
 test.describe('channel page', () => {
   test.use({ seed: { settings: { uiRoundness: 200, externalPlayer: 'mpv' } } })
+
+  test('loads the GLITCH channel home and playlists tabs', async ({ page }) => {
+    await page.locator(sel.searchInput).fill(GLITCH_CHANNEL_URL)
+    await page.locator(sel.searchInput).press('Enter')
+
+    await expect(page.getByText('GLITCH').first()).toBeVisible({ timeout: 30_000 })
+    await page.getByRole('tab', { name: 'Home' }).click()
+    await expect(page.locator('#homePanel .ft-list-video').first()).toBeVisible({ timeout: 30_000 })
+
+    await page.getByRole('tab', { name: 'Playlists' }).click()
+    await expect(page.locator('#playlistPanel .ft-list-video').first()).toBeVisible({ timeout: 30_000 })
+    const show = page.locator('#playlistPanel .ft-list-video').filter({ hasText: '3 seasons' })
+    await expect(show.getByRole('heading', { name: 'Meta Runner' })).toBeVisible()
+    expect(await show.locator('.videoCountContainer').evaluate(element => {
+      const badge = element.getBoundingClientRect()
+      const label = element.querySelector('.inner > div').getBoundingClientRect()
+      return label.left >= badge.left && label.right <= badge.right
+    })).toBe(true)
+    await expect(show.getByRole('link', { name: 'Meta Runner' })).toHaveAttribute('href', /^#\/playlist\/PLTqcR5ouTGRU\?/)
+    await expect(page.locator('[data-tab-loading-indicator]:not(.fullscreen)')).toHaveCount(0)
+  })
 
   test('shows channel info and videos', async ({ page }) => {
     let releaseVideos
