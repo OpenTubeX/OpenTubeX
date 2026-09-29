@@ -1261,6 +1261,7 @@ Video:
       'Off': '关闭'
       Minutes: '{minutes} 分钟'
       End of video: 视频结束时
+      End of current chapter: 当前章节结束时
       Remaining: '剩余 {time}'
       Cancel timer: 取消定时器
       Timer ended: 睡眠定时器已结束

@@ -2213,6 +2213,7 @@ Video:
       Off: 'Off'
       Minutes: '{minutes} minutes'
       End of video: End of video
+      End of current chapter: End of current chapter
       Remaining: '{time} remaining'
       Cancel timer: Cancel timer
       Timer ended: Sleep timer ended

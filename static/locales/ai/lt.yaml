@@ -1610,6 +1610,7 @@ Video:
       'Off': 'Išjungta'
       Minutes: '{minutes} min.'
       End of video: Vaizdo įrašo pabaigoje
+      End of current chapter: Dabartinio skyriaus pabaiga
       Remaining: 'Liko {time}'
       Cancel timer: Atšaukti laikmatį
       Timer ended: Miego laikmatis baigėsi

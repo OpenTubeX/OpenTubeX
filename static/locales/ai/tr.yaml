@@ -1261,6 +1261,7 @@ Video:
       'Off': Kapalı
       Minutes: '{minutes} dakika'
       End of video: Video sonunda
+      End of current chapter: Geçerli bölümün sonu
       Remaining: '{time} kaldı'
       Cancel timer: Zamanlayıcıyı iptal et
       Timer ended: Uyku zamanlayıcısı sona erdi

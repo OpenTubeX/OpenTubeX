@@ -1330,6 +1330,7 @@ Video:
       'Off': 'خاموش'
       Minutes: '{minutes} دقیقه'
       End of video: پایان ویدیو
+      End of current chapter: پایان فصل فعلی
       Remaining: '{time} باقی‌مانده'
       Cancel timer: لغو تایمر
       Timer ended: تایمر خواب پایان یافت

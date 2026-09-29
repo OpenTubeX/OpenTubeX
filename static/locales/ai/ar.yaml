@@ -1293,6 +1293,7 @@ Video:
       Off: عن
       Minutes: '{minutes} دقيقة'
       End of video: نهاية الفيديو
+      End of current chapter: نهاية الفصل الحالي
       Remaining: '{time} المتبقي'
       Cancel timer: إلغاء الموقت
       Timer ended: انتهى مؤقت النوم

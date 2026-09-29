@@ -1325,6 +1325,7 @@ Video:
       'Off': 'Fra'
       Minutes: '{minutes} minutter'
       End of video: Når videoen slutter
+      End of current chapter: Slutningen af det aktuelle kapitel
       Remaining: '{time} tilbage'
       Cancel timer: Annuller timer
       Timer ended: Sovetimeren er udløbet

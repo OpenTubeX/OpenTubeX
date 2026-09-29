@@ -684,6 +684,8 @@ Video:
       Error: Tłumaczenie lektorskie nie powiodło się. Spróbuj ponownie później.
       Duration Error: Tłumaczenie lektorskie jest dostępne tylko dla filmów trwających do czterech godzin.
     Auto-translate: Tłumaczenie automatyczne
+    Sleep Timer:
+      End of current chapter: Koniec bieżącego rozdziału
     A-B Repeat:
       A-B Repeat: Powtarzanie A-B
       On: Włączone

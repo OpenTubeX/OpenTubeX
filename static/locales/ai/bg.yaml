@@ -1274,6 +1274,7 @@ Video:
       'Off': 'Изключен'
       Minutes: '{minutes} минути'
       End of video: Край на видеоклипа
+      End of current chapter: Край на текущата глава
       Remaining: 'Остават {time}'
       Cancel timer: Отмяна на таймера
       Timer ended: Таймерът за заспиване изтече

@@ -1260,6 +1260,7 @@ Video:
       'Off': 'Désactivé'
       Minutes: '{minutes} minutes'
       End of video: Fin de la vidéo
+      End of current chapter: Fin du chapitre en cours
       Remaining: '{time} restantes'
       Cancel timer: Annuler le minuteur
       Timer ended: Minuteur de mise en veille terminé

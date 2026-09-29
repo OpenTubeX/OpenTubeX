@@ -1278,6 +1278,7 @@ Video:
       'Off': 'Isključeno'
       Minutes: '{minutes} min'
       End of video: Na kraju videozapisa
+      End of current chapter: Kraj trenutačnog poglavlja
       Remaining: 'Preostalo: {time}'
       Cancel timer: Otkaži mjerač vremena
       Timer ended: Mjerač vremena za isključivanje je istekao

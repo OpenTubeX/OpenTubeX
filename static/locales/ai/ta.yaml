@@ -1301,6 +1301,7 @@ Video:
       'Off': முடக்கம்
       Minutes: '{minutes} நிமிடங்கள்'
       End of video: காணொளியின் முடிவில்
+      End of current chapter: தற்போதைய அத்தியாயத்தின் முடிவு
       Remaining: '{time} மீதம்'
       Cancel timer: நேரக்கருவியை ரத்துசெய்
       Timer ended: உறக்க நேரக்கருவி முடிந்தது

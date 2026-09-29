@@ -1269,6 +1269,7 @@ Video:
       'Off': 'Nonaktif'
       Minutes: '{minutes} menit'
       End of video: Akhir video
+      End of current chapter: Akhir bab saat ini
       Remaining: 'Tersisa {time}'
       Cancel timer: Batalkan pewaktu
       Timer ended: Pewaktu tidur berakhir

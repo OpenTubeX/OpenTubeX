@@ -1268,6 +1268,7 @@ Video:
       'Off': 'Bağlı'
       Minutes: '{minutes} dəqiqə'
       End of video: Videonun sonu
+      End of current chapter: Cari fəslin sonu
       Remaining: '{time} qalıb'
       Cancel timer: Taymeri ləğv et
       Timer ended: Yuxu taymerinin vaxtı bitdi

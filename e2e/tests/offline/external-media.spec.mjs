@@ -6,11 +6,12 @@ import { expect, goTo, repoRoot, sel, setWindowSize, test } from '../../helpers/
 import { activeTab, waitForPlayback } from '../../helpers/player.mjs'
 import { DEMO_MEDIA_PATH, DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 
-async function prepareTwitchYtDlp(app, page, mediaUrl, live, description = '') {
+async function prepareTwitchYtDlp(app, page, mediaUrl, live, description = '', chapters = []) {
   const executable = path.join(app.userDataDir, `twitch-${live ? 'live' : 'replay'}-yt-dlp.sh`)
   const response = JSON.stringify({
     title: live ? 'A Twitch livestream' : 'A Twitch broadcast',
     description,
+    chapters,
     webpage_url: mediaUrl,
     live_status: live ? 'is_live' : 'was_live',
     ...(live ? {} : { duration: 30 }),
@@ -39,6 +40,28 @@ async function prepareTwitchYtDlp(app, page, mediaUrl, live, description = '') {
     await store.dispatch('updateYtDlpPath', ytDlpPath)
   }, executable)
 }
+
+test('external media can stop at the end of its current chapter', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false, '', [
+    { start_time: 0, end_time: 6, title: 'First' },
+    { start_time: 6, end_time: 30, title: 'Second' },
+  ])
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const video = await waitForPlayback(page)
+  await video.evaluate(element => element.pause())
+
+  const player = page.locator(`${activeTab} .externalMediaPlayer`)
+  await player.locator('.shaka-overflow-menu-button').click()
+  await player.locator('.sleep-timer-button').click()
+  await player.locator('.sleep-timer-menu').getByRole('button', { name: 'End of current chapter' }).click()
+  await video.evaluate(element => element.play())
+
+  await expect.poll(() => video.evaluate(element => element.paused), { timeout: 10_000 }).toBe(true)
+  expect(await video.evaluate(element => element.currentTime)).toBeLessThan(6)
+})
 
 test('adds a web URL from Downloads and passes it to yt-dlp', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')

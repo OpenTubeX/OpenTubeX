@@ -1261,6 +1261,7 @@ Video:
       'Off': 'オフ'
       Minutes: '{minutes}分'
       End of video: 動画の終了時
+      End of current chapter: 現在のチャプターの終了時
       Remaining: '残り{time}'
       Cancel timer: タイマーをキャンセル
       Timer ended: スリープタイマーが終了しました

@@ -1306,6 +1306,7 @@ Video:
       'Off': Uit
       Minutes: '{minutes} minuten'
       End of video: Einde van video
+      End of current chapter: Einde van huidig hoofdstuk
       Remaining: '{time} resterend'
       Cancel timer: Timer annuleren
       Timer ended: Slaaptimer afgelopen
