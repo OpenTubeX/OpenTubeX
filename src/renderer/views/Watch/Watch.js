@@ -3574,10 +3574,6 @@ export default defineComponent({
         this.updateTitle()
       } catch (err) {
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
-        if (metadataOnly) {
-          console.error('Could not restore downloaded video metadata', err)
-          return
-        }
 
         let handledError = err
         if (err.isIpBlock) {
@@ -3585,8 +3581,16 @@ export default defineComponent({
           handledError = new Error(this.t('Video.IP block'), { cause: err })
         }
 
+        const canFallback = this.backendPreference === 'local' && this.backendFallback &&
+          !handledError.toString().includes('private') && !handledError.toString().includes('unavailable')
+        if (metadataOnly) {
+          if (canFallback) return this.getVideoInformationInvidious(loadGeneration, true)
+          console.error('Could not restore downloaded video metadata', handledError)
+          return
+        }
+
         console.error(handledError)
-        if (this.backendPreference === 'local' && this.backendFallback && !handledError.toString().includes('private') && !handledError.toString().includes('unavailable')) {
+        if (canFallback) {
           const errorMessage = this.t('Local API Error (Click to copy)')
           showApiErrorToast(errorMessage, handledError, this.showTabToast)
           this.showTabToast({ message: this.t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
@@ -3836,13 +3840,15 @@ export default defineComponent({
         })
         .catch(async err => {
           if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+          const canFallback = process.env.SUPPORTS_LOCAL_API && this.backendPreference === 'invidious' && this.backendFallback
           if (metadataOnly) {
+            if (canFallback) return this.getVideoInformationLocal(loadGeneration, true)
             console.error('Could not restore downloaded video metadata', err)
             return
           }
 
           console.error(err)
-          if (process.env.SUPPORTS_LOCAL_API && this.backendPreference === 'invidious' && this.backendFallback) {
+          if (canFallback) {
             const errorMessage = this.t('Invidious API Error (Click to copy)')
             showApiErrorToast(errorMessage, err, this.showTabToast)
             this.showTabToast({ message: this.t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })

@@ -293,6 +293,7 @@ test.describe('download opened without a connection', () => {
     await page.locator('.profileTrigger').click()
     await page.getByRole('dialog', { name: 'Quick settings' }).getByRole('button', { name: 'Downloads' }).click()
     await page.locator('.downloadRow').filter({ hasText: 'Offline download' }).getByRole('button', { name: 'Play download', exact: true }).click()
+    await expect(page.locator('.ftVideoPlayer')).toBeVisible()
     const watch = await watchViewHandle(page)
     await watch.evaluate((vm, mediaPath) => {
       for (let index = 0; index < 13; index++) {
@@ -362,6 +363,39 @@ test.describe('download opened without a connection', () => {
       window.dispatchEvent(new Event('online'))
     })
     await expect(page.locator('.watchVideoRecommendations')).toContainText('Online suggestion')
+    await expect(page.locator('.watchVideoInfo').getByRole('button', { name: /transcript/i })).toBeVisible()
+    expect(await video.evaluate((element, expectedSource) => element.isConnected && element.currentSrc === expectedSource, source)).toBe(true)
+  })
+
+  test('falls back to Local metadata when Invidious fails after reconnecting', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page, { captionVideoIds: ['jNQXAC9IVRw'] })
+    await page.route('https://invidious.test/api/v1/videos/**', route => route.fulfill({
+      status: 503,
+      json: { error: 'Instance unavailable' }
+    }))
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await Promise.all([
+        store.dispatch('updateBackendPreference', 'invidious'),
+        store.dispatch('updateDefaultInvidiousInstance', 'https://invidious.test'),
+        store.dispatch('updateBackendFallback', true),
+      ])
+      Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })
+      window.dispatchEvent(new Event('offline'))
+    })
+    await expect(page.locator('.connectionStatus')).toHaveText('Offline')
+    await page.locator('.profileTrigger').click()
+    await page.getByRole('dialog', { name: 'Quick settings' }).getByRole('button', { name: 'Downloads' }).click()
+    await page.locator('.downloadRow').filter({ hasText: 'Offline download' }).getByRole('button', { name: 'Play download', exact: true }).click()
+    const video = await page.locator('.ftVideoPlayer video').elementHandle()
+    const source = await video.evaluate(element => element.currentSrc)
+    await expect(page.locator('.watchVideoRecommendations')).toContainText('Other saved video')
+
+    await page.evaluate(() => {
+      Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => true })
+      window.dispatchEvent(new Event('online'))
+    })
+    await expect(page.locator('.watchVideoRecommendations')).not.toContainText('Other saved video')
     await expect(page.locator('.watchVideoInfo').getByRole('button', { name: /transcript/i })).toBeVisible()
     expect(await video.evaluate((element, expectedSource) => element.isConnected && element.currentSrc === expectedSource, source)).toBe(true)
   })
