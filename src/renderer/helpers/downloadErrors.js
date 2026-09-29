@@ -5,5 +5,8 @@
  * @returns {string}
  */
 export function downloadErrorMessage(error, translate) {
-  return error === 'DOWNLOAD_EXPORT_FAILED' ? translate('Downloads.Export Failed') : error
+  if (error === 'DOWNLOAD_EXPORT_FAILED') return translate('Downloads.Export Failed')
+  if (error === 'IOS_DOWNLOAD_FAILED') return translate('Downloads.Download Failed')
+  if (error === 'INVALID_MEDIA_URL') return translate('Video.Invalid Media URL')
+  return error
 }

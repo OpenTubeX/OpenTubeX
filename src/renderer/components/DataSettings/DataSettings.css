@@ -41,3 +41,8 @@
 .takeoutSelectionCentered .pure-checkbox {
   text-align: start;
 }
+
+.importHelpLink:any-link {
+  color: var(--primary-text-color);
+  text-decoration: underline;
+}

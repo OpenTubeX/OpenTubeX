@@ -22,7 +22,7 @@
   .syncedSettingIndicator,
   .changedSettingIndicator
 )) {
-  --general-select-indicator-space: 70px;
+  --general-select-indicator-space: 74px;
 }
 
 .generalSelectGrid :deep(.select.containsTooltip:has(
@@ -30,7 +30,7 @@
 ):has(
   .changedSettingIndicator
 )) {
-  --general-select-indicator-space: 80px;
+  --general-select-indicator-space: 84px;
 }
 
 .generalSelectGrid :deep(.select.containsTooltip .select-text),

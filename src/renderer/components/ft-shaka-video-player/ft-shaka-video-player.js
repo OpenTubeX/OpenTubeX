@@ -10,6 +10,7 @@ import FtSelect from '../FtSelect/FtSelect.vue'
 import shaka from 'shaka-player'
 import { registerPlugin } from '@capacitor/core'
 import { bindIosFullscreen } from '../../helpers/player/iosFullscreen'
+import { bindIosNativeCaptions } from '../../helpers/player/iosNativeCaptions'
 import { createIOSMediaTransport } from '../../helpers/player/iosMediaTransport'
 import { useI18n } from 'vue-i18n'
 
@@ -224,6 +225,8 @@ const AdvancedRequestType = shaka.net.NetworkingEngine.AdvancedRequestType
 if (process.env.IS_IOS) {
   shaka.net.NetworkingEngine.registerScheme('https',
     createIOSMediaTransport(shaka, registerPlugin('SabrHttp')),
+    shaka.net.NetworkingEngine.PluginPriority.APPLICATION, true)
+  shaka.net.NetworkingEngine.registerScheme('capacitor', shaka.net.HttpFetchPlugin.parse,
     shaka.net.NetworkingEngine.PluginPriority.APPLICATION, true)
 }
 const TrackLabelFormat = shaka.ui.Overlay.TrackLabelFormat
@@ -763,6 +766,7 @@ export default defineComponent({
     /** @type {shaka.ui.Overlay|null} */
     let ui = null
     let iosFullscreenCleanup = null
+    let iosCaptionsCleanup = null
     let screenWakeBinding = null
 
     // Set when a UI reconfigure is requested while the player is not loaded, so
@@ -800,6 +804,8 @@ export default defineComponent({
     // Reactive mirror of the native fullscreen state, so the template can
     // decide where the chapters render (in-player panel vs the watch sidebar).
     const isFullscreen = ref(false)
+    const pictureInPictureActive = ref(false)
+    const mobileAdjustmentsVisible = ref(!isAppHidden())
     const androidFullscreenHostActive = ref(false)
     let androidFullscreenHost = null
     const playerPaused = ref(true)
@@ -1479,11 +1485,12 @@ export default defineComponent({
     }
 
     const skipSilence = computed(() => {
-      return store.getters.getTabSkipSilence(mediaTabId)
+      // WebKit media-source audio produces zero analysis samples on iOS.
+      return !process.env.IS_IOS && store.getters.getTabSkipSilence(mediaTabId)
     })
 
     const showSkipSilenceButton = computed(() => {
-      return store.getters.getShowSkipSilenceButton
+      return !process.env.IS_IOS && store.getters.getShowSkipSilenceButton
     })
 
     const silenceSkipping = useSilenceSkipping({
@@ -1661,11 +1668,16 @@ export default defineComponent({
       return store.getters.getEnableMobileFullscreenSwipe
     })
 
-    watch(enterFullscreenOnDisplayRotate, (newValue) => {
-      ui.configure({
-        enableFullscreenOnRotation: (!process.env.IS_CAPACITOR || process.env.IS_IOS) && newValue
-      })
+    const fullscreenOnRotationEnabled = computed(() => {
+      // iOS can emit an orientation change while moving to Home. Shaka exits
+      // PiP before entering fullscreen, so only allow rotation while inline.
+      return (!process.env.IS_CAPACITOR || process.env.IS_IOS) && enterFullscreenOnDisplayRotate.value &&
+        (!process.env.IS_IOS || (mobileAdjustmentsVisible.value && !pictureInPictureActive.value))
     })
+
+    watch(fullscreenOnRotationEnabled, (newValue) => {
+      ui?.configure({ enableFullscreenOnRotation: newValue })
+    }, { flush: 'sync' })
 
     watch([rotateFullscreenToLandscape, fullscreenAspectRatio], ([enabled]) => {
       if (!isNativeFullscreenActive()) return
@@ -4831,7 +4843,7 @@ export default defineComponent({
           },
 
           // these have their own watchers
-          enableFullscreenOnRotation: (!process.env.IS_CAPACITOR || process.env.IS_IOS) && enterFullscreenOnDisplayRotate.value,
+          enableFullscreenOnRotation: fullscreenOnRotationEnabled.value,
           fullScreenElement: androidFullscreenHost ?? container.value,
           playbackRates: playbackRates.value,
           tapSeekDistance: defaultSkipInterval.value,
@@ -6871,7 +6883,6 @@ export default defineComponent({
     const videoElementHeight = ref(0)
     /** Height of the video element in CSS pixels, used to scale the captions with the player. */
     const videoElementLayoutHeight = ref(0)
-    const pictureInPictureActive = ref(false)
 
     const captionPlayerVariables = computed(() => {
       return getCaptionPlayerVariables(videoElementLayoutHeight.value)
@@ -7033,7 +7044,6 @@ export default defineComponent({
       handleScrollMiniFullscreenButtonClick(event)
     }
 
-    const mobileAdjustmentsVisible = ref(!isAppHidden())
     const mobileFullscreenBrightnessActive = computed(() => process.env.IS_CAPACITOR &&
       isActiveTab.value && !scrollMiniPlayerActive.value && mobileAdjustmentsVisible.value &&
       isFullscreen.value && store.getters.getMobileFullscreenBrightness)
@@ -10217,6 +10227,7 @@ export default defineComponent({
           break
         }
         case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.TOGGLE_SKIP_SILENCE): {
+          if (process.env.IS_IOS) break
           event.preventDefault()
           const enabled = !skipSilence.value
           updateSkipSilence(enabled)
@@ -10499,6 +10510,10 @@ export default defineComponent({
         console.warn(`Ignoring player abort/interruption (code ${error.code}) in ${context}`)
         return
       }
+
+      // Shaka retries the retained stream on reconnect. Do not mark an offline
+      // transport failure as a terminal error or suppress its future errors.
+      if (error.code === ErrorCode.HTTP_ERROR && !navigator.onLine) return
 
       logShakaError(error, context, props.videoId, details)
 
@@ -10917,6 +10932,7 @@ export default defineComponent({
 
       const controls = ui.getControls()
       if (process.env.IS_IOS) {
+        iosCaptionsCleanup = bindIosNativeCaptions(videoElement)
         iosFullscreenCleanup = bindIosFullscreen(controls, {
           isEnabled: () => fullWindowEnabled.value,
           setEnabled: enabled => events.dispatchEvent(new CustomEvent('setFullWindow', { detail: enabled })),
@@ -11583,6 +11599,8 @@ export default defineComponent({
       screenWakeBinding = null
       iosFullscreenCleanup?.()
       iosFullscreenCleanup = null
+      iosCaptionsCleanup?.()
+      iosCaptionsCleanup = null
       clearTimeout(paidPromotionTimer)
       if (fullscreenDockLayoutFrame !== null) {
         cancelAnimationFrame(fullscreenDockLayoutFrame)
@@ -11795,6 +11813,8 @@ export default defineComponent({
       screenWakeBinding = null
       iosFullscreenCleanup?.()
       iosFullscreenCleanup = null
+      iosCaptionsCleanup?.()
+      iosCaptionsCleanup = null
       ignoreErrors = true
       cancelPendingVolumeUserSet()
       cancelSponsorBlockSkipSchedule()

@@ -4,6 +4,7 @@ import { promisify } from 'node:util'
 import { readFile } from 'node:fs/promises'
 import vm from 'node:vm'
 import test from 'node:test'
+import { computed, nextTick, ref, watch } from 'vue'
 
 async function helper(name, exports, ios = true) {
   const registrations = []
@@ -62,6 +63,7 @@ test('iOS media controls and file operations dispatch to their own native servic
 test('iOS folder preferences display the selected name instead of bookmark data', async () => {
   const storage = await helper('androidStorage', ['displayAndroidPath'])
   assert.equal(storage.displayAndroidPath(JSON.stringify({ name: 'Screenshots', bookmark: 'private-bookmark' })), 'Screenshots')
+  assert.equal(storage.displayAndroidPath('/private/var/mobile/Containers/Data/Application/ABC/Documents/Downloads/fixture.mp4'), 'Downloads/fixture.mp4')
   assert.equal(storage.displayAndroidPath(''), '')
 })
 
@@ -102,7 +104,6 @@ test('iOS pauses on app hiding when background playback is disabled', async () =
   }
 })
 
-
 test('iOS webpack configuration loads with the current shared build rules', async () => {
   await promisify(execFile)(process.execPath, ['-e', `
     const assert = require('node:assert/strict')
@@ -110,4 +111,106 @@ test('iOS webpack configuration loads with the current shared build rules', asyn
     assert.equal(process.env.CAPACITOR_PLATFORM, 'ios')
     assert.deepEqual(configs.map(config => config.name), ['capacitor', 'capacitorBotGuardScript'])
   `], { cwd: new URL('../../', import.meta.url) })
+})
+
+test('iOS ignores imported silence skipping preferences while other platforms retain them', async () => {
+  const source = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
+  const settings = await readFile(new URL('../../src/renderer/components/PlayerSettings/PlayerSettings.vue', import.meta.url), 'utf8')
+  for (const ios of [true, false]) {
+    for (const enabled of [true, false]) {
+      const context = vm.createContext({
+        process: { env: { IS_IOS: ios } },
+        computed: fn => ({ value: fn() }),
+        mediaTabId: 'test-tab',
+        store: { getters: { getTabSkipSilence: () => enabled, getShowSkipSilenceButton: enabled } },
+      })
+      for (const name of ['skipSilence', 'showSkipSilenceButton']) {
+        const declaration = source.match(new RegExp(`const ${name} = computed\\(\\(\\) => \\{[\\s\\S]*?\\n    \\}\\)`))?.[0]
+        assert.ok(declaration)
+        assert.equal(vm.runInContext(`${declaration}; ${name}.value`, context), !ios && enabled)
+      }
+    }
+  }
+  for (const key of ['showSkipSilenceButton', 'enableSkipSilenceByDefault']) {
+    const toggle = settings.match(new RegExp(`<FtToggleSwitch\\s[^>]*setting-key="${key}"[^>]*>`))?.[0]
+    assert.ok(toggle)
+    assert.match(toggle, /v-if="!IS_IOS"/)
+  }
+})
+
+test('silence shortcut preserves iOS preferences and toggles them on other platforms', async () => {
+  const source = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
+  const handler = source.match(/case matches\(KeyboardShortcuts\.VIDEO_PLAYER\.PLAYBACK\.TOGGLE_SKIP_SILENCE\): \{[\s\S]*?\n        \}/)?.[0]
+  assert.ok(handler)
+  for (const ios of [true, false]) {
+    for (const initial of [true, false]) {
+      let preference = initial
+      const updates = []
+      const messages = []
+      const context = vm.createContext({
+        process: { env: { IS_IOS: ios } },
+        KeyboardShortcuts: { VIDEO_PLAYER: { PLAYBACK: { TOGGLE_SKIP_SILENCE: 'shortcut' } } },
+        matches: () => true,
+        event: { preventDefault() {} },
+        skipSilence: { get value() { return !ios && preference } },
+        updateSkipSilence: value => { preference = value; updates.push(value) },
+        ui: { getControls: () => ({ getLocalization: () => ({ resolve: value => value }) }) },
+        showValueChange: value => messages.push(value),
+        blurTooltipButtons() {},
+      })
+      vm.runInContext(`switch (true) { ${handler} }`, context)
+      assert.equal(preference, ios ? initial : !initial)
+      assert.deepEqual(updates, ios ? [] : [!initial])
+      assert.deepEqual(messages, ios ? [] : [initial ? 'OFF' : 'ON'])
+    }
+  }
+})
+
+test('iOS rotation fullscreen stays off during PiP and background transitions', async () => {
+  const source = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
+  const declaration = source.match(/const fullscreenOnRotationEnabled = computed\(\(\) => \{[\s\S]*?\n    \}\)/)?.[0] ?? ''
+  const rotationWatch = source.match(/watch\((?:enterFullscreenOnDisplayRotate|fullscreenOnRotationEnabled), \(newValue\) => \{[\s\S]*?\n    \}(?:, \{ flush: 'sync' \})?\)/)?.[0]
+  const initialConfig = source.match(/enableFullscreenOnRotation: ([^\n]+),\n          fullScreenElement/)?.[1]
+  assert.ok(rotationWatch)
+  assert.ok(initialConfig)
+  for (const platform of ['ios', 'android', 'desktop']) {
+    const preference = ref(true)
+    const pip = ref(false)
+    const visible = ref(true)
+    let enabled
+    const context = vm.createContext({
+      process: { env: { IS_IOS: platform === 'ios', IS_CAPACITOR: platform !== 'desktop' } },
+      enterFullscreenOnDisplayRotate: preference,
+      pictureInPictureActive: pip,
+      mobileAdjustmentsVisible: visible,
+      computed, watch,
+      ui: { configure: options => { enabled = options.enableFullscreenOnRotation } },
+    })
+    vm.runInContext(declaration, context)
+    enabled = vm.runInContext(initialConfig, context)
+    const stop = vm.runInContext(rotationWatch, context)
+    try {
+      assert.equal(enabled, platform !== 'android')
+      pip.value = true
+      await nextTick()
+      assert.equal(enabled, platform === 'desktop', `${platform}: PiP must survive orientation changes`)
+      visible.value = false
+      pip.value = false
+      await nextTick()
+      assert.equal(enabled, platform === 'desktop', `${platform}: leaving PiP while hidden must not enable fullscreen`)
+      visible.value = true
+      await nextTick()
+      assert.equal(enabled, platform !== 'android', `${platform}: restore foreground rotation`)
+      preference.value = false
+      await nextTick()
+      assert.equal(enabled, false)
+      pip.value = true
+      preference.value = true
+      await nextTick()
+      assert.equal(enabled, platform === 'desktop', `${platform}: changing preference during PiP`)
+      assert.equal(vm.runInContext(initialConfig, context), platform === 'desktop', `${platform}: initial configuration during PiP`)
+    } finally {
+      stop()
+    }
+  }
 })

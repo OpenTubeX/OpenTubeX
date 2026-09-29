@@ -529,7 +529,7 @@ const windowStyle = computed(() => isWindowMaximized.value
   ? {
       left: '0',
       top: 'var(--app-safe-area-inset-top, 0px)',
-      inlineSize: '100vw',
+      inlineSize: '100%',
       blockSize: 'calc(100dvh - var(--app-safe-area-inset-top, 0px))'
     }
   : {

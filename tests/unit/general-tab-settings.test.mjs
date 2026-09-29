@@ -60,7 +60,7 @@ test('mobile startup waits for saved settings before restoring tabs', async () =
       watch(getter, callback) { callback(getter()); return () => {} },
     },
     initializeNetworkRecovery: () => ({ setInternetChecksEnabled: value => connectivityChoices.push(value) }),
-    initializeAndroidYtDlp: () => {},
+    initializeCapacitorYtDlp: () => {},
     initializeCapacitorTabPreviews: () => {},
     capacitorTabService: { initialize: async () => { restored = true } },
   })

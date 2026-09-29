@@ -41,8 +41,14 @@ jobs:
       with:
         version: 11
         cache: false
+    - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+      with:
+        python-version: '3.14'
     - run: pnpm run ci
     - run: pnpm run capacitor:sync:ios
+      env:
+        GH_TOKEN: ${{ github.token }}
+    - run: PYTHONPATH=ios/App/python-packages:ios/App/App python3 -m unittest discover -s tests -p ios_ytdlp_python_test.py
     - name: Select an installed simulator
       env:
         DEVICE_FAMILY: ${{ matrix.device }}
@@ -61,9 +67,9 @@ jobs:
       env:
         TEST_PLAYBACK: ${{ inputs.playback || 'false' }}
       run: |
-        args=()
+        args=(-skip-testing:AppTests/AppTests/testYtDlpPersistenceSeed -skip-testing:AppTests/AppTests/testYtDlpPersistenceAfterRelaunch)
         if [ "$TEST_PLAYBACK" != true ]; then
-          args+=(-skip-testing:AppTests/AppTests/testApplicationAndDirectPlayback -skip-testing:AppTests/AppTests/testSustainedPlayback -skip-testing:AppTests/AppTests/testPlaybackTabTeardown)
+          args+=(-skip-testing:AppTests/AppTests/testApplicationAndDirectPlayback -skip-testing:AppTests/AppTests/testSustainedPlayback -skip-testing:AppTests/AppTests/testPlaybackTabTeardown -skip-testing:AppTests/AppTests/testYtDlpLiveExternalPlayback -skip-testing:AppTests/AppTests/testYtDlpLiveYouTubePlayback -skip-testing:AppTests/AppTests/testYtDlpLiveYouTubeDownload -skip-testing:AppTests/AppTests/testYtDlpConcurrentPlaybackAndDownload)
         fi
         xcodebuild -project ios/App/App.xcodeproj -scheme App \
           -destination "platform=iOS Simulator,id=$SIMULATOR_ID" \

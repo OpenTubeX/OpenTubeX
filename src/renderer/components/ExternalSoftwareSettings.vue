@@ -26,7 +26,7 @@
             @change="updateYtDlpSource"
           />
           <FtSelect
-            v-if="ytDlpSource === 'managed'"
+            v-if="!IS_IOS && ytDlpSource === 'managed'"
             class="externalSoftwareSelect"
             :placeholder="t('Settings.External Software Settings.yt-dlp Channel')"
             :value="ytDlpChannel"
@@ -37,7 +37,7 @@
             @change="updateYtDlpChannel"
           />
           <FtInput
-            v-else
+            v-else-if="!IS_IOS"
             class="externalSoftwarePath"
             :placeholder="t('Settings.External Software Settings.yt-dlp Executable Path')"
             :show-action-button="true"
@@ -74,7 +74,7 @@
           </p>
         </div>
         <FtButton
-          v-if="ytDlpSource === 'managed'"
+          v-if="!IS_IOS && ytDlpSource === 'managed'"
           class="externalSoftwareToolAction"
           :label="ytDlpBinaryDownloadInProgress
             ? t('Settings.External Software Settings.Downloading yt-dlp')
@@ -92,6 +92,7 @@
       </section>
 
       <section
+        v-if="!IS_IOS"
         class="externalSoftwareTool"
         aria-labelledby="ffmpeg-settings-heading"
       >
@@ -212,7 +213,7 @@
     </div>
 
     <div
-      v-if="ytDlpSource === 'managed' || ytDlpFfmpegSource === 'managed'"
+      v-if="!IS_IOS && (ytDlpSource === 'managed' || ytDlpFfmpegSource === 'managed')"
       class="managedSoftwareControls"
     >
       <FtSelect
@@ -239,6 +240,7 @@
     </div>
   </FtSettingsSection>
   <FtSettingsSection
+    v-if="!IS_IOS"
     :title="t('Settings.External Software Settings.Restricted Playback Authentication')"
   >
     <FtFlexBox v-if="IS_CAPACITOR">
@@ -367,6 +369,7 @@ import { showToast } from '../helpers/utils'
 const { t } = useI18n()
 
 const YT_DLP_NAME = 'yt-dlp'
+const IS_IOS = process.env.IS_IOS
 const FFMPEG_TOOL_NAME = 'FFmpeg / FFprobe'
 const SOURCE_VALUES = ['system', 'managed']
 const CHANNEL_NAMES = ['Stable', 'Nightly', 'Master']
@@ -844,7 +847,7 @@ async function chooseBrowserProfilePath() {
 <style scoped>
 .externalSoftwareTools {
   --external-software-select-gutter: 70px;
-  --external-software-help-width: 28px;
+  --external-software-help-width: 32px;
 
   align-items: stretch;
   display: grid;
@@ -1034,7 +1037,7 @@ async function chooseBrowserProfilePath() {
 
 @container settings-content (width <= 460px) {
   .externalSoftwareTools {
-    --external-software-select-gutter: 28px;
+    --external-software-select-gutter: 32px;
   }
 
   .externalSoftwareTool {

@@ -902,8 +902,8 @@ const customState = {
 }
 
 const customGetters = {
+  getEnableDownloads: (state) => state.enableDownloads,
   // A synchronized preference must not expose a service absent on this device.
-  getEnableDownloads: (state) => !process.env.IS_IOS && state.enableDownloads,
   getUseVoiceOverTranslation: (state) => !process.env.IS_IOS && state.useVoiceOverTranslation,
 
   getQuickSettings: (state) => normalizeQuickSettings(state.quickSettings),

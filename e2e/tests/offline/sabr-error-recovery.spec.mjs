@@ -154,6 +154,47 @@ test('terminal built-in playback failure falls back to yt-dlp once', async ({ ap
   expect(result.errorMessage).toBe('')
 })
 
+test('offline WebKit errors retain the player and reconnect restores error handling', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page.locator('.ftVideoPlayer')).toBeVisible({ timeout: 30_000 })
+  const watchView = await watchViewHandle(page)
+  await watchView.evaluate(view => {
+    const video = document.querySelector('.ftVideoPlayer video')
+    const player = video.ui.getControls().getPlayer()
+    window.__offlineRecovery = { video, player, format: view.activeFormat, retries: 0 }
+    view.isAndroidTransientHttpRecoveryEnabled = () => true
+    view.retryAndroidTransientHttpError = async () => {
+      window.__offlineRecovery.retries++
+      return true
+    }
+  })
+  await page.context().setOffline(true)
+  try {
+    await expect.poll(() => page.evaluate(() => navigator.onLine)).toBe(false)
+    const emitError = () => page.evaluate(() => {
+      window.__offlineRecovery.player.dispatchEvent({
+        type: 'error',
+        detail: { severity: 2, category: 1, code: 1002, data: ['https://example.invalid/segment', new TypeError('Load failed')] }
+      })
+    })
+    await emitError()
+    expect(await watchView.evaluate(view => ({
+      retained: window.__offlineRecovery.video.isConnected,
+      sameFormat: view.activeFormat === window.__offlineRecovery.format,
+      loading: view.isLoading,
+      retries: window.__offlineRecovery.retries
+    }))).toEqual({ retained: true, sameFormat: true, loading: false, retries: 0 })
+    await page.context().setOffline(false)
+    await expect.poll(() => page.evaluate(() => navigator.onLine)).toBe(true)
+    await emitError()
+    await expect.poll(() => page.evaluate(() => window.__offlineRecovery.retries)).toBe(1)
+  } finally {
+    await page.context().setOffline(false)
+  }
+})
+
 test('Android transient HTTP recovery retries the current stream once', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await goTo(page, 'history')

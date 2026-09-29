@@ -26,15 +26,17 @@ test('iOS fullscreen stays app-owned for swipes, dock scrolling and keyboard inp
   assert.equal(controls.compiledToggle, browserToggle)
 })
 
-test('iOS fullscreen binding is restored once during player teardown', () => {
+test('iOS fullscreen and caption bindings are restored once during player teardown', () => {
   const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
   const unmount = source.split('    onBeforeUnmount(() => {')
     .find(body => body.trimStart().startsWith('sponsorBlockRequestGeneration++'))
     .split('      clearTimeout(paidPromotionTimer)')[0]
   const destroy = source.split('    async function destroyPlayer() {')[1].split('      ignoreErrors = true')[0]
   let restores = 0
+  let captionRestores = 0
   const context = {
     iosFullscreenCleanup: () => { restores++ },
+    iosCaptionsCleanup: () => { captionRestores++ },
     sponsorBlockRequestGeneration: 0,
     screenWakeBinding: null,
     repeatStatsTracker: null,
@@ -46,4 +48,6 @@ test('iOS fullscreen binding is restored once during player teardown', () => {
   vm.runInNewContext(`(() => { ${unmount} })()`, context)
   assert.equal(restores, 1)
   assert.equal(context.iosFullscreenCleanup, null)
+  assert.equal(captionRestores, 1)
+  assert.equal(context.iosCaptionsCleanup, null)
 })

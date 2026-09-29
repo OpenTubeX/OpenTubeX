@@ -476,73 +476,138 @@ for (const zoom of [1, 1.25]) {
   }
 }
 
-test('reserves the player height when Shaka loads before video metadata', async ({ app, page }) => {
+test('iOS inline player fits the picture within its height limit', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
-  await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
-
-  let releaseMedia
-  const mediaPending = new Promise(resolve => { releaseMedia = resolve })
-  await page.route(/googlevideo\.com\/videoplayback/, async route => {
-    await mediaPending
-    await route.fallback()
-  })
-
-  await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
-  await page.locator(sel.searchInput).press('Enter')
-  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
-
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  await page.addStyleTag({ path: 'src/renderer/helpers/iosSafeArea.css' })
+  await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs'))
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
-  await expect(player).toBeVisible({ timeout: 30_000 })
-  await expect.poll(async () => {
-    return await player.evaluate(element => {
-      const video = element.querySelector('video')
-      const bounds = element.getBoundingClientRect()
-      return {
-        hasReservedRatio: element.classList.contains('sixteenByNine'),
-        metadataPending: video?.videoWidth === 0,
-        geometryReserved: Math.abs(bounds.height - bounds.width * 9 / 16) <= 1,
-      }
-    })
-  }).toEqual({
-    hasReservedRatio: true,
-    metadataPending: true,
-    geometryReserved: true,
-  })
-  const pendingBounds = await player.boundingBox()
-  expect(Math.abs(pendingBounds.height - pendingBounds.width * 9 / 16)).toBeLessThanOrEqual(1)
 
-  const watchComponent = await page.evaluateHandle(findWatchComponent)
-  await watchComponent.evaluate(async component => {
-    component.refs.player.hasLoaded = true
-    await new Promise(resolve => requestAnimationFrame(resolve))
-  })
-  await expect(player).toHaveClass(/sixteenByNine/)
-  const shakaLoadedBounds = await player.boundingBox()
-  expect(Math.abs(shakaLoadedBounds.height - pendingBounds.height)).toBeLessThanOrEqual(1)
-
-  await player.evaluate(element => {
-    window.__playerLoadingHeights = []
-    const recordHeight = () => {
-      window.__playerLoadingHeights.push(element.getBoundingClientRect().height)
+  for (const zoom of [1, 0.95, 1.25]) {
+    await page.evaluate(value => window.ftElectron.setZoomFactor(value), zoom)
+    for (const size of [{ width: 1080, height: 810 }, { width: 810, height: 1080 }, { width: 450, height: 850 }]) {
+      await setWindowSize(app, page, size)
+      await expect.poll(() => video.evaluate(element => {
+        const bounds = element.getBoundingClientRect()
+        const frame = element.parentElement.getBoundingClientRect()
+        const ratio = element.videoWidth / element.videoHeight
+        const pictureWidth = Math.min(bounds.width, bounds.height * ratio)
+        return {
+          frameFitsPicture: Math.abs(frame.width - pictureWidth) <= 1,
+          contained: frame.left >= -1 && frame.right <= innerWidth + 1,
+          withinHeightLimit: frame.height <= parseFloat(getComputedStyle(element.parentElement).maxBlockSize) + 1,
+          uncropped: getComputedStyle(element).objectFit === 'contain'
+        }
+      })).toEqual({ frameFitsPicture: true, contained: true, withinHeightLimit: true, uncropped: true })
     }
-    window.__playerLoadingHeightObserver = new ResizeObserver(recordHeight)
-    window.__playerLoadingHeightObserver.observe(element)
-    recordHeight()
-  })
-  releaseMedia()
-  await waitForPlayback(page)
-  const loadingHeights = await player.evaluate((element) => {
-    window.__playerLoadingHeightObserver.disconnect()
-    return window.__playerLoadingHeights.filter(height => height > 0)
-  })
-  const maximumLoadingHeightChange = Math.max(...loadingHeights
-    .map(height => Math.abs(height - pendingBounds.height)))
-  expect(maximumLoadingHeightChange).toBeLessThanOrEqual(1)
-  await expect.poll(async () => {
-    const loadedBounds = await player.boundingBox()
-    return Math.abs(loadedBounds.height - pendingBounds.height)
-  }).toBeLessThanOrEqual(1)
+  }
+
+  await page.evaluate(() => window.ftElectron.setZoomFactor(1))
+  await setWindowSize(app, page, { width: 1080, height: 810 })
+  for (const [width, height] of [[210, 90], [160, 90]]) {
+    await video.evaluate(async (element, { width, height }) => {
+      element.srcObject?.getTracks().forEach(track => track.stop())
+      const canvas = document.createElement('canvas')
+      canvas.width = width
+      canvas.height = height
+      canvas.getContext('2d').fillRect(0, 0, width, height)
+      element.srcObject = canvas.captureStream(10)
+      await element.play()
+    }, { width, height })
+    await expect.poll(() => video.evaluate(element => [element.videoWidth, element.videoHeight]))
+      .toEqual([width, height])
+    await expect.poll(() => video.evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      return Math.abs(bounds.width - bounds.height * element.videoWidth / element.videoHeight)
+    })).toBeLessThanOrEqual(1)
+  }
+  await setPlayerFullscreen(page, true)
+  await expect.poll(() => player.evaluate(element => {
+    const bounds = element.getBoundingClientRect()
+    return Math.abs(bounds.width - innerWidth) <= 1 && Math.abs(bounds.height - innerHeight) <= 1
+  })).toBe(true)
+  await setPlayerFullscreen(page, false)
+  await expect.poll(() => video.evaluate(element => {
+    const bounds = element.getBoundingClientRect()
+    return Math.abs(bounds.width - bounds.height * element.videoWidth / element.videoHeight)
+  })).toBeLessThanOrEqual(1)
+  await video.evaluate(element => element.srcObject.getTracks().forEach(track => track.stop()))
 })
+
+for (const ios of [false, true]) {
+  test(`reserves the player height when Shaka loads before video metadata${ios ? ' on iOS' : ''}`, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    if (ios) {
+      await page.addStyleTag({ path: 'src/renderer/helpers/iosSafeArea.css' })
+      await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs'))
+    }
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+
+    let releaseMedia
+    const mediaPending = new Promise(resolve => { releaseMedia = resolve })
+    await page.route(/googlevideo\.com\/videoplayback/, async route => {
+      await mediaPending
+      await route.fallback()
+    })
+
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await expect(player).toBeVisible({ timeout: 30_000 })
+    await expect.poll(async () => {
+      return await player.evaluate(element => {
+        const video = element.querySelector('video')
+        const bounds = element.getBoundingClientRect()
+        return {
+          hasReservedRatio: element.classList.contains('sixteenByNine'),
+          metadataPending: video?.videoWidth === 0,
+          geometryReserved: Math.abs(bounds.height - bounds.width * 9 / 16) <= 1,
+        }
+      })
+    }).toEqual({
+      hasReservedRatio: true,
+      metadataPending: true,
+      geometryReserved: true,
+    })
+    const pendingBounds = await player.boundingBox()
+    expect(Math.abs(pendingBounds.height - pendingBounds.width * 9 / 16)).toBeLessThanOrEqual(1)
+
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await watchComponent.evaluate(async component => {
+      component.refs.player.hasLoaded = true
+      await new Promise(resolve => requestAnimationFrame(resolve))
+    })
+    await expect(player).toHaveClass(/sixteenByNine/)
+    const shakaLoadedBounds = await player.boundingBox()
+    expect(Math.abs(shakaLoadedBounds.height - pendingBounds.height)).toBeLessThanOrEqual(1)
+
+    await player.evaluate(element => {
+      window.__playerLoadingHeights = []
+      const recordHeight = () => {
+        window.__playerLoadingHeights.push(element.getBoundingClientRect().height)
+      }
+      window.__playerLoadingHeightObserver = new ResizeObserver(recordHeight)
+      window.__playerLoadingHeightObserver.observe(element)
+      recordHeight()
+    })
+    releaseMedia()
+    await waitForPlayback(page)
+    const loadingHeights = await player.evaluate((element) => {
+      window.__playerLoadingHeightObserver.disconnect()
+      return window.__playerLoadingHeights.filter(height => height > 0)
+    })
+    const maximumLoadingHeightChange = Math.max(...loadingHeights
+      .map(height => Math.abs(height - pendingBounds.height)))
+    expect(maximumLoadingHeightChange).toBeLessThanOrEqual(1)
+    await expect.poll(async () => {
+      const loadedBounds = await player.boundingBox()
+      return Math.abs(loadedBounds.height - pendingBounds.height)
+    }).toBeLessThanOrEqual(1)
+  })
+}
 
 test('keeps metadata errors visible in family-friendly-only mode', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)

@@ -519,7 +519,7 @@ import '@fontsource-variable/inter'
 import '@fontsource-variable/manrope'
 import '@fontsource-variable/plus-jakarta-sans'
 import FtRetryImage from './components/FtRetryImage.vue'
-import { initializeAndroidYtDlp, ytDlp } from './helpers/ytDlp'
+import { initializeCapacitorYtDlp, ytDlp } from './helpers/ytDlp'
 import { supportsYtDlp } from './helpers/ytDlpCapabilities'
 import { parseAutomaticDownloadRules } from './helpers/automaticDownloadRules'
 import { isAppHidden, setAndroidAppVisible } from './helpers/appVisibility.js'
@@ -1217,7 +1217,7 @@ const tabSwitcherSelectedTabId = computed(() => {
  * @param {('yt-dlp' | 'ffmpeg')[] | null} requestedUpdates
  */
 async function initializeManagedExternalSoftware(requestedUpdates = null) {
-  if (!supportsYtDlp) {
+  if (!supportsYtDlp || ytDlp.isBundledIosRuntime) {
     return
   }
 
@@ -1544,7 +1544,7 @@ onMounted(async () => {
       enabled => initializeNetworkRecovery().setInternetChecksEnabled(enabled),
       { immediate: true, flush: 'sync' }
     )
-    removeAndroidYtDlpSettingsListener = initializeAndroidYtDlp()
+    removeAndroidYtDlpSettingsListener = initializeCapacitorYtDlp()
     return tutorialState
   })
   if (isCapacitor) {

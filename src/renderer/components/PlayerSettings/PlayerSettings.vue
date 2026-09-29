@@ -37,6 +37,7 @@
           @change="store.dispatch('updateShowLightsOffToggle', $event)"
         />
         <FtToggleSwitch
+          v-if="!IS_IOS"
           :label="t('Settings.Player Settings.Show Skip Silence Toggle')"
           :compact="true"
           :default-value="showSkipSilenceButton"
@@ -45,6 +46,7 @@
           @change="updateShowSkipSilenceButton"
         />
         <FtToggleSwitch
+          v-if="!IS_IOS"
           :label="t('Settings.Player Settings.Enable Skip Silence by Default')"
           :compact="true"
           :disabled="!showSkipSilenceButton"
@@ -672,6 +674,7 @@ const QUICK_PLAYBACK_SPEED_LIMIT = 14
 /** @type {boolean} */
 const USING_ELECTRON = process.env.IS_ELECTRON
 const IS_CAPACITOR = process.env.IS_CAPACITOR
+const IS_IOS = process.env.IS_IOS
 const MOBILE_SWIPE_ACTION_VALUES = ['disabled', 'brightness', 'volume', 'speed']
 const MOBILE_SWIPE_ACTION_ICONS = {
   disabled: ['fas', 'xmark'],

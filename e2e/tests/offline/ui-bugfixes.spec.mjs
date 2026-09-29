@@ -924,6 +924,44 @@ test('tablet tabs autosize by default and reuse the fixed tab width setting', as
   ))).toEqual([140, 140])
 })
 
+for (const pack of ['material', 'remix']) {
+  test(`tablet tab glyphs align with their labels in ${pack}`, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 1330, height: 870 })
+    await page.evaluate(async pack => {
+      const store = document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+      await store.dispatch('updateIconPack', pack)
+    }, pack)
+    const homeIcon = page.locator(`.ft-icon[data-icon="house"][data-icon-pack="${pack}"]`).first()
+    await expect(homeIcon.locator('svg')).toBeAttached()
+    const iconMarkup = await homeIcon.evaluate(element => element.outerHTML)
+    const styles = await readFile(path.join(repoRoot, 'src/renderer/components/TabBar/CapacitorTabletTabBar.css'), 'utf8')
+    await page.addStyleTag({
+      content: styles.replaceAll(/:deep\(((?:[^()]|\([^()]*\))*)\)/g, '$1')
+    })
+    await page.evaluate(iconMarkup => {
+      const bar = document.createElement('div')
+      bar.className = 'capacitorTabletTabBar'
+      bar.style.cssText = 'position:fixed;top:120px;left:0;z-index:10000'
+      bar.innerHTML = `<div class="capacitorTabletTab"><button class="capacitorTabletTabTarget">
+        <span class="capacitorTabletTabIcon">${iconMarkup}</span>
+        <span class="capacitorTabletTabTitle">Home</span>
+      </button></div>`
+      document.body.append(bar)
+    }, iconMarkup)
+
+    for (const scale of [0.75, 1, 1.25, 1.5]) {
+      await page.evaluate(scale => window.ftElectron.setZoomFactor(scale), scale)
+      const target = page.locator('.capacitorTabletTabTarget')
+      await expect(target).toBeVisible()
+      await expect.poll(() => target.evaluate(element => {
+        const glyph = element.querySelector('.ft-icon__glyph').getBoundingClientRect()
+        const title = element.querySelector('.capacitorTabletTabTitle').getBoundingClientRect()
+        return Math.abs(glyph.y + glyph.height / 2 - title.y - title.height / 2)
+      }), { message: `Glyph and title centers at ${scale * 100}%` }).toBeLessThan(0.5)
+    }
+  })
+}
+
 test('keeps the tablet main-card top gutter compact on narrow layouts', async ({ app, page }) => {
   await setWindowSize(app, page, { width: 480, height: 800 })
   const appStyles = await readFile(path.join(repoRoot, 'src/renderer/App.css'), 'utf8')
@@ -1549,7 +1587,7 @@ test('Shorts top controls stay visible over white video content', async ({ page 
   await expect(topControls).toHaveCSS('border-top-left-radius', '16px')
   await expect(topControls).toHaveCSS('border-top-right-radius', '16px')
   await expect(topControls).toHaveCSS('transition-duration', '0.15s, 0.25s, 0.25s')
-  await expect(control).toHaveCSS('backdrop-filter', /blur\(10px\)/)
+  await expect(control).toHaveCSS('backdrop-filter', 'blur(10px) saturate(1.15)')
   await control.evaluate(element => element.classList.add('active'))
   await expect(control).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.42)')
   await expect(control).toHaveCSS('background-image', /linear-gradient.*linear-gradient/)
@@ -2463,3 +2501,152 @@ for (const zoom of [1, 0.95]) {
     await expect(menu.getByRole('menuitem', { name: 'Close Tabs', exact: true })).toBeVisible()
   })
 }
+
+test('Watch image links have accessible names and unused ad controls stay hidden', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const uploader = page.locator('.profileRow a').filter({ has: page.locator('.channelThumbnail') })
+  await expect(uploader).toHaveAccessibleName(/\S/)
+  const thumbnail = page.locator('.ft-list-video .thumbnailLink').first()
+  await expect(thumbnail).toHaveAccessibleName(/\S/)
+  const commentAvatar = page.locator('.comment a').filter({ has: page.locator('.commentThumbnail') }).first()
+  await expect(commentAvatar).toHaveAccessibleName(/\S/)
+  const adInfo = page.locator('.shaka-ad-info').first()
+  await expect(adInfo).toHaveCount(1)
+  await expect(adInfo).toBeHidden()
+})
+
+for (const theme of ['light', 'dark']) {
+  test(`sync privacy status keeps readable text in ${theme} mode`, async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.evaluate(async theme => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateBaseTheme', theme)
+      store.commit('setSyncServerEnabled', true)
+      store.commit('setSyncServerToken', 'accessibility-test-token')
+      store.commit('setSyncServerPrivacyMode', 'enhanced')
+      store.commit('setSettingsWindowSection', 'sync')
+    }, theme)
+    const status = page.locator('.privacyStatus')
+    await expect(status).toBeVisible()
+    const colors = await status.evaluate(element => ({
+      text: getComputedStyle(element).color,
+      expected: getComputedStyle(element).getPropertyValue('--primary-text-color').trim(),
+    }))
+    const expected = await page.evaluate(color => {
+      const element = document.createElement('span')
+      element.style.color = color
+      document.body.append(element)
+      const result = getComputedStyle(element).color
+      element.remove()
+      return result
+    }, colors.expected)
+    expect(colors.text).toBe(expected)
+  })
+}
+
+for (const theme of ['light', 'dark']) {
+  test(`Data Settings import help meets text contrast in ${theme} mode`, async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.evaluate(async theme => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateBaseTheme', theme)
+      await store.dispatch('updateSecColor', 'Blue')
+      store.commit('setSettingsWindowSection', 'data')
+    }, theme)
+    const link = page.locator('.settingsWindow a[href="https://opentubex.org/docs/importing/"]')
+    await expect(link).toBeVisible()
+    const contrast = await link.evaluate(element => {
+      const channels = value => value.match(/[\d.]+/g).map(Number)
+      const luminance = rgb => rgb.slice(0, 3)
+        .map(channel => channel / 255)
+        .map(channel => channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4)
+        .reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0)
+      let ancestor = element
+      let background
+      while (ancestor) {
+        const color = channels(getComputedStyle(ancestor).backgroundColor)
+        if (color.length === 3 || color[3] === 1) {
+          background = color
+          break
+        }
+        ancestor = ancestor.parentElement
+      }
+      if (!background) throw new Error('Missing opaque background')
+      const foreground = luminance(channels(getComputedStyle(element).color))
+      const backdrop = luminance(background)
+      return (Math.max(foreground, backdrop) + 0.05) / (Math.min(foreground, backdrop) + 0.05)
+    })
+    expect(contrast).toBeGreaterThanOrEqual(4.5)
+    await expect(link).toHaveCSS('text-decoration-line', 'underline')
+  })
+}
+
+for (const theme of ['light', 'dark']) {
+  test(`tablet labels and watch links retain text contrast in ${theme} mode`, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await page.evaluate(async theme => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateBaseTheme', theme)
+      await store.dispatch('updateSecColor', 'Blue')
+    }, theme)
+    const styles = await readFile(path.join(repoRoot, 'src/renderer/components/TabBar/CapacitorTabletTabBar.css'), 'utf8')
+    await page.addStyleTag({ content: styles.replaceAll(/:deep\(((?:[^()]|\([^()]*\))*)\)/g, '$1') })
+    // Electron does not mount the native tablet bar. Exercise its stylesheet
+    // with the same unloaded-tab markup, including the target's opacity.
+    await page.evaluate(() => {
+      const bar = document.createElement('div')
+      bar.className = 'capacitorTabletTabBar'
+      bar.style.cssText = 'display:flex;position:fixed;top:0;z-index:10000'
+      bar.innerHTML = '<div class="capacitorTabletTab unloaded"><button class="capacitorTabletTabTarget"><span class="capacitorTabletTabTitle">Home</span></button></div>'
+      document.body.append(bar)
+      const link = document.createElement('a')
+      link.href = 'https://example.com/contrast-test'
+      link.textContent = 'Description link'
+      document.querySelector('.description').append(link)
+    })
+    for (const selector of ['.capacitorTabletTabTitle', '.description a[href="https://example.com/contrast-test"]', '.commentTitleAction', '.commentReplyContinuationButton', '.commentHeader .select-label']) {
+      const element = page.locator(selector).first()
+      await expect(element).toBeAttached()
+      const ratio = await element.evaluate(element => {
+        const rgb = value => value.match(/[\d.]+/g).slice(0, 3).map(Number)
+        const luminance = color => color.map(value => value / 255)
+          .map(value => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
+          .reduce((sum, value, index) => sum + value * [0.2126, 0.7152, 0.0722][index], 0)
+        let opacity = 1
+        let background
+        for (let parent = element; parent; parent = parent.parentElement) {
+          const style = getComputedStyle(parent)
+          opacity *= Number(style.opacity)
+          if (!background && style.backgroundColor !== 'rgba(0, 0, 0, 0)') background = rgb(style.backgroundColor)
+        }
+        if (!background) throw new Error('Missing opaque background')
+        const foreground = rgb(getComputedStyle(element).color).map((value, index) => value * opacity + background[index] * (1 - opacity))
+        const values = [luminance(foreground), luminance(background)].sort((a, b) => a - b)
+        return (values[1] + 0.05) / (values[0] + 0.05)
+      })
+      expect.soft(ratio, selector).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+}
+
+test('Settings help buttons provide a 24 CSS pixel target at fractional scale', async ({ app, page }) => {
+  await goTo(page, 'settings')
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateUiScale', 125)
+    store.commit('setSettingsWindowSection', 'general')
+  })
+  await setWindowSize(app, page, { width: 1080, height: 810 })
+  const buttons = page.locator('.settingsWindow .tooltip > button')
+  await expect(buttons.first()).toBeVisible()
+  const sizes = await buttons.evaluateAll(buttons => buttons.map(button => {
+    const { width, height } = button.getBoundingClientRect()
+    return { width, height }
+  }))
+  for (const size of sizes) {
+    expect.soft(size.width).toBeGreaterThanOrEqual(24)
+    expect.soft(size.height).toBeGreaterThanOrEqual(24)
+  }
+})

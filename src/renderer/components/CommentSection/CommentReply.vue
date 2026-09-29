@@ -47,6 +47,7 @@
       <component
         :is="enableChannelLinks ? 'router-link' : 'div'"
         :to="`/channel/${reply.authorLink}`"
+        :aria-label="enableChannelLinks ? reply.author : null"
         tabindex="-1"
       >
         <div

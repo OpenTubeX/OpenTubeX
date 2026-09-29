@@ -26,7 +26,10 @@
 
 .settingsWindow.maximized {
   padding-inline: var(--app-safe-area-inset-left, 0) var(--app-safe-area-inset-right, 0);
-  max-inline-size: 100vw;
+
+  /* WebKit can retain an old vw size after native sheets close. Percentage
+     widths still follow the fixed-position containing viewport. */
+  max-inline-size: 100%;
   min-block-size: 0;
   max-block-size: calc(100dvh - var(--app-safe-area-inset-top, 0px));
   border-width: 0;

@@ -33,12 +33,15 @@ class OpenTubeXViewController: CAPBridgeViewController {
     override func capacitorDidLoad() {
         bridge?.registerPluginInstance(PoTokenPlugin())
         bridge?.registerPluginInstance(SabrHttpPlugin())
+        bridge?.registerPluginInstance(IOSHttpPlugin())
         bridge?.registerPluginInstance(IOSStoragePlugin())
+        bridge?.registerPluginInstance(IOSYtDlpPlugin())
         bridge?.registerPluginInstance(IOSMediaSessionPlugin())
         bridge?.registerPluginInstance(ScreenshotPlugin())
         bridge?.registerPluginInstance(IOSUiPlugin())
         do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback, options: [.allowAirPlay])
+            // Playback supports AirPlay by default; explicit allowAirPlay requires playAndRecord.
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .moviePlayback)
         } catch { NSLog("Could not configure playback audio session: %@", error.localizedDescription) }
     }
 
