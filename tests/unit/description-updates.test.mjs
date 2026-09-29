@@ -14,6 +14,11 @@ const setup = babelParse(script, { sourceType: 'module' }).program.body
 
 function descriptionComponent() {
   const props = reactive({ description: '', descriptionHtml: '', tags: [], games: [], license: null, previewOnly: false, alwaysExpanded: false })
+  const htmlTextFixtures = new Map([
+    ['', ''],
+    ['<p>Restored HTML description</p>', 'Restored HTML description'],
+    ['<p></p>', ''],
+  ])
   let copied
   const stops = []
   const context = vm.createContext({
@@ -35,7 +40,13 @@ function descriptionComponent() {
     clampOverlayScrollTop() {},
     restoreOverlayScrollTop() {},
     document: {
-      createElement: () => ({ innerHTML: '', get innerText() { return this.innerHTML.replace(/<[^>]*>/g, '') } }),
+      createElement: () => ({
+        innerHTML: '',
+        get innerText() {
+          assert.ok(htmlTextFixtures.has(this.innerHTML), 'provide a text fixture for this HTML')
+          return htmlTextFixtures.get(this.innerHTML)
+        },
+      }),
     },
   })
   vm.runInContext(setup, context)
