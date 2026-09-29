@@ -4588,6 +4588,76 @@ test.describe('watch page', () => {
     await watchComponent.dispose()
   })
 
+  test('keeps the desktop description thumb in step with mouse wheel scrolling', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await watchComponent.evaluate(async component => {
+      const view = component.proxy
+      view.isLoading = true
+      await view.$nextTick()
+      view.videoDescription = Array.from({ length: 100 }, (_, index) => `Line ${index + 1}`).join('\n')
+      view.videoDescriptionHtml = ''
+      view.videoTags = []
+      view.videoGames = []
+      view.license = null
+      view.isLoading = false
+      await view.$nextTick()
+    })
+
+    const card = page.locator(`${activeTab} .videoDescription`)
+    await card.locator(':scope > .descriptionStatus').click()
+    const scroller = card.locator('.descriptionScroll')
+    const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+
+    for (const scale of [1, 1.25]) {
+      await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+      await scroller.evaluate(element => { element.scrollTop = 0 })
+      const bounds = await scroller.boundingBox()
+      await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
+      await scroller.evaluate(element => {
+        window.__descriptionThumbSamples = []
+        window.__stopDescriptionThumbSamples = false
+        const sample = () => {
+          if (window.__stopDescriptionThumbSamples) return
+          const track = element.querySelector(':scope > .os-scrollbar-vertical .os-scrollbar-track')
+          const handle = track.querySelector('.os-scrollbar-handle')
+          const trackRect = track.getBoundingClientRect()
+          const handleRect = handle.getBoundingClientRect()
+          const scrollRange = element.scrollHeight - element.clientHeight
+          window.__descriptionThumbSamples.push({
+            scrollTop: element.scrollTop,
+            error: Math.abs(
+              handleRect.top - trackRect.top -
+              element.scrollTop / scrollRange * (trackRect.height - handleRect.height)
+            ),
+          })
+          requestAnimationFrame(sample)
+        }
+        requestAnimationFrame(sample)
+      })
+      for (let index = 0; index < 6; index++) await page.mouse.wheel(0, 80)
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+      await page.waitForTimeout(150)
+      const samples = await scroller.evaluate(async () => {
+        window.__stopDescriptionThumbSamples = true
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        const samples = window.__descriptionThumbSamples
+        delete window.__descriptionThumbSamples
+        delete window.__stopDescriptionThumbSamples
+        return samples
+      })
+      expect(samples.length).toBeGreaterThan(2)
+      expect(Math.max(...samples.map(sample => sample.error))).toBeLessThan(5)
+      await expect(scrollbar).toBeVisible()
+      expect(await scrollbar.evaluate(element => element.getAnimations().some(animation =>
+        animation.timeline?.constructor.name === 'ScrollTimeline'
+      ))).toBe(false)
+    }
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1))
+    await watchComponent.dispose()
+  })
+
   test('handles videos without a description', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)

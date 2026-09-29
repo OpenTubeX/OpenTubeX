@@ -92,15 +92,19 @@ function synchronizeScrollbarPosition(element, instance) {
   let animations = []
   let previousRange = -1
   let suspended = false
+  let touchScrolling = process.env.IS_CAPACITOR || window.matchMedia('(pointer: coarse)').matches
+  const cancelAnimations = () => {
+    animations.forEach(animation => animation.cancel())
+    animations = []
+    previousRange = -1
+  }
   const update = () => {
-    if (suspended) return
+    if (suspended || !touchScrolling) return
     const { overflowAmount } = instance.state()
     // Only vertical overflow needs synchronization. The library still handles
     // two-axis scrollers and older WebViews.
     if (overflowAmount.x > 1 || overflowAmount.y <= 0) {
-      animations.forEach(animation => animation.cancel())
-      animations = []
-      previousRange = -1
+      cancelAnimations()
       return
     }
     if (overflowAmount.y === previousRange) return
@@ -109,13 +113,25 @@ function synchronizeScrollbarPosition(element, instance) {
     if (animations.length) animations.forEach(animation => animation.effect.setKeyframes(frames))
     else animations = [scrollbarVertical, scrollbarHorizontal].map(({ scrollbar }) => scrollbar.animate(frames, { timeline }))
   }
+  // OverlayScrollbars positions the track during wheel scrolling. Its updates
+  // can compete with the scroll-linked animation and make the thumb jump.
+  const onWheel = () => {
+    if (!touchScrolling) return
+    touchScrolling = false
+    cancelAnimations()
+  }
+  const onTouchStart = () => {
+    if (touchScrolling) return
+    touchScrolling = true
+    update()
+  }
+  element.addEventListener('wheel', onWheel, { passive: true })
+  element.addEventListener('touchstart', onTouchStart, { passive: true })
   suspendScrollbarPosition.set(instance, () => {
     suspended = true
-    animations.forEach(animation => animation.cancel())
-    animations = []
+    cancelAnimations()
     return () => {
       suspended = false
-      previousRange = -1
       update()
     }
   })
@@ -123,7 +139,9 @@ function synchronizeScrollbarPosition(element, instance) {
   instance.on('updated', update)
   instance.on('destroyed', () => {
     suspendScrollbarPosition.delete(instance)
-    animations.forEach(animation => animation.cancel())
+    element.removeEventListener('wheel', onWheel)
+    element.removeEventListener('touchstart', onTouchStart)
+    cancelAnimations()
   })
 }
 

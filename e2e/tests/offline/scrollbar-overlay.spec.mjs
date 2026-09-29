@@ -317,6 +317,47 @@ test.describe('overlay scrollbars', () => {
       expect(measurements.scrollTop).toBe(120)
     })
 
+    test('uses scroll-linked tracks for touch and library positioning for wheel input', async ({ page }) => {
+      const session = await page.context().newCDPSession(page)
+      await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+      await expect.poll(() => page.evaluate(() => matchMedia('(pointer: coarse)').matches)).toBe(true)
+
+      await page.evaluate(() => {
+        const element = document.createElement('div')
+        element.dataset.inputModeScrollbarTest = ''
+        Object.assign(element.style, {
+          height: '100px',
+          left: '100px',
+          overflowY: 'auto',
+          position: 'fixed',
+          top: '100px',
+          width: '200px',
+          zIndex: '9999',
+        })
+        const content = document.createElement('div')
+        content.style.height = '300px'
+        element.append(content)
+        document.body.append(element)
+        document.querySelector('#app').__vue_app__._context.directives['overlay-scrollbars']
+          .mounted(element, { value: true })
+      })
+      const scroller = page.locator('[data-input-mode-scrollbar-test]')
+      const track = scroller.locator(':scope > .os-scrollbar-vertical')
+      const hasScrollTimeline = () => track.evaluate(element => element.getAnimations().some(animation =>
+        animation.timeline?.constructor.name === 'ScrollTimeline'
+      ))
+      await expect.poll(hasScrollTimeline).toBe(true)
+
+      await scroller.hover()
+      await page.mouse.wheel(0, 80)
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+      await expect.poll(hasScrollTimeline).toBe(false)
+
+      await scroller.evaluate(element => element.dispatchEvent(new Event('touchstart')))
+      await expect.poll(hasScrollTimeline).toBe(true)
+      await session.detach()
+    })
+
     test('only adds a blocking wheel listener while a custom speed is active', async ({ page }) => {
       const listenerCounts = await page.evaluate(() => {
         const viewport = document.createElement('div')
