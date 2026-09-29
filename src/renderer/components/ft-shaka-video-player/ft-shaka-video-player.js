@@ -16,6 +16,7 @@ import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
 import { getSubtitleRequestUrl } from '../../helpers/player/subtitleCookies'
+import { enableTwitchTsVideoGap } from '../../helpers/player/twitchTsVideoGap'
 import LightsOffOverlay from './LightsOffOverlay.vue'
 import { BooleanSettingButton } from './player-components/BooleanSettingButton'
 import { KeyboardShortcuts } from '../../../constants'
@@ -10887,6 +10888,7 @@ export default defineComponent({
     // #endregion offline message
 
     // #region setup
+    let disableTwitchTsVideoGap = null
     onMounted(async () => {
       const videoElement = video.value
       if (process.env.IS_CAPACITOR) {
@@ -10905,6 +10907,10 @@ export default defineComponent({
       voiceOverTranslation.attach(videoElement)
 
       await initializeActiveTab()
+
+      if (props.twitchSubOnlyVod) {
+        disableTwitchTsVideoGap = enableTwitchTsVideoGap(props.manifestSrc)
+      }
 
       const localPlayer = new shaka.Player()
 
@@ -11602,6 +11608,7 @@ export default defineComponent({
       iosCaptionsCleanup?.()
       iosCaptionsCleanup = null
       clearTimeout(paidPromotionTimer)
+      disableTwitchTsVideoGap?.()
       if (fullscreenDockLayoutFrame !== null) {
         cancelAnimationFrame(fullscreenDockLayoutFrame)
       }
