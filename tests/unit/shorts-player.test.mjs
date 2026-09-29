@@ -185,13 +185,93 @@ test('Shorts navigation resumes a previous position and saves the current one', 
 
 const playerSource = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
 
+for (const wasPlaying of [false, true]) {
+  test(`an inactive Short defers SABR reload and preserves ${wasPlaying ? 'playing' : 'paused'} intent`, () => {
+    const sabrStart = playerSource.indexOf('    function ensureSabrStream() {')
+    const sabrSource = playerSource.slice(sabrStart, playerSource.indexOf('    // #endregion SABR', sabrStart))
+    const lifecycleStart = playerSource.indexOf('    let resumeShortsAfterActivation = false')
+    const lifecycle = playerSource.slice(lifecycleStart, playerSource.indexOf('    function isPaused()', lifecycleStart))
+    let requestReload
+    let activate
+    let aborted = false
+    const emitted = []
+    const media = { paused: !wasPlaying, pause() { this.paused = true } }
+    const context = {
+      process: { env: { SUPPORTS_LOCAL_API: true } }, props: { shortsPlayer: true, sabrData: {} },
+      video: ref(media), shortsNavigationSuspended: ref(false),
+      suspendedShortsSabrReload: false, suspendedShortsError: null,
+      sabrStream: null, sabrAbortController: null, playerWidth: 100, playerHeight: 200,
+      AbortController: class { abort() { aborted = true } },
+      setupSabrScheme: () => ({
+        onBackoffRequested() {}, onReloadOnce(callback) { requestReload = callback },
+      }),
+      clearSabrBackoffTimer() {},
+      getSabrReloadState: () => ({ wasPlaying: !media.paused, playbackRate: 2, videoQuality: '144' }),
+      emit: (...args) => emitted.push(args), registerMediaSessionHandlers() {},
+      sleepTimer: { pauseCountdown() {} }, cancelSponsorBlockSkipSchedule() {}, clearAbRepeatBoundarySchedule() {},
+      tabMediaCoordinator: { setActionHandlers() {}, setPlaybackState() {} }, mediaTabId: 'shorts-tab',
+      onDeactivated() {}, onActivated: callback => { activate = callback },
+    }
+    const suspend = vm.runInNewContext(`${sabrSource}\n${lifecycle}\nsuspendForShortsNavigation`, context)
+    suspend()
+    requestReload()
+    assert.equal(aborted, true, 'the failed SABR transport must still be aborted')
+    assert.deepEqual(emitted, [], 'inactive recovery must not reload the current Short')
+    context.suspendedShortsError = { error: new Error('same aborted SABR request') }
+    activate()
+    assert.equal(context.shortsNavigationSuspended.value, false)
+    assert.equal(context.suspendedShortsSabrReload, false)
+    assert.equal(context.suspendedShortsError, null, 'the SABR reload owns recovery of the aborted request')
+    assert.equal(emitted.length, 1)
+    assert.equal(emitted[0][0], 'player-reload-requested')
+    assert.deepEqual({ ...emitted[0][1] }, { wasPlaying, playbackRate: 2, videoQuality: '144' })
+  })
+}
+
+test('an inactive Short ignores fullscreen events and synchronizes when activated', () => {
+  const start = playerSource.indexOf('    function fullscreenChangeHandler() {')
+  const source = playerSource.slice(start, playerSource.indexOf('    function exitFullscreenHandler()', start))
+  const closed = []
+  let fullscreen = true
+  let activate
+  const context = {
+    shortsNavigationSuspended: ref(true), isActiveTab: ref(false), isFullscreen: ref(false),
+    suspendedShortsSabrReload: false, suspendedShortsError: null,
+    isNativeFullscreenActive: () => fullscreen,
+    androidFullscreenHostActive: ref(false), androidFullscreenHost: null,
+    videoZoomPinchStart: null, selectedVideoZoom: ref(1), VIDEO_ZOOM_LEVELS: [1],
+    props: { shortsPlayer: true }, resetShortsOverflowMenu() {}, suppressPanelTransitions() {}, syncChapterOverlayButton() {},
+    process: { env: {} }, fullWindowEnabled: ref(false),
+    rememberAndCloseDockedPanels: () => closed.push('current player panels'),
+    video: ref({}), rotateFullscreenToLandscape: ref(false), fullscreenAspectRatio: ref(1),
+    setFullscreenOrientation: async () => {}, syncAndroidStatusBarVisibility() {},
+    updateScrollMiniPlayer() {}, nextTick() {}, showOverlayControls() {},
+    onDeactivated() {}, onActivated: callback => { activate = callback },
+    registerMediaSessionHandlers() {}, emit() {}, handleTimeupdate() {}, handlePause() {},
+  }
+  const handler = vm.runInNewContext(`${source}\nfullscreenChangeHandler`, context)
+  handler()
+  assert.equal(context.isFullscreen.value, false, 'another player entering fullscreen must not update a retained Short')
+  context.isFullscreen.value = true
+  fullscreen = false
+  handler()
+  assert.deepEqual(closed, [], 'a retained Short must not close the current fullwindow player panels')
+  context.isActiveTab.value = true
+  const lifecycleStart = playerSource.indexOf('    let resumeShortsAfterActivation = false')
+  const lifecycle = playerSource.slice(lifecycleStart, playerSource.indexOf('    function isPaused()', lifecycleStart))
+  vm.runInNewContext(lifecycle, { ...context, fullscreenChangeHandler: handler })
+  activate()
+  assert.equal(context.isFullscreen.value, false)
+  assert.equal(closed.length, 1, 'the returning player must synchronize its own presentation state')
+})
+
 test('an inactive Short defers player errors without changing current playback', () => {
   const start = playerSource.indexOf('    function handleError(')
   const source = playerSource.slice(start, playerSource.indexOf('    // #region seek bar markers', start))
   const emitted = []
   const playbackStates = []
   const context = {
-    ignoreErrors: false, shortsNavigationSuspended: ref(true), suspendedShortsError: null,
+    ignoreErrors: false, shortsNavigationSuspended: ref(true), suspendedShortsError: null, suspendedShortsSabrReload: false,
     ErrorCode: {}, ErrorSeverity: { RECOVERABLE: 1 }, ErrorCategory: { NETWORK: 2 },
     navigator: { onLine: true }, logShakaError() {}, props: { videoId: 'old-short' },
     shaka: { util: { Error: { Category: { TEXT: 3 }, Code: {} } } },

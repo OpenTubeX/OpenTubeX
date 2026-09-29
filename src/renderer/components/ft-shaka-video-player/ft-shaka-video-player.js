@@ -648,6 +648,7 @@ export default defineComponent({
     const { tabId, isTabPresented } = useTabContext()
     const shortsNavigationSuspended = ref(false)
     let suspendedShortsError = null
+    let suspendedShortsSabrReload = false
     const playerIsPresented = computed(() => !shortsNavigationSuspended.value && (isTabPresented?.value ?? true))
     const mediaTabId = tabId ?? 'web'
     const lightsOff = computed(() => store.getters.getTabLightsOff(mediaTabId))
@@ -7447,6 +7448,11 @@ export default defineComponent({
       sabrStream.onReloadOnce(() => {
         sabrAbortController.abort()
         clearSabrBackoffTimer()
+        if (shortsNavigationSuspended.value) {
+          // The parent handles reloads for the presented Short only.
+          suspendedShortsSabrReload = true
+          return
+        }
         emit('player-reload-requested', getSabrReloadState())
       })
     }
@@ -10831,6 +10837,7 @@ export default defineComponent({
     }
 
     function fullscreenChangeHandler() {
+      if (shortsNavigationSuspended.value) return
       const fullscreen = isNativeFullscreenActive()
       const wasFullscreen = isFullscreen.value
       androidFullscreenHostActive.value = !!androidFullscreenHost && document.fullscreenElement === androidFullscreenHost
@@ -11856,12 +11863,20 @@ export default defineComponent({
       const resume = resumeShortsAfterActivation
       resumeShortsAfterActivation = false
       registerMediaSessionHandlers()
+      if (suspendedShortsSabrReload) {
+        suspendedShortsSabrReload = false
+        // An error from the aborted transport is part of this same recovery.
+        suspendedShortsError = null
+        emit('player-reload-requested', { ...getSabrReloadState(), wasPlaying: resume })
+        return
+      }
       if (suspendedShortsError) {
         const { error, context, details } = suspendedShortsError
         suspendedShortsError = null
         handleError(error, context, details)
         return
       }
+      fullscreenChangeHandler()
       emit('loaded', {
         duration: video.value.duration,
         width: video.value.videoWidth,
