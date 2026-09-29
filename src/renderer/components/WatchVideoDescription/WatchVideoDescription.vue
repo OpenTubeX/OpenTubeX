@@ -294,7 +294,11 @@ function isShortDescription() {
   }
 
   const descriptionElem = descriptionContainer.value?.$el
-  return descriptionElem?.clientHeight >= descriptionElem?.scrollHeight
+  if (!descriptionElem) { return false }
+
+  // Preserve the original four-line expansion threshold with the taller preview.
+  const collapsedHeight = 4 * Number.parseFloat(getComputedStyle(descriptionElem).lineHeight)
+  return descriptionElem.scrollHeight <= collapsedHeight + 1
 }
 
 // To verify whether or not the description is too short for displaying

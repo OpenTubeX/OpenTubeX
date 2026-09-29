@@ -15,7 +15,7 @@
 }
 
 .videoDescription.short .descriptionScroll {
-  max-block-size: 4lh;
+  max-block-size: 5lh;
   overflow-y: clip;
   mask-image: linear-gradient(to bottom, #000 calc(100% - 16px), transparent);
 }
@@ -139,7 +139,7 @@
 .videoDescription.short .description {
   /* Measure overflow in the text separately from the collapsed card. */
   min-block-size: 1lh;
-  max-block-size: 4lh;
+  max-block-size: 5lh;
   overflow: hidden;
 }
 
@@ -150,6 +150,11 @@
 
 .descriptionContentEnd {
   display: block;
+}
+
+.videoDescription.short .descriptionContentEnd {
+  /* Reserve the old footer space inside the faded viewport for short content. */
+  block-size: 1lh;
 }
 
 .license {
