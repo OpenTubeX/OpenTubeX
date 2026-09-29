@@ -1,11 +1,12 @@
 /**
- * Extract a length-delimited protobuf field without decoding it.
+ * Extract a protobuf field without decoding it.
  *
  * @param {Uint8Array} bytes
  * @param {number} fieldNumber
+ * @param {number} expectedWireType
  * @returns {Uint8Array | undefined}
  */
-export function extractRawProtobufField(bytes, fieldNumber) {
+export function extractRawProtobufField(bytes, fieldNumber, expectedWireType = 2) {
   let offset = 0
 
   function readVarint() {
@@ -34,12 +35,16 @@ export function extractRawProtobufField(bytes, fieldNumber) {
     if (wireType === 2) {
       const length = readVarint()
       if (length === undefined || offset + length > bytes.length) return undefined
-      if (field === fieldNumber) {
+      if (field === fieldNumber && expectedWireType === 2) {
         return bytes.subarray(offset, offset + length)
       }
       offset += length
     } else if (wireType === 0) {
+      const valueStart = offset
       if (readVarint() === undefined) return undefined
+      if (field === fieldNumber && expectedWireType === 0) {
+        return bytes.subarray(valueStart, offset)
+      }
     } else if (wireType === 5) {
       offset += 4
     } else if (wireType === 1) {

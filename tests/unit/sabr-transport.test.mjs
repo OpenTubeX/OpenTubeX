@@ -18,8 +18,8 @@ class Operation {
 class ShakaError extends Error {
   static Severity = { RECOVERABLE: 1, CRITICAL: 2 }
   static Category = { NETWORK: 1 }
-  static Code = { OPERATION_ABORTED: 7001, HTTP_ERROR: 1002 }
-  constructor(severity, category, code) { super(String(code)); this.code = code }
+  static Code = { OPERATION_ABORTED: 7001, BAD_HTTP_STATUS: 1001, HTTP_ERROR: 1002 }
+  constructor(severity, category, code) { super(String(code)); this.code = code; this.severity = severity }
 }
 const audioFormatId = { itag: 140, lastModified: '123' }
 const videoFormatId = { itag: 137, lastModified: '456' }
@@ -32,7 +32,7 @@ function response(data, isInit = false, formatId = audioFormatId, contentLength 
   const buffer = new CompositeBuffer([])
   const writer = new UmpWriter(buffer)
   writer.write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({
-    headerId, formatId, isInitSeg: isInit, sequenceNumber: 1, contentLength,
+    headerId, formatId, isInitSeg: isInit, sequenceNumber: 1, contentLength: contentLength ?? undefined,
   }).finish())
   const idBytes = headerId < 128 ? [headerId] : [0x80 | (headerId & 0x3f), headerId >> 6]
   writer.write(protos.UMPPartId.MEDIA, Uint8Array.of(...idBytes, ...data))
@@ -73,6 +73,33 @@ test('rejects media bytes when the SABR header declares zero content length', as
   const uri = 'sabr1:audio?formatId=140-123-&sq=1'
   await assert.rejects(transport.request(uri, request(uri), 1).promise,
     error => error.code === ShakaError.Code.HTTP_ERROR)
+  transport.cleanup()
+})
+
+test('accepts a complete SABR segment when the media header omits content length', async () => {
+  const { createSabrTransport } = load(async () => response([1, 2], false, audioFormatId, null))
+  const transport = createSabrTransport(sabrData, () => context)
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  const segment = await transport.request(uri, request(uri), 1).promise
+  assert.deepEqual([...segment.data], [1, 2])
+  transport.cleanup()
+})
+
+test('rejects HTTP 403 even when it contains a complete init segment', async () => {
+  let calls = 0
+  const { createSabrTransport } = load(async () => {
+    calls++
+    const media = await response([1, 2], true).arrayBuffer()
+    return new Response(media, { status: calls === 1 ? 403 : 200 })
+  })
+  const transport = createSabrTransport(sabrData, () => context)
+  const uri = 'sabr1:audio?formatId=140-123-&init'
+  await assert.rejects(transport.request(uri, request(uri), 1).promise, error =>
+    error.code === ShakaError.Code.BAD_HTTP_STATUS &&
+    error.severity === ShakaError.Severity.CRITICAL)
+  const segment = await transport.request(uri, request(uri), 1).promise
+  assert.deepEqual([...segment.data], [1, 2])
+  assert.equal(calls, 2, 'a failed init segment must not be cached')
   transport.cleanup()
 })
 
@@ -157,7 +184,9 @@ test('an HTTP error with a retry policy fails without a long backoff', async t =
   await flushRequests()
   assert.deepEqual(waits, [])
   assert.equal(calls, 1)
-  await assert.rejects(pending)
+  await assert.rejects(pending, error =>
+    error.code === ShakaError.Code.BAD_HTTP_STATUS &&
+    error.severity === ShakaError.Severity.CRITICAL)
 })
 
 for (const coalesced of [false, true]) {

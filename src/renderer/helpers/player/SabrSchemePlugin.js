@@ -86,6 +86,8 @@ const ShakaError = shaka.util.Error
 
 /** NextRequestPolicy.playbackCookie, field 7. */
 const PLAYBACK_COOKIE_FIELD_NUMBER = 7
+/** MediaHeader.contentLength, field 14. */
+const MEDIA_CONTENT_LENGTH_FIELD_NUMBER = 14
 
 /**
  * @param {import('googlevideo/protos').FormatId} formatId
@@ -287,7 +289,7 @@ async function doRequest(
   /** @type {Uint8Array[]} */
   const responseDataChunks = []
   let segmentComplete = false
-  let expectedMediaLength = 0
+  let expectedMediaLength
   let receivedMediaLength = 0
   let shouldRetry = false
   let shouldRetryDueToNextRequestPolicy = false
@@ -418,12 +420,17 @@ async function doRequest(
                 mediaHeader.formatId.lastModified === lastModified &&
                 mediaHeader.formatId.xtags === xtags
               ) {
-                if (operationInputs.isInit && mediaHeader.isInitSeg) {
+                if (
+                  (operationInputs.isInit && mediaHeader.isInitSeg) ||
+                  (!operationInputs.isInit && mediaHeader.sequenceNumber === operationInputs.sequenceNumber)
+                ) {
                   mediaHeaderId = mediaHeader.headerId
-                  expectedMediaLength = Number(mediaHeader.contentLength)
-                } else if (!operationInputs.isInit && mediaHeader.sequenceNumber === operationInputs.sequenceNumber) {
-                  mediaHeaderId = mediaHeader.headerId
-                  expectedMediaLength = Number(mediaHeader.contentLength)
+                  const rawHeader = part.data.chunks.length === 1
+                    ? part.data.chunks[0]
+                    : concatenateChunks(part.data.chunks)
+                  if (extractRawProtobufField(rawHeader, MEDIA_CONTENT_LENGTH_FIELD_NUMBER, 0) !== undefined) {
+                    expectedMediaLength = Number(mediaHeader.contentLength)
+                  }
                 }
               }
             }
@@ -442,7 +449,7 @@ async function doRequest(
           case UMPPartId.MEDIA_END: {
             const [headerId] = new UmpReader(part.data).readVarInt(0)
             if (mediaHeaderId === headerId) {
-              if (receivedMediaLength !== expectedMediaLength) {
+              if (expectedMediaLength !== undefined && receivedMediaLength !== expectedMediaLength) {
                 error ??= `SABR segment length mismatch: expected ${expectedMediaLength}, received ${receivedMediaLength}`
               } else {
                 segmentComplete = true
@@ -564,6 +571,24 @@ async function doRequest(
     throw createRecoverableNetworkError(ShakaError.Code.TIMEOUT, operationInputs.uri, operationInputs.requestType)
   }
 
+  if (!response.ok) {
+    const severity = response.status === 401 || response.status === 403
+      ? ShakaError.Severity.CRITICAL
+      : ShakaError.Severity.RECOVERABLE
+
+    throw new ShakaError(
+      severity,
+      ShakaError.Category.NETWORK,
+      ShakaError.Code.BAD_HTTP_STATUS,
+      operationInputs.uri,
+      response.status,
+      '',
+      {},
+      operationInputs.requestType,
+      operationInputs.uri,
+    )
+  }
+
   if (responseDataChunks.length > 0 && segmentComplete) {
     const data = /** @__NOINLINE__ */ concatenateChunks(responseDataChunks)
 
@@ -581,22 +606,6 @@ async function doRequest(
       fromCache: false,
       originalRequest: operationInputs.request,
     }
-  } else if (!response.ok) {
-    const severity = response.status === 401 || response.status === 403
-      ? ShakaError.Severity.CRITICAL
-      : ShakaError.Severity.RECOVERABLE
-
-    throw new ShakaError(
-      severity,
-      ShakaError.Category.NETWORK,
-      ShakaError.Code.BAD_HTTP_STATUS,
-      operationInputs.uri,
-      response.status,
-      '',
-      {},
-      operationInputs.requestType,
-      operationInputs.uri,
-    )
   } else if (invalidPoToken) {
     throw new ShakaError(
       ShakaError.Severity.CRITICAL,
