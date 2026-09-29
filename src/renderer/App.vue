@@ -588,7 +588,7 @@ import {
   shouldUseProgressToast,
 } from './helpers/progressPresentation'
 import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog } from './helpers/releaseUpdates'
-import { copyToClipboard, openExternalLink, openInternalPath, shareLink, showApiErrorToast, showToast } from './helpers/utils'
+import { copyToClipboard, isUnloadedBackgroundTabClick, openExternalLink, openInternalPath, shareLink, showApiErrorToast, showToast } from './helpers/utils'
 import { openNotificationSettings } from './helpers/capacitorUi'
 import { initializeCapacitorLiveReminderActions } from './helpers/liveReminders'
 import {
@@ -4295,7 +4295,8 @@ function handleInternalLinkShortcut(event, link) {
     title: link.dataset.tabTitle || undefined,
     doCreateNewWindow: event.shiftKey,
     doCreateNewTab: !event.shiftKey,
-    makeActive: isCtrlOrCmdClick
+    makeActive: isCtrlOrCmdClick,
+    lazyLoad: isUnloadedBackgroundTabClick(event)
   })
   return true
 }
@@ -4484,7 +4485,8 @@ function handleLinkClick(event, link) {
     handleYoutubeLink(href, {
       doCreateNewWindow,
       doCreateNewTab,
-      isMiddleClick
+      isMiddleClick,
+      lazyLoad: isUnloadedBackgroundTabClick(event)
     })
   } else {
     handleExternalLink(href)
@@ -4495,6 +4497,7 @@ async function handleYoutubeLink(href, {
   doCreateNewWindow = false,
   doCreateNewTab = false,
   isMiddleClick = false,
+  lazyLoad = false,
   tabId = null
 } = {}) {
   const result = await store.dispatch('getYoutubeUrlInfo', href)
@@ -4504,7 +4507,7 @@ async function handleYoutubeLink(href, {
     if (isElectron && tabId && !options.doCreateNewWindow && !options.doCreateNewTab) {
       return navigation.push(tabId, { path: options.path, query: options.query })
     }
-    return openInternalPath(options)
+    return openInternalPath({ ...options, lazyLoad })
   }
 
   switch (result.urlType) {

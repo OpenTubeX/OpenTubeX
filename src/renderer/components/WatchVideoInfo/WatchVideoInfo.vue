@@ -363,7 +363,7 @@ import store from '../../store'
 import { vSaferHtml } from '../../directives/vSaferHtml'
 
 import { linkifyHashtagsAndHandles } from '../../helpers/descriptionLinks'
-import { escapeHTML, formatNumber, formatViewCount, getRelativeTimeFromDate, getVideoThumbnailUrl, openInternalPath, showToast } from '../../helpers/utils'
+import { escapeHTML, formatNumber, formatViewCount, getRelativeTimeFromDate, getVideoThumbnailUrl, isUnloadedBackgroundTabClick, openInternalPath, showToast } from '../../helpers/utils'
 import { translateSponsorBlockCategory } from '../../helpers/player/utils'
 import { parseChannelPreferences, removeChannelPreference } from '../../helpers/channel-preferences'
 import { useTabContext } from '../../tabs/TabContext'
@@ -1157,7 +1157,8 @@ function handleChannelLinkClick(event) {
     title: props.channelName,
     doCreateNewWindow: event.shiftKey,
     doCreateNewTab: !event.shiftKey,
-    makeActive: !isMiddleClick
+    makeActive: !isMiddleClick,
+    lazyLoad: isUnloadedBackgroundTabClick(event)
   })
 }
 </script>

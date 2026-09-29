@@ -183,6 +183,21 @@ test('middle-clicking a collaborator opens its channel in a background tab', asy
   await expect(page.locator(sel.tabs).nth(1)).toContainText('Channel C')
 })
 
+test('Ctrl+Alt+middle-clicking a feed video leaves its background tab unloaded', async ({ page }) => {
+  await goTo(page, 'subscriptions')
+
+  await page.locator('.ft-list-video .title').filter({ hasText: 'Collab video' })
+    .click({ button: 'middle', modifiers: ['Control', 'Alt'] })
+
+  await expect(page.locator(sel.tabs)).toHaveCount(2)
+  await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
+  await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/unloaded/)
+  await expect.poll(() => page.evaluate(async () => {
+    const state = await window.ftElectron.tabs.getState()
+    return state.tabs.find(tab => tab.id !== state.activeTabId)?.route.fullPath
+  })).toBe('/watch/aaaaaaaaaa1')
+})
+
 test('shift-middle-clicking a collaborator opens its channel in a new window', async ({ app, page }) => {
   await goTo(page, 'subscriptions')
 
