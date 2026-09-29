@@ -202,11 +202,13 @@ const descriptionContent = computed(() => {
     const parsed = parseDescriptionHtml(props.descriptionHtml)
 
     // Invidious can return empty HTML elements such as `<p></p>`.
-    const testDiv = document.createElement('div')
-    testDiv.innerHTML = parsed
+    // Template contents stay inert while extracting text from remote HTML.
+    const template = document.createElement('template')
+    template.innerHTML = parsed
+    const plainText = template.content.textContent ?? ''
 
-    if (!/^\s*$/.test(testDiv.innerText)) {
-      descriptionText ||= testDiv.innerText
+    if (!/^\s*$/.test(plainText)) {
+      descriptionText ||= plainText
       shownDescription = linkifyHashtagsAndHandles(parsed)
     }
   } else if (!/^\s*$/.test(props.description)) {

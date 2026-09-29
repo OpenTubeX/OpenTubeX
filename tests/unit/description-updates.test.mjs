@@ -40,13 +40,16 @@ function descriptionComponent() {
     clampOverlayScrollTop() {},
     restoreOverlayScrollTop() {},
     document: {
-      createElement: () => ({
-        innerHTML: '',
-        get innerText() {
-          assert.ok(htmlTextFixtures.has(this.innerHTML), 'provide a text fixture for this HTML')
-          return htmlTextFixtures.get(this.innerHTML)
-        },
-      }),
+      createElement: tag => {
+        assert.equal(tag, 'template')
+        return {
+          innerHTML: '',
+          get content() {
+            assert.ok(htmlTextFixtures.has(this.innerHTML), 'provide a text fixture for this HTML')
+            return { textContent: htmlTextFixtures.get(this.innerHTML) }
+          },
+        }
+      },
     },
   })
   vm.runInContext(setup, context)

@@ -254,6 +254,26 @@ test('description text updates clamp scrolling after content shrinks at fraction
   }
 })
 
+test('HTML description text extraction stays inert when metadata arrives', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.route('https://description.test/broken.png', route => route.fulfill({ status: 404, body: '' }))
+  await openMockedVideo(page)
+  const watch = await watchViewHandle(page)
+  await page.evaluate(() => { window.descriptionTextExtractionExecuted = false })
+  await watch.evaluate(async vm => {
+    vm.videoDescription = ''
+    vm.videoDescriptionHtml = 'Recovered HTML description<img src="https://description.test/broken.png" onerror="window.descriptionTextExtractionExecuted = true">'
+    await vm.$nextTick()
+  })
+  const description = page.locator('.videoDescription .description')
+  await expect(description).toContainText('Recovered HTML description')
+  await description.locator('img').evaluate(image => new Promise(resolve => {
+    if (image.complete) resolve()
+    else image.addEventListener('error', () => resolve(), { once: true })
+  }))
+  expect(await page.evaluate(() => window.descriptionTextExtractionExecuted)).toBe(false)
+})
+
 test.describe('download opened without a connection', () => {
   test.use({
     seed: {
