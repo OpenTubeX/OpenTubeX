@@ -196,6 +196,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 
 import store from '../../store/index'
+import { getChannelLinkDetails, getChannelLinkMenuItems } from '../../helpers/channel-context-menu'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import FtContextMenuItemIcon from './FtContextMenuItemIcon.vue'
 
@@ -405,10 +406,12 @@ async function open(event) {
 
   event.preventDefault()
   const request = ++openRequest
+  const link = event.target instanceof Element ? event.target.closest('a[href]') : null
+  const channel = link ? getChannelLinkDetails(link) : null
   const result = await window.ftElectron.contextMenu.open(getContextParameters(event))
-  if (request !== openRequest || result.items.length === 0) return
+  if (request !== openRequest || (result.items.length === 0 && !channel)) return
 
-  localItems.value = null
+  localItems.value = channel ? ref(getChannelLinkMenuItems(channel, t)) : null
   await showMenu(result.items, result.sessionId, event.clientX, event.clientY, request)
 }
 

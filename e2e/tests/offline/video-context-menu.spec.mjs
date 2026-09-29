@@ -1,4 +1,4 @@
-import { test, expect, goTo, goToSettingsSection } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, sel } from '../../helpers/app.mjs'
 
 const VIDEO_ID = 'jNQXAC9IVRw'
 
@@ -376,6 +376,14 @@ test('channel names keep their channel context menu', async ({ page, app }) => {
   for (const name of ['Add to Queue', 'Play Next', 'Mark As Watched', 'Remove From History', 'Download Video']) {
     await expect(menu.getByRole('menuitem', { name, exact: true })).toHaveCount(0)
   }
+  await menu.getByRole('menuitem', { name: /^Hide channel$/i }).click()
+  await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getChannelsHiddenParsed))
+    .toEqual([{ name: 'UCaaaaaaaaaaaaaaaaaaaaaa', preferredName: 'Test Channel' }])
+  await channel.locator('.channelNameText').click({ button: 'right' })
+  await menu.getByRole('menuitem', { name: /^Show channel$/i }).click()
+  await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getChannelsHiddenParsed))
+    .toEqual([])
+  await channel.locator('.channelNameText').click({ button: 'right' })
   await menu.getByRole('menuitem', { name: 'Copy YouTube Link', exact: true }).click()
   await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText()))
     .toBe('https://www.youtube.com/channel/UCaaaaaaaaaaaaaaaaaaaaaa')
@@ -386,6 +394,35 @@ test('channel names keep their channel context menu', async ({ page, app }) => {
   await menu.getByRole('menuitem', { name: 'Copy YouTube Link', exact: true }).click()
   await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText()))
     .toBe('https://www.youtube.com/channel/UCaaaaaaaaaaaaaaaaaaaaaa')
+})
+
+test('channel handles store the channel name when hidden', async ({ page }) => {
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('addToSessionSearchHistory', {
+      query: 'channel menu',
+      data: [{
+        type: 'channel',
+        dataSource: 'local',
+        id: 'UCbbbbbbbbbbbbbbbbbbbbbb',
+        name: 'Channel Menu Test',
+        thumbnail: '',
+        handle: '@channelmenutest',
+        subscribers: 100,
+        descriptionShort: ''
+      }],
+      searchSettings: { prioritize: 'relevance', time: '', type: 'all', duration: '', features: [] },
+      nextPageRef: null,
+      hasMoreResults: false,
+      apiUsed: 'local'
+    })
+  })
+  await page.locator(sel.searchInput).fill('channel menu')
+  await page.locator(sel.searchInput).press('Enter')
+  await page.locator('.ft-list-channel .handle').click({ button: 'right' })
+  await page.getByRole('menuitem', { name: /^Hide channel$/i }).click()
+  await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getChannelsHiddenParsed))
+    .toEqual([{ name: 'UCbbbbbbbbbbbbbbbbbbbbbb', preferredName: 'Channel Menu Test' }])
 })
 
 test('compact header and link submenus support keyboard navigation', async ({ page }) => {
