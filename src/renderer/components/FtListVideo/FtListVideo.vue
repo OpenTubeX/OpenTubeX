@@ -438,6 +438,7 @@ import {
   getVideoThumbnailUrl,
   openExternalLink,
   openInternalPath,
+  isUnloadedBackgroundTabClick,
   shareLink,
   showToast,
   toDistractionFreeTitle,
@@ -1849,7 +1850,8 @@ async function handleWatchPageLinkClick(event) {
       title: title.value,
       doCreateNewWindow: event.shiftKey,
       doCreateNewTab: !event.shiftKey,
-      makeActive: false
+      makeActive: false,
+      lazyLoad: isUnloadedBackgroundTabClick(event)
     })
 
     if (event.shiftKey) {
@@ -1885,7 +1887,8 @@ function handleChannelLinkClick(event) {
     title: channelName.value,
     doCreateNewWindow: event.shiftKey,
     doCreateNewTab: !event.shiftKey,
-    makeActive: false
+    makeActive: false,
+    lazyLoad: isUnloadedBackgroundTabClick(event)
   })
 }
 

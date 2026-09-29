@@ -91,6 +91,21 @@ test.describe('search history suggestions', () => {
     })).toEqual(['hd', 'subtitles'])
   })
 
+  test('Ctrl+Alt+middle-clicking a recent search leaves its background tab unloaded', async ({ page }) => {
+    await page.locator(sel.searchInput).click()
+    await suggestions(page).first().locator('.optionWrapper')
+      .click({ button: 'middle', modifiers: ['Control', 'Alt'] })
+
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
+    await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/unloaded/)
+    await expect(page).not.toHaveURL(/#\/search\/android%20tutorial/)
+    await expect.poll(() => page.evaluate(async () => {
+      const state = await window.ftElectron.tabs.getState()
+      return state.tabs.find(tab => tab.id !== state.activeTabId)?.route.fullPath
+    })).toContain('/search/android%20tutorial')
+  })
+
   test('middle-clicking works before the destination href is available', async ({ page }) => {
     await page.locator(sel.searchInput).click()
     const link = suggestions(page).first().locator('.optionWrapper')

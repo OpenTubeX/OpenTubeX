@@ -53,6 +53,7 @@ import {
   getCachedOembedTitle,
   getOembedTitle,
   getShortThumbnailUrl,
+  isUnloadedBackgroundTabClick,
   openInternalPath,
   showApiErrorToast,
   showToast,
@@ -2715,7 +2716,8 @@ export default defineComponent({
         title,
         doCreateNewWindow: event.shiftKey,
         doCreateNewTab: !event.shiftKey,
-        makeActive: !isMiddleClick
+        makeActive: !isMiddleClick,
+        lazyLoad: isUnloadedBackgroundTabClick(event)
       })
     },
 

@@ -425,6 +425,12 @@ export async function shareLink(url) {
   }
 }
 
+/** Ctrl+Alt+middle-click opens an internal link without loading its tab. */
+export function isUnloadedBackgroundTabClick(event) {
+  return process.env.IS_ELECTRON && event?.type === 'auxclick' && event.button === 1 &&
+    event.ctrlKey && event.altKey && !event.shiftKey
+}
+
 /**
  * Opens an internal path in the same window, a new tab, or a new window.
  * Optionally with query params and setting the contents of the search bar in the new window.
@@ -433,11 +439,12 @@ export async function shareLink(url) {
  * @param {boolean} [params.doCreateNewWindow] set to true to open a new window (Shift+click)
  * @param {boolean} [params.doCreateNewTab] set to true to open in a new tab (Ctrl/Cmd+click or middle-click)
  * @param {boolean} [params.makeActive=true] set to false to open tab in background (only used when doCreateNewTab is true)
+ * @param {boolean} [params.lazyLoad=false] set to true to leave a background tab unloaded
  * @param {string} [params.title] initial title for the destination
  * @param {object} [params.query] the query params to use (optional)
  * @param {string} [params.searchQueryText] the text to show in the search bar in the new window (optional)
  */
-export function openInternalPath({ path, query = undefined, doCreateNewWindow = false, doCreateNewTab = false, makeActive = true, title = undefined, searchQueryText = null }) {
+export function openInternalPath({ path, query = undefined, doCreateNewWindow = false, doCreateNewTab = false, makeActive = true, lazyLoad = false, title = undefined, searchQueryText = null }) {
   if (process.env.IS_ELECTRON) {
     if (doCreateNewTab) {
       // Open in new tab
@@ -450,9 +457,10 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
         query,
         title,
         makeActive,
+        lazyLoad,
         inheritColorFromOpener: true,
         openerTabId: getTabNavigationService().getPresentedTabId(),
-        preloadInBackground: !makeActive && path.startsWith('/watch/')
+        preloadInBackground: !makeActive && !lazyLoad && path.startsWith('/watch/')
       })
     } else if (doCreateNewWindow) {
       // Open in new window
