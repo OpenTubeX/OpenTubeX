@@ -1744,6 +1744,12 @@ CommandPalette:
     Download Finished: See allalaadimine ei ole enam pooleli
     Video: Ava esmalt video
 Downloads:
+  Search Completed: "Otsi lõpetatud allalaadimisi pealkirja või kanali järgi"
+  Format: "Vorming"
+  All Formats: "Kõik vormingud"
+  Largest First: "Suurimad enne"
+  Smallest First: "Väikseimad enne"
+  No Matching Downloads: "Sobivaid lõpetatud allalaadimisi pole. Proovi muud otsingut või filtrit."
   Add Download: Lisa allalaadimine
   Preparing: Ettevalmistamine…
   Export Failed: "Allalaaditud faili ei saanud salvestada. Vali allalaadimiskaust, kuhu saab kirjutada, ja proovi uuesti."

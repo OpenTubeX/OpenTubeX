@@ -1787,6 +1787,12 @@ CommandPalette:
     Download Finished: Tämä lataus ei ole enää käynnissä
     Video: Avaa ensin video
 Downloads:
+  Search Completed: "Hae valmiita latauksia otsikon tai kanavan perusteella"
+  Format: "Muoto"
+  All Formats: "Kaikki muodot"
+  Largest First: "Suurimmat ensin"
+  Smallest First: "Pienimmät ensin"
+  No Matching Downloads: "Vastaavia valmiita latauksia ei löytynyt. Kokeile toista hakua tai suodatinta."
   Add Download: Lisää lataus
   Preparing: Valmistellaan…
   Export Failed: "Ladattua tiedostoa ei voitu tallentaa. Valitse latauskansio, johon on kirjoitusoikeus, ja yritä uudelleen."

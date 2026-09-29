@@ -1765,6 +1765,12 @@ CommandPalette:
     Download Finished: Ovo preuzimanje više nije u tijeku
     Video: Najprije otvorite videozapis
 Downloads:
+  Search Completed: "Pretraži dovršena preuzimanja po naslovu ili kanalu"
+  Format: "Format"
+  All Formats: "Svi formati"
+  Largest First: "Najveće prvo"
+  Smallest First: "Najmanje prvo"
+  No Matching Downloads: "Nema odgovarajućih dovršenih preuzimanja. Pokušajte drugu pretragu ili filtar."
   Add Download: Dodaj preuzimanje
   Preparing: Priprema…
   Export Failed: "Preuzetu datoteku nije moguće spremiti. Odaberite mapu za preuzimanja s dozvolom pisanja i pokušajte ponovno."

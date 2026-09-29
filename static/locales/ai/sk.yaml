@@ -1744,6 +1744,12 @@ CommandPalette:
     Download Finished: Toto sťahovanie už neprebieha
     Video: Najprv otvorte video
 Downloads:
+  Search Completed: "Hľadať dokončené sťahovania podľa názvu alebo kanála"
+  Format: "Formát"
+  All Formats: "Všetky formáty"
+  Largest First: "Najväčšie prvé"
+  Smallest First: "Najmenšie prvé"
+  No Matching Downloads: "Žiadne dokončené sťahovania nezodpovedajú. Skúste iné vyhľadávanie alebo filter."
   Add Download: Pridať stiahnutie
   Preparing: Príprava…
   Export Failed: "Stiahnutý súbor sa nepodarilo uložiť. Vyberte priečinok na sťahovanie s oprávnením na zápis a skúste to znova."

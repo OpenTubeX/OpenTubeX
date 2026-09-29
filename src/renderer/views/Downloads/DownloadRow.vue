@@ -11,6 +11,13 @@
           {{ download.title }}
         </h3>
         <p
+          v-if="download.status === 'completed' && channelName"
+          class="downloadChannel"
+          dir="auto"
+        >
+          {{ channelName }}
+        </p>
+        <p
           v-if="statusText"
           class="downloadStatus"
           :aria-hidden="inProgress ? 'true' : undefined"
@@ -237,6 +244,10 @@ const modeLabel = computed(() => {
     default:
       return ''
   }
+})
+const channelName = computed(() => {
+  const authors = [...new Set(props.download.files?.map(file => file.author).filter(Boolean) ?? [])]
+  return authors.length === 1 ? authors[0] : ''
 })
 const summary = computed(() => {
   const templateName = downloadTemplateName(props.download.template, t)

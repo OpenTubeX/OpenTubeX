@@ -1754,6 +1754,12 @@ CommandPalette:
     Download Finished: Bu endirmə artıq davam etmir
     Video: Əvvəlcə video açın
 Downloads:
+  Search Completed: "Tamamlanmış endirmələri başlıq və ya kanala görə axtar"
+  Format: "Format"
+  All Formats: "Bütün formatlar"
+  Largest First: "Ən böyüklər əvvəl"
+  Smallest First: "Ən kiçiklər əvvəl"
+  No Matching Downloads: "Uyğun tamamlanmış endirmə yoxdur. Başqa axtarış və ya filtr sınayın."
   Add Download: Endirmə əlavə et
   Preparing: Hazırlanır…
   Export Failed: Endirilmiş fayl saxlanıla bilmədi. Yazıla bilən endirmə qovluğu seçib yenidən cəhd edin.

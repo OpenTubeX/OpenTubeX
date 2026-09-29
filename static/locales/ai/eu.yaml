@@ -1759,6 +1759,12 @@ CommandPalette:
     Download Finished: Deskarga hau ez dago martxan
     Video: Ireki bideo bat lehenik
 Downloads:
+  Search Completed: "Bilatu amaitutako deskargak izenburuaren edo kanalaren arabera"
+  Format: "Formatua"
+  All Formats: "Formatu guztiak"
+  Largest First: "Handienak lehenik"
+  Smallest First: "Txikienak lehenik"
+  No Matching Downloads: "Ez dago bat datorren amaitutako deskargarik. Saiatu beste bilaketa edo iragazki batekin."
   Add Download: Gehitu deskarga
   Preparing: Prestatzen…
   Export Failed: "Ezin izan da deskargatutako fitxategia gorde. Aukeratu idazteko baimena duen deskarga-karpeta bat eta saiatu berriro."

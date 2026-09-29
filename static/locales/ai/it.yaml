@@ -1741,6 +1741,12 @@ CommandPalette:
     Download Finished: Questo download non è più in corso
     Video: Apri prima un video
 Downloads:
+  Search Completed: "Cerca i download completati per titolo o canale"
+  Format: "Formato"
+  All Formats: "Tutti i formati"
+  Largest First: "Più grandi prima"
+  Smallest First: "Più piccoli prima"
+  No Matching Downloads: "Nessun download completato corrisponde. Prova un’altra ricerca o filtro."
   Add Download: Aggiungi download
   Preparing: Preparazione…
   Export Failed: "Impossibile salvare il file scaricato. Scegli una cartella di download con permessi di scrittura e riprova."

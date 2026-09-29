@@ -1742,6 +1742,12 @@ CommandPalette:
     Download Finished: Bu indirme artık çalışmıyor
     Video: Önce bir video açın
 Downloads:
+  Search Completed: "Tamamlanan indirmeleri başlığa veya kanala göre ara"
+  Format: "Biçim"
+  All Formats: "Tüm biçimler"
+  Largest First: "Önce en büyükler"
+  Smallest First: "Önce en küçükler"
+  No Matching Downloads: "Eşleşen tamamlanmış indirme yok. Başka bir arama veya filtre deneyin."
   Add Download: İndirme ekle
   Preparing: Hazırlanıyor…
   Export Failed: "İndirilen dosya kaydedilemedi. Yazma izni olan bir indirme klasörü seçip yeniden deneyin."

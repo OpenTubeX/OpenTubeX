@@ -1767,6 +1767,12 @@ CommandPalette:
     Download Finished: Þetta niðurhal er ekki lengur í gangi
     Video: Opnaðu myndband fyrst
 Downloads:
+  Search Completed: "Leita að loknu niðurhali eftir titli eða rás"
+  Format: "Snið"
+  All Formats: "Öll snið"
+  Largest First: "Stærstu fyrst"
+  Smallest First: "Minnstu fyrst"
+  No Matching Downloads: "Ekkert lokið niðurhal passar. Prófaðu aðra leit eða síu."
   Add Download: Bæta við niðurhali
   Preparing: Undirbýr…
   Export Failed: "Ekki tókst að vista niðurhalaða skrá. Veldu niðurhalsmöppu með skrifaðgangi og reyndu aftur."

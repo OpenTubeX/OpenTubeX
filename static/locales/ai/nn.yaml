@@ -2130,6 +2130,12 @@ CommandPalette:
     Download Finished: Denne nedlastinga er ikkje lenger aktiv
     Video: Opne ein video først
 Downloads:
+  Search Completed: "Søk i fullførte nedlastingar etter tittel eller kanal"
+  Format: "Format"
+  All Formats: "Alle format"
+  Largest First: "Størst først"
+  Smallest First: "Minst først"
+  No Matching Downloads: "Ingen fullførte nedlastingar samsvarar. Prøv eit anna søk eller filter."
   Add Download: Legg til nedlasting
   Preparing: Førebur…
   Export Failed: "Klarte ikkje å lagre den nedlasta fila. Vel ei nedlastingsmappe med skrivetilgang og prøv igjen."

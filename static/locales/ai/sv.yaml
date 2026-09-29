@@ -1758,6 +1758,12 @@ CommandPalette:
     Download Finished: Nedladdningen pågår inte längre
     Video: Öppna en video först
 Downloads:
+  Search Completed: "Sök bland slutförda nedladdningar efter titel eller kanal"
+  Format: "Format"
+  All Formats: "Alla format"
+  Largest First: "Störst först"
+  Smallest First: "Minst först"
+  No Matching Downloads: "Inga slutförda nedladdningar matchar. Prova en annan sökning eller ett annat filter."
   Add Download: Lägg till nedladdning
   Preparing: Förbereder…
   Export Failed: "Det gick inte att spara den nedladdade filen. Välj en nedladdningsmapp med skrivbehörighet och försök igen."

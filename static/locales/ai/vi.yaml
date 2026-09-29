@@ -1777,6 +1777,12 @@ CommandPalette:
     Download Finished: Lượt tải này không còn chạy
     Video: Hãy mở một video trước
 Downloads:
+  Search Completed: "Tìm tệp tải xuống đã hoàn tất theo tiêu đề hoặc kênh"
+  Format: "Định dạng"
+  All Formats: "Tất cả định dạng"
+  Largest First: "Lớn nhất trước"
+  Smallest First: "Nhỏ nhất trước"
+  No Matching Downloads: "Không có tệp tải xuống đã hoàn tất nào phù hợp. Hãy thử tìm kiếm hoặc bộ lọc khác."
   Add Download: Thêm lượt tải xuống
   Preparing: Đang chuẩn bị…
   Export Failed: "Không thể lưu tệp đã tải xuống. Hãy chọn thư mục tải xuống có quyền ghi và thử lại."

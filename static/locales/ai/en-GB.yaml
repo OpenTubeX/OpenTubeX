@@ -1727,6 +1727,12 @@ CommandPalette:
     Download Finished: This download is no longer running
     Video: Open a video first
 Downloads:
+  Search Completed: "Search completed downloads by title or channel"
+  Format: "Format"
+  All Formats: "All formats"
+  Largest First: "Largest first"
+  Smallest First: "Smallest first"
+  No Matching Downloads: "No completed downloads match. Try a different search or filter."
   Add Download: Add download
   Preparing: Preparing…
   Export Failed: "Could not save the downloaded file. Choose a writable download folder and retry."

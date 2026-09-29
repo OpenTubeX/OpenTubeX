@@ -956,6 +956,12 @@ CommandPalette:
     Download Finished: To pobieranie nie jest już uruchomione
     Video: Najpierw otwórz film
 Downloads:
+  Search Completed: "Szukaj ukończonych pobrań według tytułu lub kanału"
+  Format: "Format"
+  All Formats: "Wszystkie formaty"
+  Largest First: "Największe najpierw"
+  Smallest First: "Najmniejsze najpierw"
+  No Matching Downloads: "Brak pasujących ukończonych pobrań. Spróbuj innego wyszukiwania lub filtra."
   Add Download: Dodaj pobieranie
   Preparing: Przygotowywanie…
   Export Failed: "Nie udało się zapisać pobranego pliku. Wybierz folder pobierania z uprawnieniami do zapisu i spróbuj ponownie."

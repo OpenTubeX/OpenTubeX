@@ -283,6 +283,7 @@ function takeGetInfoAbortSignal(key) {
  * @property {number} [availableDestinationCount]
  * @property {number} [destinationCount]
  * @property {number} [sizeBytes]
+ * @property {number} [completedAt] Unix timestamp in milliseconds
  * @property {boolean} [titleTruncated]
  * @property {number} [estimatedSizeBytes]
  * @property {number} [availableSpaceBytes]
@@ -2746,7 +2747,10 @@ async function startYtDlpDownload(
       status.status = payload.automatic === true && status.destinations.length === 0
         ? 'skipped'
         : 'completed'
-      if (status.status === 'completed') status.percent = 100
+      if (status.status === 'completed') {
+        status.percent = 100
+        status.completedAt = Date.now()
+      }
     } else {
       status.status = 'failed'
       status.errorMessage = stderrLines.join('\n')
@@ -3195,6 +3199,7 @@ export async function handleYtDlpListDownloads(event) {
       availableDestinationCount,
       destinationCount: destinations.length,
       sizeBytes,
+      completedAt: record.completedAt ?? (Math.max(0, ...destinationStats.map(destinationStat => destinationStat?.ctimeMs ?? 0)) || undefined),
       files: getDownloadFiles(record).map(file => ({
         ...file,
         available: existsSync(file.path)

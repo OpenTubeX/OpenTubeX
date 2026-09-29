@@ -1743,6 +1743,12 @@ CommandPalette:
     Download Finished: 此下載已不再執行
     Video: 請先開啟影片
 Downloads:
+  Search Completed: "依標題或頻道搜尋已完成的下載"
+  Format: "格式"
+  All Formats: "所有格式"
+  Largest First: "由大到小"
+  Smallest First: "由小到大"
+  No Matching Downloads: "沒有符合條件的已完成下載。請嘗試其他搜尋字詞或篩選條件。"
   Add Download: 新增下載
   Preparing: 正在準備…
   Export Failed: "無法儲存已下載的檔案。請選擇有寫入權限的下載資料夾，然後重試。"

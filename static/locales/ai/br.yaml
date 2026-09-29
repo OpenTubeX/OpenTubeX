@@ -1750,6 +1750,12 @@ CommandPalette:
     Download Finished: "N'emañ ket ar pellgargadenn-mañ war ober ken"
     Video: "Digerit ur video da gentañ"
 Downloads:
+  Search Completed: "Klask en pellgargadennoù echuet dre ditl pe dre chadenn"
+  Format: "Furmad"
+  All Formats: "An holl furmadoù"
+  Largest First: "Ar re vrasañ da gentañ"
+  Smallest First: "Ar re vihanañ da gentañ"
+  No Matching Downloads: "N’eus pellgargadenn echuet ebet a glot. Klaskit pe silit en un doare all."
   Add Download: Ouzhpennañ ur bellgargadenn
   Preparing: O prientiñ…
   Export Failed: "N'eo ket bet posupl enrollañ ar restr pellgarget. Dibabit un teuliad pellgargañ a c'haller skrivañ ennañ ha klaskit en-dro."

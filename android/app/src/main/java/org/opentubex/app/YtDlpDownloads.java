@@ -292,6 +292,7 @@ final class YtDlpDownloads {
                 if (!isExecuting(id)) return;
                 if (downloadError == null) {
                     record.put("percent", 100);
+                    if (record.getJSONArray("destinations").length() > 0) record.put("completedAt", System.currentTimeMillis());
                     updateStatus(id, record.getJSONArray("destinations").length() > 0 ? "completed" : "skipped", null);
                 } else {
                     updateStatus(id, "failed", downloadError.getMessage() == null ? downloadError.getClass().getSimpleName() : downloadError.getMessage());
@@ -430,6 +431,17 @@ final class YtDlpDownloads {
         JSONArray result = snapshots();
         // Controls/progress may have changed records while inspection was running.
         YtDlpDownloadAvailability.annotate(result, availability);
+        for (int i = 0; i < result.length(); i++) {
+            JSONObject record = result.getJSONObject(i);
+            if (!"completed".equals(record.optString("status")) || record.has("completedAt")) continue;
+            JSONArray destinations = record.optJSONArray("destinations");
+            long completedAt = 0;
+            for (int j = 0; destinations != null && j < destinations.length(); j++) {
+                DocumentFile document = DocumentFile.fromSingleUri(context, Uri.parse(destinations.getString(j)));
+                if (document != null) completedAt = Math.max(completedAt, document.lastModified());
+            }
+            if (completedAt > 0) record.put("completedAt", completedAt);
+        }
         return result;
     }
 

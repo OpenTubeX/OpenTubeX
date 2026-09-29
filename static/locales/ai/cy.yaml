@@ -1770,6 +1770,12 @@ CommandPalette:
     Download Finished: Nid yw'r lawrlwythiad hwn yn rhedeg mwyach
     Video: Agorwch fideo yn gyntaf
 Downloads:
+  Search Completed: "Chwilio lawrlwythiadau wedi’u cwblhau yn ôl teitl neu sianel"
+  Format: "Fformat"
+  All Formats: "Pob fformat"
+  Largest First: "Mwyaf yn gyntaf"
+  Smallest First: "Lleiaf yn gyntaf"
+  No Matching Downloads: "Nid oes lawrlwythiadau wedi’u cwblhau sy’n cyfateb. Rhowch gynnig ar chwiliad neu hidlydd arall."
   Add Download: Ychwanegu lawrlwythiad
   Preparing: Yn paratoi…
   Export Failed: "Methu cadw’r ffeil a lawrlwythwyd. Dewiswch ffolder lawrlwytho y gellir ysgrifennu ynddi a rhowch gynnig arall arni."

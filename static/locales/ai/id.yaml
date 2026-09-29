@@ -1752,6 +1752,12 @@ CommandPalette:
     Download Finished: Unduhan ini tidak lagi berjalan
     Video: Buka video terlebih dahulu
 Downloads:
+  Search Completed: "Cari unduhan selesai berdasarkan judul atau kanal"
+  Format: "Format"
+  All Formats: "Semua format"
+  Largest First: "Terbesar dulu"
+  Smallest First: "Terkecil dulu"
+  No Matching Downloads: "Tidak ada unduhan selesai yang cocok. Coba pencarian atau filter lain."
   Add Download: Tambah unduhan
   Preparing: Menyiapkan…
   Export Failed: "File yang diunduh tidak dapat disimpan. Pilih folder unduhan yang dapat ditulisi dan coba lagi."

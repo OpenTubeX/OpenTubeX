@@ -2338,6 +2338,12 @@ CommandPalette:
     Download Finished: Ta prenos se ne izvaja več
     Video: Najprej odprite videoposnetek
 Downloads:
+  Search Completed: "Poišči dokončane prenose po naslovu ali kanalu"
+  Format: "Oblika"
+  All Formats: "Vse oblike"
+  Largest First: "Največje najprej"
+  Smallest First: "Najmanjše najprej"
+  No Matching Downloads: "Ni ujemajočih se dokončanih prenosov. Poskusite drugo iskanje ali filter."
   Add Download: Dodaj prenos
   Preparing: Pripravljanje…
   Export Failed: "Prenesene datoteke ni bilo mogoče shraniti. Izberite mapo za prenose z dovoljenjem za pisanje in poskusite znova."
