@@ -10,13 +10,26 @@ and is independently developed and supported. It is not affiliated with,
 endorsed by, maintained by, or supported by the FreeTube project.
 
 <br><p align="center"><a href="https://opentubex.org/downloads/">⬇️ Download OpenTubeX</a></p>
+
 <p align="center">
+  <a href="https://github.com/OpenTubeX/OpenTubeX/releases/latest">
+    <img alt="Latest release" src="https://img.shields.io/github/v/release/OpenTubeX/OpenTubeX?filter=%21%2A-nightly-%2A" />
+  </a>
   <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml">
-    <img alt='Build status' src="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml/badge.svg?branch=development" />
+    <img alt="Build status" src="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml/badge.svg?branch=development" />
+  </a>
+  <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/e2e.yml">
+    <img alt="E2E tests" src="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/e2e.yml/badge.svg?branch=development" />
+  </a>
+  <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/codeql.yml">
+    <img alt="CodeQL" src="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/codeql.yml/badge.svg?branch=development" />
   </a>
   <a href="https://weblate.opentubex.org/engage/opentubex/">
-    <img src="https://weblate.opentubex.org/widgets/opentubex/-/svg-badge.svg" alt="Translation status" />
+    <img alt="Translation status" src="https://weblate.opentubex.org/widgets/opentubex/-/svg-badge.svg" />
   </a>
+</p>
+
+<p align="center">
   <a href="https://fluxer.opentubex.org">
     <img alt="Fluxer members" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.fluxer.app%2Finvites%2FPHdJoM1G&query=%24.member_count&label=Fluxer&suffix=%20members&color=4641D9&logo=fluxer&logoColor=white" />
   </a>
@@ -24,6 +37,7 @@ endorsed by, maintained by, or supported by the FreeTube project.
     <img alt="Matrix" src="https://img.shields.io/badge/Matrix-%23opentubex-black?logo=matrix&logoColor=white" />
   </a>
 </p>
+
 <p align="center">
   <a href="https://alternativeto.net/software/opentubex/about/?utm_source=badge&amp;utm_medium=referral">
     <picture>
@@ -140,6 +154,12 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 <a id="download-links"></a>
 ## 📦 Download Links
 ### Official Downloads
+
+<p>
+  <a href="https://github.com/OpenTubeX/OpenTubeX/releases">
+    <img alt="GitHub downloads" src="https://img.shields.io/github/downloads/OpenTubeX/OpenTubeX/total?label=GitHub%20downloads" />
+  </a>
+</p>
 
 > [!NOTE]
 > OpenTubeX supports Windows 10 and later, macOS 12 and above, various Linux distributions, Android 8.0 and later, and experimental iOS/iPadOS 17.4 and later. Features differ between platforms.
