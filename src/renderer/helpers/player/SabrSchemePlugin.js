@@ -422,7 +422,7 @@ async function doRequest(
               ) {
                 if (
                   (operationInputs.isInit && mediaHeader.isInitSeg) ||
-                  (!operationInputs.isInit && mediaHeader.sequenceNumber === operationInputs.sequenceNumber)
+                  (!operationInputs.isInit && !mediaHeader.isInitSeg && mediaHeader.sequenceNumber === operationInputs.sequenceNumber)
                 ) {
                   mediaHeaderId = mediaHeader.headerId
                   const rawHeader = part.data.chunks.length === 1
@@ -622,6 +622,13 @@ async function doRequest(
       new Error(error),
       operationInputs.requestType,
     )
+  } else if (responseDataChunks.length > 0 && !segmentComplete) {
+    throw createRecoverableNetworkError(
+      ShakaError.Code.HTTP_ERROR,
+      operationInputs.uri,
+      new Error('Incomplete segment, missing MEDIA_END part'),
+      operationInputs.requestType,
+    )
   } else if (shouldRetry) {
     if (shouldRetryDueToNextRequestPolicy) {
       currentState.sabrStreamState.backoffUntilMs = nextRequestBackoffUntilMs
@@ -660,13 +667,6 @@ async function doRequest(
 
     currentState.abortStatus.finished = false
     return doRequest(operationInputs, currentState)
-  } else if (responseDataChunks.length > 0 && !segmentComplete) {
-    throw createRecoverableNetworkError(
-      ShakaError.Code.HTTP_ERROR,
-      operationInputs.uri,
-      new Error('Incomplete segment, missing MEDIA_END part'),
-      operationInputs.requestType,
-    )
   } else {
     throw createRecoverableNetworkError(
       ShakaError.Code.HTTP_ERROR,

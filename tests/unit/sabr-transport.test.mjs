@@ -85,6 +85,24 @@ test('accepts a complete SABR segment when the media header omits content length
   transport.cleanup()
 })
 
+test('selects a media segment after an init header with the same sequence number', async () => {
+  const buffer = new CompositeBuffer([])
+  const writer = new UmpWriter(buffer)
+  for (const [headerId, isInitSeg, data] of [[1, true, [9]], [2, false, [1, 2]]]) {
+    writer.write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({
+      headerId, formatId: audioFormatId, isInitSeg, sequenceNumber: 1, contentLength: data.length,
+    }).finish())
+    writer.write(protos.UMPPartId.MEDIA, Uint8Array.of(headerId, ...data))
+    writer.write(protos.UMPPartId.MEDIA_END, Uint8Array.of(headerId))
+  }
+  const { createSabrTransport } = load(async () => new Response(utils.concatenateChunks(buffer.chunks)))
+  const transport = createSabrTransport(sabrData, () => context)
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  const segment = await transport.request(uri, request(uri), 1).promise
+  assert.deepEqual([...segment.data], [1, 2])
+  transport.cleanup()
+})
+
 test('rejects HTTP 403 even when it contains a complete init segment', async () => {
   let calls = 0
   const { createSabrTransport } = load(async () => {
@@ -187,6 +205,33 @@ test('an HTTP error with a retry policy fails without a long backoff', async t =
   await assert.rejects(pending, error =>
     error.code === ShakaError.Code.BAD_HTTP_STATUS &&
     error.severity === ShakaError.Severity.CRITICAL)
+})
+
+test('incomplete media fails before applying a retry policy', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
+  let calls = 0
+  const waits = []
+  const { createSabrTransport } = load(async () => {
+    calls++
+    const buffer = new CompositeBuffer([])
+    const writer = new UmpWriter(buffer)
+    writer.write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({
+      headerId: 1, formatId: audioFormatId, sequenceNumber: 1, contentLength: 2,
+    }).finish())
+    writer.write(protos.UMPPartId.MEDIA, Uint8Array.of(1, 9))
+    writer.write(protos.UMPPartId.NEXT_REQUEST_POLICY,
+      protos.NextRequestPolicy.encode({ backoffTimeMs: 20000 }).finish())
+    return new Response(utils.concatenateChunks(buffer.chunks))
+  }, { Date })
+  const transport = createSabrTransport(sabrData, () => context)
+  t.after(() => transport.cleanup())
+  transport.onBackoffRequested(({ backoffMs }) => waits.push(backoffMs))
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  const pending = transport.request(uri, request(uri), 1).promise
+  await flushRequests()
+  assert.deepEqual(waits, [], 'truncated media must not start the policy countdown')
+  assert.equal(calls, 1)
+  await assert.rejects(pending, error => error.code === ShakaError.Code.HTTP_ERROR)
 })
 
 for (const coalesced of [false, true]) {
