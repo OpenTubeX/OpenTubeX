@@ -123,6 +123,34 @@ test.describe('distraction and appearance settings', () => {
 })
 
 test.describe('default appearance', () => {
+  test('vertical tabs have a soft edge without a divider line', async ({ page, attachScreenshot }) => {
+    for (const theme of ['light', 'dark']) {
+      for (const position of ['left', 'right']) {
+        await page.evaluate(({ theme, position }) => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          store.commit('setBaseTheme', theme)
+          store.commit('setTabBarPosition', position)
+        }, { theme, position })
+
+        await expect(page.locator('body')).toHaveClass(new RegExp(theme))
+        const tabBar = page.locator(`.tabBar.vertical.position-${position}`)
+        await expect(tabBar).toBeVisible()
+        const styles = await tabBar.evaluate(element => ({
+          shadow: getComputedStyle(element).boxShadow,
+          divider: getComputedStyle(element.querySelector('.tabBarResizeHandle')).backgroundImage,
+        }))
+
+        expect(styles.divider).toBe('none')
+        expect(styles.shadow).toMatch(position === 'left' ? /3px 0px 8px/ : /-3px 0px 8px/)
+        const headerShadow = await page.locator('.topNav').evaluate(element => getComputedStyle(element).boxShadow)
+        expect(headerShadow).toContain(position === 'left'
+          ? '3px 0px 8px -3px inset'
+          : '-3px 0px 8px -3px inset')
+        await attachScreenshot(`${theme} vertical tabs on ${position} with soft edge`)
+      }
+    }
+  })
+
   test('trending link and profile selector are visible by default', async ({ page, attachScreenshot }) => {
     // The link may live in the side nav itself or its "More" flyout,
     // depending on the collapsed state — either way it must exist.

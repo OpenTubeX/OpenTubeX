@@ -230,7 +230,7 @@
   flex-direction: column;
   align-items: stretch;
 
-  /* Let the resize handle straddle the divider border */
+  /* Let the resize handle straddle the edge */
   overflow: visible;
   position: fixed;
   inset-block: 0;
@@ -250,11 +250,13 @@
 .tabBar.vertical.position-left {
   left: 0;
   right: auto;
+  box-shadow: 3px 0 8px rgb(0 0 0 / 12%);
 }
 
 .tabBar.vertical.position-right {
   left: auto;
   right: 0;
+  box-shadow: -3px 0 8px rgb(0 0 0 / 12%);
 }
 
 /* Keep the scrollbar against the window edge, leaving tab content and the
@@ -298,8 +300,7 @@
   overscroll-behavior: contain;
 }
 
-/* The handle draws the divider line itself, so the hover highlight is always
-   centered on it. It straddles the bar's edge: half inside, half outside. */
+/* The handle straddles the bar's edge, with a centered highlight on hover. */
 .tabBarResizeHandle {
   position: absolute;
   inset-block: 0;
@@ -309,12 +310,6 @@
   cursor: col-resize;
   z-index: 1;
   -webkit-app-region: no-drag;
-  background: linear-gradient(
-    to right,
-    transparent 2px,
-    var(--tertiary-text-color) 2px 3px,
-    transparent 3px
-  );
 }
 
 .tabBarResizeHandle:hover,
