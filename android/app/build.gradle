@@ -113,10 +113,11 @@ android {
             signingConfig signingConfigs.nightly
         }
         release {
-            // Capacitor and its plugins discover code and resources at runtime.
-            // Preserve them without maintaining an incomplete set of keep rules.
-            minifyEnabled false
+            // Shrink unused bytecode, but preserve runtime-discovered code and
+            // resources. Avoid R8 optimizations and renaming in the keep rules.
+            minifyEnabled true
             shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             if (releaseSigningConfigured) {
                 signingConfig signingConfigs.production
             }

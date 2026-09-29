@@ -111,6 +111,10 @@ jobs:
       with:
         packages: platform-tools
 
+    - name: Install Android runtime packer
+      if: matrix.runtime == 'android'
+      run: sudo apt-get update && sudo apt-get install --yes 7zip
+
     - name: Get Version Number
       id: getPackageInfo
       shell: bash

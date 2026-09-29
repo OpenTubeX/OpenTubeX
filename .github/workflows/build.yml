@@ -474,6 +474,9 @@ jobs:
       with:
         packages: platform-tools
 
+    - name: Install Android runtime packer
+      run: sudo apt-get update && sudo apt-get install --yes 7zip
+
     - run: pnpm run ci
       shell: bash
 

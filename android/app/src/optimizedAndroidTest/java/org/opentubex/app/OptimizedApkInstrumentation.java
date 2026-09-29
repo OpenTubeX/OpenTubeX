@@ -10,6 +10,7 @@ import android.content.pm.ShortcutManager;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -100,6 +101,7 @@ public class OptimizedApkInstrumentation extends Instrumentation {
                     "document.body.append(video); video.play(); })()");
                 await(web, "document.querySelector('#optimized-video')?.currentTime > 0.25");
             } finally { evaluate(web, "document.querySelector('#optimized-video')?.remove()"); }
+            checkFullscreen(web);
             report("Playback passed");
 
             JSONObject refresh = call(web, "SubscriptionRefresh", "start", new JSONObject()
@@ -140,7 +142,9 @@ public class OptimizedApkInstrumentation extends Instrumentation {
             check(scannerReady.get(), "Native QR scanner opens and receives focus");
             sendKeyDownUpSync(KeyEvent.KEYCODE_BACK);
             await(web, "window.optimizedScan === 'OS-PLUG-BARC-0006'");
-            result.putString("stream", "\nOK (7 checks: bridge, shortcuts, callbacks, runtimes, playback, worker, scanner)\n");
+            checkPlayerFullscreen(web, fixture);
+            report("Player fullscreen passed");
+            result.putString("stream", "\nOK (8 checks: bridge, shortcuts, callbacks, runtimes, playback, worker, scanner, fullscreen)\n");
             resultCode = Activity.RESULT_OK;
         } catch (Throwable failure) {
             result.putString("stream", "\nFAILURE\n" + android.util.Log.getStackTraceString(failure));
@@ -180,6 +184,104 @@ public class OptimizedApkInstrumentation extends Instrumentation {
                     "Launcher shortcut icon survives resource shrinking: " + page);
             }
         } finally { manager.setDynamicShortcuts(previous); }
+    }
+
+    private void checkFullscreen(WebView web) throws Exception {
+        evaluate(web, "(() => { const target = document.createElement('div'); " +
+            "target.id = 'optimized-fullscreen'; " +
+            "target.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:black'; " +
+            "const button = document.createElement('button'); button.textContent = 'Fullscreen'; " +
+            "button.style.cssText = 'width:100%;height:100%'; " +
+            "button.onclick = () => target.requestFullscreen(); target.append(button); " +
+            "const player = document.createElement('div'); player.id = 'optimized-player'; " +
+            "target.append(player); document.body.append(target); })()");
+        try {
+            int[] origin = new int[2];
+            int[] size = new int[2];
+            runOnMainSync(() -> {
+                web.getLocationOnScreen(origin);
+                size[0] = web.getWidth();
+                size[1] = web.getHeight();
+            });
+            tapScreen(origin[0] + size[0] / 2f, origin[1] + size[1] / 2f);
+            await(web, "document.fullscreenElement?.id === 'optimized-fullscreen'");
+            evaluate(web, "document.querySelector('#optimized-player').remove()");
+            check("true".equals(evaluate(web, "document.fullscreenElement?.id === 'optimized-fullscreen'")),
+                "Fullscreen survives replacing the player element");
+        } finally {
+            evaluate(web, "document.exitFullscreen().catch(() => {}); " +
+                "document.querySelector('#optimized-fullscreen')?.remove()");
+        }
+        await(web, "document.fullscreenElement === null");
+    }
+
+    private void checkPlayerFullscreen(WebView web, File fixture) throws Exception {
+        // A fresh install may show the tutorial over the real player controls.
+        evaluate(web, "document.querySelector('.tutorialOverlay .tutorialActions button')?.click()");
+        JSONObject file = new JSONObject().put("videoId", "optimized-apk-demo")
+            .put("path", fixture.getAbsolutePath()).put("extension", "webm")
+            .put("available", true).put("width", 320).put("height", 240).put("duration", 30);
+        JSONObject download = new JSONObject().put("id", 91218).put("status", "completed")
+            .put("mode", "video").put("videoId", "optimized-apk-demo")
+            .put("title", "Optimized APK demo").put("files", new JSONArray().put(file));
+        evaluate(web, "(() => { const app = document.querySelector('#app').__vue_app__; " +
+            "app.config.globalProperties.$store.commit('upsertYtDlpDownload', " + download + "); " +
+            "app.config.globalProperties.$router.push({path: '/watch/optimized-apk-demo', " +
+            "query: {downloadId: '91218'}}); })()");
+        await(web, "!!document.querySelector('.ftVideoPlayer .shaka-fullscreen-button')");
+        tapCss(web, ".ftVideoPlayer");
+        await(web, "getComputedStyle(document.querySelector('.ftVideoPlayer .shaka-fullscreen-button')).visibility === 'visible'");
+        String enterLabel = evaluate(web,
+            "document.querySelector('.ftVideoPlayer .shaka-fullscreen-button').getAttribute('aria-label')");
+        tapCss(web, ".ftVideoPlayer .shaka-fullscreen-button");
+        await(web, "document.fullscreenElement?.classList.contains('videoLayout') === true");
+        check(!enterLabel.equals(evaluate(web,
+            "document.querySelector('.ftVideoPlayer .shaka-fullscreen-button').getAttribute('aria-label')")),
+            "Shaka fullscreen control switches to exit mode");
+        tapCss(web, ".ftVideoPlayer");
+        await(web, "getComputedStyle(document.querySelector('.ftVideoPlayer .shaka-fullscreen-button')).visibility === 'visible'");
+        tapCss(web, ".ftVideoPlayer .shaka-fullscreen-button");
+        await(web, "document.fullscreenElement === null");
+    }
+
+    private void tapCss(WebView web, String selector) throws Exception {
+        String position = null;
+        long deadline = SystemClock.elapsedRealtime() + 30000;
+        do {
+            String result = evaluate(web, "JSON.stringify((() => { const element = document.querySelector(" +
+                JSONObject.quote(selector) + "); if (!element) return null; const rect = element.getBoundingClientRect(); " +
+                "if (!rect.width || !rect.height) return null; return {x: rect.x + rect.width / 2, " +
+                "y: rect.y + rect.height / 2, viewportWidth: innerWidth}; })())");
+            if (result != null && !"null".equals(result)) {
+                position = new JSONArray("[" + result + "]").getString(0);
+                break;
+            }
+            Thread.sleep(100);
+        } while (SystemClock.elapsedRealtime() < deadline);
+        check(position != null, "Timed out waiting to tap " + selector);
+        JSONObject point = new JSONObject(position);
+        int[] origin = new int[2];
+        int[] width = new int[1];
+        runOnMainSync(() -> {
+            web.getLocationOnScreen(origin);
+            width[0] = web.getWidth();
+        });
+        double scale = (double) width[0] / point.getDouble("viewportWidth");
+        tapScreen((float) (origin[0] + point.getDouble("x") * scale),
+            (float) (origin[1] + point.getDouble("y") * scale));
+    }
+
+    private void tapScreen(float x, float y) {
+        long now = SystemClock.uptimeMillis();
+        MotionEvent down = MotionEvent.obtain(now, now, MotionEvent.ACTION_DOWN, x, y, 0);
+        MotionEvent up = MotionEvent.obtain(now, now + 50, MotionEvent.ACTION_UP, x, y, 0);
+        try {
+            sendPointerSync(down);
+            sendPointerSync(up);
+        } finally {
+            down.recycle();
+            up.recycle();
+        }
     }
 
     private void checkPluginCallbacks(WebView web, String permission) throws Exception {

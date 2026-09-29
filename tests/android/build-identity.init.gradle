@@ -41,7 +41,7 @@ gradle.projectsEvaluated {
             }
             for (name in ['release', 'nightly']) {
                 def variant = variants.find { it.name == name }
-                assert !variant.buildType.minifyEnabled : "${name} must preserve runtime-discovered code"
+                assert variant.buildType.minifyEnabled : "${name} must shrink unused bytecode"
                 assert !variant.buildType.shrinkResources : "${name} must preserve runtime-discovered resources"
             }
         }
