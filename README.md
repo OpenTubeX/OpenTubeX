@@ -155,10 +155,16 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 ## 📦 Download Links
 ### Official Downloads
 
+<p>
+  <a href="https://github.com/OpenTubeX/OpenTubeX/releases">
+    <img alt="GitHub downloads" src="https://img.shields.io/github/downloads/OpenTubeX/OpenTubeX/total?label=GitHub%20downloads" />
+  </a>
+</p>
+
 > [!NOTE]
 > OpenTubeX supports Windows 10 and later, macOS 12 and above, various Linux distributions, Android 8.0 and later, and experimental iOS/iPadOS 17.4 and later. Features differ between platforms.
 
-* [GitHub Releases](https://github.com/OpenTubeX/OpenTubeX/releases) [![GitHub downloads](https://img.shields.io/github/downloads/OpenTubeX/OpenTubeX/total?label=GitHub%20downloads)](https://github.com/OpenTubeX/OpenTubeX/releases)
+* [GitHub Releases](https://github.com/OpenTubeX/OpenTubeX/releases)
 * [OpenTubeX Website](https://opentubex.org/downloads/)
 * Windows: [WinGet](https://github.com/microsoft/winget-pkgs/tree/master/manifests/o/OpenTubeX/OpenTubeX) (`winget install OpenTubeX.OpenTubeX`)
 * macOS: [Homebrew tap](https://github.com/OpenTubeX/homebrew-tap) (`brew install --cask opentubex/tap/opentubex`), with [installation and update instructions](https://opentubex.org/downloads/#install-homebrew).
@@ -212,6 +218,12 @@ The first build with a green check mark is the latest build.
 * Snap: [Edge channel](https://snap.opentubex.org/#development-builds) (`sudo snap install opentubex --edge`)
 * Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/opentubex-git/) (`opentubex-git`)
 * Android: [OpenTubeX Nightly on F-Droid](https://fdroid.opentubex.org/#release-channels), [OpenTubeX Nightly through Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22org.opentubex.app.nightly%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FOpenTubeX%2FOpenTubeX%22%2C%22author%22%3A%22OpenTubeX%22%2C%22name%22%3A%22OpenTubeX%20Nightly%22%2C%22preferredApkIndex%22%3A0%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Atrue%2C%5C%22fallbackToOlderReleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22nightly%5C%22%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22android-%28arm64-v8a%7Carmeabi-v7a%7Cx86_64%7Cx86%7Cuniversal%29%5B.%5Dapk%24%5C%22%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%7D%22%2C%22overrideSource%22%3A%22GitHub%22%7D), or an APK for your device’s architecture from the build artifacts
+
+
+<a id="project-activity"></a>
+## 📈 Project activity
+
+![Repobeats analytics image](https://repobeats.axiom.co/api/embed/7abf4173ece7177b69cfb890c44de4385c4a45f1.svg "Repobeats analytics image")
 
 <a id="contributing"></a>
 ## 🤝 Contributing
