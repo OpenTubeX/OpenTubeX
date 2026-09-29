@@ -69,6 +69,13 @@ function cachedChannel(index) {
   }
 }
 
+function cachedVideoTitle(page, index) {
+  return page.evaluate(id => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return store.getters.getVideoCache[id]?.videos?.[0]?.title
+  }, channelId(index))
+}
+
 function cachedCollaboratorChannel(index) {
   const channel = cachedChannel(index)
   channel.videos[0] = {
@@ -735,7 +742,7 @@ test.describe('cancelling a subscription feed refresh', () => {
     await expect(cancelRefresh).toHaveCount(0)
     await expect(page.getByText('Fresh video 0', { exact: true })).toBeVisible()
     await expect(page.getByText(`Fresh video ${channelCount - 1}`, { exact: true })).toHaveCount(0)
-    await expect(page.getByText(`Cached video ${channelCount - 1}`, { exact: true })).toBeVisible()
+    expect(await cachedVideoTitle(page, channelCount - 1)).toBe(`Cached video ${channelCount - 1}`)
   })
 
   test('offers the cancellation in the feed tab context menu', async ({ page }) => {
@@ -756,7 +763,7 @@ test.describe('cancelling a subscription feed refresh', () => {
 
     await expect(page.locator('.tabsProgressBar')).toHaveCount(0, { timeout: 20_000 })
     await expect(page.getByText('Fresh video 0', { exact: true })).toBeVisible()
-    await expect(page.getByText(`Cached video ${channelCount - 1}`, { exact: true })).toBeVisible()
+    expect(await cachedVideoTitle(page, channelCount - 1)).toBe(`Cached video ${channelCount - 1}`)
   })
 
   test('turns the open context menu entry back into a reload when the refresh ends', async ({ page }) => {

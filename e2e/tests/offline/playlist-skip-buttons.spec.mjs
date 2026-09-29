@@ -226,7 +226,7 @@ test('offers skipping to a queued video without a playlist', async ({ page }) =>
   await queuedVideo.locator('.title').click({ button: 'right' })
   await page.getByRole('menuitem', { name: 'Add to Queue' }).click()
 
-  await page.getByRole('link', { name: /Standalone video/ }).click()
+  await page.locator('a.title').filter({ hasText: /Standalone video/ }).click()
   await expect(page).toHaveURL(/#\/watch\/queuevideo1/)
   await expect(page.locator('.watchQueue')).toBeVisible()
 

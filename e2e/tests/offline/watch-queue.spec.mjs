@@ -46,7 +46,7 @@ test('manages a temporary queue from video menus and the watch sidebar', async (
   await chooseVideoOption(page, 'Queue video two', 'Add to Queue')
   await chooseVideoOption(page, 'Queue video three', 'Play Next')
 
-  await page.getByRole('link', { name: /Current video/ }).click()
+  await page.locator('a.title').filter({ hasText: /Current video/ }).click()
 
   const queue = page.locator('.watchQueue')
   await expect(queue).toBeVisible()
@@ -174,7 +174,7 @@ for (const clearAll of [false, true]) {
     await setWindowSize(app, page, { width: 480, height: 850 })
     await goTo(page, 'history')
     await chooseVideoOption(page, 'Queue video one', 'Add to Queue')
-    await page.getByRole('link', { name: /Current video/ }).click()
+    await page.locator('a.title').filter({ hasText: /Current video/ }).click()
     await page.getByRole('button', { name: 'Queue Queue video one', exact: true }).click()
     const panel = page.getByRole('dialog').filter({ has: page.locator('.watchQueue') })
     await expect(panel).toBeVisible()

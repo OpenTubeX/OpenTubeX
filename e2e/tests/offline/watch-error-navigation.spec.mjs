@@ -272,7 +272,7 @@ for (const { name, firstManifest, secondManifest, firstFormats } of [
     await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
     await page.locator(sel.searchInput).press('Enter')
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
-    await expect(page.getByRole('main')).not.toBeEmpty()
+    await expect(page.locator('.videoLayout')).toBeAttached()
     const watchView = await watchViewHandle(page)
     await expect.poll(() => watchView.evaluate(view => view.manifestSrc)).toBe(secondManifest)
   })

@@ -46,7 +46,7 @@ test('keeps a normal square search result in the standard player', async ({ app,
 
   await page.locator(sel.searchInput).fill('square music upload')
   await page.locator(sel.searchInput).press('Enter')
-  await page.getByRole('link', { name: VIDEO.title, exact: true }).click()
+  await page.locator('a.title').filter({ hasText: VIDEO.title }).click()
 
   await expect(page).toHaveURL(/#\/watch\/squareVid01\?short=false/)
   await waitForPlayback(page)

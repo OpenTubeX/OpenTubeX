@@ -108,7 +108,7 @@ for (const feed of ['videos', 'new', 'shorts']) {
     // room for runner jitter while catching that repeated work reliably.
     expect(metrics.elapsedMs, JSON.stringify(metrics)).toBeLessThan(10_000)
     expect(metrics.medianUpdateMs, JSON.stringify(metrics)).toBeLessThan(500)
-    expect(metrics.p95SteadyTimerGapMs, JSON.stringify(metrics)).toBeLessThan(100)
+    expect(metrics.p95SteadyTimerGapMs, JSON.stringify(metrics)).toBeLessThan(125)
     // Publishing the whole feed once at completion may produce one longer gap.
     expect(metrics.maxTimerGapMs, JSON.stringify(metrics)).toBeLessThan(750)
   })

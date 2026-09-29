@@ -66,6 +66,10 @@
     .quickPlaybackSpeedToggle :deep(.switch-label) {
       max-inline-size: 100%;
     }
+
+    .quickPlaybackSpeedToggle :deep(.switch-label-text) {
+      margin-inline-end: 0;
+    }
   }
 }
 
