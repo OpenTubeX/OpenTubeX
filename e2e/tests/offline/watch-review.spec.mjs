@@ -196,6 +196,28 @@ test('disconnecting closes a format picker that has no local sources', async ({ 
   await expect(page.locator('.formatPrompt')).toHaveCount(0)
 })
 
+test('an older metadata request cannot clear the next video loading flag', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const watch = await watchViewHandle(page)
+  await watch.evaluate(vm => {
+    const pending = []
+    vm.getVideoInformationLocal = () => new Promise(resolve => pending.push(resolve))
+    vm.downloadedPlaybackWithoutMetadata = true
+    vm.handleDownloadConnectionChange({ detail: 'online' })
+
+    vm.videoLoadGeneration++
+    vm.downloadedMetadataLoading = false
+    vm.downloadedPlaybackWithoutMetadata = true
+    vm.handleDownloadConnectionChange({ detail: 'online' })
+    window.__pendingMetadataRequests = pending
+    pending[0]()
+  })
+  await expect.poll(() => watch.evaluate(vm => vm.downloadedMetadataLoading)).toBe(true)
+  await watch.evaluate(() => window.__pendingMetadataRequests[1]())
+  await expect.poll(() => watch.evaluate(vm => vm.downloadedMetadataLoading)).toBe(false)
+})
+
 test.describe('download opened without a connection', () => {
   test.use({
     seed: {

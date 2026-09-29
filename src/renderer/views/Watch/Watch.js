@@ -1430,7 +1430,9 @@ export default defineComponent({
         const load = !process.env.SUPPORTS_LOCAL_API || this.backendPreference === 'invidious'
           ? this.getVideoInformationInvidious(loadGeneration, true)
           : this.getVideoInformationLocal(loadGeneration, true)
-        Promise.resolve(load).finally(() => { this.downloadedMetadataLoading = false })
+        Promise.resolve(load).finally(() => {
+          if (loadGeneration === this.videoLoadGeneration) this.downloadedMetadataLoading = false
+        })
       }
       if (detail !== 'offline' || !this.isLoading || this.localFilePlayback) return
       if (this.finishDownloadedPlaybackWithoutMetadata()) {
