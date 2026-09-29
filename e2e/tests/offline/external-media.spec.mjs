@@ -207,6 +207,36 @@ test('Twitch replay uses the watch chat toggle and side panel', async ({ app, pa
   await page.keyboard.press('s')
 })
 
+test('returns Twitch replay chat to the sidebar after opening a tab from fullscreen', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const externalMedia = page.locator(`${activeTab} .externalMedia`)
+  const player = externalMedia.locator('.ftVideoPlayer')
+  await expect(externalMedia.locator('.externalMediaSidebar .twitchChat')).toBeVisible()
+
+  await player.click({ position: { x: 20, y: 20 } })
+  await page.keyboard.press('f')
+  await expect.poll(() => page.evaluate(() => document.fullscreenElement !== null)).toBe(true)
+  await player.locator('.fullscreenLiveChatToggle').click()
+  await expect(player.locator('.fullscreenLiveChatTarget .twitchChat')).toBeVisible()
+
+  await page.keyboard.press('Control+t')
+  await expect(page.locator('.tabBar .tab')).toHaveCount(2)
+  await page.locator('.tabBar .tab').first().click()
+
+  await expect.poll(() => page.evaluate(() => document.fullscreenElement !== null)).toBe(false)
+  await expect(player.locator('.fullscreenLiveChatOverlay')).toBeHidden()
+  await expect(externalMedia.locator('.externalMediaSidebar .twitchChat')).toBeVisible()
+
+  await page.keyboard.press('f')
+  await expect.poll(() => page.evaluate(() => document.fullscreenElement !== null)).toBe(true)
+  await expect(player.locator('.fullscreenLiveChatTarget .twitchChat')).toBeVisible()
+})
+
 test('plays a Twitch VOD when yt-dlp reports subscriber-only access', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
 

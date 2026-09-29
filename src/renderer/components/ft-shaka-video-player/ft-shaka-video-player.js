@@ -8410,6 +8410,16 @@ export default defineComponent({
       restoreFullscreenPlaylist = showFullscreenPlaylist.value
     }
 
+    function rememberAndCloseDockedPanels() {
+      rememberDockedPanels()
+      closeFullscreenMetadata()
+      closeFullscreenTranscript()
+      closeFullscreenSponsorBlock()
+      closeFullscreenLiveChat()
+      closeFullscreenComments()
+      closeFullscreenPlaylist()
+    }
+
     function restoreDockedPanels() {
       if (!isNativeFullscreenActive() && !fullWindowEnabled.value) {
         return
@@ -8513,13 +8523,7 @@ export default defineComponent({
     watch(fullWindowEnabled, enabled => {
       if (!enabled && androidRotationFullscreen) exitAndroidRotationFullscreen()
       if (!enabled && !isNativeFullscreenActive()) {
-        rememberDockedPanels()
-        closeFullscreenMetadata()
-        closeFullscreenTranscript()
-        closeFullscreenSponsorBlock()
-        closeFullscreenLiveChat()
-        closeFullscreenComments()
-        closeFullscreenPlaylist()
+        rememberAndCloseDockedPanels()
       }
     })
 
@@ -10752,6 +10756,7 @@ export default defineComponent({
 
     function fullscreenChangeHandler() {
       const fullscreen = isNativeFullscreenActive()
+      const wasFullscreen = isFullscreen.value
       androidFullscreenHostActive.value = !!androidFullscreenHost && document.fullscreenElement === androidFullscreenHost
       if (videoZoomPinchStart && videoZoomPinchStart.fullscreen !== fullscreen) invalidateVideoZoomPinch()
       if (!fullscreen && selectedVideoZoom.value > VIDEO_ZOOM_LEVELS.at(-1)) {
@@ -10763,6 +10768,12 @@ export default defineComponent({
       }
       suppressPanelTransitions(process.env.IS_CAPACITOR ? 500 : 100)
       syncChapterOverlayButton()
+
+      // Switching tabs can exit native fullscreen after this player becomes inactive.
+      // The dock still needs to return to its inline location in that case.
+      if (wasFullscreen && !fullscreen && !fullWindowEnabled.value) {
+        rememberAndCloseDockedPanels()
+      }
 
       if (!isActiveTab.value) {
         return
@@ -10782,15 +10793,6 @@ export default defineComponent({
         }
         restoreDockedPanels()
       } else {
-        if (!fullWindowEnabled.value) {
-          rememberDockedPanels()
-          closeFullscreenMetadata()
-          closeFullscreenTranscript()
-          closeFullscreenSponsorBlock()
-          closeFullscreenLiveChat()
-          closeFullscreenComments()
-          closeFullscreenPlaylist()
-        }
         updateScrollMiniPlayer()
       }
 
