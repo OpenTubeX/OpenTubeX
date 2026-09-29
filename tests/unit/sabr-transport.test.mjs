@@ -28,16 +28,53 @@ const context = { audioFormatId, videoFormatId, bufferedRanges: [], drcEnabled: 
 const sabrData = { url: 'https://example.test/sabr', scheme: 'sabr1', poToken: '', ustreamerConfig: '', clientInfo: {} }
 const request = uri => ({ uris: [uri], retryParameters: { timeout: 1000 } })
 
-function response(data, isInit = false, formatId = audioFormatId) {
+function response(data, isInit = false, formatId = audioFormatId, contentLength = data.length, headerId = 1) {
   const buffer = new CompositeBuffer([])
   const writer = new UmpWriter(buffer)
   writer.write(protos.UMPPartId.MEDIA_HEADER, protos.MediaHeader.encode({
-    headerId: 1, formatId, isInitSeg: isInit, sequenceNumber: 1,
+    headerId, formatId, isInitSeg: isInit, sequenceNumber: 1, contentLength,
   }).finish())
-  writer.write(protos.UMPPartId.MEDIA, Uint8Array.of(1, ...data))
-  writer.write(protos.UMPPartId.MEDIA_END, Uint8Array.of(1))
+  const idBytes = headerId < 128 ? [headerId] : [0x80 | (headerId & 0x3f), headerId >> 6]
+  writer.write(protos.UMPPartId.MEDIA, Uint8Array.of(...idBytes, ...data))
+  writer.write(protos.UMPPartId.MEDIA_END, Uint8Array.of(...idBytes))
   return new Response(utils.concatenateChunks(buffer.chunks), { status: 200 })
 }
+
+for (const headerId of [130, 256]) test(`reads SABR media header ID ${headerId} without adding ID bytes to the segment`, async () => {
+  const { createSabrTransport } = load(async () => response([1, 2, 3], false, audioFormatId, 3, headerId))
+  const transport = createSabrTransport(sabrData, () => context)
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  const segment = await transport.request(uri, request(uri), 1).promise
+  assert.deepEqual([...segment.data], [1, 2, 3])
+  transport.cleanup()
+})
+
+test('rejects a SABR segment shorter than its declared content length', async () => {
+  let calls = 0
+  const { createSabrTransport } = load(async () => {
+    calls++
+    return calls === 1
+      ? response([1, 2], false, audioFormatId, 3)
+      : response([1, 2, 3], false, audioFormatId, 3)
+  })
+  const transport = createSabrTransport(sabrData, () => context)
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  await assert.rejects(transport.request(uri, request(uri), 1).promise,
+    error => error.code === ShakaError.Code.HTTP_ERROR)
+  const complete = await transport.request(uri, request(uri), 1).promise
+  assert.deepEqual([...complete.data], [1, 2, 3])
+  assert.equal(calls, 2)
+  transport.cleanup()
+})
+
+test('rejects media bytes when the SABR header declares zero content length', async () => {
+  const { createSabrTransport } = load(async () => response([1], false, audioFormatId, 0))
+  const transport = createSabrTransport(sabrData, () => context)
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  await assert.rejects(transport.request(uri, request(uri), 1).promise,
+    error => error.code === ShakaError.Code.HTTP_ERROR)
+  transport.cleanup()
+})
 
 function load(fetch, globals = {}) {
   const schemes = new Map()
@@ -60,9 +97,68 @@ function policyResponse(backoffTimeMs) {
   return new Response(utils.concatenateChunks(buffer.chunks))
 }
 
+function errorWithPolicyResponse(backoffTimeMs, policyFirst) {
+  const buffer = new CompositeBuffer([])
+  const writer = new UmpWriter(buffer)
+  const writeError = () => writer.write(protos.UMPPartId.SABR_ERROR,
+    protos.SabrError.encode({ type: 1, code: 1 }).finish())
+  const writePolicy = () => writer.write(protos.UMPPartId.NEXT_REQUEST_POLICY,
+    protos.NextRequestPolicy.encode({ backoffTimeMs }).finish())
+  if (policyFirst) {
+    writePolicy()
+    writeError()
+  } else {
+    writeError()
+    writePolicy()
+  }
+  return new Response(utils.concatenateChunks(buffer.chunks), { status: 200 })
+}
+
 async function flushRequests() {
   for (let i = 0; i < 30; i++) await Promise.resolve()
 }
+
+for (const policyFirst of [false, true]) test(`a SABR error ${policyFirst ? 'after' : 'before'} a retry policy fails without a long backoff`, async t => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
+  let calls = 0
+  const waits = []
+  const { createSabrTransport } = load(async () => {
+    calls++
+    return calls === 1 ? errorWithPolicyResponse(20000, policyFirst) : response([1])
+  }, { Date })
+  const transport = createSabrTransport(sabrData, () => context)
+  t.after(() => transport.cleanup())
+  transport.onBackoffRequested(({ backoffMs }) => waits.push(backoffMs))
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  const pending = transport.request(uri, request(uri), 1).promise
+  await flushRequests()
+  assert.deepEqual(waits, [], 'a terminal error must not start a 20-second countdown')
+  assert.equal(calls, 1)
+  await assert.rejects(pending, error => error.code === ShakaError.Code.HTTP_ERROR)
+  await transport.request(uri, request(uri), 1).promise
+  assert.deepEqual(waits, [], 'a failed response must not delay the next request')
+  assert.equal(calls, 2)
+})
+
+test('an HTTP error with a retry policy fails without a long backoff', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
+  let calls = 0
+  const waits = []
+  const { createSabrTransport } = load(async () => {
+    calls++
+    const policy = await policyResponse(20000).arrayBuffer()
+    return new Response(policy, { status: 403 })
+  }, { Date })
+  const transport = createSabrTransport(sabrData, () => context)
+  t.after(() => transport.cleanup())
+  transport.onBackoffRequested(({ backoffMs }) => waits.push(backoffMs))
+  const uri = 'sabr1:audio?formatId=140-123-&sq=1'
+  const pending = transport.request(uri, request(uri), 1).promise
+  await flushRequests()
+  assert.deepEqual(waits, [])
+  assert.equal(calls, 1)
+  await assert.rejects(pending)
+})
 
 for (const coalesced of [false, true]) {
   test(`a completed segment does not apply a trailing backoff with ${coalesced ? 'coalesced' : 'separate'} network chunks`, async t => {

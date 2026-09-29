@@ -287,8 +287,13 @@ async function doRequest(
   /** @type {Uint8Array[]} */
   const responseDataChunks = []
   let segmentComplete = false
+  let expectedMediaLength = 0
+  let receivedMediaLength = 0
   let shouldRetry = false
   let shouldRetryDueToNextRequestPolicy = false
+  let nextRequestBackoffUntilMs = 0
+  let nextRequestBackoffTimeMs = 0
+  let nextRequestPlaybackCookieBytes
 
   let invalidPoToken = false
   let error
@@ -415,8 +420,10 @@ async function doRequest(
               ) {
                 if (operationInputs.isInit && mediaHeader.isInitSeg) {
                   mediaHeaderId = mediaHeader.headerId
+                  expectedMediaLength = Number(mediaHeader.contentLength)
                 } else if (!operationInputs.isInit && mediaHeader.sequenceNumber === operationInputs.sequenceNumber) {
                   mediaHeaderId = mediaHeader.headerId
+                  expectedMediaLength = Number(mediaHeader.contentLength)
                 }
               }
             }
@@ -424,14 +431,22 @@ async function doRequest(
             break
           }
           case UMPPartId.MEDIA: {
-            if (mediaHeaderId === part.data.getUint8(0)) {
-              responseDataChunks.push(...part.data.split(1).remainingBuffer.chunks)
+            const [headerId, dataOffset] = new UmpReader(part.data).readVarInt(0)
+            if (mediaHeaderId === headerId) {
+              const chunks = part.data.split(dataOffset).remainingBuffer.chunks
+              responseDataChunks.push(...chunks)
+              for (const chunk of chunks) receivedMediaLength += chunk.byteLength
             }
             break
           }
           case UMPPartId.MEDIA_END: {
-            if (mediaHeaderId === part.data.getUint8(0)) {
-              segmentComplete = true
+            const [headerId] = new UmpReader(part.data).readVarInt(0)
+            if (mediaHeaderId === headerId) {
+              if (receivedMediaLength !== expectedMediaLength) {
+                error ??= `SABR segment length mismatch: expected ${expectedMediaLength}, received ${receivedMediaLength}`
+              } else {
+                segmentComplete = true
+              }
               currentState.abortStatus.finished = true
               currentState.abortController.abort()
             }
@@ -439,6 +454,7 @@ async function doRequest(
           }
           case UMPPartId.NEXT_REQUEST_POLICY: {
             const nextRequestPolicy = decodePart(part, NextRequestPolicy)
+            if (!nextRequestPolicy) break
 
             shouldRetry = true
             shouldRetryDueToNextRequestPolicy = true
@@ -446,19 +462,16 @@ async function doRequest(
             // Audio and video loaders can reach this policy at different times.
             // Count from receipt so each loader waits only the remaining time,
             // and later segments do not repeat a delay that already elapsed.
-            currentState.sabrStreamState.backoffUntilMs = Date.now() + (nextRequestPolicy?.backoffTimeMs || 0)
+            nextRequestBackoffTimeMs = nextRequestPolicy.backoffTimeMs || 0
+            nextRequestBackoffUntilMs = Date.now() + nextRequestBackoffTimeMs
 
             const rawPolicy = part.data.chunks.length === 1
               ? part.data.chunks[0]
               : concatenateChunks(part.data.chunks)
-            currentState.sabrStreamState.playbackCookieBytes = extractRawProtobufField(
+            nextRequestPlaybackCookieBytes = extractRawProtobufField(
               rawPolicy,
               PLAYBACK_COOKIE_FIELD_NUMBER
             )
-            currentState.abrRequest.streamerContext.playbackCookie =
-              currentState.sabrStreamState.playbackCookieBytes
-
-            currentState.abrRequest.streamerContext.backoffTimeMs = nextRequestPolicy?.backoffTimeMs
             break
           }
           case UMPPartId.FORMAT_INITIALIZATION_METADATA: {
@@ -568,9 +581,45 @@ async function doRequest(
       fromCache: false,
       originalRequest: operationInputs.request,
     }
+  } else if (!response.ok) {
+    const severity = response.status === 401 || response.status === 403
+      ? ShakaError.Severity.CRITICAL
+      : ShakaError.Severity.RECOVERABLE
+
+    throw new ShakaError(
+      severity,
+      ShakaError.Category.NETWORK,
+      ShakaError.Code.BAD_HTTP_STATUS,
+      operationInputs.uri,
+      response.status,
+      '',
+      {},
+      operationInputs.requestType,
+      operationInputs.uri,
+    )
+  } else if (invalidPoToken) {
+    throw new ShakaError(
+      ShakaError.Severity.CRITICAL,
+      ShakaError.Category.NETWORK,
+      ShakaError.Code.HTTP_ERROR,
+      operationInputs.uri,
+      new Error('Invalid PO token'),
+      operationInputs.requestType,
+    )
+  } else if (error) {
+    throw createRecoverableNetworkError(
+      ShakaError.Code.HTTP_ERROR,
+      operationInputs.uri,
+      new Error(error),
+      operationInputs.requestType,
+    )
   } else if (shouldRetry) {
     if (shouldRetryDueToNextRequestPolicy) {
-      // Only count on actual retry to avoid counting false positive (when segmentComplete
+      currentState.sabrStreamState.backoffUntilMs = nextRequestBackoffUntilMs
+      currentState.sabrStreamState.playbackCookieBytes = nextRequestPlaybackCookieBytes
+      currentState.abrRequest.streamerContext.playbackCookie = nextRequestPlaybackCookieBytes
+      currentState.abrRequest.streamerContext.backoffTimeMs = nextRequestBackoffTimeMs
+      // Only count on an actual retry, not a policy after a completed segment.
       currentState.cumulativeRetryDueToNextRequestPolicy += 1
     }
 
@@ -602,22 +651,6 @@ async function doRequest(
 
     currentState.abortStatus.finished = false
     return doRequest(operationInputs, currentState)
-  } else if (invalidPoToken) {
-    throw new ShakaError(
-      ShakaError.Severity.CRITICAL,
-      ShakaError.Category.NETWORK,
-      ShakaError.Code.HTTP_ERROR,
-      operationInputs.uri,
-      new Error('Invalid PO token'),
-      operationInputs.requestType,
-    )
-  } else if (error) {
-    throw createRecoverableNetworkError(
-      ShakaError.Code.HTTP_ERROR,
-      operationInputs.uri,
-      new Error(error),
-      operationInputs.requestType,
-    )
   } else if (responseDataChunks.length > 0 && !segmentComplete) {
     throw createRecoverableNetworkError(
       ShakaError.Code.HTTP_ERROR,
@@ -625,28 +658,12 @@ async function doRequest(
       new Error('Incomplete segment, missing MEDIA_END part'),
       operationInputs.requestType,
     )
-  } else if (response.status === 200) {
+  } else {
     throw createRecoverableNetworkError(
       ShakaError.Code.HTTP_ERROR,
       operationInputs.uri,
       new Error('Empty response, this should not happen'),
       operationInputs.requestType,
-    )
-  } else {
-    const severity = response.status === 401 || response.status === 403
-      ? ShakaError.Severity.CRITICAL
-      : ShakaError.Severity.RECOVERABLE
-
-    throw new ShakaError(
-      severity,
-      ShakaError.Category.NETWORK,
-      ShakaError.Code.BAD_HTTP_STATUS,
-      operationInputs.uri,
-      response.status,
-      '',
-      {},
-      operationInputs.requestType,
-      operationInputs.uri,
     )
   }
 }
