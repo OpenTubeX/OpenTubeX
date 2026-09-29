@@ -3,6 +3,20 @@ name: iOS and iPadOS
 on:
   pull_request:
     branches: [ master, development, '**-RC' ]
+    paths:
+      - 'ios/**'
+      - 'capacitor.config.json'
+      - '_scripts/**/*[Ii][Oo][Ss]*'
+      - '_scripts/webpack.capacitor.config.js'
+      - 'src/renderer/**/*[Ii][Oo][Ss]*'
+      - 'src/renderer/**/*[Cc]apacitor*'
+      - 'src/renderer/**/*[Mm]obile*'
+      - 'tests/**/*[Ii][Oo][Ss]*'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/ios.yml'
+  schedule:
+    - cron: '45 3 * * *'
   workflow_dispatch:
     inputs:
       playback:
@@ -86,6 +100,7 @@ jobs:
 
   device:
     name: Package device IPA
+    if: github.event_name == 'workflow_dispatch'
     needs: simulator
     permissions:
       contents: read
