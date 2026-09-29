@@ -191,7 +191,7 @@ import WatchVideoDownloadPrompt from '../../components/WatchVideoDownloadPrompt/
 import { isYtDlpMediaUrl } from '../../../ytDlpArguments'
 import store from '../../store/index'
 import { formatBytes } from '../../helpers/fileSize'
-import { isPlayableDownloadFile } from '../../helpers/downloadPlayback'
+import { downloadWatchRoute, isPlayableDownloadFile } from '../../helpers/downloadPlayback'
 import { showToast } from '../../helpers/utils'
 
 const { t } = useI18n()
@@ -297,16 +297,8 @@ async function playDownload(download) {
     return
   }
 
-  const query = { downloadId: String(download.id) }
-  if (refreshedDownload.playlistId) {
-    query.playlistId = refreshedDownload.playlistId
-  } else if (refreshedDownload.playlistKey) {
-    query.playlistId = refreshedDownload.playlistKey
-    query.playlistType = 'user'
-  }
-
   store.dispatch('hideSettingsWindow')
-  router.push({ path: `/watch/${firstFile.videoId}`, query })
+  router.push(downloadWatchRoute(refreshedDownload, firstFile.videoId))
 }
 async function retryDownload(download) {
   if (retryingDownloadIds.value.includes(download.id)) return

@@ -1194,8 +1194,9 @@
         </FtPhonePanel>
       </Teleport>
       <watch-video-recommendations
-        v-if="!isLoading && !isOffline && !hideRecommendedVideos && (!localFilePlayback || recommendedVideos.length > 0)"
-        :data="recommendedVideos"
+        v-if="!isLoading && !hideRecommendedVideos && (isOffline ? localFilePlayback && offlineDownloadSuggestions.length > 0 : !localFilePlayback || recommendedVideos.length > 0)"
+        :data="isOffline ? offlineDownloadSuggestions : recommendedVideos"
+        :offline="isOffline"
         class="watchVideoSideBar watchVideoRecommendations"
         :class="{
           theatreRecommendations: useTheatreMode,

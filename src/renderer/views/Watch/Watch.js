@@ -42,6 +42,7 @@ import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers
 import { liveReminder, supportsLiveReminders } from '../../helpers/liveReminders'
 import { DOWNLOADED_MEDIA_MIME_TYPES } from '../../../constants'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
+import { downloadWatchRoute, isPlayableDownloadFile } from '../../helpers/downloadPlayback'
 import { parseLocalVideoGames } from '../../helpers/video-games'
 import { parseChannelPreferences } from '../../helpers/channel-preferences'
 import {
@@ -303,6 +304,8 @@ export default defineComponent({
       activeFormat: 'legacy',
       /** @type {'dash' | 'legacy' | null} */
       localFilePlayback: false,
+      downloadedPlaybackWithoutMetadata: false,
+      downloadedMetadataLoading: false,
       isOffline: getConnectionState() === 'offline',
       thumbnail: '',
       videoId: '',
@@ -540,6 +543,28 @@ export default defineComponent({
           ? []
           : [{ id: download.id, mode, active: download.id === activeDownloadId }]
       })
+    },
+    offlineDownloadSuggestions: function () {
+      const seen = new Set([this.videoId])
+      return Object.values(this.$store.getters.getYtDlpDownloads)
+        .filter(download => download.status === 'completed' && ['video', 'audio'].includes(download.mode))
+        .toSorted((a, b) => b.id - a.id)
+        .flatMap(download => (download.files ?? []).filter(isPlayableDownloadFile).map(file => ({
+          videoId: file.videoId,
+          title: file.title || (download.videoId === file.videoId ? download.title : '') || file.videoId,
+          author: file.author || download.author || '',
+          authorId: file.authorId || download.authorId || '',
+          route: downloadWatchRoute(download, file.videoId)
+        })))
+        .filter(video => {
+          if (!video.videoId || seen.has(video.videoId)) return false
+          seen.add(video.videoId)
+          return !isVideoHiddenByPreferences(video, {
+            hiddenChannelNames: this.$store.getters.getChannelsHiddenNames,
+            forbiddenTitles: this.forbiddenTitles,
+            hideChannelsBasedOnText: false
+          })
+        })
     },
     hasScheduledPremiereStarted: function () {
       return this.premiereDate instanceof Date &&
@@ -1041,7 +1066,7 @@ export default defineComponent({
       return this.$store.getters.getHideVideoLikesAndDislikes
     },
     theatrePossible: function () {
-      return this.showTranscript || !this.hideRecommendedVideos ||
+      return this.showTranscript || (!this.hideRecommendedVideos && (!this.isOffline || this.offlineDownloadSuggestions.length > 0)) ||
         this.showLiveChat || this.watchingPlaylist || !!this.nextQueuedVideo ||
         this.showSidebarChapters || this.showSidebarSponsorBlock
     },
@@ -1398,6 +1423,16 @@ export default defineComponent({
         if (this.showSidebarSponsorBlock || this.fullscreenSponsorBlockOpen) this.closeSidebarSponsorBlock()
         if (this.fullscreenCommentsOpen || this.shortsCommentsOpen || this.mobilePanel === 'comments') this.closeFullscreenComments()
         if (!this.watchingPlaylist) this.abortAutoplayCountdown(true)
+      }
+      if (detail !== 'offline' && this.downloadedPlaybackWithoutMetadata && !this.downloadedMetadataLoading) {
+        this.downloadedMetadataLoading = true
+        const loadGeneration = ++this.videoLoadGeneration
+        const load = !process.env.SUPPORTS_LOCAL_API || this.backendPreference === 'invidious'
+          ? this.getVideoInformationInvidious(loadGeneration, true)
+          : this.getVideoInformationLocal(loadGeneration, true)
+        Promise.resolve(load).finally(() => {
+          if (loadGeneration === this.videoLoadGeneration) this.downloadedMetadataLoading = false
+        })
       }
       if (detail !== 'offline' || !this.isLoading || this.localFilePlayback) return
       if (this.finishDownloadedPlaybackWithoutMetadata()) {
@@ -2169,6 +2204,8 @@ export default defineComponent({
       this.ytDlpStreamsPending = false
       this.legacyFormats = []
       this.localFilePlayback = false
+      this.downloadedPlaybackWithoutMetadata = false
+      this.downloadedMetadataLoading = false
       this.captions = []
       this.captionTranslations = []
       this.currentTime = 0
@@ -2365,6 +2402,7 @@ export default defineComponent({
       this.thumbnail = download.thumbnail || this.thumbnail
       this.errorMessage = null
       this.isLoading = false
+      this.downloadedPlaybackWithoutMetadata = true
       this.updateTitle()
       return true
     },
@@ -2889,15 +2927,18 @@ export default defineComponent({
       }
     },
 
-    getVideoInformationLocal: async function (loadGeneration = ++this.videoLoadGeneration) {
-      if (this.firstLoad) {
+    getVideoInformationLocal: async function (loadGeneration = ++this.videoLoadGeneration, metadataOnly = false) {
+      if (this.firstLoad && !metadataOnly) {
         this.isLoading = true
       }
 
       const videoId = this.tabRoute.params.id
       await initializeNetworkRecovery().ready
       if (!this.isCurrentVideoLoad(loadGeneration, videoId)) return
-      if (getConnectionState() === 'offline' && this.finishDownloadedPlaybackWithoutMetadata()) return
+      if (getConnectionState() === 'offline') {
+        if (!metadataOnly) this.finishDownloadedPlaybackWithoutMetadata()
+        return
+      }
 
       try {
         const videoInfo = await getLocalVideoInfo(videoId, {
@@ -2938,7 +2979,7 @@ export default defineComponent({
         const playabilityStatus = result.playability_status
         this.playabilityStatus = playabilityStatus.status
 
-        if (playabilityStatus.status === 'LOGIN_REQUIRED' && playabilityStatus.error_screen?.reason?.text === 'Private video') {
+        if (!metadataOnly && playabilityStatus.status === 'LOGIN_REQUIRED' && playabilityStatus.error_screen?.reason?.text === 'Private video') {
           // Private videos cannot be played in FreeTube, as they require to be logged as the owner of the video
           // so there is no point continuing or trying any other backends as it will always fail
           this.setNonRetryablePlaybackError('private')
@@ -3207,7 +3248,7 @@ export default defineComponent({
 
         const isDrmProtected = result.streaming_data?.adaptive_formats.some(format => format.drm_families || format.drm_track_type)
 
-        if (playabilityStatus.status === 'UNPLAYABLE' || playabilityStatus.status === 'LOGIN_REQUIRED' || isDrmProtected) {
+        if (!metadataOnly && (playabilityStatus.status === 'UNPLAYABLE' || playabilityStatus.status === 'LOGIN_REQUIRED' || isDrmProtected)) {
           if (playabilityStatus.error_screen?.offer_id === 'sponsors_only_video') {
             this.setRestrictedPlaybackError('members')
           } else if (playabilityStatus.reason === 'Sign in to confirm your age' || (result.has_trailer && result.getTrailerInfo() === null)) {
@@ -3268,7 +3309,7 @@ export default defineComponent({
           this.liveChatIsReplay = false
         }
 
-        if ((this.isLive || this.isPostLiveDvr) && !this.isUpcoming) {
+        if (!metadataOnly && (this.isLive || this.isPostLiveDvr) && !this.isUpcoming) {
           let useRemoteManifest = true
 
           if (this.isPostLiveDvr) {
@@ -3364,9 +3405,9 @@ export default defineComponent({
         if ((!this.isUpcoming && !this.isLive && !this.isPostLiveDvr) || (this.isUpcoming && this.playabilityStatus === 'OK')) {
           this.videoLengthSeconds = result.basic_info.duration
           if (result.streaming_data) {
-            this.streamingDataExpiryDate = result.streaming_data.expires
+            if (!metadataOnly) this.streamingDataExpiryDate = result.streaming_data.expires
 
-            if (result.streaming_data.formats.length > 0) {
+            if (!metadataOnly && result.streaming_data.formats.length > 0) {
               this.legacyFormats = result.streaming_data.formats.map(mapLocalLegacyFormat)
             }
 
@@ -3422,7 +3463,7 @@ export default defineComponent({
 
               this.captions = sortCaptions(captionTracks, this.preferredCaptionLocale)
             }
-          } else if (
+          } else if (!metadataOnly &&
             this.restrictedPlaybackError === null &&
             !this.isYtDlpPlaybackRequested()
           ) {
@@ -3434,7 +3475,7 @@ export default defineComponent({
             })
             this.handleVideoEnded()
             return
-          } else if (this.restrictedPlaybackError === null) {
+          } else if (!metadataOnly && this.restrictedPlaybackError === null) {
             console.warn('Built-in metadata has no streams; continuing so yt-dlp can provide the playback source')
           }
 
@@ -3451,7 +3492,7 @@ export default defineComponent({
             this.videoStoryboardSrc = this.createLocalStoryboardUrls(storyboard)
           }
 
-          if (this.restrictedPlaybackError === null && result.streaming_data?.adaptive_formats.length > 0) {
+          if (!metadataOnly && this.restrictedPlaybackError === null && result.streaming_data?.adaptive_formats.length > 0) {
             this.vrProjection = result.streaming_data.adaptive_formats
               .find(format => {
                 return format.has_video &&
@@ -3498,14 +3539,14 @@ export default defineComponent({
               this.manifestSrc = null
               this.enableLegacyFormat()
             }
-          } else if (this.restrictedPlaybackError === null) {
+          } else if (!metadataOnly && this.restrictedPlaybackError === null) {
             console.error(`No adaptive formats for ${this.videoId}, falling back to the legacy formats...`)
             this.manifestSrc = null
             this.enableLegacyFormat()
           }
         }
 
-        if (!this.isUpcoming && this.restrictedPlaybackError === null) {
+        if (!metadataOnly && !this.isUpcoming && this.restrictedPlaybackError === null) {
           if (!this.applyDownloadedPlaybackSource()) {
             this.alignActiveFormatWithAvailableSources()
 
@@ -3531,6 +3572,7 @@ export default defineComponent({
           this.loadLocalShortLinkedVideo(this.videoId)
         }
         this.isLoading = false
+        this.downloadedPlaybackWithoutMetadata = false
         this.updateTitle()
       } catch (err) {
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
@@ -3541,8 +3583,16 @@ export default defineComponent({
           handledError = new Error(this.t('Video.IP block'), { cause: err })
         }
 
+        const canFallback = this.backendPreference === 'local' && this.backendFallback &&
+          !handledError.toString().includes('private') && !handledError.toString().includes('unavailable')
+        if (metadataOnly) {
+          if (canFallback) return this.getVideoInformationInvidious(loadGeneration, true)
+          console.error('Could not restore downloaded video metadata', handledError)
+          return
+        }
+
         console.error(handledError)
-        if (this.backendPreference === 'local' && this.backendFallback && !handledError.toString().includes('private') && !handledError.toString().includes('unavailable')) {
+        if (canFallback) {
           const errorMessage = this.t('Local API Error (Click to copy)')
           showApiErrorToast(errorMessage, handledError, this.showTabToast)
           this.showTabToast({ message: this.t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
@@ -3566,17 +3616,20 @@ export default defineComponent({
       }
     },
 
-    getVideoInformationInvidious: async function (loadGeneration = ++this.videoLoadGeneration) {
-      if (this.firstLoad) {
+    getVideoInformationInvidious: async function (loadGeneration = ++this.videoLoadGeneration, metadataOnly = false) {
+      if (this.firstLoad && !metadataOnly) {
         this.isLoading = true
       }
 
       const videoId = this.tabRoute.params.id
       await initializeNetworkRecovery().ready
       if (!this.isCurrentVideoLoad(loadGeneration, videoId)) return
-      if (getConnectionState() === 'offline' && this.finishDownloadedPlaybackWithoutMetadata()) return
+      if (getConnectionState() === 'offline') {
+        if (!metadataOnly) this.finishDownloadedPlaybackWithoutMetadata()
+        return
+      }
 
-      invidiousGetVideoInformation(videoId)
+      return invidiousGetVideoInformation(videoId)
         .then(async result => {
           if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
 
@@ -3696,7 +3749,7 @@ export default defineComponent({
           this.videoChapters = chapters
           this.videoChaptersKind = 'chapters'
 
-          if (this.isLive || this.isPostLiveDvr) {
+          if (!metadataOnly && (this.isLive || this.isPostLiveDvr)) {
             // The live DASH manifest is currently unusable as it returns 403s after 1 minute of playback
             // so we have to use the HLS one for now.
             // Leaving the code here commented out in case we can use it again in the future
@@ -3736,14 +3789,16 @@ export default defineComponent({
           } else {
             this.videoLengthSeconds = result.lengthSeconds
 
-            this.streamingDataExpiryDate = this.extractExpiryDateFromStreamingUrl(result.adaptiveFormats[0].url)
+            if (!metadataOnly) {
+              this.streamingDataExpiryDate = this.extractExpiryDateFromStreamingUrl(result.adaptiveFormats[0].url)
 
-            this.legacyFormats = result.formatStreams.map(mapInvidiousLegacyFormat)
+              this.legacyFormats = result.formatStreams.map(mapInvidiousLegacyFormat)
 
-            if (!process.env.SUPPORTS_LOCAL_API || this.proxyVideos) {
-              this.legacyFormats.forEach(format => {
-                format.url = getProxyUrl(format.url)
-              })
+              if (!process.env.SUPPORTS_LOCAL_API || this.proxyVideos) {
+                this.legacyFormats.forEach(format => {
+                  format.url = getProxyUrl(format.url)
+                })
+              }
             }
 
             this.vrProjection = result.adaptiveFormats
@@ -3753,13 +3808,15 @@ export default defineComponent({
               })
               ?.projectionType ?? null
 
-            const manifestSrc = await this.createInvidiousDashManifest(result)
-            if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
-            this.manifestSrc = manifestSrc
-            this.manifestMimeType = MANIFEST_TYPE_DASH
+            if (!metadataOnly) {
+              const manifestSrc = await this.createInvidiousDashManifest(result)
+              if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+              this.manifestSrc = manifestSrc
+              this.manifestMimeType = MANIFEST_TYPE_DASH
+            }
           }
 
-          if (!this.isUpcoming) {
+          if (!metadataOnly && !this.isUpcoming) {
             if (!this.applyDownloadedPlaybackSource()) {
               this.alignActiveFormatWithAvailableSources()
 
@@ -3781,12 +3838,19 @@ export default defineComponent({
           this.updateTitle()
 
           this.isLoading = false
+          this.downloadedPlaybackWithoutMetadata = false
         })
         .catch(async err => {
           if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+          const canFallback = process.env.SUPPORTS_LOCAL_API && this.backendPreference === 'invidious' && this.backendFallback
+          if (metadataOnly) {
+            if (canFallback) return this.getVideoInformationLocal(loadGeneration, true)
+            console.error('Could not restore downloaded video metadata', err)
+            return
+          }
 
           console.error(err)
-          if (process.env.SUPPORTS_LOCAL_API && this.backendPreference === 'invidious' && this.backendFallback) {
+          if (canFallback) {
             const errorMessage = this.t('Invidious API Error (Click to copy)')
             showApiErrorToast(errorMessage, err, this.showTabToast)
             this.showTabToast({ message: this.t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
