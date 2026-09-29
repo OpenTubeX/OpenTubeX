@@ -126,7 +126,12 @@ test.describe('channel page', () => {
     await expect(aboutPanel.locator('.aboutLinkIcon')).toHaveCount(8)
     const originalViewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }))
     await page.setViewportSize({ width: 375, height: 812 })
-    expect(await websiteLink.evaluate(link => link.scrollWidth <= link.clientWidth)).toBe(true)
+    const longLink = aboutPanel.locator('.aboutLinks a').first()
+    const longUrl = longLink.locator('.aboutLinkUrl')
+    await longUrl.evaluate(element => {
+      element.textContent = `https://example.com/${'very-long-path-segment'.repeat(8)}`
+    })
+    expect(await longLink.evaluate(link => link.scrollWidth <= link.clientWidth)).toBe(true)
     await page.setViewportSize(originalViewport)
 
     const sourceTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')

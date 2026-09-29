@@ -19,8 +19,8 @@
       <h2>{{ $t('Channel.About.Links') }}</h2>
       <ul class="aboutLinks">
         <li
-          v-for="link in links"
-          :key="link.url"
+          v-for="(link, index) in links"
+          :key="`${link.url}-${index}`"
         >
           <a
             class="aboutLink"

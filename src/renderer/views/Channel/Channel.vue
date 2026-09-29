@@ -949,9 +949,17 @@ async function getChannelLocal() {
 }
 
 async function getChannelAboutLocal() {
+  const expectedId = id.value
+  const expectedRouteGeneration = channelRouteGeneration
+  const isCurrentRoute = () => expectedId === id.value && expectedRouteGeneration === channelRouteGeneration
+
   try {
     await ensureChannelInstance()
+    if (!isCurrentRoute()) return
+
     const about = await channelInstance.getAbout()
+    if (!isCurrentRoute()) return
+
     links.value = getChannelAboutLinks(about)
 
     if (about.is(YTNodes.ChannelAboutFullMetadata)) {
@@ -979,6 +987,8 @@ async function getChannelAboutLocal() {
       location.value = about.metadata.country ?? null
     }
   } catch (err) {
+    if (!isCurrentRoute()) return
+
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
