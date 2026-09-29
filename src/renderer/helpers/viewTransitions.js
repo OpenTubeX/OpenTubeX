@@ -9,6 +9,7 @@ export const NEW_TAB_THUMBNAIL_MORPH_NAME = 'new-tab-thumbnail-morph'
 let morphSourceElement = null
 let navigationRequestedAt = 0
 let shortMorphRequested = false
+let activeNewTabMorphs = 0
 
 /**
  * Request that the next router navigation runs inside a View Transition,
@@ -73,12 +74,21 @@ export async function morphThumbnailIntoNewTab(linkElement, createTab) {
   }
 
   let target = null
+  let cleanedUp = false
   thumbnail.style.viewTransitionName = NEW_TAB_THUMBNAIL_MORPH_NAME
+  activeNewTabMorphs++
+  document.documentElement.classList.add('newTabThumbnailMorphActive')
 
   const cleanup = () => {
+    if (cleanedUp) return
+    cleanedUp = true
     thumbnail.style.viewTransitionName = ''
     if (target) {
       target.style.viewTransitionName = ''
+    }
+    activeNewTabMorphs--
+    if (activeNewTabMorphs === 0) {
+      document.documentElement.classList.remove('newTabThumbnailMorphActive')
     }
   }
 

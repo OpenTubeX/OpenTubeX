@@ -138,7 +138,9 @@ test.describe('search', () => {
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       await store.dispatch('updateUiScale', 95)
+      store.commit('setTabBarPosition', 'left')
     })
+    await expect(page.locator('.tabBar.vertical')).toBeVisible()
 
     // Keep the animation running while subsequent real pointer clicks land.
     await page.addStyleTag({
@@ -150,17 +152,20 @@ test.describe('search', () => {
     })
     await page.evaluate(() => {
       window.__viewTransitionSnapshots = []
+      window.__viewTransitions = []
       const startViewTransition = document.startViewTransition.bind(document)
       document.startViewTransition = (update) => {
         const snapshot = {
           finished: false,
-          sourceName: document.querySelector('.ft-list-video .thumbnailImage')?.style.viewTransitionName
+          sourceName: document.querySelector('.ft-list-video .thumbnailImage')?.style.viewTransitionName,
+          rootName: getComputedStyle(document.documentElement).viewTransitionName
         }
         window.__viewTransitionSnapshots.push(snapshot)
         const transition = startViewTransition(async () => {
           await update()
-          snapshot.targetName = getComputedStyle(document.querySelector('.tabBar .tab:last-of-type')).viewTransitionName
+          snapshot.targetName = getComputedStyle(document.querySelectorAll('.tabBar .tab')[1]).viewTransitionName
         })
+        window.__viewTransitions.push(transition)
         transition.ready.then(
           () => { snapshot.ready = true },
           error => { snapshot.readyError = String(error) }
@@ -176,8 +181,10 @@ test.describe('search', () => {
     await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
     await expect.poll(() => page.evaluate(() => window.__viewTransitionSnapshots[0]?.targetName)).toBe('new-tab-thumbnail-morph')
     await expect.poll(() => page.evaluate(() => window.__viewTransitionSnapshots[0]?.ready)).toBe(true)
+    expect(await page.evaluate(() => window.__viewTransitionSnapshots[0].rootName)).toBe('none')
     expect(await page.evaluate(() => window.__viewTransitionSnapshots[0])).toEqual({
       sourceName: 'new-tab-thumbnail-morph',
+      rootName: 'none',
       targetName: 'new-tab-thumbnail-morph',
       ready: true,
       finished: false
@@ -192,7 +199,12 @@ test.describe('search', () => {
       await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2, { button: 'middle' })
       await expect(page.locator(sel.tabs)).toHaveCount(index + 2, { timeout: 3000 })
       await expect.poll(() => page.evaluate(index => window.__viewTransitionSnapshots[index]?.ready, index)).toBe(true)
+      expect(await page.evaluate(index => window.__viewTransitionSnapshots[index].rootName, index)).toBe('none')
     }
+
+    await page.evaluate(() => window.__viewTransitions.forEach(transition => transition.skipTransition()))
+    await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).viewTransitionName))
+      .toBe('root')
 
     await page.evaluate(() => {
       document.documentElement.dataset.reducedMotion = 'reduce'
