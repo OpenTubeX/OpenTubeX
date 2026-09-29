@@ -238,7 +238,9 @@ public class OptimizedApkInstrumentation extends Instrumentation {
         check(!enterLabel.equals(evaluate(web,
             "document.querySelector('.ftVideoPlayer .shaka-fullscreen-button').getAttribute('aria-label')")),
             "Shaka fullscreen control switches to exit mode");
-        evaluate(web, "document.exitFullscreen()");
+        tapCss(web, ".ftVideoPlayer");
+        await(web, "getComputedStyle(document.querySelector('.ftVideoPlayer .shaka-fullscreen-button')).visibility === 'visible'");
+        tapCss(web, ".ftVideoPlayer .shaka-fullscreen-button");
         await(web, "document.fullscreenElement === null");
     }
 

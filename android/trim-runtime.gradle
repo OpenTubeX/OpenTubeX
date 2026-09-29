@@ -25,6 +25,9 @@ buildscript {
 interface RuntimePackerParameters extends TransformParameters {
     @Input
     Property<String> getPackerVersion()
+
+    @Input
+    Property<String> getPackerExecutable()
 }
 
 @CacheableTransform
@@ -52,7 +55,7 @@ abstract class PackNativeRuntime implements TransformAction<RuntimePackerParamet
                     archive.getInputStream(entry).withCloseable { content ->
                         if (runtimeEntries.any { it.name == entry.name }) {
                             output.write(PackNativeRuntime.repackRuntime(content,
-                                entry.name.endsWith('/libpython.zip.so'), parameters.packerVersion.get() != 'none'))
+                                entry.name.endsWith('/libpython.zip.so'), parameters.packerExecutable.get()))
                         } else {
                             content.transferTo(output)
                         }
@@ -63,10 +66,11 @@ abstract class PackNativeRuntime implements TransformAction<RuntimePackerParamet
         }
     }
 
-    static byte[] repackRuntime(InputStream input, boolean python, boolean optimized) {
+    static byte[] repackRuntime(InputStream input, boolean python, String packerExecutable) {
         byte[] source = input.readAllBytes()
-        if (!optimized) return copyRuntime(source, python)
+        if (packerExecutable == 'none') return copyRuntime(source, python)
         File staging = Files.createTempDirectory('opentubex-runtime-').toFile()
+        File packedDir = null
         try {
             // Read the central directory: local ZIP headers omit Unix modes.
             new org.apache.commons.compress.archivers.zip.ZipFile(
@@ -98,18 +102,21 @@ abstract class PackNativeRuntime implements TransformAction<RuntimePackerParamet
                     }
                 }
             }
-            File packed = new File(staging, 'runtime.zip')
-            def command = ['7z', 'a', '-tzip', '-mm=Deflate', '-mx=9', '-mfb=258',
-                '-mpass=5', '-snl', '-mtm=off', '-bd', packed.absolutePath, 'usr']
+            packedDir = Files.createTempDirectory('opentubex-packed-').toFile()
+            File packed = new File(packedDir, 'runtime.zip')
+            def command = [packerExecutable, 'a', '-tzip', '-mm=Deflate', '-mx=9', '-mfb=258',
+                '-mpass=5', '-snl', '-mtm=off', '-bd', packed.absolutePath] +
+                staging.list().sort().collect { "./${it}".toString() }
             def process = new ProcessBuilder(command).directory(staging)
                 .redirectErrorStream(true).start()
             String log = new String(process.inputStream.readAllBytes(), 'UTF-8')
             if (process.waitFor() != 0) {
-                throw new GradleException("7z failed to pack the native runtime:\n${log}")
+                throw new GradleException("${packerExecutable} failed to pack the native runtime:\n${log}")
             }
             return packed.bytes
         } finally {
             staging.deleteDir()
+            packedDir?.deleteDir()
         }
     }
 
@@ -132,15 +139,22 @@ abstract class PackNativeRuntime implements TransformAction<RuntimePackerParamet
 }
 
 def availablePackerVersion = 'none'
+def availablePackerExecutable = 'none'
 if (FileSystems.default.supportedFileAttributeViews().contains('posix')) {
-    try {
-        def process = new ProcessBuilder('7z', 'i').redirectErrorStream(true).start()
-        def output = new String(process.inputStream.readAllBytes(), 'UTF-8')
-        if (process.waitFor() == 0) {
-            availablePackerVersion = output.readLines().find { it.startsWith('7-Zip') } ?: 'none'
+    for (def candidate : ['7zz', '7z']) {
+        try {
+            def process = new ProcessBuilder(candidate, 'i').redirectErrorStream(true).start()
+            def output = new String(process.inputStream.readAllBytes(), 'UTF-8')
+            if (process.waitFor() == 0) {
+                availablePackerVersion = output.readLines().find { it.startsWith('7-Zip') } ?: 'none'
+                if (availablePackerVersion != 'none') {
+                    availablePackerExecutable = candidate
+                    break
+                }
+            }
+        } catch (IOException ignored) {
+            // Keep regular Android builds working where this packer is unavailable.
         }
-    } catch (IOException ignored) {
-        // Keep regular Android builds working where 7z is unavailable.
     }
 }
 
@@ -150,7 +164,10 @@ dependencies {
     registerTransform(PackNativeRuntime) {
         from.attribute(trimmedRuntime, false)
         to.attribute(trimmedRuntime, true)
-        parameters { packerVersion.set(availablePackerVersion) }
+        parameters {
+            packerVersion.set(availablePackerVersion)
+            packerExecutable.set(availablePackerExecutable)
+        }
     }
 }
 configurations.configureEach {
