@@ -11,6 +11,9 @@ test('only accepts Twitch VOD URLs for the fallback', () => {
 
 test('builds a playable HLS master from accessible Twitch VOD qualities', async () => {
   const requests = []
+  const segment = Buffer.alloc(188)
+  segment[0] = 0x47
+  Buffer.from([0, 0, 1, 0x67, 0x64, 0, 0x28]).copy(segment, 24)
   const fetcher = async (url) => {
     requests.push(url)
     if (url === 'https://gql.twitch.tv/gql') {
@@ -21,6 +24,7 @@ test('builds a playable HLS master from accessible Twitch VOD qualities', async 
         owner: { login: 'example' }
       } } })
     }
+    if (url.endsWith('/720p60/segment-1.ts')) return new Response(segment)
     return new Response(url.includes('/720p60/') ? '#EXTM3U\nsegment-1.ts\n' : '', {
       status: url.includes('/720p60/') ? 200 : 404
     })
@@ -28,10 +32,40 @@ test('builds a playable HLS master from accessible Twitch VOD qualities', async 
 
   const result = await fetchTwitchSubOnlyVod('12345', fetcher)
   assert.equal(result.video.title, 'Subscriber archive')
-  assert.match(result.playlist, /#EXT-X-STREAM-INF:BANDWIDTH=5040000,CODECS="avc1\.4D001E,mp4a\.40\.2",RESOLUTION=1280x720,FRAME-RATE=60/)
+  assert.match(result.playlist, /#EXT-X-STREAM-INF:BANDWIDTH=5040000,CODECS="avc1\.640028,mp4a\.40\.2",RESOLUTION=1280x720,FRAME-RATE=60/)
   assert.match(result.playlist, /https:\/\/example\.cloudfront\.net\/archive-key\/720p60\/index-dvr\.m3u8/)
   assert.equal((result.playlist.match(/#EXT-X-STREAM-INF/g) ?? []).length, 1)
-  assert.equal(requests.length, 8)
+  assert.equal(requests.length, 9)
+})
+
+test('uses each Twitch transport stream quality’s declared H.264 codec', async () => {
+  const segment = (profile, constraints, level) => {
+    const bytes = Buffer.alloc(188)
+    bytes[0] = 0x47
+    Buffer.from([0, 0, 1, 0x67, profile, constraints, level]).copy(bytes, 24)
+    return bytes
+  }
+  const fetcher = async (url, options) => {
+    if (url === 'https://gql.twitch.tv/gql') return Response.json({ data: { video: {
+      seekPreviewsURL: 'https://example.cloudfront.net/archive-key/storyboards/1.jpg'
+    } } })
+    if (url.endsWith('/chunked/index-dvr.m3u8') || url.endsWith('/480p30/index-dvr.m3u8')) {
+      return new Response('#EXTM3U\n#EXTINF:10,\nsegment-1.ts\n')
+    }
+    if (url.endsWith('/chunked/segment-1.ts')) {
+      assert.equal(options.headers.Range, 'bytes=0-65535')
+      return new Response(segment(0x64, 0, 0x28))
+    }
+    if (url.endsWith('/480p30/segment-1.ts')) {
+      assert.equal(options.headers.Range, 'bytes=0-65535')
+      return new Response(segment(0x4d, 0x40, 0x1f))
+    }
+    return new Response('', { status: 404 })
+  }
+
+  const result = await fetchTwitchSubOnlyVod('12345', fetcher)
+  assert.match(result.playlist, /CODECS="avc1\.640028,mp4a\.40\.2"/)
+  assert.match(result.playlist, /CODECS="avc1\.4D401F,mp4a\.40\.2"/)
 })
 
 test('rejects an unsafe preview URL before fetching a quality', async () => {

@@ -85,6 +85,14 @@ function codecFromMp4Init(bytes) {
   return null
 }
 
+function codecFromTransportStream(bytes) {
+  for (let offset = 0; offset + 7 <= bytes.length; offset++) {
+    if (bytes[offset] !== 0 || bytes[offset + 1] !== 0 || bytes[offset + 2] !== 1 || bytes[offset + 3] !== 0x67) continue
+    return `avc1.${Array.from(bytes.subarray(offset + 4, offset + 7), byte => byte.toString(16).padStart(2, '0')).join('').toUpperCase()}`
+  }
+  return null
+}
+
 async function probeQuality(url, fetcher) {
   try {
     const response = await fetcher(url, {
@@ -94,7 +102,19 @@ async function probeQuality(url, fetcher) {
     if (!response.ok) return null
     const body = await response.text()
     if (!body.startsWith('#EXTM3U')) return null
-    if (body.includes('.ts')) return 'avc1.4D001E'
+    const segmentPath = body.split('\n').map(line => line.trim())
+      .find(line => line && !line.startsWith('#') && /\.ts(?:\?.*)?$/.test(line))
+    if (segmentPath) {
+      const segmentUrl = new URL(segmentPath, url)
+      if (segmentUrl.origin !== new URL(url).origin) return null
+      const segment = await fetcher(segmentUrl.href, {
+        headers: { Range: 'bytes=0-65535' },
+        responseType: 'arraybuffer',
+        signal: AbortSignal.timeout(10_000)
+      })
+      if (!segment.ok) return null
+      return codecFromTransportStream(new Uint8Array(await segment.arrayBuffer()))
+    }
     if (body.includes('.mp4')) {
       const initPath = body.match(/^#EXT-X-MAP:.*?\bURI="([^"]+)"/m)?.[1]
       if (!initPath) return null
