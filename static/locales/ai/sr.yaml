@@ -1178,6 +1178,8 @@ Profile:
   Theme Color: Боја теме
   Go To Profile Manager: Иди на управљање профилима
 Channel:
+  About:
+    Links: Везе
   Subscription settings: Подешавања претплате
   Failed to save subscription settings: Није могуће сачувати подешавања канала
   Videos per day: Видео-снимака дневно

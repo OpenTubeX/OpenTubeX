@@ -120,6 +120,19 @@ test.describe('channel page', () => {
     await expect(selectedChannelTab).toHaveAttribute('id', 'aboutTab')
     const aboutPanel = page.locator('#aboutPanel')
     await expect(aboutPanel).toHaveAttribute('role', 'tabpanel')
+    const websiteLink = aboutPanel.getByRole('link', { name: 'blender.org https://www.blender.org/' })
+    await expect(websiteLink).toHaveAttribute('href', 'https://www.blender.org/')
+    await expect(aboutPanel.locator('.aboutLinks a')).toHaveCount(8)
+    await expect(aboutPanel.locator('.aboutLinkIcon')).toHaveCount(8)
+    const originalViewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }))
+    await page.setViewportSize({ width: 375, height: 812 })
+    const longLink = aboutPanel.locator('.aboutLinks a').first()
+    const longUrl = longLink.locator('.aboutLinkUrl')
+    await longUrl.evaluate(element => {
+      element.textContent = `https://example.com/${'very-long-path-segment'.repeat(8)}`
+    })
+    expect(await longLink.evaluate(link => link.scrollWidth <= link.clientWidth)).toBe(true)
+    await page.setViewportSize(originalViewport)
 
     const sourceTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
     const tagLink = aboutPanel.locator('.aboutTagLink').first()

@@ -1129,6 +1129,8 @@ Profile:
   The selected image could not be loaded: 無法載入選取的圖片
   Theme Color: 佈景主題色彩
 Channel:
+  About:
+    Links: 連結
   Subscription settings: 訂閱設定
   Failed to save subscription settings: 無法儲存頻道設定
   Videos per day: 每日影片數

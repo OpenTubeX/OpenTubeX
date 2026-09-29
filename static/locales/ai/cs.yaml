@@ -1129,6 +1129,8 @@ Profile:
   The selected image could not be loaded: Vybraný obrázek se nepodařilo načíst
   Theme Color: Barva motivu
 Channel:
+  About:
+    Links: Odkazy
   Subscription settings: Nastavení odběru
   Failed to save subscription settings: Nastavení kanálu se nepodařilo uložit
   Videos per day: Videa za den

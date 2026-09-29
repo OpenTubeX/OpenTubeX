@@ -1420,6 +1420,7 @@ Channel:
     Courses: 강의
     This channel does not currently have any courses: 이 채널에는 현재 강의가 없습니다
   About:
+    Links: 링크
     Tags:
       Tags: 채널 태그
       Search for: '"{tag}" 검색'

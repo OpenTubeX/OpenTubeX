@@ -14,6 +14,57 @@
   white-space: pre-wrap;
 }
 
+.aboutLinks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.aboutLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-block-size: 44px;
+  padding-block: 5px;
+  text-decoration: none;
+}
+
+.aboutLink:link,
+.aboutLink:visited {
+  color: var(--primary-text-color);
+}
+
+.aboutLinkIcon {
+  display: grid;
+  flex: none;
+  inline-size: 24px;
+  block-size: 24px;
+  place-items: center;
+}
+
+.aboutLinkIcon img {
+  inline-size: 24px;
+  block-size: 24px;
+  object-fit: contain;
+}
+
+.aboutLinkText {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.aboutLinkUrl {
+  color: var(--link-color);
+  font-size: 14px;
+}
+
+.aboutLink:hover .aboutLinkUrl,
+.aboutLink:focus-visible .aboutLinkUrl {
+  text-decoration: underline;
+}
+
 .aboutTags {
   display: flex;
   flex-flow: row wrap;

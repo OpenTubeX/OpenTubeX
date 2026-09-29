@@ -1136,6 +1136,8 @@ Profile:
   Theme Color: Boja teme
   Go To Profile Manager: Otvori upravitelja profila
 Channel:
+  About:
+    Links: Poveznice
   Subscription settings: Postavke pretplate
   Failed to save subscription settings: Nije moguće spremiti postavke kanala
   Videos per day: Videozapisa dnevno

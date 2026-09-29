@@ -1125,6 +1125,8 @@ Profile:
   The selected image could not be loaded: L’image sélectionnée n’a pas pu être chargée
   Theme Color: Couleur du thème
 Channel:
+  About:
+    Links: Liens
   Subscription settings: Paramètres d'abonnement
   Failed to save subscription settings: Impossible d’enregistrer les paramètres de la chaîne
   Videos per day: Vidéos par jour

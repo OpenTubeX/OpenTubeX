@@ -1161,6 +1161,8 @@ Profile:
   Theme Color: Themakleur
   Go To Profile Manager: Naar profielbeheer
 Channel:
+  About:
+    Links: Links
   Subscription settings: Abonnementsinstellingen
   Failed to save subscription settings: Kan de kanaalinstellingen niet opslaan
   Videos per day: Video's per dag

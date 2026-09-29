@@ -1126,6 +1126,8 @@ Profile:
   The selected image could not be loaded: A kiválasztott kép nem tölthető be
   Theme Color: Téma színe
 Channel:
+  About:
+    Links: Hivatkozások
   Subscription settings: Feliratkozási beállítások
   Failed to save subscription settings: Nem sikerült menteni a csatornabeállításokat
   Videos per day: Videók naponta

@@ -1126,6 +1126,8 @@ Profile:
   The selected image could not be loaded: "N'eus ket bet gallet kargañ ar skeudenn diuzet"
   Theme Color: "Liv an neuz"
 Channel:
+  About:
+    Links: Liammoù
   Subscription settings: Arventennoù ar c'houmanant
   Failed to save subscription settings: N'eus ket bet gallet enrollañ arventennoù ar chadenn
   Videos per day: Videoioù dre zevezh

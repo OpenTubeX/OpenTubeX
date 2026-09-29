@@ -1134,6 +1134,8 @@ Profile:
   Theme Color: Temafarge
   Go To Profile Manager: Gå til profilbehandling
 Channel:
+  About:
+    Links: Lenker
   Subscription settings: Abonnementsinnstillinger
   Failed to save subscription settings: Kunne ikke lagre kanalinnstillingene
   Videos per day: Videoer per dag

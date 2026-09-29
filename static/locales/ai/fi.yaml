@@ -1158,6 +1158,8 @@ Profile:
   Theme Color: Teemaväri
   Go To Profile Manager: Siirry profiilien hallintaan
 Channel:
+  About:
+    Links: Linkit
   Subscription settings: Tilausasetukset
   Failed to save subscription settings: Kanava-asetusten tallentaminen epäonnistui
   Videos per day: Videoita päivässä
