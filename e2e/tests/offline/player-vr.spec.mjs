@@ -25,7 +25,7 @@ async function mockVrYtDlpInfo(app) {
         audioSampleRate: 44_100,
         audioChannels: 2,
         language: null,
-        formatNote: '360s, mesh',
+        formatNote: '360p',
         dynamicRange: 'SDR',
         availableAt: null
       }],
@@ -44,11 +44,6 @@ test('uses panoramic HLS for a YouTube mesh video', async ({ app, page }) => {
   let manifestRequests = 0
   let releaseManifest
   await page.route('https://vr.example.test/master.m3u8', async route => {
-    if (!await app.electronApp.evaluate(() => globalThis.__vrCachedSourceDeleted)) {
-      return new Promise(resolve => {
-        releaseManifest = () => resolve(route.fulfill({ contentType: 'application/x-mpegURL', body: '#EXTM3U\n' }))
-      })
-    }
     manifestRequests++
     if (manifestRequests > 1) {
       return new Promise(resolve => {
@@ -68,28 +63,26 @@ test('uses panoramic HLS for a YouTube mesh video', async ({ app, page }) => {
   })
 
   await app.electronApp.evaluate(({ ipcMain }) => {
-    globalThis.__vrCachedSourceDeleted = false
+    globalThis.__vrCacheKeys = []
     ipcMain.removeHandler('yt-dlp-playback-cache-get')
-    ipcMain.handle('yt-dlp-playback-cache-get', () => globalThis.__vrCachedSourceDeleted
-      ? null
-      : {
-          expiryTime: Date.now() + 60 * 60 * 1000,
-          source: {
-            manifestSrc: 'https://vr.example.test/master.m3u8',
-            manifestMimeType: 'application/x-mpegurl',
-            legacyFormats: [],
-            captions: [],
-            captionTranslations: [],
-            subtitlesIncluded: true,
-            title: 'Cached mesh video',
-            isLive: false,
-            version: 'test'
+    ipcMain.handle('yt-dlp-playback-cache-get', (_event, _videoId, cacheKey) => {
+      globalThis.__vrCacheKeys.push(cacheKey)
+      return JSON.parse(cacheKey).length === 2
+        ? {
+            expiryTime: Date.now() + 60 * 60 * 1000,
+            source: {
+              manifestSrc: 'https://vr.example.test/master.m3u8',
+              manifestMimeType: 'application/x-mpegurl',
+              legacyFormats: [],
+              captions: [],
+              captionTranslations: [],
+              subtitlesIncluded: true,
+              title: 'Cached mesh video',
+              isLive: false,
+              version: 'test'
+            }
           }
-        })
-    ipcMain.removeHandler('yt-dlp-playback-cache-delete')
-    ipcMain.handle('yt-dlp-playback-cache-delete', () => {
-      globalThis.__vrCachedSourceDeleted = true
-      return true
+        : null
     })
   })
   await mockVrYtDlpInfo(app)
@@ -117,7 +110,8 @@ test('uses panoramic HLS for a YouTube mesh video', async ({ app, page }) => {
   await expect(video).toBeVisible()
   await expect(page.locator('.ftVideoPlayer .vrCanvas')).toBeVisible()
   expect(await video.evaluate(element => element.ui.getConfiguration().displayInVrMode)).toBe(true)
-  expect(await app.electronApp.evaluate(() => globalThis.__vrCachedSourceDeleted)).toBe(true)
+  expect(await app.electronApp.evaluate(() =>
+    globalThis.__vrCacheKeys.some(cacheKey => JSON.parse(cacheKey).at(-1) === 'vr-hls'))).toBe(true)
 
   const surface = page.locator('.ftVideoPlayer .shaka-controls-container')
   await watch.evaluate(view => { view.$refs.player.hasLoaded = true })

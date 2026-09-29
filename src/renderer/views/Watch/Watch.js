@@ -5666,33 +5666,22 @@ export default defineComponent({
       cachedOnly = false
     ) {
       let source
-      const onDefaultClientsFallback = () => {
-        if (
-          this.isCurrentVideoLoad(loadGeneration, videoId) &&
-          playbackEngineSwitchGeneration === this.playbackEngineSwitchGeneration &&
-          !this.ytDlpDefaultClientsFallbackToastShown
-        ) {
-          this.ytDlpDefaultClientsFallbackToastShown = true
-          this.showTabToast({
-            message: this.t('Change Format.yt-dlp Default Clients Fallback'),
-            icon: ['fas', 'exchange-alt'],
-          })
-        }
-      }
+      const preferVrHls = this.vrProjection === 'MESH' ||
+        (this.activePlaybackEngine === 'yt-dlp' && this.builtInPlaybackSource?.vrProjection === 'MESH')
       try {
-        source = await getYtDlpPlaybackSource(
-          videoId, this.ytDlpPlaybackCacheKey, onDefaultClientsFallback,
-          useAuthentication, cachedOnly, this.captions.length === 0
-        )
-        if (source !== null && source.vrProjection === undefined && this.vrProjection === 'MESH' && !cachedOnly) {
-          // Older cached sources predate 360° playback and can retain a mesh
-          // DASH stream even when a panoramic HLS rendition is available.
-          await invalidateYtDlpPlaybackSource(videoId)
-          source = await getYtDlpPlaybackSource(
-            videoId, this.ytDlpPlaybackCacheKey, onDefaultClientsFallback,
-            useAuthentication, false, this.captions.length === 0
-          )
-        }
+        source = await getYtDlpPlaybackSource(videoId, this.ytDlpPlaybackCacheKey, () => {
+          if (
+            this.isCurrentVideoLoad(loadGeneration, videoId) &&
+            playbackEngineSwitchGeneration === this.playbackEngineSwitchGeneration &&
+            !this.ytDlpDefaultClientsFallbackToastShown
+          ) {
+            this.ytDlpDefaultClientsFallbackToastShown = true
+            this.showTabToast({
+              message: this.t('Change Format.yt-dlp Default Clients Fallback'),
+              icon: ['fas', 'exchange-alt'],
+            })
+          }
+        }, useAuthentication, cachedOnly, this.captions.length === 0, preferVrHls)
       } catch (error) {
         if (
           !this.isCurrentVideoLoad(loadGeneration, videoId) ||
