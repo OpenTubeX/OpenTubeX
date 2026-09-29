@@ -22,6 +22,7 @@ import { mapExternalPlaybackMetadata } from '../../../ytDlpMetadata'
  * @property {boolean} incomplete whether a timeout may have omitted formats
  * @property {string | null} title
  * @property {boolean} isLive
+ * @property {'EQUIRECTANGULAR' | null} [vrProjection]
  * @property {boolean} [audioOnly] whether an external manifest has no video formats
  * @property {boolean} [twitchSubOnlyVod]
  * @property {string | null} [twitchVodRegistrationId]
@@ -47,8 +48,10 @@ function notifyPlaybackSourceCacheChanged() {
   for (const listener of playbackSourceCacheChangeListeners) listener()
 }
 
-function effectivePlaybackSourceCacheKey(cacheKey, useAuthentication) {
-  return JSON.stringify([cacheKey, useAuthentication])
+function effectivePlaybackSourceCacheKey(cacheKey, useAuthentication, preferVrHls = false) {
+  return JSON.stringify(preferVrHls
+    ? [cacheKey, useAuthentication, 'vr-hls']
+    : [cacheKey, useAuthentication])
 }
 
 /**
@@ -745,6 +748,7 @@ function createPostLiveDvrActions(duration, fragmentCount) {
  * @param {boolean} [useAuthentication] whether to use the explicitly configured cookie source
  * @param {boolean} [cachedOnly] prevents a cache miss from starting a new extraction
  * @param {boolean} [includeSubtitles] whether yt-dlp should request automatic subtitles
+ * @param {boolean} [preferVrHls] whether the backend identified a mesh video
  * @returns {Promise<YtDlpPlaybackSource | null>}
  */
 export function getYtDlpPlaybackSource(
@@ -753,7 +757,8 @@ export function getYtDlpPlaybackSource(
   onDefaultClientsFallback,
   useAuthentication = false,
   cachedOnly = false,
-  includeSubtitles = true
+  includeSubtitles = true,
+  preferVrHls = false
 ) {
   if (cachedOnly) {
     return loadYtDlpPlaybackSource(
@@ -762,11 +767,12 @@ export function getYtDlpPlaybackSource(
       onDefaultClientsFallback,
       useAuthentication,
       true,
-      includeSubtitles
+      includeSubtitles,
+      preferVrHls
     )
   }
 
-  const requestKey = JSON.stringify([videoId, cacheKey, useAuthentication, includeSubtitles])
+  const requestKey = JSON.stringify([videoId, cacheKey, useAuthentication, includeSubtitles, preferVrHls])
   const pendingLoad = pendingPlaybackSourceLoads.get(requestKey)
   if (pendingLoad !== undefined) {
     if (onDefaultClientsFallback !== undefined) {
@@ -797,7 +803,8 @@ export function getYtDlpPlaybackSource(
     },
     useAuthentication,
     false,
-    includeSubtitles
+    includeSubtitles,
+    preferVrHls
   ).finally(() => {
     if (pendingPlaybackSourceLoads.get(requestKey) === pendingEntry) {
       pendingPlaybackSourceLoads.delete(requestKey)
@@ -813,9 +820,10 @@ async function loadYtDlpPlaybackSource(
   onDefaultClientsFallback,
   useAuthentication,
   cachedOnly,
-  includeSubtitles
+  includeSubtitles,
+  preferVrHls
 ) {
-  const effectiveCacheKey = effectivePlaybackSourceCacheKey(cacheKey, useAuthentication)
+  const effectiveCacheKey = effectivePlaybackSourceCacheKey(cacheKey, useAuthentication, preferVrHls)
   let cachedSource = playbackSourceCache.get(videoId, effectiveCacheKey)
 
   if (cachedSource === null) {
@@ -928,6 +936,7 @@ async function loadYtDlpPlaybackSource(
           incomplete: info.incomplete === true,
           title: info.title,
           isLive: false,
+          vrProjection: null,
           duration,
           storyboardSrc: info.storyboardVtt === null
             ? null
@@ -945,8 +954,13 @@ async function loadYtDlpPlaybackSource(
     }
 
     const httpFormats = info.formats.filter(format => format.protocol === 'https' && format.url !== null)
+    // YouTube's direct mesh streams need their embedded projection mesh to be
+    // rendered correctly. Its HLS rendition is a panorama that Shaka can show
+    // with the existing equirectangular VR renderer.
+    const usePanoramicHls = preferVrHls && !isLive && info.hlsManifestUrl !== null
     const legacyHttpFormats = httpFormats.filter(format => isVideoFormat(format) && isAudioFormat(format))
     const legacyFormatsPromise = convertLegacyFormats(legacyHttpFormats)
+    let deferredDashSource = null
 
     // live streams are only available as HLS, which is what makes rewinding within
     // the DVR window possible
@@ -966,6 +980,7 @@ async function loadYtDlpPlaybackSource(
           incomplete: info.incomplete === true,
           title: info.title,
           isLive: false,
+          vrProjection: null,
           duration: info.duration,
           storyboardSrc: info.storyboardVtt === null
             ? null
@@ -977,8 +992,12 @@ async function loadYtDlpPlaybackSource(
         }
 
         if (deferIncompleteSource(source, [...localFormats, ...legacyFormats])) continue
-        await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, source)
-        return source
+        if (usePanoramicHls) {
+          deferredDashSource = source
+        } else {
+          await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, source)
+          return source
+        }
       }
     }
 
@@ -996,6 +1015,7 @@ async function loadYtDlpPlaybackSource(
         incomplete: info.incomplete === true,
         title: info.title,
         isLive,
+        vrProjection: usePanoramicHls ? 'EQUIRECTANGULAR' : null,
         duration: info.duration,
         storyboardSrc: info.storyboardVtt === null
           ? null
@@ -1027,6 +1047,11 @@ async function loadYtDlpPlaybackSource(
       return source
     }
 
+    if (deferredDashSource !== null) {
+      await cacheYtDlpPlaybackSource(videoId, effectiveCacheKey, deferredDashSource)
+      return deferredDashSource
+    }
+
     if (!isLive) {
       const legacyFormats = await legacyFormatsPromise
       if (legacyFormats.length > 0) {
@@ -1038,6 +1063,7 @@ async function loadYtDlpPlaybackSource(
           incomplete: info.incomplete === true,
           title: info.title,
           isLive: false,
+          vrProjection: null,
           duration: info.duration,
           storyboardSrc: info.storyboardVtt === null
             ? null

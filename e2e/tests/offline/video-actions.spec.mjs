@@ -235,6 +235,7 @@ test('persists an authenticated HLS playback source across app restarts', async 
     }],
     title: 'Cached restricted video',
     isLive: false,
+    vrProjection: 'EQUIRECTANGULAR',
     version: '2026.08.19'
   }
 
