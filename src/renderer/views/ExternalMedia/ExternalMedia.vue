@@ -713,7 +713,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .externalMedia {
   margin-inline: auto;
-  padding: 24px;
+  padding-block: 24px;
 }
 
 .externalMediaLayout {
@@ -752,6 +752,12 @@ onBeforeUnmount(() => {
 .externalMediaSidebar :deep(.twitchChat) {
   margin-block: 0 16px;
   margin-inline: 8px;
+}
+
+@media (width > 1350px) {
+  .externalMediaLayout:not(.useTheatreMode, .noSidebar) .externalMediaVideo {
+    margin-inline: 8px;
+  }
 }
 
 @media (width <= 1350px) {
