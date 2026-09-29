@@ -37,6 +37,7 @@
         :views="viewCount"
         :videos="videoCount"
         :location="location"
+        :links="links"
         :tags="tags"
         :related-channels="relatedChannels"
       />
@@ -361,6 +362,7 @@ import {
   getInvidiousChannelSearchResultType,
   getLocalChannelSearchResultType,
 } from './channel-search'
+import { getChannelAboutLinks } from './channel-about-links'
 
 const { locale, t } = useI18n()
 const route = useRoute()
@@ -420,6 +422,7 @@ const viewCount = ref(0)
 const videoCount = ref(0)
 const joined = ref(0)
 const location = ref(null)
+const links = shallowRef([])
 const relatedChannels = shallowRef([])
 const isArtistTopicChannel = ref(false)
 const isFamilyFriendly = ref(false)
@@ -639,6 +642,7 @@ watch(route, () => {
   searchPage = 1
   elementListLoadingTabs.value = {}
   relatedChannels.value = []
+  links.value = []
   latestVideos.value = []
   latestShorts.value = []
   latestLive.value = []
@@ -868,6 +872,7 @@ async function getChannelLocal() {
       videoCount.value = null
       joined.value = 0
       location.value = null
+      links.value = []
     }
     const tabs = ['about']
 
@@ -947,6 +952,7 @@ async function getChannelAboutLocal() {
   try {
     await ensureChannelInstance()
     const about = await channelInstance.getAbout()
+    links.value = getChannelAboutLinks(about)
 
     if (about.is(YTNodes.ChannelAboutFullMetadata)) {
       description.value = about.description.isEmpty() ? '' : autolinker.link(about.description.text)
@@ -1082,6 +1088,7 @@ async function getChannelInfoInvidious() {
     thumbnailUrl.value = youtubeImageUrlToInvidious(thumbnail, currentInvidiousInstanceUrl.value)
     store.dispatch('updateSubscriptionDetails', { channelThumbnailUrl: thumbnail, channelName: channelName_, channelId })
     description.value = autolinker.link(response.description)
+    links.value = []
     viewCount.value = response.totalViews
     videoCount.value = null
     joined.value = response.joined * 1000

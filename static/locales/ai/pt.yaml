@@ -1160,6 +1160,8 @@ Profile:
   Theme Color: Cor do tema
   Go To Profile Manager: Ir para o gestor de perfis
 Channel:
+  About:
+    Links: Hiperligações
   Subscription settings: Definições da subscrição
   Failed to save subscription settings: Não foi possível guardar as definições do canal
   Videos per day: Vídeos por dia

@@ -12,6 +12,49 @@
         dir="auto"
       />
     </template>
+    <section
+      v-if="links.length > 0"
+      class="aboutLinksSection"
+    >
+      <h2>{{ $t('Channel.About.Links') }}</h2>
+      <ul class="aboutLinks">
+        <li
+          v-for="link in links"
+          :key="link.url"
+        >
+          <a
+            class="aboutLink"
+            :href="link.url"
+            target="_blank"
+            rel="noopener noreferrer"
+            dir="auto"
+            @click.prevent="openExternalLink(link.url)"
+          >
+            <span
+              class="aboutLinkIcon"
+              aria-hidden="true"
+            >
+              <img
+                v-if="link.iconUrl && !failedIcons.has(link.iconUrl)"
+                :src="link.iconUrl"
+                alt=""
+                loading="lazy"
+                referrerpolicy="no-referrer"
+                @error="failedIcons.add(link.iconUrl)"
+              >
+              <FtIcon
+                v-else
+                :icon="['fas', 'link']"
+              />
+            </span>
+            <span class="aboutLinkText">
+              <span>{{ link.title }}</span>
+              <span class="aboutLinkUrl">{{ link.url }}</span>
+            </span>
+          </a>
+        </li>
+      </ul>
+    </section>
     <template
       v-if="joined || views !== null || videos !== null || location"
     >
@@ -117,7 +160,8 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { FtIcon } from '@opentubex/icons'
+import { computed, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtChannelBubble from '../../components/FtChannelBubble/FtChannelBubble.vue'
@@ -127,13 +171,14 @@ import { vSaferHtml } from '../../directives/vSaferHtml.js'
 import store from '../../store/index'
 import { useTabContext } from '../../tabs/TabContext'
 
-import { formatNumber } from '../../helpers/utils'
+import { formatNumber, openExternalLink } from '../../helpers/utils'
 import { formatDate } from '../../helpers/dateFormat'
 
 const { locale } = useI18n()
 const dateFormat = computed(() => store.getters.getDateFormat)
 const { tabId: injectedTabId } = useTabContext()
 const tabId = injectedTabId ?? 'web'
+const failedIcons = reactive(new Set())
 
 const props = defineProps({
   description: {
@@ -155,6 +200,10 @@ const props = defineProps({
   location: {
     type: String,
     default: null
+  },
+  links: {
+    type: Array,
+    default: () => []
   },
   tags: {
     type: Array,

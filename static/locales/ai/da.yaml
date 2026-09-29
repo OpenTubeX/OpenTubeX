@@ -1182,6 +1182,8 @@ Profile:
   Theme Color: Temafarve
   Go To Profile Manager: Gå til profilhåndtering
 Channel:
+  About:
+    Links: Links
   Subscription settings: Abonnementsindstillinger
   Failed to save subscription settings: Kanalindstillingerne kunne ikke gemmes
   Videos per day: Videoer pr. dag

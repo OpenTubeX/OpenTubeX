@@ -1126,6 +1126,8 @@ Profile:
   The selected image could not be loaded: 選択した画像を読み込めませんでした
   Theme Color: テーマカラー
 Channel:
+  About:
+    Links: リンク
   Subscription settings: 登録設定
   Failed to save subscription settings: チャンネル設定を保存できませんでした
   Videos per day: 1日あたりの動画数

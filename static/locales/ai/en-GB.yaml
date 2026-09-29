@@ -1112,6 +1112,8 @@ Profile:
   Theme Color: Theme Colour
   Go To Profile Manager: Go to Profile Manager
 Channel:
+  About:
+    Links: Links
   Subscription settings: Subscription settings
   Failed to save subscription settings: Failed to save channel settings
   Videos per day: Videos per day

@@ -1126,6 +1126,8 @@ Profile:
   The selected image could not be loaded: 无法加载所选图片
   Theme Color: 主题颜色
 Channel:
+  About:
+    Links: 链接
   Subscription settings: 订阅设置
   Failed to save subscription settings: 无法保存频道设置
   Videos per day: 每日视频数

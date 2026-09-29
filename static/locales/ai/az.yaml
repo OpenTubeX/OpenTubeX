@@ -1129,6 +1129,8 @@ Profile:
   The selected image could not be loaded: Seçilmiş şəkli yükləmək mümkün olmadı
   Theme Color: Mövzu rəngi
 Channel:
+  About:
+    Links: Linklər
   Subscription settings: Abunəlik tənzimləmələri
   Failed to save subscription settings: Kanal tənzimləmələrini yadda saxlamaq alınmadı
   Videos per day: Gündəlik video sayı

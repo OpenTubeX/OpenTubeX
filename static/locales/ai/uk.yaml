@@ -1153,6 +1153,8 @@ Profile:
   Theme Color: Колір теми
   Go To Profile Manager: Перейти до керування профілями
 Channel:
+  About:
+    Links: Посилання
   Subscription settings: Налаштування підписки
   Failed to save subscription settings: Не вдалося зберегти налаштування каналу
   Videos per day: Відео на день

@@ -1133,6 +1133,8 @@ Profile:
   Theme Color: Temafärg
   Go To Profile Manager: Gå till profilhanteraren
 Channel:
+  About:
+    Links: Länkar
   Subscription settings: Prenumerationsinställningar
   Failed to save subscription settings: Det gick inte att spara kanalinställningarna
   Videos per day: Videor per dag

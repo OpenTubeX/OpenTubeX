@@ -1136,6 +1136,8 @@ Profile:
   Theme Color: Цвят на темата
   Go To Profile Manager: Към управлението на профили
 Channel:
+  About:
+    Links: Връзки
   Subscription settings: Настройки на абонамента
   Failed to save subscription settings: Настройките на канала не можаха да бъдат запазени
   Videos per day: Видеоклипове на ден
