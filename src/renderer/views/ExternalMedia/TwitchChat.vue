@@ -218,7 +218,7 @@ let socket = null
 let retryTimer = null
 let stopped = false
 let replayGeneration = 0
-let cursor = null
+let nextOffset = null
 let fetchedUntil = 0
 let fetching = false
 let exhausted = false
@@ -232,7 +232,16 @@ function formatMessageTime(message) {
 
 function addMessages(incoming) {
   if (incoming.length === 0) return
-  messages.value = [...messages.value, ...incoming].slice(-1000)
+  let added = incoming
+  if (props.target.type === 'replay') {
+    const seen = new Set(messages.value.map(message => message.id))
+    added = incoming.filter(message => {
+      if (seen.has(message.id)) return false
+      seen.add(message.id)
+      return true
+    })
+  }
+  messages.value = [...messages.value, ...added].slice(-1000)
 }
 
 function handleScroll() {
@@ -330,13 +339,14 @@ async function fetchReplay() {
   const generation = replayGeneration
   let failed = false
   try {
-    const payload = await getTwitchReplayPage(props.target.id, cursor ?? Math.floor(props.currentTime))
+    const position = nextOffset ?? Math.floor(props.currentTime)
+    const payload = await getTwitchReplayPage(props.target.id, position)
     if (generation !== replayGeneration || stopped || props.seeking) return
     const page = parseTwitchReplayPage(payload)
     addMessages(page.messages)
-    cursor = page.cursor
     fetchedUntil = page.messages.at(-1)?.offset ?? props.currentTime
-    exhausted = cursor === null
+    nextOffset = page.cursor ? Math.max(position + 1, Math.floor(fetchedUntil)) : null
+    exhausted = !page.cursor
     errorMessage.value = ''
   } catch (error) {
     if (generation === replayGeneration) {
@@ -352,7 +362,7 @@ async function fetchReplay() {
         retryTimer = null
         fetchReplay()
       }, 5000)
-    } else if (cursor && !stopped && fetchedUntil < props.currentTime + 20) fetchReplay()
+    } else if (nextOffset !== null && !stopped && fetchedUntil < props.currentTime + 20) fetchReplay()
   }
 }
 
@@ -368,7 +378,7 @@ function resetReplay() {
     restoreOverlayScrollTop(scrollport.value, 0)
     clampOverlayScrollTop(scrollport.value, scrollport.value.querySelector('.liveChatCommentList'))
   })
-  cursor = null
+  nextOffset = null
   fetchedUntil = 0
   exhausted = false
   fetchReplay()
