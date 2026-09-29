@@ -1504,7 +1504,7 @@ test('paid promotion badge follows the full-window title visibility', async ({ p
   await expect(badge).toHaveCSS('transition-property', 'opacity')
 })
 
-test('Shorts top controls stay visible over white video content', async ({ page }) => {
+test('Shorts top controls stay legible and blur the video beneath them', async ({ page }) => {
   await goTo(page, 'history')
   const playerStyles = await readFile(
     path.join(
@@ -1588,6 +1588,31 @@ test('Shorts top controls stay visible over white video content', async ({ page 
   await expect(topControls).toHaveCSS('border-top-right-radius', '16px')
   await expect(topControls).toHaveCSS('transition-duration', '0.15s, 0.25s, 0.25s')
   await expect(control).toHaveCSS('backdrop-filter', 'blur(10px) saturate(1.15)')
+  await player.evaluate(element => {
+    element.style.backgroundImage = 'repeating-linear-gradient(90deg, #fff 0 4px, #000 4px 8px)'
+  })
+  await control.evaluate(element => { element.textContent = '' })
+  const stripeContrast = async () => {
+    const screenshot = (await control.screenshot()).toString('base64')
+    return await page.evaluate(async (encoded) => {
+      const bytes = Uint8Array.from(atob(encoded), character => character.charCodeAt(0))
+      const image = await createImageBitmap(new Blob([bytes], { type: 'image/png' }))
+      const canvas = document.createElement('canvas')
+      canvas.width = image.width
+      canvas.height = image.height
+      const context = canvas.getContext('2d')
+      context.drawImage(image, 0, 0)
+      const row = context.getImageData(10, 23, image.width - 20, 1).data
+      const values = Array.from({ length: row.length / 4 }, (_, index) => row[index * 4])
+      return Math.max(...values) - Math.min(...values)
+    }, screenshot)
+  }
+  await control.evaluate(element => { element.style.backdropFilter = 'none' })
+  const unblurredContrast = await stripeContrast()
+  await control.evaluate(element => { element.style.removeProperty('backdrop-filter') })
+  const blurredContrast = await stripeContrast()
+  expect(unblurredContrast).toBeGreaterThan(40)
+  expect(blurredContrast).toBeLessThan(unblurredContrast * 0.6)
   await control.evaluate(element => element.classList.add('active'))
   await expect(control).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.42)')
   await expect(control).toHaveCSS('background-image', /linear-gradient.*linear-gradient/)
