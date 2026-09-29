@@ -97,7 +97,9 @@ abstract class PackNativeRuntime implements TransformAction<RuntimePackerParamet
                             archive.getInputStream(entry).withCloseable { content ->
                                 Files.copy(content, target.toPath())
                             }
-                            Files.setAttribute(target.toPath(), 'unix:mode', entry.unixMode & 0777)
+                            if (entry.platform == ZipArchiveEntry.PLATFORM_UNIX) {
+                                Files.setAttribute(target.toPath(), 'unix:mode', entry.unixMode & 0777)
+                            }
                         }
                     }
                 }

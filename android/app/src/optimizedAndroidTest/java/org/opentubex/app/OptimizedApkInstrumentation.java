@@ -245,9 +245,20 @@ public class OptimizedApkInstrumentation extends Instrumentation {
     }
 
     private void tapCss(WebView web, String selector) throws Exception {
-        String position = new JSONArray("[" + evaluate(web, "JSON.stringify((() => { const rect = document.querySelector(" +
-            JSONObject.quote(selector) + ").getBoundingClientRect(); return {x: rect.x + rect.width / 2, " +
-            "y: rect.y + rect.height / 2, viewportWidth: innerWidth}; })())") + "]").getString(0);
+        String position = null;
+        long deadline = SystemClock.elapsedRealtime() + 30000;
+        do {
+            String result = evaluate(web, "JSON.stringify((() => { const element = document.querySelector(" +
+                JSONObject.quote(selector) + "); if (!element) return null; const rect = element.getBoundingClientRect(); " +
+                "if (!rect.width || !rect.height) return null; return {x: rect.x + rect.width / 2, " +
+                "y: rect.y + rect.height / 2, viewportWidth: innerWidth}; })())");
+            if (result != null && !"null".equals(result)) {
+                position = new JSONArray("[" + result + "]").getString(0);
+                break;
+            }
+            Thread.sleep(100);
+        } while (SystemClock.elapsedRealtime() < deadline);
+        check(position != null, "Timed out waiting to tap " + selector);
         JSONObject point = new JSONObject(position);
         int[] origin = new int[2];
         int[] width = new int[1];
