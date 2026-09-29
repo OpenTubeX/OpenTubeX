@@ -49,5 +49,5 @@ Requests such as "implement issue #X" authorize local changes, not a PR. Open a 
 
 ## Related repositories and naming
 
-- Related repositories such as Website, APT, RPM, Flatpak, and AUR live alongside the main OpenTubeX checkout. Use `git worktree list --porcelain` to locate the main checkout, listed first, then look in its parent directory. Do not assume a linked worktree's parent contains these repositories.
+- Related repositories such as Website, APT, RPM, Flatpak, and AUR live alongside the main OpenTubeX checkout. Use `git worktree list --porcelain` to locate the main checkout, listed first, then look in its parent directory. Do not assume a linked worktree's parent contains these repositories. When changing a related repository, fetch its origin and create a worktree from the latest commit on origin's default branch instead of working in its main checkout.
 - Never use the "FreeTube" name for promotion of the project. See discussion #391 for details when in doubt.
