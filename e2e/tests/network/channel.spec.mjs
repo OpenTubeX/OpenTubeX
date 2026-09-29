@@ -22,8 +22,10 @@ test.describe('channel page', () => {
 
     await page.getByRole('tab', { name: 'Playlists' }).click()
     await expect(page.locator('#playlistPanel .ft-list-video').first()).toBeVisible({ timeout: 30_000 })
-    const show = page.locator('#playlistPanel .ft-list-video').filter({ hasText: '3 seasons' })
-    await expect(show.getByRole('heading', { name: 'Meta Runner' })).toBeVisible()
+    const show = page.locator('#playlistPanel .ft-list-video')
+      .filter({ has: page.getByRole('heading', { name: 'Meta Runner', exact: true }) })
+      .filter({ has: page.locator('a.title[href^="#/playlist/PLTqcR5ouTGRU?"]') })
+    await expect(show.locator('.videoCountContainer .inner > div').first()).toHaveText('3 seasons')
     expect(await show.locator('.videoCountContainer').evaluate(element => {
       const badge = element.getBoundingClientRect()
       const label = element.querySelector('.inner > div').getBoundingClientRect()
