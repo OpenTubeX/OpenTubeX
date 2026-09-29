@@ -363,7 +363,7 @@ for (const panel of ['description', 'comments', 'chapters', 'transcript', 'queue
   })
 }
 
-test('panel scrollbar positioning follows the compositor scroll timeline', async ({ app, page }) => {
+test('panel scrollbar stays aligned with its viewport while scrolling', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page, { captionTranslations: true })
   const cues = Array.from({ length: 30 }, (_, index) => (
     `00:00:${String(index).padStart(2, '0')}.000 --> 00:00:${String(index + 1).padStart(2, '0')}.000\nCaption ${index + 1}`
@@ -381,5 +381,20 @@ test('panel scrollbar positioning follows the compositor scroll timeline', async
   await expect.poll(() => segments.evaluate(el => el.scrollHeight > el.clientHeight)).toBe(true)
   const track = segments.locator(':scope > .os-scrollbar-vertical')
   await expect(track).toBeAttached()
-  await expect.poll(() => track.evaluate(el => el.getAnimations().some(animation => animation.timeline?.constructor.name === 'ScrollTimeline'))).toBe(true)
+  await segments.hover()
+  const initialHandleOffset = await track.evaluate(element => (
+    element.querySelector('.os-scrollbar-handle').getBoundingClientRect().top - element.getBoundingClientRect().top
+  ))
+  await page.mouse.wheel(0, 200)
+  await expect.poll(() => segments.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  const alignment = await segments.evaluate(element => {
+    const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+    const handle = scrollbar.querySelector('.os-scrollbar-handle')
+    return {
+      trackOffset: scrollbar.getBoundingClientRect().top - element.getBoundingClientRect().top,
+      handleOffset: handle.getBoundingClientRect().top - scrollbar.getBoundingClientRect().top,
+    }
+  })
+  expect(Math.abs(alignment.trackOffset)).toBeLessThan(1)
+  expect(alignment.handleOffset).toBeGreaterThan(initialHandleOffset)
 })
