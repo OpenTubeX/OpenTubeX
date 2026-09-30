@@ -894,6 +894,75 @@ test.describe('tab bar', () => {
     ])
   })
 
+  test('batches tab drag rendering on a throttled CPU in both layouts', async ({ page }) => {
+    await page.evaluate(async () => {
+      window.ftElectron.setZoomFactor(0.95)
+      for (let index = 0; index < 29; index++) {
+        await window.ftElectron.tabs.create({
+          route: '/about', title: `Tab ${index}`, makeActive: false, lazyLoad: true
+        })
+      }
+    })
+    const tabs = page.locator(sel.tabs)
+    await expect(tabs).toHaveCount(30)
+    const session = await page.context().newCDPSession(page)
+    await session.send('Emulation.setCPUThrottlingRate', { rate: 4 })
+
+    for (const vertical of [false, true]) {
+      if (vertical) {
+        await page.keyboard.press('F1')
+        await expect(page.locator('.app')).toHaveClass(/tabBar-left/)
+      }
+      const originalIds = await tabs.evaluateAll(elements => elements.map(element => element.dataset.tabId))
+      const metrics = await page.evaluate(async isVertical => {
+        const source = document.querySelector('.tabBar .tab')
+        const rect = source.getBoundingClientRect()
+        const startX = rect.left + rect.width / 2
+        const startY = rect.top + rect.height / 2
+        let transformWrites = 0
+        const observer = new MutationObserver(records => { transformWrites += records.length })
+        observer.observe(source, { attributes: true, attributeFilter: ['style'] })
+        source.dispatchEvent(new PointerEvent('pointerdown', {
+          bubbles: true, button: 0, clientX: startX, clientY: startY
+        }))
+        for (let index = 0; index < 40; index++) {
+          const offset = 6 + index / 4
+          window.dispatchEvent(new PointerEvent('pointermove', {
+            bubbles: true,
+            buttons: 1,
+            clientX: startX + (isVertical ? 0 : offset),
+            clientY: startY + (isVertical ? offset : 0)
+          }))
+          // Give Vue a chance to render between input events in the same frame.
+          await Promise.resolve()
+        }
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        observer.disconnect()
+        const transform = new DOMMatrixReadOnly(getComputedStyle(source).transform)
+        return { transformWrites, offset: isVertical ? transform.m42 : transform.m41 }
+      }, vertical)
+      expect(metrics.transformWrites).toBe(1)
+      expect(metrics.offset).toBeCloseTo(15.75, 2)
+
+      await page.evaluate(() => {
+        const target = document.querySelectorAll('.tabBar .tab')[3].getBoundingClientRect()
+        window.dispatchEvent(new PointerEvent('pointermove', {
+          bubbles: true,
+          buttons: 1,
+          clientX: target.left + target.width / 2,
+          clientY: target.top + target.height / 2
+        }))
+        // Release before the next frame to exercise the final position flush.
+        window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }))
+      })
+      await expect.poll(() => tabs.evaluateAll(elements => elements.map(element => element.dataset.tabId)))
+        .toEqual([...originalIds.slice(1, 4), originalIds[0], ...originalIds.slice(4)])
+      await expect(page.locator('.tab.dragging, .tab.settling, .tab.noTransition')).toHaveCount(0)
+    }
+    await session.send('Emulation.setCPUThrottlingRate', { rate: 1 })
+    await session.detach()
+  })
+
   test('animates vertical tabs when a new drag interrupts settling', async ({ page }) => {
     await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
     await page.keyboard.press('F1')
