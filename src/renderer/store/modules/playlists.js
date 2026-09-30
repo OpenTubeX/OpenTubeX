@@ -155,6 +155,11 @@ const getters = {
 
     return state.playlists.find((playlist) => playlist._id === playlistId)
   },
+  // Share one index across all mounted cards and watch tabs. Each consumer
+  // previously scanned the entire target playlist for its own video.
+  getQuickBookmarkVideoIds(_state, getters) {
+    return new Set(getters.getQuickBookmarkPlaylist?.videos.map(video => video.videoId))
+  },
   getQuickBookmarkIcon(state, getters) {
     const icon = getQuickBookmarkIconValue(getters.getQuickBookmarkPlaylist)
     return typeof icon === 'string' ? ['fas', icon] : icon
@@ -598,7 +603,8 @@ const mutations = {
   removeVideos(state, { _id, lastUpdatedAt, playlistItemIds }) {
     const playlist = state.playlists.find(playlist => playlist._id === _id)
     if (playlist) {
-      dropPlaylistVideos(state, playlist, video => playlistItemIds.includes(video.playlistItemId))
+      const removedIds = new Set(playlistItemIds)
+      dropPlaylistVideos(state, playlist, video => removedIds.has(video.playlistItemId))
       playlist.lastUpdatedAt = lastUpdatedAt
     }
   },

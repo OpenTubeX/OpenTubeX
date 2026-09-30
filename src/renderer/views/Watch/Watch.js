@@ -637,7 +637,7 @@ export default defineComponent({
       return this.quickBookmarkPlaylist != null
     },
     isCurrentVideoQuickBookmarked: function () {
-      return this.quickBookmarkPlaylist?.videos.some(video => video.videoId === this.videoId) ?? false
+      return this.$store.getters.getQuickBookmarkVideoIds.has(this.videoId)
     },
     quickBookmarkIconText: function () {
       if (!this.isQuickBookmarkEnabled) { return '' }

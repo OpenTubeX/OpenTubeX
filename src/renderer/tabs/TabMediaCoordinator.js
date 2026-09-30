@@ -92,23 +92,8 @@ function pauseOtherAndroidTabs(tabId) {
   }
 }
 
-function applyOwner(playbackStartedTabId = null) {
-  ownerTabId = chooseOwner()
-  const owner = mediaByTabId.get(ownerTabId)
-  const actionHandlers = getActionHandlers(owner)
-
+function applyPositionState(owner, actionHandlers = getActionHandlers(owner)) {
   if ('mediaSession' in navigator) {
-    navigator.mediaSession.playbackState = owner?.playbackState ?? 'none'
-    navigator.mediaSession.metadata = owner?.metadata ?? null
-
-    for (const action of MEDIA_SESSION_ACTIONS) {
-      try {
-        navigator.mediaSession.setActionHandler(action, actionHandlers[action] ?? null)
-      } catch {
-        // The action is not supported on this platform.
-      }
-    }
-
     try {
       if (owner?.positionState) {
         navigator.mediaSession.setPositionState(owner.positionState)
@@ -126,6 +111,26 @@ function applyOwner(playbackStartedTabId = null) {
     positionState: owner?.positionState,
     actionHandlers,
   })
+}
+
+function applyOwner(playbackStartedTabId = null) {
+  ownerTabId = chooseOwner()
+  const owner = mediaByTabId.get(ownerTabId)
+  const actionHandlers = getActionHandlers(owner)
+
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.playbackState = owner?.playbackState ?? 'none'
+    navigator.mediaSession.metadata = owner?.metadata ?? null
+
+    for (const action of MEDIA_SESSION_ACTIONS) {
+      try {
+        navigator.mediaSession.setActionHandler(action, actionHandlers[action] ?? null)
+      } catch {
+        // The action is not supported on this platform.
+      }
+    }
+  }
+  applyPositionState(owner, actionHandlers)
 
   globalThis.window?.ftElectron?.tabs?.setMediaSessionState?.({
     playbackState: owner?.playbackState ?? 'none',
@@ -245,7 +250,11 @@ export const tabMediaCoordinator = {
       if (playbackStarted) entry.lastPlayedAt = ++playSequence
     }
     entry.positionState = positionState
-    if (ownerTabId === tabId || presentedTabId === tabId) {
+    // A running video emits frequent clock updates. Position changes do not
+    // change ownership, metadata, action handlers or the desktop media menu.
+    if (ownerTabId === tabId && !playbackChanged) {
+      applyPositionState(entry)
+    } else if (ownerTabId === tabId || presentedTabId === tabId) {
       applyOwner(playbackStarted ? tabId : null)
     }
     if (playbackChanged) applyPowerSaveState()

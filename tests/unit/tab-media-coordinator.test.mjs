@@ -3,6 +3,47 @@ import test from 'node:test'
 
 import { tabMediaCoordinator } from '../../src/renderer/tabs/TabMediaCoordinator.js'
 
+test('video clock updates do not republish unchanged media controls', t => {
+  const descriptors = ['navigator', 'window'].map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)])
+  const calls = { handlers: 0, metadata: 0, playback: 0, ipc: 0, positions: [] }
+  Object.defineProperty(globalThis, 'navigator', {
+    configurable: true,
+    value: { mediaSession: {
+      set metadata(value) { calls.metadata++ },
+      set playbackState(value) { calls.playback++ },
+      setActionHandler() { calls.handlers++ },
+      setPositionState(state) { calls.positions.push(state) },
+    } },
+  })
+  Object.defineProperty(globalThis, 'window', {
+    configurable: true,
+    value: { ftElectron: { tabs: { setMediaSessionState() { calls.ipc++ } } } },
+  })
+  t.after(() => {
+    tabMediaCoordinator.unregister('performance-player')
+    for (const [key, descriptor] of descriptors) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor)
+      else delete globalThis[key]
+    }
+  })
+  tabMediaCoordinator.setPresented('performance-player')
+  tabMediaCoordinator.setActionHandlers('performance-player', 'player', { pause() {} })
+  tabMediaCoordinator.setMetadata('performance-player', { title: 'Video' })
+  tabMediaCoordinator.setPlaybackState('performance-player', 'playing')
+  calls.handlers = calls.metadata = calls.playback = calls.ipc = 0
+  calls.positions.length = 0
+  for (let position = 1; position <= 60; position++) {
+    tabMediaCoordinator.setPositionState('performance-player', { duration: 120, position, playbackRate: 1 }, 'playing')
+  }
+  console.log('Media control work for 60 clock updates:', { ...calls, positions: calls.positions.length })
+  assert.equal(calls.positions.length, 60, 'position must keep updating')
+  assert.equal(calls.positions.at(-1).position, 60)
+  assert.equal(calls.handlers, 0)
+  assert.equal(calls.metadata, 0)
+  assert.equal(calls.playback, 0)
+  assert.equal(calls.ipc, 0)
+})
+
 function enableCapacitorMode(t) {
   const previous = process.env.IS_CAPACITOR
   process.env.IS_CAPACITOR = 'true'

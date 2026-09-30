@@ -1697,18 +1697,7 @@ const quickBookmarkIcon = computed(() => store.getters.getQuickBookmarkIcon)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const isInQuickBookmarkPlaylist = computed(() => {
-  if (!isQuickBookmarkEnabled.value) { return false }
-
-  // Accessing a ref has a negligible amount of overhead,
-  // however as we know that some users have playlists that have more than 10k items in them
-  // it adds up quickly, especially as there are usually lots of FtListVideo instances active at the same time.
-  // So create a temporary variable outside of the array, so we only have to do it once.
-  // Also the search is retriggered every time any playlist is modified.
-  const id_ = id.value
-
-  return quickBookmarkPlaylist.value.videos.some((video) => {
-    return video.videoId === id_
-  })
+  return store.getters.getQuickBookmarkVideoIds.has(id.value)
 })
 
 const quickBookmarkIconText = computed(() => {
