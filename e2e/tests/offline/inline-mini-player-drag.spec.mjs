@@ -51,6 +51,7 @@ for (const uiScale of [100, 125]) {
         await sheet.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
         await expect(player).toHaveAttribute('data-phone-panel-video', '')
         const bounds = await player.boundingBox()
+        expect(bounds).not.toBeNull()
         const start = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
         const cdp = await page.context().newCDPSession(page)
         const touch = (type, distance) => cdp.send('Input.dispatchTouchEvent', {
