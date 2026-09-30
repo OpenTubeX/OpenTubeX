@@ -175,6 +175,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     const element = container.value.cloneNode(false)
     const videoElement = video.value.cloneNode(false)
     element.classList.remove('scrollMiniPlayer', 'mobileMiniBar', 'scrollMiniPlayerAnimating')
+    element.style.removeProperty('transform')
+    element.removeAttribute('data-mobile-mini-morph')
     Object.assign(element.style, { position: 'absolute', inset: '0 auto auto 0', width: '100%' })
     element.removeAttribute('id')
     videoElement.removeAttribute('id')
@@ -191,6 +193,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     element.remove()
     const slot = placeholder.getBoundingClientRect()
     return {
+      slotWidth: slot.width,
       rect: { left: slot.left, top: slot.top, width: rect.width, height: rect.height },
       videoRect: {
         left: slot.left + videoRect.left - rect.left,
@@ -880,7 +883,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     ) return
 
     const inlineLayout = usesMobileMiniBar() && !expectedActive ? measureInlinePlayer() : null
-    const nextRect = inlineLayout?.rect ?? playerContainer.getBoundingClientRect()
+    let inlineSlotWidth = inlineLayout?.slotWidth
+    let nextRect = inlineLayout?.rect ?? playerContainer.getBoundingClientRect()
     if (nextRect.width === 0 || nextRect.height === 0) {
       scrollMiniPlayerAnimating.value = false
       mobileMiniBarOverlayStyle.value = null
@@ -921,6 +925,19 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
         // follow touch/smooth scrolling and browser scroll anchoring while the
         // video remains in the viewport layer.
         const slot = !expectedActive ? scrollMiniPlaceholder.value?.getBoundingClientRect() : null
+        if (slot && slot.width !== inlineSlotWidth) {
+          const layout = measureInlinePlayer()
+          if (layout) {
+            inlineSlotWidth = layout.slotWidth
+            nextRect = layout.rect
+            Object.assign(videoTo, {
+              left: layout.videoRect.left - nextRect.left,
+              top: layout.videoRect.top - nextRect.top,
+              width: layout.videoRect.width,
+              height: layout.videoRect.height
+            })
+          }
+        }
         const target = expectedActive
           ? nextRect
           : {
