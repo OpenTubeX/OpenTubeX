@@ -43,6 +43,7 @@ const EXTERNAL_INFO_FIELDS = [
   ',"track":%(track|null)j',
   ',"track_number":%(track_number|null)j',
   ',"artists":%(artists|null)j',
+  ',"artist":%(artist|null)j',
   ',"album":%(album|null)j',
   ',"genres":%(genres|null)j',
   ',"license":%(license|null)j',
@@ -138,6 +139,8 @@ function stringList(value) {
 export function mapExternalPlaybackMetadata(info) {
   const duration = toFiniteNumber(info.duration)
   const chapters = Array.isArray(info.chapters) ? info.chapters : []
+  const artists = stringList(info.artists)
+  const artist = toNonEmptyString(info.artist)
   return {
     timestamp: toFiniteNumber(info.timestamp),
     releaseDate: toNonEmptyString(info.release_date),
@@ -155,7 +158,7 @@ export function mapExternalPlaybackMetadata(info) {
     episodeNumber: toFiniteNumber(info.episode_number),
     track: toNonEmptyString(info.track),
     trackNumber: toFiniteNumber(info.track_number),
-    artists: stringList(info.artists),
+    artists: artists.length > 0 ? artists : artist ? [artist] : [],
     album: toNonEmptyString(info.album),
     genres: stringList(info.genres),
     license: toNonEmptyString(info.license),
