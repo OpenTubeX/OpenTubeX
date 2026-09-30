@@ -36,7 +36,7 @@ test('mobile morph keeps player and video layout fixed between animation frames'
   ])
 })
 
-function fixture({ reducedMotion = false, available = true, restoring = false, finishRejects = false, activationSucceeds = true } = {}) {
+function fixture({ reducedMotion = false, available = true, phonePanel = false, restoring = false, finishRejects = false, activationSucceeds = true } = {}) {
   let reads = 0
   let navigations = 0
   let previewProgress = 0
@@ -56,10 +56,12 @@ function fixture({ reducedMotion = false, available = true, restoring = false, f
   const to = { left: 172.25, top: 570.75, width: 210.5, height: 118.40625 }
   const container = { value: {
     style, offsetHeight: 219.65625,
+    hasAttribute: name => phonePanel && name === 'data-phone-panel-video',
     setAttribute() {}, removeAttribute() {},
     getBoundingClientRect() { reads++; return from },
   } }
-  const methods = vm.runInNewContext(`${dragSource}\n({ beginScrollMiniPlayerDrag, moveScrollMiniPlayerDrag, updateScrollMiniPlayerBackProgress, finishScrollMiniPlayerDrag, cancelScrollMiniPlayerDrag })`, {
+  const eligibility = source.slice(source.indexOf('  function canUseScrollMiniPlayerBase('), source.indexOf('  function canShowCrossTabMiniPlayer('))
+  const methods = vm.runInNewContext(`${eligibility}\n${dragSource}\n({ beginScrollMiniPlayerDrag, moveScrollMiniPlayerDrag, updateScrollMiniPlayerBackProgress, finishScrollMiniPlayerDrag, cancelScrollMiniPlayerDrag, canUseScrollMiniPlayerBase })`, {
     process: { env: { IS_CAPACITOR: false } },
     container,
     video: { value: { getBoundingClientRect: () => from, style: { removeProperty() {} } } },
@@ -87,7 +89,11 @@ function fixture({ reducedMotion = false, available = true, restoring = false, f
     mobileMiniBarOverlayStyle: { value: null },
     scrollMiniPlayerActive,
     scrollMiniVideoAspectRatio: { value: 16 / 9 },
-    canUseScrollMiniPlayerBase: () => available,
+    playerSuspended: { value: !available },
+    props: { format: 'dash' },
+    fullWindowEnabled: { value: false },
+    isNativeFullscreenActive: () => false,
+    isNativePipActive: () => false,
     cancelScrollMiniPlayerLayoutAnimation() {},
     updateScrollMiniVideoAspectRatio() {},
     clampScrollMiniPlayerRect: rect => rect,
@@ -200,6 +206,15 @@ test('unavailable playback does not capture a drag', () => {
   const f = fixture({ available: false })
   assert.equal(f.methods.beginScrollMiniPlayerDrag(), false)
   assert.equal(f.reads(), 0)
+})
+
+test('an open phone panel allows explicit minimization while blocking automatic docking', async () => {
+  const f = fixture({ phonePanel: true, reducedMotion: true })
+  assert.equal(f.methods.canUseScrollMiniPlayerBase(), false, 'the panel keeps its inline player while scrolling')
+  assert.equal(f.methods.beginScrollMiniPlayerDrag(), true, 'swiping the video must still begin minimization')
+  await f.methods.finishScrollMiniPlayerDrag(true)
+  assert.equal(f.activated(), true)
+  assert.equal(f.haptics(), 1)
 })
 
 test('navigation can hide the watch view without losing the drag handoff dimensions', () => {

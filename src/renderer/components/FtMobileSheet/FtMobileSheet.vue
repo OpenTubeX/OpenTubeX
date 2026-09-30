@@ -89,12 +89,13 @@ const dragOffset = ref(0)
 const visibleTop = computed(() => Math.max(0, (expanded.value ? 0 : sheetTop.value) + Math.min(0, dragOffset.value)))
 const fullscreenElement = shallowRef(document.fullscreenElement)
 const playerCoversWindow = ref(false)
+const playerDragging = ref(false)
 const shortsPlayer = ref(false)
 const appHidden = ref(isAppHidden())
 const pictureInPicture = ref(document.body.classList.contains('androidPictureInPicture'))
 const docked = computed(() => props.enabled && props.belowPlayer && getPlayer !== null)
 const suspended = computed(() => docked.value &&
-  (!!fullscreenElement.value || playerCoversWindow.value || appHidden.value || pictureInPicture.value))
+  (!!fullscreenElement.value || playerCoversWindow.value || playerDragging.value || appHidden.value || pictureInPicture.value))
 function updateVisibility() {
   appHidden.value = isAppHidden()
 }
@@ -112,10 +113,11 @@ function updatePresentation() {
     observedPlayer = player
     if (player) {
       presentationObserver = new MutationObserver(updatePresentation)
-      presentationObserver.observe(player, { attributes: true, attributeFilter: ['class'] })
+      presentationObserver.observe(player, { attributes: true, attributeFilter: ['class', 'data-inline-mini-drag'] })
     }
   }
   playerCoversWindow.value = player?.classList.contains('fullWindow') ?? false
+  playerDragging.value = player?.hasAttribute('data-inline-mini-drag') ?? false
   shortsPlayer.value = player?.classList.contains('shortsPlayer') ?? false
 }
 updatePresentation()

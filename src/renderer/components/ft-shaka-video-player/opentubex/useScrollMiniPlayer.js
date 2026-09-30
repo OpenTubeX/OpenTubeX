@@ -271,7 +271,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   function beginScrollMiniPlayerDrag(restoring = false) {
     const element = container.value
     if (inlineDrag || !element || !watchNavigation?.beginMinimizePreview ||
-      scrollMiniPlayerActive.value !== restoring || !canUseScrollMiniPlayerBase()) return false
+      scrollMiniPlayerActive.value !== restoring || !canUseScrollMiniPlayerBase(true)) return false
     if (restoring && !watchNavigation.detached.value) return false
     cancelScrollMiniPlayerLayoutAnimation()
     updateScrollMiniVideoAspectRatio()
@@ -783,9 +783,10 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     togglePlayerFullScreen()
   }
 
-  function canUseScrollMiniPlayerBase() {
+  function canUseScrollMiniPlayerBase(allowPhonePanel = false) {
     if (playerSuspended.value) return false
-    if (container.value?.hasAttribute('data-phone-panel-video')) return false
+    // Panels prevent automatic docking, but an explicit swipe can minimize.
+    if (!allowPhonePanel && container.value?.hasAttribute('data-phone-panel-video')) return false
     if (props.format === 'audio') return false
     if (fullWindowEnabled.value) return false
     if (isNativeFullscreenActive()) return false

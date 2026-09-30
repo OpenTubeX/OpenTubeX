@@ -12,6 +12,7 @@ function mountSheet(t, expandPanel = null, { reducedMotion = false } = {}) {
   const scope = effectScope()
   const cleanup = []
   const landscape = ref(false)
+  const attributes = new Set()
   const observed = []
   const activeObservers = new Set()
   let resizeCallback = null
@@ -23,7 +24,8 @@ function mountSheet(t, expandPanel = null, { reducedMotion = false } = {}) {
       return (name === 'shortsPlayer' && player.shorts) ||
         (name === 'fullWindow' && player.coversWindow)
     } },
-    setAttribute() {}, removeAttribute() {},
+    setAttribute: name => attributes.add(name), removeAttribute: name => attributes.delete(name),
+    hasAttribute: name => attributes.has(name),
     getBoundingClientRect: () => ({ top: 50, bottom: 300 })
   })
   const inlinePlayer = { getBoundingClientRect: () => ({ top: 50, bottom: 300 }) }
@@ -79,6 +81,27 @@ function mountSheet(t, expandPanel = null, { reducedMotion = false } = {}) {
     resize() { resizeCallback?.() },
     async settle() { await nextTick(); await nextTick(); await nextTick() }
   }
+}
+
+for (const commit of [false, true]) {
+  test(`a video minimize drag suspends its panel and ${commit ? 'closes it when Watch leaves' : 'restores it on cancellation'}`, async t => {
+    const sheet = mountSheet(t)
+    sheet.props.open = true
+    await sheet.settle()
+    assert.equal(sheet.player.hasAttribute('data-phone-panel-video'), true)
+    sheet.player.setAttribute('data-inline-mini-drag', '')
+    sheet.state.updatePresentation()
+    await sheet.settle()
+    assert.equal(sheet.element.open, false)
+    assert.equal(sheet.player.hasAttribute('data-phone-panel-video'), false)
+    // Watch clears mobilePanel when navigation leaves the watch page.
+    if (commit) sheet.props.open = false
+    sheet.player.removeAttribute('data-inline-mini-drag')
+    sheet.state.updatePresentation()
+    await sheet.settle()
+    assert.equal(sheet.element.open, !commit)
+    assert.deepEqual(sheet.events.map(([event]) => event), ['suspend', commit ? 'closed' : 'resume'])
+  })
 }
 
 for (const commit of [false, true]) {
