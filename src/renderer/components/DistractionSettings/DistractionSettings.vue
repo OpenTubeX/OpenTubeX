@@ -397,6 +397,14 @@
           @change="handleHideRecommendedVideos"
         />
         <FtToggleSwitch
+          :label="t('Settings.Distraction Free Settings.Hide End-Screen Recommendations')"
+          :compact="true"
+          :disabled="hideRecommendedVideos"
+          :default-value="hideRecommendedVideos || hideEndScreenRecommendations"
+          setting-key="hideEndScreenRecommendations"
+          @change="store.dispatch('updateHideEndScreenRecommendations', $event)"
+        />
+        <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Comments')"
           :compact="true"
           :default-value="hideComments"
@@ -532,6 +540,9 @@ function updateHideCommentLikes(value) {
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideRecommendedVideos = computed(() => store.getters.getHideRecommendedVideos)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hideEndScreenRecommendations = computed(() => store.getters.getHideEndScreenRecommendations)
 
 /**
  * @param {boolean} value

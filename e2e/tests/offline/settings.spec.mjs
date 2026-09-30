@@ -899,6 +899,30 @@ test.describe('settings', () => {
     ])
   })
 
+  test('forces end-screen recommendation hiding while all recommendations are hidden', async ({ page }) => {
+    const focus = await goToSettingsSection(page, 'focus')
+    const allRecommendations = focus.getByRole('checkbox', { name: 'Hide Recommended Videos' })
+    const endScreen = focus.getByRole('checkbox', { name: 'Hide End-Screen Recommendations' })
+
+    await expect(allRecommendations).not.toBeChecked()
+    await expect(endScreen).not.toBeChecked()
+    await endScreen.locator('..').locator('label').click()
+    await expect(endScreen).toBeChecked()
+    await allRecommendations.locator('..').locator('label').click()
+    await expect(endScreen).toBeChecked()
+    await expect(endScreen).toBeDisabled()
+    await allRecommendations.locator('..').locator('label').click()
+    await expect(endScreen).toBeChecked()
+    await expect(endScreen).toBeEnabled()
+    await endScreen.locator('..').locator('label').click()
+    await expect(endScreen).not.toBeChecked()
+    await allRecommendations.locator('..').locator('label').click()
+    await expect(endScreen).toBeChecked()
+    await expect(endScreen).toBeDisabled()
+    await allRecommendations.locator('..').locator('label').click()
+    await expect(endScreen).not.toBeChecked()
+  })
+
   test('keeps slider values and units together without padding at fractional UI scales', async ({ page }) => {
     for (const scale of [1, 1.25]) {
       await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)

@@ -118,6 +118,7 @@ export const SYNC_SETTING_LABELS = {
   hideCommentPhotos: 'Settings.Distraction Free Settings.Hide Profile Pictures in Comments',
   hideComments: 'Settings.Distraction Free Settings.Hide Comments',
   hideEndScreenAnnotations: 'Settings.Distraction Free Settings.Hide End-Screen Annotations',
+  hideEndScreenRecommendations: 'Settings.Distraction Free Settings.Hide End-Screen Recommendations',
   hideFeaturedChannels: 'Settings.Distraction Free Settings.Hide Featured Channels',
   hideHeaderLogo: 'Settings.Theme Settings.Hide OpenTubeX Header Logo',
   hideHeaderSyncIndicator: 'Settings.Distraction Free Settings.Hide Header Sync Indicator',

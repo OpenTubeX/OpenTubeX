@@ -339,6 +339,7 @@ const state = {
   hideCommentPhotos: false,
   hideComments: false,
   hideEndScreenAnnotations: false,
+  hideEndScreenRecommendations: false,
   hidePaidPromotion: false,
   hideFeaturedChannels: false,
   channelsHidden: '[]',
