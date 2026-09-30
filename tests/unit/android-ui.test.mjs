@@ -37,33 +37,32 @@ test('fullscreen hides the Android status bar only while player controls are hid
   assert.equal(shouldShowAndroidStatusBar({ active: false, fullscreen: true, controlsShown: false }), true)
 })
 
-test('physical rotation sensing follows active Android player subscriptions', async () => {
+test('Android fullscreen observes display rotation without subscribing to the physical sensor', async () => {
   const source = readFileSync(new URL('../../src/renderer/helpers/androidUi.js', import.meta.url), 'utf8')
   const start = source.indexOf('const displayRotationCallbacks = new Set()')
   const end = source.indexOf('\nfunction videoDimensions(', start)
   assert.ok(start !== -1 && end !== -1)
 
-  const listening = []
   let emit
   let removed = false
-  const AndroidUi = {
-    addListener: async (_event, callback) => {
+  const ScreenOrientation = {
+    addListener: async (event, callback) => {
+      assert.equal(event, 'screenOrientationChange')
       emit = callback
       return { remove: async () => { removed = true } }
     },
-    setDisplayRotationListening: async ({ enabled }) => { listening.push(enabled) },
   }
   const { observeAndroidDisplayRotation } = vm.runInNewContext(
     `${source.slice(start, end).replace('export function ', 'function ')}\n({ observeAndroidDisplayRotation })`,
-    { AndroidUi, console, Set, Promise }
+    { AndroidUi: { addListener: () => assert.fail('Physical sensing bypasses the system rotation lock') }, ScreenOrientation, console, Set, Promise }
   )
   const received = []
   const stop = observeAndroidDisplayRotation(landscape => received.push(landscape))
   await new Promise(resolve => setImmediate(resolve))
-  emit({ landscape: true })
-  assert.deepEqual(received, [true])
+  emit({ type: 'landscape-primary' })
+  emit({ type: 'portrait-primary' })
+  assert.deepEqual(received, [true, false])
   stop()
   await new Promise(resolve => setImmediate(resolve))
-  assert.deepEqual(listening, [true, false])
   assert.equal(removed, true)
 })

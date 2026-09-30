@@ -34,10 +34,6 @@ export async function setFullscreenOrientation(fullscreen, video, enabled = true
   return setLandscapeOrientation(shouldRotateFullscreenToLandscape(fullscreen, video, enabled, aspectRatio))
 }
 
-export function setAndroidDisplayOrientation(landscape) {
-  return setLandscapeOrientation(landscape)
-}
-
 export async function openNotificationSettings() {
   if (!Capacitor.isNativePlatform()) return
 

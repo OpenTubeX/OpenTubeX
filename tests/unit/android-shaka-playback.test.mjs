@@ -95,10 +95,10 @@ test('Android restores orientation if fullscreen entry fails after rotation star
   assert.deepEqual(calls, [true, false])
 })
 
-test('Android opens an immersive player on physical rotation with system auto-rotate off', () => {
+function androidRotationHarness(overrides = {}) {
   const start = source.indexOf('    let androidRotationFullscreen = false')
   const end = source.indexOf('\n    let stopAndroidDisplayRotation', start)
-  assert.ok(start !== -1 && end !== -1, 'Android must handle physical rotation independently of screen.orientation')
+  assert.ok(start !== -1 && end !== -1, 'Android must handle display rotation without requiring a fullscreen user gesture')
 
   const calls = []
   let popoverOpen = false
@@ -126,10 +126,55 @@ test('Android opens an immersive player on physical rotation with system auto-ro
     syncAndroidStatusBarVisibility: () => {},
     isNativeFullscreenActive: () => false,
     pictureInPictureActive: { value: false },
+    enterFullscreenOnDisplayRotate: { value: true },
+    scrollMiniPlayerActive: { value: false },
+    props: { format: 'legacy', shortsPlayer: false },
+    ...overrides,
   }
-  vm.runInNewContext(`${source.slice(start, end)}\nhandleAndroidDisplayRotation(true); video.value.readyState = 0; handleAndroidDisplayRotation(false)`, context)
-  assert.deepEqual(calls, [true, 'orientation:true', 'navigation:false', false, 'orientation:false', 'navigation:true'])
-  assert.equal(popoverOpen, false)
+  const handlers = vm.runInNewContext(`${source.slice(start, end)}\n({ handleAndroidDisplayRotation, exitAndroidRotationFullscreen })`, context)
+  return { calls, context, handlers, isPopoverOpen: () => popoverOpen }
+}
+
+test('Android opens fullscreen after manual display rotation without overriding the system orientation', () => {
+  const { calls, context, handlers, isPopoverOpen } = androidRotationHarness()
+  handlers.handleAndroidDisplayRotation(true)
+  context.video.value.readyState = 0
+  handlers.handleAndroidDisplayRotation(false)
+  assert.deepEqual(calls, [true, 'navigation:false', false, 'navigation:true'])
+  assert.equal(isPopoverOpen(), false)
+})
+
+for (const [state, overrides] of [
+  ['fullscreen-on-rotate disabled', { enterFullscreenOnDisplayRotate: { value: false } }],
+  ['minimized player', { scrollMiniPlayerActive: { value: true } }],
+  ['audio playback', { props: { format: 'audio', shortsPlayer: false } }],
+  ['Shorts player', { props: { format: 'legacy', shortsPlayer: true } }],
+]) {
+  test(`Android preserves the system rotation lock for ${state}`, () => {
+    const { calls, handlers, isPopoverOpen } = androidRotationHarness(overrides)
+    handlers.handleAndroidDisplayRotation(true)
+    assert.deepEqual(calls, [])
+    assert.equal(isPopoverOpen(), false)
+  })
+}
+
+test('Android still exits rotation fullscreen after the player becomes minimized', () => {
+  const { calls, context, handlers, isPopoverOpen } = androidRotationHarness()
+  handlers.handleAndroidDisplayRotation(true)
+  context.scrollMiniPlayerActive.value = true
+  handlers.handleAndroidDisplayRotation(false)
+  assert.deepEqual(calls.slice(-2), [false, 'navigation:true'])
+  assert.equal(isPopoverOpen(), false)
+})
+
+test('Android does not force landscape when the fullscreen view fails to open', () => {
+  const { calls, handlers, isPopoverOpen } = androidRotationHarness({
+    events: { dispatchEvent: () => {} },
+  })
+  handlers.handleAndroidDisplayRotation(true)
+  assert.equal(calls.includes('orientation:true'), false)
+  assert.equal(calls.includes('navigation:false'), false)
+  assert.equal(isPopoverOpen(), false)
 })
 
 test('Android ignores fullscreen recovery from an earlier entry attempt', async () => {

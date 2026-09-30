@@ -88,7 +88,7 @@ import {
   removeOverlayScrollbars,
   updateOverlayScrollbars,
 } from '../../helpers/overlayScrollbars'
-import { getFullscreenAspectRatio, setAndroidDisplayOrientation, setFullscreenOrientation } from '../../helpers/capacitorUi'
+import { getFullscreenAspectRatio, setFullscreenOrientation } from '../../helpers/capacitorUi'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import {
   enterAndroidPictureInPicture,
@@ -7042,7 +7042,6 @@ export default defineComponent({
       if (fullWindowEnabled.value) events.dispatchEvent(new CustomEvent('setFullWindow', { detail: false }))
       if (androidFullscreenHost?.matches(':popover-open')) androidFullscreenHost.hidePopover()
       androidFullscreenHost?.removeAttribute('popover')
-      setAndroidDisplayOrientation(false).catch(() => {})
       setAndroidNavigationBarVisible(true).catch(() => {})
       syncAndroidStatusBarVisibility()
     }
@@ -7057,17 +7056,22 @@ export default defineComponent({
         if (androidRotationFullscreen) exitAndroidRotationFullscreen()
         else if (isNativeFullscreenActive()) {
           document.exitFullscreen().catch(() => {})
-          setAndroidDisplayOrientation(false).catch(() => {})
         }
         return
       }
+      // Follow actual display rotation, including Android's manual rotation
+      // button. Fullscreen must not change the system's orientation policy.
+      if (!enterFullscreenOnDisplayRotate.value || scrollMiniPlayerActive.value || props.format === 'audio' || props.shortsPlayer) return
       if (!video.value?.readyState || pictureInPictureActive.value) return
       if (androidRotationFullscreen || isNativeFullscreenActive() || !androidFullscreenHost) return
       androidFullscreenHost.setAttribute('popover', 'manual')
       androidFullscreenHost.showPopover()
       androidRotationFullscreen = true
       events.dispatchEvent(new CustomEvent('setFullWindow', { detail: true }))
-      setAndroidDisplayOrientation(true).catch(() => {})
+      if (!fullWindowEnabled.value) {
+        exitAndroidRotationFullscreen()
+        return
+      }
       setAndroidNavigationBarVisible(false).catch(() => {})
       syncAndroidStatusBarVisibility()
     }
