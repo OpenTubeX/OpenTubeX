@@ -376,6 +376,35 @@ public class PredictiveBackTest {
                     scenario.onActivity(activity -> activity.getOnBackPressedDispatcher().dispatchOnBackCancelled());
                     await(view, "document.querySelector('.sideNav').getAnimations().length === 0");
                     assertEquals("Cancel keeps the drawer open", "true", evaluate(view, STORE + ".getters.getIsSideNavOpen"));
+                    start(scenario, BackEventCompat.EDGE_RIGHT);
+                    progress(scenario, 0.65f, BackEventCompat.EDGE_RIGHT);
+                    await(view, "document.querySelector('.sideNav').getAnimations().some(a => a.playState === 'paused' && a.currentTime > 0)");
+                    evaluate(view, """
+                        (() => {
+                            const drawer = document.querySelector('.sideNav');
+                            let previousRight = drawer.getBoundingClientRect().right;
+                            window.__drawerCommitFlickered = false;
+                            window.__drawerCommitFrames = [];
+                            window.__drawerCommitSampling = true;
+                            const sample = () => {
+                                if (!window.__drawerCommitSampling) return;
+                                const right = drawer.getBoundingClientRect().right;
+                                window.__drawerCommitFrames.push(right);
+                                if (right > previousRight + 0.5) window.__drawerCommitFlickered = true;
+                                previousRight = right;
+                                requestAnimationFrame(sample);
+                            };
+                            requestAnimationFrame(sample);
+                        })()
+                        """);
+                    scenario.onActivity(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
+                    await(view, "!" + STORE + ".getters.getIsSideNavOpen && document.querySelector('.sideNav').getAnimations().length === 0");
+                    evaluate(view, "window.__drawerCommitSampling = false");
+                    assertEquals("Committed drawer must never move back on screen: " + evaluate(view, "window.__drawerCommitFrames"),
+                        "false", evaluate(view, "window.__drawerCommitFlickered"));
+                    evaluate(view, STORE + ".commit('toggleSideNav')");
+                    await(view, STORE + ".getters.getIsSideNavOpen");
+                    Thread.sleep(200);
                 }
                 scenario.onActivity(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
                 await(view, "!" + STORE + ".getters.getIsSideNavOpen");

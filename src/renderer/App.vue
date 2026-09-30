@@ -3383,7 +3383,12 @@ function getAndroidBackPreview() {
       update(progress) { animation.currentTime = progress * Number(animation.effect.getTiming().duration) },
       async finish(commit) {
         await settleAndroidBackAnimation(animation, commit)
-        if (commit) closeSideNav()
+        if (commit) {
+          closeSideNav()
+          await nextTick()
+          // Keep the finished effect until the closed styles take over.
+          await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        }
         animation.cancel()
       },
       cancel() { animation?.cancel() },

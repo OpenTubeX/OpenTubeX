@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
+import { nextTick, ref, watch } from 'vue'
 import { createAndroidBackGestureHandler, getAndroidBackPlayer, registerAndroidBackPlayer, settleAndroidBackAnimation } from '../../src/renderer/helpers/androidBackGesture.js'
 
 function fixture(available = true) {
@@ -164,4 +165,46 @@ test('a side drawer restored to zero progress cancels without replaying its anim
   assert.equal(reversed, false)
   assert.equal(cancelled, true)
   assert.equal(closed, false)
+})
+
+test('committing the side drawer keeps its finished frame until the closed state renders', async () => {
+  const source = readFileSync(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
+  const start = source.indexOf('function getAndroidBackPreview()')
+  const opened = ref(true)
+  let renderedClosed = false
+  const stop = watch(opened, value => { renderedClosed = !value }, { flush: 'post' })
+  let cancelled = false
+  let cancelledBeforeRender = false
+  const frames = []
+  const animation = {
+    currentTime: 0, effect: { getTiming: () => ({ duration: 200 }) }, finished: Promise.resolve(),
+    pause() {}, play() {},
+    cancel() { cancelled = true; cancelledBeforeRender = !renderedClosed },
+  }
+  const getPreview = vm.runInNewContext(`${source.slice(start, source.indexOf('\nfunction handleAndroidPictureInPictureChange', start))}\ngetAndroidBackPreview`, {
+    mobileContextLink: { value: null }, mobileContextActions: { value: null },
+    isSideNavOpen: opened, useWatchSideNavOverlay: { value: true }, isLocaleRightToLeft: { value: false },
+    window: { matchMedia: () => ({ matches: true }) },
+    document: { querySelector: () => ({ animate: () => animation, getBoundingClientRect: () => ({ width: 240 }) }) },
+    isReducedMotionEnabled: () => false, applyAnimationSpeed: animation => animation, settleAndroidBackAnimation,
+    closeSideNav: () => { opened.value = false }, nextTick,
+    requestAnimationFrame: callback => frames.push(callback),
+  })
+  try {
+    const preview = getPreview()
+    preview.begin()
+    preview.update(0.65)
+    const finished = preview.finish(true)
+    await new Promise(resolve => setImmediate(resolve))
+    assert.equal(renderedClosed, true)
+    assert.equal(cancelled, false, 'the finished effect must cover the handoff to the closed drawer')
+    frames.shift()()
+    assert.equal(cancelled, false)
+    frames.shift()()
+    await finished
+    assert.equal(cancelled, true)
+    assert.equal(cancelledBeforeRender, false)
+  } finally {
+    stop()
+  }
 })
