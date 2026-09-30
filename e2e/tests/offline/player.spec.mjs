@@ -1582,6 +1582,87 @@ test.describe('scroll mini player', () => {
     })
   })
 
+  for (const uiScale of [100, 125]) {
+    test.describe(`mini-player transition at ${uiScale}% UI scale`, () => {
+      test.use({ seed: { settings: { ...PLAYER_SEED, uiScale, ambientMode: true } } })
+
+      test('keeps expensive player work out of the mini-player transition', async ({ app, page }) => {
+        const video = await openDemoVideo({ app, page })
+        if (uiScale === 100) await video.evaluate(element => element.pause())
+        const player = page.locator('.ftVideoPlayer')
+        const watchComponent = await page.evaluateHandle(findWatchComponent)
+        await watchComponent.evaluate(component => {
+          window.miniTransitionState = component.refs.player.$.setupState
+        })
+        await watchComponent.dispose()
+
+        await player.evaluate(element => {
+          document.documentElement.dataset.reducedMotion = 'no-preference'
+          window.miniTransitionWork = { readbacks: 0, rebuilds: 0, ambientFrames: 0 }
+          window.miniSettledReadbacks = 0
+          const state = window.miniTransitionState
+          const nativeReadback = CanvasRenderingContext2D.prototype.getImageData
+          CanvasRenderingContext2D.prototype.getImageData = function (...args) {
+            if (state.scrollMiniPlayerAnimating) {
+              window.miniTransitionWork.readbacks++
+            } else if (state.scrollMiniPlayerActive && this.canvas.width === 9 && this.canvas.height === 3) {
+              window.miniSettledReadbacks++
+            }
+            return nativeReadback.apply(this, args)
+          }
+          const nativeDraw = CanvasRenderingContext2D.prototype.drawImage
+          CanvasRenderingContext2D.prototype.drawImage = function (...args) {
+            if (state.scrollMiniPlayerAnimating && this.canvas.matches('.ambientCanvas, .ambientLayoutCanvas, .ambientFullscreenCanvas')) {
+              window.miniTransitionWork.ambientFrames++
+            }
+            return nativeDraw.apply(this, args)
+          }
+          const controls = element.querySelector('.shaka-controls-button-panel')
+          new MutationObserver(records => {
+            window.miniTransitionWork.rebuilds += records.filter(record =>
+              [...record.removedNodes].some(node => node.contains(controls) || node === controls)
+            ).length
+          }).observe(element, { childList: true, subtree: true })
+        })
+
+        const cdp = await page.context().newCDPSession(page)
+        await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 })
+        await scrollBelowPlayer(player)
+        await expect(player).toHaveClass(/scrollMiniPlayer/)
+        await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+        await expect.poll(() => page.evaluate(() => window.miniSettledReadbacks)).toBeGreaterThan(0)
+        await page.evaluate(() => window.scrollTo(0, 0))
+        await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+        await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+        await cdp.detach()
+        await expect(page.locator('.ambientCanvas')).toBeVisible()
+        expect(await page.evaluate(() => window.miniTransitionWork)).toEqual({ readbacks: 0, rebuilds: 0, ambientFrames: 0 })
+      })
+
+      test('adapts the inline controls after resizing the window while docked', async ({ app, page }) => {
+        const video = await openDemoVideo({ app, page })
+        await video.evaluate(element => element.pause())
+        const player = page.locator('.ftVideoPlayer')
+        const fullWindow = player.locator('.shaka-controls-button-panel .full-window-button')
+        await expect(fullWindow).toHaveCount(1)
+
+        await scrollBelowPlayer(player)
+        await expect(player).toHaveClass(/scrollMiniPlayer/)
+        await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+        await setWindowSize(app, page, { width: 650, height: 950 })
+        await expect(fullWindow).toHaveCount(1)
+
+        await page.evaluate(() => window.scrollTo(0, 0))
+        await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+        await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+        await expect(fullWindow).toHaveCount(0)
+
+        await setWindowSize(app, page, { width: 1600, height: 900 })
+        await expect(fullWindow).toHaveCount(1)
+      })
+    })
+  }
+
   test('animates into and out of the scroll mini player', async ({ app, page, attachScreenshot }) => {
     const video = await openDemoVideo({ app, page })
     await video.evaluate(element => element.pause())

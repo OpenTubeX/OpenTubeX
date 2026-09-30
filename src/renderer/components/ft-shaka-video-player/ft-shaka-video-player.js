@@ -6105,7 +6105,7 @@ export default defineComponent({
       // Background tabs remain mounted but are hidden with display:none. Do not
       // let their zero-size control bars enter a resize/mutation feedback loop.
       // The active-tab watcher schedules a fresh measurement when presented.
-      if (!isActiveTab.value) {
+      if (!isActiveTab.value || scrollMiniPlayerActive.value || scrollMiniPlayerAnimating.value) {
         return
       }
 
@@ -6115,7 +6115,9 @@ export default defineComponent({
 
       controlPanelLayoutFrame = requestAnimationFrame(() => {
         controlPanelLayoutFrame = null
-        updateControlPanelLayout(controlPanel)
+        if (!scrollMiniPlayerActive.value && !scrollMiniPlayerAnimating.value) {
+          updateControlPanelLayout(controlPanel)
+        }
       })
     }
 
@@ -6274,7 +6276,12 @@ export default defineComponent({
       if (inlineSize === 0) {
         return
       }
-      onlyUseOverFlowMenu.value = inlineSize <= USE_OVERFLOW_MENU_WIDTH_THRESHOLD
+      // Mini-player controls are separate from Shaka's hidden inline controls.
+      // Changing their layout here rebuilds every Shaka control at both ends of
+      // the animation, even though the inline layout often has not changed.
+      if (!scrollMiniPlayerActive.value && !scrollMiniPlayerAnimating.value) {
+        onlyUseOverFlowMenu.value = inlineSize <= USE_OVERFLOW_MENU_WIDTH_THRESHOLD
+      }
       rememberInlinePlayerLayoutHeight()
       repairScrollMiniPlaceholderHeight()
     }
@@ -6283,7 +6290,7 @@ export default defineComponent({
     // that mounted in a background tab could not measure its real width, and the
     // ResizeObserver does not always fire for an ancestor display:none toggle.
     function remeasureControlPanelWidth() {
-      if (!ui || ui.isMobile()) {
+      if (!ui || ui.isMobile() || scrollMiniPlayerActive.value || scrollMiniPlayerAnimating.value) {
         return
       }
       const width = container.value?.getBoundingClientRect().width ?? 0
@@ -7034,6 +7041,12 @@ export default defineComponent({
       video,
     })
 
+    // The window may have resized while docked. Measure the settled inline
+    // player once, after the return animation, rather than its scaled bounds.
+    watch([scrollMiniPlayerActive, scrollMiniPlayerAnimating], ([active, animating]) => {
+      if (!active && !animating) nextTick(remeasureControlPanelWidth)
+    })
+
     let androidRotationFullscreen = false
 
     function exitAndroidRotationFullscreen() {
@@ -7159,7 +7172,8 @@ export default defineComponent({
         ambientMode.value &&
         props.format !== 'audio' &&
         props.vrProjection !== 'EQUIRECTANGULAR' &&
-        !scrollMiniPlayerActive.value
+        !scrollMiniPlayerActive.value &&
+        !scrollMiniPlayerAnimating.value
     })
 
     const musicVisualizerActive = computed(() => {
