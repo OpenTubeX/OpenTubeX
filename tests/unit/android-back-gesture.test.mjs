@@ -25,18 +25,19 @@ test('predictive cancellation restores the preview without navigating', async ()
   assert.deepEqual(calls, ['begin', 0.35, 0.1, 'restore'])
 })
 
-test('commit docks once and does not also invoke ordinary back navigation', async () => {
+test('later Back presses wait for the current gesture to settle instead of disappearing', async () => {
   const { handler, calls, preview } = fixture()
   const settling = Promise.withResolvers()
   preview.finish = async () => { calls.push('dock'); await settling.promise }
   await handler.handle({ phase: 'start' })
   await handler.handle({ phase: 'progress', progress: 1.2 })
   const commit = handler.handle({ phase: 'commit' })
-  await handler.handle({ phase: 'commit' })
+  const secondCommit = handler.handle({ phase: 'commit' })
   await handler.handle({ phase: 'progress', progress: 0.5 })
   settling.resolve()
   await commit
-  assert.deepEqual(calls, ['begin', 1, 'dock'])
+  await secondCommit
+  assert.deepEqual(calls, ['begin', 1, 'dock', 'back'])
 })
 
 test('ordinary back handles buttons and unavailable predictive destinations', async () => {
@@ -47,6 +48,33 @@ test('ordinary back handles buttons and unavailable predictive destinations', as
   await handler.handle({ phase: 'start' })
   await handler.handle({ phase: 'commit' })
   assert.deepEqual(calls, ['back', 'begin', 'begin', 'back'])
+})
+
+test('Back pressed while cancellation restores a preview runs after restoration', async () => {
+  const { handler, calls, preview } = fixture()
+  const settling = Promise.withResolvers()
+  preview.finish = async () => { calls.push('restore'); await settling.promise }
+  await handler.handle({ phase: 'start' })
+  const cancel = handler.handle({ phase: 'cancel' })
+  await handler.handle({ phase: 'commit' })
+  await handler.handle({ phase: 'commit' })
+  assert.deepEqual(calls, ['begin', 'restore'])
+  settling.resolve()
+  await cancel
+  assert.deepEqual(calls, ['begin', 'restore', 'back', 'back'])
+})
+
+test('teardown discards Back presses queued behind a settling preview', async () => {
+  const { handler, calls, preview } = fixture()
+  const settling = Promise.withResolvers()
+  preview.finish = async () => { calls.push('dock'); await settling.promise }
+  await handler.handle({ phase: 'start' })
+  const commit = handler.handle({ phase: 'commit' })
+  await handler.handle({ phase: 'commit' })
+  handler.dispose()
+  settling.resolve()
+  await commit
+  assert.deepEqual(calls, ['begin', 'dock', 'cancel'])
 })
 
 test('teardown cancels a held gesture and ignores late native events', async () => {

@@ -68,6 +68,16 @@ test('a suspended Short cannot own the mini player even when its watch view is m
   assert.equal(player.scrollMiniPlayerActive.value, false)
 })
 
+test('a paused Watch tab does not acquire the cross-tab mini player before navigating away', t => {
+  const { player, video, isActiveTab } = mountMiniPlayer(t, { keepPlaying: true, navigatedAway: false })
+  video.value.paused = true
+  player.scrollMiniPlayerActive.value = false
+  isActiveTab.value = false
+  player.updateScrollMiniPlayer()
+  assert.equal(coordinator.hasCrossTabMiniPlayerOwner(), false)
+  assert.equal(player.scrollMiniPlayerActive.value, false)
+})
+
 test('tab changes end held volume gestures and hide the expanded control', t => {
   const { player, window, isActiveTab } = mountMiniPlayer(t)
   player.handleScrollMiniVolumePointerDown({ clientX: 0, clientY: 0 })

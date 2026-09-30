@@ -803,7 +803,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       !autoPictureInPictureOnTabChange.value &&
       scrollMiniPlayerOnAllTabs.value &&
       canUseScrollMiniPlayerBase() &&
-      (store.getters.getKeepPlayingOnNavigation || watchNavigation?.minimized?.value ||
+      ((store.getters.getKeepPlayingOnNavigation && watchNavigation?.detached.value) || watchNavigation?.minimized?.value ||
         isCrossTabMiniPlayerOwner(crossTabMiniPlayerCandidate) || !videoElement.paused)
   }
 

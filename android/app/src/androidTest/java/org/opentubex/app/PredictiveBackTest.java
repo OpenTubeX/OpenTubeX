@@ -67,6 +67,19 @@ public class PredictiveBackTest {
                 Thread.sleep(300);
                 verifyDialogGesture(scenario, view, ".settingsContent", false);
                 await(view, "!document.querySelector('.settingsWindow[data-android-back-nested]') && " + STORE + ".getters.getSettingsWindowOpen");
+                evaluate(view, "document.querySelector('.settingsMenu [data-section=\"appearance\"]').click()");
+                await(view, "!!document.querySelector('.settingsWindow[data-android-back-nested]')");
+                Thread.sleep(300);
+                start(scenario, BackEventCompat.EDGE_LEFT);
+                progress(scenario, 0.5f, BackEventCompat.EDGE_LEFT);
+                await(view, "document.querySelector('.settingsContent').getAnimations().some(a => a.playState === 'paused')");
+                scenario.onActivity(activity -> {
+                    activity.getOnBackPressedDispatcher().onBackPressed();
+                    activity.getOnBackPressedDispatcher().onBackPressed();
+                });
+                await(view, "!document.querySelector('.settingsWindow')");
+                assertEquals("Two rapid Back presses return from the category then close Settings", "true",
+                    evaluate(view, STORE + ".getters.getActiveTab.historyIndex === window.__modalEntry"));
                 evaluate(view, STORE + ".dispatch('hideSettingsWindow');" + STORE + ".commit('setConfirmCloseApp', true)");
                 await(view, "!document.querySelector('.settingsWindow')");
                 Thread.sleep(200);
@@ -453,6 +466,8 @@ public class PredictiveBackTest {
         scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
         WebView view = reference.get();
         await(view, "!!document.querySelector('.app') && " + STORE + ".getters.getActiveTab?.loadState === 'loaded'");
+        await(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || " +
+            "!!document.querySelector('.tutorialActions button')");
         evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
         await(view, "!document.querySelector('.tutorialOverlay')");
         evaluate(view, """
@@ -525,6 +540,11 @@ public class PredictiveBackTest {
             "keep: " + STORE + ".getters.getKeepPlayingOnNavigation, motion: document.documentElement.dataset.reducedMotion," +
             "width: innerWidth, height: innerHeight, paused: window.__backVideo?.paused, player: document.querySelector('.ftVideoPlayer')?.className, " +
             "state: (() => { const s = window.__backWatch?.()?.$refs.player?.$?.setupState; " +
-            "return s && { active: s.isActiveTab, suspended: s.isPlayerSuspended, mini: s.scrollMiniPlayerActive, full: s.fullWindowEnabled }; })() })") + ")", "true", evaluate(view, script));
+            "return s && { active: s.isActiveTab, suspended: s.isPlayerSuspended, mini: s.scrollMiniPlayerActive, full: s.fullWindowEnabled }; })(), " +
+            "modal: window.__modalElement && { connected: window.__modalElement.isConnected, classes: window.__modalElement.className, " +
+            "opacity: getComputedStyle(window.__modalElement).opacity, animations: window.__modalElement.getAnimations().map(a => ({time:a.currentTime,state:a.playState})), " +
+            "nested: window.__modalElement.hasAttribute('data-android-back-nested') }, " +
+            "settingsOpen: " + STORE + ".getters.getSettingsWindowOpen, sideNav: " + STORE + ".getters.getIsSideNavOpen, " +
+            "focused: document.activeElement?.className })") + ")", "true", evaluate(view, script));
     }
 }

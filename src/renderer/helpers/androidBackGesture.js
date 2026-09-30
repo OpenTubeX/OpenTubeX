@@ -60,9 +60,15 @@ export function createAndroidBackGestureHandler({ getPreview, back }) {
   let preview = null
   let finishing = false
   let disposed = false
+  let pendingCommits = 0
   return {
     async handle({ phase, progress = 0 }) {
-      if (disposed || finishing) return
+      if (disposed) return
+      if (finishing) {
+        // A later press must act on the layer/history after the current action.
+        if (phase === 'commit') pendingCommits++
+        return
+      }
       if (phase === 'start') {
         preview?.cancel()
         const candidate = getPreview()
@@ -75,9 +81,15 @@ export function createAndroidBackGestureHandler({ getPreview, back }) {
         try {
           if (current) await current.finish(phase === 'commit')
           else if (phase === 'commit') await back()
+          while (pendingCommits > 0) {
+            if (disposed) break
+            pendingCommits--
+            await back()
+          }
         } finally {
           if (preview === current) preview = null
           finishing = false
+          pendingCommits = 0
         }
       }
     },
