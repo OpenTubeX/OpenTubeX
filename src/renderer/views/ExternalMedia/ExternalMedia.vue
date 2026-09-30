@@ -2,20 +2,27 @@
   <main class="externalMedia">
     <div
       v-if="loading"
-      class="externalMediaState externalMediaLoading"
-      data-tab-loading-indicator
-      role="status"
+      class="externalMediaLayout"
+      :class="{ useTheatreMode, noSidebar: !chatAvailable || !chatOpen }"
     >
-      <div class="externalMediaStateContent">
-        <FtLoader
-          class="externalMediaSpinner"
-          :tab-loading-indicator="false"
-        />
-        <p>{{ t('Video.Fetching Streams') }}</p>
-        <span
-          v-if="hostname"
-          class="externalMediaOrigin"
-        >{{ hostname }}</span>
+      <div class="externalMediaVideo">
+        <div
+          class="externalMediaState externalMediaLoading"
+          data-tab-loading-indicator
+          role="status"
+        >
+          <div class="externalMediaStateContent">
+            <FtLoader
+              class="externalMediaSpinner"
+              :tab-loading-indicator="false"
+            />
+            <p>{{ t('Video.Fetching Streams') }}</p>
+            <span
+              v-if="hostname"
+              class="externalMediaOrigin"
+            >{{ hostname }}</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -75,6 +82,9 @@
               :captions="source.captions"
               :caption-translations="source.captionTranslations"
               :title="info.title ?? ''"
+              :artist="musicPlayerArtist"
+              :channel-name="creatorName"
+              :channel-thumbnail="creatorAvatarUrl"
               :thumbnail="thumbnail"
               :is-live="source.isLive"
               :current-playback-rate="defaultPlaybackRate"
@@ -362,9 +372,11 @@ const hostname = computed(() => {
   }
 })
 const isCoub = computed(() => hostname.value === 'coub.com' || hostname.value.endsWith('.coub.com'))
-const twitchChatTarget = computed(() => info.value && source.value
-  ? getTwitchChatTarget(info.value.webpageUrl, source.value.isLive) ?? getTwitchChatTarget(mediaUrl.value, source.value.isLive)
-  : null)
+const twitchChatTarget = computed(() => {
+  if (loading.value) return getTwitchChatTarget(mediaUrl.value, true)
+  if (!info.value || !source.value) return null
+  return getTwitchChatTarget(info.value.webpageUrl, source.value.isLive) ?? getTwitchChatTarget(mediaUrl.value, source.value.isLive)
+})
 const chatAvailable = computed(() => twitchChatTarget.value && !(twitchChatTarget.value.type === 'replay'
   ? store.getters.getHideLiveChatReplay
   : store.getters.getHideLiveChat))
@@ -470,6 +482,7 @@ const chaptersSrc = computed(() => chapters.value.some(chapter => chapter.endSec
   ? `data:text/vtt,${encodeURIComponent(buildChaptersVttFile(chapters.value.filter(chapter => chapter.endSeconds !== null)))}`
   : '')
 const creatorName = computed(() => info.value?.channel || info.value?.uploader || '')
+const musicPlayerArtist = computed(() => metadata.value.artists?.join(', ') || creatorName.value)
 const creatorUrl = computed(() => safeWebUrl(info.value?.channel ? info.value.channelUrl : info.value?.uploaderUrl))
 const creatorAvatarUrl = computed(() => safeWebUrl(info.value?.channel ? info.value.channelThumbnail : info.value?.uploaderThumbnail))
 const hideSharingActions = computed(() => store.getters.getHideSharingActions)
@@ -730,7 +743,8 @@ onBeforeUnmount(() => {
   min-inline-size: 0;
 }
 
-.externalMediaPlayer {
+.externalMediaPlayer,
+.externalMediaLoading {
   inline-size: 100%;
   max-inline-size: calc(80vh * 1.78);
   min-inline-size: 0;
@@ -817,6 +831,10 @@ onBeforeUnmount(() => {
   max-inline-size: 640px;
   min-inline-size: 0;
   text-align: center;
+}
+
+.externalMediaLoading {
+  min-block-size: 0;
 }
 
 .externalMediaSpinner {

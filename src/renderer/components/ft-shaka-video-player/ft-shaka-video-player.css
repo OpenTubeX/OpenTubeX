@@ -163,9 +163,24 @@
   -webkit-line-clamp: 3;
 }
 
+.musicAudioCreator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-block-start: clamp(8px, 1.3vi, 16px);
+}
+
+.musicAudioAvatar {
+  flex: none;
+  inline-size: clamp(24px, 2.8vi, 40px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 .musicAudioArtist {
   overflow: hidden;
-  margin-block-start: clamp(8px, 1.3vi, 16px);
+  min-inline-size: 0;
   color: rgb(255 255 255 / 78%);
   font-size: clamp(14px, 1.8vi, 23px);
   line-height: 1.35;
@@ -206,6 +221,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
     justify-content: center;
     gap: 12px;
     inline-size: 82%;
+    block-size: 76%;
+    min-block-size: 0;
     max-block-size: 76%;
     margin-block-end: 48px;
     text-align: center;
@@ -223,8 +240,12 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
     -webkit-line-clamp: 2;
   }
 
-  .musicAudioArtist {
+  .musicAudioCreator {
+    justify-content: center;
     margin-block-start: 4px;
+  }
+
+  .musicAudioArtist {
     font-size: clamp(13px, 3.8vi, 18px);
   }
 }

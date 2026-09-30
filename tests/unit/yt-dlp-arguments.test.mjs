@@ -101,6 +101,13 @@ test('caption mapping separates translated tracks and rejects non-HTTPS URLs', (
   assert.equal(result.captionTranslations[0].language, 'de')
 })
 
+test('external metadata uses a single artist when no artist list is available', () => {
+  assert.match(EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE, /"artist":/)
+  assert.deepEqual(mapExternalPlaybackMetadata({ artist: 'Example artist' }).artists, ['Example artist'])
+  assert.deepEqual(mapExternalPlaybackMetadata({ artists: [], artist: 'Example artist' }).artists, ['Example artist'])
+  assert.deepEqual(mapExternalPlaybackMetadata({ artists: ['Artist A', 'Artist B'], artist: 'Fallback artist' }).artists, ['Artist A', 'Artist B'])
+})
+
 test('external metadata keeps optional counts, context, and chapter boundaries', () => {
   assert.match(EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE, /"chapters"/)
   assert.match(EXTERNAL_PLAYBACK_INFO_OUTPUT_TEMPLATE, /"subtitles"/)

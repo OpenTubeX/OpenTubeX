@@ -252,7 +252,7 @@
             @error="hideBrokenMusicImage"
           >
           <div
-            v-if="title || artist"
+            v-if="title || artist || channelThumbnail"
             class="musicAudioMetadata"
           >
             <div
@@ -262,10 +262,22 @@
               {{ title }}
             </div>
             <div
-              v-if="artist"
-              class="musicAudioArtist"
+              v-if="artist || channelThumbnail"
+              class="musicAudioCreator"
             >
-              {{ artist }}
+              <FtRetryImage
+                v-if="channelThumbnail"
+                class="musicAudioAvatar"
+                :src="channelThumbnail"
+                alt=""
+                @load="showMusicImage"
+                @error="hideBrokenMusicImage"
+              />
+              <span
+                v-if="artist"
+                class="musicAudioArtist"
+                dir="auto"
+              >{{ artist }}</span>
             </div>
           </div>
         </div>

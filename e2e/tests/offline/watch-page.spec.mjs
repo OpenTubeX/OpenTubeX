@@ -762,6 +762,7 @@ test('shows age-restricted and unlisted badges below the video title', async ({ 
 async function mockMusicMediaType(app, page, musicVideoType) {
   await mockPlayableWatchPage(app, page)
   await page.route('https://i.ytimg.com/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
+  await page.route('https://yt3.ggpht.com/**', route => fulfillVisualFixture(route, 'avatar'))
   await page.route(/\/youtubei\/v1\/player/, (route, request) => {
     const requestBody = JSON.parse(request.postData() ?? '{}')
     const videoId = requestBody.videoId ?? 'jNQXAC9IVRw'
@@ -793,6 +794,32 @@ async function countDistinctVisualizerFrames(canvas) {
     return signatures.size
   })
 }
+
+test('shows the channel avatar in the YouTube audio-only player', async ({ app, page, attachScreenshot }) => {
+  await mockMusicMediaType(app, page, 'MUSIC_VIDEO_TYPE_ATV')
+  await openMockedVideo(page)
+  const surface = page.locator(`${activeTab} .musicAudioSurface`)
+  await expect(surface).toBeVisible()
+  const channelAvatar = page.locator(`${activeTab} .channelThumbnail`).first()
+  const avatar = surface.locator('.musicAudioAvatar')
+  expect(await avatar.count()).toBe(1)
+  await expect(avatar).toHaveAttribute('src', await channelAvatar.getAttribute('src'))
+  await expect.poll(() => avatar.evaluate(image => image.naturalWidth)).toBeGreaterThan(0)
+  await attachScreenshot('YouTube audio player channel avatar')
+  for (const scale of [1, 1.25]) {
+    await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+    for (const size of [{ width: 1280, height: 720 }, { width: 375, height: 667 }, { width: 667, height: 375 }]) {
+      await page.setViewportSize(size)
+      const bounds = await surface.boundingBox()
+      const creator = await surface.locator('.musicAudioCreator').boundingBox()
+      expect(creator.x).toBeGreaterThanOrEqual(bounds.x - 1)
+      expect(creator.y).toBeGreaterThanOrEqual(bounds.y - 1)
+      expect(creator.x + creator.width).toBeLessThanOrEqual(bounds.x + bounds.width + 1)
+      expect(creator.y + creator.height, `${size.width}×${size.height} at ${scale * 100}% UI scale`).toBeLessThanOrEqual(bounds.y + bounds.height + 1)
+      if (scale === 1 && size.width === 375) await attachScreenshot('YouTube audio player compact creator information')
+    }
+  }
+})
 
 test('shows the audio-track player and custom visualizer for YouTube Music tracks', async ({ app, page, attachScreenshot }) => {
   await mockMusicMediaType(app, page, 'MUSIC_VIDEO_TYPE_ATV')
@@ -856,6 +883,7 @@ test('shows the audio-track player and custom visualizer for YouTube Music track
   await expect(surface.locator('.musicAudioArtwork')).toBeVisible()
   await expect(surface.locator('.musicAudioTitle')).toHaveText(/\S/)
   await expect(surface.locator('.musicAudioArtist')).toHaveText(/\S/)
+  await expect(surface.locator('.musicAudioAvatar')).toBeVisible()
   await expect(video).toHaveCSS('opacity', '0')
   await expect(canvas).toBeVisible()
 
