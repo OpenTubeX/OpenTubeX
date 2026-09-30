@@ -141,7 +141,7 @@
     "copy-webpack-plugin": "^14.0.0",
     "css-loader": "^7.1.5",
     "cssnano": "^9.0.5",
-    "electron": "^43.4.0",
+    "electron": "^43.7.6",
     "electron-builder": "^26.16.1",
     "entities": "^8.1.0",
     "eslint": "^10.11.0",
