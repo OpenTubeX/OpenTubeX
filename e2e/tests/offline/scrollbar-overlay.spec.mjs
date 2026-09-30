@@ -59,6 +59,34 @@ async function addNestedCustomSpeedScroller(page, attribute, scrollTop) {
 }
 
 test.describe('overlay scrollbars', () => {
+  test('does not rewrite visible scrollbar classes on every scroll frame', async ({ page }) => {
+    await addPageOverflow(page)
+    for (const zoomFactor of [1, 1.25]) {
+      await page.evaluate((factor) => window.ftElectron.setZoomFactor(factor), zoomFactor)
+      await page.mouse.move(800, 400)
+      await page.mouse.wheel(0, 100)
+      await expect(page.locator(PAGE_SCROLLBAR)).toHaveCSS('opacity', '1')
+
+      const classMutations = await page.evaluate(async () => {
+        let mutations = 0
+        const observer = new MutationObserver(records => { mutations += records.length })
+        for (const scrollbar of document.querySelectorAll('body > .os-scrollbar')) {
+          observer.observe(scrollbar, { attributes: true, attributeFilter: ['class'] })
+        }
+        for (let frame = 0; frame < 30; frame++) {
+          window.scrollTo(0, 200 + frame * 10)
+          await new Promise(resolve => requestAnimationFrame(resolve))
+        }
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        observer.disconnect()
+        return mutations
+      })
+
+      expect(classMutations).toBe(0)
+      await expect(page.locator(PAGE_SCROLLBAR)).toHaveCSS('opacity', '1')
+    }
+  })
+
   test('the main scroll container reserves no layout space for its scrollbar', async ({ page }) => {
     await addPageOverflow(page)
 
@@ -256,6 +284,21 @@ test.describe('overlay scrollbars', () => {
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
   })
 
+  test('keeps a held page handle visible outside the track until release', async ({ page }) => {
+    await addPageOverflow(page)
+    const scrollbar = page.locator(PAGE_SCROLLBAR)
+    await page.mouse.move(800, 400)
+    await expect(scrollbar).toHaveCSS('opacity', '1')
+    const handleBox = await scrollbar.locator('.os-scrollbar-handle').boundingBox()
+    await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + handleBox.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(800, 500)
+    await page.waitForTimeout(1600)
+    await expect(scrollbar).toHaveCSS('opacity', '1')
+    await page.mouse.up()
+    await expect(scrollbar).toHaveCSS('opacity', '0', { timeout: 5000 })
+  })
+
   test('keeps the page handle under the pointer when content loads during a drag', async ({ page }) => {
     await addPageOverflow(page)
 
@@ -315,6 +358,55 @@ test.describe('overlay scrollbars', () => {
       expect(measurements.overflows).toBe(true)
       expect(measurements.noLayoutCost).toBe(true)
       expect(measurements.scrollTop).toBe(120)
+    })
+
+    test('keeps hovered bars visible and avoids repeated visibility writes while scrolling', async ({ page }) => {
+      const viewport = await addNestedCustomSpeedScroller(page, 'data-idle-scrollbar-test', 0)
+      const scrollbar = viewport.locator(':scope > .os-scrollbar-vertical')
+      await viewport.hover()
+      await expect(scrollbar).toHaveCSS('opacity', '1')
+
+      const classMutations = await viewport.evaluate(async element => {
+        let mutations = 0
+        const observer = new MutationObserver(records => { mutations += records.length })
+        for (const bar of element.querySelectorAll(':scope > .os-scrollbar')) {
+          observer.observe(bar, { attributes: true, attributeFilter: ['class'] })
+        }
+        for (let frame = 0; frame < 30; frame++) {
+          element.scrollTop = frame * 5
+          await new Promise(resolve => requestAnimationFrame(resolve))
+        }
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        observer.disconnect()
+        return mutations
+      })
+      expect(classMutations).toBe(0)
+      await scrollbar.locator('.os-scrollbar-handle').hover()
+      await page.waitForTimeout(1600)
+      await expect(scrollbar).toHaveCSS('opacity', '1')
+      await page.mouse.move(800, 500)
+      await expect(scrollbar).toHaveCSS('opacity', '0', { timeout: 5000 })
+    })
+
+    test('cancels pending hides when always-show is enabled and restores idle hiding', async ({ page }) => {
+      const viewport = await addNestedCustomSpeedScroller(page, 'data-idle-setting-test', 0)
+      const scrollbar = viewport.locator(':scope > .os-scrollbar-vertical')
+      await viewport.hover()
+      await expect(scrollbar).toHaveCSS('opacity', '1')
+      await page.evaluate(() => {
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          .commit('setAlwaysShowScrollbars', true)
+      })
+      await page.mouse.move(800, 500)
+      await page.waitForTimeout(1600)
+      await expect(scrollbar).toHaveCSS('opacity', '1')
+      await page.evaluate(() => {
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          .commit('setAlwaysShowScrollbars', false)
+      })
+      await expect(scrollbar).toHaveCSS('opacity', '0')
+      await viewport.hover()
+      await expect(scrollbar).toHaveCSS('opacity', '1')
     })
 
     test('uses scroll-linked tracks for touch and library positioning for wheel input', async ({ page }) => {

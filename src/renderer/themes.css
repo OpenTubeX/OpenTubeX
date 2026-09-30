@@ -2522,6 +2522,12 @@ body .os-scrollbar {
   );
 }
 
+/* Hovering a track keeps it usable even after the pointer stops moving. */
+body .os-scrollbar.app-scrollbar-idle:not(:hover) {
+  opacity: 0;
+  visibility: hidden;
+}
+
 /* shared shimmer for skeleton loading placeholders */
 .ft-shimmer {
   background: linear-gradient(
