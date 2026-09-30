@@ -195,14 +195,14 @@ test('phone Shorts controls clear navigation and show quick speeds', async ({ ap
 
 test('phone Shorts loading controls match the action rail', async ({ app, page }) => {
   await openShort({ app, page })
-  await page.evaluate(() => document.querySelector('.app').classList.add('capacitorPhoneLayout', 'capacitorTabs'))
   const watch = await page.evaluateHandle(findWatchComponent)
   await watch.evaluate(component => { component.proxy.isLoading = true })
 
   const rail = page.locator('.shortsActionRailSkeleton')
   const placeholders = rail.locator('.shortsActionSkeleton > span')
   await expect(placeholders.first()).toBeVisible()
-  await expect(rail.locator('.shortsActionSkeleton > small').first()).toBeHidden()
+  await page.evaluate(() => document.querySelector('.app').classList.add('capacitorPhoneLayout', 'capacitorTabs'))
+  await expect(rail.locator('.shortsActionSkeleton > small')).toHaveCount(0)
   const bounds = await placeholders.first().boundingBox()
   expect(bounds.width).toBeGreaterThanOrEqual(40)
   expect(bounds.width).toBeCloseTo(bounds.height, 0)

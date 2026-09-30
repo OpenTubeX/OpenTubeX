@@ -120,29 +120,19 @@ test('repeat stats wrap below the player at fractional UI scale and stay out of 
   await expect(stats).toBeVisible()
 })
 
-test('repeat stats reserve space below Shorts without covering the following content', async ({ app, page }) => {
+test('repeat stats stay hidden for Shorts without disabling looping', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/jNQXAC9IVRw')
   await page.locator(sel.searchInput).press('Enter')
   const video = await waitForPlayback(page)
   await video.evaluate(element => element.pause())
   await expect(page.locator('.videoLayout')).toHaveClass(/shortsPlayerActive/)
-  const stats = page.locator('.repeatStats')
-  await expect(stats).toBeVisible()
-  const expectContained = () => expect.poll(() => stats.evaluate(element => {
-    const bounds = element.getBoundingClientRect()
-    const host = element.closest('.ftVideoPlayerHost').getBoundingClientRect()
-    const player = element.parentElement.querySelector('.ftVideoPlayer').getBoundingClientRect()
-    return host.bottom >= bounds.bottom - 0.5 && bounds.top >= player.bottom - 0.5 &&
-      element.scrollWidth <= element.clientWidth
-  })).toBe(true)
-  await expectContained()
+  await expect(video).toHaveAttribute('loop', '')
+  await expect(page.locator('.repeatStats')).toHaveCount(0)
   await setWindowSize(app, page, { width: 640, height: 800 })
   await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
-  await expectContained()
-  await expect.poll(() => page.locator('.shortsExternalMetadata').evaluate(element => {
-    return element.getBoundingClientRect().top >= document.querySelector('.repeatStats').getBoundingClientRect().bottom - 0.5
-  })).toBe(true)
+  await expect(page.locator('.repeatStats')).toHaveCount(0)
+  await expect(video).toHaveAttribute('loop', '')
 })
 
 test('Distraction Free hides repeat stats immediately without disabling looping or losing the session', async ({ app, page }) => {
