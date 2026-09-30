@@ -262,6 +262,22 @@ const fullData = computed(() => {
 })
 
 const lowerCaseQuery = computed(() => query.value.toLowerCase())
+const appliedQuery = ref('')
+
+// Track only fields used by the applied search. An idle overview must not
+// deep-watch thousands of saved videos, including in background tabs.
+const filteredPlaylists = computed(() => {
+  const needle = appliedQuery.value
+  if (needle === '') return allPlaylists.value
+  const findMatchingVideos = doSearchPlaylistsWithMatchingVideos.value
+  return allPlaylists.value.filter(playlist => {
+    if (typeof playlist.playlistName !== 'string') return false
+    return playlist.playlistName.toLowerCase().includes(needle) ||
+      (findMatchingVideos && playlist.videos.some(video => (
+        video.author?.toLowerCase().includes(needle) || video.title.toLowerCase().includes(needle)
+      )))
+  })
+})
 
 watch(lowerCaseQuery, () => {
   searchDataLimit.value = 100
@@ -274,10 +290,7 @@ watch(doSearchPlaylistsWithMatchingVideos, () => {
   saveStateInRouter()
 })
 
-watch(fullData, (value) => {
-  activeData.value = value
-  filterPlaylist()
-}, { deep: true })
+watch([fullData, filteredPlaylists], updatePlaylistResults)
 
 /**
  * @param {'name_ascending' | 'name_descending' | 'latest_created_first' | 'earliest_created_first' | 'latest_updated_first' | 'earliest_updated_first' | 'latest_played_first' | 'earliest_played_first'} value
@@ -332,33 +345,21 @@ function increaseLimit() {
 }
 
 function filterPlaylist() {
-  const lowerCaseQuery_ = lowerCaseQuery.value
+  filterPlaylistAsync.cancel()
+  appliedQuery.value = lowerCaseQuery.value
+  updatePlaylistResults()
+}
 
-  if (lowerCaseQuery_ === '') {
+function updatePlaylistResults() {
+  if (appliedQuery.value === '') {
     activeData.value = fullData.value
     showLoadMoreButton.value = allPlaylists.value.length > activeData.value.length
   } else {
-    const findMatchingVideos = doSearchPlaylistsWithMatchingVideos.value
-
-    const filteredPlaylists = allPlaylists.value.filter((playlist) => {
-      if (typeof playlist.playlistName !== 'string') { return false }
-
-      if (
-        findMatchingVideos &&
-        playlist.videos.some((v) => {
-          return v.author?.toLowerCase().includes(lowerCaseQuery_) || v.title.toLowerCase().includes(lowerCaseQuery_)
-        })
-      ) {
-        return true
-      }
-
-      return playlist.playlistName.toLowerCase().includes(lowerCaseQuery_)
-    })
-
+    const matches = filteredPlaylists.value
     const searchDataLimit_ = searchDataLimit.value
 
-    showLoadMoreButton.value = filteredPlaylists.length > searchDataLimit_
-    activeData.value = filteredPlaylists.length < searchDataLimit_ ? filteredPlaylists : filteredPlaylists.slice(0, searchDataLimit_)
+    showLoadMoreButton.value = matches.length > searchDataLimit_
+    activeData.value = matches.length < searchDataLimit_ ? matches : matches.slice(0, searchDataLimit_)
   }
 }
 
@@ -431,6 +432,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  filterPlaylistAsync.cancel()
   document.removeEventListener('keydown', keyboardShortcutHandler)
 })
 </script>

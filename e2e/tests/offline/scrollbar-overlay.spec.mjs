@@ -59,6 +59,43 @@ async function addNestedCustomSpeedScroller(page, attribute, scrollTop) {
 }
 
 test.describe('overlay scrollbars', () => {
+  test('preserves native keyboard scrolling and clamps a fractional viewport after content shrinks', async ({ page }) => {
+    const viewport = await addNestedCustomSpeedScroller(page, 'data-keyboard-scrollbar', 0)
+    await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+    await viewport.evaluate(element => {
+      element.tabIndex = 0
+      element.style.height = '100.5px'
+      element.focus()
+    })
+    await page.keyboard.press('PageDown')
+    await expect.poll(() => viewport.evaluate(element => element.scrollTop)).toBeGreaterThan(50)
+    await viewport.evaluate(element => {
+      element.scrollTop = element.scrollHeight
+      element.firstElementChild.style.height = '50px'
+      element.style.height = '150.5px'
+    })
+    await expect.poll(() => viewport.evaluate(element => element.scrollTop)).toBe(0)
+    await expect(viewport.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
+    await expect.poll(() => viewport.evaluate(element => element.scrollHeight - element.clientHeight)).toBeLessThanOrEqual(1)
+  })
+
+  test('changes idle visibility without rebuilding retained scrollbars or losing their offset', async ({ page }) => {
+    const viewport = await addNestedCustomSpeedScroller(page, 'data-retained-scrollbar', 180)
+    await expect.poll(() => viewport.evaluate(element => element.scrollTop)).toBeGreaterThan(170)
+    await page.evaluate(() => {
+      window.__retainedScrollbar = document.querySelector('[data-retained-scrollbar] > .os-scrollbar-vertical')
+    })
+    for (const alwaysShow of [true, false, true]) {
+      await page.evaluate(enabled => {
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setAlwaysShowScrollbars', enabled)
+      }, alwaysShow)
+      await expect.poll(() => page.evaluate(() =>
+        document.querySelector('[data-retained-scrollbar] > .os-scrollbar-vertical') === window.__retainedScrollbar
+      )).toBe(true)
+      await expect.poll(() => viewport.evaluate(element => element.scrollTop)).toBeGreaterThan(170)
+    }
+  })
+
   test('does not rewrite visible scrollbar classes on every scroll frame', async ({ page }) => {
     await addPageOverflow(page)
     for (const zoomFactor of [1, 1.25]) {
@@ -329,6 +366,41 @@ test.describe('overlay scrollbars', () => {
   })
 
   test.describe('a nested scroll container', () => {
+    test('clamps wrapped content after a width-only resize at fractional zoom during touch scrolling', async ({ page }) => {
+      await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+      const session = await page.context().newCDPSession(page)
+      await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+      await expect.poll(() => page.evaluate(() => matchMedia('(pointer: coarse)').matches)).toBe(true)
+      await page.evaluate(() => {
+        const viewport = document.createElement('div')
+        viewport.dataset.widthResizeScrollbarTest = ''
+        Object.assign(viewport.style, {
+          position: 'fixed',
+          top: '100px',
+          left: '100px',
+          width: '100px',
+          height: '200px',
+          overflow: 'auto',
+          zIndex: '9999',
+        })
+        const content = document.createElement('div')
+        Object.assign(content.style, { fontFamily: 'monospace', fontSize: '16px', lineHeight: '20px' })
+        content.textContent = 'word '.repeat(75)
+        viewport.append(content)
+        document.body.append(viewport)
+        document.querySelector('#app').__vue_app__._context.directives['overlay-scrollbars'].mounted(viewport, { value: true })
+      })
+      const viewport = page.locator('[data-width-resize-scrollbar-test]')
+      await expect.poll(() => viewport.evaluate(element => element.scrollHeight - element.clientHeight)).toBeGreaterThan(200)
+      await viewport.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => viewport.evaluate(element => element.scrollTop)).toBeGreaterThan(200)
+      await viewport.evaluate(element => { element.style.width = '600px' })
+      await expect.poll(() => viewport.evaluate(element => element.scrollTop)).toBe(0)
+      await expect.poll(() => viewport.evaluate(element => element.scrollHeight - element.clientHeight)).toBeLessThanOrEqual(1)
+      await expect(viewport.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
+      await session.detach()
+    })
+
     const now = Date.now()
     test.use({
       seed: {

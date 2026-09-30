@@ -21,14 +21,15 @@ OverlayScrollbars.plugin(ClickScrollPlugin)
  */
 
 /**
- * Every live instance and how it was set up, so the "Always Show Scrollbars"
- * switch can rebuild them.
+ * Every live instance and how it was set up.
  *
  * @type {Map<import('overlayscrollbars').OverlayScrollbars, HTMLElement | object>}
  */
 const instances = new Map()
 /** @type {WeakMap<import('overlayscrollbars').OverlayScrollbars, () => void>} */
 const removeScrollSpeedHandlers = new WeakMap()
+/** @type {WeakMap<import('overlayscrollbars').OverlayScrollbars, () => void>} */
+const removeAutoHideHandlers = new WeakMap()
 const SCROLL_BOUNDARY_TOLERANCE = 1
 const suspendScrollbarPosition = new WeakMap()
 
@@ -64,13 +65,13 @@ function scrollbarOptions(initialization) {
 function create(initialization) {
   const instance = OverlayScrollbars(initialization, scrollbarOptions(initialization))
   instances.set(instance, initialization)
-  if (!store.getters.getAlwaysShowScrollbars) {
-    instance.on('destroyed', addScrollbarAutoHide(instance.elements()))
-  }
+  updateAutoHideHandler(instance)
   updateScrollSpeedHandler(instance)
   instance.on('destroyed', () => {
     instances.delete(instance)
     removeScrollSpeedHandler(instance)
+    removeAutoHideHandlers.get(instance)?.()
+    removeAutoHideHandlers.delete(instance)
   })
 
   if (initialization === document.body) {
@@ -82,6 +83,20 @@ function create(initialization) {
   }
 
   return instance
+}
+
+/** Change visibility policy without rebuilding observers, tracks or offsets. */
+function updateAutoHideHandler(instance) {
+  removeAutoHideHandlers.get(instance)?.()
+  removeAutoHideHandlers.delete(instance)
+  if (store.getters.getAlwaysShowScrollbars) {
+    const { scrollbarHorizontal, scrollbarVertical } = instance.elements()
+    for (const { scrollbar } of [scrollbarHorizontal, scrollbarVertical]) {
+      scrollbar.classList.remove('app-scrollbar-idle')
+    }
+  } else {
+    removeAutoHideHandlers.set(instance, addScrollbarAutoHide(instance.elements()))
+  }
 }
 
 /**
@@ -207,17 +222,17 @@ function updateBodyScrollbarPosition(instance) {
 }
 
 /**
- * A viewport can be scrolled to the end while an opening transition still
- * makes it shorter than its final size. Chromium can retain that obsolete end
- * offset as the viewport grows, which also leaves a scrollbar for overflow
- * that no longer exists. Remeasure growing viewports from their true origin,
- * then restore the old position within the new range.
+ * Opening transitions and widening wrapped content can shorten the scroll
+ * range. Chromium can retain the obsolete end offset as the viewport grows,
+ * which also leaves a scrollbar for overflow that no longer exists. Remeasure
+ * from the true origin, then restore the old position within the new range.
  *
  * @param {HTMLElement} element
  * @param {import('overlayscrollbars').OverlayScrollbars} instance
  */
 function reconcileScrollbarOnResize(element, instance) {
   let previousHeight = element.clientHeight
+  let previousWidth = element.getBoundingClientRect().width
   let resizeFrame = null
   const resizeObserver = new ResizeObserver(() => {
     if (resizeFrame !== null) {
@@ -226,32 +241,33 @@ function reconcileScrollbarOnResize(element, instance) {
 
     resizeFrame = requestAnimationFrame(() => {
       resizeFrame = null
+      const height = element.clientHeight
+      // Preserve fractional widths: even a subpixel change can unwrap a line.
+      const width = element.getBoundingClientRect().width
+      const viewportGrew = height > previousHeight || width > previousWidth
+      previousHeight = height
+      previousWidth = width
+      // The library already observes ordinary size changes. Our extra pass is
+      // needed only for invalid offsets or a retained end after either axis grows.
+      const scrollTop = element.scrollTop
+      if (scrollTop <= 0) return
+      const maximumScrollTop = Math.max(0, element.scrollHeight - height)
+      const outOfBounds = scrollTop > maximumScrollTop + SCROLL_BOUNDARY_TOLERANCE
+      if (!outOfBounds && (!viewportGrew || scrollTop < maximumScrollTop - SCROLL_BOUNDARY_TOLERANCE)) return
       const resumeScrollbars = suspendScrollbarPosition.get(instance)?.()
       try {
-        const height = element.clientHeight
-        const scrollTop = element.scrollTop
-        const maximumScrollTop = Math.max(0, element.scrollHeight - height)
         // Content can shrink (trimmed live chat) or the viewport can grow after a
         // dock transition while an obsolete end offset is still applied — that
         // parks the view on empty space until the user scrolls up.
-        if (scrollTop > maximumScrollTop + 1) {
+        if (outOfBounds) {
           element.scrollTop = maximumScrollTop
           instance.update(true)
-          previousHeight = height
           return
         }
 
-        const grewAtOldEnd = height > previousHeight &&
-          scrollTop > 0 &&
-          scrollTop >= maximumScrollTop - 1
-        previousHeight = height
-
-        if (grewAtOldEnd) {
-          element.scrollTop = 0
-          instance.update(true)
-          element.scrollTop = Math.min(scrollTop, instance.state().overflowAmount.y)
-        }
-
+        element.scrollTop = 0
+        instance.update(true)
+        element.scrollTop = Math.min(scrollTop, instance.state().overflowAmount.y)
         instance.update(true)
       } finally {
         resumeScrollbars?.()
@@ -392,36 +408,9 @@ export function initializeAppScrollbars({ useNativePageScrollbar = false } = {})
     }
   )
 
-  // Rebuild to install/remove idle visibility handling and cancel pending hides.
+  // Cancel pending hides in place; retained tabs can have many live scrollers.
   watch(() => store.getters.getAlwaysShowScrollbars, () => {
-    const rebuilds = [...instances].map(([instance, initialization]) => {
-      const { viewport } = instance.elements()
-      const isBody = initialization === document.body
-      return {
-        initialization,
-        instance,
-        isBody,
-        scrollLeft: isBody ? window.scrollX : viewport.scrollLeft,
-        scrollTop: isBody ? window.scrollY : viewport.scrollTop
-      }
-    })
-
-    for (const { instance } of rebuilds) {
-      instance.destroy()
-    }
-
-    for (const { initialization, isBody, scrollLeft, scrollTop } of rebuilds) {
-      const replacement = create(initialization)
-      const { viewport } = replacement.elements()
-      replacement.update(true)
-      if (isBody) {
-        window.scrollTo(scrollLeft, scrollTop)
-      } else {
-        viewport.scrollLeft = scrollLeft
-        viewport.scrollTop = scrollTop
-      }
-      replacement.update(true)
-    }
+    for (const instance of instances.keys()) updateAutoHideHandler(instance)
   })
 }
 
