@@ -8,7 +8,7 @@ const source = (await readFile(new URL('../../src/renderer/helpers/capacitorUi.j
   .replace(/^export /gm, '')
 
 function loadUi(platform, ScreenOrientation, SettingsLauncher) {
-  const exports = '{ getFullscreenAspectRatio, setFullscreenOrientation, setAndroidDisplayOrientation, openNotificationSettings }'
+  const exports = '{ getFullscreenAspectRatio, setFullscreenOrientation, openNotificationSettings }'
   return vm.runInNewContext(`${source}\n(${exports})`, {
     Capacitor: { isNativePlatform: () => platform !== 'web' },
     OrientationType: { LANDSCAPE: 'landscape' },
@@ -122,15 +122,4 @@ test('fullscreen only infers an aspect ratio for known Shorts', () => {
   assert.equal(getFullscreenAspectRatio(9 / 16, false), 9 / 16)
   assert.equal(getFullscreenAspectRatio(null, false), null)
   assert.equal(getFullscreenAspectRatio(null, true), 9 / 16)
-})
-
-test('physical Android rotation requests landscape and restores the system orientation', async () => {
-  const calls = []
-  const ui = loadUi('android', {
-    lock: async ({ type }) => calls.push(type),
-    unlock: async () => calls.push('unlock'),
-  })
-  await ui.setAndroidDisplayOrientation(true)
-  await ui.setAndroidDisplayOrientation(false)
-  assert.deepEqual(calls, ['landscape', 'unlock'])
 })

@@ -9,7 +9,6 @@ import android.hardware.input.InputManager;
 import android.os.Build;
 import android.util.Rational;
 import android.view.InputDevice;
-import android.view.OrientationEventListener;
 
 import androidx.annotation.RequiresApi;
 
@@ -23,70 +22,6 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 public class AndroidUiPlugin extends Plugin {
     private boolean autoPictureInPictureEnabled = false;
     private Rational pictureInPictureAspectRatio = new Rational(16, 9);
-    private OrientationEventListener displayRotationListener;
-    private boolean displayRotationListening;
-    private Boolean lastDisplayLandscape;
-
-    @PluginMethod
-    public void setDisplayRotationListening(PluginCall call) {
-        boolean enabled = Boolean.TRUE.equals(call.getBoolean("enabled", false));
-        getActivity().runOnUiThread(() -> {
-            if (enabled) {
-                if (displayRotationListener == null) {
-                    displayRotationListener = new OrientationEventListener(getContext()) {
-                        @Override
-                        public void onOrientationChanged(int degrees) {
-                            Boolean landscape = landscapeForDegrees(degrees);
-                            if (landscape == null || landscape.equals(lastDisplayLandscape)) return;
-                            boolean hadOrientation = lastDisplayLandscape != null;
-                            lastDisplayLandscape = landscape;
-                            if (hadOrientation) {
-                                notifyListeners("displayRotation", new JSObject().put("landscape", landscape));
-                            }
-                        }
-                    };
-                }
-                if (!displayRotationListener.canDetectOrientation()) {
-                    call.reject("Device orientation sensor is unavailable");
-                    return;
-                }
-                lastDisplayLandscape = null;
-                displayRotationListening = true;
-                displayRotationListener.enable();
-            } else {
-                displayRotationListening = false;
-                if (displayRotationListener != null) displayRotationListener.disable();
-                lastDisplayLandscape = null;
-            }
-            call.resolve();
-        });
-    }
-
-    static Boolean landscapeForDegrees(int degrees) {
-        if (degrees < 0) return null;
-        if ((degrees >= 60 && degrees <= 120) || (degrees >= 240 && degrees <= 300)) return true;
-        if (degrees <= 30 || degrees >= 330 || (degrees >= 150 && degrees <= 210)) return false;
-        return null;
-    }
-
-    @Override
-    protected void handleOnPause() {
-        if (displayRotationListener != null) displayRotationListener.disable();
-        lastDisplayLandscape = null;
-        super.handleOnPause();
-    }
-
-    @Override
-    protected void handleOnResume() {
-        super.handleOnResume();
-        if (displayRotationListening && displayRotationListener != null) displayRotationListener.enable();
-    }
-
-    @Override
-    protected void handleOnDestroy() {
-        if (displayRotationListener != null) displayRotationListener.disable();
-        super.handleOnDestroy();
-    }
 
     @PluginMethod
     public void setSystemBarsBackground(PluginCall call) {

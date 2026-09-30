@@ -1,4 +1,5 @@
 import { Capacitor, registerPlugin, SystemBarType, SystemBars } from '@capacitor/core'
+import { ScreenOrientation } from '@capawesome/capacitor-screen-orientation'
 
 const AndroidUi = process.env.IS_CAPACITOR && !process.env.IS_IOS ? registerPlugin('AndroidUi') : null
 const IOSUi = process.env.IS_CAPACITOR && process.env.IS_IOS ? registerPlugin('IOSUi') : null
@@ -10,18 +11,10 @@ let displayRotationTask = Promise.resolve()
 function reconcileDisplayRotationListener() {
   displayRotationTask = displayRotationTask.then(async () => {
     if (displayRotationCallbacks.size && !displayRotationHandle) {
-      displayRotationHandle = await AndroidUi.addListener('displayRotation', ({ landscape }) => {
-        for (const callback of displayRotationCallbacks) callback(landscape)
+      displayRotationHandle = await ScreenOrientation.addListener('screenOrientationChange', ({ type }) => {
+        for (const callback of displayRotationCallbacks) callback(type.startsWith('landscape'))
       })
-      try {
-        await AndroidUi.setDisplayRotationListening({ enabled: true })
-      } catch (error) {
-        await displayRotationHandle.remove()
-        displayRotationHandle = null
-        throw error
-      }
     } else if (!displayRotationCallbacks.size && displayRotationHandle) {
-      await AndroidUi.setDisplayRotationListening({ enabled: false })
       await displayRotationHandle.remove()
       displayRotationHandle = null
     }
