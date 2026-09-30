@@ -61,7 +61,7 @@ function fixture({ reducedMotion = false, available = true, phonePanel = false, 
     getBoundingClientRect() { reads++; return from },
   } }
   const eligibility = source.slice(source.indexOf('  function canUseScrollMiniPlayerBase('), source.indexOf('  function canShowCrossTabMiniPlayer('))
-  const methods = vm.runInNewContext(`${eligibility}\n${dragSource}\n({ beginScrollMiniPlayerDrag, moveScrollMiniPlayerDrag, finishScrollMiniPlayerDrag, cancelScrollMiniPlayerDrag, canUseScrollMiniPlayerBase })`, {
+  const methods = vm.runInNewContext(`${eligibility}\n${dragSource}\n({ beginScrollMiniPlayerDrag, moveScrollMiniPlayerDrag, updateScrollMiniPlayerBackProgress, finishScrollMiniPlayerDrag, cancelScrollMiniPlayerDrag, canUseScrollMiniPlayerBase })`, {
     process: { env: { IS_CAPACITOR: false } },
     container,
     video: { value: { getBoundingClientRect: () => from, style: { removeProperty() {} } } },
@@ -127,6 +127,19 @@ test('drag batches pointer samples into one transform without reading layout per
   assert.match(f.style.transform, /^translate\([\d.]+px, [\d.]+px\) scale\(0\.\d+, 0\.\d+\)$/)
   assert.equal(f.reads(), 1)
   assert.equal(f.progress(), 1)
+})
+
+test('Android back progress follows the full dock path with fractional player geometry', () => {
+  const f = fixture()
+  f.methods.beginScrollMiniPlayerDrag()
+  f.methods.updateScrollMiniPlayerBackProgress(0.5)
+  f.frames.get(1)()
+  const halfway = Number(f.style.transform.match(/translate\([^,]+, ([\d.]+)px/)[1])
+  assert.equal(halfway, (570.75 - 80.5) / 2)
+  f.methods.updateScrollMiniPlayerBackProgress(1)
+  f.frames.get(1)()
+  assert.equal(Number(f.style.transform.match(/translate\([^,]+, ([\d.]+)px/)[1]), 570.75 - 80.5)
+  assert.equal(f.reads(), 1)
 })
 
 test('cancellation removes pending frames and restores the original player without navigation', async () => {

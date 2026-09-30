@@ -6,7 +6,7 @@ import {
   openMockedVideo,
   waitForPlayback,
 } from '../../helpers/player.mjs'
-import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 // These used to live in the network suite, where they only ran when YouTube
 // served both the watch page and a media stream. Everything they need is the
@@ -1254,6 +1254,77 @@ test('scopes the mobile fullscreen swipe movement to the video in tablet layout'
   await expect(video).toHaveCSS('translate', '0px -42px')
   await expect(player).toHaveCSS('transform', 'none')
 })
+
+for (const uiScale of [100, 125]) {
+  for (const phone of [true, false]) {
+    test(`waiting poster follows fullscreen swipes in ${phone ? 'phone' : 'tablet'} layout at ${uiScale}% scale`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      await page.route('https://i.ytimg.com/**', route => route.fulfill({
+        contentType: 'image/svg+xml',
+        body: '<svg xmlns="http://www.w3.org/2000/svg" width="480" height="270"><rect width="480" height="270" fill="#326b8a"/></svg>'
+      }))
+      await openMockedVideo(page)
+      await setWindowSize(app, page, { width: phone ? 375 : 900, height: 850 })
+      await page.evaluate(uiScale => window.ftElectron.setZoomFactor(uiScale / 100), uiScale)
+      await page.evaluate(phone => {
+        Object.defineProperty(navigator, 'maxTouchPoints', { configurable: true, get: () => 5 })
+        const app = document.querySelector('.app')
+        const mobile = () => {
+          app.classList.add('capacitorTabs')
+          app.classList.add(phone ? 'capacitorPhoneLayout' : 'capacitorTabletLayout')
+        }
+        new MutationObserver(() => {
+          if (!app.classList.contains('capacitorTabs')) mobile()
+        }).observe(app, { attributeFilter: ['class'] })
+        mobile()
+      }, phone)
+      const watch = await watchViewHandle(page)
+      await watch.evaluate(async view => {
+        view.isLoading = true
+        await view.$nextTick()
+        view.adEndTimeUnixMs = Date.now() + 60_000
+        view.isLoading = false
+      })
+      const player = page.locator('.ftVideoPlayer')
+      const video = player.locator('video')
+      const poster = player.locator('.countdownPoster')
+      await expect(poster).toBeVisible()
+      await expect.poll(() => poster.locator('img').evaluate(image => image.naturalWidth)).toBe(480)
+      await expect.poll(() => video.evaluate(element => element.readyState)).toBe(0)
+      const cdp = await page.context().newCDPSession(page)
+      const touch = (type, point) => cdp.send('Input.dispatchTouchEvent', {
+        type, touchPoints: point ? [point] : []
+      })
+      try {
+        for (const fullscreen of [false, true]) {
+          await setPlayerFullscreen(page, fullscreen)
+          const before = await poster.boundingBox()
+          const bounds = await player.boundingBox()
+          // Stay above the seek bar, which occupies the center at narrow scales.
+          const start = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height * 0.3 }
+          await touch('touchStart', start)
+          await touch('touchMove', { ...start, y: start.y + (fullscreen ? 40 : -40) })
+          await expect(player).toHaveClass(/mobileFullscreenSwiping/)
+          await expect.poll(async () => {
+            const [posterBox, videoBox] = await Promise.all([poster.boundingBox(), video.boundingBox()])
+            return Math.abs(posterBox.y - videoBox.y)
+          }, { timeout: 1000 }).toBeLessThan(1)
+          const during = await poster.boundingBox()
+          expect(fullscreen ? during.y - before.y : before.y - during.y).toBeGreaterThan(8)
+          await touch('touchCancel')
+          await expect(player).not.toHaveClass(/mobileFullscreenSwiping|mobileFullscreenSwipeSettling/)
+          await expect.poll(async () => Math.abs((await poster.boundingBox()).y - before.y)).toBeLessThan(1)
+          await expect(poster).toHaveCSS('translate', 'none')
+          await expect(video).toHaveCSS('translate', 'none')
+          await expect.poll(() => video.evaluate(element => element.readyState)).toBe(0)
+        }
+      } finally {
+        await touch('touchCancel').catch(() => {})
+        await cdp.detach()
+      }
+    })
+  }
+}
 
 test('uses mobile surface taps for controls and keeps an on-video play button', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
@@ -2661,14 +2732,63 @@ test.describe('navigation playback lifecycle', () => {
     expect(await page.locator('.ftVideoPlayer video').evaluate((element, original) => element === original, original)).toBe(true)
   })
 
-  test('does not retain paused playback when navigating away', async ({ app, page }) => {
+  test('retains paused playback when navigating away and switching tabs', async ({ app, page }) => {
     const video = await openDemoVideo({ app, page })
     await video.evaluate(element => element.pause())
+    const original = await video.elementHandle()
     await page.getByRole('button', { name: 'Expand side navigation', exact: true }).click()
     await goTo(page, 'history')
     await expect(page).toHaveURL(/#\/history$/)
-    await expect(page.locator('.ftVideoPlayer')).toHaveCount(0)
+    const player = page.locator('.ftVideoPlayer')
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect(player).toBeVisible()
+    await page.locator('.tabBar .newTabButton').click()
+    await expect(player).toBeVisible()
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await player.locator('.scrollMiniScrollTop').click()
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+    expect(await player.locator('video').evaluate((element, original) => element === original && element.paused, original)).toBe(true)
   })
+
+  for (const uiScale of [85, 100]) {
+    test.describe(`loading navigation at ${uiScale}% UI scale`, () => {
+      test.use({ seed: { settings: { ...PLAYER_SEED, keepPlayingOnNavigation: true, uiScale } } })
+      test('retains the poster and pending load while navigating away and returning', async ({ app, page }) => {
+        await mockPlayableWatchPage(app, page)
+        const media = Promise.withResolvers()
+        let requests = 0
+        await page.route('**/videoplayback?id=opentubex-e2e-demo**', async route => {
+          requests++
+          await media.promise
+          await route.fallback()
+        })
+        try {
+          await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+          await page.locator(sel.searchInput).press('Enter')
+          const player = page.locator('.ftVideoPlayer')
+          await expect(player).toBeVisible()
+          await expect.poll(() => requests).toBeGreaterThan(0)
+          const component = await page.evaluateHandle(findWatchComponent)
+          const original = await player.locator('video').elementHandle()
+          expect(await original.evaluate(element => element.readyState)).toBe(0)
+          expect(await component.evaluate(component => component.proxy.$refs.player.hasLoaded)).toBe(false)
+          await component.evaluate(component => component.proxy.tabRouter.push('/history'))
+          await expect(page).toHaveURL(/#\/history$/)
+          await expect(player).toBeVisible()
+          await expect(player).toHaveClass(/scrollMiniPlayer/)
+          expect(await player.locator('video').evaluate((element, original) => element === original && element.readyState === 0, original)).toBe(true)
+          await player.locator('.scrollMiniScrollTop').click()
+          await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+          await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+          expect(await player.locator('video').evaluate((element, original) => element === original, original)).toBe(true)
+        } finally {
+          media.resolve()
+        }
+        await waitForPlayback(page)
+      })
+    })
+  }
 
   test('disabling navigation playback disposes the retained player', async ({ app, page }) => {
     await openDemoVideo({ app, page })

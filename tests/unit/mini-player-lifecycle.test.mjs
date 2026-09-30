@@ -23,7 +23,7 @@ function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPl
   const rect = { left: 10, top: 10, width: 360, height: 202 }
   const create = vm.runInNewContext(`${source}; useScrollMiniPlayer`, {
     ...coordinator, computed, ref, watch, inject: () => ({ detached: ref(navigatedAway), tabPresented: ref(true), minimized, clearMinimizePreview() {} }), watchNavigationKey: Symbol(),
-    nextTick() {}, window, clearTimeout, process: { env: { IS_CAPACITOR: false } },
+    nextTick() {}, onMounted() {}, onBeforeUnmount() {}, window, clearTimeout, process: { env: { IS_CAPACITOR: false } },
     document: { body: { classList: { remove() {} } } },
     store: { getters: reactive({ getAutoPictureInPictureTriggers: [], getKeepPlayingOnNavigation: keepPlaying, getScrollMiniPlayerOnAllTabs: true }) },
     DEFAULT_ASPECT_RATIO: 16 / 9,
@@ -62,6 +62,16 @@ test('a suspended Short cannot own the mini player even when its watch view is m
   video.value.paused = true
   minimized.value = true
   isPlayerSuspended.value = true
+  isActiveTab.value = false
+  player.updateScrollMiniPlayer()
+  assert.equal(coordinator.hasCrossTabMiniPlayerOwner(), false)
+  assert.equal(player.scrollMiniPlayerActive.value, false)
+})
+
+test('a paused Watch tab does not acquire the cross-tab mini player before navigating away', t => {
+  const { player, video, isActiveTab } = mountMiniPlayer(t, { keepPlaying: true, navigatedAway: false })
+  video.value.paused = true
+  player.scrollMiniPlayerActive.value = false
   isActiveTab.value = false
   player.updateScrollMiniPlayer()
   assert.equal(coordinator.hasCrossTabMiniPlayerOwner(), false)

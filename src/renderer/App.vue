@@ -574,6 +574,11 @@ import { resolveBaseTheme, resolveSystemThemeSettings } from '../appearanceSetti
 import { calculateColorLuminance, resolveColor } from './helpers/colors'
 import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
 import { hasVisibleGamepadLayer, initializeGamepadNavigation } from './helpers/gamepadNavigation'
+import { initializeAndroidBack } from './helpers/androidBack'
+import { getAndroidBackPlayer, getAndroidBackSheet, settleAndroidBackAnimation } from './helpers/androidBackGesture'
+import { createAndroidBackDialogPreview } from './helpers/androidBackDialog'
+import { applyAnimationSpeed } from './helpers/animationSpeed'
+import { isReducedMotionEnabled } from './helpers/reducedMotion'
 import { keyboardEventInitFromShortcut, OPEN_COMMAND_PALETTE_EVENT } from './helpers/commandPalette'
 import { createCommandPaletteRegistry } from './helpers/commandPaletteRegistry'
 import {
@@ -3303,6 +3308,15 @@ async function handleAndroidExitPromptAnswer(option) {
   }
 }
 
+function getAndroidBackTarget() {
+  const modalDialog = [...document.querySelectorAll('dialog:modal')].at(-1)
+  const settingsWindow = settingsWindowOpen.value ? document.querySelector('.settingsWindow') : null
+  const openDialog = [...document.querySelectorAll('dialog[open]')].at(-1)
+  const focused = document.activeElement instanceof HTMLElement ? document.activeElement : document
+  const prompt = [...document.querySelectorAll('.prompt:not([inert])')].at(-1)
+  return modalDialog ?? prompt ?? (settingsWindow?.contains(focused) ? focused : settingsWindow) ?? openDialog ?? focused
+}
+
 async function handleAndroidBack() {
   if (mobileContextLink.value !== null || mobileContextActions.value !== null) {
     backMobileContextMenu()
@@ -3310,12 +3324,7 @@ async function handleAndroidBack() {
   }
 
   const hadOpenLayer = hasVisibleGamepadLayer() || isSideNavOpen.value
-  const modalDialog = [...document.querySelectorAll('dialog:modal')].at(-1)
-  const settingsWindow = settingsWindowOpen.value ? document.querySelector('.settingsWindow') : null
-  const openDialog = [...document.querySelectorAll('dialog[open]')].at(-1)
-  const focused = document.activeElement instanceof HTMLElement ? document.activeElement : document
-  const focusedPrompt = focused instanceof HTMLElement && focused.closest('.prompt') ? focused : null
-  const target = modalDialog ?? focusedPrompt ?? (settingsWindow?.contains(focused) ? focused : settingsWindow) ?? openDialog ?? focused
+  const target = getAndroidBackTarget()
   const escapeEvent = new KeyboardEvent('keydown', {
     key: 'Escape',
     code: 'Escape',
@@ -3342,6 +3351,65 @@ async function handleAndroidBack() {
   }
 
   await requestAndroidAppExit()
+}
+
+function shouldInterceptAndroidBack() {
+  const tabId = presentedTabId.value
+  return Boolean(store.getters.getConfirmCloseApp ||
+    (tabId && store.getters.getTabHistoryState(tabId).canGoBack) ||
+    isSideNavOpen.value || settingsWindowOpen.value || isAnyPromptOpen.value ||
+    mobileContextLink.value || mobileContextActions.value ||
+    document.fullscreenElement || document.querySelector('.ftVideoPlayer.fullWindow, dialog[open]') ||
+    hasVisibleGamepadLayer())
+}
+
+function getAndroidBackPreview() {
+  if (mobileContextLink.value || mobileContextActions.value) return null
+  if (isSideNavOpen.value) {
+    if (!useWatchSideNavOverlay.value || !window.matchMedia('(width > 680px)').matches) return null
+    const drawer = document.querySelector('.sideNav')
+    if (!drawer || isReducedMotionEnabled()) return null
+    let animation
+    return {
+      begin() {
+        const direction = isLocaleRightToLeft.value ? 1 : -1
+        animation = applyAnimationSpeed(drawer.animate([
+          { transform: 'translateX(0)' },
+          { transform: `translateX(${direction * drawer.getBoundingClientRect().width}px)` }
+        ], { duration: 200, fill: 'both' }))
+        animation.pause()
+        return true
+      },
+      update(progress) { animation.currentTime = progress * Number(animation.effect.getTiming().duration) },
+      async finish(commit) {
+        await settleAndroidBackAnimation(animation, commit)
+        if (commit) {
+          closeSideNav()
+          await nextTick()
+          // Keep the finished effect until the closed styles take over.
+          await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        }
+        animation.cancel()
+      },
+      cancel() { animation?.cancel() },
+    }
+  }
+  const target = getAndroidBackTarget()
+  const sheet = getAndroidBackSheet(target)
+  if (sheet && !target.classList.contains('compactSheet')) return sheet
+  const dialog = target.closest?.('.settingsWindow, .prompt, dialog[open]')
+  if (dialog && !target.closest?.('[aria-expanded="true"], [data-settings-escape-scope]')) {
+    const nested = dialog.hasAttribute('data-android-back-nested')
+    const content = nested
+      ? dialog.querySelector('.settingsContent') ?? dialog
+      : dialog
+    return createAndroidBackDialogPreview(content, handleAndroidBack, () =>
+      content.isConnected && dialog.hasAttribute('data-android-back-nested') === nested &&
+      getAndroidBackTarget().closest?.('.settingsWindow, .prompt, dialog[open]') === dialog)
+  }
+  if (settingsWindowOpen.value || isAnyPromptOpen.value || hasVisibleGamepadLayer() ||
+    document.fullscreenElement || document.querySelector('dialog[open]')) return null
+  return getAndroidBackPlayer(presentedTabId.value)
 }
 
 function handleAndroidPictureInPictureChange(event) {
@@ -4653,6 +4721,16 @@ async function enableCapacitorIntegrations() {
   const backButtonHandle = Capacitor.getPlatform() === 'android'
     ? await CapacitorApp.addListener('backButton', handleAndroidBack)
     : null
+  const removeAndroidBack = Capacitor.getPlatform() === 'android'
+    ? await initializeAndroidBack({
+        back: handleAndroidBack,
+        getPreview: getAndroidBackPreview,
+        shouldIntercept: shouldInterceptAndroidBack
+      }).catch(error => {
+        console.error('Unable to enable predictive back', error)
+        return null
+      })
+    : null
   const urlHandle = await CapacitorApp.addListener('appUrlOpen', ({ url }) => {
     openUrl(url)
   })
@@ -4728,6 +4806,7 @@ async function enableCapacitorIntegrations() {
     stopShortcutUpdates()
     shortcutHandle.remove()
     backButtonHandle?.remove()
+    removeAndroidBack?.()
     urlHandle.remove()
     appStateHandle.remove()
     window.removeEventListener('opentubex:android-task-removed', handleTaskRemoved)

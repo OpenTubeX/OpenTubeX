@@ -1,4 +1,4 @@
-import { computed, inject, nextTick, ref, watch } from 'vue'
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import store from '../../../store/index'
 import { applyAnimationSpeed, getAnimationSpeedMultiplier } from '../../../helpers/animationSpeed'
@@ -15,6 +15,8 @@ import { isReducedMotionEnabled } from '../../../helpers/reducedMotion'
 import { lightHaptic } from '../../../helpers/mobileHaptics.js'
 import { getCapacitorTabService } from '../../../tabs/CapacitorTabService'
 import { watchNavigationKey } from '../../../tabs/TabContext'
+import { getPreviousBrowsingRoute } from '../../../tabs/playerDockDestination'
+import { registerAndroidBackPlayer } from '../../../helpers/androidBackGesture'
 import {
   animateScrollMiniPlayerBounce,
   clampScrollMiniPlayerRect,
@@ -427,6 +429,11 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     if (inlineDragFrame === null) inlineDragFrame = requestAnimationFrame(renderScrollMiniPlayerDrag)
   }
 
+  function updateScrollMiniPlayerBackProgress(progress) {
+    if (!inlineDrag || inlineDrag.finishing) return
+    moveScrollMiniPlayerDrag(0, progress * getInlineDragDistance(inlineDrag))
+  }
+
   function settleScrollMiniPlayerDrag(commit) {
     const drag = inlineDrag
     const target = commit ? 1 : 0
@@ -797,7 +804,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       !autoPictureInPictureOnTabChange.value &&
       scrollMiniPlayerOnAllTabs.value &&
       canUseScrollMiniPlayerBase() &&
-      (watchNavigation?.minimized?.value || isCrossTabMiniPlayerOwner(crossTabMiniPlayerCandidate) || !videoElement.paused)
+      ((store.getters.getKeepPlayingOnNavigation && watchNavigation?.detached.value) || watchNavigation?.minimized?.value ||
+        isCrossTabMiniPlayerOwner(crossTabMiniPlayerCandidate) || !videoElement.paused)
   }
 
   function canUseScrollMiniPlayer() {
@@ -1645,6 +1653,34 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     }
   }
 
+  let unregisterAndroidBackPlayer = null
+  onMounted(() => {
+    if (!process.env.IS_CAPACITOR || process.env.IS_IOS || !tabId) return
+    unregisterAndroidBackPlayer = registerAndroidBackPlayer(tabId, {
+      begin: () => {
+        // Match normal Back's retention policy and destination. A previous
+        // Watch entry, fullscreen, or PiP cannot dock here. Paused and loading
+        // players use the same retained component as playing videos.
+        const tab = store.getters.getTabById(tabId)
+        return isActiveTab.value && !watchNavigation?.detached.value &&
+          store.getters.getKeepPlayingOnNavigation &&
+          Boolean(getPreviousBrowsingRoute(tab)) &&
+          !isReducedMotionEnabled() && beginScrollMiniPlayerDrag()
+      },
+      update: updateScrollMiniPlayerBackProgress,
+      finish: commit => {
+        if (!isActiveTab.value || playerSuspended.value ||
+          !store.getters.getKeepPlayingOnNavigation || watchNavigation?.detached.value) {
+          cancelScrollMiniPlayerDrag()
+          return Promise.resolve()
+        }
+        return finishScrollMiniPlayerDrag(commit)
+      },
+      cancel: cancelScrollMiniPlayerDrag,
+    })
+  })
+  onBeforeUnmount(() => unregisterAndroidBackPlayer?.())
+
   watch(scrollMiniVolumePercent, updateScrollMiniVolumeBarFill)
 
   watch(() => props.videoId, () => {
@@ -1656,6 +1692,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   })
 
   watch([isActiveTab, playerSuspended], ([active, suspended]) => {
+    if (inlineDrag && !inlineDrag.finishing && (!active || suspended)) cancelScrollMiniPlayerDrag()
     if (suspended) {
       unregisterCrossTabMiniPlayer(crossTabMiniPlayerCandidate)
       deactivateScrollMiniPlayer()

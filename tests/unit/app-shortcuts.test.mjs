@@ -51,6 +51,9 @@ test('retained startup clicks and running-app clicks navigate and update localiz
     Capacitor: { getPlatform: () => 'android' },
     supportsYtDlp: true,
     handleAndroidBack() {},
+    initializeAndroidBack: async () => () => {},
+    getAndroidBackPreview() {},
+    shouldInterceptAndroidBack() {},
     CapacitorApp: {
       addListener: async (name, callback) => {
         listeners.set(name, callback)

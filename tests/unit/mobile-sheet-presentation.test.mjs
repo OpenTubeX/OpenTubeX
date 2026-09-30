@@ -3,11 +3,12 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
 import { computed, effectScope, nextTick, reactive, ref, shallowRef, watch } from 'vue'
+import { getAndroidBackSheet, registerAndroidBackSheet, settleAndroidBackAnimation } from '../../src/renderer/helpers/androidBackGesture.js'
 
 const source = (await readFile(new URL('../../src/renderer/components/FtMobileSheet/FtMobileSheet.vue', import.meta.url), 'utf8'))
   .split('<script setup>')[1].split('</script>')[0].replace(/^import .*\n/gm, '')
 
-function mountSheet(t, expandPanel = null) {
+function mountSheet(t, expandPanel = null, { reducedMotion = false } = {}) {
   const scope = effectScope()
   const cleanup = []
   const landscape = ref(false)
@@ -29,11 +30,21 @@ function mountSheet(t, expandPanel = null) {
   })
   const inlinePlayer = { getBoundingClientRect: () => ({ top: 50, bottom: 300 }) }
   const inlineElement = shallowRef(inlinePlayer)
+  const animations = []
   const element = {
     open: false, style: {},
     getBoundingClientRect: () => ({ top: 300, height: 500 }),
     show() { this.open = true }, showModal() { this.open = true }, close() { this.open = false },
-    animate: () => ({ cancel() {}, finished: Promise.resolve() }), querySelector: () => null
+    animate: (frames, options) => {
+      const animation = {
+        frames, effect: { getTiming: () => options }, currentTime: 0, playState: 'running',
+        pause() { this.playState = 'paused' }, play() { this.playState = 'running' },
+        reverse() { this.playState = 'running' }, cancel() { this.playState = 'idle' },
+        finished: Promise.resolve()
+      }
+      animations.push(animation)
+      return animation
+    }, querySelector: () => null
   }
   const dialog = shallowRef(element)
   const document = Object.assign(new EventTarget(), {
@@ -44,7 +55,8 @@ function mountSheet(t, expandPanel = null) {
   const events = []
   const context = {
     computed, ref, shallowRef, watch, nextTick, document, window, innerHeight: 800,
-    isAppHidden: () => !!document.hidden,
+    isAppHidden: () => !!document.hidden, isReducedMotionEnabled: () => reducedMotion,
+    process: { env: { IS_CAPACITOR: true } }, registerAndroidBackSheet, settleAndroidBackAnimation,
     defineProps: () => props, defineEmits: () => (...args) => events.push(args),
     useTemplateRef: () => dialog, usePhoneLayout: () => landscape,
     inject: name => name === 'phonePanelPlayer' ? () => player
@@ -65,7 +77,7 @@ function mountSheet(t, expandPanel = null) {
   scope.run(() => vm.runInNewContext(source + '\nglobalThis.state = { expanded, updatePresentation, sheetStyle, startDrag, moveDrag, endDrag };', context))
   const unmount = () => { cleanup.splice(0).forEach(callback => callback()); scope.stop() }
   t.after(unmount)
-  return { ...context, element, player, inlinePlayer, inlineElement, props, landscape, observed, activeObservers, events, unmount,
+  return { ...context, element, player, inlinePlayer, inlineElement, props, landscape, observed, activeObservers, events, animations, unmount,
     resize() { resizeCallback?.() },
     async settle() { await nextTick(); await nextTick(); await nextTick() }
   }
@@ -91,6 +103,86 @@ for (const commit of [false, true]) {
     assert.deepEqual(sheet.events.map(([event]) => event), ['suspend', commit ? 'closed' : 'resume'])
   })
 }
+
+for (const commit of [false, true]) {
+  test(`predictive back ${commit ? 'dismisses' : 'restores'} a bottom sheet without changing its reading state`, async t => {
+    const sheet = mountSheet(t)
+    sheet.props.open = true
+    await sheet.settle()
+    const preview = getAndroidBackSheet(sheet.element)
+    assert.equal(preview.begin(), true)
+    preview.update(0.6)
+    const animation = sheet.animations.at(-1)
+    assert.equal(animation.playState, 'paused')
+    assert.equal(animation.currentTime, 108)
+    assert.equal(sheet.element.open, true)
+    assert.deepEqual(sheet.events, [])
+    await preview.finish(commit)
+    assert.equal(sheet.element.open, !commit)
+    assert.equal(animation.playState, 'idle')
+    assert.deepEqual(sheet.events.map(([event]) => event), commit ? ['close', 'closed'] : [])
+    if (!commit) assert.equal(preview.begin(), true, 'cancelled sheet can be previewed again')
+  })
+}
+
+test('returning a sheet gesture to its starting edge cancels without replaying the animation', async t => {
+  const sheet = mountSheet(t)
+  sheet.props.open = true
+  await sheet.settle()
+  const preview = getAndroidBackSheet(sheet.element)
+  preview.begin()
+  preview.update(0.6)
+  preview.update(0)
+  const animation = sheet.animations.at(-1)
+  let reversed = false
+  animation.reverse = () => { reversed = true }
+  await preview.finish(false)
+  assert.equal(reversed, false)
+  assert.equal(animation.playState, 'idle')
+  assert.equal(sheet.element.open, true)
+  assert.deepEqual(sheet.events, [])
+})
+
+test('nested Back and compact modal sheets keep their ordinary Back behavior', async t => {
+  const sheet = mountSheet(t)
+  sheet.props.open = true
+  await sheet.settle()
+  const preview = getAndroidBackSheet(sheet.element)
+  sheet.props.back = true
+  assert.equal(preview.begin(), false)
+  sheet.props.back = false
+  sheet.props.compact = true
+  assert.equal(preview.begin(), false)
+  assert.deepEqual(sheet.events, [])
+})
+
+test('reduced motion leaves sheet dismissal to ordinary Back', async t => {
+  const sheet = mountSheet(t, null, { reducedMotion: true })
+  sheet.props.open = true
+  await sheet.settle()
+  const count = sheet.animations.length
+  assert.equal(getAndroidBackSheet(sheet.element).begin(), false)
+  assert.equal(sheet.animations.length, count)
+  assert.equal(sheet.element.open, true)
+  assert.deepEqual(sheet.events, [])
+})
+
+test('suspending or unmounting a held sheet cancels its preview without dismissing it', async t => {
+  const sheet = mountSheet(t)
+  sheet.props.open = true
+  await sheet.settle()
+  const preview = getAndroidBackSheet(sheet.element)
+  preview.begin()
+  const animation = sheet.animations.at(-1)
+  sheet.player.coversWindow = true
+  sheet.state.updatePresentation()
+  await sheet.settle()
+  assert.equal(animation.playState, 'idle')
+  await preview.finish(true)
+  assert.deepEqual(sheet.events.map(([event]) => event), ['suspend'])
+  sheet.unmount()
+  assert.equal(getAndroidBackSheet(sheet.element), null)
+})
 
 test('a sheet opened over a mini player uses the original video position', async t => {
   const sheet = mountSheet(t)

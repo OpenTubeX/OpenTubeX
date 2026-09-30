@@ -9,6 +9,7 @@
     :style="windowStyle"
     role="dialog"
     :aria-label="windowTitle"
+    :data-android-back-nested="!isInDesktopView && showBackButton ? '' : null"
     tabindex="-1"
     @keydown.esc.capture="handleSettingsEscape"
   >
