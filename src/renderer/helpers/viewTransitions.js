@@ -3,13 +3,11 @@ import { nextTick } from 'vue'
 import { isReducedMotionEnabled } from './reducedMotion'
 
 export const VIDEO_MORPH_NAME = 'video-morph'
-export const NEW_TAB_THUMBNAIL_MORPH_NAME = 'new-tab-thumbnail-morph'
 
 /** @type {HTMLElement | null} */
 let morphSourceElement = null
 let navigationRequestedAt = 0
 let shortMorphRequested = false
-let activeNewTabMorphs = 0
 
 /**
  * Request that the next router navigation runs inside a View Transition,
@@ -60,61 +58,42 @@ export function requestWatchPageViewTransition(linkElement, { isShort, allowVisi
  * @param {() => Promise<{ id?: string } | null>} createTab creates the background tab
  */
 export async function morphThumbnailIntoNewTab(linkElement, createTab) {
-  if (typeof document.startViewTransition !== 'function' || isReducedMotionEnabled()) {
-    await createTab()
-    return
-  }
-
-  const thumbnail = linkElement instanceof HTMLElement
+  const thumbnail = !isReducedMotionEnabled() && linkElement instanceof HTMLElement
     ? findThumbnail(linkElement)
     : null
-  if (!(thumbnail instanceof HTMLElement)) {
-    await createTab()
-    return
-  }
+  const source = thumbnail?.getBoundingClientRect()
+  // Capture only the source geometry. Document View Transitions delay creation
+  // until the old snapshot and freeze rendering while the new tab mounts.
+  const tab = await createTab()
+  if (!source?.width || !source.height || !tab?.id) return
 
-  let target = null
-  let cleanedUp = false
-  thumbnail.style.viewTransitionName = NEW_TAB_THUMBNAIL_MORPH_NAME
-  activeNewTabMorphs++
-  document.documentElement.classList.add('newTabThumbnailMorphActive')
+  await nextTick()
+  const target = document.querySelector(`.tab[data-tab-id="${CSS.escape(tab.id)}"]`)
+  const destination = target?.getBoundingClientRect()
+  if (!destination?.width || !destination.height) return
 
-  const cleanup = () => {
-    if (cleanedUp) return
-    cleanedUp = true
-    thumbnail.style.viewTransitionName = ''
-    if (target) {
-      target.style.viewTransitionName = ''
+  const image = thumbnail.cloneNode(false)
+  image.removeAttribute('id')
+  image.removeAttribute('srcset')
+  image.src = thumbnail.currentSrc || thumbnail.src
+  image.alt = ''
+  image.setAttribute('aria-hidden', 'true')
+  image.className = 'newTabThumbnailMorph'
+  Object.assign(image.style, {
+    left: `${source.x}px`,
+    top: `${source.y}px`,
+    width: `${source.width}px`,
+    height: `${source.height}px`
+  })
+  document.body.append(image)
+  const animation = image.animate([
+    { transform: 'none', opacity: 1 },
+    {
+      transform: `translate(${destination.x - source.x}px, ${destination.y - source.y}px) scale(${destination.width / source.width}, ${destination.height / source.height})`,
+      opacity: 0
     }
-    activeNewTabMorphs--
-    if (activeNewTabMorphs === 0) {
-      document.documentElement.classList.remove('newTabThumbnailMorphActive')
-    }
-  }
-
-  try {
-    const transition = document.startViewTransition(async () => {
-      const tab = await createTab()
-      await nextTick()
-      // The source remains visible because this is a background-tab creation.
-      // Remove its name after the old snapshot so only the new tab owns the
-      // name when Chromium captures the new state.
-      thumbnail.style.viewTransitionName = ''
-      target = tab?.id
-        ? document.querySelector(`.tab[data-tab-id="${CSS.escape(tab.id)}"]`)
-        : null
-      if (target instanceof HTMLElement) {
-        target.style.viewTransitionName = NEW_TAB_THUMBNAIL_MORPH_NAME
-      }
-    })
-
-    transition.types.add(NEW_TAB_THUMBNAIL_MORPH_NAME)
-    transition.finished.then(cleanup, cleanup)
-    await transition.updateCallbackDone
-  } catch (error) {
-    cleanup()
-    throw error
-  }
+  ], { duration: 300, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' })
+  animation.finished.then(() => image.remove(), () => image.remove())
 }
 
 /**

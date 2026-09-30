@@ -2470,21 +2470,15 @@ a:visited {
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-::view-transition-group(new-tab-thumbnail-morph) {
-  animation-duration: 300ms;
-  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Exclude the root before the old snapshot is captured. The thumbnail and new
-   tab are the only frames needed, so the live tab bar stays painted. */
-:root.newTabThumbnailMorphActive {
-  view-transition-name: none;
-}
-
-/* Let subsequent clicks reach live links below the thumbnail animation. */
-:root:active-view-transition-type(new-tab-thumbnail-morph)::view-transition,
-:root:active-view-transition-type(new-tab-thumbnail-morph)::view-transition-group(*) {
+/* Animate only a thumbnail copy; creating a background tab must not wait for
+   document snapshots or freeze the subscriptions feed while it loads. */
+.newTabThumbnailMorph {
+  position: fixed;
+  z-index: 20000;
+  margin: 0;
+  object-fit: cover;
   pointer-events: none;
+  transform-origin: top left;
 }
 
 :root.utilityWindowMorphActive .utilityWindowMorphTarget {
