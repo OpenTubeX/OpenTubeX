@@ -8,6 +8,7 @@ import {
   normalizeScrollSpeed
 } from './scrollSpeed'
 import { initializePageScrollbar } from './pageScrollbar'
+import { addScrollbarAutoHide } from './scrollbarAutoHide'
 
 // Kept out of the core bundle by the library, so `clickScroll` below silently
 // does nothing unless it is registered.
@@ -34,9 +35,9 @@ const suspendScrollbarPosition = new WeakMap()
 function scrollbarOptions(initialization) {
   const options = {
     scrollbars: {
-      // 'move' hides the scrollbars once the pointer has been still for
-      // `autoHideDelay` and brings them back as soon as it moves again.
-      autoHide: store.getters.getAlwaysShowScrollbars ? 'never' : 'move',
+      // Our move-to-show handler changes classes only when visibility changes.
+      // The library's 'move' mode rewrites them on every scroll frame.
+      autoHide: 'never',
       // Track taps on a phone are easy to trigger while using nearby content.
       // Keep desktop track clicks, but let mobile touches reach the content;
       // the handle remains draggable on both platforms.
@@ -63,6 +64,9 @@ function scrollbarOptions(initialization) {
 function create(initialization) {
   const instance = OverlayScrollbars(initialization, scrollbarOptions(initialization))
   instances.set(instance, initialization)
+  if (!store.getters.getAlwaysShowScrollbars) {
+    instance.on('destroyed', addScrollbarAutoHide(instance.elements()))
+  }
   updateScrollSpeedHandler(instance)
   instance.on('destroyed', () => {
     instances.delete(instance)
@@ -388,9 +392,7 @@ export function initializeAppScrollbars({ useNativePageScrollbar = false } = {})
     }
   )
 
-  // Rebuilt rather than reconfigured: switching `autoHide` on a live instance
-  // leaves its already scheduled hide behind, so the scrollbars disappear again
-  // a second after being switched to "always show".
+  // Rebuild to install/remove idle visibility handling and cancel pending hides.
   watch(() => store.getters.getAlwaysShowScrollbars, () => {
     const rebuilds = [...instances].map(([instance, initialization]) => {
       const { viewport } = instance.elements()
