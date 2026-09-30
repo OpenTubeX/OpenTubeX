@@ -1685,6 +1685,7 @@ Video:
       'Off': 'Izklopljeno'
       Minutes: '{minutes} min'
       End of video: Konec videoposnetka
+      End of current chapter: Konec trenutnega poglavja
       Remaining: 'Preostane {time}'
       Cancel timer: Prekliči časovnik
       Timer ended: Časovnik za spanje se je iztekel

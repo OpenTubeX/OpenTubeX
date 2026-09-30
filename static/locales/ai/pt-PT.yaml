@@ -1290,6 +1290,7 @@ Video:
       'Off': Desativado
       Minutes: '{minutes} minutos'
       End of video: Fim do vídeo
+      End of current chapter: Fim do capítulo atual
       Remaining: 'Tempo restante: {time}'
       Cancel timer: Cancelar temporizador
       Timer ended: O temporizador de suspensão terminou

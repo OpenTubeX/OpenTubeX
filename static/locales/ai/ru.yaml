@@ -1268,6 +1268,7 @@ Video:
       'Off': 'Выкл.'
       Minutes: '{minutes} мин.'
       End of video: До конца видео
+      End of current chapter: Конец текущей главы
       Remaining: 'Осталось: {time}'
       Cancel timer: Отменить таймер
       Timer ended: Таймер сна сработал

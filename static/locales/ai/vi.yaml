@@ -1290,6 +1290,7 @@ Video:
       'Off': 'Tắt'
       Minutes: '{minutes} phút'
       End of video: Cuối video
+      End of current chapter: Kết thúc chương hiện tại
       Remaining: 'Còn {time}'
       Cancel timer: Hủy hẹn giờ
       Timer ended: Đã hết giờ ngủ

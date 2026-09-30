@@ -1276,6 +1276,7 @@ Video:
       'Off': 'Desaktibatuta'
       Minutes: '{minutes} minutu'
       End of video: Bideoaren amaieran
+      End of current chapter: Uneko kapituluaren amaiera
       Remaining: '{time} geratzen dira'
       Cancel timer: Utzi tenporizadorea
       Timer ended: Lo-tenporizadorea amaitu da

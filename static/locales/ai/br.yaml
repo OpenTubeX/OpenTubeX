@@ -1270,6 +1270,7 @@ Video:
       'Off': "Lazhet"
       Minutes: "{minutes} munutenn"
       End of video: "Dibenn ar video"
+      End of current chapter: Dibenn ar pennad a-vremañ
       Remaining: "{time} a chom"
       Cancel timer: "Nullañ ar munuter"
       Timer ended: "Echu eo ar munuter kousket"

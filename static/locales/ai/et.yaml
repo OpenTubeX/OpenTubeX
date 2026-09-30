@@ -1263,6 +1263,7 @@ Video:
       'Off': 'Väljas'
       Minutes: '{minutes} minutit'
       End of video: Video lõpp
+      End of current chapter: Praeguse peatüki lõpp
       Remaining: 'Jäänud {time}'
       Cancel timer: Tühista taimer
       Timer ended: Unetaimeri aeg sai täis

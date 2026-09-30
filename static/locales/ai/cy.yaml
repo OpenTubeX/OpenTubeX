@@ -1283,6 +1283,7 @@ Video:
       'Off': 'I ffwrdd'
       Minutes: '{minutes} munud'
       End of video: Diwedd y fideo
+      End of current chapter: Diwedd y bennod gyfredol
       Remaining: '{time} ar ôl'
       Cancel timer: Canslo'r amserydd
       Timer ended: Mae'r amserydd cysgu wedi dod i ben

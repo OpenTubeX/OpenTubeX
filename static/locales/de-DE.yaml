@@ -1910,6 +1910,7 @@ Video:
       Off: Aus
       Minutes: '{minutes} Minuten'
       End of video: Ende des Videos
+      End of current chapter: Ende des aktuellen Kapitels
       Remaining: Noch {time}
       Cancel timer: Timer abbrechen
       Timer ended: Einschlaftimer abgelaufen

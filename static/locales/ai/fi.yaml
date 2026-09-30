@@ -1298,6 +1298,7 @@ Video:
       'Off': 'Pois käytöstä'
       Minutes: '{minutes} minuuttia'
       End of video: Videon lopussa
+      End of current chapter: Nykyisen luvun lopussa
       Remaining: '{time} jäljellä'
       Cancel timer: Peruuta ajastin
       Timer ended: Uniajastin päättyi

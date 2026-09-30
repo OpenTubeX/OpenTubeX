@@ -1261,6 +1261,7 @@ Video:
       'Off': 'Ki'
       Minutes: '{minutes} perc'
       End of video: A videó végén
+      End of current chapter: Az aktuális fejezet vége
       Remaining: '{time} van hátra'
       Cancel timer: Időzítő törlése
       Timer ended: Az elalvásidőzítő lejárt

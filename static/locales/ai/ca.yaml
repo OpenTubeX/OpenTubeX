@@ -1707,6 +1707,7 @@ Video:
       'Off': Desactivat
       Minutes: '{minutes} minuts'
       End of video: Final del vídeo
+      End of current chapter: Final del capítol actual
       Remaining: 'Temps restant: {time}'
       Cancel timer: Cancel·la el temporitzador
       Timer ended: Ha acabat el temporitzador de desconnexió

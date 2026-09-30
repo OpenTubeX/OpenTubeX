@@ -1263,6 +1263,7 @@ Video:
       'Off': Desactivado
       Minutes: '{minutes} minutos'
       End of video: Fin del vídeo
+      End of current chapter: Fin del capítulo actual
       Remaining: 'Quedan {time}'
       Cancel timer: Cancelar temporizador
       Timer ended: El temporizador de suspensión ha terminado

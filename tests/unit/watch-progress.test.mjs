@@ -20,7 +20,7 @@ function fixture(existing = true) {
   const hasPlaybackPosition = { value: false }
   const handleSeeking = runInNewContext(`${seekingHandler}; handleSeeking`, {
     hasPlaybackPosition, playbackEnded: { value: false }, video: { value: element }, cancelSponsorBlockSkipSchedule() {},
-    clearAbRepeatBoundarySchedule() {}, syncPlayPauseControlIcons() {}, emit() {},
+    clearAbRepeatBoundarySchedule() {}, sleepTimer: { checkChapterBoundary() {} }, syncPlayPauseControlIcons() {}, emit() {},
   })
   const player = {
     hasLoaded: false, get hasPlaybackPosition() { return hasPlaybackPosition.value },

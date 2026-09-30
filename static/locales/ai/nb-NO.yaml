@@ -1274,6 +1274,7 @@ Video:
       'Off': 'Av'
       Minutes: '{minutes} minutter'
       End of video: Når videoen er ferdig
+      End of current chapter: Slutten av gjeldende kapittel
       Remaining: '{time} igjen'
       Cancel timer: Avbryt innsovningstimeren
       Timer ended: Innsovningstimeren er utløpt

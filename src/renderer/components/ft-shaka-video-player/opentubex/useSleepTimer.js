@@ -2,6 +2,7 @@ import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const SLEEP_TIMER_STORAGE_KEY_PREFIX = 'OpenTubeX/sleepTimer'
 const SLEEP_TIMER_UPDATE_INTERVAL_MS = 1000
+const CHAPTER_END_MARGIN_SECONDS = 0.05
 
 export const SLEEP_TIMER_DURATIONS_MINUTES = [5, 10, 15, 20, 30, 45, 60]
 
@@ -23,17 +24,19 @@ export function formatSleepTimerRemaining(remainingMs) {
 }
 
 /**
- * @param {{ getVideoId: () => string, isPaused: () => boolean, onExpired: () => void, pausePlayback: () => void, tabId?: string | null }} options
+ * @param {{ getVideoId: () => string, getCurrentTime: () => number, getPlaybackRate: () => number, isPaused: () => boolean, isSeeking: () => boolean, onExpired: () => void, pausePlayback: () => void, seekTo: (seconds: number) => void, tabId?: string | null }} options
  */
-export function useSleepTimer({ getVideoId, isPaused, onExpired, pausePlayback, tabId = null }) {
+export function useSleepTimer({ getVideoId, getCurrentTime, getPlaybackRate, isPaused, isSeeking, onExpired, pausePlayback, seekTo, tabId = null }) {
   const storageKey = tabId ? `${SLEEP_TIMER_STORAGE_KEY_PREFIX}/${tabId}` : SLEEP_TIMER_STORAGE_KEY_PREFIX
-  /** @type {import('vue').Ref<'duration' | 'end-of-video' | null>} */
+  /** @type {import('vue').Ref<'duration' | 'end-of-video' | 'end-of-chapter' | null>} */
   const mode = ref(null)
   const durationMinutes = ref(null)
   const remainingMs = ref(0)
 
   let targetVideoId = null
+  let targetChapterEndSeconds = null
   let expirationTimeoutId = null
+  let chapterTimeoutId = null
   let remainingIntervalId = null
   let lastRemainingUpdateAt = null
 
@@ -46,6 +49,11 @@ export function useSleepTimer({ getVideoId, isPaused, onExpired, pausePlayback, 
     if (remainingIntervalId !== null) {
       clearInterval(remainingIntervalId)
       remainingIntervalId = null
+    }
+
+    if (chapterTimeoutId !== null) {
+      clearTimeout(chapterTimeoutId)
+      chapterTimeoutId = null
     }
 
     lastRemainingUpdateAt = null
@@ -61,6 +69,7 @@ export function useSleepTimer({ getVideoId, isPaused, onExpired, pausePlayback, 
     durationMinutes.value = null
     remainingMs.value = 0
     targetVideoId = null
+    targetChapterEndSeconds = null
     clearStoredTimer()
   }
 
@@ -99,6 +108,11 @@ export function useSleepTimer({ getVideoId, isPaused, onExpired, pausePlayback, 
   }
 
   function resumeCountdown() {
+    if (mode.value === 'end-of-chapter') {
+      checkChapterBoundary()
+      return
+    }
+
     if (mode.value !== 'duration' || lastRemainingUpdateAt !== null) {
       return
     }
@@ -109,6 +123,11 @@ export function useSleepTimer({ getVideoId, isPaused, onExpired, pausePlayback, 
   }
 
   function pauseCountdown() {
+    if (chapterTimeoutId !== null) {
+      clearTimeout(chapterTimeoutId)
+      chapterTimeoutId = null
+    }
+
     if (mode.value !== 'duration') {
       return
     }
@@ -132,6 +151,7 @@ export function useSleepTimer({ getVideoId, isPaused, onExpired, pausePlayback, 
     durationMinutes.value = minutes
     remainingMs.value = minutes * 60 * 1000
     targetVideoId = null
+    targetChapterEndSeconds = null
 
     clearScheduledUpdates()
     storeDurationTimer()
@@ -152,11 +172,75 @@ export function useSleepTimer({ getVideoId, isPaused, onExpired, pausePlayback, 
     durationMinutes.value = null
     remainingMs.value = 0
     targetVideoId = videoId
+    targetChapterEndSeconds = null
 
     sessionStorage.setItem(storageKey, JSON.stringify({
       mode: mode.value,
       videoId,
     }))
+  }
+
+  /** @param {number} endSeconds */
+  function startEndOfChapter(endSeconds) {
+    const videoId = getVideoId()
+    if (videoId === '' || !Number.isFinite(endSeconds) || endSeconds <= getCurrentTime()) {
+      return
+    }
+
+    clearScheduledUpdates()
+    mode.value = 'end-of-chapter'
+    durationMinutes.value = null
+    remainingMs.value = 0
+    targetVideoId = videoId
+    targetChapterEndSeconds = endSeconds
+
+    sessionStorage.setItem(storageKey, JSON.stringify({ mode: mode.value, videoId, endSeconds }))
+    checkChapterBoundary()
+  }
+
+  /** @returns {boolean} Whether the chapter boundary stopped playback. */
+  function checkChapterBoundary() {
+    if (chapterTimeoutId !== null) {
+      clearTimeout(chapterTimeoutId)
+      chapterTimeoutId = null
+    }
+
+    if (mode.value !== 'end-of-chapter' || isPaused() || isSeeking()) {
+      return false
+    }
+
+    if (targetVideoId !== getVideoId()) {
+      cancel()
+      return false
+    }
+
+    const stopAt = Math.max(0, targetChapterEndSeconds - CHAPTER_END_MARGIN_SECONDS)
+    const secondsLeft = stopAt - getCurrentTime()
+    if (secondsLeft <= 0) {
+      resetState()
+      pausePlayback()
+      seekTo(stopAt)
+      onExpired()
+      return true
+    }
+
+    const rate = getPlaybackRate()
+    if (Number.isFinite(rate) && rate > 0) {
+      chapterTimeoutId = setTimeout(checkChapterBoundary, Math.max(4, secondsLeft / rate * 1000))
+    }
+    return false
+  }
+
+  function handleSeeked() {
+    if (mode.value !== 'end-of-chapter') {
+      return
+    }
+
+    if (getCurrentTime() >= targetChapterEndSeconds) {
+      cancel()
+    } else {
+      checkChapterBoundary()
+    }
   }
 
   function cancel() {
@@ -167,7 +251,7 @@ export function useSleepTimer({ getVideoId, isPaused, onExpired, pausePlayback, 
    * @returns {boolean} Whether autoplay should be suppressed for this video ending.
    */
   function consumeEndOfVideo() {
-    if (mode.value !== 'end-of-video' || targetVideoId !== getVideoId()) {
+    if (!['end-of-video', 'end-of-chapter'].includes(mode.value) || targetVideoId !== getVideoId()) {
       return false
     }
 
@@ -217,11 +301,21 @@ export function useSleepTimer({ getVideoId, isPaused, onExpired, pausePlayback, 
       return
     }
 
+    if (storedTimer?.mode === 'end-of-chapter' &&
+      storedTimer.videoId === getVideoId() &&
+      Number.isFinite(storedTimer.endSeconds) && storedTimer.endSeconds > 0) {
+      mode.value = storedTimer.mode
+      targetVideoId = storedTimer.videoId
+      targetChapterEndSeconds = storedTimer.endSeconds
+      checkChapterBoundary()
+      return
+    }
+
     clearStoredTimer()
   }
 
   watch(getVideoId, (videoId) => {
-    if (mode.value === 'end-of-video' && targetVideoId !== videoId) {
+    if (['end-of-video', 'end-of-chapter'].includes(mode.value) && targetVideoId !== videoId) {
       cancel()
     }
   })
@@ -233,11 +327,14 @@ export function useSleepTimer({ getVideoId, isPaused, onExpired, pausePlayback, 
     cancel,
     consumeEndOfVideo,
     durationMinutes,
+    checkChapterBoundary,
+    handleSeeked,
     mode,
     pauseCountdown,
     remainingMs,
     resumeCountdown,
     startDuration,
     startEndOfVideo,
+    startEndOfChapter,
   }
 }

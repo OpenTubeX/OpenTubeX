@@ -1336,6 +1336,7 @@ Video:
       'Off': 'Выкл.'
       Minutes: '{minutes} хвіл.'
       End of video: Да канца відэа
+      End of current chapter: Канец бягучага раздзела
       Remaining: 'Засталося {time}'
       Cancel timer: Скасаваць таймер
       Timer ended: Таймер сну спрацаваў

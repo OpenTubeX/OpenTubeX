@@ -1293,6 +1293,7 @@ Video:
       'Off': 'Вимкнено'
       Minutes: '{minutes} хв'
       End of video: До кінця відео
+      End of current chapter: Кінець поточного розділу
       Remaining: 'Залишилося {time}'
       Cancel timer: Скасувати таймер
       Timer ended: Таймер сну завершився

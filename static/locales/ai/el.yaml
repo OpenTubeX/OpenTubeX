@@ -1298,6 +1298,7 @@ Video:
       'Off': 'Ανενεργός'
       Minutes: '{minutes} λεπτά'
       End of video: Στο τέλος του βίντεο
+      End of current chapter: Τέλος του τρέχοντος κεφαλαίου
       Remaining: 'Απομένουν {time}'
       Cancel timer: Ακύρωση χρονοδιακόπτη
       Timer ended: Ο χρονοδιακόπτης ύπνου έληξε

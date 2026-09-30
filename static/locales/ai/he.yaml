@@ -1300,6 +1300,7 @@ Video:
       'Off': 'כבוי'
       Minutes: '{minutes} דקות'
       End of video: בסוף הסרטון
+      End of current chapter: סוף הפרק הנוכחי
       Remaining: 'נותרו {time}'
       Cancel timer: ביטול הטיימר
       Timer ended: טיימר השינה הסתיים

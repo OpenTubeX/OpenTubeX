@@ -1293,6 +1293,7 @@ Video:
       'Off': 'Dezactivat'
       Minutes: '{minutes} minute'
       End of video: La sfârșitul videoclipului
+      End of current chapter: Sfârșitul capitolului curent
       Remaining: 'Timp rămas: {time}'
       Cancel timer: Anulează temporizatorul
       Timer ended: Temporizatorul de oprire s-a încheiat

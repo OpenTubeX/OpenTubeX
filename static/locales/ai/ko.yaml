@@ -1575,6 +1575,7 @@ Video:
       'Off': 끄기
       Minutes: '{minutes}분'
       End of video: 동영상 끝
+      End of current chapter: 현재 챕터 끝
       Remaining: '{time} 남음'
       Cancel timer: 타이머 취소
       Timer ended: 취침 타이머가 끝났습니다

@@ -1283,6 +1283,7 @@ Video:
       'Off': 'Slökkt'
       Minutes: '{minutes} mínútur'
       End of video: Við lok myndbands
+      End of current chapter: Lok núverandi kafla
       Remaining: '{time} eftir'
       Cancel timer: Hætta við tímastillingu
       Timer ended: Svefntímastillingu lokið

@@ -789,10 +789,14 @@ export default defineComponent({
     const video = ref(null)
 
     const sleepTimer = useSleepTimer({
-      getVideoId: () => props.videoId,
+      getVideoId: () => props.videoId || props.externalUrl,
+      getCurrentTime: () => video.value?.currentTime ?? 0,
+      getPlaybackRate: () => video.value?.playbackRate ?? 1,
       isPaused: () => video.value?.paused ?? true,
+      isSeeking: () => video.value?.seeking ?? false,
       onExpired: () => showToast({ message: t('Video.Player.Sleep Timer.Timer ended'), icon: ['fas', 'clock'] }),
       pausePlayback: () => video.value?.pause(),
+      seekTo: seconds => { if (video.value) video.value.currentTime = seconds },
       tabId,
     })
 
@@ -2035,6 +2039,13 @@ export default defineComponent({
     const promptSponsorBlockSegments = ref([])
     const sponsorBlockToastNow = ref(Date.now())
     const sponsorBlockCurrentTime = ref(0)
+    const currentChapterEndSeconds = computed(() => {
+      if (isLive.value) return null
+      const currentTime = sponsorBlockCurrentTime.value
+      const chapter = props.chapters.find(({ startSeconds, endSeconds }) =>
+        startSeconds <= currentTime && currentTime < endSeconds)
+      return Number.isFinite(chapter?.endSeconds) ? chapter.endSeconds : null
+    })
     let sponsorBlockToastTimeInterval = null
     const manuallyMutedSponsorBlockSegments = new Set()
     const sponsorBlockDoNotMuteSegments = new Set()
@@ -6568,7 +6579,8 @@ export default defineComponent({
 
     function handleEnded() {
       clearSabrBackoffTimer({ refreshPreview: true })
-      if (abRepeatEnabled.value && hasValidAbRepeatRange()) {
+      const sleepTimerEnded = sleepTimer.consumeEndOfVideo()
+      if (!sleepTimerEnded && abRepeatEnabled.value && hasValidAbRepeatRange()) {
         // Seeking to the media end can queue ended after seeked has returned
         // playback to A. Only count a natural arrival that is still at B.
         repeatAbRangeFromStart(!video.value.seeking &&
@@ -6588,7 +6600,6 @@ export default defineComponent({
       }
 
       sleepTimer.pauseCountdown()
-      const sleepTimerEnded = sleepTimer.consumeEndOfVideo()
 
       pauseSponsorBlockHighlightLabelCountdown()
       cancelSponsorBlockSkipSchedule()
@@ -6614,6 +6625,7 @@ export default defineComponent({
     function handleSeeking() {
       hasPlaybackPosition.value = true
       playbackEnded.value = false
+      sleepTimer.checkChapterBoundary()
       cancelSponsorBlockSkipSchedule()
       clearAbRepeatBoundarySchedule()
       syncPlayPauseControlIcons()
@@ -6624,6 +6636,8 @@ export default defineComponent({
       if (video.value?.ended) {
         syncPlayPauseControlIcons()
       }
+      sponsorBlockCurrentTime.value = video.value?.currentTime ?? 0
+      sleepTimer.handleSeeked()
       checkAbRepeatBoundary(false)
       emit('seeked', video.value?.currentTime ?? 0)
     }
@@ -6783,6 +6797,7 @@ export default defineComponent({
 
     function handleTimeupdate() {
       if (video.value) {
+        if (sleepTimer.checkChapterBoundary()) return
         checkAbRepeatBoundary()
         const currentTime = video.value.currentTime
         sponsorBlockCurrentTime.value = currentTime
@@ -9014,6 +9029,9 @@ export default defineComponent({
       events.addEventListener('setSleepTimerEndOfVideo', () => {
         sleepTimer.startEndOfVideo()
       })
+      events.addEventListener('setSleepTimerEndOfChapter', (/** @type {CustomEvent} */ event) => {
+        sleepTimer.startEndOfChapter(event.detail)
+      })
       events.addEventListener('cancelSleepTimer', () => {
         sleepTimer.cancel()
       })
@@ -9021,7 +9039,7 @@ export default defineComponent({
       /** @implements {shaka.extern.IUIElement.Factory} */
       class SleepTimerFactory {
         create(rootElement, controls) {
-          return new SleepTimer(sleepTimer, !isLive.value, events, rootElement, controls)
+          return new SleepTimer(sleepTimer, !isLive.value, currentChapterEndSeconds, events, rootElement, controls)
         }
       }
 
@@ -11185,6 +11203,7 @@ export default defineComponent({
         }
         scheduleSponsorBlockSkip()
         scheduleAbRepeatBoundary()
+        sleepTimer.checkChapterBoundary()
       })
     })
     onUnmounted(() => {

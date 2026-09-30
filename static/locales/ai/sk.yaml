@@ -1264,6 +1264,7 @@ Video:
       'Off': 'Vypnuté'
       Minutes: '{minutes} minút'
       End of video: Koniec videa
+      End of current chapter: Koniec aktuálnej kapitoly
       Remaining: 'Zostáva {time}'
       Cancel timer: Zrušiť časovač
       Timer ended: Časovač vypnutia skončil

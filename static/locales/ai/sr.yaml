@@ -1319,6 +1319,7 @@ Video:
       'Off': 'Искључено'
       Minutes: '{minutes} минута'
       End of video: Крај видео-снимка
+      End of current chapter: Крај тренутног поглавља
       Remaining: 'Преостало: {time}'
       Cancel timer: Откажи тајмер
       Timer ended: Тајмер за спавање је истекао

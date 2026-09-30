@@ -7,16 +7,18 @@ import {
   formatSleepTimerRemaining,
   SLEEP_TIMER_DURATIONS_MINUTES,
 } from '../opentubex/useSleepTimer'
+import { scheduleOverflowMenuScrollClamp } from './overflowMenu'
 
 export class SleepTimer extends shaka.ui.SettingsMenu {
   /**
-   * @param {{ durationMinutes: import('vue').Ref<number | null>, mode: import('vue').Ref<'duration' | 'end-of-video' | null>, remainingMs: import('vue').Ref<number> }} timer
+   * @param {{ durationMinutes: import('vue').Ref<number | null>, mode: import('vue').Ref<'duration' | 'end-of-video' | 'end-of-chapter' | null>, remainingMs: import('vue').Ref<number> }} timer
    * @param {boolean} canEndCurrentVideo
+   * @param {import('vue').Ref<number | null>} chapterEndSeconds
    * @param {EventTarget} events
    * @param {HTMLElement} parent
    * @param {shaka.ui.Controls} controls
    */
-  constructor(timer, canEndCurrentVideo, events, parent, controls) {
+  constructor(timer, canEndCurrentVideo, chapterEndSeconds, events, parent, controls) {
     super(parent, controls, PlayerIcons.TIMER_FILLED)
 
     this.button.classList.add('sleep-timer-button', 'shaka-tooltip-status')
@@ -24,6 +26,8 @@ export class SleepTimer extends shaka.ui.SettingsMenu {
 
     /** @private */
     this.timer_ = timer
+    /** @private */
+    this.chapterEndSeconds_ = chapterEndSeconds
     /** @private */
     this.events_ = events
 
@@ -51,6 +55,13 @@ export class SleepTimer extends shaka.ui.SettingsMenu {
     this.endOfVideoButton_.classList.toggle('shaka-hidden', !canEndCurrentVideo)
 
     /** @private */
+    this.endOfChapterButton_ = this.createOption_(() => i18n.global.t('Video.Player.Sleep Timer.End of current chapter'), () => {
+      if (this.chapterEndSeconds_.value !== null) {
+        this.events_.dispatchEvent(new CustomEvent('setSleepTimerEndOfChapter', { detail: this.chapterEndSeconds_.value }))
+      }
+    })
+
+    /** @private */
     this.cancelButton_ = this.createOption_(() => i18n.global.t('Video.Player.Sleep Timer.Cancel timer'), () => {
       this.events_.dispatchEvent(new CustomEvent('cancelSleepTimer'))
     })
@@ -71,7 +82,7 @@ export class SleepTimer extends shaka.ui.SettingsMenu {
 
     /** @private */
     this.stopTimerWatch_ = watch(
-      [timer.mode, timer.durationMinutes, timer.remainingMs],
+      [timer.mode, timer.durationMinutes, timer.remainingMs, chapterEndSeconds],
       () => this.updateState_()
     )
 
@@ -130,9 +141,21 @@ export class SleepTimer extends shaka.ui.SettingsMenu {
     } else if (mode.value === 'end-of-video') {
       selectedButton = this.endOfVideoButton_
       status = i18n.global.t('Video.Player.Sleep Timer.End of video')
+    } else if (mode.value === 'end-of-chapter') {
+      selectedButton = this.endOfChapterButton_
+      status = i18n.global.t('Video.Player.Sleep Timer.End of current chapter')
     }
 
-    for (const button of [...this.durationButtons_.values(), this.endOfVideoButton_]) {
+    const wasChapterAvailable = !this.endOfChapterButton_.classList.contains('shaka-hidden')
+    const chapterAvailable = this.chapterEndSeconds_.value !== null || mode.value === 'end-of-chapter'
+    this.endOfChapterButton_.classList.toggle('shaka-hidden', !chapterAvailable)
+    if (wasChapterAvailable && !chapterAvailable) {
+      const visibleButtons = [...this.menu.children].filter(button =>
+        button instanceof HTMLButtonElement && !button.classList.contains('shaka-hidden'))
+      scheduleOverflowMenuScrollClamp(this.parent, visibleButtons.at(-1) ?? null)
+    }
+
+    for (const button of [...this.durationButtons_.values(), this.endOfVideoButton_, this.endOfChapterButton_]) {
       const isSelected = button === selectedButton
       const label = button.querySelector('span')
       label.classList.toggle('shaka-chosen-item', isSelected)
