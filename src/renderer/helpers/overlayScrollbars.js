@@ -222,17 +222,17 @@ function updateBodyScrollbarPosition(instance) {
 }
 
 /**
- * A viewport can be scrolled to the end while an opening transition still
- * makes it shorter than its final size. Chromium can retain that obsolete end
- * offset as the viewport grows, which also leaves a scrollbar for overflow
- * that no longer exists. Remeasure growing viewports from their true origin,
- * then restore the old position within the new range.
+ * Opening transitions and widening wrapped content can shorten the scroll
+ * range. Chromium can retain the obsolete end offset as the viewport grows,
+ * which also leaves a scrollbar for overflow that no longer exists. Remeasure
+ * from the true origin, then restore the old position within the new range.
  *
  * @param {HTMLElement} element
  * @param {import('overlayscrollbars').OverlayScrollbars} instance
  */
 function reconcileScrollbarOnResize(element, instance) {
   let previousHeight = element.clientHeight
+  let previousWidth = element.getBoundingClientRect().width
   let resizeFrame = null
   const resizeObserver = new ResizeObserver(() => {
     if (resizeFrame !== null) {
@@ -242,20 +242,24 @@ function reconcileScrollbarOnResize(element, instance) {
     resizeFrame = requestAnimationFrame(() => {
       resizeFrame = null
       const height = element.clientHeight
-      const previous = previousHeight
+      // Preserve fractional widths: even a subpixel change can unwrap a line.
+      const width = element.getBoundingClientRect().width
+      const viewportGrew = height > previousHeight || width > previousWidth
       previousHeight = height
+      previousWidth = width
       // The library already observes ordinary size changes. Our extra pass is
-      // only needed for the obsolete end offset Chromium can retain on growth.
-      if (height <= previous) return
+      // needed only for invalid offsets or a retained end after either axis grows.
       const scrollTop = element.scrollTop
+      if (scrollTop <= 0) return
       const maximumScrollTop = Math.max(0, element.scrollHeight - height)
-      if (scrollTop <= 0 || scrollTop < maximumScrollTop - 1) return
+      const outOfBounds = scrollTop > maximumScrollTop + SCROLL_BOUNDARY_TOLERANCE
+      if (!outOfBounds && (!viewportGrew || scrollTop < maximumScrollTop - SCROLL_BOUNDARY_TOLERANCE)) return
       const resumeScrollbars = suspendScrollbarPosition.get(instance)?.()
       try {
         // Content can shrink (trimmed live chat) or the viewport can grow after a
         // dock transition while an obsolete end offset is still applied — that
         // parks the view on empty space until the user scrolls up.
-        if (scrollTop > maximumScrollTop + 1) {
+        if (outOfBounds) {
           element.scrollTop = maximumScrollTop
           instance.update(true)
           return

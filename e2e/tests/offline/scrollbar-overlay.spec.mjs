@@ -366,6 +366,41 @@ test.describe('overlay scrollbars', () => {
   })
 
   test.describe('a nested scroll container', () => {
+    test('clamps wrapped content after a width-only resize at fractional zoom during touch scrolling', async ({ page }) => {
+      await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+      const session = await page.context().newCDPSession(page)
+      await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+      await expect.poll(() => page.evaluate(() => matchMedia('(pointer: coarse)').matches)).toBe(true)
+      await page.evaluate(() => {
+        const viewport = document.createElement('div')
+        viewport.dataset.widthResizeScrollbarTest = ''
+        Object.assign(viewport.style, {
+          position: 'fixed',
+          top: '100px',
+          left: '100px',
+          width: '100px',
+          height: '200px',
+          overflow: 'auto',
+          zIndex: '9999',
+        })
+        const content = document.createElement('div')
+        Object.assign(content.style, { fontFamily: 'monospace', fontSize: '16px', lineHeight: '20px' })
+        content.textContent = 'word '.repeat(75)
+        viewport.append(content)
+        document.body.append(viewport)
+        document.querySelector('#app').__vue_app__._context.directives['overlay-scrollbars'].mounted(viewport, { value: true })
+      })
+      const viewport = page.locator('[data-width-resize-scrollbar-test]')
+      await expect.poll(() => viewport.evaluate(element => element.scrollHeight - element.clientHeight)).toBeGreaterThan(200)
+      await viewport.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => viewport.evaluate(element => element.scrollTop)).toBeGreaterThan(200)
+      await viewport.evaluate(element => { element.style.width = '600px' })
+      await expect.poll(() => viewport.evaluate(element => element.scrollTop)).toBe(0)
+      await expect.poll(() => viewport.evaluate(element => element.scrollHeight - element.clientHeight)).toBeLessThanOrEqual(1)
+      await expect(viewport.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
+      await session.detach()
+    })
+
     const now = Date.now()
     test.use({
       seed: {
