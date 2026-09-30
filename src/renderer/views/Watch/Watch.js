@@ -1400,7 +1400,7 @@ export default defineComponent({
     this.onMountedDependOnLocalStateLoading()
   },
   updated: function () {
-    this.clampShortsErrorScroll()
+    requestAnimationFrame(() => this.clampShortsErrorScroll())
     const rail = this.$refs.shortsActionRail
     if (!rail?.scrollTop) return
     const contentEnd = rail.querySelector(':scope > .shortsSoundThumbnail, :scope > .shortsSkeletonSound') ??
@@ -1722,9 +1722,11 @@ export default defineComponent({
     },
     clampShortsErrorScroll() {
       const container = this.$refs.errorContainer
-      if (!container?.scrollTop) return
+      if (!container) return
       const content = container.querySelector('.errorWrapper')
-      if (isOverlayScrollTopOutOfBounds(container, content)) clampOverlayScrollTop(container, content)
+      // Chromium can already reset the offset when an error becomes shorter,
+      // while OverlayScrollbars still retains the previous overflow range.
+      clampOverlayScrollTop(container, content)
     },
     handleFullscreenMetadataChange({ open, target, presentationActive = false }) {
       const wasOpen = this.fullscreenMetadataOpen

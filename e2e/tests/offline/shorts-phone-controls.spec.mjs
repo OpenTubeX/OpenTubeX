@@ -272,8 +272,9 @@ test('landscape phone Shorts keep a portrait player and accessible controls', as
   await expect.poll(() => rail.evaluate(element => ({
     offset: element.scrollTop,
     overflow: element.scrollHeight - element.clientHeight,
-    scrollbarVisible: element.querySelector(':scope > .os-scrollbar-vertical')?.classList.contains('os-scrollbar-visible'),
-  }))).toEqual({ offset: 0, overflow: 0, scrollbarVisible: false })
+    scrollbarUnusable: element.querySelector(':scope > .os-scrollbar-vertical')?.classList.contains('os-scrollbar-unusable'),
+  }))).toEqual({ offset: 0, overflow: 0, scrollbarUnusable: true })
+  await expect(rail.locator(':scope > .os-scrollbar-vertical .os-scrollbar-handle')).toHaveCSS('opacity', '0')
   await page.setViewportSize({ width: 915, height: 412 })
 
   await player.locator('video').evaluate(video => video.pause())
@@ -471,8 +472,9 @@ test('landscape Shorts keep long playback errors and retry actions readable', as
   await expect.poll(() => container.evaluate(element => ({
     offset: element.scrollTop,
     overflow: element.scrollHeight - element.clientHeight,
-    scrollbarVisible: element.querySelector(':scope > .os-scrollbar-vertical')?.classList.contains('os-scrollbar-visible'),
-  }))).toEqual({ offset: 0, overflow: 0, scrollbarVisible: false })
+    scrollbarUnusable: element.querySelector(':scope > .os-scrollbar-vertical')?.classList.contains('os-scrollbar-unusable'),
+  }))).toEqual({ offset: 0, overflow: 0, scrollbarUnusable: true })
+  await expect(container.locator(':scope > .os-scrollbar-vertical .os-scrollbar-handle')).toHaveCSS('opacity', '0')
   await watch.dispose()
 })
 

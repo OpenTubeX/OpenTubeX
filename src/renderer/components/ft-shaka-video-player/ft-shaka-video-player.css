@@ -5576,7 +5576,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 /* An open touch menu should advertise its remaining content even without a mouse. */
-:deep(.phonePlayerOptions .os-scrollbar-visible) {
+:deep(.phonePlayerOptions .os-scrollbar-visible),
+:deep(.phonePlayerOptions .os-scrollbar-visible.app-scrollbar-idle) {
   opacity: 1;
   visibility: visible;
 }

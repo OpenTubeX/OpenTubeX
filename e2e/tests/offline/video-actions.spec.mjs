@@ -1338,6 +1338,8 @@ test.describe('video downloads', () => {
     await expect(otherDownload).not.toContainText('Download canceled')
 
     await hydratedDownload.getByTitle('Retry download').click()
+    // The new queued record arrives before the old canceled record is removed.
+    await expect(otherDownload).toHaveCount(1)
     await expect(otherDownload).toContainText('0.0%')
     await expect(hydratedDownload.getByTitle('Cancel Download')).toBeVisible()
     await hydratedDownload.getByTitle('Cancel Download').click()

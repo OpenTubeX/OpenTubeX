@@ -1769,9 +1769,10 @@ test('isolates the owning video surface while Android Picture-in-Picture is acti
   await page.emulateMedia({ colorScheme: 'light' })
   await expect(page.locator('body')).toHaveAttribute('data-system-theme', 'light')
   await page.evaluate(() => {
+    document.querySelector('.app').classList.add('capacitorTabs')
     for (const target of [false, true]) {
       const player = document.createElement('div')
-      player.className = 'ftVideoPlayer'
+      player.className = 'ftVideoPlayer shaka-video-container'
       if (target) player.setAttribute('data-android-picture-in-picture-target', '')
       const video = document.createElement('video')
       video.className = 'player'
@@ -1808,7 +1809,7 @@ test('isolates the owning video surface while Android Picture-in-Picture is acti
   // Vue replaces the class attribute when the player changes into its
   // cross-tab mini-player layout. PiP ownership must survive that update.
   await target.evaluate(element => {
-    element.className = 'ftVideoPlayer scrollMiniPlayer'
+    element.className = 'ftVideoPlayer shaka-video-container scrollMiniPlayer'
   })
   await expect(target).toHaveAttribute('data-android-picture-in-picture-target', '')
   await expect(target.locator('> .player')).toHaveCSS('visibility', 'visible')

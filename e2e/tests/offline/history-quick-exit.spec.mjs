@@ -11,6 +11,7 @@ test.use({
       ytDlpPlaybackEngineDefaultMigration: true,
       defaultVideoFormat: 'legacy',
       rememberHistory: true,
+      keepPlayingOnNavigation: false,
       watchedProgressSavingMode: 'auto',
       useSponsorBlock: false,
     },
