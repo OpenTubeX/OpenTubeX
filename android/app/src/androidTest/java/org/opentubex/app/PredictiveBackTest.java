@@ -363,7 +363,8 @@ public class PredictiveBackTest {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             WebView view = ready(scenario);
             prepareDrawer(scenario, view);
-            evaluate(view, "window.__backConfirm = " + STORE + ".getters.getConfirmCloseApp;" +
+            evaluate(view, "window.__drawerLocale = " + STORE + ".getters.getCurrentLocale;" +
+                "window.__drawerLanguage = document.documentElement.lang; window.__backConfirm = " + STORE + ".getters.getConfirmCloseApp;" +
                 STORE + ".commit('setConfirmCloseApp', false);" + STORE + ".commit('toggleSideNav')");
             try {
                 await(view, "document.querySelector('.app').classList.contains('isSideNavOpen')");
@@ -376,35 +377,42 @@ public class PredictiveBackTest {
                     scenario.onActivity(activity -> activity.getOnBackPressedDispatcher().dispatchOnBackCancelled());
                     await(view, "document.querySelector('.sideNav').getAnimations().length === 0");
                     assertEquals("Cancel keeps the drawer open", "true", evaluate(view, STORE + ".getters.getIsSideNavOpen"));
-                    start(scenario, BackEventCompat.EDGE_RIGHT);
-                    progress(scenario, 0.65f, BackEventCompat.EDGE_RIGHT);
-                    await(view, "document.querySelector('.sideNav').getAnimations().some(a => a.playState === 'paused' && a.currentTime > 0)");
-                    evaluate(view, """
-                        (() => {
-                            const drawer = document.querySelector('.sideNav');
-                            let previousRight = drawer.getBoundingClientRect().right;
-                            window.__drawerCommitFlickered = false;
-                            window.__drawerCommitFrames = [];
-                            window.__drawerCommitSampling = true;
-                            const sample = () => {
-                                if (!window.__drawerCommitSampling) return;
-                                const right = drawer.getBoundingClientRect().right;
-                                window.__drawerCommitFrames.push(right);
-                                if (right > previousRight + 0.5) window.__drawerCommitFlickered = true;
-                                previousRight = right;
+                    for (String locale : new String[] { "en-US", "ar" }) {
+                        evaluate(view, STORE + ".dispatch('updateCurrentLocale', '" + locale + "')");
+                        await(view, "document.documentElement.lang === '" + locale + "'");
+                        Thread.sleep(200);
+                        evaluate(view, "window.__drawerOpenLeft = document.querySelector('.sideNav').getBoundingClientRect().left");
+                        start(scenario, BackEventCompat.EDGE_RIGHT);
+                        progress(scenario, 0.65f, BackEventCompat.EDGE_RIGHT);
+                        await(view, "document.querySelector('.sideNav').getAnimations().some(a => a.playState === 'paused' && a.currentTime > 0)");
+                        evaluate(view, """
+                            (() => {
+                                const drawer = document.querySelector('.sideNav');
+                                const distance = () => Math.abs(drawer.getBoundingClientRect().left - window.__drawerOpenLeft);
+                                let previousDistance = distance();
+                                window.__drawerCommitFlickered = false;
+                                window.__drawerCommitFrames = [];
+                                window.__drawerCommitSampling = true;
+                                const sample = () => {
+                                    if (!window.__drawerCommitSampling) return;
+                                    const currentDistance = distance();
+                                    window.__drawerCommitFrames.push(currentDistance);
+                                    if (currentDistance < previousDistance - 0.5) window.__drawerCommitFlickered = true;
+                                    previousDistance = currentDistance;
+                                    requestAnimationFrame(sample);
+                                };
                                 requestAnimationFrame(sample);
-                            };
-                            requestAnimationFrame(sample);
-                        })()
-                        """);
-                    scenario.onActivity(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
-                    await(view, "!" + STORE + ".getters.getIsSideNavOpen && document.querySelector('.sideNav').getAnimations().length === 0");
-                    evaluate(view, "window.__drawerCommitSampling = false");
-                    assertEquals("Committed drawer must never move back on screen: " + evaluate(view, "window.__drawerCommitFrames"),
-                        "false", evaluate(view, "window.__drawerCommitFlickered"));
-                    evaluate(view, STORE + ".commit('toggleSideNav')");
-                    await(view, STORE + ".getters.getIsSideNavOpen");
-                    Thread.sleep(200);
+                            })()
+                            """);
+                        scenario.onActivity(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
+                        await(view, "!" + STORE + ".getters.getIsSideNavOpen && document.querySelector('.sideNav').getAnimations().length === 0");
+                        evaluate(view, "window.__drawerCommitSampling = false");
+                        assertEquals("Committed drawer must never move back on screen: " + evaluate(view, "window.__drawerCommitFrames"),
+                            "false", evaluate(view, "window.__drawerCommitFlickered"));
+                        evaluate(view, STORE + ".commit('toggleSideNav')");
+                        await(view, STORE + ".getters.getIsSideNavOpen");
+                        Thread.sleep(200);
+                    }
                 }
                 scenario.onActivity(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
                 await(view, "!" + STORE + ".getters.getIsSideNavOpen");
@@ -415,6 +423,8 @@ public class PredictiveBackTest {
                 await(view, "!document.querySelector('.settingsWindow')");
             } finally {
                 evaluate(view, "if (" + STORE + ".getters.getIsSideNavOpen) " + STORE + ".commit('toggleSideNav');" + STORE + ".commit('setConfirmCloseApp', window.__backConfirm)");
+                evaluate(view, STORE + ".dispatch('updateCurrentLocale', window.__drawerLocale)");
+                await(view, "document.documentElement.lang === window.__drawerLanguage");
                 restoreDrawer(scenario, view);
             }
         }
