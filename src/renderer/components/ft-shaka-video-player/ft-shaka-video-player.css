@@ -28,6 +28,10 @@
   overflow: hidden;
 }
 
+.ftVideoPlayer:not(:fullscreen, .fullWindow) {
+  border-radius: calc(12px * var(--ui-roundness));
+}
+
 /* Shaka sizes its center button as a percentage of the player width, which
    becomes enormous in a wide desktop or fullscreen player. */
 .ftVideoPlayer :deep(.shaka-big-buttons-container > button) {
@@ -287,7 +291,6 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   inline-size: 100%;
   block-size: 100%;
   aspect-ratio: auto;
-  border-radius: calc(12px * var(--ui-roundness));
 }
 
 .shortsTopControls {
@@ -1731,6 +1734,17 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 :deep(.ft-control-glass) {
   inset-inline: 7px;
   opacity: var(--ft-controls-fade);
+}
+
+/* Adjacent icon pills both reserve 7px inside their click targets. Share
+   that transparent space so every visible pill has the same 7px gap. */
+/* stylelint-disable-next-line selector-max-compound-selectors */
+.ftVideoPlayer:not(.classicPlayerControls) :deep(.shaka-controls-button-panel > :is(button, .ft-volume-control-group):not(.shaka-hidden) ~ :is(.shaka-play-button, .ft-shaka-skip-button, .ft-volume-control-group)) {
+  margin-inline-start: -7px;
+}
+
+.ftVideoPlayer:not(.classicPlayerControls) :deep(.shaka-controls-button-panel > :is(.ft-time-display-group, .ft-chapters-button, .ft-shaka-highlight-button, .ft-quick-playback-rate-bar)) {
+  margin-inline: 0 7px;
 }
 
 :deep(.ft-right-control-glass) {
@@ -4135,6 +4149,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 :deep(.shaka-text-container [translate='no']),
 :deep(.shaka-speech-to-text-container [translate='no']) {
+  border-radius: calc(4px * var(--ui-roundness));
   background-color: var(--caption-background-color) !important;
   color: var(--caption-text-color) !important;
   -webkit-font-smoothing: antialiased;
@@ -4194,6 +4209,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 .captionAppearanceSample span {
   padding-inline: 0.15em;
+  border-radius: calc(4px * var(--ui-roundness));
   background-color: var(--caption-background-color);
   -webkit-font-smoothing: antialiased;
   -webkit-text-stroke: var(--caption-text-stroke-width) var(--caption-edge-color);

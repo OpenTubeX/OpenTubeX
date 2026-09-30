@@ -1228,6 +1228,26 @@
           :title="$t('Comments.Comments')"
           @close="shortsPhonePanelsEnabled ? closeShortsPhonePanel() : mobilePanel = null"
         >
+          <div
+            v-if="isLoading && commentsAvailable"
+            class="watchVideo commentsSkeleton"
+            :class="{ theatreWatchVideo: useTheatreMode }"
+            aria-hidden="true"
+          >
+            <div class="skeletonLine skeletonCommentsTitle ft-shimmer" />
+            <div
+              v-for="n in 4"
+              :key="n"
+              class="skeletonComment"
+            >
+              <div class="skeletonCommentAvatar ft-shimmer" />
+              <div class="skeletonCommentDetails">
+                <div class="skeletonLine skeletonCommentAuthor ft-shimmer" />
+                <div class="skeletonLine ft-shimmer" />
+                <div class="skeletonLine short ft-shimmer" />
+              </div>
+            </div>
+          </div>
           <CommentSection
             v-if="!isLoading && commentsAvailable"
             :id="videoId"

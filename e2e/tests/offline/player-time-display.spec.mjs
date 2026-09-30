@@ -1,4 +1,4 @@
-import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection, setPlayerFullscreen } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -109,6 +109,38 @@ test('paused video shows replay after seeking to the end with End', async ({ app
   await playButton.click({ force: true })
   await expect(video).toHaveJSProperty('paused', false)
   await expect(playButton).toHaveAttribute('data-ft-play-pause-state', 'pause')
+})
+
+test('bottom control pills share the volume-to-timestamp spacing', async ({ app, page, attachScreenshot }) => {
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseQuickPlaybackSpeedBar', true))
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  await setPlayerFullscreen(page, true)
+  const panel = page.locator('.ftVideoPlayer .shaka-controls-button-panel')
+  await expect(panel.locator('.ft-quick-playback-rate-bar')).toBeVisible()
+  await expect(panel.locator('.ft-chapters-button')).toBeVisible()
+
+  for (const zoom of [1, 1.25]) {
+    await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
+    await expect.poll(() => panel.evaluate(element => {
+      const bounds = selector => element.querySelector(selector).getBoundingClientRect()
+      const play = bounds(':scope > .shaka-play-button > .ft-control-glass')
+      const volume = bounds('.ft-volume-control-group > .ft-control-glass')
+      const time = bounds('.ft-time-display-group > .ft-control-glass')
+      const chapters = bounds(':scope > .ft-chapters-button > .ft-control-glass')
+      const rates = bounds(':scope > .ft-quick-playback-rate-bar')
+      const right = bounds(':scope > .ft-right-control-glass')
+      const reference = time.left - volume.right
+      // Fractional UI scales round the shared right-hand pill's position.
+      return Math.max(
+        Math.abs(volume.left - play.right - reference),
+        Math.abs(chapters.left - time.right - reference),
+        Math.abs(right.left - rates.right - reference)
+      )
+    })).toBeLessThan(1)
+    await attachScreenshot(`uniform control pill spacing at ${zoom * 100}% UI scale`)
+  }
 })
 
 test('player controls share pill surfaces and the time display toggles together', async ({ app, page }) => {

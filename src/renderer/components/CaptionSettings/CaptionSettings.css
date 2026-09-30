@@ -17,6 +17,7 @@
   position: absolute;
   max-inline-size: 90%;
   padding-inline: 0.15em;
+  border-radius: calc(4px * var(--ui-roundness));
   background-color: var(--caption-background-color);
   color: var(--caption-text-color);
   -webkit-font-smoothing: antialiased;

@@ -85,6 +85,73 @@ async function expectSponsorBlockContentClamp(content, previousScrollTop) {
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
+test('watch page skeletons follow UI roundness before playback loads', async ({ app, page, attachScreenshot }) => {
+  await mockPlayableWatchPage(app, page)
+  let releaseMetadata
+  const metadataPending = new Promise(resolve => { releaseMetadata = resolve })
+  await page.route(/\/youtubei\/v1\/player|www\.youtube\.com\/watch\?/, async route => {
+    await metadataPending
+    await route.fallback()
+  })
+
+  try {
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+    await page.locator(sel.searchInput).press('Enter')
+    const skeleton = page.locator('.videoPlayerPlaceholder.ft-shimmer')
+    const recommendations = page.locator('.recommendationsSkeleton')
+    const comments = page.locator('.commentsSkeleton')
+    await expect(skeleton).toBeVisible()
+    await expect(recommendations).toBeVisible()
+    await expect(comments).toBeVisible()
+    await expect(comments.locator('.skeletonComment')).toHaveCount(4)
+    await expect(comments).toHaveAttribute('aria-hidden', 'true')
+
+    for (const roundness of [0, 100, 200]) {
+      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
+      await expect(skeleton).toHaveCSS('border-radius', `${12 * roundness / 100}px`)
+      await expect(recommendations).toHaveCSS('border-radius', `${8 * roundness / 100}px`)
+      await expect(comments).toHaveCSS('border-radius', `${8 * roundness / 100}px`)
+    }
+    await attachScreenshot('watch page skeletons at 200% roundness')
+
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHideComments', true))
+    await expect(comments).toHaveCount(0)
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHideComments', false))
+    await expect(comments).toBeVisible()
+    await comments.scrollIntoViewIfNeeded()
+    const waitForCommentsShimmer = () => expect.poll(() => comments.locator('.skeletonCommentAvatar').first()
+      .evaluate(element => Number.parseFloat(getComputedStyle(element).backgroundPositionX))).toBeLessThan(60)
+    await waitForCommentsShimmer()
+    await attachScreenshot('comments skeleton at 200% roundness')
+    await page.setViewportSize({ width: 520, height: 900 })
+    await expect(comments).toBeHidden()
+    await page.setViewportSize({ width: 900, height: 900 })
+    await expect(comments).toBeVisible()
+    await comments.scrollIntoViewIfNeeded()
+    await expect.poll(() => comments.evaluate(element => {
+      const viewportWidth = document.documentElement.clientWidth
+      return Math.max(...[element, ...element.querySelectorAll('.skeletonComment, .skeletonLine')]
+        .map(child => {
+          const bounds = child.getBoundingClientRect()
+          return Math.max(-bounds.left, bounds.right - viewportWidth)
+        }))
+    })).toBeLessThanOrEqual(1)
+    await waitForCommentsShimmer()
+    await attachScreenshot('comments skeleton at narrow width')
+    await page.setViewportSize({ width: 1600, height: 900 })
+  } finally {
+    releaseMetadata()
+  }
+
+  await waitForPlayback(page)
+  await expect(page.locator('.videoPlayerPlaceholder.ft-shimmer')).toHaveCount(0)
+  await expect(page.locator('.ftVideoPlayer')).toHaveCSS('border-radius', '24px')
+  await expect(page.locator('.recommendationsSkeleton')).toHaveCount(0)
+  await expect(page.locator('.watchVideoRecommendations')).toHaveCSS('border-radius', '16px')
+  await expect(page.locator('.commentsSkeleton')).toHaveCount(0)
+  await expect(page.locator('.commentsArea .card')).toBeVisible()
+})
+
 test('connection loss keeps the previous page covered while Watch is scrolled', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
@@ -5975,6 +6042,7 @@ test.describe('fullscreen playlist dock', () => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     await openFullscreenPlaylistVideo(page)
+    await waitForPlayback(page)
 
     await setPlayerFullscreen(page, true)
     await page.locator('.fullscreenPlaylistToggle').click()
