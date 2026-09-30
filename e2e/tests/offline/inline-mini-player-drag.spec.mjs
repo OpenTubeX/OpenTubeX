@@ -62,7 +62,7 @@ for (const uiScale of [100, 125]) {
           await expect(player).toHaveAttribute('data-inline-mini-drag', '')
           await expect(sheet).toHaveCount(0)
           await touch('touchCancel')
-          await expect(player).not.toHaveAttribute('data-inline-mini-drag', '')
+          await expect(player).not.toHaveAttribute('data-inline-mini-drag')
           await expect(sheet).toBeVisible()
           await expect(player).not.toHaveClass(/scrollMiniPlayer/)
           await sheet.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
@@ -77,7 +77,7 @@ for (const uiScale of [100, 125]) {
           await expect(page).not.toHaveURL(/#\/watch\//)
           await expect(sheet).toHaveCount(0)
           await expect(page.locator('.mobileMiniBarOverlay')).toBeVisible()
-          await expect(player).not.toHaveAttribute('data-phone-panel-video', '')
+          await expect(player).not.toHaveAttribute('data-phone-panel-video')
           await expect.poll(() => page.evaluate(() => document.body.style.overflow)).not.toBe('hidden')
         } finally {
           await cdp.detach()
