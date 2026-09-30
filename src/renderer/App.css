@@ -886,7 +886,9 @@
 }
 
 .mobileThumbnailActionRow button[aria-checked='true'] {
-  color: var(--primary-color);
+  color: var(--accent-color);
+  background-color: color-mix(in srgb, var(--accent-color) 16%, var(--card-bg-color));
+  box-shadow: inset 0 0 0 2px currentcolor;
 }
 
 
