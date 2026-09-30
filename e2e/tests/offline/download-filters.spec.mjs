@@ -6,8 +6,8 @@ const media = name => path.join(repoRoot, 'e2e/fixtures/media', name)
 const now = Date.now()
 const records = [
   { id: 1, title: 'Morning walk', author: 'North Channel', file: 'demo.webm', completedAt: now },
-  { id: 2, title: 'Evening song', author: 'South Channel', file: 'demo-audio.mp3', completedAt: now - 86400000 },
-  { id: 3, title: 'Old documentary', author: 'North Channel', file: 'hls-1080.mp4', completedAt: now - 400 * 86400000 }
+  { id: 2, title: 'Evening song', author: 'South Channel', file: 'demo-audio.mp3', completedAt: now },
+  { id: 3, title: 'Old documentary', author: 'North Channel', file: 'hls-1080.mp4', completedAt: now - 8 * 86400000 }
 ].map(({ id, title, author, file, completedAt }) => ({
   id,
   title,

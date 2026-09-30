@@ -3192,6 +3192,9 @@ export async function handleYtDlpListDownloads(event) {
       : availableDestinationCount === destinations.length
         ? 'available'
         : 'partial'
+    const legacyCompletedAt = Math.max(0, ...destinationStats.map(destinationStat => (
+      destinationStat?.birthtimeMs > 0 ? destinationStat.birthtimeMs : (destinationStat?.ctimeMs ?? 0)
+    )))
 
     return {
       ...record,
@@ -3199,7 +3202,7 @@ export async function handleYtDlpListDownloads(event) {
       availableDestinationCount,
       destinationCount: destinations.length,
       sizeBytes,
-      completedAt: record.completedAt ?? (Math.max(0, ...destinationStats.map(destinationStat => destinationStat?.ctimeMs ?? 0)) || undefined),
+      completedAt: record.completedAt ?? (legacyCompletedAt || undefined),
       files: getDownloadFiles(record).map(file => ({
         ...file,
         available: existsSync(file.path)

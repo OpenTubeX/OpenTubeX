@@ -10,7 +10,7 @@ export function filterCompletedDownloads(downloads, { query, format, period, sor
   const today = new Date(now)
   const start = new Date(today.getFullYear(), period === 'year' ? 0 : today.getMonth(), period === 'week' ? today.getDate() - ((today.getDay() + 6) % 7) : 1).getTime()
   return downloads.filter(download => {
-    if (search && ![download.title, ...(download.files?.map(file => file.author) ?? [])]
+    if (search && ![download.title, ...(download.files?.flatMap(file => [file.title, file.author]) ?? [])]
       .some(value => value?.toLocaleLowerCase().includes(search))) return false
     if (format && !downloadFormats(download).includes(format)) return false
     if (period && (!Number.isFinite(download.completedAt) || download.completedAt < start)) return false
