@@ -45,7 +45,8 @@ test('opens background videos promptly from a large subscriptions feed', async (
   // would otherwise measure module parsing alongside each tab's creation.
   await page.locator('.ft-list-video .title').first().click({ button: 'middle' })
   await expect(page.locator('.tabContent[aria-hidden="true"] .videoLayout')).toBeAttached()
-  await page.waitForTimeout(400)
+  await expect(page.locator('.newTabThumbnailMorph')).toHaveCount(0)
+  await expect(page.locator('.feed-enter-active, .feed-enter-from, .feed-move')).toHaveCount(0)
   const session = await page.context().newCDPSession(page)
   await session.send('Emulation.setCPUThrottlingRate', { rate: 4 })
   for (const reducedMotion of ['off', 'on']) {
@@ -54,31 +55,42 @@ test('opens background videos promptly from a large subscriptions feed', async (
       await store.dispatch('updateReducedMotion', value)
     }, reducedMotion)
     for (let index = 0; index < 3; index++) {
-      const metrics = await page.evaluate(index => new Promise(resolve => {
+      const link = page.locator('#subscriptionsPanel .ft-list-video .title')
+        .nth(index + (reducedMotion === 'on' ? 3 : 0) + 1)
+      const videoId = /\/watch\/([^?]+)/.exec(await link.getAttribute('href'))[1]
+      await page.evaluate(() => {
         const initialTabs = document.querySelectorAll('.tabBar .tab').length
-        const startedAt = performance.now()
-        let previous = startedAt
-        let longestFrame = 0
-        function frame() {
-          const now = performance.now()
-          longestFrame = Math.max(longestFrame, now - previous)
-          previous = now
-          if (document.querySelectorAll('.tabBar .tab').length > initialTabs) {
-            resolve({ elapsed: now - startedAt, longestFrame })
-          } else {
+        window.__backgroundTabTiming = new Promise(resolve => {
+          document.addEventListener('auxclick', () => {
+            const startedAt = performance.now()
+            let previous = startedAt
+            let longestFrame = 0
+            function frame() {
+              const now = performance.now()
+              longestFrame = Math.max(longestFrame, now - previous)
+              previous = now
+              if (document.querySelectorAll('.tabBar .tab').length > initialTabs) {
+                resolve({ elapsed: now - startedAt, longestFrame })
+              } else {
+                requestAnimationFrame(frame)
+              }
+            }
             requestAnimationFrame(frame)
-          }
-        }
-        document.querySelectorAll('#subscriptionsPanel .ft-list-video .title')[index].dispatchEvent(new MouseEvent('auxclick', {
-          button: 1, bubbles: true, cancelable: true
-        }))
-        requestAnimationFrame(frame)
-      }), index + (reducedMotion === 'on' ? 3 : 0) + 1)
+          }, { capture: true, once: true })
+        })
+      })
+      await link.click({ button: 'middle' })
+      const metrics = await page.evaluate(() => window.__backgroundTabTiming)
       console.log('Background tab opening:', { reducedMotion, ...metrics })
       await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
       expect.soft(metrics.elapsed).toBeLessThan(400)
       expect.soft(metrics.longestFrame).toBeLessThan(250)
-      await page.waitForTimeout(500)
+      await expect(page.locator('.newTabThumbnailMorph')).toHaveCount(0)
+      await expect.poll(() => page.evaluate(id => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        return JSON.parse(store.getters.getSubscriptionSeenVideos)
+          .some(entry => entry.videoId === id && entry.seenAt > (entry.unseenAt ?? 0))
+      }, videoId)).toBe(true)
     }
   }
   await session.detach()
