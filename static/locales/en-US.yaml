@@ -2963,6 +2963,12 @@ CommandPalette:
     Video: Open a video first
 Downloads:
   Add Download: Add download
+  Search Completed: Search completed downloads by title or channel
+  Format: Format
+  All Formats: All formats
+  Largest First: Largest first
+  Smallest First: Smallest first
+  No Matching Downloads: No completed downloads match. Try a different search or filter.
   Preparing: Preparing…
   Export Failed: "Could not save the downloaded file. Choose a writable download folder and retry."
   Remove File Permanently Warning: "This will permanently delete \"{title}\"."

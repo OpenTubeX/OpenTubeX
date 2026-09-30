@@ -1742,6 +1742,12 @@ CommandPalette:
     Download Finished: Ez a letöltés már nem fut
     Video: Előbb nyisson meg egy videót
 Downloads:
+  Search Completed: "Befejezett letöltések keresése cím vagy csatorna alapján"
+  Format: "Formátum"
+  All Formats: "Minden formátum"
+  Largest First: "Legnagyobb elöl"
+  Smallest First: "Legkisebb elöl"
+  No Matching Downloads: "Nincs megfelelő befejezett letöltés. Próbáljon más keresést vagy szűrőt."
   Add Download: Letöltés hozzáadása
   Preparing: Előkészítés…
   Export Failed: "A letöltött fájlt nem sikerült menteni. Válasszon írható letöltési mappát, és próbálja újra."

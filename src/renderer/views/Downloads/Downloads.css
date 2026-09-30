@@ -67,6 +67,35 @@
   margin-block-start: 28px;
 }
 
+.downloadSectionHeading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.downloadSearch {
+  margin-block-start: 12px;
+  max-inline-size: 420px;
+}
+
+.downloadFilters {
+  align-items: end;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(125px, 1fr));
+  margin-block: 16px 20px;
+}
+
+.downloadFilters > * {
+  min-inline-size: 0;
+}
+
+.downloadNoResults {
+  color: var(--secondary-text-color);
+  padding-block: 24px;
+  text-align: center;
+}
+
 .downloadRow {
   background: var(--side-nav-color);
   border-radius: calc(8px * var(--ui-roundness));
@@ -102,6 +131,7 @@
 }
 
 .downloadStatus,
+.downloadChannel,
 .downloadAvailability,
 .downloadSpaceWarning,
 .downloadSummary,
@@ -192,6 +222,10 @@
 }
 
 @container downloads-page (width <= 600px) {
+  .downloadFilters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .downloadRow {
     align-items: stretch;
     flex-direction: column;
@@ -208,6 +242,10 @@
 }
 
 @container downloads-page (width <= 420px) {
+  .downloadFilters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .downloadMain {
     align-items: stretch;
     flex-direction: column;

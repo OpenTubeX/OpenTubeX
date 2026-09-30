@@ -1740,6 +1740,12 @@ CommandPalette:
     Download Finished: Ce téléchargement n’est plus en cours
     Video: Ouvrez d’abord une vidéo
 Downloads:
+  Search Completed: "Rechercher des téléchargements terminés par titre ou chaîne"
+  Format: "Format"
+  All Formats: "Tous les formats"
+  Largest First: "Plus grands d’abord"
+  Smallest First: "Plus petits d’abord"
+  No Matching Downloads: "Aucun téléchargement terminé ne correspond. Essayez une autre recherche ou un autre filtre."
   Add Download: Ajouter un téléchargement
   Preparing: Préparation…
   Export Failed: "Impossible d’enregistrer le fichier téléchargé. Choisissez un dossier de téléchargement accessible en écriture et réessayez."

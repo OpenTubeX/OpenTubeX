@@ -1789,6 +1789,12 @@ CommandPalette:
     Download Finished: ההורדה הזו כבר לא פעילה
     Video: יש לפתוח תחילה סרטון
 Downloads:
+  Search Completed: "חיפוש הורדות שהושלמו לפי כותרת או ערוץ"
+  Format: "פורמט"
+  All Formats: "כל הפורמטים"
+  Largest First: "הגדולים תחילה"
+  Smallest First: "הקטנים תחילה"
+  No Matching Downloads: "אין הורדות שהושלמו התואמות לחיפוש. נסו חיפוש או מסנן אחר."
   Add Download: הוספת הורדה
   Preparing: בהכנה…
   Export Failed: "לא ניתן לשמור את הקובץ שהורד. יש לבחור תיקיית הורדות עם הרשאת כתיבה ולנסות שוב."

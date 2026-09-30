@@ -1741,6 +1741,12 @@ CommandPalette:
     Download Finished: このダウンロードはすでに終了しています
     Video: 先に動画を開いてください
 Downloads:
+  Search Completed: "完了したダウンロードをタイトルまたはチャンネルで検索"
+  Format: "形式"
+  All Formats: "すべての形式"
+  Largest First: "サイズの大きい順"
+  Smallest First: "サイズの小さい順"
+  No Matching Downloads: "一致する完了済みダウンロードはありません。検索語やフィルターを変更してください。"
   Add Download: ダウンロードを追加
   Preparing: 準備中…
   Export Failed: "ダウンロードしたファイルを保存できませんでした。書き込み可能なダウンロードフォルダーを選択して、もう一度お試しください。"

@@ -1761,6 +1761,12 @@ CommandPalette:
     Download Finished: Denne nedlastingen pågår ikke lenger
     Video: Åpne en video først
 Downloads:
+  Search Completed: "Søk i fullførte nedlastinger etter tittel eller kanal"
+  Format: "Format"
+  All Formats: "Alle formater"
+  Largest First: "Størst først"
+  Smallest First: "Minst først"
+  No Matching Downloads: "Ingen fullførte nedlastinger samsvarer. Prøv et annet søk eller filter."
   Add Download: Legg til nedlasting
   Preparing: Forbereder…
   Export Failed: "Kunne ikke lagre den nedlastede filen. Velg en nedlastingsmappe med skrivetilgang og prøv igjen."

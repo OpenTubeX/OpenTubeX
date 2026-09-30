@@ -1798,6 +1798,12 @@ CommandPalette:
     Download Finished: Deze download wordt niet meer uitgevoerd
     Video: Open eerst een video
 Downloads:
+  Search Completed: "Voltooide downloads zoeken op titel of kanaal"
+  Format: "Formaat"
+  All Formats: "Alle formaten"
+  Largest First: "Grootste eerst"
+  Smallest First: "Kleinste eerst"
+  No Matching Downloads: "Geen overeenkomende voltooide downloads. Probeer een andere zoekopdracht of filter."
   Add Download: Download toevoegen
   Preparing: Voorbereiden…
   Export Failed: "Het gedownloade bestand kon niet worden opgeslagen. Kies een downloadmap met schrijfrechten en probeer het opnieuw."

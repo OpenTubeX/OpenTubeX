@@ -1741,6 +1741,12 @@ CommandPalette:
     Download Finished: 此下载已停止运行
     Video: 请先打开一个视频
 Downloads:
+  Search Completed: "按标题或频道搜索已完成的下载"
+  Format: "格式"
+  All Formats: "所有格式"
+  Largest First: "从大到小"
+  Smallest First: "从小到大"
+  No Matching Downloads: "没有匹配的已完成下载。请尝试其他搜索词或筛选条件。"
   Add Download: 添加下载
   Preparing: 正在准备…
   Export Failed: "无法保存已下载的文件。请选择有写入权限的下载文件夹，然后重试。"

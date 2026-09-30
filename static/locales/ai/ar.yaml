@@ -1765,6 +1765,12 @@ CommandPalette:
     Download Finished: لم يعد هذا التنزيل قيد التشغيل
     Video: افتح الفيديو أولاً
 Downloads:
+  Search Completed: "ابحث في التنزيلات المكتملة حسب العنوان أو القناة"
+  Format: "الصيغة"
+  All Formats: "كل الصيغ"
+  Largest First: "الأكبر أولاً"
+  Smallest First: "الأصغر أولاً"
+  No Matching Downloads: "لا توجد تنزيلات مكتملة مطابقة. جرّب بحثاً أو تصفية مختلفة."
   Add Download: إضافة تنزيل
   Preparing: جارٍ التحضير…
   Export Failed: "تعذر حفظ الملف الذي تم تنزيله. اختر مجلد تنزيلات يمكن الكتابة فيه وحاول مجددًا."

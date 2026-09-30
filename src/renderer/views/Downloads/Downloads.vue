@@ -85,9 +85,64 @@
       v-if="finishedDownloads.length > 0"
       class="downloadSection"
     >
-      <h2>{{ t('Downloads.Downloaded') }}</h2>
+      <div class="downloadSectionHeading">
+        <h2>{{ t('Downloads.Downloaded') }}</h2>
+        <FtIconButton
+          v-if="completedDownloads.length > 0"
+          :title="t('Search Filters.Search Filters')"
+          :icon="['fas', 'filter']"
+          :aria-expanded="showDownloadFilters"
+          theme="secondary"
+          @click="showDownloadFilters = !showDownloadFilters"
+        />
+      </div>
+      <div
+        v-if="showDownloadFilters"
+        class="downloadFilterPanel"
+      >
+        <FtInput
+          class="downloadSearch"
+          input-type="search"
+          :placeholder="t('Search Bar.Search')"
+          :label="t('Downloads.Search Completed')"
+          :show-label="true"
+          :show-action-button="false"
+          :value="downloadQuery"
+          @input="downloadQuery = $event"
+        />
+        <div class="downloadFilters">
+          <FtSelect
+            :placeholder="t('Downloads.Format')"
+            :value="formatFilter"
+            :select-names="formatNames"
+            :select-values="formatValues"
+            @change="formatFilter = $event"
+          />
+          <FtSelect
+            :placeholder="t('Search Filters.Time.Time')"
+            :value="dateFilter"
+            :select-names="dateNames"
+            :select-values="dateValues"
+            @change="dateFilter = $event"
+          />
+          <FtSelect
+            :placeholder="t('Global.Sort By')"
+            :value="sortOrder"
+            :select-names="sortNames"
+            :select-values="sortValues"
+            @change="sortOrder = $event"
+          />
+        </div>
+      </div>
+      <p
+        v-if="completedDownloads.length > 0 && visibleCompletedDownloads.length === 0"
+        class="downloadNoResults"
+        role="status"
+      >
+        {{ t('Downloads.No Matching Downloads') }}
+      </p>
       <DownloadRow
-        v-for="download in finishedDownloads"
+        v-for="download in visibleFinishedDownloads"
         :key="download.id"
         :download="download"
         :retrying="retryingDownloadIds.includes(download.id)"
@@ -185,13 +240,16 @@ import { useRouter } from 'vue-router'
 import DownloadRow from './DownloadRow.vue'
 import FtButton from '../../components/FtButton/FtButton.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
+import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
 import FtInput from '../../components/FtInput/FtInput.vue'
 import FtPrompt from '../../components/FtPrompt/FtPrompt.vue'
+import FtSelect from '../../components/FtSelect/FtSelect.vue'
 import WatchVideoDownloadPrompt from '../../components/WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 import { isYtDlpMediaUrl } from '../../../ytDlpArguments'
 import store from '../../store/index'
 import { formatBytes } from '../../helpers/fileSize'
 import { downloadWatchRoute, isPlayableDownloadFile } from '../../helpers/downloadPlayback'
+import { downloadFormats, filterCompletedDownloads } from '../../helpers/downloadFilters'
 import { showToast } from '../../helpers/utils'
 
 const { t } = useI18n()
@@ -204,6 +262,13 @@ const selectedDownloadUrl = ref('')
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
 const validDownloadUrl = computed(() => isYtDlpMediaUrl(downloadUrl.value.trim()))
 const retryingDownloadIds = ref([])
+const showDownloadFilters = ref(false)
+const downloadQuery = ref('')
+const formatFilter = ref('')
+const dateFilter = ref('')
+const sortOrder = ref('date-desc')
+const dateValues = ['', 'week', 'month', 'year']
+const sortValues = ['date-desc', 'date-asc', 'size-desc', 'size-asc']
 const downloads = computed(() => Object.values(store.getters.getYtDlpDownloads).sort((a, b) => b.id - a.id))
 const activeDownloads = computed(() => downloads.value.filter(download => (
   ['preparing', 'downloading', 'processing', 'pausing'].includes(download.status) ||
@@ -216,6 +281,28 @@ const canceledDownloads = computed(() => downloads.value.filter(download => down
 const finishedDownloads = computed(() => downloads.value.filter(download => (
   !['queued', 'preparing', 'downloading', 'processing', 'pausing', 'paused', 'cancelled'].includes(download.status)
 )))
+const completedDownloads = computed(() => finishedDownloads.value.filter(download => download.status === 'completed'))
+const otherFinishedDownloads = computed(() => finishedDownloads.value.filter(download => download.status !== 'completed'))
+const formatValues = computed(() => ['', ...new Set(completedDownloads.value.flatMap(downloadFormats))].sort((a, b) => a.localeCompare(b)))
+const formatNames = computed(() => formatValues.value.map(format => format === '' ? t('Downloads.All Formats') : format.toUpperCase()))
+const dateNames = computed(() => [t('Search Filters.Time.Any Time'), t('Search Filters.Time.This Week'), t('Search Filters.Time.This Month'), t('Search Filters.Time.This Year')])
+const sortNames = computed(() => [t('Subscriptions.Newest First'), t('Subscriptions.Oldest First'), t('Downloads.Largest First'), t('Downloads.Smallest First')])
+const visibleCompletedDownloads = computed(() => filterCompletedDownloads(completedDownloads.value, {
+  query: downloadQuery.value,
+  format: formatFilter.value,
+  period: dateFilter.value,
+  sort: sortOrder.value
+}))
+const visibleFinishedDownloads = computed(() => [...visibleCompletedDownloads.value, ...otherFinishedDownloads.value])
+watch(() => completedDownloads.value.length, count => {
+  if (count === 0) {
+    showDownloadFilters.value = false
+    downloadQuery.value = ''
+    formatFilter.value = ''
+    dateFilter.value = ''
+    sortOrder.value = 'date-desc'
+  }
+})
 const pausableDownloads = computed(() => downloads.value.filter(download => ['queued', 'preparing', 'downloading', 'processing'].includes(download.status)))
 const resumableDownloads = computed(() => downloads.value.filter(download => ['paused', 'pausing'].includes(download.status)))
 const failedDownloads = computed(() => finishedDownloads.value.filter(download => download.status === 'failed'))

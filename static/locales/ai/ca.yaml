@@ -2390,6 +2390,12 @@ CommandPalette:
     Download Finished: Aquesta baixada ja no s'està executant
     Video: Obriu primer un vídeo
 Downloads:
+  Search Completed: "Cerca les baixades completades per títol o canal"
+  Format: "Format"
+  All Formats: "Tots els formats"
+  Largest First: "Més grans primer"
+  Smallest First: "Més petits primer"
+  No Matching Downloads: "No hi ha baixades completades coincidents. Prova una altra cerca o filtre."
   Add Download: Afegeix una baixada
   Preparing: S’està preparant…
   Export Failed: "No s’ha pogut desar el fitxer baixat. Trieu una carpeta de baixades amb permís d’escriptura i torneu-ho a provar."

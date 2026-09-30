@@ -2302,6 +2302,12 @@ CommandPalette:
     Download Finished: Esta descarga ya no está en curso
     Video: Abre primero un video
 Downloads:
+  Search Completed: "Buscar descargas completadas por título o canal"
+  Format: "Formato"
+  All Formats: "Todos los formatos"
+  Largest First: "Más grandes primero"
+  Smallest First: "Más pequeños primero"
+  No Matching Downloads: "No hay descargas completadas que coincidan. Probá otra búsqueda o filtro."
   Add Download: Agregar descarga
   Preparing: Preparando…
   Export Failed: "No se pudo guardar el archivo descargado. Elegí una carpeta de descargas con permiso de escritura e intentá de nuevo."

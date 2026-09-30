@@ -1789,6 +1789,12 @@ CommandPalette:
     Download Finished: Această descărcare nu mai rulează
     Video: Deschideți mai întâi un videoclip
 Downloads:
+  Search Completed: "Caută descărcările finalizate după titlu sau canal"
+  Format: "Format"
+  All Formats: "Toate formatele"
+  Largest First: "Cele mai mari mai întâi"
+  Smallest First: "Cele mai mici mai întâi"
+  No Matching Downloads: "Nu există descărcări finalizate potrivite. Încearcă altă căutare sau alt filtru."
   Add Download: Adaugă descărcare
   Preparing: Se pregătește…
   Export Failed: "Fișierul descărcat nu a putut fi salvat. Alegeți un dosar de descărcări cu permisiune de scriere și încercați din nou."

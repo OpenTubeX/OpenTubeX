@@ -1776,6 +1776,12 @@ CommandPalette:
     Download Finished: Esta descarga já não está em curso
     Video: Abra primeiro um vídeo
 Downloads:
+  Search Completed: "Pesquisar transferências concluídas por título ou canal"
+  Format: "Formato"
+  All Formats: "Todos os formatos"
+  Largest First: "Maiores primeiro"
+  Smallest First: "Menores primeiro"
+  No Matching Downloads: "Não há transferências concluídas correspondentes. Experimente outra pesquisa ou filtro."
   Add Download: Adicionar descarga
   Preparing: A preparar…
   Export Failed: "Não foi possível guardar o ficheiro transferido. Escolhe uma pasta de transferências com permissão de escrita e tenta novamente."

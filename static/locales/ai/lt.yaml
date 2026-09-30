@@ -2239,6 +2239,12 @@ CommandPalette:
     Download Finished: Šis atsisiuntimas nebevykdomas
     Video: Pirmiausia atverkite vaizdo įrašą
 Downloads:
+  Search Completed: "Ieškoti baigtų atsisiuntimų pagal pavadinimą ar kanalą"
+  Format: "Formatas"
+  All Formats: "Visi formatai"
+  Largest First: "Didžiausi pirmiausia"
+  Smallest First: "Mažiausi pirmiausia"
+  No Matching Downloads: "Atitinkančių baigtų atsisiuntimų nėra. Bandykite kitą paiešką ar filtrą."
   Add Download: Pridėti atsisiuntimą
   Preparing: Ruošiama…
   Export Failed: "Nepavyko išsaugoti atsisiųsto failo. Pasirinkite atsisiuntimų aplanką su rašymo teise ir bandykite dar kartą."
