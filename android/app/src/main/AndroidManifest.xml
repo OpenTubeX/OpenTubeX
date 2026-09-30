@@ -35,6 +35,7 @@
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density|assetsPaths"
             android:name=".MainActivity"
+            android:enableOnBackInvokedCallback="true"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBarLaunch"
             android:launchMode="singleTask"

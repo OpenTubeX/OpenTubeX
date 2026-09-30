@@ -2732,14 +2732,63 @@ test.describe('navigation playback lifecycle', () => {
     expect(await page.locator('.ftVideoPlayer video').evaluate((element, original) => element === original, original)).toBe(true)
   })
 
-  test('does not retain paused playback when navigating away', async ({ app, page }) => {
+  test('retains paused playback when navigating away and switching tabs', async ({ app, page }) => {
     const video = await openDemoVideo({ app, page })
     await video.evaluate(element => element.pause())
+    const original = await video.elementHandle()
     await page.getByRole('button', { name: 'Expand side navigation', exact: true }).click()
     await goTo(page, 'history')
     await expect(page).toHaveURL(/#\/history$/)
-    await expect(page.locator('.ftVideoPlayer')).toHaveCount(0)
+    const player = page.locator('.ftVideoPlayer')
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect(player).toBeVisible()
+    await page.locator('.tabBar .newTabButton').click()
+    await expect(player).toBeVisible()
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await player.locator('.scrollMiniScrollTop').click()
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+    expect(await player.locator('video').evaluate((element, original) => element === original && element.paused, original)).toBe(true)
   })
+
+  for (const uiScale of [85, 100]) {
+    test.describe(`loading navigation at ${uiScale}% UI scale`, () => {
+      test.use({ seed: { settings: { ...PLAYER_SEED, keepPlayingOnNavigation: true, uiScale } } })
+      test('retains the poster and pending load while navigating away and returning', async ({ app, page }) => {
+        await mockPlayableWatchPage(app, page)
+        const media = Promise.withResolvers()
+        let requests = 0
+        await page.route('**/videoplayback?id=opentubex-e2e-demo**', async route => {
+          requests++
+          await media.promise
+          await route.fallback()
+        })
+        try {
+          await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+          await page.locator(sel.searchInput).press('Enter')
+          const player = page.locator('.ftVideoPlayer')
+          await expect(player).toBeVisible()
+          await expect.poll(() => requests).toBeGreaterThan(0)
+          const component = await page.evaluateHandle(findWatchComponent)
+          const original = await player.locator('video').elementHandle()
+          expect(await original.evaluate(element => element.readyState)).toBe(0)
+          expect(await component.evaluate(component => component.proxy.$refs.player.hasLoaded)).toBe(false)
+          await component.evaluate(component => component.proxy.tabRouter.push('/history'))
+          await expect(page).toHaveURL(/#\/history$/)
+          await expect(player).toBeVisible()
+          await expect(player).toHaveClass(/scrollMiniPlayer/)
+          expect(await player.locator('video').evaluate((element, original) => element === original && element.readyState === 0, original)).toBe(true)
+          await player.locator('.scrollMiniScrollTop').click()
+          await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+          await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+          expect(await player.locator('video').evaluate((element, original) => element === original, original)).toBe(true)
+        } finally {
+          media.resolve()
+        }
+        await waitForPlayback(page)
+      })
+    })
+  }
 
   test('disabling navigation playback disposes the retained player', async ({ app, page }) => {
     await openDemoVideo({ app, page })

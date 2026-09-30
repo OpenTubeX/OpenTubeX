@@ -99,12 +99,17 @@ test('retains a playing native video outside the watch DOM across navigation', a
   assert.equal(mounted.provides.get('navigation').detached.value, false)
 })
 
-test('paused playback is disposed when leaving the watch view', async t => {
-  const mounted = mountWatch(t, { paused: true })
-  await mounted.navigate('/subscriptions')
-  assert.equal(mounted.disposals(), 1)
-  assert.equal(mounted.provides.get('navigation').detached.value, false)
-})
+for (const options of [{ paused: true }, { hasLoaded: false, paused: true }]) {
+  test(`navigation retains the mounted player ${JSON.stringify(options)}`, async t => {
+    const mounted = mountWatch(t, options)
+    await mounted.navigate('/subscriptions')
+    assert.equal(mounted.disposals(), 0)
+    assert.equal(mounted.provides.get('navigation').detached.value, true)
+    await mounted.navigate('/watch/video')
+    assert.equal(mounted.disposals(), 0)
+    assert.equal(mounted.provides.get('navigation').detached.value, false)
+  })
+}
 
 test('disabling retention disposes the hidden player only once', async t => {
   const mounted = mountWatch(t)
@@ -115,7 +120,7 @@ test('disabling retention disposes the hidden player only once', async t => {
   assert.equal(mounted.disposals(), 1)
 })
 
-for (const options of [{ hasLoaded: false }, { mounted: false }]) {
+for (const options of [{ mounted: false }, { paused: true, enabled: false }, { hasLoaded: false, enabled: false }]) {
   test(`does not retain unavailable playback ${JSON.stringify(options)}`, async t => {
     const mounted = mountWatch(t, options)
     await mounted.navigate('/subscriptions')

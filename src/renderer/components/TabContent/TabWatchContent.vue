@@ -89,7 +89,7 @@ const unregister = tabLifecycleService.register(props.tabId, {
     // Android teleports even the scrolling mini player outside this view.
     const player = watchView.value?.$refs.player
     retained.value = Boolean(player) && !context.to.path.startsWith('/watch/') &&
-      (minimized.value || (enabled.value && player.hasLoaded === true && !player.isPaused()))
+      (minimized.value || enabled.value)
     if (retained.value) {
       const tab = store.getters.getTabById(props.tabId)
       const entry = tab?.history[tab.historyIndex]
