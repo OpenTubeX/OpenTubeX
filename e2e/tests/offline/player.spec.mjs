@@ -6,7 +6,7 @@ import {
   openMockedVideo,
   waitForPlayback,
 } from '../../helpers/player.mjs'
-import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 // These used to live in the network suite, where they only ran when YouTube
 // served both the watch page and a media stream. Everything they need is the
@@ -1254,6 +1254,77 @@ test('scopes the mobile fullscreen swipe movement to the video in tablet layout'
   await expect(video).toHaveCSS('translate', '0px -42px')
   await expect(player).toHaveCSS('transform', 'none')
 })
+
+for (const uiScale of [100, 125]) {
+  for (const phone of [true, false]) {
+    test(`waiting poster follows fullscreen swipes in ${phone ? 'phone' : 'tablet'} layout at ${uiScale}% scale`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      await page.route('https://i.ytimg.com/**', route => route.fulfill({
+        contentType: 'image/svg+xml',
+        body: '<svg xmlns="http://www.w3.org/2000/svg" width="480" height="270"><rect width="480" height="270" fill="#326b8a"/></svg>'
+      }))
+      await openMockedVideo(page)
+      await setWindowSize(app, page, { width: phone ? 375 : 900, height: 850 })
+      await page.evaluate(uiScale => window.ftElectron.setZoomFactor(uiScale / 100), uiScale)
+      await page.evaluate(phone => {
+        Object.defineProperty(navigator, 'maxTouchPoints', { configurable: true, get: () => 5 })
+        const app = document.querySelector('.app')
+        const mobile = () => {
+          app.classList.add('capacitorTabs')
+          app.classList.add(phone ? 'capacitorPhoneLayout' : 'capacitorTabletLayout')
+        }
+        new MutationObserver(() => {
+          if (!app.classList.contains('capacitorTabs')) mobile()
+        }).observe(app, { attributeFilter: ['class'] })
+        mobile()
+      }, phone)
+      const watch = await watchViewHandle(page)
+      await watch.evaluate(async view => {
+        view.isLoading = true
+        await view.$nextTick()
+        view.adEndTimeUnixMs = Date.now() + 60_000
+        view.isLoading = false
+      })
+      const player = page.locator('.ftVideoPlayer')
+      const video = player.locator('video')
+      const poster = player.locator('.countdownPoster')
+      await expect(poster).toBeVisible()
+      await expect.poll(() => poster.locator('img').evaluate(image => image.naturalWidth)).toBe(480)
+      await expect.poll(() => video.evaluate(element => element.readyState)).toBe(0)
+      const cdp = await page.context().newCDPSession(page)
+      const touch = (type, point) => cdp.send('Input.dispatchTouchEvent', {
+        type, touchPoints: point ? [point] : []
+      })
+      try {
+        for (const fullscreen of [false, true]) {
+          await setPlayerFullscreen(page, fullscreen)
+          const before = await poster.boundingBox()
+          const bounds = await player.boundingBox()
+          // Stay above the seek bar, which occupies the center at narrow scales.
+          const start = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height * 0.3 }
+          await touch('touchStart', start)
+          await touch('touchMove', { ...start, y: start.y + (fullscreen ? 40 : -40) })
+          await expect(player).toHaveClass(/mobileFullscreenSwiping/)
+          await expect.poll(async () => {
+            const [posterBox, videoBox] = await Promise.all([poster.boundingBox(), video.boundingBox()])
+            return Math.abs(posterBox.y - videoBox.y)
+          }, { timeout: 1000 }).toBeLessThan(1)
+          const during = await poster.boundingBox()
+          expect(fullscreen ? during.y - before.y : before.y - during.y).toBeGreaterThan(8)
+          await touch('touchCancel')
+          await expect(player).not.toHaveClass(/mobileFullscreenSwiping|mobileFullscreenSwipeSettling/)
+          await expect.poll(async () => Math.abs((await poster.boundingBox()).y - before.y)).toBeLessThan(1)
+          await expect(poster).toHaveCSS('translate', 'none')
+          await expect(video).toHaveCSS('translate', 'none')
+          await expect.poll(() => video.evaluate(element => element.readyState)).toBe(0)
+        }
+      } finally {
+        await touch('touchCancel').catch(() => {})
+        await cdp.detach()
+      }
+    })
+  }
+}
 
 test('uses mobile surface taps for controls and keeps an on-video play button', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
