@@ -294,7 +294,10 @@ watch(() => props.captions, (captions) => {
   }
 })
 
-watch(() => props.preferredCaptionIndex, (index) => {
+let appliedPreferredCaptionIndex = props.preferredCaptionIndex
+watch([() => props.preferredCaptionIndex, () => props.offline], ([index]) => {
+  if (props.offline || index === appliedPreferredCaptionIndex) return
+  appliedPreferredCaptionIndex = index
   selectedCaptionIndex.value = String(index)
 })
 

@@ -86,68 +86,82 @@ for (const width of [1600, 480]) {
   })
 }
 
-test('keeps loaded live chat messages and its session after losing connectivity', async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
-  const watch = await watchViewHandle(page)
-  await watch.evaluate(async vm => {
-    const listeners = new Map()
-    vm.liveChat = {
-      is_replay: false,
-      stopped: false,
-      on: (event, listener) => listeners.set(listener, event),
-      once: (event, listener) => listeners.set(listener, event),
-      off: (_event, listener) => listeners.delete(listener),
-      emitError(error) {
-        for (const [listener, event] of listeners) {
-          if (event === 'error') listener(error)
-        }
-      },
-      stop() { this.stopped = true },
-      start() {
-        for (const [listener, event] of listeners) {
-          if (event !== 'start') continue
-          listener({
-            actions: [{
-              is: type => type.type === 'AddChatItemAction',
-              item: {
-                is: type => type.type === 'LiveChatTextMessage',
-                id: 'loaded-chat-message',
-                message: { runs: [{ text: 'Already loaded chat message' }] },
-                author: {
-                  id: 'chat-author',
-                  name: 'Chat author',
-                  badges: [],
-                  thumbnails: [{ url: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' }]
+for (const isReplay of [false, true]) {
+  test(`keeps loaded ${isReplay ? 'chat replay' : 'live chat'} messages and its session after losing connectivity`, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    const watch = await watchViewHandle(page)
+    await watch.evaluate(async (vm, replay) => {
+      const listeners = new Map()
+      vm.liveChat = {
+        is_replay: replay,
+        seeks: [],
+        seekTo(seconds) { this.seeks.push(seconds) },
+        async pollNext() {},
+        stopped: false,
+        on: (event, listener) => listeners.set(listener, event),
+        once: (event, listener) => listeners.set(listener, event),
+        off: (_event, listener) => listeners.delete(listener),
+        emitError(error) {
+          for (const [listener, event] of listeners) {
+            if (event === 'error') listener(error)
+          }
+        },
+        stop() { this.stopped = true },
+        start() {
+          for (const [listener, event] of listeners) {
+            if (event !== 'start') continue
+            listener({
+              actions: [{
+                is: type => type.type === 'AddChatItemAction',
+                item: {
+                  is: type => type.type === 'LiveChatTextMessage',
+                  id: 'loaded-chat-message',
+                  message: { runs: [{ text: 'Already loaded chat message' }] },
+                  author: {
+                    id: 'chat-author',
+                    name: 'Chat author',
+                    badges: [],
+                    thumbnails: [{ url: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' }]
+                  }
                 }
-              }
-            }]
-          })
+              }]
+            })
+          }
         }
       }
+      vm.isLive = !replay
+      vm.liveChatIsReplay = replay
+      vm.liveChatOpen = true
+      await vm.$nextTick()
+    }, isReplay)
+    const message = page.locator('.chatMessage')
+    await expect(message).toHaveText('Already loaded chat message')
+    await page.route(/^https?:\/\//, route => route.abort('internetdisconnected'))
+    await page.evaluate(() => {
+      Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })
+      window.dispatchEvent(new Event('offline'))
+    })
+    await expect(page.locator('.connectionStatus')).toHaveText('Offline')
+    await watch.evaluate(vm => vm.liveChat.emitError(new TypeError('Failed to fetch')))
+    if (isReplay) {
+      const previousSeeks = await watch.evaluate(vm => vm.liveChat.seeks.length)
+      await watch.evaluate(vm => {
+        vm.liveChatSeekRequest = { seconds: 12 }
+        vm.currentTime = 15
+      })
+      expect(await watch.evaluate(vm => vm.liveChat.seeks.length)).toBe(previousSeeks)
     }
-    vm.isLive = true
-    vm.liveChatOpen = true
-    await vm.$nextTick()
+    await expect(message).toHaveText('Already loaded chat message')
+    expect(await watch.evaluate(vm => vm.liveChat.stopped)).toBe(false)
+    await watch.evaluate(vm => vm.closeLiveChat())
+    expect(await watch.evaluate(vm => vm.liveChatAvailable)).toBe(true)
+    await watch.evaluate(vm => { vm.liveChatOpen = true })
+    await expect(message).toHaveText('Already loaded chat message')
+    expect(await watch.evaluate(vm => vm.liveChat.stopped)).toBe(false)
+    await watch.dispose()
   })
-  const message = page.locator('.chatMessage')
-  await expect(message).toHaveText('Already loaded chat message')
-  await page.route(/^https?:\/\//, route => route.abort('internetdisconnected'))
-  await page.evaluate(() => {
-    Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })
-    window.dispatchEvent(new Event('offline'))
-  })
-  await expect(page.locator('.connectionStatus')).toHaveText('Offline')
-  await watch.evaluate(vm => vm.liveChat.emitError(new TypeError('Failed to fetch')))
-  await expect(message).toHaveText('Already loaded chat message')
-  expect(await watch.evaluate(vm => vm.liveChat.stopped)).toBe(false)
-  await watch.evaluate(vm => vm.closeLiveChat())
-  expect(await watch.evaluate(vm => vm.liveChatAvailable)).toBe(true)
-  await watch.evaluate(vm => { vm.liveChatOpen = true })
-  await expect(message).toHaveText('Already loaded chat message')
-  expect(await watch.evaluate(vm => vm.liveChat.stopped)).toBe(false)
-  await watch.dispose()
-})
+}
 
 test('does not expose unloaded comments or live chat after losing connectivity', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)

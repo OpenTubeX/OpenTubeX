@@ -938,7 +938,7 @@ function releaseReplayComments() {
   }
 }
 
-watch([() => props.currentTime, () => props.seekRequest], ([currentTime, seekRequest], [, previousSeekRequest]) => {
+watch([() => props.currentTime, () => props.seekRequest, () => props.offline], ([currentTime, seekRequest], [, previousSeekRequest]) => {
   const seeked = seekRequest !== null && seekRequest !== previousSeekRequest
   if (liveChatInstance === null) {
     // Metadata loading can finish after a paused seek. Keep its precision, but
@@ -954,11 +954,21 @@ watch([() => props.currentTime, () => props.seekRequest], ([currentTime, seekReq
     return
   }
 
-  if (seeked) {
+  if (props.offline) {
+    if (seeked) {
+      pendingReplaySeekSeconds = seekRequest.seconds
+    } else if (pendingReplaySeekSeconds !== null && currentTime !== Math.floor(pendingReplaySeekSeconds)) {
+      pendingReplaySeekSeconds = currentTime
+    }
+    if (pendingReplaySeekSeconds !== null) return
+  }
+
+  if (seeked || pendingReplaySeekSeconds !== null) {
     // Only an actual player seek invalidates chat. Delayed time updates can span
     // many seconds on a busy or backgrounded renderer during ordinary playback.
     clearChat()
-    liveChatInstance.seekTo(seekRequest.seconds * 1000)
+    liveChatInstance.seekTo((seeked ? seekRequest.seconds : pendingReplaySeekSeconds) * 1000)
+    pendingReplaySeekSeconds = null
   } else {
     releaseReplayComments()
   }
