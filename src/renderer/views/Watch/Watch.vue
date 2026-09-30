@@ -91,7 +91,7 @@
         >
           <ft-shaka-video-player
             v-if="playerReady && (!isUpcoming || playabilityStatus === 'OK') && !errorMessage"
-            :key="customShortsPlayerActive ? `short:${videoId}` : `watch:${videoLoadGeneration}`"
+            :key="customShortsPlayerActive ? `short:${videoId}` : `watch:${playerLoadGeneration}`"
             ref="player"
             :manifest-src="manifestSrc"
             :manifest-mime-type="manifestMimeType"

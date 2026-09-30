@@ -135,13 +135,8 @@ test.describe('default appearance', () => {
         await expect(page.locator('body')).toHaveClass(new RegExp(theme))
         const tabBar = page.locator(`.tabBar.vertical.position-${position}`)
         await expect(tabBar).toBeVisible()
-        const styles = await tabBar.evaluate(element => ({
-          shadow: getComputedStyle(element).boxShadow,
-          divider: getComputedStyle(element.querySelector('.tabBarResizeHandle')).backgroundImage,
-        }))
-
-        expect(styles.divider).toBe('none')
-        expect(styles.shadow).toMatch(position === 'left' ? /3px 0px 8px/ : /-3px 0px 8px/)
+        await expect(page.locator(`.tabBarResizeHandle.position-${position}`)).toHaveCSS('background-image', 'none')
+        await expect(tabBar).toHaveCSS('box-shadow', position === 'left' ? /3px 0px 8px/ : /-3px 0px 8px/)
         const headerShadow = await page.locator('.topNav').evaluate(element => getComputedStyle(element).boxShadow)
         expect(headerShadow).toContain(position === 'left'
           ? '3px 0px 8px -3px inset'

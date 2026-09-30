@@ -293,6 +293,7 @@ export default defineComponent({
       shortsPreloadGeneration: 0,
       shortsPlayerCacheGeneration: 0,
       videoLoadGeneration: 0,
+      playerLoadGeneration: 0,
       preparingVideoLoadGeneration: null,
       hasAiGeneratedContent: false,
       hasPaidPromotion: false,
@@ -2195,6 +2196,9 @@ export default defineComponent({
         const preserveShortsPanels = videoIdChanged &&
           this.customShortsPlayerActive &&
           this.tabRoute.query.short === 'true'
+        // Replace the player only after its UI state has been saved. Metadata-only
+        // requests advance videoLoadGeneration without replacing local playback.
+        this.playerLoadGeneration = loadGeneration
         this.resetVideoState({
           preserveTitle,
           placeholderTitle: videoIdChanged ? this.getPendingVideoTitle() : '',

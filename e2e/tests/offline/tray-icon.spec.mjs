@@ -86,7 +86,10 @@ test('tray icon selector clamps and resets its scroller at fractional UI scale',
   const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
   await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
   const previousOffset = await scroller.evaluate(element => element.scrollTop)
-  await setWindowSize(app, page, { width: 1600, height: 1000 })
+  await setWindowSize(app, page, { width: 900, height: 1000 })
+  // Crossing the desktop breakpoint restores a floating settings window.
+  // Maximize it so the scroll viewport actually grows and its range shortens.
+  await page.locator('.settingsWindow').getByRole('button', { name: 'Maximize', exact: true }).click()
   await expect.poll(() => scroller.evaluate(element => {
     const viewport = element.querySelector('[data-overlayscrollbars-viewport]') ?? element
     return Math.max(0, viewport.scrollTop - (viewport.scrollHeight - viewport.clientHeight))
