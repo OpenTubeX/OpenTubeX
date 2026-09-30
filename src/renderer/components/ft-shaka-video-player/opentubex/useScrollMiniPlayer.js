@@ -918,6 +918,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       if (scrollMiniLayoutAnimation === animation) {
         scrollMiniLayoutAnimation = null
         scrollMiniPlayerAnimating.value = false
+        nextTick(() => updateScrollMiniDragHandleContrast(true))
       }
     })
   }
@@ -952,7 +953,9 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
   /** @param {boolean} [force] */
   function updateScrollMiniDragHandleContrast(force = false) {
-    if (!scrollMiniPlayerActive.value) return
+    // Reading pixels from a hardware-decoded video can synchronously stall the
+    // renderer. Keep it out of the first frame and the rest of the transition.
+    if (!scrollMiniPlayerActive.value || scrollMiniPlayerAnimating.value || inlineDrag) return
 
     const now = performance.now()
     if (!force && now - scrollMiniDragHandleContrastLastUpdate < SCROLL_MINI_DRAG_HANDLE_CONTRAST_MS) {
