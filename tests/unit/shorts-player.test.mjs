@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFile } from 'node:fs/promises'
 import vm from 'node:vm'
-import { ref, nextTick } from 'vue'
+import { compile, createRenderer, defineComponent, h, onBeforeUnmount, onDeactivated, ref, nextTick } from 'vue'
 
 import {
   buildSubscriptionShortsFeed,
@@ -66,6 +66,81 @@ const extractionSource = watchSource.slice(
   watchSource.indexOf('    getShortsExtractionKey('),
   watchSource.indexOf('    async preloadShortsPlaybackWindow()')
 )
+
+for (const failure of [
+  { status: 'OK', watchPageIpBlocked: true },
+  { status: 'LOGIN_REQUIRED' },
+  { status: 'UNPLAYABLE' },
+]) {
+  test(`resolved local Shorts failure ${JSON.stringify(failure)} is not reused during recovery`, async () => {
+    let calls = 0
+    const methods = vm.runInNewContext(`({${extractionSource}})`, {
+      process: { env: { IS_CAPACITOR: false } },
+      getLocalVideoInfo: async () => {
+        calls++
+        return calls === 1
+          ? { info: { playability_status: { status: failure.status } }, watchPageIpBlocked: failure.watchPageIpBlocked }
+          : { info: { playability_status: { status: 'OK' } } }
+      },
+    })
+    const watch = {
+      ...methods, backendPreference: 'local', isYtDlpPlaybackRequested: () => false,
+      shortsPlaybackCache: new ShortsPlaybackCache(),
+    }
+    await watch.getShortsVideoInformation('short')
+    const recovered = await watch.getShortsVideoInformation('short')
+    assert.equal(calls, 2, 'opening or recovering a preloaded failure must fetch fresh metadata')
+    assert.equal(recovered.info.playability_status.status, 'OK')
+    assert.equal(await watch.getShortsVideoInformation('short'), recovered)
+    assert.equal(calls, 2, 'successful metadata should still be cached')
+  })
+}
+
+const watchTemplate = await readFile(new URL('../../src/renderer/views/Watch/Watch.vue', import.meta.url), 'utf8')
+const keepAliveStart = watchTemplate.indexOf('<KeepAlive')
+const keepAliveOpening = watchTemplate.slice(keepAliveStart, watchTemplate.indexOf('>', keepAliveStart) + 1)
+
+for (const shorts of [false, true]) {
+  test(`${shorts ? 'Shorts retain' : 'regular videos release'} the player when playback cannot render`, async t => {
+    let unmounted = 0
+    let deactivated = 0
+    const Player = defineComponent({
+      name: 'FtShakaVideoPlayer',
+      setup() {
+        onBeforeUnmount(() => unmounted++)
+        onDeactivated(() => deactivated++)
+        return () => h('video')
+      },
+    })
+    const node = tag => ({ tag, children: [], parent: null })
+    const renderer = createRenderer({
+      createElement: node, createComment: () => node('comment'), createText: () => node('text'),
+      setElementText() {}, setText() {}, patchProp() {},
+      insert(element, parent, anchor) {
+        if (element.parent) element.parent.children.splice(element.parent.children.indexOf(element), 1)
+        element.parent = parent
+        const index = anchor ? parent.children.indexOf(anchor) : -1
+        if (index < 0) parent.children.push(element)
+        else parent.children.splice(index, 0, element)
+      },
+      remove(element) { element.parent.children.splice(element.parent.children.indexOf(element), 1) },
+      parentNode: element => element.parent,
+      nextSibling: element => element.parent.children[element.parent.children.indexOf(element) + 1] ?? null,
+    })
+    const ready = ref(true)
+    const app = renderer.createApp({
+      components: { FtShakaVideoPlayer: Player },
+      setup: () => ({ customShortsPlayerActive: shorts, shortsPlayerCacheGeneration: 0, playerReady: ready }),
+      render: compile(`${keepAliveOpening}<ft-shaka-video-player v-if="playerReady" /></KeepAlive>`),
+    })
+    app.mount(node('root'))
+    t.after(() => app.unmount())
+    ready.value = false
+    await nextTick()
+    assert.equal(unmounted, shorts ? 0 : 1, 'regular playback must release its listeners and media ownership')
+    assert.equal(deactivated, shorts ? 1 : 0)
+  })
+}
 
 for (const backend of ['local', 'invidious']) {
   test(`Shorts ${backend} extraction shares requests and uses the matching backend`, async () => {

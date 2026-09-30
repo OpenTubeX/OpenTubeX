@@ -1511,7 +1511,8 @@ export default defineComponent({
     },
     getShortsVideoInformation(videoId, backend = this.backendPreference) {
       const useYtDlp = this.isYtDlpPlaybackRequested()
-      return this.shortsPlaybackCache.get(this.getShortsExtractionKey(videoId, backend), () => {
+      const key = this.getShortsExtractionKey(videoId, backend)
+      return this.shortsPlaybackCache.get(key, () => {
         if (backend === 'invidious') {
           return invidiousGetVideoInformation(videoId).then(result => {
             if (result.error) throw new Error(result.error)
@@ -1520,6 +1521,12 @@ export default defineComponent({
         }
         return getLocalVideoInfo(videoId, {
           shouldGeneratePoToken: () => !process.env.IS_CAPACITOR || !useYtDlp
+        }).then(result => {
+          if (result.watchPageIpBlocked || result.info?.playability_status?.status !== 'OK') {
+            // Recovery and opening a preloaded failure require fresh metadata.
+            this.shortsPlaybackCache.delete(key)
+          }
+          return result
         })
       })
     },
@@ -3697,7 +3704,7 @@ export default defineComponent({
           result.basic_info.duration,
           result.streaming_data?.adaptive_formats
         )
-        if (!metadataOnly && this.customShortsPlayerActive) {
+        if (!metadataOnly && this.customShortsPlayerActive && !watchPageIpBlocked && playabilityStatus.status === 'OK') {
           const currentKey = this.getShortsExtractionKey(videoId, 'local')
           if (shortsExtractionKey === currentKey) {
             this.shortsPlaybackCache.set(currentKey, videoInfo)

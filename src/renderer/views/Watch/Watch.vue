@@ -87,6 +87,7 @@
         <KeepAlive
           :key="customShortsPlayerActive ? `shorts:${shortsPlayerCacheGeneration}` : 'watch'"
           :max="customShortsPlayerActive ? 4 : 1"
+          :include="customShortsPlayerActive ? undefined : []"
         >
           <ft-shaka-video-player
             v-if="playerReady && (!isUpcoming || playabilityStatus === 'OK') && !errorMessage"

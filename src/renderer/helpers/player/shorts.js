@@ -58,6 +58,10 @@ export class ShortsPlaybackCache {
     })
   }
 
+  delete(key) {
+    this.entries.delete(key)
+  }
+
   retain(keys, videoIds) {
     const keptKeys = new Set(keys)
     const keptVideoIds = new Set(videoIds)
