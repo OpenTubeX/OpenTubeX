@@ -35,6 +35,59 @@ async function openMobilePlayer(app, page, phone = true) {
 }
 
 for (const uiScale of [100, 125]) {
+  test.describe(`minimizing with a phone drawer at ${uiScale}% UI scale`, () => {
+    test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, enableVideoZoom: false, enableMobileFullscreenSwipe: false, uiScale } } })
+
+    for (const panel of ['comments', 'description', 'chapters', 'transcript']) {
+      test(`swiping with the ${panel} drawer restores it on cancellation and closes it on minimization`, async ({ app, page }) => {
+        const player = await openMobilePlayer(app, page)
+        const watch = await watchViewHandle(page)
+        await watch.evaluate((vm, panel) => {
+          if (panel === 'chapters') vm.videoChapters = [{ title: 'Chapter', startSeconds: 0, endSeconds: 10, timestamp: '0:00' }]
+          vm.openPhonePanel(panel)
+        }, panel)
+        const sheet = page.locator('.dockedSheet[open]')
+        await expect(sheet).toBeVisible()
+        await sheet.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
+        await expect(player).toHaveAttribute('data-phone-panel-video', '')
+        const bounds = await player.boundingBox()
+        const start = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
+        const cdp = await page.context().newCDPSession(page)
+        const touch = (type, distance) => cdp.send('Input.dispatchTouchEvent', {
+          type, touchPoints: distance === undefined ? [] : [{ ...start, y: start.y + distance }]
+        })
+        try {
+          await touch('touchStart', 0)
+          await touch('touchMove', 30)
+          await expect(player).toHaveAttribute('data-inline-mini-drag', '')
+          await expect(sheet).toHaveCount(0)
+          await touch('touchCancel')
+          await expect(player).not.toHaveAttribute('data-inline-mini-drag', '')
+          await expect(sheet).toBeVisible()
+          await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+          await sheet.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
+
+          await touch('touchStart', 0)
+          for (const distance of [20, 40, 60, 80, 110]) {
+            await touch('touchMove', distance)
+            await page.evaluate(() => new Promise(requestAnimationFrame))
+          }
+          await touch('touchEnd')
+          await expect(player).toHaveClass(/scrollMiniPlayer/)
+          await expect(page).not.toHaveURL(/#\/watch\//)
+          await expect(sheet).toHaveCount(0)
+          await expect(page.locator('.mobileMiniBarOverlay')).toBeVisible()
+          await expect(player).not.toHaveAttribute('data-phone-panel-video', '')
+          await expect.poll(() => page.evaluate(() => document.body.style.overflow)).not.toBe('hidden')
+        } finally {
+          await cdp.detach()
+        }
+      })
+    }
+  })
+}
+
+for (const uiScale of [100, 125]) {
   test.describe(`scroll mini player at ${uiScale}% UI scale`, () => {
     test.use({
       seed: {
