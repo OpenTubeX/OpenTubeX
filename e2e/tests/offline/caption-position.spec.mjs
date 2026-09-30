@@ -1,4 +1,4 @@
-import { setPlayerFullscreen, test, expect } from '../../helpers/app.mjs'
+import { goTo, setPlayerFullscreen, test, expect } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -10,6 +10,57 @@ test.use({
       enableSubtitlesByDefault: true,
     }
   }
+})
+
+test('applies UI roundness to the player and caption backgrounds', async ({ app, page, attachScreenshot }) => {
+  await mockPlayableWatchPage(app, page, { captionCueSettings: 'align:start position:0%' })
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+
+  const player = page.locator('.ftVideoPlayer')
+  const caption = player.locator('.shaka-text-container [translate="no"]')
+  await expect(caption).toBeVisible()
+
+  for (const roundness of [0, 100, 200]) {
+    await page.evaluate(value => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.dispatch('updateUiRoundness', value)
+    }, roundness)
+    await expect(player).toHaveCSS('border-radius', `${12 * roundness / 100}px`)
+    await expect(caption).toHaveCSS('border-radius', `${4 * roundness / 100}px`)
+  }
+  await attachScreenshot('player and captions at 200% roundness')
+
+  await setPlayerFullscreen(page, true)
+  await expect(player).toHaveCSS('border-radius', '0px')
+  await expect(caption).toHaveCSS('border-radius', '8px')
+  await setPlayerFullscreen(page, false)
+  await expect(player).toHaveCSS('border-radius', '24px')
+
+  await page.locator('body').press('s')
+  await expect(player).toHaveClass(/fullWindow/)
+  await expect(player).toHaveCSS('border-radius', '0px')
+  await expect(caption).toHaveCSS('border-radius', '8px')
+  await page.locator('body').press('s')
+  await expect(player).not.toHaveClass(/fullWindow/)
+  await expect(player).toHaveCSS('border-radius', '24px')
+})
+
+test('applies UI roundness to the caption settings preview background', async ({ page, attachScreenshot }) => {
+  await goTo(page, 'settings')
+  await page.locator('.settingsMenu [data-section="playback"]').click()
+  const caption = page.locator('.captionPreview span')
+  await expect(caption).toBeVisible()
+  await caption.scrollIntoViewIfNeeded()
+
+  for (const roundness of [0, 100, 200]) {
+    await page.evaluate(value => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.dispatch('updateUiRoundness', value)
+    }, roundness)
+    await expect(caption).toHaveCSS('border-radius', `${4 * roundness / 100}px`)
+  }
+  await attachScreenshot('caption preview at 200% roundness')
 })
 
 test('lowers bottom captions after the player controls fade', async ({ app, page }) => {

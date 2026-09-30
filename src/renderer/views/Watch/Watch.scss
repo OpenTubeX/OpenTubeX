@@ -161,6 +161,7 @@
   .videoPlayerPlaceholder {
     aspect-ratio: 16 / 9;
     inline-size: 100%;
+    border-radius: calc(12px * var(--ui-roundness));
   }
 
   .videoArea {
@@ -1774,6 +1775,52 @@
   }
 }
 
+.commentsSkeleton {
+  display: grid;
+  gap: 24px;
+  box-sizing: border-box;
+  padding: 16px;
+  border-radius: calc(8px * var(--ui-roundness));
+  background-color: var(--card-bg-color);
+  backdrop-filter: var(--card-bg-blur, none);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
+
+  .skeletonLine {
+    block-size: 12px;
+  }
+
+  .skeletonCommentsTitle {
+    inline-size: min(220px, 50%);
+    block-size: 20px;
+  }
+
+  .skeletonComment {
+    display: grid;
+    grid-template-columns: 60px minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .skeletonCommentAvatar {
+    inline-size: 60px;
+    block-size: 60px;
+    border-radius: 50%;
+  }
+
+  .skeletonCommentDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .skeletonCommentAuthor {
+    inline-size: min(160px, 45%);
+  }
+
+  .skeletonLine.short {
+    inline-size: 70%;
+  }
+}
+
 .playlistSkeleton {
   box-sizing: border-box;
   overflow: hidden;
@@ -1869,6 +1916,7 @@
   margin-inline: 8px;
   padding-block: 16px;
   padding-inline: 16px;
+  border-radius: calc(8px * var(--ui-roundness));
   background-color: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
   box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
