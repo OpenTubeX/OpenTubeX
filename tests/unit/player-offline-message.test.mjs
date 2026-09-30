@@ -8,6 +8,42 @@ const source = await readFile(new URL('../../src/renderer/components/ft-shaka-vi
 const start = source.indexOf('    const showOfflineMessage = computed(')
 const expression = source.slice(start, source.indexOf('\n    // #endregion offline message', start))
 
+test('offline SponsorBlock refresh preserves loaded segments without starting a request', async () => {
+  const start = source.indexOf('    async function refreshSponsorBlockInfo() {')
+  const end = source.indexOf('    async function refreshSponsorBlockContributionStats()', start)
+  const props = { offline: true }
+  let refreshes = 0
+  const refresh = vm.runInNewContext(`${source.slice(start, end)}\nrefreshSponsorBlockInfo`, {
+    props, sponsorBlockEnableSubmission: ref(false),
+    setupSponsorBlock: async () => { refreshes++ }
+  })
+  await refresh()
+  assert.equal(refreshes, 0)
+  props.offline = false
+  await refresh()
+  assert.equal(refreshes, 1)
+})
+
+test('loaded SponsorBlock segments keep working offline while submissions wait for connectivity', () => {
+  const start = source.indexOf('    const useSponsorBlock = computed(')
+  const props = reactive({ offline: false, externalUrl: null })
+  const sponsorBlockInfoSegments = ref([{ uuid: 'loaded' }])
+  const settings = source.slice(start, source.indexOf('\n    /**', source.indexOf('    const sponsorBlockEnableSubmission', start)))
+  const { useSponsorBlock, sponsorBlockEnableSubmission } = vm.runInNewContext(`${settings};\n({ useSponsorBlock, sponsorBlockEnableSubmission })`, {
+    computed, props, sponsorBlockInfoSegments,
+    store: { getters: { getUseSponsorBlock: true, getSponsorBlockEnableSubmission: true } },
+  })
+  assert.equal(useSponsorBlock.value, true)
+  props.offline = true
+  assert.equal(useSponsorBlock.value, true)
+  assert.equal(sponsorBlockEnableSubmission.value, false)
+  sponsorBlockInfoSegments.value = []
+  assert.equal(useSponsorBlock.value, false)
+  props.offline = false
+  assert.equal(useSponsorBlock.value, true)
+  assert.equal(sponsorBlockEnableSubmission.value, true)
+})
+
 for (const format of ['legacy', 'audio']) {
   test(`offline warning stays hidden while seeking downloaded ${format} media`, () => {
     const props = reactive({ localFilePlayback: true, format })
@@ -156,4 +192,19 @@ test('temporary offline cleanup preserves manual SponsorBlock mute decisions', (
   clear()
   assert.equal(manuallyMuted.size, 0)
   assert.equal(doNotMute.size, 0)
+})
+
+test('SponsorBlock draft submission controls wait for connectivity', async () => {
+  const submissionSource = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/useSponsorBlockSubmission.js', import.meta.url), 'utf8')
+  const start = submissionSource.indexOf('  const sponsorBlockEnableSubmission = computed(')
+  const expression = submissionSource.slice(start, submissionSource.indexOf('\n  const sponsorBlockDraftSegmentsByVideoId', start))
+  const props = reactive({ offline: false })
+  const enabled = vm.runInNewContext(`${expression}\nsponsorBlockEnableSubmission`, {
+    computed, props, store: { getters: { getSponsorBlockEnableSubmission: true } },
+  })
+  assert.equal(enabled.value, true)
+  props.offline = true
+  assert.equal(enabled.value, false)
+  props.offline = false
+  assert.equal(enabled.value, true)
 })

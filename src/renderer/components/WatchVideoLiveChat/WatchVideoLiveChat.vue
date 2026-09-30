@@ -61,6 +61,7 @@
           />
           <FtRadioButton
             v-if="canFilter"
+            :disabled="offline"
             class="liveChatFilter"
             :title="t('Video.Chat Filter')"
             :labels="[t('Video.Top Chat'), t('Video.All Messages')]"
@@ -136,6 +137,7 @@
             />
             <FtRadioButton
               v-if="canFilter"
+              :disabled="offline"
               class="liveChatFilter"
               :title="t('Video.Chat Filter')"
               :labels="[t('Video.Top Chat'), t('Video.All Messages')]"
@@ -437,6 +439,7 @@ import { formatNumber } from '../../helpers/utils'
 import { formatTime } from '../../helpers/dateFormat'
 import { getRandomColorClass } from '../../helpers/colors'
 import { getLocalVideoInfo, parseLocalTextRuns } from '../../helpers/api/local'
+import { isRecoverableNetworkError } from '../../helpers/networkRecovery'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import {
   createCoalescingPoller,
@@ -447,6 +450,10 @@ import {
 
 const phonePanelHeader = inject('phonePanelHeader', null)
 const props = defineProps({
+  offline: {
+    type: Boolean,
+    default: false
+  },
   fullscreenOverlay: {
     type: Boolean,
     default: false
@@ -473,7 +480,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'loaded'])
 
 const { locale, t } = useI18n()
 const timeFormat = computed(() => store.getters.getTimeFormat)
@@ -596,6 +603,7 @@ const formattedWatchingCount = computed(() => {
 })
 
 onBeforeUnmount(() => {
+  emit('loaded', false)
   isUnmounted = true
   pendingReadbackTrimRestore = null
   if (liveEdgeScrollFrame !== null) {
@@ -698,7 +706,7 @@ function startLiveChatLocal() {
   liveChatInstance.on('start', handleStart)
   liveChatInstance.on('chat-update', handleChatUpdate)
   liveChatInstance.on('metadata-update', handleMetadataUpdate)
-  liveChatInstance.once('error', handleError)
+  liveChatInstance.on('error', handleError)
   liveChatInstance.once('end', handleEnd)
 
   // Videos opened at a saved watch progress start midway through the replay.
@@ -794,12 +802,13 @@ function scrollToLiveAfterLayout() {
  * @param {import ('youtubei.js/dist/src/parser/continuations').LiveChatContinuation} initialData
  */
 function handleStart(initialData) {
+  emit('loaded', true)
   const viewSelector = initialData.header?.view_selector ?? liveChatInstance?.initial_info?.header?.view_selector
   canFilter.value = (viewSelector?.sub_menu_items?.length ?? 0) > 1
 
   // A chat always starts on YouTube's default view, so switch away from it before
   // showing anything if the other one is the view that is wanted.
-  if (canFilter.value && liveChatInstance.filter !== liveChatFilter.value) {
+  if (!props.offline && canFilter.value && liveChatInstance.filter !== liveChatFilter.value) {
     applyChatFilter()
     return
   }
@@ -904,6 +913,7 @@ function clearChat() {
  * position the player is at.
  */
 function applyChatFilter() {
+  if (props.offline) return
   if (liveChatInstance === null || !canFilter.value || liveChatInstance.filter === liveChatFilter.value) {
     return
   }
@@ -917,7 +927,7 @@ function applyChatFilter() {
   }
 }
 
-watch(liveChatFilter, applyChatFilter)
+watch([liveChatFilter, () => props.offline], applyChatFilter)
 
 /**
  * Shows every buffered replay message that the player has reached by now.
@@ -928,7 +938,7 @@ function releaseReplayComments() {
   }
 }
 
-watch([() => props.currentTime, () => props.seekRequest], ([currentTime, seekRequest], [, previousSeekRequest]) => {
+watch([() => props.currentTime, () => props.seekRequest, () => props.offline], ([currentTime, seekRequest], [, previousSeekRequest]) => {
   const seeked = seekRequest !== null && seekRequest !== previousSeekRequest
   if (liveChatInstance === null) {
     // Metadata loading can finish after a paused seek. Keep its precision, but
@@ -944,11 +954,21 @@ watch([() => props.currentTime, () => props.seekRequest], ([currentTime, seekReq
     return
   }
 
-  if (seeked) {
+  if (props.offline) {
+    if (seeked) {
+      pendingReplaySeekSeconds = seekRequest.seconds
+    } else if (pendingReplaySeekSeconds !== null && currentTime !== Math.floor(pendingReplaySeekSeconds)) {
+      pendingReplaySeekSeconds = currentTime
+    }
+    if (pendingReplaySeekSeconds !== null) return
+  }
+
+  if (seeked || pendingReplaySeekSeconds !== null) {
     // Only an actual player seek invalidates chat. Delayed time updates can span
     // many seconds on a busy or backgrounded renderer during ordinary playback.
     clearChat()
-    liveChatInstance.seekTo(seekRequest.seconds * 1000)
+    liveChatInstance.seekTo((seeked ? seekRequest.seconds : pendingReplaySeekSeconds) * 1000)
+    pendingReplaySeekSeconds = null
   } else {
     releaseReplayComments()
   }
@@ -983,6 +1003,8 @@ function handleEnd() {
  * @param {Error} error
  */
 function handleError(error) {
+  // Chat polling retries body-read failures, which happen after fetch recovery returns.
+  if (isRecoverableNetworkError(error)) return
   handleEnd()
 
   console.error(error)
@@ -1217,6 +1239,7 @@ function updateShowLiveChatTimestamps(value) {
 }
 
 function updateLiveChatFilter(value) {
+  if (props.offline) return
   store.dispatch('updateLiveChatFilter', value)
 }
 

@@ -75,7 +75,7 @@ for (const existing of [false, true]) {
   })
 }
 
-test('disconnecting dismisses network panels through their cleanup methods', () => {
+test('disconnecting preserves loaded panels and cancels network autoplay', () => {
   const start = source.indexOf('    handleDownloadConnectionChange({ detail }) {')
   const end = source.indexOf('\n    handleUpcomingPlaylistVideosChange(', start)
   const handle = vm.runInNewContext(`({ ${source.slice(start, end)} }).handleDownloadConnectionChange`)
@@ -83,11 +83,28 @@ test('disconnecting dismisses network panels through their cleanup methods', () 
   const watch = {
     isLoading: false, localFilePlayback: true,
     showTranscript: true, showLiveChat: true, liveChatOpen: true, showSidebarSponsorBlock: true,
+    fullscreenCommentsOpen: true,
     closeTranscript() { closed.push('transcript') },
     closeLiveChat() { closed.push('chat') },
     closeSidebarSponsorBlock() { closed.push('sponsorblock') },
-    abortAutoplayCountdown() {},
+    closeFullscreenComments() { closed.push('comments') },
+    abortAutoplayCountdown() { closed.push('autoplay') },
   }
   handle.call(watch, { detail: 'offline' })
-  assert.deepEqual(closed, ['transcript', 'chat', 'sponsorblock'])
+  assert.equal(watch.isOffline, true)
+  assert.deepEqual(closed, ['autoplay'])
+})
+
+test('offline live chat remains available only after a chat session has loaded', () => {
+  const start = source.indexOf('    liveChatAvailable: function () {')
+  const end = source.indexOf('\n    },', start)
+  const available = vm.runInNewContext(`({ ${source.slice(start, end)}\n} }).liveChatAvailable`)
+  const watch = { isLive: true, hideLiveChat: false, isOffline: false, liveChatLoaded: false }
+  assert.equal(available.call(watch), true)
+  watch.isOffline = true
+  assert.equal(available.call(watch), false)
+  watch.liveChatLoaded = true
+  assert.equal(available.call(watch), true)
+  watch.hideLiveChat = true
+  assert.equal(available.call(watch), false)
 })

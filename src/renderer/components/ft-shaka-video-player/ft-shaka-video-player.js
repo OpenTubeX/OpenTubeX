@@ -1890,7 +1890,7 @@ export default defineComponent({
 
     /** @type {import('vue').ComputedRef<boolean>} */
     const useSponsorBlock = computed(() => {
-      return !props.offline && !props.externalUrl && store.getters.getUseSponsorBlock
+      return (!props.offline || sponsorBlockInfoSegments.value.length > 0) && !props.externalUrl && store.getters.getUseSponsorBlock
     })
 
     /** @type {import('vue').ComputedRef<boolean>} */
@@ -1899,7 +1899,7 @@ export default defineComponent({
     })
 
     const sponsorBlockEnableSubmission = computed(() => {
-      return store.getters.getSponsorBlockEnableSubmission
+      return !props.offline && store.getters.getSponsorBlockEnableSubmission
     })
 
     /** @type {import('vue').ComputedRef<number>} */
@@ -2316,6 +2316,7 @@ export default defineComponent({
     }
 
     async function refreshSponsorBlockInfo() {
+      if (props.offline) return
       const refreshTasks = [setupSponsorBlock()]
       if (sponsorBlockEnableSubmission.value) {
         refreshTasks.push(refreshSponsorBlockContributionStats())

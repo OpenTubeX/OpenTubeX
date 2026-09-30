@@ -207,10 +207,10 @@ export function withNetworkRecovery(input, init, task, options = {}) {
   const url = new URL(request?.url ?? input.toString(), location.href)
   if (!['http:', 'https:'].includes(url.protocol) || url.origin === location.origin) return task(init?.signal ?? request?.signal)
   const method = (init?.method ?? request?.method ?? 'GET').toUpperCase()
-  // YouTube's browse/search/player APIs use POST for read-only queries.
+  // YouTube's metadata and chat APIs use POST for read-only queries.
   const retry = ['GET', 'HEAD'].includes(method) ||
     (method === 'POST' && /(^|\.)youtube\.com$/.test(url.hostname) &&
-      /^\/youtubei\/v1\/(browse|search|player|next|guide|get_transcript|navigation\/resolve_url|updated_metadata)$/.test(url.pathname))
+      /^\/youtubei\/v1\/(browse|search|player|next|guide|get_transcript|navigation\/resolve_url|updated_metadata|live_chat\/get_live_chat(?:_replay)?)$/.test(url.pathname))
   return initializeNetworkRecovery().run(url.origin, task, { ...options, signal: init?.signal ?? request?.signal, retry })
 }
 

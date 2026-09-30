@@ -266,6 +266,9 @@ export default defineComponent({
       /** @type {boolean|null} */
       isFamilyFriendly: null,
       commentsDisabled: false,
+      commentsLoaded: false,
+      liveChatLoaded: false,
+      transcriptLoaded: false,
       isLive: false,
       isPremiere: false,
       liveChat: null,
@@ -735,7 +738,7 @@ export default defineComponent({
       return caption ? this.captions.indexOf(caption) : 0
     },
     transcriptAvailable: function () {
-      return !this.isOffline && this.captions.length > 0
+      return this.captions.length > 0 && (!this.isOffline || this.transcriptLoaded)
     },
     ambientModeActive: function () {
       return this.$store.getters.getAmbientMode &&
@@ -1057,7 +1060,7 @@ export default defineComponent({
       return this.$store.getters.getHideLiveChatReplay
     },
     liveChatAvailable: function () {
-      if (this.isOffline) return false
+      if (this.isOffline && !this.liveChatLoaded) return false
       return this.liveChatIsReplay
         ? !this.hideLiveChatReplay
         : !this.hideLiveChat && (this.isLive || this.isUpcoming)
@@ -1093,7 +1096,7 @@ export default defineComponent({
       return this.$store.getters.getHideVideoLikesAndDislikes
     },
     theatrePossible: function () {
-      return this.showTranscript || (!this.hideRecommendedVideos && (!this.isOffline || this.offlineDownloadSuggestions.length > 0)) ||
+      return this.showTranscript || (!this.hideRecommendedVideos && (!this.isOffline || this.recommendedVideos.length > 0 || this.offlineDownloadSuggestions.length > 0)) ||
         this.showLiveChat || this.watchingPlaylist || !!this.nextQueuedVideo ||
         this.showSidebarChapters || this.showSidebarSponsorBlock
     },
@@ -1148,7 +1151,7 @@ export default defineComponent({
       return this.$store.getters.getPlaylist(this.playlistId)
     },
     endScreenRecommendations: function () {
-      if (this.isOffline || this.hideRecommendedVideos || this.hideEndScreenRecommendations) return []
+      if (this.hideRecommendedVideos || this.hideEndScreenRecommendations) return []
       return this.recommendedVideos.filter(video =>
         video.videoId && video.videoId !== this.videoId &&
         !this.isHiddenVideo(this.forbiddenTitles, this.channelsHidden, video)
@@ -1213,7 +1216,7 @@ export default defineComponent({
       return this.playerReady
     },
     useSponsorBlock: function () {
-      return !this.isOffline && this.$store.getters.getUseSponsorBlock
+      return (!this.isOffline || this.sponsorBlockInfoSegments.length > 0) && this.$store.getters.getUseSponsorBlock
     },
     useReturnYouTubeDislikes: function () {
       return this.$store.getters.getUseReturnYouTubeDislikes
@@ -1457,15 +1460,8 @@ export default defineComponent({
       this.mobilePanel = null
     },
     handleDownloadConnectionChange({ detail }) {
-      const chatWasOpen = this.showLiveChat || this.fullscreenLiveChatOpen || this.mobilePanel === 'chat'
       this.isOffline = detail === 'offline'
-      if (this.isOffline) {
-        if (this.showTranscript || this.fullscreenTranscriptOpen || this.mobilePanel === 'transcript') this.closeTranscript()
-        if (chatWasOpen) this.closeLiveChat()
-        if (this.showSidebarSponsorBlock || this.fullscreenSponsorBlockOpen) this.closeSidebarSponsorBlock()
-        if (this.fullscreenCommentsOpen || this.shortsCommentsOpen || this.mobilePanel === 'comments') this.closeFullscreenComments()
-        if (!this.watchingPlaylist) this.abortAutoplayCountdown(true)
-      }
+      if (this.isOffline && !this.watchingPlaylist) this.abortAutoplayCountdown(true)
       if (detail !== 'offline' && this.downloadedPlaybackWithoutMetadata && !this.downloadedMetadataLoading) {
         this.downloadedMetadataLoading = true
         const loadGeneration = ++this.videoLoadGeneration
@@ -2267,6 +2263,10 @@ export default defineComponent({
       this.commentsDisabled = false
       this.isLive = false
       this.isPremiere = false
+      this.commentsLoaded = false
+      this.liveChatLoaded = false
+      this.transcriptLoaded = false
+      this.sponsorBlockInfoSegments = []
       this.liveChat = null
       this.liveChatIsReplay = false
       this.liveChatOpen = true

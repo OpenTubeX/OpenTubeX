@@ -1,7 +1,7 @@
 import { createInternetConnectivity, createInternetProbe, INTERNET_CHECK_URL } from '../../src/renderer/helpers/internetConnectivity.js'
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createNetworkRecovery } from '../../src/renderer/helpers/networkRecovery.js'
+import { createNetworkRecovery, isRecoverableNetworkError } from '../../src/renderer/helpers/networkRecovery.js'
 
 const flush = async () => { for (let i = 0; i < 50; i++) await Promise.resolve() }
 function setup(t, online = true) {
@@ -118,6 +118,67 @@ async function loadAppNetwork(t, fetch, nativeRequest, options = {}) {
   vm.runInContext('installNetworkFetch(options); globalThis.nativeFetch = capacitorHttpFetch; globalThis.recovery = appRecovery;', context)
   t.after(() => context.recovery.dispose())
   return context
+}
+
+test('an interrupted chat response body preserves the session and later permanent errors remain actionable', async () => {
+  const { readFile } = await import('node:fs/promises')
+  const { default: vm } = await import('node:vm')
+  const source = await readFile(new URL('../../src/renderer/components/WatchVideoLiveChat/WatchVideoLiveChat.vue', import.meta.url), 'utf8')
+  const start = source.indexOf('function handleError(error) {')
+  const end = source.indexOf('\n}', start) + '\n}'.length
+  let body
+  const response = new Response(new ReadableStream({ start(controller) { body = controller } }))
+  const reading = response.json().catch(error => error)
+  body.error(new TypeError('Failed to fetch'))
+  const error = await reading
+  let ended = false
+  const hasError = { value: false }
+  const handleError = vm.runInNewContext(`${source.slice(start, end)}\nhandleError`, {
+    isRecoverableNetworkError, handleEnd: () => { ended = true }, console: { error() {} },
+    hasError, errorMessage: { value: '' }, isLoading: { value: false }
+  })
+  handleError(error)
+  assert.equal(ended, false, 'a body-read network failure must leave the session available for its next poll')
+  assert.equal(hasError.value, false, 'loaded messages must remain visible')
+  handleError(Object.assign(new Error('HTTP 404'), { status: 404 }))
+  assert.equal(ended, true)
+  assert.equal(hasError.value, true)
+})
+
+for (const endpoint of ['get_live_chat', 'get_live_chat_replay']) {
+  for (const transport of ['browser', 'native']) {
+    test(`${transport} ${endpoint} polling survives an in-flight disconnect and resumes after reconnecting`, async t => {
+      let requests = 0
+      let rejectRequest
+      const request = () => {
+        requests++
+        if (requests === 1) return new Promise((_resolve, reject) => { rejectRequest = reject })
+        return transport === 'browser'
+          ? Promise.resolve(new Response('chat recovered'))
+          : Promise.resolve({ status: 200, data: 'chat recovered', headers: {} })
+      }
+      const app = await loadAppNetwork(t, request, request, { corsDisabled: true })
+      const fetch = transport === 'browser' ? app.window.fetch : app.nativeFetch
+      const pending = fetch(`https://www.youtube.com/youtubei/v1/live_chat/${endpoint}`, {
+        method: 'POST', body: JSON.stringify({ continuation: 'loaded-chat' })
+      })
+      let outcome = 'pending'
+      pending.then(() => { outcome = 'resolved' }, () => { outcome = 'rejected' })
+      await flush()
+      assert.equal(requests, 1)
+      app.navigator.onLine = false
+      app.window.dispatchEvent(new Event('offline'))
+      rejectRequest(transport === 'browser'
+        ? new TypeError('Failed to fetch')
+        : Object.assign(new Error('Read timed out'), { code: 'SocketTimeoutException' }))
+      await flush()
+      assert.equal(outcome, 'pending', 'a failed read must wait for reconnect instead of ending the chat session')
+      app.navigator.onLine = true
+      app.window.dispatchEvent(new Event('online'))
+      assert.equal(await (await pending).text(), 'chat recovered')
+      assert.equal(requests, 2)
+    })
+  }
 }
 
 test('native API and WebView requests share recovery, including an unreported route outage', async t => {
