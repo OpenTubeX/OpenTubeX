@@ -6042,6 +6042,7 @@ test.describe('fullscreen playlist dock', () => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     await openFullscreenPlaylistVideo(page)
+    await waitForPlayback(page)
 
     await setPlayerFullscreen(page, true)
     await page.locator('.fullscreenPlaylistToggle').click()
