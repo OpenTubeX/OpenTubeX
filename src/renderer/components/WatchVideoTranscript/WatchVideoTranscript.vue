@@ -36,6 +36,7 @@
             type="button"
             class="transcriptHeaderAction"
             :class="{ active: languageMenuOpen }"
+            :disabled="offline"
             :title="t('Video.Transcript.Language')"
             :aria-label="t('Video.Transcript.Language')"
             :aria-expanded="String(languageMenuOpen)"
@@ -169,6 +170,10 @@ import {
 
 const phonePanelHeader = inject('phonePanelHeader', null)
 const props = defineProps({
+  offline: {
+    type: Boolean,
+    default: false
+  },
   captions: {
     type: Array,
     default: () => []
@@ -237,9 +242,11 @@ const statusMessage = computed(() => {
 watch(
   [() => props.captions, selectedCaptionIndex],
   async ([captions]) => {
+    if (props.offline) return
     loadController?.abort()
     loadController = null
     hasAlignedActiveSegment = false
+    emit('loaded', false)
     segments.value = []
     isLoading.value = false
     loadFailed.value = false
@@ -276,6 +283,10 @@ watch(
   },
   { immediate: true, deep: true }
 )
+
+watch(() => props.offline, offline => {
+  if (offline) languageMenuOpen.value = false
+})
 
 watch(() => props.captions, (captions) => {
   if (Number(selectedCaptionIndex.value) >= captions.length) {
@@ -366,6 +377,7 @@ function updateTranscriptFadeState() {
 }
 
 function selectCaptionLanguage(index) {
+  if (props.offline) return
   selectedCaptionIndex.value = String(index)
   languageMenuOpen.value = false
 }

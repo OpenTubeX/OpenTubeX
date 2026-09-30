@@ -61,6 +61,7 @@
           />
           <FtRadioButton
             v-if="canFilter"
+            :disabled="offline"
             class="liveChatFilter"
             :title="t('Video.Chat Filter')"
             :labels="[t('Video.Top Chat'), t('Video.All Messages')]"
@@ -136,6 +137,7 @@
             />
             <FtRadioButton
               v-if="canFilter"
+              :disabled="offline"
               class="liveChatFilter"
               :title="t('Video.Chat Filter')"
               :labels="[t('Video.Top Chat'), t('Video.All Messages')]"
@@ -448,6 +450,10 @@ import {
 
 const phonePanelHeader = inject('phonePanelHeader', null)
 const props = defineProps({
+  offline: {
+    type: Boolean,
+    default: false
+  },
   fullscreenOverlay: {
     type: Boolean,
     default: false
@@ -802,7 +808,7 @@ function handleStart(initialData) {
 
   // A chat always starts on YouTube's default view, so switch away from it before
   // showing anything if the other one is the view that is wanted.
-  if (canFilter.value && liveChatInstance.filter !== liveChatFilter.value) {
+  if (!props.offline && canFilter.value && liveChatInstance.filter !== liveChatFilter.value) {
     applyChatFilter()
     return
   }
@@ -907,6 +913,7 @@ function clearChat() {
  * position the player is at.
  */
 function applyChatFilter() {
+  if (props.offline) return
   if (liveChatInstance === null || !canFilter.value || liveChatInstance.filter === liveChatFilter.value) {
     return
   }
@@ -920,7 +927,7 @@ function applyChatFilter() {
   }
 }
 
-watch(liveChatFilter, applyChatFilter)
+watch([liveChatFilter, () => props.offline], applyChatFilter)
 
 /**
  * Shows every buffered replay message that the player has reached by now.
@@ -1222,6 +1229,7 @@ function updateShowLiveChatTimestamps(value) {
 }
 
 function updateLiveChatFilter(value) {
+  if (props.offline) return
   store.dispatch('updateLiveChatFilter', value)
 }
 

@@ -42,6 +42,7 @@
             :class="{ active: sortMenuOpen }"
             :aria-label="$t('Global.Sort By')"
             :title="$t('Global.Sort By')"
+            :disabled="offline"
             :aria-expanded="String(sortMenuOpen)"
             @click="toggleSortMenu"
           >
@@ -53,6 +54,7 @@
             class="fullscreenCommentAction"
             :aria-label="$t('Comments.Reload Comments')"
             :title="$t('Comments.Reload Comments')"
+            :disabled="offline"
             @click="reloadCommentData"
           >
             <FtIcon :icon="['fas', 'sync']" />
@@ -74,6 +76,7 @@
               v-for="(name, index) in sortNames"
               :key="sortValues[index]"
               class="commentSortOption"
+              :disabled="offline"
               type="button"
               :class="{ selected: currentSortValue === sortValues[index] }"
               @click="handleSortChange(sortValues[index])"
@@ -128,6 +131,7 @@
         />
         <FtIconButton
           :title="$t('Comments.Reload Comments')"
+          :disabled="offline"
           :icon="['fas', 'sync']"
           :size="12"
           :padding="8"
@@ -138,6 +142,7 @@
         />
         <FtSelect
           v-if="showSortBy"
+          :disabled="offline"
           :placeholder="$t('Global.Sort By')"
           :value="currentSortValue"
           :select-names="sortNames"
@@ -551,6 +556,7 @@
         >
           <FtIconButton
             :title="$t('Comments.Reload Comments')"
+            :disabled="offline"
             :icon="['fas', 'sync']"
             :size="12"
             :padding="8"
@@ -606,7 +612,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { inject, computed, nextTick, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { inject, computed, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../ft-card/ft-card.vue'
@@ -689,6 +695,10 @@ const props = defineProps({
     required: true
   },
   isPostComments: {
+    type: Boolean,
+    default: false,
+  },
+  offline: {
     type: Boolean,
     default: false,
   },
@@ -1411,6 +1421,7 @@ const sortMenuOpen = ref(false)
 const currentSortValue = computed(() => sortNewest.value ? 'newest' : 'top')
 
 function toggleSortMenu() {
+  if (props.offline) return
   sortMenuOpen.value = !sortMenuOpen.value
   if (sortMenuOpen.value) {
     commentFilterMenuOpen.value = false
@@ -1418,6 +1429,7 @@ function toggleSortMenu() {
 }
 
 function handleSortChange(value) {
+  if (props.offline) return
   const newest = value === 'newest'
   closeCommentMenus()
 
@@ -1433,6 +1445,7 @@ function handleSortChange(value) {
 }
 
 function reloadCommentData() {
+  if (props.offline) return
   commentData.value = []
   nextPageToken.value = null
   localCommentsInstance = undefined
@@ -1450,6 +1463,10 @@ function handleFullscreenActionsFocusout(event) {
 const emit = defineEmits(['timestamp-event', 'close-comments', 'loaded'])
 
 watch(() => commentData.value.length > 0, loaded => emit('loaded', loaded))
+onBeforeUnmount(() => emit('loaded', false))
+watch(() => props.offline, offline => {
+  if (offline) closeCommentMenus()
+})
 
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)
 

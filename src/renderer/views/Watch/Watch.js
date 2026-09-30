@@ -2266,6 +2266,7 @@ export default defineComponent({
       this.commentsLoaded = false
       this.liveChatLoaded = false
       this.transcriptLoaded = false
+      this.sponsorBlockInfoSegments = []
       this.liveChat = null
       this.liveChatIsReplay = false
       this.liveChatOpen = true

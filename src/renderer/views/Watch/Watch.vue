@@ -753,8 +753,10 @@
               @vote="voteOnSponsorBlockInfoSegment"
             />
             <watch-video-transcript
-              v-if="showTranscript && transcriptAvailable && !isLoading && !isLive && !isUpcoming && !shortsPhonePanelsEnabled"
+              v-if="(showTranscript || (isOffline && transcriptLoaded)) && transcriptAvailable && !isLoading && !isLive && !isUpcoming && !shortsPhonePanelsEnabled"
+              v-show="showTranscript"
               :captions="captions"
+              :offline="isOffline"
               :current-time="currentTime"
               :preferred-caption-index="preferredTranscriptCaptionIndex"
               :video-title="videoTitle"
@@ -1113,8 +1115,10 @@
             @leave-cancelled="handleSidebarPanelAfterLeave"
           >
             <watch-video-transcript
-              v-if="showTranscript && transcriptAvailable && !isLoading && !isLive && !isUpcoming && (!customShortsPlayerActive || fullscreenTranscriptOpen || shortsPhonePanelsEnabled)"
+              v-if="(showTranscript || (isOffline && transcriptLoaded)) && transcriptAvailable && !isLoading && !isLive && !isUpcoming && (!customShortsPlayerActive || fullscreenTranscriptOpen || shortsPhonePanelsEnabled)"
+              v-show="showTranscript"
               :captions="captions"
+              :offline="isOffline"
               :current-time="currentTime"
               :preferred-caption-index="preferredTranscriptCaptionIndex"
               :video-title="videoTitle"
@@ -1146,7 +1150,9 @@
             @leave-cancelled="handleSidebarPanelAfterLeave"
           >
             <watch-video-live-chat
-              v-if="!isLoading && showLiveChat"
+              v-if="!isLoading && (showLiveChat || (isOffline && liveChatLoaded))"
+              v-show="showLiveChat"
+              :offline="isOffline"
               :live-chat="liveChat"
               :video-id="videoId"
               :channel-id="channelId"
@@ -1263,6 +1269,7 @@
             :class="{ theatreWatchVideo: useTheatreMode }"
             :channel-thumbnail="channelThumbnail"
             :channel-name="channelName"
+            :offline="isOffline"
             :comments-disabled="commentsDisabled"
             :fullscreen-overlay="fullscreenCommentsOpen || (shortsCommentsOpen && !shortsPhonePanelsEnabled)"
             :highlighted-comment-id="tabRoute.query.commentId"

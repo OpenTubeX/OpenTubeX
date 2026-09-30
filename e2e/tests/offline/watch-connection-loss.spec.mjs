@@ -38,7 +38,10 @@ for (const width of [1600, 480]) {
     const sponsorSegments = page.locator('.sponsorBlockSegment')
     await expect(sponsorSegments.first()).toBeVisible()
     const loadedSponsorSegments = await sponsorSegments.allTextContents()
-    await watch.evaluate(vm => { vm.showTranscript = true })
+    await watch.evaluate(vm => {
+      vm.captions = [...vm.captions, { ...vm.captions[0], label: 'Other language' }]
+      vm.showTranscript = true
+    })
     await expect(page.locator('.transcriptSegment').first()).toBeVisible()
 
     if (width === 480) {
@@ -57,7 +60,14 @@ for (const width of [1600, 480]) {
     await expect.poll(() => recommendations.allTextContents()).toEqual(loadedRecommendations)
     await expect.poll(() => sponsorSegments.allTextContents()).toEqual(loadedSponsorSegments)
     await expect(page.locator('.sponsorBlockMarker')).toHaveCount(1)
+    await expect(page.getByRole('button', { name: 'Reload Comments', exact: true }).first()).toBeDisabled()
     await expect(page.getByRole('button', { name: 'Refresh SponsorBlock information', exact: true })).toBeDisabled()
+    await expect(page.locator('.transcriptSegment')).not.toHaveCount(0)
+    const transcriptLanguage = 'Transcript language'
+    await expect(page.locator(`.transcriptHeaderAction[aria-label="${transcriptLanguage}"]`)).toBeDisabled()
+    await watch.evaluate(vm => vm.closeTranscript())
+    expect(await watch.evaluate(vm => vm.transcriptAvailable)).toBe(true)
+    await watch.evaluate(vm => { vm.showTranscript = true })
     await expect(page.locator('.transcriptSegment')).not.toHaveCount(0)
     if (width === 480) {
       await expect(page.locator('.dockedSheet[open] .commentThread').first()).toBeVisible()
@@ -71,6 +81,7 @@ for (const width of [1600, 480]) {
     await expect.poll(() => comments.allTextContents()).toEqual(loadedComments)
     await expect.poll(() => recommendations.allTextContents()).toEqual(loadedRecommendations)
     await expect(page.getByRole('button', { name: 'Refresh SponsorBlock information', exact: true })).toBeEnabled()
+    await expect(page.getByRole('button', { name: 'Reload Comments', exact: true }).first()).toBeEnabled()
     await watch.dispose()
   })
 }
@@ -128,6 +139,11 @@ test('keeps loaded live chat messages and its session after losing connectivity'
   })
   await expect(page.locator('.connectionStatus')).toHaveText('Offline')
   await watch.evaluate(vm => vm.liveChat.emitError(new TypeError('Failed to fetch')))
+  await expect(message).toHaveText('Already loaded chat message')
+  expect(await watch.evaluate(vm => vm.liveChat.stopped)).toBe(false)
+  await watch.evaluate(vm => vm.closeLiveChat())
+  expect(await watch.evaluate(vm => vm.liveChatAvailable)).toBe(true)
+  await watch.evaluate(vm => { vm.liveChatOpen = true })
   await expect(message).toHaveText('Already loaded chat message')
   expect(await watch.evaluate(vm => vm.liveChat.stopped)).toBe(false)
   await watch.dispose()
