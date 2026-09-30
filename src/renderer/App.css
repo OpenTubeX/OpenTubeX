@@ -288,17 +288,17 @@
   touch-action: none;
 }
 
-.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwiping > .player),
-.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwipeSettling > .player) {
+.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwiping > :is(.player, .countdownPoster)),
+.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwipeSettling > :is(.player, .countdownPoster)) {
   translate: 0 var(--mobile-fullscreen-swipe-offset, 0);
   will-change: translate;
 }
 
-.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwiping > .player) {
+.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwiping > :is(.player, .countdownPoster)) {
   transition: none;
 }
 
-.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwipeSettling > .player) {
+.app.capacitorTabs :deep(.ftVideoPlayer.mobileFullscreenSwipeSettling > :is(.player, .countdownPoster)) {
   transition: translate 140ms cubic-bezier(0.2, 0, 0, 1);
 }
 
