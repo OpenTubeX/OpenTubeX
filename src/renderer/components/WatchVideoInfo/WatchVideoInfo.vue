@@ -245,7 +245,7 @@
             </div>
           </FtIconButton>
           <FtIconButton
-            v-if="!offline && useSponsorBlock && !isUpcoming && !hideFullscreenDockActions"
+            v-if="useSponsorBlock && !isUpcoming && !hideFullscreenDockActions"
             :title="sponsorBlockInfoTitle"
             :icon="['fas', 'shield-halved']"
             :theme="sponsorBlockPanelOpen ? 'secondary' : 'base'"
@@ -553,6 +553,10 @@ const props = defineProps({
     required: true
   },
   sponsorBlockPanelOpen: {
+    type: Boolean,
+    default: false
+  },
+  sponsorBlockAvailable: {
     type: Boolean,
     default: false
   },
@@ -963,7 +967,7 @@ async function removeChannelSetting(setting) {
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
-const useSponsorBlock = computed(() => store.getters.getUseSponsorBlock)
+const useSponsorBlock = computed(() => store.getters.getUseSponsorBlock && (!props.offline || props.sponsorBlockAvailable))
 
 const sponsorBlockInfoTitle = computed(() => props.sponsorBlockPanelOpen
   ? t('Video.Player.SponsorBlock.CloseInfoPanel')

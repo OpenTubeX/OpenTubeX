@@ -75,6 +75,7 @@ test('offline watch hides unavailable statistics and network actions even with a
     vm.resetVideoState({ preserveTitle: true })
     vm.isLoading = false
     vm.localFilePlayback = true
+    vm.downloadedPlaybackWithoutMetadata = true
     vm.channelId = 'saved-channel'
     vm.channelName = 'Saved channel'
     Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })
@@ -164,7 +165,7 @@ test('custom Shorts hides SponsorBlock offline and restores it on reconnect', as
   await expect(sponsorBlock).toHaveCount(1)
 })
 
-test('disconnecting removes cached end-screen recommendations and their autoplay countdown', async ({ app, page }) => {
+test('disconnecting preserves cached end-screen recommendations and cancels their autoplay countdown', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   const watch = await watchViewHandle(page)
@@ -181,7 +182,7 @@ test('disconnecting removes cached end-screen recommendations and their autoplay
     endScreenCount: vm.endScreenRecommendations.length,
     hasNextRecommendation: !!vm.nextRecommendedVideo,
     countdown: vm.autoplayCountdown,
-  }))).toEqual({ endScreenCount: 0, hasNextRecommendation: false, countdown: null })
+  }))).toEqual({ endScreenCount: 1, hasNextRecommendation: false, countdown: null })
 })
 
 test('disconnecting closes a format picker that has no local sources', async ({ app, page }) => {

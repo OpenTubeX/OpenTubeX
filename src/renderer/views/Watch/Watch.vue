@@ -691,6 +691,7 @@
               :current-subtitles-state="currentSubtitlesState"
               :current-volume="currentVolume"
               :sponsor-block-panel-open="showSidebarSponsorBlock"
+              :sponsor-block-available="useSponsorBlock"
               :transcript-open="phonePanelsEnabled ? mobilePanel === 'transcript' : showTranscript"
               :transcript-available="transcriptAvailable"
               channel-setting-dropdown-portal
@@ -731,6 +732,7 @@
             <watch-video-sponsor-block
               v-if="showSidebarSponsorBlock && !isLoading && !shortsPhonePanelsEnabled"
               class="watchVideoSideBar watchVideoSponsorBlock"
+              :offline="isOffline"
               :loading="sponsorBlockInfoLoading"
               :pending-uuid="sponsorBlockInfoPendingUuid"
               :segments="sponsorBlockInfoSegments"
@@ -838,6 +840,7 @@
           :current-subtitles-state="currentSubtitlesState"
           :current-volume="currentVolume"
           :sponsor-block-panel-open="showSidebarSponsorBlock"
+          :sponsor-block-available="useSponsorBlock"
           :transcript-open="phonePanelsEnabled ? mobilePanel === 'transcript' : showTranscript"
           :transcript-available="transcriptAvailable"
           :live-chat-available="liveChatAvailable"
@@ -1067,6 +1070,7 @@
             <watch-video-sponsor-block
               v-if="showSidebarSponsorBlock && !isLoading && (!customShortsPlayerActive || fullscreenSponsorBlockOpen || shortsPhonePanelsEnabled)"
               class="watchVideoSideBar watchVideoSponsorBlock"
+              :offline="isOffline"
               :loading="sponsorBlockInfoLoading"
               :pending-uuid="sponsorBlockInfoPendingUuid"
               :segments="sponsorBlockInfoSegments"
@@ -1201,9 +1205,9 @@
         </FtPhonePanel>
       </Teleport>
       <watch-video-recommendations
-        v-if="!isLoading && !hideRecommendedVideos && (isOffline ? localFilePlayback && offlineDownloadSuggestions.length > 0 : !localFilePlayback || recommendedVideos.length > 0)"
-        :data="isOffline ? offlineDownloadSuggestions : recommendedVideos"
-        :offline="isOffline"
+        v-if="!isLoading && !hideRecommendedVideos && (recommendedVideos.length > 0 || (isOffline && localFilePlayback && offlineDownloadSuggestions.length > 0))"
+        :data="recommendedVideos.length > 0 ? recommendedVideos : offlineDownloadSuggestions"
+        :offline="isOffline && recommendedVideos.length === 0"
         class="watchVideoSideBar watchVideoRecommendations"
         :class="{
           theatreRecommendations: useTheatreMode,

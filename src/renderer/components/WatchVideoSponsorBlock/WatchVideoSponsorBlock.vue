@@ -17,7 +17,7 @@
         <div class="sponsorBlockHeaderActions">
           <button
             type="button"
-            :disabled="loading || (submissionEnabled && contributionStatsLoading)"
+            :disabled="offline || loading || (submissionEnabled && contributionStatsLoading)"
             :aria-label="$t('Video.Player.SponsorBlock.RefreshInfo')"
             :title="$t('Video.Player.SponsorBlock.RefreshInfo')"
             @click="$emit('refresh')"
@@ -296,6 +296,7 @@ const props = defineProps({
     default: 0
   },
   loading: Boolean,
+  offline: Boolean,
   pendingUuid: {
     type: String,
     default: null

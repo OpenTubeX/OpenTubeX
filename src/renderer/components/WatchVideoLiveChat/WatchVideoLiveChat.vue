@@ -437,6 +437,7 @@ import { formatNumber } from '../../helpers/utils'
 import { formatTime } from '../../helpers/dateFormat'
 import { getRandomColorClass } from '../../helpers/colors'
 import { getLocalVideoInfo, parseLocalTextRuns } from '../../helpers/api/local'
+import { isRecoverableNetworkError } from '../../helpers/networkRecovery'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import {
   createCoalescingPoller,
@@ -698,7 +699,7 @@ function startLiveChatLocal() {
   liveChatInstance.on('start', handleStart)
   liveChatInstance.on('chat-update', handleChatUpdate)
   liveChatInstance.on('metadata-update', handleMetadataUpdate)
-  liveChatInstance.once('error', handleError)
+  liveChatInstance.on('error', handleError)
   liveChatInstance.once('end', handleEnd)
 
   // Videos opened at a saved watch progress start midway through the replay.
@@ -983,6 +984,8 @@ function handleEnd() {
  * @param {Error} error
  */
 function handleError(error) {
+  // Chat polling retries body-read failures, which happen after fetch recovery returns.
+  if (isRecoverableNetworkError(error)) return
   handleEnd()
 
   console.error(error)

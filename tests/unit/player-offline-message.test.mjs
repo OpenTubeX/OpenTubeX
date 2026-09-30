@@ -8,6 +8,42 @@ const source = await readFile(new URL('../../src/renderer/components/ft-shaka-vi
 const start = source.indexOf('    const showOfflineMessage = computed(')
 const expression = source.slice(start, source.indexOf('\n    // #endregion offline message', start))
 
+test('offline SponsorBlock refresh preserves loaded segments without starting a request', async () => {
+  const start = source.indexOf('    async function refreshSponsorBlockInfo() {')
+  const end = source.indexOf('    async function refreshSponsorBlockContributionStats()', start)
+  const props = { offline: true }
+  let refreshes = 0
+  const refresh = vm.runInNewContext(`${source.slice(start, end)}\nrefreshSponsorBlockInfo`, {
+    props, sponsorBlockEnableSubmission: ref(false),
+    setupSponsorBlock: async () => { refreshes++ }
+  })
+  await refresh()
+  assert.equal(refreshes, 0)
+  props.offline = false
+  await refresh()
+  assert.equal(refreshes, 1)
+})
+
+test('loaded SponsorBlock segments keep working offline while submissions wait for connectivity', () => {
+  const start = source.indexOf('    const useSponsorBlock = computed(')
+  const props = reactive({ offline: false, externalUrl: null })
+  const sponsorBlockInfoSegments = ref([{ uuid: 'loaded' }])
+  const settings = source.slice(start, source.indexOf('\n    /**', source.indexOf('    const sponsorBlockEnableSubmission', start)))
+  const { useSponsorBlock, sponsorBlockEnableSubmission } = vm.runInNewContext(`${settings};\n({ useSponsorBlock, sponsorBlockEnableSubmission })`, {
+    computed, props, sponsorBlockInfoSegments,
+    store: { getters: { getUseSponsorBlock: true, getSponsorBlockEnableSubmission: true } },
+  })
+  assert.equal(useSponsorBlock.value, true)
+  props.offline = true
+  assert.equal(useSponsorBlock.value, true)
+  assert.equal(sponsorBlockEnableSubmission.value, false)
+  sponsorBlockInfoSegments.value = []
+  assert.equal(useSponsorBlock.value, false)
+  props.offline = false
+  assert.equal(useSponsorBlock.value, true)
+  assert.equal(sponsorBlockEnableSubmission.value, true)
+})
+
 for (const format of ['legacy', 'audio']) {
   test(`offline warning stays hidden while seeking downloaded ${format} media`, () => {
     const props = reactive({ localFilePlayback: true, format })
