@@ -1475,6 +1475,74 @@ test.describe('tab bar', () => {
     expect(pinnedCloseBox.x).toBe(unpinnedCloseBox.x)
   })
 
+  for (const [zoomFactor, baseTheme] of [[1, 'light'], [0.95, 'dark']]) {
+    test(`keeps the vertical tab resize line above navigation at ${zoomFactor * 100}% UI scale in ${baseTheme} theme`, async ({ page, attachScreenshot }) => {
+      await page.evaluate(async ({ zoomFactor, baseTheme }) => {
+        await window.ftElectron.setZoomFactor(zoomFactor)
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setBaseTheme', baseTheme)
+      }, { zoomFactor, baseTheme })
+
+      for (const position of ['left', 'right']) {
+        await page.evaluate(position => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          store.commit('setTabBarPosition', position)
+        }, position)
+
+        const handle = page.getByRole('separator', { name: 'Resize Tab Bar' })
+        await expect(handle).toBeVisible()
+        await handle.hover()
+        await expect(handle).not.toHaveCSS('background-image', 'none')
+        // The center of the line must be opaque so the active-page accent
+        // cannot show through it, even when the handle is stacked above it.
+        expect(await handle.evaluate((element) => {
+          const color = getComputedStyle(element).backgroundImage.match(/color\([^)]+\)|rgba?\([^)]+\)/g)?.[1]
+          if (!color) return 0
+          const canvas = document.createElement('canvas')
+          canvas.width = canvas.height = 1
+          const context = canvas.getContext('2d')
+          context.fillStyle = color
+          context.fillRect(0, 0, 1, 1)
+          return context.getImageData(0, 0, 1, 1).data[3]
+        })).toBe(255)
+
+        await expect.poll(() => handle.evaluate((element) => {
+          const handleRect = element.getBoundingClientRect()
+          const headerRect = document.querySelector('.topNav').getBoundingClientRect()
+          const indicator = document.querySelector('.sideNav .activeIndicator')
+          const indicatorRect = indicator.getBoundingClientRect()
+          const x = handleRect.left + handleRect.width / 2 +
+            (element.closest('.position-left') ? 1 : -1)
+          // Include the painted indicator in hit testing despite its normal
+          // pointer-events:none, so a navigation highlight above the line fails.
+          const previousPointerEvents = indicator.style.pointerEvents
+          indicator.style.pointerEvents = 'auto'
+          try {
+            return [
+              headerRect.top + headerRect.height / 2,
+              indicatorRect.top + indicatorRect.height / 2
+            ].map(y => document.elementFromPoint(x, y) === element)
+          } finally {
+            indicator.style.pointerEvents = previousPointerEvents
+          }
+        })).toEqual([true, true])
+
+        const initialWidth = await page.locator('.tabBar.vertical').evaluate(element => element.getBoundingClientRect().width)
+        const handleBox = await handle.boundingBox()
+        await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + 30)
+        await page.mouse.down()
+        await expect(page.locator('body')).toHaveClass(/tab-bar-resizing/)
+        await page.mouse.move(handleBox.x + handleBox.width / 2 + (position === 'left' ? 30 : -30), handleBox.y + 30)
+        await expect.poll(() => page.locator('.tabBar.vertical').evaluate(element => element.getBoundingClientRect().width))
+          .toBeGreaterThan(initialWidth + 20)
+        await page.mouse.up()
+        await expect(page.locator('body')).not.toHaveClass(/tab-bar-resizing/)
+        await handle.hover()
+        await attachScreenshot(`${position} resize line at ${zoomFactor * 100}% UI scale`)
+      }
+    })
+  }
+
   test('keeps the vertical tab scrollbar inside the window edge', async ({ page }) => {
     await page.setViewportSize({ width: 800, height: 450 })
     for (let index = 0; index < 15; index++) {

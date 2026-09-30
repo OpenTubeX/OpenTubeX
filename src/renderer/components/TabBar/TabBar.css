@@ -230,7 +230,7 @@
   flex-direction: column;
   align-items: stretch;
 
-  /* Let the resize handle straddle the edge */
+  /* Let dropdowns cross the column's edge. */
   overflow: visible;
   position: fixed;
   inset-block: 0;
@@ -300,15 +300,16 @@
   overscroll-behavior: contain;
 }
 
-/* The handle straddles the bar's edge, with a centered highlight on hover. */
+/* Keep the divider outside the tab bar's stacking context so it can straddle
+   the edge above navigation while dropdowns still cross the tab column. */
 .tabBarResizeHandle {
-  position: absolute;
+  position: fixed;
   inset-block: 0;
   /* stylelint-disable-next-line liberty/use-logical-spec */
-  right: -2.5px;
+  left: calc(var(--vertical-tab-bar-width, 220px) - 2.5px);
   inline-size: 5px;
   cursor: col-resize;
-  z-index: 1;
+  z-index: 8;
   -webkit-app-region: no-drag;
 }
 
@@ -317,14 +318,14 @@
   background: linear-gradient(
     to right,
     transparent 1px,
-    color-mix(in srgb, var(--primary-text-color) 45%, transparent) 1px 4px,
+    color-mix(in srgb, var(--primary-text-color) 45%, var(--side-nav-color)) 1px 4px,
     transparent 4px
   );
 }
 
 /* stylelint-disable liberty/use-logical-spec */
-.tabBar.position-right .tabBarResizeHandle {
-  left: -2.5px;
-  right: auto;
+.tabBarResizeHandle.position-right {
+  left: auto;
+  right: calc(var(--vertical-tab-bar-width, 220px) - 2.5px);
 }
 /* stylelint-enable liberty/use-logical-spec */

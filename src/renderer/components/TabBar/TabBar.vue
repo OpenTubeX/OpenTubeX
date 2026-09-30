@@ -1,6 +1,7 @@
 <template>
   <div
     v-if="isElectron"
+    v-bind="$attrs"
     ref="tabBarRef"
     class="tabBar"
     data-tutorial="tabs"
@@ -126,17 +127,19 @@
         />
       </button>
     </div>
-    <div
-      v-if="vertical"
-      class="tabBarResizeHandle"
-      role="separator"
-      aria-orientation="vertical"
-      :aria-label="t('Resize Tab Bar')"
-      :title="t('Resize Tab Bar')"
-      @pointerdown="handleResizePointerDown"
-      @dblclick="resetTabBarWidth"
-    />
   </div>
+  <div
+    v-if="isElectron && vertical"
+    v-bind="$attrs"
+    class="tabBarResizeHandle"
+    :class="`position-${tabBarPosition}`"
+    role="separator"
+    aria-orientation="vertical"
+    :aria-label="t('Resize Tab Bar')"
+    :title="t('Resize Tab Bar')"
+    @pointerdown="handleResizePointerDown"
+    @dblclick="resetTabBarWidth"
+  />
 </template>
 
 <script setup>
@@ -164,6 +167,8 @@ import {
   getDraggedTabIds,
   getTabIndexShift
 } from './tabReorder'
+
+defineOptions({ inheritAttrs: false })
 
 const { t } = useI18n()
 const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
