@@ -218,6 +218,62 @@ test('an older metadata request cannot clear the next video loading flag', async
   await expect.poll(() => watch.evaluate(vm => vm.downloadedMetadataLoading)).toBe(false)
 })
 
+test('description text updates clamp scrolling after content shrinks at fractional UI scales', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const watch = await watchViewHandle(page)
+  const card = page.locator('.videoDescription:not(.phoneDescriptionPreview)')
+  const scroller = card.locator('.descriptionScroll')
+  for (const scale of [1, 0.95, 1.25]) {
+    await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+    await watch.evaluate(async vm => {
+      vm.videoDescriptionHtml = ''
+      vm.videoTags = []
+      vm.videoGames = []
+      vm.license = null
+      vm.videoDescription = Array.from({ length: 100 }, (_, index) => `Description line ${index}`).join('\n')
+      await vm.$nextTick()
+    })
+    await expect(card.locator('.description')).toContainText('Description line 99')
+    if (await card.locator(':scope > .descriptionStatus').isVisible()) {
+      await card.locator(':scope > .descriptionStatus').click()
+    }
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await watch.evaluate(async vm => {
+      vm.videoDescription = 'Short replacement description'
+      await vm.$nextTick()
+    })
+    await expect(card.locator('.description')).toHaveText('Short replacement description')
+    await expect.poll(() => scroller.evaluate(element => ({
+      scrollTop: element.scrollTop,
+      overflow: element.scrollHeight > element.clientHeight + 1,
+      scrollbarVisible: element.querySelector('.os-scrollbar-vertical')?.classList.contains('os-scrollbar-visible') &&
+        !element.querySelector('.os-scrollbar-vertical')?.classList.contains('os-scrollbar-unusable'),
+    }))).toEqual({ scrollTop: 0, overflow: false, scrollbarVisible: false })
+  }
+})
+
+test('HTML description text extraction stays inert when metadata arrives', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await page.route('https://description.test/broken.png', route => route.fulfill({ status: 404, body: '' }))
+  await openMockedVideo(page)
+  const watch = await watchViewHandle(page)
+  await page.evaluate(() => { window.descriptionTextExtractionExecuted = false })
+  await watch.evaluate(async vm => {
+    vm.videoDescription = ''
+    vm.videoDescriptionHtml = 'Recovered HTML description<img src="https://description.test/broken.png" onerror="window.descriptionTextExtractionExecuted = true">'
+    await vm.$nextTick()
+  })
+  const description = page.locator('.videoDescription .description')
+  await expect(description).toContainText('Recovered HTML description')
+  await description.locator('img').evaluate(image => new Promise(resolve => {
+    if (image.complete) resolve()
+    else image.addEventListener('error', () => resolve(), { once: true })
+  }))
+  expect(await page.evaluate(() => window.descriptionTextExtractionExecuted)).toBe(false)
+})
+
 test.describe('download opened without a connection', () => {
   test.use({
     seed: {
@@ -301,6 +357,11 @@ test.describe('download opened without a connection', () => {
     await expect(page.locator('.watchVideoRecommendations')).not.toContainText('Other saved video')
     await expect(page.locator('.watchVideoInfo').getByRole('button', { name: /transcript/i })).toBeVisible()
     await expect(page.locator('.ftVideoPlayer')).toBeVisible()
+    const description = await watch.evaluate(vm => vm.videoDescription)
+    expect(description.trim()).not.toBe('')
+    const descriptionLines = description.trim().split('\n')
+    await expect(page.locator('.phoneDescriptionPreview .description')).toContainText(descriptionLines[0])
+    await expect(page.locator('.phoneDescriptionPreview .description')).toContainText(descriptionLines.at(-1))
     expect(await video.evaluate(element => element.isConnected)).toBe(true)
     await expectWatchScrollRange(page)
   })
@@ -346,8 +407,8 @@ test.describe('download opened without a connection', () => {
         author: 'Test Channel',
         authorId: 'UC-test-channel-id',
         authorThumbnails: [],
-        description: '',
-        descriptionHtml: '',
+        description: 'Restored Invidious description with a link.',
+        descriptionHtml: 'Restored Invidious description <a href="https://example.test/info">with a link</a>.',
         published: 1_700_000_000,
         recommendedVideos: [{ videoId: 'onlineVideo1', title: 'Online suggestion', author: 'Test Channel', authorId: 'UC-test-channel-id' }],
         liveNow: false,
@@ -386,6 +447,8 @@ test.describe('download opened without a connection', () => {
     })
     await expect(page.locator('.watchVideoRecommendations')).toContainText('Online suggestion')
     await expect(page.locator('.watchVideoInfo').getByRole('button', { name: /transcript/i })).toBeVisible()
+    await expect(page.locator('.videoDescription .description')).toContainText('Restored Invidious description with a link.')
+    await expect(page.locator('.videoDescription .description a')).toHaveAttribute('href', 'https://example.test/info')
     expect(await video.evaluate((element, expectedSource) => element.isConnected && element.currentSrc === expectedSource, source)).toBe(true)
   })
 

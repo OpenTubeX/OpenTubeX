@@ -68,6 +68,52 @@ test('uses each Twitch transport stream quality’s declared H.264 codec', async
   assert.match(result.playlist, /CODECS="avc1\.4D401F,mp4a\.40\.2"/)
 })
 
+test('keeps a Twitch VOD quality playable when its first segment is muted', async () => {
+  const requests = []
+  const segment = Buffer.alloc(188)
+  segment[0] = 0x47
+  Buffer.from([0, 0, 1, 0x67, 0x64, 0, 0x28]).copy(segment, 24)
+  const fetcher = async url => {
+    requests.push(url)
+    if (url === 'https://gql.twitch.tv/gql') return Response.json({ data: { video: {
+      seekPreviewsURL: 'https://example.cloudfront.net/archive-key/storyboards/1.jpg'
+    } } })
+    if (url.endsWith('/720p60/index-dvr.m3u8')) {
+      return new Response('#EXTM3U\n#EXTINF:10,\n0-unmuted.ts\n')
+    }
+    if (url.endsWith('/720p60/0-muted.ts')) return new Response(segment)
+    return new Response('', { status: 403 })
+  }
+
+  const result = await fetchTwitchSubOnlyVod('12345', fetcher)
+  assert.match(result.playlist, /CODECS="avc1\.640028,mp4a\.40\.2"/)
+  assert.match(result.playlist, /\/720p60\/index-dvr\.m3u8/)
+  assert.ok(requests.includes('https://example.cloudfront.net/archive-key/720p60/0-muted.ts'))
+  assert.ok(!requests.some(url => url.endsWith('0-unmuted.ts')))
+})
+
+test('muted segment probing preserves directory names and signed query strings', async () => {
+  const requests = []
+  const segment = Buffer.alloc(188)
+  Buffer.from([0, 0, 1, 0x67, 0x64, 0, 0x28]).copy(segment, 24)
+  const expectedUrl = 'https://example.cloudfront.net/archive-key/720p60/parts-unmuted/0-muted.ts?token=keep-unmuted'
+  const fetcher = async url => {
+    requests.push(url)
+    if (url === 'https://gql.twitch.tv/gql') return Response.json({ data: { video: {
+      seekPreviewsURL: 'https://example.cloudfront.net/archive-key/storyboards/1.jpg'
+    } } })
+    if (url.endsWith('/720p60/index-dvr.m3u8')) {
+      return new Response('#EXTM3U\n#EXTINF:10,\nparts-unmuted/0-unmuted.ts?token=keep-unmuted\n')
+    }
+    if (url === expectedUrl) return new Response(segment)
+    return new Response('', { status: 403 })
+  }
+
+  const result = await fetchTwitchSubOnlyVod('12345', fetcher)
+  assert.match(result.playlist, /CODECS="avc1\.640028,mp4a\.40\.2"/)
+  assert.ok(requests.includes(expectedUrl))
+})
+
 test('rejects an unsafe preview URL before fetching a quality', async () => {
   let requests = 0
   const fetcher = async () => {

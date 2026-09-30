@@ -72,6 +72,26 @@ function sameItemsReordered(before, after) {
     oldIds.every(id => after.has(id))
 }
 
+function describeItemNameChanges(before, after, title, add, rename, update) {
+  for (const [id, entry] of before) {
+    if (!after.has(id)) add('removed', title(entry))
+  }
+  for (const [id, entry] of after) {
+    if (!before.has(id)) add('added', title(entry))
+  }
+  for (const [id, current] of after) {
+    const previous = before.get(id)
+    if (!previous) continue
+    const oldTitle = title(previous)
+    const newTitle = title(current)
+    if (oldTitle !== newTitle) {
+      if (oldTitle && newTitle) rename(oldTitle, newTitle)
+      else add(null, null)
+    }
+    update(previous, current, newTitle)
+  }
+}
+
 function describeCollectionChanges(collection, before, after, changes, channelNames) {
   const id = collection === 'subscriptions'
     ? entry => entry?.id
@@ -90,22 +110,9 @@ function describeCollectionChanges(collection, before, after, changes, channelNa
     else addSummary(changes, 'collection', collection)
   }
 
-  for (const [itemId, entry] of oldItems) {
-    if (!newItems.has(itemId)) add('removed', title(entry))
-  }
-  for (const [itemId, entry] of newItems) {
-    if (!oldItems.has(itemId)) add('added', title(entry))
-  }
-  for (const [itemId, current] of newItems) {
-    const previous = oldItems.get(itemId)
-    if (!previous) continue
-    const oldTitle = title(previous)
-    const newTitle = title(current)
-    if (oldTitle !== newTitle && oldTitle && newTitle) {
-      changes.push({ collection, action: 'renamed', item: oldTitle, value: newTitle })
-    } else if (oldTitle !== newTitle) {
-      addSummary(changes, 'collection', collection)
-    }
+  describeItemNameChanges(oldItems, newItems, title, add, (item, value) => {
+    changes.push({ collection, action: 'renamed', item, value })
+  }, (previous, current, newTitle) => {
     if (collection === 'playlists') {
       const parent = newTitle
       const oldVideos = byId(previous.videos, video => video?.id)
@@ -137,7 +144,7 @@ function describeCollectionChanges(collection, before, after, changes, channelNa
         else addSummary(changes, 'collection', collection)
       }
     }
-  }
+  })
 }
 
 const CAPTION_DETAIL_KEYS = {
@@ -191,26 +198,13 @@ function describeCustomThemes(before, after, changes) {
     if (name) changes.push({ key: 'customThemes', action, item: name })
     else addSummary(changes, 'key', 'customThemes')
   }
-  for (const [id, theme] of previous) {
-    if (!current.has(id)) add('removed', activityText(theme.name))
-  }
-  for (const [id, theme] of current) {
-    if (!previous.has(id)) add('added', activityText(theme.name))
-  }
-  for (const [id, theme] of current) {
-    const old = previous.get(id)
-    if (!old) continue
-    const oldName = activityText(old.name)
-    const newName = activityText(theme.name)
-    if (oldName !== newName && oldName && newName) {
-      changes.push({ key: 'customThemes', action: 'renamed', item: oldName, value: newName })
-    } else if (oldName !== newName) {
-      addSummary(changes, 'key', 'customThemes')
-    }
+  describeItemNameChanges(previous, current, theme => activityText(theme.name), add, (item, value) => {
+    changes.push({ key: 'customThemes', action: 'renamed', item, value })
+  }, (old, theme, newName) => {
     if (!areJsonValuesEqual({ ...old, name: null }, { ...theme, name: null })) {
       add('updated', newName)
     }
-  }
+  })
 }
 
 function subscriptionPreferences(value) {

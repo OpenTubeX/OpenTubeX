@@ -106,6 +106,7 @@ async function probeQuality(url, fetcher) {
       .find(line => line && !line.startsWith('#') && /\.ts(?:\?.*)?$/.test(line))
     if (segmentPath) {
       const segmentUrl = new URL(segmentPath, url)
+      segmentUrl.pathname = segmentUrl.pathname.replace(/-unmuted\.ts$/, '-muted.ts')
       if (segmentUrl.origin !== new URL(url).origin) return null
       const segment = await fetcher(segmentUrl.href, {
         headers: { Range: 'bytes=0-65535' },
