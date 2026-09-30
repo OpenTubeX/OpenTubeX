@@ -846,6 +846,7 @@ Settings:
     Posts Auto Refresh Interval: Posts Auto Refresh Interval
     Refresh Subscriptions While App Is Closed: "Refresh Subscriptions While App Is Closed"
   Distraction Free Settings:
+    Enable Block Lists: "Enable block lists"
     AI Video Summaries: AI video summaries
     Hide: Hide
     Collapsed: Collapsed

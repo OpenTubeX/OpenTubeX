@@ -651,6 +651,47 @@ test.describe('automatic quick setting select pairs', () => {
 })
 
 test.describe('customizable quick settings', () => {
+  test.describe('block lists', () => {
+    const channelsHidden = JSON.stringify([{ name: 'UCaaaaaaaaaaaaaaaaaaaaaa', preferredName: 'Example channel', icon: 'data:image/svg+xml;base64,PHN2Zy8+' }])
+    const forbiddenTitles = JSON.stringify(['spoiler'])
+    test.use({ seed: { settings: { channelsHidden, forbiddenTitles, quickSettings: ['enableBlockLists'] } } })
+
+    test('toggles both lists without removing their entries and persists the choice', async ({ app, page }) => {
+      await page.locator('.profileTrigger').click()
+      const menu = page.getByRole('dialog', { name: 'Quick settings' })
+      const toggle = menu.getByRole('checkbox', { name: 'Enable block lists' })
+      await expect(toggle).toBeChecked()
+      await menu.locator('label.switch-label').filter({ hasText: 'Enable block lists' }).click()
+      await expect(toggle).not.toBeChecked()
+
+      await expect.poll(() => page.evaluate(() => {
+        const getters = document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters
+        return [getters.getActiveChannelsHiddenNames.size, getters.getActiveForbiddenTitles.length]
+      })).toEqual([0, 0])
+
+      await menu.getByRole('button', { name: 'All Settings' }).click()
+      const distraction = await goToSettingsSection(page, 'distraction')
+      await expect(distraction.getByRole('checkbox', { name: 'Enable block lists' })).not.toBeChecked()
+      await expect(distraction.getByText('Example channel')).toBeVisible()
+      await expect(distraction.getByText('spoiler')).toBeVisible()
+
+      await expect.poll(async () => {
+        const saved = latestSettings(await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8'))
+        return [saved.enableBlockLists, saved.channelsHidden, saved.forbiddenTitles]
+      }).toEqual([false, channelsHidden, forbiddenTitles])
+
+      ;({ page } = await app.relaunch())
+      await page.locator('.profileTrigger').click()
+      const reopenedToggle = page.getByRole('dialog', { name: 'Quick settings' }).getByRole('checkbox', { name: 'Enable block lists' })
+      await expect(reopenedToggle).not.toBeChecked()
+      await page.getByRole('dialog', { name: 'Quick settings' }).locator('label.switch-label').filter({ hasText: 'Enable block lists' }).click()
+      await expect.poll(() => page.evaluate(() => {
+        const getters = document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters
+        return [getters.getActiveChannelsHiddenNames.size, getters.getActiveForbiddenTitles.length]
+      })).toEqual([1, 1])
+    })
+  })
+
   test('centers setting icons vertically within their rows', async ({ page }) => {
     const appearance = await goToSettingsSection(page, 'appearance')
     await appearance.getByRole('button', { name: 'Customize quick settings' }).click()

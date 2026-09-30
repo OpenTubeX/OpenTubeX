@@ -69,8 +69,8 @@ const props = defineProps({
 const visibleData = computed(() => props.offline
   ? props.data
   : props.data.filter(video => !isVideoHiddenByPreferences(video, {
-      hiddenChannelNames: store.getters.getChannelsHiddenNames,
-      forbiddenTitles: store.getters.getForbiddenTitlesParsed,
+      hiddenChannelNames: store.getters.getActiveChannelsHiddenNames,
+      forbiddenTitles: store.getters.getActiveForbiddenTitles,
       hideChannelsBasedOnText: false,
     })))
 

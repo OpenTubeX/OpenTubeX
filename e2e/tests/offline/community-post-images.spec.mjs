@@ -179,6 +179,58 @@ test.describe('community post images', () => {
     }
   })
 
+  test('shows cached posts immediately when block lists are turned off', async ({ page }) => {
+    await stubPostImages(page)
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="posts"]').click()
+
+    const post = page.locator('.ft-list-post').filter({ hasText: 'Multi image community post' })
+    await expect(post).toBeVisible()
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
+      'updateForbiddenTitles', JSON.stringify(['Channel B'])
+    ))
+    await expect(post).toHaveCount(0)
+
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateEnableBlockLists', false))
+    await expect(post).toBeVisible()
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateEnableBlockLists', true))
+    await expect(post).toHaveCount(0)
+  })
+
+  test('clamps the scrolled posts feed when block lists are turned back on at 95% scale', async ({ page }) => {
+    await stubPostImages(page)
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="posts"]').click()
+    await page.evaluate(() => window.ftElectron.setZoomFactor(0.95))
+
+    await page.evaluate(async (posts) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateEnableBlockLists', false)
+      await store.dispatch('updateForbiddenTitles', JSON.stringify(['Channel B']))
+      await store.dispatch('updateSubscriptionPostsCacheByChannel', {
+        channelId: posts[0].authorId,
+        posts,
+        timestamp: new Date(),
+      })
+    }, Array.from({ length: 12 }, (_, index) => ({
+      ...singleImagePost(),
+      postId: `scroll-post-${index}`,
+      postText: `Scroll post ${index}`,
+    })))
+
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeGreaterThan(500)
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(100)
+
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateEnableBlockLists', true))
+    await expect(page.locator('.ft-list-post')).toHaveCount(0)
+    await expect.poll(() => page.evaluate(() => ({
+      scrollY: window.scrollY,
+      overflows: document.documentElement.scrollHeight > window.innerHeight,
+      scrollbarUnusable: document.querySelector('body > .os-scrollbar-vertical')?.classList.contains('os-scrollbar-unusable') ?? false,
+    }))).toEqual({ scrollY: 0, overflows: false, scrollbarUnusable: true })
+  })
+
   test('keeps carousel crops, shows full single images, and applies UI roundness', async ({ page, attachScreenshot }) => {
     await stubPostImages(page)
 

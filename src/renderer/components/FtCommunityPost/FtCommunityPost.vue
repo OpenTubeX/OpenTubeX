@@ -234,7 +234,7 @@ const listType = computed(() => {
 /** @type {import('vue').ComputedRef<string[]>} */
 const forbiddenTitles = computed(() => {
   if (!props.hideForbiddenTitles) { return [] }
-  return store.getters.getForbiddenTitlesParsed
+  return store.getters.getActiveForbiddenTitles
 })
 
 const hideVideo = computed(() => {

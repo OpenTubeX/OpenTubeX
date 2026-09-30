@@ -241,7 +241,7 @@ const globalVideoLimit = computed(() => (
 
 const hideLiveStreams = computed(() => store.getters.getHideLiveStreams)
 const hideUpcomingPremieres = computed(() => store.getters.getHideUpcomingPremieres)
-const forbiddenTitles = computed(() => store.getters.getForbiddenTitlesParsed)
+const forbiddenTitles = computed(() => store.getters.getActiveForbiddenTitles)
 const restrictedPlaybackConfigured = computed(() => (
   hasConfiguredRestrictedPlaybackAuthentication(store.getters)
 ))

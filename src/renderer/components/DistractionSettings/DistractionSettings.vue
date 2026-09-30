@@ -102,6 +102,14 @@
     </div>
     <br class="hide-on-mobile">
     <FtFlexBox>
+      <FtToggleSwitch
+        :label="t('Settings.Distraction Free Settings.Enable Block Lists')"
+        :default-value="enableBlockLists"
+        setting-key="enableBlockLists"
+        @change="updateEnableBlockLists"
+      />
+    </FtFlexBox>
+    <FtFlexBox>
       <FtInputTags
         :disabled="channelHiderDisabled"
         setting-key="channelsHidden"
@@ -874,6 +882,12 @@ const pausedInterfaceHideDelay = computed(() => store.getters.getPausedInterface
  */
 function updatePausedInterfaceHideDelay(value) {
   store.dispatch('updatePausedInterfaceHideDelay', value)
+}
+
+const enableBlockLists = computed(() => store.getters.getEnableBlockLists)
+
+function updateEnableBlockLists(value) {
+  store.dispatch('updateEnableBlockLists', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

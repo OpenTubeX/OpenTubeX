@@ -274,6 +274,31 @@ test('opts in before requesting candidates and shows only unseen matching videos
   }, DBActions.GENERAL.FIND)).toBe(true)
 })
 
+test('restores blocked channel and title recommendations while block lists are off', async ({ page }) => {
+  const backend = await mockCandidates(page)
+  await goTo(page, 'home')
+  await setEnabled(page, true)
+  await backend.settled()
+
+  const section = recommendations(page)
+  const blockedChannel = section.locator('a[href*="/watch/recbloc0001"]')
+  const blockedTitle = section.locator('a[href*="/watch/rectext0001"]')
+  await expect(blockedChannel).toHaveCount(0)
+  await expect(blockedTitle).toHaveCount(0)
+
+  await changeLayoutSetting(page, 'updateEnableBlockLists', false)
+  await expect(blockedChannel.first()).toBeVisible()
+  await expect(blockedTitle.first()).toBeVisible()
+  await section.locator('.ft-list-video').filter({ hasText: 'Linux desktop panels' }).locator('.title').click({ button: 'right' })
+  await expect(page.getByRole('menuitem', { name: 'Show channel', exact: true })).toBeVisible()
+  await expect(page.getByRole('menuitem', { name: 'Hide Channel', exact: true })).toHaveCount(0)
+  await page.keyboard.press('Escape')
+
+  await changeLayoutSetting(page, 'updateEnableBlockLists', true)
+  await expect(blockedChannel).toHaveCount(0)
+  await expect(blockedTitle).toHaveCount(0)
+})
+
 test('reuses recommendations when revisiting Home and bypasses the cache with Refresh', async ({ page }) => {
   const backend = await mockCandidates(page)
   await goTo(page, 'home')

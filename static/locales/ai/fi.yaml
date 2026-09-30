@@ -873,6 +873,7 @@ Settings:
     Posts Auto Refresh Interval: Julkaisujen automaattisen päivityksen aikaväli
     Refresh Subscriptions While App Is Closed: "Päivitä tilaukset sovelluksen ollessa suljettuna"
   Distraction Free Settings:
+    Enable Block Lists: "Ota estolistat käyttöön"
     AI Video Summaries: Tekoälyn videoyhteenvedot
     Hide: Piilota
     Collapsed: Supistettu

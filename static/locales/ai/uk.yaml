@@ -868,6 +868,7 @@ Settings:
     Posts Auto Refresh Interval: Інтервал автоматичного оновлення дописів
     Refresh Subscriptions While App Is Closed: "Оновлювати підписки, коли застосунок закрито"
   Distraction Free Settings:
+    Enable Block Lists: "Увімкнути списки блокування"
     AI Video Summaries: Підсумки відео від ШІ
     Hide: Приховувати
     Collapsed: Згорнуті

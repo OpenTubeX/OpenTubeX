@@ -860,6 +860,7 @@ Settings:
     Posts Auto Refresh Interval: Postituste automaatse värskendamise intervall
     Refresh Subscriptions While App Is Closed: "Värskenda tellimusi, kui rakendus on suletud"
   Distraction Free Settings:
+    Enable Block Lists: "Luba blokeerimisloendid"
     AI Video Summaries: Tehisintellekti loodud videokokkuvõtted
     Hide: Peida
     Collapsed: Ahendatud

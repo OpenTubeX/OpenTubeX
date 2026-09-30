@@ -561,7 +561,7 @@ export default defineComponent({
           if (!video.videoId || seen.has(video.videoId)) return false
           seen.add(video.videoId)
           return !isVideoHiddenByPreferences(video, {
-            hiddenChannelNames: this.$store.getters.getChannelsHiddenNames,
+            hiddenChannelNames: this.$store.getters.getActiveChannelsHiddenNames,
             forbiddenTitles: this.forbiddenTitles,
             hideChannelsBasedOnText: false
           })
@@ -1104,10 +1104,10 @@ export default defineComponent({
       return this.sponsorBlockAutoSkipTemporarilyDisabled || this.isSponsorBlockChannelWhitelisted
     },
     channelsHidden() {
-      return this.$store.getters.getChannelsHiddenParsed
+      return this.$store.getters.getActiveChannelsHidden
     },
     forbiddenTitles() {
-      return this.$store.getters.getForbiddenTitlesParsed
+      return this.$store.getters.getActiveForbiddenTitles
     },
     isUserPlaylistRequested: function () {
       return this.tabRoute.query.playlistType === 'user'

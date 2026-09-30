@@ -860,6 +860,7 @@ Settings:
     Posts Auto Refresh Interval: Interval automatického obnovení příspěvků
     Refresh Subscriptions While App Is Closed: "Obnovovat odběry, když je aplikace zavřená"
   Distraction Free Settings:
+    Enable Block Lists: "Povolit seznamy blokovaných"
     AI Video Summaries: Shrnutí videí od AI
     Hide: Skrýt
     Collapsed: Sbalená

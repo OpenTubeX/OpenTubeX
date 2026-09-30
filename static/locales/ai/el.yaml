@@ -873,6 +873,7 @@ Settings:
     Posts Auto Refresh Interval: Διάστημα αυτόματης ανανέωσης αναρτήσεων
     Refresh Subscriptions While App Is Closed: "Ανανέωση συνδρομών όταν η εφαρμογή είναι κλειστή"
   Distraction Free Settings:
+    Enable Block Lists: "Ενεργοποίηση λιστών αποκλεισμού"
     AI Video Summaries: Συνόψεις βίντεο από ΤΝ
     Hide: Απόκρυψη
     Collapsed: Συμπτυγμένες

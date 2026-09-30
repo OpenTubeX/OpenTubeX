@@ -868,6 +868,7 @@ Settings:
     Posts Auto Refresh Interval: Intervalo de actualización automática das publicacións
     Refresh Subscriptions While App Is Closed: "Actualizar as subscricións coa aplicación pechada"
   Distraction Free Settings:
+    Enable Block Lists: "Activar as listas de bloqueo"
     AI Video Summaries: Resumos de vídeos con IA
     Hide: Agochar
     Collapsed: Contraídos
