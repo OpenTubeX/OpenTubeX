@@ -23,7 +23,7 @@ function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPl
   const rect = { left: 10, top: 10, width: 360, height: 202 }
   const create = vm.runInNewContext(`${source}; useScrollMiniPlayer`, {
     ...coordinator, computed, ref, watch, inject: () => ({ detached: ref(navigatedAway), tabPresented: ref(true), minimized, clearMinimizePreview() {} }), watchNavigationKey: Symbol(),
-    nextTick() {}, window, clearTimeout, process: { env: { IS_CAPACITOR: false } },
+    nextTick() {}, onMounted() {}, onBeforeUnmount() {}, window, clearTimeout, process: { env: { IS_CAPACITOR: false } },
     document: { body: { classList: { remove() {} } } },
     store: { getters: reactive({ getAutoPictureInPictureTriggers: [], getKeepPlayingOnNavigation: keepPlaying, getScrollMiniPlayerOnAllTabs: true }) },
     DEFAULT_ASPECT_RATIO: 16 / 9,

@@ -64,6 +64,9 @@ for (const eventFirst of [false, true]) {
       window,
       Capacitor: { getPlatform: () => 'android' },
       handleAndroidBack: () => { backPresses++ },
+      initializeAndroidBack: async () => () => {},
+      getAndroidBackPreview() {},
+      shouldInterceptAndroidBack() {},
       CapacitorApp: {
         addListener: async (name, callback) => {
           listeners.set(name, callback)

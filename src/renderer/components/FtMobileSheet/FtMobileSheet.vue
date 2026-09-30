@@ -63,6 +63,8 @@ import { computed, inject, nextTick, onBeforeUnmount, onUpdated, ref, shallowRef
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { isAppHidden } from '../../helpers/appVisibility'
 import { applyAnimationSpeed } from '../../helpers/animationSpeed'
+import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
+import { registerAndroidBackSheet, settleAndroidBackAnimation } from '../../helpers/androidBackGesture'
 import { lockBodyScroll, unlockBodyScroll } from '../FtPrompt/scrollLock'
 
 const props = defineProps({
@@ -141,6 +143,52 @@ let closing = false
 let resumePlayback = null
 let openingSequence = 0
 let presentationSuspended = false
+let backAnimation = null
+
+function cancelBackGesture() {
+  backAnimation?.cancel()
+  backAnimation = null
+}
+
+watch(dialog, (element, _previous, onCleanup) => {
+  if (!process.env.IS_CAPACITOR || process.env.IS_IOS || !element) return
+  const unregister = registerAndroidBackSheet(element, {
+    begin() {
+      // A sheet's nested Back action changes its view instead of dismissing it.
+      if (!props.enabled || !props.open || !element.open || props.back || props.compact ||
+        suspended.value || closing || drag || isReducedMotionEnabled()) return false
+      animation?.cancel()
+      backAnimation = applyAnimationSpeed(element.animate([
+        { transform: 'translateY(0)' },
+        { transform: 'translateY(100%)' }
+      ], { duration: 180, fill: 'both' }))
+      backAnimation.pause()
+      return true
+    },
+    update(progress) {
+      if (backAnimation) backAnimation.currentTime = progress * Number(backAnimation.effect.getTiming().duration)
+    },
+    async finish(commit) {
+      const current = backAnimation
+      if (!current) return
+      await settleAndroidBackAnimation(current, commit)
+      if (backAnimation !== current) return
+      if (commit && element.open) {
+        // The gesture already completed the exit animation.
+        element.close()
+        release()
+        emit('close')
+        emit('closed')
+      }
+      cancelBackGesture()
+    },
+    cancel: cancelBackGesture,
+  })
+  onCleanup(() => {
+    unregister()
+    cancelBackGesture()
+  })
+}, { immediate: true, flush: 'post' })
 
 function restorePlayback() {
   resumePlayback?.()
@@ -167,6 +215,7 @@ watch(() => getInlinePlayer?.(), observeInlinePlayer, { flush: 'post' })
 watch([dialog, () => props.enabled, () => props.open, docked, fullscreenElement, suspended], async ([element, enabled, open], previous) => {
   const sequence = ++openingSequence
   if (!element) return
+  if (!enabled || !open || suspended.value) cancelBackGesture()
   if (suspended.value && enabled && open) {
     if (element.open) {
       emit('suspend')
@@ -255,6 +304,7 @@ watch(landscape, (value) => {
 
 function startDrag(event) {
   if (!docked.value || event.button !== 0 || event.target.closest('button, input, a, [role="button"]')) return
+  cancelBackGesture()
   animation?.cancel()
   drag = { id: event.pointerId, y: event.clientY, start: performance.now(), distance: 0 }
   event.currentTarget.setPointerCapture(event.pointerId)
@@ -311,6 +361,7 @@ function handleClick(event) {
 }
 
 function release(preservePresentation = false) {
+  cancelBackGesture()
   closing = false
   if (!preservePresentation) {
     expanded.value = false
