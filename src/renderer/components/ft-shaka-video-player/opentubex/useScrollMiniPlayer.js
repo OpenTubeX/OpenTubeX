@@ -167,6 +167,40 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     }
   }
 
+  function measureInlinePlayer() {
+    const placeholder = scrollMiniPlaceholder.value
+    if (!placeholder || !video.value) return null
+    // Measure the inline layout in its original slot while the real video stays
+    // in the viewport layer. A detached clone avoids resizing its decode surface.
+    const element = container.value.cloneNode(false)
+    const videoElement = video.value.cloneNode(false)
+    element.classList.remove('scrollMiniPlayer', 'mobileMiniBar', 'scrollMiniPlayerAnimating')
+    Object.assign(element.style, { position: 'absolute', inset: '0 auto auto 0', width: '100%' })
+    element.removeAttribute('id')
+    videoElement.removeAttribute('id')
+    videoElement.removeAttribute('src')
+    videoElement.removeAttribute('poster')
+    videoElement.width = video.value.videoWidth
+    videoElement.height = video.value.videoHeight
+    videoElement.style.height = 'auto'
+    videoElement.style.setProperty('transition', 'none', 'important')
+    element.append(videoElement)
+    placeholder.append(element)
+    const rect = element.getBoundingClientRect()
+    const videoRect = videoElement.getBoundingClientRect()
+    element.remove()
+    const slot = placeholder.getBoundingClientRect()
+    return {
+      rect: { left: slot.left, top: slot.top, width: rect.width, height: rect.height },
+      videoRect: {
+        left: slot.left + videoRect.left - rect.left,
+        top: slot.top + videoRect.top - rect.top,
+        width: videoRect.width,
+        height: videoRect.height
+      }
+    }
+  }
+
   const scrollMiniPlayerDetached = computed(() => {
     return scrollMiniPlayerActive.value &&
       !isActiveTab.value &&
@@ -845,7 +879,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       scrollMiniPlayerActive.value !== expectedActive
     ) return
 
-    const nextRect = playerContainer.getBoundingClientRect()
+    const inlineLayout = usesMobileMiniBar() && !expectedActive ? measureInlinePlayer() : null
+    const nextRect = inlineLayout?.rect ?? playerContainer.getBoundingClientRect()
     if (nextRect.width === 0 || nextRect.height === 0) {
       scrollMiniPlayerAnimating.value = false
       mobileMiniBarOverlayStyle.value = null
@@ -854,7 +889,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
     if (usesMobileMiniBar() && previousVideoRect && video.value) {
       positionMobileMiniBarOverlay(expectedActive ? nextRect : previousRect)
-      const nextVideoRect = video.value.getBoundingClientRect()
+      const nextVideoRect = inlineLayout?.videoRect ?? video.value.getBoundingClientRect()
       const videoFrom = {
         left: previousVideoRect.left - previousRect.left,
         top: previousVideoRect.top - previousRect.top,
@@ -882,13 +917,26 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
         if (scrollMiniLayoutAnimation !== animation) return
         const time = Math.min(1, Math.max(0, (now - started) / duration))
         const progress = time * time * (3 - 2 * time)
-        renderMobileMiniMorph(previousRect, nextRect, videoFrom, videoTo, progress, !expectedActive)
+        // Read the stable inline slot before writing the transform. Its bounds
+        // follow touch/smooth scrolling and browser scroll anchoring while the
+        // video remains in the viewport layer.
+        const slot = !expectedActive ? scrollMiniPlaceholder.value?.getBoundingClientRect() : null
+        const target = expectedActive
+          ? nextRect
+          : {
+              left: slot?.left ?? nextRect.left,
+              top: slot?.top ?? nextRect.top,
+              width: nextRect.width,
+              height: nextRect.height
+            }
+        renderMobileMiniMorph(previousRect, target, videoFrom, videoTo, progress, !expectedActive)
         if (time < 1) {
           frameId = requestAnimationFrame(frame)
         } else {
           scrollMiniLayoutAnimation = null
           clearMobileMiniMorph()
           scrollMiniPlayerAnimating.value = false
+          if (!expectedActive) scrollMiniPlaceholderHeight.value = 0
           mobileMiniBarOverlayStyle.value = null
           releaseMobileMiniBarTransition(playerContainer)
         }
@@ -1123,7 +1171,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     scrollMiniPlayerActive.value = false
     scrollMiniPlayerStashedSide.value = null
     scrollMiniPlayerRestoreRect = null
-    scrollMiniPlaceholderHeight.value = 0
+    if (!previousRect || !usesMobileMiniBar()) scrollMiniPlaceholderHeight.value = 0
     scrollMiniDragHandleOnLightBg.value = false
     scrollMiniResizeHandleOnLightBg.value = false
     scrollMiniPlayPauseHiddenByTimer = false

@@ -43,7 +43,7 @@
       aria-hidden="true"
     />
     <div
-      v-if="scrollMiniPlayerActive || scrollMiniPlayerDragStyle"
+      v-if="scrollMiniPlayerActive || scrollMiniPlayerDragStyle || (mobileMiniBar && scrollMiniPlayerAnimating)"
       ref="scrollMiniPlaceholder"
       class="scrollMiniPlaceholder"
       :style="{ height: `${scrollMiniPlaceholderHeight}px` }"
@@ -52,7 +52,7 @@
     <!-- eslint-disable vue/html-indent -->
     <Teleport
       to="#cross-tab-mini-player-layer"
-      :disabled="!scrollMiniPlayerDragStyle && !scrollMiniPlayerDetached"
+      :disabled="!scrollMiniPlayerDragStyle && !scrollMiniPlayerDetached && !(mobileMiniBar && (scrollMiniPlayerActive || scrollMiniPlayerAnimating))"
     >
     <!-- Keep controls visibility out of :class: Vue would erase Shaka's
          no-cursor class when the controls time out.
@@ -79,7 +79,7 @@
           !fullWindowEnabled && !scrollMiniPlayerActive,
         musicAudioPlayer: audioPlayerMode,
         scrollMiniPlayer: scrollMiniPlayerActive,
-        mobileMiniBar: mobileMiniBar && scrollMiniPlayerActive,
+        mobileMiniBar: mobileMiniBar && (scrollMiniPlayerActive || scrollMiniPlayerAnimating),
         scrollMiniPlayerStashed,
         scrollMiniPlayerStashedRight: scrollMiniPlayerStashedSide === 'right',
         scrollMiniPlayerAnimating,
