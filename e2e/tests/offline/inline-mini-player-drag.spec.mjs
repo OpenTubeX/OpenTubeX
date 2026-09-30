@@ -34,6 +34,78 @@ async function openMobilePlayer(app, page, phone = true) {
   return page.locator('.ftVideoPlayer')
 }
 
+for (const uiScale of [100, 125]) {
+  test.describe(`scroll mini player at ${uiScale}% UI scale`, () => {
+    test.use({
+      seed: {
+        settings: {
+          videoPlaybackEngine: 'built-in',
+          ytDlpPlaybackEngineDefaultMigration: true,
+          enableVideoZoom: false,
+          enableMobileFullscreenSwipe: false,
+          uiScale
+        }
+      }
+    })
+
+    for (const resize of [false, true]) {
+      test(`scroll mini player returns without flashing controls or jumping while scrolling${resize ? ' and resizing' : ''}`, async ({ app, page }) => {
+        const player = await openMobilePlayer(app, page)
+        if (uiScale === 125) await player.locator('video').first().evaluate(element => element.play())
+        await page.evaluate(() => {
+          const spacer = document.createElement('div')
+          spacer.style.height = '2000px'
+          document.body.append(spacer)
+          window.scrollTo(0, 1200)
+        })
+        await expect(player).toHaveClass(/scrollMiniPlayer/)
+        await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+
+        const framesPromise = page.evaluate(async () => {
+          const player = document.querySelector('.ftVideoPlayer')
+          const video = player.querySelector('video')
+          const frames = []
+          let started = false
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+          for (let i = 0; i < 90; i++) {
+            // Sample after all animation callbacks for this paint have run.
+            await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)))
+            const morph = player.hasAttribute('data-mobile-mini-morph')
+            if (morph) started = true
+            if (!started) continue
+            const rect = video.getBoundingClientRect()
+            frames.push({
+              morph,
+              // Compare document positions: scrolling continues between paints.
+              top: rect.top + window.scrollY,
+              width: rect.width,
+              controlsVisible: [...player.children].some(element => {
+                if (element.matches('.player, .countdownPoster, .mobileMiniBarOverlay')) return false
+                const style = getComputedStyle(element)
+                return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0 && element.getBoundingClientRect().height > 0
+              })
+            })
+            if (!morph) break
+          }
+          return frames
+        })
+        if (resize) {
+          await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
+          await setWindowSize(app, page, { width: 640, height: 800 })
+        }
+        const frames = await framesPromise
+        expect(frames.filter(frame => frame.morph).length).toBeGreaterThan(2)
+        expect.soft(frames.filter(frame => frame.morph && frame.controlsVisible), 'only the video may move during the return').toEqual([])
+        const lastMorph = frames.at(-2)
+        const inline = frames.at(-1)
+        expect(inline.morph).toBe(false)
+        expect.soft(Math.abs(lastMorph.top - inline.top), 'the animation must land at the current scrolled position').toBeLessThan(10)
+        expect.soft(Math.abs(lastMorph.width - inline.width)).toBeLessThan(10)
+      })
+    }
+  })
+}
+
 test.describe('history progress during mobile restore', () => {
   test.use({
     seed: {

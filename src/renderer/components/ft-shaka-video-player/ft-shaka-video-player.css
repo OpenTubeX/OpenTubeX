@@ -4667,6 +4667,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 .scrollMiniPlaceholder {
+  position: relative;
   width: 100%;
   pointer-events: none;
 }
@@ -4698,6 +4699,10 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 .ftVideoPlayer.scrollMiniPlayerAnimating {
   position: relative;
   z-index: 150;
+}
+
+.ftVideoPlayer.scrollMiniPlayerAnimating > .player {
+  transition: none !important;
 }
 
 .ftVideoPlayer.scrollMiniPlayer > .player,
