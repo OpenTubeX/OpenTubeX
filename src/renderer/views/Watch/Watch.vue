@@ -559,6 +559,7 @@
               :title="$t('User Playlists.Add to Playlist')"
               :icon="isInAnyPlaylist ? ['fac', 'playlist-check'] : ['fac', 'playlist-add']"
               force-dropdown
+              dropdown-portal
               mobile-sheet
               dropdown-position-x="left"
               dropdown-position-y="top"
