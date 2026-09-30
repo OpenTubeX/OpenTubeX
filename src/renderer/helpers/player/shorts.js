@@ -10,6 +10,83 @@ const SHORTS_COMPLETION_END_MARGIN_SECONDS = 0.5
 const SHORTS_COMPLETION_MAX_PLAYBACK_TICK_SECONDS = 2
 const SHORTS_COMPLETION_MIN_PLAYBACK_AFTER_SEEK_SECONDS = 1
 const channelShortsNavigationContexts = new Map()
+export const SHORTS_PREVIOUS_COUNT = 3
+export const SHORTS_NEXT_COUNT = 3
+
+/** Keep only nearby Shorts in the playback window. */
+export function getShortsPlaybackWindow(feed, currentVideoId) {
+  const index = feed.findIndex(video => video.videoId === currentVideoId)
+  if (index < 0) return { previous: [], next: [] }
+
+  const previous = feed.slice(Math.max(0, index - SHORTS_PREVIOUS_COUNT), index)
+    .map(video => video.videoId)
+  const next = feed.slice(index + 1, index + 1 + SHORTS_NEXT_COUNT)
+    .map(video => video.videoId)
+  return { previous, next }
+}
+
+/**
+ * Shares nearby Shorts metadata and playback positions between navigation and
+ * preloading. Signed stream URLs are short lived, so stale metadata is fetched
+ * again even when its Short remains in the window.
+ */
+export class ShortsPlaybackCache {
+  constructor({ now = Date.now, ttlMs = 5 * 60_000 } = {}) {
+    this.now = now
+    this.ttlMs = ttlMs
+    this.entries = new Map()
+    this.positions = new Map()
+  }
+
+  get(key, load) {
+    const cached = this.entries.get(key)
+    if (cached && cached.expiresAt > this.now()) return cached.promise
+
+    const entry = { expiresAt: this.now() + this.ttlMs, promise: null }
+    entry.promise = Promise.resolve().then(load).catch(error => {
+      if (this.entries.get(key) === entry) this.entries.delete(key)
+      throw error
+    })
+    this.entries.set(key, entry)
+    return entry.promise
+  }
+
+  set(key, value) {
+    this.entries.set(key, {
+      expiresAt: this.now() + this.ttlMs,
+      promise: Promise.resolve(value),
+    })
+  }
+
+  delete(key) {
+    this.entries.delete(key)
+  }
+
+  retain(keys, videoIds) {
+    const keptKeys = new Set(keys)
+    const keptVideoIds = new Set(videoIds)
+    for (const key of this.entries.keys()) {
+      if (!keptKeys.has(key)) this.entries.delete(key)
+    }
+    for (const videoId of this.positions.keys()) {
+      if (!keptVideoIds.has(videoId)) this.positions.delete(videoId)
+    }
+  }
+
+  savePosition(videoId, seconds) {
+    if (videoId && Number.isFinite(seconds) && seconds >= 0) {
+      this.positions.set(videoId, seconds)
+    }
+  }
+
+  getPosition(videoId) {
+    return this.positions.get(videoId) ?? 0
+  }
+
+  hasPosition(videoId) {
+    return this.positions.has(videoId)
+  }
+}
 
 /**
  * Keeps seek jumps from completing a Short. After a seek, only continuous

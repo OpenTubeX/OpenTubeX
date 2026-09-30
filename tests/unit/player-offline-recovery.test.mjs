@@ -48,6 +48,7 @@ test('offline errors do not suppress later failures from the retained player', (
   const context = {
     navigator: { onLine: false },
     ignoreErrors: false,
+    shortsNavigationSuspended: { value: false },
     ErrorCode: Code,
     ErrorCategory: Category,
     ErrorSeverity: { RECOVERABLE: 1 },

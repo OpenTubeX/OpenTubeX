@@ -6,7 +6,7 @@ import { connectionEvents, initializeNetworkRecovery, getConnectionState } from 
 import { ytDlp } from '../../helpers/ytDlp'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 import { sampleRecommendationPlayback } from '../../../recommendation-learning'
-import { defineComponent } from 'vue'
+import { defineComponent, markRaw } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import { useRoute, useRouter } from 'vue-router'
 import { mapActions } from 'vuex'
@@ -105,8 +105,10 @@ import {
   buildSubscriptionShortsFeed,
   getChannelShortsNavigationContext,
   getShortsCompletionState,
+  getShortsPlaybackWindow,
   getVideoAspectRatio,
-  isYouTubeShort
+  isYouTubeShort,
+  ShortsPlaybackCache
 } from '../../helpers/player/shorts'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
@@ -287,6 +289,9 @@ export default defineComponent({
       shortsPlaybackCompleted: false,
       shortsCompletionBlockedBySeek: false,
       shortsPlaybackAfterSeekSeconds: 0,
+      shortsPlaybackCache: markRaw(new ShortsPlaybackCache()),
+      shortsPreloadGeneration: 0,
+      shortsPlayerCacheGeneration: 0,
       videoLoadGeneration: 0,
       preparingVideoLoadGeneration: null,
       hasAiGeneratedContent: false,
@@ -809,6 +814,22 @@ export default defineComponent({
     subscriptionShortsFeedIndex: function () {
       return this.subscriptionShortsFeed.findIndex(video => video.videoId === this.videoId)
     },
+    shortsPlaybackWindow: function () {
+      return getShortsPlaybackWindow(this.subscriptionShortsFeed, this.videoId)
+    },
+    shortsPreloadKey: function () {
+      return JSON.stringify([
+        this.customShortsPlayerActive,
+        this.videoId,
+        this.shortsPlaybackWindow,
+        this.backendPreference,
+        this.currentInvidiousInstanceUrl,
+        this.videoPlaybackEngine,
+        this.playbackEngineFallbackTarget,
+        this.ytDlpPlaybackCacheKey,
+        this.alwaysUseYtDlpPlaybackCookies,
+      ])
+    },
     hasPreviousSubscriptionShort: function () {
       return this.subscriptionShortsFeedIndex > 0
     },
@@ -982,6 +1003,7 @@ export default defineComponent({
       if (
         !supportsYtDlp ||
         this.videoPlaybackEngine !== 'yt-dlp' ||
+        this.customShortsPlayerActive ||
         !this.$store.getters.getYtDlpPreloadEnabled
       ) return []
 
@@ -1140,6 +1162,13 @@ export default defineComponent({
     startTimeSeconds: function () {
       if (this.isLoading || this.isLive) {
         return null
+      }
+
+      const shortPosition = this.customShortsPlayerActive && this.tabRoute.query.shortSource
+        ? this.shortsPlaybackCache.getPosition(this.videoId)
+        : 0
+      if (shortPosition > 0 && shortPosition < this.videoLengthSeconds) {
+        return shortPosition
       }
 
       if (this.oneTimeTimestamp !== null && this.oneTimeTimestamp < this.videoLengthSeconds) {
@@ -1317,6 +1346,14 @@ export default defineComponent({
         this.preloadUpcomingYtDlpPlaybackSources(videoIds)
       }
     },
+    shortsPreloadKey: {
+      immediate: true,
+      handler() {
+        this.preloadShortsPlaybackWindow().catch(error => {
+          console.warn('Could not preload nearby Shorts', error)
+        })
+      }
+    },
   },
   created: function () {
     this.theatreModeAnimations = []
@@ -1463,6 +1500,70 @@ export default defineComponent({
       }).catch(error => {
         console.warn('Could not preload upcoming yt-dlp playback sources', error)
       })
+    },
+    getShortsExtractionKey(videoId, backend = this.backendPreference) {
+      return JSON.stringify([
+        backend,
+        backend === 'invidious' ? this.currentInvidiousInstanceUrl : '',
+        backend === 'local' && process.env.IS_CAPACITOR && this.isYtDlpPlaybackRequested(),
+        videoId,
+      ])
+    },
+    getShortsVideoInformation(videoId, backend = this.backendPreference) {
+      const useYtDlp = this.isYtDlpPlaybackRequested()
+      const key = this.getShortsExtractionKey(videoId, backend)
+      return this.shortsPlaybackCache.get(key, () => {
+        if (backend === 'invidious') {
+          return invidiousGetVideoInformation(videoId).then(result => {
+            if (result.error) throw new Error(result.error)
+            return result
+          })
+        }
+        return getLocalVideoInfo(videoId, {
+          shouldGeneratePoToken: () => !process.env.IS_CAPACITOR || !useYtDlp
+        }).then(result => {
+          if (result.watchPageIpBlocked || result.info?.playability_status?.status !== 'OK') {
+            // Recovery and opening a preloaded failure require fresh metadata.
+            this.shortsPlaybackCache.delete(key)
+          }
+          return result
+        })
+      })
+    },
+    async preloadShortsPlaybackWindow() {
+      const generation = ++this.shortsPreloadGeneration
+      const { previous, next } = this.shortsPlaybackWindow
+      const visitedPrevious = previous.filter(id => this.shortsPlaybackCache.hasPosition(id))
+      const nearby = [...new Set([...next, ...visitedPrevious.reverse()])]
+      const videoIds = [...new Set([...previous, this.videoId, ...next])]
+      this.shortsPlaybackCache.retain(
+        this.customShortsPlayerActive ? videoIds.map(id => this.getShortsExtractionKey(id)) : [],
+        this.customShortsPlayerActive ? videoIds : []
+      )
+      if (!this.customShortsPlayerActive || nearby.length === 0) return
+
+      await initializeNetworkRecovery().ready
+      if (generation !== this.shortsPreloadGeneration || getConnectionState() === 'offline') return
+
+      // Metadata extraction is needed for both playback engines. Two workers
+      // keep the next Short close without flooding the local or Invidious API.
+      let nextIndex = 0
+      const worker = async () => {
+        while (nextIndex < nearby.length && generation === this.shortsPreloadGeneration) {
+          const videoId = nearby[nextIndex++]
+          try {
+            await this.getShortsVideoInformation(videoId)
+          } catch (error) {
+            console.warn(`Could not preload Short ${videoId}`, error)
+          }
+        }
+      }
+      const metadataPreload = Promise.all([worker(), worker()])
+
+      if (supportsYtDlp && this.videoPlaybackEngine === 'yt-dlp') {
+        this.preloadUpcomingYtDlpPlaybackSources(nearby)
+      }
+      await metadataPreload
     },
     updateUpcomingTimestamp: function () {
       if (!(this.premiereDate instanceof Date)) return
@@ -2031,6 +2132,8 @@ export default defineComponent({
     async cleanupWatchRuntime() {
       // Closing a tab unmounts Watch while progress persistence is pending.
       const player = this.$refs.player
+      this.shortsPreloadGeneration++
+      this.shortsPlaybackCache.retain([], [])
       this.$store.commit('setCurrentWatchTimestamp', { tabId: this.tabId, value: null })
       await this.handleRouteChange()
       window.removeEventListener('beforeunload', this.handleWatchProgressAutoSave)
@@ -2051,12 +2154,24 @@ export default defineComponent({
       this.preserveTitleOnNextReload = false
 
       try {
+        this.saveShortsPlaybackPosition()
         await this.handleRouteChange()
         if (!this.isCurrentVideoLoad(loadGeneration, requestedVideoId)) { return }
 
         if (this.$refs.player) {
-          await this.destroyPlayer()
-          if (!this.isCurrentVideoLoad(loadGeneration, requestedVideoId)) { return }
+          const retainShort = this.customShortsPlayerActive &&
+            this.tabRoute.query.short === 'true' &&
+            requestedVideoId !== this.videoId &&
+            this.$refs.player.hasLoaded
+          if (retainShort) {
+            this.$refs.player.suspendForShortsNavigation()
+          } else {
+            await this.destroyPlayer()
+            if (!this.isCurrentVideoLoad(loadGeneration, requestedVideoId)) { return }
+            if (this.customShortsPlayerActive) {
+              this.shortsPlayerCacheGeneration++
+            }
+          }
         }
 
         // react to route changes...
@@ -2524,6 +2639,8 @@ export default defineComponent({
         return
       }
 
+      this.saveShortsPlaybackPosition()
+
       this.shortsTransitionDirection = Math.sign(offset)
       this.shortsTransitionPreview = getShortThumbnailUrl(
         target,
@@ -2543,9 +2660,17 @@ export default defineComponent({
           ...(shortSource === 'channel'
             ? { shortChannelId: this.tabRoute.query.shortChannelId }
             : {}),
-          oneTimeTimestamp: '0',
+          oneTimeTimestamp: String(this.shortsPlaybackCache.getPosition(target.videoId)),
         }
       })
+    },
+
+    saveShortsPlaybackPosition() {
+      if (!this.customShortsPlayerActive) return
+      const player = this.$refs.player
+      if (player?.hasPlaybackPosition) {
+        this.shortsPlaybackCache.savePosition(this.videoId, player.getCurrentTime())
+      }
     },
 
     handleShortsWindowScroll: function () {
@@ -2946,12 +3071,17 @@ export default defineComponent({
       }
 
       try {
-        const videoInfo = await getLocalVideoInfo(videoId, {
-          // Metadata extraction can outlive a playback engine switch. Decide
-          // when the token is needed, after the preceding network requests.
-          shouldGeneratePoToken: () => this.isCurrentVideoLoad(loadGeneration, videoId) &&
-            (!process.env.IS_CAPACITOR || !this.isYtDlpPlaybackRequested())
-        })
+        const shortsExtractionKey = this.customShortsPlayerActive && !metadataOnly
+          ? this.getShortsExtractionKey(videoId, 'local')
+          : null
+        const videoInfo = await (this.customShortsPlayerActive && !metadataOnly
+          ? this.getShortsVideoInformation(videoId, 'local')
+          : getLocalVideoInfo(videoId, {
+              // Metadata extraction can outlive a playback engine switch. Decide
+              // when the token is needed, after the preceding network requests.
+              shouldGeneratePoToken: () => this.isCurrentVideoLoad(loadGeneration, videoId) &&
+                (!process.env.IS_CAPACITOR || !this.isYtDlpPlaybackRequested())
+            }))
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
 
         const {
@@ -3574,6 +3704,12 @@ export default defineComponent({
           result.basic_info.duration,
           result.streaming_data?.adaptive_formats
         )
+        if (!metadataOnly && this.customShortsPlayerActive && !watchPageIpBlocked && playabilityStatus.status === 'OK') {
+          const currentKey = this.getShortsExtractionKey(videoId, 'local')
+          if (shortsExtractionKey === currentKey) {
+            this.shortsPlaybackCache.set(currentKey, videoInfo)
+          }
+        }
         if (this.customShortsPlayerActive) {
           this.thumbnail = getShortThumbnailUrl(
             this.currentSubscriptionShort ?? { videoId: this.videoId },
@@ -3643,7 +3779,12 @@ export default defineComponent({
         return
       }
 
-      return invidiousGetVideoInformation(videoId)
+      const shortsExtractionKey = this.customShortsPlayerActive && !metadataOnly
+        ? this.getShortsExtractionKey(videoId, 'invidious')
+        : null
+      return (this.customShortsPlayerActive && !metadataOnly
+        ? this.getShortsVideoInformation(videoId, 'invidious')
+        : invidiousGetVideoInformation(videoId))
         .then(async result => {
           if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
 
@@ -3845,6 +3986,12 @@ export default defineComponent({
           }
 
           this.updateShortsPlayerState(result.lengthSeconds, result.adaptiveFormats)
+          if (!metadataOnly && this.customShortsPlayerActive) {
+            const currentKey = this.getShortsExtractionKey(videoId, 'invidious')
+            if (shortsExtractionKey === currentKey) {
+              this.shortsPlaybackCache.set(currentKey, result)
+            }
+          }
           if (this.customShortsPlayerActive) {
             this.thumbnail = getShortThumbnailUrl(
               this.currentSubscriptionShort ?? { videoId: this.videoId },
@@ -4683,7 +4830,7 @@ export default defineComponent({
     },
 
     checkIfTimestamp: function () {
-      const oneTimeTimestamp = parseInt(this.tabRoute.query.oneTimeTimestamp)
+      const oneTimeTimestamp = parseFloat(this.tabRoute.query.oneTimeTimestamp)
       this.oneTimeTimestamp = isNaN(oneTimeTimestamp) || oneTimeTimestamp < 0 ? null : oneTimeTimestamp
 
       const timestamp = parseInt(this.tabRoute.query.timestamp)

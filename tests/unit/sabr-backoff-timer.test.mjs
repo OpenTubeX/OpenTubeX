@@ -16,6 +16,7 @@ function fixture() {
   const noop = () => {}
   const context = {
     video, props: { manifestMimeType: 'sabr' }, MANIFEST_TYPE_SABR: 'sabr', ignoreErrors: false,
+    shortsNavigationSuspended: { value: false },
     sabrBackoffIntervalId: null, sabrBackoffRemainingMs: remaining, sabrBackoffDurationMs: duration,
     setInterval: callback => { intervals.add(callback); return callback }, clearInterval: id => intervals.delete(id),
     requestTabPreviewRefresh: noop, abRepeatEnabled: { value: false }, setShowUiOnPaused: noop,
