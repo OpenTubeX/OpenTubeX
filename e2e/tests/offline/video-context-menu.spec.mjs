@@ -24,6 +24,57 @@ const SEED = {
 
 test.use({ seed: SEED })
 
+for (const iconPack of ['material', 'remix']) {
+  test.describe(`mobile toggle indicators with ${iconPack} icons`, () => {
+    test.use({ seed: { ...SEED, settings: { ...SEED.settings, iconPack, baseTheme: iconPack === 'material' ? 'dark' : 'light' } } })
+
+    test('saved videos and premiere notifications visibly reflect their checked state', async ({ page, attachScreenshot }) => {
+      await page.setViewportSize({ width: 375, height: 812 })
+      const menu = page.locator('.mobileLinkActions')
+      const openMenu = async pressed => page.evaluate(pressed => {
+        document.querySelector('#app').__vue_app__._container._vnode.component.provides.openMobileContextActions({
+          title: 'Scheduled video',
+          actions: [{ label: 'Copy link', icon: ['fas', 'link'], run() {} }],
+          thumbnailActions: [
+            { label: pressed ? 'Remove from Watch Later' : 'Save to Watch Later', icon: ['fas', 'clock'], pressed, run() {} },
+            { label: pressed ? 'Notification on' : 'Notify me', icon: ['fas', 'calendar-days'], pressed, run() {} }
+          ]
+        })
+      }, pressed)
+
+      const colors = () => menu.getByRole('menuitemcheckbox').evaluateAll(buttons => buttons.map(button => {
+        const icon = button.querySelector('svg')
+        return { color: getComputedStyle(icon).color, background: getComputedStyle(button).backgroundColor }
+      }))
+      for (const viewport of [{ width: 375, height: 812 }, { width: 812, height: 375 }]) {
+        await page.setViewportSize(viewport)
+        await openMenu(false)
+        await expect(menu.getByRole('menuitemcheckbox').first()).toHaveAttribute('aria-checked', 'false')
+        const inactive = await colors()
+        await openMenu(true)
+        await expect(menu.getByRole('menuitemcheckbox').first()).toHaveAttribute('aria-checked', 'true')
+        const active = await colors()
+        for (let index = 0; index < active.length; index++) {
+          expect(active[index].color).not.toBe(inactive[index].color)
+          await expect(menu.getByRole('menuitemcheckbox').nth(index)).toHaveCSS('color', 'rgb(33, 150, 243)')
+          expect(active[index].background).not.toBe(inactive[index].background)
+          await menu.getByRole('menuitemcheckbox').nth(index).focus()
+          expect((await colors())[index]).toEqual(active[index])
+        }
+        await attachScreenshot(`active mobile actions ${iconPack} ${viewport.width}`)
+        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setSecColor', 'Purple'))
+        await expect(menu.getByRole('menuitemcheckbox').first()).toHaveCSS('color', 'rgb(156, 39, 176)')
+        expect(await colors()).not.toEqual(active)
+        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setSecColor', 'Blue'))
+        await openMenu(false)
+        await expect(menu.getByRole('menuitemcheckbox').first()).toHaveAttribute('aria-checked', 'false')
+        expect(await colors()).toEqual(inactive)
+        await page.keyboard.press('Escape')
+      }
+    })
+  })
+}
+
 test('video thumbnails, titles, and metadata share one menu', async ({ page, app, attachScreenshot }) => {
   await goTo(page, 'history')
   const card = page.locator('.ft-list-video').first()
