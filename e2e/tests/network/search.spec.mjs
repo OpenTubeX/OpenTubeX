@@ -142,36 +142,23 @@ test.describe('search', () => {
     })
     await expect(page.locator('.tabBar.vertical')).toBeVisible()
 
-    // Keep the animation running while subsequent real pointer clicks land.
-    await page.addStyleTag({
-      content: `
-      ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) {
-        animation-duration: 60s !important;
-      }
-    `
-    })
+    // Pause thumbnail copies while subsequent real pointer clicks land.
     await page.evaluate(() => {
-      window.__viewTransitionSnapshots = []
-      window.__viewTransitions = []
-      const startViewTransition = document.startViewTransition.bind(document)
-      document.startViewTransition = (update) => {
-        const snapshot = {
-          finished: false,
-          sourceName: document.querySelector('.ft-list-video .thumbnailImage')?.style.viewTransitionName,
-          rootName: getComputedStyle(document.documentElement).viewTransitionName
+      window.__thumbnailMorphs = []
+      const animate = Element.prototype.animate
+      Element.prototype.animate = function (keyframes, options) {
+        const animation = animate.call(this, keyframes, options)
+        if (this.classList.contains('newTabThumbnailMorph')) {
+          animation.pause()
+          window.__thumbnailMorphs.push(animation)
         }
-        window.__viewTransitionSnapshots.push(snapshot)
-        const transition = startViewTransition(async () => {
-          await update()
-          snapshot.targetName = getComputedStyle(document.querySelectorAll('.tabBar .tab')[1]).viewTransitionName
-        })
-        window.__viewTransitions.push(transition)
-        transition.ready.then(
-          () => { snapshot.ready = true },
-          error => { snapshot.readyError = String(error) }
-        )
-        transition.finished.then(() => { snapshot.finished = true })
-        return transition
+        return animation
+      }
+      window.__backgroundDocumentSnapshots = 0
+      const startViewTransition = document.startViewTransition.bind(document)
+      document.startViewTransition = (...args) => {
+        window.__backgroundDocumentSnapshots++
+        return startViewTransition(...args)
       }
     })
 
@@ -179,39 +166,27 @@ test.describe('search', () => {
     await expect(page.locator(sel.tabs)).toHaveCount(2)
     await expect(page).toHaveURL(/#\/search\//)
     await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
-    await expect.poll(() => page.evaluate(() => window.__viewTransitionSnapshots[0]?.targetName)).toBe('new-tab-thumbnail-morph')
-    await expect.poll(() => page.evaluate(() => window.__viewTransitionSnapshots[0]?.ready)).toBe(true)
-    expect(await page.evaluate(() => window.__viewTransitionSnapshots[0].rootName)).toBe('none')
-    expect(await page.evaluate(() => window.__viewTransitionSnapshots[0])).toEqual({
-      sourceName: 'new-tab-thumbnail-morph',
-      rootName: 'none',
-      targetName: 'new-tab-thumbnail-morph',
-      ready: true,
-      finished: false
-    })
+    await expect(page.locator('.newTabThumbnailMorph')).toHaveCount(1)
+    await expect(page.locator('.newTabThumbnailMorph')).toHaveCSS('pointer-events', 'none')
 
     for (const index of [1, 2]) {
-      expect(await page.evaluate(index => window.__viewTransitionSnapshots[index - 1].finished, index)).toBe(false)
       const video = page.locator('.ft-list-video').nth(index)
       const link = video.locator(index === 1 ? '.title' : '.thumbnailLink')
-      const box = await link.boundingBox()
-      // Do not let locator.click wait for the animation overlay to disappear.
-      await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2, { button: 'middle' })
+      await link.click({ button: 'middle' })
       await expect(page.locator(sel.tabs)).toHaveCount(index + 2, { timeout: 3000 })
-      await expect.poll(() => page.evaluate(index => window.__viewTransitionSnapshots[index]?.ready, index)).toBe(true)
-      expect(await page.evaluate(index => window.__viewTransitionSnapshots[index].rootName, index)).toBe('none')
+      await expect(page.locator('.newTabThumbnailMorph')).toHaveCount(index + 1)
     }
 
-    await page.evaluate(() => window.__viewTransitions.forEach(transition => transition.skipTransition()))
-    await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).viewTransitionName))
-      .toBe('root')
+    expect(await page.evaluate(() => window.__backgroundDocumentSnapshots)).toBe(0)
+    await page.evaluate(() => window.__thumbnailMorphs.forEach(animation => animation.finish()))
+    await expect(page.locator('.newTabThumbnailMorph')).toHaveCount(0)
 
     await page.evaluate(() => {
       document.documentElement.dataset.reducedMotion = 'reduce'
     })
     await page.locator('.ft-list-video .title').nth(1).click({ button: 'middle' })
     await expect(page.locator(sel.tabs)).toHaveCount(5)
-    expect(await page.evaluate(() => window.__viewTransitionSnapshots)).toHaveLength(3)
+    expect(await page.evaluate(() => window.__thumbnailMorphs)).toHaveLength(3)
 
     await page.locator(sel.tabs).nth(1).click()
     await expect(page).toHaveURL(/#\/watch\//)

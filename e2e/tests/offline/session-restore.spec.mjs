@@ -471,6 +471,13 @@ test.describe('subscriptions refresh with restored watch tabs', () => {
       })
     }, watchTabIds)).toBe(true)
 
+    // Present one restored Watch tab to initialize its underlying browsing
+    // page; the other tab keeps that page deferred until first presentation.
+    await page.locator(`.tab[data-tab-id="${watchTabIds[0]}"]`).click()
+    await expect(page.locator(`.tabContent[data-tab-id="${watchTabIds[0]}"] .browsingBehindWatch`)).toBeAttached()
+    await page.locator(`.tab[data-tab-id="${SUBSCRIPTIONS_TAB_ID}"]`).click()
+    await expect(page.locator(`.tabContent[data-tab-id="${watchTabIds[1]}"] .browsingBehindWatch`)).toHaveCount(0)
+
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       store.commit('setSubscriptionFeedRefreshTab', 'videos')

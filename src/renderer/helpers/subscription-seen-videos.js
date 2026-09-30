@@ -1,4 +1,4 @@
-import { computed, isReactive } from 'vue'
+import { computed, isReactive, shallowRef } from 'vue'
 import { parseSubscriptionSeenVideos, mergeSubscriptionSeenVideos } from '../../subscriptionSeenVideos.js'
 import { isHistoryEntryWatched } from '../../history.js'
 import { parseSubscriptionSeenPosts, mergeSubscriptionSeenPosts } from '../../subscriptionSeenPosts.js'
@@ -21,10 +21,17 @@ function applySubscriptionSeenEntriesToCache(cache, seenEntries, entriesKey, idK
   let selectors
   if (canCache) {
     selectors = cacheSelectors.get(cache)
-    if (!selectors || selectors.seenEntries !== seenEntries || selectors.entriesKey !== entriesKey) {
-      selectors = { seenEntries, entriesKey, index: computed(indexSeenEntries), channels: new WeakMap() }
+    if (!selectors || selectors.entriesKey !== entriesKey) {
+      const source = shallowRef(seenEntries)
+      selectors = {
+        source,
+        entriesKey,
+        index: computed(() => new Map(merge([], source.value).map(entry => [entry[idKey], entry]))),
+        channels: new WeakMap()
+      }
       cacheSelectors.set(cache, selectors)
     }
+    selectors.source.value = seenEntries
   }
   const byId = selectors ? selectors.index.value : indexSeenEntries()
   if (byId.size === 0) return cache
@@ -38,7 +45,25 @@ function applySubscriptionSeenEntriesToCache(cache, seenEntries, entriesKey, idK
           if (!isReactive(cached)) return applySeenEntriesToChannel(cached, selectors.index.value, entriesKey, idKey)
           let channel = selectors.channels.get(cached)
           if (!channel) {
-            channel = computed(() => applySeenEntriesToChannel(cached, selectors.index.value, entriesKey, idKey))
+            // Retain each channel's ID list and effective marks across edits to
+            // the shared seen list. Opening one video must not reprocess every
+            // cached video or recreate unchanged channel objects.
+            const ids = computed(() => cached[entriesKey].map(entry => entry[idKey]))
+            const marks = computed(previous => {
+              const index = selectors.index.value
+              const relevant = new Map()
+              for (const id of ids.value) {
+                const seen = index.get(id)
+                if (seen) relevant.set(id, seen)
+              }
+              if (previous?.size === relevant.size && [...relevant].every(([id, seen]) => {
+                const old = previous.get(id)
+                return old && old.seenAt === seen.seenAt && old.unseenAt === seen.unseenAt &&
+                  old.isMembersOnly === seen.isMembersOnly
+              })) return previous
+              return relevant
+            })
+            channel = computed(() => applySeenEntriesToChannel(cached, marks.value, entriesKey, idKey, ids.value))
             selectors.channels.set(cached, channel)
           }
           return channel.value
@@ -54,9 +79,10 @@ function applySubscriptionSeenEntriesToCache(cache, seenEntries, entriesKey, idK
   }))
 }
 
-function applySeenEntriesToChannel(cached, byId, entriesKey, idKey) {
-  const entries = cached[entriesKey].map(video => {
-    const seen = byId.get(video[idKey])
+function applySeenEntriesToChannel(cached, byId, entriesKey, idKey, ids) {
+  if (byId.size === 0) return cached
+  const entries = cached[entriesKey].map((video, index) => {
+    const seen = byId.get(ids ? ids[index] : video[idKey])
     if (!seen) return video
     if (seen.unseenAt >= seen.seenAt) {
       return video.isNewInSubscriptionFeed ? video : { ...video, isNewInSubscriptionFeed: true }

@@ -40,6 +40,25 @@ test('refreshing a channel does not rescan seen state in unchanged channels', ()
   assert.equal(feed.value[1], unchanged)
 })
 
+test('marking another video seen only reapplies seen state in its channel', () => {
+  let reads = 0
+  const cache = reactive(Object.fromEntries(Array.from({ length: 933 }, (_, channel) => [channel, {
+    videos: Array.from({ length: 36 }, (_, video) => ({
+      get videoId() { reads++; return `${channel}-${video}` },
+      isNewInSubscriptionFeed: true
+    }))
+  }])))
+  const marks = ref(JSON.stringify([{ videoId: '1-0', seenAt: 1000 }]))
+  const feed = computed(() => Object.values(applySubscriptionSeenVideosToCache(cache, marks.value)))
+  assert.equal(feed.value[1].videos[0].isNewInSubscriptionFeed, false)
+  const unchanged = feed.value[1]
+  reads = 0
+  marks.value = JSON.stringify([{ videoId: '1-0', seenAt: 1000 }, { videoId: '2-0', seenAt: 2000 }])
+  assert.equal(feed.value[2].videos[0].isNewInSubscriptionFeed, false)
+  assert.equal(feed.value[1], unchanged)
+  assert.ok(reads <= 80, `marking one channel read ${reads} video IDs`)
+})
+
 for (const reactiveMarks of [false, true]) {
   test(`cached seen state follows metadata and ${reactiveMarks ? 'reactive' : 'serialized'} mark edits`, () => {
     const cache = reactive({ channel: {

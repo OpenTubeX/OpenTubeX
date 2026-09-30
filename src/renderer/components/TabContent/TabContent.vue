@@ -28,7 +28,7 @@
     >
       <component
         :is="resolvedComponent"
-        v-if="initialized && resolvedComponent"
+        v-if="browsingInitialized && resolvedComponent"
         :key="resolvedComponentKey"
         class="routerView"
         :class="{ browsingBehindWatch: isWatchRoute }"
@@ -120,8 +120,19 @@ const routeFullPath = computed(() => props.tab.route?.fullPath || '/')
 const resolvedRoute = computed(() => navigation.resolve(routeFullPath.value))
 const isWatchRoute = computed(() => resolvedRoute.value.path.startsWith('/watch/'))
 const isBrowsingPresented = computed(() => isPresented.value && !isWatchRoute.value)
-// Keep the page beneath Watch ready so a dock gesture can reveal it without
-// mounting a route while the video is moving.
+const browsingInitialized = ref(false)
+// Background Watch tabs only need to preload the video. Mount their browsing
+// page on first presentation, then retain it so a dock gesture can reveal it
+// without mounting a route while the video is moving. Mobile swipe prewarming
+// continues to prepare both views.
+watch([initialized, isPresented, isWatchRoute], ([mounted, presented, watchRoute]) => {
+  if (!mounted) {
+    browsingInitialized.value = false
+  } else if (isCapacitor || presented || !watchRoute) {
+    browsingInitialized.value = true
+  }
+}, { immediate: true })
+
 function getBrowsingRoute(route) {
   if (!route.path.startsWith('/watch/')) return route
   return navigation.resolve(getPreviousBrowsingRoute(props.tab) || '/subscriptions')
