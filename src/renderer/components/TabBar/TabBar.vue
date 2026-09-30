@@ -358,6 +358,7 @@ const suppressTransitions = ref(false)
  * @typedef {object} DragSession
  * @property {string} tabId
  * @property {string[]} tabIds
+ * @property {Set<string>} draggedTabIdSet
  * @property {Array<{id: string, isPinned?: boolean}>} tabs
  * @property {number} sourceIndex
  * @property {number} indexShift
@@ -367,6 +368,12 @@ const suppressTransitions = ref(false)
  * @property {number} scrollStart
  * @property {Array<{id: string, start: number, size: number}>} rects
  * @property {number} gap
+ * @property {number} groupStartIndex
+ * @property {number} groupEndIndex
+ * @property {number} minOffset
+ * @property {number} maxOffset
+ * @property {Record<string, number>} neighborOffsets
+ * @property {number | null} renderedOffset
  * @property {boolean} started
  * @property {boolean} moved
  * @property {number} draggedOffset
@@ -375,6 +382,7 @@ const suppressTransitions = ref(false)
 
 /** @type {DragSession | null} */
 let dragSession = null
+let dragAnimationFrameId = null
 let settleTimeoutId = null
 /** @type {{tabIds: string[], indexShift: number, isPinned: boolean} | null} */
 let pendingSettleReorder = null
@@ -455,9 +463,19 @@ function handleTabContainerPointerDown(event) {
     gap = rects[1].start - (rects[0].start + rects[0].size)
   }
 
+  const draggedTabIdSet = new Set(tabIds)
+  const draggedRects = rects.filter(rect => draggedTabIdSet.has(rect.id))
+  const pinnedCount = tabsList.filter(tab => tab.isPinned === true).length
+  const isSourcePinned = tabsList[sourceIndex].isPinned === true
+  const groupStartIndex = isSourcePinned ? 0 : pinnedCount
+  const groupEndIndex = isSourcePinned ? pinnedCount - 1 : tabsList.length - 1
+  const firstDraggedRect = draggedRects[0]
+  const lastDraggedRect = draggedRects[draggedRects.length - 1]
+
   dragSession = {
     tabId,
     tabIds,
+    draggedTabIdSet,
     tabs: tabsList.map(tab => ({ id: tab.id, isPinned: tab.isPinned })),
     sourceIndex,
     indexShift: 0,
@@ -467,6 +485,13 @@ function handleTabContainerPointerDown(event) {
     scrollStart: containerScroll,
     rects,
     gap,
+    groupStartIndex,
+    groupEndIndex,
+    minOffset: rects[groupStartIndex].start - firstDraggedRect.start,
+    maxOffset: rects[groupEndIndex].start + rects[groupEndIndex].size -
+      lastDraggedRect.start - lastDraggedRect.size,
+    neighborOffsets: {},
+    renderedOffset: null,
     started: false,
     moved: false,
     draggedOffset: 0,
@@ -537,7 +562,16 @@ function handleDragPointerMove(event) {
   // Prevent text selection while dragging
   event.preventDefault()
 
-  updateActiveDragPosition(!dragSession.deferPositionUpdates)
+  scheduleDragPositionUpdate()
+}
+
+function scheduleDragPositionUpdate() {
+  if (!dragSession?.started || dragAnimationFrameId != null) return
+
+  dragAnimationFrameId = requestAnimationFrame(() => {
+    dragAnimationFrameId = null
+    updateActiveDragPosition(!dragSession?.deferPositionUpdates)
+  })
 }
 
 /**
@@ -554,32 +588,11 @@ function updateActiveDragPosition(updateVisuals = true) {
     containerScrollPosition(container) -
     dragSession.scrollStart
 
-  const { rects, sourceIndex, gap, tabs: tabsList } = dragSession
+  const {
+    rects, sourceIndex, gap, draggedTabIdSet,
+    groupStartIndex, groupEndIndex, minOffset, maxOffset
+  } = dragSession
   const sourceRect = rects[sourceIndex]
-  const sourceTab = tabsList[sourceIndex]
-  const isSourcePinned = sourceTab?.isPinned === true
-  const pinnedCount = tabsList.filter(tab => tab.isPinned === true).length
-  const groupStartIndex = isSourcePinned ? 0 : pinnedCount
-  const groupEndIndex = isSourcePinned ? pinnedCount - 1 : tabsList.length - 1
-  const draggedTabIdSet = new Set(dragSession.tabIds)
-  const draggedRects = rects.filter(rect => draggedTabIdSet.has(rect.id))
-  const firstDraggedRect = draggedRects[0]
-  const lastDraggedRect = draggedRects[draggedRects.length - 1]
-  const firstGroupRect = rects[groupStartIndex]
-  const lastGroupRect = rects[groupEndIndex]
-  if (
-    !sourceRect ||
-    !sourceTab ||
-    !firstDraggedRect ||
-    !lastDraggedRect ||
-    !firstGroupRect ||
-    !lastGroupRect
-  ) {
-    return
-  }
-  const minOffset = firstGroupRect.start - firstDraggedRect.start
-  const maxOffset = lastGroupRect.start + lastGroupRect.size -
-    lastDraggedRect.start - lastDraggedRect.size
   const draggedOffset = Math.max(minOffset, Math.min(maxOffset, delta))
   const intendedDraggedCenter = sourceRect.start + delta + sourceRect.size / 2
 
@@ -593,22 +606,31 @@ function updateActiveDragPosition(updateVisuals = true) {
     groupStartIndex,
     groupEndIndex
   )
-  const reorderedTabIds = buildShiftedTabIds(
-    tabsList.map(tab => tab.id),
-    dragSession.tabIds,
-    indexShift
-  )
-
-  dragSession.indexShift = indexShift
-  dragSession.reorderedTabIds = reorderedTabIds
-  if (updateVisuals) {
-    tabOffsets.value = computeTabOffsets(
+  // Neighbor positions only change when the target slot changes. Keep the
+  // pointer's continuous movement out of the full-order calculations.
+  if (indexShift !== dragSession.indexShift) {
+    const reorderedTabIds = buildShiftedTabIds(
+      dragSession.tabs.map(tab => tab.id),
+      dragSession.tabIds,
+      indexShift
+    )
+    dragSession.indexShift = indexShift
+    dragSession.reorderedTabIds = reorderedTabIds
+    dragSession.neighborOffsets = computeTabOffsets(
       rects,
       reorderedTabIds,
       gap,
-      draggedTabIdSet,
-      draggedOffset
+      draggedTabIdSet
     )
+    dragSession.renderedOffset = null
+  }
+  if (updateVisuals && dragSession.renderedOffset !== draggedOffset) {
+    const offsets = { ...dragSession.neighborOffsets }
+    for (const tabId of dragSession.tabIds) {
+      offsets[tabId] = draggedOffset
+    }
+    tabOffsets.value = offsets
+    dragSession.renderedOffset = draggedOffset
   }
 }
 
@@ -616,6 +638,10 @@ function handleDragPointerUp() {
   cleanupDragListeners()
 
   if (!dragSession) return
+
+  // A release can arrive before the scheduled frame. Settle into the slot
+  // selected by the latest pointer and scroll positions.
+  updateActiveDragPosition(false)
 
   const {
     started,
@@ -784,6 +810,10 @@ function handleDragPointerCancel() {
 }
 
 function cleanupDragListeners() {
+  if (dragAnimationFrameId != null) {
+    cancelAnimationFrame(dragAnimationFrameId)
+    dragAnimationFrameId = null
+  }
   window.removeEventListener('pointermove', handleDragPointerMove)
   window.removeEventListener('pointerup', handleDragPointerUp)
   window.removeEventListener('pointercancel', handleDragPointerCancel)
@@ -1249,7 +1279,7 @@ function handleWheel(event) {
 
 function handleScroll() {
   updateScrollbar()
-  updateActiveDragPosition()
+  scheduleDragPositionUpdate()
 }
 
 /**
