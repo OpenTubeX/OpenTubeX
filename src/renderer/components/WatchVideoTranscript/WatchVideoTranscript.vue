@@ -191,7 +191,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['close', 'timestamp-event'])
+const emit = defineEmits(['close', 'timestamp-event', 'loaded'])
 const { t } = useI18n()
 
 const selectedCaptionIndex = ref(String(props.preferredCaptionIndex))
@@ -261,6 +261,7 @@ watch(
       }
 
       segments.value = parseTranscript(await response.text())
+      emit('loaded', segments.value.length > 0)
     } catch (error) {
       if (error.name !== 'AbortError') {
         console.error('Unable to load transcript', error)
@@ -336,6 +337,7 @@ watch(activeSegmentIndex, async (index) => {
 })
 
 onBeforeUnmount(() => {
+  emit('loaded', false)
   loadController?.abort()
   segmentResizeObserver?.disconnect()
 })

@@ -32,9 +32,15 @@ test('offline playback hides comments even when download metadata includes a cha
 
 for (const localFilePlayback of [false, true]) {
   test(`losing connectivity preserves comments for loaded ${localFilePlayback ? 'downloaded' : 'streamed'} videos`, () => {
-    const state = { isLive: false, hideComments: false, localFilePlayback, channelId: 'UCchannel', downloadedPlaybackWithoutMetadata: false }
+    const state = { isLive: false, hideComments: false, localFilePlayback, channelId: 'UCchannel', downloadedPlaybackWithoutMetadata: false, commentsLoaded: true }
     assert.equal(areCommentsAvailable(state), true)
     assert.equal(areCommentsAvailable({ ...state, isOffline: true }), true)
     assert.equal(areCommentsAvailable({ ...state, isOffline: true, hideComments: true }), false)
   })
 }
+
+test('offline comments stay unavailable until comments have loaded', () => {
+  const state = { isLive: false, hideComments: false, isOffline: true }
+  assert.equal(areCommentsAvailable(state), false)
+  assert.equal(areCommentsAvailable({ ...state, commentsLoaded: true }), true)
+})

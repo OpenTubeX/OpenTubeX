@@ -474,7 +474,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'loaded'])
 
 const { locale, t } = useI18n()
 const timeFormat = computed(() => store.getters.getTimeFormat)
@@ -597,6 +597,7 @@ const formattedWatchingCount = computed(() => {
 })
 
 onBeforeUnmount(() => {
+  emit('loaded', false)
   isUnmounted = true
   pendingReadbackTrimRestore = null
   if (liveEdgeScrollFrame !== null) {
@@ -795,6 +796,7 @@ function scrollToLiveAfterLayout() {
  * @param {import ('youtubei.js/dist/src/parser/continuations').LiveChatContinuation} initialData
  */
 function handleStart(initialData) {
+  emit('loaded', true)
   const viewSelector = initialData.header?.view_selector ?? liveChatInstance?.initial_info?.header?.view_selector
   canFilter.value = (viewSelector?.sub_menu_items?.length ?? 0) > 1
 

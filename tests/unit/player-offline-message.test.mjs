@@ -193,3 +193,18 @@ test('temporary offline cleanup preserves manual SponsorBlock mute decisions', (
   assert.equal(manuallyMuted.size, 0)
   assert.equal(doNotMute.size, 0)
 })
+
+test('SponsorBlock draft submission controls wait for connectivity', async () => {
+  const submissionSource = await readFile(new URL('../../src/renderer/components/ft-shaka-video-player/opentubex/useSponsorBlockSubmission.js', import.meta.url), 'utf8')
+  const start = submissionSource.indexOf('  const sponsorBlockEnableSubmission = computed(')
+  const expression = submissionSource.slice(start, submissionSource.indexOf('\n  const sponsorBlockDraftSegmentsByVideoId', start))
+  const props = reactive({ offline: false })
+  const enabled = vm.runInNewContext(`${expression}\nsponsorBlockEnableSubmission`, {
+    computed, props, store: { getters: { getSponsorBlockEnableSubmission: true } },
+  })
+  assert.equal(enabled.value, true)
+  props.offline = true
+  assert.equal(enabled.value, false)
+  props.offline = false
+  assert.equal(enabled.value, true)
+})

@@ -132,3 +132,40 @@ test('keeps loaded live chat messages and its session after losing connectivity'
   expect(await watch.evaluate(vm => vm.liveChat.stopped)).toBe(false)
   await watch.dispose()
 })
+
+test('does not expose unloaded comments or live chat after losing connectivity', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const watch = await watchViewHandle(page)
+  await expect(page.getByText('Click to View Comments', { exact: true })).toBeVisible()
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })
+    window.dispatchEvent(new Event('offline'))
+  })
+  await expect(page.locator('.connectionStatus')).toHaveText('Offline')
+  await expect(page.getByText('Click to View Comments', { exact: true })).toHaveCount(0)
+  await watch.evaluate(vm => { vm.isLive = true })
+  expect(await watch.evaluate(vm => vm.liveChatAvailable)).toBe(false)
+  await expect(page.locator('.chatMessage')).toHaveCount(0)
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => true })
+    window.dispatchEvent(new Event('online'))
+  })
+  await watch.evaluate(vm => { vm.isLive = false })
+  await expect(page.getByText('Click to View Comments', { exact: true })).toBeVisible()
+  await watch.dispose()
+})
+
+test('does not expose an unloaded transcript after losing connectivity', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page, { captionVideoIds: ['jNQXAC9IVRw'] })
+  await openMockedVideo(page)
+  const watch = await watchViewHandle(page)
+  expect(await watch.evaluate(vm => vm.transcriptAvailable)).toBe(true)
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })
+    window.dispatchEvent(new Event('offline'))
+  })
+  await expect(page.locator('.connectionStatus')).toHaveText('Offline')
+  expect(await watch.evaluate(vm => vm.transcriptAvailable)).toBe(false)
+  await watch.dispose()
+})

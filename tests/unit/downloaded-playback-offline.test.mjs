@@ -94,3 +94,17 @@ test('disconnecting preserves loaded panels and cancels network autoplay', () =>
   assert.equal(watch.isOffline, true)
   assert.deepEqual(closed, ['autoplay'])
 })
+
+test('offline live chat remains available only after a chat session has loaded', () => {
+  const start = source.indexOf('    liveChatAvailable: function () {')
+  const end = source.indexOf('\n    },', start)
+  const available = vm.runInNewContext(`({ ${source.slice(start, end)}\n} }).liveChatAvailable`)
+  const watch = { isLive: true, hideLiveChat: false, isOffline: false, liveChatLoaded: false }
+  assert.equal(available.call(watch), true)
+  watch.isOffline = true
+  assert.equal(available.call(watch), false)
+  watch.liveChatLoaded = true
+  assert.equal(available.call(watch), true)
+  watch.hideLiveChat = true
+  assert.equal(available.call(watch), false)
+})

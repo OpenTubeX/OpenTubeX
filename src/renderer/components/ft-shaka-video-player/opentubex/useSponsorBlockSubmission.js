@@ -131,7 +131,7 @@ export function useSponsorBlockSubmission({
   useSponsorBlock,
   video,
 }) {
-  const sponsorBlockEnableSubmission = computed(() => store.getters.getSponsorBlockEnableSubmission)
+  const sponsorBlockEnableSubmission = computed(() => !props.offline && store.getters.getSponsorBlockEnableSubmission)
   const sponsorBlockDraftSegmentsByVideoId = computed(() => store.getters.getSponsorBlockDraftSegmentsByVideoId)
 
   /** @type {import('vue').Ref<{id: string, startTime: number, endTime: number | null, category: import('../../../helpers/sponsorblock').SponsorBlockCategory, actionType: 'skip' | 'mute' | 'full' | 'poi', previewed: boolean}[]>} */

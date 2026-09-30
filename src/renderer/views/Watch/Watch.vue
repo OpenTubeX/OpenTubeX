@@ -759,6 +759,7 @@
               :preferred-caption-index="preferredTranscriptCaptionIndex"
               :video-title="videoTitle"
               class="watchVideoSideBar watchVideoTranscript"
+              @loaded="transcriptLoaded = $event"
               @close="closeTranscript"
               @timestamp-event="playTranscriptSegment"
             />
@@ -1119,6 +1120,7 @@
               :video-title="videoTitle"
               :fullscreen-overlay="fullscreenTranscriptOpen"
               class="watchVideoSideBar watchVideoTranscript"
+              @loaded="transcriptLoaded = $event"
               @close="closeTranscript"
               @timestamp-event="playTranscriptSegment"
             />
@@ -1153,6 +1155,7 @@
               :fullscreen-overlay="fullscreenLiveChatOpen"
               class="watchVideoSideBar watchVideoPlaylist phoneLiveChat"
               :class="{ theatrePlaylist: useTheatreMode }"
+              @loaded="liveChatLoaded = $event"
               @close="closeLiveChat"
             />
           </transition>
@@ -1263,6 +1266,7 @@
             :comments-disabled="commentsDisabled"
             :fullscreen-overlay="fullscreenCommentsOpen || (shortsCommentsOpen && !shortsPhonePanelsEnabled)"
             :highlighted-comment-id="tabRoute.query.commentId"
+            @loaded="commentsLoaded = $event"
             @close-comments="closeFullscreenComments"
             @timestamp-event="changeTimestamp"
           />

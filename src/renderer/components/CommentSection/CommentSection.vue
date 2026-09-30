@@ -1447,7 +1447,9 @@ function handleFullscreenActionsFocusout(event) {
   }
 }
 
-const emit = defineEmits(['timestamp-event', 'close-comments'])
+const emit = defineEmits(['timestamp-event', 'close-comments', 'loaded'])
+
+watch(() => commentData.value.length > 0, loaded => emit('loaded', loaded))
 
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)
 

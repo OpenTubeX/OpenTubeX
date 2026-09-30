@@ -266,6 +266,9 @@ export default defineComponent({
       /** @type {boolean|null} */
       isFamilyFriendly: null,
       commentsDisabled: false,
+      commentsLoaded: false,
+      liveChatLoaded: false,
+      transcriptLoaded: false,
       isLive: false,
       isPremiere: false,
       liveChat: null,
@@ -735,7 +738,7 @@ export default defineComponent({
       return caption ? this.captions.indexOf(caption) : 0
     },
     transcriptAvailable: function () {
-      return this.captions.length > 0
+      return this.captions.length > 0 && (!this.isOffline || this.transcriptLoaded)
     },
     ambientModeActive: function () {
       return this.$store.getters.getAmbientMode &&
@@ -1057,6 +1060,7 @@ export default defineComponent({
       return this.$store.getters.getHideLiveChatReplay
     },
     liveChatAvailable: function () {
+      if (this.isOffline && !this.liveChatLoaded) return false
       return this.liveChatIsReplay
         ? !this.hideLiveChatReplay
         : !this.hideLiveChat && (this.isLive || this.isUpcoming)
@@ -2259,6 +2263,9 @@ export default defineComponent({
       this.commentsDisabled = false
       this.isLive = false
       this.isPremiere = false
+      this.commentsLoaded = false
+      this.liveChatLoaded = false
+      this.transcriptLoaded = false
       this.liveChat = null
       this.liveChatIsReplay = false
       this.liveChatOpen = true
