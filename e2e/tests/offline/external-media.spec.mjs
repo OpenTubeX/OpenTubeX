@@ -1265,6 +1265,13 @@ for (const scale of [1, 1.25]) {
         await page.setViewportSize(size)
         await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
         loadingBounds = await loading.boundingBox()
+        for (const content of await loading.locator('.externalMediaStateContent, .externalMediaStateContent > *').all()) {
+          const bounds = await content.boundingBox()
+          expect.soft(bounds.x).toBeGreaterThanOrEqual(loadingBounds.x - 1)
+          expect.soft(bounds.y).toBeGreaterThanOrEqual(loadingBounds.y - 1)
+          expect.soft(bounds.x + bounds.width).toBeLessThanOrEqual(loadingBounds.x + loadingBounds.width + 1)
+          expect.soft(bounds.y + bounds.height).toBeLessThanOrEqual(loadingBounds.y + loadingBounds.height + 1)
+        }
       } finally {
         await writeFile(releaseGate, '')
       }

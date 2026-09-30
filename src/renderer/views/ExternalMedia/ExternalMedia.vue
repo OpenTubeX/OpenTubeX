@@ -834,7 +834,12 @@ onBeforeUnmount(() => {
 }
 
 .externalMediaLoading {
+  container: external-media-loading / inline-size;
   min-block-size: 0;
+}
+
+.externalMediaState.externalMediaLoading {
+  padding: 8px;
 }
 
 .externalMediaSpinner {
@@ -858,6 +863,22 @@ onBeforeUnmount(() => {
 .externalMediaLoading .externalMediaStateContent > p {
   font-size: 1.125rem;
   font-weight: 600;
+}
+
+@container external-media-loading (width <= 440px) {
+  .externalMediaLoading .externalMediaStateContent {
+    gap: 4px;
+    padding: 8px;
+  }
+
+  .externalMediaSpinner {
+    block-size: 24px;
+    inline-size: 24px;
+  }
+
+  .externalMediaLoading .externalMediaStateContent > p {
+    font-size: 1rem;
+  }
 }
 
 .externalMediaStateContent > p,
