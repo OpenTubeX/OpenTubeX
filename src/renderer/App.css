@@ -188,24 +188,45 @@
   visibility: visible !important;
 }
 
-:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target]) {
+:global(body.androidPictureInPicture .app.capacitorTabs .ftVideoPlayer.shaka-video-container[data-android-picture-in-picture-target]) {
   position: fixed !important;
   inset: 0 !important;
   z-index: 2147483647 !important;
   inline-size: 100vw !important;
   block-size: 100vh !important;
+  min-inline-size: 0 !important;
+  max-inline-size: none !important;
+  min-block-size: 0 !important;
+  max-block-size: none !important;
+  margin: 0 !important;
+  border: 0 !important;
   border-radius: 0 !important;
   transform: none !important;
-}
-
-:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] > .player),
-:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] > .vrCanvas) {
-  inline-size: 100% !important;
-  block-size: 100% !important;
-  border-radius: 0 !important;
-  object-fit: contain !important;
+  translate: none !important;
   transition: none !important;
 }
+
+/* Override the phone mini bar and its morph geometry while the activity is
+   in PiP. Their fixed thumbnail bounds must not survive into this viewport. */
+/* stylelint-disable selector-max-compound-selectors */
+:global(body.androidPictureInPicture .app.capacitorTabs .ftVideoPlayer[data-android-picture-in-picture-target] > .player),
+:global(body.androidPictureInPicture .app.capacitorTabs .ftVideoPlayer[data-android-picture-in-picture-target] > .vrCanvas) {
+  position: absolute !important;
+  inset: 0 !important;
+  inline-size: 100% !important;
+  block-size: 100% !important;
+  min-inline-size: 0 !important;
+  max-inline-size: none !important;
+  min-block-size: 0 !important;
+  max-block-size: none !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  object-fit: contain !important;
+  transform: none !important;
+  clip-path: none !important;
+  transition: none !important;
+}
+/* stylelint-enable selector-max-compound-selectors */
 
 :global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .shaka-controls-container),
 :global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .scrollMiniPlayerControls) {
