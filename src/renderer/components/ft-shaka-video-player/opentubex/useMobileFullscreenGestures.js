@@ -325,7 +325,12 @@ export function useMobileFullscreenGestures({
       mobileFullscreenSwipeSettling.value = false
       if (shouldToggle && isFullscreenActive() === wasFullscreen) {
         Promise.resolve(togglePlayerFullScreen()).then(() => {
-          if (isFullscreenActive() !== wasFullscreen) lightHaptic()
+          if (isFullscreenActive() !== wasFullscreen) {
+            // Restart Shaka's touchmove-stopped idle timer with the fullscreen
+            // delay, without invoking the surface-tap handler on its child.
+            getContainer()?.dispatchEvent(new Event('touchend'))
+            lightHaptic()
+          }
         }).catch(error => console.warn('Fullscreen gesture failed', error))
       }
     }, settleDuration)
@@ -447,6 +452,9 @@ export function useMobileFullscreenGestures({
     mobileSurfaceSuppressTouchEndUntil = 0
     event.preventDefault()
     event.stopImmediatePropagation()
+    // Shaka's surface-tap handler is on the child controls container. Notify
+    // only the player container so its touchmove-stopped idle timer resumes.
+    getContainer()?.dispatchEvent(new Event('touchend'))
   }
 
   function handleMobilePlayerSurfaceClick(event) {
