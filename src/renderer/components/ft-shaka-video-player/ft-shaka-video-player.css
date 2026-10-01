@@ -1904,7 +1904,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 /* stylelint-disable-next-line selector-max-compound-selectors */
-.ftVideoPlayer:not(.classicPlayerControls) :deep(.shaka-controls-button-panel > button:nth-child(1 of .shaka-spacer ~ button:not(.shaka-hidden))) {
+.ftVideoPlayer:not(.classicPlayerControls) :deep(.shaka-controls-button-panel > button:nth-child(1 of .shaka-spacer ~ button:not(.shaka-hidden, [data-ft-control-hidden]))) {
   border-start-start-radius: calc(999px * var(--ui-roundness));
   border-end-start-radius: calc(999px * var(--ui-roundness));
   background-image:
@@ -1918,7 +1918,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 /* stylelint-disable-next-line selector-max-compound-selectors */
-.ftVideoPlayer:not(.classicPlayerControls) :deep(.shaka-controls-button-panel > button:nth-last-child(1 of .shaka-spacer ~ button:not(.shaka-hidden))) {
+.ftVideoPlayer:not(.classicPlayerControls) :deep(.shaka-controls-button-panel > button:nth-last-child(1 of .shaka-spacer ~ button:not(.shaka-hidden, [data-ft-control-hidden]))) {
   border-start-end-radius: calc(999px * var(--ui-roundness));
   border-end-end-radius: calc(999px * var(--ui-roundness));
   background-image:
@@ -1932,7 +1932,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 /* stylelint-disable-next-line selector-max-compound-selectors */
-.ftVideoPlayer:not(.classicPlayerControls) :deep(.shaka-controls-button-panel > button:nth-child(1 of .shaka-spacer ~ button:not(.shaka-hidden)):nth-last-child(1 of .shaka-spacer ~ button:not(.shaka-hidden))) {
+.ftVideoPlayer:not(.classicPlayerControls) :deep(.shaka-controls-button-panel > button:nth-child(1 of .shaka-spacer ~ button:not(.shaka-hidden, [data-ft-control-hidden])):nth-last-child(1 of .shaka-spacer ~ button:not(.shaka-hidden, [data-ft-control-hidden]))) {
   background-image:
     radial-gradient(circle var(--ft-control-pill-radius) at right center, var(--ft-control-item-hover-color) 98%, transparent),
     linear-gradient(var(--ft-control-item-hover-color), var(--ft-control-item-hover-color)),
@@ -4009,6 +4009,11 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 :deep(.ft-controls-stack-times > .ft-time-display-group > .shaka-current-time) {
   block-size: auto;
   line-height: 1.2;
+}
+
+:global(.capacitorTabs .ft-controls-overflow-pip > .shaka-pip-button),
+:global(.capacitorTabs .ft-controls-overflow-captions > .caption-toggle-button) {
+  display: none;
 }
 
 :deep(.shaka-tooltips-on > .ft-shaka-highlight-button:hover::after),
