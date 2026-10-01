@@ -85,6 +85,7 @@ import {
 } from '../../helpers/fullscreenDocks'
 import {
   addOverlayScrollbars,
+  clampOverlayScrollLeft,
   removeOverlayScrollbars,
   updateOverlayScrollbars,
 } from '../../helpers/overlayScrollbars'
@@ -6082,6 +6083,7 @@ export default defineComponent({
       controlPanel.classList.remove('ft-controls-measuring')
       if (quickRateBar && quickRateBarScrollLeft !== undefined) {
         quickRateBar.scrollLeft = quickRateBarScrollLeft
+        clampOverlayScrollLeft(quickRateBar)
       }
 
       // Pill ends must follow the visible controls, including buttons hidden
