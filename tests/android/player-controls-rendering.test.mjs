@@ -68,6 +68,8 @@ for (const classic of [false, true]) {
             settings: visible('.shaka-overflow-menu-button'),
             fullscreen: visible('.shaka-fullscreen-button'),
             settingsStartRadius: getComputedStyle(panel.querySelector('.shaka-overflow-menu-button')).borderStartStartRadius,
+            spacerWidth: panel.querySelector('.shaka-spacer').getBoundingClientRect().width,
+            trailingSpace: panel.getBoundingClientRect().right - panel.querySelector('.shaka-fullscreen-button').getBoundingClientRect().right,
             classes: panel.className,
           }
         }, layoutSource)
@@ -76,19 +78,47 @@ for (const classic of [false, true]) {
         assert.equal(portrait.captions, false, JSON.stringify(portrait))
         assert.equal(portrait.settings, true)
         assert.equal(portrait.fullscreen, true)
+        assert.ok(portrait.spacerWidth < 1, JSON.stringify(portrait))
         if (!classic) assert.notEqual(portrait.settingsStartRadius, '0px', JSON.stringify(portrait))
         await frame.locator('.shaka-overflow-menu').evaluate(menu => menu.classList.remove('shaka-hidden'))
         assert.equal(await frame.locator('.shaka-overflow-menu > .shaka-caption-button').isVisible(), true)
         assert.equal(await frame.locator('.shaka-overflow-menu > .shaka-pip-button').isVisible(), true)
         await frame.locator('.shaka-overflow-menu').evaluate(menu => menu.classList.add('shaka-hidden'))
-        await handle.evaluate(frame => { frame.style.width = '900px' })
+        await handle.evaluate(frame => { frame.style.width = '1600px' })
         const landscape = await layout()
         assert.equal(landscape.pip, true, JSON.stringify(landscape))
         assert.equal(landscape.captions, true, JSON.stringify(landscape))
+        assert.ok(landscape.spacerWidth < 1, JSON.stringify(landscape))
+        assert.ok(Math.abs(landscape.trailingSpace) < 1, JSON.stringify(landscape))
         await handle.evaluate(frame => { frame.style.width = '360px' })
         const restored = await layout()
         assert.equal(restored.pip, false, JSON.stringify(restored))
         assert.equal(restored.captions, false, JSON.stringify(restored))
+
+        const rateBar = frame.locator('.ft-quick-playback-rate-bar')
+        await rateBar.evaluate(element => {
+          for (const speed of ['0.5×', '1.5×', '2×', '3×']) {
+            const button = element.firstElementChild.cloneNode(true)
+            button.textContent = speed
+            element.append(button)
+          }
+        })
+        await layout()
+        const endOffset = await rateBar.evaluate(element => {
+          element.scrollLeft = element.scrollWidth
+          return element.scrollLeft
+        })
+        assert.ok(endOffset > 0, 'multiple rates must overflow the portrait bar')
+        await handle.evaluate(frame => { frame.style.width = '1600px' })
+        await layout()
+        const expanded = await rateBar.evaluate(element => ({ offset: element.scrollLeft, content: element.scrollWidth, viewport: element.clientWidth }))
+        assert.equal(expanded.offset, 0, JSON.stringify(expanded))
+        assert.equal(expanded.content, expanded.viewport, JSON.stringify(expanded))
+        await handle.evaluate(frame => { frame.style.width = '360px' })
+        await layout()
+        const narrowed = await rateBar.evaluate(element => ({ offset: element.scrollLeft, content: element.scrollWidth, viewport: element.clientWidth }))
+        assert.equal(narrowed.offset, 0, JSON.stringify(narrowed))
+        assert.ok(narrowed.content > narrowed.viewport, JSON.stringify(narrowed))
       } finally { await handle.evaluate(frame => frame.remove()) }
     })
   }

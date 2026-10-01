@@ -37,6 +37,7 @@ test('portrait mobile controls keep captions and PiP in settings when the row is
     await expect(panel.locator('.caption-toggle-button')).toBeHidden()
     await expect(panel.locator('.shaka-pip-button')).toBeHidden()
     await expect(panel.locator('.shaka-fullscreen-button')).toBeVisible()
+    await expect.poll(() => panel.locator('.shaka-spacer').evaluate(element => element.getBoundingClientRect().width)).toBeLessThan(1)
     await panel.locator('.shaka-overflow-menu-button').click()
     const menu = player.locator('.shaka-overflow-menu')
     await expect(menu.getByRole('button', { name: 'Captions' })).toBeVisible()
@@ -47,10 +48,20 @@ test('portrait mobile controls keep captions and PiP in settings when the row is
     await player.locator('.shaka-text-languages .shaka-back-to-overflow-button').click()
     await panel.locator('.shaka-overflow-menu-button').click()
 
+    const rateBar = panel.locator('.ft-quick-playback-rate-bar')
+    const endOffset = await rateBar.evaluate(element => {
+      element.scrollLeft = element.scrollWidth
+      return element.scrollLeft
+    })
+    expect(endOffset).toBeGreaterThan(0)
     await player.evaluate(element => { element.style.width = '1600px' })
     await expect(panel).not.toHaveClass(/ft-controls-overflow-(pip|captions)/)
     await expect(panel.locator('.caption-toggle-button')).toBeVisible()
     await expect(panel.locator('.shaka-pip-button')).toBeVisible()
+    await expect.poll(() => panel.locator('.shaka-spacer').evaluate(element => element.getBoundingClientRect().width)).toBeLessThan(1)
+    await expect.poll(() => panel.evaluate(element => Math.abs(element.getBoundingClientRect().right - element.querySelector('.shaka-fullscreen-button').getBoundingClientRect().right))).toBeLessThan(1)
+    await expect.poll(() => rateBar.evaluate(element => element.scrollLeft)).toBe(0)
+    await expect.poll(() => rateBar.evaluate(element => element.scrollWidth - element.clientWidth)).toBe(0)
   }
 })
 
