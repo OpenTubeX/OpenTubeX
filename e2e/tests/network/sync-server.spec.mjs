@@ -115,9 +115,14 @@ test.describe('OpenTubeX sync server', () => {
     const accountSessionsSupported = capabilities.account_sessions === 1
     let accountPassword = 'local-test-password'
     const bulkRequests = []
+    const playbackSpeedWrites = []
     page.on('request', request => {
       const pathname = new URL(request.url()).pathname
       if (pathname.endsWith('/bulk')) bulkRequests.push(pathname)
+      if (['PUT', 'DELETE'].includes(request.method()) && (
+        pathname.includes('/channel_playback_speeds/') ||
+        pathname.endsWith('/encrypted_sync/playbackSpeeds')
+      )) playbackSpeedWrites.push(pathname)
     })
 
     const syncSection = await goToSettingsSection(page, 'sync')
@@ -473,6 +478,7 @@ test.describe('OpenTubeX sync server', () => {
     expect(await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')).toContain(channelId)
     expect(await readFile(path.join(app.userDataDir, 'playlists.db'), 'utf8')).toContain('sync-playlist')
     expect(await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')).toContain('dQw4w9WgXcQ')
+    expect(playbackSpeedWrites).toEqual([])
   })
 
   test('disconnects after revoking the current account session', async ({ page }, testInfo) => {
