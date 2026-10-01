@@ -471,6 +471,7 @@ Settings:
       Unable to Delete: "N'eus ket bet gallet dilemel an neuz personelaet"
       Invalid Theme File: "Restr neuz personelaet didalvoudek"
       Colors:
+        Watched thumbnail overlay: "Gwiskad ar skeudennoùigoù ar videoioù gwelet"
         Main text: "Testenn bennañ"
         Secondary text: "Testenn eil renk"
         Subtle text: "Testenn disked"

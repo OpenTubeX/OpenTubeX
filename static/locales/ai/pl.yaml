@@ -190,6 +190,7 @@ Settings:
       Share Screenshots Prompt: "Przeciągnij tutaj co najmniej jeden zrzut ekranu. Pozostaw tę sekcję pustą, a bot doda trzy podglądy z przykładową zawartością, bez Twoich danych osobowych."
       Unable to Share: Nie udało się udostępnić własnego motywu
       Colors:
+        Watched thumbnail overlay: "Nakładka na miniatury obejrzanych filmów"
         Logo hover: Logo po najechaniu
         Logo pressed: Logo po naciśnięciu
         Page background: Tło strony

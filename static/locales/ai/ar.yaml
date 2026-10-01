@@ -475,6 +475,7 @@ Settings:
       Unable to Delete: غير قادر على حذف السمة المخصصة
       Invalid Theme File: ملف السمة المخصصة غير صالح
       Colors:
+        Watched thumbnail overlay: "تراكب الصور المصغّرة للفيديوهات المُشاهَدة"
         Main text: النص الرئيسي
         Secondary text: النص الثانوي
         Subtle text: نص دقيق

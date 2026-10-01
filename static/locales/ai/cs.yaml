@@ -471,6 +471,7 @@ Settings:
       Unable to Delete: Vlastní motiv se nepodařilo smazat
       Invalid Theme File: Neplatný soubor vlastního motivu
       Colors:
+        Watched thumbnail overlay: "Překryv náhledů zhlédnutých videí"
         Main text: Hlavní text
         Secondary text: Vedlejší text
         Subtle text: Tlumený text

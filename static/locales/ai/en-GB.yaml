@@ -458,6 +458,7 @@ Settings:
       Unable to Delete: Unable to delete the custom theme
       Invalid Theme File: Invalid custom theme file
       Colors:
+        Watched thumbnail overlay: "Watched thumbnail overlay"
         Main text: Main text
         Secondary text: Secondary text
         Subtle text: Subtle text

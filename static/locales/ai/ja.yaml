@@ -471,6 +471,7 @@ Settings:
       Unable to Delete: カスタムテーマを削除できませんでした
       Invalid Theme File: カスタムテーマファイルが無効です
       Colors:
+        Watched thumbnail overlay: "視聴済み動画のサムネイルオーバーレイ"
         Main text: メインテキスト
         Secondary text: サブテキスト
         Subtle text: 控えめなテキスト

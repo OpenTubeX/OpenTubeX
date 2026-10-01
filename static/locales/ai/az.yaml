@@ -473,6 +473,7 @@ Settings:
       Unable to Delete: Fərdi mövzunu silmək mümkün olmadı
       Invalid Theme File: Yanlış fərdi mövzu faylı
       Colors:
+        Watched thumbnail overlay: "Baxılmış video miniatürünün örtüyü"
         Main text: Əsas mətn
         Secondary text: İkinci dərəcəli mətn
         Subtle text: Solğun mətn

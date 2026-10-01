@@ -471,6 +471,7 @@ Settings:
       Unable to Delete: Vlastný motív sa nepodarilo odstrániť
       Invalid Theme File: Neplatný súbor vlastného motívu
       Colors:
+        Watched thumbnail overlay: "Prekrytie miniatúr pozretých videí"
         Main text: Hlavný text
         Secondary text: Vedľajší text
         Subtle text: Tlmený text

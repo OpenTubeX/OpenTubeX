@@ -599,6 +599,7 @@ test.describe('custom theme editor', () => {
     const theme = cloneDefaultCustomTheme()
     theme.name = 'Clipboard midnight'
     theme.colors.background = '#112233'
+    theme.colors.watchedThumbnailOverlay = '#66339980'
     await app.electronApp.evaluate(({ clipboard }, text) => clipboard.writeText(text), JSON.stringify(theme))
     await goToSettingsSection(page, 'theme')
     await page.getByRole('button', { name: 'Create custom theme' }).click()
@@ -608,12 +609,14 @@ test.describe('custom theme editor', () => {
     await page.keyboard.press('Enter')
     await expect(page.getByRole('textbox', { name: 'Theme name' })).toHaveValue(theme.name)
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#112233')
+    await expect(page.locator('body')).toHaveCSS('--watched-thumbnail-overlay-color', '#66339980')
     expect(await page.evaluate(() => window.ftElectron.loadCustomTheme())).toEqual([])
     await page.getByRole('button', { name: 'Save and apply' }).click()
     const saved = await page.evaluate(() => window.ftElectron.loadCustomTheme())
     expect(saved).toHaveLength(1)
     expect(saved[0].id).not.toBe(theme.id)
     expect(saved[0].colors.background).toBe('#112233')
+    expect(saved[0].colors.watchedThumbnailOverlay).toBe('#66339980')
 
     await page.emulateMedia({ colorScheme: 'dark' })
     await page.evaluate(async (themeId) => {

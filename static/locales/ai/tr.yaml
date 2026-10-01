@@ -471,6 +471,7 @@ Settings:
       Unable to Delete: Özel tema silinemedi
       Invalid Theme File: Geçersiz özel tema dosyası
       Colors:
+        Watched thumbnail overlay: "İzlenen video küçük resmi kaplaması"
         Main text: Ana metin
         Secondary text: İkincil metin
         Subtle text: Soluk metin

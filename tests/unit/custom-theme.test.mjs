@@ -29,6 +29,7 @@ function legacyTheme() {
     'coloredHeaderHoverText',
     'coloredHeaderPressed',
     'coloredHeaderPressedText',
+    'watchedThumbnailOverlay',
   ]) delete theme.colors[key]
   return theme
 }
@@ -47,6 +48,7 @@ test('migrates legacy custom themes without changing their existing appearance',
   assert.equal(migrated.colors.headerPressed, theme.colors.tertiaryText)
   assert.equal(migrated.colors.coloredHeaderPressed, theme.colors.primaryActive)
   assert.equal(migrated.colors.scrollbarActive, '#a3a3a399')
+  assert.equal(migrated.colors.watchedThumbnailOverlay, '#121212b3')
   assert.deepEqual(migrated.blurs, {
     cardBackground: 0,
     secondaryCardBackground: 0,
@@ -54,6 +56,35 @@ test('migrates legacy custom themes without changing their existing appearance',
     settingsSearchBar: 0,
     primaryInput: 0,
   })
+})
+
+test('defaults missing watched overlays to the existing thumbnail fade for older themes', () => {
+  for (const [background, overlay] of [
+    ['#ffffff', '#ffffffb3'],
+    ['#ABCDEF', '#abcdefb3'],
+    ['#12345680', '#1234565a'],
+  ]) {
+    const theme = JSON.parse(JSON.stringify(DEFAULT_CUSTOM_THEME))
+    delete theme.colors.watchedThumbnailOverlay
+    theme.colors.background = background
+    assert.equal(normalizeCustomTheme(theme).colors.watchedThumbnailOverlay, overlay)
+  }
+})
+
+test('preserves watched overlay color and opacity through theme serialization', () => {
+  for (const color of ['#ABCDEF80', '#12345600', '#123456']) {
+    const theme = {
+      ...DEFAULT_CUSTOM_THEME,
+      colors: { ...DEFAULT_CUSTOM_THEME.colors, watchedThumbnailOverlay: color },
+    }
+    const normalized = normalizeCustomTheme(theme)
+    assert.equal(normalized.colors.watchedThumbnailOverlay, color.toLowerCase())
+    assert.deepEqual(normalizeCustomTheme(JSON.parse(JSON.stringify(normalized))), normalized)
+  }
+  assert.throws(() => normalizeCustomTheme({
+    ...DEFAULT_CUSTOM_THEME,
+    colors: { ...DEFAULT_CUSTOM_THEME.colors, watchedThumbnailOverlay: 'invalid' },
+  }), /Invalid or missing custom theme color: watchedThumbnailOverlay/)
 })
 
 test('normalizes transparent colors and bounded backdrop blur strengths', () => {
