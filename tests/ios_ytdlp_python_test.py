@@ -10,10 +10,11 @@ from unittest.mock import patch
 import opentubex_ios_ytdlp as bridge
 
 
-class FakeYoutubeDL:
+class FakeYoutubeDL(bridge.yt_dlp.YoutubeDL):
     last_options = None
 
     def __init__(self, options):
+        super().__init__(options, auto_init=False)
         self.options = options
         FakeYoutubeDL.last_options = options
 
@@ -41,12 +42,13 @@ class FakeYoutubeDL:
             'status': 'downloading', 'downloaded_bytes': 50, 'total_bytes': 100,
             'speed': 1000, 'eta': 1,
         })
-        folder = Path(self.options['outtmpl']).parent
-        if ',' in self.options['format']:
-            folder.joinpath('Fixture [abc].f133.mp4').write_bytes(b'video')
-            folder.joinpath('Fixture [abc].f140.m4a').write_bytes(b'audio')
-        else:
-            folder.joinpath('Fixture [abc].mp4').write_bytes(b'media')
+        folder = Path(self.options['paths']['home'])
+        folder.joinpath('Fixture [abc].mp4').write_bytes(b'media')
+        folder.joinpath('obsolete.f133.mp4').write_bytes(b'old partial track')
+        self.options['postprocessor_hooks'][0]({
+            'status': 'finished', 'postprocessor': 'MoveFiles',
+            'info_dict': {'filepath': str(folder / 'Fixture [abc].mp4')},
+        })
         return 0
 
 
@@ -111,20 +113,19 @@ print(context.cert_store_stats()['x509_ca'])
             root = Path(temp)
             request = {
                 'payload': {'mode': 'video', 'videoId': 'abcdefghijk'},
+                'args': ['--no-playlist', '--output', '%(title)s [%(id)s].%(ext)s',
+                         '--merge-output-format', 'mkv', '-S', 'codec:av1,res:2160',
+                         'https://www.youtube.com/watch?v=abcdefghijk'],
                 'staging': str(root / 'stage'),
                 'progressFile': str(root / 'stage' / 'progress.json'),
                 'controlFile': str(root / 'stage' / 'control'),
             }
             result = bridge._download(request)
-            self.assertEqual(result['merges'], [{
-                'video': 'Fixture [abc].f133.mp4',
-                'audio': 'Fixture [abc].f140.m4a',
-                'output': 'Fixture [abc].mp4',
-            }])
-            self.assertEqual(FakeYoutubeDL.last_options['format'],
-                             'bestvideo[vcodec^=avc1][ext=mp4],bestaudio[ext=m4a]')
+            self.assertEqual(result['files'], ['Fixture [abc].mp4'])
+            self.assertEqual(FakeYoutubeDL.last_options['merge_output_format'], 'mkv')
+            self.assertEqual(FakeYoutubeDL.last_options['format_sort'], ['codec:av1', 'res:2160'])
             progress = json.loads(Path(request['progressFile']).read_text())
-            self.assertEqual(progress['percent'], 50)
+            self.assertEqual(progress['status'], 'processing')
 
     @patch.object(bridge.yt_dlp, 'YoutubeDL', FakeYoutubeDL)
     def test_external_download_keeps_single_file(self):
@@ -132,6 +133,7 @@ print(context.cert_store_stats()['x509_ca'])
             root = Path(temp)
             request = {
                 'payload': {'mode': 'video', 'externalUrl': 'https://example.org/video'},
+                'args': ['--no-playlist', 'https://example.org/video'],
                 'staging': str(root / 'stage'),
                 'progressFile': str(root / 'stage' / 'progress.json'),
                 'controlFile': str(root / 'stage' / 'control'),
@@ -145,6 +147,7 @@ print(context.cert_store_stats()['x509_ca'])
             root = Path(temp)
             request = {
                 'payload': {'mode': 'video', 'externalUrl': 'https://example.org/video'},
+                'args': ['--no-playlist', 'https://example.org/video'],
                 'staging': str(root / 'stage'),
                 'progressFile': str(root / 'stage' / 'progress.json'),
                 'controlFile': str(root / 'stage' / 'control'),
@@ -165,6 +168,7 @@ print(context.cert_store_stats()['x509_ca'])
             control.touch()
             request = {
                 'payload': {'mode': 'video', 'externalUrl': 'https://example.org/video'},
+                'args': ['--no-playlist', 'https://example.org/video'],
                 'staging': str(staging),
                 'progressFile': str(staging / 'progress.json'),
                 'controlFile': str(control),

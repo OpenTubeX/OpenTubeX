@@ -57,7 +57,7 @@ export function findSettingsSearchTab(match) {
 }
 
 function getSettingsSearchSourceValues(source, options) {
-  if (options.isIos && ['external-software', 'download', 'yt-dlp-streaming', 'proxy'].includes(source.type)) return []
+  if (options.isIos && ['external-software', 'yt-dlp-streaming', 'proxy'].includes(source.type)) return []
   if (source.subpage === 'quick-playback-speed' && !options.store.getters.getUseQuickPlaybackSpeedBar) return []
   if (source.electronOnly && !options.usingElectron && !(options.isCapacitor && (source.capacitorSupported || ['external-software', 'download', 'yt-dlp-streaming'].includes(source.type)))) return []
   return flattenSettingsSearchMessageValues(

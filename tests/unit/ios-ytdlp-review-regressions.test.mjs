@@ -4,8 +4,36 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 import { mapPlaybackCaptions } from '../../src/ytDlpMetadata.js'
+import { buildYtDlpDownloadArguments } from '../../src/ytDlpArguments.js'
 
 const read = path => readFile(new URL(`../../${path}`, import.meta.url), 'utf8')
+
+test('iOS restores arguments for saved paused downloads without changing completed files', async () => {
+  const source = await read('src/renderer/helpers/ytDlp.js')
+  const start = source.indexOf('  async ytDlpListDownloads()')
+  const end = source.indexOf('  ytDlpClearDownloads:', start)
+  const downloads = [
+    { id: 1, status: 'paused', retryPayload: { mode: 'video', videoId: 'abcdefghijk', quality: '720' } },
+    { id: 2, status: 'completed', retryPayload: { mode: 'audio', videoId: 'abcdefghijk' }, files: [{ path: '/saved.m4a' }] },
+    { id: 3, status: 'paused', args: ['existing arguments'], retryPayload: { mode: 'video', videoId: 'abcdefghijk' } }
+  ]
+  const calls = []
+  const context = vm.createContext({
+    process: { env: { IS_IOS: true } },
+    native: { list: async () => ({ downloads }), configure: async value => calls.push(value) },
+    store: { getters: { getYtDlpDownloadCustomArgs: '' } },
+    configuration: () => ({ enabled: true }),
+    buildYtDlpDownloadArguments,
+  })
+  vm.runInContext(`globalThis.list = ({${source.slice(start, end)}}).ytDlpListDownloads`, context)
+  assert.equal(await context.list(), downloads)
+  assert.equal(calls.length, 1)
+  assert.deepEqual(Object.keys(calls[0].resumeArguments), ['1'])
+  const args = calls[0].resumeArguments[1]
+  assert.equal(args[args.indexOf('-S') + 1], 'res:720')
+  assert.equal(args.at(-1), 'https://www.youtube.com/watch?v=abcdefghijk')
+  assert.equal(downloads[1].files[0].path, '/saved.m4a')
+})
 
 test('iOS media byte-range probes send a Range header through the native proxy', async () => {
   const source = await read('src/renderer/helpers/player/streamByteRanges.js')

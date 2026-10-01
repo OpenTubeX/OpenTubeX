@@ -22,7 +22,7 @@
         </h2>
       </header>
       <section
-        v-if="activeDownload === null && !isIos"
+        v-if="activeDownload === null"
         class="optionSection templateSection fixedTemplateSection"
       >
         <div class="templateControls">
@@ -78,7 +78,6 @@
               @change="setOption('quality', $event)"
             />
             <FtSelect
-              v-if="!isIos"
               :placeholder="t('Downloads.Container')"
               :value="options.videoFormat"
               :disabled="options.mode !== 'video'"
@@ -87,7 +86,6 @@
               @change="setOption('videoFormat', $event)"
             />
             <FtSelect
-              v-if="!isIos"
               :placeholder="formatLabel"
               :value="selectedCodec"
               :select-names="codecNames"
@@ -97,7 +95,6 @@
           </section>
 
           <details
-            v-if="!isIos"
             :open="!phoneLayout"
             class="advancedDownloadOptions"
           >
@@ -387,7 +384,6 @@ const props = defineProps({
 })
 const emit = defineEmits(['close'])
 const { t, locale } = useI18n()
-const isIos = process.env.IS_IOS
 const phoneLayout = usePhoneLayout()
 const optionsScroller = useTemplateRef('optionsScroller')
 const optionsContent = useTemplateRef('optionsContent')
@@ -518,7 +514,7 @@ function loadTemplate(value) {
   isDirty.value = false
 }
 let initialTemplate = 'video:best'
-if (!isIos && (DEFAULT_DOWNLOAD_TEMPLATES.some(template => template.value === storedSelection) || storedSelection.startsWith('template:'))) {
+if (DEFAULT_DOWNLOAD_TEMPLATES.some(template => template.value === storedSelection) || storedSelection.startsWith('template:')) {
   initialTemplate = storedSelection
 }
 loadTemplate(initialTemplate)
