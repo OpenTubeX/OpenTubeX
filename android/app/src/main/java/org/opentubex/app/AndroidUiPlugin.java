@@ -119,7 +119,7 @@ public class AndroidUiPlugin extends Plugin {
                 PictureInPicture.configure(
                     getActivity(),
                     pictureInPictureAspectRatio,
-                    autoPictureInPictureEnabled,
+                    autoPictureInPictureEnabled && pictureInPictureSourceRect != null,
                     pictureInPictureSourceRect
                 );
             }
@@ -133,18 +133,23 @@ public class AndroidUiPlugin extends Plugin {
             if (supportsPictureInPicture() && !getActivity().isInPictureInPictureMode()) {
                 updateSourceRect(call);
                 PictureInPicture.configure(getActivity(), pictureInPictureAspectRatio,
-                    autoPictureInPictureEnabled, pictureInPictureSourceRect);
+                    autoPictureInPictureEnabled && pictureInPictureSourceRect != null, pictureInPictureSourceRect);
             }
             call.resolve();
         });
     }
 
     private void updateSourceRect(PluginCall call) {
-        JSObject source = call.getObject("sourceRect");
         // Preserve the in-app destination while PiP exits: its mode callback
         // precedes the full-size WebView layout and window focus returning.
-        if (source == null || getActivity().isInPictureInPictureMode() ||
-            !getActivity().hasWindowFocus()) return;
+        if (getActivity().isInPictureInPictureMode() ||
+            (pictureInPictureSurface != null && pictureInPictureSurface.isPrepared())) return;
+        JSObject source = call.getObject("sourceRect");
+        if (source == null) {
+            pictureInPictureSourceRect = null;
+            return;
+        }
+        if (!getActivity().hasWindowFocus()) return;
         double viewportWidth = source.optDouble("viewportWidth", 0);
         double x = source.optDouble("x", Double.NaN);
         double y = source.optDouble("y", Double.NaN);
@@ -233,6 +238,7 @@ public class AndroidUiPlugin extends Plugin {
     public void enterAutomaticPictureInPictureIfEnabled() {
         if (
             !autoPictureInPictureEnabled ||
+            pictureInPictureSourceRect == null ||
             !supportsPictureInPicture() ||
             getActivity().isInPictureInPictureMode()
         ) {

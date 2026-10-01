@@ -42,9 +42,9 @@ function videoDimensions(video) {
   }
 }
 
-function pictureInPictureSourceRect(video) {
-  if (!video || document.body.classList.contains('androidPictureInPicture')) return null
-  const rect = video.getBoundingClientRect()
+function pictureInPictureGeometry(video) {
+  const bounds = video.getBoundingClientRect()
+  const rect = { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height }
   let { x, y, width, height } = rect
   if (getComputedStyle(video).objectFit === 'contain') {
     const dimensions = videoDimensions(video)
@@ -56,6 +56,22 @@ function pictureInPictureSourceRect(video) {
     width = videoWidth
     height = videoHeight
   }
+  if (x + width <= 0 || y + height <= 0 || x >= window.innerWidth || y >= window.innerHeight) {
+    // Keep automatic PiP available after scrolling the video offscreen. Move
+    // its live content and enclosing element together into the native crop.
+    const offsetX = Math.max(0, Math.min(x, window.innerWidth - width)) - x
+    const offsetY = Math.max(0, Math.min(y, window.innerHeight - height)) - y
+    x += offsetX
+    y += offsetY
+    rect.x += offsetX
+    rect.y += offsetY
+  }
+  return { rect, content: { x, y, width, height } }
+}
+
+function pictureInPictureSourceRect(video) {
+  if (!video || document.body.classList.contains('androidPictureInPicture')) return null
+  let { x, y, width, height } = pictureInPictureGeometry(video).content
   const right = Math.min(window.innerWidth, x + width)
   const bottom = Math.min(window.innerHeight, y + height)
   x = Math.max(0, x)
@@ -78,7 +94,7 @@ function observePictureInPictureBounds(video) {
     frame = requestAnimationFrame(() => {
       frame = null
       const sourceRect = pictureInPictureSourceRect(video)
-      if (sourceRect) {
+      if (!document.body.classList.contains('androidPictureInPicture')) {
         AndroidUi.updatePictureInPictureSourceRect({ sourceRect })
           .catch(error => console.warn('Could not update Android PiP bounds', error))
       }
@@ -114,13 +130,55 @@ function setAndroidPictureInPictureTarget(enabled, video) {
   }
 }
 
+function waitForPictureInPicturePaint() {
+  return new Promise(resolve => {
+    let frame = null
+    let timer = null
+    let finished = false
+    const finish = (painted, nativeChange = false) => {
+      if (finished) return
+      finished = true
+      if (frame !== null) cancelAnimationFrame(frame)
+      clearTimeout(timer)
+      document.removeEventListener('visibilitychange', hidden)
+      window.removeEventListener('blur', interrupted)
+      window.removeEventListener('opentubex:android-pip', changed)
+      resolve({ painted, nativeChange })
+    }
+    const interrupted = () => finish(false)
+    const changed = () => finish(false, true)
+    const hidden = () => { if (document.hidden) interrupted() }
+    document.addEventListener('visibilitychange', hidden)
+    window.addEventListener('blur', interrupted)
+    window.addEventListener('opentubex:android-pip', changed)
+    timer = setTimeout(interrupted, 1000)
+    frame = requestAnimationFrame(() => { frame = requestAnimationFrame(() => finish(true)) })
+    if (document.hidden || !document.hasFocus()) interrupted()
+  })
+}
+
 export async function enterAndroidPictureInPicture(video) {
   const options = { ...videoDimensions(video), sourceRect: pictureInPictureSourceRect(video) }
   setAndroidPictureInPictureTarget(true, video)
   window.dispatchEvent(Object.assign(new Event('opentubex:android-pip'), { active: true, transitioning: true }))
   // Paint the video-only page before Android starts its entry animation.
   // The viewport and source rectangle keep their original video geometry.
-  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+  const { painted, nativeChange } = await waitForPictureInPicturePaint()
+  if (!painted || document.hidden || !document.hasFocus()) {
+    // Home may already be entering automatic PiP. Leave its preparation intact
+    // until Android's mode/resume callback reconciles the backgrounded page.
+    if (!nativeChange && document.body.classList.contains('androidPictureInPictureEntering')) {
+      const restore = () => {
+        if (!document.hidden && document.hasFocus()) setAndroidPictureInPictureDocumentState(false)
+      }
+      // A notification shade can blur the WebView without pausing the Activity.
+      // Native mode callbacks cancel this fallback if automatic PiP takes over.
+      window.addEventListener('focus', restore)
+      stopPictureInPictureTransition = () => window.removeEventListener('focus', restore)
+      restore()
+    }
+    return
+  }
   const request = AndroidUi?.enterPictureInPicture(options) ?? Promise.resolve()
   return request.catch(error => {
     setAndroidPictureInPictureTarget(false, video)
@@ -136,7 +194,7 @@ export function setAndroidAutoPictureInPicture(enabled, video) {
   return AndroidUi?.setAutoPictureInPicture({
     enabled,
     ...videoDimensions(video),
-    sourceRect: pictureInPictureSourceRect(video),
+    sourceRect: enabled || retainTarget ? pictureInPictureSourceRect(video) : null,
   }) ?? Promise.resolve()
 }
 
@@ -195,11 +253,11 @@ export function getAndroidDeviceArchitecture() {
 
 export function setAndroidPictureInPictureDocumentState(active, { transitioning = false } = {}) {
   const classes = document.body.classList
-  if (active && transitioning && classes.contains('androidPictureInPicture')) return
   stopPictureInPictureTransition?.()
   stopPictureInPictureTransition = null
+  if (active && transitioning && classes.contains('androidPictureInPicture')) return
   if (active && !classes.contains('androidPictureInPicture')) {
-    const rect = pictureInPictureVideo?.getBoundingClientRect()
+    const rect = pictureInPictureVideo ? pictureInPictureGeometry(pictureInPictureVideo).rect : null
     if (rect) {
       // Keep the video element unchanged while native Android crops and scales
       // the live viewport, including when its safe-area insets change.
@@ -220,8 +278,12 @@ export function setAndroidPictureInPictureDocumentState(active, { transitioning 
     // the restored layout before re-enabling the page's CSS transitions.
     let frame = requestAnimationFrame(() => {
       frame = requestAnimationFrame(() => {
-        classes.toggle('androidPictureInPictureRestoring', false)
-        stopPictureInPictureTransition = null
+        window.dispatchEvent(new Event('opentubex:android-pip-restored'))
+        // Commit reanchoring while CSS transitions are still suppressed.
+        frame = requestAnimationFrame(() => {
+          classes.toggle('androidPictureInPictureRestoring', false)
+          stopPictureInPictureTransition = null
+        })
       })
     })
     stopPictureInPictureTransition = () => cancelAnimationFrame(frame)

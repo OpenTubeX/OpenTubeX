@@ -165,8 +165,9 @@ async function assertRecordedEntry(recording, remote, scale, trigger) {
   }
 }
 
-for (const [scale, trigger] of [[100, 'button'], [125, 'button'], [100, 'home'], [125, 'home']]) {
-  test(`native PiP preserves the real inline player at ${scale}% UI scale through ${trigger}`, { skip: !enabled }, async () => {
+for (const [scale, trigger, offscreen = false] of [[100, 'button'], [125, 'button'], [100, 'home'], [125, 'home'], [100, 'home', true]]) {
+  const label = offscreen ? `${trigger}-offscreen` : trigger
+  test(`native PiP preserves the real inline player at ${scale}% UI scale through ${label}`, { skip: !enabled }, async () => {
     await page.evaluate(scale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiScale', scale), scale)
     await page.evaluate(async trigger => {
       const video = document.querySelector('video')
@@ -175,7 +176,22 @@ for (const [scale, trigger] of [[100, 'button'], [125, 'button'], [100, 'home'],
       video.currentTime = 2
       await video.play()
     }, trigger)
+    await page.evaluate(offscreen => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setScrollMiniPlayerEnabled', !offscreen)
+      if (offscreen) {
+        // Stand in for a long description/comments section while retaining
+        // the real Watch layout and its scroll viewport.
+        const content = document.createElement('div')
+        content.id = 'pip-offscreen-content'
+        content.style.height = '2000px'
+        document.querySelector('.videoLayout').append(content)
+        window.scrollTo(0, 1000)
+      }
+    }, offscreen)
     await page.waitForTimeout(400)
+    if (offscreen) assert.ok(await page.evaluate(() => document.querySelector('video').getBoundingClientRect().bottom <= 0),
+      'the real inline video has scrolled entirely above the viewport')
     const start = await page.evaluate(() => {
       const video = document.querySelector('video')
       const player = video.closest('.ftVideoPlayer')
@@ -207,7 +223,7 @@ for (const [scale, trigger] of [[100, 'button'], [125, 'button'], [100, 'home'],
       const rect = video.getBoundingClientRect()
       return { y: rect.y, width: rect.width, outerWidth, rect: [rect.x, rect.y, rect.width, rect.height], inner: [innerWidth, innerHeight] }
     })
-    const remote = `/sdcard/opentubex-pip-regression-${scale}-${trigger}.mp4`
+    const remote = `/sdcard/opentubex-pip-regression-${scale}-${label}.mp4`
     const recorder = spawn('adb', ['-s', process.env.ANDROID_SERIAL, 'shell', 'screenrecord', '--time-limit', '4', remote], { stdio: 'ignore' })
     const recording = new Promise(resolve => recorder.once('exit', resolve))
     await page.waitForTimeout(300)
@@ -298,7 +314,7 @@ for (const [scale, trigger] of [[100, 'button'], [125, 'button'], [100, 'home'],
         clocks.push(clock)
       }
       assert.ok(new Set(clocks.slice(-3)).size > 1, 'PiP must keep showing live video')
-      await assertRecordedEntry(recording, remote, scale, trigger)
+      await assertRecordedEntry(recording, remote, scale, label)
       const api = Number(adb('shell', 'getprop', 'ro.build.version.sdk').trim())
       if (api >= 31 && trigger === 'button') {
         const x = Math.round((left + right) / 2)
@@ -322,7 +338,9 @@ for (const [scale, trigger] of [[100, 'button'], [125, 'button'], [100, 'home'],
       assert.ok(frames.some(frame => frame.active), 'the native window actually entered PiP')
       assert.ok(frames.every(frame => !frame.mini), 'native PiP must not activate the scroll mini-player')
       for (const frame of frames.filter(frame => frame.active && !frame.returning)) {
-        assert.ok(frame.rect.every((value, axis) => Math.abs(value - start.rect[axis]) <= 1),
+        const expected = [...start.rect]
+        if (offscreen) expected[1] = 0
+        assert.ok(frame.rect.every((value, axis) => Math.abs(value - expected[axis]) <= 1),
           `PiP must preserve the live video element's geometry: ${JSON.stringify(frame)}`)
         assert.deepEqual(frame.inner, start.inner, 'Chromium must keep the original viewport during PiP')
       }
@@ -333,12 +351,16 @@ for (const [scale, trigger] of [[100, 'button'], [125, 'button'], [100, 'home'],
     } finally {
       await recording
       if (process.env.ANDROID_ARTIFACT_DIR) {
-        await writeFile(`${process.env.ANDROID_ARTIFACT_DIR}/${process.env.ANDROID_SERIAL}-${scale}-${trigger}-trace.json`,
+        await writeFile(`${process.env.ANDROID_ARTIFACT_DIR}/${process.env.ANDROID_SERIAL}-${scale}-${label}-trace.json`,
           JSON.stringify(await page.evaluate(() => window.__stopPipLifecycleTrace?.())))
       }
       adb('shell', 'rm', '-f', remote)
       adb('shell', 'am', 'start', '-n', 'org.opentubex.app.dev/org.opentubex.app.MainActivity')
-      await page.evaluate(() => document.querySelector('video')?.pause())
+      await page.evaluate(() => {
+        document.querySelector('video')?.pause()
+        document.querySelector('#pip-offscreen-content')?.remove()
+        window.scrollTo(0, 0)
+      })
     }
   })
 }

@@ -5,7 +5,9 @@ import vm from 'node:vm'
 
 function renderer({ fit = 'contain', rect = { x: 12, y: 60, width: 400, height: 300 } } = {}) {
   const calls = []
-  const frames = []
+  const frames = new Map()
+  const timers = new Map()
+  let sequence = 0
   const listeners = new Map()
   const callbacks = new Map()
   const classes = new Set()
@@ -25,15 +27,20 @@ function renderer({ fit = 'contain', rect = { x: 12, y: 60, width: 400, height: 
     setAutoPictureInPicture: async options => calls.push(['auto', structuredClone(options)]),
     updatePictureInPictureSourceRect: async options => calls.push(['bounds', structuredClone(options)]),
   }
-  const document = {
+  const document = Object.assign(new EventTarget(), {
+    hidden: false, hasFocus: () => true,
     body: { classList: { contains: name => classes.has(name), toggle: (name, on) => on ? classes.add(name) : classes.delete(name) } },
     querySelectorAll: () => [],
     documentElement: { style: { setProperty: (name, value) => properties.set(name, value) } },
-  }
+  })
   const window = {
     innerWidth: 480, innerHeight: 800, outerWidth: 480, outerHeight: 800,
     visualViewport: Object.assign(new EventTarget(), { scale: 1 }),
-    dispatchEvent: event => api.setAndroidPictureInPictureDocumentState(event.active, event),
+    dispatchEvent: event => {
+      if (event.type === 'opentubex:android-pip') api.setAndroidPictureInPictureDocumentState(event.active, event)
+      for (const callback of [...(callbacks.get(event.type) ?? [])]) callback(event)
+      return true
+    },
     addEventListener: (name, callback) => {
       if (!callbacks.has(name)) callbacks.set(name, new Set())
       callbacks.get(name).add(callback)
@@ -51,13 +58,22 @@ function renderer({ fit = 'contain', rect = { x: 12, y: 60, width: 400, height: 
       constructor(callback) { resized = callback }
       observe() {} disconnect() { resized = null }
     },
-    requestAnimationFrame: callback => { frames.push(callback); return frames.length },
-    cancelAnimationFrame() {},
+    requestAnimationFrame: callback => { const id = ++sequence; frames.set(id, callback); return id },
+    cancelAnimationFrame: id => frames.delete(id),
+    setTimeout: callback => { const id = ++sequence; timers.set(id, callback); return id },
+    clearTimeout: id => timers.delete(id),
   }
   const source = readFileSync(new URL('../../src/renderer/helpers/androidUi.js', import.meta.url), 'utf8')
     .replace(/^import .+$/gm, '').replace(/export /g, '')
   const api = vm.runInNewContext(`${source}\n({ enterAndroidPictureInPicture, setAndroidAutoPictureInPicture, setAndroidPictureInPictureDocumentState })`, context)
-  return { ...api, video, calls, rect, classes, attributes, properties, window, resize: () => resized?.(), listeners, flush: () => { while (frames.length) frames.shift()() } }
+  const step = () => {
+    for (const [id, callback] of [...frames]) {
+      if (frames.delete(id)) callback()
+    }
+  }
+  return { ...api, video, calls, rect, classes, attributes, properties, window, document,
+    resize: () => resized?.(), listeners, step, flush: () => { while (frames.size) step() },
+    expire: () => { for (const callback of [...timers.values()]) callback() } }
 }
 
 test('manual PiP keeps the live source layout until the native mode callback, and restores without motion', async () => {
@@ -158,4 +174,117 @@ test('disabling automatic entry while already in PiP retains the manual video ta
   r.flush()
   await r.setAndroidAutoPictureInPicture(false, r.video)
   assert.equal(r.attributes.has('data-android-picture-in-picture-target'), false)
+})
+
+for (const y of [-1000, 1000]) {
+  test(`offscreen automatic PiP relocates the live content into its current crop at y=${y}`, async () => {
+    const r = renderer()
+    await r.setAndroidAutoPictureInPicture(true, r.video)
+    r.rect.y = y
+    r.listeners.get('scroll')()
+    r.flush()
+    const { sourceRect } = r.calls.at(-1)[1]
+    assert.ok(sourceRect, 'automatic entry still has a live video crop')
+    assert.ok(sourceRect.y >= 0 && sourceRect.y + sourceRect.height <= r.window.innerHeight)
+    r.setAndroidPictureInPictureDocumentState(true, { transitioning: true })
+    assert.equal(parseFloat(r.properties.get('--android-pip-source-top')) + 37.5, sourceRect.y,
+      'the frozen video and native content crop must move together')
+    assert.equal(sourceRect.height, 225)
+  })
+}
+
+test('disabling a normal PiP target explicitly clears the native source crop', async () => {
+  const r = renderer()
+  await r.setAndroidAutoPictureInPicture(true, r.video)
+  await r.setAndroidAutoPictureInPicture(false, r.video)
+  assert.equal(r.calls.at(-1)[1].sourceRect, null)
+})
+
+for (const frames of [0, 1]) {
+  test(`backgrounding manual PiP after ${frames} paint frames cannot enter late on return`, async () => {
+    const r = renderer()
+    const entered = r.enterAndroidPictureInPicture(r.video)
+    if (frames) r.step()
+    r.document.hidden = true
+    r.document.dispatchEvent(new Event('visibilitychange'))
+    r.document.hidden = false
+    r.flush()
+    await entered
+    assert.equal(r.calls.filter(([action]) => action === 'enter').length, 0)
+  })
+}
+
+for (const transitioning of [false, true]) {
+  test(`automatic PiP can take over an interrupted manual paint wait (transitioning=${transitioning})`, async () => {
+    const r = renderer()
+    const entered = r.enterAndroidPictureInPicture(r.video)
+    r.window.dispatchEvent(Object.assign(new Event('opentubex:android-pip'), { active: true, transitioning }))
+    r.flush()
+    await entered
+    assert.equal(r.calls.filter(([action]) => action === 'enter').length, 0)
+    assert.ok(r.classes.has('androidPictureInPicture'))
+  })
+}
+
+test('a foreground manual paint deadline restores the page and prevents a late request', async () => {
+  const r = renderer()
+  const entered = r.enterAndroidPictureInPicture(r.video)
+  r.expire()
+  r.flush()
+  await entered
+  assert.equal(r.calls.filter(([action]) => action === 'enter').length, 0)
+  assert.equal(r.classes.has('androidPictureInPicture'), false)
+})
+
+test('transient focus loss cancels manual entry and restores the page when focus returns', async () => {
+  const r = renderer()
+  const entered = r.enterAndroidPictureInPicture(r.video)
+  r.document.hasFocus = () => false
+  r.listeners.get('blur')()
+  await entered
+  r.document.hasFocus = () => true
+  r.listeners.get('focus')()
+  r.flush()
+  assert.equal(r.calls.filter(([action]) => action === 'enter').length, 0)
+  assert.equal(r.classes.has('androidPictureInPicture'), false)
+})
+
+for (const transitioning of [false, true]) {
+  test(`native automatic entry cancels the interrupted manual focus fallback (transitioning=${transitioning})`, async () => {
+    const r = renderer()
+    const entered = r.enterAndroidPictureInPicture(r.video)
+    r.document.hasFocus = () => false
+    r.listeners.get('blur')()
+    await entered
+    r.window.dispatchEvent(Object.assign(new Event('opentubex:android-pip'), { active: true, transitioning }))
+    r.document.hasFocus = () => true
+    r.listeners.get('focus')()
+    r.flush()
+    assert.ok(r.classes.has('androidPictureInPicture'))
+  })
+}
+
+test('restored layout work runs before CSS transitions resume and re-entry cancels obsolete work', async () => {
+  const r = renderer()
+  await r.setAndroidAutoPictureInPicture(true, r.video)
+  let restored = 0
+  r.window.addEventListener('opentubex:android-pip-restored', () => {
+    assert.ok(r.classes.has('androidPictureInPictureRestoring'))
+    restored++
+  })
+  r.setAndroidPictureInPictureDocumentState(true)
+  r.setAndroidPictureInPictureDocumentState(false)
+  r.step()
+  r.step()
+  assert.equal(restored, 1)
+  assert.ok(r.classes.has('androidPictureInPictureRestoring'))
+  r.flush()
+  assert.equal(r.classes.has('androidPictureInPictureRestoring'), false)
+  r.setAndroidPictureInPictureDocumentState(true)
+  r.setAndroidPictureInPictureDocumentState(false)
+  r.step()
+  r.setAndroidPictureInPictureDocumentState(true)
+  r.flush()
+  assert.equal(restored, 1, 'new entry cancels the old restoration')
+  assert.ok(r.classes.has('androidPictureInPicture'))
 })

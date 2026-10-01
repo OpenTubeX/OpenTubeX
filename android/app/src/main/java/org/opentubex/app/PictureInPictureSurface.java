@@ -39,6 +39,10 @@ final class PictureInPictureSurface {
         this.webView = webView;
     }
 
+    boolean isPrepared() {
+        return root != null;
+    }
+
     void prepare(Rect source) {
         if (root != null || source == null || source.isEmpty() || webView.getWidth() == 0) {
             return;

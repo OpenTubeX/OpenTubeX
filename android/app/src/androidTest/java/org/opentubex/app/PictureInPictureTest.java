@@ -2,6 +2,7 @@ package org.opentubex.app;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.app.PictureInPictureParams;
@@ -29,9 +30,48 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.json.JSONObject;
 
 @RunWith(AndroidJUnit4.class)
 public class PictureInPictureTest {
+    @Test
+    public void clearingTargetPreservesOnlyThePreparedCrop() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            boolean[] focused = { false };
+            long deadline = android.os.SystemClock.uptimeMillis() + 5000;
+            while (!focused[0] && android.os.SystemClock.uptimeMillis() < deadline) {
+                scenario.onActivity(activity -> focused[0] = activity.hasWindowFocus());
+                Thread.sleep(20);
+            }
+            assertTrue("Activity has focus", focused[0]);
+            scenario.onActivity(activity -> {
+                AndroidUiPlugin plugin = (AndroidUiPlugin) activity.getBridge().getPlugin("AndroidUi").getInstance();
+                try {
+                    Field source = AndroidUiPlugin.class.getDeclaredField("pictureInPictureSourceRect");
+                    source.setAccessible(true);
+                    Rect rect = new Rect(0, 120, 640, 480);
+                    PluginCall clear = new PluginCall(null, "AndroidUi", "pip-clear-test", "setAutoPictureInPicture",
+                        new JSObject().put("enabled", false).put("sourceRect", JSONObject.NULL)) {
+                        @Override public void resolve() {}
+                    };
+                    source.set(plugin, rect);
+                    plugin.setAutoPictureInPicture(clear);
+                    assertNull("Removing the target clears its old crop", source.get(plugin));
+                    source.set(plugin, rect);
+                    plugin.preparePictureInPictureSurface();
+                    try {
+                        plugin.setAutoPictureInPicture(clear);
+                        assertEquals("Pausing prepared PiP preserves its live crop", rect, source.get(plugin));
+                    } finally {
+                        plugin.onPictureInPictureModeChanged(false, () -> {});
+                    }
+                } catch (ReflectiveOperationException error) {
+                    throw new AssertionError(error);
+                }
+            });
+        }
+    }
+
     @Test
     public void liveVideoKeepsItsViewportAndFitsTheFirstResizedFrame() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {

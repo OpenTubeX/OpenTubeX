@@ -735,18 +735,26 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     return pictureInPictureActive.value || isAndroidPipLayoutActive()
   }
 
+  let androidPipLayoutRestored = false
   function isAndroidPipLayoutActive() {
     return process.env.IS_CAPACITOR && !process.env.IS_IOS &&
       (document.body.classList.contains('androidPictureInPicture') ||
-        document.body.classList.contains('androidPictureInPictureRestoring'))
+        (document.body.classList.contains('androidPictureInPictureRestoring') && !androidPipLayoutRestored))
   }
 
   function handleAndroidPictureInPictureChange(event) {
+    androidPipLayoutRestored = false
     if (!event.active) return
     cancelScrollMiniPlayerLayoutAnimation()
     cancelPendingScrollMiniScrollFrame()
     cancelScrollMiniPlayerBounce()
     cancelScrollMiniPlayerDrag()
+  }
+
+  function handleAndroidPictureInPictureRestored() {
+    androidPipLayoutRestored = true
+    resnapScrollMiniPlayerToEdge()
+    updateScrollMiniPlayer({ animateActivation: false, animateDeactivation: false })
   }
 
   function isNativeFullscreenActive() {
@@ -1227,8 +1235,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     }
   }
 
-  /** @param {{ animateActivation?: boolean }} [options] */
-  function updateScrollMiniPlayer({ animateActivation = true } = {}) {
+  /** @param {{ animateActivation?: boolean, animateDeactivation?: boolean }} [options] */
+  function updateScrollMiniPlayer({ animateActivation = true, animateDeactivation = true } = {}) {
     // The native PiP viewport makes the inline anchor appear offscreen. Keep
     // its existing layout so returning cannot start a dock/restore animation.
     if (isAndroidPipLayoutActive()) return
@@ -1268,7 +1276,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
     if (scrollMiniPlayerActive.value) {
       if (ratio >= EXIT_MINI_RATIO) {
-        deactivateScrollMiniPlayer(true)
+        deactivateScrollMiniPlayer(animateDeactivation)
       } else {
         syncScrollMiniPlayerState()
         updateScrollMiniDragHandleContrast()
@@ -1675,6 +1683,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   onMounted(() => {
     if (!process.env.IS_CAPACITOR || process.env.IS_IOS) return
     window.addEventListener('opentubex:android-pip', handleAndroidPictureInPictureChange)
+    window.addEventListener('opentubex:android-pip-restored', handleAndroidPictureInPictureRestored)
     if (!tabId) return
     unregisterAndroidBackPlayer = registerAndroidBackPlayer(tabId, {
       begin: () => {
@@ -1702,6 +1711,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   onBeforeUnmount(() => {
     unregisterAndroidBackPlayer?.()
     window.removeEventListener('opentubex:android-pip', handleAndroidPictureInPictureChange)
+    window.removeEventListener('opentubex:android-pip-restored', handleAndroidPictureInPictureRestored)
   })
 
   watch(scrollMiniVolumePercent, updateScrollMiniVolumeBarFill)

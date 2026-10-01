@@ -12,22 +12,25 @@ const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-vide
   .replace(/^import\s[\s\S]*?from\s+['"][^'"]+['"];?\s*$/gm, '')
   .replace(/^export /gm, '')
 
-function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPlaying = true, android = false } = {}) {
+function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPlaying = true, android = false, inlineVisible = false } = {}) {
   t.mock.timers.enable({ apis: ['setTimeout'] })
   const scope = effectScope()
-  const window = new EventTarget()
+  const mounted = []
+  const unmounting = []
+  const window = Object.assign(new EventTarget(), { innerWidth: 480, innerHeight: 800 })
   window.setTimeout = t.mock.fn(setTimeout)
   const isActiveTab = ref(true)
   const isPlayerSuspended = ref(false)
   const minimized = ref(false)
   const video = ref({ paused: false, ended: false, volume: 1, currentTime: 120, play() { this.paused = false; this.ended = false }, pause() { this.paused = true } })
   const rect = { left: 10, top: 10, width: 360, height: 202 }
+  video.value.getBoundingClientRect = () => ({ ...rect })
   const classes = new Set()
   const create = vm.runInNewContext(`${source}; useScrollMiniPlayer`, {
     ...coordinator, computed, ref, watch, inject: () => ({ detached: ref(navigatedAway), tabPresented: ref(true), minimized, clearMinimizePreview() {} }), watchNavigationKey: Symbol(),
-    nextTick() {}, onMounted() {}, onBeforeUnmount() {}, window, clearTimeout, process: { env: { IS_CAPACITOR: android } },
+    nextTick() {}, onMounted: callback => mounted.push(callback), onBeforeUnmount: callback => unmounting.push(callback), window, clearTimeout, process: { env: { IS_CAPACITOR: android } },
     document: { body: { classList: { remove() {}, contains: name => classes.has(name) } } },
-    store: { getters: reactive({ getAutoPictureInPictureTriggers: [], getKeepPlayingOnNavigation: keepPlaying, getScrollMiniPlayerOnAllTabs: true }) },
+    store: { getters: reactive({ getAutoPictureInPictureTriggers: [], getKeepPlayingOnNavigation: keepPlaying, getScrollMiniPlayerOnAllTabs: true, getScrollMiniPlayerEnabled: inlineVisible }) },
     DEFAULT_ASPECT_RATIO: 16 / 9,
     getDefaultScrollMiniPlayerRect: () => ({ ...rect }),
     scrollMiniPlayerRectToStyle,
@@ -35,28 +38,33 @@ function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPl
     parseScrollMiniPlayerSavedRect: () => null,
     setSavedScrollMiniPlayerRect() {},
     getViewportInsets: () => ({ left: 0, right: 0, top: 0, bottom: 0 }),
+    getViewportWidth: () => window.innerWidth, MARGIN: 16,
     clampScrollMiniPlayerRect: value => ({ ...value }),
     pickScrollMiniVerticalAnchor: () => null,
     getScrollMiniVerticalAnchor: () => ({}),
     getResizeHandleCorner: () => 'bottom-right',
     updateScrollMiniPlayerVolumeBarFill() {},
     getScrollMiniInlineLayoutHeight: () => 202,
+    getAnchorVisibleRatio: () => 1, EXIT_MINI_RATIO: 0.5,
     SCROLL_MINI_MIN_INLINE_LAYOUT_HEIGHT: 100,
-    isReducedMotionEnabled: () => true,
+    isReducedMotionEnabled: () => !inlineVisible,
     performance: { now: () => 0 }
   })
   const player = scope.run(() => create({
-    container: ref(null), fullWindowEnabled: ref(false), getUi: () => null,
+    container: ref(inlineVisible ? { style: { removeProperty() {} }, removeAttribute() {}, hasAttribute: () => false, getBoundingClientRect: () => ({ ...rect }) } : null),
+    fullWindowEnabled: ref(false), getUi: () => null,
     isActiveTab, isPlayerSuspended, pictureInPictureActive: ref(false), props: reactive({ format: 'video', videoId: 'video' }),
     video
   }))
+  for (const callback of mounted) callback()
   player.scrollMiniPlayerActive.value = true
   player.scrollMiniPlaceholderHeight.value = 202
+  if (inlineVisible) player.scrollMiniAnchor.value = {}
   if (detached) {
     // Register ownership through the real tab-change coordinator without layout.
     isActiveTab.value = false
   }
-  t.after(() => { player.teardownScrollMiniPlayer(); scope.stop() })
+  t.after(() => { for (const callback of unmounting) callback(); player.teardownScrollMiniPlayer(); scope.stop() })
   return { player, window, isActiveTab, isPlayerSuspended, minimized, video, classes }
 }
 
@@ -184,4 +192,28 @@ test('a rejected replay remains retryable without an unhandled rejection', async
   await player.scrollMiniTogglePlayPause()
   assert.equal(video.value.currentTime, 0)
   assert.equal(video.value.paused, false)
+})
+
+test('Android restoration reanchors skipped viewport changes without animating the mini-player', t => {
+  const { player, classes, window } = mountMiniPlayer(t, { android: true })
+  classes.add('androidPictureInPictureRestoring')
+  const previous = player.scrollMiniPlayerStyle.value
+  window.innerWidth = 640
+  window.innerHeight = 360
+  player.handleScrollMiniWindowResize()
+  assert.deepEqual(player.scrollMiniPlayerStyle.value, previous)
+  window.dispatchEvent(new Event('opentubex:android-pip-restored'))
+  assert.equal(player.scrollMiniPlayerStyle.value.width, '640px')
+  assert.equal(player.scrollMiniPlayerStyle.value.top, '284px')
+  assert.equal(player.scrollMiniPlayerAnimating.value, false)
+})
+
+test('Android restoration returns a visible mini-player inline without its slide animation', t => {
+  const { player, classes, window } = mountMiniPlayer(t, { android: true, inlineVisible: true })
+  classes.add('androidPictureInPictureRestoring')
+  player.updateScrollMiniPlayer()
+  assert.equal(player.scrollMiniPlayerActive.value, true)
+  window.dispatchEvent(new Event('opentubex:android-pip-restored'))
+  assert.equal(player.scrollMiniPlayerActive.value, false)
+  assert.equal(player.scrollMiniPlayerAnimating.value, false)
 })
