@@ -284,7 +284,10 @@
               :icon="tab.icon"
               class="subscriptionIcon"
             />
-            <span>{{ tab.label }}</span>
+            <span
+              class="tabLabel"
+              :data-label="tab.label"
+            ><span>{{ tab.label }}</span></span>
             <FtNewContentDot
               v-if="showNewSubscriptionFeedIndicators && newFeedTabHasNewContent(tab.id)"
               class="newFeedTabDot"

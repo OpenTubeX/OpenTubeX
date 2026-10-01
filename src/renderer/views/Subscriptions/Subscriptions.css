@@ -374,7 +374,8 @@
     gap: 0;
   }
 
-  .tab {
+  .tab,
+  .newFeedTab {
     flex: 1 1 0;
     min-inline-size: 0;
     min-block-size: 44px;
@@ -457,12 +458,14 @@
   }
 
   .newFeedTabs {
-    gap: 4px;
+    flex-wrap: nowrap;
+    gap: 0;
   }
 }
 
 @media only screen and (width <= 480px) {
-  .tabs .subscriptionIcon {
+  .tabs .subscriptionIcon,
+  .newFeedTabs .subscriptionIcon {
     display: none;
   }
 }
