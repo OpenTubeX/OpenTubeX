@@ -21,6 +21,67 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class MobileAppearanceSettingsTest {
     @Test
+    public void performanceIndicatorsWrapWithoutSqueezingSwitchLabels() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            WebView view = webView(scenario);
+            try {
+                prepare(view);
+                evaluate(view, """
+                    (() => {
+                        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                        window.__mobileAppearanceSaved.ShowPerformanceImpactIndicators = store.getters.getShowPerformanceImpactIndicators;
+                        store.dispatch('showSettingsWindow');
+                    })()
+                    """);
+                awaitCondition(view, "!!document.querySelector('.settingsMenu [data-section=general]')");
+                evaluate(view, "document.querySelector('.settingsMenu [data-section=general]').click()");
+                String control = "document.querySelector('.settingsContent [data-setting-key=updateRelativeTimestamps]')";
+                awaitCondition(view, "!!" + control);
+                for (int scale : new int[] {100, 125, 150}) {
+                    evaluate(view, """
+                        (() => {
+                            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                            store.commit('setShowPerformanceImpactIndicators', false);
+                            store.commit('setUiScale', %d);
+                        })()
+                        """.formatted(scale));
+                    awaitCondition(view, "Math.abs(window.visualViewport.scale - " + scale / 100.0 + ") < 0.01 && !" +
+                        control + ".querySelector('.performanceImpact')");
+                    double originalWidth = json(view, "({width: " + control +
+                        ".querySelector('.switch-label-text').getBoundingClientRect().width})").getDouble("width");
+                    evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setShowPerformanceImpactIndicators', true)");
+                    awaitCondition(view, "!!" + control + ".querySelector('.performanceImpact')");
+                    JSONObject layout = json(view, """
+                        (() => {
+                            const element = %s;
+                            const text = element.querySelector('.switch-label-text');
+                            const badge = element.querySelector('.performanceImpact');
+                            const range = document.createRange();
+                            range.selectNodeContents(text);
+                            const textBottom = Math.max(...Array.from(range.getClientRects(), rect => rect.bottom));
+                            const bounds = badge.getBoundingClientRect();
+                            return {width: text.getBoundingClientRect().width, textBottom,
+                                badgeTop: bounds.top, badgeRight: bounds.right,
+                                helpLeft: element.querySelector('.tooltip').getBoundingClientRect().left,
+                                helpBottom: element.querySelector('.tooltip').getBoundingClientRect().bottom};
+                        })()
+                        """.formatted(control));
+                    assertTrue("The label retains its width at " + scale + "%: " + layout,
+                        layout.getDouble("width") >= originalWidth - 1);
+                    assertTrue("The badge wraps below the text at " + scale + "%: " + layout,
+                        layout.getDouble("badgeTop") >= layout.getDouble("textBottom") - 1);
+                    assertTrue("The badge does not overlap help at " + scale + "%: " + layout,
+                        layout.getDouble("badgeRight") <= layout.getDouble("helpLeft") + 1 ||
+                            layout.getDouble("badgeTop") >= layout.getDouble("helpBottom") - 1);
+                }
+            } finally {
+                evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setSettingsWindowOpen', false)");
+                restore(view);
+            }
+        }
+    }
+
+    @Test
     public void tappingBesideNestedScrollbarHandleDoesNotScroll() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             WebView view = webView(scenario);
