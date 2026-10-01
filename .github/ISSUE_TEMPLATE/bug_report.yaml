@@ -102,8 +102,16 @@ body:
         - Flatpak
         - Flatpark
         - Snap
+        - Nix
         - .dmg
+        - Homebrew
+        - .apk (Android)
+        - F-Droid repository
+        - Obtainium
         - .ipa (iOS / iPadOS)
+        - SideStore
+        - iloader
+        - AltStore Classic
         - .exe
         - WinGet
         - .pacman
