@@ -25,7 +25,7 @@ export function createMobileDlnaCast(native) {
     })
   }
 
-  return {
+  const cast = {
     async discover() {
       const { responses } = await native.discover()
       const locations = new Map()
@@ -87,6 +87,18 @@ export function createMobileDlnaCast(native) {
       }
     },
 
+    async recover(castId, payload) {
+      if (activeCast?.castId !== castId || payload.audioUrl || !await cast.hasFailed(castId)) {
+        return { error: 'No failed cast is available to recover' }
+      }
+      await cast.stop(castId)
+      return cast.start(payload)
+    },
+
+    async hasFailed(castId) {
+      return (await native.hasFailed({ castId })).failed
+    },
+
     async stop(castId) {
       if (!activeCast || activeCast.castId !== castId) return false
       const cast = activeCast
@@ -101,6 +113,7 @@ export function createMobileDlnaCast(native) {
       }
     }
   }
+  return cast
 }
 
 export const dlnaCast = process.env.IS_CAPACITOR
@@ -108,5 +121,7 @@ export const dlnaCast = process.env.IS_CAPACITOR
   : {
       discover: () => window.ftElectron.dlna.discover(),
       start: payload => window.ftElectron.dlna.start(payload),
-      stop: castId => window.ftElectron.dlna.stop(castId)
+      stop: castId => window.ftElectron.dlna.stop(castId),
+      hasFailed: castId => window.ftElectron.dlna.hasFailed(castId),
+      recover: (castId, payload) => window.ftElectron.dlna.recover(castId, payload)
     }

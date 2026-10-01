@@ -288,7 +288,15 @@ public class DlnaCastingTest {
         }
     }
 
+    @Test public void reportsFailedMergeForCompleteSourceRecovery() throws Exception {
+        verifyMergedRelay(true);
+    }
+
     @Test public void mergesSeparateTracksWithoutPreparingACompleteFile() throws Exception {
+        verifyMergedRelay(false);
+    }
+
+    private void verifyMergedRelay(boolean invalid) throws Exception {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         byte[] video;
         byte[] audio;
@@ -309,7 +317,7 @@ public class DlnaCastingTest {
                                 BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.US_ASCII));
                                 String first = reader.readLine();
                                 for (String line; (line = reader.readLine()) != null && !line.isEmpty();) {}
-                                byte[] bytes = first.contains("/audio") ? audio : video;
+                                byte[] bytes = invalid ? new byte[]{0} : first.contains("/audio") ? audio : video;
                                 socket.getOutputStream().write(("HTTP/1.1 200 OK\r\nContent-Length: " + bytes.length + "\r\nConnection: close\r\n\r\n").getBytes(StandardCharsets.US_ASCII));
                                 if (!first.startsWith("HEAD")) socket.getOutputStream().write(bytes);
                             } catch (IOException ignored) {}
@@ -344,6 +352,11 @@ public class DlnaCastingTest {
                 File received = File.createTempFile("dlna-merged-", ".mp4", context.getCacheDir());
                 long started = System.nanoTime();
                 try {
+                    if (invalid) {
+                        assertEquals(502, request.getResponseCode());
+                        assertTrue("Failed merge is exposed for renderer recovery", relay.muxFailed);
+                        return;
+                    }
                     assertEquals(200, request.getResponseCode());
                     assertEquals("none", request.getHeaderField("Accept-Ranges"));
                     long firstBytesMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started);
