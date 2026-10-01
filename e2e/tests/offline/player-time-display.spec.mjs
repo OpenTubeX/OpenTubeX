@@ -1,5 +1,5 @@
 import { test, expect, goToSettingsSection, setPlayerFullscreen } from '../../helpers/app.mjs'
-import { openMockedVideo } from '../../helpers/player.mjs'
+import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 test.use({
@@ -147,22 +147,55 @@ test('play and pause icons morph in both player themes', async ({ app, page }) =
   }
 })
 
-test('paused video shows replay after seeking to the end with End', async ({ app, page }) => {
-  await mockPlayableWatchPage(app, page)
-  const video = await openMockedVideo(page)
-  await video.evaluate(element => element.pause())
-  await expect(video).toHaveJSProperty('paused', true)
+for (const shorterSeekRange of [false, true]) {
+  test(`paused video shows replay after seeking to the end with End${shorterSeekRange ? ' before the media duration' : ''}`, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    const watch = await page.evaluateHandle(findWatchComponent)
+    const replayPath = await watch.evaluate(component => component.refs.player.$.setupState.replayIcon)
+    const playButton = page.locator('.ftVideoPlayer .shaka-controls-button-panel > .shaka-play-button')
+    const replayIcon = playButton.locator(':scope > .shaka-ui-icon:not(.ft-play-pause-morph-icon)')
+    const morphIcon = playButton.locator('.ft-play-pause-morph-icon')
 
-  await page.keyboard.press('End')
+    if (shorterSeekRange) {
+      // Adaptive streams can have a seek range ending before the media duration.
+      // Use Shaka's real range configuration to reproduce that state offline.
+      await video.evaluate(element => element.ui.getControls().getPlayer().configure({ playRangeEnd: Math.floor(element.duration) - 0.25 }))
+    }
 
-  const playButton = page.locator('.ftVideoPlayer .shaka-controls-button-panel > .shaka-play-button')
-  await expect(video).toHaveJSProperty('ended', true)
-  await expect(playButton).toHaveAttribute('data-ft-play-pause-state', 'replay')
+    for (const frosted of [true, false]) {
+      await watch.evaluate((component, value) => component.proxy.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+      await video.evaluate(element => element.pause())
+      await expect(video).toHaveJSProperty('paused', true)
 
-  await playButton.click({ force: true })
-  await expect(video).toHaveJSProperty('paused', false)
-  await expect(playButton).toHaveAttribute('data-ft-play-pause-state', 'pause')
-})
+      await page.keyboard.press('End')
+      await expect.poll(() => video.evaluate(element => element.ui.getControls().getPlayer().isEnded())).toBe(true)
+      await expect(video).toHaveJSProperty('ended', !shorterSeekRange)
+      await expect(playButton).toHaveAccessibleName('Replay')
+      await expect(playButton).toHaveAttribute('data-ft-play-pause-state', 'replay')
+      await expect(replayIcon).toHaveCSS('opacity', '1')
+      await expect(replayIcon.locator('path')).toHaveAttribute('d', replayPath)
+      await expect(morphIcon).toHaveCSS('opacity', '0')
+
+      await page.keyboard.press('Home')
+      await expect(playButton).toHaveAttribute('data-ft-play-pause-state', 'play')
+      await expect(replayIcon).toHaveCSS('opacity', '0')
+      await expect(morphIcon).toHaveCSS('opacity', '1')
+
+      await page.keyboard.press('End')
+      await expect(playButton).toHaveAttribute('data-ft-play-pause-state', 'replay')
+      await expect(replayIcon).toHaveCSS('opacity', '1')
+      await expect(replayIcon.locator('path')).toHaveAttribute('d', replayPath)
+      await playButton.click({ force: true })
+      await expect(video).toHaveJSProperty('paused', false)
+      await expect.poll(() => video.evaluate(element => element.currentTime)).toBeLessThan(5)
+      await expect(playButton).toHaveAttribute('data-ft-play-pause-state', 'pause')
+      await expect(replayIcon).toHaveCSS('opacity', '0')
+      await expect(morphIcon).toHaveCSS('opacity', '1')
+    }
+    await watch.dispose()
+  })
+}
 
 test('bottom control pills share the volume-to-timestamp spacing', async ({ app, page, attachScreenshot }) => {
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseQuickPlaybackSpeedBar', true))
