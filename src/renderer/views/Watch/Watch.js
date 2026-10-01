@@ -100,6 +100,7 @@ import {
 } from '../../helpers/player/ytDlpPlaybackPreload'
 import { getMusicTrackArtist, MUSIC_MEDIA_TYPE } from '../../helpers/player/musicMediaType'
 import { getCompatibleAdaptiveFormats } from '../../helpers/player/compatibleAdaptiveFormats'
+import { getLiveDvrWindowSeconds } from '../../helpers/player/liveManifest'
 import { selectSponsorBlockFullVideoLabel } from '../../helpers/player/sponsorBlockFullVideo'
 import {
   buildSubscriptionShortsFeed,
@@ -3121,6 +3122,7 @@ export default defineComponent({
           watchPageIpBlocked,
           musicMediaType,
           androidLiveHlsManifestUrl,
+          androidLiveDashManifestUrl,
         } = videoInfo
 
         this.musicMediaType = musicMediaType
@@ -3496,15 +3498,18 @@ export default defineComponent({
           }
 
           if (useRemoteManifest) {
-            if (result.streaming_data?.dash_manifest_url) {
-              this.manifestSrc = result.streaming_data.dash_manifest_url
+            const hlsManifestUrl = result.streaming_data?.hls_manifest_url ?? androidLiveHlsManifestUrl
+            const dashManifestUrl = result.streaming_data?.dash_manifest_url ??
+              ((getLiveDvrWindowSeconds(hlsManifestUrl) ?? 0) <= 30 ? androidLiveDashManifestUrl : null)
+            if (dashManifestUrl) {
+              this.manifestSrc = dashManifestUrl
               this.manifestMimeType = MANIFEST_TYPE_DASH
             } else {
               // A blocked live player response can contain all watch-page metadata
               // without either manifest URL. Keep the missing source as `null`, as
               // expected by the player availability checks, while yt-dlp extracts
               // its independent HLS manifest.
-              this.manifestSrc = result.streaming_data?.hls_manifest_url ?? androidLiveHlsManifestUrl
+              this.manifestSrc = hlsManifestUrl
               this.manifestMimeType = MANIFEST_TYPE_HLS
             }
           }
