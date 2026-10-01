@@ -259,6 +259,144 @@ test('hides the DLNA action while the playback source is pending', async ({ app,
 test.describe('desktop quick playback speed bar', () => {
   test.use({ seed: { settings: { ...WATCH_PAGE_SEED, useQuickPlaybackSpeedBar: true } } })
 
+  const overflowingPresets = Array.from({ length: 24 }, (_, index) => ({ speed: 0.5 + index * 0.25 }))
+
+  for (const scale of [100, 125]) {
+    test(`uses available control space before clipping presets at ${scale}% scale`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      await openMockedVideo(page)
+      await page.evaluate(async ({ scale, presets }) => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await store.dispatch('updateQuickPlaybackSpeedBarOptions', JSON.stringify(presets))
+        await store.dispatch('updateUiScale', scale)
+      }, { scale, presets: overflowingPresets })
+      await page.locator('body').press('s')
+      await expect(page.locator('.ftVideoPlayer')).toHaveClass(/fullWindow/)
+      const bar = page.locator('.ft-quick-playback-rate-bar')
+      for (const [index, width] of [1050, 1350, 1750].entries()) {
+        await setWindowSize(app, page, { width, height: 850 + index * 10 })
+        await expect.poll(() => bar.evaluate(element => (
+          element.scrollWidth > element.clientWidth + 1 &&
+          element.parentElement.querySelector('.shaka-spacer').getBoundingClientRect().width > 1
+        ))).toBe(false)
+      }
+      await expect.poll(() => bar.evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThan(640)
+    })
+
+    test(`clamps scrolled presets after content and viewport changes at ${scale}% scale`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      const video = await openMockedVideo(page)
+      await video.evaluate(element => element.pause())
+      await page.evaluate(scale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', scale), scale)
+      await page.locator('body').press('s')
+      const bar = page.locator('.ft-quick-playback-rate-bar')
+      const view = await watchViewHandle(page)
+
+      for (const [index, change] of ['resize', 'presets', 'labels', 'locale', 'save action', 'save label'].entries()) {
+        await setWindowSize(app, page, { width: 1050 + index * 10, height: 850 + index * 10 })
+        await page.evaluate(async presets => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          await store.dispatch('updateQuickPlaybackSpeedBarOptions', JSON.stringify(presets))
+          await store.dispatch('updateRememberPlaybackSpeedPerChannel', true)
+          await store.dispatch('updateAutoUpdateChannelPlaybackSpeeds', false)
+          await store.dispatch('updateCurrentLocale', 'de-DE')
+        }, overflowingPresets.map(preset => ({ ...preset, name: `Playback speed ${preset.speed}` })))
+        await expect.poll(() => bar.evaluate(element => element.scrollWidth - element.clientWidth)).toBeGreaterThan(0)
+        const previousScrollLeft = await bar.evaluate(element => {
+          element.scrollLeft = element.scrollWidth
+          return element.scrollLeft
+        })
+
+        if (change === 'resize') {
+          await setWindowSize(app, page, { width: 1350, height: 900 })
+        } else if (change === 'save label') {
+          await expect(bar.locator('.ft-quick-playback-rate-save')).toHaveAttribute('data-remove', 'false')
+          await view.evaluate(view => view.saveChannelPlaybackSpeed(view.currentPlaybackRate))
+          await expect(bar.locator('.ft-quick-playback-rate-save')).toHaveAttribute('data-remove', 'true')
+        } else {
+          await page.evaluate(async ({ change, presets }) => {
+            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            if (change === 'presets' || change === 'labels') {
+              await store.dispatch('updateQuickPlaybackSpeedBarOptions', JSON.stringify(change === 'presets' ? presets.slice(0, 2) : presets))
+            } else if (change === 'locale') {
+              await store.dispatch('updateCurrentLocale', 'en-US')
+            } else {
+              await store.dispatch('updateRememberPlaybackSpeedPerChannel', false)
+            }
+          }, { change, presets: overflowingPresets })
+        }
+
+        await expect.poll(() => bar.evaluate((element, previous) => {
+          const bounds = element.getBoundingClientRect()
+          const lastButton = element.querySelector('button:last-child').getBoundingClientRect()
+          const padding = Number.parseFloat(getComputedStyle(element).paddingRight)
+          return {
+            offsetReduced: element.scrollLeft < previous,
+            offsetValid: element.scrollLeft <= element.scrollWidth - element.clientWidth + 1,
+            noEmptySpace: bounds.right - padding - lastButton.right <= 1,
+            scrollbarHidden: getComputedStyle(element).scrollbarWidth === 'none'
+          }
+        }, previousScrollLeft), { message: `scroll range after ${change}` }).toEqual({ offsetReduced: true, offsetValid: true, noEmptySpace: true, scrollbarHidden: true })
+      }
+    })
+  }
+
+  test('scrolls clipped presets with the mouse wheel without changing playback', async ({ app, page }, testInfo) => {
+    await mockPlayableWatchPage(app, page)
+    const video = await openMockedVideo(page)
+    await video.evaluate(element => element.pause())
+    await page.evaluate(presets => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
+      'updateQuickPlaybackSpeedBarOptions', JSON.stringify(presets)
+    ), overflowingPresets)
+    await setWindowSize(app, page, { width: 1050, height: 850 })
+    await page.locator('body').press('s')
+    await page.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+    const bar = page.locator('.ft-quick-playback-rate-bar')
+    await expect.poll(() => bar.evaluate(element => element.scrollWidth - element.clientWidth)).toBeGreaterThan(0)
+    const before = await video.evaluate(element => ({ rate: element.playbackRate, volume: element.volume }))
+    for (const frosted of [true, false]) {
+      await page.evaluate(frosted => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', frosted), frosted)
+      await bar.locator('[data-rate="1"]').hover()
+      await page.mouse.wheel(0, 120)
+      await expect.poll(() => bar.evaluate(element => element.scrollLeft)).toBeGreaterThan(0)
+      await page.mouse.wheel(0, -120)
+      await expect.poll(() => bar.evaluate(element => element.scrollLeft)).toBe(0)
+      await page.mouse.wheel(120, 0)
+      await expect.poll(() => bar.evaluate(element => element.scrollLeft)).toBeGreaterThan(0)
+      await page.mouse.wheel(-120, 0)
+      await expect.poll(() => bar.evaluate(element => element.scrollLeft)).toBe(0)
+      for (const edge of ['start', 'end']) {
+        expect(await bar.evaluate((element, edge) => {
+          element.scrollLeft = edge === 'start' ? 0 : element.scrollWidth
+          const previousScrollLeft = element.scrollLeft
+          const event = new WheelEvent('wheel', {
+            deltaY: edge === 'start' ? -120 : 120,
+            bubbles: true,
+            cancelable: true
+          })
+          let bubbled = false
+          const onWheel = () => { bubbled = true }
+          element.parentElement.addEventListener('wheel', onWheel, { once: true })
+          element.dispatchEvent(event)
+          element.parentElement.removeEventListener('wheel', onWheel)
+          return {
+            defaultPrevented: event.defaultPrevented,
+            bubbled,
+            offsetUnchanged: element.scrollLeft === previousScrollLeft
+          }
+        }, edge)).toEqual({ defaultPrevented: false, bubbled: true, offsetUnchanged: true })
+      }
+      await bar.evaluate(element => { element.scrollLeft = 0 })
+      expect(await video.evaluate(element => ({ rate: element.playbackRate, volume: element.volume }))).toEqual(before)
+      if (frosted) {
+        await testInfo.attach('desktop quick speed controls', {
+          body: await page.locator('.shaka-controls-button-panel').screenshot(),
+          contentType: 'image/png'
+        })
+      }
+    }
+  })
+
   test('follows later player speed changes after a quick speed selection', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     const video = await openMockedVideo(page)

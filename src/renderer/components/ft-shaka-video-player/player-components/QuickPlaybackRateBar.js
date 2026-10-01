@@ -63,6 +63,27 @@ export class QuickPlaybackRateBar extends shaka.ui.Element {
 
     this.parent.appendChild(this.root_)
 
+    this.eventManager.listen(this.root_, 'wheel', (event) => {
+      if (event.defaultPrevented || event.ctrlKey || event.metaKey ||
+        this.root_.scrollWidth <= this.root_.clientWidth) {
+        return
+      }
+
+      const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY
+      const unit = event.deltaMode === WheelEvent.DOM_DELTA_LINE
+        ? 16
+        : event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? this.root_.clientWidth : 1
+
+      const previousScrollLeft = this.root_.scrollLeft
+      this.root_.scrollLeft += delta * unit
+      if (this.root_.scrollLeft === previousScrollLeft) {
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+    }, { passive: false })
+
     this.eventManager.listen(this.saveButton_, 'click', () => {
       quickPlaybackRateBarContexts.get(this.controls)?.events.dispatchEvent(new CustomEvent(this.saveButton_.dataset.remove === 'true' ? 'removeChannelPlaybackSpeed' : 'saveChannelPlaybackSpeed'))
     })
