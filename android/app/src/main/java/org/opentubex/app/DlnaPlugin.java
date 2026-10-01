@@ -141,6 +141,11 @@ public final class DlnaPlugin extends Plugin {
         });
     }
 
+    @PluginMethod public void hasFailed(PluginCall call) {
+        worker.execute(() -> call.resolve(new JSObject().put("failed", relay != null &&
+            relay.castId.equals(call.getString("castId")) && relay.muxFailed)));
+    }
+
     @PluginMethod public void stopMediaServer(PluginCall call) {
         worker.execute(() -> {
             if (relay != null && relay.castId.equals(call.getString("castId"))) {

@@ -65,6 +65,7 @@ export async function createMuxedMediaServer(videoUrl, audioUrl, address, token,
     })
     process.stdout.pipe(response, { end: false })
     process.on('error', () => {
+      if (!response.destroyed) server.muxFailed = true
       clearTimeout(timeout)
       processes.delete(process)
       if (!response.headersSent) response.writeHead(502).end()
@@ -75,12 +76,14 @@ export async function createMuxedMediaServer(videoUrl, audioUrl, address, token,
       processes.delete(process)
       if (code === 0 && response.headersSent) response.end()
       else {
+        if (!response.destroyed) server.muxFailed = true
         if (!response.headersSent) response.writeHead(502).end()
         else response.destroy()
       }
     })
     response.on('close', () => process.kill('SIGKILL'))
   })
+  server.muxFailed = false
   server.on('close', close)
   return server
 }

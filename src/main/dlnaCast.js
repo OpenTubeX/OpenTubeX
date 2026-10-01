@@ -184,3 +184,7 @@ export async function stopDlnaCast(ownerId, castId) {
   } catch { /* The renderer may already have disconnected. */ }
   return true
 }
+
+export function hasDlnaCastFailed(ownerId, castId) {
+  return activeCast?.ownerId === ownerId && activeCast.castId === castId && Boolean(activeCast.server.muxFailed)
+}

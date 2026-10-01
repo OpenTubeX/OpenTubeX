@@ -40,6 +40,7 @@ final class DlnaMediaServer implements AutoCloseable {
     private Context context;
     private List<DlnaMediaServer> sources = List.of();
     private double startSeconds;
+    volatile boolean muxFailed;
     private final Set<Process> processes = ConcurrentHashMap.newKeySet();
     private final ScheduledExecutorService timers = Executors.newSingleThreadScheduledExecutor();
 
@@ -184,19 +185,29 @@ final class DlnaMediaServer implements AutoCloseable {
             var timeout = timers.schedule(running::destroy, 15, TimeUnit.SECONDS);
             InputStream merged = process.getInputStream();
             byte[] buffer = new byte[32 * 1024];
-            int first = merged.read(buffer);
+            int first = readMerged(merged, buffer);
             timeout.cancel(false);
             if (first < 0) {
+                muxFailed = true;
                 output.write("HTTP/1.1 502 Bad Gateway\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".getBytes(StandardCharsets.US_ASCII));
                 return;
             }
             output.write(headers);
             output.write(buffer, 0, first);
-            for (int count; (count = merged.read(buffer)) != -1;) output.write(buffer, 0, count);
-        } catch (Exception error) { throw new IOException("DLNA stream merge failed", error); }
+            for (int count; (count = readMerged(merged, buffer)) != -1;) output.write(buffer, 0, count);
+            if (process.waitFor() != 0) muxFailed = true;
+        } catch (Exception error) {
+            if (process == null) muxFailed = true;
+            throw new IOException("DLNA stream merge failed", error);
+        }
         finally {
             if (process != null) { process.destroy(); processes.remove(process); }
         }
+    }
+
+    private int readMerged(InputStream input, byte[] buffer) throws IOException {
+        try { return input.read(buffer); }
+        catch (IOException error) { muxFailed = true; throw error; }
     }
 
     @Override public void close() {
