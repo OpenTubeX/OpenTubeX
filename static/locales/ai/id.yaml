@@ -623,6 +623,7 @@ Settings:
     Preload Upcoming Videos: "Pramuat video berikutnya"
     Upcoming Videos to Preload: "Jumlah video yang dipramuat"
     Concurrent Preloads: "Prapemuatan serentak"
+    Ignore System Rotation Lock for Fullscreen: Abaikan kunci rotasi sistem untuk layar penuh
   Channel Settings:
     Channel Settings: Pengaturan Saluran
     Channel Settings Description: Ingat pengaturan yang Anda pilih saat menonton untuk setiap saluran, lalu terapkan lagi saat Anda menonton video saluran tersebut berikutnya.
@@ -1658,6 +1659,7 @@ Tooltips:
     Preload Upcoming Videos: "Mengambil dan menyimpan URL yt-dlp untuk video berikutnya. Antrean didahulukan dari daftar putar dan rekomendasi."
     Upcoming Videos to Preload: "Jumlah maksimum video berikutnya yang URL yt-dlp-nya diambil di latar belakang."
     Concurrent Preloads: "Jumlah maksimum proses yt-dlp yang digunakan untuk pramuat video secara bersamaan. Nilai yang lebih tinggi menggunakan lebih banyak CPU, memori, dan bandwidth jaringan."
+    Ignore System Rotation Lock for Fullscreen: Putar perangkat secara fisik untuk masuk dan keluar layar penuh meskipun rotasi otomatis Android dimatikan.
   Download Settings:
     Download Folder: Video disimpan ke folder ini. Biarkan kosong untuk menggunakan folder Unduhan sistem.
     Global Additional yt-dlp Arguments: Argumen baris perintah tambahan yang diteruskan ke yt-dlp untuk setiap unduhan, misalnya --cookies-from-browser firefox.

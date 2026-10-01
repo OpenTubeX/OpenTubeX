@@ -647,6 +647,7 @@ Settings:
     Preload Upcoming Videos: "Forudindlæs kommende videoer"
     Upcoming Videos to Preload: "Antal videoer, der skal forudindlæses"
     Concurrent Preloads: "Samtidige forudindlæsninger"
+    Ignore System Rotation Lock for Fullscreen: Ignorer systemets rotationslås for fuld skærm
   Channel Settings:
     Channel Settings: Kanalindstillinger
     Channel Settings Description: Husk de indstillinger, du vælger under afspilning, for hver kanal, så de anvendes igen, næste gang du ser en af kanalens videoer.
@@ -1723,6 +1724,7 @@ Tooltips:
     Preload Upcoming Videos: "Henter og gemmer yt-dlp-streamadresser for de næste videoer. Køen har prioritet over afspilningslister og anbefalinger."
     Upcoming Videos to Preload: "Det højeste antal kommende videoer, hvis yt-dlp-streamadresser hentes i baggrunden."
     Concurrent Preloads: "Det højeste antal yt-dlp-processer, der bruges til at forudindlæse videoer samtidig. Højere værdier bruger mere CPU, hukommelse og netværksbåndbredde."
+    Ignore System Rotation Lock for Fullscreen: Drej enheden fysisk for at åbne og afslutte fuld skærm, selv når automatisk rotation er slået fra i Android.
   Download Settings:
     Download Folder: Videoer gemmes i denne mappe. Lad feltet stå tomt for at bruge systemets Downloads-mappe.
     Global Additional yt-dlp Arguments: Yderligere kommandolinjeargumenter, der sendes til yt-dlp ved hver download, f.eks. --cookies-from-browser firefox.

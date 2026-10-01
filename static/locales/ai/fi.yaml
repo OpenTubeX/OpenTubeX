@@ -636,6 +636,7 @@ Settings:
     Preload Upcoming Videos: "Esilataa seuraavat videot"
     Upcoming Videos to Preload: "Esiladattavien videoiden määrä"
     Concurrent Preloads: "Samanaikaiset esilataukset"
+    Ignore System Rotation Lock for Fullscreen: Ohita järjestelmän kiertolukitus koko näytössä
   Channel Settings:
     Channel Settings: Kanava-asetukset
     Channel Settings Description: Muista katselun aikana valitsemasi asetukset kanavakohtaisesti, jotta niitä käytetään uudelleen, kun katsot seuraavan kerran saman kanavan videota.
@@ -1689,6 +1690,7 @@ Tooltips:
     Preload Upcoming Videos: "Noutaa ja tallentaa välimuistiin seuraavien videoiden yt-dlp-osoitteet. Jono on etusijalla soittolistoihin ja suosituksiin nähden."
     Upcoming Videos to Preload: "Enimmäismäärä seuraavia videoita, joiden yt-dlp-osoitteet noudetaan taustalla."
     Concurrent Preloads: "Videoiden samanaikaiseen esilataukseen käytettävien yt-dlp-prosessien enimmäismäärä. Suuremmat arvot käyttävät enemmän suoritinta, muistia ja verkon kaistanleveyttä."
+    Ignore System Rotation Lock for Fullscreen: Käännä laitetta siirtyäksesi koko näyttöön ja poistuaksesi siitä, vaikka Androidin automaattinen kierto olisi pois käytöstä.
   Download Settings:
     Download Folder: Videot tallennetaan tähän kansioon. Jos kenttä jätetään tyhjäksi, käytetään järjestelmän Lataukset-kansiota.
     Global Additional yt-dlp Arguments: Kaikissa latauksissa yt-dlp:lle välitettävät komentorivin lisäargumentit, esimerkiksi --cookies-from-browser firefox.

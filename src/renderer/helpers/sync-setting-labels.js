@@ -99,6 +99,7 @@ export const SYNC_SETTING_LABELS = {
   enableVideoZoom: 'Settings.Player Settings.Enable Video Zoom',
   enableWatchStats: 'Settings.Privacy Settings.Enable Watch Statistics',
   enterFullscreenOnDisplayRotate: 'Settings.Player Settings.Enter Fullscreen on Display Rotate',
+  fullscreenRotationIgnoresSystemLock: 'Settings.Player Settings.Ignore System Rotation Lock for Fullscreen',
   expandSideBar: 'Settings.Theme Settings.Expand Side Bar by Default',
   externalLinkHandling: 'Settings.General Settings.External Link Handling.External Link Handling',
   extraThumbnailAction: 'Settings.General Settings.Extra Thumbnail Action Button.Extra Thumbnail Action Button',

@@ -28,6 +28,19 @@ import org.junit.runner.RunWith;
 public class RotationFullscreenTest {
     @Test
     public void manualDisplayRotationEntersFullscreenWithoutOverridingTheSystemLock() throws Exception {
+        verifyRotationFullscreen(false);
+    }
+
+    @Test
+    public void physicalRotationCanOverrideTheSystemLockWhenEnabled() throws Exception {
+        org.junit.Assume.assumeTrue("Requires the emulator accelerometer host driver",
+            "true".equals(InstrumentationRegistry.getArguments().getString("physicalRotationTest")));
+        // The host sets the emulator accelerometer to landscape before this test,
+        // then to portrait when the physical-fullscreen marker is logged.
+        verifyRotationFullscreen(true);
+    }
+
+    private void verifyRotationFullscreen(boolean physicalRotation) throws Exception {
         String media;
         try (InputStream input = InstrumentationRegistry.getInstrumentation().getContext()
             .getAssets().open("demo.webm")) {
@@ -40,6 +53,13 @@ public class RotationFullscreenTest {
         try {
             shell("settings put system accelerometer_rotation 0");
             assertTrue(InstrumentationRegistry.getInstrumentation().getUiAutomation().setRotation(UiAutomation.ROTATION_FREEZE_0));
+            if (physicalRotation) {
+                // UiAutomation unfreeze enables system auto-rotate as a side effect.
+                // Release its forced display rotation, then restore the portrait lock.
+                assertTrue(InstrumentationRegistry.getInstrumentation().getUiAutomation().setRotation(UiAutomation.ROTATION_UNFREEZE));
+                shell("settings put system accelerometer_rotation 0");
+                shell("settings put system user_rotation 0");
+            }
             try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
                 AtomicReference<WebView> reference = new AtomicReference<>();
                 scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
@@ -48,7 +68,8 @@ public class RotationFullscreenTest {
                 evaluate(view, """
                     (() => {
                         const app = document.querySelector('#app').__vue_app__.config.globalProperties;
-                        const values = { EnterFullscreenOnDisplayRotate: true, VideoPlaybackEngine: 'built-in',
+                        const values = { EnterFullscreenOnDisplayRotate: true, FullscreenRotationIgnoresSystemLock: false,
+                            VideoPlaybackEngine: 'built-in',
                             AutoplayVideos: false, UseSponsorBlock: false, UseReturnYouTubeDislikes: false,
                             UiScale: 100, CapacitorLayoutMode: 'phone', ScrollMiniPlayerEnabled: true };
                         window.__rotationSettings = Object.fromEntries(Object.keys(values).map(
@@ -99,16 +120,28 @@ public class RotationFullscreenTest {
 
                     // Android's rotation suggestion button changes the user-selected
                     // display rotation while accelerometer rotation remains disabled.
-                    assertTrue(InstrumentationRegistry.getInstrumentation().getUiAutomation().setRotation(UiAutomation.ROTATION_FREEZE_90));
+                    if (physicalRotation) {
+                        evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setFullscreenRotationIgnoresSystemLock', true)");
+                    } else {
+                        assertTrue(InstrumentationRegistry.getInstrumentation().getUiAutomation().setRotation(UiAutomation.ROTATION_FREEZE_90));
+                    }
                     awaitCondition(view, "innerWidth > innerHeight");
                     awaitCondition(view, "!!document.querySelector('.videoLayout:popover-open .ftVideoPlayer.fullWindow')");
                     awaitCondition(view, "(() => { const rect = document.querySelector('.ftVideoPlayer').getBoundingClientRect(); return rect.width >= innerWidth - 2 && rect.height >= innerHeight - 2; })()");
-                    scenario.onActivity(activity -> assertFalse("Auto fullscreen must not force sensor rotation",
-                        activity.getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE));
+                    scenario.onActivity(activity -> assertEquals("Only the explicit opt-in may force landscape",
+                        physicalRotation, activity.getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE));
                     assertEquals("0", shell("settings get system accelerometer_rotation"));
-                    assertTrue(InstrumentationRegistry.getInstrumentation().getUiAutomation().setRotation(UiAutomation.ROTATION_FREEZE_0));
+                    if (physicalRotation) {
+                        android.util.Log.i("OpenTubeXRotationTest", "physical-fullscreen");
+                    } else {
+                        assertTrue(InstrumentationRegistry.getInstrumentation().getUiAutomation().setRotation(UiAutomation.ROTATION_FREEZE_0));
+                    }
                     awaitCondition(view, "!document.body.classList.contains('playerFullWindow')");
                     assertInlinePortrait(scenario, view);
+                    if (physicalRotation) {
+                        scenario.onActivity(activity -> assertEquals("Restore the user's orientation policy",
+                            ActivityInfo.SCREEN_ORIENTATION_USER, activity.getRequestedOrientation()));
+                    }
                 } finally {
                     scenario.onActivity(activity -> activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER));
                     evaluate(view, """

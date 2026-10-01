@@ -39,7 +39,7 @@ test('fullscreen hides the Android status bar only while player controls are hid
 
 test('Android fullscreen observes display rotation without subscribing to the physical sensor', async () => {
   const source = readFileSync(new URL('../../src/renderer/helpers/androidUi.js', import.meta.url), 'utf8')
-  const start = source.indexOf('const displayRotationCallbacks = new Set()')
+  const start = source.indexOf('function createAndroidRotationObserver(')
   const end = source.indexOf('\nfunction videoDimensions(', start)
   assert.ok(start !== -1 && end !== -1)
 
@@ -53,7 +53,7 @@ test('Android fullscreen observes display rotation without subscribing to the ph
     },
   }
   const { observeAndroidDisplayRotation } = vm.runInNewContext(
-    `${source.slice(start, end).replace('export function ', 'function ')}\n({ observeAndroidDisplayRotation })`,
+    `${source.slice(start, end).replace(/^export /gm, '')}\n;({ observeAndroidDisplayRotation })`,
     { AndroidUi: { addListener: () => assert.fail('Physical sensing bypasses the system rotation lock') }, ScreenOrientation, console, Set, Promise }
   )
   const received = []
@@ -65,4 +65,40 @@ test('Android fullscreen observes display rotation without subscribing to the ph
   stop()
   await new Promise(resolve => setImmediate(resolve))
   assert.equal(removed, true)
+})
+
+test('Android physical rotation sensing starts only for explicit subscribers and stops after the last one', async () => {
+  const source = readFileSync(new URL('../../src/renderer/helpers/androidUi.js', import.meta.url), 'utf8')
+  const start = source.indexOf('function createAndroidRotationObserver(')
+  const end = source.indexOf('\nfunction videoDimensions(', start)
+  assert.ok(start !== -1 && end !== -1)
+  const calls = []
+  let emit
+  const AndroidUi = {
+    addListener: async (event, callback) => {
+      assert.equal(event, 'deviceRotationChange')
+      emit = callback
+      return { remove: async () => { calls.push('remove') } }
+    },
+    setDeviceRotationEnabled: async ({ enabled }) => { calls.push(enabled) },
+  }
+  const { observeAndroidDeviceRotation } = vm.runInNewContext(
+    `${source.slice(start, end).replace(/^export /gm, '')}\n;({ observeAndroidDeviceRotation })`,
+    { AndroidUi, ScreenOrientation: {}, console, Set, Promise }
+  )
+  const received = []
+  assert.deepEqual(calls, [])
+  const stop = observeAndroidDeviceRotation(landscape => received.push(landscape))
+  const stopSecond = observeAndroidDeviceRotation(() => {})
+  await new Promise(resolve => setImmediate(resolve))
+  emit({ landscape: true })
+  emit({ landscape: false })
+  assert.deepEqual(received, [true, false])
+  assert.deepEqual(calls, [true])
+  stop()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.deepEqual(calls, [true])
+  stopSecond()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.deepEqual(calls, [true, false, 'remove'])
 })

@@ -625,6 +625,7 @@ Settings:
     Preload Upcoming Videos: "Rhaglwytho fideos nesaf"
     Upcoming Videos to Preload: "Nifer y fideos i’w rhaglwytho"
     Concurrent Preloads: "Rhaglwythiadau cydamserol"
+    Ignore System Rotation Lock for Fullscreen: Anwybyddu clo cylchdroi’r system ar gyfer sgrin lawn
   Channel Settings:
     Channel Settings: Gosodiadau sianeli
     Channel Settings Description: Cofiwch y gosodiadau a ddewiswch wrth wylio ar gyfer pob sianel ar wahân, fel eu bod yn cael eu gosod eto y tro nesaf y byddwch yn gwylio un o'i fideos.
@@ -1674,6 +1675,7 @@ Tooltips:
     Preload Upcoming Videos: "Mae’n nôl ac yn storio URLau yt-dlp y fideos nesaf. Mae’r ciw yn cael blaenoriaeth dros restrau chwarae ac argymhellion."
     Upcoming Videos to Preload: "Uchafswm y fideos nesaf y nôlir eu URLau yt-dlp yn y cefndir."
     Concurrent Preloads: "Uchafswm nifer y prosesau yt-dlp a ddefnyddir i raglwytho fideos ar yr un pryd. Mae gwerthoedd uwch yn defnyddio mwy o CPU, cof a lled band rhwydwaith."
+    Ignore System Rotation Lock for Fullscreen: Cylchdrowch y ddyfais yn gorfforol i agor a chau sgrin lawn hyd yn oed pan fydd cylchdroi awtomatig Android wedi’i ddiffodd.
   Download Settings:
     Download Folder: Caiff fideos eu cadw yn y ffolder hon. Gadewch yn wag i ddefnyddio ffolder Lawrlwythiadau eich system.
     Global Additional yt-dlp Arguments: Ymresymiadau llinell orchymyn ychwanegol a drosglwyddir i yt-dlp ar gyfer pob lawrlwythiad, er enghraifft --cookies-from-browser firefox.

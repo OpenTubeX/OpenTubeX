@@ -610,6 +610,7 @@ Settings:
     Preload Upcoming Videos: "Preload Upcoming Videos"
     Upcoming Videos to Preload: "Upcoming Videos to Preload"
     Concurrent Preloads: "Concurrent Preloads"
+    Ignore System Rotation Lock for Fullscreen: Ignore system rotation lock for fullscreen
   Channel Settings:
     Channel Settings: Channel Settings
     Channel Settings Description: Remember the settings you pick while watching for each channel individually, so they are applied again the next time you watch one of its videos.
@@ -1632,6 +1633,7 @@ Tooltips:
     Preload Upcoming Videos: "Fetches and caches yt-dlp stream URLs for the videos that can play next. The queue takes priority over playlists and recommendations."
     Upcoming Videos to Preload: "The maximum number of upcoming videos whose yt-dlp stream URLs are fetched in the background."
     Concurrent Preloads: "The maximum number of yt-dlp processes used to preload videos at once. Higher values use more CPU, memory, and network bandwidth."
+    Ignore System Rotation Lock for Fullscreen: Use physical device rotation to enter and exit fullscreen even when Android's auto-rotate is off.
   Download Settings:
     Download Folder: Videos are saved to this folder. Leave blank to use your system's Downloads folder.
     Global Additional yt-dlp Arguments: Additional command line arguments passed to yt-dlp for every download, for example --cookies-from-browser firefox.

@@ -625,6 +625,7 @@ Settings:
     Reorder Playback Speed: Oynatma sürətinin yerini dəyişmək üçün sürükləyin
     Playback Speed: Oynatma sürəti
     Parallel Segment Loading: Seqmentlərin paralel yüklənməsi
+    Ignore System Rotation Lock for Fullscreen: Tam ekran üçün sistemin fırlanma kilidini nəzərə alma
   Channel Settings:
     Channel Settings: Kanal tənzimləmələri
     Channel Settings Description: Baxış zamanı seçdiyiniz tənzimləmələri hər kanal üçün ayrıca yadda saxlayın ki, həmin kanalın növbəti videosuna baxanda yenidən tətbiq edilsin.
@@ -1660,6 +1661,7 @@ Tooltips:
     Preload Upcoming Videos: Növbəti oynadıla biləcək videoların yt-dlp axın URL-lərini alır və keşdə saxlayır. Baxış növbəsinə pleylistlər və tövsiyələrdən daha çox üstünlük verilir.
     Upcoming Videos to Preload: yt-dlp axın URL-ləri arxa planda alınan növbəti videoların maksimum sayı.
     Concurrent Preloads: Videoları eyni anda öncədən yükləmək üçün istifadə olunan yt-dlp proseslərinin maksimum sayı. Yüksək dəyərlər daha çox prosessor, yaddaş və şəbəkə resursu istifadə edir.
+    Ignore System Rotation Lock for Fullscreen: Android-də avtomatik fırlanma söndürülsə belə, cihazı fiziki olaraq döndərərək tam ekrana keçin və çıxın.
   Download Settings:
     Download Folder: Videolar bu qovluqda saxlanır. Sistemin Yükləmələr qovluğunu istifadə etmək üçün boş buraxın.
     Global Additional yt-dlp Arguments: Hər endirmədə yt-dlp-yə ötürülən əlavə əmr sətri arqumentləri, məsələn --cookies-from-browser firefox.

@@ -17,6 +17,7 @@ test('platform-specific settings stay local to every device', () => {
     'enableClosedAppSubscriptionRefresh',
     'enableMobileFullscreenSwipe',
     'enablePullToRefresh',
+    'fullscreenRotationIgnoresSystemLock',
     'hideToTrayOnClose',
     'hideToTrayOnMinimize',
     'useTrayIcon',

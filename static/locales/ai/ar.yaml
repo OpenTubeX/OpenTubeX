@@ -631,6 +631,7 @@ Settings:
     Preload Upcoming Videos: "تحميل الفيديوهات القادمة مسبقًا"
     Upcoming Videos to Preload: "عدد الفيديوهات المراد تحميلها مسبقًا"
     Concurrent Preloads: "عمليات التحميل المسبق المتزامنة"
+    Ignore System Rotation Lock for Fullscreen: تجاهل قفل دوران النظام لملء الشاشة
   Channel Settings:
     Channel Settings: إعدادات القناة
     Channel Settings Description: تذكر الإعدادات التي تختارها أثناء المشاهدة لكل قناة على حدة، بحيث يتم تطبيقها مرة أخرى في المرة التالية التي تشاهد فيها أحد مقاطع الفيديو الخاصة بها.
@@ -1669,6 +1670,7 @@ Tooltips:
     Preload Upcoming Videos: "يجلب روابط بث yt-dlp للفيديوهات التالية ويخزنها مؤقتًا. لقائمة الانتظار الأولوية على قوائم التشغيل والاقتراحات."
     Upcoming Videos to Preload: "الحد الأقصى لعدد الفيديوهات القادمة التي تُجلب روابط بثها في الخلفية."
     Concurrent Preloads: "الحد الأقصى لعدد عمليات yt-dlp المستخدمة لتحميل مقاطع الفيديو مسبقًا في الوقت نفسه. تستخدم القيم الأعلى مزيدًا من وحدة المعالجة المركزية والذاكرة وعرض النطاق الترددي للشبكة."
+    Ignore System Rotation Lock for Fullscreen: استخدم دوران الجهاز الفعلي للدخول إلى ملء الشاشة والخروج منه حتى عند إيقاف التدوير التلقائي في أندرويد.
   Download Settings:
     Download Folder: يتم حفظ مقاطع الفيديو في هذا المجلد. اتركه فارغًا لاستخدام مجلد التنزيلات الخاص بنظامك.
     Global Additional yt-dlp Arguments: يتم تمرير وسيطات سطر الأوامر الإضافية إلى yt-dlp لكل عملية تنزيل، على سبيل المثال --cookies-from-browser Firefox.

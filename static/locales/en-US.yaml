@@ -1027,7 +1027,7 @@ Settings:
     Skip by Scrolling Over Video Player: Skip by Scrolling Over Video Player
     Multiply Seek Interval by Playback Rate: Multiply Seek Interval by Playback Rate
     Display Play Button In Video Player: Display Play Button In Video Player
-    Enter Fullscreen on Display Rotate: Enter Fullscreen on Display Rotate
+    Enter Fullscreen on Display Rotate: Enter fullscreen when the screen rotates to landscape
     Rotate Wide Videos to Landscape in Fullscreen: Rotate wide videos to landscape in fullscreen
     Swipe Up or Down to Enter or Exit Fullscreen: Swipe up or down to enter or exit fullscreen
     Show Playback Rate Adjusted Timestamp: Show Playback Rate Adjusted Timestamp
@@ -1110,6 +1110,7 @@ Settings:
       Error:
         Forbidden Characters: Forbidden Characters
         Empty File Name: Empty File Name
+    Ignore System Rotation Lock for Fullscreen: Ignore system rotation lock for fullscreen
   Channel Settings:
     Channel Settings: Channel Settings
     Channel Settings Description: Remember the settings you pick while watching for each channel individually, so they are applied again the next time you watch one of its videos.
@@ -2723,6 +2724,7 @@ Tooltips:
     Preload Upcoming Videos: Fetches and caches yt-dlp stream URLs for videos that can play next. The watch queue takes priority over playlists and recommendations.
     Upcoming Videos to Preload: The maximum number of upcoming videos whose yt-dlp stream URLs are fetched in the background.
     Concurrent Preloads: The maximum number of yt-dlp processes used to preload videos at once. Higher values use more CPU, memory, and network bandwidth.
+    Ignore System Rotation Lock for Fullscreen: Use physical device rotation to enter and exit fullscreen even when Android's auto-rotate is off.
   External Player Settings:
     External Player: Choosing an external player will display an icon, for opening the
       video (playlist if supported) in the external player, on the thumbnail. Warning, Invidious settings do not affect external players.

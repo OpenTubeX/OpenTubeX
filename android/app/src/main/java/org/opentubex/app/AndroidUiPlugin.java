@@ -6,10 +6,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
+import android.content.res.Configuration;
 import android.hardware.input.InputManager;
 import android.os.Build;
 import android.util.Rational;
 import android.view.InputDevice;
+import android.view.OrientationEventListener;
+import android.view.Surface;
 
 import androidx.annotation.RequiresApi;
 
@@ -28,6 +31,63 @@ public class AndroidUiPlugin extends Plugin {
     private boolean pictureInPictureScrollbarsHidden;
     private boolean restoreVerticalScrollBar;
     private boolean restoreHorizontalScrollBar;
+    private OrientationEventListener deviceRotationListener;
+    private boolean deviceRotationEnabled;
+    private Boolean deviceLandscape;
+
+    @PluginMethod
+    public void setDeviceRotationEnabled(PluginCall call) {
+        getActivity().runOnUiThread(() -> {
+            deviceRotationEnabled = Boolean.TRUE.equals(call.getBoolean("enabled", false));
+            if (deviceRotationEnabled) {
+                if (deviceRotationListener == null) {
+                    int rotation = getActivity().getWindowManager().getDefaultDisplay().getRotation();
+                    boolean displayLandscape = getActivity().getResources().getConfiguration().orientation
+                        == Configuration.ORIENTATION_LANDSCAPE;
+                    // Sensor angles are relative to the device's natural orientation,
+                    // which is landscape on some tablets.
+                    boolean naturalLandscape = displayLandscape
+                        ^ (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270);
+                    deviceRotationListener = new OrientationEventListener(getContext()) {
+                        @Override
+                        public void onOrientationChanged(int orientation) {
+                            Boolean landscape = landscapeForDeviceOrientation(orientation, naturalLandscape);
+                            if (landscape == null || landscape.equals(deviceLandscape)) return;
+                            deviceLandscape = landscape;
+                            notifyListeners("deviceRotationChange", new JSObject().put("landscape", landscape));
+                        }
+                    };
+                }
+                deviceLandscape = null;
+                deviceRotationListener.enable();
+            } else if (deviceRotationListener != null) {
+                deviceRotationListener.disable();
+            }
+            call.resolve();
+        });
+    }
+
+    // Leave a gap between portrait and landscape to avoid toggling near diagonals.
+    static Boolean landscapeForDeviceOrientation(int orientation, boolean naturalLandscape) {
+        if (orientation == OrientationEventListener.ORIENTATION_UNKNOWN) return null;
+        int angle = orientation % 180;
+        if (angle <= 20 || angle >= 160) return naturalLandscape;
+        if (angle >= 70 && angle <= 110) return !naturalLandscape;
+        return null;
+    }
+
+    @Override
+    protected void handleOnPause() {
+        if (deviceRotationListener != null) deviceRotationListener.disable();
+    }
+
+    @Override
+    protected void handleOnResume() {
+        if (deviceRotationEnabled && deviceRotationListener != null) {
+            deviceLandscape = null;
+            deviceRotationListener.enable();
+        }
+    }
 
     @PluginMethod
     public void setSystemBarsBackground(PluginCall call) {
@@ -309,6 +369,7 @@ public class AndroidUiPlugin extends Plugin {
 
     @Override
     protected void handleOnDestroy() {
+        if (deviceRotationListener != null) deviceRotationListener.disable();
         if (pictureInPictureSurface != null) pictureInPictureSurface.clear();
         super.handleOnDestroy();
     }

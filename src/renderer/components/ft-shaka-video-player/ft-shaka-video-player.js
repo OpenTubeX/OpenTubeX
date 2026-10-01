@@ -90,11 +90,12 @@ import {
   removeOverlayScrollbars,
   updateOverlayScrollbars,
 } from '../../helpers/overlayScrollbars'
-import { getFullscreenAspectRatio, setFullscreenOrientation } from '../../helpers/capacitorUi'
+import { getFullscreenAspectRatio, setFullscreenOrientation, setLandscapeOrientation } from '../../helpers/capacitorUi'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import {
   enterAndroidPictureInPicture,
   observeAndroidDisplayRotation,
+  observeAndroidDeviceRotation,
   setAndroidNavigationBarVisible,
   setAndroidStatusBarVisible,
   shouldShowAndroidStatusBar,
@@ -1653,6 +1654,8 @@ export default defineComponent({
     const rotateFullscreenToLandscape = computed(() => {
       return store.getters.getRotateFullscreenToLandscape
     })
+
+    const fullscreenRotationIgnoresSystemLock = computed(() => store.getters.getFullscreenRotationIgnoresSystemLock)
 
     const fullscreenAspectRatio = computed(() => {
       if (props.format === 'audio') return null
@@ -7043,10 +7046,15 @@ export default defineComponent({
     })
 
     let androidRotationFullscreen = false
+    let androidRotationOrientationLocked = false
 
     function exitAndroidRotationFullscreen() {
       if (!androidRotationFullscreen) return
       androidRotationFullscreen = false
+      if (androidRotationOrientationLocked) {
+        androidRotationOrientationLocked = false
+        setLandscapeOrientation(false).catch(() => {})
+      }
       if (fullWindowEnabled.value) events.dispatchEvent(new CustomEvent('setFullWindow', { detail: false }))
       if (androidFullscreenHost?.matches(':popover-open')) androidFullscreenHost.hidePopover()
       androidFullscreenHost?.removeAttribute('popover')
@@ -7058,8 +7066,9 @@ export default defineComponent({
       if (event.newState === 'closed') exitAndroidRotationFullscreen()
     }
 
-    function handleAndroidDisplayRotation(landscape) {
+    function handleAndroidRotation(landscape) {
       if (!isActiveTab.value || !ui || !fullWindowListenerReady) return
+      if (pictureInPictureActive.value || !mobileAdjustmentsVisible.value) return
       if (!landscape) {
         if (androidRotationFullscreen) exitAndroidRotationFullscreen()
         else if (isNativeFullscreenActive()) {
@@ -7067,8 +7076,7 @@ export default defineComponent({
         }
         return
       }
-      // Follow actual display rotation, including Android's manual rotation
-      // button. Fullscreen must not change the system's orientation policy.
+      // Use display rotation by default; physical rotation is an explicit opt-in.
       if (!enterFullscreenOnDisplayRotate.value || scrollMiniPlayerActive.value || props.format === 'audio' || props.shortsPlayer) return
       if (!video.value?.readyState || pictureInPictureActive.value) return
       if (androidRotationFullscreen || isNativeFullscreenActive() || !androidFullscreenHost) return
@@ -7080,20 +7088,24 @@ export default defineComponent({
         exitAndroidRotationFullscreen()
         return
       }
+      if (fullscreenRotationIgnoresSystemLock.value) {
+        androidRotationOrientationLocked = true
+        setLandscapeOrientation(true).catch(() => exitAndroidRotationFullscreen())
+      }
       setAndroidNavigationBarVisible(false).catch(() => {})
       syncAndroidStatusBarVisibility()
     }
 
-    let stopAndroidDisplayRotation = () => {}
-    watch([enterFullscreenOnDisplayRotate, isActiveTab], ([enabled, active]) => {
-      stopAndroidDisplayRotation()
-      if (!enabled || !active) exitAndroidRotationFullscreen()
-      stopAndroidDisplayRotation = enabled && active && process.env.IS_CAPACITOR && !process.env.IS_IOS
-        ? observeAndroidDisplayRotation(handleAndroidDisplayRotation)
+    let stopAndroidRotation = () => {}
+    watch([enterFullscreenOnDisplayRotate, isActiveTab, fullscreenRotationIgnoresSystemLock], ([enabled, active, ignoreLock]) => {
+      stopAndroidRotation()
+      exitAndroidRotationFullscreen()
+      stopAndroidRotation = enabled && active && process.env.IS_CAPACITOR && !process.env.IS_IOS
+        ? (ignoreLock ? observeAndroidDeviceRotation : observeAndroidDisplayRotation)(handleAndroidRotation)
         : () => {}
     }, { immediate: true })
     onBeforeUnmount(() => {
-      stopAndroidDisplayRotation()
+      stopAndroidRotation()
       exitAndroidRotationFullscreen()
       androidFullscreenHost?.removeEventListener('toggle', handleAndroidRotationPopoverToggle)
     })

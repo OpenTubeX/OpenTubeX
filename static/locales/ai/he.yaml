@@ -636,6 +636,7 @@ Settings:
     Preload Upcoming Videos: "טעינה מראש של הסרטונים הבאים"
     Upcoming Videos to Preload: "מספר הסרטונים לטעינה מראש"
     Concurrent Preloads: "טעינות מראש במקביל"
+    Ignore System Rotation Lock for Fullscreen: התעלמות מנעילת סיבוב המערכת עבור מסך מלא
   Channel Settings:
     Channel Settings: הגדרות ערוץ
     Channel Settings Description: שמירת ההגדרות שנבחרו בזמן צפייה לכל ערוץ בנפרד, כדי שיוחלו שוב בצפייה הבאה באחד מסרטוניו.
@@ -1691,6 +1692,7 @@ Tooltips:
     Preload Upcoming Videos: "אחזור ושמירה במטמון של כתובות yt-dlp לסרטונים הבאים. לתור יש עדיפות על רשימות השמעה והמלצות."
     Upcoming Videos to Preload: "המספר המרבי של סרטונים הבאים שכתובות yt-dlp שלהם יאוחזרו ברקע."
     Concurrent Preloads: "המספר המרבי של תהליכי yt-dlp המשמשים לטעינה מראש של סרטונים בו־זמנית. ערכים גבוהים יותר משתמשים ביותר מעבד, זיכרון ורוחב פס רשת."
+    Ignore System Rotation Lock for Fullscreen: סובבו את המכשיר כדי להיכנס למסך מלא ולצאת ממנו, גם כשהסיבוב האוטומטי של Android כבוי.
   Download Settings:
     Download Folder: הסרטונים נשמרים בתיקייה זו. השאירו ריק כדי להשתמש בתיקיית ההורדות של המערכת.
     Global Additional yt-dlp Arguments: ארגומנטים נוספים לשורת הפקודה שיועברו אל yt-dlp בכל הורדה, לדוגמה --cookies-from-browser firefox.
