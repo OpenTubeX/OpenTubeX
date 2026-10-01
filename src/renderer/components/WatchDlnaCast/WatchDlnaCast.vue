@@ -41,6 +41,7 @@ const castId = ref(null)
 const deviceName = ref('')
 let disposed = false
 let resumeLocalPlayback = false
+let castPayload = null
 const mergedSource = ref(null)
 
 const source = computed(() => {
@@ -54,7 +55,7 @@ const options = computed(() => {
   const items = []
   if (castId.value) {
     items.push(
-      { label: t('Video.Player.DLNA.Stop'), value: 'stop', icon: ['fas', 'power-off'] },
+      { label: t('Video.Player.DLNA.Stop'), value: 'stop', icon: ['fas', 'power-off'], disabled: busy.value },
       { type: 'divider' }
     )
   }
@@ -113,6 +114,7 @@ async function stopCasting(resumeLocal = true) {
       try { await props.getPlayer()?.play?.() } catch (error) { console.error(error) }
     }
     resumeLocalPlayback = false
+    castPayload = null
   }
 }
 
@@ -122,6 +124,7 @@ async function handleChoice(choice) {
     return
   }
   if (choice === 'stop') {
+    if (busy.value) return
     await stopCasting()
     return
   }
@@ -140,6 +143,8 @@ async function handleChoice(choice) {
     if (result.muxUnavailable && payload.audioUrl && !disposed) {
       const combined = selectDlnaSource(props.formats)
       if (combined) {
+        delete payload.audioUrl
+        payload.mediaUrl = combined.url
         result = await dlnaCast.start({
           deviceId: choice, mediaUrl: combined.url, title: props.title, startSeconds: payload.startSeconds
         })
@@ -150,6 +155,7 @@ async function handleChoice(choice) {
       await dlnaCast.stop(result.castId)
       return
     }
+    castPayload = result.muxUnavailable ? null : payload
     resumeLocalPlayback = wasPlaying
     castId.value = result.castId
     deviceName.value = result.deviceName
@@ -165,8 +171,44 @@ async function handleChoice(choice) {
   }
 }
 
+// Relay failures happen when the TV fetches media, after Play has returned.
+const failureCheck = setInterval(async () => {
+  if (disposed || busy.value || !castId.value || !castPayload?.audioUrl) return
+  const id = castId.value
+  try {
+    if (!await dlnaCast.hasFailed(id) || disposed || castId.value !== id || busy.value) return
+  } catch { return }
+  busy.value = true
+  const wasPlaying = resumeLocalPlayback
+  const payload = castPayload
+  try {
+    if (disposed) return
+    const combined = selectDlnaSource(props.formats)
+    if (!combined) throw new Error('No complete MP4 fallback is available')
+    const result = await dlnaCast.recover(id, {
+      deviceId: payload.deviceId, mediaUrl: combined.url, title: props.title, startSeconds: payload.startSeconds
+    })
+    if (result.error) throw new Error(result.error)
+    if (disposed) { await dlnaCast.stop(result.castId); return }
+    castId.value = result.castId
+    castPayload = null
+    deviceName.value = result.deviceName
+    resumeLocalPlayback = wasPlaying
+  } catch (error) {
+    if (!disposed) {
+      await stopCasting(false).catch(console.error)
+      console.error('DLNA stream failed', error)
+      showToast({ message: t('Video.Player.DLNA.Error'), icon: ['fas', 'cast'] })
+      if (wasPlaying) {
+        try { await props.getPlayer()?.play?.() } catch (error) { console.error(error) }
+      }
+    }
+  } finally { busy.value = false }
+}, 1000)
+
 onBeforeUnmount(() => {
   disposed = true
+  clearInterval(failureCheck)
   stopCasting(false).catch(console.error)
 })
 </script>
