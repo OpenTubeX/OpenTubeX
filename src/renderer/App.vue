@@ -3437,7 +3437,7 @@ function getAndroidBackPreview() {
 }
 
 function handleAndroidPictureInPictureChange(event) {
-  setAndroidPictureInPictureDocumentState(event.active === true)
+  setAndroidPictureInPictureDocumentState(event.active === true, event)
 }
 
 function handleHardwareKeyboardChange(event) {

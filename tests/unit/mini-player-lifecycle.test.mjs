@@ -4,6 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 import * as coordinator from '../../src/renderer/helpers/crossTabMiniPlayer.js'
 import { computed, effectScope, reactive, ref, watch } from 'vue'
+import { scrollMiniPlayerRectToStyle } from '../../src/renderer/helpers/scrollMiniPlayer.js'
 
 // Execute the entire composable. Stub its platform/layout dependencies, while
 // retaining Vue watchers, pointer events, and the real volume timeout behavior.
@@ -11,7 +12,7 @@ const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-vide
   .replace(/^import\s[\s\S]*?from\s+['"][^'"]+['"];?\s*$/gm, '')
   .replace(/^export /gm, '')
 
-function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPlaying = true } = {}) {
+function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPlaying = true, android = false } = {}) {
   t.mock.timers.enable({ apis: ['setTimeout'] })
   const scope = effectScope()
   const window = new EventTarget()
@@ -21,13 +22,15 @@ function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPl
   const minimized = ref(false)
   const video = ref({ paused: false, ended: false, volume: 1, currentTime: 120, play() { this.paused = false; this.ended = false }, pause() { this.paused = true } })
   const rect = { left: 10, top: 10, width: 360, height: 202 }
+  const classes = new Set()
   const create = vm.runInNewContext(`${source}; useScrollMiniPlayer`, {
     ...coordinator, computed, ref, watch, inject: () => ({ detached: ref(navigatedAway), tabPresented: ref(true), minimized, clearMinimizePreview() {} }), watchNavigationKey: Symbol(),
-    nextTick() {}, onMounted() {}, onBeforeUnmount() {}, window, clearTimeout, process: { env: { IS_CAPACITOR: false } },
-    document: { body: { classList: { remove() {} } } },
+    nextTick() {}, onMounted() {}, onBeforeUnmount() {}, window, clearTimeout, process: { env: { IS_CAPACITOR: android } },
+    document: { body: { classList: { remove() {}, contains: name => classes.has(name) } } },
     store: { getters: reactive({ getAutoPictureInPictureTriggers: [], getKeepPlayingOnNavigation: keepPlaying, getScrollMiniPlayerOnAllTabs: true }) },
     DEFAULT_ASPECT_RATIO: 16 / 9,
     getDefaultScrollMiniPlayerRect: () => ({ ...rect }),
+    scrollMiniPlayerRectToStyle,
     getSavedScrollMiniPlayerRect: () => null,
     parseScrollMiniPlayerSavedRect: () => null,
     setSavedScrollMiniPlayerRect() {},
@@ -54,7 +57,19 @@ function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPl
     isActiveTab.value = false
   }
   t.after(() => { player.teardownScrollMiniPlayer(); scope.stop() })
-  return { player, window, isActiveTab, isPlayerSuspended, minimized, video }
+  return { player, window, isActiveTab, isPlayerSuspended, minimized, video, classes }
+}
+
+for (const phase of ['androidPictureInPicture', 'androidPictureInPictureRestoring']) {
+  test(`Android PiP viewport changes preserve the existing mini-player state during ${phase}`, t => {
+    const { player, classes } = mountMiniPlayer(t, { android: true })
+    classes.add(phase)
+    const rect = player.scrollMiniPlayerStyle.value
+    player.updateScrollMiniPlayer()
+    assert.equal(player.scrollMiniPlayerActive.value, true, 'native PiP must not switch the underlying player layout')
+    player.handleScrollMiniWindowResize()
+    assert.deepEqual(player.scrollMiniPlayerStyle.value, rect, 'PiP dimensions must not overwrite the normal mini-player geometry')
+  })
 }
 
 test('a suspended Short cannot own the mini player even when its watch view is minimized', t => {
