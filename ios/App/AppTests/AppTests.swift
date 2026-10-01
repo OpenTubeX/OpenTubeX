@@ -118,7 +118,7 @@ final class AppTests: XCTestCase {
         FileManager.default.delegate = observer
         defer { release.signal(); FileManager.default.delegate = oldDelegate }
         _ = try await webView.callAsyncJavaScript("await Capacitor.Plugins.YtDlp.configure({configuration:{enabled:true,folder,concurrency:1}})", arguments: ["folder": reference], in: nil, contentWorld: .page)
-        let response = try await webView.callAsyncJavaScript("return await Capacitor.Plugins.YtDlp.download({payload:{mode:'video',externalUrl:url,title:'Export cancellation regression'}})", arguments: ["url": "http://127.0.0.1:\(try XCTUnwrap(listener.port).rawValue)/fixture.mp4"], in: nil, contentWorld: .page) as? [String: Any]
+        let response = try await webView.callAsyncJavaScript("return await Capacitor.Plugins.YtDlp.download({args:['--no-playlist',url],payload:{mode:'video',externalUrl:url,title:'Export cancellation regression'}})", arguments: ["url": "http://127.0.0.1:\(try XCTUnwrap(listener.port).rawValue)/fixture.mp4"], in: nil, contentWorld: .page) as? [String: Any]
         let id = try XCTUnwrap(response?["id"] as? Int)
         await fulfillment(of: [copied], timeout: 15)
         XCTAssertFalse(observer.onMain, "A slow File Provider copy must not block the main thread")
@@ -185,6 +185,60 @@ final class AppTests: XCTestCase {
         let certificates = Bundle.main.bundleURL.appendingPathComponent("python-packages/certifi/cacert.pem")
         XCTAssertTrue(FileManager.default.fileExists(atPath: certificates.path))
         XCTAssertEqual(getenv("SSL_CERT_FILE").map { String(cString: $0) }, certificates.path)
+    }
+
+    func testIOSDownloadTemplatesAndFFmpegConversion() async throws {
+        try await openApplication()
+        let enabled = try await evaluate("testStore.getters.getEnableDownloads") as? Bool ?? false
+        addTeardownBlock { @MainActor [weak self] in
+            _ = try? await self?.webView.callAsyncJavaScript("await testStore.dispatch('updateEnableDownloads', enabled); await testStore.dispatch('hideSettingsWindow'); await testRouter.push('/subscriptions')",
+                arguments: ["enabled": enabled], in: nil, contentWorld: .page)
+        }
+        let info = try await webView.callAsyncJavaScript("return await Capacitor.Plugins.YtDlp.info()", arguments: [:], in: nil, contentWorld: .page) as? [String: Any]
+        XCTAssertEqual((info?["ffmpeg"] as? [String: Any])?["available"] as? Bool, true)
+        XCTAssertEqual((info?["ffprobe"] as? [String: Any])?["available"] as? Bool, true)
+        _ = try await evaluate("testStore.dispatch('updateEnableDownloads', true); testRouter.push('/settings'); true")
+        try await wait("!!document.querySelector('.settingsMenu button[data-section=download]')")
+        _ = try await evaluate("document.querySelector('.settingsMenu button[data-section=download]').click(); true")
+        try await wait("Array.from(document.querySelectorAll('.section[data-section=download] button')).some(button=>button.textContent.includes('Manage Download Templates'))")
+        _ = try await evaluate("Array.from(document.querySelectorAll('.section[data-section=download] button')).find(button=>button.textContent.includes('Manage Download Templates')).click(); true")
+        try await wait("!!document.querySelector('.templateManagerHeader select')")
+        let options = try await evaluate("Array.from(document.querySelector('.templateManagerHeader select').options).map(option=>option.textContent).join(' ')") as? String
+        XCTAssertTrue(options?.contains("MP3") == true)
+        _ = try await evaluate("testRouter.push('/'); true")
+
+        let media = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "fixture", withExtension: "m4a"))
+        let bytes = try Data(contentsOf: media)
+        let listener = try await loopbackServer { _, connection in
+            let header = "HTTP/1.1 200 OK\r\nContent-Type: audio/mp4\r\nContent-Length: \(bytes.count)\r\nConnection: close\r\n\r\n"
+            connection.send(content: Data(header.utf8) + bytes, completion: .contentProcessed { _ in connection.cancel() })
+        }
+        defer { listener.cancel() }
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("ffmpeg-export-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let bookmark = try folder.bookmarkData(options: .minimalBookmark, includingResourceValuesForKeys: nil, relativeTo: nil)
+        let reference = try JSONSerialization.data(withJSONObject: ["name": folder.lastPathComponent, "bookmark": bookmark.base64EncodedString()])
+        _ = try await webView.callAsyncJavaScript("await Capacitor.Plugins.YtDlp.configure({configuration})",
+            arguments: ["configuration": ["enabled": true, "folder": String(decoding: reference, as: UTF8.self), "concurrency": 1]], in: nil, contentWorld: .page)
+        let url = "http://127.0.0.1:\(try XCTUnwrap(listener.port).rawValue)/fixture.m4a"
+        let response = try await webView.callAsyncJavaScript("return await Capacitor.Plugins.YtDlp.download({payload:{mode:'audio',externalUrl:url},args:['--no-playlist','--extract-audio','--audio-format','mp3','--embed-metadata','--output','Playlist/Converted with spaces.%(ext)s',url]})",
+            arguments: ["url": url], in: nil, contentWorld: .page) as? [String: Any]
+        let id = try XCTUnwrap(response?["id"] as? Int, String(describing: response))
+        var record: [String: Any] = [:]
+        for _ in 0..<120 {
+            record = try await webView.callAsyncJavaScript("return (await Capacitor.Plugins.YtDlp.list()).downloads.find(download=>download.id===id)", arguments: ["id": id], in: nil, contentWorld: .page) as? [String: Any] ?? [:]
+            if ["completed", "failed"].contains(record["status"] as? String ?? "") { break }
+            try await Task.sleep(for: .milliseconds(250))
+        }
+        XCTAssertEqual(record["status"] as? String, "completed", String(describing: record))
+        let file = try XCTUnwrap((record["files"] as? [[String: Any]])?.first)
+        XCTAssertEqual(file["relativePath"] as? String, "Playlist/Converted with spaces.mp3")
+        let path = try XCTUnwrap(file["path"] as? String)
+        let probe = try await Task.detached { try IOSFFmpeg.execute(["ffprobe", "-v", "quiet", "-show_streams", "-of", "json", path]) }.value
+        XCTAssertEqual(probe["returncode"] as? Int, 0)
+        XCTAssertTrue((probe["stdout"] as? String ?? "").contains("mp3"))
+        _ = try await webView.callAsyncJavaScript("return await Capacitor.Plugins.YtDlp.remove({id})", arguments: ["id": id], in: nil, contentWorld: .page)
     }
 
     func testDownloadsSettingSurvivesCategorySwitch() async throws {
@@ -311,78 +365,84 @@ final class AppTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: root.appendingPathComponent("output/secret.mp4").path))
     }
 
-    func testYtDlpMergeUsesSampleDurationForFragmentedTracks() async throws {
-        // A two-second synthetic fragmented MP4 with populated initialization
-        // durations. AVFoundation counts that duration again when reading fragments.
-        let root = FileManager.default.temporaryDirectory.appendingPathComponent("yt-dlp-duration-\(UUID().uuidString)")
+    func testYtDlpExportsTemplateSubfoldersWithoutOverwritingFiles() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("template-export-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let staging = root.appendingPathComponent("staging")
+        let target = root.appendingPathComponent("target")
+        let name = "Playlist/Audio with spaces.mp3"
+        let source = staging.appendingPathComponent(name)
+        let existing = target.appendingPathComponent(name)
+        try FileManager.default.createDirectory(at: source.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: existing.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try Data("downloaded".utf8).write(to: source)
+        try Data("existing".utf8).write(to: existing)
+        let result = try IOSYtDlpExporter.copy([name], from: staging, to: target, videoId: "fixture")
+        XCTAssertEqual(result.files.first?["relativePath"] as? String, "Playlist/Audio with spaces (2).mp3")
+        XCTAssertEqual(try Data(contentsOf: existing), Data("existing".utf8))
+        XCTAssertEqual(try Data(contentsOf: URL(fileURLWithPath: XCTUnwrap(result.destinations.first))), Data("downloaded".utf8))
+    }
+
+    func testBundledFFmpegAndFFprobe() async throws {
+        for tool in ["ffmpeg", "ffprobe"] {
+            let result = try await Task.detached { try IOSFFmpeg.execute([tool, "-version"]) }.value
+            XCTAssertEqual(result["returncode"] as? Int, 0)
+            let output = (result["stdout"] as? String ?? "") + (result["stderr"] as? String ?? "")
+            XCTAssertTrue(output.contains("version n8.1.2"), output)
+        }
+        let media = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "fixture", withExtension: "mp4"))
+        let result = try await Task.detached {
+            try IOSFFmpeg.execute(["ffprobe", "-v", "quiet", "-show_streams", "-of", "json", media.path])
+        }.value
+        let data = try XCTUnwrap((result["stdout"] as? String)?.data(using: .utf8))
+        let info = try XCTUnwrap(try JSONSerialization.jsonObject(with: data) as? [String: Any])
+        XCTAssertFalse((info["streams"] as? [[String: Any]] ?? []).isEmpty)
+    }
+
+    func testFFmpegMergeUsesSampleDurationForFragmentedTracks() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("ffmpeg-duration-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: root) }
         let video = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "fragmented-duration", withExtension: "mp4"))
         let audio = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "fixture", withExtension: "m4a"))
-        try FileManager.default.copyItem(at: video, to: root.appendingPathComponent("video.mp4"))
-        try FileManager.default.copyItem(at: audio, to: root.appendingPathComponent("audio.m4a"))
-        let value: [String: Any] = ["merges": [["video": "video.mp4", "audio": "audio.m4a", "output": "merged.mp4"]]]
-        let _: [String: Any] = try await withCheckedThrowingContinuation { continuation in
-            IOSYtDlpMerger.run(value, in: root) { continuation.resume(with: $0) }
-        }
-        let asset = AVURLAsset(url: root.appendingPathComponent("merged.mp4"))
-        let duration = try await asset.load(.duration)
-        XCTAssertEqual(duration.seconds, 2, accuracy: 0.05)
-        let videoTracks = try await asset.loadTracks(withMediaType: .video)
-        let audioTracks = try await asset.loadTracks(withMediaType: .audio)
-        let videoTrack = try XCTUnwrap(videoTracks.first)
-        let audioTrack = try XCTUnwrap(audioTracks.first)
-        let videoRange = try await videoTrack.load(.timeRange)
-        let audioRange = try await audioTrack.load(.timeRange)
-        XCTAssertEqual(videoRange.duration.seconds, 2, accuracy: 0.05)
-        XCTAssertEqual(audioRange.duration.seconds, 2, accuracy: 0.05)
-    }
-
-    func testYtDlpMergeReplacesStaleOutputOnRetry() async throws {
-        let root = FileManager.default.temporaryDirectory.appendingPathComponent("yt-dlp-merge-\(UUID().uuidString)")
-        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-        defer { try? FileManager.default.removeItem(at: root) }
-        let video = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "fixture", withExtension: "mp4"))
-        let audio = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "fixture", withExtension: "m4a"))
-        try FileManager.default.copyItem(at: video, to: root.appendingPathComponent("video.mp4"))
-        try FileManager.default.copyItem(at: audio, to: root.appendingPathComponent("audio.m4a"))
         let output = root.appendingPathComponent("merged.mp4")
         try Data("stale".utf8).write(to: output)
-
-        let value: [String: Any] = ["merges": [["video": "video.mp4", "audio": "audio.m4a", "output": "merged.mp4"]]]
-        let result: [String: Any] = try await withCheckedThrowingContinuation { continuation in
-            IOSYtDlpMerger.run(value, in: root) { continuation.resume(with: $0) }
-        }
-
-        XCTAssertEqual(result["files"] as? [String], ["merged.mp4"])
+        let result = try await Task.detached {
+            try IOSFFmpeg.execute(["ffmpeg", "-y", "-i", video.path, "-i", audio.path,
+                                   "-map", "0:v:0", "-map", "1:a:0", "-c", "copy", "-shortest", output.path])
+        }.value
+        XCTAssertEqual(result["returncode"] as? Int, 0, result["stderr"] as? String ?? "")
         let asset = AVURLAsset(url: output)
+        let duration = try await asset.load(.duration)
+        XCTAssertEqual(duration.seconds, 2, accuracy: 0.1)
         let videoTracks = try await asset.loadTracks(withMediaType: .video)
         let audioTracks = try await asset.loadTracks(withMediaType: .audio)
         XCTAssertEqual(videoTracks.count, 1)
         XCTAssertEqual(audioTracks.count, 1)
-        XCTAssertFalse(FileManager.default.fileExists(atPath: root.appendingPathComponent("video.mp4").path))
-        XCTAssertFalse(FileManager.default.fileExists(atPath: root.appendingPathComponent("audio.m4a").path))
     }
 
-    func testYtDlpMergeRejectsParentOutput() async throws {
-        let sandbox = FileManager.default.temporaryDirectory.appendingPathComponent("yt-dlp-merge-unsafe-\(UUID().uuidString)")
-        let staging = sandbox.appendingPathComponent("job")
-        let sibling = sandbox.appendingPathComponent("other-job/marker")
-        try FileManager.default.createDirectory(at: staging, withIntermediateDirectories: true)
-        try FileManager.default.createDirectory(at: sibling.deletingLastPathComponent(), withIntermediateDirectories: true)
-        defer { try? FileManager.default.removeItem(at: sandbox) }
-        try Data("retained".utf8).write(to: sibling)
-        let video = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "fixture", withExtension: "mp4"))
+    func testFFmpegAudioConversionAndCancellation() async throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("ffmpeg-audio-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
         let audio = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "fixture", withExtension: "m4a"))
-        try FileManager.default.copyItem(at: video, to: staging.appendingPathComponent("video.mp4"))
-        try FileManager.default.copyItem(at: audio, to: staging.appendingPathComponent("audio.m4a"))
-
-        let value: [String: Any] = ["merges": [["video": "video.mp4", "audio": "audio.m4a", "output": ".."]]]
-        let result: Result<[String: Any], Error> = await withCheckedContinuation { continuation in
-            IOSYtDlpMerger.run(value, in: staging) { continuation.resume(returning: $0) }
+        let output = root.appendingPathComponent("converted with spaces.mp3")
+        let result = try await Task.detached {
+            try IOSFFmpeg.execute(["ffmpeg", "-y", "-i", audio.path, "-c:a", "libmp3lame", output.path])
+        }.value
+        XCTAssertEqual(result["returncode"] as? Int, 0, result["stderr"] as? String ?? "")
+        XCTAssertTrue(FileManager.default.fileExists(atPath: output.path))
+        let control = root.appendingPathComponent("control")
+        let job = Task.detached {
+            try IOSFFmpeg.execute(["ffmpeg", "-re", "-stream_loop", "-1", "-i", audio.path,
+                                   "-f", "null", "-"], controlFile: control.path)
         }
-        if case .success = result { XCTFail("Parent output was accepted") }
-        XCTAssertEqual(try Data(contentsOf: sibling), Data("retained".utf8))
+        try await Task.sleep(for: .milliseconds(250))
+        try Data().write(to: control)
+        let cancelled = try await job.value
+        XCTAssertEqual(cancelled["returncode"] as? Int, 255)
+        let independent = try await Task.detached { try IOSFFmpeg.execute(["ffprobe", "-version"]) }.value
+        XCTAssertEqual(independent["returncode"] as? Int, 0)
     }
 
     func testBackgroundPreparationEvent() async throws {
@@ -552,7 +612,7 @@ final class AppTests: XCTestCase {
         var ids: [Int] = []
         for index in 1...3 {
             let started = try await webView.callAsyncJavaScript(
-                "return await Capacitor.Plugins.YtDlp.download({payload: {mode: 'video', externalUrl: url, title: 'Queue fixture ' + index}})",
+                "return await Capacitor.Plugins.YtDlp.download({args: ['--no-playlist',url], payload: {mode: 'video', externalUrl: url, title: 'Queue fixture ' + index}})",
                 arguments: ["url": url, "index": index], in: nil, contentWorld: .page) as? [String: Any]
             ids.append(try XCTUnwrap(started?["id"] as? Int))
         }
@@ -639,7 +699,7 @@ final class AppTests: XCTestCase {
         for url in ["file:///etc/passwd", "ftp://example.org/video", "http://user:pass@example.org/video",
                     "https://example.org/" + String(repeating: "a", count: 8192)] {
             let result = try await webView.callAsyncJavaScript(
-                "return await Capacitor.Plugins.YtDlp.download({payload: {mode: 'video', externalUrl: url}})",
+                "return await Capacitor.Plugins.YtDlp.download({args: ['--no-playlist',url], payload: {mode: 'video', externalUrl: url}})",
                 arguments: ["url": url], in: nil, contentWorld: .page) as? [String: Any]
             XCTAssertEqual(result?["error"] as? String, "INVALID_MEDIA_URL")
         }
@@ -697,7 +757,7 @@ final class AppTests: XCTestCase {
             "await Capacitor.Plugins.YtDlp.configure({configuration})",
             arguments: ["configuration": configuration], in: nil, contentWorld: .page)
         let started = try await webView.callAsyncJavaScript(
-            "return await Capacitor.Plugins.YtDlp.download({payload: {mode: 'video', externalUrl: url, title: 'Fixture'}})",
+            "return await Capacitor.Plugins.YtDlp.download({args: ['--no-playlist',url], payload: {mode: 'video', externalUrl: url, title: 'Fixture'}})",
             arguments: ["url": url], in: nil, contentWorld: .page) as? [String: Any]
         let id = try XCTUnwrap(started?["id"] as? Int, String(describing: started))
         var record: [String: Any] = [:]
@@ -838,7 +898,7 @@ final class AppTests: XCTestCase {
             in: nil, contentWorld: .page)
         let payload: [String: Any] = ["mode": "video", "externalUrl": url, "title": "Slow fixture"]
         let started = try await webView.callAsyncJavaScript(
-            "return await Capacitor.Plugins.YtDlp.download({payload})",
+            "return await Capacitor.Plugins.YtDlp.download({payload, args: ['--no-playlist',payload.externalUrl]})",
             arguments: ["payload": payload], in: nil, contentWorld: .page) as? [String: Any]
         let id = try XCTUnwrap(started?["id"] as? Int, String(describing: started))
 
@@ -867,7 +927,7 @@ final class AppTests: XCTestCase {
         }
         XCTAssertFalse(FileManager.default.fileExists(atPath: staging.path))
         let retry = try await webView.callAsyncJavaScript(
-            "return await Capacitor.Plugins.YtDlp.download({payload, retryDownloadId: id})",
+            "return await Capacitor.Plugins.YtDlp.download({payload, args: ['--no-playlist',payload.externalUrl], retryDownloadId: id})",
             arguments: ["payload": payload, "id": id], in: nil, contentWorld: .page) as? [String: Any]
         XCTAssertEqual(retry?["id"] as? Int, id, String(describing: retry))
         for _ in 0..<120 {
@@ -885,7 +945,7 @@ final class AppTests: XCTestCase {
 
         let offlinePayload: [String: Any] = ["mode": "video", "externalUrl": "http://127.0.0.1:\(try XCTUnwrap(listener.port).rawValue)/offline.mp4", "title": "Recovering fixture"]
         let failedStart = try await webView.callAsyncJavaScript(
-            "return await Capacitor.Plugins.YtDlp.download({payload})",
+            "return await Capacitor.Plugins.YtDlp.download({payload, args: ['--no-playlist',payload.externalUrl]})",
             arguments: ["payload": offlinePayload], in: nil, contentWorld: .page) as? [String: Any]
         let failedId = try XCTUnwrap(failedStart?["id"] as? Int, String(describing: failedStart))
         for _ in 0..<80 {
@@ -899,7 +959,7 @@ final class AppTests: XCTestCase {
         XCTAssertFalse((record["errorMessage"] as? String ?? "").isEmpty)
         lock.lock(); offline = false; lock.unlock()
         let recovered = try await webView.callAsyncJavaScript(
-            "return await Capacitor.Plugins.YtDlp.download({payload, retryDownloadId: id})",
+            "return await Capacitor.Plugins.YtDlp.download({payload, args: ['--no-playlist',payload.externalUrl], retryDownloadId: id})",
             arguments: ["payload": offlinePayload, "id": failedId], in: nil, contentWorld: .page) as? [String: Any]
         XCTAssertEqual(recovered?["id"] as? Int, failedId, String(describing: recovered))
         for _ in 0..<120 {
@@ -917,7 +977,7 @@ final class AppTests: XCTestCase {
         let lostPayload: [String: Any] = ["mode": "video", "externalUrl": url.replacingOccurrences(of: "/slow.mp4", with: "/lost.mp4"),
                                           "title": "Disconnected fixture"]
         let lostStart = try await webView.callAsyncJavaScript(
-            "return await Capacitor.Plugins.YtDlp.download({payload})",
+            "return await Capacitor.Plugins.YtDlp.download({payload, args: ['--no-playlist',payload.externalUrl]})",
             arguments: ["payload": lostPayload], in: nil, contentWorld: .page) as? [String: Any]
         let lostId = try XCTUnwrap(lostStart?["id"] as? Int)
         for _ in 0..<120 {
@@ -1048,7 +1108,7 @@ final class AppTests: XCTestCase {
             in: nil, contentWorld: .page)
         let url = "http://127.0.0.1:\(try XCTUnwrap(listener.port).rawValue)/slow.mp4"
         let started = try await webView.callAsyncJavaScript(
-            "return await Capacitor.Plugins.YtDlp.download({payload: {mode: 'video', externalUrl: url, title: 'Concurrent fixture'}})",
+            "return await Capacitor.Plugins.YtDlp.download({args: ['--no-playlist',url], payload: {mode: 'video', externalUrl: url, title: 'Concurrent fixture'}})",
             arguments: ["url": url], in: nil, contentWorld: .page) as? [String: Any]
         let id = try XCTUnwrap(started?["id"] as? Int)
         try await wait("!!document.querySelector('#app')")
@@ -1099,7 +1159,7 @@ final class AppTests: XCTestCase {
             "window.iosProcessingEvents = []; window.iosProcessingListener = await Capacitor.Plugins.YtDlp.addListener('downloadStatus', record => { if (record.status === 'processing') iosProcessingEvents.push(record) })",
             arguments: [:], in: nil, contentWorld: .page)
         let started = try await webView.callAsyncJavaScript(
-            "return await Capacitor.Plugins.YtDlp.download({payload: {mode: 'video', videoId, title: 'Me at the zoo'}})",
+            "return await Capacitor.Plugins.YtDlp.download({args: ['--no-playlist','https://www.youtube.com/watch?v='+videoId], payload: {mode: 'video', videoId, title: 'Me at the zoo'}})",
             arguments: ["videoId": videoId], in: nil, contentWorld: .page) as? [String: Any]
         let id = try XCTUnwrap(started?["id"] as? Int, String(describing: started))
         var record: [String: Any] = [:]
@@ -1132,7 +1192,7 @@ final class AppTests: XCTestCase {
         XCTAssertEqual(removed, true)
 
         let audioStart = try await webView.callAsyncJavaScript(
-            "return await Capacitor.Plugins.YtDlp.download({payload: {mode: 'audio', videoId, title: 'Me at the zoo audio'}})",
+            "return await Capacitor.Plugins.YtDlp.download({args: ['--no-playlist','--extract-audio','https://www.youtube.com/watch?v='+videoId], payload: {mode: 'audio', videoId, title: 'Me at the zoo audio'}})",
             arguments: ["videoId": videoId], in: nil, contentWorld: .page) as? [String: Any]
         let audioId = try XCTUnwrap(audioStart?["id"] as? Int)
         var audioRecord: [String: Any] = [:]
@@ -1180,7 +1240,7 @@ final class AppTests: XCTestCase {
             arguments: ["configuration": ["enabled": true, "folder": String(decoding: reference, as: UTF8.self), "concurrency": 1]],
             in: nil, contentWorld: .page)
         let started = try await webView.callAsyncJavaScript(
-            "return await Capacitor.Plugins.YtDlp.download({payload: {mode: 'video', externalUrl: url, title: 'Persistence fixture'}})",
+            "return await Capacitor.Plugins.YtDlp.download({args: ['--no-playlist',url], payload: {mode: 'video', externalUrl: url, title: 'Persistence fixture'}})",
             arguments: ["url": "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"],
             in: nil, contentWorld: .page) as? [String: Any]
         let id = try XCTUnwrap(started?["id"] as? Int)

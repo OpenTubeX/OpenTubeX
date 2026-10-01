@@ -45,3 +45,13 @@ project = project.replaceAll(/MARKETING_VERSION = [^;]+;/g, `MARKETING_VERSION =
 // ManagedMediaSource and AbortSignal.any are required by playback and networking.
 project = project.replaceAll(/IPHONEOS_DEPLOYMENT_TARGET = [^;]+;/g, 'IPHONEOS_DEPLOYMENT_TARGET = 17.4;')
 writeFileSync(projectPath, project)
+
+// Capacitor regenerates this package during sync. Reapply the native dependency.
+const packagePath = new URL('ios/App/CapApp-SPM/Package.swift', root)
+let capacitorPackage = readFileSync(packagePath, 'utf8')
+capacitorPackage = capacitorPackage.replace('platforms: [.iOS(.v17)]', 'platforms: [.iOS("17.4")]')
+if (!capacitorPackage.includes('OpenTubeXFFmpeg')) {
+  capacitorPackage = capacitorPackage.replace('dependencies: [', 'dependencies: [\n        .package(name: "OpenTubeXFFmpeg", path: "../FFmpegKit"),')
+  capacitorPackage = capacitorPackage.replace('dependencies: [\n                .product', 'dependencies: [\n                .product(name: "OpenTubeXFFmpeg", package: "OpenTubeXFFmpeg"),\n                .product')
+}
+writeFileSync(packagePath, capacitorPackage)

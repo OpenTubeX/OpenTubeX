@@ -89,7 +89,25 @@ const capacitor = {
   ytDlpCancelDownload: id => native.control({ id, action: 'cancel' }).then(result => result.ok),
   ytDlpControlDownload: (id, action, value) => native.control({ id, action, value }).then(result => result.ok),
   ytDlpQueueAction: action => native.queue({ action, configuration: configuration() }).then(result => result.ok),
-  ytDlpListDownloads: () => native.list().then(result => result.downloads),
+  async ytDlpListDownloads() {
+    const { downloads } = await native.list()
+    // Downloads saved by the previous AVFoundation implementation only stored
+    // their payload. Rebuild their arguments with the shared parser on resume.
+    if (process.env.IS_IOS) {
+      const resumeArguments = {}
+      for (const download of downloads) {
+        if (!download.args && download.retryPayload && download.status !== 'completed') {
+          try {
+            resumeArguments[download.id] = buildYtDlpDownloadArguments(download.retryPayload, store.getters.getYtDlpDownloadCustomArgs).args
+          } catch (error) { console.warn('Could not restore download arguments', error) }
+        }
+      }
+      if (Object.keys(resumeArguments).length > 0) {
+        await native.configure({ configuration: configuration(), resumeArguments })
+      }
+    }
+    return downloads
+  },
   ytDlpClearDownloads: ids => native.clear({ ids }).then(result => result.ok),
   ytDlpOpenDownload: id => native.open({ id }).then(result => result.ok),
   ytDlpPlayDownload: (id, path) => native.play({ id, path }).then(result => result.ok),

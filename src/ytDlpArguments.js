@@ -1,4 +1,4 @@
-/** Build the same yt-dlp options for desktop and Android. */
+/** Build the same yt-dlp options for desktop, Android, and iOS. */
 export const ID_REGEX = /^[\w-]{11}$/
 export const PLAYLIST_ID_REGEX = /^[\w-]{10,128}$/
 export const DOWNLOAD_TITLE_FILENAME_BYTE_LIMIT = 200
