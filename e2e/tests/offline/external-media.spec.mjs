@@ -42,6 +42,43 @@ async function prepareTwitchYtDlp(app, page, mediaUrl, live, description = '', c
   }, executable)
 }
 
+test('external media honors the hide sidebar on watch pages setting', async ({ app, page }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false)
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateHideSideBarOnWatchPages', true)
+    if (!store.getters.getIsSideNavOpen) store.commit('toggleSideNav')
+  })
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page.locator(`${activeTab} .externalMediaPlayer`)).toBeVisible()
+
+  const sideNav = page.locator('.sideNav')
+  for (const scale of [1, 1.25]) {
+    await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+    await expect(sideNav).not.toBeInViewport()
+    await page.locator('.menuButton').click()
+    await expect(sideNav).toBeInViewport()
+    await page.locator('.sideNavBackdrop').click()
+    await expect(sideNav).not.toBeInViewport()
+
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHideSideBarOnWatchPages', false))
+    await expect(sideNav).toBeInViewport()
+    await expect(sideNav).toHaveClass(/opened/)
+    await expect(page.locator('.sideNavBackdrop')).toHaveCount(0)
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHideSideBarOnWatchPages', true))
+    await expect(sideNav).not.toBeInViewport()
+  }
+
+  await page.locator('.menuButton').click()
+  await goTo(page, 'history')
+  await expect(sideNav).toBeInViewport()
+  await expect(sideNav).toHaveClass(/opened/)
+  await expect(page.locator('.app')).not.toHaveClass(/watchSideNavOverlay/)
+})
+
 test('external media can stop at the end of its current chapter', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const mediaUrl = 'https://www.twitch.tv/videos/123456789'

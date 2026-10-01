@@ -864,7 +864,7 @@ function handleTabletTabStripChange(event) {
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const useWatchSideNavOverlay = computed(() => {
-  return store.getters.getHideSideBarOnWatchPages && route.path.startsWith('/watch/')
+  return store.getters.getHideSideBarOnWatchPages && (route.path.startsWith('/watch/') || route.path === '/external-media')
 })
 
 let sideNavOpenBeforeWatchOverlay = null
