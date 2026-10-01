@@ -68,6 +68,11 @@ private final class DlnaTrackReader: NSObject, URLSessionDataDelegate {
         let http = response as? HTTPURLResponse
         let valid = offset == 0 ? http?.statusCode == 200 || http?.statusCode == 206
             : http?.statusCode == 206 && (http?.value(forHTTPHeaderField: "Content-Range") ?? "").hasPrefix("bytes \(offset)-")
+        if !valid {
+            condition.lock()
+            failure = URLError(.badServerResponse)
+            condition.unlock()
+        }
         completionHandler(valid ? .allow : .cancel)
     }
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
@@ -80,7 +85,7 @@ private final class DlnaTrackReader: NSObject, URLSessionDataDelegate {
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         condition.lock()
         ended = true
-        failure = error
+        if failure == nil { failure = error }
         condition.broadcast()
         condition.unlock()
         session.finishTasksAndInvalidate()
@@ -147,6 +152,7 @@ private final class DlnaTrack {
     var ftyp: DlnaBox!
     var moov: DlnaBox!
     var pending: DlnaBox?
+    private var pendingFragments = [(DlnaBox, DlnaBox, Double)]()
     var timescale: UInt64 = 0
     var index = [(offset: UInt64, time: Double)]()
     private var position: UInt64 = 0
@@ -200,16 +206,31 @@ private final class DlnaTrack {
         throw URLError(.cannotDecodeContentData)
     }
 
-    func seek(_ seconds: Double) -> Double {
-        guard seconds > 0, let segment = index.last(where: { $0.time <= seconds }), segment.time > 0 else { return 0 }
-        reader.cancel()
-        reader = DlnaTrackReader(request, offset: segment.offset)
-        pending = nil
-        position = segment.offset
-        return segment.time
+    func seek(_ seconds: Double) throws -> Double {
+        guard seconds > 0 else { return 0 }
+        if let segment = index.last(where: { $0.time <= seconds }), segment.time > 0 {
+            reader.cancel()
+            reader = DlnaTrackReader(request, offset: segment.offset)
+            pending = nil
+            position = segment.offset
+            return segment.time
+        }
+        // Some fragmented MP4s omit sidx. Scan fragments with bounded memory
+        // instead of silently starting over, keeping the preceding keyframe.
+        guard var preceding = try fragment() else { return 0 }
+        while let next = try fragment() {
+            if next.2 > seconds {
+                pendingFragments = [preceding, next]
+                return preceding.2
+            }
+            preceding = next
+        }
+        pendingFragments = [preceding]
+        return preceding.2
     }
 
     func fragment() throws -> (DlnaBox, DlnaBox, Double)? {
+        if !pendingFragments.isEmpty { return pendingFragments.removeFirst() }
         var moof = pending
         pending = nil
         while moof == nil {
@@ -303,8 +324,8 @@ final class DlnaMuxer {
         try videoTrack.prepare()
         try audioTrack.prepare()
         // Begin at the preceding video segment/keyframe, retaining audio alignment.
-        let base = videoTrack.seek(startSeconds)
-        _ = audioTrack.seek(base)
+        let base = try videoTrack.seek(startSeconds)
+        _ = try audioTrack.seek(base)
         var children = try videoTrack.moov.children().filter { !["trak", "mvex"].contains($0.type) }
         if let at = children.firstIndex(where: { $0.type == "mvhd" }) {
             try children[at].clearDuration()

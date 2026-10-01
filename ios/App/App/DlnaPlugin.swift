@@ -71,6 +71,7 @@ private final class DlnaTransfer: NSObject, URLSessionDataDelegate {
     private var started = false
     private let path: String
     private let complete: () -> Void
+    private let failure: () -> Void
     private var header = Data()
     private var head = false
     private var task: URLSessionDataTask?
@@ -78,13 +79,14 @@ private final class DlnaTransfer: NSObject, URLSessionDataDelegate {
     private var finished = false
     private var sentHeaders = false
 
-    init(_ connection: NWConnection, media: URLRequest, audio: URLRequest?, startSeconds: Double, path: String, complete: @escaping () -> Void) {
+    init(_ connection: NWConnection, media: URLRequest, audio: URLRequest?, startSeconds: Double, path: String, failure: @escaping () -> Void, complete: @escaping () -> Void) {
         self.connection = connection
         self.media = media
         self.audio = audio
         self.startSeconds = startSeconds
         self.path = path
         self.complete = complete
+        self.failure = failure
         super.init()
         connection.stateUpdateHandler = { [weak self] status in
             if case .failed = status { self?.close() }
@@ -137,6 +139,7 @@ private final class DlnaTransfer: NSObject, URLSessionDataDelegate {
                         return sent
                     }
                 } catch {
+                    if (error as? URLError)?.code != .cancelled { self.failure() }
                     if !self.sentHeaders { _ = self.send(Data("HTTP/1.1 502 Bad Gateway\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".utf8)) }
                 }
                 self.close()
@@ -227,6 +230,7 @@ final class DlnaMediaServer {
     private let listener: NWListener
     private var transfers: [UUID: DlnaTransfer] = [:]
     private(set) var mediaUrl = ""
+    private(set) var muxFailed = false
 
     init(media: URLRequest, audio: URLRequest? = nil, startSeconds: Double = 0, address: String, localAddress: String, ready: @escaping (Result<Void, Error>) -> Void) throws {
         let parameters = NWParameters.tcp
@@ -249,7 +253,9 @@ final class DlnaMediaServer {
                   case .hostPort(let host, _) = connection.endpoint,
                   host == NWEndpoint.Host(address) else { connection.cancel(); return }
             let id = UUID()
-            self.transfers[id] = DlnaTransfer(connection, media: media, audio: audio, startSeconds: startSeconds, path: "/\(self.castId)/video.mp4") { [weak self] in
+            self.transfers[id] = DlnaTransfer(connection, media: media, audio: audio, startSeconds: startSeconds, path: "/\(self.castId)/video.mp4", failure: { [weak self] in
+                dlnaQueue.async { self?.muxFailed = true }
+            }) { [weak self] in
                 self?.transfers.removeValue(forKey: id)
             }
         }
@@ -278,7 +284,7 @@ final class DlnaMediaServer {
 public class DlnaPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "DlnaPlugin"
     public let jsName = "Dlna"
-    public let pluginMethods: [CAPPluginMethod] = ["discover", "request", "startMediaServer", "stopMediaServer"].map {
+    public let pluginMethods: [CAPPluginMethod] = ["discover", "request", "startMediaServer", "stopMediaServer", "hasFailed"].map {
         CAPPluginMethod(name: $0, returnType: CAPPluginReturnPromise)
     }
     private var addresses = Set<String>()
@@ -416,6 +422,12 @@ public class DlnaPlugin: CAPPlugin, CAPBridgedPlugin {
     deinit {
         let server = relay
         dlnaQueue.async { server?.close() }
+    }
+
+    @objc func hasFailed(_ call: CAPPluginCall) {
+        dlnaQueue.async {
+            call.resolve(["failed": self.relay?.castId == call.getString("castId") && self.relay?.muxFailed == true])
+        }
     }
 
     @objc func stopMediaServer(_ call: CAPPluginCall) {
