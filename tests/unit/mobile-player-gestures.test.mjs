@@ -12,28 +12,28 @@ class ElementStub {
   closest(selectors) { return this.selector && selectors.includes(this.selector) ? this : null }
 }
 
-function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = true, mobile = true, mini = false, shorts = false, height = 200.5, nativeReplay = false, minimize = false, fullscreen = () => false } = {}) {
+function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = true, mobile = true, mini = false, shorts = false, height = 200.5, nativeReplay = false, minimize = false, fullscreen = () => false, controls, toggleFullscreen } = {}) {
   t.mock.method(globalThis, 'setTimeout', setTimeout)
   const previous = { document: globalThis.document, window: globalThis.window, Element: globalThis.Element }
   globalThis.Element = ElementStub
   globalThis.document = { querySelector: () => ({ classList: { contains: () => mobile } }) }
-  globalThis.window = { setTimeout, matchMedia: () => ({ matches: true }) }
+  globalThis.window = { setTimeout: (...args) => setTimeout(...args), matchMedia: () => ({ matches: true }) }
   const surface = new ElementStub()
   const calls = []
   const captures = new Set()
-  const container = {
+  const container = Object.assign(new EventTarget(), {
     getBoundingClientRect: () => ({ left: 10, width: 400, height }),
     setPointerCapture: id => captures.add(id),
     hasPointerCapture: id => captures.has(id),
     releasePointerCapture: id => captures.delete(id),
-  }
+  })
   let gestures
   const renderer = createRenderer({ createComment: () => ({}), insert() {}, remove() {}, parentNode() {}, nextSibling() {} })
   const app = renderer.createApp({
     setup() {
       gestures = useMobileFullscreenGestures({
         getContainer: () => container,
-        getControls: () => ({ getControlsContainer: () => ({ hasAttribute: () => false }), anySettingsMenusAreOpen: () => false, getConfig: () => ({ tapSeekDistance: 0 }), showUI: () => calls.push('show') }),
+        getControls: () => controls ?? ({ getControlsContainer: () => ({ hasAttribute: () => false }), anySettingsMenusAreOpen: () => false, getConfig: () => ({ tapSeekDistance: 0 }), showUI: () => calls.push('show') }),
         isFullscreenActive: fullscreen,
         isFullscreenMetadataShown: () => false,
         isFullscreenSwipeEnabled: () => fullscreenSwipe,
@@ -60,7 +60,7 @@ function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = t
           cancel: () => calls.push('cancel'),
         },
         setFullscreenMetadata() {}, setShowUiOnPaused() {}, showOverlayControls() {},
-        togglePlayerFullScreen: () => calls.push('fullscreen'),
+        togglePlayerFullScreen: toggleFullscreen ?? (() => calls.push('fullscreen')),
       })
       return () => null
     },
@@ -71,7 +71,7 @@ function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = t
     return { clientX: x, clientY: y, pointerId: 1, pointerType: 'touch', button: 0, isPrimary: true, target: surface,
       preventDefault() { this.prevented = true }, stopPropagation() {}, stopImmediatePropagation() {}, ...extra }
   }
-  return { gestures, calls, event, captures }
+  return { gestures, calls, event, captures, container }
 }
 
 test('Shorts vertical swipes stay available for feed navigation', t => {
@@ -126,6 +126,77 @@ test('center swipes retain fullscreen and disabled sides allow fullscreen swipes
     g.cancelMobileFullscreenGesture()
   }
   assert.deepEqual(calls, [])
+})
+
+test('fullscreen swipe controls auto-hide after the configured delay despite suppressed touchend', async t => {
+  // Exercise Shaka's real touch/mouse and opacity methods. touchmove stops its
+  // idle timer, while the app consumes touchend to prevent a second surface tap.
+  const source = readFileSync(new URL('../../node_modules/shaka-player/ui/controls.js', import.meta.url), 'utf8')
+  const shaka = { ui: {}, util: { FakeEventTarget: class {} } }
+  vm.runInNewContext(source.slice(source.indexOf('shaka.ui.Controls = class'), source.indexOf('\n};') + 3), {
+    shaka, Event, Date, goog: { asserts: { assert } },
+  })
+  const controls = Object.create(shaka.ui.Controls.prototype)
+  const attributes = new Map()
+  const classList = { add() {}, remove() {}, contains: () => false }
+  const timer = callback => {
+    let id
+    return {
+      stop() { clearTimeout(id) },
+      tickAfter(seconds) { this.stop(); id = setTimeout(callback, seconds * 1000) },
+    }
+  }
+  Object.assign(controls, {
+    enabled_: true,
+    controlsContainer_: {
+      classList,
+      getAttribute: name => attributes.get(name) ?? null,
+      setAttribute: (name, value) => attributes.set(name, value),
+      hasAttribute: name => attributes.has(name),
+    },
+    videoContainer_: { classList, dataset: {} },
+    video_: { paused: false },
+    config_: { showUIOnPaused: true, fadeDelay: 0.5 },
+    isHovered_: () => false,
+    shouldShowUIAlways_: () => false,
+    anySettingsMenusAreOpen: () => false,
+    updateTimeAndSeekRange_() {},
+    dispatchVisibilityEvent_() {},
+    computeShakaTextContainerSize_() {},
+    hideSettingsMenusTimer_: timer(() => {}),
+    fadeControlsTimer_: timer(() => attributes.delete('shown')),
+    mouseStillTimer_: timer(() => controls.onMouseStill_()),
+  })
+  let fullscreen = false
+  const { gestures: g, event, container } = fixture(t, {
+    controls,
+    fullscreen: () => fullscreen,
+    toggleFullscreen: () => {
+      fullscreen = true
+      controls.videoContainer_.dataset.playingInterfaceHideDelay = '2'
+      controls.showUI()
+    },
+  })
+  for (const type of ['touchmove', 'touchend']) {
+    container.addEventListener(type, event => controls.onMouseMove_(event))
+  }
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  g.startMobileFullscreenGesture(event(210, 150))
+  g.moveMobileFullscreenGesture(event(210, 50))
+  container.dispatchEvent(new Event('touchmove'))
+  g.finishMobileFullscreenGesture(event(210, 50))
+  const touchEnd = event()
+  g.handleMobilePlayerTouchEnd(touchEnd)
+  assert.equal(touchEnd.prevented, true)
+  t.mock.timers.tick(0)
+  await Promise.resolve()
+  assert.equal(fullscreen, true)
+  assert.equal(attributes.has('shown'), true)
+  t.mock.timers.tick(1999)
+  assert.equal(attributes.has('shown'), true, 'Controls respect the configured idle delay')
+  t.mock.timers.tick(1)
+  t.mock.timers.tick(500)
+  assert.equal(attributes.has('shown'), false, 'Controls must hide without another tap')
 })
 
 test('horizontal movement never becomes an adjustment later in the same gesture', t => {
