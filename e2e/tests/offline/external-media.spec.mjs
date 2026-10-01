@@ -6,6 +6,7 @@ import { expect, goTo, repoRoot, sel, setWindowSize, test } from '../../helpers/
 import { activeTab, waitForPlayback } from '../../helpers/player.mjs'
 import { DEMO_MEDIA_PATH, DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
 import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
+import { mapExternalPlaybackMetadata } from '../../../src/ytDlpMetadata.js'
 
 async function prepareTwitchYtDlp(app, page, mediaUrl, live, description = '', chapters = []) {
   const executable = path.join(app.userDataDir, `twitch-${live ? 'live' : 'replay'}-yt-dlp.sh`)
@@ -1397,6 +1398,105 @@ for (const scale of [1, 1.25]) {
       const bounds = await player.boundingBox()
       for (const dimension of ['width', 'height']) {
         expect.soft(Math.abs(loadingBounds[dimension] - bounds[dimension]), `${dimension}: loading ${loadingBounds[dimension]}, player ${bounds[dimension]}`).toBeLessThan(2)
+      }
+    })
+  }
+}
+
+for (const scale of [1, 1.25]) {
+  for (const size of [
+    { width: 1800, height: 1000 },
+    { width: 1800, height: 400 },
+    { width: 375, height: 667 }
+  ]) {
+    test(`external media upcoming keeps the loading panel bounds at ${size.width}×${size.height} and ${scale * 100}% UI scale`, async ({ app, page }) => {
+      await app.electronApp.evaluate(({ ipcMain }) => {
+        ipcMain.removeHandler('yt-dlp-get-playback-info')
+        ipcMain.handle('yt-dlp-get-playback-info', () => new Promise(resolve => {
+          globalThis.finishUpcomingExtraction = resolve
+        }))
+      })
+      await page.locator(sel.searchInput).fill('https://videos.example.test/upcoming')
+      await page.locator(sel.searchInput).press('Enter')
+      const loading = page.locator(`${activeTab} .externalMediaLoading`)
+      await expect(loading).toBeVisible()
+      await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+      await page.setViewportSize(size)
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+      const loadingBounds = await loading.boundingBox()
+      await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.finishUpcomingExtraction)).toBe('function')
+      await app.electronApp.evaluate((_electron, info) => globalThis.finishUpcomingExtraction(info), {
+        title: 'Upcoming stream',
+        liveStatus: 'is_upcoming',
+        formats: [],
+        externalMetadata: mapExternalPlaybackMetadata({})
+      })
+      await expect(loading).toHaveCount(0)
+      const upcoming = page.locator(`${activeTab} .externalMediaVideo .externalMediaState`)
+      await expect(upcoming).toHaveText('Upcoming')
+      const upcomingBounds = await upcoming.boundingBox()
+      for (const dimension of ['x', 'y', 'width', 'height']) {
+        expect.soft(Math.abs(loadingBounds[dimension] - upcomingBounds[dimension]), `${dimension}: loading ${loadingBounds[dimension]}, upcoming ${upcomingBounds[dimension]}`).toBeLessThan(2)
+      }
+    })
+  }
+}
+
+for (const scale of [1, 1.25]) {
+  for (const layout of [
+    { width: 1800, height: 1000, mediaUrl: 'https://soundcloud.com/example/unavailable' },
+    { width: 1800, height: 400, mediaUrl: 'https://soundcloud.com/example/unavailable' },
+    { width: 1280, height: 720, mediaUrl: 'https://soundcloud.com/example/unavailable' },
+    { width: 1800, height: 1000, mediaUrl: 'https://www.twitch.tv/videos/123456789' },
+    { width: 1800, height: 1000, mediaUrl: 'https://www.twitch.tv/videos/123456789', viewingMode: 'theatre' },
+    { width: 1800, height: 1000, mediaUrl: 'https://www.twitch.tv/videos/123456789', hideChat: true }
+  ]) {
+    const { mediaUrl, viewingMode = 'default', hideChat = false, ...size } = layout
+    test(`external media error keeps the loading panel bounds for ${mediaUrl} in ${viewingMode} mode${hideChat ? ' without chat' : ''} at ${size.width}×${size.height} and ${scale * 100}% UI scale`, async ({ app, page }, testInfo) => {
+      await app.electronApp.evaluate(({ ipcMain }) => {
+        ipcMain.removeHandler('twitch-sub-only-vod')
+        ipcMain.handle('twitch-sub-only-vod', () => null)
+        ipcMain.removeHandler('yt-dlp-get-playback-info')
+        ipcMain.handle('yt-dlp-get-playback-info', () => new Promise(resolve => {
+          globalThis.failExternalExtraction = () => resolve({ error: 'yt-dlp did not return any playable formats' })
+        }))
+      })
+      await page.evaluate(async ({ viewingMode, hideChat }) => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await store.dispatch('updateDefaultViewingMode', viewingMode)
+        await store.dispatch('updateHideLiveChatReplay', hideChat)
+      }, { viewingMode, hideChat })
+      await page.locator(sel.searchInput).fill(mediaUrl)
+      await page.locator(sel.searchInput).press('Enter')
+      const loading = page.locator(`${activeTab} .externalMediaLoading`)
+      await expect(loading).toBeVisible()
+      await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+      await page.setViewportSize(size)
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+      const loadingBounds = await loading.boundingBox()
+      await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.failExternalExtraction)).toBe('function')
+      await app.electronApp.evaluate(() => globalThis.failExternalExtraction())
+      const error = page.locator(`${activeTab} .externalMediaError`)
+      await expect(error).toBeVisible()
+      const errorBounds = await error.boundingBox()
+      for (const dimension of ['x', 'y', 'width', 'height']) {
+        expect.soft(Math.abs(loadingBounds[dimension] - errorBounds[dimension]), `${dimension}: loading ${loadingBounds[dimension]}, error ${errorBounds[dimension]}`).toBeLessThan(2)
+      }
+      for (const content of await error.locator('.externalMediaStateContent > *').all()) {
+        const bounds = await content.boundingBox()
+        expect.soft(bounds.y).toBeGreaterThanOrEqual(errorBounds.y - 1)
+        expect.soft(bounds.y + bounds.height).toBeLessThanOrEqual(errorBounds.y + errorBounds.height + 1)
+      }
+      if (size.height === 400 && scale === 1.25) {
+        await page.screenshot({ path: testInfo.outputPath('short-window-error.png') })
+      }
+      await expect(error.getByRole('button', { name: 'Retry', exact: true })).toBeVisible()
+      await error.getByRole('button', { name: 'Retry', exact: true }).click()
+      await expect(loading).toBeVisible()
+      const retryBounds = await loading.boundingBox()
+      // Clicking Retry can scroll the route to bring the button into view.
+      for (const dimension of ['width', 'height']) {
+        expect.soft(Math.abs(errorBounds[dimension] - retryBounds[dimension]), `${dimension}: error ${errorBounds[dimension]}, retry ${retryBounds[dimension]}`).toBeLessThan(2)
       }
     })
   }

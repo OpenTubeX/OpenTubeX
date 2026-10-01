@@ -1,12 +1,13 @@
 <template>
   <main class="externalMedia">
     <div
-      v-if="loading"
+      v-if="loading || errorMessage"
       class="externalMediaLayout"
       :class="{ useTheatreMode, noSidebar: !chatAvailable || !chatOpen }"
     >
       <div class="externalMediaVideo">
         <div
+          v-if="loading"
           class="externalMediaState externalMediaLoading"
           data-tab-loading-indicator
           role="status"
@@ -23,42 +24,41 @@
             >{{ hostname }}</span>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div
-      v-else-if="errorMessage"
-      class="externalMediaState externalMediaError"
-      role="alert"
-    >
-      <div class="externalMediaStateContent">
-        <FtIcon
-          :icon="['fas', 'exclamation-circle']"
-          class="externalMediaErrorIcon"
-          aria-hidden="true"
-        />
-        <h1>{{ info?.title || hostname || mediaUrl || t('Change Format.Stream Source') }}</h1>
-        <span
-          v-if="info?.title && hostname"
-          class="externalMediaOrigin"
-        >{{ hostname }}</span>
-        <p class="externalMediaDiagnostic">
-          {{ errorMessage }}
-        </p>
-        <FtButton
-          v-if="isExternalMediaUrl(mediaUrl)"
-          class="externalMediaRetry"
-          :label="t('User Playlists.SinglePlaylistView.Retry')"
-          :icon="['fas', 'sync']"
-          @click="loadMedia(route.query.url)"
-        />
-        <FtButton
-          v-if="canRetryWithCookies"
-          class="externalMediaRetry"
-          :label="t('Video.Try With Configured Cookies')"
-          :icon="['fas', 'cookie']"
-          @click="loadMedia(mediaUrl, true)"
-        />
+        <div
+          v-else
+          class="externalMediaState externalMediaError"
+          role="alert"
+        >
+          <div class="externalMediaStateContent">
+            <FtIcon
+              :icon="['fas', 'exclamation-circle']"
+              class="externalMediaErrorIcon"
+              aria-hidden="true"
+            />
+            <h1>{{ info?.title || hostname || mediaUrl || t('Change Format.Stream Source') }}</h1>
+            <span
+              v-if="info?.title && hostname"
+              class="externalMediaOrigin"
+            >{{ hostname }}</span>
+            <p class="externalMediaDiagnostic">
+              {{ errorMessage }}
+            </p>
+            <FtButton
+              v-if="isExternalMediaUrl(mediaUrl)"
+              class="externalMediaRetry"
+              :label="t('User Playlists.SinglePlaylistView.Retry')"
+              :icon="['fas', 'sync']"
+              @click="loadMedia(route.query.url)"
+            />
+            <FtButton
+              v-if="canRetryWithCookies"
+              class="externalMediaRetry"
+              :label="t('Video.Try With Configured Cookies')"
+              :icon="['fas', 'cookie']"
+              @click="loadMedia(mediaUrl, true)"
+            />
+          </div>
+        </div>
       </div>
     </div>
 
@@ -374,7 +374,7 @@ const hostname = computed(() => {
 })
 const isCoub = computed(() => hostname.value === 'coub.com' || hostname.value.endsWith('.coub.com'))
 const twitchChatTarget = computed(() => {
-  if (loading.value) return getTwitchChatTarget(mediaUrl.value, true)
+  if (loading.value || (errorMessage.value && !info.value)) return getTwitchChatTarget(mediaUrl.value, true)
   if (!info.value || !source.value) return null
   return getTwitchChatTarget(info.value.webpageUrl, source.value.isLive) ?? getTwitchChatTarget(mediaUrl.value, source.value.isLive)
 })
@@ -745,7 +745,7 @@ onBeforeUnmount(() => {
 }
 
 .externalMediaPlayer,
-.externalMediaLoading {
+.externalMediaState {
   inline-size: 100%;
   max-inline-size: calc(80vh * 1.78);
   min-inline-size: 0;
@@ -827,7 +827,7 @@ onBeforeUnmount(() => {
   border-radius: calc(8px * var(--ui-roundness));
   box-sizing: border-box;
   display: grid;
-  min-block-size: 320px;
+  min-block-size: 0;
   padding: 32px;
   place-items: center;
 }
@@ -845,7 +845,6 @@ onBeforeUnmount(() => {
 
 .externalMediaLoading {
   container: external-media-loading / inline-size;
-  min-block-size: 0;
 }
 
 .externalMediaState.externalMediaLoading {
@@ -926,9 +925,18 @@ onBeforeUnmount(() => {
   min-block-size: 44px;
 }
 
+@media (height <= 500px) and (width > 680px) {
+  .externalMediaError {
+    padding: 16px;
+  }
+
+  .externalMediaError .externalMediaStateContent {
+    gap: 8px;
+  }
+}
+
 @media only screen and (width <= 680px) {
   .externalMediaState {
-    min-block-size: 0;
     padding: 20px;
   }
 
