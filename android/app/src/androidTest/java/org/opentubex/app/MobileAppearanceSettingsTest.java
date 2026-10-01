@@ -263,13 +263,29 @@ public class MobileAppearanceSettingsTest {
                     evaluate(view, "document.querySelector('.sideNav .moreOptionNav').click()");
                     awaitCondition(view, "!!document.querySelector('.moreOptionContainer')");
                     assertEquals("Overflow labels stay readable", "true", evaluate(view,
-                        "[...document.querySelectorAll('.moreOptionContainer .navLabel')].every(label => getComputedStyle(label).visibility === 'visible')"));
+                        """
+                        (() => {
+                            const labels = [...document.querySelectorAll('.moreOptionContainer .navLabel')];
+                            return labels.length > 0 && labels.every(label => {
+                                const bounds = label.getBoundingClientRect();
+                                return getComputedStyle(label).visibility === 'visible' && bounds.width > 0 && bounds.height > 0;
+                            });
+                        })()
+                        """));
                     evaluate(view, "document.querySelector('.moreOptionContainer a[href=\"#/subscribedchannels\"]').click()");
                     awaitCondition(view, "document.querySelector('.moreOptionNav').classList.contains('router-link-active') && getComputedStyle(document.querySelector('.moreOptionNav .navLabel')).display === 'none'");
                     evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/history')");
                     awaitCondition(view, "!!document.querySelector('.sideNav .inner > .navOption.router-link-active[href=\"#/history\"]')");
                     evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setCompactNavigationLabels', false)");
-                    awaitCondition(view, "[...document.querySelectorAll('.sideNav .navLabel')].every(label => getComputedStyle(label).visibility === 'visible')");
+                    awaitCondition(view, """
+                        (() => {
+                            const labels = [...document.querySelectorAll('.sideNav .inner > .navOption:not(.mobileHidden) .navLabel, .moreOptionNav .navLabel')];
+                            return labels.length === 5 && labels.every(label => {
+                                const bounds = label.getBoundingClientRect();
+                                return getComputedStyle(label).visibility === 'visible' && bounds.width > 0 && bounds.height > 0;
+                            });
+                        })()
+                        """);
                 }
             } finally {
                 evaluate(view, "document.querySelector('#mobile-navigation-options-fixture')?.remove(); window.scrollTo(0, 0)");

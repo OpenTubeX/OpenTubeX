@@ -118,6 +118,49 @@ for (const uiScale of [100, 125]) {
         await page.locator('.moreOptionNav').click()
       }
     })
+
+    test('bottom notifications follow compact navigation while visible and hidden', async ({ app, page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await setWindowSize(app, page, { width: 500, height: 850 })
+      await goTo(page, 'history')
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setToastPosition', 'bottom-center')
+        document.documentElement.style.setProperty('--safe-area-inset-bottom', '24px')
+        document.querySelector('.app > .flexBox').style.minHeight = '3000px'
+        window.ftElectron.showToastOnAllTabs('Navigation spacing test', 60000)
+      })
+      const toast = page.locator('.toast', { hasText: 'Navigation spacing test' })
+      await expect(toast).toBeVisible()
+      for (const compact of [false, true, false, true]) {
+        await page.evaluate(compact => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setCompactNavigationLabels', compact), compact)
+        await expect.poll(async () => {
+          const nav = await page.locator('.sideNav').boundingBox()
+          const notification = await toast.boundingBox()
+          return nav.y - notification.y - notification.height
+        }).toBeCloseTo(12, 0)
+      }
+      await page.locator('.app').evaluate(app => app.classList.add('capacitorPhoneLayout'))
+      await expect.poll(async () => {
+        const nav = await page.locator('.sideNav').boundingBox()
+        const notification = await toast.boundingBox()
+        return nav.y - notification.y - notification.height
+      }).toBeCloseTo(12, 0)
+      await page.evaluate(() => {
+        Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+        window.dispatchEvent(new Event('offline'))
+      })
+      const status = page.locator('.connection-status-holder')
+      await expect(page.locator('.connectionStatus')).toBeVisible()
+      await expect.poll(async () => {
+        const nav = await page.locator('.sideNav').boundingBox()
+        const notice = await status.boundingBox()
+        return Math.abs(nav.y - notice.y - notice.height)
+      }).toBeLessThanOrEqual(1)
+      await page.evaluate(() => window.scrollTo(0, 300))
+      await expect(page.locator('.sideNav')).toHaveClass(/scrollHidden/)
+      await expect.poll(() => status.evaluate(element => Math.abs(element.getBoundingClientRect().bottom - innerHeight))).toBeLessThanOrEqual(1)
+    })
   })
 }
 
