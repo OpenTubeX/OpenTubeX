@@ -263,6 +263,7 @@ Settings:
       Network: 网络
       Disk: 磁盘
   General Settings:
+    Data Saver Thumbnails: "省流量缩略图"
     Use tray icon: "使用托盘图标"
     Close to system tray: "关闭时最小化到系统托盘"
     Tray required for background refresh: "启用后台刷新订阅时，必须显示托盘图标。"
@@ -1600,6 +1601,7 @@ Description:
   Games: 游戏
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "使用较低分辨率的缩略图以减少数据用量。"
     Use AI Translation Completions: 使用 AI 生成的文本补全人工翻译中的缺失内容。始终优先使用人工翻译。
     Update Relative Timestamps: 页面保持打开时，持续更新应用各处的相对时间戳。禁用后，仅在重新加载或再次访问页面时更新。
     Stream Extraction Method: |

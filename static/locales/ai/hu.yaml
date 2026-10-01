@@ -263,6 +263,7 @@ Settings:
       Network: hálózat
       Disk: lemez
   General Settings:
+    Data Saver Thumbnails: "Adattakarékos bélyegképek"
     Use tray icon: "Rendszertálcaikon használata"
     Close to system tray: "Bezárás a rendszertálcára"
     Tray required for background refresh: "A rendszertálcaikon szükséges, amíg a feliratkozások háttérben történő frissítése engedélyezve van."
@@ -1601,6 +1602,7 @@ Description:
   Games: Játékok
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Alacsonyabb felbontású bélyegképek használata az adatforgalom csökkentéséhez."
     Use AI Translation Completions: Az emberi fordítások hiányzó részeinek kitöltése mesterséges intelligenciával létrehozott szöveggel. Az emberi fordítások mindig elsőbbséget élveznek.
     Update Relative Timestamps: A relatív időbélyegek frissítése az egész alkalmazásban, amíg nyitva van egy oldal. Kikapcsolva csak az oldal újratöltésekor vagy újbóli megnyitásakor frissülnek.
     Stream Extraction Method: |

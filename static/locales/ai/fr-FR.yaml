@@ -263,6 +263,7 @@ Settings:
       Network: le réseau
       Disk: le disque
   General Settings:
+    Data Saver Thumbnails: "Miniatures économes en données"
     Use tray icon: "Utiliser l’icône de notification"
     Close to system tray: "Fermer dans la zone de notification"
     Tray required for background refresh: "L’icône de notification est nécessaire lorsque l’actualisation des abonnements en arrière-plan est activée."
@@ -1599,6 +1600,7 @@ Description:
   Games: Jeux
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Utiliser des miniatures de résolution inférieure pour réduire la consommation de données."
     Use AI Translation Completions: Complète les traductions humaines avec du texte généré par l’IA. Les traductions humaines sont toujours prioritaires.
     Update Relative Timestamps: Actualise les horodatages relatifs dans toute l’application tant qu’une page reste ouverte. Lorsque cette option est désactivée, ils ne sont actualisés qu’après le rechargement ou une nouvelle visite de la page.
     Stream Extraction Method: |

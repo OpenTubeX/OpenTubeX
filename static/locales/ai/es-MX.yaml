@@ -291,6 +291,7 @@ Settings:
       Network: red
       Disk: disco
   General Settings:
+    Data Saver Thumbnails: "Miniaturas con ahorro de datos"
     Use tray icon: "Usar icono de la bandeja"
     Close to system tray: "Cerrar a la bandeja del sistema"
     Tray required for background refresh: "El icono de la bandeja es necesario mientras la actualización de suscripciones en segundo plano esté activada."
@@ -1943,6 +1944,7 @@ Description:
   Games: Juegos
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Usar miniaturas de menor resolución para reducir el consumo de datos."
     Use AI Translation Completions: Completa las partes que faltan en las traducciones humanas con texto generado por IA. Las traducciones humanas siempre tienen prioridad.
     Update Relative Timestamps: Actualiza las marcas de tiempo relativas en toda la aplicación mientras una página permanece abierta. Si se desactiva, solo se actualizan al recargar la página o volver a visitarla.
     Stream Extraction Method: |

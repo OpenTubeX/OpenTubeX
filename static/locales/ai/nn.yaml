@@ -277,6 +277,7 @@ Settings:
       Disk: disk
   Return to Settings Menu: Tilbake til innstillingsmenyen
   General Settings:
+    Data Saver Thumbnails: "Datasparande miniatyrbilete"
     Use tray icon: "Bruk ikon i systemtrauet"
     Close to system tray: "Lukk til systemtrauet"
     Tray required for background refresh: "Ikonet i systemtrauet er påkravd medan oppdatering av abonnement i bakgrunnen er aktivert."
@@ -1903,6 +1904,7 @@ Description:
   Games: Spel
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Bruk miniatyrbilete med lågare oppløysing for å redusere databruken."
     Use AI Translation Completions: Fyll ut det som manglar i menneskelagde omsetjingar med KI-generert tekst. Menneskelagde omsetjingar vert alltid brukte fyrst.
     Update Relative Timestamps: Oppdaterer relative tidsstempel i heile appen medan ei side er open. Når dette er slått av, vert dei berre oppdaterte når sida vert lasta inn på nytt eller opna att.
     Stream Extraction Method: |

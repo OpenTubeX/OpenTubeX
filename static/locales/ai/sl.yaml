@@ -385,6 +385,7 @@ Settings:
       Disk: disk
   Return to Settings Menu: Nazaj v meni z nastavitvami
   General Settings:
+    Data Saver Thumbnails: "Sličice za varčevanje s podatki"
     Use tray icon: "Uporabi ikono v sistemski vrstici"
     Close to system tray: "Zapri v sistemsko vrstico"
     Tray required for background refresh: "Ikona v sistemski vrstici je potrebna, dokler je omogočeno osveževanje naročnin v ozadju."
@@ -2088,6 +2089,7 @@ Description:
   Games: Igre
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Uporabite sličice z nižjo ločljivostjo za zmanjšanje porabe podatkov."
     Use AI Translation Completions: Zapolni vrzeli v človeških prevodih z besedilom, ki ga ustvari umetna inteligenca. Človeški prevodi imajo vedno prednost.
     Update Relative Timestamps: Posodablja relativne časovne žige po vsej aplikaciji, dokler je stran odprta. Če je možnost izklopljena, se posodobijo šele po ponovnem nalaganju ali obisku strani.
     Stream Extraction Method: |

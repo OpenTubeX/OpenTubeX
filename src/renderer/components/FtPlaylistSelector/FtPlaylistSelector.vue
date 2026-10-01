@@ -13,11 +13,11 @@
         class="selectedIcon"
         :icon="['fas', 'check']"
       />
-      <img
+      <FtRetryImage
         alt=""
         :src="thumbnail"
         class="thumbnailImage"
-      >
+      />
       <div
         class="videoCountContainer"
       >
@@ -57,6 +57,8 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
+import FtRetryImage from '../FtRetryImage.vue'
+import { getVideoThumbnailUrl } from '../../helpers/utils'
 
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
@@ -176,11 +178,7 @@ const videoPresenceCountInPlaylistTextVisible = computed(() => {
 const thumbnail = ref(thumbnailPlaceholder)
 
 if (props.playlist.videos.length > 0) {
-  const origin = backendPreference.value === 'invidious'
-    ? currentInvidiousInstanceUrl.value
-    : 'https://i.ytimg.com'
-
-  thumbnail.value = `${origin}/vi/${props.playlist.videos[0].videoId}/mqdefault.jpg`
+  thumbnail.value = getVideoThumbnailUrl(props.playlist.videos[0].videoId, backendPreference.value, currentInvidiousInstanceUrl.value)
 }
 
 function toggleSelection() {

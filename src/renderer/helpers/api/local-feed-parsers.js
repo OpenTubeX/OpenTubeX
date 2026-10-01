@@ -238,7 +238,8 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         author: channelName,
         authorId: channelId,
         viewCount: reelItem.views.isEmpty() ? null : parseLocalSubscriberCount(reelItem.views.text),
-        thumbnailUrl: reelItem.thumbnails.at(-1)?.url,
+        thumbnailUrl: reelItem.thumbnails.at(0)?.url,
+        lowResolutionThumbnailUrl: reelItem.thumbnails.at(-1)?.url,
         isShort: true,
         lengthSeconds: ''
       }
@@ -254,6 +255,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         authorId: channelId,
         viewCount: shortsLockupView.overlay_metadata.secondary_text ? parseLocalSubscriberCount(shortsLockupView.overlay_metadata.secondary_text.text) : null,
         thumbnailUrl: getShortsLockupThumbnailUrl(shortsLockupView),
+        lowResolutionThumbnailUrl: shortsLockupView.thumbnail?.at(-1)?.url,
         isShort: true,
         lengthSeconds: ''
       }
@@ -360,7 +362,8 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         videoId: short.id,
         title: short.title.text?.trim(),
         viewCount: parseLocalSubscriberCount(short.views.text),
-        thumbnailUrl: short.thumbnails.at(-1)?.url,
+        thumbnailUrl: short.thumbnails.at(0)?.url,
+        lowResolutionThumbnailUrl: short.thumbnails.at(-1)?.url,
         isShort: true,
         lengthSeconds: ''
       }
@@ -399,6 +402,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
         title: shortsLockupView.overlay_metadata.primary_text.text?.trim(),
         viewCount,
         thumbnailUrl: getShortsLockupThumbnailUrl(shortsLockupView),
+        lowResolutionThumbnailUrl: shortsLockupView.thumbnail?.at(-1)?.url,
         isShort: true,
         lengthSeconds: ''
       }
@@ -471,7 +475,7 @@ export function createLocalFeedParsers(shouldHideMembersOnly) {
    * @returns {string | undefined}
    */
   function getShortsLockupThumbnailUrl(short) {
-    return short.thumbnail?.at(-1)?.url
+    return short.thumbnail?.at(0)?.url
   }
 
   /**

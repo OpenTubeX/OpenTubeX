@@ -263,6 +263,7 @@ Settings:
       Network: sarea
       Disk: diskoa
   General Settings:
+    Data Saver Thumbnails: "Datuak aurrezteko miniaturak"
     Use tray icon: "Erabili sistemaren erretiluko ikonoa"
     Close to system tray: "Itxi sistemaren erretilura"
     Tray required for background refresh: "Sistemaren erretiluko ikonoa beharrezkoa da harpidetzak atzeko planoan eguneratzea gaituta dagoen bitartean."
@@ -1618,6 +1619,7 @@ Description:
   Games: Jokoak
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Erabili bereizmen txikiagoko miniaturak datuen erabilera murrizteko."
     Use AI Translation Completions: Bete giza itzulpenetan falta diren zatiak adimen artifizialak sortutako testuarekin. Giza itzulpenek beti dute lehentasuna.
     Update Relative Timestamps: Denbora-marka erlatiboak aplikazio osoan eguneratzen ditu orria irekita dagoen bitartean. Desgaituta dagoenean, orria berriro kargatu edo bisitatu ondoren soilik eguneratzen dira.
     Stream Extraction Method: |

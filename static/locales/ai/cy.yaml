@@ -265,6 +265,7 @@ Settings:
       Network: rhwydwaith
       Disk: disg
   General Settings:
+    Data Saver Thumbnails: "Mân-luniau arbed data"
     Use tray icon: "Defnyddio eicon hambwrdd"
     Close to system tray: "Cau i hambwrdd y system"
     Tray required for background refresh: "Mae angen yr eicon hambwrdd tra bo diweddaru tanysgrifiadau yn y cefndir wedi’i alluogi."
@@ -1627,6 +1628,7 @@ Description:
   Games: Gemau
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Defnyddiwch fân-luniau cydraniad is i leihau defnydd data."
     Use AI Translation Completions: Llenwi bylchau mewn cyfieithiadau dynol â thestun a gynhyrchwyd gan AI. Mae cyfieithiadau dynol bob amser yn cael blaenoriaeth.
     Update Relative Timestamps: Mae'n diweddaru stampiau amser cymharol drwy'r ap tra bo tudalen ar agor. Pan fydd wedi'i analluogi, dim ond ar ôl ail-lwytho neu ailagor y dudalen y cânt eu diweddaru.
     Stream Extraction Method: |

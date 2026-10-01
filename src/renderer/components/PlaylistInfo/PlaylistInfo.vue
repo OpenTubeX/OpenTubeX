@@ -18,18 +18,18 @@
         }"
         tabindex="-1"
       >
-        <img
+        <FtRetryImage
           :src="thumbnail"
           alt=""
           :class="{ blur: blurThumbnails }"
-        >
+        />
       </router-link>
-      <img
+      <FtRetryImage
         v-else
         :src="thumbnail"
         alt=""
         :class="{ blur: blurThumbnails }"
-      >
+      />
     </div>
 
     <div class="playlistStats">
@@ -594,7 +594,7 @@ const thumbnail = computed(() => {
     case 'end':
       return `${baseUrl}/vi/${props.firstVideoId}/mq3.jpg`
     default:
-      return `${baseUrl}/vi/${props.firstVideoId}/mqdefault.jpg`
+      return `${baseUrl}/vi/${props.firstVideoId}/maxresdefault.jpg`
   }
 })
 

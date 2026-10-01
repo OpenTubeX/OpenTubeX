@@ -265,6 +265,7 @@ Settings:
       Network: şəbəkə
       Disk: disk
   General Settings:
+    Data Saver Thumbnails: "Verilənlərə qənaət edən miniatürlər"
     Use tray icon: "Sistem sahəsi nişanından istifadə et"
     Close to system tray: "Sistem sahəsinə bağla"
     Tray required for background refresh: "Abunəliklərin arxa planda yenilənməsi aktiv olduqda sistem sahəsi nişanı tələb olunur."
@@ -1613,6 +1614,7 @@ Description:
   Games: Oyunlar
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Verilən istifadəsini azaltmaq üçün daha aşağı keyfiyyətli miniatürlərdən istifadə edin."
     Use AI Translation Completions: İnsan tərcümələrindəki boşluqları süni intellektin yaratdığı mətnlə doldur. İnsan tərcümələrinə həmişə üstünlük verilir.
     Update Relative Timestamps: Səhifə açıq qaldıqda tətbiq boyu nisbi vaxt göstəricilərini yeniləyir. Bağlandıqda onlar yalnız səhifə yenidən yüklənəndə və ya ona yenidən daxil olduqda yenilənir.
     Stream Extraction Method: |

@@ -267,6 +267,7 @@ Settings:
       Network: רשת
       Disk: כונן
   General Settings:
+    Data Saver Thumbnails: "תמונות ממוזערות לחיסכון בנתונים"
     Use tray icon: "שימוש בסמל במגש המערכת"
     Close to system tray: "סגירה למגש המערכת"
     Tray required for background refresh: "סמל מגש המערכת נדרש כל עוד רענון המינויים ברקע מופעל."
@@ -1644,6 +1645,7 @@ Description:
   Games: משחקים
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "שימוש בתמונות ממוזערות ברזולוציה נמוכה יותר להפחתת השימוש בנתונים."
     Use AI Translation Completions: השלמת פערים בתרגומים אנושיים באמצעות טקסט שנוצר בבינה מלאכותית. תרגומים אנושיים תמיד מקבלים עדיפות.
     Update Relative Timestamps: עדכון חותמות הזמן היחסיות בכל היישום כל עוד הדף פתוח. כשהאפשרות מושבתת, הן מתעדכנות רק לאחר טעינה מחדש או חזרה לדף.
     Stream Extraction Method: |

@@ -263,6 +263,7 @@ Settings:
       Network: jaringan
       Disk: disk
   General Settings:
+    Data Saver Thumbnails: "Thumbnail hemat data"
     Use tray icon: "Gunakan ikon baki sistem"
     Close to system tray: "Tutup ke baki sistem"
     Tray required for background refresh: "Ikon baki sistem diperlukan selama pembaruan langganan di latar belakang diaktifkan."
@@ -1611,6 +1612,7 @@ Description:
   Games: Gim
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Gunakan thumbnail beresolusi lebih rendah untuk mengurangi penggunaan data."
     Use AI Translation Completions: Isi bagian yang belum diterjemahkan manusia dengan teks buatan AI. Terjemahan manusia selalu diutamakan.
     Update Relative Timestamps: Memperbarui stempel waktu relatif di seluruh aplikasi selama halaman tetap terbuka. Jika dinonaktifkan, stempel waktu hanya diperbarui setelah halaman dimuat ulang atau dikunjungi kembali.
     Stream Extraction Method: |

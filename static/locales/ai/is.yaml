@@ -265,6 +265,7 @@ Settings:
       Network: nets
       Disk: disks
   General Settings:
+    Data Saver Thumbnails: "Gagnasparandi smámyndir"
     Use tray icon: "Nota tákn í kerfisbakka"
     Close to system tray: "Loka í kerfisbakka"
     Tray required for background refresh: "Tákn í kerfisbakka er nauðsynlegt meðan uppfærsla áskrifta í bakgrunni er virk."
@@ -1624,6 +1625,7 @@ Description:
   Games: Leikir
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Nota smámyndir í lægri upplausn til að draga úr gagnanotkun."
     Use AI Translation Completions: Fylla í eyður í þýðingum fólks með texta sem gerður er með gervigreind. Þýðingar fólks ganga alltaf fyrir.
     Update Relative Timestamps: Uppfærir afstæð tímamerki í forritinu meðan síða er opin. Ef slökkt er á þessu uppfærast þau aðeins þegar síðan er endurhlaðin eða opnuð aftur.
     Stream Extraction Method: |

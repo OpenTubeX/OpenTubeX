@@ -27,6 +27,59 @@ async function openShort({ app, page }) {
   await expect(page.locator('.ftVideoPlayer')).toHaveClass(/shortsPlayer/)
 }
 
+test('data saver updates the poster of an already-open Short', async ({ app, page }) => {
+  await openShort({ app, page })
+  const high = 'https://i.ytimg.com/vi/short-poster/large.jpg'
+  const low = 'https://i.ytimg.com/vi/short-poster/small.jpg'
+  await page.route('https://i.ytimg.com/vi/short-poster/**', route => route.fulfill({
+    contentType: 'image/svg+xml',
+    body: '<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1080"/>'
+  }))
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate(async (component, { high, low }) => {
+    const store = component.proxy.$store
+    const channelId = 'UC-short-poster-test'
+    const profile = JSON.parse(JSON.stringify(store.getters.getActiveProfile))
+    await store.dispatch('updateProfile', { ...profile, subscriptions: [{ id: channelId, name: 'Poster test', thumbnail: '' }] })
+    await store.dispatch('updateSubscriptionShortsCacheByChannel', {
+      channelId,
+      videos: [{ videoId: component.proxy.videoId, title: 'Poster test', authorId: channelId, published: Date.now(), thumbnailUrl: high, lowResolutionThumbnailUrl: low }]
+    })
+    component.proxy.thumbnail = high
+    document.querySelector('.ftVideoPlayer video').pause()
+    component.proxy.$refs.player.showPoster = true
+  }, { high, low })
+  const video = page.locator('.ftVideoPlayer video').first()
+  await expect(video).toHaveAttribute('poster', high)
+  await watch.evaluate(component => component.proxy.$store.dispatch('updateThumbnailDataSaver', true))
+  await expect(video).toHaveAttribute('poster', low)
+  await watch.evaluate(component => component.proxy.$store.dispatch('updateThumbnailDataSaver', false))
+  await expect(video).toHaveAttribute('poster', high)
+  await watch.dispose()
+})
+
+test('data saver preserves standalone Shorts posters without alternate thumbnails', async ({ app, page }) => {
+  await openShort({ app, page })
+  const poster = 'https://provider.test/short-poster.jpg'
+  await page.route(poster, route => route.fulfill({
+    contentType: 'image/svg+xml',
+    body: '<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1080"/>'
+  }))
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate((component, poster) => {
+    component.proxy.thumbnail = poster
+    document.querySelector('.ftVideoPlayer video').pause()
+    component.proxy.$refs.player.showPoster = true
+  }, poster)
+  const video = page.locator('.ftVideoPlayer video').first()
+  await expect(video).toHaveAttribute('poster', poster)
+  await watch.evaluate(component => component.proxy.$store.dispatch('updateThumbnailDataSaver', true))
+  await expect(video).toHaveAttribute('poster', poster)
+  await watch.evaluate(component => component.proxy.$store.dispatch('updateThumbnailDataSaver', false))
+  await expect(video).toHaveAttribute('poster', poster)
+  await watch.dispose()
+})
+
 test('phone Shorts options stay inside their menu dialog', async ({ app, page }) => {
   await openShort({ app, page })
   await page.locator('.shortsTopControlsGroup').last().locator('button').nth(-2).click({ force: true })

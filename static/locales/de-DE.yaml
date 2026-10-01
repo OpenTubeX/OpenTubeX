@@ -347,6 +347,7 @@ Settings:
     Advanced Description: Anbieter, externe Anwendungen und Netzwerk
     Alternative providers: Video- und Metadatenanbieter
   General Settings:
+    Data Saver Thumbnails: "Datensparende Vorschaubilder"
     Use tray icon: "Symbol im Infobereich verwenden"
     Close to system tray: "Beim Schließen in den Infobereich minimieren"
     Tray required for background refresh: "Das Symbol im Infobereich ist erforderlich, solange die Hintergrundaktualisierung von Abonnements aktiviert ist."
@@ -2366,6 +2367,7 @@ See changes and update: Änderungen ansehen und aktualisieren
 Dismiss: Ausblenden
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Verwendet Vorschaubilder mit geringerer Auflösung, um den Datenverbrauch zu reduzieren."
     Use AI Translation Completions: Füllt Lücken in den von Menschen erstellten Übersetzungen mit KI-generiertem Text. Menschliche Übersetzungen haben immer Vorrang.
     Playback Engine: Legt fest, welche Engine die Videostreams ermittelt. yt-dlp muss verfügbar sein, wenn es ausgewählt ist.
     Thumbnail Preference: Alle Vorschaubilder in OpenTubeX werden verpixelt, versteckt oder durch ein Einzelbild aus dem Video ersetzt, anstatt das Standard-Vorschaubild anzuzeigen.

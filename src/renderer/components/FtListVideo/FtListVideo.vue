@@ -44,7 +44,10 @@
         <FtRetryImage
           :src="thumbnail"
           class="thumbnailImage"
-          :class="{ blur: blurThumbnails }"
+          :class="{
+            blur: blurThumbnails,
+            deArrowThumbnail: appearance !== 'youtubeShort' && showDeArrowThumbnail && deArrowCache?.thumbnail != null
+          }"
           alt=""
         />
         <img
@@ -1558,7 +1561,8 @@ const thumbnail = computed(() => {
       props.data,
       backendPreference.value,
       currentInvidiousInstanceUrl.value,
-      thumbnailPreference.value
+      thumbnailPreference.value,
+      store.getters.getThumbnailDataSaver
     ) ?? thumbnailPlaceholder
   }
 

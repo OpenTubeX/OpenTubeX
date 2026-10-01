@@ -266,7 +266,7 @@ const playlistMetadata = computed(() => {
       const origin = backendPreference.value === 'invidious'
         ? currentInvidiousInstanceUrl.value
         : 'https://i.ytimg.com'
-      thumbnailUrl = `${origin}/vi/${props.data.videos[0].videoId}/mqdefault.jpg`
+      thumbnailUrl = `${origin}/vi/${props.data.videos[0].videoId}/maxresdefault.jpg`
     }
 
     return {
@@ -295,7 +295,7 @@ const playlistMetadata = computed(() => {
   if (props.data.proxyThumbnail === false) {
     thumbnailUrl = props.data.playlistThumbnail
   } else if (typeof props.data.playlistThumbnail === 'string' && props.data.playlistThumbnail !== '') {
-    thumbnailUrl = props.data.playlistThumbnail.replace('hqdefault', 'mqdefault')
+    thumbnailUrl = props.data.playlistThumbnail.replace(/(?:mq|hq|sd)default\.(jpg|webp)(?=[?#]|$)/, 'maxresdefault.$1')
     if (!isPlaylistBookmark.value || backendPreference.value === 'invidious') {
       thumbnailUrl = thumbnailUrl.replace('https://i.ytimg.com', currentInvidiousInstanceUrl.value)
     }

@@ -321,6 +321,7 @@ export const SYNC_SETTING_LABELS = {
   tabBarPosition: 'Settings.Theme Settings.Tab Layout.Tab Layout',
   tabCloseFocus: 'Settings.General Settings.Tab Close Focus.Tab Close Focus',
   thumbnailPreference: 'Settings.General Settings.Thumbnail Preference.Thumbnail Preference',
+  thumbnailDataSaver: 'Settings.General Settings.Data Saver Thumbnails',
   thumbnailSize: 'Settings.Theme Settings.Thumbnail Size',
   timeFormat: 'Settings.General Settings.Time Format',
   toastPosition: 'Settings.Theme Settings.Toast Position.Toast Position',

@@ -263,6 +263,7 @@ Settings:
       Network: võrgu
       Disk: ketta
   General Settings:
+    Data Saver Thumbnails: "Andmesäästlikud pisipildid"
     Use tray icon: "Kasuta süsteemisalve ikooni"
     Close to system tray: "Sulge süsteemisalve"
     Tray required for background refresh: "Süsteemisalve ikoon on vajalik, kui tellimuste taustal värskendamine on lubatud."
@@ -1603,6 +1604,7 @@ Description:
   Games: Mängud
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Kasuta väiksema eraldusvõimega pisipilte, et vähendada andmekasutust."
     Use AI Translation Completions: Täida inimeste tehtud tõlgete lüngad tehisaru loodud tekstiga. Inimeste tehtud tõlkeid eelistatakse alati.
     Update Relative Timestamps: Uuendab suhtelisi ajamärke kogu rakenduses, kuni leht on avatud. Kui see on välja lülitatud, uuendatakse neid alles pärast lehe uuesti laadimist või sellele naasmist.
     Stream Extraction Method: |

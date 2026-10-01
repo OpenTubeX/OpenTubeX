@@ -103,6 +103,7 @@ Settings:
     Advanced Description: Dostawcy, aplikacje zewnętrzne i sieć
     Alternative providers: Dostawcy filmów i metadanych
   General Settings:
+    Data Saver Thumbnails: "Miniatury oszczędzające dane"
     Tab Close Focus:
       Last active tab: "Ostatnio aktywna karta"
       Next tab in tab order: "Następna karta w kolejności kart"
@@ -877,6 +878,7 @@ Description:
   Games: Gry
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Używaj miniatur o niższej rozdzielczości, aby zmniejszyć zużycie danych."
     Use AI Translation Completions: Uzupełnia luki w tłumaczeniach tekstem wygenerowanym przez AI. Tłumaczenia wykonane przez ludzi zawsze mają pierwszeństwo.
     Update Relative Timestamps: Aktualizuje względne znaczniki czasu w całej aplikacji, dopóki strona pozostaje otwarta. Po wyłączeniu są aktualizowane dopiero po ponownym wczytaniu lub otwarciu strony.
     Stream Extraction Method: |

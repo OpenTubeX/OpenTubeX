@@ -198,11 +198,11 @@
               :title="recommendation.title"
               :aria-label="recommendation.title"
             >
-              <img
+              <FtRetryImage
                 :class="{ blur: blurThumbnails }"
                 :src="recommendation.thumbnail"
                 alt=""
-              >
+              />
               <span
                 class="endedRecommendationTitle"
                 dir="auto"
@@ -427,11 +427,11 @@
               {{ $t('Video.Player.Up next in {seconds}', { seconds: autoplayCountdown.remainingSeconds }) }}
             </p>
             <div class="autoplayThumbnailWrapper">
-              <img
+              <FtRetryImage
                 class="autoplayThumbnail"
                 :src="autoplayThumbnail"
                 alt=""
-              >
+              />
               <span
                 v-if="autoplayDuration"
                 class="autoplayDuration"

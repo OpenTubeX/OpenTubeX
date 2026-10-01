@@ -273,6 +273,7 @@ Settings:
       Network: мрежа
       Disk: диск
   General Settings:
+    Data Saver Thumbnails: "Сличице за уштеду података"
     Use tray icon: "Користи икону у системској палети"
     Close to system tray: "Затвори у системску палету"
     Tray required for background refresh: "Икона у системској палети је потребна док је омогућено освежавање претплата у позадини."
@@ -1670,6 +1671,7 @@ Description:
   Games: Игре
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Користите сличице ниже резолуције да бисте смањили потрошњу података."
     Use AI Translation Completions: Попуни празнине у људским преводима текстом који је генерисала вештачка интелигенција. Људски преводи увек имају предност.
     Update Relative Timestamps: Ажурира релативне временске ознаке у целој апликацији док је страница отворена. Када је искључено, ажурирају се тек након поновног учитавања или повратка на страницу.
     Stream Extraction Method: |

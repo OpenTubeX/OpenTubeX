@@ -280,6 +280,7 @@ Settings:
       Network: شبکه
       Disk: دیسک
   General Settings:
+    Data Saver Thumbnails: "تصاویر بندانگشتی کم‌مصرف"
     Use tray icon: "استفاده از نماد سینی سیستم"
     Close to system tray: "بستن به سینی سیستم"
     Tray required for background refresh: "تا زمانی که به‌روزرسانی اشتراک‌ها در پس‌زمینه فعال است، نماد سینی سیستم لازم است."
@@ -1681,6 +1682,7 @@ Description:
   Games: بازی‌ها
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "برای کاهش مصرف داده از تصاویر بندانگشتی با وضوح پایین‌تر استفاده کنید."
     Use AI Translation Completions: جاهای خالی ترجمه‌های انسانی را با متن تولیدشده با هوش مصنوعی پر می‌کند. ترجمه‌های انسانی همیشه اولویت دارند.
     Update Relative Timestamps: تا زمانی که صفحه باز است، زمان‌های نسبی را در سراسر برنامه به‌روز می‌کند. در صورت غیرفعال بودن، فقط پس از بارگیری دوباره یا بازدید مجدد از صفحه به‌روز می‌شوند.
     Stream Extraction Method: |
