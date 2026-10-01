@@ -3585,6 +3585,51 @@ test.describe('watch page', () => {
     })
   }
 
+  for (const incompletePreferredSource of [true, false]) {
+    test(`retains the complete limited live source when preferred clients are incomplete: ${incompletePreferredSource}`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      await page.route(/^https:\/\/example\.invalid\/.*\.m3u8$/, route => route.fulfill({
+        contentType: 'application/x-mpegURL',
+        body: '#EXTM3U\n'
+      }))
+      await openMockedVideo(page)
+      await page.evaluate(async () => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await store.dispatch('updateYtDlpPlaybackAuthMode', 'browser')
+        await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
+        await store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', true)
+      })
+      await app.electronApp.evaluate(({ ipcMain }, incompletePreferredSource) => {
+        globalThis.__limitedSourceAuthenticationCalls = []
+        ipcMain.removeHandler('yt-dlp-get-playback-info')
+        ipcMain.handle('yt-dlp-get-playback-info', (_event, _videoId, useDefaultClients, useAuthentication) => {
+          globalThis.__limitedSourceAuthenticationCalls.push({ useDefaultClients, useAuthentication })
+          if (!useAuthentication) return { error: 'This live stream requires authentication' }
+          return {
+            isLive: true,
+            liveStatus: 'is_live',
+            hlsManifestUrl: `https://example.invalid/manifest_duration/30/${useDefaultClients ? 'default' : 'preferred'}.m3u8`,
+            incomplete: useDefaultClients ? !incompletePreferredSource : incompletePreferredSource,
+            formats: [],
+            duration: null,
+            version: 'test'
+          }
+        })
+      }, incompletePreferredSource)
+      const view = await watchViewHandle(page)
+      await view.evaluate(view => view.handlePlaybackEngineChange('yt-dlp'))
+      expect(await app.electronApp.evaluate(() => globalThis.__limitedSourceAuthenticationCalls)).toEqual([
+        { useDefaultClients: false, useAuthentication: true },
+        { useDefaultClients: true, useAuthentication: true },
+        { useDefaultClients: true, useAuthentication: false }
+      ])
+      expect(await view.evaluate(view => view.manifestSrc)).toBe(
+        `https://example.invalid/manifest_duration/30/${incompletePreferredSource ? 'default' : 'preferred'}.m3u8`
+      )
+      await expect(page.locator('.shaka-seek-bar-container')).toHaveCount(0)
+    })
+  }
+
   test('treats yt-dlp live status as live and does not cache its HLS source', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.route('https://example.invalid/live-status.m3u8', route => route.fulfill({

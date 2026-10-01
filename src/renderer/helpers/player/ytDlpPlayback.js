@@ -1022,12 +1022,14 @@ async function loadYtDlpPlaybackSource(
 
       // Web clients, including authenticated defaults, can expose only the last
       // 30 seconds of a rewindable live stream. Use the remaining retries for its
-      // full DVR manifest, retaining the first playable source if those fail.
+      // full DVR manifest, preferring a complete source if those fail.
       if (
         isLive &&
         hasLimitedLiveDvrWindow(info.hlsManifestUrl)
       ) {
-        limitedLiveSource ??= source
+        if (limitedLiveSource === null || (limitedLiveSource.incomplete && !source.incomplete)) {
+          limitedLiveSource = source
+        }
         continue
       }
 
