@@ -260,9 +260,9 @@
       <FtToggleSwitch
         :label="t('Settings.Player Settings.Auto Picture in Picture.Auto Picture in Picture')"
         :compact="true"
-        :default-value="androidAutoPictureInPicture"
-        setting-key="androidAutoPictureInPicture"
-        @change="updateAndroidAutoPictureInPicture"
+        :default-value="mobileAutoPictureInPicture"
+        setting-key="mobileAutoPictureInPicture"
+        @change="updateMobileAutoPictureInPicture"
       />
     </FtFlexBox>
     <FtFlexBox
@@ -1025,10 +1025,10 @@ const autoPictureInPictureTriggers = computed({
   set: (value) => store.dispatch('updateAutoPictureInPictureTriggers', value)
 })
 
-const androidAutoPictureInPicture = computed(() => store.getters.getAndroidAutoPictureInPicture)
+const mobileAutoPictureInPicture = computed(() => store.getters.getMobileAutoPictureInPicture)
 
-function updateAndroidAutoPictureInPicture(value) {
-  store.dispatch('updateAndroidAutoPictureInPicture', value)
+function updateMobileAutoPictureInPicture(value) {
+  store.dispatch('updateMobileAutoPictureInPicture', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

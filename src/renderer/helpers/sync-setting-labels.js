@@ -5,7 +5,7 @@ export const SYNC_SETTING_LABELS = {
   aiVideoSummaryMode: 'Settings.Distraction Free Settings.AI Video Summaries',
   alwaysShowScrollbars: 'Settings.Theme Settings.Always Show Scrollbars',
   ambientMode: 'Global.Ambient Mode',
-  androidAutoPictureInPicture: 'Settings.Player Settings.Auto Picture in Picture.Auto Picture in Picture',
+  mobileAutoPictureInPicture: 'Settings.Player Settings.Auto Picture in Picture.Auto Picture in Picture',
   animationSpeed: 'Settings.Theme Settings.Animation Speed',
   appFont: 'Settings.Theme Settings.Font.App Font',
   autoOpenChapters: 'Settings.Player Settings.Automatically Open Chapters',

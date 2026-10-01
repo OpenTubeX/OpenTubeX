@@ -223,7 +223,7 @@ const state = {
   autoplayVideos: true,
   // Combinable triggers for automatically entering Picture-in-Picture: 'tab', 'minimize', 'blur'
   autoPictureInPictureTriggers: [],
-  androidAutoPictureInPicture: false,
+  mobileAutoPictureInPicture: true,
   scrollMiniPlayerEnabled: true,
   scrollMiniPlayerOnAllTabs: false,
   keepPlayingOnNavigation: true,
@@ -848,7 +848,7 @@ export const NON_SYNCABLE_SETTINGS = new Set([
   'scrollMiniPlayerSavedRect',
   'crossTabMiniPlayerSavedRect',
   // These choices describe one physical device, not the user's account.
-  'androidAutoPictureInPicture',
+  'mobileAutoPictureInPicture',
   'capacitorLayoutMode',
   'continuePlaybackWhenScreenIsLocked',
   'uiScale',
