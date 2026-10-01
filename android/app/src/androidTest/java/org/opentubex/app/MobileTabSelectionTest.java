@@ -103,9 +103,14 @@ public class MobileTabSelectionTest {
             } finally {
                 evaluate(view, "document.querySelector('.capacitorPhoneTabHeaderButton:last-of-type')?.click();" +
                     STORE + ".commit('setTabsState', window.tabHistoryOriginal.state);" +
+                    STORE + ".commit('setTabNavigation', window.tabHistoryOriginal);" +
                     STORE + ".commit('setUiScale', window.tabHistoryOriginal.scale);" +
-                    STORE + ".commit('setCapacitorLayoutMode', window.tabHistoryOriginal.layout);" +
-                    "delete window.tabHistoryOriginal; delete window.tabHistoryNeighborTitleHeight");
+                    STORE + ".commit('setCapacitorLayoutMode', window.tabHistoryOriginal.layout)");
+                assertEquals("The original navigation history is restored", "true", evaluate(view,
+                    "(() => { const saved = window.tabHistoryOriginal; const tab = " + STORE +
+                    ".getters.getTabById(saved.tabId); return tab.history.length === saved.history.length && " +
+                    "tab.historyIndex === saved.historyIndex; })()"));
+                evaluate(view, "delete window.tabHistoryOriginal; delete window.tabHistoryNeighborTitleHeight");
             }
         }
     }
