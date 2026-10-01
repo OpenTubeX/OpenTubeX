@@ -51,7 +51,7 @@ async function loadMetadata(info, avoidTranslation = 'disabled', options = {}) {
     $store: { getters: { getAvoidTranslation: avoidTranslation }, commit() {} },
     setTabAvatar() {}, updateSubscriptionDetails() {}, initializePlaybackRate() {}, initializeVideoQuality() {},
     extractChaptersFromDescription, finalizeChapters() {}, getSponsorBlockCommunityChapters: async () => [],
-    updateShortsPlayerState() {}, updateTitle() { completed = true },
+    updateShortsPlayerState() {}, updateShortThumbnail() {}, updateTitle() { completed = true },
     runIpBlockRecoveryScriptAndReload: async () => false,
     finishDownloadedPlaybackWithoutMetadata: () => false,
     getUnavailableVideoThumbnail: () => '',

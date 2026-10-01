@@ -1234,6 +1234,7 @@ export default defineComponent({
     }
   },
   watch: {
+    '$store.getters.getThumbnailDataSaver': 'updateShortThumbnail',
     '$store.getters.getWatchQueueLength'(length) {
       if (length === 0 && this.mobilePanel === 'queue') this.mobilePanel = null
     },
@@ -2633,6 +2634,18 @@ export default defineComponent({
       }
     },
 
+    updateShortThumbnail: function () {
+      if (!this.customShortsPlayerActive) { return }
+
+      this.thumbnail = getShortThumbnailUrl(
+        this.currentSubscriptionShort ?? { videoId: this.videoId },
+        this.backendPreference,
+        this.currentInvidiousInstanceUrl,
+        this.thumbnailPreference,
+        this.$store.getters.getThumbnailDataSaver
+      ) ?? this.thumbnail
+    },
+
     navigateSubscriptionShort: function (offset) {
       if (
         !this.subscriptionShortsFeedActive ||
@@ -3718,15 +3731,7 @@ export default defineComponent({
             this.shortsPlaybackCache.set(currentKey, videoInfo)
           }
         }
-        if (this.customShortsPlayerActive) {
-          this.thumbnail = getShortThumbnailUrl(
-            this.currentSubscriptionShort ?? { videoId: this.videoId },
-            this.backendPreference,
-            this.currentInvidiousInstanceUrl,
-            this.thumbnailPreference,
-            this.$store.getters.getThumbnailDataSaver
-          ) ?? this.thumbnail
-        }
+        this.updateShortThumbnail()
         if (this.isShort) {
           this.loadLocalShortLinkedVideo(this.videoId)
         }
@@ -4001,15 +4006,7 @@ export default defineComponent({
               this.shortsPlaybackCache.set(currentKey, result)
             }
           }
-          if (this.customShortsPlayerActive) {
-            this.thumbnail = getShortThumbnailUrl(
-              this.currentSubscriptionShort ?? { videoId: this.videoId },
-              this.backendPreference,
-              this.currentInvidiousInstanceUrl,
-              this.thumbnailPreference,
-              this.$store.getters.getThumbnailDataSaver
-            ) ?? this.thumbnail
-          }
+          this.updateShortThumbnail()
           this.updateTitle()
 
           this.isLoading = false
