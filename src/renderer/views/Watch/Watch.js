@@ -100,7 +100,7 @@ import {
 } from '../../helpers/player/ytDlpPlaybackPreload'
 import { getMusicTrackArtist, MUSIC_MEDIA_TYPE } from '../../helpers/player/musicMediaType'
 import { getCompatibleAdaptiveFormats } from '../../helpers/player/compatibleAdaptiveFormats'
-import { hasLimitedLiveDvrWindow } from '../../helpers/player/liveManifest'
+import { getLiveDvrWindowSeconds } from '../../helpers/player/liveManifest'
 import { selectSponsorBlockFullVideoLabel } from '../../helpers/player/sponsorBlockFullVideo'
 import {
   buildSubscriptionShortsFeed,
@@ -3500,7 +3500,7 @@ export default defineComponent({
           if (useRemoteManifest) {
             const hlsManifestUrl = result.streaming_data?.hls_manifest_url ?? androidLiveHlsManifestUrl
             const dashManifestUrl = result.streaming_data?.dash_manifest_url ??
-              ((!hlsManifestUrl || hasLimitedLiveDvrWindow(hlsManifestUrl)) ? androidLiveDashManifestUrl : null)
+              ((getLiveDvrWindowSeconds(hlsManifestUrl) ?? 0) <= 30 ? androidLiveDashManifestUrl : null)
             if (dashManifestUrl) {
               this.manifestSrc = dashManifestUrl
               this.manifestMimeType = MANIFEST_TYPE_DASH

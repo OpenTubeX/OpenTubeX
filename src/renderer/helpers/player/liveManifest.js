@@ -5,8 +5,17 @@ const MINIMUM_LIVE_DVR_WINDOW_SECONDS = 30
  * @returns {boolean}
  */
 export function hasLimitedLiveDvrWindow(url) {
+  const duration = getLiveDvrWindowSeconds(url)
+  return duration != null && duration <= MINIMUM_LIVE_DVR_WINDOW_SECONDS
+}
+
+/**
+ * @param {string | null} url
+ * @returns {number | null}
+ */
+export function getLiveDvrWindowSeconds(url) {
   const match = url?.match(/\/(?:manifest|playlist)_duration\/(\d+)\//)
-  return match != null && parseInt(match[1], 10) <= MINIMUM_LIVE_DVR_WINDOW_SECONDS
+  return match != null ? parseInt(match[1], 10) : null
 }
 
 /**
