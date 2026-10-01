@@ -26,6 +26,21 @@ export function formatDlnaTime(seconds) {
     .map(part => String(part).padStart(2, '0')).join(':')
 }
 
+export function parseDlnaPosition(description) {
+  const parser = sax.parser(true, { trim: true })
+  let reading = false
+  let time = ''
+  parser.onopentag = tag => { reading = tag.name.split(':').at(-1) === 'RelTime' }
+  parser.onclosetag = () => { reading = false }
+  parser.ontext = text => { if (reading) time += text }
+  parser.oncdata = parser.ontext
+  try { parser.write(description).close() } catch { return null }
+  const parts = /^(\d+):([0-5]\d):([0-5]\d(?:\.\d+)?)$/.exec(time)
+  if (!parts) return null
+  const seconds = Number(parts[1]) * 3600 + Number(parts[2]) * 60 + Number(parts[3])
+  return Number.isFinite(seconds) ? seconds : null
+}
+
 /**
  * @param {string} description
  * @param {string} location

@@ -119,7 +119,7 @@ public class DlnaCastingTest {
                             }
                             String body = request.contains("/otx-dlna-test.xml")
                                 ? "<root><device><deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType><friendlyName>Android test TV</friendlyName><serviceList><service><serviceType>urn:schemas-upnp-org:service:AVTransport:1</serviceType><controlURL>/control</controlURL></service></serviceList></device></root>"
-                                : request.startsWith("POST ") ? "<ok/>" : range ? "cdef" : "abcdefghij";
+                                : "GetPositionInfo".equals(action) ? "<GetPositionInfoResponse><RelTime>00:00:08</RelTime></GetPositionInfoResponse>" : request.startsWith("POST ") ? "<ok/>" : range ? "cdef" : "abcdefghij";
                             byte[] bytes = request.contains("/audio.m4a") ? audio : request.contains("/real.mp4") ? video : body.getBytes(StandardCharsets.US_ASCII);
                             String headers = "HTTP/1.1 " + (range ? "206 Partial Content" : "200 OK") +
                                 "\r\nContent-Length: " + bytes.length + "\r\nContent-Type: " + (request.contains("/real.mp4") ? "video/mp4" : "text/xml") + "\r\nAccess-Control-Allow-Origin: *\r\n" +
@@ -162,12 +162,14 @@ public class DlnaCastingTest {
                         const device = discovery.responses.find(item => item.message.includes('/otx-dlna-test.xml'));
                         if (!device) throw new Error('Fixture not discovered: ' + JSON.stringify(discovery));
                         const description = await native('request', {url: '%s'});
-                        const control = await native('request', {url: 'http://%s:%d/control',method:'POST',body:'<Play/>',headers:{SOAPACTION:'"urn:schemas-upnp-org:service:AVTransport:1#Play"'}});
+                        const controlUrl = 'http://%s:%d/control';
+                        const control = await native('request', {url: controlUrl,method:'POST',body:'<Play/>',headers:{SOAPACTION:'"urn:schemas-upnp-org:service:AVTransport:1#Play"'}});
+                        const position = await native('request', {url:controlUrl,method:'POST',body:'<GetPositionInfo/>',headers:{SOAPACTION:'"urn:schemas-upnp-org:service:AVTransport:1#GetPositionInfo"'}});
                         const relay = await native('startMediaServer', {address:device.address, mediaUrl:'http://%s:%d/video.mp4'});
                         let rejected = false;
                         try { await native('startMediaServer', {address:device.address, mediaUrl:'http://%s:%d/video.mp4'}); }
                         catch { rejected = true; }
-                        window.__dlnaTest = {description, control, relay, rejected};
+                        window.__dlnaTest = {description, control, position, relay, rejected};
                     } catch (error) { window.__dlnaTest = {error:String(error)}; }
                 })();
                 """, descriptionUrl, host, fixture.getLocalPort(), host, fixture.getLocalPort(), host, fixture.getLocalPort()));
@@ -176,6 +178,7 @@ public class DlnaCastingTest {
             assertFalse(result.toString(), result.has("error"));
             assertTrue(result.getJSONObject("description").getString("body").contains("Android test TV"));
             assertEquals(200, result.getJSONObject("control").getInt("status"));
+            assertTrue(result.getJSONObject("position").getString("body").contains("<RelTime>00:00:08</RelTime>"));
             assertTrue(result.getBoolean("rejected"));
             JSONObject relay = result.getJSONObject("relay");
             String media = relay.getString("mediaUrl");

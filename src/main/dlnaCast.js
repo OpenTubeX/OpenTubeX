@@ -3,7 +3,7 @@ import { isIP } from 'node:net'
 import { randomBytes } from 'node:crypto'
 import { createMediaServer } from './dlnaMediaServer.js'
 import { createMuxedMediaServer } from './dlnaMux.js'
-import { createAvTransportBody, createDlnaMetadata, formatDlnaTime, parseDlnaDevice, parseSsdpLocation } from '../dlnaProtocol.js'
+import { createAvTransportBody, createDlnaMetadata, formatDlnaTime, parseDlnaPosition, parseDlnaDevice, parseSsdpLocation } from '../dlnaProtocol.js'
 
 export { createMediaServer } from './dlnaMediaServer.js'
 export { parseDlnaDevice } from '../dlnaProtocol.js'
@@ -79,6 +79,13 @@ export async function sendAvTransport(device, action, fields) {
     body
   })
   if (!response.ok) throw new Error(`${action} failed with HTTP ${response.status}`)
+  if (action === 'GetPositionInfo') {
+    if (Number(response.headers.get('content-length')) > 256_000) throw new Error('DLNA response is too large')
+    const text = await response.text()
+    if (text.length > 256_000) throw new Error('DLNA response is too large')
+    return text
+  }
+  await response.body?.cancel()
 }
 
 function chooseLocalAddress(remoteAddress) {
@@ -187,4 +194,11 @@ export async function stopDlnaCast(ownerId, castId) {
 
 export function hasDlnaCastFailed(ownerId, castId) {
   return activeCast?.ownerId === ownerId && activeCast.castId === castId && Boolean(activeCast.server.muxFailed)
+}
+
+export async function getDlnaCastPosition(ownerId, castId) {
+  if (activeCast?.ownerId !== ownerId || activeCast.castId !== castId) return null
+  try {
+    return parseDlnaPosition(await sendAvTransport(activeCast.device, 'GetPositionInfo', { InstanceID: 0 }))
+  } catch { return null }
 }
