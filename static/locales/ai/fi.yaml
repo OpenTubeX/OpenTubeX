@@ -274,6 +274,8 @@ Settings:
     Swipe to refresh: Päivitä pyyhkäisemällä
     Blur Thumbnails: Sumenna pikkukuvat
     Navigation:
+      Always Show Navigation Bar: Näytä navigointipalkki aina
+      Compact Tab Labels: Tiiviit välilehtien nimet
       Show Active Subscriptions: Näytä aktiiviset tilaukset
       Navigation: Navigointi
       Customize Navigation: Mukauta navigointia

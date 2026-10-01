@@ -270,6 +270,8 @@ Settings:
     Swipe to refresh: Yenilemek için kaydır
     Blur Thumbnails: Küçük resimleri bulanıklaştır
     Navigation:
+      Always Show Navigation Bar: Gezinme çubuğunu her zaman göster
+      Compact Tab Labels: Kompakt sekme etiketleri
       Show Active Subscriptions: Etkin abonelikleri göster
       Navigation: Gezinme
       Customize Navigation: Gezinmeyi özelleştir

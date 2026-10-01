@@ -281,6 +281,8 @@ Settings:
     Swipe to refresh: Stryg for at opdatere
     Blur Thumbnails: Slør miniaturebilleder
     Navigation:
+      Always Show Navigation Bar: Vis altid navigationslinjen
+      Compact Tab Labels: Kompakte fanebladeetiketter
       Show Active Subscriptions: Vis aktive abonnementer
       Navigation: Navigation
       Customize Navigation: Tilpas navigation

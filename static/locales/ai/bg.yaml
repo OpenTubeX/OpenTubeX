@@ -272,6 +272,8 @@ Settings:
     Swipe to refresh: Плъзнете за опресняване
     Blur Thumbnails: Замъгляване на миниатюрите
     Navigation:
+      Always Show Navigation Bar: Винаги показвай лентата за навигация
+      Compact Tab Labels: Компактни етикети на разделите
       Show Active Subscriptions: Показване на активните абонаменти
       Navigation: Навигация
       Customize Navigation: Персонализиране на навигацията

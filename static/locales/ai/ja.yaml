@@ -270,6 +270,8 @@ Settings:
     Swipe to refresh: スワイプして更新
     Blur Thumbnails: サムネイルをぼかす
     Navigation:
+      Always Show Navigation Bar: ナビゲーションバーを常に表示
+      Compact Tab Labels: コンパクトなタブラベル
       Show Active Subscriptions: 登録チャンネルを表示
       Navigation: ナビゲーション
       Customize Navigation: ナビゲーションをカスタマイズ

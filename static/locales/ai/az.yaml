@@ -272,6 +272,8 @@ Settings:
     Swipe to refresh: Yeniləmək üçün sürüşdür
     Blur Thumbnails: Miniatürləri bulanıqlaşdır
     Navigation:
+      Always Show Navigation Bar: Naviqasiya panelini həmişə göstər
+      Compact Tab Labels: Yığcam vərəq etiketləri
       Show Active Subscriptions: Aktiv abunəlikləri göstər
       Navigation: Naviqasiya
       Customize Navigation: Naviqasiyanı fərdiləşdir

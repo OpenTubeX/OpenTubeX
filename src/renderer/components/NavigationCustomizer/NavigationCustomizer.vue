@@ -173,6 +173,20 @@
     </p>
     <div class="fixedNavigationOptions">
       <FtToggleSwitch
+        :label="t('Settings.General Settings.Navigation.Always Show Navigation Bar')"
+        :compact="true"
+        :default-value="alwaysShowNavigationBar"
+        setting-key="alwaysShowNavigationBar"
+        @change="store.dispatch('updateAlwaysShowNavigationBar', $event)"
+      />
+      <FtToggleSwitch
+        :label="t('Settings.General Settings.Navigation.Compact Tab Labels')"
+        :compact="true"
+        :default-value="compactNavigationLabels"
+        setting-key="compactNavigationLabels"
+        @change="store.dispatch('updateCompactNavigationLabels', $event)"
+      />
+      <FtToggleSwitch
         :label="t('Settings.General Settings.Navigation.Show Active Subscriptions')"
         :compact="true"
         :default-value="!hideActiveSubscriptions"
@@ -224,6 +238,8 @@ const catalog = computed(() => NAVIGATION_ITEM_DEFINITIONS
 const catalogById = computed(() => new Map(catalog.value.map(item => [item.id, item])))
 const navigationItems = computed(() => store.getters.getNavigationItems)
 const hideActiveSubscriptions = computed(() => store.getters.getHideActiveSubscriptions)
+const alwaysShowNavigationBar = computed(() => store.getters.getAlwaysShowNavigationBar)
+const compactNavigationLabels = computed(() => store.getters.getCompactNavigationLabels)
 const isDefaultNavigation = computed(() => (
   navigationItems.value.length === DEFAULT_NAVIGATION_ITEMS.length &&
   navigationItems.value.every((id, index) => id === DEFAULT_NAVIGATION_ITEMS[index])
@@ -482,8 +498,10 @@ function resetItems() {
 }
 
 .fixedNavigationOptions {
+  align-items: stretch;
   box-sizing: border-box;
   display: flex;
+  flex-direction: column;
   inline-size: 100%;
   margin-block-start: 8px;
   margin-inline: auto;

@@ -335,6 +335,23 @@
   .hiddenLabels {
     inline-size: 100%;
   }
+
+  .compactLabels .navOption {
+    align-items: center;
+    block-size: var(--mobile-nav-content-height);
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    padding-block: 0;
+  }
+
+  .compactLabels .thumbnailContainer {
+    margin-block: 0;
+  }
+
+  .compactLabels .navLabel {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

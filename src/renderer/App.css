@@ -9,6 +9,8 @@
   --app-safe-area-inset-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0));
   --top-nav-height: 60px;
   --progress-bar-height: 6px;
+  --mobile-nav-content-height: 60px;
+  --mobile-nav-height: calc(var(--mobile-nav-content-height) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
 
   /* Keep a length so the empty space can be added inside calc(). */
   /* stylelint-disable-next-line length-zero-no-unit */
@@ -350,7 +352,7 @@
   inline-size: 100%;
   max-inline-size: none;
   margin: 0;
-  padding-block-end: calc(60px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + var(--mobile-progress-bar-space));
+  padding-block-end: calc(var(--mobile-nav-height) + var(--mobile-progress-bar-space));
 }
 
 /* Narrow viewports normally reserve a phone-sized top gap. The tablet tab
@@ -698,9 +700,12 @@
 
 @media only screen and (width <= 680px) {
   .app {
-    --mobile-nav-height: calc(60px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
     --mobile-nav-reveal-transition: transform 280ms cubic-bezier(0.2, 0, 0, 1);
     --mobile-nav-hide-transition: transform 220ms cubic-bezier(0.4, 0, 1, 1);
+  }
+
+  .app.compactNavigation {
+    --mobile-nav-content-height: 48px;
   }
 
   .app:has(> .progressBar) {
@@ -725,7 +730,7 @@
   }
 
   .routerView {
-    margin-block: 68px calc(68px + var(--mobile-progress-bar-space));
+    margin-block: 68px calc(var(--mobile-nav-content-height) + 8px + var(--mobile-progress-bar-space));
     margin-inline: 8px;
   }
 
@@ -802,7 +807,7 @@
 
 @media only screen and (width <= 680px) {
   .app:is(.topTabs, .bottomTabs) :deep(.sideNav) {
-    block-size: calc(60px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+    block-size: var(--mobile-nav-height);
     inset-block-start: auto;
   }
 
@@ -811,11 +816,11 @@
   }
 
   .app.bottomTabs :deep(.progressBar) {
-    inset-block-end: calc(94px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+    inset-block-end: calc(34px + var(--mobile-nav-height));
   }
 
   .app.bottomTabs :deep(.moreOptionContainer) {
-    inset-block-end: calc(94px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)) + var(--mobile-progress-bar-space));
+    inset-block-end: calc(34px + var(--mobile-nav-height) + var(--mobile-progress-bar-space));
   }
 
   .sideNavBackdrop {

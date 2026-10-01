@@ -274,6 +274,8 @@ Settings:
     Swipe to refresh: Проведіть, щоб оновити
     Blur Thumbnails: Розмивати мініатюри
     Navigation:
+      Always Show Navigation Bar: Завжди показувати панель навігації
+      Compact Tab Labels: Компактні підписи вкладок
       Show Active Subscriptions: Показувати активні підписки
       Navigation: Навігація
       Customize Navigation: Налаштувати навігацію

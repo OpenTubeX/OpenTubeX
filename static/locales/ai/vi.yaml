@@ -274,6 +274,8 @@ Settings:
     Swipe to refresh: Vuốt để làm mới
     Blur Thumbnails: Làm mờ hình thu nhỏ
     Navigation:
+      Always Show Navigation Bar: Luôn hiển thị thanh điều hướng
+      Compact Tab Labels: Nhãn thẻ thu gọn
       Show Active Subscriptions: Hiển thị các kênh đăng ký đang hoạt động
       Navigation: Điều hướng
       Customize Navigation: Tùy chỉnh điều hướng

@@ -383,6 +383,8 @@ Settings:
     Swipe to refresh: Perbraukite, kad atnaujintumėte
     Blur Thumbnails: Sulieti miniatiūras
     Navigation:
+      Always Show Navigation Bar: Visada rodyti naršymo juostą
+      Compact Tab Labels: Kompaktiškos kortelių etiketės
       Show Active Subscriptions: Rodyti aktyvias prenumeratas
       Navigation: Naršymas
       Customize Navigation: Tinkinti naršymą

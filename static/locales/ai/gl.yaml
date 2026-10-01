@@ -274,6 +274,8 @@ Settings:
     Swipe to refresh: Esvarar para actualizar
     Blur Thumbnails: Desenfocar miniaturas
     Navigation:
+      Always Show Navigation Bar: Mostrar sempre a barra de navegación
+      Compact Tab Labels: Etiquetas de lapelas compactas
       Show Active Subscriptions: Amosar as subscricións activas
       Navigation: Navegación
       Customize Navigation: Personalizar a navegación

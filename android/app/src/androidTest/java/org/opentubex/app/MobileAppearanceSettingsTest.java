@@ -205,6 +205,79 @@ public class MobileAppearanceSettingsTest {
         }
     }
 
+    @Test
+    public void navigationVisibilityAndCompactLabelsFollowPreferences() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            WebView view = webView(scenario);
+            awaitCondition(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || !!document.querySelector('.tutorialActions button')");
+            evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
+            awaitCondition(view, "!document.querySelector('.tutorialOverlay')");
+            try {
+                prepare(view);
+                evaluate(view, """
+                    (() => {
+                        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                        for (const key of ['AlwaysShowNavigationBar', 'CompactNavigationLabels', 'HideLabelsSideBar']) {
+                            window.__mobileAppearanceSaved[key] = store.getters['get' + key];
+                            store.commit('set' + key, false);
+                        }
+                        const content = document.createElement('div');
+                        content.id = 'mobile-navigation-options-fixture';
+                        content.style.height = '4000px';
+                        document.querySelector('.app > .flexBox').append(content);
+                    })()
+                    """);
+                for (int scale : new int[] {100, 125}) {
+                    evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiScale', " + scale + ")");
+                    awaitCondition(view, "Math.abs(window.visualViewport.scale - " + scale / 100.0 + ") < 0.01");
+                    evaluate(view, "window.scrollTo(0, 0)");
+                    awaitCondition(view, "window.scrollY === 0");
+                    evaluate(view, "document.activeElement.blur(); window.scrollTo(0, 300)");
+                    awaitCondition(view, "document.querySelector('.sideNav').classList.contains('scrollHidden')");
+                    evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setAlwaysShowNavigationBar', true)");
+                    awaitCondition(view, "!document.querySelector('.sideNav').classList.contains('scrollHidden')");
+                    evaluate(view, "window.scrollTo(0, 600)");
+                    awaitCondition(view, "Math.abs(window.scrollY - 600) <= 1");
+                    awaitCondition(view, "Math.abs(document.querySelector('.sideNav').getBoundingClientRect().bottom - innerHeight) <= 1");
+                    evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setAlwaysShowNavigationBar', false)");
+                    evaluate(view, "window.scrollTo(0, 800)");
+                    awaitCondition(view, "document.querySelector('.sideNav').classList.contains('scrollHidden')");
+                    evaluate(view, "window.scrollTo(0, 0)");
+                    awaitCondition(view, "!document.querySelector('.sideNav').classList.contains('scrollHidden')");
+                    evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setCompactNavigationLabels', true)");
+                    awaitCondition(view, """
+                        (() => {
+                            const labels = [...document.querySelectorAll('.sideNav .inner > .navOption:not(.mobileHidden) .navLabel')];
+                            const visible = labels.filter(label => getComputedStyle(label).display !== 'none');
+                            const icons = [...document.querySelectorAll('.sideNav .inner > .navOption:not(.mobileHidden) .navIcon, .moreOptionNav .navIcon')];
+                            const centered = icons.every(icon => {
+                                const bounds = icon.getBoundingClientRect();
+                                const option = icon.closest('.navOption').getBoundingClientRect();
+                                return Math.abs((bounds.top + bounds.bottom - option.top - option.bottom) / 2) <= 1 &&
+                                    Math.abs(option.height - 48) <= 1;
+                            });
+                            return labels.length === 4 && visible.length === 0 && centered &&
+                                labels.every(label => !!label.closest('.navOption').getAttribute('aria-label'));
+                        })()
+                        """);
+                    evaluate(view, "document.querySelector('.sideNav .moreOptionNav').click()");
+                    awaitCondition(view, "!!document.querySelector('.moreOptionContainer')");
+                    assertEquals("Overflow labels stay readable", "true", evaluate(view,
+                        "[...document.querySelectorAll('.moreOptionContainer .navLabel')].every(label => getComputedStyle(label).visibility === 'visible')"));
+                    evaluate(view, "document.querySelector('.moreOptionContainer a[href=\"#/subscribedchannels\"]').click()");
+                    awaitCondition(view, "document.querySelector('.moreOptionNav').classList.contains('router-link-active') && getComputedStyle(document.querySelector('.moreOptionNav .navLabel')).display === 'none'");
+                    evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/history')");
+                    awaitCondition(view, "!!document.querySelector('.sideNav .inner > .navOption.router-link-active[href=\"#/history\"]')");
+                    evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setCompactNavigationLabels', false)");
+                    awaitCondition(view, "[...document.querySelectorAll('.sideNav .navLabel')].every(label => getComputedStyle(label).visibility === 'visible')");
+                }
+            } finally {
+                evaluate(view, "document.querySelector('#mobile-navigation-options-fixture')?.remove(); window.scrollTo(0, 0)");
+                restore(view);
+            }
+        }
+    }
+
     private static final String SCROLL_STATE = """
         (() => {
             const viewport = document.querySelector('.quickSettingsMenu .quickSettingsScroll');

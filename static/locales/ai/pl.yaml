@@ -114,6 +114,8 @@ Settings:
     Swipe to refresh: Przeciągnij, aby odświeżyć
     Blur Thumbnails: Rozmyj miniatury
     Navigation:
+      Always Show Navigation Bar: Zawsze pokazuj pasek nawigacji
+      Compact Tab Labels: Kompaktowe etykiety kart
       Show Active Subscriptions: Pokaż aktywne subskrypcje
       Navigation: Nawigacja
       Customize Navigation: Dostosuj nawigację

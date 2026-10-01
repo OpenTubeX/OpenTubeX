@@ -270,6 +270,8 @@ Settings:
     Swipe to refresh: 下拉刷新
     Blur Thumbnails: 模糊缩略图
     Navigation:
+      Always Show Navigation Bar: 始终显示导航栏
+      Compact Tab Labels: 紧凑标签页名称
       Show Active Subscriptions: 显示活跃订阅
       Navigation: 导航
       Customize Navigation: 自定义导航

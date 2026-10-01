@@ -274,6 +274,8 @@ Settings:
     Swipe to refresh: Σύρετε για ανανέωση
     Blur Thumbnails: Θόλωση μικρογραφιών
     Navigation:
+      Always Show Navigation Bar: Να εμφανίζεται πάντα η γραμμή πλοήγησης
+      Compact Tab Labels: Συμπαγείς ετικέτες καρτελών
       Show Active Subscriptions: Εμφάνιση ενεργών συνδρομών
       Navigation: Πλοήγηση
       Customize Navigation: Προσαρμογή πλοήγησης

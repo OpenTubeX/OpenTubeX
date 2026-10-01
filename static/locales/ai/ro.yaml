@@ -272,6 +272,8 @@ Settings:
     Swipe to refresh: Glisează pentru a reîmprospăta
     Blur Thumbnails: Estompează miniaturile
     Navigation:
+      Always Show Navigation Bar: Afișează întotdeauna bara de navigare
+      Compact Tab Labels: Etichete compacte pentru file
       Show Active Subscriptions: Afișează abonamentele active
       Navigation: Navigare
       Customize Navigation: Personalizează navigarea

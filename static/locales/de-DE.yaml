@@ -355,6 +355,8 @@ Settings:
     Blur Thumbnails: Vorschaubilder weichzeichnen
     General Settings: Allgemein
     Navigation:
+      Always Show Navigation Bar: Navigationsleiste immer anzeigen
+      Compact Tab Labels: Kompakte Tab-Beschriftungen
       Show Active Subscriptions: Aktive Abos anzeigen
       Navigation: Navigation
       Customize Navigation: Navigation anpassen
