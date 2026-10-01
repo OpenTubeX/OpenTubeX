@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { createMobileDlnaCast } from '../../src/renderer/helpers/player/dlnaCast.js'
-import { parseSsdpLocation } from '../../src/dlnaProtocol.js'
+import { parseDlnaPosition, parseSsdpLocation } from '../../src/dlnaProtocol.js'
 
 const location = 'http://192.168.1.7:8000/device.xml'
 const description = `<root><device><deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType>
@@ -151,6 +151,32 @@ test('a failed merged relay can recover through the complete source without anot
   assert.ok((await setup.cast.recover('wrong-cast', payload)).error)
   assert.ok((await setup.cast.recover('cast-1', { ...payload, audioUrl: 'https://media.example/audio.m4a' })).error)
   assert.ok((await setup.cast.recover('cast-1', payload)).castId)
-  assert.deepEqual(actions(setup.calls), ['SetAVTransportURI', 'Play', 'Stop', 'SetAVTransportURI', 'Play', 'Seek'])
+  assert.deepEqual(actions(setup.calls), ['SetAVTransportURI', 'Play', 'GetPositionInfo', 'Stop', 'SetAVTransportURI', 'Play', 'Seek'])
   assert.deepEqual(setup.calls.filter(call => call.start).at(-1).start, { mediaUrl: payload.mediaUrl, address: '192.168.1.7' })
+})
+
+
+test('recovery uses the renderer position plus the merged source offset', async () => {
+  const setup = fixture()
+  const request = setup.native.request
+  setup.native.request = async options => {
+    const result = await request(options)
+    return options.headers?.SOAPACTION?.includes('#GetPositionInfo')
+      ? { ...result, body: '<s:Envelope><s:Body><u:GetPositionInfoResponse><RelTime>00:00:08</RelTime></u:GetPositionInfoResponse></s:Body></s:Envelope>' }
+      : result
+  }
+  await setup.cast.discover()
+  await setup.cast.start({ ...payload, audioUrl: 'https://media.example/audio.m4a' })
+  setup.failStream()
+  assert.ok((await setup.cast.recover('cast-1', payload)).castId)
+  assert.match(setup.calls.at(-1).body, /<Target>00:01:13<\/Target>/)
+})
+
+
+test('renderer position parsing accepts valid SOAP time and rejects unavailable or malformed values', () => {
+  assert.equal(parseDlnaPosition('<response><RelTime>01:02:03.5</RelTime></response>'), 3723.5)
+  assert.equal(parseDlnaPosition('<response><upnp:RelTime><![CDATA[00:00:12]]></upnp:RelTime></response>'), 12)
+  assert.equal(parseDlnaPosition('<response><RelTime>NOT_IMPLEMENTED</RelTime></response>'), null)
+  assert.equal(parseDlnaPosition('<response><RelTime>00:64:00</RelTime></response>'), null)
+  assert.equal(parseDlnaPosition('<response><RelTime>12</RelTime>'), null)
 })
