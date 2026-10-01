@@ -56,21 +56,19 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+:global(html:has(body.androidPictureInPicture)),
 :global(body.androidPictureInPicture) {
   overflow: hidden !important;
+  scrollbar-width: none !important;
   background: #000 !important;
 }
 
-:global(body.androidPictureInPicture .app > *),
-:global(body.androidPictureInPicture .ftVideoPlayer *) {
-  visibility: hidden !important;
+:global(body.androidPictureInPicture .app) {
+  background: #000 !important;
 }
 
-/* Chromium WebView treats an inline-size query container as the containing
-   block for fixed descendants. Drop that containment so the PiP player uses
-   the activity viewport instead of inheriting the route's top-nav offset. */
-:global(body.androidPictureInPicture .app > .routerView) {
-  container-type: normal;
+:global(body.androidPictureInPicture *) {
+  visibility: hidden !important;
 }
 
 .mobileLinkActionsBackdrop {
@@ -183,6 +181,12 @@
   transform: rotate(180deg);
 }
 
+/* Chromium WebView treats an inline-size query container as the containing
+   block for fixed descendants. Use the activity viewport for the PiP player. */
+:global(body.androidPictureInPicture .app > .routerView) {
+  container-type: normal;
+}
+
 :global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target]),
 :global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .player) {
   visibility: visible !important;
@@ -190,24 +194,27 @@
 
 :global(body.androidPictureInPicture .app.capacitorTabs .ftVideoPlayer.shaka-video-container[data-android-picture-in-picture-target]) {
   position: fixed !important;
-  inset: 0 !important;
-  z-index: 2147483647 !important;
-  inline-size: 100vw !important;
-  block-size: 100vh !important;
+
+  /* DOM rectangles use physical coordinates in both text directions. */
+  /* stylelint-disable-next-line liberty/use-logical-spec */
+  inset: var(--android-pip-source-top, 0) auto auto var(--android-pip-source-left, 0) !important;
+  inline-size: var(--android-pip-source-width, 100vw) !important;
+  block-size: var(--android-pip-source-height, 0) !important;
   min-inline-size: 0 !important;
   max-inline-size: none !important;
   min-block-size: 0 !important;
   max-block-size: none !important;
   margin: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
   transform: none !important;
   translate: none !important;
+  z-index: 2147483647 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
   transition: none !important;
 }
 
-/* Override the phone mini bar and its morph geometry while the activity is
-   in PiP. Their fixed thumbnail bounds must not survive into this viewport. */
+/* Override the phone mini bar's transform and clipping while native PiP owns
+   the video crop. Keep the original object fit and video element dimensions. */
 /* stylelint-disable selector-max-compound-selectors */
 :global(body.androidPictureInPicture .app.capacitorTabs .ftVideoPlayer[data-android-picture-in-picture-target] > .player),
 :global(body.androidPictureInPicture .app.capacitorTabs .ftVideoPlayer[data-android-picture-in-picture-target] > .vrCanvas) {
@@ -221,12 +228,21 @@
   max-block-size: none !important;
   margin: 0 !important;
   border-radius: 0 !important;
-  object-fit: contain !important;
+  object-fit: var(--android-pip-video-fit, contain) !important;
   transform: none !important;
   clip-path: none !important;
   transition: none !important;
 }
 /* stylelint-enable selector-max-compound-selectors */
+
+/* Android already animates the window. Restoring the page must not trigger
+   another player or responsive-layout animation after that transition. */
+:global(body.androidPictureInPictureEntering .ftVideoPlayer[data-android-picture-in-picture-target]),
+:global(body.androidPictureInPictureEntering .ftVideoPlayer[data-android-picture-in-picture-target] *),
+:global(body.androidPictureInPictureRestoring .app),
+:global(body.androidPictureInPictureRestoring .app *) {
+  transition: none !important;
+}
 
 :global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .shaka-controls-container),
 :global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .scrollMiniPlayerControls) {
