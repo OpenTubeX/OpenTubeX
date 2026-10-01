@@ -182,37 +182,16 @@ final class AppTests: XCTestCase {
         try await verifyDlnaMergedFixture(videoResource: "fragmented-duration", duration: 2)
     }
 
-    func testDlnaStartWithoutSegmentIndexKeepsPosition() async throws {
-        try await verifyDlnaMergedFixture(videoResource: "fragmented-duration", duration: 2, startSeconds: 2)
+    func testDlnaStartWithoutSegmentIndexReportsFailure() async throws {
+        try await verifyDlnaMergedFixture(videoResource: "fragmented-duration", startSeconds: 1)
     }
 
     private func verifyDlnaMergedFixture(videoResource: String, duration: Double? = nil, startSeconds: Double = 0) async throws {
-        var video = try Data(contentsOf: XCTUnwrap(Bundle(for: Self.self).url(forResource: videoResource, withExtension: "mp4")))
+        let video = try Data(contentsOf: XCTUnwrap(Bundle(for: Self.self).url(forResource: videoResource, withExtension: "mp4")))
         let encoded = try Data(contentsOf: XCTUnwrap(Bundle(for: Self.self).url(forResource: "post-live-audio.m4a", withExtension: "b64")))
-        var audio = try XCTUnwrap(Data(base64Encoded: encoded, options: .ignoreUnknownCharacters))
-        if startSeconds > 0 {
-            // Repeat the two-second fragment with its decode time advanced. Neither
-            // source has a sidx, so a cast at 2s must omit the first fragment.
-            func repeatFragment(_ data: Data) throws -> Data {
-                let mdhd = try XCTUnwrap(data.range(of: Data("mdhd".utf8))).upperBound
-                let scaleAt = mdhd + (data[mdhd] == 1 ? 20 : 12)
-                let scale = data[scaleAt..<(scaleAt + 4)].reduce(UInt64(0)) { ($0 << 8) | UInt64($1) }
-                let moof = try XCTUnwrap(data.range(of: Data("moof".utf8))).lowerBound - 4
-                var fragment = data.subdata(in: moof..<data.count)
-                let tfdt = try XCTUnwrap(fragment.range(of: Data("tfdt".utf8))).upperBound
-                let bytes = fragment[tfdt] == 1 ? 8 : 4
-                for index in 0..<bytes {
-                    fragment[tfdt + 4 + index] = UInt8(truncatingIfNeeded: (scale * 2) >> ((bytes - index - 1) * 8))
-                }
-                return data + fragment
-            }
-            video = try repeatFragment(video)
-            audio = try repeatFragment(audio)
-        }
-        let fixtureVideo = video
-        let fixtureAudio = audio
+        let audio = try XCTUnwrap(Data(base64Encoded: encoded, options: .ignoreUnknownCharacters))
         let source = try await loopbackServer { header, connection in
-            let bytes = header.hasPrefix("GET /audio ") ? fixtureAudio : fixtureVideo
+            let bytes = header.hasPrefix("GET /audio ") ? audio : video
             connection.send(content: Data("HTTP/1.1 200 OK\r\nContent-Length: \(bytes.count)\r\nConnection: close\r\n\r\n".utf8) + bytes,
                             completion: .contentProcessed { _ in connection.cancel() })
         }
@@ -229,6 +208,11 @@ final class AppTests: XCTestCase {
         let (_, rejected) = try await URLSession.shared.data(for: range)
         XCTAssertEqual((rejected as? HTTPURLResponse)?.statusCode, 416)
         let (data, response) = try await URLSession.shared.data(from: url)
+        if startSeconds > 0 {
+            XCTAssertEqual((response as? HTTPURLResponse)?.statusCode, 502)
+            XCTAssertTrue(relay.muxFailed, "An unindexed nonzero start requests complete-source recovery")
+            return
+        }
         XCTAssertEqual((response as? HTTPURLResponse)?.statusCode, 200)
         XCTAssertEqual((response as? HTTPURLResponse)?.value(forHTTPHeaderField: "Accept-Ranges"), "none")
         try await verifyMergedTracks(data, height: 1080)

@@ -152,7 +152,6 @@ private final class DlnaTrack {
     var ftyp: DlnaBox!
     var moov: DlnaBox!
     var pending: DlnaBox?
-    private var pendingFragments = [(DlnaBox, DlnaBox, Double)]()
     var timescale: UInt64 = 0
     var index = [(offset: UInt64, time: Double)]()
     private var position: UInt64 = 0
@@ -208,29 +207,19 @@ private final class DlnaTrack {
 
     func seek(_ seconds: Double) throws -> Double {
         guard seconds > 0 else { return 0 }
-        if let segment = index.last(where: { $0.time <= seconds }), segment.time > 0 {
-            reader.cancel()
-            reader = DlnaTrackReader(request, offset: segment.offset)
-            pending = nil
-            position = segment.offset
-            return segment.time
-        }
-        // Some fragmented MP4s omit sidx. Scan fragments with bounded memory
-        // instead of silently starting over, keeping the preceding keyframe.
-        guard var preceding = try fragment() else { return 0 }
-        while let next = try fragment() {
-            if next.2 > seconds {
-                pendingFragments = [preceding, next]
-                return preceding.2
-            }
-            preceding = next
-        }
-        pendingFragments = [preceding]
-        return preceding.2
+        // Without an index, locating a late keyframe would download the entire
+        // preceding video. Report an unsupported seek so the complete source
+        // can start promptly at the requested position instead.
+        guard let segment = index.last(where: { $0.time <= seconds }) else { throw URLError(.cannotDecodeContentData) }
+        guard segment.time > 0 else { return 0 }
+        reader.cancel()
+        reader = DlnaTrackReader(request, offset: segment.offset)
+        pending = nil
+        position = segment.offset
+        return segment.time
     }
 
     func fragment() throws -> (DlnaBox, DlnaBox, Double)? {
-        if !pendingFragments.isEmpty { return pendingFragments.removeFirst() }
         var moof = pending
         pending = nil
         while moof == nil {
