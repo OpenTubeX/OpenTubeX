@@ -48,28 +48,31 @@ for (const uiScale of [100, 95]) {
       }
     })
 
-    test('uses the native cancel control and restores recent searches', async ({ page }) => {
-      const input = page.locator(sel.searchInput)
-      const suggestions = page.locator('.topNav .searchContainer .options .list li')
-      await expect(input).toHaveAttribute('type', 'search')
-      await expect(page.locator('.topNav .clearInputTextButton')).toHaveCount(0)
+    for (const direction of ['ltr', 'rtl']) {
+      test(`uses the native cancel control and restores recent searches in ${direction}`, async ({ page }) => {
+        await page.locator('body').evaluate((element, direction) => { element.dir = direction }, direction)
+        const input = page.locator(sel.searchInput)
+        const suggestions = page.locator('.topNav .searchContainer .options .list li')
+        await expect(input).toHaveAttribute('type', 'search')
+        await expect(page.locator('.topNav .clearInputTextButton')).toHaveCount(0)
 
-      await input.fill('unmatched query')
-      await expect(suggestions).toHaveCount(0)
-      await clickSearchCancel(input)
+        await input.fill('unmatched query')
+        await expect(suggestions).toHaveCount(0)
+        await clickSearchCancel(input)
 
-      await expect(input).toHaveValue('')
-      await expect(input).toBeFocused()
-      await expect(suggestions).toHaveCount(1)
-      await expect(suggestions.first()).toContainText('recent search')
+        await expect(input).toHaveValue('')
+        await expect(input).toBeFocused()
+        await expect(suggestions).toHaveCount(1)
+        await expect(suggestions.first()).toContainText('recent search')
 
-      await input.press('ArrowDown')
-      await expect(input).toHaveValue('recent search')
-      await clickSearchCancel(input)
-      await expect(input).toHaveValue('')
-      await input.press('Enter')
-      await expect(page).not.toHaveURL(/#\/search\//)
-    })
+        await input.press('ArrowDown')
+        await expect(input).toHaveValue('recent search')
+        await clickSearchCancel(input)
+        await expect(input).toHaveValue('')
+        await input.press('Enter')
+        await expect(page).not.toHaveURL(/#\/search\//)
+      })
+    }
   })
 }
 

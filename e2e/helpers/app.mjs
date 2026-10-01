@@ -59,10 +59,16 @@ export async function updateInputWithoutScrolling(input, value) {
 
 /** Clicks Chromium's themed cancel control, which has no DOM locator. */
 export async function clickSearchCancel(input) {
-  const position = await input.evaluate(element => ({
-    x: element.getBoundingClientRect().width - Number.parseFloat(getComputedStyle(element).paddingRight) - 12,
-    y: element.getBoundingClientRect().height / 2
-  }))
+  const position = await input.evaluate(element => {
+    const rect = element.getBoundingClientRect()
+    const style = getComputedStyle(element)
+    return {
+      x: style.direction === 'rtl'
+        ? Number.parseFloat(style.paddingLeft) + 12
+        : rect.width - Number.parseFloat(style.paddingRight) - 12,
+      y: rect.height / 2
+    }
+  })
   await input.click({ position })
 }
 
