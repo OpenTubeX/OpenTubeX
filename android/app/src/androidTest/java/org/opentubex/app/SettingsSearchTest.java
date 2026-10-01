@@ -55,8 +55,12 @@ public class SettingsSearchTest {
                 awaitCondition(view, "!!document.querySelector('.settingsSearch input')");
                 evaluate(view, """
                     (() => {
-                        const input = document.querySelector('.settingsSearch input');
-                        input.addEventListener('input', event => window.__settingsSearchComposing = event.isComposing);
+                        window.__settingsSearchInputListener = event => {
+                            if (event.target.matches('.settingsSearch input')) {
+                                window.__settingsSearchComposing = event.isComposing;
+                            }
+                        };
+                        document.addEventListener('input', window.__settingsSearchInputListener, true);
                     })()
                     """);
                 tapSearch(scenario, view);
@@ -113,6 +117,8 @@ public class SettingsSearchTest {
                         }
                         await store.dispatch('triggerCurrentLocaleSideEffects', window.__settingsSearchSaved.CurrentLocale);
                         delete window.__settingsSearchSaved;
+                        document.removeEventListener('input', window.__settingsSearchInputListener, true);
+                        delete window.__settingsSearchInputListener;
                         delete window.__settingsSearchComposing;
                         window.__settingsSearchRestored = true;
                     })()
