@@ -2,13 +2,35 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
-import { reactive, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
+import { tabLifecycleService } from '../../src/renderer/tabs/TabLifecycleService.js'
 
 const source = (await readFile(new URL('../../src/renderer/helpers/capacitorPullToRefresh.js', import.meta.url), 'utf8'))
   .replace(/^import .*\n/gm, '')
   .replace(/^export /gm, '')
 
-function setup({ available = true, handled = false, fail = false, enabled = true } = {}) {
+const refreshWidgetSource = (await readFile(new URL('../../src/renderer/components/FtRefreshWidget/FtRefreshWidget.vue', import.meta.url), 'utf8'))
+  .split('<script setup>')[1].split('</script>')[0]
+  .replace(/^import .*\n/gm, '')
+
+function mountFeedRefreshWidget(state) {
+  const presented = ref(true)
+  let unregister
+  vm.runInNewContext(refreshWidgetSource, {
+    computed, ref, watch,
+    onMounted: () => {}, onBeforeUnmount: () => {},
+    defineProps: () => ({ disableRefresh: false, refreshInProgress: false }),
+    defineEmits: () => event => state.calls.push(`feed:${event}`),
+    useI18n: () => ({ t: key => key }),
+    store: { getters: state.getters },
+    useTabContext: () => ({ isTabPresented: presented }),
+    useTabLifecycle: hooks => { unregister = tabLifecycleService.register(state.tab.id, hooks) },
+    document: state.document
+  })
+  return { presented, unmount: () => unregister() }
+}
+
+function setup({ available = true, handled = false, fail = false, enabled = true, lifecycle } = {}) {
   const calls = []
   const tab = { id: 'a', route: { name: 'subscriptions', fullPath: '/subscriptions' }, refreshKey: 0 }
   const body = {}
@@ -43,7 +65,7 @@ function setup({ available = true, handled = false, fail = false, enabled = true
       if (fail) throw new Error('reload failed')
     } }),
     tabRuntimeRegistry: { getRoot: () => root },
-    tabLifecycleService: { run: async (id, hook, request) => {
+    tabLifecycleService: lifecycle ?? { run: async (id, hook, request) => {
       assert.equal(hook, 'pullToRefresh')
       request.handled = handled
       calls.push(`refresh:${id}`)
@@ -52,6 +74,27 @@ function setup({ available = true, handled = false, fail = false, enabled = true
   })
   return { api, calls, tab, root, child, document, window, getters, plugin, refresh: context => refresh(context) }
 }
+
+test('refreshes the watch page instead of the subscriptions retained behind it', async () => {
+  const state = setup({ lifecycle: tabLifecycleService })
+  const widget = mountFeedRefreshWidget(state)
+  const remove = await state.api.initializeCapacitorPullToRefresh()
+  try {
+    state.tab.route = { name: 'watch', fullPath: '/watch/video' }
+    widget.presented.value = false
+    await state.refresh(state.window.__opentubexPullToRefresh(0.5, 0.5))
+    assert.deepEqual(state.calls, [true, 'reload:a', 'finish'])
+
+    state.calls.length = 0
+    state.tab.route = { name: 'subscriptions', fullPath: '/subscriptions' }
+    widget.presented.value = true
+    await state.refresh(state.window.__opentubexPullToRefresh(0.5, 0.5))
+    assert.deepEqual(state.calls, ['feed:click', 'finish'], 'returning to subscriptions still uses its feed refresh')
+  } finally {
+    remove()
+    widget.unmount()
+  }
+})
 
 test('native availability gates setup, including future iOS builds without the plugin', async () => {
   const state = setup({ available: false })
