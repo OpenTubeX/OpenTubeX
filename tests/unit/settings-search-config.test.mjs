@@ -13,6 +13,7 @@ import {
   createSettingsSearchIndex,
   findSettingsSearchTab,
   findSettingsSearchTarget,
+  removeRedundantSettingsSearchMatches,
 } from '../../src/renderer/helpers/settingsSearch.js'
 
 const locale = loadYaml(await readFile(
@@ -20,6 +21,25 @@ const locale = loadYaml(await readFile(
   'utf8'
 ))
 const getAtPath = (value, path) => path.split('.').reduce((nested, key) => nested?.[key], value)
+
+test('playback search indexes the lights off visibility toggle instead of its player action', () => {
+  const entries = createSettingsSearchIndex({
+    sections: [{ type: 'playback', title: 'Playback', description: '' }],
+    tm: path => getAtPath(locale, path),
+    store: { getters: {} },
+    usingElectron: true,
+  }).get('playback')
+
+  assert.ok(entries.some(({ label }) => label === 'Show Lights Off Toggle'))
+  assert.deepEqual(
+    removeRedundantSettingsSearchMatches(
+      entries.filter(({ label }) => label.toLowerCase().includes('lights off')),
+      'en-US'
+    ).map(({ label }) => label),
+    ['Show Lights Off Toggle']
+  )
+  assert.ok(!entries.some(({ label }) => label === 'Lights Off'))
+})
 
 test('iOS settings search omits unavailable native services', () => {
   const index = createSettingsSearchIndex({
