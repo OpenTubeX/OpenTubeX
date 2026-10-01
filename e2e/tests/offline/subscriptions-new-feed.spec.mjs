@@ -144,6 +144,108 @@ test.describe('new subscriptions feed', () => {
     await expect(page.locator('.headerRefreshWidget .lastRefreshTimestamp')).toHaveCount(0)
   })
 
+  for (const uiScale of [100, 95, 200]) {
+    test(`keeps New feed tabs on one compact row at phone widths and ${uiScale}% scale`, async ({ app, page }, testInfo) => {
+      await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
+        BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale / 100)
+      }, uiScale)
+      await goTo(page, 'subscriptions')
+      await page.locator('[data-subscription-feed-tab="all"]').click()
+      await page.getByRole('button', { name: 'Show tabbed view' }).click()
+
+      const tabs = page.locator('[data-new-feed-tab]')
+      await expect(tabs).toHaveCount(4)
+
+      for (const width of [640, 500, 375, 340, 640]) {
+        await app.electronApp.evaluate(({ BrowserWindow }, width) => {
+          BrowserWindow.getAllWindows()[0].setBounds({ width, height: 900 })
+        }, width)
+        await page.waitForFunction(({ width, uiScale }) => {
+          return Math.abs(window.innerWidth - width * 100 / uiScale) <= 2
+        }, { width, uiScale })
+
+        await expect.poll(() => tabs.evaluateAll(elements => {
+          const tops = elements.map(element => element.getBoundingClientRect().top)
+          return Math.max(...tops) - Math.min(...tops)
+        })).toBeLessThan(1)
+
+        const layout = await page.locator('.newFeedTabs').evaluate(element => ({
+          container: element.getBoundingClientRect(),
+          viewportWidth: document.documentElement.clientWidth,
+          tabs: [...element.querySelectorAll('[data-new-feed-tab]')]
+            .map(tab => tab.getBoundingClientRect())
+        }))
+        // Electron's fractional zoom can round a 44px button just below 44.
+        expect(Math.min(...layout.tabs.map(tab => tab.height))).toBeGreaterThan(43.5)
+        expect(layout.tabs.every(tab => tab.width >= 24)).toBe(true)
+        expect(layout.tabs.every(tab => tab.left >= layout.container.left - 1 && tab.right <= layout.container.right + 1)).toBe(true)
+        expect(layout.container.left).toBeGreaterThanOrEqual(-1)
+        expect(layout.container.right).toBeLessThanOrEqual(layout.viewportWidth + 1)
+
+        // Both rows keep their icons in roomy layouts and restore them when
+        // growing back from a narrow phone layout. At 200% zoom these bounds
+        // still produce a narrow CSS viewport.
+        const hasRoomForIcons = uiScale !== 200 && width >= 500
+        for (const row of ['.tabs', '.newFeedTabs']) {
+          for (const icon of await page.locator(`${row} .subscriptionIcon`).all()) {
+            if (hasRoomForIcons) {
+              await expect(icon).toBeVisible()
+            } else {
+              await expect(icon).toBeHidden()
+            }
+          }
+          if (hasRoomForIcons) {
+            const labelsFit = await page.locator(`${row} .tabLabel > span`).evaluateAll(labels => {
+              return labels.every(label => label.scrollWidth <= label.clientWidth + 1)
+            })
+            expect(labelsFit).toBe(true)
+          }
+        }
+
+        if (width === 375) {
+          const path = testInfo.outputPath('compact-new-feed-tabs.png')
+          await page.locator('.subscriptionsHeader').screenshot({ path })
+          await testInfo.attach('compact New feed tabs', { path, contentType: 'image/png' })
+        }
+      }
+
+      // Exercise the long German label from the reported layout without
+      // depending on translation-service responses.
+      const postsTab = page.locator('[data-new-feed-tab="posts"]')
+      const label = postsTab.locator('.tabLabel')
+      await label.evaluate(element => {
+        element.dataset.label = 'Sehr lange übersetzte Beiträge'
+        element.querySelector('span').textContent = element.dataset.label
+      })
+      const labelLayout = await label.evaluate(element => {
+        const text = element.querySelector('span')
+        return {
+          right: element.getBoundingClientRect().right,
+          tabRight: element.closest('[data-new-feed-tab]').getBoundingClientRect().right,
+          width: text.clientWidth,
+          fullWidth: text.scrollWidth
+        }
+      })
+      expect(labelLayout.right).toBeLessThanOrEqual(labelLayout.tabRight)
+      expect(labelLayout.fullWidth).toBeGreaterThan(labelLayout.width)
+
+      await page.locator('[data-new-feed-tab="videos"]').focus()
+      await page.locator('[data-new-feed-tab="videos"]').press('End')
+      await expect(postsTab).toBeFocused()
+      await expect(postsTab).toHaveAttribute('aria-selected', 'true')
+      await expect(page.getByText('New community post', { exact: true })).toBeVisible()
+      await expect.poll(() => page.evaluate(() => {
+        const indicator = document.querySelector('.newFeedTabsIndicator').getBoundingClientRect()
+        const tab = document.querySelector('[data-new-feed-tab="posts"]').getBoundingClientRect()
+        return Math.max(
+          Math.abs(indicator.x - tab.x),
+          Math.abs(indicator.width - tab.width),
+          Math.abs(indicator.top - tab.bottom)
+        )
+      })).toBeLessThan(2)
+    })
+  }
+
   test('switches between the combined and tabbed views and remembers the choice', async ({ app, page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
