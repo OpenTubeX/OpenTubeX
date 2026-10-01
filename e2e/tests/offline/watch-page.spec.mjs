@@ -365,6 +365,28 @@ test.describe('desktop quick playback speed bar', () => {
       await expect.poll(() => bar.evaluate(element => element.scrollLeft)).toBeGreaterThan(0)
       await page.mouse.wheel(-120, 0)
       await expect.poll(() => bar.evaluate(element => element.scrollLeft)).toBe(0)
+      for (const edge of ['start', 'end']) {
+        expect(await bar.evaluate((element, edge) => {
+          element.scrollLeft = edge === 'start' ? 0 : element.scrollWidth
+          const previousScrollLeft = element.scrollLeft
+          const event = new WheelEvent('wheel', {
+            deltaY: edge === 'start' ? -120 : 120,
+            bubbles: true,
+            cancelable: true
+          })
+          let bubbled = false
+          const onWheel = () => { bubbled = true }
+          element.parentElement.addEventListener('wheel', onWheel, { once: true })
+          element.dispatchEvent(event)
+          element.parentElement.removeEventListener('wheel', onWheel)
+          return {
+            defaultPrevented: event.defaultPrevented,
+            bubbled,
+            offsetUnchanged: element.scrollLeft === previousScrollLeft
+          }
+        }, edge)).toEqual({ defaultPrevented: false, bubbled: true, offsetUnchanged: true })
+      }
+      await bar.evaluate(element => { element.scrollLeft = 0 })
       expect(await video.evaluate(element => ({ rate: element.playbackRate, volume: element.volume }))).toEqual(before)
       if (frosted) {
         await testInfo.attach('desktop quick speed controls', {

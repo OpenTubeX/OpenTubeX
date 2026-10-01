@@ -74,9 +74,14 @@ export class QuickPlaybackRateBar extends shaka.ui.Element {
         ? 16
         : event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? this.root_.clientWidth : 1
 
+      const previousScrollLeft = this.root_.scrollLeft
+      this.root_.scrollLeft += delta * unit
+      if (this.root_.scrollLeft === previousScrollLeft) {
+        return
+      }
+
       event.preventDefault()
       event.stopPropagation()
-      this.root_.scrollLeft += delta * unit
     }, { passive: false })
 
     this.eventManager.listen(this.saveButton_, 'click', () => {
