@@ -238,8 +238,34 @@ public class MobileTabSelectionTest {
                 await(view, "!!document.querySelector('.capacitorPhoneTabHistoryButton')");
                 evaluate(view, "document.querySelector('.capacitorPhoneTabHistoryButton').click()");
                 await(view, "!!document.querySelector('.capacitorPhoneTabHistoryEntry[aria-current=\"page\"]')");
+                evaluate(view, "window.dispatchEvent(new CustomEvent('opentubex:focus-search'))");
+                await(view, "document.querySelector('.topNav').classList.contains('phoneSearchOpen')");
+                evaluate(view, "window.mobileHeaderHistoryIndex = " + STORE + ".getters.getActiveTab.historyIndex");
                 scenario.onActivity(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
                 await(view, "!!document.querySelector('.capacitorPhoneOpenTabs')");
+                assertEquals("Android Back returns from foreground history before closing background search", "true", evaluate(view,
+                    "document.querySelector('.topNav').classList.contains('phoneSearchOpen')"));
+                evaluate(view, "document.querySelector('.capacitorPhoneTabRow').dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }))");
+                await(view, "!!document.querySelector('.capacitorTabActions .closeMenuTrigger')");
+                evaluate(view, "document.querySelector('.capacitorTabActions .closeMenuTrigger').click()");
+                await(view, "!!document.querySelector('.capacitorTabActions .submenuBack') && " +
+                    "document.querySelector('.capacitorTabActions').contains(document.activeElement)");
+                scenario.onActivity(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
+                await(view, "!!document.querySelector('.capacitorTabActions .closeMenuTrigger')");
+                assertEquals("Android Back closes only the nested tab-actions submenu", "true", evaluate(view,
+                    "!!document.querySelector('.capacitorPhoneTabDialog') && document.querySelector('.topNav').classList.contains('phoneSearchOpen')"));
+                scenario.onActivity(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
+                await(view, "!document.querySelector('.capacitorTabActionsBackdrop')");
+                scenario.onActivity(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
+                await(view, "!document.querySelector('.capacitorPhoneTabDialog')");
+                assertEquals("Android Back closes the foreground tab overview before background search", "true", evaluate(view,
+                    "document.querySelector('.topNav').classList.contains('phoneSearchOpen')"));
+                scenario.onActivity(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
+                await(view, "!document.querySelector('.topNav').classList.contains('phoneSearchOpen')");
+                assertEquals("Closing the layered header UI does not navigate the tab", "true", evaluate(view,
+                    STORE + ".getters.getActiveTab.historyIndex === window.mobileHeaderHistoryIndex"));
+                evaluate(view, "document.querySelector('.capacitorPhoneTabSwitcherButton').click()");
+                await(view, "!!document.querySelector('.capacitorPhoneTabHistoryButton')");
                 evaluate(view, "document.querySelector('.capacitorPhoneTabHistoryButton').click()");
                 await(view, "!!document.querySelector('.capacitorPhoneTabHistoryEntry')");
                 evaluate(view, "document.querySelector('.capacitorPhoneTabHistoryEntry').click()");

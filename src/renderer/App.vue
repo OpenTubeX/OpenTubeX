@@ -3335,8 +3335,10 @@ function getAndroidBackTarget() {
   const focused = document.activeElement instanceof HTMLElement ? document.activeElement : document
   const prompt = [...document.querySelectorAll('.prompt:not([inert])')].at(-1)
   const phoneSearch = document.querySelector('.topNav.phoneSearchOpen')
+  const phoneTabDialog = document.querySelector('.capacitorPhoneTabDialog')
+  const tabTarget = phoneTabDialog?.contains(focused) ? focused : phoneTabDialog
   const searchTarget = phoneSearch?.contains(focused) ? focused : phoneSearch
-  return modalDialog ?? prompt ?? (settingsWindow?.contains(focused) ? focused : settingsWindow) ?? openDialog ?? searchTarget ?? focused
+  return modalDialog ?? prompt ?? (settingsWindow?.contains(focused) ? focused : settingsWindow) ?? openDialog ?? tabTarget ?? searchTarget ?? focused
 }
 
 async function handleAndroidBack() {
