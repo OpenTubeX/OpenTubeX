@@ -2358,3 +2358,5 @@ Storage Startup Error:
   Title: "Kunne ikkje laste appdata"
   Message: "Frigjer lagringsplass på eininga og prøv igjen. Synkronisering er sett på pause til dataa dine er lasta."
   Retry: "Prøv igjen"
+Native Permissions:
+  Local Network: "Finn einingar på det lokale nettverket og cast videoar til dei, og synkroniser innstillingar og data mellom einingar."

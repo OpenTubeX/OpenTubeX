@@ -3169,3 +3169,5 @@ Storage Startup Error:
   Title: "App-Daten konnten nicht geladen werden"
   Message: "Gib Speicherplatz auf dem Gerät frei und versuche es erneut. Die Synchronisierung bleibt pausiert, bis deine Daten geladen sind."
   Retry: "Erneut versuchen"
+Native Permissions:
+  Local Network: "Geräte im lokalen Netzwerk finden, Videos auf diese Geräte übertragen und Einstellungen und Daten geräteübergreifend synchronisieren."
