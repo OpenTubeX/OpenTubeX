@@ -424,7 +424,7 @@ const IS_IOS = !!process.env.IS_IOS
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const enablePullToRefresh = computed(() => store.getters.getEnablePullToRefresh)
 const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
-const PLAYBACK_ENGINE_VALUES = ['yt-dlp', 'built-in']
+const PLAYBACK_ENGINE_VALUES = ['built-in', 'yt-dlp']
 
 const { locale, t } = useI18n()
 
@@ -479,8 +479,8 @@ const sectionTitle = computed(() => ({
 })[mode.value])
 
 const playbackEngineNames = computed(() => [
-  t('Settings.General Settings.Stream Extraction Method.yt-dlp'),
-  t('Settings.General Settings.Stream Extraction Method.Built-in')
+  t('Settings.General Settings.Stream Extraction Method.Built-in'),
+  t('Settings.General Settings.Stream Extraction Method.yt-dlp')
 ])
 
 /** @type {import('vue').ComputedRef<'yt-dlp' | 'built-in'>} */
