@@ -562,6 +562,7 @@ import {
 } from './helpers/androidUi'
 import {
   applyThemeToDocument,
+  getThemeBackground,
   handleCustomThemeUpdated,
   loadCustomThemes,
 } from './helpers/customTheme'
@@ -587,7 +588,7 @@ import {
 } from './helpers/mobileLinkActions'
 import { startProgressBarOperation } from './helpers/progressBar'
 import { initializePlatformInfo, isLinuxWayland, supportsAutoPictureInPictureMinimize } from './helpers/platform'
-import { revealStartupSplash } from './helpers/startupSplash'
+import { cacheStartupAppearance, revealStartupSplash } from './helpers/startupSplash'
 import {
   shouldShowProgressStartToast,
   shouldUseProgressToast,
@@ -1599,7 +1600,7 @@ onMounted(async () => {
     await repairSystemThemeSettings(store, themes)
     updateTheme()
   })
-  trayAppearanceReady = true
+  appearanceSettingsReady = true
   updateTheme()
   if (store.getters.getTrayIconPreset !== 'theme') refreshTrayIcon()
 
@@ -1855,7 +1856,7 @@ watch([
   () => store.getters.getActiveTab?.loadState,
   () => store.getters.getTabById(presentedTabId.value)?.route.fullPath,
 ], async ([ready, presented, loadState, fullPath], _, onCleanup) => {
-  if (!isElectron || !ready || (!presented && loadState !== 'unloaded') || !document.getElementById('startup-splash')) return
+  if (!usesLogicalTabs || !ready || (!presented && loadState !== 'unloaded') || !document.getElementById('startup-splash')) return
   let cancelled = false
   let preloadTimeout
   onCleanup(() => {
@@ -2992,6 +2993,7 @@ watch(() => store.getters.getSystemDarkTheme, updateTheme)
 const mainColor = computed(() => store.getters.getMainColor)
 
 watch(mainColor, updateTheme)
+watch(() => store.getters.getHideStartupSplash, cacheCapacitorStartupAppearance)
 
 /** @type {import('vue').ComputedRef<string>} */
 const secColor = computed(() => store.getters.getSecColor)
@@ -3013,11 +3015,11 @@ const thumbnailSize = computed(() => store.getters.getThumbnailSize)
 
 watch(thumbnailSize, updateThumbnailListSize)
 
-let trayAppearanceReady = false
+let appearanceSettingsReady = false
 watch(() => store.getters.getTrayIconPreset, refreshTrayIcon)
 
 function refreshTrayIcon() {
-  if (isElectron && trayAppearanceReady) {
+  if (isElectron && appearanceSettingsReady) {
     updateTrayIcon(store.getters.getTrayIconPreset).catch(error => console.error('Unable to update tray icon', error))
   }
 }
@@ -3030,8 +3032,25 @@ function updateTheme() {
   const customTheme = customThemes.find(theme => `custom:${theme.id}` === effectiveTheme) ??
     (effectiveTheme === 'custom' ? customThemes[0] : null) ?? null
   applyThemeToDocument(effectiveTheme, mainColor.value, secColor.value, customTheme)
+  cacheCapacitorStartupAppearance()
   if (store.getters.getTrayIconPreset === 'theme') refreshTrayIcon()
   updateSystemBarsStyle()
+}
+
+function cacheCapacitorStartupAppearance() {
+  if (!isCapacitor || !appearanceSettingsReady) return
+  const appearance = (dark) => {
+    const theme = baseTheme.value === 'system'
+      ? (dark ? store.getters.getSystemDarkTheme : store.getters.getSystemLightTheme)
+      : baseTheme.value
+    const background = getThemeBackground(theme, store.getters.getCustomThemes, dark)
+    return { background, dark: calculateColorLuminance(background) !== '#000000' }
+  }
+  cacheStartupAppearance({
+    light: appearance(false),
+    dark: appearance(true),
+    hideSplash: store.getters.getHideStartupSplash
+  })
 }
 
 function updateSystemBarsStyle() {

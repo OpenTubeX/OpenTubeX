@@ -59,7 +59,7 @@
 
 .startupTrack {
   position: absolute;
-  inset-block-end: 0;
+  inset-block-end: env(safe-area-inset-bottom, 0);
   inline-size: 100%;
   block-size: 3px;
   overflow: clip;
