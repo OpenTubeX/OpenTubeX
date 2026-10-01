@@ -267,6 +267,7 @@ Settings:
       Network: verkko
       Disk: levytila
   General Settings:
+    Data Saver Thumbnails: "Dataa säästävät pikkukuvat"
     Use tray icon: "Käytä ilmoitusalueen kuvaketta"
     Close to system tray: "Sulje ilmoitusalueelle"
     Tray required for background refresh: "Ilmoitusalueen kuvake tarvitaan, kun tilausten päivitys taustalla on käytössä."
@@ -1642,6 +1643,7 @@ Description:
   Games: Pelit
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Käytä pienemmän tarkkuuden pikkukuvia datankäytön vähentämiseksi."
     Use AI Translation Completions: Täydennä ihmiskäännösten puuttuvat kohdat tekoälyn luomalla tekstillä. Ihmisten tekemät käännökset ovat aina etusijalla.
     Update Relative Timestamps: Päivittää suhteellisia aikaleimoja kaikkialla sovelluksessa sivun ollessa avoinna. Jos asetus on poistettu käytöstä, ne päivittyvät vasta, kun sivu ladataan uudelleen tai sillä käydään uudelleen.
     Stream Extraction Method: |

@@ -263,6 +263,7 @@ Settings:
       Network: ネットワーク
       Disk: ディスク
   General Settings:
+    Data Saver Thumbnails: "データ節約用サムネイル"
     Use tray icon: "トレイアイコンを使用"
     Close to system tray: "閉じるときにトレイに格納"
     Tray required for background refresh: "バックグラウンドでの登録チャンネルの更新が有効な間は、トレイアイコンが必要です。"
@@ -1600,6 +1601,7 @@ Description:
   Games: ゲーム
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "低解像度のサムネイルを使用してデータ使用量を減らします。"
     Use AI Translation Completions: 人手による翻訳の不足部分をAI生成テキストで補います。人手による翻訳が常に優先されます。
     Update Relative Timestamps: ページを開いている間、アプリ内の相対日時を更新します。無効にすると、ページを再読み込みするか開き直したときにのみ更新されます。
     Stream Extraction Method: |

@@ -150,7 +150,7 @@ function secondsToVttTimestamp(seconds) {
 }
 
 /**
- * Builds a medium-quality thumbnail URL for a video, honouring the current backend
+ * Builds a maximum-quality thumbnail URL for a video, honouring the current backend
  * and the user's thumbnail preference. Handy for toasts that reference a single
  * video by id. Returns null when thumbnails are hidden, so callers can omit the
  * image entirely rather than showing a meaningless placeholder.
@@ -178,7 +178,7 @@ export function getVideoThumbnailUrl(videoId, backendPreference, currentInvidiou
     case 'end':
       return `${baseUrl}/vi/${videoId}/${portrait ? 'oar3' : 'mq3'}.jpg`
     default:
-      return `${baseUrl}/vi/${videoId}/${portrait ? 'oardefault' : 'mqdefault'}.jpg`
+      return `${baseUrl}/vi/${videoId}/${portrait ? 'oardefault' : 'maxresdefault'}.jpg`
   }
 }
 
@@ -186,13 +186,14 @@ export function getVideoThumbnailUrl(videoId, backendPreference, currentInvidiou
  * Resolves a Shorts thumbnail consistently for cards, navigation previews, and
  * the player poster. YouTube's selected portrait image wins for the default
  * preference; explicit frame preferences still use their generated URLs.
- * @param {{ videoId: string, thumbnailUrl?: string } | null | undefined} video
+ * @param {{ videoId: string, thumbnailUrl?: string, lowResolutionThumbnailUrl?: string } | null | undefined} video
  * @param {'local' | 'invidious'} backendPreference
  * @param {string} currentInvidiousInstanceUrl
  * @param {'' | 'hidden' | 'start' | 'middle' | 'end'} thumbnailPreference
+ * @param {boolean} dataSaver
  * @returns {string | null}
  */
-export function getShortThumbnailUrl(video, backendPreference, currentInvidiousInstanceUrl, thumbnailPreference = '') {
+export function getShortThumbnailUrl(video, backendPreference, currentInvidiousInstanceUrl, thumbnailPreference = '', dataSaver = false) {
   if (!video?.videoId) {
     return null
   }
@@ -205,7 +206,10 @@ export function getShortThumbnailUrl(video, backendPreference, currentInvidiousI
     true
   )
 
-  return getPreferredShortThumbnailUrl(video, thumbnailPreference, fallbackUrl)
+  const preferredVideo = dataSaver && video.lowResolutionThumbnailUrl
+    ? { ...video, thumbnailUrl: video.lowResolutionThumbnailUrl }
+    : video
+  return getPreferredShortThumbnailUrl(preferredVideo, thumbnailPreference, fallbackUrl)
 }
 
 export const ToastEventBus = new EventTarget()

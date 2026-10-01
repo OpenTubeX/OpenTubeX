@@ -4,6 +4,7 @@ import test from 'node:test'
 import { runInNewContext } from 'node:vm'
 import * as Vue from 'vue'
 import { compileScript, parse } from 'vue/compiler-sfc'
+import { getVideoThumbnailSource, getVideoThumbnailFallbackUrl } from '../../src/renderer/helpers/videoThumbnail.js'
 
 async function compileComponent(path, bindings = {}) {
   const { descriptor } = parse(await readFile(new URL(`../../src/renderer/components/${path}`, import.meta.url), 'utf8'))
@@ -12,18 +13,20 @@ async function compileComponent(path, bindings = {}) {
     .replace(/^import .* from .*\n/gm, '')
     .replace("import('../helpers/api/capacitor-http')", 'loadNativeHttp()')
     .replace('export default', 'const component =')
-  return runInNewContext(`${source}; component`, { Vue, process: { env: { IS_CAPACITOR: true } }, URL, Date, ...bindings })
+  return runInNewContext(`${source}; component`, { Vue, process: { env: { IS_CAPACITOR: true } }, URL, Date, getVideoThumbnailSource, getVideoThumbnailFallbackUrl, ...bindings })
 }
 
 async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtChannelAvatar.vue') {
   const requests = []
   const timers = new Map()
+  const settings = Vue.reactive({ getThumbnailDataSaver: false })
   const RetryImage = await compileComponent('FtRetryImage.vue', {
+    store: { getters: settings },
     loadNativeHttp: async () => ({ fetchCapacitorAvatarDataUrl: async src => { requests.push(src); return typeof nativeResult === 'function' ? nativeResult() : nativeResult } }),
     setTimeout: callback => { const id = {}; timers.set(id, callback); return id },
     clearTimeout: id => timers.delete(id)
   })
-  const Avatar = await compileComponent(componentPath, {
+  const Avatar = componentPath === 'FtRetryImage.vue' ? RetryImage : await compileComponent(componentPath, {
     FtRetryImage: RetryImage, FtIcon: { render: () => Vue.h('fallback') },
     getTabAvatarUrl: tab => tab.avatarUrl, getTabPreviewFallbackUrl: () => null,
     getTabPageIcon: () => null, formatTabTitle: title => title
@@ -46,13 +49,15 @@ async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtC
   })
   const thumbnail = Vue.ref('https://yt3.ggpht.com/avatar')
   const root = { children: [] }
-  const app = renderer.createApp({ render: () => Vue.h(Avatar, componentPath.startsWith('TabBar/')
+  const app = renderer.createApp({ render: () => Vue.h(Avatar, componentPath === 'FtRetryImage.vue'
+    ? { src: thumbnail.value }
+    : componentPath.startsWith('TabBar/')
     ? { tab: { id: 'channel-tab', avatarUrl: thumbnail.value, title: 'Channel' } }
     : { thumbnail: thumbnail.value }) })
   app.mount(root)
   t.after(() => app.unmount())
   const find = (tag, node = root) => node.tag === tag ? node : node.children?.map(child => find(tag, child)).find(Boolean)
-  return { requests, timers, thumbnail, find }
+  return { requests, timers, thumbnail, settings, find }
 }
 
 async function fail(image) {
@@ -60,12 +65,64 @@ async function fail(image) {
   await Vue.nextTick()
 }
 
+test('stored medium-resolution thumbnails load sharply by default and honor data saver', async t => {
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue')
+  f.thumbnail.value = 'https://i.ytimg.com/vi/video/mqdefault.jpg'
+  await Vue.nextTick()
+  assert.equal(f.find('img').props.src, 'https://i.ytimg.com/vi/video/maxresdefault.jpg')
+  f.settings.getThumbnailDataSaver = true
+  await Vue.nextTick()
+  assert.equal(f.find('img').props.src, f.thumbnail.value)
+})
+
+test('data saver changes loaded thumbnail sources and resets resolution fallbacks', async t => {
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue')
+  f.thumbnail.value = 'https://invidious.test/vi/video/maxresdefault.jpg?cache=1'
+  await Vue.nextTick()
+  f.settings.getThumbnailDataSaver = true
+  await Vue.nextTick()
+  assert.equal(f.find('img').props.src, 'https://invidious.test/vi/video/mqdefault.jpg?cache=1')
+  f.settings.getThumbnailDataSaver = false
+  await Vue.nextTick()
+  assert.equal(f.find('img').props.src, f.thumbnail.value)
+  await fail(f.find('img'))
+  assert.equal(f.find('img').props.src, 'https://invidious.test/vi/video/sddefault.jpg?cache=1')
+  f.settings.getThumbnailDataSaver = true
+  await Vue.nextTick()
+  assert.equal(f.find('img').props.src, 'https://invidious.test/vi/video/mqdefault.jpg?cache=1')
+  assert.equal(f.timers.size, 0)
+})
+
 test('channel avatars recover through native HTTP before showing a fallback', async t => {
   const f = await mountAvatar(t, 'data:image/png;base64,AA==')
   await fail(f.find('img'))
   assert.deepEqual(f.requests, ['https://yt3.ggpht.com/avatar'])
   assert.equal(f.find('img')?.props.src, 'data:image/png;base64,AA==')
   assert.equal(f.find('fallback'), undefined)
+})
+
+test('video thumbnails fall back in resolution order on errors and loaded placeholders', async t => {
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue')
+  f.thumbnail.value = 'https://invidious.test/vi/video/maxresdefault.jpg?cache=1'
+  await Vue.nextTick()
+  await fail(f.find('img'))
+  assert.equal(f.find('img').props.src, 'https://invidious.test/vi/video/sddefault.jpg?cache=1')
+  f.find('img').props.onLoad({ target: { naturalWidth: 120, naturalHeight: 90 } })
+  await Vue.nextTick()
+  assert.equal(f.find('img').props.src, 'https://invidious.test/vi/video/hqdefault.jpg?cache=1')
+  f.find('img').props.onLoad({ target: { naturalWidth: 480, naturalHeight: 360 } })
+  await Vue.nextTick()
+  assert.equal(f.find('img').props.src, 'https://invidious.test/vi/video/hqdefault.jpg?cache=1')
+  await fail(f.find('img'))
+  assert.equal(f.find('img').props.src, 'https://invidious.test/vi/video/mqdefault.jpg?cache=1')
+  assert.equal(f.requests.length, 0)
+  assert.equal(f.timers.size, 0)
+  f.thumbnail.value = 'https://i.ytimg.com/vi/other/maxresdefault.jpg'
+  await Vue.nextTick()
+  assert.equal(f.find('img').props.src, f.thumbnail.value)
+  f.find('img').props.onLoad({ target: { naturalWidth: 1280, naturalHeight: 720 } })
+  await Vue.nextTick()
+  assert.equal(f.find('img').props.src, f.thumbnail.value)
 })
 
 test('channel avatars show a fallback only after the delayed retry fails and reset for a new URL', async t => {

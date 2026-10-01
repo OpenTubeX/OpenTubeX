@@ -279,6 +279,7 @@ Settings:
       Network: сетка
       Disk: дыск
   General Settings:
+    Data Saver Thumbnails: "Эканомныя мініяцюры"
     Use tray icon: "Выкарыстоўваць значок у трэі"
     Close to system tray: "Згортваць у трэй пры закрыцці"
     Tray required for background refresh: "Значок у трэі неабходны, пакуль уключана фонавае абнаўленне падпісак."
@@ -1687,6 +1688,7 @@ Description:
   Games: Гульні
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Выкарыстоўваць мініяцюры ніжэйшай раздзяляльнасці, каб зменшыць расход даных."
     Use AI Translation Completions: Запаўняе прагалы ў перакладах, зробленых людзьмі, тэкстам, створаным ШІ. Пераклады людзей заўсёды маюць перавагу.
     Update Relative Timestamps: Абнаўляе адносныя пазнакі часу ва ўсёй праграме, пакуль старонка адкрытая. Калі адключана, яны абнаўляюцца толькі пасля перазагрузкі або паўторнага адкрыцця старонкі.
     Stream Extraction Method: |

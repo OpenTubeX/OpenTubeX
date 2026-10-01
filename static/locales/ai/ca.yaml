@@ -393,6 +393,7 @@ Settings:
       Disk: disc
   Return to Settings Menu: Torna al menú de configuració
   General Settings:
+    Data Saver Thumbnails: "Miniatures amb estalvi de dades"
     Use tray icon: "Utilitza la icona de la safata"
     Close to system tray: "Tanca a la safata del sistema"
     Tray required for background refresh: "La icona de la safata és necessària mentre l’actualització de subscripcions en segon pla està activada."
@@ -2126,6 +2127,7 @@ Description:
   Games: Jocs
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Utilitza miniatures de menys resolució per reduir el consum de dades."
     Use AI Translation Completions: Omple els buits de les traduccions humanes amb text generat per IA. Les traduccions humanes sempre tenen prioritat.
     Update Relative Timestamps: Actualitza les marques horàries relatives de tota l'aplicació mentre la pàgina estigui oberta. Si es desactiva, només s'actualitzen en tornar a carregar o visitar la pàgina.
     Stream Extraction Method: |

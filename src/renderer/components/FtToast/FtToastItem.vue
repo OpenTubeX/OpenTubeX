@@ -19,13 +19,13 @@
       @pointerup="onPointerUp"
     >
       <div class="toastMessage">
-        <img
+        <FtRetryImage
           v-if="toast.image"
           :src="toast.image"
           class="image"
           alt=""
           draggable="false"
-        >
+        />
         <FtIcon
           v-else-if="toast.icon"
           :icon="toast.icon"
@@ -77,6 +77,7 @@ import { computed, onBeforeUnmount, onMounted, useTemplateRef } from 'vue'
 import store from '../../store'
 import FtEmbeddedProgress from '../FtEmbeddedProgress/FtEmbeddedProgress.vue'
 import FtButton from '../FtButton/FtButton.vue'
+import FtRetryImage from '../FtRetryImage.vue'
 
 /** Distance in px the pointer may travel before a click counts as the tail end of a swipe */
 const CLICK_SLOP = 5

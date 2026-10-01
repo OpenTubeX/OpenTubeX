@@ -479,6 +479,7 @@ const state = {
     skip: 'promptToSkip'
   },
   thumbnailPreference: '',
+  thumbnailDataSaver: false,
   showThumbnailPreviews: true,
   showVideoMenuButton: false,
   thumbnailSize: DEFAULT_THUMBNAIL_SIZE,

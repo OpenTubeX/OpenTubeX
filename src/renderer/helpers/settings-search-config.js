@@ -25,6 +25,7 @@ const GENERAL_EVERYDAY_KEYS = new Set([
 ])
 
 const GENERAL_APPEARANCE_KEYS = new Set([
+  'Data Saver Thumbnails',
   'Mobile Layout',
   'Navigation',
   'Playlist View Type',

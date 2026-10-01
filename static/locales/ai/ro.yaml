@@ -265,6 +265,7 @@ Settings:
       Network: rețea
       Disk: disc
   General Settings:
+    Data Saver Thumbnails: "Miniaturi pentru economisirea datelor"
     Use tray icon: "Folosește pictograma din zona de notificare"
     Close to system tray: "Închide în zona de notificare"
     Tray required for background refresh: "Pictograma din zona de notificare este necesară cât timp actualizarea abonamentelor în fundal este activată."
@@ -1644,6 +1645,7 @@ Description:
   Games: Jocuri
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Folosește miniaturi cu rezoluție mai mică pentru a reduce consumul de date."
     Use AI Translation Completions: Completează golurile din traducerile umane cu text generat de IA. Traducerile umane au întotdeauna prioritate.
     Update Relative Timestamps: Actualizează marcajele temporale relative în întreaga aplicație cât timp o pagină rămâne deschisă. Când opțiunea este dezactivată, acestea se actualizează numai după reîncărcarea sau revizitarea paginii.
     Stream Extraction Method: |

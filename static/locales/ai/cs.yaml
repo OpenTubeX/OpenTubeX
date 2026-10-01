@@ -263,6 +263,7 @@ Settings:
       Network: sítě
       Disk: disku
   General Settings:
+    Data Saver Thumbnails: "Úsporné náhledy"
     Use tray icon: "Používat ikonu v oznamovací oblasti"
     Close to system tray: "Při zavření skrýt do oznamovací oblasti"
     Tray required for background refresh: "Ikona v oznamovací oblasti je nutná, pokud je zapnutá aktualizace odběrů na pozadí."
@@ -1600,6 +1601,7 @@ Description:
   Games: Hry
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Používat náhledy s nižším rozlišením pro snížení spotřeby dat."
     Use AI Translation Completions: Doplňuje mezery v lidských překladech textem vytvořeným umělou inteligencí. Lidské překlady mají vždy přednost.
     Update Relative Timestamps: Aktualizuje relativní časové údaje v celé aplikaci, dokud stránka zůstává otevřená. Pokud je funkce vypnutá, údaje se aktualizují až po opětovném načtení nebo návratu na stránku.
     Stream Extraction Method: |

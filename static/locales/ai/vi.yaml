@@ -267,6 +267,7 @@ Settings:
       Network: mạng
       Disk: ổ đĩa
   General Settings:
+    Data Saver Thumbnails: "Ảnh thu nhỏ tiết kiệm dữ liệu"
     Use tray icon: "Sử dụng biểu tượng khay hệ thống"
     Close to system tray: "Đóng vào khay hệ thống"
     Tray required for background refresh: "Biểu tượng khay hệ thống là bắt buộc khi bật làm mới kênh đăng ký trong nền."
@@ -1634,6 +1635,7 @@ Description:
   Games: Trò chơi
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Sử dụng ảnh thu nhỏ có độ phân giải thấp hơn để giảm mức sử dụng dữ liệu."
     Use AI Translation Completions: Điền phần còn thiếu trong bản dịch của con người bằng văn bản do AI tạo. Bản dịch của con người luôn được ưu tiên.
     Update Relative Timestamps: Cập nhật mốc thời gian tương đối trên toàn ứng dụng khi trang vẫn mở. Khi tắt, mốc thời gian chỉ cập nhật sau khi tải lại hoặc mở lại trang.
     Stream Extraction Method: |

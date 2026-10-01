@@ -52,7 +52,8 @@ $grab-bar-padding: 1em;
 
 .thumbnailImage {
   // Makes img element sized correctly before image loading starts
-  aspect-ratio: 16/9 auto;
+  aspect-ratio: 16/9;
+  object-fit: cover;
 }
 
 .thumbnailPreview {

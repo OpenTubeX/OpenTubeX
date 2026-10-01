@@ -33,6 +33,15 @@
         @change="updateShowThumbnailPreviews"
       />
       <FtToggleSwitch
+        v-if="mode === 'appearance'"
+        :label="t('Settings.General Settings.Data Saver Thumbnails')"
+        :default-value="thumbnailDataSaver"
+        setting-key="thumbnailDataSaver"
+        compact
+        :tooltip="t('Tooltips.General Settings.Data Saver Thumbnails')"
+        @change="store.dispatch('updateThumbnailDataSaver', $event)"
+      />
+      <FtToggleSwitch
         v-if="mode === 'general'"
         :label="t('Settings.General Settings.Check for Updates')"
         :default-value="checkForUpdates"
@@ -761,6 +770,8 @@ const showVideoMenuButton = computed(() => store.getters.getShowVideoMenuButton)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const showThumbnailPreviews = computed(() => store.getters.getShowThumbnailPreviews)
+
+const thumbnailDataSaver = computed(() => store.getters.getThumbnailDataSaver)
 
 /**
  * @param {boolean} value

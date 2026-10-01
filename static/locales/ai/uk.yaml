@@ -267,6 +267,7 @@ Settings:
       Network: мережа
       Disk: диск
   General Settings:
+    Data Saver Thumbnails: "Мініатюри для економії даних"
     Use tray icon: "Використовувати значок у треї"
     Close to system tray: "Згортати в трей при закритті"
     Tray required for background refresh: "Значок у треї потрібний, поки ввімкнено фонове оновлення підписок."
@@ -1637,6 +1638,7 @@ Description:
   Games: Ігри
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Використовувати мініатюри нижчої роздільності, щоб зменшити споживання даних."
     Use AI Translation Completions: Заповнює прогалини в перекладах, зроблених людьми, текстом від ШІ. Переклади, зроблені людьми, завжди мають перевагу.
     Update Relative Timestamps: Оновлює відносні часові позначки в усій програмі, доки сторінка відкрита. Якщо вимкнено, вони оновлюються лише після перезавантаження або повторного відкриття сторінки.
     Stream Extraction Method: |

@@ -263,6 +263,7 @@ Settings:
       Network: 網路
       Disk: 磁碟
   General Settings:
+    Data Saver Thumbnails: "節省流量的縮圖"
     Use tray icon: "使用系統匣圖示"
     Close to system tray: "關閉時縮小至系統匣"
     Tray required for background refresh: "啟用背景重新整理訂閱時，必須顯示系統匣圖示。"
@@ -1602,6 +1603,7 @@ Description:
   Games: 遊戲
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "使用較低解析度的縮圖以減少數據用量。"
     Use AI Translation Completions: 使用 AI 產生的文字補齊人工翻譯的缺漏。人工翻譯一律優先採用。
     Update Relative Timestamps: 頁面開啟期間持續更新應用程式中的相對時間戳記。停用後，只有重新載入或再次開啟頁面時才會更新。
     Stream Extraction Method: |

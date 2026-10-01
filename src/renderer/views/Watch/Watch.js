@@ -860,7 +860,8 @@ export default defineComponent({
         this.nextSubscriptionShort,
         this.backendPreference,
         this.currentInvidiousInstanceUrl,
-        this.thumbnailPreference
+        this.thumbnailPreference,
+        this.$store.getters.getThumbnailDataSaver
       ) ?? ''
     },
     shortsCommentsPanelOpen: function () {
@@ -2652,7 +2653,8 @@ export default defineComponent({
         target,
         this.backendPreference,
         this.currentInvidiousInstanceUrl,
-        this.thumbnailPreference
+        this.thumbnailPreference,
+        this.$store.getters.getThumbnailDataSaver
       ) ?? ''
       this.shortsNavigationLockedUntil = Date.now() + 300
       const shortSource = this.tabRoute.query.shortSource === 'channel'
@@ -3721,7 +3723,8 @@ export default defineComponent({
             this.currentSubscriptionShort ?? { videoId: this.videoId },
             this.backendPreference,
             this.currentInvidiousInstanceUrl,
-            this.thumbnailPreference
+            this.thumbnailPreference,
+            this.$store.getters.getThumbnailDataSaver
           ) ?? this.thumbnail
         }
         if (this.isShort) {
@@ -4003,7 +4006,8 @@ export default defineComponent({
               this.currentSubscriptionShort ?? { videoId: this.videoId },
               this.backendPreference,
               this.currentInvidiousInstanceUrl,
-              this.thumbnailPreference
+              this.thumbnailPreference,
+              this.$store.getters.getThumbnailDataSaver
             ) ?? this.thumbnail
           }
           this.updateTitle()

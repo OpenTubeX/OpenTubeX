@@ -528,6 +528,7 @@ Settings:
   The app needs to restart for changes to take effect. Restart and apply change?: The
     app needs to restart for changes to take effect. Restart and apply change?
   General Settings:
+    Data Saver Thumbnails: "Data saver thumbnails"
     Use tray icon: "Use tray icon"
     Close to system tray: "Close to system tray"
     Tray required for background refresh: "The tray icon is required while background subscription refresh is enabled."
@@ -2647,6 +2648,7 @@ Description:
 #Tooltips
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Use lower-resolution thumbnails to reduce data usage."
     Use AI Translation Completions: Fill gaps in human translations with AI-generated text. Human translations always take priority.
     Update Relative Timestamps: Updates relative timestamps throughout the app while a page remains open. When disabled, they update only after reloading or revisiting the page.
     Stream Extraction Method: |

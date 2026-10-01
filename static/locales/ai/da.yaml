@@ -274,6 +274,7 @@ Settings:
       Network: netværk
       Disk: diskplads
   General Settings:
+    Data Saver Thumbnails: "Databesparende miniaturebilleder"
     Use tray icon: "Brug ikon i systembakken"
     Close to system tray: "Luk til systembakken"
     Tray required for background refresh: "Ikonet i systembakken er påkrævet, mens opdatering af abonnementer i baggrunden er aktiveret."
@@ -1676,6 +1677,7 @@ Description:
   Games: Spil
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Brug miniaturebilleder med lavere opløsning for at reducere dataforbruget."
     Use AI Translation Completions: Udfyld huller i menneskelige oversættelser med AI-genereret tekst. Menneskelige oversættelser har altid forrang.
     Update Relative Timestamps: Opdaterer relative tidsangivelser i hele appen, mens en side er åben. Når funktionen er slået fra, opdateres de kun, når siden genindlæses eller besøges igen.
     Stream Extraction Method: |

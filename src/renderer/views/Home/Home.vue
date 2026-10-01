@@ -736,7 +736,7 @@ function videoThumbnail(video) {
   const storedVideo = store.getters.getHistoryCacheById[video.videoId]
   return video.thumbnailUrl ?? video.thumbnail ??
     storedVideo?.thumbnailUrl ?? storedVideo?.thumbnail ??
-    `${thumbnailOrigin.value}/vi/${video.videoId}/mqdefault.jpg`
+    `${thumbnailOrigin.value}/vi/${video.videoId}/maxresdefault.jpg`
 }
 
 function playlistThumbnail(playlist) {

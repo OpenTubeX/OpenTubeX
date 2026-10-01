@@ -70,6 +70,7 @@ import {
   formatDurationAsTimestamp,
   getCachedOembedTitle,
   getOembedTitle,
+  getVideoThumbnailUrl,
   showToast,
   writeFileWithPicker,
   throttle,
@@ -726,28 +727,12 @@ export default defineComponent({
         return thumbnailPlaceholder
       }
 
-      if (store.getters.getThumbnailPreference === 'hidden') {
-        return thumbnailPlaceholder
-      }
-
-      const baseUrl = store.getters.getBackendPreference === 'invidious'
-        ? store.getters.getCurrentInvidiousInstanceUrl
-        : 'https://i.ytimg.com'
-      let thumbnailName = 'mqdefault.jpg'
-
-      switch (store.getters.getThumbnailPreference) {
-        case 'start':
-          thumbnailName = 'mq1.jpg'
-          break
-        case 'middle':
-          thumbnailName = 'mq2.jpg'
-          break
-        case 'end':
-          thumbnailName = 'mq3.jpg'
-          break
-      }
-
-      return `${baseUrl}/vi/${videoId}/${thumbnailName}`
+      return getVideoThumbnailUrl(
+        videoId,
+        store.getters.getBackendPreference,
+        store.getters.getCurrentInvidiousInstanceUrl,
+        store.getters.getThumbnailPreference
+      ) ?? thumbnailPlaceholder
     }
     const autoplayDuration = computed(() => {
       const lengthSeconds = Number(autoplayNextVideo.value?.lengthSeconds)
