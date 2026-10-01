@@ -199,6 +199,7 @@ import store from '../../store/index'
 import { getChannelLinkDetails, getChannelLinkMenuItems } from '../../helpers/channel-context-menu'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import FtContextMenuItemIcon from './FtContextMenuItemIcon.vue'
+import { getTabDeviceMenuItem } from '../../helpers/tab-device-menu'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -408,7 +409,17 @@ async function open(event) {
   const request = ++openRequest
   const link = event.target instanceof Element ? event.target.closest('a[href]') : null
   const channel = link ? getChannelLinkDetails(link) : null
+  const tabId = event.target instanceof Element ? event.target.closest('.tab[data-tab-id]')?.dataset.tabId : null
+  const selectedIds = store.getters.getSelectedTabIds
+  const contextTabs = tabId
+    ? store.getters.getTabs.filter(tab => selectedIds.includes(tabId) ? selectedIds.includes(tab.id) : tab.id === tabId)
+    : []
+  const deviceMenuItem = getTabDeviceMenuItem(contextTabs, t)
   const result = await window.ftElectron.contextMenu.open(getContextParameters(event))
+  if (deviceMenuItem) {
+    const copyIndex = result.items.findIndex(item => ['Context Menu.Copy YouTube Link', 'Context Menu.Copy YouTube Links'].includes(item.labelKey))
+    result.items.splice(copyIndex + 1, 0, deviceMenuItem)
+  }
   if (request !== openRequest || (result.items.length === 0 && !channel)) return
 
   localItems.value = channel ? ref(getChannelLinkMenuItems(channel, t)) : null

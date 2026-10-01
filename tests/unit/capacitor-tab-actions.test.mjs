@@ -358,11 +358,11 @@ test('tablet selection arrows move focus without toggling or activating tabs', a
 
 test('an unavailable close submenu keeps keyboard focus on its Back button', async () => {
   const component = await readFile(new URL('../../src/renderer/components/TabBar/CapacitorTabActionsMenu.vue', import.meta.url), 'utf8')
-  const start = component.indexOf('async function setCloseMenu(')
+  const start = component.indexOf('async function setMenu(')
   const method = component.slice(start, component.indexOf('watch(() => props.tab', start))
   let focused = false
   const context = vm.createContext({
-    showCloseMenu: { value: false },
+    activeMenu: { value: null },
     mainScrollTop: 0,
     actionList: { value: { scrollTop: 24, querySelector: () => null } },
     actionContent: { value: {} },
@@ -373,7 +373,7 @@ test('an unavailable close submenu keeps keyboard focus on its Back button', asy
     clampOverlayScrollTop() {},
   })
   vm.runInContext(method, context)
-  await context.setCloseMenu(true)
+  await context.setMenu('close')
   assert.equal(focused, true)
 })
 
