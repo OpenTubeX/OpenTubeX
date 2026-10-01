@@ -3121,6 +3121,7 @@ export default defineComponent({
           watchPageIpBlocked,
           musicMediaType,
           androidLiveHlsManifestUrl,
+          androidLiveDashManifestUrl,
         } = videoInfo
 
         this.musicMediaType = musicMediaType
@@ -3496,8 +3497,9 @@ export default defineComponent({
           }
 
           if (useRemoteManifest) {
-            if (result.streaming_data?.dash_manifest_url) {
-              this.manifestSrc = result.streaming_data.dash_manifest_url
+            const dashManifestUrl = result.streaming_data?.dash_manifest_url ?? androidLiveDashManifestUrl
+            if (dashManifestUrl) {
+              this.manifestSrc = dashManifestUrl
               this.manifestMimeType = MANIFEST_TYPE_DASH
             } else {
               // A blocked live player response can contain all watch-page metadata

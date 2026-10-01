@@ -877,7 +877,9 @@ async function loadYtDlpPlaybackSource(
     const info = await ytDlp.ytDlpGetPlaybackInfo(
       videoId,
       useDefaultClients,
-      useAuthentication,
+      // Signed-in clients can expose only 30 seconds of a public premiere.
+      // Retry its DVR stream without cookies, keeping the limited source if needed.
+      useAuthentication && limitedLiveSource === null,
       includeSubtitles
     )
 
@@ -1026,16 +1028,14 @@ async function loadYtDlpPlaybackSource(
         version: info.version
       }
 
-      // The preferred web clients sometimes expose only the last 30 seconds of an
-      // otherwise rewindable live stream. Let the existing default-client fallback
-      // try to obtain its full DVR manifest, while retaining this playable source in
-      // case those clients fail.
+      // Web clients, including authenticated defaults, can expose only the last
+      // 30 seconds of a rewindable live stream. Use the remaining retries for its
+      // full DVR manifest, retaining the first playable source if those fail.
       if (
-        !useDefaultClients &&
         isLive &&
         hasLimitedLiveDvrWindow(info.hlsManifestUrl)
       ) {
-        limitedLiveSource = source
+        limitedLiveSource ??= source
         continue
       }
 

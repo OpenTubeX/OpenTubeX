@@ -3534,6 +3534,58 @@ test.describe('watch page', () => {
     })).toHaveCount(1)
   })
 
+  for (const scenario of ['preferred clients', 'default clients', 'anonymous extraction fails']) {
+    test(`retries a limited authenticated live manifest without cookies: ${scenario}`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      await page.route(/^https:\/\/example\.invalid\/.*\.m3u8$/, route => route.fulfill({
+        contentType: 'application/x-mpegURL',
+        body: '#EXTM3U\n'
+      }))
+      await openMockedVideo(page)
+      await page.evaluate(async () => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await store.dispatch('updateYtDlpPlaybackAuthMode', 'browser')
+        await store.dispatch('updateYtDlpPlaybackCookiesBrowser', 'firefox')
+        await store.dispatch('updateYtDlpPlaybackAlwaysUseCookies', true)
+      })
+      await app.electronApp.evaluate(({ ipcMain }, scenario) => {
+        globalThis.__premiereAuthenticationCalls = []
+        ipcMain.removeHandler('yt-dlp-get-playback-info')
+        ipcMain.handle('yt-dlp-get-playback-info', (_event, _videoId, useDefaultClients, useAuthentication) => {
+          globalThis.__premiereAuthenticationCalls.push({ useDefaultClients, useAuthentication })
+          if (scenario === 'default clients' && !useDefaultClients) {
+            return { error: 'Preferred clients could not extract formats' }
+          }
+          if (scenario === 'anonymous extraction fails' && !useAuthentication) {
+            return { error: 'This live stream requires authentication' }
+          }
+          return {
+            isLive: true,
+            liveStatus: 'is_live',
+            hlsManifestUrl: useAuthentication
+              ? 'https://example.invalid/manifest_duration/30/limited.m3u8'
+              : 'https://example.invalid/manifest_duration/3600/full.m3u8',
+            formats: [],
+            duration: null,
+            version: 'test'
+          }
+        })
+      }, scenario)
+      const view = await watchViewHandle(page)
+      await view.evaluate(view => view.handlePlaybackEngineChange('yt-dlp'))
+      const calls = [{ useDefaultClients: false, useAuthentication: true }]
+      if (scenario === 'default clients') calls.push({ useDefaultClients: true, useAuthentication: true })
+      calls.push({ useDefaultClients: true, useAuthentication: false })
+      if (scenario === 'anonymous extraction fails') calls.push({ useDefaultClients: true, useAuthentication: false })
+      expect(await app.electronApp.evaluate(() => globalThis.__premiereAuthenticationCalls)).toEqual(calls)
+      const retainedLimitedStream = scenario === 'anonymous extraction fails'
+      expect(await view.evaluate(view => view.manifestSrc)).toBe(retainedLimitedStream
+        ? 'https://example.invalid/manifest_duration/30/limited.m3u8'
+        : 'https://example.invalid/manifest_duration/3600/full.m3u8')
+      await expect(page.locator('.shaka-seek-bar-container')).toHaveCount(retainedLimitedStream ? 0 : 1)
+    })
+  }
+
   test('treats yt-dlp live status as live and does not cache its HLS source', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.route('https://example.invalid/live-status.m3u8', route => route.fulfill({
