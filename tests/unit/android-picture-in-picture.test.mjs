@@ -71,7 +71,7 @@ function renderer({ fit = 'contain', rect = { x: 12, y: 60, width: 400, height: 
       if (frames.delete(id)) callback()
     }
   }
-  return { ...api, video, calls, rect, classes, attributes, properties, window, document,
+  return { ...api, video, calls, rect, classes, attributes, properties, window, document, plugin,
     resize: () => resized?.(), listeners, step, flush: () => { while (frames.size) step() },
     expire: () => { for (const callback of [...timers.values()]) callback() } }
 }
@@ -127,6 +127,76 @@ test('automatic Android PiP tracks scrolling and resized video bounds, preservin
   assert.equal(r.calls.at(-1)[1].sourceRect.width, 200)
   await r.setAndroidAutoPictureInPicture(false, r.video)
   assert.equal(r.listeners.has('scroll'), false)
+})
+
+test('unchanged PiP bounds skip native updates across observed layout events', async () => {
+  const r = renderer()
+  await r.setAndroidAutoPictureInPicture(true, r.video)
+  r.resize()
+  r.flush()
+  const count = r.calls.length
+  for (const update of [r.resize, r.listeners.get('scroll'), r.listeners.get('resize')]) {
+    update()
+    r.flush()
+    assert.equal(r.calls.length, count)
+  }
+  r.rect.y += 0.25
+  r.resize()
+  r.flush()
+  assert.equal(r.calls.length, count + 1, 'fractional geometry changes still update the native crop')
+})
+
+test('offscreen scrolls skip duplicate crops while viewport conversion changes still update', async () => {
+  const r = renderer()
+  await r.setAndroidAutoPictureInPicture(true, r.video)
+  r.rect.y = -1000
+  r.listeners.get('scroll')()
+  r.flush()
+  const count = r.calls.length
+  r.rect.y = -1200
+  r.listeners.get('scroll')()
+  r.flush()
+  assert.equal(r.calls.length, count)
+  r.window.innerWidth += 0.25
+  r.listeners.get('resize')()
+  r.flush()
+  assert.equal(r.calls.length, count + 1)
+  assert.equal(r.calls.at(-1)[1].sourceRect.viewportWidth, 480.25)
+})
+
+test('focus return resends unchanged PiP bounds that native Android may have ignored', async () => {
+  const r = renderer()
+  await r.setAndroidAutoPictureInPicture(true, r.video)
+  r.document.hasFocus = () => false
+  r.resize()
+  r.flush()
+  const count = r.calls.length
+  const previous = r.calls.at(-1)[1]
+  r.document.hasFocus = () => true
+  r.listeners.get('focus')()
+  r.flush()
+  assert.equal(r.calls.length, count + 1)
+  assert.deepEqual(r.calls.at(-1)[1], previous)
+})
+
+test('a failed native PiP bounds update retries on the next layout event', async t => {
+  const r = renderer()
+  t.mock.method(console, 'warn', () => {})
+  const update = r.plugin.updatePictureInPictureSourceRect
+  let attemptsMade = 0
+  const attempts = t.mock.method(r.plugin, 'updatePictureInPictureSourceRect', async options => {
+    if (++attemptsMade === 1) throw new Error('Bridge unavailable')
+    return update(options)
+  })
+  await r.setAndroidAutoPictureInPicture(true, r.video)
+  r.resize()
+  r.flush()
+  await new Promise(resolve => setImmediate(resolve))
+  r.resize()
+  r.flush()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(attempts.mock.callCount(), 2)
+  assert.equal(r.calls.at(-1)[0], 'bounds')
 })
 
 test('cover video bounds are clipped to the visible viewport and retain their object fit', async () => {

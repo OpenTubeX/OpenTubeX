@@ -89,29 +89,41 @@ function observePictureInPictureBounds(video) {
   updatePictureInPictureBounds = null
   if (!video || !AndroidUi) return
   let frame = null
+  let lastSent
   const update = () => {
     if (frame !== null) return
     frame = requestAnimationFrame(() => {
       frame = null
+      if (document.body.classList.contains('androidPictureInPicture')) return
       const sourceRect = pictureInPictureSourceRect(video)
-      if (!document.body.classList.contains('androidPictureInPicture')) {
-        AndroidUi.updatePictureInPictureSourceRect({ sourceRect })
-          .catch(error => console.warn('Could not update Android PiP bounds', error))
-      }
+      const key = JSON.stringify(sourceRect)
+      if (key === lastSent) return
+      lastSent = key
+      AndroidUi.updatePictureInPictureSourceRect({ sourceRect })
+        .catch(error => {
+          if (lastSent === key) lastSent = undefined
+          console.warn('Could not update Android PiP bounds', error)
+        })
     })
+  }
+  const focused = () => {
+    // Native Android ignores bounds while unfocused. Resend on return even
+    // when the renderer's geometry has stayed unchanged.
+    lastSent = undefined
+    update()
   }
   const observer = new ResizeObserver(update)
   updatePictureInPictureBounds = update
   observer.observe(video)
   window.addEventListener('scroll', update, true)
   window.addEventListener('resize', update)
-  window.addEventListener('focus', update)
+  window.addEventListener('focus', focused)
   video.closest('.ftVideoPlayer')?.addEventListener('transitionend', update)
   stopPictureInPictureBounds = () => {
     observer.disconnect()
     window.removeEventListener('scroll', update, true)
     window.removeEventListener('resize', update)
-    window.removeEventListener('focus', update)
+    window.removeEventListener('focus', focused)
     video.closest('.ftVideoPlayer')?.removeEventListener('transitionend', update)
     if (frame !== null) cancelAnimationFrame(frame)
   }
