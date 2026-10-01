@@ -32,16 +32,10 @@ import store from '../store/index'
 import { useKeepAliveEffectScope } from '../composables/useKeepAliveEffectScope'
 import { useRelativeTimeClock } from '../composables/useRelativeTimeClock'
 import { useSubscriptionChannelUpdates } from '../composables/useSubscriptionChannelUpdates'
-import {
-  ensureUpcomingSubscriptionFeedPublished,
-  getUpcomingPremiereTimestamp
-} from '../helpers/subscription-entries'
+import { getUpcomingPremiereTimestamp } from '../helpers/subscription-entries'
 import { getCachedRelativeTimeFormat, getRelativeTimeFromDate } from '../helpers/utils'
 import { formatShortDateTime } from '../helpers/dateFormat'
-import {
-  refreshSubscriptionVideosFromRemote,
-  updateVideoListAfterProcessing
-} from '../helpers/subscriptions'
+import { refreshSubscriptionVideosFromRemote } from '../helpers/subscriptions'
 import {
   getSubscriptionsForFeed,
   MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES
@@ -327,20 +321,11 @@ function loadVideosFromCacheSometimes() {
 }
 
 function loadVideosFromCacheForAllActiveProfileChannels() {
-  const videoList_ = cacheEntriesForAllActiveProfileChannels.value.flatMap((cacheEntry) => {
-    const rawCacheEntry = toRaw(cacheEntry)
-    const cacheTimestamp = new Date(rawCacheEntry.timestamp).getTime()
-
-    return (rawCacheEntry.videos ?? []).map(video => {
-      return ensureUpcomingSubscriptionFeedPublished(
-        video,
-        cacheTimestamp,
-        premiereUpdateNow.value
-      )
-    })
-  })
-
-  videoList.value = updateVideoListAfterProcessing(videoList_, premiereUpdateNow.value)
+  const nextPremiere = store.getters.getSubscriptionVideosFeed.nextPremiereTimestamp
+  if (nextPremiere !== null && nextPremiere <= premiereUpdateNow.value) {
+    store.commit('setSubscriptionVideoProcessingTimestamp', premiereUpdateNow.value)
+  }
+  videoList.value = store.getters.getSubscriptionVideosFeed.videos
   isLoading.value = false
 }
 

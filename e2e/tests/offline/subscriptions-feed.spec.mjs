@@ -211,6 +211,21 @@ test.describe('subscriptions feed from cache', () => {
     await expect(premiere.locator('.videoDuration')).toHaveText('Premiere')
   })
 
+  test('updates a cached premiere that started while visiting Playlists', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    await page.clock.install({ time: now })
+    await goTo(page, 'subscriptions')
+    await expect(page.getByText('Upcoming premiere video')).toHaveCount(0)
+
+    await goTo(page, 'userplaylists')
+    await page.clock.setFixedTime(now + 30 * 24 * HOUR + 1000)
+    await goTo(page, 'subscriptions')
+
+    const premiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
+    await expect(premiere).toBeVisible()
+    await expect(premiere.locator('.videoDuration')).toHaveText('Premiere')
+  })
+
   test('polls a started premiere for watching counts and its completed video state', async ({ page }) => {
     await goTo(page, 'trending')
     await page.clock.install({ time: now + 30 * 24 * HOUR - 30_000 })
@@ -452,6 +467,30 @@ test.describe('subscriptions feed with upcoming premieres shown', () => {
       ...seed,
       settings: { ...seed.settings, hideUpcomingPremieres: false }
     }
+  })
+
+  test('updates seen state in a cached legacy premiere after visiting Playlists', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    await page.evaluate(channelId => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setShowNewSubscriptionFeedIndicators', true)
+      const entries = store.getters.getVideoCache[channelId].videos.map(entry => (
+        entry.videoId === 'aaaaaaaaaa3' ? { ...entry, videoId: 'premiere-seen-test', isNewInSubscriptionFeed: true } : entry
+      ))
+      store.commit('updateVideoCacheByChannel', { channelId, entries })
+    }, CHANNEL_A)
+    await goTo(page, 'subscriptions')
+    const premiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
+    await expect(premiere.locator('.newContentDot')).toBeVisible()
+    await goTo(page, 'userplaylists')
+    await page.evaluate(channelId => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('markSubscriptionEntriesAsSeenInCache', [{
+        tab: 'videos', channelId, entries: [{ videoId: 'premiere-seen-test', isNewInSubscriptionFeed: false }]
+      }])
+    }, CHANNEL_A)
+    await goTo(page, 'subscriptions')
+    await expect(premiere.locator('.newContentDot')).toHaveCount(0)
   })
 
   test('does not offer to mark an upcoming premiere as watched', async ({ page }) => {
