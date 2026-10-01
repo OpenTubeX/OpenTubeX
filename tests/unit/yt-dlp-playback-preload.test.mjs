@@ -300,6 +300,7 @@ test('reports sources that cannot be cached as preload failures', async () => {
 
 test('retries incomplete metadata after the bulk playlist preload finishes', async () => {
   const videoIds = Array.from({ length: 64 }, (_, index) => `video${index}`)
+  const incompleteVideoIds = new Set(videoIds.slice(0, 20))
   const attempts = new Map()
   const loaded = []
   const progressUpdates = []
@@ -320,7 +321,7 @@ test('retries incomplete metadata after the bulk playlist preload finishes', asy
       }
       return {
         ...source(videoId),
-        incomplete: ['video5', 'video7'].includes(videoId) && attempt < 3,
+        incomplete: incompleteVideoIds.has(videoId) && attempt < 3,
       }
     },
     onProgress: progress => progressUpdates.push(progress),
@@ -328,9 +329,9 @@ test('retries incomplete metadata after the bulk playlist preload finishes', asy
 
   assert.deepEqual(result, { requested: 64, preloaded: 64, failed: 0 })
   assert.equal(attempts.get('video5'), 3)
-  assert.equal(attempts.get('video6'), 1)
-  assert.deepEqual(loaded.slice(64), ['video5', 'video7', 'video5', 'video7'])
-  assert.equal(peakActiveRetries, 1)
+  assert.equal(attempts.get('video20'), 1)
+  assert.deepEqual(loaded.slice(64), [...incompleteVideoIds, ...incompleteVideoIds])
+  assert.equal(peakActiveRetries, 16)
   assert.equal(progressUpdates.at(-1).completed, 64)
   assert.ok(progressUpdates.slice(0, -1).every(progress => progress.completed < 64))
 })
@@ -349,4 +350,18 @@ test('retries a failed playlist extraction and reports only its final result', a
   assert.deepEqual(result, { requested: 1, preloaded: 1, failed: 0 })
   assert.equal(attempts, 2)
   assert.deepEqual(progressUpdates.at(-1), { requested: 1, completed: 1, preloaded: 1, failed: 0 })
+})
+
+test('reports a missing or unavailable executable without retrying', async () => {
+  for (const message of ['yt-dlp could not be found', 'yt-dlp is not available']) {
+    let attempts = 0
+    const result = await preloadYtDlpPlaybackSources(['video000001'], {
+      loadSource: async () => {
+        attempts++
+        throw new Error(message)
+      },
+    })
+    assert.deepEqual(result, { requested: 1, preloaded: 0, failed: 1 })
+    assert.equal(attempts, 1, message)
+  }
 })
