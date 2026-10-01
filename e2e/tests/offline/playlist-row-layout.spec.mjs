@@ -36,43 +36,45 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
       for (const size of [{ width: 375, height: 812 }, { width: 812, height: 375 }, { width: 1440, height: 900 }]) {
         await setWindowSize(app, page, size)
         for (const row of await rows.all()) {
-          await expect.poll(() => row.evaluate(element => element.getBoundingClientRect().right - document.documentElement.clientWidth)).toBeLessThanOrEqual(1)
           const title = row.locator('.title')
           // Clamp only the visible text; retain the full accessible link name.
           await expect(title).toHaveAccessibleName(await title.textContent().then(text => text.trim()))
-          const geometry = await row.evaluate(element => {
-            const title = element.querySelector('.title')
-            const thumbnail = element.querySelector('.videoThumbnail')
-            const info = element.querySelector('.infoLine')
-            const numberedRow = element.closest('.playlistItem').getBoundingClientRect()
-            const indexParts = [...element.closest('.playlistItem').querySelectorAll('.videoIndex, .grabBar')]
-              .filter(part => part.getClientRects().length > 0)
-              .map(part => part.getBoundingClientRect())
-            const indexCenter = (Math.min(...indexParts.map(part => part.top)) + Math.max(...indexParts.map(part => part.bottom))) / 2
-            const thumbnailRect = thumbnail.getBoundingClientRect()
-            const thumbnailCenter = thumbnailRect.top + thumbnailRect.height / 2
-            const contentCenter = (title.getBoundingClientRect().top + info.getBoundingClientRect().bottom) / 2
-            const style = getComputedStyle(title)
-            return {
-              fontSize: parseFloat(style.fontSize),
-              titleHeight: title.getBoundingClientRect().height,
-              lineHeight: parseFloat(style.lineHeight),
-              contentCenterDifference: Math.abs(contentCenter - thumbnailCenter),
-              metadataFontSize: parseFloat(getComputedStyle(info).fontSize),
-              overflow: Math.max(element.getBoundingClientRect().right, title.getBoundingClientRect().right, info.getBoundingClientRect().right) - document.documentElement.clientWidth,
-              thumbnailRatio: thumbnail.getBoundingClientRect().width / thumbnail.getBoundingClientRect().height,
-              indexCenterDifference: Math.abs(indexCenter - thumbnailCenter),
-              rowCenterDifference: Math.abs(thumbnailCenter - numberedRow.top - numberedRow.height / 2)
-            }
-          })
-          expect(geometry.fontSize).toBeLessThanOrEqual(16)
-          expect(geometry.titleHeight).toBeLessThanOrEqual(geometry.lineHeight * 2 + 1)
-          expect(geometry.contentCenterDifference).toBeLessThanOrEqual(1)
-          expect(geometry.metadataFontSize).toBeLessThan(geometry.fontSize)
-          expect(geometry.overflow).toBeLessThanOrEqual(1)
-          expect(geometry.thumbnailRatio).toBeCloseTo(16 / 9, 1)
-          expect(geometry.indexCenterDifference).toBeLessThanOrEqual(2)
-          expect(geometry.rowCenterDifference).toBeLessThanOrEqual(1)
+          // Wait for every part of the row to reflow after a responsive layout change.
+          await expect(async () => {
+            const geometry = await row.evaluate(element => {
+              const title = element.querySelector('.title')
+              const thumbnail = element.querySelector('.videoThumbnail')
+              const info = element.querySelector('.infoLine')
+              const numberedRow = element.closest('.playlistItem').getBoundingClientRect()
+              const indexParts = [...element.closest('.playlistItem').querySelectorAll('.videoIndex, .grabBar')]
+                .filter(part => part.getClientRects().length > 0)
+                .map(part => part.getBoundingClientRect())
+              const indexCenter = (Math.min(...indexParts.map(part => part.top)) + Math.max(...indexParts.map(part => part.bottom))) / 2
+              const thumbnailRect = thumbnail.getBoundingClientRect()
+              const thumbnailCenter = thumbnailRect.top + thumbnailRect.height / 2
+              const contentCenter = (title.getBoundingClientRect().top + info.getBoundingClientRect().bottom) / 2
+              const style = getComputedStyle(title)
+              return {
+                fontSize: parseFloat(style.fontSize),
+                titleHeight: title.getBoundingClientRect().height,
+                lineHeight: parseFloat(style.lineHeight),
+                contentCenterDifference: Math.abs(contentCenter - thumbnailCenter),
+                metadataFontSize: parseFloat(getComputedStyle(info).fontSize),
+                overflow: Math.max(element.getBoundingClientRect().right, title.getBoundingClientRect().right, info.getBoundingClientRect().right) - document.documentElement.clientWidth,
+                thumbnailRatio: thumbnail.getBoundingClientRect().width / thumbnail.getBoundingClientRect().height,
+                indexCenterDifference: Math.abs(indexCenter - thumbnailCenter),
+                rowCenterDifference: Math.abs(thumbnailCenter - numberedRow.top - numberedRow.height / 2)
+              }
+            })
+            expect(geometry.fontSize).toBeLessThanOrEqual(16)
+            expect(geometry.titleHeight).toBeLessThanOrEqual(geometry.lineHeight * 2 + 1)
+            expect(geometry.contentCenterDifference).toBeLessThanOrEqual(1)
+            expect(geometry.metadataFontSize).toBeLessThan(geometry.fontSize)
+            expect(geometry.overflow).toBeLessThanOrEqual(1)
+            expect(geometry.thumbnailRatio).toBeCloseTo(16 / 9, 1)
+            expect(geometry.indexCenterDifference).toBeLessThanOrEqual(2)
+            expect(geometry.rowCenterDifference).toBeLessThanOrEqual(1)
+          }).toPass({ timeout: 15_000 })
         }
         await attachScreenshot(`playlist rows ${size.width}px`)
       }
