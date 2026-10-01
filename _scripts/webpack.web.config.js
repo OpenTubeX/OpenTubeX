@@ -4,6 +4,7 @@ const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const { VueLoaderPlugin } = require('vue-loader')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
+const getStartupSplash = require('./startupSplash')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const MinimizerPlugin = require('minimizer-webpack-plugin')
 const ProcessLocalesPlugin = require('./ProcessLocalesPlugin')
@@ -167,7 +168,8 @@ const config = {
     new HtmlWebpackPlugin({
       excludeChunks: ['processTaskWorker'],
       filename: 'index.html',
-      template: path.resolve(__dirname, '../src/index.ejs')
+      template: path.resolve(__dirname, '../src/index.ejs'),
+      templateParameters: isCapacitor ? { startupSplash: getStartupSplash() } : {}
     }),
     new VueLoaderPlugin(),
     new MiniCssExtractPlugin({

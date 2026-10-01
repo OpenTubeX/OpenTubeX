@@ -7,6 +7,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const MinimizerPlugin = require('minimizer-webpack-plugin')
 const ProcessLocalesPlugin = require('./ProcessLocalesPlugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
+const getStartupSplash = require('./startupSplash')
 const {
   SHAKA_LOCALE_MAPPINGS,
   SHAKA_LOCALES_PREBUNDLED,
@@ -200,11 +201,7 @@ const config = {
       filename: 'index.html',
       template: path.resolve(__dirname, '../src/index.ejs'),
       templateParameters: {
-        startupSplash: {
-          styles: readFileSync(path.join(__dirname, '../src/renderer/startup/splash.css'), 'utf8'),
-          script: readFileSync(path.join(__dirname, '../src/renderer/startup/boot.js'), 'utf8'),
-          logo: readFileSync(path.join(__dirname, '../_icons/iconColorSmall.svg'), 'utf8').replaceAll('#212121', 'currentColor')
-        }
+        startupSplash: getStartupSplash()
       }
     }),
     new VueLoaderPlugin(),

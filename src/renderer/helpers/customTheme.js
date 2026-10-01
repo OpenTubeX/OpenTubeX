@@ -9,10 +9,31 @@ import {
 } from '../../customTheme.js'
 import { PALETTE_BASE_THEMES } from '../../constants.js'
 
-import { androidDynamicColors, applyDynamicColors } from './dynamicColors.js'
+import { androidDynamicColors, applyDynamicColors, dynamicThemeColors } from './dynamicColors.js'
 
 const STORAGE_KEY = 'opentubex-custom-theme'
 let appliedBodyThemeClasses = []
+
+/** Read either system appearance without changing the app's active theme. */
+export function getThemeBackground(baseTheme, customThemes, dark) {
+  const custom = customThemes.find(theme => `custom:${theme.id}` === baseTheme)
+  if (custom) return custom.colors.background
+  if (baseTheme === 'dynamic') {
+    if (androidDynamicColors.value.supported) {
+      return dynamicThemeColors(androidDynamicColors.value.palette, dark).background
+    }
+    baseTheme = dark ? 'dark' : 'light'
+  }
+  const probe = document.createElement('span')
+  probe.hidden = true
+  probe.className = baseTheme
+  document.body.appendChild(probe)
+  try {
+    return getComputedStyle(probe).getPropertyValue('--bg-color').trim()
+  } finally {
+    probe.remove()
+  }
+}
 
 export function applyThemeToDocument(baseTheme, mainColor, secColor, customTheme) {
   const dynamic = baseTheme === 'dynamic'
