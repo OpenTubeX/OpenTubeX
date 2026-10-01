@@ -12,6 +12,59 @@ test.use({
   }
 })
 
+test('portrait mobile controls keep captions and PiP in settings when the row is crowded', async ({ app, page }) => {
+  await page.locator('.app').evaluate(element => {
+    const applyMobileClasses = () => {
+      if (!element.classList.contains('capacitorTabs')) element.classList.add('capacitorTabs')
+      if (!element.classList.contains('capacitorPhoneLayout')) element.classList.add('capacitorPhoneLayout')
+    }
+    new MutationObserver(applyMobileClasses).observe(element, { attributeFilter: ['class'] })
+    applyMobileClasses()
+  })
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseQuickPlaybackSpeedBar', true))
+  await mockPlayableWatchPage(app, page, { captionTranslations: true })
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  const player = page.locator('.ftVideoPlayer')
+  const panel = player.locator('.shaka-controls-button-panel')
+
+  for (const scale of [1, 1.25]) {
+    await app.electronApp.evaluate(({ BrowserWindow }, scale) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale), scale)
+    await player.evaluate(element => { element.style.width = '360px' })
+    await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
+    await expect(panel.locator('.caption-toggle-button')).toHaveCount(1)
+    await expect(panel).toHaveClass(/ft-controls-overflow-captions/)
+    await expect(panel.locator('.caption-toggle-button')).toBeHidden()
+    await expect(panel.locator('.shaka-pip-button')).toBeHidden()
+    await expect(panel.locator('.shaka-fullscreen-button')).toBeVisible()
+    await expect.poll(() => panel.locator('.shaka-spacer').evaluate(element => element.getBoundingClientRect().width)).toBeLessThan(1)
+    await panel.locator('.shaka-overflow-menu-button').click()
+    const menu = player.locator('.shaka-overflow-menu')
+    await expect(menu.getByRole('button', { name: 'Captions' })).toBeVisible()
+    await expect(menu.locator('.shaka-pip-button')).toBeVisible()
+    await menu.getByRole('button', { name: 'Captions' }).click()
+    await expect(player.locator('.shaka-text-languages')).toBeVisible()
+    await expect(menu.locator('.shaka-pip-button')).toBeHidden()
+    await player.locator('.shaka-text-languages .shaka-back-to-overflow-button').click()
+    await panel.locator('.shaka-overflow-menu-button').click()
+
+    const rateBar = panel.locator('.ft-quick-playback-rate-bar')
+    const endOffset = await rateBar.evaluate(element => {
+      element.scrollLeft = element.scrollWidth
+      return element.scrollLeft
+    })
+    expect(endOffset).toBeGreaterThan(0)
+    await player.evaluate(element => { element.style.width = '1600px' })
+    await expect(panel).not.toHaveClass(/ft-controls-overflow-(pip|captions)/)
+    await expect(panel.locator('.caption-toggle-button')).toBeVisible()
+    await expect(panel.locator('.shaka-pip-button')).toBeVisible()
+    await expect.poll(() => panel.locator('.shaka-spacer').evaluate(element => element.getBoundingClientRect().width)).toBeLessThan(1)
+    await expect.poll(() => panel.evaluate(element => Math.abs(element.getBoundingClientRect().right - element.querySelector('.shaka-fullscreen-button').getBoundingClientRect().right))).toBeLessThan(1)
+    await expect.poll(() => rateBar.evaluate(element => element.scrollLeft)).toBe(0)
+    await expect.poll(() => rateBar.evaluate(element => element.scrollWidth - element.clientWidth)).toBe(0)
+  }
+})
+
 test('Layout setting restores classic player controls and switches the active player live', async ({ app, page }) => {
   const appearance = await goToSettingsSection(page, 'appearance')
   const frosted = appearance.getByRole('checkbox', { name: 'Frosted glass player UI' })

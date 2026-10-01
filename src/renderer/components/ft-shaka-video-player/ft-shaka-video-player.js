@@ -6084,6 +6084,12 @@ export default defineComponent({
         quickRateBar.scrollLeft = quickRateBarScrollLeft
       }
 
+      // Pill ends must follow the visible controls, including buttons hidden
+      // by the adaptive layout rather than by Shaka's own visibility class.
+      for (const button of controlPanel.querySelectorAll(':scope > .shaka-spacer ~ button')) {
+        button.toggleAttribute('data-ft-control-hidden', window.getComputedStyle(button).display === 'none')
+      }
+
       const rightGlass = controlPanel.querySelector(':scope > .ft-right-control-glass')
       if (rightGlass instanceof HTMLElement) {
         const rightButtons = [...controlPanel.querySelectorAll(':scope > .shaka-spacer ~ button:not(.shaka-hidden)')]
