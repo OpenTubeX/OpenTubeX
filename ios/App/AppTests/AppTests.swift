@@ -113,12 +113,12 @@ final class AppTests: XCTestCase {
         let reference = String(decoding: try JSONSerialization.data(withJSONObject: ["name": folder.lastPathComponent, "bookmark": bookmark.base64EncodedString()]), as: UTF8.self)
         let copied = expectation(description: "Export copy reached")
         let release = DispatchSemaphore(value: 0)
-        let observer = BlockingCopyObserver(target: folder, reached: copied, release: release)
+        let observer = BlockingCopyObserver(target: folder.appendingPathComponent("Playlist/Subfolder"), reached: copied, release: release)
         let oldDelegate = FileManager.default.delegate
         FileManager.default.delegate = observer
         defer { release.signal(); FileManager.default.delegate = oldDelegate }
         _ = try await webView.callAsyncJavaScript("await Capacitor.Plugins.YtDlp.configure({configuration:{enabled:true,folder,concurrency:1}})", arguments: ["folder": reference], in: nil, contentWorld: .page)
-        let response = try await webView.callAsyncJavaScript("return await Capacitor.Plugins.YtDlp.download({args:['--no-playlist',url],payload:{mode:'video',externalUrl:url,title:'Export cancellation regression'}})", arguments: ["url": "http://127.0.0.1:\(try XCTUnwrap(listener.port).rawValue)/fixture.mp4"], in: nil, contentWorld: .page) as? [String: Any]
+        let response = try await webView.callAsyncJavaScript("return await Capacitor.Plugins.YtDlp.download({args:['--no-playlist','--output','Playlist/Subfolder/fixture.%(ext)s',url],payload:{mode:'video',externalUrl:url,title:'Export cancellation regression'}})", arguments: ["url": "http://127.0.0.1:\(try XCTUnwrap(listener.port).rawValue)/fixture.mp4"], in: nil, contentWorld: .page) as? [String: Any]
         let id = try XCTUnwrap(response?["id"] as? Int)
         await fulfillment(of: [copied], timeout: 15)
         XCTAssertFalse(observer.onMain, "A slow File Provider copy must not block the main thread")
@@ -145,6 +145,7 @@ final class AppTests: XCTestCase {
             }
             XCTAssertEqual(try Data(contentsOf: URL(fileURLWithPath: XCTUnwrap(destination))), media)
             _ = try await webView.callAsyncJavaScript("return await Capacitor.Plugins.YtDlp.remove({id})", arguments: ["id": id], in: nil, contentWorld: .page)
+            try FileManager.default.removeItem(at: folder.appendingPathComponent("Playlist"))
         }
         var removed = false
         for _ in 0..<60 {
@@ -351,6 +352,22 @@ final class AppTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: destination.appendingPathComponent("first (2).mp4").path))
     }
 
+    func testYtDlpExportRollsBackNewTemplateFoldersOnFailure() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("template-rollback-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let staging = root.appendingPathComponent("staging")
+        let target = root.appendingPathComponent("target")
+        let existing = target.appendingPathComponent("Existing")
+        let name = "Existing/Playlist/Subfolder/first.mp4"
+        try FileManager.default.createDirectory(at: staging.appendingPathComponent(name).deletingLastPathComponent(), withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: existing, withIntermediateDirectories: true)
+        try Data("first".utf8).write(to: staging.appendingPathComponent(name))
+
+        XCTAssertThrowsError(try IOSYtDlpExporter.copy([name, "Existing/Playlist/Subfolder/missing.mp4"], from: staging, to: target, videoId: "fixture"))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: existing.appendingPathComponent("Playlist").path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: existing.path))
+    }
+
     func testYtDlpExportRejectsEscapingFilename() throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent("yt-dlp-export-\(UUID().uuidString)")
         let staging = root.appendingPathComponent("input/stage")
@@ -378,9 +395,27 @@ final class AppTests: XCTestCase {
         try Data("downloaded".utf8).write(to: source)
         try Data("existing".utf8).write(to: existing)
         let result = try IOSYtDlpExporter.copy([name], from: staging, to: target, videoId: "fixture")
+        XCTAssertTrue(result.createdDirectories.isEmpty)
         XCTAssertEqual(result.files.first?["relativePath"] as? String, "Playlist/Audio with spaces (2).mp3")
         XCTAssertEqual(try Data(contentsOf: existing), Data("existing".utf8))
         XCTAssertEqual(try Data(contentsOf: URL(fileURLWithPath: XCTUnwrap(result.destinations.first))), Data("downloaded".utf8))
+    }
+
+    func testYtDlpRollbackPreservesFilesAddedToTemplateFolders() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("rollback-preserve-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let staging = root.appendingPathComponent("staging")
+        let target = root.appendingPathComponent("target")
+        let name = "Playlist/fixture.mp4"
+        try FileManager.default.createDirectory(at: staging.appendingPathComponent(name).deletingLastPathComponent(), withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: target, withIntermediateDirectories: true)
+        try Data("downloaded".utf8).write(to: staging.appendingPathComponent(name))
+        let result = try IOSYtDlpExporter.copy([name], from: staging, to: target, videoId: "fixture")
+        let externalFile = target.appendingPathComponent("Playlist/keep.txt")
+        try Data("keep".utf8).write(to: externalFile)
+        IOSYtDlpExporter.rollback(result.destinations, createdDirectories: result.createdDirectories)
+        XCTAssertEqual(try Data(contentsOf: externalFile), Data("keep".utf8))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: target.appendingPathComponent(name).path))
     }
 
     func testBundledFFmpegAndFFprobe() async throws {

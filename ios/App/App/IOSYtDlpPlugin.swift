@@ -1,4 +1,5 @@
 import Capacitor
+import Darwin
 import ffmpegkit
 import AVFoundation
 import AVKit
@@ -139,8 +140,9 @@ private func iosFFmpegExecute(_ input: UnsafePointer<CChar>, _ output: UnsafePoi
 
 enum IOSYtDlpExporter {
     static func copy(_ names: [String], from staging: URL, to target: URL, videoId: String) throws
-        -> (destinations: [String], files: [[String: Any]], sizeBytes: Int64) {
+        -> (destinations: [String], files: [[String: Any]], sizeBytes: Int64, createdDirectories: [String]) {
         var destinations: [String] = []
+        var createdDirectories: [String] = []
         var files: [[String: Any]] = []
         var size: Int64 = 0
         do {
@@ -154,6 +156,13 @@ enum IOSYtDlpExporter {
                     throw NSError(domain: "IOSYtDlp", code: 8,
                                   userInfo: [NSLocalizedDescriptionKey: "Invalid downloaded file name"])
                 }
+                var parent = destination.deletingLastPathComponent()
+                var missingParents: [String] = []
+                while parent.path.hasPrefix(targetRoot) && !FileManager.default.fileExists(atPath: parent.path) {
+                    missingParents.append(parent.path)
+                    parent = parent.deletingLastPathComponent()
+                }
+                createdDirectories.append(contentsOf: missingParents.reversed())
                 try FileManager.default.createDirectory(at: destination.deletingLastPathComponent(), withIntermediateDirectories: true)
                 var duplicate = 2
                 while FileManager.default.fileExists(atPath: destination.path) {
@@ -168,10 +177,18 @@ enum IOSYtDlpExporter {
                               "extension": destination.pathExtension, "available": true])
             }
         } catch {
-            for path in destinations { try? FileManager.default.removeItem(atPath: path) }
+            rollback(destinations, createdDirectories: createdDirectories)
             throw error
         }
-        return (destinations, files, size)
+        return (destinations, files, size, createdDirectories)
+    }
+
+    static func rollback(_ destinations: [String], createdDirectories: [String]) {
+        for path in destinations { try? FileManager.default.removeItem(atPath: path) }
+        for path in createdDirectories.reversed() {
+            // Remove only empty folders; preserve files added during the export.
+            path.withCString { _ = rmdir($0) }
+        }
     }
 }
 
@@ -502,7 +519,7 @@ public final class IOSYtDlpPlugin: CAPPlugin, CAPBridgedPlugin {
                         completed = true
                     }
                     if !completed {
-                        for path in exported.destinations { try? FileManager.default.removeItem(atPath: path) }
+                        IOSYtDlpExporter.rollback(exported.destinations, createdDirectories: exported.createdDirectories)
                     }
                 } catch { failure = error }
             }

@@ -191,3 +191,27 @@ class IOSFFmpegPythonTest(unittest.TestCase):
             server.shutdown()
             server.server_close()
             thread.join()
+
+    def test_subtitles_only_exports_converted_subtitles(self):
+        caption = 'WEBVTT\n\n00:00:00.000 --> 00:00:01.000\nSubtitle fixture\n'
+
+        def download(ydl, _urls):
+            ydl.process_ie_result({
+                'id': 'subtitle-fixture', 'title': 'Subtitles',
+                'url': 'https://example.test/fixture.mp4', 'ext': 'mp4',
+                'extractor': 'generic', 'extractor_key': 'Generic',
+                'subtitles': {'en': [{'ext': 'vtt', 'data': caption}]},
+            }, download=True)
+            return 0
+
+        with tempfile.TemporaryDirectory() as temp, patch.object(bridge.yt_dlp.YoutubeDL, 'download', download):
+            root = Path(temp)
+            result = bridge._download({
+                'args': ['--skip-download', '--write-subs', '--sub-langs', 'en', '--sub-format', 'vtt',
+                         '--convert-subs', 'srt', '--output', 'Captions/%(title)s.%(ext)s',
+                         'https://example.test/video'],
+                'staging': temp, 'progressFile': str(root / 'progress.json'),
+                'controlFile': str(root / 'control'),
+            })
+            self.assertEqual(result['files'], ['Captions/Subtitles.en.srt'])
+            self.assertIn('Subtitle fixture', (root / result['files'][0]).read_text())
