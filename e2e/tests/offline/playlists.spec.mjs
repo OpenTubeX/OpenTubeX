@@ -349,20 +349,23 @@ test.describe('seeded playlists', () => {
     await expect(title).toHaveCSS('color', 'rgb(18, 52, 86)')
   })
 
-  test('playlist artwork keeps its native aspect ratio', async ({ page }) => {
+  test('playlist artwork crops square images into a 16:9 frame', async ({ page }) => {
     await goTo(page, 'userplaylists')
     await page.getByText('My seeded playlist').click()
 
     const thumbnail = page.locator('.playlistThumbnail img')
     await page.addStyleTag({ content: '.playlistThumbnail { display: block !important; }' })
-    await thumbnail.evaluate((image) => {
+    await thumbnail.evaluate(async (image) => {
       image.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"/>'
+      await image.decode()
     })
     await expect(thumbnail).toBeVisible()
-    await expect(thumbnail).toHaveJSProperty('complete', true)
+    await expect(thumbnail).toHaveJSProperty('naturalWidth', 120)
+    await expect(thumbnail).toHaveJSProperty('naturalHeight', 120)
+    await expect(thumbnail).toHaveCSS('object-fit', 'cover')
 
     const bounds = await thumbnail.boundingBox()
-    expect(bounds.width).toBe(bounds.height)
+    expect(bounds.width / bounds.height).toBeCloseTo(16 / 9, 2)
   })
 
   test('keeps the playlist title when switching tabs', async ({ page }) => {
