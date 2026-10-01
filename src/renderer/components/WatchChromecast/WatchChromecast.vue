@@ -14,7 +14,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, ref, shallowRef, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import { showToast, formatDurationAsTimestamp } from '../../helpers/utils'
@@ -28,9 +28,10 @@ const props = defineProps({
   subtitlesEnabled: { type: Boolean, default: false },
   isLive: { type: Boolean, default: false },
   title: { type: String, required: true },
-  getPlayer: { type: Function, required: true }
+  getPlayer: { type: Function, required: true },
+  getSource: { type: Function, required: true }
 })
-const emit = defineEmits(['casting-change'])
+const emit = defineEmits(['casting-change', 'playback-state', 'ended'])
 const { t } = useI18n()
 const button = useTemplateRef('button')
 const devices = ref([])
@@ -42,7 +43,8 @@ const status = ref({ currentTime: 0, duration: 0, paused: false, volume: 1, mute
 const castCaptions = ref([])
 let disposed = false
 let pollTimer
-const source = computed(() => selectCastSource(props.formats, props.manifestUrl, props.manifestType))
+const fallbackSource = shallowRef(null)
+const source = computed(() => selectCastSource(props.formats, props.manifestUrl, props.manifestType) ?? fallbackSource.value)
 const options = computed(() => {
   if (castId.value) {
     const items = [
@@ -87,7 +89,11 @@ async function refreshDevices() {
   if (loading.value || disposed || castId.value) return
   loading.value = true
   try {
-    const result = await window.ftElectron.chromecast.discover()
+    const [resolvedSource, result] = await Promise.all([
+      source.value ?? props.getSource(),
+      window.ftElectron.chromecast.discover()
+    ])
+    if (!source.value) fallbackSource.value = resolvedSource
     if (!Array.isArray(result)) throw new Error('Cast discovery failed')
     if (!disposed) devices.value = result
   } catch { reportError() } finally { loading.value = false }
@@ -95,9 +101,9 @@ async function refreshDevices() {
 
 function releaseLocalPlayer(position, resume) {
   if (disposed) return
-  emit('casting-change', false)
   const player = props.getPlayer()
   if (Number.isFinite(position)) player?.setCurrentTime(position)
+  emit('casting-change', false)
   if (resume) player?.play()?.catch(reportError)
 }
 
@@ -114,6 +120,12 @@ async function poll() {
       return
     }
     status.value = result
+    emit('playback-state', result)
+    if (result.ended) {
+      await stopCasting(false)
+      if (!disposed) emit('ended')
+      return
+    }
   } catch { reportError() }
   if (castId.value && !disposed) pollTimer = setTimeout(poll, 1000)
 }
@@ -126,6 +138,7 @@ async function stopCasting(resume = true) {
   try {
     const result = await window.ftElectron.chromecast.stop(id)
     status.value = { ...previous, ...result }
+    if (!disposed) emit('playback-state', status.value)
   } finally {
     castId.value = null
     releaseLocalPlayer(status.value.currentTime, resume && !status.value.paused && !previous.ended)
@@ -157,13 +170,16 @@ async function handleChoice(choice) {
       const result = await window.ftElectron.chromecast.control(castId.value, action, value)
       if (result.error) throw new Error(result.error)
       status.value = result
+      emit('playback-state', result)
       return
     }
     if (!choice.startsWith('device-') || !source.value) return
     const captions = props.captions.filter(caption => caption.mimeType === 'text/vtt' && /^https?:\/\//i.test(caption.url))
       .map(({ url, label, language }) => ({ url, label, language }))
-    const captionIndex = props.subtitlesEnabled ? props.getPlayer()?.getSabrReloadState()?.captionIndex : null
-    const caption = Number.isInteger(captionIndex) ? props.captions[captionIndex] : null
+    const caption = props.subtitlesEnabled ? props.getPlayer()?.getActiveCaption() : null
+    if (caption?.mimeType === 'text/vtt' && /^https?:\/\//i.test(caption.url) && !captions.some(item => item.url === caption.url)) {
+      captions.push({ url: caption.url, label: caption.label, language: caption.language })
+    }
     const result = await window.ftElectron.chromecast.start({
       deviceId: choice.slice(7),
       source: source.value,
@@ -181,11 +197,14 @@ async function handleChoice(choice) {
     status.value = result.status
     castCaptions.value = captions
     emit('casting-change', true)
+    emit('playback-state', status.value)
     props.getPlayer()?.pause()
     button.value?.hideDropdown()
     pollTimer = setTimeout(poll, 1000)
   } catch { reportError() } finally { busy.value = false }
 }
+
+defineExpose({ stopCasting })
 
 onBeforeUnmount(() => {
   disposed = true

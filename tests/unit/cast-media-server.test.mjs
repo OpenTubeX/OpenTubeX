@@ -2,8 +2,84 @@ import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
 import test from 'node:test'
 import { gzipSync } from 'node:zlib'
-import { createCastMediaServer, rewriteCastDash, rewriteCastHls } from '../../src/main/castMediaServer.js'
+import { EventEmitter } from 'node:events'
+import { Readable } from 'node:stream'
+import { createCastMediaServer as createMediaServer, fetchCastMedia, rewriteCastDash, rewriteCastHls } from '../../src/main/castMediaServer.js'
 import { isInvidiousInstanceUrl } from '../../src/main/invidiousAuthorization.js'
+
+// Trust only the loopback HTTP fixtures in these unit tests.
+function createCastMediaServer(source, address, token, headers, allowed = url => url.hostname === '127.0.0.1') {
+  return createMediaServer(source, address, token, headers, allowed)
+}
+
+test('Chromium requests expose redirects for policy checks and omit ambient credentials', async () => {
+  let aborted = false
+  const network = {
+    request(options) {
+      assert.equal(options.credentials, 'omit')
+      assert.equal(options.redirect, 'manual')
+      const request = new EventEmitter()
+      request.setHeader = (name, value) => {
+        assert.equal(name, 'range')
+        assert.equal(value, 'bytes=0-3')
+      }
+      request.end = () => queueMicrotask(() => request.emit('redirect', 302, 'GET', 'https://media.test/video'))
+      request.abort = () => { aborted = true; request.emit('error', new Error('Redirect cancelled')) }
+      return request
+    }
+  }
+  const response = await fetchCastMedia(network, 'https://instance.test/video', {
+    method: 'GET', headers: new Headers({ Range: 'bytes=0-3' }), signal: new AbortController().signal
+  })
+  assert.equal(response.status, 302)
+  assert.equal(response.headers.get('location'), 'https://media.test/video')
+  assert.equal(aborted, true)
+})
+
+test('Chromium requests stream media responses and abort with their caller', async () => {
+  let aborted = false
+  const network = {
+    request() {
+      const request = new EventEmitter()
+      request.setHeader = () => {}
+      request.end = () => queueMicrotask(() => {
+        const incoming = Readable.from([Buffer.from('video')])
+        incoming.statusCode = 206
+        incoming.headers = { 'content-type': 'video/mp4' }
+        request.emit('response', incoming)
+      })
+      request.abort = () => { aborted = true }
+      return request
+    }
+  }
+  const controller = new AbortController()
+  const response = await fetchCastMedia(network, 'https://media.test/video', { method: 'GET', headers: new Headers(), signal: controller.signal })
+  assert.equal(response.status, 206)
+  controller.abort()
+  assert.equal(aborted, true)
+  assert.equal(await response.text(), 'video')
+})
+
+test('Chromium HEAD responses handle transport errors after their headers', async () => {
+  const network = {
+    request() {
+      const request = new EventEmitter()
+      request.setHeader = () => {}
+      request.abort = () => {}
+      request.end = () => queueMicrotask(() => {
+        const incoming = Readable.from([])
+        incoming.statusCode = 200
+        incoming.headers = {}
+        request.emit('response', incoming)
+        incoming.destroy(new Error('Connection lost after headers'))
+      })
+      return request
+    }
+  }
+  const response = await fetchCastMedia(network, 'https://media.test/video', { method: 'HEAD', headers: new Headers(), signal: new AbortController().signal })
+  assert.equal(response.status, 200)
+  assert.equal(response.body, null)
+})
 
 async function listen(server) {
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
@@ -161,4 +237,40 @@ test('recalculates Invidious authorization on redirects without leaking it to th
     { target: false, authorization: 'Bearer cast-test', range: 'bytes=0-3' },
     { target: true, authorization: undefined, range: 'bytes=0-3' }
   ])
+})
+
+
+test('rejects untrusted upstream destinations before any request', async t => {
+  let fetched = false
+  const upstream = createServer((request, response) => { fetched = true; response.end('private service') })
+  const upstreamUrl = await listen(upstream)
+  t.after(() => close(upstream))
+  const media = createCastMediaServer({ url: `${upstreamUrl}/video.mp4`, contentType: 'video/mp4' }, '127.0.0.1', 'token', () => ({}), () => false)
+  media.setOrigin(await listen(media.server))
+  t.after(() => close(media.server))
+  assert.equal((await fetch(media.mediaUrl())).status, 502)
+  assert.equal(fetched, false)
+})
+
+
+test('checks manifest resources and redirects against the destination policy', async t => {
+  let privateRequests = 0
+  const privateService = createServer((request, response) => { privateRequests++; response.end('private') })
+  const privateUrl = await listen(privateService)
+  t.after(() => close(privateService))
+  const instance = createServer((request, response) => {
+    if (request.url === '/manifest.m3u8') {
+      response.writeHead(200, { 'content-type': 'application/x-mpegurl' }).end(`#EXTM3U\n${privateUrl}/segment.ts\n`)
+    } else response.writeHead(302, { location: `${privateUrl}/video.mp4` }).end()
+  })
+  const instanceUrl = await listen(instance)
+  t.after(() => close(instance))
+  const media = createCastMediaServer({ url: `${instanceUrl}/manifest.m3u8`, contentType: 'application/x-mpegurl' }, '127.0.0.1', 'token', () => ({}), url => url.origin === instanceUrl)
+  media.setOrigin(await listen(media.server))
+  t.after(() => close(media.server))
+  const manifest = await (await fetch(media.mediaUrl())).text()
+  const segment = manifest.trim().split('\n').at(-1)
+  assert.equal((await fetch(segment)).status, 502)
+  assert.equal((await fetch(media.register(`${instanceUrl}/redirect`, 'video/mp4'))).status, 502)
+  assert.equal(privateRequests, 0)
 })

@@ -53,6 +53,7 @@ import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
 import { discoverDlnaDevices, startDlnaCast, stopDlnaCast, hasDlnaCastFailed, getDlnaCastPosition } from './dlnaCast'
 import { ChromecastManager } from './chromecast'
+import { fetchCastMedia } from './castMediaServer'
 import { handleTwitchChatReplayPage, handleTwitchSubOnlyVod } from './twitchChat'
 import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
 import { getDlnaFfmpegExecutable, isYtDlpStoryboardUrl, getYtDlpDownloadFile, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpControlDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetSubtitle, handleYtDlpGetPlaybackInfo, handleYtDlpGetHistoryMetadata, handleYtDlpCancelHistoryRepair, handleYtDlpGetRecommendations, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpQueueAction, handleYtDlpRemoveDownload, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
@@ -3689,7 +3690,7 @@ function runApp() {
   ])
   let videoMetadataCacheGeneration = 0
 
-  async function isAllowedVideoMetadataThumbnailUrl(parsedUrl, allowedPrivateOrigin) {
+  async function isAllowedNetworkMediaUrl(parsedUrl, allowedPrivateOrigin) {
     if (!['http:', 'https:'].includes(parsedUrl.protocol)) return false
     if (parsedUrl.origin === allowedPrivateOrigin) return true
 
@@ -3733,7 +3734,7 @@ function runApp() {
       let response
 
       for (let redirectCount = 0; redirectCount <= MAX_VIDEO_METADATA_THUMBNAIL_REDIRECTS; redirectCount += 1) {
-        if (!await isAllowedVideoMetadataThumbnailUrl(parsedUrl, allowedPrivateOrigin)) return null
+        if (!await isAllowedNetworkMediaUrl(parsedUrl, allowedPrivateOrigin)) return null
 
         response = await net.fetch(parsedUrl.href, {
           // Thumbnail replacements often keep the same URL. Comparing a cached
@@ -4653,7 +4654,12 @@ function runApp() {
       if (cookies !== null) headers.Cookie = cookies
       return headers
     }
-    const result = await chromecast.start(ownerId, payload, getHeaders)
+    let allowedPrivateOrigin = null
+    try {
+      const instance = (await baseHandlers.settings._findOne('defaultInvidiousInstance'))?.value
+      if (typeof instance === 'string' && instance) allowedPrivateOrigin = new URL(instance).origin
+    } catch { }
+    const result = await chromecast.start(ownerId, payload, getHeaders, url => isAllowedNetworkMediaUrl(url, allowedPrivateOrigin), (url, options) => fetchCastMedia(net, url, options))
     if (result.castId) {
       if (event.sender.isDestroyed()) await chromecast.stop(ownerId, result.castId)
       else if (!castOwners.has(event.sender)) {

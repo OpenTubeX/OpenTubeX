@@ -14,6 +14,7 @@ import shaka from 'shaka-player'
 import { Utils, YTNodes } from 'youtubei.js'
 import FtShakaVideoPlayer from '../../components/ft-shaka-video-player/ft-shaka-video-player.vue'
 import WatchDlnaCast from '../../components/WatchDlnaCast/WatchDlnaCast.vue'
+import { selectCastSource } from '../../helpers/player/castSource'
 import WatchChromecast from '../../components/WatchChromecast/WatchChromecast.vue'
 import WatchVideoInfo from '../../components/WatchVideoInfo/WatchVideoInfo.vue'
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
@@ -403,6 +404,7 @@ export default defineComponent({
       ytDlpDefaultClientsFallbackToastShown: false,
       legacyFormats: [],
       chromecastActive: false,
+      chromecastStatus: null,
       captions: [],
       captionTranslations: [],
       currentTime: 0,
@@ -4311,7 +4313,8 @@ export default defineComponent({
       this.currentTime = currentSeconds
     },
 
-    handleTimeUpdate: function (currentSeconds) {
+    handleTimeUpdate: function (currentSeconds, fromChromecast = false) {
+      if (this.chromecastActive && !fromChromecast) return
       // Once the refreshed stream has actually played a stretch of content it
       // has proven itself, so refill the budget: a later, unrelated SABR
       // failure gets its own refetch instead of dropping straight to legacy
@@ -4416,7 +4419,7 @@ export default defineComponent({
         !this.videoPlayerLoaded ||
         this.isUpcoming ||
         this.isLive ||
-        this.$refs.player?.isPaused() ||
+        this.isPlaybackPaused() ||
         now - this.historyLastTouchedAt < 60_000
       ) {
         return
@@ -4439,7 +4442,7 @@ export default defineComponent({
         return
       }
 
-      if (!isFinished && this.$refs.player?.isPaused()) {
+      if (!isFinished && this.isPlaybackPaused()) {
         return
       }
 
@@ -4544,6 +4547,24 @@ export default defineComponent({
       this.flushWatchTime()
       this.handleWatchProgressAutoSaveWhenProgressEnabled()
     },
+    isPlaybackPaused() {
+      return this.chromecastStatus?.paused ?? this.$refs.player?.isPaused() ?? true
+    },
+    handleChromecastState(state) {
+      this.chromecastStatus = state
+      this.handleTimeUpdate(state.currentTime, true)
+    },
+    handleChromecastChange(active) {
+      this.chromecastActive = active
+      if (!active) this.chromecastStatus = null
+    },
+    async getChromecastSource() {
+      const source = selectCastSource(this.legacyFormats, this.manifestSrc, this.manifestMimeType)
+      if (source || !supportsYtDlp || this.manifestMimeType !== MANIFEST_TYPE_SABR) return source
+      const extracted = await getYtDlpPlaybackSource(this.videoId, this.ytDlpPlaybackCacheKey, undefined,
+        this.alwaysUseYtDlpPlaybackCookies, false, false)
+      return extracted ? selectCastSource(extracted.legacyFormats, extracted.manifestSrc, extracted.manifestMimeType) : null
+    },
     handleVideoPlay() {
       if (this.chromecastActive) {
         this.$refs.player?.pause()
@@ -4588,7 +4609,7 @@ export default defineComponent({
         videoId: this.videoId,
         time,
         now: Date.now(),
-        playing: !this.$refs.player.isPaused(),
+        playing: !this.isPlaybackPaused(),
         rate: this.currentPlaybackRate ?? 1,
       })
       this.recommendationPlaybackSample = current
@@ -4618,7 +4639,7 @@ export default defineComponent({
       }
     },
     trackWatchTime() {
-      if (!this.rememberHistory || !this.enableWatchStats || this.$refs.player?.isPaused()) {
+      if (!this.rememberHistory || !this.enableWatchStats || this.isPlaybackPaused()) {
         this.watchTimeLastTick = null
         return
       }
@@ -4683,11 +4704,11 @@ export default defineComponent({
       const player = this.$refs.player
       // A seek establishes a position before its media segment finishes loading.
       // Save that position, but never the initial zero before playback or a seek.
-      if (!player?.hasPlaybackPosition) { return }
+      if (!player?.hasPlaybackPosition && !this.chromecastStatus) { return }
 
       const currentTime = this.shortsPlaybackCompleted && this.watchedProgressSavingEnabled
         ? this.videoLengthSeconds
-        : player.getCurrentTime()
+        : (this.chromecastStatus?.currentTime ?? player.getCurrentTime())
       if (!this.historyEntryExists) {
         this.addToHistory(currentTime)
         return
@@ -5274,6 +5295,7 @@ export default defineComponent({
     },
 
     handleRouteChange: async function () {
+      await this.$refs.chromecast?.stopCasting(false)
       this.abortAutoplayCountdown(true)
       this.handleWatchProgressAutoSave()
       await this.flushWatchTime()

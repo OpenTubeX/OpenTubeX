@@ -56,6 +56,7 @@ async function openCastVideo(app, page) {
   await mockCast(app)
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
+  await page.route('https://cast-media.test/*.vtt', route => route.fulfill({ contentType: 'text/vtt', body: 'WEBVTT\n\n00:00.000 --> 00:30.000\nCast caption\n' }))
   const watch = await watchViewHandle(page)
   await watch.evaluate(vm => {
     // The existing WebM fixture remains the local player's first format.
@@ -189,7 +190,6 @@ test('packaged sender discovers and plays on the selected Cast emulator', async 
   test.skip(!process.env.OPENTUBEX_CAST_TEST_DEVICE, 'Requires an explicitly selected Cast test receiver')
   const directory = await mkdtemp(path.join(tmpdir(), 'otx-cast-electron-'))
   let upstream
-  let instance
   const instanceRequests = []
   const mediaRequests = []
   try {
@@ -197,6 +197,11 @@ test('packaged sender discovers and plays on the selected Cast emulator', async 
     await promisify(execFile)('ffmpeg', ['-v', 'error', '-i', path.resolve('e2e/fixtures/media/demo.webm'), '-c:v', 'libx264', '-preset', 'ultrafast', '-c:a', 'aac', '-movflags', '+faststart', filename])
     const media = await readFile(filename)
     upstream = createServer((request, response) => {
+      if (request.url === '/inv/videoplayback') {
+        instanceRequests.push(request.headers)
+        if (request.headers.authorization !== 'Bearer cast-test') return response.writeHead(401).end()
+        return response.writeHead(302, { location: '/video.mp4' }).end()
+      }
       mediaRequests.push(request.headers)
       const range = /^bytes=(\d+)-(\d*)$/.exec(request.headers.range ?? '')
       const start = range ? Number(range[1]) : 0
@@ -209,13 +214,8 @@ test('packaged sender discovers and plays on the selected Cast emulator', async 
       }).end(request.method === 'HEAD' ? undefined : media.subarray(start, end + 1))
     })
     await new Promise(resolve => upstream.listen(0, '127.0.0.1', resolve))
-    instance = createServer((request, response) => {
-      instanceRequests.push(request.headers)
-      if (request.headers.authorization !== 'Bearer cast-test') return response.writeHead(401).end()
-      response.writeHead(302, { location: `http://127.0.0.1:${upstream.address().port}/video.mp4` }).end()
-    })
-    await new Promise(resolve => instance.listen(0, '127.0.0.1', resolve))
-    const instanceUrl = `http://127.0.0.1:${instance.address().port}`
+    const instanceUrl = `http://127.0.0.1:${upstream.address().port}/inv`
+    await page.evaluate(url => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateDefaultInvidiousInstance', url), instanceUrl)
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     await page.evaluate(url => window.ftElectron.setInvidiousAuthorization('Bearer cast-test', url), instanceUrl)
@@ -243,10 +243,64 @@ test('packaged sender discovers and plays on the selected Cast emulator', async 
     await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.currentTime)).toBeGreaterThanOrEqual(9)
     await expect.poll(() => page.locator('.ftVideoPlayer video').evaluate(video => video.paused)).toBe(true)
   } finally {
-    instance?.closeAllConnections()
-    instance?.close()
     upstream?.closeAllConnections()
     upstream?.close()
     await rm(directory, { recursive: true, force: true })
   }
+})
+
+test('receiver polling saves progress before navigation', async ({ app, page }) => {
+  const watch = await openCastVideo(app, page)
+  await choice(page, 'Test TV')
+  await app.electronApp.evaluate(() => { globalThis.castTest.state.currentTime = 18 })
+  await expect.poll(() => watch.evaluate(vm => vm.currentTime)).toBe(18)
+  await watch.evaluate(vm => vm.handleWatchProgressManualSave())
+  await expect.poll(() => watch.evaluate(vm => vm.historyEntry?.watchProgress)).toBe(18)
+  await page.locator('.sideNav a[href="#/history"]').first().evaluate(link => link.click())
+  await expect(page).toHaveURL(/#\/history/)
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.castTest.stops)).toEqual(['session-id'])
+})
+
+test('natural receiver completion marks watched and invokes Watch completion once', async ({ app, page }) => {
+  const watch = await openCastVideo(app, page)
+  await watch.evaluate(vm => { window.castCompletions = 0; vm.handleVideoEnded = () => { window.castCompletions++ } })
+  await choice(page, 'Test TV')
+  await app.electronApp.evaluate(() => { Object.assign(globalThis.castTest.state, { currentTime: 30, ended: true }) })
+  await expect.poll(() => page.evaluate(() => window.castCompletions)).toBe(1)
+  await expect.poll(() => watch.evaluate(vm => vm.historyEntry?.isWatched)).toBe(true)
+  await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'false')
+  expect(await app.electronApp.evaluate(() => globalThis.castTest.stops)).toEqual(['session-id'])
+})
+
+test('resolves a Cast-compatible fallback when local playback uses SABR', async ({ app, page }) => {
+  await mockCast(app)
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const watch = await watchViewHandle(page)
+  await watch.evaluate(vm => {
+    vm.getChromecastSource = async () => ({ url: 'https://cast-media.test/manifest.mpd', contentType: 'application/dash+xml' })
+  })
+  await choice(page, 'Test TV')
+  await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
+  expect((await app.electronApp.evaluate(() => globalThis.castTest.starts))[0].source.contentType).toBe('application/dash+xml')
+})
+
+test('preserves the active subtitle identity when Watch and player track order differ', async ({ app, page }) => {
+  const watch = await openCastVideo(app, page)
+  await watch.evaluate(vm => {
+    vm.captions = [{ url: 'https://cast-media.test/de.vtt', label: 'German', language: 'de', mimeType: 'text/vtt' }, ...vm.captions]
+    vm.currentSubtitlesState = true
+  })
+  await page.locator('.ftVideoPlayer video').evaluate(async video => {
+    const player = video.ui.getControls().getPlayer()
+    // Load English first so its Shaka index differs from its Watch index.
+    const english = await player.addTextTrackAsync('https://cast-media.test/en.vtt', 'en', 'captions', 'text/vtt', undefined, 'English')
+    await player.addTextTrackAsync('https://cast-media.test/de.vtt', 'de', 'captions', 'text/vtt', undefined, 'German')
+    player.selectTextTrack(english)
+  })
+  await expect.poll(() => watch.evaluate(vm => vm.$refs.player.getActiveCaption()?.language)).toBe('en')
+  await choice(page, 'Test TV')
+  await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
+  const [started] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
+  expect(started.captions[started.captionIndex].language).toBe('en')
 })

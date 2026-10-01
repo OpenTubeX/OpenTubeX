@@ -20,8 +20,8 @@ function mediaState(status) {
     connected: true,
     currentTime: Number.isFinite(status.currentTime) ? status.currentTime : 0,
     duration: Number.isFinite(status.media?.duration) ? status.media.duration : 0,
-    paused: status.playerState === 'PAUSED',
-    ended: status.playerState === 'IDLE',
+    paused: status.playerState === 'PAUSED' || status.playerState === 'IDLE',
+    ended: status.playerState === 'IDLE' && status.idleReason === 'FINISHED',
     volume: status.volume?.level ?? 1,
     muted: status.volume?.muted ?? false,
     activeTrackIds: status.activeTrackIds ?? []
@@ -52,7 +52,7 @@ export class ChromecastManager {
     return this.active && this.active.ownerId === ownerId && this.active.castId === castId ? this.active : null
   }
 
-  async start(ownerId, payload, getHeaders) {
+  async start(ownerId, payload, getHeaders, isAllowedUrl, fetchMedia) {
     const device = this.devices.get(payload?.deviceId)
     if (!device || !castSourceAvailable(payload?.source) || typeof payload.title !== 'string' || payload.title.length > 500 ||
       !Number.isFinite(payload.startSeconds) || payload.startSeconds < 0 || typeof payload.paused !== 'boolean') {
@@ -67,7 +67,7 @@ export class ChromecastManager {
     }
     this.starting = true
     const sender = new CastSender(this.executable, device)
-    const media = createCastMediaServer(payload.source, device.address, randomBytes(24).toString('hex'), getHeaders)
+    const media = createCastMediaServer(payload.source, device.address, randomBytes(24).toString('hex'), getHeaders, isAllowedUrl, fetchMedia)
     const cast = {
       ownerId,
       castId: randomBytes(16).toString('hex'),
@@ -185,6 +185,7 @@ export class ChromecastManager {
     if (!cast) return { connected: false }
     try {
       await cast.sender.send(CAST_MEDIA, cast.transportId, { type: 'GET_STATUS' })
+      if (cast.status.playerState === 'IDLE' && cast.status.idleReason !== 'FINISHED') this.cleanup(cast)
       if (this.active !== cast) return { ...mediaState(cast.status), connected: false }
       return mediaState(cast.status)
     } catch {
@@ -234,8 +235,10 @@ export class ChromecastManager {
     if (!cast) return { connected: false }
     let state = mediaState(cast.status)
     try {
-      await this.status(cast.ownerId, cast.castId)
-      state = mediaState(cast.status)
+      try {
+        await cast.sender.send(CAST_MEDIA, cast.transportId, { type: 'GET_STATUS' })
+        state = mediaState(cast.status)
+      } catch { /* Still attempt STOP when only the final status request fails. */ }
       if (this.active === cast) await cast.sender.send(CAST_MEDIA, cast.transportId, { type: 'STOP', mediaSessionId: cast.mediaSessionId })
     } catch { /* Preserve the last known playback position when disconnected. */ } finally { this.cleanup(cast) }
     return { ...state, connected: false }

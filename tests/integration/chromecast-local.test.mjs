@@ -67,7 +67,7 @@ test('Cast emulator fetches MP4, local DASH and HLS and supports session control
   ]) {
     const requestCount = requests.length
     const result = await manager.start(1, { deviceId: device.id, source, title: 'OpenTubeX Cast integration test', startSeconds: 1, paused: false,
-      captions: [{ url: `${upstreamUrl}/caption.vtt`, label: 'English', language: 'en' }], captionIndex: null })
+      captions: [{ url: `${upstreamUrl}/caption.vtt`, label: 'English', language: 'en' }], captionIndex: null }, () => ({}), url => url.origin === upstreamUrl)
     assert.ok(result.castId, JSON.stringify(result))
     const id = result.castId
     await eventually(id, state => state.connected && !state.paused && state.duration >= 29 && state.currentTime >= 1 && state.currentTime <= 4 &&

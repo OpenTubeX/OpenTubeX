@@ -5,6 +5,7 @@ import { compileFunction } from 'node:vm'
 import { sampleRecommendationPlayback } from '../../src/recommendation-learning.js'
 
 const source = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
+const playbackMethod = source.slice(source.indexOf('    isPlaybackPaused() {'), source.indexOf('    handleChromecastState(state)'))
 const method = source.slice(source.indexOf('    trackRecommendationWatch(time) {'), source.indexOf('    async flushRecommendationWatch()'))
 
 for (const outcome of ['rejection', 'missing epoch']) {
@@ -13,10 +14,11 @@ for (const outcome of ['rejection', 'missing epoch']) {
     let calls = 0
     let recover = false
     const getters = { getEnableHomeRecommendations: true, getRecommendationEpoch: null }
-    const { trackRecommendationWatch } = compileFunction(`return {${method}}`, ['Date', 'console', 'sampleRecommendationPlayback'])(
+    const { trackRecommendationWatch, isPlaybackPaused } = compileFunction(`return {${method}${playbackMethod}}`, ['Date', 'console', 'sampleRecommendationPlayback'])(
       { now: () => now }, { error() {} }, sampleRecommendationPlayback,
     )
     const watch = {
+      isPlaybackPaused,
       rememberHistory: true,
       isLoading: false,
       videoId: 'video',

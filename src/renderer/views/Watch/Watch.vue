@@ -882,6 +882,7 @@
             />
             <WatchChromecast
               v-if="isElectron && $store.getters.getShowChromecastButton"
+              ref="chromecast"
               :key="`cast-${videoId}`"
               :formats="legacyFormats"
               :manifest-url="manifestSrc"
@@ -891,7 +892,10 @@
               :is-live="isLive"
               :title="videoTitle"
               :get-player="() => $refs.player"
-              @casting-change="chromecastActive = $event"
+              :get-source="() => getChromecastSource()"
+              @casting-change="handleChromecastChange"
+              @playback-state="handleChromecastState"
+              @ended="handlePlayerEnded"
             />
           </template>
         </watch-video-info>

@@ -6,6 +6,37 @@ const MAX_MANIFEST_SIZE = 2_000_000
 const escapeXml = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;')
   .replaceAll('>', '&gt;').replaceAll('"', '&quot;')
 
+/** Chromium networking with manual redirects and explicitly scoped credentials. */
+export function fetchCastMedia(network, url, { method, headers, signal }) {
+  return new Promise((resolve, reject) => {
+    const request = network.request({ url, method, redirect: 'manual', credentials: 'omit' })
+    for (const [name, value] of headers) request.setHeader(name, value)
+    const cleanup = () => signal.removeEventListener('abort', abort)
+    const abort = () => { request.abort(); reject(signal.reason) }
+    request.on('error', error => { cleanup(); reject(error) })
+    request.on('redirect', (status, _method, location) => {
+      cleanup()
+      resolve(new Response(null, { status, headers: { location } }))
+      request.abort()
+    })
+    request.on('response', incoming => {
+      incoming.once('close', cleanup)
+      incoming.once('end', cleanup)
+      incoming.once('error', error => { cleanup(); reject(error) })
+      try {
+        const body = method === 'HEAD' || [204, 205, 304].includes(incoming.statusCode)
+          ? null
+          : Readable.toWeb(incoming)
+        if (body === null) incoming.resume()
+        resolve(new Response(body, { status: incoming.statusCode, headers: incoming.headers }))
+      } catch (error) { incoming.destroy(); cleanup(); reject(error) }
+    })
+    signal.addEventListener('abort', abort, { once: true })
+    if (signal.aborted) abort()
+    else request.end()
+  })
+}
+
 function httpUrl(value, base) {
   const url = new URL(value, base)
   if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) throw new Error('Unsupported Cast resource URL')
@@ -61,7 +92,7 @@ export function rewriteCastHls(text, base, register) {
 }
 
 /** A session-scoped endpoint; only registered resources are fetchable. */
-export function createCastMediaServer(source, deviceAddress, token, getHeaders = () => ({})) {
+export function createCastMediaServer(source, deviceAddress, token, getHeaders = () => ({}), isAllowedUrl = () => false, fetchMedia = fetch) {
   const resources = []
   const resourceIds = new Map()
   let origin
@@ -124,10 +155,11 @@ export function createCastMediaServer(source, deviceAddress, token, getHeaders =
           url = next
         } else if (match[2] !== 'media') throw new Error('Invalid Cast resource path')
         for (let redirects = 0; ; redirects++) {
+          if (!await isAllowedUrl(url)) throw new Error('Unsupported Cast resource destination')
           const headers = new Headers(getHeaders(url.href) ?? {})
           headers.set('Accept-Encoding', 'identity')
           if (request.headers.range) headers.set('Range', request.headers.range)
-          upstream = await fetch(url, { headers, signal: controller.signal, redirect: 'manual', method: request.method })
+          upstream = await fetchMedia(url.href, { headers, signal: controller.signal, redirect: 'manual', method: request.method })
           const location = upstream.headers.get('location')
           if (![301, 302, 303, 307, 308].includes(upstream.status) || !location) break
           if (redirects >= 5) throw new Error('Too many Cast media redirects')

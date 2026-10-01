@@ -1,4 +1,5 @@
 const path = require('path')
+const fs = require('fs/promises')
 const webpack = require('webpack')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const MinimizerPlugin = require('minimizer-webpack-plugin')
@@ -69,10 +70,25 @@ const config = {
   plugins: [
     {
       apply(compiler) {
+        const directory = path.join(__dirname, 'cast-sender')
+        let preparedInputs = null
+        let inputs = []
         const prepare = async () => {
-          const { prepareCastSender } = await import('./castSender.mjs')
+          inputs = (await fs.readdir(directory)).filter(file => /\.(go|mod|sum|LICENSE)$/.test(file)).sort().map(file => path.join(directory, file))
+          inputs.push(path.join(__dirname, 'castSender.mjs'))
+          const signature = (await Promise.all(inputs.map(async file => {
+            const stat = await fs.stat(file)
+            return `${file}:${stat.size}:${stat.mtimeMs}`
+          }))).join('|')
+          if (signature === preparedInputs) return
+          const { prepareCastSender } = await import(`./castSender.mjs?${encodeURIComponent(signature)}`)
           await prepareCastSender(compiler.options.output.path)
+          preparedInputs = signature
         }
+        compiler.hooks.afterCompile.tap('CastSender', compilation => {
+          for (const file of inputs) compilation.fileDependencies.add(file)
+          compilation.contextDependencies.add(directory)
+        })
         compiler.hooks.beforeRun.tapPromise('CastSender', prepare)
         compiler.hooks.watchRun.tapPromise('CastSender', prepare)
       }

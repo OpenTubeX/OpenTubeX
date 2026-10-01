@@ -37,7 +37,7 @@ lines.on('line', async line=>{
   }
   if(p.type==='PLAY') media.playerState='PLAYING'
   if(p.type==='PAUSE') media.playerState='PAUSED'
-  if(p.type==='SEEK') {media.currentTime=p.currentTime;media.playerState=p.resumeState==='PLAYBACK_PAUSE'?'PAUSED':'PLAYING'}
+  if(p.type==='SEEK') {media.currentTime=p.currentTime;media.playerState=p.resumeState==='PLAYBACK_PAUSE'?'PAUSED':'PLAYING';if(p.currentTime>=119){media.playerState='IDLE';media.idleReason=p.currentTime===120?'FINISHED':'CANCELLED'}}
   if(p.type==='EDIT_TRACKS_INFO') media.activeTrackIds=p.activeTrackIds
   if(p.type==='STOP') media.playerState='IDLE'
   response={type:'MEDIA_STATUS',status:media?[media]:[]}
@@ -123,4 +123,37 @@ test('failed loads release resources and allow a subsequent cast', async t => {
   manager.active.sender.close()
   assert.equal((await manager.status(42, result.castId)).connected, false)
   assert.equal(manager.active, null)
+})
+
+
+test('attempts receiver STOP even if the final status request fails', async t => {
+  const manager = await managerForTest(t)
+  if (!manager) return
+  const cast = await manager.start(42, payload)
+  const sender = manager.active.sender
+  const originalSend = sender.send.bind(sender)
+  let stopped = false
+  sender.send = (namespace, destination, message, wait) => {
+    if (message.type === 'GET_STATUS') return Promise.reject(new Error('Status timed out'))
+    if (message.type === 'STOP') stopped = true
+    return originalSend(namespace, destination, message, wait)
+  }
+  const result = await manager.stop(42, cast.castId)
+  assert.equal(stopped, true)
+  assert.equal(result.connected, false)
+  assert.equal(result.currentTime, 12)
+})
+
+
+test('reports only natural receiver completion as ended', async t => {
+  const manager = await managerForTest(t)
+  if (!manager) return
+  const cast = await manager.start(42, payload)
+  const cancelled = await manager.control(42, cast.castId, 'seek', 119)
+  assert.equal(cancelled.ended, false)
+  assert.equal(cancelled.paused, true)
+  assert.equal((await manager.status(42, cast.castId)).connected, false)
+  assert.equal(manager.active, null)
+  const next = await manager.start(42, payload)
+  assert.equal((await manager.control(42, next.castId, 'seek', 120)).ended, true)
 })

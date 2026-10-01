@@ -16,7 +16,7 @@ test('selects a complete H.264 MP4 rather than an adaptive track or an unsupport
 
 test('allows local DASH and remote HLS but excludes SABR, blobs and files', () => {
   for (const [url, type] of [
-    ['data:application/dash+xml;charset=UTF-8,%3CMPD%2F%3E', 'application/dash+xml'],
+    ['data:application/dash+xml;charset=UTF-8,%3CMPD%3E%3CAdaptationSet%20mimeType%3D%22video%2Fmp4%22%2F%3E%3C%2FMPD%3E', 'application/dash+xml'],
     ['https://media.test/live', 'application/x-mpegurl'],
     ['https://media.test/vod.mpd', 'application/dash+xml']
   ]) {
@@ -34,4 +34,19 @@ test('allows local DASH and remote HLS but excludes SABR, blobs and files', () =
     assert.equal(castSourceAvailable({ url, contentType: type }), false)
   }
   assert.equal(castSourceAvailable({ url: 'https://user:password@media.test/video', contentType: 'video/mp4' }), false)
+})
+
+
+test('prefers adaptive manifests over a lower-quality progressive fallback', () => {
+  const source = selectCastSource([{ url: 'https://media.test/360', mimeType: 'video/mp4', height: 360 }],
+    'https://media.test/4k.mpd', 'application/dash+xml')
+  assert.deepEqual(source, { url: 'https://media.test/4k.mpd', contentType: 'application/dash+xml' })
+})
+
+
+test('does not replace video with an audio-only DASH manifest', () => {
+  const url = 'https://media.test/video.mp4'
+  const manifest = `data:application/dash+xml,${encodeURIComponent('<MPD><AdaptationSet mimeType="audio/mp4"/></MPD>')}`
+  assert.deepEqual(selectCastSource([{ url, mimeType: 'video/mp4' }], manifest, 'application/dash+xml'),
+    { url, contentType: 'video/mp4' })
 })
