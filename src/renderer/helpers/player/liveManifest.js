@@ -1,3 +1,14 @@
+const MINIMUM_LIVE_DVR_WINDOW_SECONDS = 30
+
+/**
+ * @param {string | null} url
+ * @returns {boolean}
+ */
+export function hasLimitedLiveDvrWindow(url) {
+  const match = url?.match(/\/(?:manifest|playlist)_duration\/(\d+)\//)
+  return match != null && parseInt(match[1], 10) <= MINIMUM_LIVE_DVR_WINDOW_SECONDS
+}
+
 /**
  * The WEB player response occasionally omits live manifests while the
  * parallel ANDROID response still contains one.

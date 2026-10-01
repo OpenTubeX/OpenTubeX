@@ -4,6 +4,7 @@ import { FormatUtils, Misc } from 'youtubei.js'
 import { MANIFEST_TYPE_DASH, MANIFEST_TYPE_HLS } from './utils'
 import { probeStreamByteRanges } from './streamByteRanges'
 import { getCompatibleAdaptiveFormats } from './compatibleAdaptiveFormats'
+import { hasLimitedLiveDvrWindow } from './liveManifest'
 import { generateAudioTrackField } from '../api/local'
 import { waitForYtDlpFormatAvailability } from './ytDlpFormatAvailability'
 import { getEarliestYtDlpFormatExpiry, YtDlpPlaybackSourceCache } from './ytDlpPlaybackCache'
@@ -39,7 +40,6 @@ import { mapExternalPlaybackMetadata } from '../../../ytDlpMetadata'
 const ITAG_REGEX = /^\d+/
 const URL_PROBE_TIMEOUT = 10_000
 const REJECTED_PLAYBACK_URL_STATUSES = new Set([401, 403, 404, 410])
-const MINIMUM_LIVE_DVR_WINDOW_SECONDS = 30
 const playbackSourceCache = new YtDlpPlaybackSourceCache()
 const pendingPlaybackSourceLoads = new Map()
 const playbackSourceCacheChangeListeners = new Set()
@@ -126,14 +126,6 @@ async function cacheYtDlpPlaybackSource(videoId, cacheKey, source) {
   } catch (error) {
     console.warn('Could not save the persistent yt-dlp playback cache', error)
   }
-}
-
-/**
- * @param {string} url
- */
-function hasLimitedLiveDvrWindow(url) {
-  const match = url.match(/\/(?:manifest|playlist)_duration\/(\d+)\//)
-  return match !== null && parseInt(match[1], 10) <= MINIMUM_LIVE_DVR_WINDOW_SECONDS
 }
 
 /**
@@ -868,7 +860,7 @@ async function loadYtDlpPlaybackSource(
   // an immediately preceding extraction returned URLs that respond with 403. Give
   // yt-dlp's defaults one bounded retry before falling back to the built-in source.
   let defaultClientsFallbackAnnounced = false
-  for (const useDefaultClients of [false, true, true]) {
+  for (const [attemptIndex, useDefaultClients] of [false, true, true].entries()) {
     if (useDefaultClients && !defaultClientsFallbackAnnounced) {
       defaultClientsFallbackAnnounced = true
       onDefaultClientsFallback?.()
@@ -877,9 +869,9 @@ async function loadYtDlpPlaybackSource(
     const info = await ytDlp.ytDlpGetPlaybackInfo(
       videoId,
       useDefaultClients,
-      // Signed-in clients can expose only 30 seconds of a public premiere.
-      // Retry its DVR stream without cookies, keeping the limited source if needed.
-      useAuthentication && limitedLiveSource === null,
+      // Try authenticated default clients before using the final attempt for
+      // a public DVR stream without cookies. Keep the limited source if it fails.
+      useAuthentication && (attemptIndex < 2 || limitedLiveSource === null),
       includeSubtitles
     )
 

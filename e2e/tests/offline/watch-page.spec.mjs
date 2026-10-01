@@ -3534,7 +3534,7 @@ test.describe('watch page', () => {
     })).toHaveCount(1)
   })
 
-  for (const scenario of ['preferred clients', 'default clients', 'anonymous extraction fails']) {
+  for (const scenario of ['preferred clients', 'default clients', 'authenticated default clients', 'anonymous extraction fails']) {
     test(`retries a limited authenticated live manifest without cookies: ${scenario}`, async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
       await page.route(/^https:\/\/example\.invalid\/.*\.m3u8$/, route => route.fulfill({
@@ -3556,15 +3556,15 @@ test.describe('watch page', () => {
           if (scenario === 'default clients' && !useDefaultClients) {
             return { error: 'Preferred clients could not extract formats' }
           }
-          if (scenario === 'anonymous extraction fails' && !useAuthentication) {
+          if (['authenticated default clients', 'anonymous extraction fails'].includes(scenario) && !useAuthentication) {
             return { error: 'This live stream requires authentication' }
           }
           return {
             isLive: true,
             liveStatus: 'is_live',
-            hlsManifestUrl: useAuthentication
-              ? 'https://example.invalid/manifest_duration/30/limited.m3u8'
-              : 'https://example.invalid/manifest_duration/3600/full.m3u8',
+            hlsManifestUrl: !useAuthentication || (scenario === 'authenticated default clients' && useDefaultClients)
+              ? 'https://example.invalid/manifest_duration/3600/full.m3u8'
+              : 'https://example.invalid/manifest_duration/30/limited.m3u8',
             formats: [],
             duration: null,
             version: 'test'
@@ -3574,9 +3574,8 @@ test.describe('watch page', () => {
       const view = await watchViewHandle(page)
       await view.evaluate(view => view.handlePlaybackEngineChange('yt-dlp'))
       const calls = [{ useDefaultClients: false, useAuthentication: true }]
-      if (scenario === 'default clients') calls.push({ useDefaultClients: true, useAuthentication: true })
-      calls.push({ useDefaultClients: true, useAuthentication: false })
-      if (scenario === 'anonymous extraction fails') calls.push({ useDefaultClients: true, useAuthentication: false })
+      calls.push({ useDefaultClients: true, useAuthentication: true })
+      if (scenario !== 'authenticated default clients') calls.push({ useDefaultClients: true, useAuthentication: false })
       expect(await app.electronApp.evaluate(() => globalThis.__premiereAuthenticationCalls)).toEqual(calls)
       const retainedLimitedStream = scenario === 'anonymous extraction fails'
       expect(await view.evaluate(view => view.manifestSrc)).toBe(retainedLimitedStream

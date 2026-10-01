@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import vm from 'node:vm'
+import { hasLimitedLiveDvrWindow } from '../../src/renderer/helpers/player/liveManifest.js'
 
 const source = readFileSync(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
 const start = source.indexOf('          if (useRemoteManifest) {')
@@ -9,7 +10,7 @@ const end = source.indexOf('          this.streamingDataExpiryDate', start)
 const selectManifest = vm.runInNewContext(`(function (result, androidLiveHlsManifestUrl, androidLiveDashManifestUrl) {
   const useRemoteManifest = true
   ${source.slice(start, end)}
-})`, { MANIFEST_TYPE_DASH: 'application/dash+xml', MANIFEST_TYPE_HLS: 'application/x-mpegurl' })
+})`, { MANIFEST_TYPE_DASH: 'application/dash+xml', MANIFEST_TYPE_HLS: 'application/x-mpegurl', hasLimitedLiveDvrWindow })
 
 test('running premieres use Android DASH instead of a limited WEB HLS manifest', () => {
   const watch = {}
@@ -24,5 +25,13 @@ test('keeps WEB DASH first and HLS available when neither client has DASH', () =
   assert.equal(watch.manifestSrc, 'https://example.com/web.mpd')
   selectManifest.call(watch, {}, 'https://example.com/android.m3u8', null)
   assert.equal(watch.manifestSrc, 'https://example.com/android.m3u8')
+  assert.equal(watch.manifestMimeType, 'application/x-mpegurl')
+})
+
+test('preserves a long WEB HLS rewind window instead of replacing it with Android DASH', () => {
+  const watch = {}
+  const hls = 'https://example.com/manifest_duration/21600/live.m3u8'
+  selectManifest.call(watch, { streaming_data: { hls_manifest_url: hls } }, null, 'https://example.com/recent-only.mpd')
+  assert.equal(watch.manifestSrc, hls)
   assert.equal(watch.manifestMimeType, 'application/x-mpegurl')
 })
