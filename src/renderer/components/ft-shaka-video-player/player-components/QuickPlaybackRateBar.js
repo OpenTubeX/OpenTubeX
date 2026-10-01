@@ -64,8 +64,7 @@ export class QuickPlaybackRateBar extends shaka.ui.Element {
     this.parent.appendChild(this.root_)
 
     this.eventManager.listen(this.root_, 'wheel', (event) => {
-      if (event.defaultPrevented || event.ctrlKey || event.metaKey ||
-        this.root_.scrollWidth <= this.root_.clientWidth) {
+      if (event.defaultPrevented || event.ctrlKey || event.metaKey) {
         return
       }
 
@@ -74,12 +73,9 @@ export class QuickPlaybackRateBar extends shaka.ui.Element {
         ? 16
         : event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? this.root_.clientWidth : 1
 
-      const previousScrollLeft = this.root_.scrollLeft
       this.root_.scrollLeft += delta * unit
-      if (this.root_.scrollLeft === previousScrollLeft) {
-        return
-      }
 
+      // Keep wheel input inside the bar even at its ends or without overflow.
       event.preventDefault()
       event.stopPropagation()
     }, { passive: false })

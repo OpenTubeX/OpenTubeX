@@ -262,6 +262,45 @@ test.describe('desktop quick playback speed bar', () => {
   const overflowingPresets = Array.from({ length: 24 }, (_, index) => ({ speed: 0.5 + index * 0.25 }))
 
   for (const scale of [100, 125]) {
+    test(`contains quick speed wheel input at both ends at ${scale}% scale`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      const video = await openMockedVideo(page)
+      await video.evaluate(element => element.pause())
+      await setWindowSize(app, page, { width: 1050, height: 850 })
+      await page.evaluate(scale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', scale), scale)
+      await page.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+      const bar = page.locator('.ft-quick-playback-rate-bar')
+
+      for (const presets of [overflowingPresets, [{ speed: 1 }]]) {
+        await page.evaluate(presets => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
+          'updateQuickPlaybackSpeedBarOptions', JSON.stringify(presets)
+        ), presets)
+        await expect.poll(() => bar.evaluate(element => element.scrollWidth > element.clientWidth)).toBe(presets.length > 1)
+
+        for (const scrollSpeed of [100, 200]) {
+          await page.evaluate(speed => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateScrollSpeed', speed), scrollSpeed)
+          for (const edge of ['start', 'end']) {
+            await page.evaluate(() => window.scrollTo(0, 100))
+            await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
+            const previousScrollLeft = await bar.evaluate((element, edge) => {
+              element.scrollLeft = edge === 'start' ? 0 : element.scrollWidth
+              return element.scrollLeft
+            }, edge)
+            await bar.hover()
+            const previousPageScroll = await page.evaluate(() => window.scrollY)
+            const delta = edge === 'start' ? -120 : 120
+            for (const horizontal of [false, true]) {
+              await page.mouse.wheel(horizontal ? delta : 0, horizontal ? 0 : delta)
+              // Wheel dispatch returns before Chromium applies its default scroll.
+              await page.waitForTimeout(250)
+              expect(await page.evaluate(() => window.scrollY)).toBe(previousPageScroll)
+              expect(await bar.evaluate(element => element.scrollLeft)).toBe(previousScrollLeft)
+            }
+          }
+        }
+      }
+    })
+
     test(`uses available control space before clipping presets at ${scale}% scale`, async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
       await openMockedVideo(page)
@@ -384,7 +423,7 @@ test.describe('desktop quick playback speed bar', () => {
             bubbled,
             offsetUnchanged: element.scrollLeft === previousScrollLeft
           }
-        }, edge)).toEqual({ defaultPrevented: false, bubbled: true, offsetUnchanged: true })
+        }, edge)).toEqual({ defaultPrevented: true, bubbled: false, offsetUnchanged: true })
       }
       await bar.evaluate(element => { element.scrollLeft = 0 })
       expect(await video.evaluate(element => ({ rate: element.playbackRate, volume: element.volume }))).toEqual(before)
