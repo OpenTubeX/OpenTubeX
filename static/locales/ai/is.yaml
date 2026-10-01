@@ -2000,3 +2000,6 @@ Storage Startup Error:
   Retry: "Reyna aftur"
 Search Bar:
   Use Suggestion: Nota tillögu
+
+Native Permissions:
+  Local Network: "Finna tæki á staðarnetinu og senda myndskeið í þau, og samstilla stillingar og gögn milli tækja."

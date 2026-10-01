@@ -1978,3 +1978,6 @@ Storage Startup Error:
   Retry: "Riprova"
 Search Bar:
   Use Suggestion: Usa suggerimento
+
+Native Permissions:
+  Local Network: "Rilevare i dispositivi sulla rete locale e trasmettere video a essi, e sincronizzare impostazioni e dati tra dispositivi."

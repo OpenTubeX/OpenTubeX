@@ -2572,3 +2572,5 @@ Storage Startup Error:
   Title: "Podatkov aplikacije ni bilo mogoče naložiti"
   Message: "Sprostite prostor v napravi in poskusite znova. Sinhronizacija je začasno ustavljena, dokler se podatki ne naložijo."
   Retry: "Poskusi znova"
+Native Permissions:
+  Local Network: "Poiščite naprave v lokalnem omrežju in vanje predvajajte videoposnetke ter sinhronizirajte nastavitve in podatke med napravami."

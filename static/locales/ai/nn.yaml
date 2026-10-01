@@ -2367,3 +2367,6 @@ Storage Startup Error:
   Retry: "Prøv igjen"
 Search Bar:
   Use Suggestion: Bruk framlegg
+
+Native Permissions:
+  Local Network: "Finn einingar på det lokale nettverket og cast videoar til dei, og synkroniser innstillingar og data mellom einingar."
