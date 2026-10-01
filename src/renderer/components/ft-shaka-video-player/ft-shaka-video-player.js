@@ -6433,7 +6433,8 @@ export default defineComponent({
       const video_ = video.value
       if (!video_) return
 
-      const nextState = (playbackEnded.value || video_.ended) && video_.duration ? 'replay' : video_.paused ? 'play' : 'pause'
+      // Shaka can reach its seek-range end before the media element is ended.
+      const nextState = (playbackEnded.value || video_.ended || player?.isEnded()) && video_.duration ? 'replay' : video_.paused ? 'play' : 'pause'
 
       window.requestAnimationFrame(() => {
         container.value?.querySelectorAll('.shaka-play-button').forEach((button) => {
