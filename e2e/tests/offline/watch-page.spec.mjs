@@ -262,6 +262,61 @@ test.describe('desktop quick playback speed bar', () => {
   const overflowingPresets = Array.from({ length: 24 }, (_, index) => ({ speed: 0.5 + index * 0.25 }))
 
   for (const scale of [100, 125]) {
+    test(`smoothly scrolls clipped quick speeds without dropping wheel ticks at ${scale}% scale`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      const video = await openMockedVideo(page)
+      await video.evaluate(element => element.pause())
+      await setWindowSize(app, page, { width: 1050, height: 850 })
+      await page.evaluate(async ({ scale, presets }) => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await store.dispatch('updateQuickPlaybackSpeedBarOptions', JSON.stringify(presets))
+        await store.dispatch('updateUiScale', scale)
+        await store.dispatch('updateReducedMotion', 'off')
+      }, { scale, presets: overflowingPresets })
+      await page.locator('body').press('s')
+      await page.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+      const bar = page.locator('.ft-quick-playback-rate-bar')
+      await expect.poll(() => bar.evaluate(element => element.scrollWidth - element.clientWidth)).toBeGreaterThan(240)
+
+      for (const frosted of [true, false]) {
+        await page.evaluate(frosted => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', frosted), frosted)
+        for (const horizontal of [false, true]) {
+          await bar.evaluate(element => { element.scrollLeft = 0 })
+          const movement = await bar.evaluate(async (element, horizontal) => {
+            // Dispatch together so the animation cannot advance between ticks.
+            for (let tick = 0; tick < 3; tick++) {
+              element.dispatchEvent(new WheelEvent('wheel', {
+                deltaX: horizontal ? 80 : 0,
+                deltaY: horizontal ? 0 : 80,
+                bubbles: true,
+                cancelable: true
+              }))
+            }
+            const initial = element.scrollLeft
+            const samples = []
+            const deadline = performance.now() + 2000
+            while (performance.now() < deadline && element.scrollLeft < 239) {
+              await new Promise(resolve => requestAnimationFrame(resolve))
+              samples.push(element.scrollLeft)
+            }
+            return { initial, samples, final: element.scrollLeft }
+          }, horizontal)
+          expect(movement.initial).toBe(0)
+          expect(movement.samples.some(offset => offset > 0 && offset < 239)).toBe(true)
+          expect(Math.abs(movement.final - 240)).toBeLessThanOrEqual(1)
+          // Let scrollend clear the previous destination before the next gesture.
+          await page.waitForTimeout(100)
+        }
+      }
+
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'on'))
+      expect(await bar.evaluate(element => {
+        element.scrollLeft = 0
+        element.dispatchEvent(new WheelEvent('wheel', { deltaY: 120, bubbles: true, cancelable: true }))
+        return element.scrollLeft
+      })).toBeCloseTo(120, 0)
+    })
+
     test(`contains quick speed wheel input at both ends at ${scale}% scale`, async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
       const video = await openMockedVideo(page)

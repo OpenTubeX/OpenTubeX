@@ -3,6 +3,7 @@ import { Fragment, h, render } from 'vue'
 import { FtIcon } from '@opentubex/icons'
 
 import i18n from '../../../i18n/index'
+import { isReducedMotionEnabled } from '../../../helpers/reducedMotion'
 
 /**
  * @typedef {{ speed: number, name?: string }} QuickPlaybackRateOption
@@ -61,7 +62,14 @@ export class QuickPlaybackRateBar extends shaka.ui.Element {
     /** @private @type {Array<{speed: number, button: HTMLButtonElement}>} */
     this.rateButtons_ = []
 
+    /** @private @type {number | null} */
+    this.scrollTarget_ = null
+
     this.parent.appendChild(this.root_)
+
+    this.eventManager.listen(this.root_, 'scrollend', () => {
+      this.scrollTarget_ = null
+    })
 
     this.eventManager.listen(this.root_, 'wheel', (event) => {
       if (event.defaultPrevented || event.ctrlKey || event.metaKey) {
@@ -73,7 +81,18 @@ export class QuickPlaybackRateBar extends shaka.ui.Element {
         ? 16
         : event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? this.root_.clientWidth : 1
 
-      this.root_.scrollLeft += delta * unit
+      const maximum = Math.max(0, this.root_.scrollWidth - this.root_.clientWidth)
+      // Accumulate ticks against the destination while the animation is running.
+      // Clamp it first in case the presets or available width changed.
+      const target = Math.min(Math.max(this.scrollTarget_ ?? this.root_.scrollLeft, 0), maximum)
+      this.scrollTarget_ = Math.min(Math.max(target + delta * unit, 0), maximum)
+      // Keep the actual fractional offset at a boundary at non-100% UI scales.
+      if (this.scrollTarget_ !== target) {
+        this.root_.scrollTo({
+          left: this.scrollTarget_,
+          behavior: isReducedMotionEnabled() ? 'instant' : 'smooth'
+        })
+      }
 
       // Keep wheel input inside the bar even at its ends or without overflow.
       event.preventDefault()
