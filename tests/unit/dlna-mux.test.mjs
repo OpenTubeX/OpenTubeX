@@ -60,6 +60,8 @@ test('a missing mux executable produces an HTTP error and can be stopped', async
   const relay = await createMuxedMediaServer('https://media.test/video', 'https://media.test/audio', '127.0.0.1', 'secret', { ffmpegPath: '/nonexistent/otx-ffmpeg' })
   await listen(relay)
   t.after(() => close(relay))
+  assert.equal(relay.muxFailed, false)
   const response = await fetch(`http://127.0.0.1:${relay.address().port}/secret/video.mp4`)
   assert.equal(response.status, 502)
+  assert.equal(relay.muxFailed, true)
 })

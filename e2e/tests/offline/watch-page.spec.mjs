@@ -231,10 +231,11 @@ test('connection loss keeps the previous page covered while Watch is scrolled', 
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
 })
 
-for (const mode of ['combined', 'merged', 'fallback']) {
+for (const mode of ['combined', 'merged', 'fallback', 'late-failure']) {
   const merged = mode !== 'combined'
   const fallback = mode === 'fallback'
-  test(`casts ${fallback ? 'a complete MP4 when FFmpeg is unavailable' : merged ? 'separate high-resolution tracks' : 'a complete MP4 stream'} to a discovered DLNA device and returns to local playback`, async ({ app, page }) => {
+  const lateFailure = mode === 'late-failure'
+  test(`casts ${lateFailure ? 'a complete MP4 after a merged stream fails' : fallback ? 'a complete MP4 when FFmpeg is unavailable' : merged ? 'separate high-resolution tracks' : 'a complete MP4 stream'} to a discovered DLNA device and returns to local playback`, async ({ app, page }) => {
     await app.electronApp.evaluate(({ ipcMain }, { merged, fallback }) => {
       globalThis.__dlnaCalls = []
       ipcMain.removeHandler('yt-dlp-get-playback-info')
@@ -250,6 +251,13 @@ for (const mode of ['combined', 'merged', 'fallback']) {
       ipcMain.removeHandler('dlna-discover')
       ipcMain.removeHandler('dlna-start')
       ipcMain.removeHandler('dlna-stop')
+      ipcMain.removeHandler('dlna-recover')
+      ipcMain.handle('dlna-recover', (_event, castId, payload) => {
+        globalThis.__dlnaCalls.push({ action: 'stop', castId }, { action: 'start', payload })
+        return { castId: 'recovered-cast', deviceName: 'Living room TV' }
+      })
+      ipcMain.removeHandler('dlna-has-failed')
+      ipcMain.handle('dlna-has-failed', () => globalThis.__dlnaFailed ?? false)
       ipcMain.handle('dlna-discover', () => [{ id: 'living-room', name: 'Living room TV' }])
       ipcMain.handle('dlna-start', (_event, payload) => {
         globalThis.__dlnaCalls.push({ action: 'start', payload })
@@ -260,7 +268,7 @@ for (const mode of ['combined', 'merged', 'fallback']) {
         globalThis.__dlnaCalls.push({ action: 'stop', castId })
         return true
       })
-    }, { merged, fallback })
+    }, { merged, fallback, lateFailure })
     await mockPlayableWatchPage(app, page)
     const video = await openMockedVideo(page)
     const view = await watchViewHandle(page)
@@ -292,20 +300,26 @@ for (const mode of ['combined', 'merged', 'fallback']) {
     await castButton.click()
     await page.getByRole('option', { name: 'Living room TV' }).click()
     await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
+    if (lateFailure) {
+      await app.electronApp.evaluate(() => { globalThis.__dlnaFailed = true })
+      await expect.poll(() => app.electronApp.evaluate(() => globalThis.__dlnaCalls.filter(call => call.action === 'start').length)).toBe(2)
+      await app.electronApp.evaluate(() => { globalThis.__dlnaFailed = false })
+    }
     const calls = await app.electronApp.evaluate(() => globalThis.__dlnaCalls)
     expect(calls[0].action).toBe('start')
     expect(calls[0].payload.mediaUrl).toBe(merged ? 'https://example.test/video-1080.mp4' : 'https://example.test/video.mp4')
     expect(calls[0].payload.audioUrl).toBe(merged ? 'https://example.test/audio.m4a' : undefined)
-    if (fallback) {
-      expect(calls[1].payload.mediaUrl).toBe('https://example.test/video.mp4')
-      expect(calls[1].payload.audioUrl).toBeUndefined()
+    if (fallback || lateFailure) {
+      const retry = calls.filter(call => call.action === 'start')[1]
+      expect(retry.payload.mediaUrl).toBe('https://example.test/video.mp4')
+      expect(retry.payload.audioUrl).toBeUndefined()
     }
 
     await castButton.click()
     await page.getByRole('option', { name: 'Stop casting' }).click()
     await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
     expect(await app.electronApp.evaluate(() => globalThis.__dlnaCalls.at(-1))).toEqual({
-      action: 'stop', castId: 'test-cast'
+      action: 'stop', castId: lateFailure ? 'recovered-cast' : 'test-cast'
     })
 
     await video.evaluate(element => element.pause())
