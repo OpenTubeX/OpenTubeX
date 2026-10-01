@@ -26,47 +26,6 @@
   translate: 0 -1px;
 }
 
-body[dir='rtl'] .ft-input-component.search.showClearTextButton .inputAction {
-  inset-inline-end: -30px;
-}
-
-body[dir='rtl'] .ft-input-component.search.clearTextButtonVisible .inputAction,
-body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inputAction {
-  inset-inline-end: 0;
-}
-
-.ft-input-component.search.showClearTextButton {
-  padding-inline-start: 30px;
-}
-
-.ft-input-component.search.clearTextButtonVisible,
-.ft-input-component.search.showClearTextButton:focus-within {
-  padding-inline-start: 0;
-}
-
-.ft-input-component.showClearTextButton:not(.search) .ft-input {
-  padding-inline-start: 46px;
-}
-
-/* Main search input */
-.clearTextButtonVisible.search .ft-input,
-.ft-input-component.search.showClearTextButton:focus-within .ft-input {
-  padding-inline-start: 46px;
-}
-
-.ft-input-component:focus-within .clearInputTextButton,
-.ft-input-component.showOptions .clearInputTextButton {
-  opacity: 0.5;
-}
-
-
-.ft-input-component.inputDataPresent .clearInputTextButton.visible,
-.clearTextButtonVisible:not(.showOptions) .clearInputTextButton.visible,
-.ft-input-component:focus-within:not(.showOptions) .clearInputTextButton.visible {
-  cursor: pointer;
-  opacity: 1;
-}
-
 .ft-input.disabled,
 .selectLabel.disabled .selectLabelText {
   opacity: 0.4;
@@ -75,54 +34,6 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
 .ft-input.disabled,
 .selectLabel.disabled {
   cursor: not-allowed;
-}
-
-.clearInputTextButton {
-  position: absolute;
-  inset-block-start: 5px;
-  inset-inline-start: 0;
-
-  /* To be higher than `.inputWrapper` */
-  z-index: 1;
-  margin-block: 0;
-  margin-inline: 3px;
-  padding: 10px;
-  border-radius: 100%;
-  border-style: none;
-  background-color: transparent;
-  color: var(--primary-text-color);
-  font-size: 1em;
-  line-height: 1em;
-  opacity: 0;
-  transition: background 0.2s ease-in;
-}
-
-.clearInputTextButton.visible:hover {
-  background-color: var(--side-nav-hover-color);
-  color: var(--side-nav-hover-text-color);
-}
-
-.forceTextColor .clearInputTextButton:hover {
-  background-color: var(--primary-color-hover);
-}
-
-.clearInputTextButton.visible:active {
-  background-color: var(--subtle-surface-color);
-  color: var(--side-nav-active-text-color);
-  transition: background 0.2s ease-in;
-}
-
-.search .clearInputTextButton {
-  inset-block-start: 50%;
-  transform: translateY(-50%);
-}
-
-.forceTextColor .clearInputTextButton {
-  color: #eee;
-}
-
-.forceTextColor .clearInputTextButton:active {
-  background-color: var(--primary-color-active);
 }
 
 .ft-input {

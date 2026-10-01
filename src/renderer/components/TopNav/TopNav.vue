@@ -100,13 +100,12 @@
             ref="searchInput"
             :placeholder="t('Search / Go to URL')"
             class="searchInput"
+            input-type="search"
             is-search
             external-media-navigation
             :action-button-label="t('Search Bar.Search')"
             :data-list="activeDataList"
             :data-list-properties="activeDataListProperties"
-            :input-type="phoneLayout ? 'search' : 'text'"
-            :show-clear-text-button="!phoneLayout"
             show-data-when-empty
             @input="getSearchSuggestionsDebounce"
             @click="goToSearch"

@@ -1,4 +1,4 @@
-import { test, expect, sel, waitForAppReady } from '../../helpers/app.mjs'
+import { test, expect, sel, waitForAppReady, clickSearchCancel, setWindowSize } from '../../helpers/app.mjs'
 
 test.use({
   seed: {
@@ -14,6 +14,67 @@ test.use({
     }
   }
 })
+
+for (const uiScale of [100, 95]) {
+  test.describe(`search input at ${uiScale}% UI scale`, () => {
+    test.use({
+      seed: {
+        settings: { enableSearchSuggestions: false, uiScale },
+        searchHistory: [{ _id: 'recent search', lastUpdatedAt: Date.now() }]
+      }
+    })
+
+    test('keeps its width when focused, typed into, and cleared', async ({ app, page }) => {
+      const input = page.locator(sel.searchInput)
+      for (const width of [1600, 900]) {
+        if (width === 900) await setWindowSize(app, page, { width, height: 700 })
+        await input.evaluate(element => element.blur())
+        const initialBox = await input.boundingBox()
+
+        const expectStableWidth = async () => {
+          const box = await input.boundingBox()
+          expect(box.x).toBeCloseTo(initialBox.x, 1)
+          expect(box.width).toBeCloseTo(initialBox.width, 1)
+        }
+
+        await input.focus()
+        await expectStableWidth()
+        await input.fill('a search')
+        await expectStableWidth()
+        await input.fill('')
+        await expectStableWidth()
+        await input.evaluate(element => element.blur())
+        await expectStableWidth()
+      }
+    })
+
+    for (const direction of ['ltr', 'rtl']) {
+      test(`uses the native cancel control and restores recent searches in ${direction}`, async ({ page }) => {
+        await page.locator('body').evaluate((element, direction) => { element.dir = direction }, direction)
+        const input = page.locator(sel.searchInput)
+        const suggestions = page.locator('.topNav .searchContainer .options .list li')
+        await expect(input).toHaveAttribute('type', 'search')
+        await expect(page.locator('.topNav .clearInputTextButton')).toHaveCount(0)
+
+        await input.fill('unmatched query')
+        await expect(suggestions).toHaveCount(0)
+        await clickSearchCancel(input)
+
+        await expect(input).toHaveValue('')
+        await expect(input).toBeFocused()
+        await expect(suggestions).toHaveCount(1)
+        await expect(suggestions.first()).toContainText('recent search')
+
+        await input.press('ArrowDown')
+        await expect(input).toHaveValue('recent search')
+        await clickSearchCancel(input)
+        await expect(input).toHaveValue('')
+        await input.press('Enter')
+        await expect(page).not.toHaveURL(/#\/search\//)
+      })
+    }
+  })
+}
 
 test('Enter searches in place', async ({ page }) => {
   await page.locator(sel.searchInput).fill('enter search')
