@@ -178,6 +178,13 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}) {
       await new Promise((resolve) => setTimeout(resolve, (attempt + 1) * 1000))
     }
   }
+  // Listen before waiting for the first window or renderer readiness so startup
+  // exceptions cannot disappear before a test gets access to its page fixture.
+  const context = electronApp.context()
+  const startupErrors = []
+  const recordStartupError = error => startupErrors.push(error.error().message)
+  context.on('weberror', recordStartupError)
+
   const notifyPhase = async (phase, page) => {
     try {
       await options.onPhase?.(phase, page)
@@ -188,7 +195,7 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}) {
   }
   // Tests control WAN reachability independently of the host running them.
   // Page routes can override these replies to exercise real offline recovery.
-  await electronApp.context().route(INTERNET_CHECK_URL, route => route.fulfill({ status: 204 }))
+  await context.route(INTERNET_CHECK_URL, route => route.fulfill({ status: 204 }))
   await notifyPhase('electronConnected')
 
   const page = await electronApp.firstWindow()
@@ -229,8 +236,16 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}) {
     )
   }
 
-  await waitForAppReady(page)
-  await notifyPhase('interactive', page)
+  try {
+    await waitForAppReady(page)
+    await notifyPhase('interactive', page)
+    expect(startupErrors, 'Renderer errors during startup').toEqual([])
+  } catch (error) {
+    await electronApp.close().catch(() => {})
+    throw error
+  } finally {
+    context.off('weberror', recordStartupError)
+  }
 
   return { electronApp, page }
 }
@@ -343,63 +358,67 @@ export const test = base.extend({
   app: async ({ seed, launchArgs, showTutorial, localeOverrides }, use, testInfo) => {
     const userDataDir = await createUserDataDir(seed)
     const hasLocaleOverrides = Object.keys(localeOverrides).length > 0
-    const appRoot = hasLocaleOverrides
-      ? await mkdtemp(path.join(tmpdir(), 'opentubex-e2e-app-'))
-      : repoRoot
-
-    if (hasLocaleOverrides) {
-      await cp(path.join(repoRoot, 'dist-e2e'), path.join(appRoot, 'dist-e2e'), {
-        recursive: true
-      })
-      await cp(path.join(repoRoot, '_icons'), path.join(appRoot, '_icons'), {
-        recursive: true
-      })
-      for (const [localePath, messages] of Object.entries(localeOverrides)) {
-        const outputPath = path.join(
-          appRoot,
-          'dist-e2e',
-          'static',
-          'locales',
-          `${localePath}.json.br`
-        )
-        await writeFile(outputPath, brotliCompressSync(JSON.stringify(messages)))
-      }
-    }
-
-    const { electronApp, page } = await launchApp(userDataDir, launchArgs, { appRoot })
-
-    if (!showTutorial) {
-      const tutorial = page.locator('.tutorialOverlay')
-      await expect(tutorial).toBeVisible()
-      await tutorial.locator('.tutorialActions').getByRole('button').last().click()
-      await expect(tutorial).toBeHidden()
-    }
-
-    const relaunch = async () => {
-      // Wait until the old process has fully exited, otherwise it still owns
-      // the single-instance lock for this userData dir and the new instance
-      // immediately exits again.
-      const oldProcess = appHandle.electronApp.process()
-      const exited = new Promise((resolve) => oldProcess.once('exit', resolve))
-      await appHandle.electronApp.close()
-      await exited
-      const next = await launchApp(userDataDir, launchArgs, { appRoot })
-      appHandle.electronApp = next.electronApp
-      appHandle.page = next.page
-      return next
-    }
-
-    const appHandle = { electronApp, page, userDataDir, relaunch }
-
+    let appRoot
+    let appHandle
     try {
+      appRoot = hasLocaleOverrides
+        ? await mkdtemp(path.join(tmpdir(), 'opentubex-e2e-app-'))
+        : repoRoot
+
+      if (hasLocaleOverrides) {
+        await cp(path.join(repoRoot, 'dist-e2e'), path.join(appRoot, 'dist-e2e'), {
+          recursive: true
+        })
+        await cp(path.join(repoRoot, '_icons'), path.join(appRoot, '_icons'), {
+          recursive: true
+        })
+        for (const [localePath, messages] of Object.entries(localeOverrides)) {
+          const outputPath = path.join(
+            appRoot,
+            'dist-e2e',
+            'static',
+            'locales',
+            `${localePath}.json.br`
+          )
+          await writeFile(outputPath, brotliCompressSync(JSON.stringify(messages)))
+        }
+      }
+
+      const { electronApp, page } = await launchApp(userDataDir, launchArgs, { appRoot })
+
+      const relaunch = async () => {
+        // Wait until the old process has fully exited, otherwise it still owns
+        // the single-instance lock for this userData dir and the new instance
+        // immediately exits again.
+        const oldProcess = appHandle.electronApp.process()
+        const exited = new Promise((resolve) => oldProcess.once('exit', resolve))
+        await appHandle.electronApp.close()
+        await exited
+        const next = await launchApp(userDataDir, launchArgs, { appRoot })
+        appHandle.electronApp = next.electronApp
+        appHandle.page = next.page
+        return next
+      }
+
+      appHandle = { electronApp, page, userDataDir, relaunch }
+
+      if (!showTutorial) {
+        const tutorial = page.locator('.tutorialOverlay')
+        await expect(tutorial).toBeVisible()
+        await tutorial.locator('.tutorialActions').getByRole('button').last().click()
+        await expect(tutorial).toBeHidden()
+      }
+
       await use(appHandle)
     } finally {
-      if (testInfo.status !== testInfo.expectedStatus) {
-        await attachScreenshot(testInfo, appHandle.page, 'failure')
+      if (appHandle) {
+        if (testInfo.status !== testInfo.expectedStatus) {
+          await attachScreenshot(testInfo, appHandle.page, 'failure')
+        }
+        await appHandle.electronApp.close().catch(() => {})
       }
-      await appHandle.electronApp.close().catch(() => {})
       await rm(userDataDir, { recursive: true, force: true })
-      if (hasLocaleOverrides) {
+      if (hasLocaleOverrides && appRoot) {
         await rm(appRoot, { recursive: true, force: true })
       }
     }

@@ -1739,16 +1739,6 @@ test.describe('tab bar', () => {
     await expect(page.locator(sel.searchInput)).toHaveValue('loaded tab query')
   })
 
-  test('closing the active tab activates a remaining tab', async ({ page }) => {
-    await page.locator(sel.newTabButton).click()
-    await page.locator(sel.newTabButton).click()
-    await expect(page.locator(sel.tabs)).toHaveCount(3)
-
-    await page.locator(sel.activeTab).locator('.closeButton').click()
-    await expect(page.locator(sel.tabs)).toHaveCount(2)
-    await expect(page.locator(sel.activeTab)).toHaveCount(1)
-  })
-
   test('closing the active tab returns to the last active tab by default', async ({ page }) => {
     const tabIds = await openThreeTabsAndActivate(page, 1)
 

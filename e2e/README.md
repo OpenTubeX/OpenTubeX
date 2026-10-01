@@ -1,12 +1,14 @@
 # End-to-end tests
 
-Playwright drives the packed Electron app (`dist/main.js`) against an isolated,
-per-test userData directory. Playback tests use the local API (youtubei.js).
+Playwright drives the packed Electron app (`dist-e2e/main.js`) against an isolated,
+per-test userData directory. Isolated browser checks use headless Chromium directly.
+Playback tests use the local API (youtubei.js).
 Offline metadata tests may use Invidious when they mock every request.
 
 ## Running locally
 
 ```bash
+pnpm exec playwright install --only-shell chromium  # required for browser checks
 pnpm run test:e2e:pack      # build dist-e2e/ (required once per code change)
 pnpm run test:e2e:offline   # fast suite, no YouTube network needed
 pnpm run test:e2e:network   # talks to the real YouTube servers
