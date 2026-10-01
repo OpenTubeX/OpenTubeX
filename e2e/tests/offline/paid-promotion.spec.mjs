@@ -39,8 +39,7 @@ test('paid promotion badge respects every external link opening policy', async (
   await expect(prompt).toBeHidden()
   expect(await openedUrls()).toEqual([])
 
-  await badge.focus()
-  await page.keyboard.press('Enter')
+  await badge.press('Enter')
   await expect(prompt).toBeVisible()
   await prompt.getByRole('button', { name: 'Yes, Open Link', exact: true }).click()
   await expect(prompt).toBeHidden()
