@@ -51,7 +51,7 @@ import { brotliDecompress } from 'zlib'
 
 import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
-import { discoverDlnaDevices, startDlnaCast, stopDlnaCast, hasDlnaCastFailed } from './dlnaCast'
+import { discoverDlnaDevices, startDlnaCast, stopDlnaCast, hasDlnaCastFailed, getDlnaCastPosition } from './dlnaCast'
 import { handleTwitchChatReplayPage, handleTwitchSubOnlyVod } from './twitchChat'
 import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
 import { getDlnaFfmpegExecutable, isYtDlpStoryboardUrl, getYtDlpDownloadFile, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpControlDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetSubtitle, handleYtDlpGetPlaybackInfo, handleYtDlpGetHistoryMetadata, handleYtDlpCancelHistoryRepair, handleYtDlpGetRecommendations, handleYtDlpSearch, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpQueueAction, handleYtDlpRemoveDownload, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
@@ -4622,8 +4622,11 @@ function runApp() {
         payload?.audioUrl !== undefined || !hasDlnaCastFailed(event.sender.id, castId)) {
       return { error: 'No failed cast is available to recover' }
     }
+    const position = await getDlnaCastPosition(event.sender.id, castId)
     await stopDlnaCast(event.sender.id, castId)
-    return startDlnaForWindow(event, payload)
+    return startDlnaForWindow(event, {
+      ...payload, startSeconds: (Number.isFinite(payload?.startSeconds) ? payload.startSeconds : 0) + (position ?? 0)
+    })
   })
   ipcMain.handle(IpcChannels.DLNA_HAS_FAILED, (event, castId) => {
     if (!isOpenTubeXUrl(event.senderFrame.url) || typeof castId !== 'string') return false
