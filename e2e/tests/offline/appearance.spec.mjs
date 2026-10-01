@@ -638,6 +638,21 @@ test.describe('custom theme editor', () => {
     })).toBe(`custom:${importedId}`)
   })
 
+  test('keeps watched overlays visible when importing older transparent themes', async ({ app, page }) => {
+    const theme = cloneDefaultCustomTheme()
+    theme.colors.background = '#11223300'
+    delete theme.colors.watchedThumbnailOverlay
+    await app.electronApp.evaluate(({ clipboard }, text) => clipboard.writeText(text), JSON.stringify(theme))
+    await goToSettingsSection(page, 'theme')
+    await page.getByRole('button', { name: 'Create custom theme' }).click()
+    await page.getByRole('button', { name: 'Import from clipboard' }).click()
+    await expect(page.locator('body')).toHaveCSS('--watched-thumbnail-overlay-color', '#112233b3')
+    await page.getByRole('button', { name: 'Save and apply' }).click()
+    const [saved] = await page.evaluate(() => window.ftElectron.loadCustomTheme())
+    expect(saved.colors.background).toBe('#11223300')
+    expect(saved.colors.watchedThumbnailOverlay).toBe('#112233b3')
+  })
+
   test('ignores clipboard imports after the editor unmounts', async ({ app, page }) => {
     const theme = cloneDefaultCustomTheme()
     theme.colors.background = '#112233'

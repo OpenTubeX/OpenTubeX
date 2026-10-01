@@ -250,8 +250,7 @@ function deriveScrollbarActiveColor(hoverColor) {
 function deriveWatchedThumbnailOverlayColor(background) {
   if (typeof background !== 'string' || !HEX_COLOR_PATTERN.test(background)) return undefined
 
-  const components = background.match(/[\da-f]{2}/gi).map(component => Number.parseInt(component, 16))
-  return formatHexColor(components.slice(0, 3), Math.round((components[3] ?? 255) * 0.7))
+  return `${background.slice(0, 7)}b3`
 }
 
 function formatHexColor(rgb, alpha) {

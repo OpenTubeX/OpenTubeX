@@ -62,7 +62,8 @@ test('defaults missing watched overlays to the existing thumbnail fade for older
   for (const [background, overlay] of [
     ['#ffffff', '#ffffffb3'],
     ['#ABCDEF', '#abcdefb3'],
-    ['#12345680', '#1234565a'],
+    ['#12345600', '#123456b3'],
+    ['#12345680', '#123456b3'],
   ]) {
     const theme = JSON.parse(JSON.stringify(DEFAULT_CUSTOM_THEME))
     delete theme.colors.watchedThumbnailOverlay
