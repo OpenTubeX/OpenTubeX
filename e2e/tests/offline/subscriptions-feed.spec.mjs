@@ -226,6 +226,32 @@ test.describe('subscriptions feed from cache', () => {
     await expect(premiere.locator('.videoDuration')).toHaveText('Premiere')
   })
 
+  test('rechecks a cached premiere after the clock moves backward', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    await page.evaluate(({ channelId, start }) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const entries = store.getters.getVideoCache[channelId].videos.map(entry => (
+        entry.videoId === 'aaaaaaaaaa3' ? { ...entry, premiereDate: new Date(start).toISOString() } : entry
+      ))
+      store.commit('updateVideoCacheByChannel', { channelId, entries })
+    }, { channelId: CHANNEL_A, start: now + 1000 })
+    await page.clock.install({ time: now })
+    await goTo(page, 'subscriptions')
+    await expect(page.getByText('Upcoming premiere video')).toHaveCount(0)
+
+    await page.clock.fastForward(1100)
+    await expect(page.getByText('Upcoming premiere video')).toBeVisible()
+
+    await goTo(page, 'userplaylists')
+    await page.clock.setFixedTime(now)
+    await goTo(page, 'subscriptions')
+    expect(await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getSubscriptionVideosFeed.videos.some(entry => entry.videoId === 'aaaaaaaaaa3')
+    })).toBe(false)
+    await expect(page.getByText('Upcoming premiere video')).toHaveCount(0)
+  })
+
   test('polls a started premiere for watching counts and its completed video state', async ({ page }) => {
     await goTo(page, 'trending')
     await page.clock.install({ time: now + 30 * 24 * HOUR - 30_000 })

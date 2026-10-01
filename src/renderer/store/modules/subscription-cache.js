@@ -53,7 +53,7 @@ const state = {
   liveCache: {},
   shortsCache: {},
   postsCache: {},
-  subscriptionVideoProcessingTimestamp: 0,
+  subscriptionVideosFeedVersion: 0,
 
   subscriptionCacheReady: false,
   subscriptionFeedRefreshInProgress: false,
@@ -92,9 +92,10 @@ const getters = {
   getPostsCache: (state, getters) => applySubscriptionSeenPostsToCache(state.postsCache, getters.getSubscriptionSeenPosts),
 
   // Retain merged, sorted videos across route mounts and logical tabs. The
-  // timestamp invalidates time-dependent filtering when a premiere starts.
-  getSubscriptionVideosFeed: (state, getters) => {
-    const now = Math.max(Date.now(), state.subscriptionVideoProcessingTimestamp)
+  // Destructuring the version tracks explicit clock invalidation, while
+  // processing always uses the current clock, including backward corrections.
+  getSubscriptionVideosFeed: ({ subscriptionVideosFeedVersion }, getters) => {
+    const now = Date.now()
     let nextPremiereTimestamp = null
     const cache = getters.getVideoCache
     const videos = getSubscriptionsForFeed(getters.getActiveProfile.subscriptions, 'videos').flatMap(channel => {
@@ -115,7 +116,7 @@ const getters = {
         return ensureUpcomingSubscriptionFeedPublished(source, timestamp, now)
       })
     })
-    return { videos: updateVideoListAfterProcessing(videos, now), nextPremiereTimestamp }
+    return { videos: updateVideoListAfterProcessing(videos, now), nextPremiereTimestamp, processedAt: now }
   },
 }
 
@@ -435,8 +436,8 @@ const actions = {
 }
 
 const mutations = {
-  setSubscriptionVideoProcessingTimestamp(state, timestamp) {
-    state.subscriptionVideoProcessingTimestamp = timestamp
+  invalidateSubscriptionVideosFeed(state) {
+    state.subscriptionVideosFeedVersion++
   },
   markSubscriptionEntriesAsSeenInCache(state, cacheEntries) {
     for (const { tab, channelId, entries: marked } of cacheEntries) {

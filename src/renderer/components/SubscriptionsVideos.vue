@@ -321,9 +321,11 @@ function loadVideosFromCacheSometimes() {
 }
 
 function loadVideosFromCacheForAllActiveProfileChannels() {
-  const nextPremiere = store.getters.getSubscriptionVideosFeed.nextPremiereTimestamp
-  if (nextPremiere !== null && nextPremiere <= premiereUpdateNow.value) {
-    store.commit('setSubscriptionVideoProcessingTimestamp', premiereUpdateNow.value)
+  const feed = store.getters.getSubscriptionVideosFeed
+  const now = Date.now()
+  const nextPremiere = feed.nextPremiereTimestamp
+  if (feed.processedAt > now || (nextPremiere !== null && nextPremiere <= now)) {
+    store.commit('invalidateSubscriptionVideosFeed')
   }
   videoList.value = store.getters.getSubscriptionVideosFeed.videos
   isLoading.value = false

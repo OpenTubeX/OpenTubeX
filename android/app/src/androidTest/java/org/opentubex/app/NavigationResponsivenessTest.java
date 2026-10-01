@@ -31,7 +31,12 @@ public class NavigationResponsivenessTest {
             evaluate(view, """
                 (() => {
                     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
-                    window.navigationSavedState = JSON.parse(JSON.stringify(store.state));
+                    window.navigationSavedState = {
+                        ...store.state,
+                        settings: { ...store.state.settings },
+                        profiles: { ...store.state.profiles },
+                        subscriptionCache: { ...store.state.subscriptionCache }
+                    };
                     window.navigationSavedFeed = localStorage.getItem('Subscriptions/currentTab');
                     store.commit('setFetchSubscriptionsAutomatically', false);
                     store.commit('setHideSubscriptionsVideos', false);
@@ -98,6 +103,10 @@ public class NavigationResponsivenessTest {
                     for (const key of ['navigationSort', 'navigationSorts', 'navigationElapsed', 'navigationSavedState', 'navigationSavedFeed']) delete window[key];
                     """);
             }
+            assertEquals("Restored playlist counts retain their Map type", "true", evaluate(view,
+                "document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPlaylistVideoCounts instanceof Map"));
+            assertEquals("Restored prompts retain their Set type", "true", evaluate(view,
+                "document.querySelector('#app').__vue_app__.config.globalProperties.$store.state.utils.openPrompts instanceof Set"));
         }
     }
 
