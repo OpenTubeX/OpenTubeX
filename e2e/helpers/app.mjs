@@ -178,6 +178,13 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}) {
       await new Promise((resolve) => setTimeout(resolve, (attempt + 1) * 1000))
     }
   }
+  // Listen before waiting for the first window or renderer readiness so startup
+  // exceptions cannot disappear before a test gets access to its page fixture.
+  const context = electronApp.context()
+  const startupErrors = []
+  const recordStartupError = error => startupErrors.push(error.error().message)
+  context.on('weberror', recordStartupError)
+
   const notifyPhase = async (phase, page) => {
     try {
       await options.onPhase?.(phase, page)
@@ -188,7 +195,7 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}) {
   }
   // Tests control WAN reachability independently of the host running them.
   // Page routes can override these replies to exercise real offline recovery.
-  await electronApp.context().route(INTERNET_CHECK_URL, route => route.fulfill({ status: 204 }))
+  await context.route(INTERNET_CHECK_URL, route => route.fulfill({ status: 204 }))
   await notifyPhase('electronConnected')
 
   const page = await electronApp.firstWindow()
@@ -229,8 +236,16 @@ export async function launchApp(userDataDir, extraArgs = [], options = {}) {
     )
   }
 
-  await waitForAppReady(page)
-  await notifyPhase('interactive', page)
+  try {
+    await waitForAppReady(page)
+    await notifyPhase('interactive', page)
+    expect(startupErrors, 'Renderer errors during startup').toEqual([])
+  } catch (error) {
+    await electronApp.close().catch(() => {})
+    throw error
+  } finally {
+    context.off('weberror', recordStartupError)
+  }
 
   return { electronApp, page }
 }

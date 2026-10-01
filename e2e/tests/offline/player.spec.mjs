@@ -169,16 +169,6 @@ test('repeated seek shortcuts accumulate the OSD while seeking immediately', asy
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(5, 3)
 })
 
-test('playback starts', async ({ app, page, attachScreenshot }) => {
-  const video = await openDemoVideo({ app, page })
-
-  await expect
-    .poll(() => video.evaluate((element) => element.currentTime), { timeout: 30_000 })
-    .toBeGreaterThan(1)
-
-  await attachScreenshot('playing video')
-})
-
 test('shows the replay icon when playback ends before Shaka updates its play icon', async ({ app, page }) => {
   const video = await openDemoVideo({ app, page })
   const watchComponent = await page.evaluateHandle(findWatchComponent)

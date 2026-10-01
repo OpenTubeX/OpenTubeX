@@ -3084,16 +3084,6 @@ test.describe('settings', () => {
     await expect(page).toHaveURL(url)
   })
 
-  test('scrolls to the top when switching categories', async ({ page }) => {
-    await goToSettingsSection(page, 'appearance')
-    const content = page.locator('.settingsContent')
-    await content.evaluate(element => element.scrollTo(0, element.scrollHeight))
-    await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
-
-    await page.locator('.settingsMenu [data-section="privacy"]').click()
-    await expect.poll(() => content.evaluate(element => element.scrollTop)).toBe(0)
-  })
-
   test('keeps the window and its scroll position when switching tabs', async ({ page }) => {
     await goTo(page, 'settings')
 

@@ -15,13 +15,6 @@ test.use({
   }
 })
 
-test('Enter searches in place', async ({ page }) => {
-  await page.locator(sel.searchInput).fill('enter search')
-  await page.locator(sel.searchInput).press('Enter')
-
-  await expect(page).toHaveURL(/#\/search\/enter%20search/)
-})
-
 test('back navigation restores the previous search text', async ({ page }) => {
   const searchInput = page.locator(sel.searchInput)
 

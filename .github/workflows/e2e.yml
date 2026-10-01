@@ -226,6 +226,11 @@ jobs:
         name: dist-e2e
         path: dist-e2e
 
+    - name: Install Chromium for browser integration tests
+      if: ${{ matrix.project == 'offline' }}
+      run: pnpm exec playwright install --with-deps --only-shell chromium
+      shell: bash
+
     - name: Start sync server
       if: ${{ matrix.project == 'network' }}
       run: docker compose -f e2e/sync-server/compose.yml up -d --wait --pull always

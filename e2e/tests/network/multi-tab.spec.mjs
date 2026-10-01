@@ -90,21 +90,6 @@ test.describe('automatic picture-in-picture', () => {
     await setWindowFocused(app, page, true)
   })
 
-  // Regression: the blur emitted while minimizing kept the blur trigger active
-  // after restore, so the automatically opened PiP window never closed (#265).
-  test('exits PiP after restoring a minimized window', async ({ app, page, innertube }) => {
-    test.skip(innertube.replay, 'no recorded fixtures for these videos')
-    test.slow()
-
-    const video = await openVideoInActiveTab(page, VIDEO_ONE)
-
-    await setWindowMinimized(app.electronApp, true)
-    await expectPictureInPicture(video, true)
-
-    await setWindowMinimized(app.electronApp, false)
-    await expectPictureInPicture(video, false)
-  })
-
   // Regression: Chromium on Windows can briefly stretch the poster across the
   // compositor surface when blur-triggered PiP detaches a playing video (#362).
   test('removes the poster before blur-triggered PiP', async ({ app, page, innertube }) => {

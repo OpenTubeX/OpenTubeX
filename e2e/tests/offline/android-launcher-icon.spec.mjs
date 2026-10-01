@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises'
-import { test, expect } from '../../helpers/app.mjs'
+import { test, expect } from '@playwright/test'
 
 test('nightly themed launcher wrench stays inside the adaptive icon safe zone', async ({ page }, testInfo) => {
   const xml = await readFile('android/app/src/debug/res/drawable/ic_launcher_nightly_monochrome.xml', 'utf8')
