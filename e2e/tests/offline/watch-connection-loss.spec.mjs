@@ -1,5 +1,5 @@
-import { test, expect, setWindowSize } from '../../helpers/app.mjs'
-import { openMockedVideo } from '../../helpers/player.mjs'
+import { test, expect, setWindowSize, sel } from '../../helpers/app.mjs'
+import { openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 
 test.use({
@@ -12,6 +12,62 @@ test.use({
       useSponsorBlock: true,
     }
   }
+})
+
+for (const action of ['open', 'reload']) {
+  test(`resumes a watch page ${action} started offline after reconnecting`, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    if (action === 'reload') await openMockedVideo(page)
+    await page.evaluate(() => {
+      Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })
+      window.dispatchEvent(new Event('offline'))
+    })
+    await expect(page.locator('.connectionStatus')).toHaveText('Offline')
+
+    if (action === 'open') {
+      await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+      await page.locator(sel.searchInput).press('Enter')
+    } else {
+      const watch = await watchViewHandle(page)
+      await watch.evaluate(vm => { vm.reloadView() })
+      await watch.dispose()
+    }
+    const skeleton = page.locator('.videoPlayerPlaceholder.ft-shimmer')
+    await expect(skeleton).toBeVisible()
+    await page.evaluate(() => {
+      Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => true })
+      window.dispatchEvent(new Event('online'))
+    })
+    await expect(skeleton).toHaveCount(0)
+    await waitForPlayback(page)
+    await expect(page.locator('.videoTitle')).toContainText('Me at the zoo')
+  })
+}
+
+test('resumes watch metadata interrupted by a brief disconnect', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  let interrupted = false
+  await page.route('https://www.youtube.com/watch?**', async route => {
+    if (interrupted) return route.fallback()
+    interrupted = true
+    await page.evaluate(() => {
+      Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false })
+      window.dispatchEvent(new Event('offline'))
+    })
+    await route.abort('internetdisconnected')
+  })
+  await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page.locator('.connectionStatus')).toHaveText('Offline')
+  const skeleton = page.locator('.videoPlayerPlaceholder.ft-shimmer')
+  await expect(skeleton).toBeVisible()
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => true })
+    window.dispatchEvent(new Event('online'))
+  })
+  await expect(skeleton).toHaveCount(0)
+  await waitForPlayback(page)
+  await expect(page.locator('.videoTitle')).toContainText('Me at the zoo')
 })
 
 for (const width of [1600, 480]) {

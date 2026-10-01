@@ -3092,8 +3092,9 @@ export default defineComponent({
       await initializeNetworkRecovery().ready
       if (!this.isCurrentVideoLoad(loadGeneration, videoId)) return
       if (getConnectionState() === 'offline') {
-        if (!metadataOnly) this.finishDownloadedPlaybackWithoutMetadata()
-        return
+        if (metadataOnly || this.finishDownloadedPlaybackWithoutMetadata()) return
+        // Keep the metadata request queued for reconnect instead of abandoning
+        // the watch page with its loading skeleton still visible.
       }
 
       try {
@@ -3794,8 +3795,8 @@ export default defineComponent({
       await initializeNetworkRecovery().ready
       if (!this.isCurrentVideoLoad(loadGeneration, videoId)) return
       if (getConnectionState() === 'offline') {
-        if (!metadataOnly) this.finishDownloadedPlaybackWithoutMetadata()
-        return
+        if (metadataOnly || this.finishDownloadedPlaybackWithoutMetadata()) return
+        // The shared network queue resumes this request when connectivity returns.
       }
 
       const shortsExtractionKey = this.customShortsPlayerActive && !metadataOnly
