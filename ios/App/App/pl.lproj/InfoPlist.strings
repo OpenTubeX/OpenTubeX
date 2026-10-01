@@ -1,2 +1,2 @@
 "NSCameraUsageDescription" = "Zeskanuj kod parowania wyświetlony na dodawanym urządzeniu.";
-"NSLocalNetworkUsageDescription" = "Synchronizacja ustawień i danych między urządzeniami";
+"NSLocalNetworkUsageDescription" = "Wykrywanie urządzeń w sieci lokalnej i przesyłanie do nich filmów oraz synchronizowanie ustawień i danych między urządzeniami.";
