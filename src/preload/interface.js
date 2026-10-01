@@ -376,7 +376,9 @@ export default {
     start: payload => navigator.userActivation.isActive
       ? ipcRenderer.invoke(IpcChannels.DLNA_START, payload)
       : Promise.resolve({ error: 'Casting requires a user action' }),
-    stop: castId => ipcRenderer.invoke(IpcChannels.DLNA_STOP, castId)
+    stop: castId => ipcRenderer.invoke(IpcChannels.DLNA_STOP, castId),
+    hasFailed: castId => ipcRenderer.invoke(IpcChannels.DLNA_HAS_FAILED, castId),
+    recover: (castId, payload) => ipcRenderer.invoke(IpcChannels.DLNA_RECOVER, castId, payload)
   },
 
   /**
