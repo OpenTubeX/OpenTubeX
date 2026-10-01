@@ -318,6 +318,8 @@ test('uses one playing interface hide delay in portrait, landscape, fullscreen a
     await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
     await expect(controls).toHaveAttribute('shown', 'true')
     await expect(player).not.toHaveClass(/no-cursor/)
+    await page.waitForTimeout(250)
+    await expect(controls).toHaveAttribute('shown', 'true')
     await expect(controls).not.toHaveAttribute('shown', 'true', { timeout: 2000 })
     await expect(player).toHaveClass(/no-cursor/)
 
