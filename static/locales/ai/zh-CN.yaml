@@ -352,6 +352,7 @@ Settings:
     Invalid Engine: 请输入名称以及包含 %s 的有效 HTTP 或 HTTPS 搜索 URL。
     Engine Limit: 最多可以添加 {count} 个自定义搜索引擎。
   Theme Settings:
+    Always Show Mobile Search Bar: "始终显示移动端搜索栏"
     Frosted Glass Player UI: "磨砂玻璃播放器界面"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato 玫瑰水"
@@ -1501,6 +1502,8 @@ Context Menu:
   Search With Multiple: 搜索方式…
   Selection Too Long: 所选内容过长，无法搜索（超过 {count} 个字符）
 Tab Organizer:
+  Tab History: "标签页历史记录"
+  Current Page: "当前页面"
   Icon Labels:
     Podcast: '播客'
     Clock: '时钟'

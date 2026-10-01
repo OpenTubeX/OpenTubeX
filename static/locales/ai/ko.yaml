@@ -448,6 +448,7 @@ Settings:
     Invalid Engine: 이름과 %s을(를) 포함하는 올바른 HTTP 또는 HTTPS 검색 URL을 입력하세요.
     Engine Limit: 사용자 지정 검색 엔진은 최대 {count}개까지 추가할 수 있습니다.
   Theme Settings:
+    Always Show Mobile Search Bar: "모바일 검색창 항상 표시"
     Frosted Glass Player UI: "반투명 유리 효과 플레이어 UI"
     Move Downloads to App Header: 다운로드를 앱 헤더로 이동
     Move Settings to App Header: 설정을 앱 헤더로 이동
@@ -1864,6 +1865,8 @@ Context Menu:
   Search With Multiple: 검색 엔진 선택...
   Selection Too Long: 선택한 텍스트가 너무 길어 검색할 수 없습니다. {count}자 이하여야 합니다
 Tab Organizer:
+  Tab History: "탭 기록"
+  Current Page: "현재 페이지"
   Icon Labels:
     Podcast: '팟캐스트'
     Clock: '시계'

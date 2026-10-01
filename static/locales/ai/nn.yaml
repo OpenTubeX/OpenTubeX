@@ -374,6 +374,7 @@ Settings:
     Invalid Engine: Skriv inn eit namn og ei gyldig HTTP- eller HTTPS-søkjeadresse som inneheld %s.
     Engine Limit: Du kan leggje til opptil {count} eigne søkjemotorar.
   Theme Settings:
+    Always Show Mobile Search Bar: "Vis alltid søkjefeltet på mobil"
     Frosted Glass Player UI: "Spelargrensesnitt med frosta glas"
     Move Downloads to App Header: Flytt nedlastingar til apphovudet
     Move Settings to App Header: Flytt innstillingar til apphovudet
@@ -1795,6 +1796,8 @@ Context Menu:
   Search With Multiple: Søk med …
   Selection Too Long: Utvalet er for langt til å søkje etter (> {count} teikn)
 Tab Organizer:
+  Tab History: "Fanelogg"
+  Current Page: "Gjeldande side"
   Icon Labels:
     Podcast: 'Podkast'
     Clock: 'Klokke'

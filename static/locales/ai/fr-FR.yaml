@@ -352,6 +352,7 @@ Settings:
     Invalid Engine: Saisissez un nom et une URL de recherche HTTP ou HTTPS valide contenant %s.
     Engine Limit: Vous pouvez ajouter jusqu’à {count} moteurs de recherche personnalisés.
   Theme Settings:
+    Always Show Mobile Search Bar: "Toujours afficher la barre de recherche sur mobile"
     Frosted Glass Player UI: "Interface du lecteur avec effet verre dépoli"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Eau de Rose"
@@ -1500,6 +1501,8 @@ Context Menu:
   Search With Multiple: Rechercher avec...
   Selection Too Long: La sélection est trop longue pour la recherche (> {count} caractères)
 Tab Organizer:
+  Tab History: "Historique de l’onglet"
+  Current Page: "Page actuelle"
   Icon Labels:
     Podcast: 'Podcast'
     Clock: 'Horloge'

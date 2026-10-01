@@ -177,6 +177,73 @@
   overscroll-behavior: contain;
 }
 
+.capacitorPhoneTabHistory {
+  min-block-size: 0;
+  padding-block: 12px;
+  padding-inline: 16px;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+}
+
+.capacitorPhoneTabHistoryContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.capacitorPhoneTabHistoryEntry,
+.capacitorPhoneTabHistoryButton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-block-size: 48px;
+  padding: 12px;
+  color: var(--primary-text-color);
+  background-color: transparent;
+  border: 0;
+  border-radius: calc(8px * var(--ui-roundness));
+  cursor: pointer;
+  text-align: start;
+  font-size: 14px;
+}
+
+.historyEntryLabel {
+  flex: 1;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.capacitorPhoneTabHistoryEntry :deep(.ft-icon),
+.capacitorPhoneTabHistoryButton :deep(.ft-icon) {
+  flex: 0 0 20px;
+  inline-size: 20px;
+}
+
+
+.currentPageLabel {
+  color: var(--secondary-text-color);
+  font-size: 12px;
+}
+
+.capacitorPhoneTabHistoryButton {
+  inline-size: 100%;
+  border-block-start: 1px solid var(--border-color);
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+  font-size: 13px;
+}
+
+.capacitorPhoneTabHistoryEntry[aria-current='page'],
+.capacitorPhoneTabHistoryEntry:is(:hover, :active),
+.capacitorPhoneTabHistoryButton:is(:hover, :active) {
+  background-color: var(--side-nav-hover-color);
+}
+
+
+.withHistory .capacitorPhoneTabClose {
+  inset-block-end: 52px;
+}
+
 .capacitorPhoneOpenTabs,
 .capacitorPhoneSyncedTabsContent {
   min-block-size: max-content;

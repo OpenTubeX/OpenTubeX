@@ -354,6 +354,7 @@ Settings:
     Invalid Engine: Ange ett namn och en giltig HTTP- eller HTTPS-söknings-URL som innehåller %s.
     Engine Limit: Du kan lägga till högst {count} egna sökmotorer.
   Theme Settings:
+    Always Show Mobile Search Bar: "Visa alltid sökfältet på mobilen"
     Frosted Glass Player UI: "Spelargränssnitt med frostat glas"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato rosenvatten"
@@ -1515,6 +1516,8 @@ Context Menu:
   Search With Multiple: Sök med…
   Selection Too Long: Markeringen är för lång för en sökning (> {count} tecken)
 Tab Organizer:
+  Tab History: "Flikhistorik"
+  Current Page: "Aktuell sida"
   Icon Labels:
     Podcast: 'Podd'
     Clock: 'Klocka'

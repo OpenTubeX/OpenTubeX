@@ -1,0 +1,245 @@
+import { test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
+
+async function enablePhoneHeader(page) {
+  await page.evaluate(() => {
+    document.querySelector('.app').classList.add('capacitorTabs')
+    const seen = new Set()
+    const visit = vnode => {
+      if (!vnode || typeof vnode !== 'object' || seen.has(vnode)) return
+      seen.add(vnode)
+      if (vnode.component) {
+        if (vnode.component.type?.__name === 'CapacitorPhoneTabSwitcher') vnode.component.props.enabled = true
+        visit(vnode.component.subTree)
+      }
+      if (Array.isArray(vnode.children)) vnode.children.forEach(visit)
+      if (Array.isArray(vnode.dynamicChildren)) vnode.dynamicChildren.forEach(visit)
+    }
+    visit(document.querySelector('#app')._vnode)
+  })
+}
+
+for (const pinned of [false, true]) {
+  test(`crowded phone header keeps actions reachable with pinned search ${pinned}`, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 375, height: 850 })
+    await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1.25))
+    await page.evaluate(pinned => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setEnableDownloads', true)
+      store.commit('setMoveDownloadsToAppHeader', true)
+      store.commit('setMoveSettingsToAppHeader', true)
+      store.commit('setAlwaysShowMobileSearchBar', pinned)
+      store.commit('setHideHeaderSyncIndicator', false)
+      store.commit('setSyncServerStatus', 'syncing')
+      store.commit('setSettingsWindowView', 'about')
+      store.commit('setSettingsWindowMinimized', true)
+    }, pinned)
+    await enablePhoneHeader(page)
+    const header = page.locator('.topNav')
+    await expect.poll(() => header.evaluate(element => {
+      const controls = [...element.querySelectorAll('button, .logo')]
+        .map(control => control.getBoundingClientRect()).filter(rect => rect.width > 0 && rect.height > 0)
+      return controls.every(rect => rect.left >= 0 && rect.right <= window.innerWidth + 0.1) &&
+        controls.every((rect, index) => controls.slice(index + 1).every(other => rect.right <= other.left + 0.1 || other.right <= rect.left + 0.1))
+    })).toBe(true)
+    if (pinned) await expect.poll(() => page.locator('.pinnedSearchTrigger').evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThanOrEqual(48)
+    await page.locator('.profileTrigger').click()
+    await expect(page.locator('.downloadsShortcut')).toBeVisible()
+    await expect(page.locator('.allSettingsShortcut')).toBeVisible()
+    await expect(page.locator('.phoneOverflowSync')).toBeVisible()
+    await expect(page.locator('.phoneOverflowRestore')).toBeVisible()
+    await page.locator('.phoneOverflowRestore').click()
+    await expect(page.locator('.settingsWindow')).toBeVisible()
+  })
+}
+
+for (const zoom of [1, 1.25]) {
+  test(`phone header keeps the brand and replaces its row with balanced search at ${zoom} scale`, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 390, height: 850 })
+    await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
+    await enablePhoneHeader(page)
+    const header = page.locator('.topNav')
+    await expect(header.locator('.navBackButton')).toBeHidden()
+    await expect(header.locator('.navForwardButton')).toBeHidden()
+    await expect(header.locator('.logoText')).toBeVisible()
+    await expect(header.locator('.searchContainer')).toBeHidden()
+    await header.locator('.navSearchButton').click()
+    const input = header.locator('.ft-input')
+    await expect(input).toBeFocused()
+    await expect(header.locator('.logo')).toBeHidden()
+    await expect(header.locator('.profiles')).toBeHidden()
+    await expect.poll(() => header.evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      const search = element.querySelector('.searchContainer').getBoundingClientRect()
+      return Math.abs((search.left - bounds.left) - (bounds.right - search.right)) < 0.1 &&
+        search.top >= bounds.top && search.bottom <= bounds.bottom
+    })).toBe(true)
+    await input.fill('my draft')
+    await header.locator('.closeMobileSearch').click()
+    await expect(input).toBeHidden()
+    await expect(header.locator('.navSearchButton')).toBeFocused()
+    await header.locator('.navSearchButton').click()
+    await expect(input).toHaveValue('my draft')
+    await input.press('Escape')
+    await expect(header.locator('.logo')).toBeVisible()
+    await expect(input).toBeHidden()
+    await page.keyboard.press('Control+l')
+    await expect(input).toBeFocused()
+  })
+
+  test(`always-visible phone search returns to its pill and persists at ${zoom} scale`, async ({ app, page, attachScreenshot }) => {
+    await setWindowSize(app, page, { width: 375, height: 850 })
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
+    await enablePhoneHeader(page)
+    await expect(page.locator('.pinnedSearchTrigger')).toHaveCount(0)
+    await page.evaluate(async theme => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateBaseTheme', theme)
+      await store.dispatch('updateAlwaysShowMobileSearchBar', true)
+    }, zoom === 1 ? 'dark' : 'light')
+    const pill = page.locator('.pinnedSearchTrigger')
+    await expect(pill).toBeVisible()
+    await expect(page.locator('.topNav .logo')).toBeHidden()
+    await expect(page.locator('.capacitorPhoneTabSwitcherButton')).toBeVisible()
+    await expect(page.locator('.profileTrigger')).toBeVisible()
+    await expect.poll(() => pill.evaluate(element => {
+      const pill = element.getBoundingClientRect()
+      const tabs = document.querySelector('.capacitorPhoneTabSwitcherButton').getBoundingClientRect()
+      return pill.height >= 48 && pill.width >= 48 && pill.right <= tabs.left && pill.left >= 0
+    })).toBe(true)
+    await attachScreenshot('always-visible mobile search')
+    await pill.click()
+    const input = page.locator('.topNav .ft-input')
+    await expect(input).toBeFocused()
+    await input.fill('saved draft')
+    await input.press('Escape')
+    await expect(pill).toBeFocused()
+    await pill.click()
+    await expect(input).toHaveValue('saved draft')
+    await page.locator('.closeMobileSearch').click()
+    await page.locator('.capacitorPhoneTabSwitcherButton').click()
+    await expect(page.locator('.capacitorPhoneTabDialog')).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(pill).toBeVisible()
+    await page.reload()
+    await expect(pill).toBeVisible()
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setHideSearchBar', true))
+    await expect(pill).toHaveCount(0)
+    await expect(page.locator('.navSearchButton')).toHaveCount(0)
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setHideSearchBar', false)
+      return store.dispatch('updateAlwaysShowMobileSearchBar', false)
+    })
+    await expect(pill).toHaveCount(0)
+    await expect(page.locator('.navSearchButton')).toBeVisible()
+  })
+}
+
+test.describe('phone search suggestions', () => {
+  test.use({
+    seed: {
+      settings: { enableSearchSuggestions: false },
+      searchHistory: [{ _id: 'header test', lastUpdatedAt: Date.now() }]
+    }
+  })
+
+  for (const zoom of [1, 1.25]) {
+    for (const direction of ['ltr', 'rtl']) {
+      test(`span the whole search bar at ${zoom} scale in ${direction}`, async ({ app, page }) => {
+        await setWindowSize(app, page, { width: 375, height: 850 })
+        await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
+        await page.evaluate(dir => { document.body.dir = dir }, direction)
+        await enablePhoneHeader(page)
+        await page.locator('.navSearchButton').click()
+        const results = page.locator('.topNav .searchInput .list')
+        await expect(results).toBeVisible()
+        await expect(results).toContainText('header test')
+        await expect.poll(() => results.evaluate(list => {
+          const bounds = list.getBoundingClientRect()
+          const search = list.closest('.searchContainer').getBoundingClientRect()
+          return Math.abs(bounds.left - search.left) < 0.1 &&
+            Math.abs(bounds.right - search.right) < 0.1 &&
+            Math.abs(bounds.top - search.bottom) < 0.1
+        })).toBe(true)
+      })
+    }
+  }
+})
+
+test('phone tab overview exposes multi-step back and forward history without changing tabs', async ({ app, page }) => {
+  await goTo(page, 'history')
+  await goTo(page, 'userplaylists')
+  await goTo(page, 'subscriptions')
+  await setWindowSize(app, page, { width: 390, height: 850 })
+  await enablePhoneHeader(page)
+  const activeTabId = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPresentedTabId)
+  const openHistory = async () => {
+    await page.locator('.capacitorPhoneTabSwitcherButton').click()
+    await page.getByRole('button', { name: 'Tab history', exact: true }).click()
+    await expect(page.locator('.capacitorPhoneTabHistory')).toBeVisible()
+  }
+  await openHistory()
+  await expect.poll(() => page.locator('.capacitorPhoneTabHistoryEntry').first().evaluate(entry => {
+    const icon = entry.querySelector('.ft-icon').getBoundingClientRect()
+    const label = entry.querySelector('span[dir="auto"]').getBoundingClientRect()
+    return icon.width <= 20.1 && Math.abs(label.left - icon.right - 12) < 0.1
+  })).toBe(true)
+  await expect(page.locator('.capacitorPhoneTabHistoryEntry[aria-current="page"]')).toContainText('Subscriptions')
+  await page.locator('.capacitorPhoneTabHistoryEntry').filter({ hasText: /^History/ }).click()
+  await expect(page).toHaveURL(/#\/history/)
+  await expect(page.locator('.capacitorPhoneTabOverlay')).toBeHidden()
+  await openHistory()
+  await page.locator('.capacitorPhoneTabHistoryEntry').filter({ hasText: /^Subscriptions/ }).last().click()
+  await expect(page).toHaveURL(/#\/subscriptions/)
+  expect(await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPresentedTabId)).toBe(activeTabId)
+  await openHistory()
+  await page.keyboard.press('Escape')
+  await expect(page.locator('.capacitorPhoneOpenTabs')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Tab history', exact: true })).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(page.locator('.capacitorPhoneTabSwitcherButton')).toBeFocused()
+})
+
+test('phone tab history clamps its rendered scroll range after resize and fewer entries', async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 390, height: 550 })
+  await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(0.95))
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const tab = store.getters.getPresentedTab
+    const entry = tab.history[tab.historyIndex]
+    store.commit('setTabNavigation', {
+      tabId: tab.id,
+      route: tab.route,
+      history: Array.from({ length: 40 }, (_, index) => ({ ...entry, title: `Page ${index}` })),
+      historyIndex: 39
+    })
+  })
+  await enablePhoneHeader(page)
+  await page.locator('.capacitorPhoneTabSwitcherButton').click()
+  await page.getByRole('button', { name: 'Tab history', exact: true }).click()
+  const panel = page.locator('.capacitorPhoneTabHistory')
+  const checkRange = () => panel.evaluate(element => {
+    const content = element.querySelector('.capacitorPhoneTabHistoryContent')
+    const bottom = content.getBoundingClientRect().bottom + Number.parseFloat(getComputedStyle(element).paddingBottom)
+    const end = element.getBoundingClientRect().bottom
+    const maximum = Math.max(0, bottom - end + element.scrollTop)
+    const track = element.querySelector('.os-scrollbar-vertical .os-scrollbar-track')
+    const thumb = track.querySelector('.os-scrollbar-handle')
+    return element.scrollTop <= maximum + 1 && (maximum === 0
+      ? element.querySelector('.os-scrollbar-vertical').classList.contains('os-scrollbar-unusable')
+      : Math.abs(thumb.getBoundingClientRect().height / track.getBoundingClientRect().height - element.clientHeight / element.scrollHeight) < 0.02)
+  })
+  await panel.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => panel.evaluate(element => element.scrollTop)).toBeGreaterThan(100)
+  await setWindowSize(app, page, { width: 760, height: 850 })
+  await expect.poll(checkRange).toBe(true)
+  await panel.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const tab = store.getters.getPresentedTab
+    store.commit('setTabNavigation', { tabId: tab.id, route: tab.route, history: tab.history.slice(0, 2), historyIndex: 1 })
+  })
+  await expect.poll(() => panel.evaluate(element => element.scrollTop)).toBe(0)
+  await expect.poll(checkRange).toBe(true)
+})

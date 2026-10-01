@@ -171,6 +171,10 @@ test('shared settings search index includes only settings available on this plat
   assert.ok(mobileValues.some(({ label }) => label === locale.Settings['Theme Settings']['Move Settings to App Header']))
   assert.ok(mobileValues.some(({ label }) => label === locale.Settings['Theme Settings']['UI Scale']))
   assert.ok(!mobileValues.some(({ label }) => label === 'Show progress as notification'))
+  const mobileSearchLabel = locale.Settings['Theme Settings']['Always Show Mobile Search Bar']
+  assert.ok(mobileValues.some(({ label }) => label === mobileSearchLabel))
+  assert.ok(!desktopValues.some(({ label }) => label === mobileSearchLabel))
+  assert.ok(!webValues.some(({ label }) => label === mobileSearchLabel))
 })
 
 test('mobile playback search excludes settings that have no Capacitor behavior', () => {
