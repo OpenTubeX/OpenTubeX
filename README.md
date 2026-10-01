@@ -196,8 +196,6 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
   <img alt="Get it on Obtainium" src="docs/badges/obtainium.png" width="215" align="middle">
 </a>
 
-[![Packaging status](https://repology.org/badge/vertical-allrepos/opentubex.svg)](https://repology.org/project/opentubex/versions)
-<br />
 [![Copr build status](https://copr.fedorainfracloud.org/coprs/d3sox/opentubex/package/opentubex/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/d3sox/opentubex/package/opentubex/)
 
 #### Automated Builds (Nightly / Daily)
@@ -225,11 +223,11 @@ The first build with a green check mark is the latest build.
 
 ![Repobeats analytics image](https://repobeats.axiom.co/api/embed/7abf4173ece7177b69cfb890c44de4385c4a45f1.svg "Repobeats analytics image")
 
-<a href="https://www.star-history.com/?repos=opentubex%2Fopentubex&type=date&legend=bottom-right">
+<a href="https://www.star-history.com/?repos=OpenTubeX%2FOpenTubeX&type=date&legend=bottom-right">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=opentubex/opentubex&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=opentubex/opentubex&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=opentubex/opentubex&type=date&legend=top-left" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=OpenTubeX/OpenTubeX&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=OpenTubeX/OpenTubeX&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=OpenTubeX/OpenTubeX&type=date&legend=top-left" />
  </picture>
 </a>
 
