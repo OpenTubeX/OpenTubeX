@@ -1,6 +1,6 @@
 import { registerPlugin } from '@capacitor/core'
 import { isDlnaSourceUrl } from './dlnaSource.js'
-import { createAvTransportBody, createDlnaMetadata, formatDlnaTime, parseDlnaDevice, parseSsdpLocation } from '../../../dlnaProtocol.js'
+import { createAvTransportBody, createDlnaMetadata, formatDlnaTime, parseDlnaPosition, parseDlnaDevice, parseSsdpLocation } from '../../../dlnaProtocol.js'
 
 /** Native networking keeps multicast and streaming bytes outside the WebView. */
 export function createMobileDlnaCast(native) {
@@ -19,7 +19,7 @@ export function createMobileDlnaCast(native) {
 
   async function send(device, action, fields) {
     const body = createAvTransportBody(device.serviceType, action, fields)
-    await request(device.controlUrl, 'POST', body, {
+    return request(device.controlUrl, 'POST', body, {
       'Content-Type': 'text/xml; charset="utf-8"',
       SOAPACTION: `"${device.serviceType}#${action}"`
     })
@@ -91,8 +91,14 @@ export function createMobileDlnaCast(native) {
       if (activeCast?.castId !== castId || payload.audioUrl || !await cast.hasFailed(castId)) {
         return { error: 'No failed cast is available to recover' }
       }
+      let position = null
+      try {
+        position = parseDlnaPosition(await send(activeCast.device, 'GetPositionInfo', { InstanceID: 0 }))
+      } catch { /* Some renderers do not report their playback position. */ }
       await cast.stop(castId)
-      return cast.start(payload)
+      return cast.start({
+        ...payload, startSeconds: (Number.isFinite(payload.startSeconds) ? payload.startSeconds : 0) + (position ?? 0)
+      })
     },
 
     async hasFailed(castId) {
