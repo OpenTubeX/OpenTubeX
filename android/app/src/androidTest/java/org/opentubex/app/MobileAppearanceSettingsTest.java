@@ -231,14 +231,19 @@ public class MobileAppearanceSettingsTest {
         """;
 
     @Test
-    public void enlargedPhoneHeaderKeepsBackAndBothShortcutsWithinViewport() throws Exception {
+    public void enlargedPhoneHeaderKeepsHistoryAndOverflowShortcutsAccessible() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             WebView view = webView(scenario);
+            awaitCondition(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || !!document.querySelector('.tutorialActions button')");
+            evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
+            awaitCondition(view, "!document.querySelector('.tutorialOverlay')");
             try {
                 prepare(view);
                 evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/userplaylists')");
                 awaitCondition(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$route.path === '/userplaylists'");
-                awaitCondition(view, "!!document.querySelector('.topNav .downloadsButton') && !!document.querySelector('.topNav .settingsButton')");
+                assertEquals("Phone history arrows are replaced by the tab overview", "true", evaluate(view,
+                    "document.querySelector('.navBackButton').getBoundingClientRect().width === 0 && " +
+                    "document.querySelector('.navForwardButton').getBoundingClientRect().width === 0"));
                 awaitCondition(view, """
                     (() => {
                         const viewport = window.visualViewport;
@@ -247,8 +252,8 @@ public class MobileAppearanceSettingsTest {
                             return rect.width > 0 && rect.height > 0 &&
                                 getComputedStyle(element).visibility !== 'hidden';
                         };
-                        const back = document.querySelector('.navBackButton');
-                        if (!back || !visible(back)) return false;
+                        if (!['.navSearchButton', '.capacitorPhoneTabSwitcherButton', '.profileTrigger']
+                            .every(selector => visible(document.querySelector(selector)))) return false;
                         const buttons = [...document.querySelectorAll('.topNav button')].filter(visible);
                         return buttons.length > 0 && buttons.every(button => {
                             const rect = button.getBoundingClientRect();
@@ -259,30 +264,36 @@ public class MobileAppearanceSettingsTest {
                         });
                     })()
                     """);
-                String route = "document.querySelector('#app').__vue_app__.config.globalProperties.$route.fullPath";
-                String backDisabled = "document.querySelector('.navBackButton button').getAttribute('aria-disabled') === 'true'";
-                String expectedForwardRoute = null;
-                for (int entry = 0; entry < 10 && !"true".equals(evaluate(view, backDisabled)); entry++) {
-                    expectedForwardRoute = evaluate(view, route);
-                    assertTrue("Back remains visible while navigating history", "true".equals(evaluate(view,
-                        "document.querySelector('.navBackButton button').getBoundingClientRect().width > 0")));
-                    evaluate(view, "document.querySelector('.navBackButton button').click()");
-                    awaitCondition(view, route + " !== " + expectedForwardRoute + " || " + backDisabled);
-                }
-                assertEquals("Back is disabled at the earliest history entry", "true", evaluate(view, backDisabled));
-                assertTrue("The fixture has a forward history entry", expectedForwardRoute != null);
+                assertEquals("Optional shortcuts leave room for the phone header", "true", evaluate(view,
+                    "(document.querySelector('.downloadsButton')?.getBoundingClientRect().width ?? 0) === 0 && " +
+                    "(document.querySelector('.settingsButton')?.getBoundingClientRect().width ?? 0) === 0"));
+                evaluate(view, "document.querySelector('.profileTrigger').click()");
                 awaitCondition(view, """
                     (() => {
-                        const forward = document.querySelector('.navForwardButton button');
-                        const rect = forward.getBoundingClientRect();
                         const viewport = window.visualViewport;
-                        return forward.getAttribute('aria-disabled') === 'false' && rect.width > 0 &&
-                            rect.left >= viewport.offsetLeft - 1 &&
-                            rect.right <= viewport.offsetLeft + viewport.width + 1;
+                        return ['.downloadsShortcut', '.allSettingsShortcut'].every(selector => {
+                            const rect = document.querySelector(selector)?.getBoundingClientRect();
+                            return rect && rect.width > 0 && rect.height > 0 &&
+                                rect.left >= viewport.offsetLeft - 1 &&
+                                rect.right <= viewport.offsetLeft + viewport.width + 1 &&
+                                rect.top >= viewport.offsetTop - 1 &&
+                                rect.bottom <= viewport.offsetTop + viewport.height + 1;
+                        });
                     })()
                     """);
-                evaluate(view, "document.querySelector('.navForwardButton button').click()");
-                awaitCondition(view, route + " === " + expectedForwardRoute);
+                scenario.onActivity(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
+                awaitCondition(view, "document.querySelector('.profileTrigger').getAttribute('aria-expanded') === 'false'");
+                String route = "document.querySelector('#app').__vue_app__.config.globalProperties.$route.fullPath";
+                String firstRoute = evaluate(view,
+                    "document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPresentedTab.history[0].route.fullPath");
+                String lastRoute = evaluate(view, route);
+                assertTrue("The fixture retains backward and forward history", !firstRoute.equals(lastRoute));
+                openPhoneTabHistory(view);
+                evaluate(view, "document.querySelector('.capacitorPhoneTabHistoryEntry:first-child').click()");
+                awaitCondition(view, route + " === " + firstRoute + " && !document.querySelector('.capacitorPhoneTabDialog')");
+                openPhoneTabHistory(view);
+                evaluate(view, "document.querySelector('.capacitorPhoneTabHistoryEntry:last-child').click()");
+                awaitCondition(view, route + " === " + lastRoute + " && !document.querySelector('.capacitorPhoneTabDialog')");
             } finally {
                 restore(view);
             }
@@ -447,6 +458,13 @@ public class MobileAppearanceSettingsTest {
         return view.get();
     }
 
+    private static void openPhoneTabHistory(WebView view) throws Exception {
+        evaluate(view, "document.querySelector('.capacitorPhoneTabSwitcherButton').click()");
+        awaitCondition(view, "!!document.querySelector('.capacitorPhoneTabHistoryButton')");
+        evaluate(view, "document.querySelector('.capacitorPhoneTabHistoryButton').click()");
+        awaitCondition(view, "!!document.querySelector('.capacitorPhoneTabHistoryEntry')");
+    }
+
     private static void prepare(WebView view) throws Exception {
         evaluate(view, """
             (() => {
@@ -454,7 +472,8 @@ public class MobileAppearanceSettingsTest {
                 const values = {
                     UiScale: 150, CapacitorLayoutMode: 'phone', EnableDownloads: true,
                     MoveDownloadsToAppHeader: true, MoveSettingsToAppHeader: true,
-                    HideHeaderLogo: false, AlwaysShowScrollbars: true,
+                    HideHeaderLogo: false, HideSearchBar: false, AlwaysShowMobileSearchBar: false,
+                    AlwaysShowScrollbars: true,
                     FetchSubscriptionsAutomatically: false,
                     QuickSettings: ['baseTheme', 'mainColor', 'uiScale', 'thumbnailSize',
                         'defaultQuality', 'defaultPlayback', 'playNextVideo',

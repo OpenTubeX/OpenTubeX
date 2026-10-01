@@ -46,13 +46,29 @@
             :inert="sessionToDelete !== null || sessionToOpen !== null"
           >
             <header class="capacitorPhoneTabHeader">
+              <button
+                v-if="activeView === 'history'"
+                type="button"
+                class="capacitorPhoneTabHeaderButton"
+                :aria-label="t('Back')"
+                @click="selectView('open', true)"
+              >
+                <FtIcon
+                  :icon="['fas', 'arrow-left']"
+                  aria-hidden="true"
+                />
+              </button>
               <div class="capacitorPhoneTabHeading">
                 <h2 id="capacitor-phone-tab-dialog-title">
-                  {{ t('Tab Organizer.Title') }}
+                  {{ activeView === 'history' ? t('Tab Organizer.Tab History') : t('Tab Organizer.Title') }}
                 </h2>
                 <span v-if="activeView === 'open'">
                   {{ t('Tab Organizer.Open Tab Count', { count: tabs.length }, tabs.length) }}
                 </span>
+                <span
+                  v-else-if="activeView === 'history'"
+                  dir="auto"
+                >{{ presentedTab ? tabTitle(presentedTab) : '' }}</span>
                 <span v-else>{{ t('Settings.Sync Settings.Tabs From Other Devices') }}</span>
               </div>
               <button
@@ -95,7 +111,7 @@
               @cancel="clearSelection"
             />
             <div
-              v-if="showSyncedTabsView"
+              v-if="showSyncedTabsView && activeView !== 'history'"
               class="capacitorPhoneTabViewTabs"
               role="tablist"
               :aria-label="t('Tab Organizer.Title')"
@@ -148,6 +164,7 @@
                   class="capacitorPhoneTabRow"
                   :class="{
                     active: tab.id === activeTabId,
+                    withHistory: tab.id === presentedTabId && !selecting,
                     pinned: tab.isPinned,
                     unloaded: tab.isUnloaded,
                     holding: drag.tabId === tab.id && drag.ready,
@@ -211,11 +228,24 @@
                       aria-hidden="true"
                     />
                   </button>
+                  <button
+                    v-if="tab.id === presentedTabId && !selecting"
+                    type="button"
+                    class="capacitorPhoneTabHistoryButton"
+                    @pointerdown.stop
+                    @click.stop="openTabHistory"
+                  >
+                    <FtIcon
+                      :icon="['fas', 'clock-rotate-left']"
+                      aria-hidden="true"
+                    />
+                    {{ t('Tab Organizer.Tab History') }}
+                  </button>
                 </div>
               </div>
             </div>
             <div
-              v-else
+              v-else-if="activeView === 'synced'"
               id="capacitor-phone-synced-tabs-panel"
               class="capacitorPhoneSyncedView"
               role="tabpanel"
@@ -312,6 +342,44 @@
                 </div>
               </div>
             </div>
+            <div
+              v-else
+              ref="historyScrollRef"
+              v-overlay-scrollbars
+              class="capacitorPhoneTabHistory"
+            >
+              <div
+                ref="historyContentRef"
+                class="capacitorPhoneTabHistoryContent"
+              >
+                <button
+                  v-for="entry in tabHistoryEntries"
+                  :key="entry.index"
+                  type="button"
+                  class="capacitorPhoneTabHistoryEntry"
+                  :aria-current="entry.offset === 0 ? 'page' : undefined"
+                  @click="jumpToHistory(entry.offset)"
+                >
+                  <FtIcon
+                    :icon="entry.icon"
+                    aria-hidden="true"
+                  />
+                  <span
+                    class="historyEntryLabel"
+                    dir="auto"
+                  >{{ entry.label }}</span>
+                  <span
+                    v-if="entry.offset === 0"
+                    class="currentPageLabel"
+                  >{{ t('Tab Organizer.Current Page') }}</span>
+                  <FtIcon
+                    v-else
+                    :icon="['fas', entry.offset < 0 ? 'arrow-left' : 'arrow-right']"
+                    aria-hidden="true"
+                  />
+                </button>
+              </div>
+            </div>
             <button
               v-if="activeView === 'open' && !selecting"
               type="button"
@@ -395,6 +463,8 @@ import CapacitorTabSelectionControls from './CapacitorTabSelectionControls.vue'
 import CapacitorTabActionsMenu from './CapacitorTabActionsMenu.vue'
 import { useCapacitorTabActions } from './useCapacitorTabActions'
 import { getTabGridReorder } from './tabGridReorder'
+import { getTabNavigationService } from '../../tabs/TabNavigationService'
+import { getTabPageIcon } from '../../tabs/tabPageIcon'
 
 const props = defineProps({
   enabled: {
@@ -419,10 +489,19 @@ const openTabsScrollRef = useTemplateRef('openTabsScrollRef')
 const openTabsContentRef = useTemplateRef('openTabsContentRef')
 const syncedTabsScrollRef = useTemplateRef('syncedTabsScrollRef')
 const syncedTabsContentRef = useTemplateRef('syncedTabsContentRef')
+const historyScrollRef = useTemplateRef('historyScrollRef')
+const historyContentRef = useTemplateRef('historyContentRef')
 const tabs = computed(() => store.getters.getTabs)
 const closedTabs = computed(() => store.getters.getClosedTabs)
 const activeTabId = computed(() => store.getters.getActiveTabId)
 const presentedTabId = computed(() => store.getters.getPresentedTabId)
+const presentedTab = computed(() => store.getters.getTabById(presentedTabId.value))
+const tabHistoryEntries = computed(() => presentedTab.value?.history.map((entry, index) => ({
+  index,
+  offset: index - presentedTab.value.historyIndex,
+  label: entry.title || entry.route.fullPath,
+  icon: getTabPageIcon(entry),
+})) ?? [])
 const syncEnabled = computed(() => store.getters.getSyncServerEnabled)
 const syncConnected = computed(() => store.getters.getSyncServerToken !== '')
 const syncSessionsEnabled = computed(() => store.getters.getSyncServerSyncSessions)
@@ -474,7 +553,7 @@ const dragOffsets = ref({})
 const dragSettling = ref(false)
 const suppressDragTransition = ref(false)
 let contentResizeObserver = null
-const viewScrollTop = { open: 0, synced: 0 }
+const viewScrollTop = { open: 0, synced: 0, history: 0 }
 const swipe = reactive({
   tabId: null,
   pointerId: null,
@@ -577,6 +656,7 @@ async function openSwitcher() {
 
 async function selectView(view, focus = false) {
   clearSelection()
+  const previousView = activeView.value
   const outgoingScroll = activeScrollRef()
   if (outgoingScroll) viewScrollTop[activeView.value] = outgoingScroll.scrollTop
   stopObservingContent()
@@ -587,6 +667,10 @@ async function selectView(view, focus = false) {
   observeActiveContent()
   if (!focus) return
 
+  if (view === 'open' && (previousView === 'history' || !showSyncedTabsView.value)) {
+    dialogRef.value?.querySelector('.capacitorPhoneTabHistoryButton')?.focus({ preventScroll: true })
+    return
+  }
   const id = view === 'synced'
     ? 'capacitor-phone-synced-tabs-tab'
     : 'capacitor-phone-open-tabs-tab'
@@ -594,11 +678,28 @@ async function selectView(view, focus = false) {
 }
 
 function activeScrollRef() {
+  if (activeView.value === 'history') return historyScrollRef.value
   return activeView.value === 'open' ? openTabsScrollRef.value : syncedTabsScrollRef.value
 }
 
 function activeContentRef() {
+  if (activeView.value === 'history') return historyContentRef.value
   return activeView.value === 'open' ? openTabsContentRef.value : syncedTabsContentRef.value
+}
+
+async function openTabHistory() {
+  viewScrollTop.history = 0
+  await selectView('history')
+  const current = historyContentRef.value?.querySelector('[aria-current="page"]')
+  current?.focus({ preventScroll: true })
+  current?.scrollIntoView({ block: 'nearest' })
+}
+
+async function jumpToHistory(offset) {
+  if (presentedTabId.value && offset !== 0) {
+    await getTabNavigationService().go(presentedTabId.value, offset)
+  }
+  closeSwitcher()
 }
 
 function clampActiveContentScroll() {
@@ -1002,7 +1103,8 @@ function focusActiveTab() {
 function handleDialogKeydown(event) {
   if (event.key === 'Escape') {
     event.preventDefault()
-    closeSwitcher()
+    if (activeView.value === 'history') selectView('open', true)
+    else closeSwitcher()
     return
   }
   if (event.key !== 'Tab') return
@@ -1040,7 +1142,7 @@ watch(open, async (isOpen) => {
 })
 
 watch(showSyncedTabsView, (visible) => {
-  if (!visible && activeView.value !== 'open') selectView('open')
+  if (!visible && activeView.value === 'synced') selectView('open')
 })
 
 watch(() => tabs.value.map(tab => `${tab.id}:${tab.isPinned}`).join(','), () => {
@@ -1048,7 +1150,7 @@ watch(() => tabs.value.map(tab => `${tab.id}:${tab.isPinned}`).join(','), () => 
 })
 
 watch(
-  () => [tabs.value.length, ...otherDeviceSessions.value.map(session => session.tabs.length)],
+  () => [tabs.value.length, tabHistoryEntries.value.length, ...otherDeviceSessions.value.map(session => session.tabs.length)],
   async () => {
     await nextTick()
     clampActiveContentScroll()

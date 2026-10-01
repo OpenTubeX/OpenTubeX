@@ -356,6 +356,7 @@ Settings:
     Invalid Engine: Introduce un nome e unha URL de busca HTTP ou HTTPS válida que conteña %s.
     Engine Limit: Podes engadir ata {count} motores de busca personalizados.
   Theme Settings:
+    Always Show Mobile Search Bar: "Amosar sempre a barra de busca no móbil"
     Frosted Glass Player UI: "Interface do reprodutor con efecto de vidro esmerilado"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Auga de Rosas"
@@ -1546,6 +1547,8 @@ Context Menu:
   Search With Multiple: Buscar con…
   Selection Too Long: A selección é demasiado longa para a busca (> {count} caracteres)
 Tab Organizer:
+  Tab History: "Historial da lapela"
+  Current Page: "Páxina actual"
   Icon Labels:
     Podcast: 'Pódcast'
     Clock: 'Reloxo'

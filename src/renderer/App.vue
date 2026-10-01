@@ -3334,7 +3334,11 @@ function getAndroidBackTarget() {
   const openDialog = [...document.querySelectorAll('dialog[open]')].at(-1)
   const focused = document.activeElement instanceof HTMLElement ? document.activeElement : document
   const prompt = [...document.querySelectorAll('.prompt:not([inert])')].at(-1)
-  return modalDialog ?? prompt ?? (settingsWindow?.contains(focused) ? focused : settingsWindow) ?? openDialog ?? focused
+  const phoneSearch = document.querySelector('.topNav.phoneSearchOpen')
+  const phoneTabDialog = document.querySelector('.capacitorPhoneTabDialog')
+  const tabTarget = phoneTabDialog?.contains(focused) ? focused : phoneTabDialog
+  const searchTarget = phoneSearch?.contains(focused) ? focused : phoneSearch
+  return modalDialog ?? prompt ?? (settingsWindow?.contains(focused) ? focused : settingsWindow) ?? openDialog ?? tabTarget ?? searchTarget ?? focused
 }
 
 async function handleAndroidBack() {
@@ -3379,7 +3383,7 @@ function shouldInterceptAndroidBack() {
     (tabId && store.getters.getTabHistoryState(tabId).canGoBack) ||
     isSideNavOpen.value || settingsWindowOpen.value || isAnyPromptOpen.value ||
     mobileContextLink.value || mobileContextActions.value ||
-    document.fullscreenElement || document.querySelector('.ftVideoPlayer.fullWindow, dialog[open]') ||
+    document.fullscreenElement || document.querySelector('.ftVideoPlayer.fullWindow, dialog[open], .topNav.phoneSearchOpen') ||
     hasVisibleGamepadLayer())
 }
 
@@ -3428,7 +3432,7 @@ function getAndroidBackPreview() {
       getAndroidBackTarget().closest?.('.settingsWindow, .prompt, dialog[open]') === dialog)
   }
   if (settingsWindowOpen.value || isAnyPromptOpen.value || hasVisibleGamepadLayer() ||
-    document.fullscreenElement || document.querySelector('dialog[open]')) return null
+    document.fullscreenElement || document.querySelector('dialog[open], .topNav.phoneSearchOpen')) return null
   return getAndroidBackPlayer(presentedTabId.value)
 }
 
@@ -3465,11 +3469,7 @@ function clearSettingsSearchTarget(target) {
 }
 
 function focusSearchFromCommandPalette() {
-  setTimeout(() => {
-    const input = document.querySelector('.topNav .searchInput .ft-input')
-    input?.focus()
-    input?.select()
-  })
+  window.dispatchEvent(new CustomEvent('opentubex:focus-search'))
 }
 
 function createWindowFromCommandPalette() {

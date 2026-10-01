@@ -389,6 +389,10 @@
                 </section>
 
                 <div class="menuLinks">
+                  <slot
+                    name="overflow-actions"
+                    :close="closeMenu"
+                  />
                   <button
                     v-if="USING_ELECTRON"
                     type="button"
@@ -462,6 +466,9 @@ import { switchActiveProfile, translateProfileName as getTranslatedProfileName }
 import { getThemeClassification, hasFixedThemeColors } from '../../../appearanceSettings'
 
 const quickHeaderActions = useTemplateRef('quickHeaderActions')
+const props = defineProps({
+  headerActionsOverflow: { type: Boolean, default: false }
+})
 const { locale, t } = useI18n()
 const id = useId()
 const phoneLayout = usePhoneLayout()
@@ -556,10 +563,10 @@ const proxyUrl = computed(() => (
 const showDownloadsShortcut = computed(() => (
   (USING_ELECTRON || process.env.IS_CAPACITOR) &&
   store.getters.getEnableDownloads &&
-  !store.getters.getMoveDownloadsToAppHeader
+  (!store.getters.getMoveDownloadsToAppHeader || props.headerActionsOverflow)
 ))
 const showSettingsShortcut = computed(() => (
-  !(USING_ELECTRON || process.env.IS_CAPACITOR) || !store.getters.getMoveSettingsToAppHeader
+  !(USING_ELECTRON || process.env.IS_CAPACITOR) || !store.getters.getMoveSettingsToAppHeader || props.headerActionsOverflow
 ))
 
 const quickSettings = computed(() => store.getters.getQuickSettings)

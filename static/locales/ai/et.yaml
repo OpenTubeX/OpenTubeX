@@ -352,6 +352,7 @@ Settings:
     Invalid Engine: Sisestage nimi ja sobiv HTTP- või HTTPS-otsingu URL, mis sisaldab %s.
     Engine Limit: Saate lisada kuni {count} kohandatud otsingumootorit.
   Theme Settings:
+    Always Show Mobile Search Bar: "Kuva mobiili otsinguriba alati"
     Frosted Glass Player UI: "Mattklaasi efektiga pleieri kasutajaliides"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Roosivesi"
@@ -1503,6 +1504,8 @@ Context Menu:
   Search With Multiple: Otsi otsingumootoriga...
   Selection Too Long: Valik on otsimiseks liiga pikk (> {count} märki)
 Tab Organizer:
+  Tab History: "Vahekaardi ajalugu"
+  Current Page: "Praegune leht"
   Icon Labels:
     Podcast: 'Taskuhääling'
     Clock: 'Kell'

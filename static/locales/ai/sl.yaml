@@ -482,6 +482,7 @@ Settings:
     Invalid Engine: Vnesite ime in veljaven iskalni URL HTTP ali HTTPS, ki vsebuje %s.
     Engine Limit: Dodate lahko največ {count} iskalnikov po meri.
   Theme Settings:
+    Always Show Mobile Search Bar: "Vedno prikaži iskalno vrstico na telefonu"
     Frosted Glass Player UI: "Vmesnik predvajalnika z učinkom motnega stekla"
     Move Downloads to App Header: Premakni prenose v glavo aplikacije
     Move Settings to App Header: Premakni nastavitve v glavo aplikacije
@@ -1977,6 +1978,8 @@ Context Menu:
   Search With Multiple: Poišči z …
   Selection Too Long: Izbrano besedilo je predolgo za iskanje (> {count} znakov)
 Tab Organizer:
+  Tab History: "Zgodovina zavihka"
+  Current Page: "Trenutna stran"
   Icon Labels:
     Podcast: 'Podkast'
     Clock: 'Ura'

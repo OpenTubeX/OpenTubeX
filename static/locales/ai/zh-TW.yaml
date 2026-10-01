@@ -352,6 +352,7 @@ Settings:
     Invalid Engine: 請輸入名稱，以及包含 %s 的有效 HTTP 或 HTTPS 搜尋 URL。
     Engine Limit: 最多可新增 {count} 個自訂搜尋引擎。
   Theme Settings:
+    Always Show Mobile Search Bar: "一律顯示行動版搜尋列"
     Frosted Glass Player UI: "毛玻璃播放器介面"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato 玫瑰水"
@@ -1503,6 +1504,8 @@ Context Menu:
   Search With Multiple: 搜尋工具...
   Selection Too Long: 選取內容過長，無法搜尋（> {count} 個字元）
 Tab Organizer:
+  Tab History: "分頁歷史紀錄"
+  Current Page: "目前頁面"
   Icon Labels:
     Podcast: '播客'
     Clock: '時鐘'

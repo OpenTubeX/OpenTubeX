@@ -354,6 +354,7 @@ Settings:
     Invalid Engine: Sláðu inn heiti og gilda HTTP- eða HTTPS-leitarslóð sem inniheldur %s.
     Engine Limit: Þú getur bætt við allt að {count} sérsniðnum leitarvélum.
   Theme Settings:
+    Always Show Mobile Search Bar: "Sýna alltaf leitarstikuna í síma"
     Frosted Glass Player UI: "Viðmót spilara með mattgleráhrifum"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato rósavatn"
@@ -1525,6 +1526,8 @@ Context Menu:
   Search With Multiple: Leita með...
   Selection Too Long: Valið er of langt fyrir leit (> {count} stafir)
 Tab Organizer:
+  Tab History: "Ferill flipa"
+  Current Page: "Núverandi síða"
   Icon Labels:
     Podcast: 'Hlaðvarp'
     Clock: 'Klukka'

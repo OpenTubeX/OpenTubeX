@@ -364,6 +364,7 @@ Settings:
     Invalid Engine: Angiv et navn og en gyldig HTTP- eller HTTPS-søge-URL, der indeholder %s.
     Engine Limit: Du kan tilføje op til {count} brugerdefinerede søgemaskiner.
   Theme Settings:
+    Always Show Mobile Search Bar: "Vis altid søgefeltet på mobilen"
     Frosted Glass Player UI: "Afspillergrænseflade med matteret glas"
     Move Downloads to App Header: Flyt Downloads til appens toplinje
     Move Settings to App Header: Flyt Indstillinger til appens toplinje
@@ -1573,6 +1574,8 @@ Context Menu:
   Search With Multiple: Søg med…
   Selection Too Long: Markeringen er for lang til en søgning (> {count} tegn)
 Tab Organizer:
+  Tab History: "Fanens historik"
+  Current Page: "Aktuel side"
   Icon Labels:
     Podcast: 'Podcast'
     Clock: 'Ur'

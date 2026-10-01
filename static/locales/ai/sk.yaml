@@ -352,6 +352,7 @@ Settings:
     Invalid Engine: Zadajte názov a platnú adresu URL vyhľadávania cez HTTP alebo HTTPS, ktorá obsahuje %s.
     Engine Limit: Môžete pridať najviac {count} vlastných vyhľadávačov.
   Theme Settings:
+    Always Show Mobile Search Bar: "Vždy zobrazovať vyhľadávací panel na telefóne"
     Frosted Glass Player UI: "Rozhranie prehrávača s efektom matného skla"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato ružová voda"
@@ -1504,6 +1505,8 @@ Context Menu:
   Search With Multiple: Vyhľadať cez…
   Selection Too Long: Označený text je príliš dlhý na vyhľadanie (> {count} znakov)
 Tab Organizer:
+  Tab History: "História karty"
+  Current Page: "Aktuálna stránka"
   Icon Labels:
     Podcast: 'Podcast'
     Clock: 'Hodiny'
