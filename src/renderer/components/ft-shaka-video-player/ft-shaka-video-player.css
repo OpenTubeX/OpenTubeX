@@ -383,7 +383,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   display: flex;
   align-items: center;
   min-inline-size: 46px;
-  border-radius: 24px;
+  border-radius: calc(24px * var(--ui-roundness));
   background-color: rgb(0 0 0 / 32%);
   backdrop-filter: blur(8px) saturate(120%);
   pointer-events: auto;
@@ -1970,7 +1970,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   gap: 8px;
   max-inline-size: calc(100% - 32px);
   padding: 8px 12px;
-  border-radius: 8px;
+  border-radius: calc(8px * var(--ui-roundness));
   color: #fff;
   background: rgb(0 0 0 / 75%);
   box-shadow: 0 2px 8px rgb(0 0 0 / 35%);
@@ -2122,7 +2122,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   position: absolute;
   bottom: 62px;
   padding: 2px 10px;
-  border-radius: 2px;
+  border-radius: calc(2px * var(--ui-roundness));
   background: rgb(0 0 0 / 50%);
   color: #fff;
   font-family: Roboto, sans-serif;
@@ -5419,7 +5419,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
     inset-inline: calc(100% + 12px) auto;
     inline-size: min(300px, calc(50vw - 50% - 108px));
     block-size: 100%;
-    border-radius: 12px;
+    border-radius: calc(12px * var(--ui-roundness));
   }
 
   @media (width < 980px) {

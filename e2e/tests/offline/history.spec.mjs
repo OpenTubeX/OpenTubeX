@@ -255,6 +255,7 @@ test.describe('watch history', () => {
     const durationIndicator = watchedVideo.locator('.videoDuration')
     await expect(page.getByRole('checkbox', { name: 'Show Watched Indicators' })).toHaveCount(0)
     await expect(watchedIndicator).toHaveText('Watched')
+    await expect(watchedVideo).toHaveCSS('border-radius', '24px')
     await expect(watchedIndicator).toHaveCSS('border-radius', '10px')
     await expect(watchedIndicator).toHaveCSS('font-size', '15px')
     await expect(durationIndicator).toHaveCSS('border-radius', '10px')

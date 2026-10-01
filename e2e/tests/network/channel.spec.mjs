@@ -73,6 +73,13 @@ test.describe('channel page', () => {
     await expect(page.locator('.channelDetails .bannerContainer')).toHaveCSS('border-top-right-radius', '16px')
     await expect(page.locator('.channelDetails .infoContainer')).toHaveCSS('border-bottom-left-radius', '16px')
     await expect(page.locator('.channelDetails .infoContainer')).toHaveCSS('border-bottom-right-radius', '16px')
+    for (const roundness of [0, 50, 100, 200]) {
+      await page.evaluate(value => {
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
+      }, roundness)
+      await expect.poll(() => page.locator('.channelDetails .selectedTab').evaluate(element =>
+        getComputedStyle(element, '::before').borderRadius)).toBe(`${1.5 * roundness / 100}px`)
+    }
 
     await page.locator('body').evaluate(element => {
       element.style.fontFamily = 'Arial, sans-serif'

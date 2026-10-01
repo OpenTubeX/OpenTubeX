@@ -40,7 +40,7 @@ h3 {
   background: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
   border: 2px solid transparent;
-  border-radius: 8px;
+  border-radius: calc(8px * var(--ui-roundness));
   cursor: pointer;
   font-size: 24px;
   block-size: 42px;

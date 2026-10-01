@@ -142,7 +142,7 @@
 .storageLegendMarker {
   block-size: 12px;
   border: 1px solid color-mix(in srgb, var(--primary-text-color) 32%, transparent);
-  border-radius: 3px;
+  border-radius: calc(3px * var(--ui-roundness));
   inline-size: 12px;
 }
 

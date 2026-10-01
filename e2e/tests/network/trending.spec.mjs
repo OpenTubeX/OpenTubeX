@@ -94,6 +94,14 @@ test.describe('trending page', () => {
 
     await expect(page.locator('.ft-list-video').first()).toBeVisible({ timeout: 30_000 })
 
+    for (const roundness of [0, 50, 100, 200]) {
+      await page.evaluate(value => {
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
+      }, roundness)
+      await expect.poll(() => page.locator('.trendingInfoTabs .selectedTab').evaluate(element =>
+        getComputedStyle(element, '::before').borderRadius)).toBe(`${1.5 * roundness / 100}px`)
+    }
+
     const sportsTab = page.getByRole('tab', { name: 'Sports' })
     await sportsTab.click()
     await expect(sportsTab).toHaveAttribute('aria-selected', 'true')

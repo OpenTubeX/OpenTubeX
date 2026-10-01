@@ -11,7 +11,7 @@
 .appIconPreset {
   align-items: center;
   border: 2px solid var(--secondary-card-bg-color);
-  border-radius: 12px;
+  border-radius: calc(12px * var(--ui-roundness));
   cursor: pointer;
   display: flex;
   flex-direction: column;

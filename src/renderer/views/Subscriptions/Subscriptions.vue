@@ -1397,6 +1397,7 @@ function updateTabIndicator(containerRef, selectedTabSelector, indicatorStyle, s
   // The indicator sits just below the tab and only its transform is animated,
   // keeping movement on the compositor while a large feed renders.
   const style = {
+    '--tab-indicator-width': String(selected.offsetWidth),
     transform: `translate(${selected.offsetLeft}px, ${selected.offsetTop + selected.offsetHeight}px) scaleX(${selected.offsetWidth})`
   }
 
