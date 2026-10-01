@@ -58,6 +58,28 @@ test('data saver updates the poster of an already-open Short', async ({ app, pag
   await watch.dispose()
 })
 
+test('data saver preserves standalone Shorts posters without alternate thumbnails', async ({ app, page }) => {
+  await openShort({ app, page })
+  const poster = 'https://provider.test/short-poster.jpg'
+  await page.route(poster, route => route.fulfill({
+    contentType: 'image/svg+xml',
+    body: '<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1080"/>'
+  }))
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate((component, poster) => {
+    component.proxy.thumbnail = poster
+    document.querySelector('.ftVideoPlayer video').pause()
+    component.proxy.$refs.player.showPoster = true
+  }, poster)
+  const video = page.locator('.ftVideoPlayer video').first()
+  await expect(video).toHaveAttribute('poster', poster)
+  await watch.evaluate(component => component.proxy.$store.dispatch('updateThumbnailDataSaver', true))
+  await expect(video).toHaveAttribute('poster', poster)
+  await watch.evaluate(component => component.proxy.$store.dispatch('updateThumbnailDataSaver', false))
+  await expect(video).toHaveAttribute('poster', poster)
+  await watch.dispose()
+})
+
 test('phone Shorts options stay inside their menu dialog', async ({ app, page }) => {
   await openShort({ app, page })
   await page.locator('.shortsTopControlsGroup').last().locator('button').nth(-2).click({ force: true })

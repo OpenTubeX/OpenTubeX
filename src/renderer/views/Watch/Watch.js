@@ -1234,7 +1234,12 @@ export default defineComponent({
     }
   },
   watch: {
-    '$store.getters.getThumbnailDataSaver': 'updateShortThumbnail',
+    '$store.getters.getThumbnailDataSaver'() {
+      const short = this.currentSubscriptionShort
+      if (short?.thumbnailUrl && short.lowResolutionThumbnailUrl) {
+        this.updateShortThumbnail()
+      }
+    },
     '$store.getters.getWatchQueueLength'(length) {
       if (length === 0 && this.mobilePanel === 'queue') this.mobilePanel = null
     },
