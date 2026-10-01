@@ -297,7 +297,7 @@ test('a Short opened in a background tab never starts playback', async ({ app, p
   }))).toEqual({ paused: true, currentTime: 0 })
 })
 
-test('uses the playing interface hide delay in fullscreen and full window', async ({ app, page }) => {
+test('uses one playing interface hide delay in portrait, landscape, fullscreen and full window', async ({ app, page }) => {
   const video = await openDemoVideo({ app, page })
   await video.evaluate(element => { element.loop = true })
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
@@ -307,20 +307,25 @@ test('uses the playing interface hide delay in fullscreen and full window', asyn
     await store.dispatch('updatePlayingInterfaceHideDelay', 0.5)
   })
 
-  for (const mode of ['fullWindow', 'fullscreen']) {
+  for (const mode of ['portrait', 'landscape', 'fullWindow', 'fullscreen']) {
+    if (mode === 'portrait') await setWindowSize(app, page, { width: 420, height: 920 })
+    if (mode === 'landscape') await setWindowSize(app, page, { width: 1600, height: 880 })
     if (mode === 'fullWindow') await page.locator('body').press('s')
-    else await setPlayerFullscreen(page, true)
+    if (mode === 'fullscreen') await setPlayerFullscreen(page, true)
     await expect(player).toHaveAttribute('data-playing-interface-hide-delay', '0.5')
     const bounds = await player.boundingBox()
+    await page.mouse.move(0, 0)
     await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
     await expect(controls).toHaveAttribute('shown', 'true')
     await expect(player).not.toHaveClass(/no-cursor/)
+    await page.waitForTimeout(250)
+    await expect(controls).toHaveAttribute('shown', 'true')
     await expect(controls).not.toHaveAttribute('shown', 'true', { timeout: 2000 })
     await expect(player).toHaveClass(/no-cursor/)
 
     if (mode === 'fullWindow') await page.locator('body').press('s')
-    else await setPlayerFullscreen(page, false)
-    await expect(player).not.toHaveAttribute('data-playing-interface-hide-delay')
+    if (mode === 'fullscreen') await setPlayerFullscreen(page, false)
+    await expect(player).toHaveAttribute('data-playing-interface-hide-delay', '0.5')
   }
 })
 

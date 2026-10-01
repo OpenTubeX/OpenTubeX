@@ -61,7 +61,7 @@
          visibility uses its own reveal timer. -->
     <div
       ref="container"
-      :data-playing-interface-hide-delay="isFullscreen || fullWindowEnabled ? playingInterfaceHideDelay : null"
+      :data-playing-interface-hide-delay="playingInterfaceHideDelay"
       class="ftVideoPlayer shaka-video-container"
       :data-tab-id="tabId"
       :data-action-dock-visible="actionDockVisible"
