@@ -31,10 +31,18 @@ public class MobileTabSelectionTest {
                 "!!document.querySelector('.tutorialActions button')");
             evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
             await(view, "!document.querySelector('.tutorialOverlay')");
-            evaluate(view, "window.nativeHeaderOriginalSettings = { layout: " + STORE + ".getters.getCapacitorLayoutMode," +
-                " scale: " + STORE + ".getters.getUiScale, hideSearch: " + STORE + ".getters.getHideSearchBar };" +
-                STORE + ".commit('setUiScale', 100);" + STORE + ".commit('setHideSearchBar', false);" +
-                STORE + ".commit('setCapacitorLayoutMode', 'auto')");
+            evaluate(view, """
+                (() => {
+                    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                    const values = {
+                        UiScale: 100, CapacitorLayoutMode: 'auto', HideSearchBar: false, HideHeaderLogo: false,
+                        EnableDownloads: true, MoveDownloadsToAppHeader: true, MoveSettingsToAppHeader: true,
+                        AlwaysShowMobileSearchBar: false
+                    };
+                    window.nativeHeaderOriginalSettings = Object.fromEntries(Object.keys(values).map(key => [key, store.getters['get' + key]]));
+                    for (const [key, value] of Object.entries(values)) store.commit('set' + key, value);
+                })()
+                """);
             try {
                 scenario.onActivity(activity -> activity.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE));
                 await(view, "innerWidth >= 768 && innerHeight <= 600 && document.querySelector('.app').classList.contains('capacitorTabletLayout')");
@@ -48,16 +56,42 @@ public class MobileTabSelectionTest {
                 await(view, "innerWidth < 768 && innerWidth < innerHeight");
                 evaluate(view, STORE + ".commit('setCapacitorLayoutMode', 'tablet')");
                 await(view, "document.querySelector('.app').classList.contains('capacitorTabletLayout')");
-                assertTabletHeaderHistoryControls(view, "Forced Tablet portrait");
+                for (int scale : new int[] {100, 125}) {
+                    evaluate(view, STORE + ".commit('setUiScale', " + scale + ")");
+                    await(view, "Math.abs(visualViewport.scale - " + scale / 100.0 + ") < 0.01");
+                    for (boolean pinned : new boolean[] {false, true}) {
+                        evaluate(view, STORE + ".commit('setAlwaysShowMobileSearchBar', " + pinned + ")");
+                        assertCompactTabletHeader(view, scale, pinned);
+                        evaluate(view, "document.querySelector('.pinnedSearchTrigger, .navSearchButton').click()");
+                        await(view, "document.activeElement === document.querySelector('.topNav .ft-input')");
+                        assertEquals("Compact tablet search replaces the full header with balanced gutters", "true", evaluate(view, """
+                            (() => {
+                                const header = document.querySelector('.topNav').getBoundingClientRect();
+                                const search = document.querySelector('.searchContainer').getBoundingClientRect();
+                                return search.top >= header.top && search.bottom <= header.bottom &&
+                                    Math.abs((search.left - header.left) - (header.right - search.right)) < 0.1 &&
+                                    getComputedStyle(document.querySelector('.topNav .side')).display === 'none';
+                            })()
+                            """));
+                        scenario.onActivity(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
+                        await(view, "!document.querySelector('.topNav').classList.contains('phoneSearchOpen')");
+                        assertCompactTabletHeader(view, scale, pinned);
+                        evaluate(view, "document.querySelector('.profileTrigger').click()");
+                        await(view, "document.querySelector('.downloadsShortcut')?.getBoundingClientRect().width > 0 && " +
+                            "document.querySelector('.allSettingsShortcut')?.getBoundingClientRect().width > 0");
+                        scenario.onActivity(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
+                        await(view, "document.querySelector('.profileTrigger').getAttribute('aria-expanded') === 'false'");
+                        await(view, "!document.querySelector('.mobileSheet[open]')");
+                    }
+                }
                 evaluate(view, STORE + ".commit('setCapacitorLayoutMode', 'auto')");
                 await(view, "document.querySelector('.app').classList.contains('capacitorPhoneLayout')");
                 assertEquals("Auto portrait returns to the tab overview", "true", evaluate(view,
                     "document.querySelector('.topNav').classList.contains('phoneLayout') && " +
                     "document.querySelector('.capacitorPhoneTabSwitcherButton').getBoundingClientRect().width > 0"));
             } finally {
-                evaluate(view, STORE + ".commit('setCapacitorLayoutMode', window.nativeHeaderOriginalSettings.layout);" +
-                    STORE + ".commit('setUiScale', window.nativeHeaderOriginalSettings.scale);" +
-                    STORE + ".commit('setHideSearchBar', window.nativeHeaderOriginalSettings.hideSearch);" +
+                evaluate(view, "for (const [key, value] of Object.entries(window.nativeHeaderOriginalSettings)) " +
+                    STORE + ".commit('set' + key, value);" +
                     "delete window.nativeHeaderOriginalSettings");
                 scenario.onActivity(activity -> activity.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED));
             }
@@ -74,6 +108,29 @@ public class MobileTabSelectionTest {
                     header.querySelector('.searchContainer').getBoundingClientRect().width > 0;
             })()
             """));
+    }
+
+    private static void assertCompactTabletHeader(WebView view, int scale, boolean pinned) throws Exception {
+        assertEquals("Forced Tablet keeps compact history and search controls at " + scale + "% with pinned search " + pinned,
+            "true", evaluate(view, """
+                (() => {
+                    const header = document.querySelector('.topNav');
+                    const bounds = header.getBoundingClientRect();
+                    const arrows = [...header.querySelectorAll('.navBackButton button, .navForwardButton button')];
+                    const search = header.querySelector('.pinnedSearchTrigger, .navSearchButton');
+                    const controls = [...header.querySelectorAll('button, .logo')].map(element => element.getBoundingClientRect())
+                        .filter(rect => rect.width > 0 && rect.height > 0);
+                    return header.classList.contains('phoneLayout') && arrows.length === 2 && arrows.every(arrow => {
+                        const rect = arrow.getBoundingClientRect();
+                        return rect.width >= 48 && rect.height >= 48;
+                    }) && search?.getBoundingClientRect().width >= 48 &&
+                        header.querySelector('.searchContainer').getBoundingClientRect().width === 0 &&
+                        header.querySelector('.capacitorPhoneTabSwitcherButton').getBoundingClientRect().width === 0 &&
+                        controls.every((rect, index) => rect.left >= bounds.left && rect.right <= bounds.right + 0.1 &&
+                            rect.top >= bounds.top && rect.bottom <= bounds.bottom + 0.1 &&
+                            controls.slice(index + 1).every(other => rect.right <= other.left + 0.1 || other.right <= rect.left + 0.1));
+                })()
+                """));
     }
 
     @Test

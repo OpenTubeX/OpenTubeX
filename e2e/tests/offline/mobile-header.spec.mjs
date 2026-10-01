@@ -52,6 +52,56 @@ for (const pinned of [false, true]) {
   })
 }
 
+for (const width of [375, 450, 480]) {
+  for (const pinned of [false, true]) {
+    test(`tablet header at ${width}px preserves history and full-width search with pinned search ${pinned}`, async ({ app, page }) => {
+      await setWindowSize(app, page, { width, height: 850 })
+      await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), width === 375 ? 1.25 : 1)
+      await page.evaluate(pinned => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setAlwaysShowMobileSearchBar', pinned)
+        store.commit('setMoveDownloadsToAppHeader', true)
+        store.commit('setEnableDownloads', true)
+        store.commit('setMoveSettingsToAppHeader', true)
+        store.commit('setSyncServerStatus', 'syncing')
+        store.commit('setHideHeaderSyncIndicator', false)
+        store.commit('setSettingsWindowView', 'about')
+        store.commit('setSettingsWindowMinimized', true)
+      }, pinned)
+      await enablePhoneHeader(page)
+      await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabletLayout'))
+      const header = page.locator('.topNav')
+      await expect(header.locator('.navBackButton')).toBeVisible()
+      await expect(header.locator('.navForwardButton')).toBeVisible()
+      await expect(page.locator('.capacitorPhoneTabSwitcherButton')).toBeHidden()
+      await expect.poll(() => header.evaluate(element => {
+        const controls = [...element.querySelectorAll('button, .logo')]
+          .map(control => control.getBoundingClientRect()).filter(rect => rect.width > 0 && rect.height > 0)
+        return controls.every(rect => rect.left >= 0 && rect.right <= window.innerWidth + 0.1) &&
+        controls.every((rect, index) => controls.slice(index + 1).every(other => rect.right <= other.left + 0.1 || other.right <= rect.left + 0.1))
+      })).toBe(true)
+      const search = header.locator(pinned ? '.pinnedSearchTrigger' : '.navSearchButton')
+      await expect.poll(() => search.evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThanOrEqual(48)
+      await search.click()
+      await expect(header.locator('.ft-input')).toBeFocused()
+      await expect.poll(() => header.evaluate(element => {
+        const bounds = element.getBoundingClientRect()
+        const search = element.querySelector('.searchContainer').getBoundingClientRect()
+        return Math.abs((search.left - bounds.left) - (bounds.right - search.right)) < 0.1
+      })).toBe(true)
+      await header.locator('.ft-input').press('Escape')
+      await expect(header.locator('.navBackButton')).toBeVisible()
+      if (!await header.locator('.downloadsButton').isVisible()) {
+        await page.locator('.profileTrigger').click()
+        await expect(page.locator('.downloadsShortcut')).toBeVisible()
+        await expect(page.locator('.allSettingsShortcut')).toBeVisible()
+      } else {
+        await expect(header.locator('.downloadsButton')).toBeVisible()
+        await expect(header.locator('.settingsButton')).toBeVisible()
+      }
+    })
+  }
+}
 for (const zoom of [1, 1.25]) {
   test(`phone header keeps the brand and replaces its row with balanced search at ${zoom} scale`, async ({ app, page }) => {
     await setWindowSize(app, page, { width: 390, height: 850 })
@@ -176,8 +226,36 @@ test('phone tab overview exposes multi-step back and forward history without cha
   const activeTabId = await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getPresentedTabId)
   const openHistory = async () => {
     await page.locator('.capacitorPhoneTabSwitcherButton').click()
+    const historyButton = page.getByRole('button', { name: 'Tab history', exact: true })
+    await historyButton.focus()
+    await page.keyboard.press('Tab')
+    await page.keyboard.press('Shift+Tab')
+    await expect(historyButton).toBeFocused()
+    await expect.poll(() => historyButton.evaluate(element => {
+      const style = getComputedStyle(element)
+      const probe = document.createElement('span')
+      probe.style.color = 'var(--primary-color)'
+      element.append(probe)
+      const expectedColor = getComputedStyle(probe).color
+      probe.remove()
+      return style.outlineStyle === 'solid' && Number.parseFloat(style.outlineWidth) >= 2 && style.outlineColor === expectedColor
+    })).toBe(true)
     await page.getByRole('button', { name: 'Tab history', exact: true }).click()
     await expect(page.locator('.capacitorPhoneTabHistory')).toBeVisible()
+    const entry = page.locator('.capacitorPhoneTabHistoryEntry[aria-current="page"]')
+    await entry.focus()
+    await page.keyboard.press('Tab')
+    await page.keyboard.press('Shift+Tab')
+    await expect(entry).toBeFocused()
+    await expect.poll(() => entry.evaluate(element => {
+      const style = getComputedStyle(element)
+      const probe = document.createElement('span')
+      probe.style.color = 'var(--primary-color)'
+      element.append(probe)
+      const expectedColor = getComputedStyle(probe).color
+      probe.remove()
+      return style.outlineStyle === 'solid' && Number.parseFloat(style.outlineWidth) >= 2 && style.outlineColor === expectedColor
+    })).toBe(true)
   }
   await openHistory()
   await expect.poll(() => page.locator('.capacitorPhoneTabHistoryEntry').first().evaluate(entry => {

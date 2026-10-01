@@ -234,6 +234,9 @@ public class MobileAppearanceSettingsTest {
     public void enlargedPhoneHeaderKeepsHistoryAndOverflowShortcutsAccessible() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             WebView view = webView(scenario);
+            awaitCondition(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || !!document.querySelector('.tutorialActions button')");
+            evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
+            awaitCondition(view, "!document.querySelector('.tutorialOverlay')");
             try {
                 prepare(view);
                 evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/userplaylists')");

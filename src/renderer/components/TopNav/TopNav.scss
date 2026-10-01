@@ -525,6 +525,35 @@
   }
 }
 
+.app.capacitorTabletLayout .phoneLayout {
+  .navBackButton,
+  .navForwardButton {
+    display: flex;
+    flex: 0 0 48px;
+
+    :deep(.iconButton) {
+      box-sizing: border-box;
+      inline-size: 48px;
+      block-size: 48px;
+    }
+  }
+
+  .logoText {
+    display: none;
+  }
+
+  &.phoneSearchPinned {
+    .side:first-child {
+      display: flex;
+      flex: 0 0 auto;
+    }
+
+    .logo {
+      display: none;
+    }
+  }
+}
+
 @container top-nav (width < 560px) {
   .app.capacitorTabs .phoneLayout .topNavInner:has(.downloadsButton, .settingsButton, .minimizedUtilityButton, .syncIndicator) .logoText {
     display: none;

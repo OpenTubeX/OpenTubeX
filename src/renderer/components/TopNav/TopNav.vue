@@ -286,14 +286,13 @@ const route = useRoute()
 const usesLogicalTabs = process.env.IS_ELECTRON || process.env.IS_CAPACITOR
 const navigation = usesLogicalTabs ? getTabNavigationService() : null
 
-const compactViewport = usePhoneLayout(process.env.IS_CAPACITOR
-  ? '(width < 768px)'
-  : '(max-width: 680px)')
+const compactViewport = usePhoneLayout('(max-width: 680px)')
+const automaticTabletViewport = usePhoneLayout('(min-width: 768px)')
 const phoneLayout = computed(() => process.env.IS_CAPACITOR
-  ? !usesCapacitorTabletLayout(store.getters.getCapacitorLayoutMode, !compactViewport.value)
+  ? compactViewport.value || !usesCapacitorTabletLayout(store.getters.getCapacitorLayoutMode, automaticTabletViewport.value)
   : compactViewport.value)
 const showSearchContainer = ref(!phoneLayout.value)
-const narrowHeader = usePhoneLayout('(max-width: 439px)')
+const narrowHeader = usePhoneLayout('(width < 480px)')
 const compactPhoneActions = computed(() => phoneLayout.value && narrowHeader.value)
 const searchTrigger = useTemplateRef('searchTrigger')
 const pinnedSearchTrigger = useTemplateRef('pinnedSearchTrigger')
