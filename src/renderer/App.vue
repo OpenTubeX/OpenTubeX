@@ -1599,7 +1599,7 @@ onMounted(async () => {
     await repairSystemThemeSettings(store, themes)
     updateTheme()
   })
-  trayAppearanceReady = true
+  appearanceSettingsReady = true
   updateTheme()
   if (store.getters.getTrayIconPreset !== 'theme') refreshTrayIcon()
 
@@ -3013,16 +3013,19 @@ const thumbnailSize = computed(() => store.getters.getThumbnailSize)
 
 watch(thumbnailSize, updateThumbnailListSize)
 
-let trayAppearanceReady = false
+let appearanceSettingsReady = false
 watch(() => store.getters.getTrayIconPreset, refreshTrayIcon)
 
 function refreshTrayIcon() {
-  if (isElectron && trayAppearanceReady) {
+  if (isElectron && appearanceSettingsReady) {
     updateTrayIcon(store.getters.getTrayIconPreset).catch(error => console.error('Unable to update tray icon', error))
   }
 }
 
 function updateTheme() {
+  // Keep Android's cached native background until the saved theme is known.
+  // Applying the store's temporary system default can otherwise flash white.
+  if (isCapacitor && Capacitor.getPlatform() === 'android' && !appearanceSettingsReady) return
   const effectiveTheme = baseTheme.value === 'system'
     ? (systemUsesDarkTheme.value ? store.getters.getSystemDarkTheme : store.getters.getSystemLightTheme)
     : baseTheme.value
@@ -3042,7 +3045,7 @@ function updateSystemBarsStyle() {
   const backgroundColor = bodyStyle.getPropertyValue('--bg-color').trim() || bodyStyle.backgroundColor
   const usesDarkIcons = calculateColorLuminance(backgroundColor) === '#000000'
   Promise.all([
-    setAndroidSystemBarsBackground(backgroundColor),
+    setAndroidSystemBarsBackground(backgroundColor, ['system', 'dynamic'].includes(baseTheme.value)),
     SystemBars.setStyle({
       style: usesDarkIcons ? SystemBarsStyle.Light : SystemBarsStyle.Dark
     })
