@@ -4560,10 +4560,15 @@ export default defineComponent({
     },
     async getChromecastSource() {
       const source = selectCastSource(this.legacyFormats, this.manifestSrc, this.manifestMimeType)
-      if (source || !supportsYtDlp || this.manifestMimeType !== MANIFEST_TYPE_SABR) return source
-      const extracted = await getYtDlpPlaybackSource(this.videoId, this.ytDlpPlaybackCacheKey, undefined,
-        this.alwaysUseYtDlpPlaybackCookies, false, false)
-      return extracted ? selectCastSource(extracted.legacyFormats, extracted.manifestSrc, extracted.manifestMimeType) : null
+      if (!supportsYtDlp || this.manifestMimeType !== MANIFEST_TYPE_SABR) return source
+      try {
+        const extracted = await getYtDlpPlaybackSource(this.videoId, this.ytDlpPlaybackCacheKey, undefined,
+          this.alwaysUseYtDlpPlaybackCookies, false, false)
+        return (extracted && selectCastSource(extracted.legacyFormats, extracted.manifestSrc, extracted.manifestMimeType)) ?? source
+      } catch (error) {
+        if (source) return source
+        throw error
+      }
     },
     handleVideoPlay() {
       if (this.chromecastActive) {

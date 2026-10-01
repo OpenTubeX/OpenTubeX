@@ -272,12 +272,13 @@ test('natural receiver completion marks watched and invokes Watch completion onc
   expect(await app.electronApp.evaluate(() => globalThis.castTest.stops)).toEqual(['session-id'])
 })
 
-test('resolves a Cast-compatible fallback when local playback uses SABR', async ({ app, page }) => {
+test('prefers the resolved adaptive source over a progressive SABR fallback', async ({ app, page }) => {
   await mockCast(app)
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   const watch = await watchViewHandle(page)
   await watch.evaluate(vm => {
+    vm.legacyFormats = [...vm.legacyFormats, { url: 'https://cast-media.test/360.mp4', mimeType: 'video/mp4', height: 360 }]
     vm.getChromecastSource = async () => ({ url: 'https://cast-media.test/manifest.mpd', contentType: 'application/dash+xml' })
   })
   await choice(page, 'Test TV')

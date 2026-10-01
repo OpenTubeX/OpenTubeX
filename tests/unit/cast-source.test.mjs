@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { readFile } from 'node:fs/promises'
+import { compileFunction } from 'node:vm'
 import { selectCastSource } from '../../src/renderer/helpers/player/castSource.js'
 import { castSourceAvailable } from '../../src/main/chromecast.js'
 
@@ -50,3 +52,31 @@ test('does not replace video with an audio-only DASH manifest', () => {
   assert.deepEqual(selectCastSource([{ url, mimeType: 'video/mp4' }], manifest, 'application/dash+xml'),
     { url, contentType: 'video/mp4' })
 })
+
+const watchCode = await readFile(new URL('../../src/renderer/views/Watch/Watch.js', import.meta.url), 'utf8')
+const methodCode = watchCode.slice(watchCode.indexOf('    async getChromecastSource() {'), watchCode.indexOf('    handleVideoPlay() {'))
+
+for (const outcome of ['adaptive', 'failed extraction', 'non-SABR']) {
+  test(`Watch Cast source selection handles ${outcome} with a progressive fallback`, async () => {
+    let lookups = 0
+    const progressive = { url: 'https://media.test/360.mp4', mimeType: 'video/mp4', height: 360 }
+    const adaptive = { legacyFormats: [], manifestSrc: 'https://media.test/4k.mpd', manifestMimeType: 'application/dash+xml' }
+    const getSource = async () => {
+      lookups++
+      if (outcome === 'failed extraction') throw new Error('Extraction failed')
+      return adaptive
+    }
+    const { getChromecastSource } = compileFunction(`return {${methodCode}}`, ['selectCastSource', 'supportsYtDlp', 'MANIFEST_TYPE_SABR', 'getYtDlpPlaybackSource'])(
+      selectCastSource, true, 'application/sabr+json', getSource,
+    )
+    const source = await getChromecastSource.call({
+      legacyFormats: [progressive], manifestSrc: null,
+      manifestMimeType: outcome === 'non-SABR' ? null : 'application/sabr+json',
+      videoId: 'video', ytDlpPlaybackCacheKey: 'cache-key', alwaysUseYtDlpPlaybackCookies: false
+    })
+    assert.equal(lookups, outcome === 'non-SABR' ? 0 : 1)
+    assert.deepEqual(source, outcome === 'adaptive'
+      ? { url: adaptive.manifestSrc, contentType: adaptive.manifestMimeType }
+      : { url: progressive.url, contentType: 'video/mp4' })
+  })
+}

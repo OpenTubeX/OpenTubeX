@@ -14,7 +14,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref, shallowRef, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import { showToast, formatDurationAsTimestamp } from '../../helpers/utils'
@@ -43,8 +43,9 @@ const status = ref({ currentTime: 0, duration: 0, paused: false, volume: 1, mute
 const castCaptions = ref([])
 let disposed = false
 let pollTimer
-const fallbackSource = shallowRef(null)
-const source = computed(() => selectCastSource(props.formats, props.manifestUrl, props.manifestType) ?? fallbackSource.value)
+const resolvedSource = shallowRef(null)
+const source = computed(() => resolvedSource.value ?? selectCastSource(props.formats, props.manifestUrl, props.manifestType))
+watch(() => [props.formats, props.manifestUrl, props.manifestType], () => { resolvedSource.value = null })
 const options = computed(() => {
   if (castId.value) {
     const items = [
@@ -89,13 +90,15 @@ async function refreshDevices() {
   if (loading.value || disposed || castId.value) return
   loading.value = true
   try {
-    const [resolvedSource, result] = await Promise.all([
-      source.value ?? props.getSource(),
+    const [selectedSource, result] = await Promise.all([
+      props.getSource(),
       window.ftElectron.chromecast.discover()
     ])
-    if (!source.value) fallbackSource.value = resolvedSource
     if (!Array.isArray(result)) throw new Error('Cast discovery failed')
-    if (!disposed) devices.value = result
+    if (!disposed) {
+      resolvedSource.value = selectedSource
+      devices.value = result
+    }
   } catch { reportError() } finally { loading.value = false }
 }
 
