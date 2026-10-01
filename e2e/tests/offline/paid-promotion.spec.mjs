@@ -35,15 +35,22 @@ test('paid promotion badge respects every external link opening policy', async (
   await expect(prompt.getByText(helpUrl, { exact: true })).toBeVisible()
   expect(await openedUrls()).toEqual([])
 
-  await prompt.getByRole('button', { name: 'No', exact: true }).click()
+  await prompt.getByRole('button', { name: 'No', exact: true }).press('Space')
   await expect(prompt).toBeHidden()
   expect(await openedUrls()).toEqual([])
 
   await badge.press('Enter')
   await expect(prompt).toBeVisible()
-  await prompt.getByRole('button', { name: 'Yes, Open Link', exact: true }).click()
+  await prompt.getByRole('button', { name: 'Yes, Open Link', exact: true }).press('Space')
   await expect(prompt).toBeHidden()
   await expect.poll(openedUrls).toEqual([helpUrl])
+  await expect(video).toHaveJSProperty('paused', true)
+
+  await badge.press('Space')
+  await expect(prompt).toBeVisible()
+  await prompt.getByRole('button', { name: 'No', exact: true }).press('Enter')
+  await expect(prompt).toBeHidden()
+  expect(await openedUrls()).toEqual([helpUrl])
   await expect(video).toHaveJSProperty('paused', true)
 
   await page.evaluate(async () => {

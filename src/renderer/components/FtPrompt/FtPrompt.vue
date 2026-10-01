@@ -12,6 +12,8 @@
       @dblclick.stop
       @click.stop="($event.target === $event.currentTarget) && hide()"
       @keydown.enter.self="hide"
+      @keydown.space.stop
+      @keyup.space.stop
       @keydown.left.right.capture="handleArrowKeys"
     >
       <FtCard
