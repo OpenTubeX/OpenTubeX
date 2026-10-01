@@ -5,18 +5,16 @@ import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 const helpUrl = 'https://support.google.com/youtube?p=ppp&nohelpkit=1'
 
 test.use({
-  seed: { settings: { currentLocale: 'en-US', externalLinkHandling: 'openLinkAfterPrompt' } }
+  seed: {
+    settings: {
+      currentLocale: 'en-US',
+      externalLinkHandling: 'openLinkAfterPrompt',
+      holdToDoublePlaybackSpeed: true
+    }
+  }
 })
 
-test('paid promotion badge respects every external link opening policy', async ({ app, page }) => {
-  await app.electronApp.evaluate(({ shell }) => {
-    globalThis.paidPromotionExternalUrls = []
-    shell.openExternal = async url => {
-      globalThis.paidPromotionExternalUrls.push(url)
-    }
-  })
-  const openedUrls = () => app.electronApp.evaluate(() => globalThis.paidPromotionExternalUrls)
-
+async function openPaidPromotionVideo(app, page) {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
   await video.evaluate(element => element.pause())
@@ -27,6 +25,19 @@ test('paid promotion badge respects every external link opening policy', async (
     await component.proxy.$nextTick()
   })
   await watch.dispose()
+  return video
+}
+
+test('paid promotion badge respects every external link opening policy', async ({ app, page }) => {
+  await app.electronApp.evaluate(({ shell }) => {
+    globalThis.paidPromotionExternalUrls = []
+    shell.openExternal = async url => {
+      globalThis.paidPromotionExternalUrls.push(url)
+    }
+  })
+  const openedUrls = () => app.electronApp.evaluate(() => globalThis.paidPromotionExternalUrls)
+
+  const video = await openPaidPromotionVideo(app, page)
 
   const badge = page.locator('.paidPromotionBadge')
   const prompt = page.getByRole('dialog', { name: 'Are you sure you want to open this link?' })
@@ -70,4 +81,33 @@ test('paid promotion badge respects every external link opening policy', async (
   await expect.poll(openedUrls).toEqual([helpUrl, helpUrl])
   await expect(prompt).toBeHidden()
   await expect(video).toHaveJSProperty('paused', true)
+})
+
+test('releasing held Space over the paid promotion badge or prompt restores playback speed', async ({ app, page }) => {
+  const video = await openPaidPromotionVideo(app, page)
+  const badge = page.locator('.paidPromotionBadge')
+  const prompt = page.getByRole('dialog', { name: 'Are you sure you want to open this link?' })
+
+  for (const target of ['badge', 'prompt']) {
+    await page.evaluate(() => document.activeElement?.blur())
+    await page.keyboard.down('Space')
+    try {
+      await expect(video).toHaveJSProperty('playbackRate', 2)
+      if (target === 'badge') {
+        await badge.focus()
+      } else {
+        await badge.click()
+        await expect(prompt).toBeVisible()
+        await expect(prompt.getByRole('button', { name: 'Yes, Open Link', exact: true })).toBeFocused()
+      }
+    } finally {
+      await page.keyboard.up('Space')
+    }
+    await expect(video).toHaveJSProperty('playbackRate', 1)
+    await expect(video).toHaveJSProperty('paused', true)
+    if (target === 'prompt') {
+      await prompt.getByRole('button', { name: 'No', exact: true }).press('Space')
+      await expect(prompt).toBeHidden()
+    }
+  }
 })
