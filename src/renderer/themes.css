@@ -2804,7 +2804,7 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
 
   /* Search fields retain a dark fill in colored headers, while hovered
      search actions use the preset's primary fill and its paired text. */
-  .forceTextColor :is(.inputAction.enabled, .clearInputTextButton.visible):is(:hover, :active) {
+  .forceTextColor .inputAction.enabled:is(:hover, :active) {
     color: var(--text-with-main-color);
   }
 }
@@ -3161,7 +3161,7 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
     opacity: 1;
   }
 
-  .forceTextColor :is(.inputAction.enabled, .clearInputTextButton.visible):is(:hover, :active) {
+  .forceTextColor .inputAction.enabled:is(:hover, :active) {
     color: var(--text-with-main-color);
   }
 

@@ -5,11 +5,7 @@
     :class="{
       search: isSearch,
       forceTextColor,
-      showActionButton,
-      showClearTextButton,
-      clearTextButtonVisible: showClearTextButton && (inputDataPresent || showOptions),
-      inputDataPresent,
-      showOptions
+      showActionButton
     }"
   >
     <label
@@ -32,21 +28,6 @@
       />
       <FtSyncedSettingIndicator :setting-key="settingKey" />
     </label>
-    <button
-      v-if="showClearTextButton"
-      class="clearInputTextButton"
-      :class="{
-        visible: inputDataPresent || showOptions
-      }"
-      :aria-label="t('Search Bar.Clear Input')"
-      :title="t('Search Bar.Clear Input')"
-      @click="handleClearTextClick"
-    >
-      <FtIcon
-        class="buttonIcon"
-        :icon="['fas', 'times-circle']"
-      />
-    </button>
     <span class="inputWrapper">
       <input
         :id="id"
@@ -191,12 +172,6 @@ const props = defineProps({
   forceActionButtonIconName: {
     type: Array,
     default: null
-  },
-  showClearTextButton: {
-    // Reserved for TopNav autocomplete. Regular search fields use inputType="search"
-    // so Chromium supplies the themed native cancel control.
-    type: Boolean,
-    default: false
   },
   showLabel: {
     type: Boolean,
@@ -355,6 +330,9 @@ function handleInput(data) {
   const text = typeof data === 'string' ? data : inputRef.value.value
   inputData.value = text
 
+  // Native cancel can clear a keyboard preview while inputData is already empty.
+  if (text === '') updateVisibleDataList()
+
   if (
     props.isSearch &&
     searchState.selectedOption !== -1 &&
@@ -367,7 +345,7 @@ function handleInput(data) {
   emit('input', text)
 }
 
-function handleClearTextClick() {
+function clearText() {
   // No action if no input text
   if (!inputDataPresent.value) { return }
 
@@ -676,9 +654,7 @@ defineExpose({
     inputData.value = text
   },
 
-  clear: () => {
-    handleClearTextClick()
-  }
+  clear: clearText
 })
 </script>
 

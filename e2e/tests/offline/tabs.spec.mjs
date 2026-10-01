@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto'
 
-import { abortUnmockedRequest, test, expect, sel, goTo, goToSettingsSection } from '../../helpers/app.mjs'
+import { abortUnmockedRequest, test, expect, sel, goTo, goToSettingsSection, clickSearchCancel } from '../../helpers/app.mjs'
 import {
   encryptSyncServerDeviceInfo,
   randomSyncServerDeviceId,
@@ -1691,7 +1691,7 @@ test.describe('tab bar', () => {
     await page.locator(sel.newTabButton).click()
 
     await searchInput.fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
-    await page.locator('.topNav .searchInput .clearInputTextButton').click()
+    await clickSearchCancel(searchInput)
     await expect(searchInput).toHaveValue('')
 
     await page.locator(sel.tabs).first().click()
