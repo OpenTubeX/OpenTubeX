@@ -305,3 +305,22 @@ test('preserves the active subtitle identity when Watch and player track order d
   const [started] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
   expect(started.captions[started.captionIndex].language).toBe('en')
 })
+
+test('discards a Cast source lookup superseded by stream recovery', async ({ app, page }) => {
+  const watch = await openCastVideo(app, page)
+  await watch.evaluate(vm => {
+    vm.getChromecastSource = () => new Promise(resolve => { window.finishCastLookup = resolve })
+  })
+  await page.locator('.chromecastControl > button').click()
+  await expect.poll(() => page.evaluate(() => typeof window.finishCastLookup)).toBe('function')
+  await watch.evaluate(async vm => {
+    vm.manifestSrc = 'https://cast-media.test/recovered.mpd'
+    vm.manifestMimeType = 'application/dash+xml'
+    await vm.$nextTick()
+    window.finishCastLookup({ url: 'https://cast-media.test/obsolete.mpd', contentType: 'application/dash+xml' })
+  })
+  await page.getByRole('option', { name: 'Test TV', exact: true }).click()
+  await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
+  const [started] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
+  expect(started.source.url).toBe('https://cast-media.test/recovered.mpd')
+})

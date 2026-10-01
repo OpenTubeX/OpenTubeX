@@ -89,6 +89,7 @@ function reportError() {
 async function refreshDevices() {
   if (loading.value || disposed || castId.value) return
   loading.value = true
+  const inputs = { formats: props.formats, url: props.manifestUrl, type: props.manifestType }
   try {
     const [selectedSource, result] = await Promise.all([
       props.getSource(),
@@ -96,7 +97,9 @@ async function refreshDevices() {
     ])
     if (!Array.isArray(result)) throw new Error('Cast discovery failed')
     if (!disposed) {
-      resolvedSource.value = selectedSource
+      if (inputs.formats === props.formats && inputs.url === props.manifestUrl && inputs.type === props.manifestType) {
+        resolvedSource.value = selectedSource
+      }
       devices.value = result
     }
   } catch { reportError() } finally { loading.value = false }
