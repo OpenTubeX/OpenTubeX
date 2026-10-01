@@ -820,6 +820,7 @@ Settings:
     Preload Upcoming Videos: "Iš anksto įkelti kitus vaizdo įrašus"
     Upcoming Videos to Preload: "Iš anksto įkeliamų vaizdo įrašų skaičius"
     Concurrent Preloads: "Vienalaikiai išankstiniai įkėlimai"
+    Show Google Cast Button: "Rodyti Google Cast mygtuką"
   Channel Settings:
     Channel Settings: Kanalo nustatymai
     Channel Settings Description: Atskirai įsiminti kiekvienam kanalui žiūrint pasirinktus nustatymus, kad jie vėl būtų pritaikyti kitą kartą žiūrint vieną iš jo vaizdo įrašų.
@@ -1759,6 +1760,15 @@ Video:
       UpvoteSegment: Balsuoti už
       DownvoteSegment: Balsuoti prieš
       VoteFailed: Nepavyko pateikti SponsorBlock balso.
+    Google Cast:
+      Cast: "Perduoti į Google Cast įrenginį"
+      Connected: "Perduodama į {device}"
+      Rewind: "Atgal 10 sekundžių"
+      Forward: "Pirmyn 10 sekundžių"
+      Subtitles Off: "Išjungti subtitrus"
+      Return: "Grįžti į vietinį atkūrimą"
+      No Devices: "Google Cast įrenginių nerasta"
+      No Source: "Nėra su Google Cast suderinamo srauto"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Reklamos prieš vaizdo įrašą likęs laikas: {remindingTimeSeconds} s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Likęs SABR delsos laikas: {remindingTimeSeconds} s'

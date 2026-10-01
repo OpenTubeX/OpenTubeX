@@ -634,6 +634,7 @@ Settings:
     Preload Upcoming Videos: "Volgende video’s vooraf laden"
     Upcoming Videos to Preload: "Aantal vooraf te laden video’s"
     Concurrent Preloads: "Gelijktijdige voorladingen"
+    Show Google Cast Button: "Google Cast-knop tonen"
   Channel Settings:
     Channel Settings: Kanaalinstellingen
     Channel Settings Description: Onthoud de instellingen die je tijdens het kijken kiest afzonderlijk voor elk kanaal, zodat ze weer worden toegepast wanneer je een andere video van dat kanaal bekijkt.
@@ -1427,6 +1428,15 @@ Video:
       UpvoteSegment: Positieve stem
       DownvoteSegment: Negatieve stem
       VoteFailed: SponsorBlock-stem indienen mislukt.
+    Google Cast:
+      Cast: "Casten naar een Google Cast-apparaat"
+      Connected: "Casten naar {device}"
+      Rewind: "10 seconden terug"
+      Forward: "10 seconden vooruit"
+      Subtitles Off: "Ondertiteling uit"
+      Return: "Terug naar lokaal afspelen"
+      No Devices: "Geen Google Cast-apparaten gevonden"
+      No Source: "Geen compatibele stream voor Google Cast"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Resterende tijd van preroll-advertentie: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Resterende SABR-wachttijd: {remindingTimeSeconds}s'

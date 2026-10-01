@@ -621,6 +621,7 @@ Settings:
     Preload Upcoming Videos: "Précharger les vidéos suivantes"
     Upcoming Videos to Preload: "Nombre de vidéos à précharger"
     Concurrent Preloads: "Préchargements simultanés"
+    Show Google Cast Button: "Afficher le bouton Google Cast"
   Channel Settings:
     Channel Settings: Paramètres des chaînes
     Channel Settings Description: Mémorisez séparément pour chaque chaîne les paramètres choisis pendant le visionnage afin de les appliquer de nouveau à la prochaine vidéo de cette chaîne.
@@ -1381,6 +1382,15 @@ Video:
       UpvoteSegment: Voter pour
       DownvoteSegment: Voter contre
       VoteFailed: Échec de l’envoi du vote à SponsorBlock.
+    Google Cast:
+      Cast: "Diffuser sur un appareil Google Cast"
+      Connected: "Diffusion sur {device}"
+      Rewind: "Reculer de 10 secondes"
+      Forward: "Avancer de 10 secondes"
+      Subtitles Off: "Désactiver les sous-titres"
+      Return: "Revenir à la lecture locale"
+      No Devices: "Aucun appareil Google Cast trouvé"
+      No Source: "Aucun flux compatible avec Google Cast"
   External Media:
     Dislikes: "Vote négatif | Votes négatifs | Votes négatifs"
     Reposts: "Republication | Republications | Republications"

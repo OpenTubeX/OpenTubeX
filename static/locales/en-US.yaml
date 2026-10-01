@@ -1108,6 +1108,7 @@ Settings:
       Error:
         Forbidden Characters: Forbidden Characters
         Empty File Name: Empty File Name
+    Show Google Cast Button: "Show Google Cast button"
   Channel Settings:
     Channel Settings: Channel Settings
     Channel Settings Description: Remember the settings you pick while watching for each channel individually, so they are applied again the next time you watch one of its videos.
@@ -2362,6 +2363,15 @@ Video:
       UpvoteSegment: Upvote
       DownvoteSegment: Downvote
       VoteFailed: Failed to submit SponsorBlock vote.
+    Google Cast:
+      Cast: "Cast to a Google Cast device"
+      Connected: "Casting to {device}"
+      Rewind: "Rewind 10 seconds"
+      Forward: "Forward 10 seconds"
+      Subtitles Off: "Subtitles off"
+      Return: "Return to local playback"
+      No Devices: "No Google Cast devices found"
+      No Source: "No compatible stream for Google Cast"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Remaining preroll-ad time: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Remaining SABR backoff time: {remindingTimeSeconds}s'

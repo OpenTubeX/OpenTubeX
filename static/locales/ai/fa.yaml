@@ -650,6 +650,7 @@ Settings:
     Preload Upcoming Videos: "پیش‌بارگیری ویدیوهای بعدی"
     Upcoming Videos to Preload: "تعداد ویدیوها برای پیش‌بارگیری"
     Concurrent Preloads: "پیش‌بارگذاری‌های هم‌زمان"
+    Show Google Cast Button: "نمایش دکمهٔ Google Cast"
   Channel Settings:
     Channel Settings: تنظیمات کانال
     Channel Settings Description: تنظیمات انتخابی هنگام تماشای هر کانال را جداگانه به‌خاطر بسپار تا دفعهٔ بعد برای ویدیوهای آن دوباره اعمال شوند.
@@ -1451,6 +1452,15 @@ Video:
       UpvoteSegment: رأی مثبت
       DownvoteSegment: رأی منفی
       VoteFailed: ارسال رأی SponsorBlock ناموفق بود.
+    Google Cast:
+      Cast: "پخش روی دستگاه Google Cast"
+      Connected: "در حال پخش روی {device}"
+      Rewind: "۱۰ ثانیه عقب"
+      Forward: "۱۰ ثانیه جلو"
+      Subtitles Off: "خاموش کردن زیرنویس"
+      Return: "بازگشت به پخش محلی"
+      No Devices: "هیچ دستگاه Google Cast پیدا نشد"
+      No Source: "جریان سازگاری برای Google Cast وجود ندارد"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'زمان باقی‌ماندهٔ تبلیغ پیش از پخش: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'زمان باقی‌ماندهٔ وقفهٔ SABR: {remindingTimeSeconds}s'

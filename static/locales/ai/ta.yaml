@@ -633,6 +633,7 @@ Settings:
     Preload Upcoming Videos: "அடுத்த காணொளிகளை முன்பே ஏற்று"
     Upcoming Videos to Preload: "முன்பே ஏற்ற வேண்டிய காணொளிகளின் எண்ணிக்கை"
     Concurrent Preloads: "ஒரேநேர முன் ஏற்றங்கள்"
+    Show Google Cast Button: "Google Cast பொத்தானைக் காட்டு"
   Channel Settings:
     Channel Settings: சேனல் அமைப்புகள்
     Channel Settings Description: ஒவ்வொரு சேனலையும் பார்க்கும்போது தேர்ந்தெடுக்கும் அமைப்புகளைத் தனித்தனியாக நினைவில் கொண்டு, அதன் காணொளியை அடுத்த முறை பார்க்கும்போது மீண்டும் பயன்படுத்தும்.
@@ -1422,6 +1423,15 @@ Video:
       UpvoteSegment: ஆதரவு வாக்கு
       DownvoteSegment: எதிர்ப்பு வாக்கு
       VoteFailed: SponsorBlock வாக்கைச் சமர்ப்பிக்க முடியவில்லை.
+    Google Cast:
+      Cast: "Google Cast சாதனத்திற்கு ஒளிபரப்பு"
+      Connected: "{device} சாதனத்திற்கு ஒளிபரப்பப்படுகிறது"
+      Rewind: "10 வினாடிகள் பின்னால்"
+      Forward: "10 வினாடிகள் முன்னால்"
+      Subtitles Off: "வசன வரிகளை அணை"
+      Return: "உள்ளூர் இயக்கத்திற்குத் திரும்பு"
+      No Devices: "Google Cast சாதனங்கள் கிடைக்கவில்லை"
+      No Source: "Google Cast-க்கு இணக்கமான ஓடை இல்லை"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'தொடக்க விளம்பரத்தில் மீதமுள்ள நேரம்: {remindingTimeSeconds}வி.'
   Station: நிலையம்

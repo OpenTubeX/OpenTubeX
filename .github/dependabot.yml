@@ -46,6 +46,7 @@ updates:
       - dependency-name: "@lezer/markdown"
       - dependency-name: "@playwright/test"
       - dependency-name: "@vot.js/core"
+      - dependency-name: "copy-webpack-plugin"
       - dependency-name: "dbus-native"
       - dependency-name: "eld"
       - dependency-name: "entities"
@@ -59,6 +60,13 @@ updates:
       - dependency-name: "sax"
       - dependency-name: "vue-sonner"
       - dependency-name: "yaml"
+  - package-ecosystem: "gomod"
+    directory: "/_scripts/cast-sender"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "PR: waiting for review"
+      - "PR: dependencies"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

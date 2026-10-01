@@ -634,6 +634,7 @@ Settings:
     Preload Upcoming Videos: "טעינה מראש של הסרטונים הבאים"
     Upcoming Videos to Preload: "מספר הסרטונים לטעינה מראש"
     Concurrent Preloads: "טעינות מראש במקביל"
+    Show Google Cast Button: "הצגת כפתור Google Cast"
   Channel Settings:
     Channel Settings: הגדרות ערוץ
     Channel Settings Description: שמירת ההגדרות שנבחרו בזמן צפייה לכל ערוץ בנפרד, כדי שיוחלו שוב בצפייה הבאה באחד מסרטוניו.
@@ -1421,6 +1422,15 @@ Video:
       UpvoteSegment: הצבעה בעד
       DownvoteSegment: הצבעה נגד
       VoteFailed: שליחת ההצבעה אל SponsorBlock נכשלה.
+    Google Cast:
+      Cast: "שידור למכשיר Google Cast"
+      Connected: "משדר אל {device}"
+      Rewind: "10 שניות אחורה"
+      Forward: "10 שניות קדימה"
+      Subtitles Off: "כיבוי כתוביות"
+      Return: "חזרה לניגון מקומי"
+      No Devices: "לא נמצאו מכשירי Google Cast"
+      No Source: "אין זרם תואם ל־Google Cast"
   Station: תחנה
   Playlist:
     Unavailable videos are hidden: סרטון אחד שאינו זמין מוסתר | {count} סרטונים לא זמינים מוסתרים | {count} סרטונים לא זמינים מוסתרים

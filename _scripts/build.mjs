@@ -3,11 +3,13 @@ import config from './ebuilder.config.mjs'
 import { prepareWindowsShare } from './windowsShare.mjs'
 import { prepareWindowsInterposer } from './windowsInterposer.mjs'
 import { withWindowsPortable } from './windowsPortable.mjs'
+import { prepareCastSender } from './castSender.mjs'
 
 const args = process.argv
 
 let buildRequests
 const platform = process.platform
+await prepareCastSender('dist', platform, { arm32: 'arm', arm64: 'arm64' }[args[2]] ?? 'x64')
 
 if (platform === 'darwin') {
   let arch = Arch.x64

@@ -621,6 +621,7 @@ Settings:
     Preload Upcoming Videos: "Sonraki videoları önceden yükle"
     Upcoming Videos to Preload: "Önceden yüklenecek video sayısı"
     Concurrent Preloads: "Eş Zamanlı Ön Yüklemeler"
+    Show Google Cast Button: "Google Cast düğmesini göster"
   Channel Settings:
     Channel Settings: Kanal Ayarları
     Channel Settings Description: İzlerken seçtiğiniz ayarları her kanal için ayrı ayrı hatırlayarak kanalın bir sonraki videosunda yeniden uygular.
@@ -1382,6 +1383,15 @@ Video:
       UpvoteSegment: Olumlu oy ver
       DownvoteSegment: Olumsuz oy ver
       VoteFailed: SponsorBlock oyu gönderilemedi.
+    Google Cast:
+      Cast: "Google Cast cihazına yayınla"
+      Connected: "{device} cihazına yayınlanıyor"
+      Rewind: "10 saniye geri"
+      Forward: "10 saniye ileri"
+      Subtitles Off: "Altyazıları kapat"
+      Return: "Yerel oynatmaya dön"
+      No Devices: "Google Cast cihazı bulunamadı"
+      No Source: "Google Cast için uyumlu akış yok"
   External Media:
     Dislikes: "Beğenmeme | Beğenmeme"
     Reposts: "Repost | Repost"

@@ -1273,6 +1273,8 @@ export default defineComponent({
       )
     }
 
+    const captionSources = new WeakMap()
+
     function findMatchingTextTrack(textTracks, caption) {
       if (!caption) {
         return null
@@ -8044,7 +8046,7 @@ export default defineComponent({
      */
     async function addCaptionTrack(caption, captionPlayer = player) {
       const url = await getSubtitleRequestUrl(caption.url, store.getters)
-      return captionPlayer.addTextTrackAsync(
+      const track = await captionPlayer.addTextTrackAsync(
         url,
         caption.language,
         'captions',
@@ -8052,6 +8054,9 @@ export default defineComponent({
         undefined,
         caption.label
       )
+      if (!captionSources.has(captionPlayer)) captionSources.set(captionPlayer, new Map())
+      captionSources.get(captionPlayer).set(track.id, caption)
+      return track
     }
 
     /**
@@ -11927,6 +11932,13 @@ export default defineComponent({
       video.value.currentTime = time
     }
 
+    function getActiveCaption() {
+      const active = player?.getTextTracks().find(track => track.active)
+      if (!active) return null
+      return captionSources.get(player)?.get(active.id) ??
+        props.captions.find(caption => findMatchingTextTrack([active], caption)) ?? null
+    }
+
     function getSabrReloadState() {
       const captionIndex = player?.getTextTracks().findIndex(caption => caption.active) ?? -1
 
@@ -12067,6 +12079,7 @@ export default defineComponent({
       getCurrentTime,
       setCurrentTime,
       getSabrReloadState,
+      getActiveCaption,
       retryStreaming,
       setFullscreenMetadata,
       closeFullscreenMetadata,

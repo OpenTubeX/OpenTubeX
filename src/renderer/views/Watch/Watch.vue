@@ -869,15 +869,33 @@
           @toggle-live-chat="toggleLiveChat"
         >
           <template
-            v-if="playerReady && (isElectron || isCapacitor) && $store.getters.getShowDlnaCastButton && !customShortsPlayerActive && !localFilePlayback && !isUpcoming && !errorMessage"
+            v-if="playerReady && (isElectron || isCapacitor) && ($store.getters.getShowDlnaCastButton || (isElectron && $store.getters.getShowChromecastButton)) && !customShortsPlayerActive && !localFilePlayback && !isUpcoming && !errorMessage"
             #cast-action
           >
             <WatchDlnaCast
+              v-if="$store.getters.getShowDlnaCastButton && !chromecastActive"
               :key="videoId"
               :video-id="videoId"
               :formats="legacyFormats"
               :title="videoTitle"
               :get-player="() => $refs.player"
+            />
+            <WatchChromecast
+              v-if="isElectron && $store.getters.getShowChromecastButton"
+              ref="chromecast"
+              :key="`cast-${videoId}`"
+              :formats="legacyFormats"
+              :manifest-url="manifestSrc"
+              :manifest-type="manifestMimeType"
+              :captions="captions"
+              :subtitles-enabled="currentSubtitlesState"
+              :is-live="isLive"
+              :title="videoTitle"
+              :get-player="() => $refs.player"
+              :get-source="() => getChromecastSource()"
+              @casting-change="handleChromecastChange"
+              @playback-state="handleChromecastState"
+              @ended="handlePlayerEnded"
             />
           </template>
         </watch-video-info>

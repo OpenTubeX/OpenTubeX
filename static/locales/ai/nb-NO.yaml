@@ -621,6 +621,7 @@ Settings:
     Preload Upcoming Videos: "Forhåndslast kommende videoer"
     Upcoming Videos to Preload: "Antall videoer som skal forhåndslastes"
     Concurrent Preloads: "Samtidige forhåndslastinger"
+    Show Google Cast Button: "Vis Google Cast-knapp"
   Channel Settings:
     Channel Settings: Kanalinnstillinger
     Channel Settings Description: Husk innstillingene du velger mens du ser på hver kanal, slik at de brukes igjen neste gang du ser en av videoene fra kanalen.
@@ -1395,6 +1396,15 @@ Video:
       UpvoteSegment: Stem opp
       DownvoteSegment: Stem ned
       VoteFailed: Kunne ikke sende inn SponsorBlock-stemmen.
+    Google Cast:
+      Cast: "Cast til en Google Cast-enhet"
+      Connected: "Caster til {device}"
+      Rewind: "Spol 10 sekunder tilbake"
+      Forward: "Spol 10 sekunder frem"
+      Subtitles Off: "Slå av undertekster"
+      Return: "Gå tilbake til lokal avspilling"
+      No Devices: "Ingen Google Cast-enheter funnet"
+      No Source: "Ingen kompatibel strøm for Google Cast"
   Station: Stasjon
   Playlist:
     Unavailable videos are hidden: 1 utilgjengelig video er skjult | {count} utilgjengelige videoer er skjult

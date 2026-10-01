@@ -621,6 +621,7 @@ Settings:
     Preload Upcoming Videos: "Přednačítat následující videa"
     Upcoming Videos to Preload: "Počet videí k přednačtení"
     Concurrent Preloads: "Souběžná přednačtení"
+    Show Google Cast Button: "Zobrazit tlačítko Google Cast"
   Channel Settings:
     Channel Settings: Nastavení kanálů
     Channel Settings Description: Zapamatuje nastavení zvolená při sledování pro každý kanál zvlášť a znovu je použije při příštím sledování některého z jeho videí.
@@ -1382,6 +1383,15 @@ Video:
       UpvoteSegment: Hlasovat pro
       DownvoteSegment: Hlasovat proti
       VoteFailed: Hlas pro SponsorBlock se nepodařilo odeslat.
+    Google Cast:
+      Cast: "Odeslat do zařízení Google Cast"
+      Connected: "Odesílání do {device}"
+      Rewind: "Zpět o 10 sekund"
+      Forward: "Vpřed o 10 sekund"
+      Subtitles Off: "Vypnout titulky"
+      Return: "Vrátit se k místnímu přehrávání"
+      No Devices: "Nenalezena žádná zařízení Google Cast"
+      No Source: "Žádný kompatibilní stream pro Google Cast"
   External Media:
     Dislikes: "Dislajk | Dislajky | Dislajků"
     Reposts: "Repost | Reposty | Repostů"

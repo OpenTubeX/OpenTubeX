@@ -623,6 +623,7 @@ Settings:
     Preload Upcoming Videos: "Предварително зареждане на следващите видеа"
     Upcoming Videos to Preload: "Брой видеа за предварително зареждане"
     Concurrent Preloads: "Едновременни предварителни зареждания"
+    Show Google Cast Button: "Показване на бутона Google Cast"
   Channel Settings:
     Channel Settings: Настройки за каналите
     Channel Settings Description: Запомняне на избраните при гледане настройки поотделно за всеки канал, за да бъдат приложени отново следващия път, когато гледате негов видеоклип.
@@ -1395,6 +1396,15 @@ Video:
       UpvoteSegment: Гласуване „за“
       DownvoteSegment: Гласуване „против“
       VoteFailed: Гласът в SponsorBlock не можа да бъде изпратен.
+    Google Cast:
+      Cast: "Предаване към устройство Google Cast"
+      Connected: "Предаване към {device}"
+      Rewind: "Назад с 10 секунди"
+      Forward: "Напред с 10 секунди"
+      Subtitles Off: "Изключване на субтитрите"
+      Return: "Връщане към локално възпроизвеждане"
+      No Devices: "Няма намерени устройства Google Cast"
+      No Source: "Няма съвместим поток за Google Cast"
   Station: Станция
   Playlist:
     Unavailable videos are hidden: 1 недостъпен видеоклип е скрит | {count} недостъпни видеоклипа са скрити

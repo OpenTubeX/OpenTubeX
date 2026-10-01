@@ -629,6 +629,7 @@ Settings:
     Preload Upcoming Videos: "Tải trước các video tiếp theo"
     Upcoming Videos to Preload: "Số video cần tải trước"
     Concurrent Preloads: "Số lượt tải trước đồng thời"
+    Show Google Cast Button: "Hiện nút Google Cast"
   Channel Settings:
     Channel Settings: Cài đặt kênh
     Channel Settings Description: Ghi nhớ riêng các cài đặt bạn chọn khi xem từng kênh để áp dụng lại vào lần sau khi bạn xem video của kênh đó.
@@ -1411,6 +1412,15 @@ Video:
       UpvoteSegment: Bình chọn tích cực
       DownvoteSegment: Bình chọn tiêu cực
       VoteFailed: Không thể gửi bình chọn SponsorBlock.
+    Google Cast:
+      Cast: "Truyền tới thiết bị Google Cast"
+      Connected: "Đang truyền tới {device}"
+      Rewind: "Lùi 10 giây"
+      Forward: "Tiến 10 giây"
+      Subtitles Off: "Tắt phụ đề"
+      Return: "Quay lại phát trên máy"
+      No Devices: "Không tìm thấy thiết bị Google Cast"
+      No Source: "Không có luồng tương thích với Google Cast"
   Station: Trạm
   Playlist:
     Unavailable videos are hidden: '{count} video không có sẵn đã bị ẩn'

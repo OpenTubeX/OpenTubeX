@@ -621,6 +621,7 @@ Settings:
     Preload Upcoming Videos: "次の動画を先読み"
     Upcoming Videos to Preload: "先読みする動画数"
     Concurrent Preloads: "同時先読み数"
+    Show Google Cast Button: "Google Castボタンを表示"
   Channel Settings:
     Channel Settings: チャンネル設定
     Channel Settings Description: 視聴中に選んだ設定をチャンネルごとに記憶し、次回そのチャンネルの動画を見るときに再度適用します。
@@ -1382,6 +1383,15 @@ Video:
       UpvoteSegment: 高評価
       DownvoteSegment: 低評価
       VoteFailed: SponsorBlockの評価を送信できませんでした。
+    Google Cast:
+      Cast: "Google Castデバイスにキャスト"
+      Connected: "{device}にキャスト中"
+      Rewind: "10秒戻る"
+      Forward: "10秒進む"
+      Subtitles Off: "字幕をオフ"
+      Return: "ローカル再生に戻る"
+      No Devices: "Google Castデバイスが見つかりません"
+      No Source: "Google Cast対応のストリームがありません"
   External Media:
     Dislikes: "低評価"
     Reposts: "再投稿"

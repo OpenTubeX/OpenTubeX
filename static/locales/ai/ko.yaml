@@ -795,6 +795,7 @@ Settings:
     Preload Upcoming Videos: "다음 동영상 미리 불러오기"
     Upcoming Videos to Preload: "미리 불러올 동영상 수"
     Concurrent Preloads: "동시 미리 로드 수"
+    Show Google Cast Button: "Google Cast 버튼 표시"
   Channel Settings:
     Channel Settings: 채널 설정
     Channel Settings Description: 채널마다 시청 중 선택한 설정을 기억하고, 다음에 해당 채널의 동영상을 시청할 때 다시 적용합니다.
@@ -1724,6 +1725,15 @@ Video:
       UpvoteSegment: 추천
       DownvoteSegment: 비추천
       VoteFailed: SponsorBlock 투표를 제출하지 못했습니다.
+    Google Cast:
+      Cast: "Google Cast 기기로 전송"
+      Connected: "{device}(으)로 전송 중"
+      Rewind: "10초 뒤로"
+      Forward: "10초 앞으로"
+      Subtitles Off: "자막 끄기"
+      Return: "로컬 재생으로 돌아가기"
+      No Devices: "Google Cast 기기를 찾을 수 없습니다"
+      No Source: "Google Cast와 호환되는 스트림이 없습니다"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': '프리롤 광고 남은 시간: {remindingTimeSeconds}초'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'SABR 대기 남은 시간: {remindingTimeSeconds}초'

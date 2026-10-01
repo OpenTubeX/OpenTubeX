@@ -621,6 +621,7 @@ Settings:
     Preload Upcoming Videos: "Aurrekargatu hurrengo bideoak"
     Upcoming Videos to Preload: "Aurrekargatu beharreko bideo kopurua"
     Concurrent Preloads: "Aldibereko aurrekargak"
+    Show Google Cast Button: "Erakutsi Google Cast botoia"
   Channel Settings:
     Channel Settings: Kanalen ezarpenak
     Channel Settings Description: Gogoratu kanal bakoitzerako bideoak ikustean aukeratutako ezarpenak, kanal horretako beste bideo bat ikusten duzunean berriro aplikatzeko.
@@ -1397,6 +1398,15 @@ Video:
       UpvoteSegment: Eman aldeko botoa
       DownvoteSegment: Eman kontrako botoa
       VoteFailed: Ezin izan da SponsorBlock botoa bidali.
+    Google Cast:
+      Cast: "Igorri Google Cast gailu batera"
+      Connected: "{device} gailura igortzen"
+      Rewind: "10 segundo atzera"
+      Forward: "10 segundo aurrera"
+      Subtitles Off: "Desaktibatu azpitituluak"
+      Return: "Itzuli tokiko erreprodukziora"
+      No Devices: "Ez da Google Cast gailurik aurkitu"
+      No Source: "Ez dago Google Cast-erako korronte bateragarririk"
   Station: Estazioa
   Playlist:
     Unavailable videos are hidden: Erabilgarri ez dagoen bideo 1 ezkutatuta dago | Erabilgarri ez dauden {count} bideo ezkutatuta daude
