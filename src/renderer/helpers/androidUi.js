@@ -16,10 +16,16 @@ function createAndroidRotationObserver(subscribe, setEnabled) {
   function reconcile() {
     task = task.then(async () => {
       if (callbacks.size && !handle) {
-        handle = await subscribe(landscape => {
+        const subscription = await subscribe(landscape => {
           for (const callback of callbacks) callback(landscape)
         })
-        await setEnabled?.(true)
+        try {
+          await setEnabled?.(true)
+          handle = subscription
+        } catch (error) {
+          await subscription.remove()
+          throw error
+        }
       } else if (!callbacks.size && handle) {
         await setEnabled?.(false)
         await handle.remove()

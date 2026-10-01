@@ -169,6 +169,17 @@ test('Android restores the system orientation policy when rotation fullscreen is
   ])
 })
 
+test('Android exits physical rotation fullscreen when portrait arrives before resume visibility', () => {
+  const { calls, context, handlers, isPopoverOpen } = androidRotationHarness({
+    fullscreenRotationIgnoresSystemLock: { value: true },
+  })
+  handlers.handleAndroidRotation(true)
+  context.mobileAdjustmentsVisible.value = false
+  handlers.handleAndroidRotation(false)
+  assert.equal(isPopoverOpen(), false)
+  assert.ok(calls.includes('orientation:false'))
+})
+
 for (const [state, overrides] of [
   ['fullscreen-on-rotate disabled', { enterFullscreenOnDisplayRotate: { value: false } }],
   ['minimized player', { scrollMiniPlayerActive: { value: true } }],

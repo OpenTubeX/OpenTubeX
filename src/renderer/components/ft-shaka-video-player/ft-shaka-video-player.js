@@ -7068,7 +7068,7 @@ export default defineComponent({
 
     function handleAndroidRotation(landscape) {
       if (!isActiveTab.value || !ui || !fullWindowListenerReady) return
-      if (pictureInPictureActive.value || !mobileAdjustmentsVisible.value) return
+      if (pictureInPictureActive.value) return
       if (!landscape) {
         if (androidRotationFullscreen) exitAndroidRotationFullscreen()
         else if (isNativeFullscreenActive()) {
@@ -7076,6 +7076,8 @@ export default defineComponent({
         }
         return
       }
+      // Resume can deliver portrait before the visibility event reaches the renderer.
+      if (!mobileAdjustmentsVisible.value) return
       // Use display rotation by default; physical rotation is an explicit opt-in.
       if (!enterFullscreenOnDisplayRotate.value || scrollMiniPlayerActive.value || props.format === 'audio' || props.shortsPlayer) return
       if (!video.value?.readyState || pictureInPictureActive.value) return

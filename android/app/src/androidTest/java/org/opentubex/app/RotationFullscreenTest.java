@@ -12,6 +12,7 @@ import android.webkit.WebView;
 import android.view.WindowManager;
 
 import androidx.test.core.app.ActivityScenario;
+import androidx.lifecycle.Lifecycle;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -132,7 +133,11 @@ public class RotationFullscreenTest {
                         physicalRotation, activity.getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE));
                     assertEquals("0", shell("settings get system accelerometer_rotation"));
                     if (physicalRotation) {
+                        scenario.moveToState(Lifecycle.State.CREATED);
                         android.util.Log.i("OpenTubeXRotationTest", "physical-fullscreen");
+                        // Let the host turn the device upright while sensing is paused.
+                        Thread.sleep(1000);
+                        scenario.moveToState(Lifecycle.State.RESUMED);
                     } else {
                         assertTrue(InstrumentationRegistry.getInstrumentation().getUiAutomation().setRotation(UiAutomation.ROTATION_FREEZE_0));
                     }

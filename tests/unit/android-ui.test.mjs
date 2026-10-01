@@ -102,3 +102,38 @@ test('Android physical rotation sensing starts only for explicit subscribers and
   await new Promise(resolve => setImmediate(resolve))
   assert.deepEqual(calls, [true, false, 'remove'])
 })
+
+test('Android cleans up a failed sensor enable so a later subscriber can retry', async () => {
+  const source = readFileSync(new URL('../../src/renderer/helpers/androidUi.js', import.meta.url), 'utf8')
+  const start = source.indexOf('function createAndroidRotationObserver(')
+  const end = source.indexOf('\nfunction videoDimensions(', start)
+  const calls = []
+  let failEnable = true
+  const AndroidUi = {
+    addListener: async () => {
+      calls.push('subscribe')
+      return { remove: async () => { calls.push('remove') } }
+    },
+    setDeviceRotationEnabled: async ({ enabled }) => {
+      calls.push(enabled)
+      if (enabled && failEnable) throw new Error('Native enable failed')
+    },
+  }
+  const warnings = []
+  const { observeAndroidDeviceRotation } = vm.runInNewContext(
+    `${source.slice(start, end).replace(/^export /gm, '')}\n;({ observeAndroidDeviceRotation })`,
+    { AndroidUi, ScreenOrientation: {}, console: { warn: (...args) => warnings.push(args) }, Set, Promise }
+  )
+  const stop = observeAndroidDeviceRotation(() => {})
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(warnings.length, 1)
+  assert.deepEqual(calls, ['subscribe', true, 'remove'])
+  failEnable = false
+  const stopSecond = observeAndroidDeviceRotation(() => {})
+  await new Promise(resolve => setImmediate(resolve))
+  assert.deepEqual(calls, ['subscribe', true, 'remove', 'subscribe', true])
+  stop()
+  stopSecond()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.deepEqual(calls.slice(-2), [false, 'remove'])
+})
