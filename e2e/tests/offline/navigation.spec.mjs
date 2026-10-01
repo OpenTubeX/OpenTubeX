@@ -77,6 +77,7 @@ for (const uiScale of [100, 125]) {
     test('updates safe-area, progress and overflow insets when compact mode changes', async ({ app, page }) => {
       await setWindowSize(app, page, { width: 500, height: 850 })
       await goTo(page, 'history')
+      await expect(page.getByRole('heading', { name: 'History', exact: true })).toBeVisible()
       await page.evaluate(() => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
         store.commit('setAlwaysShowNavigationBar', true)
@@ -89,6 +90,7 @@ for (const uiScale of [100, 125]) {
         document.querySelector('.tabContent:not([inert]) > .routerView').append(content)
       })
       await expect(page.locator('.progressBar')).toBeVisible()
+      await expect.poll(() => page.evaluate(() => document.scrollingElement.scrollHeight)).toBeGreaterThan(3000)
       for (const compact of [false, true, false, true]) {
         await page.evaluate(() => window.scrollTo(0, document.scrollingElement.scrollHeight))
         const previousHeight = await page.evaluate(() => document.scrollingElement.scrollHeight)
