@@ -306,21 +306,32 @@ test('preserves the active subtitle identity when Watch and player track order d
   expect(started.captions[started.captionIndex].language).toBe('en')
 })
 
-test('discards a Cast source lookup superseded by stream recovery', async ({ app, page }) => {
-  const watch = await openCastVideo(app, page)
-  await watch.evaluate(vm => {
-    vm.getChromecastSource = () => new Promise(resolve => { window.finishCastLookup = resolve })
+for (const outcome of ['resolved', 'rejected']) {
+  test(`refreshes a ${outcome} Cast source lookup superseded by stream recovery`, async ({ app, page }) => {
+    const watch = await openCastVideo(app, page)
+    await watch.evaluate((vm, obsoleteOutcome) => {
+      window.castSourceLookups = 0
+      vm.getChromecastSource = () => {
+        if (++window.castSourceLookups === 1) {
+          return new Promise((resolve, reject) => {
+            window.finishCastLookup = result => obsoleteOutcome === 'rejected' ? reject(new Error('Obsolete source failed')) : resolve(result)
+          })
+        }
+        return Promise.resolve({ url: 'https://cast-media.test/recovered.mpd', contentType: 'application/dash+xml' })
+      }
+    }, outcome)
+    await page.locator('.chromecastControl > button').click()
+    await expect.poll(() => page.evaluate(() => typeof window.finishCastLookup)).toBe('function')
+    await watch.evaluate(async vm => {
+      vm.manifestSrc = 'https://cast-media.test/recovered.sabr'
+      vm.manifestMimeType = 'application/sabr+json'
+      await vm.$nextTick()
+      window.finishCastLookup({ url: 'https://cast-media.test/obsolete.mpd', contentType: 'application/dash+xml' })
+    })
+    await expect.poll(() => page.evaluate(() => window.castSourceLookups), { timeout: 5000 }).toBe(2)
+    await page.getByRole('option', { name: 'Test TV', exact: true }).click()
+    await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
+    const [started] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
+    expect(started.source.url).toBe('https://cast-media.test/recovered.mpd')
   })
-  await page.locator('.chromecastControl > button').click()
-  await expect.poll(() => page.evaluate(() => typeof window.finishCastLookup)).toBe('function')
-  await watch.evaluate(async vm => {
-    vm.manifestSrc = 'https://cast-media.test/recovered.mpd'
-    vm.manifestMimeType = 'application/dash+xml'
-    await vm.$nextTick()
-    window.finishCastLookup({ url: 'https://cast-media.test/obsolete.mpd', contentType: 'application/dash+xml' })
-  })
-  await page.getByRole('option', { name: 'Test TV', exact: true }).click()
-  await expect(page.locator('.chromecastControl > button')).toHaveAttribute('aria-pressed', 'true')
-  const [started] = await app.electronApp.evaluate(() => globalThis.castTest.starts)
-  expect(started.source.url).toBe('https://cast-media.test/recovered.mpd')
-})
+}

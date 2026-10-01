@@ -89,18 +89,20 @@ function reportError() {
 async function refreshDevices() {
   if (loading.value || disposed || castId.value) return
   loading.value = true
-  const inputs = { formats: props.formats, url: props.manifestUrl, type: props.manifestType }
   try {
-    const [selectedSource, result] = await Promise.all([
-      props.getSource(),
-      window.ftElectron.chromecast.discover()
-    ])
-    if (!Array.isArray(result)) throw new Error('Cast discovery failed')
-    if (!disposed) {
-      if (inputs.formats === props.formats && inputs.url === props.manifestUrl && inputs.type === props.manifestType) {
-        resolvedSource.value = selectedSource
-      }
+    const discovery = window.ftElectron.chromecast.discover()
+    while (true) {
+      const inputs = { formats: props.formats, url: props.manifestUrl, type: props.manifestType }
+      const [selectedSource, discovered] = await Promise.allSettled([props.getSource(), discovery])
+      if (disposed) return
+      if (discovered.status === 'rejected') throw discovered.reason
+      const result = discovered.value
+      if (!Array.isArray(result)) throw new Error('Cast discovery failed')
+      if (inputs.formats !== props.formats || inputs.url !== props.manifestUrl || inputs.type !== props.manifestType) continue
+      if (selectedSource.status === 'rejected') throw selectedSource.reason
+      resolvedSource.value = selectedSource.value
       devices.value = result
+      return
     }
   } catch { reportError() } finally { loading.value = false }
 }
