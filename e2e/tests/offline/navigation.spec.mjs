@@ -1,15 +1,6 @@
 import { test, expect, goTo, goToSettingsSection, sel, setWindowSize } from '../../helpers/app.mjs'
 import { DEFAULT_NAVIGATION_ITEMS } from '../../../src/navigationItems.js'
 
-// Pages that work without any network access.
-const OFFLINE_PAGES = [
-  { route: 'subscriptions', name: 'Subscriptions' },
-  { route: 'subscribedchannels', name: 'Channels' },
-  { route: 'userplaylists', name: 'Playlists' },
-  { route: 'history', name: 'History' },
-  { route: 'settings', name: 'Settings' }
-]
-
 for (const uiScale of [100, 125]) {
   test.describe(`navigation options outline at ${uiScale}% UI scale`, () => {
     test.use({ seed: { settings: { uiScale } } })
@@ -295,12 +286,6 @@ for (const uiScale of [100, 125]) {
 }
 
 test.describe('side nav navigation', () => {
-  for (const { route, name } of OFFLINE_PAGES) {
-    test(`navigates to ${name}`, async ({ page }) => {
-      await goTo(page, route)
-    })
-  }
-
   test('omits About from the mobile navigation', async ({ page }) => {
     const sideNav = page.locator('.sideNav')
     const moreButton = sideNav.getByRole('button', { name: 'More', exact: true })

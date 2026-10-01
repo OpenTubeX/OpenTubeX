@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises'
-import { test, expect } from '../../helpers/app.mjs'
+import { test, expect } from '@playwright/test'
 
 const source = await readFile(new URL('../../../src/datastores/browserSubscriptionCache.js', import.meta.url), 'utf8')
 const seenSource = await readFile(new URL('../../../src/subscriptionFeedState.js', import.meta.url), 'utf8')
@@ -7,6 +7,10 @@ const seenSource = await readFile(new URL('../../../src/subscriptionFeedState.js
 test.beforeEach(async ({ page }) => {
   // Exercise the browser backend against Chromium's real IndexedDB, including
   // transaction commits and structured cloning, without touching the app cache.
+  await page.route('http://subscription-cache.test/', route => route.fulfill({
+    contentType: 'text/html', body: '<!doctype html><title>Subscription cache tests</title>'
+  }))
+  await page.goto('http://subscription-cache.test/')
   await page.evaluate(`${seenSource.replaceAll('export function', 'function')}\n${source.replace(/^import .*\n/m, '').replace('export function', 'function')}; window.createTestCache = createBrowserSubscriptionCache`)
 })
 
