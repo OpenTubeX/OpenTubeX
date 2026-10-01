@@ -125,6 +125,7 @@
 
 .tutorialActions :deep(.btn) {
   margin: 0;
+  transition-property: color, background-color, border-color, box-shadow;
 }
 
 .tutorialImportActions {

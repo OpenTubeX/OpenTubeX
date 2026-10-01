@@ -3,6 +3,69 @@ import { test, expect, setWindowSize } from '../../helpers/app.mjs'
 test.use({ showTutorial: true })
 
 for (const zoom of [1, 0.95]) {
+  test(`secondary tutorial buttons keep their size during step changes at ${zoom} scale`, async ({ page }) => {
+    await page.evaluate(() => localStorage.setItem('opentubex.tutorial.audience', 'new'))
+    await page.reload()
+    await page.evaluate(async factor => {
+      window.ftElectron.setZoomFactor(factor)
+      await document.fonts.ready
+    }, zoom)
+
+    const tutorial = page.locator('.tutorialCard')
+    await expect(tutorial).toHaveAccessibleName('Welcome to OpenTubeX')
+    for (let step = 0; step < 4; step++) {
+      await tutorial.getByRole('button', { name: 'Next' }).click()
+    }
+    await expect(tutorial).toHaveAccessibleName('Make it yours')
+
+    for (const [action, title] of [
+      ['Next', 'Bring your data with you'],
+      ['Back', 'Make it yours'],
+      ['Next', 'Bring your data with you']
+    ]) {
+      const sizes = await tutorial.evaluate(async (card, action) => {
+        const button = Array.from(card.querySelectorAll('.tutorialActions .btn')).find(element => {
+          return (element.getAttribute('aria-label') || element.textContent.trim()) === action
+        })
+        button.click()
+
+        // Sample the actual transition, before Playwright's actionability
+        // waits can hide a brief change in button size.
+        const samples = new Map()
+        await new Promise(resolve => {
+          const start = performance.now()
+          const sample = () => {
+            for (const element of card.querySelectorAll('.tutorialActions .btn')) {
+              const label = element.getAttribute('aria-label') || element.textContent.trim()
+              if (label !== 'Back' && label !== 'Not now') continue
+              const { width, height } = element.getBoundingClientRect()
+              const values = samples.get(label) || []
+              values.push({ width, height })
+              samples.set(label, values)
+            }
+            if (performance.now() - start < 400) requestAnimationFrame(sample)
+            else resolve()
+          }
+          requestAnimationFrame(sample)
+        })
+        return Array.from(samples, ([label, values]) => ({
+          label,
+          count: values.length,
+          widthChange: Math.max(...values.map(value => value.width)) - Math.min(...values.map(value => value.width)),
+          heightChange: Math.max(...values.map(value => value.height)) - Math.min(...values.map(value => value.height))
+        }))
+      }, action)
+
+      await expect(tutorial).toHaveAccessibleName(title)
+      expect(sizes.map(({ label }) => label)).toEqual(title === 'Make it yours' ? ['Back'] : ['Back', 'Not now'])
+      for (const size of sizes) {
+        expect(size.count).toBeGreaterThan(1)
+        expect(size.widthChange, `${action}: ${JSON.stringify(size)}`).toBeLessThanOrEqual(0.1)
+        expect(size.heightChange, `${action}: ${JSON.stringify(size)}`).toBeLessThanOrEqual(0.1)
+      }
+    }
+  })
+
   test(`neutral tutorial buttons have the same visible height as colored buttons at ${zoom} scale`, async ({ page }, testInfo) => {
     await page.evaluate(() => localStorage.setItem('opentubex.tutorial.audience', 'new'))
     await page.reload()
