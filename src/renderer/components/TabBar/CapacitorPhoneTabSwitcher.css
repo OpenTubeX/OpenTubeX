@@ -258,6 +258,8 @@
 
 .capacitorPhoneTabRow {
   position: relative;
+  display: flex;
+  flex-direction: column;
   min-inline-size: 0;
   border: 2px solid var(--border-color);
   border-radius: calc(8px * var(--ui-roundness));
@@ -293,6 +295,7 @@
 
 .capacitorPhoneTabTarget {
   display: flex;
+  flex: 1;
   flex-direction: column;
   inline-size: 100%;
   min-inline-size: 0;
@@ -308,8 +311,13 @@
   touch-action: manipulation;
 }
 
+.capacitorPhoneTabTarget :deep(.capacitorTabPreview) {
+  flex: 1;
+}
+
 .capacitorPhoneTabTitle {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 6px;
   align-self: stretch;

@@ -21,6 +21,96 @@ public class MobileTabSelectionTest {
     private static final String STORE = "document.querySelector('#app').__vue_app__.config.globalProperties.$store";
 
     @Test
+    public void tabHistoryButtonRequiresAnotherNavigationEntry() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            AtomicReference<WebView> reference = new AtomicReference<>();
+            scenario.onActivity(activity -> reference.set(activity.getBridge().getWebView()));
+            WebView view = reference.get();
+            await(view, "!!document.querySelector('.capacitorPhoneTabSwitcherButton') && " +
+                STORE + ".getters.getActiveTab?.loadState === 'loaded'");
+            await(view, "localStorage.getItem('opentubex.tutorial.audience') === 'completed' || " +
+                "!!document.querySelector('.tutorialActions button')");
+            evaluate(view, "document.querySelector('.tutorialActions button')?.click()");
+            await(view, "!document.querySelector('.tutorialOverlay')");
+            evaluate(view, """
+                (() => {
+                    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store;
+                    const tab = store.getters.getPresentedTab;
+                    window.tabHistoryOriginal = {
+                        layout: store.getters.getCapacitorLayoutMode,
+                        scale: store.getters.getUiScale,
+                        state: { ...store.state.tabs, tabs: store.state.tabs.tabs.map(tab => ({ ...tab })) },
+                        tabId: tab.id, route: tab.route, history: tab.history, historyIndex: tab.historyIndex
+                    };
+                    store.commit('setCapacitorLayoutMode', 'phone');
+                    store.commit('setTabsState', {
+                        ...store.state.tabs,
+                        tabs: [tab, { ...tab, id: 'tab-history-neighbor', isUnloaded: true, loadState: 'unloaded' }]
+                    });
+                })()
+                """);
+            try {
+                evaluate(view, "document.querySelector('.capacitorPhoneTabSwitcherButton').click()");
+                await(view, "!!document.querySelector('.capacitorPhoneTabDialog')");
+                for (int scale : new int[] {100, 95}) {
+                    evaluate(view, STORE + ".commit('setUiScale', " + scale + ")");
+                    await(view, "Math.abs(visualViewport.scale - " + scale / 100.0 + ") < 0.01");
+                    for (int[] state : new int[][] {{1, 0}, {2, 1}, {2, 0}, {1, 0}}) {
+                        evaluate(view, String.format("""
+                            (() => {
+                                const saved = window.tabHistoryOriginal;
+                                const entry = saved.history[saved.historyIndex];
+                                %s.commit('setTabNavigation', {
+                                    tabId: saved.tabId, route: saved.route,
+                                    history: Array.from({ length: %d }, () => entry), historyIndex: %d
+                                });
+                            })()
+                            """, STORE, state[0], state[1]));
+                        boolean visible = state[0] > 1;
+                        await(view, "!!document.querySelector('.capacitorPhoneTabHistoryButton') === " + visible);
+                        assertEquals("The tab card reserves history space only when the button is visible", "true",
+                            evaluate(view, "document.querySelector('.capacitorPhoneTabTarget[data-tab-id=\"' + " +
+                                "window.tabHistoryOriginal.tabId + '\"]').closest('.capacitorPhoneTabRow')" +
+                                ".classList.contains('withHistory') === " + visible));
+                        if (state[0] == 1) {
+                            evaluate(view, """
+                                (() => {
+                                    const neighbor = document.querySelector('.capacitorPhoneTabTarget[data-tab-id="tab-history-neighbor"]')
+                                        .closest('.capacitorPhoneTabRow');
+                                    window.tabHistoryNeighborTitleHeight = neighbor.getBoundingClientRect().bottom -
+                                        neighbor.querySelector('.capacitorTabPreview').getBoundingClientRect().bottom;
+                                })()
+                                """);
+                        } else {
+                            assertEquals("Cards stay equally tall without stretching the neighboring title area at " + scale + "%", "true",
+                                evaluate(view, """
+                                    (() => {
+                                        const historyCard = document.querySelector('.capacitorPhoneTabRow.withHistory');
+                                        const neighborCard = document.querySelector('.capacitorPhoneTabTarget[data-tab-id="tab-history-neighbor"]')
+                                            .closest('.capacitorPhoneTabRow');
+                                        const history = historyCard.getBoundingClientRect();
+                                        const neighbor = neighborCard.getBoundingClientRect();
+                                        const preview = neighborCard.querySelector('.capacitorTabPreview').getBoundingClientRect();
+                                        return Math.abs(history.top - neighbor.top) < 0.5 &&
+                                            Math.abs(history.height - neighbor.height) < 0.5 &&
+                                            Math.abs(neighbor.bottom - preview.bottom - window.tabHistoryNeighborTitleHeight) < 0.5 &&
+                                            preview.height > historyCard.querySelector('.capacitorTabPreview').getBoundingClientRect().height + 20;
+                                    })()
+                                    """));
+                        }
+                    }
+                }
+            } finally {
+                evaluate(view, "document.querySelector('.capacitorPhoneTabHeaderButton:last-of-type')?.click();" +
+                    STORE + ".commit('setTabsState', window.tabHistoryOriginal.state);" +
+                    STORE + ".commit('setUiScale', window.tabHistoryOriginal.scale);" +
+                    STORE + ".commit('setCapacitorLayoutMode', window.tabHistoryOriginal.layout);" +
+                    "delete window.tabHistoryOriginal; delete window.tabHistoryNeighborTitleHeight");
+            }
+        }
+    }
+
+    @Test
     public void nativeHeaderPreservesHistoryControlsInAutoLandscapeAndForcedTabletMode() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             AtomicReference<WebView> reference = new AtomicReference<>();

@@ -164,7 +164,7 @@
                   class="capacitorPhoneTabRow"
                   :class="{
                     active: tab.id === activeTabId,
-                    withHistory: tab.id === presentedTabId && !selecting,
+                    withHistory: tab.id === presentedTabId && tab.history.length > 1 && !selecting,
                     pinned: tab.isPinned,
                     unloaded: tab.isUnloaded,
                     holding: drag.tabId === tab.id && drag.ready,
@@ -229,7 +229,7 @@
                     />
                   </button>
                   <button
-                    v-if="tab.id === presentedTabId && !selecting"
+                    v-if="tab.id === presentedTabId && tab.history.length > 1 && !selecting"
                     type="button"
                     class="capacitorPhoneTabHistoryButton"
                     @pointerdown.stop
