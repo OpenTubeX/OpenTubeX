@@ -267,6 +267,7 @@ Settings:
       Network: δικτύου
       Disk: δίσκου
   General Settings:
+    Data Saver Thumbnails: "Μικρογραφίες εξοικονόμησης δεδομένων"
     Use tray icon: "Χρήση εικονιδίου περιοχής ειδοποιήσεων"
     Close to system tray: "Κλείσιμο στην περιοχή ειδοποιήσεων"
     Tray required for background refresh: "Το εικονίδιο απαιτείται όσο είναι ενεργή η ανανέωση συνδρομών στο παρασκήνιο."
@@ -356,6 +357,7 @@ Settings:
     Invalid Engine: Εισαγάγετε ένα όνομα και ένα έγκυρο URL αναζήτησης HTTP ή HTTPS που περιέχει %s.
     Engine Limit: Μπορείτε να προσθέσετε έως {count} προσαρμοσμένες μηχανές αναζήτησης.
   Theme Settings:
+    Always Show Mobile Search Bar: "Να εμφανίζεται πάντα η γραμμή αναζήτησης στο κινητό"
     Frosted Glass Player UI: "Διεπαφή προγράμματος αναπαραγωγής με εφέ θαμπού γυαλιού"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Ροδόνερο"
@@ -1542,6 +1544,8 @@ Context Menu:
   Search With Multiple: Αναζήτηση με...
   Selection Too Long: Η επιλογή είναι πολύ μεγάλη για αναζήτηση (> {count} χαρακτήρες)
 Tab Organizer:
+  Tab History: "Ιστορικό καρτέλας"
+  Current Page: "Τρέχουσα σελίδα"
   Icon Labels:
     Podcast: 'Podcast'
     Clock: 'Ρολόι'
@@ -1639,6 +1643,7 @@ Description:
   Games: Παιχνίδια
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Χρησιμοποιήστε μικρογραφίες χαμηλότερης ανάλυσης για να μειώσετε τη χρήση δεδομένων."
     Use AI Translation Completions: Συμπληρώνει τα κενά στις ανθρώπινες μεταφράσεις με κείμενο παραγόμενο από AI. Οι ανθρώπινες μεταφράσεις έχουν πάντα προτεραιότητα.
     Update Relative Timestamps: Ενημερώνει τις σχετικές χρονικές ενδείξεις σε όλη την εφαρμογή όσο μια σελίδα παραμένει ανοιχτή. Όταν είναι απενεργοποιημένο, ενημερώνονται μόνο μετά από επαναφόρτωση ή νέα επίσκεψη στη σελίδα.
     Stream Extraction Method: |

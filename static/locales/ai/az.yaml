@@ -265,6 +265,7 @@ Settings:
       Network: şəbəkə
       Disk: disk
   General Settings:
+    Data Saver Thumbnails: "Verilənlərə qənaət edən miniatürlər"
     Use tray icon: "Sistem sahəsi nişanından istifadə et"
     Close to system tray: "Sistem sahəsinə bağla"
     Tray required for background refresh: "Abunəliklərin arxa planda yenilənməsi aktiv olduqda sistem sahəsi nişanı tələb olunur."
@@ -354,6 +355,7 @@ Settings:
     Invalid Engine: Ad və %s ehtiva edən düzgün HTTP və ya HTTPS axtarış URL-si daxil edin.
     Engine Limit: Ən çox {count} fərdi axtarış sistemi əlavə edə bilərsiniz.
   Theme Settings:
+    Always Show Mobile Search Bar: "Mobil axtarış çubuğunu həmişə göstər"
     Frosted Glass Player UI: "Buzlu şüşə effektli pleyer interfeysi"
     Move Downloads to App Header: Yükləmələri tətbiqin başlığına köçür
     Move Settings to App Header: Tənzimləmələri tətbiqin başlığına köçür
@@ -1513,6 +1515,8 @@ Context Menu:
   Search With Multiple: Bununla axtar...
   Selection Too Long: Seçim axtarış üçün çox uzundur (> {count} simvol)
 Tab Organizer:
+  Tab History: "Vərəqçə tarixçəsi"
+  Current Page: "Cari səhifə"
   Icon Labels:
     Podcast: 'Podkast'
     Clock: 'Saat'
@@ -1610,6 +1614,7 @@ Description:
   Games: Oyunlar
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Verilən istifadəsini azaltmaq üçün daha aşağı keyfiyyətli miniatürlərdən istifadə edin."
     Use AI Translation Completions: İnsan tərcümələrindəki boşluqları süni intellektin yaratdığı mətnlə doldur. İnsan tərcümələrinə həmişə üstünlük verilir.
     Update Relative Timestamps: Səhifə açıq qaldıqda tətbiq boyu nisbi vaxt göstəricilərini yeniləyir. Bağlandıqda onlar yalnız səhifə yenidən yüklənəndə və ya ona yenidən daxil olduqda yenilənir.
     Stream Extraction Method: |

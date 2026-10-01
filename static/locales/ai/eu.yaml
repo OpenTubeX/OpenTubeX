@@ -263,6 +263,7 @@ Settings:
       Network: sarea
       Disk: diskoa
   General Settings:
+    Data Saver Thumbnails: "Datuak aurrezteko miniaturak"
     Use tray icon: "Erabili sistemaren erretiluko ikonoa"
     Close to system tray: "Itxi sistemaren erretilura"
     Tray required for background refresh: "Sistemaren erretiluko ikonoa beharrezkoa da harpidetzak atzeko planoan eguneratzea gaituta dagoen bitartean."
@@ -352,6 +353,7 @@ Settings:
     Invalid Engine: Idatzi izen bat eta %s duen baliozko HTTP edo HTTPS bilaketa-URL bat.
     Engine Limit: Gehienez {count} bilaketa-motor pertsonalizatu gehi ditzakezu.
   Theme Settings:
+    Always Show Mobile Search Bar: "Erakutsi beti mugikorreko bilaketa-barra"
     Frosted Glass Player UI: "Beira esmerilatu efektuko erreproduzigailuaren interfazea"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Kaputxino Macchiato urlarrosa"
@@ -1519,6 +1521,8 @@ Context Menu:
   Search With Multiple: Bilatu honekin...
   Selection Too Long: Hautapena luzeegia da bilatzeko (> {count} karaktere)
 Tab Organizer:
+  Tab History: "Fitxaren historia"
+  Current Page: "Uneko orria"
   Icon Labels:
     Podcast: 'Podcasta'
     Clock: 'Erlojua'
@@ -1615,6 +1619,7 @@ Description:
   Games: Jokoak
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Erabili bereizmen txikiagoko miniaturak datuen erabilera murrizteko."
     Use AI Translation Completions: Bete giza itzulpenetan falta diren zatiak adimen artifizialak sortutako testuarekin. Giza itzulpenek beti dute lehentasuna.
     Update Relative Timestamps: Denbora-marka erlatiboak aplikazio osoan eguneratzen ditu orria irekita dagoen bitartean. Desgaituta dagoenean, orria berriro kargatu edo bisitatu ondoren soilik eguneratzen dira.
     Stream Extraction Method: |

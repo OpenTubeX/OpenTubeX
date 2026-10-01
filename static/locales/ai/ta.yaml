@@ -268,6 +268,7 @@ Settings:
       Network: பிணையம்
       Disk: வட்டு
   General Settings:
+    Data Saver Thumbnails: "தரவைச் சேமிக்கும் சிறுபடங்கள்"
     Use tray icon: "கணினித் தட்டு சின்னத்தைப் பயன்படுத்து"
     Close to system tray: "கணினித் தட்டிற்கு மூடு"
     Tray required for background refresh: "பின்னணியில் சந்தாக்களைப் புதுப்பித்தல் இயக்கப்பட்டிருக்கும் வரை கணினித் தட்டு சின்னம் தேவை."
@@ -357,6 +358,7 @@ Settings:
     Invalid Engine: பெயரையும் %s உள்ள சரியான HTTP அல்லது HTTPS தேடல் URL-ஐயும் உள்ளிடவும்.
     Engine Limit: அதிகபட்சம் {count} தனிப்பயன் தேடுபொறிகளைச் சேர்க்கலாம்.
   Theme Settings:
+    Always Show Mobile Search Bar: "மொபைல் தேடல் பட்டியை எப்போதும் காட்டு"
     Frosted Glass Player UI: "உறைபனி கண்ணாடி விளைவுள்ள பிளேயர் இடைமுகம்"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato ரோஸ் வாட்டர்"
@@ -1547,6 +1549,8 @@ Context Menu:
   Search With Multiple: இதன் மூலம் தேடு...
   Selection Too Long: தேடுவதற்குத் தேர்வு மிக நீளமாக உள்ளது (> {count} எழுத்துகள்)
 Tab Organizer:
+  Tab History: "தாவல் வரலாறு"
+  Current Page: "தற்போதைய பக்கம்"
   Icon Labels:
     Podcast: 'வலையொலி'
     Clock: 'கடிகாரம்'
@@ -1644,6 +1648,7 @@ Description:
   Games: விளையாட்டுகள்
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "தரவுப் பயன்பாட்டைக் குறைக்க குறைந்த தெளிவுத்திறன் கொண்ட சிறுபடங்களைப் பயன்படுத்தவும்."
     Use AI Translation Completions: மனித மொழிபெயர்ப்புகளில் உள்ள இடைவெளிகளை AI உருவாக்கிய உரையால் நிரப்பும். மனித மொழிபெயர்ப்புகளுக்கே எப்போதும் முன்னுரிமை.
     Update Relative Timestamps: ஒரு பக்கம் திறந்திருக்கும் வரை செயலி முழுவதும் சார்புநேரக் குறிப்புகளைப் புதுப்பிக்கும். முடக்கியிருந்தால், பக்கத்தை மீண்டும் ஏற்றிய அல்லது பார்வையிட்ட பிறகே அவை புதுப்பிக்கப்படும்.
     Stream Extraction Method: |

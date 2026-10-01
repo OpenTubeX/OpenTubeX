@@ -240,6 +240,7 @@ Settings:
       Network: сеть
       Disk: диск
   General Settings:
+    Data Saver Thumbnails: "Миниатюры для экономии трафика"
     Use tray icon: "Использовать значок в трее"
     Close to system tray: "Сворачивать в трей при закрытии"
     Tray required for background refresh: "Значок в трее необходим, пока включено фоновое обновление подписок."
@@ -329,6 +330,7 @@ Settings:
     Invalid Engine: Введите название и корректный URL поиска с HTTP или HTTPS, содержащий %s.
     Engine Limit: Можно добавить не более {count} своих поисковых систем.
   Theme Settings:
+    Always Show Mobile Search Bar: "Всегда показывать строку поиска на телефоне"
     Frosted Glass Player UI: "Интерфейс плеера с эффектом матового стекла"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Розовая вода - Catppuccin Macchiato"
@@ -1512,6 +1514,8 @@ Context Menu:
   Search With Multiple: Искать с помощью...
   Selection Too Long: Выделенный текст слишком длинный для поиска (> {count} символов)
 Tab Organizer:
+  Tab History: "История вкладки"
+  Current Page: "Текущая страница"
   Icon Labels:
     Podcast: 'Подкаст'
     Clock: 'Часы'
@@ -1609,6 +1613,7 @@ Description:
   Games: Игры
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Использовать миниатюры меньшего разрешения для снижения расхода трафика."
     Use AI Translation Completions: Дополняет недостающие фрагменты переводов, сделанных людьми, текстом от ИИ. Переводы людей всегда имеют приоритет.
     Update Relative Timestamps: Обновляет относительные отметки времени во всём приложении, пока страница открыта. Если отключено, они обновляются только после перезагрузки страницы или повторного перехода на неё.
     Stream Extraction Method: |

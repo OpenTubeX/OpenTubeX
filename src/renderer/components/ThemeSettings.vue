@@ -158,6 +158,14 @@
     <div class="switchColumnGrid">
       <div class="switchColumn">
         <FtToggleSwitch
+          v-if="IS_CAPACITOR"
+          :label="$t('Settings.Theme Settings.Always Show Mobile Search Bar')"
+          compact
+          :default-value="alwaysShowMobileSearchBar"
+          setting-key="alwaysShowMobileSearchBar"
+          @change="store.dispatch('updateAlwaysShowMobileSearchBar', $event)"
+        />
+        <FtToggleSwitch
           :label="$t('Settings.Theme Settings.Match Top Bar with Main Color')"
           compact
           :default-value="barColor"
@@ -713,6 +721,7 @@ const hideHeaderLogo = computed(() => {
 })
 
 const moveDownloadsToAppHeader = computed(() => store.getters.getMoveDownloadsToAppHeader)
+const alwaysShowMobileSearchBar = computed(() => store.getters.getAlwaysShowMobileSearchBar)
 const moveSettingsToAppHeader = computed(() => store.getters.getMoveSettingsToAppHeader)
 
 function updateMoveDownloadsToAppHeader(value) {

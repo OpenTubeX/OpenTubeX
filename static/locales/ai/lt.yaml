@@ -376,6 +376,7 @@ Settings:
       Disk: disko
   Return to Settings Menu: Grįžti į nustatymų meniu
   General Settings:
+    Data Saver Thumbnails: "Duomenis taupančios miniatiūros"
     Use tray icon: "Naudoti sistemos dėklo piktogramą"
     Close to system tray: "Uždaryti į sistemos dėklą"
     Tray required for background refresh: "Sistemos dėklo piktograma būtina, kol įjungtas prenumeratų atnaujinimas fone."
@@ -473,6 +474,7 @@ Settings:
     Invalid Engine: Įveskite pavadinimą ir tinkamą HTTP arba HTTPS paieškos URL su %s.
     Engine Limit: Galite pridėti iki {count} pasirinktinių paieškos sistemų.
   Theme Settings:
+    Always Show Mobile Search Bar: "Visada rodyti paieškos juostą telefone"
     Frosted Glass Player UI: "Grotuvo sąsaja su matinio stiklo efektu"
     Move Downloads to App Header: Atsisiuntimus perkelti į programos antraštę
     Move Settings to App Header: Nustatymus perkelti į programos antraštę
@@ -1899,6 +1901,8 @@ Context Menu:
   Search With Multiple: Ieškoti naudojant...
   Selection Too Long: Pažymėtas tekstas per ilgas paieškai (> {count} simbolių)
 Tab Organizer:
+  Tab History: "Kortelės istorija"
+  Current Page: "Dabartinis puslapis"
   Icon Labels:
     Podcast: 'Tinklalaidė'
     Clock: 'Laikrodis'
@@ -2006,6 +2010,7 @@ Description:
   Games: Žaidimai
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Naudoti mažesnės raiškos miniatiūras, kad sumažėtų duomenų naudojimas."
     Use AI Translation Completions: Užpildyti žmonių vertimų spragas DI sugeneruotu tekstu. Žmonių vertimams visada teikiama pirmenybė.
     Update Relative Timestamps: Kol puslapis atvertas, visoje programoje atnaujina santykines laiko žymas. Išjungus jos atnaujinamos tik iš naujo įkėlus puslapį arba į jį sugrįžus.
     Stream Extraction Method: |

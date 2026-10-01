@@ -267,6 +267,7 @@ Settings:
       Network: rede
       Disk: disco
   General Settings:
+    Data Saver Thumbnails: "Miniaturas con aforro de datos"
     Use tray icon: "Usar a icona da bandexa"
     Close to system tray: "Pechar na bandexa do sistema"
     Tray required for background refresh: "A icona da bandexa é necesaria mentres a actualización das subscricións en segundo plano estea activada."
@@ -356,6 +357,7 @@ Settings:
     Invalid Engine: Introduce un nome e unha URL de busca HTTP ou HTTPS válida que conteña %s.
     Engine Limit: Podes engadir ata {count} motores de busca personalizados.
   Theme Settings:
+    Always Show Mobile Search Bar: "Amosar sempre a barra de busca no móbil"
     Frosted Glass Player UI: "Interface do reprodutor con efecto de vidro esmerilado"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Auga de Rosas"
@@ -1546,6 +1548,8 @@ Context Menu:
   Search With Multiple: Buscar con…
   Selection Too Long: A selección é demasiado longa para a busca (> {count} caracteres)
 Tab Organizer:
+  Tab History: "Historial da lapela"
+  Current Page: "Páxina actual"
   Icon Labels:
     Podcast: 'Pódcast'
     Clock: 'Reloxo'
@@ -1643,6 +1647,7 @@ Description:
   Games: Xogos
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Usar miniaturas de menor resolución para reducir o consumo de datos."
     Use AI Translation Completions: Completa as lagoas das traducións humanas con texto xerado por IA. As traducións humanas sempre teñen prioridade.
     Update Relative Timestamps: Actualiza as marcas de tempo relativas en toda a aplicación mentres a páxina permaneza aberta. Se se desactiva, só se actualizan ao recargar ou volver visitar a páxina.
     Stream Extraction Method: |

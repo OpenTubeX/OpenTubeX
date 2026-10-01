@@ -263,6 +263,7 @@ Settings:
       Network: rete
       Disk: disco
   General Settings:
+    Data Saver Thumbnails: "Miniature per il risparmio dati"
     Use tray icon: "Usa l’icona nell’area di notifica"
     Close to system tray: "Chiudi nell’area di notifica"
     Tray required for background refresh: "L’icona nell’area di notifica è necessaria quando l’aggiornamento degli abbonamenti in background è attivo."
@@ -352,6 +353,7 @@ Settings:
     Invalid Engine: Inserisci un nome e un URL di ricerca HTTP o HTTPS valido contenente %s.
     Engine Limit: Puoi aggiungere fino a {count} motori di ricerca personalizzati.
   Theme Settings:
+    Always Show Mobile Search Bar: "Mostra sempre la barra di ricerca su mobile"
     Frosted Glass Player UI: "Interfaccia del lettore con effetto vetro smerigliato"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato acqua di rose"
@@ -1501,6 +1503,8 @@ Context Menu:
   Search With Multiple: Cerca con...
   Selection Too Long: La selezione è troppo lunga per la ricerca (> {count} caratteri)
 Tab Organizer:
+  Tab History: "Cronologia della scheda"
+  Current Page: "Pagina attuale"
   Icon Labels:
     Podcast: 'Podcast'
     Clock: 'Orologio'
@@ -1597,6 +1601,7 @@ Description:
   Games: Giochi
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Usa miniature a risoluzione inferiore per ridurre il consumo di dati."
     Use AI Translation Completions: Completa le parti mancanti delle traduzioni umane con testo generato dall'IA. Le traduzioni umane hanno sempre la precedenza.
     Update Relative Timestamps: Aggiorna gli orari relativi in tutta l'app mentre una pagina rimane aperta. Se disabilitato, si aggiornano solo dopo aver ricaricato o riaperto la pagina.
     Stream Extraction Method: |

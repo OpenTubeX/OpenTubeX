@@ -273,6 +273,7 @@ Settings:
       Network: мрежа
       Disk: диск
   General Settings:
+    Data Saver Thumbnails: "Сличице за уштеду података"
     Use tray icon: "Користи икону у системској палети"
     Close to system tray: "Затвори у системску палету"
     Tray required for background refresh: "Икона у системској палети је потребна док је омогућено освежавање претплата у позадини."
@@ -362,6 +363,7 @@ Settings:
     Invalid Engine: Унесите назив и важећи HTTP или HTTPS URL за претрагу који садржи %s.
     Engine Limit: Можете додати до {count} прилагођених претраживача.
   Theme Settings:
+    Always Show Mobile Search Bar: "Увек приказуј траку за претрагу на телефону"
     Frosted Glass Player UI: "Интерфејс плејера са ефектом мат стакла"
     Move Downloads to App Header: Премести преузимања у заглавље апликације
     Move Settings to App Header: Премести подешавања у заглавље апликације
@@ -1567,6 +1569,8 @@ Context Menu:
   Search With Multiple: Претражи помоћу…
   Selection Too Long: Избор је предугачак за претрагу (> {count} знакова)
 Tab Organizer:
+  Tab History: "Историја картице"
+  Current Page: "Тренутна страница"
   Icon Labels:
     Podcast: 'Подкаст'
     Clock: 'Сат'
@@ -1667,6 +1671,7 @@ Description:
   Games: Игре
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Користите сличице ниже резолуције да бисте смањили потрошњу података."
     Use AI Translation Completions: Попуни празнине у људским преводима текстом који је генерисала вештачка интелигенција. Људски преводи увек имају предност.
     Update Relative Timestamps: Ажурира релативне временске ознаке у целој апликацији док је страница отворена. Када је искључено, ажурирају се тек након поновног учитавања или повратка на страницу.
     Stream Extraction Method: |

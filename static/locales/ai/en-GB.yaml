@@ -262,6 +262,7 @@ Settings:
       Network: network
       Disk: disk
   General Settings:
+    Data Saver Thumbnails: "Data saver thumbnails"
     Use tray icon: "Use tray icon"
     Close to system tray: "Close to system tray"
     Tray required for background refresh: "The tray icon is required while background subscription refresh is enabled."
@@ -340,6 +341,7 @@ Settings:
     Invalid Engine: Enter a name and a valid HTTP or HTTPS search URL containing %s.
     Engine Limit: You can add up to {count} custom search engines.
   Theme Settings:
+    Always Show Mobile Search Bar: "Always show mobile search bar"
     Frosted Glass Player UI: "Frosted glass player UI"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Rosewater"
@@ -1485,6 +1487,8 @@ Context Menu:
   Search With Multiple: Search with...
   Selection Too Long: Selection is too long for search (> {count} characters)
 Tab Organizer:
+  Tab History: "Tab history"
+  Current Page: "Current page"
   Icon Labels:
     Podcast: 'Podcast'
     Clock: 'Clock'
@@ -1582,6 +1586,7 @@ Description:
   Games: Games
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Use lower-resolution thumbnails to reduce data usage."
     Use AI Translation Completions: Fill gaps in human translations with AI-generated text. Human translations always take priority.
     Update Relative Timestamps: Updates relative timestamps throughout the app while a page remains open. When disabled, they update only after reloading or revisiting the page.
     Stream Extraction Method: |

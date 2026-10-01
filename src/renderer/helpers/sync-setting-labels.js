@@ -36,6 +36,7 @@ export const SYNC_SETTING_LABELS = {
   baseTheme: 'Settings.Theme Settings.Base Theme.Base Theme',
   blurThumbnails: 'Settings.General Settings.Blur Thumbnails',
   capacitorLayoutMode: 'Settings.General Settings.Mobile Layout.Mobile Layout',
+  alwaysShowMobileSearchBar: 'Settings.Theme Settings.Always Show Mobile Search Bar',
   channelPlaybackSpeeds: [
     'Settings.Channel Settings.Saved Channels',
     'Settings.Channel Settings.Enable Playback Speed'
@@ -320,6 +321,7 @@ export const SYNC_SETTING_LABELS = {
   tabBarPosition: 'Settings.Theme Settings.Tab Layout.Tab Layout',
   tabCloseFocus: 'Settings.General Settings.Tab Close Focus.Tab Close Focus',
   thumbnailPreference: 'Settings.General Settings.Thumbnail Preference.Thumbnail Preference',
+  thumbnailDataSaver: 'Settings.General Settings.Data Saver Thumbnails',
   thumbnailSize: 'Settings.Theme Settings.Thumbnail Size',
   timeFormat: 'Settings.General Settings.Time Format',
   toastPosition: 'Settings.Theme Settings.Toast Position.Toast Position',

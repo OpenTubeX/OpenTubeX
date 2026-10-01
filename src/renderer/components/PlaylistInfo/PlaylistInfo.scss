@@ -3,7 +3,9 @@
 }
 
 .playlistThumbnail img {
+  aspect-ratio: 16 / 9;
   inline-size: 100%;
+  object-fit: cover;
 
   @media only screen and (width <= 800px) {
     display: none;

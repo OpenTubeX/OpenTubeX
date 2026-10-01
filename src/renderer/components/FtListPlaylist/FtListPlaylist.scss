@@ -1,5 +1,10 @@
 @use '../../scss-partials/ft-list-item';
 
+.thumbnailImage {
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
 .blur {
   filter: blur(20px);
 }

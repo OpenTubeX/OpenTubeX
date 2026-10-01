@@ -1,9 +1,12 @@
 import {
   DBSubscriptionCacheHandlers,
 } from '../../../datastores/handlers/index'
-import { ensureSubscriptionFeedEntryState } from '../../helpers/subscription-entries'
+import { toRaw } from 'vue'
+import { ensureSubscriptionFeedEntryState, ensureUpcomingSubscriptionFeedPublished, getUpcomingPremiereTimestamp } from '../../helpers/subscription-entries'
 import { applySubscriptionSeenVideosToCache, applySubscriptionSeenPostsToCache } from '../../helpers/subscription-seen-videos'
 import { preserveSubscriptionSeenEntries } from '../../../subscriptionFeedState'
+import { getSubscriptionsForFeed } from '../../helpers/subscription-channels'
+import { updateVideoListAfterProcessing } from '../../helpers/subscriptions'
 
 const MAX_CONCURRENT_CACHE_WRITES = 8
 
@@ -50,6 +53,7 @@ const state = {
   liveCache: {},
   shortsCache: {},
   postsCache: {},
+  subscriptionVideosFeedVersion: 0,
 
   subscriptionCacheReady: false,
   subscriptionFeedRefreshInProgress: false,
@@ -86,6 +90,34 @@ const getters = {
   getLiveCache: (state, getters) => applySubscriptionSeenVideosToCache(state.liveCache, getters.getSubscriptionSeenVideos),
 
   getPostsCache: (state, getters) => applySubscriptionSeenPostsToCache(state.postsCache, getters.getSubscriptionSeenPosts),
+
+  // Retain merged, sorted videos across route mounts and logical tabs. The
+  // Destructuring the version tracks explicit clock invalidation, while
+  // processing always uses the current clock, including backward corrections.
+  getSubscriptionVideosFeed: ({ subscriptionVideosFeedVersion }, getters) => {
+    const now = Date.now()
+    let nextPremiereTimestamp = null
+    const cache = getters.getVideoCache
+    const videos = getSubscriptionsForFeed(getters.getActiveProfile.subscriptions, 'videos').flatMap(channel => {
+      const entry = cache[channel.id]
+      if (entry == null) return []
+      const entries = entry.videos ?? []
+      const timestamp = toDate(entry.timestamp).getTime()
+      return toRaw(entries).map((video, index) => {
+        const premiereTimestamp = getUpcomingPremiereTimestamp(video)
+        if (premiereTimestamp > now && (nextPremiereTimestamp === null || premiereTimestamp < nextPremiereTimestamp)) {
+          nextPremiereTimestamp = premiereTimestamp
+        }
+        // Premiere processing copies entries. Track those source fields so
+        // in-place edits (including seen marks) invalidate the copied result.
+        const source = premiereTimestamp > 0 || video.isUpcoming === true || video.premiere === true
+          ? entries[index]
+          : video
+        return ensureUpcomingSubscriptionFeedPublished(source, timestamp, now)
+      })
+    })
+    return { videos: updateVideoListAfterProcessing(videos, now), nextPremiereTimestamp, processedAt: now }
+  },
 }
 
 const actions = {
@@ -404,6 +436,9 @@ const actions = {
 }
 
 const mutations = {
+  invalidateSubscriptionVideosFeed(state) {
+    state.subscriptionVideosFeedVersion++
+  },
   markSubscriptionEntriesAsSeenInCache(state, cacheEntries) {
     for (const { tab, channelId, entries: marked } of cacheEntries) {
       const cache = tab === 'videos'

@@ -21,9 +21,8 @@
   // Keep scrolling list content below the sticky navigation while they are open.
   z-index: 7;
 
-  /* Query container so the centered layout responds to the top nav's own width
-     (which shrinks beside the vertical tab bar) instead of the viewport, and so
-     the fixed mobile search bar is positioned relative to the top nav. */
+  /* Center the layout against the top nav's own width, which shrinks beside
+     the vertical tab bar. */
   container: top-nav / inline-size;
 
   .app.capacitorTabs & {
@@ -53,45 +52,6 @@
   @container top-nav (width >= 961px) {
     display: grid;
     grid-template-columns: 1fr 440px 1fr;
-  }
-}
-
-// Keep optional header actions reachable on phones, including enlarged UI.
-@container top-nav (width < 400px) {
-  .app.capacitorTabs .navForwardButton {
-    display: none;
-  }
-
-  // Keep the enabled direction and its history menu reachable at the start of history.
-  .app.capacitorTabs .navBackButton.arrowDisabled:has(+ .navForwardButton:not(.arrowDisabled)) {
-    display: none;
-  }
-
-  .app.capacitorTabs .navBackButton.arrowDisabled + .navForwardButton:not(.arrowDisabled) {
-    display: block;
-  }
-
-  .app.capacitorTabs .downloadsButton,
-  .app.capacitorTabs .settingsButton,
-  .app.capacitorTabs .minimizedUtilityButton {
-    margin-inline-end: 0;
-  }
-}
-
-@container top-nav (width < 370px) {
-  .app.capacitorTabs .side .logo {
-    display: none;
-  }
-}
-
-@container top-nav (width < 300px) {
-  .app.capacitorTabs .side {
-    gap: 0;
-    margin-inline: 0;
-  }
-
-  .app.capacitorTabs .navButton {
-    padding: 8px;
   }
 }
 
@@ -346,16 +306,6 @@
     display: flex;
     position: relative;
 
-    @media only screen and (width <= 680px) {
-      background-color: var(--side-nav-color);
-      inset-inline: 0;
-      position: fixed;
-      inset-block-start: calc(var(--app-safe-area-inset-top, 0px) + var(--top-nav-height, 60px));
-
-      @include top-nav-is-colored {
-        background-color: var(--primary-color-hover);
-      }
-    }
 
     .searchInput {
       flex: 1;
@@ -367,37 +317,290 @@
   }
 }
 
-/* The fixed mobile search bar is positioned against the viewport, so it needs
-   the same vertical/horizontal offsets as the top nav when a tab bar is present. */
-.app.topTabs .middle .searchContainer {
-  @media only screen and (width <= 680px) {
-    inset-block-start: calc(var(--app-safe-area-inset-top, 0px) + var(--top-tab-bar-height, 32px) + var(--top-nav-height, 60px));
-  }
-}
-
-.app.verticalTabs .middle .searchContainer {
-  @media only screen and (width <= 680px) {
-    inset-block-start: calc(var(--app-safe-area-inset-top, 0px) + var(--top-nav-height, 60px));
-  }
-}
-
-/* stylelint-disable liberty/use-logical-spec */
-@media only screen and (width <= 680px) {
-  .app.verticalTabsLeft .middle .searchContainer {
-    left: var(--vertical-tab-bar-width, 220px);
-    right: 0;
-  }
-
-  .app.verticalTabsRight .middle .searchContainer {
-    left: 0;
-    right: var(--vertical-tab-bar-width, 220px);
-  }
-}
-/* stylelint-enable liberty/use-logical-spec */
 
 .syncIndicator {
   flex-shrink: 0;
   font-size: 16px;
+}
+
+// Phone search occupies the header's own row, including in native landscape.
+.phoneLayout {
+  .pinnedSearchTrigger {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    inline-size: 100%;
+    min-block-size: 48px;
+    padding-inline: 12px;
+    border: 0;
+    border-radius: calc(12px * var(--ui-roundness));
+    background-color: var(--search-bar-color);
+    box-shadow: inset 0 0 0 1px var(--input-border-color, transparent);
+    color: var(--primary-text-color);
+    font: inherit;
+    font-size: 14px;
+    line-height: normal;
+    text-align: start;
+    cursor: pointer;
+
+    @include top-nav-is-colored {
+      background-color: var(--primary-input-color);
+      color: var(--text-with-main-color);
+    }
+
+    &:hover,
+    &:focus-visible {
+      background-color: var(--header-button-hover-color);
+      color: var(--header-button-hover-text-color);
+    }
+
+    &:active {
+      background-color: var(--header-button-pressed-color);
+      color: var(--header-button-pressed-text-color);
+    }
+
+    .ft-icon {
+      flex-shrink: 0;
+      font-size: 20px;
+    }
+
+    .pinnedSearchLabel {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .profiles .navSearchButton {
+    display: inline-flex;
+  }
+
+  .middle {
+    display: none;
+  }
+
+  &.phoneSearchOpen {
+    .side {
+      display: none;
+    }
+
+    .middle {
+      display: block;
+      max-inline-size: none;
+      min-inline-size: 0;
+      margin-inline: 16px;
+    }
+
+    .searchContainer {
+      align-items: center;
+      background-color: var(--search-bar-color);
+      border-radius: calc(12px * var(--ui-roundness));
+      box-shadow: inset 0 0 0 1px var(--input-border-color, transparent);
+
+      @include top-nav-is-colored {
+        background-color: var(--primary-input-color);
+      }
+    }
+
+    .closeMobileSearch {
+      flex: 0 0 48px;
+      block-size: 48px;
+      padding: 0;
+    }
+
+    .searchInput {
+      min-inline-size: 0;
+      position: static;
+
+      // Anchor suggestions to the whole search bar, including the close button.
+      :deep(.list) {
+        inset-inline: 0;
+        inset-block-start: 100%;
+      }
+
+      :deep(.inputWrapper),
+      :deep(.ft-input) {
+        block-size: 48px;
+      }
+
+      :deep(.ft-input) {
+        padding-inline: 8px 96px;
+        background-color: transparent;
+        box-shadow: none;
+      }
+
+      :deep(.inputAction),
+      .navFilterButton {
+        box-sizing: border-box;
+        inline-size: 48px;
+        block-size: 48px;
+        margin: 0;
+        padding: 0;
+      }
+
+      :deep(.inputAction) {
+        inset-inline-end: 0;
+      }
+
+      .navFilterButton {
+        inset-inline-end: 48px;
+      }
+    }
+  }
+
+  &.phoneSearchPinned {
+    .side:first-child {
+      display: none;
+    }
+
+    .middle {
+      display: block;
+      flex: 1;
+      min-inline-size: 0;
+      max-inline-size: none;
+      margin: 0;
+    }
+  }
+}
+
+.app.capacitorTabs .phoneLayout {
+  .topNavInner {
+    display: flex;
+    padding-inline: 12px;
+    box-sizing: border-box;
+    gap: 4px;
+  }
+
+  .side {
+    margin: 0;
+    gap: 4px;
+    min-inline-size: 0;
+
+    &:first-child {
+      flex: 1;
+    }
+  }
+
+  .navBackButton,
+  .navForwardButton,
+  .menuButton {
+    display: none;
+  }
+
+  .logo {
+    min-inline-size: 0;
+    min-block-size: 48px;
+    padding-inline: 4px;
+  }
+
+  .logoIcon {
+    flex-shrink: 0;
+  }
+
+  .logoText {
+    display: block;
+    flex: 0 1 100px;
+    min-inline-size: 0;
+    background-position: left center;
+    background-size: contain;
+  }
+
+  .navButton {
+    flex: 0 0 48px;
+    inline-size: 48px;
+    block-size: 48px;
+    padding: 0;
+  }
+
+  .downloadsButton,
+  .settingsButton,
+  .minimizedUtilityButton {
+    margin-inline-end: 0;
+  }
+
+  &.phoneSearchOpen {
+    .topNavInner {
+      padding-inline: 0;
+    }
+  }
+}
+
+.app.capacitorTabletLayout .phoneLayout {
+  .navBackButton,
+  .navForwardButton {
+    display: flex;
+    flex: 0 0 48px;
+
+    :deep(.iconButton) {
+      box-sizing: border-box;
+      inline-size: 48px;
+      block-size: 48px;
+    }
+  }
+
+  .logoText {
+    display: none;
+  }
+
+  &.phoneSearchPinned {
+    .side:first-child {
+      display: flex;
+      flex: 0 0 auto;
+    }
+
+    .logo {
+      display: none;
+    }
+  }
+}
+
+@container top-nav (width < 560px) {
+  .app.capacitorTabs .phoneLayout .topNavInner:has(.downloadsButton, .settingsButton, .minimizedUtilityButton, .syncIndicator) .logoText {
+    display: none;
+  }
+}
+
+.phoneOverflowAction {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  inline-size: 100%;
+  min-block-size: 48px;
+  padding-block: 12px;
+  padding-inline: 20px;
+  border: 0;
+  background: transparent;
+  color: var(--primary-text-color);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+
+  .phoneOverflowIcon {
+    flex-shrink: 0;
+    font-size: 20px;
+  }
+
+  &:hover,
+  &:focus-visible {
+    background: var(--side-nav-hover-color);
+  }
+}
+
+@container top-nav (width < 350px) {
+  .app.capacitorTabs .phoneLayout {
+    .topNavInner {
+      padding-inline: 8px;
+      gap: 0;
+    }
+
+    .side {
+      gap: 0;
+    }
+
+    &.phoneSearchOpen .topNavInner {
+      padding-inline: 0;
+    }
+  }
 }
 
 .syncIndicator :deep(.ft-icon__glyph) {

@@ -265,6 +265,7 @@ Settings:
       Network: rețea
       Disk: disc
   General Settings:
+    Data Saver Thumbnails: "Miniaturi pentru economisirea datelor"
     Use tray icon: "Folosește pictograma din zona de notificare"
     Close to system tray: "Închide în zona de notificare"
     Tray required for background refresh: "Pictograma din zona de notificare este necesară cât timp actualizarea abonamentelor în fundal este activată."
@@ -354,6 +355,7 @@ Settings:
     Invalid Engine: Introduceți un nume și o adresă URL de căutare HTTP sau HTTPS validă, care conține %s.
     Engine Limit: Puteți adăuga până la {count} motoare de căutare personalizate.
   Theme Settings:
+    Always Show Mobile Search Bar: "Afișează mereu bara de căutare pe mobil"
     Frosted Glass Player UI: "Interfață de player cu efect de sticlă mată"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Apă de Trandafiri"
@@ -1541,6 +1543,8 @@ Context Menu:
   Search With Multiple: Caută cu...
   Selection Too Long: Selecția este prea lungă pentru căutare (> {count} caractere)
 Tab Organizer:
+  Tab History: "Istoricul filei"
+  Current Page: "Pagina curentă"
   Icon Labels:
     Podcast: 'Podcast'
     Clock: 'Ceas'
@@ -1641,6 +1645,7 @@ Description:
   Games: Jocuri
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Folosește miniaturi cu rezoluție mai mică pentru a reduce consumul de date."
     Use AI Translation Completions: Completează golurile din traducerile umane cu text generat de IA. Traducerile umane au întotdeauna prioritate.
     Update Relative Timestamps: Actualizează marcajele temporale relative în întreaga aplicație cât timp o pagină rămâne deschisă. Când opțiunea este dezactivată, acestea se actualizează numai după reîncărcarea sau revizitarea paginii.
     Stream Extraction Method: |

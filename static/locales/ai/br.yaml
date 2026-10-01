@@ -263,6 +263,7 @@ Settings:
       Network: "ar rouedad"
       Disk: "ar bladenn"
   General Settings:
+    Data Saver Thumbnails: "Skeudennoù bihan evit espern roadennoù"
     Use tray icon: "Implijout un arlun er maez reizhiad"
     Close to system tray: "Serriñ er maez reizhiad"
     Tray required for background refresh: "Ret eo an arlun er maez reizhiad pa vez gweredekaet hizivaat ar c’houmanantoù en drekleur."
@@ -352,6 +353,7 @@ Settings:
     Invalid Engine: "Lakait un anv hag un URL enklask HTTP pe HTTPS talvoudek ennañ %s."
     Engine Limit: "Gallout a rit ouzhpennañ betek {count} keflusker enklask personelaet."
   Theme Settings:
+    Always Show Mobile Search Bar: "Diskouez barrenn enklask ar pellgomzer atav"
     Frosted Glass Player UI: "Etrefas al lenner gant efed gwer skornet"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Roz sklaer"
@@ -1510,6 +1512,8 @@ Context Menu:
   Search With Multiple: "Klask gant…"
   Selection Too Long: "Re hir eo an diuzadenn evit klask (> {count} arouezenn)"
 Tab Organizer:
+  Tab History: "Istor an ivinell"
+  Current Page: "Pajenn vremanel"
   Icon Labels:
     Podcast: 'Podkast'
     Clock: 'Eurier'
@@ -1606,6 +1610,7 @@ Description:
   Games: "C'hoarioù"
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Implijit skeudennoù bihan gant un diarunusted izeloc’h evit espern roadennoù."
     Use AI Translation Completions: "Leuniañ ar pezh a vank en troidigezhioù denel gant testenn savet gant an IA. An troidigezhioù denel a vez implijet da gentañ bepred."
     Update Relative Timestamps: "Hizivaat an deiziadoù hag eurioù keñverel en arload a-bezh keit ha ma chom ur bajenn digor. Pa vez diweredekaet ne vezont hizivaet nemet goude adkargañ pe addigeriñ ar bajenn."
     Stream Extraction Method: |

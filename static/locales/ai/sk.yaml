@@ -263,6 +263,7 @@ Settings:
       Network: sieť
       Disk: disk
   General Settings:
+    Data Saver Thumbnails: "Úsporné náhľady"
     Use tray icon: "Používať ikonu v systémovej lište"
     Close to system tray: "Pri zatvorení skryť do systémovej lišty"
     Tray required for background refresh: "Ikona v systémovej lište je potrebná, kým je zapnutá aktualizácia odberov na pozadí."
@@ -352,6 +353,7 @@ Settings:
     Invalid Engine: Zadajte názov a platnú adresu URL vyhľadávania cez HTTP alebo HTTPS, ktorá obsahuje %s.
     Engine Limit: Môžete pridať najviac {count} vlastných vyhľadávačov.
   Theme Settings:
+    Always Show Mobile Search Bar: "Vždy zobrazovať vyhľadávací panel na telefóne"
     Frosted Glass Player UI: "Rozhranie prehrávača s efektom matného skla"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato ružová voda"
@@ -1504,6 +1506,8 @@ Context Menu:
   Search With Multiple: Vyhľadať cez…
   Selection Too Long: Označený text je príliš dlhý na vyhľadanie (> {count} znakov)
 Tab Organizer:
+  Tab History: "História karty"
+  Current Page: "Aktuálna stránka"
   Icon Labels:
     Podcast: 'Podcast'
     Clock: 'Hodiny'
@@ -1600,6 +1604,7 @@ Description:
   Games: Hry
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Používať náhľady s nižším rozlíšením na zníženie spotreby dát."
     Use AI Translation Completions: Doplní medzery v ľudských prekladoch textom vytvoreným umelou inteligenciou. Ľudské preklady majú vždy prednosť.
     Update Relative Timestamps: Aktualizuje relatívne časové údaje v celej aplikácii, kým je stránka otvorená. Ak je táto možnosť vypnutá, aktualizujú sa až po opätovnom načítaní alebo otvorení stránky.
     Stream Extraction Method: |

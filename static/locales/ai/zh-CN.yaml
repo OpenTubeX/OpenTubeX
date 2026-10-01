@@ -263,6 +263,7 @@ Settings:
       Network: 网络
       Disk: 磁盘
   General Settings:
+    Data Saver Thumbnails: "省流量缩略图"
     Use tray icon: "使用托盘图标"
     Close to system tray: "关闭时最小化到系统托盘"
     Tray required for background refresh: "启用后台刷新订阅时，必须显示托盘图标。"
@@ -352,6 +353,7 @@ Settings:
     Invalid Engine: 请输入名称以及包含 %s 的有效 HTTP 或 HTTPS 搜索 URL。
     Engine Limit: 最多可以添加 {count} 个自定义搜索引擎。
   Theme Settings:
+    Always Show Mobile Search Bar: "始终显示移动端搜索栏"
     Frosted Glass Player UI: "磨砂玻璃播放器界面"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato 玫瑰水"
@@ -1501,6 +1503,8 @@ Context Menu:
   Search With Multiple: 搜索方式…
   Selection Too Long: 所选内容过长，无法搜索（超过 {count} 个字符）
 Tab Organizer:
+  Tab History: "标签页历史记录"
+  Current Page: "当前页面"
   Icon Labels:
     Podcast: '播客'
     Clock: '时钟'
@@ -1597,6 +1601,7 @@ Description:
   Games: 游戏
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "使用较低分辨率的缩略图以减少数据用量。"
     Use AI Translation Completions: 使用 AI 生成的文本补全人工翻译中的缺失内容。始终优先使用人工翻译。
     Update Relative Timestamps: 页面保持打开时，持续更新应用各处的相对时间戳。禁用后，仅在重新加载或再次访问页面时更新。
     Stream Extraction Method: |

@@ -279,6 +279,7 @@ Settings:
       Network: сетка
       Disk: дыск
   General Settings:
+    Data Saver Thumbnails: "Эканомныя мініяцюры"
     Use tray icon: "Выкарыстоўваць значок у трэі"
     Close to system tray: "Згортваць у трэй пры закрыцці"
     Tray required for background refresh: "Значок у трэі неабходны, пакуль уключана фонавае абнаўленне падпісак."
@@ -369,6 +370,7 @@ Settings:
     Invalid Engine: Увядзіце назву і дапушчальны URL пошуку HTTP або HTTPS, які змяшчае %s.
     Engine Limit: Можна дадаць не больш за {count} уласных пошукавых сістэм.
   Theme Settings:
+    Always Show Mobile Search Bar: "Заўсёды паказваць радок пошуку на тэлефоне"
     Frosted Glass Player UI: "Інтэрфейс прайгравальніка з эфектам матавага шкла"
     Move Downloads to App Header: Перамясціць спампоўванні ў загаловак праграмы
     Move Settings to App Header: Перамясціць налады ў загаловак праграмы
@@ -1584,6 +1586,8 @@ Context Menu:
   Search With Multiple: Шукаць праз...
   Selection Too Long: Вылучаны тэкст задоўгі для пошуку (> {count} знакаў)
 Tab Organizer:
+  Tab History: "Гісторыя ўкладкі"
+  Current Page: "Бягучая старонка"
   Icon Labels:
     Podcast: 'Падкаст'
     Clock: 'Гадзіннік'
@@ -1684,6 +1688,7 @@ Description:
   Games: Гульні
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Выкарыстоўваць мініяцюры ніжэйшай раздзяляльнасці, каб зменшыць расход даных."
     Use AI Translation Completions: Запаўняе прагалы ў перакладах, зробленых людзьмі, тэкстам, створаным ШІ. Пераклады людзей заўсёды маюць перавагу.
     Update Relative Timestamps: Абнаўляе адносныя пазнакі часу ва ўсёй праграме, пакуль старонка адкрытая. Калі адключана, яны абнаўляюцца толькі пасля перазагрузкі або паўторнага адкрыцця старонкі.
     Stream Extraction Method: |

@@ -267,6 +267,7 @@ Settings:
       Network: rede
       Disk: disco
   General Settings:
+    Data Saver Thumbnails: "Miniaturas com poupança de dados"
     Use tray icon: "Usar ícone na área de notificação"
     Close to system tray: "Fechar para a área de notificação"
     Tray required for background refresh: "O ícone na área de notificação é necessário enquanto a atualização de subscrições em segundo plano estiver ativada."
@@ -356,6 +357,7 @@ Settings:
     Invalid Engine: Introduza um nome e um URL de pesquisa HTTP ou HTTPS válido que contenha %s.
     Engine Limit: Pode adicionar até {count} motores de pesquisa personalizados.
   Theme Settings:
+    Always Show Mobile Search Bar: "Mostrar sempre a barra de pesquisa no telemóvel"
     Frosted Glass Player UI: "Interface do leitor com efeito de vidro fosco"
     Move Downloads to App Header: Mover «Transferências» para o cabeçalho da aplicação
     Move Settings to App Header: Mover «Definições» para o cabeçalho da aplicação
@@ -1548,6 +1550,8 @@ Context Menu:
   Search With Multiple: Pesquisar com...
   Selection Too Long: A seleção é demasiado longa para pesquisar (> {count} caracteres)
 Tab Organizer:
+  Tab History: "Histórico do separador"
+  Current Page: "Página atual"
   Icon Labels:
     Podcast: 'Podcast'
     Clock: 'Relógio'
@@ -1645,6 +1649,7 @@ Description:
   Games: Jogos
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Utilizar miniaturas de menor resolução para reduzir o consumo de dados."
     Use AI Translation Completions: Preenche as lacunas das traduções humanas com texto gerado por IA. As traduções humanas têm sempre prioridade.
     Update Relative Timestamps: Atualiza as marcas temporais relativas em toda a aplicação enquanto uma página permanece aberta. Quando esta opção está desativada, só são atualizadas após recarregar ou voltar a visitar a página.
     Stream Extraction Method: |

@@ -238,6 +238,7 @@ const state = {
   checkForUpdates: true,
   internetConnectivityChecks: true,
   capacitorLayoutMode: 'auto',
+  alwaysShowMobileSearchBar: false,
   commentTranslationIgnoredLanguages: [],
   confirmCloseApp: true,
   confirmCloseMultipleTabs: true,
@@ -478,6 +479,7 @@ const state = {
     skip: 'promptToSkip'
   },
   thumbnailPreference: '',
+  thumbnailDataSaver: false,
   showThumbnailPreviews: true,
   showVideoMenuButton: false,
   thumbnailSize: DEFAULT_THUMBNAIL_SIZE,
@@ -850,6 +852,7 @@ export const NON_SYNCABLE_SETTINGS = new Set([
   // These choices describe one physical device, not the user's account.
   'mobileAutoPictureInPicture',
   'capacitorLayoutMode',
+  'alwaysShowMobileSearchBar',
   'continuePlaybackWhenScreenIsLocked',
   'uiScale',
   'verticalTabBarWidth',

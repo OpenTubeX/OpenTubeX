@@ -263,6 +263,7 @@ Settings:
       Network: 網路
       Disk: 磁碟
   General Settings:
+    Data Saver Thumbnails: "節省流量的縮圖"
     Use tray icon: "使用系統匣圖示"
     Close to system tray: "關閉時縮小至系統匣"
     Tray required for background refresh: "啟用背景重新整理訂閱時，必須顯示系統匣圖示。"
@@ -352,6 +353,7 @@ Settings:
     Invalid Engine: 請輸入名稱，以及包含 %s 的有效 HTTP 或 HTTPS 搜尋 URL。
     Engine Limit: 最多可新增 {count} 個自訂搜尋引擎。
   Theme Settings:
+    Always Show Mobile Search Bar: "一律顯示行動版搜尋列"
     Frosted Glass Player UI: "毛玻璃播放器介面"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato 玫瑰水"
@@ -1503,6 +1505,8 @@ Context Menu:
   Search With Multiple: 搜尋工具...
   Selection Too Long: 選取內容過長，無法搜尋（> {count} 個字元）
 Tab Organizer:
+  Tab History: "分頁歷史紀錄"
+  Current Page: "目前頁面"
   Icon Labels:
     Podcast: '播客'
     Clock: '時鐘'
@@ -1599,6 +1603,7 @@ Description:
   Games: 遊戲
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "使用較低解析度的縮圖以減少數據用量。"
     Use AI Translation Completions: 使用 AI 產生的文字補齊人工翻譯的缺漏。人工翻譯一律優先採用。
     Update Relative Timestamps: 頁面開啟期間持續更新應用程式中的相對時間戳記。停用後，只有重新載入或再次開啟頁面時才會更新。
     Stream Extraction Method: |

@@ -80,11 +80,11 @@
           :to="`/watch/${item.videoId}`"
           @click="playQueuedVideo(item.queueItemId, $event)"
         >
-          <img
+          <FtRetryImage
             class="queueThumbnail"
             :src="thumbnailUrl(item.videoId)"
             alt=""
-          >
+          />
           <span class="queueDetails">
             <strong
               class="queueVideoTitle"
@@ -150,6 +150,8 @@ import { useI18n } from 'vue-i18n'
 
 import { useOrderedItemDrag } from '../../composables/useOrderedItemDrag'
 import FtCard from '../ft-card/ft-card.vue'
+import FtRetryImage from '../FtRetryImage.vue'
+import { getVideoThumbnailUrl } from '../../helpers/utils'
 import store from '../../store/index'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
@@ -219,8 +221,7 @@ const {
 })
 
 function thumbnailUrl(videoId) {
-  const baseUrl = backendPreference.value === 'invidious' ? invidiousUrl.value : 'https://i.ytimg.com'
-  return `${baseUrl}/vi/${videoId}/mqdefault.jpg`
+  return getVideoThumbnailUrl(videoId, backendPreference.value, invidiousUrl.value)
 }
 
 function playQueuedVideo(queueItemId, event) {

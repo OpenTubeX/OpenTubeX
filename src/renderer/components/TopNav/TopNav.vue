@@ -1,7 +1,8 @@
 <template>
   <nav
     class="topNav"
-    :class="{ topNavBarColor: barColor }"
+    :class="{ topNavBarColor: barColor, phoneLayout, phoneSearchOpen: phoneLayout && showSearchContainer, phoneSearchPinned }"
+    @keydown.esc="closePhoneSearch"
   >
     <div class="topNavInner">
       <div class="side">
@@ -44,19 +45,6 @@
           :title="forwardText"
           @click="historyForward"
         />
-        <button
-          v-if="!hideSearchBar"
-          class="navSearchButton navButton"
-          :aria-label="t('Search Bar.Open Search Container')"
-          :title="t('Search Bar.Open Search Container')"
-          data-tutorial="search"
-          @click="toggleSearchContainer"
-        >
-          <FtIcon
-            class="navIcon"
-            :icon="['fas', 'search']"
-          />
-        </button>
         <RouterLink
           v-if="!hideHeaderLogo"
           class="logo"
@@ -73,6 +61,21 @@
         </RouterLink>
       </div>
       <div class="middle">
+        <button
+          v-if="phoneSearchPinned"
+          ref="pinnedSearchTrigger"
+          type="button"
+          class="pinnedSearchTrigger"
+          :aria-label="t('Search / Go to URL')"
+          data-tutorial="search"
+          @click="focusSearch"
+        >
+          <FtIcon
+            :icon="['fas', 'search']"
+            aria-hidden="true"
+          />
+          <span class="pinnedSearchLabel">{{ t('Search / Go to URL') }}</span>
+        </button>
         <div
           v-if="!hideSearchBar"
           v-show="showSearchContainer"
@@ -80,6 +83,19 @@
           class="searchContainer"
           data-tutorial="search"
         >
+          <button
+            v-if="phoneLayout"
+            type="button"
+            class="closeMobileSearch navButton"
+            :aria-label="t('Close')"
+            :title="t('Close')"
+            @click="closePhoneSearch"
+          >
+            <FtIcon
+              :icon="['fas', 'times']"
+              aria-hidden="true"
+            />
+          </button>
           <FtInput
             ref="searchInput"
             :placeholder="t('Search / Go to URL')"
@@ -117,7 +133,23 @@
       </div>
       <div class="side profiles">
         <button
-          v-if="syncing && !hideHeaderSyncIndicator"
+          v-if="!hideSearchBar && !phoneSearchPinned"
+          ref="searchTrigger"
+          type="button"
+          class="navSearchButton navButton"
+          :aria-label="t('Search Bar.Open Search Container')"
+          :title="t('Search Bar.Open Search Container')"
+          data-tutorial="search"
+          @click="focusSearch"
+        >
+          <FtIcon
+            class="navIcon"
+            :icon="['fas', 'search']"
+            aria-hidden="true"
+          />
+        </button>
+        <button
+          v-if="syncing && !hideHeaderSyncIndicator && !compactPhoneActions"
           type="button"
           class="syncIndicator navButton"
           :aria-label="syncIndicatorLabel"
@@ -131,7 +163,7 @@
           />
         </button>
         <button
-          v-if="settingsWindowMinimized"
+          v-if="settingsWindowMinimized && !compactPhoneActions"
           type="button"
           class="minimizedUtilityButton navButton"
           :class="{ utilityWindowMorphTarget: settingsWindowMorphing }"
@@ -145,7 +177,7 @@
           />
         </button>
         <button
-          v-if="showDownloadsButton"
+          v-if="showDownloadsButton && !compactPhoneActions"
           type="button"
           class="downloadsButton navButton"
           :class="{ active: downloadsWindowOpen }"
@@ -160,7 +192,7 @@
           />
         </button>
         <button
-          v-if="showSettingsButton"
+          v-if="showSettingsButton && !compactPhoneActions"
           type="button"
           class="settingsButton navButton"
           :class="{ active: settingsWindowOpen }"
@@ -175,7 +207,38 @@
           />
         </button>
         <CapacitorPhoneTabSwitcher @request-exit="emit('request-android-exit')" />
-        <FtQuickSettingsMenu />
+        <FtQuickSettingsMenu :header-actions-overflow="compactPhoneActions">
+          <template #overflow-actions="{ close }">
+            <template v-if="compactPhoneActions">
+              <button
+                v-if="syncing && !hideHeaderSyncIndicator"
+                type="button"
+                class="phoneOverflowAction phoneOverflowSync"
+                @click="close(); openSyncSettings()"
+              >
+                <FtIcon
+                  class="phoneOverflowIcon"
+                  :icon="['fas', 'sync']"
+                  aria-hidden="true"
+                />
+                <span>{{ syncIndicatorLabel }}</span>
+              </button>
+              <button
+                v-if="settingsWindowMinimized"
+                type="button"
+                class="phoneOverflowAction phoneOverflowRestore"
+                @click="close(); restoreSettingsWindow()"
+              >
+                <FtIcon
+                  class="phoneOverflowIcon"
+                  :icon="minimizedSettingsWindowIcon"
+                  aria-hidden="true"
+                />
+                <span>{{ restoreSettingsWindowLabel }}</span>
+              </button>
+            </template>
+          </template>
+        </FtQuickSettingsMenu>
       </div>
     </div>
   </nav>
@@ -184,7 +247,7 @@
 <script setup>
 import { syncProgressLabel } from '../../helpers/syncProgressLabel'
 import { FtIcon } from '@opentubex/icons'
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -195,7 +258,7 @@ import CapacitorPhoneTabSwitcher from '../TabBar/CapacitorPhoneTabSwitcher.vue'
 
 import store from '../../store/index'
 
-import { getConfiguredKeyboardShortcuts, MOBILE_WIDTH_THRESHOLD, SEARCH_RESULTS_DISPLAY_LIMIT } from '../../../constants'
+import { getConfiguredKeyboardShortcuts, SEARCH_RESULTS_DISPLAY_LIMIT } from '../../../constants'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
 import { getSearchHistoryEntryQuery } from '../../../search-history'
 import { debounce, isUnloadedBackgroundTabClick, localizeAndAddKeyboardShortcutToActionTitle, openInternalPath } from '../../helpers/utils'
@@ -205,6 +268,8 @@ import { getInvidiousSearchSuggestions } from '../../helpers/api/invidious'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { shouldOpenExternalMediaUrl } from '../../helpers/externalMediaUrl'
 import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
+import { usesCapacitorTabletLayout } from '../../helpers/capacitorLayout'
 
 const { t } = useI18n()
 const syncing = computed(() => store.getters.getSyncServerStatus === 'syncing')
@@ -220,7 +285,17 @@ const route = useRoute()
 const usesLogicalTabs = process.env.IS_ELECTRON || process.env.IS_CAPACITOR
 const navigation = usesLogicalTabs ? getTabNavigationService() : null
 
-const showSearchContainer = ref(true)
+const compactViewport = usePhoneLayout('(max-width: 680px)')
+const automaticTabletViewport = usePhoneLayout('(min-width: 768px)')
+const phoneLayout = computed(() => process.env.IS_CAPACITOR
+  ? compactViewport.value || !usesCapacitorTabletLayout(store.getters.getCapacitorLayoutMode, automaticTabletViewport.value)
+  : compactViewport.value)
+const showSearchContainer = ref(!phoneLayout.value)
+const narrowHeader = usePhoneLayout('(width < 480px)')
+const compactPhoneActions = computed(() => phoneLayout.value && narrowHeader.value)
+const searchTrigger = useTemplateRef('searchTrigger')
+const pinnedSearchTrigger = useTemplateRef('pinnedSearchTrigger')
+watch(phoneLayout, phone => { showSearchContainer.value = !phone })
 const logicalHistoryState = computed(() => {
   const tabId = store.getters.getPresentedTabId
   return store.getters.getTabHistoryState(tabId)
@@ -234,6 +309,11 @@ const lastSuggestionQuery = ref('')
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideSearchBar = computed(() => store.getters.getHideSearchBar)
+const phoneSearchPinned = computed(() => phoneLayout.value && store.getters.getAlwaysShowMobileSearchBar &&
+  !hideSearchBar.value && !showSearchContainer.value)
+watch(hideSearchBar, hidden => {
+  if (hidden && phoneLayout.value) closePhoneSearch()
+})
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideHeaderLogo = computed(() => store.getters.getHideHeaderLogo)
 const useWatchSideNavOverlay = computed(() => {
@@ -551,7 +631,6 @@ function clearSearchFilters() {
   store.commit('setSearchFilterValueChanged', { tabId, value: false })
 }
 
-const searchContainer = useTemplateRef('searchContainer')
 const searchInput = useTemplateRef('searchInput')
 
 // The search bar renders once for the whole window and is shared by every
@@ -632,6 +711,7 @@ if (usesLogicalTabs) {
     }
 
     searchTextByTabId.set(previousTabId, currentSearchText)
+    if (phoneLayout.value) closePhoneSearch()
     updateSearchInputText(tabId != null ? getSearchTextForTab(tabId) : '')
     clearLastSuggestionQuery()
   })
@@ -761,8 +841,8 @@ async function goToSearch(queryText, { event, dataListIndex }) {
   const makeActive = !isMiddleClick
 
   if (!isMiddleClick) {
-    if (window.innerWidth <= MOBILE_WIDTH_THRESHOLD) {
-      searchContainer.value.blur()
+    if (phoneLayout.value) {
+      searchInput.value.blur()
       showSearchContainer.value = false
     } else {
       searchInput.value.blur()
@@ -902,8 +982,25 @@ function removeSearchHistoryEntryInDbAndCache(query, { dataListIndex }) {
   })
 }
 
-function toggleSearchContainer() {
-  showSearchContainer.value = !showSearchContainer.value
+async function focusSearch(selectText = false) {
+  if (hideSearchBar.value) return
+  showSearchContainer.value = true
+  await nextTick()
+  searchInput.value?.focus()
+  if (selectText === true) searchInput.value?.select()
+}
+
+function closePhoneSearch(event) {
+  if (!phoneLayout.value || !showSearchContainer.value) return
+  event?.preventDefault()
+  event?.stopPropagation()
+  searchInput.value?.blur()
+  showSearchContainer.value = false
+  nextTick(() => (pinnedSearchTrigger.value ?? searchTrigger.value)?.focus({ preventScroll: true }))
+}
+
+function handleFocusSearch() {
+  setTimeout(() => focusSearch(true), 0)
 }
 
 /**
@@ -933,29 +1030,12 @@ function handleKeyboardShortcuts(event) {
     // Chromium on KDE Plasma, it seems both focus() focus and
     // select() have to be called asynchronously (see issue #2019).
     setTimeout(() => {
-      searchInput.value?.focus()
-      searchInput.value?.select()
+      focusSearch(true)
     }, 0)
   }
 }
 
-let previousWindowWidth
-
-function handleWindowResize() {
-  // Don't change the status of showSearchContainer if only the height of the window changes
-  // Opening the virtual keyboard can trigger this resize event, but it won't change the width
-  if (previousWindowWidth !== window.innerWidth) {
-    showSearchContainer.value = window.innerWidth > MOBILE_WIDTH_THRESHOLD
-    previousWindowWidth = window.innerWidth
-  }
-}
-
 onMounted(() => {
-  previousWindowWidth = window.innerWidth
-  if (window.innerWidth <= MOBILE_WIDTH_THRESHOLD) {
-    showSearchContainer.value = false
-  }
-
   // Store is not up-to-date when the component mounts, so we use timeout.
   setTimeout(() => {
     if (store.getters.getExpandSideBar && !useWatchSideNavOverlay.value) {
@@ -963,7 +1043,7 @@ onMounted(() => {
     }
   }, 0)
 
-  window.addEventListener('resize', handleWindowResize)
+  window.addEventListener('opentubex:focus-search', handleFocusSearch)
 
   if (usesLogicalTabs) {
     const tabId = store.getters.getPresentedTabId
@@ -985,7 +1065,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', handleWindowResize)
+  window.removeEventListener('opentubex:focus-search', handleFocusSearch)
 
   if (process.env.IS_ELECTRON) {
     window.removeEventListener('keydown', handleKeyboardShortcuts)

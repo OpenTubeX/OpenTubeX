@@ -43,11 +43,11 @@
             @keydown.enter.prevent="togglePlaylist(playlist)"
             @keydown.space.prevent="togglePlaylist(playlist)"
           >
-            <img
+            <FtRetryImage
               alt=""
               class="playlistThumbnail"
               :src="playlistThumbnail(playlist)"
-            >
+            />
             <span class="playlistDetails">
               <span class="playlistName">{{ playlist.playlistName }}</span>
               <span class="videoCount">{{ t('Global.Counts.Video Count', { count: playlist.videos.length }, playlist.videos.length) }}</span>
@@ -79,6 +79,7 @@
 import { FtIcon } from '@opentubex/icons'
 import { computed, inject, ref, useTemplateRef } from 'vue'
 import FtMobileSheet from '../FtMobileSheet/FtMobileSheet.vue'
+import FtRetryImage from '../FtRetryImage.vue'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { useScrollClamp } from '../../composables/useScrollClamp'
 import { useI18n } from 'vue-i18n'
@@ -168,11 +169,7 @@ function playlistThumbnail(playlist) {
     return thumbnailPlaceholder
   }
 
-  const origin = store.getters.getBackendPreference === 'invidious'
-    ? store.getters.getCurrentInvidiousInstanceUrl
-    : 'https://i.ytimg.com'
-
-  return `${origin}/vi/${playlist.videos[0].videoId}/mqdefault.jpg`
+  return getVideoThumbnailUrl(playlist.videos[0].videoId, store.getters.getBackendPreference, store.getters.getCurrentInvidiousInstanceUrl)
 }
 
 /**

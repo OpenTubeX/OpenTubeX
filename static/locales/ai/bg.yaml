@@ -265,6 +265,7 @@ Settings:
       Network: мрежата
       Disk: диска
   General Settings:
+    Data Saver Thumbnails: "Миниатюри с икономия на данни"
     Use tray icon: "Използване на икона в системната лента"
     Close to system tray: "Затваряне в системната лента"
     Tray required for background refresh: "Иконата в системната лента е необходима, докато е включено фоновото обновяване на абонаментите."
@@ -354,6 +355,7 @@ Settings:
     Invalid Engine: Въведете име и валиден HTTP или HTTPS URL адрес за търсене, който съдържа %s.
     Engine Limit: Можете да добавите до {count} персонализирани търсачки.
   Theme Settings:
+    Always Show Mobile Search Bar: "Винаги показвай лентата за търсене на телефона"
     Frosted Glass Player UI: "Интерфейс на плейъра с ефект на матирано стъкло"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Розова вода"
@@ -1518,6 +1520,8 @@ Context Menu:
   Search With Multiple: Търсене с...
   Selection Too Long: Избраният текст е твърде дълъг за търсене (> {count} знака)
 Tab Organizer:
+  Tab History: "История на раздела"
+  Current Page: "Текуща страница"
   Icon Labels:
     Podcast: 'Подкаст'
     Clock: 'Часовник'
@@ -1615,6 +1619,7 @@ Description:
   Games: Игри
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Използвайте миниатюри с по-ниска разделителна способност, за да намалите потреблението на данни."
     Use AI Translation Completions: Попълва липсващите части в човешките преводи с текст, създаден от ИИ. Човешките преводи винаги са с предимство.
     Update Relative Timestamps: Обновява относителните времеви отметки в цялото приложение, докато страницата е отворена. Когато е изключено, те се обновяват само след презареждане или повторно отваряне на страницата.
     Stream Extraction Method: |

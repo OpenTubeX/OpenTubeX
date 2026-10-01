@@ -162,6 +162,27 @@ async function expectSubscriptionRefreshIntervalSelectHighlight(page) {
     .toBeGreaterThanOrEqual(tooltipBounds.x + tooltipBounds.width)
 }
 
+test.describe('lights off settings search', () => {
+  test.use({ seed: { settings: { currentLocale: 'en-US' } } })
+
+  for (const query of ['lights off', 'Show Lights Off Toggle']) {
+    test(`opens and highlights the visibility toggle for "${query}"`, async ({ page }) => {
+      await goTo(page, 'settings')
+      const search = page.getByRole('searchbox', { name: 'Search settings' })
+
+      await search.fill(query)
+      await expect(page.locator('.settingsSearchResultMatch'))
+        .toHaveText(['Show Lights Off Toggle'])
+      await page.getByRole('button', { name: 'Show Lights Off Toggle', exact: true }).click()
+
+      const toggle = page.locator('.switch-ctn.settingsSearchTarget')
+      await expect(toggle).toContainText('Show Lights Off Toggle')
+      await expect(toggle.getByRole('checkbox', { name: 'Show Lights Off Toggle' })).toBeVisible()
+      await expect(page.locator('.section.settingsSearchTarget')).toHaveCount(0)
+    })
+  }
+})
+
 test.describe('skip silence settings search', () => {
   test.use({ seed: { settings: { currentLocale: 'en-US' } } })
 

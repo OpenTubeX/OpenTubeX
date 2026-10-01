@@ -4033,6 +4033,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   color: var(--text-with-main-color, #fff);
 }
 
+/* This compact preset strip intentionally scrolls without a visible scrollbar. */
 :deep(.ft-quick-playback-rate-bar) {
   display: inline-flex;
   align-items: center;
@@ -4053,12 +4054,22 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 :deep(.shaka-controls-button-panel > .ft-quick-playback-rate-bar) {
   width: fit-content;
   min-width: 0;
+  max-width: none;
   height: var(--ft-control-pill-size);
   padding-inline: 6px;
   flex: 0 1 auto;
 }
 
+/* Give the presets room before reserving any empty space between controls. */
+:deep(.shaka-controls-button-panel:has(> .ft-quick-playback-rate-bar) > .shaka-spacer) {
+  flex-basis: 0;
+  min-inline-size: 0;
+  padding: 0;
+}
+
 :deep(.shaka-controls-button-panel.ft-controls-measuring > .ft-quick-playback-rate-bar) {
+  /* Reserve a usable strip when deciding which other controls need compacting. */
+  max-width: min(70vw, 640px);
   flex-shrink: 0;
 }
 

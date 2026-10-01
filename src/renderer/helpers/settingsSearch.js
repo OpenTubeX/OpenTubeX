@@ -306,6 +306,7 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
   }
 
   if (sectionType === 'theme') {
+    if (group === 'Always Show Mobile Search Bar') return isCapacitor
     if (isCapacitor && group === 'Show Progress as Notification') {
       return false
     }

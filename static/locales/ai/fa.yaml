@@ -280,6 +280,7 @@ Settings:
       Network: شبکه
       Disk: دیسک
   General Settings:
+    Data Saver Thumbnails: "تصاویر بندانگشتی کم‌مصرف"
     Use tray icon: "استفاده از نماد سینی سیستم"
     Close to system tray: "بستن به سینی سیستم"
     Tray required for background refresh: "تا زمانی که به‌روزرسانی اشتراک‌ها در پس‌زمینه فعال است، نماد سینی سیستم لازم است."
@@ -369,6 +370,7 @@ Settings:
     Invalid Engine: نام و یک نشانی معتبر جست‌وجوی HTTP یا HTTPS حاوی %s وارد کنید.
     Engine Limit: می‌توانید حداکثر {count} موتور جست‌وجوی سفارشی بیفزایید.
   Theme Settings:
+    Always Show Mobile Search Bar: "نوار جستجوی موبایل همیشه نمایش داده شود"
     Frosted Glass Player UI: "رابط پخش‌کننده با جلوه شیشه مات"
     Move Downloads to App Header: انتقال بارگیری‌ها به سربرگ برنامه
     Move Settings to App Header: انتقال تنظیمات به سربرگ برنامه
@@ -1578,6 +1580,8 @@ Context Menu:
   Search With Multiple: جست‌وجو با...
   Selection Too Long: متن انتخاب‌شده برای جست‌وجو بیش از حد بلند است (> {count} نویسه)
 Tab Organizer:
+  Tab History: "تاریخچهٔ زبانه"
+  Current Page: "صفحهٔ کنونی"
   Icon Labels:
     Podcast: 'پادکست'
     Clock: 'ساعت'
@@ -1678,6 +1682,7 @@ Description:
   Games: بازی‌ها
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "برای کاهش مصرف داده از تصاویر بندانگشتی با وضوح پایین‌تر استفاده کنید."
     Use AI Translation Completions: جاهای خالی ترجمه‌های انسانی را با متن تولیدشده با هوش مصنوعی پر می‌کند. ترجمه‌های انسانی همیشه اولویت دارند.
     Update Relative Timestamps: تا زمانی که صفحه باز است، زمان‌های نسبی را در سراسر برنامه به‌روز می‌کند. در صورت غیرفعال بودن، فقط پس از بارگیری دوباره یا بازدید مجدد از صفحه به‌روز می‌شوند.
     Stream Extraction Method: |

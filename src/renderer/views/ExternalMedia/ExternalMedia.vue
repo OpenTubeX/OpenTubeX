@@ -66,7 +66,7 @@
       <div
         ref="videoLayout"
         class="externalMediaLayout"
-        :class="{ useTheatreMode, noSidebar: !chatAvailable || !chatOpen }"
+        :class="{ ambientModeActive, useTheatreMode, noSidebar: !chatAvailable || !chatOpen }"
       >
         <div class="externalMediaVideo">
           <template v-if="source">
@@ -349,6 +349,7 @@ const showChapters = ref(false)
 const showDownloadPrompt = ref(false)
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
 const defaultPlaybackRate = computed(() => store.getters.getDefaultPlayback)
+const ambientModeActive = computed(() => store.getters.getAmbientMode && source.value && !source.value.audioOnly)
 const attemptUsedCookies = ref(false)
 const drmError = ref(false)
 const seekCount = ref(0)
@@ -756,11 +757,20 @@ onBeforeUnmount(() => {
   gap: 16px;
   grid-area: info;
   min-inline-size: 0;
+  position: relative;
+  z-index: 2;
 }
 
 .externalMediaSidebar {
   grid-area: sidebar;
   min-inline-size: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.externalMediaLayout.ambientModeActive :is(.externalMediaDetails, .externalMediaChapters),
+.externalMediaLayout.ambientModeActive .externalMediaSidebar :deep(.twitchChat) {
+  background-color: color-mix(in srgb, var(--card-bg-color) 78%, transparent);
 }
 
 .externalMediaSidebar :deep(.twitchChat) {

@@ -265,6 +265,7 @@ Settings:
       Network: rhwydwaith
       Disk: disg
   General Settings:
+    Data Saver Thumbnails: "Mân-luniau arbed data"
     Use tray icon: "Defnyddio eicon hambwrdd"
     Close to system tray: "Cau i hambwrdd y system"
     Tray required for background refresh: "Mae angen yr eicon hambwrdd tra bo diweddaru tanysgrifiadau yn y cefndir wedi’i alluogi."
@@ -354,6 +355,7 @@ Settings:
     Invalid Engine: Rhowch enw ac URL chwilio HTTP neu HTTPS dilys sy'n cynnwys %s.
     Engine Limit: Gallwch ychwanegu hyd at {count} o beiriannau chwilio personol.
   Theme Settings:
+    Always Show Mobile Search Bar: "Dangos y bar chwilio symudol bob amser"
     Frosted Glass Player UI: "Rhyngwyneb chwaraewr gwydr barugog"
     Main Color Theme:
       Catppuccin Macchiato Rosewater: "Catppuccin Macchiato Rosewater"
@@ -1527,6 +1529,8 @@ Context Menu:
   Search With Multiple: Chwilio gyda...
   Selection Too Long: Mae'r dewis yn rhy hir i'w chwilio (> {count} nod)
 Tab Organizer:
+  Tab History: "Hanes y tab"
+  Current Page: "Tudalen gyfredol"
   Icon Labels:
     Podcast: 'Podlediad'
     Clock: 'Cloc'
@@ -1624,6 +1628,7 @@ Description:
   Games: Gemau
 Tooltips:
   General Settings:
+    Data Saver Thumbnails: "Defnyddiwch fân-luniau cydraniad is i leihau defnydd data."
     Use AI Translation Completions: Llenwi bylchau mewn cyfieithiadau dynol â thestun a gynhyrchwyd gan AI. Mae cyfieithiadau dynol bob amser yn cael blaenoriaeth.
     Update Relative Timestamps: Mae'n diweddaru stampiau amser cymharol drwy'r ap tra bo tudalen ar agor. Pan fydd wedi'i analluogi, dim ond ar ôl ail-lwytho neu ailagor y dudalen y cânt eu diweddaru.
     Stream Extraction Method: |

@@ -25,6 +25,7 @@ const GENERAL_EVERYDAY_KEYS = new Set([
 ])
 
 const GENERAL_APPEARANCE_KEYS = new Set([
+  'Data Saver Thumbnails',
   'Mobile Layout',
   'Navigation',
   'Playlist View Type',
@@ -319,7 +320,7 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
 export const SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS = {
   general: new Set(['System Default']),
   'context-menu-search': new Set(['Engine Name', 'Search URL']),
-  player: new Set(['Skip Silence', 'Playback Speed Name', 'Use Automatic Playback Speed Name']),
+  player: new Set(['Lights Off', 'Skip Silence', 'Playback Speed Name', 'Use Automatic Playback Speed Name']),
   'sponsor-block': new Set(['Generated SponsorBlock User ID Copy Button']),
   subscription: new Set(['Auto Refresh Interval']),
   'caption-appearance': new Set(['Application Language']),
