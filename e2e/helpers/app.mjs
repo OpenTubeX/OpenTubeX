@@ -373,65 +373,69 @@ export const test = base.extend({
   app: async ({ seed, launchArgs, showTutorial, localeOverrides }, use, testInfo) => {
     const userDataDir = await createUserDataDir(seed)
     const hasLocaleOverrides = Object.keys(localeOverrides).length > 0
-    const appRoot = hasLocaleOverrides
-      ? await mkdtemp(path.join(tmpdir(), 'opentubex-e2e-app-'))
-      : repoRoot
-
-    if (hasLocaleOverrides) {
-      await cp(path.join(repoRoot, 'dist-e2e'), path.join(appRoot, 'dist-e2e'), {
-        recursive: true
-      })
-      await cp(path.join(repoRoot, '_icons'), path.join(appRoot, '_icons'), {
-        recursive: true
-      })
-      for (const [localePath, messages] of Object.entries(localeOverrides)) {
-        const outputPath = path.join(
-          appRoot,
-          'dist-e2e',
-          'static',
-          'locales',
-          `${localePath}.json.br`
-        )
-        await writeFile(outputPath, brotliCompressSync(JSON.stringify(messages)))
-      }
-    }
-
-    const { electronApp, page } = await launchApp(userDataDir, launchArgs, { appRoot })
-
-    if (!showTutorial) {
-      const tutorial = page.locator('.tutorialOverlay')
-      await expect(tutorial).toBeVisible()
-      await tutorial.locator('.tutorialActions').getByRole('button').last().click()
-      await expect(tutorial).toBeHidden()
-    }
-
-    /** Runs an optional checkpoint with the exited process before launching again. */
-    const relaunch = async (beforeLaunch) => {
-      // Wait until the old process has fully exited, otherwise it still owns
-      // the single-instance lock for this userData dir and the new instance
-      // immediately exits again.
-      const oldProcess = appHandle.electronApp.process()
-      const exited = new Promise((resolve) => oldProcess.once('exit', resolve))
-      await appHandle.electronApp.close()
-      await exited
-      await beforeLaunch?.(oldProcess)
-      const next = await launchApp(userDataDir, launchArgs, { appRoot })
-      appHandle.electronApp = next.electronApp
-      appHandle.page = next.page
-      return next
-    }
-
-    const appHandle = { electronApp, page, userDataDir, relaunch }
-
+    let appRoot
+    let appHandle
     try {
+      appRoot = hasLocaleOverrides
+        ? await mkdtemp(path.join(tmpdir(), 'opentubex-e2e-app-'))
+        : repoRoot
+
+      if (hasLocaleOverrides) {
+        await cp(path.join(repoRoot, 'dist-e2e'), path.join(appRoot, 'dist-e2e'), {
+          recursive: true
+        })
+        await cp(path.join(repoRoot, '_icons'), path.join(appRoot, '_icons'), {
+          recursive: true
+        })
+        for (const [localePath, messages] of Object.entries(localeOverrides)) {
+          const outputPath = path.join(
+            appRoot,
+            'dist-e2e',
+            'static',
+            'locales',
+            `${localePath}.json.br`
+          )
+          await writeFile(outputPath, brotliCompressSync(JSON.stringify(messages)))
+        }
+      }
+
+      const { electronApp, page } = await launchApp(userDataDir, launchArgs, { appRoot })
+
+      /** Runs an optional checkpoint with the exited process before launching again. */
+      const relaunch = async (beforeLaunch) => {
+        // Wait until the old process has fully exited, otherwise it still owns
+        // the single-instance lock for this userData dir and the new instance
+        // immediately exits again.
+        const oldProcess = appHandle.electronApp.process()
+        const exited = new Promise((resolve) => oldProcess.once('exit', resolve))
+        await appHandle.electronApp.close()
+        await exited
+        await beforeLaunch?.(oldProcess)
+        const next = await launchApp(userDataDir, launchArgs, { appRoot })
+        appHandle.electronApp = next.electronApp
+        appHandle.page = next.page
+        return next
+      }
+
+      appHandle = { electronApp, page, userDataDir, relaunch }
+
+      if (!showTutorial) {
+        const tutorial = page.locator('.tutorialOverlay')
+        await expect(tutorial).toBeVisible()
+        await tutorial.locator('.tutorialActions').getByRole('button').last().click()
+        await expect(tutorial).toBeHidden()
+      }
+
       await use(appHandle)
     } finally {
-      if (testInfo.status !== testInfo.expectedStatus) {
-        await attachScreenshot(testInfo, appHandle.page, 'failure')
+      if (appHandle) {
+        if (testInfo.status !== testInfo.expectedStatus) {
+          await attachScreenshot(testInfo, appHandle.page, 'failure')
+        }
+        await appHandle.electronApp.close().catch(() => {})
       }
-      await appHandle.electronApp.close().catch(() => {})
       await rm(userDataDir, { recursive: true, force: true })
-      if (hasLocaleOverrides) {
+      if (hasLocaleOverrides && appRoot) {
         await rm(appRoot, { recursive: true, force: true })
       }
     }
