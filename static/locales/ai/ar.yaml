@@ -629,6 +629,7 @@ Settings:
     Preload Upcoming Videos: "تحميل الفيديوهات القادمة مسبقًا"
     Upcoming Videos to Preload: "عدد الفيديوهات المراد تحميلها مسبقًا"
     Concurrent Preloads: "عمليات التحميل المسبق المتزامنة"
+    Show Google Cast Button: "إظهار زر Google Cast"
   Channel Settings:
     Channel Settings: إعدادات القناة
     Channel Settings Description: تذكر الإعدادات التي تختارها أثناء المشاهدة لكل قناة على حدة، بحيث يتم تطبيقها مرة أخرى في المرة التالية التي تشاهد فيها أحد مقاطع الفيديو الخاصة بها.
@@ -1414,6 +1415,15 @@ Video:
       UpvoteSegment: التصويت لصالح
       DownvoteSegment: التصويت السلبي
       VoteFailed: فشل إرسال تصويت SponsorBlock.
+    Google Cast:
+      Cast: "البث إلى جهاز Google Cast"
+      Connected: "جارٍ البث إلى {device}"
+      Rewind: "الرجوع 10 ثوانٍ"
+      Forward: "التقديم 10 ثوانٍ"
+      Subtitles Off: "إيقاف الترجمة"
+      Return: "العودة إلى التشغيل المحلي"
+      No Devices: "لم يُعثر على أجهزة Google Cast"
+      No Source: "لا يوجد بث متوافق مع Google Cast"
   Station: محطة
   Playlist:
     Unavailable videos are hidden: تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء فيديو واحد غير متاح | تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء {count} من مقاطع الفيديو غير المتاحة | تم إخفاء {count} من مقاطع الفيديو غير المتاحة

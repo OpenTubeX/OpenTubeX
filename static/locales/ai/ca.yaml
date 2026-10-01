@@ -866,6 +866,7 @@ Settings:
     Preload Upcoming Videos: "Precarrega els vídeos següents"
     Upcoming Videos to Preload: "Vídeos següents per precarregar"
     Concurrent Preloads: "Precàrregues simultànies"
+    Show Google Cast Button: "Mostra el botó de Google Cast"
   Channel Settings:
     Channel Settings: Configuració dels canals
     Channel Settings Description: Recorda per separat la configuració que trieu mentre mireu cada canal, per tornar-la a aplicar la propera vegada que mireu un dels seus vídeos.
@@ -1856,6 +1857,15 @@ Video:
       UpvoteSegment: Vot positiu
       DownvoteSegment: Vot negatiu
       VoteFailed: No s'ha pogut enviar el vot a SponsorBlock.
+    Google Cast:
+      Cast: "Transmet a un dispositiu Google Cast"
+      Connected: "S’està transmetent a {device}"
+      Rewind: "Retrocedeix 10 segons"
+      Forward: "Avança 10 segons"
+      Subtitles Off: "Desactiva els subtítols"
+      Return: "Torna a la reproducció local"
+      No Devices: "No s’han trobat dispositius Google Cast"
+      No Source: "No hi ha cap flux compatible amb Google Cast"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Temps restant de l''anunci previ: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Temps d''espera de SABR restant: {remindingTimeSeconds}s'

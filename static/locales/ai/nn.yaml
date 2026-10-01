@@ -721,6 +721,7 @@ Settings:
     Preload Upcoming Videos: "Førehandslast komande videoar"
     Upcoming Videos to Preload: "Talet på videoar som skal førehandslastast"
     Concurrent Preloads: "Samstundes førehandslasting"
+    Show Google Cast Button: "Vis Google Cast-knapp"
   Channel Settings:
     Channel Settings: Kanalinnstillingar
     Channel Settings Description: Hugs innstillingane du vel medan du ser på kvar einskild kanal, slik at dei blir brukte att neste gong du ser ein av videoane til kanalen.
@@ -1655,6 +1656,15 @@ Video:
       UpvoteSegment: Røyst opp
       DownvoteSegment: Røyst ned
       VoteFailed: Klarte ikkje å sende inn røysta til SponsorBlock.
+    Google Cast:
+      Cast: "Cast til ei Google Cast-eining"
+      Connected: "Castar til {device}"
+      Rewind: "Spol 10 sekund tilbake"
+      Forward: "Spol 10 sekund fram"
+      Subtitles Off: "Slå av undertekstar"
+      Return: "Gå tilbake til lokal avspeling"
+      No Devices: "Fann ingen Google Cast-einingar"
+      No Source: "Ingen kompatibel straum for Google Cast"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Attverande tid for førehandsannonsen: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Attverande ventetid for SABR: {remindingTimeSeconds}s'

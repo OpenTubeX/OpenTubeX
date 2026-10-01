@@ -623,6 +623,7 @@ Settings:
     Preload Upcoming Videos: "Predučitaj sljedeće videozapise"
     Upcoming Videos to Preload: "Broj videozapisa za predučitavanje"
     Concurrent Preloads: "Istodobna predučitavanja"
+    Show Google Cast Button: "Prikaži gumb Google Cast"
   Channel Settings:
     Channel Settings: Postavke kanala
     Channel Settings Description: Postavke koje odaberete tijekom gledanja pamte se zasebno za svaki kanal kako bi se ponovno primijenile kada sljedeći put gledate neki njegov videozapis.
@@ -1399,6 +1400,15 @@ Video:
       UpvoteSegment: Glasaj za
       DownvoteSegment: Glasaj protiv
       VoteFailed: Slanje glasa u SponsorBlock nije uspjelo.
+    Google Cast:
+      Cast: "Emitiraj na uređaj Google Cast"
+      Connected: "Emitiranje na {device}"
+      Rewind: "Natrag 10 sekundi"
+      Forward: "Naprijed 10 sekundi"
+      Subtitles Off: "Isključi titlove"
+      Return: "Vrati se na lokalnu reprodukciju"
+      No Devices: "Nisu pronađeni uređaji Google Cast"
+      No Source: "Nema kompatibilnog toka za Google Cast"
   Station: Postaja
   Playlist:
     Unavailable videos are hidden: 1 nedostupan videozapis je skriven | {count} nedostupna videozapisa su skrivena | {count} nedostupnih videozapisa je skriveno

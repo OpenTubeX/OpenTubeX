@@ -625,6 +625,7 @@ Settings:
     Preload Upcoming Videos: "Preîncarcă videoclipurile următoare"
     Upcoming Videos to Preload: "Numărul de videoclipuri de preîncărcat"
     Concurrent Preloads: "Preîncărcări simultane"
+    Show Google Cast Button: "Afișează butonul Google Cast"
   Channel Settings:
     Channel Settings: Setări pentru canale
     Channel Settings Description: Rețineți separat pentru fiecare canal setările alese în timpul vizionării, pentru a fi aplicate din nou când vizionați alt videoclip al canalului.
@@ -1414,6 +1415,15 @@ Video:
       UpvoteSegment: Votează pozitiv
       DownvoteSegment: Votează negativ
       VoteFailed: Votul SponsorBlock nu a putut fi trimis.
+    Google Cast:
+      Cast: "Transmite către un dispozitiv Google Cast"
+      Connected: "Se transmite către {device}"
+      Rewind: "Înapoi 10 secunde"
+      Forward: "Înainte 10 secunde"
+      Subtitles Off: "Dezactivează subtitrările"
+      Return: "Revino la redarea locală"
+      No Devices: "Nu s-au găsit dispozitive Google Cast"
+      No Source: "Nu există un flux compatibil cu Google Cast"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Timp rămas din reclama de început: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Timp rămas din așteptarea SABR: {remindingTimeSeconds}s'

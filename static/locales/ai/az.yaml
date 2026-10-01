@@ -623,6 +623,7 @@ Settings:
     Reorder Playback Speed: Oynatma sürətinin yerini dəyişmək üçün sürükləyin
     Playback Speed: Oynatma sürəti
     Parallel Segment Loading: Seqmentlərin paralel yüklənməsi
+    Show Google Cast Button: "Google Cast düyməsini göstər"
   Channel Settings:
     Channel Settings: Kanal tənzimləmələri
     Channel Settings Description: Baxış zamanı seçdiyiniz tənzimləmələri hər kanal üçün ayrıca yadda saxlayın ki, həmin kanalın növbəti videosuna baxanda yenidən tətbiq edilsin.
@@ -1394,6 +1395,15 @@ Video:
       UpvoteSegment: Müsbət səs ver
       DownvoteSegment: Mənfi səs ver
       VoteFailed: SponsorBlock səsi göndərilə bilmədi.
+    Google Cast:
+      Cast: "Google Cast cihazına yayımla"
+      Connected: "{device} cihazına yayımlanır"
+      Rewind: "10 saniyə geri"
+      Forward: "10 saniyə irəli"
+      Subtitles Off: "Altyazıları söndür"
+      Return: "Yerli oxutmaya qayıt"
+      No Devices: "Google Cast cihazları tapılmadı"
+      No Source: "Google Cast üçün uyğun yayım yoxdur"
   External Media:
     Dislikes: "Bəyənməmə | Bəyənməmə"
     Reposts: "Repost | Repostlar"

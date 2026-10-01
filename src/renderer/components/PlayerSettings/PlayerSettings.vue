@@ -63,6 +63,14 @@
         @change="store.dispatch('updateShowDlnaCastButton', $event)"
       />
       <FtToggleSwitch
+        v-if="USING_ELECTRON"
+        :label="t('Settings.Player Settings.Show Google Cast Button')"
+        :compact="true"
+        :default-value="store.getters.getShowChromecastButton"
+        setting-key="showChromecastButton"
+        @change="store.dispatch('updateShowChromecastButton', $event)"
+      />
+      <FtToggleSwitch
         :label="t('Settings.Player Settings.Enable Video Zoom')"
         :compact="true"
         :default-value="enableVideoZoom"

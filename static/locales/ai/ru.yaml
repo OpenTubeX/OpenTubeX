@@ -604,6 +604,7 @@ Settings:
     Preload Upcoming Videos: "Предзагружать следующие видео"
     Upcoming Videos to Preload: "Количество видео для предзагрузки"
     Concurrent Preloads: "Одновременная предзагрузка"
+    Show Google Cast Button: "Показывать кнопку Google Cast"
   Channel Settings:
     Channel Settings: Настройки каналов
     Channel Settings Description: Запоминать выбранные при просмотре настройки отдельно для каждого канала и применять их снова при следующем просмотре видео с этого канала.
@@ -1389,6 +1390,15 @@ Video:
       UpvoteSegment: Нравится
       DownvoteSegment: Не нравится
       VoteFailed: Не удалось отправить оценку в SponsorBlock.
+    Google Cast:
+      Cast: "Транслировать на устройство Google Cast"
+      Connected: "Трансляция на {device}"
+      Rewind: "Назад на 10 секунд"
+      Forward: "Вперёд на 10 секунд"
+      Subtitles Off: "Выключить субтитры"
+      Return: "Вернуться к локальному воспроизведению"
+      No Devices: "Устройства Google Cast не найдены"
+      No Source: "Нет совместимого потока для Google Cast"
   Station: Станция
   Playlist:
     Unavailable videos are hidden: 1 недоступное видео скрыто | {count} недоступных видео скрыто | {count} недоступных видео скрыто

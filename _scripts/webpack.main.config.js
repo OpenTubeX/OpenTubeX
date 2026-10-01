@@ -67,6 +67,16 @@ const config = {
     __filename: isDevMode
   },
   plugins: [
+    {
+      apply(compiler) {
+        const prepare = async () => {
+          const { prepareCastSender } = await import('./castSender.mjs')
+          await prepareCastSender(compiler.options.output.path)
+        }
+        compiler.hooks.beforeRun.tapPromise('CastSender', prepare)
+        compiler.hooks.watchRun.tapPromise('CastSender', prepare)
+      }
+    },
     new webpack.DefinePlugin({
       // Do not bake process.platform here. Cross-compiling (e.g. macOS
       // builds on Linux) would otherwise hardcode the build host OS and

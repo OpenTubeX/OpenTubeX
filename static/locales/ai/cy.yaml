@@ -623,6 +623,7 @@ Settings:
     Preload Upcoming Videos: "Rhaglwytho fideos nesaf"
     Upcoming Videos to Preload: "Nifer y fideos i’w rhaglwytho"
     Concurrent Preloads: "Rhaglwythiadau cydamserol"
+    Show Google Cast Button: "Dangos botwm Google Cast"
   Channel Settings:
     Channel Settings: Gosodiadau sianeli
     Channel Settings Description: Cofiwch y gosodiadau a ddewiswch wrth wylio ar gyfer pob sianel ar wahân, fel eu bod yn cael eu gosod eto y tro nesaf y byddwch yn gwylio un o'i fideos.
@@ -1404,6 +1405,15 @@ Video:
       UpvoteSegment: Pleidleisio o blaid
       DownvoteSegment: Pleidleisio yn erbyn
       VoteFailed: Methodd cyflwyno pleidlais SponsorBlock.
+    Google Cast:
+      Cast: "Castio i ddyfais Google Cast"
+      Connected: "Yn castio i {device}"
+      Rewind: "Yn ôl 10 eiliad"
+      Forward: "Ymlaen 10 eiliad"
+      Subtitles Off: "Diffodd isdeitlau"
+      Return: "Dychwelyd i chwarae lleol"
+      No Devices: "Heb ganfod dyfeisiau Google Cast"
+      No Source: "Dim ffrwd gydnaws ar gyfer Google Cast"
   Station: Gorsaf
   Playlist:
     Unavailable videos are hidden: Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae 1 fideo nad yw ar gael wedi'i guddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio | Mae {count} o fideos nad ydynt ar gael wedi'u cuddio

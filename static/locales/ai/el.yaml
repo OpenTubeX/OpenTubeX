@@ -634,6 +634,7 @@ Settings:
     Preload Upcoming Videos: "Προφόρτωση επόμενων βίντεο"
     Upcoming Videos to Preload: "Πλήθος βίντεο για προφόρτωση"
     Concurrent Preloads: "Ταυτόχρονες προφορτώσεις"
+    Show Google Cast Button: "Εμφάνιση κουμπιού Google Cast"
   Channel Settings:
     Channel Settings: Ρυθμίσεις καναλιών
     Channel Settings Description: Απομνημόνευση των ρυθμίσεων που επιλέγετε κατά την παρακολούθηση, ξεχωριστά για κάθε κανάλι, ώστε να εφαρμόζονται ξανά την επόμενη φορά που θα παρακολουθήσετε κάποιο βίντεό του.
@@ -1419,6 +1420,15 @@ Video:
       UpvoteSegment: Θετική ψήφος
       DownvoteSegment: Αρνητική ψήφος
       VoteFailed: Απέτυχε η υποβολή ψήφου στο SponsorBlock.
+    Google Cast:
+      Cast: "Μετάδοση σε συσκευή Google Cast"
+      Connected: "Μετάδοση στο {device}"
+      Rewind: "Πίσω 10 δευτερόλεπτα"
+      Forward: "Μπροστά 10 δευτερόλεπτα"
+      Subtitles Off: "Απενεργοποίηση υποτίτλων"
+      Return: "Επιστροφή στην τοπική αναπαραγωγή"
+      No Devices: "Δεν βρέθηκαν συσκευές Google Cast"
+      No Source: "Δεν υπάρχει συμβατή ροή για το Google Cast"
   Station: Σταθμός
   Playlist:
     Unavailable videos are hidden: 1 μη διαθέσιμο βίντεο είναι κρυμμένο | {count} μη διαθέσιμα βίντεο είναι κρυμμένα

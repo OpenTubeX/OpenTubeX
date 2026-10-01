@@ -650,6 +650,7 @@ Settings:
     Preload Upcoming Videos: "Папярэдне загружаць наступныя відэа"
     Upcoming Videos to Preload: "Колькасць відэа для папярэдняй загрузкі"
     Concurrent Preloads: "Адначасовыя папярэднія загрузкі"
+    Show Google Cast Button: "Паказваць кнопку Google Cast"
   Channel Settings:
     Channel Settings: Налады каналаў
     Channel Settings Description: Запамінаць асобныя налады, абраныя падчас прагляду кожнага канала, і ўжываць іх пры наступным праглядзе відэа з гэтага канала.
@@ -1457,6 +1458,15 @@ Video:
       UpvoteSegment: Прагаласаваць за
       DownvoteSegment: Прагаласаваць супраць
       VoteFailed: Не ўдалося адправіць голас у SponsorBlock.
+    Google Cast:
+      Cast: "Трансляваць на прыладу Google Cast"
+      Connected: "Трансляцыя на {device}"
+      Rewind: "Назад на 10 секунд"
+      Forward: "Наперад на 10 секунд"
+      Subtitles Off: "Выключыць субцітры"
+      Return: "Вярнуцца да лакальнага прайгравання"
+      No Devices: "Прылады Google Cast не знойдзены"
+      No Source: "Няма сумяшчальнага патоку для Google Cast"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Да канца рэкламы перад відэа: {remindingTimeSeconds} с'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Да паўторнай спробы SABR: {remindingTimeSeconds} с'

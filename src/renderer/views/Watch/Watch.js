@@ -14,6 +14,7 @@ import shaka from 'shaka-player'
 import { Utils, YTNodes } from 'youtubei.js'
 import FtShakaVideoPlayer from '../../components/ft-shaka-video-player/ft-shaka-video-player.vue'
 import WatchDlnaCast from '../../components/WatchDlnaCast/WatchDlnaCast.vue'
+import WatchChromecast from '../../components/WatchChromecast/WatchChromecast.vue'
 import WatchVideoInfo from '../../components/WatchVideoInfo/WatchVideoInfo.vue'
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
 import WatchVideoTranscript from '../../components/WatchVideoTranscript/WatchVideoTranscript.vue'
@@ -170,6 +171,7 @@ export default defineComponent({
     FtPhonePanel,
     'ft-shaka-video-player': FtShakaVideoPlayer,
     WatchDlnaCast,
+    WatchChromecast,
     'watch-video-info': WatchVideoInfo,
     'watch-video-description': WatchVideoDescription,
     WatchVideoSummary,
@@ -400,6 +402,7 @@ export default defineComponent({
       ytDlpStreamsPending: false,
       ytDlpDefaultClientsFallbackToastShown: false,
       legacyFormats: [],
+      chromecastActive: false,
       captions: [],
       captionTranslations: [],
       currentTime: 0,
@@ -4542,6 +4545,10 @@ export default defineComponent({
       this.handleWatchProgressAutoSaveWhenProgressEnabled()
     },
     handleVideoPlay() {
+      if (this.chromecastActive) {
+        this.$refs.player?.pause()
+        return
+      }
       this.$refs.watchVideoPlaylist?.resetUnavailableSkipChain()
     },
     handlePlayerSeeking() {

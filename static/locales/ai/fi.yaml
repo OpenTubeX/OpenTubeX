@@ -634,6 +634,7 @@ Settings:
     Preload Upcoming Videos: "Esilataa seuraavat videot"
     Upcoming Videos to Preload: "Esiladattavien videoiden määrä"
     Concurrent Preloads: "Samanaikaiset esilataukset"
+    Show Google Cast Button: "Näytä Google Cast -painike"
   Channel Settings:
     Channel Settings: Kanava-asetukset
     Channel Settings Description: Muista katselun aikana valitsemasi asetukset kanavakohtaisesti, jotta niitä käytetään uudelleen, kun katsot seuraavan kerran saman kanavan videota.
@@ -1419,6 +1420,15 @@ Video:
       UpvoteSegment: Äänestä puolesta
       DownvoteSegment: Äänestä vastaan
       VoteFailed: SponsorBlock-äänen lähettäminen epäonnistui.
+    Google Cast:
+      Cast: "Lähetä Google Cast -laitteeseen"
+      Connected: "Lähetetään laitteeseen {device}"
+      Rewind: "Kelaa 10 sekuntia taaksepäin"
+      Forward: "Kelaa 10 sekuntia eteenpäin"
+      Subtitles Off: "Poista tekstitys käytöstä"
+      Return: "Palaa paikalliseen toistoon"
+      No Devices: "Google Cast -laitteita ei löytynyt"
+      No Source: "Ei yhteensopivaa suoratoistoa Google Castille"
   Station: Asema
   Playlist:
     Unavailable videos are hidden: 1 video, joka ei ole saatavilla, on piilotettu | {count} videota, jotka eivät ole saatavilla, on piilotettu

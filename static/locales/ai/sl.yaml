@@ -834,6 +834,7 @@ Settings:
     Preload Upcoming Videos: "Prednaloži naslednje videoposnetke"
     Upcoming Videos to Preload: "Število videov za prednalaganje"
     Concurrent Preloads: "Sočasno prednalaganje"
+    Show Google Cast Button: "Prikaži gumb Google Cast"
   Channel Settings:
     Channel Settings: Nastavitve kanalov
     Channel Settings Description: Zapomni si nastavitve, ki jih med gledanjem izberete za vsak kanal posebej, in jih znova uporabi ob naslednjem ogledu enega od njegovih videoposnetkov.
@@ -1834,6 +1835,15 @@ Video:
       UpvoteSegment: Glasuj za
       DownvoteSegment: Glasuj proti
       VoteFailed: Glasu za SponsorBlock ni bilo mogoče oddati.
+    Google Cast:
+      Cast: "Predvajaj na napravi Google Cast"
+      Connected: "Predvajanje na {device}"
+      Rewind: "Nazaj za 10 sekund"
+      Forward: "Naprej za 10 sekund"
+      Subtitles Off: "Izklopi podnapise"
+      Return: "Vrni se na lokalno predvajanje"
+      No Devices: "Ni najdenih naprav Google Cast"
+      No Source: "Ni združljivega toka za Google Cast"
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Preostali čas oglasa pred videoposnetkom: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Preostali čas zakasnitve SABR: {remindingTimeSeconds}s'

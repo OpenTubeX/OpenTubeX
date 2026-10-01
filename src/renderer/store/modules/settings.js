@@ -533,6 +533,7 @@ const state = {
   showLightsOffToggle: false,
   showSkipSilenceButton: false,
   showDlnaCastButton: false,
+  showChromecastButton: false,
   enableSkipSilenceByDefault: false,
   useVoiceOverTranslation: false,
   voiceOverTranslationPrepareInBackground: false,

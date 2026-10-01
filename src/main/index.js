@@ -52,6 +52,7 @@ import { brotliDecompress } from 'zlib'
 import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
 import { discoverDlnaDevices, startDlnaCast, stopDlnaCast, hasDlnaCastFailed, getDlnaCastPosition } from './dlnaCast'
+import { ChromecastManager } from './chromecast'
 import { handleTwitchChatReplayPage, handleTwitchSubOnlyVod } from './twitchChat'
 import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
 import { getDlnaFfmpegExecutable, isYtDlpStoryboardUrl, getYtDlpDownloadFile, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpControlDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetSubtitle, handleYtDlpGetPlaybackInfo, handleYtDlpGetHistoryMetadata, handleYtDlpCancelHistoryRepair, handleYtDlpGetRecommendations, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpQueueAction, handleYtDlpRemoveDownload, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
@@ -89,6 +90,8 @@ import {
 import { createSubscriptionBackgroundService } from './subscriptionBackground'
 import { supportsNativeNotifications } from './nativeNotifications'
 
+const castSenderPath = path.resolve(__dirname, process.env.NODE_ENV === 'development' ? '../../dist/opentubex-cast' : 'opentubex-cast') + (process.platform === 'win32' ? '.exe' : '')
+const chromecast = new ChromecastManager(castSenderPath.replace(/\.asar([\\/])/, '.asar.unpacked$1'))
 const brotliDecompressAsync = promisify(brotliDecompress)
 if (process.argv.includes('--version')) {
   console.log(`v${packageDetails.version} Beta`) // eslint-disable-line no-console
@@ -4628,6 +4631,55 @@ function runApp() {
     return stopDlnaCast(event.sender.id, castId)
   })
 
+  ipcMain.handle(IpcChannels.CAST_DISCOVER, async event => {
+    if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) return []
+    try { return await chromecast.discover() } catch { return { error: 'Cast discovery failed' } }
+  })
+  const castOwners = new WeakSet()
+  ipcMain.handle(IpcChannels.CAST_START, async (event, payload) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) return { error: 'Casting requires an active OpenTubeX window' }
+    const ownerId = event.sender.id
+    const getHeaders = mediaUrl => {
+      const url = new URL(mediaUrl)
+      const headers = {}
+      if (url.hostname.endsWith('.googlevideo.com') && url.pathname === '/videoplayback') {
+        headers.Referer = 'https://www.youtube.com/'
+        headers.Origin = 'https://www.youtube.com'
+      }
+      const authorization = invidiousAuthorizations.get(ownerId)
+      if (authorization && isInvidiousInstanceUrl(mediaUrl, authorization.url)) headers.Authorization = authorization.authorization
+      Object.assign(headers, getYtDlpExternalStreamHeaders(event.sender, mediaUrl))
+      const cookies = getYtDlpExternalStreamCookieHeader(event.sender, mediaUrl)
+      if (cookies !== null) headers.Cookie = cookies
+      return headers
+    }
+    const result = await chromecast.start(ownerId, payload, getHeaders)
+    if (result.castId) {
+      if (event.sender.isDestroyed()) await chromecast.stop(ownerId, result.castId)
+      else if (!castOwners.has(event.sender)) {
+        castOwners.add(event.sender)
+        event.sender.once('destroyed', () => {
+          if (chromecast.active?.ownerId === ownerId) chromecast.stop(ownerId, chromecast.active.castId).catch(console.error)
+        })
+      }
+    }
+    return result
+  })
+  ipcMain.handle(IpcChannels.CAST_STATUS, (event, castId) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof castId !== 'string') return { connected: false }
+    return chromecast.status(event.sender.id, castId)
+  })
+  ipcMain.handle(IpcChannels.CAST_CONTROL, (event, castId, action, value) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused() || typeof castId !== 'string') {
+      return { error: 'Casting requires an active OpenTubeX window' }
+    }
+    return chromecast.control(event.sender.id, castId, action, value)
+  })
+  ipcMain.handle(IpcChannels.CAST_STOP, (event, castId) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof castId !== 'string') return { connected: false }
+    return chromecast.stop(event.sender.id, castId)
+  })
+
   ipcMain.handle(IpcChannels.YT_DLP_DOWNLOAD, (event, payload, retryDownloadId) => {
     const automaticDownloadAuthorized = subscriptionAutoRefreshOwner?.webContents.id === event.sender.id &&
       payload?.refreshOwnerTabId === subscriptionAutoRefreshOwner.tabId
@@ -5714,6 +5766,7 @@ function runApp() {
 
     isQuitting = true
     stopDlnaCast().catch(error => console.error('Failed to stop DLNA casting', error))
+    chromecast.stop().catch(error => console.error('Failed to stop Google Cast', error))
     backgroundSubscriptions.stop()
     if (tray) { tray.destroy(); tray = null }
   })

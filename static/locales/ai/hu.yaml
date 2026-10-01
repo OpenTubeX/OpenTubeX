@@ -621,6 +621,7 @@ Settings:
     Preload Upcoming Videos: "Következő videók előtöltése"
     Upcoming Videos to Preload: "Előtöltendő videók száma"
     Concurrent Preloads: "Egyidejű előtöltések"
+    Show Google Cast Button: "Google Cast gomb megjelenítése"
   Channel Settings:
     Channel Settings: Csatornabeállítások
     Channel Settings Description: Csatornánként megjegyzi a videónézés közben kiválasztott beállításokat, és a csatorna következő videójánál újra alkalmazza őket.
@@ -1382,6 +1383,15 @@ Video:
       UpvoteSegment: Pozitív szavazat
       DownvoteSegment: Negatív szavazat
       VoteFailed: Nem sikerült elküldeni a SponsorBlock-szavazatot.
+    Google Cast:
+      Cast: "Átküldés Google Cast-eszközre"
+      Connected: "Átküldés ide: {device}"
+      Rewind: "Vissza 10 másodpercet"
+      Forward: "Előre 10 másodpercet"
+      Subtitles Off: "Feliratok kikapcsolása"
+      Return: "Visszatérés a helyi lejátszáshoz"
+      No Devices: "Nem találhatók Google Cast-eszközök"
+      No Source: "Nincs kompatibilis adatfolyam a Google Casthoz"
   External Media:
     Dislikes: "Nemtetszés | Nemtetszés"
     Reposts: "Újbóli bejegyzés | Újbóli bejegyzés"

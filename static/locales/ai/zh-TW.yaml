@@ -621,6 +621,7 @@ Settings:
     Preload Upcoming Videos: "預先載入後續影片"
     Upcoming Videos to Preload: "要預先載入的影片數量"
     Concurrent Preloads: "同時預先載入數量"
+    Show Google Cast Button: "顯示 Google Cast 按鈕"
   Channel Settings:
     Channel Settings: 頻道設定
     Channel Settings Description: 為各頻道分別記住觀看時選擇的設定，下次觀看該頻道的影片時便會再次套用。
@@ -1384,6 +1385,15 @@ Video:
       UpvoteSegment: 投贊成票
       DownvoteSegment: 投反對票
       VoteFailed: 無法提交 SponsorBlock 投票。
+    Google Cast:
+      Cast: "投放到 Google Cast 裝置"
+      Connected: "正在投放到 {device}"
+      Rewind: "倒退 10 秒"
+      Forward: "快進 10 秒"
+      Subtitles Off: "關閉字幕"
+      Return: "返回本機播放"
+      No Devices: "找不到 Google Cast 裝置"
+      No Source: "沒有相容 Google Cast 的串流"
   External Media:
     Dislikes: "倒讚"
     Reposts: "轉發"

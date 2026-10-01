@@ -621,6 +621,7 @@ Settings:
     Preload Upcoming Videos: "Rakgargañ ar videoioù da-heul"
     Upcoming Videos to Preload: "Niver a videoioù da rakgargañ"
     Concurrent Preloads: "Rakgargadennoù war un dro"
+    Show Google Cast Button: "Diskouez ar bouton Google Cast"
   Channel Settings:
     Channel Settings: "Arventennoù ar chadennoù"
     Channel Settings Description: "Derc'hel soñj, evit pep chadenn, eus an arventennoù a zibabit pa sellit. Arloet e vint en-dro ar wech da-heul ma sellot ouzh unan eus he videoioù."
@@ -1391,6 +1392,15 @@ Video:
       UpvoteSegment: "Mouezhiañ a-du"
       DownvoteSegment: "Mouezhiañ a-enep"
       VoteFailed: "N'eus ket bet gallet kas ar vouezh SponsorBlock."
+    Google Cast:
+      Cast: "Kas d’un trevnad Google Cast"
+      Connected: "O kas da {device}"
+      Rewind: "Distreiñ 10 eilenn"
+      Forward: "Mont war-raok 10 eilenn"
+      Subtitles Off: "Istitloù diweredekaet"
+      Return: "Distreiñ d’al lenn lec’hel"
+      No Devices: "N’eus trevnad Google Cast ebet kavet"
+      No Source: "N’eus gwazh kenglotus ebet evit Google Cast"
   External Media:
     Dislikes: "Displijadenn | Displijadennoù | Displijadennoù | Displijadennoù | Displijadennoù"
     Reposts: "Adkasadenn | Adkasadennoù | Adkasadennoù | Adkasadennoù | Adkasadennoù"
