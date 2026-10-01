@@ -3804,6 +3804,72 @@ test.describe('watch page', () => {
     })
   })
 
+  for (const scale of [1, 1.25]) {
+    test(`balances normal watch chat margins at ${scale * 100}% UI scale`, async ({ app, page, attachScreenshot }) => {
+      await setWindowSize(app, page, { width: 1800, height: 1000 })
+      await page.evaluate(scale => window.ftElectron.setZoomFactor(scale), scale)
+      await mockPlayableWatchPage(app, page)
+      await openMockedVideo(page)
+
+      const watchView = await watchViewHandle(page)
+      await watchView.evaluate(async (view) => {
+        const chat = new EventTarget()
+        chat.is_replay = true
+        chat.on = (event, listener) => chat.addEventListener(event, listener)
+        chat.once = (event, listener) => chat.addEventListener(event, listener, { once: true })
+        chat.off = (event, listener) => chat.removeEventListener(event, listener)
+        chat.start = () => {}
+        chat.stop = () => {}
+
+        view.$store.commit('setHideLiveChatReplay', false)
+        view.liveChat = chat
+        view.liveChatIsReplay = true
+        view.liveChatOpen = true
+        view.useTheatreMode = false
+        await view.$nextTick()
+      })
+
+      const watch = page.locator(`${activeTab} .videoLayout`)
+      const player = watch.locator('.videoPlayer').first()
+      const chat = watch.locator('.watchVideoPlaylist').filter({ hasText: 'Live Chat Replay' })
+      const info = watch.locator('.watchVideoInfo')
+      await expect(chat).toBeVisible()
+      await expect.poll(async () => {
+        const playerBox = await player.boundingBox()
+        const chatBox = await chat.boundingBox()
+        const viewportWidth = await page.evaluate(() => innerWidth)
+        return Math.abs(chatBox.x - playerBox.x - playerBox.width - (viewportWidth - chatBox.x - chatBox.width))
+      }).toBeLessThan(3)
+      const playerBox = await player.boundingBox()
+      const infoBox = await info.boundingBox()
+      expect(Math.abs(playerBox.x - infoBox.x)).toBeLessThan(2)
+      expect(Math.abs(playerBox.x + playerBox.width - infoBox.x - infoBox.width)).toBeLessThan(2)
+      await attachScreenshot(`Normal watch chat at ${scale * 100}% UI scale`)
+
+      await watchView.evaluate(async (view) => {
+        view.useTheatreMode = true
+        await view.$nextTick()
+      })
+      await expect.poll(async () => {
+        const playerBox = await player.boundingBox()
+        const chatBox = await chat.boundingBox()
+        return chatBox.y >= playerBox.y + playerBox.height - 2
+      }).toBe(true)
+
+      await watchView.evaluate(async (view) => {
+        view.useTheatreMode = false
+        await view.$nextTick()
+      })
+      await setWindowSize(app, page, { width: 1000, height: 780 })
+      await expect.poll(async () => {
+        const infoBox = await info.boundingBox()
+        const chatBox = await chat.boundingBox()
+        return chatBox.y >= infoBox.y + infoBox.height - 2
+      }).toBe(true)
+      expect(await watch.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+    })
+  }
+
   test('does not speculate about live chat while availability loads', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
 

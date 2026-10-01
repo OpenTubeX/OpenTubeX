@@ -1332,6 +1332,17 @@
     }
   }
 
+  @media (width > 1350px) {
+    @container route (width >= 1051px) {
+      &:not(.useTheatreMode, .noSidebar, .shortsPlayerActive) {
+        .videoAreaMargin,
+        .watchVideo {
+          margin-inline: 8px;
+        }
+      }
+    }
+  }
+
   // Match the player control's viewport breakpoint so theatre mode never has
   // a visible button while the responsive layout already forces the same grid.
   @media (width <= 1350px) {
