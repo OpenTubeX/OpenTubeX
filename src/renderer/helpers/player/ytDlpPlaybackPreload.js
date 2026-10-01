@@ -4,6 +4,7 @@ export const DEFAULT_YT_DLP_PRELOAD_COUNT = 2
 export const MAX_YT_DLP_PRELOAD_COUNT = 10
 export const DEFAULT_YT_DLP_PRELOAD_CONCURRENCY = 2
 export const MAX_YT_DLP_PRELOAD_CONCURRENCY = 32
+const PRELOAD_RETRY_DELAYS_MS = [1000, 2000]
 
 const pendingPreloadTasks = []
 let activePreloadTasks = 0
@@ -127,29 +128,40 @@ export async function preloadYtDlpPlaybackSources(videoIds, {
   let nextIndex = 0
   let preloaded = 0
   let failed = 0
+  let retryVideoIds = []
+
+  async function preloadVideo(videoId, concurrency, retryQueue) {
+    try {
+      const source = await scheduleYtDlpPlaybackPreload(
+        () => loadSource(videoId),
+        concurrency
+      )
+      if (source !== null && isYtDlpPlaybackSourceCacheable(source)) {
+        preloaded++
+      } else if (source?.incomplete && !source.isLive && retryQueue) {
+        retryQueue.push(videoId)
+      } else {
+        failed++
+      }
+    } catch {
+      if (retryQueue) {
+        retryQueue.push(videoId)
+      } else {
+        failed++
+      }
+    }
+    onProgress({
+      requested: uniqueVideoIds.length,
+      completed: preloaded + failed,
+      preloaded,
+      failed,
+    })
+  }
 
   async function worker() {
     while (nextIndex < uniqueVideoIds.length) {
       const videoId = uniqueVideoIds[nextIndex++]
-      try {
-        const source = await scheduleYtDlpPlaybackPreload(
-          () => loadSource(videoId),
-          normalizedConcurrency
-        )
-        if (source === null || !isYtDlpPlaybackSourceCacheable(source)) {
-          failed++
-        } else {
-          preloaded++
-        }
-      } catch {
-        failed++
-      }
-      onProgress({
-        requested: uniqueVideoIds.length,
-        completed: preloaded + failed,
-        preloaded,
-        failed,
-      })
+      await preloadVideo(videoId, normalizedConcurrency, retryVideoIds)
     }
   }
 
@@ -158,6 +170,19 @@ export async function preloadYtDlpPlaybackSources(videoIds, {
     normalizedConcurrency
   )
   await Promise.all(Array.from({ length: workerCount }, worker))
+
+  // Immediate playback retries can all fail under a large preload's contention.
+  // Give failed extractions time to recover, then retry serially through the
+  // shared scheduler. Only count a video as completed after its final attempt.
+  for (let retry = 0; retry < PRELOAD_RETRY_DELAYS_MS.length && retryVideoIds.length > 0; retry++) {
+    await new Promise(resolve => setTimeout(resolve, PRELOAD_RETRY_DELAYS_MS[retry]))
+    const pendingVideoIds = retryVideoIds
+    retryVideoIds = []
+    const retryQueue = retry < PRELOAD_RETRY_DELAYS_MS.length - 1 ? retryVideoIds : null
+    for (const videoId of pendingVideoIds) {
+      await preloadVideo(videoId, 1, retryQueue)
+    }
+  }
 
   return {
     requested: uniqueVideoIds.length,

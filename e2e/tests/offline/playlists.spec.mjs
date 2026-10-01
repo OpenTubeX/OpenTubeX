@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { chmod, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { IpcChannels } from '../../../src/constants.js'
@@ -203,8 +203,8 @@ test.describe('seeded playlists', () => {
     await expect.poll(() => app.electronApp.evaluate(
       () => [...new Set(globalThis.__ytDlpPreloadVideoIds)]
     )).toEqual(['ccccccccccc', 'ddddddddddd'])
-    await expect(progressToast).toContainText('Preloading videos: 1 of 2')
-    await expect(progressToast.locator('.progress-indicator')).toHaveAttribute('data-progress', '50')
+    await expect(progressToast).toContainText('Preloading videos: 0 of 2')
+    await expect(progressToast.locator('.progress-indicator')).toHaveAttribute('data-progress', '0')
 
     await app.electronApp.evaluate(() => globalThis.__ytDlpPreloadResolvers.shift()({ error: 'mock failure' }))
     await expect(page.getByText(
@@ -212,6 +212,58 @@ test.describe('seeded playlists', () => {
     )).toBeVisible()
     await expect(progressToast).toHaveCount(0)
     await expect(page.getByTitle('Preload all videos')).toHaveAttribute('aria-disabled', 'false')
+  })
+
+  test('recovers full playlist metadata after repeated partial yt-dlp timeouts', async ({ app, page }) => {
+    test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+
+    const executable = path.join(app.userDataDir, 'playlist-timeout-yt-dlp.sh')
+    const callsFile = path.join(app.userDataDir, 'playlist-timeout-calls.txt')
+    const metadata = height => ({
+      title: `Playlist video ${height}p`,
+      is_live: false,
+      live_status: 'not_live',
+      duration: 60,
+      manifest_url: `https://example.invalid/${height}.m3u8?expire=4102444800`,
+      formats: [{
+        protocol: 'm3u8_native',
+        url: `https://example.invalid/${height}.m3u8?expire=4102444800`,
+        height,
+      }],
+    })
+    await writeFile(executable, [
+      '#!/bin/sh',
+      'if [ "$1" = "--version" ]; then printf "%s\\n" "2026.09.01"; exit; fi',
+      'for arg do videoUrl="$arg"; done',
+      'case "$videoUrl" in *ccccccccccc)',
+      `count=$(cat '${callsFile}' 2>/dev/null || printf 0)`,
+      'count=$((count + 1))',
+      `printf '%s' "$count" > '${callsFile}'`,
+      'if [ "$count" -le 6 ]; then',
+      "printf '%s\\n' 'WARNING: [youtube] Unable to download web client API page: The read operation timed out' >&2",
+      `printf '%s\\n' '${JSON.stringify(metadata(360))}'`,
+      'exit; fi;; esac',
+      `printf '%s\\n' '${JSON.stringify(metadata(1080))}'`,
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.route('https://example.invalid/**', route => route.fulfill({
+      contentType: 'application/x-mpegURL',
+      body: '#EXTM3U\n',
+    }))
+    await dispatchStoreAction(page, 'updateYtDlpSource', 'system')
+    await dispatchStoreAction(page, 'updateYtDlpPath', executable)
+    await dispatchStoreAction(page, 'updateYtDlpPreloadConcurrency', 32)
+
+    await goTo(page, 'userplaylists')
+    await page.getByText('My seeded playlist').click()
+    await page.getByTitle('Preload all videos').click()
+
+    await expect(page.getByText('Preloaded videos: 2.')).toBeVisible()
+    await expect(page.getByTitle('All playlist videos are already preloaded')).toHaveAttribute('aria-disabled', 'true')
+    expect(Number(await readFile(callsFile, 'utf8'))).toBe(7)
+    const entries = JSON.parse(await readFile(path.join(app.userDataDir, 'yt-dlp-playback-cache.json'), 'utf8'))
+    expect(entries).toHaveLength(2)
+    expect(entries.every(entry => entry.source.manifestSrc.includes('/1080.m3u8'))).toBe(true)
   })
 
   test('keeps a successfully preloaded playlist disabled', async ({ app, page }) => {
