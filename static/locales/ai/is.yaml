@@ -1921,3 +1921,5 @@ Tray:
 Tray Icon:
   Title: "Tákn í kerfisbakka"
   Follow App Theme: "Fylgja þema forritsins"
+Native Permissions:
+  Local Network: "Finna tæki á staðarnetinu og senda myndskeið í þau, og samstilla stillingar og gögn milli tækja."

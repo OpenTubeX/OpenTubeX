@@ -1918,3 +1918,5 @@ Tray:
 Tray Icon:
   Title: "Ikon i systemstatusfeltet"
   Follow App Theme: "Følg appens tema"
+Native Permissions:
+  Local Network: "Finn enheter på det lokale nettverket og cast videoer til dem, og synkroniser innstillinger og data mellom enheter."

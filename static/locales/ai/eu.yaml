@@ -1913,3 +1913,5 @@ Tray:
 Tray Icon:
   Title: "Sistemaren erretiluko ikonoa"
   Follow App Theme: "Jarraitu aplikazioaren gaiari"
+Native Permissions:
+  Local Network: "Sare lokaleko gailuak aurkitu eta bideoak haietara igorri, eta ezarpenak eta datuak gailuen artean sinkronizatu."

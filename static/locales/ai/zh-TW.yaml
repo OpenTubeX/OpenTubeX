@@ -1897,3 +1897,5 @@ Tray:
 Tray Icon:
   Title: "系統匣圖示"
   Follow App Theme: "跟隨應用程式主題"
+Native Permissions:
+  Local Network: "尋找區域網路中的裝置並向其投放影片，同時在裝置之間同步設定和資料。"

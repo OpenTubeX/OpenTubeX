@@ -1895,3 +1895,5 @@ Tray:
 Tray Icon:
   Title: "托盘图标"
   Follow App Theme: "跟随应用主题"
+Native Permissions:
+  Local Network: "发现本地网络中的设备并向其投放视频，同时在设备之间同步设置和数据。"

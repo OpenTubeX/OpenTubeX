@@ -18,6 +18,13 @@ final class AppTests: XCTestCase {
                 connection.receive(minimumIncompleteLength: 1, maximumLength: 8192) { data, _, complete, error in
                     let request = buffered + (data ?? Data())
                     if let header = String(data: request, encoding: .utf8), header.contains("\r\n\r\n") {
+                        let parts = header.components(separatedBy: "\r\n\r\n")
+                        let length = parts[0].components(separatedBy: "\r\n").first(where: { $0.lowercased().hasPrefix("content-length:") })
+                            .flatMap { Int($0.components(separatedBy: ":").last!.trimmingCharacters(in: .whitespaces)) } ?? 0
+                        if request.count < parts[0].utf8.count + 4 + length && request.count <= 16384 {
+                            receive(request)
+                            return
+                        }
                         handle(header, connection)
                     } else if complete || error != nil || request.count > 16384 { connection.cancel() }
                     else { receive(request) }
@@ -28,6 +35,359 @@ final class AppTests: XCTestCase {
         listener.start(queue: .global())
         await fulfillment(of: [ready], timeout: 10)
         return listener
+    }
+
+    func testDlnaRelayStreamsRangesAndHeadAndStops() async throws {
+        let upstream = try await loopbackServer { header, connection in
+            XCTAssertTrue(header.contains("User-Agent: OpenTubeX DLNA test"), header)
+            let ranged = header.contains("Range: bytes=2-5")
+            let response = ranged
+                ? "HTTP/1.1 206 Partial Content\r\nContent-Length: 4\r\nContent-Range: bytes 2-5/10\r\nAccept-Ranges: bytes\r\nConnection: close\r\n\r\ncdef"
+                : "HTTP/1.1 200 OK\r\nContent-Length: 10\r\nConnection: close\r\n\r\n" + (header.hasPrefix("HEAD ") ? "" : "abcdefghij")
+            connection.send(content: Data(response.utf8), completion: .contentProcessed { _ in connection.cancel() })
+        }
+        defer { upstream.cancel() }
+        let media = try XCTUnwrap(URL(string: "http://127.0.0.1:\(try XCTUnwrap(upstream.port).rawValue)/video.mp4"))
+        var registered = URLRequest(url: media)
+        registered.setValue("OpenTubeX DLNA test", forHTTPHeaderField: "User-Agent")
+        let id = IOSNetwork.shared.prepareExternal(registered)
+        let nativeUrl = try XCTUnwrap(URL(string: "capacitor://localhost/_opentubex_media/\(id)"))
+        let mediaRequest = try XCTUnwrap(IOSNetwork.shared.registeredMediaRequest(nativeUrl))
+        XCTAssertNil(IOSNetwork.shared.registeredMediaRequest(URL(string: "capacitor://localhost/private")!))
+        let ready = expectation(description: "DLNA relay ready")
+        var startupError: Error?
+        let relay = try DlnaMediaServer(media: mediaRequest, address: "127.0.0.1", localAddress: "127.0.0.1") { result in
+            if case .failure(let error) = result { startupError = error }
+            ready.fulfill()
+        }
+        defer { relay.close() }
+        await fulfillment(of: [ready], timeout: 10)
+        XCTAssertNil(startupError)
+        let url = try XCTUnwrap(URL(string: relay.mediaUrl))
+        var request = URLRequest(url: url)
+        request.setValue("bytes=2-5", forHTTPHeaderField: "Range")
+        let (bytes, result) = try await URLSession.shared.data(for: request)
+        let response = try XCTUnwrap(result as? HTTPURLResponse)
+        XCTAssertEqual(response.statusCode, 206)
+        XCTAssertEqual(response.value(forHTTPHeaderField: "Content-Range"), "bytes 2-5/10")
+        XCTAssertEqual(bytes, Data("cdef".utf8))
+        request.httpMethod = "HEAD"
+        request.setValue(nil, forHTTPHeaderField: "Range")
+        let (headBytes, headResult) = try await URLSession.shared.data(for: request)
+        XCTAssertEqual((headResult as? HTTPURLResponse)?.statusCode, 200)
+        XCTAssertEqual((headResult as? HTTPURLResponse)?.value(forHTTPHeaderField: "Content-Length"), "10")
+        XCTAssertTrue(headBytes.isEmpty)
+        let wrong = try XCTUnwrap(URL(string: relay.mediaUrl.replacingOccurrences(of: relay.castId, with: "wrong-token")))
+        let (_, denied) = try await URLSession.shared.data(from: wrong)
+        XCTAssertEqual((denied as? HTTPURLResponse)?.statusCode, 404)
+        relay.close()
+        try await Task.sleep(nanoseconds: 100_000_000)
+        do {
+            _ = try await URLSession.shared.data(from: url)
+            XCTFail("Stopped relay still listening")
+        } catch { /* Closing the listener must reject subsequent requests. */ }
+    }
+
+    private func verifyMergedTracks(_ data: Data, height: Int) async throws {
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent("dlna-merged-\(UUID().uuidString).mp4")
+        try data.write(to: file)
+        defer { try? FileManager.default.removeItem(at: file) }
+        let asset = AVURLAsset(url: file)
+        let videos = try await asset.loadTracks(withMediaType: .video)
+        let audios = try await asset.loadTracks(withMediaType: .audio)
+        XCTAssertEqual(videos.count, 1)
+        XCTAssertEqual(audios.count, 1)
+        let reader = try AVAssetReader(asset: asset)
+        let decodedAudio = AVAssetReaderTrackOutput(track: try XCTUnwrap(audios.first), outputSettings: [AVFormatIDKey: kAudioFormatLinearPCM])
+        reader.add(decodedAudio)
+        XCTAssertTrue(reader.startReading())
+        XCTAssertNotNil(decodedAudio.copyNextSampleBuffer(), "Merged AAC decodes to PCM")
+        reader.cancelReading()
+        let dimensions = try await XCTUnwrap(videos.first).load(.naturalSize)
+        XCTAssertEqual(Int(dimensions.height), height)
+        let generator = AVAssetImageGenerator(asset: asset)
+        let frame = try await generator.image(at: .zero)
+        XCTAssertGreaterThan(frame.image.width, 0)
+    }
+
+    func testDlnaMergesSeparateTracks() async throws {
+        try await verifyDlnaMergedFixture(videoResource: "fixture")
+    }
+
+    func testDlnaMergedDurationUsesFragmentSamples() async throws {
+        try await verifyDlnaMergedFixture(videoResource: "fragmented-duration", duration: 2)
+    }
+
+    private func verifyDlnaMergedFixture(videoResource: String, duration: Double? = nil) async throws {
+        let video = try Data(contentsOf: XCTUnwrap(Bundle(for: Self.self).url(forResource: videoResource, withExtension: "mp4")))
+        let encoded = try Data(contentsOf: XCTUnwrap(Bundle(for: Self.self).url(forResource: "post-live-audio.m4a", withExtension: "b64")))
+        let audio = try XCTUnwrap(Data(base64Encoded: encoded, options: .ignoreUnknownCharacters))
+        let source = try await loopbackServer { header, connection in
+            let bytes = header.hasPrefix("GET /audio ") ? audio : video
+            connection.send(content: Data("HTTP/1.1 200 OK\r\nContent-Length: \(bytes.count)\r\nConnection: close\r\n\r\n".utf8) + bytes,
+                            completion: .contentProcessed { _ in connection.cancel() })
+        }
+        defer { source.cancel() }
+        let base = "http://127.0.0.1:\(try XCTUnwrap(source.port).rawValue)"
+        let ready = expectation(description: "Merged relay ready")
+        let relay = try DlnaMediaServer(media: URLRequest(url: URL(string: base + "/video")!),
+                                       audio: URLRequest(url: URL(string: base + "/audio")!), address: "127.0.0.1", localAddress: "127.0.0.1") { _ in ready.fulfill() }
+        defer { relay.close() }
+        await fulfillment(of: [ready], timeout: 10)
+        let url = try XCTUnwrap(URL(string: relay.mediaUrl))
+        var range = URLRequest(url: url)
+        range.setValue("bytes=100-", forHTTPHeaderField: "Range")
+        let (_, rejected) = try await URLSession.shared.data(for: range)
+        XCTAssertEqual((rejected as? HTTPURLResponse)?.statusCode, 416)
+        let (data, response) = try await URLSession.shared.data(from: url)
+        XCTAssertEqual((response as? HTTPURLResponse)?.statusCode, 200)
+        XCTAssertEqual((response as? HTTPURLResponse)?.value(forHTTPHeaderField: "Accept-Ranges"), "none")
+        try await verifyMergedTracks(data, height: 1080)
+        if let duration {
+            let file = FileManager.default.temporaryDirectory.appendingPathComponent("dlna-duration-\(UUID().uuidString).mp4")
+            try data.write(to: file)
+            defer { try? FileManager.default.removeItem(at: file) }
+            let measured = try await AVURLAsset(url: file).load(.duration)
+            XCTAssertEqual(measured.seconds, duration, accuracy: 0.05)
+        }
+        print("DLNA merged fixture: native streaming H.264 + AAC, decoded 1080p frame")
+    }
+
+    func testDlnaRejectsTruncatedFullBox() async throws {
+        func box(_ type: String, _ body: Data = Data()) -> Data {
+            let size = UInt32(body.count + 8)
+            return Data([UInt8(truncatingIfNeeded: size >> 24), UInt8(truncatingIfNeeded: size >> 16),
+                         UInt8(truncatingIfNeeded: size >> 8), UInt8(truncatingIfNeeded: size)]) + Data(type.utf8) + body
+        }
+        // The container sizes are valid, but mdhd is missing its version and fields.
+        let malformed = box("ftyp") + box("moov", box("trak", box("mdia", box("mdhd"))))
+        let source = try await loopbackServer { _, connection in
+            connection.send(content: Data("HTTP/1.1 200 OK\r\nContent-Length: \(malformed.count)\r\nConnection: close\r\n\r\n".utf8) + malformed,
+                            completion: .contentProcessed { _ in connection.cancel() })
+        }
+        defer { source.cancel() }
+        let request = URLRequest(url: URL(string: "http://127.0.0.1:\(try XCTUnwrap(source.port).rawValue)/video")!)
+        let rejected = try await Task.detached { () -> Bool in
+            do {
+                try DlnaMuxer().stream(video: request, audio: request, startSeconds: 0) { _ in true }
+                return false
+            } catch {
+                return (error as? URLError)?.code == .cannotDecodeContentData
+            }
+        }.value
+        XCTAssertTrue(rejected, "Malformed MP4 fails cleanly without trapping")
+    }
+
+    func testDlnaMergesLiveYouTubeTracks() async throws {
+        try XCTSkipUnless(ProcessInfo.processInfo.environment["OTX_DLNA_YOUTUBE_TEST"] == "1", "Opt-in live YouTube test")
+        let (json, _) = try await URLSession.shared.data(from: URL(string: "http://127.0.0.1:18773/sources")!)
+        let sources = try XCTUnwrap(JSONSerialization.jsonObject(with: json) as? [String: Any])
+        func request(_ key: String) throws -> URLRequest {
+            var request = URLRequest(url: URL(string: try XCTUnwrap(sources[key] as? String))!)
+            for (name, value) in sources["headers"] as? [String: String] ?? [:] { request.setValue(value, forHTTPHeaderField: name) }
+            return request
+        }
+        let ready = expectation(description: "Live merged relay ready")
+        let start = ProcessInfo.processInfo.systemUptime
+        let relay = try DlnaMediaServer(media: request("videoUrl"), audio: request("audioUrl"),
+                                       startSeconds: 100, address: "127.0.0.1", localAddress: "127.0.0.1") { _ in ready.fulfill() }
+        defer { relay.close() }
+        await fulfillment(of: [ready], timeout: 10)
+        let (bytes, response) = try await URLSession.shared.bytes(from: URL(string: relay.mediaUrl)!)
+        XCTAssertEqual((response as? HTTPURLResponse)?.statusCode, 200)
+        let firstBytesMs = Int((ProcessInfo.processInfo.systemUptime - start) * 1000)
+        let data = try await Task.detached(priority: .userInitiated) {
+            var data = Data()
+            for try await byte in bytes {
+                data.append(byte)
+                if data.count >= 2 * 1024 * 1024 { break }
+            }
+            return data
+        }.value
+        relay.close()
+        try await verifyMergedTracks(data, height: 1080)
+        print("DLNA live YouTube: 1080p60 + AAC, start at 100s, first bytes in \(firstBytesMs)ms, decoded frame from \(data.count) bytes")
+    }
+
+    func testDlnaDiscoveryAndControlThroughTheNativeBridge() async throws {
+        try await verifyDlnaCastMenu(merged: false)
+    }
+
+    func testDlnaMergedTracksThroughTheCastMenu() async throws {
+        try await verifyDlnaCastMenu(merged: true)
+    }
+
+    private func verifyDlnaCastMenu(merged: Bool) async throws {
+        try await openApplication()
+        let media = try Data(contentsOf: XCTUnwrap(Bundle(for: AppTests.self).url(forResource: "fixture", withExtension: "mp4")))
+        let encodedAudio = try Data(contentsOf: XCTUnwrap(Bundle(for: Self.self).url(forResource: "post-live-audio.m4a", withExtension: "b64")))
+        let audio = try XCTUnwrap(Data(base64Encoded: encodedAudio, options: .ignoreUnknownCharacters))
+        let lock = NSLock()
+        var actions: [String] = []
+        var castUri: URL?
+        var receivedVideo: Data?
+        let transferred = expectation(description: "Local renderer receives MP4 from the iOS relay")
+        let fixture = try await loopbackServer { header, connection in
+            let description = "<root><device><deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType><friendlyName>iOS test TV</friendlyName><serviceList><service><serviceType>urn:schemas-upnp-org:service:AVTransport:1</serviceType><controlURL>/control</controlURL></service></serviceList></device></root>"
+            func reply(_ body: Data, status: String = "200 OK", extra: String = "") {
+                let response = "HTTP/1.1 \(status)\r\nContent-Length: \(body.count)\r\nAccess-Control-Allow-Origin: *\r\n\(extra)Connection: close\r\n\r\n"
+                connection.send(content: Data(response.utf8) + (header.hasPrefix("HEAD ") ? Data() : body), completion: .contentProcessed { _ in connection.cancel() })
+            }
+            if header.contains(" /real.mp4 ") {
+                let ranged = header.lowercased().contains("range: bytes=0-")
+                reply(media, status: ranged ? "206 Partial Content" : "200 OK",
+                      extra: "Content-Type: video/mp4\r\nAccept-Ranges: bytes\r\n" + (ranged ? "Content-Range: bytes 0-\(media.count - 1)/\(media.count)\r\n" : ""))
+            } else if header.contains(" /audio.m4a ") {
+                reply(audio, extra: "Content-Type: audio/mp4\r\n")
+            } else if header.hasPrefix("POST ") {
+                let action = header.components(separatedBy: "\r\n").first(where: { $0.lowercased().hasPrefix("soapaction:") })?
+                    .components(separatedBy: "#").last?.replacingOccurrences(of: "\"", with: "").trimmingCharacters(in: .whitespaces) ?? ""
+                lock.lock()
+                actions.append(action)
+                if action == "SetAVTransportURI", let uri = header.components(separatedBy: "<CurrentURI>").dropFirst().first?.components(separatedBy: "</CurrentURI>").first {
+                    castUri = URL(string: uri.replacingOccurrences(of: "&amp;", with: "&"))
+                }
+                let uri = castUri
+                lock.unlock()
+                if action == "Play", let uri {
+                    var request = URLRequest(url: uri)
+                    request.setValue("bytes=0-", forHTTPHeaderField: "Range")
+                    URLSession.shared.dataTask(with: request) { data, response, error in
+                        XCTAssertNil(error)
+                        XCTAssertEqual((response as? HTTPURLResponse)?.statusCode, merged ? 200 : 206)
+                        lock.lock(); receivedVideo = data; lock.unlock()
+                        transferred.fulfill()
+                        reply(Data("<ok/>".utf8))
+                    }.resume()
+                } else { reply(Data("<ok/>".utf8)) }
+            } else { reply(Data(description.utf8)) }
+        }
+        defer { fixture.cancel() }
+        let port = try XCTUnwrap(fixture.port).rawValue
+        let fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
+        XCTAssertGreaterThanOrEqual(fd, 0)
+        defer { Darwin.close(fd) }
+        var reuse: Int32 = 1
+        setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, socklen_t(MemoryLayout<Int32>.size))
+        var local = sockaddr_in()
+        local.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
+        local.sin_family = sa_family_t(AF_INET)
+        local.sin_port = UInt16(1900).bigEndian
+        let bound = withUnsafePointer(to: &local) { pointer in
+            pointer.withMemoryRebound(to: sockaddr.self, capacity: 1) { Darwin.bind(fd, $0, socklen_t(MemoryLayout<sockaddr_in>.size)) }
+        }
+        XCTAssertEqual(bound, 0)
+        var membership = ip_mreq()
+        inet_pton(AF_INET, "239.255.255.250", &membership.imr_multiaddr)
+        XCTAssertEqual(setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &membership, socklen_t(MemoryLayout<ip_mreq>.size)), 0)
+        var timeout = timeval(tv_sec: 10, tv_usec: 0)
+        setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
+        let responded = expectation(description: "SSDP fixture responds")
+        DispatchQueue.global().async {
+            var buffer = [UInt8](repeating: 0, count: 8192)
+            var remote = sockaddr_in()
+            var length = socklen_t(MemoryLayout<sockaddr_in>.size)
+            let count = withUnsafeMutablePointer(to: &remote) { pointer in
+                pointer.withMemoryRebound(to: sockaddr.self, capacity: 1) { recvfrom(fd, &buffer, buffer.count, 0, $0, &length) }
+            }
+            if count > 0 {
+                var ip = [CChar](repeating: 0, count: Int(INET_ADDRSTRLEN))
+                inet_ntop(AF_INET, &remote.sin_addr, &ip, socklen_t(ip.count))
+                let response = Data("HTTP/1.1 200 OK\r\nLOCATION: http://\(String(cString: ip)):\(port)/otx-ios-dlna-test.xml\r\n\r\n".utf8)
+                response.withUnsafeBytes { bytes in
+                    withUnsafePointer(to: &remote) { pointer in
+                        pointer.withMemoryRebound(to: sockaddr.self, capacity: 1) {
+                            _ = sendto(fd, bytes.baseAddress, bytes.count, 0, $0, length)
+                        }
+                    }
+                }
+            }
+            responded.fulfill()
+        }
+        // Use iOS's registered source URL, as yt-dlp does, and the real casting UI.
+        let id = IOSNetwork.shared.prepareExternal(URLRequest(url: try XCTUnwrap(URL(string: "http://127.0.0.1:\(port)/real.mp4"))))
+        let original = try await evaluate("testStore.getters.getShowDlnaCastButton") as? Bool ?? false
+        _ = try await evaluate("""
+        window.findWatch = vnode => {
+            if (vnode?.component?.type?.name === 'Watch') return vnode.component.proxy;
+            const inner = vnode?.component?.subTree && findWatch(vnode.component.subTree);
+            if (inner) return inner;
+            for (const child of Array.isArray(vnode?.children) ? vnode.children : []) {
+                const found = findWatch(child); if (found) return found;
+            }
+        }; window.dlnaOriginalNativePromise = window.Capacitor.nativePromise;
+                window.Capacitor.nativePromise = function(plugin, method, options) {
+                    if (plugin === 'YtDlp' && method === 'extract' && options.args?.some(arg => arg.includes('DlnaTest001'))) {
+                        return Promise.resolve({stdout: JSON.stringify({id:'DlnaTest001', formats:window.dlnaExtractionFormats ?? [], is_live:false})});
+                    }
+                    return dlnaOriginalNativePromise.call(this, plugin, method, options);
+                };
+                testRouter.push('/watch/DlnaTest001'); true;
+        """)
+        let audioId = IOSNetwork.shared.prepareExternal(URLRequest(url: URL(string: "http://127.0.0.1:\(port)/audio.m4a")!))
+        _ = try await webView.callAsyncJavaScript("""
+        window.dlnaMergedUi = merged;
+        window.dlnaExtractionFormats = merged ? [
+            {url:videoSource, format_id:'299', protocol:'http', ext:'mp4', vcodec:'avc1.640028', acodec:'none', height:1080},
+            {url:audioSource, format_id:'140', protocol:'http', ext:'m4a', vcodec:'none', acodec:'mp4a.40.2'}
+        ] : [];
+        """, arguments: ["merged": merged, "videoSource": "capacitor://localhost/_opentubex_media/\(id)", "audioSource": "capacitor://localhost/_opentubex_media/\(audioId)"], in: nil, contentWorld: .page)
+        let cleanup = "document.querySelector('video')?.pause(); await testRouter.push('/subscriptions'); await testStore.dispatch('updateShowDlnaCastButton', original); window.Capacitor.nativePromise=dlnaOriginalNativePromise"
+        do {
+            try await wait("!!findWatch(document.querySelector('#app').__vue_app__._container._vnode)")
+            _ = try await webView.callAsyncJavaScript("""
+            window.watchFixture = findWatch(document.querySelector('#app').__vue_app__._container._vnode);
+            watchFixture.videoLoadGeneration++;
+            Object.assign(watchFixture, {isLoading:false, ytDlpStreamsPending:false, errorMessage:null,
+                isUpcoming:false, videoTitle:'Local DLNA MP4', videoLengthSeconds:2, activeFormat:'legacy',
+                legacyFormats:[{itag:18,url,mimeType:'video/mp4',height:dlnaMergedUi?360:1080,qualityLabel:'1080p'}]});
+            await testStore.dispatch('updateShowDlnaCastButton', true);
+            """, arguments: ["url": "capacitor://localhost/_opentubex_media/\(id)"], in: nil, contentWorld: .page)
+            try await wait("!!document.querySelector('.dlnaCastControl button') && !!document.querySelector('video') && watchFixture.$refs.player?.hasLoaded")
+            _ = try await webView.callAsyncJavaScript("document.querySelector('video').loop=true; await document.querySelector('video').play(); document.querySelector('.dlnaCastControl button').click()", arguments: [:], in: nil, contentWorld: .page)
+            try await wait("Array.from(document.querySelectorAll('[role=option]')).some(option=>option.textContent.trim()==='iOS test TV')")
+            _ = try await evaluate("document.querySelector('video').currentTime=dlnaMergedUi?0:0.5;Array.from(document.querySelectorAll('[role=option]')).find(option=>option.textContent.trim()==='iOS test TV').click();true")
+            try await wait("document.querySelector('.dlnaCastControl button')?.getAttribute('aria-pressed')==='true'")
+            await fulfillment(of: [responded, transferred], timeout: 12)
+            if !merged { XCTAssertEqual(receivedVideo, media) }
+            XCTAssertEqual(actions, merged ? ["SetAVTransportURI", "Play"] : ["SetAVTransportURI", "Play", "Seek"])
+            let paused = try await evaluate("document.querySelector('video').paused") as? Bool
+            XCTAssertEqual(paused, true)
+            let received = FileManager.default.temporaryDirectory.appendingPathComponent("dlna-received-\(UUID().uuidString).mp4")
+            defer { try? FileManager.default.removeItem(at: received) }
+            try XCTUnwrap(receivedVideo).write(to: received)
+            if merged { try await verifyMergedTracks(try XCTUnwrap(receivedVideo), height: 1080) }
+            let asset = AVURLAsset(url: received)
+            let duration = try await asset.load(.duration)
+            XCTAssertEqual(duration.seconds, 2, accuracy: 0.01)
+            let generator = AVAssetImageGenerator(asset: asset)
+            let (image, _) = try await generator.image(at: .zero)
+            XCTAssertGreaterThan(image.width, 0)
+            _ = try await evaluate("document.querySelector('.dlnaCastControl button').click();true")
+            try await wait("Array.from(document.querySelectorAll('[role=option]')).some(option=>option.textContent.trim()==='Stop casting')")
+            _ = try await evaluate("Array.from(document.querySelectorAll('[role=option]')).find(option=>option.textContent.trim()==='Stop casting').click();true")
+            try await wait("document.querySelector('.dlnaCastControl button')?.getAttribute('aria-pressed')==='false' && !document.querySelector('video').paused")
+            XCTAssertEqual(actions.last, "Stop")
+            do {
+                _ = try await URLSession.shared.data(from: XCTUnwrap(castUri))
+                XCTFail("Cast relay still listening after Stop casting")
+            } catch { /* Stop must close the native media server. */ }
+            print("DLNA UI \(merged ? "streaming merge" : "complete MP4"): discovered renderer, Play/Stop, decoded frame, resumed local playback, closed relay")
+        } catch {
+            _ = try? await webView.callAsyncJavaScript(cleanup, arguments: ["original": original], in: nil, contentWorld: .page)
+            throw error
+        }
+        _ = try await webView.callAsyncJavaScript(cleanup, arguments: ["original": original], in: nil, contentWorld: .page)
+    }
+
+    func testDlnaPluginAndOptInSettingAreAvailable() async throws {
+        try await openApplication()
+        let available = try await evaluate("Capacitor.isPluginAvailable('Dlna')") as? Bool
+        XCTAssertEqual(available, true)
+        _ = try await webView.callAsyncJavaScript("testStore.commit('setSettingsWindowSection', 'player'); await testStore.dispatch('showSettingsWindow')", arguments: [:], in: nil, contentWorld: .page)
+        try await wait("Array.from(document.querySelectorAll('.settingsWindow label')).some(label => label.textContent.includes('Show DLNA Cast Button'))")
+        let original = try await evaluate("testStore.getters.getShowDlnaCastButton") as? Bool ?? false
+        _ = try await webView.callAsyncJavaScript("await testStore.dispatch('updateShowDlnaCastButton', !original); await testStore.dispatch('updateShowDlnaCastButton', original); await testStore.dispatch('hideSettingsWindow')", arguments: ["original": original], in: nil, contentWorld: .page)
     }
 
     func testExternalMediaOutlivesSabrResourceTimeout() async throws {

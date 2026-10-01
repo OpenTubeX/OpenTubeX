@@ -1922,3 +1922,5 @@ Tray:
 Tray Icon:
   Title: "Ikona u sistemskoj traci"
   Follow App Theme: "Prati temu aplikacije"
+Native Permissions:
+  Local Network: "Pronađite uređaje na lokalnoj mreži i emitirajte videozapise na njih te sinkronizirajte postavke i podatke između uređaja."

@@ -54,7 +54,7 @@ import { handleOpenInExternalPlayer } from './externalPlayer'
 import { discoverDlnaDevices, startDlnaCast, stopDlnaCast } from './dlnaCast'
 import { handleTwitchChatReplayPage, handleTwitchSubOnlyVod } from './twitchChat'
 import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
-import { isYtDlpStoryboardUrl, getYtDlpDownloadFile, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpControlDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetSubtitle, handleYtDlpGetPlaybackInfo, handleYtDlpGetHistoryMetadata, handleYtDlpCancelHistoryRepair, handleYtDlpGetRecommendations, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpQueueAction, handleYtDlpRemoveDownload, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
+import { getDlnaFfmpegExecutable, isYtDlpStoryboardUrl, getYtDlpDownloadFile, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpControlDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetSubtitle, handleYtDlpGetPlaybackInfo, handleYtDlpGetHistoryMetadata, handleYtDlpCancelHistoryRepair, handleYtDlpGetRecommendations, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpQueueAction, handleYtDlpRemoveDownload, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
 import { applyYtDlpPlaybackCacheSettings, handleYtDlpPlaybackCacheClear, handleYtDlpPlaybackCacheDelete, handleYtDlpPlaybackCacheGet, handleYtDlpPlaybackCacheSet } from './ytDlpPlaybackCache'
 import { generatePoToken } from './poTokenGenerator'
 import { expandMultipleOnlyPluralMessages, selectPluralForm } from '../renderer/i18n/plurals'
@@ -4568,24 +4568,32 @@ function runApp() {
     if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) {
       return { error: 'Casting requires an active OpenTubeX window' }
     }
-    const mediaUrl = payload?.mediaUrl
-    let headers = {}
-    if (typeof mediaUrl === 'string' && /^https?:\/\//.test(mediaUrl)) {
-      try {
-        const url = new URL(mediaUrl)
-        if (url.hostname.endsWith('.googlevideo.com') && url.pathname === '/videoplayback') {
-          headers = { Referer: 'https://www.youtube.com/', Origin: 'https://www.youtube.com' }
-        }
-        const invidiousAuthorization = invidiousAuthorizations.get(event.sender.id)
-        if (invidiousAuthorization && isInvidiousInstanceUrl(mediaUrl, invidiousAuthorization.url)) {
-          headers.Authorization = invidiousAuthorization.authorization
-        }
-        Object.assign(headers, getYtDlpExternalStreamHeaders(event.sender, mediaUrl))
-        const cookies = getYtDlpExternalStreamCookieHeader(event.sender, mediaUrl)
-        if (cookies !== null) headers.Cookie = cookies
-      } catch { /* startDlnaCast reports an invalid URL. */ }
+    const sourceHeaders = mediaUrl => {
+      let headers = {}
+      if (typeof mediaUrl === 'string' && /^https?:\/\//.test(mediaUrl)) {
+        try {
+          const url = new URL(mediaUrl)
+          if (url.hostname.endsWith('.googlevideo.com') && url.pathname === '/videoplayback') {
+            headers = { Referer: 'https://www.youtube.com/', Origin: 'https://www.youtube.com' }
+          }
+          const invidiousAuthorization = invidiousAuthorizations.get(event.sender.id)
+          if (invidiousAuthorization && isInvidiousInstanceUrl(mediaUrl, invidiousAuthorization.url)) {
+            headers.Authorization = invidiousAuthorization.authorization
+          }
+          Object.assign(headers, getYtDlpExternalStreamHeaders(event.sender, mediaUrl))
+          const cookies = getYtDlpExternalStreamCookieHeader(event.sender, mediaUrl)
+          if (cookies !== null) headers.Cookie = cookies
+        } catch { /* startDlnaCast reports an invalid URL. */ }
+      }
+      return headers
     }
-    const result = await startDlnaCast(event.sender.id, payload, headers)
+    let muxOptions = {}
+    if (payload?.audioUrl !== undefined) {
+      try {
+        muxOptions = { ffmpegPath: await getDlnaFfmpegExecutable(), audioHeaders: sourceHeaders(payload.audioUrl) }
+      } catch (error) { return { error: error.message, muxUnavailable: true } }
+    }
+    const result = await startDlnaCast(event.sender.id, payload, sourceHeaders(payload?.mediaUrl), muxOptions)
     if (result.castId) {
       if (event.sender.isDestroyed()) {
         stopDlnaCast(event.sender.id).catch(console.error)

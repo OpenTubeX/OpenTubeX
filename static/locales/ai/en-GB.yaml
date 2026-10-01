@@ -1882,3 +1882,5 @@ Tray:
 Tray Icon:
   Title: "Tray icon"
   Follow App Theme: "Follow app theme"
+Native Permissions:
+  Local Network: "Discover and cast videos to devices on your local network, and sync settings and data across devices."

@@ -1944,3 +1944,5 @@ Tray:
 Tray Icon:
   Title: "Ilmoitusalueen kuvake"
   Follow App Theme: "Seuraa sovelluksen teemaa"
+Native Permissions:
+  Local Network: "Etsi lähiverkon laitteita ja suoratoista niihin videoita sekä synkronoi asetukset ja tiedot laitteiden välillä."

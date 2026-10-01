@@ -81,6 +81,19 @@ final class YtDlpRuntime {
         return builder;
     }
 
+    static Process startDlnaFfmpeg(Context context, List<String> args) throws Exception {
+        initialize(context);
+        List<String> command = new java.util.ArrayList<>();
+        command.add(new File(context.getApplicationInfo().nativeLibraryDir, "libffmpeg.so").getAbsolutePath());
+        command.addAll(args);
+        ProcessBuilder builder = command(context, command);
+        // The inputs are private local relays; their native HTTP clients handle proxying.
+        builder.environment().put("no_proxy", "127.0.0.1");
+        builder.environment().put("NO_PROXY", "127.0.0.1");
+        builder.redirectError(new File("/dev/null"));
+        return builder.start();
+    }
+
     static String execute(Context context, List<String> args, String id, Consumer<String> progress) throws Exception {
         return execute(context, args, id, progress, null);
     }

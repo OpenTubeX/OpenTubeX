@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+D1A000000000000000000007 /* post-live-audio.m4a.b64 in Resources */ = {isa = PBXBuildFile; fileRef = D1A000000000000000000008; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		4D22ABE92AF431CB00220026 /* CapApp-SPM in Frameworks */ = {isa = PBXBuildFile; productRef = 4D22ABE82AF431CB00220026 /* CapApp-SPM */; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
@@ -29,6 +30,8 @@ B0C0DE000000000000000014 /* fixture.m4a in Resources */ = {isa = PBXBuildFile; f
 B0C0DE000000000000000016 /* fragmented-duration.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = B0C0DE000000000000000015 /* fragmented-duration.mp4 */; };
 A12790000000000000000022 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A12790000000000000000021; };
 A12790000000000000000032 = {isa = PBXBuildFile; fileRef = A12790000000000000000031; };
+D1A000000000000000000005 /* DlnaMux.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A000000000000000000006; };
+D1A000000000000000000001 /* DlnaPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A000000000000000000002; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -44,6 +47,7 @@ A12790000000000000000032 = {isa = PBXBuildFile; fileRef = A127900000000000000000
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+D1A000000000000000000008 /* post-live-audio.m4a.b64 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "../../e2e/fixtures/media/post-live-audio.m4a.b64"; sourceTree = SOURCE_ROOT; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
 		504EC3041FED79650016851F /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -67,6 +71,9 @@ B0C0DE000000000000000013 /* fixture.m4a */ = {isa = PBXFileReference; lastKnownF
 B0C0DE000000000000000015 /* fragmented-duration.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "fragmented-duration.mp4"; sourceTree = "<group>"; };
 A12790000000000000000003 /* AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = AppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 A12790000000000000000021 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+D1A000000000000000000006 /* DlnaMux.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DlnaMux.swift; sourceTree = "<group>"; };
+D1A000000000000000000002 /* DlnaPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DlnaPlugin.swift; sourceTree = "<group>"; };
+D1A000000000000000000003 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,6 +122,9 @@ A12790000000000000000008 = {isa = PBXFrameworksBuildPhase; buildActionMask = 214
 				ADD1B05EA5E47CC37630C757 /* OpenTubeXViewController.swift */,
 				50379B222058CBB4000EE86E /* capacitor.config.json */,
 				504EC3071FED79650016851F /* AppDelegate.swift */,
+D1A000000000000000000002 /* DlnaPlugin.swift */,
+D1A000000000000000000006 /* DlnaMux.swift */,
+D1A000000000000000000003 /* App.entitlements */,
 				504EC30E1FED79650016851F /* Assets.xcassets */,
 				504EC3101FED79650016851F /* LaunchScreen.storyboard */,
 				504EC3131FED79650016851F /* Info.plist */,
@@ -126,7 +136,7 @@ A12790000000000000000021,
 			path = App;
 			sourceTree = "<group>";
 		};
-A12790000000000000000004 /* AppTests */ = {isa = PBXGroup; children = (A12790000000000000000002, B0C0DE000000000000000011 /* fixture.mp4 */, B0C0DE000000000000000013 /* fixture.m4a */, B0C0DE000000000000000015 /* fragmented-duration.mp4 */,); path = AppTests; sourceTree = "<group>"; };
+A12790000000000000000004 /* AppTests */ = {isa = PBXGroup; children = (D1A000000000000000000008, A12790000000000000000002, B0C0DE000000000000000011 /* fixture.mp4 */, B0C0DE000000000000000013 /* fixture.m4a */, B0C0DE000000000000000015 /* fragmented-duration.mp4 */,); path = AppTests; sourceTree = "<group>"; };
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -251,7 +261,7 @@ A12790000000000000000031 = {isa = PBXVariantGroup; children = (A1279100000000000
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-B0C0DE000000000000000012 /* Test Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (B0C0DE000000000000000010 /* fixture.mp4 in Resources */, B0C0DE000000000000000014 /* fixture.m4a in Resources */, B0C0DE000000000000000016 /* fragmented-duration.mp4 in Resources */,); runOnlyForDeploymentPostprocessing = 0; };
+B0C0DE000000000000000012 /* Test Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (D1A000000000000000000007,B0C0DE000000000000000010 /* fixture.mp4 in Resources */, B0C0DE000000000000000014 /* fixture.m4a in Resources */, B0C0DE000000000000000016 /* fragmented-duration.mp4 in Resources */,); runOnlyForDeploymentPostprocessing = 0; };
 		504EC3021FED79650016851F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -289,6 +299,8 @@ A12790000000000000000022,
 			buildActionMask = 2147483647;
 			files = (
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
+D1A000000000000000000001 /* DlnaPlugin.swift in Sources */,
+D1A000000000000000000005 /* DlnaMux.swift in Sources */,
 				9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */,
 				5B13C50093778C69ADEF041E /* IOSStoragePlugin.swift in Sources */,
 				B0C0DE000000000000000001 /* IOSYtDlpPlugin.swift in Sources */,
@@ -429,6 +441,7 @@ A12790000000000000000007 = {isa = PBXSourcesBuildPhase; buildActionMask = 214748
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.4;
@@ -452,6 +465,7 @@ A12790000000000000000007 = {isa = PBXSourcesBuildPhase; buildActionMask = 214748
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_ENTITLEMENTS = App/App.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.4;

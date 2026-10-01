@@ -15,10 +15,10 @@ for (const [index, locale] of locales.entries()) {
   let ai = {}
   try { ai = load(read(`static/locales/ai/${locale}.yaml`)) ?? {} } catch (error) { if (error.code !== 'ENOENT') throw error }
   const permissions = [
-    ['NSCameraUsageDescription', 'Sync Settings', 'Pairing Scan Hint'],
-    ['NSLocalNetworkUsageDescription', 'Categories', 'Sync Description']
-  ].map(([permission, group, key]) => {
-    const message = human?.Settings?.[group]?.[key] || ai?.Settings?.[group]?.[key]
+    ['NSCameraUsageDescription', 'Settings', 'Sync Settings', 'Pairing Scan Hint'],
+    ['NSLocalNetworkUsageDescription', 'Native Permissions', 'Local Network']
+  ].map(([permission, ...path]) => {
+    const message = path.reduce((value, key) => value?.[key], human) || path.reduce((value, key) => value?.[key], ai)
     if (!message) throw new Error(`Missing ${permission} translation: ${locale}`)
     return `"${permission}" = ${JSON.stringify(message)};`
   })

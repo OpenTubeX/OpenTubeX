@@ -3097,3 +3097,5 @@ Tray Icon:
   Follow App Theme: "App-Design folgen"
 SponsorBlock Disabled on Channel: SponsorBlock auf {channel} deaktiviert
 SponsorBlock Enabled on Channel: SponsorBlock auf {channel} aktiviert
+Native Permissions:
+  Local Network: "Geräte im lokalen Netzwerk finden, Videos auf diese Geräte übertragen und Einstellungen und Daten geräteübergreifend synchronisieren."

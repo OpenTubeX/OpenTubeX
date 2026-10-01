@@ -1895,3 +1895,5 @@ Tray:
 Tray Icon:
   Title: "Icona nell’area di notifica"
   Follow App Theme: "Segui il tema dell’app"
+Native Permissions:
+  Local Network: "Rilevare i dispositivi sulla rete locale e trasmettere video a essi, e sincronizzare impostazioni e dati tra dispositivi."

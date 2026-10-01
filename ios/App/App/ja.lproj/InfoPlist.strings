@@ -1,2 +1,2 @@
 "NSCameraUsageDescription" = "追加するデバイスに表示されたペアリングコードをスキャンしてください。";
-"NSLocalNetworkUsageDescription" = "デバイス間で設定とデータを同期";
+"NSLocalNetworkUsageDescription" = "ローカルネットワーク上のデバイスを検出して動画をキャストし、デバイス間で設定とデータを同期します。";

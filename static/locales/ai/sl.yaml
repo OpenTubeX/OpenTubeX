@@ -2492,3 +2492,5 @@ Tray:
 Tray Icon:
   Title: "Ikona v sistemski vrstici"
   Follow App Theme: "Sledi temi aplikacije"
+Native Permissions:
+  Local Network: "Poiščite naprave v lokalnem omrežju in vanje predvajajte videoposnetke ter sinhronizirajte nastavitve in podatke med napravami."

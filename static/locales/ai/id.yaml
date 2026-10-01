@@ -1906,3 +1906,5 @@ Tray:
 Tray Icon:
   Title: "Ikon baki sistem"
   Follow App Theme: "Ikuti tema aplikasi"
+Native Permissions:
+  Local Network: "Temukan perangkat di jaringan lokal Anda dan transmisikan video ke perangkat tersebut, serta sinkronkan pengaturan dan data antarperangkat."

@@ -1934,3 +1934,5 @@ Tray:
 Tray Icon:
   Title: "Biểu tượng khay hệ thống"
   Follow App Theme: "Theo chủ đề ứng dụng"
+Native Permissions:
+  Local Network: "Tìm thiết bị trên mạng cục bộ và truyền video đến chúng, đồng bộ hóa cài đặt và dữ liệu giữa các thiết bị."

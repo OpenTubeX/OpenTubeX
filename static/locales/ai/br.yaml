@@ -1904,3 +1904,5 @@ Tray:
 Tray Icon:
   Title: "Arlun ar maez reizhiad"
   Follow App Theme: "Heuliañ neuz an arload"
+Native Permissions:
+  Local Network: "Kavout trevnadoù war ho rouedad lec'hel ha skignañ videoioù warno, ha goubredañ an arventennoù hag ar roadennoù etre trevnadoù."

@@ -222,6 +222,7 @@ export default defineComponent({
     return {
       t,
       isElectron: process.env.IS_ELECTRON,
+      isCapacitor: process.env.IS_CAPACITOR,
       phoneLayout: usePhoneLayout(),
       portraitLayout: usePhoneLayout('(orientation: portrait)'),
       currentLocale: locale,

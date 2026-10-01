@@ -1905,3 +1905,5 @@ Tray:
 Tray Icon:
   Title: "Sistem treyi nişanı"
   Follow App Theme: "Tətbiqin mövzusunu izlə"
+Native Permissions:
+  Local Network: "Yerli şəbəkənizdə cihazları tapın və videoları onlara yayımlayın, cihazlar arasında parametrləri və məlumatları sinxronlaşdırın."

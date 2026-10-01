@@ -632,6 +632,13 @@ async function resolveExecutable(sourceSettingId, pathSettingId, binaryName, sou
   return { source, executable: customPath === '' ? binaryName : customPath }
 }
 
+/** Reuse the configured FFmpeg installation for streaming DLNA remuxing. */
+export async function getDlnaFfmpegExecutable() {
+  const { executable } = await resolveExecutable('ytDlpFfmpegSource', 'ytDlpFfmpegPath', 'ffmpeg')
+  if (await getFfmpegVersion(executable) === null) throw new Error('FFmpeg is required to cast separate video and audio tracks')
+  return executable
+}
+
 /**
  * FFmpeg and FFprobe share one source setting because yt-dlp accepts a single
  * `--ffmpeg-location`. A custom FFmpeg path therefore also locates FFprobe in
