@@ -1968,3 +1968,5 @@ Storage Startup Error:
   Title: "Impossible de charger les données de l’application"
   Message: "Libérez de l’espace sur l’appareil et réessayez. La synchronisation est suspendue jusqu’au chargement de vos données."
   Retry: "Réessayer"
+Native Permissions:
+  Local Network: "Détecter les appareils sur votre réseau local et y diffuser des vidéos, et synchroniser les paramètres et les données entre appareils."

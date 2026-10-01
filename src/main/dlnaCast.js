@@ -1,9 +1,12 @@
 import { createSocket } from 'node:dgram'
-import { createServer } from 'node:http'
 import { isIP } from 'node:net'
 import { randomBytes } from 'node:crypto'
-import { Readable } from 'node:stream'
-import sax from 'sax'
+import { createMediaServer } from './dlnaMediaServer.js'
+import { createMuxedMediaServer } from './dlnaMux.js'
+import { createAvTransportBody, createDlnaMetadata, formatDlnaTime, parseDlnaDevice, parseSsdpLocation } from '../dlnaProtocol.js'
+
+export { createMediaServer } from './dlnaMediaServer.js'
+export { parseDlnaDevice } from '../dlnaProtocol.js'
 
 const SSDP_ADDRESS = '239.255.255.250'
 const DISCOVERY_TIME_MS = 2500
@@ -14,80 +17,6 @@ const discoveredDevices = new Map()
 /** @type {{ ownerId: number, castId: string, device: object, server: import('node:http').Server } | null} */
 let activeCast = null
 let startingCast = false
-
-function escapeXml(value) {
-  return String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&apos;')
-}
-
-/**
- * @param {string} description
- * @param {string} location
- * @param {string} address
- */
-export function parseDlnaDevice(description, location, address) {
-  const parser = sax.parser(true, { trim: true })
-  const stack = []
-  let name = ''
-  let baseUrl = ''
-  let isRenderer = false
-  let service = null
-  let transport = null
-
-  parser.onopentag = tag => {
-    const element = { name: tag.name.split(':').at(-1), text: '' }
-    stack.push(element)
-    if (element.name === 'service') service = {}
-  }
-  parser.ontext = text => { if (stack.length > 0) stack.at(-1).text += text }
-  parser.oncdata = text => { if (stack.length > 0) stack.at(-1).text += text }
-  parser.onclosetag = () => {
-    const element = stack.pop()
-    if (element.name === 'URLBase' && stack.length === 1 && stack[0].name === 'root') baseUrl = element.text.trim()
-    if (element.name === 'friendlyName' && !name) name = element.text.trim()
-    if (element.name === 'deviceType' && /:device:MediaRenderer:\d+$/.test(element.text.trim())) isRenderer = true
-    if (service && element.name === 'serviceType') service.type = element.text.trim()
-    if (service && element.name === 'controlURL') service.controlUrl = element.text.trim()
-    if (element.name === 'service') {
-      if (service?.type?.startsWith('urn:schemas-upnp-org:service:AVTransport:') && service.controlUrl) {
-        transport = service
-      }
-      service = null
-    }
-  }
-
-  try {
-    parser.write(description).close()
-    if (!isRenderer || !transport || !name) return null
-    const base = new URL(baseUrl || location)
-    if (base.protocol !== 'http:' || (isIP(base.hostname) && base.hostname !== address)) return null
-    const control = new URL(transport.controlUrl, base)
-    if (control.protocol !== 'http:' || (isIP(control.hostname) && control.hostname !== address)) return null
-    control.hostname = address
-    return {
-      id: location,
-      name,
-      address,
-      controlUrl: control.href,
-      serviceType: transport.type
-    }
-  } catch {
-    return null
-  }
-}
-
-function parseSsdpLocation(message, address) {
-  const header = /^location:\s*(\S+)/im.exec(message)
-  if (!header) return null
-  try {
-    const url = new URL(header[1])
-    if (url.protocol !== 'http:' || (isIP(url.hostname) && url.hostname !== address)) return null
-    url.hostname = address
-    return url.href
-  } catch {
-    return null
-  }
-}
 
 export async function discoverDlnaDevices() {
   const locations = new Map()
@@ -138,9 +67,7 @@ export async function discoverDlnaDevices() {
 }
 
 export async function sendAvTransport(device, action, fields) {
-  const argumentsXml = Object.entries(fields)
-    .map(([name, value]) => `<${name}>${escapeXml(value)}</${name}>`).join('')
-  const body = `<?xml version="1.0" encoding="utf-8"?><s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:${action} xmlns:u="${device.serviceType}">${argumentsXml}</u:${action}></s:Body></s:Envelope>`
+  const body = createAvTransportBody(device.serviceType, action, fields)
   const response = await fetch(device.controlUrl, {
     method: 'POST',
     signal: AbortSignal.timeout(5000),
@@ -166,94 +93,42 @@ function chooseLocalAddress(remoteAddress) {
   })
 }
 
-export function createMediaServer(mediaUrl, deviceAddress, token, upstreamHeaders = {}) {
-  return createServer(async (request, response) => {
-    if (
-      request.url !== `/${token}/video.mp4` ||
-      !['GET', 'HEAD'].includes(request.method) ||
-      request.socket.remoteAddress?.replace(/^::ffff:/, '') !== deviceAddress
-    ) {
-      response.writeHead(404).end()
-      return
-    }
-    try {
-      const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), 10_000)
-      const headers = new Headers(upstreamHeaders)
-      if (request.headers.range) headers.set('Range', request.headers.range)
-      let upstream
-      let url = new URL(mediaUrl)
-      try {
-        for (let redirects = 0; ; redirects++) {
-          upstream = await fetch(url, {
-            method: request.method,
-            headers,
-            signal: controller.signal,
-            redirect: 'manual'
-          })
-          const location = upstream.headers.get('location')
-          if (![301, 302, 303, 307, 308].includes(upstream.status) || !location) break
-          if (redirects >= 5) throw new Error('Too many media redirects')
-          const nextUrl = new URL(location, url)
-          if (!['http:', 'https:'].includes(nextUrl.protocol)) throw new Error('Unsupported media redirect')
-          if (nextUrl.origin !== url.origin) {
-            for (const name of ['Authorization', 'Cookie', 'Host', 'Proxy-Authorization']) headers.delete(name)
-          }
-          await upstream.body?.cancel()
-          url = nextUrl
-        }
-      } finally {
-        clearTimeout(timeout)
-      }
-      const responseHeaders = { 'content-type': 'video/mp4', 'transfermode.dlna.org': 'Streaming' }
-      for (const name of ['content-length', 'content-range', 'accept-ranges']) {
-        const value = upstream.headers.get(name)
-        if (value) responseHeaders[name] = value
-      }
-      response.writeHead(upstream.status, responseHeaders)
-      if (request.method === 'HEAD' || !upstream.body) {
-        await upstream.body?.cancel()
-        response.end()
-        return
-      }
-      const stream = Readable.fromWeb(upstream.body)
-      response.on('close', () => stream.destroy())
-      stream.on('error', () => response.destroy()).pipe(response)
-    } catch {
-      if (!response.headersSent) response.writeHead(502).end()
-      else response.destroy()
-    }
-  })
-}
-
-function formatTime(seconds) {
-  const value = Math.floor(Math.max(0, seconds))
-  return [Math.floor(value / 3600), Math.floor(value / 60) % 60, value % 60]
-    .map(part => String(part).padStart(2, '0')).join(':')
-}
-
 /**
  * @param {number} ownerId
- * @param {{ deviceId: string, mediaUrl: string, title: string, startSeconds?: number }} payload
+ * @param {{ deviceId: string, mediaUrl: string, title: string, audioUrl?: string, startSeconds?: number }} payload
  */
-export async function startDlnaCast(ownerId, payload, upstreamHeaders = {}) {
+export async function startDlnaCast(ownerId, payload, upstreamHeaders = {}, muxOptions = {}) {
   const device = discoveredDevices.get(payload?.deviceId)
   let url
   try { url = new URL(payload?.mediaUrl) } catch { return { error: 'Invalid media URL' } }
-  if (!device || !['http:', 'https:'].includes(url.protocol) || !isIP(device.address)) {
+  if (!device || !['http:', 'https:'].includes(url.protocol) || url.username || url.password || !isIP(device.address)) {
     return { error: 'Device or media URL is unavailable' }
   }
   if (typeof payload.title !== 'string' || payload.title.length > 500) {
     return { error: 'Invalid video title' }
   }
+  if (payload.audioUrl !== undefined) {
+    try {
+      const audio = new URL(payload.audioUrl)
+      if (!['http:', 'https:'].includes(audio.protocol) || audio.username || audio.password ||
+          typeof muxOptions.ffmpegPath !== 'string') return { error: 'Invalid audio source or FFmpeg is unavailable' }
+    } catch { return { error: 'Invalid audio source' } }
+  }
   if (activeCast || startingCast) return { error: 'Another window is already casting' }
   startingCast = true
 
   const token = randomBytes(24).toString('hex')
-  const server = createMediaServer(url.href, device.address, token, upstreamHeaders)
+  let server
   let didSetUri = false
   try {
     const localAddress = await chooseLocalAddress(device.address)
+    server = payload.audioUrl
+      ? await createMuxedMediaServer(url.href, payload.audioUrl, device.address, token, {
+          ...muxOptions,
+          videoHeaders: upstreamHeaders,
+          startSeconds: Number.isFinite(payload.startSeconds) ? Math.max(0, payload.startSeconds) : 0
+        })
+      : createMediaServer(url.href, device.address, token, upstreamHeaders)
     await new Promise((resolve, reject) => {
       server.once('error', reject)
       server.listen(0, localAddress, () => {
@@ -262,7 +137,7 @@ export async function startDlnaCast(ownerId, payload, upstreamHeaders = {}) {
       })
     })
     const mediaAddress = `http://${localAddress}:${server.address().port}/${token}/video.mp4`
-    const metadata = `<DIDL-Lite xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/"><item id="0" parentID="-1" restricted="1"><dc:title>${escapeXml(payload.title)}</dc:title><upnp:class>object.item.videoItem</upnp:class><res protocolInfo="http-get:*:video/mp4:DLNA.ORG_OP=01">${escapeXml(mediaAddress)}</res></item></DIDL-Lite>`
+    const metadata = createDlnaMetadata(payload.title, mediaAddress, Boolean(payload.audioUrl))
     await sendAvTransport(device, 'SetAVTransportURI', {
       InstanceID: 0,
       CurrentURI: mediaAddress,
@@ -272,12 +147,12 @@ export async function startDlnaCast(ownerId, payload, upstreamHeaders = {}) {
     await sendAvTransport(device, 'Play', { InstanceID: 0, Speed: 1 })
     const castId = randomBytes(16).toString('hex')
     activeCast = { ownerId, castId, device, server }
-    if (Number.isFinite(payload.startSeconds) && payload.startSeconds > 0) {
+    if (!payload.audioUrl && Number.isFinite(payload.startSeconds) && payload.startSeconds > 0) {
       try {
         await sendAvTransport(device, 'Seek', {
           InstanceID: 0,
           Unit: 'REL_TIME',
-          Target: formatTime(payload.startSeconds)
+          Target: formatDlnaTime(payload.startSeconds)
         })
       } catch { /* Some renderers do not support seeking. */ }
     }
@@ -286,7 +161,10 @@ export async function startDlnaCast(ownerId, payload, upstreamHeaders = {}) {
     if (didSetUri) {
       try { await sendAvTransport(device, 'Stop', { InstanceID: 0 }) } catch { /* Preserve the startup error. */ }
     }
-    if (server.listening) server.close()
+    if (server) {
+      server.closeAllConnections()
+      server.close()
+    }
     return { error: error.message }
   } finally {
     startingCast = false
