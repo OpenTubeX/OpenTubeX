@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { setTimeout as delay } from 'node:timers/promises'
 import { chromium, expect } from '@playwright/test'
+import { DEFAULT_CUSTOM_THEME } from '../../src/customTheme.js'
 
 // Acquire the Android lab device lock and install the current debug APK first.
 const serial = process.argv[2]
@@ -138,6 +139,50 @@ try {
     }
   }
 
+  const originalThemes = await page.evaluate(() => localStorage.getItem('opentubex-custom-theme'))
+  try {
+    for (const selection of ['custom:splash-regression', 'system']) {
+      const theme = { ...DEFAULT_CUSTOM_THEME, id: 'splash-regression', colors: { ...DEFAULT_CUSTOM_THEME.colors, background: '#123456' } }
+      const lightTheme = { ...DEFAULT_CUSTOM_THEME, id: 'splash-regression-light', isDark: false, basedOn: 'light', colors: { ...DEFAULT_CUSTOM_THEME.colors, background: '#fff8ee' } }
+      await page.evaluate(async ({ theme, lightTheme, selection }) => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        localStorage.setItem('opentubex-custom-theme', JSON.stringify([theme, lightTheme]))
+        await store.dispatch('updateCustomThemes', [theme, lightTheme])
+        await store.dispatch('updateSystemLightTheme', `custom:${lightTheme.id}`)
+        await store.dispatch('updateSystemDarkTheme', `custom:${theme.id}`)
+        await store.dispatch('updateBaseTheme', selection)
+      }, { theme, lightTheme, selection })
+      await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('opentubex-startup-appearance')).light.background)).toBe(selection === 'system' ? '#fff8ee' : '#123456')
+      theme.colors.background = '#345678'
+      lightTheme.colors.background = '#faf0dd'
+      await page.evaluate(async themes => {
+        localStorage.setItem('opentubex-custom-theme', JSON.stringify(themes))
+        await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCustomThemes', themes)
+      }, [theme, lightTheme])
+      for (const mode of ['light', 'dark']) {
+        await expect.poll(() => page.evaluate(mode => JSON.parse(localStorage.getItem('opentubex-startup-appearance'))[mode].background, mode)).toBe(selection === 'system' && mode === 'light' ? '#faf0dd' : '#345678')
+      }
+      const inspect = await pauseRenderer()
+      try {
+        assert.equal(await inspect("getComputedStyle(document.querySelector('.startupCurtain')).backgroundColor"), selection === 'system' ? 'rgb(250, 240, 221)' : 'rgb(52, 86, 120)')
+        await debuggerSession.send('Debugger.resume')
+        await ready()
+      } finally {
+        await debuggerSession.send('Debugger.resume').catch(() => {})
+      }
+    }
+  } finally {
+    await page.evaluate(async original => {
+      if (original === null) localStorage.removeItem('opentubex-custom-theme')
+      else localStorage.setItem('opentubex-custom-theme', original)
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateBaseTheme', 'dark')
+      await store.dispatch('updateSystemLightTheme', 'light')
+      await store.dispatch('updateSystemDarkTheme', 'dark')
+      await store.dispatch('updateCustomThemes', original === null ? [] : JSON.parse(original))
+    }, originalThemes)
+  }
+
   if (await page.locator('.tutorialOverlay').isVisible()) {
     await page.locator('.tutorialActions button').first().click()
     await expect(page.locator('.tutorialOverlay')).toHaveCount(0)
@@ -166,7 +211,7 @@ try {
   } finally {
     await debuggerSession.send('Debugger.resume').catch(() => {})
   }
-  console.log('PASS: Android early splash, saved light/dark appearance, ready tab reveal, reduced motion, and hide setting')
+  console.log('PASS: Android early splash, saved light/dark appearance, custom theme edits, ready tab reveal, reduced motion, and hide setting')
 } finally {
   if (browser) await browser.close()
   if (port) adb('forward', '--remove', `tcp:${port}`)

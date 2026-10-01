@@ -2994,6 +2994,7 @@ const mainColor = computed(() => store.getters.getMainColor)
 
 watch(mainColor, updateTheme)
 watch(() => store.getters.getHideStartupSplash, cacheCapacitorStartupAppearance)
+watch(() => store.getters.getCustomThemes, cacheCapacitorStartupAppearance)
 
 /** @type {import('vue').ComputedRef<string>} */
 const secColor = computed(() => store.getters.getSecColor)

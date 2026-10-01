@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import vm from 'node:vm'
+import { computed, effectScope, nextTick, reactive, ref, watch } from 'vue'
 import { cacheStartupAppearance, curtainExtent, STARTUP_REVEAL_DURATION_MS } from '../../src/renderer/helpers/startupSplash.js'
 import { getThemeBackground } from '../../src/renderer/helpers/customTheme.js'
 import { androidDynamicColors } from '../../src/renderer/helpers/dynamicColors.js'
@@ -168,6 +169,38 @@ test('mobile appearance cache preserves colors and the visibility preference', (
   } finally {
     if (original) Object.defineProperty(globalThis, 'localStorage', original)
     else delete globalThis.localStorage
+  }
+})
+
+test('saving edits to selected custom themes refreshes both mobile splash appearances', async t => {
+  const source = await readFile(new URL('../../src/renderer/App.vue', import.meta.url), 'utf8')
+  const watchers = source.slice(source.indexOf('watch(baseTheme, updateTheme)'), source.indexOf('const secColor ='))
+  const cache = source.slice(source.indexOf('function cacheCapacitorStartupAppearance()'), source.indexOf('function updateSystemBarsStyle()'))
+  for (const selection of ['custom:paper', 'system']) {
+    const getters = reactive({
+      getBaseTheme: selection, getSystemLightTheme: 'custom:paper', getSystemDarkTheme: 'custom:ink',
+      getMainColor: 'Red', getHideStartupSplash: false,
+      getCustomThemes: [{ id: 'paper', colors: { background: '#fff8ee' } }, { id: 'ink', colors: { background: '#102030' } }]
+    })
+    let saved
+    const scope = effectScope()
+    t.after(() => scope.stop())
+    scope.run(() => vm.runInNewContext(`${cache}\n${watchers}\ncacheCapacitorStartupAppearance()`, {
+      isCapacitor: true, appearanceSettingsReady: true,
+      store: { getters }, baseTheme: computed(() => getters.getBaseTheme),
+      appFont: ref('default'), updateAppFont: () => {},
+      computed, watch, getThemeBackground, calculateColorLuminance: () => '#000000',
+      cacheStartupAppearance: appearance => { saved = appearance },
+      updateTheme: () => {}
+    }))
+    assert.equal(saved.light.background, '#fff8ee')
+    getters.getCustomThemes = [
+      { id: 'paper', colors: { background: '#faf0dd' } },
+      { id: 'ink', colors: { background: '#203040' } }
+    ]
+    await nextTick()
+    assert.equal(saved.light.background, '#faf0dd', 'Editing a theme keeps its ID but refreshes the cached colors')
+    assert.equal(saved.dark.background, selection === 'system' ? '#203040' : '#faf0dd')
   }
 })
 
