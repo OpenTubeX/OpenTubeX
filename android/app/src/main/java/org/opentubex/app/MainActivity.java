@@ -41,7 +41,6 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        StartupBackground.apply(getWindow(), StartupBackground.getColor(this));
         registerPlugin(AndroidProxyPlugin.class);
         registerPlugin(PoTokenPlugin.class);
         registerPlugin(YtDlpPlugin.class);
@@ -57,6 +56,8 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(SabrHttpPlugin.class);
         registerPlugin(VoiceOverHttpPlugin.class);
         super.onCreate(savedInstanceState);
+        // Capacitor must select its no-title theme before the decor is created.
+        StartupBackground.apply(getWindow(), StartupBackground.getColor(this));
         // Keep swiped bars visible so a second swipe can open notifications.
         // The player hides the status bar again with its controls.
         androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView())

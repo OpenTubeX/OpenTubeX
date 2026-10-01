@@ -23,6 +23,29 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class StartupBackgroundTest {
     @Test
+    public void launchDoesNotAddANativeActivityTitle() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            AtomicReference<WebView> reference = new AtomicReference<>();
+            AtomicReference<String> title = new AtomicReference<>();
+            scenario.onActivity(activity -> {
+                reference.set(activity.getBridge().getWebView());
+                title.set(activity.getTitle().toString());
+            });
+            awaitReady(reference.get());
+            var automation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
+            var root = automation.getRootInActiveWindow();
+            long deadline = android.os.SystemClock.uptimeMillis() + 5000;
+            while (root == null && android.os.SystemClock.uptimeMillis() < deadline) {
+                Thread.sleep(50);
+                root = automation.getRootInActiveWindow();
+            }
+            assertTrue("The activity is visible", root != null);
+            assertTrue("The app must not show a native activity title above its interface",
+                root.findAccessibilityNodeInfosByText(title.get()).isEmpty());
+        }
+    }
+
+    @Test
     public void launchWithoutSplashKeepsTheSelectedBackgroundBeforeRendererLoads() throws Exception {
         for (String[] appearance : new String[][] {
             {"dark", "#0f0f0f"}, {"light", "#f1f1f1"},

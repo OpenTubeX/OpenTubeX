@@ -16,10 +16,13 @@ let port
 let originalSettings
 
 async function disconnect() {
-  if (browser) await browser.close()
-  browser = undefined
-  if (port) adb('forward', '--remove', `tcp:${port}`)
-  port = undefined
+  try {
+    if (browser) await browser.close()
+  } finally {
+    browser = undefined
+    if (port) adb('forward', '--remove', `tcp:${port}`)
+    port = undefined
+  }
 }
 
 async function connect() {
@@ -110,7 +113,10 @@ try {
     console.log(`PASS: ${appearance.theme} with OS night=${appearance.night}: ${samples} native frames, no opposite-theme flash`)
   }
 } finally {
-  adb('shell', 'cmd', 'uimode', 'night', originalNight)
-  if (originalSettings) await settings(await connect(), originalSettings)
-  await disconnect()
+  try {
+    adb('shell', 'cmd', 'uimode', 'night', originalNight)
+    if (originalSettings) await settings(await connect(), originalSettings)
+  } finally {
+    await disconnect()
+  }
 }
