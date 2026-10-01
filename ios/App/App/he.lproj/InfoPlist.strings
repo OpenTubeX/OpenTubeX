@@ -1,2 +1,2 @@
 "NSCameraUsageDescription" = "סרקו את קוד הצימוד שמוצג במכשיר שאתם מוסיפים.";
-"NSLocalNetworkUsageDescription" = "סנכרון ההגדרות והנתונים בין מכשירים";
+"NSLocalNetworkUsageDescription" = "איתור מכשירים ברשת המקומית והעברת סרטונים אליהם, וסנכרון הגדרות ונתונים בין מכשירים.";

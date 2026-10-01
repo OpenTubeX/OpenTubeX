@@ -1,2 +1,2 @@
 "NSCameraUsageDescription" = "Olvassa be a hozzáadni kívánt eszközön megjelenő párosítási kódot.";
-"NSLocalNetworkUsageDescription" = "A beállítások és adatok szinkronizálása az eszközök között";
+"NSLocalNetworkUsageDescription" = "Eszközök keresése a helyi hálózaton és videók átküldése rájuk, valamint a beállítások és adatok szinkronizálása az eszközök között.";

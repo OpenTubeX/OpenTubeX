@@ -1978,3 +1978,5 @@ Storage Startup Error:
   Title: "無法載入應用程式資料"
   Message: "請釋放裝置儲存空間後重試。在資料載入完成前，同步將暫停。"
   Retry: "重試"
+Native Permissions:
+  Local Network: "尋找區域網路中的裝置並向其投放影片，同時在裝置之間同步設定和資料。"
