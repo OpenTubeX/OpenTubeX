@@ -79,6 +79,85 @@ test('external media honors the hide sidebar on watch pages setting', async ({ a
   await expect(page.locator('.app')).not.toHaveClass(/watchSideNavOverlay/)
 })
 
+test('external ambient mode stays behind metadata and chat like the watch page', async ({ app, page, attachScreenshot }) => {
+  test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+  await setWindowSize(app, page, { width: 1800, height: 1000 })
+  const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+  await prepareTwitchYtDlp(app, page, mediaUrl, false, 'A Twitch broadcast description', [
+    { start_time: 0, end_time: 30, title: 'First chapter' }
+  ])
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAmbientMode', true))
+  await page.locator(sel.searchInput).fill(mediaUrl)
+  await page.locator(sel.searchInput).press('Enter')
+  const video = await waitForPlayback(page)
+  await video.evaluate(element => element.pause())
+
+  const externalMedia = page.locator(`${activeTab} .externalMedia`)
+  await externalMedia.locator('.shaka-controls-button-panel .ft-chapters-button').click()
+  await expect(externalMedia.locator('.externalMediaChapters')).toBeVisible()
+  const canvas = externalMedia.locator('.ambientLayoutCanvas')
+  await expect(canvas).toBeVisible()
+  await expect.poll(() => canvas.evaluate(element =>
+    element.getContext('2d').getImageData(0, 0, element.width, element.height).data.some(value => value > 0))).toBe(true)
+
+  for (const scale of [1, 1.25]) {
+    await page.evaluate(async value => {
+      window.ftElectron.setZoomFactor(value)
+      await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateBaseTheme', value === 1 ? 'dark' : 'light')
+    }, scale)
+    for (const chatOpen of [true, false]) {
+      const title = externalMedia.locator('.externalMediaDetails .videoTitle')
+      await title.scrollIntoViewIfNeeded()
+      // Include the decorative canvases in hit testing to inspect their actual
+      // paint order relative to the title, without relying on specific z-index values.
+      await expect.poll(() => title.evaluate(element => {
+        const canvases = [...element.closest('.externalMediaLayout').querySelectorAll('.ambientCanvas, .ambientLayoutCanvas')]
+        const bounds = element.getBoundingClientRect()
+        canvases.forEach(canvas => { canvas.style.pointerEvents = 'auto' })
+        try {
+          const layers = document.elementsFromPoint(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
+          const ambientLayers = layers.filter(layer => canvases.includes(layer))
+          return {
+            overlapsGlow: ambientLayers.length > 0,
+            textAboveGlow: ambientLayers.every(layer => layers.indexOf(element) < layers.indexOf(layer))
+          }
+        } finally {
+          canvases.forEach(canvas => { canvas.style.pointerEvents = '' })
+        }
+      }), { timeout: 5000 }).toEqual({ overlapsGlow: true, textAboveGlow: true })
+
+      for (const selector of ['.externalMediaDetails', '.externalMediaChapters', ...(chatOpen ? ['.twitchChat'] : [])]) {
+        await expect.poll(() => externalMedia.locator(selector).evaluate(element => {
+          const probe = document.createElement('div')
+          probe.style.backgroundColor = 'color-mix(in srgb, var(--card-bg-color) 78%, transparent)'
+          element.append(probe)
+          try {
+            return getComputedStyle(element).backgroundColor === getComputedStyle(probe).backgroundColor
+          } finally {
+            probe.remove()
+          }
+        })).toBe(true)
+      }
+      await attachScreenshot(`External ambient mode at ${scale * 100}% with chat ${chatOpen ? 'open' : 'closed'}`)
+      await externalMedia.locator('.externalMediaDetails').getByRole('button', { name: chatOpen ? 'Close Live Chat Replay' : 'Show Live Chat Replay' }).click()
+    }
+  }
+
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAmbientMode', false))
+  await expect(canvas).toBeHidden()
+  await expect(externalMedia.locator('.externalMediaLayout')).not.toHaveClass(/ambientModeActive/)
+  await expect.poll(() => externalMedia.locator('.externalMediaDetails').evaluate(element => {
+    const probe = document.createElement('div')
+    probe.style.backgroundColor = 'var(--card-bg-color)'
+    element.append(probe)
+    try {
+      return getComputedStyle(element).backgroundColor === getComputedStyle(probe).backgroundColor
+    } finally {
+      probe.remove()
+    }
+  })).toBe(true)
+})
+
 test('external media can stop at the end of its current chapter', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const mediaUrl = 'https://www.twitch.tv/videos/123456789'
@@ -1953,6 +2032,7 @@ ${segmentUrl}
   await page.route(segmentUrl, route => route.fulfill({ contentType: 'audio/mp4', body: media }))
   await page.evaluate(async ytDlpPath => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateAmbientMode', true)
     await store.dispatch('updateYtDlpSource', 'system')
     await store.dispatch('updateYtDlpPath', ytDlpPath)
   }, executable)
@@ -1967,6 +2047,8 @@ ${segmentUrl}
       ? 'playing'
       : 'pending'
   }, { timeout: 20000 }).toBe('playing')
+  await expect(page.locator(`${activeTab} .externalMediaLayout`)).not.toHaveClass(/ambientModeActive/)
+  await expect(page.locator(`${activeTab} .ambientLayoutCanvas`)).toBeHidden()
 })
 
 test('plays both streams when an external clip has separate audio and codec-free video', async ({ app, page }) => {
