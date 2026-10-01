@@ -90,6 +90,16 @@ for (const classic of [false, true]) {
         assert.equal(landscape.captions, true, JSON.stringify(landscape))
         assert.ok(landscape.spacerWidth < 1, JSON.stringify(landscape))
         assert.ok(Math.abs(landscape.trailingSpace) < 1, JSON.stringify(landscape))
+        const player = frame.locator('.ftVideoPlayer')
+        await player.evaluate(element => element.classList.add('shortsPlayer'))
+        const shorts = await frame.locator('.ft-quick-playback-rate-bar').evaluate(element => ({
+          bar: element.getBoundingClientRect().width,
+          panel: element.parentElement.getBoundingClientRect().width,
+          grow: getComputedStyle(element).flexGrow,
+        }))
+        assert.equal(shorts.grow, '0', JSON.stringify(shorts))
+        assert.ok(shorts.bar < shorts.panel / 2, JSON.stringify(shorts))
+        await player.evaluate(element => element.classList.remove('shortsPlayer'))
         await handle.evaluate(frame => { frame.style.width = '360px' })
         const restored = await layout()
         assert.equal(restored.pip, false, JSON.stringify(restored))

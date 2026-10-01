@@ -4063,13 +4063,14 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 /* stylelint-disable-next-line selector-max-compound-selectors */
-:global(.capacitorTabs .shaka-controls-button-panel:has(> .ft-quick-playback-rate-bar) > .shaka-spacer) {
+:global(.capacitorTabs .ftVideoPlayer:not(.shortsPlayer) .shaka-controls-button-panel:has(> .ft-quick-playback-rate-bar) > .shaka-spacer) {
   flex: 0 0 0;
   min-inline-size: 0;
   padding: 0;
 }
 
-:global(.capacitorTabs .shaka-controls-button-panel > .ft-quick-playback-rate-bar) {
+/* stylelint-disable-next-line selector-max-compound-selectors */
+:global(.capacitorTabs .ftVideoPlayer:not(.shortsPlayer) .shaka-controls-button-panel > .ft-quick-playback-rate-bar) {
   flex-grow: 1;
   max-width: none;
 }
