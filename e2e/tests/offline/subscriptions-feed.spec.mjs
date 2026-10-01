@@ -235,11 +235,11 @@ test.describe('subscriptions feed from cache', () => {
       ))
       store.commit('updateVideoCacheByChannel', { channelId, entries })
     }, { channelId: CHANNEL_A, start: now + 1000 })
-    await page.clock.install({ time: now })
+    await page.clock.setFixedTime(now)
     await goTo(page, 'subscriptions')
     await expect(page.getByText('Upcoming premiere video')).toHaveCount(0)
 
-    await page.clock.fastForward(1100)
+    await page.clock.setFixedTime(now + 1100)
     await expect(page.getByText('Upcoming premiere video')).toBeVisible()
 
     await goTo(page, 'userplaylists')
