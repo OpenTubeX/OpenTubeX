@@ -176,6 +176,16 @@ test.describe('OpenTubeX sync server', () => {
         ])
       )
       expect(encryptedCollectionNames).not.toContain('playbackSpeeds')
+      const retiredSpeedsResponse = await fetch(`${syncServerUrl}/v1/encrypted_sync/playbackSpeeds`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({ revision: 0, payload: 'retired-speeds-ciphertext' })
+      })
+      expect(retiredSpeedsResponse.status).toBe(405)
+      const retiredSpeedsRead = await fetch(`${syncServerUrl}/v1/encrypted_sync/playbackSpeeds`, { headers })
+      expect(await retiredSpeedsRead.json()).toEqual({
+        collection: 'playbackSpeeds', revision: 0, payload: null
+      })
       for (const { collection, revision } of encryptedManifest.collections) {
         expect(revision).toBeGreaterThan(0)
         const collectionResponse = await fetch(

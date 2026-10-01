@@ -537,17 +537,6 @@ export class SyncServerClient {
       throw error
     }
   }
-
-  putChannelPlaybackSpeed(speed) {
-    return this.apiRequest('/channel_playback_speeds/', { method: 'PUT', body: speed })
-  }
-
-  deleteChannelPlaybackSpeed(channelId) {
-    return this.apiRequest(
-      `/channel_playback_speeds/${encodeURIComponent(channelId)}`,
-      { method: 'DELETE' }
-    )
-  }
 }
 
 function mapBy(items, getId) {

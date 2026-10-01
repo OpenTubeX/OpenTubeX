@@ -371,16 +371,6 @@ export class EncryptedSyncAdapter {
 
   async getChannelPlaybackSpeeds() { return structuredClone(this.document.playbackSpeeds) }
 
-  async putChannelPlaybackSpeed(speed) {
-    await this.deleteChannelPlaybackSpeed(speed.channel_id)
-    this.document.playbackSpeeds.push(structuredClone(speed))
-  }
-
-  async deleteChannelPlaybackSpeed(id) {
-    this.document.playbackSpeeds = this.document.playbackSpeeds
-      .filter(entry => entry.channel_id !== id)
-  }
-
   async getSubscriptionGroups() { return structuredClone(this.document.profiles) }
 
   async createSubscriptionGroup(group) {
