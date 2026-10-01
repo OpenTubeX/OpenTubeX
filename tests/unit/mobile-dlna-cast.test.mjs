@@ -14,6 +14,7 @@ const payload = { deviceId: location, mediaUrl: 'https://media.example/video.mp4
 function fixture() {
   const calls = []
   let failure
+  let streamFailed = false
   let finishStop
   const native = {
     async discover() {
@@ -33,11 +34,13 @@ function fixture() {
       calls.push({ start: options })
       return { castId: 'cast-1', mediaUrl: 'http://192.168.1.2:1234/token/video.mp4' }
     },
+    async hasFailed() { return { failed: streamFailed } },
     async stopMediaServer(options) { calls.push({ stop: options }) }
   }
   return {
     cast: createMobileDlnaCast(native), calls, native,
     fail(action) { failure = action },
+    failStream() { streamFailed = true },
     delayStop(promise) { finishStop = promise }
   }
 }
@@ -135,4 +138,19 @@ test('merged casting passes both tracks and start time to native without sending
   assert.match(calls[2].body, /DLNA.ORG_OP=00/)
   await cast.stop('cast-1')
   assert.ok((await cast.start({ ...payload, audioUrl: 'file:///private/audio' })).error)
+})
+
+
+test('a failed merged relay can recover through the complete source without another user gesture', async () => {
+  const setup = fixture()
+  await setup.cast.discover()
+  await setup.cast.start({ ...payload, audioUrl: 'https://media.example/audio.m4a' })
+  assert.equal(await setup.cast.hasFailed('cast-1'), false)
+  assert.ok((await setup.cast.recover('cast-1', payload)).error)
+  setup.failStream()
+  assert.ok((await setup.cast.recover('wrong-cast', payload)).error)
+  assert.ok((await setup.cast.recover('cast-1', { ...payload, audioUrl: 'https://media.example/audio.m4a' })).error)
+  assert.ok((await setup.cast.recover('cast-1', payload)).castId)
+  assert.deepEqual(actions(setup.calls), ['SetAVTransportURI', 'Play', 'Stop', 'SetAVTransportURI', 'Play', 'Seek'])
+  assert.deepEqual(setup.calls.filter(call => call.start).at(-1).start, { mediaUrl: payload.mediaUrl, address: '192.168.1.7' })
 })

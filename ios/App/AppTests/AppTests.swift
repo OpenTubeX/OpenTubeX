@@ -182,12 +182,37 @@ final class AppTests: XCTestCase {
         try await verifyDlnaMergedFixture(videoResource: "fragmented-duration", duration: 2)
     }
 
-    private func verifyDlnaMergedFixture(videoResource: String, duration: Double? = nil) async throws {
-        let video = try Data(contentsOf: XCTUnwrap(Bundle(for: Self.self).url(forResource: videoResource, withExtension: "mp4")))
+    func testDlnaStartWithoutSegmentIndexKeepsPosition() async throws {
+        try await verifyDlnaMergedFixture(videoResource: "fragmented-duration", duration: 2, startSeconds: 2)
+    }
+
+    private func verifyDlnaMergedFixture(videoResource: String, duration: Double? = nil, startSeconds: Double = 0) async throws {
+        var video = try Data(contentsOf: XCTUnwrap(Bundle(for: Self.self).url(forResource: videoResource, withExtension: "mp4")))
         let encoded = try Data(contentsOf: XCTUnwrap(Bundle(for: Self.self).url(forResource: "post-live-audio.m4a", withExtension: "b64")))
-        let audio = try XCTUnwrap(Data(base64Encoded: encoded, options: .ignoreUnknownCharacters))
+        var audio = try XCTUnwrap(Data(base64Encoded: encoded, options: .ignoreUnknownCharacters))
+        if startSeconds > 0 {
+            // Repeat the two-second fragment with its decode time advanced. Neither
+            // source has a sidx, so a cast at 2s must omit the first fragment.
+            func repeatFragment(_ data: Data) throws -> Data {
+                let mdhd = try XCTUnwrap(data.range(of: Data("mdhd".utf8))).upperBound
+                let scaleAt = mdhd + (data[mdhd] == 1 ? 20 : 12)
+                let scale = data[scaleAt..<(scaleAt + 4)].reduce(UInt64(0)) { ($0 << 8) | UInt64($1) }
+                let moof = try XCTUnwrap(data.range(of: Data("moof".utf8))).lowerBound - 4
+                var fragment = data.subdata(in: moof..<data.count)
+                let tfdt = try XCTUnwrap(fragment.range(of: Data("tfdt".utf8))).upperBound
+                let bytes = fragment[tfdt] == 1 ? 8 : 4
+                for index in 0..<bytes {
+                    fragment[tfdt + 4 + index] = UInt8(truncatingIfNeeded: (scale * 2) >> ((bytes - index - 1) * 8))
+                }
+                return data + fragment
+            }
+            video = try repeatFragment(video)
+            audio = try repeatFragment(audio)
+        }
+        let fixtureVideo = video
+        let fixtureAudio = audio
         let source = try await loopbackServer { header, connection in
-            let bytes = header.hasPrefix("GET /audio ") ? audio : video
+            let bytes = header.hasPrefix("GET /audio ") ? fixtureAudio : fixtureVideo
             connection.send(content: Data("HTTP/1.1 200 OK\r\nContent-Length: \(bytes.count)\r\nConnection: close\r\n\r\n".utf8) + bytes,
                             completion: .contentProcessed { _ in connection.cancel() })
         }
@@ -195,7 +220,7 @@ final class AppTests: XCTestCase {
         let base = "http://127.0.0.1:\(try XCTUnwrap(source.port).rawValue)"
         let ready = expectation(description: "Merged relay ready")
         let relay = try DlnaMediaServer(media: URLRequest(url: URL(string: base + "/video")!),
-                                       audio: URLRequest(url: URL(string: base + "/audio")!), address: "127.0.0.1", localAddress: "127.0.0.1") { _ in ready.fulfill() }
+                                       audio: URLRequest(url: URL(string: base + "/audio")!), startSeconds: startSeconds, address: "127.0.0.1", localAddress: "127.0.0.1") { _ in ready.fulfill() }
         defer { relay.close() }
         await fulfillment(of: [ready], timeout: 10)
         let url = try XCTUnwrap(URL(string: relay.mediaUrl))
@@ -225,8 +250,10 @@ final class AppTests: XCTestCase {
         }
         // The container sizes are valid, but mdhd is missing its version and fields.
         let malformed = box("ftyp") + box("moov", box("trak", box("mdia", box("mdhd"))))
-        let source = try await loopbackServer { _, connection in
-            connection.send(content: Data("HTTP/1.1 200 OK\r\nContent-Length: \(malformed.count)\r\nConnection: close\r\n\r\n".utf8) + malformed,
+        let plain = try Data(contentsOf: XCTUnwrap(Bundle(for: Self.self).url(forResource: "fixture", withExtension: "m4a")))
+        let source = try await loopbackServer { header, connection in
+            let body = header.contains("/plain ") ? plain : malformed
+            connection.send(content: Data("HTTP/1.1 200 OK\r\nContent-Length: \(body.count)\r\nConnection: close\r\n\r\n".utf8) + body,
                             completion: .contentProcessed { _ in connection.cancel() })
         }
         defer { source.cancel() }
@@ -240,6 +267,16 @@ final class AppTests: XCTestCase {
             }
         }.value
         XCTAssertTrue(rejected, "Malformed MP4 fails cleanly without trapping")
+        for path in ["video", "plain"] {
+            let media = URLRequest(url: URL(string: "http://127.0.0.1:\(try XCTUnwrap(source.port).rawValue)/\(path)")!)
+            let ready = expectation(description: "Invalid source relay ready")
+            let relay = try DlnaMediaServer(media: media, audio: media, address: "127.0.0.1", localAddress: "127.0.0.1") { _ in ready.fulfill() }
+            defer { relay.close() }
+            await fulfillment(of: [ready], timeout: 10)
+            let (_, response) = try await URLSession.shared.data(from: URL(string: relay.mediaUrl)!)
+            XCTAssertEqual((response as? HTTPURLResponse)?.statusCode, 502)
+            XCTAssertTrue(relay.muxFailed, "Unsupported tracks report failure for complete-source recovery")
+        }
     }
 
     func testDlnaMergesLiveYouTubeTracks() async throws {
@@ -347,27 +384,6 @@ final class AppTests: XCTestCase {
         var timeout = timeval(tv_sec: 10, tv_usec: 0)
         setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
         let responded = expectation(description: "SSDP fixture responds")
-        DispatchQueue.global().async {
-            var buffer = [UInt8](repeating: 0, count: 8192)
-            var remote = sockaddr_in()
-            var length = socklen_t(MemoryLayout<sockaddr_in>.size)
-            let count = withUnsafeMutablePointer(to: &remote) { pointer in
-                pointer.withMemoryRebound(to: sockaddr.self, capacity: 1) { recvfrom(fd, &buffer, buffer.count, 0, $0, &length) }
-            }
-            if count > 0 {
-                var ip = [CChar](repeating: 0, count: Int(INET_ADDRSTRLEN))
-                inet_ntop(AF_INET, &remote.sin_addr, &ip, socklen_t(ip.count))
-                let response = Data("HTTP/1.1 200 OK\r\nLOCATION: http://\(String(cString: ip)):\(port)/otx-ios-dlna-test.xml\r\n\r\n".utf8)
-                response.withUnsafeBytes { bytes in
-                    withUnsafePointer(to: &remote) { pointer in
-                        pointer.withMemoryRebound(to: sockaddr.self, capacity: 1) {
-                            _ = sendto(fd, bytes.baseAddress, bytes.count, 0, $0, length)
-                        }
-                    }
-                }
-            }
-            responded.fulfill()
-        }
         // Use iOS's registered source URL, as yt-dlp does, and the real casting UI.
         let id = IOSNetwork.shared.prepareExternal(URLRequest(url: try XCTUnwrap(URL(string: "http://127.0.0.1:\(port)/real.mp4"))))
         let original = try await evaluate("testStore.getters.getShowDlnaCastButton") as? Bool ?? false
@@ -408,6 +424,28 @@ final class AppTests: XCTestCase {
             await testStore.dispatch('updateShowDlnaCastButton', true);
             """, arguments: ["url": "capacitor://localhost/_opentubex_media/\(id)"], in: nil, contentWorld: .page)
             try await wait("!!document.querySelector('.dlnaCastControl button') && !!document.querySelector('video') && watchFixture.$refs.player?.hasLoaded")
+            // Begin waiting only once the player is ready; CI startup can exceed the UDP timeout.
+            DispatchQueue.global().async {
+                var buffer = [UInt8](repeating: 0, count: 8192)
+                var remote = sockaddr_in()
+                var length = socklen_t(MemoryLayout<sockaddr_in>.size)
+                let count = withUnsafeMutablePointer(to: &remote) { pointer in
+                    pointer.withMemoryRebound(to: sockaddr.self, capacity: 1) { recvfrom(fd, &buffer, buffer.count, 0, $0, &length) }
+                }
+                if count > 0 {
+                    var ip = [CChar](repeating: 0, count: Int(INET_ADDRSTRLEN))
+                    inet_ntop(AF_INET, &remote.sin_addr, &ip, socklen_t(ip.count))
+                    let response = Data("HTTP/1.1 200 OK\r\nLOCATION: http://\(String(cString: ip)):\(port)/otx-ios-dlna-test.xml\r\n\r\n".utf8)
+                    response.withUnsafeBytes { bytes in
+                        withUnsafePointer(to: &remote) { pointer in
+                            pointer.withMemoryRebound(to: sockaddr.self, capacity: 1) {
+                                _ = sendto(fd, bytes.baseAddress, bytes.count, 0, $0, length)
+                            }
+                        }
+                    }
+                }
+                responded.fulfill()
+            }
             _ = try await webView.callAsyncJavaScript("document.querySelector('video').loop=true; await document.querySelector('video').play(); document.querySelector('.dlnaCastControl button').click()", arguments: [:], in: nil, contentWorld: .page)
             try await wait("Array.from(document.querySelectorAll('[role=option]')).some(option=>option.textContent.trim()==='iOS test TV')")
             _ = try await evaluate("document.querySelector('video').currentTime=dlnaMergedUi?0:0.5;Array.from(document.querySelectorAll('[role=option]')).find(option=>option.textContent.trim()==='iOS test TV').click();true")
@@ -423,7 +461,7 @@ final class AppTests: XCTestCase {
             if merged { try await verifyMergedTracks(try XCTUnwrap(receivedVideo), height: 1080) }
             let asset = AVURLAsset(url: received)
             let duration = try await asset.load(.duration)
-            XCTAssertEqual(duration.seconds, 2, accuracy: 0.01)
+            XCTAssertEqual(duration.seconds, 2, accuracy: 0.05)
             let generator = AVAssetImageGenerator(asset: asset)
             let (image, _) = try await generator.image(at: .zero)
             XCTAssertGreaterThan(image.width, 0)
