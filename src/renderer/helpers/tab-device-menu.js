@@ -21,13 +21,24 @@ export function getTabDeviceMenuItem(tabs, t) {
       icon: getSyncServerDeviceIcon(device.platform),
       enabled: true,
       async run() {
-        try {
-          for (const video of videos) {
+        const sentTitles = []
+        for (const video of videos) {
+          try {
             await store.dispatch('sendSyncServerVideo', { recipient: device.id, ...video })
+            sentTitles.push(video.title)
+          } catch (error) {
+            showToast({
+              message: videos.length > 1 ? `${video.title}: ${error.message}` : error.message,
+              icon: ['fas', 'circle-exclamation'],
+            })
           }
-          showToast({ message: t('Settings.Sync Settings.Video Sent'), icon: ['fas', 'devices'] })
-        } catch (error) {
-          showToast({ message: error.message, icon: ['fas', 'circle-exclamation'] })
+        }
+        if (sentTitles.length > 0) {
+          const message = t('Settings.Sync Settings.Video Sent')
+          showToast({
+            message: videos.length > 1 ? `${message} (${sentTitles.length}/${videos.length}): ${sentTitles.join(', ')}` : message,
+            icon: ['fas', 'devices'],
+          })
         }
       },
     })),

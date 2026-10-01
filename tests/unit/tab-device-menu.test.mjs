@@ -6,7 +6,7 @@ import vm from 'node:vm'
 const source = (await readFile(new URL('../../src/renderer/helpers/tab-device-menu.js', import.meta.url), 'utf8'))
   .replace(/^import .*\n/gm, '').replace('export function', 'function')
 
-function setup({ enabled = true, live = true, devices = [{ id: 'laptop', name: 'Laptop', platform: 'linux' }], error = null } = {}) {
+function setup({ enabled = true, live = true, devices = [{ id: 'laptop', name: 'Laptop', platform: 'linux' }], error = null, errorVideoId = null } = {}) {
   const calls = []
   const toasts = []
   const context = vm.createContext({
@@ -14,7 +14,7 @@ function setup({ enabled = true, live = true, devices = [{ id: 'laptop', name: '
       getters: { getSyncServerEnabled: enabled, getSyncServerLiveSupported: live, getSyncServerDevices: devices },
       async dispatch(action, request) {
         calls.push({ action, ...request })
-        if (error) throw new Error(error)
+        if (error && (!errorVideoId || request.videoId === errorVideoId)) throw new Error(error)
       },
     },
     formatTabTitle: title => title,
@@ -54,7 +54,7 @@ test('device menu sends every selected video with its title to the chosen device
     { action: 'sendSyncServerVideo', recipient: 'laptop', videoId: 'aqz-KE-bpKQ', title: 'Second video' },
   ])
   assert.equal(toasts.length, 1)
-  assert.equal(toasts[0].message, 'Settings.Sync Settings.Video Sent')
+  assert.ok(toasts[0].message.startsWith('Settings.Sync Settings.Video Sent'))
 })
 
 test('device menu reports a send failure', async () => {
@@ -63,4 +63,21 @@ test('device menu reports a send failure', async () => {
   assert.equal(calls.length, 1)
   assert.equal(toasts[0].message, 'Device unavailable')
   assert.deepEqual([...toasts[0].icon], ['fas', 'circle-exclamation'])
+})
+
+test('a partial bulk send reports which videos succeeded and failed and continues', async () => {
+  const { menu, calls, toasts } = setup({ error: 'Device unavailable', errorVideoId: 'aqz-KE-bpKQ' })
+  const videos = [
+    video,
+    { route: { fullPath: '/watch/aqz-KE-bpKQ' }, title: 'Second video' },
+    { route: { fullPath: '/watch/dQw4w9WgXcQ' }, title: 'Third video' },
+  ]
+  await menu(videos).submenu[0].run()
+  assert.equal(calls.length, 3)
+  assert.equal(toasts.length, 2)
+  assert.equal(toasts[0].message, 'Second video: Device unavailable')
+  assert.ok(toasts[1].message.includes('(2/3)'))
+  assert.ok(toasts[1].message.includes('Video title'))
+  assert.ok(toasts[1].message.includes('Third video'))
+  assert.ok(!toasts[1].message.includes('Second video'))
 })

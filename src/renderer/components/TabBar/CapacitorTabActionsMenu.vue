@@ -275,9 +275,11 @@ async function setMenu(menu) {
   if (!actionList.value) return
   restoreOverlayScrollTop(actionList.value, menu ? 0 : mainScrollTop)
   clampOverlayScrollTop(actionList.value, actionContent.value)
+  const firstAction = actionList.value.querySelector('button:not(:disabled)')
+  const trigger = previousMenu === 'devices' ? deviceMenuTrigger.value : closeMenuTrigger.value
   const target = menu
-    ? actionList.value.querySelector('button:not(:disabled)') ?? submenuBack.value
-    : previousMenu === 'devices' ? deviceMenuTrigger.value : closeMenuTrigger.value
+    ? firstAction ?? submenuBack.value
+    : trigger && !trigger.disabled ? trigger : firstAction
   target?.focus({ preventScroll: true })
 }
 

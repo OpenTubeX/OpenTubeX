@@ -416,3 +416,24 @@ test('closing the bulk action menu restores focus after Escape and while an acti
   assert.equal(context.showActions.value, false)
   assert.deepEqual(focused, ['more', 'controls'])
 })
+
+test('Back restores focus to an enabled action when the device trigger is disabled', async () => {
+  const component = await readFile(new URL('../../src/renderer/components/TabBar/CapacitorTabActionsMenu.vue', import.meta.url), 'utf8')
+  const start = component.indexOf('async function setMenu(')
+  let focused = false
+  const context = vm.createContext({
+    activeMenu: { value: 'devices' },
+    mainScrollTop: 0,
+    actionList: { value: { querySelector: () => ({ focus() { focused = true } }) } },
+    actionContent: { value: {} },
+    deviceMenuTrigger: { value: { disabled: true, focus() {} } },
+    closeMenuTrigger: { value: null },
+    submenuBack: { value: null },
+    nextTick: async () => {},
+    restoreOverlayScrollTop() {},
+    clampOverlayScrollTop() {},
+  })
+  vm.runInContext(component.slice(start, component.indexOf('watch(() => props.tab', start)), context)
+  await context.setMenu(null)
+  assert.equal(focused, true)
+})

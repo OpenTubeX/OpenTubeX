@@ -66,6 +66,18 @@ for (const layout of ['desktop', 'phone']) {
       await page.keyboard.press('Escape')
       await expect(openOnDevice).toBeFocused()
       await openOnDevice.click()
+      await page.evaluate(() => {
+        document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+          .commit('setSyncServerDevices', {})
+      })
+      await menu.getByRole('menuitem', { name: 'Back', exact: true }).click()
+      await expect(openOnDevice).toBeDisabled()
+      await expect(menu.getByRole('menuitem', { name: 'Select Tab', exact: true })).toBeFocused()
+      await page.evaluate(recipient => {
+        document.querySelector('#app')._vnode.component.appContext.config.globalProperties.$store
+          .commit('setSyncServerDevices', { [recipient]: { name: 'Laptop', platform: 'linux' } })
+      }, recipient)
+      await openOnDevice.click()
     }
     await laptop.click()
     await expect(menu).toBeHidden()
