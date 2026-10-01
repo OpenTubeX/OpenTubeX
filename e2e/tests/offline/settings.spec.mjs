@@ -1311,7 +1311,7 @@ test.describe('settings', () => {
     await expect(submission).toBeVisible()
 
     const centerOffset = await submission.evaluate(element => {
-      const label = element.querySelector('.switch-label')
+      const label = element.querySelector('.switch-label-text')
       const text = element.querySelector('.switch-label-text').getBoundingClientRect()
       const labelBounds = label.getBoundingClientRect()
       const knob = getComputedStyle(label, '::after')

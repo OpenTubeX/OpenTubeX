@@ -35,8 +35,21 @@ async function expectBadgeBelowLabel(control, textSelector) {
     const badgeBounds = badge.getBoundingClientRect()
     const controlBounds = element.getBoundingClientRect()
     const helpBounds = element.querySelector('.tooltip').getBoundingClientRect()
+    const label = element.querySelector('.switch-label')
+    let switchCenterOffset
+    if (label) {
+      const anchor = text
+      const knob = getComputedStyle(anchor, '::after')
+      const anchorBounds = anchor.getBoundingClientRect()
+      const textBounds = text.getBoundingClientRect()
+      const knobCenter = anchorBounds.top + Number.parseFloat(knob.top) +
+        new DOMMatrix(knob.transform).m42 + Number.parseFloat(knob.height) / 2
+      switchCenterOffset = Math.abs(knobCenter - textBounds.top - textBounds.height / 2)
+    }
     return {
+      switchCenterOffset,
       textBottom: Math.max(...textRects.map(rect => rect.bottom)),
+      textLastLineTop: Math.max(...textRects.map(rect => rect.top)),
       badgeTop: badgeBounds.top,
       badgeLeft: badgeBounds.left,
       badgeRight: badgeBounds.right,
@@ -44,6 +57,7 @@ async function expectBadgeBelowLabel(control, textSelector) {
       controlRight: controlBounds.right,
       helpLeft: helpBounds.left,
       helpRight: helpBounds.right,
+      helpCenter: helpBounds.top + helpBounds.height / 2,
       overlapsHelp: badgeBounds.left < helpBounds.right && badgeBounds.right > helpBounds.left &&
         badgeBounds.top < helpBounds.bottom && badgeBounds.bottom > helpBounds.top,
       badgeScrollWidth: badge.scrollWidth,
@@ -61,6 +75,10 @@ async function expectBadgeBelowLabel(control, textSelector) {
   expect(layout.helpRight).toBeLessThanOrEqual(layout.controlRight + 1)
   expect(layout.overlapsHelp, JSON.stringify(layout)).toBe(false)
   expect(layout.badgeScrollWidth - layout.badgeClientWidth, JSON.stringify(layout)).toBeLessThanOrEqual(1)
+  if (layout.switchCenterOffset !== undefined) {
+    expect(layout.switchCenterOffset, JSON.stringify(layout)).toBeLessThanOrEqual(1)
+    expect(layout.helpCenter, JSON.stringify(layout)).toBeGreaterThanOrEqual(layout.textLastLineTop - 1)
+  }
 }
 
 for (const currentLocale of ['en-US', 'de-DE']) {

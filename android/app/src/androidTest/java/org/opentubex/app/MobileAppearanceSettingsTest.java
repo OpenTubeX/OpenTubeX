@@ -60,7 +60,12 @@ public class MobileAppearanceSettingsTest {
                             range.selectNodeContents(text);
                             const textBottom = Math.max(...Array.from(range.getClientRects(), rect => rect.bottom));
                             const bounds = badge.getBoundingClientRect();
-                            return {width: text.getBoundingClientRect().width, textBottom,
+                            const label = text;
+                            const knob = getComputedStyle(label, '::after');
+                            const textBounds = text.getBoundingClientRect();
+                            const knobCenter = label.getBoundingClientRect().top + parseFloat(knob.top) +
+                                new DOMMatrix(knob.transform).m42 + parseFloat(knob.height) / 2;
+                            return {switchCenterOffset: Math.abs(knobCenter - textBounds.top - textBounds.height / 2), width: text.getBoundingClientRect().width, textBottom,
                                 badgeTop: bounds.top, badgeRight: bounds.right,
                                 helpLeft: element.querySelector('.tooltip').getBoundingClientRect().left,
                                 helpBottom: element.querySelector('.tooltip').getBoundingClientRect().bottom};
@@ -70,6 +75,8 @@ public class MobileAppearanceSettingsTest {
                         layout.getDouble("width") >= originalWidth - 1);
                     assertTrue("The badge wraps below the text at " + scale + "%: " + layout,
                         layout.getDouble("badgeTop") >= layout.getDouble("textBottom") - 1);
+                    assertTrue("The switch stays centered beside its text at " + scale + "%: " + layout,
+                        layout.getDouble("switchCenterOffset") <= 1);
                     assertTrue("The badge does not overlap help at " + scale + "%: " + layout,
                         layout.getDouble("badgeRight") <= layout.getDouble("helpLeft") + 1 ||
                             layout.getDouble("badgeTop") >= layout.getDouble("helpBottom") - 1);
