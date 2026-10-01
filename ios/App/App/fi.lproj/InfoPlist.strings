@@ -1,2 +1,2 @@
 "NSCameraUsageDescription" = "Skannaa lisättävässä laitteessa näkyvä parituskoodi.";
-"NSLocalNetworkUsageDescription" = "Pidä asetukset ja tiedot samoina kaikilla laitteilla";
+"NSLocalNetworkUsageDescription" = "Etsi lähiverkon laitteita ja suoratoista niihin videoita sekä synkronoi asetukset ja tiedot laitteiden välillä.";

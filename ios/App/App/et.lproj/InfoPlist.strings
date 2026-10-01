@@ -1,2 +1,2 @@
 "NSCameraUsageDescription" = "Skannige lisatavas seadmes kuvatav sidumiskood.";
-"NSLocalNetworkUsageDescription" = "Seadete ja andmete sünkroonimine seadmete vahel";
+"NSLocalNetworkUsageDescription" = "Leia seadmeid kohalikust võrgust ja edasta neisse videoid ning sünkrooni seadeid ja andmeid seadmete vahel.";

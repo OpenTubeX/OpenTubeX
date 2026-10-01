@@ -1,2 +1,2 @@
 "NSCameraUsageDescription" = "扫描要添加的设备上显示的配对码。";
-"NSLocalNetworkUsageDescription" = "在不同设备间同步设置和数据";
+"NSLocalNetworkUsageDescription" = "发现本地网络中的设备并向其投放视频，同时在设备之间同步设置和数据。";
