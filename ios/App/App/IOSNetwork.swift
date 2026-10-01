@@ -46,6 +46,14 @@ final class IOSNetwork: NSObject, URLSessionDataDelegate {
         return id
     }
 
+    // Accessed on the main queue, like registration and the WebKit scheme handler.
+    func registeredMediaRequest(_ url: URL) -> URLRequest? {
+        let id = url.lastPathComponent
+        guard url.scheme == "capacitor", url.host == "localhost", url.query == nil,
+              url.path == "/_opentubex_media/\(id)" else { return nil }
+        return external[id]
+    }
+
     func abort(_ id: String) {
         prepared.removeValue(forKey: id)
         for task in Array(tasks.values) where task.taskDescription == id {
