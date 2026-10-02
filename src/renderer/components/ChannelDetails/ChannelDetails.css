@@ -203,7 +203,7 @@
     margin-block-start: 5px;
   }
 
-  .infoActionsContainer:has(> .shareIcon) {
+  .infoActionsContainer:has(> .shareIcon):has(> .ftSubscribeButton) {
     justify-content: space-between;
   }
 }

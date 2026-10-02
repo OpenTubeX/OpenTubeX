@@ -463,19 +463,25 @@ for (const scale of [100, 95]) {
           await testInfo.attach('aligned-channel-actions', { path: screenshot, contentType: 'image/png' })
         }
         if (width <= 680) {
-          await page.evaluate(async () => {
-            document.body.dir = 'ltr'
-            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-            await store.dispatch('updateHideSharingActions', true)
-          })
-          await expect(row.locator('.shareIcon')).toHaveCount(0)
-          await expect.poll(() => row.evaluate(element => {
-            const row = element.getBoundingClientRect()
-            const subscribe = element.querySelector('.ftSubscribeButton').getBoundingClientRect()
-            return window.innerWidth <= 400
-              ? Math.abs(subscribe.left + subscribe.width / 2 - row.left - row.width / 2)
-              : Math.abs(subscribe.left - row.left)
-          }), { message: 'Subscription button keeps its alignment with Share hidden' }).toBeLessThanOrEqual(1)
+          for (const [setting, remainingAction] of [
+            ['updateHideSharingActions', '.ftSubscribeButton'],
+            ['updateHideUnsubscribeButton', '.shareIcon']
+          ]) {
+            await page.evaluate(async setting => {
+              document.body.dir = 'ltr'
+              const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+              await store.dispatch(setting, true)
+            }, setting)
+            await expect(row.locator(':scope > *')).toHaveCount(1)
+            await expect.poll(() => row.evaluate((element, remainingAction) => {
+              const row = element.getBoundingClientRect()
+              const action = element.querySelector(remainingAction).getBoundingClientRect()
+              return window.innerWidth <= 400
+                ? Math.abs(action.left + action.width / 2 - row.left - row.width / 2)
+                : Math.abs(action.left - row.left)
+            }, remainingAction), { message: `${remainingAction} keeps its alignment when shown alone` }).toBeLessThanOrEqual(1)
+            await page.evaluate(setting => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(setting, false), setting)
+          }
         }
       })
 
