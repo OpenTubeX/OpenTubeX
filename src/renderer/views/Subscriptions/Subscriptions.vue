@@ -641,60 +641,6 @@ useTabLifecycle({
   }
 })
 
-const subscriptionRefreshTimestamps = computed(() => [
-  store.getters.getSubscriptionFeedLastRefreshTimestamp,
-  store.getters.getSubscriptionShortsLastRefreshTimestamp,
-  store.getters.getSubscriptionLiveLastRefreshTimestamp,
-  store.getters.getSubscriptionPostsLastRefreshTimestamp
-])
-
-watch(subscriptionRefreshTimestamps, (timestamps, previousTimestamps) => {
-  const feedTabs = ['videos', 'shorts', 'live', 'community']
-
-  timestamps.forEach((timestamp, index) => {
-    if (timestamp && timestamp !== previousTimestamps[index]) {
-      resetScrollAfterRefresh(feedTabs[index])
-    }
-  })
-})
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'community'} refreshedTab
- */
-async function resetScrollAfterRefresh(refreshedTab) {
-  tabScrollPositions[refreshedTab] = 0
-  tabScrollPositions.new = 0
-
-  if (currentTab.value !== refreshedTab && currentTab.value !== 'new') {
-    return
-  }
-
-  if (usesLogicalTabs && tabId) {
-    // Watch can keep this feed mounted behind the player. A refresh there
-    // must not erase the Watch history entry's scroll position.
-    if (store.getters.getTabById(tabId)?.route.path === route.path) {
-      getTabNavigationService().resetScroll(tabId)
-    }
-  } else {
-    window.scrollTo({ left: 0, top: 0, behavior: 'instant' })
-  }
-
-  // The completion event is dispatched before the refreshed array reaches
-  // this view. Correct the scroll again after Vue and browser scroll anchoring
-  // have applied the new list layout.
-  await nextTick()
-  await nextAnimationFrame()
-  await nextAnimationFrame()
-
-  if (
-    isMounted &&
-    (currentTab.value === refreshedTab || currentTab.value === 'new') &&
-    (!usesLogicalTabs || isTabPresented?.value === true)
-  ) {
-    window.scrollTo({ left: 0, top: 0, behavior: 'instant' })
-  }
-}
-
 function nextAnimationFrame() {
   return new Promise(resolve => window.requestAnimationFrame(() => resolve()))
 }
