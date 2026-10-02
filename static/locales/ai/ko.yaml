@@ -836,9 +836,9 @@ Settings:
     Update Managed Tools: 업데이트
     Managed Tools Download Error Template: '관리되는 도구를 다운로드할 수 없습니다: {errors}'
     Download Folder: 다운로드 폴더
-    Global Additional yt-dlp Arguments: 전역 추가 yt-dlp 인수
+    Global Additional yt-dlp Arguments: 추가 yt-dlp 인수
     Concurrent Downloads: 동시 다운로드 수
-    Bandwidth Limit: 대역폭 제한 (KiB/s, 0은 무제한)
+    Bandwidth Limit: 대역폭 제한 (KiB/s)
     Choose Download Folder: 다운로드 폴더 선택
     Download Templates: 다운로드 템플릿
     Manage Download Templates: '다운로드 템플릿 관리 ({templateCount})'
@@ -911,8 +911,8 @@ Settings:
       Automatic: 자동 업데이트
       Ask: 업데이트 전 확인
       Manual: 수동으로만 업데이트
-    yt-dlp Executable Path: yt-dlp 실행 파일 경로
-    FFmpeg Executable Path: FFmpeg 실행 파일 경로
+    yt-dlp Executable Path: yt-dlp 실행 파일
+    FFmpeg Executable Path: FFmpeg 실행 파일
     Restricted Playback Authentication: "yt-dlp 쿠키"
     Cookie Source: 쿠키 소스
     Cookie Sources:
@@ -1203,7 +1203,7 @@ Settings:
     Enhanced Privacy Enabled: 강화된 개인 정보 보호가 활성화되었습니다. 서버에는 암호화된 동기화 데이터만 저장됩니다.
     Enhanced Privacy Unsupported: 경고. 이 서버는 강화된 개인 정보 보호를 지원하지 않습니다. 동기화된 데이터를 서버 운영자가 볼 수 있습니다.
     Description: 'OpenTubeX 또는 LibreTube 동기화 서버와 구독, 프로필, 재생목록, 시청 기록 및 지원되는 설정을 동기화합니다. LibreTube 서버는 일부 동기화 기능을 지원하지 않을 수 있습니다.'
-    Server URL: 서버 URL
+    Server URL: 동기화 서버 URL
     Checking Server: 동기화 서버 확인 중…
     Server Unavailable: 이 동기화 서버에 연결할 수 없습니다. URL을 확인하고 다시 시도하세요.
     Username: 사용자 이름
@@ -1296,7 +1296,7 @@ Settings:
     Proxy Warning: OpenTubeX에는 내장 프록시가 없지만 기기에서 실행 중인 Tor나 일부 VPN에서 제공하는 SOCKS5 프록시 같은 외부 프록시에 연결할 수 있습니다. 활성화한 경우 프록시 또는 Tor를 올바르게 설정해야 합니다. 그렇지 않으면 OpenTubeX에서 데이터를 가져올 수 없습니다.
     Proxy Username: 프록시 사용자 이름
     Proxy Password: 프록시 비밀번호
-    IP Block Recovery Script Path: IP 차단 복구 스크립트 경로
+    IP Block Recovery Script Path: IP 차단 복구 스크립트
     Select IP Block Recovery Script File: IP 차단 복구 스크립트 파일 선택
     Running IP block recovery script: IP 차단 복구 스크립트 실행 중
     IP block recovery script failed: 'IP 차단 복구 스크립트 실패 (종료 코드: {exitCode})'
@@ -1308,7 +1308,7 @@ Settings:
       Excluded Channels: "제외된 채널"
       Tooltip: "해당 채널의 동영상에서 SponsorBlock 구간을 건너뛰지 않으려면 채널 ID를 입력하세요. ID는 대소문자를 구분하여 정확히 일치해야 합니다."
     Enable SponsorBlock Submission: SponsorBlock 제출 활성화
-    SponsorBlock Private User ID (optional): SponsorBlock 비공개 사용자 ID (선택 사항)
+    SponsorBlock Private User ID (optional): 비공개 사용자 ID (선택 사항)
     SponsorBlock Private User ID Tooltip: 브라우저 확장 프로그램의 비공개 SponsorBlock 사용자 ID를 붙여 넣으세요. 앱에서 생성한 ID를 사용하려면 비워 두세요.
     Generated SponsorBlock User ID: 생성된 SponsorBlock 사용자 ID
     Generated SponsorBlock User ID Tooltip: 앱에서 생성한 SponsorBlock 사용자 ID를 브라우저 확장 프로그램이나 다른 컴퓨터의 앱에서 사용할 수 있습니다.
@@ -1318,12 +1318,12 @@ Settings:
     Skip notification timeout: 건너뛰기 알림 표시 시간
     UseDeArrowTitles: DeArrow 동영상 제목 사용
     UseDeArrowThumbnails: 썸네일에 DeArrow 사용
-    DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): DeArrow 썸네일 생성기 API URL (기본값 https://dearrow-thumb.ajay.app)
+    DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): DeArrow 썸네일 API URL
     Custom Color: 사용자 지정 색상
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Return YouTube Dislike 활성화
-    Return YouTube Dislike Url: Return YouTube Dislike API URL (기본값 https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: API URL
   Parental Control Settings:
     Hide Uploader on Watch page: 시청 페이지에서 업로더 숨기기
     Disable Channel Links: 채널 링크 비활성화
@@ -2278,8 +2278,8 @@ Downloads:
   File Name Template: 파일 이름 템플릿
   File Name Template Help: '사용 가능한 필드: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: 시간 범위 및 챕터
-  Start Time: 시작 시간 (HH:MM:SS)
-  End Time: 종료 시간 (HH:MM:SS)
+  Start Time: 시작 시간
+  End Time: 종료 시간
   Split by Chapters: 챕터별로 별도 파일로 분할
   Remove Segments: 구간 제거
   Subtitles and Metadata: 자막 및 메타데이터
@@ -2368,3 +2368,23 @@ Tray:
 Tray Icon:
   Title: "트레이 아이콘"
   Follow App Theme: "앱 테마 따르기"
+
+Form Inputs:
+  Enter Channels: "채널 입력"
+  Enter Text: "텍스트 입력"
+  Video URL: 동영상 또는 재생목록 URL
+  Paste Link: 동영상 또는 재생목록 링크 붙여넣기
+  Example: "예: {example}"
+  No Minimum: 최솟값 없음
+  No Maximum: 최댓값 없음
+  Any Age: 게시 시기 무관
+  Included Terms Example: "예: 튜토리얼, 리뷰"
+  Excluded Terms Example: "예: 예고편, 미리보기"
+  Download Folder Hint: 비워 두면 다운로드 폴더 사용
+  Global Arguments Hint: 모든 다운로드에 사용할 선택적 인수
+  Unlimited Hint: 0은 무제한
+  Add Argument: 인수 추가
+  Template Name Example: "예: 오디오만"
+  Download Arguments Hint: 이 다운로드에 사용할 선택적 인수
+  Generated ID Hint: 비워 두면 ID 생성
+  Default Value: "기본값: {value}"

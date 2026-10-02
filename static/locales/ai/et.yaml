@@ -660,9 +660,9 @@ Settings:
     Update Managed Tools: Uuenda
     Managed Tools Download Error Template: 'Hallatavaid tööriistu ei õnnestunud alla laadida: {errors}'
     Download Folder: Allalaadimiskaust
-    Global Additional yt-dlp Arguments: Üldised yt-dlp lisaargumendid
+    Global Additional yt-dlp Arguments: Täiendavad yt-dlp argumendid
     Concurrent Downloads: Samaaegsed allalaadimised
-    Bandwidth Limit: Ribalaiuse piirang (KiB/s, 0 tähendab piiranguta)
+    Bandwidth Limit: Ribalaiuse piirang (KiB/s)
     Choose Download Folder: Vali allalaadimiskaust
     Download Templates: Allalaadimismallid
     Manage Download Templates: Halda allalaadimismalle ({templateCount})
@@ -735,8 +735,8 @@ Settings:
       Automatic: Uuenda automaatselt
       Ask: Küsi enne uuendamist
       Manual: Uuenda ainult käsitsi
-    yt-dlp Executable Path: yt-dlp täitmisfaili asukoht
-    FFmpeg Executable Path: FFmpegi täitmisfaili asukoht
+    yt-dlp Executable Path: yt-dlp käivitatav fail
+    FFmpeg Executable Path: FFmpeg käivitatav fail
     Restricted Playback Authentication: "yt-dlp küpsised"
     Cookie Source: Küpsiste allikas
     Cookie Sources:
@@ -968,7 +968,7 @@ Settings:
     Enhanced Privacy Enabled: Täiustatud privaatsus on lubatud. Server salvestab ainult krüptitud sünkroonimisandmeid.
     Enhanced Privacy Unsupported: Hoiatus — see server ei toeta täiustatud privaatsust. Sünkroonitud andmed on serveri haldajale nähtavad.
     Description: 'Sünkrooni tellimused, profiilid, esitusloendid, vaatamisajalugu ja toetatud seaded OpenTubeXi või LibreTube’i sünkroonimisserveriga. LibreTube’i serverid ei pruugi kõiki sünkroonimisfunktsioone toetada.'
-    Server URL: Serveri URL
+    Server URL: Sünkroonimisserveri URL
     Checking Server: Sünkroonimisserveri kontrollimine…
     Server Unavailable: Selle sünkroonimisserveriga ei saa ühendust luua. Kontrollige URL-i ja proovige uuesti.
     Username: Kasutajanimi
@@ -1058,7 +1058,7 @@ Settings:
     Open All Tabs Confirmation: "Kas avada kõik vahelehed?"
     Server Update Required: "Uuenda seda serverit, et toetada krüptitud reaalajas sünkroonimist."
   Proxy Settings:
-    IP Block Recovery Script Path: IP-blokeeringust taastamise skripti asukoht
+    IP Block Recovery Script Path: IP-blokeeringust taastamise skript
     Select IP Block Recovery Script File: Vali IP-blokeeringust taastamise skriptifail
     Running IP block recovery script: IP-blokeeringust taastamise skripti käivitamine
     IP block recovery script failed: 'IP-blokeeringust taastamise skript nurjus (väljumiskood: {exitCode})'
@@ -1067,7 +1067,7 @@ Settings:
     Failed to select IP block recovery script: IP-blokeeringust taastamise skripti valimine nurjus
   SponsorBlock Settings:
     Enable SponsorBlock Submission: Luba SponsorBlocki andmete esitamine
-    SponsorBlock Private User ID (optional): SponsorBlocki privaatne kasutaja-ID (valikuline)
+    SponsorBlock Private User ID (optional): Privaatne kasutaja ID (valikuline)
     SponsorBlock Private User ID Tooltip: Kleepige brauserilaiendist SponsorBlocki privaatne kasutaja-ID. Rakenduse loodud ID kasutamiseks jätke see tühjaks.
     Generated SponsorBlock User ID: Loodud SponsorBlocki kasutaja-ID
     Generated SponsorBlock User ID Tooltip: Seda rakenduse loodud SponsorBlocki kasutaja-ID-d saab kasutada brauserilaiendis või rakenduse kasutamisel teises arvutis.
@@ -1079,7 +1079,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Luba Return YouTube Dislike
-    Return YouTube Dislike Url: Return YouTube Dislike’i API URL (vaikimisi https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: API URL
   Password Dialog:
     Incorrect Password: Vale parool
     Unlock: Ava
@@ -1830,8 +1830,8 @@ Downloads:
   File Name Template: Failinime mall
   File Name Template Help: 'Saadaolevad väljad: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Ajavahemik ja peatükid
-  Start Time: Algusaeg (HH:MM:SS)
-  End Time: Lõpuaeg (HH:MM:SS)
+  Start Time: Algusaeg
+  End Time: Lõpuaeg
   Split by Chapters: Jaga peatükkide kaupa eraldi failideks
   Remove Segments: Eemalda segmendid
   Subtitles and Metadata: Subtiitrid ja metaandmed
@@ -1917,3 +1917,23 @@ Tray:
 Tray Icon:
   Title: "Süsteemisalve ikoon"
   Follow App Theme: "Järgi rakenduse teemat"
+
+Form Inputs:
+  Enter Channels: "Sisesta kanalid"
+  Enter Text: "Sisesta tekst"
+  Video URL: Video või esitusloendi URL
+  Paste Link: Kleebi video või esitusloendi link
+  Example: nt {example}
+  No Minimum: Miinimum puudub
+  No Maximum: Maksimum puudub
+  Any Age: Mis tahes vanus
+  Included Terms Example: nt õpetus, arvustus
+  Excluded Terms Example: nt treiler, eelvaade
+  Download Folder Hint: Jäta tühjaks, et kasutada allalaadimiste kausta
+  Global Arguments Hint: Valikulised argumendid igale allalaadimisele
+  Unlimited Hint: 0 tähendab piiramatut
+  Add Argument: Lisa argument
+  Template Name Example: nt Ainult heli
+  Download Arguments Hint: Valikulised argumendid sellele allalaadimisele
+  Generated ID Hint: Jäta tühjaks, et luua ID
+  Default Value: "Vaikimisi: {value}"

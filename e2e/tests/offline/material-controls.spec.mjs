@@ -8,6 +8,20 @@ test('closed selects announce their current choice', async ({ page }) => {
   await expect(select).toHaveAccessibleDescription('3')
 })
 
+test('inputs announce tooltip guidance together with supporting text', async ({ page }) => {
+  const downloads = await goToSettingsSection(page, 'download')
+  const folder = downloads.getByRole('textbox', { name: 'Download Folder', exact: true })
+  const folderDescription = "Videos are saved to this folder. Leave blank to use your system's Downloads folder. Leave blank to use your Downloads folder"
+  await expect(folder).toHaveAccessibleDescription(folderDescription)
+  await folder.focus()
+  await expect(folder).toHaveAccessibleDescription(folderDescription)
+  await expect(downloads.getByRole('textbox', { name: 'Additional yt-dlp arguments', exact: true }))
+    .toHaveAccessibleDescription('Additional command line arguments passed to yt-dlp for every download, for example --cookies-from-browser firefox.')
+  const privacy = await goToSettingsSection(page, 'privacy')
+  await expect(privacy.getByLabel('Password', { exact: true }))
+    .toHaveAccessibleDescription('Set a password to prevent access to settings')
+})
+
 for (const scale of [100, 95]) {
   test.describe(`modal control regressions at ${scale}% scale`, () => {
     test.use({ seed: { settings: { currentLocale: 'en-US', uiScale: scale, baseTheme: 'dark' } } })
@@ -203,11 +217,19 @@ for (const scale of [100, 95]) {
         const input = password.getByLabel('Password', { exact: true })
         const button = password.getByRole('button', { name: 'Set Password', exact: true })
         await expect(button).toBeVisible()
+        const contentWidth = await page.locator('.settingsContent').evaluate(element => {
+          const style = getComputedStyle(element)
+          return element.getBoundingClientRect().width - parseFloat(style.paddingInlineStart) - parseFloat(style.paddingInlineEnd) - parseFloat(style.borderInlineStartWidth) - parseFloat(style.borderInlineEndWidth)
+        })
         for (const highlight of [false, true]) {
           await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHighlightChangedSettings', value), highlight)
           const bounds = await input.boundingBox()
           const action = await button.boundingBox()
-          if (action.y >= bounds.y + bounds.height) {
+          const stacked = action.y >= bounds.y + bounds.height
+          if (contentWidth <= 680) {
+            expect.soft(stacked, `password action stacking at ${contentWidth}px with highlighting=${highlight}`).toBe(true)
+          }
+          if (stacked) {
             expect.soft(Math.abs(action.x + action.width / 2 - bounds.x - bounds.width / 2), `password action center with highlighting=${highlight}`).toBeLessThanOrEqual(1)
           }
         }

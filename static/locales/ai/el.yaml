@@ -673,9 +673,9 @@ Settings:
     Update Managed Tools: Ενημέρωση
     Managed Tools Download Error Template: 'Δεν ήταν δυνατή η λήψη των διαχειριζόμενων εργαλείων: {errors}'
     Download Folder: Φάκελος λήψεων
-    Global Additional yt-dlp Arguments: Καθολικά πρόσθετα ορίσματα yt-dlp
+    Global Additional yt-dlp Arguments: Πρόσθετα ορίσματα yt-dlp
     Concurrent Downloads: Ταυτόχρονες λήψεις
-    Bandwidth Limit: Όριο εύρους ζώνης (KiB/s, 0 για απεριόριστο)
+    Bandwidth Limit: Όριο εύρους ζώνης (KiB/s)
     Choose Download Folder: Επιλογή φακέλου λήψεων
     Download Templates: Πρότυπα λήψεων
     Manage Download Templates: Διαχείριση προτύπων λήψεων ({templateCount})
@@ -748,8 +748,8 @@ Settings:
       Automatic: Αυτόματη ενημέρωση
       Ask: Ερώτηση πριν από την ενημέρωση
       Manual: Μόνο μη αυτόματη ενημέρωση
-    yt-dlp Executable Path: Διαδρομή εκτελέσιμου yt-dlp
-    FFmpeg Executable Path: Διαδρομή εκτελέσιμου FFmpeg
+    yt-dlp Executable Path: Εκτελέσιμο yt-dlp
+    FFmpeg Executable Path: Εκτελέσιμο FFmpeg
     Restricted Playback Authentication: "Cookies του yt-dlp"
     Cookie Source: Προέλευση cookie
     Cookie Sources:
@@ -992,7 +992,7 @@ Settings:
     Enhanced Privacy Enabled: Το ενισχυμένο απόρρητο είναι ενεργοποιημένο. Ο διακομιστής αποθηκεύει μόνο κρυπτογραφημένα δεδομένα συγχρονισμού.
     Enhanced Privacy Unsupported: 'Προειδοποίηση: Αυτός ο διακομιστής δεν υποστηρίζει ενισχυμένο απόρρητο. Ο διαχειριστής του μπορεί να δει τα συγχρονισμένα δεδομένα.'
     Description: 'Συγχρονίστε συνδρομές, προφίλ, λίστες αναπαραγωγής, ιστορικό παρακολούθησης και υποστηριζόμενες ρυθμίσεις με έναν διακομιστή συγχρονισμού OpenTubeX ή LibreTube. Οι διακομιστές LibreTube ενδέχεται να μην υποστηρίζουν κάθε δυνατότητα συγχρονισμού.'
-    Server URL: URL διακομιστή
+    Server URL: URL διακομιστή συγχρονισμού
     Checking Server: Έλεγχος διακομιστή συγχρονισμού…
     Server Unavailable: Δεν είναι δυνατή η σύνδεση σε αυτόν τον διακομιστή συγχρονισμού. Ελέγξτε το URL και δοκιμάστε ξανά.
     Username: Όνομα χρήστη
@@ -1082,7 +1082,7 @@ Settings:
     Open All Tabs Confirmation: "Άνοιγμα όλων των καρτελών;"
     Server Update Required: "Ενημερώστε αυτόν τον διακομιστή για υποστήριξη κρυπτογραφημένου συγχρονισμού σε πραγματικό χρόνο."
   Proxy Settings:
-    IP Block Recovery Script Path: Διαδρομή δέσμης ενεργειών αποκατάστασης αποκλεισμού IP
+    IP Block Recovery Script Path: Σενάριο ανάκτησης από αποκλεισμό IP
     Select IP Block Recovery Script File: Επιλογή αρχείου δέσμης ενεργειών αποκατάστασης αποκλεισμού IP
     Running IP block recovery script: Εκτέλεση δέσμης ενεργειών αποκατάστασης αποκλεισμού IP
     IP block recovery script failed: 'Η δέσμη ενεργειών αποκατάστασης αποκλεισμού IP απέτυχε (κωδικός εξόδου: {exitCode})'
@@ -1094,7 +1094,7 @@ Settings:
       Excluded Channels: "Εξαιρούμενα κανάλια"
       Tooltip: "Εισαγάγετε αναγνωριστικό καναλιού ώστε να μην παραλείπονται τα τμήματα SponsorBlock στα βίντεό του. Πρέπει να ταιριάζει ακριβώς, με διάκριση πεζών και κεφαλαίων."
     Enable SponsorBlock Submission: Ενεργοποίηση υποβολών SponsorBlock
-    SponsorBlock Private User ID (optional): Ιδιωτικό αναγνωριστικό χρήστη SponsorBlock (προαιρετικό)
+    SponsorBlock Private User ID (optional): Ιδιωτικό ID χρήστη (προαιρετικό)
     SponsorBlock Private User ID Tooltip: Επικολλήστε το ιδιωτικό αναγνωριστικό χρήστη SponsorBlock από την επέκταση προγράμματος περιήγησης. Αφήστε το κενό για να χρησιμοποιηθεί αναγνωριστικό που δημιουργεί η εφαρμογή.
     Generated SponsorBlock User ID: Αναγνωριστικό χρήστη SponsorBlock που δημιουργήθηκε
     Generated SponsorBlock User ID Tooltip: Αυτό το αναγνωριστικό χρήστη SponsorBlock δημιουργήθηκε από την εφαρμογή και μπορεί να χρησιμοποιηθεί στην επέκταση προγράμματος περιήγησης ή σε άλλον υπολογιστή όπου χρησιμοποιείτε την εφαρμογή.
@@ -1106,7 +1106,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Ενεργοποίηση Return YouTube Dislike
-    Return YouTube Dislike Url: URL API του Return YouTube Dislike (προεπιλογή https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: URL API
   Parental Control Settings:
     Disable Channel Links: Απενεργοποίηση συνδέσμων καναλιών
   Password Dialog:
@@ -1873,8 +1873,8 @@ Downloads:
   File Name Template: Πρότυπο ονόματος αρχείου
   File Name Template Help: 'Διαθέσιμα πεδία: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Χρονικό εύρος και κεφάλαια
-  Start Time: Ώρα έναρξης (HH:MM:SS)
-  End Time: Ώρα λήξης (HH:MM:SS)
+  Start Time: Ώρα έναρξης
+  End Time: Ώρα λήξης
   Split by Chapters: Διαχωρισμός σε ξεχωριστά αρχεία ανά κεφάλαιο
   Remove Segments: Αφαίρεση τμημάτων
   Subtitles and Metadata: Υπότιτλοι και μεταδεδομένα
@@ -1963,3 +1963,23 @@ Tray:
 Tray Icon:
   Title: "Εικονίδιο περιοχής ειδοποιήσεων"
   Follow App Theme: "Ακολούθηση θέματος εφαρμογής"
+
+Form Inputs:
+  Enter Channels: "Εισαγάγετε κανάλια"
+  Enter Text: "Εισαγάγετε κείμενο"
+  Video URL: URL βίντεο ή λίστας αναπαραγωγής
+  Paste Link: Επικολλήστε σύνδεσμο βίντεο ή λίστας αναπαραγωγής
+  Example: π.χ. {example}
+  No Minimum: Χωρίς ελάχιστο
+  No Maximum: Χωρίς μέγιστο
+  Any Age: Οποιαδήποτε ηλικία
+  Included Terms Example: π.χ. οδηγός, κριτική
+  Excluded Terms Example: π.χ. τρέιλερ, προεπισκόπηση
+  Download Folder Hint: Αφήστε κενό για χρήση του φακέλου λήψεων
+  Global Arguments Hint: Προαιρετικά ορίσματα για κάθε λήψη
+  Unlimited Hint: 0 για απεριόριστο
+  Add Argument: Προσθέστε ένα όρισμα
+  Template Name Example: π.χ. Μόνο ήχος
+  Download Arguments Hint: Προαιρετικά ορίσματα για αυτή τη λήψη
+  Generated ID Hint: Αφήστε κενό για δημιουργία ID
+  Default Value: "Προεπιλογή: {value}"

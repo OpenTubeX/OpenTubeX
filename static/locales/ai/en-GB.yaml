@@ -647,9 +647,9 @@ Settings:
     Update Managed Tools: Update
     Managed Tools Download Error Template: 'Could not download the managed tools: {errors}'
     Download Folder: Download Folder
-    Global Additional yt-dlp Arguments: Global Additional yt-dlp Arguments
+    Global Additional yt-dlp Arguments: Additional yt-dlp arguments
     Concurrent Downloads: Concurrent downloads
-    Bandwidth Limit: Bandwidth limit (KiB/s, 0 for unlimited)
+    Bandwidth Limit: Bandwidth limit (KiB/s)
     Choose Download Folder: Choose Download Folder
     Download Templates: Download Templates
     Manage Download Templates: Manage Download Templates ({templateCount})
@@ -722,8 +722,8 @@ Settings:
       Automatic: Update automatically
       Ask: Ask before updating
       Manual: Only update manually
-    yt-dlp Executable Path: yt-dlp Executable Path
-    FFmpeg Executable Path: FFmpeg Executable Path
+    yt-dlp Executable Path: yt-dlp executable
+    FFmpeg Executable Path: FFmpeg executable
     Restricted Playback Authentication: "yt-dlp Cookies"
     Cookie Source: Cookie Source
     Cookie Sources:
@@ -949,7 +949,7 @@ Settings:
     Enhanced Privacy Enabled: Enhanced privacy is enabled. The server stores only encrypted sync data.
     Enhanced Privacy Unsupported: Warning — this server does not support enhanced privacy. Synced data is visible to its operator.
     Description: 'Synchronise subscriptions, profiles, playlists, watch history, and supported settings with an OpenTubeX or LibreTube sync server. LibreTube servers may not support every sync feature.'
-    Server URL: Server URL
+    Server URL: Sync server URL
     Checking Server: Checking sync server…
     Server Unavailable: Unable to connect to this sync server. Check the URL and try again.
     Username: Username
@@ -1039,7 +1039,7 @@ Settings:
     Open All Tabs Confirmation: "Open all tabs?"
     Server Update Required: "Update this server to support encrypted live sync."
   Proxy Settings:
-    IP Block Recovery Script Path: IP Block Recovery Script Path
+    IP Block Recovery Script Path: IP block recovery script
     Select IP Block Recovery Script File: Select IP Block Recovery Script File
     Running IP block recovery script: Running IP block recovery script
     IP block recovery script failed: 'IP block recovery script failed (exit code: {exitCode})'
@@ -1051,7 +1051,7 @@ Settings:
       Excluded Channels: "Excluded channels"
       Tooltip: "Enter a channel ID to stop SponsorBlock skipping segments in its videos. IDs must match exactly and are case-sensitive."
     Enable SponsorBlock Submission: Enable SponsorBlock Submission
-    SponsorBlock Private User ID (optional): SponsorBlock Private User ID (optional)
+    SponsorBlock Private User ID (optional): Private user ID (optional)
     SponsorBlock Private User ID Tooltip: Paste the private SponsorBlock user ID from the browser extension. Leave this empty to use an app-generated ID.
     Generated SponsorBlock User ID: Generated SponsorBlock User ID
     Generated SponsorBlock User ID Tooltip: This app-generated SponsorBlock user ID can be used in the browser extension or if you use the app on another computer.
@@ -1062,7 +1062,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Enable Return YouTube Dislike
-    Return YouTube Dislike Url: Return YouTube Dislike API URL (Default is https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: API URL
   Password Dialog:
     Incorrect Password: Incorrect password
     Unlock: Unlock
@@ -1813,8 +1813,8 @@ Downloads:
   File Name Template: File Name Template
   File Name Template Help: 'Available fields: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Time Range and Chapters
-  Start Time: Start Time (HH:MM:SS)
-  End Time: End Time (HH:MM:SS)
+  Start Time: Start time
+  End Time: End time
   Split by Chapters: Split into separate files by chapter
   Remove Segments: Remove segments
   Subtitles and Metadata: Subtitles and Metadata
@@ -1901,3 +1901,23 @@ Tray:
 Tray Icon:
   Title: "Tray icon"
   Follow App Theme: "Follow app theme"
+
+Form Inputs:
+  Enter Channels: "Enter channels"
+  Enter Text: "Enter text"
+  Video URL: Video or playlist URL
+  Paste Link: Paste a video or playlist link
+  Example: e.g. {example}
+  No Minimum: No minimum
+  No Maximum: No maximum
+  Any Age: Any age
+  Included Terms Example: e.g. tutorial, review
+  Excluded Terms Example: e.g. trailer, preview
+  Download Folder Hint: Leave blank to use your Downloads folder
+  Global Arguments Hint: Optional arguments for every download
+  Unlimited Hint: 0 for unlimited
+  Add Argument: Add an argument
+  Template Name Example: e.g. Audio only
+  Download Arguments Hint: Optional arguments for this download
+  Generated ID Hint: Leave blank to generate an ID
+  Default Value: "Default: {value}"

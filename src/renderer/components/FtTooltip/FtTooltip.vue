@@ -205,6 +205,8 @@ const props = defineProps({
 })
 
 const id = useId()
+
+defineExpose({ id })
 </script>
 
 <style scoped src="./FtTooltip.css" />

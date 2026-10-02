@@ -675,9 +675,9 @@ Settings:
     Update Managed Tools: Atualizar
     Managed Tools Download Error Template: 'Não foi possível transferir as ferramentas geridas: {errors}'
     Download Folder: Pasta de transferências
-    Global Additional yt-dlp Arguments: Argumentos adicionais globais do yt-dlp
+    Global Additional yt-dlp Arguments: Argumentos adicionais do yt-dlp
     Concurrent Downloads: Transferências simultâneas
-    Bandwidth Limit: Limite de largura de banda (KiB/s, 0 para ilimitado)
+    Bandwidth Limit: Limite de largura de banda (KiB/s)
     Choose Download Folder: Escolher pasta de transferências
     Download Templates: Modelos de transferência
     Manage Download Templates: Gerir modelos de transferência ({templateCount})
@@ -750,8 +750,8 @@ Settings:
       Automatic: Atualizar automaticamente
       Ask: Perguntar antes de atualizar
       Manual: Atualizar apenas manualmente
-    yt-dlp Executable Path: Caminho do executável yt-dlp
-    FFmpeg Executable Path: Caminho do executável FFmpeg
+    yt-dlp Executable Path: Executável do yt-dlp
+    FFmpeg Executable Path: Executável do FFmpeg
     Restricted Playback Authentication: "Cookies do yt-dlp"
     Cookie Source: Origem dos cookies
     Cookie Sources:
@@ -994,7 +994,7 @@ Settings:
     Enhanced Privacy Enabled: A privacidade reforçada está ativada. O servidor guarda apenas dados de sincronização encriptados.
     Enhanced Privacy Unsupported: 'Aviso: este servidor não suporta privacidade reforçada. Os dados sincronizados estão visíveis para o respetivo operador.'
     Description: 'Sincronize subscrições, perfis, listas de reprodução, histórico de visualização e definições suportadas com um servidor de sincronização OpenTubeX ou LibreTube. Os servidores LibreTube poderão não suportar todas as funcionalidades de sincronização.'
-    Server URL: URL do servidor
+    Server URL: URL do servidor de sincronização
     Checking Server: A verificar o servidor de sincronização…
     Server Unavailable: Não foi possível estabelecer ligação a este servidor de sincronização. Verifique o URL e tente novamente.
     Username: Nome de utilizador
@@ -1084,7 +1084,7 @@ Settings:
     Open All Tabs Confirmation: "Abrir todos os separadores?"
     Server Update Required: "Atualize este servidor para suportar sincronização encriptada em tempo real."
   Proxy Settings:
-    IP Block Recovery Script Path: Caminho do script de recuperação de bloqueio de IP
+    IP Block Recovery Script Path: Script de recuperação do bloqueio de IP
     Select IP Block Recovery Script File: Selecionar ficheiro do script de recuperação de bloqueio de IP
     Running IP block recovery script: A executar o script de recuperação de bloqueio de IP
     IP block recovery script failed: 'Falha no script de recuperação de bloqueio de IP (código de saída: {exitCode})'
@@ -1096,7 +1096,7 @@ Settings:
       Excluded Channels: "Canais excluídos"
       Tooltip: "Introduza o ID de um canal para impedir que os segmentos do SponsorBlock sejam ignorados nos seus vídeos. O ID tem de corresponder exatamente e distingue maiúsculas de minúsculas."
     Enable SponsorBlock Submission: Ativar envio para o SponsorBlock
-    SponsorBlock Private User ID (optional): ID de utilizador privado do SponsorBlock (opcional)
+    SponsorBlock Private User ID (optional): ID privado de utilizador (opcional)
     SponsorBlock Private User ID Tooltip: Cole o ID de utilizador privado do SponsorBlock obtido na extensão do navegador. Deixe este campo vazio para usar um ID gerado pela aplicação.
     Generated SponsorBlock User ID: ID de utilizador do SponsorBlock gerado
     Generated SponsorBlock User ID Tooltip: Este ID de utilizador do SponsorBlock gerado pela aplicação pode ser usado na extensão do navegador ou ao utilizar a aplicação noutro computador.
@@ -1108,7 +1108,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Ativar Return YouTube Dislike
-    Return YouTube Dislike Url: URL da API Return YouTube Dislike (a predefinição é https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: URL da API
   Parental Control Settings:
     Disable Channel Links: Desativar hiperligações dos canais
   Password Dialog:
@@ -1879,8 +1879,8 @@ Downloads:
   File Name Template: Modelo de nome do ficheiro
   File Name Template Help: 'Campos disponíveis: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Intervalo de tempo e capítulos
-  Start Time: Hora de início (HH:MM:SS)
-  End Time: Hora de fim (HH:MM:SS)
+  Start Time: Hora de início
+  End Time: Hora de fim
   Split by Chapters: Dividir em ficheiros separados por capítulo
   Remove Segments: Remover segmentos
   Subtitles and Metadata: Legendas e metadados
@@ -1968,3 +1968,23 @@ Tray:
 Tray Icon:
   Title: "Ícone da área de notificação"
   Follow App Theme: "Seguir o tema da aplicação"
+
+Form Inputs:
+  Enter Channels: "Insira canais"
+  Enter Text: "Insira texto"
+  Video URL: URL do vídeo ou da lista
+  Paste Link: Cole uma ligação de vídeo ou de lista
+  Example: p. ex. {example}
+  No Minimum: Sem mínimo
+  No Maximum: Sem máximo
+  Any Age: Qualquer antiguidade
+  Included Terms Example: p. ex. tutorial, análise
+  Excluded Terms Example: p. ex. trailer, pré-visualização
+  Download Folder Hint: Deixe em branco para usar a pasta Transferências
+  Global Arguments Hint: Argumentos opcionais para cada transferência
+  Unlimited Hint: 0 para ilimitado
+  Add Argument: Adicione um argumento
+  Template Name Example: p. ex. Apenas áudio
+  Download Arguments Hint: Argumentos opcionais para esta transferência
+  Generated ID Hint: Deixe em branco para gerar um ID
+  Default Value: "Predefinição: {value}"

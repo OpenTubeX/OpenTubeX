@@ -664,9 +664,9 @@ Settings:
     Update Managed Tools: Actualizează
     Managed Tools Download Error Template: 'Instrumentele gestionate nu au putut fi descărcate: {errors}'
     Download Folder: Folder pentru descărcări
-    Global Additional yt-dlp Arguments: Argumente yt-dlp suplimentare globale
+    Global Additional yt-dlp Arguments: Argumente suplimentare yt-dlp
     Concurrent Downloads: Descărcări simultane
-    Bandwidth Limit: Limită de lățime de bandă (KiB/s, 0 pentru nelimitat)
+    Bandwidth Limit: Limită de lățime de bandă (KiB/s)
     Choose Download Folder: Alege folderul pentru descărcări
     Download Templates: Șabloane de descărcare
     Manage Download Templates: Gestionează șabloanele de descărcare ({templateCount})
@@ -739,8 +739,8 @@ Settings:
       Automatic: Actualizează automat
       Ask: Întreabă înainte de actualizare
       Manual: Actualizează numai manual
-    yt-dlp Executable Path: Calea executabilului yt-dlp
-    FFmpeg Executable Path: Calea executabilului FFmpeg
+    yt-dlp Executable Path: Executabil yt-dlp
+    FFmpeg Executable Path: Executabil FFmpeg
     Restricted Playback Authentication: "Cookie-uri yt-dlp"
     Cookie Source: Sursa cookie-urilor
     Cookie Sources:
@@ -982,7 +982,7 @@ Settings:
     Enhanced Privacy Enabled: Confidențialitatea sporită este activată. Serverul stochează numai date de sincronizare criptate.
     Enhanced Privacy Unsupported: Avertisment — acest server nu acceptă confidențialitatea sporită. Datele sincronizate sunt vizibile operatorului său.
     Description: 'Sincronizați abonamentele, profilurile, listele de redare, istoricul vizionărilor și setările acceptate cu un server de sincronizare OpenTubeX sau LibreTube. Este posibil ca serverele LibreTube să nu accepte toate funcțiile de sincronizare.'
-    Server URL: Adresa URL a serverului
+    Server URL: URL-ul serverului de sincronizare
     Checking Server: Se verifică serverul de sincronizare…
     Server Unavailable: Conectarea la acest server de sincronizare nu a reușit. Verificați adresa URL și încercați din nou.
     Username: Nume de utilizator
@@ -1073,7 +1073,7 @@ Settings:
   Proxy Settings:
     Proxy Username: Nume de utilizator pentru proxy
     Proxy Password: Parolă pentru proxy
-    IP Block Recovery Script Path: Calea scriptului de recuperare după blocarea IP-ului
+    IP Block Recovery Script Path: Script de recuperare după blocarea IP
     Select IP Block Recovery Script File: Selectați fișierul scriptului de recuperare după blocarea IP-ului
     Running IP block recovery script: Se rulează scriptul de recuperare după blocarea IP-ului
     IP block recovery script failed: 'Scriptul de recuperare după blocarea IP-ului a eșuat (cod de ieșire: {exitCode})'
@@ -1085,7 +1085,7 @@ Settings:
       Excluded Channels: "Canale excluse"
       Tooltip: "Introdu ID-ul unui canal pentru a împiedica omiterea segmentelor SponsorBlock din videoclipurile sale. ID-ul trebuie să corespundă exact și diferențiază literele mari de cele mici."
     Enable SponsorBlock Submission: Activează trimiterea către SponsorBlock
-    SponsorBlock Private User ID (optional): ID privat de utilizator SponsorBlock (opțional)
+    SponsorBlock Private User ID (optional): ID privat de utilizator (opțional)
     SponsorBlock Private User ID Tooltip: Lipiți ID-ul privat de utilizator SponsorBlock din extensia de browser. Lăsați câmpul gol pentru a folosi un ID generat de aplicație.
     Generated SponsorBlock User ID: ID de utilizator SponsorBlock generat
     Generated SponsorBlock User ID Tooltip: Acest ID de utilizator SponsorBlock generat de aplicație poate fi folosit în extensia de browser sau când folosiți aplicația pe alt computer.
@@ -1097,7 +1097,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Activează Return YouTube Dislike
-    Return YouTube Dislike Url: Adresa URL a API-ului Return YouTube Dislike (implicită este https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: URL API
   Parental Control Settings:
     Disable Channel Links: Dezactivează linkurile canalelor
   Password Dialog:
@@ -1875,8 +1875,8 @@ Downloads:
   File Name Template: Șablon pentru numele fișierului
   File Name Template Help: 'Câmpuri disponibile: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Interval de timp și capitole
-  Start Time: Ora de început (HH:MM:SS)
-  End Time: Ora de sfârșit (HH:MM:SS)
+  Start Time: Ora de început
+  End Time: Ora de sfârșit
   Split by Chapters: Împarte în fișiere separate după capitole
   Remove Segments: Elimină segmentele
   Subtitles and Metadata: Subtitrări și metadate
@@ -1965,3 +1965,23 @@ Tray:
 Tray Icon:
   Title: "Pictogramă în zona de notificare"
   Follow App Theme: "Urmează tema aplicației"
+
+Form Inputs:
+  Enter Channels: "Introdu canale"
+  Enter Text: "Introdu text"
+  Video URL: URL video sau listă de redare
+  Paste Link: Lipește un link video sau de listă de redare
+  Example: de ex. {example}
+  No Minimum: Fără minim
+  No Maximum: Fără maxim
+  Any Age: Orice vechime
+  Included Terms Example: de ex. tutorial, recenzie
+  Excluded Terms Example: de ex. trailer, previzualizare
+  Download Folder Hint: Lasă gol pentru a folosi dosarul Descărcări
+  Global Arguments Hint: Argumente opționale pentru fiecare descărcare
+  Unlimited Hint: 0 pentru nelimitat
+  Add Argument: Adaugă un argument
+  Template Name Example: de ex. Doar audio
+  Download Arguments Hint: Argumente opționale pentru această descărcare
+  Generated ID Hint: Lasă gol pentru a genera un ID
+  Default Value: "Implicit: {value}"

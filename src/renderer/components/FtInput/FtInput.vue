@@ -26,8 +26,7 @@
         :disabled="disabled"
         :readonly="readonly"
         :spellcheck="false"
-        :aria-description="tooltip || undefined"
-        :aria-describedby="supportingText ? `${id}-supporting` : undefined"
+        :aria-describedby="descriptionIds"
         :aria-label="showLabel ? null : placeholder"
         @input="handleInput"
         @focus="handleFocus"
@@ -75,6 +74,7 @@
       >
         <FtTooltip
           v-if="tooltip !== ''"
+          ref="tooltipRef"
           class="selectTooltip"
           position="bottom"
           :tooltip="tooltip"
@@ -260,6 +260,11 @@ const emit = defineEmits(['blur', 'clear', 'click', 'input', 'keydown', 'remove'
 const id = useId()
 
 const inputRef = useTemplateRef('inputRef')
+const tooltipRef = useTemplateRef('tooltipRef')
+const descriptionIds = computed(() => [
+  tooltipRef.value?.id,
+  props.supportingText ? `${id}-supporting` : null
+].filter(Boolean).join(' ') || undefined)
 const optionsList = useTemplateRef('optionsList')
 
 watch(optionsList, (list, previousList, onCleanup) => {

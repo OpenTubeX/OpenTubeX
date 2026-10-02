@@ -668,9 +668,9 @@ Settings:
     Update Managed Tools: Оновити
     Managed Tools Download Error Template: 'Не вдалося завантажити керовані інструменти: {errors}'
     Download Folder: Папка завантажень
-    Global Additional yt-dlp Arguments: Загальні додаткові аргументи yt-dlp
+    Global Additional yt-dlp Arguments: Додаткові аргументи yt-dlp
     Concurrent Downloads: Одночасні завантаження
-    Bandwidth Limit: Обмеження пропускної здатності (КіБ/с, 0 — без обмежень)
+    Bandwidth Limit: Обмеження пропускної здатності (KiB/s)
     Choose Download Folder: Вибрати папку завантажень
     Download Templates: Шаблони завантаження
     Manage Download Templates: Керувати шаблонами завантаження ({templateCount})
@@ -743,8 +743,8 @@ Settings:
       Automatic: Оновлювати автоматично
       Ask: Запитувати перед оновленням
       Manual: Оновлювати лише вручну
-    yt-dlp Executable Path: Шлях до виконуваного файла yt-dlp
-    FFmpeg Executable Path: Шлях до виконуваного файла FFmpeg
+    yt-dlp Executable Path: Виконуваний файл yt-dlp
+    FFmpeg Executable Path: Виконуваний файл FFmpeg
     Restricted Playback Authentication: "Файли cookie yt-dlp"
     Cookie Source: Джерело файлів cookie
     Cookie Sources:
@@ -988,7 +988,7 @@ Settings:
     Enhanced Privacy Enabled: Посилений захист приватності ввімкнено. Сервер зберігає лише зашифровані дані синхронізації.
     Enhanced Privacy Unsupported: Увага! Цей сервер не підтримує посилений захист приватності. Оператор сервера може бачити синхронізовані дані.
     Description: 'Синхронізуйте підписки, профілі, списки відтворення, історію переглядів і підтримувані налаштування із сервером синхронізації OpenTubeX або LibreTube. Сервери LibreTube можуть підтримувати не всі функції синхронізації.'
-    Server URL: URL-адреса сервера
+    Server URL: URL сервера синхронізації
     Checking Server: Перевірка сервера синхронізації…
     Server Unavailable: Не вдалося підключитися до цього сервера синхронізації. Перевірте URL-адресу й повторіть спробу.
     Username: Ім’я користувача
@@ -1077,7 +1077,7 @@ Settings:
     Open All Tabs Confirmation: "Відкрити всі вкладки?"
     Server Update Required: "Оновіть цей сервер для підтримки зашифрованої синхронізації в реальному часі."
   Proxy Settings:
-    IP Block Recovery Script Path: Шлях до сценарію відновлення після блокування IP-адреси
+    IP Block Recovery Script Path: Скрипт відновлення після блокування IP
     Select IP Block Recovery Script File: Вибрати файл сценарію відновлення після блокування IP-адреси
     Running IP block recovery script: Виконання сценарію відновлення після блокування IP-адреси
     IP block recovery script failed: 'Не вдалося виконати сценарій відновлення після блокування IP-адреси (код виходу: {exitCode})'
@@ -1089,7 +1089,7 @@ Settings:
       Excluded Channels: "Виключені канали"
       Tooltip: "Введіть ID каналу, щоб сегменти SponsorBlock у його відео не пропускалися. ID має точно збігатися з урахуванням регістру."
     Enable SponsorBlock Submission: Увімкнути надсилання даних до SponsorBlock
-    SponsorBlock Private User ID (optional): Приватний ідентифікатор користувача SponsorBlock (необов’язково)
+    SponsorBlock Private User ID (optional): Приватний ID користувача (необов’язково)
     SponsorBlock Private User ID Tooltip: Вставте приватний ідентифікатор користувача SponsorBlock із розширення браузера. Залиште поле порожнім, щоб використати ідентифікатор, створений застосунком.
     Generated SponsorBlock User ID: Створений ідентифікатор користувача SponsorBlock
     Generated SponsorBlock User ID Tooltip: Цей створений застосунком ідентифікатор користувача SponsorBlock можна використовувати в розширенні браузера або в застосунку на іншому комп’ютері.
@@ -1101,7 +1101,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Увімкнути Return YouTube Dislike
-    Return YouTube Dislike Url: URL-адреса API Return YouTube Dislike (типово https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: URL API
   Parental Control Settings:
     Disable Channel Links: Вимкнути посилання на канали
   Password Dialog:
@@ -1866,8 +1866,8 @@ Downloads:
   File Name Template: Шаблон назви файла
   File Name Template Help: 'Доступні поля: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Часовий діапазон і розділи
-  Start Time: Час початку (HH:MM:SS)
-  End Time: Час завершення (HH:MM:SS)
+  Start Time: Час початку
+  End Time: Час завершення
   Split by Chapters: Розділити на окремі файли за розділами
   Remove Segments: Видалити сегменти
   Subtitles and Metadata: Субтитри й метадані
@@ -1956,3 +1956,23 @@ Tray:
 Tray Icon:
   Title: "Значок у системному треї"
   Follow App Theme: "Використовувати тему застосунку"
+
+Form Inputs:
+  Enter Channels: "Введіть канали"
+  Enter Text: "Введіть текст"
+  Video URL: URL відео або списку відтворення
+  Paste Link: Вставте посилання на відео або список відтворення
+  Example: напр. {example}
+  No Minimum: Без мінімуму
+  No Maximum: Без максимуму
+  Any Age: Будь-який вік
+  Included Terms Example: напр. інструкція, огляд
+  Excluded Terms Example: напр. трейлер, анонс
+  Download Folder Hint: Залиште порожнім, щоб використовувати теку завантажень
+  Global Arguments Hint: Необов’язкові аргументи для кожного завантаження
+  Unlimited Hint: 0 — без обмежень
+  Add Argument: Додати аргумент
+  Template Name Example: напр. Лише аудіо
+  Download Arguments Hint: Необов’язкові аргументи для цього завантаження
+  Generated ID Hint: Залиште порожнім, щоб згенерувати ID
+  Default Value: "Типово: {value}"
