@@ -682,9 +682,9 @@ Settings:
     Update Managed Tools: Ажурирај
     Managed Tools Download Error Template: 'Није могуће преузети алате којима управља апликација: {errors}'
     Download Folder: Фасцикла за преузимање
-    Global Additional yt-dlp Arguments: Додатни yt-dlp аргументи
+    Global Additional yt-dlp Arguments: Додатни глобални аргументи за yt-dlp
     Concurrent Downloads: Истовремена преузимања
-    Bandwidth Limit: Ограничење протока (KiB/s)
+    Bandwidth Limit: Ограничење протока (KiB/s, 0 за неограничено)
     Choose Download Folder: Изабери фасциклу за преузимање
     Download Templates: Шаблони за преузимање
     Manage Download Templates: Управљај шаблонима за преузимање ({templateCount})
@@ -757,8 +757,8 @@ Settings:
       Automatic: Ажурирај аутоматски
       Ask: Питај пре ажурирања
       Manual: Ажурирај само ручно
-    yt-dlp Executable Path: Извршна датотека yt-dlp
-    FFmpeg Executable Path: Извршна датотека FFmpeg
+    yt-dlp Executable Path: Путања до извршне датотеке за yt-dlp
+    FFmpeg Executable Path: Путања до извршне датотеке за FFmpeg
     Restricted Playback Authentication: "yt-dlp колачићи"
     Cookie Source: Извор колачића
     Cookie Sources:
@@ -1008,7 +1008,7 @@ Settings:
     Enhanced Privacy Enabled: Побољшана приватност је омогућена. Сервер чува само шифроване податке синхронизације.
     Enhanced Privacy Unsupported: Упозорење — овај сервер не подржава побољшану приватност. Синхронизовани подаци су видљиви администратору сервера.
     Description: 'Синхронизујте претплате, профиле, плејлисте, историју гледања и подржана подешавања са OpenTubeX или LibreTube сервером за синхронизацију. LibreTube сервери можда не подржавају све функције синхронизације.'
-    Server URL: URL сервера за синхронизацију
+    Server URL: URL сервера
     Checking Server: Провера сервера за синхронизацију…
     Server Unavailable: Повезивање са овим сервером за синхронизацију није могуће. Проверите URL и покушајте поново.
     Username: Корисничко име
@@ -1099,7 +1099,7 @@ Settings:
   Proxy Settings:
     Proxy Username: Корисничко име за прокси
     Proxy Password: Лозинка за прокси
-    IP Block Recovery Script Path: Скрипта за опоравак од блокирања IP-а
+    IP Block Recovery Script Path: Путања скрипте за опоравак од IP блокаде
     Select IP Block Recovery Script File: Изабери датотеку скрипте за опоравак од IP блокаде
     Running IP block recovery script: Покретање скрипте за опоравак од IP блокаде
     IP block recovery script failed: 'Скрипта за опоравак од IP блокаде није успела (излазни кôд: {exitCode})'
@@ -1111,7 +1111,7 @@ Settings:
       Excluded Channels: "Изузети канали"
       Tooltip: "Унесите ID канала да се SponsorBlock сегменти не прескачу у његовим видео-снимцима. ID мора да се подудара тачно и разликује велика и мала слова."
     Enable SponsorBlock Submission: Омогући слање у SponsorBlock
-    SponsorBlock Private User ID (optional): Приватни кориснички ID (опционо)
+    SponsorBlock Private User ID (optional): Приватни SponsorBlock кориснички ID (опционално)
     SponsorBlock Private User ID Tooltip: Налепите приватни SponsorBlock кориснички ID из проширења прегледача. Оставите празно да бисте користили ID који је направила апликација.
     Generated SponsorBlock User ID: SponsorBlock кориснички ID који је направила апликација
     Generated SponsorBlock User ID Tooltip: Овај SponsorBlock кориснички ID који је направила апликација може да се користи у проширењу прегледача или при коришћењу апликације на другом рачунару.
@@ -1123,7 +1123,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Омогући Return YouTube Dislike
-    Return YouTube Dislike Url: URL API-ја
+    Return YouTube Dislike Url: URL за Return YouTube Dislike API (подразумевано је https://ryd-proxy.kavin.rocks)
   Parental Control Settings:
     Disable Channel Links: Онемогући везе ка каналима
   Password Dialog:
@@ -1901,8 +1901,8 @@ Downloads:
   File Name Template: Шаблон назива датотеке
   File Name Template Help: 'Доступна поља: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Временски опсег и поглавља
-  Start Time: Почетно време
-  End Time: Завршно време
+  Start Time: Почетно време (HH:MM:SS)
+  End Time: Завршно време (HH:MM:SS)
   Split by Chapters: Подели поглавља у засебне датотеке
   Remove Segments: Уклони сегменте
   Subtitles and Metadata: Титлови и метаподаци
@@ -1991,23 +1991,3 @@ Tray:
 Tray Icon:
   Title: "Икона у системској палети"
   Follow App Theme: "Прати тему апликације"
-
-Form Inputs:
-  Enter Channels: "Унесите канале"
-  Enter Text: "Унесите текст"
-  Video URL: URL видеа или плејлисте
-  Paste Link: Налепите везу до видеа или плејлисте
-  Example: нпр. {example}
-  No Minimum: Без минимума
-  No Maximum: Без максимума
-  Any Age: Било која старост
-  Included Terms Example: нпр. упутство, рецензија
-  Excluded Terms Example: нпр. трејлер, преглед
-  Download Folder Hint: Оставите празно да користите фасциклу Преузимања
-  Global Arguments Hint: Опциони аргументи за свако преузимање
-  Unlimited Hint: 0 за неограничено
-  Add Argument: Додајте аргумент
-  Template Name Example: нпр. Само звук
-  Download Arguments Hint: Опциони аргументи за ово преузимање
-  Generated ID Hint: Оставите празно да генеришете ID
-  Default Value: "Подразумевано: {value}"

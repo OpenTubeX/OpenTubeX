@@ -660,9 +660,9 @@ Settings:
     Update Managed Tools: Eguneratu
     Managed Tools Download Error Template: 'Ezin izan dira kudeatutako tresnak deskargatu: {errors}'
     Download Folder: Deskargen karpeta
-    Global Additional yt-dlp Arguments: yt-dlp argumentu gehigarriak
+    Global Additional yt-dlp Arguments: yt-dlp-ren argumentu global gehigarriak
     Concurrent Downloads: Aldibereko deskargak
-    Bandwidth Limit: Banda-zabaleraren muga (KiB/s)
+    Bandwidth Limit: Banda-zabaleraren muga (KiB/s, 0 mugarik gabe)
     Choose Download Folder: Aukeratu deskargen karpeta
     Download Templates: Deskarga-txantiloiak
     Manage Download Templates: Kudeatu deskarga-txantiloiak ({templateCount})
@@ -735,8 +735,8 @@ Settings:
       Automatic: Eguneratu automatikoki
       Ask: Galdetu eguneratu aurretik
       Manual: Eguneratu eskuz soilik
-    yt-dlp Executable Path: yt-dlp exekutagarria
-    FFmpeg Executable Path: FFmpeg exekutagarria
+    yt-dlp Executable Path: yt-dlp exekutagarriaren bide-izena
+    FFmpeg Executable Path: FFmpeg exekutagarriaren bide-izena
     Restricted Playback Authentication: "yt-dlp cookieak"
     Cookie Source: Cookieen jatorria
     Cookie Sources:
@@ -968,7 +968,7 @@ Settings:
     Enhanced Privacy Enabled: Pribatutasun hobetua gaituta dago. Zerbitzariak sinkronizatutako datu zifratuak soilik gordetzen ditu.
     Enhanced Privacy Unsupported: Abisua. Zerbitzari honek ez du pribatutasun hobetua onartzen. Sinkronizatutako datuak zerbitzariaren operadoreak ikus ditzake.
     Description: 'Sinkronizatu harpidetzak, profilak, erreprodukzio-zerrendak, ikustaldien historia eta onartutako ezarpenak OpenTubeX edo LibreTube sinkronizazio-zerbitzari batekin. Baliteke LibreTube zerbitzariek sinkronizazio-eginbide guztiak ez onartzea.'
-    Server URL: Sinkronizazio-zerbitzariaren URLa
+    Server URL: Zerbitzariaren URLa
     Checking Server: Sinkronizazio-zerbitzaria egiaztatzen…
     Server Unavailable: Ezin da sinkronizazio-zerbitzari honekin konektatu. Egiaztatu URLa eta saiatu berriro.
     Username: Erabiltzaile-izena
@@ -1058,7 +1058,7 @@ Settings:
     Open All Tabs Confirmation: "Fitxa guztiak ireki?"
     Server Update Required: "Eguneratu zerbitzari hau zifratutako zuzeneko sinkronizazioa onartzeko."
   Proxy Settings:
-    IP Block Recovery Script Path: IP blokeoaren berreskuratze-scripta
+    IP Block Recovery Script Path: IP blokeoa berreskuratzeko scriptaren bide-izena
     Select IP Block Recovery Script File: Hautatu IP blokeoa berreskuratzeko script-fitxategia
     Running IP block recovery script: IP blokeoa berreskuratzeko scripta exekutatzen
     IP block recovery script failed: 'IP blokeoa berreskuratzeko scriptak huts egin du (irteera-kodea: {exitCode})'
@@ -1070,7 +1070,7 @@ Settings:
       Excluded Channels: "Salbuetsitako kanalak"
       Tooltip: "Sartu kanalaren IDa haren bideoetan SponsorBlock segmentuak ez saltatzeko. IDak bat etorri behar du zehazki, maiuskulak eta minuskulak bereizita."
     Enable SponsorBlock Submission: Gaitu SponsorBlock-era bidaltzea
-    SponsorBlock Private User ID (optional): Erabiltzailearen ID pribatua (aukerakoa)
+    SponsorBlock Private User ID (optional): SponsorBlock erabiltzaile-ID pribatua (aukerakoa)
     SponsorBlock Private User ID Tooltip: Itsatsi arakatzailearen hedapeneko SponsorBlock erabiltzaile-ID pribatua. Utzi hutsik aplikazioak sortutako ID bat erabiltzeko.
     Generated SponsorBlock User ID: Aplikazioak sortutako SponsorBlock erabiltzaile-IDa
     Generated SponsorBlock User ID Tooltip: Aplikazioak sortutako SponsorBlock erabiltzaile-ID hau arakatzailearen hedapenean edo aplikazioa beste ordenagailu batean erabiltzean erabil dezakezu.
@@ -1082,7 +1082,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Gaitu Return YouTube Dislike
-    Return YouTube Dislike Url: APIaren URLa
+    Return YouTube Dislike Url: Return YouTube Dislike APIaren URLa (lehenetsia https://ryd-proxy.kavin.rocks da)
   Password Dialog:
     Incorrect Password: Pasahitza ez da zuzena
     Unlock: Desblokeatu
@@ -1845,8 +1845,8 @@ Downloads:
   File Name Template: Fitxategi-izenaren txantiloia
   File Name Template Help: 'Eremu erabilgarriak: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Denbora-tartea eta kapituluak
-  Start Time: Hasiera-unea
-  End Time: Amaiera-unea
+  Start Time: Hasiera-unea (HH:MM:SS)
+  End Time: Amaiera-unea (HH:MM:SS)
   Split by Chapters: Zatitu kapitulu bakoitza fitxategi bereizi batean
   Remove Segments: Kendu segmentuak
   Subtitles and Metadata: Azpitituluak eta metadatuak
@@ -1932,23 +1932,3 @@ Tray:
 Tray Icon:
   Title: "Sistemaren erretiluko ikonoa"
   Follow App Theme: "Jarraitu aplikazioaren gaiari"
-
-Form Inputs:
-  Enter Channels: "Sartu kanalak"
-  Enter Text: "Sartu testua"
-  Video URL: Bideoaren edo erreprodukzio-zerrendaren URLa
-  Paste Link: Itsatsi bideo edo erreprodukzio-zerrenda baten esteka
-  Example: adib. {example}
-  No Minimum: Gutxienekorik ez
-  No Maximum: Gehienekorik ez
-  Any Age: Edozein antzinatasun
-  Included Terms Example: adib. tutoriala, iritzia
-  Excluded Terms Example: adib. trailerra, aurrerapena
-  Download Folder Hint: Utzi hutsik Deskargak karpeta erabiltzeko
-  Global Arguments Hint: Aukerako argumentuak deskarga guztietarako
-  Unlimited Hint: 0 mugarik ez izateko
-  Add Argument: Gehitu argumentu bat
-  Template Name Example: adib. Audioa soilik
-  Download Arguments Hint: Aukerako argumentuak deskarga honetarako
-  Generated ID Hint: Utzi hutsik ID bat sortzeko
-  Default Value: "Lehenetsia: {value}"

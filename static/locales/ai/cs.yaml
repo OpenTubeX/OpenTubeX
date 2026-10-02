@@ -660,9 +660,9 @@ Settings:
     Update Managed Tools: Aktualizovat
     Managed Tools Download Error Template: 'Spravované nástroje se nepodařilo stáhnout: {errors}'
     Download Folder: Složka pro stahování
-    Global Additional yt-dlp Arguments: Další argumenty yt-dlp
+    Global Additional yt-dlp Arguments: Globální dodatečné argumenty yt-dlp
     Concurrent Downloads: Souběžná stahování
-    Bandwidth Limit: Omezení přenosové rychlosti (KiB/s)
+    Bandwidth Limit: Omezení přenosové rychlosti (KiB/s, 0 znamená bez omezení)
     Choose Download Folder: Vybrat složku pro stahování
     Download Templates: Šablony stahování
     Manage Download Templates: Spravovat šablony stahování ({templateCount})
@@ -735,8 +735,8 @@ Settings:
       Automatic: Aktualizovat automaticky
       Ask: Před aktualizací se zeptat
       Manual: Aktualizovat pouze ručně
-    yt-dlp Executable Path: Spustitelný soubor yt-dlp
-    FFmpeg Executable Path: Spustitelný soubor FFmpeg
+    yt-dlp Executable Path: Cesta ke spustitelnému souboru yt-dlp
+    FFmpeg Executable Path: Cesta ke spustitelnému souboru FFmpeg
     Restricted Playback Authentication: "Cookies yt-dlp"
     Cookie Source: Zdroj cookies
     Cookie Sources:
@@ -968,7 +968,7 @@ Settings:
     Enhanced Privacy Enabled: Rozšířená ochrana soukromí je zapnutá. Server ukládá pouze šifrovaná synchronizovaná data.
     Enhanced Privacy Unsupported: Varování. Tento server nepodporuje rozšířenou ochranu soukromí. Jeho provozovatel může synchronizovaná data zobrazit.
     Description: 'Synchronizujte odběry, profily, playlisty, historii sledování a podporovaná nastavení se synchronizačním serverem OpenTubeX nebo LibreTube. Servery LibreTube nemusí podporovat všechny funkce synchronizace.'
-    Server URL: URL synchronizačního serveru
+    Server URL: Adresa URL serveru
     Checking Server: Kontrola synchronizačního serveru…
     Server Unavailable: K tomuto synchronizačnímu serveru se nelze připojit. Zkontrolujte adresu URL a zkuste to znovu.
     Username: Uživatelské jméno
@@ -1058,7 +1058,7 @@ Settings:
     Open All Tabs Confirmation: "Otevřít všechny karty?"
     Server Update Required: "Aktualizujte tento server, aby podporoval šifrovanou synchronizaci v reálném čase."
   Proxy Settings:
-    IP Block Recovery Script Path: Skript pro obnovení po zablokování IP
+    IP Block Recovery Script Path: Cesta ke skriptu pro obnovení po blokování IP adresy
     Select IP Block Recovery Script File: Vybrat soubor skriptu pro obnovení po blokování IP adresy
     Running IP block recovery script: Spouštění skriptu pro obnovení po blokování IP adresy
     IP block recovery script failed: 'Skript pro obnovení po blokování IP adresy selhal (návratový kód: {exitCode})'
@@ -1067,7 +1067,7 @@ Settings:
     Failed to select IP block recovery script: Skript pro obnovení po blokování IP adresy se nepodařilo vybrat
   SponsorBlock Settings:
     Enable SponsorBlock Submission: Povolit odesílání do SponsorBlock
-    SponsorBlock Private User ID (optional): Soukromé ID uživatele (volitelné)
+    SponsorBlock Private User ID (optional): Soukromé ID uživatele SponsorBlock (volitelné)
     SponsorBlock Private User ID Tooltip: Vložte soukromé ID uživatele SponsorBlock z rozšíření prohlížeče. Chcete-li používat ID vytvořené aplikací, ponechte pole prázdné.
     Generated SponsorBlock User ID: Vytvořené ID uživatele SponsorBlock
     Generated SponsorBlock User ID Tooltip: Toto ID uživatele SponsorBlock vytvořené aplikací můžete použít v rozšíření prohlížeče nebo v aplikaci na jiném počítači.
@@ -1079,7 +1079,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Povolit Return YouTube Dislike
-    Return YouTube Dislike Url: URL API
+    Return YouTube Dislike Url: Adresa URL API Return YouTube Dislike (výchozí je https://ryd-proxy.kavin.rocks)
   Password Dialog:
     Incorrect Password: Nesprávné heslo
     Unlock: Odemknout
@@ -1827,8 +1827,8 @@ Downloads:
   File Name Template: Šablona názvu souboru
   File Name Template Help: 'Dostupná pole: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Časový rozsah a kapitoly
-  Start Time: Čas začátku
-  End Time: Čas konce
+  Start Time: Čas začátku (HH:MM:SS)
+  End Time: Čas konce (HH:MM:SS)
   Split by Chapters: Rozdělit kapitoly do samostatných souborů
   Remove Segments: Odebrat úseky
   Subtitles and Metadata: Titulky a metadata
@@ -1914,23 +1914,3 @@ Tray:
 Tray Icon:
   Title: "Ikona v oznamovací oblasti"
   Follow App Theme: "Použít motiv aplikace"
-
-Form Inputs:
-  Enter Channels: "Zadejte kanály"
-  Enter Text: "Zadejte text"
-  Video URL: URL videa nebo playlistu
-  Paste Link: Vložte odkaz na video nebo playlist
-  Example: např. {example}
-  No Minimum: Bez minima
-  No Maximum: Bez maxima
-  Any Age: Libovolné stáří
-  Included Terms Example: např. návod, recenze
-  Excluded Terms Example: např. trailer, ukázka
-  Download Folder Hint: Ponechte prázdné pro použití složky Stažené soubory
-  Global Arguments Hint: Volitelné argumenty pro každé stahování
-  Unlimited Hint: 0 pro neomezenou rychlost
-  Add Argument: Přidejte argument
-  Template Name Example: např. Pouze zvuk
-  Download Arguments Hint: Volitelné argumenty pro toto stahování
-  Generated ID Hint: Ponechte prázdné pro vygenerování ID
-  Default Value: "Výchozí: {value}"

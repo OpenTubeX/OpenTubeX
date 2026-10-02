@@ -662,9 +662,9 @@ Settings:
     Update Managed Tools: Uppdatera
     Managed Tools Download Error Template: 'Det gick inte att ladda ned de hanterade verktygen: {errors}'
     Download Folder: Nedladdningsmapp
-    Global Additional yt-dlp Arguments: Ytterligare yt-dlp-argument
+    Global Additional yt-dlp Arguments: Globala extra argument för yt-dlp
     Concurrent Downloads: Samtidiga nedladdningar
-    Bandwidth Limit: Bandbreddsgräns (KiB/s)
+    Bandwidth Limit: Bandbreddsgräns (KiB/s, 0 för obegränsat)
     Choose Download Folder: Välj nedladdningsmapp
     Download Templates: Nedladdningsmallar
     Manage Download Templates: Hantera nedladdningsmallar ({templateCount})
@@ -737,8 +737,8 @@ Settings:
       Automatic: Uppdatera automatiskt
       Ask: Fråga före uppdatering
       Manual: Uppdatera endast manuellt
-    yt-dlp Executable Path: Körbar fil för yt-dlp
-    FFmpeg Executable Path: Körbar fil för FFmpeg
+    yt-dlp Executable Path: Sökväg till yt-dlp-programfilen
+    FFmpeg Executable Path: Sökväg till FFmpeg-programfilen
     Restricted Playback Authentication: "yt-dlp-kakor"
     Cookie Source: Källa för kakor
     Cookie Sources:
@@ -973,7 +973,7 @@ Settings:
     Enhanced Privacy Enabled: Förstärkt integritet är aktiverad. Servern lagrar endast krypterade synkroniseringsdata.
     Enhanced Privacy Unsupported: Varning! Den här servern stöder inte förstärkt integritet. Synkroniserade data är synliga för serveroperatören.
     Description: 'Synkronisera prenumerationer, profiler, spellistor, visningshistorik och inställningar som stöds med en synkroniseringsserver för OpenTubeX eller LibreTube. LibreTube-servrar stöder kanske inte alla synkroniseringsfunktioner.'
-    Server URL: Synkroniseringsserverns URL
+    Server URL: Server-URL
     Checking Server: Kontrollerar synkroniseringsservern…
     Server Unavailable: Det gick inte att ansluta till synkroniseringsservern. Kontrollera URL:en och försök igen.
     Username: Användarnamn
@@ -1062,7 +1062,7 @@ Settings:
     Open All Tabs Confirmation: "Öppna alla flikar?"
     Server Update Required: "Uppdatera den här servern för att stödja krypterad synkronisering i realtid."
   Proxy Settings:
-    IP Block Recovery Script Path: Skript för återställning efter IP-blockering
+    IP Block Recovery Script Path: Sökväg till skript för återställning efter IP-blockering
     Select IP Block Recovery Script File: Välj skriptfil för återställning efter IP-blockering
     Running IP block recovery script: Kör skript för återställning efter IP-blockering
     IP block recovery script failed: 'Skriptet för återställning efter IP-blockering misslyckades (slutkod: {exitCode})'
@@ -1071,7 +1071,7 @@ Settings:
     Failed to select IP block recovery script: Det gick inte att välja skript för återställning efter IP-blockering
   SponsorBlock Settings:
     Enable SponsorBlock Submission: Aktivera inskickning till SponsorBlock
-    SponsorBlock Private User ID (optional): Privat användar-ID (valfritt)
+    SponsorBlock Private User ID (optional): Privat användar-ID för SponsorBlock (valfritt)
     SponsorBlock Private User ID Tooltip: Klistra in ditt privata användar-ID för SponsorBlock från webbläsartillägget. Lämna tomt för att använda ett ID som appen skapar.
     Generated SponsorBlock User ID: Skapat användar-ID för SponsorBlock
     Generated SponsorBlock User ID Tooltip: Detta användar-ID för SponsorBlock har skapats av appen och kan användas i webbläsartillägget eller när du använder appen på en annan dator.
@@ -1083,7 +1083,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Aktivera Return YouTube Dislike
-    Return YouTube Dislike Url: API-URL
+    Return YouTube Dislike Url: API-URL för Return YouTube Dislike (standard är https://ryd-proxy.kavin.rocks)
   Password Dialog:
     Incorrect Password: Felaktigt lösenord
     Unlock: Lås upp
@@ -1844,8 +1844,8 @@ Downloads:
   File Name Template: Filnamnsmall
   File Name Template Help: 'Tillgängliga fält: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Tidsintervall och kapitel
-  Start Time: Starttid
-  End Time: Sluttid
+  Start Time: Starttid (HH:MM:SS)
+  End Time: Sluttid (HH:MM:SS)
   Split by Chapters: Dela upp i separata filer efter kapitel
   Remove Segments: Ta bort segment
   Subtitles and Metadata: Undertexter och metadata
@@ -1934,23 +1934,3 @@ Tray:
 Tray Icon:
   Title: "Ikon i systemfältet"
   Follow App Theme: "Följ appens tema"
-
-Form Inputs:
-  Enter Channels: "Ange kanaler"
-  Enter Text: "Ange text"
-  Video URL: Video- eller spelliste-URL
-  Paste Link: Klistra in en länk till en video eller spellista
-  Example: t.ex. {example}
-  No Minimum: Ingen minimigräns
-  No Maximum: Ingen maxgräns
-  Any Age: Valfri ålder
-  Included Terms Example: t.ex. handledning, recension
-  Excluded Terms Example: t.ex. trailer, förhandsvisning
-  Download Folder Hint: Lämna tomt för att använda mappen Hämtade filer
-  Global Arguments Hint: Valfria argument för varje hämtning
-  Unlimited Hint: 0 för obegränsat
-  Add Argument: Lägg till ett argument
-  Template Name Example: t.ex. Endast ljud
-  Download Arguments Hint: Valfria argument för denna hämtning
-  Generated ID Hint: Lämna tomt för att generera ett ID
-  Default Value: "Standard: {value}"

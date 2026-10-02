@@ -777,9 +777,9 @@ Settings:
     Update Managed Tools: Actualizar
     Managed Tools Download Error Template: 'No se pudieron descargar las herramientas gestionadas: {errors}'
     Download Folder: Carpeta de descargas
-    Global Additional yt-dlp Arguments: Argumentos adicionales de yt-dlp
+    Global Additional yt-dlp Arguments: Argumentos adicionales globales de yt-dlp
     Concurrent Downloads: Descargas simultáneas
-    Bandwidth Limit: Límite de ancho de banda (KiB/s)
+    Bandwidth Limit: Límite de ancho de banda (KiB/s, 0 para ilimitado)
     Choose Download Folder: Elegir carpeta de descargas
     Download Templates: Plantillas de descarga
     Manage Download Templates: Gestionar plantillas de descarga ({templateCount})
@@ -852,8 +852,8 @@ Settings:
       Automatic: Actualizar automáticamente
       Ask: Preguntar antes de actualizar
       Manual: Actualizar solo manualmente
-    yt-dlp Executable Path: Ejecutable de yt-dlp
-    FFmpeg Executable Path: Ejecutable de FFmpeg
+    yt-dlp Executable Path: Ruta del ejecutable yt-dlp
+    FFmpeg Executable Path: Ruta del ejecutable FFmpeg
     Restricted Playback Authentication: "Cookies de yt-dlp"
     Cookie Source: Fuente de las cookies
     Cookie Sources:
@@ -1141,7 +1141,7 @@ Settings:
     Enhanced Privacy Enabled: La privacidad mejorada está activada. El servidor solo guarda datos de sincronización cifrados.
     Enhanced Privacy Unsupported: 'Advertencia: este servidor no admite la privacidad mejorada. Su operador puede ver los datos sincronizados.'
     Description: 'Sincroniza suscripciones, perfiles, listas de reproducción, historial de reproducciones y ajustes compatibles con un servidor de sincronización de OpenTubeX o LibreTube. Es posible que los servidores de LibreTube no admitan todas las funciones de sincronización.'
-    Server URL: URL del servidor de sincronización
+    Server URL: URL del servidor
     Checking Server: Comprobando el servidor de sincronización…
     Server Unavailable: No se pudo conectar a este servidor de sincronización. Comprueba la URL y vuelve a intentarlo.
     Username: Nombre de usuario
@@ -1234,7 +1234,7 @@ Settings:
     Proxy Warning: OpenTubeX no tiene un proxy incorporado, pero puede conectarse a un proxy externo, como uno que se ejecuta en su máquina como Tor o un proxy externo como un proxy SOCKS5 proporcionado por algunas VPN. Si está habilitado, asegúrese de que su proxy/Tor esté configurado correctamente, o OpenTubeX no podrá recuperar ningún dato.
     Proxy Username: Nombre de Usuario del proxy
     Proxy Password: Contraseña del proxy
-    IP Block Recovery Script Path: Script de recuperación del bloqueo de IP
+    IP Block Recovery Script Path: Ruta del script de recuperación tras un bloqueo de IP
     Select IP Block Recovery Script File: Seleccionar archivo del script de recuperación tras un bloqueo de IP
     Running IP block recovery script: Ejecutando script de recuperación tras un bloqueo de IP
     IP block recovery script failed: 'Falló el script de recuperación tras un bloqueo de IP (código de salida: {exitCode})'
@@ -1246,7 +1246,7 @@ Settings:
       Excluded Channels: "Canales excluidos"
       Tooltip: "Ingresa el ID de un canal para evitar que se salten los segmentos de SponsorBlock en sus videos. El ID debe coincidir exactamente y distingue mayúsculas de minúsculas."
     Enable SponsorBlock Submission: Activar envíos a SponsorBlock
-    SponsorBlock Private User ID (optional): ID de usuario privado (opcional)
+    SponsorBlock Private User ID (optional): ID de usuario privado de SponsorBlock (opcional)
     SponsorBlock Private User ID Tooltip: Pega el ID de usuario privado de SponsorBlock de la extensión del navegador. Déjalo vacío para usar un ID generado por la aplicación.
     Generated SponsorBlock User ID: ID de usuario de SponsorBlock generado
     Generated SponsorBlock User ID Tooltip: Este ID de usuario de SponsorBlock generado por la aplicación se puede usar en la extensión del navegador o al usar la aplicación en otro equipo.
@@ -1256,7 +1256,7 @@ Settings:
     Skip notification timeout: Duración de la notificación de omisión
     UseDeArrowTitles: Utilizar los títulos para el video de DeArrow
     UseDeArrowThumbnails: Utiliza DeArrow para las miniaturas
-    DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): URL de la API de miniaturas de DeArrow
+    DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): La dirección url de la API del generador de miniaturas de DeArrow (por defecto es https://dearrow-thumb.ajay.app)
     Skip Options:
       Skip Option: Omitir opción
       Auto Skip: Salto automático
@@ -1268,7 +1268,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Activar Return YouTube Dislike
-    Return YouTube Dislike Url: URL de la API
+    Return YouTube Dislike Url: URL de la API de Return YouTube Dislike (la predeterminada es https://ryd-proxy.kavin.rocks)
   Parental Control Settings:
     Parental Control Settings: Control parental
     Hide Unsubscribe Button: Ocultar botón de anular suscripción
@@ -2261,8 +2261,8 @@ Downloads:
   File Name Template: Plantilla de nombre de archivo
   File Name Template Help: 'Campos disponibles: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Intervalo de tiempo y capítulos
-  Start Time: Hora de inicio
-  End Time: Hora de fin
+  Start Time: Hora de inicio (HH:MM:SS)
+  End Time: Hora de fin (HH:MM:SS)
   Split by Chapters: Dividir en archivos separados por capítulo
   Remove Segments: Eliminar segmentos
   Subtitles and Metadata: Subtítulos y metadatos
@@ -2351,23 +2351,3 @@ Tray:
 Tray Icon:
   Title: "Icono de la bandeja"
   Follow App Theme: "Seguir el tema de la aplicación"
-
-Form Inputs:
-  Enter Channels: "Ingresa canales"
-  Enter Text: "Ingresa texto"
-  Video URL: URL del vídeo o de la lista
-  Paste Link: Pega un enlace de vídeo o de lista
-  Example: p. ej. {example}
-  No Minimum: Sin mínimo
-  No Maximum: Sin máximo
-  Any Age: Cualquier antigüedad
-  Included Terms Example: p. ej. tutorial, reseña
-  Excluded Terms Example: p. ej. tráiler, avance
-  Download Folder Hint: Déjalo vacío para usar tu carpeta de descargas
-  Global Arguments Hint: Argumentos opcionales para cada descarga
-  Unlimited Hint: 0 para ilimitado
-  Add Argument: Añade un argumento
-  Template Name Example: p. ej. Solo audio
-  Download Arguments Hint: Argumentos opcionales para esta descarga
-  Generated ID Hint: Déjalo vacío para generar un ID
-  Default Value: "Predeterminado: {value}"

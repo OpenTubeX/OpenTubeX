@@ -672,9 +672,9 @@ Settings:
     Update Managed Tools: புதுப்பி
     Managed Tools Download Error Template: 'நிர்வகிக்கப்பட்ட கருவிகளைப் பதிவிறக்க முடியவில்லை: {errors}'
     Download Folder: பதிவிறக்கக் கோப்புறை
-    Global Additional yt-dlp Arguments: கூடுதல் yt-dlp வாதங்கள்
+    Global Additional yt-dlp Arguments: பொதுவான கூடுதல் yt-dlp அளவுருக்கள்
     Concurrent Downloads: ஒரேநேரப் பதிவிறக்கங்கள்
-    Bandwidth Limit: அலைவரிசை வரம்பு (KiB/s)
+    Bandwidth Limit: அலைவரிசை வரம்பு (KiB/s, வரம்பில்லாமல் இருக்க 0)
     Choose Download Folder: பதிவிறக்கக் கோப்புறையைத் தேர்ந்தெடு
     Download Templates: பதிவிறக்க வார்ப்புருக்கள்
     Manage Download Templates: பதிவிறக்க வார்ப்புருக்களை நிர்வகி ({templateCount})
@@ -747,8 +747,8 @@ Settings:
       Automatic: தானாகப் புதுப்பி
       Ask: புதுப்பிக்கும் முன் கேள்
       Manual: கைமுறையாக மட்டும் புதுப்பி
-    yt-dlp Executable Path: yt-dlp இயக்கக்கூடிய கோப்பு
-    FFmpeg Executable Path: FFmpeg இயக்கக்கூடிய கோப்பு
+    yt-dlp Executable Path: yt-dlp இயக்கக்கூடிய கோப்பின் பாதை
+    FFmpeg Executable Path: FFmpeg இயக்கக்கூடிய கோப்பின் பாதை
     Restricted Playback Authentication: "yt-dlp குக்கீகள்"
     Cookie Source: குக்கீ மூலம்
     Cookie Sources:
@@ -992,7 +992,7 @@ Settings:
     Enhanced Privacy Enabled: மேம்பட்ட தனியுரிமை இயக்கப்பட்டுள்ளது. சேவையகம் மறையாக்கப்பட்ட ஒத்திசைவுத் தரவை மட்டுமே சேமிக்கும்.
     Enhanced Privacy Unsupported: 'எச்சரிக்கை: இந்தச் சேவையகம் மேம்பட்ட தனியுரிமையை ஆதரிக்காது. ஒத்திசைத்த தரவை அதன் இயக்குநர் பார்க்க முடியும்.'
     Description: 'OpenTubeX அல்லது LibreTube ஒத்திசைவு சேவையகத்துடன் சந்தாக்கள், சுயவிவரங்கள், இயக்கப்பட்டியல்கள், பார்த்த வரலாறு மற்றும் ஆதரிக்கப்படும் அமைப்புகளை ஒத்திசைக்கவும். LibreTube சேவையகங்கள் எல்லா ஒத்திசைவு அம்சங்களையும் ஆதரிக்காமல் இருக்கலாம்.'
-    Server URL: ஒத்திசைவு சேவையக URL
+    Server URL: சேவையக URL
     Checking Server: ஒத்திசைவுச் சேவையகம் சரிபார்க்கப்படுகிறது…
     Server Unavailable: இந்த ஒத்திசைவுச் சேவையகத்துடன் இணைக்க முடியவில்லை. URL-ஐச் சரிபார்த்து மீண்டும் முயலவும்.
     Username: பயனர்பெயர்
@@ -1081,7 +1081,7 @@ Settings:
     Open All Tabs Confirmation: "எல்லா தாவல்களையும் திறக்கவா?"
     Server Update Required: "மறையாக்கப்பட்ட நேரடி ஒத்திசைவை ஆதரிக்க இந்தச் சேவையகத்தைப் புதுப்பிக்கவும்."
   Proxy Settings:
-    IP Block Recovery Script Path: IP தடுப்பு மீட்பு நிரல்
+    IP Block Recovery Script Path: IP தடுப்பு மீட்பு நிரலாக்கப் பாதை
     Select IP Block Recovery Script File: IP தடுப்பு மீட்பு நிரலாக்கக் கோப்பைத் தேர்ந்தெடு
     Running IP block recovery script: IP தடுப்பு மீட்பு நிரலாக்கம் இயங்குகிறது
     IP block recovery script failed: 'IP தடுப்பு மீட்பு நிரலாக்கம் தோல்வியடைந்தது (வெளியேற்றக் குறியீடு: {exitCode})'
@@ -1093,7 +1093,7 @@ Settings:
       Excluded Channels: "விலக்கப்பட்ட சேனல்கள்"
       Tooltip: "அந்தச் சேனலின் காணொளிகளில் SponsorBlock பகுதிகள் தவிர்க்கப்படாமல் இருக்க சேனல் ID-ஐ உள்ளிடவும். ID எழுத்து வடிவத்துடன் துல்லியமாகப் பொருந்த வேண்டும்."
     Enable SponsorBlock Submission: SponsorBlock சமர்ப்பிப்பை இயக்கு
-    SponsorBlock Private User ID (optional): தனிப்பட்ட பயனர் ID (விருப்பம்)
+    SponsorBlock Private User ID (optional): SponsorBlock தனிப்பட்ட பயனர் ID (விருப்பத்தேர்வு)
     SponsorBlock Private User ID Tooltip: உலாவி நீட்சியிலிருந்து தனிப்பட்ட SponsorBlock பயனர் ID-ஐ ஒட்டவும். செயலி உருவாக்கிய ID-ஐப் பயன்படுத்த இதைக் காலியாக விடவும்.
     Generated SponsorBlock User ID: உருவாக்கிய SponsorBlock பயனர் ID
     Generated SponsorBlock User ID Tooltip: செயலி உருவாக்கிய இந்த SponsorBlock பயனர் ID-ஐ உலாவி நீட்சியிலும் மற்றொரு கணினியில் செயலியைப் பயன்படுத்தும்போதும் பயன்படுத்தலாம்.
@@ -1105,7 +1105,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Return YouTube Dislike-ஐ இயக்கு
-    Return YouTube Dislike Url: API URL
+    Return YouTube Dislike Url: Return YouTube Dislike API URL (இயல்புநிலை https://ryd-proxy.kavin.rocks)
   Parental Control Settings:
     Disable Channel Links: சேனல் இணைப்புகளை முடக்கு
   Password Dialog:
@@ -1878,8 +1878,8 @@ Downloads:
   File Name Template: கோப்புப் பெயர் வார்ப்புரு
   File Name Template Help: 'கிடைக்கும் புலங்கள்: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: நேர வரம்பும் அத்தியாயங்களும்
-  Start Time: தொடக்க நேரம்
-  End Time: முடிவு நேரம்
+  Start Time: தொடக்க நேரம் (HH:MM:SS)
+  End Time: முடிவு நேரம் (HH:MM:SS)
   Split by Chapters: அத்தியாயம் வாரியாகத் தனிக் கோப்புகளாகப் பிரி
   Remove Segments: பகுதிகளை அகற்று
   Subtitles and Metadata: துணைத்தலைப்புகளும் மெட்டாதரவும்
@@ -1968,23 +1968,3 @@ Tray:
 Tray Icon:
   Title: "கணினித் தட்டு சின்னம்"
   Follow App Theme: "செயலியின் கருப்பொருளைப் பின்பற்று"
-
-Form Inputs:
-  Enter Channels: "சேனல்களை உள்ளிடவும்"
-  Enter Text: "உரையை உள்ளிடவும்"
-  Video URL: வீடியோ அல்லது இயக்கப்பட்டியல் URL
-  Paste Link: வீடியோ அல்லது இயக்கப்பட்டியல் இணைப்பை ஒட்டவும்
-  Example: எ.கா. {example}
-  No Minimum: குறைந்தபட்சம் இல்லை
-  No Maximum: அதிகபட்சம் இல்லை
-  Any Age: எந்த வயதும்
-  Included Terms Example: எ.கா. பயிற்சி, விமர்சனம்
-  Excluded Terms Example: எ.கா. முன்னோட்டம், அறிமுகம்
-  Download Folder Hint: பதிவிறக்கக் கோப்புறையைப் பயன்படுத்த காலியாக விடவும்
-  Global Arguments Hint: ஒவ்வொரு பதிவிறக்கத்திற்கும் விருப்ப வாதங்கள்
-  Unlimited Hint: வரம்பற்றதற்கு 0
-  Add Argument: ஒரு வாதத்தைச் சேர்க்கவும்
-  Template Name Example: எ.கா. ஒலி மட்டும்
-  Download Arguments Hint: இந்தப் பதிவிறக்கத்திற்கான விருப்ப வாதங்கள்
-  Generated ID Hint: ID உருவாக்க காலியாக விடவும்
-  Default Value: "இயல்புநிலை: {value}"

@@ -668,9 +668,9 @@ Settings:
     Update Managed Tools: تحديث
     Managed Tools Download Error Template: 'تعذر تنزيل الأدوات المُدارة: {errors}'
     Download Folder: مجلد التنزيل
-    Global Additional yt-dlp Arguments: وسيطات yt-dlp الإضافية
+    Global Additional yt-dlp Arguments: وسيطات yt-dlp الإضافية العامة
     Concurrent Downloads: التنزيلات المتزامنة
-    Bandwidth Limit: حد النطاق الترددي (KiB/s)
+    Bandwidth Limit: حد النطاق الترددي (كيلو بايت/ثانية، 0 لعدد غير محدود)
     Choose Download Folder: اختر مجلد التنزيل
     Download Templates: قوالب التنزيل
     Manage Download Templates: إدارة تنزيل القوالب ({templateCount})
@@ -743,8 +743,8 @@ Settings:
       Automatic: التحديث تلقائيا
       Ask: اسأل قبل التحديث
       Manual: قم بالتحديث يدويًا فقط
-    yt-dlp Executable Path: ملف yt-dlp التنفيذي
-    FFmpeg Executable Path: ملف FFmpeg التنفيذي
+    yt-dlp Executable Path: yt-dlp المسار القابل للتنفيذ
+    FFmpeg Executable Path: المسار القابل للتنفيذ FFmpeg
     Restricted Playback Authentication: "ملفات تعريف ارتباط yt-dlp"
     Cookie Source: مصدر ملفات تعريف الارتباط
     Cookie Sources:
@@ -987,7 +987,7 @@ Settings:
     Enhanced Privacy Enabled: تم تمكين الخصوصية المحسنة. يقوم الخادم بتخزين بيانات المزامنة المشفرة فقط.
     Enhanced Privacy Unsupported: تحذير — هذا الخادم لا يدعم الخصوصية المحسنة. البيانات المتزامنة مرئية لمشغلها.
     Description: 'زامن الاشتراكات والملفات الشخصية وقوائم التشغيل وسجل المشاهدة والإعدادات المدعومة مع خادم مزامنة OpenTubeX أو LibreTube. قد لا تدعم خوادم LibreTube جميع ميزات المزامنة.'
-    Server URL: رابط خادم المزامنة
+    Server URL: عنوان URL للخادم
     Checking Server: جارٍ التحقق من خادم المزامنة…
     Server Unavailable: غير قادر على الاتصال بخادم المزامنة هذا. تحقق من عنوان URL وحاول مرة أخرى.
     Username: اسم المستخدم
@@ -1077,7 +1077,7 @@ Settings:
     Open All Tabs Confirmation: "هل تريد فتح كل علامات التبويب؟"
     Server Update Required: "حدّث هذا الخادم لدعم المزامنة المباشرة المشفّرة."
   Proxy Settings:
-    IP Block Recovery Script Path: برنامج استعادة حظر عنوان IP
+    IP Block Recovery Script Path: مسار البرنامج النصي لاسترداد كتلة IP
     Select IP Block Recovery Script File: حدد ملف البرنامج النصي لاسترداد حظر IP
     Running IP block recovery script: تشغيل البرنامج النصي لاسترداد كتلة IP
     IP block recovery script failed: 'فشل البرنامج النصي لاسترداد حظر IP (رمز الخروج: {exitCode})'
@@ -1089,7 +1089,7 @@ Settings:
       Excluded Channels: "القنوات المستثناة"
       Tooltip: "أدخل معرّف قناة لمنع تخطي مقاطع SponsorBlock في فيديوهاتها. يجب أن يطابق المعرّف تمامًا، مع مراعاة حالة الأحرف."
     Enable SponsorBlock Submission: تمكين تقديم SponsorBlock
-    SponsorBlock Private User ID (optional): معرّف المستخدم الخاص (اختياري)
+    SponsorBlock Private User ID (optional): معرف المستخدم الخاص لـ SponsorBlock (اختياري)
     SponsorBlock Private User ID Tooltip: الصق معرف مستخدم SponsorBlock الخاص من ملحق المتصفح. اترك هذا الحقل فارغًا لاستخدام المعرف الذي أنشأه التطبيق.
     Generated SponsorBlock User ID: تم إنشاء معرف مستخدم SponsorBlock
     Generated SponsorBlock User ID Tooltip: يمكن استخدام معرف مستخدم SponsorBlock الذي تم إنشاؤه بواسطة التطبيق في ملحق المتصفح أو إذا كنت تستخدم التطبيق على جهاز كمبيوتر آخر.
@@ -1101,7 +1101,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: إرجاع عدم الإعجاب على YouTube
     Enable Return YouTube Dislike: تمكين إرجاع عدم الإعجاب على YouTube
-    Return YouTube Dislike Url: رابط API
+    Return YouTube Dislike Url: قم بإرجاع عنوان URL لواجهة برمجة تطبيقات YouTube Dislike (الافتراضي هو https://ryd-proxy.kavin.rocks)
   Parental Control Settings:
     Disable Channel Links: تعطيل روابط القنوات
   Password Dialog:
@@ -1851,8 +1851,8 @@ Downloads:
   File Name Template: قالب اسم الملف
   File Name Template Help: 'الحقول المتاحة: {title}، {author}، {upload_date}، {id}، {playlist}، {playlist_index}، {ext}'
   Time Range and Chapters: النطاق الزمني والفصول
-  Start Time: وقت البدء
-  End Time: وقت الانتهاء
+  Start Time: 'وقت البدء (س س: د د: ث س)'
+  End Time: 'وقت الانتهاء (س س: د د: ث س)'
   Split by Chapters: تقسيم إلى ملفات منفصلة حسب الفصل
   Remove Segments: إزالة القطاعات
   Subtitles and Metadata: الترجمة والبيانات الوصفية
@@ -1941,23 +1941,3 @@ Tray:
 Tray Icon:
   Title: "أيقونة علبة النظام"
   Follow App Theme: "اتباع سمة التطبيق"
-
-Form Inputs:
-  Enter Channels: "أدخل القنوات"
-  Enter Text: "أدخل النص"
-  Video URL: رابط الفيديو أو قائمة التشغيل
-  Paste Link: الصق رابط فيديو أو قائمة تشغيل
-  Example: مثلًا {example}
-  No Minimum: لا حد أدنى
-  No Maximum: لا حد أقصى
-  Any Age: أي عمر
-  Included Terms Example: مثلًا شرح, مراجعة
-  Excluded Terms Example: مثلًا إعلان, معاينة
-  Download Folder Hint: اتركه فارغًا لاستخدام مجلد التنزيلات
-  Global Arguments Hint: وسيطات اختيارية لكل تنزيل
-  Unlimited Hint: 0 لعدم التقييد
-  Add Argument: أضف وسيطة
-  Template Name Example: مثلًا صوت فقط
-  Download Arguments Hint: وسيطات اختيارية لهذا التنزيل
-  Generated ID Hint: اتركه فارغًا لإنشاء معرّف
-  Default Value: "الافتراضي: {value}"

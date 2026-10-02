@@ -673,9 +673,9 @@ Settings:
     Update Managed Tools: Bijwerken
     Managed Tools Download Error Template: 'De beheerde hulpprogramma''s kunnen niet worden gedownload: {errors}'
     Download Folder: Downloadmap
-    Global Additional yt-dlp Arguments: Extra yt-dlp-argumenten
+    Global Additional yt-dlp Arguments: Algemene aanvullende yt-dlp-argumenten
     Concurrent Downloads: Gelijktijdige downloads
-    Bandwidth Limit: Bandbreedtelimiet (KiB/s)
+    Bandwidth Limit: Bandbreedtelimiet (KiB/s, 0 voor onbeperkt)
     Choose Download Folder: Downloadmap kiezen
     Download Templates: Downloadsjablonen
     Manage Download Templates: Downloadsjablonen beheren ({templateCount})
@@ -748,8 +748,8 @@ Settings:
       Automatic: Automatisch bijwerken
       Ask: Vragen vóór het bijwerken
       Manual: Alleen handmatig bijwerken
-    yt-dlp Executable Path: Uitvoerbaar yt-dlp-bestand
-    FFmpeg Executable Path: Uitvoerbaar FFmpeg-bestand
+    yt-dlp Executable Path: Pad naar uitvoerbaar bestand van yt-dlp
+    FFmpeg Executable Path: Pad naar uitvoerbaar bestand van FFmpeg
     Restricted Playback Authentication: "yt-dlp-cookies"
     Cookie Source: Cookiebron
     Cookie Sources:
@@ -992,7 +992,7 @@ Settings:
     Enhanced Privacy Enabled: Verbeterde privacy is ingeschakeld. De server bewaart alleen versleutelde synchronisatiegegevens.
     Enhanced Privacy Unsupported: Waarschuwing. Deze server ondersteunt geen verbeterde privacy. De beheerder kan gesynchroniseerde gegevens bekijken.
     Description: 'Synchroniseer abonnementen, profielen, afspeellijsten, kijkgeschiedenis en ondersteunde instellingen met een OpenTubeX- of LibreTube-synchronisatieserver. LibreTube-servers ondersteunen mogelijk niet alle synchronisatiefuncties.'
-    Server URL: URL van synchronisatieserver
+    Server URL: Server-URL
     Checking Server: Synchronisatieserver controleren…
     Server Unavailable: Kan geen verbinding maken met deze synchronisatieserver. Controleer de URL en probeer het opnieuw.
     Username: Gebruikersnaam
@@ -1082,7 +1082,7 @@ Settings:
     Open All Tabs Confirmation: "Alle tabbladen openen?"
     Server Update Required: "Werk deze server bij om versleutelde livesynchronisatie te ondersteunen."
   Proxy Settings:
-    IP Block Recovery Script Path: Script voor herstel na IP-blokkering
+    IP Block Recovery Script Path: Pad naar herstelscript voor IP-blokkade
     Select IP Block Recovery Script File: Herstelscript voor IP-blokkade selecteren
     Running IP block recovery script: Herstelscript voor IP-blokkade uitvoeren
     IP block recovery script failed: 'Herstelscript voor IP-blokkade mislukt (afsluitcode: {exitCode})'
@@ -1094,7 +1094,7 @@ Settings:
       Excluded Channels: "Uitgesloten kanalen"
       Tooltip: "Voer een kanaal-ID in om te voorkomen dat SponsorBlock-segmenten in de video’s van dit kanaal worden overgeslagen. De ID moet exact overeenkomen en is hoofdlettergevoelig."
     Enable SponsorBlock Submission: Inzenden naar SponsorBlock inschakelen
-    SponsorBlock Private User ID (optional): Privégebruikers-ID (optioneel)
+    SponsorBlock Private User ID (optional): Privé-gebruikers-ID van SponsorBlock (optioneel)
     SponsorBlock Private User ID Tooltip: Plak de privé-gebruikers-ID van SponsorBlock uit de browserextensie. Laat dit leeg om een door de app gegenereerde ID te gebruiken.
     Generated SponsorBlock User ID: Gegenereerde SponsorBlock-gebruikers-ID
     Generated SponsorBlock User ID Tooltip: Deze door de app gegenereerde SponsorBlock-gebruikers-ID kan worden gebruikt in de browserextensie of als je de app op een andere computer gebruikt.
@@ -1106,7 +1106,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Return YouTube Dislike inschakelen
-    Return YouTube Dislike Url: API-URL
+    Return YouTube Dislike Url: API-URL van Return YouTube Dislike (standaard is https://ryd-proxy.kavin.rocks)
   Parental Control Settings:
     Disable Channel Links: Kanaallinks uitschakelen
   Password Dialog:
@@ -1884,8 +1884,8 @@ Downloads:
   File Name Template: Sjabloon voor bestandsnaam
   File Name Template Help: 'Beschikbare velden: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Tijdsbereik en hoofdstukken
-  Start Time: Begintijd
-  End Time: Eindtijd
+  Start Time: Begintijd (UU:MM:SS)
+  End Time: Eindtijd (UU:MM:SS)
   Split by Chapters: Per hoofdstuk in afzonderlijke bestanden splitsen
   Remove Segments: Segmenten verwijderen
   Subtitles and Metadata: Ondertiteling en metadata
@@ -1974,23 +1974,3 @@ Tray:
 Tray Icon:
   Title: "Systeemvakpictogram"
   Follow App Theme: "Appthema volgen"
-
-Form Inputs:
-  Enter Channels: "Voer kanalen in"
-  Enter Text: "Voer tekst in"
-  Video URL: Video- of afspeellijst-URL
-  Paste Link: Plak een video- of afspeellijstlink
-  Example: bijv. {example}
-  No Minimum: Geen minimum
-  No Maximum: Geen maximum
-  Any Age: Elke ouderdom
-  Included Terms Example: bijv. uitleg, recensie
-  Excluded Terms Example: bijv. trailer, voorvertoning
-  Download Folder Hint: Laat leeg om je downloadmap te gebruiken
-  Global Arguments Hint: Optionele argumenten voor elke download
-  Unlimited Hint: 0 voor onbeperkt
-  Add Argument: Voeg een argument toe
-  Template Name Example: bijv. Alleen audio
-  Download Arguments Hint: Optionele argumenten voor deze download
-  Generated ID Hint: Laat leeg om een ID te genereren
-  Default Value: "Standaard: {value}"

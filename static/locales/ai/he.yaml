@@ -673,9 +673,9 @@ Settings:
     Update Managed Tools: עדכון
     Managed Tools Download Error Template: 'לא ניתן להוריד את הכלים המנוהלים: {errors}'
     Download Folder: תיקיית הורדות
-    Global Additional yt-dlp Arguments: ארגומנטים נוספים של yt-dlp
+    Global Additional yt-dlp Arguments: ארגומנטים נוספים כלליים של yt-dlp
     Concurrent Downloads: הורדות במקביל
-    Bandwidth Limit: מגבלת רוחב פס (KiB/s)
+    Bandwidth Limit: מגבלת רוחב פס (KiB/s, 0 ללא הגבלה)
     Choose Download Folder: בחירת תיקיית הורדות
     Download Templates: תבניות הורדה
     Manage Download Templates: ניהול תבניות הורדה ({templateCount})
@@ -748,8 +748,8 @@ Settings:
       Automatic: עדכון אוטומטי
       Ask: לשאול לפני עדכון
       Manual: עדכון ידני בלבד
-    yt-dlp Executable Path: קובץ ההפעלה של yt-dlp
-    FFmpeg Executable Path: קובץ ההפעלה של FFmpeg
+    yt-dlp Executable Path: נתיב קובץ ההפעלה של yt-dlp
+    FFmpeg Executable Path: נתיב קובץ ההפעלה של FFmpeg
     Restricted Playback Authentication: "עוגיות yt-dlp"
     Cookie Source: מקור העוגיות
     Cookie Sources:
@@ -992,7 +992,7 @@ Settings:
     Enhanced Privacy Enabled: פרטיות מוגברת מופעלת. השרת שומר רק נתוני סנכרון מוצפנים.
     Enhanced Privacy Unsupported: אזהרה — השרת הזה אינו תומך בפרטיות מוגברת. מפעיל השרת יכול לראות את הנתונים המסונכרנים.
     Description: 'סנכרון מינויים, פרופילים, רשימות השמעה, היסטוריית צפייה והגדרות נתמכות עם שרת סנכרון של OpenTubeX או LibreTube. ייתכן ששרתי LibreTube לא יתמכו בכל תכונות הסנכרון.'
-    Server URL: כתובת שרת הסנכרון
+    Server URL: כתובת ה-URL של השרת
     Checking Server: שרת הסנכרון נבדק…
     Server Unavailable: לא ניתן להתחבר לשרת הסנכרון. בדקו את כתובת ה-URL ונסו שוב.
     Username: שם משתמש
@@ -1082,7 +1082,7 @@ Settings:
     Open All Tabs Confirmation: "לפתוח את כל הכרטיסיות?"
     Server Update Required: "יש לעדכן שרת זה כדי לתמוך בסנכרון מוצפן בזמן אמת."
   Proxy Settings:
-    IP Block Recovery Script Path: סקריפט שחזור מחסימת IP
+    IP Block Recovery Script Path: נתיב לסקריפט התאוששות מחסימת IP
     Select IP Block Recovery Script File: בחירת קובץ סקריפט התאוששות מחסימת IP
     Running IP block recovery script: סקריפט ההתאוששות מחסימת IP פועל
     IP block recovery script failed: 'סקריפט ההתאוששות מחסימת IP נכשל (קוד יציאה: {exitCode})'
@@ -1094,7 +1094,7 @@ Settings:
       Excluded Channels: "ערוצים מוחרגים"
       Tooltip: "יש להזין מזהה ערוץ כדי למנוע דילוג על מקטעי SponsorBlock בסרטונים שלו. המזהה חייב להתאים בדיוק, כולל אותיות גדולות וקטנות."
     Enable SponsorBlock Submission: הפעלת שליחה ל-SponsorBlock
-    SponsorBlock Private User ID (optional): מזהה משתמש פרטי (אופציונלי)
+    SponsorBlock Private User ID (optional): מזהה משתמש פרטי של SponsorBlock (לא חובה)
     SponsorBlock Private User ID Tooltip: הדביקו את מזהה המשתמש הפרטי של SponsorBlock מהרחבת הדפדפן. השאירו שדה זה ריק כדי להשתמש במזהה שיצרה האפליקציה.
     Generated SponsorBlock User ID: מזהה משתמש של SponsorBlock שיצרה האפליקציה
     Generated SponsorBlock User ID Tooltip: אפשר להשתמש במזהה המשתמש של SponsorBlock שיצרה האפליקציה בהרחבת הדפדפן או באפליקציה במחשב אחר.
@@ -1106,7 +1106,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: הפעלת Return YouTube Dislike
-    Return YouTube Dislike Url: כתובת API
+    Return YouTube Dislike Url: כתובת ה-API של Return YouTube Dislike (ברירת המחדל היא https://ryd-proxy.kavin.rocks)
   Parental Control Settings:
     Disable Channel Links: השבתת קישורים לערוצים
   Password Dialog:
@@ -1875,8 +1875,8 @@ Downloads:
   File Name Template: תבנית שם קובץ
   File Name Template Help: 'שדות זמינים: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: טווח זמן ופרקים
-  Start Time: זמן התחלה
-  End Time: זמן סיום
+  Start Time: זמן התחלה (HH:MM:SS)
+  End Time: זמן סיום (HH:MM:SS)
   Split by Chapters: פיצול לקובץ נפרד לכל פרק
   Remove Segments: הסרת מקטעים
   Subtitles and Metadata: כתוביות ומטא-נתונים
@@ -1965,23 +1965,3 @@ Tray:
 Tray Icon:
   Title: "סמל במגש המערכת"
   Follow App Theme: "התאמה לערכת הנושא של היישום"
-
-Form Inputs:
-  Enter Channels: "הזנת ערוצים"
-  Enter Text: "הזנת טקסט"
-  Video URL: כתובת סרטון או רשימת השמעה
-  Paste Link: הדבק קישור לסרטון או לרשימת השמעה
-  Example: למשל {example}
-  No Minimum: ללא מינימום
-  No Maximum: ללא מקסימום
-  Any Age: כל גיל
-  Included Terms Example: למשל מדריך, סקירה
-  Excluded Terms Example: למשל קדימון, תצוגה מקדימה
-  Download Folder Hint: השאר ריק כדי להשתמש בתיקיית ההורדות
-  Global Arguments Hint: ארגומנטים אופציונליים לכל הורדה
-  Unlimited Hint: 0 ללא הגבלה
-  Add Argument: הוסף ארגומנט
-  Template Name Example: למשל שמע בלבד
-  Download Arguments Hint: ארגומנטים אופציונליים להורדה זו
-  Generated ID Hint: השאר ריק כדי ליצור מזהה
-  Default Value: "ברירת מחדל: {value}"

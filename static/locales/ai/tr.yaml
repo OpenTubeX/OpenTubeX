@@ -660,9 +660,9 @@ Settings:
     Update Managed Tools: Güncelle
     Managed Tools Download Error Template: 'Yönetilen araçlar indirilemedi: {errors}'
     Download Folder: İndirme Klasörü
-    Global Additional yt-dlp Arguments: Ek yt-dlp argümanları
+    Global Additional yt-dlp Arguments: Genel Ek yt-dlp Argümanları
     Concurrent Downloads: Eş Zamanlı İndirmeler
-    Bandwidth Limit: Bant genişliği sınırı (KiB/s)
+    Bandwidth Limit: Bant genişliği sınırı (KiB/sn, sınırsız için 0)
     Choose Download Folder: İndirme Klasörü Seç
     Download Templates: İndirme Şablonları
     Manage Download Templates: 'İndirme Şablonlarını Yönet ({templateCount})'
@@ -735,8 +735,8 @@ Settings:
       Automatic: Otomatik güncelle
       Ask: Güncellemeden önce sor
       Manual: Yalnızca elle güncelle
-    yt-dlp Executable Path: yt-dlp çalıştırılabilir dosyası
-    FFmpeg Executable Path: FFmpeg çalıştırılabilir dosyası
+    yt-dlp Executable Path: yt-dlp Yürütülebilir Dosya Yolu
+    FFmpeg Executable Path: FFmpeg Yürütülebilir Dosya Yolu
     Restricted Playback Authentication: "yt-dlp çerezleri"
     Cookie Source: Çerez Kaynağı
     Cookie Sources:
@@ -969,7 +969,7 @@ Settings:
     Enhanced Privacy Enabled: Gelişmiş gizlilik etkin. Sunucu yalnızca şifrelenmiş eşitleme verilerini saklar.
     Enhanced Privacy Unsupported: 'Uyarı: Bu sunucu gelişmiş gizliliği desteklemiyor. Eşitlenen veriler sunucu işletmecisi tarafından görülebilir.'
     Description: 'Abonelikleri, profilleri, oynatma listelerini, izleme geçmişini ve desteklenen ayarları bir OpenTubeX veya LibreTube eşitleme sunucusuyla eşitleyin. LibreTube sunucuları tüm eşitleme özelliklerini desteklemeyebilir.'
-    Server URL: Eşitleme sunucusu URL'si
+    Server URL: Sunucu URL'si
     Checking Server: Eşitleme sunucusu denetleniyor…
     Server Unavailable: Bu eşitleme sunucusuna bağlanılamadı. URL'yi denetleyip yeniden deneyin.
     Username: Kullanıcı adı
@@ -1058,7 +1058,7 @@ Settings:
     Open All Tabs Confirmation: "Tüm sekmeler açılsın mı?"
     Server Update Required: "Şifreli canlı eşitlemeyi desteklemek için bu sunucuyu güncelleyin."
   Proxy Settings:
-    IP Block Recovery Script Path: IP engeli kurtarma betiği
+    IP Block Recovery Script Path: IP Engeli Kurtarma Betiği Yolu
     Select IP Block Recovery Script File: IP Engeli Kurtarma Betiği Dosyasını Seç
     Running IP block recovery script: IP engeli kurtarma betiği çalıştırılıyor
     IP block recovery script failed: 'IP engeli kurtarma betiği başarısız oldu (çıkış kodu: {exitCode})'
@@ -1067,7 +1067,7 @@ Settings:
     Failed to select IP block recovery script: IP engeli kurtarma betiği seçilemedi
   SponsorBlock Settings:
     Enable SponsorBlock Submission: SponsorBlock Gönderimini Etkinleştir
-    SponsorBlock Private User ID (optional): Özel kullanıcı kimliği (isteğe bağlı)
+    SponsorBlock Private User ID (optional): SponsorBlock Özel Kullanıcı Kimliği (isteğe bağlı)
     SponsorBlock Private User ID Tooltip: Tarayıcı uzantısındaki özel SponsorBlock kullanıcı kimliğini yapıştırın. Uygulama tarafından oluşturulan bir kimlik kullanmak için boş bırakın.
     Generated SponsorBlock User ID: Oluşturulan SponsorBlock Kullanıcı Kimliği
     Generated SponsorBlock User ID Tooltip: Uygulama tarafından oluşturulan bu SponsorBlock kullanıcı kimliği, tarayıcı uzantısında veya uygulamayı başka bir bilgisayarda kullandığınızda kullanılabilir.
@@ -1079,7 +1079,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Return YouTube Dislike'ı Etkinleştir
-    Return YouTube Dislike Url: API URL'si
+    Return YouTube Dislike Url: Return YouTube Dislike API URL'si (Varsayılan https://ryd-proxy.kavin.rocks)
   Password Dialog:
     Incorrect Password: Parola yanlış
     Unlock: Kilidi aç
@@ -1828,8 +1828,8 @@ Downloads:
   File Name Template: Dosya Adı Şablonu
   File Name Template Help: 'Kullanılabilir alanlar: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Zaman Aralığı ve Bölümler
-  Start Time: Başlangıç Zamanı
-  End Time: Bitiş Zamanı
+  Start Time: Başlangıç Zamanı (HH:MM:SS)
+  End Time: Bitiş Zamanı (HH:MM:SS)
   Split by Chapters: Bölümlere göre ayrı dosyalara ayır
   Remove Segments: Bölümleri kaldır
   Subtitles and Metadata: Alt Yazılar ve Meta Veriler
@@ -1915,23 +1915,3 @@ Tray:
 Tray Icon:
   Title: "Sistem tepsisi simgesi"
   Follow App Theme: "Uygulama temasını izle"
-
-Form Inputs:
-  Enter Channels: "Kanalları girin"
-  Enter Text: "Metin girin"
-  Video URL: Video veya oynatma listesi URL'si
-  Paste Link: Video veya oynatma listesi bağlantısı yapıştırın
-  Example: örn. {example}
-  No Minimum: Alt sınır yok
-  No Maximum: Üst sınır yok
-  Any Age: Herhangi bir yaş
-  Included Terms Example: örn. eğitim, inceleme
-  Excluded Terms Example: örn. fragman, önizleme
-  Download Folder Hint: İndirilenler klasörünü kullanmak için boş bırakın
-  Global Arguments Hint: Her indirme için isteğe bağlı argümanlar
-  Unlimited Hint: Sınırsız için 0
-  Add Argument: Argüman ekleyin
-  Template Name Example: örn. Yalnızca ses
-  Download Arguments Hint: Bu indirme için isteğe bağlı argümanlar
-  Generated ID Hint: Kimlik oluşturmak için boş bırakın
-  Default Value: "Varsayılan: {value}"

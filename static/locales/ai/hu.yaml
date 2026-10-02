@@ -660,9 +660,9 @@ Settings:
     Update Managed Tools: Frissítés
     Managed Tools Download Error Template: 'Nem sikerült letölteni a felügyelt eszközöket: {errors}'
     Download Folder: Letöltési mappa
-    Global Additional yt-dlp Arguments: További yt-dlp argumentumok
+    Global Additional yt-dlp Arguments: Globális további yt-dlp-argumentumok
     Concurrent Downloads: Egyidejű letöltések
-    Bandwidth Limit: Sávszélességkorlát (KiB/s)
+    Bandwidth Limit: Sávszélességkorlát (KiB/s, 0 = korlátlan)
     Choose Download Folder: Letöltési mappa kiválasztása
     Download Templates: Letöltési sablonok
     Manage Download Templates: Letöltési sablonok kezelése ({templateCount})
@@ -735,8 +735,8 @@ Settings:
       Automatic: Automatikus frissítés
       Ask: Rákérdezés frissítés előtt
       Manual: Csak kézi frissítés
-    yt-dlp Executable Path: yt-dlp végrehajtható fájl
-    FFmpeg Executable Path: FFmpeg végrehajtható fájl
+    yt-dlp Executable Path: yt-dlp végrehajtható fájljának elérési útja
+    FFmpeg Executable Path: FFmpeg végrehajtható fájljának elérési útja
     Restricted Playback Authentication: "yt-dlp sütik"
     Cookie Source: Sütik forrása
     Cookie Sources:
@@ -968,7 +968,7 @@ Settings:
     Enhanced Privacy Enabled: A fokozott adatvédelem be van kapcsolva. A kiszolgáló csak titkosított szinkronizálási adatokat tárol.
     Enhanced Privacy Unsupported: Figyelmeztetés — ez a kiszolgáló nem támogatja a fokozott adatvédelmet. A szinkronizált adatokat a kiszolgáló üzemeltetője láthatja.
     Description: 'Szinkronizáld a feliratkozásokat, profilokat, lejátszási listákat, megtekintési előzményeket és támogatott beállításokat egy OpenTubeX- vagy LibreTube-szinkronizálási kiszolgálóval. Előfordulhat, hogy a LibreTube-kiszolgálók nem támogatnak minden szinkronizálási funkciót.'
-    Server URL: Szinkronizálási kiszolgáló URL-je
+    Server URL: Kiszolgáló URL-je
     Checking Server: Szinkronizálási kiszolgáló ellenőrzése…
     Server Unavailable: Nem lehet kapcsolódni ehhez a szinkronizálási kiszolgálóhoz. Ellenőrizze az URL-t, majd próbálja újra.
     Username: Felhasználónév
@@ -1058,7 +1058,7 @@ Settings:
     Open All Tabs Confirmation: "Megnyitja az összes lapot?"
     Server Update Required: "Frissítse ezt a kiszolgálót a titkosított, valós idejű szinkronizálás támogatásához."
   Proxy Settings:
-    IP Block Recovery Script Path: IP-blokkolás helyreállítási szkriptje
+    IP Block Recovery Script Path: IP-tiltás helyreállító parancsfájljának elérési útja
     Select IP Block Recovery Script File: IP-tiltás helyreállító parancsfájljának kiválasztása
     Running IP block recovery script: IP-tiltás helyreállító parancsfájljának futtatása
     IP block recovery script failed: 'Az IP-tiltás helyreállító parancsfájlja hibával leállt (kilépési kód: {exitCode})'
@@ -1067,7 +1067,7 @@ Settings:
     Failed to select IP block recovery script: Nem sikerült kiválasztani az IP-tiltás helyreállító parancsfájlját
   SponsorBlock Settings:
     Enable SponsorBlock Submission: SponsorBlock-beküldések engedélyezése
-    SponsorBlock Private User ID (optional): Privát felhasználói azonosító (opcionális)
+    SponsorBlock Private User ID (optional): Privát SponsorBlock felhasználói azonosító (nem kötelező)
     SponsorBlock Private User ID Tooltip: Illessze be a böngészőbővítményből a privát SponsorBlock felhasználói azonosítót. Hagyja üresen az alkalmazás által létrehozott azonosító használatához.
     Generated SponsorBlock User ID: Létrehozott SponsorBlock felhasználói azonosító
     Generated SponsorBlock User ID Tooltip: Az alkalmazás által létrehozott SponsorBlock felhasználói azonosító használható a böngészőbővítményben, illetve akkor, ha az alkalmazást másik számítógépen használja.
@@ -1079,7 +1079,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Return YouTube Dislike engedélyezése
-    Return YouTube Dislike Url: API URL-je
+    Return YouTube Dislike Url: Return YouTube Dislike API URL-je (alapértelmezés szerint https://ryd-proxy.kavin.rocks)
   Password Dialog:
     Incorrect Password: Hibás jelszó
     Unlock: Feloldás
@@ -1828,8 +1828,8 @@ Downloads:
   File Name Template: Fájlnévsablon
   File Name Template Help: 'Elérhető mezők: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Időtartomány és fejezetek
-  Start Time: Kezdési idő
-  End Time: Befejezési idő
+  Start Time: Kezdési idő (HH:MM:SS)
+  End Time: Befejezési idő (HH:MM:SS)
   Split by Chapters: Felosztás fejezetenként külön fájlokra
   Remove Segments: Szegmensek eltávolítása
   Subtitles and Metadata: Feliratok és metaadatok
@@ -1915,23 +1915,3 @@ Tray:
 Tray Icon:
   Title: "Tálcaikon"
   Follow App Theme: "Alkalmazástéma követése"
-
-Form Inputs:
-  Enter Channels: "Csatornák megadása"
-  Enter Text: "Szöveg megadása"
-  Video URL: Videó vagy lejátszási lista URL-je
-  Paste Link: Illesszen be egy videó- vagy lejátszásilista-hivatkozást
-  Example: pl. {example}
-  No Minimum: Nincs minimum
-  No Maximum: Nincs maximum
-  Any Age: Bármilyen korú
-  Included Terms Example: pl. útmutató, értékelés
-  Excluded Terms Example: pl. előzetes, bemutató
-  Download Folder Hint: Hagyja üresen a Letöltések mappa használatához
-  Global Arguments Hint: Opcionális argumentumok minden letöltéshez
-  Unlimited Hint: 0 a korlátlanhoz
-  Add Argument: Argumentum hozzáadása
-  Template Name Example: pl. Csak hang
-  Download Arguments Hint: Opcionális argumentumok ehhez a letöltéshez
-  Generated ID Hint: Hagyja üresen egy azonosító létrehozásához
-  Default Value: "Alapértelmezett: {value}"

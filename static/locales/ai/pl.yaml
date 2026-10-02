@@ -274,7 +274,7 @@ Settings:
     Enable Setting Before Adding Channel: Przed dodaniem kanału włącz co najmniej jedno ustawienie kanału w ustawieniach odtwarzania
   Download Settings:
     Concurrent Downloads: Jednoczesne pobieranie
-    Bandwidth Limit: Limit przepustowości (KiB/s)
+    Bandwidth Limit: Limit przepustowości (KiB/s, 0 oznacza brak limitu)
   External Software Settings:
     Create YouTube session: "Utwórz sesję YouTube"
     YouTube session hint: "Zaloguj się w razie potrzeby i zapisz sesję. W ustawieniach wybierz, czy używać jej do pobierania, odtwarzania lub napisów."
@@ -1040,8 +1040,8 @@ Downloads:
   File Name Template: Szablon nazwy pliku
   File Name Template Help: 'Dostępne pola: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Zakres czasu i rozdziały
-  Start Time: Czas rozpoczęcia
-  End Time: Czas zakończenia
+  Start Time: Czas rozpoczęcia (HH:MM:SS)
+  End Time: Czas zakończenia (HH:MM:SS)
   Split by Chapters: Podziel rozdziały na osobne pliki
   Remove Segments: Usuń segmenty
   Subtitles and Metadata: Napisy i metadane
@@ -1140,23 +1140,3 @@ Tray Icon:
 
 Stats:
   All devices: Wszystkie urządzenia
-
-Form Inputs:
-  Enter Channels: "Wprowadź kanały"
-  Enter Text: "Wprowadź tekst"
-  Video URL: URL filmu lub playlisty
-  Paste Link: Wklej link do filmu lub playlisty
-  Example: np. {example}
-  No Minimum: Bez minimum
-  No Maximum: Bez maksimum
-  Any Age: Dowolny wiek
-  Included Terms Example: np. poradnik, recenzja
-  Excluded Terms Example: np. zwiastun, podgląd
-  Download Folder Hint: Pozostaw puste, aby użyć folderu Pobrane
-  Global Arguments Hint: Opcjonalne argumenty dla każdego pobierania
-  Unlimited Hint: 0 oznacza brak limitu
-  Add Argument: Dodaj argument
-  Template Name Example: np. Tylko dźwięk
-  Download Arguments Hint: Opcjonalne argumenty dla tego pobierania
-  Generated ID Hint: Pozostaw puste, aby wygenerować ID
-  Default Value: "Domyślnie: {value}"

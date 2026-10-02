@@ -660,9 +660,9 @@ Settings:
     Update Managed Tools: "Hizivaat"
     Managed Tools Download Error Template: "N'eus ket bet gallet pellgargañ an ostilhoù meret: {errors}"
     Download Folder: "Teuliad pellgargañ"
-    Global Additional yt-dlp Arguments: Arventennoù ouzhpenn yt-dlp
+    Global Additional yt-dlp Arguments: "Arventennoù ouzhpenn hollek evit yt-dlp"
     Concurrent Downloads: "Pellgargadennoù war un dro"
-    Bandwidth Limit: Bevenn ledander-bann (KiB/s)
+    Bandwidth Limit: "Bevenn ledander-bann (KiB/s, 0 evit hep bevenn)"
     Choose Download Folder: "Dibab un teuliad pellgargañ"
     Download Templates: "Patromoù pellgargañ"
     Manage Download Templates: "Merañ ar patromoù pellgargañ ({templateCount})"
@@ -735,8 +735,8 @@ Settings:
       Automatic: "Hizivaat ent emgefreek"
       Ask: "Goulenn a-raok hizivaat"
       Manual: "Hizivaat gant an dorn hepken"
-    yt-dlp Executable Path: Restr erounezadus yt-dlp
-    FFmpeg Executable Path: Restr erounezadus FFmpeg
+    yt-dlp Executable Path: "Hent erounezadus yt-dlp"
+    FFmpeg Executable Path: "Hent erounezadus FFmpeg"
     Restricted Playback Authentication: "Toupinoù yt-dlp"
     Cookie Source: "Tarzh an toupinoù"
     Cookie Sources:
@@ -968,7 +968,7 @@ Settings:
     Enhanced Privacy Enabled: "Gweredekaet eo ar prevezded kreñvaet. Roadennoù goubredañ sifret hepken a vez kadavet gant ar servijer."
     Enhanced Privacy Unsupported: "Diwallit: ar servijer-mañ ne skor ket ar prevezded kreñvaet. Gallout a ra e verour gwelet ar roadennoù goubredet."
     Description: 'Goubredit ar c’houmanantoù, ar profiloù, ar rolloù-lenn, istor ar selladennoù hag an arventennoù skoret gant ur servijer goubredañ OpenTubeX pe LibreTube. Marteze ne skor ket servijerioù LibreTube an holl arc’hwelioù goubredañ.'
-    Server URL: URL ar servijer goubredañ
+    Server URL: "URL ar servijer"
     Checking Server: "O wiriañ ar servijer goubredañ…"
     Server Unavailable: "N'eus ket bet gallet kennaskañ ouzh ar servijer goubredañ-mañ. Gwiriit an URL ha klaskit en-dro."
     Username: "Anv implijer"
@@ -1058,7 +1058,7 @@ Settings:
     Open All Tabs Confirmation: "Digeriñ an holl ivinelloù?"
     Server Update Required: "Hizivait ar servijer-mañ evit ma vo skoret ar c’henamzeriañ sifret en amzer wir."
   Proxy Settings:
-    IP Block Recovery Script Path: Skript adtapout goude ur stankadur IP
+    IP Block Recovery Script Path: "Hent ar skript adtapout goude ur stankadur IP"
     Select IP Block Recovery Script File: "Dibab restr ar skript adtapout goude ur stankadur IP"
     Running IP block recovery script: "Oc'h erounit ar skript adtapout goude ur stankadur IP"
     IP block recovery script failed: "C'hwitet eo ar skript adtapout goude ur stankadur IP (kod ermaeziañ: {exitCode})"
@@ -1067,7 +1067,7 @@ Settings:
     Failed to select IP block recovery script: "N'eus ket bet gallet dibab ar skript adtapout goude ur stankadur IP"
   SponsorBlock Settings:
     Enable SponsorBlock Submission: "Gweredekaat ar c'hasadennoù da SponsorBlock"
-    SponsorBlock Private User ID (optional): ID prevez an implijer (diret)
+    SponsorBlock Private User ID (optional): "Naoudi implijer prevez SponsorBlock (diret)"
     SponsorBlock Private User ID Tooltip: "Pegit an naoudi implijer prevez SponsorBlock eus askouezh ar merdeer. Laoskit goullo evit implijout un naoudi krouet gant an arload."
     Generated SponsorBlock User ID: "Naoudi implijer SponsorBlock krouet"
     Generated SponsorBlock User ID Tooltip: "Gallout a reer implijout an naoudi implijer SponsorBlock krouet gant an arload en askouezh ar merdeer pe pa vez implijet an arload war un urzhiataer all."
@@ -1079,7 +1079,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: "Gweredekaat Return YouTube Dislike"
-    Return YouTube Dislike Url: URL an API
+    Return YouTube Dislike Url: "URL API Return YouTube Dislike (https://ryd-proxy.kavin.rocks dre ziouer)"
   Password Dialog:
     Incorrect Password: "Ger-tremen direizh"
     Unlock: "Dibrennañ"
@@ -1836,8 +1836,8 @@ Downloads:
   File Name Template: "Patrom anv restr"
   File Name Template Help: "Maeziennoù hegerz: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}"
   Time Range and Chapters: "Etremez amzer ha chabistroù"
-  Start Time: Mare deroù
-  End Time: Mare dibenn
+  Start Time: "Mare deroù (HH:MM:SS)"
+  End Time: "Mare dibenn (HH:MM:SS)"
   Split by Chapters: "Dispartiañ e restroù distag dre chabistr"
   Remove Segments: "Dilemel rannoù"
   Subtitles and Metadata: "Istitloù ha metaroadennoù"
@@ -1923,23 +1923,3 @@ Tray:
 Tray Icon:
   Title: "Arlun ar maez reizhiad"
   Follow App Theme: "Heuliañ neuz an arload"
-
-Form Inputs:
-  Enter Channels: "Merkit ar chadennoù"
-  Enter Text: "Merkit un destenn"
-  Video URL: URL video pe roll-lenn
-  Paste Link: Pegit ul liamm video pe roll-lenn
-  Example: da skouer {example}
-  No Minimum: Hep izelañ
-  No Maximum: Hep uhelañ
-  Any Age: Oad forzh pe hini
-  Included Terms Example: da skouer kentel, selladenn
-  Excluded Terms Example: da skouer tañva, rakwel
-  Download Folder Hint: Lezit goullo evit implijout ho teuliad Pellgargadennoù
-  Global Arguments Hint: Arventennoù diret evit pep pellgargadenn
-  Unlimited Hint: 0 evit didermenet
-  Add Argument: Ouzhpennañ un arventenn
-  Template Name Example: da skouer Son hepken
-  Download Arguments Hint: Arventennoù diret evit ar bellgargadenn-mañ
-  Generated ID Hint: Lezit goullo evit genel un ID
-  Default Value: "Dre ziouer: {value}"
