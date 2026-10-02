@@ -10,6 +10,7 @@ const mainProfile = {
   name: 'All Channels',
   bgColor: '#d50000',
   textColor: '#FFFFFF',
+  icon: { type: 'initial' },
   subscriptions: []
 }
 
@@ -28,6 +29,122 @@ async function openProfileList(page) {
   await profileIcon(page).click()
   await page.locator('.profileSummary').click()
   await expect(page.locator('.profileList')).toBeVisible()
+}
+
+test('creates All Channels with the default person icon', async ({ app, page }) => {
+  await expect(profileIconInitial(page).locator('[data-icon="circle-user"] svg')).toBeVisible()
+  await expect.poll(async () => {
+    const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+    const records = contents.trim().split('\n').map(line => JSON.parse(line))
+    return records.findLast(record => record._id === 'allChannels' && !record.$$deleted)?.icon
+  }).toEqual({ type: 'icon', value: 'circle-user' })
+})
+
+test.describe('All Channels with a previously saved color', () => {
+  test.use({
+    seed: {
+      profiles: [
+        { ...mainProfile, bgColor: '#558B2F', icon: null },
+        { ...secondProfile, icon: null }
+      ]
+    }
+  })
+
+  test('adopts the person icon while keeping the saved color and other profile initials', async ({ app, page }) => {
+    await expect(profileIconInitial(page).locator('[data-icon="circle-user"] svg')).toBeVisible()
+    await expect(profileIconInitial(page)).toHaveCSS('background-color', 'rgb(85, 139, 47)')
+    await expect.poll(async () => {
+      const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+      const records = contents.trim().split('\n').map(line => JSON.parse(line))
+      return records.findLast(record => record._id === 'allChannels' && !record.$$deleted)
+    }).toEqual({ ...mainProfile, bgColor: '#558B2F', icon: { type: 'icon', value: 'circle-user' } })
+    await openProfileList(page)
+    await page.locator('.profileList .profileOption').filter({ hasText: 'Second profile' }).click()
+    await expect(profileIconInitial(page)).toHaveText('S')
+  })
+})
+
+test.describe('existing All Channels without an icon', () => {
+  test.use({ seed: { profiles: [{ ...mainProfile, icon: undefined }, secondProfile] } })
+
+  test('uses the person icon and keeps other profiles on their initials', async ({ app, page }) => {
+    await expect(profileIconInitial(page).locator('[data-icon="circle-user"] svg')).toBeVisible()
+    await expect.poll(async () => {
+      const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+      const records = contents.trim().split('\n').map(line => JSON.parse(line))
+      return records.findLast(record => record._id === 'allChannels' && !record.$$deleted)
+    }).toEqual({ ...mainProfile, icon: { type: 'icon', value: 'circle-user' } })
+    await openProfileList(page)
+    await page.locator('.profileList .profileOption').filter({ hasText: 'Second profile' }).click()
+    await expect(profileIconInitial(page)).toHaveText('S')
+  })
+
+  test('keeps the default icon when an older profile arrives from another window', async ({ page }) => {
+    const personIcon = profileIconInitial(page).locator('[data-icon="circle-user"] svg')
+    await expect(personIcon).toBeVisible()
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const profile = { ...store.getters.getActiveProfile }
+      profile.icon = null
+      store.commit('upsertProfileToList', profile)
+    })
+    await expect(personIcon).toBeVisible()
+  })
+})
+
+for (const iconPack of ['material', 'remix']) {
+  test.describe(`built-in profile icons (${iconPack})`, () => {
+    test.use({ seed: { settings: { iconPack }, profiles: [mainProfile, secondProfile] } })
+
+    test('previews, saves and resets built-in icons at desktop and phone widths', async ({ app, page }, testInfo) => {
+      await openProfileList(page)
+      await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
+      await page.locator('.card .profileList').getByText('All Channels').click()
+
+      const gallery = page.locator('.builtinIconOptions')
+      const preview = page.locator('.profilePreviewIcon')
+      await expect(gallery.getByRole('button')).toHaveCount(12)
+      await expect(gallery.locator('svg')).toHaveCount(12)
+      for (const [width, scale] of [[1200, 1], [390, 0.95]]) {
+        await page.setViewportSize({ width, height: 900 })
+        await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+        for (const label of ['Person', 'Headphones', 'Gaming', 'Art', 'Science']) {
+          const option = gallery.getByRole('button', { name: label, exact: true })
+          await option.click()
+          await expect(option).toHaveAttribute('aria-pressed', 'true')
+          await expect(preview.locator('.ft-icon')).toHaveAttribute('data-icon-pack', iconPack)
+          await expect(preview.locator('svg')).toBeVisible()
+          const galleryBox = await gallery.boundingBox()
+          expect(galleryBox.x).toBeGreaterThanOrEqual(0)
+          expect(galleryBox.x + galleryBox.width).toBeLessThanOrEqual(await page.evaluate(() => innerWidth))
+        }
+      }
+      await gallery.getByRole('button', { name: 'Gaming', exact: true }).click()
+      await page.getByRole('button', { name: 'Update Profile' }).click()
+      await expect(profileIconInitial(page).locator('[data-icon="gamepad"] svg')).toBeVisible()
+      await expect.poll(async () => {
+        const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+        const records = contents.trim().split('\n').map(line => JSON.parse(line))
+        return records.findLast(record => record._id === 'allChannels' && !record.$$deleted)?.icon
+      }).toEqual({ type: 'icon', value: 'gamepad' })
+
+      await page.evaluate(() => window.ftElectron.setZoomFactor(1))
+      await page.setViewportSize({ width: 1200, height: 1000 })
+      await page.locator('.profileIconHeading').scrollIntoViewIfNeeded()
+      await page.screenshot({ path: testInfo.outputPath(`profile-icons-${iconPack}.png`) })
+
+      await page.getByRole('button', { name: 'Use Initial' }).click()
+      await expect(preview).toHaveText('A')
+      await page.getByRole('button', { name: 'Update Profile' }).click()
+      await expect.poll(async () => {
+        const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+        const records = contents.trim().split('\n').map(line => JSON.parse(line))
+        return records.findLast(record => record._id === 'allChannels' && !record.$$deleted)?.icon
+      }).toEqual({ type: 'initial' })
+      await page.reload()
+      await expect(profileIconInitial(page)).toHaveText('A')
+    })
+  })
 }
 
 test.describe('profile selector', () => {

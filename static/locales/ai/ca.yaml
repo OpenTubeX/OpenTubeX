@@ -1481,6 +1481,19 @@ About:
   Please read the {roomRulesLink}: Llegiu les {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: L'OpenTubeX és possible gràcies a {creditsPageLink}
 Profile:
+  Icon Names:
+    Person: Persona
+    People: Persones
+    Headphones: Auriculars
+    Gaming: Jocs
+    Film: Pel·lícula
+    Art: Art
+    Science: Ciència
+    Globe: Globus terraqüi
+    Heart: Cor
+    Sun: Sol
+    Moon: Lluna
+    Trophy: Trofeu
   Toggle Profile List: Commuta la llista de perfils
   Edit Profile Name: Edita el nom del perfil
   Create Profile Name: Crea un nom de perfil

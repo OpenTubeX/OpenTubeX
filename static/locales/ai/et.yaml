@@ -1120,6 +1120,19 @@ About:
   Matrix: Matrix
   Email: E-post
 Profile:
+  Icon Names:
+    Person: Inimene
+    People: Inimesed
+    Headphones: Kõrvaklapid
+    Gaming: Mängud
+    Film: Film
+    Art: Kunst
+    Science: Teadus
+    Globe: Gloobus
+    Heart: Süda
+    Sun: Päike
+    Moon: Kuu
+    Trophy: Karikas
   Profile Icon: Profiiliikoon
   Choose an Emoji: Vali emotikon
   Custom Emoji: Kohandatud emotikon

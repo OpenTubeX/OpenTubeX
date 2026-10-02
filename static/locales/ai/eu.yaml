@@ -1123,6 +1123,19 @@ About:
   Matrix: Matrix
   Email: Helbide elektronikoa
 Profile:
+  Icon Names:
+    Person: Pertsona
+    People: Pertsonak
+    Headphones: Entzungailuak
+    Gaming: Jokoak
+    Film: Filma
+    Art: Artea
+    Science: Zientzia
+    Globe: Lur-globoa
+    Heart: Bihotza
+    Sun: Eguzkia
+    Moon: Ilargia
+    Trophy: Garaikurra
   Profile Icon: Profilaren ikonoa
   Choose an Emoji: Aukeratu emojia
   Custom Emoji: Emoji pertsonalizatua

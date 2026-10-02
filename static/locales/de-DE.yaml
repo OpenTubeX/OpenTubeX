@@ -2310,6 +2310,19 @@ Yes: Ja
 No: Nein
 Locale Name: Deutsch
 Profile:
+  Icon Names:
+    Person: Person
+    People: Personen
+    Headphones: Kopfhörer
+    Gaming: Gaming
+    Film: Film
+    Art: Kunst
+    Science: Wissenschaft
+    Globe: Globus
+    Heart: Herz
+    Sun: Sonne
+    Moon: Mond
+    Trophy: Pokal
   '{profile} is now the active profile': '{profile} ist jetzt dein aktives Profil'
   Your default profile has been changed to your primary profile: Dein Standardprofil wurde in dein Hauptprofil geändert
   Removed {profile} from your profiles: '{profile} wurde aus deinen Profilen entfernt'

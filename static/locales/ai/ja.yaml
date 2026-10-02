@@ -1120,6 +1120,19 @@ About:
   Matrix: Matrix
   Email: メール
 Profile:
+  Icon Names:
+    Person: 人物
+    People: 人々
+    Headphones: ヘッドホン
+    Gaming: ゲーム
+    Film: 映画
+    Art: アート
+    Science: 科学
+    Globe: 地球
+    Heart: ハート
+    Sun: 太陽
+    Moon: 月
+    Trophy: トロフィー
   Profile Icon: プロフィールアイコン
   Choose an Emoji: 絵文字を選択
   Custom Emoji: カスタム絵文字

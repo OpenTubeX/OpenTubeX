@@ -1171,6 +1171,19 @@ About:
   Please read the {roomRulesLink}: Прочитајте {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX постоји захваљујући {creditsPageLink}
 Profile:
+  Icon Names:
+    Person: Особа
+    People: Људи
+    Headphones: Слушалице
+    Gaming: Игре
+    Film: Филм
+    Art: Уметност
+    Science: Наука
+    Globe: Глобус
+    Heart: Срце
+    Sun: Сунце
+    Moon: Месец
+    Trophy: Трофеј
   Profile Icon: Икона профила
   Choose an Emoji: Изабери емоџи
   Custom Emoji: Прилагођени емоџи

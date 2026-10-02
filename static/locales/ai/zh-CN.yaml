@@ -1120,6 +1120,19 @@ About:
   Matrix: Matrix
   Email: 电子邮件
 Profile:
+  Icon Names:
+    Person: 人物
+    People: 人群
+    Headphones: 耳机
+    Gaming: 游戏
+    Film: 电影
+    Art: 艺术
+    Science: 科学
+    Globe: 地球
+    Heart: 爱心
+    Sun: 太阳
+    Moon: 月亮
+    Trophy: 奖杯
   Profile Icon: 配置文件图标
   Choose an Emoji: 选择表情符号
   Custom Emoji: 自定义表情符号

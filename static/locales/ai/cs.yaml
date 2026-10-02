@@ -1120,6 +1120,19 @@ About:
   Matrix: Matrix
   Email: E-mail
 Profile:
+  Icon Names:
+    Person: Osoba
+    People: Lidé
+    Headphones: Sluchátka
+    Gaming: Hraní
+    Film: Film
+    Art: Umění
+    Science: Věda
+    Globe: Glóbus
+    Heart: Srdce
+    Sun: Slunce
+    Moon: Měsíc
+    Trophy: Trofej
   Profile Icon: Ikona profilu
   Choose an Emoji: Vyberte emoji
   Custom Emoji: Vlastní emoji

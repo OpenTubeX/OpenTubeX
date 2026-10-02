@@ -1145,6 +1145,19 @@ About:
   Please read the {roomRulesLink}: Citiți {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX este posibil datorită {creditsPageLink}
 Profile:
+  Icon Names:
+    Person: Persoană
+    People: Persoane
+    Headphones: Căști
+    Gaming: Jocuri
+    Film: Film
+    Art: Artă
+    Science: Știință
+    Globe: Glob
+    Heart: Inimă
+    Sun: Soare
+    Moon: Lună
+    Trophy: Trofeu
   Profile Icon: Pictograma profilului
   Choose an Emoji: Alegeți un emoji
   Custom Emoji: Emoji personalizat

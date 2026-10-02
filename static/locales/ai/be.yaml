@@ -1179,6 +1179,19 @@ About:
   Please read the {roomRulesLink}: Азнаёмцеся з {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX створаны дзякуючы {creditsPageLink}
 Profile:
+  Icon Names:
+    Person: Чалавек
+    People: Людзі
+    Headphones: Навушнікі
+    Gaming: Гульні
+    Film: Фільм
+    Art: Мастацтва
+    Science: Навука
+    Globe: Глобус
+    Heart: Сэрца
+    Sun: Сонца
+    Moon: Месяц
+    Trophy: Кубак
   Profile Icon: Значок профілю
   Choose an Emoji: Выбраць эмодзі
   Custom Emoji: Уласны эмодзі

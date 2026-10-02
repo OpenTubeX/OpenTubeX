@@ -1151,6 +1151,19 @@ About:
   Matrix: Matrix
   Email: Sähköposti
 Profile:
+  Icon Names:
+    Person: Henkilö
+    People: Ihmiset
+    Headphones: Kuulokkeet
+    Gaming: Pelaaminen
+    Film: Elokuva
+    Art: Taide
+    Science: Tiede
+    Globe: Maapallo
+    Heart: Sydän
+    Sun: Aurinko
+    Moon: Kuu
+    Trophy: Pokaali
   Profile Icon: Profiilikuvake
   Choose an Emoji: Valitse emoji
   Custom Emoji: Mukautettu emoji

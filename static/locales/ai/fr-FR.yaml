@@ -1119,6 +1119,19 @@ About:
   Fluxer: Rejoindre notre communauté Fluxer
   Matrix: Matrix
 Profile:
+  Icon Names:
+    Person: Personne
+    People: Personnes
+    Headphones: Casque
+    Gaming: Jeux
+    Film: Film
+    Art: Art
+    Science: Science
+    Globe: Globe
+    Heart: Cœur
+    Sun: Soleil
+    Moon: Lune
+    Trophy: Trophée
   Profile Icon: Icône du profil
   Choose an Emoji: Choisir un emoji
   Custom Emoji: Emoji personnalisé

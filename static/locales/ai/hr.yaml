@@ -1129,6 +1129,19 @@ About:
   Matrix: Matrix
   Email: E-pošta
 Profile:
+  Icon Names:
+    Person: Osoba
+    People: Ljudi
+    Headphones: Slušalice
+    Gaming: Igre
+    Film: Film
+    Art: Umjetnost
+    Science: Znanost
+    Globe: Globus
+    Heart: Srce
+    Sun: Sunce
+    Moon: Mjesec
+    Trophy: Trofej
   Profile Icon: Ikona profila
   Choose an Emoji: Odaberi emoji
   Custom Emoji: Prilagođeni emoji

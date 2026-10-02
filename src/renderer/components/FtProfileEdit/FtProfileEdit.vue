@@ -80,6 +80,25 @@
             </h3>
             <div class="profileIconOptions">
               <div
+                class="builtinIconOptions"
+                role="group"
+                :aria-label="$t('Profile.Profile Icon')"
+              >
+                <button
+                  v-for="icon in PROFILE_ICONS"
+                  :key="icon"
+                  type="button"
+                  class="builtinIconOption"
+                  :class="{ selected: profileIcon?.type === 'icon' && profileIcon.value === icon }"
+                  :aria-label="iconLabels[icon]"
+                  :title="iconLabels[icon]"
+                  :aria-pressed="profileIcon?.type === 'icon' && profileIcon.value === icon"
+                  @click="selectBuiltinIcon(icon)"
+                >
+                  <FtIcon :icon="['fas', icon]" />
+                </button>
+              </div>
+              <div
                 class="emojiOptions"
                 role="group"
                 :aria-label="$t('Profile.Choose an Emoji')"
@@ -126,7 +145,7 @@
                   @click="openImagePicker"
                 />
                 <FtButton
-                  v-if="profileIcon"
+                  v-if="profileIcon && profileIcon.type !== 'initial'"
                   :label="$t('Profile.Use Initial')"
                   :icon="['fas', 'undo']"
                   @click="clearProfileIcon"
@@ -234,6 +253,7 @@
 
 <script setup>
 import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
+import { FtIcon } from '@opentubex/icons'
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../ft-card/ft-card.vue'
@@ -251,6 +271,7 @@ import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../../cons
 import { calculateColorLuminance, colors, resolveThemeColor } from '../../helpers/colors'
 import { deepCopy, showToast } from '../../helpers/utils'
 import { getFirstCharacter } from '../../helpers/strings'
+import { INITIAL_PROFILE_ICON, PROFILE_ICONS } from '../../helpers/profileIcons'
 
 /**
  * @typedef {object} Profile
@@ -258,7 +279,7 @@ import { getFirstCharacter } from '../../helpers/strings'
  * @property {string} name
  * @property {string} bgColor
  * @property {string} textColor
- * @property {{type: 'emoji'|'image', value: string}|null|undefined} icon
+ * @property {{type: 'icon'|'emoji'|'image', value: string}|{type: 'initial'}|null|undefined} icon
  * @property {object[]} subscriptions
  * @property {string} subscriptions[].id
  * @property {string|undefined} subscriptions[].name
@@ -320,6 +341,21 @@ let cropPointer = null
 let imageSelectionRequest = 0
 
 const EMOJI_OPTIONS = ['😀', '😎', '🤓', '🥳', '🤠', '👻', '🐱', '🐶', '🌈', '⭐']
+
+const iconLabels = computed(() => ({
+  'circle-user': t('Profile.Icon Names.Person'),
+  users: t('Profile.Icon Names.People'),
+  headphones: t('Profile.Icon Names.Headphones'),
+  gamepad: t('Profile.Icon Names.Gaming'),
+  film: t('Profile.Icon Names.Film'),
+  palette: t('Profile.Icon Names.Art'),
+  flask: t('Profile.Icon Names.Science'),
+  globe: t('Profile.Icon Names.Globe'),
+  heart: t('Profile.Icon Names.Heart'),
+  sun: t('Profile.Icon Names.Sun'),
+  moon: t('Profile.Icon Names.Moon'),
+  trophy: t('Profile.Icon Names.Trophy')
+}))
 
 watch(profileBgColor, (value) => {
   profileTextColor.value = value === THEME_BG_COLOR ? THEME_TEXT_COLOR : calculateColorLuminance(value)
@@ -439,6 +475,11 @@ function saveProfile() {
   }
 }
 
+function selectBuiltinIcon(icon) {
+  profileIcon.value = { type: 'icon', value: icon }
+  restoreOpaqueProfileColor()
+}
+
 function selectEmoji(emoji) {
   profileIcon.value = { type: 'emoji', value: emoji }
   restoreOpaqueProfileColor()
@@ -455,7 +496,7 @@ function selectCustomEmoji(event) {
   }
 
   event.target.value = candidate
-  profileIcon.value = candidate ? { type: 'emoji', value: candidate } : null
+  profileIcon.value = candidate ? { type: 'emoji', value: candidate } : { ...INITIAL_PROFILE_ICON }
   restoreOpaqueProfileColor()
 }
 
@@ -628,7 +669,7 @@ function closeCropEditor() {
 }
 
 function clearProfileIcon() {
-  profileIcon.value = null
+  profileIcon.value = { ...INITIAL_PROFILE_ICON }
   restoreOpaqueProfileColor()
 }
 

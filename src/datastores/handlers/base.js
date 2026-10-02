@@ -1,6 +1,6 @@
 import * as db from '../index'
 import { updateSettingIfUnchanged } from '../settingRepair'
-import { PlaylistVideoAddResult } from '../../constants'
+import { MAIN_PROFILE_ID, PlaylistVideoAddResult } from '../../constants'
 import { hasReachedWatchedThreshold, migrateLegacyHistoryRecord } from '../../history'
 import { resolveSearchHistoryEntry } from '../../search-history'
 import { createRecommendationStore } from '../recommendations'
@@ -8,6 +8,7 @@ import { mergeSubscriptionSeenVideos, parseSubscriptionSeenVideos, nextSubscript
 import { preserveSubscriptionSeenEntries, subscriptionFeedField } from '../../subscriptionFeedState'
 import { mergeSubscriptionSeenPosts, parseSubscriptionSeenPosts } from '../../subscriptionSeenPosts'
 import { mergeBackupWatchStatsAdjustment, mergeBackupWatchStatsRecord, validateBackupWatchStats } from '../../renderer/helpers/unifiedBackup'
+import { DEFAULT_PROFILE_ICON } from '../../renderer/helpers/profileIcons'
 
 const recommendations = createRecommendationStore(db.recommendations)
 
@@ -656,6 +657,14 @@ class Profiles {
 
   static async find() {
     await loadProfilesDatastore()
+    try {
+      await db.profiles.updateAsync(
+        { _id: MAIN_PROFILE_ID, $or: [{ icon: null }, { icon: { $exists: false } }] },
+        { $set: { icon: { ...DEFAULT_PROFILE_ICON } } }
+      )
+    } catch (error) {
+      console.error(error)
+    }
     return db.profiles.findAsync({})
   }
 

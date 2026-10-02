@@ -1449,6 +1449,19 @@ About:
   Please read the {roomRulesLink}: Preberite {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX omogočajo {creditsPageLink}
 Profile:
+  Icon Names:
+    Person: Oseba
+    People: Ljudje
+    Headphones: Slušalke
+    Gaming: Igre
+    Film: Film
+    Art: Umetnost
+    Science: Znanost
+    Globe: Globus
+    Heart: Srce
+    Sun: Sonce
+    Moon: Luna
+    Trophy: Pokal
   Toggle Profile List: Preklopi seznam profilov
   Edit Profile Name: Uredi ime profila
   Create Profile Name: Ustvari ime profila

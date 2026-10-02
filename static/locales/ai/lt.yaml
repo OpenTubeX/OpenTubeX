@@ -1396,6 +1396,19 @@ About:
   Please read the {roomRulesLink}: Susipažinkite su {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX sukurti padėjo {creditsPageLink}
 Profile:
+  Icon Names:
+    Person: Asmuo
+    People: Žmonės
+    Headphones: Ausinės
+    Gaming: Žaidimai
+    Film: Filmas
+    Art: Menas
+    Science: Mokslas
+    Globe: Gaublys
+    Heart: Širdis
+    Sun: Saulė
+    Moon: Mėnulis
+    Trophy: Taurė
   Toggle Profile List: Rodyti arba slėpti profilių sąrašą
   Edit Profile Name: Keisti profilio pavadinimą
   Create Profile Name: Naujo profilio pavadinimas
