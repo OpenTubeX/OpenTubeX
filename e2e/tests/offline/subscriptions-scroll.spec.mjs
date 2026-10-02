@@ -191,8 +191,10 @@ for (const uiScale of [100, 95]) {
 
     const header = page.locator('.subscriptionsHeader')
     const headerBottom = () => header.evaluate(element => element.getBoundingClientRect().bottom)
+    await expect(header).toHaveCSS('transition-duration', '0.28s')
     await scrollFeedTo(page, 600)
     await expect.poll(headerBottom).toBeLessThanOrEqual(0)
+    await expect(header).toHaveCSS('transition-duration', '0.22s')
     await scrollFeedTo(page, 580)
     await expect.poll(headerBottom).toBeLessThanOrEqual(0)
     await scrollFeedTo(page, 540)
@@ -201,6 +203,10 @@ for (const uiScale of [100, 95]) {
     await expect.poll(() => header.evaluate(element => {
       return Math.abs(element.getBoundingClientRect().top - Number.parseFloat(getComputedStyle(element).top))
     })).toBeLessThanOrEqual(1)
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await expect(header).toHaveCSS('transition-duration', '0s')
+    await scrollFeedTo(page, 600)
+    await expect.poll(headerBottom).toBeLessThanOrEqual(0)
   })
 }
 
