@@ -556,6 +556,9 @@ jobs:
       snapshot: true
 
   publish-nightly:
+    outputs:
+      tag: ${{ steps.release.outputs.tag }}
+      version: ${{ steps.release.outputs.version }}
     name: Publish nightly release
     needs: [build, android, ios]
     if: github.event_name == 'workflow_dispatch' && inputs.publishNightly && github.ref == 'refs/heads/development'
@@ -662,26 +665,6 @@ jobs:
           echo "version=$version"
         } >> "$GITHUB_OUTPUT"
 
-    - name: Trigger nightly package repositories
-      env:
-        GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
-        TAG: ${{ steps.release.outputs.tag }}
-        VERSION: ${{ steps.release.outputs.version }}
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        bash _scripts/wait-for-nightly-assets.sh "$TAG"
-
-        for repository in apt rpm fdroid sidestore flatpak snap; do
-          gh api "repos/OpenTubeX/${repository}/dispatches" \
-            --method POST \
-            -f event_type=opentubex-nightly \
-            -f "client_payload[tag]=$TAG" \
-            -f "client_payload[version]=$VERSION" \
-            || echo "::warning title=Nightly dispatch failed::${repository}"
-        done
-
     - name: Remove expired nightly releases
       if: always()
       env:
@@ -698,3 +681,59 @@ jobs:
           | while IFS= read -r tag; do
               gh release delete "$tag" --cleanup-tag --yes
             done
+
+  notify-nightly-repositories:
+    name: Notify ${{ matrix.repository }} of nightly release
+    needs: publish-nightly
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - repository: apt
+            pattern: '[.]deb$'
+            count: 3
+          - repository: rpm
+            pattern: '[.](amd64|arm64)[.]rpm$'
+            count: 2
+          - repository: fdroid
+            pattern: '[.]apk$'
+            count: 5
+          - repository: flatpak
+            pattern: '-linux-(x64|arm64)-portable[.]zip$'
+            count: 2
+          - repository: snap
+            pattern: '_(amd64|arm64)[.]deb$'
+            count: 2
+          - repository: sidestore
+            pattern: '-ios-unsigned[.]ipa$'
+            count: 1
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Wait for public release assets
+      env:
+        GH_TOKEN: ${{ github.token }}
+        TAG: ${{ needs.publish-nightly.outputs.tag }}
+        ASSET_PATTERN: ${{ matrix.pattern }}
+        ASSET_COUNT: ${{ matrix.count }}
+      shell: bash
+      run: bash _scripts/wait-for-release-assets.sh "tags/$TAG" "$ASSET_PATTERN" "$ASSET_COUNT"
+
+    - name: Notify package repository
+      env:
+        GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+        REPOSITORY: ${{ matrix.repository }}
+        TAG: ${{ needs.publish-nightly.outputs.tag }}
+        VERSION: ${{ needs.publish-nightly.outputs.version }}
+      shell: bash
+      run: |
+        gh api "repos/OpenTubeX/${REPOSITORY}/dispatches" \
+          --method POST \
+          -f event_type=opentubex-nightly \
+          -f "client_payload[tag]=$TAG" \
+          -f "client_payload[version]=$VERSION"
