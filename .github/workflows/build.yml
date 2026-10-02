@@ -673,7 +673,7 @@ jobs:
 
         bash _scripts/wait-for-nightly-assets.sh "$TAG"
 
-        for repository in apt rpm fdroid flatpak snap; do
+        for repository in apt rpm fdroid sidestore flatpak snap; do
           gh api "repos/OpenTubeX/${repository}/dispatches" \
             --method POST \
             -f event_type=opentubex-nightly \

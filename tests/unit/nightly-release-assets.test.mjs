@@ -21,9 +21,14 @@ printf '%s\\n' "$url" >> "$REQUESTS_FILE"
 count=$(cat "$COUNT_FILE" 2>/dev/null || echo 0)
 count=$((count + 1))
 echo "$count" > "$COUNT_FILE"
-if [ "$count" -eq 1 ]; then
-  exit 1
-fi
+case "$url" in
+  *-ios-unsigned.ipa)
+    if [ ! -f "$FAILED_IPA_FILE" ]; then
+      touch "$FAILED_IPA_FILE"
+      exit 1
+    fi
+    ;;
+esac
 exit 0
 `)
     chmodSync(wget, 0o755)
@@ -34,6 +39,7 @@ exit 0
         ...process.env,
         COUNT_FILE: count,
         REQUESTS_FILE: requests,
+        FAILED_IPA_FILE: join(directory, 'failed-ipa'),
         GITHUB_REPOSITORY: 'OpenTubeX/test-fork',
         PATH: `${directory}:${process.env.PATH}`,
         RELEASE_ASSET_RETRY_DELAY: '0',
@@ -57,6 +63,7 @@ exit 0
       `opentubex-${version}-android-x86.apk`,
       `opentubex-${version}-android-x86_64.apk`,
       `opentubex-${version}-android-universal.apk`,
+      `opentubex-${version}-ios-unsigned.ipa`,
     ].map(asset => `${base}${asset}`)
     assert.deepEqual(readFileSync(requests, 'utf8').trim().split('\n'), [...expected, ...expected])
     assert.equal(readFileSync(count, 'utf8').trim(), String(expected.length * 2))

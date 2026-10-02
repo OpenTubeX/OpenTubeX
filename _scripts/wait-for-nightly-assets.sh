@@ -21,6 +21,7 @@ expected_assets=(
   "opentubex-${version}-android-x86.apk"
   "opentubex-${version}-android-x86_64.apk"
   "opentubex-${version}-android-universal.apk"
+  "opentubex-${version}-ios-unsigned.ipa"
 )
 
 for ((attempt = 1; attempt <= max_attempts; attempt++)); do
