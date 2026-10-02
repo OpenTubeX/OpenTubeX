@@ -69,6 +69,8 @@ public class MainActivity extends BridgeActivity {
         }
         // Honor viewport widths larger than the device for UI scales below 100%.
         getBridge().getWebView().getSettings().setUseWideViewPort(true);
+        // UI scale owns the page viewport; the custom player handles video pinch zoom.
+        getBridge().getWebView().getSettings().setSupportZoom(false);
         // Capacitor falls back to addJavascriptInterface when the modern,
         // top-frame-only bridge is unavailable. Fail closed instead of
         // exposing native plugins to untrusted subframes.

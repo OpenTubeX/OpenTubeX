@@ -23,6 +23,87 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class MobileAppearanceSettingsTest {
     @Test
+    public void pinchGesturesKeepTheConfiguredUiScale() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            WebView view = webView(scenario);
+            boolean[] builtInZoom = new boolean[1];
+            scenario.onActivity(activity -> {
+                builtInZoom[0] = view.getSettings().getBuiltInZoomControls();
+                // Exercise gesture-enabled WebViews as well as Capacitor's default.
+                // Disabling page zoom must not rely only on the built-in-controls flag.
+                view.getSettings().setBuiltInZoomControls(true);
+            });
+            try {
+                prepare(view);
+                evaluate(view, """
+                    (() => {
+                        const target = document.createElement('div');
+                        target.id = 'pinch-test-target';
+                        target.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:var(--bg-color)';
+                        target.textContent = 'Pinch zoom regression';
+                        document.body.append(target);
+                    })()
+                    """);
+                for (int scale : new int[] {100, 75, 125, 150}) {
+                    evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiScale', " + scale + ")");
+                    awaitCondition(view, "Math.abs(window.visualViewport.scale - " + scale / 100.0 + ") < 0.01");
+                    for (boolean spread : new boolean[] {true, false}) {
+                        pinch(view, spread);
+                        Thread.sleep(300);
+                        double actual = Double.parseDouble(evaluate(view, "window.visualViewport.scale"));
+                        assertEquals("Pinching must keep the configured " + scale + "% UI scale", scale / 100.0, actual, 0.01);
+                    }
+                }
+            } finally {
+                scenario.onActivity(activity -> view.getSettings().setBuiltInZoomControls(builtInZoom[0]));
+                evaluate(view, "document.querySelector('#pinch-test-target')?.remove()");
+                restore(view);
+            }
+        }
+    }
+
+    private static void pinch(WebView view, boolean spread) throws Exception {
+        float[] geometry = new float[3];
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            int[] origin = new int[2];
+            view.getLocationOnScreen(origin);
+            geometry[0] = origin[0] + view.getWidth() / 2f;
+            geometry[1] = origin[1] + view.getHeight() / 2f;
+            geometry[2] = view.getWidth();
+        });
+        long downTime = SystemClock.uptimeMillis();
+        float start = geometry[2] * (spread ? 0.1f : 0.35f);
+        float end = geometry[2] * (spread ? 0.35f : 0.1f);
+        touch(downTime, MotionEvent.ACTION_DOWN, geometry[0] - start, geometry[1]);
+        MotionEvent.PointerProperties[] properties = new MotionEvent.PointerProperties[2];
+        MotionEvent.PointerCoords[] coordinates = new MotionEvent.PointerCoords[2];
+        for (int i = 0; i < 2; i++) {
+            properties[i] = new MotionEvent.PointerProperties();
+            properties[i].id = i;
+            properties[i].toolType = MotionEvent.TOOL_TYPE_FINGER;
+            coordinates[i] = new MotionEvent.PointerCoords();
+            coordinates[i].y = geometry[1];
+            coordinates[i].pressure = 1;
+            coordinates[i].size = 1;
+        }
+        for (int step = 0; step <= 21; step++) {
+            float distance = start + (end - start) * Math.min(step, 20) / 20f;
+            coordinates[0].x = geometry[0] - distance;
+            coordinates[1].x = geometry[0] + distance;
+            int action = step == 0
+                ? MotionEvent.ACTION_POINTER_DOWN | (1 << MotionEvent.ACTION_POINTER_INDEX_SHIFT)
+                : step == 21 ? MotionEvent.ACTION_POINTER_UP | (1 << MotionEvent.ACTION_POINTER_INDEX_SHIFT)
+                : MotionEvent.ACTION_MOVE;
+            MotionEvent event = MotionEvent.obtain(downTime, SystemClock.uptimeMillis(), action,
+                2, properties, coordinates, 0, 0, 1, 1, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, 0);
+            InstrumentationRegistry.getInstrumentation().sendPointerSync(event);
+            event.recycle();
+            Thread.sleep(20);
+        }
+        touch(downTime, MotionEvent.ACTION_UP, geometry[0] - end, geometry[1]);
+    }
+
+    @Test
     public void alwaysShowScrollbarsControlsNativePageFading() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
             WebView view = webView(scenario);
