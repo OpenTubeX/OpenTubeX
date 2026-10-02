@@ -2,6 +2,9 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { test, expect, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
+import { expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
+
+const channelAvatar = `data:image/svg+xml;base64,${(await readFile(new URL('../../fixtures/media/avatar.svg', import.meta.url))).toString('base64')}`
 
 // The main profile ('allChannels') must exist in any seeded profiles.db,
 // otherwise the app would recreate the store with only the default profile.
@@ -382,6 +385,7 @@ test.describe('profile channel thumbnails', () => {
     await openProfileList(page)
     await page.locator('.profilePanelHeader button').last().click()
     await page.locator('.card .profileList').getByText('All Channels').click()
+    await page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true }).click()
 
     const channel = page.locator('#subscriptionsPanel').getByRole('link', { name: 'Deleted Channel' })
     await expect(channel).toHaveCSS('border-radius', '16px')
@@ -396,12 +400,12 @@ for (const uiScale of [100, 125]) {
   test.describe(`profile manager presentation at ${uiScale}% UI scale`, () => {
     test.use({
       seed: {
-        settings: { uiScale, baseTheme: 'black', currentLocale: 'en-US' },
+        settings: { uiScale, baseTheme: 'system', systemDarkTheme: 'dark', systemLightTheme: 'light', currentLocale: 'en-US' },
         profiles: [mainProfile, {
           ...secondProfile,
           subscriptions: [
-            { id: 'channel-one', name: 'Channel one', thumbnail: '' },
-            { id: 'channel-two', name: 'Channel two', thumbnail: '' }
+            { id: 'channel-one', name: 'Channel one', thumbnail: channelAvatar },
+            { id: 'channel-two', name: 'Channel two', thumbnail: channelAvatar }
           ]
         }]
       }
@@ -570,36 +574,109 @@ for (const uiScale of [100, 125]) {
       })).toBe(true)
     })
 
-    test('keeps the subscriptions heading close to the last customization controls after resizing', async ({ app, page }, testInfo) => {
+    test('switches profile tabs without losing draft customization across layouts', async ({ app, page }, testInfo) => {
       await openProfileList(page)
       await page.locator('.profilePanelHeader button').last().click()
       await page.locator('.profileSettingsContent .profileList').getByText('Second profile').click()
+      const customization = page.getByRole('tab', { name: 'Customization', exact: true })
+      const subscriptions = page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true })
+      const name = page.locator('.profileName input')
+      await name.fill('Unsaved profile name')
       await page.locator('.builtinIconOptions').getByRole('button', { name: 'Gaming', exact: true }).click()
-      for (const width of [1200, 940, 350]) {
+      const colorPickerTrigger = page.locator('.profileColorPicker .colorFieldTrigger')
+      await colorPickerTrigger.focus()
+      await colorPickerTrigger.press('Enter')
+      await expect(page.locator('.colorPickerPopover')).toBeVisible()
+      await customization.focus()
+      await customization.press('ArrowRight')
+      await expect(page.locator('.colorPickerPopover')).toHaveCount(0)
+      await expect(subscriptions).toBeFocused()
+      await customization.click()
+      for (const width of [1200, 940, 375]) {
         await app.electronApp.evaluate(({ BrowserWindow }, width) => {
           const window = BrowserWindow.getAllWindows()[0]
           window.setBounds({ ...window.getBounds(), width })
         }, Math.round(width * uiScale / 100))
         await expect.poll(() => page.evaluate(() => window.innerWidth)).toBe(width)
-        await expect.soft.poll(() => page.locator('.profileSubscriptionsHeading').evaluate(element => {
-          const controls = [...document.querySelectorAll('.iconActions button, .profileActions button')]
-          const controlsEnd = Math.max(...controls.map(control => control.getBoundingClientRect().bottom))
-          return element.getBoundingClientRect().top - controlsEnd
-        }), { timeout: 2000, message: `heading follows the final customization control at ${width}px` }).toBeLessThanOrEqual(40)
-        await page.locator('.profileSubscriptionsHeading').evaluate(element => element.scrollIntoView({ block: 'center', behavior: 'instant' }))
-        await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
-        const screenshot = await app.electronApp.evaluate(async ({ BrowserWindow }) =>
-          (await BrowserWindow.getAllWindows()[0].webContents.capturePage()).toPNG().toString('base64'))
-        await testInfo.attach(`Compact editor ending at ${width}px and ${uiScale}% scale`, {
-          body: Buffer.from(screenshot, 'base64'), contentType: 'image/png'
-        })
+        await expect(customization).toHaveAttribute('aria-selected', 'true')
+        await expect(page.locator('.selectionActions')).toBeHidden()
+        await subscriptions.click()
+        await expect(subscriptions).toHaveAttribute('aria-selected', 'true')
+        await expect(page.locator('.profileEdit')).toBeHidden()
+        await expect(page.locator('.profileSettingsContent').getByRole('tabpanel')).toHaveAttribute('id', await subscriptions.getAttribute('aria-controls'))
+        await page.locator('.selectionActions').getByRole('button', { name: 'Select All', exact: true }).click()
+        await customization.click()
+        await expect(name).toHaveValue('Unsaved profile name')
+        await expect(page.locator('.profilePreviewIcon [data-icon="gamepad"] svg')).toBeVisible()
+        await subscriptions.click()
+        await expect(page.locator('.selectedCount')).toHaveText('2 selected')
+        await page.locator('.selectionActions').getByRole('button', { name: 'Select None', exact: true }).click()
+        await expect.poll(() => subscriptions.evaluate(element => {
+          const bounds = element.getBoundingClientRect()
+          return bounds.left >= 0 && bounds.right <= innerWidth
+        })).toBe(true)
+        if (width === 1200 && uiScale === 100) {
+          for (const theme of ['dark', 'light']) {
+            await page.emulateMedia({ colorScheme: theme })
+            await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+            await expectImagesLoaded(page.locator('.profileSettingsContent img:visible'))
+            await page.locator('.profileSettingsContent').evaluate(element => Promise.all(
+              element.getAnimations({ subtree: true }).map(animation => animation.finished.catch(() => {}))
+            ))
+            const path = testInfo.outputPath(`profile-tabs-${theme}.png`)
+            await page.locator('.profileSettingsContent').screenshot({ path })
+            await testInfo.attach(`Profile tabs in ${theme} theme`, { path, contentType: 'image/png' })
+          }
+        }
+        await customization.click()
       }
+      await page.evaluate(() => {
+        const createBitmap = window.createImageBitmap.bind(window)
+        window.createImageBitmap = async (...args) => {
+          await new Promise(resolve => { window.releaseProfileImage = resolve })
+          const bitmap = await createBitmap(...args)
+          window.profileImageDecoded = true
+          return bitmap
+        }
+      })
+      await page.locator('.imageInput').setInputFiles({
+        name: 'avatar.png',
+        mimeType: 'image/png',
+        buffer: await readFile(new URL('../../../src/renderer/assets/img/yt_logo_mono_dark.png', import.meta.url))
+      })
+      await expect.poll(() => page.evaluate(() => typeof window.releaseProfileImage)).toBe('function')
+      await subscriptions.click()
+      await page.evaluate(() => window.releaseProfileImage())
+      await expect.poll(() => page.evaluate(() => window.profileImageDecoded)).toBe(true)
+      await expect(page.getByRole('heading', { name: 'Crop Image', exact: true })).toHaveCount(0)
+      await customization.click()
+      await customization.focus()
+      await customization.press('ArrowRight')
+      await expect(subscriptions).toBeFocused()
+      await expect(subscriptions).toHaveAttribute('tabindex', '0')
+      await expect(customization).toHaveAttribute('tabindex', '-1')
+      await subscriptions.press('Home')
+      await expect(customization).toBeFocused()
+      await customization.press('End')
+      await expect(subscriptions).toBeFocused()
+      await subscriptions.press('ArrowLeft')
+      await expect(customization).toBeFocused()
+      await customization.press('ArrowLeft')
+      await expect(subscriptions).toBeFocused()
+      await page.locator('.profileSettingsContent .profileList').getByText('All Channels').click()
+      await expect(customization).toHaveAttribute('aria-selected', 'true')
+      await subscriptions.click()
+      await expect(page.locator('.profileSettingsContent .select')).toHaveCount(0)
+      await page.getByRole('button', { name: 'Create New Profile', exact: true }).click()
+      await expect(page.locator('.profileTabs')).toHaveCount(0)
+      await expect(page.locator('.profileEdit')).toBeVisible()
     })
 
     test('balances profile filter spacing when subscriptions are present', async ({ app, page }) => {
       await openProfileList(page)
       await page.locator('.profilePanelHeader button').last().click()
       await page.locator('.profileSettingsContent .profileList').getByText('Second profile').click()
+      await page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true }).click()
       for (const width of [1200, 350]) {
         await app.electronApp.evaluate(({ BrowserWindow }, width) => {
           const window = BrowserWindow.getAllWindows()[0]
@@ -619,6 +696,8 @@ for (const uiScale of [100, 125]) {
       await openProfileList(page)
       await page.locator('.profilePanelHeader button').last().click()
       await page.locator('.profileSettingsContent .profileList').getByText('Second profile').click()
+      await page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true }).click()
+      await setWindowSize(app, page, { width: Math.round(350 * uiScale / 100), height: Math.round(700 * uiScale / 100) })
       await page.locator('.selectionActions').getByRole('button', { name: 'Select All', exact: true }).click()
       await page.locator('.selectionActions').getByRole('button', { name: 'Delete Selected', exact: true }).click()
       const scroller = page.locator('.settingsSubpageScroll')
@@ -660,28 +739,19 @@ for (const uiScale of [100, 125]) {
       }
     })
 
-    test('places customization and selection actions before subscriptions and keeps selection working', async ({ app, page }, testInfo) => {
+    test('keeps subscription selection working in its own tab', async ({ app, page }, testInfo) => {
       await openProfileList(page)
       await page.locator('.profilePanelHeader button').last().click()
       await page.locator('.profileSettingsContent .profileList').getByText('Second profile').click()
-      const customizer = page.locator('.profileSettingsContent .profileEdit')
-      const subscriptionsHeading = page.getByRole('heading', { name: 'Manage profile subscriptions', exact: true })
       const selectAll = page.getByRole('button', { name: 'Select All', exact: true }).first()
       const subscription = page.locator('.profileSettingsContent').getByText('Channel one', { exact: true })
-      expect(await customizer.evaluate((element, selector) => Boolean(element.compareDocumentPosition(document.querySelector(selector)) & Node.DOCUMENT_POSITION_FOLLOWING), '.profileSettingsContent .selectedCount')).toBe(true)
-      expect((await selectAll.boundingBox()).y).toBeGreaterThan((await customizer.boundingBox()).y)
-      expect((await subscription.boundingBox()).y).toBeGreaterThan((await selectAll.boundingBox()).y)
-      await expect(subscriptionsHeading).toBeVisible()
-      await expect.poll(() => subscriptionsHeading.evaluate(element => {
-        const customizer = element.previousElementSibling.querySelector('.card')
-        return element.getBoundingClientRect().top - customizer.getBoundingClientRect().bottom
-      })).toBeCloseTo(15, 0)
       await expect.poll(() => page.locator('.profileActions').evaluate(element =>
         element.querySelector('button').getBoundingClientRect().top - element.previousElementSibling.getBoundingClientRect().bottom
       ), { timeout: 2000 }).toBeCloseTo(21, 0)
       await expect.poll(() => page.locator('.secondEditRow').evaluate(element =>
         element.getBoundingClientRect().top - element.previousElementSibling.getBoundingClientRect().bottom
       )).toBeGreaterThanOrEqual(19)
+      await page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true }).click()
       await expect.poll(() => page.locator('.selectionActions').evaluate(element => (
         element.nextElementSibling.getBoundingClientRect().top - element.getBoundingClientRect().bottom
       ))).toBeCloseTo(16, 0)
@@ -697,12 +767,12 @@ for (const uiScale of [100, 125]) {
       await page.getByRole('button', { name: 'Select None', exact: true }).first().click()
       await expect(page.locator('.selectedCount')).toHaveText('0 selected')
       await selectAll.click()
-      await expect(selectAll).toHaveCSS('opacity', '0.4')
+      await expect(selectAll).toBeDisabled()
       await expect(page.locator('.selectionActions').getByRole('button', { name: 'Select None', exact: true })).toHaveCSS('opacity', '1')
       await subscription.scrollIntoViewIfNeeded()
       const desktopScreenshot = await app.electronApp.evaluate(async ({ BrowserWindow }) =>
         (await BrowserWindow.getAllWindows()[0].webContents.capturePage()).toPNG().toString('base64'))
-      await testInfo.attach(`Profile customization before subscriptions at ${uiScale}% scale`, {
+      await testInfo.attach(`Subscription selection at ${uiScale}% scale`, {
         body: Buffer.from(desktopScreenshot, 'base64'), contentType: 'image/png'
       })
       await app.electronApp.evaluate(({ BrowserWindow }, width) => {
@@ -739,6 +809,7 @@ for (const uiScale of [100, 125]) {
       await openProfileList(page)
       await page.locator('.profilePanelHeader button').last().click()
       await page.locator('.profileSettingsContent .profileList').getByText('All Channels').click()
+      await page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true }).click()
       const actions = page.locator('.selectionActions')
       const selectAll = actions.getByRole('button', { name: 'Select All', exact: true })
       const selectNone = actions.getByRole('button', { name: 'Select None', exact: true })
@@ -748,6 +819,7 @@ for (const uiScale of [100, 125]) {
       await expect(deleteSelected).toBeDisabled()
 
       await page.locator('.profileSettingsContent .profileList').getByText('Second profile').click()
+      await page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true }).click()
       await expect(selectAll).toBeEnabled()
       await expect(selectNone).toBeDisabled()
       await expect(deleteSelected).toBeDisabled()
@@ -789,6 +861,36 @@ test.describe('profile manager', () => {
         ]
       }
     })
+
+    for (const scale of [1, 1.25]) {
+      test(`resets profile tab scrolling after switching from the bottom at ${scale} scale`, async ({ app, page }) => {
+        await openProfileList(page)
+        await page.locator('.profilePanelHeader button').last().click()
+        await page.locator('.card .profileList').getByText('Second profile').click()
+        await page.evaluate(scale => window.ftElectron.setZoomFactor(scale), scale)
+        await setWindowSize(app, page, { width: Math.round(375 * scale), height: Math.round(700 * scale) })
+        const customization = page.getByRole('tab', { name: 'Customization', exact: true })
+        const subscriptions = page.getByRole('tab', { name: 'Manage profile subscriptions', exact: true })
+        const scroller = page.locator('.settingsSubpageScroll')
+        for (const current of [customization, subscriptions]) {
+          await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+          await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+          await current.evaluate(element => element.focus({ preventScroll: true }))
+          await page.keyboard.press('ArrowRight')
+          await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeLessThanOrEqual(1)
+          await expect.poll(() => scroller.evaluate(element => {
+            const content = element.firstElementChild
+            const contentEnd = content.getBoundingClientRect().bottom -
+              element.getBoundingClientRect().top + element.scrollTop +
+              Number.parseFloat(getComputedStyle(element).paddingBottom)
+            const maximumScrollTop = Math.max(0, contentEnd - element.clientHeight)
+            const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+            return element.scrollTop <= maximumScrollTop + 1 &&
+              scrollbar.classList.contains('os-scrollbar-unusable') === (maximumScrollTop <= 1)
+          })).toBe(true)
+        }
+      })
+    }
 
     test('clamps the scroll position after deleting an open profile', async ({ page }) => {
       await openProfileList(page)

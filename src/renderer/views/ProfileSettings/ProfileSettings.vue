@@ -1,5 +1,8 @@
 <template>
-  <div class="profileSettingsContent">
+  <div
+    ref="rootRef"
+    class="profileSettingsContent"
+  >
     <FtCard
       v-if="!isNewProfileOpen"
       class="card"
@@ -47,35 +50,93 @@
       v-if="openSettingsProfile"
       :key="openSettingsProfileId"
     >
-      <FtProfileEdit
-        :profile="openSettingsProfile"
-        :is-new="isNewProfileOpen"
-        :is-main-profile="isMainProfile"
-        @new-profile-created="closeProfileCreation"
-        @cancel-creation="closeProfileCreation"
-        @profile-deleted="handleProfileDeleted"
-      />
-      <h2
+      <div
         v-if="!isNewProfileOpen"
-        class="profileSubscriptionsHeading"
+        class="profileTabs"
+        role="tablist"
+        :aria-label="$t('Profile.Profile Settings')"
       >
-        {{ $t('Profile.Manage Profile Subscriptions') }}
-      </h2>
-      <FtProfileChannelList
+        <button
+          :id="customizationTabId"
+          ref="customizationTabRef"
+          type="button"
+          class="profileTab"
+          :class="{ selected: activeTab === 'customization' }"
+          role="tab"
+          :aria-controls="customizationPanelId"
+          :aria-selected="activeTab === 'customization'"
+          :tabindex="activeTab === 'customization' ? 0 : -1"
+          @click="activateTab('customization')"
+          @keydown.left.right.prevent="activateTab('subscriptions', true)"
+          @keydown.home.prevent="activateTab('customization', true)"
+          @keydown.end.prevent="activateTab('subscriptions', true)"
+        >
+          <FtIcon
+            :icon="['fas', 'palette']"
+            aria-hidden="true"
+          />
+          {{ $t('Profile.Customization') }}
+        </button>
+        <button
+          :id="subscriptionsTabId"
+          ref="subscriptionsTabRef"
+          type="button"
+          class="profileTab"
+          :class="{ selected: activeTab === 'subscriptions' }"
+          role="tab"
+          :aria-controls="subscriptionsPanelId"
+          :aria-selected="activeTab === 'subscriptions'"
+          :tabindex="activeTab === 'subscriptions' ? 0 : -1"
+          @click="activateTab('subscriptions')"
+          @keydown.left.right.prevent="activateTab('customization', true)"
+          @keydown.home.prevent="activateTab('customization', true)"
+          @keydown.end.prevent="activateTab('subscriptions', true)"
+        >
+          <FtIcon
+            :icon="['fas', 'users']"
+            aria-hidden="true"
+          />
+          {{ $t('Profile.Manage Profile Subscriptions') }}
+        </button>
+      </div>
+      <div
+        v-show="isNewProfileOpen || activeTab === 'customization'"
+        :id="customizationPanelId"
+        :role="isNewProfileOpen ? undefined : 'tabpanel'"
+        :aria-labelledby="isNewProfileOpen ? undefined : customizationTabId"
+      >
+        <FtProfileEdit
+          :profile="openSettingsProfile"
+          :is-active="isNewProfileOpen || activeTab === 'customization'"
+          :is-new="isNewProfileOpen"
+          :is-main-profile="isMainProfile"
+          @new-profile-created="closeProfileCreation"
+          @cancel-creation="closeProfileCreation"
+          @profile-deleted="handleProfileDeleted"
+        />
+      </div>
+      <div
         v-if="!isNewProfileOpen"
-        :profile="openSettingsProfile"
-        :is-main-profile="isMainProfile"
-      />
-      <FtProfileFilterChannelsList
-        v-if="!isNewProfileOpen && !isMainProfile"
-        :profile="openSettingsProfile"
-      />
+        v-show="activeTab === 'subscriptions'"
+        :id="subscriptionsPanelId"
+        role="tabpanel"
+        :aria-labelledby="subscriptionsTabId"
+      >
+        <FtProfileChannelList
+          :profile="openSettingsProfile"
+          :is-main-profile="isMainProfile"
+        />
+        <FtProfileFilterChannelsList
+          v-if="!isMainProfile"
+          :profile="openSettingsProfile"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, ref, shallowRef, watch } from 'vue'
+import { computed, nextTick, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import { FtIcon } from '@opentubex/icons'
 
 import FtCard from '../../components/ft-card/ft-card.vue'
@@ -89,6 +150,7 @@ import store from '../../store/index'
 
 import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../../constants'
 import { DEFAULT_PROFILE_ICON } from '../../helpers/profileIcons'
+import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
 /**
  * @typedef {object} Profile
@@ -104,6 +166,14 @@ import { DEFAULT_PROFILE_ICON } from '../../helpers/profileIcons'
  */
 
 const isNewProfileOpen = ref(false)
+const activeTab = ref('customization')
+const rootRef = useTemplateRef('rootRef')
+const customizationTabRef = useTemplateRef('customizationTabRef')
+const subscriptionsTabRef = useTemplateRef('subscriptionsTabRef')
+const customizationTabId = useId()
+const customizationPanelId = useId()
+const subscriptionsTabId = useId()
+const subscriptionsPanelId = useId()
 
 /** @type {import('vue').Ref<string>} */
 const openSettingsProfileId = ref('')
@@ -147,8 +217,24 @@ function openSettingsForProfileWithId(profileId) {
   }
 
   isNewProfileOpen.value = false
+  activeTab.value = 'customization'
   openSettingsProfileId.value = profileId
   openSettingsProfile.value = getProfileById(profileId)
+}
+
+async function activateTab(tab, focus = false) {
+  const changed = activeTab.value !== tab
+  activeTab.value = tab
+  await nextTick()
+
+  if (focus) {
+    const tabElement = tab === 'customization' ? customizationTabRef.value : subscriptionsTabRef.value
+    tabElement?.focus({ preventScroll: true })
+  }
+  if (changed) {
+    const scrollViewport = rootRef.value?.closest('.settingsSubpageScroll')
+    if (scrollViewport) restoreOverlayScrollTop(scrollViewport, 0)
+  }
 }
 
 /**

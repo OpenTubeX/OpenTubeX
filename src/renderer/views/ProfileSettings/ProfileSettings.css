@@ -10,8 +10,67 @@ h2 {
   margin-block: 0 20px;
 }
 
-.profileSubscriptionsHeading {
-  margin-block: 0 10px;
+.profileTabs {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  inline-size: 85%;
+  margin-block: 0 15px;
+  margin-inline: auto;
+}
+
+.profileTab {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--secondary-text-color);
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  gap: 8px;
+  justify-content: center;
+  min-block-size: 44px;
+  padding-block: 8px 10px;
+  padding-inline: 12px;
+  position: relative;
+}
+
+.profileTab::after {
+  background: transparent;
+  block-size: 2px;
+  border-radius: calc(2px * var(--ui-roundness));
+  content: '';
+  inset-block-end: 0;
+  inset-inline: 12px;
+  position: absolute;
+}
+
+.profileTab:hover {
+  color: var(--primary-text-color);
+}
+
+.profileTab.selected {
+  color: var(--primary-text-color);
+  font-weight: 600;
+}
+
+.profileTab.selected::after {
+  background: var(--primary-color);
+}
+
+.profileTab:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.profileTab :deep(.ft-icon) {
+  color: currentcolor;
+  flex-shrink: 0;
+}
+
+.profileTab.selected :deep(.ft-icon) {
+  color: var(--primary-color);
 }
 
 .message {
@@ -80,8 +139,17 @@ h2 {
 }
 
 @media only screen and (width <= 680px) {
-  .card {
+  .card,
+  .profileTabs {
     inline-size: 90%;
+  }
+}
+
+@media only screen and (width <= 480px) {
+  .profileTab {
+    flex-direction: column;
+    gap: 4px;
+    padding-inline: 8px;
   }
 }
 

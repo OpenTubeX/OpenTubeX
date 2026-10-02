@@ -1374,6 +1374,7 @@ About:
   Please read the {roomRulesLink}: '{roomRulesLink}을(를) 읽어 주세요'
   OpenTubeX is made possible by {creditsPageLink}: '{creditsPageLink}의 도움으로 OpenTubeX를 만들 수 있었습니다'
 Profile:
+  Customization: 맞춤 설정
   Manage Profile Subscriptions: 프로필 구독 관리
   Icon Names:
     Person: 사람

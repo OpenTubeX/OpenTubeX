@@ -299,6 +299,10 @@ import { DEFAULT_PROFILE_ICON, INITIAL_PROFILE_ICON, PROFILE_ICONS } from '../..
 const { locale, t } = useI18n()
 
 const props = defineProps({
+  isActive: {
+    type: Boolean,
+    default: true
+  },
   isMainProfile: {
     type: Boolean,
     required: true
@@ -356,6 +360,13 @@ const cropOffset = { x: 0, y: 0 }
 let cropBitmap = null
 let cropPointer = null
 let imageSelectionRequest = 0
+
+watch(() => props.isActive, (isActive) => {
+  if (isActive) return
+  profileColorPickerRef.value?.close(false, false)
+  imageSelectionRequest++
+  closeCropEditor()
+})
 
 const EMOJI_OPTIONS = ['😀', '😎', '🤓', '🥳', '🤠', '👻', '🐱', '🐶', '🌈', '⭐']
 
