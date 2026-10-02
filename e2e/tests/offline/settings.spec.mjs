@@ -1098,10 +1098,11 @@ test.describe('settings', () => {
     const gaps = await startup.evaluate(element => {
       const select = element.querySelector('.select-text').getBoundingClientRect()
       const tooltip = element.querySelector('.selectTooltip').getBoundingClientRect()
+      const indicators = element.querySelector('.selectIndicators').getBoundingClientRect()
       const root = element.getBoundingClientRect()
       return {
         before: tooltip.left - select.right,
-        after: root.right - tooltip.right,
+        after: root.right - indicators.right,
       }
     })
 
