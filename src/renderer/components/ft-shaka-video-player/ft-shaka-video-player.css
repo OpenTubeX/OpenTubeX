@@ -1239,6 +1239,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   border-radius: calc(999px * var(--ui-roundness));
   background-color: transparent;
   line-height: 1;
+  interpolate-size: allow-keywords;
+  transition: inline-size 200ms ease, padding-inline 200ms ease, margin-inline 200ms ease;
 }
 
 :deep(.shaka-tooltips-on > .ft-chapters-button:hover::after),
@@ -1259,13 +1261,28 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 :deep(.shaka-controls-button-panel > .ft-chapters-button .ft-chapters-icon) {
-  display: none;
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  opacity: 0;
+  transform: scale(0.75);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+:deep(.shaka-controls-button-panel > .ft-chapters-button :is(.ft-chapters-current-title, .ft-chapters-chevron)) {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+:deep(.shaka-controls-button-panel.ft-controls-measuring > .ft-chapters-button),
+:deep(.shaka-controls-button-panel.ft-controls-measuring > .ft-chapters-button > *) {
+  transition: none;
 }
 
 :deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button) {
   justify-content: center;
   inline-size: 48px;
-  max-inline-size: 48px;
   block-size: 48px;
   margin-inline: 0;
   padding-inline: 2px;
@@ -1274,7 +1291,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 :deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button .ft-chapters-icon) {
-  display: block;
+  opacity: 1;
+  transform: scale(1);
 }
 
 :deep(.shaka-controls-button-panel > .ft-chapters-button.open .ft-chapters-icon) {
@@ -1283,7 +1301,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 :deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button .ft-chapters-current-title),
 :deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button .ft-chapters-chevron) {
-  display: none;
+  opacity: 0;
+  transform: translateX(-8px);
 }
 
 :deep(.ft-chapters-chevron) {
@@ -4068,8 +4087,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 :deep(.shaka-controls-button-panel.ft-controls-measuring > .ft-quick-playback-rate-bar) {
-  /* Reserve a usable strip when deciding which other controls need compacting. */
-  max-width: min(70vw, 640px);
+  /* Narrow the scrollable presets before collapsing the chapter title. */
+  max-width: min(70vw, 180px);
   flex-shrink: 0;
 }
 
