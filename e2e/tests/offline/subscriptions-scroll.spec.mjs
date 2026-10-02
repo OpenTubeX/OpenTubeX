@@ -210,11 +210,17 @@ for (const uiScale of [100, 95]) {
       }, uiScale)
       await setWindowSize(app, page, { width: 375, height: 700 })
       await expect(page.getByText('Feed video 00')).toBeVisible()
+      const response = Promise.withResolvers()
+      const requested = Promise.withResolvers()
+      await routeFeed(page, videos.slice(0, remainingCount), async () => {
+        requested.resolve()
+        await response.promise
+      })
+      await page.getByRole('button', { name: /Refresh Videos/ }).click()
+      await requested.promise
       await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
       await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(1000)
-      await routeFeed(page, videos.slice(0, remainingCount))
-      // Refresh through the control without bringing the hidden header into view.
-      await page.getByRole('button', { name: /Refresh Videos/ }).evaluate(element => element.click())
+      response.resolve()
       await expect.poll(() => page.evaluate(channelId => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
         return store.getters.getVideoCache[channelId]?.videos?.length
