@@ -52,6 +52,118 @@ test('download options fit horizontally and its Cancel button retains a border',
   expect.soft(await cancel.evaluate(element => getComputedStyle(element).borderTopColor)).not.toBe('rgba(0, 0, 0, 0)')
 })
 
+test('player controls, overlays, tooltips and captions follow the app font in both themes', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page, { captionTranslations: true })
+  await page.route('**/api/videoLabels/**', route => route.fulfill({ status: 404 }))
+  await page.route('**/api/skipSegments/**', route => route.fulfill({
+    json: [{
+      videoID: 'jNQXAC9IVRw',
+      segments: [{
+        UUID: 'typography-highlight',
+        actionType: 'poi',
+        category: 'poi_highlight',
+        segment: [15, 15],
+        videoDuration: 30,
+        votes: 1,
+        locked: 0,
+        description: ''
+      }]
+    }]
+  }))
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setUseSponsorBlock', true)
+    store.commit('setSponsorBlockHighlight', { color: '#ff1684', skip: 'promptToSkip' })
+    store.commit('setEnableSubtitlesByDefault', true)
+    store.commit('setUseQuickPlaybackSpeedBar', true)
+  })
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => {
+    element.playbackRate = 2
+    element.pause()
+  })
+  await setPlayerFullscreen(page, true)
+  const player = page.locator('.ftVideoPlayer')
+  const label = player.locator('.ft-shaka-highlight-button-label')
+  const caption = player.locator('.shaka-text-container [translate="no"]').first()
+  await expect(caption).toBeVisible()
+  await expect(player.locator('.ft-quick-playback-rate-button:not(.shaka-hidden)').first()).toBeVisible()
+
+  for (const frosted of [true, false]) {
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+    await expect(player).toHaveClass(frosted ? /^(?!.*classicPlayerControls)/ : /classicPlayerControls/)
+    for (const scale of [1, 1.25]) {
+      const font = scale === 1 ? 'Geist Variable' : 'Inter Variable'
+      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAppFont', value), font)
+      const appFont = await page.locator('body').evaluate(element => getComputedStyle(element).fontFamily)
+      expect(appFont).toContain(font)
+      await app.electronApp.evaluate(({ BrowserWindow }, value) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(value), scale)
+      await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
+      await expect(label).toBeVisible()
+      await expect(label).toHaveText('Skip to Highlight? (Enter)')
+      const typography = await player.evaluate(element => {
+        const properties = ['fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'fontVariantNumeric', 'textRendering', 'letterSpacing']
+        const read = selector => {
+          const style = getComputedStyle(element.querySelector(selector))
+          return Object.fromEntries(properties.map(property => [property, style[property]]))
+        }
+        return {
+          timestamp: read('.ft-time-display-group > .shaka-current-time'),
+          adjustedTimestamp: read('.ft-playback-adjusted-time'),
+          highlight: read('.ft-shaka-highlight-button-label')
+        }
+      })
+      expect(typography.highlight).toEqual(typography.timestamp)
+      expect(typography.adjustedTimestamp).toEqual(typography.timestamp)
+      expect(typography.timestamp.fontFamily).toBe(appFont)
+      await expect(player).toHaveCSS('font-family', appFont)
+      await expect(caption).toHaveCSS('font-family', appFont)
+      // Shaka recreates cues after resizing; create and measure inline-font ruby text together.
+      const captionFonts = await caption.evaluate(element => {
+        const originalFont = element.style.fontFamily
+        element.style.fontFamily = 'serif'
+        const ruby = document.createElement('ruby')
+        ruby.style.fontFamily = 'serif'
+        ruby.textContent = '漢字'
+        const annotation = document.createElement('rt')
+        annotation.style.fontFamily = 'serif'
+        annotation.textContent = 'かんじ'
+        ruby.appendChild(annotation)
+        element.appendChild(ruby)
+        const fonts = [element, ruby, annotation].map(node => getComputedStyle(node).fontFamily)
+        ruby.remove()
+        element.style.fontFamily = originalFont
+        return fonts
+      })
+      expect(captionFonts).toEqual([appFont, appFont, appFont])
+      const mismatchedFonts = await player.evaluate((element, expectedFont) => {
+        const selectors = 'button, input, select, textarea, .ft-chapters-current-title, .playerFullscreenTitleOverlay, .shaka-overflow-playback-rate-mark, .shaka-overflow-quality-mark'
+        return [...element.querySelectorAll(selectors)].flatMap(node => {
+          const family = getComputedStyle(node).fontFamily
+          return family === expectedFont ? [] : [{ element: node.className, family }]
+        })
+      }, appFont)
+      expect(mismatchedFonts).toEqual([])
+
+      // The wrapped mute control and Shaka's regular/status tooltips use separate rules.
+      for (const selector of ['.shaka-mute-button', '.shaka-fullscreen-button']) {
+        const button = player.locator(selector).first()
+        await button.hover()
+        expect(await button.evaluate(element => getComputedStyle(element, '::after').fontFamily)).toBe(appFont)
+      }
+      const settingsButton = player.locator('.shaka-overflow-menu-button')
+      await settingsButton.click()
+      const playbackRate = player.locator('.shaka-overflow-menu .shaka-playbackrate-button')
+      await playbackRate.hover()
+      expect(await playbackRate.evaluate(element => getComputedStyle(element, '::after').fontFamily)).toBe(appFont)
+      await playbackRate.click()
+      await expect(player.locator('.shaka-playback-rates:not(.shaka-hidden)')).toBeVisible()
+      await player.locator('.shaka-playback-rates .shaka-back-to-overflow-button').click()
+      await settingsButton.click()
+    }
+  }
+})
+
 test('portrait mobile controls keep captions and PiP in settings when the row is crowded', async ({ app, page }) => {
   await page.locator('.app').evaluate(element => {
     const applyMobileClasses = () => {

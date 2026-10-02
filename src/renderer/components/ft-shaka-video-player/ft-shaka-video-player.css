@@ -13,6 +13,7 @@
 
   display: flex;
   position: relative;
+  font-family: var(--app-font-family);
 
   /*
     For vertical videos and full window mode the background is visible,
@@ -26,6 +27,12 @@
     But also vertically in case context menu overflows.
   */
   overflow: hidden;
+}
+
+/* Override browser form fonts and Shaka's badge/tooltip fonts without changing their sizing. */
+.ftVideoPlayer :deep(:is(button, input, select, textarea, .shaka-overflow-playback-rate-mark, .shaka-overflow-quality-mark)),
+.ftVideoPlayer :deep(.shaka-tooltips-on > :is(.shaka-tooltip, .shaka-tooltip-status):is(:hover, :focus-visible, :active)::after) {
+  font-family: var(--app-font-family);
 }
 
 .ftVideoPlayer:not(:fullscreen, .fullWindow) {
@@ -2144,7 +2151,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   border-radius: calc(2px * var(--ui-roundness));
   background: rgb(0 0 0 / 50%);
   color: #fff;
-  font-family: Roboto, sans-serif;
+  font-family: inherit;
   font-size: 14px;
   line-height: 20px;
   white-space: nowrap;
@@ -3939,10 +3946,6 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   max-width: 220px;
   overflow: hidden;
   color: #fff;
-  font-family: var(--app-font-family);
-  font-size: 14px;
-  font-weight: 400;
-  line-height: normal;
   text-overflow: ellipsis;
   transform: translateX(0);
   transition: max-width 200ms ease, opacity 150ms ease, transform 200ms ease;
@@ -3994,6 +3997,16 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   outline-offset: 2px;
 }
 
+:deep(.ft-time-display-group > .shaka-current-time),
+:deep(.ft-shaka-highlight-button-label) {
+  font-family: var(--app-font-family);
+  font-size: 14px;
+  font-weight: 400;
+  font-variant-numeric: lining-nums tabular-nums;
+  line-height: 1.2;
+  text-rendering: geometricprecision;
+}
+
 :deep(.ft-time-display-group > .shaka-current-time) {
   display: flex;
   align-items: center;
@@ -4003,14 +4016,11 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   border: 0;
   background-color: transparent;
   color: #fff;
-  font-family: Roboto, sans-serif;
-  font-variant-numeric: lining-nums tabular-nums;
-  line-height: 1.2;
-  text-rendering: geometricprecision;
   white-space: nowrap;
 }
 
-.ftVideoPlayer:not(.classicPlayerControls) :deep(.ft-time-display-group > .shaka-current-time) {
+.ftVideoPlayer:not(.classicPlayerControls) :deep(.ft-time-display-group > .shaka-current-time),
+.ftVideoPlayer:not(.classicPlayerControls) :deep(.ft-shaka-highlight-button-label) {
   font-size: 13px;
 }
 
@@ -4198,6 +4208,10 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
     instead of letting Shaka move them to that zero-height controls boundary.
   */
   bottom: var(--caption-hidden-bottom-gap) !important;
+}
+
+:deep(:is(.shaka-text-container, .shaka-speech-to-text-container) *) {
+  font-family: var(--app-font-family) !important;
 }
 
 :deep(.shaka-text-container div),
@@ -5692,10 +5706,6 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 .ftVideoPlayer.classicPlayerControls :deep(.ft-time-display-group) {
   padding: 0;
   cursor: default;
-}
-
-.ftVideoPlayer.classicPlayerControls :deep(.ft-time-display-group > .shaka-current-time) {
-  line-height: 0.5;
 }
 
 .ftVideoPlayer.classicPlayerControls :deep(.ft-quick-playback-rate-bar) {
