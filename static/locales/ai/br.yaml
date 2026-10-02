@@ -271,9 +271,9 @@ Settings:
     Swipe to refresh: Riklañ evit freskaat
     Blur Thumbnails: Lakaat ar skeudennoùigoù da vezañ dispis
     Navigation:
-      Always Show Navigation Bar: Diskouez ar varrenn verdeiñ atav
-      Compact Tab Labels: Skritelloù ivinelloù berr
-      Show Active Subscriptions: Diskouez ar c’houmanantoù oberiant
+      Always Show Navigation Bar: Diskouez ar varrenn verdeiñ atav pa vez en traoñ
+      Compact Tab Labels: Barrenn verdeiñ gompakt pa vez en traoñ
+      Show Active Subscriptions: Diskouez ar c’houmanantoù oberiant er varrenn gostez
       Navigation: Merdeiñ
       Customize Navigation: Personelaat ar merdeiñ
       Add Item: Ouzhpennañ un elfenn
@@ -1120,6 +1120,7 @@ About:
   Matrix: Matrix
   Email: "Postel"
 Profile:
+  Manage Profile Subscriptions: Merañ koumanantoù ar profil
   Icon Names:
     Person: Den
     People: Tud

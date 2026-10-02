@@ -354,7 +354,7 @@ test.describe('settings search highlights', () => {
     test.describe(`subpage search at ${uiScale}% UI scale`, () => {
       test.use({ seed: { settings: { currentLocale: 'en-US', uiScale, useQuickPlaybackSpeedBar: true } } })
 
-      for (const label of ['Show Active Subscriptions', 'Add item', 'Add Playback Speed', 'Playback Speed']) {
+      for (const label of ['Show active subscriptions in sidebar', 'Add item', 'Add Playback Speed', 'Playback Speed']) {
         test(`opens and highlights ${label} inside its subpage`, async ({ page }) => {
           await goTo(page, 'settings')
           await page.getByRole('searchbox', { name: 'Search settings' }).fill(label)
@@ -6187,3 +6187,60 @@ test.describe('tabs from other synced devices', () => {
     await expect(section.getByRole('heading', { name: 'Tabs from other devices' })).toHaveCount(0)
   })
 })
+
+for (const uiScale of [100, 125]) {
+  test.describe(`subscription settings horizontal layout at ${uiScale}% UI scale`, () => {
+    test.use({ seed: { settings: { uiScale, reducedMotion: 'on', alwaysShowScrollbars: true } } })
+
+    test('fits all subscription controls across window widths without horizontal scrolling', async ({ app, page }) => {
+      await goToSettingsSection(page, 'subscription')
+      await page.getByRole('button', { name: 'Maximize', exact: true }).click()
+      const content = page.locator('.settingsContent')
+      for (const width of [1100, 1000, 900, 820, 740, 680, 500, 375, 1100]) {
+        await content.evaluate(element => { element.scrollTop = element.scrollHeight })
+        await app.electronApp.evaluate(({ BrowserWindow }, size) => {
+          const window = BrowserWindow.getAllWindows()[0]
+          window.setBounds({ ...window.getBounds(), ...size })
+        }, { width: Math.round(width * uiScale / 100), height: 750 * uiScale / 100 })
+        await expect.poll(() => page.evaluate(() => window.innerWidth)).toBe(width)
+        await expect.poll(() => content.evaluate(element => element.scrollWidth - element.clientWidth), { message: `subscriptions fit at ${width}px` }).toBeLessThanOrEqual(1)
+        await expect(content.locator('.os-scrollbar-horizontal')).toHaveClass(/os-scrollbar-unusable/)
+        await expect(content).toHaveJSProperty('scrollLeft', 0)
+        await expect.poll(() => content.evaluate(element => {
+          const section = element.querySelector('.section')
+          const contentEnd = section.getBoundingClientRect().bottom - element.getBoundingClientRect().top +
+            element.scrollTop + Number.parseFloat(getComputedStyle(element).paddingBottom)
+          const maximum = Math.max(0, contentEnd - element.clientHeight)
+          const scrollbar = element.querySelector('.os-scrollbar-vertical')
+          if (maximum <= 1) return element.scrollTop <= 1 && scrollbar.classList.contains('os-scrollbar-unusable')
+          const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
+          const thumb = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+          return element.scrollTop <= maximum + 1 &&
+            Math.abs(thumb.height / track.height - element.clientHeight / element.scrollHeight) < 0.02
+        })).toBe(true)
+        const controls = content.locator('.switch-ctn, .select, .pure-material-slider, .manageButton')
+        expect(await controls.evaluateAll(elements => elements.every(control => {
+          const bounds = control.getBoundingClientRect()
+          const viewport = control.closest('.settingsContent').getBoundingClientRect()
+          return bounds.left >= viewport.left - 1 && bounds.right <= viewport.right + 1
+        }))).toBe(true)
+      }
+    })
+
+    test('clears a horizontal offset when switching settings categories', async ({ page }) => {
+      await goToSettingsSection(page, 'subscription')
+      const content = page.locator('.settingsContent')
+      // Keep the previous overflow range alive until the category switch. This
+      // reproduces Chromium retaining a horizontal offset after content changes.
+      await content.evaluate(element => {
+        element.firstElementChild.style.minWidth = '1500px'
+        element.scrollLeft = element.scrollWidth
+      })
+      await expect.poll(() => content.evaluate(element => element.scrollLeft)).toBeGreaterThan(0)
+      await page.locator('.settingsMenu [data-section="privacy"]').click()
+      await expect.poll(() => content.evaluate(element => element.scrollLeft)).toBe(0)
+      await expect.poll(() => content.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+      await expect(content.locator('.os-scrollbar-horizontal')).toHaveClass(/os-scrollbar-unusable/)
+    })
+  })
+}

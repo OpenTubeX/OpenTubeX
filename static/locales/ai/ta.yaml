@@ -276,9 +276,9 @@ Settings:
     Swipe to refresh: புதுப்பிக்க ஸ்வைப் செய்யவும்
     Blur Thumbnails: சிறுபடங்களை மங்கலாக்கு
     Navigation:
-      Always Show Navigation Bar: வழிசெலுத்தல் பட்டியை எப்போதும் காட்டு
-      Compact Tab Labels: சுருக்கமான தாவல் பெயர்கள்
-      Show Active Subscriptions: செயலில் உள்ள சந்தாக்களைக் காட்டு
+      Always Show Navigation Bar: வழிசெலுத்தல் பட்டி கீழே இருக்கும்போது எப்போதும் காட்டு
+      Compact Tab Labels: வழிசெலுத்தல் பட்டி கீழே இருக்கும்போது சுருக்கமாகக் காட்டு
+      Show Active Subscriptions: பக்கப்பட்டியில் செயலில் உள்ள சந்தாக்களைக் காட்டு
       Navigation: வழிசெலுத்தல்
       Customize Navigation: வழிசெலுத்தலைத் தனிப்பயனாக்கு
       Add Item: உருப்படியைச் சேர்
@@ -1150,6 +1150,7 @@ About:
   Matrix: Matrix
   Email: மின்னஞ்சல்
 Profile:
+  Manage Profile Subscriptions: சுயவிவரச் சந்தாக்களை நிர்வகி
   Icon Names:
     Person: நபர்
     People: மக்கள்

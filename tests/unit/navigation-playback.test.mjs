@@ -319,12 +319,14 @@ test('upward preview starts fading after a short swipe', async t => {
   assert.equal(Number(mounted.previewRoot.firstElementChild.style.opacity), 0)
 })
 
-test('restoring after resizing uses the current Watch host geometry', async t => {
+test('restoring after resizing uses the current tab geometry', async t => {
   const mounted = mountWatch(t)
   const navigation = mounted.provides.get('navigation')
   await navigation.minimize()
   mounted.hostBounds.width = 800.5
   mounted.hostBounds.top = -139.75
+  mounted.tabBounds.width = 800.5
+  mounted.tabBounds.top = -139.75
   mounted.viewport.scrollY = 220
   mounted.viewport.innerHeight = 600
   navigation.beginRestorePreview()
@@ -333,14 +335,16 @@ test('restoring after resizing uses the current Watch host geometry', async t =>
   assert.equal(mounted.previewStyle.value.height, '519.75px')
 })
 
-test('mobile restore aligns the retained Watch view with its tab', async t => {
-  const mounted = mountWatch(t, { mobile: true })
-  const navigation = mounted.provides.get('navigation')
-  await navigation.minimize()
-  mounted.hostBounds.top = 452.125
-  mounted.viewport.scrollY = 0
-  navigation.beginRestorePreview()
-  assert.equal(mounted.previewStyle.value.top, '-391.875px')
-  assert.equal(mounted.previewStyle.value.width, '412.25px')
-  assert.equal(mounted.previewStyle.value.height, '739.75px')
-})
+for (const mobile of [false, true]) {
+  test(`${mobile ? 'mobile' : 'desktop'} restore aligns the retained Watch view with its tab`, async t => {
+    const mounted = mountWatch(t, { mobile })
+    const navigation = mounted.provides.get('navigation')
+    await navigation.minimize()
+    mounted.hostBounds.top = 2452.125
+    mounted.viewport.scrollY = 0
+    navigation.beginRestorePreview()
+    assert.equal(mounted.previewStyle.value.top, '-2391.875px')
+    assert.equal(mounted.previewStyle.value.width, '412.25px')
+    assert.equal(mounted.previewStyle.value.height, '739.75px')
+  })
+}

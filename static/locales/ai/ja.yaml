@@ -271,9 +271,9 @@ Settings:
     Swipe to refresh: スワイプして更新
     Blur Thumbnails: サムネイルをぼかす
     Navigation:
-      Always Show Navigation Bar: ナビゲーションバーを常に表示
-      Compact Tab Labels: コンパクトなタブラベル
-      Show Active Subscriptions: 登録チャンネルを表示
+      Always Show Navigation Bar: ナビゲーションバーが下部にあるときは常に表示
+      Compact Tab Labels: ナビゲーションバーが下部にあるときはコンパクトに表示
+      Show Active Subscriptions: サイドバーにアクティブな登録チャンネルを表示
       Navigation: ナビゲーション
       Customize Navigation: ナビゲーションをカスタマイズ
       Add Item: 項目を追加
@@ -1120,6 +1120,7 @@ About:
   Matrix: Matrix
   Email: メール
 Profile:
+  Manage Profile Subscriptions: プロフィールの登録チャンネルを管理
   Icon Names:
     Person: 人物
     People: 人々

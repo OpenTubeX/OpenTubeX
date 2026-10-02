@@ -467,11 +467,13 @@ import { getThemeClassification, hasFixedThemeColors } from '../../../appearance
 
 const quickHeaderActions = useTemplateRef('quickHeaderActions')
 const props = defineProps({
+  compactHeader: { type: Boolean, default: false },
   headerActionsOverflow: { type: Boolean, default: false }
 })
 const { locale, t } = useI18n()
 const id = useId()
-const phoneLayout = usePhoneLayout()
+const shortViewport = usePhoneLayout('(max-height: 600px)')
+const phoneLayout = computed(() => props.compactHeader || shortViewport.value)
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const USING_ELECTRON = process.env.IS_ELECTRON
 const systemColorScheme = window.matchMedia('(prefers-color-scheme: dark)')

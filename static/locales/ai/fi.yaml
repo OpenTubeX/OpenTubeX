@@ -275,9 +275,9 @@ Settings:
     Swipe to refresh: Päivitä pyyhkäisemällä
     Blur Thumbnails: Sumenna pikkukuvat
     Navigation:
-      Always Show Navigation Bar: Näytä navigointipalkki aina
-      Compact Tab Labels: Tiiviit välilehtien nimet
-      Show Active Subscriptions: Näytä aktiiviset tilaukset
+      Always Show Navigation Bar: Näytä navigointipalkki aina, kun se on alareunassa
+      Compact Tab Labels: Tiivis navigointipalkki, kun se on alareunassa
+      Show Active Subscriptions: Näytä aktiiviset tilaukset sivupalkissa
       Navigation: Navigointi
       Customize Navigation: Mukauta navigointia
       Add Item: Lisää kohde
@@ -1151,6 +1151,7 @@ About:
   Matrix: Matrix
   Email: Sähköposti
 Profile:
+  Manage Profile Subscriptions: Hallitse profiilin tilauksia
   Icon Names:
     Person: Henkilö
     People: Ihmiset

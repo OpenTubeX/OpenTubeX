@@ -11,6 +11,7 @@
 
   <FtSettingsSubpage
     :open="open"
+    grow-with-content
     :title="t('Settings.General Settings.Navigation.Customize Navigation')"
     :icon="['fas', 'bars']"
     @close="close"
@@ -171,7 +172,10 @@
     >
       {{ reorderStatus }}
     </p>
-    <div class="fixedNavigationOptions">
+    <div
+      ref="fixedNavigationOptionsRef"
+      class="fixedNavigationOptions"
+    >
       <FtToggleSwitch
         :label="t('Settings.General Settings.Navigation.Always Show Navigation Bar')"
         :compact="true"
@@ -226,7 +230,9 @@ const itemPickerId = `navigation-item-picker-${useId().replaceAll(':', '')}`
 const itemPickerAnchorRef = useTemplateRef('itemPickerAnchorRef')
 const itemPickerListRef = useTemplateRef('itemPickerListRef')
 const itemPickerContentRef = useTemplateRef('itemPickerContentRef')
+const fixedNavigationOptionsRef = useTemplateRef('fixedNavigationOptionsRef')
 let itemPickerResizeObserver = null
+let navigationResizeObserver = null
 
 const catalog = computed(() => NAVIGATION_ITEM_DEFINITIONS
   .filter(item => !item.requiresLocalApi || process.env.SUPPORTS_LOCAL_API)
@@ -299,6 +305,23 @@ function stopObservingItemPicker() {
   itemPickerResizeObserver = null
 }
 
+function clampNavigationScroll() {
+  const content = fixedNavigationOptionsRef.value?.parentElement
+  const scroller = content?.closest('.settingsSubpageScroll')
+  if (scroller) clampOverlayScrollTop(scroller, content)
+}
+
+watch(fixedNavigationOptionsRef, (options) => {
+  navigationResizeObserver?.disconnect()
+  navigationResizeObserver = null
+  if (!options) return
+
+  navigationResizeObserver = new ResizeObserver(clampNavigationScroll)
+  navigationResizeObserver.observe(options.parentElement)
+  navigationResizeObserver.observe(options.closest('.settingsSubpageScroll'))
+  clampNavigationScroll()
+})
+
 watch(itemPickerOpen, async (isOpen) => {
   stopObservingItemPicker()
   if (!isOpen) return
@@ -315,6 +338,7 @@ watch(itemPickerOpen, async (isOpen) => {
 onMounted(() => document.addEventListener('pointerdown', closeItemPickerFromOutside))
 onBeforeUnmount(() => {
   stopObservingItemPicker()
+  navigationResizeObserver?.disconnect()
   document.removeEventListener('pointerdown', closeItemPickerFromOutside)
 })
 
@@ -502,10 +526,13 @@ function resetItems() {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   inline-size: 100%;
+  margin-block-end: 20px;
   margin-block-start: 8px;
   margin-inline: auto;
   max-inline-size: 720px;
+  padding-block: 8px;
   padding-inline: 12px;
 }
 

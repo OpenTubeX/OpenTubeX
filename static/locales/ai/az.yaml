@@ -273,9 +273,9 @@ Settings:
     Swipe to refresh: Yeniləmək üçün sürüşdür
     Blur Thumbnails: Miniatürləri bulanıqlaşdır
     Navigation:
-      Always Show Navigation Bar: Naviqasiya panelini həmişə göstər
-      Compact Tab Labels: Yığcam vərəq etiketləri
-      Show Active Subscriptions: Aktiv abunəlikləri göstər
+      Always Show Navigation Bar: Naviqasiya paneli aşağıda olduqda onu həmişə göstər
+      Compact Tab Labels: Aşağıda olduqda yığcam naviqasiya paneli
+      Show Active Subscriptions: Aktiv abunəlikləri yan paneldə göstər
       Navigation: Naviqasiya
       Customize Navigation: Naviqasiyanı fərdiləşdir
       Add Item: Element əlavə et
@@ -1123,6 +1123,7 @@ About:
   Matrix: Matrix
   Email: E-poçt
 Profile:
+  Manage Profile Subscriptions: Profil abunəliklərini idarə et
   Icon Names:
     Person: Şəxs
     People: İnsanlar

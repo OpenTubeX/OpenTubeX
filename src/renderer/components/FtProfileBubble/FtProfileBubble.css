@@ -9,8 +9,7 @@
 }
 
 .bubblePadding:hover {
-  background-color: var(--side-nav-hover-color);
-  color: var(--side-nav-hover-text-color);
+  background-color: color-mix(in srgb, var(--side-nav-hover-color) 30%, transparent);
   transition: background 0.2s ease-in;
 }
 
@@ -24,6 +23,7 @@
 }
 
 .profileName {
+  color: var(--primary-text-color);
   font-size: 14px;
   line-height: 1.5em;
   overflow: hidden;

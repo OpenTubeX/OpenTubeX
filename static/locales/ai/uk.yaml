@@ -275,9 +275,9 @@ Settings:
     Swipe to refresh: Проведіть, щоб оновити
     Blur Thumbnails: Розмивати мініатюри
     Navigation:
-      Always Show Navigation Bar: Завжди показувати панель навігації
-      Compact Tab Labels: Компактні підписи вкладок
-      Show Active Subscriptions: Показувати активні підписки
+      Always Show Navigation Bar: Завжди показувати панель навігації, коли вона внизу
+      Compact Tab Labels: Компактна панель навігації, коли вона внизу
+      Show Active Subscriptions: Показувати активні підписки на бічній панелі
       Navigation: Навігація
       Customize Navigation: Налаштувати навігацію
       Add Item: Додати елемент
@@ -1146,6 +1146,7 @@ About:
   Matrix: Matrix
   Email: Електронна пошта
 Profile:
+  Manage Profile Subscriptions: Керування підписками профілю
   Icon Names:
     Person: Людина
     People: Люди

@@ -275,9 +275,9 @@ Settings:
     Swipe to refresh: Σύρετε για ανανέωση
     Blur Thumbnails: Θόλωση μικρογραφιών
     Navigation:
-      Always Show Navigation Bar: Να εμφανίζεται πάντα η γραμμή πλοήγησης
-      Compact Tab Labels: Συμπαγείς ετικέτες καρτελών
-      Show Active Subscriptions: Εμφάνιση ενεργών συνδρομών
+      Always Show Navigation Bar: Να εμφανίζεται πάντα η γραμμή πλοήγησης όταν βρίσκεται στο κάτω μέρος
+      Compact Tab Labels: Συμπαγής γραμμή πλοήγησης όταν βρίσκεται στο κάτω μέρος
+      Show Active Subscriptions: Εμφάνιση ενεργών συνδρομών στην πλαϊνή γραμμή
       Navigation: Πλοήγηση
       Customize Navigation: Προσαρμογή πλοήγησης
       Add Item: Προσθήκη στοιχείου
@@ -1151,6 +1151,7 @@ About:
   Matrix: Matrix
   Email: Ηλεκτρονικό ταχυδρομείο
 Profile:
+  Manage Profile Subscriptions: Διαχείριση συνδρομών προφίλ
   Icon Names:
     Person: Άτομο
     People: Άτομα

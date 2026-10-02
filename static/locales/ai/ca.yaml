@@ -401,9 +401,9 @@ Settings:
     Swipe to refresh: Llisca per actualitzar
     Blur Thumbnails: Difumina les miniatures
     Navigation:
-      Always Show Navigation Bar: Mostra sempre la barra de navegació
-      Compact Tab Labels: Etiquetes de pestanya compactes
-      Show Active Subscriptions: Mostra les subscripcions actives
+      Always Show Navigation Bar: Mostra sempre la barra de navegació quan és a la part inferior
+      Compact Tab Labels: Barra de navegació compacta quan és a la part inferior
+      Show Active Subscriptions: Mostra les subscripcions actives a la barra lateral
       Navigation: Navegació
       Customize Navigation: Personalitza la navegació
       Add Item: Afegeix un element
@@ -1481,6 +1481,7 @@ About:
   Please read the {roomRulesLink}: Llegiu les {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: L'OpenTubeX és possible gràcies a {creditsPageLink}
 Profile:
+  Manage Profile Subscriptions: Gestiona les subscripcions del perfil
   Icon Names:
     Person: Persona
     People: Persones

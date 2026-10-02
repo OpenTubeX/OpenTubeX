@@ -273,9 +273,9 @@ Settings:
     Swipe to refresh: Povucite za osvježavanje
     Blur Thumbnails: Zamuti minijature
     Navigation:
-      Always Show Navigation Bar: Uvijek prikaži navigacijsku traku
-      Compact Tab Labels: Kompaktne oznake kartica
-      Show Active Subscriptions: Prikaži aktivne pretplate
+      Always Show Navigation Bar: Uvijek prikaži navigacijsku traku kada je na dnu
+      Compact Tab Labels: Kompaktna navigacijska traka kada je na dnu
+      Show Active Subscriptions: Prikaži aktivne pretplate u bočnoj traci
       Navigation: Navigacija
       Customize Navigation: Prilagodi navigaciju
       Add Item: Dodaj stavku
@@ -1129,6 +1129,7 @@ About:
   Matrix: Matrix
   Email: E-pošta
 Profile:
+  Manage Profile Subscriptions: Upravljaj pretplatama profila
   Icon Names:
     Person: Osoba
     People: Ljudi

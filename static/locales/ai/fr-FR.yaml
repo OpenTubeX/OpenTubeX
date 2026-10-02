@@ -271,9 +271,9 @@ Settings:
     Swipe to refresh: Balayer pour actualiser
     Blur Thumbnails: Flouter les miniatures
     Navigation:
-      Always Show Navigation Bar: Toujours afficher la barre de navigation
-      Compact Tab Labels: Libellés d’onglets compacts
-      Show Active Subscriptions: Afficher les abonnements actifs
+      Always Show Navigation Bar: Toujours afficher la barre de navigation lorsqu’elle est en bas
+      Compact Tab Labels: Barre de navigation compacte lorsqu’elle est en bas
+      Show Active Subscriptions: Afficher les abonnements actifs dans la barre latérale
       Navigation: Navigation
       Customize Navigation: Personnaliser la navigation
       Add Item: Ajouter un élément
@@ -1119,6 +1119,7 @@ About:
   Fluxer: Rejoindre notre communauté Fluxer
   Matrix: Matrix
 Profile:
+  Manage Profile Subscriptions: Gérer les abonnements du profil
   Icon Names:
     Person: Personne
     People: Personnes

@@ -288,9 +288,9 @@ Settings:
     Swipe to refresh: کشیدن برای تازه‌سازی
     Blur Thumbnails: تار کردن تصاویر بندانگشتی
     Navigation:
-      Always Show Navigation Bar: همیشه نوار پیمایش را نمایش بده
-      Compact Tab Labels: برچسب‌های فشردهٔ زبانه‌ها
-      Show Active Subscriptions: نمایش اشتراک‌های فعال
+      Always Show Navigation Bar: همیشه نوار پیمایش را وقتی در پایین است نمایش بده
+      Compact Tab Labels: نوار پیمایش فشرده وقتی در پایین است
+      Show Active Subscriptions: نمایش اشتراک‌های فعال در نوار کناری
       Navigation: پیمایش
       Customize Navigation: سفارشی‌سازی پیمایش
       Add Item: افزودن مورد
@@ -1176,6 +1176,7 @@ About:
   Please read the {roomRulesLink}: لطفاً {roomRulesLink} را بخوانید
   OpenTubeX is made possible by {creditsPageLink}: ساخت OpenTubeX با کمک {creditsPageLink} ممکن شده است
 Profile:
+  Manage Profile Subscriptions: مدیریت اشتراک‌های نمایه
   Icon Names:
     Person: شخص
     People: افراد

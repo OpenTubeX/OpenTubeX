@@ -275,9 +275,9 @@ Settings:
     Swipe to refresh: החלקה לרענון
     Blur Thumbnails: טשטוש תמונות ממוזערות
     Navigation:
-      Always Show Navigation Bar: הצגת סרגל הניווט תמיד
-      Compact Tab Labels: תוויות לשוניות קומפקטיות
-      Show Active Subscriptions: הצגת מינויים פעילים
+      Always Show Navigation Bar: הצגת סרגל הניווט תמיד כשהוא בתחתית
+      Compact Tab Labels: סרגל ניווט קומפקטי כשהוא בתחתית
+      Show Active Subscriptions: הצגת מינויים פעילים בסרגל הצד
       Navigation: ניווט
       Customize Navigation: התאמה אישית של הניווט
       Add Item: הוספת פריט
@@ -1151,6 +1151,7 @@ About:
   Matrix: Matrix
   Email: דוא״ל
 Profile:
+  Manage Profile Subscriptions: ניהול המינויים של הפרופיל
   Icon Names:
     Person: אדם
     People: אנשים

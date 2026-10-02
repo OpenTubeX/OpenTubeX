@@ -11,14 +11,23 @@ h3 {
   color: var(--tertiary-text-color);
 }
 
-.profileName,
-.colorSelection {
+.profileName {
   margin: auto;
   inline-size: min(350px, 100%);
 }
 
 .profileIconHeading {
   margin-block-start: 24px;
+}
+
+.profileActions {
+  margin-block-start: 16px;
+  justify-content: center;
+  gap: 12px;
+}
+
+.profileActions :deep(.btn) {
+  margin: 0;
 }
 
 .profileIconOptions {
@@ -137,13 +146,8 @@ h3 {
   justify-content: center;
 }
 
-.profileEdit {
-  flex-direction: column;
-  column-gap: 10px;
-}
-
-.profileEdit > * {
-  flex: 1;
+.profileEdit > * + * {
+  margin-block-start: 20px;
 }
 
 .colorOptions {
@@ -173,6 +177,10 @@ h3 {
 
 .themeColorOption {
   background: var(--primary-color);
+  color: var(--text-with-main-color);
+  display: grid;
+  place-items: center;
+  font-size: 20px;
 }
 
 .transparentColorOption {
@@ -202,14 +210,19 @@ h3 {
 }
 
 .secondEditRow {
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: space-evenly;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  align-items: start;
+  gap: 24px;
+}
+
+.secondEditRow > * {
+  min-inline-size: 0;
 }
 
 .card {
   inline-size: 85%;
-  margin-block: 0 60px;
+  margin-block: 0 15px;
   margin-inline: auto;
 }
 

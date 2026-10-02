@@ -537,9 +537,9 @@ Settings:
     Blur Thumbnails: Blur thumbnails
     General Settings: General
     Navigation:
-      Always Show Navigation Bar: Always show navigation bar
-      Compact Tab Labels: Compact tab labels
-      Show Active Subscriptions: Show Active Subscriptions
+      Always Show Navigation Bar: Always show navigation bar when it's at the bottom
+      Compact Tab Labels: Compact navigation bar when it's at the bottom
+      Show Active Subscriptions: Show active subscriptions in sidebar
       Navigation: Navigation
       Customize Navigation: Customize navigation
       Add Item: Add item
@@ -1834,6 +1834,7 @@ About:
   Donate: Donate
 
 Profile:
+  Manage Profile Subscriptions: Manage profile subscriptions
   Icon Names:
     Person: Person
     People: People

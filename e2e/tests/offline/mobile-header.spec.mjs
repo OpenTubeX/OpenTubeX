@@ -1,5 +1,78 @@
 import { test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
 
+for (const uiScale of [100, 125]) {
+  test.describe(`centered desktop header at ${uiScale}% UI scale`, () => {
+    test.use({ seed: { settings: { uiScale } } })
+
+    test('centers search with space on both sides and removes logo text before collapsing search', async ({ app, page }, testInfo) => {
+      const pageErrors = []
+      page.on('pageerror', error => pageErrors.push(error.message))
+      for (const [tabPosition, extraActions] of [['top', false], ['left', false], ['right', true]]) {
+        await page.evaluate(({ tabPosition, extraActions }) => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          store.commit('setTabBarPosition', tabPosition)
+          store.commit('setVerticalTabBarWidth', 220)
+          store.commit('setEnableDownloads', extraActions)
+          store.commit('setMoveDownloadsToAppHeader', extraActions)
+          store.commit('setMoveSettingsToAppHeader', extraActions)
+          store.commit('setHideHeaderSyncIndicator', !extraActions)
+          store.commit('setSyncServerStatus', extraActions ? 'syncing' : 'idle')
+        }, { tabPosition, extraActions })
+        for (const width of [1000, 1280, 1080, 960, 900, 800, 735, 681, 680]) {
+          await app.electronApp.evaluate(({ BrowserWindow }, size) => {
+            const window = BrowserWindow.getAllWindows()[0]
+            window.setBounds({ ...window.getBounds(), ...size })
+          }, { width: Math.round(width * uiScale / 100), height: 820 * uiScale / 100 })
+          await expect.poll(() => page.evaluate(() => window.innerWidth)).toBe(width)
+          await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+          const header = page.locator('.topNav')
+          const search = header.locator('.searchContainer')
+          if (tabPosition === 'top' && width === 735) {
+            await expect(header.locator('.logoText')).toBeHidden()
+            await expect(search).toBeVisible()
+          }
+          if (tabPosition === 'top' && width === 1280) await expect(header.locator('.logoText')).toBeVisible()
+          if (await search.isVisible()) {
+            await expect.poll(() => header.evaluate(element => {
+              const header = element.getBoundingClientRect()
+              const field = element.querySelector('.searchContainer').getBoundingClientRect()
+              return Math.abs((field.left + field.right) / 2 - (header.left + header.right) / 2)
+            }), { message: `search is centered at ${width}px with ${tabPosition} tabs` }).toBeLessThan(1)
+            const gaps = await header.evaluate(element => {
+              const field = element.querySelector('.searchContainer').getBoundingClientRect()
+              const visibleBounds = selector => [...element.querySelector(selector).children]
+                .map(child => child.getBoundingClientRect()).filter(bounds => bounds.width > 0)
+              const left = visibleBounds('.side:first-child')
+              const right = visibleBounds('.profiles')
+              return {
+                left: field.left - Math.max(...left.map(bounds => bounds.right)),
+                right: Math.min(...right.map(bounds => bounds.left)) - field.right
+              }
+            })
+            expect(gaps.left).toBeGreaterThanOrEqual(12)
+            expect(gaps.right).toBeGreaterThanOrEqual(12)
+          } else {
+            await expect(header.locator('.logoText')).toBeHidden()
+            await header.locator('.navSearchButton').click()
+            await expect(header.locator('.ft-input')).toBeFocused()
+            await expect(header.locator('.profiles')).toBeHidden()
+            await header.locator('.ft-input').press('Escape')
+          }
+          if (tabPosition === 'top' && width === 735) {
+            const screenshot = await app.electronApp.evaluate(async ({ BrowserWindow }) => (
+              (await BrowserWindow.getAllWindows()[0].webContents.capturePage()).toPNG().toString('base64')
+            ))
+            await testInfo.attach('centered search after hiding logo text', {
+              body: Buffer.from(screenshot, 'base64'), contentType: 'image/png'
+            })
+          }
+        }
+      }
+      expect(pageErrors).toEqual([])
+    })
+  })
+}
+
 async function enablePhoneHeader(page) {
   await page.evaluate(() => {
     document.querySelector('.app').classList.add('capacitorTabs')

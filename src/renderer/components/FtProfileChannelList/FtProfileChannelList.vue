@@ -10,6 +10,30 @@
       >
         {{ selectedText }}
       </p>
+      <FtFlexBox
+        v-if="showUnsubscribeButton"
+        class="selectionActions"
+      >
+        <FtButton
+          :label="$t('Profile.Select All')"
+          :icon="['fas', 'check']"
+          :disabled="selected.size === subscriptions.length"
+          @click="selectAll"
+        />
+        <FtButton
+          :label="$t('Profile.Select None')"
+          :icon="['fas', 'xmark']"
+          :disabled="selected.size === 0"
+          @click="selectNone"
+        />
+        <FtButton
+          :label="$t('Profile.Delete Selected')"
+          :icon="['fas', 'trash']"
+          theme="destructive"
+          :disabled="selected.size === 0"
+          @click="displayDeletePrompt"
+        />
+      </FtFlexBox>
       <FtFlexBox>
         <FtChannelBubble
           v-for="channel in subscriptions"
@@ -20,26 +44,6 @@
           :selectable="showUnsubscribeButton"
           :selected="selected.has(channel.id)"
           @change="handleChannelToggle(channel.id)"
-        />
-      </FtFlexBox>
-      <FtFlexBox
-        v-if="showUnsubscribeButton"
-      >
-        <FtButton
-          :label="$t('Profile.Select All')"
-          :icon="['fas', 'check']"
-          @click="selectAll"
-        />
-        <FtButton
-          :label="$t('Profile.Select None')"
-          :icon="['fas', 'xmark']"
-          @click="selectNone"
-        />
-        <FtButton
-          :label="$t('Profile.Delete Selected')"
-          :icon="['fas', 'trash']"
-          theme="destructive"
-          @click="displayDeletePrompt"
         />
       </FtFlexBox>
     </FtCard>

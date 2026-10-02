@@ -167,9 +167,9 @@ function beginRestorePreview() {
   previewRestoring = true
   previewScroll = { left: window.scrollX, top: window.scrollY }
   const parentBounds = previewHost.value.getBoundingClientRect()
-  const targetBounds = document.querySelector('.app.capacitorTabs')
-    ? previewHost.value.closest('.tabContent')?.getBoundingClientRect() ?? parentBounds
-    : parentBounds
+  // The retained Watch host follows the browsing page in document flow. Use
+  // the tab's origin so a tall page cannot send the returning video offscreen.
+  const targetBounds = previewHost.value.closest('.tabContent')?.getBoundingClientRect() ?? parentBounds
   previewOrigin = {
     left: window.scrollX + targetBounds.left - parentBounds.left,
     top: window.scrollY + targetBounds.top - parentBounds.top

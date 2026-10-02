@@ -273,9 +273,9 @@ Settings:
     Swipe to refresh: Glisează pentru a reîmprospăta
     Blur Thumbnails: Estompează miniaturile
     Navigation:
-      Always Show Navigation Bar: Afișează întotdeauna bara de navigare
-      Compact Tab Labels: Etichete compacte pentru file
-      Show Active Subscriptions: Afișează abonamentele active
+      Always Show Navigation Bar: Afișează întotdeauna bara de navigare când este în partea de jos
+      Compact Tab Labels: Bară de navigare compactă când este în partea de jos
+      Show Active Subscriptions: Afișează abonamentele active în bara laterală
       Navigation: Navigare
       Customize Navigation: Personalizează navigarea
       Add Item: Adaugă element
@@ -1145,6 +1145,7 @@ About:
   Please read the {roomRulesLink}: Citiți {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX este posibil datorită {creditsPageLink}
 Profile:
+  Manage Profile Subscriptions: Gestionează abonamentele profilului
   Icon Names:
     Person: Persoană
     People: Persoane

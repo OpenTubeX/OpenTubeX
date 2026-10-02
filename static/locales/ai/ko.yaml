@@ -359,9 +359,9 @@ Settings:
     Swipe to refresh: 스와이프하여 새로고침
     Blur Thumbnails: 썸네일 흐리게 표시
     Navigation:
-      Always Show Navigation Bar: 탐색 막대 항상 표시
-      Compact Tab Labels: 간결한 탭 라벨
-      Show Active Subscriptions: 활성 구독 표시
+      Always Show Navigation Bar: 탐색 막대가 하단에 있을 때 항상 표시
+      Compact Tab Labels: 탐색 막대가 하단에 있을 때 간소화
+      Show Active Subscriptions: 사이드바에 활성 구독 표시
       Navigation: 탐색
       Customize Navigation: 탐색 맞춤 설정
       Add Item: 항목 추가
@@ -1374,6 +1374,7 @@ About:
   Please read the {roomRulesLink}: '{roomRulesLink}을(를) 읽어 주세요'
   OpenTubeX is made possible by {creditsPageLink}: '{creditsPageLink}의 도움으로 OpenTubeX를 만들 수 있었습니다'
 Profile:
+  Manage Profile Subscriptions: 프로필 구독 관리
   Icon Names:
     Person: 사람
     People: 사람들
