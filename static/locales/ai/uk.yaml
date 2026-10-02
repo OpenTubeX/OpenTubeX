@@ -1146,6 +1146,19 @@ About:
   Matrix: Matrix
   Email: Електронна пошта
 Profile:
+  Icon Names:
+    Person: Людина
+    People: Люди
+    Headphones: Навушники
+    Gaming: Ігри
+    Film: Фільм
+    Art: Мистецтво
+    Science: Наука
+    Globe: Глобус
+    Heart: Серце
+    Sun: Сонце
+    Moon: Місяць
+    Trophy: Кубок
   Profile Icon: Піктограма профілю
   Choose an Emoji: Вибрати емодзі
   Custom Emoji: Власний емодзі

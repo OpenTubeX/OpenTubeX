@@ -1154,6 +1154,19 @@ About:
   Please read the {roomRulesLink}: Lees de {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX wordt mogelijk gemaakt door {creditsPageLink}
 Profile:
+  Icon Names:
+    Person: Persoon
+    People: Personen
+    Headphones: Hoofdtelefoon
+    Gaming: Games
+    Film: Film
+    Art: Kunst
+    Science: Wetenschap
+    Globe: Wereldbol
+    Heart: Hart
+    Sun: Zon
+    Moon: Maan
+    Trophy: Trofee
   Profile Icon: Profielpictogram
   Choose an Emoji: Emoji kiezen
   Custom Emoji: Aangepaste emoji

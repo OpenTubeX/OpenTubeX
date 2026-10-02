@@ -1146,6 +1146,19 @@ About:
   Matrix: مصفوفة
   Email: بريد إلكتروني
 Profile:
+  Icon Names:
+    Person: شخص
+    People: أشخاص
+    Headphones: سماعات الرأس
+    Gaming: ألعاب
+    Film: فيلم
+    Art: فن
+    Science: علوم
+    Globe: كرة أرضية
+    Heart: قلب
+    Sun: شمس
+    Moon: قمر
+    Trophy: كأس
   Profile Icon: أيقونة الملف الشخصي
   Choose an Emoji: اختر رمزًا تعبيريًا
   Custom Emoji: رموز تعبيرية مخصصة

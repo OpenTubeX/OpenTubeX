@@ -1120,6 +1120,19 @@ About:
   Matrix: Matrix
   Email: E-posta
 Profile:
+  Icon Names:
+    Person: Kişi
+    People: Kişiler
+    Headphones: Kulaklık
+    Gaming: Oyun
+    Film: Film
+    Art: Sanat
+    Science: Bilim
+    Globe: Küre
+    Heart: Kalp
+    Sun: Güneş
+    Moon: Ay
+    Trophy: Kupa
   Profile Icon: Profil Simgesi
   Choose an Emoji: Bir Emoji Seç
   Custom Emoji: Özel Emoji

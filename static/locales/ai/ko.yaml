@@ -1374,6 +1374,19 @@ About:
   Please read the {roomRulesLink}: '{roomRulesLink}을(를) 읽어 주세요'
   OpenTubeX is made possible by {creditsPageLink}: '{creditsPageLink}의 도움으로 OpenTubeX를 만들 수 있었습니다'
 Profile:
+  Icon Names:
+    Person: 사람
+    People: 사람들
+    Headphones: 헤드폰
+    Gaming: 게임
+    Film: 영화
+    Art: 예술
+    Science: 과학
+    Globe: 지구본
+    Heart: 하트
+    Sun: 태양
+    Moon: 달
+    Trophy: 트로피
   Toggle Profile List: 프로필 목록 전환
   Edit Profile Name: 프로필 이름 편집
   Create Profile Name: 프로필 이름 만들기

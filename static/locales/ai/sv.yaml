@@ -1126,6 +1126,19 @@ About:
   Matrix: Matrix
   Email: E-post
 Profile:
+  Icon Names:
+    Person: Person
+    People: Personer
+    Headphones: Hörlurar
+    Gaming: Spel
+    Film: Film
+    Art: Konst
+    Science: Vetenskap
+    Globe: Jordglob
+    Heart: Hjärta
+    Sun: Sol
+    Moon: Måne
+    Trophy: Pokal
   Profile Icon: Profilikon
   Choose an Emoji: Välj en emoji
   Custom Emoji: Egen emoji

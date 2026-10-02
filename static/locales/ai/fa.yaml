@@ -1176,6 +1176,19 @@ About:
   Please read the {roomRulesLink}: لطفاً {roomRulesLink} را بخوانید
   OpenTubeX is made possible by {creditsPageLink}: ساخت OpenTubeX با کمک {creditsPageLink} ممکن شده است
 Profile:
+  Icon Names:
+    Person: شخص
+    People: افراد
+    Headphones: هدفون
+    Gaming: بازی
+    Film: فیلم
+    Art: هنر
+    Science: علم
+    Globe: کرهٔ زمین
+    Heart: قلب
+    Sun: خورشید
+    Moon: ماه
+    Trophy: جام
   Profile Icon: نماد نمایه
   Choose an Emoji: انتخاب ایموجی
   Custom Emoji: ایموجی سفارشی

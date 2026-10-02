@@ -1105,6 +1105,19 @@ About:
   Matrix: Matrix
   Email: Email
 Profile:
+  Icon Names:
+    Person: Person
+    People: People
+    Headphones: Headphones
+    Gaming: Gaming
+    Film: Film
+    Art: Art
+    Science: Science
+    Globe: Globe
+    Heart: Heart
+    Sun: Sun
+    Moon: Moon
+    Trophy: Trophy
   Profile Icon: Profile Icon
   Choose an Emoji: Choose an Emoji
   Custom Emoji: Custom Emoji

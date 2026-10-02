@@ -1120,6 +1120,19 @@ About:
   Matrix: Matrix
   Email: E-mail
 Profile:
+  Icon Names:
+    Person: Személy
+    People: Emberek
+    Headphones: Fejhallgató
+    Gaming: Játék
+    Film: Film
+    Art: Művészet
+    Science: Tudomány
+    Globe: Földgömb
+    Heart: Szív
+    Sun: Nap
+    Moon: Hold
+    Trophy: Trófea
   Profile Icon: Profilikon
   Choose an Emoji: Emoji kiválasztása
   Custom Emoji: Egyéni emoji

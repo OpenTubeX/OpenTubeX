@@ -1175,6 +1175,19 @@ About:
   Please read the {roomRulesLink}: Læs venligst {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX er gjort muligt af {creditsPageLink}
 Profile:
+  Icon Names:
+    Person: Person
+    People: Personer
+    Headphones: Hovedtelefoner
+    Gaming: Spil
+    Film: Film
+    Art: Kunst
+    Science: Videnskab
+    Globe: Globus
+    Heart: Hjerte
+    Sun: Sol
+    Moon: Måne
+    Trophy: Trofæ
   Profile Icon: Profilikon
   Choose an Emoji: Vælg en emoji
   Custom Emoji: Brugerdefineret emoji

@@ -1153,6 +1153,19 @@ About:
   Matrix: Matrix
   Email: Correio eletrónico
 Profile:
+  Icon Names:
+    Person: Pessoa
+    People: Pessoas
+    Headphones: Auscultadores
+    Gaming: Jogos
+    Film: Filme
+    Art: Arte
+    Science: Ciência
+    Globe: Globo
+    Heart: Coração
+    Sun: Sol
+    Moon: Lua
+    Trophy: Troféu
   Profile Icon: Ícone do perfil
   Choose an Emoji: Escolher um emoji
   Custom Emoji: Emoji personalizado

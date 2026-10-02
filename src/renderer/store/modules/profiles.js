@@ -2,6 +2,7 @@ import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../../cons
 import { DBProfileHandlers } from '../../../datastores/handlers/index'
 import { deepCopy } from '../../helpers/utils'
 import { getProfileWithUpdatedSubscriptionDetails } from '../../helpers/subscription-profile-details'
+import { DEFAULT_PROFILE_ICON } from '../../helpers/profileIcons'
 
 const state = {
   profileList: [{
@@ -9,6 +10,7 @@ const state = {
     name: 'All Channels',
     bgColor: THEME_BG_COLOR,
     textColor: THEME_TEXT_COLOR,
+    icon: { ...DEFAULT_PROFILE_ICON },
     subscriptions: []
   }],
   activeProfile: MAIN_PROFILE_ID
@@ -82,6 +84,7 @@ const actions = {
         name: defaultName,
         bgColor: THEME_BG_COLOR,
         textColor: THEME_TEXT_COLOR,
+        icon: { ...DEFAULT_PROFILE_ICON },
         subscriptions: []
       }
 
@@ -287,9 +290,15 @@ const actions = {
   }
 }
 
+function withDefaultProfileIcon(profile) {
+  return profile._id === MAIN_PROFILE_ID && profile.icon === undefined
+    ? { ...profile, icon: { ...DEFAULT_PROFILE_ICON } }
+    : profile
+}
+
 const mutations = {
   setProfileList(state, profileList) {
-    state.profileList = profileList
+    state.profileList = profileList.map(withDefaultProfileIcon)
   },
 
   setActiveProfile(state, activeProfile) {
@@ -297,7 +306,7 @@ const mutations = {
   },
 
   addProfileToList(state, profile) {
-    state.profileList.push(profile)
+    state.profileList.push(withDefaultProfileIcon(profile))
     state.profileList.sort(profileSort)
   },
 
@@ -307,9 +316,9 @@ const mutations = {
     })
 
     if (i === -1) {
-      state.profileList.push(updatedProfile)
+      state.profileList.push(withDefaultProfileIcon(updatedProfile))
     } else {
-      state.profileList.splice(i, 1, updatedProfile)
+      state.profileList.splice(i, 1, withDefaultProfileIcon(updatedProfile))
     }
 
     state.profileList.sort(profileSort)

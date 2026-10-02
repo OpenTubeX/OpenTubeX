@@ -28,6 +28,7 @@ h3 {
   gap: 10px;
 }
 
+.builtinIconOptions,
 .emojiOptions {
   display: flex;
   flex-wrap: wrap;
@@ -36,18 +37,23 @@ h3 {
   max-inline-size: min(350px, 100%);
 }
 
+.builtinIconOption,
 .emojiOption {
   background: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
   border: 2px solid transparent;
   border-radius: calc(8px * var(--ui-roundness));
   cursor: pointer;
+  color: var(--primary-text-color);
   font-size: 24px;
   block-size: 42px;
   inline-size: 42px;
   padding: 0;
 }
 
+.builtinIconOption:hover,
+.builtinIconOption:focus-visible,
+.builtinIconOption.selected,
 .emojiOption:hover,
 .emojiOption:focus-visible,
 .emojiOption.selected {
@@ -220,6 +226,7 @@ h3 {
     max-inline-size: 100%;
   }
 
+  .builtinIconOption,
   .emojiOption,
   .colorOption {
     inline-size: var(--phone-touch-target, 48px);

@@ -1300,6 +1300,19 @@ About:
   Please read the {roomRulesLink}: Les {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX er gjort mogleg av {creditsPageLink}
 Profile:
+  Icon Names:
+    Person: Person
+    People: Personar
+    Headphones: Hovudtelefonar
+    Gaming: Spel
+    Film: Film
+    Art: Kunst
+    Science: Vitskap
+    Globe: Globus
+    Heart: Hjarte
+    Sun: Sol
+    Moon: Måne
+    Trophy: Pokal
   Toggle Profile List: Vis eller gøym profillista
   Edit Profile Name: Rediger profilnamnet
   Create Profile Name: Lag profilnamn

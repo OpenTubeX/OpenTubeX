@@ -1151,6 +1151,19 @@ About:
   Matrix: Matrix
   Email: Ηλεκτρονικό ταχυδρομείο
 Profile:
+  Icon Names:
+    Person: Άτομο
+    People: Άτομα
+    Headphones: Ακουστικά
+    Gaming: Παιχνίδια
+    Film: Ταινία
+    Art: Τέχνη
+    Science: Επιστήμη
+    Globe: Υδρόγειος
+    Heart: Καρδιά
+    Sun: Ήλιος
+    Moon: Σελήνη
+    Trophy: Τρόπαιο
   Profile Icon: Εικονίδιο προφίλ
   Choose an Emoji: Επιλογή emoji
   Custom Emoji: Προσαρμοσμένο emoji
