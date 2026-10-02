@@ -271,6 +271,8 @@ export default defineComponent({
       liveChatLoaded: false,
       transcriptLoaded: false,
       isLive: false,
+      /** @type {boolean | null} */
+      isLiveDvrEnabled: null,
       isPremiere: false,
       liveChat: null,
       liveChatIsReplay: false,
@@ -2272,6 +2274,7 @@ export default defineComponent({
       this.isFamilyFriendly = null
       this.commentsDisabled = false
       this.isLive = false
+      this.isLiveDvrEnabled = null
       this.isPremiere = false
       this.commentsLoaded = false
       this.liveChatLoaded = false
@@ -3119,6 +3122,7 @@ export default defineComponent({
           adEndTimeUnixMs,
           paidPromotionDurationMs,
           isPremiere,
+          isLiveDvrEnabled,
           watchPageIpBlocked,
           musicMediaType,
           androidLiveHlsManifestUrl,
@@ -3332,6 +3336,7 @@ export default defineComponent({
         }
 
         this.isLive = !!result.basic_info.is_live
+        this.isLiveDvrEnabled = isLiveDvrEnabled ?? null
         this.isUpcoming = !!result.basic_info.is_upcoming
         this.isLiveContent = !!result.basic_info.is_live_content
         this.isPremiere = isPremiere === true
@@ -3498,9 +3503,13 @@ export default defineComponent({
           }
 
           if (useRemoteManifest) {
+            // Ongoing streams and premieres use HLS at the live edge. Remote
+            // DASH can advertise a rewind range whose segments are unavailable.
             const hlsManifestUrl = result.streaming_data?.hls_manifest_url ?? androidLiveHlsManifestUrl
-            const dashManifestUrl = result.streaming_data?.dash_manifest_url ??
-              ((getLiveDvrWindowSeconds(hlsManifestUrl) ?? 0) <= 30 ? androidLiveDashManifestUrl : null)
+            const dashManifestUrl = this.isPostLiveDvr
+              ? result.streaming_data?.dash_manifest_url ??
+                ((getLiveDvrWindowSeconds(hlsManifestUrl) ?? 0) <= 30 ? androidLiveDashManifestUrl : null)
+              : null
             if (dashManifestUrl) {
               this.manifestSrc = dashManifestUrl
               this.manifestMimeType = MANIFEST_TYPE_DASH
@@ -3882,6 +3891,7 @@ export default defineComponent({
           this.recommendedVideos = recommendedVideos.sort(this.sortWatchedVideosLast)
 
           this.isLive = result.liveNow
+          this.isLiveDvrEnabled = null
           this.isPremiere = this.isLive && result.premiereTimestamp > 0
           this.isFamilyFriendly = result.isFamilyFriendly
           this.isPostLiveDvr = !!result.isPostLiveDvr

@@ -524,6 +524,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    isLiveDvrEnabled: {
+      type: Boolean,
+      default: null
+    },
     isUpcoming: {
       type: Boolean,
       default: false
@@ -787,7 +791,7 @@ export default defineComponent({
       isSeeking: () => video.value?.seeking ?? false,
       onExpired: () => showToast({ message: t('Video.Player.Sleep Timer.Timer ended'), icon: ['fas', 'clock'] }),
       pausePlayback: () => video.value?.pause(),
-      seekTo: seconds => { if (video.value) video.value.currentTime = seconds },
+      seekTo: seconds => { if (video.value) setCurrentTime(seconds) },
       tabId,
     })
 
@@ -3438,6 +3442,10 @@ export default defineComponent({
     // #region player config
 
     const seekingIsPossible = computed(() => {
+      if (props.isLive && (props.playbackEngine === 'built-in' || props.isLiveDvrEnabled === false)) {
+        return false
+      }
+
       if (props.manifestMimeType !== 'application/x-mpegurl' || !props.isLive) {
         return true
       }
@@ -4613,6 +4621,7 @@ export default defineComponent({
 
       /** @type {shaka.extern.UIConfiguration} */
       const uiConfig = {
+        addSeekBar: seekingIsPossible.value,
         controlPanelElements: controlPanelElements,
         bigButtons: getBigButtons(displayVideoPlayButton.value, mobile),
         topControlPanelElements: [],
@@ -4830,7 +4839,6 @@ export default defineComponent({
       if (firstTime) {
         /** @type {shaka.extern.UIConfiguration} */
         const firstTimeConfig = {
-          addSeekBar: seekingIsPossible.value,
           customContextMenu: true,
           contextMenuElements: contextMenuElements.value,
           enableTooltips: true,
@@ -6413,7 +6421,7 @@ export default defineComponent({
           const wasPaused = videoElement.paused
           mediaSessionStopped = true
           videoElement.pause()
-          if (Number.isFinite(videoElement.duration)) {
+          if (seekingIsPossible.value && Number.isFinite(videoElement.duration)) {
             accumulatedSeekSeconds = 0
             videoElement.currentTime = 0
           }
@@ -6429,7 +6437,7 @@ export default defineComponent({
         },
         seekto: (details = {}) => {
           const videoElement = video.value
-          if (!videoElement || !Number.isFinite(details.seekTime)) return
+          if (!videoElement || !canSeek() || !Number.isFinite(details.seekTime)) return
           accumulatedSeekSeconds = 0
           if (details.fastSeek === true && typeof videoElement.fastSeek === 'function') {
             videoElement.fastSeek(details.seekTime)
@@ -10479,18 +10487,16 @@ export default defineComponent({
           changeVolume(-0.05)
           break
         case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.LAST_CHAPTER):
-          if (props.chapters.length > 0 && props.currentChapterIndex > 0) {
+          if (canSeek() && props.chapters.length > 0 && props.currentChapterIndex > 0) {
             event.preventDefault()
-            accumulatedSeekSeconds = 0
-            video_.currentTime = props.chapters[props.currentChapterIndex - 1].startSeconds
+            setCurrentTime(props.chapters[props.currentChapterIndex - 1].startSeconds)
             showOverlayControls()
           }
           break
         case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.NEXT_CHAPTER):
-          if (props.chapters.length > 0 && props.currentChapterIndex < props.chapters.length - 1) {
+          if (canSeek() && props.chapters.length > 0 && props.currentChapterIndex < props.chapters.length - 1) {
             event.preventDefault()
-            accumulatedSeekSeconds = 0
-            video_.currentTime = props.chapters[props.currentChapterIndex + 1].startSeconds
+            setCurrentTime(props.chapters[props.currentChapterIndex + 1].startSeconds)
             showOverlayControls()
           }
           break
@@ -11974,6 +11980,7 @@ export default defineComponent({
      * @param {number} time
      */
     function setCurrentTime(time) {
+      if (!seekingIsPossible.value) return
       accumulatedSeekSeconds = 0
       video.value.currentTime = time
     }

@@ -3105,6 +3105,68 @@ async function measureSponsorBlockSkipStartTime(app, page, { rendererLoad = fals
 }
 
 test.describe('watch page', () => {
+  for (const playbackEngine of ['built-in', 'yt-dlp']) {
+    test(`${playbackEngine} respects live and premiere seeking limits`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      const video = await openMockedVideo(page)
+      const watchView = await watchViewHandle(page)
+      await watchView.evaluate((view, engine) => { view.activePlaybackEngine = engine }, playbackEngine)
+
+      let liveDetails = {}
+      await page.route(/\/youtubei\/v1\/player/, (route, request) => {
+        const videoId = JSON.parse(request.postData() ?? '{}').videoId
+        const response = demoPlayerResponse(videoId)
+        Object.assign(response.videoDetails, liveDetails)
+        return route.fulfill({ contentType: 'application/json', body: JSON.stringify(response) })
+      })
+
+      const seekBar = page.locator(`${activeTab} .shaka-seek-bar`)
+      for (const scenario of [
+        { details: { isLive: true, isLiveContent: true, isLiveDvrEnabled: false }, dvr: false, premiere: false },
+        { details: { isLive: true, isLiveContent: true, isLiveDvrEnabled: true }, dvr: true, premiere: false },
+        { details: { isLive: true, isLiveContent: false }, dvr: null, premiere: true }
+      ]) {
+        liveDetails = scenario.details
+        await watchView.evaluate(view => view.getVideoInformationLocal(view.videoLoadGeneration, true))
+        expect(await watchView.evaluate(view => ({
+          live: view.isLive,
+          dvr: view.isLiveDvrEnabled,
+          premiere: view.isPremiere
+        }))).toEqual({ live: true, dvr: scenario.dvr, premiere: scenario.premiere })
+        const seekingAllowed = playbackEngine === 'yt-dlp' && scenario.dvr !== false
+        await expect(seekBar).toHaveCount(seekingAllowed ? 1 : 0)
+
+        await video.evaluate(element => {
+          element.pause()
+          element.currentTime = 10
+        })
+        await page.keyboard.press('ArrowLeft')
+        await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(seekingAllowed ? 5 : 10, 3)
+
+        await watchView.evaluate(view => view.changeTimestamp(3))
+        await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(seekingAllowed ? 3 : 10, 3)
+
+        await watchView.evaluate(async view => {
+          view.videoChapters = [
+            { title: 'First chapter', startSeconds: 0 },
+            { title: 'Second chapter', startSeconds: 5 }
+          ]
+          view.videoCurrentChapterIndex = 1
+          await view.$nextTick()
+        })
+        await page.keyboard.press('Control+ArrowLeft')
+        await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(seekingAllowed ? 0 : 10, 3)
+      }
+
+      await watchView.evaluate(view => { view.isLiveDvrEnabled = false })
+      liveDetails = {}
+      await openMockedVideo(page, 'dQw4w9WgXcQ')
+      const nextWatchView = await watchViewHandle(page)
+      expect(await nextWatchView.evaluate(view => view.isLiveDvrEnabled)).toBeNull()
+      await expect(seekBar).toHaveCount(1)
+    })
+  }
+
   test('skips known unavailable playlist videos when enabled and stops at the end', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)

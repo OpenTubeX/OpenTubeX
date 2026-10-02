@@ -144,6 +144,7 @@
             :playlist-video-data="addToPlaylistVideoData"
             :published="videoPublished"
             :is-live="isLive"
+            :is-live-dvr-enabled="isLiveDvrEnabled"
             :is-upcoming="isUpcoming"
             :transcript-open="phonePanelsEnabled ? mobilePanel === 'transcript' : showTranscript"
             :sponsor-block-info-open="showSidebarSponsorBlock"

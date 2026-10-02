@@ -18,7 +18,7 @@ import { parseLocalShortLinkedVideo } from '../player/shorts'
 import { getPaidPromotionDurationMs } from '../player/paidPromotion'
 import { classifyMusicMediaType, MUSIC_MEDIA_TYPE } from '../player/musicMediaType'
 import { getLocalPremiereState } from '../premiere'
-import { getAndroidLiveDashManifestUrl, getAndroidLiveHlsManifestUrl } from '../player/liveManifest'
+import { getAndroidLiveDashManifestUrl, getAndroidLiveHlsManifestUrl, getLiveDvrEnabled } from '../player/liveManifest'
 import { shouldHideMembersOnlyContent } from '../restricted-playback'
 import { getThumbnailPreviewUrl } from '../thumbnailPreview'
 import { parseLocalVideoChannels } from '../video-collaborators'
@@ -619,6 +619,7 @@ async function resolveMusicMediaType(playerResponse, actions, videoId) {
  *   adEndTimeUnixMs: number,
  *   paidPromotionDurationMs: number | null,
  *   isPremiere: boolean | undefined,
+ *   isLiveDvrEnabled: boolean | undefined,
  *   watchPageIpBlocked: boolean,
  *   androidLiveHlsManifestUrl: string | null,
  *   androidLiveDashManifestUrl: string | null,
@@ -775,6 +776,7 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
 
   const cpn = Utils.generateRandomString(16)
 
+  const isLiveDvrEnabled = getLiveDvrEnabled(playerResponse.data.videoDetails)
   const info = new YT.VideoInfo([playerResponse, nextResponse], htmlExtracts.session.actions, cpn)
   const musicMediaType = await musicMediaTypeRequest
   const androidPlayerResponse = await paidPromotionRequest
@@ -794,7 +796,9 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
   }
   const [androidLiveHlsManifestUrl, androidLiveDashManifestUrl] = await Promise.all([
     decipherAndroidManifest(getAndroidLiveHlsManifestUrl(androidPlayerResponse), false),
-    decipherAndroidManifest(getAndroidLiveDashManifestUrl(androidPlayerResponse), true)
+    info.basic_info.is_post_live_dvr
+      ? decipherAndroidManifest(getAndroidLiveDashManifestUrl(androidPlayerResponse), true)
+      : Promise.resolve(null)
   ])
   const totalAdTimeMilliseconds = extractTotalAdTimeMilliseconds(playerResponse.data)
 
@@ -856,6 +860,7 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
       clientInfo,
       paidPromotionDurationMs,
       isPremiere,
+      isLiveDvrEnabled,
       androidLiveHlsManifestUrl,
       androidLiveDashManifestUrl,
       watchPageIpBlocked,
@@ -929,6 +934,7 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
     adEndTimeUnixMs,
     paidPromotionDurationMs,
     isPremiere,
+    isLiveDvrEnabled,
     androidLiveHlsManifestUrl,
     androidLiveDashManifestUrl,
     watchPageIpBlocked,
