@@ -322,6 +322,11 @@ export function setAndroidPictureInPictureDocumentState(active, { transitioning 
   if (!active && pictureInPictureVideo) updatePictureInPictureBounds?.()
 }
 
+/** Applies the visibility preference to Android's native page scrollbar. */
+export function setAndroidAlwaysShowScrollbars(enabled) {
+  return AndroidUi?.setAlwaysShowScrollbars({ enabled }) ?? Promise.resolve()
+}
+
 /** Colors native inset padding used by Android WebViews without edge-to-edge CSS. */
 export function setAndroidSystemBarsBackground(color) {
   if (Capacitor.getPlatform() !== 'android') return Promise.resolve()
