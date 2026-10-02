@@ -98,7 +98,8 @@ test('portrait mobile controls keep captions and PiP in settings when the row is
     await expect(panel).not.toHaveClass(/ft-controls-overflow-(pip|captions)/)
     await expect(panel.locator('.caption-toggle-button')).toBeVisible()
     await expect(panel.locator('.shaka-pip-button')).toBeVisible()
-    await expect.poll(() => panel.locator('.shaka-spacer').evaluate(element => element.getBoundingClientRect().width)).toBeLessThan(1)
+    // Wide layouts leave surplus space after the content-sized speed presets.
+    await expect.poll(() => panel.locator('.shaka-spacer').evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThan(0)
     await expect.poll(() => panel.evaluate(element => Math.abs(element.getBoundingClientRect().right - element.querySelector('.shaka-fullscreen-button').getBoundingClientRect().right))).toBeLessThan(1)
     await expect.poll(() => rateBar.evaluate(element => element.scrollLeft)).toBe(0)
     await expect.poll(() => rateBar.evaluate(element => element.scrollWidth - element.clientWidth)).toBe(0)

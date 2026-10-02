@@ -149,7 +149,7 @@ test.describe('video link copy actions', () => {
   })
 
   for (const width of [1600, 375]) {
-    test(`keeps copying in the context menu and thumbnail action at ${width}px`, async ({ app, page }) => {
+    test(`keeps video link copy actions available at ${width}px`, async ({ app, page }) => {
       await goTo(page, 'history')
       await page.setViewportSize({ width, height: 900 })
       const video = page.locator('.ft-list-video').first()
@@ -175,7 +175,10 @@ test.describe('video link copy actions', () => {
         await video.locator('.title').evaluate(element => element.dispatchEvent(new PointerEvent('contextmenu', {
           bubbles: true, cancelable: true, pointerType: 'touch'
         })))
-        await page.locator('.mobileThumbnailActionRow').getByRole('menuitem', { name: 'Copy YouTube Link', exact: true }).click()
+        const mobileMenu = page.locator('.mobileLinkActions')
+        await expect(mobileMenu.locator('.mobileThumbnailActionRow').getByRole('menuitem', { name: 'Copy YouTube Link', exact: true })).toHaveCount(0)
+        await mobileMenu.getByRole('menuitem', { name: 'Copy Link', exact: true }).click()
+        await mobileMenu.getByRole('menuitem', { name: 'Copy YouTube Link', exact: true }).click()
       } else {
         await video.hover()
         await video.locator('.extraThumbnailActionIcon .iconButton').click()
