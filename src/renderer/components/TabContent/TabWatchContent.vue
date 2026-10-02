@@ -174,7 +174,10 @@ function beginRestorePreview() {
     left: window.scrollX + targetBounds.left - parentBounds.left,
     top: window.scrollY + targetBounds.top - parentBounds.top
   }
-  previewViewport = { left: targetBounds.left, top: targetBounds.top }
+  previewViewport = {
+    left: window.scrollX + targetBounds.left,
+    top: window.scrollY + targetBounds.top
+  }
   previewStyle.value = {
     left: `${previewOrigin.left}px`,
     top: `${previewOrigin.top}px`,

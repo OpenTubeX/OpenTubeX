@@ -348,3 +348,24 @@ for (const mobile of [false, true]) {
     assert.equal(mounted.previewStyle.value.height, '739.75px')
   })
 }
+
+test('restore preview stays at the visible tab origin while browsing scroll resets', async t => {
+  const mounted = mountWatch(t)
+  const navigation = mounted.provides.get('navigation')
+  await navigation.minimize()
+  mounted.viewport.scrollY = 900.5
+  mounted.tabBounds.top = 80.25 - mounted.viewport.scrollY
+  mounted.hostBounds.top = 1600.75 - mounted.viewport.scrollY
+  mounted.previewRoot.getBoundingClientRect = () => ({
+    left: mounted.hostBounds.left + Number.parseFloat(mounted.previewRoot.style.left),
+    top: mounted.hostBounds.top + Number.parseFloat(mounted.previewRoot.style.top),
+    width: mounted.tabBounds.width
+  })
+  navigation.beginRestorePreview()
+  Object.assign(mounted.previewRoot.style, mounted.previewStyle.value)
+  assert.equal(mounted.previewRoot.getBoundingClientRect().top, 80.25)
+  mounted.hostBounds.top += mounted.viewport.scrollY
+  mounted.viewport.scrollTo({ left: 0, top: 0, behavior: 'instant' })
+  mounted.listeners.get('scroll')()
+  assert.equal(mounted.previewRoot.getBoundingClientRect().top, 80.25)
+})

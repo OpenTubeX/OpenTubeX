@@ -2689,7 +2689,7 @@ for (const uiScale of [100, 125]) {
         const spacer = document.createElement('div')
         spacer.style.height = '2000px'
         document.querySelector('.tabContent[aria-hidden="false"] > .routerView').append(spacer)
-        window.scrollTo(0, 120)
+        window.scrollTo(0, 900)
       })
       await attachScreenshot('video continues while browsing subscriptions')
       await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
