@@ -15,6 +15,33 @@ test.use({
   }
 })
 
+test('mobile quick speeds stay no wider than their presets', async ({ app, page }) => {
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateQuickPlaybackSpeedBarOptions', JSON.stringify([1, 1.5, 2].map(speed => ({ speed })))))
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  await setWindowSize(app, page, { width: 1100, height: 700 })
+  await page.locator('.app').evaluate(element => element.classList.add('capacitorTabs', 'capacitorTabletLayout'))
+  const player = page.locator('.ftVideoPlayer')
+  await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+  const bar = player.locator('.shaka-controls-button-panel > .ft-quick-playback-rate-bar')
+
+  for (const scale of [1, 1.25]) {
+    await app.electronApp.evaluate(({ BrowserWindow }, scale) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale), scale)
+    for (const frosted of [true, false]) {
+      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+      await expect.poll(() => bar.evaluate(element => {
+        const style = getComputedStyle(element)
+        const buttons = [...element.children].filter(child => getComputedStyle(child).display !== 'none')
+        const contentWidth = buttons.reduce((width, child) => width + child.getBoundingClientRect().width, 0) +
+          Math.max(0, buttons.length - 1) * Number.parseFloat(style.columnGap) +
+          Number.parseFloat(style.paddingLeft) + Number.parseFloat(style.paddingRight)
+        return element.getBoundingClientRect().width - contentWidth
+      })).toBeLessThan(1)
+    }
+  }
+})
+
 for (const scale of [1, 1.25]) {
   test(`chapter controls narrow quick speeds first during playback at ${scale * 100}% scale`, async ({ app, page }, testInfo) => {
     await mockPlayableWatchPage(app, page)

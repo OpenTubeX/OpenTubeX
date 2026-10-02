@@ -4087,22 +4087,10 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 :deep(.shaka-controls-button-panel.ft-controls-measuring > .ft-quick-playback-rate-bar) {
-  /* Narrow the scrollable presets before collapsing the chapter title. */
+  /* Reserve a usable preset strip before collapsing other controls. The live
+     strip can shrink further when even the compact controls do not fit. */
   max-width: min(70vw, 180px);
   flex-shrink: 0;
-}
-
-/* stylelint-disable-next-line selector-max-compound-selectors */
-:global(.capacitorTabs .ftVideoPlayer:not(.shortsPlayer) .shaka-controls-button-panel:has(> .ft-quick-playback-rate-bar) > .shaka-spacer) {
-  flex: 0 0 0;
-  min-inline-size: 0;
-  padding: 0;
-}
-
-/* stylelint-disable-next-line selector-max-compound-selectors */
-:global(.capacitorTabs .ftVideoPlayer:not(.shortsPlayer) .shaka-controls-button-panel > .ft-quick-playback-rate-bar) {
-  flex-grow: 1;
-  max-width: none;
 }
 
 :deep(.ft-quick-playback-rate-bar::-webkit-scrollbar) {
