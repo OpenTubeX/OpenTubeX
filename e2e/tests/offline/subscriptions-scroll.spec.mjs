@@ -1,4 +1,4 @@
-import { test, expect, goTo, sel, setWindowSize } from '../../helpers/app.mjs'
+import { abortUnmockedRequest, test, expect, goTo, sel, setWindowSize } from '../../helpers/app.mjs'
 
 const now = Date.now()
 const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
@@ -20,6 +20,45 @@ async function scrollFeedTo(page, top) {
   await expect.poll(() => page.evaluate(offset => Math.abs(window.scrollY - offset) * devicePixelRatio, top)).toBeLessThanOrEqual(1)
 }
 
+/** Applies the refresh completion signal and waits for its deferred layout work. */
+async function completeFeedRefresh(page, tab = 'videos', trigger = 'completion event') {
+  return page.evaluate(async ({ tab, trigger }) => {
+    if (trigger === 'completion event') {
+      window.dispatchEvent(new CustomEvent('opentubex-subscription-refresh-completed', {
+        detail: { tab, profileId: 'allChannels', timestamp: Date.now() }
+      }))
+    } else {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setSubscriptionFeedLastRefreshTimestamp', Date.now())
+    }
+    for (let frame = 0; frame < 5; frame++) {
+      await new Promise(resolve => requestAnimationFrame(resolve))
+    }
+    return { top: window.scrollY, pixelRatio: devicePixelRatio }
+  }, { tab, trigger })
+}
+
+async function routeFeed(page, entries, beforeResponse = () => {}) {
+  await page.route(/^https?:\/\//, abortUnmockedRequest)
+  await page.route('**/feeds/videos.xml**', async route => {
+    await beforeResponse()
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/xml',
+      body: `<?xml version="1.0" encoding="UTF-8"?>
+        <feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns:media="http://search.yahoo.com/mrss/" xmlns="http://www.w3.org/2005/Atom">
+          <author><name>Channel A</name></author>
+          ${entries.map(video => `<entry>
+            <yt:videoId>${video.videoId}</yt:videoId>
+            <title>${video.title}</title>
+            <published>${new Date(video.published).toISOString()}</published>
+            <media:group><media:statistics views="2000"/></media:group>
+          </entry>`).join('')}
+        </feed>`
+    })
+  })
+}
+
 const videos = Array.from({ length: 80 }, (_, index) => ({
   videoId: `video${String(index).padStart(6, '0')}`,
   title: `Feed video ${String(index).padStart(2, '0')}`,
@@ -38,6 +77,7 @@ test.use({
   seed: {
     settings: {
       fetchSubscriptionsAutomatically: false,
+      useRssFeeds: true,
       rememberTabNavigationHistory: true
     },
     profiles: [
@@ -59,7 +99,7 @@ test.use({
   }
 })
 
-test('a background feed refresh resets its logical tab scroll across restart', async ({ app, page }) => {
+test('a background feed refresh preserves its logical tab scroll across restart', async ({ app, page }) => {
   await expect(page.getByText('Feed video 00')).toBeVisible()
   await scrollFeedTo(page, 600)
 
@@ -69,7 +109,7 @@ test('a background feed refresh resets its logical tab scroll across restart', a
   await goTo(page, 'settings')
 
   // Reproduce a subscriptions offset that has already been saved to the app
-  // session, so the refresh must also replace its persisted value.
+  // session, so the refresh must also preserve its persisted value.
   await page.evaluate((tabId) => {
     window.ftElectron.tabs.updateNavigationHistory({
       tabId,
@@ -87,45 +127,123 @@ test('a background feed refresh resets its logical tab scroll across restart', a
     return tab && tab.history ? tab.history[0].scroll.top : null
   }).toBe(600)
 
-  await page.evaluate(() => {
-    window.dispatchEvent(new CustomEvent('opentubex-subscription-refresh-completed', {
-      detail: { tab: 'videos', profileId: 'allChannels', timestamp: Date.now() }
-    }))
-  })
+  await completeFeedRefresh(page)
 
   await expect.poll(async () => {
     const state = await page.evaluate(() => window.ftElectron.tabs.getState())
     const tab = state.tabs.find(candidate => candidate.id === subscriptionsTabId)
     return tab && tab.history ? tab.history[0].scroll.top : null
-  }).toBe(0)
+  }).toBe(600)
 
   await page.locator(sel.tabs).first().click()
-  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(600)
 
   const relaunched = await app.relaunch()
   await expect(relaunched.page.getByText('Feed video 00')).toBeVisible()
-  await expect.poll(() => relaunched.page.evaluate(() => window.scrollY)).toBe(0)
+  await expect.poll(async () => {
+    const state = await relaunched.page.evaluate(() => window.ftElectron.tabs.getState())
+    const tab = state.tabs.find(candidate => candidate.id === subscriptionsTabId)
+    return tab?.history?.[0].scroll.top
+  }).toBe(600)
+  // Startup header reflow can anchor the viewport slightly above the saved
+  // offset. The persisted position must survive and the feed must stay scrolled.
+  await expect.poll(() => relaunched.page.evaluate(() => window.scrollY)).toBeGreaterThan(500)
 })
 
-test('a visible feed stays at the top while refreshed content is applied', async ({ page }) => {
-  await expect(page.getByText('Feed video 00')).toBeVisible()
-  await scrollFeedTo(page, 600)
+for (const [trigger, uiScale] of [
+  ['completion event', 100],
+  ['completion event', 95],
+  ['refresh timestamp', 100]
+]) {
+  test(`a visible mobile feed preserves its scroll after a ${trigger} at ${uiScale}% scale`, async ({ app, page }) => {
+    await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
+      BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale / 100)
+    }, uiScale)
+    await setWindowSize(app, page, { width: 375, height: 700 })
+    await expect(page.getByText('Feed video 00')).toBeVisible()
+    await scrollFeedTo(page, 600)
 
-  const displacedScroll = await page.evaluate(async () => {
-    window.dispatchEvent(new CustomEvent('opentubex-subscription-refresh-completed', {
-      detail: { tab: 'videos', profileId: 'allChannels', timestamp: Date.now() }
-    }))
-
-    // Browser scroll anchoring can adjust the offset during the next layout
-    // frame, after the completion handler's immediate reset.
-    await new Promise(resolve => window.requestAnimationFrame(resolve))
-    window.scrollTo(0, 300)
-    return window.scrollY
+    const scroll = await completeFeedRefresh(page, 'videos', trigger)
+    expect(Math.abs(scroll.top - 600) * scroll.pixelRatio).toBeLessThanOrEqual(1)
   })
+}
 
-  expect(displacedScroll).toBe(300)
+test('every feed refresh preserves the visible New feed position', async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 375, height: 700 })
+  await expect(page.getByText('Feed video 00')).toBeVisible()
+  await page.locator('[data-subscription-feed-tab="all"]').click()
+  await expect(page.locator('[data-subscription-feed-tab="all"]')).toHaveAttribute('aria-selected', 'true')
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
+  await scrollFeedTo(page, 800)
+  for (const tab of ['videos', 'shorts', 'live', 'posts']) {
+    const scroll = await completeFeedRefresh(page, tab)
+    expect(scroll.top).toBe(800)
+  }
 })
+
+test('finishing a refresh keeps the position reached while scrolling the mobile feed', async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 375, height: 700 })
+  await expect(page.getByText('Feed video 00')).toBeVisible()
+  const response = Promise.withResolvers()
+  const requested = Promise.withResolvers()
+  await routeFeed(page, videos, async () => {
+    requested.resolve()
+    await response.promise
+  })
+  await page.getByRole('button', { name: /Refresh Videos/ }).click()
+  await requested.promise
+  await scrollFeedTo(page, 600)
+  response.resolve()
+  await expect(page.getByRole('button', { name: 'Cancel refresh' })).toHaveCount(0)
+  await expect.poll(() => page.evaluate(channelId => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    return store.getters.getVideoCache[channelId]?.videos?.[0]?.viewCount
+  }, CHANNEL_ID)).toBe(2000)
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(600)
+})
+
+for (const uiScale of [100, 95]) {
+  for (const remainingCount of [3, 0]) {
+    test(`a refresh with ${remainingCount} videos clamps the feed and updates its scrollbar at ${uiScale}% scale`, async ({ app, page }) => {
+      await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
+        BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale / 100)
+      }, uiScale)
+      await setWindowSize(app, page, { width: 375, height: 700 })
+      await expect(page.getByText('Feed video 00')).toBeVisible()
+      const response = Promise.withResolvers()
+      const requested = Promise.withResolvers()
+      await routeFeed(page, videos.slice(0, remainingCount), async () => {
+        requested.resolve()
+        await response.promise
+      })
+      await page.getByRole('button', { name: /Refresh Videos/ }).click()
+      await requested.promise
+      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+      await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(1000)
+      response.resolve()
+      await expect.poll(() => page.evaluate(channelId => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        return store.getters.getVideoCache[channelId]?.videos?.length
+      }, CHANNEL_ID)).toBe(remainingCount)
+      await expect(page.getByRole('button', { name: 'Cancel refresh' })).toHaveCount(0)
+      await expect.poll(() => page.evaluate(() => {
+        return Math.abs(window.scrollY - Math.max(0, document.documentElement.scrollHeight - innerHeight)) * devicePixelRatio
+      })).toBeLessThanOrEqual(2)
+      const scrollbar = page.locator('body > .os-scrollbar-vertical')
+      if (remainingCount === 0) {
+        await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+        await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
+      } else {
+        await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+        await expect.poll(() => scrollbar.evaluate(element => {
+          const handle = element.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+          const track = element.querySelector('.os-scrollbar-track').getBoundingClientRect()
+          return Math.abs(handle.bottom - track.bottom) * devicePixelRatio
+        })).toBeLessThanOrEqual(2)
+      }
+    })
+  }
+}
 
 for (const uiScale of [100, 95]) {
   test(`mobile header hides fully and returns on a deliberate upward scroll at ${uiScale}% scale`, async ({ app, page, attachScreenshot }) => {
