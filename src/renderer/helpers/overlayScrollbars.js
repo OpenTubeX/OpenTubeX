@@ -500,7 +500,9 @@ export function clampOverlayScrollTop(element, contentElement = null) {
     const scrollOffsetElement = instance?.elements().scrollOffsetElement ?? element
     instance?.update(true)
     const maximumScrollTop = getMaximumOverlayScrollTop(scrollOffsetElement, contentElement)
-    if (isScrollTopOutOfBounds(scrollOffsetElement, maximumScrollTop)) {
+    const staleScrollRange = maximumScrollTop === 0 && contentElement && instance &&
+      instance.state().overflowAmount.y > maximumScrollTop + SCROLL_BOUNDARY_TOLERANCE
+    if (isScrollTopOutOfBounds(scrollOffsetElement, maximumScrollTop) || staleScrollRange) {
       if (instance) {
         // Chromium can preserve the old overflow range when content shrinks
         // beneath a non-zero offset. Remeasure from the true origin so both the
