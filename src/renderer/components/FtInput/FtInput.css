@@ -1,10 +1,36 @@
 /* stylelint-disable no-descending-specificity */
 .ft-input-component {
+  --input-label-scale: 1;
+  --input-label-reserved-space: 32px;
+
   position: relative;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.floatingLabel {
+  inline-size: fit-content;
+  min-inline-size: min(340px, 100%);
+}
+
+.hasSupportingText .inputWrapper {
+  margin-block-end: 0;
+}
+
+.ft-input-component.search {
+  inline-size: 100%;
+}
+
+.supportingText {
+  margin-block: 4px 10px;
+  padding-inline: 16px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--secondary-text-color);
+  overflow-wrap: anywhere;
 }
 
 .selectTooltip {
-  margin-inline-start: 6px;
   vertical-align: middle;
 }
 
@@ -37,19 +63,34 @@
 }
 
 .ft-input {
+  display: block;
   box-sizing: border-box;
-  outline: none;
   inline-size: 100%;
   padding: 1rem;
   border: 0;
-  margin-block-end: 10px;
+  border-block-end: 1px solid var(--secondary-text-color);
+  margin-block-end: 0;
   font-size: 16px;
-  block-size: 45px;
-  color: var(--secondary-text-color);
-  border-radius: calc(5px * var(--ui-roundness));
+  block-size: var(--form-control-height);
+  font-family: inherit;
+  line-height: 20px;
+  color: var(--primary-text-color);
+  border-radius: calc(4px * var(--ui-roundness)) calc(4px * var(--ui-roundness)) 0 0;
   background-color: var(--search-bar-color);
   box-shadow: inset 0 0 0 1px var(--input-border-color, transparent);
   backdrop-filter: var(--search-bar-blur, none);
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.ft-input:not(:disabled):hover {
+  border-block-end-color: var(--primary-text-color);
+}
+
+.ft-input-component:not(.search, .outlined) .ft-input:focus {
+  border-block-end-color: var(--primary-color);
+
+  /* Paint the thicker underline without changing the text's content box. */
+  box-shadow: inset 0 -1px 0 var(--primary-color), inset 0 0 0 1px var(--focus-ring-contrast-color);
 }
 
 .ftcomponent ::placeholder {
@@ -73,16 +114,133 @@
 }
 
 .inputWrapper {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   position: relative;
+  margin-block-end: 10px;
+}
+
+.inputWrapper > .ft-input {
+  grid-area: 1 / 1;
+}
+
+.floatingLabel .ft-input {
+  padding-block: var(--form-control-value-padding);
+}
+
+.floatingLabel .selectLabel {
+  position: relative;
+  grid-area: 1 / 1;
+  align-self: start;
+  inset-block-start: 50%;
+  inset-inline-start: 0;
+  inline-size: max-content;
+  max-inline-size: calc((100% - var(--input-label-reserved-space)) / var(--input-label-scale));
+  display: inline-flex;
+  align-items: center;
+  margin-block: 0;
+  margin-inline: 16px;
+  font-size: 16px;
+  line-height: 20px;
+  color: var(--secondary-text-color);
+  transform: translateY(-50%);
+  transform-origin: left top;
+  transition: inset-block-start 150ms ease, transform 150ms ease, color 150ms ease;
+}
+
+.floatingLabel .selectLabel:dir(rtl) {
+  transform-origin: right top;
+}
+
+.floatingLabel .selectLabelText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.showActionButton {
+  --input-label-reserved-space: 64px;
+}
+
+.inputIndicators {
+  position: absolute;
+  inset-inline-start: calc(100% + 8px);
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ft-input-component:has(.inputIndicators > *) {
+  margin-inline-end: 70px;
+}
+
+.inputIndicators :deep(.button) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inputIndicators :deep(.syncedSettingIndicator),
+.inputIndicators :deep(.changedSettingIndicator),
+.inputIndicators :deep(.changedSettingIndicatorPlaceholder) {
+  line-height: 1;
+  margin-inline-start: 0;
+}
+
+.floatingLabel:focus-within,
+.floatingLabel.hasValue {
+  --input-label-scale: 0.75;
+}
+
+.floatingLabel:focus-within .selectLabel,
+.floatingLabel.hasValue .selectLabel {
+  inset-block-start: var(--form-control-label-top);
+
+  /* Scale the label visually so intrinsic field widths stay fixed on focus. */
+  transform: scale(0.75);
+}
+
+.floatingLabel:focus-within .selectLabel {
+  color: var(--primary-color);
+}
+
+.floatingLabel:not(:focus-within) .ft-input::placeholder {
+  color: transparent;
+}
+
+.outlined .ft-input {
+  border: 1px solid var(--secondary-text-color);
+  border-radius: calc(4px * var(--ui-roundness));
+  background-color: transparent;
+}
+
+.outlined .ft-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: inset 0 0 0 1px var(--primary-color);
+}
+
+.outlined.floatingLabel:focus-within .selectLabel,
+.outlined.floatingLabel.hasValue .selectLabel {
+  inset-block-start: 0;
+  padding-inline: 4px;
+  margin-inline-start: 12px;
+  background-color: var(--card-bg-color);
+  transform: scale(0.75) translateY(-50%);
 }
 
 .search .inputWrapper {
   display: block;
   block-size: 45px;
+  margin-block-end: 0;
 }
 
 .search .ft-input {
   display: block;
+  block-size: 45px;
+  border: 0;
+  border-radius: calc(24px * var(--ui-roundness));
 
   /* Keep themed text selection close to the glyphs while the padding centers
      the line and compensates for taller fallback fonts. */
@@ -99,11 +257,15 @@
 }
 
 .inputAction {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: absolute;
   margin-block: 0;
   margin-inline: 3px;
   padding: 10px;
-  inset-block-start: -8px;
+  inset-block-start: 50%;
+  transform: translateY(-50%);
   inset-inline-end: 0;
   border-style: none;
   border-radius: 100%;
@@ -114,6 +276,13 @@
 
   /* this should look disabled by default */
   opacity: 0.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ft-input,
+  .floatingLabel .selectLabel {
+    transition: none;
+  }
 }
 
 .search .inputAction {

@@ -660,9 +660,9 @@ Settings:
     Update Managed Tools: Aggiorna
     Managed Tools Download Error Template: 'Impossibile scaricare gli strumenti gestiti: {errors}'
     Download Folder: Cartella dei download
-    Global Additional yt-dlp Arguments: Argomenti aggiuntivi globali di yt-dlp
+    Global Additional yt-dlp Arguments: Argomenti aggiuntivi di yt-dlp
     Concurrent Downloads: Download simultanei
-    Bandwidth Limit: Limite di banda (KiB/s, 0 per nessun limite)
+    Bandwidth Limit: Limite di banda (KiB/s)
     Choose Download Folder: Scegli cartella dei download
     Download Templates: Modelli di download
     Manage Download Templates: Gestisci modelli di download ({templateCount})
@@ -735,8 +735,8 @@ Settings:
       Automatic: Aggiorna automaticamente
       Ask: Chiedi prima di aggiornare
       Manual: Aggiorna solo manualmente
-    yt-dlp Executable Path: Percorso dell'eseguibile yt-dlp
-    FFmpeg Executable Path: Percorso dell'eseguibile FFmpeg
+    yt-dlp Executable Path: Eseguibile di yt-dlp
+    FFmpeg Executable Path: Eseguibile di FFmpeg
     Restricted Playback Authentication: "Cookie di yt-dlp"
     Cookie Source: Origine dei cookie
     Cookie Sources:
@@ -968,7 +968,7 @@ Settings:
     Enhanced Privacy Enabled: La privacy avanzata è abilitata. Il server memorizza solo dati di sincronizzazione cifrati.
     Enhanced Privacy Unsupported: Avviso — questo server non supporta la privacy avanzata. I dati sincronizzati sono visibili al suo gestore.
     Description: 'Sincronizza iscrizioni, profili, playlist, cronologia di visualizzazione e impostazioni supportate con un server di sincronizzazione OpenTubeX o LibreTube. I server LibreTube potrebbero non supportare tutte le funzioni di sincronizzazione.'
-    Server URL: URL del server
+    Server URL: URL del server di sincronizzazione
     Checking Server: Controllo del server di sincronizzazione…
     Server Unavailable: Impossibile connettersi a questo server di sincronizzazione. Controlla l'URL e riprova.
     Username: Nome utente
@@ -1058,7 +1058,7 @@ Settings:
     Open All Tabs Confirmation: "Aprire tutte le schede?"
     Server Update Required: "Aggiorna questo server per supportare la sincronizzazione cifrata in tempo reale."
   Proxy Settings:
-    IP Block Recovery Script Path: Percorso dello script di ripristino dal blocco IP
+    IP Block Recovery Script Path: Script di recupero dal blocco IP
     Select IP Block Recovery Script File: Seleziona file dello script di ripristino dal blocco IP
     Running IP block recovery script: Esecuzione dello script di ripristino dal blocco IP
     IP block recovery script failed: 'Script di ripristino dal blocco IP non riuscito (codice di uscita: {exitCode})'
@@ -1067,7 +1067,7 @@ Settings:
     Failed to select IP block recovery script: Impossibile selezionare lo script di ripristino dal blocco IP
   SponsorBlock Settings:
     Enable SponsorBlock Submission: Abilita invio a SponsorBlock
-    SponsorBlock Private User ID (optional): ID utente privato di SponsorBlock (facoltativo)
+    SponsorBlock Private User ID (optional): ID utente privato (facoltativo)
     SponsorBlock Private User ID Tooltip: Incolla l'ID utente privato di SponsorBlock dall'estensione del browser. Lascia vuoto per usare un ID generato dall'app.
     Generated SponsorBlock User ID: ID utente SponsorBlock generato
     Generated SponsorBlock User ID Tooltip: Questo ID utente SponsorBlock generato dall'app può essere usato nell'estensione del browser o su un altro computer con l'app.
@@ -1079,7 +1079,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Abilita Return YouTube Dislike
-    Return YouTube Dislike Url: URL dell'API Return YouTube Dislike (predefinito https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: URL dell’API
   Password Dialog:
     Incorrect Password: Password errata
     Unlock: Sblocca
@@ -1827,8 +1827,8 @@ Downloads:
   File Name Template: Modello del nome file
   File Name Template Help: 'Campi disponibili: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Intervallo di tempo e capitoli
-  Start Time: Ora di inizio (HH:MM:SS)
-  End Time: Ora di fine (HH:MM:SS)
+  Start Time: Ora di inizio
+  End Time: Ora di fine
   Split by Chapters: Dividi in file separati per capitolo
   Remove Segments: Rimuovi segmenti
   Subtitles and Metadata: Sottotitoli e metadati
@@ -1914,3 +1914,23 @@ Tray:
 Tray Icon:
   Title: "Icona nell’area di notifica"
   Follow App Theme: "Segui il tema dell’app"
+
+Form Inputs:
+  Enter Channels: "Inserisci canali"
+  Enter Text: "Inserisci testo"
+  Video URL: URL del video o della playlist
+  Paste Link: Incolla un link a un video o una playlist
+  Example: ad es. {example}
+  No Minimum: Nessun minimo
+  No Maximum: Nessun massimo
+  Any Age: Qualsiasi età
+  Included Terms Example: ad es. tutorial, recensione
+  Excluded Terms Example: ad es. trailer, anteprima
+  Download Folder Hint: Lascia vuoto per usare la cartella Download
+  Global Arguments Hint: Argomenti facoltativi per ogni download
+  Unlimited Hint: 0 per illimitato
+  Add Argument: Aggiungi un argomento
+  Template Name Example: ad es. Solo audio
+  Download Arguments Hint: Argomenti facoltativi per questo download
+  Generated ID Hint: Lascia vuoto per generare un ID
+  Default Value: "Predefinito: {value}"

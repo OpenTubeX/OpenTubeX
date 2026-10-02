@@ -284,18 +284,20 @@ for (const uiScale of [100, 95]) {
       await expect(page.locator('.promptFixedFooter')).toBeInViewport()
     })
 
-    test('keeps filter actions fixed and clears the visible summary', async ({ app, page }) => {
+    test('keeps filter actions fixed without an active-filter summary', async ({ app, page }) => {
       await setWindowSize(app, page, { width: 360, height: 760 })
       await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showSearchFilters'))
       const prompt = page.locator('.searchFiltersCard')
       await expect(prompt).toBeVisible()
       await prompt.getByText('Today', { exact: true }).click()
-      await expect(prompt.locator('.activeFilters')).toContainText('Today')
+      await expect(prompt.locator('.activeFilters')).toHaveCount(0)
+      await expect(prompt.locator('input[value="today"]')).toBeChecked()
       await prompt.locator('.promptContentScroller').evaluate(element => { element.scrollTop = 100000 })
       await expect(prompt.locator('.clearFilterButton')).toBeInViewport()
       await expect(prompt.locator('.promptFixedFooter')).toBeInViewport()
       await prompt.locator('.clearFilterButton').click()
       await expect(prompt.locator('.activeFilters')).toHaveCount(0)
+      await expect(prompt.locator('input[value="today"]')).not.toBeChecked()
       await prompt.getByRole('button', { name: 'Close', exact: true }).click()
       await expect(prompt).toHaveCount(0)
     })

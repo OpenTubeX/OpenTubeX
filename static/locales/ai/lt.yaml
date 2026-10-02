@@ -861,9 +861,9 @@ Settings:
     Update Managed Tools: Atnaujinti
     Managed Tools Download Error Template: 'Nepavyko atsisiųsti valdomų įrankių: {errors}'
     Download Folder: Atsisiuntimų aplankas
-    Global Additional yt-dlp Arguments: Visuotiniai papildomi yt-dlp argumentai
+    Global Additional yt-dlp Arguments: Papildomi yt-dlp argumentai
     Concurrent Downloads: Vienalaikiai atsisiuntimai
-    Bandwidth Limit: Pralaidumo riba (KiB/s, 0 – neribota)
+    Bandwidth Limit: Pralaidumo riba (KiB/s)
     Choose Download Folder: Pasirinkti atsisiuntimų aplanką
     Download Templates: Atsisiuntimo šablonai
     Manage Download Templates: Tvarkyti atsisiuntimo šablonus ({templateCount})
@@ -936,8 +936,8 @@ Settings:
       Automatic: Atnaujinti automatiškai
       Ask: Klausti prieš atnaujinant
       Manual: Atnaujinti tik rankiniu būdu
-    yt-dlp Executable Path: Kelias iki yt-dlp vykdomojo failo
-    FFmpeg Executable Path: Kelias iki FFmpeg vykdomojo failo
+    yt-dlp Executable Path: yt-dlp vykdomasis failas
+    FFmpeg Executable Path: FFmpeg vykdomasis failas
     Restricted Playback Authentication: "yt-dlp slapukai"
     Cookie Source: Slapukų šaltinis
     Cookie Sources:
@@ -1220,7 +1220,7 @@ Settings:
     Enhanced Privacy Enabled: Sustiprintas privatumas įjungtas. Serveryje saugomi tik užšifruoti sinchronizavimo duomenys.
     Enhanced Privacy Unsupported: Įspėjimas — šis serveris nepalaiko sustiprinto privatumo. Sinchronizuojamus duomenis gali matyti jo operatorius.
     Description: 'Sinchronizuokite prenumeratas, profilius, grojaraščius, žiūrėjimo istoriją ir palaikomus nustatymus su „OpenTubeX“ arba „LibreTube“ sinchronizavimo serveriu. „LibreTube“ serveriai gali nepalaikyti visų sinchronizavimo funkcijų.'
-    Server URL: Serverio URL
+    Server URL: Sinchronizavimo serverio URL
     Checking Server: Tikrinamas sinchronizavimo serveris…
     Server Unavailable: Nepavyko prisijungti prie šio sinchronizavimo serverio. Patikrinkite URL ir bandykite dar kartą.
     Username: Naudotojo vardas
@@ -1313,7 +1313,7 @@ Settings:
     Proxy Warning: OpenTubeX neturi integruoto įgaliotojo serverio, tačiau gali prisijungti prie išorinio, pavyzdžiui, šiame kompiuteryje veikiančio Tor arba kai kurių VPN teikiamo SOCKS5 įgaliotojo serverio. Įjungę įsitikinkite, kad įgaliotasis serveris arba Tor tinkamai sukonfigūruotas, kitaip OpenTubeX negalės gauti duomenų.
     Proxy Username: Įgaliotojo serverio naudotojo vardas
     Proxy Password: Įgaliotojo serverio slaptažodis
-    IP Block Recovery Script Path: IP blokavimo atkūrimo scenarijaus kelias
+    IP Block Recovery Script Path: IP blokavimo atkūrimo scenarijus
     Select IP Block Recovery Script File: Pasirinkti IP blokavimo atkūrimo scenarijaus failą
     Running IP block recovery script: Vykdomas IP blokavimo atkūrimo scenarijus
     IP block recovery script failed: 'IP blokavimo atkūrimo scenarijaus vykdyti nepavyko (išėjimo kodas: {exitCode})'
@@ -1325,7 +1325,7 @@ Settings:
       Excluded Channels: "Neįtraukti kanalai"
       Tooltip: "Įveskite kanalo ID, kad jo vaizdo įrašuose nebūtų praleidžiami SponsorBlock segmentai. ID turi tiksliai sutapti, atsižvelgiant į raidžių dydį."
     Enable SponsorBlock Submission: Leisti teikti duomenis „SponsorBlock“
-    SponsorBlock Private User ID (optional): Privatus „SponsorBlock“ naudotojo ID (nebūtina)
+    SponsorBlock Private User ID (optional): Privatus naudotojo ID (nebūtina)
     SponsorBlock Private User ID Tooltip: Įklijuokite privatų „SponsorBlock“ naudotojo ID iš naršyklės plėtinio. Jei norite naudoti programėlės sugeneruotą ID, palikite tuščią.
     Generated SponsorBlock User ID: Sugeneruotas „SponsorBlock“ naudotojo ID
     Generated SponsorBlock User ID Tooltip: Šį programėlės sugeneruotą „SponsorBlock“ naudotojo ID galite naudoti naršyklės plėtinyje arba programėlėje kitame kompiuteryje.
@@ -1335,12 +1335,12 @@ Settings:
     Skip notification timeout: Praleidimo pranešimo rodymo trukmė
     UseDeArrowTitles: Naudoti „DeArrow“ vaizdo įrašų pavadinimus
     UseDeArrowThumbnails: Naudoti „DeArrow“ miniatiūroms
-    DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): „DeArrow“ miniatiūrų generatoriaus API URL (numatytasis yra https://dearrow-thumb.ajay.app)
+    DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): DeArrow miniatiūrų API URL
     Custom Color: Pasirinktinė spalva
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Įjungti „Return YouTube Dislike“
-    Return YouTube Dislike Url: „Return YouTube Dislike“ API URL (numatytasis yra https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: API URL
   Parental Control Settings:
     Hide Uploader on Watch page: Slėpti įkėlėją žiūrėjimo puslapyje
     Disable Channel Links: Išjungti kanalų nuorodas
@@ -2325,8 +2325,8 @@ Downloads:
   File Name Template: Failo pavadinimo šablonas
   File Name Template Help: 'Galimi laukai: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Laiko intervalas ir skyriai
-  Start Time: Pradžios laikas (HH:MM:SS)
-  End Time: Pabaigos laikas (HH:MM:SS)
+  Start Time: Pradžios laikas
+  End Time: Pabaigos laikas
   Split by Chapters: Skaidyti į atskirus failus pagal skyrius
   Remove Segments: Pašalinti segmentus
   Subtitles and Metadata: Subtitrai ir metaduomenys
@@ -2415,3 +2415,23 @@ Tray:
 Tray Icon:
   Title: "Sistemos dėklo piktograma"
   Follow App Theme: "Naudoti programos apipavidalinimą"
+
+Form Inputs:
+  Enter Channels: "Įveskite kanalus"
+  Enter Text: "Įveskite tekstą"
+  Video URL: Vaizdo įrašo arba grojaraščio URL
+  Paste Link: Įklijuokite vaizdo įrašo arba grojaraščio nuorodą
+  Example: pvz. {example}
+  No Minimum: Be minimumo
+  No Maximum: Be maksimumo
+  Any Age: Bet kokio senumo
+  Included Terms Example: pvz. pamoka, apžvalga
+  Excluded Terms Example: pvz. anonsas, peržiūra
+  Download Folder Hint: Palikite tuščią, kad būtų naudojamas atsisiuntimų aplankas
+  Global Arguments Hint: Pasirinktiniai argumentai kiekvienam atsisiuntimui
+  Unlimited Hint: 0 – neribota
+  Add Argument: Pridėkite argumentą
+  Template Name Example: pvz. Tik garsas
+  Download Arguments Hint: Pasirinktiniai argumentai šiam atsisiuntimui
+  Generated ID Hint: Palikite tuščią, kad būtų sukurtas ID
+  Default Value: "Numatyta: {value}"

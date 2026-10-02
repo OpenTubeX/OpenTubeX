@@ -58,7 +58,9 @@
       <FtFlexBox>
         <FtInput
           ref="sponsorBlockUrlInput"
-          :placeholder="$t('Settings.SponsorBlock Settings[\'SponsorBlock API Url (Default is https://sponsor.ajay.app)\']')"
+          :label="$t('Settings.SponsorBlock Settings[\'SponsorBlock API Url (Default is https://sponsor.ajay.app)\']')"
+          placeholder="https://sponsor.ajay.app"
+          :supporting-text="$t('Form Inputs.Default Value', { value: 'https://sponsor.ajay.app' })"
           :show-action-button="false"
           :show-label="true"
           :value="sponsorBlockUrl"
@@ -88,7 +90,8 @@
       >
         <div class="sponsorBlockUserIdSection">
           <FtInput
-            :placeholder="$t('Settings.SponsorBlock Settings.SponsorBlock Private User ID (optional)')"
+            :label="$t('Settings.SponsorBlock Settings.SponsorBlock Private User ID (optional)')"
+            :placeholder="t('Form Inputs.Generated ID Hint')"
             :show-action-button="false"
             :show-label="true"
             :tooltip="$t('Settings.SponsorBlock Settings.SponsorBlock Private User ID Tooltip')"
@@ -144,7 +147,9 @@
       >
         <FtInput
           ref="deArrowThumbnailGeneratorUrl"
-          :placeholder="$t('Settings.SponsorBlock Settings[\'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)\']')"
+          :label="$t('Settings.SponsorBlock Settings[\'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)\']')"
+          placeholder="https://dearrow-thumb.ajay.app"
+          :supporting-text="$t('Form Inputs.Default Value', { value: 'https://dearrow-thumb.ajay.app' })"
           :show-action-button="false"
           :show-label="true"
           :value="deArrowThumbnailGeneratorUrl"

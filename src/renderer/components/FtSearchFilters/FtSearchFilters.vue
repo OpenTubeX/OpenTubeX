@@ -13,12 +13,6 @@
         >
           {{ title }}
         </h2>
-        <p
-          v-if="activeLabels.length"
-          class="activeFilters"
-        >
-          {{ activeLabels.join(' · ') }}
-        </p>
         <button
           type="button"
           class="clearFilterButton"
@@ -257,14 +251,6 @@ watch(featuresValue, (values) => {
 
   store.commit('setSearchFeatures', { tabId, value: [...values] })
 }, { deep: true })
-
-const activeLabels = computed(() => [
-  typeValue.value !== TYPE_VALUES[0] && typeLabels.value[TYPE_VALUES.indexOf(typeValue.value)],
-  durationValue.value !== DURATION_VALUES[0] && durationLabels.value[DURATION_VALUES.indexOf(durationValue.value)],
-  timeValue.value !== TIME_VALUES[0] && timeLabels.value[TIME_VALUES.indexOf(timeValue.value)],
-  prioritizeValue.value !== PRIORITIZE_VALUES[0] && prioritizeLabels.value[PRIORITIZE_VALUES.indexOf(prioritizeValue.value)],
-  ...featuresValue.value.map(value => featureLabels.value[FEATURE_VALUES.indexOf(value)])
-].filter(Boolean))
 
 const searchFilterValueChanged = computed(() => {
   return prioritizeValue.value !== PRIORITIZE_VALUES[0] ||

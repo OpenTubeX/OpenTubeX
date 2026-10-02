@@ -88,6 +88,12 @@
   inline-size: 100%;
 }
 
+.downloadOptions :deep(.ft-input-component:has(.inputIndicators > *)) {
+  box-sizing: border-box;
+  min-inline-size: 0;
+  inline-size: calc(100% - 70px);
+}
+
 .optionGrid,
 .toggleGrid {
   align-items: start;

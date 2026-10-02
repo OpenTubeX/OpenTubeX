@@ -88,7 +88,7 @@ async function analyzeControl (page, unchecked, checked) {
     const left = horizontalMarker.left
     const right = Math.min(before.width, left + 22)
     const top = verticalMarker.top
-    const bottom = Math.min(before.height, top + 24)
+    const bottom = Math.min(before.height, top + Math.ceil(uncheckedCapture.rect.height))
     const colors = new Map()
     const borderPoints = []
     const indicatorPoints = []

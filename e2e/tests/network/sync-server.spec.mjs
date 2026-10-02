@@ -126,7 +126,7 @@ test.describe('OpenTubeX sync server', () => {
     })
 
     const syncSection = await goToSettingsSection(page, 'sync')
-    const serverUrlInput = syncSection.getByLabel('Server URL')
+    const serverUrlInput = syncSection.getByLabel('Sync server URL')
     await serverUrlInput.fill(syncServerUrl)
     await syncSection.getByLabel('Username').fill(username)
     await syncSection.getByLabel('Password').fill('local-test-password')
@@ -491,7 +491,7 @@ test.describe('OpenTubeX sync server', () => {
     const username = `opentubex-session-${randomUUID()}`
     const password = 'local-test-password'
     const syncSection = await goToSettingsSection(page, 'sync')
-    await syncSection.getByLabel('Server URL').fill(syncServerUrl)
+    await syncSection.getByLabel('Sync server URL').fill(syncServerUrl)
     await syncSection.getByLabel('Username').fill(username)
     await syncSection.getByLabel('Password').fill(password)
     await syncSection.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
@@ -553,7 +553,7 @@ test.describe('OpenTubeX sync server', () => {
     }, theme)
 
     const syncSection = await goToSettingsSection(page, 'sync')
-    await syncSection.getByLabel('Server URL').fill(syncServerUrl)
+    await syncSection.getByLabel('Sync server URL').fill(syncServerUrl)
     await syncSection.getByLabel('Username').fill(username)
     await syncSection.getByLabel('Password').fill('local-test-password')
     await syncSection.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
@@ -685,7 +685,7 @@ test.describe('OpenTubeX sync server', () => {
     })
 
     const syncSection = await goToSettingsSection(page, 'sync')
-    await syncSection.getByLabel('Server URL').fill(syncServerUrl)
+    await syncSection.getByLabel('Sync server URL').fill(syncServerUrl)
     await syncSection.getByLabel('Username').fill(username)
     await syncSection.getByLabel('Password').fill(password)
     await syncSection.getByLabel(/Privacy passphrase/).fill('migration-privacy-passphrase')
@@ -779,7 +779,7 @@ test.describe('OpenTubeX sync server', () => {
     })
 
     const syncSection = await goToSettingsSection(page, 'sync')
-    await syncSection.getByLabel('Server URL').fill(syncServerUrl)
+    await syncSection.getByLabel('Sync server URL').fill(syncServerUrl)
     await syncSection.getByLabel('Username').fill(username)
     await syncSection.getByLabel('Password').fill('local-test-password')
     await syncSection.getByRole('button', { name: 'Register' }).click()
@@ -840,7 +840,7 @@ test.describe('OpenTubeX sync server', () => {
     })
 
     const syncSection = await goToSettingsSection(page, 'sync')
-    await syncSection.getByLabel('Server URL').fill(syncServerUrl)
+    await syncSection.getByLabel('Sync server URL').fill(syncServerUrl)
     await syncSection.getByLabel('Username').fill(username)
     await syncSection.getByLabel('Password').fill('local-test-password')
     await syncSection.getByRole('button', { name: 'Register' }).click()
@@ -922,7 +922,7 @@ test.describe('OpenTubeX sync server', () => {
     })
 
     const syncSection = await goToSettingsSection(page, 'sync')
-    const serverUrlInput = syncSection.getByLabel('Server URL')
+    const serverUrlInput = syncSection.getByLabel('Sync server URL')
     // A connection abort waits for network recovery; an HTTP error rejects
     // this endpoint immediately because it is not a sync server.
     await page.route('https://not-a-sync-server.invalid/**', route => route.fulfill({

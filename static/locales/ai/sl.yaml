@@ -864,8 +864,8 @@ Settings:
     Volume: Glasnost
   External Player Settings:
     Ignore Default Arguments: Prezri privzete argumente
-    Custom External Player Executable: Izvedljiva datoteka zunanjega predvajalnika po meri
-    Custom External Player Arguments: Argumenti zunanjega predvajalnika po meri
+    Custom External Player Executable: Executable path
+    Custom External Player Arguments: Custom arguments
   Download Settings:
     Download Settings: Prenosi
     Enable Downloads: Omogoči prenose
@@ -877,9 +877,9 @@ Settings:
     Update Managed Tools: Posodobi
     Managed Tools Download Error Template: 'Upravljanih orodij ni bilo mogoče prenesti: {errors}'
     Download Folder: Mapa za prenose
-    Global Additional yt-dlp Arguments: Splošni dodatni argumenti za yt-dlp
+    Global Additional yt-dlp Arguments: Dodatni argumenti yt-dlp
     Concurrent Downloads: Sočasni prenosi
-    Bandwidth Limit: Omejitev pasovne širine (KiB/s, 0 pomeni neomejeno)
+    Bandwidth Limit: Omejitev pasovne širine (KiB/s)
     Choose Download Folder: Izberi mapo za prenose
     Download Templates: Predloge za prenos
     Manage Download Templates: Upravljaj predloge za prenos ({templateCount})
@@ -952,8 +952,8 @@ Settings:
       Automatic: Posodobi samodejno
       Ask: Vprašaj pred posodobitvijo
       Manual: Posodobi samo ročno
-    yt-dlp Executable Path: Pot do izvedljive datoteke yt-dlp
-    FFmpeg Executable Path: Pot do izvedljive datoteke FFmpeg
+    yt-dlp Executable Path: Izvršljiva datoteka yt-dlp
+    FFmpeg Executable Path: Izvršljiva datoteka FFmpeg
     Restricted Playback Authentication: "Piškotki yt-dlp"
     Cookie Source: Vir piškotkov
     Cookie Sources:
@@ -1254,7 +1254,7 @@ Settings:
     Enhanced Privacy Enabled: Izboljšana zasebnost je omogočena. Strežnik hrani samo šifrirane sinhronizirane podatke.
     Enhanced Privacy Unsupported: Opozorilo — ta strežnik ne podpira izboljšane zasebnosti. Sinhronizirani podatki so vidni njegovemu upravljavcu.
     Description: 'Sinhronizirajte naročnine, profile, sezname predvajanja, zgodovino ogledov in podprte nastavitve s sinhronizacijskim strežnikom OpenTubeX ali LibreTube. Strežniki LibreTube morda ne podpirajo vseh funkcij sinhronizacije.'
-    Server URL: URL strežnika
+    Server URL: URL strežnika za sinhronizacijo
     Checking Server: Preverjanje sinhronizacijskega strežnika …
     Server Unavailable: Povezava s tem sinhronizacijskim strežnikom ni mogoča. Preverite URL in poskusite znova.
     Username: Uporabniško ime
@@ -1346,7 +1346,7 @@ Settings:
     Proxy Warning: OpenTubeX nima vgrajenega posredniškega strežnika, vendar se lahko poveže z zunanjim posredniškim strežnikom, na primer s storitvijo Tor v vašem računalniku ali strežnikom SOCKS5, ki ga ponujajo nekatera navidezna zasebna omrežja. Če ga omogočite, preverite, ali je posredniški strežnik oziroma Tor pravilno nastavljen, sicer OpenTubeX ne bo mogel pridobiti podatkov.
     Proxy Username: Uporabniško ime posredniškega strežnika
     Proxy Password: Geslo posredniškega strežnika
-    IP Block Recovery Script Path: Pot do skripta za obnovitev po blokadi IP-ja
+    IP Block Recovery Script Path: Skript za obnovitev po blokadi IP
     Select IP Block Recovery Script File: Izberi datoteko skripta za obnovitev po blokadi IP-ja
     Running IP block recovery script: Izvajanje skripta za obnovitev po blokadi IP-ja
     IP block recovery script failed: 'Skript za obnovitev po blokadi IP-ja ni uspel (izhodna koda: {exitCode})'
@@ -1360,8 +1360,8 @@ Settings:
     SponsorBlock Settings: SponsorBlock
     Enable SponsorBlock: Omogoči SponsorBlock
     Enable SponsorBlock Submission: Omogoči prispevanje v SponsorBlock
-    SponsorBlock API Url (Default is https://sponsor.ajay.app): URL API-ja SponsorBlock (privzeto je https://sponsor.ajay.app)
-    SponsorBlock Private User ID (optional): Zasebni uporabniški ID za SponsorBlock (izbirno)
+    SponsorBlock API Url (Default is https://sponsor.ajay.app): URL API-ja SponsorBlock
+    SponsorBlock Private User ID (optional): Zasebni ID uporabnika (izbirno)
     SponsorBlock Private User ID Tooltip: Prilepite zasebni uporabniški ID za SponsorBlock iz razširitve brskalnika. Če želite uporabiti ID, ki ga ustvari aplikacija, pustite polje prazno.
     Generated SponsorBlock User ID: Ustvarjeni uporabniški ID za SponsorBlock
     Generated SponsorBlock User ID Tooltip: Uporabniški ID za SponsorBlock, ki ga je ustvarila aplikacija, lahko uporabite v razširitvi brskalnika ali v aplikaciji v drugem računalniku.
@@ -1372,7 +1372,7 @@ Settings:
     Skip notification timeout: Čas do izginotja obvestila o preskoku
     UseDeArrowTitles: Uporabi naslove videoposnetkov DeArrow
     UseDeArrowThumbnails: Uporabi DeArrow za sličice
-    DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): URL API-ja ustvarjalnika sličic DeArrow (privzeto je https://dearrow-thumb.ajay.app)
+    DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): URL API-ja sličic DeArrow
     Skip Options:
       Skip Option: Možnost preskoka
       Auto Skip: Samodejno preskoči
@@ -1384,7 +1384,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Omogoči Return YouTube Dislike
-    Return YouTube Dislike Url: URL API-ja Return YouTube Dislike (privzeto je https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: URL API-ja
   Parental Control Settings:
     Parental Control Settings: Starševski nadzor
     Hide Unsubscribe Button: Skrij gumb za odjavo
@@ -2424,8 +2424,8 @@ Downloads:
   File Name Template: Predloga imena datoteke
   File Name Template Help: 'Razpoložljiva polja: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Časovni razpon in poglavja
-  Start Time: Začetni čas (HH:MM:SS)
-  End Time: Končni čas (HH:MM:SS)
+  Start Time: Začetni čas
+  End Time: Končni čas
   Split by Chapters: Razdeli v ločene datoteke po poglavjih
   Remove Segments: Odstrani odseke
   Subtitles and Metadata: Podnapisi in metapodatki
@@ -2511,3 +2511,23 @@ Tray:
 Tray Icon:
   Title: "Ikona v sistemski vrstici"
   Follow App Theme: "Sledi temi aplikacije"
+
+Form Inputs:
+  Enter Channels: "Vnesite kanale"
+  Enter Text: "Vnesite besedilo"
+  Video URL: URL videa ali seznama predvajanja
+  Paste Link: Prilepite povezavo do videa ali seznama predvajanja
+  Example: npr. {example}
+  No Minimum: Brez minimuma
+  No Maximum: Brez maksimuma
+  Any Age: Poljubna starost
+  Included Terms Example: npr. vodič, recenzija
+  Excluded Terms Example: npr. napovednik, predogled
+  Download Folder Hint: Pustite prazno za uporabo mape Prenosi
+  Global Arguments Hint: Izbirni argumenti za vsak prenos
+  Unlimited Hint: 0 za neomejeno
+  Add Argument: Dodajte argument
+  Template Name Example: npr. Samo zvok
+  Download Arguments Hint: Izbirni argumenti za ta prenos
+  Generated ID Hint: Pustite prazno za ustvarjanje ID-ja
+  Default Value: "Privzeto: {value}"

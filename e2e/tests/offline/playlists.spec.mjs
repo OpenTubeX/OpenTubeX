@@ -26,6 +26,7 @@ test.describe('playlist creation', () => {
     await page.getByTitle('Create New Playlist').click()
     const createDialog = page.getByRole('dialog')
     await expect(createDialog).toBeVisible()
+    expect(await createDialog.getByRole('button', { name: 'Cancel', exact: true }).evaluate(element => getComputedStyle(element).borderTopColor)).not.toBe('rgba(0, 0, 0, 0)')
     await expect(createDialog.getByText('Quick bookmark icon')).toHaveCount(0)
     await createDialog.locator('.playlistNameInput input').fill('Created via UI')
     await createDialog.getByRole('button', { name: 'Create', exact: true }).click()

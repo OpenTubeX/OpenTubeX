@@ -14,7 +14,8 @@
     <template v-if="syncEnabled">
       <FtFlexBox class="fields">
         <FtInput
-          :placeholder="t('Settings.Sync Settings.Server URL')"
+          :label="t('Settings.Sync Settings.Server URL')"
+          placeholder="https://sync.example.com"
           :show-action-button="false"
           :data-list="syncServerInstances"
           :value="serverUrl"
@@ -24,7 +25,8 @@
           @blur="saveServerUrl"
         />
         <FtInput
-          :placeholder="t('Settings.Sync Settings.Username')"
+          :label="t('Settings.Sync Settings.Username')"
+          placeholder=""
           :show-action-button="false"
           :value="connected ? savedUsername : username"
           :disabled="connected || serverCredentialsDisabled"
@@ -33,7 +35,8 @@
         />
         <FtInput
           v-if="!connected"
-          :placeholder="t('Settings.Password Dialog.Password')"
+          :label="t('Settings.Password Dialog.Password')"
+          placeholder=""
           :show-action-button="false"
           :value="password"
           :disabled="serverCredentialsDisabled"
@@ -44,7 +47,8 @@
         />
         <FtInput
           v-if="!connected && serverPrivacySupported !== false && serverCheckStatus !== 'error'"
-          :placeholder="t('Settings.Sync Settings.Privacy Passphrase')"
+          :label="t('Settings.Sync Settings.Privacy Passphrase')"
+          placeholder=""
           :show-action-button="false"
           :value="privacyPassphrase"
           :disabled="serverCredentialsDisabled"
@@ -376,7 +380,8 @@
         <div class="deleteAccountContent passwordForm">
           <p>{{ t('Settings.Sync Settings.Change Password Warning') }}</p>
           <FtInput
-            :placeholder="t('Settings.Sync Settings.Current Password')"
+            :label="t('Settings.Sync Settings.Current Password')"
+            placeholder=""
             :show-action-button="false"
             :value="currentPassword"
             :disabled="accountActionBusy"
@@ -385,7 +390,8 @@
             @input="currentPassword = $event"
           />
           <FtInput
-            :placeholder="t('Settings.Sync Settings.New Password')"
+            :label="t('Settings.Sync Settings.New Password')"
+            placeholder=""
             :show-action-button="false"
             :value="newPassword"
             :disabled="accountActionBusy"
@@ -394,7 +400,8 @@
             @input="newPassword = $event"
           />
           <FtInput
-            :placeholder="t('Settings.Sync Settings.Confirm New Password')"
+            :label="t('Settings.Sync Settings.Confirm New Password')"
+            placeholder=""
             :show-action-button="false"
             :value="confirmedPassword"
             :disabled="accountActionBusy"
@@ -437,7 +444,8 @@
             {{ t('Settings.Sync Settings.Delete Account Warning') }}
           </p>
           <FtInput
-            :placeholder="t('Settings.Password Dialog.Password')"
+            :label="t('Settings.Password Dialog.Password')"
+            placeholder=""
             :show-action-button="false"
             :value="deleteAccountPassword"
             input-type="password"

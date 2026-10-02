@@ -1,10 +1,10 @@
 /* stylelint-disable no-descending-specificity */
 .pure-radiobutton {
-  --radio-dot-offset: calc(-50% - 0.5px);
+  --radio-dot-offset: -50%;
 }
 
 .pure-radiobutton:dir(rtl) {
-  --radio-dot-offset: calc(50% + 0.5px);
+  --radio-dot-offset: 50%;
 }
 
 .pure-radiobutton input[type='radio'] {
@@ -18,87 +18,83 @@
   inline-size: 1px;
 }
 
-.pure-radiobutton input[type='radio']:focus + label::before,
-.pure-radiobutton input[type='radio']:hover + label::before {
-  border: 2px solid var(--primary-color);
-}
-
-.pure-radiobutton input[type='radio']:active + label::before { transition-duration: 0s; }
-
-.pure-radiobutton input[type='radio'] + label {
+.pure-radiobutton input + label {
   position: relative;
-  padding-inline-start: 2em;
+  box-sizing: border-box;
+  padding-block: 8px;
+  padding-inline-start: 32px;
+  min-block-size: 40px;
+  line-height: 24px;
   user-select: none;
   cursor: pointer;
   display: block;
-  margin-block-start: 10px;
 }
 
-.pure-radiobutton input[type='radio'] + label::before {
-  box-sizing: content-box;
+.pure-radiobutton input + label::before,
+.pure-radiobutton input + label::after {
+  box-sizing: border-box;
   content: '';
-  color: var(--primary-text-color);
   position: absolute;
   inset-block-start: 50%;
+  border-radius: 50%;
+}
+
+.pure-radiobutton input + label::before {
   inset-inline-start: 0;
-  inline-size: 14px;
-  block-size: 14px;
-  border: 2px solid var(--primary-text-color);
-  text-align: center;
+  inline-size: 20px;
+  block-size: 20px;
+  border: 2px solid var(--secondary-text-color);
   transform: translateY(-50%);
-  transition: all 0.4s ease;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 
-.pure-radiobutton input[type='radio'] + label::after {
-  box-sizing: content-box;
-  content: '';
-  background-color: var(--primary-text-color);
-  position: absolute;
-  inset-block-start: 50%;
-  inset-inline-start: 9px;
+.pure-radiobutton input + label::after {
+  background-color: var(--accent-color);
+  inset-inline-start: 10px;
   inline-size: 10px;
   block-size: 10px;
   transform: translate(var(--radio-dot-offset), -50%) scale(0);
-  transform-origin: 50%;
-  transition: transform 200ms ease-out;
+  transition: transform 150ms ease;
 }
 
-.pure-radiobutton input[type='radio']:disabled + label::before { border-color: #ccc; }
-
-.pure-radiobutton input[type='radio']:disabled:focus + label::before,
-.pure-radiobutton input[type='radio']:disabled:hover + label::before { background-color: inherit; }
-
-.pure-radiobutton input[type='radio']:disabled:checked + label::before { background-color: #ccc; }
-
-
-.pure-checkbox input[type='radio']:checked + label::before,
-.pure-radiobutton input[type='radio']:checked + label::before {
-  animation: borderscale 300ms ease-in;
+.pure-radiobutton input:checked + label::before {
+  border-color: var(--accent-color);
 }
 
-.pure-radiobutton input[type='radio']:focus + label::after {
-  background-color: var(--primary-color);
-}
-
-.pure-radiobutton input[type='radio']:checked + label::after {
+.pure-radiobutton input:checked + label::after {
   transform: translate(var(--radio-dot-offset), -50%) scale(1);
 }
 
-.pure-radiobutton input[type='radio'] + label::before,
-.pure-radiobutton input[type='radio'] + label::after { border-radius: 50%; }
+.pure-radiobutton input:not(:disabled) + label:hover::before,
+.pure-radiobutton input:focus-visible + label::before {
+  box-shadow: 0 0 0 8px var(--accent-color-opacity2);
+}
 
-@keyframes
-  borderscale {  50% {
-    box-shadow: 0 0 0 2px var(--primary-text-color);
-  }
+.pure-radiobutton input:focus-visible + label {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+  border-radius: calc(4px * var(--ui-roundness));
+}
+
+.pure-radiobutton input:disabled + label {
+  opacity: 0.38;
+  cursor: not-allowed;
 }
 
 .radioTitle {
   margin-block: 0;
 }
 
-@media only screen and (width <= 680px) {
-  .pure-radiobutton input[type='radio'] + label {
-    margin-block-start: 3px;
+@media (any-pointer: coarse), (width <= 680px) {
+  .pure-radiobutton input + label {
+    min-block-size: 48px;
+    padding-block: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pure-radiobutton input + label::before,
+  .pure-radiobutton input + label::after {
+    transition: none;
   }
 }

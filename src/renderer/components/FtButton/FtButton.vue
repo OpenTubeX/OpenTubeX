@@ -1,11 +1,11 @@
 <template>
   <button
     class="btn ripple"
-    :class="buttonTheme"
+    :class="[buttonTheme, `variant-${buttonVariant}`, `shape-${shape}`, `size-${size}`, { selected }]"
+    :aria-pressed="selected ?? $attrs['aria-pressed']"
     :style="{
-      color: buttonTheme === '' ? textColor : undefined,
-      backgroundColor: buttonTheme === '' ? backgroundColor : undefined,
-      borderColor: buttonTheme === '' ? backgroundColor : undefined
+      '--button-base': buttonTheme === '' ? backgroundColor : undefined,
+      '--button-on-base': buttonTheme === '' ? textColor : undefined
     }"
     @click="click"
   >
@@ -13,6 +13,7 @@
       <FtIcon
         v-if="icon"
         :icon="icon"
+        aria-hidden="true"
       />
       {{ label }}
     </slot>
@@ -24,6 +25,25 @@ import { FtIcon } from '@opentubex/icons'
 import { computed } from 'vue'
 
 const props = defineProps({
+  variant: {
+    type: String,
+    default: '',
+    validator: value => ['', 'filled', 'tonal', 'outlined', 'text', 'elevated'].includes(value)
+  },
+  shape: {
+    type: String,
+    default: 'round',
+    validator: value => ['round', 'square'].includes(value)
+  },
+  size: {
+    type: String,
+    default: 'small',
+    validator: value => ['extra-small', 'small', 'medium', 'large', 'extra-large'].includes(value)
+  },
+  selected: {
+    type: Boolean,
+    default: null
+  },
   label: {
     type: String,
     default: ''
@@ -58,6 +78,10 @@ const buttonTheme = computed(() => {
   }
   return ''
 })
+
+const buttonVariant = computed(() => props.variant || (
+  props.backgroundColor === null || props.backgroundColor === 'null' ? 'outlined' : buttonTheme.value === 'secondary' ? 'tonal' : 'filled'
+))
 
 function click() {
   emit('click')

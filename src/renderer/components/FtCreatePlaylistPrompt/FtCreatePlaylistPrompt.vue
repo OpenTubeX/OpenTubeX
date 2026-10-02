@@ -31,6 +31,7 @@
     <template #footer>
       <FtFlexBox>
         <FtButton
+          theme="primary"
           :label="$t('User Playlists.CreatePlaylistPrompt.Create')"
           :icon="['fas', 'playlist-add']"
           :disabled="playlistPersistenceDisabled"

@@ -48,6 +48,24 @@ for (const uiScale of [100, 95]) {
       }
     })
 
+    test('keeps the text position stable when focus changes', async ({ page }) => {
+      const input = page.locator(sel.searchInput)
+      await input.fill('OpenTubeX')
+      await input.evaluate(element => element.blur())
+      const textCenter = () => input.evaluate(element => {
+        const bounds = element.getBoundingClientRect()
+        const style = getComputedStyle(element)
+        return bounds.top + (bounds.height + parseFloat(style.borderTopWidth) - parseFloat(style.borderBottomWidth) +
+          parseFloat(style.paddingTop) - parseFloat(style.paddingBottom)) / 2
+      })
+      const unfocusedCenter = await textCenter()
+      await input.focus()
+      await expect(input).toBeFocused()
+      expect(await textCenter()).toBeCloseTo(unfocusedCenter, 1)
+      await input.evaluate(element => element.blur())
+      expect(await textCenter()).toBeCloseTo(unfocusedCenter, 1)
+    })
+
     for (const direction of ['ltr', 'rtl']) {
       test(`uses the native cancel control and restores recent searches in ${direction}`, async ({ page }) => {
         await page.locator('body').evaluate((element, direction) => { element.dir = direction }, direction)

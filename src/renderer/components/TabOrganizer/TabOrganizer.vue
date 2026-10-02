@@ -54,6 +54,7 @@
             </button>
             <FtSelect
               v-if="moveTargets.length > 0"
+              variant="outlined"
               class="compactSelect"
               :placeholder="t('Tab Organizer.Move To Window')"
               :value="selectedWindowTarget"
@@ -122,6 +123,7 @@
               {{ t('Close') }}
             </button>
             <FtSelect
+              variant="outlined"
               class="compactSelect bulkActionSelect"
               :placeholder="t('Tab Organizer.Move To Group')"
               :value="selectedGroupTarget"
@@ -160,19 +162,9 @@
                 class="groupNameInput"
                 type="text"
                 maxlength="80"
-                :placeholder="t('Tab Organizer.Group Name')"
+                :placeholder="t('Form Inputs.Example', { example: t('Tab Organizer.Icon Labels.Music') })"
               >
             </label>
-            <FtSelect
-              class="compactSelect colorSelect"
-              :placeholder="t('Tab Organizer.Color')"
-              :value="newGroupColor"
-              :select-names="colorSelectNames"
-              :select-values="colorSelectValues"
-              :option-colors="colorSelectColors"
-              :show-icon="false"
-              @change="newGroupColor = $event"
-            />
             <button
               type="submit"
               :disabled="newGroupName.trim().length === 0"
@@ -236,8 +228,9 @@
                   <button
                     type="button"
                     class="groupIconButton"
-                    :aria-label="t('Tab Organizer.Group Icon')"
-                    :title="t('Tab Organizer.Group Icon')"
+                    :aria-label="`${t('Tab Organizer.Group Icon')} / ${t('Tab Organizer.Change Group Color', { name: section.name })}`"
+                    :title="`${t('Tab Organizer.Group Icon')} / ${t('Tab Organizer.Change Group Color', { name: section.name })}`"
+                    :style="section.color ? { color: getTabAccentColor(section.color) } : null"
                     :aria-expanded="editingIconGroupId === section.id"
                     @click="toggleIconPicker(section.id)"
                   >
@@ -248,69 +241,51 @@
                   </button>
                   <div
                     v-if="editingIconGroupId === section.id"
-                    class="groupIconPicker"
-                    role="group"
-                    :aria-label="t('Tab Organizer.Group Icon')"
+                    class="groupAppearancePicker"
                   >
-                    <button
-                      v-for="(icon, index) in groupIconValues"
-                      :key="icon"
-                      type="button"
-                      :aria-pressed="normalizeTabGroupIcon(section.icon) === icon"
-                      :aria-label="groupIconNames[index]"
-                      :title="groupIconNames[index]"
-                      @click="updateGroupIcon(section.id, icon)"
+                    <div
+                      class="groupColorPicker"
+                      role="listbox"
+                      :aria-label="t('Tab Organizer.Change Group Color', { name: section.name })"
                     >
-                      <FtIcon
-                        :icon="['fas', icon]"
-                        aria-hidden="true"
-                      />
-                    </button>
-                  </div>
-                </div>
-                <div
-                  v-if="section.id"
-                  class="groupColorEditor"
-                  @focusout="handleColorPickerFocusOut($event, section.id)"
-                >
-                  <button
-                    type="button"
-                    class="groupColorButton"
-                    :aria-label="t('Tab Organizer.Change Group Color', { name: section.name })"
-                    :title="t('Tab Organizer.Change Group Color', { name: section.name })"
-                    :aria-expanded="editingColorGroupId === section.id"
-                    @click="toggleColorPicker(section.id)"
-                  >
-                    <span
-                      class="groupColor"
-                      :class="{ noColor: !section.color }"
-                      :style="section.color ? { '--group-color': getTabAccentColor(section.color) } : null"
-                      aria-hidden="true"
-                    />
-                  </button>
-                  <div
-                    v-if="editingColorGroupId === section.id"
-                    class="groupColorPicker"
-                    role="listbox"
-                    :aria-label="t('Tab Organizer.Change Group Color', { name: section.name })"
-                  >
-                    <button
-                      v-for="color in editableGroupColors"
-                      :key="color.value || 'none'"
-                      type="button"
-                      role="option"
-                      :aria-selected="(section.color ?? '') === color.value"
-                      :aria-label="color.label"
-                      :title="color.label"
-                      @click="updateGroupColor(section.id, color.value)"
+                      <button
+                        v-for="color in editableGroupColors"
+                        :key="color.value || 'none'"
+                        type="button"
+                        role="option"
+                        :aria-selected="(section.color ?? '') === color.value"
+                        :aria-label="color.label"
+                        :title="color.label"
+                        @click="updateGroupColor(section.id, color.value)"
+                      >
+                        <span
+                          class="groupColor"
+                          :class="{ noColor: color.value === '' }"
+                          :style="color.value ? { '--group-color': color.color } : null"
+                          aria-hidden="true"
+                        />
+                      </button>
+                    </div>
+                    <div
+                      class="groupIconPicker"
+                      role="group"
+                      :aria-label="t('Tab Organizer.Group Icon')"
                     >
-                      <span
-                        class="groupColor"
-                        :class="{ noColor: color.value === '' }"
-                        :style="color.value ? { '--group-color': color.color } : null"
-                        aria-hidden="true"
-                      />
-                    </button>
+                      <button
+                        v-for="(icon, index) in groupIconValues"
+                        :key="icon"
+                        type="button"
+                        :aria-pressed="normalizeTabGroupIcon(section.icon) === icon"
+                        :aria-label="groupIconNames[index]"
+                        :title="groupIconNames[index]"
+                        @click="updateGroupIcon(section.id, icon)"
+                      >
+                        <FtIcon
+                          :icon="['fas', icon]"
+                          aria-hidden="true"
+                        />
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <template v-if="section.id && editingNameGroupId === section.id">
@@ -355,7 +330,7 @@
                   <button
                     v-if="section.allTabs.length > 0"
                     type="button"
-                    :disabled="section.allTabs.every(tab => tab.isUnloaded)"
+                    :disabled="tabs.length <= 1 || section.allTabs.every(tab => tab.isUnloaded)"
                     @click="runAction('unload', section.allTabs.map(tab => tab.id))"
                   >
                     <FtIcon
@@ -366,6 +341,7 @@
                   </button>
                   <FtSelect
                     v-if="section.allTabs.length > 0 && moveTargets.length > 0"
+                    variant="outlined"
                     class="compactSelect groupWindowSelect"
                     :placeholder="t('Tab Organizer.Move To Window')"
                     value=""
@@ -725,7 +701,6 @@ const syncedSessionPanelId = `${syncedSessionIdPrefix}-panel`
 const teleportTarget = document.fullscreenElement ?? '.app'
 const query = ref('')
 const newGroupName = ref('')
-const newGroupColor = ref('')
 const selectedGroupTarget = ref('')
 const selectedWindowTarget = ref('')
 const moveTargets = ref([])
@@ -733,7 +708,6 @@ const draggedTabIds = ref([])
 const dragTargetGroupId = ref(undefined)
 const editingNameGroupId = ref(null)
 const editingGroupName = ref('')
-const editingColorGroupId = ref(null)
 const editingIconGroupId = ref(null)
 const failedTabAvatarUrls = ref({})
 const sessionToDelete = ref(null)
@@ -776,9 +750,6 @@ const editableGroupColors = computed(() => [
     color: getTabAccentColor(color.value)
   }))
 ])
-const colorSelectNames = computed(() => editableGroupColors.value.map(color => color.label))
-const colorSelectValues = computed(() => editableGroupColors.value.map(color => color.value))
-const colorSelectColors = computed(() => editableGroupColors.value.map(color => color.color))
 const groupSelectNames = computed(() => [
   t('Tab Organizer.Choose Group'),
   t('Tab Organizer.Ungrouped'),
@@ -1064,7 +1035,7 @@ async function runAction(action, tabIds) {
 async function createGroup() {
   const group = await store.dispatch('createTabGroup', {
     name: newGroupName.value,
-    color: newGroupColor.value || null
+    color: null
   })
   if (!group) return
 
@@ -1075,7 +1046,6 @@ async function createGroup() {
     })
   }
   newGroupName.value = ''
-  newGroupColor.value = ''
 }
 
 async function moveSelectedTabsToGroup(groupId) {
@@ -1115,7 +1085,6 @@ async function moveSelectedTabsToWindow(value) {
 
 async function startGroupRename(group) {
   editingIconGroupId.value = null
-  editingColorGroupId.value = null
   editingNameGroupId.value = group.id
   editingGroupName.value = group.name
   await nextTick()
@@ -1143,7 +1112,6 @@ function cancelGroupRename() {
 
 function toggleIconPicker(groupId) {
   cancelGroupRename()
-  editingColorGroupId.value = null
   editingIconGroupId.value = editingIconGroupId.value === groupId ? null : groupId
 }
 
@@ -1156,8 +1124,6 @@ function closeIconPicker(event) {
 }
 
 async function updateGroupIcon(groupId, icon) {
-  dialogRef.value?.querySelector('.groupIconEditor:focus-within .groupIconButton')?.focus()
-  editingIconGroupId.value = null
   await store.dispatch('updateTabGroup', { groupId, changes: { icon } })
 }
 
@@ -1166,23 +1132,11 @@ function handleIconPickerFocusOut(event, groupId) {
   if (editingIconGroupId.value === groupId) editingIconGroupId.value = null
 }
 
-function toggleColorPicker(groupId) {
-  editingIconGroupId.value = null
-  cancelGroupRename()
-  editingColorGroupId.value = editingColorGroupId.value === groupId ? null : groupId
-}
-
 async function updateGroupColor(groupId, color) {
-  editingColorGroupId.value = null
   await store.dispatch('updateTabGroup', {
     groupId,
     changes: { color: color || null }
   })
-}
-
-function handleColorPickerFocusOut(event, groupId) {
-  if (event.currentTarget.contains(event.relatedTarget)) return
-  if (editingColorGroupId.value === groupId) editingColorGroupId.value = null
 }
 
 function restoreClosedTab(tabId) {

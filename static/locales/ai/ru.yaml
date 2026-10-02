@@ -643,9 +643,9 @@ Settings:
     Update Managed Tools: Обновить
     Managed Tools Download Error Template: 'Не удалось загрузить управляемые инструменты: {errors}'
     Download Folder: Папка загрузки
-    Global Additional yt-dlp Arguments: Общие дополнительные аргументы yt-dlp
+    Global Additional yt-dlp Arguments: Дополнительные аргументы yt-dlp
     Concurrent Downloads: Одновременные загрузки
-    Bandwidth Limit: Ограничение скорости (КиБ/с, 0 — без ограничения)
+    Bandwidth Limit: Ограничение скорости (KiB/s)
     Choose Download Folder: Выбрать папку загрузки
     Download Templates: Шаблоны загрузки
     Manage Download Templates: Управление шаблонами загрузки ({templateCount})
@@ -718,8 +718,8 @@ Settings:
       Automatic: Обновлять автоматически
       Ask: Спрашивать перед обновлением
       Manual: Обновлять только вручную
-    yt-dlp Executable Path: Путь к исполняемому файлу yt-dlp
-    FFmpeg Executable Path: Путь к исполняемому файлу FFmpeg
+    yt-dlp Executable Path: Исполняемый файл yt-dlp
+    FFmpeg Executable Path: Исполняемый файл FFmpeg
     Restricted Playback Authentication: "Файлы cookie yt-dlp"
     Cookie Source: Источник файлов cookie
     Cookie Sources:
@@ -963,7 +963,7 @@ Settings:
     Enhanced Privacy Enabled: Усиленная защита конфиденциальности включена. Сервер хранит только зашифрованные данные синхронизации.
     Enhanced Privacy Unsupported: Внимание! Этот сервер не поддерживает усиленную защиту конфиденциальности. Оператор сервера может видеть синхронизированные данные.
     Description: 'Синхронизируйте подписки, профили, плейлисты, историю просмотров и поддерживаемые настройки с сервером синхронизации OpenTubeX или LibreTube. Серверы LibreTube могут поддерживать не все функции синхронизации.'
-    Server URL: URL сервера
+    Server URL: URL сервера синхронизации
     Checking Server: Проверка сервера синхронизации…
     Server Unavailable: Не удалось подключиться к этому серверу синхронизации. Проверьте URL и повторите попытку.
     Username: Имя пользователя
@@ -1052,7 +1052,7 @@ Settings:
     Open All Tabs Confirmation: "Открыть все вкладки?"
     Server Update Required: "Обновите этот сервер для поддержки зашифрованной синхронизации в реальном времени."
   Proxy Settings:
-    IP Block Recovery Script Path: Путь к скрипту восстановления после блокировки IP
+    IP Block Recovery Script Path: Скрипт восстановления после блокировки IP
     Select IP Block Recovery Script File: Выбрать файл скрипта восстановления после блокировки IP
     Running IP block recovery script: Выполняется скрипт восстановления после блокировки IP
     IP block recovery script failed: 'Сбой скрипта восстановления после блокировки IP (код выхода: {exitCode})'
@@ -1064,7 +1064,7 @@ Settings:
       Excluded Channels: "Исключённые каналы"
       Tooltip: "Введите ID канала, чтобы сегменты SponsorBlock в его видео не пропускались. ID должен совпадать точно, с учётом регистра."
     Enable SponsorBlock Submission: Разрешить отправку данных в SponsorBlock
-    SponsorBlock Private User ID (optional): Личный идентификатор пользователя SponsorBlock (необязательно)
+    SponsorBlock Private User ID (optional): Личный ID пользователя (необязательно)
     SponsorBlock Private User ID Tooltip: Вставьте личный идентификатор пользователя SponsorBlock из расширения браузера. Оставьте поле пустым, чтобы использовать идентификатор, созданный приложением.
     Generated SponsorBlock User ID: Созданный идентификатор пользователя SponsorBlock
     Generated SponsorBlock User ID Tooltip: Этот идентификатор пользователя SponsorBlock создан приложением. Его можно использовать в расширении браузера или в приложении на другом компьютере.
@@ -1076,7 +1076,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Включить Return YouTube Dislike
-    Return YouTube Dislike Url: URL API Return YouTube Dislike (по умолчанию https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: URL API
   Parental Control Settings:
     Disable Channel Links: Отключить ссылки на каналы
   Password Dialog:
@@ -1840,8 +1840,8 @@ Downloads:
   File Name Template: Шаблон имени файла
   File Name Template Help: 'Доступные поля: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Диапазон времени и главы
-  Start Time: Начало (HH:MM:SS)
-  End Time: Конец (HH:MM:SS)
+  Start Time: Начало
+  End Time: Конец
   Split by Chapters: Разделить главы на отдельные файлы
   Remove Segments: Удалить сегменты
   Subtitles and Metadata: Субтитры и метаданные
@@ -1932,3 +1932,23 @@ Close Confirmation:
 Tray Icon:
   Title: "Значок в трее"
   Follow App Theme: "Использовать тему приложения"
+
+Form Inputs:
+  Enter Channels: "Введите каналы"
+  Enter Text: "Введите текст"
+  Video URL: URL видео или плейлиста
+  Paste Link: Вставьте ссылку на видео или плейлист
+  Example: напр. {example}
+  No Minimum: Без минимума
+  No Maximum: Без максимума
+  Any Age: Любой возраст
+  Included Terms Example: напр. инструкция, обзор
+  Excluded Terms Example: напр. трейлер, анонс
+  Download Folder Hint: Оставьте пустым, чтобы использовать папку загрузок
+  Global Arguments Hint: Необязательные аргументы для каждой загрузки
+  Unlimited Hint: 0 — без ограничений
+  Add Argument: Добавить аргумент
+  Template Name Example: напр. Только аудио
+  Download Arguments Hint: Необязательные аргументы для этой загрузки
+  Generated ID Hint: Оставьте пустым, чтобы сгенерировать ID
+  Default Value: "По умолчанию: {value}"

@@ -1,29 +1,13 @@
-.switchColumn :deep(.select) {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto 45px;
-  row-gap: 6px;
+.autoRefreshIntervals {
+  display: flex;
+  flex-direction: column;
+  inline-size: 100%;
 }
 
-.switchColumn :deep(.select > *) {
-  grid-column: 1;
-  grid-row: 2;
-}
-
-.switchColumn :deep(.select > .selectSearchHighlightFrame) {
-  grid-row: 1 / -1;
-}
-
-.switchColumn :deep(.select .select-label) {
-  position: static;
-  grid-row: 1;
-}
-
-.switchColumn :deep(.select .select-label-text),
-.switchColumn :deep(.select .select-placeholder) {
-  white-space: normal;
-  line-height: 1.3;
-  overflow-wrap: anywhere;
+.autoRefreshIntervals > :deep(.select) {
+  box-sizing: border-box;
+  inline-size: calc(100% - 70px);
+  margin-block: 8px;
 }
 
 .onlyShowLatestFromChannelNumber {
@@ -40,5 +24,7 @@
 }
 
 .subscriptionChannelSettingsManager {
+  box-sizing: border-box;
+  max-inline-size: 100%;
   padding-inline-start: 44px;
 }

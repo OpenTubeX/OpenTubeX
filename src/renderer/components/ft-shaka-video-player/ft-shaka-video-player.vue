@@ -1268,6 +1268,7 @@
               </div>
               <FtSelect
                 class="sponsorBlockDraftCategory"
+                variant="outlined"
                 :placeholder="$t('Video.Player.SponsorBlock.CategoryLabel')"
                 :value="sponsorBlockDraftEditValues[segment.id]?.category ?? segment.category"
                 :select-names="sponsorBlockSubmissionCategoryNames"
@@ -1279,6 +1280,7 @@
               <FtSelect
                 v-if="!isSponsorBlockPointSegment(segment)"
                 class="sponsorBlockDraftCategory"
+                variant="outlined"
                 :placeholder="$t('Video.Player.SponsorBlock.ActionTypeLabel')"
                 :value="sponsorBlockDraftEditValues[segment.id]?.actionType ?? segment.actionType"
                 :select-names="getSponsorBlockActionTypeSelectNames(sponsorBlockDraftEditValues[segment.id]?.category ?? segment.category)"

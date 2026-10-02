@@ -327,7 +327,8 @@
     >
       <FtFlexBox class="settingsFlexStart460px">
         <FtInput
-          :placeholder="t('Settings.General Settings.Current Invidious Instance')"
+          :label="t('Settings.General Settings.Current Invidious Instance')"
+          placeholder="https://your-instance.example"
           :show-action-button="false"
           :show-label="true"
           :value="currentInvidiousInstance"

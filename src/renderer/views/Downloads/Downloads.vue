@@ -186,7 +186,8 @@
       <div class="addDownloadPrompt">
         <FtInput
           input-type="url"
-          placeholder="URL"
+          :label="t('Form Inputs.Video URL')"
+          :placeholder="t('Form Inputs.Paste Link')"
           :show-label="true"
           :show-action-button="false"
           :value="downloadUrl"

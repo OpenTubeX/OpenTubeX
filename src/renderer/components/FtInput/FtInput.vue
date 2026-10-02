@@ -5,29 +5,13 @@
     :class="{
       search: isSearch,
       forceTextColor,
-      showActionButton
+      showActionButton,
+      floatingLabel: showLabel && !isSearch,
+      hasValue: inputDataPresent,
+      hasSupportingText: supportingText !== '',
+      outlined: variant === 'outlined' && !isSearch
     }"
   >
-    <label
-      v-if="showLabel"
-      :for="id"
-      class="selectLabel"
-      :class="{ disabled, hasIcon: icon !== null }"
-    >
-      <FtIcon
-        v-if="icon !== null"
-        :icon="icon"
-        class="selectLabelIcon"
-      />
-      <span class="selectLabelText">{{ label || placeholder }}</span>
-      <FtTooltip
-        v-if="tooltip !== ''"
-        class="selectTooltip"
-        position="bottom"
-        :tooltip="tooltip"
-      />
-      <FtSyncedSettingIndicator :setting-key="settingKey" />
-    </label>
     <span class="inputWrapper">
       <input
         :id="id"
@@ -42,12 +26,31 @@
         :disabled="disabled"
         :readonly="readonly"
         :spellcheck="false"
+        :aria-description="tooltip || undefined"
+        :aria-describedby="supportingText ? `${id}-supporting` : undefined"
         :aria-label="showLabel ? null : placeholder"
         @input="handleInput"
         @focus="handleFocus"
         @blur="handleInputBlur"
         @keydown="handleKeyDown"
       >
+      <label
+        v-if="showLabel"
+        :for="id"
+        class="selectLabel"
+        :class="{ disabled, hasIcon: icon !== null }"
+      >
+        <FtIcon
+          v-if="icon !== null"
+          :icon="icon"
+          class="selectLabelIcon"
+          aria-hidden="true"
+        />
+        <span
+          class="selectLabelText"
+          :title="label || placeholder"
+        >{{ label || placeholder }}</span>
+      </label>
       <slot name="extraAction" />
       <button
         v-if="showActionButton"
@@ -63,8 +66,21 @@
         <FtIcon
           class="buttonIcon"
           :icon="actionButtonIconName"
+          aria-hidden="true"
         />
       </button>
+      <span
+        v-if="tooltip !== '' || settingKey !== ''"
+        class="inputIndicators"
+      >
+        <FtTooltip
+          v-if="tooltip !== ''"
+          class="selectTooltip"
+          position="bottom"
+          :tooltip="tooltip"
+        />
+        <FtSyncedSettingIndicator :setting-key="settingKey" />
+      </span>
     </span>
     <div class="options">
       <ul
@@ -115,6 +131,13 @@
         <!-- skipped -->
       </ul>
     </div>
+    <p
+      v-if="supportingText"
+      :id="`${id}-supporting`"
+      class="supportingText"
+    >
+      {{ supportingText }}
+    </p>
   </div>
 </template>
 
@@ -137,6 +160,11 @@ import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 const { t } = useI18n()
 
 const props = defineProps({
+  variant: {
+    type: String,
+    default: 'filled',
+    validator: value => ['filled', 'outlined'].includes(value)
+  },
   inputType: {
     type: String,
     default: 'text'
@@ -148,6 +176,10 @@ const props = defineProps({
   label: {
     type: String,
     default: null
+  },
+  supportingText: {
+    type: String,
+    default: ''
   },
   icon: {
     type: Array,

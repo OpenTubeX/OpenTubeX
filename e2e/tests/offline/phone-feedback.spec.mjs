@@ -334,24 +334,40 @@ test('submenu navigation stays outside the player menu scroller', async ({ app, 
   await expect(back).toBeInViewport()
 })
 
-test('autoplay glyph stays within its switch in both states', async ({ app, page }) => {
+test('autoplay glyph stays within its original compact switch in both states and directions', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
   await setWindowSize(app, page, { width: 360, height: 760 })
+  await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.locator('.shaka-overflow-menu-button').click({ force: true })
   const toggle = page.locator('.phonePlayerOptions[open] .autoplay-toggle')
-  for (let state = 0; state < 2; state++) {
-    await toggle.scrollIntoViewIfNeeded()
-    await page.waitForTimeout(200)
-    const geometry = await toggle.evaluate(el => {
-      const track = el.querySelector('.ft-autoplay-switch').getBoundingClientRect()
-      const thumb = el.querySelector('.ft-autoplay-switch-thumb').getBoundingClientRect()
-      const enabled = el.getAttribute('aria-pressed') === 'true'
-      return { edge: enabled ? track.right - thumb.right : thumb.left - track.left, center: thumb.top + thumb.height / 2 - track.top - track.height / 2 }
-    })
-    expect(geometry.edge).toBeCloseTo(1, 0)
-    expect(geometry.center).toBeCloseTo(0, 0)
-    await toggle.click()
+  for (const roundness of [0, 50, 100, 200]) {
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
+    await expect(toggle.locator('.ft-autoplay-switch')).toHaveCSS('border-radius', `${999 * roundness / 100}px`)
+  }
+  for (const direction of ['ltr', 'rtl']) {
+    await page.evaluate(value => { document.body.dir = value }, direction)
+    for (let state = 0; state < 2; state++) {
+      await toggle.scrollIntoViewIfNeeded()
+      const geometry = await toggle.evaluate(el => {
+        const track = el.querySelector('.ft-autoplay-switch').getBoundingClientRect()
+        const thumb = el.querySelector('.ft-autoplay-switch-thumb').getBoundingClientRect()
+        const enabled = el.getAttribute('aria-pressed') === 'true'
+        const rtl = getComputedStyle(el).direction === 'rtl'
+        const startGap = rtl ? track.right - thumb.right : thumb.left - track.left
+        const endGap = rtl ? thumb.left - track.left : track.right - thumb.right
+        return {
+          edge: enabled ? endGap : startGap,
+          center: thumb.top + thumb.height / 2 - track.top - track.height / 2,
+          width: thumb.width,
+          enabled
+        }
+      })
+      expect(geometry.edge).toBeCloseTo(1, 0)
+      expect(geometry.width).toBeCloseTo(16, 0)
+      expect(geometry.center).toBeCloseTo(0, 0)
+      await toggle.click()
+    }
   }
 })
 

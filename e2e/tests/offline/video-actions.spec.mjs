@@ -1795,6 +1795,19 @@ test.describe('list video actions', () => {
     }))
     expect(opacity).toEqual({ label: '1', labelText: '0.4' })
     await expect(tooltip).toHaveCSS('opacity', '1')
+    for (const fullWindow of [false, true]) {
+      await page.evaluate(value => document.body.classList.toggle('playerFullWindow', value), fullWindow)
+      await expect.poll(() => tooltip.evaluate(element => {
+        const rect = element.getBoundingClientRect()
+        // Tooltips ignore pointer events; temporarily enable hit testing to verify
+        // the visible tooltip paints above the modal rather than underneath it.
+        element.style.pointerEvents = 'auto'
+        const top = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)
+        element.style.pointerEvents = ''
+        return top === element || element.contains(top)
+      })).toBe(true)
+    }
+    await page.evaluate(() => document.body.classList.remove('playerFullWindow'))
   })
 
   test('the video context menu and playlist dropdown work with vertical tabs', async ({ page }) => {

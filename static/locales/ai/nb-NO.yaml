@@ -660,9 +660,9 @@ Settings:
     Update Managed Tools: Oppdater
     Managed Tools Download Error Template: 'Kunne ikke laste ned de administrerte verktøyene: {errors}'
     Download Folder: Nedlastingsmappe
-    Global Additional yt-dlp Arguments: Globale tilleggsargumenter for yt-dlp
+    Global Additional yt-dlp Arguments: Ekstra yt-dlp-argumenter
     Concurrent Downloads: Samtidige nedlastinger
-    Bandwidth Limit: Båndbreddegrense (KiB/s, 0 for ubegrenset)
+    Bandwidth Limit: Båndbreddegrense (KiB/s)
     Choose Download Folder: Velg nedlastingsmappe
     Download Templates: Nedlastingsmaler
     Manage Download Templates: Administrer nedlastingsmaler ({templateCount})
@@ -735,8 +735,8 @@ Settings:
       Automatic: Oppdater automatisk
       Ask: Spør før oppdatering
       Manual: Oppdater bare manuelt
-    yt-dlp Executable Path: Bane til kjørbar yt-dlp-fil
-    FFmpeg Executable Path: Bane til kjørbar FFmpeg-fil
+    yt-dlp Executable Path: yt-dlp-programfil
+    FFmpeg Executable Path: FFmpeg-programfil
     Restricted Playback Authentication: "yt-dlp-informasjonskapsler"
     Cookie Source: Kilde for informasjonskapsler
     Cookie Sources:
@@ -970,7 +970,7 @@ Settings:
     Enhanced Privacy Enabled: Utvidet personvern er slått på. Serveren lagrer bare krypterte synkroniseringsdata.
     Enhanced Privacy Unsupported: Advarsel. Denne serveren støtter ikke utvidet personvern. De synkroniserte dataene er synlige for den som driver serveren.
     Description: 'Synkroniser abonnementer, profiler, spillelister, seerhistorikk og støttede innstillinger med en OpenTubeX- eller LibreTube-synkroniseringsserver. LibreTube-servere støtter kanskje ikke alle synkroniseringsfunksjoner.'
-    Server URL: Server-URL
+    Server URL: URL til synkroniseringsserver
     Checking Server: Kontrollerer synkroniseringsserveren…
     Server Unavailable: Kan ikke koble til denne synkroniseringsserveren. Kontroller URL-en og prøv på nytt.
     Username: Brukernavn
@@ -1060,7 +1060,7 @@ Settings:
     Open All Tabs Confirmation: "Åpne alle faner?"
     Server Update Required: "Oppdater denne serveren for å støtte kryptert synkronisering i sanntid."
   Proxy Settings:
-    IP Block Recovery Script Path: Bane til skript for gjenoppretting etter IP-blokkering
+    IP Block Recovery Script Path: Skript for gjenoppretting etter IP-blokkering
     Select IP Block Recovery Script File: Velg skriptfil for gjenoppretting etter IP-blokkering
     Running IP block recovery script: Kjører skriptet for gjenoppretting etter IP-blokkering
     IP block recovery script failed: 'Skriptet for gjenoppretting etter IP-blokkering mislyktes (avslutningskode: {exitCode})'
@@ -1072,7 +1072,7 @@ Settings:
       Excluded Channels: "Unntatte kanaler"
       Tooltip: "Skriv inn en kanal-ID for å hindre at SponsorBlock-segmenter hoppes over i kanalens videoer. ID-en må samsvare nøyaktig og skiller mellom store og små bokstaver."
     Enable SponsorBlock Submission: Slå på innsending til SponsorBlock
-    SponsorBlock Private User ID (optional): Privat SponsorBlock-bruker-ID (valgfritt)
+    SponsorBlock Private User ID (optional): Privat bruker-ID (valgfritt)
     SponsorBlock Private User ID Tooltip: Lim inn den private SponsorBlock-bruker-ID-en fra nettleserutvidelsen. La feltet stå tomt for å bruke en ID som programmet oppretter.
     Generated SponsorBlock User ID: Generert SponsorBlock-bruker-ID
     Generated SponsorBlock User ID Tooltip: Denne SponsorBlock-bruker-ID-en, som programmet har opprettet, kan brukes i nettleserutvidelsen eller hvis du bruker programmet på en annen datamaskin.
@@ -1084,7 +1084,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Slå på Return YouTube Dislike
-    Return YouTube Dislike Url: API-URL for Return YouTube Dislike (standard er https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: API-URL
   Password Dialog:
     Incorrect Password: Feil passord
     Unlock: Lås opp
@@ -1847,8 +1847,8 @@ Downloads:
   File Name Template: Filnavnmal
   File Name Template Help: 'Tilgjengelige felt: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Tidsområde og kapitler
-  Start Time: Starttid (HH:MM:SS)
-  End Time: Sluttid (HH:MM:SS)
+  Start Time: Starttid
+  End Time: Sluttid
   Split by Chapters: Del i separate filer etter kapittel
   Remove Segments: Fjern segmenter
   Subtitles and Metadata: Undertekster og metadata
@@ -1937,3 +1937,23 @@ Tray:
 Tray Icon:
   Title: "Ikon i systemstatusfeltet"
   Follow App Theme: "Følg appens tema"
+
+Form Inputs:
+  Enter Channels: "Skriv inn kanaler"
+  Enter Text: "Skriv inn tekst"
+  Video URL: Video- eller spilleliste-URL
+  Paste Link: Lim inn en lenke til en video eller spilleliste
+  Example: f.eks. {example}
+  No Minimum: Ingen minimumsgrense
+  No Maximum: Ingen maksimumsgrense
+  Any Age: Uansett alder
+  Included Terms Example: f.eks. veiledning, anmeldelse
+  Excluded Terms Example: f.eks. trailer, forhåndsvisning
+  Download Folder Hint: La stå tomt for å bruke Nedlastinger-mappen
+  Global Arguments Hint: Valgfrie argumenter for hver nedlasting
+  Unlimited Hint: 0 for ubegrenset
+  Add Argument: Legg til et argument
+  Template Name Example: f.eks. Bare lyd
+  Download Arguments Hint: Valgfrie argumenter for denne nedlastingen
+  Generated ID Hint: La stå tomt for å generere en ID
+  Default Value: "Standard: {value}"

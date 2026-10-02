@@ -2226,6 +2226,10 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   transform: translateX(18px);
 }
 
+:deep(.autoplay-toggle[aria-pressed='true']:dir(rtl) .ft-autoplay-switch-thumb) {
+  transform: translateX(-18px);
+}
+
 :deep(.shaka-overflow-menu .autoplay-toggle > .ft-autoplay-switch) {
   margin-inline-end: 14px;
 }
@@ -2714,7 +2718,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 :deep(.sponsorBlockDraftCategory .select-text ~ .select-label) {
-  inset-block-start: -16px;
+  inset-block-start: 0;
+  background-color: rgb(0 0 0 / 85%);
 }
 
 :deep(.sponsorBlockDraftCategory .select-bar::before),

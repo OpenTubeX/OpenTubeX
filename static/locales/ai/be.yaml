@@ -689,9 +689,9 @@ Settings:
     Update Managed Tools: Абнавіць
     Managed Tools Download Error Template: 'Не ўдалося спампаваць кіраваныя інструменты: {errors}'
     Download Folder: Папка спампоўванняў
-    Global Additional yt-dlp Arguments: Глабальныя дадатковыя аргументы yt-dlp
+    Global Additional yt-dlp Arguments: Дадатковыя аргументы yt-dlp
     Concurrent Downloads: Адначасовыя спампоўванні
-    Bandwidth Limit: Абмежаванне прапускной здольнасці (КіБ/с, 0 — без абмежавання)
+    Bandwidth Limit: Абмежаванне прапускной здольнасці (KiB/s)
     Choose Download Folder: Выбраць папку спампоўванняў
     Download Templates: Шаблоны спампоўвання
     Manage Download Templates: Кіраванне шаблонамі спампоўвання ({templateCount})
@@ -764,8 +764,8 @@ Settings:
       Automatic: Абнаўляць аўтаматычна
       Ask: Пытацца перад абнаўленнем
       Manual: Абнаўляць толькі ўручную
-    yt-dlp Executable Path: Шлях да выканальнага файла yt-dlp
-    FFmpeg Executable Path: Шлях да выканальнага файла FFmpeg
+    yt-dlp Executable Path: Выканальны файл yt-dlp
+    FFmpeg Executable Path: Выканальны файл FFmpeg
     Restricted Playback Authentication: "Файлы cookie yt-dlp"
     Cookie Source: Крыніца файлаў cookie
     Cookie Sources:
@@ -1014,7 +1014,7 @@ Settings:
     Enhanced Privacy Enabled: Палепшаная прыватнасць уключана. Сервер захоўвае толькі зашыфраваныя даныя сінхранізацыі.
     Enhanced Privacy Unsupported: Увага — гэты сервер не падтрымлівае палепшаную прыватнасць. Аператар сервера можа бачыць сінхранізаваныя даныя.
     Description: 'Сінхранізуйце падпіскі, профілі, плэйлісты, гісторыю праглядаў і падтрыманыя налады з серверам сінхранізацыі OpenTubeX або LibreTube. Серверы LibreTube могуць падтрымліваць не ўсе функцыі сінхранізацыі.'
-    Server URL: URL сервера
+    Server URL: URL сервера сінхранізацыі
     Checking Server: Праверка сервера сінхранізацыі…
     Server Unavailable: Не ўдалося злучыцца з гэтым серверам сінхранізацыі. Праверце URL і паўтарыце спробу.
     Username: Імя карыстальніка
@@ -1106,7 +1106,7 @@ Settings:
   Proxy Settings:
     Proxy Username: Імя карыстальніка проксі
     Proxy Password: Пароль проксі
-    IP Block Recovery Script Path: Шлях да сцэнарыя аднаўлення пасля блакавання IP
+    IP Block Recovery Script Path: Скрыпт аднаўлення пасля блакіроўкі IP
     Select IP Block Recovery Script File: Выберыце файл сцэнарыя аднаўлення пасля блакавання IP
     Running IP block recovery script: Выконваецца сцэнарый аднаўлення пасля блакавання IP
     IP block recovery script failed: 'Памылка сцэнарыя аднаўлення пасля блакавання IP (код выхаду: {exitCode})'
@@ -1118,7 +1118,7 @@ Settings:
       Excluded Channels: "Выключаныя каналы"
       Tooltip: "Увядзіце ID канала, каб сегменты SponsorBlock у яго відэа не прапускаліся. ID павінен дакладна супадаць з улікам рэгістра."
     Enable SponsorBlock Submission: Уключыць адпраўленне даных у SponsorBlock
-    SponsorBlock Private User ID (optional): Прыватны ідэнтыфікатар карыстальніка SponsorBlock (неабавязкова)
+    SponsorBlock Private User ID (optional): Прыватны ID карыстальніка (неабавязкова)
     SponsorBlock Private User ID Tooltip: Устаўце прыватны ідэнтыфікатар карыстальніка SponsorBlock з пашырэння браўзера. Пакіньце поле пустым, каб выкарыстоўваць ідэнтыфікатар, створаны праграмай.
     Generated SponsorBlock User ID: Створаны ідэнтыфікатар карыстальніка SponsorBlock
     Generated SponsorBlock User ID Tooltip: Гэты створаны праграмай ідэнтыфікатар карыстальніка SponsorBlock можна выкарыстоўваць у пашырэнні браўзера або ў праграме на іншым камп'ютары.
@@ -1130,7 +1130,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Уключыць Return YouTube Dislike
-    Return YouTube Dislike Url: URL API Return YouTube Dislike (прадвызначана https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: URL API
   Parental Control Settings:
     Hide Uploader on Watch page: Хаваць аўтара на старонцы прагляду
     Disable Channel Links: Адключыць спасылкі на каналы
@@ -1921,8 +1921,8 @@ Downloads:
   File Name Template: Шаблон назвы файла
   File Name Template Help: 'Даступныя палі: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Дыяпазон часу і раздзелы
-  Start Time: Час пачатку (HH:MM:SS)
-  End Time: Час заканчэння (HH:MM:SS)
+  Start Time: Час пачатку
+  End Time: Час заканчэння
   Split by Chapters: Раздзяліць кожны раздзел у асобны файл
   Remove Segments: Выдаліць фрагменты
   Subtitles and Metadata: Субцітры і метаданыя
@@ -2011,3 +2011,23 @@ Tray:
 Tray Icon:
   Title: "Значок у трэі"
   Follow App Theme: "Выкарыстоўваць тэму праграмы"
+
+Form Inputs:
+  Enter Channels: "Увядзіце каналы"
+  Enter Text: "Увядзіце тэкст"
+  Video URL: URL відэа або плэйліста
+  Paste Link: Устаўце спасылку на відэа або плэйліст
+  Example: напр. {example}
+  No Minimum: Без мінімуму
+  No Maximum: Без максімуму
+  Any Age: Любы ўзрост
+  Included Terms Example: напр. інструкцыя, агляд
+  Excluded Terms Example: напр. трэйлер, анонс
+  Download Folder Hint: Пакіньце пустым, каб выкарыстоўваць папку спамповак
+  Global Arguments Hint: Неабавязковыя аргументы для кожнага спампоўвання
+  Unlimited Hint: 0 — без абмежавання
+  Add Argument: Дадаць аргумент
+  Template Name Example: напр. Толькі аўдыя
+  Download Arguments Hint: Неабавязковыя аргументы для гэтага спампоўвання
+  Generated ID Hint: Пакіньце пустым, каб згенераваць ID
+  Default Value: "Прадвызначана: {value}"

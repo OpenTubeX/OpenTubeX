@@ -12,6 +12,46 @@ test.use({
   }
 })
 
+test('autoplay keeps its original compact switch geometry', async ({ app, page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const player = page.locator('.ftVideoPlayer')
+  await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
+  const toggle = player.locator('.shaka-controls-button-panel > .autoplay-toggle')
+  const track = toggle.locator('.ft-autoplay-switch')
+  const thumb = track.locator('.ft-autoplay-switch-thumb')
+  await expect.soft(track).toHaveCSS('width', '36px', { timeout: 1000 })
+  await expect.soft(track).toHaveCSS('height', '18px', { timeout: 1000 })
+  for (const checked of [false, true]) {
+    if ((await toggle.getAttribute('aria-pressed') === 'true') !== checked) await toggle.click()
+    await expect(toggle).toHaveAttribute('aria-pressed', String(checked))
+    await expect.soft(thumb).toHaveCSS('width', '16px', { timeout: 1000 })
+    await expect.soft(thumb).toHaveCSS('height', '16px', { timeout: 1000 })
+  }
+})
+
+test('download options fit horizontally and its Cancel button retains a border', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  await page.locator('.videoOptions').getByRole('button', { name: 'Download Video', exact: true }).click()
+  const prompt = page.locator('.downloadPromptCard')
+  await expect(prompt).toBeVisible()
+  const advanced = prompt.locator('.advancedDownloadOptions')
+  if (!await advanced.evaluate(element => element.open)) await advanced.locator('summary').click()
+  const scroller = prompt.locator('.downloadOptions')
+  expect.soft(await scroller.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+  const clipped = await scroller.evaluate(element => {
+    const viewport = element.getBoundingClientRect()
+    return Array.from(element.querySelectorAll('.switch-label, .ft-input, .inputIndicators, .select-text'))
+      .map(control => ({ className: control.className, text: control.textContent.trim(), right: control.getBoundingClientRect().right - viewport.right }))
+      .filter(control => control.right > 1)
+  })
+  expect.soft(clipped).toEqual([])
+  const cancel = prompt.getByRole('button', { name: 'Cancel', exact: true })
+  expect.soft(await cancel.evaluate(element => getComputedStyle(element).borderTopColor)).not.toBe('rgba(0, 0, 0, 0)')
+})
+
 test('portrait mobile controls keep captions and PiP in settings when the row is crowded', async ({ app, page }) => {
   await page.locator('.app').evaluate(element => {
     const applyMobileClasses = () => {

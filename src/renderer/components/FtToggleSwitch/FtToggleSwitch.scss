@@ -1,5 +1,3 @@
-/* Thanks to Guus Lieben for the Material Design Switch */
-
 .switch-ctn {
   margin-block: 20px;
   margin-inline: 16px;
@@ -19,13 +17,14 @@
 
 .switch-input {
   appearance: none;
-  background: transparent;
-  block-size: 20px;
-  inset-inline-start: -3px;
+  block-size: var(--switch-touch-height);
+  inset-inline-start: 6px;
+  margin: 0;
+  opacity: 0;
   position: absolute;
-  inset-block-start: calc(50% - 3px);
+  inset-block-start: 50%;
   transform: translate(0, -50%);
-  inline-size: 34px;
+  inline-size: var(--switch-track-width);
 }
 
 .switch-label {
@@ -33,9 +32,10 @@
   cursor: pointer;
   display: inline-flex;
   font-weight: 500;
-  margin-inline-start: -5px;
-  padding-block: 12px;
-  padding-inline: 49px 0;
+  box-sizing: border-box;
+  min-block-size: var(--switch-touch-height);
+  padding-block: 6px;
+  padding-inline: calc(var(--switch-track-width) + 18px) 6px;
   position: relative;
   text-align: start;
 
@@ -43,45 +43,42 @@
   &::after {
     content: '';
     margin: 0;
-    outline: 0;
     position: absolute;
     inset-block-start: 50%;
     transform: translate(0, -50%);
-    transition: all 0.3s ease;
+    transition: background-color 200ms ease, border-color 200ms ease,
+      inline-size 200ms ease, block-size 200ms ease, inset-inline-start 200ms ease,
+      box-shadow 150ms ease;
   }
 
   &::before {
-    background-color: var(--toggle-track-color, #9e9e9e);
-    border-radius: calc(8px * var(--ui-roundness));
-    block-size: 14px;
+    background-color: var(--toggle-track-color, color-mix(in srgb, var(--primary-text-color) 8%, var(--card-bg-color)));
+    border: 2px solid var(--secondary-text-color);
+    box-sizing: border-box;
+    border-radius: calc(var(--switch-track-height) / 2);
+    block-size: var(--switch-track-height);
     inset-inline-start: 6px;
-    inline-size: 34px;
+    inline-size: var(--switch-track-width);
 
     .switch-input:checked + & {
-      background-color: var(--toggle-checked-track-color, var(--accent-color-light));
-    }
-
-    .switch-input:disabled + & {
-      background-color: #9e9e9e;
+      background-color: var(--toggle-checked-track-color, var(--accent-color));
+      border-color: var(--toggle-checked-track-color, var(--accent-color));
     }
   }
 
   &::after {
-    background-color: var(--toggle-thumb-color, #fafafa);
+    background-color: var(--toggle-thumb-color, var(--secondary-text-color));
     border-radius: 50%;
-    box-shadow: inset 0 0 0 1px var(--toggle-thumb-outline-color, transparent),
-      0 3px 1px -2px rgb(0 0 0 / 14%), 0 2px 2px 0 rgb(0 0 0 / 9.8%), 0 1px 5px 0 rgb(0 0 0 / 8.4%);
-    block-size: 20px;
-    inset-inline-start: 5px;
-    inline-size: 20px;
+    box-shadow: inset 0 0 0 1px var(--toggle-thumb-outline-color, transparent);
+    block-size: calc(var(--switch-track-height) / 2);
+    inset-inline-start: calc(6px + var(--switch-track-height) / 4);
+    inline-size: calc(var(--switch-track-height) / 2);
 
     .switch-input:checked + & {
-      background-color: var(--toggle-checked-thumb-color, var(--accent-color));
-      transform: translate(calc(80% * var(--horizontal-directionality-coefficient)), -50%);
-    }
-
-    .switch-input:disabled + & {
-      background-color: #bdbdbd;
+      background-color: var(--toggle-checked-thumb-color, var(--text-with-accent-color));
+      inset-inline-start: calc(6px + var(--switch-track-width) - var(--switch-track-height) + var(--switch-thumb-inset));
+      block-size: calc(var(--switch-track-height) - 2 * var(--switch-thumb-inset));
+      inline-size: calc(var(--switch-track-height) - 2 * var(--switch-thumb-inset));
     }
   }
 
@@ -101,6 +98,16 @@
   }
 }
 
+@media (any-pointer: coarse), (width <= 680px) {
+  .switch-input {
+    block-size: max(48px, var(--switch-touch-height));
+  }
+
+  .switch-label {
+    min-block-size: max(48px, var(--switch-touch-height));
+  }
+}
+
 .containsTooltip .switch-label-text {
   margin-inline-end: 5px;
 }
@@ -113,6 +120,18 @@
   .switch-label-text {
     opacity: 0.4;
   }
+
+  .switch-label::before,
+  .switch-label::after {
+    opacity: 0.38;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switch-label::before,
+  .switch-label::after {
+    transition: none;
+  }
 }
 
 /* The label is the visible control, so it also owns the focus indicator. */
@@ -123,8 +142,26 @@
 }
 
 .switch-input:focus-visible + .switch-label {
-  border-radius: calc(4px * var(--ui-roundness));
+  border-radius: 4px;
   outline: 2px solid var(--primary-color);
   outline-offset: -3px;
   box-shadow: inset 0 0 0 1px var(--focus-ring-contrast-color);
+}
+
+.switch-input:not(:disabled):is(:hover, :focus-visible) + .switch-label::after,
+.switch-input:not(:disabled) + .switch-label:hover::after {
+  box-shadow: inset 0 0 0 1px var(--toggle-thumb-outline-color, transparent),
+    0 0 0 6px var(--accent-color-opacity2);
+}
+
+.switch-input:not(:disabled):active + .switch-label::after,
+.switch-input:not(:disabled) + .switch-label:active::after {
+  block-size: calc(var(--switch-track-height) - 4px);
+  inline-size: calc(var(--switch-track-height) - 4px);
+  inset-inline-start: 8px;
+}
+
+.switch-input:checked:not(:disabled):active + .switch-label::after,
+.switch-input:checked:not(:disabled) + .switch-label:active::after {
+  inset-inline-start: calc(8px + var(--switch-track-width) - var(--switch-track-height));
 }
