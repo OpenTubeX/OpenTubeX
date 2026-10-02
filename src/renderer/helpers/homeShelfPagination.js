@@ -15,7 +15,9 @@ export function getHomeShelfLayout(containerWidth, itemCount, itemMinWidth, item
 
   if (!Number.isFinite(containerWidth) || containerWidth <= 0) {
     return {
-      pageSize: Math.max(1, normalizedItemCount),
+      // ResizeObserver measures after mounting. Keep that first render bounded
+      // instead of mounting the entire library only to remove it a frame later.
+      pageSize: 1,
       showControls: false,
     }
   }
