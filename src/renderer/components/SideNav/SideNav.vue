@@ -1,7 +1,7 @@
 <template>
   <FtFlexBox
     class="sideNav"
-    :class="[{ opened: isOpen, expanded: isOpen || props.forceExpanded, scrollHidden }, applyHiddenLabels]"
+    :class="[{ opened: isOpen, expanded: isOpen || props.forceExpanded, scrollHidden, compactLabels: compactNavigationLabels }, applyHiddenLabels]"
     data-tutorial="navigation"
     role="navigation"
     @focusin="resetScrollVisibility"
@@ -29,6 +29,7 @@
         role="button"
         :to="`/${item.id}`"
         :title="item.id === 'history' ? historyTitle : item.label"
+        :aria-label="item.label"
       >
         <div class="thumbnailContainer">
           <FtIcon
@@ -44,6 +45,7 @@
       <SideNavMoreOptions
         v-if="mobileOverflowItems.length > 0"
         :items="mobileOverflowItems"
+        :class="{ compactLabels: compactNavigationLabels }"
       />
       <hr>
       <div
@@ -272,6 +274,8 @@ const historyTitle = computed(() => {
 const route = useRoute()
 const innerRef = useTemplateRef('innerRef')
 const scrollHidden = ref(false)
+const alwaysShowNavigationBar = computed(() => store.getters.getAlwaysShowNavigationBar)
+const compactNavigationLabels = computed(() => store.getters.getCompactNavigationLabels)
 const navigationScroll = createMobileNavigationScroll()
 let hideOnScroll = false
 
@@ -288,7 +292,7 @@ function updateScrollLayout() {
 }
 
 function updateScrollVisibility() {
-  if (!hideOnScroll) return
+  if (!hideOnScroll || alwaysShowNavigationBar.value) return
   const nav = innerRef.value?.closest('.sideNav')
   if (!nav || nav.querySelector(':focus-visible, [aria-expanded="true"]')) {
     resetScrollVisibility()
@@ -360,6 +364,7 @@ watch(() => route.fullPath, () => {
   resetScrollVisibility()
   nextTick(updateIndicator)
 })
+watch(alwaysShowNavigationBar, resetScrollVisibility)
 watch([
   () => activeProfile.value._id,
   () => activeProfile.value.subscriptions.length

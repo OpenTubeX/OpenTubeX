@@ -273,6 +273,8 @@ Settings:
     Swipe to refresh: Sychwch i adnewyddu
     Blur Thumbnails: Niwlio mân-luniau
     Navigation:
+      Always Show Navigation Bar: Dangos y bar llywio bob amser
+      Compact Tab Labels: Labeli tabiau cryno
       Show Active Subscriptions: Dangos tanysgrifiadau gweithredol
       Navigation: Llywio
       Customize Navigation: Addasu'r llywio

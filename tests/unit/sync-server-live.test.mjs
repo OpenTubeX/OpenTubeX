@@ -59,6 +59,16 @@ test('caption font changes describe caption appearance rather than the unchanged
   assert.equal(SYNC_SETTING_LABELS[activity.changes[0].key], 'Settings.Player Settings.Caption Appearance.Caption Appearance')
 })
 
+test('navigation preferences describe translated control labels in sync activity', () => {
+  for (const [key, label] of [
+    ['alwaysShowNavigationBar', 'Always Show Navigation Bar'],
+    ['compactNavigationLabels', 'Compact Tab Labels']
+  ]) {
+    const activity = createSyncActivity('settings', [{ key, value: false }], [{ key, value: true }], 'device', 'Phone')
+    assert.equal(SYNC_SETTING_LABELS[activity.changes[0].key], `Settings.General Settings.Navigation.${label}`)
+  }
+})
+
 test('device requests reject another recipient, arbitrary routes, expired messages and invalid positions', () => {
   const now = 100000
   const request = { version: 1, type: 'openVideo', recipient: 'phone', videoId: 'dQw4w9WgXcQ', title: 'Video', position: 30, expiresAt: now + 5000 }

@@ -401,6 +401,8 @@ Settings:
     Swipe to refresh: Llisca per actualitzar
     Blur Thumbnails: Difumina les miniatures
     Navigation:
+      Always Show Navigation Bar: Mostra sempre la barra de navegació
+      Compact Tab Labels: Etiquetes de pestanya compactes
       Show Active Subscriptions: Mostra les subscripcions actives
       Navigation: Navegació
       Customize Navigation: Personalitza la navegació

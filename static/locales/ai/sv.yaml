@@ -273,6 +273,8 @@ Settings:
     Swipe to refresh: Svep för att uppdatera
     Blur Thumbnails: Gör miniatyrbilder suddiga
     Navigation:
+      Always Show Navigation Bar: Visa alltid navigeringsfältet
+      Compact Tab Labels: Kompakta fliketiketter
       Show Active Subscriptions: Visa aktiva prenumerationer
       Navigation: Navigering
       Customize Navigation: Anpassa navigeringen

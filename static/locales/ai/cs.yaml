@@ -271,6 +271,8 @@ Settings:
     Swipe to refresh: Obnovit potažením
     Blur Thumbnails: Rozmazat miniatury
     Navigation:
+      Always Show Navigation Bar: Vždy zobrazovat navigační lištu
+      Compact Tab Labels: Kompaktní popisky karet
       Show Active Subscriptions: Zobrazit aktivní odběry
       Navigation: Navigace
       Customize Navigation: Přizpůsobit navigaci

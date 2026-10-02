@@ -10,6 +10,162 @@ const OFFLINE_PAGES = [
   { route: 'settings', name: 'Settings' }
 ]
 
+test('navigation visibility and compact labels are saved through their settings controls', async ({ app, page }) => {
+  const appearance = await goToSettingsSection(page, 'appearance')
+  await appearance.getByRole('button', { name: 'Customize navigation' }).click()
+  for (const name of ['Always show navigation bar', 'Compact tab labels']) {
+    const toggle = page.getByRole('checkbox', { name: new RegExp(`^${name}`) })
+    await expect(toggle).not.toBeChecked()
+    await page.locator('label.switch-label').filter({ hasText: name }).click()
+    await expect(toggle).toBeChecked()
+  }
+  ;({ page } = await app.relaunch())
+  const restoredAppearance = await goToSettingsSection(page, 'appearance')
+  await restoredAppearance.getByRole('button', { name: 'Customize navigation' }).click()
+  for (const name of ['Always show navigation bar', 'Compact tab labels']) {
+    await expect(page.getByRole('checkbox', { name: new RegExp(`^${name}`) })).toBeChecked()
+  }
+})
+
+for (const uiScale of [100, 125]) {
+  test.describe(`compact navigation labels at ${uiScale}%`, () => {
+    test.use({ seed: { settings: { compactNavigationLabels: true, showProgressBarToast: false, uiScale } } })
+
+    test('hides all mobile labels, centers icons and keeps overflow entries readable', async ({ app, page }) => {
+      const nav = page.locator('.sideNav')
+      const primary = nav.locator('.inner > .navOption:not(.mobileHidden)')
+      const more = nav.getByRole('button', { name: 'More', exact: true })
+      for (const viewport of [{ width: 375, height: 700 }, { width: 667, height: 375 }]) {
+        await setWindowSize(app, page, {
+          width: Math.round(viewport.width * uiScale / 100),
+          height: Math.round(viewport.height * uiScale / 100)
+        })
+        for (const route of ['subscriptions', 'history']) {
+          await goTo(page, route)
+          await expect(primary.locator('.navLabel:visible')).toHaveCount(0)
+          await expect(nav.locator('.inner > .navOption.router-link-active')).toHaveAttribute('aria-label', route === 'history' ? 'History' : 'Subscriptions')
+          await expect(primary.locator('.navIcon:visible')).toHaveCount(4)
+          await expect(nav).toHaveCSS('height', '48px')
+          await expect.poll(() => nav.locator('.inner > .navOption:not(.mobileHidden) .navIcon, .moreOptionNav .navIcon').evaluateAll(icons => Math.max(...icons.map(icon => {
+            const iconBounds = icon.getBoundingClientRect()
+            const optionBounds = icon.closest('.navOption').getBoundingClientRect()
+            return Math.abs((iconBounds.top + iconBounds.bottom - optionBounds.top - optionBounds.bottom) / 2)
+          })))).toBeLessThanOrEqual(1)
+          await expect(nav.getByRole('button', { name: 'Playlists', exact: true })).toBeVisible()
+          await expect(more.locator('.navLabel')).toBeHidden()
+        }
+        await more.click()
+        for (const label of await nav.locator('.moreOptionContainer .navLabel').all()) {
+          await expect(label).toBeVisible()
+        }
+        await nav.locator('.moreOptionContainer a[href="#/subscribedchannels"]').click()
+        await expect(more).toHaveClass(/router-link-active/)
+        await expect(more.locator('.navLabel')).toBeHidden()
+        await expect(primary.locator('.navLabel:visible')).toHaveCount(0)
+        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/search/example'))
+        await expect(page).toHaveURL(/#\/search\/example$/)
+        await expect(nav.locator('.navLabel:visible')).toHaveCount(0)
+      }
+      await setWindowSize(app, page, { width: 1200, height: 800 })
+      await expect(primary.locator('.navLabel:visible')).toHaveCount(4)
+      await setWindowSize(app, page, { width: 400, height: 850 })
+      await goTo(page, 'history')
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setHideLabelsSideBar', true))
+      await expect(nav.locator('.navLabel:visible')).toHaveCount(0)
+    })
+
+    test('updates safe-area, progress and overflow insets when compact mode changes', async ({ app, page }) => {
+      await setWindowSize(app, page, { width: 500, height: 850 })
+      await goTo(page, 'history')
+      await expect(page.getByRole('heading', { name: 'History', exact: true })).toBeVisible()
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setAlwaysShowNavigationBar', true)
+        store.commit('setShowProgressBar', true)
+        store.commit('setProgressBarPercentage', 50)
+        document.documentElement.style.setProperty('--safe-area-inset-bottom', '24px')
+        document.querySelector('.app').classList.add('capacitorPhoneLayout')
+        const content = document.createElement('div')
+        content.style.height = '3000px'
+        document.querySelector('.tabContent:not([inert]) > .routerView').append(content)
+      })
+      await expect(page.locator('.progressBar')).toBeVisible()
+      await expect.poll(() => page.evaluate(() => document.scrollingElement.scrollHeight)).toBeGreaterThan(3000)
+      for (const compact of [false, true, false, true]) {
+        await page.evaluate(() => window.scrollTo(0, document.scrollingElement.scrollHeight))
+        const previousHeight = await page.evaluate(() => document.scrollingElement.scrollHeight)
+        await page.evaluate(async compact => {
+          document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setCompactNavigationLabels', compact)
+          // Restore the phone fixture after Vue updates the root class, before layout.
+          await Promise.resolve()
+          document.querySelector('.app').classList.add('capacitorPhoneLayout')
+        }, compact)
+        await expect(page.locator('.sideNav')).toHaveCSS('height', `${(compact ? 48 : 60) + 24}px`)
+        if (compact) {
+          await expect.poll(() => page.evaluate(() => document.scrollingElement.scrollHeight)).toBeLessThan(previousHeight)
+          await expect.poll(() => page.evaluate(() => Math.abs(window.scrollY - (document.scrollingElement.scrollHeight - document.scrollingElement.clientHeight)))).toBeLessThanOrEqual(1)
+        }
+        await expect(page.locator('.tabContent:not([inert]) > .routerView')).toHaveCSS('padding-bottom', `${(compact ? 48 : 60) + 24 + 6}px`)
+        await expect.poll(() => page.evaluate(() => {
+          const nav = document.querySelector('.sideNav').getBoundingClientRect()
+          const progress = document.querySelector('.progressBar').getBoundingClientRect()
+          return Math.abs(nav.top - progress.bottom)
+        })).toBeLessThanOrEqual(1)
+        await page.locator('.moreOptionNav').click()
+        await expect.poll(() => page.evaluate(() => {
+          const menu = document.querySelector('.moreOptionContainer').getBoundingClientRect()
+          const progress = document.querySelector('.progressBar').getBoundingClientRect()
+          return Math.abs(menu.bottom - progress.top)
+        })).toBeLessThanOrEqual(1)
+        await page.locator('.moreOptionNav').click()
+      }
+    })
+
+    test('bottom notifications follow compact navigation while visible and hidden', async ({ app, page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await setWindowSize(app, page, { width: 500, height: 850 })
+      await goTo(page, 'history')
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setToastPosition', 'bottom-center')
+        document.documentElement.style.setProperty('--safe-area-inset-bottom', '24px')
+        document.querySelector('.app > .flexBox').style.minHeight = '3000px'
+        window.ftElectron.showToastOnAllTabs('Navigation spacing test', 60000)
+      })
+      const toast = page.locator('.toast', { hasText: 'Navigation spacing test' })
+      await expect(toast).toBeVisible()
+      for (const compact of [false, true, false, true]) {
+        await page.evaluate(compact => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setCompactNavigationLabels', compact), compact)
+        await expect.poll(async () => {
+          const nav = await page.locator('.sideNav').boundingBox()
+          const notification = await toast.boundingBox()
+          return nav.y - notification.y - notification.height
+        }).toBeCloseTo(12, 0)
+      }
+      await page.locator('.app').evaluate(app => app.classList.add('capacitorPhoneLayout'))
+      await expect.poll(async () => {
+        const nav = await page.locator('.sideNav').boundingBox()
+        const notification = await toast.boundingBox()
+        return nav.y - notification.y - notification.height
+      }).toBeCloseTo(12, 0)
+      await page.evaluate(() => {
+        Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+        window.dispatchEvent(new Event('offline'))
+      })
+      const status = page.locator('.connection-status-holder')
+      await expect(page.locator('.connectionStatus')).toBeVisible()
+      await expect.poll(async () => {
+        const nav = await page.locator('.sideNav').boundingBox()
+        const notice = await status.boundingBox()
+        return Math.abs(nav.y - notice.y - notice.height)
+      }).toBeLessThanOrEqual(1)
+      await page.evaluate(() => window.scrollTo(0, 300))
+      await expect(page.locator('.sideNav')).toHaveClass(/scrollHidden/)
+      await expect.poll(() => status.evaluate(element => Math.abs(element.getBoundingClientRect().bottom - innerHeight))).toBeLessThanOrEqual(1)
+    })
+  })
+}
+
 test.describe('side nav navigation', () => {
   for (const { route, name } of OFFLINE_PAGES) {
     test(`navigates to ${name}`, async ({ page }) => {

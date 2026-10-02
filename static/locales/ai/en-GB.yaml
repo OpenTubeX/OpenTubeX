@@ -270,6 +270,8 @@ Settings:
     Swipe to refresh: Swipe to refresh
     Blur Thumbnails: Blur thumbnails
     Navigation:
+      Always Show Navigation Bar: Always show navigation bar
+      Compact Tab Labels: Compact tab labels
       Show Active Subscriptions: Show Active Subscriptions
       Navigation: Navigation
       Customize Navigation: Customise navigation

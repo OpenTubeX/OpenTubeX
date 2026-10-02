@@ -7,6 +7,7 @@
       isLocaleRightToLeft: isLocaleRightToLeft,
       isSideNavOpen: isSideNavOpen,
       hideLabelsSideBar: hideLabelsSideBar && !isSideNavOpen,
+      compactNavigation: compactNavigationLabels,
       capacitorTabs: isCapacitor,
       capacitorPhoneLayout: isCapacitor && !showTabletTabStrip,
       capacitorTabletLayout: showTabletTabStrip,
@@ -835,6 +836,7 @@ const isSideNavOpen = computed(() => store.getters.getIsSideNavOpen)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideLabelsSideBar = computed(() => store.getters.getHideLabelsSideBar)
+const compactNavigationLabels = computed(() => store.getters.getCompactNavigationLabels)
 
 const tabBarPosition = computed(() => isElectron
   ? normalizeTabBarPosition(store.getters.getTabBarPosition)

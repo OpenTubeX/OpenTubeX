@@ -756,13 +756,17 @@ body:has(.app > .progressBar) {
 }
 
 body:has(.app.capacitorPhoneLayout) {
-  --mobile-toast-inset: 43px;
+  --mobile-toast-inset: calc(var(--connection-navigation-inset, 60px) - 17px);
 }
 
 @media (width <= 680px) {
   body:has(.app) {
     --connection-navigation-inset: 60px;
-    --mobile-toast-inset: 43px;
+    --mobile-toast-inset: calc(var(--connection-navigation-inset) - 17px);
+  }
+
+  body:has(.app.compactNavigation) {
+    --connection-navigation-inset: 48px;
   }
 
   .connection-status-holder {
@@ -771,7 +775,7 @@ body:has(.app.capacitorPhoneLayout) {
   }
 
   body:where(:has(.sideNav.scrollHidden):not(:has(.sideNav :focus-visible))) .connection-status-holder {
-    transform: translateY(calc(60px + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))));
+    transform: translateY(calc(var(--connection-navigation-inset) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))));
     transition: transform 220ms cubic-bezier(0.4, 0, 1, 1);
   }
 

@@ -275,6 +275,8 @@ Settings:
     Swipe to refresh: اسحب للتحديث
     Blur Thumbnails: تمويه الصور المصغرة
     Navigation:
+      Always Show Navigation Bar: إظهار شريط التنقل دائمًا
+      Compact Tab Labels: تسميات علامات تبويب مختصرة
       Show Active Subscriptions: إظهار الاشتراكات النشطة
       Navigation: التنقل
       Customize Navigation: تخصيص التنقل

@@ -273,6 +273,8 @@ Settings:
     Swipe to refresh: Povucite za osvježavanje
     Blur Thumbnails: Zamuti minijature
     Navigation:
+      Always Show Navigation Bar: Uvijek prikaži navigacijsku traku
+      Compact Tab Labels: Kompaktne oznake kartica
       Show Active Subscriptions: Prikaži aktivne pretplate
       Navigation: Navigacija
       Customize Navigation: Prilagodi navigaciju

@@ -271,6 +271,8 @@ Settings:
     Swipe to refresh: Scorri per aggiornare
     Blur Thumbnails: Sfoca le miniature
     Navigation:
+      Always Show Navigation Bar: Mostra sempre la barra di navigazione
+      Compact Tab Labels: Etichette delle schede compatte
       Show Active Subscriptions: Mostra iscrizioni attive
       Navigation: Navigazione
       Customize Navigation: Personalizza la navigazione

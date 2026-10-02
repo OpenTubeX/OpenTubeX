@@ -248,6 +248,8 @@ Settings:
     Swipe to refresh: Обновлять смахиванием
     Blur Thumbnails: Размывать миниатюры
     Navigation:
+      Always Show Navigation Bar: Всегда показывать панель навигации
+      Compact Tab Labels: Компактные подписи вкладок
       Show Active Subscriptions: Показывать активные подписки
       Navigation: Навигация
       Customize Navigation: Настроить навигацию

@@ -271,6 +271,8 @@ Settings:
     Swipe to refresh: Balayer pour actualiser
     Blur Thumbnails: Flouter les miniatures
     Navigation:
+      Always Show Navigation Bar: Toujours afficher la barre de navigation
+      Compact Tab Labels: Libellés d’onglets compacts
       Show Active Subscriptions: Afficher les abonnements actifs
       Navigation: Navigation
       Customize Navigation: Personnaliser la navigation

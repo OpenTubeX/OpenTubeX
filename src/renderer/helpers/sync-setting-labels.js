@@ -3,6 +3,7 @@ import { BUILTIN_BASE_THEME_VALUES, BUILTIN_BASE_THEME_TRANSLATION_KEYS } from '
 // Stable setting keys map to the same translation keys used by their controls.
 export const SYNC_SETTING_LABELS = {
   aiVideoSummaryMode: 'Settings.Distraction Free Settings.AI Video Summaries',
+  alwaysShowNavigationBar: 'Settings.General Settings.Navigation.Always Show Navigation Bar',
   alwaysShowScrollbars: 'Settings.Theme Settings.Always Show Scrollbars',
   ambientMode: 'Global.Ambient Mode',
   mobileAutoPictureInPicture: 'Settings.Player Settings.Auto Picture in Picture.Auto Picture in Picture',
@@ -57,6 +58,7 @@ export const SYNC_SETTING_LABELS = {
   enableBlockLists: 'Settings.Distraction Free Settings.Enable Block Lists',
   checkForUpdates: 'Settings.General Settings.Check for Updates',
   commentTranslationIgnoredLanguages: 'Settings.General Settings.Comment Translation.Never Translate',
+  compactNavigationLabels: 'Settings.General Settings.Navigation.Compact Tab Labels',
   confirmCloseApp: 'Settings.General Settings.Confirmation Options.Closing App',
   confirmCloseMultipleTabs: 'Settings.General Settings.Confirmation Options.Closing Tabs',
   confirmCloseWindowWithMultipleTabs: 'Settings.General Settings.Confirmation Options.Closing Window',

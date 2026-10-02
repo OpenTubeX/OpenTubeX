@@ -448,6 +448,8 @@ test('settings search retains the subpage containing each control', () => {
   })
   for (const [section, label, subpage] of [
     ['appearance', 'Show Active Subscriptions', 'navigation'],
+    ['appearance', 'Always show navigation bar', 'navigation'],
+    ['appearance', 'Compact tab labels', 'navigation'],
     ['appearance', 'Add item', 'navigation'],
     ['playback', 'Add Playback Speed', 'quick-playback-speed'],
     ['playback', 'Playback Speed', 'quick-playback-speed'],

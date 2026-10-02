@@ -271,6 +271,8 @@ Settings:
     Swipe to refresh: 下拉重新整理
     Blur Thumbnails: 模糊縮圖
     Navigation:
+      Always Show Navigation Bar: 永遠顯示導覽列
+      Compact Tab Labels: 精簡分頁標籤
       Show Active Subscriptions: 顯示活躍訂閱
       Navigation: 導覽
       Customize Navigation: 自訂導覽

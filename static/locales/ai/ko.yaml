@@ -359,6 +359,8 @@ Settings:
     Swipe to refresh: 스와이프하여 새로고침
     Blur Thumbnails: 썸네일 흐리게 표시
     Navigation:
+      Always Show Navigation Bar: 탐색 막대 항상 표시
+      Compact Tab Labels: 간결한 탭 라벨
       Show Active Subscriptions: 활성 구독 표시
       Navigation: 탐색
       Customize Navigation: 탐색 맞춤 설정

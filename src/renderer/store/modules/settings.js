@@ -379,6 +379,8 @@ const state = {
   hideUploader: false,
   unsubscriptionPopupStatus: false,
   hideLabelsSideBar: false,
+  alwaysShowNavigationBar: false,
+  compactNavigationLabels: false,
   hideChapters: false,
   homeSectionLayout: DEFAULT_HOME_SECTION_LAYOUT.map(section => ({ ...section })),
   enableHomeRecommendations: false,

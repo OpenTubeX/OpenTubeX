@@ -393,6 +393,8 @@ Settings:
     Swipe to refresh: Povlecite za osvežitev
     Blur Thumbnails: Zamegli sličice
     Navigation:
+      Always Show Navigation Bar: Vedno prikaži navigacijsko vrstico
+      Compact Tab Labels: Strnjene oznake zavihkov
       Show Active Subscriptions: Prikaži aktivne naročnine
       Navigation: Krmarjenje
       Customize Navigation: Prilagodi krmarjenje

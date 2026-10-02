@@ -288,6 +288,8 @@ Settings:
     Swipe to refresh: کشیدن برای تازه‌سازی
     Blur Thumbnails: تار کردن تصاویر بندانگشتی
     Navigation:
+      Always Show Navigation Bar: همیشه نوار پیمایش را نمایش بده
+      Compact Tab Labels: برچسب‌های فشردهٔ زبانه‌ها
       Show Active Subscriptions: نمایش اشتراک‌های فعال
       Navigation: پیمایش
       Customize Navigation: سفارشی‌سازی پیمایش
