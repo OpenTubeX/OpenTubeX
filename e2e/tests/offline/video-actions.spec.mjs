@@ -7,6 +7,7 @@ import {
   goTo,
   goToSettingsSection,
   openNewWindowFromTabBar,
+  setWindowSize,
   waitForAppReady
 } from '../../helpers/app.mjs'
 import { DEMO_MEDIA_LENGTH, DEMO_MEDIA_PATH } from '../../helpers/media.mjs'
@@ -1767,6 +1768,74 @@ test.describe('list video actions', () => {
     await expect.poll(() => page.locator('.downloadOptions').evaluate(element => element.scrollTop)).toBeGreaterThan(0)
     await expect.poll(() => templateSection.evaluate(element => element.getBoundingClientRect().top)).toBe(templateTop)
   })
+
+  for (const uiScale of [100, 95]) {
+    test(`download time ranges and helper spacing stay compact at ${uiScale}%`, async ({ app, page }, testInfo) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), uiScale)
+      await goTo(page, 'history')
+      const video = page.locator('.ft-list-video').first()
+      await video.hover()
+      await video.locator('.title').click({ button: 'right' })
+      await page.getByRole('menuitem', { name: 'Download Video' }).click()
+      for (const width of [1200, 400]) {
+        await setWindowSize(app, page, { width, height: width === 1200 ? 800 : 900 })
+        await page.locator('.advancedDownloadOptions').evaluate(element => { element.open = true })
+        for (const direction of ['ltr', 'rtl']) {
+          await page.evaluate(value => { document.body.dir = value }, direction)
+          for (const name of ['Subtitle Languages', 'File Name Template']) {
+            const field = page.locator('.downloadOptions .ft-input-component').filter({ has: page.getByRole('textbox', { name, exact: true }) })
+            await field.scrollIntoViewIfNeeded()
+            const spacing = await field.evaluate(element => {
+              const field = element.querySelector('input').getBoundingClientRect()
+              const help = element.querySelector('.selectTooltip button').getBoundingClientRect()
+              const section = element.closest('.optionSection').getBoundingClientRect()
+              const rtl = getComputedStyle(element).direction === 'rtl'
+              const before = rtl ? field.left - help.right : help.left - field.right
+              const after = rtl ? help.left - section.left : section.right - help.right
+              return Math.abs(before - after)
+            })
+            expect.soft(spacing, `${direction} ${name} helper margins at ${width}px`).toBeLessThanOrEqual(1)
+          }
+          const range = page.locator('.segmentGrid')
+          await range.scrollIntoViewIfNeeded()
+          await expect(range.locator('.timeRangeSeparator')).toBeVisible()
+          expect(await range.locator('.timeRangeSeparator').evaluate(element => getComputedStyle(element, '::before').content)).toBe('"–"')
+          const geometry = await range.evaluate(element => {
+            const [start, end] = [...element.querySelectorAll('input')].map(input => input.getBoundingClientRect())
+            const rtl = getComputedStyle(element).direction === 'rtl'
+            return { gap: rtl ? start.left - end.right : end.left - start.right, top: Math.abs(start.top - end.top) }
+          })
+          expect.soft(geometry.gap).toBeGreaterThanOrEqual(16)
+          expect.soft(geometry.gap).toBeLessThanOrEqual(40)
+          expect.soft(geometry.top).toBeLessThanOrEqual(1)
+          const sponsor = page.locator('.optionSection').filter({ has: page.getByRole('heading', { name: 'SponsorBlock', exact: true }) })
+          for (const group of [range, range.locator('..').locator('.switch-label'), sponsor.locator('.switch-label'), sponsor.locator('.sponsorCategories')]) {
+            const center = await group.evaluate(element => {
+              const rect = element.getBoundingClientRect()
+              const section = element.closest('.optionSection').getBoundingClientRect()
+              return Math.abs(rect.left + rect.width / 2 - section.left - section.width / 2)
+            })
+            expect.soft(center, `${direction} centered download control at ${width}px`).toBeLessThanOrEqual(1)
+          }
+        }
+        await page.evaluate(() => { document.body.dir = 'ltr' })
+        await page.locator('.segmentGrid').locator('..').screenshot({ path: testInfo.outputPath(`time-range-${width}.png`) })
+        await page.locator('.optionSection').filter({ has: page.getByRole('heading', { name: 'SponsorBlock', exact: true }) }).screenshot({ path: testInfo.outputPath(`sponsorblock-${width}.png`) })
+        for (const [name, filename] of [['Subtitle Languages', 'subtitle-help'], ['File Name Template', 'filename-help']]) {
+          const field = page.locator('.downloadOptions .ft-input-component').filter({ has: page.getByRole('textbox', { name, exact: true }) })
+          await field.scrollIntoViewIfNeeded()
+          const box = await field.boundingBox()
+          await page.screenshot({
+            path: testInfo.outputPath(`${filename}-${width}.png`),
+            clip: {
+              x: box.x, y: box.y, width: box.width + 40, height: box.height
+            }
+          })
+        }
+      }
+    })
+  }
 
   test('disabled download inputs do not fade their tooltips', async ({ page }) => {
     await goTo(page, 'history')

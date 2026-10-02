@@ -123,24 +123,10 @@
       overflow-wrap: break-word;
     }
 
-    :deep(.switchColumn > .select.containsTooltip) {
+    :deep(.switchColumn > .select) {
       box-sizing: border-box;
       inline-size: min(100%, 270px);
       margin-inline-end: 0;
-    }
-
-    :deep(.switchColumn > .select.containsTooltip .select-text),
-    :deep(.switchColumn > .select.containsTooltip .nativeSelect),
-    :deep(.switchColumn > .select.containsTooltip .select-bar) {
-      inline-size: calc(100% - 70px);
-    }
-
-    :deep(.switchColumn > .select.containsTooltip .iconSelect) {
-      inset-inline-end: 80px;
-    }
-
-    :deep(.switchColumn > .select.containsTooltip .selectIndicators) {
-      inset-inline: calc(100% - 54px) auto;
     }
 
     :deep(.switch-ctn.containsTooltip) {

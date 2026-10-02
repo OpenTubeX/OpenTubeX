@@ -1032,9 +1032,9 @@ function handleSmoothScrolling(value) {
 }
 
 .themeSelectRow :deep(.select) {
-  flex: 1 1 200px;
+  flex: 1 1 calc(200px + var(--select-indicator-space));
   min-inline-size: 0;
-  max-inline-size: 200px;
+  max-inline-size: calc(200px + var(--select-indicator-space));
 }
 
 .testToastButton {
@@ -1056,7 +1056,7 @@ function handleSmoothScrolling(value) {
 
   .themeSelectRow :deep(.select) {
     flex: 0 0 auto;
-    inline-size: min(200px, 100%);
+    inline-size: min(calc(200px + var(--select-indicator-space)), 100%);
   }
 
   .testToastButton {

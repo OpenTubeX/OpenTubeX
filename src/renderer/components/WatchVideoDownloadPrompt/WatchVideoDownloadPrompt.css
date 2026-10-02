@@ -91,7 +91,8 @@
 .downloadOptions :deep(.ft-input-component:has(.inputIndicators > *)) {
   box-sizing: border-box;
   min-inline-size: 0;
-  inline-size: calc(100% - 70px);
+  inline-size: calc(100% - 40px);
+  margin-inline-end: 40px;
 }
 
 .optionGrid,
@@ -106,15 +107,47 @@
   inline-size: 100%;
 }
 
-.segmentGrid > * {
+.segmentGrid {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  inline-size: min(500px, 100%);
+  margin-inline: auto;
+}
+
+.segmentGrid > :deep(.ft-input-component) {
   min-inline-size: 0;
+  inline-size: 100%;
+  margin-inline: 0;
+}
+
+.timeRangeSeparator {
+  margin-block-end: 10px;
+}
+
+.timeRangeSeparator::before {
+  content: '–';
+}
+
+.centeredToggle {
+  display: flex;
+  justify-content: center;
+  margin-block-start: 8px;
+}
+
+.centeredToggle > :deep(.switch-ctn) {
+  inline-size: auto;
 }
 
 .sponsorCategories {
   display: grid;
   gap: 2px 18px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, max-content));
+  inline-size: fit-content;
+  max-inline-size: 100%;
   margin-block-start: 0;
+  margin-inline: auto;
 }
 
 .sponsorCategories :deep(.checkboxTitle) {

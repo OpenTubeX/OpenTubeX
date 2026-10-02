@@ -83,7 +83,7 @@
 
 .captionControl :deep(.select) {
   inline-size: 100%;
-  margin-block-start: 20px;
+  margin-block-start: 0;
 }
 
 .captionColorControl {

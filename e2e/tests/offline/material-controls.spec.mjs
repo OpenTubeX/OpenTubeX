@@ -1,6 +1,52 @@
-import { test, expect, goToSettingsSection, sel, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, sel, setWindowSize } from '../../helpers/app.mjs'
 
 const DOWNLOAD_FOLDER_DESCRIPTION = "Videos are saved to this folder. Leave blank to use your system's Downloads folder. Leave blank to use your Downloads folder"
+
+for (const baseTheme of ['dark', 'light']) {
+  for (const uiScale of [100, 95]) {
+    test.describe(`outlined selects in ${baseTheme} at ${uiScale}% scale`, () => {
+      test.use({ seed: { settings: { currentLocale: 'en-US', baseTheme, uiScale, rememberHistory: true, enableWatchStats: true } } })
+
+      test('default selects round every corner with UI Roundness', async ({ app, page }, testInfo) => {
+        await page.emulateMedia({ reducedMotion: 'reduce' })
+        const section = await goToSettingsSection(page, 'general')
+        const select = section.getByRole('combobox', { name: 'Week Starts On', exact: true })
+        await expect(select.locator('..')).toHaveClass(/outlined/)
+        await select.hover()
+        const hoverBorders = await select.evaluate(element => {
+          const style = getComputedStyle(element)
+          return [style.borderTopColor, style.borderRightColor, style.borderBottomColor, style.borderLeftColor]
+        })
+        expect(new Set(hoverBorders).size).toBe(1)
+        for (const width of [1200, 400]) {
+          await setWindowSize(app, page, { width, height: width === 1200 ? 800 : 900 })
+          for (const roundness of [0, 50, 100, 200]) {
+            await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
+            for (const corner of ['top-left', 'top-right', 'bottom-left', 'bottom-right']) {
+              await expect(select).toHaveCSS(`border-${corner}-radius`, `${4 * roundness / 100}px`)
+            }
+            for (const edge of ['top', 'right', 'bottom', 'left']) {
+              expect(await select.evaluate((element, edge) => parseFloat(getComputedStyle(element).getPropertyValue(`border-${edge}-width`)), edge)).toBeGreaterThan(0)
+            }
+          }
+        }
+        await select.click()
+        await expect(page.getByRole('listbox')).toBeVisible()
+        await page.getByRole('option', { name: 'Monday', exact: true }).click()
+        await expect(select).toHaveAccessibleDescription('Monday')
+        await select.blur()
+        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', 100))
+        const narrowScreenshot = testInfo.outputPath('outlined-selects-narrow.png')
+        await page.locator('.settingsWindow').screenshot({ path: narrowScreenshot })
+        await testInfo.attach('outlined-selects-narrow', { path: narrowScreenshot, contentType: 'image/png' })
+        await setWindowSize(app, page, { width: 1200, height: 800 })
+        const screenshot = testInfo.outputPath('outlined-selects.png')
+        await page.locator('.settingsWindow').screenshot({ path: screenshot })
+        await testInfo.attach('outlined-selects', { path: screenshot, contentType: 'image/png' })
+      })
+    })
+  }
+}
 
 test('closed selects announce their current choice', async ({ page }) => {
   const section = await goToSettingsSection(page, 'download')
@@ -9,6 +55,82 @@ test('closed selects announce their current choice', async ({ page }) => {
   await select.press('ArrowDown')
   await expect(select).toHaveAccessibleDescription('3')
 })
+
+for (const uiScale of [100, 95]) {
+  test.describe(`select indicators at ${uiScale}% scale`, () => {
+    test.use({
+      seed: {
+        settings: {
+          currentLocale: 'en-US',
+          uiScale,
+          highlightChangedSettings: true,
+          syncServerEnabled: true,
+          syncServerAutoSync: false,
+          syncServerSyncSettings: true,
+          syncServerToken: 'e2e-select-indicators',
+          enableScreenshot: true,
+          screenshotMode: 'clipboard',
+          defaultVideoFormat: 'legacy',
+          landingPage: 'history'
+        }
+      }
+    })
+
+    test('places sync and reset after selects with and without tooltips', async ({ app, page }, testInfo) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      for (const width of [1200, 400]) {
+        await setWindowSize(app, page, { width, height: width === 1200 ? 800 : 900 })
+        for (const [category, name] of [['general', 'Default Landing Page'], ['general', 'On Startup'], ['player', 'Screenshot Mode'], ['player', 'Default Video Format'], ['player', 'Default Quality']]) {
+          if (await page.locator('.settingsBackButton').isVisible()) {
+            await page.locator('.settingsBackButton').click()
+          }
+          const section = await goToSettingsSection(page, category)
+          const root = section.locator('.select').filter({ hasText: name })
+          const select = root.getByRole('combobox')
+          await expect(select).toHaveAccessibleName(name)
+          await expect(root.locator('.select-label button')).toHaveCount(0)
+          await expect(root.locator('.selectIndicators .syncedSettingIndicator')).toBeVisible()
+          for (const direction of ['ltr', 'rtl']) {
+            await page.evaluate(value => { document.body.dir = value }, direction)
+            await select.scrollIntoViewIfNeeded()
+            const geometry = await root.evaluate(element => {
+              const field = element.querySelector('.select-text').getBoundingClientRect()
+              const icons = element.querySelector('.selectIndicators').getBoundingClientRect()
+              const viewport = element.closest('.settingsContent').getBoundingClientRect()
+              const bounds = element.getBoundingClientRect()
+              const rtl = getComputedStyle(element).direction === 'rtl'
+              return {
+                gap: rtl ? field.left - icons.right : icons.left - field.right,
+                centers: Math.abs(field.top + field.height / 2 - icons.top - icons.height / 2),
+                overflow: Math.max(viewport.left - icons.left, icons.right - viewport.right),
+                rootOverflow: Math.max(bounds.left - icons.left, icons.right - bounds.right)
+              }
+            })
+            expect(geometry.gap).toBeGreaterThanOrEqual(7)
+            expect(geometry.gap).toBeLessThanOrEqual(9)
+            expect(geometry.centers).toBeLessThanOrEqual(1)
+            expect(geometry.overflow).toBeLessThanOrEqual(1)
+            expect(geometry.rootOverflow).toBeLessThanOrEqual(1)
+          }
+          await page.evaluate(() => { document.body.dir = 'ltr' })
+          if (name === 'Screenshot Mode') {
+            await expect(root.locator('.selectIndicators .changedSettingIndicator')).toBeVisible()
+            await root.locator('..').screenshot({ path: testInfo.outputPath(`screenshot-mode-${width}.png`) })
+          }
+        }
+      }
+      if (await page.locator('.settingsBackButton').isVisible()) {
+        await page.locator('.settingsBackButton').click()
+      }
+      const general = await goToSettingsSection(page, 'general')
+      const landing = general.getByRole('combobox', { name: 'Default Landing Page', exact: true }).locator('..')
+      await landing.getByRole('button', { name: 'Stop syncing this setting', exact: true }).click()
+      await expect(landing.getByRole('button', { name: 'Sync this setting', exact: true })).toBeVisible()
+      await landing.getByRole('button', { name: 'Reset this setting to its default', exact: true }).click()
+      await expect(landing.getByRole('combobox')).toHaveAccessibleDescription('Home')
+    })
+  })
+}
 
 test('inputs announce tooltip guidance together with supporting text', async ({ page }) => {
   const downloads = await goToSettingsSection(page, 'download')
@@ -640,6 +762,7 @@ for (const scale of [100, 95]) {
         for (const direction of ['ltr', 'rtl']) {
           await page.evaluate(value => { document.body.dir = value }, direction)
           const boxes = await Promise.all([source.boundingBox(), input.boundingBox()])
+          expect.soft(boxes[0].width).toBeCloseTo(boxes[1].width, 0)
           if (width === 1600) {
             expect.soft(boxes[0].y).toBeCloseTo(boxes[1].y, 0)
             expect.soft(boxes[0].height).toBeCloseTo(boxes[1].height, 0)
@@ -678,6 +801,80 @@ for (const scale of [100, 95]) {
 
   test.describe(`paired switch alignment at ${scale}% scale`, () => {
     test.use({ seed: { settings: { currentLocale: 'en-US', uiScale: scale, baseTheme: scale === 100 ? 'dark' : 'light', bounds: { x: 0, y: 0, width: 1600, height: 1000, maximized: false } } } })
+
+    test('centers switches within changed markers and beside caption selects', async ({ app, page }, testInfo) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      const section = await goToSettingsSection(page, 'playback')
+      const quick = section.locator('.quickPlaybackSpeedToggle')
+      await quick.locator('input').press('Space')
+      await expect(quick.locator('.changedSettingIndicator')).toBeVisible()
+      for (const width of [1200, 480]) {
+        await setWindowSize(app, page, { width, height: width === 1200 ? 900 : 850 })
+        for (const direction of ['ltr', 'rtl']) {
+          await page.evaluate(value => { document.body.dir = value }, direction)
+          for (const toggle of [quick, section.locator('[data-setting-key="enableCaptionTranslations"]')]) {
+            await toggle.scrollIntoViewIfNeeded()
+            const centers = await toggle.evaluate(element => {
+              const root = element.getBoundingClientRect()
+              const label = element.querySelector('.switch-label').getBoundingClientRect()
+              return Math.abs(root.top + root.height / 2 - label.top - label.height / 2)
+            })
+            expect.soft(centers, `${direction} marker center`).toBeLessThanOrEqual(0.1)
+          }
+          const paired = await section.locator('.captionControls').evaluate(element => {
+            const select = element.querySelector('.select-text').getBoundingClientRect()
+            const toggle = element.querySelector('.switch-label').getBoundingClientRect()
+            return {
+              columns: getComputedStyle(element).gridTemplateColumns.split(' ').length,
+              offset: Math.abs(select.top + select.height / 2 - toggle.top - toggle.height / 2),
+              gap: toggle.top - select.bottom
+            }
+          })
+          if (paired.columns > 1) {
+            expect.soft(paired.offset, `${direction} caption control centers`).toBeLessThanOrEqual(0.1)
+          } else {
+            expect(paired.gap).toBeGreaterThan(0)
+          }
+        }
+        await page.evaluate(() => { document.body.dir = 'ltr' })
+        await quick.screenshot({ path: testInfo.outputPath(`centered-switch-marker-${width}.png`) })
+        await section.locator('.captionControls').screenshot({ path: testInfo.outputPath(`aligned-caption-controls-${width}.png`) })
+      }
+    })
+
+    test('centers modal text fields horizontally', async ({ app, page }, testInfo) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateEnableDownloads', true))
+      await goTo(page, 'downloads')
+      for (const width of [1200, 400]) {
+        await setWindowSize(app, page, { width, height: width === 1200 ? 800 : 900 })
+        for (const direction of ['ltr', 'rtl']) {
+          await page.evaluate(value => { document.body.dir = value }, direction)
+          await page.getByRole('button', { name: 'Add download', exact: true }).click()
+          const prompt = page.getByRole('dialog', { name: 'Add download', exact: true })
+          const field = prompt.getByRole('textbox')
+          const offset = await field.evaluate(element => {
+            const field = element.getBoundingClientRect()
+            const card = element.closest('.promptCard').getBoundingClientRect()
+            return Math.abs(field.left + field.width / 2 - card.left - card.width / 2)
+          })
+          expect.soft(offset, `${direction} modal field center at ${width}px`).toBeLessThanOrEqual(1)
+          if (direction === 'ltr') await prompt.screenshot({ path: testInfo.outputPath(`centered-download-input-${width}.png`) })
+          await prompt.getByRole('button', { name: 'Cancel', exact: true }).click()
+        }
+      }
+      await page.evaluate(() => { document.body.dir = 'ltr' })
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
+        'showCreatePlaylistPrompt', { title: '', description: '', sourcePlaylistId: null }
+      ))
+      const playlist = page.locator('.playlistNameInput input')
+      const offset = await playlist.evaluate(element => {
+        const field = element.getBoundingClientRect()
+        const card = element.closest('.promptCard').getBoundingClientRect()
+        return Math.abs(field.left + field.width / 2 - card.left - card.width / 2)
+      })
+      expect(offset).toBeLessThanOrEqual(1)
+    })
 
     test('shows the complete password guidance without truncating the field label', async ({ page }) => {
       const section = await goToSettingsSection(page, 'privacy')
