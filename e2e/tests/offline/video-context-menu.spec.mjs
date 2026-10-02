@@ -44,6 +44,7 @@ for (const iconPack of ['material', 'remix']) {
           await expect(extraAction).toHaveCount(0)
           await title.scrollIntoViewIfNeeded()
           const titleBounds = await title.boundingBox()
+          expect(titleBounds).not.toBeNull()
           await session.send('Input.dispatchTouchEvent', {
             type: 'touchStart', touchPoints: [{ x: titleBounds.x + 8, y: titleBounds.y + 8 }]
           })
@@ -56,6 +57,7 @@ for (const iconPack of ['material', 'remix']) {
           await expect(row.getByRole('menuitem', { name: /Watched/ })).toHaveCount(0)
           await expect(menu.getByRole('menuitem', { name: 'Mark As Watched', exact: true })).toHaveCount(1)
           const bounds = await backgroundTab.boundingBox()
+          expect(bounds).not.toBeNull()
           expect(bounds.width).toBeGreaterThanOrEqual(48)
           expect(bounds.height).toBeGreaterThanOrEqual(48)
           await attachScreenshot(`background tab mobile menu ${iconPack} ${viewport.width}`)
