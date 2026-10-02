@@ -5,6 +5,7 @@
 Requests such as "implement issue #X" authorize local changes, not a PR. Open a PR only when the user explicitly requests or approves one for that repository. Approval for an application PR does not authorize a website PR, or vice versa.
 
 - For every PR opened in this repository, copy the linked issue's milestone if it has one. Otherwise, automatically assign the currently open milestone with the lowest version in its title. Query open milestones with `gh api --paginate` at PR creation time and compare titles by numeric version order, not alphabetical order or milestone number. Use the exact title with `gh pr create --milestone` or `gh pr edit --milestone`. If the issue has no milestone and no version milestone is open, report that instead of creating one.
+- When creating a PR, adding a closing issue link, or assigning/changing its milestone, check every issue the PR closes. If the PR has a milestone and an issue has none, assign that issue the PR's milestone immediately, even while the PR is still open. Preserve existing issue milestones and verify the assignments on GitHub before considering the PR work complete.
 
 ## Documentation
 
