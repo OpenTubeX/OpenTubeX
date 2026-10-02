@@ -57,9 +57,20 @@
 .headingActions {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 8px;
-  margin-inline: auto 5px;
+  margin-inline-start: auto;
+}
+
+@media only screen and (width <= 800px) {
+  .headingRow h2 {
+    margin-block-end: 0;
+  }
+
+  .headingActions {
+    flex-basis: 100%;
+    margin-inline-start: 0;
+  }
 }
 
 .historySearch {

@@ -1,7 +1,7 @@
 <template>
   <FtCard
     class="relative"
-    :class="{ fullscreenPlaylist: fullscreenOverlay, isCollapsed: playlistCollapsed }"
+    :class="{ fullscreenPlaylist: fullscreenOverlay, phonePlaylist: phonePanel, isCollapsed: playlistCollapsed }"
   >
     <FtLoader
       v-if="isLoading"
@@ -33,35 +33,41 @@
         :class="{ fullscreenPlaylistContent: fullscreenOverlay }"
       >
         <div class="playlistHeader">
-          <div
-            v-if="!fullscreenOverlay"
-            class="playlistTitleRow"
+          <Teleport
+            :to="phonePanelHeader || 'body'"
+            :disabled="!phonePanelHeader"
           >
-            <h3
-              class="playlistTitle"
-              :title="playlistTitle"
+            <div
+              v-if="!fullscreenOverlay"
+              class="playlistTitleRow"
             >
-              <RouterLink
-                class="playlistTitleLink"
-                dir="auto"
-                :to="playlistPageLinkTo"
+              <h3
+                class="playlistTitle"
+                :title="playlistTitle"
               >
-                {{ playlistTitle }}
-              </RouterLink>
-            </h3>
-            <button
-              class="playlistButton playlistCollapseButton"
-              :aria-label="playlistCollapsed ? t('Video.Expand Playlist') : t('Video.Collapse Playlist')"
-              :aria-expanded="!playlistCollapsed"
-              :title="playlistCollapsed ? t('Video.Expand Playlist') : t('Video.Collapse Playlist')"
-              @click="toggleCollapse"
-            >
-              <FtIcon
-                class="playlistIcon"
-                :icon="['fas', playlistCollapsed ? 'angle-down' : 'angle-up']"
-              />
-            </button>
-          </div>
+                <RouterLink
+                  class="playlistTitleLink"
+                  dir="auto"
+                  :to="playlistPageLinkTo"
+                >
+                  {{ playlistTitle }}
+                </RouterLink>
+              </h3>
+              <button
+                v-if="!phonePanel"
+                class="playlistButton playlistCollapseButton"
+                :aria-label="playlistCollapsed ? t('Video.Expand Playlist') : t('Video.Collapse Playlist')"
+                :aria-expanded="!playlistCollapsed"
+                :title="playlistCollapsed ? t('Video.Expand Playlist') : t('Video.Collapse Playlist')"
+                @click="toggleCollapse"
+              >
+                <FtIcon
+                  class="playlistIcon"
+                  :icon="['fas', playlistCollapsed ? 'angle-down' : 'angle-up']"
+                />
+              </button>
+            </div>
+          </Teleport>
           <template
             v-if="!playlistCollapsed && channelName !== ''"
           >
@@ -131,62 +137,68 @@
               </div>
             </div>
           </span>
-          <div
-            v-show="!playlistCollapsed"
-            class="playlistButtons"
+          <Teleport
+            :to="phonePanelHeader || 'body'"
+            :disabled="!phonePanelHeader"
           >
-            <button
-              class="playlistButton"
-              :class="{ playlistButtonActive: loopEnabled }"
-              :aria-label="t('Video.Loop Playlist')"
-              :aria-pressed="loopEnabled"
-              :title="t('Video.Loop Playlist')"
-              @click="toggleLoop"
+            <div
+              v-show="!playlistCollapsed"
+              class="playlistButtons"
+              :class="{ phonePlaylistActions: phonePanelHeader }"
             >
-              <FtIcon
-                class="playlistIcon"
-                :icon="['fas', 'retweet']"
-              />
-            </button>
-            <button
-              class="playlistButton"
-              :class="{ playlistButtonActive: shuffleEnabled }"
-              :aria-label="t('Video.Shuffle Playlist')"
-              :aria-pressed="shuffleEnabled"
-              :title="t('Video.Shuffle Playlist')"
-              @click="toggleShuffle"
-            >
-              <FtIcon
-                class="playlistIcon"
-                :icon="['fas', 'random']"
-              />
-            </button>
-            <button
-              class="playlistButton"
-              :class="{ playlistButtonActive: reversePlaylist }"
-              :aria-label="t('Video.Reverse Playlist')"
-              :aria-pressed="reversePlaylist"
-              :title="t('Video.Reverse Playlist')"
-              @click="toggleReversePlaylist"
-            >
-              <FtIcon
-                class="playlistIcon"
-                :icon="['fas', 'exchange-alt']"
-              />
-            </button>
-            <button
-              v-if="userPlaylistWatchedVideoCount > 0"
-              class="playlistButton"
-              :aria-label="t('User Playlists.Remove Watched Videos')"
-              :title="t('User Playlists.Remove Watched Videos')"
-              @click="showRemoveWatchedVideosPrompt = true"
-            >
-              <FtIcon
-                class="playlistIcon"
-                :icon="['fas', 'eye-slash']"
-              />
-            </button>
-          </div>
+              <button
+                class="playlistButton"
+                :class="{ playlistButtonActive: loopEnabled }"
+                :aria-label="t('Video.Loop Playlist')"
+                :aria-pressed="loopEnabled"
+                :title="t('Video.Loop Playlist')"
+                @click="toggleLoop"
+              >
+                <FtIcon
+                  class="playlistIcon"
+                  :icon="['fas', 'retweet']"
+                />
+              </button>
+              <button
+                class="playlistButton"
+                :class="{ playlistButtonActive: shuffleEnabled }"
+                :aria-label="t('Video.Shuffle Playlist')"
+                :aria-pressed="shuffleEnabled"
+                :title="t('Video.Shuffle Playlist')"
+                @click="toggleShuffle"
+              >
+                <FtIcon
+                  class="playlistIcon"
+                  :icon="['fas', 'random']"
+                />
+              </button>
+              <button
+                class="playlistButton"
+                :class="{ playlistButtonActive: reversePlaylist }"
+                :aria-label="t('Video.Reverse Playlist')"
+                :aria-pressed="reversePlaylist"
+                :title="t('Video.Reverse Playlist')"
+                @click="toggleReversePlaylist"
+              >
+                <FtIcon
+                  class="playlistIcon"
+                  :icon="['fas', 'exchange-alt']"
+                />
+              </button>
+              <button
+                v-if="userPlaylistWatchedVideoCount > 0"
+                class="playlistButton"
+                :aria-label="t('User Playlists.Remove Watched Videos')"
+                :title="t('User Playlists.Remove Watched Videos')"
+                @click="showRemoveWatchedVideosPrompt = true"
+              >
+                <FtIcon
+                  class="playlistIcon"
+                  :icon="['fas', 'eye-slash']"
+                />
+              </button>
+            </div>
+          </Teleport>
         </div>
         <component
           :is="playlistItemsWrapperComponent"
@@ -253,7 +265,7 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, TransitionGroup, useTemplateRef, watch } from 'vue'
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, TransitionGroup, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
@@ -310,11 +322,16 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  phonePanel: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['close', 'pause-player', 'skip-availability-change', 'upcoming-videos-change'])
 
 const { locale, t } = useI18n()
+const phonePanelHeader = inject('phonePanelHeader', null)
 const router = useRouter()
 const { tabId, isTabPresented } = useTabContext()
 const playlistCacheTabId = tabId ?? 'web'
@@ -325,7 +342,7 @@ const needsInitialCenter = ref(false)
 
 const isLoading = ref(false)
 const isCollapsed = ref(false)
-const playlistCollapsed = computed(() => isCollapsed.value && !props.fullscreenOverlay)
+const playlistCollapsed = computed(() => isCollapsed.value && !props.fullscreenOverlay && !props.phonePanel)
 let savedScrollTop = 0
 let lastScrolledVideoId = null
 const shuffleEnabled = ref(false)
@@ -1152,11 +1169,14 @@ function shufflePlaylistItems() {
 
 const playlistItemsWrapper = useTemplateRef('playlistItemsWrapper')
 let playlistItemsObserver = null
+let playlistItemsResizeObserver = null
 let playlistItemsClampFrame = null
 
 function stopObservingPlaylistItems() {
   playlistItemsObserver?.disconnect()
   playlistItemsObserver = null
+  playlistItemsResizeObserver?.disconnect()
+  playlistItemsResizeObserver = null
   if (playlistItemsClampFrame !== null) {
     cancelAnimationFrame(playlistItemsClampFrame)
     playlistItemsClampFrame = null
@@ -1170,7 +1190,7 @@ watch(playlistItemsWrapper, (wrapper) => {
     return
   }
 
-  playlistItemsObserver = new MutationObserver(() => {
+  const scheduleClamp = () => {
     playlistItemsClampFrame ??= requestAnimationFrame(() => {
       playlistItemsClampFrame = null
       const items = container.querySelectorAll(':scope > .playlistItem')
@@ -1179,8 +1199,11 @@ watch(playlistItemsWrapper, (wrapper) => {
         items[items.length - 1] ?? null
       )
     })
-  })
+  }
+  playlistItemsObserver = new MutationObserver(scheduleClamp)
   playlistItemsObserver.observe(container, { childList: true })
+  playlistItemsResizeObserver = new ResizeObserver(scheduleClamp)
+  playlistItemsResizeObserver.observe(container)
 }, { flush: 'post' })
 
 onBeforeUnmount(stopObservingPlaylistItems)

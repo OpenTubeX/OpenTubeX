@@ -143,6 +143,11 @@
   overflow: hidden;
 }
 
+.videoDescription.short.descriptionPreview .descriptionScroll,
+.videoDescription.short.descriptionPreview .description {
+  max-block-size: 2lh;
+}
+
 .videoDescription.short .description:empty {
   min-block-size: 0;
   margin-block: 0;

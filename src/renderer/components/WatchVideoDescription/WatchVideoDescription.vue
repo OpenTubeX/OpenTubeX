@@ -5,7 +5,8 @@
     :class="{
       videoDescription: true,
       short: !isExpanded,
-      alwaysExpanded
+      alwaysExpanded,
+      descriptionPreview: previewOnly
     }"
   >
     <FtIconButton

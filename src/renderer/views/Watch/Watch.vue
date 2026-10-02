@@ -904,6 +904,24 @@
           />
         </button>
         <button
+          v-if="phonePanelsEnabled && watchingPlaylist && !isLoading"
+          type="button"
+          class="phonePanelButton phonePlaylistButton watchVideo"
+          aria-haspopup="dialog"
+          :aria-expanded="mobilePanel === 'playlist'"
+          @click="openPhonePanel('playlist')"
+        >
+          <ft-icon
+            :icon="['fas', 'list']"
+            aria-hidden="true"
+          />
+          <span class="phoneCommentsLabel">{{ $t('Playlist.Playlist') }}</span>
+          <ft-icon
+            :icon="['fas', 'angle-down']"
+            aria-hidden="true"
+          />
+        </button>
+        <button
           v-if="phonePanelsEnabled && commentsAvailable && !isLoading"
           type="button"
           class="phonePanelButton phoneCommentsButton watchVideo"
@@ -1187,9 +1205,10 @@
         :disabled="!fullscreenPlaylistOpen || shortsPhonePanelsEnabled"
       >
         <FtPhonePanel
-          :enabled="shortsPhonePanelsEnabled"
+          :enabled="(phonePanelsEnabled && !fullscreenPlaylistOpen) || shortsPhonePanelsEnabled"
           :open="mobilePanel === 'playlist'"
           :title="$t('Playlist.Playlist')"
+          custom-header
           fill
           @close="closeShortsPhonePanel"
         >
@@ -1205,6 +1224,7 @@
             :playlist-item-id="playlistItemId"
             :download-id="typeof tabRoute.query.downloadId === 'string' ? tabRoute.query.downloadId : ''"
             :fullscreen-overlay="fullscreenPlaylistOpen"
+            :phone-panel="(phonePanelsEnabled && !fullscreenPlaylistOpen) || shortsPhonePanelsEnabled"
             class="watchVideoSideBar watchVideoPlaylist resizablePlaylist"
             :class="{ theatrePlaylist: useTheatreMode }"
             @close="closeFullscreenPlaylist"
