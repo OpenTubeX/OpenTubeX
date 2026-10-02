@@ -57,6 +57,20 @@ test('iOS settings search omits unavailable native services', () => {
   assert.equal(labels.includes('Mobile layout'), true)
 })
 
+test('fullscreen rotation lock override is searchable only on Android', () => {
+  for (const [isCapacitor, isIos] of [[true, false], [true, true], [false, false]]) {
+    const entries = createSettingsSearchIndex({
+      sections: [{ type: 'playback', title: 'Playback', description: '' }],
+      tm: path => getAtPath(locale, path),
+      store: { getters: {} },
+      isCapacitor,
+      isIos,
+      usingElectron: !isCapacitor,
+    }).get('playback')
+    assert.equal(entries.some(({ label }) => label === 'Ignore system rotation lock for fullscreen'), isCapacitor && !isIos)
+  }
+})
+
 test('swipe to refresh is searchable in mobile general settings only', () => {
   for (const isCapacitor of [true, false]) {
     const entries = createSettingsSearchIndex({

@@ -631,6 +631,7 @@ Settings:
     Preload Upcoming Videos: "Precargar os seguintes vídeos"
     Upcoming Videos to Preload: "Número de vídeos para precargar"
     Concurrent Preloads: "Precargas simultáneas"
+    Ignore System Rotation Lock for Fullscreen: Ignorar o bloqueo de rotación do sistema para pantalla completa
   Channel Settings:
     Channel Settings: Configuración das canles
     Channel Settings Description: Lembrar por separado os axustes escollidos mentres ves vídeos de cada canle para aplicalos de novo a próxima vez que vexas un dos seus vídeos.
@@ -1693,6 +1694,7 @@ Tooltips:
     Preload Upcoming Videos: "Obtén e garda na caché os URL de yt-dlp dos seguintes vídeos. A cola ten prioridade sobre as listas e as recomendacións."
     Upcoming Videos to Preload: "Número máximo de vídeos seguintes cuxos URL de yt-dlp se obteñen en segundo plano."
     Concurrent Preloads: "Número máximo de procesos de yt-dlp utilizados para precargar vídeos ao mesmo tempo. Os valores máis altos usan máis CPU, memoria e largura de banda da rede."
+    Ignore System Rotation Lock for Fullscreen: Xira fisicamente o dispositivo para entrar e saír de pantalla completa aínda que a rotación automática de Android estea desactivada.
   Download Settings:
     Download Folder: Os vídeos gárdanse neste cartafol. Déixao en branco para usar o cartafol Descargas do sistema.
     Global Additional yt-dlp Arguments: Argumentos adicionais da liña de ordes que se pasan a yt-dlp en todas as descargas, por exemplo --cookies-from-browser firefox.

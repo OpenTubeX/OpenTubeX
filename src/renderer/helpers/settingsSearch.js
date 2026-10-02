@@ -349,6 +349,10 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     return false
   }
 
+  if (sectionType === 'player' && group === 'Ignore System Rotation Lock for Fullscreen') {
+    return isCapacitor && !isIos
+  }
+
   if (sectionType === 'player' && !isCapacitor && [
     'Rotate Wide Videos to Landscape in Fullscreen',
     'Swipe Up or Down to Enter or Exit Fullscreen',

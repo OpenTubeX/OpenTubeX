@@ -623,6 +623,7 @@ Settings:
     Preload Upcoming Videos: "Következő videók előtöltése"
     Upcoming Videos to Preload: "Előtöltendő videók száma"
     Concurrent Preloads: "Egyidejű előtöltések"
+    Ignore System Rotation Lock for Fullscreen: Rendszerszintű forgatászár figyelmen kívül hagyása teljes képernyőhöz
   Channel Settings:
     Channel Settings: Csatornabeállítások
     Channel Settings Description: Csatornánként megjegyzi a videónézés közben kiválasztott beállításokat, és a csatorna következő videójánál újra alkalmazza őket.
@@ -1648,6 +1649,7 @@ Tooltips:
     Preload Upcoming Videos: "Lekéri és gyorsítótárazza a következő videók yt-dlp-címeit. A várólista elsőbbséget élvez a lejátszási listákkal és ajánlásokkal szemben."
     Upcoming Videos to Preload: "A háttérben lekért yt-dlp-címmel rendelkező következő videók legnagyobb száma."
     Concurrent Preloads: "A videók egyidejű előtöltésére használt yt-dlp-folyamatok legnagyobb száma. A magasabb értékek több processzort, memóriát és hálózati sávszélességet használnak."
+    Ignore System Rotation Lock for Fullscreen: A készülék fizikai elforgatásával léphet teljes képernyőre és ki onnan akkor is, ha az Android automatikus forgatása ki van kapcsolva.
   Download Settings:
     Download Folder: A videók ebbe a mappába kerülnek. Hagyja üresen a rendszer Letöltések mappájának használatához.
     Global Additional yt-dlp Arguments: Minden letöltésnél a yt-dlp számára átadott további parancssori argumentumok, például --cookies-from-browser firefox.

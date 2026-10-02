@@ -873,7 +873,7 @@ Settings:
         Empty File Name: Leerer Dateiname
       File Name Tooltip: Du kannst die folgenden Variablen verwenden. %Y Jahr 4-stellig. %M Monat 2 Ziffern. %D Tag 2 Ziffern. %H Stunde 2 Ziffern. %N Minute 2 Ziffern. %S Sekunde 2 Ziffern. %T Millisekunde 3 Ziffern. %s Video-Sekunde. %t Video Millisekunde 3 Ziffern. %i Video-ID.
       Mode: Screenshot-Modus
-    Enter Fullscreen on Display Rotate: Beim Drehen des Bildschirms zu Vollbild wechseln
+    Enter Fullscreen on Display Rotate: Beim Drehen des Bildschirms ins Querformat zum Vollbild wechseln
     Rotate Wide Videos to Landscape in Fullscreen: Breite Videos im Vollbild ins Querformat drehen
     Swipe Up or Down to Enter or Exit Fullscreen: Zum Öffnen oder Schließen des Vollbilds nach oben oder unten wischen
     Continue Playback When Screen Is Locked: Wiedergabe bei gesperrtem Bildschirm fortsetzen
@@ -935,6 +935,7 @@ Settings:
       English: Englisch
       Kazakh: Kasachisch
     Parallel Segment Loading: Paralleles Laden von Segmenten
+    Ignore System Rotation Lock for Fullscreen: System-Drehsperre für Vollbild ignorieren
   Subscription Settings:
     Subscription Settings: Abo
     Fetch Feeds from RSS: Abos via RSS abrufen
@@ -2446,6 +2447,7 @@ Tooltips:
     Preload Upcoming Videos: Ruft die yt-dlp-Stream-URLs der Videos ab, die als Nächstes abgespielt werden können, und speichert sie zwischen. Die Warteschlange hat Vorrang vor Playlists und Empfehlungen.
     Upcoming Videos to Preload: Die Höchstzahl bevorstehender Videos, deren yt-dlp-Stream-URLs im Hintergrund abgerufen werden.
     Concurrent Preloads: Die maximale Anzahl von yt-dlp-Prozessen, die gleichzeitig Videos vorladen. Höhere Werte benötigen mehr Prozessorleistung, Arbeitsspeicher und Netzwerkbandbreite.
+    Ignore System Rotation Lock for Fullscreen: Durch Drehen des Geräts zum Vollbild wechseln und es verlassen, auch wenn die automatische Drehung in Android ausgeschaltet ist.
   External Player Settings:
     Custom External Player Arguments: Alle benutzerdefinierten Befehlszeilenargumente, die an den externen Video-Player übergeben werden sollen.
     Ignore Warnings: Warnungen unterdrücken, wenn der aktuelle externe Video-Player die aktuelle Aktion nicht unterstützt (z. B. das Umkehren von Playlists usw.).

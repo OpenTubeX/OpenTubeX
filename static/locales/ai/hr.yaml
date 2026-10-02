@@ -625,6 +625,7 @@ Settings:
     Preload Upcoming Videos: "Predučitaj sljedeće videozapise"
     Upcoming Videos to Preload: "Broj videozapisa za predučitavanje"
     Concurrent Preloads: "Istodobna predučitavanja"
+    Ignore System Rotation Lock for Fullscreen: Zanemari zaključavanje rotacije sustava za cijeli zaslon
   Channel Settings:
     Channel Settings: Postavke kanala
     Channel Settings Description: Postavke koje odaberete tijekom gledanja pamte se zasebno za svaki kanal kako bi se ponovno primijenile kada sljedeći put gledate neki njegov videozapis.
@@ -1669,6 +1670,7 @@ Tooltips:
     Preload Upcoming Videos: "Dohvaća i sprema yt-dlp adrese za sljedeće videozapise. Red čekanja ima prednost pred popisima i preporukama."
     Upcoming Videos to Preload: "Najveći broj sljedećih videozapisa čije se yt-dlp adrese dohvaćaju u pozadini."
     Concurrent Preloads: "Najveći broj yt-dlp procesa koji se koriste za istodobno predučitavanje videozapisa. Veće vrijednosti koriste više procesora, memorije i mrežne propusnosti."
+    Ignore System Rotation Lock for Fullscreen: Fizički okrenite uređaj za ulazak i izlazak iz cijelog zaslona, čak i kada je automatska rotacija u Androidu isključena.
   Download Settings:
     Download Folder: Videozapisi se spremaju u ovu mapu. Ostavite prazno za upotrebu sustavske mape Preuzimanja.
     Global Additional yt-dlp Arguments: Dodatni argumenti naredbenog retka koji se prosljeđuju alatu yt-dlp pri svakom preuzimanju, primjerice --cookies-from-browser firefox.

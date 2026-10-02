@@ -623,6 +623,7 @@ Settings:
     Preload Upcoming Videos: "預先載入後續影片"
     Upcoming Videos to Preload: "要預先載入的影片數量"
     Concurrent Preloads: "同時預先載入數量"
+    Ignore System Rotation Lock for Fullscreen: 全螢幕時忽略系統旋轉鎖定
   Channel Settings:
     Channel Settings: 頻道設定
     Channel Settings Description: 為各頻道分別記住觀看時選擇的設定，下次觀看該頻道的影片時便會再次套用。
@@ -1649,6 +1650,7 @@ Tooltips:
     Preload Upcoming Videos: "取得並快取後續影片的 yt-dlp 串流網址。佇列優先於播放清單和推薦。"
     Upcoming Videos to Preload: "在背景取得 yt-dlp 串流網址的後續影片數量上限。"
     Concurrent Preloads: "同時用於預先載入影片的 yt-dlp 處理程序數量上限。數值越高，使用的 CPU、記憶體和網路頻寬越多。"
+    Ignore System Rotation Lock for Fullscreen: 透過轉動裝置進入和退出全螢幕，即使 Android 的自動旋轉已關閉。
   Download Settings:
     Download Folder: 影片會儲存至此資料夾。留白可使用系統的「下載」資料夾。
     Global Additional yt-dlp Arguments: 每次下載時傳遞給 yt-dlp 的額外命令列引數，例如 --cookies-from-browser firefox。

@@ -623,6 +623,7 @@ Settings:
     Preload Upcoming Videos: "Prednačítavať nasledujúce videá"
     Upcoming Videos to Preload: "Počet videí na prednačítanie"
     Concurrent Preloads: "Súbežné prednačítania"
+    Ignore System Rotation Lock for Fullscreen: Ignorovať systémový zámok otáčania pre celú obrazovku
   Channel Settings:
     Channel Settings: Nastavenia kanálov
     Channel Settings Description: Nastavenia, ktoré vyberiete pri sledovaní, sa zapamätajú pre každý kanál samostatne a znova sa použijú pri ďalšom sledovaní jeho videa.
@@ -1650,6 +1651,7 @@ Tooltips:
     Preload Upcoming Videos: "Načíta a uloží do vyrovnávacej pamäte adresy yt-dlp pre nasledujúce videá. Front má prednosť pred zoznamami a odporúčaniami."
     Upcoming Videos to Preload: "Najvyšší počet nasledujúcich videí, ktorých adresy yt-dlp sa načítajú na pozadí."
     Concurrent Preloads: "Maximálny počet procesov yt-dlp použitých na súbežné prednačítanie videí. Vyššie hodnoty využívajú viac procesora, pamäte a šírky pásma siete."
+    Ignore System Rotation Lock for Fullscreen: Fyzickým otočením zariadenia zapnete a vypnete celú obrazovku, aj keď je automatické otáčanie v Androide vypnuté.
   Download Settings:
     Download Folder: Videá sa ukladajú do tohto priečinka. Ak chcete použiť systémový priečinok Stiahnuté súbory, ponechajte pole prázdne.
     Global Additional yt-dlp Arguments: Dodatočné argumenty príkazového riadka odovzdané nástroju yt-dlp pri každom sťahovaní, napríklad --cookies-from-browser firefox.

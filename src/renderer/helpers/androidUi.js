@@ -4,36 +4,55 @@ import { ScreenOrientation } from '@capawesome/capacitor-screen-orientation'
 const AndroidUi = process.env.IS_CAPACITOR && !process.env.IS_IOS ? registerPlugin('AndroidUi') : null
 const IOSUi = process.env.IS_CAPACITOR && process.env.IS_IOS ? registerPlugin('IOSUi') : null
 const ANDROID_PICTURE_IN_PICTURE_TARGET_ATTRIBUTE = 'data-android-picture-in-picture-target'
-const displayRotationCallbacks = new Set()
-let displayRotationHandle = null
-let displayRotationTask = Promise.resolve()
 let pictureInPictureVideo = null
 let stopPictureInPictureBounds = null
 let updatePictureInPictureBounds = null
 let stopPictureInPictureTransition = null
+function createAndroidRotationObserver(subscribe, setEnabled) {
+  const callbacks = new Set()
+  let handle = null
+  let task = Promise.resolve()
 
-function reconcileDisplayRotationListener() {
-  displayRotationTask = displayRotationTask.then(async () => {
-    if (displayRotationCallbacks.size && !displayRotationHandle) {
-      displayRotationHandle = await ScreenOrientation.addListener('screenOrientationChange', ({ type }) => {
-        for (const callback of displayRotationCallbacks) callback(type.startsWith('landscape'))
-      })
-    } else if (!displayRotationCallbacks.size && displayRotationHandle) {
-      await displayRotationHandle.remove()
-      displayRotationHandle = null
+  function reconcile() {
+    task = task.then(async () => {
+      if (callbacks.size && !handle) {
+        const subscription = await subscribe(landscape => {
+          for (const callback of callbacks) callback(landscape)
+        })
+        try {
+          await setEnabled?.(true)
+          handle = subscription
+        } catch (error) {
+          await subscription.remove()
+          throw error
+        }
+      } else if (!callbacks.size && handle) {
+        await setEnabled?.(false)
+        await handle.remove()
+        handle = null
+      }
+    }).catch(error => console.warn('Could not observe Android rotation', error))
+  }
+
+  return callback => {
+    if (!AndroidUi) return () => {}
+    callbacks.add(callback)
+    reconcile()
+    return () => {
+      callbacks.delete(callback)
+      reconcile()
     }
-  }).catch(error => console.warn('Could not observe Android display rotation', error))
-}
-
-export function observeAndroidDisplayRotation(callback) {
-  if (!AndroidUi) return () => {}
-  displayRotationCallbacks.add(callback)
-  reconcileDisplayRotationListener()
-  return () => {
-    displayRotationCallbacks.delete(callback)
-    reconcileDisplayRotationListener()
   }
 }
+
+export const observeAndroidDisplayRotation = createAndroidRotationObserver(callback =>
+  ScreenOrientation.addListener('screenOrientationChange', ({ type }) => callback(type.startsWith('landscape')))
+)
+
+export const observeAndroidDeviceRotation = createAndroidRotationObserver(
+  callback => AndroidUi.addListener('deviceRotationChange', ({ landscape }) => callback(landscape)),
+  enabled => AndroidUi.setDeviceRotationEnabled({ enabled })
+)
 
 function videoDimensions(video) {
   return {

@@ -188,6 +188,16 @@
         @change="updateEnterFullscreenOnDisplayRotate"
       />
       <FtToggleSwitch
+        v-if="IS_CAPACITOR && !IS_IOS"
+        :label="t('Settings.Player Settings.Ignore System Rotation Lock for Fullscreen')"
+        :tooltip="t('Tooltips.Player Settings.Ignore System Rotation Lock for Fullscreen')"
+        :compact="true"
+        :disabled="!enterFullscreenOnDisplayRotate"
+        :default-value="fullscreenRotationIgnoresSystemLock"
+        setting-key="fullscreenRotationIgnoresSystemLock"
+        @change="updateFullscreenRotationIgnoresSystemLock"
+      />
+      <FtToggleSwitch
         v-if="IS_CAPACITOR"
         :label="t('Settings.Player Settings.Rotate Wide Videos to Landscape in Fullscreen')"
         :compact="true"
@@ -895,6 +905,15 @@ const enterFullscreenOnDisplayRotate = computed(() => store.getters.getEnterFull
  */
 function updateEnterFullscreenOnDisplayRotate(value) {
   store.dispatch('updateEnterFullscreenOnDisplayRotate', value)
+}
+
+const fullscreenRotationIgnoresSystemLock = computed(() => store.getters.getFullscreenRotationIgnoresSystemLock)
+
+/**
+ * @param {boolean} value
+ */
+function updateFullscreenRotationIgnoresSystemLock(value) {
+  store.dispatch('updateFullscreenRotationIgnoresSystemLock', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

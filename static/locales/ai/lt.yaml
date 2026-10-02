@@ -822,6 +822,7 @@ Settings:
     Preload Upcoming Videos: "Iš anksto įkelti kitus vaizdo įrašus"
     Upcoming Videos to Preload: "Iš anksto įkeliamų vaizdo įrašų skaičius"
     Concurrent Preloads: "Vienalaikiai išankstiniai įkėlimai"
+    Ignore System Rotation Lock for Fullscreen: Nepaisyti sistemos sukimo užrakto visam ekranui
   Channel Settings:
     Channel Settings: Kanalo nustatymai
     Channel Settings Description: Atskirai įsiminti kiekvienam kanalui žiūrint pasirinktus nustatymus, kad jie vėl būtų pritaikyti kitą kartą žiūrint vieną iš jo vaizdo įrašų.
@@ -2058,6 +2059,7 @@ Tooltips:
     Preload Upcoming Videos: "Gauna ir talpykloje išsaugo kitų vaizdo įrašų yt-dlp adresus. Eilė yra svarbesnė už grojaraščius ir rekomendacijas."
     Upcoming Videos to Preload: "Didžiausias kitų vaizdo įrašų skaičius, kurių yt-dlp adresai gaunami fone."
     Concurrent Preloads: "Didžiausias yt-dlp procesų, vienu metu naudojamų vaizdo įrašams iš anksto įkelti, skaičius. Didesnės reikšmės naudoja daugiau procesoriaus, atminties ir tinklo pralaidumo."
+    Ignore System Rotation Lock for Fullscreen: Fiziškai pasukite įrenginį, kad įjungtumėte arba išjungtumėte visą ekraną, net kai automatinis sukimas sistemoje „Android“ išjungtas.
   External Player Settings:
     Ignore Default Arguments: Išoriniam leistuvui nesiųsti jokių numatytųjų argumentų, išskyrus vaizdo įrašo URL (pvz., atkūrimo greitį, grojaraščio URL ir kt.). Pasirinktiniai argumentai vis tiek bus perduoti.
   Download Settings:

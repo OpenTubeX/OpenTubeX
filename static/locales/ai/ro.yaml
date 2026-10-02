@@ -627,6 +627,7 @@ Settings:
     Preload Upcoming Videos: "Preîncarcă videoclipurile următoare"
     Upcoming Videos to Preload: "Numărul de videoclipuri de preîncărcat"
     Concurrent Preloads: "Preîncărcări simultane"
+    Ignore System Rotation Lock for Fullscreen: Ignoră blocarea rotirii sistemului pentru ecran complet
   Channel Settings:
     Channel Settings: Setări pentru canale
     Channel Settings Description: Rețineți separat pentru fiecare canal setările alese în timpul vizionării, pentru a fi aplicate din nou când vizionați alt videoclip al canalului.
@@ -1691,6 +1692,7 @@ Tooltips:
     Preload Upcoming Videos: "Obține și memorează în cache adresele yt-dlp ale videoclipurilor următoare. Coada are prioritate față de liste și recomandări."
     Upcoming Videos to Preload: "Numărul maxim de videoclipuri următoare ale căror adrese yt-dlp sunt obținute în fundal."
     Concurrent Preloads: "Numărul maxim de procese yt-dlp utilizate pentru a preîncărca videoclipuri simultan. Valorile mai mari folosesc mai mult procesor, memorie și lățime de bandă a rețelei."
+    Ignore System Rotation Lock for Fullscreen: Rotește fizic dispozitivul pentru a intra și ieși din ecranul complet, chiar dacă rotirea automată din Android este dezactivată.
   Download Settings:
     Download Folder: Videoclipurile sunt salvate în acest folder. Lăsați necompletat pentru a folosi folderul Descărcări al sistemului.
     Global Additional yt-dlp Arguments: Argumente suplimentare de linie de comandă transmise către yt-dlp pentru fiecare descărcare, de exemplu --cookies-from-browser firefox.
