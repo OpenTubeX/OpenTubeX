@@ -29,7 +29,8 @@
       <template v-if="receiveStage === 'name'">
         <p>{{ t('Settings.Sync Settings.Pairing Device Name Hint') }}</p>
         <FtInput
-          :placeholder="t('Settings.Sync Settings.Device Name')"
+          :label="t('Settings.Sync Settings.Device Name')"
+          :placeholder="t('Form Inputs.Example', { example: t('Settings.Sync Settings.Desktop Device') })"
           :show-action-button="false"
           :value="deviceName"
           show-label

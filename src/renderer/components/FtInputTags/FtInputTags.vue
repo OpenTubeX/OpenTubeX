@@ -1,7 +1,15 @@
 <template>
   <div
     class="ft-input-tags-component"
+    role="group"
+    :aria-labelledby="`${id}-heading`"
   >
+    <h3
+      :id="`${id}-heading`"
+      class="tagInputHeading"
+    >
+      {{ label }}
+    </h3>
     <div
       v-if="disabled"
       class="disabledMsg"
@@ -12,7 +20,7 @@
       ref="tagNameInput"
       :disabled="disabled || isUpdating"
       :placeholder="tagNamePlaceholder"
-      :label="label"
+      :label="entryLabel || (areChannelTags ? t('Form Inputs.Enter Channels') : t('Form Inputs.Enter Text'))"
       :setting-key="settingKey"
       :min-input-length="minInputLength"
       :show-label="true"
@@ -120,6 +128,10 @@ const props = defineProps({
   label: {
     type: String,
     required: true
+  },
+  entryLabel: {
+    type: String,
+    default: ''
   },
   minInputLength: {
     type: Number,

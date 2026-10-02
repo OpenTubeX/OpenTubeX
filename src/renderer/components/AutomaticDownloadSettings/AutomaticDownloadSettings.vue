@@ -107,7 +107,8 @@
               <div class="filterGrid">
                 <FtInput
                   input-type="number"
-                  :placeholder="t('Settings.Download Settings.Minimum Duration Seconds')"
+                  :label="t('Settings.Download Settings.Minimum Duration Seconds')"
+                  :placeholder="t('Form Inputs.No Minimum')"
                   :show-label="true"
                   :show-action-button="false"
                   :maxlength="9"
@@ -116,7 +117,8 @@
                 />
                 <FtInput
                   input-type="number"
-                  :placeholder="t('Settings.Download Settings.Maximum Duration Seconds')"
+                  :label="t('Settings.Download Settings.Maximum Duration Seconds')"
+                  :placeholder="t('Form Inputs.No Maximum')"
                   :show-label="true"
                   :show-action-button="false"
                   :maxlength="9"
@@ -125,7 +127,8 @@
                 />
                 <FtInput
                   input-type="number"
-                  :placeholder="t('Settings.Download Settings.Minimum File Size MB')"
+                  :label="t('Settings.Download Settings.Minimum File Size MB')"
+                  :placeholder="t('Form Inputs.No Minimum')"
                   :show-label="true"
                   :show-action-button="false"
                   :maxlength="9"
@@ -134,7 +137,8 @@
                 />
                 <FtInput
                   input-type="number"
-                  :placeholder="t('Settings.Download Settings.Maximum File Size MB')"
+                  :label="t('Settings.Download Settings.Maximum File Size MB')"
+                  :placeholder="t('Form Inputs.No Maximum')"
                   :show-label="true"
                   :show-action-button="false"
                   :maxlength="9"
@@ -143,7 +147,8 @@
                 />
                 <FtInput
                   input-type="number"
-                  :placeholder="t('Settings.Download Settings.Maximum Age Days')"
+                  :label="t('Settings.Download Settings.Maximum Age Days')"
+                  :placeholder="t('Form Inputs.Any Age')"
                   :show-label="true"
                   :show-action-button="false"
                   :maxlength="6"
@@ -153,7 +158,8 @@
               </div>
               <div class="titleFilters">
                 <FtInput
-                  :placeholder="t('Settings.Download Settings.Title Includes')"
+                  :label="t('Settings.Download Settings.Title Includes')"
+                  :placeholder="t('Form Inputs.Included Terms Example')"
                   :show-label="true"
                   :show-action-button="false"
                   :maxlength="200"
@@ -161,7 +167,8 @@
                   @input="value => updateRule(channel.id, 'titleIncludes', value)"
                 />
                 <FtInput
-                  :placeholder="t('Settings.Download Settings.Title Excludes')"
+                  :label="t('Settings.Download Settings.Title Excludes')"
+                  :placeholder="t('Form Inputs.Excluded Terms Example')"
                   :show-label="true"
                   :show-action-button="false"
                   :maxlength="200"
@@ -394,7 +401,7 @@ function displayNumber(value) {
 .templateAndTypes :deep(.switch-label) {
   align-items: center;
   box-sizing: border-box;
-  block-size: 45px;
+  min-block-size: var(--form-control-height);
   display: inline-flex;
 }
 

@@ -177,15 +177,10 @@
 
 .compactSelect :deep(.select-label) {
   font-size: 12px;
-  inset-block-start: -18px;
 }
 
 .compactSelect :deep(.iconSelect) {
   inset-inline-end: 8px;
-}
-
-.colorSelect {
-  inline-size: 150px;
 }
 
 .newGroupForm {
@@ -283,8 +278,7 @@
   box-sizing: border-box;
 }
 
-.groupIconButton,
-.groupColorButton {
+.groupIconButton {
   aspect-ratio: 1;
   background: transparent !important;
   border-color: transparent !important;
@@ -296,25 +290,23 @@
 }
 
 .groupIconButton:hover,
-.groupIconButton:focus-visible,
-.groupColorButton:hover,
-.groupColorButton:focus-visible {
+.groupIconButton:focus-visible {
   background: var(--side-nav-hover-color) !important;
 }
 
-.groupIconEditor,
-.groupColorEditor {
+.groupIconEditor {
   position: relative;
 }
 
-.groupIconPicker,
-.groupColorPicker {
+.groupAppearancePicker {
   background: var(--card-bg-color);
   border: 1px solid var(--divider-color);
   border-radius: calc(8px * var(--ui-roundness));
   box-shadow: 0 8px 24px rgb(0 0 0 / 30%);
-  display: flex;
-  gap: 3px;
+  box-sizing: border-box;
+  display: grid;
+  gap: 6px;
+  inline-size: min(305px, calc(100vw - 116px));
   inset-block-start: calc(100% + 3px);
   inset-inline-start: 0;
   padding: 5px;
@@ -322,14 +314,13 @@
   z-index: 3;
 }
 
-.groupIconPicker button,
-.groupColorPicker button {
+.groupAppearancePicker button {
   aspect-ratio: 1;
   background: transparent;
   border-color: transparent;
   display: grid;
-  min-block-size: 30px;
-  min-inline-size: 30px;
+  min-block-size: 0;
+  min-inline-size: 0;
   padding: 0;
   place-items: center;
 }
@@ -340,9 +331,21 @@
   border-color: var(--accent-color);
 }
 
+.groupColorPicker,
 .groupIconPicker {
   display: grid;
-  grid-template-columns: repeat(5, 34px);
+  gap: 3px;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+}
+
+.groupColorPicker .groupColor {
+  block-size: 18px;
+  inline-size: 18px;
+}
+
+.groupIconPicker {
+  border-block-start: 1px solid var(--divider-color);
+  padding-block-start: 6px;
 }
 
 .groupNameButton {
@@ -494,7 +497,11 @@
 }
 
 .tabSelection :deep(label::after) {
-  inset-inline-start: 6px !important;
+  inset-inline-start: 12px !important;
+}
+
+.tabSelection :deep(.checkboxStateLayer) {
+  inset-inline-start: 12px;
 }
 
 .tabSelection :deep(.checkboxLabelText) {

@@ -249,16 +249,7 @@
 
 .menuSection :deep(.quickSelect) {
   inline-size: 100%;
-  margin-block: 26px 6px;
-}
-
-.menuSection :deep(.quickSelect + .quickSelect) {
-  margin-block-start: 28px;
-}
-
-.menuSection :deep(.quickSelect .select-text),
-.menuSection :deep(.quickSelect .nativeSelect) {
-  block-size: 38px;
+  margin-block: 4px 6px;
 }
 
 .menuSection :deep(.pure-material-slider) {
@@ -273,7 +264,6 @@
 
 .sliderGroup :deep(.pure-material-slider) {
   display: grid;
-  grid-template-rows: auto 24px;
   margin: 0;
   padding-block: 0;
 }
@@ -282,13 +272,24 @@
   block-size: 24px;
 }
 
-.sliderGroup :deep(.pure-material-slider .input::-webkit-slider-runnable-track) {
-  margin-block: 11px;
+.sliderGroup :deep(.sliderControl) {
+  --slider-track-height: 8px;
+  --slider-handle-height: 20px;
+  --slider-handle-gap: 3px;
+  --slider-stop-size: 2px;
 }
 
-.sliderGroup :deep(.pure-material-slider .input::-moz-range-track) {
-  margin-block: 11px;
-  margin-inline: 0;
+@media (any-pointer: coarse), (width <= 680px) {
+  .sliderGroup :deep(.sliderControl) {
+    --slider-track-height: 16px;
+    --slider-handle-height: 44px;
+    --slider-handle-gap: 6px;
+    --slider-stop-size: 4px;
+  }
+
+  .sliderGroup :deep(.input) {
+    block-size: 48px;
+  }
 }
 
 .menuSection :deep(.switch-label) {
@@ -383,7 +384,10 @@
   block-size: var(--phone-touch-target, 48px);
 }
 
-.phoneQuickSettings .menuSection :deep(.select-text),
+.phoneQuickSettings .menuSection :deep(.select-text) {
+  block-size: max(var(--form-control-height), var(--phone-touch-target, 48px));
+}
+
 .phoneQuickSettings .sliderGroup :deep(.input) {
   block-size: var(--phone-touch-target, 48px);
 }

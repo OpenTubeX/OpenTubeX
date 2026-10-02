@@ -660,9 +660,9 @@ Settings:
     Update Managed Tools: Atualizar
     Managed Tools Download Error Template: 'Não foi possível baixar as ferramentas gerenciadas: {errors}'
     Download Folder: Pasta de downloads
-    Global Additional yt-dlp Arguments: Argumentos adicionais globais do yt-dlp
+    Global Additional yt-dlp Arguments: Argumentos adicionais do yt-dlp
     Concurrent Downloads: Downloads simultâneas
-    Bandwidth Limit: Limite de largura de banda (KiB/s, 0 para ilimitado)
+    Bandwidth Limit: Limite de largura de banda (KiB/s)
     Choose Download Folder: Escolher pasta de downloads
     Download Templates: Modelos de download
     Manage Download Templates: Gerenciar modelos de download ({templateCount})
@@ -735,8 +735,8 @@ Settings:
       Automatic: Atualizar automaticamente
       Ask: Perguntar antes de atualizar
       Manual: Atualizar apenas manualmente
-    yt-dlp Executable Path: Caminho do executável yt-dlp
-    FFmpeg Executable Path: Caminho do executável FFmpeg
+    yt-dlp Executable Path: Executável do yt-dlp
+    FFmpeg Executable Path: Executável do FFmpeg
     Restricted Playback Authentication: "Cookies do yt-dlp"
     Cookie Source: Origem dos cookies
     Cookie Sources:
@@ -969,7 +969,7 @@ Settings:
     Enhanced Privacy Enabled: A privacidade reforçada está ativada. O servidor guarda apenas dados de sincronização criptografados.
     Enhanced Privacy Unsupported: 'Aviso: este servidor não suporta privacidade reforçada. Os dados sincronizados estão visíveis para o respectivo operador.'
     Description: 'Sincronize inscrições, perfis, playlists, histórico de exibição e configurações compatíveis com um servidor de sincronização do OpenTubeX ou LibreTube. Os servidores do LibreTube podem não ser compatíveis com todos os recursos de sincronização.'
-    Server URL: URL do servidor
+    Server URL: URL do servidor de sincronização
     Checking Server: Verificando o servidor de sincronização…
     Server Unavailable: Não foi possível estabelecer conexão a este servidor de sincronização. Verifique o URL e tente novamente.
     Username: Nome de usuário
@@ -1058,7 +1058,7 @@ Settings:
     Open All Tabs Confirmation: "Abrir todas as abas?"
     Server Update Required: "Atualize este servidor para oferecer sincronização criptografada em tempo real."
   Proxy Settings:
-    IP Block Recovery Script Path: Caminho do script de recuperação de bloqueio de IP
+    IP Block Recovery Script Path: Script de recuperação do bloqueio de IP
     Select IP Block Recovery Script File: Selecionar arquivo do script de recuperação de bloqueio de IP
     Running IP block recovery script: Executando o script de recuperação de bloqueio de IP
     IP block recovery script failed: 'Falha no script de recuperação de bloqueio de IP (código de saída: {exitCode})'
@@ -1067,7 +1067,7 @@ Settings:
     Failed to select IP block recovery script: Falha ao selecionar o script de recuperação de bloqueio de IP
   SponsorBlock Settings:
     Enable SponsorBlock Submission: Ativar envio para o SponsorBlock
-    SponsorBlock Private User ID (optional): ID de usuário privado do SponsorBlock (opcional)
+    SponsorBlock Private User ID (optional): ID privado de usuário (opcional)
     SponsorBlock Private User ID Tooltip: Cole o ID de usuário privado do SponsorBlock obtido na extensão do navegador. Deixe este campo vazio para usar um ID gerado pelo aplicativo.
     Generated SponsorBlock User ID: ID de usuário do SponsorBlock gerado
     Generated SponsorBlock User ID Tooltip: Este ID de usuário do SponsorBlock gerado pelo aplicativo pode ser usado na extensão do navegador ou ao usar o aplicativo noutro computador.
@@ -1079,7 +1079,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Ativar Return YouTube Dislike
-    Return YouTube Dislike Url: URL da API Return YouTube Dislike (a preconfiguração é https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: URL da API
   Password Dialog:
     Incorrect Password: Palavra-passe incorreta
     Unlock: Desbloquear
@@ -1827,8 +1827,8 @@ Downloads:
   File Name Template: Modelo de nome do arquivo
   File Name Template Help: 'Campos disponíveis: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Intervalo de tempo e capítulos
-  Start Time: Hora de início (HH:MM:SS)
-  End Time: Hora de fim (HH:MM:SS)
+  Start Time: Hora de início
+  End Time: Hora de fim
   Split by Chapters: Dividir em arquivos separados por capítulo
   Remove Segments: Remover segmentos
   Subtitles and Metadata: Legendas e metadados
@@ -1914,3 +1914,23 @@ Tray:
 Tray Icon:
   Title: "Ícone da bandeja"
   Follow App Theme: "Seguir o tema do aplicativo"
+
+Form Inputs:
+  Enter Channels: "Insira canais"
+  Enter Text: "Insira texto"
+  Video URL: URL do vídeo ou da playlist
+  Paste Link: Cole um link de vídeo ou de playlist
+  Example: por ex. {example}
+  No Minimum: Sem mínimo
+  No Maximum: Sem máximo
+  Any Age: Qualquer idade
+  Included Terms Example: por ex. tutorial, análise
+  Excluded Terms Example: por ex. trailer, prévia
+  Download Folder Hint: Deixe em branco para usar a pasta Downloads
+  Global Arguments Hint: Argumentos opcionais para cada download
+  Unlimited Hint: 0 para ilimitado
+  Add Argument: Adicione um argumento
+  Template Name Example: por ex. Apenas áudio
+  Download Arguments Hint: Argumentos opcionais para este download
+  Generated ID Hint: Deixe em branco para gerar um ID
+  Default Value: "Padrão: {value}"

@@ -762,9 +762,9 @@ Settings:
     Update Managed Tools: Oppdater
     Managed Tools Download Error Template: 'Klarte ikkje å laste ned dei forvalta verktøya: {errors}'
     Download Folder: Nedlastingsmappe
-    Global Additional yt-dlp Arguments: Globale tilleggsargument for yt-dlp
+    Global Additional yt-dlp Arguments: Ekstra yt-dlp-argument
     Concurrent Downloads: Samstundes nedlastingar
-    Bandwidth Limit: Bandbreiddegrense (KiB/s, 0 for inga grense)
+    Bandwidth Limit: Bandbreiddegrense (KiB/s)
     Choose Download Folder: Vel nedlastingsmappe
     Download Templates: Nedlastingsmalar
     Manage Download Templates: Handsam nedlastingsmalar ({templateCount})
@@ -837,8 +837,8 @@ Settings:
       Automatic: Oppdater automatisk
       Ask: Spør før oppdatering
       Manual: Oppdater berre manuelt
-    yt-dlp Executable Path: Stig til den køyrbare yt-dlp-fila
-    FFmpeg Executable Path: Stig til den køyrbare FFmpeg-fila
+    yt-dlp Executable Path: yt-dlp-programfil
+    FFmpeg Executable Path: FFmpeg-programfil
     Restricted Playback Authentication: "yt-dlp-informasjonskapslar"
     Cookie Source: Kjelde for informasjonskapslar
     Cookie Sources:
@@ -1129,7 +1129,7 @@ Settings:
     Enhanced Privacy Enabled: Styrkt personvern er slått på. Tenaren lagrar berre krypterte synkroniseringsdata.
     Enhanced Privacy Unsupported: Åtvaring — denne tenaren støttar ikkje styrkt personvern. Den som driv tenaren, kan sjå dei synkroniserte dataa.
     Description: 'Synkroniser abonnement, profilar, spelelister, sjåarhistorikk og støtta innstillingar med ein OpenTubeX- eller LibreTube-synkroniseringstenar. LibreTube-tenarar støttar kanskje ikkje alle synkroniseringsfunksjonar.'
-    Server URL: Tenaradresse
+    Server URL: URL til synkroniseringstenar
     Checking Server: Kontrollerer synkroniseringstenaren …
     Server Unavailable: Klarte ikkje å kopla til denne synkroniseringstenaren. Kontroller adressa og prøv på nytt.
     Username: Brukarnamn
@@ -1222,7 +1222,7 @@ Settings:
     Proxy Warning: OpenTubeX har ingen innebygd mellomtenar, men kan kopla til ein ekstern mellomtenar, til dømes Tor som køyrer på maskina di, eller ein SOCKS5-mellomtenar frå enkelte VPN-tenester. Dersom du slår på dette, må du kontrollera at mellomtenaren eller Tor er rett sett opp. Elles kan ikkje OpenTubeX henta data.
     Proxy Username: Brukarnamn for mellomtenar
     Proxy Password: Passord for mellomtenar
-    IP Block Recovery Script Path: Sti til skript for gjenoppretting etter IP-blokkering
+    IP Block Recovery Script Path: Skript for gjenoppretting etter IP-blokkering
     Select IP Block Recovery Script File: Vel skriptfil for gjenoppretting etter IP-blokkering
     Running IP block recovery script: Køyrer skriptet for gjenoppretting etter IP-blokkering
     IP block recovery script failed: 'Skriptet for gjenoppretting etter IP-blokkering mislykkast (avsluttingskode: {exitCode})'
@@ -1234,7 +1234,7 @@ Settings:
       Excluded Channels: "Unntatte kanalar"
       Tooltip: "Skriv inn ein kanal-ID for å hindre at SponsorBlock-segment vert hoppa over i videoane til kanalen. ID-en må samsvare nøyaktig og skil mellom store og små bokstavar."
     Enable SponsorBlock Submission: Slå på innsending til SponsorBlock
-    SponsorBlock Private User ID (optional): Privat SponsorBlock-brukar-ID (valfritt)
+    SponsorBlock Private User ID (optional): Privat brukar-ID (valfritt)
     SponsorBlock Private User ID Tooltip: Lim inn den private SponsorBlock-brukar-ID-en frå nettlesarutvidinga. La feltet stå tomt for å bruka ein ID som appen har laga.
     Generated SponsorBlock User ID: SponsorBlock-brukar-ID laga av appen
     Generated SponsorBlock User ID Tooltip: Denne SponsorBlock-brukar-ID-en er laga av appen og kan brukast i nettlesarutvidinga eller når du brukar appen på ei anna datamaskin.
@@ -1244,12 +1244,12 @@ Settings:
     Skip notification timeout: Tidsgrense for hoppvarsel
     UseDeArrowTitles: Bruk videotitlar frå DeArrow
     UseDeArrowThumbnails: Bruk DeArrow for miniatyrbilete
-    DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): API-adresse til miniatyrbiletgeneratoren i DeArrow (standard er https://dearrow-thumb.ajay.app)
+    DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app): URL til DeArrow-miniatyr-API
     Custom Color: Tilpassa farge
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Slå på Return YouTube Dislike
-    Return YouTube Dislike Url: API-adresse til Return YouTube Dislike (standard er https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: API-URL
   Parental Control Settings:
     Hide Uploader on Watch page: Gøym opplastaren på avspelingssida
     Disable Channel Links: Slå av kanallenkjer
@@ -2216,8 +2216,8 @@ Downloads:
   File Name Template: Filnamnmal
   File Name Template Help: 'Tilgjengelege felt: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Tidsrom og kapittel
-  Start Time: Starttid (HH:MM:SS)
-  End Time: Sluttid (HH:MM:SS)
+  Start Time: Starttid
+  End Time: Sluttid
   Split by Chapters: Del i separate filer etter kapittel
   Remove Segments: Fjern segment
   Subtitles and Metadata: Undertekstar og metadata
@@ -2303,3 +2303,23 @@ Tray:
 Tray Icon:
   Title: "Ikon i systemtrauet"
   Follow App Theme: "Følg temaet til appen"
+
+Form Inputs:
+  Enter Channels: "Skriv inn kanalar"
+  Enter Text: "Skriv inn tekst"
+  Video URL: Video- eller speleliste-URL
+  Paste Link: Lim inn ei lenkje til ein video eller ei speleliste
+  Example: t.d. {example}
+  No Minimum: Inga minimumsgrense
+  No Maximum: Inga maksimumsgrense
+  Any Age: Uansett alder
+  Included Terms Example: t.d. rettleiing, melding
+  Excluded Terms Example: t.d. trailer, førehandsvising
+  Download Folder Hint: Lat stå tomt for å bruke Nedlastingar-mappa
+  Global Arguments Hint: Valfrie argument for kvar nedlasting
+  Unlimited Hint: 0 for uavgrensa
+  Add Argument: Legg til eit argument
+  Template Name Example: t.d. Berre lyd
+  Download Arguments Hint: Valfrie argument for denne nedlastinga
+  Generated ID Hint: Lat stå tomt for å generere ein ID
+  Default Value: "Standard: {value}"

@@ -660,9 +660,9 @@ Settings:
     Update Managed Tools: Perbarui
     Managed Tools Download Error Template: 'Tidak dapat mengunduh alat terkelola: {errors}'
     Download Folder: Folder Unduhan
-    Global Additional yt-dlp Arguments: Argumen Tambahan Global yt-dlp
+    Global Additional yt-dlp Arguments: Argumen tambahan yt-dlp
     Concurrent Downloads: Unduhan serentak
-    Bandwidth Limit: Batas lebar pita (KiB/dtk, 0 untuk tanpa batas)
+    Bandwidth Limit: Batas lebar pita (KiB/s)
     Choose Download Folder: Pilih Folder Unduhan
     Download Templates: Templat Unduhan
     Manage Download Templates: Kelola Templat Unduhan ({templateCount})
@@ -735,8 +735,8 @@ Settings:
       Automatic: Perbarui otomatis
       Ask: Tanyakan sebelum memperbarui
       Manual: Hanya perbarui secara manual
-    yt-dlp Executable Path: Jalur Program yt-dlp
-    FFmpeg Executable Path: Jalur Program FFmpeg
+    yt-dlp Executable Path: Berkas eksekusi yt-dlp
+    FFmpeg Executable Path: Berkas eksekusi FFmpeg
     Restricted Playback Authentication: "Kuki yt-dlp"
     Cookie Source: Sumber Kuki
     Cookie Sources:
@@ -968,7 +968,7 @@ Settings:
     Enhanced Privacy Enabled: Privasi tingkat lanjut aktif. Server hanya menyimpan data sinkronisasi terenkripsi.
     Enhanced Privacy Unsupported: 'Peringatan: server ini tidak mendukung privasi tingkat lanjut. Data yang disinkronkan dapat dilihat oleh operatornya.'
     Description: 'Sinkronkan langganan, profil, daftar putar, histori tontonan, dan pengaturan yang didukung dengan server sinkronisasi OpenTubeX atau LibreTube. Server LibreTube mungkin tidak mendukung semua fitur sinkronisasi.'
-    Server URL: URL Server
+    Server URL: URL server sinkronisasi
     Checking Server: Memeriksa server sinkronisasi…
     Server Unavailable: Tidak dapat terhubung ke server sinkronisasi ini. Periksa URL lalu coba lagi.
     Username: Nama pengguna
@@ -1058,7 +1058,7 @@ Settings:
     Open All Tabs Confirmation: "Buka semua tab?"
     Server Update Required: "Perbarui server ini untuk mendukung sinkronisasi langsung terenkripsi."
   Proxy Settings:
-    IP Block Recovery Script Path: Jalur Skrip Pemulihan Blokir IP
+    IP Block Recovery Script Path: Skrip pemulihan blokir IP
     Select IP Block Recovery Script File: Pilih Berkas Skrip Pemulihan Blokir IP
     Running IP block recovery script: Menjalankan skrip pemulihan blokir IP
     IP block recovery script failed: 'Skrip pemulihan blokir IP gagal (kode keluar: {exitCode})'
@@ -1070,7 +1070,7 @@ Settings:
       Excluded Channels: "Saluran yang dikecualikan"
       Tooltip: "Masukkan ID saluran agar segmen SponsorBlock di videonya tidak dilewati. ID harus sama persis dan peka huruf besar-kecil."
     Enable SponsorBlock Submission: Aktifkan Pengiriman SponsorBlock
-    SponsorBlock Private User ID (optional): ID Pengguna Pribadi SponsorBlock (opsional)
+    SponsorBlock Private User ID (optional): ID pengguna pribadi (opsional)
     SponsorBlock Private User ID Tooltip: Tempel ID pengguna pribadi SponsorBlock dari ekstensi peramban. Biarkan kosong untuk menggunakan ID yang dibuat aplikasi.
     Generated SponsorBlock User ID: ID Pengguna SponsorBlock Buatan Aplikasi
     Generated SponsorBlock User ID Tooltip: ID pengguna SponsorBlock buatan aplikasi ini dapat digunakan di ekstensi peramban atau saat Anda menggunakan aplikasi di komputer lain.
@@ -1082,7 +1082,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Aktifkan Return YouTube Dislike
-    Return YouTube Dislike Url: URL API Return YouTube Dislike (Bawaan adalah https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: URL API
   Password Dialog:
     Incorrect Password: Kata sandi salah
     Unlock: Buka kunci
@@ -1838,8 +1838,8 @@ Downloads:
   File Name Template: Templat Nama Berkas
   File Name Template Help: 'Kolom yang tersedia: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Rentang Waktu dan Bab
-  Start Time: Waktu Mulai (HH:MM:SS)
-  End Time: Waktu Akhir (HH:MM:SS)
+  Start Time: Waktu Mulai
+  End Time: Waktu Akhir
   Split by Chapters: Pisahkan menjadi berkas tersendiri per bab
   Remove Segments: Hapus segmen
   Subtitles and Metadata: Takarir dan Metadata
@@ -1925,3 +1925,23 @@ Tray:
 Tray Icon:
   Title: "Ikon baki sistem"
   Follow App Theme: "Ikuti tema aplikasi"
+
+Form Inputs:
+  Enter Channels: "Masukkan channel"
+  Enter Text: "Masukkan teks"
+  Video URL: URL video atau playlist
+  Paste Link: Tempel tautan video atau playlist
+  Example: mis. {example}
+  No Minimum: Tanpa minimum
+  No Maximum: Tanpa maksimum
+  Any Age: Usia berapa pun
+  Included Terms Example: mis. tutorial, ulasan
+  Excluded Terms Example: mis. cuplikan, pratinjau
+  Download Folder Hint: Biarkan kosong untuk memakai folder Unduhan
+  Global Arguments Hint: Argumen opsional untuk setiap unduhan
+  Unlimited Hint: 0 untuk tanpa batas
+  Add Argument: Tambahkan argumen
+  Template Name Example: mis. Hanya audio
+  Download Arguments Hint: Argumen opsional untuk unduhan ini
+  Generated ID Hint: Biarkan kosong untuk membuat ID
+  Default Value: "Default: {value}"

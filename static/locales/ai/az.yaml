@@ -662,9 +662,9 @@ Settings:
     Update Managed Tools: Yenilə
     Managed Tools Download Error Template: 'İdarə olunan vasitələri endirmək mümkün olmadı: {errors}'
     Download Folder: Endirmə qovluğu
-    Global Additional yt-dlp Arguments: Əlavə ümumi yt-dlp arqumentləri
+    Global Additional yt-dlp Arguments: Əlavə yt-dlp arqumentləri
     Concurrent Downloads: Eyni vaxtda endirmələr
-    Bandwidth Limit: Ötürmə sürəti limiti (KiB/s, limitsiz üçün 0)
+    Bandwidth Limit: Ötürmə sürəti limiti (KiB/s)
     Choose Download Folder: Endirmə qovluğunu seç
     Download Templates: Endirmə şablonları
     Manage Download Templates: Endirmə şablonlarını idarə et ({templateCount})
@@ -737,8 +737,8 @@ Settings:
       Automatic: Avtomatik yenilə
       Ask: Yeniləməzdən əvvəl soruş
       Manual: Yalnız əl ilə yenilə
-    yt-dlp Executable Path: yt-dlp icra faylının yolu
-    FFmpeg Executable Path: FFmpeg icra faylının yolu
+    yt-dlp Executable Path: yt-dlp icra faylı
+    FFmpeg Executable Path: FFmpeg icra faylı
     Restricted Playback Authentication: "yt-dlp kukiləri"
     Cookie Source: Kuki mənbəyi
     Cookie Sources:
@@ -941,7 +941,7 @@ Settings:
     Enhanced Privacy Enabled: Təkmilləşdirilmiş məxfilik aktivdir. Server yalnız şifrələnmiş sinxronizasiya məlumatlarını saxlayır.
     Enhanced Privacy Unsupported: Xəbərdarlıq — bu server təkmilləşdirilmiş məxfiliyi dəstəkləmir. Sinxronlaşdırılan məlumatlar serverin operatoruna görünür.
     Description: 'Abunəlikləri, profilləri, pleylistləri, baxış tarixçəsini və dəstəklənən tənzimləmələri OpenTubeX və ya LibreTube sinxronizasiya serveri ilə sinxronlaşdırın. LibreTube serverləri bütün sinxronizasiya funksiyalarını dəstəkləməyə bilər.'
-    Server URL: Server URL-i
+    Server URL: Sinxronizasiya serverinin URL-si
     Checking Server: Sinxronizasiya serveri yoxlanılır…
     Server Unavailable: Bu sinxronizasiya serverinə qoşulmaq mümkün olmadı. URL-i yoxlayıb yenidən cəhd edin.
     Username: İstifadəçi adı
@@ -1061,7 +1061,7 @@ Settings:
     Confirm Data Loss: Sil və davam et
     Server Update Required: "Şifrələnmiş canlı sinxronizasiyanı dəstəkləmək üçün bu serveri yeniləyin."
   Proxy Settings:
-    IP Block Recovery Script Path: IP blokundan bərpa skriptinin yolu
+    IP Block Recovery Script Path: IP blokundan bərpa skripti
     Select IP Block Recovery Script File: IP blokundan bərpa skripti faylını seç
     Running IP block recovery script: IP blokundan bərpa skripti işə salınır
     IP block recovery script failed: 'IP blokundan bərpa skripti uğursuz oldu (çıxış kodu: {exitCode})'
@@ -1070,7 +1070,7 @@ Settings:
     Failed to select IP block recovery script: IP blokundan bərpa skriptini seçmək alınmadı
   SponsorBlock Settings:
     Enable SponsorBlock Submission: SponsorBlock göndərişlərini aktivləşdir
-    SponsorBlock Private User ID (optional): SponsorBlock məxfi istifadəçi ID-si (istəyə bağlı)
+    SponsorBlock Private User ID (optional): Məxfi istifadəçi ID-si (istəyə bağlı)
     SponsorBlock Private User ID Tooltip: Brauzer əlavəsindən məxfi SponsorBlock istifadəçi ID-sini yapışdırın. Tətbiqin yaratdığı ID-dən istifadə etmək üçün boş buraxın.
     Generated SponsorBlock User ID: Yaradılmış SponsorBlock istifadəçi ID-si
     Generated SponsorBlock User ID Tooltip: Tətbiqin yaratdığı bu SponsorBlock istifadəçi ID-si brauzer əlavəsində və ya tətbiqi başqa kompüterdə istifadə etdikdə işlədilə bilər.
@@ -1082,7 +1082,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Return YouTube Dislike aktivləşdir
-    Return YouTube Dislike Url: "Return YouTube Dislike API URL-i (varsayılan: https://ryd-proxy.kavin.rocks)"
+    Return YouTube Dislike Url: API URL-si
   Password Dialog:
     Incorrect Password: Yanlış parol
     Unlock: Kilidi aç
@@ -1840,8 +1840,8 @@ Downloads:
   File Name Template: Fayl adı şablonu
   File Name Template Help: 'Mövcud sahələr: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Vaxt aralığı və bölümlər
-  Start Time: Başlama vaxtı (HH:MM:SS)
-  End Time: Bitmə vaxtı (HH:MM:SS)
+  Start Time: Başlama vaxtı
+  End Time: Bitmə vaxtı
   Split by Chapters: Bölümlərə görə ayrı fayllara böl
   Remove Segments: Seqmentləri sil
   Subtitles and Metadata: Titrlər və metaməlumatlar
@@ -1924,3 +1924,23 @@ Tray:
 Tray Icon:
   Title: "Sistem treyi nişanı"
   Follow App Theme: "Tətbiqin mövzusunu izlə"
+
+Form Inputs:
+  Enter Channels: "Kanalları daxil edin"
+  Enter Text: "Mətn daxil edin"
+  Video URL: Video və ya pleylist URL-si
+  Paste Link: Video və ya pleylist keçidini yapışdırın
+  Example: məs. {example}
+  No Minimum: Minimum yoxdur
+  No Maximum: Maksimum yoxdur
+  Any Age: İstənilən yaş
+  Included Terms Example: məs. təlimat, icmal
+  Excluded Terms Example: məs. treyler, önizləmə
+  Download Folder Hint: Yükləmələr qovluğunu istifadə etmək üçün boş saxlayın
+  Global Arguments Hint: Hər yükləmə üçün əlavə arqumentlər
+  Unlimited Hint: Limitsiz üçün 0
+  Add Argument: Arqument əlavə edin
+  Template Name Example: məs. Yalnız audio
+  Download Arguments Hint: Bu yükləmə üçün əlavə arqumentlər
+  Generated ID Hint: ID yaratmaq üçün boş saxlayın
+  Default Value: "Standart: {value}"

@@ -128,6 +128,7 @@
 }
 
 .headerSortSelect :deep(.select-text) {
+  padding-block: 2px;
   block-size: 36px;
   padding-inline-start: 86px;
   font-size: 0.9rem;

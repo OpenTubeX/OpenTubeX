@@ -2,7 +2,7 @@
   <div
     ref="selectRoot"
     class="select"
-    :class="{ containsTooltip: tooltip !== '', open: dropdownShown }"
+    :class="{ containsTooltip: tooltip !== '', open: dropdownShown, outlined: variant === 'outlined' }"
     @focusout="handleFocusOut"
   >
     <select
@@ -35,8 +35,9 @@
       aria-haspopup="listbox"
       class="select-text"
       :class="{ disabled, withOptionVisuals: hasOptionVisuals }"
+      :aria-labelledby="`${id}-label`"
       :aria-controls="`${id}-listbox`"
-      :aria-describedby="describeById"
+      :aria-describedby="[`${id}-value`, describeById].filter(Boolean).join(' ')"
       :aria-expanded="dropdownShown"
       :aria-activedescendant="dropdownShown ? `${id}-option-${activeIndex}` : null"
       :disabled="disabled"
@@ -58,7 +59,10 @@
         :style="selectedOptionColor == null ? null : { '--option-color': selectedOptionColor }"
         aria-hidden="true"
       />
-      <span class="selectedValue">
+      <span
+        :id="`${id}-value`"
+        class="selectedValue"
+      >
         <slot
           name="option"
           :label="selectedName"
@@ -76,6 +80,7 @@
       :id="`${id}-label`"
       class="select-label"
       :for="id"
+      :title="placeholder"
     >
       <FtIcon
         v-if="showIcon && icon !== null"
@@ -233,6 +238,11 @@ import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettin
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
 const props = defineProps({
+  variant: {
+    type: String,
+    default: 'filled',
+    validator: value => ['filled', 'outlined'].includes(value)
+  },
   placeholder: {
     type: String,
     required: true

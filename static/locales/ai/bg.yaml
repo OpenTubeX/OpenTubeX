@@ -662,9 +662,9 @@ Settings:
     Update Managed Tools: Обновяване
     Managed Tools Download Error Template: 'Управляваните инструменти не можаха да бъдат изтеглени: {errors}'
     Download Folder: Папка за изтегляния
-    Global Additional yt-dlp Arguments: Общи допълнителни аргументи за yt-dlp
+    Global Additional yt-dlp Arguments: Допълнителни аргументи на yt-dlp
     Concurrent Downloads: Едновременни изтегляния
-    Bandwidth Limit: Ограничение на пропускателната способност (KiB/s, 0 за неограничена)
+    Bandwidth Limit: Ограничение на пропускателната способност (KiB/s)
     Choose Download Folder: Избор на папка за изтегляния
     Download Templates: Шаблони за изтегляне
     Manage Download Templates: Управление на шаблоните за изтегляне ({templateCount})
@@ -737,8 +737,8 @@ Settings:
       Automatic: Автоматично обновяване
       Ask: Питане преди обновяване
       Manual: Само ръчно обновяване
-    yt-dlp Executable Path: Път до изпълнимия файл на yt-dlp
-    FFmpeg Executable Path: Път до изпълнимия файл на FFmpeg
+    yt-dlp Executable Path: Изпълним файл на yt-dlp
+    FFmpeg Executable Path: Изпълним файл на FFmpeg
     Restricted Playback Authentication: "Бисквитки на yt-dlp"
     Cookie Source: Източник на бисквитките
     Cookie Sources:
@@ -972,7 +972,7 @@ Settings:
     Enhanced Privacy Enabled: Подобрената поверителност е включена. Сървърът съхранява само шифровани синхронизирани данни.
     Enhanced Privacy Unsupported: Предупреждение — този сървър не поддържа подобрена поверителност. Операторът му има достъп до синхронизираните данни.
     Description: 'Синхронизирайте абонаменти, профили, плейлисти, история на гледане и поддържани настройки със сървър за синхронизация на OpenTubeX или LibreTube. Сървърите на LibreTube може да не поддържат всички функции за синхронизация.'
-    Server URL: URL адрес на сървъра
+    Server URL: URL на сървъра за синхронизиране
     Checking Server: Проверка на сървъра за синхронизиране…
     Server Unavailable: Няма връзка с този сървър за синхронизиране. Проверете URL адреса и опитайте отново.
     Username: Потребителско име
@@ -1062,7 +1062,7 @@ Settings:
     Open All Tabs Confirmation: "Отваряне на всички раздели?"
     Server Update Required: "Обновете този сървър за поддръжка на шифрована синхронизация в реално време."
   Proxy Settings:
-    IP Block Recovery Script Path: Път до скрипта за възстановяване след блокиране на IP адреса
+    IP Block Recovery Script Path: Скрипт за възстановяване при блокиран IP
     Select IP Block Recovery Script File: Избор на файл със скрипт за възстановяване след блокиране на IP адреса
     Running IP block recovery script: Изпълнение на скрипта за възстановяване след блокиране на IP адреса
     IP block recovery script failed: 'Скриптът за възстановяване след блокиране на IP адреса е неуспешен (код за изход: {exitCode})'
@@ -1074,7 +1074,7 @@ Settings:
       Excluded Channels: "Изключени канали"
       Tooltip: "Въведете идентификатор на канал, за да не се пропускат сегментите на SponsorBlock във видеоклиповете му. Идентификаторът трябва да съвпада точно и различава главни от малки букви."
     Enable SponsorBlock Submission: Включване на изпращането към SponsorBlock
-    SponsorBlock Private User ID (optional): Частен потребителски идентификатор на SponsorBlock (по избор)
+    SponsorBlock Private User ID (optional): Частен потребителски ID (незадължително)
     SponsorBlock Private User ID Tooltip: Поставете частния потребителски идентификатор на SponsorBlock от разширението за браузъра. Оставете полето празно, за да се използва идентификатор, създаден от приложението.
     Generated SponsorBlock User ID: Създаден потребителски идентификатор на SponsorBlock
     Generated SponsorBlock User ID Tooltip: Този създаден от приложението потребителски идентификатор на SponsorBlock може да се използва в разширението за браузъра или при използване на приложението на друг компютър.
@@ -1086,7 +1086,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Включване на Return YouTube Dislike
-    Return YouTube Dislike Url: URL адрес на API на Return YouTube Dislike (по подразбиране https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: URL на API
   Password Dialog:
     Incorrect Password: Неправилна парола
     Unlock: Отключване
@@ -1847,8 +1847,8 @@ Downloads:
   File Name Template: Шаблон за име на файла
   File Name Template Help: 'Налични полета: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Времеви диапазон и глави
-  Start Time: Начален час (HH:MM:SS)
-  End Time: Краен час (HH:MM:SS)
+  Start Time: Начален час
+  End Time: Краен час
   Split by Chapters: Разделяне в отделни файлове по глави
   Remove Segments: Премахване на сегменти
   Subtitles and Metadata: Субтитри и метаданни
@@ -1937,3 +1937,23 @@ Tray:
 Tray Icon:
   Title: "Икона в системната област"
   Follow App Theme: "Следване на темата на приложението"
+
+Form Inputs:
+  Enter Channels: "Въведете канали"
+  Enter Text: "Въведете текст"
+  Video URL: URL на видео или плейлист
+  Paste Link: Поставете връзка към видео или плейлист
+  Example: напр. {example}
+  No Minimum: Без минимум
+  No Maximum: Без максимум
+  Any Age: Без ограничение за възрастта
+  Included Terms Example: напр. урок, ревю
+  Excluded Terms Example: напр. трейлър, преглед
+  Download Folder Hint: Оставете празно, за да използвате папката за изтегляния
+  Global Arguments Hint: Незадължителни аргументи за всяко изтегляне
+  Unlimited Hint: 0 за неограничено
+  Add Argument: Добавете аргумент
+  Template Name Example: напр. Само аудио
+  Download Arguments Hint: Незадължителни аргументи за това изтегляне
+  Generated ID Hint: Оставете празно, за да се генерира ID
+  Default Value: "По подразбиране: {value}"

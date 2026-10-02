@@ -660,9 +660,9 @@ Settings:
     Update Managed Tools: 更新
     Managed Tools Download Error Template: '无法下载由应用管理的工具：{errors}'
     Download Folder: 下载文件夹
-    Global Additional yt-dlp Arguments: 全局附加 yt-dlp 参数
+    Global Additional yt-dlp Arguments: 附加 yt-dlp 参数
     Concurrent Downloads: 并发下载数
-    Bandwidth Limit: 带宽限制（KiB/s，0 表示不限速）
+    Bandwidth Limit: 带宽限制 (KiB/s)
     Choose Download Folder: 选择下载文件夹
     Download Templates: 下载模板
     Manage Download Templates: 管理下载模板（{templateCount}）
@@ -735,8 +735,8 @@ Settings:
       Automatic: 自动更新
       Ask: 更新前询问
       Manual: 仅手动更新
-    yt-dlp Executable Path: yt-dlp 可执行文件路径
-    FFmpeg Executable Path: FFmpeg 可执行文件路径
+    yt-dlp Executable Path: yt-dlp 可执行文件
+    FFmpeg Executable Path: FFmpeg 可执行文件
     Restricted Playback Authentication: "yt-dlp Cookie"
     Cookie Source: Cookie 来源
     Cookie Sources:
@@ -969,7 +969,7 @@ Settings:
     Enhanced Privacy Enabled: 已启用增强隐私保护。服务器仅存储加密的同步数据。
     Enhanced Privacy Unsupported: 警告：此服务器不支持增强隐私保护，服务器运营者可以查看同步的数据。
     Description: '通过 OpenTubeX 或 LibreTube 同步服务器同步订阅、个人资料、播放列表、观看历史记录及支持的设置。LibreTube 服务器可能不支持所有同步功能。'
-    Server URL: 服务器 URL
+    Server URL: 同步服务器 URL
     Checking Server: 正在检查同步服务器…
     Server Unavailable: 无法连接到此同步服务器。请检查 URL 后重试。
     Username: 用户名
@@ -1058,7 +1058,7 @@ Settings:
     Open All Tabs Confirmation: "打开所有标签页？"
     Server Update Required: "请更新此服务器以支持加密实时同步。"
   Proxy Settings:
-    IP Block Recovery Script Path: IP 封锁恢复脚本路径
+    IP Block Recovery Script Path: IP 封禁恢复脚本
     Select IP Block Recovery Script File: 选择 IP 封锁恢复脚本文件
     Running IP block recovery script: 正在运行 IP 封锁恢复脚本
     IP block recovery script failed: 'IP 封锁恢复脚本运行失败（退出代码：{exitCode}）'
@@ -1067,7 +1067,7 @@ Settings:
     Failed to select IP block recovery script: 无法选择 IP 封锁恢复脚本
   SponsorBlock Settings:
     Enable SponsorBlock Submission: 启用 SponsorBlock 提交功能
-    SponsorBlock Private User ID (optional): SponsorBlock 私有用户 ID（可选）
+    SponsorBlock Private User ID (optional): 私有用户 ID（可选）
     SponsorBlock Private User ID Tooltip: 粘贴浏览器扩展中的 SponsorBlock 私有用户 ID。留空则使用应用生成的 ID。
     Generated SponsorBlock User ID: 生成的 SponsorBlock 用户 ID
     Generated SponsorBlock User ID Tooltip: 应用生成的此 SponsorBlock 用户 ID 可用于浏览器扩展，也可在另一台电脑上使用本应用时使用。
@@ -1079,7 +1079,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: 启用 Return YouTube Dislike
-    Return YouTube Dislike Url: Return YouTube Dislike API URL（默认为 https://ryd-proxy.kavin.rocks）
+    Return YouTube Dislike Url: API URL
   Password Dialog:
     Incorrect Password: 密码错误
     Unlock: 解锁
@@ -1827,8 +1827,8 @@ Downloads:
   File Name Template: 文件名模板
   File Name Template Help: '可用字段：{title}、{author}、{upload_date}、{id}、{playlist}、{playlist_index}、{ext}'
   Time Range and Chapters: 时间范围和章节
-  Start Time: 开始时间 (HH:MM:SS)
-  End Time: 结束时间 (HH:MM:SS)
+  Start Time: 开始时间
+  End Time: 结束时间
   Split by Chapters: 按章节拆分为单独文件
   Remove Segments: 移除片段
   Subtitles and Metadata: 字幕和元数据
@@ -1914,3 +1914,23 @@ Tray:
 Tray Icon:
   Title: "托盘图标"
   Follow App Theme: "跟随应用主题"
+
+Form Inputs:
+  Enter Channels: "输入频道"
+  Enter Text: "输入文本"
+  Video URL: 视频或播放列表 URL
+  Paste Link: 粘贴视频或播放列表链接
+  Example: 例如：{example}
+  No Minimum: 无最小值
+  No Maximum: 无最大值
+  Any Age: 不限发布时间
+  Included Terms Example: 例如：教程, 评测
+  Excluded Terms Example: 例如：预告片, 预览
+  Download Folder Hint: 留空以使用下载文件夹
+  Global Arguments Hint: 所有下载的可选参数
+  Unlimited Hint: 0 表示不限速
+  Add Argument: 添加参数
+  Template Name Example: 例如：仅音频
+  Download Arguments Hint: 此次下载的可选参数
+  Generated ID Hint: 留空以生成 ID
+  Default Value: 默认值：{value}

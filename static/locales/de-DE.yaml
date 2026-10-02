@@ -421,7 +421,7 @@ Settings:
     Current instance will be randomized on startup: Beim Start wird eine zufällige Instanz festgelegt
     No default instance has been set: Es wurde keine Standardinstanz festgelegt
     The currently set default instance is {instance}: Die aktuelle Standardinstanz ist {instance}
-    Current Invidious Instance: Aktuelle Invidious-Instanz
+    Current Invidious Instance: Invidious-Instanz
     Clear Default Instance: Standardinstanz zurücksetzen
     Set Current Instance as Default: Derzeitige Instanz als Standard festlegen
     External Link Handling:
@@ -1235,7 +1235,7 @@ Settings:
     Your Info: Deine Info
     Test Proxy: Proxy testen
     Clicking on Test Proxy will send a request to: Indem du auf „Proxy testen“ klickst, sendest du eine Anfrage an
-    Proxy Port Number: Proxy-Portnummer
+    Proxy Port Number: Proxy-Port
     Proxy Host: Proxy-Host
     Proxy Protocol: Proxy-Protokoll
     Enable Tor / Proxy: Tor / Proxy aktivieren
@@ -1243,7 +1243,7 @@ Settings:
     Proxy Warning: OpenTubeX hat keinen eingebauten Proxy, kann aber mit einem externen Proxy verbunden werden, wie z. B. einem, der auf deinem Gerät läuft wie Tor, oder einem externen Proxy wie einem SOCKS5-Proxy, der von einigen VPNs bereitgestellt wird. Falls aktiviert, stelle sicher, dass dein Proxy/Tor richtig konfiguriert ist, da OpenTubeX ansonsten keine Daten abrufen kann.
     Proxy Username: Proxy-Anmeldename
     Proxy Password: Proxy-Passwort
-    IP Block Recovery Script Path: Skriptpfad zur IP-Block-Wiederherstellung
+    IP Block Recovery Script Path: Skript zur IP-Block-Wiederherstellung
     Select IP Block Recovery Script File: Skriptdatei für IP-Block-Wiederherstellung auswählen
     Running IP block recovery script: IP-Block-Wiederherstellungsskript wird ausgeführt
     IP block recovery script failed: 'IP-Block-Wiederherstellungsskript fehlgeschlagen (Exit-Code: {exitCode})'
@@ -1257,10 +1257,10 @@ Settings:
       Disabled Message: Einige Kanäle wurden anhand ihrer ID ausgeschlossen und werden nicht verarbeitet. Die Funktion ist gesperrt, während diese IDs aktualisiert werden.
     Notify when sponsor segment is skipped: Hinweis nach dem Überspringen eines Segments anzeigen
     Skip notification timeout: Timeout für Benachrichtigung bei Überspringen
-    'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock-API-URL (Standard ist https://sponsor.ajay.app)
+    'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock-API-URL
     Enable SponsorBlock: SponsorBlock aktivieren
     Enable SponsorBlock Submission: SponsorBlock-Einreichung aktivieren
-    SponsorBlock Private User ID (optional): SponsorBlock Private User ID (optional)
+    SponsorBlock Private User ID (optional): Private Benutzer-ID (optional)
     SponsorBlock Private User ID Tooltip: Füge die private SponsorBlock-Benutzer-ID aus der Browser-Erweiterung ein. Lasse dieses Feld leer, um eine von der App erzeugte ID zu verwenden.
     Generated SponsorBlock User ID: Erzeugte SponsorBlock-Benutzer-ID
     Generated SponsorBlock User ID Tooltip: Diese von der App erzeugte SponsorBlock-Benutzer-ID kann in der Browser-Erweiterung oder bei Nutzung der App auf einem anderen Computer verwendet werden.
@@ -1278,13 +1278,13 @@ Settings:
     Custom Color: Benutzerdefinierte Farbe
     UseDeArrowTitles: DeArrow-Videotitel verwenden
     UseDeArrowThumbnails: DeArrow für Miniaturansichten verwenden
-    'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': DeArrow-Thumbnail-Generator-API-URL (Standard ist https://dearrow-thumb.ajay.app)
+    'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': DeArrow-Vorschaubild-API-URL
   External Player Settings:
     Ignore Unsupported Action Warnings: Warnungen vor nicht unterstützten Aktionen ignorieren
     External Player: Externer Video-Player
     External Player Settings: Externe Video-Player
-    Custom External Player Executable: Benutzerdefinierte ausführbare Datei des Video-Players
-    Custom External Player Arguments: Benutzerdefinierte Argumente für externen Video-Player
+    Custom External Player Executable: Pfad zur ausführbaren Datei
+    Custom External Player Arguments: Benutzerdefinierte Argumente
     Players:
       None:
         Name: Keine
@@ -1299,9 +1299,9 @@ Settings:
     Update Managed Tools: Aktualisieren
     Managed Tools Download Error Template: 'Die verwalteten Tools konnten nicht heruntergeladen werden: {errors}'
     Download Folder: Download-Ordner
-    Global Additional yt-dlp Arguments: Globale zusätzliche yt-dlp-Argumente
+    Global Additional yt-dlp Arguments: Zusätzliche yt-dlp-Argumente
     Concurrent Downloads: Parallele Downloads
-    Bandwidth Limit: Bandbreitenlimit (KiB/s, 0 für unbegrenzt)
+    Bandwidth Limit: Bandbreitenlimit (KiB/s)
     Choose Download Folder: Download-Ordner auswählen
     Templates Hint: Benutzerdefinierte Download-Vorlagen können im Download-Dialog erstellt und verwaltet werden, der sich unterhalb des Video-Players befindet.
     External Software Hint: yt-dlp und FFmpeg werden in den Einstellungen für externe Software konfiguriert.
@@ -1374,8 +1374,8 @@ Settings:
     FFmpeg Downloaded Template: FFmpeg {version} wurde heruntergeladen
     FFmpeg Download Error Template: 'Herunterladen von FFmpeg fehlgeschlagen: {error}'
     Managed Tool Already Current Template: '{tool} {version} ist bereits auf dem neuesten Stand'
-    yt-dlp Executable Path: Pfad zur ausführbaren yt-dlp-Datei
-    FFmpeg Executable Path: Pfad zur ausführbaren FFmpeg-Datei
+    yt-dlp Executable Path: Ausführbare yt-dlp-Datei
+    FFmpeg Executable Path: Ausführbare FFmpeg-Datei
     Restricted Playback Authentication: "yt-dlp-Cookies"
     Cookie Source: Cookie-Quelle
     Cookie Sources:
@@ -1432,7 +1432,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Return YouTube Dislike
     Enable Return YouTube Dislike: Return YouTube Dislike aktivieren
-    Return YouTube Dislike Url: Return YouTube Dislike API URL (Standard ist https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: API-URL
   Quick Settings:
     Quick Settings: Schnelleinstellungen
     Customize Quick Settings: Schnelleinstellungen anpassen
@@ -1533,7 +1533,7 @@ Settings:
       Synchronisiere Abos, Profile, Wiedergabelisten, Wiedergabeverlauf und unterstützte Einstellungen mit einem
       OpenTubeX- oder LibreTube-Synchronisierungsserver. LibreTube-Server unterstützen möglicherweise nicht alle
       Synchronisierungsfunktionen.
-    Server URL: Server-URL
+    Server URL: Sync-Server-URL
     Checking Server: Synchronisierungsserver wird überprüft…
     Server Unavailable: Verbindung zu diesem Synchronisierungsserver fehlgeschlagen. Überprüfe die URL und versuche es erneut.
     Username: Benutzername
@@ -2991,8 +2991,8 @@ Downloads:
   File Name Template: Vorlage für Dateinamen
   File Name Template Help: 'Verfügbare Felder: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
   Time Range and Chapters: Zeitbereich und Kapitel
-  Start Time: Startzeit (HH:MM:SS)
-  End Time: Endzeit (HH:MM:SS)
+  Start Time: Startzeit
+  End Time: Endzeit
   Split by Chapters: Nach Kapiteln in separate Dateien aufteilen
   Remove Segments: Segmente entfernen
   Subtitles and Metadata: Untertitel und Metadaten
@@ -3116,3 +3116,23 @@ Tray Icon:
   Follow App Theme: "App-Design folgen"
 SponsorBlock Disabled on Channel: SponsorBlock auf {channel} deaktiviert
 SponsorBlock Enabled on Channel: SponsorBlock auf {channel} aktiviert
+
+Form Inputs:
+  Enter Channels: "Kanäle eingeben"
+  Enter Text: "Text eingeben"
+  Video URL: Video- oder Playlist-URL
+  Paste Link: Video- oder Playlist-Link einfügen
+  Example: z. B. {example}
+  No Minimum: Kein Minimum
+  No Maximum: Kein Maximum
+  Any Age: Beliebiges Alter
+  Included Terms Example: z. B. Anleitung, Rezension
+  Excluded Terms Example: z. B. Trailer, Vorschau
+  Download Folder Hint: Leer lassen, um deinen Downloads-Ordner zu verwenden
+  Global Arguments Hint: Optionale Argumente für jeden Download
+  Unlimited Hint: 0 für unbegrenzt
+  Add Argument: Argument hinzufügen
+  Template Name Example: z. B. Nur Audio
+  Download Arguments Hint: Optionale Argumente für diesen Download
+  Generated ID Hint: Leer lassen, um eine ID zu erzeugen
+  Default Value: "Standard: {value}"

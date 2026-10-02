@@ -20,7 +20,8 @@
         @change="loadTemplateSource"
       />
       <FtInput
-        :placeholder="t('Downloads.Template Name')"
+        :label="t('Downloads.Template Name')"
+        :placeholder="t('Form Inputs.Template Name Example')"
         :show-label="true"
         :show-action-button="false"
         :maxlength="100"
@@ -67,7 +68,8 @@
 
       <section class="optionSection">
         <FtInput
-          :placeholder="t('Downloads.File Name Template')"
+          :label="t('Downloads.File Name Template')"
+          placeholder="{title}.{ext}"
           :tooltip="fileNameTemplateHelp"
           :show-action-button="false"
           :show-label="true"
@@ -80,7 +82,8 @@
         <h3>{{ t('Downloads.Time Range and Chapters') }}</h3>
         <div class="optionGrid">
           <FtInput
-            :placeholder="t('Downloads.Start Time')"
+            :label="t('Downloads.Start Time')"
+            placeholder="HH:MM:SS"
             :disabled="subtitlesOnly"
             :show-action-button="false"
             :show-label="true"
@@ -88,7 +91,8 @@
             @input="setOption('startTime', $event)"
           />
           <FtInput
-            :placeholder="t('Downloads.End Time')"
+            :label="t('Downloads.End Time')"
+            placeholder="HH:MM:SS"
             :disabled="subtitlesOnly"
             :show-action-button="false"
             :show-label="true"
@@ -166,7 +170,8 @@
         </div>
         <FtInput
           class="subtitleLanguages"
-          :placeholder="t('Downloads.Subtitle Languages')"
+          :label="t('Downloads.Subtitle Languages')"
+          placeholder="en.*,de.*"
           :tooltip="t('Downloads.Subtitle Languages Help')"
           :disabled="!subtitlesOnly && !options.includeSubtitles"
           :show-action-button="false"
@@ -178,7 +183,8 @@
 
       <section class="optionSection">
         <FtInput
-          :placeholder="t('Downloads.Additional yt-dlp Arguments')"
+          :label="t('Downloads.Additional yt-dlp Arguments')"
+          :placeholder="t('Form Inputs.Download Arguments Hint')"
           :show-action-button="false"
           :show-label="true"
           :value="options.customArgs"
@@ -501,17 +507,23 @@ function deleteTemplate() {
   inline-size: 100%;
 }
 
+.optionGrid > :deep(.ft-input-component) {
+  min-inline-size: 0;
+  inline-size: 100%;
+}
+
+.templateOptions :deep(.ft-input-component:has(.inputIndicators > *)) {
+  box-sizing: border-box;
+  min-inline-size: 0;
+  inline-size: min(340px, calc(100% - 70px));
+}
+
 .templateManagerHeader > :deep(.ft-input-component) {
   margin-block-start: 30px;
 }
 
-.templateManagerHeader :deep(.selectLabel) {
-  position: absolute;
-  inset-block-start: -20px;
-  inset-inline-start: 0;
-  color: var(--accent-color);
-  font-size: 14px;
-  line-height: 1;
+.templateManagerHeader :deep(.inputWrapper) {
+  margin-block-end: 0;
 }
 
 .templateManagerHeader :deep(.ft-input) {

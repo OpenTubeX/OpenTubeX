@@ -111,6 +111,68 @@ for (const uiScale of [100, 125]) {
   })
 }
 
+for (const uiScale of [100, 95]) {
+  for (const width of [1280, 480]) {
+    test.describe(`quick settings heading spacing at ${width}px and ${uiScale}% scale`, () => {
+      test.use({ seed: { settings: { currentLocale: 'en-US', uiScale, bounds: { x: 0, y: 0, width, height: 900, maximized: false } } } })
+
+      test('keeps the first selects close to their section headings', async ({ page }, testInfo) => {
+        await page.emulateMedia({ reducedMotion: 'reduce' })
+        await page.locator('.profileTrigger').click()
+        const menu = page.locator('.quickSettingsMenu')
+        await expect(menu).toBeVisible()
+        await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
+        const gaps = await menu.locator('.menuSection').evaluateAll(sections => sections.map(section => {
+          const heading = section.querySelector('h3').getBoundingClientRect()
+          const firstControl = section.querySelector('.quickSettingControl')
+          const select = firstControl.querySelector('.select-text')
+          if (!select) return null
+          return { heading: section.querySelector('h3').textContent.trim(), gap: select.getBoundingClientRect().top - heading.bottom }
+        }).filter(Boolean))
+
+        expect(gaps).toHaveLength(4)
+        for (const { heading, gap } of gaps) {
+          expect.soft(gap, `${heading} heading gap`).toBeGreaterThanOrEqual(8)
+          expect.soft(gap, `${heading} heading gap`).toBeLessThanOrEqual(16)
+        }
+        if (uiScale === 100) {
+          const screenshot = testInfo.outputPath('quick-settings-heading-spacing.png')
+          await menu.screenshot({ path: screenshot })
+          await testInfo.attach('quick-settings-heading-spacing', { path: screenshot, contentType: 'image/png' })
+        }
+      })
+
+      test('gives select labels and values the same spacing as full settings', async ({ page }) => {
+        await page.emulateMedia({ reducedMotion: 'reduce' })
+        const geometry = control => control.evaluate(element => {
+          const label = element.parentElement.querySelector('.select-label').getBoundingClientRect()
+          const value = element.querySelector('.selectedValue').getBoundingClientRect()
+          return { gap: value.top - label.bottom, height: element.getBoundingClientRect().height }
+        })
+        const appearance = await goToSettingsSection(page, 'appearance')
+        await expect(page.locator('.settingsWindow')).not.toHaveClass(/settings-window-enter-active/)
+        const fullSettings = []
+        for (const name of ['Base Theme', 'Main Color Theme']) {
+          fullSettings.push(await geometry(appearance.getByRole('combobox', { name, exact: true })))
+        }
+        await page.locator('.settingsHeaderActions').getByRole('button', { name: 'Close', exact: true }).click()
+        await page.locator('.profileTrigger').click()
+        const menu = page.locator('.quickSettingsMenu')
+        await expect(menu).toBeVisible()
+        await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
+        for (const [index, name] of ['Base Theme', 'Main Color Theme'].entries()) {
+          const quickSettings = await geometry(menu.getByRole('combobox', { name, exact: true }))
+          expect.soft(quickSettings.gap, `${name} label/value gap`).toBeGreaterThanOrEqual(fullSettings[index].gap - 0.1)
+          expect.soft(quickSettings.height, `${name} height`).toBeGreaterThanOrEqual(fullSettings[index].height - 0.1)
+          // Larger phone touch targets add equal space above and below the value.
+          const addedSpace = (quickSettings.height - fullSettings[index].height) / 2
+          expect.soft(quickSettings.gap, `${name} centered label/value gap`).toBeCloseTo(fullSettings[index].gap + addedSpace, 1)
+        }
+      })
+    })
+  }
+}
+
 test.describe('quick system themes', () => {
   test.use({ seed: { settings: { quickSettings: ['baseTheme'], baseTheme: 'system', currentLocale: 'en-US', uiScale: 125 } } })
 

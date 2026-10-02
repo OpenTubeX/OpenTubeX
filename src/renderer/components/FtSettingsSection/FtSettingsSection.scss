@@ -46,11 +46,11 @@
 %switch-grid {
   align-items: center;
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: minmax(0, auto) minmax(0, auto);
   justify-content: space-evenly;
 
   @container settings-content (width <= 680px) {
-    grid-template-columns: auto;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -72,6 +72,17 @@
   display: flex;
   flex-direction: column;
   align-items: start;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+:deep(.switchColumn .pure-material-slider) {
+  box-sizing: border-box;
+  inline-size: min(380px, calc(100% - 16px));
+}
+
+:deep(.switchColumn > .select) {
+  margin-block: 8px;
 }
 
 :deep(.center) {
@@ -98,6 +109,18 @@
 
     :deep(.switchColumn) {
       align-items: center;
+      inline-size: 100%;
+    }
+
+    :deep(.switch-label) {
+      min-inline-size: 0;
+      max-inline-size: 100%;
+    }
+
+    :deep(.switch-label-text) {
+      min-inline-size: 0;
+      hyphens: auto;
+      overflow-wrap: break-word;
     }
 
     :deep(.switchColumn > .select.containsTooltip) {
@@ -140,19 +163,22 @@
       display: inline-flex;
     }
 
-    :deep(:not(.select, .selectLabel, .groupTitle, .selectIndicators, .labelRow, .switch-label) > .tooltip) {
+    :deep(:not(.select, .selectLabel, .groupTitle, .selectIndicators, .inputIndicators, .labelRow, .switch-label) > .tooltip) {
       display: inline-block;
       position: absolute;
       inset-inline-end: -25px;
       inset-block-start: 12px;
     }
 
-    :deep(.settingsFlexStart460px .tooltip) {
+    :deep(.settingsFlexStart460px :not(.inputIndicators) > .tooltip) {
       inset-inline-end: 0;
       inset-block-start: -2px;
     }
 
     :deep(.switch-ctn) {
+      box-sizing: border-box;
+      min-inline-size: 0;
+      max-inline-size: calc(100% - 14px);
       margin-block: 10px;
       margin-inline: 7px;
     }

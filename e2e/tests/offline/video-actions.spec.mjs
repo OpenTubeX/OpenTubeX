@@ -149,7 +149,7 @@ test.describe('video link copy actions', () => {
   })
 
   for (const width of [1600, 375]) {
-    test(`keeps copying in the context menu and thumbnail action at ${width}px`, async ({ app, page }) => {
+    test(`keeps video link copy actions available at ${width}px`, async ({ app, page }) => {
       await goTo(page, 'history')
       await page.setViewportSize({ width, height: 900 })
       const video = page.locator('.ft-list-video').first()
@@ -175,7 +175,10 @@ test.describe('video link copy actions', () => {
         await video.locator('.title').evaluate(element => element.dispatchEvent(new PointerEvent('contextmenu', {
           bubbles: true, cancelable: true, pointerType: 'touch'
         })))
-        await page.locator('.mobileThumbnailActionRow').getByRole('menuitem', { name: 'Copy YouTube Link', exact: true }).click()
+        const mobileMenu = page.locator('.mobileLinkActions')
+        await expect(mobileMenu.locator('.mobileThumbnailActionRow').getByRole('menuitem', { name: 'Copy YouTube Link', exact: true })).toHaveCount(0)
+        await mobileMenu.getByRole('menuitem', { name: 'Copy Link', exact: true }).click()
+        await mobileMenu.getByRole('menuitem', { name: 'Copy YouTube Link', exact: true }).click()
       } else {
         await video.hover()
         await video.locator('.extraThumbnailActionIcon .iconButton').click()
@@ -1795,6 +1798,19 @@ test.describe('list video actions', () => {
     }))
     expect(opacity).toEqual({ label: '1', labelText: '0.4' })
     await expect(tooltip).toHaveCSS('opacity', '1')
+    for (const fullWindow of [false, true]) {
+      await page.evaluate(value => document.body.classList.toggle('playerFullWindow', value), fullWindow)
+      await expect.poll(() => tooltip.evaluate(element => {
+        const rect = element.getBoundingClientRect()
+        // Tooltips ignore pointer events; temporarily enable hit testing to verify
+        // the visible tooltip paints above the modal rather than underneath it.
+        element.style.pointerEvents = 'auto'
+        const top = document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)
+        element.style.pointerEvents = ''
+        return top === element || element.contains(top)
+      })).toBe(true)
+    }
+    await page.evaluate(() => document.body.classList.remove('playerFullWindow'))
   })
 
   test('the video context menu and playlist dropdown work with vertical tabs', async ({ page }) => {

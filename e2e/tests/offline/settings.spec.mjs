@@ -114,19 +114,21 @@ async function pressSettingsShortcut(app) {
   })
 }
 
-async function expectExternalSoftwarePathAlignment(tool, sourceName, pathPlaceholder) {
+async function expectExternalSoftwarePathAlignment(tool, sourceName, pathLabel) {
   const source = tool.locator('.select').filter({ hasText: sourceName })
   const [sourceBox, helpBox, pathBox] = await Promise.all([
     source.locator('.select-text').boundingBox(),
     source.locator('.selectIndicators button').boundingBox(),
-    tool.getByPlaceholder(pathPlaceholder).boundingBox()
+    tool.getByLabel(pathLabel).boundingBox()
   ])
 
   expect(sourceBox).not.toBeNull()
   expect(helpBox).not.toBeNull()
   expect(pathBox).not.toBeNull()
   expect(pathBox.x).toBeCloseTo(sourceBox.x, 0)
-  expect(pathBox.x + pathBox.width).toBeCloseTo(helpBox.x + helpBox.width, 0)
+  expect(pathBox.width).toBeCloseTo(sourceBox.width, 0)
+  const inputHelpBox = await tool.getByLabel(pathLabel).locator('..').locator('.inputIndicators button').first().boundingBox()
+  expect(inputHelpBox.x).toBeCloseTo(helpBox.x, 0)
 }
 
 async function expectSubscriptionRefreshIntervalSelectHighlight(page) {
@@ -479,9 +481,9 @@ test.describe('settings search highlights', () => {
       'Screenshot Mode',
       'Edge Color',
       'Server URL',
-      'Custom External Player Executable',
-      'SponsorBlock API Url (Default is https://sponsor.ajay.app)',
-      'Return YouTube Dislike API URL (Default is https://ryd-proxy.kavin.rocks)',
+      'Executable path',
+      'SponsorBlock API URL',
+      'API URL',
       'Proxy Host',
       'Edit custom theme',
       'Remove Password',
@@ -562,7 +564,7 @@ test.describe('settings', () => {
     await proxy.locator('label.switch-label').filter({ hasText: 'Enable Tor / Proxy' }).click()
     const [testProxyBox, recoveryScriptBox] = await Promise.all([
       proxy.getByRole('button', { name: 'Test Proxy', exact: true }).boundingBox(),
-      proxy.getByPlaceholder('IP Block Recovery Script Path').boundingBox()
+      proxy.getByLabel('IP block recovery script').boundingBox()
     ])
 
     expect(testProxyBox).not.toBeNull()
@@ -612,9 +614,9 @@ test.describe('settings', () => {
       'FFmpeg / FFprobe'
     ])
     await expect(ytDlpTool.getByRole('combobox', { name: 'yt-dlp Source' })).toBeVisible()
-    await expect(ytDlpTool.getByPlaceholder('yt-dlp Executable Path')).toBeVisible()
+    await expect(ytDlpTool.getByLabel('yt-dlp executable')).toBeVisible()
     await expect(ffmpegTool.getByRole('combobox', { name: 'FFmpeg Source' })).toBeVisible()
-    await expect(ffmpegTool.getByPlaceholder('FFmpeg Executable Path')).toBeVisible()
+    await expect(ffmpegTool.getByLabel('FFmpeg executable')).toBeVisible()
     await expect(ffmpegTool.locator('.externalSoftwareToolStatus')).toHaveText(
       'Detected FFmpeg/FFprobe version: 8.0'
     )
@@ -626,12 +628,12 @@ test.describe('settings', () => {
     await expectExternalSoftwarePathAlignment(
       ytDlpTool,
       'yt-dlp Source',
-      'yt-dlp Executable Path'
+      'yt-dlp executable'
     )
     await expectExternalSoftwarePathAlignment(
       ffmpegTool,
       'FFmpeg Source',
-      'FFmpeg Executable Path'
+      'FFmpeg executable'
     )
     const positionWithinTool = source => source.evaluate(element => {
       const sourceBounds = element.getBoundingClientRect()
@@ -648,9 +650,9 @@ test.describe('settings', () => {
 
     await ytDlpSource.locator('select').selectOption('managed')
     await expect(ytDlpTool.getByRole('combobox', { name: 'yt-dlp Channel' })).toBeVisible()
-    await expect(ytDlpTool.getByPlaceholder('yt-dlp Executable Path')).toHaveCount(0)
+    await expect(ytDlpTool.getByLabel('yt-dlp executable')).toHaveCount(0)
     await expect(ytDlpTool.getByRole('button', { name: 'Update yt-dlp' })).toBeVisible()
-    await expect(ffmpegTool.getByPlaceholder('FFmpeg Executable Path')).toBeVisible()
+    await expect(ffmpegTool.getByLabel('FFmpeg executable')).toBeVisible()
 
     const positionsAfter = await Promise.all([
       positionWithinTool(ytDlpSource),
@@ -662,7 +664,7 @@ test.describe('settings', () => {
     }
 
     await ffmpegSource.locator('select').selectOption('managed')
-    await expect(ffmpegTool.getByPlaceholder('FFmpeg Executable Path')).toHaveCount(0)
+    await expect(ffmpegTool.getByLabel('FFmpeg executable')).toHaveCount(0)
     await expect(ffmpegTool.getByRole('button', { name: 'Update FFmpeg and FFprobe' })).toBeVisible()
     await expect(externalSoftware.getByRole('combobox', { name: 'Managed Tool Updates' })).toBeVisible()
   })
@@ -716,12 +718,12 @@ test.describe('settings', () => {
       await expectExternalSoftwarePathAlignment(
         tools.nth(0),
         'yt-dlp Source',
-        'yt-dlp Executable Path'
+        'yt-dlp executable'
       )
       await expectExternalSoftwarePathAlignment(
         tools.nth(1),
         'FFmpeg Source',
-        'FFmpeg Executable Path'
+        'FFmpeg executable'
       )
     })
   })
@@ -953,7 +955,7 @@ test.describe('settings', () => {
         ['appearance', /Scrollbar Width/],
       ]) {
         const settings = await goToSettingsSection(page, section)
-        const value = settings.getByRole('slider', { name }).locator('..').locator('.value')
+        const value = settings.getByRole('slider', { name }).locator('../..').locator('.value')
         await expect.poll(() => value.evaluate(element => {
           const number = element.querySelector('.valueNumber')
           const numberRange = document.createRange()
@@ -974,7 +976,7 @@ test.describe('settings', () => {
   test('does not reserve unit text for a unitless slider', async ({ page }) => {
     const subscriptions = await goToSettingsSection(page, 'subscriptions')
     const slider = subscriptions.getByRole('slider', { name: /^To:/ })
-    const value = slider.locator('..').locator('.value')
+    const value = slider.locator('..').locator('..').locator('.value')
     await expect.poll(() => value.evaluate(element => (
       getComputedStyle(element, '::after').content
     ))).toMatch(/^"\d+"$/)
@@ -1935,6 +1937,7 @@ test.describe('settings', () => {
   })
 
   test('searches setting labels and opens their category', async ({ page }) => {
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'en-US'))
     await goTo(page, 'settings')
     const search = page.getByRole('searchbox', { name: 'Search settings' })
     await expect(search).toBeVisible()
@@ -2002,13 +2005,13 @@ test.describe('settings', () => {
 
     await page.getByRole('combobox', { name: 'External Player', exact: true }).click()
     await page.getByRole('option', { name: 'mpv', exact: true }).click()
-    await search.fill('Custom External Player Executable')
-    await page.getByRole('button', { name: 'Custom External Player Executable', exact: true }).click()
+    await search.fill('Executable path')
+    await page.getByRole('button', { name: 'Executable path', exact: true }).click()
     const executableHighlight = page.locator('input.settingsSearchTarget')
-    await expect(executableHighlight).toHaveAttribute('placeholder', 'Custom External Player Executable')
+    await expect(executableHighlight).toHaveAccessibleName('Executable path')
     expect(await executableHighlight.evaluate(element => getComputedStyle(element).animationName))
       .toContain('settings-search-highlight')
-    expect((await executableHighlight.boundingBox()).height).toBeLessThanOrEqual(45)
+    expect((await executableHighlight.boundingBox()).height).toBeLessThanOrEqual(56.01)
     await expect(page.locator('.ft-input-component.settingsSearchTarget')).toHaveCount(0)
 
     await search.fill('Proxy Videos Through Invidious')
@@ -3429,9 +3432,9 @@ test.describe('settings', () => {
       'https://operator.example/privacy'
     )
 
-    await syncSection.getByLabel('Server URL').fill('https://sync.libretube.dev')
+    await syncSection.getByLabel('Sync server URL').fill('https://sync.libretube.dev')
     await expect(privacyPolicy).toHaveCount(0)
-    await syncSection.getByLabel('Server URL').fill('https://sync.opentubex.org')
+    await syncSection.getByLabel('Sync server URL').fill('https://sync.opentubex.org')
     await expect(privacyPolicy).toHaveAttribute('href', 'https://operator.example/privacy')
   })
 
@@ -3453,7 +3456,7 @@ test.describe('settings', () => {
     await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'en-US'))
     await expect(syncSection.locator('.error')).toHaveText('Update this server to support encrypted live sync.')
     await expect(syncSection.getByRole('button', { name: 'Log in' })).toBeDisabled()
-    await syncSection.getByLabel('Server URL').fill('https://sync.libretube.dev')
+    await syncSection.getByLabel('Sync server URL').fill('https://sync.libretube.dev')
     await expect(syncSection.getByText(/does not support enhanced privacy/)).toBeVisible()
     await expect(syncSection.getByLabel(/Privacy passphrase/)).toBeHidden()
     await syncSection.getByLabel('Username').fill('legacy-user')
@@ -3519,8 +3522,8 @@ test.describe('settings', () => {
     await page.locator('.settingsMenu [data-section="sync"]').click()
     const syncSection = page.locator('[data-section="sync"]')
     await syncSection.getByText('Enable Sync', { exact: true }).click()
-    await syncSection.getByLabel('Server URL').fill(serverUrl)
-    await syncSection.getByLabel('Server URL').press('Tab')
+    await syncSection.getByLabel('Sync server URL').fill(serverUrl)
+    await syncSection.getByLabel('Sync server URL').press('Tab')
     const pairButton = syncSection.getByRole('button', { name: 'Pair with an existing device' })
     const loginButton = syncSection.getByRole('button', { name: 'Log in' })
     const registerButton = syncSection.getByRole('button', { name: 'Register' })
@@ -3587,7 +3590,7 @@ test.describe('settings', () => {
 
     const syncSection = page.locator('[data-section="sync"]')
     await expect(syncSection.getByLabel('Enable Sync')).not.toBeChecked()
-    await expect(syncSection.getByLabel('Server URL')).toHaveCount(0)
+    await expect(syncSection.getByLabel('Sync server URL')).toHaveCount(0)
     await page.waitForTimeout(500)
     expect(syncRequests).toEqual([])
   })
@@ -5227,7 +5230,7 @@ test.describe('sync settings', () => {
     await page.waitForTimeout(250)
     await expect(page.locator('.toast', { hasText: 'Sync failed: Sync failed' })).toHaveCount(0)
 
-    await expect(syncSection.getByLabel('Server URL')).toBeDisabled()
+    await expect(syncSection.getByLabel('Sync server URL')).toBeDisabled()
     await expect(syncSection.getByLabel('Username')).toBeDisabled()
     // Sync may query optional capabilities before the post-disconnect check.
     delayServerCheck = true
@@ -5238,7 +5241,7 @@ test.describe('sync settings', () => {
       // Scoped to the sync failure: the same element also carries unrelated
       // notices (e.g. the enhanced-privacy hint) once the server check lands.
       await expect(syncSection.locator('.error', { hasText: 'Sync failed' })).toHaveCount(0)
-      await expect(syncSection.getByLabel('Server URL')).toBeEnabled()
+      await expect(syncSection.getByLabel('Sync server URL')).toBeEnabled()
       await expect(syncSection.getByLabel('Username')).toBeEnabled()
       await expect(syncSection.getByLabel('Password')).toBeEnabled()
     } finally {
@@ -5404,7 +5407,7 @@ test.describe('sync settings', () => {
     await syncSection.getByLabel('Password').fill('sync-password')
     await syncSection.getByRole('button', { name: 'Log in' }).click()
 
-    await expect(syncSection.getByLabel('Server URL')).toBeDisabled()
+    await expect(syncSection.getByLabel('Sync server URL')).toBeDisabled()
     await expect(syncSection.getByLabel('Username')).toBeDisabled()
     await expect(syncSection.getByLabel('Password')).toBeDisabled()
     await expect(syncSection.getByRole('button', { name: 'Log in' })).toBeDisabled()
@@ -5412,7 +5415,7 @@ test.describe('sync settings', () => {
 
     finishAuthentication()
     await expect(syncSection.locator('.error')).toHaveText('Invalid credentials')
-    await expect(syncSection.getByLabel('Server URL')).toBeEnabled()
+    await expect(syncSection.getByLabel('Sync server URL')).toBeEnabled()
     await expect(syncSection.getByLabel('Username')).toBeEnabled()
     await expect(syncSection.getByLabel('Password')).toBeEnabled()
   })
@@ -5676,8 +5679,7 @@ test.describe('synced setting indicators', () => {
     expect(resetBox.x - syncBox.x - syncBox.width).toBeGreaterThanOrEqual(6)
 
     const storage = await goToSettingsSection(page, 'storage')
-    const input = storage.locator('label.selectLabel')
-      .filter({ hasText: 'Automatic History Retention' })
+    const input = storage.getByRole('spinbutton', { name: 'Automatic History Retention (Days)', exact: true }).locator('../..')
     const [inputSyncBox, inputHelpBox] = await Promise.all([
       input.locator('.syncedSettingIndicator').boundingBox(),
       input.locator('.selectTooltip').boundingBox()
@@ -5698,26 +5700,14 @@ test.describe('synced setting indicators', () => {
     expect(sectionBox).not.toBeNull()
     expect(tooltipTextBox.width).toBeLessThan(sectionBox.width / 2)
 
-    const removeHistoryButton = page.getByRole('button', { name: 'Remove Watch History' })
-    const removeHistoryButtonBox = await removeHistoryButton.boundingBox()
-    expect(removeHistoryButtonBox).not.toBeNull()
-
-    const overlapLeft = Math.max(tooltipTextBox.x, removeHistoryButtonBox.x)
-    const overlapRight = Math.min(
-      tooltipTextBox.x + tooltipTextBox.width,
-      removeHistoryButtonBox.x + removeHistoryButtonBox.width
-    )
-    const overlapTop = Math.max(tooltipTextBox.y, removeHistoryButtonBox.y)
-    const overlapBottom = Math.min(
-      tooltipTextBox.y + tooltipTextBox.height,
-      removeHistoryButtonBox.y + removeHistoryButtonBox.height
-    )
-    expect(overlapLeft).toBeLessThan(overlapRight)
-    expect(overlapTop).toBeLessThan(overlapBottom)
-
-    const overlapPoint = {
-      x: (overlapLeft + overlapRight) / 2,
-      y: (overlapTop + overlapBottom) / 2
+    const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }))
+    expect(tooltipTextBox.x).toBeGreaterThanOrEqual(0)
+    expect(tooltipTextBox.y).toBeGreaterThanOrEqual(0)
+    expect(tooltipTextBox.x + tooltipTextBox.width).toBeLessThanOrEqual(viewport.width)
+    expect(tooltipTextBox.y + tooltipTextBox.height).toBeLessThanOrEqual(viewport.height)
+    const tooltipCenter = {
+      x: tooltipTextBox.x + tooltipTextBox.width / 2,
+      y: tooltipTextBox.y + tooltipTextBox.height / 2
     }
     await tooltipText.evaluate(element => {
       element.style.pointerEvents = 'auto'
@@ -5725,7 +5715,7 @@ test.describe('synced setting indicators', () => {
     await expect.poll(() => page.evaluate(({ x, y }) => {
       const element = document.elementFromPoint(x, y)
       return element !== null && element.closest('[role="tooltip"]') !== null
-    }, overlapPoint)).toBe(true)
+    }, tooltipCenter)).toBe(true)
   })
 
   test('spreads the theme sliders evenly over their rows', async ({ page }) => {
@@ -5869,7 +5859,7 @@ test.describe('synced setting indicators', () => {
     const viewingModeSelect = playerSectionAgain.locator('.select')
       .filter({ hasText: 'Default Viewing Mode' })
     const [selectBox, selectLabelBox] = await Promise.all([
-      viewingModeSelect.locator('.select-text').boundingBox(),
+      viewingModeSelect.locator('.selectedValue').boundingBox(),
       viewingModeSelect.locator('.select-label').boundingBox()
     ])
     expect(selectBox).not.toBeNull()

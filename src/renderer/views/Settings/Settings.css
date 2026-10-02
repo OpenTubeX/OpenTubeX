@@ -433,7 +433,7 @@
 /* Select labels are absolutely positioned, so the wrapper padding above does
    not move them with the field unless their inset reserves the same gutter. */
 .settingsContent.highlightChangedSettings :deep(.select-label) {
-  inset-inline-start: 9px;
+  inset-inline-start: 25px;
 }
 
 :deep(.switch-ctn:has(.changedSettingIndicator)),
@@ -445,6 +445,14 @@
 :deep(.sponsorBlockCategory:has(.changedSettingIndicator)) {
   border-inline-start: 3px solid var(--settings-changed-color, var(--primary-color));
   padding-inline-start: 9px;
+}
+
+/* Keep tag and password fields centered when reserving the marker gutter. */
+.settingsContent.highlightChangedSettings :deep(.ft-input-tags-component .ft-input-component),
+.settingsContent.highlightChangedSettings :deep(.passwordForm .ft-input-component),
+:deep(.ft-input-tags-component .ft-input-component:has(.changedSettingIndicator)),
+:deep(.passwordForm .ft-input-component:has(.changedSettingIndicator)) {
+  padding-inline-end: 12px;
 }
 
 .settingsSubpageScroll {

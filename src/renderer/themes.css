@@ -9,6 +9,13 @@ body {
 
   --app-font-family: 'Geist Variable', system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   --ui-roundness: 1;
+  --form-control-height: 45px;
+  --form-control-value-padding: 18px 4px;
+  --form-control-label-top: 4px;
+  --switch-track-width: 40px;
+  --switch-track-height: 24px;
+  --switch-thumb-inset: 3px;
+  --switch-touch-height: 36px;
 
   /* Optional decorative layers, separate from colors used by contrast checks
      and native windows. Fixed backgrounds keep the field aligned on scroll. */
@@ -68,12 +75,23 @@ body {
   --colored-header-button-pressed-text-color: var(--text-with-main-color);
 }
 
+/* Inherit native touch sizing into dialogs and other teleported controls too. */
+body:where(:has(.app.capacitorTabs)) {
+  --form-control-height: max(56px, var(--phone-touch-target, 48px));
+  --form-control-value-padding: 24px 8px;
+  --form-control-label-top: 8px;
+  --switch-track-width: 52px;
+  --switch-track-height: 32px;
+  --switch-thumb-inset: 4px;
+  --switch-touch-height: var(--phone-touch-target, 48px);
+}
+
 ::selection {
   color: var(--selection-text-color);
   background-color: var(--selection-background-color);
 }
 
-:where(:root:not(.hideOutlines)) :focus:not(:disabled) {
+:where(:root:not(.hideOutlines)) :focus-visible:not(:disabled) {
   outline: 2px solid var(--primary-color);
   outline-offset: -3px;
   border-radius: calc(4px * var(--ui-roundness));

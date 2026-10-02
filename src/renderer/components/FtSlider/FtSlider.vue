@@ -34,19 +34,32 @@
         @reset="emit('reset')"
       />
     </span>
-    <input
-      :id="id"
-      v-model.number="currentValue"
-      v-touch-range
-      class="input"
-      :disabled="disabled"
-      type="range"
-      :min="minValue"
-      :max="maxValue"
-      :step="step"
-      @input="input"
-      @change="change"
+    <span
+      class="sliderControl"
+      :style="{ '--slider-progress': `${progress}%`, '--slider-fraction': progress / 100 }"
     >
+      <span
+        class="sliderTrack activeTrack"
+        aria-hidden="true"
+      />
+      <span
+        class="sliderTrack inactiveTrack"
+        aria-hidden="true"
+      />
+      <input
+        :id="id"
+        v-model.number="currentValue"
+        v-touch-range
+        class="input"
+        :disabled="disabled"
+        type="range"
+        :min="minValue"
+        :max="maxValue"
+        :step="step"
+        @input="input"
+        @change="change"
+      >
+    </span>
   </label>
 </template>
 
@@ -106,6 +119,11 @@ const emit = defineEmits(['change', 'input', 'reset'])
 
 const id = useId()
 const currentValue = ref(props.defaultValue)
+
+const progress = computed(() => {
+  const range = props.maxValue - props.minValue
+  return range > 0 ? Math.max(0, Math.min(100, (currentValue.value - props.minValue) / range * 100)) : 0
+})
 
 // Apply new bounds before the value, or a range input clamps it to the old max.
 watch(() => props.defaultValue, (value) => {

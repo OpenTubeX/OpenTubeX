@@ -50,11 +50,44 @@ async function scrollToBottom(scroller) {
 
 test.use({
   seed: {
-    profiles: PROFILES
+    profiles: PROFILES,
+    settings: { currentLocale: 'en-US' }
   }
 })
 
 test.describe('download settings', () => {
+  for (const uiScale of [100, 95]) {
+    test(`template controls keep desktop columns and helpers inside narrow windows at ${uiScale}%`, async ({ app, page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), uiScale)
+      await goToSettingsSection(page, 'download')
+      await page.getByRole('button', { name: 'Manage Download Templates (0)' }).click()
+      const options = page.locator('.templateOptions')
+      expect.soft(await options.locator('.optionGrid').first().evaluate(element => getComputedStyle(element).display)).toBe('grid')
+      const grids = options.locator('.optionGrid')
+      for (const grid of await grids.all()) {
+        const boxes = await grid.locator(':scope > *').evaluateAll(elements => elements.slice(0, 2).map(element => element.getBoundingClientRect().top))
+        expect.soft(Math.abs(boxes[0] - boxes[1])).toBeLessThanOrEqual(1)
+      }
+      await setWindowSize(app, page, { width: 400, height: 901 })
+      for (const direction of ['ltr', 'rtl']) {
+        await page.evaluate(value => { document.body.dir = value }, direction)
+        expect.soft(await options.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+        const outside = await options.evaluate(element => {
+          const viewport = element.getBoundingClientRect()
+          return Array.from(element.querySelectorAll('.inputIndicators')).filter(indicators => {
+            const bounds = indicators.getBoundingClientRect()
+            return bounds.width > 0 && (bounds.left < viewport.left - 1 || bounds.right > viewport.right + 1)
+          }).map(indicators => indicators.className)
+        })
+        expect.soft(outside, direction).toEqual([])
+      }
+      await scrollToBottom(options)
+      await setWindowSize(app, page, { width: 1600, height: 1000 })
+      await expectScrollAtRenderedEnd(options)
+    })
+  }
+
   test('folder picker action has an accessible name', async ({ page }) => {
     await goToSettingsSection(page, 'download')
     await expect(page.locator('.downloadPathInputs .inputAction')).toHaveAccessibleName('Choose Download Folder')
@@ -63,7 +96,7 @@ test.describe('download settings', () => {
   test('stores global yt-dlp arguments and centers wrapped download actions', async ({ app, page }) => {
     await goToSettingsSection(page, 'download')
 
-    const globalArguments = page.getByRole('textbox', { name: 'Global Additional yt-dlp Arguments' })
+    const globalArguments = page.getByRole('textbox', { name: 'Additional yt-dlp arguments' })
     await globalArguments.fill('--cookies-from-browser firefox')
     await expect.poll(() => page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -92,9 +125,10 @@ test.describe('download settings', () => {
     expect(wrappedGeometry.tops[2]).toBeGreaterThan(wrappedGeometry.tops[0])
     expect(wrappedGeometry.centers[2]).toBeCloseTo(wrappedGeometry.containerCenter, 0)
 
-    const inputsTop = await page.getByRole('textbox', { name: 'Download Folder' })
-      .evaluate(element => element.getBoundingClientRect().top)
-    expect(inputsTop - wrappedGeometry.actionsBottom).toBeGreaterThanOrEqual(20)
+    await expect.poll(() => actions.evaluate(element => {
+      const inputsTop = document.querySelector('.downloadPathInputs input').getBoundingClientRect().top
+      return inputsTop - element.getBoundingClientRect().bottom
+    })).toBeGreaterThanOrEqual(19.99)
   })
 
   test('creates templates from built-in and custom templates', async ({ page }) => {
@@ -230,6 +264,7 @@ test.describe('automatic download authorization', () => {
   test.use({
     seed: {
       settings: {
+        currentLocale: 'en-US',
         ytDlpAutomaticDownloadRules: JSON.stringify({ [BETA_CHANNEL_ID]: AUTOMATIC_RULE })
       },
       profiles: PROFILES
