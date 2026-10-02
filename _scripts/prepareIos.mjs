@@ -41,6 +41,21 @@ if (project.includes(start)) {
   project = project.replace('504EC30F1FED79650016851F /* Assets.xcassets in Resources */,', '504EC30F1FED79650016851F /* Assets.xcassets in Resources */,\nA12790000000000000000032,')
 }
 const { version } = JSON.parse(read('package.json'))
+const isNightly = /-nightly-\d+$/.test(version)
+const appId = isNightly ? 'org.opentubex.app.nightly' : 'org.opentubex.app'
+const appName = isNightly ? 'OpenTubeX Nightly' : 'OpenTubeX'
+// Only the app's Release configuration changes; Debug keeps its Dev identity.
+project = project.replace(/(504EC3181FED79650016851F \/\* Release \*\/ = \{[\s\S]*?buildSettings = \{)([\s\S]*?)(\n\t\t\t\};)/, (match, start, settings, end) => {
+  const updated = settings
+    .replace(/PRODUCT_BUNDLE_IDENTIFIER = [^;]+;/, `PRODUCT_BUNDLE_IDENTIFIER = ${appId};`)
+    .replace(/APP_DISPLAY_NAME = [^;]+;/, `APP_DISPLAY_NAME = "${appName}";`)
+  return start + updated + end
+})
+const configPath = new URL('ios/App/App/capacitor.config.json', root)
+const config = JSON.parse(readFileSync(configPath, 'utf8'))
+config.appId = appId
+config.appName = appName
+writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`)
 project = project.replaceAll(/MARKETING_VERSION = [^;]+;/g, `MARKETING_VERSION = ${version.split('-')[0]};`)
 // ManagedMediaSource and AbortSignal.any are required by playback and networking.
 project = project.replaceAll(/IPHONEOS_DEPLOYMENT_TARGET = [^;]+;/g, 'IPHONEOS_DEPLOYMENT_TARGET = 17.4;')
