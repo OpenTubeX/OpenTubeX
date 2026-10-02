@@ -33,7 +33,15 @@ const fs = require('node:fs')
 const args = process.argv.slice(2)
 fs.appendFileSync(process.env.REQUESTS_FILE, JSON.stringify(['${name}', ...args]) + '\\n')
 if ('${name}' === 'gh' && args[1]?.includes('/releases/')) {
-  process.stdout.write((args.at(-1) === '.tag_name' ? process.env.TAG : process.env.RELEASE_JSON) + '\\n')
+  let output = args.at(-1) === '.tag_name' ? process.env.TAG : process.env.RELEASE_JSON
+  const failure = process.env.REQUESTS_FILE + '.incomplete'
+  if (process.env.INCOMPLETE_METADATA && args.at(-1) !== '.tag_name' && !fs.existsSync(failure)) {
+    fs.writeFileSync(failure, '')
+    const release = JSON.parse(output)
+    release.assets = release.assets.filter(asset => !asset.name.endsWith('.ipa'))
+    output = JSON.stringify(release)
+  }
+  process.stdout.write(output + '\\n')
 }
 if ('${name}' === 'wget' && new RegExp(process.env.FAIL_PATTERN || '(?!)').test(args.at(-1))) {
   const failure = process.env.REQUESTS_FILE + '.failed'
@@ -162,7 +170,19 @@ test('nightly publishers wait independently so a missing IPA cannot suppress oth
   }
 })
 
-test('missing release metadata cannot silently bypass the download check', async (t) => {
+test('incomplete release metadata is retried before probing downloads and notifying SideStore', async (t) => {
+  const workflow = load(await readFile('.github/workflows/release.yml', 'utf8'))
+  const setup = await fixture(t, 'v0.35.2-beta')
+  setup.env.INCOMPLETE_METADATA = 'once'
+  const result = runSteps(setup, workflow.jobs['trigger-sidestore-update'].steps)
+  assert.equal(result.status, 0, result.stderr)
+  const requests = await calls(setup)
+  assert.equal(requests.filter(call => call[0] === 'gh' && call[2].endsWith('/releases/42') && !call.includes('--jq')).length, 2)
+  assert.equal(requests.filter(call => call[0] === 'wget').length, 1)
+  assert.ok(requests.at(-1).includes('repos/OpenTubeX/sidestore/dispatches'))
+})
+
+test('permanently missing release metadata cannot bypass the download check', async (t) => {
   const setup = await fixture(t, 'v0.35.2-beta')
   setup.env.RELEASE_JSON = '{"assets":[]}'
   const result = spawnSync('bash', ['_scripts/wait-for-release-assets.sh', '42', '[.]deb$', '3'], {
@@ -170,7 +190,7 @@ test('missing release metadata cannot silently bypass the download check', async
   })
   assert.notEqual(result.status, 0)
   assert.match(result.stderr, /Expected 3 release assets/)
-  assert.equal((await calls(setup)).length, 1)
+  assert.equal((await calls(setup)).length, 2)
 })
 
 test('release-event publishers check their public downloads before consuming them', async () => {
