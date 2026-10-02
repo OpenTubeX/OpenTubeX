@@ -222,15 +222,16 @@
         fixed-layout
         @click="closeAddChannelPrompt"
       >
-        <div class="addSubscribedChannelPicker">
-          <p
-            v-if="enabledPreferences.length === 0"
-            class="addSubscribedChannelEmptyState"
-          >
-            {{ t('Settings.Channel Settings.Enable Setting Before Adding Channel') }}
-          </p>
-          <template v-else>
+        <template #label="{ labelId }">
+          <div class="addSubscribedChannelHeader">
+            <h2
+              :id="labelId"
+              class="addSubscribedChannelHeading"
+            >
+              {{ t('Settings.Channel Settings.Add Subscribed Channel') }}
+            </h2>
             <FtInput
+              v-if="enabledPreferences.length > 0"
               ref="addChannelSearch"
               class="addSubscribedChannelSearch"
               input-type="search"
@@ -239,6 +240,16 @@
               :value="addChannelSearchQuery"
               @input="value => addChannelSearchQuery = value"
             />
+          </div>
+        </template>
+        <div class="addSubscribedChannelPicker">
+          <p
+            v-if="enabledPreferences.length === 0"
+            class="addSubscribedChannelEmptyState"
+          >
+            {{ t('Settings.Channel Settings.Enable Setting Before Adding Channel') }}
+          </p>
+          <template v-else>
             <p
               v-if="visibleAvailableSubscriptions.length === 0"
               class="addSubscribedChannelEmptyState"

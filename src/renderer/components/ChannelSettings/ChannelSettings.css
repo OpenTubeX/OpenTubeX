@@ -52,6 +52,15 @@
   text-align: start;
 }
 
+.addSubscribedChannelHeader {
+  flex: none;
+  padding-inline: 12px;
+}
+
+.addSubscribedChannelHeading {
+  text-align: center;
+}
+
 .addSubscribedChannelSearch {
   margin-block-end: 8px;
 }
@@ -116,6 +125,9 @@
 
   /* Keep the cards' focus outlines clear of the scroll container's edges */
   padding: 2px;
+
+  /* Overlay scrollbars need their own space beside the cards. */
+  padding-inline-end: calc(var(--scrollbar-track-width) + 6px);
 }
 
 .emptyState {
