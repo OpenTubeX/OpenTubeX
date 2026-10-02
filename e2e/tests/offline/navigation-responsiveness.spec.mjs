@@ -82,18 +82,27 @@ test.describe('Home navigation', () => {
     await page.setViewportSize({ width: 375, height: 700 })
     await goTo(page, 'userplaylists')
     await page.evaluate(() => {
-      window.navigationMaxHomeCards = 0
       // Include transient cards rendered before ResizeObserver measures the shelf.
       window.navigationHomeObserver = new MutationObserver(() => {
-        const count = document.querySelectorAll('[data-home-section="newSinceLastVisit"] .mediaGrid li').length
-        window.navigationMaxHomeCards = Math.max(window.navigationMaxHomeCards, count)
+        const shelf = document.querySelector('[data-home-section="newSinceLastVisit"] [data-home-shelf]')
+        if (shelf == null) return
+        const width = shelf.getBoundingClientRect().width
+        // A full row is a conservative bound: paging controls take extra space.
+        const capacity = Math.max(1, Math.floor((width + 12) / (260 + 12)))
+        const count = shelf.querySelectorAll('.mediaGrid li').length
+        if (count > capacity) window.navigationHomeOverflow = { count, capacity, width }
       })
-      window.navigationHomeObserver.observe(document.querySelector('#app'), { childList: true, subtree: true })
     })
     try {
-      for (const viewport of [{ width: 375, height: 700 }, { width: 700, height: 375 }]) {
+      for (const viewport of [
+        { width: 375, height: 700 },
+        { width: 700, height: 375 },
+        { width: 1440, height: 900 }
+      ]) {
         await page.setViewportSize(viewport)
         const elapsed = await page.evaluate(() => new Promise(resolve => {
+          window.navigationHomeOverflow = null
+          window.navigationHomeObserver.observe(document.querySelector('#app'), { childList: true, subtree: true })
           const startedAt = performance.now()
           document.querySelector('.sideNav a[href="#/home"]').click()
           function rendered() {
@@ -106,7 +115,9 @@ test.describe('Home navigation', () => {
         console.log(`Home navigation (${viewport.width}px): ${elapsed.toFixed(1)} ms`)
         const shelf = page.locator('[data-home-section="newSinceLastVisit"]')
         await expect(shelf).toContainText('Video 0-0')
-        expect(await page.evaluate(() => window.navigationMaxHomeCards)).toBeLessThanOrEqual(3)
+        expect(await page.evaluate(() => window.navigationHomeOverflow)).toBeNull()
+        // Shelf paging intentionally overlaps two pages during its transition.
+        await page.evaluate(() => window.navigationHomeObserver.disconnect())
         await shelf.getByRole('button', { name: 'Next New since last visit page' }).click()
         await expect(shelf.locator('[data-home-shelf-page="2"]')).toBeVisible()
         await goTo(page, 'userplaylists')
@@ -115,7 +126,7 @@ test.describe('Home navigation', () => {
       await page.evaluate(() => {
         window.navigationHomeObserver.disconnect()
         delete window.navigationHomeObserver
-        delete window.navigationMaxHomeCards
+        delete window.navigationHomeOverflow
       })
     }
   })

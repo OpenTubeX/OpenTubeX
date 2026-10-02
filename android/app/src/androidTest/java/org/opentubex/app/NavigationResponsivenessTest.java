@@ -80,10 +80,13 @@ public class NavigationResponsivenessTest {
                 await(view, "!!document.querySelector('.newPlaylistButton')");
                 if (route.equals("home")) {
                     evaluate(view, """
-                        window.navigationMaxHomeCards = 0;
+                        window.navigationHomeOverflow = false;
                         window.navigationHomeObserver = new MutationObserver(() => {
-                            const count = document.querySelectorAll('[data-home-section="newSinceLastVisit"] .mediaGrid li').length;
-                            window.navigationMaxHomeCards = Math.max(window.navigationMaxHomeCards, count);
+                            const shelf = document.querySelector('[data-home-section="newSinceLastVisit"] [data-home-shelf]');
+                            if (shelf === null) return;
+                            // Bound a full row using fractional CSS width; controls reduce its capacity further.
+                            const capacity = Math.max(1, Math.floor((shelf.getBoundingClientRect().width + 12) / (260 + 12)));
+                            if (shelf.querySelectorAll('.mediaGrid li').length > capacity) window.navigationHomeOverflow = true;
                         });
                         window.navigationHomeObserver.observe(document.querySelector('#app'), { childList: true, subtree: true });
                         """);
@@ -115,8 +118,8 @@ public class NavigationResponsivenessTest {
                 await(view, "window.navigationElapsed !== null");
                 Log.i("NavigationResponsiveness", route + " tap-to-render ms: " + evaluate(view, "window.navigationElapsed"));
                 if (route.equals("home")) {
-                    assertTrue("Home must not mount the full shelf before measuring its width",
-                        Integer.parseInt(evaluate(view, "window.navigationMaxHomeCards")) <= 3);
+                    assertEquals("Home must not mount more than a row of cards before measuring its width", "false",
+                        evaluate(view, "window.navigationHomeOverflow"));
                 } else {
                     assertEquals("An unchanged feed must not sort its entire cache after a tab switch", "0",
                         evaluate(view, "window.navigationSorts"));
@@ -128,7 +131,7 @@ public class NavigationResponsivenessTest {
                     document.querySelector('#app').__vue_app__.config.globalProperties.$store.replaceState(window.navigationSavedState);
                     if (window.navigationSavedFeed === null) localStorage.removeItem('Subscriptions/currentTab');
                     else localStorage.setItem('Subscriptions/currentTab', window.navigationSavedFeed);
-                    for (const key of ['navigationSort', 'navigationSorts', 'navigationElapsed', 'navigationSavedState', 'navigationSavedFeed', 'navigationContentSelector', 'navigationHomeObserver', 'navigationMaxHomeCards']) delete window[key];
+                    for (const key of ['navigationSort', 'navigationSorts', 'navigationElapsed', 'navigationSavedState', 'navigationSavedFeed', 'navigationContentSelector', 'navigationHomeObserver', 'navigationHomeOverflow']) delete window[key];
                     """);
             }
             assertEquals("Restored playlist counts retain their Map type", "true", evaluate(view,
