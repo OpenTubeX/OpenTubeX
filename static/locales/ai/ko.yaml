@@ -2354,3 +2354,5 @@ Tray:
 Tray Icon:
   Title: "트레이 아이콘"
   Follow App Theme: "앱 테마 따르기"
+Native Permissions:
+  Local Network: "로컬 네트워크에서 기기를 검색하고 동영상을 전송하며, 기기 간 설정과 데이터를 동기화합니다."

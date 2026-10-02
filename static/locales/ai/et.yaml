@@ -1903,3 +1903,5 @@ Tray:
 Tray Icon:
   Title: "Süsteemisalve ikoon"
   Follow App Theme: "Järgi rakenduse teemat"
+Native Permissions:
+  Local Network: "Leia seadmeid kohalikust võrgust ja edasta neisse videoid ning sünkrooni seadeid ja andmeid seadmete vahel."

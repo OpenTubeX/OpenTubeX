@@ -1900,3 +1900,5 @@ Tray:
 Tray Icon:
   Title: "トレイアイコン"
   Follow App Theme: "アプリのテーマに合わせる"
+Native Permissions:
+  Local Network: "ローカルネットワーク上のデバイスを検出して動画をキャストし、デバイス間で設定とデータを同期します。"

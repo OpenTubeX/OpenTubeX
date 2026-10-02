@@ -168,3 +168,18 @@ test('follows media redirects without forwarding credentials to another origin',
   assert.equal(redirectedHeaders.cookie, undefined)
   assert.equal(redirectedHeaders.authorization, undefined)
 })
+
+
+test('reads the renderer SOAP playback position for cast recovery', async t => {
+  const xml = '<response><RelTime>00:00:08</RelTime></response>'
+  const renderer = createServer((request, response) => {
+    assert.match(request.headers.soapaction, /#GetPositionInfo"$/)
+    response.writeHead(200, { 'Content-Type': 'text/xml' }).end(xml)
+  })
+  const port = await listen(renderer)
+  t.after(() => close(renderer))
+  const body = await sendAvTransport({
+    controlUrl: `http://127.0.0.1:${port}/control`, serviceType: 'urn:schemas-upnp-org:service:AVTransport:1'
+  }, 'GetPositionInfo', { InstanceID: 0 })
+  assert.equal(body, xml)
+})

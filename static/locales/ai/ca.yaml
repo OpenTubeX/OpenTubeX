@@ -2547,3 +2547,5 @@ Tray:
 Tray Icon:
   Title: "Icona de la safata"
   Follow App Theme: "Segueix el tema de l’aplicació"
+Native Permissions:
+  Local Network: "Descobrir dispositius a la xarxa local i enviar-hi vídeos, i sincronitzar la configuració i les dades entre dispositius."

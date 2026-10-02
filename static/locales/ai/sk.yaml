@@ -1903,3 +1903,5 @@ Tray:
 Tray Icon:
   Title: "Ikona v oblasti oznámení"
   Follow App Theme: "Použiť motív aplikácie"
+Native Permissions:
+  Local Network: "Vyhľadávať zariadenia v miestnej sieti a prenášať do nich videá a synchronizovať nastavenia a údaje medzi zariadeniami."

@@ -1900,3 +1900,5 @@ Tray:
 Tray Icon:
   Title: "Ícone da bandeja"
   Follow App Theme: "Seguir o tema do aplicativo"
+Native Permissions:
+  Local Network: "Encontrar dispositivos na sua rede local e transmitir vídeos para eles, e sincronizar configurações e dados entre dispositivos."

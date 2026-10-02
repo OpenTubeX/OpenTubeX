@@ -1,2 +1,2 @@
 "NSCameraUsageDescription" = "Skann paringskoden som blir vist på eininga du legg til.";
-"NSLocalNetworkUsageDescription" = "Hald innstillingar og data synkroniserte mellom einingar";
+"NSLocalNetworkUsageDescription" = "Finn einingar på det lokale nettverket og cast videoar til dei, og synkroniser innstillingar og data mellom einingar.";

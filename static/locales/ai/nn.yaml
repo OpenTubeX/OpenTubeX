@@ -2289,3 +2289,5 @@ Tray:
 Tray Icon:
   Title: "Ikon i systemtrauet"
   Follow App Theme: "Følg temaet til appen"
+Native Permissions:
+  Local Network: "Finn einingar på det lokale nettverket og cast videoar til dei, og synkroniser innstillingar og data mellom einingar."

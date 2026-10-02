@@ -1960,3 +1960,5 @@ Tray:
 Tray Icon:
   Title: "Systeemvakpictogram"
   Follow App Theme: "Appthema volgen"
+Native Permissions:
+  Local Network: "Apparaten op je lokale netwerk vinden en er video's naartoe casten, en instellingen en gegevens tussen apparaten synchroniseren."

@@ -1901,3 +1901,5 @@ Tray:
 Tray Icon:
   Title: "Tálcaikon"
   Follow App Theme: "Alkalmazástéma követése"
+Native Permissions:
+  Local Network: "Eszközök keresése a helyi hálózaton és videók átküldése rájuk, valamint a beállítások és adatok szinkronizálása az eszközök között."

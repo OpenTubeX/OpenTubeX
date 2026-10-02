@@ -1920,3 +1920,5 @@ Tray:
 Tray Icon:
   Title: "Ikon i systemfältet"
   Follow App Theme: "Följ appens tema"
+Native Permissions:
+  Local Network: "Hitta enheter i ditt lokala nätverk och casta videor till dem, och synkronisera inställningar och data mellan enheter."

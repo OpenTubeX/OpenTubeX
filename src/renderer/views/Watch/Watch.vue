@@ -869,11 +869,12 @@
           @toggle-live-chat="toggleLiveChat"
         >
           <template
-            v-if="playerReady && isElectron && $store.getters.getShowDlnaCastButton && !customShortsPlayerActive && !localFilePlayback && !isUpcoming && !errorMessage"
+            v-if="playerReady && (isElectron || isCapacitor) && $store.getters.getShowDlnaCastButton && !customShortsPlayerActive && !localFilePlayback && !isUpcoming && !errorMessage"
             #cast-action
           >
             <WatchDlnaCast
               :key="videoId"
+              :video-id="videoId"
               :formats="legacyFormats"
               :title="videoTitle"
               :get-player="() => $refs.player"

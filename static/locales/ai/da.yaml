@@ -1986,3 +1986,5 @@ Tray:
 Tray Icon:
   Title: "Ikon i systembakken"
   Follow App Theme: "Følg appens tema"
+Native Permissions:
+  Local Network: "Find enheder på dit lokale netværk, cast videoer til dem, og synkroniser indstillinger og data mellem enheder."

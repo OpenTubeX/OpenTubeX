@@ -1,2 +1,2 @@
 "NSCameraUsageDescription" = "Nuskaitykite pridedamame įrenginyje rodomą susiejimo kodą.";
-"NSLocalNetworkUsageDescription" = "Nustatymų ir duomenų sinchronizavimas įrenginiuose";
+"NSLocalNetworkUsageDescription" = "Aptikti įrenginius vietiniame tinkle ir perduoti į juos vaizdo įrašus bei sinchronizuoti nustatymus ir duomenis tarp įrenginių.";

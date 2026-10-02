@@ -1932,3 +1932,5 @@ Tray:
 Tray Icon:
   Title: "Eicon hambwrdd"
   Follow App Theme: "Dilyn thema’r ap"
+Native Permissions:
+  Local Network: "Canfod dyfeisiau ar eich rhwydwaith lleol a chastio fideos iddynt, a chysoni gosodiadau a data rhwng dyfeisiau."

@@ -1951,3 +1951,5 @@ Tray:
 Tray Icon:
   Title: "Icona da bandexa"
   Follow App Theme: "Seguir o tema da aplicación"
+Native Permissions:
+  Local Network: "Descubrir dispositivos na túa rede local e enviarlles vídeos, e sincronizar a configuración e os datos entre dispositivos."

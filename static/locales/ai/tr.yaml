@@ -1901,3 +1901,5 @@ Tray:
 Tray Icon:
   Title: "Sistem tepsisi simgesi"
   Follow App Theme: "Uygulama temasını izle"
+Native Permissions:
+  Local Network: "Yerel ağınızdaki cihazları keşfedin ve onlara video yayınlayın, cihazlar arasında ayarları ve verileri eşitleyin."

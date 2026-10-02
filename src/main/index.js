@@ -51,10 +51,10 @@ import { brotliDecompress } from 'zlib'
 
 import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
-import { discoverDlnaDevices, startDlnaCast, stopDlnaCast } from './dlnaCast'
+import { discoverDlnaDevices, startDlnaCast, stopDlnaCast, hasDlnaCastFailed, getDlnaCastPosition } from './dlnaCast'
 import { handleTwitchChatReplayPage, handleTwitchSubOnlyVod } from './twitchChat'
 import { applyTwitchPlaylistOrigin } from '../twitchPlaylistOrigin'
-import { isYtDlpStoryboardUrl, getYtDlpDownloadFile, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpControlDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetSubtitle, handleYtDlpGetPlaybackInfo, handleYtDlpGetHistoryMetadata, handleYtDlpCancelHistoryRepair, handleYtDlpGetRecommendations, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpQueueAction, handleYtDlpRemoveDownload, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
+import { getDlnaFfmpegExecutable, isYtDlpStoryboardUrl, getYtDlpDownloadFile, getYtDlpExternalStreamCookieHeader, getYtDlpExternalStreamHeaders, handleYtDlpCancelDownload, handleYtDlpCheckBinaryUpdate, handleYtDlpClearDownloads, handleYtDlpControlDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetSubtitle, handleYtDlpGetPlaybackInfo, handleYtDlpGetHistoryMetadata, handleYtDlpCancelHistoryRepair, handleYtDlpGetRecommendations, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpQueueAction, handleYtDlpRemoveDownload, refreshYtDlpDownloadQueue, restoreYtDlpDownloadQueue, shutdownYtDlpDownloads } from './ytDlp'
 import { applyYtDlpPlaybackCacheSettings, handleYtDlpPlaybackCacheClear, handleYtDlpPlaybackCacheDelete, handleYtDlpPlaybackCacheGet, handleYtDlpPlaybackCacheSet } from './ytDlpPlaybackCache'
 import { generatePoToken } from './poTokenGenerator'
 import { expandMultipleOnlyPluralMessages, selectPluralForm } from '../renderer/i18n/plurals'
@@ -4564,28 +4564,36 @@ function runApp() {
     return discoverDlnaDevices()
   })
   const dlnaOwners = new WeakSet()
-  ipcMain.handle(IpcChannels.DLNA_START, async (event, payload) => {
-    if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) {
+  const startDlnaForWindow = async (event, payload) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return { error: 'Casting requires an active OpenTubeX window' }
     }
-    const mediaUrl = payload?.mediaUrl
-    let headers = {}
-    if (typeof mediaUrl === 'string' && /^https?:\/\//.test(mediaUrl)) {
-      try {
-        const url = new URL(mediaUrl)
-        if (url.hostname.endsWith('.googlevideo.com') && url.pathname === '/videoplayback') {
-          headers = { Referer: 'https://www.youtube.com/', Origin: 'https://www.youtube.com' }
-        }
-        const invidiousAuthorization = invidiousAuthorizations.get(event.sender.id)
-        if (invidiousAuthorization && isInvidiousInstanceUrl(mediaUrl, invidiousAuthorization.url)) {
-          headers.Authorization = invidiousAuthorization.authorization
-        }
-        Object.assign(headers, getYtDlpExternalStreamHeaders(event.sender, mediaUrl))
-        const cookies = getYtDlpExternalStreamCookieHeader(event.sender, mediaUrl)
-        if (cookies !== null) headers.Cookie = cookies
-      } catch { /* startDlnaCast reports an invalid URL. */ }
+    const sourceHeaders = mediaUrl => {
+      let headers = {}
+      if (typeof mediaUrl === 'string' && /^https?:\/\//.test(mediaUrl)) {
+        try {
+          const url = new URL(mediaUrl)
+          if (url.hostname.endsWith('.googlevideo.com') && url.pathname === '/videoplayback') {
+            headers = { Referer: 'https://www.youtube.com/', Origin: 'https://www.youtube.com' }
+          }
+          const invidiousAuthorization = invidiousAuthorizations.get(event.sender.id)
+          if (invidiousAuthorization && isInvidiousInstanceUrl(mediaUrl, invidiousAuthorization.url)) {
+            headers.Authorization = invidiousAuthorization.authorization
+          }
+          Object.assign(headers, getYtDlpExternalStreamHeaders(event.sender, mediaUrl))
+          const cookies = getYtDlpExternalStreamCookieHeader(event.sender, mediaUrl)
+          if (cookies !== null) headers.Cookie = cookies
+        } catch { /* startDlnaCast reports an invalid URL. */ }
+      }
+      return headers
     }
-    const result = await startDlnaCast(event.sender.id, payload, headers)
+    let muxOptions = {}
+    if (payload?.audioUrl !== undefined) {
+      try {
+        muxOptions = { ffmpegPath: await getDlnaFfmpegExecutable(), audioHeaders: sourceHeaders(payload.audioUrl) }
+      } catch (error) { return { error: error.message, muxUnavailable: true } }
+    }
+    const result = await startDlnaCast(event.sender.id, payload, sourceHeaders(payload?.mediaUrl), muxOptions)
     if (result.castId) {
       if (event.sender.isDestroyed()) {
         stopDlnaCast(event.sender.id).catch(console.error)
@@ -4595,6 +4603,25 @@ function runApp() {
       }
     }
     return result
+  }
+  ipcMain.handle(IpcChannels.DLNA_START, (event, payload) => {
+    if (!event.sender.isFocused()) return { error: 'Casting requires an active OpenTubeX window' }
+    return startDlnaForWindow(event, payload)
+  })
+  ipcMain.handle(IpcChannels.DLNA_RECOVER, async (event, castId, payload) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof castId !== 'string' ||
+        payload?.audioUrl !== undefined || !hasDlnaCastFailed(event.sender.id, castId)) {
+      return { error: 'No failed cast is available to recover' }
+    }
+    const position = await getDlnaCastPosition(event.sender.id, castId)
+    await stopDlnaCast(event.sender.id, castId)
+    return startDlnaForWindow(event, {
+      ...payload, startSeconds: (Number.isFinite(payload?.startSeconds) ? payload.startSeconds : 0) + (position ?? 0)
+    })
+  })
+  ipcMain.handle(IpcChannels.DLNA_HAS_FAILED, (event, castId) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof castId !== 'string') return false
+    return hasDlnaCastFailed(event.sender.id, castId)
   })
   ipcMain.handle(IpcChannels.DLNA_STOP, (event, castId) => {
     if (!isOpenTubeXUrl(event.senderFrame.url) || typeof castId !== 'string') return false

@@ -55,7 +55,7 @@
         @change="updateEnableSkipSilenceByDefault"
       />
       <FtToggleSwitch
-        v-if="USING_ELECTRON"
+        v-if="USING_ELECTRON || IS_CAPACITOR"
         :label="t('Settings.Player Settings.Show DLNA Cast Button')"
         :compact="true"
         :default-value="showDlnaCastButton"

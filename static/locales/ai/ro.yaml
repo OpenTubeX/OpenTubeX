@@ -1951,3 +1951,5 @@ Tray:
 Tray Icon:
   Title: "Pictogramă în zona de notificare"
   Follow App Theme: "Urmează tema aplicației"
+Native Permissions:
+  Local Network: "Descoperă dispozitive din rețeaua locală și transmite videoclipuri către ele, și sincronizează setările și datele între dispozitive."
