@@ -50,9 +50,14 @@ test.describe('All Channels with a previously saved color', () => {
     }
   })
 
-  test('adopts the person icon while keeping the saved color and other profile initials', async ({ page }) => {
+  test('adopts the person icon while keeping the saved color and other profile initials', async ({ app, page }) => {
     await expect(profileIconInitial(page).locator('[data-icon="circle-user"] svg')).toBeVisible()
     await expect(profileIconInitial(page)).toHaveCSS('background-color', 'rgb(85, 139, 47)')
+    await expect.poll(async () => {
+      const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+      const records = contents.trim().split('\n').map(line => JSON.parse(line))
+      return records.findLast(record => record._id === 'allChannels' && !record.$$deleted)
+    }).toEqual({ ...mainProfile, bgColor: '#558B2F', icon: { type: 'icon', value: 'circle-user' } })
     await openProfileList(page)
     await page.locator('.profileList .profileOption').filter({ hasText: 'Second profile' }).click()
     await expect(profileIconInitial(page)).toHaveText('S')
@@ -62,8 +67,13 @@ test.describe('All Channels with a previously saved color', () => {
 test.describe('existing All Channels without an icon', () => {
   test.use({ seed: { profiles: [{ ...mainProfile, icon: undefined }, secondProfile] } })
 
-  test('uses the person icon and keeps other profiles on their initials', async ({ page }) => {
+  test('uses the person icon and keeps other profiles on their initials', async ({ app, page }) => {
     await expect(profileIconInitial(page).locator('[data-icon="circle-user"] svg')).toBeVisible()
+    await expect.poll(async () => {
+      const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+      const records = contents.trim().split('\n').map(line => JSON.parse(line))
+      return records.findLast(record => record._id === 'allChannels' && !record.$$deleted)
+    }).toEqual({ ...mainProfile, icon: { type: 'icon', value: 'circle-user' } })
     await openProfileList(page)
     await page.locator('.profileList .profileOption').filter({ hasText: 'Second profile' }).click()
     await expect(profileIconInitial(page)).toHaveText('S')

@@ -99,6 +99,18 @@ const actions = {
       return false
     }
 
+    const mainProfileIndex = profiles.findIndex(profile => profile._id === MAIN_PROFILE_ID)
+    if (mainProfileIndex !== -1 && profiles[mainProfileIndex].icon == null) {
+      const mainProfile = withDefaultProfileIcon(profiles[mainProfileIndex])
+      try {
+        await DBProfileHandlers.upsert(mainProfile)
+      } catch (errMessage) {
+        console.error(errMessage)
+        return null
+      }
+      profiles[mainProfileIndex] = mainProfile
+    }
+
     // We want the primary profile to always be first
     // So sort with that then sort alphabetically by profile name
     profiles = profiles.sort(profileSort)
