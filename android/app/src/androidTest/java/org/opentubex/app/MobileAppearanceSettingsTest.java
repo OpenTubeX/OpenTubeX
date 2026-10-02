@@ -486,6 +486,87 @@ public class MobileAppearanceSettingsTest {
     }
 
     @Test
+    public void dynamicBackgroundRespectsSystemThemeOverlays() throws Exception {
+        org.junit.Assume.assumeTrue(android.os.Build.VERSION.SDK_INT >= 31);
+        android.content.Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        boolean dark = (context.getResources().getConfiguration().uiMode &
+            android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+            android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        int backgroundId = dark ? android.R.color.system_neutral1_900 : android.R.color.system_neutral1_50;
+        String expected = String.format(java.util.Locale.ROOT, "#%06x", context.getColor(backgroundId) & 0xffffff);
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            WebView view = webView(scenario);
+            String store = "document.querySelector('#app').__vue_app__.config.globalProperties.$store";
+            String savedTheme = evaluate(view, store + ".getters.getBaseTheme");
+            String savedWindowOpen = evaluate(view, store + ".getters.getSettingsWindowOpen");
+            String savedWindowMinimized = evaluate(view, store + ".getters.getSettingsWindowMinimized");
+            try {
+                evaluate(view, store + ".commit('setBaseTheme', 'dynamic')");
+                evaluate(view, store + ".commit('setSettingsWindowMinimized', false); " +
+                    store + ".commit('setSettingsWindowOpen', true)");
+                String background = "document.body.style.getPropertyValue('--bg-color').toLowerCase()";
+                awaitCondition(view, background + " !== '' && !!document.querySelector('.settingsWindow')");
+                assertEquals("Dynamic background respects system dark-theme overlays", JSONObject.quote(expected),
+                    evaluate(view, background));
+                int cardId = dark ? android.R.color.system_neutral1_800 : android.R.color.system_neutral1_100;
+                String expectedCard = dark && expected.equals("#000000") ? "#191919" :
+                    String.format(java.util.Locale.ROOT, "#%06x", context.getColor(cardId) & 0xffffff);
+                assertEquals("Cards remain distinguishable above pure-black backgrounds", JSONObject.quote(expectedCard),
+                    evaluate(view, "document.body.style.getPropertyValue('--card-bg-color').toLowerCase()"));
+                int rgb = Integer.parseInt(expectedCard.substring(1), 16);
+                String expectedRgb = "rgb(" + ((rgb >> 16) & 255) + ", " + ((rgb >> 8) & 255) + ", " + (rgb & 255) + ")";
+                assertEquals("The visible settings panel uses the system surface", JSONObject.quote(expectedRgb),
+                    evaluate(view, "getComputedStyle(document.querySelector('.settingsWindow')).backgroundColor"));
+                assertEquals("The status-bar inset uses the system surface", JSONObject.quote(expectedRgb),
+                    evaluate(view, "getComputedStyle(document.querySelector('.app'), '::before').backgroundColor"));
+                evaluate(view, "document.body.style.removeProperty('--bg-color')");
+                scenario.onActivity(activity -> activity.onConfigurationChanged(
+                    new android.content.res.Configuration(activity.getResources().getConfiguration())));
+                awaitCondition(view, background + " === '" + expected + "'");
+            } finally {
+                evaluate(view, store + ".commit('setBaseTheme', " + savedTheme + ")");
+                evaluate(view, store + ".commit('setSettingsWindowOpen', " + savedWindowOpen + "); " +
+                    store + ".commit('setSettingsWindowMinimized', " + savedWindowMinimized + ")");
+            }
+        }
+    }
+
+    @Test
+    public void lineageBlackThemeUpdatesTheExistingWebView() throws Exception {
+        org.junit.Assume.assumeTrue(android.os.Build.VERSION.SDK_INT >= 31);
+        String overlay = "org.lineageos.overlay.customization.blacktheme";
+        String overlays = shell("cmd overlay list android");
+        org.junit.Assume.assumeTrue(overlays.contains(overlay));
+        boolean originallyEnabled = overlays.contains("[x] " + overlay);
+        org.junit.Assume.assumeTrue((InstrumentationRegistry.getInstrumentation().getTargetContext()
+            .getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+            android.content.res.Configuration.UI_MODE_NIGHT_YES);
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            WebView view = webView(scenario);
+            String store = "document.querySelector('#app').__vue_app__.config.globalProperties.$store";
+            String savedTheme = evaluate(view, store + ".getters.getBaseTheme");
+            try {
+                evaluate(view, store + ".commit('setBaseTheme', 'dynamic')");
+                awaitCondition(view, "document.body.style.getPropertyValue('--primary-color') !== ''");
+                for (boolean enabled : new boolean[] {false, true, false, true}) {
+                    shell("cmd overlay " + (enabled ? "enable" : "disable") + " --user 0 " + overlay);
+                    String nativeColor = shell("cmd overlay lookup android android:color/system_neutral1_900").trim();
+                    java.util.regex.Matcher resolved = java.util.regex.Pattern.compile("#ff([0-9a-fA-F]{6})$").matcher(nativeColor);
+                    assertTrue("System background is a resolved color: " + nativeColor, resolved.find());
+                    String expected = "#" + resolved.group(1).toLowerCase(java.util.Locale.ROOT);
+                    if (enabled) assertEquals("LineageOS supplies pure black", "#000000", expected);
+                    awaitCondition(view, "document.body.style.getPropertyValue('--bg-color').toLowerCase() === '" + expected + "'");
+                    if (enabled) assertEquals("Live pure-black updates keep elevated card surfaces", "\"#191919\"",
+                        evaluate(view, "document.body.style.getPropertyValue('--card-bg-color')"));
+                }
+            } finally {
+                shell("cmd overlay " + (originallyEnabled ? "enable" : "disable") + " --user 0 " + overlay);
+                evaluate(view, store + ".commit('setBaseTheme', " + savedTheme + ")");
+            }
+        }
+    }
+
+    @Test
     public void systemPaletteChangeUpdatesTheExistingWebView() throws Exception {
         org.junit.Assume.assumeTrue(android.os.Build.VERSION.SDK_INT >= 31);
         android.content.Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
@@ -598,6 +679,14 @@ public class MobileAppearanceSettingsTest {
                 document.querySelector('#mobile-appearance-test-style')?.remove();
             })()
             """);
+    }
+
+    private static String shell(String command) throws Exception {
+        try (java.io.InputStream output = new android.os.ParcelFileDescriptor.AutoCloseInputStream(
+            InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(command))) {
+            return new java.io.BufferedReader(new java.io.InputStreamReader(output,
+                java.nio.charset.StandardCharsets.UTF_8)).lines().collect(java.util.stream.Collectors.joining("\n"));
+        }
     }
 
     private static JSONObject json(WebView view, String expression) throws Exception {
