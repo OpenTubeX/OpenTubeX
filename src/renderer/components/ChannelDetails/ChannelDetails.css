@@ -202,7 +202,9 @@
     gap: 10px;
     margin-block-start: 5px;
   }
+}
 
+@media only screen and (300px < width <=680px) {
   .infoActionsContainer:has(> .shareIcon):has(> .ftSubscribeButton) {
     justify-content: space-between;
   }

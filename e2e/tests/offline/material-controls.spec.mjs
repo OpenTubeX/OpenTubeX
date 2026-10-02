@@ -400,7 +400,7 @@ for (const scale of [100, 95]) {
     test.describe(`input alignment at ${width}px and ${scale}% scale`, () => {
       test.use({ seed: { settings: { currentLocale: 'en-US', uiScale: scale, baseTheme: scale === 100 ? 'dark' : 'light', bounds: { x: 0, y: 0, width, height: 900, maximized: false } } } })
 
-      test('centers channel share and subscription buttons on the same row', async ({ page }, testInfo) => {
+      test('centers channel share and subscription buttons on the same row', async ({ app, page }, testInfo) => {
         await page.emulateMedia({ reducedMotion: 'reduce' })
         await page.evaluate(async () => {
           const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -481,6 +481,26 @@ for (const scale of [100, 95]) {
                 : Math.abs(action.left - row.left)
             }, remainingAction), { message: `${remainingAction} keeps its alignment when shown alone` }).toBeLessThanOrEqual(1)
             await page.evaluate(setting => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(setting, false), setting)
+          }
+        }
+        if (width === 375 && scale === 100) {
+          await setWindowSize(app, page, { width: 340, height: 800 })
+          for (const [locale, label] of [['en-US', 'Unsubscribe'], ['de-DE', 'Deabonnieren']]) {
+            await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+            await expect(subscribe).toHaveText(label)
+            for (const zoom of [1.5, 2]) {
+              await app.electronApp.evaluate(({ BrowserWindow }, zoom) => {
+                BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(zoom)
+              }, zoom)
+              await expect.poll(() => row.evaluate(element => {
+                const row = element.getBoundingClientRect()
+                const actions = [...element.children]
+                return actions.length === 2 && actions.every(action => {
+                  const rect = action.getBoundingClientRect()
+                  return Math.abs(rect.left + rect.width / 2 - row.left - row.width / 2) <= 1
+                })
+              }), { message: `Wrapped actions remain centered at ${zoom * 100}% scale in ${locale}` }).toBe(true)
+            }
           }
         }
       })
