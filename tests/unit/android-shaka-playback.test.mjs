@@ -169,6 +169,25 @@ test('Android restores the system orientation policy when rotation fullscreen is
   ])
 })
 
+test('Android ignores a rejected orientation lock from an earlier fullscreen session', async () => {
+  const rejections = []
+  const { handlers, isPopoverOpen } = androidRotationHarness({
+    fullscreenRotationIgnoresSystemLock: { value: true },
+    setLandscapeOrientation: landscape => landscape
+      ? new Promise((_resolve, reject) => rejections.push(reject))
+      : Promise.resolve(),
+  })
+  handlers.handleAndroidRotation(true)
+  handlers.handleAndroidRotation(false)
+  handlers.handleAndroidRotation(true)
+  rejections[0](new Error('Old orientation request failed'))
+  await Promise.resolve()
+  assert.equal(isPopoverOpen(), true)
+  rejections[1](new Error('Current orientation request failed'))
+  await Promise.resolve()
+  assert.equal(isPopoverOpen(), false)
+})
+
 test('Android exits physical rotation fullscreen when portrait arrives before resume visibility', () => {
   const { calls, context, handlers, isPopoverOpen } = androidRotationHarness({
     fullscreenRotationIgnoresSystemLock: { value: true },

@@ -10,6 +10,8 @@ import android.content.res.Configuration;
 import android.os.ParcelFileDescriptor;
 import android.webkit.WebView;
 import android.view.WindowManager;
+import android.view.OrientationEventListener;
+import android.view.Surface;
 
 import androidx.test.core.app.ActivityScenario;
 import androidx.lifecycle.Lifecycle;
@@ -17,6 +19,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +31,80 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class RotationFullscreenTest {
     @Test
+    public void unsupportedOrientationSensorsAreRejectedAndStayDisabledOnResume() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            Field listenerField = AndroidUiPlugin.class.getDeclaredField("deviceRotationListener");
+            Field enabledField = AndroidUiPlugin.class.getDeclaredField("deviceRotationEnabled");
+            listenerField.setAccessible(true);
+            enabledField.setAccessible(true);
+            scenario.onActivity(activity -> {
+                AndroidUiPlugin plugin = (AndroidUiPlugin) activity.getBridge().getPlugin("AndroidUi").getInstance();
+                boolean[] enabled = { false };
+                boolean[] rejected = { false };
+                OrientationEventListener unsupported = new OrientationEventListener(activity) {
+                    @Override public boolean canDetectOrientation() { return false; }
+                    @Override public void enable() { enabled[0] = true; }
+                    @Override public void onOrientationChanged(int orientation) { }
+                };
+                try {
+                    listenerField.set(plugin, unsupported);
+                    plugin.setDeviceRotationEnabled(new com.getcapacitor.PluginCall(null, "AndroidUi", "test",
+                        "setDeviceRotationEnabled", new com.getcapacitor.JSObject().put("enabled", true)) {
+                        @Override public void resolve() { }
+                        @Override public void reject(String message) { rejected[0] = true; }
+                    });
+                    assertTrue("Unsupported sensors must reject the bridge call", rejected[0]);
+                    assertFalse("Unsupported sensors must not stay enabled", enabledField.getBoolean(plugin));
+                    plugin.handleOnResume();
+                    assertFalse("Unsupported sensors must not be enabled on resume", enabled[0]);
+                } catch (IllegalAccessException error) {
+                    throw new AssertionError(error);
+                } finally {
+                    unsupported.disable();
+                }
+            });
+        }
+    }
+
+    @Test
+    public void physicalRotationRechecksTheCurrentDisplayOrientationBasis() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            Field listenerField = AndroidUiPlugin.class.getDeclaredField("deviceRotationListener");
+            Field landscapeField = AndroidUiPlugin.class.getDeclaredField("deviceLandscape");
+            listenerField.setAccessible(true);
+            landscapeField.setAccessible(true);
+            scenario.onActivity(activity -> {
+                AndroidUiPlugin plugin = (AndroidUiPlugin) activity.getBridge().getPlugin("AndroidUi").getInstance();
+                Configuration configuration = activity.getResources().getConfiguration();
+                int originalOrientation = configuration.orientation;
+                try {
+                    int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+                    configuration.orientation = rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270
+                        ? Configuration.ORIENTATION_LANDSCAPE : Configuration.ORIENTATION_PORTRAIT;
+                    plugin.setDeviceRotationEnabled(new com.getcapacitor.PluginCall(null, "AndroidUi", "test",
+                        "setDeviceRotationEnabled", new com.getcapacitor.JSObject().put("enabled", true)) {
+                        @Override public void resolve() { }
+                    });
+                    OrientationEventListener listener = (OrientationEventListener) listenerField.get(plugin);
+                    listener.onOrientationChanged(90);
+                    assertEquals(Boolean.TRUE, landscapeField.get(plugin));
+                    // Simulate switching to a display with the opposite natural basis.
+                    configuration.orientation = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+                        ? Configuration.ORIENTATION_LANDSCAPE : Configuration.ORIENTATION_PORTRAIT;
+                    listener.onOrientationChanged(90);
+                    assertEquals("The same sensor angle must use the updated display basis",
+                        Boolean.FALSE, landscapeField.get(plugin));
+                } catch (IllegalAccessException error) {
+                    throw new AssertionError(error);
+                } finally {
+                    configuration.orientation = originalOrientation;
+                    plugin.handleOnPause();
+                }
+            });
+        }
+    }
+
+    @Test
     public void manualDisplayRotationEntersFullscreenWithoutOverridingTheSystemLock() throws Exception {
         verifyRotationFullscreen(false);
     }
@@ -36,8 +113,8 @@ public class RotationFullscreenTest {
     public void physicalRotationCanOverrideTheSystemLockWhenEnabled() throws Exception {
         org.junit.Assume.assumeTrue("Requires the emulator accelerometer host driver",
             "true".equals(InstrumentationRegistry.getArguments().getString("physicalRotationTest")));
-        // The host sets the emulator accelerometer to landscape before this test,
-        // then to portrait when the physical-fullscreen marker is logged.
+        // The host turns the device sideways after the physical-inline marker,
+        // then upright while backgrounded after the physical-fullscreen marker.
         verifyRotationFullscreen(true);
     }
 
@@ -122,6 +199,13 @@ public class RotationFullscreenTest {
                     // Android's rotation suggestion button changes the user-selected
                     // display rotation while accelerometer rotation remains disabled.
                     if (physicalRotation) {
+                        android.util.Log.i("OpenTubeXRotationTest", "physical-inline");
+                        long deadline = android.os.SystemClock.uptimeMillis() + 15000;
+                        while (!shell("logcat -d -s OpenTubeXRotationTest:I '*:S'").contains("physical-landscape-ready")) {
+                            assertTrue("Host turns the device sideways", android.os.SystemClock.uptimeMillis() < deadline);
+                            Thread.sleep(100);
+                        }
+                        assertInlinePortrait(scenario, view);
                         evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setFullscreenRotationIgnoresSystemLock', true)");
                     } else {
                         assertTrue(InstrumentationRegistry.getInstrumentation().getUiAutomation().setRotation(UiAutomation.ROTATION_FREEZE_90));

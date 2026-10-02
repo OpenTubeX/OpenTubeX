@@ -19,14 +19,19 @@ test('Android fullscreen follows display rotation by default and physical rotati
   const acceleration = (await adb('emu', 'sensor', 'get', 'acceleration')).match(/acceleration = ([^\r\n]+)/)?.[1]
   assert.ok(acceleration)
   let logcat
+  let rotateSideways
   let rotateBack
   try {
-    await adb('emu', 'sensor', 'set', 'acceleration', '9.8:0:0')
+    await adb('emu', 'sensor', 'set', 'acceleration', '0:9.8:0')
     await adb('logcat', '-c')
     logcat = spawn('adb', ['-s', serial, 'logcat', '-v', 'brief', 'OpenTubeXRotationTest:I', '*:S'])
     let logs = ''
     logcat.stdout.on('data', chunk => {
       logs += chunk.toString()
+      if (!rotateSideways && logs.includes('physical-inline')) {
+        rotateSideways = adb('emu', 'sensor', 'set', 'acceleration', '9.8:0:0')
+          .then(() => adb('shell', 'log', '-t', 'OpenTubeXRotationTest', 'physical-landscape-ready'))
+      }
       if (!rotateBack && logs.includes('physical-fullscreen')) {
         rotateBack = adb('emu', 'sensor', 'set', 'acceleration', '0:9.8:0')
       }
@@ -35,11 +40,13 @@ test('Android fullscreen follows display rotation by default and physical rotati
       '-e', 'class', 'org.opentubex.app.RotationFullscreenTest',
       '-e', 'physicalRotationTest', 'true',
       'org.opentubex.app.dev.test/androidx.test.runner.AndroidJUnitRunner')
-    assert.match(result, /OK \(2 tests\)/, result)
+    assert.match(result, /OK \(4 tests\)/, result)
+    assert.ok(rotateSideways, 'The device must turn sideways with the override disabled first')
     assert.ok(rotateBack, 'The physical sensor must trigger fullscreen before rotating back')
     await rotateBack
   } finally {
     logcat?.kill()
+    await rotateSideways
     await rotateBack
     await adb('emu', 'sensor', 'set', 'acceleration', acceleration)
   }

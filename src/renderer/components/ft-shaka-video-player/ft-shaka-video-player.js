@@ -7047,8 +7047,10 @@ export default defineComponent({
 
     let androidRotationFullscreen = false
     let androidRotationOrientationLocked = false
+    let androidRotationLockAttempt = 0
 
     function exitAndroidRotationFullscreen() {
+      androidRotationLockAttempt++
       if (!androidRotationFullscreen) return
       androidRotationFullscreen = false
       if (androidRotationOrientationLocked) {
@@ -7092,7 +7094,10 @@ export default defineComponent({
       }
       if (fullscreenRotationIgnoresSystemLock.value) {
         androidRotationOrientationLocked = true
-        setLandscapeOrientation(true).catch(() => exitAndroidRotationFullscreen())
+        const attempt = ++androidRotationLockAttempt
+        setLandscapeOrientation(true).catch(() => {
+          if (attempt === androidRotationLockAttempt) exitAndroidRotationFullscreen()
+        })
       }
       setAndroidNavigationBarVisible(false).catch(() => {})
       syncAndroidStatusBarVisibility()

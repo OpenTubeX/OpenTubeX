@@ -41,22 +41,26 @@ public class AndroidUiPlugin extends Plugin {
             deviceRotationEnabled = Boolean.TRUE.equals(call.getBoolean("enabled", false));
             if (deviceRotationEnabled) {
                 if (deviceRotationListener == null) {
-                    int rotation = getActivity().getWindowManager().getDefaultDisplay().getRotation();
-                    boolean displayLandscape = getActivity().getResources().getConfiguration().orientation
-                        == Configuration.ORIENTATION_LANDSCAPE;
-                    // Sensor angles are relative to the device's natural orientation,
-                    // which is landscape on some tablets.
-                    boolean naturalLandscape = displayLandscape
-                        ^ (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270);
                     deviceRotationListener = new OrientationEventListener(getContext()) {
                         @Override
                         public void onOrientationChanged(int orientation) {
+                            int rotation = getActivity().getWindowManager().getDefaultDisplay().getRotation();
+                            boolean displayLandscape = getActivity().getResources().getConfiguration().orientation
+                                == Configuration.ORIENTATION_LANDSCAPE;
+                            // Refresh the natural basis when the activity's display changes.
+                            boolean naturalLandscape = displayLandscape
+                                ^ (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270);
                             Boolean landscape = landscapeForDeviceOrientation(orientation, naturalLandscape);
                             if (landscape == null || landscape.equals(deviceLandscape)) return;
                             deviceLandscape = landscape;
                             notifyListeners("deviceRotationChange", new JSObject().put("landscape", landscape));
                         }
                     };
+                }
+                if (!deviceRotationListener.canDetectOrientation()) {
+                    deviceRotationEnabled = false;
+                    call.reject("Device orientation sensing is unavailable");
+                    return;
                 }
                 deviceLandscape = null;
                 deviceRotationListener.enable();
