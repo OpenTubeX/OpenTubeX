@@ -533,6 +533,7 @@ import { Capacitor, SystemBars, SystemBarsStyle } from '@capacitor/core'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from './helpers/overlayScrollbars'
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef, unref, useId, useTemplateRef, watch } from 'vue'
 import { useScrollClamp } from './composables/useScrollClamp'
+import { usePhoneLayout } from './composables/usePhoneLayout'
 import { useI18n } from 'vue-i18n'
 import { routerKey, useRoute, useRouter } from 'vue-router'
 
@@ -3241,6 +3242,7 @@ watch(outlinesHidden, hidden => {
   document.documentElement.classList.toggle('hideOutlines', hidden)
 }, { flush: 'sync', immediate: true })
 
+const phoneLayout = usePhoneLayout()
 const commandPaletteCommands = computed(() => createCommandPaletteRegistry({
   t,
   tm,
@@ -3249,6 +3251,7 @@ const commandPaletteCommands = computed(() => createCommandPaletteRegistry({
   store,
   isElectron,
   isCapacitor,
+  phoneLayout: phoneLayout.value,
   hardwareKeyboardAttached: hardwareKeyboardAttached.value,
   navigate: navigateFromCommandPalette,
   openSettingsSection,

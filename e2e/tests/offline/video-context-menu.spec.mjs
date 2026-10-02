@@ -25,6 +25,67 @@ const SEED = {
 test.use({ seed: SEED })
 
 for (const iconPack of ['material', 'remix']) {
+  test.describe(`background tab shortcut with ${iconPack} icons`, () => {
+    test.use({ seed: { ...SEED, settings: { ...SEED.settings, iconPack, extraThumbnailAction: 'history' } } })
+
+    test('mobile menu replaces the extra thumbnail action and keeps the current tab active', async ({ page, attachScreenshot }) => {
+      await goTo(page, 'history')
+      const title = page.locator('.ft-list-video .title').first()
+      const extraAction = page.locator('.ft-list-video .extraThumbnailActionIcon').first()
+      await expect(extraAction).toBeAttached()
+      const initialState = await page.evaluate(() => window.ftElectron.tabs.getState())
+      const menu = page.locator('.mobileLinkActions')
+
+      const session = await page.context().newCDPSession(page)
+      await session.send('Emulation.setTouchEmulationEnabled', { enabled: true })
+      try {
+        for (const viewport of [{ width: 375, height: 812 }, { width: 812, height: 375 }]) {
+          await page.setViewportSize(viewport)
+          await expect(extraAction).toHaveCount(0)
+          await title.scrollIntoViewIfNeeded()
+          const titleBounds = await title.boundingBox()
+          expect(titleBounds).not.toBeNull()
+          await session.send('Input.dispatchTouchEvent', {
+            type: 'touchStart', touchPoints: [{ x: titleBounds.x + 8, y: titleBounds.y + 8 }]
+          })
+          await expect(menu).toBeVisible({ timeout: 3000 })
+          await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+          const row = menu.locator('.mobileThumbnailActionRow')
+          const backgroundTab = row.getByRole('menuitem', { name: 'Open in a Background Tab', exact: true })
+          await expect(backgroundTab).toBeVisible()
+          await expect(row.getByRole('menuitem').first()).toHaveAccessibleName('Open in a Background Tab')
+          await expect(row.getByRole('menuitem', { name: /Watched/ })).toHaveCount(0)
+          await expect(menu.getByRole('menuitem', { name: 'Mark As Watched', exact: true })).toHaveCount(1)
+          const bounds = await backgroundTab.boundingBox()
+          expect(bounds).not.toBeNull()
+          expect(bounds.width).toBeGreaterThanOrEqual(48)
+          expect(bounds.height).toBeGreaterThanOrEqual(48)
+          await attachScreenshot(`background tab mobile menu ${iconPack} ${viewport.width}`)
+          const before = await page.evaluate(() => window.ftElectron.tabs.getState())
+          await backgroundTab.click()
+          await expect(menu).toHaveCount(0)
+          await expect(page).toHaveURL(/#\/history/)
+          await expect.poll(async () => (await page.evaluate(() => window.ftElectron.tabs.getState())).tabs.length).toBe(before.tabs.length + 1)
+          const after = await page.evaluate(() => window.ftElectron.tabs.getState())
+          expect(after.activeTabId).toBe(initialState.activeTabId)
+          const created = after.tabs.find(tab => !before.tabs.some(previous => previous.id === tab.id))
+          expect(created.route.path).toBe(`/watch/${VIDEO_ID}`)
+        }
+
+        await page.setViewportSize({ width: 1600, height: 900 })
+        await expect(extraAction).toBeAttached()
+        await goToSettingsSection(page, 'general')
+        await expect(page.getByRole('combobox', { name: /Extra thumbnail action button/i })).toBeVisible()
+        await page.setViewportSize({ width: 375, height: 812 })
+        await expect(page.getByRole('combobox', { name: /Extra thumbnail action button/i })).toHaveCount(0)
+      } finally {
+        await session.detach()
+      }
+    })
+  })
+}
+
+for (const iconPack of ['material', 'remix']) {
   test.describe(`mobile toggle indicators with ${iconPack} icons`, () => {
     test.use({ seed: { ...SEED, settings: { ...SEED.settings, iconPack, baseTheme: iconPack === 'material' ? 'dark' : 'light' } } })
 

@@ -249,7 +249,7 @@
         @reset="resetThumbnailPreference"
       />
       <FtSelect
-        v-if="mode === 'general'"
+        v-if="mode === 'general' && !IS_CAPACITOR && !phoneLayout"
         :placeholder="t('Settings.General Settings.Extra Thumbnail Action Button.Extra Thumbnail Action Button')"
         :value="effectiveExtraThumbnailAction"
         setting-key="extraThumbnailAction"
@@ -410,6 +410,7 @@ import { debounce, randomArrayItem, showToast } from '../../helpers/utils'
 import { translateWindowTitle } from '../../helpers/strings'
 import { initializePlatformInfo, supportsAutoPictureInPictureMinimize } from '../../helpers/platform'
 import { filterAvailableNavigationItems } from '../../../navigationAvailability'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import {
   DATE_FORMAT_OPTIONS,
   TIME_FORMAT_OPTIONS,
@@ -422,6 +423,7 @@ import {
 const USING_ELECTRON = !!process.env.IS_ELECTRON
 const IS_IOS = !!process.env.IS_IOS
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
+const phoneLayout = usePhoneLayout()
 const enablePullToRefresh = computed(() => store.getters.getEnablePullToRefresh)
 const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
 const PLAYBACK_ENGINE_VALUES = ['built-in', 'yt-dlp']

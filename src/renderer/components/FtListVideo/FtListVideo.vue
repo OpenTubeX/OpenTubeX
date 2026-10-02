@@ -113,7 +113,7 @@
         @dragstart="onDragStart"
       >
         <FtIconButton
-          v-if="extraThumbnailActionButton"
+          v-if="!useMobileThumbnailActions && extraThumbnailActionButton"
           :title="extraThumbnailActionButton.title"
           :icon="extraThumbnailActionButton.icon"
           class="extraThumbnailActionIcon"
@@ -1303,11 +1303,11 @@ const useMobileThumbnailActions = computed(() => process.env.IS_CAPACITOR || pho
 const mobilePlaylistPickerOpen = ref(false)
 const mobileThumbnailActions = computed(() => {
   const actions = []
-  if (extraThumbnailActionButton.value) {
+  if (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) {
     actions.push({
-      label: extraThumbnailActionButton.value.title,
-      icon: extraThumbnailActionButton.value.icon,
-      run: handleExtraThumbnailAction
+      label: t('Context Menu.Open in a Background Tab'),
+      icon: ['fas', 'clone'],
+      run: () => handleOptionsClick('openBackgroundTab')
     })
   }
   if (showPlaylists.value) {
@@ -1435,14 +1435,15 @@ function handleContextMenuKeydown(event) {
 function handleOptionsClick(option) {
   switch (option) {
     case 'openNewTab':
+    case 'openBackgroundTab':
     case 'openNewWindow':
       openInternalPath({
         path: `/watch/${id.value}`,
         query: watchPageLinkQuery.value,
         title: title.value,
-        doCreateNewTab: option === 'openNewTab',
+        doCreateNewTab: option !== 'openNewWindow',
         doCreateNewWindow: option === 'openNewWindow',
-        makeActive: true
+        makeActive: option !== 'openBackgroundTab'
       })
       break
     case 'copyYoutubeWithoutPlaylist':

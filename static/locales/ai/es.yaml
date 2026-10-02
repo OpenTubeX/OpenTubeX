@@ -1446,6 +1446,7 @@ Share:
   Share failed: "No se pudo compartir el enlace"
   Timestamp Link Copied: Enlace con marca de tiempo copiado al portapapeles
 Context Menu:
+  Open in a Background Tab: "Abrir en una pestaña en segundo plano"
   Select Tab: Seleccionar pestaña
   Close Tabs Before: Cerrar pestañas anteriores
   Close Tabs After: Cerrar pestañas posteriores

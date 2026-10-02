@@ -388,6 +388,7 @@ import About from '../About/About.vue'
 import Downloads from '../Downloads/Downloads.vue'
 
 import store from '../../store/index'
+import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { settingsSubpageKey } from '../../components/FtSettingsSubpage/settingsSubpage'
 import {
   clampOverlayScrollTop,
@@ -406,6 +407,7 @@ import {
 
 const USING_ELECTRON = !!process.env.IS_ELECTRON
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
+const phoneLayout = usePhoneLayout()
 const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
 const IS_MAC = process.platform === 'darwin'
 const SETTINGS_DESKTOP_WIDTH_THRESHOLD = 760
@@ -657,6 +659,7 @@ const settingsSearchableValues = computed(() => createSettingsSearchIndex({
   store,
   usingElectron: USING_ELECTRON,
   isCapacitor: IS_CAPACITOR,
+  phoneLayout: phoneLayout.value,
   isIos: !!process.env.IS_IOS,
   supportsLocalApi: SUPPORTS_LOCAL_API,
   isMac: IS_MAC,

@@ -1444,6 +1444,7 @@ Share:
   Share failed: "Odkaz se nepodařilo sdílet"
   Timestamp Link Copied: Odkaz s časovým údajem byl zkopírován do schránky
 Context Menu:
+  Open in a Background Tab: "Otevřít na kartě na pozadí"
   Select Tab: Vybrat kartu
   Close Tabs Before: Zavřít předchozí karty
   Close Tabs After: Zavřít následující karty
