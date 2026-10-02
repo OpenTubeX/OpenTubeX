@@ -6,21 +6,21 @@
       :class="`mode-${mode}`"
       @pointerdown.self.stop
       @click.self.stop="emit('dismiss')"
-      @keydown.esc.stop.prevent="showCloseMenu ? setCloseMenu(false) : emit('dismiss')"
+      @keydown.esc.stop.prevent="activeMenu ? setMenu(null) : emit('dismiss')"
     >
       <section
         class="capacitorTabActions"
         role="menu"
-        :aria-label="showCloseMenu ? t('Context Menu.Close Tabs') : title"
+        :aria-label="menuLabel"
       >
         <header class="capacitorTabActionHeader">
           <button
-            v-if="showCloseMenu"
+            v-if="activeMenu"
             ref="submenuBack"
             type="button"
             role="menuitem"
             class="submenuBack"
-            @click="setCloseMenu(false)"
+            @click="setMenu(null)"
           >
             <FtIcon
               :icon="['fas', 'arrow-left']"
@@ -29,7 +29,7 @@
             {{ t('Back') }}
           </button>
           <strong
-            v-if="!showCloseMenu"
+            v-if="!activeMenu"
             dir="auto"
           >{{ title }}</strong>
         </header>
@@ -42,7 +42,7 @@
             ref="actionContent"
             class="capacitorTabActionContent"
           >
-            <template v-if="showCloseMenu">
+            <template v-if="activeMenu === 'close'">
               <button
                 v-for="(label, position) in { before: t('Context Menu.Close Tabs Before'), after: t('Context Menu.Close Tabs After'), other: t('Context Menu.Close Other Tabs') }"
                 :key="position"
@@ -57,6 +57,21 @@
                   aria-hidden="true"
                 />
                 {{ label }}
+              </button>
+            </template>
+            <template v-else-if="activeMenu === 'devices'">
+              <button
+                v-for="(device, index) in deviceMenuItem?.submenu"
+                :key="index"
+                type="button"
+                role="menuitem"
+                @click="sendToDevice(device)"
+              >
+                <FtIcon
+                  :icon="device.icon"
+                  aria-hidden="true"
+                />
+                {{ device.label }}
               </button>
             </template>
             <template v-else>
@@ -82,6 +97,27 @@
                   aria-hidden="true"
                 />
                 {{ t('Context Menu.Copy YouTube Link') }}
+              </button>
+              <button
+                v-if="deviceMenuItem"
+                ref="deviceMenuTrigger"
+                type="button"
+                role="menuitem"
+                aria-haspopup="menu"
+                :aria-expanded="activeMenu === 'devices'"
+                :disabled="!deviceMenuItem.enabled"
+                class="submenuTrigger"
+                @click="setMenu('devices')"
+              >
+                <FtIcon
+                  :icon="['fas', 'devices']"
+                  aria-hidden="true"
+                />
+                <span>{{ t('Settings.Sync Settings.Open On Device') }}</span>
+                <FtIcon
+                  :icon="['fas', 'chevron-right']"
+                  aria-hidden="true"
+                />
               </button>
               <button
                 type="button"
@@ -133,9 +169,9 @@
                 type="button"
                 role="menuitem"
                 aria-haspopup="menu"
-                :aria-expanded="showCloseMenu"
-                class="closeMenuTrigger"
-                @click="setCloseMenu(true)"
+                :aria-expanded="activeMenu === 'close'"
+                class="submenuTrigger"
+                @click="setMenu('close')"
               >
                 <FtIcon
                   :icon="['fas', 'rectangle-xmark']"
@@ -169,9 +205,10 @@
 
 <script setup>
 import { FtIcon } from '@opentubex/icons'
-import { nextTick, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
 import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { useI18n } from 'vue-i18n'
+import { getTabDeviceMenuItem } from '../../helpers/tab-device-menu'
 
 const props = defineProps({
   relatedTabIds: {
@@ -213,28 +250,41 @@ const emit = defineEmits([
   'toggle-pinned'
 ])
 const { t } = useI18n()
-const showCloseMenu = ref(false)
+const activeMenu = ref(null)
+const deviceMenuItem = computed(() => getTabDeviceMenuItem(props.tab ? [props.tab] : [], t))
+const menuLabel = computed(() => activeMenu.value === 'close'
+  ? t('Context Menu.Close Tabs')
+  : activeMenu.value === 'devices' ? t('Settings.Sync Settings.Open On Device') : props.title)
 const actionList = useTemplateRef('actionList')
 const actionContent = useTemplateRef('actionContent')
 const closeMenuTrigger = useTemplateRef('closeMenuTrigger')
+const deviceMenuTrigger = useTemplateRef('deviceMenuTrigger')
 const submenuBack = useTemplateRef('submenuBack')
 let mainScrollTop = 0
 
-async function setCloseMenu(open) {
-  if (open) mainScrollTop = actionList.value?.scrollTop ?? 0
-  showCloseMenu.value = open
+async function sendToDevice(device) {
+  emit('dismiss')
+  await device.run()
+}
+
+async function setMenu(menu) {
+  const previousMenu = activeMenu.value
+  if (menu) mainScrollTop = actionList.value?.scrollTop ?? 0
+  activeMenu.value = menu
   await nextTick()
   if (!actionList.value) return
-  restoreOverlayScrollTop(actionList.value, open ? 0 : mainScrollTop)
+  restoreOverlayScrollTop(actionList.value, menu ? 0 : mainScrollTop)
   clampOverlayScrollTop(actionList.value, actionContent.value)
-  const target = open
-    ? actionList.value.querySelector('button:not(:disabled)') ?? submenuBack.value
-    : closeMenuTrigger.value
+  const firstAction = actionList.value.querySelector('button:not(:disabled)')
+  const trigger = previousMenu === 'devices' ? deviceMenuTrigger.value : closeMenuTrigger.value
+  const target = menu
+    ? firstAction ?? submenuBack.value
+    : trigger && !trigger.disabled ? trigger : firstAction
   target?.focus({ preventScroll: true })
 }
 
 watch(() => props.tab?.id, async () => {
-  showCloseMenu.value = false
+  activeMenu.value = null
   mainScrollTop = 0
   await nextTick()
   if (actionList.value) restoreOverlayScrollTop(actionList.value, 0)
