@@ -36,7 +36,25 @@ export function getLiveDvrWindowSeconds(url) {
  * @returns {string | null}
  */
 export function getAndroidLiveHlsManifestUrl(response) {
-  const manifestUrl = response?.data?.streamingData?.hlsManifestUrl
+  return getAndroidLiveManifestUrl(response, 'hlsManifestUrl')
+}
+
+/**
+ * Android can supply a DASH fallback for recently ended streams.
+ * @param {unknown} response
+ * @returns {string | null}
+ */
+export function getAndroidLiveDashManifestUrl(response) {
+  return getAndroidLiveManifestUrl(response, 'dashManifestUrl')
+}
+
+/**
+ * @param {unknown} response
+ * @param {'hlsManifestUrl' | 'dashManifestUrl'} field
+ * @returns {string | null}
+ */
+function getAndroidLiveManifestUrl(response, field) {
+  const manifestUrl = response?.data?.streamingData?.[field]
   if (typeof manifestUrl !== 'string') return null
 
   try {

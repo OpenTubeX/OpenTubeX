@@ -18,7 +18,7 @@ import { parseLocalShortLinkedVideo } from '../player/shorts'
 import { getPaidPromotionDurationMs } from '../player/paidPromotion'
 import { classifyMusicMediaType, MUSIC_MEDIA_TYPE } from '../player/musicMediaType'
 import { getLocalPremiereState } from '../premiere'
-import { getAndroidLiveHlsManifestUrl, getLiveDvrEnabled } from '../player/liveManifest'
+import { getAndroidLiveDashManifestUrl, getAndroidLiveHlsManifestUrl, getLiveDvrEnabled } from '../player/liveManifest'
 import { shouldHideMembersOnlyContent } from '../restricted-playback'
 import { getThumbnailPreviewUrl } from '../thumbnailPreview'
 import { parseLocalVideoChannels } from '../video-collaborators'
@@ -622,6 +622,7 @@ async function resolveMusicMediaType(playerResponse, actions, videoId) {
  *   isLiveDvrEnabled: boolean | undefined,
  *   watchPageIpBlocked: boolean,
  *   androidLiveHlsManifestUrl: string | null,
+ *   androidLiveDashManifestUrl: string | null,
  *   musicMediaType: import('../player/musicMediaType').MusicMediaType
  * }>}
  */
@@ -779,15 +780,26 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
   const info = new YT.VideoInfo([playerResponse, nextResponse], htmlExtracts.session.actions, cpn)
   const musicMediaType = await musicMediaTypeRequest
   const androidPlayerResponse = await paidPromotionRequest
-  let androidLiveHlsManifestUrl = getAndroidLiveHlsManifestUrl(androidPlayerResponse)
-  if (androidLiveHlsManifestUrl !== null) {
+  /**
+   * @param {string | null} manifestUrl
+   * @param {boolean} isDash
+   * @returns {Promise<string | null>}
+   */
+  const decipherAndroidManifest = async (manifestUrl, isDash) => {
+    if (manifestUrl === null) return null
     try {
-      androidLiveHlsManifestUrl = await decipherManifestUrl(androidLiveHlsManifestUrl, player, contentPoToken, false)
+      return await decipherManifestUrl(manifestUrl, player, contentPoToken, isDash)
     } catch (error) {
-      console.warn('Failed to decipher the Android live HLS fallback', error)
-      androidLiveHlsManifestUrl = null
+      console.warn(`Failed to decipher the Android live ${isDash ? 'DASH' : 'HLS'} fallback`, error)
+      return null
     }
   }
+  const [androidLiveHlsManifestUrl, androidLiveDashManifestUrl] = await Promise.all([
+    decipherAndroidManifest(getAndroidLiveHlsManifestUrl(androidPlayerResponse), false),
+    info.basic_info.is_post_live_dvr
+      ? decipherAndroidManifest(getAndroidLiveDashManifestUrl(androidPlayerResponse), true)
+      : Promise.resolve(null)
+  ])
   const totalAdTimeMilliseconds = extractTotalAdTimeMilliseconds(playerResponse.data)
 
   // Some time would be used for parsing and maybe additional requests so end time should be calculated sooner to reduce actual waiting time
@@ -850,6 +862,7 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
       isPremiere,
       isLiveDvrEnabled,
       androidLiveHlsManifestUrl,
+      androidLiveDashManifestUrl,
       watchPageIpBlocked,
       musicMediaType,
     }
@@ -923,6 +936,7 @@ export async function getLocalVideoInfo(id, { shouldGeneratePoToken = () => true
     isPremiere,
     isLiveDvrEnabled,
     androidLiveHlsManifestUrl,
+    androidLiveDashManifestUrl,
     watchPageIpBlocked,
     musicMediaType,
   }
