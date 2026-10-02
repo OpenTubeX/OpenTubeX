@@ -1,5 +1,5 @@
 // Accumulate small scroll steps without reacting to subpixel jitter or overscroll.
-export function createMobileNavigationScroll() {
+export function createMobileNavigationScroll({ revealThreshold = 8 } = {}) {
   let anchor = 0
   let hidden = false
 
@@ -15,7 +15,7 @@ export function createMobileNavigationScroll() {
         anchor = 0
       } else if (hidden) {
         anchor = Math.max(anchor, top)
-        if (anchor - top >= 8) {
+        if (anchor - top >= revealThreshold) {
           hidden = false
           anchor = top
         }

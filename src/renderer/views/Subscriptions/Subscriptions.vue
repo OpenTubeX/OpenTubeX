@@ -490,8 +490,8 @@ const { tabId, isTabPresented } = useTabContext()
 
 const headerRef = useTemplateRef('headerRef')
 const headerScrollHidden = ref(false)
-const headerScroll = createMobileNavigationScroll()
-const mobileHeaderLayout = window.matchMedia('(max-width: 680px)')
+const headerScroll = createMobileNavigationScroll({ revealThreshold: 64 })
+const mobileHeaderLayout = window.matchMedia('(max-width: 680px), (orientation: landscape) and (max-height: 600px)')
 
 function resetHeaderScrollVisibility() {
   headerScroll.reset(window.scrollY)

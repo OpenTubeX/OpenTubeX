@@ -11,6 +11,8 @@
   --progress-bar-height: 6px;
   --mobile-nav-content-height: 60px;
   --mobile-nav-height: calc(var(--mobile-nav-content-height) + var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
+  --mobile-nav-reveal-transition: transform 280ms cubic-bezier(0.2, 0, 0, 1);
+  --mobile-nav-hide-transition: transform 220ms cubic-bezier(0.4, 0, 1, 1);
 
   /* Keep a length so the empty space can be added inside calc(). */
   /* stylelint-disable-next-line length-zero-no-unit */
@@ -714,12 +716,14 @@
   -webkit-box-orient: vertical;
 }
 
-@media only screen and (width <= 680px) {
+@media (prefers-reduced-motion: reduce) {
   .app {
-    --mobile-nav-reveal-transition: transform 280ms cubic-bezier(0.2, 0, 0, 1);
-    --mobile-nav-hide-transition: transform 220ms cubic-bezier(0.4, 0, 1, 1);
+    --mobile-nav-reveal-transition: none;
+    --mobile-nav-hide-transition: none;
   }
+}
 
+@media only screen and (width <= 680px) {
   .app.compactNavigation {
     --mobile-nav-content-height: 48px;
   }
@@ -736,13 +740,6 @@
   .app > :deep(.sideNav.scrollHidden:not(:has(:focus-visible)) ~ .progressBar) {
     transform: translateY(var(--mobile-nav-height));
     transition: var(--mobile-nav-hide-transition);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .app {
-      --mobile-nav-reveal-transition: none;
-      --mobile-nav-hide-transition: none;
-    }
   }
 
   .routerView {

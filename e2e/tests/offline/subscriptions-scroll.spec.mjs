@@ -128,7 +128,7 @@ test('a visible feed stays at the top while refreshed content is applied', async
 })
 
 for (const uiScale of [100, 95]) {
-  test(`mobile header hides fully and returns on a short upward scroll at ${uiScale}% scale`, async ({ app, page, attachScreenshot }) => {
+  test(`mobile header hides fully and returns on a deliberate upward scroll at ${uiScale}% scale`, async ({ app, page, attachScreenshot }) => {
     await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
       BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale / 100)
     }, uiScale)
@@ -147,6 +147,8 @@ for (const uiScale of [100, 95]) {
 
     // Stay deep in the feed: changing tabs must not require returning to its top.
     await scrollFeedTo(page, 580)
+    await expect.poll(headerBottom).toBeLessThanOrEqual(0)
+    await scrollFeedTo(page, 530)
     await expect.poll(async () => Math.abs(await headerTop() - await stickyOffset())).toBeLessThanOrEqual(1)
     await attachScreenshot(`mobile header revealed at ${uiScale}%`)
 
@@ -159,6 +161,8 @@ for (const uiScale of [100, 95]) {
     await scrollFeedTo(page, 600)
     await expect.poll(headerBottom).toBeLessThanOrEqual(0)
     await scrollFeedTo(page, 580)
+    await expect.poll(headerBottom).toBeLessThanOrEqual(0)
+    await scrollFeedTo(page, 530)
     await expect.poll(async () => Math.abs(await headerTop() - await stickyOffset())).toBeLessThanOrEqual(1)
 
     // A hidden phone header must become sticky again after resizing to desktop.
@@ -173,6 +177,36 @@ for (const uiScale of [100, 95]) {
     await expect.poll(async () => Math.abs(await headerTop() - await stickyOffset())).toBeLessThanOrEqual(1)
     await scrollFeedTo(page, 650)
     await expect.poll(async () => Math.abs(await headerTop() - await stickyOffset())).toBeLessThanOrEqual(1)
+  })
+}
+
+for (const uiScale of [100, 95]) {
+  test(`landscape phone header hides and requires a longer upward scroll at ${uiScale}% scale`, async ({ app, page }) => {
+    await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
+      BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale / 100)
+    }, uiScale)
+    await setWindowSize(app, page, { width: 844, height: 390 })
+    await expect(page.getByText('Feed video 00')).toBeVisible()
+    await page.evaluate(() => document.activeElement.blur())
+
+    const header = page.locator('.subscriptionsHeader')
+    const headerBottom = () => header.evaluate(element => element.getBoundingClientRect().bottom)
+    await expect(header).toHaveCSS('transition-duration', '0.28s')
+    await scrollFeedTo(page, 600)
+    await expect.poll(headerBottom).toBeLessThanOrEqual(0)
+    await expect(header).toHaveCSS('transition-duration', '0.22s')
+    await scrollFeedTo(page, 580)
+    await expect.poll(headerBottom).toBeLessThanOrEqual(0)
+    await scrollFeedTo(page, 540)
+    await expect.poll(headerBottom).toBeLessThanOrEqual(0)
+    await scrollFeedTo(page, 530)
+    await expect.poll(() => header.evaluate(element => {
+      return Math.abs(element.getBoundingClientRect().top - Number.parseFloat(getComputedStyle(element).top))
+    })).toBeLessThanOrEqual(1)
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await expect(header).toHaveCSS('transition-duration', '0s')
+    await scrollFeedTo(page, 600)
+    await expect.poll(headerBottom).toBeLessThanOrEqual(0)
   })
 }
 
@@ -202,7 +236,7 @@ test('mobile header keeps focused controls visible and hides the taller New feed
   await scrollFeedTo(page, 600)
   await expect.poll(() => header.evaluate(element => element.getBoundingClientRect().bottom)).toBeLessThanOrEqual(0)
   await expect(header).toHaveCSS('transition-duration', '0s')
-  await scrollFeedTo(page, 580)
+  await scrollFeedTo(page, 530)
   await expect(page.locator('[data-new-feed-tab="videos"]')).toBeInViewport()
   await page.locator('[data-subscription-feed-tab="videos"]').click()
   await expect(videosTab).toBeInViewport()
