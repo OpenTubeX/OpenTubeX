@@ -72,16 +72,17 @@ test('fullscreen rotation lock override is searchable only on Android', () => {
 })
 
 test('mobile general settings search includes swipe to refresh and omits desktop thumbnail actions', () => {
-  for (const isCapacitor of [true, false]) {
+  for (const [isCapacitor, phoneLayout] of [[true, false], [false, false], [false, true]]) {
     const entries = createSettingsSearchIndex({
       sections: [{ type: 'general', title: 'General', description: '' }],
       tm: path => getAtPath(locale, path),
       store: { getters: {} },
       isCapacitor,
+      phoneLayout,
       usingElectron: !isCapacitor,
     }).get('general')
     assert.equal(entries.some(({ label }) => label === 'Swipe to refresh'), isCapacitor)
-    assert.equal(entries.some(({ label }) => label === 'Extra Thumbnail Action Button'), !isCapacitor)
+    assert.equal(entries.some(({ label }) => label === 'Extra Thumbnail Action Button'), !isCapacitor && !phoneLayout)
   }
 })
 

@@ -86,6 +86,7 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
     store,
     usingElectron,
     isCapacitor = false,
+    phoneLayout = false,
     isIos = false,
     supportsLocalApi,
     isLinuxWayland,
@@ -128,7 +129,7 @@ function isSettingsSearchMessageVisible(sectionType, path, options) {
   }
 
   if (sectionType === 'general') {
-    if (group === 'Extra Thumbnail Action Button') return !isCapacitor
+    if (group === 'Extra Thumbnail Action Button') return !isCapacitor && !phoneLayout
     if (group === 'Stream Extraction Method') return usingElectron || isCapacitor
     if (['Mobile Layout', 'Swipe to refresh'].includes(group)) {
       return isCapacitor
