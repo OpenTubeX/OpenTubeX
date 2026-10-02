@@ -4,6 +4,35 @@ for (const uiScale of [100, 125]) {
   test.describe(`centered desktop header at ${uiScale}% UI scale`, () => {
     test.use({ seed: { settings: { uiScale } } })
 
+    test('preserves search spacing when scrollbar width changes without resizing', async ({ app, page }) => {
+      await app.electronApp.evaluate(({ BrowserWindow }, factor) => {
+        const window = BrowserWindow.getAllWindows()[0]
+        window.setBounds({ ...window.getBounds(), width: 800 * factor, height: 820 * factor })
+      }, uiScale / 100)
+      await expect.poll(() => page.evaluate(() => window.innerWidth)).toBe(800)
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setEnableDownloads', true)
+        store.commit('setMoveDownloadsToAppHeader', true)
+        store.commit('setMoveSettingsToAppHeader', true)
+        store.commit('setHideHeaderSyncIndicator', false)
+        store.commit('setSyncServerStatus', 'syncing')
+      })
+      const header = page.locator('.topNav')
+      await expect(header.locator('.searchContainer')).toBeVisible()
+      for (const width of [4, 20, 4]) {
+        await page.evaluate(width => {
+          document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setScrollbarThumbWidth', width)
+        }, width)
+        await expect.poll(() => header.evaluate(element => {
+          const field = element.querySelector('.searchContainer').getBoundingClientRect()
+          const actions = [...element.querySelector('.profiles').children]
+            .map(child => child.getBoundingClientRect()).filter(bounds => bounds.width > 0)
+          return Math.min(...actions.map(bounds => bounds.left)) - field.right
+        }), { message: `search keeps its action gap with ${width}px scrollbar width` }).toBeGreaterThanOrEqual(12)
+      }
+    })
+
     test('centers search with space on both sides and removes logo text before collapsing search', async ({ app, page }, testInfo) => {
       const pageErrors = []
       page.on('pageerror', error => pageErrors.push(error.message))

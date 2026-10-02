@@ -352,6 +352,8 @@ function measureHeader() {
   }
 }
 const headerResizeObserver = new ResizeObserver(measureHeader)
+// The scrollbar setting changes the actions' margin without resizing their box.
+watch(() => store.getters.getScrollbarThumbWidth, measureHeader, { flush: 'post' })
 const logicalHistoryState = computed(() => {
   const tabId = store.getters.getPresentedTabId
   return store.getters.getTabHistoryState(tabId)
