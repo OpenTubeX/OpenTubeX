@@ -396,7 +396,7 @@ async function updateControlProps(control, props) {
 }
 
 for (const scale of [100, 95]) {
-  for (const width of [1600, 480]) {
+  for (const width of [1600, 480, 375]) {
     test.describe(`input alignment at ${width}px and ${scale}% scale`, () => {
       test.use({ seed: { settings: { currentLocale: 'en-US', uiScale: scale, baseTheme: scale === 100 ? 'dark' : 'light', bounds: { x: 0, y: 0, width, height: 900, maximized: false } } } })
 
@@ -443,13 +443,39 @@ for (const scale of [100, 95]) {
               const subscribe = element.querySelector('.subscribeButton').getBoundingClientRect()
               return Math.abs(share.top + share.height / 2 - subscribe.top - subscribe.height / 2)
             }), { message: `${label} and Share centers in ${direction}` }).toBeLessThanOrEqual(0.1)
+            if (width <= 680) {
+              await expect.poll(() => row.evaluate((element, direction) => {
+                const row = element.getBoundingClientRect()
+                const share = element.querySelector('.shareIcon').getBoundingClientRect()
+                const subscribe = element.querySelector('.ftSubscribeButton').getBoundingClientRect()
+                return direction === 'ltr'
+                  ? Math.max(Math.abs(share.right - row.right), Math.abs(subscribe.left - row.left))
+                  : Math.max(Math.abs(share.left - row.left), Math.abs(subscribe.right - row.right))
+              }, direction), { message: `${label} and Share at opposite row edges in ${direction}` }).toBeLessThanOrEqual(1)
+            }
           }
           if (label === 'Subscribe') await subscribe.click()
         }
         if (scale === 100) {
+          await page.evaluate(() => { document.body.dir = 'ltr' })
           const screenshot = testInfo.outputPath('aligned-channel-actions.png')
-          await row.screenshot({ path: screenshot })
+          await page.locator('.channelDetails').screenshot({ path: screenshot })
           await testInfo.attach('aligned-channel-actions', { path: screenshot, contentType: 'image/png' })
+        }
+        if (width <= 680) {
+          await page.evaluate(async () => {
+            document.body.dir = 'ltr'
+            const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+            await store.dispatch('updateHideSharingActions', true)
+          })
+          await expect(row.locator('.shareIcon')).toHaveCount(0)
+          await expect.poll(() => row.evaluate(element => {
+            const row = element.getBoundingClientRect()
+            const subscribe = element.querySelector('.ftSubscribeButton').getBoundingClientRect()
+            return window.innerWidth <= 400
+              ? Math.abs(subscribe.left + subscribe.width / 2 - row.left - row.width / 2)
+              : Math.abs(subscribe.left - row.left)
+          }), { message: 'Subscription button keeps its alignment with Share hidden' }).toBeLessThanOrEqual(1)
         }
       })
 

@@ -202,6 +202,10 @@
     gap: 10px;
     margin-block-start: 5px;
   }
+
+  .infoActionsContainer:has(> .shareIcon) {
+    justify-content: space-between;
+  }
 }
 
 @media only screen and (width <=400px) {
