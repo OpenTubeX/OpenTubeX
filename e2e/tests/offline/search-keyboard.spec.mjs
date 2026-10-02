@@ -29,6 +29,8 @@ for (const uiScale of [100, 95]) {
       for (const width of [1600, 900]) {
         if (width === 900) await setWindowSize(app, page, { width, height: 700 })
         await input.evaluate(element => element.blur())
+        // Let the header's ResizeObserver and Vue update settle before measuring.
+        await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
         const initialBox = await input.boundingBox()
 
         const expectStableWidth = async () => {
