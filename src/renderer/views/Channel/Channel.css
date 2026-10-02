@@ -64,7 +64,7 @@
   background-color: var(--search-bar-color);
   backdrop-filter: var(--search-bar-blur, none);
   border: 1px solid var(--border-color);
-  border-radius: 999px;
+  border-radius: calc(999px * var(--ui-roundness));
   padding-block: 7px;
   padding-inline: 14px;
   cursor: pointer;

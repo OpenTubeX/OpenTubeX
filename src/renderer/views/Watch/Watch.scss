@@ -426,7 +426,7 @@
       inset-block-end: 5px;
       inset-inline: 8px;
       block-size: 4px;
-      border-radius: 2px;
+      border-radius: calc(2px * var(--ui-roundness));
     }
 
     .shortsExternalMetadata {
@@ -617,7 +617,7 @@
     .shortsSkeletonChannel {
       inline-size: min(180px, 42%);
       block-size: 14px;
-      border-radius: 7px;
+      border-radius: calc(7px * var(--ui-roundness));
     }
 
     .shortsSkeletonSubscribe {
@@ -631,7 +631,7 @@
       inline-size: min(280px, 70%);
       block-size: 20px;
       margin-block-start: 12px;
-      border-radius: 7px;
+      border-radius: calc(7px * var(--ui-roundness));
     }
 
     .shortsLinkedVideo {
@@ -643,7 +643,7 @@
       padding-block: 6px;
       padding-inline: 10px;
       border: 0;
-      border-radius: 14px;
+      border-radius: calc(14px * var(--ui-roundness));
       color: var(--primary-text-color);
       background-color: var(--side-nav-hover-color);
       cursor: pointer;

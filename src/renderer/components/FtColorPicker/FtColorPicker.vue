@@ -795,7 +795,7 @@ onBeforeUnmount(() => {
 
 .hueSlider::-webkit-slider-runnable-track {
   block-size: 10px;
-  border-radius: 999px;
+  border-radius: calc(999px * var(--ui-roundness));
   background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
 }
 
@@ -808,7 +808,7 @@ onBeforeUnmount(() => {
 
 .blurSlider::-webkit-slider-runnable-track {
   block-size: 10px;
-  border-radius: 999px;
+  border-radius: calc(999px * var(--ui-roundness));
   background: var(--subtle-surface-color);
 }
 
@@ -816,7 +816,7 @@ onBeforeUnmount(() => {
   grid-column: 1 / -1;
   position: relative;
   block-size: 10px;
-  border-radius: 999px;
+  border-radius: calc(999px * var(--ui-roundness));
 }
 
 .alphaSliderBackground::after {

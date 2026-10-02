@@ -192,23 +192,23 @@
   inline-size: 100%;
   block-size: 6px;
   border: 0;
-  border-radius: 3px;
+  border-radius: calc(3px * var(--ui-roundness));
   background: var(--border-color);
   accent-color: var(--primary-color);
 }
 
 .repairProgress::-webkit-progress-bar {
-  border-radius: 3px;
+  border-radius: calc(3px * var(--ui-roundness));
   background: var(--border-color);
 }
 
 .repairProgress::-webkit-progress-value {
-  border-radius: 3px;
+  border-radius: calc(3px * var(--ui-roundness));
   background: var(--primary-color);
 }
 
 .repairProgress::-moz-progress-bar {
-  border-radius: 3px;
+  border-radius: calc(3px * var(--ui-roundness));
   background: var(--primary-color);
 }
 

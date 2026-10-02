@@ -407,7 +407,7 @@ function resetQuickSettings() {
 .selectedSetting.dropAfter::after {
   background: var(--primary-color);
   block-size: 3px;
-  border-radius: 2px;
+  border-radius: calc(2px * var(--ui-roundness));
   content: '';
   inset-inline: 0;
   position: absolute;

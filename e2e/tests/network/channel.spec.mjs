@@ -73,6 +73,13 @@ test.describe('channel page', () => {
     await expect(page.locator('.channelDetails .bannerContainer')).toHaveCSS('border-top-right-radius', '16px')
     await expect(page.locator('.channelDetails .infoContainer')).toHaveCSS('border-bottom-left-radius', '16px')
     await expect(page.locator('.channelDetails .infoContainer')).toHaveCSS('border-bottom-right-radius', '16px')
+    for (const roundness of [0, 50, 100, 200]) {
+      await page.evaluate(value => {
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
+      }, roundness)
+      await expect.poll(() => page.locator('.channelDetails .selectedTab').evaluate(element =>
+        getComputedStyle(element, '::before').borderRadius)).toBe(`${1.5 * roundness / 100}px`)
+    }
 
     await page.locator('body').evaluate(element => {
       element.style.fontFamily = 'Arial, sans-serif'
@@ -83,6 +90,19 @@ test.describe('channel page', () => {
     const widthBeforeHover = (await aboutTab.boundingBox()).width
     await aboutTab.hover()
     expect((await aboutTab.boundingBox()).width).toBe(widthBeforeHover)
+
+    const selectedTab = page.locator('.channelDetails .selectedTab')
+    const selectedIndicatorColor = await selectedTab.evaluate(element => getComputedStyle(element, '::before').backgroundColor)
+    const unselectedIndicatorColor = await aboutTab.evaluate(element => getComputedStyle(element, '::before').backgroundColor)
+    expect(selectedIndicatorColor).not.toBe(unselectedIndicatorColor)
+    await page.keyboard.press('Tab')
+    await selectedTab.focus()
+    await expect.poll(() => selectedTab.evaluate(element => element.matches(':focus-visible'))).toBe(true)
+    await expect.poll(() => selectedTab.evaluate(element => getComputedStyle(element, '::before').backgroundColor)).toBe(selectedIndicatorColor)
+    await page.mouse.move(0, 0)
+    await aboutTab.focus()
+    await expect.poll(() => aboutTab.evaluate(element => element.matches(':focus-visible'))).toBe(true)
+    await expect.poll(() => aboutTab.evaluate(element => getComputedStyle(element, '::before').backgroundColor)).toBe(unselectedIndicatorColor)
 
     // Channel tab changes must update the route and title without creating a
     // new history entry for every tab selection (796650405, 912e5ea6e).

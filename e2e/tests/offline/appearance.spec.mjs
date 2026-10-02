@@ -1360,6 +1360,19 @@ test.describe('global progress presentation', () => {
 test.describe('UI roundness', () => {
   test.use({ seed: { settings: { uiRoundness: 0 } } })
 
+  test('applies to the color picker opacity background', async ({ page }) => {
+    await goToSettingsSection(page, 'theme')
+    await page.getByRole('button', { name: 'Create custom theme' }).click()
+    await page.getByRole('button', { name: 'Page background', exact: true }).click()
+    const background = page.getByRole('dialog', { name: 'Page background' }).locator('.alphaSliderBackground')
+    for (const roundness of [0, 50, 100, 200]) {
+      await page.evaluate(value => {
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
+      }, roundness)
+      await expect(background).toHaveCSS('border-radius', `${999 * roundness / 100}px`)
+    }
+  })
+
   test('applies to controls, cards, popovers, and modals', async ({ app, page, attachScreenshot }) => {
     await expect(page.locator('body')).toHaveCSS('--ui-roundness', '0')
 
@@ -1369,11 +1382,13 @@ test.describe('UI roundness', () => {
     const toggleTrackRadius = () => toggleSwitch.evaluate((element) =>
       getComputedStyle(element, '::before').borderRadius)
     await expect(roundnessSlider).toHaveValue('0')
-    expect(await toggleTrackRadius()).toBe('8px')
+    await expect.poll(toggleTrackRadius).toBe('0px')
     await expect(page.locator('.sectionBody').first()).toHaveCSS('border-radius', '0px')
     await expect(page.getByRole('button').first()).toHaveCSS('border-radius', '0px')
 
     await page.locator('.settingsMenu [data-section="data"]').click()
+    expect(await page.locator('.dataStorageTab.selected').evaluate(element =>
+      getComputedStyle(element, '::after').borderRadius)).toBe('0px')
     await page.getByRole('button', { name: 'Export Subscriptions' }).click()
     await expect(page.getByRole('dialog')).toHaveCSS('border-radius', '0px')
     await attachScreenshot('square modal at 0% roundness')
@@ -1388,7 +1403,7 @@ test.describe('UI roundness', () => {
     await goToSettingsSection(page, 'theme')
     await roundnessSlider.fill('150')
     await expect(page.locator('body')).toHaveCSS('--ui-roundness', '1.5')
-    expect(await toggleTrackRadius()).toBe('8px')
+    await expect.poll(toggleTrackRadius).toBe('12px')
     await expect(page.locator('.sectionBody').first()).toHaveCSS('border-radius', '12px')
     await attachScreenshot('settings at 150% roundness')
 

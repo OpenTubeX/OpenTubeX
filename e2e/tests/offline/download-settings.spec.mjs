@@ -153,6 +153,12 @@ test.describe('download settings', () => {
     await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
 
     const manager = page.locator('.settingsSubpageContent')
+    for (const roundness of [0, 50, 100, 200, 100]) {
+      await page.evaluate(value => {
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
+      }, roundness)
+      await expect(manager.locator('.channelRule').first()).toHaveCSS('border-radius', `${10 * roundness / 100}px`)
+    }
     const search = manager.getByRole('searchbox', { name: 'Search channels' })
     const scroller = manager.locator('.automaticDownloadsScroller')
     const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')

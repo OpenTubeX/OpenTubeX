@@ -250,6 +250,9 @@
 
   /* scaled up to the tab width via the inline transform */
   inline-size: 1px;
+
+  /* Compensate for scaleX so the end caps stay round at every tab width. */
+  border-radius: calc(1.5px * var(--ui-roundness) / var(--tab-indicator-width)) / calc(1.5px * var(--ui-roundness));
   background-color: var(--primary-color);
   pointer-events: none;
   transform-origin: left top;

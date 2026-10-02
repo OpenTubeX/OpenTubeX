@@ -67,6 +67,7 @@ $watched-transition-duration: 0.5s;
 
 .ft-list-item {
   padding: 6px;
+  border-radius: calc(12px * var(--ui-roundness));
 
   &.watched {
     background-color: var(--bg-color);

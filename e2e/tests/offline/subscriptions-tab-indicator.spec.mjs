@@ -59,6 +59,34 @@ test.use({
 })
 
 test.describe('subscriptions feed tab indicator', () => {
+  test('rounds both feed indicators without stretching their end caps', async ({ app, page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+    await page.getByRole('button', { name: 'Show tabbed view' }).click()
+
+    for (const width of [1600, 375]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, width) => {
+        BrowserWindow.getAllWindows()[0].setSize(width, 900)
+      }, width)
+      for (const roundness of [0, 50, 100, 200]) {
+        await page.evaluate(value => {
+          document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
+        }, roundness)
+        for (const selector of ['.tabsIndicator:not(.newFeedTabsIndicator)', '.newFeedTabsIndicator']) {
+          await expect.poll(() => page.locator(selector).evaluate(element => {
+            const style = getComputedStyle(element)
+            const [horizontal, vertical = horizontal] = style.borderTopLeftRadius.split(' ').map(Number.parseFloat)
+            const scale = new DOMMatrixReadOnly(style.transform).a
+            return {
+              horizontal: Math.round(horizontal * scale * 100) / 100,
+              vertical
+            }
+          })).toEqual({ horizontal: 1.5 * roundness / 100, vertical: 1.5 * roundness / 100 })
+        }
+      }
+    }
+  })
+
   test('falls back when the persisted tab is hidden on startup', async ({ page }) => {
     await page.evaluate(async () => {
       localStorage.setItem('Subscriptions/currentTab', 'videos')

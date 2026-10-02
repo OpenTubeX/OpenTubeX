@@ -98,6 +98,7 @@
 }
 
 .tab {
+  position: relative;
   padding: 15px;
   font-size: 15px;
   cursor: pointer;
@@ -107,10 +108,24 @@
   border-block-end: 3px solid transparent;
 }
 
+.tab::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: -3px;
+  block-size: 3px;
+  border-radius: calc(1.5px * var(--ui-roundness));
+  background-color: transparent;
+}
+
 .tab:focus-visible,
 .tab:hover:not(.selectedTab) {
   font-weight: bold;
-  border-block-end: 3px solid var(--border-color);
+}
+
+.tab:focus-visible:not(.selectedTab)::before,
+.tab:hover:not(.selectedTab)::before {
+  background-color: var(--border-color);
 }
 
 .tabLabel {
@@ -130,9 +145,12 @@
 
 .selectedTab {
   color: var(--primary-text-color);
-  border-block-end: 3px solid var(--primary-color);
   font-weight: bold;
   box-sizing: border-box;
+}
+
+.selectedTab::before {
+  background-color: var(--primary-color);
 }
 
 .thumbnailContainer {
