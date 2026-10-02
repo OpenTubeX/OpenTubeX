@@ -13,6 +13,10 @@ h2 {
   margin-inline: auto;
 }
 
+.card :deep(.select) {
+  margin-block-start: 6px;
+}
+
 @media only screen and (width <= 680px) {
   .card {
     inline-size: 90%;
