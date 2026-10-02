@@ -43,8 +43,7 @@ public class MobileAppearanceSettingsTest {
                     """);
                 for (boolean enabled : new boolean[] {false, true, false}) {
                     evaluate(view, store + ".commit('setAlwaysShowScrollbars', " + enabled + ")");
-                    // Allow the Vue watcher and Capacitor bridge to reach the native view.
-                    Thread.sleep(500);
+                    awaitScrollbarFading(scenario, view, !enabled);
                     WebView currentView = view;
                     scenario.onActivity(activity -> {
                         assertTrue("The native page scrollbar stays enabled", currentView.isVerticalScrollBarEnabled());
@@ -55,14 +54,17 @@ public class MobileAppearanceSettingsTest {
                     awaitCondition(view, "window.scrollY > 1000");
                     assertIdlePageScrollbar(scenario, view, enabled);
                 }
+                // Enabling the preference must also cancel a fade from recent scrolling.
+                evaluate(view, "window.scrollTo(0, 1500)");
+                awaitCondition(view, "window.scrollY >= 1499");
+                evaluate(view, store + ".commit('setAlwaysShowScrollbars', true)");
+                awaitScrollbarFading(scenario, view, false);
+                assertIdlePageScrollbar(scenario, view, true);
                 evaluate(view, store + ".dispatch('updateAlwaysShowScrollbars', true).then(() => window.__scrollbarSettingSaved = true)");
                 awaitCondition(view, "window.__scrollbarSettingSaved === true");
                 scenario.recreate();
                 view = webView(scenario);
-                WebView recreatedView = view;
-                Thread.sleep(500);
-                scenario.onActivity(activity -> assertEquals("The saved preference applies on startup", false,
-                    recreatedView.isScrollbarFadingEnabled()));
+                awaitScrollbarFading(scenario, view, false);
             } finally {
                 evaluate(view, "document.querySelector('#native-scrollbar-test-style')?.remove(); document.querySelector('#native-scrollbar-test-content')?.remove(); window.scrollTo(0, 0)");
                 evaluate(view, store + ".dispatch('updateAlwaysShowScrollbars', " + saved + ").then(() => window.__scrollbarSettingRestored = true)");
@@ -72,33 +74,58 @@ public class MobileAppearanceSettingsTest {
         }
     }
 
+    private static void awaitScrollbarFading(ActivityScenario<MainActivity> scenario, WebView view,
+        boolean expected) throws Exception {
+        long deadline = SystemClock.uptimeMillis() + 15000;
+        AtomicReference<Boolean> fading = new AtomicReference<>();
+        while (SystemClock.uptimeMillis() < deadline) {
+            scenario.onActivity(activity -> fading.set(view.isScrollbarFadingEnabled()));
+            if (Boolean.valueOf(expected).equals(fading.get())) return;
+            Thread.sleep(100);
+        }
+        assertEquals("Native scrollbar fading follows Always Show Scrollbars", Boolean.valueOf(expected), fading.get());
+    }
+
     private static void assertIdlePageScrollbar(ActivityScenario<MainActivity> scenario, WebView view,
         boolean visible) throws Exception {
         int[] bounds = new int[4];
         int[] idleDelay = new int[1];
+        CountDownLatch rendered = new CountDownLatch(1);
         scenario.onActivity(activity -> {
             view.getLocationOnScreen(bounds);
             bounds[2] = view.getWidth();
             bounds[3] = view.getHeight();
             idleDelay[0] = view.getScrollBarDefaultDelayBeforeFade() + view.getScrollBarFadeDuration() + 500;
-        });
-        Thread.sleep(idleDelay[0]);
-        Bitmap screenshot = InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
-        assertTrue("The screen can be captured", screenshot != null);
-        try {
-            int scrollbarPixels = 0;
-            // The fixture has a uniform magenta background. Only the native thumb
-            // should draw over the right edge, away from Android's system bars.
-            for (int y = bounds[1] + bounds[3] / 10; y < bounds[1] + bounds[3] * 9 / 10; y++) {
-                for (int x = bounds[0] + bounds[2] - 20; x < bounds[0] + bounds[2]; x++) {
-                    if (screenshot.getPixel(x, y) != Color.MAGENTA) scrollbarPixels++;
+            view.postVisualStateCallback(0, new WebView.VisualStateCallback() {
+                @Override public void onComplete(long requestId) {
+                    view.postOnAnimation(() -> view.postOnAnimation(rendered::countDown));
                 }
+            });
+        });
+        assertTrue("The scroll fixture is rendered", rendered.await(10, TimeUnit.SECONDS));
+        Thread.sleep(idleDelay[0]);
+        long deadline = SystemClock.uptimeMillis() + 15000;
+        int scrollbarPixels = 0;
+        while (SystemClock.uptimeMillis() < deadline) {
+            Bitmap screenshot = InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
+            assertTrue("The screen can be captured", screenshot != null);
+            try {
+                scrollbarPixels = 0;
+                // The fixture has a uniform magenta background. Only the native thumb
+                // should draw over the right edge, away from Android's system bars.
+                for (int y = bounds[1] + bounds[3] / 10; y < bounds[1] + bounds[3] * 9 / 10; y++) {
+                    for (int x = bounds[0] + bounds[2] - 20; x < bounds[0] + bounds[2]; x++) {
+                        if (screenshot.getPixel(x, y) != Color.MAGENTA) scrollbarPixels++;
+                    }
+                }
+            } finally {
+                screenshot.recycle();
             }
-            assertEquals("The page scrollbar's idle visibility follows the preference (pixels: " + scrollbarPixels + ")",
-                visible, scrollbarPixels > 0);
-        } finally {
-            screenshot.recycle();
+            if (visible == (scrollbarPixels > 0)) return;
+            Thread.sleep(100);
         }
+        assertEquals("The page scrollbar's idle visibility follows the preference (pixels: " + scrollbarPixels + ")",
+            visible, scrollbarPixels > 0);
     }
 
     @Test
