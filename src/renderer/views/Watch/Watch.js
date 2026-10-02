@@ -100,7 +100,6 @@ import {
 } from '../../helpers/player/ytDlpPlaybackPreload'
 import { getMusicTrackArtist, MUSIC_MEDIA_TYPE } from '../../helpers/player/musicMediaType'
 import { getCompatibleAdaptiveFormats } from '../../helpers/player/compatibleAdaptiveFormats'
-import { getLiveDvrWindowSeconds } from '../../helpers/player/liveManifest'
 import { selectSponsorBlockFullVideoLabel } from '../../helpers/player/sponsorBlockFullVideo'
 import {
   buildSubscriptionShortsFeed,
@@ -271,6 +270,8 @@ export default defineComponent({
       liveChatLoaded: false,
       transcriptLoaded: false,
       isLive: false,
+      /** @type {boolean | null} */
+      isLiveDvrEnabled: null,
       isPremiere: false,
       liveChat: null,
       liveChatIsReplay: false,
@@ -2272,6 +2273,7 @@ export default defineComponent({
       this.isFamilyFriendly = null
       this.commentsDisabled = false
       this.isLive = false
+      this.isLiveDvrEnabled = null
       this.isPremiere = false
       this.commentsLoaded = false
       this.liveChatLoaded = false
@@ -3119,10 +3121,10 @@ export default defineComponent({
           adEndTimeUnixMs,
           paidPromotionDurationMs,
           isPremiere,
+          isLiveDvrEnabled,
           watchPageIpBlocked,
           musicMediaType,
           androidLiveHlsManifestUrl,
-          androidLiveDashManifestUrl,
         } = videoInfo
 
         this.musicMediaType = musicMediaType
@@ -3332,6 +3334,7 @@ export default defineComponent({
         }
 
         this.isLive = !!result.basic_info.is_live
+        this.isLiveDvrEnabled = isLiveDvrEnabled ?? null
         this.isUpcoming = !!result.basic_info.is_upcoming
         this.isLiveContent = !!result.basic_info.is_live_content
         this.isPremiere = isPremiere === true
@@ -3498,18 +3501,17 @@ export default defineComponent({
           }
 
           if (useRemoteManifest) {
-            const hlsManifestUrl = result.streaming_data?.hls_manifest_url ?? androidLiveHlsManifestUrl
-            const dashManifestUrl = result.streaming_data?.dash_manifest_url ??
-              ((getLiveDvrWindowSeconds(hlsManifestUrl) ?? 0) <= 30 ? androidLiveDashManifestUrl : null)
-            if (dashManifestUrl) {
-              this.manifestSrc = dashManifestUrl
+            // Ongoing streams and premieres use HLS at the live edge. Remote
+            // DASH can advertise a rewind range whose segments are unavailable.
+            if (this.isPostLiveDvr && result.streaming_data?.dash_manifest_url) {
+              this.manifestSrc = result.streaming_data.dash_manifest_url
               this.manifestMimeType = MANIFEST_TYPE_DASH
             } else {
               // A blocked live player response can contain all watch-page metadata
               // without either manifest URL. Keep the missing source as `null`, as
               // expected by the player availability checks, while yt-dlp extracts
               // its independent HLS manifest.
-              this.manifestSrc = hlsManifestUrl
+              this.manifestSrc = result.streaming_data?.hls_manifest_url ?? androidLiveHlsManifestUrl
               this.manifestMimeType = MANIFEST_TYPE_HLS
             }
           }
@@ -3882,6 +3884,7 @@ export default defineComponent({
           this.recommendedVideos = recommendedVideos.sort(this.sortWatchedVideosLast)
 
           this.isLive = result.liveNow
+          this.isLiveDvrEnabled = null
           this.isPremiere = this.isLive && result.premiereTimestamp > 0
           this.isFamilyFriendly = result.isFamilyFriendly
           this.isPostLiveDvr = !!result.isPostLiveDvr
