@@ -1444,6 +1444,7 @@ Share:
   Share failed: "无法分享链接"
   Timestamp Link Copied: 已将带时间戳的链接复制到剪贴板
 Context Menu:
+  Open in a Background Tab: "在后台标签页中打开"
   Select Tab: 选择标签页
   Close Tabs Before: 关闭之前的标签页
   Close Tabs After: 关闭之后的标签页

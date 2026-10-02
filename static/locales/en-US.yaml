@@ -2459,6 +2459,7 @@ Clipboard:
   Cannot access clipboard without a secure connection: Cannot access clipboard without a secure connection
 
 Context Menu:
+  Open in a Background Tab: "Open in a Background Tab"
   Select Tab: Select Tab
   Close Tabs Before: Close Tabs Before
   Close Tabs After: Close Tabs After

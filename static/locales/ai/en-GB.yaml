@@ -1428,6 +1428,7 @@ Share:
   Share failed: "Could not share the link"
   Timestamp Link Copied: Timestamp link copied to clipboard
 Context Menu:
+  Open in a Background Tab: "Open in a Background Tab"
   Select Tab: Select Tab
   Close Tabs Before: Close Tabs Before
   Close Tabs After: Close Tabs After

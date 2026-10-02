@@ -249,7 +249,7 @@
         @reset="resetThumbnailPreference"
       />
       <FtSelect
-        v-if="mode === 'general'"
+        v-if="mode === 'general' && !IS_CAPACITOR"
         :placeholder="t('Settings.General Settings.Extra Thumbnail Action Button.Extra Thumbnail Action Button')"
         :value="effectiveExtraThumbnailAction"
         setting-key="extraThumbnailAction"

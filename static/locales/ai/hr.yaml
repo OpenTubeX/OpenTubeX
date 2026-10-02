@@ -1465,6 +1465,7 @@ Share:
   Share failed: "Poveznicu nije moguće podijeliti"
   Timestamp Link Copied: Poveznica s vremenskom oznakom kopirana je u međuspremnik
 Context Menu:
+  Open in a Background Tab: "Otvori u kartici u pozadini"
   Select Tab: Odaberi karticu
   Close Tabs Before: Zatvori prethodne kartice
   Close Tabs After: Zatvori sljedeće kartice
