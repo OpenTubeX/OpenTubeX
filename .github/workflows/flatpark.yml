@@ -21,7 +21,7 @@ jobs:
   prepare:
     if: github.repository == 'OpenTubeX/OpenTubeX'
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 90
 
     outputs:
       needed: ${{ steps.duplicate.outputs.needed }}
@@ -202,7 +202,6 @@ jobs:
         RELEASE_JSON: ${{ steps.release.outputs.release_json }}
         RELEASE_TAG: ${{ steps.release.outputs.tag }}
         VERSION: ${{ steps.release.outputs.version }}
-        RELEASE_ASSET_MAX_ATTEMPTS: '12'
       shell: bash
       run: |
         set -euo pipefail
