@@ -118,7 +118,7 @@
 
             <section class="optionSection">
               <h3>{{ t('Downloads.Time Range and Chapters') }}</h3>
-              <div class="optionGrid segmentGrid">
+              <div class="segmentGrid">
                 <FtInput
                   :label="t('Downloads.Start Time')"
                   placeholder="HH:MM:SS"
@@ -127,6 +127,10 @@
                   :show-label="true"
                   :value="options.startTime"
                   @input="setOption('startTime', $event)"
+                />
+                <span
+                  class="timeRangeSeparator"
+                  aria-hidden="true"
                 />
                 <FtInput
                   :label="t('Downloads.End Time')"
@@ -138,7 +142,7 @@
                   @input="setOption('endTime', $event)"
                 />
               </div>
-              <div class="toggleGrid">
+              <div class="centeredToggle">
                 <FtToggleSwitch
                   compact
                   :label="t('Downloads.Split by Chapters')"
@@ -151,7 +155,7 @@
 
             <section class="optionSection">
               <h3>{{ t('Settings.SponsorBlock Settings.SponsorBlock Settings') }}</h3>
-              <div class="toggleGrid">
+              <div class="centeredToggle">
                 <FtToggleSwitch
                   compact
                   :label="t('Downloads.Remove Segments')"

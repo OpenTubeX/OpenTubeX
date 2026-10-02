@@ -80,7 +80,7 @@
 
       <section class="optionSection">
         <h3>{{ t('Downloads.Time Range and Chapters') }}</h3>
-        <div class="optionGrid">
+        <div class="segmentGrid">
           <FtInput
             :label="t('Downloads.Start Time')"
             placeholder="HH:MM:SS"
@@ -89,6 +89,10 @@
             :show-label="true"
             :value="options.startTime"
             @input="setOption('startTime', $event)"
+          />
+          <span
+            class="timeRangeSeparator"
+            aria-hidden="true"
           />
           <FtInput
             :label="t('Downloads.End Time')"
@@ -100,7 +104,7 @@
             @input="setOption('endTime', $event)"
           />
         </div>
-        <div class="toggleGrid">
+        <div class="centeredToggle">
           <FtToggleSwitch
             compact
             :label="t('Downloads.Split by Chapters')"
@@ -113,7 +117,7 @@
 
       <section class="optionSection">
         <h3>{{ t('Settings.SponsorBlock Settings.SponsorBlock Settings') }}</h3>
-        <div class="toggleGrid">
+        <div class="centeredToggle">
           <FtToggleSwitch
             compact
             :label="t('Downloads.Remove Segments')"
@@ -515,7 +519,8 @@ function deleteTemplate() {
 .templateOptions :deep(.ft-input-component:has(.inputIndicators > *)) {
   box-sizing: border-box;
   min-inline-size: 0;
-  inline-size: min(340px, calc(100% - 70px));
+  inline-size: calc(100% - 40px);
+  margin-inline-end: 40px;
 }
 
 .templateManagerHeader > :deep(.ft-input-component) {
@@ -534,10 +539,46 @@ function deleteTemplate() {
   margin-block-start: 10px;
 }
 
+.segmentGrid {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  inline-size: min(500px, 100%);
+  margin-inline: auto;
+}
+
+.segmentGrid > :deep(.ft-input-component) {
+  min-inline-size: 0;
+  inline-size: 100%;
+  margin-inline: 0;
+}
+
+.timeRangeSeparator {
+  margin-block-end: 10px;
+}
+
+.timeRangeSeparator::before {
+  content: '–';
+}
+
+.centeredToggle {
+  display: flex;
+  justify-content: center;
+  margin-block-start: 8px;
+}
+
+.centeredToggle > :deep(.switch-ctn) {
+  inline-size: auto;
+}
+
 .sponsorCategories {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, max-content));
   gap: 2px 18px;
+  inline-size: fit-content;
+  max-inline-size: 100%;
+  margin-inline: auto;
 }
 
 .disabledOptions {
