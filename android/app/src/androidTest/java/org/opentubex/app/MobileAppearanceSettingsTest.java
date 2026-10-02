@@ -3,6 +3,8 @@ package org.opentubex.app;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.SystemClock;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -20,6 +22,85 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class MobileAppearanceSettingsTest {
+    @Test
+    public void alwaysShowScrollbarsControlsNativePageFading() throws Exception {
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {
+            WebView view = webView(scenario);
+            String store = "document.querySelector('#app').__vue_app__.config.globalProperties.$store";
+            String saved = evaluate(view, store + ".getters.getAlwaysShowScrollbars");
+            try {
+                evaluate(view, """
+                    (() => {
+                        const style = document.createElement('style');
+                        style.id = 'native-scrollbar-test-style';
+                        style.textContent = '#app { display: none !important; } html, body { background: #ff00ff !important; overflow-y: auto !important; }';
+                        document.head.append(style);
+                        const content = document.createElement('div');
+                        content.id = 'native-scrollbar-test-content';
+                        content.style.height = '6000px';
+                        document.body.append(content);
+                    })()
+                    """);
+                for (boolean enabled : new boolean[] {false, true, false}) {
+                    evaluate(view, store + ".commit('setAlwaysShowScrollbars', " + enabled + ")");
+                    // Allow the Vue watcher and Capacitor bridge to reach the native view.
+                    Thread.sleep(500);
+                    WebView currentView = view;
+                    scenario.onActivity(activity -> {
+                        assertTrue("The native page scrollbar stays enabled", currentView.isVerticalScrollBarEnabled());
+                        assertEquals("Native scrollbar fading follows Always Show Scrollbars", !enabled,
+                            currentView.isScrollbarFadingEnabled());
+                    });
+                    evaluate(view, "window.scrollTo(0, 1200)");
+                    awaitCondition(view, "window.scrollY > 1000");
+                    assertIdlePageScrollbar(scenario, view, enabled);
+                }
+                evaluate(view, store + ".dispatch('updateAlwaysShowScrollbars', true).then(() => window.__scrollbarSettingSaved = true)");
+                awaitCondition(view, "window.__scrollbarSettingSaved === true");
+                scenario.recreate();
+                view = webView(scenario);
+                WebView recreatedView = view;
+                Thread.sleep(500);
+                scenario.onActivity(activity -> assertEquals("The saved preference applies on startup", false,
+                    recreatedView.isScrollbarFadingEnabled()));
+            } finally {
+                evaluate(view, "document.querySelector('#native-scrollbar-test-style')?.remove(); document.querySelector('#native-scrollbar-test-content')?.remove(); window.scrollTo(0, 0)");
+                evaluate(view, store + ".dispatch('updateAlwaysShowScrollbars', " + saved + ").then(() => window.__scrollbarSettingRestored = true)");
+                awaitCondition(view, "window.__scrollbarSettingRestored === true");
+                evaluate(view, "delete window.__scrollbarSettingSaved; delete window.__scrollbarSettingRestored");
+            }
+        }
+    }
+
+    private static void assertIdlePageScrollbar(ActivityScenario<MainActivity> scenario, WebView view,
+        boolean visible) throws Exception {
+        int[] bounds = new int[4];
+        int[] idleDelay = new int[1];
+        scenario.onActivity(activity -> {
+            view.getLocationOnScreen(bounds);
+            bounds[2] = view.getWidth();
+            bounds[3] = view.getHeight();
+            idleDelay[0] = view.getScrollBarDefaultDelayBeforeFade() + view.getScrollBarFadeDuration() + 500;
+        });
+        Thread.sleep(idleDelay[0]);
+        Bitmap screenshot = InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();
+        assertTrue("The screen can be captured", screenshot != null);
+        try {
+            int scrollbarPixels = 0;
+            // The fixture has a uniform magenta background. Only the native thumb
+            // should draw over the right edge, away from Android's system bars.
+            for (int y = bounds[1] + bounds[3] / 10; y < bounds[1] + bounds[3] * 9 / 10; y++) {
+                for (int x = bounds[0] + bounds[2] - 20; x < bounds[0] + bounds[2]; x++) {
+                    if (screenshot.getPixel(x, y) != Color.MAGENTA) scrollbarPixels++;
+                }
+            }
+            assertEquals("The page scrollbar's idle visibility follows the preference (pixels: " + scrollbarPixels + ")",
+                visible, scrollbarPixels > 0);
+        } finally {
+            screenshot.recycle();
+        }
+    }
+
     @Test
     public void tappingBesideNestedScrollbarHandleDoesNotScroll() throws Exception {
         try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(MainActivity.class)) {

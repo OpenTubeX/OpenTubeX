@@ -94,6 +94,17 @@ public class AndroidUiPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void setAlwaysShowScrollbars(PluginCall call) {
+        boolean enabled = Boolean.TRUE.equals(call.getBoolean("enabled", false));
+        getActivity().runOnUiThread(() -> {
+            android.webkit.WebView view = getBridge().getWebView();
+            view.setScrollbarFadingEnabled(!enabled);
+            view.invalidate();
+            call.resolve();
+        });
+    }
+
+    @PluginMethod
     public void setSystemBarsBackground(PluginCall call) {
         final int color;
         try {

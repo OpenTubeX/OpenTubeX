@@ -9,6 +9,7 @@ import {
 } from './scrollSpeed'
 import { initializePageScrollbar } from './pageScrollbar'
 import { addScrollbarAutoHide } from './scrollbarAutoHide'
+import { setAndroidAlwaysShowScrollbars } from './androidUi'
 
 // Kept out of the core bundle by the library, so `clickScroll` below silently
 // does nothing unless it is registered.
@@ -409,9 +410,14 @@ export function initializeAppScrollbars({ useNativePageScrollbar = false } = {})
   )
 
   // Cancel pending hides in place; retained tabs can have many live scrollers.
-  watch(() => store.getters.getAlwaysShowScrollbars, () => {
+  watch(() => store.getters.getAlwaysShowScrollbars, enabled => {
     for (const instance of instances.keys()) updateAutoHideHandler(instance)
-  })
+    if (useNativePageScrollbar) {
+      setAndroidAlwaysShowScrollbars(enabled).catch(error => {
+        console.warn('Could not update Android scrollbar visibility', error)
+      })
+    }
+  }, { immediate: true })
 }
 
 /**
