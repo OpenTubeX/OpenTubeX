@@ -354,6 +354,18 @@
     inline-size: 100%;
   }
 
+  .subscriptionsHeader {
+    --subscriptions-top-bar-block-size: var(--top-nav-sticky-offset);
+
+    transition: var(--mobile-nav-reveal-transition);
+  }
+
+  .subscriptionsHeader.scrollHidden:not(:has(:focus-visible)) {
+    transform: translateY(calc(-100% - var(--subscriptions-top-bar-block-size) - 2px));
+    transition: var(--mobile-nav-hide-transition);
+    pointer-events: none;
+  }
+
   .headerRow {
     align-items: flex-start;
     row-gap: 0;

@@ -1,10 +1,10 @@
-import { test, expect, goTo, sel } from '../../helpers/app.mjs'
+import { test, expect, goTo, sel, setWindowSize } from '../../helpers/app.mjs'
 
 const now = Date.now()
 const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
 
 /**
- * Scroll to an exact offset. The feed fills in lazily, so on a loaded machine
+ * Scroll to an offset within one physical pixel. The feed fills in lazily, so on a loaded machine
  * the document can still be too short when we scroll, which silently clamps the
  * offset and fails the assertion. Wait for enough scrollable height first.
  *
@@ -17,7 +17,7 @@ async function scrollFeedTo(page, top) {
     .toBeGreaterThanOrEqual(top)
 
   await page.evaluate((offset) => window.scrollTo(0, offset), top)
-  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(top)
+  await expect.poll(() => page.evaluate(offset => Math.abs(window.scrollY - offset) * devicePixelRatio, top)).toBeLessThanOrEqual(1)
 }
 
 const videos = Array.from({ length: 80 }, (_, index) => ({
@@ -30,7 +30,8 @@ const videos = Array.from({ length: 80 }, (_, index) => ({
   lengthSeconds: 120,
   liveNow: false,
   isUpcoming: false,
-  type: 'video'
+  type: 'video',
+  isNewInSubscriptionFeed: true
 }))
 
 test.use({
@@ -124,4 +125,85 @@ test('a visible feed stays at the top while refreshed content is applied', async
 
   expect(displacedScroll).toBe(300)
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
+})
+
+for (const uiScale of [100, 95]) {
+  test(`mobile header hides fully and returns on a short upward scroll at ${uiScale}% scale`, async ({ app, page, attachScreenshot }) => {
+    await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
+      BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale / 100)
+    }, uiScale)
+    await setWindowSize(app, page, { width: 375, height: 700 })
+    await expect(page.getByText('Feed video 00')).toBeVisible()
+    await page.evaluate(() => document.activeElement.blur())
+
+    const header = page.locator('.subscriptionsHeader')
+    const headerBottom = () => header.evaluate(element => element.getBoundingClientRect().bottom)
+    const headerTop = () => header.evaluate(element => element.getBoundingClientRect().top)
+    const stickyOffset = () => header.evaluate(element => Number.parseFloat(getComputedStyle(element).top))
+
+    await scrollFeedTo(page, 600)
+    await expect.poll(headerBottom).toBeLessThanOrEqual(0)
+    await attachScreenshot(`mobile header hidden at ${uiScale}%`)
+
+    // Stay deep in the feed: changing tabs must not require returning to its top.
+    await scrollFeedTo(page, 580)
+    await expect.poll(async () => Math.abs(await headerTop() - await stickyOffset())).toBeLessThanOrEqual(1)
+    await attachScreenshot(`mobile header revealed at ${uiScale}%`)
+
+    await scrollFeedTo(page, 620)
+    await expect.poll(headerBottom).toBeLessThanOrEqual(0)
+    await scrollFeedTo(page, 0)
+    await expect.poll(headerTop).toBeGreaterThanOrEqual(await stickyOffset() - 1)
+
+    await setWindowSize(app, page, { width: 640, height: 375 })
+    await scrollFeedTo(page, 600)
+    await expect.poll(headerBottom).toBeLessThanOrEqual(0)
+    await scrollFeedTo(page, 580)
+    await expect.poll(async () => Math.abs(await headerTop() - await stickyOffset())).toBeLessThanOrEqual(1)
+
+    // A hidden phone header must become sticky again after resizing to desktop.
+    await scrollFeedTo(page, 600)
+    await expect.poll(headerBottom).toBeLessThanOrEqual(0)
+    await setWindowSize(app, page, { width: 1600, height: 900 })
+    await expect(header).toHaveClass(/singleRow/)
+    // The header and video grid finish reflowing after the window bounds change.
+    // Let scroll anchoring settle before setting the desktop scroll offset.
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+    await scrollFeedTo(page, 600)
+    await expect.poll(async () => Math.abs(await headerTop() - await stickyOffset())).toBeLessThanOrEqual(1)
+    await scrollFeedTo(page, 650)
+    await expect.poll(async () => Math.abs(await headerTop() - await stickyOffset())).toBeLessThanOrEqual(1)
+  })
+}
+
+test('mobile header keeps focused controls visible and hides the taller New feed in reduced motion', async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 375, height: 700 })
+  await expect(page.getByText('Feed video 00')).toBeVisible()
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await expect(page.locator('html')).toHaveAttribute('data-reduced-motion', 'reduce')
+
+  const header = page.locator('.subscriptionsHeader')
+  const videosTab = page.locator('[data-subscription-feed-tab="videos"]')
+  await page.keyboard.press('Tab')
+  await videosTab.focus()
+  await scrollFeedTo(page, 600)
+  await expect(videosTab).toBeInViewport()
+
+  await page.evaluate(() => document.activeElement.blur())
+  await scrollFeedTo(page, 640)
+  await expect.poll(() => header.evaluate(element => element.getBoundingClientRect().bottom)).toBeLessThanOrEqual(0)
+  await videosTab.focus()
+  await expect(videosTab).toBeInViewport()
+
+  await page.locator('[data-subscription-feed-tab="all"]').click()
+  await page.getByRole('button', { name: 'Show tabbed view' }).click()
+  await expect(page.locator('[data-new-feed-tab="videos"]')).toBeInViewport()
+  await page.evaluate(() => document.activeElement.blur())
+  await scrollFeedTo(page, 600)
+  await expect.poll(() => header.evaluate(element => element.getBoundingClientRect().bottom)).toBeLessThanOrEqual(0)
+  await expect(header).toHaveCSS('transition-duration', '0s')
+  await scrollFeedTo(page, 580)
+  await expect(page.locator('[data-new-feed-tab="videos"]')).toBeInViewport()
+  await page.locator('[data-subscription-feed-tab="videos"]').click()
+  await expect(videosTab).toBeInViewport()
 })

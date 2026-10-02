@@ -10,11 +10,14 @@
   >
     <FtCard class="card">
       <div
+        ref="headerRef"
         class="subscriptionsHeader"
         :class="{
           singleRow: headerFitsOneRow,
+          scrollHidden: headerScrollHidden,
           tabbedNewFeed: currentTab === 'new' && newFeedView === 'tabbed'
         }"
+        @focusin="resetHeaderScrollVisibility"
       >
         <div
           ref="headerRowRef"
@@ -373,6 +376,7 @@ import SubscriptionsShorts from '../../components/SubscriptionsShorts.vue'
 import SubscriptionsPosts from '../../components/SubscriptionPosts/SubscriptionsPosts.vue'
 
 import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
+import { createMobileNavigationScroll } from '../../helpers/mobileNavigationScroll'
 import { lightHaptic } from '../../helpers/mobileHaptics'
 import { getIconForSortPreference } from '../../helpers/utils'
 import store from '../../store/index'
@@ -483,6 +487,28 @@ function handleFeedContextMenu(event) {
 const hasHorizontalTabBar = computed(() => isElectron && store.getters.getTabBarPosition === 'top')
 
 const { tabId, isTabPresented } = useTabContext()
+
+const headerRef = useTemplateRef('headerRef')
+const headerScrollHidden = ref(false)
+const headerScroll = createMobileNavigationScroll()
+const mobileHeaderLayout = window.matchMedia('(max-width: 680px)')
+
+function resetHeaderScrollVisibility() {
+  headerScroll.reset(window.scrollY)
+  headerScrollHidden.value = false
+}
+
+function updateHeaderScrollVisibility() {
+  if (!mobileHeaderLayout.matches || (isTabPresented && !isTabPresented.value)) return
+  if (headerRef.value?.querySelector(':focus-visible, [aria-expanded="true"]')) {
+    resetHeaderScrollVisibility()
+    return
+  }
+  const page = document.scrollingElement
+  headerScrollHidden.value = headerScroll.update(window.scrollY, page.scrollHeight - page.clientHeight)
+}
+
+watch(() => isTabPresented?.value, resetHeaderScrollVisibility)
 useSubscriptionPremiereUpdates()
 const { t } = useI18n()
 const route = useRoute()
@@ -602,6 +628,7 @@ let restoreScrollOnActivate = false
 useTabLifecycle({
   deactivate: resetFeedTabHold,
   activate: () => {
+    resetHeaderScrollVisibility()
     if (!restoreScrollOnActivate) {
       return
     }
@@ -609,6 +636,7 @@ useTabLifecycle({
     restoreScrollOnActivate = false
     const value = currentTab.value
     window.scrollTo(0, value === null ? 0 : tabScrollPositions[value])
+    resetHeaderScrollVisibility()
     scrollPositionOwnerTab = value
   }
 })
@@ -678,6 +706,9 @@ let removeFeedMarkSeenRequestListener = null
 onMounted(() => {
   isMounted = true
   document.addEventListener('keydown', handlePanelTabNavigation)
+  resetHeaderScrollVisibility()
+  window.addEventListener('scroll', updateHeaderScrollVisibility, { passive: true })
+  window.addEventListener('resize', resetHeaderScrollVisibility)
 
   if (isElectron) {
     removeFeedReloadRequestListener = window.ftElectron.subscriptionFeeds.onRequestReload(handleFeedReloadRequest)
@@ -690,11 +721,14 @@ onBeforeUnmount(() => {
   resetFeedTabHold()
   tabChangeSequence++
   document.removeEventListener('keydown', handlePanelTabNavigation)
+  window.removeEventListener('scroll', updateHeaderScrollVisibility)
+  window.removeEventListener('resize', resetHeaderScrollVisibility)
   removeFeedReloadRequestListener?.()
   removeFeedMarkSeenRequestListener?.()
 })
 
 watch(currentTab, async (value) => {
+  resetHeaderScrollVisibility()
   if (value !== null) {
     // Use the last selected feed when opening another subscription view
     localStorage.setItem(currentTabStorageKey, value)
@@ -731,6 +765,7 @@ watch(currentTab, async (value) => {
   }
 
   window.scrollTo(0, value === null ? 0 : tabScrollPositions[value])
+  resetHeaderScrollVisibility()
   scrollPositionOwnerTab = value
 })
 
