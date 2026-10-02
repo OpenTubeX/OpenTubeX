@@ -1,5 +1,7 @@
 import { test, expect, goToSettingsSection, sel, setWindowSize } from '../../helpers/app.mjs'
 
+const DOWNLOAD_FOLDER_DESCRIPTION = "Videos are saved to this folder. Leave blank to use your system's Downloads folder. Leave blank to use your Downloads folder"
+
 test('closed selects announce their current choice', async ({ page }) => {
   const section = await goToSettingsSection(page, 'download')
   const select = section.getByRole('combobox', { name: 'Concurrent downloads', exact: true })
@@ -11,10 +13,9 @@ test('closed selects announce their current choice', async ({ page }) => {
 test('inputs announce tooltip guidance together with supporting text', async ({ page }) => {
   const downloads = await goToSettingsSection(page, 'download')
   const folder = downloads.getByRole('textbox', { name: 'Download Folder', exact: true })
-  const folderDescription = "Videos are saved to this folder. Leave blank to use your system's Downloads folder. Leave blank to use your Downloads folder"
-  await expect(folder).toHaveAccessibleDescription(folderDescription)
+  await expect(folder).toHaveAccessibleDescription(DOWNLOAD_FOLDER_DESCRIPTION)
   await folder.focus()
-  await expect(folder).toHaveAccessibleDescription(folderDescription)
+  await expect(folder).toHaveAccessibleDescription(DOWNLOAD_FOLDER_DESCRIPTION)
   await expect(downloads.getByRole('textbox', { name: 'Additional yt-dlp arguments', exact: true }))
     .toHaveAccessibleDescription('Additional command line arguments passed to yt-dlp for every download, for example --cookies-from-browser firefox.')
   const privacy = await goToSettingsSection(page, 'privacy')
@@ -340,7 +341,7 @@ for (const scale of [100, 95]) {
         await expect(label).toHaveCSS('font-size', '16px')
         await field.focus()
         await expect(field).toHaveAttribute('placeholder', '')
-        await expect(field).toHaveAccessibleDescription('Leave blank to use your Downloads folder')
+        await expect(field).toHaveAccessibleDescription(DOWNLOAD_FOLDER_DESCRIPTION)
         await expect(field).toHaveAccessibleName('Download Folder')
         await expect(label).toHaveCSS('transform', 'matrix(0.75, 0, 0, 0.75, 0, 0)')
         await field.fill('/tmp/material-downloads')
