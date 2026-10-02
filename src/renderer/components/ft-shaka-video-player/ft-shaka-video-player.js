@@ -6054,23 +6054,40 @@ export default defineComponent({
         return
       }
 
-      // Measuring briefly widens the scrollable bar and clamps its offset.
-      const quickRateBar = controlPanel.querySelector('.ft-quick-playback-rate-bar')
-      const quickRateBarScrollLeft = quickRateBar?.scrollLeft
-      controlPanel.classList.add('ft-controls-measuring')
-      controlPanel.classList.remove(...controlPanelCompactClasses)
+      // Measure a hidden copy so intermediate compact states do not interrupt
+      // chapter transitions or change the preset strip's scroll position.
+      const measurementPanel = /** @type {HTMLElement} */ (controlPanel.cloneNode(true))
+      measurementPanel.classList.add('ft-controls-measuring')
+      measurementPanel.classList.remove(...controlPanelCompactClasses)
+      measurementPanel.ariaHidden = 'true'
+      measurementPanel.inert = true
+      measurementPanel.style.position = 'absolute'
+      measurementPanel.style.visibility = 'hidden'
+      measurementPanel.style.width = window.getComputedStyle(controlPanel).width
+
+      // A clone does not inherit the real volume group's hover/focus state.
+      const volumeGroup = controlPanel.querySelector('.ft-volume-control-group')
+      const measurementVolumeGroup = measurementPanel.querySelector('.ft-volume-control-group')
+      if (volumeGroup && measurementVolumeGroup instanceof HTMLElement) {
+        measurementVolumeGroup.style.width = window.getComputedStyle(volumeGroup).width
+      }
+      controlPanel.after(measurementPanel)
 
       for (const compactClass of controlPanelCompactClasses) {
-        if (!controlPanelOverflows(controlPanel)) {
+        if (!controlPanelOverflows(measurementPanel)) {
           break
         }
 
-        controlPanel.classList.add(compactClass)
+        measurementPanel.classList.add(compactClass)
       }
 
-      controlPanel.classList.remove('ft-controls-measuring')
-      if (quickRateBar && quickRateBarScrollLeft !== undefined) {
-        quickRateBar.scrollLeft = quickRateBarScrollLeft
+      for (const compactClass of controlPanelCompactClasses) {
+        controlPanel.classList.toggle(compactClass, measurementPanel.classList.contains(compactClass))
+      }
+      measurementPanel.remove()
+
+      const quickRateBar = controlPanel.querySelector('.ft-quick-playback-rate-bar')
+      if (quickRateBar) {
         clampOverlayScrollLeft(quickRateBar)
       }
 
@@ -6080,6 +6097,11 @@ export default defineComponent({
         button.toggleAttribute('data-ft-control-hidden', window.getComputedStyle(button).display === 'none')
       }
 
+      updateRightControlGlass(controlPanel)
+    }
+
+    /** @param {HTMLElement} controlPanel */
+    function updateRightControlGlass(controlPanel) {
       const rightGlass = controlPanel.querySelector(':scope > .ft-right-control-glass')
       if (rightGlass instanceof HTMLElement) {
         const rightButtons = [...controlPanel.querySelectorAll(':scope > .shaka-spacer ~ button:not(.shaka-hidden)')]
@@ -6208,10 +6230,19 @@ export default defineComponent({
         spacer.after(rightGlass)
       }
 
-      controlPanelResizeObserver = new ResizeObserver(() => {
-        scheduleControlPanelLayout(controlPanel)
+      controlPanelResizeObserver = new ResizeObserver(entries => {
+        if (entries.some(entry => entry.target === controlPanel)) {
+          scheduleControlPanelLayout(controlPanel)
+        }
+        // Chapter width transitions can move these buttons without resizing
+        // the panel. Follow their actual geometry throughout the animation.
+        updateRightControlGlass(controlPanel)
       })
       controlPanelResizeObserver.observe(controlPanel)
+      const chaptersButton = controlPanel.querySelector(':scope > .ft-chapters-button')
+      if (chaptersButton) {
+        controlPanelResizeObserver.observe(chaptersButton)
+      }
 
       controlPanelMutationObserver = new MutationObserver(mutations => {
         if (mutations.some(mutation => mutation.target !== controlPanel)) {

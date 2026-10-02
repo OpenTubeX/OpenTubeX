@@ -451,6 +451,9 @@ test.describe('desktop quick playback speed bar', () => {
     for (const frosted of [true, false]) {
       await page.evaluate(frosted => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', frosted), frosted)
       await bar.locator('[data-rate="1"]').hover()
+      // Hover can scroll the preset into view after the previous theme's end test.
+      await bar.evaluate(element => { element.scrollLeft = 0 })
+      await expect.poll(() => bar.evaluate(element => element.scrollLeft)).toBe(0)
       await page.mouse.wheel(0, 120)
       await expect.poll(() => bar.evaluate(element => element.scrollLeft)).toBeGreaterThan(0)
       await page.mouse.wheel(0, -120)
