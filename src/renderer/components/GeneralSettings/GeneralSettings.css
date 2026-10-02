@@ -12,45 +12,6 @@
   box-sizing: border-box;
 }
 
-.generalSelectGrid :deep(.select.containsTooltip) {
-  --general-select-indicator-space: 40px;
-
-  margin-inline-end: 0;
-}
-
-.generalSelectGrid :deep(.select.containsTooltip:has(
-  .syncedSettingIndicator,
-  .changedSettingIndicator
-)) {
-  --general-select-indicator-space: 74px;
-}
-
-.generalSelectGrid :deep(.select.containsTooltip:has(
-  .syncedSettingIndicator
-):has(
-  .changedSettingIndicator
-)) {
-  --general-select-indicator-space: 84px;
-}
-
-.generalSelectGrid :deep(.select.containsTooltip .select-text),
-.generalSelectGrid :deep(.select.containsTooltip .nativeSelect),
-.generalSelectGrid :deep(.select.containsTooltip .select-bar) {
-  inline-size: calc(100% - var(--general-select-indicator-space));
-}
-
-.generalSelectGrid :deep(.select.containsTooltip .iconSelect) {
-  inset-inline-end: calc(var(--general-select-indicator-space) + 10px);
-}
-
-.generalSelectGrid :deep(.select.containsTooltip .selectIndicators) {
-  inset-inline: auto 8px;
-}
-
-.generalSelectGrid :deep(.select.containsTooltip .changedSettingIndicatorPlaceholder) {
-  display: none;
-}
-
 .switchGrid {
   gap: 10px;
   margin-block-end: 12px;

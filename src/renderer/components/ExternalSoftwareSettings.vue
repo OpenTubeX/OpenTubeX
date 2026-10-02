@@ -891,8 +891,8 @@ async function chooseBrowserProfilePath() {
 }
 
 .externalSoftwareSelect {
-  inline-size: calc(100% - var(--external-software-select-gutter));
-  max-inline-size: 340px;
+  inline-size: calc(100% - var(--external-software-select-gutter) + var(--select-indicator-space));
+  max-inline-size: calc(340px + var(--select-indicator-space));
 }
 
 .externalSoftwarePath {
@@ -922,8 +922,14 @@ async function chooseBrowserProfilePath() {
 }
 
 .managedSoftwareControls .externalSoftwareSelect {
-  inline-size: 250px;
-  margin-inline-start: 70px;
+  inline-size: calc(250px + var(--select-indicator-space));
+  margin-inline-start: var(--select-indicator-space);
+}
+
+.managedSoftwareControls .externalSoftwareSelect:has(.changedSettingIndicator),
+.settingsContent.highlightChangedSettings .managedSoftwareControls .externalSoftwareSelect {
+  /* Center the field while accounting for the marker's 3px border and 9px padding. */
+  margin-inline-start: calc(var(--select-indicator-space) - 12px);
 }
 
 .restrictedPlaybackAuthControls {
@@ -944,25 +950,25 @@ async function chooseBrowserProfilePath() {
   justify-content: flex-end;
 }
 
-.restrictedPlaybackAuthControl > :deep(.select),
 .restrictedPlaybackAuthControl > :deep(.ft-input-component) {
   box-sizing: border-box;
   inline-size: 340px;
   min-inline-size: 0;
   max-inline-size: calc(100% - 70px);
   margin-inline-end: 70px;
+  margin-block-start: 30px;
 }
 
-.restrictedPlaybackAuthControl > :deep(.ft-input-component) {
-  margin-block-start: 30px;
+.restrictedPlaybackAuthControl > :deep(.select) {
+  box-sizing: border-box;
+  inline-size: calc(340px + var(--select-indicator-space));
+  min-inline-size: 0;
+  max-inline-size: calc(100% - 70px + var(--select-indicator-space));
+  margin-inline-end: calc(70px - var(--select-indicator-space));
 }
 
 .restrictedPlaybackAuthDetail :deep(.inputWrapper) {
   margin-block-end: 0;
-}
-
-.restrictedPlaybackAuthDetail > :deep(.select) {
-  margin-inline-end: 70px;
 }
 
 .restrictedPlaybackBrowserProfile {
@@ -1049,25 +1055,12 @@ async function chooseBrowserProfilePath() {
 }
 
 @container settings-content (width <= 460px) {
-  .externalSoftwareTools {
-    --external-software-select-gutter: 32px;
-  }
-
   .externalSoftwareTool {
     padding-inline: 14px;
   }
 
-  .externalSoftwareSelect,
   .managedSoftwareControls .externalSoftwareSelect {
-    margin-inline: 0 28px;
-  }
-
-  .externalSoftwareSelect {
-    inline-size: calc(100% - var(--external-software-select-gutter));
-  }
-
-  .managedSoftwareControls .externalSoftwareSelect {
-    inline-size: calc(100% - 28px);
+    inline-size: min(calc(250px + var(--select-indicator-space)), calc(100% - var(--select-indicator-space)));
   }
 }
 </style>

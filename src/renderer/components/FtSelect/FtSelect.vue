@@ -94,20 +94,13 @@
           compact
           :setting-key="settingKey"
         />
-        <FtSyncedSettingIndicator
-          v-if="tooltip === ''"
-          :setting-key="settingKey"
-          :is-changed="isChanged"
-          :disabled="disabled"
-          @reset="emit('reset')"
-        />
       </span>
     </label>
     <span
-      v-if="tooltip !== ''"
       class="selectIndicators"
     >
       <FtTooltip
+        v-if="tooltip !== ''"
         class="selectTooltip"
         :tooltip="tooltip"
       />
@@ -240,7 +233,7 @@ import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 const props = defineProps({
   variant: {
     type: String,
-    default: 'filled',
+    default: 'outlined',
     validator: value => ['filled', 'outlined'].includes(value)
   },
   placeholder: {

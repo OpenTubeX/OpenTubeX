@@ -196,6 +196,11 @@ async function chooseDownloadFolder() {
   margin-block-start: 16px;
 }
 
+.downloadQueueInputs :deep(.select) {
+  inline-size: calc(340px + var(--select-indicator-space));
+  margin-inline-end: calc(70px - var(--select-indicator-space));
+}
+
 .downloadQueueInputs :deep(.ft-input-component) {
   margin-block-start: 30px;
 }

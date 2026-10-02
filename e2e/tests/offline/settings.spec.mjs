@@ -65,7 +65,10 @@ async function expectDownloadQueueSettingsAlignment(page) {
   expect(Math.abs(bounds.folder.x - bounds.queueSelect.x)).toBeLessThanOrEqual(1)
   expect(Math.abs(bounds.customArguments.x - bounds.bandwidthInput.x)).toBeLessThanOrEqual(1)
   expect(Math.abs(bounds.queueSelect.y - bounds.bandwidthInput.y)).toBeLessThanOrEqual(1)
-  expect(Math.abs(bounds.queueSelectLabel.y - bounds.bandwidthLabel.y)).toBeLessThanOrEqual(1)
+  // Outlined selects float the label across the border; filled inputs keep it inside.
+  expect(Math.abs(bounds.queueSelectLabel.y + bounds.queueSelectLabel.height / 2 - bounds.queueSelect.y)).toBeLessThanOrEqual(1)
+  expect(bounds.bandwidthLabel.y).toBeGreaterThanOrEqual(bounds.bandwidthInput.y)
+  expect(bounds.bandwidthLabel.y + bounds.bandwidthLabel.height).toBeLessThanOrEqual(bounds.bandwidthInput.y + bounds.bandwidthInput.height)
 }
 
 async function expectAlwaysVisibleScrollbarsToPreserveSettingsScroll(page) {
@@ -159,7 +162,7 @@ async function expectSubscriptionRefreshIntervalSelectHighlight(page) {
   expect(highlightBounds).not.toBeNull()
   expect(labelBounds).not.toBeNull()
   expect(tooltipBounds).not.toBeNull()
-  expect(highlightBounds.y).toBeLessThanOrEqual(labelBounds.y)
+  expect(highlightBounds.y).toBeLessThanOrEqual(labelBounds.y + 1)
   expect(highlightBounds.x + highlightBounds.width)
     .toBeGreaterThanOrEqual(tooltipBounds.x + tooltipBounds.width)
 }
@@ -708,23 +711,42 @@ test.describe('settings', () => {
       await page.setViewportSize({ width: 1000, height: 800 })
       const advanced = await goToSettingsSection(page, 'advanced')
       const tools = advanced.locator('.externalSoftwareTool')
-      const [ytDlpBox, ffmpegBox] = await Promise.all([
-        tools.nth(0).boundingBox(),
-        tools.nth(1).boundingBox()
-      ])
+      for (const width of [1000, 400]) {
+        await page.setViewportSize({ width, height: 800 })
+        const [ytDlpBox, ffmpegBox] = await Promise.all([
+          tools.nth(0).boundingBox(),
+          tools.nth(1).boundingBox()
+        ])
 
-      expect(ffmpegBox.y).toBeGreaterThan(ytDlpBox.y + ytDlpBox.height)
+        expect(ffmpegBox.y).toBeGreaterThan(ytDlpBox.y + ytDlpBox.height)
 
-      await expectExternalSoftwarePathAlignment(
-        tools.nth(0),
-        'yt-dlp Source',
-        'yt-dlp executable'
-      )
-      await expectExternalSoftwarePathAlignment(
-        tools.nth(1),
-        'FFmpeg Source',
-        'FFmpeg executable'
-      )
+        await expectExternalSoftwarePathAlignment(
+          tools.nth(0),
+          'yt-dlp Source',
+          'yt-dlp executable'
+        )
+        await expectExternalSoftwarePathAlignment(
+          tools.nth(1),
+          'FFmpeg Source',
+          'FFmpeg executable'
+        )
+      }
+      for (const tool of [tools.nth(0), tools.nth(1)]) {
+        await tool.locator('.externalSoftwareSelect select').first().selectOption('managed')
+      }
+      const managed = advanced.locator('.managedSoftwareControls')
+      await expect(managed).toBeVisible()
+      const geometry = await managed.evaluate(element => {
+        const container = element.getBoundingClientRect()
+        const field = element.querySelector('.select-text').getBoundingClientRect()
+        const indicators = element.querySelector('.selectIndicators').getBoundingClientRect()
+        return {
+          center: Math.abs(field.left + field.width / 2 - container.left - container.width / 2),
+          overflow: Math.max(container.left - indicators.left, indicators.right - container.right)
+        }
+      })
+      expect(geometry.center).toBeLessThanOrEqual(1)
+      expect(geometry.overflow).toBeLessThanOrEqual(1)
     })
   })
 
@@ -809,9 +831,9 @@ test.describe('settings', () => {
     await expect(subtitleCookies).toBeDisabled()
 
     const [sourceBox, browserBox, profileBox] = await Promise.all([
-      authentication.locator('.restrictedPlaybackAuthSource .select').boundingBox(),
-      authentication.locator('.restrictedPlaybackAuthDetail .select').boundingBox(),
-      authentication.locator('.restrictedPlaybackBrowserProfile .ft-input-component').boundingBox()
+      authentication.locator('.restrictedPlaybackAuthSource .select-text').boundingBox(),
+      authentication.locator('.restrictedPlaybackAuthDetail .select-text').boundingBox(),
+      authentication.locator('.restrictedPlaybackBrowserProfile input').boundingBox()
     ])
     expect(sourceBox).not.toBeNull()
     expect(browserBox).not.toBeNull()
@@ -5570,15 +5592,15 @@ test.describe('synced setting indicators', () => {
   test('allows account sync to be disabled per setting', async ({ page }) => {
     await goTo(page, 'settings')
 
-    const syncedLabel = page.locator('label').filter({ hasText: 'Default Landing Page' })
-    const syncButton = syncedLabel.getByRole('button', { name: 'Stop syncing this setting' })
+    const landingPage = page.locator('.select').filter({ hasText: 'Default Landing Page' })
+    const syncButton = landingPage.getByRole('button', { name: 'Stop syncing this setting' })
     await expect(syncButton).toBeVisible()
     await syncButton.click()
-    await expect(syncedLabel.getByRole('button', { name: 'Sync this setting' })).toBeVisible()
+    await expect(landingPage.getByRole('button', { name: 'Sync this setting' })).toBeVisible()
 
     await page.reload()
     await goTo(page, 'settings')
-    await expect(syncedLabel.getByRole('button', { name: 'Sync this setting' })).toBeVisible()
+    await expect(landingPage.getByRole('button', { name: 'Sync this setting' })).toBeVisible()
 
     const toggle = page.getByRole('checkbox', { name: /Auto load next page/i })
     await page.locator('label').filter({ hasText: 'Auto load next page' })
@@ -5858,13 +5880,13 @@ test.describe('synced setting indicators', () => {
     const playerSectionAgain = await goToSettingsSection(page, 'playback')
     const viewingModeSelect = playerSectionAgain.locator('.select')
       .filter({ hasText: 'Default Viewing Mode' })
-    const [selectBox, selectLabelBox] = await Promise.all([
+    const [selectBox, selectLabelContentBox] = await Promise.all([
       viewingModeSelect.locator('.selectedValue').boundingBox(),
-      viewingModeSelect.locator('.select-label').boundingBox()
+      viewingModeSelect.locator('.select-label > *').first().boundingBox()
     ])
     expect(selectBox).not.toBeNull()
-    expect(selectLabelBox).not.toBeNull()
-    expect(selectLabelBox.x).toBeCloseTo(selectBox.x, 0)
+    expect(selectLabelContentBox).not.toBeNull()
+    expect(Math.abs(selectLabelContentBox.x - selectBox.x)).toBeLessThanOrEqual(1)
   })
 
   test('keeps a wrapped slider label beside its icons and above its track', async ({ page }) => {

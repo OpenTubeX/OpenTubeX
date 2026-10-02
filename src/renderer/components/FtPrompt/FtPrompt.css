@@ -125,6 +125,10 @@
   min-inline-size: 0;
 }
 
+.promptCard :deep(.ft-input-component:not(:has(.inputIndicators > *))) {
+  margin-inline: auto;
+}
+
 @media (width <= 600px), (height <= 600px) {
   .prompt {
     block-size: var(--phone-viewport-height, 100dvh);
