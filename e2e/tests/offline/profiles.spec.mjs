@@ -88,7 +88,7 @@ for (const iconPack of ['material', 'remix']) {
 
     test('previews, saves and resets built-in icons at desktop and phone widths', async ({ app, page }, testInfo) => {
       await openProfileList(page)
-      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.profilePanelHeader').getByRole('button', { name: 'Profile', exact: true }).click()
       await page.locator('.card .profileList').getByText('All Channels').click()
 
       const gallery = page.locator('.builtinIconOptions')
