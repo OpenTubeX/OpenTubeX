@@ -400,6 +400,40 @@ test('upward swipe also starts on the mini-player transparent touch layer', t =>
   assert.deepEqual(calls.at(-1), ['drag-finish', true])
 })
 
+test('tapping the full-bar return button leaves restoration to its native click', t => {
+  const { gestures: g, event, calls } = fixture(t, { mini: true, minimize: true })
+  const target = new ElementStub('.mobileMiniBarReturn')
+  g.startMobileFullscreenGesture(event(210, 400, { target }))
+  const release = event(210, 400, { target })
+  assert.equal(g.finishMobileFullscreenGesture(release), false)
+  assert.notEqual(release.prevented, true)
+  assert.equal(g.handleMobilePlayerSurfaceClick(event(210, 400, { target })), false)
+  assert.deepEqual(calls, [])
+})
+
+test('upward swipes on the full-bar return button restore the video', t => {
+  const { gestures: g, event, calls, captures } = fixture(t, { mini: true, minimize: true })
+  const target = new ElementStub('.mobileMiniBarReturn')
+  g.startMobileFullscreenGesture(event(210, 400, { target }))
+  assert.equal(g.moveMobileFullscreenGesture(event(210, 300, { target })), true)
+  assert.equal(g.finishMobileFullscreenGesture(event(210, 300, { target })), true)
+  assert.deepEqual(calls.at(-1), ['drag-finish', true])
+  assert.equal(captures.size, 0)
+  assert.equal(calls.includes('return-to-video'), false)
+})
+
+test('the mini-player close button does not start tap or swipe restoration', t => {
+  const { gestures: g, event, calls } = fixture(t, { mini: true, minimize: true })
+  const target = new ElementStub('.mobileMiniBarDismiss')
+  for (const distance of [0, 100]) {
+    g.startMobileFullscreenGesture(event(210, 400, { target }))
+    assert.equal(g.moveMobileFullscreenGesture(event(210, 400 - distance, { target })), false)
+    assert.equal(g.finishMobileFullscreenGesture(event(210, 400 - distance, { target })), false)
+    assert.equal(g.handleMobilePlayerSurfaceClick(event(210, 400 - distance, { target })), false)
+  }
+  assert.deepEqual(calls, [])
+})
+
 test('a rejected scroll-mini-player restore never enters fullscreen or retains capture', t => {
   const { gestures: g, event, calls, captures } = fixture(t, { mini: true, minimize: false })
   g.startMobileFullscreenGesture(event(210, 300))

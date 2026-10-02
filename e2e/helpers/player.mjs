@@ -4,6 +4,31 @@ import { sel } from './app.mjs'
 
 export const activeTab = '.tabContent[aria-hidden="false"]'
 
+export const mobileMiniPlayerRegions = ['thumbnail', 'title', 'uploader', 'left edge', 'right edge', 'top padding', 'bottom padding']
+
+/**
+ * Returns a rendered point in the mini-player's reopen area for touch tests.
+ * @param {HTMLElement} element
+ * @param {string} region
+ */
+export function mobileMiniPlayerReturnPoint(element, region) {
+  const bar = element.getBoundingClientRect()
+  const details = element.querySelector('.mobileMiniBarDetails').getBoundingClientRect()
+  const label = element.querySelector(region === 'uploader' ? '.mobileMiniBarUploader' : '.mobileMiniBarTitle').getBoundingClientRect()
+  return {
+    x: region === 'thumbnail'
+      ? bar.left + 60
+      : region === 'left edge'
+        ? bar.left + 1
+        : region === 'right edge' ? bar.right - 1 : details.left + details.width / 2,
+    y: region === 'top padding'
+      ? bar.top + 2
+      : region === 'bottom padding'
+        ? bar.bottom - 2
+        : ['title', 'uploader'].includes(region) ? label.top + label.height / 2 : bar.top + bar.height / 2
+  }
+}
+
 /**
  * Opens a watch page and waits for its player, or skips when the live API
  * refuses to serve it (bot checks and IP blocks on CI runners and VPNs),
