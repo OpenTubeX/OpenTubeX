@@ -72,7 +72,7 @@ import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../../cons
  * @property {string} name
  * @property {string} bgColor
  * @property {string} textColor
- * @property {{type: 'icon'|'emoji'|'image', value: string}|null|undefined} icon
+ * @property {{type: 'icon'|'emoji'|'image', value: string}|{type: 'initial'}|null|undefined} icon
  * @property {object[]} subscriptions
  * @property {string} subscriptions[].id
  * @property {string|undefined} subscriptions[].name

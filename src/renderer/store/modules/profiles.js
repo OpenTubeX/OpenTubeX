@@ -291,7 +291,7 @@ const actions = {
 }
 
 function withDefaultProfileIcon(profile) {
-  return profile._id === MAIN_PROFILE_ID && profile.icon === undefined
+  return profile._id === MAIN_PROFILE_ID && profile.icon == null
     ? { ...profile, icon: { ...DEFAULT_PROFILE_ICON } }
     : profile
 }

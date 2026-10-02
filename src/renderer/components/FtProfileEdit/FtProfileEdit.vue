@@ -145,7 +145,7 @@
                   @click="openImagePicker"
                 />
                 <FtButton
-                  v-if="profileIcon"
+                  v-if="profileIcon && profileIcon.type !== 'initial'"
                   :label="$t('Profile.Use Initial')"
                   :icon="['fas', 'undo']"
                   @click="clearProfileIcon"
@@ -271,7 +271,7 @@ import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../../cons
 import { calculateColorLuminance, colors, resolveThemeColor } from '../../helpers/colors'
 import { deepCopy, showToast } from '../../helpers/utils'
 import { getFirstCharacter } from '../../helpers/strings'
-import { PROFILE_ICONS } from '../../helpers/profileIcons'
+import { INITIAL_PROFILE_ICON, PROFILE_ICONS } from '../../helpers/profileIcons'
 
 /**
  * @typedef {object} Profile
@@ -279,7 +279,7 @@ import { PROFILE_ICONS } from '../../helpers/profileIcons'
  * @property {string} name
  * @property {string} bgColor
  * @property {string} textColor
- * @property {{type: 'icon'|'emoji'|'image', value: string}|null|undefined} icon
+ * @property {{type: 'icon'|'emoji'|'image', value: string}|{type: 'initial'}|null|undefined} icon
  * @property {object[]} subscriptions
  * @property {string} subscriptions[].id
  * @property {string|undefined} subscriptions[].name
@@ -496,7 +496,7 @@ function selectCustomEmoji(event) {
   }
 
   event.target.value = candidate
-  profileIcon.value = candidate ? { type: 'emoji', value: candidate } : null
+  profileIcon.value = candidate ? { type: 'emoji', value: candidate } : { ...INITIAL_PROFILE_ICON }
   restoreOpaqueProfileColor()
 }
 
@@ -669,7 +669,7 @@ function closeCropEditor() {
 }
 
 function clearProfileIcon() {
-  profileIcon.value = null
+  profileIcon.value = { ...INITIAL_PROFILE_ICON }
   restoreOpaqueProfileColor()
 }
 

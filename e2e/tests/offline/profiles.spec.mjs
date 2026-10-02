@@ -10,7 +10,7 @@ const mainProfile = {
   name: 'All Channels',
   bgColor: '#d50000',
   textColor: '#FFFFFF',
-  icon: null,
+  icon: { type: 'initial' },
   subscriptions: []
 }
 
@@ -40,6 +40,25 @@ test('creates All Channels with the default person icon', async ({ app, page }) 
   }).toEqual({ type: 'icon', value: 'circle-user' })
 })
 
+test.describe('All Channels with a previously saved color', () => {
+  test.use({
+    seed: {
+      profiles: [
+        { ...mainProfile, bgColor: '#558B2F', icon: null },
+        { ...secondProfile, icon: null }
+      ]
+    }
+  })
+
+  test('adopts the person icon while keeping the saved color and other profile initials', async ({ page }) => {
+    await expect(profileIconInitial(page).locator('[data-icon="circle-user"] svg')).toBeVisible()
+    await expect(profileIconInitial(page)).toHaveCSS('background-color', 'rgb(85, 139, 47)')
+    await openProfileList(page)
+    await page.locator('.profileList .profileOption').filter({ hasText: 'Second profile' }).click()
+    await expect(profileIconInitial(page)).toHaveText('S')
+  })
+})
+
 test.describe('existing All Channels without an icon', () => {
   test.use({ seed: { profiles: [{ ...mainProfile, icon: undefined }, secondProfile] } })
 
@@ -56,7 +75,7 @@ test.describe('existing All Channels without an icon', () => {
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const profile = { ...store.getters.getActiveProfile }
-      delete profile.icon
+      profile.icon = null
       store.commit('upsertProfileToList', profile)
     })
     await expect(personIcon).toBeVisible()
@@ -107,6 +126,11 @@ for (const iconPack of ['material', 'remix']) {
       await page.getByRole('button', { name: 'Use Initial' }).click()
       await expect(preview).toHaveText('A')
       await page.getByRole('button', { name: 'Update Profile' }).click()
+      await expect.poll(async () => {
+        const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+        const records = contents.trim().split('\n').map(line => JSON.parse(line))
+        return records.findLast(record => record._id === 'allChannels' && !record.$$deleted)?.icon
+      }).toEqual({ type: 'initial' })
       await page.reload()
       await expect(profileIconInitial(page)).toHaveText('A')
     })

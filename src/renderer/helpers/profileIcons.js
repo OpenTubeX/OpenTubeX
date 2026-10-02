@@ -4,3 +4,4 @@ export const PROFILE_ICONS = [
 ]
 
 export const DEFAULT_PROFILE_ICON = { type: 'icon', value: 'circle-user' }
+export const INITIAL_PROFILE_ICON = { type: 'initial' }
