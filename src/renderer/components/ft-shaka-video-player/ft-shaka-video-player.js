@@ -4970,18 +4970,12 @@ export default defineComponent({
      * @param {WheelEvent} event
      */
     function handleControlsContainerWheel(event) {
-      /** @type {DOMTokenList} */
-      const classList = event.target.classList
+      const target = event.target
+      if (!(target instanceof Element)) return
 
-      if (classList.contains('shaka-scrim-container') ||
-        classList.contains('shaka-fast-forward-container') ||
-        classList.contains('shaka-rewind-container') ||
-        classList.contains('shaka-play-button-container') ||
-        classList.contains('shaka-play-button') ||
-        classList.contains('shaka-controls-container') ||
-        classList.contains('shaka-spacer')) {
-        //
-
+      if (target.classList.contains('shaka-controls-container') || target.closest(
+        '.shaka-scrim-container, .shaka-fast-forward-container, .shaka-rewind-container, .shaka-play-button-container, .shaka-play-button, .shaka-spacer'
+      )) {
         if (event.ctrlKey || event.metaKey) {
           if (videoPlaybackRateMouseScroll.value) {
             mouseScrollPlaybackRateHandler(event)
@@ -11207,8 +11201,9 @@ export default defineComponent({
       // Not a template listener: it only swallows the click that shaka-player
       // would otherwise read as play/pause at the end of a pan.
       container.value?.addEventListener('click', handleVideoZoomClickCapture, true)
-      document.addEventListener('pointerup', handleTemporaryPlaybackRatePointerUp, true)
-      document.addEventListener('pointercancel', handleTemporaryPlaybackRatePointerCancel, true)
+      // Release the hold before mobile gestures consume pointerup on window.
+      window.addEventListener('pointerup', handleTemporaryPlaybackRatePointerUp, true)
+      window.addEventListener('pointercancel', handleTemporaryPlaybackRatePointerCancel, true)
       document.addEventListener('visibilitychange', handleTemporaryPlaybackRateVisibilityChange)
       document.addEventListener('fullscreenchange', fullscreenChangeHandler)
       // Use event delegation on document with capture phase to catch events before shaka-no-propagation stops them from bubbling
@@ -11789,8 +11784,8 @@ export default defineComponent({
       document.removeEventListener('keydown', handleVideoZoomModifierKey)
       document.removeEventListener('keyup', handleVideoZoomModifierKey)
       container.value?.removeEventListener('click', handleVideoZoomClickCapture, true)
-      document.removeEventListener('pointerup', handleTemporaryPlaybackRatePointerUp, true)
-      document.removeEventListener('pointercancel', handleTemporaryPlaybackRatePointerCancel, true)
+      window.removeEventListener('pointerup', handleTemporaryPlaybackRatePointerUp, true)
+      window.removeEventListener('pointercancel', handleTemporaryPlaybackRatePointerCancel, true)
       document.removeEventListener('visibilitychange', handleTemporaryPlaybackRateVisibilityChange)
       document.removeEventListener('fullscreenchange', fullscreenChangeHandler)
       document.removeEventListener('click', handlePlaybackRateMenuClick, true)

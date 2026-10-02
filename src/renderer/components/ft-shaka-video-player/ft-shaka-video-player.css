@@ -69,6 +69,12 @@
   block-size: 48px;
 }
 
+/* Transparent center buttons must let surface taps and speed holds through. */
+/* stylelint-disable-next-line selector-max-compound-selectors */
+:global(.capacitorTabs .shaka-controls-container:not([shown='true'], [casting='true']) .shaka-big-buttons-container > button) {
+  pointer-events: none;
+}
+
 .player {
   width: 100%;
 
