@@ -202,6 +202,7 @@ jobs:
         RELEASE_JSON: ${{ steps.release.outputs.release_json }}
         RELEASE_TAG: ${{ steps.release.outputs.tag }}
         VERSION: ${{ steps.release.outputs.version }}
+        RELEASE_ASSET_MAX_ATTEMPTS: '12'
       shell: bash
       run: |
         set -euo pipefail
