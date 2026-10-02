@@ -685,6 +685,8 @@ jobs:
   notify-nightly-repositories:
     name: Notify ${{ matrix.repository }} of nightly release
     needs: publish-nightly
+    # Publication outputs remain usable if pruning old releases fails afterward.
+    if: ${{ !cancelled() && needs.publish-nightly.outputs.tag != '' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
