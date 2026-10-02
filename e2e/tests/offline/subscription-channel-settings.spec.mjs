@@ -46,6 +46,40 @@ test.use({
   }
 })
 
+for (const uiScale of [100, 95]) {
+  test(`keeps subscription popover controls compact at ${uiScale}%`, async ({ app, page }, testInfo) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), uiScale)
+    await goTo(page, 'subscribedchannels')
+    const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
+    await alpha.getByRole('button', { name: 'Subscription settings' }).click()
+    const popover = page.locator('.profileDropdown')
+    for (const width of [1200, 400]) {
+      await setWindowSize(app, page, { width, height: width === 1200 ? 800 : 900 })
+      for (const direction of ['ltr', 'rtl']) {
+        await page.evaluate(value => { document.body.dir = value }, direction)
+        const gap = await popover.evaluate(element => {
+          const members = element.querySelector('.membersOnlyPreference button').getBoundingClientRect()
+          const label = element.querySelector('.dailyVideoLimitSelect .select-label').getBoundingClientRect()
+          return label.top - members.bottom
+        })
+        expect.soft(gap, `${direction} control spacing at ${width}px`).toBeGreaterThanOrEqual(7)
+        expect.soft(gap, `${direction} control spacing at ${width}px`).toBeLessThanOrEqual(9)
+        await expect(popover.getByRole('combobox', { name: 'Videos per day' })).toBeVisible()
+      }
+      await page.evaluate(() => { document.body.dir = 'ltr' })
+      await popover.screenshot({ path: testInfo.outputPath(`subscription-popover-${width}.png`) })
+    }
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateYtDlpPlaybackAuthMode', 'none'))
+    await expect(popover.getByRole('checkbox', { name: 'Members only' })).toHaveCount(0)
+    await expect(popover.getByRole('combobox', { name: 'Videos per day' })).toBeVisible()
+    expect(await popover.evaluate(element => {
+      const label = element.querySelector('.dailyVideoLimitSelect .select-label').getBoundingClientRect()
+      return label.top - element.querySelector('.secondaryPreferences').getBoundingClientRect().top
+    })).toBeGreaterThanOrEqual(5)
+  })
+}
+
 test('keeps the popover and Subscription Settings manager in sync', async ({ app, page }) => {
   const subscriptionSettings = await goToSettingsSection(page, 'subscription')
   await subscriptionSettings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
