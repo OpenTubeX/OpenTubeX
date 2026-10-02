@@ -44,13 +44,23 @@ const { version } = JSON.parse(read('package.json'))
 const isNightly = /-nightly-\d+$/.test(version)
 const appId = isNightly ? 'org.opentubex.app.nightly' : 'org.opentubex.app'
 const appName = isNightly ? 'OpenTubeX Nightly' : 'OpenTubeX'
+const appUrlScheme = isNightly ? 'opentubex-nightly' : 'opentubex'
 // Only the app's Release configuration changes; Debug keeps its Dev identity.
+let configuredRelease = false
 project = project.replace(/(504EC3181FED79650016851F \/\* Release \*\/ = \{[\s\S]*?buildSettings = \{)([\s\S]*?)(\n\t\t\t\};)/, (match, start, settings, end) => {
+  if (!/PRODUCT_BUNDLE_IDENTIFIER = [^;]+;/.test(settings) ||
+      !/APP_DISPLAY_NAME = [^;]+;/.test(settings) ||
+      !/APP_URL_SCHEME = [^;]+;/.test(settings)) {
+    throw new Error('Unable to configure iOS Release identity: missing build settings')
+  }
   const updated = settings
     .replace(/PRODUCT_BUNDLE_IDENTIFIER = [^;]+;/, `PRODUCT_BUNDLE_IDENTIFIER = ${appId};`)
     .replace(/APP_DISPLAY_NAME = [^;]+;/, `APP_DISPLAY_NAME = "${appName}";`)
+    .replace(/APP_URL_SCHEME = [^;]+;/, `APP_URL_SCHEME = ${appUrlScheme};`)
+  configuredRelease = true
   return start + updated + end
 })
+if (!configuredRelease) throw new Error('Unable to configure iOS Release identity: missing Release configuration')
 const configPath = new URL('ios/App/App/capacitor.config.json', root)
 const config = JSON.parse(readFileSync(configPath, 'utf8'))
 config.appId = appId

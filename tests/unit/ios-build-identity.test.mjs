@@ -33,9 +33,29 @@ test('iOS preparation gives nightly its own Release identity and restores stable
     const debug = project.match(/504EC3171FED79650016851F \/\* Debug \*\/ = \{[\s\S]*?name = Debug;/)[0]
     assert.ok(release.includes(`PRODUCT_BUNDLE_IDENTIFIER = ${id};`))
     assert.ok(release.includes(`APP_DISPLAY_NAME = "${name}";`))
+    assert.ok(release.includes(`APP_URL_SCHEME = ${id.endsWith('.nightly') ? 'opentubex-nightly' : 'opentubex'};`))
     assert.ok(debug.includes('PRODUCT_BUNDLE_IDENTIFIER = org.opentubex.app.dev;'))
     assert.ok(debug.includes('APP_DISPLAY_NAME = "OpenTubeX Dev";'))
     assert.ok(release.includes(`MARKETING_VERSION = ${version.split('-')[0]};`))
     assert.deepEqual(JSON.parse(await readFile(configPath, 'utf8')), { appId: id, appName: name, plugins: { Share: {} } })
+  }
+
+  const originalProject = await readFile('ios/App/App.xcodeproj/project.pbxproj', 'utf8')
+  await writeFile(join(directory, 'package.json'), JSON.stringify({ version: '0.35.2-nightly-1757' }))
+  for (const [name, invalidProject] of [
+    ['changed Release configuration identifier', originalProject.replaceAll('504EC3181FED79650016851F', '504EC3181FED79650016851E')],
+    ['missing bundle identifier', originalProject.replace('PRODUCT_BUNDLE_IDENTIFIER = org.opentubex.app;', '')],
+    ['missing display name', originalProject.replace('APP_DISPLAY_NAME = OpenTubeX;', '')],
+    ['missing URL scheme', originalProject.replace('APP_URL_SCHEME = opentubex;\n\t\t\t\tPRODUCT_BUNDLE_IDENTIFIER = org.opentubex.app;', 'PRODUCT_BUNDLE_IDENTIFIER = org.opentubex.app;')],
+  ]) {
+    await t.test(`rejects ${name} before changing Capacitor identity`, async () => {
+      await writeFile(projectPath, invalidProject)
+      const config = { appId: 'org.opentubex.app', appName: 'OpenTubeX' }
+      await writeFile(configPath, JSON.stringify(config))
+      const result = spawnSync(process.execPath, ['_scripts/prepareIos.mjs'], { cwd: directory, encoding: 'utf8' })
+      assert.notEqual(result.status, 0, 'Preparation must reject a missing Release identity setting')
+      assert.match(result.stderr, /Unable to configure iOS Release identity/)
+      assert.deepEqual(JSON.parse(await readFile(configPath, 'utf8')), config)
+    })
   }
 })
