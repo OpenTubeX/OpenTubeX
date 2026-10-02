@@ -550,13 +550,11 @@ public class MobileAppearanceSettingsTest {
                 awaitCondition(view, "document.body.style.getPropertyValue('--primary-color') !== ''");
                 for (boolean enabled : new boolean[] {false, true, false, true}) {
                     shell("cmd overlay " + (enabled ? "enable" : "disable") + " --user 0 " + overlay);
-                    String nativeColor = shell("cmd overlay lookup android android:color/system_neutral1_900").trim();
-                    java.util.regex.Matcher resolved = java.util.regex.Pattern.compile("#ff([0-9a-fA-F]{6})$").matcher(nativeColor);
-                    assertTrue("System background is a resolved color: " + nativeColor, resolved.find());
-                    String expected = "#" + resolved.group(1).toLowerCase(java.util.Locale.ROOT);
+                    String expected = overlayColor("system_neutral1_900");
                     if (enabled) assertEquals("LineageOS supplies pure black", "#000000", expected);
                     awaitCondition(view, "document.body.style.getPropertyValue('--bg-color').toLowerCase() === '" + expected + "'");
-                    if (enabled) assertEquals("Live pure-black updates keep elevated card surfaces", "\"#191919\"",
+                    String expectedCard = enabled ? "#191919" : overlayColor("system_neutral1_800");
+                    assertEquals("Live overlay updates restore the expected card surface", JSONObject.quote(expectedCard),
                         evaluate(view, "document.body.style.getPropertyValue('--card-bg-color')"));
                 }
             } finally {
@@ -679,6 +677,13 @@ public class MobileAppearanceSettingsTest {
                 document.querySelector('#mobile-appearance-test-style')?.remove();
             })()
             """);
+    }
+
+    private static String overlayColor(String resource) throws Exception {
+        String nativeColor = shell("cmd overlay lookup android android:color/" + resource).trim();
+        java.util.regex.Matcher resolved = java.util.regex.Pattern.compile("#ff([0-9a-fA-F]{6})$").matcher(nativeColor);
+        assertTrue("System resource is a resolved color: " + nativeColor, resolved.find());
+        return "#" + resolved.group(1).toLowerCase(java.util.Locale.ROOT);
     }
 
     private static String shell(String command) throws Exception {
