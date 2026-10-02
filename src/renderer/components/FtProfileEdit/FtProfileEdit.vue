@@ -516,8 +516,12 @@ function selectCustomEmoji(event) {
   }
 
   event.target.value = candidate
+  if (!candidate) {
+    clearProfileIcon()
+    return
+  }
   automaticProfileIcon = false
-  profileIcon.value = candidate ? { type: 'emoji', value: candidate } : { ...INITIAL_PROFILE_ICON }
+  profileIcon.value = { type: 'emoji', value: candidate }
   restoreOpaqueProfileColor()
 }
 

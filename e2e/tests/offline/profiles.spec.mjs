@@ -163,6 +163,13 @@ for (const iconPack of ['material', 'remix']) {
       await page.locator('#profileEmoji').fill('🐶')
       await name.fill('Eve')
       await expect(preview).toHaveText('🐶')
+      await page.locator('#profileEmoji').fill('')
+      await expect(preview).toHaveText('E')
+      await name.fill('')
+      await expect(person).toBeVisible()
+      await name.fill('Eve')
+      await expect(preview).toHaveText('E')
+      await page.locator('#profileEmoji').fill('🐶')
       await page.locator('.imageInput').setInputFiles({
         name: 'globe.svg',
         mimeType: 'image/svg+xml',
