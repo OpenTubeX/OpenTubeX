@@ -21,6 +21,9 @@
     :icon="['fas', 'sliders-h']"
     @close="close"
   >
+    <template #breadcrumb-action>
+      <FtSyncedSettingIndicator setting-key="quickSettings" />
+    </template>
     <div class="quickSettingsActions">
       <div
         ref="settingPickerAnchorRef"
