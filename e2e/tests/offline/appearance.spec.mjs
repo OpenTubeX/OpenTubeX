@@ -1378,7 +1378,7 @@ test.describe('UI roundness', () => {
 
     await goToSettingsSection(page, 'theme')
     const roundnessSlider = page.getByRole('slider', { name: /UI Roundness/ })
-    const toggleSwitch = page.locator('label.switch-label').first()
+    const toggleSwitch = page.locator('label.switch-label .switch-label-text').first()
     const toggleTrackRadius = () => toggleSwitch.evaluate((element) =>
       getComputedStyle(element, '::before').borderRadius)
     await expect(roundnessSlider).toHaveValue('0')

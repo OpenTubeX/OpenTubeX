@@ -1332,7 +1332,7 @@ test.describe('settings', () => {
     await expect(submission).toBeVisible()
 
     const centerOffset = await submission.evaluate(element => {
-      const label = element.querySelector('.switch-label')
+      const label = element.querySelector('.switch-label-text')
       const text = element.querySelector('.switch-label-text').getBoundingClientRect()
       const labelBounds = label.getBoundingClientRect()
       const knob = getComputedStyle(label, '::after')
@@ -1549,9 +1549,12 @@ test.describe('settings', () => {
       const tooltipToggle = playerSettings.locator('.switch-ctn')
         .filter({ hasText: 'Show Skip Silence Toggle' })
       const toggleCenterOffset = await tooltipToggle.evaluate(element => {
-        const label = element.querySelector('.switch-label').getBoundingClientRect()
-        const text = element.querySelector('.switch-label-text').getBoundingClientRect()
-        return Math.abs(label.top + label.height / 2 - (text.top + text.height / 2))
+        const text = element.querySelector('.switch-label-text')
+        const textBounds = text.getBoundingClientRect()
+        const knob = getComputedStyle(text, '::after')
+        const knobCenter = textBounds.top + Number.parseFloat(knob.top) +
+          new DOMMatrix(knob.transform).m42 + Number.parseFloat(knob.height) / 2
+        return Math.abs(knobCenter - (textBounds.top + textBounds.height / 2))
       })
       expect.soft(toggleCenterOffset).toBeLessThanOrEqual(1)
 

@@ -32,13 +32,33 @@
   align-items: center;
   cursor: pointer;
   display: inline-flex;
+  flex-wrap: wrap;
   font-weight: 500;
   margin-inline-start: -5px;
   padding-block: 12px;
   padding-inline: 49px 0;
   position: relative;
+  row-gap: 4px;
   text-align: start;
 
+  @media (width <= 680px) {
+    box-sizing: border-box;
+    min-inline-size: 0;
+    inline-size: 100%;
+    max-inline-size: 100%;
+  }
+}
+
+.switch-label-main {
+  display: block;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.switch-label-text {
+  position: relative;
+
+  /* Anchor the switch to its text while help icons and badges can wrap. */
   &::before,
   &::after {
     content: '';
@@ -54,14 +74,14 @@
     background-color: var(--toggle-track-color, #9e9e9e);
     border-radius: calc(8px * var(--ui-roundness));
     block-size: 14px;
-    inset-inline-start: 6px;
+    inset-inline-start: -43px;
     inline-size: 34px;
 
-    .switch-input:checked + & {
+    .switch-input:checked + .switch-label & {
       background-color: var(--toggle-checked-track-color, var(--accent-color-light));
     }
 
-    .switch-input:disabled + & {
+    .switch-input:disabled + .switch-label & {
       background-color: #9e9e9e;
     }
   }
@@ -72,28 +92,19 @@
     box-shadow: inset 0 0 0 1px var(--toggle-thumb-outline-color, transparent),
       0 3px 1px -2px rgb(0 0 0 / 14%), 0 2px 2px 0 rgb(0 0 0 / 9.8%), 0 1px 5px 0 rgb(0 0 0 / 8.4%);
     block-size: 20px;
-    inset-inline-start: 5px;
+    inset-inline-start: -44px;
     inline-size: 20px;
 
-    .switch-input:checked + & {
+    .switch-input:checked + .switch-label & {
       background-color: var(--toggle-checked-thumb-color, var(--accent-color));
       transform: translate(calc(80% * var(--horizontal-directionality-coefficient)), -50%);
     }
 
-    .switch-input:disabled + & {
+    .switch-input:disabled + .switch-label & {
       background-color: #bdbdbd;
     }
   }
 
-  @media (width <= 680px) {
-    box-sizing: border-box;
-    min-inline-size: 0;
-    inline-size: 100%;
-    max-inline-size: 100%;
-  }
-}
-
-.switch-label-text {
   @media (width <= 680px) {
     min-inline-size: 0;
     hyphens: auto;
@@ -101,8 +112,9 @@
   }
 }
 
-.containsTooltip .switch-label-text {
-  margin-inline-end: 5px;
+.switch-label-main > .selectTooltip {
+  margin-inline-start: 5px;
+  vertical-align: middle;
 }
 
 .disabled {
@@ -111,7 +123,7 @@
   }
 
   .switch-label-text {
-    opacity: 0.4;
+    color: color-mix(in srgb, currentcolor 40%, transparent);
   }
 }
 

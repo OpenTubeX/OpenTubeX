@@ -9,7 +9,10 @@
     :title="title"
     :aria-label="fullText"
   >
-    <FtIcon :icon="['fas', impact.level === 'high' ? 'gauge-high' : 'gauge']" />
+    <FtIcon
+      class="performanceImpactIcon"
+      :icon="['fas', impact.level === 'high' ? 'gauge-high' : 'gauge']"
+    />
     <span
       v-if="!compact"
       class="performanceImpactLabel"
@@ -91,19 +94,30 @@ const title = computed(() => props.compact ? fullText.value : description.value)
   background-color: color-mix(in srgb, var(--impact-color) 12%, transparent);
   border: 1px solid color-mix(in srgb, var(--impact-color) 35%, transparent);
   border-radius: calc(10px * var(--ui-roundness));
+  box-sizing: border-box;
   color: color-mix(in srgb, var(--impact-color) 70%, var(--primary-text-color));
   cursor: help;
   display: inline-flex;
+  flex-shrink: 0;
   font-size: 0.7em;
   font-weight: 600;
   gap: 4px;
   /* Symmetric, as the badge sits between the label and the tooltip or sync icons */
   margin-inline: 6px;
+  max-inline-size: calc(100% - 12px);
   padding-block: 1px;
   padding-inline: 6px;
   text-transform: uppercase;
   vertical-align: middle;
-  white-space: nowrap;
+}
+
+.performanceImpactIcon {
+  flex-shrink: 0;
+}
+
+.performanceImpactLabel {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
 }
 
 .compact {
