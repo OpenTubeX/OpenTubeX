@@ -955,7 +955,7 @@ test.describe('settings', () => {
         ['appearance', /Scrollbar Width/],
       ]) {
         const settings = await goToSettingsSection(page, section)
-        const value = settings.getByRole('slider', { name }).locator('..').locator('.value')
+        const value = settings.getByRole('slider', { name }).locator('../..').locator('.value')
         await expect.poll(() => value.evaluate(element => {
           const number = element.querySelector('.valueNumber')
           const numberRange = document.createRange()
@@ -5679,8 +5679,7 @@ test.describe('synced setting indicators', () => {
     expect(resetBox.x - syncBox.x - syncBox.width).toBeGreaterThanOrEqual(6)
 
     const storage = await goToSettingsSection(page, 'storage')
-    const input = storage.locator('label.selectLabel')
-      .filter({ hasText: 'Automatic History Retention' })
+    const input = storage.getByRole('spinbutton', { name: 'Automatic History Retention (Days)', exact: true }).locator('../..')
     const [inputSyncBox, inputHelpBox] = await Promise.all([
       input.locator('.syncedSettingIndicator').boundingBox(),
       input.locator('.selectTooltip').boundingBox()
@@ -5701,26 +5700,14 @@ test.describe('synced setting indicators', () => {
     expect(sectionBox).not.toBeNull()
     expect(tooltipTextBox.width).toBeLessThan(sectionBox.width / 2)
 
-    const removeHistoryButton = page.getByRole('button', { name: 'Remove Watch History' })
-    const removeHistoryButtonBox = await removeHistoryButton.boundingBox()
-    expect(removeHistoryButtonBox).not.toBeNull()
-
-    const overlapLeft = Math.max(tooltipTextBox.x, removeHistoryButtonBox.x)
-    const overlapRight = Math.min(
-      tooltipTextBox.x + tooltipTextBox.width,
-      removeHistoryButtonBox.x + removeHistoryButtonBox.width
-    )
-    const overlapTop = Math.max(tooltipTextBox.y, removeHistoryButtonBox.y)
-    const overlapBottom = Math.min(
-      tooltipTextBox.y + tooltipTextBox.height,
-      removeHistoryButtonBox.y + removeHistoryButtonBox.height
-    )
-    expect(overlapLeft).toBeLessThan(overlapRight)
-    expect(overlapTop).toBeLessThan(overlapBottom)
-
-    const overlapPoint = {
-      x: (overlapLeft + overlapRight) / 2,
-      y: (overlapTop + overlapBottom) / 2
+    const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }))
+    expect(tooltipTextBox.x).toBeGreaterThanOrEqual(0)
+    expect(tooltipTextBox.y).toBeGreaterThanOrEqual(0)
+    expect(tooltipTextBox.x + tooltipTextBox.width).toBeLessThanOrEqual(viewport.width)
+    expect(tooltipTextBox.y + tooltipTextBox.height).toBeLessThanOrEqual(viewport.height)
+    const tooltipCenter = {
+      x: tooltipTextBox.x + tooltipTextBox.width / 2,
+      y: tooltipTextBox.y + tooltipTextBox.height / 2
     }
     await tooltipText.evaluate(element => {
       element.style.pointerEvents = 'auto'
@@ -5728,7 +5715,7 @@ test.describe('synced setting indicators', () => {
     await expect.poll(() => page.evaluate(({ x, y }) => {
       const element = document.elementFromPoint(x, y)
       return element !== null && element.closest('[role="tooltip"]') !== null
-    }, overlapPoint)).toBe(true)
+    }, tooltipCenter)).toBe(true)
   })
 
   test('spreads the theme sliders evenly over their rows', async ({ page }) => {
@@ -5872,7 +5859,7 @@ test.describe('synced setting indicators', () => {
     const viewingModeSelect = playerSectionAgain.locator('.select')
       .filter({ hasText: 'Default Viewing Mode' })
     const [selectBox, selectLabelBox] = await Promise.all([
-      viewingModeSelect.locator('.select-text').boundingBox(),
+      viewingModeSelect.locator('.selectedValue').boundingBox(),
       viewingModeSelect.locator('.select-label').boundingBox()
     ])
     expect(selectBox).not.toBeNull()

@@ -37,7 +37,7 @@
       :class="{ disabled, withOptionVisuals: hasOptionVisuals }"
       :aria-labelledby="`${id}-label`"
       :aria-controls="`${id}-listbox`"
-      :aria-describedby="describeById"
+      :aria-describedby="[`${id}-value`, describeById].filter(Boolean).join(' ')"
       :aria-expanded="dropdownShown"
       :aria-activedescendant="dropdownShown ? `${id}-option-${activeIndex}` : null"
       :disabled="disabled"
@@ -59,7 +59,10 @@
         :style="selectedOptionColor == null ? null : { '--option-color': selectedOptionColor }"
         aria-hidden="true"
       />
-      <span class="selectedValue">
+      <span
+        :id="`${id}-value`"
+        class="selectedValue"
+      >
         <slot
           name="option"
           :label="selectedName"

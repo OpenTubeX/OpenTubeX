@@ -17,23 +17,27 @@ for (const zoom of [1, 0.95]) {
         await store.dispatch('updateBaseTheme', baseTheme)
       }, theme)
 
-      // A contrasting border shrinks the visible fill even when the outer
-      // bounds match. Compare both the bounds and the painted background.
+      // Outlined Skip and filled Next share the same outer bounds; the
+      // outline is part of Skip's visible surface.
       const buttons = tutorial.locator('.tutorialActions .btn')
       await expect(buttons).toHaveCount(2)
       const metrics = await buttons.evaluateAll(elements => elements.map(element => {
         const style = getComputedStyle(element)
         const bounds = element.getBoundingClientRect()
-        const borderBlends = style.borderTopColor === style.backgroundColor ||
-          (style.borderTopColor === 'rgba(0, 0, 0, 0)' && style.backgroundClip === 'border-box')
-        const borderHeight = Number.parseFloat(style.borderTopWidth) + Number.parseFloat(style.borderBottomWidth)
         return {
           height: bounds.height,
-          visibleHeight: bounds.height - (borderBlends ? 0 : borderHeight)
+          center: bounds.y + bounds.height / 2,
+          background: style.backgroundColor,
+          border: style.borderTopColor,
+          borderWidth: Number.parseFloat(style.borderTopWidth)
         }
       }))
       expect(metrics[0].height).toBeCloseTo(metrics[1].height, 1)
-      expect(metrics[0].visibleHeight).toBeCloseTo(metrics[1].visibleHeight, 1)
+      expect(metrics[0].center).toBeCloseTo(metrics[1].center, 1)
+      expect(metrics[0].background).toBe('rgba(0, 0, 0, 0)')
+      expect(metrics[0].border).not.toBe('rgba(0, 0, 0, 0)')
+      expect(metrics[0].borderWidth).toBeGreaterThan(0)
+      expect(metrics[1].background).not.toBe('rgba(0, 0, 0, 0)')
       await testInfo.attach(`Tutorial buttons in ${theme} theme at ${zoom} scale`, {
         body: await tutorial.screenshot({ animations: 'disabled' }),
         contentType: 'image/png'

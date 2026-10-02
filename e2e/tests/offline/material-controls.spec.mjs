@@ -1,5 +1,13 @@
 import { test, expect, goToSettingsSection, sel, setWindowSize } from '../../helpers/app.mjs'
 
+test('closed selects announce their current choice', async ({ page }) => {
+  const section = await goToSettingsSection(page, 'download')
+  const select = section.getByRole('combobox', { name: 'Concurrent downloads', exact: true })
+  await expect(select).toHaveAccessibleDescription('2')
+  await select.press('ArrowDown')
+  await expect(select).toHaveAccessibleDescription('3')
+})
+
 for (const scale of [100, 95]) {
   test.describe(`modal control regressions at ${scale}% scale`, () => {
     test.use({ seed: { settings: { currentLocale: 'en-US', uiScale: scale, baseTheme: 'dark' } } })
