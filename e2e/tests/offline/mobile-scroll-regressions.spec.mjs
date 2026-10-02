@@ -84,5 +84,61 @@ for (const [uiScale, reducedMotion, compactNavigationLabels] of [
       await page.evaluate(() => window.scrollTo(0, 600))
       await expect(nav).not.toHaveClass(/scrollHidden/)
     })
+
+    test('connection banner appearing during navigation hiding stays above the moving bars', async ({ app, page }) => {
+      await page.emulateMedia({ reducedMotion })
+      await setWindowSize(app, page, { width: 400, height: 850 })
+      await goTo(page, 'subscriptions')
+      await page.evaluate(() => {
+        document.querySelector('.app').classList.add('capacitorPhoneLayout')
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setShowProgressBar', true)
+        store.commit('setProgressBarPercentage', 50)
+        document.querySelector('.app > .flexBox').style.minHeight = '3000px'
+        document.documentElement.style.setProperty('--safe-area-inset-bottom', '17px')
+        document.activeElement?.blur()
+        window.dispatchEvent(new Event('resize'))
+      })
+      await expect(page.locator('.progressBar')).toBeVisible()
+      await expect(page.locator('.connectionStatus')).toBeHidden()
+      const overlap = await page.evaluate(async () => {
+        window.scrollTo(0, 300)
+        const nav = document.querySelector('.sideNav')
+        while (!nav.classList.contains('scrollHidden')) await new Promise(requestAnimationFrame)
+        await new Promise(requestAnimationFrame)
+        // A network change on returning to the app can mount the banner while
+        // the navigation's scroll transition is already in progress.
+        Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+        window.dispatchEvent(new Event('offline'))
+        let maximumOverlap = 0
+        const start = performance.now()
+        do {
+          await new Promise(requestAnimationFrame)
+          const status = document.querySelector('.connectionStatus')?.getBoundingClientRect()
+          const progress = document.querySelector('.progressBar').getBoundingClientRect()
+          if (status) maximumOverlap = Math.max(maximumOverlap, status.bottom - progress.top)
+        } while (performance.now() - start < 350)
+        return maximumOverlap
+      })
+      expect(overlap).toBeLessThan(1)
+      await expect(page.locator('.connectionStatus')).toHaveText('Offline')
+      await expect(page.locator('.sideNav')).toHaveClass(/scrollHidden/)
+      for (const top of [100, 400, 0]) {
+        const gap = await page.evaluate(async top => {
+          window.scrollTo(0, top)
+          let maximumGap = 0
+          const start = performance.now()
+          do {
+            await new Promise(requestAnimationFrame)
+            const status = document.querySelector('.connectionStatus').getBoundingClientRect()
+            const progress = document.querySelector('.progressBar').getBoundingClientRect()
+            maximumGap = Math.max(maximumGap, Math.abs(status.bottom - progress.top))
+          } while (performance.now() - start < 350)
+          return maximumGap
+        }, top)
+        expect(gap).toBeLessThan(1)
+      }
+      await expect(page.locator('.sideNav')).not.toHaveClass(/scrollHidden/)
+    })
   })
 }
