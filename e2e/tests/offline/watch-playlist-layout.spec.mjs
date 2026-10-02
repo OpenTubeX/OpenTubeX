@@ -158,6 +158,36 @@ for (const zoom of [1, 0.95]) {
     await expect(page.locator('.watchVideoPlaylist .playlistProgressBarContainer')).toBeVisible()
   })
 
+  test(`playlist channel separator follows the counter at ${zoom} UI scale`, async ({ app, page }) => {
+    const watch = await openPlaylist(app, page)
+    await watch.evaluate(async (vm, items) => {
+      const store = vm.$store
+      const router = vm.tabRouter
+      const tabId = vm.tabId ?? 'web'
+      await router.push('/watch/jNQXAC9IVRw')
+      await vm.$nextTick()
+      store.commit('setCachedPlaylist', {
+        tabId,
+        value: { id: 'channel-layout', title: 'Channel playlist', channelName: 'Test channel', channelId: 'UC-test', totalVideoCount: items.length, items, continuationData: null }
+      })
+      await router.push('/watch/jNQXAC9IVRw?playlistId=channel-layout')
+    }, videos)
+    await waitForPlayback(page)
+    await setWindowSize(app, page, { width: 480, height: 800 })
+    await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
+    await page.setViewportSize({ width: Math.round(480 / zoom), height: Math.round(800 / zoom) })
+    await page.locator('.phonePlaylistButton').click()
+    const sheet = page.locator('.dockedSheet[open]')
+    await expect(sheet.locator('.playlistHeader > .channelName')).toHaveText('Test channel', { useInnerText: true })
+    await expect(sheet.locator('.playlistIndex')).toBeHidden()
+    await sheet.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
+    await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setBounds({ width: 1280, height: 850 }))
+    await page.setViewportSize({ width: Math.round(1280 / zoom), height: Math.round(850 / zoom) })
+    await expect(page.locator('.watchVideoPlaylist .playlistHeader > .channelName')).toHaveText('Test channel -')
+    await expect(page.locator('.watchVideoPlaylist .playlistIndex')).toBeVisible()
+    await watch.dispose()
+  })
+
   test(`landscape fullscreen playlist shows more videos and keeps controls outside the scroller at ${zoom} UI scale`, async ({ app, page, attachScreenshot }) => {
     await openPlaylist(app, page)
     await setWindowSize(app, page, { width: 960, height: 440 })

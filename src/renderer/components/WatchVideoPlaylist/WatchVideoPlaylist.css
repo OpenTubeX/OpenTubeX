@@ -440,6 +440,7 @@
 }
 
 @media (width <= 600px), (height <= 600px) {
+  .channelNameSeparator,
   .playlistIndex {
     display: none;
   }

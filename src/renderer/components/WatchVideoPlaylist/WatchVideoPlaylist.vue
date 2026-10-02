@@ -77,13 +77,19 @@
               dir="auto"
               :to="`/channel/${channelId}`"
             >
-              {{ channelName }} -
+              {{ channelName }}<span
+                class="channelNameSeparator"
+                aria-hidden="true"
+              > -</span>
             </RouterLink>
             <bdi
               v-else
               class="channelName"
             >
-              {{ channelName }} -
+              {{ channelName }}<span
+                class="channelNameSeparator"
+                aria-hidden="true"
+              > -</span>
             </bdi>
           </template>
           <span
