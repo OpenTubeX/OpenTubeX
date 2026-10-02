@@ -271,9 +271,9 @@ Settings:
     Swipe to refresh: Geser untuk menyegarkan
     Blur Thumbnails: Buramkan gambar mini
     Navigation:
-      Always Show Navigation Bar: Selalu tampilkan bilah navigasi
-      Compact Tab Labels: Label tab ringkas
-      Show Active Subscriptions: Tampilkan langganan aktif
+      Always Show Navigation Bar: Selalu tampilkan bilah navigasi saat berada di bagian bawah
+      Compact Tab Labels: Bilah navigasi ringkas saat berada di bagian bawah
+      Show Active Subscriptions: Tampilkan langganan aktif di bilah samping
       Navigation: Navigasi
       Customize Navigation: Sesuaikan navigasi
       Add Item: Tambah item
@@ -1123,6 +1123,7 @@ About:
   Matrix: Matrix
   Email: Email
 Profile:
+  Manage Profile Subscriptions: Kelola langganan profil
   Icon Names:
     Person: Orang
     People: Orang-orang

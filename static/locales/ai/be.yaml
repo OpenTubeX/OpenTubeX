@@ -287,9 +287,9 @@ Settings:
     Swipe to refresh: Пацягніце, каб абнавіць
     Blur Thumbnails: Размываць мініяцюры
     Navigation:
-      Always Show Navigation Bar: Заўсёды паказваць панэль навігацыі
-      Compact Tab Labels: Кампактныя подпісы ўкладак
-      Show Active Subscriptions: Паказваць актыўныя падпіскі
+      Always Show Navigation Bar: Заўсёды паказваць панэль навігацыі, калі яна ўнізе
+      Compact Tab Labels: Кампактная панэль навігацыі, калі яна ўнізе
+      Show Active Subscriptions: Паказваць актыўныя падпіскі ў бакавой панэлі
       Navigation: Навігацыя
       Customize Navigation: Наладзіць навігацыю
       Add Item: Дадаць элемент
@@ -1179,6 +1179,7 @@ About:
   Please read the {roomRulesLink}: Азнаёмцеся з {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX створаны дзякуючы {creditsPageLink}
 Profile:
+  Manage Profile Subscriptions: Кіраванне падпіскамі профілю
   Icon Names:
     Person: Чалавек
     People: Людзі

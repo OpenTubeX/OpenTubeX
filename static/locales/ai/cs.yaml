@@ -271,9 +271,9 @@ Settings:
     Swipe to refresh: Obnovit potažením
     Blur Thumbnails: Rozmazat miniatury
     Navigation:
-      Always Show Navigation Bar: Vždy zobrazovat navigační lištu
-      Compact Tab Labels: Kompaktní popisky karet
-      Show Active Subscriptions: Zobrazit aktivní odběry
+      Always Show Navigation Bar: Vždy zobrazovat navigační lištu, když je dole
+      Compact Tab Labels: Kompaktní navigační lišta, když je dole
+      Show Active Subscriptions: Zobrazit aktivní odběry v postranním panelu
       Navigation: Navigace
       Customize Navigation: Přizpůsobit navigaci
       Add Item: Přidat položku
@@ -1120,6 +1120,7 @@ About:
   Matrix: Matrix
   Email: E-mail
 Profile:
+  Manage Profile Subscriptions: Spravovat odběry profilu
   Icon Names:
     Person: Osoba
     People: Lidé

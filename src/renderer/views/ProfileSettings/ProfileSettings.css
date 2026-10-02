@@ -2,25 +2,74 @@ h2 {
   text-align: center;
 }
 
+.createProfileHeading {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-block: 0 20px;
+}
+
+.profileSubscriptionsHeading {
+  margin-block: 0 10px;
+}
+
 .message {
   color: var(--tertiary-text-color);
 }
 
 .profileList {
+  justify-content: center;
+  gap: 16px;
   max-inline-size: 1000px;
   margin-block: 0 10px;
   margin-inline: auto;
 }
 
-.openedProfile {
-  background-color: var(--primary-text-color);
+.createProfileOption {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: calc(8px * var(--ui-roundness));
+  box-sizing: border-box;
+  color: var(--primary-text-color);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  font: inherit;
+  font-size: 14px;
+  gap: 5px;
+  inline-size: 120px;
+  line-height: 1.5em;
+  min-block-size: 155px;
+  padding-block: 30px 8px;
+  padding-inline: 10px;
+  text-align: center;
   transition: background 0.2s ease-out;
-  color: var(--card-bg-color);
+}
+
+.createProfileOption:is(:hover, :focus-visible) {
+  background-color: color-mix(in srgb, var(--side-nav-hover-color) 30%, transparent);
+}
+
+.createProfileIcon {
+  align-items: center;
+  block-size: 70px;
+  display: flex;
+  flex-shrink: 0;
+  font-size: 35px;
+  inline-size: 70px;
+  justify-content: center;
+}
+
+.openedProfile {
+  background-color: color-mix(in srgb, var(--primary-text-color) 15%, transparent);
+  transition: background 0.2s ease-out;
 }
 
 .openedProfile:hover,
 .openedProfile:focus-visible {
-  background-color: var(--subtle-surface-color);
+  background-color: color-mix(in srgb, var(--primary-text-color) 20%, transparent);
   transition: background 0.2s ease-in;
 }
 

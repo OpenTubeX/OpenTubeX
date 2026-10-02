@@ -393,7 +393,8 @@ import { settingsSubpageKey } from '../../components/FtSettingsSubpage/settingsS
 import {
   clampOverlayScrollTop,
   isOverlayScrollTopOutOfBounds,
-  restoreOverlayScrollTop
+  restoreOverlayScrollTop,
+  updateOverlayScrollbars
 } from '../../helpers/overlayScrollbars'
 import { initializePlatformInfo, isLinuxWayland, supportsAutoPictureInPictureMinimize } from '../../helpers/platform'
 import {
@@ -1027,7 +1028,11 @@ function navigateToSection(sectionType) {
   if (previousSection !== sectionType) {
     nextTick(() => {
       const content = settingsContentRef.value
-      if (content) restoreOverlayScrollTop(content, 0)
+      if (content) {
+        restoreOverlayScrollTop(content, 0)
+        content.scrollLeft = 0
+        updateOverlayScrollbars(content)
+      }
     })
   }
   if (isInDesktopView.value && previousSection !== null && previousSection !== sectionType) {

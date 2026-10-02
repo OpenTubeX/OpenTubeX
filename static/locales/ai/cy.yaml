@@ -273,9 +273,9 @@ Settings:
     Swipe to refresh: Sychwch i adnewyddu
     Blur Thumbnails: Niwlio mân-luniau
     Navigation:
-      Always Show Navigation Bar: Dangos y bar llywio bob amser
-      Compact Tab Labels: Labeli tabiau cryno
-      Show Active Subscriptions: Dangos tanysgrifiadau gweithredol
+      Always Show Navigation Bar: Dangos y bar llywio bob amser pan fydd ar y gwaelod
+      Compact Tab Labels: Bar llywio cryno pan fydd ar y gwaelod
+      Show Active Subscriptions: Dangos tanysgrifiadau gweithredol yn y bar ochr
       Navigation: Llywio
       Customize Navigation: Addasu'r llywio
       Add Item: Ychwanegu eitem
@@ -1129,6 +1129,7 @@ About:
   Matrix: Matrix
   Email: E-bost
 Profile:
+  Manage Profile Subscriptions: Rheoli tanysgrifiadau proffil
   Icon Names:
     Person: Person
     People: Pobl

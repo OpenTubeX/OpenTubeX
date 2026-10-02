@@ -271,9 +271,9 @@ Settings:
     Swipe to refresh: Deslizar para actualizar
     Blur Thumbnails: Desenfocar miniaturas
     Navigation:
-      Always Show Navigation Bar: Mostrar siempre la barra de navegación
-      Compact Tab Labels: Etiquetas de pestañas compactas
-      Show Active Subscriptions: Mostrar suscripciones activas
+      Always Show Navigation Bar: Mostrar siempre la barra de navegación cuando está en la parte inferior
+      Compact Tab Labels: Barra de navegación compacta cuando está en la parte inferior
+      Show Active Subscriptions: Mostrar suscripciones activas en la barra lateral
       Navigation: Navegación
       Customize Navigation: Personalizar navegación
       Add Item: Añadir elemento
@@ -1122,6 +1122,7 @@ About:
   Matrix: Matrix
   Email: Correo electrónico
 Profile:
+  Manage Profile Subscriptions: Gestionar suscripciones del perfil
   Icon Names:
     Person: Persona
     People: Personas

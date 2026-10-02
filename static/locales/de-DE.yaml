@@ -356,9 +356,9 @@ Settings:
     Blur Thumbnails: Vorschaubilder weichzeichnen
     General Settings: Allgemein
     Navigation:
-      Always Show Navigation Bar: Navigationsleiste immer anzeigen
-      Compact Tab Labels: Kompakte Tab-Beschriftungen
-      Show Active Subscriptions: Aktive Abos anzeigen
+      Always Show Navigation Bar: Navigationsleiste immer anzeigen, wenn sie unten ist
+      Compact Tab Labels: Kompakte Navigationsleiste, wenn sie unten ist
+      Show Active Subscriptions: Aktive Abos in der Seitenleiste anzeigen
       Navigation: Navigation
       Customize Navigation: Navigation anpassen
       Add Item: Eintrag hinzufügen
@@ -2310,6 +2310,7 @@ Yes: Ja
 No: Nein
 Locale Name: Deutsch
 Profile:
+  Manage Profile Subscriptions: Profil-Abos verwalten
   Icon Names:
     Person: Person
     People: Personen

@@ -10,10 +10,133 @@ const OFFLINE_PAGES = [
   { route: 'settings', name: 'Settings' }
 ]
 
+for (const uiScale of [100, 125]) {
+  test.describe(`navigation options outline at ${uiScale}% UI scale`, () => {
+    test.use({ seed: { settings: { uiScale } } })
+
+    test('clamps scrolling after wider layouts and shorter translated labels', async ({ app, page }) => {
+      async function resize(width) {
+        await app.electronApp.evaluate(({ BrowserWindow }, bounds) => {
+          const window = BrowserWindow.getAllWindows()[0]
+          window.setBounds({ ...window.getBounds(), ...bounds })
+        }, { width: Math.round(width * uiScale / 100), height: Math.round(650 * uiScale / 100) })
+        await expect.poll(() => page.evaluate(() => innerWidth)).toBe(width)
+      }
+      await resize(900)
+      const appearance = await goToSettingsSection(page, 'appearance')
+      await page.getByRole('button', { name: 'Maximize', exact: true }).click()
+      await appearance.getByRole('button', { name: 'Customize navigation' }).click()
+      await resize(350)
+      const scroller = page.locator('.settingsSubpageScroll:visible')
+      const content = scroller.locator('.settingsSubpageContent')
+      const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+      const thumb = scrollbar.locator('.os-scrollbar-handle')
+      async function scrollToEnd() {
+        await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+        await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+        await expect.poll(() => content.evaluate(element => {
+          const viewport = element.closest('.settingsSubpageScroll')
+          return Math.abs(element.getBoundingClientRect().bottom - viewport.getBoundingClientRect().bottom +
+            Number.parseFloat(getComputedStyle(viewport).paddingBottom)) * devicePixelRatio
+        })).toBeLessThanOrEqual(2)
+      }
+      async function expectShorter(previousHeight, previousThumb) {
+        await expect.poll(() => content.evaluate(element => element.getBoundingClientRect().height)).toBeLessThan(previousHeight)
+        await expect.poll(() => content.evaluate(element => {
+          const viewport = element.closest('.settingsSubpageScroll')
+          const contentEnd = element.getBoundingClientRect().bottom - viewport.getBoundingClientRect().top +
+            viewport.scrollTop + Number.parseFloat(getComputedStyle(viewport).paddingBottom)
+          return (viewport.scrollTop - Math.max(0, contentEnd - viewport.clientHeight)) * devicePixelRatio
+        }), { message: 'reflow leaves no obsolete scroll offset beyond the rendered content' }).toBeLessThanOrEqual(2)
+        await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+        await expect.poll(() => thumb.evaluate(element => element.getBoundingClientRect().height)).toBeGreaterThan(previousThumb)
+        await expect.poll(() => content.evaluate(element => {
+          const viewport = element.closest('.settingsSubpageScroll')
+          const contentEnd = element.getBoundingClientRect().bottom - viewport.getBoundingClientRect().top +
+            viewport.scrollTop + Number.parseFloat(getComputedStyle(viewport).paddingBottom)
+          const bar = viewport.querySelector('.os-scrollbar-vertical')
+          const track = bar.querySelector('.os-scrollbar-track').getBoundingClientRect()
+          const handle = bar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+          return Math.abs(handle.height / track.height - viewport.clientHeight / contentEnd)
+        })).toBeLessThan(0.01)
+        await scrollToEnd()
+        await expect.poll(() => scrollbar.evaluate(element => {
+          const track = element.querySelector('.os-scrollbar-track').getBoundingClientRect()
+          const handle = element.querySelector('.os-scrollbar-handle').getBoundingClientRect()
+          return Math.abs(track.bottom - handle.bottom) * devicePixelRatio
+        })).toBeLessThanOrEqual(2)
+      }
+      await scrollToEnd()
+      const narrowHeight = await content.evaluate(element => element.getBoundingClientRect().height)
+      const narrowThumb = await thumb.evaluate(element => element.getBoundingClientRect().height)
+      await resize(900)
+      await expectShorter(narrowHeight, narrowThumb)
+      await resize(350)
+      await page.evaluate(async () => {
+        await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'de-DE')
+      })
+      await expect(page.locator('.fixedNavigationOptions')).toContainText('Navigationsleiste')
+      await scrollToEnd()
+      const germanHeight = await content.evaluate(element => element.getBoundingClientRect().height)
+      const germanThumb = await thumb.evaluate(element => element.getBoundingClientRect().height)
+      await page.evaluate(async () => {
+        await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', 'en-US')
+      })
+      await expectShorter(germanHeight, germanThumb)
+    })
+
+    test('encloses all three switches at desktop and narrow widths', async ({ app, page }, testInfo) => {
+      await setWindowSize(app, page, { width: 900, height: 650 })
+      const appearance = await goToSettingsSection(page, 'appearance')
+      await appearance.getByRole('button', { name: 'Customize navigation' }).click()
+      const group = page.locator('.fixedNavigationOptions')
+      await expect(group.getByRole('checkbox')).toHaveCount(3)
+      for (const narrow of [false, true]) {
+        if (narrow) await setWindowSize(app, page, { width: 500, height: 760 })
+        await expect.poll(() => group.evaluate(element => {
+          const outline = element.getBoundingClientRect()
+          return [...element.querySelectorAll('.switch-label')].every(label => {
+            const bounds = label.getBoundingClientRect()
+            return bounds.top >= outline.top + 7 && bounds.bottom <= outline.bottom - 7
+          })
+        }), { message: 'the outline leaves space above and below every switch label' }).toBe(true)
+        await group.scrollIntoViewIfNeeded()
+        const scroller = page.locator('.settingsSubpageScroll:visible')
+        await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+        await expect.poll(() => group.evaluate(element => {
+          const scroller = element.closest('.settingsSubpageScroll')
+          return scroller.getBoundingClientRect().bottom - element.getBoundingClientRect().bottom -
+            Number.parseFloat(getComputedStyle(scroller).paddingBottom)
+        }), { message: 'extra space remains below the outlined options at the end of the page' }).toBeGreaterThan(15)
+        const screenshot = await app.electronApp.evaluate(async ({ BrowserWindow }) => (
+          (await BrowserWindow.getAllWindows()[0].webContents.capturePage()).toPNG().toString('base64')
+        ))
+        await testInfo.attach(`${narrow ? 'narrow' : 'desktop'} navigation options`, {
+          body: Buffer.from(screenshot, 'base64'), contentType: 'image/png'
+        })
+      }
+      const scroller = page.locator('.settingsSubpageScroll:visible')
+      const items = page.locator('.selectedItems .selectedItem')
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+      while (await items.count() > 0) {
+        await items.last().getByRole('button', { name: /^Remove / }).click()
+        await expect.poll(() => scroller.evaluate(element => {
+          const content = element.querySelector('.settingsSubpageContent')
+          const contentEnd = content.getBoundingClientRect().bottom - element.getBoundingClientRect().top +
+            element.scrollTop + Number.parseFloat(getComputedStyle(element).paddingBottom)
+          return element.scrollTop - Math.max(0, contentEnd - element.clientHeight)
+        }), { message: 'removing navigation items leaves no obsolete scroll offset' }).toBeLessThanOrEqual(1)
+      }
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeLessThanOrEqual(1)
+      await expect(scroller.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
+    })
+  })
+}
+
 test('navigation visibility and compact labels are saved through their settings controls', async ({ app, page }) => {
   const appearance = await goToSettingsSection(page, 'appearance')
   await appearance.getByRole('button', { name: 'Customize navigation' }).click()
-  for (const name of ['Always show navigation bar', 'Compact tab labels']) {
+  for (const name of ["Always show navigation bar when it's at the bottom", "Compact navigation bar when it's at the bottom"]) {
     const toggle = page.getByRole('checkbox', { name: new RegExp(`^${name}`) })
     await expect(toggle).not.toBeChecked()
     await page.locator('label.switch-label').filter({ hasText: name }).click()
@@ -22,7 +145,7 @@ test('navigation visibility and compact labels are saved through their settings 
   ;({ page } = await app.relaunch())
   const restoredAppearance = await goToSettingsSection(page, 'appearance')
   await restoredAppearance.getByRole('button', { name: 'Customize navigation' }).click()
-  for (const name of ['Always show navigation bar', 'Compact tab labels']) {
+  for (const name of ["Always show navigation bar when it's at the bottom", "Compact navigation bar when it's at the bottom"]) {
     await expect(page.getByRole('checkbox', { name: new RegExp(`^${name}`) })).toBeChecked()
   }
 })

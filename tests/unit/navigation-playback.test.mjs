@@ -319,12 +319,14 @@ test('upward preview starts fading after a short swipe', async t => {
   assert.equal(Number(mounted.previewRoot.firstElementChild.style.opacity), 0)
 })
 
-test('restoring after resizing uses the current Watch host geometry', async t => {
+test('restoring after resizing uses the current tab geometry', async t => {
   const mounted = mountWatch(t)
   const navigation = mounted.provides.get('navigation')
   await navigation.minimize()
   mounted.hostBounds.width = 800.5
   mounted.hostBounds.top = -139.75
+  mounted.tabBounds.width = 800.5
+  mounted.tabBounds.top = -139.75
   mounted.viewport.scrollY = 220
   mounted.viewport.innerHeight = 600
   navigation.beginRestorePreview()
@@ -333,14 +335,37 @@ test('restoring after resizing uses the current Watch host geometry', async t =>
   assert.equal(mounted.previewStyle.value.height, '519.75px')
 })
 
-test('mobile restore aligns the retained Watch view with its tab', async t => {
-  const mounted = mountWatch(t, { mobile: true })
+for (const mobile of [false, true]) {
+  test(`${mobile ? 'mobile' : 'desktop'} restore aligns the retained Watch view with its tab`, async t => {
+    const mounted = mountWatch(t, { mobile })
+    const navigation = mounted.provides.get('navigation')
+    await navigation.minimize()
+    mounted.hostBounds.top = 2452.125
+    mounted.viewport.scrollY = 0
+    navigation.beginRestorePreview()
+    assert.equal(mounted.previewStyle.value.top, '-2391.875px')
+    assert.equal(mounted.previewStyle.value.width, '412.25px')
+    assert.equal(mounted.previewStyle.value.height, '739.75px')
+  })
+}
+
+test('restore preview stays at the visible tab origin while browsing scroll resets', async t => {
+  const mounted = mountWatch(t)
   const navigation = mounted.provides.get('navigation')
   await navigation.minimize()
-  mounted.hostBounds.top = 452.125
-  mounted.viewport.scrollY = 0
+  mounted.viewport.scrollY = 900.5
+  mounted.tabBounds.top = 80.25 - mounted.viewport.scrollY
+  mounted.hostBounds.top = 1600.75 - mounted.viewport.scrollY
+  mounted.previewRoot.getBoundingClientRect = () => ({
+    left: mounted.hostBounds.left + Number.parseFloat(mounted.previewRoot.style.left),
+    top: mounted.hostBounds.top + Number.parseFloat(mounted.previewRoot.style.top),
+    width: mounted.tabBounds.width
+  })
   navigation.beginRestorePreview()
-  assert.equal(mounted.previewStyle.value.top, '-391.875px')
-  assert.equal(mounted.previewStyle.value.width, '412.25px')
-  assert.equal(mounted.previewStyle.value.height, '739.75px')
+  Object.assign(mounted.previewRoot.style, mounted.previewStyle.value)
+  assert.equal(mounted.previewRoot.getBoundingClientRect().top, 80.25)
+  mounted.hostBounds.top += mounted.viewport.scrollY
+  mounted.viewport.scrollTo({ left: 0, top: 0, behavior: 'instant' })
+  mounted.listeners.get('scroll')()
+  assert.equal(mounted.previewRoot.getBoundingClientRect().top, 80.25)
 })

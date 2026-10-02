@@ -270,9 +270,9 @@ Settings:
     Swipe to refresh: Swipe to refresh
     Blur Thumbnails: Blur thumbnails
     Navigation:
-      Always Show Navigation Bar: Always show navigation bar
-      Compact Tab Labels: Compact tab labels
-      Show Active Subscriptions: Show Active Subscriptions
+      Always Show Navigation Bar: Always show navigation bar when it's at the bottom
+      Compact Tab Labels: Compact navigation bar when it's at the bottom
+      Show Active Subscriptions: Show active subscriptions in sidebar
       Navigation: Navigation
       Customize Navigation: Customise navigation
       Add Item: Add item
@@ -1105,6 +1105,7 @@ About:
   Matrix: Matrix
   Email: Email
 Profile:
+  Manage Profile Subscriptions: Manage profile subscriptions
   Icon Names:
     Person: Person
     People: People

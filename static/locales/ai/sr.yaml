@@ -281,9 +281,9 @@ Settings:
     Swipe to refresh: Превуците за освежавање
     Blur Thumbnails: Замагли сличице
     Navigation:
-      Always Show Navigation Bar: Увек приказуј траку за навигацију
-      Compact Tab Labels: Компактне ознаке картица
-      Show Active Subscriptions: Прикажи активне претплате
+      Always Show Navigation Bar: Увек прикажи траку за навигацију када је на дну
+      Compact Tab Labels: Компактна трака за навигацију када је на дну
+      Show Active Subscriptions: Прикажи активне претплате у бочној траци
       Navigation: Навигација
       Customize Navigation: Прилагоди навигацију
       Add Item: Додај ставку
@@ -1171,6 +1171,7 @@ About:
   Please read the {roomRulesLink}: Прочитајте {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX постоји захваљујући {creditsPageLink}
 Profile:
+  Manage Profile Subscriptions: Управљај претплатама профила
   Icon Names:
     Person: Особа
     People: Људи

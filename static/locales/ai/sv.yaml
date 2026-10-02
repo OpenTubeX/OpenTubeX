@@ -273,9 +273,9 @@ Settings:
     Swipe to refresh: Svep för att uppdatera
     Blur Thumbnails: Gör miniatyrbilder suddiga
     Navigation:
-      Always Show Navigation Bar: Visa alltid navigeringsfältet
-      Compact Tab Labels: Kompakta fliketiketter
-      Show Active Subscriptions: Visa aktiva prenumerationer
+      Always Show Navigation Bar: Visa alltid navigeringsfältet när det är längst ned
+      Compact Tab Labels: Kompakt navigeringsfält när det är längst ned
+      Show Active Subscriptions: Visa aktiva prenumerationer i sidofältet
       Navigation: Navigering
       Customize Navigation: Anpassa navigeringen
       Add Item: Lägg till objekt
@@ -1126,6 +1126,7 @@ About:
   Matrix: Matrix
   Email: E-post
 Profile:
+  Manage Profile Subscriptions: Hantera profilens prenumerationer
   Icon Names:
     Person: Person
     People: Personer

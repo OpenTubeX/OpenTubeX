@@ -27,8 +27,16 @@
 }
 
 .onlyShowLatestFromChannelNumber {
-  inline-size: calc(100% - 44px);
+  box-sizing: border-box;
+  inline-size: 100%;
   padding-inline-start: 44px;
+}
+
+.onlyShowLatestFromChannelNumber :deep(.pure-material-slider) {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: 380px;
+  margin-inline: 0;
 }
 
 .subscriptionChannelSettingsManager {

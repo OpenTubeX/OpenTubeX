@@ -2685,13 +2685,30 @@ for (const uiScale of [100, 125]) {
       await expect(player).toHaveClass(/scrollMiniPlayer/)
       await expect(page.locator('.tabBar .tab')).toHaveCount(1)
       await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(time)
+      await page.evaluate(() => {
+        const spacer = document.createElement('div')
+        spacer.style.height = '2000px'
+        document.querySelector('.tabContent[aria-hidden="false"] > .routerView').append(spacer)
+        window.scrollTo(0, 900)
+      })
       await attachScreenshot('video continues while browsing subscriptions')
+      await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
       await player.evaluate(element => {
         document.documentElement.dataset.reducedMotion = 'no-preference'
         window.oversizedMiniControls = []
         window.miniRestoreFrames = 0
+        window.miniRestoreGeometry = []
         const sample = () => {
           if (!element.isConnected) return
+          const bounds = element.getBoundingClientRect()
+          const center = document.elementFromPoint(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2)
+          window.miniRestoreGeometry.push({
+            left: bounds.left,
+            top: bounds.top,
+            width: bounds.width,
+            height: bounds.height,
+            visible: element.contains(center)
+          })
           if (element.hasAttribute('data-inline-mini-drag')) {
             window.miniRestoreFrames++
             for (const button of element.querySelectorAll('.scrollMiniPlayerControls button')) {
@@ -2710,10 +2727,21 @@ for (const uiScale of [100, 125]) {
       await expect(player).not.toHaveClass(/scrollMiniPlayer/)
       const samples = await page.evaluate(() => {
         cancelAnimationFrame(window.miniRestoreSample)
-        return { frames: window.miniRestoreFrames, oversized: window.oversizedMiniControls }
+        return { frames: window.miniRestoreFrames, oversized: window.oversizedMiniControls, geometry: window.miniRestoreGeometry }
       })
       expect(samples.frames).toBeGreaterThan(0)
       expect(samples.oversized).toEqual([])
+      const start = samples.geometry[0]
+      const end = samples.geometry.at(-1)
+      const expanding = samples.geometry.filter(frame => frame.width > start.width + 5 && frame.width < end.width - 5)
+      expect(expanding.length, 'the video visibly expands from the mini player').toBeGreaterThan(2)
+      expect(expanding.filter(frame => !frame.visible), 'the moving video stays above the Watch preview').toEqual([])
+      const distance = Math.hypot(end.left - start.left, end.top - start.top, end.width - start.width, end.height - start.height)
+      const steps = samples.geometry.slice(1).map((frame, index) => {
+        const previous = samples.geometry[index]
+        return Math.hypot(frame.left - previous.left, frame.top - previous.top, frame.width - previous.width, frame.height - previous.height)
+      })
+      expect(Math.max(...steps), 'the player must not jump at the preview handoff').toBeLessThan(distance / 2)
       expect(await video.evaluate((element, original) => element === original, originalVideo)).toBe(true)
       await expect(page.locator('.tabBar .tab')).toHaveText(title)
     })

@@ -271,9 +271,9 @@ Settings:
     Swipe to refresh: Frissítés húzással
     Blur Thumbnails: Bélyegképek elhomályosítása
     Navigation:
-      Always Show Navigation Bar: Navigációs sáv állandó megjelenítése
-      Compact Tab Labels: Kompakt lapcímkék
-      Show Active Subscriptions: Aktív feliratkozások megjelenítése
+      Always Show Navigation Bar: Navigációs sáv megjelenítése mindig, amikor alul van
+      Compact Tab Labels: Kompakt navigációs sáv, amikor alul van
+      Show Active Subscriptions: Aktív feliratkozások megjelenítése az oldalsávban
       Navigation: Navigáció
       Customize Navigation: Navigáció testreszabása
       Add Item: Elem hozzáadása
@@ -1120,6 +1120,7 @@ About:
   Matrix: Matrix
   Email: E-mail
 Profile:
+  Manage Profile Subscriptions: Profil feliratkozásainak kezelése
   Icon Names:
     Person: Személy
     People: Emberek

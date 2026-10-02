@@ -393,9 +393,9 @@ Settings:
     Swipe to refresh: Povlecite za osvežitev
     Blur Thumbnails: Zamegli sličice
     Navigation:
-      Always Show Navigation Bar: Vedno prikaži navigacijsko vrstico
-      Compact Tab Labels: Strnjene oznake zavihkov
-      Show Active Subscriptions: Prikaži aktivne naročnine
+      Always Show Navigation Bar: Vedno prikaži navigacijsko vrstico, ko je na dnu
+      Compact Tab Labels: Strnjena navigacijska vrstica, ko je na dnu
+      Show Active Subscriptions: Prikaži aktivne naročnine v stranski vrstici
       Navigation: Krmarjenje
       Customize Navigation: Prilagodi krmarjenje
       Add Item: Dodaj element
@@ -1449,6 +1449,7 @@ About:
   Please read the {roomRulesLink}: Preberite {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX omogočajo {creditsPageLink}
 Profile:
+  Manage Profile Subscriptions: Upravljaj naročnine profila
   Icon Names:
     Person: Oseba
     People: Ljudje

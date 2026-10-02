@@ -2,7 +2,7 @@
   <div>
     <FtCard class="card">
       <h2>{{ editOrCreateProfileLabel }}</h2>
-      <FtFlexBox class="profileEdit">
+      <div class="profileEdit">
         <div>
           <h3>{{ $t("Profile.Color Picker") }}</h3>
           <FtFlexBox
@@ -12,12 +12,18 @@
               class="colorOption themeColorOption"
               :class="{ selected: profileBgColor === THEME_BG_COLOR }"
               :aria-pressed="profileBgColor === THEME_BG_COLOR"
+              :aria-label="$t('Profile.Theme Color')"
               :title="$t('Profile.Theme Color')"
               tabindex="0"
               role="button"
               @click="selectProfileBgColor(THEME_BG_COLOR)"
               @keydown.enter.space.prevent="selectProfileBgColor(THEME_BG_COLOR)"
-            />
+            >
+              <FtIcon
+                :icon="['fas', 'palette']"
+                aria-hidden="true"
+              />
+            </div>
             <div
               v-for="color in COLOR_VALUES"
               :key="color"
@@ -53,13 +59,6 @@
             @apply="rememberSemanticProfileBgColor"
             @cancel="restoreSemanticProfileBgColor"
             @reset="restoreSemanticProfileBgColor"
-          />
-          <FtInput
-            class="colorSelection"
-            placeholder=""
-            :value="profileBgColorLabel"
-            :show-action-button="false"
-            :disabled="true"
           />
         </div>
         <div class="secondEditRow">
@@ -161,13 +160,24 @@
                 :profile="profilePreview"
                 :fallback="profileInitial"
               />
-              <FtFlexBox>
-                <FtButton
+              <FtFlexBox
+                class="profileActions"
+                :class="{ profileCreationActions: isNew }"
+              >
+                <template
                   v-if="isNew"
-                  :label="$t('Profile.Create Profile')"
-                  :icon="['fas', 'user-plus']"
-                  @click="saveProfile"
-                />
+                >
+                  <FtButton
+                    :label="$t('Profile.Create Profile')"
+                    :icon="['fas', 'user-plus']"
+                    @click="saveProfile"
+                  />
+                  <FtButton
+                    :label="$t('Cancel')"
+                    :icon="['fas', 'xmark']"
+                    @click="emit('cancel-creation')"
+                  />
+                </template>
                 <template
                   v-else
                 >
@@ -194,7 +204,7 @@
             </div>
           </div>
         </div>
-      </FtFlexBox>
+      </div>
     </FtCard>
     <FtPrompt
       v-if="cropDialogOpen"
@@ -252,7 +262,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { FtIcon } from '@opentubex/icons'
 import { useI18n } from 'vue-i18n'
 
@@ -271,7 +281,7 @@ import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../../cons
 import { calculateColorLuminance, colors, resolveThemeColor } from '../../helpers/colors'
 import { deepCopy, showToast } from '../../helpers/utils'
 import { getFirstCharacter } from '../../helpers/strings'
-import { INITIAL_PROFILE_ICON, PROFILE_ICONS } from '../../helpers/profileIcons'
+import { DEFAULT_PROFILE_ICON, INITIAL_PROFILE_ICON, PROFILE_ICONS } from '../../helpers/profileIcons'
 
 /**
  * @typedef {object} Profile
@@ -303,7 +313,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['new-profile-created', 'profile-deleted'])
+const emit = defineEmits(['new-profile-created', 'profile-deleted', 'cancel-creation'])
 
 const COLOR_VALUES = colors.map(color => color.value)
 
@@ -329,6 +339,13 @@ const lastOpaqueProfileBgColor = ref(
 const profileTextColor = ref(props.profile.textColor)
 
 const profileIcon = ref(deepCopy(props.profile.icon ?? null))
+let automaticProfileIcon = props.isNew
+
+watch(profileName, (name) => {
+  if (automaticProfileIcon) {
+    profileIcon.value = { ...(name.trim() ? INITIAL_PROFILE_ICON : DEFAULT_PROFILE_ICON) }
+  }
+})
 
 const imageInput = useTemplateRef('imageInput')
 const cropCanvas = useTemplateRef('cropCanvas')
@@ -379,20 +396,21 @@ onBeforeUnmount(() => {
 // the color input can't handle a CSS variable, so it needs the resolved value,
 // which has to be refreshed whenever the theme changes the variable underneath it
 const themeColor = ref(resolveThemeColor())
-
-watch([() => store.getters.getMainColor, () => store.getters.getBaseTheme], async () => {
-  await nextTick()
+const themeColorObserver = new MutationObserver(() => {
   themeColor.value = resolveThemeColor()
 })
+
+onMounted(() => {
+  themeColorObserver.observe(document.body, { attributes: true, attributeFilter: ['class', 'style'] })
+  themeColor.value = resolveThemeColor()
+})
+
+onBeforeUnmount(() => themeColorObserver.disconnect())
 
 const customColorPickerValue = computed(() => {
   if (profileBgColor.value === THEME_BG_COLOR) return themeColor.value
 
   return profileBgColor.value === 'transparent' ? '#000000' : profileBgColor.value
-})
-
-const profileBgColorLabel = computed(() => {
-  return profileBgColor.value === THEME_BG_COLOR ? t('Profile.Theme Color') : profileBgColor.value
 })
 
 function isSemanticProfileBgColor(color) {
@@ -476,11 +494,13 @@ function saveProfile() {
 }
 
 function selectBuiltinIcon(icon) {
+  automaticProfileIcon = false
   profileIcon.value = { type: 'icon', value: icon }
   restoreOpaqueProfileColor()
 }
 
 function selectEmoji(emoji) {
+  automaticProfileIcon = false
   profileIcon.value = { type: 'emoji', value: emoji }
   restoreOpaqueProfileColor()
 }
@@ -496,7 +516,12 @@ function selectCustomEmoji(event) {
   }
 
   event.target.value = candidate
-  profileIcon.value = candidate ? { type: 'emoji', value: candidate } : { ...INITIAL_PROFILE_ICON }
+  if (!candidate) {
+    clearProfileIcon()
+    return
+  }
+  automaticProfileIcon = false
+  profileIcon.value = { type: 'emoji', value: candidate }
   restoreOpaqueProfileColor()
 }
 
@@ -649,6 +674,7 @@ function applyCrop() {
     canvas.height
   )
 
+  automaticProfileIcon = false
   profileIcon.value = {
     type: 'image',
     value: canvas.toDataURL('image/webp', 0.9)
@@ -669,7 +695,8 @@ function closeCropEditor() {
 }
 
 function clearProfileIcon() {
-  profileIcon.value = { ...INITIAL_PROFILE_ICON }
+  automaticProfileIcon = true
+  profileIcon.value = { ...(profileName.value.trim() ? INITIAL_PROFILE_ICON : DEFAULT_PROFILE_ICON) }
   restoreOpaqueProfileColor()
 }
 

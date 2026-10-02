@@ -1,6 +1,9 @@
 <template>
   <div class="profileSettingsContent">
-    <FtCard class="card">
+    <FtCard
+      v-if="!isNewProfileOpen"
+      class="card"
+    >
       <h2>{{ $t("Profile.Profile Manager") }}</h2>
       <FtFlexBox
         class="profileList"
@@ -16,21 +19,48 @@
           :class="{ openedProfile: openSettingsProfile?._id === profile._id }"
           @click="openSettingsForProfileWithId(profile._id)"
         />
-      </FtFlexBox>
-      <FtFlexBox
-        v-if="!isNewProfileOpen"
-      >
-        <FtButton
-          :label="$t('Profile.Create New Profile')"
-          :icon="['fas', 'user-plus']"
+        <button
+          type="button"
+          class="createProfileOption"
           @click="openSettingsForNewProfile"
-        />
+        >
+          <FtIcon
+            class="createProfileIcon"
+            :icon="['fas', 'user-plus']"
+            aria-hidden="true"
+          />
+          <span class="createProfileLabel">{{ $t('Profile.Create New Profile') }}</span>
+        </button>
       </FtFlexBox>
     </FtCard>
+    <h2
+      v-else
+      class="createProfileHeading"
+    >
+      <FtIcon
+        :icon="['fas', 'user-plus']"
+        aria-hidden="true"
+      />
+      {{ $t('Profile.Create New Profile') }}
+    </h2>
     <div
       v-if="openSettingsProfile"
       :key="openSettingsProfileId"
     >
+      <FtProfileEdit
+        :profile="openSettingsProfile"
+        :is-new="isNewProfileOpen"
+        :is-main-profile="isMainProfile"
+        @new-profile-created="closeProfileCreation"
+        @cancel-creation="closeProfileCreation"
+        @profile-deleted="handleProfileDeleted"
+      />
+      <h2
+        v-if="!isNewProfileOpen"
+        class="profileSubscriptionsHeading"
+      >
+        {{ $t('Profile.Manage Profile Subscriptions') }}
+      </h2>
       <FtProfileChannelList
         v-if="!isNewProfileOpen"
         :profile="openSettingsProfile"
@@ -40,24 +70,17 @@
         v-if="!isNewProfileOpen && !isMainProfile"
         :profile="openSettingsProfile"
       />
-      <FtProfileEdit
-        :profile="openSettingsProfile"
-        :is-new="isNewProfileOpen"
-        :is-main-profile="isMainProfile"
-        @new-profile-created="handleNewProfileCreated"
-        @profile-deleted="handleProfileDeleted"
-      />
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed, ref, shallowRef, watch } from 'vue'
+import { FtIcon } from '@opentubex/icons'
 
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import FtProfileBubble from '../../components/FtProfileBubble/FtProfileBubble.vue'
-import FtButton from '../../components/FtButton/FtButton.vue'
 import FtProfileEdit from '../../components/FtProfileEdit/FtProfileEdit.vue'
 import FtProfileChannelList from '../../components/FtProfileChannelList/FtProfileChannelList.vue'
 import FtProfileFilterChannelsList from '../../components/FtProfileFilterChannelsList/FtProfileFilterChannelsList.vue'
@@ -65,6 +88,7 @@ import FtProfileFilterChannelsList from '../../components/FtProfileFilterChannel
 import store from '../../store/index'
 
 import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../../constants'
+import { DEFAULT_PROFILE_ICON } from '../../helpers/profileIcons'
 
 /**
  * @typedef {object} Profile
@@ -107,6 +131,7 @@ function openSettingsForNewProfile() {
     name: '',
     bgColor: THEME_BG_COLOR,
     textColor: THEME_TEXT_COLOR,
+    icon: { ...DEFAULT_PROFILE_ICON },
     subscriptions: []
   }
 
@@ -137,7 +162,7 @@ function getProfileById(profileId) {
   return store.getters.profileById(profileId)
 }
 
-function handleNewProfileCreated() {
+function closeProfileCreation() {
   isNewProfileOpen.value = false
   openSettingsProfile.value = null
   openSettingsProfileId.value = ''

@@ -271,9 +271,9 @@ Settings:
     Swipe to refresh: 下拉重新整理
     Blur Thumbnails: 模糊縮圖
     Navigation:
-      Always Show Navigation Bar: 永遠顯示導覽列
-      Compact Tab Labels: 精簡分頁標籤
-      Show Active Subscriptions: 顯示活躍訂閱
+      Always Show Navigation Bar: 導覽列位於底部時一律顯示
+      Compact Tab Labels: 導覽列位於底部時使用精簡配置
+      Show Active Subscriptions: 在側邊欄顯示活躍訂閱
       Navigation: 導覽
       Customize Navigation: 自訂導覽
       Add Item: 新增項目
@@ -1120,6 +1120,7 @@ About:
   Matrix: Matrix
   Email: 電子郵件
 Profile:
+  Manage Profile Subscriptions: 管理個人資料的訂閱
   Icon Names:
     Person: 人物
     People: 人群

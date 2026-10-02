@@ -271,9 +271,9 @@ Settings:
     Swipe to refresh: Värskendamiseks viipa
     Blur Thumbnails: Hägusta pisipildid
     Navigation:
-      Always Show Navigation Bar: Kuva alati navigeerimisriba
-      Compact Tab Labels: Kompaktsed vahekaardisildid
-      Show Active Subscriptions: Näita aktiivseid tellimusi
+      Always Show Navigation Bar: Kuva navigeerimisriba alati, kui see on allosas
+      Compact Tab Labels: Kompaktne navigeerimisriba, kui see on allosas
+      Show Active Subscriptions: Näita aktiivseid tellimusi külgribal
       Navigation: Navigeerimine
       Customize Navigation: Kohanda navigeerimist
       Add Item: Lisa üksus
@@ -1120,6 +1120,7 @@ About:
   Matrix: Matrix
   Email: E-post
 Profile:
+  Manage Profile Subscriptions: Halda profiili tellimusi
   Icon Names:
     Person: Inimene
     People: Inimesed

@@ -275,9 +275,9 @@ Settings:
     Swipe to refresh: Vegen om te vernieuwen
     Blur Thumbnails: Miniaturen vervagen
     Navigation:
-      Always Show Navigation Bar: Navigatiebalk altijd weergeven
-      Compact Tab Labels: Compacte tablabels
-      Show Active Subscriptions: Actieve abonnementen tonen
+      Always Show Navigation Bar: Navigatiebalk altijd tonen wanneer deze onderaan staat
+      Compact Tab Labels: Compacte navigatiebalk wanneer deze onderaan staat
+      Show Active Subscriptions: Actieve abonnementen in de zijbalk tonen
       Navigation: Navigatie
       Customize Navigation: Navigatie aanpassen
       Add Item: Item toevoegen
@@ -1154,6 +1154,7 @@ About:
   Please read the {roomRulesLink}: Lees de {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX wordt mogelijk gemaakt door {creditsPageLink}
 Profile:
+  Manage Profile Subscriptions: Profielabonnementen beheren
   Icon Names:
     Person: Persoon
     People: Personen

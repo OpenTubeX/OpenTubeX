@@ -275,9 +275,9 @@ Settings:
     Swipe to refresh: اسحب للتحديث
     Blur Thumbnails: تمويه الصور المصغرة
     Navigation:
-      Always Show Navigation Bar: إظهار شريط التنقل دائمًا
-      Compact Tab Labels: تسميات علامات تبويب مختصرة
-      Show Active Subscriptions: إظهار الاشتراكات النشطة
+      Always Show Navigation Bar: إظهار شريط التنقل دائمًا عندما يكون في الأسفل
+      Compact Tab Labels: شريط تنقل مضغوط عندما يكون في الأسفل
+      Show Active Subscriptions: إظهار الاشتراكات النشطة في الشريط الجانبي
       Navigation: التنقل
       Customize Navigation: تخصيص التنقل
       Add Item: إضافة عنصر
@@ -1146,6 +1146,7 @@ About:
   Matrix: مصفوفة
   Email: بريد إلكتروني
 Profile:
+  Manage Profile Subscriptions: إدارة اشتراكات الملف الشخصي
   Icon Names:
     Person: شخص
     People: أشخاص

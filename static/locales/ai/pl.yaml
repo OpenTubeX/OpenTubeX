@@ -115,9 +115,9 @@ Settings:
     Swipe to refresh: Przeciągnij, aby odświeżyć
     Blur Thumbnails: Rozmyj miniatury
     Navigation:
-      Always Show Navigation Bar: Zawsze pokazuj pasek nawigacji
-      Compact Tab Labels: Kompaktowe etykiety kart
-      Show Active Subscriptions: Pokaż aktywne subskrypcje
+      Always Show Navigation Bar: Zawsze pokazuj pasek nawigacji, gdy jest na dole
+      Compact Tab Labels: Kompaktowy pasek nawigacji, gdy jest na dole
+      Show Active Subscriptions: Pokaż aktywne subskrypcje na pasku bocznym
       Navigation: Nawigacja
       Customize Navigation: Dostosuj nawigację
       Add Item: Dodaj element
@@ -593,6 +593,7 @@ About:
   Fluxer: Dołącz do naszej społeczności na Fluxerze
   Matrix: Matrix
 Profile:
+  Manage Profile Subscriptions: Zarządzaj subskrypcjami profilu
   Icon Names:
     Person: Osoba
     People: Ludzie

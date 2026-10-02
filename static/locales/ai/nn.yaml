@@ -285,9 +285,9 @@ Settings:
     Swipe to refresh: Sveip for å oppdatere
     Blur Thumbnails: Gjer miniatyrbilete uskarpe
     Navigation:
-      Always Show Navigation Bar: Vis alltid navigasjonslinja
-      Compact Tab Labels: Kompakte faneetikettar
-      Show Active Subscriptions: Vis aktive abonnement
+      Always Show Navigation Bar: Vis alltid navigasjonslinja når ho er nedst
+      Compact Tab Labels: Kompakt navigasjonslinje når ho er nedst
+      Show Active Subscriptions: Vis aktive abonnement i sidepanelet
       Navigation: Navigasjon
       Customize Navigation: Tilpass navigasjon
       Add Item: Legg til element
@@ -1300,6 +1300,7 @@ About:
   Please read the {roomRulesLink}: Les {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX er gjort mogleg av {creditsPageLink}
 Profile:
+  Manage Profile Subscriptions: Administrer abonnementa til profilen
   Icon Names:
     Person: Person
     People: Personar

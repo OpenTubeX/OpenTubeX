@@ -271,9 +271,9 @@ Settings:
     Swipe to refresh: Yenilemek için kaydır
     Blur Thumbnails: Küçük resimleri bulanıklaştır
     Navigation:
-      Always Show Navigation Bar: Gezinme çubuğunu her zaman göster
-      Compact Tab Labels: Kompakt sekme etiketleri
-      Show Active Subscriptions: Etkin abonelikleri göster
+      Always Show Navigation Bar: Gezinme çubuğu alttayken her zaman göster
+      Compact Tab Labels: Gezinme çubuğu alttayken kompakt göster
+      Show Active Subscriptions: Etkin abonelikleri kenar çubuğunda göster
       Navigation: Gezinme
       Customize Navigation: Gezinmeyi özelleştir
       Add Item: Öğe ekle
@@ -1120,6 +1120,7 @@ About:
   Matrix: Matrix
   Email: E-posta
 Profile:
+  Manage Profile Subscriptions: Profil aboneliklerini yönet
   Icon Names:
     Person: Kişi
     People: Kişiler

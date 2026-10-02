@@ -48,11 +48,15 @@
   display: flex;
   block-size: 100%;
   inline-size: 100%;
+}
 
-  @container top-nav (width >= 961px) {
-    display: grid;
-    grid-template-columns: 1fr 440px 1fr;
-  }
+.topNav:not(.phoneLayout) .topNavInner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) min(440px, max(0px, calc(100% - 2 * var(--header-side-space)))) minmax(0, 1fr);
+}
+
+.phoneLayout .logoText {
+  display: none;
 }
 
 /* Only the top tab bar sits above the navigation. */
@@ -226,7 +230,7 @@
 
   &.profiles {
     justify-content: flex-end;
-    margin-inline-end: calc(var(--scrollbar-track-width) + 6px);
+    margin-inline: auto calc(var(--scrollbar-track-width) + 6px);
   }
 
   .navSearchButton {
@@ -297,8 +301,22 @@
   }
 }
 
+.topNav:not(.phoneLayout) .side {
+  inline-size: max-content;
+  justify-self: start;
+
+  &.profiles {
+    justify-self: end;
+  }
+}
+
+.compactLogo:not(.phoneLayout) .logoText {
+  display: none;
+}
+
 .middle {
   flex: 1;
+  min-inline-size: 0;
   max-inline-size: 440px;
 
   .searchContainer {
@@ -309,6 +327,7 @@
 
     .searchInput {
       flex: 1;
+      min-inline-size: 0;
 
       :deep(.ft-input) {
         padding-inline-end: 84px;

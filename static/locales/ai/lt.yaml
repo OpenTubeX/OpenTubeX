@@ -384,9 +384,9 @@ Settings:
     Swipe to refresh: Perbraukite, kad atnaujintumėte
     Blur Thumbnails: Sulieti miniatiūras
     Navigation:
-      Always Show Navigation Bar: Visada rodyti naršymo juostą
-      Compact Tab Labels: Kompaktiškos skirtukų etiketės
-      Show Active Subscriptions: Rodyti aktyvias prenumeratas
+      Always Show Navigation Bar: Visada rodyti naršymo juostą, kai ji yra apačioje
+      Compact Tab Labels: Kompaktiška naršymo juosta, kai ji yra apačioje
+      Show Active Subscriptions: Rodyti aktyvias prenumeratas šoninėje juostoje
       Navigation: Naršymas
       Customize Navigation: Tinkinti naršymą
       Add Item: Pridėti elementą
@@ -1396,6 +1396,7 @@ About:
   Please read the {roomRulesLink}: Susipažinkite su {roomRulesLink}
   OpenTubeX is made possible by {creditsPageLink}: OpenTubeX sukurti padėjo {creditsPageLink}
 Profile:
+  Manage Profile Subscriptions: Tvarkyti profilio prenumeratas
   Icon Names:
     Person: Asmuo
     People: Žmonės

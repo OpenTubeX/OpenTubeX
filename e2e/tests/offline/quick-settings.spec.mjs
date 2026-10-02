@@ -30,6 +30,87 @@ const ADDITIONAL_QUICK_SETTINGS = [
   ['enableCommentTranslations', 'Enable comment translations', 'Language and region'],
 ]
 
+for (const uiScale of [100, 125]) {
+  test.describe(`compact quick settings at ${uiScale}% UI scale`, () => {
+    test.use({ seed: { settings: { uiScale } } })
+
+    async function resize(app, page, width) {
+      await app.electronApp.evaluate(({ BrowserWindow }, size) => {
+        const window = BrowserWindow.getAllWindows()[0]
+        window.setBounds({ ...window.getBounds(), ...size })
+      }, { width: Math.round(width * uiScale / 100), height: 820 * uiScale / 100 })
+      await expect.poll(() => page.evaluate(() => window.innerWidth)).toBe(width)
+    }
+
+    test('uses a full-screen sheet when wide vertical tabs make the header compact', async ({ app, page }) => {
+      await resize(app, page, 800)
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setTabBarPosition', 'right')
+        store.commit('setVerticalTabBarWidth', 400)
+      })
+      await expect(page.locator('.topNav')).toHaveClass(/phoneLayout/)
+      await page.locator('.profileTrigger').click()
+      const sheet = page.getByRole('dialog', { name: 'Quick settings' })
+      await expect(sheet).toHaveClass(/mobileSheetEnabled/)
+      await sheet.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
+      const bounds = await sheet.boundingBox()
+      expect(Math.abs(bounds.x)).toBeLessThan(1)
+      expect(Math.abs(bounds.y)).toBeLessThan(1)
+      expect(Math.abs(bounds.width - 800)).toBeLessThan(1)
+      expect(Math.abs(bounds.height - 820)).toBeLessThan(1)
+    })
+
+    test('aligns header actions to the right at compact widths', async ({ app, page }) => {
+      for (const width of [600, 601, 640, 680, 681, 960, 961]) {
+        await resize(app, page, width)
+        const header = page.locator('.topNav')
+        const trigger = header.locator('.profileTrigger')
+        const headerBounds = await header.boundingBox()
+        const triggerBounds = await trigger.boundingBox()
+        expect(headerBounds.x + headerBounds.width - triggerBounds.x - triggerBounds.width,
+          'header actions stay at the right edge').toBeLessThan(30)
+      }
+    })
+
+    test('fills the viewport with quick settings throughout the compact header layout', async ({ app, page }, testInfo) => {
+      for (const width of [600, 601, 640, 680, 681]) {
+        await resize(app, page, width)
+        await page.locator('.profileTrigger').click()
+        const quick = page.locator('.quickSettingsMenu')
+        await expect(quick).toBeVisible()
+        if (width <= 680) {
+          const sheet = page.getByRole('dialog', { name: 'Quick settings' })
+          await expect(sheet).toHaveClass(/mobileSheetEnabled/)
+          await sheet.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
+          const bounds = await sheet.boundingBox()
+          expect(Math.abs(bounds.x)).toBeLessThan(1)
+          expect(Math.abs(bounds.y)).toBeLessThan(1)
+          expect(Math.abs(bounds.width - width)).toBeLessThan(1)
+          expect(Math.abs(bounds.height - 820)).toBeLessThan(1)
+          if (width === 640) {
+            // Electron captures the whole window at non-100% UI scales.
+            const screenshot = await app.electronApp.evaluate(async ({ BrowserWindow }) => (
+              (await BrowserWindow.getAllWindows()[0].webContents.capturePage()).toPNG().toString('base64')
+            ))
+            await testInfo.attach('fullscreen quick settings at the previously broken width', {
+              body: Buffer.from(screenshot, 'base64'), contentType: 'image/png'
+            })
+          }
+          await sheet.getByRole('button', { name: 'Close', exact: true }).click()
+        } else {
+          await expect(quick).not.toHaveClass(/phoneQuickSettings/)
+          const bounds = await quick.boundingBox()
+          expect(bounds.x).toBeGreaterThanOrEqual(0)
+          expect(bounds.x + bounds.width).toBeLessThanOrEqual(width)
+          await quick.press('Escape')
+        }
+        await expect(quick).toHaveCount(0)
+      }
+    })
+  })
+}
+
 test.describe('quick system themes', () => {
   test.use({ seed: { settings: { quickSettings: ['baseTheme'], baseTheme: 'system', currentLocale: 'en-US', uiScale: 125 } } })
 
