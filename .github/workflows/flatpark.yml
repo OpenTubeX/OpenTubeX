@@ -21,7 +21,7 @@ jobs:
   prepare:
     if: github.repository == 'OpenTubeX/OpenTubeX'
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 90
 
     outputs:
       needed: ${{ steps.duplicate.outputs.needed }}
@@ -141,6 +141,16 @@ jobs:
         path: opentubex
         persist-credentials: false
 
+    - name: Check out download readiness helper
+      if: steps.duplicate.outputs.needed == 'true'
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        ref: ${{ github.workflow_sha }}
+        path: workflow-automation
+        sparse-checkout: _scripts/wait-for-release-asset.sh
+        sparse-checkout-cone-mode: false
+        persist-credentials: false
+
     - name: Resolve official Flatpak packaging revision
       if: steps.duplicate.outputs.needed == 'true'
       id: flatpak
@@ -222,6 +232,11 @@ jobs:
               }
             ]
           }' "$RELEASE_JSON" > "$resolver_json"
+
+        for architecture in x64 arm64; do
+          bash workflow-automation/_scripts/wait-for-release-asset.sh \
+            "https://github.com/${GITHUB_REPOSITORY}/releases/download/${RELEASE_TAG}/opentubex-${VERSION}-linux-${architecture}-portable.zip"
+        done
 
         node flatpark/scripts/update-pins.mjs "$manifest" "$metainfo" < "$resolver_json"
         node opentubex/_scripts/syncFlatpakFinishArgs.mjs \
