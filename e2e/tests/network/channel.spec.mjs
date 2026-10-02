@@ -91,6 +91,19 @@ test.describe('channel page', () => {
     await aboutTab.hover()
     expect((await aboutTab.boundingBox()).width).toBe(widthBeforeHover)
 
+    const selectedTab = page.locator('.channelDetails .selectedTab')
+    const selectedIndicatorColor = await selectedTab.evaluate(element => getComputedStyle(element, '::before').backgroundColor)
+    const unselectedIndicatorColor = await aboutTab.evaluate(element => getComputedStyle(element, '::before').backgroundColor)
+    expect(selectedIndicatorColor).not.toBe(unselectedIndicatorColor)
+    await page.keyboard.press('Tab')
+    await selectedTab.focus()
+    await expect.poll(() => selectedTab.evaluate(element => element.matches(':focus-visible'))).toBe(true)
+    await expect.poll(() => selectedTab.evaluate(element => getComputedStyle(element, '::before').backgroundColor)).toBe(selectedIndicatorColor)
+    await page.mouse.move(0, 0)
+    await aboutTab.focus()
+    await expect.poll(() => aboutTab.evaluate(element => element.matches(':focus-visible'))).toBe(true)
+    await expect.poll(() => aboutTab.evaluate(element => getComputedStyle(element, '::before').backgroundColor)).toBe(unselectedIndicatorColor)
+
     // Channel tab changes must update the route and title without creating a
     // new history entry for every tab selection (796650405, 912e5ea6e).
     await expect(page.locator(sel.activeTab)).toContainText('Blender')
