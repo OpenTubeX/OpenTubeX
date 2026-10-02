@@ -4737,7 +4737,7 @@ async function enableCapacitorIntegrations() {
   const openUrl = url => {
     if (!url) return
     // iOS URL handling can remove the embedded protocol's colon.
-    const target = url.replace(/^opentubex:(?:\/\/)?/, '').replace(/^(https?)\/\//, '$1://')
+    const target = url.replace(/^opentubex(?:-nightly)?:(?:\/\/)?/, '').replace(/^(https?)\/\//, '$1://')
     return handleYoutubeLink(target)
   }
   const backButtonHandle = Capacitor.getPlatform() === 'android'
