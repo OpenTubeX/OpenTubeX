@@ -70,6 +70,7 @@ for (const uiScale of [100, 95]) {
           syncServerToken: 'e2e-select-indicators',
           enableScreenshot: true,
           screenshotMode: 'clipboard',
+          defaultVideoFormat: 'legacy',
           landingPage: 'history'
         }
       }
@@ -79,7 +80,7 @@ for (const uiScale of [100, 95]) {
       await page.emulateMedia({ reducedMotion: 'reduce' })
       for (const width of [1200, 400]) {
         await setWindowSize(app, page, { width, height: width === 1200 ? 800 : 900 })
-        for (const [category, name] of [['general', 'Default Landing Page'], ['general', 'On Startup'], ['player', 'Screenshot Mode']]) {
+        for (const [category, name] of [['general', 'Default Landing Page'], ['general', 'On Startup'], ['player', 'Screenshot Mode'], ['player', 'Default Video Format'], ['player', 'Default Quality']]) {
           if (await page.locator('.settingsBackButton').isVisible()) {
             await page.locator('.settingsBackButton').click()
           }
@@ -96,16 +97,20 @@ for (const uiScale of [100, 95]) {
               const field = element.querySelector('.select-text').getBoundingClientRect()
               const icons = element.querySelector('.selectIndicators').getBoundingClientRect()
               const viewport = element.closest('.settingsContent').getBoundingClientRect()
+              const bounds = element.getBoundingClientRect()
               const rtl = getComputedStyle(element).direction === 'rtl'
               return {
                 gap: rtl ? field.left - icons.right : icons.left - field.right,
                 centers: Math.abs(field.top + field.height / 2 - icons.top - icons.height / 2),
-                overflow: Math.max(viewport.left - icons.left, icons.right - viewport.right)
+                overflow: Math.max(viewport.left - icons.left, icons.right - viewport.right),
+                rootOverflow: Math.max(bounds.left - icons.left, icons.right - bounds.right)
               }
             })
             expect(geometry.gap).toBeGreaterThanOrEqual(7)
+            expect(geometry.gap).toBeLessThanOrEqual(9)
             expect(geometry.centers).toBeLessThanOrEqual(1)
             expect(geometry.overflow).toBeLessThanOrEqual(1)
+            expect(geometry.rootOverflow).toBeLessThanOrEqual(1)
           }
           await page.evaluate(() => { document.body.dir = 'ltr' })
           if (name === 'Screenshot Mode') {

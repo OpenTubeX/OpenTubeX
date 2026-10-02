@@ -31,19 +31,6 @@
     margin-inline-end: 0;
   }
 
-  .playerSelectGrid :deep(.select-text),
-  .playerSelectGrid :deep(.nativeSelect),
-  .playerSelectGrid :deep(.select-bar) {
-    inline-size: calc(100% - 70px);
-  }
-
-  .playerSelectGrid :deep(.iconSelect) {
-    inset-inline-end: 80px;
-  }
-
-  .playerSelectGrid :deep(.selectIndicators) {
-    inset-inline: calc(100% - 54px) auto;
-  }
 }
 
 @media only screen and (width <= 680px) {
