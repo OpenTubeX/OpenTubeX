@@ -2,12 +2,14 @@ package org.opentubex.app;
 
 import android.app.Activity;
 import android.app.PictureInPictureParams;
+import android.app.UiModeManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.content.res.Configuration;
 import android.hardware.input.InputManager;
+import android.graphics.Color;
 import android.os.Build;
 import android.util.Rational;
 import android.view.InputDevice;
@@ -114,15 +116,17 @@ public class AndroidUiPlugin extends Plugin {
             return;
         }
         getActivity().runOnUiThread(() -> {
-            android.view.Window window = getActivity().getWindow();
-            // Capacitor pads the WebView parent on older WebViews. Its native
-            // inset background must follow the same theme as the shared UI.
-            // SystemBars reapplies the OS theme background on style/rotation
-            // changes. A tint preserves the app theme through those updates.
-            window.getDecorView().setBackgroundTintList(android.content.res.ColorStateList.valueOf(color));
-            window.getDecorView().setBackgroundColor(color);
-            window.setStatusBarColor(color);
-            window.setNavigationBarColor(color);
+            boolean followSystem = Boolean.TRUE.equals(call.getBoolean("followSystem"));
+            StartupBackground.save(getContext(), color, followSystem);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                // Android creates the splash window before onCreate can read our cache.
+                // Persist the app's brightness without changing the phone's night mode.
+                double brightness = 0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 * Color.blue(color);
+                getContext().getSystemService(UiModeManager.class).setApplicationNightMode(followSystem
+                    ? UiModeManager.MODE_NIGHT_AUTO
+                    : brightness > 127.5 ? UiModeManager.MODE_NIGHT_NO : UiModeManager.MODE_NIGHT_YES);
+            }
+            StartupBackground.apply(getActivity().getWindow(), color);
             call.resolve();
         });
     }

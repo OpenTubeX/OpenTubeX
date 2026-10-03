@@ -17,6 +17,8 @@ public final class SubscriptionRefreshWebView extends CapacitorWebView {
 
     public SubscriptionRefreshWebView(Context context, AttributeSet attributes) {
         super(context, attributes);
+        // Let the themed native surface show through the blank startup page.
+        setBackgroundColor(android.graphics.Color.TRANSPARENT);
         AndroidProxy.protectWebView(this);
         activeView = new WeakReference<>(this);
     }
