@@ -301,6 +301,72 @@ for (const uiScale of [100, 95]) {
 }
 
 for (const uiScale of [100, 95]) {
+  test.describe(`quick settings pointer spacing at ${uiScale}% scale`, () => {
+    test.use({
+      seed: {
+        settings: {
+          currentLocale: 'en-US',
+          uiScale,
+          quickSettings: ['uiScale', 'thumbnailSize', 'uiRoundness', 'defaultPlayback', 'playNextVideo', 'enableSubtitlesByDefault'],
+        }
+      }
+    })
+
+    test('keeps mouse toggles compact and slider inputs below their captions in every menu layout', async ({ app, page }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      const touch = await page.context().newCDPSession(page)
+      for (const { width, height } of [{ width: 1280, height: 900 }, { width: 480, height: 900 }, { width: 1280, height: 550 }]) {
+        await app.electronApp.evaluate(({ BrowserWindow }, bounds) => {
+          BrowserWindow.getAllWindows()[0].setBounds({ x: 0, y: 0, ...bounds })
+        }, { width: Math.round(width * uiScale / 100), height: Math.round(height * uiScale / 100) })
+        await page.locator('.profileTrigger').click()
+        const menu = page.locator('.quickSettingsMenu')
+        await expect(menu).toBeVisible()
+        if (width < 680 || height < 600) await expect(menu).toHaveClass(/phoneQuickSettings/)
+        else await expect(menu).not.toHaveClass(/phoneQuickSettings/)
+        await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
+        for (const slider of await menu.locator('.pure-material-slider').all()) {
+          const bounds = await slider.evaluate(element => ({
+            caption: element.querySelector('.labelRow').getBoundingClientRect().toJSON(),
+            input: element.querySelector('.input').getBoundingClientRect().toJSON(),
+          }))
+          expect.soft(bounds.input.top, `${width}×${height}: input does not overlap caption`).toBeGreaterThanOrEqual(bounds.caption.bottom - 0.1)
+        }
+        const tracks = await menu.locator('.switch-label').evaluateAll(labels => labels.map(label => {
+          const bounds = label.getBoundingClientRect()
+          const height = Number.parseFloat(getComputedStyle(label, '::before').blockSize)
+          return { top: bounds.top + (bounds.height - height) / 2, bottom: bounds.top + (bounds.height + height) / 2 }
+        }))
+        expect(tracks).toHaveLength(2)
+        expect.soft(tracks[1].top - tracks[0].bottom, `${width}×${height}: visible toggle gap`).toBeCloseTo(16, 1)
+        const roundness = menu.locator('[data-setting-id="uiRoundness"]')
+        await roundness.scrollIntoViewIfNeeded()
+        const caption = await roundness.locator('.labelRow').boundingBox()
+        const input = roundness.getByRole('slider')
+        const before = await input.inputValue()
+        await page.mouse.click(caption.x + caption.width * 0.75, caption.y + caption.height - 1)
+        await expect.soft(input, 'clicking the caption does not change the slider').toHaveValue(before, { timeout: 1000 })
+        await input.press('ArrowRight')
+        await expect(input).toHaveValue(String(Number(before) + 5))
+        await input.press('ArrowLeft')
+
+        await touch.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 })
+        await expect.poll(() => page.evaluate(() => matchMedia('(any-pointer: coarse)').matches)).toBe(true)
+        for (const label of await menu.locator('.switch-label').all()) {
+          expect((await label.boundingBox()).height, 'coarse-pointer toggle target stays large').toBeGreaterThanOrEqual(47.9)
+        }
+        await touch.send('Emulation.setTouchEmulationEnabled', { enabled: false })
+        if (width < 680 || height < 600) {
+          await page.getByRole('dialog', { name: 'Quick settings' }).getByRole('button', { name: 'Close', exact: true }).click()
+        } else {
+          await menu.press('Escape')
+        }
+        await expect(menu).toHaveCount(0)
+      }
+      await touch.detach()
+    })
+  })
+
   test.describe(`quick settings select spacing at ${uiScale}% scale`, () => {
     test.use({
       seed: {
@@ -393,11 +459,7 @@ for (const uiScale of [100, 95]) {
         await expect(quality.getByRole('combobox')).toHaveText('720p')
         await expect(menu).toBeVisible()
         const label = menu.locator('.switch-label')
-        if (width > 680) {
-          expect((await label.boundingBox()).height).toBeCloseTo(24, 1)
-        } else {
-          expect((await label.boundingBox()).height).toBeGreaterThanOrEqual(47.9)
-        }
+        expect((await label.boundingBox()).height).toBeCloseTo(24, 1)
         if (width > 680) {
           await menu.press('Escape')
         } else {

@@ -293,18 +293,20 @@
 .menuSection :deep(.pure-material-slider) {
   margin-inline: 0;
   padding: 0;
+
+  /* Leave clearance for native input hit testing at fractional zoom. */
+  row-gap: 2px;
 }
 
 .menuSection :deep(.sliderControl) {
-  block-size: var(--slider-handle-height);
+  --quick-settings-slider-input-height: 36px;
+
+  /* Count the visible handle while keeping the input below its caption. */
+  margin-block-end: max(-8px, calc((var(--slider-handle-height) - var(--quick-settings-slider-input-height)) / 2));
 }
 
-/* Preserve the larger input hit area without adding empty space to the row. */
 .menuSection :deep(.sliderControl .input) {
-  position: absolute;
-  inset-block-start: 50%;
-  inset-inline-start: 0;
-  transform: translateY(-50%);
+  block-size: var(--quick-settings-slider-input-height);
 }
 
 /* Align the visible track, which has a built-in six-pixel inset. */
@@ -321,11 +323,8 @@
   display: grid;
 }
 
-.sliderGroup :deep(.input) {
-  block-size: 24px;
-}
-
 .sliderGroup :deep(.sliderControl) {
+  --quick-settings-slider-input-height: 24px;
   --slider-track-height: 8px;
   --slider-handle-height: 20px;
   --slider-handle-gap: 3px;
@@ -337,15 +336,15 @@
     --quick-settings-label-overhang: 8px;
   }
 
+  .menuSection :deep(.sliderControl) {
+    --quick-settings-slider-input-height: 48px;
+  }
+
   .sliderGroup :deep(.sliderControl) {
     --slider-track-height: 16px;
     --slider-handle-height: 44px;
     --slider-handle-gap: 6px;
     --slider-stop-size: 4px;
-  }
-
-  .sliderGroup :deep(.input) {
-    block-size: 48px;
   }
 }
 
@@ -353,8 +352,12 @@
   padding-block: 6px;
 }
 
-/* Keep touch targets on hybrid devices with both a mouse and touchscreen. */
-@media (any-pointer: fine) and (not (any-pointer: coarse)) and (width > 680px) {
+/* Compact mouse-only switches in both popup and full-screen layouts. */
+@media (any-pointer: fine) and (not (any-pointer: coarse)) {
+  .menuSection :deep(.switch-input) {
+    block-size: var(--switch-touch-height);
+  }
+
   .menuSection :deep(.switch-label) {
     min-block-size: var(--switch-track-height);
     padding-block: 0;
@@ -453,8 +456,12 @@
   block-size: max(var(--form-control-height), var(--phone-touch-target, 48px));
 }
 
-.phoneQuickSettings .sliderGroup :deep(.input) {
-  block-size: var(--phone-touch-target, 48px);
+.phoneQuickSettings :deep(.sliderControl) {
+  --quick-settings-slider-input-height: var(--phone-touch-target, 48px);
+  --slider-track-height: 16px;
+  --slider-handle-height: 44px;
+  --slider-handle-gap: 6px;
+  --slider-stop-size: 4px;
 }
 
 .phoneQuickHeaderActions {
