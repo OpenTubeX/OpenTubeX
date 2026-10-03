@@ -34,6 +34,13 @@ for (const { layout, width, height, uiScale, cpuThrottle = 1 } of [
       const player = page.locator('.ftVideoPlayer')
       const video = player.locator('video')
       await expect(player).not.toHaveClass(/presentationModeChanging/)
+      expect(await video.evaluate(element => getComputedStyle(element).transform)).toBe('none')
+      const fade = await player.locator('.shaka-controls-button-panel').evaluate(element => {
+        const style = getComputedStyle(element)
+        return { property: style.transitionProperty, duration: style.transitionDuration }
+      })
+      expect(fade.property).toContain('--ft-controls-fade')
+      expect(parseFloat(fade.duration)).toBeGreaterThan(0)
       if (cpuThrottle !== 1) {
         const session = await page.context().newCDPSession(page)
         await session.send('Emulation.setCPUThrottlingRate', { rate: cpuThrottle })
@@ -81,7 +88,12 @@ test('full-window docks preserve zoom, stacked panel controls and rapid toggles'
   await openMockedVideo(page)
   const player = page.locator('.ftVideoPlayer')
   const video = player.locator('video')
-  await player.locator('.full-window-button').click({ force: true })
+  const clickPlayerControl = async selector => {
+    await player.hover({ position: { x: 20, y: 20 } })
+    await expect(player.locator('.shaka-controls-container')).toHaveAttribute('shown', 'true')
+    await player.locator(selector).click()
+  }
+  await clickPlayerControl('.full-window-button')
   await expect(player).toHaveClass(/fullWindow/)
   await expect(player).not.toHaveClass(/presentationModeChanging/)
   const watch = await page.evaluateHandle(findWatchComponent)
@@ -128,7 +140,7 @@ test('full-window docks preserve zoom, stacked panel controls and rapid toggles'
     expect(samples.animationKeyframes.length).toBe(2)
     expect(await video.evaluate(element => element.style.transform)).toBe(zoomTransform)
 
-    await player.locator('.shaka-controls-button-panel .ft-chapters-button').click({ force: true })
+    await clickPlayerControl('.shaka-controls-button-panel .ft-chapters-button')
     const metadata = player.locator('.fullscreenMetadataOverlay.open')
     const chapters = player.locator('.chapterOverlay')
     await expect(chapters).toBeVisible()
@@ -185,7 +197,7 @@ test('full-window docks preserve zoom, stacked panel controls and rapid toggles'
     const reduced = await measureFullscreenDockToggle(watch, true)
     expect(reduced.animationKeyframes).toEqual([])
     expect(reduced.widths.length).toBe(2)
-    await player.locator('.full-window-button').click({ force: true })
+    await clickPlayerControl('.full-window-button')
     await expect(player).not.toHaveClass(/fullWindow/)
     await expect.poll(() => video.evaluate(element => element.getAnimations().length)).toBe(0)
   } finally {
