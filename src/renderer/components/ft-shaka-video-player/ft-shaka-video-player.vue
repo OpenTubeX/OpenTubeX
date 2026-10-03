@@ -151,7 +151,7 @@
         playsinline
         :autoplay="autoplayVideos || (!suppressInitialAutoplay && shortsPlayer && isActiveTab) ? true : null"
         :loop="shortsPlayer && loopShorts && !autoplayEnabled"
-        :poster="!audioPlayerMode && showPoster ? thumbnail : null"
+        :poster="!audioPlayerMode && showPoster ? posterThumbnail : null"
         @play="handlePlay"
         @playing="handlePlaying"
         @waiting="handleWaiting"
