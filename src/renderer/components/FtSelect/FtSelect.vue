@@ -148,6 +148,7 @@
           :aria-labelledby="`${id}-label`"
           :style="phoneLayout ? null : dropdownStyle"
           @pointerdown="handleDropdownPointerDown"
+          @mousedown="handleDropdownMouseDown"
           @keydown="handlePickerKeydown"
         >
           <template
@@ -688,6 +689,12 @@ function handleDropdownPointerDown() {
   setTimeout(() => {
     pointerDownInDropdown = false
   }, 0)
+}
+
+function handleDropdownMouseDown(event) {
+  // Desktop lists use aria-activedescendant on the button. Keep that focus
+  // when grabbing a scrollbar, including inside a popup that closes on blur.
+  if (!phoneLayout.value) event.preventDefault()
 }
 
 function removeDropdownListeners() {
