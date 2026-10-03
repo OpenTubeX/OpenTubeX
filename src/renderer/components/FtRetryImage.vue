@@ -1,9 +1,13 @@
 <template>
+  <!-- Keep a small box for lazy loading without expanding scroll overflow. -->
   <img
+    ref="image"
     v-bind="{ ...$attrs, ...parentScope }"
     :src="imageUrl"
     :alt="$attrs.alt ?? ''"
-    :style="hasLoaded ? null : { position: 'absolute', visibility: 'hidden', pointerEvents: 'none' }"
+    :style="hasLoaded ? null : {
+      position: 'absolute', visibility: 'hidden', pointerEvents: 'none', inlineSize: '1px', blockSize: '1px'
+    }"
     @error="retryImageLoad"
     @load="handleImageLoad"
   >
@@ -25,7 +29,7 @@
 </template>
 
 <script setup>
-import { computed, getCurrentInstance, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, getCurrentInstance, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { FtIcon } from '@opentubex/icons'
 import store from '../store/index'
 import { getVideoThumbnailSource, getVideoThumbnailFallbackUrl } from '../helpers/videoThumbnail.js'
@@ -54,6 +58,7 @@ const emit = defineEmits(['error', 'load'])
 
 const preferredSource = computed(() => getVideoThumbnailSource(props.src, store.getters.getThumbnailDataSaver))
 const imageUrl = ref(preferredSource.value)
+const image = useTemplateRef('image')
 const hasLoaded = ref(false)
 let currentSource = preferredSource.value
 let hasRetried = false
@@ -62,6 +67,15 @@ let retryTimeoutId
 let sourceVersion = 0
 
 watch(preferredSource, resetSource)
+// Cached images can already be usable before the browser delivers their load
+// event. Check after mounting and after patching src, before the next paint.
+watch([image, imageUrl], checkCachedImage, { flush: 'post' })
+
+function checkCachedImage() {
+  if (!hasLoaded.value && image.value?.complete && image.value.naturalWidth) {
+    image.value.dispatchEvent(new Event('load'))
+  }
+}
 
 function resetSource(src) {
   clearTimeout(retryTimeoutId)
@@ -83,6 +97,7 @@ function useSmallerThumbnail() {
 }
 
 function handleImageLoad(event) {
+  if (hasLoaded.value) return
   // YouTube can return a decodable 120x90 placeholder for missing resolutions.
   const image = event.target
   if (image.naturalWidth === 120 && image.naturalHeight === 90) {

@@ -5404,6 +5404,10 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   flex: none;
 }
 
+.ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow) > .countdownPoster img {
+  object-fit: cover;
+}
+
 .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar > :is(.player, .countdownPoster) {
   position: absolute !important;
   inset: 7.5px auto auto 10px !important;
@@ -5477,7 +5481,9 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
     container: shorts-landscape-player / inline-size;
   }
 
-  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow) > .player) {
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow) > .player),
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  :global(.capacitorTabs .ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow) > .countdownPoster img) {
     object-fit: contain !important;
   }
 
