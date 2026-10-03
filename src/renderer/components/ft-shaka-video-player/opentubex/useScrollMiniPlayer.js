@@ -92,6 +92,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   const scrollMiniPlayerRect = ref(getDefaultScrollMiniPlayerRect())
   const scrollMiniIsPaused = ref(true)
   const mobileMiniBarProgress = ref(0)
+  const mobileMiniBarHasSeekRange = ref(false)
   const scrollMiniVolume = ref(1)
   const scrollMiniPlayPauseVisible = ref(true)
   const scrollMiniVolumeExpanded = ref(false)
@@ -1060,7 +1061,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     const end = seekRange?.end ?? videoElement?.duration
     const duration = end - start
     const currentTime = videoElement?.currentTime
-    mobileMiniBarProgress.value = Number.isFinite(duration) && duration > 0 && Number.isFinite(currentTime)
+    mobileMiniBarHasSeekRange.value = Number.isFinite(duration) && duration > 0
+    mobileMiniBarProgress.value = mobileMiniBarHasSeekRange.value && Number.isFinite(currentTime)
       ? Math.min(1, Math.max(0, (currentTime - start) / duration))
       : 0
   }
@@ -1744,6 +1746,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   watch(() => props.videoId, () => {
     lastKnownInlinePlayerHeight = 0
     mobileMiniBarProgress.value = 0
+    mobileMiniBarHasSeekRange.value = false
 
     if (scrollMiniPlayerActive.value) {
       deactivateScrollMiniPlayer()
@@ -1814,6 +1817,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     mobileMiniBarCanDismiss,
     mobileMiniBarOverlayStyle,
     mobileMiniBarProgress,
+    mobileMiniBarHasSeekRange,
     updateMobileMiniBarProgress,
     beginScrollMiniPlayerDrag,
     moveScrollMiniPlayerDrag,

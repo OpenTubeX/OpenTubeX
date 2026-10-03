@@ -2,7 +2,26 @@ import { test, expect, setWindowSize } from '../../helpers/app.mjs'
 import { mobileMiniPlayerRegions, mobileMiniPlayerReturnPoint, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchHistoryEntry, watchViewHandle } from '../../helpers/watch.mjs'
 
-test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, enableVideoZoom: false, enableMobileFullscreenSwipe: false } } })
+test.use({
+  seed: {
+    settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, enableVideoZoom: false, enableMobileFullscreenSwipe: false },
+    playlists: [{
+      _id: 'mini-bar-playlist',
+      playlistName: 'Mini-player controls',
+      protected: false,
+      description: '',
+      createdAt: Date.now(),
+      lastUpdatedAt: Date.now(),
+      videos: ['mini-previous', watchHistoryEntry.videoId, 'mini-next'].map((videoId, index) => ({
+        ...watchHistoryEntry,
+        _id: videoId,
+        videoId,
+        timeAdded: Date.now() + index,
+        playlistItemId: `mini-item-${index}`
+      }))
+    }]
+  }
+})
 
 async function enableMobileTouch(app, page, phone = true) {
   await setWindowSize(app, page, { width: 480, height: 850 })
@@ -896,6 +915,16 @@ test('bottom bar progress follows a moving live seek window while paused', async
   await expect.poll(fill).toBeCloseTo(1 / 3, 2)
   expect(await video.evaluate(element => ({ paused: element.paused, currentTime: element.currentTime })))
     .toEqual({ paused: true, currentTime: 15 })
+  const controls = player.locator('.mobileMiniBarPlayback')
+  const rewind = controls.getByRole('button', { name: 'Rewind 10 seconds' })
+  const forward = controls.getByRole('button', { name: 'Forward 10 seconds' })
+  await page.evaluate(() => { window.miniBarSeekRange = { start: 15, end: 15 } })
+  await expect(rewind).toBeDisabled()
+  await expect(forward).toBeDisabled()
+  await expect(controls.getByRole('button', { name: 'Play', exact: true })).toBeEnabled()
+  await page.evaluate(() => { window.miniBarSeekRange = { start: 5, end: 35 } })
+  await expect(rewind).toBeEnabled()
+  await expect(forward).toBeEnabled()
 })
 
 for (const uiScale of [100, 125, 150]) {
@@ -959,12 +988,12 @@ for (const uiScale of [100, 125, 150]) {
     // Playlist controls follow the same capabilities and events as the full player.
     const watch = await watchViewHandle(page)
     await watch.evaluate(async vm => {
-      const component = vm.$refs.player.$
-      component.props.canSkipPrevious = true
-      component.props.canSkipNext = true
+      vm.playlistId = 'mini-bar-playlist'
+      vm.playlistType = 'user'
+      vm.watchingPlaylist = true
       window.miniBarSkips = []
-      component.vnode.props['onSkip-to-prev'] = () => window.miniBarSkips.push('previous')
-      component.vnode.props['onSkip-to-next'] = () => window.miniBarSkips.push('next')
+      vm.handleSkipToPrev = () => window.miniBarSkips.push('previous')
+      vm.handleSkipToNext = () => window.miniBarSkips.push('next')
       await vm.$nextTick()
     })
     await expect(controls.getByRole('button')).toHaveCount(5)

@@ -7057,6 +7057,7 @@ export default defineComponent({
       mobileMiniBarCanDismiss,
       mobileMiniBarOverlayStyle,
       mobileMiniBarProgress,
+      mobileMiniBarHasSeekRange,
       updateMobileMiniBarProgress,
       beginScrollMiniPlayerDrag,
       moveScrollMiniPlayerDrag,
@@ -7126,7 +7127,7 @@ export default defineComponent({
     })
 
     const mobileMiniBarControlsDisabled = computed(() => Boolean(scrollMiniPlayerDragStyle.value || scrollMiniPlayerAnimating.value))
-    const mobileMiniBarSeekDisabled = computed(() => mobileMiniBarControlsDisabled.value || !hasLoaded.value || !seekingIsPossible.value)
+    const mobileMiniBarSeekDisabled = computed(() => mobileMiniBarControlsDisabled.value || !hasLoaded.value || !seekingIsPossible.value || !mobileMiniBarHasSeekRange.value)
 
     // The window may have resized while docked. Measure the settled inline
     // player once, after the return animation, rather than its scaled bounds.
