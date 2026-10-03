@@ -223,11 +223,11 @@
   z-index: -1;
 }
 
-.selectOption.active {
+.selectOption.active:not(.selected) {
   color: var(--dropdown-item-hover-text-color);
 }
 
-.selectOption.active::before {
+.selectOption.active:not(.selected)::before {
   background-color: var(--dropdown-item-hover-color);
 }
 
