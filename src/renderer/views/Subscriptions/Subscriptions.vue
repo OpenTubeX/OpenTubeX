@@ -500,7 +500,12 @@ function resetHeaderScrollVisibility() {
 
 function updateHeaderScrollVisibility() {
   if (!mobileHeaderLayout.matches || (isTabPresented && !isTabPresented.value)) return
-  if (headerRef.value?.querySelector(':focus-visible, [aria-expanded="true"]')) {
+  const header = headerRef.value
+  const content = header?.nextElementSibling
+  // The translated sticky header keeps its space in the document. Wait until
+  // that space scrolls behind the top bar so hiding cannot expose an empty gap.
+  if (!content || content.getBoundingClientRect().top > Number.parseFloat(getComputedStyle(header).top) ||
+      header.querySelector(':focus-visible, [aria-expanded="true"]')) {
     resetHeaderScrollVisibility()
     return
   }
