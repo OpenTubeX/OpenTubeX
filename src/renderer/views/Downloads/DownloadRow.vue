@@ -156,6 +156,13 @@
           @click="emit('play')"
         />
         <FtIconButton
+          v-if="canPlay && !IS_IOS"
+          :title="t('Video.Add to Queue')"
+          :icon="['fas', 'add-to-queue']"
+          theme="secondary"
+          @click="emit('queue')"
+        />
+        <FtIconButton
           v-if="canAccessFiles"
           :title="t('Downloads.Show in Folder')"
           :icon="['fas', 'folder-open']"
@@ -206,7 +213,8 @@ const props = defineProps({
   canMoveEarlier: { type: Boolean, default: false },
   canMoveLater: { type: Boolean, default: false }
 })
-const emit = defineEmits(['clear', 'move', 'open', 'pause', 'play', 'remove', 'resume', 'retry'])
+const emit = defineEmits(['clear', 'move', 'open', 'pause', 'play', 'queue', 'remove', 'resume', 'retry'])
+const IS_IOS = !!process.env.IS_IOS
 const { t } = useI18n()
 const inProgress = computed(() => ['preparing', 'downloading', 'processing'].includes(props.download.status))
 const progressPercentage = computed(() => (

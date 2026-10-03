@@ -5237,7 +5237,7 @@ export default defineComponent({
       }
 
       this.$store.commit('removeVideoFromWatchQueue', nextVideo.queueItemId)
-      this.tabRouter.push({ path: `/watch/${nextVideo.videoId}` })
+      this.tabRouter.push(nextVideo.route ?? { path: `/watch/${nextVideo.videoId}` })
       showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
       return true
     },
