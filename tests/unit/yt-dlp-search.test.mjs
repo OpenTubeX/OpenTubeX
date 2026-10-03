@@ -26,17 +26,25 @@ test('rejects invalid search requests before launching yt-dlp', () => {
 })
 
 test('maps flat search videos and skips invalid entries', () => {
-  const info = { entries: [null, { id: 'invalid', title: 'Invalid' }, {
-    id: 'dQw4w9WgXcQ', title: 'Search result', channel: 'Creator', channel_id: 'UCcreator',
-    duration: 120, view_count: 42, timestamp: 100, thumbnails: [{ url: 'https://i.ytimg.com/example.jpg' }]
-  }] }
+  const info = {
+    entries: [null, { id: 'invalid', title: 'Invalid' }, {
+      id: 'dQw4w9WgXcQ',
+      title: 'Search result',
+      channel: 'Creator',
+      channel_id: 'UCcreator',
+      duration: 120,
+      view_count: 42,
+      timestamp: 100,
+      thumbnails: [{ url: 'https://i.ytimg.com/example.jpg' }]
+    }]
+  }
   const { results, hasMoreResults } = normalizeYtDlpSearchResults(info)
   assert.equal(results.length, 1)
   assert.equal(results[0].videoId, 'dQw4w9WgXcQ')
   assert.equal(results[0].title, 'Search result')
   assert.equal(results[0].author, 'Creator')
   assert.equal(results[0].lengthSeconds, 120)
-  assert.equal(results[0].published, 100_000)
+  assert.equal(results[0].published, 100000)
   assert.equal(results[0].videoThumbnails[0].url, info.entries[2].thumbnails[0].url)
   assert.equal(hasMoreResults, false)
 })
@@ -47,11 +55,19 @@ test('marks full pages for continuation and empty pages as exhausted', () => {
   assert.throws(() => normalizeYtDlpSearchResults({}))
 })
 
+test('stops continuation at the last supported search page', () => {
+  const response = { entries: Array(20).fill({ id: 'dQw4w9WgXcQ', title: 'Video' }) }
+  assert.equal(normalizeYtDlpSearchResults(response, 99).hasMoreResults, true)
+  assert.equal(normalizeYtDlpSearchResults(response, 100).hasMoreResults, false)
+})
+
 test('maps channel and playlist results into the existing list data formats', () => {
-  const { results } = normalizeYtDlpSearchResults({ entries: [
-    { id: 'UC' + 'x'.repeat(22), title: 'Creator', channel_follower_count: 42, thumbnails: [{ url: 'https://example.test/avatar' }] },
-    { id: 'PLplaylist', ie_key: 'YoutubeTab', title: 'Playlist', channel: 'Creator', channel_id: 'UCcreator', playlist_count: 3, thumbnails: [{ url: 'https://example.test/playlist' }] }
-  ] })
+  const { results } = normalizeYtDlpSearchResults({
+    entries: [
+      { id: 'UC' + 'x'.repeat(22), title: 'Creator', channel_follower_count: 42, thumbnails: [{ url: 'https://example.test/avatar' }] },
+      { id: 'PLplaylist', ie_key: 'YoutubeTab', title: 'Playlist', channel: 'Creator', channel_id: 'UCcreator', playlist_count: 3, thumbnails: [{ url: 'https://example.test/playlist' }] }
+    ]
+  })
   assert.equal(results[0].type, 'channel')
   assert.equal(results[0].authorThumbnails[0].url, 'https://example.test/avatar')
   assert.equal(results[0].subCount, 42)

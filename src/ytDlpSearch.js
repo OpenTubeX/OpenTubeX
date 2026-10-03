@@ -1,9 +1,10 @@
 const SEARCH_PAGE_SIZE = 20
+const MAX_SEARCH_PAGES = 100
 
 export function buildYtDlpSearchArguments(query, params = '', page = 1) {
   if (typeof query !== 'string' || !query.trim() || query.length > 100 ||
     typeof params !== 'string' || params.length > 2048 ||
-    !Number.isInteger(page) || page < 1 || page > 100) {
+    !Number.isInteger(page) || page < 1 || page > MAX_SEARCH_PAGES) {
     throw new Error('Invalid search request')
   }
   const url = new URL('https://www.youtube.com/results')
@@ -19,7 +20,7 @@ export function buildYtDlpSearchArguments(query, params = '', page = 1) {
   ]
 }
 
-export function normalizeYtDlpSearchResults(info) {
+export function normalizeYtDlpSearchResults(info, page = 1) {
   if (!Array.isArray(info?.entries)) throw new Error('Invalid search response')
   const results = info.entries.flatMap(entry => {
     if (!entry || typeof entry.title !== 'string' || !entry.title.trim()) return []
@@ -46,5 +47,5 @@ export function normalizeYtDlpSearchResults(info) {
       ...(Number.isFinite(entry.timestamp) ? { published: entry.timestamp * 1000 } : {})
     }]
   })
-  return { results, hasMoreResults: info.entries.length >= SEARCH_PAGE_SIZE }
+  return { results, hasMoreResults: page < MAX_SEARCH_PAGES && info.entries.length >= SEARCH_PAGE_SIZE }
 }
