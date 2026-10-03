@@ -39,6 +39,142 @@ test.use({
   }
 })
 
+async function expectStableImageSlot(app, page, container, pending, layouts = ['grid'], aspectRatio = 1) {
+  const viewports = [[1600, 900, 1], [375, 812, 1], [812, 375, 1.25]]
+  const placeholder = container.locator('.retryImagePlaceholder')
+  const image = container.locator('img:not(.retryImagePlaceholder)')
+  const fulfillImage = route => aspectRatio === 1
+    ? fulfillVisualFixture(route, 'avatar')
+    : route.fulfill({ contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="160" height="224"><rect width="100%" height="100%" fill="teal"/></svg>' })
+  const resize = async viewport => {
+    await app.electronApp.evaluate(({ BrowserWindow }, [width, height, zoom]) => {
+      const window = BrowserWindow.getAllWindows()[0]
+      window.setMinimumSize(0, 0)
+      window.webContents.setZoomFactor(zoom)
+      window.setContentSize(width, height)
+    }, viewport)
+    await expect.poll(() => page.evaluate(() => window.innerWidth)).toBe(Math.round(viewport[0] / viewport[2]))
+    await expect(page.locator('.feed-enter-active, .feed-leave-active')).toHaveCount(0)
+  }
+  const setLayout = async layout => {
+    await page.evaluate(layout => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setListType', layout), layout)
+    await expect.poll(() => container.evaluate((element, layout) => element.closest('.ft-list-channel')?.classList.contains(layout) ?? true, layout)).toBe(true)
+    await expect(page.locator('.feed-enter-active, .feed-leave-active')).toHaveCount(0)
+  }
+  const position = element => {
+    const { width, height, x, y } = element.getBoundingClientRect()
+    const parent = element.parentElement.getBoundingClientRect()
+    return { width, height, x: x - parent.x, y: y - parent.y }
+  }
+  const slots = []
+  for (const layout of layouts) {
+    await setLayout(layout)
+    for (const viewport of viewports) {
+      await resize(viewport)
+      await expect(placeholder).toBeVisible()
+      await expect(image).toBeHidden()
+      const slot = await placeholder.evaluate(position)
+      expect(slot.width).toBeGreaterThan(0)
+      expect(slot.width / slot.height).toBeCloseTo(aspectRatio, 3)
+      slots.push(slot)
+    }
+  }
+  await expect.poll(() => pending.length).toBeGreaterThan(0)
+  while (pending.length) await pending.shift().abort()
+  await expect(image).toHaveAttribute('src', /opentubex_retry=/)
+  await expect(placeholder).toBeVisible()
+  for (const [key, value] of Object.entries(slots.at(-1))) expect((await placeholder.evaluate(position))[key]).toBeCloseTo(value, 1)
+  await expect.poll(() => pending.length).toBeGreaterThan(0)
+  await page.route('https://slot-images.test/**', fulfillImage)
+  while (pending.length) await fulfillImage(pending.shift())
+  await expect(image).toBeVisible()
+  await expect(placeholder).toHaveCount(0)
+  let index = 0
+  for (const layout of layouts) {
+    await setLayout(layout)
+    for (const viewport of viewports) {
+      await resize(viewport)
+      const expected = slots[index++]
+      await expect.poll(async () => {
+        const actual = await image.evaluate(position)
+        return Object.entries(expected).every(([key, value]) => Math.abs(actual[key] - value) < 0.05)
+      }).toBe(true)
+    }
+  }
+}
+
+test('preserves channel search avatar slots in grid and list layouts', async ({ app, page }) => {
+  const pending = []
+  let searchRequests = 0
+  await page.route('https://slot-images.test/**', route => { pending.push(route) })
+  await page.route('**/api/v1/search**', route => route.fulfill({
+    json: searchRequests++ === 0
+      ? [{
+          type: 'channel', author: 'Avatar slot channel', authorId: channelId, authorThumbnails: [{ url: 'https://slot-images.test/search' }], subCount: 10, videoCount: 1, descriptionHtml: ''
+        }]
+      : []
+  }))
+  await page.evaluate(() => {
+    document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setBackendPreference', 'invidious')
+    return window.ftElectron.tabs.create({ route: '/search/avatar-slots' })
+  })
+  await expectStableImageSlot(app, page, page.locator('.ft-list-channel .channelThumbnailLink'), pending, ['grid', 'list'])
+})
+
+test('preserves watch channel avatar slots while loading and retrying', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const pending = []
+  await page.route('https://slot-images.test/**', route => { pending.push(route) })
+  const view = await watchViewHandle(page)
+  await view.evaluate(view => { view.channelThumbnail = 'https://slot-images.test/watch' })
+  await expectStableImageSlot(app, page, page.locator('.watchVideoInfo :is(a, div):has(> .channelThumbnail)'), pending)
+})
+
+test('preserves game cover placeholder slots in grid and list layouts', async ({ app, page }) => {
+  const pending = []
+  await page.route('https://slot-images.test/**', route => { pending.push(route) })
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('addToSessionSearchHistory', {
+      query: 'game-slots',
+      data: [{ type: 'channel', dataSource: 'local', isGame: true, name: 'Game cover slot', id: 'game-slot', thumbnail: 'https://slot-images.test/game' }],
+      searchSettings: { prioritize: 'relevance', time: '', type: 'all', duration: '', features: [] },
+      nextPageRef: null,
+      hasMoreResults: false,
+      apiUsed: 'local'
+    })
+    return window.ftElectron.tabs.create({ route: '/search/game-slots' })
+  })
+  await expectStableImageSlot(app, page, page.locator('.ft-list-channel .channelThumbnailLink'), pending, ['grid', 'list'], 5 / 7)
+})
+
+test('preserves playlist channel avatar slots while loading and retrying', async ({ app, page }) => {
+  const pending = []
+  await page.route('https://slot-images.test/**', route => { pending.push(route) })
+  await page.route('**/api/v1/playlists/avatar-slots**', route => route.fulfill({
+    json: {
+      type: 'playlist',
+      title: 'Avatar slot playlist',
+      playlistId: 'avatar-slots',
+      author: 'Avatar slot channel',
+      authorId: channelId,
+      authorThumbnails: [{ url: 'https://slot-images.test/playlist' }],
+      description: '',
+      descriptionHtml: '',
+      videoCount: 0,
+      viewCount: 1,
+      updated: 1_700_000_000,
+      videos: []
+    }
+  }))
+  await page.evaluate(() => {
+    document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setBackendPreference', 'invidious')
+    return window.ftElectron.tabs.create({ route: '/playlist/avatar-slots' })
+  })
+  await expectStableImageSlot(app, page, page.locator('.playlistInfo .playlistChannel'), pending)
+})
+
 test('renders member comments and replies with missing, empty, and broken badge URLs', async ({ page }) => {
   const rendererErrors = []
   page.on('pageerror', error => rendererErrors.push(error.message))
@@ -150,6 +286,9 @@ test('renders live chat members with empty badge thumbnails without image setup 
   const empty = page.locator('.liveChatComments .comment', { hasText: 'Empty badge message' })
   await expect(empty).toBeVisible()
   await expect(empty.locator('.channelName.member')).toBeVisible()
+  const avatarBounds = await empty.locator('.channelThumbnail.retryImagePlaceholder').boundingBox()
+  expect(avatarBounds.width).toBe(25)
+  expect(avatarBounds.height).toBe(25)
   await expect(empty.locator('.badge')).toHaveCount(0)
   const broken = page.locator('.liveChatComments .comment', { hasText: 'Broken badge message' })
   await expect(broken.locator('.badgeImage[data-icon="user-check"]')).toBeVisible()

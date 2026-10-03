@@ -71,6 +71,8 @@
   cursor: pointer;
   margin-inline-end: 10px;
   inline-size: 56px;
+  block-size: 56px;
+  vertical-align: middle;
 }
 
 .collaboratorThumbnail {
