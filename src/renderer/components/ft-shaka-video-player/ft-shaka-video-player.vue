@@ -174,10 +174,10 @@
           class="endedPoster"
           aria-hidden="true"
         >
-          <img
+          <FtRetryImage
             :src="thumbnail"
             alt=""
-          >
+          />
         </div>
         <div
           v-if="endedRecommendations.length > 0"
@@ -218,24 +218,24 @@
         class="countdownPoster"
         aria-hidden="true"
       >
-        <img
+        <FtRetryImage
           :src="thumbnail"
           alt=""
-        >
+        />
       </div>
       <div
         v-if="audioPlayerMode"
         class="musicAudioSurface"
         aria-hidden="true"
       >
-        <img
+        <FtRetryImage
           v-if="thumbnail"
           class="musicAudioBackdrop"
           :src="thumbnail"
           alt=""
           @load="showMusicImage"
           @error="hideBrokenMusicImage"
-        >
+        />
         <div class="musicAudioShade" />
         <canvas
           v-show="musicVisualizerEnabled && !scrollMiniPlayerActive"
@@ -243,14 +243,14 @@
           class="musicVisualizerCanvas"
         />
         <div class="musicAudioContent">
-          <img
+          <FtRetryImage
             v-if="thumbnail"
             class="musicAudioArtwork"
             :src="thumbnail"
             alt=""
             @load="showMusicImage"
             @error="hideBrokenMusicImage"
-          >
+          />
           <div
             v-if="title || artist || channelThumbnail"
             class="musicAudioMetadata"
@@ -267,6 +267,7 @@
             >
               <FtRetryImage
                 v-if="channelThumbnail"
+                :fallback-icon="['fas', 'circle-user']"
                 class="musicAudioAvatar"
                 :src="channelThumbnail"
                 alt=""

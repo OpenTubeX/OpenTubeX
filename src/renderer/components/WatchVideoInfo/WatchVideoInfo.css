@@ -71,13 +71,25 @@
   cursor: pointer;
   margin-inline-end: 10px;
   inline-size: 56px;
+  block-size: 56px;
+  vertical-align: middle;
 }
 
 .collaboratorThumbnail {
+  display: block;
   border: 2px solid var(--card-bg-color);
   flex: 0 0 auto;
   inline-size: 36px;
+  block-size: 36px;
   margin-inline-end: 0;
+}
+
+.collaboratorThumbnailImage {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: inherit;
+  object-fit: cover;
 }
 
 .collaboratorThumbnail + .collaboratorThumbnail {

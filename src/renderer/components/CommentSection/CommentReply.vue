@@ -59,6 +59,7 @@
         </div>
         <FtRetryImage
           v-else
+          :fallback-icon="['fas', 'circle-user']"
           :src="reply.authorThumb"
           class="commentThumbnail"
         />
@@ -91,12 +92,13 @@
             </template>
           </template>
         </component>
-        <img
-          v-if="reply.isMember"
+        <FtRetryImage
+          v-if="reply.isMember && typeof reply.memberIconUrl === 'string'"
+          :fallback-icon="['fas', 'user-check']"
           :src="reply.memberIconUrl"
           class="commentMemberIcon"
           alt=""
-        >
+        />
         <img
           v-if="subscribedChannelIds.has(reply.authorId)"
           :title="$t('Comments.Subscribed')"
@@ -161,6 +163,7 @@
           class="commentHeartBadge"
         >
           <FtRetryImage
+            :fallback-icon="['fas', 'circle-user']"
             :src="channelThumbnail"
             :title="$t('Comments.Hearted')"
             :aria-label="$t('Comments.Hearted')"

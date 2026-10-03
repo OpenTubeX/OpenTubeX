@@ -16,6 +16,7 @@
         aria-hidden="true"
       >
         <FtRetryImage
+          :fallback-icon="isGame ? ['fas', 'gamepad'] : ['fas', 'circle-user']"
           :src="thumbnail"
           :class="!isGame ? 'channelImage' : 'gameImage'"
           alt=""

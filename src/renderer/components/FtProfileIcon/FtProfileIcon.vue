@@ -3,12 +3,13 @@
     class="profileIcon"
     :style="{ background: profile.bgColor, color: profile.textColor }"
   >
-    <img
+    <FtRetryImage
       v-if="imageSource"
+      :fallback-icon="['fas', 'circle-user']"
       class="profileIconImage"
       :src="imageSource"
       alt=""
-    >
+    />
     <span
       v-else-if="!builtinIcon"
       class="profileIconText"
@@ -26,6 +27,7 @@
 <script setup>
 import { computed } from 'vue'
 import { FtIcon } from '@opentubex/icons'
+import FtRetryImage from '../FtRetryImage.vue'
 
 import { getCustomIconImageSource } from '../../helpers/customIcons'
 import { PROFILE_ICONS } from '../../helpers/profileIcons'

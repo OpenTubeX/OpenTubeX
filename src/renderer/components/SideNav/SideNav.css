@@ -145,8 +145,16 @@
 }
 
 .channelThumbnail {
+  block-size: 35px;
+  inline-size: 35px;
   border-radius: 50%;
   vertical-align: middle;
+}
+
+.channelThumbnail :deep(.ft-icon__glyph) {
+  block-size: 100%;
+  inline-size: 100%;
+  scale: 1;
 }
 
 .subscriptionLoadSentinel {

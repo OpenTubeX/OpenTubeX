@@ -446,7 +446,8 @@
   justify-content: center;
 }
 
-.tabIcon img {
+.tabIcon img,
+.tabIcon .retryImagePlaceholder {
   block-size: 20px;
   border-radius: 50%;
   inline-size: 20px;

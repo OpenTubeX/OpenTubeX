@@ -422,8 +422,10 @@ interruptedImageTest('clears the loader when a gallery image request is interrup
   await expect(post).toBeVisible()
 
   const firstSlide = post.locator('swiper-slide').first()
-  const image = firstSlide.locator('img.communityImage')
+  const image = firstSlide.locator('img.communityImage:not(.retryImagePlaceholder)')
   await expect.poll(async () => image.evaluate((element) => element.complete)).toBe(true)
 
   await expect(firstSlide.locator('.swiper-lazy-preloader')).toHaveCount(0)
+  await expect(image).toBeHidden()
+  await expect(firstSlide.locator('.retryImagePlaceholder')).toBeVisible()
 })

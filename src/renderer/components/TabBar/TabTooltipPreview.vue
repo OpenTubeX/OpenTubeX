@@ -1,14 +1,15 @@
 <template>
   <div class="tabTooltipPreview">
-    <img
+    <FtRetryImage
       v-if="previewUrl"
       :src="previewUrl"
       alt=""
       draggable="false"
       @error="previewUrl = null"
-    >
+    />
     <FtRetryImage
       v-else-if="avatarUrl && avatarUrl !== failedAvatarUrl"
+      :fallback-icon="pageIcon || ['fas', 'display']"
       :src="avatarUrl"
       alt=""
       class="tabTooltipPreviewAvatar"
@@ -32,6 +33,7 @@
   >
     <FtRetryImage
       v-if="showIcon && avatarUrl && avatarUrl !== failedAvatarUrl"
+      :fallback-icon="pageIcon || ['fas', 'display']"
       :src="avatarUrl"
       class="tabTooltipGridTitleAvatar"
       alt=""
@@ -96,7 +98,8 @@ onBeforeUnmount(() => { requestId++ })
   backdrop-filter: var(--secondary-card-bg-blur, none);
 }
 
-.tabTooltipPreview img {
+.tabTooltipPreview img,
+.tabTooltipPreview .retryImagePlaceholder {
   display: block;
   inline-size: 100%;
   block-size: 100%;

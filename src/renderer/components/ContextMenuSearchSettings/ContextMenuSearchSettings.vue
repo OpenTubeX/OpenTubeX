@@ -16,14 +16,15 @@
         class="engineRow"
       >
         <div class="engineToggle">
-          <img
+          <FtRetryImage
             v-if="hasFavicon(engine)"
+            :fallback-icon="['fas', 'search']"
             class="engineIcon"
             :src="engine.icon"
             alt=""
             referrerpolicy="no-referrer"
             @error="handleFaviconError(engine)"
-          >
+          />
           <FtIcon
             v-else
             class="engineIcon fallbackIcon"
@@ -99,6 +100,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
+import FtRetryImage from '../FtRetryImage.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'

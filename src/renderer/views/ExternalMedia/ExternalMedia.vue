@@ -184,6 +184,7 @@
               >
                 <FtRetryImage
                   v-if="creatorAvatarUrl"
+                  :fallback-icon="['fas', 'circle-user']"
                   :src="creatorAvatarUrl"
                   class="externalMediaCreatorAvatar"
                   alt=""

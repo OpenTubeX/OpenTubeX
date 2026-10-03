@@ -47,11 +47,11 @@
               <time :datetime="dateTime(version.cachedAt)">{{ formatDate(version.cachedAt) }}</time>
             </div>
             <div class="thumbnailFrame">
-              <img
+              <FtRetryImage
                 v-if="thumbnailSource(version)"
                 :src="thumbnailSource(version)"
                 :alt="versionLabel(index)"
-              >
+              />
             </div>
           </li>
         </ol>
@@ -100,6 +100,7 @@
 </template>
 
 <script setup>
+import FtRetryImage from '../FtRetryImage.vue'
 import { computed, nextTick, onBeforeUnmount, onMounted, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 

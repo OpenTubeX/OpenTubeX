@@ -1,4 +1,5 @@
 import DOMPurify from 'dompurify'
+import { addHtmlImagePlaceholders } from '../helpers/htmlImagePlaceholder'
 
 const USE_NATIVE_SANITIZER = process.env.IS_ELECTRON || ('Sanitizer' in window && typeof HTMLElement.prototype.setHTML === 'function')
 
@@ -98,5 +99,6 @@ export const vSaferHtml = (element, { value, oldValue, modifiers }) => {
 
       element.innerHTML = DOMPurify.sanitize(value, domPurifyStrictConfig)
     }
+    addHtmlImagePlaceholders(element)
   }
 }

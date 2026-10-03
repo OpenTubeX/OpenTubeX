@@ -68,13 +68,14 @@
               :tabindex="game.channelId ? linkTabIndex : null"
               class="game"
             >
-              <img
+              <FtRetryImage
                 v-if="game.thumbnail"
+                :fallback-icon="['fas', 'gamepad']"
                 :src="game.thumbnail"
                 class="gameBoxArt"
                 alt=""
                 loading="lazy"
-              >
+              />
               <span class="gameText">
                 <bdi class="gameTitle">{{ game.title }}</bdi>
                 <bdi
@@ -139,6 +140,7 @@
 </template>
 
 <script setup>
+import FtRetryImage from '../FtRetryImage.vue'
 import { onBeforeUnmount, onMounted, ref, computed, nextTick, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import FtCard from '../ft-card/ft-card.vue'

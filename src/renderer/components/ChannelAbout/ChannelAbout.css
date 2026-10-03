@@ -42,10 +42,16 @@
   place-items: center;
 }
 
-.aboutLinkIcon img {
+.aboutLinkImage {
   inline-size: 24px;
   block-size: 24px;
   object-fit: contain;
+}
+
+.aboutLinkImage :deep(.ft-icon__glyph) {
+  block-size: 100%;
+  inline-size: 100%;
+  scale: 1;
 }
 
 .aboutLinkText {

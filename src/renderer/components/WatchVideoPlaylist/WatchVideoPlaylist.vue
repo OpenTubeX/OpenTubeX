@@ -125,12 +125,12 @@
                   :style="previewStyle"
                 >
                   <div class="previewTooltip">
-                    <img
+                    <FtRetryImage
                       v-if="previewVideoThumbnail"
                       :src="previewVideoThumbnail"
                       alt=""
                       class="previewThumbnail"
-                    >
+                    />
                     <div class="previewText">
                       {{ previewVideoIndex }} / {{ playlistVideoCount }}
                     </div>
@@ -270,6 +270,7 @@
 </template>
 
 <script setup>
+import FtRetryImage from '../FtRetryImage.vue'
 import { FtIcon } from '@opentubex/icons'
 import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, TransitionGroup, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'

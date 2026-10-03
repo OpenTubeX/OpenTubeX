@@ -256,6 +256,7 @@
 
 .channelThumbnail {
   inline-size: 25px;
+  block-size: 25px;
   border-radius: 200px;
 }
 
@@ -539,6 +540,7 @@
 }
 
 .badgeImage {
+  block-size: 14px;
   inline-size: 14px;
 }
 

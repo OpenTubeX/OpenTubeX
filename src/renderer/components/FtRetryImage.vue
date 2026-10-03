@@ -1,16 +1,41 @@
 <template>
   <img
+    v-bind="{ ...$attrs, ...parentScope }"
     :src="imageUrl"
-    alt=""
+    :alt="$attrs.alt ?? ''"
+    :style="hasLoaded ? null : { position: 'absolute', visibility: 'hidden', pointerEvents: 'none' }"
     @error="retryImageLoad"
     @load="handleImageLoad"
+  >
+  <FtIcon
+    v-if="!hasLoaded && fallbackIcon"
+    v-bind="{ ...$attrs, ...parentScope }"
+    class="retryImagePlaceholder"
+    :icon="fallbackIcon"
+    aria-hidden="true"
+  />
+  <img
+    v-else-if="!hasLoaded"
+    v-bind="{ ...$attrs, ...parentScope }"
+    class="retryImagePlaceholder"
+    :src="thumbnailPlaceholder"
+    alt=""
+    aria-hidden="true"
   >
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, getCurrentInstance, onBeforeUnmount, ref, watch } from 'vue'
+import { FtIcon } from '@opentubex/icons'
 import store from '../store/index'
 import { getVideoThumbnailSource, getVideoThumbnailFallbackUrl } from '../helpers/videoThumbnail.js'
+import thumbnailPlaceholder from '../assets/img/thumbnail_placeholder.svg'
+
+defineOptions({ inheritAttrs: false })
+
+// Multiple roots need the caller's scoped styles on both the image and placeholder.
+const parentScopeId = getCurrentInstance().vnode.scopeId
+const parentScope = parentScopeId ? { [parentScopeId]: '' } : {}
 
 const RETRY_DELAY_MS = 3000
 
@@ -18,13 +43,18 @@ const props = defineProps({
   src: {
     type: String,
     required: true
+  },
+  fallbackIcon: {
+    type: [Array, String, Object],
+    default: null
   }
 })
 
-const emit = defineEmits(['error'])
+const emit = defineEmits(['error', 'load'])
 
 const preferredSource = computed(() => getVideoThumbnailSource(props.src, store.getters.getThumbnailDataSaver))
 const imageUrl = ref(preferredSource.value)
+const hasLoaded = ref(false)
 let currentSource = preferredSource.value
 let hasRetried = false
 let retryPending = false
@@ -40,6 +70,7 @@ function resetSource(src) {
   hasRetried = false
   retryPending = false
   currentSource = src
+  hasLoaded.value = false
   imageUrl.value = src
 }
 
@@ -55,8 +86,10 @@ function handleImageLoad(event) {
   // YouTube can return a decodable 120x90 placeholder for missing resolutions.
   const image = event.target
   if (image.naturalWidth === 120 && image.naturalHeight === 90) {
-    useSmallerThumbnail()
+    if (useSmallerThumbnail()) return
   }
+  hasLoaded.value = true
+  emit('load', event)
 }
 
 function addRetryParameter(src) {
@@ -71,7 +104,14 @@ function addRetryParameter(src) {
 }
 
 async function retryImageLoad(event) {
+  hasLoaded.value = false
   if (useSmallerThumbnail()) return
+
+  // Embedded images cannot recover through an HTTP retry or a query parameter.
+  if (/^(data|blob):/.test(currentSource)) {
+    emit('error', event)
+    return
+  }
 
   if (hasRetried) {
     if (!retryPending) emit('error', event)
@@ -111,3 +151,11 @@ onBeforeUnmount(() => {
   clearTimeout(retryTimeoutId)
 })
 </script>
+
+<style scoped>
+.retryImagePlaceholder :deep(.ft-icon__glyph) {
+  block-size: 100%;
+  inline-size: 100%;
+  scale: 1;
+}
+</style>

@@ -61,6 +61,7 @@
               class="tag-icon-link"
             >
               <FtRetryImage
+                :fallback-icon="['fas', 'circle-user']"
                 :src="tag.icon"
                 alt=""
                 class="tag-icon"

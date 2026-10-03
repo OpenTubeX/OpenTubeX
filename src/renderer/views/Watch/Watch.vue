@@ -32,7 +32,7 @@
           class="videoPlayer videoPlayerPlaceholder shortsPlayerPlaceholder"
           data-tab-loading-indicator
         >
-          <img
+          <FtRetryImage
             v-if="shortsTransitionPreview"
             :src="shortsTransitionPreview"
             class="shortsTransitionPreview"
@@ -41,7 +41,7 @@
               shortsTransitionPrevious: shortsTransitionDirection < 0
             }"
             alt=""
-          >
+          />
           <div
             v-else
             class="shortsSkeleton"
@@ -71,12 +71,12 @@
           :class="{ shortsPlayerPlaceholder: customShortsPlayerActive }"
           data-tab-loading-indicator
         >
-          <img
+          <FtRetryImage
             v-if="thumbnail"
             :src="thumbnail"
             class="videoThumbnail"
             alt=""
-          >
+          />
           <div class="streamPlaceholderOverlay">
             <span class="streamPlaceholderSpinner">
               <ft-loader />
@@ -227,6 +227,7 @@
                   >
                     <FtRetryImage
                       v-if="channelThumbnail"
+                      :fallback-icon="['fas', 'circle-user']"
                       :src="channelThumbnail"
                       class="shortsFullscreenChannelThumbnail"
                       alt=""
@@ -263,12 +264,12 @@
           class="videoPlayer"
           :class="{ videoPlayerError: errorMessage }"
         >
-          <img
+          <FtRetryImage
             v-if="!isUpcoming || playabilityStatus !== 'OK'"
             :src="thumbnail"
             class="videoThumbnail"
             alt=""
-          >
+          />
           <div
             v-if="isUpcoming"
             class="premiereDate"
@@ -397,6 +398,7 @@
               >
                 <FtRetryImage
                   v-if="channelThumbnail"
+                  :fallback-icon="['fas', 'circle-user']"
                   :src="channelThumbnail"
                   class="shortsExternalChannelThumbnail"
                   alt=""
@@ -592,6 +594,7 @@
             @auxclick="openShortsChannel"
           >
             <FtRetryImage
+              :fallback-icon="['fas', 'circle-user']"
               :src="channelThumbnail"
               alt=""
             />

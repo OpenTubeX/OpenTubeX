@@ -42,6 +42,12 @@
   object-fit: contain;
 }
 
+.engineIcon :deep(.ft-icon__glyph) {
+  block-size: 100%;
+  inline-size: 100%;
+  scale: 1;
+}
+
 .fallbackIcon {
   color: var(--secondary-text-color);
 }

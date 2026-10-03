@@ -1,11 +1,11 @@
 <template>
   <article class="downloadRow">
     <div class="downloadMain">
-      <img
+      <FtRetryImage
         :src="download.thumbnail || thumbnailPlaceholder"
         class="downloadThumbnail"
         alt=""
-      >
+      />
       <div class="downloadDetails">
         <h3 dir="auto">
           {{ download.title }}
@@ -181,6 +181,7 @@
 </template>
 
 <script setup>
+import FtRetryImage from '../../components/FtRetryImage.vue'
 import { displayAndroidPath } from '../../helpers/androidStorage'
 import { ytDlp } from '../../helpers/ytDlp'
 import { FtIcon } from '@opentubex/icons'

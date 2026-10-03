@@ -235,10 +235,15 @@ $watched-transition-duration: 0.5s;
       .channelImage {
         border-radius: 50%;
         block-size: 130px;
+        inline-size: 130px;
+        vertical-align: middle;
       }
 
       .gameImage {
         block-size: 130px;
+        inline-size: calc(130px * 5 / 7);
+        object-fit: contain;
+        vertical-align: middle;
       }
     }
   }
