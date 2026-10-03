@@ -2184,7 +2184,7 @@ test.describe('select dropdown pixel grid', () => {
     expect(inactiveOptionIndex).toBeGreaterThanOrEqual(0)
     const option = options.nth(inactiveOptionIndex)
     // The option label is a direct text node, so measure its rendered range.
-    const textPosition = () => option.evaluate(element => {
+    const textPosition = (target = option) => target.evaluate(element => {
       const range = document.createRange()
       range.selectNodeContents(element)
       const bounds = range.getBoundingClientRect()
@@ -2197,24 +2197,23 @@ test.describe('select dropdown pixel grid', () => {
     expect(await textPosition()).toEqual(beforeHover)
 
     const selectedOption = dropdown.locator('.selectOption[aria-selected="true"]')
+    const selectedTextPosition = await textPosition(selectedOption)
+    const selectedBackground = await selectedOption.evaluate(element => getComputedStyle(element).backgroundColor)
+    expect(selectedBackground).not.toBe('rgba(0, 0, 0, 0)')
     await selectedOption.hover()
     await expect(selectedOption).toHaveClass(/active/)
+    expect(await textPosition(selectedOption)).toEqual(selectedTextPosition)
     const indicatorAppearance = await selectedOption.evaluate(element => {
       const hoverLayer = getComputedStyle(element, '::before')
-      const selectedIndicator = getComputedStyle(element, '::after')
       return {
         hoverLayerZIndex: hoverLayer.zIndex,
-        indicatorColor: selectedIndicator.backgroundColor,
-        indicatorWidth: Number.parseFloat(selectedIndicator.width),
-        indicatorZIndex: selectedIndicator.zIndex
+        selectionBackground: getComputedStyle(element).backgroundColor
       }
     })
     expect(indicatorAppearance).toMatchObject({
       hoverLayerZIndex: '-1',
-      indicatorColor: 'rgb(33, 150, 243)',
-      indicatorZIndex: '1'
+      selectionBackground: selectedBackground
     })
-    expect(indicatorAppearance.indicatorWidth).toBeCloseTo(3, 1)
 
     // At arbitrary UI scales, fixed-height options cannot all start on device
     // pixels. Their stable paint layer must therefore prevent the hover

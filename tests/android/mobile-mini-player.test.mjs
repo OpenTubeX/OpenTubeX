@@ -79,11 +79,12 @@ test('mobile mini-player restores from the whole bar and keeps close separate', 
           // Navigate away while playback continues, retaining the actual player.
           await page.evaluate(() => { location.hash = '#/subscriptions' })
           await expect(player).toHaveClass(/mobileMiniBar/)
+          await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
           const returnButton = player.locator('.mobileMiniBarReturn')
           await expect(returnButton).toBeEnabled()
           await expect(returnButton.locator('svg')).toHaveCount(0)
           const point = await player.evaluate(mobileMiniPlayerReturnPoint, region)
-          assert.equal(await page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.classList.contains('mobileMiniBarReturn'), point), true, region)
+          await expect.poll(() => page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.classList.contains('mobileMiniBarReturn'), point), { message: region }).toBe(true)
           await touch('touchStart', point)
           if (swipe) {
             for (const distance of [20, 40, 80, 100]) await touch('touchMove', { ...point, y: point.y - distance })

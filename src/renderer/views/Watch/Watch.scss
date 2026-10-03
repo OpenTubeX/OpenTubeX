@@ -1168,7 +1168,7 @@
     overflow: hidden;
     background-color: var(--card-bg-color);
     backdrop-filter: var(--card-bg-blur, none);
-    border-radius: calc(8px * var(--ui-roundness));
+    border-radius: calc(12px * var(--ui-roundness));
     color: var(--primary-text-color);
     box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
 
@@ -1778,7 +1778,7 @@
   gap: 24px;
   box-sizing: border-box;
   padding: 16px;
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: calc(12px * var(--ui-roundness));
   background-color: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
   box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
@@ -1914,7 +1914,7 @@
   margin-inline: 8px;
   padding-block: 16px;
   padding-inline: 16px;
-  border-radius: calc(8px * var(--ui-roundness));
+  border-radius: calc(12px * var(--ui-roundness));
   background-color: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
   box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
