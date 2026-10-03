@@ -64,12 +64,25 @@ test('mobile select labels are readable and centered with both icon packs', asyn
 
 test('subscription videos per day picker preserves its parent popup', async ({ page }) => {
   await goTo(page, 'subscribedchannels')
+  await page.evaluate(() => document.body.style.setProperty('--card-bg-blur', 'blur(8px)'))
   await page.locator('.channel').getByRole('button', { name: 'Subscription settings' }).click()
   const popup = page.locator('body > .profileDropdown')
   const select = popup.getByRole('combobox', { name: 'Videos per day' })
   await select.click()
   const picker = page.getByRole('dialog', { name: 'Videos per day' })
   await expect(picker).toBeVisible()
+  expect(await picker.evaluate(element => {
+    const rect = element.getBoundingClientRect()
+    return {
+      fitsViewport: rect.left >= 0 && rect.top >= 0 && rect.right <= innerWidth && rect.bottom <= innerHeight,
+      centered: Math.abs(rect.left + rect.width / 2 - innerWidth / 2) < 1,
+      expectedWidth: Math.abs(rect.width - Math.min(innerWidth - 40, 400)) < 1
+    }
+  })).toEqual({ fitsViewport: true, centered: true, expectedWidth: true })
+  expect(await picker.getByRole('option', { name: '2', exact: true }).evaluate(element => {
+    const rect = element.getBoundingClientRect()
+    return element.contains(document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2))
+  })).toBe(true)
   await picker.getByRole('option', { name: '2', exact: true }).click()
   await expect(picker).toBeHidden()
   await expect(popup).toBeVisible()

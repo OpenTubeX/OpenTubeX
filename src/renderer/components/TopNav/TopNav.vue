@@ -6,7 +6,10 @@
     :style="{ '--header-side-space': `${headerSideSpace}px` }"
     @keydown.esc="closePhoneSearch"
   >
-    <div class="topNavInner">
+    <div
+      class="topNavInner"
+      :class="{ headerShortcutsEnabled: showDownloadsButton || showSettingsButton }"
+    >
       <div
         ref="navigationActions"
         class="side"
@@ -347,15 +350,17 @@ function measureHeader() {
   const text = navigationActions.value.querySelector('.logoText')
   const textStyle = text && getComputedStyle(text)
   const logoText = textStyle ? parseFloat(textStyle.inlineSize) + parseFloat(textStyle.marginInlineStart) : 0
-  const navigationSpace = measureActions(navigationActions.value, 'marginInlineStart') -
+  const navigationWidth = measureActions(navigationActions.value, 'marginInlineStart')
+  const navigationSpace = navigationWidth -
     (text?.getBoundingClientRect().width > 0 ? logoText : 0)
+  const sectionGap = parseFloat(getComputedStyle(header.value.firstElementChild).columnGap) || 0
   headerMetrics.value = {
     width,
     navigation: navigationSpace,
     actions: measureActions(headerActions.value, 'marginInlineEnd'),
     logoText,
     // Reserve a 48px touch target plus the 4px gap for search and each shortcut.
-    shortcutSpace: width - navigationSpace - measureActions(headerActions.value, 'marginInlineEnd', true) -
+    shortcutSpace: width - navigationWidth - sectionGap - measureActions(headerActions.value, 'marginInlineEnd', true) -
       (hideSearchBar.value ? 0 : 52)
   }
 }
