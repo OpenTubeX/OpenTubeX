@@ -400,7 +400,7 @@ for (const scale of [100, 95]) {
     test.describe(`input alignment at ${width}px and ${scale}% scale`, () => {
       test.use({ seed: { settings: { currentLocale: 'en-US', uiScale: scale, baseTheme: scale === 100 ? 'dark' : 'light', bounds: { x: 0, y: 0, width, height: 900, maximized: false } } } })
 
-      test('centers channel share and subscription buttons on the same row', async ({ page }, testInfo) => {
+      test('centers channel share and subscription buttons on the same row', async ({ app, page }, testInfo) => {
         await page.emulateMedia({ reducedMotion: 'reduce' })
         await page.evaluate(async () => {
           const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -434,22 +434,80 @@ for (const scale of [100, 95]) {
         const row = page.locator('.channelDetails .infoActionsContainer')
         const subscribe = row.locator('.subscribeButton')
         await expect(row.locator('.shareButton .iconButton')).toBeVisible()
-        for (const label of ['Subscribe', 'Unsubscribe']) {
-          await expect(subscribe).toHaveText(label)
-          for (const direction of ['ltr', 'rtl']) {
-            await page.evaluate(value => { document.body.dir = value }, direction)
-            await expect.poll(() => row.evaluate(element => {
-              const share = element.querySelector('.shareButton .iconButton').getBoundingClientRect()
-              const subscribe = element.querySelector('.subscribeButton').getBoundingClientRect()
-              return Math.abs(share.top + share.height / 2 - subscribe.top - subscribe.height / 2)
-            }), { message: `${label} and Share centers in ${direction}` }).toBeLessThanOrEqual(0.1)
+        for (const viewportWidth of width === 480 ? [480, 375] : [width]) {
+          if (viewportWidth !== width) {
+            await subscribe.click()
+            await setWindowSize(app, page, { width: viewportWidth, height: 800 })
           }
-          if (label === 'Subscribe') await subscribe.click()
-        }
-        if (scale === 100) {
-          const screenshot = testInfo.outputPath('aligned-channel-actions.png')
-          await row.screenshot({ path: screenshot })
-          await testInfo.attach('aligned-channel-actions', { path: screenshot, contentType: 'image/png' })
+          for (const label of ['Subscribe', 'Unsubscribe']) {
+            await expect(subscribe).toHaveText(label)
+            for (const direction of ['ltr', 'rtl']) {
+              await page.evaluate(value => { document.body.dir = value }, direction)
+              await expect.poll(() => row.evaluate(element => {
+                const share = element.querySelector('.shareButton .iconButton').getBoundingClientRect()
+                const subscribe = element.querySelector('.subscribeButton').getBoundingClientRect()
+                return Math.abs(share.top + share.height / 2 - subscribe.top - subscribe.height / 2)
+              }), { message: `${label} and Share centers in ${direction}` }).toBeLessThanOrEqual(0.1)
+              if (viewportWidth <= 680) {
+                await expect.poll(() => row.evaluate((element, direction) => {
+                  const row = element.getBoundingClientRect()
+                  const share = element.querySelector('.shareIcon').getBoundingClientRect()
+                  const subscribe = element.querySelector('.ftSubscribeButton').getBoundingClientRect()
+                  return direction === 'ltr'
+                    ? Math.max(Math.abs(share.right - row.right), Math.abs(subscribe.left - row.left))
+                    : Math.max(Math.abs(share.left - row.left), Math.abs(subscribe.right - row.right))
+                }, direction), { message: `${label} and Share at opposite row edges in ${direction}` }).toBeLessThanOrEqual(1)
+              }
+            }
+            if (label === 'Subscribe') await subscribe.click()
+          }
+          if (scale === 100) {
+            await page.evaluate(() => { document.body.dir = 'ltr' })
+            const screenshot = testInfo.outputPath(`aligned-channel-actions-${viewportWidth}.png`)
+            await page.locator('.channelDetails').screenshot({ path: screenshot })
+            await testInfo.attach('aligned-channel-actions', { path: screenshot, contentType: 'image/png' })
+          }
+          if (viewportWidth <= 680) {
+            for (const [setting, remainingAction] of [
+              ['updateHideSharingActions', '.ftSubscribeButton'],
+              ['updateHideUnsubscribeButton', '.shareIcon']
+            ]) {
+              await page.evaluate(async setting => {
+                document.body.dir = 'ltr'
+                const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+                await store.dispatch(setting, true)
+              }, setting)
+              await expect(row.locator(':scope > *')).toHaveCount(1)
+              await expect.poll(() => row.evaluate((element, remainingAction) => {
+                const row = element.getBoundingClientRect()
+                const action = element.querySelector(remainingAction).getBoundingClientRect()
+                return window.innerWidth <= 400
+                  ? Math.abs(action.left + action.width / 2 - row.left - row.width / 2)
+                  : Math.abs(action.left - row.left)
+              }, remainingAction), { message: `${remainingAction} keeps its alignment when shown alone` }).toBeLessThanOrEqual(1)
+              await page.evaluate(setting => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(setting, false), setting)
+            }
+          }
+          if (viewportWidth === 375 && scale === 100) {
+            await setWindowSize(app, page, { width: 340, height: 700 })
+            for (const [locale, label] of [['en-US', 'Unsubscribe'], ['de-DE', 'Deabonnieren']]) {
+              await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+              await expect(subscribe).toHaveText(label)
+              for (const zoom of [1.5, 2]) {
+                await app.electronApp.evaluate(({ BrowserWindow }, zoom) => {
+                  BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(zoom)
+                }, zoom)
+                await expect.poll(() => row.evaluate(element => {
+                  const row = element.getBoundingClientRect()
+                  const actions = [...element.children]
+                  return actions.length === 2 && actions.every(action => {
+                    const rect = action.getBoundingClientRect()
+                    return Math.abs(rect.left + rect.width / 2 - row.left - row.width / 2) <= 1
+                  })
+                }), { message: `Wrapped actions remain centered at ${zoom * 100}% scale in ${locale}` }).toBe(true)
+              }
+            }
+          }
         }
       })
 

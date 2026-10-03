@@ -204,6 +204,12 @@
   }
 }
 
+@media only screen and (300px < width <=680px) {
+  .infoActionsContainer:has(> .shareIcon):has(> .ftSubscribeButton) {
+    justify-content: space-between;
+  }
+}
+
 @media only screen and (width <=400px) {
   .info {
     justify-content: center;
