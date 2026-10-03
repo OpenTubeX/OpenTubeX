@@ -3,6 +3,41 @@
   src: url('assets/font/Roboto-Regular.ttf');
 }
 
+/* Accept control taps without waiting for a double tap, while retaining
+   scrolling and pinch zoom. Gesture-specific rules override this default. */
+:global(:where(
+  a[href],
+  button,
+  input,
+  select,
+  textarea,
+  label,
+  summary,
+  [role='button'],
+  [role='link'],
+  [role='tab'],
+  [role='option'],
+  [role='menuitem'],
+  [role='checkbox'],
+  [role='radio'],
+  [role='switch'],
+  [role='combobox'],
+  .ft-playlist-selector,
+  .ft-input-component .optionWrapper,
+  .toast.actionable,
+  .playlistProgressBar,
+  .mobileLinkActionsBackdrop,
+  .tabOrganizerBackdrop,
+  .capacitorPhoneTabOverlay,
+  .capacitorTabActionsBackdrop,
+  .prompt,
+  .dropdownLayer,
+  .commandPaletteBackdrop,
+  .mobileSheet
+)) {
+  touch-action: manipulation;
+}
+
 .app {
   --app-safe-area-inset-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0));
   --app-safe-area-inset-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0));
