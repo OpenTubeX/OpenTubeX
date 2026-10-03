@@ -298,6 +298,10 @@
   }
 }
 
+.phoneLayout .profiles {
+  gap: 4px;
+}
+
 .topNav:not(.phoneLayout) .side {
   inline-size: max-content;
   justify-self: start;
@@ -341,10 +345,6 @@
 
 // Phone search occupies the header's own row, including in native landscape.
 .phoneLayout {
-  .profiles {
-    gap: 4px;
-  }
-
   .profiles > .navButton,
   .profiles :deep(.profileTrigger) {
     box-sizing: border-box;

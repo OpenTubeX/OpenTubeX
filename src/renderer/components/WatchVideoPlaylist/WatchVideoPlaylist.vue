@@ -342,8 +342,7 @@ const router = useRouter()
 const { tabId, isTabPresented } = useTabContext()
 const playlistCacheTabId = tabId ?? 'web'
 
-// Set when centering is attempted while the tab is hidden (e.g. opened in a
-// background tab): the list has no layout yet, so we retry once it is presented.
+// Retry centering once a hidden tab or phone panel has a measurable list.
 const needsInitialCenter = ref(false)
 
 const isLoading = ref(false)
@@ -1204,6 +1203,9 @@ watch(playlistItemsWrapper, (wrapper) => {
         container,
         items[items.length - 1] ?? null
       )
+      if (needsInitialCenter.value && container.clientHeight > 0) {
+        centerCurrentVideo()
+      }
     })
   }
   playlistItemsObserver = new MutationObserver(scheduleClamp)
@@ -1254,7 +1256,7 @@ function scrollToVideo(index) {
     return false
   }
 
-  const currentVideoItemEl = container.children[index]
+  const currentVideoItemEl = container.querySelectorAll(':scope > .playlistItem')[index]
 
   if (currentVideoItemEl == null) {
     return false
@@ -1265,7 +1267,7 @@ function scrollToVideo(index) {
   const itemOffset = itemRect.top - containerRect.top - container.clientTop + container.scrollTop
   const centeredOffset = (container.clientHeight - itemRect.height) / 2
 
-  container.scrollTop = Math.max(0, itemOffset - centeredOffset)
+  restoreOverlayScrollTop(container, Math.max(0, itemOffset - centeredOffset))
   return true
 }
 
@@ -1275,12 +1277,16 @@ function scrollToCurrentVideo() {
 
 function centerCurrentVideo() {
   nextTick(() => {
-    requestAnimationFrame(() => {
+    requestAnimationFrame(async () => {
+      const container = playlistItemsWrapper.value?.$el ?? playlistItemsWrapper.value
+      const item = container?.querySelectorAll(':scope > .playlistItem')[currentVideoIndexZeroBased.value]
+      // Move transitions can temporarily place a newly visible row outside the list.
+      await Promise.allSettled((item?.getAnimations() ?? []).map(animation => animation.finished))
       if (scrollToCurrentVideo()) {
         needsInitialCenter.value = false
         requestAnimationFrame(scrollToCurrentVideo)
       } else {
-        // The tab is still hidden; retry once it becomes presented.
+        // Retry once the tab or phone panel becomes visible.
         needsInitialCenter.value = true
       }
     })

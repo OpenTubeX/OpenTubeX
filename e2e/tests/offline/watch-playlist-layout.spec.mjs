@@ -61,11 +61,48 @@ async function openPlaylist(app, page) {
   await page.getByText('Layout test playlist', { exact: true }).click()
   await page.getByText('Playlist video 1', { exact: true }).click()
   await waitForPlayback(page)
-  await expect(page.locator('.playlistItem')).toHaveCount(videos.length)
+  await expect(page.locator('.watchVideoPlaylist .playlistItem')).toHaveCount(videos.length)
   return watchViewHandle(page)
 }
 
 for (const zoom of [1, 0.95]) {
+  test(`phone playlist centers pending current items when opened at ${zoom} UI scale`, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 480, height: 800 })
+    await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
+    await page.setViewportSize({ width: 480, height: 800 })
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const playlist = store.getters.getPlaylist('layout-playlist')
+      const [current, ...others] = playlist.videos
+      await store.dispatch('updatePlaylist', { ...playlist, videos: [...others.slice(0, 8), current, ...others.slice(8)] })
+    })
+    const watch = await openPlaylist(app, page)
+    await page.locator('.phonePlaylistButton').click()
+    const sheet = page.locator('.dockedSheet[open]')
+    const list = sheet.locator('.playlistItemsWrapper')
+    const current = list.locator('.playlistItem').filter({ has: page.getByText('Playlist video 1', { exact: true }) })
+    const expectCurrentVisible = async () => {
+      await sheet.evaluate(el => Promise.all(el.getAnimations().map(animation => animation.finished)))
+      await expect.poll(async () => {
+        const item = await current.boundingBox()
+        const viewport = await list.boundingBox()
+        return item != null && viewport != null && item.y >= viewport.y - 1 && item.y + item.height <= viewport.y + viewport.height + 1
+      }).toBe(true)
+    }
+    await expectCurrentVisible()
+    await sheet.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(sheet).toHaveCount(0)
+    await watch.evaluate(async vm => {
+      const playlist = vm.$store.getters.getPlaylist('layout-playlist')
+      const current = playlist.videos.find(video => video.videoId === vm.videoId)
+      const others = playlist.videos.filter(video => video !== current)
+      await vm.$store.dispatch('updatePlaylist', { ...playlist, videos: [...others.slice(0, 10), current, ...others.slice(10)] })
+    })
+    await page.locator('.phonePlaylistButton').click()
+    await expectCurrentVisible()
+    await watch.dispose()
+  })
+
   test(`portrait playlist opens below the video and clamps after resize and removal at ${zoom} UI scale`, async ({ app, page, attachScreenshot }) => {
     const watch = await openPlaylist(app, page)
     await setWindowSize(app, page, { width: 480, height: 800 })
