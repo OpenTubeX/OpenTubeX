@@ -188,17 +188,27 @@ function requiresEncryptedSync(settings) {
   return settings.syncServerPrivacyMode === 'enhanced' || Boolean(settings.syncServerPrivacyKey)
 }
 
-async function getSyncServerCapabilities(client, { refresh = false } = {}) {
+async function getSyncServerCapabilities(client, { refresh = false, requiredCapabilities = [] } = {}) {
   const identity = JSON.stringify([client.serverUrl, client.token])
   const age = syncCapabilities ? Date.now() - syncCapabilities.checkedAt : Infinity
-  if (!refresh && syncCapabilities?.identity === identity && age >= 0 && age < AUTO_SYNC_INTERVAL_MS) {
+  if (!refresh && syncCapabilities?.identity === identity && syncCapabilities.value &&
+      age >= 0 && age < AUTO_SYNC_INTERVAL_MS &&
+      requiredCapabilities.every(capability => syncCapabilities.value[capability] === 1)) {
     return syncCapabilities.value
   }
   // Failed discovery must not leave previously advertised support reusable.
-  syncCapabilities = null
+  const discovery = { identity, value: null, checkedAt: 0 }
+  syncCapabilities = discovery
   const value = await client.getCapabilities()
-  syncCapabilities = { identity, value, checkedAt: Date.now() }
-  return value
+  // An older in-flight discovery must not replace a newer result or revive a
+  // cache cleared when the live connection was stopped.
+  if (syncCapabilities === discovery) {
+    discovery.value = value
+    discovery.checkedAt = Date.now()
+  }
+  return syncCapabilities?.identity === identity && syncCapabilities.value
+    ? syncCapabilities.value
+    : value
 }
 
 function assertEncryptionSupported(supported, required) {
@@ -406,7 +416,16 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   try {
     // Remote checks share recent discovery. Full syncs refresh it for subsequent
     // live checks too, so new support cannot be reverted by an old live client.
-    const capabilities = await getSyncServerCapabilities(networkClient, { refresh: !remoteOnly })
+    // Recheck missing support before consuming a live notification, otherwise an
+    // enabled collection added by a server upgrade could miss its only event.
+    const capabilities = await getSyncServerCapabilities(networkClient, {
+      refresh: !remoteOnly,
+      requiredCapabilities: [
+        ...(stages.includes('watchStats') ? ['watch_stats'] : []),
+        ...(stages.includes('liveReminders') ? ['live_reminders'] : []),
+        ...(encrypted && settings.syncServerSyncHistory ? ['seen_videos', 'seen_posts'] : []),
+      ],
+    })
     const watchStatsSupported = encrypted && capabilities.watch_stats === 1
     commit('setSyncServerWatchStatsSupported', watchStatsSupported)
     if (!watchStatsSupported) {

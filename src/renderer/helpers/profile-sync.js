@@ -10,8 +10,9 @@ export function getProfileSyncSignature(profiles) {
     const channels = profile.subscriptions.map(channel => channel.id).sort()
     return profile._id === MAIN_PROFILE_ID
       ? [profile._id, channels]
-      : [profile._id, profile.name, getSyncProfileBackground(profile.bgColor),
-          getSyncProfileTextColor(profile.textColor) ?? DEFAULT_PROFILE_TEXT, channels]
+      : [profile._id, profile.name,
+          isLocalOnlyBackground(profile.bgColor) ? null : getSyncProfileBackground(profile.bgColor),
+          profile.textColor === THEME_TEXT_COLOR ? null : profile.textColor, channels]
   }).sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0))
 }
 

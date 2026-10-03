@@ -5,7 +5,7 @@ import { createStore } from 'vuex'
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import * as profileSync from '../../src/renderer/helpers/profile-sync.js'
-import { MAIN_PROFILE_ID } from '../../src/constants.js'
+import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../src/constants.js'
 import { getProfileWithUpdatedSubscriptionDetails } from '../../src/renderer/helpers/subscription-profile-details.js'
 
 import {
@@ -145,6 +145,20 @@ test('local-only profile edits and identical saves do not schedule syncs', async
   await store.dispatch('updateProfile', JSON.parse(JSON.stringify(store.state.profiles.profileList[1])))
   assert.deepEqual(scheduled, [])
 })
+
+for (const [color, themeColor, explicitColor] of [
+  ['bgColor', THEME_BG_COLOR, '#000000'],
+  ['textColor', THEME_TEXT_COLOR, '#FFFFFF'],
+]) {
+  test(`changing theme ${color} to its explicit fallback still schedules a profile sync`, async () => {
+    const { store, scheduled } = await profileChangeFixture()
+    store.commit('setProfileList', store.state.profiles.profileList.map(profile =>
+      profile._id === 'profile' ? { ...profile, [color]: themeColor } : profile))
+    const profile = JSON.parse(JSON.stringify(store.state.profiles.profileList[1]))
+    await store.dispatch('updateProfile', { ...profile, [color]: explicitColor })
+    assert.deepEqual(scheduled, ['profilesOrSubscriptions'])
+  })
+}
 
 test('channel preference reordering does not make a later refresh or identical save schedule profile sync', async () => {
   const { store, scheduled } = await profileChangeFixture()
