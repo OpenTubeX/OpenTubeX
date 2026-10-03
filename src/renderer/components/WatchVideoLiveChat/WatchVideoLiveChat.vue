@@ -385,7 +385,7 @@
                     {{ comment.author.name }}
                   </RouterLink>
                   <span
-                    v-if="comment.badge"
+                    v-if="comment.badge?.url"
                     class="badge"
                   >
                     <FtRetryImage

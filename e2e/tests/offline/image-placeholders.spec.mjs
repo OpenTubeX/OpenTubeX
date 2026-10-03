@@ -39,6 +39,124 @@ test.use({
   }
 })
 
+test('renders member comments and replies with missing, empty, and broken badge URLs', async ({ page }) => {
+  const rendererErrors = []
+  page.on('pageerror', error => rendererErrors.push(error.message))
+  page.on('console', message => {
+    if (message.type() === 'error' && message.text().includes('replace')) rendererErrors.push(message.text())
+  })
+  const cases = [
+    { name: 'Missing badge', url: null },
+    { name: 'Empty badge', url: '' },
+    { name: 'Broken badge', url: 'data:image/png;base64,AAAA' }
+  ]
+  const comment = (item, reply = false) => ({
+    commentId: `${item.name}-${reply ? 'reply' : 'root'}`,
+    author: `${item.name}${reply ? ' reply' : ''}`,
+    authorId: channelId,
+    authorThumbnails: [],
+    contentHtml: reply ? 'Member reply content' : 'Member comment content',
+    published: 1_700_000_000,
+    likeCount: 0,
+    isSponsor: true,
+    sponsorIconUrl: item.url,
+    ...(reply ? {} : { replies: { replyCount: 1, continuation: item.name } })
+  })
+  await page.route('**/api/v1/post/**', route => {
+    const url = new URL(route.request().url())
+    const item = cases.find(item => item.name === url.searchParams.get('continuation'))
+    return route.fulfill({
+      json: url.pathname.endsWith('/comments')
+        ? { comments: item ? [comment(item, true)] : cases.map(item => comment(item)), commentCount: cases.length }
+        : { comments: [{ commentId: 'member-post', contentHtml: 'Membership badges', author: 'Placeholder channel', authorId: channelId, authorThumbnails: [{ url: 'data:image/png;base64,AAAA' }], publishedText: '1 day ago', likeCount: 0, replyCount: 0 }] }
+    })
+  })
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setBackendPreference', 'invidious')
+    return window.ftElectron.tabs.create({ route: '/post/member-post', query: { authorId: 'UCaaaaaaaaaaaaaaaaaaaaaa' } })
+  })
+  for (const [index, item] of cases.entries()) {
+    const root = page.locator(`#comment${index}`)
+    await expect(root).toBeVisible()
+    await root.locator('.commentReplyToggleLabel').click()
+    const reply = page.locator('.commentReplyContent', { hasText: `${item.name} reply` })
+    await expect(reply).toBeVisible()
+    for (const entry of [root, reply]) {
+      if (item.url === null) await expect(entry.locator(':scope > .commentAuthorWrapper .commentMemberIcon')).toHaveCount(0)
+      else {
+        await expect(entry.locator(':scope > .commentAuthorWrapper .commentMemberIcon[data-icon="user-check"]')).toBeVisible()
+        await expect(entry.locator(':scope > .commentAuthorWrapper img.commentMemberIcon')).toBeHidden()
+      }
+    }
+  }
+  expect(rendererErrors).toEqual([])
+})
+
+test('renders live chat members with empty badge thumbnails without image setup errors', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const rendererErrors = []
+  page.on('pageerror', error => rendererErrors.push(error.message))
+  page.on('console', message => {
+    if (message.type() === 'error' && message.text().includes('replace')) rendererErrors.push(message.text())
+  })
+  await openMockedVideo(page)
+  const view = await watchViewHandle(page)
+  await view.evaluate(async view => {
+    const listeners = new Map()
+    const chat = {
+      is_replay: false,
+      on: (event, listener) => listeners.set(listener, event),
+      once: (event, listener) => listeners.set(listener, event),
+      off: (_event, listener) => listeners.delete(listener),
+      start() {},
+      stop() {},
+      emit(event, value) {
+        for (const [listener, listenerEvent] of listeners) if (listenerEvent === event) listener(value)
+      }
+    }
+    view.$store.commit('setHideLiveChat', false)
+    view.liveChat = chat
+    view.liveChatIsReplay = false
+    view.liveChatOpen = true
+    view.isLive = true
+    view.isUpcoming = false
+    await view.$nextTick()
+  })
+  await expect(page.locator('.liveChatSkeleton')).toBeVisible()
+  await view.evaluate(view => {
+    view.liveChat.emit('start', {
+      actions: ['Empty', 'Broken'].map(name => {
+        let checks = 0
+        return {
+          is: () => ++checks === 2,
+          item: {
+            is: () => true,
+            id: `member-${name}`,
+            timestamp: Date.now(),
+            message: { runs: [{ text: `${name} badge message` }] },
+            author: {
+              id: `member-${name}`,
+              name: `${name} badge member`,
+              thumbnails: [{ url: 'data:image/png;base64,AAAA' }],
+              badges: [{ is: () => true, custom_thumbnail: name === 'Empty' ? [] : [{ url: 'data:image/png;base64,AAAA' }], tooltip: 'Member' }],
+              is_moderator: false
+            }
+          }
+        }
+      })
+    })
+  })
+  const empty = page.locator('.liveChatComments .comment', { hasText: 'Empty badge message' })
+  await expect(empty).toBeVisible()
+  await expect(empty.locator('.channelName.member')).toBeVisible()
+  await expect(empty.locator('.badge')).toHaveCount(0)
+  const broken = page.locator('.liveChatComments .comment', { hasText: 'Broken badge message' })
+  await expect(broken.locator('.badgeImage[data-icon="user-check"]')).toBeVisible()
+  await expect(broken.locator('img.badgeImage')).toBeHidden()
+  expect(rendererErrors).toEqual([])
+})
+
 for (const iconPack of ['material', 'remix']) {
   test(`keeps ${iconPack} avatar placeholders visible during loading and retries`, async ({ app, page }, testInfo) => {
     await page.evaluate(pack => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', pack), iconPack)

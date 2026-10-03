@@ -93,7 +93,7 @@
           </template>
         </component>
         <FtRetryImage
-          v-if="reply.isMember"
+          v-if="reply.isMember && typeof reply.memberIconUrl === 'string'"
           :fallback-icon="['fas', 'user-check']"
           :src="reply.memberIconUrl"
           class="commentMemberIcon"

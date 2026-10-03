@@ -305,7 +305,7 @@
               </template>
             </component>
             <FtRetryImage
-              v-if="comment.isMember"
+              v-if="comment.isMember && typeof comment.memberIconUrl === 'string'"
               :fallback-icon="['fas', 'user-check']"
               :src="comment.memberIconUrl"
               :title="$t('Comments.Member')"
