@@ -259,7 +259,7 @@ const colorSourcesAbove = ref(false)
 const popoverStyle = ref({})
 const colorWhenOpened = ref(props.modelValue)
 const blurWhenOpened = ref(props.blurValue ?? 0)
-let draggingSaturationValue = false
+let saturationValuePointerId = null
 let saturationValuePointer = null
 let saturationValueFrame = null
 let statusTimeout = null
@@ -357,8 +357,8 @@ function emitCurrentBlur() {
 }
 
 function startSaturationValue(event) {
-  if (event.button !== 0) return
-  draggingSaturationValue = true
+  if (event.button !== 0 || saturationValuePointerId !== null) return
+  saturationValuePointerId = event.pointerId
   saturationValuePointer = { x: event.clientX, y: event.clientY }
   renderSaturationValue()
   window.addEventListener('pointermove', updateSaturationValue)
@@ -368,7 +368,7 @@ function startSaturationValue(event) {
 }
 
 function updateSaturationValue(event) {
-  if (!draggingSaturationValue) return
+  if (saturationValuePointerId === null || event.pointerId !== saturationValuePointerId) return
   saturationValuePointer = { x: event.clientX, y: event.clientY }
   if (saturationValueFrame !== null) return
   saturationValueFrame = requestAnimationFrame(() => {
@@ -378,7 +378,7 @@ function updateSaturationValue(event) {
 }
 
 function renderSaturationValue() {
-  if (!draggingSaturationValue || saturationValuePointer === null) return
+  if (saturationValuePointerId === null || saturationValuePointer === null) return
   const { x, y } = saturationValuePointer
   saturationValuePointer = null
   const bounds = saturationValueRef.value?.getBoundingClientRect()
@@ -392,10 +392,12 @@ function renderSaturationValue() {
 }
 
 function stopSaturationValue(event) {
-  if (!draggingSaturationValue) return
-  if (event && event.type !== 'pointercancel') {
-    saturationValuePointer = { x: event.clientX, y: event.clientY }
+  if (saturationValuePointerId === null || event.pointerId !== saturationValuePointerId) return
+  if (event.type === 'pointercancel') {
+    cancelSaturationValue()
+    return
   }
+  saturationValuePointer = { x: event.clientX, y: event.clientY }
   // Apply a release that arrives before the scheduled frame before committing.
   renderSaturationValue()
   cancelSaturationValue()
@@ -403,7 +405,7 @@ function stopSaturationValue(event) {
 }
 
 function cancelSaturationValue() {
-  draggingSaturationValue = false
+  saturationValuePointerId = null
   if (saturationValueFrame !== null) cancelAnimationFrame(saturationValueFrame)
   saturationValueFrame = null
   saturationValuePointer = null

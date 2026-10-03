@@ -31,7 +31,7 @@ function colorPicker() {
   }
   const saturation = ref(0)
   const value = ref(0)
-  const declarations = source.match(/^let (?:draggingSaturationValue|saturationValue\w*) = .*$/gm).join('\n')
+  const declarations = source.match(/^let saturationValue\w* = .*$/gm).join('\n')
   const methods = source.slice(source.indexOf('function startSaturationValue('), source.indexOf('function adjustSaturationValue('))
   const api = vm.runInNewContext(`${declarations}\n${methods}\n({ startSaturationValue, updateSaturationValue, stopSaturationValue, cancelSaturationValue })`, {
     ...frames, saturation, value,
@@ -41,7 +41,7 @@ function colorPicker() {
     emit() { calls.changes++ },
     window: { addEventListener() {}, removeEventListener() {} }
   })
-  const event = (clientX, clientY) => ({ button: 0, clientX, clientY, preventDefault() {} })
+  const event = (clientX, clientY, pointerId = 7, type = 'pointermove') => ({ button: 0, clientX, clientY, pointerId, type, preventDefault() {} })
   api.startSaturationValue(event(10.5, 20.25))
   Object.assign(calls, { reads: 0, colors: 0, changes: 0 })
   return { api, calls, frames, saturation, value, event }
@@ -57,7 +57,7 @@ test('color picker coalesces pointer bursts into one geometry read and color upd
   assert.equal(harness.calls.reads, 1)
   assert.equal(harness.calls.colors, 1)
   assert.ok(Math.abs(harness.saturation.value - (99 - 10.5) / 200.5 * 100) < 0.001)
-  harness.api.stopSaturationValue()
+  harness.api.cancelSaturationValue()
 })
 
 test('color picker flushes the release position before change and cancels pending work', async () => {
@@ -83,6 +83,37 @@ test('closing a color picker discards pending previews without emitting a change
   assert.equal(harness.frames.frames.size, 0)
 })
 
+test('a second pointer cannot start another color drag', async () => {
+  const harness = colorPicker()
+  harness.api.startSaturationValue(harness.event(211, 120.5, 8, 'pointerdown'))
+  assert.deepEqual(harness.calls, { reads: 0, colors: 0, changes: 0 })
+  harness.api.cancelSaturationValue()
+})
+
+test('unrelated pointer moves and releases cannot update or commit a color drag', async () => {
+  const harness = colorPicker()
+  harness.api.updateSaturationValue(harness.event(50, 45))
+  harness.api.updateSaturationValue(harness.event(211, 120.5, 8))
+  harness.api.stopSaturationValue(harness.event(211, 120.5, 8, 'pointerup'))
+  harness.api.stopSaturationValue(harness.event(211, 120.5, 8, 'pointercancel'))
+  assert.equal(harness.calls.changes, 0)
+  await harness.frames.flush()
+  assert.ok(Math.abs(harness.saturation.value - (50 - 10.5) / 200.5 * 100) < 0.001)
+  harness.api.stopSaturationValue(harness.event(50, 45, 7, 'pointerup'))
+  assert.equal(harness.calls.changes, 1)
+})
+
+test('canceling a color drag discards queued work without committing', async () => {
+  const harness = colorPicker()
+  harness.api.updateSaturationValue(harness.event(50, 45))
+  harness.api.stopSaturationValue(harness.event(0, 0, 7, 'pointercancel'))
+  await harness.frames.flush()
+  assert.deepEqual(harness.calls, { reads: 0, colors: 0, changes: 0 })
+  assert.equal(harness.frames.frames.size, 0)
+  harness.api.stopSaturationValue(harness.event(211, 120.5, 7, 'pointerup'))
+  assert.equal(harness.calls.changes, 0)
+})
+
 test('stationary color picker pointers do not emit redundant theme updates', async () => {
   const harness = colorPicker()
   harness.api.updateSaturationValue(harness.event(50, 45))
@@ -90,7 +121,7 @@ test('stationary color picker pointers do not emit redundant theme updates', asy
   harness.api.updateSaturationValue(harness.event(50, 45))
   await harness.frames.flush()
   assert.equal(harness.calls.colors, 1)
-  harness.api.stopSaturationValue()
+  harness.api.cancelSaturationValue()
 })
 
 test('playlist preview measures one pointer position per frame and uses the latest index', async () => {

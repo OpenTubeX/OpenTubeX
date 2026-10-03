@@ -82,8 +82,8 @@ for (const zoom of [1, 0.95]) {
       const bounds = original.call(element)
       let reads = 0
       element.getBoundingClientRect = function () { reads++; return original.call(this) }
-      const pointer = (type, x, y) => new PointerEvent(type, {
-        bubbles: true, button: 0, pointerId: 7, clientX: x, clientY: y
+      const pointer = (type, x, y, pointerId = 7) => new PointerEvent(type, {
+        bubbles: true, button: 0, pointerId, clientX: x, clientY: y
       })
       try {
         element.dispatchEvent(pointer('pointerdown', bounds.left + 1, bounds.top + 1))
@@ -91,12 +91,21 @@ for (const zoom of [1, 0.95]) {
         for (let index = 0; index < 50; index++) {
           window.dispatchEvent(pointer('pointermove', bounds.left + bounds.width * index / 100, bounds.top + 10))
         }
+        element.dispatchEvent(pointer('pointerdown', bounds.right, bounds.bottom, 8))
+        window.dispatchEvent(pointer('pointermove', bounds.right, bounds.bottom, 8))
+        window.dispatchEvent(pointer('pointerup', bounds.right, bounds.bottom, 8))
         await new Promise(resolve => requestAnimationFrame(resolve))
         const burstReads = reads
         window.dispatchEvent(pointer('pointermove', bounds.left + 20, bounds.top + 20))
         window.dispatchEvent(pointer('pointerup', bounds.right + 1, bounds.top + bounds.height / 2))
         await new Promise(resolve => requestAnimationFrame(resolve))
-        return { burstReads, releaseValue: element.getAttribute('aria-valuetext') }
+        const releaseValue = element.getAttribute('aria-valuetext')
+        element.dispatchEvent(pointer('pointerdown', bounds.right + 1, bounds.top + bounds.height / 2))
+        reads = 0
+        window.dispatchEvent(pointer('pointermove', bounds.left + 20, bounds.top + 20))
+        window.dispatchEvent(pointer('pointercancel', 0, 0))
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        return { burstReads, releaseValue, cancelReads: reads, cancelValue: element.getAttribute('aria-valuetext') }
       } finally {
         element.getBoundingClientRect = original
       }
@@ -104,6 +113,8 @@ for (const zoom of [1, 0.95]) {
     console.log('Rendered color picker pointer work:', metrics)
     expect.soft(metrics.burstReads).toBe(1)
     expect(metrics.releaseValue).toBe('100%, 50%')
+    expect(metrics.cancelReads).toBe(0)
+    expect(metrics.cancelValue).toBe('100%, 50%')
     await surface.press('ArrowUp')
     await expect(surface).toHaveAttribute('aria-valuetext', '100%, 51%')
     await page.locator('.colorPickerPopover').getByRole('button', { name: 'Apply', exact: true }).click()
