@@ -152,6 +152,9 @@ test('keeps all tabs visible without scrolling after labels or available tabs ch
     await expectAligned(page)
   }
   await expectAllTabsFit()
+  await expect.poll(() => tabs.locator('[role="tab"]').evaluateAll(elements =>
+    Math.min(...elements.map(element => element.getBoundingClientRect().height))
+  )).toBeGreaterThan(47.5)
   await page.locator('#aboutTab').click()
   await expectAllTabsFit()
   await page.locator('#videosTab .tabLabel').evaluate(label => {
