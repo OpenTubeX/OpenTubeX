@@ -82,8 +82,8 @@ for (const indicator of ['loading', 'playing']) {
       const firstFrame = await tab.evaluate(element => new Promise(resolve => requestAnimationFrame(() => {
         const image = element.querySelector('img.tabAvatar:not(.retryImagePlaceholder)')
         resolve({
-          visible: image?.checkVisibility() === true,
-          placeholder: [...element.querySelectorAll('.retryImagePlaceholder')].some(icon => icon.checkVisibility())
+          visible: image?.checkVisibility({ visibilityProperty: true }) === true,
+          placeholder: [...element.querySelectorAll('.retryImagePlaceholder')].some(icon => icon.checkVisibility({ visibilityProperty: true }))
         })
       })))
       expect(firstFrame).toEqual({ visible: true, placeholder: false })

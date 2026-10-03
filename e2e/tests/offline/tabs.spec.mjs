@@ -436,7 +436,7 @@ test.describe('tab bar', () => {
           window.__watchTabIconStates.push({
             id: tab.dataset.tabId,
             loading: tab.querySelector('.tabLoadingDot') != null,
-            avatar: tab.querySelector('.tabAvatar')?.checkVisibility() === true
+            avatar: tab.querySelector('.tabAvatar')?.checkVisibility({ visibilityProperty: true }) === true
           })
         }
       }
