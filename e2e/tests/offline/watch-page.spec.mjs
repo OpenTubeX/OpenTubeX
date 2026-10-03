@@ -2,6 +2,7 @@ import crypto from 'node:crypto'
 import { abortUnmockedRequest, sel, setPlayerFullscreen, setWindowSize, test, expect } from '../../helpers/app.mjs'
 import { activeTab, findWatchComponent, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
+import { measureFullscreenDockToggle } from '../../helpers/fullscreen-docks.mjs'
 import {
   DEMO_MEDIA_URL,
   POST_LIVE_AUDIO_URL,
@@ -5381,22 +5382,7 @@ test.describe('watch page', () => {
     await expect(fullscreenMetadata).toBeVisible()
     await expect(player).not.toHaveClass(/presentationModeChanging/)
 
-    expect(await player.evaluate(element => {
-      const movingProperties = [
-        ['.player', 'inline-size'],
-        ['.shaka-controls-container', 'inline-size'],
-        ['.shortsTopControls', 'inset-inline-start'],
-        ['.shortsTopControls', 'max-inline-size'],
-        ['.fullscreenActions', 'inset-inline-end']
-      ]
-      return movingProperties.map(([selector, property]) => {
-        const style = getComputedStyle(element.querySelector(selector))
-        const properties = style.transitionProperty.split(', ')
-        const durations = style.transitionDuration.split(', ')
-        const index = properties.indexOf(property)
-        return index === -1 ? null : durations[index % durations.length]
-      })
-    })).toEqual(Array(5).fill('0.25s'))
+    await expect(player.locator('.shaka-controls-container')).toHaveCSS('transition-property', 'none')
 
     expect(await player.evaluate(element => {
       return getComputedStyle(
@@ -5404,23 +5390,16 @@ test.describe('watch page', () => {
       ).transitionProperty
     })).toBe('none')
 
-    const closingMotion = player.evaluate(element => new Promise(resolve => {
-      const controls = element.querySelector('.shaka-controls-container')
-      const seek = element.querySelector('.shaka-seek-bar-container')
-      const initial = {
-        seekLeft: seek.getBoundingClientRect().left
-      }
-      controls.addEventListener('transitionrun', event => {
-        resolve({ initial, transitionProperty: event.propertyName })
-      }, { once: true })
-    }))
-    await watchComponent.evaluate(component => {
-      component.proxy.$refs.player.setFullscreenMetadata(false)
+    const initialSeekLeft = await player.locator('.shaka-seek-bar-container').evaluate(element => {
+      return element.getBoundingClientRect().left
     })
-    const { initial, transitionProperty } = await closingMotion
+    const closingMotion = await measureFullscreenDockToggle(watchComponent, false)
+    expect(closingMotion.animationKeyframes).toHaveLength(2)
+    expect(closingMotion.animationKeyframes[0].scale).not.toBe(closingMotion.animationKeyframes[1].scale)
+    expect(closingMotion.widths.length).toBeLessThanOrEqual(2)
+    expect(closingMotion.controlWidths.length).toBeLessThanOrEqual(2)
     await expect(fullscreenMetadata).toHaveCount(0)
     const fullscreenWidth = (await player.boundingBox()).width
-    expect(['inline-size', 'width']).toContain(transitionProperty)
     await expect.poll(async () => {
       return player.locator('.shaka-controls-container').evaluate(element => {
         return element.getBoundingClientRect().width
@@ -5429,19 +5408,14 @@ test.describe('watch page', () => {
     const closedSeekLeft = await player.locator('.shaka-seek-bar-container').evaluate(element => {
       return element.getBoundingClientRect().left
     })
-    expect(closedSeekLeft).toBeGreaterThan(initial.seekLeft)
+    expect(closedSeekLeft).toBeGreaterThan(initialSeekLeft)
 
-    const reopeningMotion = player.evaluate(element => new Promise(resolve => {
-      const controls = element.querySelector('.shaka-controls-container')
-      controls.addEventListener('transitionend', event => {
-        resolve(event.propertyName)
-      }, { once: true })
-    }))
-    await watchComponent.evaluate(component => {
-      component.proxy.$refs.player.setFullscreenMetadata(true)
-    })
+    const reopeningMotion = await measureFullscreenDockToggle(watchComponent, true)
     await expect(fullscreenMetadata).toBeVisible()
-    expect(['inline-size', 'width']).toContain(await reopeningMotion)
+    expect(reopeningMotion.animationKeyframes).toHaveLength(2)
+    expect(reopeningMotion.animationKeyframes[0].scale).not.toBe(reopeningMotion.animationKeyframes[1].scale)
+    expect(reopeningMotion.widths.length).toBeLessThanOrEqual(2)
+    expect(reopeningMotion.controlWidths.length).toBeLessThanOrEqual(2)
     const reopenedControlsWidth = await player.locator('.shaka-controls-container').evaluate(element => {
       return element.getBoundingClientRect().width
     })
