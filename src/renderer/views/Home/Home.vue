@@ -647,6 +647,7 @@ const recentDownloads = computed(() => getRecentDownloads(store.getters.getYtDlp
 const activeSubscriptions = computed(() => store.getters.getActiveProfile.subscriptions)
 const enabledSubscriptionFeeds = computed(() => getEnabledSubscriptionFeedSources(store.getters))
 const newSubscriptionContent = computed(() => getNewSubscriptionFeedEntries({
+  decorateEntries: false,
   feeds: enabledSubscriptionFeeds.value,
   activeSubscriptions: activeSubscriptions.value,
   historyCacheById: store.getters.getHistoryCacheById,
@@ -660,8 +661,12 @@ const newSubscriptionContent = computed(() => getNewSubscriptionFeedEntries({
 }))
 const newSubscriptionEntries = computed(() => (
   Object.entries(newSubscriptionContent.value)
-    .flatMap(([category, entries]) => entries.map(entry => ({ category, entry })))
-    .toSorted((a, b) => newSubscriptionEntryTimestamp(b.entry) - newSubscriptionEntryTimestamp(a.entry))
+    .flatMap(([category, entries]) => entries.map(entry => ({
+      category,
+      entry,
+      timestamp: newSubscriptionEntryTimestamp(entry)
+    })))
+    .toSorted((a, b) => b.timestamp - a.timestamp)
 ))
 const newSubscriptionFeedRoute = Object.freeze({
   path: '/subscriptions',

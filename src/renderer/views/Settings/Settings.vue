@@ -955,13 +955,21 @@ function observeActiveSettingsSection() {
   const content = settingsContentRef.value
   const contentEnd = getSettingsContentEnd(content)
   if (!content || !contentEnd) return
-  settingsSectionResizeObserver = new ResizeObserver(() => {
-    clampOverlayScrollTop(content, contentEnd)
+  let previousHeight = null
+  settingsSectionResizeObserver = new ResizeObserver(([entry]) => {
+    const height = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height
+    const contentShrank = previousHeight !== null && height < previousHeight
+    previousHeight = height
+    if (isInDesktopView.value || content.scrollTop > 0 || contentShrank) {
+      clampOverlayScrollTop(content, contentEnd)
+    }
   })
   content.querySelectorAll(':scope > .section, :scope > .settingsSearchResults').forEach(element => {
     settingsSectionResizeObserver.observe(element)
   })
-  clampOverlayScrollTop(content, contentEnd)
+  // Desktop keeps this pane visible between categories; reconcile its retained
+  // scrollbar tracks. A fresh phone viewport at the origin has nothing to clamp.
+  if (isInDesktopView.value || content.scrollTop > 0) clampOverlayScrollTop(content, contentEnd)
 }
 
 function clampSettingsContentScroll(event) {
@@ -1020,19 +1028,21 @@ function getRememberedSection() {
 
 function navigateToSection(sectionType) {
   const previousSection = activeSection.value
+  const content = settingsContentRef.value
+  const resetScroll = previousSection !== sectionType && content &&
+    (previousSection !== null || content.scrollTop !== 0 || content.scrollLeft !== 0)
   closeSubpage?.()
   subpageTitle.value = ''
   subpageIcon.value = null
   closeSubpage = null
   activeSection.value = sectionType
-  if (previousSection !== sectionType) {
+  if (resetScroll) {
+    // Reconcile retained scrollbars after replacing an existing category.
+    // Opening a fresh viewport from the phone menu needs no forced update.
     nextTick(() => {
-      const content = settingsContentRef.value
-      if (content) {
-        restoreOverlayScrollTop(content, 0)
-        content.scrollLeft = 0
-        updateOverlayScrollbars(content)
-      }
+      restoreOverlayScrollTop(content, 0)
+      content.scrollLeft = 0
+      updateOverlayScrollbars(content)
     })
   }
   if (isInDesktopView.value && previousSection !== null && previousSection !== sectionType) {
