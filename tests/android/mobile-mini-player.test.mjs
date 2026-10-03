@@ -7,7 +7,7 @@ import { resetMiniPlayerWork, stopTrackingMiniPlayerWork, trackMiniPlayerWork } 
 
 // Run against a current debug APK on a locked emulator, forwarding its WebView
 // socket and setting ANDROID_CDP_URL=http://127.0.0.1:<forwarded-port>.
-test('mobile mini-player restores from the whole bar and keeps close separate', {
+test('mobile mini-player restores from the whole bar, swipes down to close, and keeps controls separate', {
   skip: !process.env.ANDROID_CDP_URL,
 }, async () => {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
@@ -25,7 +25,7 @@ test('mobile mini-player restores from the whole bar and keeps close separate', 
         VideoPlaybackEngine: 'built-in', AutoplayVideos: false,
         UseSponsorBlock: false, UseReturnYouTubeDislikes: false,
         KeepPlayingOnNavigation: true, ScrollMiniPlayerEnabled: true, CapacitorLayoutMode: 'phone',
-        UiScale: 100, ReducedMotion: 'off', EnableMobileFullscreenSwipe: false, RotateFullscreenToLandscape: false,
+        UiScale: 100, ReducedMotion: 'off', AnimationSpeed: 100, EnableMobileFullscreenSwipe: false, RotateFullscreenToLandscape: false,
         EnterFullscreenOnDisplayRotate: false, PlayingInterfaceHideDelay: 5,
         MobileLeftSwipeAction: 'disabled', MobileRightSwipeAction: 'disabled',
         AmbientMode: true,
@@ -43,33 +43,53 @@ test('mobile mini-player restores from the whole bar and keeps close separate', 
       location.hash = '#/watch/jNQXAC9IVRw'
       return saved
     })
-    await expect.poll(async () => {
-      const handle = await page.evaluateHandle(findWatchComponent)
-      try { return await handle.evaluate(component => !!component && component.proxy.preparingVideoLoadGeneration === null) }
-      finally { await handle.dispose() }
-    }).toBe(true)
-    watch = await page.evaluateHandle(findWatchComponent)
     const media = (await readFile(new URL('../../e2e/fixtures/media/demo.webm', import.meta.url))).toString('base64')
-    await watch.evaluate((component, media) => {
-      const watch = component.proxy
-      watch.videoLoadGeneration++
-      Object.assign(watch, {
-        isLoading: false, ytDlpStreamsPending: false, errorMessage: null,
-        isUpcoming: false, isLive: false, localFilePlayback: true, activeFormat: 'legacy',
-        videoTitle: 'A long mini-player title with more room after removing the expand arrow', videoLengthSeconds: 60,
-        legacyFormats: [{ itag: 0, qualityLabel: 'Test', mimeType: 'video/webm',
-          width: 320, height: 180, bitrate: 0, localFile: true, url: `data:video/webm;base64,${media}` }],
-      })
-    }, media)
     const player = page.locator('.ftVideoPlayer')
     const video = player.locator('video')
-    await expect.poll(() => video.evaluate(video => video.readyState), { timeout: 15000 }).toBe(4)
-    await watch.evaluate(component => { component.proxy.channelName = 'Mini-player test channel' })
-    await video.evaluate(video => { video.loop = true; return video.play() })
+    const loadTestVideo = async () => {
+      const previous = watch ? await watch.evaluate(component => ({
+        uid: component.uid, generation: component.proxy.videoLoadGeneration,
+      })) : null
+      await page.evaluate(() => { location.hash = '#/watch/jNQXAC9IVRw' })
+      await expect.poll(async () => {
+        const handle = await page.evaluateHandle(findWatchComponent)
+        try {
+          return await handle.evaluate((component, previous) => !!component && component.proxy.onMountedRun &&
+            component.proxy.preparingVideoLoadGeneration === null && component.proxy.isCurrentlyPresented() &&
+            (!previous || component.uid !== previous.uid || component.proxy.videoLoadGeneration > previous.generation), previous)
+        }
+        finally { await handle.dispose() }
+      }).toBe(true)
+      await watch?.dispose()
+      watch = await page.evaluateHandle(findWatchComponent)
+      await watch.evaluate((component, media) => {
+        const watch = component.proxy
+        watch.videoLoadGeneration++
+        Object.assign(watch, {
+          isLoading: false, ytDlpStreamsPending: false, errorMessage: null,
+          isUpcoming: false, isLive: false, localFilePlayback: true, activeFormat: 'legacy',
+          videoTitle: 'A long mini-player title with more room after removing the expand arrow', videoLengthSeconds: 60,
+          legacyFormats: [{ itag: 0, qualityLabel: 'Test', mimeType: 'video/webm',
+            width: 320, height: 180, bitrate: 0, localFile: true, url: `data:video/webm;base64,${media}` }],
+        })
+      }, media)
+      await expect(player).toBeVisible()
+      await page.evaluate(() => window.scrollTo(0, 0))
+      await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+      await expect.poll(() => video.evaluate(video => video.readyState), { timeout: 15000 }).toBe(4)
+      await watch.evaluate(component => { component.proxy.channelName = 'Mini-player test channel' })
+      await video.evaluate(video => { video.loop = true; return video.play() })
+    }
+    await loadTestVideo()
     const originalVideo = await video.elementHandle()
     const touch = (type, point) => session.send('Input.dispatchTouchEvent', {
       type, touchPoints: point ? [point] : [],
     })
+    const returnPoint = async region => {
+      await expect.poll(() => player.evaluate(element =>
+        element.getAnimations().every(animation => animation.playState !== 'running'))).toBe(true)
+      return player.evaluate(mobileMiniPlayerReturnPoint, region)
+    }
     await trackMiniPlayerWork(page)
     try {
       await expect.poll(() => page.evaluate(() => window.__miniPlayerWork.ambientDraws)).toBeGreaterThan(0)
@@ -114,7 +134,15 @@ test('mobile mini-player restores from the whole bar and keeps close separate', 
         await page.evaluate(() => window.scrollTo(0, 1200))
         await expect(player).toHaveClass(/mobileMiniBar/)
         await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
-        const point = await player.evaluate(mobileMiniPlayerReturnPoint, region)
+        await expect(player.locator('.mobileMiniBarDismiss')).toHaveCount(0)
+        let point = await returnPoint(region)
+        await touch('touchStart', point)
+        for (const distance of [20, 40, 80]) await touch('touchMove', { ...point, y: point.y + distance })
+        await touch('touchEnd')
+        await expect(player, 'same-page scroll mini-player cannot close').toHaveClass(/scrollMiniPlayer/)
+        await expect(page).toHaveURL(/#\/watch\//)
+        // Native scrolling can hide the navigation bar and move the mini player.
+        point = await returnPoint(region)
         await touch('touchStart', point)
         for (const distance of [20, 40, 80, 100]) await touch('touchMove', { ...point, y: point.y - distance })
         await touch('touchEnd')
@@ -130,11 +158,30 @@ test('mobile mini-player restores from the whole bar and keeps close separate', 
           await page.evaluate(() => { location.hash = '#/subscriptions' })
           await expect(player).toHaveClass(/mobileMiniBar/)
           await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+          if (scale === 125) assert.equal(await player.evaluate(element => getComputedStyle(element).transitionDuration), '0s')
           const returnButton = player.locator('.mobileMiniBarReturn')
           await expect(returnButton).toBeEnabled()
           await expect(returnButton.locator('svg')).toHaveCount(0)
-          const point = await player.evaluate(mobileMiniPlayerReturnPoint, region)
+          let point = await returnPoint(region)
           await expect.poll(() => page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.classList.contains('mobileMiniBarReturn'), point), { message: region }).toBe(true)
+          if (swipe) {
+            const top = await player.locator('.mobileMiniBarReturn').boundingBox()
+            // Start near the top so downward samples stay inside the WebView.
+            const down = { ...point, y: top.y + 8 }
+            for (const canceled of [false, true]) {
+              const before = await player.boundingBox()
+              await touch('touchStart', down)
+              await touch('touchMove', { ...down, y: down.y + (canceled ? 70 : 24) })
+              await expect.poll(() => player.evaluate(element => Number.parseFloat(element.style.getPropertyValue('--mobile-mini-dismiss-offset')))).toBeCloseTo(canceled ? 70 : 24, 2)
+              await expect.poll(async () => (await player.boundingBox()).y - before.y).toBeCloseTo(canceled ? 70 : 24, 0)
+              await touch(canceled ? 'touchCancel' : 'touchEnd')
+              await expect.poll(() => player.evaluate(element => element.style.getPropertyValue('--mobile-mini-dismiss-offset'))).toBe('')
+              await expect(player, 'short and canceled downward swipes keep playback').toHaveClass(/scrollMiniPlayer/)
+              await expect(page).toHaveURL(/#\/subscriptions/)
+              assert.equal(await originalVideo.evaluate(video => !video.paused), true)
+            }
+          }
+          point = await returnPoint(region)
           await touch('touchStart', point)
           if (swipe) {
             for (const distance of [20, 40, 80, 100]) await touch('touchMove', { ...point, y: point.y - distance })
@@ -161,11 +208,59 @@ test('mobile mini-player restores from the whole bar and keeps close separate', 
     await touch('touchCancel')
     await expect(page).toHaveURL(/#\/subscriptions/)
     await expect(close).toBeEnabled()
-    await touch('touchStart', point)
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateReducedMotion', 'off')
+      await store.dispatch('updateAnimationSpeed', 25)
+    })
+    // Cover closing by a downward swipe after verifying the close control.
+    const returnBox = await player.locator('.mobileMiniBarReturn').boundingBox()
+    const down = { x: returnBox.x + returnBox.width / 2, y: returnBox.y + 8 }
+    await player.evaluate(element => {
+      window.__miniDismissRegression = {}
+      const recordTransition = event => {
+        if (event.propertyName !== 'transform') return
+        element.removeEventListener('transitionrun', recordTransition)
+        queueMicrotask(() => {
+          const animation = element.getAnimations().find(animation => animation.transitionProperty === 'transform')
+          if (animation) animation.ready.then(() => {
+            window.__miniDismissRegression.transition = {
+              duration: animation.effect.getTiming().duration, rate: animation.playbackRate,
+            }
+          })
+        })
+      }
+      element.addEventListener('transitionrun', recordTransition)
+      window.__miniDismissPointerUp = () => setTimeout(() => {
+        const button = element.querySelector('.mobileMiniBarReturn')
+        window.__miniDismissRegression.controlsDisabled = button?.disabled
+        // Exercise input after the normal 350ms compatibility-click suppression.
+        element.dispatchEvent(new PointerEvent('pointerdown', {
+          pointerType: 'touch', pointerId: 2, isPrimary: false, button: 0, bubbles: true,
+        }))
+        button?.click()
+      }, 400)
+      window.addEventListener('pointerup', window.__miniDismissPointerUp, { capture: true, once: true })
+    })
+    await touch('touchStart', down)
+    for (const distance of [20, 40, 64, 80]) await touch('touchMove', { ...down, y: down.y + distance })
+    await touch('touchEnd')
+    await expect(page.locator('.mobileMiniBarOverlay')).toHaveCount(0)
+    assert.deepEqual(await page.evaluate(() => window.__miniDismissRegression), {
+      transition: { duration: 140, rate: 0.25 }, controlsDisabled: true,
+    })
+    await expect(page).toHaveURL(/#\/subscriptions/)
+    assert.equal(await originalVideo.evaluate(video => video.paused && !video.isConnected), true)
+    await originalVideo.dispose()
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAnimationSpeed', 100))
+    await loadTestVideo()
+    await page.evaluate(() => { location.hash = '#/subscriptions' })
+    await expect(close).toBeEnabled()
+    const closeBox = await close.boundingBox()
+    await touch('touchStart', { x: closeBox.x + closeBox.width / 2, y: closeBox.y + closeBox.height / 2 })
     await touch('touchEnd')
     await expect(page.locator('.mobileMiniBarOverlay')).toHaveCount(0)
     await expect(page).toHaveURL(/#\/subscriptions/)
-    await originalVideo.dispose()
   } finally {
     await session.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] }).catch(() => {})
     await page.evaluate(({ settings, originalRoute }) => {
@@ -175,8 +270,12 @@ test('mobile mini-player restores from the whole bar and keeps close separate', 
       location.hash = originalRoute
       for (const [key, value] of Object.entries(settings ?? {})) store.commit('set' + key, value)
       if (settings) store.dispatch('updateReducedMotion', settings.ReducedMotion)
+      if (settings) store.dispatch('updateAnimationSpeed', settings.AnimationSpeed)
       if (window.__miniPlayerFetch) window.fetch = window.__miniPlayerFetch
       delete window.__miniPlayerFetch
+      window.removeEventListener('pointerup', window.__miniDismissPointerUp, true)
+      delete window.__miniDismissPointerUp
+      delete window.__miniDismissRegression
       document.querySelector('#mini-player-test-style')?.remove()
       document.querySelector('#mini-player-test-spacer')?.remove()
     }, { settings, originalRoute })

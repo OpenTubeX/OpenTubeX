@@ -5231,6 +5231,7 @@ export default defineComponent({
       mobileFullscreenSwipeSettling,
       mobileFullscreenSwipeStyle,
       mobileFullscreenSwiping,
+      mobileMiniPlayerDismissSettling,
       moveMobileFullscreenGesture,
       startMobileFullscreenGesture,
     } = useMobileFullscreenGestures({
@@ -5256,6 +5257,9 @@ export default defineComponent({
         : 'disabled',
       adjustments: mobileAdjustments,
       miniPlayerDrag: {
+        canDismiss: () => mobileMiniBarCanDismiss.value && !mobileMiniBarControlsDisabled.value,
+        dismiss: () => dismissCrossTabMiniPlayer(),
+        dismissDuration: () => isReducedMotionEnabled() ? 0 : 140 / getAnimationSpeedMultiplier(store.getters.getAnimationSpeed),
         begin: restoring => beginScrollMiniPlayerDrag(restoring),
         move: (x, y) => moveScrollMiniPlayerDrag(x, y),
         finish: commit => finishScrollMiniPlayerDrag(commit),
@@ -7186,7 +7190,7 @@ export default defineComponent({
       video,
     })
 
-    const mobileMiniBarControlsDisabled = computed(() => Boolean(scrollMiniPlayerDragStyle.value || scrollMiniPlayerAnimating.value))
+    const mobileMiniBarControlsDisabled = computed(() => Boolean(scrollMiniPlayerDragStyle.value || scrollMiniPlayerAnimating.value || mobileMiniPlayerDismissSettling.value))
     const mobileMiniBarSeekDisabled = computed(() => mobileMiniBarControlsDisabled.value || !hasLoaded.value || !seekingIsPossible.value || !mobileMiniBarHasSeekRange.value)
 
     // The window may have resized while docked. Measure the settled inline
@@ -7297,10 +7301,14 @@ export default defineComponent({
       isActiveTab.value && !scrollMiniPlayerActive.value && mobileAdjustmentsVisible.value &&
       isFullscreen.value && store.getters.getMobileFullscreenBrightness)
     watch(mobileFullscreenBrightnessActive, enabled => mobileAdjustments.setFullscreenBrightness(Boolean(enabled)))
-    watch([isActiveTab, scrollMiniPlayerActive, mobileAdjustmentsVisible, () => props.videoId], ([active, , visible, videoId], [, , , previousVideoId]) => {
+    watch([isActiveTab, scrollMiniPlayerActive, mobileAdjustmentsVisible, () => props.videoId], ([active, , visible, videoId], [, , previousVisible, previousVideoId]) => {
       // Revealing retained Watch during an upward drag presents this player
       // again. That transition must not cancel the gesture that caused it.
-      resetMobileAdjustments(Boolean(scrollMiniPlayerDragStyle.value && active && visible && videoId === previousVideoId))
+      // A committed close also survives visibility changes for the same video.
+      resetMobileAdjustments(Boolean(videoId === previousVideoId && (
+        (scrollMiniPlayerDragStyle.value && active && visible) ||
+        (mobileMiniPlayerDismissSettling.value && visible !== previousVisible)
+      )))
       if (mobileFullscreenBrightnessActive.value) mobileAdjustments.setFullscreenBrightness(true)
     })
     watch(() => [store.getters.getMobileLeftSwipeAction, store.getters.getMobileRightSwipeAction], () => {
