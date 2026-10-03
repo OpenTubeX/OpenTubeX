@@ -21,17 +21,18 @@ for (const uiScale of [100, 125]) {
       })
 
       const sidebar = page.locator('.sideNav')
+      await expect(sidebar).toBeVisible()
       for (const inset of [0, 27]) {
         await page.evaluate(inset => {
           window.scrollTo(0, 0)
           document.documentElement.style.setProperty('--safe-area-inset-top', `${inset}px`)
         }, inset)
         await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
-        const initialTop = (await sidebar.boundingBox()).y
+        const initialTop = await sidebar.evaluate(element => element.getBoundingClientRect().top)
         for (const top of [300, 900, 100, 0]) {
           await page.evaluate(top => window.scrollTo(0, top), top)
           await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(top)
-          await expect.poll(async () => Math.abs((await sidebar.boundingBox()).y - initialTop), {
+          await expect.poll(async () => Math.abs(await sidebar.evaluate(element => element.getBoundingClientRect().top) - initialTop), {
             message: 'scrolling the page must not move the sidebar beneath the header'
           }).toBeLessThan(1)
           await expect.poll(() => page.evaluate(() => {
