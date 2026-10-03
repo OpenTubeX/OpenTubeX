@@ -11245,6 +11245,7 @@ export default defineComponent({
       }
 
       controls.addEventListener('uiupdated', addUICustomizations)
+      controls.addEventListener('timeandseekrangeupdated', updateMobileMiniBarProgress)
       configureUI(true)
 
       applyInitialVolume(videoElement)
@@ -11942,6 +11943,7 @@ export default defineComponent({
       }
 
       const controls = ui?.getControls()
+      controls?.removeEventListener('timeandseekrangeupdated', updateMobileMiniBarProgress)
       controls?.removeEventListener('submenuopen', handleSubMenuOpen)
       controls?.removeEventListener('submenuclose', handleSubMenuClose)
 

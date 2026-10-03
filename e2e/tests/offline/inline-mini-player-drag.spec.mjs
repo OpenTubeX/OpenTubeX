@@ -870,6 +870,34 @@ for (const uiScale of [100, 125]) {
   })
 }
 
+test('bottom bar progress follows a moving live seek window while paused', async ({ app, page }) => {
+  const player = await openMobilePlayer(app, page)
+  await page.evaluate(() => {
+    const spacer = document.createElement('div')
+    spacer.style.height = '2000px'
+    document.body.append(spacer)
+    window.scrollTo(0, 1200)
+  })
+  await expect(player).toHaveClass(/scrollMiniPlayer/)
+  await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+  const video = player.locator('video').first()
+  const progress = player.locator('.mobileMiniBarProgress > div')
+  await player.evaluate(element => {
+    const shakaPlayer = element.ui.getControls().getPlayer()
+    window.miniBarSeekRange = { start: 0, end: 30 }
+    shakaPlayer.seekRange = () => window.miniBarSeekRange
+    shakaPlayer.isLive = () => true
+    element.querySelector('video').currentTime = 15
+  })
+  const fill = () => progress.evaluate(element => new DOMMatrixReadOnly(getComputedStyle(element).transform).a)
+  await expect.poll(fill).toBeCloseTo(0.5, 2)
+  await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+  await page.evaluate(() => { window.miniBarSeekRange = { start: 5, end: 35 } })
+  await expect.poll(fill).toBeCloseTo(1 / 3, 2)
+  expect(await video.evaluate(element => ({ paused: element.paused, currentTime: element.currentTime })))
+    .toEqual({ paused: true, currentTime: 15 })
+})
+
 for (const uiScale of [100, 125, 150]) {
   test(`bottom bar playback controls work without reopening Watch at ${uiScale}%`, async ({ app, page }, testInfo) => {
     const player = await openMobilePlayer(app, page)
