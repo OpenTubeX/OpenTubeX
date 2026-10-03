@@ -925,6 +925,62 @@ export default defineComponent({
     })
     const fullscreenDockLayoutOpen = ref(false)
     let fullscreenDockLayoutFrame = null
+    /** @type {Animation | null} */
+    let fullscreenDockVideoAnimation = null
+    let fullscreenDockAnimationGeneration = 0
+
+    function cancelFullscreenDockVideoAnimation() {
+      fullscreenDockAnimationGeneration++
+      fullscreenDockVideoAnimation?.cancel()
+      fullscreenDockVideoAnimation = null
+    }
+
+    function getFullscreenDockVideoGeometry() {
+      const element = video.value
+      if (!element || !element.videoWidth || !element.videoHeight) return null
+      const bounds = element.getBoundingClientRect()
+      const fit = Math.min(bounds.width / element.videoWidth, bounds.height / element.videoHeight)
+      return {
+        width: element.videoWidth * fit,
+        x: bounds.left + bounds.width / 2,
+        y: bounds.top + bounds.height / 2,
+      }
+    }
+
+    // Commit the final layout once, then animate the fitted video on the
+    // compositor. Animating its width also reflows Shaka, captions, annotations
+    // and ResizeObservers on every frame, even when the dock only slides in.
+    watch(fullscreenDockLayoutOpen, async () => {
+      const before = getFullscreenDockVideoGeometry()
+      cancelFullscreenDockVideoAnimation()
+      const generation = fullscreenDockAnimationGeneration
+      if (!before || presentationModeChanging.value || isReducedMotionEnabled() ||
+        (!isFullscreen.value && !fullWindowEnabled.value)) return
+
+      await nextTick()
+      if (generation !== fullscreenDockAnimationGeneration || presentationModeChanging.value) return
+      const after = getFullscreenDockVideoGeometry()
+      if (!after || after.width <= 0) return
+      const scale = before.width / after.width
+      // Zoom/pan uses `transform`. Individual scale/translate keep that intact;
+      // compensate for scaling its translation around the element's centre.
+      const transform = new DOMMatrix(getComputedStyle(video.value).transform)
+      const x = before.x - after.x + transform.e * (1 - scale)
+      const y = before.y - after.y + transform.f * (1 - scale)
+      const animation = applyAnimationSpeed(video.value.animate([
+        { scale: String(scale), translate: `${x}px ${y}px` },
+        { scale: '1', translate: '0px 0px' },
+      ], { duration: 250, easing: 'ease' }))
+      fullscreenDockVideoAnimation = animation
+      animation.addEventListener('finish', () => {
+        if (fullscreenDockVideoAnimation === animation) fullscreenDockVideoAnimation = null
+      })
+    })
+
+    watch(presentationModeChanging, changing => {
+      if (changing) cancelFullscreenDockVideoAnimation()
+    })
+
     watch(fullscreenDockOpen, (open) => {
       if (fullscreenDockLayoutFrame !== null) {
         cancelAnimationFrame(fullscreenDockLayoutFrame)
@@ -11775,6 +11831,7 @@ export default defineComponent({
       if (fullscreenDockLayoutFrame !== null) {
         cancelAnimationFrame(fullscreenDockLayoutFrame)
       }
+      cancelFullscreenDockVideoAnimation()
       cancelPendingVolumeUserSet()
       fullWindowAnimation?.cancel()
       hasLoaded.value = false
