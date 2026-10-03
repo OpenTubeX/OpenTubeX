@@ -149,8 +149,8 @@ test('full-window docks preserve zoom, stacked panel controls and rapid toggles'
     const scroller = chapters.locator('.chaptersWrapper')
     await expect(scroller).toHaveAttribute('data-overlayscrollbars-viewport')
     const scrollToBottom = async () => {
-      await scroller.dispatchEvent('wheel', { deltaY: 1 })
-      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await scroller.hover()
+      await page.mouse.wheel(0, 10000)
       await expectScrollAtRenderedEnd(scroller)
     }
     const expectValidScrollbar = async () => {
