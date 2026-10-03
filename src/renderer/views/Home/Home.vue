@@ -350,7 +350,7 @@
                 v-for="video in items"
                 :key="video.queueItemId"
               >
-                <RouterLink :to="`/watch/${video.videoId}`">
+                <RouterLink :to="video.route ?? `/watch/${video.videoId}`">
                   <span class="mediaThumbnail">
                     <FtRetryImage
                       :src="videoThumbnail(video)"
