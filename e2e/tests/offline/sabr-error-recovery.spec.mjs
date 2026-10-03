@@ -1335,7 +1335,7 @@ test('repeated SABR failures without a legacy fallback never switch to audio', a
 
   const errorPlayer = page.locator('.videoPlayerError')
   await expect(errorPlayer).toBeVisible()
-  await expect(errorPlayer.locator('.videoThumbnail')).toHaveAttribute('src', /\S+/)
+  await expect(errorPlayer.locator('.videoThumbnail:not(.retryImagePlaceholder)')).toHaveAttribute('src', /\S+/)
 
   const [playerBounds, infoBounds] = await Promise.all([
     errorPlayer.boundingBox(),
