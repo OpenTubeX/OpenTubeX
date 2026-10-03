@@ -5640,6 +5640,49 @@ test.describe('synced setting indicators', () => {
     })).toEqual(['navigationItems'])
   })
 
+  for (const { section, label, settingKey } of [
+    { section: 'appearance', label: 'Customize quick settings', settingKey: 'quickSettings' },
+    { section: 'appearance', label: 'Customize navigation', settingKey: 'navigationItems' },
+    { section: 'playback', label: 'Customize Quick Playback Speed Bar', settingKey: 'quickPlaybackSpeedBarOptions' }
+  ]) {
+    test(`shares the ${settingKey} sync toggle between its launcher and breadcrumb`, async ({ app, page }) => {
+      const content = await goToSettingsSection(page, section)
+      if (section === 'playback') {
+        await content.locator('label.switch-label')
+          .filter({ hasText: 'Use Quick Playback Speed Bar' }).click()
+      }
+      const launcher = content.locator('.settingButtonWithSync').filter({ hasText: label })
+      await launcher.getByRole('button', { name: 'Stop syncing this setting' }).click()
+      await launcher.getByRole('button', { name: label, exact: true }).click()
+
+      const breadcrumb = page.locator('.settingsBreadcrumb')
+      const sync = breadcrumb.locator('.syncedSettingIndicator')
+      await expect(sync).toBeVisible()
+      await expect(sync).toHaveAttribute('aria-pressed', 'false')
+      await expect(sync).toHaveAccessibleName('Sync this setting')
+      await sync.click()
+      await expect(sync).toHaveAttribute('aria-pressed', 'true')
+      await expect(sync).toHaveAccessibleName('Stop syncing this setting')
+      await expect.poll(() => page.evaluate(() => (
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          .state.settings.syncServerSettingsExcluded
+      ))).toEqual([])
+
+      await setWindowSize(app, page, { width: 480, height: 800 })
+      await expect(sync).toBeVisible()
+      await sync.click()
+      await expect.poll(() => page.evaluate(() => (
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          .state.settings.syncServerSettingsExcluded
+      ))).toEqual([settingKey])
+
+      await page.locator('.settingsBackButton').click()
+      await expect(breadcrumb.locator('.syncedSettingIndicator')).toHaveCount(0)
+      await expect(launcher.getByRole('button', { name: 'Sync this setting' }))
+        .toHaveAttribute('aria-pressed', 'false')
+    })
+  }
+
   test('spaces setting sync and help icons', async ({ page }) => {
     await goTo(page, 'settings')
 
