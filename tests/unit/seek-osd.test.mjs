@@ -12,6 +12,7 @@ function fixture(t, { time = 50, live = false } = {}) {
     accumulatedSeekSeconds: 0,
     hasPlaybackPosition: { value: false },
     hasLoaded: { value: true },
+    videoLayoutReady: { value: true },
     pendingMetadataSeek: null,
     video: { value: { readyState: 4, get currentTime() { return time }, set currentTime(value) { time = value; writes.push(value) } } },
     player: { seekRange: () => ({ start: 0, end: 100 }), goToLive: () => { time = 100; writes.push(time) } },

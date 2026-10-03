@@ -1219,6 +1219,7 @@ export default defineComponent({
     const hasPlaybackPosition = ref(false)
     /** @type {number|null} */
     let pendingMetadataSeek = null
+    let seekBarMouseDown = false
     const videoLayoutReady = ref(false)
     const annotationCurrentTime = ref(0)
     const annotationVideoAspectRatio = ref(null)
@@ -5508,11 +5509,18 @@ export default defineComponent({
 
     function handleSeekBarInput(event) {
       accumulatedSeekSeconds = 0
-      if (pendingMetadataSeek === null || !event.target.matches('.shaka-seek-bar') || event.target.disabled) return
-      if (event.type === 'keydown' && !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'].includes(event.key)) return
+      if (event.type === 'pointerdown' || event.type === 'keydown') return
+      if (!event.target.matches('.shaka-seek-bar') || event.target.disabled) return
       // Shaka's range control writes currentTime directly. A newer timeline
       // action must supersede a chapter seek queued before metadata was ready.
-      pendingMetadataSeek = event.type === 'input' ? Number(event.target.value) : null
+      if (event.type === 'mousedown') seekBarMouseDown = true
+      rememberSeekPosition(Number(event.target.value))
+    }
+
+    function handleSeekBarMouseChange(event) {
+      if (!seekBarMouseDown) return
+      if (event.type === 'mouseup') seekBarMouseDown = false
+      rememberSeekPosition(ui.getControls().getDisplayTime())
     }
 
     function setupChapterPreview() {
@@ -5524,6 +5532,20 @@ export default defineComponent({
       for (const event of ['pointerdown', 'keydown', 'input']) {
         seekBarContainer.removeEventListener(event, handleSeekBarInput, true)
         seekBarContainer.addEventListener(event, handleSeekBarInput, true)
+      }
+      const seekBar = seekBarContainer.querySelector('.shaka-seek-bar')
+      if (seekBar) {
+        // Run after Shaka updates its value; it stops propagation for these events.
+        for (const event of ['mousedown', 'touchstart', 'touchmove', 'touchend', 'touchcancel']) {
+          seekBar.removeEventListener(event, handleSeekBarInput)
+          seekBar.addEventListener(event, handleSeekBarInput)
+        }
+        seekBar.removeEventListener('mouseup', handleSeekBarMouseChange)
+        seekBar.addEventListener('mouseup', handleSeekBarMouseChange)
+      }
+      for (const event of ['mousemove', 'mouseup']) {
+        document.removeEventListener(event, handleSeekBarMouseChange)
+        document.addEventListener(event, handleSeekBarMouseChange)
       }
       seekBarContainer.removeEventListener('mousemove', handleSeekBarMouseMove)
       seekBarContainer.removeEventListener('mouseleave', handleSeekBarMouseLeave)
@@ -11345,7 +11367,7 @@ export default defineComponent({
       const mediaElement = video.value
       const restoreNativeStart = () => {
         if (player !== loadingPlayer || pendingMetadataSeek !== null ||
-          hasPlaybackPosition.value || mediaElement.seeking || mediaElement.currentTime !== 0 || startTime == null) return
+          hasPlaybackPosition.value || mediaElement.seeking || startTime == null) return
         mediaElement.currentTime = startTime
       }
       const prepareStartTime = () => {
@@ -11823,6 +11845,7 @@ export default defineComponent({
       hasLoaded.value = false
       hasPlaybackPosition.value = false
       pendingMetadataSeek = null
+      seekBarMouseDown = false
       if (!shortsNavigationSuspended.value) {
         closeFullscreenMetadata()
         closeFullscreenTranscript()
@@ -11837,6 +11860,8 @@ export default defineComponent({
       }
 
       document.removeEventListener('keydown', keyboardShortcutHandler)
+      document.removeEventListener('mousemove', handleSeekBarMouseChange)
+      document.removeEventListener('mouseup', handleSeekBarMouseChange)
       document.removeEventListener('keyup', keyboardShortcutKeyupHandler)
       document.removeEventListener('keydown', handleVideoZoomModifierKey)
       document.removeEventListener('keyup', handleVideoZoomModifierKey)
@@ -12043,7 +12068,7 @@ export default defineComponent({
      */
     function rememberSeekPosition(time) {
       hasPlaybackPosition.value = true
-      if (pendingMetadataSeek !== null || !hasLoaded.value || video.value.readyState < 3) pendingMetadataSeek = time
+      if (pendingMetadataSeek !== null || !hasLoaded.value || !videoLayoutReady.value || video.value.readyState < 3) pendingMetadataSeek = time
     }
 
     function getSabrReloadState() {
