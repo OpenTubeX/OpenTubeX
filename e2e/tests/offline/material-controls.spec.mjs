@@ -1105,11 +1105,12 @@ for (const scale of [100, 95]) {
           // Phone targets compensate for Electron zoom to stay 48 screen pixels.
           expect((await slider.getByRole('slider').boundingBox()).height).toBeCloseTo(compact ? 24 : 48 * 100 / scale, 1)
         }
-        const labelSpacing = await sliders.evaluateAll(elements => (
-          elements[1].querySelector('.labelRow').getBoundingClientRect().top -
-          elements[0].querySelector('.labelRow').getBoundingClientRect().top
-        ))
-        expect(labelSpacing).toBeLessThanOrEqual(compact ? 55 : 79 * 100 / scale)
+        // Separate slider controls use the section's 16px row gap.
+        const rowGap = await sliders.evaluateAll(elements => {
+          const [first, second] = elements.map(element => element.closest('.quickSettingControl').getBoundingClientRect())
+          return second.top - first.bottom
+        })
+        expect(rowGap).toBeCloseTo(16, 1)
         const thumbnail = menu.getByRole('slider', { name: 'Thumbnail Size' })
         const value = Number(await thumbnail.inputValue())
         const step = Number(await thumbnail.getAttribute('step'))
