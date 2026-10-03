@@ -17,6 +17,7 @@
     :style="customIconStyle"
   >
     <img
+      ref="customImage"
       :src="customImageSource"
       :style="{ visibility: customImageLoaded ? 'visible' : 'hidden' }"
       alt=""
@@ -55,7 +56,7 @@
 </template>
 
 <script setup>
-import { computed, normalizeStyle, ref, useAttrs, watch } from 'vue'
+import { computed, normalizeStyle, ref, useAttrs, useTemplateRef, watch } from 'vue'
 import { Icon } from '@iconify/vue/offline'
 
 import faAliasToCanon from '../../icons/faAliasToCanon.json'
@@ -124,8 +125,15 @@ const customEmoji = computed(() => {
 
 const customImageSource = computed(() => getCustomIconImageSource(props.icon))
 const loadedCustomImage = ref(null)
+const customImage = useTemplateRef('customImage')
 const customImageLoaded = computed(() => loadedCustomImage.value === customImageSource.value)
 watch(customImageSource, () => { loadedCustomImage.value = null })
+// The ref also changes when switching from a glyph or emoji to an image.
+watch([customImage, customImageSource], () => {
+  if (customImage.value?.complete && customImage.value.naturalWidth) {
+    loadedCustomImage.value = customImageSource.value
+  }
+}, { flush: 'post' })
 const iconifyId = computed(() => resolveIconifyId(props.icon))
 
 // Preserve the stable semantic metadata used by existing styling and consumers,

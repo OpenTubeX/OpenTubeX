@@ -15,6 +15,7 @@ import { createIOSMediaTransport } from '../../helpers/player/iosMediaTransport'
 import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
+import { getVideoThumbnailSource } from '../../helpers/videoThumbnail.js'
 import { getSubtitleRequestUrl } from '../../helpers/player/subtitleCookies'
 import { enableTwitchTsVideoGap } from '../../helpers/player/twitchTsVideoGap'
 import LightsOffOverlay from './LightsOffOverlay.vue'
@@ -703,6 +704,7 @@ export default defineComponent({
         : video.title,
       thumbnail: getRecommendationThumbnail(video.videoId)
     })))
+    const posterThumbnail = computed(() => getVideoThumbnailSource(props.thumbnail, store.getters.getThumbnailDataSaver))
     const showPoster = ref(true)
     const showAndroidPoster = computed(() => process.env.IS_CAPACITOR && showPoster.value)
     const showPaidPromotion = ref(false)
@@ -11730,7 +11732,7 @@ export default defineComponent({
             // its last frame instead of showing a newly assigned poster. Reset
             // it after Shaka detaches the video source so audio-only playback
             // reliably returns to the thumbnail.
-            video.value.poster = props.thumbnail
+            video.value.poster = posterThumbnail.value
             video.value.load()
           }
 
@@ -11820,7 +11822,7 @@ export default defineComponent({
           ensureSabrStream()
 
           if (newFormat === 'audio' && props.thumbnail) {
-            video_.poster = props.thumbnail
+            video_.poster = posterThumbnail.value
             video_.load()
           }
 
@@ -12378,6 +12380,7 @@ export default defineComponent({
       closedCaptionsOutlinedIcon: CLOSED_CAPTIONS_OUTLINED,
       closedCaptionsFilledIcon: shaka.ui.Enums.MaterialDesignSVGIcons.CLOSED_CAPTIONS,
       showPoster,
+      posterThumbnail,
       showAndroidPoster,
       showEndedScreen,
       useFrostedGlassPlayerUi,
