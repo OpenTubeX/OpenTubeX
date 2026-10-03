@@ -100,6 +100,7 @@
       class="transcriptControls"
     >
       <FtInput
+        ref="searchInput"
         input-type="search"
         :value="searchQuery"
         :placeholder="t('Video.Transcript.Search')"
@@ -207,6 +208,7 @@ const segments = ref([])
 const isLoading = ref(false)
 const loadFailed = ref(false)
 const segmentList = useTemplateRef('segmentList')
+const searchInput = useTemplateRef('searchInput')
 const transcriptFadeTop = ref(false)
 const transcriptFadeBottom = ref(false)
 
@@ -360,10 +362,13 @@ function formatTimestamp(seconds) {
   return formatDurationAsTimestamp(Math.floor(seconds))
 }
 
-function toggleTranscriptSearch() {
+async function toggleTranscriptSearch() {
   searchOpen.value = !searchOpen.value
   if (!searchOpen.value) {
     searchQuery.value = ''
+  } else {
+    await nextTick()
+    searchInput.value?.focus()
   }
 }
 
