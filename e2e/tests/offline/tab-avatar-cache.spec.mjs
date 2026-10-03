@@ -43,6 +43,58 @@ async function createChannelTabWithAvatar(page, channelId, avatarBase64) {
   }, { channelId, avatarBase64 })
 }
 
+for (const indicator of ['loading', 'playing']) {
+  test(`loads a watch avatar behind the ${indicator} indicator and retains it`, async ({ page }) => {
+    let avatarRequest
+    await page.route('https://images.test/watch-avatar.png', route => {
+      avatarRequest = route
+    })
+    const watchTab = await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/watch/cached-avatar',
+      makeActive: false,
+      lazyLoad: true
+    }))
+    const tab = page.locator(`.tab[data-tab-id="${watchTab.id}"]`)
+    const setIndicator = enabled => page.evaluate(({ tabId, indicator, enabled }) => {
+      if (indicator === 'loading') {
+        window.ftElectron.tabs.setLoading(enabled, tabId)
+      } else {
+        window.ftElectron.tabs.setPlaybackState(enabled ? 'playing' : 'paused', tabId)
+      }
+    }, { tabId: watchTab.id, indicator, enabled })
+    const statusIcon = tab.locator(indicator === 'loading' ? '.tabLoadingDot' : '.playingIcon')
+    await setIndicator(true)
+    await expect(statusIcon).toBeVisible()
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setVideoAvatar', { videoId: 'cached-avatar', avatar: 'https://images.test/watch-avatar.png' })
+    })
+    await expect.poll(() => avatarRequest != null, { timeout: 2000 }).toBe(true)
+    await avatarRequest.fulfill({ contentType: 'image/png', body: Buffer.from(AVATAR_PNG, 'base64') })
+    const avatar = tab.locator('img.tabAvatar:not(.retryImagePlaceholder)')
+    await expect.poll(() => avatar.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
+    await expect(avatar).toBeHidden()
+    const originalImage = await avatar.elementHandle()
+
+    for (let transition = 0; transition < 2; transition++) {
+      await setIndicator(false)
+      await expect(statusIcon).toHaveCount(0)
+      const firstFrame = await tab.evaluate(element => new Promise(resolve => requestAnimationFrame(() => {
+        const image = element.querySelector('img.tabAvatar:not(.retryImagePlaceholder)')
+        resolve({
+          visible: image?.checkVisibility() === true,
+          placeholder: [...element.querySelectorAll('.retryImagePlaceholder')].some(icon => icon.checkVisibility())
+        })
+      })))
+      expect(firstFrame).toEqual({ visible: true, placeholder: false })
+      expect(await avatar.evaluate((image, original) => image === original, originalImage)).toBe(true)
+      await setIndicator(true)
+      await expect(statusIcon).toBeVisible()
+      await expect(avatar).toBeHidden()
+    }
+  })
+}
+
 test('tabs of the same channel share one cached avatar file', async ({ app, page }) => {
   // Previews of the tab that is already open are not part of this
   const baseline = new Set((await listCachedFiles(app.userDataDir)).map(file => file.name))

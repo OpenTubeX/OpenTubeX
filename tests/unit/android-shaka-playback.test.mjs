@@ -8,18 +8,21 @@ const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-vide
 const template = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.vue', import.meta.url), 'utf8')
 
 test('Android shows a thumbnail over the video while waiting for playback', () => {
-  const poster = template.match(/<div\s+v-if="[^"]+"\s+class="countdownPoster"[\s\S]*?<\/div>/)?.[0]
+  const poster = template.match(/<div\s+v-if="!audioPlayerMode && thumbnail"[\s\S]*?<\/div>/)?.[0]
   assert.ok(poster)
-  const render = Vue.compile(poster)
+  const render = Vue.compile(poster.replace('v-show=', ':data-visible='))
   const context = {
     showCountdownOverlay: false,
-    showAndroidPoster: true,
+    showPoster: true,
+    showEndedScreen: false,
     audioPlayerMode: false,
     thumbnail: 'poster.jpg',
   }
   assert.equal(render(context).type, 'div')
-  context.showAndroidPoster = false
-  assert.equal(render(context).type, Vue.Comment)
+  context.showPoster = false
+  const hidden = render(context)
+  assert.equal(hidden.type, 'div')
+  assert.equal(hidden.props['data-visible'], false)
 })
 
 test('Android registers the SABR scheme before Shaka loads its manifest', () => {
