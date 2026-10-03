@@ -290,7 +290,12 @@ function updateScrollLayout() {
   const nav = innerRef.value?.closest('.sideNav')
   // Resolve the CSS layout on mount/resize, not on every page scroll.
   hideOnScroll = nav != null && getComputedStyle(nav).getPropertyValue('--hide-on-scroll').trim() === '1'
-  resetScrollVisibility()
+  if (hideOnScroll && !alwaysShowNavigationBar.value &&
+    (mobileNavigationMinimizePreview.value !== null || scrollResumeFrame !== null)) {
+    navigationScroll.reset(window.scrollY, scrollHidden.value)
+  } else {
+    resetScrollVisibility()
+  }
 }
 
 function updateScrollVisibility() {

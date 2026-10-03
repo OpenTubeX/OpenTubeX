@@ -71,7 +71,8 @@ for (const hidden of [false, true]) {
     preview.value = 'watch-tab'
     route.fullPath = '/subscriptions'
     await nextTick()
-    assert.equal(api.scrollHidden.value, hidden, 'route handoff must preserve Watch visibility')
+    api.updateScrollLayout()
+    assert.equal(api.scrollHidden.value, hidden, 'resize during preview must preserve Watch visibility')
     viewport.scrollY = 1000
     api.updateScrollVisibility()
     assert.equal(api.scrollHidden.value, hidden, 'restored scroll must not change navigation')
@@ -81,11 +82,15 @@ for (const hidden of [false, true]) {
     await nextTick()
     viewport.scrollY = hidden ? 1000 : 1108
     api.updateScrollVisibility()
+    api.updateScrollLayout()
+    assert.equal(api.scrollHidden.value, hidden, 'resize during layout settling must preserve visibility')
     frames.get(1)()
     api.updateScrollVisibility()
     assert.equal(api.scrollHidden.value, hidden, 'queued scroll event after handoff must not change navigation')
     viewport.scrollY += hidden ? -20 : 20
     api.updateScrollVisibility()
     assert.equal(api.scrollHidden.value, !hidden, 'user scrolling works again after handoff')
+    api.updateScrollLayout()
+    assert.equal(api.scrollHidden.value, false, 'ordinary resize still reveals navigation')
   })
 }

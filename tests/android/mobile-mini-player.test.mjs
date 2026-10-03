@@ -145,6 +145,9 @@ async function testMobileMiniPlayer(t, navigationOnly) {
             await touch('touchStart', point)
             await touch('touchMove', { ...point, y: point.y + 30 })
             await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
+            await page.evaluate(() => window.dispatchEvent(new Event('resize')))
+            if (hidden) await expect(nav).toHaveClass(/scrollHidden/)
+            else await expect(nav).not.toHaveClass(/scrollHidden/)
             // The overlay is laid out at the final morph endpoint throughout the drag.
             const endpoint = await page.locator('#cross-tab-mini-player-layer > .mobileMiniBarOverlay').boundingBox()
             for (const distance of [60, 100, 160]) await touch('touchMove', { ...point, y: point.y + distance })
@@ -192,6 +195,37 @@ async function testMobileMiniPlayer(t, navigationOnly) {
         await expect(player).not.toHaveClass(/scrollMiniPlayer/)
         await settle()
       }
+      await t.test('hidden navigation over an unscrollable browsing page can be restored with the player', async () => {
+        await page.evaluate(async () => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          store.commit('setUiScale', 100)
+          await store.dispatch('updateReducedMotion', 'off')
+          window.scrollTo(0, 40)
+        })
+        await expect(nav).toHaveClass(/scrollHidden/)
+        const box = await player.boundingBox()
+        const point = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+        await touch('touchStart', point)
+        await touch('touchMove', { ...point, y: point.y + 30 })
+        await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
+        // The browsing route has no content to scroll once this fixture is gone.
+        await page.evaluate(() => document.querySelector('#mini-player-test-spacer')?.remove())
+        for (const distance of [60, 100, 160]) await touch('touchMove', { ...point, y: point.y + distance })
+        await touch('touchEnd')
+        await expect(page).toHaveURL(/#\/subscriptions/)
+        await expect(player).toHaveClass(/mobileMiniBar/)
+        await settle()
+        await expect.poll(() => page.evaluate(() => {
+          const root = document.scrollingElement
+          return root.scrollHeight <= root.clientHeight
+        })).toBe(true)
+        await expect(nav).toHaveClass(/scrollHidden/)
+        await page.waitForTimeout(400)
+        await player.locator('.mobileMiniBarReturn').click()
+        await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+        await settle()
+        await expect(nav).not.toHaveClass(/scrollHidden/)
+      })
       await page.evaluate(() => document.querySelector('#mini-player-test-spacer')?.remove())
       return
     }
