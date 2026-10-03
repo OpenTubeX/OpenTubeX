@@ -105,7 +105,14 @@ for (const zoom of [1, 0.95]) {
         window.dispatchEvent(pointer('pointermove', bounds.left + 20, bounds.top + 20))
         window.dispatchEvent(pointer('pointercancel', 0, 0))
         await new Promise(resolve => requestAnimationFrame(resolve))
-        return { burstReads, releaseValue, cancelReads: reads, cancelValue: element.getAttribute('aria-valuetext') }
+        const cancelReads = reads
+        const cancelValue = element.getAttribute('aria-valuetext')
+        element.dispatchEvent(pointer('pointerdown', bounds.right + 1, bounds.top + bounds.height / 2))
+        reads = 0
+        window.dispatchEvent(pointer('pointermove', bounds.left + 20, bounds.top + 20))
+        window.dispatchEvent(new Event('blur'))
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        return { burstReads, releaseValue, cancelReads, cancelValue, blurReads: reads, blurValue: element.getAttribute('aria-valuetext') }
       } finally {
         element.getBoundingClientRect = original
       }
@@ -115,6 +122,8 @@ for (const zoom of [1, 0.95]) {
     expect(metrics.releaseValue).toBe('100%, 50%')
     expect(metrics.cancelReads).toBe(0)
     expect(metrics.cancelValue).toBe('100%, 50%')
+    expect(metrics.blurReads).toBe(0)
+    expect(metrics.blurValue).toBe('100%, 50%')
     await surface.press('ArrowUp')
     await expect(surface).toHaveAttribute('aria-valuetext', '100%, 51%')
     await page.locator('.colorPickerPopover').getByRole('button', { name: 'Apply', exact: true }).click()

@@ -357,13 +357,17 @@ function emitCurrentBlur() {
 }
 
 function startSaturationValue(event) {
-  if (event.button !== 0 || saturationValuePointerId !== null) return
+  if (event.button !== 0) return
+  if (saturationValuePointerId !== null && event.pointerId !== saturationValuePointerId) return
+  // A fresh press can follow a release outside the window that was not delivered.
+  cancelSaturationValue()
   saturationValuePointerId = event.pointerId
   saturationValuePointer = { x: event.clientX, y: event.clientY }
   renderSaturationValue()
   window.addEventListener('pointermove', updateSaturationValue)
   window.addEventListener('pointerup', stopSaturationValue)
   window.addEventListener('pointercancel', stopSaturationValue)
+  window.addEventListener('blur', cancelSaturationValue)
   event.preventDefault()
 }
 
@@ -412,6 +416,7 @@ function cancelSaturationValue() {
   window.removeEventListener('pointermove', updateSaturationValue)
   window.removeEventListener('pointerup', stopSaturationValue)
   window.removeEventListener('pointercancel', stopSaturationValue)
+  window.removeEventListener('blur', cancelSaturationValue)
 }
 
 function adjustSaturationValue(event) {
