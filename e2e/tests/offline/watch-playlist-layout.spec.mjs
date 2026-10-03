@@ -185,6 +185,15 @@ for (const zoom of [1, 0.95]) {
     await page.setViewportSize({ width: Math.round(1280 / zoom), height: Math.round(850 / zoom) })
     await expect(page.locator('.watchVideoPlaylist .playlistHeader > .channelName')).toHaveText('Test channel -')
     await expect(page.locator('.watchVideoPlaylist .playlistIndex')).toBeVisible()
+    await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setBounds({ width: 1280, height: 550 }))
+    await page.setViewportSize({ width: 1280, height: 550 })
+    await expect.poll(() => page.evaluate(() => window.matchMedia('(height <= 600px)').matches)).toBe(true)
+    // Exercise the ordinary component independently of the phone-layout query.
+    await watch.evaluate(vm => { vm.phoneLayout = false })
+    await expect(page.locator('.watchVideoPlaylist')).toBeVisible()
+    await expect(page.locator('.watchVideoPlaylist .playlistHeader > .channelName')).toHaveText('Test channel -', { useInnerText: true })
+    await expect(page.locator('.watchVideoPlaylist .playlistIndex')).toBeVisible()
+    await expect(page.locator('.watchVideoPlaylist .playlistProgressBarContainer')).toBeVisible()
     await watch.dispose()
   })
 

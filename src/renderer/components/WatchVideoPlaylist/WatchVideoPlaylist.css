@@ -440,8 +440,10 @@
 }
 
 @media (width <= 600px), (height <= 600px) {
-  .channelNameSeparator,
-  .playlistIndex {
+  .phonePlaylist .channelNameSeparator,
+  .phonePlaylist .playlistIndex,
+  .fullscreenPlaylist .channelNameSeparator,
+  .fullscreenPlaylist .playlistIndex {
     display: none;
   }
 }
