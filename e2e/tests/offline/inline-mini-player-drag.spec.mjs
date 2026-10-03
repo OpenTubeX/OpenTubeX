@@ -821,3 +821,51 @@ for (const uiScale of [100, 125]) {
     })
   }
 }
+
+for (const uiScale of [100, 125]) {
+  test(`swiping across the scroll-triggered bottom bar returns to the video at ${uiScale}%`, async ({ app, page }) => {
+    const player = await openMobilePlayer(app, page)
+    await page.evaluate(scale => {
+      window.ftElectron.setZoomFactor(scale / 100)
+      const spacer = document.createElement('div')
+      spacer.style.height = '2000px'
+      document.body.append(spacer)
+    }, uiScale)
+    const cdp = await page.context().newCDPSession(page)
+    const touch = (type, point) => cdp.send('Input.dispatchTouchEvent', {
+      type, touchPoints: point ? [point] : []
+    })
+    try {
+      await page.evaluate(() => window.scrollTo(0, 1200))
+      await expect(player).toHaveClass(/scrollMiniPlayer/)
+      await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+      const cancelPoint = await player.evaluate(mobileMiniPlayerReturnPoint, 'thumbnail')
+      for (const end of ['touchCancel', 'touchEnd']) {
+        await touch('touchStart', cancelPoint)
+        await touch('touchMove', { ...cancelPoint, y: cancelPoint.y - 40 })
+        await touch(end)
+        await page.waitForTimeout(400)
+        await expect(player, `${end} below the restore threshold`).toHaveClass(/scrollMiniPlayer/)
+      }
+      for (const region of mobileMiniPlayerRegions) {
+        await page.evaluate(() => window.scrollTo(0, 1200))
+        await expect(player).toHaveClass(/scrollMiniPlayer/)
+        await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+        await expect(page).toHaveURL(/#\/watch\//)
+        const point = await player.evaluate(mobileMiniPlayerReturnPoint, region)
+        await touch('touchStart', point)
+        for (const distance of [20, 40, 80, 100]) {
+          await touch('touchMove', { ...point, y: point.y - distance })
+        }
+        await touch('touchEnd')
+        await expect(player, `swipe on ${region}`).not.toHaveClass(/scrollMiniPlayer/)
+        await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
+        await expect(page).toHaveURL(/#\/watch\//)
+        await page.waitForTimeout(400)
+      }
+    } finally {
+      await touch('touchEnd').catch(() => {})
+      await cdp.detach()
+    }
+  })
+}

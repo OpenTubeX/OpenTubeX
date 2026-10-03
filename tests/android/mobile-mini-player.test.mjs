@@ -74,6 +74,26 @@ test('mobile mini-player restores from the whole bar and keeps close separate', 
         store.commit('setUiScale', scale)
         store.dispatch('updateReducedMotion', scale === 125 ? 'on' : 'off')
       }, scale)
+      await page.evaluate(() => {
+        const spacer = document.createElement('div')
+        spacer.id = 'mini-player-test-spacer'
+        spacer.style.height = '2000px'
+        document.body.append(spacer)
+      })
+      for (const region of mobileMiniPlayerRegions) {
+        await page.evaluate(() => window.scrollTo(0, 1200))
+        await expect(player).toHaveClass(/mobileMiniBar/)
+        await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+        const point = await player.evaluate(mobileMiniPlayerReturnPoint, region)
+        await touch('touchStart', point)
+        for (const distance of [20, 40, 80, 100]) await touch('touchMove', { ...point, y: point.y - distance })
+        await touch('touchEnd')
+        await expect(player, `same-page swipe on ${region} at ${scale}%`).not.toHaveClass(/scrollMiniPlayer/)
+        await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
+        await page.waitForTimeout(400)
+        await expect(page).toHaveURL(/#\/watch\//)
+      }
+      await page.evaluate(() => document.querySelector('#mini-player-test-spacer')?.remove())
       for (const swipe of [false, true]) {
         for (const region of mobileMiniPlayerRegions) {
           // Navigate away while playback continues, retaining the actual player.
@@ -128,6 +148,7 @@ test('mobile mini-player restores from the whole bar and keeps close separate', 
       if (window.__miniPlayerFetch) window.fetch = window.__miniPlayerFetch
       delete window.__miniPlayerFetch
       document.querySelector('#mini-player-test-style')?.remove()
+      document.querySelector('#mini-player-test-spacer')?.remove()
     }, { settings, originalRoute })
     await watch?.dispose()
     await session.detach()
