@@ -1113,17 +1113,17 @@ test('shows the audio-track player and custom visualizer for YouTube Music track
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
   const surface = player.locator('.musicAudioSurface')
   const canvas = surface.locator('.musicVisualizerCanvas')
+  const artwork = surface.locator('img.musicAudioArtwork:not(.retryImagePlaceholder)')
 
   await expect(player).toHaveClass(/musicAudioPlayer/)
   await expect(surface).toBeVisible()
-  await expect(surface.locator('.musicAudioArtwork')).toBeVisible()
+  await expect(artwork).toBeVisible()
   await expect(surface.locator('.musicAudioTitle')).toHaveText(/\S/)
   await expect(surface.locator('.musicAudioArtist')).toHaveText(/\S/)
   await expect(surface.locator('.musicAudioAvatar')).toBeVisible()
   await expect(video).toHaveCSS('opacity', '0')
   await expect(canvas).toBeVisible()
 
-  const artwork = surface.locator('.musicAudioArtwork')
   const artworkSrc = await artwork.getAttribute('src')
   await artwork.dispatchEvent('error')
   await expect(artwork).toBeHidden()
@@ -1203,7 +1203,7 @@ test('shows the audio-track player and custom visualizer for YouTube Music track
 
   const [playerBounds, artworkBounds] = await Promise.all([
     player.boundingBox(),
-    surface.locator('.musicAudioArtwork').boundingBox(),
+    artwork.boundingBox(),
   ])
   expect(playerBounds).not.toBeNull()
   expect(artworkBounds).not.toBeNull()
@@ -6964,6 +6964,7 @@ test.describe('manual comment loading', () => {
 
   test('loads collapsed replies from the video uploader while filtering', async ({ app, page, attachScreenshot }) => {
     await mockPlayableWatchPage(app, page, { creatorReply: true, ownerReply: true })
+    await page.route('https://yt3.ggpht.com/**', route => fulfillVisualFixture(route, 'avatar'))
     await openMockedVideo(page)
 
     const loadComments = page.locator('.getCommentsTitle')
@@ -6976,7 +6977,7 @@ test.describe('manual comment loading', () => {
       name: /replies from .+ and others/
     })
     await expect(ownerReplyToggle).toBeVisible()
-    await expect(ownerReplyToggle.locator('.commentReplyOwnerThumbnail')).toBeVisible()
+    await expect(ownerReplyToggle.locator('img.commentReplyOwnerThumbnail')).toBeVisible()
     await expect(ownerReplyToggle.locator('.commentReplyOwnerSeparator')).toHaveText('•')
     await expect(ownerReplyToggle.locator('.commentReplyToggleText')).toHaveText(/\d+ replies/)
     await expect(ownerReplyToggle).not.toContainText('from')
@@ -7413,7 +7414,7 @@ test.describe('manual comment loading', () => {
 
     await page.getByRole('button', { name: 'Filter loaded comments' }).click()
     const creatorFilter = page.getByRole('checkbox', { name: 'From creator' })
-    await expect(creatorFilter.locator('.commentCreatorFilterAvatar')).toHaveAttribute('src', /.+/)
+    await expect(creatorFilter.locator('img.commentCreatorFilterAvatar')).toHaveAttribute('src', /.+/)
     await creatorFilter.click()
 
     await expect(page.locator('.commentThread')).toHaveCount(1)
@@ -7592,7 +7593,7 @@ test.describe('manual comment loading', () => {
       const scroller = dock.locator('.commentsContentWrapper')
       const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
       await dock.getByRole('button', { name: 'Filter loaded comments' }).click()
-      await expect(dock.getByRole('checkbox', { name: 'From creator' }).locator('.commentCreatorFilterAvatar')).toHaveAttribute('src', /.+/)
+      await expect(dock.getByRole('checkbox', { name: 'From creator' }).locator('img.commentCreatorFilterAvatar')).toHaveAttribute('src', /.+/)
       await dock.getByRole('button', { name: 'Filter loaded comments' }).click()
       await expect.poll(() => scroller.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
       await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
