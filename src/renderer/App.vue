@@ -4558,6 +4558,8 @@ function handleExternalLink(href) {
   }
 }
 
+provide('handleExternalLink', handleExternalLink)
+
 /**
  * @param {PointerEvent} event
  * @param {HTMLAnchorElement} link

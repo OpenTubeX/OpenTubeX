@@ -4,6 +4,7 @@
     class="paidPromotionBadge"
     @click.stop="openPaidPromotionHelp"
     @dblclick.stop
+    @keydown.space.stop
   >
     <ft-icon
       :icon="['fas', 'money-check-dollar']"
@@ -20,12 +21,14 @@
 </template>
 
 <script setup>
-import { openExternalLink } from '../../helpers/utils'
+import { inject } from 'vue'
+
+const handleExternalLink = inject('handleExternalLink')
 
 const PAID_PROMOTION_HELP_URL = 'https://support.google.com/youtube?p=ppp&nohelpkit=1'
 
 function openPaidPromotionHelp() {
-  openExternalLink(PAID_PROMOTION_HELP_URL)
+  handleExternalLink(PAID_PROMOTION_HELP_URL)
 }
 </script>
 
