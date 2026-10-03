@@ -8,10 +8,74 @@ import AVKit
 
 @MainActor
 final class AppTests: XCTestCase {
-    private func loopbackServer(_ handle: @escaping (String, NWConnection) -> Void) async throws -> NWListener {
-        let listener = try NWListener(using: .tcp, on: .any)
+    private func makeLoopbackListener(port: NWEndpoint.Port = .any) throws -> NWListener {
+        let parameters = NWParameters.tcp
+        // Fixture servers must not wait for the runner's external network interfaces.
+        parameters.requiredInterfaceType = .loopback
+        return try NWListener(using: parameters, on: port)
+    }
+
+    private func startLoopbackListener(_ listener: NWListener) async throws {
         let ready = expectation(description: "Loopback server ready")
-        listener.stateUpdateHandler = { if case .ready = $0 { ready.fulfill() } }
+        var finished = false
+        listener.stateUpdateHandler = { state in
+            guard !finished else { return }
+            switch state {
+            case .ready, .failed:
+                finished = true
+                ready.fulfill()
+            case .waiting(let error) where error == .posix(.EADDRINUSE):
+                finished = true
+                ready.fulfill()
+            default: break
+            }
+        }
+        // Deliver startup state on the same queue as the test's state inspection.
+        listener.start(queue: .main)
+        defer { listener.stateUpdateHandler = nil }
+        await fulfillment(of: [ready], timeout: 30)
+        switch listener.state {
+        case .ready:
+            guard let port = listener.port, port.rawValue != 0 else {
+                listener.cancel()
+                throw URLError(.cannotConnectToHost)
+            }
+        case .failed(let error), .waiting(let error):
+            listener.cancel()
+            throw error
+        default:
+            listener.cancel()
+            throw URLError(.timedOut)
+        }
+    }
+
+    func testLoopbackStartupRejectsOccupiedPort() async throws {
+        let listener = try makeLoopbackListener()
+        listener.newConnectionHandler = { $0.cancel() }
+        defer { listener.cancel() }
+        try await startLoopbackListener(listener)
+        let occupied = try makeLoopbackListener(port: XCTUnwrap(listener.port))
+        occupied.newConnectionHandler = { $0.cancel() }
+        defer { occupied.cancel() }
+        do {
+            try await startLoopbackListener(occupied)
+            XCTFail("An unready fixture must fail startup instead of requesting port zero")
+        } catch let error as NWError {
+            XCTAssertEqual(error, .posix(.EADDRINUSE))
+        }
+        let recovered = try await loopbackServer { _, connection in
+            connection.send(content: Data("HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\nok".utf8),
+                            completion: .contentProcessed { _ in connection.cancel() })
+        }
+        defer { recovered.cancel() }
+        let port = try XCTUnwrap(recovered.port).rawValue
+        let (data, response) = try await URLSession.shared.data(from: XCTUnwrap(URL(string: "http://127.0.0.1:\(port)/recover")))
+        XCTAssertEqual((response as? HTTPURLResponse)?.statusCode, 200)
+        XCTAssertEqual(data, Data("ok".utf8))
+    }
+
+    private func loopbackServer(_ handle: @escaping (String, NWConnection) -> Void) async throws -> NWListener {
+        let listener = try makeLoopbackListener()
         listener.newConnectionHandler = { connection in
             connection.start(queue: .global())
             func receive(_ buffered: Data) {
@@ -25,8 +89,7 @@ final class AppTests: XCTestCase {
             }
             receive(Data())
         }
-        listener.start(queue: .global())
-        await fulfillment(of: [ready], timeout: 10)
+        try await startLoopbackListener(listener)
         return listener
     }
 
@@ -522,20 +585,17 @@ final class AppTests: XCTestCase {
 
     func testYtDlpQueueReordering() async throws {
         try await openApplication()
-        let listener = try NWListener(using: .tcp, on: .any)
-        let ready = expectation(description: "Queue fixture server ready")
+        let listener = try makeLoopbackListener()
         let connectionLock = NSLock()
         var connections: [NWConnection] = []
-        listener.stateUpdateHandler = { state in if case .ready = state { ready.fulfill() } }
         listener.newConnectionHandler = { connection in
             connectionLock.lock()
             connections.append(connection)
             connectionLock.unlock()
             connection.start(queue: .global())
         }
-        listener.start(queue: .global())
         defer { listener.cancel() }
-        await fulfillment(of: [ready], timeout: 10)
+        try await startLoopbackListener(listener)
 
         let folder = try XCTUnwrap(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first)
             .appendingPathComponent("yt-dlp-queue", isDirectory: true)
@@ -649,11 +709,7 @@ final class AppTests: XCTestCase {
         try await openApplication()
         let fixtureURL = try XCTUnwrap(Bundle(for: Self.self).url(forResource: "fixture", withExtension: "mp4"))
         let media = try Data(contentsOf: fixtureURL)
-        let listener = try NWListener(using: .tcp, on: .any)
-        let ready = expectation(description: "yt-dlp fixture server ready")
-        listener.stateUpdateHandler = { state in
-            if case .ready = state { ready.fulfill() }
-        }
+        let listener = try makeLoopbackListener()
         listener.newConnectionHandler = { connection in
             connection.start(queue: .global())
             func receive(_ buffered: Data) {
@@ -673,9 +729,8 @@ final class AppTests: XCTestCase {
             }
             receive(Data())
         }
-        listener.start(queue: .global())
         defer { listener.cancel() }
-        await fulfillment(of: [ready], timeout: 10)
+        try await startLoopbackListener(listener)
         let url = "http://127.0.0.1:\(try XCTUnwrap(listener.port).rawValue)/fixture.mp4"
 
         let extracted = try await webView.callAsyncJavaScript(
@@ -774,14 +829,10 @@ final class AppTests: XCTestCase {
     func testYtDlpCancellationAndRetry() async throws {
         try await openApplication()
         let media = Data(repeating: 42, count: 2 * 1024 * 1024)
-        let listener = try NWListener(using: .tcp, on: .any)
-        let ready = expectation(description: "Slow yt-dlp fixture ready")
+        let listener = try makeLoopbackListener()
         let lock = NSLock()
         var requestCount = 0
         var offline = true
-        listener.stateUpdateHandler = { state in
-            if case .ready = state { ready.fulfill() }
-        }
         listener.newConnectionHandler = { connection in
             connection.start(queue: .global())
             func receive(_ buffered: Data) {
@@ -821,9 +872,8 @@ final class AppTests: XCTestCase {
             }
             receive(Data())
         }
-        listener.start(queue: .global())
         defer { listener.cancel() }
-        await fulfillment(of: [ready], timeout: 10)
+        try await startLoopbackListener(listener)
         let url = "http://127.0.0.1:\(try XCTUnwrap(listener.port).rawValue)/slow.mp4"
         let folder = try XCTUnwrap(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first)
             .appendingPathComponent("yt-dlp-cancel-fixture", isDirectory: true)
@@ -1005,9 +1055,7 @@ final class AppTests: XCTestCase {
     func testYtDlpConcurrentPlaybackAndDownload() async throws {
         try await openApplication()
         let body = Data(repeating: 42, count: 4 * 1024 * 1024)
-        let listener = try NWListener(using: .tcp, on: .any)
-        let ready = expectation(description: "Concurrent download server ready")
-        listener.stateUpdateHandler = { state in if case .ready = state { ready.fulfill() } }
+        let listener = try makeLoopbackListener()
         listener.newConnectionHandler = { connection in
             connection.start(queue: .global())
             connection.receive(minimumIncompleteLength: 1, maximumLength: 8192) { data, _, _, _ in
@@ -1032,9 +1080,8 @@ final class AppTests: XCTestCase {
                 })
             }
         }
-        listener.start(queue: .global())
         defer { listener.cancel() }
-        await fulfillment(of: [ready], timeout: 10)
+        try await startLoopbackListener(listener)
         let folder = try XCTUnwrap(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first)
             .appendingPathComponent("yt-dlp-concurrent", isDirectory: true)
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
@@ -1347,11 +1394,7 @@ final class AppTests: XCTestCase {
 
     func testLocalHTTPTransport() async throws {
         try await openApplication()
-        let listener = try NWListener(using: .tcp, on: .any)
-        let ready = expectation(description: "Local HTTP server ready")
-        listener.stateUpdateHandler = { state in
-            if case .ready = state { ready.fulfill() }
-        }
+        let listener = try makeLoopbackListener()
         listener.newConnectionHandler = { connection in
             connection.start(queue: .global())
             connection.receive(minimumIncompleteLength: 1, maximumLength: 8192) { _, _, _, _ in
@@ -1359,9 +1402,8 @@ final class AppTests: XCTestCase {
                 connection.send(content: Data(response.utf8), completion: .contentProcessed { _ in connection.cancel() })
             }
         }
-        listener.start(queue: .global())
         defer { listener.cancel() }
-        await fulfillment(of: [ready], timeout: 10)
+        try await startLoopbackListener(listener)
         let port = try XCTUnwrap(listener.port).rawValue
         let result = try await webView.callAsyncJavaScript("return await Capacitor.Plugins.CapacitorHttp.request({url, method: 'GET', responseType: 'json'})", arguments: ["url": "http://127.0.0.1:\(port)/health"], in: nil, contentWorld: .page) as? [String: Any]
         XCTAssertEqual(result?["status"] as? Int, 200)
@@ -1379,11 +1421,7 @@ final class AppTests: XCTestCase {
     private func verifyHTTPErrorRedirectHeadersAndRecovery(plugin: String) async throws {
         try await openApplication()
         _ = try await webView.callAsyncJavaScript("await testRouter.push('/subscriptions')", arguments: [:], in: nil, contentWorld: .page)
-        let listener = try NWListener(using: .tcp, on: .any)
-        let ready = expectation(description: "HTTP edge-case server ready")
-        listener.stateUpdateHandler = { state in
-            if case .ready = state { ready.fulfill() }
-        }
+        let listener = try makeLoopbackListener()
         listener.newConnectionHandler = { connection in
             connection.start(queue: .global())
             func receive(_ buffered: Data) {
@@ -1427,9 +1465,8 @@ final class AppTests: XCTestCase {
             }
             receive(Data())
         }
-        listener.start(queue: .global())
         defer { listener.cancel() }
-        await fulfillment(of: [ready], timeout: 10)
+        try await startLoopbackListener(listener)
         let port = try XCTUnwrap(listener.port).rawValue
         let result = try await webView.callAsyncJavaScript("""
         const nativeRequest = options => Capacitor.Plugins[plugin].request({...options, requestId: crypto.randomUUID()});
@@ -1477,13 +1514,9 @@ final class AppTests: XCTestCase {
         try await openApplication()
         _ = try await webView.callAsyncJavaScript("await testRouter.push('/subscriptions')", arguments: [:], in: nil, contentWorld: .page)
         for cancelThroughBridge in [true, false] {
-            let listener = try NWListener(using: .tcp, on: .any)
-            let ready = expectation(description: "Cancellation server ready")
+            let listener = try makeLoopbackListener()
             let started = expectation(description: "Partial response sent")
             let closed = expectation(description: "Native transport closed connection")
-            listener.stateUpdateHandler = { state in
-                if case .ready = state { ready.fulfill() }
-            }
             listener.newConnectionHandler = { connection in
                 connection.start(queue: .global())
                 connection.receive(minimumIncompleteLength: 1, maximumLength: 8192) { _, _, _, _ in
@@ -1497,9 +1530,8 @@ final class AppTests: XCTestCase {
                     })
                 }
             }
-            listener.start(queue: .global())
             defer { listener.cancel() }
-            await fulfillment(of: [ready], timeout: 10)
+            try await startLoopbackListener(listener)
             let port = try XCTUnwrap(listener.port).rawValue
             // Inject a loopback request into the transport; production plugin URL
             // validation remains covered separately and still forbids this origin.
@@ -1528,13 +1560,9 @@ final class AppTests: XCTestCase {
         try await openApplication()
         _ = try await webView.callAsyncJavaScript("await testRouter.push('/subscriptions')", arguments: [:], in: nil, contentWorld: .page)
         for immediate in [false, true] {
-            let listener = try NWListener(using: .tcp, on: .any)
-            let ready = expectation(description: "Cancellation server ready")
+            let listener = try makeLoopbackListener()
             let started = immediate ? nil : expectation(description: "Partial response sent")
             let closed = immediate ? nil : expectation(description: "Native transport closed connection")
-            listener.stateUpdateHandler = { state in
-                if case .ready = state { ready.fulfill() }
-            }
             listener.newConnectionHandler = { connection in
                 connection.start(queue: .global())
                 connection.receive(minimumIncompleteLength: 1, maximumLength: 8192) { data, _, _, _ in
@@ -1552,9 +1580,8 @@ final class AppTests: XCTestCase {
                     })
                 }
             }
-            listener.start(queue: .global())
             defer { listener.cancel() }
-            await fulfillment(of: [ready], timeout: 10)
+            try await startLoopbackListener(listener)
             let port = try XCTUnwrap(listener.port).rawValue
             let id = UUID().uuidString
             _ = try await webView.callAsyncJavaScript("""
@@ -1580,9 +1607,7 @@ final class AppTests: XCTestCase {
 
     func testInvidiousBrowsing() async throws {
         try await openApplication()
-        let listener = try NWListener(using: .tcp, on: .any)
-        let ready = expectation(description: "Invidious fixture ready")
-        listener.stateUpdateHandler = { if case .ready = $0 { ready.fulfill() } }
+        let listener = try makeLoopbackListener()
         listener.newConnectionHandler = { connection in
             connection.start(queue: .global())
             connection.receive(minimumIncompleteLength: 1, maximumLength: 16384) { data, _, _, _ in
@@ -1612,9 +1637,8 @@ final class AppTests: XCTestCase {
                 connection.send(content: Data(header.utf8) + body, completion: .contentProcessed { _ in connection.cancel() })
             }
         }
-        listener.start(queue: .global())
         defer { listener.cancel() }
-        await fulfillment(of: [ready], timeout: 10)
+        try await startLoopbackListener(listener)
         let base = "http://127.0.0.1:\(try XCTUnwrap(listener.port).rawValue)"
         _ = try await webView.callAsyncJavaScript("""
         window.invidiousBefore = {backend: testStore.getters.getBackendPreference, instance: testStore.getters.getDefaultInvidiousInstance};
