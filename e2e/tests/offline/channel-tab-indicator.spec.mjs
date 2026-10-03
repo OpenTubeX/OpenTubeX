@@ -92,7 +92,7 @@ test('keeps every channel tab in one row across zoom, RTL, and changing labels',
       await expectAligned(page)
       await expect.poll(() => tab.evaluate(element => {
         const tab = element.getBoundingClientRect()
-        const viewport = element.closest('.tabsViewport').getBoundingClientRect()
+        const viewport = element.closest('.tabs').getBoundingClientRect()
         return Math.max(viewport.left - tab.left, tab.right - viewport.right)
       })).toBeLessThan(2)
     }
@@ -107,7 +107,7 @@ test('keeps every channel tab in one row across zoom, RTL, and changing labels',
     contentType: 'image/png'
   })
 
-  await page.locator('.channelDetails:visible .tabsViewport').evaluate(element => { element.dir = 'rtl' })
+  await page.locator('.channelDetails:visible .tabs').evaluate(element => { element.dir = 'rtl' })
   await page.locator('#videosTab').click()
   await expectAligned(page)
   await page.locator('#aboutTab').click()
@@ -134,67 +134,38 @@ test('keeps every channel tab in one row across zoom, RTL, and changing labels',
   }
 })
 
-test('clamps the horizontal tab scroll when tabs disappear, labels shrink, or the viewport grows', async ({ app, page }) => {
+test('keeps all tabs visible without scrolling after labels or available tabs change', async ({ app, page }) => {
   await app.electronApp.evaluate(({ BrowserWindow }) => {
     BrowserWindow.getAllWindows()[0].setSize(375, 812)
   })
-  const viewport = page.locator('.channelDetails:visible .tabsViewport')
-  await expect(viewport).toHaveAttribute('data-overlayscrollbars-viewport', /overflowXScroll/)
-
-  async function scrollToEnd() {
-    await viewport.evaluate(element => { element.scrollLeft = element.scrollWidth })
-    await expect.poll(() => viewport.evaluate(element => element.scrollLeft)).toBeGreaterThan(0)
-  }
-  async function expectValidRange() {
-    await expect.poll(() => viewport.evaluate(element => {
-      const viewport = element.getBoundingClientRect()
-      const content = element.querySelector('.tabs').getBoundingClientRect()
-      return Math.max(element.scrollLeft - (element.scrollWidth - element.clientWidth), viewport.right - content.right)
-    })).toBeLessThan(2)
-    await expect.poll(() => viewport.evaluate(element => {
-      const scrollbar = element.querySelector(':scope > .os-scrollbar-horizontal')
-      const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
-      const thumb = scrollbar.querySelector('.os-scrollbar-handle').getBoundingClientRect()
-      const overflowing = element.scrollWidth - element.clientWidth > 1
+  const tabs = page.locator('.channelDetails:visible .tabs')
+  async function expectAllTabsFit() {
+    await expect.poll(() => tabs.evaluate(container => {
+      const bounds = container.getBoundingClientRect()
+      const tabs = [...container.querySelectorAll('[role="tab"]')].map(tab => tab.getBoundingClientRect())
       return {
-        overflowMatches: scrollbar.classList.contains('os-scrollbar-unusable') !== overflowing,
-        thumbMatches: !overflowing || Math.abs(thumb.width / track.width - element.clientWidth / element.scrollWidth) < 0.02
+        oneRow: Math.max(...tabs.map(tab => tab.top)) - Math.min(...tabs.map(tab => tab.top)) < 1,
+        fit: tabs.every(tab => tab.left >= bounds.left - 1 && tab.right <= bounds.right + 1),
+        noScroll: container.scrollWidth <= container.clientWidth + 1 && container.scrollLeft === 0
       }
-    })).toEqual({ overflowMatches: true, thumbMatches: true })
+    })).toEqual({ oneRow: true, fit: true, noScroll: true })
     await expectAligned(page)
   }
-
-  await scrollToEnd()
+  await expectAllTabsFit()
+  await page.locator('#aboutTab').click()
+  await expectAllTabsFit()
+  await page.locator('#videosTab .tabLabel').evaluate(label => {
+    label.dataset.label = 'A very long translated video tab label'
+    label.firstElementChild.textContent = label.dataset.label
+  })
+  await expectAllTabsFit()
+  await expect(page.locator('#videosTab .tabLabel > span')).toHaveCSS('text-overflow', 'ellipsis')
   await page.evaluate(async () => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     await Promise.all(['Shorts', 'Playlists', 'Community', 'Releases', 'Podcasts', 'Courses']
       .map(tab => store.dispatch(`updateHideChannel${tab}`, true)))
   })
-  await expectValidRange()
-
-  await page.locator('#videosTab .tabLabel').evaluate(label => {
-    label.dataset.label = 'A very long video tab label for horizontal scrolling'
-    label.firstElementChild.textContent = label.dataset.label
-  })
-  await scrollToEnd()
-  await page.locator('#videosTab .tabLabel').evaluate(label => {
-    label.dataset.label = 'Videos'
-    label.firstElementChild.textContent = label.dataset.label
-  })
-  await expectValidRange()
-
-  await page.evaluate(async () => {
-    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-    await Promise.all(['Shorts', 'Playlists', 'Community', 'Releases', 'Podcasts', 'Courses']
-      .map(tab => store.dispatch(`updateHideChannel${tab}`, false)))
-  })
-  await scrollToEnd()
-  await app.electronApp.evaluate(({ BrowserWindow }) => {
-    BrowserWindow.getAllWindows()[0].setSize(1600, 900)
-  })
-  await expectValidRange()
-  await expect.poll(() => viewport.evaluate(element => element.scrollLeft)).toBe(0)
-  await expect(viewport.locator(':scope > .os-scrollbar-horizontal')).toHaveClass(/os-scrollbar-unusable/)
+  await expectAllTabsFit()
 })
 
 test('handles quick switches, search, background tabs, and reduced motion', async ({ page }) => {

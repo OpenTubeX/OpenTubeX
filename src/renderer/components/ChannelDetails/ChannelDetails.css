@@ -91,19 +91,13 @@
   flex-wrap: nowrap;
 }
 
-.tabsViewport {
-  flex: 0 1 66%;
-  min-inline-size: 0;
-  overflow-x: auto;
-  padding-block-end: 8px;
-}
-
 .tabs {
   position: relative;
   display: flex;
   flex-wrap: nowrap;
-  inline-size: max-content;
-  min-inline-size: 100%;
+  flex: 0 1 66%;
+  min-inline-size: 0;
+  overflow-inline: clip;
 }
 
 .tabsIndicator {
@@ -128,8 +122,11 @@
 
 .tab {
   position: relative;
-  flex: 0 0 auto;
-  padding: 15px;
+  box-sizing: border-box;
+  flex: 1 1 0%;
+  min-inline-size: 0;
+  padding-block: 15px;
+  padding-inline: 8px;
   font-size: 15px;
   cursor: pointer;
   align-self: flex-end;
@@ -161,6 +158,11 @@
 
 .tabLabel {
   display: inline-grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .tabLabel::after {
@@ -172,12 +174,13 @@
 
 .tabLabel > span {
   grid-area: 1 / 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .selectedTab {
   color: var(--primary-text-color);
   font-weight: bold;
-  box-sizing: border-box;
 }
 
 .thumbnailContainer {
@@ -208,9 +211,16 @@
     max-inline-size: none;
   }
 
-  .tabsViewport {
+  .tabs {
     flex: 1 1 auto;
     inline-size: 100%;
+  }
+
+  .tab {
+    min-block-size: 44px;
+    padding-block: 4px;
+    padding-inline: 4px;
+    font-size: 0.9em;
   }
 }
 
