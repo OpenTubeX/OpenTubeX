@@ -9,16 +9,30 @@
   >
     <span class="ft-custom-icon__emoji">{{ customEmoji }}</span>
   </span>
-  <img
+  <span
     v-else-if="customImageSource"
     v-bind="forwardedAttrs"
     class="ft-custom-icon ft-custom-icon--image"
     :class="iconClass"
     :style="customIconStyle"
-    :src="customImageSource"
-    alt=""
-    draggable="false"
   >
+    <img
+      :src="customImageSource"
+      :style="{ visibility: customImageLoaded ? 'visible' : 'hidden' }"
+      alt=""
+      draggable="false"
+      @load="loadedCustomImage = customImageSource"
+      @error="loadedCustomImage = null"
+    >
+    <Icon
+      v-if="!customImageLoaded"
+      class="customImagePlaceholder"
+      :icon="resolveIconifyId(['fas', 'file-image'])"
+      width="100%"
+      height="100%"
+      aria-hidden="true"
+    />
+  </span>
   <span
     v-else-if="iconifyId"
     v-bind="forwardedAttrs"
@@ -41,7 +55,7 @@
 </template>
 
 <script setup>
-import { computed, normalizeStyle, useAttrs } from 'vue'
+import { computed, normalizeStyle, ref, useAttrs, watch } from 'vue'
 import { Icon } from '@iconify/vue/offline'
 
 import faAliasToCanon from '../../icons/faAliasToCanon.json'
@@ -109,6 +123,9 @@ const customEmoji = computed(() => {
 })
 
 const customImageSource = computed(() => getCustomIconImageSource(props.icon))
+const loadedCustomImage = ref(null)
+const customImageLoaded = computed(() => loadedCustomImage.value === customImageSource.value)
+watch(customImageSource, () => { loadedCustomImage.value = null })
 const iconifyId = computed(() => resolveIconifyId(props.icon))
 
 // Preserve the stable semantic metadata used by existing styling and consumers,
@@ -291,6 +308,15 @@ const iconifyGlyphStyle = computed(() => cssFromIconTransform(props.transform))
 
 .ft-custom-icon--image {
   border-radius: calc(2px * var(--ui-roundness));
+}
+
+.ft-custom-icon--image > img,
+.customImagePlaceholder {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
 }
 
 .ft-custom-icon__emoji {

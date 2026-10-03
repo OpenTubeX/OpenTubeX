@@ -60,6 +60,7 @@
               />
               <FtRetryImage
                 v-else-if="getTabAvatarUrl(tab)"
+                :fallback-icon="getTabPageIcon(tab) || ['fas', 'display']"
                 :src="getTabAvatarUrl(tab)"
                 class="capacitorTabletTabAvatar"
                 alt=""

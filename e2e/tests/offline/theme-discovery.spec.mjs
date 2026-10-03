@@ -68,6 +68,22 @@ async function savedThemes(app) {
   return Promise.all(files.map(async file => JSON.parse(await readFile(path.join(directory, file), 'utf8'))))
 }
 
+test('shows a placeholder while theme screenshots load and a text fallback after failure', async ({ page }, testInfo) => {
+  const pending = []
+  await page.route('https://github.com/user-attachments/assets/*', route => { pending.push(route) })
+  await page.route(feedUrl, route => route.fulfill({ contentType: 'application/atom+xml', body: feed([entry(1), entry(2)]) }))
+  const gallery = await openDiscovery(page)
+  const card = gallery.locator('article').first()
+  await expect.poll(() => pending.length).toBeGreaterThan(0)
+  await expect(card.locator('.themePreview img:not(.retryImagePlaceholder)')).toBeHidden()
+  await expect(card.locator('.retryImagePlaceholder')).toBeVisible()
+  await card.screenshot({ path: testInfo.outputPath('theme-screenshot-placeholder.png') })
+  while (pending.length) await pending.shift().abort()
+  await expect.poll(() => pending.length).toBeGreaterThan(0)
+  while (pending.length) await pending.shift().abort()
+  await expect(card.getByText('Screenshot unavailable', { exact: true })).toBeVisible()
+})
+
 test('discovers, installs, persists and updates themes without overwriting local edits on refresh', async ({ page, app }) => {
   let revision = oldRevision
   let requests = 0
@@ -107,7 +123,7 @@ test('discovers, installs, persists and updates themes without overwriting local
   const first = gallery.locator('article').first()
   await expect(first.locator('.themePreview img')).toHaveAttribute('src', screenshot)
   await page.emulateMedia({ reducedMotion: 'no-preference' })
-  await first.locator('.themePreview img').evaluate(image => {
+  await first.locator('.themeScreenshotImage').evaluate(image => {
     window.themeFadeObserved = false
     image.addEventListener('transitionrun', event => {
       if (event.propertyName === 'opacity') window.themeFadeObserved = true
@@ -388,20 +404,31 @@ test('only offers updates for changes to the theme JSON', async ({ page, app }) 
 for (const fullPreview of [false, true]) {
   test(`keeps the selected screenshot after an outgoing image fails (${fullPreview ? 'full preview' : 'gallery'})`, async ({ page }) => {
     await mockScreenshots(page)
+    let retry
+    await page.route(`${screenshot}?*`, route => { retry = route })
     await page.route(feedUrl, route => route.fulfill({ contentType: 'application/atom+xml', body: feed([entry(1)]) }))
     const gallery = await openDiscovery(page)
     await page.emulateMedia({ reducedMotion: 'no-preference' })
     if (fullPreview) await gallery.locator('.themePreview button').click()
     const container = fullPreview ? page.getByRole('dialog', { name: 'Community theme 1', exact: true }) : gallery
     await expect(container.locator('img')).toHaveAttribute('src', screenshot)
+    await container.locator('img').evaluate(image => image.dispatchEvent(new Event('error')))
+    await expect.poll(() => retry !== undefined).toBe(true)
     await container.evaluate((element, full) => {
       const outgoing = element.querySelector('img')
-      outgoing.addEventListener('transitionrun', () => outgoing.dispatchEvent(new Event('error')), { once: true })
+      if (!full) {
+        outgoing.closest('.themeScreenshotImage').addEventListener('transitionrun', () => {
+          element.dataset.outgoingError = 'true'
+          outgoing.dispatchEvent(new Event('error'))
+        }, { once: true })
+      }
       const next = full
         ? element.querySelector('.screenshotNavigation button:last-child')
         : element.querySelector('.screenshotChoices button:last-child')
       next.click()
     }, fullPreview)
+    if (!fullPreview) await expect(container).toHaveAttribute('data-outgoing-error', 'true')
+    await retry.abort()
     await expect(container.locator('img')).toHaveAttribute('src', secondScreenshot)
     await expect(container.locator('img')).toBeVisible()
     await expect.poll(() => container.locator('img').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)

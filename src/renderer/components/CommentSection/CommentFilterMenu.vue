@@ -59,6 +59,7 @@
         >
           <FtRetryImage
             v-if="channelThumbnail"
+            :fallback-icon="['fas', 'circle-user']"
             :src="channelThumbnail"
             class="commentCreatorFilterAvatar"
           />

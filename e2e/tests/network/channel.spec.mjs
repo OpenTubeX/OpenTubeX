@@ -35,7 +35,13 @@ test.describe('channel page', () => {
     await expect(page.locator('[data-tab-loading-indicator]:not(.fullscreen)')).toHaveCount(0)
   })
 
-  test('shows channel info and videos', async ({ page }) => {
+  test('shows channel info and videos', async ({ page }, testInfo) => {
+    const pendingLinkIcons = []
+    let failLinkIcons = false
+    await page.route('https://encrypted-tbn2.gstatic.com/favicon-tbn**', route => {
+      if (failLinkIcons) return route.abort()
+      pendingLinkIcons.push(route)
+    })
     let releaseVideos
     const heldVideos = new Promise(resolve => { releaseVideos = resolve })
     let videosRequested = false
@@ -168,6 +174,18 @@ test.describe('channel page', () => {
     await expect(websiteLink).toHaveAttribute('href', 'https://www.blender.org/')
     await expect(aboutPanel.locator('.aboutLinks a')).toHaveCount(8)
     await expect(aboutPanel.locator('.aboutLinkIcon')).toHaveCount(8)
+    await expect.poll(() => pendingLinkIcons.length).toBeGreaterThan(0)
+    const linkIcon = websiteLink.locator('.aboutLinkIcon')
+    await expect(linkIcon.locator('img')).toBeHidden()
+    await expect(linkIcon.locator('.retryImagePlaceholder[data-icon="link"]')).toBeVisible()
+    const iconBounds = await linkIcon.locator('.retryImagePlaceholder').boundingBox()
+    expect(iconBounds.width).toBe(24)
+    expect(iconBounds.height).toBe(24)
+    await aboutPanel.locator('.aboutLinks').screenshot({ path: testInfo.outputPath('channel-link-placeholders.png') })
+    failLinkIcons = true
+    while (pendingLinkIcons.length) await pendingLinkIcons.shift().abort()
+    await expect(linkIcon.locator('img')).toHaveCount(0)
+    await expect(linkIcon.locator('[data-icon="link"]')).toBeVisible()
     const originalViewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }))
     await page.setViewportSize({ width: 375, height: 812 })
     const longLink = aboutPanel.locator('.aboutLinks a').first()

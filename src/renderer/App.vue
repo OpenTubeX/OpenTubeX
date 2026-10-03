@@ -459,15 +459,16 @@
             v-if="showTabPreviews"
             class="tabSwitcherPreview"
           >
-            <img
+            <FtRetryImage
               v-if="getUsableTabSwitcherPreviewUrl(tab)"
               :src="tabSwitcherPreviewUrls[tab.id]"
               :alt="`${formatTabTitle(tab.title)} preview`"
               draggable="false"
               @error="handleTabSwitcherPreviewError(tab)"
-            >
+            />
             <FtRetryImage
               v-else-if="!tabSwitcherPreviewPending[tab.id] && getUsableTabSwitcherAvatarUrl(tab)"
+              :fallback-icon="getTabPageIcon(tab) || ['fas', 'display']"
               :src="getUsableTabSwitcherAvatarUrl(tab)"
               :alt="`${formatTabTitle(tab.title)} preview`"
               class="tabSwitcherPreviewAvatar"
@@ -488,6 +489,7 @@
           <span class="tabSwitcherTitle">
             <FtRetryImage
               v-if="showTabIcons && getUsableTabSwitcherAvatarUrl(tab)"
+              :fallback-icon="getTabPageIcon(tab) || ['fas', 'display']"
               :src="getUsableTabSwitcherAvatarUrl(tab)"
               class="tabSwitcherTitleAvatar"
               alt=""

@@ -539,6 +539,7 @@
 }
 
 .badgeImage {
+  block-size: 14px;
   inline-size: 14px;
 }
 

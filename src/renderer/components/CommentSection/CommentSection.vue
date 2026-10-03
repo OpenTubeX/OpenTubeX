@@ -253,6 +253,7 @@
             </div>
             <FtRetryImage
               v-else
+              :fallback-icon="['fas', 'circle-user']"
               :src="comment.authorThumb"
               class="commentThumbnail"
             />
@@ -303,14 +304,15 @@
                 </template>
               </template>
             </component>
-            <img
+            <FtRetryImage
               v-if="comment.isMember"
+              :fallback-icon="['fas', 'user-check']"
               :src="comment.memberIconUrl"
               :title="$t('Comments.Member')"
               :aria-label="$t('Comments.Member')"
               class="commentMemberIcon"
               alt=""
-            >
+            />
             <img
               v-if="isSubscribedToChannel(comment.authorId)"
               :title="$t('Comments.Subscribed')"
@@ -381,6 +383,7 @@
               class="commentHeartBadge"
             >
               <FtRetryImage
+                :fallback-icon="['fas', 'circle-user']"
                 :src="channelThumbnail"
                 :title="$t('Comments.Hearted')"
                 :aria-label="$t('Comments.Hearted')"
@@ -420,6 +423,7 @@
                 <span class="commentReplyToggleLabel">
                   <FtRetryImage
                     v-if="comment.hasOwnerReplied && channelThumbnail"
+                    :fallback-icon="['fas', 'circle-user']"
                     :src="channelThumbnail"
                     class="commentReplyOwnerThumbnail"
                     aria-hidden="true"

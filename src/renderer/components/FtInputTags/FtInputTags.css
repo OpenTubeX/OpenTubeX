@@ -55,6 +55,8 @@
 }
 
 .tag-icon {
+  block-size: 24px;
+  inline-size: 24px;
   border-radius: 50%;
   vertical-align: middle;
 }

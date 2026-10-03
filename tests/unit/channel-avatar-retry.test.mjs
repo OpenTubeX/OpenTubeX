@@ -23,6 +23,8 @@ async function mountAvatar(t, nativeResult, componentPath = 'FtChannelAvatar/FtC
   const RetryImage = await compileComponent('FtRetryImage.vue', {
     store: { getters: settings },
     loadNativeHttp: async () => ({ fetchCapacitorAvatarDataUrl: async src => { requests.push(src); return typeof nativeResult === 'function' ? nativeResult() : nativeResult } }),
+    FtIcon: { render: () => Vue.h('fallback') },
+    thumbnailPlaceholder: 'placeholder.svg',
     setTimeout: callback => { const id = {}; timers.set(id, callback); return id },
     clearTimeout: id => timers.delete(id)
   })
@@ -65,6 +67,25 @@ async function fail(image) {
   await Vue.nextTick()
 }
 
+test('avatars show their default icon while loading, retrying, and after a source change', async t => {
+  const f = await mountAvatar(t, null)
+  assert.ok(f.find('fallback'), 'show the avatar placeholder before the first load')
+  assert.equal(f.find('img').props.style?.visibility, 'hidden')
+  await fail(f.find('img'))
+  assert.ok(f.find('fallback'), 'keep the placeholder during native recovery and the retry delay')
+  assert.equal(f.find('img').props.style?.visibility, 'hidden')
+  for (const callback of f.timers.values()) callback()
+  await Vue.nextTick()
+  f.find('img').props.onLoad({ target: { naturalWidth: 48, naturalHeight: 48 } })
+  await Vue.nextTick()
+  assert.equal(f.find('fallback'), undefined)
+  assert.notEqual(f.find('img').props.style?.visibility, 'hidden')
+  f.thumbnail.value = 'https://yt3.ggpht.com/new-avatar'
+  await Vue.nextTick()
+  assert.ok(f.find('fallback'), 'restore the placeholder for a new URL')
+  assert.equal(f.find('img').props.style?.visibility, 'hidden')
+})
+
 test('stored medium-resolution thumbnails load sharply by default and honor data saver', async t => {
   const f = await mountAvatar(t, null, 'FtRetryImage.vue')
   f.thumbnail.value = 'https://i.ytimg.com/vi/video/mqdefault.jpg'
@@ -73,6 +94,19 @@ test('stored medium-resolution thumbnails load sharply by default and honor data
   f.settings.getThumbnailDataSaver = true
   await Vue.nextTick()
   assert.equal(f.find('img').props.src, f.thumbnail.value)
+})
+
+test('undecodable embedded images keep their placeholder without an invalid HTTP retry', async t => {
+  const f = await mountAvatar(t, null, 'FtRetryImage.vue')
+  for (const source of ['data:image/png;base64,AAAA', 'blob:https://localhost/invalid']) {
+    f.thumbnail.value = source
+    await Vue.nextTick()
+    await fail(f.find('img'))
+    assert.equal(f.find('img').props.src, source)
+    assert.equal(f.find('img').props.style?.visibility, 'hidden')
+    assert.equal(f.timers.size, 0)
+    assert.equal(f.requests.length, 0)
+  }
 })
 
 test('data saver changes loaded thumbnail sources and resets resolution fallbacks', async t => {
@@ -93,11 +127,14 @@ test('data saver changes loaded thumbnail sources and resets resolution fallback
   assert.equal(f.timers.size, 0)
 })
 
-test('channel avatars recover through native HTTP before showing a fallback', async t => {
+test('channel avatars keep their placeholder until the native HTTP image loads', async t => {
   const f = await mountAvatar(t, 'data:image/png;base64,AA==')
   await fail(f.find('img'))
   assert.deepEqual(f.requests, ['https://yt3.ggpht.com/avatar'])
   assert.equal(f.find('img')?.props.src, 'data:image/png;base64,AA==')
+  assert.ok(f.find('fallback'), 'keep the placeholder until the recovered image decodes')
+  f.find('img').props.onLoad({ target: { naturalWidth: 48, naturalHeight: 48 } })
+  await Vue.nextTick()
   assert.equal(f.find('fallback'), undefined)
 })
 
@@ -125,7 +162,7 @@ test('video thumbnails fall back in resolution order on errors and loaded placeh
   assert.equal(f.find('img').props.src, f.thumbnail.value)
 })
 
-test('channel avatars show a fallback only after the delayed retry fails and reset for a new URL', async t => {
+test('channel avatars remove the failed image after the delayed retry and reset for a new URL', async t => {
   const f = await mountAvatar(t, null)
   await fail(f.find('img'))
   assert.ok(f.find('img'), 'keep the image mounted while retrying')

@@ -8,6 +8,7 @@
   >
     <FtRetryImage
       v-if="channelThumbnail != null && !thumbnailLoadFailed"
+      :fallback-icon="['fas', 'circle-user']"
       class="bubble"
       :src="channelThumbnail"
       alt=""
@@ -38,6 +39,7 @@
   >
     <FtRetryImage
       v-if="channelThumbnail != null && !thumbnailLoadFailed"
+      :fallback-icon="['fas', 'circle-user']"
       class="bubble"
       :src="channelThumbnail"
       alt=""

@@ -405,6 +405,7 @@
                   <span class="tabIcon">
                     <FtRetryImage
                       v-if="usableTabAvatarUrl(tab)"
+                      :fallback-icon="getTabPageIcon(tab) || ['fas', 'display']"
                       :src="usableTabAvatarUrl(tab)"
                       alt=""
                       draggable="false"
@@ -547,6 +548,7 @@
                         <span class="tabIcon">
                           <FtRetryImage
                             v-if="usableTabAvatarUrl(syncedTabPreview(tab))"
+                            :fallback-icon="getTabPageIcon(syncedTabPreview(tab)) || ['fas', 'display']"
                             :src="usableTabAvatarUrl(syncedTabPreview(tab))"
                             alt=""
                             @error="handleTabAvatarError(syncedTabPreview(tab))"

@@ -113,6 +113,7 @@
             <FtRetryImage
               v-for="collaborator in channelCollaborators"
               :key="collaborator.id"
+              :fallback-icon="['fas', 'circle-user']"
               :src="collaborator.thumbnail"
               class="channelThumbnail collaboratorThumbnail"
               alt=""
@@ -137,6 +138,7 @@
               @auxclick="handleChannelLinkClick"
             >
               <FtRetryImage
+                :fallback-icon="['fas', 'circle-user']"
                 :src="channelThumbnail"
                 :class="enableChannelLinks ? '' : 'initialCursor'"
                 class="channelThumbnail"

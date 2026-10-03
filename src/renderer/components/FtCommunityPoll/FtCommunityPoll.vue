@@ -30,11 +30,11 @@
         class="option"
       >
         <span class="empty-circle" />
-        <img
+        <FtRetryImage
           v-if="choice.image"
           :src="findSmallestPollImage(choice.image)"
           alt=""
-        >
+        />
         <div
           class="option-text"
           dir="auto"
@@ -68,6 +68,7 @@
 </template>
 
 <script setup>
+import FtRetryImage from '../FtRetryImage.vue'
 import { computed, ref } from 'vue'
 import { FtIcon } from '@opentubex/icons'
 

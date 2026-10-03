@@ -67,6 +67,7 @@
           >
             <FtRetryImage
               v-if="channel.thumbnail != null"
+              :fallback-icon="['fas', 'circle-user']"
               class="channelThumbnail"
               height="35"
               width="35"

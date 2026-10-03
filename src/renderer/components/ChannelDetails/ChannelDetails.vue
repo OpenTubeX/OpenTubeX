@@ -20,6 +20,7 @@
         >
           <FtRetryImage
             v-if="thumbnailUrl && !thumbnailLoadFailed"
+            :fallback-icon="['fas', 'circle-user']"
             class="thumbnail"
             :src="thumbnailUrl"
             alt=""

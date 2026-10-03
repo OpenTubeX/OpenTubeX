@@ -45,20 +45,26 @@
                 <button
                   v-if="entry.screenshots.length && !failedImages.has(currentScreenshot(entry))"
                   type="button"
+                  :aria-label="entry.title"
                   @click="preview = entry"
                 >
                   <Transition
                     name="themeScreenshot"
                     mode="out-in"
                   >
-                    <img
+                    <span
                       :key="currentScreenshot(entry)"
-                      :src="currentScreenshot(entry)"
-                      :alt="entry.title"
-                      loading="lazy"
-                      referrerpolicy="no-referrer"
-                      @error="failedImages.add($event.currentTarget.src)"
+                      class="themeScreenshotImage"
                     >
+                      <FtRetryImage
+                        :fallback-icon="['fas', 'file-image']"
+                        :src="currentScreenshot(entry)"
+                        :alt="entry.title"
+                        loading="lazy"
+                        referrerpolicy="no-referrer"
+                        @error="failedImages.add(currentScreenshot(entry))"
+                      />
+                    </span>
                   </Transition>
                 </button>
                 <span v-else>{{ t('Theme Discovery.No Preview') }}</span>
@@ -161,13 +167,14 @@
         >
           <SwiperSlide>
             <div class="swiper-zoom-container">
-              <img
+              <FtRetryImage
+                :fallback-icon="['fas', 'file-image']"
                 class="fullThemeScreenshot"
                 :src="currentScreenshot(preview)"
                 :alt="preview.title"
                 referrerpolicy="no-referrer"
-                @error="failedImages.add($event.currentTarget.src)"
-              >
+                @error="failedImages.add(currentScreenshot(preview))"
+              />
             </div>
           </SwiperSlide>
         </Swiper>
@@ -205,6 +212,7 @@ import { Zoom } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/zoom'
 import FtButton from './FtButton/FtButton.vue'
+import FtRetryImage from './FtRetryImage.vue'
 import FtPrompt from './FtPrompt/FtPrompt.vue'
 import FtIconButton from './FtIconButton/FtIconButton.vue'
 import FtSpinner from './FtSpinner/FtSpinner.vue'
@@ -411,11 +419,31 @@ async function install(entry) {
 }
 
 .themePreview button,
+.themeScreenshotImage,
 .themePreview img {
   display: block;
   inline-size: 100%;
   block-size: 100%;
   border-radius: inherit;
+}
+
+.themeScreenshotImage {
+  position: relative;
+}
+
+.themeScreenshotImage .retryImagePlaceholder,
+.fullThemeScreenshot.retryImagePlaceholder {
+  display: grid;
+  place-items: center;
+  inline-size: 100%;
+  block-size: 100%;
+  color: var(--secondary-text-color);
+}
+
+.themeScreenshotImage .retryImagePlaceholder :deep(.ft-icon__glyph),
+.fullThemeScreenshot.retryImagePlaceholder :deep(.ft-icon__glyph) {
+  block-size: 48px;
+  inline-size: 48px;
 }
 
 .themePreview button {

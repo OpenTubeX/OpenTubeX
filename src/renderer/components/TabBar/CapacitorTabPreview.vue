@@ -3,16 +3,16 @@
     class="capacitorTabPreview"
     aria-hidden="true"
   >
-    <img
+    <FtRetryImage
       v-if="pagePreview"
       :src="pagePreview"
       class="capacitorTabThumbnail"
       draggable="false"
       alt=""
-    >
+      @error="failedPagePreview = pagePreview"
+    />
     <FtRetryImage
-      v-else-if="thumbnailUrl"
-      v-show="failedThumbnailUrl !== thumbnailUrl"
+      v-else-if="thumbnailUrl && failedThumbnailUrl !== thumbnailUrl"
       :src="thumbnailUrl"
       class="capacitorTabThumbnail"
       loading="lazy"
@@ -21,8 +21,8 @@
       @load="failedThumbnailUrl = null"
     />
     <FtRetryImage
-      v-if="!pagePreview && avatarUrl && (!thumbnailUrl || failedThumbnailUrl === thumbnailUrl)"
-      v-show="failedAvatarUrl !== avatarUrl"
+      v-if="!pagePreview && avatarUrl && failedAvatarUrl !== avatarUrl && (!thumbnailUrl || failedThumbnailUrl === thumbnailUrl)"
+      :fallback-icon="getTabPageIcon(tab) || ['fas', 'display']"
       :src="avatarUrl"
       class="capacitorPhoneTabAvatar capacitorTabPreviewAvatar"
       loading="lazy"
@@ -54,7 +54,11 @@ import FtRetryImage from '../FtRetryImage.vue'
 const props = defineProps({
   tab: { type: Object, required: true },
 })
-const pagePreview = computed(() => store.getters.getShowTabPreviews ? getCapacitorTabPreview(props.tab) : null)
+const failedPagePreview = ref(null)
+const pagePreview = computed(() => {
+  const preview = store.getters.getShowTabPreviews ? getCapacitorTabPreview(props.tab) : null
+  return preview !== failedPagePreview.value ? preview : null
+})
 const failedThumbnailUrl = ref(null)
 const failedAvatarUrl = ref(null)
 const avatarUrl = computed(() => getTabAvatarUrl(props.tab))

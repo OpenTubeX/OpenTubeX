@@ -52,6 +52,7 @@
           />
           <FtRetryImage
             v-else-if="showIcon && usableTabAvatarUrl"
+            :fallback-icon="tabPageIcon || ['fas', 'display']"
             :src="tabAvatarUrl"
             class="tabAvatar"
             alt=""

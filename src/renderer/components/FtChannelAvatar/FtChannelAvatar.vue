@@ -5,6 +5,7 @@
   >
     <FtRetryImage
       v-if="thumbnail && !thumbnailLoadFailed"
+      :fallback-icon="['fas', 'circle-user']"
       class="channelAvatarImage"
       :src="thumbnail"
       alt=""
