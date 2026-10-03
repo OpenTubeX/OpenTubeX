@@ -191,8 +191,7 @@
   gap: 4px;
 }
 
-.capacitorPhoneTabHistoryEntry,
-.capacitorPhoneTabHistoryButton {
+.capacitorPhoneTabHistoryEntry {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -213,8 +212,7 @@
   overflow-wrap: anywhere;
 }
 
-.capacitorPhoneTabHistoryEntry :deep(.ft-icon),
-.capacitorPhoneTabHistoryButton :deep(.ft-icon) {
+.capacitorPhoneTabHistoryEntry :deep(.ft-icon) {
   flex: 0 0 20px;
   inline-size: 20px;
 }
@@ -225,24 +223,11 @@
   font-size: 12px;
 }
 
-.capacitorPhoneTabHistoryButton {
-  inline-size: 100%;
-  border-block-start: 1px solid var(--border-color);
-  border-start-start-radius: 0;
-  border-start-end-radius: 0;
-  font-size: 13px;
-}
-
 .capacitorPhoneTabHistoryEntry[aria-current='page'],
-.capacitorPhoneTabHistoryEntry:is(:hover, :active),
-.capacitorPhoneTabHistoryButton:is(:hover, :active) {
+.capacitorPhoneTabHistoryEntry:is(:hover, :active) {
   background-color: var(--side-nav-hover-color);
 }
 
-
-.withHistory .capacitorPhoneTabClose {
-  inset-block-end: 52px;
-}
 
 .capacitorPhoneOpenTabs,
 .capacitorPhoneSyncedTabsContent {

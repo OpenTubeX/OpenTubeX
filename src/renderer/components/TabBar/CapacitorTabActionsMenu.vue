@@ -153,6 +153,18 @@
                 {{ t('Context Menu.Reload Tab') }}
               </button>
               <button
+                v-if="showHistory"
+                type="button"
+                role="menuitem"
+                @click="emit('history')"
+              >
+                <FtIcon
+                  :icon="['fas', 'clock-rotate-left']"
+                  aria-hidden="true"
+                />
+                {{ t('Tab Organizer.Tab History') }}
+              </button>
+              <button
                 type="button"
                 role="menuitem"
                 :disabled="!canToggleLoaded"
@@ -236,6 +248,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  showHistory: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits([
@@ -246,6 +262,7 @@ const emit = defineEmits([
   'dismiss',
   'duplicate',
   'reload',
+  'history',
   'toggle-loaded',
   'toggle-pinned'
 ])
