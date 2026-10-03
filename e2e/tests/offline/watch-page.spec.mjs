@@ -6175,15 +6175,19 @@ test.describe('watch page', () => {
     await openMockedVideo(page)
 
     const video = page.locator('.ftVideoPlayer video')
-    await video.evaluate(element => {
+    await video.evaluate(async element => {
       element.pause()
+      const seeked = new Promise(resolve => element.addEventListener('seeked', resolve, { once: true }))
       element.currentTime = 29
-      element.dispatchEvent(new Event('timeupdate'))
+      await seeked
     })
 
     const prompt = page.locator('.skippedSegment').filter({ hasText: 'Skip Endcards/Credits?' })
     await expect(prompt).toBeVisible()
-    await video.dispatchEvent('ended')
+    // A synthetic ended event leaves playback inside the segment, where a queued
+    // timeupdate can recreate the prompt. Let the media actually finish instead.
+    await video.evaluate(element => element.play())
+    await expect.poll(() => video.evaluate(element => element.ended)).toBe(true)
 
     await expect(prompt).toHaveCount(0)
   })
