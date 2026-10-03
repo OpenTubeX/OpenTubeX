@@ -139,6 +139,30 @@ test('consumes the startup seek even when canplay precedes Shaka loaded', () => 
   assert.equal(state.video.value.currentTime, 20)
 })
 
+test('loading completion consumes a native seek made after canplay', () => {
+  const { state, setCurrentTime, handleCanPlay } = absoluteSeekFixture({ isLive: false })
+  state.hasLoaded.value = false
+  state.video.value.readyState = 4
+  handleCanPlay()
+  setCurrentTime(5)
+  assert.equal(state.pendingMetadataSeek, 5)
+  state.video.value.currentTime = 6
+  const loadedStart = source.indexOf('    async function handleLoaded() {')
+  const loadedEnd = source.indexOf('      // Background tabs', loadedStart)
+  Object.assign(state, {
+    togglePlaybackRate: null,
+    isLive: { value: false },
+    restorePendingPlaybackRate() {},
+    player: { isLive: () => false, getManifest: () => null }
+  })
+  vm.runInNewContext(`${source.slice(loadedStart, loadedEnd)}\n    }\nhandleLoaded()`, state)
+  assert.equal(state.pendingMetadataSeek, null)
+  assert.equal(state.video.value.currentTime, 6)
+  state.video.value.currentTime = 20
+  handleCanPlay()
+  assert.equal(state.video.value.currentTime, 20)
+})
+
 test('retains a queued seek when a timeline pointer interaction is canceled', () => {
   const { state, setCurrentTime, handleSeekBarInput } = absoluteSeekFixture({ isLive: false })
   state.video.value.readyState = 0

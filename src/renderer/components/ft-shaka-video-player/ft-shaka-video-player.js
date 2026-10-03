@@ -11465,6 +11465,9 @@ export default defineComponent({
       isLive.value = player.isLive()
       restorePendingPlaybackRate()
       const mediaElement = video.value
+      // Native HLS can emit canplay before Shaka finishes loading its tracks.
+      // Seeks already applied in that interval must not survive to a later rebuffer.
+      if (videoLayoutReady.value && player.getManifest() === null && mediaElement.readyState >= 3) pendingMetadataSeek = null
       // Background tabs may finish loading without emitting play or pause.
       shortsPaused.value = mediaElement.paused
       if (process.env.IS_ELECTRON && !mediaElement.autoplay && mediaElement.paused) {
