@@ -64,6 +64,7 @@ Search Listing:
   Label:
     Members Only: 회원 전용
 Search Filters:
+  Cookie Search Failed: "설정된 쿠키를 사용한 검색에 실패했습니다."
   Prioritize:
     Prioritize: 우선순위
     Popularity: 인기순

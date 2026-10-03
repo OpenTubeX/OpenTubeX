@@ -187,6 +187,7 @@ const IpcChannels = {
   TWITCH_CHAT_REPLAY_PAGE: 'twitch-chat-replay-page',
   TWITCH_SUB_ONLY_VOD: 'twitch-sub-only-vod',
   YT_DLP_GET_RECOMMENDATIONS: 'yt-dlp-get-recommendations',
+  YT_DLP_SEARCH: 'yt-dlp-search',
   YT_DLP_PLAYBACK_CACHE_GET: 'yt-dlp-playback-cache-get',
   YT_DLP_PLAYBACK_CACHE_SET: 'yt-dlp-playback-cache-set',
   YT_DLP_PLAYBACK_CACHE_DELETE: 'yt-dlp-playback-cache-delete',

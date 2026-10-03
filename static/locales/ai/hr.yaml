@@ -1964,3 +1964,6 @@ Form Inputs:
   Download Arguments Hint: Neobavezni argumenti za ovo preuzimanje
   Generated ID Hint: Ostavite prazno za generiranje ID-a
   Default Value: "Zadano: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Pretraživanje s konfiguriranim kolačićima nije uspjelo."

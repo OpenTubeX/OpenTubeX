@@ -1964,3 +1964,6 @@ Form Inputs:
   Download Arguments Hint: وسيطات اختيارية لهذا التنزيل
   Generated ID Hint: اتركه فارغًا لإنشاء معرّف
   Default Value: "الافتراضي: {value}"
+
+Search Filters:
+  Cookie Search Failed: "فشل البحث باستخدام ملفات تعريف الارتباط المحددة."

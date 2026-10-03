@@ -1997,3 +1997,6 @@ Form Inputs:
   Download Arguments Hint: Optionele argumenten voor deze download
   Generated ID Hint: Laat leeg om een ID te genereren
   Default Value: "Standaard: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Zoeken met de ingestelde cookies is mislukt."
