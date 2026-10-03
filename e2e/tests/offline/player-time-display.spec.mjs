@@ -52,6 +52,199 @@ test('download options fit horizontally and its Cancel button retains a border',
   expect.soft(await cancel.evaluate(element => getComputedStyle(element).borderTopColor)).not.toBe('rgba(0, 0, 0, 0)')
 })
 
+test('player controls, overlays, tooltips and captions follow the app font in both themes', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page, { captionTranslations: true })
+  await page.route('**/api/videoLabels/**', route => route.fulfill({ status: 404 }))
+  await page.route('**/api/skipSegments/**', route => route.fulfill({
+    json: [{
+      videoID: 'jNQXAC9IVRw',
+      segments: [{
+        UUID: 'typography-highlight',
+        actionType: 'poi',
+        category: 'poi_highlight',
+        segment: [15, 15],
+        videoDuration: 30,
+        votes: 1,
+        locked: 0,
+        description: ''
+      }]
+    }]
+  }))
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setUseSponsorBlock', true)
+    store.commit('setSponsorBlockHighlight', { color: '#ff1684', skip: 'promptToSkip' })
+    store.commit('setEnableSubtitlesByDefault', true)
+    store.commit('setUseQuickPlaybackSpeedBar', true)
+  })
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => {
+    element.playbackRate = 2
+    element.pause()
+  })
+  await setPlayerFullscreen(page, true)
+  const player = page.locator('.ftVideoPlayer')
+  const label = player.locator('.ft-shaka-highlight-button-label')
+  const caption = player.locator('.shaka-text-container [translate="no"]').first()
+  await expect(caption).toBeVisible()
+  await expect(player.locator('.ft-quick-playback-rate-button:not(.shaka-hidden)').first()).toBeVisible()
+
+  for (const frosted of [true, false]) {
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+    await expect(player).toHaveClass(frosted ? /^(?!.*classicPlayerControls)/ : /classicPlayerControls/)
+    for (const scale of [1, 1.25]) {
+      const font = scale === 1 ? 'Geist Variable' : 'Inter Variable'
+      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAppFont', value), font)
+      const appFont = await page.locator('body').evaluate(element => getComputedStyle(element).fontFamily)
+      expect(appFont).toContain(font)
+      await app.electronApp.evaluate(({ BrowserWindow }, value) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(value), scale)
+      await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
+      await expect(label).toBeVisible()
+      await expect(label).toHaveText('Skip to Highlight? (Enter)')
+      const typography = await player.evaluate(element => {
+        const properties = ['fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'fontVariantNumeric', 'textRendering', 'letterSpacing']
+        const read = selector => {
+          const style = getComputedStyle(element.querySelector(selector))
+          return Object.fromEntries(properties.map(property => [property, style[property]]))
+        }
+        return {
+          timestamp: read('.ft-time-display-group > .shaka-current-time'),
+          adjustedTimestamp: read('.ft-playback-adjusted-time'),
+          highlight: read('.ft-shaka-highlight-button-label')
+        }
+      })
+      expect(typography.highlight).toEqual(typography.timestamp)
+      expect(typography.adjustedTimestamp).toEqual(typography.timestamp)
+      expect(typography.timestamp.fontFamily).toBe(appFont)
+      await expect(player).toHaveCSS('font-family', appFont)
+      await expect(caption).toHaveCSS('font-family', appFont)
+      // Shaka recreates cues after resizing; create and measure inline-font ruby text together.
+      const captionFonts = await caption.evaluate(element => {
+        const originalFont = element.style.fontFamily
+        element.style.fontFamily = 'serif'
+        const ruby = document.createElement('ruby')
+        ruby.style.fontFamily = 'serif'
+        ruby.textContent = '漢字'
+        const annotation = document.createElement('rt')
+        annotation.style.fontFamily = 'serif'
+        annotation.textContent = 'かんじ'
+        ruby.appendChild(annotation)
+        element.appendChild(ruby)
+        const fonts = [element, ruby, annotation].map(node => getComputedStyle(node).fontFamily)
+        ruby.remove()
+        element.style.fontFamily = originalFont
+        return fonts
+      })
+      expect(captionFonts).toEqual([appFont, appFont, appFont])
+      const mismatchedFonts = await player.evaluate((element, expectedFont) => {
+        const selectors = 'button, input, select, textarea, .ft-chapters-current-title, .playerFullscreenTitleOverlay, .shaka-overflow-playback-rate-mark, .shaka-overflow-quality-mark'
+        return [...element.querySelectorAll(selectors)].flatMap(node => {
+          const family = getComputedStyle(node).fontFamily
+          return family === expectedFont ? [] : [{ element: node.className, family }]
+        })
+      }, appFont)
+      expect(mismatchedFonts).toEqual([])
+
+      // The wrapped mute control and Shaka's regular/status tooltips use separate rules.
+      for (const selector of ['.shaka-mute-button', '.shaka-fullscreen-button']) {
+        const button = player.locator(selector).first()
+        await button.hover()
+        expect(await button.evaluate(element => getComputedStyle(element, '::after').fontFamily)).toBe(appFont)
+      }
+      const settingsButton = player.locator('.shaka-overflow-menu-button')
+      await settingsButton.click()
+      const playbackRate = player.locator('.shaka-overflow-menu .shaka-playbackrate-button')
+      await playbackRate.hover()
+      expect(await playbackRate.evaluate(element => getComputedStyle(element, '::after').fontFamily)).toBe(appFont)
+      await playbackRate.click()
+      await expect(player.locator('.shaka-playback-rates:not(.shaka-hidden)')).toBeVisible()
+      await player.locator('.shaka-playback-rates .shaka-back-to-overflow-button').click()
+      await settingsButton.click()
+    }
+  }
+})
+
+test('changing fonts remeasures paused controls and clipped menu labels without resizing', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => {
+    element.playbackRate = 2
+    element.pause()
+  })
+  const player = page.locator('.ftVideoPlayer')
+  const panel = player.locator('.shaka-controls-button-panel')
+  const setFont = async font => {
+    await page.evaluate(async value => {
+      await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAppFont', value)
+      // Force styles to resolve before waiting for the selected bundled font.
+      document.querySelector('.ftVideoPlayer').getBoundingClientRect()
+      await document.fonts.ready
+    }, font)
+  }
+
+  for (const scale of [1, 1.25]) {
+    await app.electronApp.evaluate(({ BrowserWindow }, value) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(value), scale)
+    await player.evaluate(element => { element.style.width = '1600px' })
+    await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
+    const widths = []
+    for (const font of ['Source Sans 3 Variable', 'Plus Jakarta Sans Variable']) {
+      await setFont(font)
+      // Locate each font's compact-layout threshold by resizing before the regression.
+      let compactWidth = 300
+      let fullWidth = 1200
+      for (let step = 0; step < 10; step++) {
+        const width = (compactWidth + fullWidth) / 2
+        const compact = await player.evaluate(async (element, value) => {
+          element.style.width = `${value}px`
+          for (let frame = 0; frame < 3; frame++) await new Promise(requestAnimationFrame)
+          return element.querySelector('.shaka-controls-button-panel').classList.contains('ft-controls-compact-chapters')
+        }, width)
+        if (compact) compactWidth = width
+        else fullWidth = width
+      }
+      widths.push({ font, width: fullWidth })
+    }
+    widths.sort((a, b) => a.width - b.width)
+    const [narrow, wide] = widths
+    expect(wide.width - narrow.width).toBeGreaterThan(2)
+    await setFont(wide.font)
+    await player.evaluate((element, width) => { element.style.width = `${width}px` }, (wide.width + narrow.width) / 2)
+    await expect(panel).toHaveClass(/ft-controls-compact-chapters/)
+    await setFont(narrow.font)
+    await expect(panel).not.toHaveClass(/ft-controls-compact-chapters/)
+    await setFont(wide.font)
+    await expect(panel).toHaveClass(/ft-controls-compact-chapters/)
+
+    await panel.locator('.shaka-overflow-menu-button').click()
+    const menuLabel = player.locator('.shaka-overflow-menu .shaka-playbackrate-button .shaka-overflow-button-label > span:not(.shaka-current-selection-span)').first()
+    const labelText = (await menuLabel.textContent()).trim()
+    const labelWidths = []
+    for (const font of [narrow.font, wide.font]) {
+      await setFont(font)
+      labelWidths.push(await menuLabel.evaluate(element => {
+        const style = getComputedStyle(element)
+        const canvas = document.createElement('canvas')
+        const context = canvas.getContext('2d')
+        context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`
+        return context.measureText(element.textContent).width
+      }))
+    }
+    expect(labelWidths[1] - labelWidths[0]).toBeGreaterThan(1)
+    await menuLabel.evaluate((element, width) => {
+      element.style.inlineSize = `${width}px`
+      element.style.whiteSpace = 'nowrap'
+      // Shaka's text mutations start the initial measurement.
+      element.textContent = element.textContent.trim()
+    }, (labelWidths[0] + labelWidths[1]) / 2)
+    await expect(menuLabel).toHaveAttribute('title', labelText)
+    await setFont(narrow.font)
+    await expect(menuLabel).not.toHaveAttribute('title')
+    await setFont(wide.font)
+    await expect(menuLabel).toHaveAttribute('title', labelText)
+    await panel.locator('.shaka-overflow-menu-button').click()
+  }
+})
+
 test('portrait mobile controls keep captions and PiP in settings when the row is crowded', async ({ app, page }) => {
   await page.locator('.app').evaluate(element => {
     const applyMobileClasses = () => {
@@ -278,6 +471,9 @@ test('player controls share pill surfaces and the time display toggles together'
     element.pause()
   })
   await expect(page.locator('.shaka-controls-button-panel > .shaka-play-button > .shaka-ui-icon:not(.ft-play-pause-morph-icon)')).toHaveCSS('opacity', '0')
+  await page.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
+  // Pill colors inherit the controls' animated fade, so compare them once it finishes.
+  await expect.poll(() => page.locator('.shaka-controls-button-panel').evaluate(element => getComputedStyle(element).getPropertyValue('--ft-controls-fade').trim())).toBe('1')
 
   const group = page.locator('.ft-time-display-group')
   const regular = group.locator('.shaka-current-time:not(.ft-playback-adjusted-time)')

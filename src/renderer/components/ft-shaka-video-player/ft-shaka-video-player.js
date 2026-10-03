@@ -5796,6 +5796,20 @@ export default defineComponent({
       }
     })
 
+    watch(() => store.getters.getAppFont, async () => {
+      if (!ui) return
+      // Resolve the new font before waiting for its glyphs to finish loading.
+      container.value?.getBoundingClientRect()
+      await document.fonts.ready
+      const controlPanel = container.value?.querySelector('.shaka-controls-button-panel')
+      if (controlPanel instanceof HTMLElement) {
+        scheduleControlPanelLayout(controlPanel)
+      }
+      if (overflowMenuElement) {
+        scheduleOverflowMenuLabelTitles(overflowMenuElement)
+      }
+    }, { flush: 'post' })
+
     // Reapply any reconfigure that was deferred while the player was unloaded,
     // now that it is loaded again and rebuilding the controls is safe.
     watch(hasLoaded, (loaded) => {
