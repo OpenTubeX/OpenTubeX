@@ -518,22 +518,34 @@ for (const unmounted of [false, true]) {
   })
 }
 
-for (const secondTouch of [false, true]) {
-  test(`committed dismissal survives ${secondTouch ? 'a second touch' : 'event-less cancellation'} during settling`, t => {
+for (const primary of [false, true]) {
+  test(`committed dismissal ignores a new ${primary ? 'primary' : 'secondary'} touch during settling`, t => {
     const { gestures: g, event, calls } = fixture(t, { mini: true, dismissible: () => true, reducedMotion: false })
     t.mock.timers.enable({ apis: ['setTimeout'] })
     g.startMobileFullscreenGesture(event(210, 400))
     g.moveMobileFullscreenGesture(event(210, 500))
     g.finishMobileFullscreenGesture(event(210, 500))
     t.mock.timers.tick(70)
-    if (secondTouch) g.startMobileFullscreenGesture(event(220, 480, { pointerId: 2, isPrimary: false }))
-    else assert.equal(g.cancelMobileFullscreenGesture(), false)
+    g.startMobileFullscreenGesture(event(220, 480, { pointerId: 2, isPrimary: primary }))
     assert.equal(g.mobileFullscreenSwipeStyle.value?.['--mobile-mini-dismiss-offset'], '296.5px')
     t.mock.timers.tick(70)
     assert.deepEqual(calls, ['dismiss'])
     assert.equal(g.mobileFullscreenSwipeStyle.value, undefined)
   })
 }
+
+test('a video-change cancellation stops a committed dismissal before replacement playback', t => {
+  const { gestures: g, event, calls } = fixture(t, { mini: true, dismissible: () => true, reducedMotion: false })
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  g.startMobileFullscreenGesture(event(210, 400))
+  g.moveMobileFullscreenGesture(event(210, 500))
+  g.finishMobileFullscreenGesture(event(210, 500))
+  t.mock.timers.tick(70)
+  g.cancelMobileFullscreenGesture()
+  t.mock.timers.tick(70)
+  assert.deepEqual(calls, [])
+  assert.equal(g.mobileFullscreenSwipeStyle.value, undefined)
+})
 
 for (const selector of ['.mobileMiniBarDismiss', '.mobileMiniBarPlayPause', '.mobileMiniBarPlayback']) {
   test(`downward swipes on ${selector} keep its control action separate`, t => {

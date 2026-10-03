@@ -48,6 +48,8 @@ test('mobile mini-player restores from the whole bar, swipes down to close, and 
     const video = player.locator('video')
     const loadTestVideo = async () => {
       await page.evaluate(() => { location.hash = '#/watch/jNQXAC9IVRw' })
+      await expect(player).toBeVisible()
+      await expect(player).not.toHaveClass(/scrollMiniPlayer/)
       await expect.poll(async () => {
         const handle = await page.evaluateHandle(findWatchComponent)
         try { return await handle.evaluate(component => !!component && component.proxy.preparingVideoLoadGeneration === null) }
@@ -198,21 +200,40 @@ test('mobile mini-player restores from the whole bar, swipes down to close, and 
     // Cover closing by a downward swipe after verifying the close control.
     const returnBox = await player.locator('.mobileMiniBarReturn').boundingBox()
     const down = { x: returnBox.x + returnBox.width / 2, y: returnBox.y + 8 }
+    await player.evaluate(element => {
+      window.__miniDismissRegression = {}
+      const recordTransition = event => {
+        if (event.propertyName !== 'transform') return
+        element.removeEventListener('transitionrun', recordTransition)
+        queueMicrotask(() => {
+          const animation = element.getAnimations().find(animation => animation.transitionProperty === 'transform')
+          if (animation) window.__miniDismissRegression.transition = {
+            duration: animation.effect.getTiming().duration, rate: animation.playbackRate,
+          }
+        })
+      }
+      element.addEventListener('transitionrun', recordTransition)
+      element.addEventListener('pointerup', () => setTimeout(() => {
+        const button = element.querySelector('.mobileMiniBarReturn')
+        window.__miniDismissRegression.controlsDisabled = button?.disabled
+        // Exercise input after the normal 350ms compatibility-click suppression.
+        element.dispatchEvent(new PointerEvent('pointerdown', {
+          pointerType: 'touch', pointerId: 2, isPrimary: false, button: 0, bubbles: true,
+        }))
+        button?.click()
+      }, 400), { capture: true, once: true })
+    })
     await touch('touchStart', down)
     for (const distance of [20, 40, 64, 80]) await touch('touchMove', { ...down, y: down.y + distance })
     await touch('touchEnd')
-    await expect.poll(() => player.evaluate(element => {
-      const animation = element.getAnimations().find(animation => animation.transitionProperty === 'transform')
-      return animation && { duration: animation.effect.getTiming().duration, rate: animation.playbackRate }
-    })).toEqual({ duration: 140, rate: 0.25 })
-    // A second pointer arriving after release must not cancel the close timer.
-    await player.evaluate(element => element.dispatchEvent(new PointerEvent('pointerdown', {
-      pointerType: 'touch', pointerId: 2, isPrimary: false, button: 0, bubbles: true,
-    })))
     await expect(page.locator('.mobileMiniBarOverlay')).toHaveCount(0)
+    assert.deepEqual(await page.evaluate(() => window.__miniDismissRegression), {
+      transition: { duration: 140, rate: 0.25 }, controlsDisabled: true,
+    })
     await expect(page).toHaveURL(/#\/subscriptions/)
     assert.equal(await originalVideo.evaluate(video => video.paused && !video.isConnected), true)
     await originalVideo.dispose()
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateAnimationSpeed', 100))
     await loadTestVideo()
     await page.evaluate(() => { location.hash = '#/subscriptions' })
     await expect(close).toBeEnabled()
@@ -233,6 +254,7 @@ test('mobile mini-player restores from the whole bar, swipes down to close, and 
       if (settings) store.dispatch('updateAnimationSpeed', settings.AnimationSpeed)
       if (window.__miniPlayerFetch) window.fetch = window.__miniPlayerFetch
       delete window.__miniPlayerFetch
+      delete window.__miniDismissRegression
       document.querySelector('#mini-player-test-style')?.remove()
       document.querySelector('#mini-player-test-spacer')?.remove()
     }, { settings, originalRoute })

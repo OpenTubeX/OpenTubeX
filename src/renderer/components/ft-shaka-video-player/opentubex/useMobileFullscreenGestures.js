@@ -75,11 +75,11 @@ export function useMobileFullscreenGestures({
   }
 
   function startMobileFullscreenGesture(event) {
+    if (mobileMiniPlayerDismissSettling.value) return
     if (event.pointerType === 'touch' && !event.isPrimary) {
       cancelMobileFullscreenGesture()
       return
     }
-    if (mobileMiniPlayerDismissSettling.value) return
     if (
       !isCapacitorMobilePlayer() ||
       event.pointerType !== 'touch' ||
@@ -376,9 +376,7 @@ export function useMobileFullscreenGestures({
     }
     if (event && event.pointerId !== mobileFullscreenGesture?.pointerId) return false
 
-    if (mobileFullscreenGesture !== null || !mobileMiniPlayerDismissSettling.value) {
-      clearMobileMiniPlayerDismiss()
-    }
+    clearMobileMiniPlayerDismiss()
 
     clearTimeout(mobileSurfaceTapTimer)
     mobileSurfaceTapTimer = null
@@ -553,6 +551,7 @@ export function useMobileFullscreenGestures({
     mobileFullscreenSwipeSettling,
     mobileFullscreenSwipeStyle,
     mobileFullscreenSwiping,
+    mobileMiniPlayerDismissSettling,
     moveMobileFullscreenGesture,
     startMobileFullscreenGesture,
   }

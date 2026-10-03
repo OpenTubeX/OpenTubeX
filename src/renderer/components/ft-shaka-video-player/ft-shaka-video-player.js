@@ -5231,6 +5231,7 @@ export default defineComponent({
       mobileFullscreenSwipeSettling,
       mobileFullscreenSwipeStyle,
       mobileFullscreenSwiping,
+      mobileMiniPlayerDismissSettling,
       moveMobileFullscreenGesture,
       startMobileFullscreenGesture,
     } = useMobileFullscreenGestures({
@@ -7189,7 +7190,7 @@ export default defineComponent({
       video,
     })
 
-    const mobileMiniBarControlsDisabled = computed(() => Boolean(scrollMiniPlayerDragStyle.value || scrollMiniPlayerAnimating.value))
+    const mobileMiniBarControlsDisabled = computed(() => Boolean(scrollMiniPlayerDragStyle.value || scrollMiniPlayerAnimating.value || mobileMiniPlayerDismissSettling.value))
     const mobileMiniBarSeekDisabled = computed(() => mobileMiniBarControlsDisabled.value || !hasLoaded.value || !seekingIsPossible.value || !mobileMiniBarHasSeekRange.value)
 
     // The window may have resized while docked. Measure the settled inline
