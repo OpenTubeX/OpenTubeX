@@ -578,7 +578,10 @@
 }
 
 @container top-nav (width < 560px) {
-  .app.capacitorTabs .phoneLayout .topNavInner:has(.downloadsButton, .settingsButton, .minimizedUtilityButton, .syncIndicator) .logoText {
+  // Follow the preference so moving shortcuts into overflow cannot reveal the
+  // logo text and prevent them from returning when the header gets wider.
+  .app.capacitorTabs .phoneLayout .topNavInner.headerShortcutsEnabled .logoText,
+  .app.capacitorTabs .phoneLayout .topNavInner:has(.minimizedUtilityButton, .syncIndicator) .logoText {
     display: none;
   }
 }

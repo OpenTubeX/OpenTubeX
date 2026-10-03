@@ -313,9 +313,24 @@
 .select-label-text {
   align-items: center;
   display: inline-flex;
-  line-height: 14px;
+  line-height: inherit;
   min-inline-size: 0;
   white-space: nowrap;
+}
+
+@media (any-pointer: coarse), (width <= 680px) {
+  .select-label {
+    font-size: 14px;
+    line-height: 18px;
+  }
+
+  .select-icon {
+    display: flex;
+    align-items: center;
+    inline-size: 16px;
+    block-size: 16px;
+    font-size: 16px;
+  }
 }
 
 /* active state */
@@ -460,6 +475,10 @@
 
 .phonePicker .selectOption.selected::after {
   display: none;
+}
+
+.phonePicker .selectOption.selected {
+  background-color: transparent;
 }
 
 .phonePicker .selectOption.active:not(:hover, :focus-visible) {

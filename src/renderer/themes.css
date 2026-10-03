@@ -15,6 +15,7 @@ body {
   --switch-track-width: 40px;
   --switch-track-height: 24px;
   --switch-thumb-inset: 3px;
+  --switch-unchecked-thumb-size: 12px;
   --switch-touch-height: 36px;
 
   /* Optional decorative layers, separate from colors used by contrast checks
@@ -83,6 +84,7 @@ body:where(:has(.app.capacitorTabs)) {
   --switch-track-width: 52px;
   --switch-track-height: 32px;
   --switch-thumb-inset: 4px;
+  --switch-unchecked-thumb-size: 24px;
   --switch-touch-height: var(--phone-touch-target, 48px);
 }
 

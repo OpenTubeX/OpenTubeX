@@ -143,6 +143,117 @@ for (const zoom of [1, 1.25]) {
   })
 }
 
+test('phone header honors settings and downloads placement', async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 390, height: 850 })
+  const header = page.locator('.topNav')
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setEnableDownloads', true)
+    store.commit('setMoveDownloadsToAppHeader', true)
+    store.commit('setMoveSettingsToAppHeader', true)
+  })
+  await enablePhoneHeader(page)
+  await expect(header.locator('.downloadsButton')).toBeVisible()
+  await expect(header.locator('.settingsButton')).toBeVisible()
+  // Reach the smaller phone viewport below Electron's minimum window width.
+  await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1.25))
+  for (const width of [280, 390]) {
+    await app.electronApp.evaluate(({ BrowserWindow }, width) => {
+      const window = BrowserWindow.getAllWindows()[0]
+      window.setBounds({ ...window.getBounds(), width })
+    }, Math.round(width * 1.25))
+    await expect.poll(() => page.evaluate(() => window.innerWidth)).toBe(width)
+    await expect(header.locator('.downloadsButton, .settingsButton')).toHaveCount(width === 280 ? 0 : 2)
+  }
+  await header.locator('.downloadsButton').click()
+  await expect(page.locator('.settingsWindow')).toBeVisible()
+  await page.locator('.settingsWindow').getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(page.locator('.settingsWindow')).toBeHidden()
+  await header.locator('.settingsButton').click()
+  await expect(page.locator('.settingsWindow')).toBeVisible()
+  await page.locator('.settingsWindow').getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(page.locator('.settingsWindow')).toBeHidden()
+  await page.locator('.profileTrigger').click()
+  await expect(page.locator('.downloadsShortcut')).toHaveCount(0)
+  await expect(page.locator('.allSettingsShortcut')).toHaveCount(0)
+  await page.keyboard.press('Escape')
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setMoveDownloadsToAppHeader', false)
+    store.commit('setMoveSettingsToAppHeader', false)
+  })
+  await expect(header.locator('.downloadsButton')).toHaveCount(0)
+  await expect(header.locator('.settingsButton')).toHaveCount(0)
+  await page.locator('.profileTrigger').click()
+  await expect(page.locator('.downloadsShortcut')).toBeVisible()
+  await expect(page.locator('.allSettingsShortcut')).toBeVisible()
+})
+
+for (const zoom of [1, 1.25]) {
+  test(`phone header reserves section gaps at the shortcut cutoff at ${zoom} scale`, async ({ app, page }) => {
+    await setWindowSize(app, page, { width: 390, height: 850 })
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setEnableDownloads', true)
+      store.commit('setMoveDownloadsToAppHeader', true)
+      store.commit('setMoveSettingsToAppHeader', true)
+      store.commit('setAlwaysShowMobileSearchBar', true)
+    })
+    await enablePhoneHeader(page)
+    await page.evaluate(() => {
+      document.querySelector('.app').classList.add('capacitorTabletLayout')
+      // Put the shortcut cutoff above the 350px layout breakpoint so the section
+      // gaps are present. Action margins are part of the measured header budget.
+      document.querySelector('.topNav .quickSettings').style.marginInlineStart = '52px'
+    })
+    await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
+    for (const width of [380, 383, 384, 390, 380]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, size) => {
+        const window = BrowserWindow.getAllWindows()[0]
+        window.setBounds({ ...window.getBounds(), ...size })
+      }, { width: Math.round(width * zoom), height: 850 * zoom })
+      await expect.poll(() => page.evaluate(() => window.innerWidth)).toBe(width)
+      await expect.poll(() => page.locator('.pinnedSearchTrigger').evaluate(element => element.getBoundingClientRect().width), {
+        message: `pinned search retains its 48px target at ${width}px`
+      }).toBeGreaterThanOrEqual(48)
+      const shortcuts = page.locator('.topNav .downloadsButton, .topNav .settingsButton')
+      await expect(shortcuts).toHaveCount(width < 384 ? 0 : 2)
+    }
+  })
+}
+
+test('phone header retains visible logo text and shortcuts when search is hidden', async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 680, height: 850 })
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setHideSearchBar', true)
+    store.commit('setEnableDownloads', true)
+    store.commit('setMoveDownloadsToAppHeader', true)
+    store.commit('setMoveSettingsToAppHeader', true)
+    store.commit('setHideHeaderSyncIndicator', false)
+    store.commit('setSyncServerStatus', 'syncing')
+    store.commit('setSettingsWindowView', 'about')
+    store.commit('setSettingsWindowMinimized', true)
+  })
+  await enablePhoneHeader(page)
+  const header = page.locator('.topNav')
+  for (const width of [560, 680, 560]) {
+    await app.electronApp.evaluate(({ BrowserWindow }, width) => {
+      const window = BrowserWindow.getAllWindows()[0]
+      window.setBounds({ ...window.getBounds(), width })
+    }, width)
+    await expect.poll(() => page.evaluate(() => window.innerWidth)).toBe(width)
+    await expect(header.locator('.logoText')).toBeVisible()
+    await expect(header.locator('.downloadsButton')).toBeVisible()
+    await expect(header.locator('.settingsButton')).toBeVisible()
+    await expect.poll(() => header.evaluate(element => {
+      const logo = element.querySelector('.logo').getBoundingClientRect()
+      const action = element.querySelector('.profiles').getBoundingClientRect()
+      return action.left - logo.right
+    })).toBeGreaterThanOrEqual(4)
+  }
+})
+
 for (const pinned of [false, true]) {
   test(`crowded phone header keeps actions reachable with pinned search ${pinned}`, async ({ app, page }) => {
     await setWindowSize(app, page, { width: 375, height: 850 })
@@ -168,8 +279,14 @@ for (const pinned of [false, true]) {
     })).toBe(true)
     if (pinned) await expect.poll(() => page.locator('.pinnedSearchTrigger').evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThanOrEqual(48)
     await page.locator('.profileTrigger').click()
-    await expect(page.locator('.downloadsShortcut')).toBeVisible()
-    await expect(page.locator('.allSettingsShortcut')).toBeVisible()
+    if (await header.locator('.downloadsButton').isVisible()) {
+      await expect(header.locator('.settingsButton')).toBeVisible()
+      await expect(page.locator('.downloadsShortcut')).toHaveCount(0)
+      await expect(page.locator('.allSettingsShortcut')).toHaveCount(0)
+    } else {
+      await expect(page.locator('.downloadsShortcut')).toBeVisible()
+      await expect(page.locator('.allSettingsShortcut')).toBeVisible()
+    }
     await expect(page.locator('.phoneOverflowSync')).toBeVisible()
     await expect(page.locator('.phoneOverflowRestore')).toBeVisible()
     await page.locator('.phoneOverflowRestore').click()

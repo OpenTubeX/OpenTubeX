@@ -6,7 +6,10 @@
     :style="{ '--header-side-space': `${headerSideSpace}px` }"
     @keydown.esc="closePhoneSearch"
   >
-    <div class="topNavInner">
+    <div
+      class="topNavInner"
+      :class="{ headerShortcutsEnabled: showDownloadsButton || showSettingsButton }"
+    >
       <div
         ref="navigationActions"
         class="side"
@@ -185,7 +188,7 @@
           />
         </button>
         <button
-          v-if="showDownloadsButton && !compactPhoneActions"
+          v-if="showDownloadsButton && !headerShortcutsOverflow"
           type="button"
           class="downloadsButton navButton"
           :class="{ active: downloadsWindowOpen }"
@@ -200,7 +203,7 @@
           />
         </button>
         <button
-          v-if="showSettingsButton && !compactPhoneActions"
+          v-if="showSettingsButton && !headerShortcutsOverflow"
           type="button"
           class="settingsButton navButton"
           :class="{ active: settingsWindowOpen }"
@@ -217,7 +220,7 @@
         <CapacitorPhoneTabSwitcher @request-exit="emit('request-android-exit')" />
         <FtQuickSettingsMenu
           :compact-header="phoneLayout"
-          :header-actions-overflow="compactPhoneActions"
+          :header-actions-overflow="headerShortcutsOverflow"
         >
           <template #overflow-actions="{ close }">
             <template v-if="compactPhoneActions">
@@ -300,7 +303,7 @@ const automaticTabletViewport = usePhoneLayout('(min-width: 768px)')
 const header = useTemplateRef('header')
 const navigationActions = useTemplateRef('navigationActions')
 const headerActions = useTemplateRef('headerActions')
-const headerMetrics = shallowRef({ width: window.innerWidth, navigation: 0, actions: 0, logoText: 0 })
+const headerMetrics = shallowRef({ width: window.innerWidth, navigation: 0, actions: 0, logoText: 0, shortcutSpace: window.innerWidth })
 const compactLogo = computed(() => !hideSearchBar.value && headerMetrics.value.width < 440 + 2 * Math.max(
   headerMetrics.value.navigation + headerMetrics.value.logoText,
   headerMetrics.value.actions
@@ -317,6 +320,8 @@ const phoneLayout = computed(() => process.env.IS_CAPACITOR
 const showSearchContainer = ref(!phoneLayout.value)
 const narrowHeader = computed(() => headerMetrics.value.width < 480)
 const compactPhoneActions = computed(() => phoneLayout.value && narrowHeader.value)
+const headerShortcutsOverflow = computed(() => phoneLayout.value &&
+  headerMetrics.value.shortcutSpace < 52 * (Number(showDownloadsButton.value) + Number(showSettingsButton.value)))
 const searchTrigger = useTemplateRef('searchTrigger')
 const pinnedSearchTrigger = useTemplateRef('pinnedSearchTrigger')
 watch(phoneLayout, phone => { showSearchContainer.value = !phone })
@@ -329,9 +334,11 @@ function measureHeader() {
     headerMetrics.value = { ...headerMetrics.value, width }
     return
   }
-  const measureActions = (element, outerMargin) => {
+  const measureActions = (element, outerMargin, excludeShortcuts = false) => {
     const children = [...element.children].filter(child =>
-      !child.classList.contains('navSearchButton') && child.getBoundingClientRect().width > 0)
+      !child.classList.contains('navSearchButton') &&
+      (!excludeShortcuts || !child.matches('.downloadsButton, .settingsButton')) &&
+      child.getBoundingClientRect().width > 0)
     const style = getComputedStyle(element)
     return children.reduce((total, child) => {
       const childStyle = getComputedStyle(child)
@@ -343,12 +350,18 @@ function measureHeader() {
   const text = navigationActions.value.querySelector('.logoText')
   const textStyle = text && getComputedStyle(text)
   const logoText = textStyle ? parseFloat(textStyle.inlineSize) + parseFloat(textStyle.marginInlineStart) : 0
+  const navigationWidth = measureActions(navigationActions.value, 'marginInlineStart')
+  const navigationSpace = navigationWidth -
+    (text?.getBoundingClientRect().width > 0 ? logoText : 0)
+  const sectionGap = parseFloat(getComputedStyle(header.value.firstElementChild).columnGap) || 0
   headerMetrics.value = {
     width,
-    navigation: measureActions(navigationActions.value, 'marginInlineStart') -
-      (text?.getBoundingClientRect().width > 0 ? logoText : 0),
+    navigation: navigationSpace,
     actions: measureActions(headerActions.value, 'marginInlineEnd'),
-    logoText
+    logoText,
+    // Reserve a 48px touch target plus the 4px gap for search and each shortcut.
+    shortcutSpace: width - navigationWidth - sectionGap - measureActions(headerActions.value, 'marginInlineEnd', true) -
+      (hideSearchBar.value ? 0 : 52)
   }
 }
 const headerResizeObserver = new ResizeObserver(measureHeader)

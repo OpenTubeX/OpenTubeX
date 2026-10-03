@@ -402,7 +402,10 @@ function openDropdown() {
   search.value = ''
   emit('open')
   activeIndex.value = Math.max(0, selectedIndex.value)
-  dropdownTarget.value = selectRoot.value?.closest('.prompt, .tutorialCard, .tabOrganizerBackdrop') ?? document.fullscreenElement ?? document.body
+  // Mobile sheets must keep focus inside their subscription popup. Desktop lists
+  // stay outside it so blurred card backgrounds cannot offset or clip them.
+  const popupTarget = phoneLayout.value ? selectRoot.value?.closest('.profileDropdown') : null
+  dropdownTarget.value = popupTarget ?? selectRoot.value?.closest('.prompt, .tutorialCard, .tabOrganizerBackdrop') ?? document.fullscreenElement ?? document.body
   dropdownShown.value = true
 
   nextTick(async () => {
