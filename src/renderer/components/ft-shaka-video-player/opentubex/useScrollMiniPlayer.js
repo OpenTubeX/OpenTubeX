@@ -146,8 +146,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     videoElement.removeAttribute('poster')
     element.append(videoElement)
     element.style.setProperty('transition', 'none', 'important')
-    // Leaving Watch resets hidden navigation, so dock above the visible nav.
-    element.style.setProperty('translate', 'none', 'important')
+    // Keep the CSS translation for hidden navigation: it is also the settled
+    // bar's position after the browsing page has been restored.
     Object.assign(element.style, {
       position: 'fixed', left: '0px', top: `${top}px`, width: `${width}px`, height: `${height}px`, margin: '0px'
     })

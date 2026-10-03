@@ -30,6 +30,7 @@ import { resolveRouteComponent } from '../../router/index'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { tabLifecycleService } from '../../tabs/TabLifecycleService'
 import { tabLifecycleKey, tabPresentedKey, watchNavigationKey } from '../../tabs/TabContext'
+import { mobileNavigationMinimizePreview } from '../../helpers/mobileNavigationScroll'
 import { getPreviousBrowsingRoute } from '../../tabs/playerDockDestination'
 
 const props = defineProps({
@@ -142,6 +143,7 @@ async function minimize() {
 function beginMinimizePreview() {
   if (previewActive.value) return
   previewRestoring = false
+  if (document.querySelector('.app.capacitorPhoneLayout')) mobileNavigationMinimizePreview.value = props.tabId
   previewViewport = null
   previewScroll = { left: window.scrollX, top: window.scrollY }
   const bounds = watchRoot.value.getBoundingClientRect()
@@ -250,6 +252,7 @@ async function finishMinimizePreview(commit) {
 }
 
 function clearMinimizePreview() {
+  if (mobileNavigationMinimizePreview.value === props.tabId) mobileNavigationMinimizePreview.value = null
   previewActive.value = false
   previewStyle.value = null
   previewViewport = null
@@ -312,6 +315,7 @@ watch(enabled, value => {
 }, { flush: 'sync' })
 
 onBeforeUnmount(() => {
+  if (mobileNavigationMinimizePreview.value === props.tabId) mobileNavigationMinimizePreview.value = null
   window.removeEventListener('scroll', updatePreviewPosition)
   unregister()
   dispose()
