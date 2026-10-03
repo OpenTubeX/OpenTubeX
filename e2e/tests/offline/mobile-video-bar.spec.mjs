@@ -54,7 +54,8 @@ test('mobile video bar follows hidden navigation and stays above the connection 
     Object.defineProperty(navigator, 'onLine', { configurable: true, value: true })
     window.dispatchEvent(new Event('online'))
   })
-  await expect(banner).toHaveCount(0)
+  // The holder stays mounted so it can track the moving navigation bar.
+  await expect(banner.locator('.connectionStatus')).toHaveCount(0)
   await expect.poll(() => barGap('viewport')).toBeLessThan(1)
   await page.locator('.sideNav').evaluate(element => element.classList.remove('scrollHidden'))
   await expect.poll(() => barGap('.sideNav')).toBeLessThan(1)

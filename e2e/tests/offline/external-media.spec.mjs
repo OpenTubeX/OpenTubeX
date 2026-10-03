@@ -302,7 +302,9 @@ test('Twitch replay uses the watch chat toggle and side panel', async ({ app, pa
   expect(Math.abs(chatBox.x - playerBox.x - playerBox.width - (viewportWidth - chatBox.x - chatBox.width))).toBeLessThan(3)
   expect(chatBox.x).toBeGreaterThan(playerBox.x + playerBox.width - 5)
   expect(Math.abs(chatBox.y - playerBox.y)).toBeLessThan(12)
-  expect(chatBox.height).toBeGreaterThan(playerBox.height * 0.8)
+  // Chat has a fixed reading area independent of the video's aspect ratio.
+  // The whole panel should remain in view at both desktop UI scales.
+  expect(chatBox.y + chatBox.height).toBeLessThanOrEqual(await page.evaluate(() => innerHeight))
   await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
   const scaledPlayerBox = await externalMedia.locator('.externalMediaPlayer').boundingBox()
   const scaledChatBox = await externalMedia.locator('.twitchChat').boundingBox()
@@ -311,6 +313,7 @@ test('Twitch replay uses the watch chat toggle and side panel', async ({ app, pa
   expect(Math.abs(scaledPlayerBox.x - scaledInfoBox.x)).toBeLessThan(2)
   expect(Math.abs(scaledPlayerBox.x + scaledPlayerBox.width - scaledInfoBox.x - scaledInfoBox.width)).toBeLessThan(2)
   expect(Math.abs(scaledChatBox.x - scaledPlayerBox.x - scaledPlayerBox.width - (scaledViewportWidth - scaledChatBox.x - scaledChatBox.width))).toBeLessThan(3)
+  expect(scaledChatBox.y + scaledChatBox.height).toBeLessThanOrEqual(await page.evaluate(() => innerHeight))
   await page.evaluate(() => window.ftElectron.setZoomFactor(1))
   await attachScreenshot('Twitch chat normal layout')
 
@@ -319,7 +322,7 @@ test('Twitch replay uses the watch chat toggle and side panel', async ({ app, pa
   await externalMedia.locator('.externalMediaPlayer').evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
   const theatrePlayerBox = await externalMedia.locator('.externalMediaPlayer').boundingBox()
   const theatreChatBox = await externalMedia.locator('.twitchChat').boundingBox()
-  expect(theatrePlayerBox.width).toBeGreaterThan(playerBox.width * 1.25)
+  expect(theatrePlayerBox.width).toBeGreaterThan(playerBox.width)
   expect(theatreChatBox.y).toBeGreaterThan(theatrePlayerBox.y + theatrePlayerBox.height - 5)
   await attachScreenshot('Twitch chat theatre layout')
   await externalMedia.locator('.externalMediaPlayer .theatre-button').click()

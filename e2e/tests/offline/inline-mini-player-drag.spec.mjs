@@ -1,5 +1,5 @@
 import { test, expect, setWindowSize } from '../../helpers/app.mjs'
-import { openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
+import { mobileMiniPlayerRegions, mobileMiniPlayerReturnPoint, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchHistoryEntry, watchViewHandle } from '../../helpers/watch.mjs'
 
 test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, enableVideoZoom: false, enableMobileFullscreenSwipe: false } } })
@@ -334,10 +334,8 @@ test('mobile bar details fade at the destination during both swipe directions', 
     await expect(page.locator('.watchDragPreview')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
     await expect(player.locator('video').first()).toHaveCSS('object-fit', 'cover')
     const details = page.locator('.mobileMiniBarDetails')
-    const chevron = page.locator('.mobileMiniBarReturn')
     await expect(details).toHaveCount(1)
     await expect.poll(() => details.evaluate(element => Number(getComputedStyle(element).opacity))).toBeGreaterThan(0.5)
-    await expect.poll(() => chevron.evaluate(element => Number(getComputedStyle(element).opacity))).toBeGreaterThan(0.5)
     await touch('touchEnd')
     await expect(player).toHaveClass(/scrollMiniPlayer/)
     await expect(player.locator('video').first()).toHaveCSS('object-fit', 'cover')
@@ -361,7 +359,6 @@ test('mobile bar details fade at the destination during both swipe directions', 
     await expect(player).toHaveCSS('box-shadow', 'none')
     await expect.poll(() => details.evaluate(element => Number(getComputedStyle(element).opacity))).toBeLessThan(0.5)
     expect(Math.abs((await details.boundingBox()).y - barTop)).toBeLessThan(2)
-    expect(Math.abs((await chevron.boundingBox()).y - barTop)).toBeLessThan(2)
     await page.evaluate(() => {
       const element = document.querySelector('.ftVideoPlayer')
       const watchRoot = document.querySelector('.watchPreviewHost > div')
@@ -770,33 +767,105 @@ test('waiting poster follows the video into and out of the bottom bar', async ({
   }
 })
 
-test('tapping the bottom bar video returns to Watch', async ({ app, page }) => {
-  const player = await openMobilePlayer(app, page)
-  const bounds = await player.boundingBox()
-  const start = { x: bounds.x + bounds.width / 2, y: bounds.y + 100 }
-  const cdp = await page.context().newCDPSession(page)
-  try {
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] })
-    await cdp.send('Input.dispatchTouchEvent', {
-      type: 'touchMove', touchPoints: [{ ...start, y: start.y + 100 }]
+for (const uiScale of [100, 125]) {
+  for (const swipe of [false, true]) {
+    test(`${swipe ? 'swiping' : 'clicking'} across the bottom bar returns to Watch at ${uiScale}%`, async ({ app, page }) => {
+      const player = await openMobilePlayer(app, page)
+      await page.evaluate(scale => window.ftElectron.setZoomFactor(scale / 100), uiScale)
+      const cdp = await page.context().newCDPSession(page)
+      const touch = (type, point) => cdp.send('Input.dispatchTouchEvent', {
+        type, touchPoints: point ? [point] : []
+      })
+      try {
+        for (const region of mobileMiniPlayerRegions) {
+          const bounds = await player.boundingBox()
+          const start = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
+          await touch('touchStart', start)
+          for (const distance of [20, 40, 60, 80, 100]) {
+            await touch('touchMove', { ...start, y: start.y + distance })
+          }
+          await touch('touchEnd')
+          await expect(page).not.toHaveURL(/#\/watch\//)
+          await expect(player).toHaveClass(/scrollMiniPlayer/)
+          const returnButton = player.locator('.mobileMiniBarReturn')
+          await expect(returnButton).toBeEnabled()
+          await expect(returnButton.locator('svg')).toHaveCount(0)
+          const point = await player.evaluate(mobileMiniPlayerReturnPoint, region)
+          expect(await page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.classList.contains('mobileMiniBarReturn'), point), region).toBe(true)
+          if (swipe) {
+            await touch('touchStart', point)
+            for (const distance of [20, 40, 80, 100]) {
+              await touch('touchMove', { ...point, y: point.y - distance })
+            }
+            await touch('touchEnd')
+          } else {
+            // Android taps are verified on WebView; Electron needs mouse input
+            // to exercise the button's native click and pressed appearance.
+            await page.mouse.move(point.x, point.y)
+            await page.mouse.down()
+            if (region === 'thumbnail') {
+              await expect(returnButton).toHaveCSS('background-color', /(?:\/|,)\s*0\.12\)/)
+            }
+            await page.mouse.up()
+          }
+          await expect(page, `${swipe ? 'swipe' : 'click'} on ${region}`).toHaveURL(/#\/watch\//)
+          await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+          await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+          // Let click suppression from this gesture expire before the next one.
+          await page.waitForTimeout(400)
+        }
+      } finally {
+        await touch('touchEnd').catch(() => {})
+        await cdp.detach()
+      }
     })
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-    await expect(page).not.toHaveURL(/#\/watch\//)
-    await expect(player).toHaveClass(/scrollMiniPlayer/)
-    await expect(player).not.toHaveAttribute('data-mobile-mini-morph', '')
-    const thumbnail = player.locator('.mobileMiniBarThumbnailReturn')
-    await expect(thumbnail).toBeEnabled()
-    const video = await thumbnail.boundingBox()
-    expect(await page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.classList.contains('mobileMiniBarThumbnailReturn'), {
-      x: video.x + video.width / 2, y: video.y + video.height / 2
-    })).toBe(true)
-    await cdp.send('Input.dispatchTouchEvent', {
-      type: 'touchStart', touchPoints: [{ x: video.x + video.width / 2, y: video.y + video.height / 2 }]
-    })
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-    await expect(page).toHaveURL(/#\/watch\//)
-  } finally {
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }).catch(() => {})
-    await cdp.detach()
   }
-})
+}
+
+for (const uiScale of [100, 125]) {
+  test(`swiping across the scroll-triggered bottom bar returns to the video at ${uiScale}%`, async ({ app, page }) => {
+    const player = await openMobilePlayer(app, page)
+    await page.evaluate(scale => {
+      window.ftElectron.setZoomFactor(scale / 100)
+      const spacer = document.createElement('div')
+      spacer.style.height = '2000px'
+      document.body.append(spacer)
+    }, uiScale)
+    const cdp = await page.context().newCDPSession(page)
+    const touch = (type, point) => cdp.send('Input.dispatchTouchEvent', {
+      type, touchPoints: point ? [point] : []
+    })
+    try {
+      await page.evaluate(() => window.scrollTo(0, 1200))
+      await expect(player).toHaveClass(/scrollMiniPlayer/)
+      await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+      const cancelPoint = await player.evaluate(mobileMiniPlayerReturnPoint, 'thumbnail')
+      for (const end of ['touchCancel', 'touchEnd']) {
+        await touch('touchStart', cancelPoint)
+        await touch('touchMove', { ...cancelPoint, y: cancelPoint.y - 40 })
+        await touch(end)
+        await page.waitForTimeout(400)
+        await expect(player, `${end} below the restore threshold`).toHaveClass(/scrollMiniPlayer/)
+      }
+      for (const region of mobileMiniPlayerRegions) {
+        await page.evaluate(() => window.scrollTo(0, 1200))
+        await expect(player).toHaveClass(/scrollMiniPlayer/)
+        await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+        await expect(page).toHaveURL(/#\/watch\//)
+        const point = await player.evaluate(mobileMiniPlayerReturnPoint, region)
+        await touch('touchStart', point)
+        for (const distance of [20, 40, 80, 100]) {
+          await touch('touchMove', { ...point, y: point.y - distance })
+        }
+        await touch('touchEnd')
+        await expect(player, `swipe on ${region}`).not.toHaveClass(/scrollMiniPlayer/)
+        await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
+        await expect(page).toHaveURL(/#\/watch\//)
+        await page.waitForTimeout(400)
+      }
+    } finally {
+      await touch('touchEnd').catch(() => {})
+      await cdp.detach()
+    }
+  })
+}

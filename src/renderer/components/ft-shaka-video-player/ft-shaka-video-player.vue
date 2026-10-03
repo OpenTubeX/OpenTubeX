@@ -1370,7 +1370,7 @@
           <button
             v-if="scrollMiniPlayerActive"
             type="button"
-            class="mobileMiniBarThumbnailReturn"
+            class="mobileMiniBarReturn"
             :disabled="Boolean(scrollMiniPlayerDragStyle || scrollMiniPlayerAnimating)"
             :aria-label="scrollMiniPlayerDetached
               ? $t('Video.Player.Scroll Mini Player.Return to Video Tab')
@@ -1392,20 +1392,6 @@
               <span dir="auto">{{ channelName }}</span>
             </span>
           </div>
-          <button
-            type="button"
-            class="mobileMiniBarReturn"
-            :disabled="Boolean(scrollMiniPlayerDragStyle || scrollMiniPlayerAnimating)"
-            :aria-label="scrollMiniPlayerDetached
-              ? $t('Video.Player.Scroll Mini Player.Return to Video Tab')
-              : $t('Video.Player.Scroll Mini Player.Back to Top')"
-            @click.stop.prevent="scrollMiniScrollToTop"
-          >
-            <ft-icon
-              :icon="['fas', 'angle-up']"
-              aria-hidden="true"
-            />
-          </button>
           <button
             v-if="mobileMiniBarCanDismiss"
             type="button"

@@ -258,6 +258,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     (scrollMiniPlayerDetached.value || Boolean(watchNavigation?.detached.value)))
   let inlineDrag = null
   let inlineDragFrame = null
+  let scrollRestoreDrag = false
 
   function positionMobileMiniBarOverlay(bar) {
     mobileMiniBarOverlayStyle.value = {
@@ -270,9 +271,13 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
   function beginScrollMiniPlayerDrag(restoring = false) {
     const element = container.value
-    if (inlineDrag || !element || !watchNavigation?.beginMinimizePreview ||
+    if (inlineDrag || scrollRestoreDrag || !element || !watchNavigation?.beginMinimizePreview ||
       scrollMiniPlayerActive.value !== restoring || !canUseScrollMiniPlayerBase(true)) return false
-    if (restoring && !watchNavigation.detached.value) return false
+    if (restoring && !watchNavigation.detached.value) {
+      // The current Watch page restores by scrolling, without a navigation preview.
+      scrollRestoreDrag = true
+      return true
+    }
     cancelScrollMiniPlayerLayoutAnimation()
     updateScrollMiniVideoAspectRatio()
     const from = element.getBoundingClientRect()
@@ -461,6 +466,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   }
 
   function cancelScrollMiniPlayerDrag() {
+    scrollRestoreDrag = false
     if (inlineDragFrame !== null) cancelAnimationFrame(inlineDragFrame)
     inlineDragFrame = null
     inlineDrag?.resolveSettle?.()
@@ -480,6 +486,11 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   }
 
   async function finishScrollMiniPlayerDrag(commit) {
+    if (scrollRestoreDrag) {
+      scrollRestoreDrag = false
+      if (commit && scrollMiniPlayerActive.value && isActiveTab.value && !playerSuspended.value) scrollMiniScrollToTop()
+      return
+    }
     if (!inlineDrag || inlineDrag.finishing) return
     const drag = inlineDrag
     let restored = false

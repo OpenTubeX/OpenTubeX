@@ -109,8 +109,8 @@ test('watch page skeletons follow UI roundness before playback loads', async ({ 
     for (const roundness of [0, 100, 200]) {
       await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
       await expect(skeleton).toHaveCSS('border-radius', `${12 * roundness / 100}px`)
-      await expect(recommendations).toHaveCSS('border-radius', `${8 * roundness / 100}px`)
-      await expect(comments).toHaveCSS('border-radius', `${8 * roundness / 100}px`)
+      await expect(recommendations).toHaveCSS('border-radius', `${12 * roundness / 100}px`)
+      await expect(comments).toHaveCSS('border-radius', `${12 * roundness / 100}px`)
     }
     await attachScreenshot('watch page skeletons at 200% roundness')
 
@@ -147,7 +147,7 @@ test('watch page skeletons follow UI roundness before playback loads', async ({ 
   await expect(page.locator('.videoPlayerPlaceholder.ft-shimmer')).toHaveCount(0)
   await expect(page.locator('.ftVideoPlayer')).toHaveCSS('border-radius', '24px')
   await expect(page.locator('.recommendationsSkeleton')).toHaveCount(0)
-  await expect(page.locator('.watchVideoRecommendations')).toHaveCSS('border-radius', '16px')
+  await expect(page.locator('.watchVideoRecommendations')).toHaveCSS('border-radius', '24px')
   await expect(page.locator('.commentsSkeleton')).toHaveCount(0)
   await expect(page.locator('.commentsArea .card')).toBeVisible()
 })
@@ -5710,7 +5710,7 @@ test.describe('watch page', () => {
     })
     await expect(layout).toHaveClass(/useTheatreMode/)
     await expect(panel).toBeVisible()
-    expect(standardCardRadius).toBe('16px')
+    expect(standardCardRadius).toBe('24px')
     await expect(panel).toHaveCSS('border-radius', standardCardRadius)
     await expect(panel).not.toHaveClass(/chapters-panel-enter-active/)
     await expect.poll(() => panel.evaluate((element) => {

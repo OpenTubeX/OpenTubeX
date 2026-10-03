@@ -232,7 +232,7 @@ final class AppTests: XCTestCase {
                         const buttons = document.querySelectorAll('.addDownloadPrompt .btn');
                         const cancel = buttons[1];
                         const reference = document.createElement('button');
-                        reference.style.color = 'ButtonText';
+                        reference.style.color = 'var(--primary-text-color)';
                         reference.style.visibility = 'hidden';
                         document.body.append(reference);
                         const expected = getComputedStyle(reference).color;
@@ -1738,8 +1738,9 @@ final class AppTests: XCTestCase {
         try await wait("document.activeElement?.matches('.settingsCloseButton') === true")
         let searchFocused = try await evaluate("document.activeElement?.matches('input, textarea')") as? Bool
         XCTAssertEqual(searchFocused, false)
-        let transparentSwitches = try await evaluate("Array.from(document.querySelectorAll('.settingsWindow .switch-input')).every(input => getComputedStyle(input).backgroundColor === 'rgba(0, 0, 0, 0)')") as? Bool
-        XCTAssertEqual(transparentSwitches, true)
+        // The label paints the custom switch; its native input stays invisible.
+        let hiddenNativeSwitches = try await evaluate("Array.from(document.querySelectorAll('.settingsWindow .switch-input')).every(input => { const style = getComputedStyle(input); return style.opacity === '0' && style.appearance === 'none' })") as? Bool
+        XCTAssertEqual(hiddenNativeSwitches, true)
         _ = try await evaluate("document.querySelector('.settingsWindow .select-text').click(); true")
         try await wait("!!document.querySelector('.mobileSheetEnabled[open] .phonePicker')")
         _ = try await evaluate("document.querySelector('.mobileSheetEnabled[open] .mobileSheetHeader button:last-child').click(); true")

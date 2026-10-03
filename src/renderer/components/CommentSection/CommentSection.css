@@ -411,11 +411,11 @@
 }
 
 .reloadCommentsAligned {
-  margin-block-start: 39px;
+  margin-block-start: calc(30px + (var(--form-control-height) - 28px) / 2);
 }
 
 .noCommentActions .reloadCommentsAligned {
-  margin-block-start: 29px;
+  margin-block-start: calc(20px + (var(--form-control-height) - 28px) / 2);
 }
 
 .comment {
