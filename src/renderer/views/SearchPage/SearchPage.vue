@@ -206,6 +206,16 @@ watch(route, () => {
   checkSearchCache(payload)
 }, { deep: true })
 
+watch(showFamilyFriendlyOnly, (enabled) => {
+  if (enabled && (isRetryingWithCookies.value || apiUsed.value === 'yt-dlp')) {
+    checkSearchCache({
+      query: processedQuery.value,
+      options: {},
+      searchSettings: getRouteSearchSettings()
+    })
+  }
+})
+
 onMounted(() => {
   query.value = route.params.query
   setTabTitle(processedQuery.value)
@@ -239,6 +249,13 @@ function updateSearchHistoryEntry(searchSettings) {
 }
 
 function checkSearchCache(payload) {
+  searchRequestId++
+  searchNotice.value = null
+  searchParams.value = ''
+  cookieSearchFailed.value = false
+  isRetryingWithCookies.value = false
+  isLoadingMore.value = false
+
   if (payload.query.length > SEARCH_CHAR_LIMIT) {
     console.warn(`Search character limit is: ${SEARCH_CHAR_LIMIT}`)
     showToast({
@@ -247,13 +264,6 @@ function checkSearchCache(payload) {
     })
     return
   }
-
-  searchRequestId++
-  searchNotice.value = null
-  searchParams.value = ''
-  cookieSearchFailed.value = false
-  isRetryingWithCookies.value = false
-  isLoadingMore.value = false
 
   const sameSearch = sessionSearchHistory.value.filter((search) => {
     return search.query === payload.query && searchFiltersMatch(payload.searchSettings, search.searchSettings)
@@ -343,13 +353,14 @@ async function retrySearchWithCookies() {
 }
 
 async function performSearchWithCookies() {
+  if (showFamilyFriendlyOnly.value) return
   const requestId = searchRequestId
   const page = searchPage.value
   isRetryingWithCookies.value = true
   cookieSearchFailed.value = false
   try {
     const response = await ytDlp.ytDlpSearch(processedQuery.value, searchParams.value, page)
-    if (requestId !== searchRequestId) return
+    if (requestId !== searchRequestId || showFamilyFriendlyOnly.value) return
     if (!response || response.error || (page === 1 && response.results.length === 0)) {
       throw new Error('Authenticated search failed')
     }
