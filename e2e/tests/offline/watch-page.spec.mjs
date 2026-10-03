@@ -86,6 +86,65 @@ async function expectSponsorBlockContentClamp(content, previousScrollTop) {
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
+test('phone watch players have square corners where the layout meets the screen or header', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  let releaseMetadata
+  const metadataPending = new Promise(resolve => { releaseMetadata = resolve })
+  await page.route(/\/youtubei\/v1\/player|www\.youtube\.com\/watch\?/, async route => {
+    await metadataPending
+    await route.fallback()
+  })
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', 200))
+  await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+  await page.locator(sel.searchInput).press('Enter')
+
+  const skeleton = page.locator('.videoPlayerPlaceholder.ft-shimmer')
+  try {
+    await expect(skeleton).toHaveCSS('border-radius', '24px')
+    await page.locator('.tabBar').evaluate(element => { element.style.display = 'none' })
+    await page.locator('.app').evaluate(element => {
+      element.classList.remove('topTabs')
+      element.classList.add('capacitorTabs', 'capacitorPhoneLayout')
+    })
+    await setWindowSize(app, page, { width: 375, height: 812 })
+    await expect(skeleton).toHaveCSS('border-radius', '0px')
+  } finally {
+    releaseMetadata()
+  }
+
+  await waitForPlayback(page)
+  const player = page.locator('.ftVideoPlayer')
+  await player.locator('video').evaluate(element => element.pause())
+  for (const scale of [1, 1.25]) {
+    await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
+    for (const size of [{ width: 375, height: 812 }, { width: 667, height: 375 }, { width: 812, height: 375 }]) {
+      await page.setViewportSize(size)
+      if (size.width === 375) {
+        await expect(player).toHaveCSS('border-radius', '0px')
+        continue
+      }
+      const headerGap = await player.evaluate(element => {
+        const bounds = element.getBoundingClientRect()
+        const header = document.querySelector('.topNav').getBoundingClientRect()
+        return Math.abs(bounds.top - header.bottom)
+      })
+      await expect(player).toHaveCSS('border-radius', headerGap <= 1 ? '0px' : '24px')
+    }
+  }
+
+  await page.evaluate(() => window.ftElectron.setZoomFactor(1))
+  await page.setViewportSize({ width: 1600, height: 900 })
+  await page.locator('.tabBar').evaluate(element => { element.style.display = '' })
+  await page.locator('.app').evaluate(element => {
+    element.classList.remove('capacitorPhoneLayout')
+    element.classList.add('capacitorTabletLayout', 'topTabs')
+  })
+  await expect(player).toHaveCSS('border-radius', '24px')
+  await page.locator('.app').evaluate(element => element.classList.remove('capacitorTabs', 'capacitorTabletLayout'))
+  await page.setViewportSize({ width: 375, height: 812 })
+  await expect(player).toHaveCSS('border-radius', '24px')
+})
+
 test('watch page skeletons follow UI roundness before playback loads', async ({ app, page, attachScreenshot }) => {
   await mockPlayableWatchPage(app, page)
   let releaseMetadata
