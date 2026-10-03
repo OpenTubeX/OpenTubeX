@@ -1345,6 +1345,8 @@ Video:
       Play: Spila
       Pause: Gera hlé
       Drag Handle: Færa smáspilarann
+      Rewind 10 seconds: Spóla 10 sekúndur til baka
+      Forward 10 seconds: Spóla 10 sekúndur áfram
     SponsorBlock:
       CancelCurrentSegment: Hætta við að búa til kafla
       ClearSegments: Hreinsa kafla

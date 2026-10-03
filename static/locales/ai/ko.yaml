@@ -1664,6 +1664,8 @@ Video:
       Play: 재생
       Pause: 일시 정지
       Drag Handle: 미니 플레이어 이동
+      Rewind 10 seconds: 10초 뒤로
+      Forward 10 seconds: 10초 앞으로
     Skipped segment: '{segmentCategory} 건너뜀'
     SponsorBlock:
       CancelCurrentSegment: 구간 만들기 취소

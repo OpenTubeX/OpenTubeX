@@ -1323,6 +1323,8 @@ Video:
       Play: Lejátszás
       Pause: Szünet
       Drag Handle: Minilejátszó áthelyezése
+      Rewind 10 seconds: Visszatekerés 10 másodperccel
+      Forward 10 seconds: Előretekerés 10 másodperccel
     SponsorBlock:
       CancelCurrentSegment: Szakasz létrehozásának megszakítása
       ClearSegments: Szakaszok törlése

@@ -1323,6 +1323,8 @@ Video:
       Play: 再生
       Pause: 一時停止
       Drag Handle: ミニプレーヤーを移動
+      Rewind 10 seconds: 10秒戻る
+      Forward 10 seconds: 10秒進む
     SponsorBlock:
       CancelCurrentSegment: 区間の作成をキャンセル
       ClearSegments: 区間を消去

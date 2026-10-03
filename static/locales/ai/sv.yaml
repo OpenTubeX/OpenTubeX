@@ -1333,6 +1333,8 @@ Video:
       Play: Spela upp
       Pause: Pausa
       Drag Handle: Flytta minispelaren
+      Rewind 10 seconds: Spola tillbaka 10 sekunder
+      Forward 10 seconds: Spola framåt 10 sekunder
     SponsorBlock:
       CancelCurrentSegment: Avbryt skapandet av segmentet
       ClearSegments: Rensa segment

@@ -1362,6 +1362,8 @@ Video:
       Play: הפעלה
       Pause: השהיה
       Drag Handle: הזזת הנגן הממוזער
+      Rewind 10 seconds: חזרה 10 שניות אחורה
+      Forward 10 seconds: מעבר 10 שניות קדימה
     SponsorBlock:
       CancelCurrentSegment: ביטול יצירת הקטע
       ClearSegments: ניקוי הקטעים

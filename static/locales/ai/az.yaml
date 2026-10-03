@@ -1335,6 +1335,8 @@ Video:
       Play: Oynat
       Pause: Dayandır
       Drag Handle: Kiçik oynadıcını köçür
+      Rewind 10 seconds: 10 saniyə geri sar
+      Forward 10 seconds: 10 saniyə irəli sar
     SponsorBlock:
       CancelCurrentSegment: Seqment yaratmağı ləğv et
       ClearSegments: Seqmentləri təmizlə

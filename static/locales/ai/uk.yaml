@@ -1355,6 +1355,8 @@ Video:
       Play: Відтворити
       Pause: Призупинити
       Drag Handle: Перемістити мініпрогравач
+      Rewind 10 seconds: Перемотати на 10 секунд назад
+      Forward 10 seconds: Перемотати на 10 секунд уперед
     SponsorBlock:
       CancelCurrentSegment: Скасувати створення сегмента
       ClearSegments: Очистити сегменти

@@ -1360,6 +1360,8 @@ Video:
       Play: Toista
       Pause: Keskeytä
       Drag Handle: Siirrä minisoitinta
+      Rewind 10 seconds: Kelaa 10 sekuntia taaksepäin
+      Forward 10 seconds: Kelaa 10 sekuntia eteenpäin
     SponsorBlock:
       CancelCurrentSegment: Peru osuuden luominen
       ClearSegments: Tyhjennä osuudet

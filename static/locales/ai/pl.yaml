@@ -730,6 +730,8 @@ Video:
     Scroll Mini Player:
       Return to Video Tab: Wróć do karty filmu
       Hide: Ukryj miniodtwarzacz
+      Rewind 10 seconds: Przewiń o 10 sekund do tyłu
+      Forward 10 seconds: Przewiń o 10 sekund do przodu
     SponsorBlock:
       ActionTypeLabel: Typ segmentu
       MutedSegment: 'Wyciszono: {segmentCategory}'

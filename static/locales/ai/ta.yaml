@@ -1363,6 +1363,8 @@ Video:
       Play: இயக்கு
       Pause: இடைநிறுத்து
       Drag Handle: சிறிய இயக்கியை நகர்த்து
+      Rewind 10 seconds: 10 விநாடிகள் பின்னோக்கி
+      Forward 10 seconds: 10 விநாடிகள் முன்னோக்கி
     SponsorBlock:
       CancelCurrentSegment: பகுதியை உருவாக்குவதை ரத்துசெய்
       ClearSegments: பகுதிகளை அழி

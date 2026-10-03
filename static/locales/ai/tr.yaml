@@ -1323,6 +1323,8 @@ Video:
       Play: Oynat
       Pause: Duraklat
       Drag Handle: Mini oynatıcıyı taşı
+      Rewind 10 seconds: 10 saniye geri sar
+      Forward 10 seconds: 10 saniye ileri sar
     SponsorBlock:
       CancelCurrentSegment: Bölüm Oluşturmayı İptal Et
       ClearSegments: Bölümleri Temizle

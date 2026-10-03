@@ -2302,6 +2302,8 @@ Video:
       Play: Play
       Pause: Pause
       Drag Handle: Move mini player
+      Rewind 10 seconds: Rewind 10 seconds
+      Forward 10 seconds: Forward 10 seconds
     Skipped segment: '{segmentCategory} Skipped'
     SponsorBlock:
       CancelCurrentSegment: Cancel Creating Segment

@@ -1352,6 +1352,8 @@ Video:
       Play: Phát
       Pause: Tạm dừng
       Drag Handle: Di chuyển trình phát thu nhỏ
+      Rewind 10 seconds: Tua lại 10 giây
+      Forward 10 seconds: Tua tới 10 giây
     SponsorBlock:
       CancelCurrentSegment: Hủy tạo phân đoạn
       ClearSegments: Xóa phân đoạn

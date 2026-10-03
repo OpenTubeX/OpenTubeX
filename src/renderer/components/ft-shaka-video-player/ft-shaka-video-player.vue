@@ -164,8 +164,8 @@
         @volumechange="updateVolume"
         @timeupdate="handleTimeupdate"
         @ratechange="syncMediaSessionPosition"
-        @loadedmetadata="handleAbRepeatDurationChange"
-        @durationchange="handleAbRepeatDurationChange"
+        @loadedmetadata="handleAbRepeatDurationChange(); updateMobileMiniBarProgress()"
+        @durationchange="handleAbRepeatDurationChange(); updateMobileMiniBarProgress()"
         @enterpictureinpicture="handleEnterPictureInPicture"
         @leavepictureinpicture="handleLeavePictureInPicture"
       />
@@ -1367,11 +1367,17 @@
           }"
           :style="mobileMiniBarOverlayStyle"
         >
+          <div
+            class="mobileMiniBarProgress"
+            aria-hidden="true"
+          >
+            <div :style="{ transform: `scaleX(${mobileMiniBarProgress})` }" />
+          </div>
           <button
             v-if="scrollMiniPlayerActive"
             type="button"
             class="mobileMiniBarReturn"
-            :disabled="Boolean(scrollMiniPlayerDragStyle || scrollMiniPlayerAnimating)"
+            :disabled="mobileMiniBarControlsDisabled"
             :aria-label="scrollMiniPlayerDetached
               ? $t('Video.Player.Scroll Mini Player.Return to Video Tab')
               : $t('Video.Player.Scroll Mini Player.Back to Top')"
@@ -1383,12 +1389,6 @@
               dir="auto"
             >{{ title }}</span>
             <span class="mobileMiniBarUploader">
-              <FtRetryImage
-                v-if="channelThumbnail"
-                class="mobileMiniBarAvatar"
-                :src="channelThumbnail"
-                alt=""
-              />
               <span dir="auto">{{ channelName }}</span>
             </span>
           </div>
@@ -1396,7 +1396,7 @@
             v-if="mobileMiniBarCanDismiss"
             type="button"
             class="mobileMiniBarDismiss"
-            :disabled="Boolean(scrollMiniPlayerDragStyle || scrollMiniPlayerAnimating)"
+            :disabled="mobileMiniBarControlsDisabled"
             :aria-label="$t('Video.Player.Scroll Mini Player.Hide')"
             @click.stop.prevent="dismissCrossTabMiniPlayer"
           >
@@ -1405,6 +1405,70 @@
               aria-hidden="true"
             />
           </button>
+          <div
+            class="mobileMiniBarPlayback"
+            @pointerdown.stop
+            @keydown.stop
+          >
+            <button
+              v-if="canSkipPrevious"
+              type="button"
+              :disabled="mobileMiniBarControlsDisabled"
+              :aria-label="$t('Video.Previous')"
+              @click.stop.prevent="$emit('skip-to-prev')"
+            >
+              <ft-icon
+                :icon="['fas', 'step-backward']"
+                aria-hidden="true"
+              />
+            </button>
+            <button
+              type="button"
+              :disabled="mobileMiniBarSeekDisabled"
+              :aria-label="$t('Video.Player.Scroll Mini Player.Rewind 10 seconds')"
+              @click.stop.prevent="seekBySeconds(-10, false, false, false)"
+            >
+              <ft-icon
+                :icon="['fas', 'rewind-10']"
+                aria-hidden="true"
+              />
+            </button>
+            <button
+              type="button"
+              class="mobileMiniBarPlayPause"
+              :disabled="mobileMiniBarControlsDisabled"
+              :aria-label="playbackEnded ? replayLabel : scrollMiniIsPaused ? $t('Video.Player.Scroll Mini Player.Play') : $t('Video.Player.Scroll Mini Player.Pause')"
+              @click.stop.prevent="scrollMiniTogglePlayPause"
+            >
+              <ft-icon
+                :icon="['fas', playbackEnded ? 'replay' : scrollMiniIsPaused ? 'play' : 'pause']"
+                aria-hidden="true"
+              />
+            </button>
+            <button
+              type="button"
+              :disabled="mobileMiniBarSeekDisabled"
+              :aria-label="$t('Video.Player.Scroll Mini Player.Forward 10 seconds')"
+              @click.stop.prevent="seekBySeconds(10, false, false, false)"
+            >
+              <ft-icon
+                :icon="['fas', 'forward-10']"
+                aria-hidden="true"
+              />
+            </button>
+            <button
+              v-if="canSkipNext"
+              type="button"
+              :disabled="mobileMiniBarControlsDisabled"
+              :aria-label="$t('Video.Next')"
+              @click.stop.prevent="$emit('skip-to-next')"
+            >
+              <ft-icon
+                :icon="['fas', 'step-forward']"
+                aria-hidden="true"
+              />
+            </button>
+          </div>
         </div>
       </Teleport>
       <div

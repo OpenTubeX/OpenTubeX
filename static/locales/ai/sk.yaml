@@ -1326,6 +1326,8 @@ Video:
       Play: Prehrať
       Pause: Pozastaviť
       Drag Handle: Presunúť miniatúrny prehrávač
+      Rewind 10 seconds: Pretočiť o 10 sekúnd späť
+      Forward 10 seconds: Pretočiť o 10 sekúnd dopredu
     SponsorBlock:
       CancelCurrentSegment: Zrušiť vytváranie segmentu
       ClearSegments: Vymazať segmenty

@@ -267,6 +267,10 @@
     "ri": "speed-line",
     "material": "forward-media"
   },
+  "forward-10": {
+    "ri": "forward-10-line",
+    "material": "forward-10-rounded"
+  },
   "forward-fast": {
     "ri": "speed-line",
     "material": "fast-forward-outline"
@@ -461,6 +465,10 @@
   "replay": {
     "ri": "restart-line",
     "material": "replay-rounded"
+  },
+  "rewind-10": {
+    "ri": "replay-10-line",
+    "material": "replay-10-rounded"
   },
   "rss": {
     "ri": "rss-line",

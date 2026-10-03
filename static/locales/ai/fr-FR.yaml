@@ -1322,6 +1322,8 @@ Video:
       Play: Lire
       Pause: Mettre en pause
       Drag Handle: Déplacer le mini-lecteur
+      Rewind 10 seconds: Reculer de 10 secondes
+      Forward 10 seconds: Avancer de 10 secondes
     SponsorBlock:
       CancelCurrentSegment: Annuler la création du segment
       ClearSegments: Effacer les segments

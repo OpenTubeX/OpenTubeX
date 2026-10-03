@@ -1331,6 +1331,8 @@ Video:
       Play: Putar
       Pause: Jeda
       Drag Handle: Pindahkan pemutar mini
+      Rewind 10 seconds: Mundur 10 detik
+      Forward 10 seconds: Maju 10 detik
     SponsorBlock:
       CancelCurrentSegment: Batalkan Pembuatan Segmen
       ClearSegments: Bersihkan Segmen
