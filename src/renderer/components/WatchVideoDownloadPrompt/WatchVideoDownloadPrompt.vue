@@ -250,7 +250,7 @@
             <div
               class="downloadProgressBarFill"
               :class="{ indeterminate: ['preparing', 'processing'].includes(activeDownload.status) }"
-              :style="{ inlineSize: `${activeDownload.percent}%` }"
+              :style="{ transform: `scaleX(${Math.min(100, Math.max(0, activeDownload.percent)) / 100})` }"
             />
           </div>
           <p class="downloadStatusLine">

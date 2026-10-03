@@ -382,25 +382,36 @@
 .select-bar::after {
   content: '';
   block-size: 2px;
-  inline-size: 0;
+  inline-size: 50%;
   inset-block-end: 1px;
   position: absolute;
   background: var(--primary-color);
-  transition: 0.2s ease all;
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
 }
 
 .select-bar::before {
   inset-inline-start: 50%;
+  transform-origin: left;
 }
 
 .select-bar::after {
   inset-inline-end: 50%;
+  transform-origin: right;
+}
+
+.select-bar:dir(rtl)::before {
+  transform-origin: right;
+}
+
+.select-bar:dir(rtl)::after {
+  transform-origin: left;
 }
 
 /* active state */
 .select-text:focus ~ .select-bar::before,
 .select-text:focus ~ .select-bar::after {
-  inline-size: 50%;
+  transform: scaleX(1);
 }
 
 .select.outlined .select-bar {

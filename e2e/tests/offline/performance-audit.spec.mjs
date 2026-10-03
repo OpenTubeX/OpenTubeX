@@ -1,11 +1,162 @@
-import { test, expect, goTo, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, setWindowSize } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 import { IpcChannels } from '../../../src/constants.js'
 
 test.use({
-  seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } },
+  seed: {
+    settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true },
+    history: [{
+      _id: 'jNQXAC9IVRw',
+      videoId: 'jNQXAC9IVRw',
+      title: 'Progress animation fixture',
+      author: 'Test channel',
+      lengthSeconds: 60,
+      timeWatched: 1000,
+      watchProgress: 0,
+      type: 'video',
+    }],
+  },
 })
+
+for (const zoom of [1, 0.95]) {
+  test(`download progress animates without changing layout width at ${zoom} UI scale`, async ({ page }) => {
+    await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
+    await goTo(page, 'downloads')
+    const setProgress = percent => page.evaluate(percent => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('upsertYtDlpDownload', { id: 42, videoId: 'jNQXAC9IVRw', title: 'Progress animation fixture', status: 'downloading', percent, mode: 'video' })
+    }, percent)
+    await setProgress(10)
+    const row = page.locator('.downloadRow').filter({ hasText: 'Progress animation fixture' })
+    const fill = row.locator('.progressFill')
+    const track = row.locator('.progressTrack')
+    const layoutWidth = await track.evaluate(element => element.clientWidth)
+    await expect.poll(() => fill.evaluate(element => element.clientWidth)).toBe(layoutWidth)
+    for (const direction of ['ltr', 'rtl']) {
+      await row.evaluate((element, direction) => { element.dir = direction }, direction)
+      await setProgress(90)
+      await expect.poll(() => fill.evaluate(element => element.getBoundingClientRect().width /
+        element.parentElement.getBoundingClientRect().width)).toBeCloseTo(0.9, 2)
+      expect(await fill.evaluate(element => element.clientWidth)).toBe(layoutWidth)
+      const bounds = await fill.boundingBox()
+      const parent = await track.boundingBox()
+      expect(direction === 'rtl' ? parent.x + parent.width - bounds.x - bounds.width : bounds.x - parent.x).toBeCloseTo(0, 0)
+      await setProgress(0)
+      await expect.poll(() => fill.evaluate(element => element.getBoundingClientRect().width)).toBe(0)
+    }
+    await page.getByRole('dialog', { name: 'Downloads', exact: true }).press('Escape')
+    await goTo(page, 'history')
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.title').click({ button: 'right' })
+    await page.getByRole('menuitem', { name: 'Download Video', exact: true }).click()
+    const prompt = page.locator('.activeDownloadCard')
+    const promptFill = prompt.locator('.downloadProgressBarFill')
+    const promptTrack = prompt.locator('.downloadProgressBarTrack')
+    const promptLayoutWidth = await promptTrack.evaluate(element => element.clientWidth)
+    for (const direction of ['ltr', 'rtl']) {
+      await prompt.evaluate((element, direction) => { element.dir = direction }, direction)
+      await setProgress(50)
+      await expect.poll(() => promptFill.evaluate(element => element.getBoundingClientRect().width /
+        element.parentElement.getBoundingClientRect().width)).toBeCloseTo(0.5, 2)
+      expect(await promptFill.evaluate(element => element.clientWidth)).toBe(promptLayoutWidth)
+      const bounds = await promptFill.boundingBox()
+      const parent = await promptTrack.boundingBox()
+      expect(direction === 'rtl' ? parent.x + parent.width - bounds.x - bounds.width : bounds.x - parent.x).toBeCloseTo(0, 0)
+      await setProgress(142)
+      await expect.poll(() => promptFill.evaluate(element => element.getBoundingClientRect().width /
+        element.parentElement.getBoundingClientRect().width)).toBeCloseTo(1, 2)
+    }
+  })
+
+  test(`color picker batches theme previews and preserves release position at ${zoom} UI scale`, async ({ page }) => {
+    await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
+    const appearance = await goToSettingsSection(page, 'appearance')
+    await appearance.getByRole('button', { name: 'Create custom theme' }).click()
+    await page.locator('.customThemeEditor .colorFieldTrigger').first().click()
+    const surface = page.locator('.colorPickerPopover .saturationValue')
+    await expect(surface).toBeVisible()
+    const metrics = await surface.evaluate(async element => {
+      const original = element.getBoundingClientRect
+      const bounds = original.call(element)
+      let reads = 0
+      element.getBoundingClientRect = function () { reads++; return original.call(this) }
+      const pointer = (type, x, y, pointerId = 7) => new PointerEvent(type, {
+        bubbles: true, button: 0, pointerId, clientX: x, clientY: y
+      })
+      try {
+        element.dispatchEvent(pointer('pointerdown', bounds.left + 1, bounds.top + 1))
+        reads = 0
+        for (let index = 0; index < 50; index++) {
+          window.dispatchEvent(pointer('pointermove', bounds.left + bounds.width * index / 100, bounds.top + 10))
+        }
+        element.dispatchEvent(pointer('pointerdown', bounds.right, bounds.bottom, 8))
+        window.dispatchEvent(pointer('pointermove', bounds.right, bounds.bottom, 8))
+        window.dispatchEvent(pointer('pointerup', bounds.right, bounds.bottom, 8))
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        const burstReads = reads
+        window.dispatchEvent(pointer('pointermove', bounds.left + 20, bounds.top + 20))
+        window.dispatchEvent(pointer('pointerup', bounds.right + 1, bounds.top + bounds.height / 2))
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        const releaseValue = element.getAttribute('aria-valuetext')
+        element.dispatchEvent(pointer('pointerdown', bounds.right + 1, bounds.top + bounds.height / 2))
+        reads = 0
+        window.dispatchEvent(pointer('pointermove', bounds.left + 20, bounds.top + 20))
+        window.dispatchEvent(pointer('pointercancel', 0, 0))
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        const cancelReads = reads
+        const cancelValue = element.getAttribute('aria-valuetext')
+        element.dispatchEvent(pointer('pointerdown', bounds.right + 1, bounds.top + bounds.height / 2))
+        reads = 0
+        window.dispatchEvent(pointer('pointermove', bounds.left + 20, bounds.top + 20))
+        window.dispatchEvent(new Event('blur'))
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        return { burstReads, releaseValue, cancelReads, cancelValue, blurReads: reads, blurValue: element.getAttribute('aria-valuetext') }
+      } finally {
+        element.getBoundingClientRect = original
+      }
+    })
+    console.log('Rendered color picker pointer work:', metrics)
+    expect.soft(metrics.burstReads).toBe(1)
+    expect(metrics.releaseValue).toBe('100%, 50%')
+    expect(metrics.cancelReads).toBe(0)
+    expect(metrics.cancelValue).toBe('100%, 50%')
+    expect(metrics.blurReads).toBe(0)
+    expect(metrics.blurValue).toBe('100%, 50%')
+    await surface.press('ArrowUp')
+    await expect(surface).toHaveAttribute('aria-valuetext', '100%, 51%')
+    await page.locator('.colorPickerPopover').getByRole('button', { name: 'Apply', exact: true }).click()
+    await expect(surface).toHaveCount(0)
+  })
+
+  test(`select focus underline animates with transforms at ${zoom} UI scale`, async ({ page }) => {
+    await page.evaluate(async zoom => {
+      window.ftElectron.setZoomFactor(zoom)
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateReducedMotion', 'off')
+    }, zoom)
+    const appearance = await goToSettingsSection(page, 'appearance')
+    const select = appearance.locator('.select').first()
+    // Exercise the supported filled variant, including its focus underline.
+    await select.evaluate(element => { element.classList.remove('outlined') })
+    const button = select.locator('.select-text')
+    await button.focus()
+    const result = await select.locator('.select-bar').evaluate(element => {
+      const before = getComputedStyle(element, '::before')
+      const after = getComputedStyle(element, '::after')
+      return { before: before.transitionProperty, after: after.transitionProperty }
+    })
+    expect(result).toEqual({ before: 'transform', after: 'transform' })
+    await expect.poll(() => select.locator('.select-bar').evaluate(element => (
+      getComputedStyle(element, '::before').transform
+    ))).toBe('matrix(1, 0, 0, 1, 0, 0)')
+    await button.evaluate(element => element.blur())
+    await expect.poll(() => select.locator('.select-bar').evaluate(element => (
+      getComputedStyle(element, '::before').transform
+    ))).toBe('matrix(0, 0, 0, 1, 0, 0)')
+  })
+}
 
 test.describe('large bookmark playlist', () => {
   test.use({

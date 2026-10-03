@@ -191,12 +191,18 @@
 .progressFill {
   background: var(--accent-color);
   block-size: 100%;
-  transition: inline-size 0.3s ease;
+  inline-size: 100%;
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.progressFill:dir(rtl) {
+  transform-origin: right;
 }
 
 .progressFill.indeterminate {
   animation: download-pulse 1.5s ease-in-out infinite;
-  inline-size: 100% !important;
+  transform: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

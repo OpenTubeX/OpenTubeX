@@ -66,6 +66,51 @@ async function openPlaylist(app, page) {
 }
 
 for (const zoom of [1, 0.95]) {
+  test(`playlist preview batches pointer measurements at ${zoom} UI scale`, async ({ app, page }) => {
+    await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
+    const watch = await openPlaylist(app, page)
+    const panel = page.locator('.watchVideoPlaylist').filter({ visible: true })
+    const container = panel.locator('.playlistProgressBarContainer')
+    await container.hover()
+    await expect(panel.locator('.progressBarPreview')).toBeVisible()
+    const reads = await container.evaluate(async element => {
+      const bar = element.querySelector('.playlistProgressBar')
+      const original = bar.getBoundingClientRect
+      const bounds = original.call(bar)
+      let reads = 0
+      bar.getBoundingClientRect = function () { reads++; return original.call(this) }
+      try {
+        for (let index = 0; index < 50; index++) {
+          element.dispatchEvent(new MouseEvent('mousemove', {
+            bubbles: true, clientX: bounds.left + bounds.width * index / 49
+          }))
+        }
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        return reads
+      } finally {
+        bar.getBoundingClientRect = original
+      }
+    })
+    console.log('Rendered playlist preview pointer work:', { reads })
+    expect(reads).toBe(1)
+    await expect(panel.locator('.previewText')).toContainText('12 / 12')
+    const expectInsidePanel = async () => {
+      const panelBounds = await panel.boundingBox()
+      const tooltip = await panel.locator('.previewTooltip').boundingBox()
+      expect(tooltip.x).toBeGreaterThanOrEqual(panelBounds.x + 7)
+      expect(tooltip.x + tooltip.width).toBeLessThanOrEqual(panelBounds.x + panelBounds.width - 7)
+    }
+    await expectInsidePanel()
+    await setWindowSize(app, page, { width: 1200, height: 800 })
+    await container.hover({ position: { x: 2, y: 5 } })
+    await expect(panel.locator('.previewText')).toContainText('1 / 12')
+    await expectInsidePanel()
+    await page.mouse.move(10, 10)
+    await expect(panel.locator('.progressBarPreview')).toHaveCount(0)
+    await watch.dispose()
+  })
+
   test(`phone playlist centers pending current items when opened at ${zoom} UI scale`, async ({ app, page }) => {
     await setWindowSize(app, page, { width: 480, height: 800 })
     await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
