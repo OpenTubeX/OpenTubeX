@@ -355,9 +355,7 @@ public class MobileTabSelectionTest {
                 await(view, "location.hash.includes('/history')");
                 evaluate(view, "document.querySelector('#app').__vue_app__.config.globalProperties.$router.push('/userplaylists')");
                 await(view, "location.hash.includes('/userplaylists')");
-                evaluate(view, "document.querySelector('.capacitorPhoneTabSwitcherButton').click()");
-                await(view, "!!document.querySelector('.capacitorPhoneTabHistoryButton')");
-                evaluate(view, "document.querySelector('.capacitorPhoneTabHistoryButton').click()");
+                openPhoneTabHistory(view);
                 await(view, "!!document.querySelector('.capacitorPhoneTabHistoryEntry[aria-current=\"page\"]')");
                 evaluate(view, "window.dispatchEvent(new CustomEvent('opentubex:focus-search'))");
                 await(view, "document.querySelector('.topNav').classList.contains('phoneSearchOpen')");
@@ -366,13 +364,16 @@ public class MobileTabSelectionTest {
                 await(view, "!!document.querySelector('.capacitorPhoneOpenTabs')");
                 assertEquals("Android Back returns from foreground history before closing background search", "true", evaluate(view,
                     "document.querySelector('.topNav').classList.contains('phoneSearchOpen')"));
-                evaluate(view, "document.querySelector('.capacitorPhoneTabRow').dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }))");
-                await(view, "!!document.querySelector('.capacitorTabActions .closeMenuTrigger')");
-                evaluate(view, "document.querySelector('.capacitorTabActions .closeMenuTrigger').click()");
+                evaluate(view, "document.querySelector('.capacitorPhoneTabTarget[aria-selected=\"true\"]')" +
+                    ".dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }))");
+                String closeTabsAction = "[...document.querySelectorAll('.capacitorTabActions [role=menuitem]')]" +
+                    ".find(button => button.textContent.trim() === document.querySelector('#app').__vue_app__.config.globalProperties.$t('Context Menu.Close Tabs'))";
+                await(view, "!!(" + closeTabsAction + ")");
+                clickText(view, ".capacitorTabActions button", "Context Menu.Close Tabs");
                 await(view, "!!document.querySelector('.capacitorTabActions .submenuBack') && " +
                     "document.querySelector('.capacitorTabActions').contains(document.activeElement)");
                 scenario.onActivity(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
-                await(view, "!!document.querySelector('.capacitorTabActions .closeMenuTrigger')");
+                await(view, "!!(" + closeTabsAction + ")");
                 assertEquals("Android Back closes only the nested tab-actions submenu", "true", evaluate(view,
                     "!!document.querySelector('.capacitorPhoneTabDialog') && document.querySelector('.topNav').classList.contains('phoneSearchOpen')"));
                 scenario.onActivity(activity -> activity.getOnBackPressedDispatcher().onBackPressed());
@@ -385,15 +386,11 @@ public class MobileTabSelectionTest {
                 await(view, "!document.querySelector('.topNav').classList.contains('phoneSearchOpen')");
                 assertEquals("Closing the layered header UI does not navigate the tab", "true", evaluate(view,
                     STORE + ".getters.getActiveTab.historyIndex === window.mobileHeaderHistoryIndex"));
-                evaluate(view, "document.querySelector('.capacitorPhoneTabSwitcherButton').click()");
-                await(view, "!!document.querySelector('.capacitorPhoneTabHistoryButton')");
-                evaluate(view, "document.querySelector('.capacitorPhoneTabHistoryButton').click()");
+                openPhoneTabHistory(view);
                 await(view, "!!document.querySelector('.capacitorPhoneTabHistoryEntry')");
                 evaluate(view, "document.querySelector('.capacitorPhoneTabHistoryEntry').click()");
                 await(view, STORE + ".getters.getActiveTab.historyIndex === 0 && !document.querySelector('.capacitorPhoneTabDialog')");
-                evaluate(view, "document.querySelector('.capacitorPhoneTabSwitcherButton').click()");
-                await(view, "!!document.querySelector('.capacitorPhoneTabHistoryButton')");
-                evaluate(view, "document.querySelector('.capacitorPhoneTabHistoryButton').click()");
+                openPhoneTabHistory(view);
                 await(view, "!!document.querySelector('.capacitorPhoneTabHistoryEntry:last-child')");
                 evaluate(view, "document.querySelector('.capacitorPhoneTabHistoryEntry:last-child').click()");
                 await(view, "location.hash.includes('/userplaylists') && !document.querySelector('.capacitorPhoneTabDialog')");
@@ -796,6 +793,17 @@ public class MobileTabSelectionTest {
                     """, STORE, STORE, STORE));
             }
         }
+    }
+
+    private static void openPhoneTabHistory(WebView view) throws Exception {
+        evaluate(view, "document.querySelector('.capacitorPhoneTabSwitcherButton').click()");
+        await(view, "!!document.querySelector('.capacitorPhoneTabTarget[aria-selected=\"true\"]')");
+        evaluate(view, "document.querySelector('.capacitorPhoneTabTarget[aria-selected=\"true\"]')" +
+            ".dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }))");
+        await(view, "!!document.querySelector('.capacitorTabActions')");
+        clickText(view, ".capacitorTabActions button", "Tab Organizer.Tab History");
+        await(view, "!!document.querySelector('.capacitorPhoneTabHistoryEntry') && " +
+            "!document.querySelector('.capacitorTabActionsBackdrop')");
     }
 
     private static void clickText(WebView view, String selector, String text) throws Exception {
