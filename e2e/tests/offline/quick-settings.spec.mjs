@@ -114,7 +114,8 @@ for (const uiScale of [100, 125]) {
 for (const uiScale of [100, 95]) {
   for (const width of [1280, 480]) {
     test.describe(`quick settings heading spacing at ${width}px and ${uiScale}% scale`, () => {
-      test.use({ seed: { settings: { currentLocale: 'en-US', uiScale, bounds: { x: 0, y: 0, width, height: 900, maximized: false } } } })
+      const settings = { currentLocale: 'en-US', uiScale, bounds: { x: 0, y: 0, width, height: 900, maximized: false } }
+      test.use({ seed: { settings } })
 
       test('keeps the first selects close to their section headings', async ({ page }, testInfo) => {
         await page.emulateMedia({ reducedMotion: 'reduce' })
@@ -170,131 +171,152 @@ for (const uiScale of [100, 95]) {
         }
       })
 
-      test('aligns first slider captions with outlined select labels', async ({ page }) => {
-        await page.emulateMedia({ reducedMotion: 'reduce' })
-        await page.evaluate(() => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-          return store.dispatch('updateQuickSettings', ['uiScale', 'defaultQuality', 'uiRoundness'])
+      test.describe('slider captions', () => {
+        test.use({
+          seed: {
+            settings: {
+              ...settings,
+              quickSettings: ['uiScale', 'defaultQuality', 'uiRoundness'],
+            }
+          }
         })
-        await page.locator('.profileTrigger').click()
-        const menu = page.locator('.quickSettingsMenu')
-        await expect(menu).toBeVisible()
-        await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
-        const gaps = await menu.locator('.menuSection').evaluateAll(sections => sections.map(section => {
-          const heading = section.querySelector('h3').getBoundingClientRect()
-          const control = section.querySelector('.quickSettingControl')
-          const caption = control.querySelector('.labelRow, .select-label').getBoundingClientRect()
-          return { setting: control.dataset.settingId, gap: caption.top - heading.bottom }
-        }))
-        expect(gaps.map(({ setting }) => setting)).toEqual(['uiScale', 'defaultQuality', 'uiRoundness'])
-        for (const { setting, gap } of gaps) {
-          expect.soft(gap, `${setting} heading-to-caption gap`).toBeCloseTo(gaps[1].gap, 1)
-        }
+
+        test('aligns first slider captions with outlined select labels', async ({ page }) => {
+          await page.emulateMedia({ reducedMotion: 'reduce' })
+          await page.locator('.profileTrigger').click()
+          const menu = page.locator('.quickSettingsMenu')
+          await expect(menu).toBeVisible()
+          await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
+          const gaps = await menu.locator('.menuSection').evaluateAll(sections => sections.map(section => {
+            const heading = section.querySelector('h3').getBoundingClientRect()
+            const control = section.querySelector('.quickSettingControl')
+            const caption = control.querySelector('.labelRow, .select-label').getBoundingClientRect()
+            return { setting: control.dataset.settingId, gap: caption.top - heading.bottom }
+          }))
+          expect(gaps.map(({ setting }) => setting)).toEqual(['uiScale', 'defaultQuality', 'uiRoundness'])
+          for (const { setting, gap } of gaps) {
+            expect.soft(gap, `${setting} heading-to-caption gap`).toBeCloseTo(gaps[1].gap, 1)
+          }
+        })
       })
 
-      test('aligns sliders and switches with the section gutters', async ({ page }) => {
-        await page.emulateMedia({ reducedMotion: 'reduce' })
-        await page.evaluate(() => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-          return store.dispatch('updateQuickSettings', ['uiScale', 'thumbnailSize', 'ambientMode', 'uiRoundness', 'defaultPlayback'])
-        })
-        await page.locator('.profileTrigger').click()
-        const menu = page.locator('.quickSettingsMenu')
-        await expect(menu).toBeVisible()
-        await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
-        const geometry = await menu.locator('.menuSection').evaluateAll(sections => sections.flatMap(section => {
-          const bounds = section.getBoundingClientRect()
-          const style = getComputedStyle(section)
-          const left = bounds.left + Number.parseFloat(style.paddingLeft)
-          const right = bounds.right - Number.parseFloat(style.paddingRight)
-          return [...section.querySelectorAll('.quickSettingControl')].map(control => {
-            const caption = control.querySelector('.labelRow')
-            const track = control.querySelector('.sliderControl')
-            const switchLabel = control.querySelector('.switch-label')
-            return {
-              setting: control.dataset.settingId,
-              left,
-              right,
-              captionLeft: caption?.getBoundingClientRect().left,
-              trackLeft: track?.getBoundingClientRect().left,
-              trackRight: track?.getBoundingClientRect().right,
-              switchLeft: switchLabel && switchLabel.getBoundingClientRect().left +
-                Number.parseFloat(getComputedStyle(switchLabel, '::before').insetInlineStart),
+      test.describe('control alignment', () => {
+        test.use({
+          seed: {
+            settings: {
+              ...settings,
+              quickSettings: ['uiScale', 'thumbnailSize', 'ambientMode', 'uiRoundness', 'defaultPlayback'],
             }
-          })
-        }))
-        expect(geometry.map(({ setting }) => setting)).toEqual(['uiScale', 'thumbnailSize', 'ambientMode', 'uiRoundness', 'defaultPlayback'])
-        for (const control of geometry) {
-          if (control.setting === 'ambientMode') {
-            expect.soft(control.switchLeft, 'switch track aligns with the section gutter').toBeCloseTo(control.left, 1)
-          } else {
-            expect.soft(control.captionLeft, `${control.setting} caption left gutter`).toBeCloseTo(control.left, 1)
-            expect.soft(control.trackLeft, `${control.setting} track left gutter`).toBeCloseTo(control.left, 1)
-            expect.soft(control.trackRight, `${control.setting} track right gutter`).toBeCloseTo(control.right, 1)
           }
-        }
+        })
+
+        test('aligns sliders and switches with the section gutters', async ({ page }) => {
+          await page.emulateMedia({ reducedMotion: 'reduce' })
+          await page.locator('.profileTrigger').click()
+          const menu = page.locator('.quickSettingsMenu')
+          await expect(menu).toBeVisible()
+          await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
+          const geometry = await menu.locator('.menuSection').evaluateAll(sections => sections.flatMap(section => {
+            const bounds = section.getBoundingClientRect()
+            const style = getComputedStyle(section)
+            const left = bounds.left + Number.parseFloat(style.paddingLeft)
+            const right = bounds.right - Number.parseFloat(style.paddingRight)
+            return [...section.querySelectorAll('.quickSettingControl')].map(control => {
+              const caption = control.querySelector('.labelRow')
+              const track = control.querySelector('.sliderControl')
+              const switchLabel = control.querySelector('.switch-label')
+              return {
+                setting: control.dataset.settingId,
+                left,
+                right,
+                captionLeft: caption?.getBoundingClientRect().left,
+                trackLeft: track?.getBoundingClientRect().left,
+                trackRight: track?.getBoundingClientRect().right,
+                switchLeft: switchLabel && switchLabel.getBoundingClientRect().left +
+                  Number.parseFloat(getComputedStyle(switchLabel, '::before').insetInlineStart),
+              }
+            })
+          }))
+          expect(geometry.map(({ setting }) => setting)).toEqual(['uiScale', 'thumbnailSize', 'ambientMode', 'uiRoundness', 'defaultPlayback'])
+          for (const control of geometry) {
+            if (control.setting === 'ambientMode') {
+              expect.soft(control.switchLeft, 'switch track aligns with the section gutter').toBeCloseTo(control.left, 1)
+            } else {
+              expect.soft(control.captionLeft, `${control.setting} caption left gutter`).toBeCloseTo(control.left, 1)
+              expect.soft(control.trackLeft, `${control.setting} track left gutter`).toBeCloseTo(control.left, 1)
+              expect.soft(control.trackRight, `${control.setting} track right gutter`).toBeCloseTo(control.right, 1)
+            }
+          }
+        })
       })
 
-      test('uses consistent gaps between mixed control rows', async ({ page }) => {
-        await page.emulateMedia({ reducedMotion: 'reduce' })
-        await page.evaluate(async () => {
-          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-          await store.dispatch('updateBaseTheme', 'system')
-          await store.dispatch('updateQuickSettings', [
-            'uiScale', 'thumbnailSize', 'baseTheme', 'systemLightTheme', 'systemDarkTheme',
-            'ambientMode', 'uiRoundness', 'defaultQuality', 'defaultPlayback', 'enableSubtitlesByDefault',
-          ])
+      test.describe('mixed controls', () => {
+        test.use({
+          seed: {
+            settings: {
+              ...settings,
+              baseTheme: 'system',
+              quickSettings: [
+                'uiScale', 'thumbnailSize', 'baseTheme', 'systemLightTheme', 'systemDarkTheme',
+                'ambientMode', 'uiRoundness', 'defaultQuality', 'defaultPlayback', 'enableSubtitlesByDefault',
+              ],
+            }
+          }
         })
-        await page.locator('.profileTrigger').click()
-        const menu = page.locator('.quickSettingsMenu')
-        await expect(menu).toBeVisible()
-        await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
-        const sections = await menu.locator('.menuSection').evaluateAll(elements => elements.map(section => {
-          const rows = []
-          for (const control of section.querySelectorAll('.quickSettingControl')) {
-            const select = control.querySelector('.select-text')
-            const slider = control.querySelector('.sliderControl')
-            const toggle = control.querySelector('.switch-label')
-            let top
-            let bottom
-            if (select) {
-              top = control.querySelector('.select-label').getBoundingClientRect().top
-              bottom = select.getBoundingClientRect().bottom
-            } else if (slider) {
-              top = control.querySelector('.labelRow').getBoundingClientRect().top
-              const track = slider.getBoundingClientRect()
-              bottom = (track.top + track.bottom) / 2 +
-                Number.parseFloat(getComputedStyle(slider).getPropertyValue('--slider-handle-height')) / 2
-            } else {
-              const label = toggle.getBoundingClientRect()
-              top = label.top
-              bottom = label.bottom
+
+        test('uses consistent gaps between mixed control rows', async ({ page }) => {
+          await page.emulateMedia({ reducedMotion: 'reduce' })
+          await page.locator('.profileTrigger').click()
+          const menu = page.locator('.quickSettingsMenu')
+          await expect(menu).toBeVisible()
+          await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
+          const sections = await menu.locator('.menuSection').evaluateAll(elements => elements.map(section => {
+            const rows = []
+            for (const control of section.querySelectorAll('.quickSettingControl')) {
+              const select = control.querySelector('.select-text')
+              const slider = control.querySelector('.sliderControl')
+              const toggle = control.querySelector('.switch-label')
+              let top
+              let bottom
+              if (select) {
+                top = control.querySelector('.select-label').getBoundingClientRect().top
+                bottom = select.getBoundingClientRect().bottom
+              } else if (slider) {
+                top = control.querySelector('.labelRow').getBoundingClientRect().top
+                const track = slider.getBoundingClientRect()
+                bottom = (track.top + track.bottom) / 2 +
+                  Number.parseFloat(getComputedStyle(slider).getPropertyValue('--slider-handle-height')) / 2
+              } else {
+                const label = toggle.getBoundingClientRect()
+                top = label.top
+                bottom = label.bottom
+              }
+              const previous = rows.at(-1)
+              if (previous && Math.abs(previous.top - top) < 0.1) {
+                previous.bottom = Math.max(previous.bottom, bottom)
+              } else {
+                rows.push({ setting: control.dataset.settingId, top, bottom })
+              }
             }
-            const previous = rows.at(-1)
-            if (previous && Math.abs(previous.top - top) < 0.1) {
-              previous.bottom = Math.max(previous.bottom, bottom)
-            } else {
-              rows.push({ setting: control.dataset.settingId, top, bottom })
+            return { rows, bottom: section.getBoundingClientRect().bottom }
+          }))
+          expect(sections).toHaveLength(2)
+          for (const section of sections) {
+            for (let index = 1; index < section.rows.length; index++) {
+              const row = section.rows[index]
+              const previous = section.rows[index - 1]
+              expect.soft(row.top - previous.bottom, `${previous.setting} to ${row.setting}`).toBeCloseTo(16, 1)
             }
+            expect.soft(section.bottom - section.rows.at(-1).bottom, 'last control to section divider').toBeCloseTo(16, 1)
           }
-          return { rows, bottom: section.getBoundingClientRect().bottom }
-        }))
-        expect(sections).toHaveLength(2)
-        for (const section of sections) {
-          for (let index = 1; index < section.rows.length; index++) {
-            const row = section.rows[index]
-            const previous = section.rows[index - 1]
-            expect.soft(row.top - previous.bottom, `${previous.setting} to ${row.setting}`).toBeCloseTo(16, 1)
-          }
-          expect.soft(section.bottom - section.rows.at(-1).bottom, 'last control to section divider').toBeCloseTo(16, 1)
-        }
-        const roundness = menu.locator('[data-setting-id="uiRoundness"] input[type="range"]')
-        const inputBounds = await roundness.boundingBox()
-        expect(inputBounds.height, 'native slider hit area stays large enough').toBeGreaterThanOrEqual(width > 680 ? 35.9 : 47.9)
-        await roundness.click({ position: { x: inputBounds.width * 0.75, y: inputBounds.height / 2 } })
-        await expect(roundness).toHaveValue('150')
-        await roundness.press('ArrowLeft')
-        await expect(roundness).toHaveValue('145')
+          const roundness = menu.locator('[data-setting-id="uiRoundness"] input[type="range"]')
+          const inputBounds = await roundness.boundingBox()
+          expect(inputBounds.height, 'native slider hit area stays large enough').toBeGreaterThanOrEqual(width > 680 ? 35.9 : 47.9)
+          await roundness.click({ position: { x: inputBounds.width * 0.75, y: inputBounds.height / 2 } })
+          await expect(roundness).toHaveValue('150')
+          await roundness.press('ArrowLeft')
+          await expect(roundness).toHaveValue('145')
+        })
       })
     })
   }
@@ -340,11 +362,11 @@ for (const uiScale of [100, 95]) {
         expect(tracks).toHaveLength(2)
         expect.soft(tracks[1].top - tracks[0].bottom, `${width}×${height}: visible toggle gap`).toBeCloseTo(16, 1)
         const roundness = menu.locator('[data-setting-id="uiRoundness"]')
-        await roundness.scrollIntoViewIfNeeded()
-        const caption = await roundness.locator('.labelRow').boundingBox()
+        const caption = roundness.locator('.labelRow')
+        const captionBounds = await caption.boundingBox()
         const input = roundness.getByRole('slider')
         const before = await input.inputValue()
-        await page.mouse.click(caption.x + caption.width * 0.75, caption.y + caption.height - 1)
+        await caption.click({ position: { x: captionBounds.width * 0.75, y: captionBounds.height - 1 } })
         await expect.soft(input, 'clicking the caption does not change the slider').toHaveValue(before, { timeout: 1000 })
         await input.press('ArrowRight')
         await expect(input).toHaveValue(String(Number(before) + 5))
