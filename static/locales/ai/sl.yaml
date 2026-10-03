@@ -603,6 +603,7 @@ Settings:
       Unable to Delete: Teme po meri ni mogoče izbrisati
       Invalid Theme File: Neveljavna datoteka s temo po meri
       Colors:
+        Watched thumbnail overlay: "Prekrivanje sličic ogledanih videoposnetkov"
         Main text: Glavno besedilo
         Secondary text: Sekundarno besedilo
         Subtle text: Pridušeno besedilo

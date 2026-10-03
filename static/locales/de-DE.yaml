@@ -710,6 +710,7 @@ Settings:
       Unable to Delete: Benutzerdefiniertes Design konnte nicht gelöscht werden
       Invalid Theme File: Ungültige Datei für ein benutzerdefiniertes Design
       Colors:
+        Watched thumbnail overlay: "Überlagerung für angesehene Vorschaubilder"
         Main text: Haupttext
         Secondary text: Sekundärtext
         Subtle text: Dezenter Text

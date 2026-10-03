@@ -475,6 +475,7 @@ Settings:
       Unable to Delete: Tema personalizată nu a putut fi ștearsă
       Invalid Theme File: Fișier de temă personalizată nevalid
       Colors:
+        Watched thumbnail overlay: "Suprapunere pe miniaturile videoclipurilor vizionate"
         Main text: Text principal
         Secondary text: Text secundar
         Subtle text: Text discret

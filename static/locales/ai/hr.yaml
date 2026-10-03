@@ -475,6 +475,7 @@ Settings:
       Unable to Delete: Nije moguće izbrisati prilagođenu temu
       Invalid Theme File: Neispravna datoteka prilagođene teme
       Colors:
+        Watched thumbnail overlay: "Prekrivanje sličica pogledanih videozapisa"
         Main text: Glavni tekst
         Secondary text: Sporedni tekst
         Subtle text: Nenaglašeni tekst

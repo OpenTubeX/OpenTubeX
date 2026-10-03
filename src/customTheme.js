@@ -18,6 +18,7 @@ export const CUSTOM_THEME_COLORS = Object.freeze([
   ['background', '--bg-color', 'Page background'],
   ['cardBackground', '--card-bg-color', 'Card background'],
   ['secondaryCardBackground', '--secondary-card-bg-color', 'Secondary card background'],
+  ['watchedThumbnailOverlay', '--watched-thumbnail-overlay-color', 'Watched thumbnail overlay'],
   ['favoriteIcon', '--favorite-icon-color', 'Favorite icon'],
   ['error', '--red-500', 'Error color'],
   ['scrollbar', '--scrollbar-color', 'Scrollbar thumb'],
@@ -106,6 +107,7 @@ export const DEFAULT_CUSTOM_THEME = Object.freeze({
     background: '#121212',
     cardBackground: '#242424',
     secondaryCardBackground: '#181818',
+    watchedThumbnailOverlay: '#121212b3',
     favoriteIcon: '#6eaa73',
     error: '#f44336',
     scrollbar: '#515151',
@@ -179,6 +181,7 @@ export function normalizeCustomTheme(value) {
   const colors = {}
   for (const [key] of CUSTOM_THEME_COLORS) {
     const color = value.colors?.[key] ??
+      (key === 'watchedThumbnailOverlay' ? deriveWatchedThumbnailOverlayColor(value.colors?.background) : undefined) ??
       (key === 'scrollbarActive' ? deriveScrollbarActiveColor(value.colors?.scrollbarHover) : undefined) ??
       value.colors?.[LEGACY_CUSTOM_THEME_COLOR_FALLBACKS[key]]
     if (typeof color !== 'string' || !HEX_COLOR_PATTERN.test(color)) {
@@ -242,6 +245,12 @@ function deriveScrollbarActiveColor(hoverColor) {
     Math.round((component * hoverAlpha * 0.8 + 255 * 0.2) / mixedAlpha))
   const alpha = Math.round(mixedAlpha * 255)
   return formatHexColor(rgb, alpha)
+}
+
+function deriveWatchedThumbnailOverlayColor(background) {
+  if (typeof background !== 'string' || !HEX_COLOR_PATTERN.test(background)) return undefined
+
+  return `${background.slice(0, 7)}b3`
 }
 
 function formatHexColor(rgb, alpha) {

@@ -473,6 +473,7 @@ Settings:
       Unable to Delete: Tidak dapat menghapus tema khusus
       Invalid Theme File: Berkas tema khusus tidak valid
       Colors:
+        Watched thumbnail overlay: "Lapisan gambar mini video yang ditonton"
         Main text: Teks utama
         Secondary text: Teks sekunder
         Subtle text: Teks samar

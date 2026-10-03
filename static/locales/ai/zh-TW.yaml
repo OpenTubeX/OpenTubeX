@@ -473,6 +473,7 @@ Settings:
       Unable to Delete: 無法刪除自訂主題
       Invalid Theme File: 無效的自訂主題檔案
       Colors:
+        Watched thumbnail overlay: "已觀看影片縮圖覆蓋層"
         Main text: 主要文字
         Secondary text: 次要文字
         Subtle text: 低對比文字

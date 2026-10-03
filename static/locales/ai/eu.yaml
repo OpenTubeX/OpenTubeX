@@ -473,6 +473,7 @@ Settings:
       Unable to Delete: Ezin izan da gai pertsonalizatua ezabatu
       Invalid Theme File: Gai pertsonalizatuaren fitxategia ez da baliozkoa
       Colors:
+        Watched thumbnail overlay: "Ikusitako bideoen miniaturen gainjartzea"
         Main text: Testu nagusia
         Secondary text: Bigarren mailako testua
         Subtle text: Testu lausoa

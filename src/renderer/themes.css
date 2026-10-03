@@ -27,6 +27,7 @@ body {
   --border-color: var(--tertiary-text-color);
   --divider-color: color-mix(in srgb, var(--border-color) 45%, transparent);
   --subtle-surface-color: var(--tertiary-text-color);
+  --watched-thumbnail-overlay-color: color-mix(in srgb, var(--bg-color) 70%, transparent);
   --dropdown-item-hover-color: var(--scrollbar-color-hover);
   --dropdown-item-hover-text-color: var(--scrollbar-text-color-hover);
   --selection-background-color: var(--primary-color);

@@ -475,6 +475,7 @@ Settings:
       Unable to Delete: Ekki tókst að eyða sérsniðna þemanu
       Invalid Theme File: Ógild sérsniðin þemaskrá
       Colors:
+        Watched thumbnail overlay: "Yfirlag á smámyndir áhorfðra myndskeiða"
         Main text: Aðaltexti
         Secondary text: Aukatexti
         Subtle text: Daufur texti

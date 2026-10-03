@@ -473,6 +473,7 @@ Settings:
       Unable to Delete: Kohandatud teemat ei õnnestunud kustutada
       Invalid Theme File: Vigane kohandatud teema fail
       Colors:
+        Watched thumbnail overlay: "Vaadatud videote pisipiltide ülekate"
         Main text: Põhitekst
         Secondary text: Teisene tekst
         Subtle text: Vähemärgatav tekst

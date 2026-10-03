@@ -473,6 +473,7 @@ Settings:
       Unable to Delete: Nem sikerült törölni az egyéni témát
       Invalid Theme File: Érvénytelen egyénitéma-fájl
       Colors:
+        Watched thumbnail overlay: "Megtekintett videók bélyegképeinek fedőrétege"
         Main text: Főszöveg
         Secondary text: Másodlagos szöveg
         Subtle text: Halvány szöveg

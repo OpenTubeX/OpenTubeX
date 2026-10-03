@@ -477,6 +477,7 @@ Settings:
       Unable to Delete: Не вдалося видалити власну тему
       Invalid Theme File: Неприпустимий файл власної теми
       Colors:
+        Watched thumbnail overlay: "Накладання на мініатюри переглянутих відео"
         Main text: Основний текст
         Secondary text: Другорядний текст
         Subtle text: Приглушений текст

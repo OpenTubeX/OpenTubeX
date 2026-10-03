@@ -477,6 +477,7 @@ Settings:
       Unable to Delete: Não foi possível eliminar o tema personalizado
       Invalid Theme File: Ficheiro de tema personalizado inválido
       Colors:
+        Watched thumbnail overlay: "Sobreposição das miniaturas dos vídeos vistos"
         Main text: Texto principal
         Secondary text: Texto secundário
         Subtle text: Texto discreto

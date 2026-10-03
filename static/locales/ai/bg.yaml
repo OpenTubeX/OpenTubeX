@@ -475,6 +475,7 @@ Settings:
       Unable to Delete: Персонализираната тема не може да бъде изтрита
       Invalid Theme File: Невалиден файл с персонализирана тема
       Colors:
+        Watched thumbnail overlay: "Наслагване върху миниатюрите на гледаните видеоклипове"
         Main text: Основен текст
         Secondary text: Вторичен текст
         Subtle text: Приглушен текст

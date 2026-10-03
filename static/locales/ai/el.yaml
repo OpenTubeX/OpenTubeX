@@ -477,6 +477,7 @@ Settings:
       Unable to Delete: Δεν ήταν δυνατή η διαγραφή του προσαρμοσμένου θέματος
       Invalid Theme File: Μη έγκυρο αρχείο προσαρμοσμένου θέματος
       Colors:
+        Watched thumbnail overlay: "Επικάλυψη μικρογραφιών προβεβλημένων βίντεο"
         Main text: Κύριο κείμενο
         Secondary text: Δευτερεύον κείμενο
         Subtle text: Διακριτικό κείμενο

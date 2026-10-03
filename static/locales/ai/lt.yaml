@@ -594,6 +594,7 @@ Settings:
       Unable to Delete: Nepavyko ištrinti pasirinktinės temos
       Invalid Theme File: Netinkamas pasirinktinės temos failas
       Colors:
+        Watched thumbnail overlay: "Peržiūrėtų vaizdo įrašų miniatiūrų perdanga"
         Main text: Pagrindinis tekstas
         Secondary text: Antrinis tekstas
         Subtle text: Neryškus tekstas

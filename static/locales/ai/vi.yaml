@@ -477,6 +477,7 @@ Settings:
       Unable to Delete: Không thể xóa chủ đề tùy chỉnh
       Invalid Theme File: Tệp chủ đề tùy chỉnh không hợp lệ
       Colors:
+        Watched thumbnail overlay: "Lớp phủ hình thu nhỏ của video đã xem"
         Main text: Văn bản chính
         Secondary text: Văn bản phụ
         Subtle text: Văn bản mờ
