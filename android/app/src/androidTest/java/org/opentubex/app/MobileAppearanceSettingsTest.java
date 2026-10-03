@@ -558,8 +558,11 @@ public class MobileAppearanceSettingsTest {
                         evaluate(view, "document.body.style.getPropertyValue('--card-bg-color')"));
                 }
             } finally {
-                shell("cmd overlay " + (originallyEnabled ? "enable" : "disable") + " --user 0 " + overlay);
-                evaluate(view, store + ".commit('setBaseTheme', " + savedTheme + ")");
+                try {
+                    shell("cmd overlay " + (originallyEnabled ? "enable" : "disable") + " --user 0 " + overlay);
+                } finally {
+                    evaluate(view, store + ".commit('setBaseTheme', " + savedTheme + ")");
+                }
             }
         }
     }
