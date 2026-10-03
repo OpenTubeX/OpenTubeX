@@ -1963,3 +1963,6 @@ Form Inputs:
   Download Arguments Hint: Valfrjáls viðföng fyrir þetta niðurhal
   Generated ID Hint: Skildu eftir autt til að búa til auðkenni
   Default Value: "Sjálfgefið: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Leit með stilltum vafrakökum mistókst."

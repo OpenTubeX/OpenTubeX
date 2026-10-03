@@ -1937,3 +1937,6 @@ Form Inputs:
   Download Arguments Hint: 此次下载的可选参数
   Generated ID Hint: 留空以生成 ID
   Default Value: 默认值：{value}
+
+Search Filters:
+  Cookie Search Failed: "使用已配置的 Cookie 搜索失败。"

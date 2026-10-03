@@ -904,6 +904,10 @@ const mutations = {
       if (Object.hasOwn(payload, 'hasMoreResults')) {
         state.sessionSearchHistory[sameSearch].hasMoreResults = payload.hasMoreResults
       }
+      if (Object.hasOwn(payload, 'searchNotice')) {
+        state.sessionSearchHistory[sameSearch].searchNotice = payload.searchNotice
+        state.sessionSearchHistory[sameSearch].searchParams = payload.searchParams
+      }
     } else {
       state.sessionSearchHistory.push(payload)
     }

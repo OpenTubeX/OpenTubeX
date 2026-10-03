@@ -1937,3 +1937,6 @@ Form Inputs:
   Download Arguments Hint: このダウンロードに追加する任意の引数
   Generated ID Hint: 空欄にするとIDを生成
   Default Value: "既定: {value}"
+
+Search Filters:
+  Cookie Search Failed: "設定済みの Cookie を使用した検索に失敗しました。"

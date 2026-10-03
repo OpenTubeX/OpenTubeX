@@ -1957,3 +1957,6 @@ Form Inputs:
   Download Arguments Hint: Valfria argument för denna hämtning
   Generated ID Hint: Lämna tomt för att generera ett ID
   Default Value: "Standard: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Sökning med de konfigurerade kakorna misslyckades."
