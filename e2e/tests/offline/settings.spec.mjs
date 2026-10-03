@@ -167,6 +167,47 @@ async function expectSubscriptionRefreshIntervalSelectHighlight(page) {
     .toBeGreaterThanOrEqual(tooltipBounds.x + tooltipBounds.width)
 }
 
+test.describe('settings search category headings', () => {
+  for (const { width, height } of [
+    { width: 1600, height: 900 },
+    { width: 375, height: 812 }
+  ]) {
+    test.describe(`${width}px viewport`, () => {
+      test.use({
+        seed: {
+          settings: {
+            currentLocale: 'en-US',
+            bounds: { x: 0, y: 0, width, height, maximized: false }
+          }
+        }
+      })
+
+      test('keeps search results open when clicking a category heading', async ({ page }) => {
+        await goTo(page, 'settings')
+        const search = page.getByRole('searchbox', { name: 'Search settings' })
+        await search.fill('FFmpeg Source')
+        const heading = page.locator('.settingsSearchResultHeading')
+        const matches = page.locator('.settingsSearchResultMatch')
+        await expect(heading).toHaveText('Advanced')
+        await expect(matches).toHaveText(['FFmpeg Source'])
+
+        await heading.click()
+
+        await expect(page.locator('.settingsContent > .section')).toHaveCount(0)
+        await expect(search).toHaveValue('FFmpeg Source')
+        await expect(matches).toHaveText(['FFmpeg Source'])
+        await expect(page.getByRole('heading', { name: 'Advanced', level: 2, exact: true })).toBeVisible()
+        expect(await heading.evaluate(element => element.tabIndex)).toBe(-1)
+        await expect(heading).not.toHaveCSS('cursor', 'pointer')
+
+        await matches.click()
+        await expect(page.locator('.settingsContent > [data-section="advanced"]')).toBeVisible()
+        await expect(page.locator('.select.settingsSearchTarget')).toContainText('FFmpeg Source')
+      })
+    })
+  }
+})
+
 test.describe('lights off settings search', () => {
   test.use({ seed: { settings: { currentLocale: 'en-US' } } })
 

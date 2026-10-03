@@ -294,14 +294,15 @@
                   :key="result.section.type"
                   class="settingsSearchResult"
                 >
-                  <button
-                    type="button"
+                  <h2
                     class="settingsSearchResultHeading"
-                    @click="navigateToSection(result.section.type)"
                   >
-                    <FtIcon :icon="result.section.icon" />
+                    <FtIcon
+                      :icon="result.section.icon"
+                      aria-hidden="true"
+                    />
                     {{ result.section.title }}
-                  </button>
+                  </h2>
                   <button
                     v-for="match in result.matches"
                     :key="`${match.label}-${match.tab ?? ''}`"
