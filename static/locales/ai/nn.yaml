@@ -1595,6 +1595,8 @@ Video:
       Play: Spel av
       Pause: Pause
       Drag Handle: Flytt minispelaren
+      Rewind 10 seconds: Spol 10 sekund tilbake
+      Forward 10 seconds: Spol 10 sekund fram
     Skipped segment: 'Hoppa over {segmentCategory}'
     SponsorBlock:
       CancelCurrentSegment: Avbryt opprettinga av segmentet

@@ -1360,6 +1360,8 @@ Video:
       Play: Αναπαραγωγή
       Pause: Παύση
       Drag Handle: Μετακίνηση μικρού προγράμματος αναπαραγωγής
+      Rewind 10 seconds: Μετάβαση 10 δευτερόλεπτα πίσω
+      Forward 10 seconds: Μετάβαση 10 δευτερόλεπτα μπροστά
     SponsorBlock:
       CancelCurrentSegment: Ακύρωση δημιουργίας τμήματος
       ClearSegments: Εκκαθάριση τμημάτων

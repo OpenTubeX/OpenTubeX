@@ -1330,6 +1330,8 @@ Video:
       Play: Воспроизвести
       Pause: Пауза
       Drag Handle: Переместить мини-плеер
+      Rewind 10 seconds: Перемотать на 10 секунд назад
+      Forward 10 seconds: Перемотать на 10 секунд вперёд
     SponsorBlock:
       CancelCurrentSegment: Отменить создание фрагмента
       ClearSegments: Очистить фрагменты

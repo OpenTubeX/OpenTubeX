@@ -1368,6 +1368,8 @@ Video:
       Play: Afspelen
       Pause: Pauzeren
       Drag Handle: Minispeler verplaatsen
+      Rewind 10 seconds: 10 seconden terugspoelen
+      Forward 10 seconds: 10 seconden vooruitspoelen
     SponsorBlock:
       CancelCurrentSegment: Maken van segment annuleren
       ClearSegments: Segmenten wissen

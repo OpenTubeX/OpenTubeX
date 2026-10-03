@@ -1340,6 +1340,8 @@ Video:
       Play: Reproduciraj
       Pause: Pauziraj
       Drag Handle: Premjesti minireproduktor
+      Rewind 10 seconds: Premotaj 10 sekundi unatrag
+      Forward 10 seconds: Premotaj 10 sekundi unaprijed
     SponsorBlock:
       CancelCurrentSegment: Odustani od izrade segmenta
       ClearSegments: Očisti segmente

@@ -1323,6 +1323,8 @@ Video:
       Play: Přehrát
       Pause: Pozastavit
       Drag Handle: Přesunout minipřehrávač
+      Rewind 10 seconds: Přetočit o 10 sekund zpět
+      Forward 10 seconds: Přetočit o 10 sekund vpřed
     SponsorBlock:
       CancelCurrentSegment: Zrušit vytváření úseku
       ClearSegments: Vymazat úseky

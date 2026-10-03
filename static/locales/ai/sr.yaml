@@ -1381,6 +1381,8 @@ Video:
       Play: Репродукуј
       Pause: Паузирај
       Drag Handle: Помери мини-плејер
+      Rewind 10 seconds: Премотај 10 секунди уназад
+      Forward 10 seconds: Премотај 10 секунди унапред
     SponsorBlock:
       CancelCurrentSegment: Откажи прављење сегмента
       ClearSegments: Обриши сегменте

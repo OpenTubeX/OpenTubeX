@@ -1325,6 +1325,8 @@ Video:
       Play: Esita
       Pause: Peata
       Drag Handle: Liiguta minipleierit
+      Rewind 10 seconds: Keri 10 sekundit tagasi
+      Forward 10 seconds: Keri 10 sekundit edasi
     SponsorBlock:
       CancelCurrentSegment: Tühista lõigu loomine
       ClearSegments: Kustuta lõigud

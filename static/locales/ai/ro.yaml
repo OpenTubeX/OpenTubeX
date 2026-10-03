@@ -1355,6 +1355,8 @@ Video:
       Play: Redă
       Pause: Pauză
       Drag Handle: Mută miniplayerul
+      Rewind 10 seconds: Înapoi cu 10 secunde
+      Forward 10 seconds: Înainte cu 10 secunde
     SponsorBlock:
       CancelCurrentSegment: Anulează crearea segmentului
       ClearSegments: Șterge segmentele

@@ -1336,6 +1336,8 @@ Video:
       Play: Възпроизвеждане
       Pause: Пауза
       Drag Handle: Преместване на миниплейъра
+      Rewind 10 seconds: Превъртане 10 секунди назад
+      Forward 10 seconds: Превъртане 10 секунди напред
     SponsorBlock:
       CancelCurrentSegment: Отмяна на създаването на сегмент
       ClearSegments: Изчистване на сегментите

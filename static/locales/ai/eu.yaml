@@ -1338,6 +1338,8 @@ Video:
       Play: Erreproduzitu
       Pause: Pausatu
       Drag Handle: Mugitu minierreproduzigailua
+      Rewind 10 seconds: 10 segundo atzera
+      Forward 10 seconds: 10 segundo aurrera
     SponsorBlock:
       CancelCurrentSegment: Utzi segmentua sortzeari
       ClearSegments: Garbitu segmentuak

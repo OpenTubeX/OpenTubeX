@@ -1774,6 +1774,8 @@ Video:
       Play: Predvajaj
       Pause: Začasno ustavi
       Drag Handle: Premakni mali predvajalnik
+      Rewind 10 seconds: Previj 10 sekund nazaj
+      Forward 10 seconds: Previj 10 sekund naprej
     Skipped segment: 'Preskočeno: {segmentCategory}'
     SponsorBlock:
       CancelCurrentSegment: Prekliči ustvarjanje odseka

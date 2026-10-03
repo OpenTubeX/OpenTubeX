@@ -1387,6 +1387,8 @@ Video:
       Play: Afspil
       Pause: Sæt på pause
       Drag Handle: Flyt miniafspiller
+      Rewind 10 seconds: Spol 10 sekunder tilbage
+      Forward 10 seconds: Spol 10 sekunder frem
     SponsorBlock:
       CancelCurrentSegment: Annuller oprettelse af segment
       ClearSegments: Ryd segmenter

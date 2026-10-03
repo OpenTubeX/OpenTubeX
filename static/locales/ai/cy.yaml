@@ -1345,6 +1345,8 @@ Video:
       Play: Chwarae
       Pause: Oedi
       Drag Handle: Symud y chwaraewr bach
+      Rewind 10 seconds: Ailddirwyn 10 eiliad
+      Forward 10 seconds: Ymlaen 10 eiliad
     SponsorBlock:
       CancelCurrentSegment: Canslo creu'r segment
       ClearSegments: Clirio segmentau

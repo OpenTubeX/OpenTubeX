@@ -1398,6 +1398,8 @@ Video:
       Play: Прайграць
       Pause: Паўза
       Drag Handle: Перамясціць міні-плэер
+      Rewind 10 seconds: Пераматаць на 10 секунд назад
+      Forward 10 seconds: Пераматаць на 10 секунд наперад
     SponsorBlock:
       CancelCurrentSegment: Скасаваць стварэнне сегмента
       ClearSegments: Ачысціць сегменты

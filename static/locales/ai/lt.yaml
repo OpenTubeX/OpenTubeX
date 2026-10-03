@@ -1699,6 +1699,8 @@ Video:
       Play: Leisti
       Pause: Pristabdyti
       Drag Handle: Perkelti minileistuvą
+      Rewind 10 seconds: Atsukti 10 sekundžių atgal
+      Forward 10 seconds: Prasukti 10 sekundžių pirmyn
     Skipped segment: 'Praleista: {segmentCategory}'
     SponsorBlock:
       CancelCurrentSegment: Atšaukti segmento kūrimą

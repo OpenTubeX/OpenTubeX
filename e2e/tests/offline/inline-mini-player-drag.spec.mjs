@@ -2,7 +2,26 @@ import { test, expect, setWindowSize } from '../../helpers/app.mjs'
 import { mobileMiniPlayerRegions, mobileMiniPlayerReturnPoint, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchHistoryEntry, watchViewHandle } from '../../helpers/watch.mjs'
 
-test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, enableVideoZoom: false, enableMobileFullscreenSwipe: false } } })
+test.use({
+  seed: {
+    settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, enableVideoZoom: false, enableMobileFullscreenSwipe: false },
+    playlists: [{
+      _id: 'mini-bar-playlist',
+      playlistName: 'Mini-player controls',
+      protected: false,
+      description: '',
+      createdAt: Date.now(),
+      lastUpdatedAt: Date.now(),
+      videos: ['mini-previous', watchHistoryEntry.videoId, 'mini-next'].map((videoId, index) => ({
+        ...watchHistoryEntry,
+        _id: videoId,
+        videoId,
+        timeAdded: Date.now() + index,
+        playlistItemId: `mini-item-${index}`
+      }))
+    }]
+  }
+})
 
 async function enableMobileTouch(app, page, phone = true) {
   await setWindowSize(app, page, { width: 480, height: 850 })
@@ -199,7 +218,7 @@ test.describe('history progress during mobile restore', () => {
       await player.evaluate(element => {
         element.style.left = '0px'
         element.style.width = `${window.innerWidth}px`
-        element.style.height = '76px'
+        element.style.height = '108px'
       })
       await page.waitForTimeout(300)
       const bar = await player.boundingBox()
@@ -325,7 +344,7 @@ test('mobile bar details fade at the destination during both swipe directions', 
     await touch('touchMove', { ...down, y: down.y + 30 })
     await page.waitForTimeout(40)
     const distance = await player.evaluate(element => {
-      const targetTop = window.innerHeight - 76
+      const targetTop = window.innerHeight - 108
       return Math.max(150, (targetTop - element.getBoundingClientRect().top) / 2)
     })
     await touch('touchMove', { ...down, y: down.y + distance })
@@ -342,7 +361,7 @@ test('mobile bar details fade at the destination during both swipe directions', 
     await player.evaluate(element => {
       element.style.left = '0px'
       element.style.width = `${window.innerWidth}px`
-      element.style.height = '76px'
+      element.style.height = '108px'
     })
     await page.waitForTimeout(300)
     const bar = await player.boundingBox()
@@ -631,7 +650,7 @@ test('video keeps its shape while dragging into a shorter player', async ({ app,
     await player.evaluate(element => {
       element.style.left = '0px'
       element.style.width = `${window.innerWidth}px`
-      element.style.height = '76px'
+      element.style.height = '108px'
     })
     await page.waitForTimeout(300)
     const morphTop = await page.evaluate(() => window.lastMiniMorphTop)
@@ -867,5 +886,145 @@ for (const uiScale of [100, 125]) {
       await touch('touchEnd').catch(() => {})
       await cdp.detach()
     }
+  })
+}
+
+test('bottom bar progress follows a moving live seek window while paused', async ({ app, page }) => {
+  const player = await openMobilePlayer(app, page)
+  await page.evaluate(() => {
+    const spacer = document.createElement('div')
+    spacer.style.height = '2000px'
+    document.body.append(spacer)
+    window.scrollTo(0, 1200)
+  })
+  await expect(player).toHaveClass(/scrollMiniPlayer/)
+  await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+  const video = player.locator('video').first()
+  const progress = player.locator('.mobileMiniBarProgress > div')
+  await player.evaluate(element => {
+    const shakaPlayer = element.ui.getControls().getPlayer()
+    window.miniBarSeekRange = { start: 0, end: 30 }
+    shakaPlayer.seekRange = () => window.miniBarSeekRange
+    shakaPlayer.isLive = () => true
+    element.querySelector('video').currentTime = 15
+  })
+  const fill = () => progress.evaluate(element => new DOMMatrixReadOnly(getComputedStyle(element).transform).a)
+  await expect.poll(fill).toBeCloseTo(0.5, 2)
+  await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+  await page.evaluate(() => { window.miniBarSeekRange = { start: 5, end: 35 } })
+  await expect.poll(fill).toBeCloseTo(1 / 3, 2)
+  expect(await video.evaluate(element => ({ paused: element.paused, currentTime: element.currentTime })))
+    .toEqual({ paused: true, currentTime: 15 })
+  const controls = player.locator('.mobileMiniBarPlayback')
+  const rewind = controls.getByRole('button', { name: 'Rewind 10 seconds' })
+  const forward = controls.getByRole('button', { name: 'Forward 10 seconds' })
+  await page.evaluate(() => { window.miniBarSeekRange = { start: 15, end: 15 } })
+  await expect(rewind).toBeDisabled()
+  await expect(forward).toBeDisabled()
+  await expect(controls.getByRole('button', { name: 'Play', exact: true })).toBeEnabled()
+  await page.evaluate(() => { window.miniBarSeekRange = { start: 5, end: 35 } })
+  await expect(rewind).toBeEnabled()
+  await expect(forward).toBeEnabled()
+})
+
+for (const uiScale of [100, 125, 150]) {
+  test(`bottom bar playback controls work without reopening Watch at ${uiScale}%`, async ({ app, page }, testInfo) => {
+    const player = await openMobilePlayer(app, page)
+    await page.evaluate(scale => {
+      window.ftElectron.setZoomFactor(scale / 100)
+      const spacer = document.createElement('div')
+      spacer.style.height = '2000px'
+      document.body.append(spacer)
+      window.scrollTo(0, 1200)
+    }, uiScale)
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+    const video = player.locator('video').first()
+    const controls = player.locator('.mobileMiniBarPlayback')
+    const progress = player.locator('.mobileMiniBarProgress > div')
+    const expectProgress = async () => {
+      await expect.poll(() => video.evaluate(element => element.seeking)).toBe(false)
+      await expect.poll(() => progress.evaluate(element => {
+        const video = document.querySelector('.ftVideoPlayer video')
+        return Math.abs(new DOMMatrixReadOnly(getComputedStyle(element).transform).a - video.currentTime / video.duration)
+      })).toBeLessThan(0.01)
+    }
+    const thumbnailBounds = await video.boundingBox()
+    expect(thumbnailBounds.width).toBeCloseTo(80, 1)
+    expect(thumbnailBounds.height).toBeCloseTo(45, 1)
+    await expect(controls.getByRole('button')).toHaveCount(3)
+    const rewind = controls.getByRole('button', { name: 'Rewind 10 seconds' })
+    const forward = controls.getByRole('button', { name: 'Forward 10 seconds' })
+    for (const button of await controls.getByRole('button').all()) {
+      const bounds = await button.boundingBox()
+      expect(bounds.width).toBeGreaterThanOrEqual(48)
+      expect(bounds.height).toBeGreaterThanOrEqual(48)
+    }
+    await video.evaluate(element => { element.currentTime = 15 })
+    await forward.click()
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(25, 1)
+    await expectProgress()
+    await rewind.click()
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(15, 1)
+    await expectProgress()
+    await video.evaluate(element => { element.currentTime = 2 })
+    await rewind.click()
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBe(0)
+    await expectProgress()
+    await controls.getByRole('button', { name: 'Play', exact: true }).click()
+    await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(0.5)
+    await expectProgress()
+    await controls.getByRole('button', { name: 'Pause', exact: true }).click()
+    await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
+    await controls.getByRole('button', { name: 'Play', exact: true }).focus()
+    await page.keyboard.press('Space')
+    await expect.poll(() => video.evaluate(element => element.paused)).toBe(false)
+    await page.keyboard.press('Space')
+    await expect.poll(() => video.evaluate(element => element.paused)).toBe(true)
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(1200)
+
+    // Playlist controls follow the same capabilities and events as the full player.
+    const watch = await watchViewHandle(page)
+    await watch.evaluate(async vm => {
+      vm.playlistId = 'mini-bar-playlist'
+      vm.playlistType = 'user'
+      vm.watchingPlaylist = true
+      window.miniBarSkips = []
+      vm.handleSkipToPrev = () => window.miniBarSkips.push('previous')
+      vm.handleSkipToNext = () => window.miniBarSkips.push('next')
+      await vm.$nextTick()
+    })
+    await expect(controls.getByRole('button')).toHaveCount(5)
+    await controls.getByRole('button', { name: 'Previous', exact: true }).click()
+    await controls.getByRole('button', { name: 'Next', exact: true }).click()
+    expect(await page.evaluate(() => window.miniBarSkips)).toEqual(['previous', 'next'])
+    await testInfo.attach('bottom bar playback controls', { body: await player.screenshot(), contentType: 'image/png' })
+    for (const size of [{ width: 320, height: 800 }, { width: 375, height: 850 }, { width: 850, height: 480 }]) {
+      await setWindowSize(app, page, size)
+      await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+      // Electron retains desktop docking calculations after a resize. Supply
+      // the native bar's full-width bounds when checking its responsive CSS.
+      await player.evaluate(element => {
+        element.style.left = '0px'
+        element.style.width = `${window.innerWidth}px`
+        element.style.height = '108px'
+      })
+      await expect.poll(() => controls.evaluate(element => {
+        const bar = element.closest('.ftVideoPlayer').getBoundingClientRect()
+        return [...element.querySelectorAll('button')].every(button => {
+          const bounds = button.getBoundingClientRect()
+          return bounds.left >= bar.left - 0.5 && bounds.right <= bar.right + 0.5 && bounds.bottom <= bar.bottom + 0.5
+        })
+      })).toBe(true)
+      for (const button of await controls.getByRole('button').all()) {
+        const bounds = await button.boundingBox()
+        expect(bounds.width * uiScale / 100).toBeGreaterThanOrEqual(48)
+      }
+    }
+    await player.locator('.mobileMiniBarReturn').click({ position: { x: 60, y: 30 } })
+    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
   })
 }

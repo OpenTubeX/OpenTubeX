@@ -1325,6 +1325,8 @@ Video:
       Play: 播放
       Pause: 暫停
       Drag Handle: 移動迷你播放器
+      Rewind 10 seconds: 倒轉10秒
+      Forward 10 seconds: 快轉10秒
     SponsorBlock:
       CancelCurrentSegment: 取消建立片段
       ClearSegments: 清除片段

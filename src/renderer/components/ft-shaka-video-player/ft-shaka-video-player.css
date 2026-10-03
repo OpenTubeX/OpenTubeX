@@ -4791,7 +4791,6 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar {
   box-sizing: border-box;
   border-radius: 0;
-  border-top: 1px solid var(--secondary-text-color);
   background: var(--card-bg-color);
   box-shadow: 0 -4px 18px rgb(0 0 0 / 20%);
 }
@@ -4828,7 +4827,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 :global(.app.capacitorTabs:has(.mobileMiniBar) > .routerView) {
-  padding-block-end: 76px;
+  padding-block-end: 108px;
 }
 
 .ftVideoPlayer.mobileMiniBar > :not(.player, .countdownPoster, .mobileMiniBarOverlay) {
@@ -4839,6 +4838,20 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   position: absolute;
   inset: 0;
   pointer-events: none;
+}
+
+.mobileMiniBarProgress {
+  position: absolute;
+  z-index: 3;
+  inset: 0 0 auto;
+  block-size: 2px;
+  background: color-mix(in srgb, var(--primary-text-color) 20%, transparent);
+}
+
+.mobileMiniBarProgress > div {
+  block-size: 100%;
+  background: var(--seekbar-played-color, var(--primary-color));
+  transform-origin: left;
 }
 
 .mobileMiniBarReturn {
@@ -4867,7 +4880,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 .mobileMiniBarMorphOverlay::before {
   position: absolute;
-  inset: 0 0 0 120px;
+  inset: 0 0 0 90px;
   background: linear-gradient(to right, transparent, var(--card-bg-color) 8px);
   opacity: var(--mobile-mini-bar-opacity);
   content: '';
@@ -4875,8 +4888,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 .mobileMiniBarDetails {
   position: absolute;
-  inset-block: 0;
-  left: 128px;
+  inset-block: 0 48px;
+  left: 100px;
   right: 8px;
   display: flex;
   flex-direction: column;
@@ -4906,8 +4919,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 .mobileMiniBarUploader {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-block-start: 4px;
+  margin-block-start: 2px;
   color: var(--secondary-text-color);
   font-size: 12px;
 }
@@ -4917,18 +4929,10 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   text-overflow: ellipsis;
 }
 
-.mobileMiniBarAvatar {
-  inline-size: 18px;
-  block-size: 18px;
-  flex: none;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
 .mobileMiniBarDismiss {
   position: absolute;
   z-index: 2;
-  inset-block: 0;
+  inset-block: 0 48px;
   right: 4px;
   display: grid;
   place-items: center;
@@ -4950,13 +4954,56 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   background: color-mix(in srgb, var(--primary-text-color) 12%, var(--card-bg-color));
 }
 
+.mobileMiniBarPlayback {
+  position: absolute;
+  z-index: 2;
+  inset: auto 0 0;
+  display: flex;
+  justify-content: center;
+  gap: clamp(0px, calc((100% - 240px) / 4), 8px);
+  block-size: 48px;
+  direction: ltr;
+}
+
+.mobileMiniBarPlayback > button {
+  display: grid;
+  place-items: center;
+  flex: 0 1 48px;
+  inline-size: 48px;
+  block-size: 48px;
+  padding: 0;
+  border: 0;
+  border-radius: calc(24px * var(--ui-roundness));
+  background: transparent;
+  color: var(--primary-text-color);
+  font-size: 24px;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.mobileMiniBarPlayback > .mobileMiniBarPlayPause {
+  background: color-mix(in srgb, var(--primary-text-color) 8%, var(--card-bg-color));
+}
+
+.mobileMiniBarPlayback > button:active {
+  background: color-mix(in srgb, var(--primary-text-color) 12%, var(--card-bg-color));
+}
+
+.mobileMiniBarPlayback > button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 .mobileMiniBarMorphOverlay > .mobileMiniBarDetails,
-.mobileMiniBarMorphOverlay > .mobileMiniBarDismiss {
+.mobileMiniBarMorphOverlay > .mobileMiniBarProgress,
+.mobileMiniBarMorphOverlay > .mobileMiniBarDismiss,
+.mobileMiniBarMorphOverlay > .mobileMiniBarPlayback {
   opacity: var(--mobile-mini-bar-opacity);
 }
 
 .mobileMiniBarMorphOverlay > .mobileMiniBarReturn,
-.mobileMiniBarMorphOverlay > .mobileMiniBarDismiss {
+.mobileMiniBarMorphOverlay > .mobileMiniBarDismiss,
+.mobileMiniBarMorphOverlay > .mobileMiniBarPlayback > button {
   pointer-events: none;
 }
 
@@ -5337,14 +5384,14 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar > :is(.player, .countdownPoster) {
   position: absolute !important;
-  inset: 6px auto 6px 8px !important;
+  inset: 7.5px auto auto 10px !important;
   box-sizing: border-box;
-  inline-size: 112px !important;
-  min-inline-size: 112px;
-  max-inline-size: 112px;
-  block-size: 63px !important;
-  min-block-size: 63px;
-  max-block-size: 63px;
+  inline-size: 80px !important;
+  min-inline-size: 80px;
+  max-inline-size: 80px;
+  block-size: 45px !important;
+  min-block-size: 45px;
+  max-block-size: 45px;
   margin: 0 !important;
   border-radius: calc(4px * var(--ui-roundness));
   background: #000;

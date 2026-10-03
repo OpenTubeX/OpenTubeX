@@ -1355,6 +1355,8 @@ Video:
       Play: يلعب
       Pause: يوقف
       Drag Handle: نقل لاعب صغير
+      Rewind 10 seconds: الرجوع 10 ثوانٍ
+      Forward 10 seconds: التقديم 10 ثوانٍ
     SponsorBlock:
       CancelCurrentSegment: إلغاء إنشاء المقطع
       ClearSegments: مسح القطاعات

@@ -1332,6 +1332,8 @@ Video:
       Play: "Lenn"
       Pause: "Ehan"
       Drag Handle: "Dilec'hiañ al lenner bihan"
+      Rewind 10 seconds: Mont 10 eilenn war-gil
+      Forward 10 seconds: Mont 10 eilenn war-raok
     SponsorBlock:
       CancelCurrentSegment: "Nullañ krouidigezh ar rann"
       ClearSegments: "Skarzhañ ar rannoù"

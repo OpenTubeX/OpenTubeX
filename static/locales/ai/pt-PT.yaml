@@ -1352,6 +1352,8 @@ Video:
       Play: Reproduzir
       Pause: Pausar
       Drag Handle: Mover mini-reprodutor
+      Rewind 10 seconds: Recuar 10 segundos
+      Forward 10 seconds: Avançar 10 segundos
     SponsorBlock:
       CancelCurrentSegment: Cancelar criação do segmento
       ClearSegments: Limpar segmentos

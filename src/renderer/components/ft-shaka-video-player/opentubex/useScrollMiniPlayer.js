@@ -91,6 +91,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   /** @type {import('vue').Ref<import('../../../helpers/scrollMiniPlayer').ScrollMiniPlayerRect>} */
   const scrollMiniPlayerRect = ref(getDefaultScrollMiniPlayerRect())
   const scrollMiniIsPaused = ref(true)
+  const mobileMiniBarProgress = ref(0)
+  const mobileMiniBarHasSeekRange = ref(false)
   const scrollMiniVolume = ref(1)
   const scrollMiniPlayPauseVisible = ref(true)
   const scrollMiniVolumeExpanded = ref(false)
@@ -118,7 +120,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
   function getMobileMiniBarRect() {
     const insets = getViewportInsets()
-    const height = 76
+    const height = 108
     return {
       left: 0,
       top: window.innerHeight - height - Math.max(0, insets.bottom - MARGIN),
@@ -488,7 +490,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   async function finishScrollMiniPlayerDrag(commit) {
     if (scrollRestoreDrag) {
       scrollRestoreDrag = false
-      if (commit && scrollMiniPlayerActive.value && isActiveTab.value && !playerSuspended.value) scrollMiniScrollToTop()
+      if (commit && scrollMiniPlayerActive.value && isActiveTab.value && !playerSuspended.value) restoreInlinePlayer()
       return
     }
     if (!inlineDrag || inlineDrag.finishing) return
@@ -1048,7 +1050,21 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
     scrollMiniVolume.value = videoElement.muted ? 0 : videoElement.volume
     scrollMiniIsPaused.value = videoElement.paused
+    updateMobileMiniBarProgress()
     updateScrollMiniVolumeBarFill()
+  }
+
+  function updateMobileMiniBarProgress() {
+    const videoElement = video.value
+    const seekRange = getUi()?.getControls()?.getPlayer()?.seekRange()
+    const start = seekRange?.start ?? 0
+    const end = seekRange?.end ?? videoElement?.duration
+    const duration = end - start
+    const currentTime = videoElement?.currentTime
+    mobileMiniBarHasSeekRange.value = Number.isFinite(duration) && duration > 0
+    mobileMiniBarProgress.value = mobileMiniBarHasSeekRange.value && Number.isFinite(currentTime)
+      ? Math.min(1, Math.max(0, (currentTime - start) / duration))
+      : 0
   }
 
   function updateScrollMiniVolumeBarFill() {
@@ -1729,6 +1745,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
   watch(() => props.videoId, () => {
     lastKnownInlinePlayerHeight = 0
+    mobileMiniBarProgress.value = 0
+    mobileMiniBarHasSeekRange.value = false
 
     if (scrollMiniPlayerActive.value) {
       deactivateScrollMiniPlayer()
@@ -1798,6 +1816,9 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     mobileMiniBar,
     mobileMiniBarCanDismiss,
     mobileMiniBarOverlayStyle,
+    mobileMiniBarProgress,
+    mobileMiniBarHasSeekRange,
+    updateMobileMiniBarProgress,
     beginScrollMiniPlayerDrag,
     moveScrollMiniPlayerDrag,
     finishScrollMiniPlayerDrag,

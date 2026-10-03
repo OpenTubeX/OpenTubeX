@@ -1796,6 +1796,8 @@ Video:
       Play: Reprodueix
       Pause: Pausa
       Drag Handle: Mou el minireproductor
+      Rewind 10 seconds: Retrocedeix 10 segons
+      Forward 10 seconds: Avança 10 segons
     Skipped segment: 'S''ha omès: {segmentCategory}'
     SponsorBlock:
       CancelCurrentSegment: Cancel·la la creació del segment

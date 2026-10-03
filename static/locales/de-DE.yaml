@@ -2057,6 +2057,8 @@ Video:
       Play: Abspielen
       Pause: Pausieren
       Drag Handle: Mini-Player verschieben
+      Rewind 10 seconds: 10 Sekunden zurückspulen
+      Forward 10 seconds: 10 Sekunden vorspulen
     MusicPlaybackRateOverride: Musikvideo erkannt, wird mit 1-facher Geschwindigkeit wiedergegeben
     Voice-over Translation:
       Start: Übersetzen

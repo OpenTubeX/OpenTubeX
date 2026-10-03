@@ -6727,6 +6727,7 @@ export default defineComponent({
 
     function handleSeeked() {
       if (shortsNavigationSuspended.value) return
+      updateMobileMiniBarProgress()
       if (video.value?.ended) {
         syncPlayPauseControlIcons()
       }
@@ -6769,7 +6770,11 @@ export default defineComponent({
       // Metadata initialization can restore Shaka's original start time after
       // an earlier seek. Apply that seek before playback becomes ready.
       if (pendingMetadataSeek !== null) {
-        setCurrentTime(pendingMetadataSeek)
+        // Restoring an existing seek must preserve its accumulated OSD feedback.
+        if (seekingIsPossible.value) {
+          rememberSeekPosition(pendingMetadataSeek)
+          video.value.currentTime = pendingMetadataSeek
+        }
         pendingMetadataSeek = null
       }
 
@@ -6902,6 +6907,7 @@ export default defineComponent({
         if (sleepTimer.checkChapterBoundary()) return
         checkAbRepeatBoundary()
         const currentTime = video.value.currentTime
+        updateMobileMiniBarProgress()
         sponsorBlockCurrentTime.value = currentTime
         annotationCurrentTime.value = currentTime
         updateHiddenShortsSeekBar(currentTime)
@@ -7054,6 +7060,9 @@ export default defineComponent({
       mobileMiniBar,
       mobileMiniBarCanDismiss,
       mobileMiniBarOverlayStyle,
+      mobileMiniBarProgress,
+      mobileMiniBarHasSeekRange,
+      updateMobileMiniBarProgress,
       beginScrollMiniPlayerDrag,
       moveScrollMiniPlayerDrag,
       finishScrollMiniPlayerDrag,
@@ -7120,6 +7129,9 @@ export default defineComponent({
       tabId,
       video,
     })
+
+    const mobileMiniBarControlsDisabled = computed(() => Boolean(scrollMiniPlayerDragStyle.value || scrollMiniPlayerAnimating.value))
+    const mobileMiniBarSeekDisabled = computed(() => mobileMiniBarControlsDisabled.value || !hasLoaded.value || !seekingIsPossible.value || !mobileMiniBarHasSeekRange.value)
 
     // The window may have resized while docked. Measure the settled inline
     // player once, after the return animation, rather than its scaled bounds.
@@ -11238,6 +11250,7 @@ export default defineComponent({
       }
 
       controls.addEventListener('uiupdated', addUICustomizations)
+      controls.addEventListener('timeandseekrangeupdated', updateMobileMiniBarProgress)
       configureUI(true)
 
       applyInitialVolume(videoElement)
@@ -11935,6 +11948,7 @@ export default defineComponent({
       }
 
       const controls = ui?.getControls()
+      controls?.removeEventListener('timeandseekrangeupdated', updateMobileMiniBarProgress)
       controls?.removeEventListener('submenuopen', handleSubMenuOpen)
       controls?.removeEventListener('submenuclose', handleSubMenuClose)
 
@@ -12290,6 +12304,8 @@ export default defineComponent({
       playbackEnded,
       replayIcon: shaka.ui.Enums.MaterialDesignSVGIcons.REPLAY,
       replayLabel,
+      seekingIsPossible,
+      seekBySeconds,
       shortsMuted,
       shortsCaptionsAvailable,
       shortsCaptionsEnabled,
@@ -12530,7 +12546,11 @@ export default defineComponent({
       scrollMiniPlayerActive,
       mobileMiniBar,
       mobileMiniBarCanDismiss,
+      mobileMiniBarControlsDisabled,
+      mobileMiniBarSeekDisabled,
       mobileMiniBarOverlayStyle,
+      mobileMiniBarProgress,
+      updateMobileMiniBarProgress,
       scrollMiniPlayerAnimating,
       scrollMiniPlayerDetached,
       scrollMiniPlayerDismissed,

@@ -12,7 +12,7 @@ const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-vide
   .replace(/^import\s[\s\S]*?from\s+['"][^'"]+['"];?\s*$/gm, '')
   .replace(/^export /gm, '')
 
-function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPlaying = true, android = false, inlineVisible = false } = {}) {
+function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPlaying = true, android = false, inlineVisible = false, seekRange = null } = {}) {
   t.mock.timers.enable({ apis: ['setTimeout'] })
   const scope = effectScope()
   const mounted = []
@@ -52,7 +52,7 @@ function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPl
   })
   const player = scope.run(() => create({
     container: ref(inlineVisible ? { style: { removeProperty() {} }, removeAttribute() {}, hasAttribute: () => false, getBoundingClientRect: () => ({ ...rect }) } : null),
-    fullWindowEnabled: ref(false), getUi: () => null,
+    fullWindowEnabled: ref(false), getUi: () => seekRange ? { getControls: () => ({ getPlayer: () => ({ seekRange: () => seekRange }) }) } : null,
     isActiveTab, isPlayerSuspended, pictureInPictureActive: ref(false), props: reactive({ format: 'video', videoId: 'video' }),
     video
   }))
@@ -67,6 +67,33 @@ function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPl
   t.after(() => { for (const callback of unmounting) callback(); player.teardownScrollMiniPlayer(); scope.stop() })
   return { player, window, isActiveTab, isPlayerSuspended, minimized, video, classes }
 }
+
+test('mobile playback progress follows seeks and clamps invalid media positions', t => {
+  const { player, video } = mountMiniPlayer(t)
+  for (const [duration, currentTime, expected] of [
+    [60, 15, 0.25], [60, 30, 0.5], [60, -5, 0], [60, 65, 1],
+    [0, 15, 0], [Infinity, 15, 0], [NaN, 15, 0], [60, NaN, 0]
+  ]) {
+    Object.assign(video.value, { duration, currentTime })
+    player.updateMobileMiniBarProgress()
+    assert.equal(player.mobileMiniBarProgress.value, expected)
+  }
+  video.value = null
+  player.updateMobileMiniBarProgress()
+  assert.equal(player.mobileMiniBarProgress.value, 0)
+})
+
+test('mobile playback progress uses the seekable window for live DVR', t => {
+  const seekRange = { start: 100, end: 160 }
+  const { player, video } = mountMiniPlayer(t, { seekRange })
+  Object.assign(video.value, { duration: Infinity, currentTime: 130 })
+  player.updateMobileMiniBarProgress()
+  assert.equal(player.mobileMiniBarProgress.value, 0.5)
+  seekRange.start = 120
+  seekRange.end = 180
+  player.updateMobileMiniBarProgress()
+  assert.equal(player.mobileMiniBarProgress.value, 1 / 6)
+})
 
 for (const phase of ['androidPictureInPicture', 'androidPictureInPictureRestoring']) {
   test(`Android PiP viewport changes preserve the existing mini-player state during ${phase}`, t => {
@@ -204,7 +231,7 @@ test('Android restoration reanchors skipped viewport changes without animating t
   assert.deepEqual(player.scrollMiniPlayerStyle.value, previous)
   window.dispatchEvent(new Event('opentubex:android-pip-restored'))
   assert.equal(player.scrollMiniPlayerStyle.value.width, '640px')
-  assert.equal(player.scrollMiniPlayerStyle.value.top, '284px')
+  assert.equal(player.scrollMiniPlayerStyle.value.top, '252px')
   assert.equal(player.scrollMiniPlayerAnimating.value, false)
 })
 
