@@ -98,6 +98,8 @@ test('full-window docks preserve zoom, stacked panel controls and rapid toggles'
   await expect(player).not.toHaveClass(/presentationModeChanging/)
   const watch = await page.evaluateHandle(findWatchComponent)
   try {
+    // Keep active-chapter auto-scroll from competing with bottom-position checks.
+    await video.evaluate(element => element.pause())
     await watch.evaluate(component => {
       component.proxy.videoChapters = Array.from({ length: 50 }, (_, index) => ({
         title: `Chapter ${index}`, startSeconds: index, endSeconds: index + 1, timestamp: `0:${index}`,
@@ -162,17 +164,17 @@ test('full-window docks preserve zoom, stacked panel controls and rapid toggles'
     await scrollToBottom()
     const height = await metadata.evaluate(element => element.clientHeight)
     const header = metadata.locator('.fullscreenMetadataHeader')
-    await header.dispatchEvent('dblclick')
+    await header.dblclick()
     await expect.poll(() => metadata.evaluate(element => element.clientHeight)).toBeLessThan(height / 2)
     await expectValidScrollbar()
-    await header.dispatchEvent('dblclick')
+    await header.dblclick()
     await expect.poll(() => metadata.evaluate(element => element.clientHeight)).toBe(height)
     const handle = metadata.locator('.fullscreenDockResizeHandle')
     await scrollToBottom()
     await handle.press('ArrowUp')
     await expect.poll(() => metadata.evaluate(element => element.clientHeight)).toBeLessThan(height)
     await expectValidScrollbar()
-    await handle.dispatchEvent('dblclick')
+    await handle.dblclick()
     await expect.poll(() => metadata.evaluate(element => element.clientHeight)).toBe(height)
     await scrollToBottom()
     await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
