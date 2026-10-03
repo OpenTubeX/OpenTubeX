@@ -27,6 +27,7 @@ test('dynamic palettes use contrasting tones in light and dark mode', () => {
   assert.equal(light.primary, colors.accent1[600])
   assert.equal(light.textWithPrimary, colors.accent1[0])
   assert.equal(dark.background, colors.neutral1[900])
+  assert.equal(dark.cardBackground, colors.neutral1[800])
   assert.equal(dark.primaryText, colors.neutral1[100])
   assert.equal(dark.primary, colors.accent1[200])
   assert.equal(dark.textWithPrimary, colors.accent1[800])
@@ -46,6 +47,31 @@ test('palette refresh updates existing CSS properties and RGB accents', (t) => {
   applyDynamicColors(colors, true)
   assert.equal(properties.get('--bg-color'), colors.neutral1[900])
   assert.equal(properties.get('--accent-color-rgb'), '171 205 239')
+  colors.neutral1[900] = '#000000'
+  applyDynamicColors(colors, true)
+  assert.equal(properties.get('--card-bg-color'), '#191919')
+  colors.neutral1[900] = '#151515'
+  applyDynamicColors(colors, true)
+  assert.equal(properties.get('--card-bg-color'), colors.neutral1[800])
+})
+
+test('LineageOS pure-black mode keeps the page black with distinguishable cards and menus', () => {
+  const colors = neutralTonalPalette()
+  // LineageOS's night overlay keeps raised tones gray but makes containers black.
+  colors.neutral1[900] = '#000000'
+  colors.neutral1[800] = '#171717'
+  const dark = dynamicThemeColors(colors, true)
+  for (const surface of ['background', 'secondaryCardBackground', 'sideNav']) {
+    assert.equal(dark[surface], '#000000', surface)
+  }
+  assert.equal(dark.cardBackground, '#191919')
+  assert.equal(dark.instanceMenu, dark.cardBackground)
+  assert.ok(contrast(dark.cardBackground, dark.background) >= 1.18, 'Cards have visible surface separation')
+  assert.ok(contrast(dark.primaryText, dark.cardBackground) >= 4.5, 'Card text remains readable')
+  assert.ok(contrast(dark.secondaryText, dark.cardBackground) >= 4.5, 'Secondary card text remains readable')
+  assert.equal(dark.primary, colors.accent1[200], 'Wallpaper accents are preserved')
+  assert.equal(dark.dropdownHover, colors.neutral2[800], 'Hover states remain distinguishable')
+  assert.equal(dynamicThemeColors(colors, false).cardBackground, colors.neutral1[100], 'Light mode is unchanged')
 })
 
 test('switching back from dynamic colors or a custom-theme preview restores the selected theme', async (t) => {
