@@ -164,7 +164,6 @@
                   class="capacitorPhoneTabRow"
                   :class="{
                     active: tab.id === activeTabId,
-                    withHistory: tab.id === presentedTabId && tab.history.length > 1 && !selecting,
                     pinned: tab.isPinned,
                     unloaded: tab.isUnloaded,
                     holding: drag.tabId === tab.id && drag.ready,
@@ -227,19 +226,6 @@
                       :icon="['fas', 'times']"
                       aria-hidden="true"
                     />
-                  </button>
-                  <button
-                    v-if="tab.id === presentedTabId && tab.history.length > 1 && !selecting"
-                    type="button"
-                    class="capacitorPhoneTabHistoryButton"
-                    @pointerdown.stop
-                    @click.stop="openTabHistory"
-                  >
-                    <FtIcon
-                      :icon="['fas', 'clock-rotate-left']"
-                      aria-hidden="true"
-                    />
-                    {{ t('Tab Organizer.Tab History') }}
                   </button>
                 </div>
               </div>
@@ -399,6 +385,7 @@
               :title="actionTab ? tabTitle(actionTab) : ''"
               :youtube-url="actionTabYoutubeUrl"
               :can-toggle-loaded="canToggleActionTabLoaded"
+              :show-history="!selecting && actionTab?.id === presentedTabId && actionTab?.history.length > 1"
               mode="phone"
               @select="selectActionTab"
               @close-related="closeRelatedTabs"
@@ -407,6 +394,7 @@
               @dismiss="closeTabActions"
               @duplicate="duplicateActionTab"
               @reload="reloadActionTab"
+              @history="openTabHistory"
               @toggle-loaded="toggleActionTabLoaded"
               @toggle-pinned="toggleActionTabPinned"
             />
@@ -668,7 +656,7 @@ async function selectView(view, focus = false) {
   if (!focus) return
 
   if (view === 'open' && (previousView === 'history' || !showSyncedTabsView.value)) {
-    dialogRef.value?.querySelector('.capacitorPhoneTabHistoryButton')?.focus({ preventScroll: true })
+    focusActiveTab()
     return
   }
   const id = view === 'synced'
@@ -688,6 +676,7 @@ function activeContentRef() {
 }
 
 async function openTabHistory() {
+  closeTabActions()
   viewScrollTop.history = 0
   await selectView('history')
   const current = historyContentRef.value?.querySelector('[aria-current="page"]')
@@ -1096,7 +1085,7 @@ function resetTabSwipe() {
 
 function focusActiveTab() {
   dialogRef.value
-    ?.querySelector('[role="tab"][aria-selected="true"]')
+    ?.querySelector('.capacitorPhoneTabTarget[aria-selected="true"]')
     ?.focus({ preventScroll: true })
 }
 

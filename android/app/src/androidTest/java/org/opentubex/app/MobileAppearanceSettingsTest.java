@@ -820,9 +820,14 @@ public class MobileAppearanceSettingsTest {
 
     private static void openPhoneTabHistory(WebView view) throws Exception {
         evaluate(view, "document.querySelector('.capacitorPhoneTabSwitcherButton').click()");
-        awaitCondition(view, "!!document.querySelector('.capacitorPhoneTabHistoryButton')");
-        evaluate(view, "document.querySelector('.capacitorPhoneTabHistoryButton').click()");
-        awaitCondition(view, "!!document.querySelector('.capacitorPhoneTabHistoryEntry')");
+        awaitCondition(view, "!!document.querySelector('.capacitorPhoneTabTarget[aria-selected=\"true\"]')");
+        evaluate(view, "document.querySelector('.capacitorPhoneTabTarget[aria-selected=\"true\"]')" +
+            ".dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }))");
+        awaitCondition(view, "!!document.querySelector('.capacitorTabActions')");
+        evaluate(view, "[...document.querySelectorAll('.capacitorTabActions [role=menuitem]')]" +
+            ".find(button => button.textContent.trim() === document.querySelector('#app').__vue_app__.config.globalProperties.$t('Tab Organizer.Tab History')).click()");
+        awaitCondition(view, "!!document.querySelector('.capacitorPhoneTabHistoryEntry') && " +
+            "!document.querySelector('.capacitorTabActionsBackdrop')");
     }
 
     private static void prepare(WebView view) throws Exception {
