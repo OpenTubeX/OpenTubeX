@@ -250,3 +250,26 @@ test('ignores an authenticated retry after navigating to an oversized search', a
   await page.waitForTimeout(500)
   await expect(page.getByText('Stale authenticated result', { exact: true })).toHaveCount(0)
 })
+
+test('stops loading after replacing a pending local search with an oversized query', async ({ page }) => {
+  let finishRequest
+  let notifyRequestStarted
+  const pendingResponse = new Promise(resolve => { finishRequest = resolve })
+  const requestStarted = new Promise(resolve => { notifyRequestStarted = resolve })
+  await page.route('https://www.youtube.com/youtubei/v1/search**', async route => {
+    notifyRequestStarted()
+    await pendingResponse
+    await route.fulfill({ json: ageGate })
+  })
+  await page.locator(sel.searchInput).fill('pending local search')
+  await page.locator(sel.searchInput).press('Enter')
+  await requestStarted
+  const oversizedQuery = 'x'.repeat(101)
+  await page.locator(sel.searchInput).fill(oversizedQuery)
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page).toHaveURL(new RegExp(`/search/${oversizedQuery}(\\?|$)`))
+  finishRequest()
+  await page.waitForTimeout(500)
+  await expect(page.getByRole('heading', { name: 'Search results', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Confirm your age' })).toHaveCount(0)
+})
