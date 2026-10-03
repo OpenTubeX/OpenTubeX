@@ -135,6 +135,16 @@
   margin-block: 8px;
 }
 
+.phonePlaylistActions {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.phonePlaylistActions .playlistButton.playlistButtonActive {
+  color: var(--accent-color);
+}
+
 .playlistButton {
   display: inline-flex;
   align-items: center;
@@ -295,6 +305,25 @@
   --scrollbar-color-hover: rgb(255 255 255 / 65%);
 }
 
+.phonePlaylist,
+.phonePlaylist > div {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-block-size: 0;
+}
+
+.phonePlaylist .playlistItemsWrapper {
+  flex: 1;
+  block-size: 0;
+  min-block-size: 0;
+  resize: none;
+}
+
+.phonePlaylist .playlistHeader {
+  flex: none;
+}
+
 .playlistItemsWrapper::-webkit-resizer {
   background:
     linear-gradient(
@@ -407,5 +436,88 @@
   .playlistProgressBar {
     block-size: 12px;
     margin-block: -3px;
+  }
+}
+
+@media (width <= 600px), (height <= 600px) {
+  .phonePlaylist .channelNameSeparator,
+  .phonePlaylist .playlistIndex,
+  .fullscreenPlaylist .channelNameSeparator,
+  .fullscreenPlaylist .playlistIndex {
+    display: none;
+  }
+}
+
+@media (orientation: landscape) and (height <= 600px) {
+  .fullscreenPlaylistContent {
+    padding-block: 4px 8px;
+    padding-inline: 8px;
+  }
+
+  .fullscreenPlaylist .playlistHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .fullscreenPlaylist .playlistHeader > .channelName {
+    display: none;
+  }
+
+  .fullscreenPlaylist .playlistButtons {
+    display: flex;
+    margin: 0;
+  }
+
+  .fullscreenPlaylist .playlistButton {
+    inline-size: var(--phone-touch-target, 48px);
+    block-size: var(--phone-touch-target, 48px);
+    margin: 0;
+    padding: 8px;
+  }
+
+  .fullscreenPlaylist .playlistItem {
+    align-items: center;
+    grid-template-columns: 32px minmax(0, 1fr);
+  }
+
+  /* Match the child card's thumbnail rule so its fixed height cannot win. */
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  .fullscreenPlaylist .playlistItem :deep(.ft-list-item .videoThumbnail .thumbnailImage) {
+    inline-size: 80px;
+    block-size: 45px;
+    object-fit: cover;
+  }
+
+  .fullscreenPlaylist .playlistItem :deep(.info) {
+    min-inline-size: 0;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  /* Match the child card's overlay rule to keep the labels apart. */
+  /* stylelint-disable-next-line selector-max-compound-selectors */
+  .fullscreenPlaylist :deep(.ft-list-item .videoThumbnail .videoWatched) {
+    place-self: start start;
+    margin-block: 2px 0;
+    font-size: 10px;
+    padding-block: 1px;
+  }
+
+  .fullscreenPlaylist :deep(.watchPlaylistItem.watched .sponsorBlockVideoLabel) {
+    margin-block: 4px;
+  }
+
+  .fullscreenPlaylist .playlistItem :deep(.restArea) {
+    line-height: 0;
+  }
+
+  .fullscreenPlaylist .playlistItem :deep(.infoLine) {
+    flex-wrap: nowrap;
+  }
+
+  .fullscreenPlaylist .playlistItem :deep(.videoIndexArea) {
+    margin-block: 0;
   }
 }

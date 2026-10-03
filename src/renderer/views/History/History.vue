@@ -19,6 +19,13 @@
           class="headingActions"
         >
           <FtButton
+            class="historyActionButton"
+            :label="t('History.Delete Old History')"
+            :icon="['fas', 'trash']"
+            theme="destructive"
+            @click="showHistoryCleanupPrompt = true"
+          />
+          <FtButton
             ref="repairAction"
             class="historyActionButton"
             :label="t('History.Repair')"
@@ -34,13 +41,6 @@
             background-color="var(--primary-color)"
             text-color="var(--text-with-main-color)"
             @click="showMarkAllPrompt = true"
-          />
-          <FtButton
-            class="historyActionButton"
-            :label="t('History.Delete Old History')"
-            :icon="['fas', 'trash']"
-            theme="destructive"
-            @click="showHistoryCleanupPrompt = true"
           />
         </div>
       </div>

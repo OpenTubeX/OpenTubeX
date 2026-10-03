@@ -120,6 +120,29 @@ async function enablePhoneHeader(page) {
   })
 }
 
+for (const zoom of [1, 1.25]) {
+  test(`phone header actions have equal spacing at ${zoom} scale`, async ({ app, page }) => {
+    await enablePhoneHeader(page)
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setEnableDownloads', true)
+      store.commit('setMoveDownloadsToAppHeader', true)
+      store.commit('setMoveSettingsToAppHeader', true)
+    })
+    await app.electronApp.evaluate(({ BrowserWindow }, factor) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(factor), zoom)
+    for (const width of [375, 680, 850]) {
+      await setWindowSize(app, page, { width, height: width === 375 ? 850 : width === 680 ? 800 : 700 })
+      if (width === 850) await page.locator('.topNav').evaluate(header => header.classList.add('phoneLayout'))
+      await expect.poll(() => page.locator('.profiles').evaluate(element => {
+        const buttons = [...element.querySelectorAll(':scope > button, .capacitorPhoneTabSwitcherButton, .profileTrigger')]
+          .map(button => button.getBoundingClientRect()).filter(rect => rect.width > 0 && rect.height > 0)
+        const distances = buttons.slice(1).map((rect, index) => rect.left + rect.width / 2 - buttons[index].left - buttons[index].width / 2)
+        return Math.max(...distances) - Math.min(...distances)
+      })).toBeLessThan(0.2)
+    }
+  })
+}
+
 for (const pinned of [false, true]) {
   test(`crowded phone header keeps actions reachable with pinned search ${pinned}`, async ({ app, page }) => {
     await setWindowSize(app, page, { width: 375, height: 850 })

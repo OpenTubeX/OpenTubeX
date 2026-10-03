@@ -160,8 +160,6 @@
 
 .downloadsButton,
 .settingsButton {
-  margin-inline-end: 8px;
-
   &.active {
     color: var(--primary-color);
     background-color: var(--side-nav-hover-color);
@@ -169,7 +167,6 @@
 }
 
 .minimizedUtilityButton {
-  margin-inline-end: 8px;
   color: var(--primary-color);
   background-color: var(--side-nav-hover-color);
 }
@@ -301,6 +298,10 @@
   }
 }
 
+.phoneLayout .profiles {
+  gap: 4px;
+}
+
 .topNav:not(.phoneLayout) .side {
   inline-size: max-content;
   justify-self: start;
@@ -344,6 +345,15 @@
 
 // Phone search occupies the header's own row, including in native landscape.
 .phoneLayout {
+  .profiles > .navButton,
+  .profiles :deep(.profileTrigger) {
+    box-sizing: border-box;
+    flex: 0 0 48px;
+    inline-size: 48px;
+    block-size: 48px;
+    padding: 0;
+  }
+
   .pinnedSearchTrigger {
     display: flex;
     align-items: center;
@@ -529,12 +539,6 @@
     inline-size: 48px;
     block-size: 48px;
     padding: 0;
-  }
-
-  .downloadsButton,
-  .settingsButton,
-  .minimizedUtilityButton {
-    margin-inline-end: 0;
   }
 
   &.phoneSearchOpen {
