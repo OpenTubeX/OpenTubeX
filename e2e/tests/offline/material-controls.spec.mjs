@@ -44,9 +44,130 @@ for (const baseTheme of ['dark', 'light']) {
         await page.locator('.settingsWindow').screenshot({ path: screenshot })
         await testInfo.attach('outlined-selects', { path: screenshot, contentType: 'image/png' })
       })
+
+      test('select option menus keep Material spacing and distinguish selection from keyboard focus', async ({ page }, testInfo) => {
+        await page.emulateMedia({ reducedMotion: 'reduce' })
+        const section = await goToSettingsSection(page, 'general')
+        const select = section.getByRole('combobox', { name: 'Week Starts On', exact: true })
+        await select.click()
+        const menu = page.getByRole('listbox')
+        const selected = menu.locator('[aria-selected="true"]')
+        const selectedName = await selected.innerText()
+        const screenshot = testInfo.outputPath('material-select-menu.png')
+        await page.locator('.settingsWindow').screenshot({ path: screenshot })
+        await testInfo.attach('material-select-menu', { path: screenshot, contentType: 'image/png' })
+        await expect(menu.getByRole('option').first()).toHaveCSS('min-height', '48px')
+        await expect(menu).toHaveCSS('padding-top', '8px')
+        await expect(menu).toHaveCSS('border-top-width', '0px')
+        await expect(menu.locator('.optionCheck')).toHaveCount(0)
+        await select.press('Home')
+        if (await menu.locator('.selectOption.active').innerText() === selectedName) {
+          await select.press('ArrowDown')
+        }
+        await expect(selected).toHaveAttribute('aria-selected', 'true')
+        await expect(selected).toHaveText(selectedName)
+        const active = menu.locator('.selectOption.active')
+        await expect(active).toHaveAttribute('aria-selected', 'false')
+        const activeName = await active.innerText()
+        await select.press('Enter')
+        await expect(menu).toHaveCount(0)
+        await expect(select).toHaveAccessibleDescription(activeName)
+        await expect(select).toBeFocused()
+
+        for (const direction of ['ltr', 'rtl']) {
+          await page.evaluate(value => { document.body.dir = value }, direction)
+          await select.click()
+          const selectedBackground = await menu.locator('[aria-selected="true"]').evaluate(element => getComputedStyle(element).backgroundColor)
+          expect(selectedBackground).not.toBe('rgba(0, 0, 0, 0)')
+          for (const option of await menu.getByRole('option').all()) {
+            await expect(option).toHaveCSS('padding-inline-start', '12px')
+            await expect(option).toHaveCSS('padding-inline-end', '12px')
+          }
+          for (const roundness of [0, 100, 200]) {
+            await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
+            await expect(menu).toHaveCSS('border-top-left-radius', `${4 * roundness / 100}px`)
+          }
+          await select.press('Escape')
+        }
+      })
+
+      test('select menus fit their full option labels without a selection gutter', async ({ page }, testInfo) => {
+        await page.emulateMedia({ reducedMotion: 'reduce' })
+        for (const [category, name] of [['theme', 'Tab Layout'], ['general', /Language preference|Locale Preference/]]) {
+          const section = await goToSettingsSection(page, category)
+          const select = section.getByRole('combobox', { name, exact: true })
+          await select.click()
+          const menu = page.getByRole('listbox')
+          const screenshot = testInfo.outputPath(`select-option-width-${category}.png`)
+          await menu.screenshot({ path: screenshot })
+          await testInfo.attach(`select-option-width-${category}`, { path: screenshot, contentType: 'image/png' })
+          for (const direction of ['ltr', 'rtl']) {
+            await page.evaluate(value => { document.body.dir = value }, direction)
+            const clipping = await menu.getByRole('option').evaluateAll(options => options.map(option => {
+              const range = document.createRange()
+              range.selectNodeContents(option.querySelector('.optionName'))
+              const text = range.getBoundingClientRect()
+              const row = option.getBoundingClientRect()
+              const style = getComputedStyle(option)
+              return {
+                label: option.innerText,
+                missingSpace: Math.max(row.left + parseFloat(style.paddingLeft) - text.left,
+                  text.right - row.right + parseFloat(style.paddingRight))
+              }
+            }))
+            for (const { label, missingSpace } of clipping) {
+              expect(missingSpace, `${direction}: ${label} fits inside its option`).toBeLessThanOrEqual(0.01)
+            }
+          }
+          await select.press('Escape')
+        }
+      })
+
+      test('selected select options follow theme color changes while open', async ({ page }, testInfo) => {
+        const section = await goToSettingsSection(page, 'theme')
+        await section.getByRole('combobox', { name: 'Tab Layout', exact: true }).click()
+        const selected = page.getByRole('listbox').locator('[aria-selected="true"]')
+        for (const color of ['Red', 'Blue']) {
+          await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateMainColor', value), color)
+          await expect.poll(() => selected.evaluate((element, color) => {
+            const canvas = document.createElement('canvas')
+            canvas.width = canvas.height = 1
+            const context = canvas.getContext('2d')
+            context.fillStyle = getComputedStyle(element).backgroundColor
+            context.fillRect(0, 0, 1, 1)
+            const [red, green, blue] = context.getImageData(0, 0, 1, 1).data
+            return color === 'Red' ? red - green : blue - red
+          }, color), { message: `Selected row has a ${color.toLowerCase()} theme tint` }).toBeGreaterThan(25)
+          await expect(selected).toHaveAttribute('aria-selected', 'true')
+          if (uiScale === 100) {
+            const screenshot = testInfo.outputPath(`selected-option-${color.toLowerCase()}.png`)
+            await page.getByRole('listbox').screenshot({ path: screenshot })
+            await testInfo.attach(`selected-option-${color.toLowerCase()}`, { path: screenshot, contentType: 'image/png' })
+          }
+        }
+      })
     })
   }
 }
+
+test('select option hover retains custom theme colors', async ({ page }) => {
+  await goToSettingsSection(page, 'theme')
+  await page.getByRole('button', { name: 'Create custom theme', exact: true }).click()
+  const editor = page.locator('.customThemeEditor')
+  for (const [label, color] of [['Dropdown item hover background', '#123456'], ['Dropdown item hover text', '#fedcba']]) {
+    await editor.getByRole('button', { name: label, exact: true }).click()
+    const picker = page.getByRole('dialog', { name: label, exact: true })
+    await picker.getByRole('textbox', { name: 'Hex color' }).fill(color)
+    await picker.getByRole('textbox', { name: 'Hex color' }).press('Enter')
+    await picker.getByRole('button', { name: 'Apply', exact: true }).click()
+  }
+  await editor.getByRole('combobox', { name: 'Based on', exact: true }).click()
+  const option = page.getByRole('option', { name: 'Dark', exact: true })
+  await option.hover()
+  await expect(option).toHaveCSS('color', 'rgb(254, 220, 186)')
+  await expect.poll(() => option.evaluate(element => getComputedStyle(element, '::before').backgroundColor))
+    .toBe('rgb(18, 52, 86)')
+})
 
 test('closed selects announce their current choice', async ({ page }) => {
   const section = await goToSettingsSection(page, 'download')
@@ -1282,7 +1403,7 @@ test('filled fields and slider progress retain their input behavior', async ({ p
   await select.click()
   const options = page.getByRole('listbox').getByRole('option')
   await expect(options.first()).toBeVisible()
-  expect((await options.first().boundingBox()).height).toBeLessThan(40)
+  expect((await options.first().boundingBox()).height).toBeCloseTo(48, 1)
   await select.press('Escape')
   await expect(page.getByRole('listbox')).toHaveCount(0)
 
