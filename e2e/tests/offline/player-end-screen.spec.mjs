@@ -58,7 +58,9 @@ for (const dataSaver of [false, true]) {
       await store.dispatch('updateThumbnailDataSaver', dataSaver)
     }, dataSaver)
     await mockPlayableWatchPage(app, page)
+    const requests = []
     await page.route('https://i.ytimg.com/**', route => {
+      requests.push(route.request().url())
       if (/\/(?:maxres|sd)default.jpg$/.test(route.request().url())) {
         return route.fulfill({
           contentType: 'image/svg+xml',
@@ -75,6 +77,10 @@ for (const dataSaver of [false, true]) {
     const startup = page.locator('.countdownPoster img:not(.retryImagePlaceholder)')
     await expect(startup).toBeVisible()
     await expect(startup).toHaveAttribute('src', new RegExp(`/${dataSaver ? 'mq' : 'hq'}default.jpg$`))
+    await expect(video).not.toHaveAttribute('poster', /.+/)
+    if (dataSaver) {
+      expect(requests).toEqual(['https://i.ytimg.com/vi/jNQXAC9IVRw/mqdefault.jpg'])
+    }
     const poster = await startup.elementHandle()
     const startupPoster = await startup.getAttribute('src')
     await expect.poll(() => video.evaluate(element => element.duration)).toBeGreaterThan(1)
