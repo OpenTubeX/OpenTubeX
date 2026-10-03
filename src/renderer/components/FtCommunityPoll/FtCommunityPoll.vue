@@ -7,7 +7,7 @@
       {{ $t('Channel.Posts.votes', {votes: formattedVotes}, data.totalVotes) }}
     </div>
     <div
-      v-for="(choice, index) in data.content"
+      v-for="(choice, index) in choices"
       :key="index"
     >
       <div
@@ -32,7 +32,10 @@
         <span class="empty-circle" />
         <FtRetryImage
           v-if="choice.image"
-          :src="findSmallestPollImage(choice.image)"
+          class="pollImage"
+          :src="choice.image.url"
+          :style="{ inlineSize: `${125 * (choice.image.width / choice.image.height || 1)}px` }"
+          :fallback-icon="['fas', 'file-image']"
           alt=""
         />
         <div
@@ -87,12 +90,17 @@ const formattedVotes = computed(() => {
 
 const revealAnswer = ref(false)
 
+const choices = computed(() => props.data.content.map(choice => ({
+  ...choice,
+  image: choice.image ? findSmallestPollImage(choice.image) : null
+})))
+
 /**
  * Use smallest as it's resized to 125px anyways and they're usually all larger than that
  * @param {{ height: number, width: number, url: string }[]} images
  */
 function findSmallestPollImage(images) {
-  return images.reduce((prev, img) => (img.height < prev.height) ? img : prev, images[0]).url
+  return images.reduce((prev, img) => (img.height < prev.height) ? img : prev, images[0])
 }
 </script>
 

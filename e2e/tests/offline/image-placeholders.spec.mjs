@@ -234,6 +234,73 @@ test('keeps inline post emoji images hidden until loaded and after failure', asy
   await text.screenshot({ path: testInfo.outputPath('inline-emoji-fallback.png') })
 })
 
+test('keeps poll image slots stable while loading and after failure', async ({ page }) => {
+  const choices = [
+    { text: 'Square', width: 400, height: 400 },
+    { text: 'Wide', width: 600, height: 300 },
+    { text: 'Tall', width: 300, height: 600 }
+  ]
+  const pending = []
+  let failTall = false
+  await page.route('https://poll-images.test/**', route => failTall && route.request().url().includes('Tall')
+    ? route.abort()
+    : pending.push(route))
+  await page.route('**/api/v1/post/**', route => route.fulfill({
+    json: {
+      comments: [{
+        commentId: 'placeholder-poll',
+        contentHtml: 'Image poll',
+        author: 'Placeholder channel',
+        authorId: channelId,
+        authorThumbnails: [],
+        publishedText: '1 day ago',
+        likeCount: 0,
+        replyCount: 0,
+        attachment: { type: 'poll', totalVotes: 10, choices: choices.map(choice => ({ text: choice.text, image: [{ ...choice, url: `https://poll-images.test/${choice.text}` }] })) }
+      }]
+    }
+  }))
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setBackendPreference', 'invidious')
+    store.commit('setHideComments', true)
+    return window.ftElectron.tabs.create({ route: '/post/placeholder-poll', query: { authorId: 'UCaaaaaaaaaaaaaaaaaaaaaa' } })
+  })
+  await expect.poll(() => pending.length).toBe(3)
+  const slots = []
+  for (const choice of choices) {
+    const option = page.locator('.poll .option', { hasText: choice.text })
+    const placeholder = option.locator('.retryImagePlaceholder')
+    await expect(placeholder).toBeVisible()
+    const bounds = await placeholder.boundingBox()
+    expect(bounds.height).toBe(125)
+    expect(bounds.width).toBe(125 * choice.width / choice.height)
+    slots.push(await option.locator('.option-text').boundingBox())
+  }
+  while (pending.length) {
+    const route = pending.shift()
+    const choice = choices.find(choice => route.request().url().endsWith(choice.text))
+    if (choice.text === 'Tall') {
+      failTall = true
+      await route.abort()
+    } else {
+      await route.fulfill({ contentType: 'image/svg+xml', body: `<svg xmlns="http://www.w3.org/2000/svg" width="${choice.width}" height="${choice.height}"><rect width="100%" height="100%" fill="teal"/></svg>` })
+    }
+  }
+  for (const [index, choice] of choices.entries()) {
+    const option = page.locator('.poll .option', { hasText: choice.text })
+    if (choice.text === 'Tall') {
+      await expect(option.locator('img:not(.retryImagePlaceholder)')).toHaveAttribute('src', /opentubex_retry=/)
+      await expect(option.locator('img:not(.retryImagePlaceholder)')).toBeHidden()
+      await expect(option.locator('.retryImagePlaceholder')).toBeVisible()
+    } else {
+      await expect(option.locator('img')).toBeVisible()
+      await expect(option.locator('.retryImagePlaceholder')).toHaveCount(0)
+    }
+    expect(await option.locator('.option-text').boundingBox()).toEqual(slots[index])
+  }
+})
+
 test('isolates inline HTML placeholders from responsive image sources', async ({ page }) => {
   const source = await readFile(new URL('../../../src/renderer/helpers/htmlImagePlaceholder.js', import.meta.url), 'utf8')
   const svg = await readFile(new URL('../../../src/renderer/assets/img/thumbnail_placeholder.svg', import.meta.url), 'utf8')
