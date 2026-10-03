@@ -76,8 +76,7 @@ jobs:
         if not devices:
             raise SystemExit('No matching iOS simulator installed')
         device = devices[-1]
-        if device['state'] != 'Booted':
-            subprocess.run(['xcrun', 'simctl', 'boot', device['udid']], check=True)
+        # bootstatus -b boots if needed and also waits for an ongoing boot.
         subprocess.run(['xcrun', 'simctl', 'bootstatus', device['udid'], '-b'], check=True, timeout=240)
         with open(os.environ['GITHUB_ENV'], 'a') as output:
             output.write('SIMULATOR_ID=' + device['udid'] + '\n')

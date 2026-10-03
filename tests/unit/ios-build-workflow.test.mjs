@@ -64,8 +64,13 @@ test('nightly asset preparation includes the IPA alongside desktop packages', as
   assert.deepEqual((await readdir(join(directory, 'release-assets'))).sort(), names.sort())
 })
 
-for (const state of ['Shutdown', 'Booted']) {
-  test(`iOS workflow waits for a ${state.toLowerCase()} simulator before testing without clones`, async t => {
+for (const { state, bootRace = false } of [
+  { state: 'Shutdown' },
+  { state: 'Booting' },
+  { state: 'Booted' },
+  { state: 'Shutdown', bootRace: true },
+]) {
+  test(`iOS workflow waits for simulator readiness (${state}${bootRace ? ', racing boot' : ''}) without clones`, async t => {
     const directory = await mkdtemp(join(tmpdir(), 'ios-simulator-'))
     t.after(() => rm(directory, { recursive: true, force: true }))
     const log = join(directory, 'commands')
@@ -78,7 +83,10 @@ if args == ['simctl', 'list', 'devices', 'available', '--json']:
     print(json.dumps({'devices': {'com.apple.CoreSimulator.SimRuntime.iOS-26-2': [
         {'name': 'iPhone 17', 'udid': 'test-simulator', 'state': '${state}'}
     ]}}))
-elif args not in [['simctl', 'boot', 'test-simulator'], ['simctl', 'bootstatus', 'test-simulator', '-b']]:
+elif args == ['simctl', 'boot', 'test-simulator']:
+    if '${state}' == 'Booting' or ${bootRace ? 'True' : 'False'}:
+        sys.exit('Unable to boot device in current state: Booted or Booting')
+elif args != ['simctl', 'bootstatus', 'test-simulator', '-b']:
     sys.exit('Unexpected simulator command: ' + str(args))
 if 'bootstatus' in args and os.environ.get('IOS_MOCK_FAIL_BOOT'):
     sys.exit('Simulator boot failed')
@@ -92,7 +100,6 @@ if 'bootstatus' in args and os.environ.get('IOS_MOCK_FAIL_BOOT'):
     const commands = (await readFile(log, 'utf8')).trim().split('\n').map(line => JSON.parse(line))
     assert.deepEqual(commands, [
       ['simctl', 'list', 'devices', 'available', '--json'],
-      ...(state === 'Shutdown' ? [['simctl', 'boot', 'test-simulator']] : []),
       ['simctl', 'bootstatus', 'test-simulator', '-b'],
     ])
     assert.equal(await readFile(envFile, 'utf8'), 'SIMULATOR_ID=test-simulator\n')
