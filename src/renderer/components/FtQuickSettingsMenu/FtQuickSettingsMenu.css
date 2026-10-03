@@ -205,12 +205,14 @@
 }
 
 .menuSection {
+  --quick-settings-label-overhang: 7px;
+
   border-block-start: 1px solid var(--divider-color);
-  column-gap: 12px;
+  gap: 16px 8px;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  padding-block: 10px 12px;
-  padding-inline: 18px;
+  padding-block: 10px 16px;
+  padding-inline: 12px;
 }
 
 .menuSection h3 {
@@ -222,7 +224,7 @@
   gap: 6px;
   grid-column: 1 / -1;
   line-height: 1.2;
-  margin-block: 0 10px;
+  margin-block: 0;
   margin-inline: 0;
   text-transform: uppercase;
 }
@@ -241,31 +243,82 @@
   grid-column: auto;
 }
 
+.quickSettingControl:first-of-type,
+.quickSettingsMenu:not(.phoneQuickSettings) .pairedQuickSetting:first-of-type + .pairedQuickSetting {
+  /* Keep the first caption seven pixels below its section heading. */
+  margin-block-start: -9px;
+}
+
+.quickSettingControl:has(.quickSelect) {
+  /* Include the floating label in the row's footprint. */
+  padding-block-start: var(--quick-settings-label-overhang);
+}
+
 .menuSection :deep(.pure-material-slider),
 .menuSection :deep(.switch-ctn) {
-  margin-block: 4px;
+  margin-block: 0;
   inline-size: 100%;
 }
 
 .menuSection :deep(.quickSelect) {
+  /* stylelint-disable length-zero-no-unit */
+  --select-indicator-space: 0px;
+  --select-reset-space: 0px;
+  /* stylelint-enable length-zero-no-unit */
+
   inline-size: 100%;
-  margin-block: 4px 6px;
+  margin-block: 0;
+}
+
+.menuSection :deep(.quickSelect:has(.selectIndicators > :not(.changedSettingIndicatorPlaceholder))) {
+  --select-indicator-space: calc(8px + var(--select-tooltip-space) + var(--select-sync-space) + var(--select-reset-space));
+}
+
+.menuSection :deep(.quickSelect:has(.syncedSettingIndicator):has(.changedSettingIndicator)) {
+  --select-indicator-space: calc(14px + var(--select-tooltip-space) + var(--select-sync-space) + var(--select-reset-space));
+}
+
+.menuSection :deep(.quickSelect:has(.syncedSettingIndicator)) {
+  --select-sync-space: 1em;
+}
+
+.menuSection :deep(.quickSelect:has(.changedSettingIndicator)) {
+  --select-reset-space: 1em;
+}
+
+.menuSection :deep(.quickSelect .changedSettingIndicatorPlaceholder) {
+  display: none;
 }
 
 .menuSection :deep(.pure-material-slider) {
-  padding-block: 2px;
+  margin-inline: 0;
+  padding: 0;
+}
+
+.menuSection :deep(.sliderControl) {
+  block-size: var(--slider-handle-height);
+}
+
+/* Preserve the larger input hit area without adding empty space to the row. */
+.menuSection :deep(.sliderControl .input) {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 0;
+  transform: translateY(-50%);
+}
+
+/* Align the visible track, which has a built-in six-pixel inset. */
+.menuSection :deep(.switch-ctn) {
+  margin-inline-start: -6px;
 }
 
 .sliderGroup {
   display: grid;
   gap: 8px;
-  margin-block-start: 6px;
 }
 
 .sliderGroup :deep(.pure-material-slider) {
   display: grid;
-  margin: 0;
-  padding-block: 0;
 }
 
 .sliderGroup :deep(.input) {
@@ -280,6 +333,10 @@
 }
 
 @media (any-pointer: coarse), (width <= 680px) {
+  .menuSection {
+    --quick-settings-label-overhang: 8px;
+  }
+
   .sliderGroup :deep(.sliderControl) {
     --slider-track-height: 16px;
     --slider-handle-height: 44px;
@@ -294,6 +351,14 @@
 
 .menuSection :deep(.switch-label) {
   padding-block: 6px;
+}
+
+/* Keep touch targets on hybrid devices with both a mouse and touchscreen. */
+@media (any-pointer: fine) and (not (any-pointer: coarse)) and (width > 680px) {
+  .menuSection :deep(.switch-label) {
+    min-block-size: var(--switch-track-height);
+    padding-block: 0;
+  }
 }
 
 .menuLinks {
@@ -390,10 +455,6 @@
 
 .phoneQuickSettings .sliderGroup :deep(.input) {
   block-size: var(--phone-touch-target, 48px);
-}
-
-.phoneQuickSettings .sliderGroup :deep(.pure-material-slider) {
-  grid-template-rows: auto var(--phone-touch-target, 48px);
 }
 
 .phoneQuickHeaderActions {

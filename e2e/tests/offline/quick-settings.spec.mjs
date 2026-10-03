@@ -169,8 +169,244 @@ for (const uiScale of [100, 95]) {
           expect.soft(quickSettings.gap, `${name} centered label/value gap`).toBeCloseTo(fullSettings[index].gap + addedSpace, 1)
         }
       })
+
+      test('aligns first slider captions with outlined select labels', async ({ page }) => {
+        await page.emulateMedia({ reducedMotion: 'reduce' })
+        await page.evaluate(() => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          return store.dispatch('updateQuickSettings', ['uiScale', 'defaultQuality', 'uiRoundness'])
+        })
+        await page.locator('.profileTrigger').click()
+        const menu = page.locator('.quickSettingsMenu')
+        await expect(menu).toBeVisible()
+        await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
+        const gaps = await menu.locator('.menuSection').evaluateAll(sections => sections.map(section => {
+          const heading = section.querySelector('h3').getBoundingClientRect()
+          const control = section.querySelector('.quickSettingControl')
+          const caption = control.querySelector('.labelRow, .select-label').getBoundingClientRect()
+          return { setting: control.dataset.settingId, gap: caption.top - heading.bottom }
+        }))
+        expect(gaps.map(({ setting }) => setting)).toEqual(['uiScale', 'defaultQuality', 'uiRoundness'])
+        for (const { setting, gap } of gaps) {
+          expect.soft(gap, `${setting} heading-to-caption gap`).toBeCloseTo(gaps[1].gap, 1)
+        }
+      })
+
+      test('aligns sliders and switches with the section gutters', async ({ page }) => {
+        await page.emulateMedia({ reducedMotion: 'reduce' })
+        await page.evaluate(() => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          return store.dispatch('updateQuickSettings', ['uiScale', 'thumbnailSize', 'ambientMode', 'uiRoundness', 'defaultPlayback'])
+        })
+        await page.locator('.profileTrigger').click()
+        const menu = page.locator('.quickSettingsMenu')
+        await expect(menu).toBeVisible()
+        await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
+        const geometry = await menu.locator('.menuSection').evaluateAll(sections => sections.flatMap(section => {
+          const bounds = section.getBoundingClientRect()
+          const style = getComputedStyle(section)
+          const left = bounds.left + Number.parseFloat(style.paddingLeft)
+          const right = bounds.right - Number.parseFloat(style.paddingRight)
+          return [...section.querySelectorAll('.quickSettingControl')].map(control => {
+            const caption = control.querySelector('.labelRow')
+            const track = control.querySelector('.sliderControl')
+            const switchLabel = control.querySelector('.switch-label')
+            return {
+              setting: control.dataset.settingId,
+              left,
+              right,
+              captionLeft: caption?.getBoundingClientRect().left,
+              trackLeft: track?.getBoundingClientRect().left,
+              trackRight: track?.getBoundingClientRect().right,
+              switchLeft: switchLabel && switchLabel.getBoundingClientRect().left +
+                Number.parseFloat(getComputedStyle(switchLabel, '::before').insetInlineStart),
+            }
+          })
+        }))
+        expect(geometry.map(({ setting }) => setting)).toEqual(['uiScale', 'thumbnailSize', 'ambientMode', 'uiRoundness', 'defaultPlayback'])
+        for (const control of geometry) {
+          if (control.setting === 'ambientMode') {
+            expect.soft(control.switchLeft, 'switch track aligns with the section gutter').toBeCloseTo(control.left, 1)
+          } else {
+            expect.soft(control.captionLeft, `${control.setting} caption left gutter`).toBeCloseTo(control.left, 1)
+            expect.soft(control.trackLeft, `${control.setting} track left gutter`).toBeCloseTo(control.left, 1)
+            expect.soft(control.trackRight, `${control.setting} track right gutter`).toBeCloseTo(control.right, 1)
+          }
+        }
+      })
+
+      test('uses consistent gaps between mixed control rows', async ({ page }) => {
+        await page.emulateMedia({ reducedMotion: 'reduce' })
+        await page.evaluate(async () => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          await store.dispatch('updateBaseTheme', 'system')
+          await store.dispatch('updateQuickSettings', [
+            'uiScale', 'thumbnailSize', 'baseTheme', 'systemLightTheme', 'systemDarkTheme',
+            'ambientMode', 'uiRoundness', 'defaultQuality', 'defaultPlayback', 'enableSubtitlesByDefault',
+          ])
+        })
+        await page.locator('.profileTrigger').click()
+        const menu = page.locator('.quickSettingsMenu')
+        await expect(menu).toBeVisible()
+        await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
+        const sections = await menu.locator('.menuSection').evaluateAll(elements => elements.map(section => {
+          const rows = []
+          for (const control of section.querySelectorAll('.quickSettingControl')) {
+            const select = control.querySelector('.select-text')
+            const slider = control.querySelector('.sliderControl')
+            const toggle = control.querySelector('.switch-label')
+            let top
+            let bottom
+            if (select) {
+              top = control.querySelector('.select-label').getBoundingClientRect().top
+              bottom = select.getBoundingClientRect().bottom
+            } else if (slider) {
+              top = control.querySelector('.labelRow').getBoundingClientRect().top
+              const track = slider.getBoundingClientRect()
+              bottom = (track.top + track.bottom) / 2 +
+                Number.parseFloat(getComputedStyle(slider).getPropertyValue('--slider-handle-height')) / 2
+            } else {
+              const label = toggle.getBoundingClientRect()
+              top = label.top
+              bottom = label.bottom
+            }
+            const previous = rows.at(-1)
+            if (previous && Math.abs(previous.top - top) < 0.1) {
+              previous.bottom = Math.max(previous.bottom, bottom)
+            } else {
+              rows.push({ setting: control.dataset.settingId, top, bottom })
+            }
+          }
+          return { rows, bottom: section.getBoundingClientRect().bottom }
+        }))
+        expect(sections).toHaveLength(2)
+        for (const section of sections) {
+          for (let index = 1; index < section.rows.length; index++) {
+            const row = section.rows[index]
+            const previous = section.rows[index - 1]
+            expect.soft(row.top - previous.bottom, `${previous.setting} to ${row.setting}`).toBeCloseTo(16, 1)
+          }
+          expect.soft(section.bottom - section.rows.at(-1).bottom, 'last control to section divider').toBeCloseTo(16, 1)
+        }
+        const roundness = menu.locator('[data-setting-id="uiRoundness"] input[type="range"]')
+        const inputBounds = await roundness.boundingBox()
+        expect(inputBounds.height, 'native slider hit area stays large enough').toBeGreaterThanOrEqual(width > 680 ? 35.9 : 47.9)
+        await roundness.click({ position: { x: inputBounds.width * 0.75, y: inputBounds.height / 2 } })
+        await expect(roundness).toHaveValue('150')
+        await roundness.press('ArrowLeft')
+        await expect(roundness).toHaveValue('145')
+      })
     })
   }
+}
+
+for (const uiScale of [100, 95]) {
+  test.describe(`quick settings select spacing at ${uiScale}% scale`, () => {
+    test.use({
+      seed: {
+        settings: {
+          currentLocale: 'en-US',
+          uiScale,
+          baseTheme: 'system',
+          quickSettings: ['baseTheme', 'systemLightTheme', 'systemDarkTheme', 'defaultQuality', 'hideRecommendedVideos'],
+          defaultQuality: '1080',
+          highlightChangedSettings: true,
+          syncServerEnabled: true,
+          syncServerToken: 'local-test-token',
+          syncServerUrl: 'http://127.0.0.1:1',
+          syncServerSyncSettings: true,
+          syncServerSettingsExcluded: ['baseTheme', 'systemLightTheme', 'systemDarkTheme'],
+        }
+      }
+    })
+
+    test('keeps select spacing compact without changing the Material 3 design', async ({ app, page }, testInfo) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      for (const width of [1280, 480]) {
+        await app.electronApp.evaluate(({ BrowserWindow }, width) => {
+          BrowserWindow.getAllWindows()[0].setBounds({ x: 0, y: 0, width, height: 900 })
+        }, Math.round(width * uiScale / 100))
+        await page.evaluate(() => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          return store.dispatch('updateDefaultQuality', '1080')
+        })
+        await page.locator('.profileTrigger').click()
+        const menu = page.locator('.quickSettingsMenu')
+        await expect(menu).toBeVisible()
+        await expect(menu).not.toHaveClass(/quick-settings-menu-enter-active/)
+        const controls = menu.locator('.quickSelect')
+        await expect(controls).toHaveCount(4)
+        await expect(menu.locator('[data-setting-id="baseTheme"] .changedSettingIndicatorPlaceholder')).toHaveCSS('display', 'none')
+        await expect(menu.locator('[data-setting-id="defaultQuality"] .changedSettingIndicator')).toBeVisible()
+        for (const scheme of ['dark', 'light']) {
+          await page.emulateMedia({ colorScheme: scheme })
+          await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${scheme}\\b`))
+          const positions = []
+          for (const control of await controls.all()) {
+            const geometry = await control.evaluate(element => {
+              const field = element.querySelector('.select-text').getBoundingClientRect()
+              const label = element.querySelector('.select-label').getBoundingClientRect()
+              const indicators = element.querySelector('.selectIndicators').getBoundingClientRect()
+              const visibleIndicators = Array.from(element.querySelectorAll('.selectIndicators > *')).filter(indicator => {
+                const style = getComputedStyle(indicator)
+                return style.display !== 'none' && style.visibility !== 'hidden'
+              })
+              const indicatorsWidth = visibleIndicators.reduce((width, indicator) => width + indicator.getBoundingClientRect().width, 0) +
+                Math.max(0, visibleIndicators.length - 1) * 6
+              return {
+                width: element.getBoundingClientRect().width,
+                fieldWidth: field.width,
+                fieldLeft: field.left,
+                fieldRight: field.right,
+                labelCenter: (label.top + label.bottom) / 2,
+                indicatorsWidth,
+                indicatorsRight: visibleIndicators.at(-1).getBoundingClientRect().right,
+                controlRight: element.getBoundingClientRect().right,
+                indicatorCenter: (indicators.top + indicators.bottom) / 2,
+                fieldCenter: (field.top + field.bottom) / 2,
+                fieldTop: field.top,
+                fieldBottom: field.bottom,
+                labelTop: label.top,
+              }
+            })
+            positions.push(geometry)
+            const spareSpace = geometry.width - geometry.fieldWidth - geometry.indicatorsWidth - 8
+            expect.soft(spareSpace, 'space around the indicators').toBeGreaterThanOrEqual(-0.1)
+            expect.soft(spareSpace, 'space around the indicators').toBeLessThanOrEqual(6.1)
+            expect.soft(geometry.labelCenter, 'Material 3 label stays on the outline').toBeCloseTo(geometry.fieldTop, 1)
+            expect.soft(geometry.indicatorCenter, 'indicators remain beside the field').toBeCloseTo(geometry.fieldCenter, 1)
+            expect.soft(geometry.indicatorsRight).toBeLessThanOrEqual(geometry.controlRight + 0.1)
+          }
+          const nextRow = positions[width > 680 ? 2 : 1]
+          expect.soft(nextRow.labelTop - positions[0].fieldBottom, 'spacing between select rows').toBeCloseTo(16, 1)
+          if (width > 680) {
+            const gap = positions[1].fieldLeft - positions[0].fieldRight - positions[0].indicatorsWidth
+            expect.soft(gap, 'gap between the paired selects after accounting for indicators').toBeGreaterThanOrEqual(15.9)
+            expect.soft(gap, 'gap between the paired selects after accounting for indicators').toBeLessThanOrEqual(22.1)
+            expect.soft(positions[1].fieldTop, 'paired selects stay aligned').toBeCloseTo(positions[0].fieldTop, 1)
+          }
+          await menu.screenshot({ path: testInfo.outputPath(`quick-settings-${width}-${scheme}.png`) })
+        }
+        const quality = menu.locator('[data-setting-id="defaultQuality"]')
+        await quality.getByRole('button', { name: 'Reset this setting to its default' }).click()
+        await expect(quality.locator('.changedSettingIndicator')).toHaveCount(0)
+        await expect(quality.getByRole('combobox')).toHaveText('720p')
+        await expect(menu).toBeVisible()
+        const label = menu.locator('.switch-label')
+        if (width > 680) {
+          expect((await label.boundingBox()).height).toBeCloseTo(24, 1)
+        } else {
+          expect((await label.boundingBox()).height).toBeGreaterThanOrEqual(47.9)
+        }
+        if (width > 680) {
+          await menu.press('Escape')
+        } else {
+          await page.getByRole('dialog', { name: 'Quick settings' }).getByRole('button', { name: 'Close', exact: true }).click()
+        }
+        await expect(menu).toHaveCount(0)
+      }
+    })
+  })
 }
 
 test.describe('quick system themes', () => {
