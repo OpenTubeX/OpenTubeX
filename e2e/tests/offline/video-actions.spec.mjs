@@ -1623,12 +1623,12 @@ test('exposes download progress to assistive technology', async ({ page }) => {
   await upsertDownload('downloading', 142)
   await expect(progress).toHaveAttribute('aria-valuenow', '100')
   await expect(progress).toHaveAttribute('aria-valuetext', '100.0% • 1 MiB/s • ETA 00:10')
-  expect(await fill.evaluate(element => element.style.inlineSize)).toBe('100%')
+  expect(await fill.evaluate(element => element.style.transform)).toBe('scaleX(1)')
 
   await upsertDownload('downloading', -42)
   await expect(progress).toHaveAttribute('aria-valuenow', '0')
   await expect(progress).toHaveAttribute('aria-valuetext', '0.0% • 1 MiB/s • ETA 00:10')
-  expect(await fill.evaluate(element => element.style.inlineSize)).toBe('0%')
+  expect(await fill.evaluate(element => element.style.transform)).toBe('scaleX(0)')
 
   await upsertDownload('processing', 42)
   await expect(progress).toHaveAccessibleName('Accessible download')

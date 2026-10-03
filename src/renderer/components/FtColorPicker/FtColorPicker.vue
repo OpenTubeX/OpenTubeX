@@ -260,6 +260,8 @@ const popoverStyle = ref({})
 const colorWhenOpened = ref(props.modelValue)
 const blurWhenOpened = ref(props.blurValue ?? 0)
 let draggingSaturationValue = false
+let saturationValuePointer = null
+let saturationValueFrame = null
 let statusTimeout = null
 let copiedTimeout = null
 let lastEmittedColor = null
@@ -332,6 +334,7 @@ function togglePicker() {
 
 function closePicker(apply = false, restoreFocus = true) {
   if (!open.value) return
+  cancelSaturationValue()
   if (!apply && !resetDisabled.value) resetColor()
   if (apply) emit('apply')
   else emit('cancel')
@@ -356,27 +359,57 @@ function emitCurrentBlur() {
 function startSaturationValue(event) {
   if (event.button !== 0) return
   draggingSaturationValue = true
-  updateSaturationValue(event)
+  saturationValuePointer = { x: event.clientX, y: event.clientY }
+  renderSaturationValue()
   window.addEventListener('pointermove', updateSaturationValue)
-  window.addEventListener('pointerup', stopSaturationValue, { once: true })
+  window.addEventListener('pointerup', stopSaturationValue)
+  window.addEventListener('pointercancel', stopSaturationValue)
   event.preventDefault()
 }
 
 function updateSaturationValue(event) {
   if (!draggingSaturationValue) return
-  const bounds = event.currentTarget?.classList?.contains('saturationValue')
-    ? event.currentTarget.getBoundingClientRect()
-    : popoverRef.value?.querySelector('.saturationValue')?.getBoundingClientRect()
+  saturationValuePointer = { x: event.clientX, y: event.clientY }
+  if (saturationValueFrame !== null) return
+  saturationValueFrame = requestAnimationFrame(() => {
+    saturationValueFrame = null
+    renderSaturationValue()
+  })
+}
+
+function renderSaturationValue() {
+  if (!draggingSaturationValue || saturationValuePointer === null) return
+  const { x, y } = saturationValuePointer
+  saturationValuePointer = null
+  const bounds = saturationValueRef.value?.getBoundingClientRect()
   if (bounds === undefined) return
-  saturation.value = clamp((event.clientX - bounds.left) / bounds.width * 100, 0, 100)
-  value.value = 100 - clamp((event.clientY - bounds.top) / bounds.height * 100, 0, 100)
+  const nextSaturation = clamp((x - bounds.left) / bounds.width * 100, 0, 100)
+  const nextValue = 100 - clamp((y - bounds.top) / bounds.height * 100, 0, 100)
+  if (saturation.value === nextSaturation && value.value === nextValue) return
+  saturation.value = nextSaturation
+  value.value = nextValue
   emitCurrentColor()
 }
 
-function stopSaturationValue() {
-  draggingSaturationValue = false
-  window.removeEventListener('pointermove', updateSaturationValue)
+function stopSaturationValue(event) {
+  if (!draggingSaturationValue) return
+  if (event && event.type !== 'pointercancel') {
+    saturationValuePointer = { x: event.clientX, y: event.clientY }
+  }
+  // Apply a release that arrives before the scheduled frame before committing.
+  renderSaturationValue()
+  cancelSaturationValue()
   emit('change')
+}
+
+function cancelSaturationValue() {
+  draggingSaturationValue = false
+  if (saturationValueFrame !== null) cancelAnimationFrame(saturationValueFrame)
+  saturationValueFrame = null
+  saturationValuePointer = null
+  window.removeEventListener('pointermove', updateSaturationValue)
+  window.removeEventListener('pointerup', stopSaturationValue)
+  window.removeEventListener('pointercancel', stopSaturationValue)
 }
 
 function adjustSaturationValue(event) {
@@ -584,7 +617,7 @@ defineExpose({ close: closePicker })
 onBeforeUnmount(() => {
   removeOpenListeners()
   stopObservingColorSources()
-  window.removeEventListener('pointermove', updateSaturationValue)
+  cancelSaturationValue()
   if (statusTimeout !== null) clearTimeout(statusTimeout)
   if (copiedTimeout !== null) clearTimeout(copiedTimeout)
 })

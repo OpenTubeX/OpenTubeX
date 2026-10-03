@@ -1,6 +1,7 @@
 import { test, expect, setWindowSize } from '../../helpers/app.mjs'
 import { mobileMiniPlayerRegions, mobileMiniPlayerReturnPoint, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchHistoryEntry, watchViewHandle } from '../../helpers/watch.mjs'
+import { resetMiniPlayerWork, stopTrackingMiniPlayerWork, trackMiniPlayerWork } from '../../helpers/mini-player-performance.mjs'
 
 test.use({ seed: { settings: { videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, enableVideoZoom: false, enableMobileFullscreenSwipe: false } } })
 
@@ -33,6 +34,57 @@ async function openMobilePlayer(app, page, phone = true) {
   await enableMobileTouch(app, page, phone)
   return page.locator('.ftVideoPlayer')
 }
+
+test('mobile swipes suspend ambient sampling and hidden control layout in both directions', async ({ app, page }) => {
+  const player = await openMobilePlayer(app, page)
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateAmbientMode', true)
+    await store.dispatch('updateReducedMotion', 'off')
+  })
+  await player.locator('video').evaluate(element => { element.loop = true; return element.play() })
+  const originalVideo = await player.locator('video').elementHandle()
+  await trackMiniPlayerWork(page)
+  const cdp = await page.context().newCDPSession(page)
+  const touch = (type, point) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: point ? [point] : [] })
+  try {
+    await expect.poll(() => page.evaluate(() => window.__miniPlayerWork.ambientDraws)).toBeGreaterThan(0)
+    for (const restoring of [false, true]) {
+      const bounds = await (restoring ? player.locator('.mobileMiniBarReturn') : player).boundingBox()
+      const start = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 }
+      const direction = restoring ? -1 : 1
+      await touch('touchStart', start)
+      await touch('touchMove', { ...start, y: start.y + direction * 30 })
+      await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
+      await resetMiniPlayerWork(page)
+      for (const distance of [40, 60, 80, 100]) {
+        await touch('touchMove', { ...start, y: start.y + direction * distance })
+        await page.waitForTimeout(30)
+      }
+      await page.waitForTimeout(350)
+      const work = await page.evaluate(() => window.__miniPlayerWork)
+      console.log(`${restoring ? 'Restoring' : 'Minimizing'} mobile swipe work:`, work)
+      expect.soft(work).toEqual({ ambientDraws: 0, controlClones: 0 })
+      await touch('touchEnd')
+      if (restoring) {
+        await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+        await expect(page).toHaveURL(/#\/watch\//)
+      } else {
+        await expect(player).toHaveClass(/scrollMiniPlayer/)
+        await expect(page).not.toHaveURL(/#\/watch\//)
+      }
+      await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+      expect(await originalVideo.evaluate(element => element === document.querySelector('.ftVideoPlayer video') && !element.paused)).toBe(true)
+    }
+    await resetMiniPlayerWork(page)
+    await expect.poll(() => page.evaluate(() => window.__miniPlayerWork.ambientDraws)).toBeGreaterThan(0)
+  } finally {
+    await touch('touchCancel').catch(() => {})
+    await stopTrackingMiniPlayerWork(page)
+    await cdp.detach()
+    await originalVideo.dispose()
+  }
+})
 
 for (const uiScale of [100, 125]) {
   test.describe(`minimizing with a phone drawer at ${uiScale}% UI scale`, () => {

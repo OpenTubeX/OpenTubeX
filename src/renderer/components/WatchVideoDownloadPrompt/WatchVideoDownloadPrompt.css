@@ -238,12 +238,18 @@
   background-color: var(--accent-color);
   block-size: 100%;
   border-radius: calc(4px * var(--ui-roundness));
-  transition: inline-size 0.3s ease;
+  inline-size: 100%;
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.downloadProgressBarFill:dir(rtl) {
+  transform-origin: right;
 }
 
 .downloadProgressBarFill.indeterminate {
   animation: download-progress-indeterminate 1.5s ease-in-out infinite;
-  inline-size: 100% !important;
+  transform: none !important;
 }
 
 .downloadErrorDetails {

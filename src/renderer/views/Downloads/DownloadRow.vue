@@ -44,7 +44,7 @@
           <div
             class="progressFill"
             :class="{ indeterminate: download.status !== 'downloading' }"
-            :style="{ inlineSize: `${progressPercentage}%` }"
+            :style="{ transform: `scaleX(${progressPercentage / 100})` }"
             aria-hidden="true"
           />
         </div>

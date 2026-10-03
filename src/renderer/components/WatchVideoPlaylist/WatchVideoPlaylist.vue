@@ -371,7 +371,7 @@ const previewVideoIndex = ref(1)
 
 const prevVideoBeforeDeletion = ref(null)
 let getPlaylistInfoRun = false
-let previewPositionUpdatePending = false
+let previewAnimationFrame = null
 let previewPointerClientX = 0
 
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
@@ -1303,21 +1303,26 @@ const progressBarPreview = useTemplateRef('progressBarPreview')
 /**
  * @param {MouseEvent} event
  */
-async function updateProgressBarPreview(event) {
+function updateProgressBarPreview(event) {
   if (!showProgressBarPreview.value) return
+  previewPointerClientX = event.clientX
+  if (previewAnimationFrame !== null) return
+  previewAnimationFrame = requestAnimationFrame(renderProgressBarPreview)
+}
+
+async function renderProgressBarPreview() {
+  previewAnimationFrame = null
+  if (!showProgressBarPreview.value || !playlistProgressBar.value) return
 
   const rect = playlistProgressBar.value.getBoundingClientRect()
-  const mouseX = event.clientX - rect.left
+  const clientX = previewPointerClientX
+  const mouseX = clientX - rect.left
   const progressBarWidth = rect.width
   const percentage = Math.max(0, Math.min(100, (mouseX / progressBarWidth) * 100))
 
   previewVideoIndex.value = Math.max(1, Math.min(playlistVideoCount.value, Math.ceil((percentage / 100) * playlistVideoCount.value)))
-  previewPointerClientX = event.clientX
-
-  if (previewPositionUpdatePending) return
-  previewPositionUpdatePending = true
   await nextTick()
-  previewPositionUpdatePending = false
+  if (!showProgressBarPreview.value || !playlistProgressBar.value) return
 
   const boundary = playlistProgressBar.value.closest('.watchVideoPlaylist')
   if (boundary && progressBarPreview.value) {
@@ -1331,7 +1336,7 @@ async function updateProgressBarPreview(event) {
     const previewWidth = Math.min(progressBarPreview.value.offsetWidth, availableWidth)
     const minimumViewportLeft = boundaryRect.left + margin
     const maximumViewportLeft = boundaryRect.right - margin - previewWidth
-    const centeredViewportLeft = previewPointerClientX - (previewWidth / 2)
+    const centeredViewportLeft = clientX - (previewWidth / 2)
     const viewportLeft = Math.max(
       minimumViewportLeft,
       Math.min(maximumViewportLeft, centeredViewportLeft)
@@ -1339,6 +1344,17 @@ async function updateProgressBarPreview(event) {
     previewPositionPixels.value = viewportLeft - rect.left
   }
 }
+
+watch(showProgressBarPreview, shown => {
+  if (!shown) cancelProgressBarPreview()
+})
+
+function cancelProgressBarPreview() {
+  if (previewAnimationFrame !== null) cancelAnimationFrame(previewAnimationFrame)
+  previewAnimationFrame = null
+}
+
+onBeforeUnmount(cancelProgressBarPreview)
 
 /**
  * @param {PointerEvent} event

@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
 import { chromium, expect } from '@playwright/test'
 import { findWatchComponent, mobileMiniPlayerRegions, mobileMiniPlayerReturnPoint } from '../../e2e/helpers/player.mjs'
+import { resetMiniPlayerWork, stopTrackingMiniPlayerWork, trackMiniPlayerWork } from '../../e2e/helpers/mini-player-performance.mjs'
 
 // Run against a current debug APK on a locked emulator, forwarding its WebView
 // socket and setting ANDROID_CDP_URL=http://127.0.0.1:<forwarded-port>.
@@ -27,6 +28,7 @@ test('mobile mini-player restores from the whole bar and keeps close separate', 
         UiScale: 100, ReducedMotion: 'off', EnableMobileFullscreenSwipe: false, RotateFullscreenToLandscape: false,
         EnterFullscreenOnDisplayRotate: false, PlayingInterfaceHideDelay: 5,
         MobileLeftSwipeAction: 'disabled', MobileRightSwipeAction: 'disabled',
+        AmbientMode: true,
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
@@ -68,6 +70,34 @@ test('mobile mini-player restores from the whole bar and keeps close separate', 
     const touch = (type, point) => session.send('Input.dispatchTouchEvent', {
       type, touchPoints: point ? [point] : [],
     })
+    await trackMiniPlayerWork(page)
+    try {
+      await expect.poll(() => page.evaluate(() => window.__miniPlayerWork.ambientDraws)).toBeGreaterThan(0)
+      for (const restoring of [false, true]) {
+        const box = await (restoring ? player.locator('.mobileMiniBarReturn') : player).boundingBox()
+        const point = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+        const direction = restoring ? -1 : 1
+        await touch('touchStart', point)
+        await touch('touchMove', { ...point, y: point.y + direction * 30 })
+        await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
+        await resetMiniPlayerWork(page)
+        for (const distance of [40, 60, 80, 100]) {
+          await touch('touchMove', { ...point, y: point.y + direction * distance })
+          await page.waitForTimeout(30)
+        }
+        await page.waitForTimeout(350)
+        const work = await page.evaluate(() => window.__miniPlayerWork)
+        console.log(`Android ${restoring ? 'restore' : 'minimize'} swipe work:`, work)
+        await touch('touchEnd')
+        await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+        assert.deepEqual(work, { ambientDraws: 0, controlClones: 0 })
+        assert.equal(await originalVideo.evaluate(element => element === document.querySelector('.ftVideoPlayer video') && !element.paused), true)
+      }
+      await resetMiniPlayerWork(page)
+      await expect.poll(() => page.evaluate(() => window.__miniPlayerWork.ambientDraws)).toBeGreaterThan(0)
+    } finally {
+      await stopTrackingMiniPlayerWork(page)
+    }
     for (const scale of [100, 125]) {
       await page.evaluate(scale => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
