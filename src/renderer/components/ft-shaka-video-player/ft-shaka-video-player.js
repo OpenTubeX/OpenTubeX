@@ -1217,6 +1217,9 @@ export default defineComponent({
 
     const hasLoaded = ref(false)
     const hasPlaybackPosition = ref(false)
+    /** @type {number|null} */
+    let pendingMetadataSeek = null
+    let seekBarMouseDown = false
     const videoLayoutReady = ref(false)
     const annotationCurrentTime = ref(0)
     const annotationVideoAspectRatio = ref(null)
@@ -5504,8 +5507,20 @@ export default defineComponent({
       }
     }
 
-    function handleSeekBarInput() {
+    function handleSeekBarInput(event) {
       accumulatedSeekSeconds = 0
+      if (event.type === 'pointerdown' || event.type === 'keydown') return
+      if (!event.target.matches('.shaka-seek-bar') || event.target.disabled) return
+      // Shaka's range control writes currentTime directly. A newer timeline
+      // action must supersede a chapter seek queued before metadata was ready.
+      if (event.type === 'mousedown') seekBarMouseDown = true
+      rememberSeekPosition(Number(event.target.value))
+    }
+
+    function handleSeekBarMouseChange(event) {
+      if (!seekBarMouseDown) return
+      if (event.type === 'mouseup') seekBarMouseDown = false
+      rememberSeekPosition(ui.getControls().getDisplayTime())
     }
 
     function setupChapterPreview() {
@@ -5517,6 +5532,20 @@ export default defineComponent({
       for (const event of ['pointerdown', 'keydown', 'input']) {
         seekBarContainer.removeEventListener(event, handleSeekBarInput, true)
         seekBarContainer.addEventListener(event, handleSeekBarInput, true)
+      }
+      const seekBar = seekBarContainer.querySelector('.shaka-seek-bar')
+      if (seekBar) {
+        // Run after Shaka updates its value; it stops propagation for these events.
+        for (const event of ['mousedown', 'touchstart', 'touchmove', 'touchend', 'touchcancel']) {
+          seekBar.removeEventListener(event, handleSeekBarInput)
+          seekBar.addEventListener(event, handleSeekBarInput)
+        }
+        seekBar.removeEventListener('mouseup', handleSeekBarMouseChange)
+        seekBar.addEventListener('mouseup', handleSeekBarMouseChange)
+      }
+      for (const event of ['mousemove', 'mouseup']) {
+        document.removeEventListener(event, handleSeekBarMouseChange)
+        document.addEventListener(event, handleSeekBarMouseChange)
       }
       seekBarContainer.removeEventListener('mousemove', handleSeekBarMouseMove)
       seekBarContainer.removeEventListener('mouseleave', handleSeekBarMouseLeave)
@@ -6429,8 +6458,7 @@ export default defineComponent({
           mediaSessionStopped = true
           videoElement.pause()
           if (seekingIsPossible.value && Number.isFinite(videoElement.duration)) {
-            accumulatedSeekSeconds = 0
-            videoElement.currentTime = 0
+            setCurrentTime(0)
           }
           if (wasPaused) {
             tabMediaCoordinator.setPlaybackState(mediaTabId, 'none')
@@ -6446,6 +6474,7 @@ export default defineComponent({
           const videoElement = video.value
           if (!videoElement || !canSeek() || !Number.isFinite(details.seekTime)) return
           accumulatedSeekSeconds = 0
+          rememberSeekPosition(details.seekTime)
           if (details.fastSeek === true && typeof videoElement.fastSeek === 'function') {
             videoElement.fastSeek(details.seekTime)
           } else {
@@ -6737,6 +6766,13 @@ export default defineComponent({
     }
 
     function handleCanPlay() {
+      // Metadata initialization can restore Shaka's original start time after
+      // an earlier seek. Apply that seek before playback becomes ready.
+      if (pendingMetadataSeek !== null) {
+        setCurrentTime(pendingMetadataSeek)
+        pendingMetadataSeek = null
+      }
+
       // PiP can only be activated once the video's readyState and video track are populated.
       applyPendingPresentationModes()
 
@@ -8964,7 +9000,7 @@ export default defineComponent({
             throw new Error('yt-dlp format availability delay is too long')
           }
 
-          await player.load(format.url, playbackPosition, format.mimeType)
+          await loadPlaybackSource(format.url, playbackPosition, format.mimeType)
         } catch (error) {
           handleError(error, 'setLegacyFormat', event.detail)
         }
@@ -10039,14 +10075,17 @@ export default defineComponent({
       const newTime = currentTime + seconds
 
       if (newTime < seekRange.start) {
+        rememberSeekPosition(seekRange.start)
         video_.currentTime = seekRange.start
       } else if (newTime > seekRange.end) {
         if (isLive.value) {
           player.goToLive()
         } else {
+          rememberSeekPosition(seekRange.end)
           video_.currentTime = seekRange.end
         }
       } else {
+        rememberSeekPosition(newTime)
         video_.currentTime = newTime
       }
       if (showPopUp) {
@@ -10543,8 +10582,7 @@ export default defineComponent({
             const length = seekRange.end - seekRange.start
             const percentage = parseInt(event.key) / 10
 
-            accumulatedSeekSeconds = 0
-            video_.currentTime = seekRange.start + (length * percentage)
+            setCurrentTime(seekRange.start + (length * percentage))
             showOverlayControls()
           }
           break
@@ -10577,8 +10615,7 @@ export default defineComponent({
             event.preventDefault()
             // use seek range instead of duration so that it works for live streams too
             const seekRange = player.seekRange()
-            accumulatedSeekSeconds = 0
-            video_.currentTime = seekRange.start
+            setCurrentTime(seekRange.start)
             showOverlayControls()
           }
           break
@@ -10588,8 +10625,7 @@ export default defineComponent({
             event.preventDefault()
             // use seek range instead of duration so that it works for live streams too
             const seekRange = player.seekRange()
-            accumulatedSeekSeconds = 0
-            video_.currentTime = seekRange.end
+            setCurrentTime(seekRange.end)
             showOverlayControls()
           }
           break
@@ -11321,6 +11357,35 @@ export default defineComponent({
       abRepeatDragCleanup?.()
     })
 
+    /**
+     * @param {string} url
+     * @param {number|null} startTime
+     * @param {string} mimeType
+     */
+    async function loadPlaybackSource(url, startTime, mimeType) {
+      const loadingPlayer = player
+      const mediaElement = video.value
+      const restoreNativeStart = () => {
+        if (player !== loadingPlayer || pendingMetadataSeek !== null ||
+          hasPlaybackPosition.value || mediaElement.seeking || startTime == null) return
+        mediaElement.currentTime = startTime
+      }
+      const prepareStartTime = () => {
+        if (loadingPlayer.getManifest() !== null) return
+        // Native playback otherwise restores saved progress on canplay, after
+        // a user may have sought. Restore it at metadata readiness instead.
+        loadingPlayer.updateStartTime(null)
+        mediaElement.addEventListener('loadedmetadata', restoreNativeStart, { once: true })
+      }
+      loadingPlayer.addEventListener('canupdatestarttime', prepareStartTime, { once: true })
+      try {
+        await loadingPlayer.load(url, startTime, mimeType)
+      } finally {
+        loadingPlayer.removeEventListener('canupdatestarttime', prepareStartTime)
+        mediaElement.removeEventListener('loadedmetadata', restoreNativeStart)
+      }
+    }
+
     async function performFirstLoad(isCurrentLoad = () => true) {
       clearSabrBackoffTimer()
       if (process.env.SUPPORTS_LOCAL_API && sabrStream) {
@@ -11353,7 +11418,7 @@ export default defineComponent({
 
       if (props.format === 'dash' || props.format === 'audio') {
         try {
-          await player.load(props.manifestSrc, props.startTime, props.manifestMimeType)
+          await loadPlaybackSource(props.manifestSrc, props.startTime, props.manifestMimeType)
           if (!ui || !player || !isCurrentLoad()) return
 
           if (props.format === 'dash') {
@@ -11400,6 +11465,9 @@ export default defineComponent({
       isLive.value = player.isLive()
       restorePendingPlaybackRate()
       const mediaElement = video.value
+      // Native HLS can emit canplay before Shaka finishes loading its tracks.
+      // Seeks already applied in that interval must not survive to a later rebuffer.
+      if (videoLayoutReady.value && player.getManifest() === null && mediaElement.readyState >= 3) pendingMetadataSeek = null
       // Background tabs may finish loading without emitting play or pause.
       shortsPaused.value = mediaElement.paused
       if (process.env.IS_ELECTRON && !mediaElement.autoplay && mediaElement.paused) {
@@ -11684,7 +11752,7 @@ export default defineComponent({
           player.configure(getPlayerConfig(newFormat, useAutoQuality))
 
           try {
-            await player.load(props.manifestSrc, playbackPosition, props.manifestMimeType)
+            await loadPlaybackSource(props.manifestSrc, playbackPosition, props.manifestMimeType)
             if (!isCurrentFormatSwitch()) return
 
             if (useAutoQuality) {
@@ -11779,6 +11847,8 @@ export default defineComponent({
       fullWindowAnimation?.cancel()
       hasLoaded.value = false
       hasPlaybackPosition.value = false
+      pendingMetadataSeek = null
+      seekBarMouseDown = false
       if (!shortsNavigationSuspended.value) {
         closeFullscreenMetadata()
         closeFullscreenTranscript()
@@ -11793,6 +11863,8 @@ export default defineComponent({
       }
 
       document.removeEventListener('keydown', keyboardShortcutHandler)
+      document.removeEventListener('mousemove', handleSeekBarMouseChange)
+      document.removeEventListener('mouseup', handleSeekBarMouseChange)
       document.removeEventListener('keyup', keyboardShortcutKeyupHandler)
       document.removeEventListener('keydown', handleVideoZoomModifierKey)
       document.removeEventListener('keyup', handleVideoZoomModifierKey)
@@ -11990,7 +12062,16 @@ export default defineComponent({
     function setCurrentTime(time) {
       if (!seekingIsPossible.value) return
       accumulatedSeekSeconds = 0
+      rememberSeekPosition(time)
       video.value.currentTime = time
+    }
+
+    /**
+     * @param {number} time
+     */
+    function rememberSeekPosition(time) {
+      hasPlaybackPosition.value = true
+      if (pendingMetadataSeek !== null || !hasLoaded.value || !videoLayoutReady.value || video.value.readyState < 3) pendingMetadataSeek = time
     }
 
     function getSabrReloadState() {

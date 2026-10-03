@@ -10,7 +10,11 @@ function fixture(t, { time = 50, live = false } = {}) {
   const writes = []
   const state = {
     accumulatedSeekSeconds: 0,
-    video: { value: { get currentTime() { return time }, set currentTime(value) { time = value; writes.push(value) } } },
+    hasPlaybackPosition: { value: false },
+    hasLoaded: { value: true },
+    videoLayoutReady: { value: true },
+    pendingMetadataSeek: null,
+    video: { value: { readyState: 4, get currentTime() { return time }, set currentTime(value) { time = value; writes.push(value) } } },
     player: { seekRange: () => ({ start: 0, end: 100 }), goToLive: () => { time = 100; writes.push(time) } },
     isLive: { value: live },
     canSeek: () => true,
@@ -23,7 +27,7 @@ function fixture(t, { time = 50, live = false } = {}) {
     setTimeout,
     clearTimeout,
   }
-  const names = ['seekBySeconds', 'showValueChange']
+  const names = ['seekBySeconds', 'rememberSeekPosition', 'showValueChange']
   const functions = names.map(name => {
     const match = source.match(new RegExp(`    function ${name}\\([^]*?\\n    }`))
     assert.ok(match, `missing ${name}`)

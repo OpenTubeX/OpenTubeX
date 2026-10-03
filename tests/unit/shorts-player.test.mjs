@@ -454,6 +454,8 @@ for (const paused of [true, false]) {
       shortsPaused,
       video,
       hasLoaded: ref(false),
+      videoLayoutReady: ref(false),
+      pendingMetadataSeek: null,
       isLive: ref(false),
       hasMultipleAudioTracks: ref(false),
       togglePlaybackRate: null,
