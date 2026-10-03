@@ -1,10 +1,13 @@
 <template>
+  <!-- Keep a small box for lazy loading without expanding scroll overflow. -->
   <img
     ref="image"
     v-bind="{ ...$attrs, ...parentScope }"
     :src="imageUrl"
     :alt="$attrs.alt ?? ''"
-    :style="hasLoaded ? null : { position: 'absolute', visibility: 'hidden', pointerEvents: 'none' }"
+    :style="hasLoaded ? null : {
+      position: 'absolute', visibility: 'hidden', pointerEvents: 'none', inlineSize: '1px', blockSize: '1px'
+    }"
     @error="retryImageLoad"
     @load="handleImageLoad"
   >
