@@ -72,9 +72,9 @@
     background-color: var(--toggle-thumb-color, var(--secondary-text-color));
     border-radius: 50%;
     box-shadow: inset 0 0 0 1px var(--toggle-thumb-outline-color, transparent);
-    block-size: calc(var(--switch-track-height) / 2);
-    inset-inline-start: calc(6px + var(--switch-track-height) / 4);
-    inline-size: calc(var(--switch-track-height) / 2);
+    block-size: var(--switch-unchecked-thumb-size);
+    inset-inline-start: calc(6px + (var(--switch-track-height) - var(--switch-unchecked-thumb-size)) / 2);
+    inline-size: var(--switch-unchecked-thumb-size);
 
     .switch-input:checked + & {
       background-color: var(--toggle-checked-thumb-color, var(--text-with-accent-color));

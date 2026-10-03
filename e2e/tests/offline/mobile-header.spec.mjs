@@ -143,6 +143,42 @@ for (const zoom of [1, 1.25]) {
   })
 }
 
+test('phone header honors settings and downloads placement', async ({ app, page }) => {
+  await setWindowSize(app, page, { width: 390, height: 850 })
+  await enablePhoneHeader(page)
+  const header = page.locator('.topNav')
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setEnableDownloads', true)
+    store.commit('setMoveDownloadsToAppHeader', true)
+    store.commit('setMoveSettingsToAppHeader', true)
+  })
+  await expect(header.locator('.downloadsButton')).toBeVisible()
+  await expect(header.locator('.settingsButton')).toBeVisible()
+  await header.locator('.downloadsButton').click()
+  await expect(page.locator('.settingsWindow')).toBeVisible()
+  await page.locator('.settingsWindow').getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(page.locator('.settingsWindow')).toBeHidden()
+  await header.locator('.settingsButton').click()
+  await expect(page.locator('.settingsWindow')).toBeVisible()
+  await page.locator('.settingsWindow').getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(page.locator('.settingsWindow')).toBeHidden()
+  await page.locator('.profileTrigger').click()
+  await expect(page.locator('.downloadsShortcut')).toHaveCount(0)
+  await expect(page.locator('.allSettingsShortcut')).toHaveCount(0)
+  await page.keyboard.press('Escape')
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setMoveDownloadsToAppHeader', false)
+    store.commit('setMoveSettingsToAppHeader', false)
+  })
+  await expect(header.locator('.downloadsButton')).toHaveCount(0)
+  await expect(header.locator('.settingsButton')).toHaveCount(0)
+  await page.locator('.profileTrigger').click()
+  await expect(page.locator('.downloadsShortcut')).toBeVisible()
+  await expect(page.locator('.allSettingsShortcut')).toBeVisible()
+})
+
 for (const pinned of [false, true]) {
   test(`crowded phone header keeps actions reachable with pinned search ${pinned}`, async ({ app, page }) => {
     await setWindowSize(app, page, { width: 375, height: 850 })
@@ -168,8 +204,14 @@ for (const pinned of [false, true]) {
     })).toBe(true)
     if (pinned) await expect.poll(() => page.locator('.pinnedSearchTrigger').evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThanOrEqual(48)
     await page.locator('.profileTrigger').click()
-    await expect(page.locator('.downloadsShortcut')).toBeVisible()
-    await expect(page.locator('.allSettingsShortcut')).toBeVisible()
+    if (await header.locator('.downloadsButton').isVisible()) {
+      await expect(header.locator('.settingsButton')).toBeVisible()
+      await expect(page.locator('.downloadsShortcut')).toHaveCount(0)
+      await expect(page.locator('.allSettingsShortcut')).toHaveCount(0)
+    } else {
+      await expect(page.locator('.downloadsShortcut')).toBeVisible()
+      await expect(page.locator('.allSettingsShortcut')).toBeVisible()
+    }
     await expect(page.locator('.phoneOverflowSync')).toBeVisible()
     await expect(page.locator('.phoneOverflowRestore')).toBeVisible()
     await page.locator('.phoneOverflowRestore').click()
