@@ -7301,10 +7301,14 @@ export default defineComponent({
       isActiveTab.value && !scrollMiniPlayerActive.value && mobileAdjustmentsVisible.value &&
       isFullscreen.value && store.getters.getMobileFullscreenBrightness)
     watch(mobileFullscreenBrightnessActive, enabled => mobileAdjustments.setFullscreenBrightness(Boolean(enabled)))
-    watch([isActiveTab, scrollMiniPlayerActive, mobileAdjustmentsVisible, () => props.videoId], ([active, , visible, videoId], [, , , previousVideoId]) => {
+    watch([isActiveTab, scrollMiniPlayerActive, mobileAdjustmentsVisible, () => props.videoId], ([active, , visible, videoId], [, , previousVisible, previousVideoId]) => {
       // Revealing retained Watch during an upward drag presents this player
       // again. That transition must not cancel the gesture that caused it.
-      resetMobileAdjustments(Boolean(scrollMiniPlayerDragStyle.value && active && visible && videoId === previousVideoId))
+      // A committed close also survives visibility changes for the same video.
+      resetMobileAdjustments(Boolean(videoId === previousVideoId && (
+        (scrollMiniPlayerDragStyle.value && active && visible) ||
+        (mobileMiniPlayerDismissSettling.value && visible !== previousVisible)
+      )))
       if (mobileFullscreenBrightnessActive.value) mobileAdjustments.setFullscreenBrightness(true)
     })
     watch(() => [store.getters.getMobileLeftSwipeAction, store.getters.getMobileRightSwipeAction], () => {

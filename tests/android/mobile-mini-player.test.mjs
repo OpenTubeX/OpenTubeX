@@ -47,12 +47,17 @@ test('mobile mini-player restores from the whole bar, swipes down to close, and 
     const player = page.locator('.ftVideoPlayer')
     const video = player.locator('video')
     const loadTestVideo = async () => {
+      const previous = watch ? await watch.evaluate(component => ({
+        uid: component.uid, generation: component.proxy.videoLoadGeneration,
+      })) : null
       await page.evaluate(() => { location.hash = '#/watch/jNQXAC9IVRw' })
-      await expect(player).toBeVisible()
-      await expect(player).not.toHaveClass(/scrollMiniPlayer/)
       await expect.poll(async () => {
         const handle = await page.evaluateHandle(findWatchComponent)
-        try { return await handle.evaluate(component => !!component && component.proxy.preparingVideoLoadGeneration === null) }
+        try {
+          return await handle.evaluate((component, previous) => !!component && component.proxy.onMountedRun &&
+            component.proxy.preparingVideoLoadGeneration === null && component.proxy.isCurrentlyPresented() &&
+            (!previous || component.uid !== previous.uid || component.proxy.videoLoadGeneration > previous.generation), previous)
+        }
         finally { await handle.dispose() }
       }).toBe(true)
       await watch?.dispose()
@@ -68,6 +73,9 @@ test('mobile mini-player restores from the whole bar, swipes down to close, and 
             width: 320, height: 180, bitrate: 0, localFile: true, url: `data:video/webm;base64,${media}` }],
         })
       }, media)
+      await expect(player).toBeVisible()
+      await page.evaluate(() => window.scrollTo(0, 0))
+      await expect(player).not.toHaveClass(/scrollMiniPlayer/)
       await expect.poll(() => video.evaluate(video => video.readyState), { timeout: 15000 }).toBe(4)
       await watch.evaluate(component => { component.proxy.channelName = 'Mini-player test channel' })
       await video.evaluate(video => { video.loop = true; return video.play() })
@@ -77,6 +85,11 @@ test('mobile mini-player restores from the whole bar, swipes down to close, and 
     const touch = (type, point) => session.send('Input.dispatchTouchEvent', {
       type, touchPoints: point ? [point] : [],
     })
+    const returnPoint = async region => {
+      await expect.poll(() => player.evaluate(element =>
+        element.getAnimations().every(animation => animation.playState !== 'running'))).toBe(true)
+      return player.evaluate(mobileMiniPlayerReturnPoint, region)
+    }
     await trackMiniPlayerWork(page)
     try {
       await expect.poll(() => page.evaluate(() => window.__miniPlayerWork.ambientDraws)).toBeGreaterThan(0)
@@ -122,12 +135,14 @@ test('mobile mini-player restores from the whole bar, swipes down to close, and 
         await expect(player).toHaveClass(/mobileMiniBar/)
         await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
         await expect(player.locator('.mobileMiniBarDismiss')).toHaveCount(0)
-        const point = await player.evaluate(mobileMiniPlayerReturnPoint, region)
+        let point = await returnPoint(region)
         await touch('touchStart', point)
         for (const distance of [20, 40, 80]) await touch('touchMove', { ...point, y: point.y + distance })
         await touch('touchEnd')
         await expect(player, 'same-page scroll mini-player cannot close').toHaveClass(/scrollMiniPlayer/)
         await expect(page).toHaveURL(/#\/watch\//)
+        // Native scrolling can hide the navigation bar and move the mini player.
+        point = await returnPoint(region)
         await touch('touchStart', point)
         for (const distance of [20, 40, 80, 100]) await touch('touchMove', { ...point, y: point.y - distance })
         await touch('touchEnd')
@@ -147,7 +162,7 @@ test('mobile mini-player restores from the whole bar, swipes down to close, and 
           const returnButton = player.locator('.mobileMiniBarReturn')
           await expect(returnButton).toBeEnabled()
           await expect(returnButton.locator('svg')).toHaveCount(0)
-          const point = await player.evaluate(mobileMiniPlayerReturnPoint, region)
+          let point = await returnPoint(region)
           await expect.poll(() => page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.classList.contains('mobileMiniBarReturn'), point), { message: region }).toBe(true)
           if (swipe) {
             const top = await player.locator('.mobileMiniBarReturn').boundingBox()
@@ -166,6 +181,7 @@ test('mobile mini-player restores from the whole bar, swipes down to close, and 
               assert.equal(await originalVideo.evaluate(video => !video.paused), true)
             }
           }
+          point = await returnPoint(region)
           await touch('touchStart', point)
           if (swipe) {
             for (const distance of [20, 40, 80, 100]) await touch('touchMove', { ...point, y: point.y - distance })
@@ -207,13 +223,15 @@ test('mobile mini-player restores from the whole bar, swipes down to close, and 
         element.removeEventListener('transitionrun', recordTransition)
         queueMicrotask(() => {
           const animation = element.getAnimations().find(animation => animation.transitionProperty === 'transform')
-          if (animation) window.__miniDismissRegression.transition = {
-            duration: animation.effect.getTiming().duration, rate: animation.playbackRate,
-          }
+          if (animation) animation.ready.then(() => {
+            window.__miniDismissRegression.transition = {
+              duration: animation.effect.getTiming().duration, rate: animation.playbackRate,
+            }
+          })
         })
       }
       element.addEventListener('transitionrun', recordTransition)
-      element.addEventListener('pointerup', () => setTimeout(() => {
+      window.__miniDismissPointerUp = () => setTimeout(() => {
         const button = element.querySelector('.mobileMiniBarReturn')
         window.__miniDismissRegression.controlsDisabled = button?.disabled
         // Exercise input after the normal 350ms compatibility-click suppression.
@@ -221,7 +239,8 @@ test('mobile mini-player restores from the whole bar, swipes down to close, and 
           pointerType: 'touch', pointerId: 2, isPrimary: false, button: 0, bubbles: true,
         }))
         button?.click()
-      }, 400), { capture: true, once: true })
+      }, 400)
+      window.addEventListener('pointerup', window.__miniDismissPointerUp, { capture: true, once: true })
     })
     await touch('touchStart', down)
     for (const distance of [20, 40, 64, 80]) await touch('touchMove', { ...down, y: down.y + distance })
@@ -254,6 +273,8 @@ test('mobile mini-player restores from the whole bar, swipes down to close, and 
       if (settings) store.dispatch('updateAnimationSpeed', settings.AnimationSpeed)
       if (window.__miniPlayerFetch) window.fetch = window.__miniPlayerFetch
       delete window.__miniPlayerFetch
+      window.removeEventListener('pointerup', window.__miniDismissPointerUp, true)
+      delete window.__miniDismissPointerUp
       delete window.__miniDismissRegression
       document.querySelector('#mini-player-test-style')?.remove()
       document.querySelector('#mini-player-test-spacer')?.remove()

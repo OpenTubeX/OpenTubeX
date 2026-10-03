@@ -378,15 +378,18 @@ test('a teleported player receives release outside its DOM and removes window li
   assert.equal(handlers.size, 0)
 })
 
-test('revealing Watch preserves an upward drag but hiding the app or changing video cancels it', () => {
+test('revealing Watch preserves a drag and completed dismissal survives visibility changes, but changing video cancels', () => {
   const start = playerSource.indexOf('    watch([isActiveTab, scrollMiniPlayerActive, mobileAdjustmentsVisible, () => props.videoId]')
   const end = playerSource.indexOf('\n    watch(', start + 10)
   let changed
   const resets = []
+  const dragging = { value: {} }
+  const dismissing = { value: false }
   vm.runInNewContext(playerSource.slice(start, end), {
     watch: (_sources, callback) => { changed = callback },
     isActiveTab: {}, scrollMiniPlayerActive: {}, mobileAdjustmentsVisible: {}, props: { videoId: 'video' },
-    scrollMiniPlayerDragStyle: { value: {} },
+    scrollMiniPlayerDragStyle: dragging,
+    mobileMiniPlayerDismissSettling: dismissing,
     mobileFullscreenBrightnessActive: { value: false },
     resetMobileAdjustments: preserve => resets.push(preserve),
   })
@@ -395,6 +398,14 @@ test('revealing Watch preserves an upward drag but hiding the app or changing vi
   changed([true, true, false, 'video'], [true, true, true, 'video'])
   changed([true, true, true, 'other'], [true, true, true, 'video'])
   assert.deepEqual(resets, [true, false, false, false])
+  resets.length = 0
+  dragging.value = null
+  dismissing.value = true
+  changed([false, true, false, 'video'], [false, true, true, 'video'])
+  changed([false, true, true, 'video'], [false, true, false, 'video'])
+  changed([false, true, false, 'other'], [false, true, true, 'video'])
+  changed([false, true, true, 'other'], [false, true, false, 'video'])
+  assert.deepEqual(resets, [true, true, false, false])
 })
 
 
