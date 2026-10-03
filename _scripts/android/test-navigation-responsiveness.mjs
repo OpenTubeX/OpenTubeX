@@ -13,7 +13,13 @@ let page
 let port
 try {
   adb('shell', 'am', 'start', '--user', '0', '-n', 'org.opentubex.app.dev/org.opentubex.app.MainActivity')
-  const pid = adb('shell', 'pidof', 'org.opentubex.app.dev')
+  let pid = ''
+  for (let attempt = 0; attempt < 50; attempt++) {
+    try { pid = adb('shell', 'pidof', 'org.opentubex.app.dev') } catch { /* The app process may still be starting. */ }
+    if (pid) break
+    await delay(100)
+  }
+  assert.ok(pid, 'Android app process is available')
   port = adb('forward', 'tcp:0', `localabstract:webview_devtools_remote_${pid}`)
   for (let attempt = 0; attempt < 100; attempt++) {
     try {
@@ -131,6 +137,14 @@ try {
   await measureTap(picker.locator('[role="option"][aria-selected="true"]'), 'select-option')
   await expect(picker).toBeHidden()
 
+  const settingsContent = page.locator('.settingsContent')
+  await settingsContent.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => settingsContent.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  await measureTap(page.locator('.settingsBackButton'), 'category-back')
+  await expect(page.locator('.settingsMenu [data-section="privacy"]')).toBeVisible()
+  await measureTap(page.locator('.settingsMenu [data-section="privacy"]'), 'category-replacement', '.settingsContent > [data-section="privacy"]')
+  await expect(settingsContent).toHaveJSProperty('scrollTop', 0)
+
   await page.evaluate(() => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     store.dispatch('hideSettingsWindow')
@@ -152,6 +166,9 @@ try {
         if (window.navigationSavedState) document.querySelector('#app').__vue_app__.config.globalProperties.$store.replaceState(window.navigationSavedState)
         delete window.navigationSavedState
         delete window.navigationTouchMetrics
+      }).catch(error => {
+        console.error('Failed to restore Android navigation check state:', error)
+        throw error
       })
     }
   } finally {

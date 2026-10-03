@@ -1,4 +1,4 @@
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection } from '../../helpers/app.mjs'
 import { largeSubscriptionsSeed } from '../../performance/subscriptions.mjs'
 
 test('opens phone settings without repeated scrollbar remeasurement before painting', async ({ page }) => {
@@ -21,6 +21,93 @@ test('opens phone settings without repeated scrollbar remeasurement before paint
   // Bound layout work instead of asserting machine-dependent milliseconds.
   expect(reads).toBeLessThanOrEqual(20)
 })
+
+async function expectCurrentScrollRange(content) {
+  let measurements
+  await expect.poll(async () => {
+    measurements = await content.evaluate(element => {
+      const wrapper = element.querySelector(':scope > .section, :scope > .settingsSearchResults')
+      const style = getComputedStyle(element)
+      const renderedEnd = wrapper.getBoundingClientRect().bottom +
+        Number.parseFloat(getComputedStyle(wrapper).marginBottom) + Number.parseFloat(style.paddingBottom)
+      const viewportEnd = element.getBoundingClientRect().bottom - Number.parseFloat(style.borderBottomWidth)
+      const maximum = Math.max(0, element.scrollTop + renderedEnd - viewportEnd)
+      const tolerance = 2 / devicePixelRatio
+      const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+      const offsetIsValid = element.scrollTop <= maximum + tolerance &&
+        Math.abs(element.scrollHeight - element.clientHeight - maximum) <= tolerance
+      const unusable = scrollbar.classList.contains('os-scrollbar-unusable')
+      const track = scrollbar.querySelector('.os-scrollbar-track').getBoundingClientRect()
+      const handle = scrollbar.querySelector('.os-scrollbar-handle')
+      const thumb = handle.getBoundingClientRect()
+      const thumbRatio = thumb.height / track.height
+      const expectedRatio = Math.max(element.clientHeight / element.scrollHeight,
+        Number.parseFloat(getComputedStyle(handle).minHeight) / track.height)
+      const scrollbarIsValid = maximum <= tolerance
+        ? unusable
+        : !unusable && Math.abs(thumbRatio - expectedRatio) < 0.02
+      return { valid: offsetIsValid && scrollbarIsValid, maximum, scrollTop: element.scrollTop, scrollHeight: element.scrollHeight, clientHeight: element.clientHeight, thumbRatio, expectedRatio, unusable }
+    })
+    return measurements.valid
+  }).toBe(true).catch(error => {
+    error.message += `\nScroll measurements: ${JSON.stringify(measurements)}`
+    throw error
+  })
+}
+
+async function scrollSettingsToBottom(content) {
+  await content.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  await expectCurrentScrollRange(content)
+}
+
+for (const uiScale of [100, 125]) {
+  test.describe(`phone settings scroll ranges at ${uiScale}% UI scale`, () => {
+    test.use({ seed: { settings: { uiScale, enableDownloads: true, reducedMotion: 'on', alwaysShowScrollbars: true } } })
+
+    test('reconciles collapsed controls and wider phone layouts from the bottom', async ({ page }) => {
+      await page.setViewportSize({ width: 375, height: 640 })
+      const section = await goToSettingsSection(page, 'download')
+      const content = page.locator('.settingsContent')
+      await scrollSettingsToBottom(content)
+      const previousHeight = await content.evaluate(element => element.scrollHeight)
+      // Toggle without Playwright scrolling the control into view first.
+      await section.getByRole('checkbox', { name: 'Enable Downloads' }).evaluate(element => element.click())
+      await expect(section.locator('.downloadPathInputs')).toHaveCount(0)
+      await expectCurrentScrollRange(content)
+      expect(await content.evaluate(element => element.scrollHeight)).toBeLessThan(previousHeight)
+
+      await page.locator('.settingsBackButton').click()
+      await goToSettingsSection(page, 'playback')
+      await scrollSettingsToBottom(content)
+      await page.setViewportSize({ width: 640, height: 640 })
+      await expectCurrentScrollRange(content)
+    })
+
+    test('resets category replacements and shortened search results from the bottom', async ({ page }) => {
+      await page.setViewportSize({ width: 375, height: 640 })
+      await goToSettingsSection(page, 'playback')
+      const content = page.locator('.settingsContent')
+      await scrollSettingsToBottom(content)
+      await page.locator('.settingsBackButton').click()
+      await goToSettingsSection(page, 'privacy')
+      await expect(content).toHaveJSProperty('scrollTop', 0)
+      await expectCurrentScrollRange(content)
+
+      const search = page.getByRole('searchbox', { name: 'Search settings' })
+      await search.fill('a')
+      await scrollSettingsToBottom(content)
+      await search.fill('Default Volume')
+      await expect(content).toHaveJSProperty('scrollTop', 0)
+      await expectCurrentScrollRange(content)
+      await expect(content.locator(':scope > .os-scrollbar-vertical')).toHaveClass(/os-scrollbar-unusable/)
+      await page.locator('.settingsSearchResultHeading').click()
+      await expect(content.locator(':scope > [data-section="playback"]')).toBeVisible()
+      await expect(content).toHaveJSProperty('scrollTop', 0)
+      await expectCurrentScrollRange(content)
+    })
+  })
+}
 
 test.describe('Home subscription processing', () => {
   test.use({

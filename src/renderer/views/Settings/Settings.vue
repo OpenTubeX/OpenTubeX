@@ -1243,6 +1243,13 @@ function returnToSettingsMenu() {
   closeSubpage = null
   if (!isInDesktopView.value) {
     const previousSection = activeSection.value
+    const content = settingsContentRef.value
+    // Clear retained offsets while the viewport is visible. Hidden viewports
+    // report zero even when their scrollbar instance retains the old position.
+    if (content && (content.scrollTop !== 0 || content.scrollLeft !== 0)) {
+      restoreOverlayScrollTop(content, 0)
+      content.scrollLeft = 0
+    }
     activeSection.value = null
     animateSettingsElement(menuRef, settingsMenuTransitionClass, 'settingsCompactSlideBackward')
     nextTick(() => menuRef.value?.focusLink(previousSection))
