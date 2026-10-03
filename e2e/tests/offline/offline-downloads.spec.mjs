@@ -116,10 +116,8 @@ for (const mobile of [false, true]) {
       await expect(video).toHaveAttribute('src', 'downloadmedia://file/2/offline0002')
       await video.evaluate(element => element.pause())
 
-      if (mobile) await page.getByRole('button', { name: 'Queue Downloaded audio', exact: true }).click()
+      if (mobile) await page.getByRole('button', { name: 'Queue Playlist video one', exact: true }).click()
       const queue = page.locator('.watchQueue')
-      await expect(queue.locator('.queueVideoTitle')).toHaveText(['Downloaded audio', 'Playlist video one', 'Playlist video two'])
-      await queue.getByRole('link').filter({ hasText: 'Downloaded audio' }).click()
       await expect(queue.locator('.queueVideoTitle')).toHaveText(['Playlist video one', 'Playlist video two'])
       await video.evaluate(element => element.dispatchEvent(new Event('ended')))
       await expect(page).toHaveURL(/#\/watch\/offline0003\?downloadId=3/)
@@ -132,6 +130,25 @@ for (const mobile of [false, true]) {
       await expect.poll(() => video.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2)
       await expect(video).toHaveAttribute('src', 'downloadmedia://file/3/offline0004')
       await expect(queue).toBeHidden()
+    })
+
+    test('clearing a download removes all its queued copies', async ({ app, page }) => {
+      if (mobile) {
+        await setWindowSize(app, page, { width: 480, height: 850 })
+        await page.getByRole('button', { name: 'Quick settings', exact: true }).click()
+        await page.getByRole('button', { name: 'Downloads', exact: true }).click()
+      } else {
+        await goTo(page, 'downloads')
+      }
+      const audio = page.locator('.downloadRow').filter({ hasText: 'Downloaded audio' })
+      await audio.getByRole('button', { name: 'Add to Queue', exact: true }).click()
+      await audio.getByRole('button', { name: 'Add to Queue', exact: true }).click()
+      await page.locator('.downloadRow').filter({ hasText: 'Downloaded playlist' }).getByRole('button', { name: 'Add to Queue', exact: true }).click()
+      const queuedIds = () => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getWatchQueue.map(video => video.route.query.downloadId))
+      await expect.poll(queuedIds).toEqual(['2', '2', '3', '3'])
+      await audio.getByRole('button', { name: 'Clear From List', exact: true }).click()
+      await expect(audio).toHaveCount(0)
+      await expect.poll(queuedIds).toEqual(['3', '3'])
     })
   })
 }

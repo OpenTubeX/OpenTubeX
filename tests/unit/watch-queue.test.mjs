@@ -2,8 +2,11 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { runInNewContext } from 'node:vm'
+import { createStore } from 'vuex'
+import downloads from '../../src/renderer/store/modules/downloads.js'
 
 import {
+  default as watchQueue,
   createWatchQueueState,
   watchQueueGetters,
   watchQueueMutations,
@@ -12,6 +15,22 @@ import {
 function video (videoId) {
   return { videoId, title: `Video ${videoId}` }
 }
+
+test('removing a download also removes its queued copies without affecting other sources', () => {
+  const store = createStore({ modules: {
+    downloads: { ...downloads, state: () => ({ ytDlpDownloads: { 1: { id: 1 }, 2: { id: 2 } } }) },
+    watchQueue,
+  } })
+  for (const downloadId of ['1', '2', '1', undefined]) {
+    store.commit('addVideoToWatchQueue', {
+      video: { videoId: 'same-video', route: downloadId ? { query: { downloadId } } : undefined },
+    })
+  }
+  store.commit('removeYtDlpDownload', 1)
+  assert.equal(store.getters.getYtDlpDownloads[1], undefined)
+  assert.equal(store.getters.getYtDlpDownloads[2].id, 2)
+  assert.deepEqual(store.getters.getWatchQueue.map(item => item.route?.query.downloadId), ['2', undefined])
+})
 
 test('adds videos to the end or front of the watch queue', () => {
   const state = createWatchQueueState()

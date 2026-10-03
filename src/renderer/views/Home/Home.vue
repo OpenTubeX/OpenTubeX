@@ -350,7 +350,10 @@
                 v-for="video in items"
                 :key="video.queueItemId"
               >
-                <RouterLink :to="video.route ?? `/watch/${video.videoId}`">
+                <RouterLink
+                  :to="video.route ?? `/watch/${video.videoId}`"
+                  @click="playQueuedVideo(video.queueItemId, $event)"
+                >
                   <span class="mediaThumbnail">
                     <FtRetryImage
                       :src="videoThumbnail(video)"
@@ -797,6 +800,14 @@ function watchProgressPercent(video) {
   }
 
   return `${Math.min(100, Math.max(0, progress / duration * 100))}%`
+}
+
+function playQueuedVideo(queueItemId, event) {
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+    return
+  }
+
+  store.commit('removeVideoFromWatchQueue', queueItemId)
 }
 
 function activateExistingContinueWatchingTab(event, videoId) {
