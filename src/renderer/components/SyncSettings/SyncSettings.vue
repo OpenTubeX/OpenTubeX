@@ -140,7 +140,7 @@
         >
           {{ t('Settings.Sync Settings.Enhanced Privacy Unsupported') }}
         </p>
-        <FtFlexBox class="toggles">
+        <FtFlexBox class="toggles syncOptions">
           <FtToggleSwitch
             :label="t('Settings.Sync Settings.Sync Automatically')"
             :default-value="autoSync"
