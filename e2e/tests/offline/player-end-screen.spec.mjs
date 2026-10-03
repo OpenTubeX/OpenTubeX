@@ -51,25 +51,47 @@ async function openVideo({ app, page }) {
 }
 
 for (const dataSaver of [false, true]) {
-  test(`uses the same thumbnail URL for startup and ended posters with data saver ${dataSaver}`, async ({ app, page }) => {
+  test(`reuses the startup poster and its resolution fallback with data saver ${dataSaver}`, async ({ app, page }) => {
     await page.evaluate(async dataSaver => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       await store.dispatch('updateAutoplayVideos', false)
       await store.dispatch('updateThumbnailDataSaver', dataSaver)
     }, dataSaver)
     await mockPlayableWatchPage(app, page)
-    await page.route('https://i.ytimg.com/**', route => route.fulfill({
-      path: fileURLToPath(new URL('../../fixtures/media/video-thumbnail.svg', import.meta.url)),
-      contentType: 'image/svg+xml'
-    }))
+    await page.route('https://i.ytimg.com/**', route => {
+      if (/\/(?:maxres|sd)default.jpg$/.test(route.request().url())) {
+        return route.fulfill({
+          contentType: 'image/svg+xml',
+          body: '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="90"/>'
+        })
+      }
+      return route.fulfill({
+        path: fileURLToPath(new URL('../../fixtures/media/video-thumbnail.svg', import.meta.url)),
+        contentType: 'image/svg+xml'
+      })
+    })
     await page.evaluate(() => window.ftElectron.tabs.create({ route: '/watch/jNQXAC9IVRw' }))
     const video = page.locator('.ftVideoPlayer video')
-    const quality = dataSaver ? 'mq' : 'maxres'
-    await expect(video).toHaveAttribute('poster', new RegExp(`/${quality}default.jpg$`))
-    const startupPoster = await video.getAttribute('poster')
+    const startup = page.locator('.countdownPoster img:not(.retryImagePlaceholder)')
+    await expect(startup).toBeVisible()
+    await expect(startup).toHaveAttribute('src', new RegExp(`/${dataSaver ? 'mq' : 'hq'}default.jpg$`))
+    const poster = await startup.elementHandle()
+    const startupPoster = await startup.getAttribute('src')
     await expect.poll(() => video.evaluate(element => element.duration)).toBeGreaterThan(1)
-    await endVideo(video)
-    await expect(page.locator('.endedPoster img:not(.retryImagePlaceholder)')).toHaveAttribute('src', startupPoster)
+    await startup.evaluate(image => {
+      window.__posterReloads = 0
+      image.addEventListener('load', () => { window.__posterReloads++ })
+    })
+    for (let repeat = 0; repeat < 2; repeat++) {
+      await endVideo(video)
+      const ended = page.locator('.endedPoster img:not(.retryImagePlaceholder)')
+      await expect(ended).toHaveAttribute('src', startupPoster)
+      expect(await ended.evaluate((image, original) => image === original, poster)).toBe(true)
+      await expect(page.locator('.endedPoster .retryImagePlaceholder')).toHaveCount(0)
+      expect(await page.evaluate(() => window.__posterReloads)).toBe(0)
+      await video.evaluate(element => { element.currentTime = 1 })
+      await expect(page.locator('.endedPoster')).toHaveCount(0)
+    }
   })
 }
 
