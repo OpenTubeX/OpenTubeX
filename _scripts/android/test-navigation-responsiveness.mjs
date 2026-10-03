@@ -146,13 +146,19 @@ try {
     assert.ok(Number.isFinite(delay) && delay < 100, `${destination} must accept a tap without waiting for a second one`)
   }
 } finally {
-  if (page) {
-    await page.evaluate(() => {
-      if (window.navigationSavedState) document.querySelector('#app').__vue_app__.config.globalProperties.$store.replaceState(window.navigationSavedState)
-      delete window.navigationSavedState
-      delete window.navigationTouchMetrics
-    })
+  try {
+    if (page) {
+      await page.evaluate(() => {
+        if (window.navigationSavedState) document.querySelector('#app').__vue_app__.config.globalProperties.$store.replaceState(window.navigationSavedState)
+        delete window.navigationSavedState
+        delete window.navigationTouchMetrics
+      })
+    }
+  } finally {
+    try {
+      if (browser) await browser.close()
+    } finally {
+      if (port) adb('forward', '--remove', `tcp:${port}`)
+    }
   }
-  if (browser) await browser.close()
-  if (port) adb('forward', '--remove', `tcp:${port}`)
 }
