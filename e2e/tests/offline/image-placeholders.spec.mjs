@@ -2,12 +2,14 @@ import { readFile } from 'node:fs/promises'
 import { test, expect, goTo, goToSettingsSection } from '../../helpers/app.mjs'
 import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 import { IpcChannels } from '../../../src/constants.js'
+import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
+import { openMockedVideo } from '../../helpers/player.mjs'
 
 const channelId = 'UCaaaaaaaaaaaaaaaaaaaaaa'
 
 test.use({
   seed: {
-    settings: { fetchSubscriptionsAutomatically: false, quickBookmarkTargetPlaylistId: 'favorites', baseTheme: 'system', systemDarkTheme: 'dark', systemLightTheme: 'light', mainColor: 'Red', secColor: 'Blue' },
+    settings: { fetchSubscriptionsAutomatically: false, videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true, quickBookmarkTargetPlaylistId: 'favorites', baseTheme: 'system', systemDarkTheme: 'dark', systemLightTheme: 'light', mainColor: 'Red', secColor: 'Blue' },
     playlists: [{
       _id: 'favorites',
       playlistName: 'Favorites',
@@ -232,6 +234,54 @@ test('keeps inline post emoji images hidden until loaded and after failure', asy
   await expect(text).toContainText(':smile:')
   await expect(placeholder).toHaveCount(0)
   await text.screenshot({ path: testInfo.outputPath('inline-emoji-fallback.png') })
+})
+
+test('keeps overlapping collaborator avatars stable while images load', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const pending = []
+  await page.route('https://collaborator-images.test/**', route => { pending.push(route) })
+  const view = await watchViewHandle(page)
+  await view.evaluate(view => {
+    view.channelCollaborators = Array.from({ length: 3 }, (_, index) => ({ id: `collaborator-${index}`, name: `Collaborator ${index}`, thumbnail: `https://collaborator-images.test/${index}`, subtitle: '' }))
+  })
+  const group = page.locator('.collaboratorSummaryThumbnails')
+  await expect.poll(() => pending.length).toBe(3)
+  await expect(group.locator('.retryImagePlaceholder')).toHaveCount(3)
+  const positions = () => group.evaluate(element => {
+    const rectangle = node => {
+      const { x, y, width, height } = node.getBoundingClientRect()
+      return { x, y, width, height }
+    }
+    const visible = [...element.querySelectorAll('.collaboratorThumbnail')].filter(node => getComputedStyle(node).visibility !== 'hidden')
+    return { group: rectangle(element), avatars: visible.map(rectangle) }
+  })
+  const before = await positions()
+  expect(before.group.width).toBe(96)
+  expect(before.avatars).toHaveLength(3)
+  expect(before.avatars[0].x).toBe(before.group.x)
+  for (const avatar of before.avatars) {
+    expect(avatar.width).toBe(40)
+    expect(avatar.height).toBe(40)
+  }
+  // Loading just one image must not change the overlap of its neighbors.
+  await fulfillVisualFixture(pending.shift(), 'avatar')
+  await expect(group.locator('.retryImagePlaceholder')).toHaveCount(2)
+  expect(await positions()).toEqual(before)
+  while (pending.length) await fulfillVisualFixture(pending.shift(), 'avatar')
+  await expect(group.locator('.retryImagePlaceholder')).toHaveCount(0)
+  expect(await positions()).toEqual(before)
+
+  await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  const scaled = await positions()
+  await view.evaluate(view => { view.channelCollaborators[0].thumbnail = 'https://collaborator-images.test/replacement' })
+  await expect.poll(() => pending.length).toBe(1)
+  await expect(group.locator('.retryImagePlaceholder')).toHaveCount(1)
+  expect(await positions()).toEqual(scaled)
+  await fulfillVisualFixture(pending.shift(), 'avatar')
+  await expect(group.locator('.retryImagePlaceholder')).toHaveCount(0)
+  expect(await positions()).toEqual(scaled)
 })
 
 test('keeps poll image slots stable while loading and after failure', async ({ page }) => {

@@ -110,14 +110,18 @@
           @click="showCollaboratorsPrompt = true"
         >
           <span class="collaboratorSummaryThumbnails">
-            <FtRetryImage
+            <span
               v-for="collaborator in channelCollaborators"
               :key="collaborator.id"
-              :fallback-icon="['fas', 'circle-user']"
-              :src="collaborator.thumbnail"
               class="channelThumbnail collaboratorThumbnail"
-              alt=""
-            />
+            >
+              <FtRetryImage
+                :fallback-icon="['fas', 'circle-user']"
+                :src="collaborator.thumbnail"
+                class="collaboratorThumbnailImage"
+                alt=""
+              />
+            </span>
           </span>
           <span
             class="channelName collaboratorSummaryName"
