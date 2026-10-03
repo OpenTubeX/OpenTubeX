@@ -43,10 +43,16 @@ async function expectCurrentScrollRange(content) {
       const thumbRatio = thumb.height / track.height
       const expectedRatio = Math.max(element.clientHeight / element.scrollHeight,
         Number.parseFloat(getComputedStyle(handle).minHeight) / track.height)
+      const thumbOffset = thumb.top - track.top
+      const expectedOffset = maximum <= tolerance
+        ? 0
+        : element.scrollTop / maximum * Math.max(0, track.height - thumb.height)
+      // A hidden, unusable thumb has no meaningful position to compare.
+      const thumbPositionIsValid = maximum <= tolerance || Math.abs(thumbOffset - expectedOffset) <= tolerance
       const scrollbarIsValid = maximum <= tolerance
-        ? unusable
-        : !unusable && Math.abs(thumbRatio - expectedRatio) < 0.02
-      return { valid: offsetIsValid && scrollbarIsValid, maximum, scrollTop: element.scrollTop, scrollHeight: element.scrollHeight, clientHeight: element.clientHeight, thumbRatio, expectedRatio, unusable }
+        ? unusable && thumbPositionIsValid
+        : !unusable && Math.abs(thumbRatio - expectedRatio) < 0.02 && thumbPositionIsValid
+      return { valid: offsetIsValid && scrollbarIsValid, maximum, scrollTop: element.scrollTop, scrollHeight: element.scrollHeight, clientHeight: element.clientHeight, thumbRatio, expectedRatio, thumbOffset, expectedOffset, unusable }
     })
     return measurements.valid
   }).toBe(true).catch(error => {
