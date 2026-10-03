@@ -345,8 +345,21 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   pointer-events: none;
   transform: translateZ(0);
   transition:
-    opacity 600ms cubic-bezier(0.4, 0, 0.6, 1),
+    var(--shorts-controls-fade-property, opacity) 600ms cubic-bezier(0.4, 0, 0.6, 1),
     visibility 0s linear 600ms;
+}
+
+/* As in the watch player, fade glass and icons separately so the row never
+   becomes a backdrop root that cuts the blur off from the video. */
+.ftVideoPlayer.shortsPlayer:where(:not(.classicPlayerControls)) > .shortsTopControls {
+  --ft-controls-fade: 0;
+
+  /* The transition needs the property's name, rather than its value. */
+  /* stylelint-disable-next-line custom-property-no-missing-var-function */
+  --shorts-controls-fade-property: --ft-controls-fade;
+
+  opacity: 1;
+  background: linear-gradient(rgb(0 0 0 / calc(38% * var(--ft-controls-fade))), transparent);
 }
 
 .ftVideoPlayer.presentationModeChanging .shortsTopControls {
@@ -355,10 +368,12 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 .ftVideoPlayer.shortsPlayer.shortsPaused > .shortsTopControls,
 .ftVideoPlayer.shortsPlayer:has(:deep(.shaka-controls-container[shown='true'])) > .shortsTopControls {
+  --ft-controls-fade: 1;
+
   visibility: visible;
   opacity: 1;
   transition:
-    opacity 150ms ease,
+    var(--shorts-controls-fade-property, opacity) 150ms ease,
     inset-inline-start 250ms ease,
     max-inline-size 250ms ease;
 }
@@ -415,14 +430,34 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 .ftVideoPlayer.shortsPlayer:not(.classicPlayerControls) .shortsTopControlsGroup > .shortsTopControl,
 .ftVideoPlayer.shortsPlayer:not(.classicPlayerControls) .shortsVolumeControl {
+  position: relative;
+  isolation: isolate;
+  background: transparent;
+  backdrop-filter: none;
+}
+
+.ftVideoPlayer.shortsPlayer:not(.classicPlayerControls) .shortsTopControlsGroup > .shortsTopControl::before,
+.ftVideoPlayer.shortsPlayer:not(.classicPlayerControls) .shortsVolumeControl::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: inherit;
   background: linear-gradient(145deg, rgb(255 255 255 / 12%), rgb(255 255 255 / 3%)), rgb(0 0 0 / 42%);
   box-shadow: 0 2px 8px rgb(0 0 0 / 28%), inset 0 1px rgb(255 255 255 / 24%), inset 0 0 0 1px rgb(255 255 255 / 16%), inset 0 -2px 8px rgb(0 0 0 / 22%);
   backdrop-filter: blur(10px) saturate(1.15);
+  opacity: var(--ft-controls-fade);
+  pointer-events: none;
 }
 
-.ftVideoPlayer.shortsPlayer:not(.classicPlayerControls) .shortsTopControlsGroup > .shortsTopControl:is(:hover, :focus-visible, .active),
-.ftVideoPlayer.shortsPlayer:not(.classicPlayerControls) .shortsVolumeControl:is(:hover, :focus-within) {
+.ftVideoPlayer.shortsPlayer:not(.classicPlayerControls) .shortsTopControlsGroup > .shortsTopControl:is(:hover, :focus-visible, .active)::before,
+.ftVideoPlayer.shortsPlayer:not(.classicPlayerControls) .shortsVolumeControl:is(:hover, :focus-within)::before {
   background: linear-gradient(rgb(255 255 255 / 12%), rgb(255 255 255 / 12%)), linear-gradient(145deg, rgb(255 255 255 / 12%), rgb(255 255 255 / 3%)), rgb(0 0 0 / 42%);
+}
+
+.ftVideoPlayer.shortsPlayer:not(.classicPlayerControls) .shortsTopControl > *,
+:where(.ftVideoPlayer.shortsPlayer:not(.classicPlayerControls)) .shortsVolumeSlider {
+  filter: opacity(var(--ft-controls-fade));
 }
 
 .shortsVolumeSlider {
@@ -5367,7 +5402,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 .ftVideoPlayer.shortsPlayer:is(:fullscreen, .fullWindow) .shortsTopControls {
-  transition: opacity 600ms cubic-bezier(0.4, 0, 0.6, 1), visibility 0s linear 600ms;
+  transition: var(--shorts-controls-fade-property, opacity) 600ms cubic-bezier(0.4, 0, 0.6, 1), visibility 0s linear 600ms;
 }
 
 .ftVideoPlayer:is(:fullscreen, .fullWindow) :deep(.shaka-text-container) {
