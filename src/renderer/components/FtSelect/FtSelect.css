@@ -156,24 +156,35 @@
 }
 
 .selectDropdown {
+  --dropdown-item-hover-color: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+  --dropdown-item-hover-text-color: var(--primary-text-color);
+  --select-menu-surface: color-mix(in srgb, var(--primary-color) 4%, var(--card-bg-color));
+
   position: fixed;
   z-index: 12;
   box-sizing: border-box;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding-block: 4px;
+  padding-block: 8px;
   padding-inline: 0;
   margin: 0;
   list-style: none;
   font-family: var(--app-font-family);
   font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0.5px;
   text-align: start;
-  color: var(--secondary-text-color);
-  background-color: var(--card-bg-color);
+  color: var(--primary-text-color);
+  background-color: var(--select-menu-surface);
   backdrop-filter: var(--card-bg-blur, none);
-  border: 1px solid var(--border-color);
-  border-radius: calc(12px * var(--ui-roundness));
-  box-shadow: 0 2px 8px rgb(0 0 0 / 35%);
+  border: 0;
+  border-radius: calc(4px * var(--ui-roundness));
+  box-shadow: 0 2px 6px 2px rgb(0 0 0 / 15%), 0 1px 2px rgb(0 0 0 / 30%);
+}
+
+.custom .selectDropdown {
+  --dropdown-item-hover-color: inherit;
+  --dropdown-item-hover-text-color: inherit;
 }
 
 .select-dropdown-enter-active {
@@ -192,9 +203,9 @@
 
 .selectOption {
   box-sizing: border-box;
-  min-block-size: 34px;
-  padding-block: 7px;
-  padding-inline: 16px;
+  min-block-size: 48px;
+  padding-block: 12px;
+  padding-inline: 12px;
   cursor: default;
   isolation: isolate;
   overflow: hidden;
@@ -220,10 +231,14 @@
   background-color: var(--dropdown-item-hover-color);
 }
 
+.selectOption:active::before,
+.selectOption:focus-visible::before {
+  background-color: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
+}
+
 .selectOption.selected {
   position: relative;
-  color: var(--primary-text-color);
-  background-color: color-mix(in srgb, var(--primary-color) 12%, var(--card-bg-color));
+  background-color: color-mix(in srgb, var(--primary-color) 20%, var(--select-menu-surface));
 }
 
 .iconSelect {
@@ -470,6 +485,7 @@
   padding-inline: 12px;
   border: 0;
   border-radius: 0;
+  background-color: var(--card-bg-color);
   box-shadow: none;
 }
 
