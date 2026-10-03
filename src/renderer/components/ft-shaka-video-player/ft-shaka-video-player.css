@@ -1159,8 +1159,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   min-block-size: 0;
   overflow: hidden;
 
-  /* Scope per-frame style/layout/paint work to the panel while its insets
-     animate, so a resizing dock cannot invalidate its siblings. */
+  /* Isolate dock content from the player and neighbouring panels. */
   contain: layout paint;
   background-color: rgb(12 12 12 / 62%);
   border: 1px solid var(--side-nav-hover-color);
@@ -1169,8 +1168,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   backdrop-filter: blur(14px);
   color: #fff;
   user-select: auto;
-  transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1),
-    inset-block-start 250ms ease, inset-block-end 250ms ease;
+  transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .chapter-slide-enter-active,
@@ -3249,13 +3247,10 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   visibility: hidden;
   pointer-events: none;
 
-  /* Scope per-frame style/layout/paint work to the panel while its insets
-     animate, so a resizing dock cannot invalidate its siblings. */
+  /* Isolate dock content from the player and neighbouring panels. */
   contain: layout paint;
   transform: translateX(calc(100% + 24px));
-  transition: transform 250ms ease, opacity 200ms ease,
-    inset-block-start 250ms ease, inset-block-end 250ms ease,
-    visibility 0s 250ms;
+  transition: transform 250ms ease, opacity 200ms ease, visibility 0s 250ms;
 }
 
 /*
@@ -3693,7 +3688,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   opacity: 0;
   filter: blur(clamp(24px, 4vw, 52px)) saturate(1.05);
   pointer-events: none;
-  transition: opacity 250ms ease, inline-size 250ms ease;
+  transition: opacity 250ms ease;
 }
 
 /* Suppressed during presentation mode switches; see the block near the end of the file. */
@@ -5320,17 +5315,17 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   aside instead of covering it. Kept at the end of the file so the
   higher-specificity .player rules follow the scroll mini player ones.
 */
-.ftVideoPlayer:fullscreen:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) :is(.player, .ambientFullscreenCanvas),
-.ftVideoPlayer.fullWindow:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) :is(.player, .ambientFullscreenCanvas) {
+.ftVideoPlayer:fullscreen.fullscreenDockLayoutOpen :is(.player, .ambientFullscreenCanvas),
+.ftVideoPlayer.fullWindow.fullscreenDockLayoutOpen :is(.player, .ambientFullscreenCanvas) {
   inline-size: calc(100% - var(--side-panel-width));
 }
 
-.ftVideoPlayer:fullscreen:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) :deep(.shaka-controls-container),
-.ftVideoPlayer.fullWindow:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) :deep(.shaka-controls-container) {
+.ftVideoPlayer:fullscreen.fullscreenDockLayoutOpen :deep(.shaka-controls-container),
+.ftVideoPlayer.fullWindow.fullscreenDockLayoutOpen :deep(.shaka-controls-container) {
   inline-size: calc(100% - var(--side-panel-width));
 }
 
-.ftVideoPlayer:fullscreen:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) :is(
+.ftVideoPlayer:fullscreen.fullscreenDockLayoutOpen :is(
   :deep(.shaka-spinner-container),
   .endedPoster,
   .endedScreen,
@@ -5340,7 +5335,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   :deep(.shaka-text-container),
   :deep(.shaka-speech-to-text-container)
 ),
-  .ftVideoPlayer.fullWindow:is(.fullscreenDockLayoutOpen, .fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) :is(
+  .ftVideoPlayer.fullWindow.fullscreenDockLayoutOpen :is(
   :deep(.shaka-spinner-container),
   .endedPoster,
   .endedScreen,
@@ -5354,9 +5349,34 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   inset-inline-end: var(--side-panel-width);
 }
 
+/* Dock pushes reflow once; only the video image and panel slide animate. */
+.ftVideoPlayer:is(:fullscreen, .fullWindow) > .player {
+  transition: transform 200ms ease-out;
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow) :is(
+  .shortsFullscreenMetadata,
+  :deep(.shaka-controls-container),
+  :deep(.shaka-spinner-container),
+  .countdownPoster,
+  .countdownOverlay,
+  :deep(.videoAnnotations),
+  :deep(.shaka-speech-to-text-container)
+) {
+  transition: none;
+}
+
+.ftVideoPlayer.shortsPlayer:is(:fullscreen, .fullWindow) .shortsTopControls {
+  transition: opacity 600ms cubic-bezier(0.4, 0, 0.6, 1), visibility 0s linear 600ms;
+}
+
+.ftVideoPlayer:is(:fullscreen, .fullWindow) :deep(.shaka-text-container) {
+  transition: bottom cubic-bezier(0.4, 0, 0.6, 1) 0.1s;
+}
+
 /* Panning must track the pointer instead of easing toward it. */
 .ftVideoPlayer.videoZoomPanning > .player {
-  transition: inline-size 250ms ease;
+  transition: none;
 }
 
 .ftVideoPlayer.videoZoomPinching > .player {
