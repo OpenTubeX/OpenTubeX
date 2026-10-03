@@ -6770,7 +6770,11 @@ export default defineComponent({
       // Metadata initialization can restore Shaka's original start time after
       // an earlier seek. Apply that seek before playback becomes ready.
       if (pendingMetadataSeek !== null) {
-        setCurrentTime(pendingMetadataSeek)
+        // Restoring an existing seek must preserve its accumulated OSD feedback.
+        if (seekingIsPossible.value) {
+          rememberSeekPosition(pendingMetadataSeek)
+          video.value.currentTime = pendingMetadataSeek
+        }
         pendingMetadataSeek = null
       }
 
