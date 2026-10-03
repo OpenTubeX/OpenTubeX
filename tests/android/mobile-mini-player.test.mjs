@@ -7,9 +7,15 @@ import { resetMiniPlayerWork, stopTrackingMiniPlayerWork, trackMiniPlayerWork } 
 
 // Run against a current debug APK on a locked emulator, forwarding its WebView
 // socket and setting ANDROID_CDP_URL=http://127.0.0.1:<forwarded-port>.
-test('mobile mini-player restores from the whole bar, swipes down to close, and keeps controls separate', {
-  skip: !process.env.ANDROID_CDP_URL,
-}, async () => {
+for (const navigationOnly of [true, false]) {
+  test(navigationOnly
+    ? 'mobile mini-player preserves bottom navigation during swipes'
+    : 'mobile mini-player restores from the whole bar, swipes down to close, and keeps controls separate', {
+    skip: !process.env.ANDROID_CDP_URL,
+  }, t => testMobileMiniPlayer(t, navigationOnly))
+}
+
+async function testMobileMiniPlayer(t, navigationOnly) {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const context = browser.contexts()[0]
   const page = context.pages()[0]
@@ -28,7 +34,7 @@ test('mobile mini-player restores from the whole bar, swipes down to close, and 
         UiScale: 100, ReducedMotion: 'off', AnimationSpeed: 100, EnableMobileFullscreenSwipe: false, RotateFullscreenToLandscape: false,
         EnterFullscreenOnDisplayRotate: false, PlayingInterfaceHideDelay: 5,
         MobileLeftSwipeAction: 'disabled', MobileRightSwipeAction: 'disabled',
-        AmbientMode: true,
+        AmbientMode: true, AlwaysShowNavigationBar: false,
       }
       const saved = Object.fromEntries(Object.keys(values).map(key => [key, structuredClone(store.getters['get' + key])]))
       for (const [key, value] of Object.entries(values)) store.commit('set' + key, value)
@@ -89,6 +95,105 @@ test('mobile mini-player restores from the whole bar, swipes down to close, and 
       await expect.poll(() => player.evaluate(element =>
         element.getAnimations().every(animation => animation.playState !== 'running'))).toBe(true)
       return player.evaluate(mobileMiniPlayerReturnPoint, region)
+    }
+    if (navigationOnly) {
+      const nav = page.locator('.app > .sideNav')
+      const settle = async () => {
+        await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+        await expect.poll(() => player.evaluate(element =>
+          element.getAnimations().every(animation => animation.playState !== 'running'))).toBe(true)
+      }
+      // Keep both routes scrollable so returning restores an actual browsing offset.
+      await page.evaluate(() => {
+        const spacer = document.createElement('div')
+        spacer.id = 'mini-player-test-spacer'
+        spacer.style.height = '2000px'
+        document.body.append(spacer)
+        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setAlwaysShowNavigationBar', false)
+      })
+      for (const { scale, reducedMotion } of [
+        { scale: 100, reducedMotion: 'off' },
+        { scale: 125, reducedMotion: 'off' },
+        { scale: 125, reducedMotion: 'on' },
+      ]) {
+        const motionLabel = reducedMotion === 'on' ? 'reduced motion' : 'animated'
+        await page.evaluate(async ({ scale, reducedMotion }) => {
+          const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+          store.commit('setUiScale', scale)
+          await store.dispatch('updateReducedMotion', reducedMotion)
+        }, { scale, reducedMotion })
+        for (const hidden of [false, true]) {
+          await t.test(`minimize preserves ${hidden ? 'hidden' : 'visible'} Watch navigation without an endpoint jump at ${scale}% (${motionLabel})`, async () => {
+            await page.evaluate(() => { location.hash = '#/subscriptions' })
+            await expect(player).toHaveClass(/mobileMiniBar/)
+            await settle()
+            await page.evaluate(() => window.scrollTo(0, 1000))
+            await expect(nav).toHaveClass(/scrollHidden/)
+            await player.locator('.mobileMiniBarReturn').click()
+            await expect(page).toHaveURL(/#\/watch\//)
+            await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+            await settle()
+            await expect(nav).not.toHaveClass(/scrollHidden/)
+            if (hidden) {
+              await page.evaluate(() => window.scrollTo(0, 40))
+              await expect(nav).toHaveClass(/scrollHidden/)
+            }
+            // Let the nav's own reveal/hide transition finish before sampling geometry.
+            await expect.poll(() => nav.evaluate(element => element.getAnimations().length)).toBe(0)
+            const box = await player.boundingBox()
+            const point = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+            await touch('touchStart', point)
+            await touch('touchMove', { ...point, y: point.y + 30 })
+            await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
+            // The overlay is laid out at the final morph endpoint throughout the drag.
+            const endpoint = await page.locator('#cross-tab-mini-player-layer > .mobileMiniBarOverlay').boundingBox()
+            for (const distance of [60, 100, 160]) await touch('touchMove', { ...point, y: point.y + distance })
+            await touch('touchEnd')
+            await expect(page).toHaveURL(/#\/subscriptions/)
+            await expect(player).toHaveClass(/mobileMiniBar/)
+            await settle()
+            await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(900)
+            const settled = await player.boundingBox()
+            console.log('Navigation endpoint:', { hidden, endpoint, settled, navHidden: await nav.evaluate(el => el.classList.contains('scrollHidden')) })
+            if (hidden) await expect(nav).toHaveClass(/scrollHidden/)
+            else await expect(nav).not.toHaveClass(/scrollHidden/)
+            assert.ok(Math.abs(endpoint.y - settled.y) < 1, 'morph must reach the settled bar without a position jump')
+          })
+          // Restore even when the subtest failed, keeping subsequent cases independent.
+          if (!/watch/.test(await page.evaluate(() => location.hash))) {
+            await player.locator('.mobileMiniBarReturn').click()
+            await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+            await settle()
+          }
+        }
+        await t.test(`downward dismissal paints underneath the bottom navigation at ${scale}% (${motionLabel})`, async () => {
+          await page.evaluate(() => { location.hash = '#/subscriptions' })
+          await expect(player).toHaveClass(/mobileMiniBar/)
+          await page.evaluate(() => window.scrollTo(0, 0))
+          await expect(nav).not.toHaveClass(/scrollHidden/)
+          await settle()
+          await expect.poll(() => nav.evaluate(element => element.getAnimations().length)).toBe(0)
+          const box = await player.boundingBox()
+          const navBox = await nav.boundingBox()
+          const point = { x: box.x + box.width / 2, y: box.y + 8 }
+          try {
+            await touch('touchStart', point)
+            await touch('touchMove', { ...point, y: point.y + 40 })
+            await expect.poll(() => player.evaluate(element => Number.parseFloat(element.style.getPropertyValue('--mobile-mini-dismiss-offset')))).toBeCloseTo(40, 2)
+            assert.equal(await page.evaluate(({ x, y }) => !!document.elementFromPoint(x, y)?.closest('.sideNav'), {
+              x: point.x, y: navBox.y + 12,
+            }), true, 'navigation must paint over the dragged mini player')
+          } finally {
+            await touch('touchCancel')
+            await page.waitForTimeout(400)
+          }
+        })
+        await player.locator('.mobileMiniBarReturn').click()
+        await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+        await settle()
+      }
+      await page.evaluate(() => document.querySelector('#mini-player-test-spacer')?.remove())
+      return
     }
     await trackMiniPlayerWork(page)
     try {
@@ -283,4 +388,4 @@ test('mobile mini-player restores from the whole bar, swipes down to close, and 
     await session.detach()
     await browser.close()
   }
-})
+}

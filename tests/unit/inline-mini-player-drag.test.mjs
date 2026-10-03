@@ -415,3 +415,24 @@ for (const navigatedAway of [false, true]) {
     assert.equal(dismissed.value, !navigatedAway)
   })
 }
+
+for (const hidden of [false, true]) {
+  test(`mobile minimize measures the settled endpoint with navigation ${hidden ? 'hidden' : 'visible'}`, () => {
+    const styles = new Map()
+    const element = {
+      classList: { add() {} }, removeAttribute() {}, append() {}, remove() {},
+      style: { setProperty: (key, value) => styles.set(key, value) },
+      getBoundingClientRect: () => ({
+        left: 0, top: 600 + (hidden && styles.get('translate') !== 'none' ? 60 : 0), width: 400, height: 108
+      })
+    }
+    const video = { removeAttribute() {}, getBoundingClientRect: () => ({ left: 8, top: element.getBoundingClientRect().top + 6, width: 112, height: 63 }) }
+    const measure = vm.runInNewContext(`${source.slice(source.indexOf('  function measureMobileMiniBar('), source.indexOf('  function measureInlinePlayer('))}\nmeasureMobileMiniBar`, {
+      document: { getElementById: () => ({ append() {} }) },
+      container: { value: { cloneNode: () => element } },
+      video: { value: { cloneNode: () => video } },
+      getMobileMiniBarRect: () => ({ top: 600, width: 400, height: 108 })
+    })
+    assert.equal(measure().rect.top, hidden ? 660 : 600)
+  })
+}

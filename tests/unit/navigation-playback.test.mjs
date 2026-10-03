@@ -19,6 +19,7 @@ function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabl
   const unmount = []
   const titles = []
   const scope = effectScope()
+  const mobileNavigationMinimizePreview = ref(null)
   const video = { paused, ended: false }
   const previewRoot = {
     closest: () => ({ getBoundingClientRect: () => hostBounds }),
@@ -50,8 +51,9 @@ function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabl
   }
   const previewStyle = scope.run(() => vm.runInNewContext(`${source}\npreviewStyle`, {
     computed, nextTick, reactive, ref, shallowRef, watch,
+    mobileNavigationMinimizePreview,
     window: viewport,
-    document: { querySelector: selector => selector === '.app.capacitorTabs' && mobile ? {} : null },
+    document: { querySelector: selector => ['.app.capacitorTabs', '.app.capacitorPhoneLayout'].includes(selector) && mobile ? {} : null },
     isReducedMotionEnabled: () => true,
     defineProps: () => props,
     // The native scroll mini player lives outside the watch view's DOM tree.
@@ -77,7 +79,7 @@ function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabl
     scope.stop()
   })
   return {
-    props, getters, provides, lifecycle, previewRoot, previewStyle, hostBounds, tabBounds, viewport, listeners, titles, updateTitle,
+    mobileNavigationMinimizePreview, unmount, props, getters, provides, lifecycle, previewRoot, previewStyle, hostBounds, tabBounds, viewport, listeners, titles, updateTitle,
     disposals: () => disposals,
     savedBrowsingScroll: () => savedBrowsingScroll,
     navigate
@@ -368,4 +370,24 @@ test('restore preview stays at the visible tab origin while browsing scroll rese
   mounted.viewport.scrollTo({ left: 0, top: 0, behavior: 'instant' })
   mounted.listeners.get('scroll')()
   assert.equal(mounted.previewRoot.getBoundingClientRect().top, 80.25)
+})
+
+for (const commit of [false, true]) {
+  test(`mobile minimize holds navigation until preview cleanup after ${commit ? 'commit' : 'cancel'}`, async t => {
+    const mounted = mountWatch(t, { mobile: true })
+    const navigation = mounted.provides.get('navigation')
+    navigation.beginMinimizePreview()
+    assert.equal(mounted.mobileNavigationMinimizePreview.value, 'tab')
+    await navigation.finishMinimizePreview(commit)
+    assert.equal(mounted.mobileNavigationMinimizePreview.value, 'tab')
+    navigation.clearMinimizePreview()
+    assert.equal(mounted.mobileNavigationMinimizePreview.value, null)
+  })
+}
+
+test('unmount releases mobile minimize navigation ownership', t => {
+  const mounted = mountWatch(t, { mobile: true })
+  mounted.provides.get('navigation').beginMinimizePreview()
+  mounted.unmount.forEach(callback => callback())
+  assert.equal(mounted.mobileNavigationMinimizePreview.value, null)
 })
