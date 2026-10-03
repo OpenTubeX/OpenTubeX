@@ -1,7 +1,19 @@
-import { THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../constants.js'
+import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../constants.js'
 
 const DEFAULT_PROFILE_BACKGROUND = '#000000'
 const DEFAULT_PROFILE_TEXT = '#FFFFFF'
+
+// Channel names, avatars and profile icons are local metadata. Existing remote
+// subscriptions are merged by membership, not updated by metadata refreshes.
+export function getProfileSyncSignature(profiles) {
+  return JSON.stringify(profiles.map(profile => {
+    const channels = profile.subscriptions.map(channel => channel.id).sort()
+    return profile._id === MAIN_PROFILE_ID
+      ? [profile._id, channels]
+      : [profile._id, profile.name, getSyncProfileBackground(profile.bgColor),
+          getSyncProfileTextColor(profile.textColor) ?? DEFAULT_PROFILE_TEXT, channels]
+  }).sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0))
+}
 
 /** Backgrounds that only make sense locally, so they can't be sent to the sync server */
 function isLocalOnlyBackground(color) {

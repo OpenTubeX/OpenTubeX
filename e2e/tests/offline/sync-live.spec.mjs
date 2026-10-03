@@ -10,6 +10,146 @@ const device = Buffer.alloc(16, 3).toString('base64url')
 const phone = Buffer.alloc(16, 4).toString('base64url')
 const videoId = 'jNQXAC9IVRw'
 
+test.describe('automatic sync efficiency', () => {
+  test.use({
+    seed: {
+      settings: {
+        syncServerEnabled: false,
+        syncServerAutoSync: false,
+        syncServerUrl: 'https://sync-efficiency.example',
+        syncServerToken: 'test-token',
+        syncServerPrivacyMode: 'enhanced',
+        syncServerPrivacyKey: key,
+        syncServerPrivacySalt: salt,
+        syncServerDeviceId: device,
+        syncServerSyncSubscriptions: true,
+        syncServerSyncSettings: true,
+        syncServerSyncPlaylists: false,
+        syncServerSyncProfiles: false,
+        syncServerSyncHistory: false,
+        syncServerSyncWatchStats: false,
+        syncServerSyncLiveReminders: false,
+        syncServerSyncSessions: false,
+        baseTheme: 'dark',
+        autoplayVideos: true,
+      },
+      profiles: [{
+        _id: 'allChannels',
+        name: 'All Channels',
+        subscriptions: [{
+          id: 'UCaaaaaaaaaaaaaaaaaaaaaa',
+          name: 'Old channel',
+          thumbnail: 'https://yt3.googleusercontent.com/old=s176',
+        }],
+      }],
+    },
+  })
+
+  test('ignores channel refreshes and coalesces upload checks without losing a peer edit', async ({ page }) => {
+    const collections = new Map()
+    const waiting = new Set()
+    const requests = []
+    let cursor = 1
+    let holdUploads = false
+    let batchWrites = 0
+    let releaseUpload
+    let reachedUpload
+    const uploadBlocked = new Promise(resolve => { releaseUpload = resolve })
+    const uploadReached = new Promise(resolve => { reachedUpload = resolve })
+    const wake = () => {
+      cursor++
+      for (const route of waiting) route.fulfill({ json: { cursor: String(cursor) } }).catch(() => {})
+      waiting.clear()
+    }
+    await page.route('https://sync-efficiency.example/**', async route => {
+      const request = route.request()
+      const url = new URL(request.url())
+      const path = url.pathname
+      requests.push({ path, method: request.method() })
+      if (path === '/health') return route.fulfill({ json: { capabilities: { encrypted_sync: 1, live_sync: 1 } } })
+      if (path === '/v1/account/sessions') return route.fulfill({ json: { sessions: [] } })
+      if (path === '/v1/encrypted_sync/events') return route.fulfill({ json: [] })
+      if (path === '/v1/encrypted_sync/changes') {
+        if (url.searchParams.get('since') !== String(cursor)) return route.fulfill({ json: { cursor: String(cursor) } })
+        waiting.add(route)
+        return
+      }
+      if (path === '/v1/encrypted_sync') {
+        return route.fulfill({
+          json: {
+            collections: [...collections].map(([collection, value]) => ({ collection, revision: value.revision })),
+            legacy_data: false,
+          }
+        })
+      }
+      if (!path.startsWith('/v1/encrypted_sync/')) return route.fulfill({ status: 404 })
+      const collection = path.split('/').at(-1)
+      let saved
+      if (request.method() === 'PUT') {
+        const { revision, payload } = request.postDataJSON()
+        if (revision !== (collections.get(collection)?.revision ?? 0)) return route.fulfill({ status: 409 })
+        saved = { revision: revision + 1, payload }
+        collections.set(collection, saved)
+        wake()
+        if (holdUploads && ++batchWrites === 2) {
+          reachedUpload()
+          await uploadBlocked
+        }
+      }
+      return route.fulfill({ json: saved ?? collections.get(collection) ?? { revision: 0, payload: null } })
+    })
+    try {
+      const sync = await goToSettingsSection(page, 'sync')
+      await sync.getByRole('checkbox', { name: 'Enable Sync', exact: true }).press('Space')
+      await sync.getByRole('button', { name: 'Sync now', exact: true }).click()
+      await expect.poll(() => collections.size).toBe(2)
+      await sync.getByRole('checkbox', { name: 'Sync automatically', exact: true }).press('Space')
+      await expect.poll(() => waiting.size).toBe(1)
+      requests.length = 0
+
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
+        'batchUpdateSubscriptionDetails', [{ channelId: 'UCaaaaaaaaaaaaaaaaaaaaaa', channelName: 'Refreshed channel' }]
+      ))
+      await page.waitForTimeout(2000)
+      expect(requests.filter(request => request.path !== '/v1/encrypted_sync/changes')).toEqual([])
+
+      holdUploads = true
+      const syncing = page.evaluate(async () => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await store.dispatch('updateBaseTheme', 'light')
+        await store.dispatch('addChannelToProfiles', {
+          channel: { id: 'UCbbbbbbbbbbbbbbbbbbbbbb', name: 'New channel', thumbnail: 'https://yt3.googleusercontent.com/new=s176' },
+          profileIds: ['allChannels'],
+        })
+        await store.dispatch('syncWithSyncServer')
+      })
+      await uploadReached
+      // A peer edits the server after our upload committed but before its
+      // response arrives. Coalescing must still compare the newest revisions.
+      const saved = collections.get('settings')
+      const remote = await decryptSyncDocument(saved.payload, key)
+      const autoplay = remote.find(entry => entry.key === 'autoplayVideos')
+      autoplay.value = false
+      autoplay.updatedAt = Date.now() + 10000
+      collections.set('settings', { revision: saved.revision + 1, payload: await encryptSyncDocument(remote, key, salt) })
+      wake()
+      releaseUpload()
+      await syncing
+      await expect.poll(() => waiting.size).toBe(1)
+      await expect.poll(() => page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters.getAutoplayVideos)).toBe(false)
+      await page.waitForTimeout(2000)
+      expect(requests.filter(request => request.method === 'PUT').map(request => request.path)).toEqual([
+        '/v1/encrypted_sync/subscriptions', '/v1/encrypted_sync/settings',
+      ])
+      expect(requests.filter(request => request.path === '/v1/encrypted_sync')).toHaveLength(2)
+      expect(requests.filter(request => request.path === '/health')).toHaveLength(1)
+    } finally {
+      releaseUpload()
+      for (const route of waiting) await route.abort().catch(() => {})
+    }
+  })
+})
+
 for (const uiScale of [95, 125]) {
   test.describe(`live sync at ${uiScale}%`, () => {
     test.use({

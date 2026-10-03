@@ -8,6 +8,7 @@ import * as historyHelpers from '../../src/history.js'
 import * as seenHelpers from '../../src/subscriptionSeenVideos.js'
 import { createRecommendationStore } from '../../src/datastores/recommendations.js'
 import { buildRecommendationProfile } from '../../src/renderer/helpers/recommendations.js'
+import { getProfileSyncSignature } from '../../src/renderer/helpers/profile-sync.js'
 
 const sources = await Promise.all([
   'src/datastores/handlers/base.js',
@@ -36,6 +37,7 @@ function fixture () {
     history,
     recommendations,
     createStore,
+    getProfileSyncSignature,
     settings: {
       state: {},
       actions: {
