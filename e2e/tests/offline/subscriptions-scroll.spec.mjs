@@ -18,6 +18,8 @@ async function scrollFeedTo(page, top) {
 
   await page.evaluate((offset) => window.scrollTo(0, offset), top)
   await expect.poll(() => page.evaluate(offset => Math.abs(window.scrollY - offset) * devicePixelRatio, top)).toBeLessThanOrEqual(1)
+  // Deliver the scroll event before assertions about the header's visibility.
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)))
 }
 
 /** Applies the refresh completion signal and waits for its deferred layout work. */
@@ -246,6 +248,51 @@ for (const uiScale of [100, 95]) {
 }
 
 for (const uiScale of [100, 95]) {
+  for (const [layout, size] of [
+    ['portrait', { width: 375, height: 700 }],
+    ['landscape', { width: 844, height: 390 }]
+  ]) {
+    test(`mobile header waits until its space leaves the viewport in ${layout} at ${uiScale}% scale`, async ({ app, page }) => {
+      await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
+        BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale / 100)
+      }, uiScale)
+      await setWindowSize(app, page, size)
+      await expect(page.getByText('Feed video 00')).toBeVisible()
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      const header = page.locator('.subscriptionsHeader')
+
+      for (const feed of ['videos', 'new']) {
+        if (feed === 'new') {
+          await page.locator('[data-subscription-feed-tab="all"]').click()
+          await page.getByRole('button', { name: 'Show tabbed view' }).click()
+        }
+        await page.evaluate(() => document.activeElement.blur())
+        await scrollFeedTo(page, 0)
+        const boundary = await header.evaluate(element => {
+          return element.nextElementSibling.getBoundingClientRect().top - Number.parseFloat(getComputedStyle(element).top)
+        })
+        expect(boundary).toBeGreaterThan(32)
+
+        await scrollFeedTo(page, 32)
+        await expect(header).not.toHaveClass(/scrollHidden/)
+        await scrollFeedTo(page, boundary - 8)
+        await expect(header).not.toHaveClass(/scrollHidden/)
+        await scrollFeedTo(page, boundary + 16)
+        await expect(header).toHaveClass(/scrollHidden/)
+        await expect.poll(() => header.evaluate(element => element.getBoundingClientRect().bottom)).toBeLessThanOrEqual(0)
+        const gap = await header.evaluate(element => {
+          return element.nextElementSibling.getBoundingClientRect().top - Number.parseFloat(getComputedStyle(element).top)
+        })
+        expect(gap).toBeLessThanOrEqual(1)
+
+        // Returning to the header's original space must reveal it immediately.
+        await scrollFeedTo(page, boundary - 8)
+        await expect(header).not.toHaveClass(/scrollHidden/)
+        await scrollFeedTo(page, 0)
+      }
+    })
+  }
+
   test(`mobile header hides fully and returns on a deliberate upward scroll at ${uiScale}% scale`, async ({ app, page, attachScreenshot }) => {
     await app.electronApp.evaluate(({ BrowserWindow }, scale) => {
       BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale / 100)
