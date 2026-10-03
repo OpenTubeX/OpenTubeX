@@ -4,6 +4,9 @@ import { SyncLiveConnectionState } from '../../src/renderer/helpers/sync-server-
 import { createStore } from 'vuex'
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import * as profileSync from '../../src/renderer/helpers/profile-sync.js'
+import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../src/constants.js'
+import { getProfileWithUpdatedSubscriptionDetails } from '../../src/renderer/helpers/subscription-profile-details.js'
 
 import {
   AUTO_SYNC_INTERVAL_MS,
@@ -80,10 +83,94 @@ async function loadLocalChangePlugin() {
   const source = await readFile(new URL('../../src/renderer/store/index.js', import.meta.url), 'utf8')
   return vm.runInNewContext(
     source.slice(source.indexOf('function syncOnLocalChanges('), source.indexOf('function reloadRecommendationEvidenceAfterHistoryRemoval(')) + '\nsyncOnLocalChanges',
-    { SYNC_ACTION_REASONS, SYNC_MUTATION_REASONS, isRemoteSyncDispatch,
+    { SYNC_ACTION_REASONS, SYNC_MUTATION_REASONS, isRemoteSyncDispatch, ...profileSync,
       isSettingSyncable: key => key === 'autoplayVideos', isSettingSyncEnabled: () => true }
   )
 }
+
+async function profileChangeFixture() {
+  const source = await readFile(new URL('../../src/renderer/store/modules/profiles.js', import.meta.url), 'utf8')
+  const profiles = vm.runInNewContext(source
+    .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
+    .replace('export default {', 'globalThis.profiles = {') + '\nprofiles', {
+    MAIN_PROFILE_ID, DEFAULT_PROFILE_ICON: {},
+    THEME_BG_COLOR: 'theme', THEME_TEXT_COLOR: 'theme',
+    getProfileWithUpdatedSubscriptionDetails, deepCopy: value => JSON.parse(JSON.stringify(value)),
+    DBProfileHandlers: { upsert: async () => {} },
+  })
+  const channel = { id: 'channel', name: 'Old channel name', thumbnail: 'old-avatar' }
+  profiles.state.profileList = [
+    { _id: MAIN_PROFILE_ID, name: 'All channels', subscriptions: [channel] },
+    { _id: 'profile', name: 'Music', bgColor: '#123456', textColor: '#abcdef', subscriptions: [channel] },
+  ]
+  const scheduled = []
+  const store = createStore({
+    modules: { profiles },
+    state: { settings: {} },
+    plugins: [await loadLocalChangePlugin()],
+    actions: { scheduleSyncServer: (_, reason) => scheduled.push(reason) },
+  })
+  return { store, scheduled }
+}
+
+test('channel metadata refreshes update real profiles without scheduling a sync', async () => {
+  const { store, scheduled } = await profileChangeFixture()
+  await store.dispatch('batchUpdateSubscriptionDetails', [{
+    channelId: 'channel', channelName: 'New channel name', channelThumbnailUrl: 'https://yt3.googleusercontent.com/new=s88',
+  }])
+  await store.dispatch('updateSubscriptionDetails', {
+    channelId: 'channel', channelName: 'Latest channel name', channelThumbnailUrl: 'https://yt3.googleusercontent.com/latest=s88',
+  })
+  assert.equal(store.state.profiles.profileList[0].subscriptions[0].name, 'Latest channel name')
+  assert.deepEqual(scheduled, [])
+})
+
+test('profile metadata and membership edits still schedule syncs after channel refreshes', async () => {
+  const { store, scheduled } = await profileChangeFixture()
+  await store.dispatch('batchUpdateSubscriptionDetails', [{ channelId: 'channel', channelName: 'Refreshed' }])
+  scheduled.length = 0
+  for (const change of [{ name: 'Renamed' }, { bgColor: '#654321' }, { textColor: '#fedcba' },
+    { subscriptions: [{ id: 'other', name: 'Other channel' }] }]) {
+    const profile = JSON.parse(JSON.stringify(store.state.profiles.profileList.find(profile => profile._id === 'profile')))
+    await store.dispatch('updateProfile', { ...profile, ...change })
+  }
+  assert.deepEqual(scheduled, Array(4).fill('profilesOrSubscriptions'))
+})
+
+test('local-only profile edits and identical saves do not schedule syncs', async () => {
+  const { store, scheduled } = await profileChangeFixture()
+  await store.dispatch('updateProfile', { ...JSON.parse(JSON.stringify(store.state.profiles.profileList[0])), name: 'Local label', bgColor: '#fff' })
+  const profile = JSON.parse(JSON.stringify(store.state.profiles.profileList[1]))
+  await store.dispatch('updateProfile', { ...profile, icon: { type: 'emoji', value: '🎵' } })
+  await store.dispatch('updateProfile', JSON.parse(JSON.stringify(store.state.profiles.profileList[1])))
+  assert.deepEqual(scheduled, [])
+})
+
+for (const [color, themeColor, explicitColor] of [
+  ['bgColor', THEME_BG_COLOR, '#000000'],
+  ['textColor', THEME_TEXT_COLOR, '#FFFFFF'],
+]) {
+  test(`changing theme ${color} to its explicit fallback still schedules a profile sync`, async () => {
+    const { store, scheduled } = await profileChangeFixture()
+    store.commit('setProfileList', store.state.profiles.profileList.map(profile =>
+      profile._id === 'profile' ? { ...profile, [color]: themeColor } : profile))
+    const profile = JSON.parse(JSON.stringify(store.state.profiles.profileList[1]))
+    await store.dispatch('updateProfile', { ...profile, [color]: explicitColor })
+    assert.deepEqual(scheduled, ['profilesOrSubscriptions'])
+  })
+}
+
+test('channel preference reordering does not make a later refresh or identical save schedule profile sync', async () => {
+  const { store, scheduled } = await profileChangeFixture()
+  const subscriptions = [{ id: 'channel', name: 'First' }, { id: 'other', name: 'Second' }]
+  store.commit('setProfileList', store.state.profiles.profileList.map(profile => ({ ...profile, subscriptions })))
+  store.commit('updateChannelSettings', {
+    channel: { ...subscriptions[0], dailyVideoLimit: 3 }, profileIds: [MAIN_PROFILE_ID, 'profile'],
+  })
+  await store.dispatch('updateProfile', JSON.parse(JSON.stringify(store.state.profiles.profileList[1])))
+  await store.dispatch('batchUpdateSubscriptionDetails', [{ channelId: 'other', channelName: 'Refreshed second' }])
+  assert.deepEqual(scheduled, [])
+})
 
 test('remote actions do not schedule uploads while concurrent user actions still do', async () => {
   let releaseRemote

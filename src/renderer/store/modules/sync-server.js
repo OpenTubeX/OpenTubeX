@@ -69,6 +69,7 @@ const LEGACY_ENCRYPTED_COLLECTIONS = [
 const collectionCache = new SyncCollectionCache()
 const liveConnection = new SyncLiveConnectionState(typeof navigator !== 'undefined' ? navigator.locks : null)
 let liveClient = null
+let syncCapabilities = null
 let liveLockController = null
 let liveGeneration = 0
 let eventsSince = ''
@@ -185,6 +186,29 @@ function withSyncLock(callback) {
 function requiresEncryptedSync(settings) {
   // A key may survive a privacy-mode downgrade made by an older app version.
   return settings.syncServerPrivacyMode === 'enhanced' || Boolean(settings.syncServerPrivacyKey)
+}
+
+async function getSyncServerCapabilities(client, { refresh = false, requiredCapabilities = [] } = {}) {
+  const identity = JSON.stringify([client.serverUrl, client.token])
+  const age = syncCapabilities ? Date.now() - syncCapabilities.checkedAt : Infinity
+  if (!refresh && syncCapabilities?.identity === identity && syncCapabilities.value &&
+      age >= 0 && age < AUTO_SYNC_INTERVAL_MS &&
+      requiredCapabilities.every(capability => syncCapabilities.value[capability] === 1)) {
+    return syncCapabilities.value
+  }
+  // Failed discovery must not leave previously advertised support reusable.
+  const discovery = { identity, value: null, checkedAt: 0 }
+  syncCapabilities = discovery
+  const value = await client.getCapabilities()
+  // An older in-flight discovery must not replace a newer result or revive a
+  // cache cleared when the live connection was stopped.
+  if (syncCapabilities === discovery) {
+    discovery.value = value
+    discovery.checkedAt = Date.now()
+  }
+  return syncCapabilities?.identity === identity && syncCapabilities.value
+    ? syncCapabilities.value
+    : value
 }
 
 function assertEncryptionSupported(supported, required) {
@@ -390,7 +414,18 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
   }
 
   try {
-    const capabilities = await networkClient.getCapabilities()
+    // Remote checks share recent discovery. Full syncs refresh it for subsequent
+    // live checks too, so new support cannot be reverted by an old live client.
+    // Recheck missing support before consuming a live notification, otherwise an
+    // enabled collection added by a server upgrade could miss its only event.
+    const capabilities = await getSyncServerCapabilities(networkClient, {
+      refresh: !remoteOnly,
+      requiredCapabilities: [
+        ...(stages.includes('watchStats') ? ['watch_stats'] : []),
+        ...(stages.includes('liveReminders') ? ['live_reminders'] : []),
+        ...(encrypted && settings.syncServerSyncHistory ? ['seen_videos', 'seen_posts'] : []),
+      ],
+    })
     const watchStatsSupported = encrypted && capabilities.watch_stats === 1
     commit('setSyncServerWatchStatsSupported', watchStatsSupported)
     if (!watchStatsSupported) {
@@ -412,7 +447,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
     const liveSupported = encrypted && capabilities.live_sync === 1
     commit('setSyncServerLiveSupported', liveSupported)
     if (encrypted) {
-      if (settings.syncServerSyncHistory && await networkClient.supportsSeenVideosSync()) {
+      if (settings.syncServerSyncHistory && capabilities.seen_videos === 1) {
         stages.splice(stages.indexOf('history') + 1, 0, 'seenVideos')
       }
       if (settings.syncServerSyncHistory && capabilities.seen_posts === 1) {
@@ -665,6 +700,7 @@ async function runSync(context, { allowDataLoss = false, notifyDataLoss = true, 
 
 const actions = {
   stopSyncServerLive() {
+    syncCapabilities = null
     liveGeneration++
     liveConnection.setConnected(false)
     liveClient?.cancel()
@@ -687,9 +723,6 @@ const actions = {
       if (generation !== liveGeneration) return
       await watchSyncChanges(client, async () => {
         if (generation !== liveGeneration) return
-        // A change arriving during an upload needs a second pass after it finishes.
-        await activeSyncPromise
-        if (generation !== liveGeneration) return
         await dispatch('syncWithSyncServer', { automatic: true, remoteOnly: true })
       }, async error => {
         if (error instanceof SyncServerUnsupportedError) {
@@ -703,11 +736,17 @@ const actions = {
         }
         return true
       }, {
+        waitForPendingSync: async () => {
+          const pending = activeSyncPromise
+          if (!pending) return false
+          await pending
+          return true
+        },
         onConnectionChange: connected => {
           if (generation === liveGeneration) liveConnection.setConnected(connected)
         },
         prepare: async () => {
-          const supported = (await client.getCapabilities()).live_sync === 1
+          const supported = (await getSyncServerCapabilities(client, { refresh: true })).live_sync === 1
           if (generation !== liveGeneration) return false
           commit('setSyncServerLiveSupported', supported)
           return supported
