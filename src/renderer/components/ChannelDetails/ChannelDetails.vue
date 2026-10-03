@@ -72,198 +72,212 @@
         class="infoTabs"
       >
         <div
-          class="tabs"
-          role="tablist"
-          :aria-label="$t('Channel.Channel Tabs')"
+          ref="tabsViewport"
+          v-overlay-scrollbars
+          class="tabsViewport"
         >
-          <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
           <div
-            v-if="visibleTabs.includes('home')"
-            id="homeTab"
-            class="tab"
-            :class="{ selectedTab: currentTab === 'home' }"
-            role="tab"
-            :aria-selected="currentTab === 'home'"
-            aria-controls="homePanel"
-            :tabindex="(currentTab === 'home' || currentTab === 'search') ? 0 : -1"
-            @click="changeTabFromPointer($event, 'home')"
-            @keydown.left.right="focusTab('home', $event)"
-            @keydown.enter.space.prevent="changeTab('home')"
+            ref="tabsContainer"
+            class="tabs"
+            role="tablist"
+            :aria-label="$t('Channel.Channel Tabs')"
           >
-            <span
-              class="tabLabel"
-              :data-label="$t('Channel.Home.Home')"
-            ><span>{{ $t("Channel.Home.Home") }}</span></span>
-          </div>
-          <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-          <div
-            v-if="visibleTabs.includes('videos')"
-            id="videosTab"
-            class="tab"
-            :class="{ selectedTab: currentTab === 'videos' }"
-            role="tab"
-            :aria-selected="currentTab === 'videos'"
-            aria-controls="videoPanel"
-            :tabindex="(currentTab === 'videos' || currentTab === 'search') ? 0 : -1"
-            @click="changeTabFromPointer($event, 'videos')"
-            @keydown.left.right="focusTab('videos', $event)"
-            @keydown.enter.space.prevent="changeTab('videos')"
-          >
-            <span
-              class="tabLabel"
-              :data-label="$t('Channel.Videos.Videos')"
-            ><span>{{ $t("Channel.Videos.Videos") }}</span></span>
-          </div>
-          <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-          <div
-            v-if="visibleTabs.includes('shorts')"
-            id="shortsTab"
-            class="tab"
-            :class="{ selectedTab: currentTab === 'shorts' }"
-            role="tab"
-            :aria-selected="currentTab === 'shorts'"
-            aria-controls="shortPanel"
-            :tabindex="currentTab === 'shorts' ? 0 : -1"
-            @click="changeTabFromPointer($event, 'shorts')"
-            @keydown.left.right="focusTab('shorts', $event)"
-            @keydown.enter.space.prevent="changeTab('shorts')"
-          >
-            <span
-              class="tabLabel"
-              :data-label="$t('Global.Shorts')"
-            ><span>{{ $t("Global.Shorts") }}</span></span>
-          </div>
-          <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-          <div
-            v-if="visibleTabs.includes('live')"
-            id="liveTab"
-            class="tab"
-            :class="{ selectedTab: currentTab === 'live' }"
-            role="tab"
-            :aria-selected="currentTab === 'live'"
-            aria-controls="livePanel"
-            :tabindex="currentTab === 'live' ? 0 : -1"
-            @click="changeTabFromPointer($event, 'live')"
-            @keydown.left.right="focusTab('live', $event)"
-            @keydown.enter.space.prevent="changeTab('live')"
-          >
-            <span
-              class="tabLabel"
-              :data-label="$t('Channel.Live.Live')"
-            ><span>{{ $t("Channel.Live.Live") }}</span></span>
-          </div>
-          <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-          <div
-            v-if="visibleTabs.includes('releases')"
-            id="releasesTab"
-            class="tab"
-            role="tab"
-            :aria-selected="currentTab === 'releases'"
-            aria-controls="releasePanel"
-            :tabindex="currentTab === 'releases' ? 0 : -1"
-            :class="{ selectedTab: currentTab === 'releases' }"
-            @click="changeTabFromPointer($event, 'releases')"
-            @keydown.left.right="focusTab('releases', $event)"
-            @keydown.enter.space.prevent="changeTab('releases')"
-          >
-            <span
-              class="tabLabel"
-              :data-label="$t('Channel.Releases.Releases')"
-            ><span>{{ $t("Channel.Releases.Releases") }}</span></span>
-          </div>
-          <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-          <div
-            v-if="visibleTabs.includes('podcasts')"
-            id="podcastsTab"
-            class="tab"
-            role="tab"
-            :aria-selected="currentTab === 'podcasts'"
-            aria-controls="podcastPanel"
-            :tabindex="currentTab === 'podcasts' ? 0 : -1"
-            :class="{ selectedTab: currentTab === 'podcasts' }"
-            @click="changeTabFromPointer($event, 'podcasts')"
-            @keydown.left.right="focusTab('podcasts', $event)"
-            @keydown.enter.space.prevent="changeTab('podcasts')"
-          >
-            <span
-              class="tabLabel"
-              :data-label="$t('Channel.Podcasts.Podcasts')"
-            ><span>{{ $t("Channel.Podcasts.Podcasts") }}</span></span>
-          </div>
-          <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-          <div
-            v-if="visibleTabs.includes('courses')"
-            id="coursesTab"
-            class="tab"
-            role="tab"
-            :aria-selected="currentTab === 'courses'"
-            aria-controls="coursesPanel"
-            :tabindex="currentTab === 'courses' ? 0 : -1"
-            :class="{ selectedTab: currentTab === 'courses' }"
-            @click="changeTabFromPointer($event, 'courses')"
-            @keydown.left.right="focusTab('courses', $event)"
-            @keydown.enter.space.prevent="changeTab('courses')"
-          >
-            <span
-              class="tabLabel"
-              :data-label="$t('Channel.Courses.Courses')"
-            ><span>{{ $t("Channel.Courses.Courses") }}</span></span>
-          </div>
-          <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-          <div
-            v-if="visibleTabs.includes('playlists')"
-            id="playlistsTab"
-            class="tab"
-            role="tab"
-            :aria-selected="currentTab === 'playlists'"
-            aria-controls="playlistPanel"
-            :tabindex="currentTab === 'playlists' ? 0 : -1"
-            :class="{ selectedTab: currentTab === 'playlists' }"
-            @click="changeTabFromPointer($event, 'playlists')"
-            @keydown.left.right="focusTab('playlists', $event)"
-            @keydown.enter.space.prevent="changeTab('playlists')"
-          >
-            <span
-              class="tabLabel"
-              :data-label="$t('Channel.Playlists.Playlists')"
-            ><span>{{ $t("Channel.Playlists.Playlists") }}</span></span>
-          </div>
-          <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-          <div
-            v-if="visibleTabs.includes('community')"
-            id="communityTab"
-            class="tab"
-            role="tab"
-            :aria-selected="currentTab === 'community'"
-            aria-controls="communityPanel"
-            :tabindex="currentTab === 'community' ? 0 : -1"
-            :class="{ selectedTab: currentTab === 'community' }"
-            @click="changeTabFromPointer($event, 'community')"
-            @keydown.left.right="focusTab('community', $event)"
-            @keydown.enter.space.prevent="changeTab('community')"
-          >
-            <span
-              class="tabLabel"
-              :data-label="$t('Global.Posts')"
-            ><span>{{ $t("Global.Posts") }}</span></span>
-          </div>
-          <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-          <div
-            id="aboutTab"
-            class="tab"
-            role="tab"
-            :aria-selected="currentTab === 'about'"
-            aria-controls="aboutPanel"
-            :tabindex="currentTab === 'about' ? 0 : -1"
-            :class="{ selectedTab: currentTab === 'about' }"
-            @click="changeTabFromPointer($event, 'about')"
-            @keydown.left.right="focusTab('about', $event)"
-            @keydown.enter.space.prevent="changeTab('about')"
-          >
-            <span
-              class="tabLabel"
-              :data-label="$t('Channel.About.About')"
-            ><span>{{ $t("Channel.About.About") }}</span></span>
+            <div
+              v-if="tabsIndicatorStyle"
+              class="tabsIndicator"
+              data-animation-speed-managed
+              :style="[tabsIndicatorStyle, { transitionDuration: tabsIndicatorTransitionDuration }]"
+              aria-hidden="true"
+            />
+            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+            <div
+              v-if="visibleTabs.includes('home')"
+              id="homeTab"
+              class="tab"
+              :class="{ selectedTab: currentTab === 'home' }"
+              role="tab"
+              :aria-selected="currentTab === 'home'"
+              aria-controls="homePanel"
+              :tabindex="(currentTab === 'home' || currentTab === 'search') ? 0 : -1"
+              @click="changeTabFromPointer($event, 'home')"
+              @keydown.left.right="focusTab('home', $event)"
+              @keydown.enter.space.prevent="changeTab('home')"
+            >
+              <span
+                class="tabLabel"
+                :data-label="$t('Channel.Home.Home')"
+              ><span>{{ $t("Channel.Home.Home") }}</span></span>
+            </div>
+            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+            <div
+              v-if="visibleTabs.includes('videos')"
+              id="videosTab"
+              class="tab"
+              :class="{ selectedTab: currentTab === 'videos' }"
+              role="tab"
+              :aria-selected="currentTab === 'videos'"
+              aria-controls="videoPanel"
+              :tabindex="(currentTab === 'videos' || currentTab === 'search') ? 0 : -1"
+              @click="changeTabFromPointer($event, 'videos')"
+              @keydown.left.right="focusTab('videos', $event)"
+              @keydown.enter.space.prevent="changeTab('videos')"
+            >
+              <span
+                class="tabLabel"
+                :data-label="$t('Channel.Videos.Videos')"
+              ><span>{{ $t("Channel.Videos.Videos") }}</span></span>
+            </div>
+            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+            <div
+              v-if="visibleTabs.includes('shorts')"
+              id="shortsTab"
+              class="tab"
+              :class="{ selectedTab: currentTab === 'shorts' }"
+              role="tab"
+              :aria-selected="currentTab === 'shorts'"
+              aria-controls="shortPanel"
+              :tabindex="currentTab === 'shorts' ? 0 : -1"
+              @click="changeTabFromPointer($event, 'shorts')"
+              @keydown.left.right="focusTab('shorts', $event)"
+              @keydown.enter.space.prevent="changeTab('shorts')"
+            >
+              <span
+                class="tabLabel"
+                :data-label="$t('Global.Shorts')"
+              ><span>{{ $t("Global.Shorts") }}</span></span>
+            </div>
+            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+            <div
+              v-if="visibleTabs.includes('live')"
+              id="liveTab"
+              class="tab"
+              :class="{ selectedTab: currentTab === 'live' }"
+              role="tab"
+              :aria-selected="currentTab === 'live'"
+              aria-controls="livePanel"
+              :tabindex="currentTab === 'live' ? 0 : -1"
+              @click="changeTabFromPointer($event, 'live')"
+              @keydown.left.right="focusTab('live', $event)"
+              @keydown.enter.space.prevent="changeTab('live')"
+            >
+              <span
+                class="tabLabel"
+                :data-label="$t('Channel.Live.Live')"
+              ><span>{{ $t("Channel.Live.Live") }}</span></span>
+            </div>
+            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+            <div
+              v-if="visibleTabs.includes('releases')"
+              id="releasesTab"
+              class="tab"
+              role="tab"
+              :aria-selected="currentTab === 'releases'"
+              aria-controls="releasePanel"
+              :tabindex="currentTab === 'releases' ? 0 : -1"
+              :class="{ selectedTab: currentTab === 'releases' }"
+              @click="changeTabFromPointer($event, 'releases')"
+              @keydown.left.right="focusTab('releases', $event)"
+              @keydown.enter.space.prevent="changeTab('releases')"
+            >
+              <span
+                class="tabLabel"
+                :data-label="$t('Channel.Releases.Releases')"
+              ><span>{{ $t("Channel.Releases.Releases") }}</span></span>
+            </div>
+            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+            <div
+              v-if="visibleTabs.includes('podcasts')"
+              id="podcastsTab"
+              class="tab"
+              role="tab"
+              :aria-selected="currentTab === 'podcasts'"
+              aria-controls="podcastPanel"
+              :tabindex="currentTab === 'podcasts' ? 0 : -1"
+              :class="{ selectedTab: currentTab === 'podcasts' }"
+              @click="changeTabFromPointer($event, 'podcasts')"
+              @keydown.left.right="focusTab('podcasts', $event)"
+              @keydown.enter.space.prevent="changeTab('podcasts')"
+            >
+              <span
+                class="tabLabel"
+                :data-label="$t('Channel.Podcasts.Podcasts')"
+              ><span>{{ $t("Channel.Podcasts.Podcasts") }}</span></span>
+            </div>
+            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+            <div
+              v-if="visibleTabs.includes('courses')"
+              id="coursesTab"
+              class="tab"
+              role="tab"
+              :aria-selected="currentTab === 'courses'"
+              aria-controls="coursesPanel"
+              :tabindex="currentTab === 'courses' ? 0 : -1"
+              :class="{ selectedTab: currentTab === 'courses' }"
+              @click="changeTabFromPointer($event, 'courses')"
+              @keydown.left.right="focusTab('courses', $event)"
+              @keydown.enter.space.prevent="changeTab('courses')"
+            >
+              <span
+                class="tabLabel"
+                :data-label="$t('Channel.Courses.Courses')"
+              ><span>{{ $t("Channel.Courses.Courses") }}</span></span>
+            </div>
+            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+            <div
+              v-if="visibleTabs.includes('playlists')"
+              id="playlistsTab"
+              class="tab"
+              role="tab"
+              :aria-selected="currentTab === 'playlists'"
+              aria-controls="playlistPanel"
+              :tabindex="currentTab === 'playlists' ? 0 : -1"
+              :class="{ selectedTab: currentTab === 'playlists' }"
+              @click="changeTabFromPointer($event, 'playlists')"
+              @keydown.left.right="focusTab('playlists', $event)"
+              @keydown.enter.space.prevent="changeTab('playlists')"
+            >
+              <span
+                class="tabLabel"
+                :data-label="$t('Channel.Playlists.Playlists')"
+              ><span>{{ $t("Channel.Playlists.Playlists") }}</span></span>
+            </div>
+            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+            <div
+              v-if="visibleTabs.includes('community')"
+              id="communityTab"
+              class="tab"
+              role="tab"
+              :aria-selected="currentTab === 'community'"
+              aria-controls="communityPanel"
+              :tabindex="currentTab === 'community' ? 0 : -1"
+              :class="{ selectedTab: currentTab === 'community' }"
+              @click="changeTabFromPointer($event, 'community')"
+              @keydown.left.right="focusTab('community', $event)"
+              @keydown.enter.space.prevent="changeTab('community')"
+            >
+              <span
+                class="tabLabel"
+                :data-label="$t('Global.Posts')"
+              ><span>{{ $t("Global.Posts") }}</span></span>
+            </div>
+            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+            <div
+              id="aboutTab"
+              class="tab"
+              role="tab"
+              :aria-selected="currentTab === 'about'"
+              aria-controls="aboutPanel"
+              :tabindex="currentTab === 'about' ? 0 : -1"
+              :class="{ selectedTab: currentTab === 'about' }"
+              @click="changeTabFromPointer($event, 'about')"
+              @keydown.left.right="focusTab('about', $event)"
+              @keydown.enter.space.prevent="changeTab('about')"
+            >
+              <span
+                class="tabLabel"
+                :data-label="$t('Channel.About.About')"
+              ><span>{{ $t("Channel.About.About") }}</span></span>
+            </div>
           </div>
         </div>
 
@@ -286,7 +300,7 @@
 
 <script setup>
 import FtRetryImage from '../FtRetryImage.vue'
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, useTemplateRef, watch } from 'vue'
 
 import { FtIcon } from '@opentubex/icons'
 import FtCard from '../ft-card/ft-card.vue'
@@ -298,6 +312,9 @@ import FtInput from '../FtInput/FtInput.vue'
 import store from '../../store/index'
 
 import { ctrlFHandler, formatNumber } from '../../helpers/utils'
+import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
+import { clampOverlayScrollLeft } from '../../helpers/overlayScrollbars'
+import { useTabContext } from '../../tabs/TabContext'
 
 const props = defineProps({
   id: {
@@ -351,6 +368,72 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['change-tab', 'search', 'subscribed'])
+
+const { isTabPresented } = useTabContext()
+const tabsViewport = useTemplateRef('tabsViewport')
+const tabsContainer = useTemplateRef('tabsContainer')
+/** @type {import('vue').Ref<Record<string, string> | null>} */
+const tabsIndicatorStyle = ref(null)
+const tabsIndicatorTransitionDuration = computed(() => (
+  `${200 / getAnimationSpeedMultiplier(store.getters.getAnimationSpeed)}ms`
+))
+let tabsResizeObserver = null
+let indicatorWasHidden = true
+
+function updateTabIndicator() {
+  const selected = tabsContainer.value?.querySelector('.selectedTab')
+  if ((isTabPresented && !isTabPresented.value) ||
+    !(selected instanceof HTMLElement) || selected.getClientRects().length === 0) {
+    tabsIndicatorStyle.value = null
+    indicatorWasHidden = true
+    return
+  }
+
+  const viewport = tabsViewport.value
+  clampOverlayScrollLeft(viewport, tabsContainer.value)
+  const viewportRect = viewport.getBoundingClientRect()
+  const tabRect = selected.getBoundingClientRect()
+  // Reveal selection horizontally without scrolling the channel page itself.
+  const scrollDelta = tabRect.left < viewportRect.left
+    ? tabRect.left - viewportRect.left
+    : Math.max(0, tabRect.right - viewportRect.right)
+  viewport.scrollLeft += scrollDelta
+
+  // Match the subscriptions indicator: animate only the transform and
+  // compensate for scaled end caps.
+  // Keep fractional geometry at non-100% UI scales.
+  const containerRect = tabsContainer.value.getBoundingClientRect()
+  const selectedRect = selected.getBoundingClientRect()
+  const style = {
+    '--tab-indicator-scale': String(selectedRect.width / 100),
+    transform: `translate(${selectedRect.left - containerRect.left}px, ${selectedRect.bottom - containerRect.top - 3}px) scaleX(${selectedRect.width / 100})`
+  }
+  if (indicatorWasHidden) {
+    style.transition = 'none'
+  }
+  tabsIndicatorStyle.value = style
+  indicatorWasHidden = false
+}
+
+function observeTabs() {
+  tabsResizeObserver?.disconnect()
+  if (tabsContainer.value) {
+    tabsResizeObserver?.observe(tabsViewport.value)
+    tabsResizeObserver?.observe(tabsContainer.value)
+    // Labels can change width without resizing the wrapping container.
+    tabsContainer.value.querySelectorAll('.tab').forEach(tab => tabsResizeObserver?.observe(tab))
+  }
+  updateTabIndicator()
+}
+
+watch([() => props.currentTab, () => props.visibleTabs, tabsContainer,
+  () => isTabPresented?.value], observeTabs, { flush: 'post' })
+
+onActivated(() => nextTick(observeTabs))
+onDeactivated(() => {
+  tabsResizeObserver?.disconnect()
+  indicatorWasHidden = true
+})
 
 const thumbnailLoadFailed = ref(false)
 
@@ -463,10 +546,13 @@ function keyboardShortcutHandler(event) {
 }
 
 onMounted(() => {
+  tabsResizeObserver = new ResizeObserver(updateTabIndicator)
+  observeTabs()
   document.addEventListener('keydown', keyboardShortcutHandler)
 })
 
 onBeforeUnmount(() => {
+  tabsResizeObserver?.disconnect()
   document.removeEventListener('keydown', keyboardShortcutHandler)
 })
 </script>
