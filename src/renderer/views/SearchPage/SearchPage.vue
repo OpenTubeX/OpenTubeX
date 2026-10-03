@@ -258,6 +258,9 @@ function checkSearchCache(payload) {
 
   if (payload.query.length > SEARCH_CHAR_LIMIT) {
     isLoading.value = false
+    shownResults.value = []
+    nextPageRef.value = null
+    hasMoreResults.value = false
     console.warn(`Search character limit is: ${SEARCH_CHAR_LIMIT}`)
     showToast({
       message: t('Search character limit', { searchCharacterLimit: SEARCH_CHAR_LIMIT }),

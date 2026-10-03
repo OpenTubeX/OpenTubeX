@@ -251,7 +251,17 @@ test('ignores an authenticated retry after navigating to an oversized search', a
   await expect(page.getByText('Stale authenticated result', { exact: true })).toHaveCount(0)
 })
 
-test('stops loading after replacing a pending local search with an oversized query', async ({ page }) => {
+test('clears prior results and loading after replacing a pending search with an oversized query', async ({ app, page }) => {
+  const { response } = await configureCookieSearch(app)
+  await searchForAgeGate(page)
+  await writeFile(response, JSON.stringify({
+    entries: Array.from({ length: 20 }, (_, index) => ({
+      id: String(index).padStart(11, '0'), title: `Prior result ${index}`, channel: 'Creator', duration: 120
+    }))
+  }))
+  await page.getByRole('button', { name: 'Try with configured cookies' }).click()
+  await expect(page.getByRole('heading', { name: 'Prior result 0', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Fetch more results' })).toHaveCount(1)
   let finishRequest
   let notifyRequestStarted
   const pendingResponse = new Promise(resolve => { finishRequest = resolve })
@@ -272,4 +282,6 @@ test('stops loading after replacing a pending local search with an oversized que
   await page.waitForTimeout(500)
   await expect(page.getByRole('heading', { name: 'Search results', exact: true })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Confirm your age' })).toHaveCount(0)
+  await expect(page.getByText('Prior result', { exact: false })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Fetch more results' })).toHaveCount(0)
 })

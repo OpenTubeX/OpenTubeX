@@ -1927,7 +1927,7 @@ export async function handleYtDlpSearch(event, query, params, page) {
       maxBuffer: PLAYBACK_INFO_MAX_BUFFER,
       windowsHide: true
     })
-    return normalizeYtDlpSearchResults(JSON.parse(stdout))
+    return normalizeYtDlpSearchResults(JSON.parse(stdout), page)
   } catch {
     // Process errors can contain account information or cookie paths.
     return { error: 'Unable to search with configured cookies' }
