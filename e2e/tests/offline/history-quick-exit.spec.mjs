@@ -1,7 +1,8 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { test, expect, sel } from '../../helpers/app.mjs'
-import { openMockedVideo } from '../../helpers/player.mjs'
+import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
+import { DEMO_MEDIA_URL } from '../../helpers/media.mjs'
 import { mockPlayableWatchPage, watchHistoryEntry } from '../../helpers/watch.mjs'
 
 test.use({
@@ -130,6 +131,31 @@ test('persists the latest seek when quitting the desktop app', async ({ app, pag
 })
 
 for (const existing of [true, false]) {
+  for (const position of [0, 5, 15]) {
+    test(`starts at the latest seek to ${position} before the first media data loads with ${existing ? 'existing' : 'new'} history`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      if (!existing) {
+        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('removeAllHistory'))
+      }
+      await page.evaluate(seconds => {
+        document.addEventListener('loadedmetadata', event => {
+          const video = event.target
+          window.firstPlaybackPosition = null
+          video.addEventListener('playing', () => {
+            window.firstPlaybackPosition = video.currentTime
+          }, { once: true })
+          video.currentTime = 20
+          video.currentTime = seconds
+        }, { capture: true, once: true })
+      }, position)
+      await openMockedVideo(page)
+      await expect.poll(() => page.evaluate(() => window.firstPlaybackPosition)).not.toBeNull()
+      const firstPosition = await page.evaluate(() => window.firstPlaybackPosition)
+      expect(firstPosition).toBeGreaterThanOrEqual(position)
+      expect(firstPosition).toBeLessThan(position + 1)
+    })
+  }
+
   test(`saves a seek before the first media data loads with ${existing ? 'existing' : 'new'} history`, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     if (!existing) {
@@ -157,3 +183,162 @@ for (const existing of [true, false]) {
     await expect(page).toHaveURL(/#\/history/)
   })
 }
+
+for (const position of [0, 5, 15]) {
+  test(`starts at a chapter seek to ${position} made before metadata is available`, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    let release
+    const pending = new Promise(resolve => { release = resolve })
+    let reached
+    const requested = new Promise(resolve => { reached = resolve })
+    await page.route(/googlevideo\.com\/videoplayback/, async route => {
+      reached()
+      await pending
+      await route.fallback()
+    })
+    try {
+      await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+      await page.locator(sel.searchInput).press('Enter')
+      await requested
+      const watch = await page.evaluateHandle(findWatchComponent)
+      await watch.evaluate((component, seconds) => {
+        const player = component.refs.player
+        const video = component.proxy.$el.querySelector('video')
+        window.firstPlaybackPosition = null
+        video.addEventListener('playing', () => {
+          window.firstPlaybackPosition = video.currentTime
+        }, { once: true })
+        player.setCurrentTime(20)
+        player.setCurrentTime(seconds)
+      }, position)
+      release()
+      await expect.poll(() => page.evaluate(() => window.firstPlaybackPosition)).not.toBeNull()
+      const firstPosition = await page.evaluate(() => window.firstPlaybackPosition)
+      expect(firstPosition).toBeGreaterThanOrEqual(position)
+      expect(firstPosition).toBeLessThan(position + 1)
+    } finally {
+      release()
+    }
+  })
+}
+
+for (const action of ['chapter', 'timeline']) {
+  test(`a newer ${action} seek during buffering replaces a chapter seek before metadata`, async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    let release
+    const pending = new Promise(resolve => { release = resolve })
+    let reached
+    const requested = new Promise(resolve => { reached = resolve })
+    await page.route(/googlevideo\.com\/videoplayback/, async route => {
+      reached()
+      await pending
+      await route.fallback()
+    })
+    try {
+      await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+      await page.locator(sel.searchInput).press('Enter')
+      await requested
+      const watch = await page.evaluateHandle(findWatchComponent)
+      await watch.evaluate((component, action) => {
+        const video = component.proxy.$el.querySelector('video')
+        window.firstPlaybackPosition = null
+        video.addEventListener('playing', () => { window.firstPlaybackPosition = video.currentTime }, { once: true })
+        video.addEventListener('loadeddata', () => {
+          if (action === 'chapter') {
+            component.refs.player.setCurrentTime(5)
+          } else {
+            const range = component.proxy.$el.querySelector('.shaka-seek-bar')
+            range.disabled = false
+            range.min = '0'
+            range.max = '30'
+            range.value = '5'
+            range.dispatchEvent(new Event('input', { bubbles: true }))
+          }
+        }, { once: true })
+        component.refs.player.setCurrentTime(15)
+      }, action)
+      release()
+      await expect.poll(() => page.evaluate(() => window.firstPlaybackPosition)).not.toBeNull()
+      const firstPosition = await page.evaluate(() => window.firstPlaybackPosition)
+      expect(firstPosition).toBeGreaterThanOrEqual(5)
+      expect(firstPosition).toBeLessThan(6)
+    } finally {
+      release()
+    }
+  })
+}
+
+test('native audio loading preserves a seek made during buffering', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  await openMockedVideo(page)
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate((component, url) => {
+    const video = component.proxy.$el.querySelector('video')
+    window.firstPlaybackPosition = null
+    video.addEventListener('loadedmetadata', () => {
+      video.addEventListener('playing', () => { window.firstPlaybackPosition = video.currentTime }, { once: true })
+      component.refs.player.setCurrentTime(5)
+    }, { once: true })
+    component.proxy.manifestSrc = url
+    component.proxy.manifestMimeType = 'video/webm'
+    component.proxy.activeFormat = 'audio'
+  }, DEMO_MEDIA_URL)
+  await expect.poll(() => page.evaluate(() => window.firstPlaybackPosition)).not.toBeNull()
+  const firstPosition = await page.evaluate(() => window.firstPlaybackPosition)
+  expect(firstPosition).toBeGreaterThanOrEqual(5)
+  expect(firstPosition).toBeLessThan(6)
+})
+
+test('starts DASH at a chapter seek made before metadata is available', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  let release
+  const pending = new Promise(resolve => { release = resolve })
+  let reached
+  const requested = new Promise(resolve => { reached = resolve })
+  await page.route(/googlevideo\.com\/videoplayback/, async route => {
+    reached()
+    await pending
+    await route.fallback()
+  })
+  try {
+    const watch = await page.evaluateHandle(findWatchComponent)
+    const mediaUrl = DEMO_MEDIA_URL.replaceAll('&', '&amp;')
+    const manifest = `<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="static" mediaPresentationDuration="PT30S" minBufferTime="PT0.1S">
+      <Period>
+        <AdaptationSet mimeType="video/webm" codecs="vp9,opus">
+          <Representation id="demo" bandwidth="200000" width="640" height="360">
+            <SegmentList duration="30">
+              <Initialization sourceURL="${mediaUrl}"/>
+              <SegmentURL media="${mediaUrl}"/>
+            </SegmentList>
+          </Representation>
+        </AdaptationSet>
+      </Period>
+    </MPD>`
+    await watch.evaluate((component, manifest) => {
+      const view = component.proxy
+      view.manifestMimeType = 'application/dash+xml'
+      view.manifestSrc = `data:application/dash+xml,${encodeURIComponent(manifest)}`
+      view.activeFormat = 'dash'
+    }, manifest)
+    await requested
+    await expect.poll(() => page.locator('.ftVideoPlayer').evaluate(element => element.ui?.getControls().getPlayer().getManifest() != null)).toBe(true)
+    await watch.evaluate(component => {
+      const video = component.proxy.$el.querySelector('video')
+      window.firstPlaybackPosition = null
+      video.addEventListener('playing', () => {
+        window.firstPlaybackPosition = video.currentTime
+      }, { once: true })
+      component.refs.player.setCurrentTime(15)
+    })
+    release()
+    await expect.poll(() => page.evaluate(() => window.firstPlaybackPosition)).not.toBeNull()
+    const firstPosition = await page.evaluate(() => window.firstPlaybackPosition)
+    expect(firstPosition).toBeGreaterThanOrEqual(15)
+    expect(firstPosition).toBeLessThan(16)
+  } finally {
+    release()
+  }
+})
