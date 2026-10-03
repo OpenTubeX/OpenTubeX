@@ -171,3 +171,56 @@ test.describe('Home subscription processing', () => {
     await expect(page.getByText('Video 1-0', { exact: true })).toBeVisible()
   })
 })
+
+for (const limit of ['global', 'daily']) {
+  test.describe(`Home with a ${limit} channel limit`, () => {
+    const channel = largeSubscriptionsSeed.profiles[0].subscriptions[0]
+    const thumbnail = color => `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="160" height="90"><rect width="160" height="90" fill="${color}"/></svg>`)}`
+    const refreshedThumbnail = thumbnail('blue')
+    test.use({
+      seed: {
+        settings: {
+          ...largeSubscriptionsSeed.settings,
+          hideSubscriptionsVideos: true,
+          hideSubscriptionsShorts: false,
+          onlyShowLatestFromChannel: limit === 'global',
+          onlyShowLatestFromChannelNumber: 1
+        },
+        profiles: [{
+          ...largeSubscriptionsSeed.profiles[0],
+          subscriptions: [{ ...channel, ...(limit === 'daily' ? { dailyVideoLimit: 1 } : {}) }]
+        }],
+        subscriptionCache: [{
+          ...largeSubscriptionsSeed.subscriptionCache[0],
+          videos: [],
+          shorts: largeSubscriptionsSeed.subscriptionCache[0].videos.slice(0, 3).map((video, index) => ({
+            ...video,
+            title: `Limited Short ${index}`,
+            published: new Date(2026, 9, 3, 12, 0, 3 - index).getTime(),
+            thumbnailUrl: thumbnail('red')
+          }))
+        }]
+      }
+    })
+
+    test('updates retained Home cards when cached Shorts metadata changes in place', async ({ page }) => {
+      await page.setViewportSize({ width: 375, height: 812 })
+      await goTo(page, 'home')
+      const cards = page.locator('[data-home-section="newSinceLastVisit"] .mediaGrid li')
+      await expect(cards).toHaveCount(1)
+      await expect(cards).toContainText('Limited Short 0')
+      await page.evaluate(thumbnailUrl => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        const channelId = store.getters.getActiveProfile.subscriptions[0].id
+        const video = store.state.subscriptionCache.shortsCache[channelId].videos[0]
+        store.commit('updateShortsCacheWithChannelPageShorts', {
+          channelId,
+          entries: [{ ...video, title: 'Refreshed Limited Short', thumbnailUrl }]
+        })
+      }, refreshedThumbnail)
+      await expect(cards).toHaveCount(1)
+      await expect(cards).toContainText('Refreshed Limited Short')
+      await expect(cards.locator('img')).toHaveAttribute('src', refreshedThumbnail)
+    })
+  })
+}
