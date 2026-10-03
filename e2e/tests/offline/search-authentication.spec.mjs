@@ -153,6 +153,33 @@ test('does not offer an authenticated retry while family-friendly search is enab
   await expect(page.getByRole('button', { name: 'Try with configured cookies' })).toHaveCount(0)
 })
 
+for (const pendingRetry of [true, false]) {
+  test(`discards ${pendingRetry ? 'pending' : 'loaded'} cookie results when family-friendly search is enabled`, async ({ app, page }) => {
+    const { log, response } = await configureCookieSearch(app)
+    await searchForAgeGate(page)
+    await writeFile(response, JSON.stringify({
+      entries: Array.from({ length: 20 }, (_, index) => ({
+        id: String(index).padStart(11, '0'), title: `Restricted result ${index}`, channel: 'Creator', duration: 120
+      }))
+    }))
+    await page.getByRole('button', { name: 'Try with configured cookies' }).click()
+    if (pendingRetry) {
+      await expect.poll(() => readFile(log, 'utf8').catch(() => '')).not.toBe('')
+    } else {
+      await expect(page.getByRole('heading', { name: 'Restricted result 0', exact: true })).toBeVisible()
+      await expect(page.getByRole('button', { name: 'Fetch more results' })).toHaveCount(1)
+    }
+    await page.evaluate(async () => {
+      await document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowFamilyFriendlyOnly', true)
+    })
+    await page.waitForTimeout(500)
+    await expect(page.getByRole('heading', { name: 'Confirm your age' })).toBeVisible()
+    await expect(page.getByText('Restricted result', { exact: false })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Fetch more results' })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Try with configured cookies' })).toHaveCount(0)
+  })
+}
+
 test('paginates authenticated results and stops at an empty final page', async ({ app, page }) => {
   const { log, response } = await configureCookieSearch(app)
   await searchForAgeGate(page)
@@ -205,6 +232,21 @@ test('ignores an authenticated retry that finishes after changing the search', a
   await page.locator(sel.searchInput).press('Enter')
   await expect(page).toHaveURL(/new%20search/)
   await expect(page.getByRole('heading', { name: 'Confirm your age' })).toBeVisible()
+  await page.waitForTimeout(500)
+  await expect(page.getByText('Stale authenticated result', { exact: true })).toHaveCount(0)
+})
+
+test('ignores an authenticated retry after navigating to an oversized search', async ({ app, page }) => {
+  const { log, response } = await configureCookieSearch(app)
+  await searchForAgeGate(page)
+  await writeFile(response, JSON.stringify({ entries: [{ id: 'dQw4w9WgXcQ', title: 'Stale authenticated result' }] }))
+  await page.getByRole('button', { name: 'Try with configured cookies' }).click()
+  await expect.poll(() => readFile(log, 'utf8').catch(() => '')).not.toBe('')
+  const oversizedQuery = 'x'.repeat(101)
+  await page.locator(sel.searchInput).fill(oversizedQuery)
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page).toHaveURL(new RegExp(`/search/${oversizedQuery}(\\?|$)`))
+  await expect(page.getByRole('button', { name: oversizedQuery, exact: true })).toBeVisible()
   await page.waitForTimeout(500)
   await expect(page.getByText('Stale authenticated result', { exact: true })).toHaveCount(0)
 })
