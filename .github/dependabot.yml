@@ -46,6 +46,7 @@ updates:
       - dependency-name: "@lezer/markdown"
       - dependency-name: "@playwright/test"
       - dependency-name: "@vot.js/core"
+      - dependency-name: "copy-webpack-plugin"
       - dependency-name: "dbus-native"
       - dependency-name: "eld"
       - dependency-name: "entities"
