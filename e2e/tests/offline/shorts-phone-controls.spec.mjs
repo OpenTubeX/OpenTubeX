@@ -27,6 +27,49 @@ async function openShort({ app, page }) {
   await expect(page.locator('.ftVideoPlayer')).toHaveClass(/shortsPlayer/)
 }
 
+for (const zoom of [1, 1.25]) {
+  test(`Shorts posters match the video crop across presentation modes at ${zoom * 100}% UI scale`, async ({ app, page }) => {
+    await openShort({ app, page })
+    await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
+    const poster = 'https://provider.test/landscape-short-poster.jpg'
+    await page.route(poster, route => route.fulfill({
+      contentType: 'image/svg+xml',
+      body: '<svg xmlns="http://www.w3.org/2000/svg" width="720" height="405"/>'
+    }))
+    const watch = await page.evaluateHandle(findWatchComponent)
+    await watch.evaluate((component, poster) => {
+      component.proxy.thumbnail = poster
+      document.querySelector('.ftVideoPlayer video').pause()
+      component.proxy.$refs.player.showPoster = true
+    }, poster)
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    const image = player.locator('.countdownPoster img:not(.retryImagePlaceholder)')
+    const video = player.locator('video')
+    await expect(image).toBeVisible()
+    await expect.poll(() => image.evaluate(image => image.naturalWidth)).toBe(720)
+    const expectCrop = async crop => {
+      await expect(video).toHaveCSS('object-fit', crop)
+      await expect(image).toHaveCSS('object-fit', crop)
+    }
+    await expectCrop('cover')
+    await page.locator('body').press('s')
+    await expect(player).toHaveClass(/fullWindow/)
+    await expectCrop('contain')
+    await page.locator('body').press('s')
+    await expectCrop('cover')
+    await player.evaluate(player => player.requestFullscreen())
+    await expectCrop('contain')
+    await page.evaluate(() => document.exitFullscreen())
+    await expectCrop('cover')
+    await page.evaluate(() => document.querySelector('.app').classList.add('capacitorTabs'))
+    await page.setViewportSize({ width: 1026, height: 461 })
+    await expectCrop('contain')
+    await page.setViewportSize({ width: 390, height: 800 })
+    await expectCrop('cover')
+    await watch.dispose()
+  })
+}
+
 test('data saver updates the poster of an already-open Short', async ({ app, page }) => {
   await openShort({ app, page })
   const high = 'https://i.ytimg.com/vi/short-poster/large.jpg'
