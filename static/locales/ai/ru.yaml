@@ -1953,3 +1953,6 @@ Form Inputs:
   Download Arguments Hint: Необязательные аргументы для этой загрузки
   Generated ID Hint: Оставьте пустым, чтобы сгенерировать ID
   Default Value: "По умолчанию: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Поиск с настроенными файлами cookie не удался."

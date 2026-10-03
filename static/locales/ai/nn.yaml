@@ -2324,3 +2324,6 @@ Form Inputs:
   Download Arguments Hint: Valfrie argument for denne nedlastinga
   Generated ID Hint: Lat stå tomt for å generere ein ID
   Default Value: "Standard: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Søk med dei konfigurerte informasjonskapslane mislukkast."

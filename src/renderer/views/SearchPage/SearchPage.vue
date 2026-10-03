@@ -15,6 +15,45 @@
         />
         {{ t("Search Filters.Search Results") }}
       </h2>
+      <div
+        v-if="searchNotice"
+        class="searchNotice"
+        role="status"
+      >
+        <h3>{{ searchNotice.title }}</h3>
+        <p>{{ searchNotice.body }}</p>
+        <template v-if="searchNotice.requiresAuthentication && supportsCookieSearch && !showFamilyFriendlyOnly">
+          <p v-if="!cookiesConfigured">
+            {{ t('Video.Configure Restricted Playback Cookies Hint') }}
+          </p>
+          <FtButton
+            v-else
+            class="searchRetryButton"
+            :label="t('Video.Try With Configured Cookies')"
+            :icon="['fas', 'cookie']"
+            :disabled="isRetryingWithCookies"
+            @click="retrySearchWithCookies"
+          />
+          <p v-if="isRetryingWithCookies">
+            {{ t('Search Filters["Fetching results. Please wait"]') }}
+          </p>
+        </template>
+      </div>
+      <p
+        v-if="cookieSearchFailed"
+        class="searchStatus"
+        role="alert"
+      >
+        {{ t('Search Filters.Cookie Search Failed') }}
+      </p>
+      <FtButton
+        v-if="cookieSearchFailed && !searchNotice && cookiesConfigured && !showFamilyFriendlyOnly"
+        class="searchRetryButton"
+        :label="t('Video.Try With Configured Cookies')"
+        :icon="['fas', 'cookie']"
+        :disabled="isRetryingWithCookies"
+        @click="retrySearchWithCookies"
+      />
       <FtElementList
         :data="shownResults"
       />
@@ -34,7 +73,7 @@
         </div>
       </FtAutoLoadNextPageWrapper>
       <p
-        v-else
+        v-else-if="!searchNotice && !cookieSearchFailed"
         class="searchStatus"
         role="status"
       >
@@ -52,6 +91,7 @@ import { useRoute } from 'vue-router'
 
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtCard from '../../components/ft-card/ft-card.vue'
+import FtButton from '../../components/FtButton/FtButton.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrapper.vue'
 
@@ -70,6 +110,8 @@ import {
 import { getInvidiousSearchResults } from '../../helpers/api/invidious'
 import { SEARCH_CHAR_LIMIT } from '../../../constants'
 import { useTabContext, useTabTitle } from '../../tabs/TabContext'
+import { ytDlp } from '../../helpers/ytDlp'
+import { hasConfiguredRestrictedPlaybackAuthentication } from '../../helpers/restricted-playback'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -86,6 +128,13 @@ const searchPage = ref(1)
 /** @type {import('vue').ShallowRef<import('youtubei.js').YT.Search | string | null>} */
 const nextPageRef = shallowRef(null)
 const shownResults = shallowRef([])
+const searchNotice = shallowRef(null)
+const searchParams = ref('')
+const isRetryingWithCookies = ref(false)
+const cookieSearchFailed = ref(false)
+const supportsCookieSearch = !!process.env.IS_ELECTRON
+const cookiesConfigured = computed(() => hasConfiguredRestrictedPlaybackAuthentication(store.getters, supportsCookieSearch))
+let searchRequestId = 0
 
 const query = ref('')
 const processedQuery = computed(() => query.value.trim())
@@ -199,6 +248,13 @@ function checkSearchCache(payload) {
     return
   }
 
+  searchRequestId++
+  searchNotice.value = null
+  searchParams.value = ''
+  cookieSearchFailed.value = false
+  isRetryingWithCookies.value = false
+  isLoadingMore.value = false
+
   const sameSearch = sessionSearchHistory.value.filter((search) => {
     return search.query === payload.query && searchFiltersMatch(payload.searchSettings, search.searchSettings)
   })
@@ -229,13 +285,18 @@ function checkSearchCache(payload) {
 
 async function performSearchLocal(payload) {
   isLoading.value = true
+  const requestId = searchRequestId
 
   try {
-    const { results, continuationData } = await getLocalSearchResults(
+    const response = await getLocalSearchResults(
       payload.query,
       payload.searchSettings,
       showFamilyFriendlyOnly.value
     )
+    if (requestId !== searchRequestId) return
+    const { results, continuationData } = response
+    searchNotice.value = response.searchNotice
+    searchParams.value = response.searchParams
 
     apiUsed.value = 'local'
 
@@ -251,6 +312,8 @@ async function performSearchLocal(payload) {
       searchSettings: searchSettings.value,
       nextPageRef: nextPageRef.value ? extractLocalCacheableSearchContinuation(nextPageRef.value) : null,
       hasMoreResults: hasMoreResults.value,
+      searchNotice: searchNotice.value,
+      searchParams: searchParams.value,
       apiUsed: apiUsed.value
     }
 
@@ -258,6 +321,7 @@ async function performSearchLocal(payload) {
 
     updateSubscriptionDetails(results)
   } catch (err) {
+    if (requestId !== searchRequestId) return
     console.error(err)
 
     const errorMessage = t('Local API Error (Click to copy)')
@@ -269,6 +333,41 @@ async function performSearchLocal(payload) {
     } else {
       isLoading.value = false
     }
+  }
+}
+
+async function retrySearchWithCookies() {
+  if (!cookiesConfigured.value || isRetryingWithCookies.value || showFamilyFriendlyOnly.value) return
+  if (apiUsed.value !== 'yt-dlp') searchPage.value = 1
+  await performSearchWithCookies()
+}
+
+async function performSearchWithCookies() {
+  const requestId = searchRequestId
+  const page = searchPage.value
+  isRetryingWithCookies.value = true
+  cookieSearchFailed.value = false
+  try {
+    const response = await ytDlp.ytDlpSearch(processedQuery.value, searchParams.value, page)
+    if (requestId !== searchRequestId) return
+    if (!response || response.error || (page === 1 && response.results.length === 0)) {
+      throw new Error('Authenticated search failed')
+    }
+    searchNotice.value = null
+    shownResults.value = page === 1 ? response.results : shownResults.value.concat(response.results)
+    apiUsed.value = 'yt-dlp'
+    hasMoreResults.value = response.hasMoreResults
+    nextPageRef.value = null
+    searchPage.value++
+    // Account-derived results stay in this tab and do not enter the shared cache.
+    updateSubscriptionDetails(response.results)
+  } catch {
+    if (requestId === searchRequestId) {
+      cookieSearchFailed.value = true
+      if (page > 1) hasMoreResults.value = false
+    }
+  } finally {
+    if (requestId === searchRequestId) isRetryingWithCookies.value = false
   }
 }
 
@@ -379,7 +478,11 @@ async function nextPage() {
     }
   }
 
-  if (apiUsed.value === 'local') {
+  if (apiUsed.value === 'yt-dlp') {
+    isLoadingMore.value = true
+    await performSearchWithCookies()
+    isLoadingMore.value = false
+  } else if (apiUsed.value === 'local') {
     if (nextPageRef.value !== null) {
       isLoadingMore.value = true
       try {
@@ -405,6 +508,8 @@ function replaceShownResults(history) {
   shownResults.value = history.data
   searchSettings.value = history.searchSettings
   apiUsed.value = history.apiUsed
+  searchNotice.value = history.searchNotice ?? null
+  searchParams.value = history.searchParams ?? ''
   nextPageRef.value = history.nextPageRef ?? null
   hasMoreResults.value = history.hasMoreResults ?? (
     history.apiUsed === 'local' ? nextPageRef.value !== null : true

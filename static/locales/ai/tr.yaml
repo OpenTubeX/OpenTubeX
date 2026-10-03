@@ -1936,3 +1936,6 @@ Form Inputs:
   Download Arguments Hint: Bu indirme için isteğe bağlı argümanlar
   Generated ID Hint: Kimlik oluşturmak için boş bırakın
   Default Value: "Varsayılan: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Yapılandırılan çerezlerle arama başarısız oldu."

@@ -383,13 +383,21 @@ export async function getLocalTrending(location, tab) {
  * @param {AbortSignal} [signal]
  */
 export async function getLocalSearchResults(query, filters, safetyMode, signal) {
+  let searchParams = ''
   const innertube = await createInnertube({
     safetyMode,
     signal,
+    fetchFunc: (input, init) => {
+      if (new URL(input instanceof Request ? input.url : input).pathname === '/youtubei/v1/search') {
+        // Reuse YouTube.js' encoded filters for an explicit yt-dlp retry.
+        searchParams = JSON.parse(init.body).params ?? ''
+      }
+      return localApiFetch(input, init)
+    },
   })
   const response = await innertube.search(query, convertSearchFilters(filters))
 
-  return handleSearchResponse(response)
+  return { ...handleSearchResponse(response), searchParams }
 }
 
 /**
@@ -1413,10 +1421,19 @@ export async function getLocalArtistTopicChannelReleasesContinuation(channel, co
  * @param {YT.Search} response
  */
 function handleSearchResponse(response) {
+  const notice = response.results?.find(item => item.type === 'BackgroundPromo')
+  const searchNotice = notice
+    ? {
+        title: notice.title.toString(),
+        body: notice.body_text.toString(),
+        requiresAuthentication: notice.cta_button?.endpoint?.name === 'signInEndpoint'
+      }
+    : null
   if (!response.results) {
     return {
       results: [],
-      continuationData: null
+      continuationData: null,
+      searchNotice
     }
   }
 
@@ -1435,6 +1452,7 @@ function handleSearchResponse(response) {
 
   return {
     results,
+    searchNotice,
     // check the length of the results, as there can be continuations for things that we've filtered out, which we don't want
     continuationData: response.has_continuation && results.length > 0 ? response : null
   }

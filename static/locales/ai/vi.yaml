@@ -1974,3 +1974,6 @@ Form Inputs:
   Download Arguments Hint: Đối số tùy chọn cho lượt tải này
   Generated ID Hint: Để trống để tạo ID
   Default Value: "Mặc định: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Tìm kiếm bằng cookie đã cấu hình thất bại."

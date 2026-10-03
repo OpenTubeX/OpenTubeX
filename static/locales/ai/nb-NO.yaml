@@ -1958,3 +1958,6 @@ Form Inputs:
   Download Arguments Hint: Valgfrie argumenter for denne nedlastingen
   Generated ID Hint: La stå tomt for å generere en ID
   Default Value: "Standard: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Søk med de konfigurerte informasjonskapslene mislyktes."

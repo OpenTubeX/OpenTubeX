@@ -545,6 +545,8 @@ export default {
     return ipcRenderer.invoke(IpcChannels.YT_DLP_GET_RECOMMENDATIONS, currentVideoId)
   },
 
+  ytDlpSearch: (query, params, page) => ipcRenderer.invoke(IpcChannels.YT_DLP_SEARCH, query, params, page),
+
   ytDlpGetSubtitle: (url) => {
     return ipcRenderer.invoke(IpcChannels.YT_DLP_GET_SUBTITLE, url)
   },

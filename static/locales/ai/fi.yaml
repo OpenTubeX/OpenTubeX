@@ -1984,3 +1984,6 @@ Form Inputs:
   Download Arguments Hint: Valinnaiset argumentit tälle lataukselle
   Generated ID Hint: Jätä tyhjäksi luodaksesi tunnuksen
   Default Value: "Oletus: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Haku määritetyillä evästeillä epäonnistui."

@@ -1946,3 +1946,6 @@ Form Inputs:
   Download Arguments Hint: Argumen opsional untuk unduhan ini
   Generated ID Hint: Biarkan kosong untuk membuat ID
   Default Value: "Default: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Pencarian dengan cookie yang dikonfigurasi gagal."

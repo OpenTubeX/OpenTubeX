@@ -1922,3 +1922,6 @@ Form Inputs:
   Download Arguments Hint: Optional arguments for this download
   Generated ID Hint: Leave blank to generate an ID
   Default Value: "Default: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Search failed with the configured cookies."

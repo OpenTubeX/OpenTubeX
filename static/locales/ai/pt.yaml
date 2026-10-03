@@ -1989,3 +1989,6 @@ Form Inputs:
   Download Arguments Hint: Argumentos opcionais para esta transferência
   Generated ID Hint: Deixe em branco para gerar um ID
   Default Value: "Predefinição: {value}"
+
+Search Filters:
+  Cookie Search Failed: "A pesquisa com os cookies configurados falhou."

@@ -1934,3 +1934,6 @@ Form Inputs:
   Download Arguments Hint: Arguments facultatifs pour ce téléchargement
   Generated ID Hint: Laissez vide pour générer un ID
   Default Value: "Par défaut : {value}"
+
+Search Filters:
+  Cookie Search Failed: "La recherche avec les cookies configurés a échoué."

@@ -1944,3 +1944,6 @@ Form Inputs:
   Download Arguments Hint: Arventennoù diret evit ar bellgargadenn-mañ
   Generated ID Hint: Lezit goullo evit genel un ID
   Default Value: "Dre ziouer: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Cʼhwitet eo ar cʼhlask gant an toupinoù kefluniet."

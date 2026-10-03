@@ -1935,3 +1935,6 @@ Form Inputs:
   Download Arguments Hint: Argomenti facoltativi per questo download
   Generated ID Hint: Lascia vuoto per generare un ID
   Default Value: "Predefinito: {value}"
+
+Search Filters:
+  Cookie Search Failed: "La ricerca con i cookie configurati non è riuscita."

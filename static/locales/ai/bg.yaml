@@ -1958,3 +1958,6 @@ Form Inputs:
   Download Arguments Hint: Незадължителни аргументи за това изтегляне
   Generated ID Hint: Оставете празно, за да се генерира ID
   Default Value: "По подразбиране: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Търсенето с настроените бисквитки е неуспешно."
