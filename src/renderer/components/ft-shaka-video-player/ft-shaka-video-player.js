@@ -5256,6 +5256,9 @@ export default defineComponent({
         : 'disabled',
       adjustments: mobileAdjustments,
       miniPlayerDrag: {
+        canDismiss: () => mobileMiniBarCanDismiss.value && !mobileMiniBarControlsDisabled.value,
+        dismiss: () => dismissCrossTabMiniPlayer(),
+        dismissDuration: () => isReducedMotionEnabled() ? 0 : 140 / getAnimationSpeedMultiplier(store.getters.getAnimationSpeed),
         begin: restoring => beginScrollMiniPlayerDrag(restoring),
         move: (x, y) => moveScrollMiniPlayerDrag(x, y),
         finish: commit => finishScrollMiniPlayerDrag(commit),

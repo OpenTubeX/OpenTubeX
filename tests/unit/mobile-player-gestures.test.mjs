@@ -12,12 +12,12 @@ class ElementStub {
   closest(selectors) { return this.selector && selectors.includes(this.selector) ? this : null }
 }
 
-function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = true, mobile = true, mini = false, shorts = false, height = 200.5, nativeReplay = false, minimize = false, fullscreen = () => false, controls, toggleFullscreen } = {}) {
+function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = true, mobile = true, mini = false, dismissible = () => false, reducedMotion = true, shorts = false, height = 200.5, nativeReplay = false, minimize = false, fullscreen = () => false, controls, toggleFullscreen } = {}) {
   t.mock.method(globalThis, 'setTimeout', setTimeout)
   const previous = { document: globalThis.document, window: globalThis.window, Element: globalThis.Element }
   globalThis.Element = ElementStub
   globalThis.document = { querySelector: () => ({ classList: { contains: () => mobile } }) }
-  globalThis.window = { setTimeout: (...args) => setTimeout(...args), matchMedia: () => ({ matches: true }) }
+  globalThis.window = { setTimeout: (...args) => setTimeout(...args), matchMedia: () => ({ matches: reducedMotion }) }
   const surface = new ElementStub()
   const calls = []
   const captures = new Set()
@@ -48,6 +48,8 @@ function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = t
         isShortsPlayer: () => shorts,
         getSwipeAction: side => side === 'left' ? left : right,
         miniPlayerDrag: {
+          canDismiss: dismissible,
+          dismiss: () => calls.push('dismiss'),
           begin: () => { if (minimize) calls.push('drag-begin'); return minimize },
           move: (x, y) => calls.push(['drag-move', x, y]),
           finish: commit => calls.push(['drag-finish', commit]),
@@ -445,6 +447,82 @@ test('a rejected scroll-mini-player restore never enters fullscreen or retains c
   assert.equal(calls.includes('fullscreen'), false)
   assert.equal(captures.size, 0)
 })
+
+for (const distance of [24, 64, 100]) {
+  test(`downward mini-player swipe ${distance}px closes only after the threshold`, t => {
+    const { gestures: g, event, calls, captures } = fixture(t, { mini: true, dismissible: () => true, fullscreenSwipe: false })
+    t.mock.timers.enable({ apis: ['setTimeout'] })
+    const target = new ElementStub('.mobileMiniBarReturn')
+    g.startMobileFullscreenGesture(event(210, 400, { target }))
+    assert.equal(g.moveMobileFullscreenGesture(event(212, 400 + distance, { target })), true)
+    assert.equal(g.mobileFullscreenSwipeStyle.value['--mobile-mini-dismiss-offset'], `${distance}px`)
+    assert.equal(g.finishMobileFullscreenGesture(event(212, 400 + distance, { target })), true)
+    assert.equal(captures.size, 0)
+    assert.equal(g.handleMobilePlayerSurfaceClick(event(212, 400 + distance, { target })), true)
+    t.mock.timers.tick(0)
+    assert.deepEqual(calls, distance >= 64 ? ['dismiss'] : [])
+    assert.equal(g.mobileFullscreenSwipeStyle.value, undefined)
+  })
+}
+
+test('downward swipe leaves a same-page scroll mini-player open', t => {
+  const { gestures: g, event, calls } = fixture(t, { mini: true, minimize: true })
+  g.startMobileFullscreenGesture(event(210, 400))
+  assert.equal(g.moveMobileFullscreenGesture(event(210, 500)), false)
+  g.finishMobileFullscreenGesture(event(210, 500))
+  assert.deepEqual(calls, [])
+})
+
+for (const reason of ['reversed', 'pointer cancel', 'second finger', 'unavailable']) {
+  test(`dismissal cancels when ${reason}`, t => {
+    let available = true
+    const { gestures: g, event, calls, captures } = fixture(t, { mini: true, dismissible: () => available })
+    t.mock.timers.enable({ apis: ['setTimeout'] })
+    g.startMobileFullscreenGesture(event(210, 400))
+    g.moveMobileFullscreenGesture(event(210, 500))
+    if (reason === 'reversed') {
+      g.moveMobileFullscreenGesture(event(210, 390))
+      g.finishMobileFullscreenGesture(event(210, 390))
+    } else if (reason === 'pointer cancel') g.cancelMobileFullscreenGesture(event())
+    else if (reason === 'second finger') g.startMobileFullscreenGesture(event(220, 480, { pointerId: 2, isPrimary: false }))
+    else {
+      g.finishMobileFullscreenGesture(event(210, 500))
+      available = false
+    }
+    t.mock.timers.tick(0)
+    assert.deepEqual(calls, [])
+    assert.equal(captures.size, 0)
+    assert.equal(g.mobileFullscreenSwipeStyle.value, undefined)
+  })
+}
+
+for (const canceled of [false, true]) {
+  test(`dismissal waits for its release animation${canceled ? ' and can be canceled during it' : ''}`, t => {
+    const { gestures: g, event, calls } = fixture(t, { mini: true, dismissible: () => true, reducedMotion: false })
+    t.mock.timers.enable({ apis: ['setTimeout'] })
+    g.startMobileFullscreenGesture(event(210, 400))
+    g.moveMobileFullscreenGesture(event(210, 500))
+    g.finishMobileFullscreenGesture(event(210, 500))
+    assert.equal(g.mobileFullscreenSwipeStyle.value['--mobile-mini-dismiss-duration'], '140ms')
+    t.mock.timers.tick(139)
+    assert.deepEqual(calls, [])
+    if (canceled) g.cancelMobileFullscreenGesture()
+    t.mock.timers.tick(1)
+    assert.deepEqual(calls, canceled ? [] : ['dismiss'])
+    assert.equal(g.mobileFullscreenSwipeStyle.value, undefined)
+  })
+}
+
+for (const selector of ['.mobileMiniBarDismiss', '.mobileMiniBarPlayPause', '.mobileMiniBarPlayback']) {
+  test(`downward swipes on ${selector} keep its control action separate`, t => {
+    const { gestures: g, event, calls } = fixture(t, { mini: true, dismissible: () => true })
+    const target = new ElementStub(selector)
+    g.startMobileFullscreenGesture(event(210, 400, { target }))
+    assert.equal(g.moveMobileFullscreenGesture(event(210, 500, { target })), false)
+    g.finishMobileFullscreenGesture(event(210, 500, { target }))
+    assert.deepEqual(calls, [])
+  })
+}
 
 
 test('does not reenter fullscreen when iPadOS already exited during a downward swipe', async t => {
