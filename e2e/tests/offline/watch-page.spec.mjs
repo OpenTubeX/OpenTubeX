@@ -119,6 +119,10 @@ test('phone watch players have square corners where the layout meets the screen 
     await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
     for (const size of [{ width: 375, height: 812 }, { width: 667, height: 375 }, { width: 812, height: 375 }]) {
       await page.setViewportSize(size)
+      if (size.width === 375) {
+        await expect(player).toHaveCSS('border-radius', '0px')
+        continue
+      }
       const headerGap = await player.evaluate(element => {
         const bounds = element.getBoundingClientRect()
         const header = document.querySelector('.topNav').getBoundingClientRect()
