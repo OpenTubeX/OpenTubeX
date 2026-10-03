@@ -376,7 +376,9 @@ export function useMobileFullscreenGestures({
     }
     if (event && event.pointerId !== mobileFullscreenGesture?.pointerId) return false
 
-    clearMobileMiniPlayerDismiss()
+    if (mobileFullscreenGesture !== null || !mobileMiniPlayerDismissSettling.value) {
+      clearMobileMiniPlayerDismiss()
+    }
 
     clearTimeout(mobileSurfaceTapTimer)
     mobileSurfaceTapTimer = null

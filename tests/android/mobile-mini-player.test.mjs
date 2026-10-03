@@ -25,7 +25,7 @@ test('mobile mini-player restores from the whole bar, swipes down to close, and 
         VideoPlaybackEngine: 'built-in', AutoplayVideos: false,
         UseSponsorBlock: false, UseReturnYouTubeDislikes: false,
         KeepPlayingOnNavigation: true, ScrollMiniPlayerEnabled: true, CapacitorLayoutMode: 'phone',
-        UiScale: 100, ReducedMotion: 'off', EnableMobileFullscreenSwipe: false, RotateFullscreenToLandscape: false,
+        UiScale: 100, ReducedMotion: 'off', AnimationSpeed: 100, EnableMobileFullscreenSwipe: false, RotateFullscreenToLandscape: false,
         EnterFullscreenOnDisplayRotate: false, PlayingInterfaceHideDelay: 5,
         MobileLeftSwipeAction: 'disabled', MobileRightSwipeAction: 'disabled',
         AmbientMode: true,
@@ -141,6 +141,7 @@ test('mobile mini-player restores from the whole bar, swipes down to close, and 
           await page.evaluate(() => { location.hash = '#/subscriptions' })
           await expect(player).toHaveClass(/mobileMiniBar/)
           await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+          if (scale === 125) assert.equal(await player.evaluate(element => getComputedStyle(element).transitionDuration), '0s')
           const returnButton = player.locator('.mobileMiniBarReturn')
           await expect(returnButton).toBeEnabled()
           await expect(returnButton.locator('svg')).toHaveCount(0)
@@ -189,13 +190,25 @@ test('mobile mini-player restores from the whole bar, swipes down to close, and 
     await touch('touchCancel')
     await expect(page).toHaveURL(/#\/subscriptions/)
     await expect(close).toBeEnabled()
-    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'off'))
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateReducedMotion', 'off')
+      await store.dispatch('updateAnimationSpeed', 25)
+    })
     // Cover closing by a downward swipe after verifying the close control.
     const returnBox = await player.locator('.mobileMiniBarReturn').boundingBox()
     const down = { x: returnBox.x + returnBox.width / 2, y: returnBox.y + 8 }
     await touch('touchStart', down)
     for (const distance of [20, 40, 64, 80]) await touch('touchMove', { ...down, y: down.y + distance })
     await touch('touchEnd')
+    await expect.poll(() => player.evaluate(element => {
+      const animation = element.getAnimations().find(animation => animation.transitionProperty === 'transform')
+      return animation && { duration: animation.effect.getTiming().duration, rate: animation.playbackRate }
+    })).toEqual({ duration: 140, rate: 0.25 })
+    // A second pointer arriving after release must not cancel the close timer.
+    await player.evaluate(element => element.dispatchEvent(new PointerEvent('pointerdown', {
+      pointerType: 'touch', pointerId: 2, isPrimary: false, button: 0, bubbles: true,
+    })))
     await expect(page.locator('.mobileMiniBarOverlay')).toHaveCount(0)
     await expect(page).toHaveURL(/#\/subscriptions/)
     assert.equal(await originalVideo.evaluate(video => video.paused && !video.isConnected), true)
@@ -217,6 +230,7 @@ test('mobile mini-player restores from the whole bar, swipes down to close, and 
       location.hash = originalRoute
       for (const [key, value] of Object.entries(settings ?? {})) store.commit('set' + key, value)
       if (settings) store.dispatch('updateReducedMotion', settings.ReducedMotion)
+      if (settings) store.dispatch('updateAnimationSpeed', settings.AnimationSpeed)
       if (window.__miniPlayerFetch) window.fetch = window.__miniPlayerFetch
       delete window.__miniPlayerFetch
       document.querySelector('#mini-player-test-style')?.remove()

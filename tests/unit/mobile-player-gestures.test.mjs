@@ -68,12 +68,17 @@ function fixture(t, { left = 'brightness', right = 'volume', fullscreenSwipe = t
     },
   })
   app.mount({})
-  t.after(() => { app.unmount(); Object.assign(globalThis, previous) })
+  let mounted = true
+  const unmount = () => {
+    if (mounted) app.unmount()
+    mounted = false
+  }
+  t.after(() => { unmount(); Object.assign(globalThis, previous) })
   function event(x = 50, y = 150, extra = {}) {
     return { clientX: x, clientY: y, pointerId: 1, pointerType: 'touch', button: 0, isPrimary: true, target: surface,
       preventDefault() { this.prevented = true }, stopPropagation() {}, stopImmediatePropagation() {}, ...extra }
   }
-  return { gestures, calls, event, captures, container }
+  return { gestures, calls, event, captures, container, unmount }
 }
 
 test('Shorts vertical swipes stay available for feed navigation', t => {
@@ -496,9 +501,9 @@ for (const reason of ['reversed', 'pointer cancel', 'second finger', 'unavailabl
   })
 }
 
-for (const canceled of [false, true]) {
-  test(`dismissal waits for its release animation${canceled ? ' and can be canceled during it' : ''}`, t => {
-    const { gestures: g, event, calls } = fixture(t, { mini: true, dismissible: () => true, reducedMotion: false })
+for (const unmounted of [false, true]) {
+  test(`dismissal waits for its release animation${unmounted ? ' and is canceled on unmount' : ''}`, t => {
+    const { gestures: g, event, calls, unmount } = fixture(t, { mini: true, dismissible: () => true, reducedMotion: false })
     t.mock.timers.enable({ apis: ['setTimeout'] })
     g.startMobileFullscreenGesture(event(210, 400))
     g.moveMobileFullscreenGesture(event(210, 500))
@@ -506,9 +511,26 @@ for (const canceled of [false, true]) {
     assert.equal(g.mobileFullscreenSwipeStyle.value['--mobile-mini-dismiss-duration'], '140ms')
     t.mock.timers.tick(139)
     assert.deepEqual(calls, [])
-    if (canceled) g.cancelMobileFullscreenGesture()
+    if (unmounted) unmount()
     t.mock.timers.tick(1)
-    assert.deepEqual(calls, canceled ? [] : ['dismiss'])
+    assert.deepEqual(calls, unmounted ? ['cancel'] : ['dismiss'])
+    assert.equal(g.mobileFullscreenSwipeStyle.value, undefined)
+  })
+}
+
+for (const secondTouch of [false, true]) {
+  test(`committed dismissal survives ${secondTouch ? 'a second touch' : 'event-less cancellation'} during settling`, t => {
+    const { gestures: g, event, calls } = fixture(t, { mini: true, dismissible: () => true, reducedMotion: false })
+    t.mock.timers.enable({ apis: ['setTimeout'] })
+    g.startMobileFullscreenGesture(event(210, 400))
+    g.moveMobileFullscreenGesture(event(210, 500))
+    g.finishMobileFullscreenGesture(event(210, 500))
+    t.mock.timers.tick(70)
+    if (secondTouch) g.startMobileFullscreenGesture(event(220, 480, { pointerId: 2, isPrimary: false }))
+    else assert.equal(g.cancelMobileFullscreenGesture(), false)
+    assert.equal(g.mobileFullscreenSwipeStyle.value?.['--mobile-mini-dismiss-offset'], '296.5px')
+    t.mock.timers.tick(70)
+    assert.deepEqual(calls, ['dismiss'])
     assert.equal(g.mobileFullscreenSwipeStyle.value, undefined)
   })
 }
