@@ -1134,6 +1134,7 @@ test('shows the audio-track player and custom visualizer for YouTube Music track
   await artwork.evaluate((element, src) => { element.src = src }, artworkSrc)
   await expect.poll(() => artwork.evaluate(element => element.naturalWidth)).toBeGreaterThan(0)
 
+  await player.hover()
   await player.getByRole('button', { name: 'More settings' }).click({ force: true })
   const visualizerToggle = player.getByRole('button', { name: 'Music visualizer', exact: true })
   await expect(visualizerToggle).toBeVisible()
