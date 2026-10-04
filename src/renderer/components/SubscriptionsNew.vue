@@ -146,7 +146,10 @@ const watchedHistoryState = computed(() => {
     .map(({ videoId, isWatched }) => `${videoId}:${isWatched === true}`).join(',')
 })
 
-watch(() => store.getters.getSubscriptionFeedRefreshInProgress, refreshing => {
+watch([
+  () => store.getters.getSubscriptionFeedRefreshInProgress,
+  () => store.getters.getSubscriptionFeedRefreshTab
+], ([refreshing]) => {
   if (!refreshing) {
     cachedContentDuringRefresh.value = null
     deferChannelUpdates = false
@@ -164,7 +167,7 @@ watch(() => store.getters.getSubscriptionFeedRefreshInProgress, refreshing => {
   deferChannelUpdates = cachedEntryCount > MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES
   // Snapshot every refresh so incoming responses cannot each rebuild the DOM.
   // Small feeds publish coalesced updates; large feeds publish at completion.
-  cachedContentDuringRefresh.value = newContentByCategory.value
+  cachedContentDuringRefresh.value = getCurrentContentByCategory()
 }, { immediate: true, flush: 'sync' })
 
 for (const feedType of ['videos', 'shorts', 'live', 'posts']) {
