@@ -1434,9 +1434,6 @@ test.describe('large combined new feed', () => {
 
     const metrics = await page.evaluate(async () => {
       const scroller = document.scrollingElement
-      const cards = () => document.querySelectorAll(
-        '.tabContent[aria-hidden="false"] #subscriptionsPanel:not(.newFeed) .ft-list-video'
-      ).length
       let steps = 0
       for (let y = 0; y < scroller.scrollHeight - innerHeight && steps < 200; y += 350, steps++) {
         scroller.scrollTo(0, y)
@@ -1447,11 +1444,13 @@ test.describe('large combined new feed', () => {
       )].some(card => card.textContent.includes('New video 99'))
       scroller.scrollTo(0, 0)
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
-      return { afterReturning: cards(), reachedLastVideo, steps }
+      return { reachedLastVideo, steps }
     })
     expect(metrics.steps).toBeGreaterThan(5)
     expect(metrics.reachedLastVideo).toBe(true)
-    expect(metrics.afterReturning).toBeLessThan(40)
+    // Intersection delivery, the release frame and Vue's patch can take more
+    // than two frames. Wait for actual eviction rather than sampling mid-update.
+    await expect.poll(() => panel.locator('.ft-list-video').count()).toBeLessThan(40)
     await expect(panel.getByText('New video 0', { exact: true })).toBeVisible()
   })
 
