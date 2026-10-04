@@ -299,8 +299,14 @@ export function useHomeRecommendations(visible) {
       clearFeed()
       initialized = available.value
     })
-  watch(exploration, () => rerank())
-  watch(() => store.getters.getEnableBlockLists, () => rerank())
+  function updateRanking() {
+    // Supersede the entire cached restore so a cancelled ranking cannot publish
+    // an empty feed while the replacement ranking is still running.
+    if (isLoading.value && cachedCandidates?.videos === candidates) refresh(true)
+    else rerank()
+  }
+  watch(exploration, updateRanking)
+  watch(() => store.getters.getEnableBlockLists, updateRanking)
   onBeforeUnmount(cancelRequest)
   return {
     enabled,

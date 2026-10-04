@@ -163,6 +163,52 @@ for (const [setting, value] of [['getRecommendationExploration', 0.5], ['getEnab
   })
 }
 
+test('a preference change during a cached rerank waits for the replacement ranking before caching it', async () => {
+  const profile = { channels: [], channelWeights: new Map(), evidence: new Map() }
+  const releases = new Map()
+  let profileCalls = 0
+  const first = createFeed({
+    candidates: [{ videoId: 'candidate' }],
+    buildProfile: async () => {
+      const call = ++profileCalls
+      if (call === 2 || call === 3) await new Promise(resolve => releases.set(call, resolve))
+      return profile
+    },
+  })
+  async function waitForProfile(call) {
+    for (let index = 0; index < 1000 && !releases.has(call); index++) {
+      await new Promise(resolve => setTimeout(resolve, 1))
+    }
+    assert.ok(releases.has(call), `profile ${call} did not start`)
+  }
+  await waitForFeed(first.feed)
+  first.stop()
+  first.getters.getRecommendationExploration = 0.3
+  const second = first.mount()
+  try {
+    await waitForProfile(2)
+    second.getters.getRecommendationExploration = 0.4
+    await waitForProfile(3)
+    releases.get(2)()
+    await new Promise(resolve => setTimeout(resolve, 0))
+    assert.equal(second.feed.isLoading.value, true)
+    releases.get(3)()
+    await waitForFeed(second.feed)
+    assert.equal(second.feed.recommendations.value.length, 1)
+    assert.equal(second.work.requests, 1)
+  } finally {
+    for (const release of releases.values()) release()
+    second.stop()
+  }
+  const third = first.mount()
+  try {
+    assert.equal(third.feed.isLoading.value, false)
+    assert.equal(third.feed.recommendations.value.length, 1)
+  } finally {
+    third.stop()
+  }
+})
+
 test('revisiting Home refreshes expired feeds', async t => {
   const first = createFeed({ candidates: [{ videoId: 'candidate' }] })
   await waitForFeed(first.feed)
