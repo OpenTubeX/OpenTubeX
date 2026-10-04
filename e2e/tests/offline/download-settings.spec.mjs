@@ -307,82 +307,85 @@ test.describe('download settings', () => {
     })).toEqual(['Podcast', 'Podcast Copy'])
   })
 
-  test('clamps the automatic download manager after dynamic content changes', async ({ app, page }) => {
-    await goToSettingsSection(page, 'download')
-    await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
+  for (const uiScale of [100, 95]) {
+    test(`clamps the automatic download manager after dynamic content changes at ${uiScale}%`, async ({ app, page }) => {
+      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), uiScale)
+      await goToSettingsSection(page, 'download')
+      await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
 
-    const manager = page.locator('.settingsSubpageContent')
-    for (const roundness of [0, 50, 100, 200, 100]) {
-      await page.evaluate(value => {
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
-      }, roundness)
-      await expect(manager.locator('.channelRule').first()).toHaveCSS('border-radius', `${10 * roundness / 100}px`)
-    }
-    const search = manager.getByRole('searchbox', { name: 'Search channels' })
-    const scroller = manager.locator('.automaticDownloadsScroller')
-    const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
-    await scrollToBottom(scroller)
-    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
-
-    await search.fill('beta')
-    await expect(manager.getByText('Beta Channel', { exact: true })).toBeVisible()
-    await expect(manager.getByText('Alpha Channel', { exact: true })).toHaveCount(0)
-    await expectScrollAtRenderedEnd(scroller)
-    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
-
-    await manager.getByText('Beta Channel', { exact: true }).click()
-    await expect.poll(() => page.evaluate((channelId) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      return JSON.parse(store.getters.getYtDlpAutomaticDownloadRules)[channelId]
-    }, BETA_CHANNEL_ID)).toEqual(expect.objectContaining({
-      template: 'video:best',
-      includeVideos: true,
-      includeShorts: false,
-      includeLivestreams: false,
-      enabledAt: expect.any(Number)
-    }))
-
-    const options = manager.locator('.templateAndTypes')
-    const geometry = await options.evaluate((row) => {
-      const controls = [
-        row.querySelector('.select-text'),
-        ...row.querySelectorAll('.switch-label')
-      ].map(element => element.getBoundingClientRect())
-      return {
-        centers: controls.map(box => box.y + box.height / 2),
-        widths: controls.map(box => box.width)
+      const manager = page.locator('.settingsSubpageContent')
+      for (const roundness of [0, 50, 100, 200, 100]) {
+        await page.evaluate(value => {
+          document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
+        }, roundness)
+        await expect(manager.locator('.channelRule').first()).toHaveCSS('border-radius', `${10 * roundness / 100}px`)
       }
+      const search = manager.getByRole('searchbox', { name: 'Search channels' })
+      const scroller = manager.locator('.automaticDownloadsScroller')
+      const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+      await scrollToBottom(scroller)
+      await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+
+      await search.fill('beta')
+      await expect(manager.getByText('Beta Channel', { exact: true })).toBeVisible()
+      await expect(manager.getByText('Alpha Channel', { exact: true })).toHaveCount(0)
+      await expectScrollAtRenderedEnd(scroller)
+      await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+
+      await manager.getByText('Beta Channel', { exact: true }).click()
+      await expect.poll(() => page.evaluate((channelId) => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        return JSON.parse(store.getters.getYtDlpAutomaticDownloadRules)[channelId]
+      }, BETA_CHANNEL_ID)).toEqual(expect.objectContaining({
+        template: 'video:best',
+        includeVideos: true,
+        includeShorts: false,
+        includeLivestreams: false,
+        enabledAt: expect.any(Number)
+      }))
+
+      const options = manager.locator('.templateAndTypes')
+      const geometry = await options.evaluate((row) => {
+        const controls = [
+          row.querySelector('.select-text'),
+          ...row.querySelectorAll('.switch-label')
+        ].map(element => element.getBoundingClientRect())
+        return {
+          centers: controls.map(box => box.y + box.height / 2),
+          widths: controls.map(box => box.width)
+        }
+      })
+      for (const center of geometry.centers.slice(1)) {
+        expect(center).toBeCloseTo(geometry.centers[0], 0)
+      }
+      expect(geometry.widths[0]).toBeGreaterThan(geometry.widths[1])
+
+      await page.getByRole('button', { name: 'Maximize' }).click()
+      await setWindowSize(app, page, { width: 560, height: 800 })
+      await expect.poll(() => manager.evaluate(element => element.clientWidth)).toBeLessThanOrEqual(600)
+      await scrollToBottom(scroller)
+      await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+
+      await manager.getByText('Beta Channel', { exact: true }).click()
+      await expect(options).toHaveCount(0)
+      await expectScrollAtRenderedEnd(scroller)
+      await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+
+      await manager.getByText('Beta Channel', { exact: true }).click()
+      await expect(options).toBeVisible()
+      await scrollToBottom(scroller)
+      await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+
+      await setWindowSize(app, page, { width: 1200, height: 900 })
+      await expect.poll(() => manager.evaluate(element => element.clientWidth)).toBeGreaterThan(760)
+      await expectScrollAtRenderedEnd(scroller)
+      await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+
+      const { page: relaunchedPage } = await app.relaunch()
+      await goToSettingsSection(relaunchedPage, 'download')
+      await expect(relaunchedPage.getByRole('button', { name: 'Manage Automatic Downloads (1)' })).toBeVisible()
     })
-    for (const center of geometry.centers.slice(1)) {
-      expect(center).toBeCloseTo(geometry.centers[0], 0)
-    }
-    expect(geometry.widths[0]).toBeGreaterThan(geometry.widths[1])
-
-    await page.getByRole('button', { name: 'Maximize' }).click()
-    await setWindowSize(app, page, { width: 560, height: 800 })
-    await expect.poll(() => manager.evaluate(element => element.clientWidth)).toBeLessThanOrEqual(600)
-    await scrollToBottom(scroller)
-    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
-
-    await manager.getByText('Beta Channel', { exact: true }).click()
-    await expect(options).toHaveCount(0)
-    await expectScrollAtRenderedEnd(scroller)
-    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
-
-    await manager.getByText('Beta Channel', { exact: true }).click()
-    await expect(options).toBeVisible()
-    await scrollToBottom(scroller)
-    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
-
-    await setWindowSize(app, page, { width: 1200, height: 900 })
-    await expect.poll(() => manager.evaluate(element => element.clientWidth)).toBeGreaterThan(760)
-    await expectScrollAtRenderedEnd(scroller)
-    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
-
-    const { page: relaunchedPage } = await app.relaunch()
-    await goToSettingsSection(relaunchedPage, 'download')
-    await expect(relaunchedPage.getByRole('button', { name: 'Manage Automatic Downloads (1)' })).toBeVisible()
-  })
+  }
 })
 
 test.describe('automatic download authorization', () => {

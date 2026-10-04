@@ -400,7 +400,9 @@ function displayNumber(value) {
 }
 
 .templateAndTypes {
-  align-items: end;
+  --settings-control-margin: 7px;
+
+  align-items: center;
   grid-template-columns: minmax(260px, 2fr) repeat(3, minmax(max-content, 1fr));
 }
 
