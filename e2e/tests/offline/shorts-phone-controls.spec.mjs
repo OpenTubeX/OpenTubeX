@@ -735,3 +735,87 @@ test('Shorts fullscreen control opens fullscreen and only the top control shows 
   })
   await expect(player.locator('.shortsTopControls .shortsReplayIcon')).toBeVisible()
 })
+
+for (const durationBackoff of [0, 0.5]) {
+  test(`End on a paused Short reaches replay with ${durationBackoff}s seek backoff`, async ({ app, page }) => {
+    await openShort({ app, page })
+    const watch = await page.evaluateHandle(findWatchComponent)
+    await watch.evaluate(async component => {
+      await component.proxy.$store.dispatch('updateLoopShorts', false)
+    })
+    await watch.dispose()
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    const video = player.locator('video')
+    await expect.poll(() => video.evaluate(video => Number.isFinite(video.duration) && video.duration > 0)).toBe(true)
+    await video.evaluate(video => {
+      video.pause()
+      video.currentTime = video.duration / 2
+    })
+    await expect.poll(() => video.evaluate(video => video.seeking)).toBe(false)
+    if (durationBackoff) {
+      await video.evaluate((video, backoff) => {
+        // Reproduce Shaka's MSE duration clamp using the real media element.
+        video.ui.getControls().getPlayer().configure('streaming.durationBackoff', backoff)
+        video.addEventListener('seeking', () => {
+          video.currentTime = video.duration - backoff
+        }, { once: true })
+      }, durationBackoff)
+    }
+    await page.locator('body').press('End')
+    await expect(player.locator('.shortsTopControls .shortsReplayIcon')).toBeVisible()
+    await expect.poll(() => video.evaluate(video => video.paused && !video.seeking)).toBe(true)
+    expect(await video.evaluate(video => video.duration - video.currentTime)).toBeCloseTo(durationBackoff, 3)
+    if (durationBackoff) {
+      await player.locator('.shortsTopControl').first().click()
+    } else {
+      await page.locator('body').press('k')
+    }
+    await expect.poll(() => video.evaluate(video => !video.paused && video.currentTime < video.duration / 2)).toBe(true)
+    await expect(player.locator('.shortsTopControls .shortsReplayIcon')).toBeHidden()
+
+    // Seeking away from replay must leave the chosen position paused.
+    await video.evaluate(video => video.pause())
+    await page.locator('body').press('End')
+    await expect(player.locator('.shortsTopControls .shortsReplayIcon')).toBeVisible()
+    await page.locator('body').press('Home')
+    await expect(player.locator('.shortsTopControls .shortsReplayIcon')).toBeHidden()
+    await expect.poll(() => video.evaluate(video => video.currentTime)).toBe(0)
+    await expect.poll(() => video.evaluate(video => video.paused)).toBe(true)
+  })
+}
+
+test('End on a paused looping Short keeps the loop behavior', async ({ app, page }) => {
+  await openShort({ app, page })
+  const player = page.locator('.ftVideoPlayer.shortsPlayer')
+  const video = player.locator('video')
+  await expect.poll(() => video.evaluate(video => video.loop)).toBe(true)
+  await video.evaluate(video => video.pause())
+  await page.locator('body').press('End')
+  await expect.poll(() => video.evaluate(video => !video.seeking)).toBe(true)
+  await expect(player.locator('.shortsTopControls .shortsReplayIcon')).toBeHidden()
+  await page.locator('body').press('k')
+  await expect.poll(() => video.evaluate(video => !video.paused && video.currentTime < video.duration / 2)).toBe(true)
+})
+
+test('a timeline seek superseding End on a paused Short cancels replay', async ({ app, page }) => {
+  await openShort({ app, page })
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate(async component => {
+    await component.proxy.$store.dispatch('updateLoopShorts', false)
+  })
+  await watch.dispose()
+  const player = page.locator('.ftVideoPlayer.shortsPlayer')
+  const video = player.locator('video')
+  await video.evaluate(video => {
+    video.pause()
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))
+    // Shaka's timeline and Media Session write currentTime directly.
+    video.currentTime = video.duration / 2
+  })
+  await expect.poll(() => video.evaluate(video => !video.seeking)).toBe(true)
+  await expect(player.locator('.shortsReplayIcon')).toBeHidden()
+  expect(await video.evaluate(video => video.currentTime)).toBeCloseTo(15, 0)
+  await page.locator('body').press('k')
+  await expect.poll(() => video.evaluate(video => !video.paused)).toBe(true)
+  expect(await video.evaluate(video => video.currentTime)).toBeGreaterThan(14)
+})
