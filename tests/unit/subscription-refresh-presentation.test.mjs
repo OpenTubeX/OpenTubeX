@@ -12,6 +12,7 @@ function setup(channelCount, presented = true, feed = 'videos') {
   const window = new EventTarget()
   const state = reactive({
     getSubscriptionFeedRefreshInProgress: true,
+    getSubscriptionFeedRefreshTab: feed,
     getActiveProfile: { subscriptions: Array.from({ length: channelCount }, (_, index) => ({ id: `UC${index}` })) }
   })
   const visibility = reactive({ value: presented })
@@ -82,6 +83,22 @@ test('a completed large refresh keeps hidden feeds idle and publishes on present
     app.flush()
     assert.equal(app.updates, 0)
     app.visibility.value = true
+    await nextTick()
+    app.flush()
+    assert.equal(app.updates, 1)
+  } finally { app.scope.stop() }
+})
+
+test('a completed feed publishes pending results while the next feed refreshes', async () => {
+  const app = setup(40)
+  try {
+    await app.channel()
+    app.flush()
+    assert.equal(app.updates, 0)
+    // Consecutive feeds may transition before the callback timer runs.
+    app.state.getSubscriptionFeedRefreshInProgress = false
+    app.state.getSubscriptionFeedRefreshTab = 'shorts'
+    app.state.getSubscriptionFeedRefreshInProgress = true
     await nextTick()
     app.flush()
     assert.equal(app.updates, 1)

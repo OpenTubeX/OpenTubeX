@@ -31,6 +31,7 @@ window.addEventListener(SUBSCRIPTION_REFRESH_CHANNEL_EVENT, (event) => {
 export function useSubscriptionChannelUpdates(tab, onChannelsRefreshed) {
   const { isTabPresented } = useTabContext()
   const deferDuringRefresh = computed(() => store.getters.getSubscriptionFeedRefreshInProgress &&
+    store.getters.getSubscriptionFeedRefreshTab === tab &&
     getSubscriptionsForFeed(store.getters.getActiveProfile.subscriptions, tab).length > MAX_INCREMENTAL_CHANNELS)
   let timeout = null
   let lastRun = 0
