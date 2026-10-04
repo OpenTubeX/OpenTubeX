@@ -76,12 +76,12 @@ function absoluteSeekFixture(props) {
       setPlaybackState() {}
     },
   }
-  const functions = ['setCurrentTime', 'rememberSeekPosition', 'registerMediaSessionHandlers', 'handleSeekBarInput', 'handleSeekBarMouseChange', 'restoreSeekAutoplay', 'handleCanPlay'].map(name => {
+  const functions = ['pause', 'setCurrentTime', 'rememberSeekPosition', 'registerMediaSessionHandlers', 'handleSeekBarInput', 'handleSeekBarMouseChange', 'restoreSeekAutoplay', 'handleCanPlay'].map(name => {
     const match = source.match(new RegExp(`    function ${name}\\([^]*?\\n    }`))
     assert.ok(match, `missing ${name}`)
     return match[0]
   }).join('\n')
-  const api = vm.runInNewContext(`${functions}\nregisterMediaSessionHandlers();\n({ setCurrentTime, handleSeekBarInput, handleSeekBarMouseChange, handleCanPlay })`, state)
+  const api = vm.runInNewContext(`${functions}\nregisterMediaSessionHandlers();\n({ pause, setCurrentTime, handleSeekBarInput, handleSeekBarMouseChange, handleCanPlay })`, state)
   return { state, ...api }
 }
 
@@ -233,16 +233,17 @@ for (const [autoplay, ready] of [[false, false], [true, true]]) {
   })
 }
 
-for (const action of ['pause', 'stop']) {
+for (const action of ['pause', 'stop', 'exposed pause']) {
   for (const duringSeek of [false, true]) {
-    test(`a Media Session ${action} ${duringSeek ? 'during' : 'before'} startup seeking cancels pending autoplay`, () => {
-      const { state, handleSeekBarInput, handleSeekBarMouseChange } = absoluteSeekFixture({ isLive: false })
+    test(`${action === 'exposed pause' ? 'An exposed pause' : `A Media Session ${action}`} ${duringSeek ? 'during' : 'before'} startup seeking cancels pending autoplay`, () => {
+      const { state, pause, handleSeekBarInput, handleSeekBarMouseChange } = absoluteSeekFixture({ isLive: false })
+      const requestPause = action === 'exposed pause' ? pause : state.handlers[action]
       state.video.value.autoplay = true
       state.videoLayoutReady.value = false
       state.ui = { getControls: () => ({ getDisplayTime: () => 5 }) }
-      if (!duringSeek) state.handlers[action]()
+      if (!duringSeek) requestPause()
       handleSeekBarInput({ type: 'mousedown', target: { matches: () => true, value: '5' } })
-      if (duringSeek) state.handlers[action]()
+      if (duringSeek) requestPause()
       handleSeekBarMouseChange({ type: 'mouseup' })
       assert.equal(state.playCalls, 0)
     })

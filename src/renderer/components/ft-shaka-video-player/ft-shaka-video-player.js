@@ -12246,6 +12246,7 @@ export default defineComponent({
     }
 
     function pause() {
+      initialAutoplayCanceled = true
       video.value.pause()
     }
 
