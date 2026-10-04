@@ -7,6 +7,15 @@
       :class="{ appearanceSwitchGrid: mode === 'appearance' }"
     >
       <FtToggleSwitch
+        v-if="mode === 'general' && IS_CAPACITOR"
+        :label="t('Settings.General Settings.Enable Tabs')"
+        :tooltip="t('Tooltips.General Settings.Enable Tabs')"
+        :default-value="store.getters.getEnableMobileTabs"
+        setting-key="enableMobileTabs"
+        compact
+        @change="store.dispatch('updateEnableMobileTabs', $event)"
+      />
+      <FtToggleSwitch
         v-if="mode === 'general'"
         :label="t('Settings.Privacy Settings.Enable Watch Statistics')"
         compact
@@ -194,6 +203,7 @@
         :placeholder="t('Settings.General Settings.New Tab Position.New Tab Position')"
         :value="newTabPosition"
         setting-key="newTabPosition"
+        :disabled="!store.getters.getTabsEnabled"
         :select-names="newTabPositionNames"
         :select-values="NEW_TAB_POSITION_VALUES"
         :icon="['fas', 'plus']"
@@ -205,6 +215,7 @@
         :placeholder="t('Settings.General Settings.Tab Close Focus.Tab Close Focus')"
         :value="tabCloseFocus"
         setting-key="tabCloseFocus"
+        :disabled="!store.getters.getTabsEnabled"
         :select-names="tabCloseFocusNames"
         :select-values="TAB_CLOSE_FOCUS_VALUES"
         :icon="['fas', 'xmark']"

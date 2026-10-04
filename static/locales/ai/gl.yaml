@@ -267,6 +267,7 @@ Settings:
       Network: rede
       Disk: disco
   General Settings:
+    Enable Tabs: "Activar as lapelas"
     Thumbnail Swipe Gestures:
       Left: Deslizar á esquerda nas miniaturas
       Right: Deslizar á dereita nas miniaturas
@@ -1676,6 +1677,7 @@ Description:
   Games: Xogos
 Tooltips:
   General Settings:
+    Enable Tabs: "Ao desactivar esta opción péchanse todas as demais lapelas e mantense aberta a páxina actual."
     Data Saver Thumbnails: "Usar miniaturas de menor resolución para reducir o consumo de datos."
     Use AI Translation Completions: Completa as lagoas das traducións humanas con texto xerado por IA. As traducións humanas sempre teñen prioridade.
     Update Relative Timestamps: Actualiza as marcas de tempo relativas en toda a aplicación mentres a páxina permaneza aberta. Se se desactiva, só se actualizan ao recargar ou volver visitar a páxina.

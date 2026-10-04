@@ -267,6 +267,7 @@ Settings:
       Network: רשת
       Disk: כונן
   General Settings:
+    Enable Tabs: "הפעלת לשוניות"
     Thumbnail Swipe Gestures:
       Left: החלקה שמאלה על תמונות ממוזערות
       Right: החלקה ימינה על תמונות ממוזערות
@@ -1674,6 +1675,7 @@ Description:
   Games: משחקים
 Tooltips:
   General Settings:
+    Enable Tabs: "כיבוי האפשרות סוגר את כל הלשוניות האחרות ומשאיר את הדף הנוכחי פתוח."
     Data Saver Thumbnails: "שימוש בתמונות ממוזערות ברזולוציה נמוכה יותר להפחתת השימוש בנתונים."
     Use AI Translation Completions: השלמת פערים בתרגומים אנושיים באמצעות טקסט שנוצר בבינה מלאכותית. תרגומים אנושיים תמיד מקבלים עדיפות.
     Update Relative Timestamps: עדכון חותמות הזמן היחסיות בכל היישום כל עוד הדף פתוח. כשהאפשרות מושבתת, הן מתעדכנות רק לאחר טעינה מחדש או חזרה לדף.

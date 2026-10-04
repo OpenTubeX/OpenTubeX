@@ -265,6 +265,7 @@ Settings:
       Network: şəbəkə
       Disk: disk
   General Settings:
+    Enable Tabs: "Vərəqləri aktivləşdir"
     Thumbnail Swipe Gestures:
       Left: Miniatürlərdə sola sürüşdürmə
       Right: Miniatürlərdə sağa sürüşdürmə
@@ -1643,6 +1644,7 @@ Description:
   Games: Oyunlar
 Tooltips:
   General Settings:
+    Enable Tabs: "Bunu söndürmək bütün digər vərəqləri bağlayır və cari səhifəni açıq saxlayır."
     Data Saver Thumbnails: "Verilən istifadəsini azaltmaq üçün daha aşağı keyfiyyətli miniatürlərdən istifadə edin."
     Use AI Translation Completions: İnsan tərcümələrindəki boşluqları süni intellektin yaratdığı mətnlə doldur. İnsan tərcümələrinə həmişə üstünlük verilir.
     Update Relative Timestamps: Səhifə açıq qaldıqda tətbiq boyu nisbi vaxt göstəricilərini yeniləyir. Bağlandıqda onlar yalnız səhifə yenidən yüklənəndə və ya ona yenidən daxil olduqda yenilənir.

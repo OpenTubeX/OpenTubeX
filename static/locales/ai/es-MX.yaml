@@ -292,6 +292,7 @@ Settings:
       Network: red
       Disk: disco
   General Settings:
+    Enable Tabs: "Activar pestañas"
     Thumbnail Swipe Gestures:
       Left: Deslizar a la izquierda en las miniaturas
       Right: Deslizar a la derecha en las miniaturas
@@ -1974,6 +1975,7 @@ Description:
   Games: Juegos
 Tooltips:
   General Settings:
+    Enable Tabs: "Al desactivar esta opción se cierran las demás pestañas y se mantiene abierta la página actual."
     Data Saver Thumbnails: "Usar miniaturas de menor resolución para reducir el consumo de datos."
     Use AI Translation Completions: Completa las partes que faltan en las traducciones humanas con texto generado por IA. Las traducciones humanas siempre tienen prioridad.
     Update Relative Timestamps: Actualiza las marcas de tiempo relativas en toda la aplicación mientras una página permanece abierta. Si se desactiva, solo se actualizan al recargar la página o volver a visitarla.

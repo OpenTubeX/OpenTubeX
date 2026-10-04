@@ -7,6 +7,7 @@ const GENERAL_EVERYDAY_KEYS = new Set([
   'Confirm Before',
   'Confirmation Options',
   'Default Landing Page',
+  'Enable Tabs',
   'Extra Thumbnail Action Button',
   'Locale Preference',
   'Minimize to system tray',

@@ -267,6 +267,7 @@ Settings:
       Network: mạng
       Disk: ổ đĩa
   General Settings:
+    Enable Tabs: "Bật thẻ"
     Thumbnail Swipe Gestures:
       Left: Vuốt sang trái trên hình thu nhỏ
       Right: Vuốt sang phải trên hình thu nhỏ
@@ -1664,6 +1665,7 @@ Description:
   Games: Trò chơi
 Tooltips:
   General Settings:
+    Enable Tabs: "Tắt tùy chọn này sẽ đóng tất cả các thẻ khác và giữ trang hiện tại mở."
     Data Saver Thumbnails: "Sử dụng ảnh thu nhỏ có độ phân giải thấp hơn để giảm mức sử dụng dữ liệu."
     Use AI Translation Completions: Điền phần còn thiếu trong bản dịch của con người bằng văn bản do AI tạo. Bản dịch của con người luôn được ưu tiên.
     Update Relative Timestamps: Cập nhật mốc thời gian tương đối trên toàn ứng dụng khi trang vẫn mở. Khi tắt, mốc thời gian chỉ cập nhật sau khi tải lại hoặc mở lại trang.

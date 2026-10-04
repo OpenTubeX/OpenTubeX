@@ -103,6 +103,7 @@ Settings:
     Advanced Description: Dostawcy, aplikacje zewnętrzne i sieć
     Alternative providers: Dostawcy filmów i metadanych
   General Settings:
+    Enable Tabs: "Włącz karty"
     Thumbnail Swipe Gestures:
       Left: Przesunięcie w lewo na miniaturach
       Right: Przesunięcie w prawo na miniaturach
@@ -907,6 +908,7 @@ Description:
   Games: Gry
 Tooltips:
   General Settings:
+    Enable Tabs: "Wyłączenie zamyka wszystkie pozostałe karty i pozostawia bieżącą stronę otwartą."
     Data Saver Thumbnails: "Używaj miniatur o niższej rozdzielczości, aby zmniejszyć zużycie danych."
     Use AI Translation Completions: Uzupełnia luki w tłumaczeniach tekstem wygenerowanym przez AI. Tłumaczenia wykonane przez ludzi zawsze mają pierwszeństwo.
     Update Relative Timestamps: Aktualizuje względne znaczniki czasu w całej aplikacji, dopóki strona pozostaje otwarta. Po wyłączeniu są aktualizowane dopiero po ponownym wczytaniu lub otwarciu strony.

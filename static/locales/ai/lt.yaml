@@ -377,6 +377,7 @@ Settings:
       Disk: disko
   Return to Settings Menu: Grįžti į nustatymų meniu
   General Settings:
+    Enable Tabs: "Įjungti korteles"
     Thumbnail Swipe Gestures:
       Left: Braukti kairėn per miniatiūras
       Right: Braukti dešinėn per miniatiūras
@@ -2040,6 +2041,7 @@ Description:
   Games: Žaidimai
 Tooltips:
   General Settings:
+    Enable Tabs: "Išjungus šią parinktį uždaromos visos kitos kortelės, o dabartinis puslapis lieka atvertas."
     Data Saver Thumbnails: "Naudoti mažesnės raiškos miniatiūras, kad sumažėtų duomenų naudojimas."
     Use AI Translation Completions: Užpildyti žmonių vertimų spragas DI sugeneruotu tekstu. Žmonių vertimams visada teikiama pirmenybė.
     Update Relative Timestamps: Kol puslapis atvertas, visoje programoje atnaujina santykines laiko žymas. Išjungus jos atnaujinamos tik iš naujo įkėlus puslapį arba į jį sugrįžus.

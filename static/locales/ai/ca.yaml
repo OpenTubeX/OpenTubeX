@@ -394,6 +394,7 @@ Settings:
       Disk: disc
   Return to Settings Menu: Torna al menú de configuració
   General Settings:
+    Enable Tabs: "Activa les pestanyes"
     Thumbnail Swipe Gestures:
       Left: Lliscar cap a l'esquerra a les miniatures
       Right: Lliscar cap a la dreta a les miniatures
@@ -2157,6 +2158,7 @@ Description:
   Games: Jocs
 Tooltips:
   General Settings:
+    Enable Tabs: "Si desactives aquesta opció, es tanquen totes les altres pestanyes i la pàgina actual es manté oberta."
     Data Saver Thumbnails: "Utilitza miniatures de menys resolució per reduir el consum de dades."
     Use AI Translation Completions: Omple els buits de les traduccions humanes amb text generat per IA. Les traduccions humanes sempre tenen prioritat.
     Update Relative Timestamps: Actualitza les marques horàries relatives de tota l'aplicació mentre la pàgina estigui oberta. Si es desactiva, només s'actualitzen en tornar a carregar o visitar la pàgina.

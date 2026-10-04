@@ -265,6 +265,7 @@ Settings:
       Network: rhwydwaith
       Disk: disg
   General Settings:
+    Enable Tabs: "Galluogi tabiau"
     Thumbnail Swipe Gestures:
       Left: Llithro i'r chwith ar fân-luniau
       Right: Llithro i'r dde ar fân-luniau
@@ -1657,6 +1658,7 @@ Description:
   Games: Gemau
 Tooltips:
   General Settings:
+    Enable Tabs: "Mae diffodd hwn yn cau pob tab arall ac yn cadw'r dudalen bresennol ar agor."
     Data Saver Thumbnails: "Defnyddiwch fân-luniau cydraniad is i leihau defnydd data."
     Use AI Translation Completions: Llenwi bylchau mewn cyfieithiadau dynol â thestun a gynhyrchwyd gan AI. Mae cyfieithiadau dynol bob amser yn cael blaenoriaeth.
     Update Relative Timestamps: Mae'n diweddaru stampiau amser cymharol drwy'r ap tra bo tudalen ar agor. Pan fydd wedi'i analluogi, dim ond ar ôl ail-lwytho neu ailagor y dudalen y cânt eu diweddaru.

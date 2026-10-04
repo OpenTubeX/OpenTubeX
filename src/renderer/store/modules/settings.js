@@ -397,6 +397,7 @@ const state = {
   showLiveChatTimestamps: false,
   liveChatFilter: 'TOP_CHAT',
   landingPage: DEFAULT_LANDING_PAGE,
+  enableMobileTabs: true,
   newTabPosition: 'afterCurrentInOrder',
   tabCloseFocus: 'lastActiveTab',
   startupBehavior: 'loadLastActiveTab',

@@ -263,6 +263,7 @@ Settings:
       Network: sarea
       Disk: diskoa
   General Settings:
+    Enable Tabs: "Gaitu fitxak"
     Thumbnail Swipe Gestures:
       Left: Irudi txikietan ezkerrera irristatu
       Right: Irudi txikietan eskuinera irristatu
@@ -1648,6 +1649,7 @@ Description:
   Games: Jokoak
 Tooltips:
   General Settings:
+    Enable Tabs: "Aukera hau desaktibatzean, gainerako fitxa guztiak ixten dira eta uneko orria irekita mantentzen da."
     Data Saver Thumbnails: "Erabili bereizmen txikiagoko miniaturak datuen erabilera murrizteko."
     Use AI Translation Completions: Bete giza itzulpenetan falta diren zatiak adimen artifizialak sortutako testuarekin. Giza itzulpenek beti dute lehentasuna.
     Update Relative Timestamps: Denbora-marka erlatiboak aplikazio osoan eguneratzen ditu orria irekita dagoen bitartean. Desgaituta dagoenean, orria berriro kargatu edo bisitatu ondoren soilik eguneratzen dira.

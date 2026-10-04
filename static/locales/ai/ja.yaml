@@ -263,6 +263,7 @@ Settings:
       Network: ネットワーク
       Disk: ディスク
   General Settings:
+    Enable Tabs: "タブを有効にする"
     Thumbnail Swipe Gestures:
       Left: サムネイルを左にスワイプ
       Right: サムネイルを右にスワイプ
@@ -1630,6 +1631,7 @@ Description:
   Games: ゲーム
 Tooltips:
   General Settings:
+    Enable Tabs: "オフにすると他のすべてのタブが閉じられ、現在のページは開いたままになります。"
     Data Saver Thumbnails: "低解像度のサムネイルを使用してデータ使用量を減らします。"
     Use AI Translation Completions: 人手による翻訳の不足部分をAI生成テキストで補います。人手による翻訳が常に優先されます。
     Update Relative Timestamps: ページを開いている間、アプリ内の相対日時を更新します。無効にすると、ページを再読み込みするか開き直したときにのみ更新されます。

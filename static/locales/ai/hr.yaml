@@ -265,6 +265,7 @@ Settings:
       Network: mreže
       Disk: diska
   General Settings:
+    Enable Tabs: "Omogući kartice"
     Thumbnail Swipe Gestures:
       Left: Povlačenje ulijevo po sličicama
       Right: Povlačenje udesno po sličicama
@@ -1652,6 +1653,7 @@ Description:
   Games: Igre
 Tooltips:
   General Settings:
+    Enable Tabs: "Isključivanjem se zatvaraju sve ostale kartice, a trenutačna stranica ostaje otvorena."
     Data Saver Thumbnails: "Koristite sličice niže razlučivosti kako biste smanjili potrošnju podataka."
     Use AI Translation Completions: Popunjava praznine u ljudskim prijevodima tekstom koji generira umjetna inteligencija. Ljudski prijevodi uvijek imaju prednost.
     Update Relative Timestamps: Ažurira relativne vremenske oznake u cijeloj aplikaciji dok je stranica otvorena. Kada je isključeno, ažuriraju se tek nakon ponovnog učitavanja ili ponovnog posjeta stranici.

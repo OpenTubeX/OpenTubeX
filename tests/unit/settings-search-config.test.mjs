@@ -382,6 +382,7 @@ for (const [platform, usingElectron, isCapacitor] of [
       const label = getAtPath(locale, `Settings.General Settings.${path}`)
       assert.equal(entries.some(entry => entry.label === label), usingElectron || isCapacitor, label)
     }
+    assert.equal(entries.some(entry => entry.label === 'Enable Tabs'), isCapacitor)
   })
 }
 

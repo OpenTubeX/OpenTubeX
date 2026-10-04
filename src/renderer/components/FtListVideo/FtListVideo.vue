@@ -962,11 +962,13 @@ const { hideSubscriptionFeedType, hideSubscriptionFeedTypeOption } = useHideSubs
 
 const videoMenuOptions = computed(() => {
   const options = [
-    {
-      label: t('Context Menu.Open in a New Tab'),
-      value: 'openNewTab',
-      icon: ['fas', 'arrow-up-right-from-square']
-    },
+    ...(store.getters.getTabsEnabled
+      ? [{
+          label: t('Context Menu.Open in a New Tab'),
+          value: 'openNewTab',
+          icon: ['fas', 'arrow-up-right-from-square']
+        }]
+      : []),
     ...(process.env.IS_ELECTRON
       ? [{
           label: t('Context Menu.Open in a New Window'),
@@ -1339,7 +1341,7 @@ const useMobileThumbnailActions = computed(() => process.env.IS_CAPACITOR || pho
 const mobilePlaylistPickerOpen = ref(false)
 const mobileThumbnailActions = computed(() => {
   const actions = []
-  if (process.env.IS_ELECTRON || process.env.IS_CAPACITOR) {
+  if ((process.env.IS_ELECTRON || process.env.IS_CAPACITOR) && store.getters.getTabsEnabled) {
     actions.push({
       label: t('Context Menu.Open in a Background Tab'),
       icon: ['fas', 'clone'],

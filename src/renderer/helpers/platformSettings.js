@@ -8,6 +8,7 @@ export const DEVICE_LOCAL_SETTING_KEYS = new Set([
   'enableClosedAppSubscriptionRefresh',
   'enableMobileFullscreenSeek',
   'enableMobileFullscreenSwipe',
+  'enableMobileTabs',
   'enablePullToRefresh',
   'fullscreenRotationIgnoresSystemLock',
   'hideToTrayOnClose',

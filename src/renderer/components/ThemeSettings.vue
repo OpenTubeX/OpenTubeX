@@ -271,6 +271,7 @@
           compact
           :default-value="showTabIcons"
           setting-key="showTabIcons"
+          :disabled="!store.getters.getTabsEnabled"
           @change="updateShowTabIcons"
         />
         <FtToggleSwitch
@@ -279,6 +280,7 @@
           compact
           :default-value="showTabPreviews"
           setting-key="showTabPreviews"
+          :disabled="!store.getters.getTabsEnabled"
           @change="updateShowTabPreviews"
         />
         <FtToggleSwitch
@@ -288,6 +290,7 @@
           compact
           :default-value="useFixedTabWidth"
           setting-key="useFixedTabWidth"
+          :disabled="!store.getters.getTabsEnabled"
           @change="updateUseFixedTabWidth"
         />
         <FtToggleSwitch
@@ -325,7 +328,7 @@
             :min-value="MIN_FIXED_TAB_WIDTH"
             :max-value="MAX_FIXED_TAB_WIDTH"
             :step="FIXED_TAB_WIDTH_STEP"
-            :disabled="!useFixedTabWidth"
+            :disabled="!useFixedTabWidth || !store.getters.getTabsEnabled"
             value-extension="px"
             @input="previewFixedTabWidth"
             @change="updateFixedTabWidth"
