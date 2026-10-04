@@ -244,6 +244,74 @@ test.describe('large bookmark playlist', () => {
   })
 })
 
+test('player visibility and playback changes avoid repeated layout work', async ({ app, page }, testInfo) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  const controls = page.locator('.ftVideoPlayer .shaka-controls-container')
+  await controls.evaluate(element => element.setAttribute('shown', 'true'))
+  await page.waitForTimeout(1000)
+
+  const session = await page.context().newCDPSession(page)
+  await session.send('Performance.enable')
+  await session.send('Emulation.setCPUThrottlingRate', { rate: 6 })
+  await page.evaluate(() => {
+    const original = window.getComputedStyle
+    window.__playerLayoutReads = 0
+    window.getComputedStyle = function (element, pseudo) {
+      if (element.parentElement?.matches('.shaka-controls-button-panel')) window.__playerLayoutReads++
+      return original.call(this, element, pseudo)
+    }
+  })
+
+  const metrics = async () => Object.fromEntries((await session.send('Performance.getMetrics')).metrics.map(metric => [metric.name, metric.value]))
+  const before = await metrics()
+  const fadeTransitions = []
+  for (const shown of [false, true]) {
+    await controls.evaluate((element, shown) => {
+      if (shown) element.setAttribute('shown', 'true')
+      else element.removeAttribute('shown')
+    }, shown)
+    fadeTransitions.push(...await controls.evaluate(element => (
+      element.querySelector('.shaka-controls-button-panel').getAnimations().map(animation => animation.transitionProperty)
+    )))
+    await page.waitForTimeout(750)
+  }
+  const after = await metrics()
+  const visibility = {
+    styleRecalculations: after.RecalcStyleCount - before.RecalcStyleCount,
+    styleMilliseconds: (after.RecalcStyleDuration - before.RecalcStyleDuration) * 1000,
+    layoutReads: await page.evaluate(() => window.__playerLayoutReads),
+  }
+
+  const playback = await page.evaluate(async () => {
+    const video = document.querySelector('.ftVideoPlayer video')
+    const button = document.querySelector('.ftVideoPlayer .shaka-controls-button-panel > .shaka-play-button')
+    window.__playerLayoutReads = 0
+    const toggles = []
+    for (let index = 0; index < 4; index++) {
+      document.querySelector('.ftVideoPlayer .shaka-controls-container').setAttribute('shown', 'true')
+      const wasPaused = video.paused
+      button.click()
+      toggles.push(video.paused !== wasPaused)
+      await new Promise(resolve => setTimeout(resolve, 300))
+    }
+    return { paused: video.paused, layoutReads: window.__playerLayoutReads, toggles }
+  })
+  await session.send('Emulation.setCPUThrottlingRate', { rate: 1 })
+  await testInfo.attach('player interaction work at 6x CPU slowdown', {
+    body: JSON.stringify({ visibility, playback }), contentType: 'application/json',
+  })
+  console.log('Player interaction work at 6x CPU slowdown:', { visibility, playback })
+  // Keep timings diagnostic: machine load must not turn this into a CI flake.
+  // Animating the inherited fade value forces descendant styles every frame.
+  expect.soft(fadeTransitions).not.toContain('--ft-controls-fade')
+  expect.soft(visibility.layoutReads).toBe(0)
+  expect(playback.paused).toBe(true)
+  expect(playback.toggles).toEqual([true, true, true, true])
+  expect(playback.layoutReads).toBe(0)
+})
+
 test('default-speed button transitions do not query animations in JavaScript', async ({ page }) => {
   await page.evaluate(async () => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -265,6 +333,35 @@ test('default-speed button transitions do not query animations in JavaScript', a
   const metrics = await page.evaluate(() => window.__buttonAnimationWork)
   console.log('Default-speed button animation work:', metrics)
   expect(metrics.queries).toBe(0)
+})
+
+test('hidden player menus do not measure labels after playback option changes', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  await page.waitForTimeout(1000)
+  const measurements = await page.evaluate(async () => {
+    const menu = document.querySelector('.ftVideoPlayer .shaka-overflow-menu')
+    const descriptor = Object.getOwnPropertyDescriptor(Element.prototype, 'clientWidth')
+    let reads = 0
+    Object.defineProperty(Element.prototype, 'clientWidth', {
+      ...descriptor,
+      get() {
+        if (menu.contains(this)) reads++
+        return descriptor.get.call(this)
+      },
+    })
+    try {
+      const video = document.querySelector('.ftVideoPlayer video')
+      video.loop = !video.loop
+      await new Promise(resolve => setTimeout(resolve, 300))
+      return reads
+    } finally {
+      Object.defineProperty(Element.prototype, 'clientWidth', descriptor)
+    }
+  })
+  console.log('Hidden player menu label measurements:', measurements)
+  expect(measurements).toBe(0)
 })
 
 test.describe('history progress direction', () => {

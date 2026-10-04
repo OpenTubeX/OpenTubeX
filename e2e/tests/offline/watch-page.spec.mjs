@@ -805,13 +805,13 @@ test.describe('desktop quick playback speed bar', () => {
       controls.removeAttribute('shown')
       await new Promise(resolve => setTimeout(resolve, 180))
       return {
-        panelFade: Number(getComputedStyle(panel).getPropertyValue('--ft-controls-fade')),
+        glassOpacity: Number(getComputedStyle(panel.querySelector('.ft-right-control-glass')).opacity),
         barOpacity: Number(getComputedStyle(bar).opacity)
       }
     })
-    expect(result.panelFade).toBeGreaterThan(0.1)
-    expect(result.panelFade).toBeLessThan(0.9)
-    expect(result.barOpacity - result.panelFade).toBeLessThan(0.05)
+    expect(result.glassOpacity).toBeGreaterThan(0.1)
+    expect(result.glassOpacity).toBeLessThan(0.9)
+    expect(Math.abs(result.barOpacity - result.glassOpacity)).toBeLessThan(0.05)
   })
 
   test('uses the shaded glass surface', async ({ app, page }) => {
@@ -863,31 +863,30 @@ test.describe('desktop quick playback speed bar', () => {
 
 test('right control pill fades with its icons in both directions', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
   const result = await page.evaluate(async () => {
     const controls = document.querySelector('.shaka-controls-container')
     const panel = controls.querySelector('.shaka-controls-button-panel')
     const pill = panel.querySelector('.ft-right-control-glass')
     const snapshot = () => ({
-      panelFade: Number(getComputedStyle(panel).getPropertyValue('--ft-controls-fade')),
+      iconOpacity: Number(getComputedStyle(panel.querySelector('.shaka-overflow-menu-button > .shaka-ui-icon')).filter.match(/opacity\(([^)]+)\)/)[1]),
       pillOpacity: Number(getComputedStyle(pill).opacity)
     })
-    controls.setAttribute('casting', 'true')
-    panel.style.transition = 'none'
-    panel.style.setProperty('--ft-controls-fade', '0')
+    controls.setAttribute('shown', 'true')
+    await new Promise(resolve => setTimeout(resolve, 750))
+    controls.removeAttribute('shown')
     await new Promise(resolve => setTimeout(resolve, 150))
-    panel.style.setProperty('--ft-controls-fade', '0.5')
-    await new Promise(resolve => setTimeout(resolve, 30))
-    const appearing = snapshot()
-    panel.style.setProperty('--ft-controls-fade', '1')
+    const disappearing = snapshot()
+    await new Promise(resolve => setTimeout(resolve, 750))
+    controls.setAttribute('shown', 'true')
     await new Promise(resolve => setTimeout(resolve, 150))
-    panel.style.setProperty('--ft-controls-fade', '0.5')
-    await new Promise(resolve => setTimeout(resolve, 30))
-    return { appearing, disappearing: snapshot() }
+    return { appearing: snapshot(), disappearing }
   })
   for (const state of [result.appearing, result.disappearing]) {
-    expect(state.panelFade).toBe(0.5)
-    expect(Math.abs(state.pillOpacity - state.panelFade)).toBeLessThan(0.05)
+    expect(state.iconOpacity).toBeGreaterThan(0)
+    expect(state.iconOpacity).toBeLessThan(1)
+    expect(Math.abs(state.pillOpacity - state.iconOpacity)).toBeLessThan(0.05)
   }
 })
 
