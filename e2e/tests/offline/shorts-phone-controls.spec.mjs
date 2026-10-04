@@ -27,6 +27,19 @@ async function openShort({ app, page }) {
   await expect(page.locator('.ftVideoPlayer')).toHaveClass(/shortsPlayer/)
 }
 
+async function showShortPoster(page, watch) {
+  // Let pause settle before revealing the retained poster in component state.
+  await page.locator('.ftVideoPlayer video').evaluate(async video => {
+    if (!video.paused) {
+      await new Promise(resolve => {
+        video.addEventListener('pause', resolve, { once: true })
+        video.pause()
+      })
+    }
+  })
+  await watch.evaluate(component => { component.proxy.$refs.player.$.setupState.showPoster = true })
+}
+
 for (const zoom of [1, 1.25]) {
   test(`Shorts posters match the video crop across presentation modes at ${zoom * 100}% UI scale`, async ({ app, page }) => {
     await openShort({ app, page })
@@ -39,9 +52,8 @@ for (const zoom of [1, 1.25]) {
     const watch = await page.evaluateHandle(findWatchComponent)
     await watch.evaluate((component, poster) => {
       component.proxy.thumbnail = poster
-      document.querySelector('.ftVideoPlayer video').pause()
-      component.proxy.$refs.player.showPoster = true
     }, poster)
+    await showShortPoster(page, watch)
     const player = page.locator('.ftVideoPlayer.shortsPlayer')
     const image = player.locator('.countdownPoster img:not(.retryImagePlaceholder)')
     const video = player.locator('video')
@@ -89,9 +101,8 @@ test('data saver updates the poster of an already-open Short', async ({ app, pag
       videos: [{ videoId: component.proxy.videoId, title: 'Poster test', authorId: channelId, published: Date.now(), thumbnailUrl: high, lowResolutionThumbnailUrl: low }]
     })
     component.proxy.thumbnail = high
-    document.querySelector('.ftVideoPlayer video').pause()
-    component.proxy.$refs.player.showPoster = true
   }, { high, low })
+  await showShortPoster(page, watch)
   const image = page.locator('.countdownPoster img:not(.retryImagePlaceholder)').first()
   await expect(image).toBeVisible()
   await expect(image).toHaveAttribute('src', high)
@@ -112,9 +123,8 @@ test('data saver preserves standalone Shorts posters without alternate thumbnail
   const watch = await page.evaluateHandle(findWatchComponent)
   await watch.evaluate((component, poster) => {
     component.proxy.thumbnail = poster
-    document.querySelector('.ftVideoPlayer video').pause()
-    component.proxy.$refs.player.showPoster = true
   }, poster)
+  await showShortPoster(page, watch)
   const image = page.locator('.countdownPoster img:not(.retryImagePlaceholder)').first()
   await expect(image).toBeVisible()
   await expect(image).toHaveAttribute('src', poster)
