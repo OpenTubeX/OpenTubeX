@@ -265,6 +265,10 @@ Settings:
       Network: nätverk
       Disk: diskutrymme
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Svep åt vänster på miniatyrbilder
+      Right: Svep åt höger på miniatyrbilder
+      Description: Svep vågrätt på en videominiatyr och släpp för att utföra den valda åtgärden.
     Data Saver Thumbnails: "Datasparande miniatyrbilder"
     Use tray icon: "Använd ikon i systemfältet"
     Close to system tray: "Stäng till systemfältet"

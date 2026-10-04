@@ -493,6 +493,8 @@ const state = {
   useFrostedGlassPlayerUi: true,
   toastPosition: 'bottom-left',
   extraThumbnailAction: '',
+  thumbnailLeftSwipeAction: 'disabled',
+  thumbnailRightSwipeAction: 'disabled',
   blurThumbnails: false,
   syncServerEnabled: false,
   syncServerUrl: 'https://sync.opentubex.org',

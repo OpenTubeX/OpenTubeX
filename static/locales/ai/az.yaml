@@ -265,6 +265,10 @@ Settings:
       Network: şəbəkə
       Disk: disk
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Miniatürlərdə sola sürüşdürmə
+      Right: Miniatürlərdə sağa sürüşdürmə
+      Description: Seçilmiş əməliyyatı yerinə yetirmək üçün video miniatürünü üfüqi sürüşdürüb buraxın.
     Data Saver Thumbnails: "Verilənlərə qənaət edən miniatürlər"
     Use tray icon: "Sistem sahəsi nişanından istifadə et"
     Close to system tray: "Sistem sahəsinə bağla"

@@ -24,6 +24,8 @@ export const DEVICE_LOCAL_SETTING_KEYS = new Set([
   'showProgressBarToast',
   'showTabPreviews',
   'tabBarPosition',
+  'thumbnailLeftSwipeAction',
+  'thumbnailRightSwipeAction',
   'ytDlpDownloadFolderPath',
   'ytDlpPlaybackCookiesPath',
   'videoVolumeMouseScroll',

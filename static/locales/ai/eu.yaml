@@ -263,6 +263,10 @@ Settings:
       Network: sarea
       Disk: diskoa
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Irudi txikietan ezkerrera irristatu
+      Right: Irudi txikietan eskuinera irristatu
+      Description: Irristatu horizontalki bideo baten irudi txikian eta askatu hautatutako ekintza egiteko.
     Data Saver Thumbnails: "Datuak aurrezteko miniaturak"
     Use tray icon: "Erabili sistemaren erretiluko ikonoa"
     Close to system tray: "Itxi sistemaren erretilura"

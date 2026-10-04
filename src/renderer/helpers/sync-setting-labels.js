@@ -102,6 +102,8 @@ export const SYNC_SETTING_LABELS = {
   fullscreenRotationIgnoresSystemLock: 'Settings.Player Settings.Ignore System Rotation Lock for Fullscreen',
   expandSideBar: 'Settings.Theme Settings.Expand Side Bar by Default',
   externalLinkHandling: 'Settings.General Settings.External Link Handling.External Link Handling',
+  thumbnailLeftSwipeAction: 'Settings.General Settings.Thumbnail Swipe Gestures.Left',
+  thumbnailRightSwipeAction: 'Settings.General Settings.Thumbnail Swipe Gestures.Right',
   extraThumbnailAction: 'Settings.General Settings.Extra Thumbnail Action Button.Extra Thumbnail Action Button',
   fetchSubscriptionsAutomatically: 'Settings.Subscription Settings.Fetch Feed on Startup',
   fixedTabWidth: 'Settings.Theme Settings.Tab Width',

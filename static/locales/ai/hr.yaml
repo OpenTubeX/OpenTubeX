@@ -265,6 +265,10 @@ Settings:
       Network: mreže
       Disk: diska
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Povlačenje ulijevo po sličicama
+      Right: Povlačenje udesno po sličicama
+      Description: Povucite vodoravno po sličici videozapisa i otpustite za izvođenje odabrane radnje.
     Data Saver Thumbnails: "Sličice za uštedu podataka"
     Use tray icon: "Koristi ikonu u sistemskoj traci"
     Close to system tray: "Zatvori u sistemsku traku"

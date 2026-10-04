@@ -215,8 +215,8 @@ for (const uiScale of [100, 125]) {
         for (const viewport of [{ width: 375, height: 812 }, { width: 812, height: 375 }, { width: 1024, height: 768 }]) {
           await page.setViewportSize(viewport)
           const card = page.locator('.ft-list-video').first()
-          await card.locator('.thumbnailImage').scrollIntoViewIfNeeded()
-          const bounds = await card.locator('.thumbnailImage').boundingBox()
+          await card.locator('.thumbnailLink').scrollIntoViewIfNeeded()
+          const bounds = await card.locator('.thumbnailLink').boundingBox()
           await session.send('Input.dispatchTouchEvent', {
             type: 'touchStart', touchPoints: [{ x: bounds.x + 8, y: bounds.y + 8 }]
           })

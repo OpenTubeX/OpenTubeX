@@ -18,6 +18,7 @@ const GENERAL_EVERYDAY_KEYS = new Set([
   'Region for Trending',
   'Startup Behavior',
   'Swipe to refresh',
+  'Thumbnail Swipe Gestures',
   'System Default',
   'Tab Close Focus',
   'Update Relative Timestamps',

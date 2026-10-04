@@ -376,6 +376,10 @@ Settings:
       Disk: disko
   Return to Settings Menu: Grįžti į nustatymų meniu
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Braukti kairėn per miniatiūras
+      Right: Braukti dešinėn per miniatiūras
+      Description: Braukite horizontaliai per vaizdo įrašo miniatiūrą ir atleiskite, kad atliktumėte pasirinktą veiksmą.
     Data Saver Thumbnails: "Duomenis taupančios miniatiūros"
     Use tray icon: "Naudoti sistemos dėklo piktogramą"
     Close to system tray: "Uždaryti į sistemos dėklą"

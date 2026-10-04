@@ -259,6 +259,28 @@
         @change="updateExtraThumbnailAction"
       />
       <FtSelect
+        v-if="mode === 'general' && (IS_CAPACITOR || phoneLayout)"
+        :placeholder="t('Settings.General Settings.Thumbnail Swipe Gestures.Left')"
+        :value="store.getters.getThumbnailLeftSwipeAction"
+        setting-key="thumbnailLeftSwipeAction"
+        :select-names="thumbnailSwipeActionNames"
+        :select-values="thumbnailSwipeActionValues"
+        :tooltip="t('Settings.General Settings.Thumbnail Swipe Gestures.Description')"
+        :icon="getThumbnailSwipeIcon(store.getters.getThumbnailLeftSwipeAction)"
+        @change="store.dispatch('updateThumbnailLeftSwipeAction', $event)"
+      />
+      <FtSelect
+        v-if="mode === 'general' && (IS_CAPACITOR || phoneLayout)"
+        :placeholder="t('Settings.General Settings.Thumbnail Swipe Gestures.Right')"
+        :value="store.getters.getThumbnailRightSwipeAction"
+        setting-key="thumbnailRightSwipeAction"
+        :select-names="thumbnailSwipeActionNames"
+        :select-values="thumbnailSwipeActionValues"
+        :tooltip="t('Settings.General Settings.Thumbnail Swipe Gestures.Description')"
+        :icon="getThumbnailSwipeIcon(store.getters.getThumbnailRightSwipeAction)"
+        @change="store.dispatch('updateThumbnailRightSwipeAction', $event)"
+      />
+      <FtSelect
         v-if="mode === 'general'"
         :placeholder="t('Settings.General Settings.Locale Preference')"
         :value="currentLocale"
@@ -858,6 +880,35 @@ const extraThumbnailActionNames = computed(() => [
 function updateExtraThumbnailAction(value) {
   store.dispatch('updateExtraThumbnailAction', value)
 }
+
+const thumbnailSwipeActions = computed(() => [
+  ['disabled', t('Settings.Player Settings.Swipe Gestures.Disabled')],
+  ['addToPlaylist', t('User Playlists.Add to Playlist')],
+  ['history', t('Video.Mark As Watched')],
+  ['markAsFullySeen', t('Video.Mark As Fully Watched')],
+  ['quickBookmark', t('Tab Organizer.Icon Labels.Bookmark')],
+  ['addToQueue', t('Video.Add to Queue')],
+  ['playNext', t('Video.Play Next')],
+  ['copyYoutube', t('Video.Copy YouTube Link')],
+  ...(IS_CAPACITOR ? [['share', t('Share.Share Link')]] : []),
+  ...(supportsYtDlp && enableDownloads.value ? [['download', t('Downloads.Download Video')]] : []),
+])
+function getThumbnailSwipeIcon(action) {
+  return {
+    addToPlaylist: ['fac', 'playlist-add'],
+    history: ['fas', 'eye'],
+    markAsFullySeen: ['fas', 'flag-checkered'],
+    quickBookmark: ['fas', 'bookmark'],
+    addToQueue: ['fas', 'add-to-queue'],
+    playNext: ['fas', 'step-forward'],
+    copyYoutube: ['fas', 'link'],
+    share: ['fas', 'share-alt'],
+    download: ['fas', 'download'],
+  }[action] ?? ['fas', 'xmark']
+}
+
+const thumbnailSwipeActionValues = computed(() => thumbnailSwipeActions.value.map(([value]) => value))
+const thumbnailSwipeActionNames = computed(() => thumbnailSwipeActions.value.map(([, name]) => name))
 
 const LOCALE_VALUES = ['system', ...allLocales]
 

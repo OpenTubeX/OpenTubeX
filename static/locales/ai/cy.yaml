@@ -265,6 +265,10 @@ Settings:
       Network: rhwydwaith
       Disk: disg
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Llithro i'r chwith ar fân-luniau
+      Right: Llithro i'r dde ar fân-luniau
+      Description: Llithrwch yn llorweddol ar fân-lun fideo a rhyddhewch i gyflawni'r weithred a ddewiswyd.
     Data Saver Thumbnails: "Mân-luniau arbed data"
     Use tray icon: "Defnyddio eicon hambwrdd"
     Close to system tray: "Cau i hambwrdd y system"

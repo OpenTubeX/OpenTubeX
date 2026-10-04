@@ -263,6 +263,10 @@ Settings:
       Network: 网络
       Disk: 磁盘
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: 在缩略图上向左滑动
+      Right: 在缩略图上向右滑动
+      Description: 在视频缩略图上水平滑动并松开，即可执行所选操作。
     Data Saver Thumbnails: "省流量缩略图"
     Use tray icon: "使用托盘图标"
     Close to system tray: "关闭时最小化到系统托盘"

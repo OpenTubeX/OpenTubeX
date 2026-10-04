@@ -725,7 +725,7 @@ function startPageSwipe(event) {
   if (!isCapacitor || event.pointerType !== 'touch' || !event.isPrimary ||
       pageSwipe.value || isAnyPromptOpen.value ||
       activeTabId.value !== presentedTabId.value ||
-      event.target.closest('button, a, input, textarea, select, [role="button"], .searchContainer')) return
+      event.target.closest('button, a, input, textarea, select, [role="button"], .searchContainer, .thumbnailSwipeEnabled')) return
 
   const width = document.querySelector('.app > .routerView')?.getBoundingClientRect().width
   if (!width) return

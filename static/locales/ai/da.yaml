@@ -274,6 +274,10 @@ Settings:
       Network: netværk
       Disk: diskplads
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Stryg til venstre på miniaturebilleder
+      Right: Stryg til højre på miniaturebilleder
+      Description: Stryg vandret på et videos miniaturebillede, og slip for at udføre den valgte handling.
     Data Saver Thumbnails: "Databesparende miniaturebilleder"
     Use tray icon: "Brug ikon i systembakken"
     Close to system tray: "Luk til systembakken"

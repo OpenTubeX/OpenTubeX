@@ -267,6 +267,10 @@ Settings:
       Network: شبكة
       Disk: القرص
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: السحب لليسار على الصور المصغرة
+      Right: السحب لليمين على الصور المصغرة
+      Description: اسحب صورة الفيديو المصغرة أفقيًا ثم ارفع إصبعك لتنفيذ الإجراء المحدد.
     Data Saver Thumbnails: "صور مصغرة موفرة للبيانات"
     Use tray icon: "استخدام أيقونة علبة النظام"
     Close to system tray: "الإغلاق إلى علبة النظام"

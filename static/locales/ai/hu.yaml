@@ -263,6 +263,10 @@ Settings:
       Network: hálózat
       Disk: lemez
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Balra húzás a bélyegképeken
+      Right: Jobbra húzás a bélyegképeken
+      Description: Húzza vízszintesen a videó bélyegképét, majd engedje el a kiválasztott művelet végrehajtásához.
     Data Saver Thumbnails: "Adattakarékos bélyegképek"
     Use tray icon: "Rendszertálcaikon használata"
     Close to system tray: "Bezárás a rendszertálcára"

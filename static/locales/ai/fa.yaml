@@ -280,6 +280,10 @@ Settings:
       Network: شبکه
       Disk: دیسک
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: کشیدن به چپ روی تصاویر بندانگشتی
+      Right: کشیدن به راست روی تصاویر بندانگشتی
+      Description: تصویر بندانگشتی ویدیو را افقی بکشید و رها کنید تا عمل انتخاب‌شده انجام شود.
     Data Saver Thumbnails: "تصاویر بندانگشتی کم‌مصرف"
     Use tray icon: "استفاده از نماد سینی سیستم"
     Close to system tray: "بستن به سینی سیستم"

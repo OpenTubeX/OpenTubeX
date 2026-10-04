@@ -263,6 +263,10 @@ Settings:
       Network: jaringan
       Disk: disk
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Usap ke kiri pada gambar mini
+      Right: Usap ke kanan pada gambar mini
+      Description: Usap gambar mini video secara horizontal dan lepaskan untuk melakukan tindakan yang dipilih.
     Data Saver Thumbnails: "Thumbnail hemat data"
     Use tray icon: "Gunakan ikon baki sistem"
     Close to system tray: "Tutup ke baki sistem"

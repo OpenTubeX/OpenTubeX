@@ -263,6 +263,10 @@ Settings:
       Network: rede
       Disk: disco
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Deslizar para a esquerda nas miniaturas
+      Right: Deslizar para a direita nas miniaturas
+      Description: Deslize horizontalmente sobre a miniatura de um vídeo e solte para executar a ação selecionada.
     Data Saver Thumbnails: "Miniaturas com economia de dados"
     Use tray icon: "Usar ícone na bandeja"
     Close to system tray: "Fechar para a bandeja do sistema"

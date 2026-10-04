@@ -263,6 +263,10 @@ Settings:
       Network: "ar rouedad"
       Disk: "ar bladenn"
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Riklañ a-gleiz war ar skeudennigoù
+      Right: Riklañ a-zehou war ar skeudennigoù
+      Description: Riklit a-blaen war skeudennig ur video ha laoskit evit seveniñ an ober dibabet.
     Data Saver Thumbnails: "Skeudennoù bihan evit espern roadennoù"
     Use tray icon: "Implijout un arlun er maez reizhiad"
     Close to system tray: "Serriñ er maez reizhiad"
