@@ -283,7 +283,7 @@
       >
         <p class="downloadFolderRow">
           <FtIcon :icon="['fas', 'folder-open']" />
-          <span>{{ downloadFolderDisplay }}</span>
+          <span :title="downloadFolderDisplay">{{ downloadFolderDisplay }}</span>
           <button
             type="button"
             class="chooseFolderButton"

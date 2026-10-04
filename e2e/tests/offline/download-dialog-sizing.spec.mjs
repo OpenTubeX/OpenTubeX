@@ -33,9 +33,13 @@ async function expectScrollbarMatchesOverflow(scroller) {
 }
 
 async function expectFixedSections(prompt) {
-  for (const selector of ['.downloadHeader', '.fixedTemplateSection', '.downloadFooter']) {
+  for (const selector of ['.downloadHeader', '.fixedTemplateSection', '.downloadFooter', '.chooseFolderButton']) {
     await expect(prompt.locator(selector)).toBeInViewport()
   }
+  for (const button of await prompt.locator('.downloadFooter .btn').all()) {
+    await expect(button).toBeInViewport({ ratio: 1 })
+  }
+  await expect.poll(() => prompt.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
   await expect.poll(() => prompt.evaluate(element => element.scrollTop)).toBe(0)
   await expect.poll(() => prompt.evaluate(element => element.getBoundingClientRect().top)).toBeGreaterThanOrEqual(0)
   await expect.poll(() => prompt.evaluate(element => element.getBoundingClientRect().bottom - innerHeight)).toBeLessThanOrEqual(1)
@@ -100,16 +104,18 @@ for (const uiScale of [100, 125]) {
       await expectScrollbarMatchesOverflow(scroller)
       await expectFixedSections(prompt)
 
-      await page.setViewportSize({ width: 812, height: 375 })
-      await advanced.evaluate(element => { element.open = true })
-      await scrollToBottom(scroller)
-      await expectFixedSections(prompt)
-      await expect.poll(() => scroller.evaluate(element => element.clientHeight)).toBeGreaterThanOrEqual(48)
-      await attachScreenshot(`landscape mobile download dialog at ${uiScale}%`)
-      await advanced.evaluate(element => { element.open = false })
-      await expectScrollAtRenderedEnd(scroller)
-      await expectScrollbarMatchesOverflow(scroller)
-      await expectFixedSections(prompt)
+      for (const viewport of [{ width: 812, height: 375 }, { width: 600, height: 320 }]) {
+        await page.setViewportSize(viewport)
+        await advanced.evaluate(element => { element.open = true })
+        await scrollToBottom(scroller)
+        await expectFixedSections(prompt)
+        await expect.poll(() => scroller.evaluate(element => element.clientHeight)).toBeGreaterThanOrEqual(48)
+        await attachScreenshot(`landscape mobile download dialog at ${uiScale}% and ${viewport.width}px`)
+        await advanced.evaluate(element => { element.open = false })
+        await expectScrollAtRenderedEnd(scroller)
+        await expectScrollbarMatchesOverflow(scroller)
+        await expectFixedSections(prompt)
+      }
     })
   })
 }

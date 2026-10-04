@@ -343,9 +343,28 @@
   block-size: auto;
 }
 
-@media (height <= 400px) and (width > 600px) {
+@media (height <= 400px) {
+  :global(.promptCard.downloadPromptCard.fixedLayout) {
+    padding-block: 0;
+  }
+
   .downloadHeader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     padding-block: 4px;
+  }
+
+  .downloadKind {
+    flex: none;
+    margin-block: 0;
+  }
+
+  .downloadVideoTitle {
+    min-inline-size: 0;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
   }
 
   .fixedTemplateSection :deep(.select) {
@@ -360,6 +379,14 @@
   }
 
   .downloadFolderRow {
+    flex-wrap: nowrap;
     margin-block: 0;
+  }
+
+  .downloadFolderRow > span {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
