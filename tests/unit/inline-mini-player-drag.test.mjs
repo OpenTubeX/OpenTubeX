@@ -72,7 +72,7 @@ test('mobile morph keeps player and video layout fixed between animation frames'
   methods.clearMobileMiniMorph()
 })
 
-function fixture({ reducedMotion = false, available = true, phonePanel = false, restoring = false, finishRejects = false, activationSucceeds = true } = {}) {
+function fixture({ reducedMotion = false, available = true, phonePanel = false, restoring = false, finishRejects = false, activationSucceeds = true, format = 'dash', mobile = false } = {}) {
   let reads = 0
   let navigations = 0
   let previewProgress = 0
@@ -102,7 +102,7 @@ function fixture({ reducedMotion = false, available = true, phonePanel = false, 
     process: { env: { IS_CAPACITOR: false } },
     container,
     video: { value: { getBoundingClientRect: () => from, style: { removeProperty() {} } } },
-    usesMobileMiniBar: () => false,
+    usesMobileMiniBar: () => mobile,
     performance: { now: () => 0 },
     SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS: 300,
     getAnimationSpeedMultiplier: () => 1,
@@ -128,7 +128,7 @@ function fixture({ reducedMotion = false, available = true, phonePanel = false, 
     scrollMiniPlayerActive,
     scrollMiniVideoAspectRatio: { value: 16 / 9 },
     playerSuspended: { value: !available },
-    props: { format: 'dash' },
+    props: { format },
     fullWindowEnabled: { value: false },
     isNativeFullscreenActive: () => false,
     isNativePipActive: () => false,
@@ -472,5 +472,26 @@ for (const hidden of [false, true]) {
       getMobileMiniBarRect: () => ({ top: 600, width: 400, height: 108 })
     })
     assert.equal(measure().rect.top, hidden ? 660 : 600)
+  })
+}
+
+for (const mobile of [false, true]) {
+  test(`${mobile ? 'mobile' : 'desktop'} audio mini-player eligibility covers explicit minimization`, () => {
+    const f = fixture({ format: 'audio', mobile })
+    assert.equal(f.methods.canUseScrollMiniPlayerBase(true), mobile)
+  })
+}
+
+for (const mobile of [false, true]) {
+  test(`${mobile ? 'mobile' : 'desktop'} audio observes inline visibility for scroll docking`, () => {
+    let observed = false
+    const setup = source.slice(source.indexOf('  function setupScrollMiniIntersectionObserver()'), source.indexOf('  /** @param {boolean} [animate] */', source.indexOf('  function setupScrollMiniIntersectionObserver()')))
+    const initialize = vm.runInNewContext(`${setup}\nsetupScrollMiniIntersectionObserver`, {
+      scrollMiniIntersectionObserver: null, props: { format: 'audio' }, usesMobileMiniBar: () => mobile,
+      getScrollMiniAnchor: () => ({}), updateScrollMiniPlayer() {}, ENTER_MINI_RATIO: 0.1, EXIT_MINI_RATIO: 0.5,
+      IntersectionObserver: class { observe() { observed = true } },
+    })
+    initialize()
+    assert.equal(observed, mobile)
   })
 }

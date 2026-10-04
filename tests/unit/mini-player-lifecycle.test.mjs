@@ -12,7 +12,7 @@ const source = readFileSync(new URL('../../src/renderer/components/ft-shaka-vide
   .replace(/^import\s[\s\S]*?from\s+['"][^'"]+['"];?\s*$/gm, '')
   .replace(/^export /gm, '')
 
-function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPlaying = true, android = false, inlineVisible = false, seekRange = null } = {}) {
+function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPlaying = true, android = false, inlineVisible = false, seekRange = null, format = 'video' } = {}) {
   t.mock.timers.enable({ apis: ['setTimeout'] })
   const scope = effectScope()
   const mounted = []
@@ -53,7 +53,7 @@ function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPl
   const player = scope.run(() => create({
     container: ref(inlineVisible ? { style: { removeProperty() {} }, removeAttribute() {}, hasAttribute: () => false, querySelectorAll: () => [], getBoundingClientRect: () => ({ ...rect }) } : null),
     fullWindowEnabled: ref(false), getUi: () => seekRange ? { getControls: () => ({ getPlayer: () => ({ seekRange: () => seekRange }) }) } : null,
-    isActiveTab, isPlayerSuspended, pictureInPictureActive: ref(false), props: reactive({ format: 'video', videoId: 'video' }),
+    isActiveTab, isPlayerSuspended, pictureInPictureActive: ref(false), props: reactive({ format, videoId: 'video' }),
     video, mobileMiniBarOverlay: ref(null)
   }))
   for (const callback of mounted) callback()
@@ -252,4 +252,12 @@ test('Android restoration returns a visible mini-player inline without its slide
   window.dispatchEvent(new Event('opentubex:android-pip-restored'))
   assert.equal(player.scrollMiniPlayerActive.value, false)
   assert.equal(player.scrollMiniPlayerAnimating.value, false)
+})
+
+test('downloaded audio keeps a visible mobile mini player after leaving Watch', t => {
+  const { player } = mountMiniPlayer(t, { detached: true, android: true, format: 'audio' })
+  player.updateScrollMiniPlayer()
+  assert.equal(coordinator.hasCrossTabMiniPlayerOwner(), true)
+  assert.equal(player.scrollMiniPlayerActive.value, true)
+  assert.equal(player.scrollMiniPlayerDetached.value, true)
 })

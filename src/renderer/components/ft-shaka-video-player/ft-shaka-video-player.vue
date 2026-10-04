@@ -170,10 +170,12 @@
       />
       <!-- Keep the decoded poster and its resolution fallback through playback. -->
       <div
-        v-if="!audioPlayerMode && thumbnail"
-        v-show="showPoster || showCountdownOverlay || showEndedScreen"
+        v-if="thumbnail"
+        v-show="audioPlayerMode
+          ? mobileMiniBar && (scrollMiniPlayerActive || scrollMiniPlayerDragStyle || scrollMiniPlayerAnimating)
+          : showPoster || showCountdownOverlay || showEndedScreen"
         class="countdownPoster"
-        :class="{ endedPoster: showEndedScreen }"
+        :class="{ endedPoster: !audioPlayerMode && showEndedScreen }"
         aria-hidden="true"
       >
         <FtRetryImage
