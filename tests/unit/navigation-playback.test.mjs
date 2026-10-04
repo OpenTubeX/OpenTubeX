@@ -11,7 +11,7 @@ const source = (await readFile(new URL('../../src/renderer/components/TabContent
 const titleSource = (await readFile(new URL('../../src/renderer/tabs/TabContext.js', import.meta.url), 'utf8'))
   .replace(/^import .*$/gm, '').replace(/^export /gm, '')
 
-function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabled = true, previous = '/history', loaded = hasLoaded, mobile = false } = {}) {
+function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabled = true, previous = '/history', loaded = hasLoaded, mobile = false, exitPresentationModes = () => {} } = {}) {
   const route = { path: '/watch/video', fullPath: '/watch/video', params: { id: 'video' } }
   const props = reactive({ tabId: 'tab', route, presented: true })
   const getters = reactive({ getKeepPlayingOnNavigation: enabled, getTabById: () => ({ historyIndex: previous ? 1 : 0, history: previous ? [{ route: { path: previous } }] : [] }) })
@@ -58,7 +58,7 @@ function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabl
     defineProps: () => props,
     // The native scroll mini player lives outside the watch view's DOM tree.
     // Its component reference must remain usable without a DOM video descendant.
-    useTemplateRef: name => name === 'watchRoot' ? ref(previewRoot) : name === 'previewHost' ? ref({ getBoundingClientRect: () => hostBounds, closest: () => ({ getBoundingClientRect: () => tabBounds }) }) : ref(mounted ? { $refs: { player: { hasLoaded: loaded, isPaused: () => video.paused } }, querySelector: () => null } : null),
+    useTemplateRef: name => name === 'watchRoot' ? ref(previewRoot) : name === 'previewHost' ? ref({ getBoundingClientRect: () => hostBounds, closest: () => ({ getBoundingClientRect: () => tabBounds }) }) : ref(mounted ? { $refs: { player: { hasLoaded: loaded, isPaused: () => video.paused, exitPresentationModes } }, querySelector: () => null } : null),
     provide: (key, value) => provides.set(key, value),
     onBeforeUnmount: callback => unmount.push(callback),
     store: { getters, commit: (_name, payload) => { savedBrowsingScroll = payload.scroll } },
@@ -85,6 +85,24 @@ function mountWatch(t, { paused = false, hasLoaded = true, mounted = true, enabl
     navigate
   }
 }
+
+test('retained navigation waits for fullscreen exit before deactivating Watch', async t => {
+  const exit = Promise.withResolvers()
+  const exitPresentationModes = t.mock.fn(() => exit.promise)
+  const mounted = mountWatch(t, { exitPresentationModes })
+  const deactivate = t.mock.fn()
+  mounted.provides.get('lifecycle').register('tab', { deactivate })
+  const navigation = mounted.navigate('/channel/commenter')
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(exitPresentationModes.mock.callCount(), 1)
+  assert.equal(deactivate.mock.callCount(), 0)
+  assert.equal(mounted.provides.get('presented').value, true)
+  exit.resolve()
+  await navigation
+  assert.equal(deactivate.mock.callCount(), 1)
+  assert.equal(mounted.provides.get('navigation').detached.value, true)
+  assert.equal(mounted.disposals(), 0)
+})
 
 test('retains a playing native video outside the watch DOM across navigation', async t => {
   const mounted = mountWatch(t)

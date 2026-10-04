@@ -1,5 +1,7 @@
-import { test, expect, setWindowSize } from '../../helpers/app.mjs'
-import { mobileMiniPlayerRegions, mobileMiniPlayerReturnPoint, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
+import { writeFile } from 'node:fs/promises'
+
+import { test, expect, setPlayerFullscreen, setWindowSize } from '../../helpers/app.mjs'
+import { findWatchComponent, mobileMiniPlayerRegions, mobileMiniPlayerReturnPoint, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchHistoryEntry, watchViewHandle } from '../../helpers/watch.mjs'
 import { mobileMiniPlayerBackdrop, resetMiniPlayerWork, stopTrackingMiniPlayerWork, trackMiniPlayerWork } from '../../helpers/mini-player-performance.mjs'
 
@@ -52,6 +54,130 @@ async function openMobilePlayer(app, page, phone = true) {
   await video.evaluate(element => element.pause())
   await enableMobileTouch(app, page, phone)
   return page.locator('.ftVideoPlayer')
+}
+
+for (const mode of ['fullscreen', 'fullwindow']) {
+  test(`${mode} commenter avatar navigation retains the video in the mobile mini-player`, async ({ app, page }) => {
+    const player = await openMobilePlayer(app, page)
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setKeepPlayingOnNavigation', true)
+      store.commit('setHideCommentPhotos', true)
+      store.commit('setReducedMotion', 'off')
+    })
+    await player.locator('video').evaluate(video => { video.loop = true; return video.play() })
+    const originalVideo = await player.locator('video').elementHandle()
+    const watch = await page.evaluateHandle(findWatchComponent)
+    try {
+      if (mode === 'fullscreen') await setPlayerFullscreen(page, true)
+      else await player.locator('.full-window-button').first().evaluate(button => button.click())
+      await player.evaluate(element => {
+        window.__fullWindowAnimationAtDock = false
+        const observer = new MutationObserver(() => {
+          if (!element.classList.contains('mobileMiniBar')) return
+          window.__fullWindowAnimationAtDock ||= element.getAnimations().some(animation =>
+            animation.playState === 'running' && animation.effect.getTiming().duration === 400)
+          observer.disconnect()
+        })
+        observer.observe(element, { attributeFilter: ['class'] })
+      })
+      await watch.evaluate(component => component.proxy.$refs.player.$.setupState.setFullscreenComments(true))
+      const avatarLink = player.locator('.fullscreenCommentCard a[tabindex="-1"]').first()
+      const avatar = avatarLink.locator('.commentThumbnail, .commentThumbnailHidden').first()
+      await expect(avatar).toBeVisible()
+      const destination = await avatarLink.getAttribute('href')
+      await avatar.click()
+      await expect(page).toHaveURL(new RegExp(destination.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
+      await expect.poll(() => page.evaluate(() => document.fullscreenElement === null)).toBe(true)
+      await expect(player).not.toHaveClass(/fullWindow/)
+      await expect(player).toHaveClass(/mobileMiniBar/)
+      await expect(player).toBeVisible()
+      expect(await page.evaluate(() => window.__fullWindowAnimationAtDock)).toBe(false)
+      expect(await originalVideo.evaluate(video => video.isConnected && !video.paused)).toBe(true)
+      await player.locator('.mobileMiniBarReturn').click()
+      await expect(page).toHaveURL(/#\/watch\//)
+      await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+    } finally {
+      await originalVideo.dispose()
+      await watch.dispose()
+    }
+  })
+}
+
+for (const uiScale of [100, 125]) {
+  test(`landscape minimize clears the expanded hidden Watch sidebar at ${uiScale}%`, async ({ app, page }) => {
+    const player = await openMobilePlayer(app, page)
+    await setWindowSize(app, page, { width: 1250, height: 540 })
+    await page.evaluate(async scale => {
+      window.ftElectron.setZoomFactor(scale / 100)
+      const app = document.querySelector('#app').__vue_app__
+      const store = app.config.globalProperties.$store
+      store.commit('setHideSideBarOnWatchPages', false)
+      await new Promise(requestAnimationFrame)
+      if (!store.getters.getIsSideNavOpen) store.commit('toggleSideNav')
+      await new Promise(requestAnimationFrame)
+      store.commit('setHideSideBarOnWatchPages', true)
+      await new Promise(requestAnimationFrame)
+    }, uiScale)
+    await expect.poll(() => page.locator('.app > .sideNav').evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      return bounds.width === 200 && bounds.right <= 0
+    })).toBe(true)
+    await player.locator('video').evaluate(video => { video.loop = true; return video.play() })
+    const bounds = await player.boundingBox()
+    const start = { x: bounds.x + bounds.width / 2, y: bounds.y + 100 }
+    const cdp = await page.context().newCDPSession(page)
+    try {
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] })
+      for (const distance of [30, 80, 150, 250]) {
+        await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ ...start, y: start.y + distance }] })
+      }
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+    } finally {
+      await cdp.detach()
+    }
+    await expect(player).toHaveClass(/mobileMiniBar/)
+    await expect.poll(() => player.evaluate(element => {
+      const nav = document.querySelector('.app > .sideNav').getBoundingClientRect()
+      return nav.width > 190 && nav.left >= 0 && element.getBoundingClientRect().left >= nav.right - 2 / devicePixelRatio
+    })).toBe(true)
+  })
+}
+
+for (const uiScale of [100, 125, 150]) {
+  test(`landscape mobile mini-player clears the sidebar at ${uiScale}%`, async ({ app, page }, testInfo) => {
+    const player = await openMobilePlayer(app, page)
+    await page.evaluate(scale => {
+      window.ftElectron.setZoomFactor(scale / 100)
+      document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setKeepPlayingOnNavigation', true)
+    }, uiScale)
+    await player.locator('video').evaluate(video => { video.loop = true; return video.play() })
+    const watch = await watchViewHandle(page)
+    await watch.evaluate(vm => vm.tabRouter.push('/subscriptions'))
+    await watch.dispose()
+    await expect(player).toHaveClass(/mobileMiniBar/)
+    const expectClearOfSidebar = () => expect.poll(() => player.evaluate(element => {
+      const bar = element.getBoundingClientRect()
+      const nav = document.querySelector('.app > .sideNav').getBoundingClientRect()
+      const tolerance = 2 / devicePixelRatio
+      return window.innerWidth <= 680
+        ? bar.bottom <= nav.top + tolerance
+        : bar.left >= nav.right - tolerance
+    })).toBe(true)
+    for (const width of [1000, 1250, 480, 1000]) {
+      await setWindowSize(app, page, { width, height: width === 480 ? 850 : width === 1250 ? 540 : 500 })
+      await expectClearOfSidebar()
+    }
+    await setWindowSize(app, page, { width: 1250, height: 380 })
+    for (const expanded of [true, false]) {
+      await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('toggleSideNav'))
+      await expect.poll(() => page.locator('.app > .sideNav').evaluate(element => element.getBoundingClientRect().width)).toBeCloseTo(expanded ? 200 : 80, 0)
+      await expectClearOfSidebar()
+    }
+    const screenshot = await app.electronApp.evaluate(async ({ BrowserWindow }) =>
+      (await BrowserWindow.getAllWindows()[0].webContents.capturePage()).toPNG().toString('base64'))
+    await writeFile(testInfo.outputPath('landscape-mini-player.png'), Buffer.from(screenshot, 'base64'))
+  })
 }
 
 test('mobile swipes suspend ambient sampling and hidden control layout in both directions', async ({ app, page }, testInfo) => {

@@ -119,12 +119,14 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   }
 
   function getMobileMiniBarRect() {
-    const insets = getViewportInsets()
+    const insets = getViewportInsets({ includeSideNav: true })
     const height = 108
+    const left = Math.max(0, insets.left - MARGIN)
+    const right = Math.max(0, insets.right - MARGIN)
     return {
-      left: 0,
+      left,
       top: window.innerHeight - height - Math.max(0, insets.bottom - MARGIN),
-      width: getViewportWidth(),
+      width: Math.max(0, getViewportWidth() - left - right),
       height,
       dock: 'left',
     }
@@ -137,7 +139,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     // block for fixed children. Measure in the same layer as the settled bar.
     const element = container.value.cloneNode(false)
     const videoElement = video.value.cloneNode(false)
-    const { top, width, height } = getMobileMiniBarRect()
+    const { left, top, width, height } = getMobileMiniBarRect()
     element.classList.add('scrollMiniPlayer', 'mobileMiniBar')
     element.removeAttribute('id')
     element.removeAttribute('style')
@@ -149,7 +151,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     // Keep the CSS translation for hidden navigation: it is also the settled
     // bar's position after the browsing page has been restored.
     Object.assign(element.style, {
-      position: 'fixed', left: '0px', top: `${top}px`, width: `${width}px`, height: `${height}px`, margin: '0px'
+      position: 'fixed', left: `${left}px`, top: `${top}px`, width: `${width}px`, height: `${height}px`, margin: '0px'
     })
     layer.append(element)
     const bounds = element.getBoundingClientRect()
@@ -226,6 +228,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
   /** @type {IntersectionObserver | null} */
   let scrollMiniIntersectionObserver = null
+  let mobileMiniBarLayoutObserver = null
   /** @type {number | null} */
   let scrollMiniPlayPauseHideTimeout = null
   /** @type {number | null} */
@@ -1212,7 +1215,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   }
 
   function restoreScrollMiniPlayerPosition() {
-    if (process.env.IS_CAPACITOR) {
+    if (usesMobileMiniBar()) {
       scrollMiniPlayerRect.value = getMobileMiniBarRect()
       return
     }
@@ -1347,7 +1350,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
    */
   function resnapScrollMiniPlayerToEdge() {
     if (!scrollMiniPlayerActive.value) return
-    if (process.env.IS_CAPACITOR) {
+    if (usesMobileMiniBar()) {
       scrollMiniPlayerRect.value = getMobileMiniBarRect()
       return
     }
@@ -1686,6 +1689,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
   function teardownScrollMiniPlayer() {
     unregisterCrossTabMiniPlayer(crossTabMiniPlayerCandidate)
+    mobileMiniBarLayoutObserver?.disconnect()
+    mobileMiniBarLayoutObserver = null
 
     if (scrollMiniIntersectionObserver) {
       scrollMiniIntersectionObserver.disconnect()
@@ -1713,6 +1718,13 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
   let unregisterAndroidBackPlayer = null
   onMounted(() => {
+    const sideNav = document.querySelector('.sideNav')
+    if (sideNav) {
+      mobileMiniBarLayoutObserver = new ResizeObserver(() => {
+        if (scrollMiniPlayerActive.value && usesMobileMiniBar()) handleScrollMiniWindowResize()
+      })
+      mobileMiniBarLayoutObserver.observe(sideNav)
+    }
     if (!process.env.IS_CAPACITOR || process.env.IS_IOS) return
     window.addEventListener('opentubex:android-pip', handleAndroidPictureInPictureChange)
     window.addEventListener('opentubex:android-pip-restored', handleAndroidPictureInPictureRestored)

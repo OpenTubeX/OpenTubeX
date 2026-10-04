@@ -29,7 +29,7 @@ function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPl
   const create = vm.runInNewContext(`${source}; useScrollMiniPlayer`, {
     ...coordinator, computed, ref, watch, inject: () => ({ detached: ref(navigatedAway), tabPresented: ref(true), minimized, clearMinimizePreview() {} }), watchNavigationKey: Symbol(),
     nextTick() {}, onMounted: callback => mounted.push(callback), onBeforeUnmount: callback => unmounting.push(callback), window, clearTimeout, process: { env: { IS_CAPACITOR: android } },
-    document: { body: { classList: { remove() {}, contains: name => classes.has(name) } } },
+    document: { querySelector: () => null, body: { classList: { remove() {}, contains: name => classes.has(name) } } },
     store: { getters: reactive({ getAutoPictureInPictureTriggers: [], getKeepPlayingOnNavigation: keepPlaying, getScrollMiniPlayerOnAllTabs: true, getScrollMiniPlayerEnabled: inlineVisible }) },
     DEFAULT_ASPECT_RATIO: 16 / 9,
     getDefaultScrollMiniPlayerRect: () => ({ ...rect }),
