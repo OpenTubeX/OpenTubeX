@@ -327,6 +327,11 @@ export function setAndroidAlwaysShowScrollbars(enabled) {
   return AndroidUi?.setAlwaysShowScrollbars({ enabled }) ?? Promise.resolve()
 }
 
+/** Suppresses Android's native page scrollbars while a player fills the window. */
+export function setAndroidPageScrollbarsHidden(hidden) {
+  return AndroidUi?.setPageScrollbarsHidden({ hidden }) ?? Promise.resolve()
+}
+
 /** Colors native inset padding used by Android WebViews without edge-to-edge CSS. */
 export function setAndroidSystemBarsBackground(color) {
   if (Capacitor.getPlatform() !== 'android') return Promise.resolve()

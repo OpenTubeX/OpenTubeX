@@ -7,9 +7,9 @@ import {
   DEFAULT_SCROLL_SPEED,
   normalizeScrollSpeed
 } from './scrollSpeed'
-import { initializePageScrollbar } from './pageScrollbar'
+import { initializePageScrollbar, observePageScrollbarVisibility } from './pageScrollbar'
 import { addScrollbarAutoHide } from './scrollbarAutoHide'
-import { setAndroidAlwaysShowScrollbars } from './androidUi'
+import { setAndroidAlwaysShowScrollbars, setAndroidPageScrollbarsHidden } from './androidUi'
 
 // Kept out of the core bundle by the library, so `clickScroll` below silently
 // does nothing unless it is registered.
@@ -387,6 +387,14 @@ function optimizeBodyScrollbarDrag(instance) {
  */
 export function initializeAppScrollbars({ useNativePageScrollbar = false } = {}) {
   initializePageScrollbar(document, useNativePageScrollbar, create)
+
+  if (useNativePageScrollbar) {
+    observePageScrollbarVisibility(document, hidden => {
+      setAndroidPageScrollbarsHidden(hidden).catch(error => {
+        console.warn('Could not update Android fullscreen scrollbar visibility', error)
+      })
+    })
+  }
 
   watch(
     () => normalizeScrollSpeed(store.getters.getScrollSpeed),

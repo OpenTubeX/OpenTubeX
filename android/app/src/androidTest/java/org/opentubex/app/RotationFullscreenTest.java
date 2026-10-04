@@ -212,6 +212,7 @@ public class RotationFullscreenTest {
                     }
                     awaitCondition(view, "innerWidth > innerHeight");
                     awaitCondition(view, "!!document.querySelector('.videoLayout:popover-open .ftVideoPlayer.fullWindow')");
+                    awaitPageScrollbarEnabled(scenario, view, false);
                     awaitCondition(view, "(() => { const rect = document.querySelector('.ftVideoPlayer').getBoundingClientRect(); return rect.width >= innerWidth - 2 && rect.height >= innerHeight - 2; })()");
                     scenario.onActivity(activity -> assertEquals("Only the explicit opt-in may force landscape",
                         physicalRotation, activity.getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE));
@@ -226,6 +227,7 @@ public class RotationFullscreenTest {
                         assertTrue(InstrumentationRegistry.getInstrumentation().getUiAutomation().setRotation(UiAutomation.ROTATION_FREEZE_0));
                     }
                     awaitCondition(view, "!document.body.classList.contains('playerFullWindow')");
+                    awaitPageScrollbarEnabled(scenario, view, true);
                     assertInlinePortrait(scenario, view);
                     if (physicalRotation) {
                         scenario.onActivity(activity -> assertEquals("Restore the user's orientation policy",
@@ -260,6 +262,20 @@ public class RotationFullscreenTest {
                 }
             }
         }
+    }
+
+    private static void awaitPageScrollbarEnabled(ActivityScenario<MainActivity> scenario, WebView view,
+        boolean enabled) throws Exception {
+        // The DOM update precedes the bridge worker and its native UI-thread
+        // update. Main-looper idleness alone does not drain the bridge queue.
+        AtomicReference<Boolean> actual = new AtomicReference<>();
+        long deadline = android.os.SystemClock.uptimeMillis() + 5000;
+        do {
+            scenario.onActivity(activity -> actual.set(view.isVerticalScrollBarEnabled()));
+            if (actual.get() == enabled) return;
+            Thread.sleep(100);
+        } while (android.os.SystemClock.uptimeMillis() < deadline);
+        assertEquals("Native page scrollbar follows fullscreen state", Boolean.valueOf(enabled), actual.get());
     }
 
     private static String shell(String command) throws Exception {
