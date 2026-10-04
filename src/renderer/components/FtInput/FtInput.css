@@ -400,6 +400,7 @@
 
 .showPasswordToggle {
   --password-toggle-size: 40px;
+  --password-input-height: var(--form-control-height);
   --input-label-reserved-space: calc(var(--password-toggle-size) + 24px);
 }
 
@@ -431,10 +432,11 @@
 @media (any-pointer: coarse), (width <= 680px) {
   .showPasswordToggle {
     --password-toggle-size: 48px;
+    --password-input-height: max(56px, var(--phone-touch-target, 48px));
   }
 
   .showPasswordToggle .ft-input {
-    min-block-size: max(56px, var(--phone-touch-target, 48px));
+    min-block-size: var(--password-input-height);
   }
 
   .passwordVisibilityToggle {

@@ -120,7 +120,7 @@
   }
 
   :deep(.centeredSettingsInput .passwordVisibilityToggle) {
-    inset-block-start: calc(var(--form-control-height) / 2);
+    inset-block-start: calc(var(--password-input-height) / 2);
   }
 
   :deep(.settingsFlexStart460px) {

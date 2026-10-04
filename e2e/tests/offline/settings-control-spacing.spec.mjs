@@ -90,8 +90,8 @@ for (const uiScale of [100, 95]) {
 
     test('API and private ID fields center their outlines and tag labels blend into their panel', async ({ app, page }, testInfo) => {
       const section = await goToSettingsSection(page, 'add-ons')
-      for (const width of [1000, 450, 360]) {
-        await resize(app, page, width === 1000 ? 1600 : 480, uiScale)
+      for (const [width, viewportWidth] of [[1000, 1600], [450, 480], [360, 480], [360, 1600]]) {
+        await resize(app, page, viewportWidth, uiScale)
         await section.evaluate((element, width) => { element.parentElement.style.inlineSize = `${width}px` }, width)
         for (const highlightChangedSettings of [false, true]) {
           await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHighlightChangedSettings', value), highlightChangedSettings)
@@ -105,6 +105,19 @@ for (const uiScale of [100, 95]) {
                 return field.left + field.width / 2 - row.left - row.width / 2
               })
               expect.soft(Math.abs(offset), `${width}px ${direction} ${name}`).toBeLessThanOrEqual(1)
+              const toggle = input.locator('../..').locator('.passwordVisibilityToggle')
+              if (await toggle.count()) {
+                const geometry = await input.evaluate(element => {
+                  const field = element.getBoundingClientRect()
+                  const eye = element.parentElement.querySelector('.passwordVisibilityToggle').getBoundingClientRect()
+                  return {
+                    centerOffset: Math.abs(eye.top + eye.height / 2 - field.top - field.height / 2),
+                    inside: eye.top >= field.top && eye.bottom <= field.bottom
+                  }
+                })
+                expect.soft(geometry.centerOffset, `${width}px ${direction} eye center`).toBeLessThanOrEqual(1)
+                expect.soft(geometry.inside, `${width}px ${direction} eye containment`).toBe(true)
+              }
               const label = input.locator('../..').locator('.selectLabelText')
               expect.soft(await label.evaluate(element => element.scrollWidth - element.clientWidth), `${width}px ${direction} ${name} label`).toBeLessThanOrEqual(1)
             }
@@ -118,7 +131,7 @@ for (const uiScale of [100, 95]) {
         }))
         expect.soft(colors.label).toBe(colors.panel)
         await section.getByLabel('Private user ID (optional)', { exact: true }).scrollIntoViewIfNeeded()
-        await captureAppFramebuffer(app, testInfo, `sponsorblock-spacing-${width}`)
+        await captureAppFramebuffer(app, testInfo, `sponsorblock-spacing-${width}-${viewportWidth}`)
       }
     })
 

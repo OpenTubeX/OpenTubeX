@@ -231,12 +231,13 @@ export const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
   sync: {
     '': [
       'Sync Settings', 'Enable Sync', 'Server URL', 'Username', 'Privacy Passphrase',
-      'Log In', 'Register', 'Pair Another Device', 'Pair With Existing Device',
+      'Log In', 'Register', 'Privacy Policy', 'Pair Another Device', 'Pair With Existing Device',
       'Device Name', 'Pairing Code', 'Create Pairing Code', 'Use Text Pairing Code',
       'Show QR Code', 'Enter Pairing Code', 'Check Pairing Code', 'Scan QR Code',
       'Pairing Codes Match', 'Approve Pairing', 'Try Again', 'Scan Again',
+      'Turn Flashlight On', 'Turn Flashlight Off', 'Confirm Data Loss',
       'Sync Automatically', 'Watch stats', 'Profiles', 'Open Tabs', 'Use Shared Tabs',
-      'Sync Now', 'Disconnect', 'Delete Account', 'Confirm Delete Account',
+      'Open All Tabs', 'Open On Device', 'Sync Now', 'Disconnect', 'Delete Account', 'Confirm Delete Account',
       'Devices', 'Activity', 'Show More', 'Refresh Devices', 'Revoke Session',
       'Confirm Revoke Session', 'Rename Device', 'Save Device Name',
       'Change Password', 'Current Password', 'New Password', 'Confirm New Password',
