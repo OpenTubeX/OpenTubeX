@@ -2638,7 +2638,10 @@ test.describe('settings', () => {
 
     for (const grid of ['.switchColumnGrid', '.switchGrid']) {
       expect(await page.locator(grid).first().evaluate(element => {
-        return getComputedStyle(element).gridTemplateColumns.split(' ').length
+        return new Set(Array.from(element.children).map(control => {
+          const bounds = (control.querySelector('.select-text') || control).getBoundingClientRect()
+          return Math.round(bounds.left + bounds.width / 2)
+        })).size
       })).toBe(1)
     }
 
