@@ -11584,7 +11584,10 @@ export default defineComponent({
     }
 
     async function performFirstLoad(isCurrentLoad = () => true) {
+      const generation = formatSwitchGeneration
+      const isCurrentInitialLoad = () => generation === formatSwitchGeneration && isCurrentLoad()
       clearSabrBackoffTimer()
+      clearPreRollTimer()
       if (process.env.SUPPORTS_LOCAL_API && sabrStream) {
         // Longer timeout for receiving larger responses
         player.configure({
@@ -11610,14 +11613,14 @@ export default defineComponent({
       if (!props.localFilePlayback && initialLoadDelayMs > 0 && (props.format === 'legacy' || props.manifestMimeType !== MANIFEST_TYPE_SABR)) {
         startPreRollTimer(initialLoadDelayMs)
         await new Promise((resolve) => setTimeout(resolve, initialLoadDelayMs))
+        if (!ui || !player || !isCurrentInitialLoad()) return
         clearPreRollTimer()
-        if (!ui || !player || !isCurrentLoad()) return
       }
 
       if (props.format === 'dash' || props.format === 'audio') {
         try {
           await loadPlaybackSource(props.manifestSrc, props.startTime, props.manifestMimeType)
-          if (!ui || !player || !isCurrentLoad()) return
+          if (!ui || !player || !isCurrentInitialLoad()) return
 
           if (props.format === 'dash') {
             // Let shaka-player's ABR pick the variant when auto quality is preferred
@@ -11643,7 +11646,7 @@ export default defineComponent({
             }
           }
         } catch (error) {
-          if (ui && player && isCurrentLoad()) {
+          if (ui && player && isCurrentInitialLoad()) {
             handleError(error, 'loading dash/audio manifest and setting default quality in mounted')
           }
         }
