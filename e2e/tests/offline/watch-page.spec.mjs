@@ -383,7 +383,7 @@ test.describe('desktop quick playback speed bar', () => {
     }
   })
 
-  for (const control of ['quick bar', 'menu', 'normal-speed toggle']) {
+  for (const control of ['quick bar', 'menu', 'normal-rate menu', 'normal-speed toggle']) {
     test(`keeps ${control} speed selections while the DASH manifest is still loading`, async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
       const video = await openMockedVideo(page)
@@ -424,23 +424,27 @@ test.describe('desktop quick playback speed bar', () => {
         const bar = page.locator(`${activeTab} .ft-quick-playback-rate-bar`)
         await expect.poll(() => video.evaluate(element => element.readyState)).toBe(0)
         await page.locator(`${activeTab} .shaka-controls-container`).evaluate(element => element.setAttribute('shown', 'true'))
-        if (control !== 'menu') {
+        if (!control.endsWith('menu')) {
           await bar.locator('[data-rate="1.5"]').click()
           await expect(bar.locator('[data-rate="1.5"]')).toHaveClass(/is-current-rate/)
         } else {
+          if (control === 'normal-rate menu') await bar.locator('[data-rate="1.5"]').click()
+          const selectedRate = control === 'normal-rate menu' ? 1 : 1.5
           const player = page.locator(`${activeTab} .ftVideoPlayer`)
           await player.getByRole('button', { name: 'More settings', exact: true }).click()
           await player.locator('.shaka-playbackrate-button').click()
           const menu = player.locator('.shaka-playback-rates')
-          await menu.getByRole('button', { name: '1.5x', exact: true }).click()
+          await menu.getByRole('button', { name: `${selectedRate}x`, exact: true }).click()
           await player.getByRole('button', { name: 'More settings', exact: true }).click()
           await player.locator('.shaka-playbackrate-button').click()
-          await expect(menu.getByRole('button', { name: '1.5x', exact: true })).toHaveAttribute('aria-selected', 'true')
+          await expect(menu.getByRole('button', { name: `${selectedRate}x`, exact: true })).toHaveAttribute('aria-selected', 'true')
           await menu.locator('.shaka-back-to-overflow-button').click()
           await player.getByRole('button', { name: 'More settings', exact: true }).click()
         }
-        const rate = control === 'normal-speed toggle' ? 1 : 1.75
-        await page.locator('body').press(control === 'normal-speed toggle' ? 'g' : 'p')
+        const rate = control === 'normal-speed toggle' || control === 'normal-rate menu' ? 1 : 1.75
+        if (control !== 'normal-rate menu') {
+          await page.locator('body').press(control === 'normal-speed toggle' ? 'g' : 'p')
+        }
         await expect(bar.locator(`[data-rate="${rate}"]`)).toHaveClass(/is-current-rate/)
 
         releaseManifest()
