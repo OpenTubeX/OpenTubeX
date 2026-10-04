@@ -1942,15 +1942,6 @@ Tray Icon:
   Follow App Theme: "Следване на темата на приложението"
 
 Form Inputs:
-  Enter Password Hint: "Въведете паролата си"
-  Choose Password Hint: "Изберете парола"
-  Confirm Password Hint: "Повторете новата си парола"
-  Encryption Passphrase Hint: "Въведете фразата си за шифроване"
-  Show Password: "Показване на паролата"
-  Hide Password: "Скриване на паролата"
-  Search Text Hint: "Въведете думи за търсене"
-  Playlist Description Hint: "Опишете този плейлист"
-  Filename Preview: "Преглед на името на файла"
   Enter Channels: "Въведете канали"
   Enter Text: "Въведете текст"
   Video URL: URL на видео или плейлист

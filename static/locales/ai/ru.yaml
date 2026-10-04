@@ -1937,15 +1937,6 @@ Tray Icon:
   Follow App Theme: "Использовать тему приложения"
 
 Form Inputs:
-  Enter Password Hint: "Введите свой пароль"
-  Choose Password Hint: "Выберите пароль"
-  Confirm Password Hint: "Повторите новый пароль"
-  Encryption Passphrase Hint: "Введите свою парольную фразу шифрования"
-  Show Password: "Показать пароль"
-  Hide Password: "Скрыть пароль"
-  Search Text Hint: "Введите поисковые слова"
-  Playlist Description Hint: "Опишите этот плейлист"
-  Filename Preview: "Предпросмотр имени файла"
   Enter Channels: "Введите каналы"
   Enter Text: "Введите текст"
   Video URL: URL видео или плейлиста

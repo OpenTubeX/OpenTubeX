@@ -1922,15 +1922,6 @@ Tray Icon:
   Follow App Theme: "Järgi rakenduse teemat"
 
 Form Inputs:
-  Enter Password Hint: "Sisesta oma parool"
-  Choose Password Hint: "Vali parool"
-  Confirm Password Hint: "Korda oma uut parooli"
-  Encryption Passphrase Hint: "Sisesta oma krüptimise paroolifraas"
-  Show Password: "Näita parooli"
-  Hide Password: "Peida parool"
-  Search Text Hint: "Sisesta otsingusõnad"
-  Playlist Description Hint: "Kirjelda seda esitusloendit"
-  Filename Preview: "Failinime eelvaade"
   Enter Channels: "Sisesta kanalid"
   Enter Text: "Sisesta tekst"
   Video URL: Video või esitusloendi URL

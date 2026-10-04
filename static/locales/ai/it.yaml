@@ -1919,15 +1919,6 @@ Tray Icon:
   Follow App Theme: "Segui il tema dell’app"
 
 Form Inputs:
-  Enter Password Hint: "Inserisci la tua password"
-  Choose Password Hint: "Scegli una password"
-  Confirm Password Hint: "Ripeti la nuova password"
-  Encryption Passphrase Hint: "Inserisci la tua passphrase di cifratura"
-  Show Password: "Mostra password"
-  Hide Password: "Nascondi password"
-  Search Text Hint: "Inserisci termini di ricerca"
-  Playlist Description Hint: "Descrivi questa playlist"
-  Filename Preview: "Anteprima del nome del file"
   Enter Channels: "Inserisci canali"
   Enter Text: "Inserisci testo"
   Video URL: URL del video o della playlist

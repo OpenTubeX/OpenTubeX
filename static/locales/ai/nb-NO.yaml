@@ -1942,15 +1942,6 @@ Tray Icon:
   Follow App Theme: "Følg appens tema"
 
 Form Inputs:
-  Enter Password Hint: "Skriv inn passordet ditt"
-  Choose Password Hint: "Velg et passord"
-  Confirm Password Hint: "Gjenta det nye passordet ditt"
-  Encryption Passphrase Hint: "Skriv inn krypteringspassfrasen din"
-  Show Password: "Vis passord"
-  Hide Password: "Skjul passord"
-  Search Text Hint: "Skriv inn søkeord"
-  Playlist Description Hint: "Beskriv denne spillelisten"
-  Filename Preview: "Forhåndsvisning av filnavn"
   Enter Channels: "Skriv inn kanaler"
   Enter Text: "Skriv inn tekst"
   Video URL: Video- eller spilleliste-URL
