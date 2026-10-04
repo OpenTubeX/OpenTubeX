@@ -1865,7 +1865,7 @@ test.describe('list video actions', () => {
       label: getComputedStyle(field.querySelector('.selectLabel')).opacity,
       labelText: getComputedStyle(field.querySelector('.selectLabelText')).opacity
     }))
-    expect(opacity).toEqual({ label: '1', labelText: '0.4' })
+    expect(opacity).toEqual({ label: '1', labelText: '0.38' })
     await expect(tooltip).toHaveCSS('opacity', '1')
     for (const fullWindow of [false, true]) {
       await page.evaluate(value => document.body.classList.toggle('playerFullWindow', value), fullWindow)

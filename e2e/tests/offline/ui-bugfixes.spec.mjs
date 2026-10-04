@@ -513,10 +513,10 @@ for (const iconPack of ['material', 'remix']) {
       await expect.poll(() => row(title).locator('img').evaluate(image => image.naturalWidth)).toBe(24)
     }
     await expect(row('Broken avatar').locator('img')).toBeHidden()
-    // Keep the retry pending to check that only exhausted retries show a fallback.
+    // Keep the retry pending to check the placeholder until the image loads.
     const retryRoute = await retryRequest
-    await expect(row('Retry avatar').locator('img')).toBeVisible()
-    await expect(row('Retry avatar').locator('[data-icon="clapperboard"]')).toHaveCount(0)
+    await expect(row('Retry avatar').locator('img')).toBeHidden()
+    await expect(row('Retry avatar').locator('[data-icon="clapperboard"]')).toBeVisible()
     await retryRoute.fulfill({
       contentType: 'image/svg+xml',
       body: decodeURIComponent(avatar.split(',')[1]),

@@ -3515,6 +3515,7 @@ test.describe('settings', () => {
   test('waits for the device name before creating a secure sync pairing code', async ({ app, page }) => {
     const serverUrl = 'https://pairing.example'
     let createdSession
+    let pendingSession
     let cancelledSessionId
     let cancelledRecipientToken
 
@@ -3540,20 +3541,22 @@ test.describe('settings', () => {
       }
       if (url.pathname === '/v1/pairing' && request.method() === 'POST') {
         createdSession = request.postDataJSON()
-        await route.fulfill({
-          status: 201,
-          json: {
-            version: 1,
-            id: createdSession.id,
-            account_id: null,
-            recipient_public_key: createdSession.recipient_public_key,
-            recipient_device_id: createdSession.recipient_device_id,
-            recipient_device_name: createdSession.recipient_device_name,
-            approving_device_id: null,
-            expires_at: Date.now() + 120_000,
-            approved: false
-          }
-        })
+        pendingSession = {
+          version: 1,
+          id: createdSession.id,
+          account_id: null,
+          recipient_public_key: createdSession.recipient_public_key,
+          recipient_device_id: createdSession.recipient_device_id,
+          recipient_device_name: createdSession.recipient_device_name,
+          approving_device_id: null,
+          expires_at: Date.now() + 120_000,
+          approved: false
+        }
+        await route.fulfill({ status: 201, json: pendingSession })
+        return
+      }
+      if (url.pathname.startsWith('/v1/pairing/') && request.method() === 'GET') {
+        await route.fulfill({ json: pendingSession })
         return
       }
       if (url.pathname.startsWith('/v1/pairing/') && request.method() === 'DELETE') {

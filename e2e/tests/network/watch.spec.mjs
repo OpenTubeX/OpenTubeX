@@ -277,7 +277,7 @@ test.describe('watch page metadata', () => {
   test('shows video metadata', async ({ page }) => {
     await openVideo(page)
     await expect(page.getByText('jawed').first()).toBeVisible()
-    await expect(page.locator(sel.activeTab).locator('.tabAvatar')).toBeVisible()
+    await expect(page.locator(sel.activeTab).locator('img.tabAvatar')).toBeVisible()
   })
 })
 
@@ -1677,7 +1677,7 @@ test.describe('custom Shorts player', () => {
     await page.mouse.move(playerBounds.x + 8, playerBounds.y + playerBounds.height / 2)
     await expect(player).not.toHaveClass(/no-cursor/)
     await expect(controls).not.toHaveAttribute('shown', 'true')
-    await expect(topControls).toHaveCSS('transition-duration', '0.6s, 0s, 0.25s, 0.25s')
+    await expect(topControls).toHaveCSS('transition-duration', '0.6s, 0s')
     await expect(topControls).toHaveCSS('opacity', '0')
     await expect(actionDock).toHaveCSS('opacity', '1')
     await expect(actionDock).toHaveCSS('pointer-events', 'auto')

@@ -800,12 +800,19 @@ test.describe('desktop quick playback speed bar', () => {
       const controls = document.querySelector('.shaka-controls-container')
       const panel = controls.querySelector('.shaka-controls-button-panel')
       const bar = panel.querySelector('.ft-quick-playback-rate-bar')
+      const glass = panel.querySelector('.ft-right-control-glass')
+      const layers = [glass, bar]
       controls.setAttribute('shown', 'true')
-      await new Promise(resolve => setTimeout(resolve, 750))
+      layers.forEach(element => element.getAnimations().forEach(animation => animation.finish()))
       controls.removeAttribute('shown')
-      await new Promise(resolve => setTimeout(resolve, 180))
+      for (const element of layers) {
+        const fade = element.getAnimations().find(animation => animation.transitionProperty === 'opacity')
+        if (!fade) throw new Error('Controls fade transition not found')
+        fade.pause()
+        fade.currentTime = 300
+      }
       return {
-        glassOpacity: Number(getComputedStyle(panel.querySelector('.ft-right-control-glass')).opacity),
+        glassOpacity: Number(getComputedStyle(glass).opacity),
         barOpacity: Number(getComputedStyle(bar).opacity)
       }
     })
@@ -818,8 +825,8 @@ test.describe('desktop quick playback speed bar', () => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     const bar = page.locator('.ft-quick-playback-rate-bar')
-    await expect(bar).toBeVisible()
     await page.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+    await expect(bar).toBeVisible()
     await expect(bar).toHaveCSS('backdrop-filter', /blur\(10px\)/)
     const surface = await bar.evaluate(element => {
       const style = getComputedStyle(element)
@@ -1597,7 +1604,8 @@ test('updates boolean settings from the player options', async ({ app, page }) =
   await openMockedVideo(page)
 
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
-  await player.getByRole('button', { name: 'More settings' }).click({ force: true })
+  await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+  await player.getByRole('button', { name: 'More settings' }).click()
   const ambientMode = player.getByRole('button', { name: 'Ambient Mode', exact: true })
   const skipSilence = player.getByRole('button', { name: 'Skip Silence', exact: true })
 
