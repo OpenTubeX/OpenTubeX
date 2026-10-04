@@ -83,7 +83,7 @@ test.describe('search', () => {
     ))).toBe(true)
 
     const [thumbnailBox, previewBox] = await Promise.all([
-      video.locator('.thumbnailImage').first().boundingBox(),
+      video.locator('.thumbnailImage:not(.thumbnailPreview):visible').boundingBox(),
       preview.boundingBox()
     ])
     expect(previewBox.x).toBeCloseTo(thumbnailBox.x, 1)
@@ -111,7 +111,7 @@ test.describe('search', () => {
     await expect.poll(() => placeholderPreviewRequested).toBe(true)
     await page.waitForTimeout(600)
     await expect(secondVideo.locator('.thumbnailPreview')).toHaveCount(0)
-    await expect(secondVideo.locator('.thumbnailImage').first()).toBeVisible()
+    await expect(secondVideo.locator('.thumbnailImage:not(.thumbnailPreview):visible')).toBeVisible()
     const loaderCountAfterPlaceholder = await page.evaluate(() => window.__thumbnailPreviewLoaderCount)
 
     await page.mouse.move(0, 0)

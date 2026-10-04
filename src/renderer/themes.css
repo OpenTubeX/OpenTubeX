@@ -3097,7 +3097,7 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
 }
 
 .oneDark {
-  --primary-text-color: #abb2bf;
+  --primary-text-color: #b5bdca;
   --secondary-text-color: #9ca0a8;
   --bg-color: #282c34;
   --card-bg-color: #21252b;

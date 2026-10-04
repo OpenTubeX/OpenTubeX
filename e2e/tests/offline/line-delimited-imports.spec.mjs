@@ -243,7 +243,6 @@ test('invalid-only line-delimited imports do not report success', async ({ page 
   const pageErrors = []
   page.on('pageerror', error => pageErrors.push(error.message))
   const dataSection = await goToSettingsSection(page, 'data')
-  let expectedErrorCount = 0
   const imports = [
     {
       filename: 'issue-866-subscriptions.db',
@@ -267,14 +266,13 @@ test('invalid-only line-delimited imports do not report success', async ({ page 
     }
   ]
 
-  for (const { filename, button, success } of imports) {
-    await mockImportFile(page, filename, ' \t \r\n{"broken":')
+  for (const [index, { filename, button, success }] of imports.entries()) {
+    await mockImportFile(page, filename, ' \t \r\n'.repeat(index + 1) + '{"broken":')
     await dataSection.getByRole('button', { name: button, exact: true }).click()
 
-    expectedErrorCount++
     await expect(page.locator('.toast', {
-      hasText: 'Invalid JSON at row 2, skipping item'
-    })).toHaveCount(expectedErrorCount)
+      hasText: `Invalid JSON at row ${index + 2}, skipping item`
+    })).toHaveCount(1)
     await expect(page.locator('.toast', { hasText: success })).toHaveCount(0)
 
     await mockImportFile(page, filename, '{}')

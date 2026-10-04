@@ -1,4 +1,6 @@
 import { randomBytes } from 'node:crypto'
+import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
+import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 import { abortUnmockedRequest, test, expect, sel, goTo, goToSettingsSection, clickSearchCancel } from '../../helpers/app.mjs'
 import {
@@ -418,7 +420,9 @@ test.describe('tab bar', () => {
     await expect(tab.locator('[data-icon="play"]')).toHaveCount(0)
   })
 
-  test('does not show a cached watch avatar before its loading indicator settles', async ({ page }) => {
+  test('does not show a cached watch avatar before its loading indicator settles', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.route(/^https:\/\/yt3\.(?:ggpht|googleusercontent)\.com\//, route => fulfillVisualFixture(route, 'avatar'))
     const videoId = 'jNQXAC9IVRw'
     await page.evaluate(({ videoId }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -427,7 +431,7 @@ test.describe('tab bar', () => {
       store.commit('setAutoplayVideos', false)
       store.commit('setVideoAvatar', {
         videoId,
-        avatar: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAF/gL+Xw4AAAAASUVORK5CYII='
+        avatar: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
       })
 
       window.__watchTabIconStates = []
@@ -736,14 +740,19 @@ test.describe('tab bar', () => {
     const tabCounts = await page.evaluate(async () => {
       const initialState = await window.ftElectron.tabs.getState()
       const counts = []
+      let finishBurst
+      const burstFinished = new Promise(resolve => { finishBurst = resolve })
       const removeListener = window.ftElectron.tabs.onStateUpdated((state) => {
         if (state.tabs.length === initialState.tabs.length || state.tabs.length === counts.at(-1)) return
         counts.push(state.tabs.length)
+        if (state.tabs.length === initialState.tabs.length + 4) finishBurst()
       })
 
       await Promise.all(Array.from({ length: 4 }, () => (
         window.ftElectron.tabs.create({ route: '/history', makeActive: false })
       )))
+      // Creation replies can arrive before the coalesced state notification.
+      await burstFinished
       removeListener()
       return counts
     })

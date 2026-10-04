@@ -268,7 +268,7 @@ test('HTML description text extraction stays inert when metadata arrives', async
   })
   const description = page.locator('.videoDescription .description')
   await expect(description).toContainText('Recovered HTML description')
-  await description.locator('img').evaluate(image => new Promise(resolve => {
+  await description.locator('img:not(.htmlImagePlaceholder)').evaluate(image => new Promise(resolve => {
     if (image.complete) resolve()
     else image.addEventListener('error', () => resolve(), { once: true })
   }))

@@ -535,7 +535,7 @@ for (const iconPack of ['material', 'remix']) {
 }
 
 test('unknown external sites use their own favicon while unloaded', async ({ page }) => {
-  await page.route('https://media.example/favicon.ico', route => route.fulfill({
+  await page.route('https://media.example/favicon.ico*', route => route.fulfill({
     contentType: 'image/png',
     body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64')
   }))
@@ -1091,6 +1091,7 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   ].join('\n'))
   await chmod(executable, 0o755)
   await routeDemoMedia(page)
+  await page.route('https://videos.example.test/favicon.ico*', route => fulfillVisualFixture(route, 'avatar'))
   await page.route(avatarUrl, route => route.fulfill({
     contentType: 'image/png',
     headers: { 'access-control-allow-origin': '*' },
@@ -1186,7 +1187,7 @@ test('plays a non-YouTube URL and shows the available yt-dlp metadata', async ({
   await externalMedia.getByRole('button', { name: 'Copy Link', exact: true }).click()
   await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toBe(mediaUrl)
   expect(sponsorBlockRequests).toEqual([])
-  await expect(page.locator(`${sel.activeTab} .tabAvatar`)).toBeVisible()
+  await expect(page.locator(`${sel.activeTab} img.tabAvatar`)).toBeVisible()
   await expect(page.locator('.toast-holder .toast')).toHaveCount(0)
   await expect.poll(() => page.locator(`${activeTab} .externalMediaCreator img`).evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
   for (const theme of ['dark', 'light']) {

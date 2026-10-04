@@ -268,7 +268,7 @@ test('two independent devices settle after live sync and propagate a real edit o
       clients.push(client)
       Object.assign(client, await launchApp(userDataDir))
       const { page } = client
-      await page.context().route('**/*', abortUnmockedRequest)
+      await page.context().route(/^https?:\/\//, abortUnmockedRequest)
       await page.route('https://two-devices.example/**', async route => {
         const request = route.request()
         const url = new URL(request.url())

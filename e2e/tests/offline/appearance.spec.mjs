@@ -40,8 +40,8 @@ async function enableVerticalTabBar (page, width) {
 async function expectHorizontalGap (left, right, expectedGap) {
   await expect.poll(async () => {
     const [leftBox, rightBox] = await Promise.all([
-      left.boundingBox(),
-      right.boundingBox()
+      left.locator('..').boundingBox(),
+      right.locator('..').boundingBox()
     ])
 
     return leftBox !== null && rightBox !== null &&
@@ -246,8 +246,8 @@ test.describe('default appearance', () => {
     const secondaryColorTheme = page.getByRole('combobox', { name: /Secondary colou?r theme/i })
     await expect(lightTheme).toHaveText('Light')
     await expect(darkTheme).toHaveText('Dark')
-    await expectHorizontalGap(lightTheme, darkTheme, 24)
-    await expectHorizontalGap(mainColorTheme, secondaryColorTheme, 24)
+    await expectHorizontalGap(lightTheme, darkTheme, 12)
+    await expectHorizontalGap(mainColorTheme, secondaryColorTheme, 12)
     await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
     await expectHorizontalGap(lightTheme, darkTheme, 12)
     await expectHorizontalGap(mainColorTheme, secondaryColorTheme, 12)
@@ -338,7 +338,7 @@ test.describe('default appearance', () => {
 
       const lightTheme = page.getByRole('combobox', { name: 'Light theme' })
       const darkTheme = page.getByRole('combobox', { name: 'Dark theme' })
-      await expectHorizontalGap(lightTheme, darkTheme, 24)
+      await expectHorizontalGap(lightTheme, darkTheme, 12)
       await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
       await expectHorizontalGap(lightTheme, darkTheme, 12)
     })
@@ -522,25 +522,25 @@ test.describe('default appearance', () => {
     // Keep this scroll-clamping check in desktop layout; phone pickers close on exit.
     await page.setViewportSize({ width: 800, height: 650 })
     await expect.poll(() => fontDropdown.evaluate(menu => menu.clientWidth)).toBeLessThanOrEqual(784)
+    await appFont.click()
+    await page.setViewportSize({ width: 1200, height: 610 })
     await appFont.evaluate(element => element.scrollIntoView({ block: 'center' }))
+    await appFont.click()
+    await expect(fontDropdown).toBeVisible()
+    await expect.poll(() => fontDropdown.evaluate(menu => menu.clientHeight)).toBeLessThan(400)
     await expect.poll(() => fontDropdown.evaluate(menu => menu.scrollHeight - menu.clientHeight))
       .toBeGreaterThan(0)
     await fontDropdown.evaluate(menu => { menu.scrollTop = menu.scrollHeight })
     await expect.poll(() => fontDropdown.evaluate(menu => menu.scrollTop)).toBeGreaterThan(0)
-    await page.setViewportSize({ width: 1200, height: 720 })
+    const previousScrollRange = await fontDropdown.evaluate(menu => menu.scrollHeight - menu.clientHeight)
+    await page.setViewportSize({ width: 1200, height: 1000 })
+    await expect.poll(() => fontDropdown.evaluate(menu => menu.scrollHeight - menu.clientHeight)).toBeLessThan(previousScrollRange)
     await expect.poll(() => fontDropdown.evaluate(menu => {
       const lastOption = menu.querySelector('.selectOption:last-of-type')
-      const offsetTopFromDocument = (element) => {
-        let offsetTop = 0
-        for (let current = element; current !== null; current = current.offsetParent) {
-          offsetTop += current.offsetTop
-        }
-        return offsetTop
-      }
-      const contentEnd = offsetTopFromDocument(lastOption) - offsetTopFromDocument(menu) +
-        lastOption.offsetHeight + Number.parseFloat(getComputedStyle(menu).paddingBottom)
-      const maximumScrollTop = Math.max(0, contentEnd - menu.clientHeight)
-      return Math.abs(menu.scrollTop - maximumScrollTop) <= 1
+      const style = getComputedStyle(menu)
+      const contentEnd = lastOption.getBoundingClientRect().bottom + Number.parseFloat(style.paddingBottom)
+      const viewportEnd = menu.getBoundingClientRect().bottom - Number.parseFloat(style.borderBottomWidth)
+      return Math.abs(contentEnd - viewportEnd) * devicePixelRatio <= 2
     })).toBe(true)
     await appFont.evaluate(element => element.scrollIntoView({ block: 'center' }))
     await expect(appFont).toBeInViewport()
@@ -593,6 +593,60 @@ test.describe('custom theme editor', () => {
         quickSettings: ['baseTheme', 'mainColor'],
       },
     },
+  })
+
+  test('keeps custom button state labels readable across variants and explicit colors', async ({ page }) => {
+    await goToSettingsSection(page, 'theme')
+    await page.getByRole('button', { name: 'Create custom theme' }).click()
+    const button = page.getByRole('button', { name: 'Save and apply' })
+    await page.locator('body').evaluate(element => {
+      element.style.setProperty('--primary-text-color', '#111111')
+      element.style.setProperty('--card-bg-color', '#ffffff')
+      for (const token of ['primary-color', 'accent-color', 'destructive-color']) {
+        element.style.setProperty(`--${token}`, '#333333')
+      }
+      for (const token of ['primary-color-hover', 'accent-color-hover', 'destructive-hover-color']) {
+        element.style.setProperty(`--${token}`, '#111111')
+      }
+      for (const token of ['primary-color-active', 'accent-color-active', 'destructive-active-color']) {
+        element.style.setProperty(`--${token}`, '#222222')
+      }
+      for (const token of ['text-with-main-color', 'text-with-accent-color', 'destructive-text-color']) {
+        element.style.setProperty(`--${token}`, '#ffffff')
+      }
+    })
+    for (const theme of ['primary', 'secondary', 'destructive']) {
+      for (const variant of ['filled', 'tonal', 'outlined', 'text', 'elevated']) {
+        // Keep the rendered component's scoped styles while exercising its CSS variants.
+        await button.evaluate((element, { theme, variant }) => {
+          element.classList.remove('primary', 'secondary', 'destructive', ...Array.from(element.classList).filter(name => name.startsWith('variant-')))
+          element.classList.add(theme, `variant-${variant}`)
+        }, { theme, variant })
+        await button.hover()
+        await expect(button).toHaveCSS('background-color', 'rgb(17, 17, 17)')
+        await expect(button).toHaveCSS('color', 'rgb(255, 255, 255)')
+        await button.focus()
+        await page.mouse.move(0, 0)
+        await expect(button).toHaveCSS('color', 'rgb(255, 255, 255)')
+        await page.keyboard.down('Space')
+        await expect(button).toHaveCSS('background-color', 'rgb(34, 34, 34)')
+        await expect(button).toHaveCSS('color', 'rgb(255, 255, 255)')
+        // Blurring before keyup keeps this styling check from saving the draft.
+        await button.evaluate(element => element.blur())
+        await page.keyboard.up('Space')
+      }
+    }
+    await button.evaluate(element => {
+      element.classList.remove('primary', 'secondary', 'destructive', 'variant-elevated')
+      element.classList.add('variant-filled')
+      element.style.setProperty('--button-base', '#006400')
+      element.style.setProperty('--button-on-base', '#ffffff')
+    })
+    await button.hover()
+    await expect(button).not.toHaveCSS('background-color', 'rgb(17, 17, 17)')
+    await expect(button).toHaveCSS('color', 'rgb(255, 255, 255)')
+    await page.mouse.move(0, 0)
+    await expect(button).toHaveCSS('background-color', 'rgb(0, 100, 0)')
   })
 
   test('imports clipboard themes as new drafts and saves only on confirmation', async ({ app, page }) => {
@@ -933,11 +987,13 @@ test.describe('custom theme editor', () => {
     await expect(editor.getByText('Visited accent', { exact: true })).toHaveCount(0)
     await editor.getByRole('textbox', { name: 'Theme name' }).fill('Midnight')
     const optionsRow = editor.locator('.themeSources')
-    const [editorBox, colorGridBox] = await Promise.all([
-      editor.boundingBox(),
+    const [optionsBox, colorGridBox] = await Promise.all([
+      optionsRow.boundingBox(),
       editor.locator('.colorGrid').boundingBox()
     ])
-    expect(colorGridBox.y - editorBox.y).toBeLessThan(200)
+    const gap = colorGridBox.y - optionsBox.y - optionsBox.height
+    expect(gap).toBeGreaterThanOrEqual(0)
+    expect(gap).toBeLessThanOrEqual(24)
     await expect(optionsRow.getByRole('checkbox', { name: 'Dark theme' })).toBeVisible()
     await expect(optionsRow.getByRole('combobox', { name: 'Based on' })).toBeVisible()
     const sourceMainColor = optionsRow.getByRole('combobox', { name: /Main colou?r theme/i })
@@ -1024,8 +1080,8 @@ test.describe('custom theme editor', () => {
     await setEditorColor('Dropdown item hover text', '#fedcba')
     await basedOn.click()
     await expect(page.getByRole('option', { name: 'System Default' })).toHaveCount(0)
-    await page.getByRole('option', { name: 'Dark', exact: true }).hover()
-    await expect(page.getByRole('option', { name: 'Dark', exact: true })).toHaveCSS('color', 'rgb(254, 220, 186)')
+    await page.getByRole('option', { name: 'Light', exact: true }).hover()
+    await expect(page.getByRole('option', { name: 'Light', exact: true })).toHaveCSS('color', 'rgb(254, 220, 186)')
     await page.getByRole('option', { name: 'Light', exact: true }).click()
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#f1f1f1')
     await basedOn.click()
@@ -1403,7 +1459,7 @@ test.describe('UI roundness', () => {
     await goToSettingsSection(page, 'theme')
     await roundnessSlider.fill('150')
     await expect(page.locator('body')).toHaveCSS('--ui-roundness', '1.5')
-    await expect.poll(toggleTrackRadius).toBe('12px')
+    await expect.poll(toggleTrackRadius).toBe('18px')
     await expect(page.locator('.sectionBody').first()).toHaveCSS('border-radius', '12px')
     await attachScreenshot('settings at 150% roundness')
 
