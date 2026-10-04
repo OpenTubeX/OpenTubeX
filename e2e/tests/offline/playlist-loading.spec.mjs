@@ -340,6 +340,9 @@ test('refreshes saved playlist metadata after opening the playlist again', async
   const updatedThumbnailUrl = 'https://invidious.test/vi/updated-first-video/maxresdefault.jpg'
   await expect(savedPlaylistThumbnail).toHaveAttribute('src', updatedThumbnailUrl)
 
+  // Restore an image-free route so thumbnails cannot fail before the new
+  // page's fixture is installed, then open the persisted playlist cards.
+  await goTo(page, 'history')
   ;({ page } = await app.relaunch())
   await page.route('https://invidious.test/vi/**', route => fulfillVisualFixture(route, 'video-thumbnail'))
   await goTo(page, 'userplaylists')
