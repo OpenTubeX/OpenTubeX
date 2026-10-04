@@ -15,7 +15,7 @@ async function dispatchStoreAction(page, action, payload) {
 }
 
 async function allThumbnailsInclude(playlistCard, expectedUrlPart) {
-  const sources = await playlistCard.locator('.thumbnailImage').evaluateAll(images => images.map(image => image.src))
+  const sources = await playlistCard.locator('.thumbnailImage:not(.retryImagePlaceholder)').evaluateAll(images => images.map(image => image.src))
   return sources.length > 0 && sources.every(source => source.includes(expectedUrlPart))
 }
 
@@ -131,7 +131,7 @@ test.describe('seeded playlists', () => {
     const playlistCard = page.locator('.ft-list-video', {
       has: page.getByRole('link', { name: 'My seeded playlist', exact: true })
     })
-    const thumbnail = playlistCard.locator('.thumbnailImage')
+    const thumbnail = playlistCard.locator('.thumbnailImage:not(.retryImagePlaceholder)')
     const displayedVideoCounts = async () => {
       const counts = await playlistCard.locator('.videoCountContainer').allTextContents()
       return [...new Set(counts)]
@@ -354,7 +354,7 @@ test.describe('seeded playlists', () => {
     await goTo(page, 'userplaylists')
     await page.getByText('My seeded playlist').click()
 
-    const thumbnail = page.locator('.playlistThumbnail img')
+    const thumbnail = page.locator('.playlistThumbnail img:not(.retryImagePlaceholder)')
     await page.addStyleTag({ content: '.playlistThumbnail { display: block !important; }' })
     await thumbnail.evaluate(async (image) => {
       image.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"/>'
@@ -573,7 +573,7 @@ test.describe('saved playlist metadata', () => {
     })
     await expect(playlistCard.locator('.h3Title')).toHaveText('Saved playlist')
     await expect(playlistCard.locator('.channelNameText')).toHaveText('Saved channel')
-    await expect(playlistCard.locator('.thumbnailImage')).toHaveAttribute('src', /ggggggggggg/)
+    await expect(playlistCard.locator('.thumbnailImage:not(.retryImagePlaceholder)')).toHaveAttribute('src', /ggggggggggg/)
     await expect(playlistCard.locator('.videoCountContainer')).toHaveText('4')
 
     await dispatchStoreAction(page, 'savePlaylistBookmark', {
@@ -595,7 +595,7 @@ test.describe('saved playlist metadata', () => {
 
     await expect(playlistCard.locator('.h3Title')).toHaveText('Saved playlist updated')
     await expect(playlistCard.locator('.channelNameText')).toHaveText('Updated saved channel')
-    await expect(playlistCard.locator('.thumbnailImage')).toHaveAttribute('src', /hhhhhhhhhhh/)
+    await expect(playlistCard.locator('.thumbnailImage:not(.retryImagePlaceholder)')).toHaveAttribute('src', /hhhhhhhhhhh/)
     await expect(playlistCard.locator('.videoCountContainer')).toHaveText('5')
     await expect(playlistCard.locator('.channelName')).toHaveAttribute('href', '#/channel/UC-updated-saved-playlist')
   })
