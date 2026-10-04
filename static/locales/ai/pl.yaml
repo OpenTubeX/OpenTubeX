@@ -269,6 +269,7 @@ Settings:
     Upcoming Videos to Preload: "Liczba filmów do wstępnego wczytania"
     Concurrent Preloads: "Jednoczesne wstępne ładowanie"
     Ignore System Rotation Lock for Fullscreen: Ignoruj systemową blokadę obrotu dla pełnego ekranu
+    Swipe Left or Right to Seek in Fullscreen: Przesuń w lewo lub w prawo, aby przewijać na pełnym ekranie
   Channel Settings:
     Add Subscribed Channel: Dodaj subskrybowany kanał
     Enable Setting Before Adding Channel: Przed dodaniem kanału włącz co najmniej jedno ustawienie kanału w ustawieniach odtwarzania

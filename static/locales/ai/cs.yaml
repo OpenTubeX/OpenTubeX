@@ -624,6 +624,7 @@ Settings:
     Upcoming Videos to Preload: "Počet videí k přednačtení"
     Concurrent Preloads: "Souběžná přednačtení"
     Ignore System Rotation Lock for Fullscreen: Ignorovat systémový zámek otáčení pro celou obrazovku
+    Swipe Left or Right to Seek in Fullscreen: Přejetím doleva nebo doprava posouvat přehrávání na celé obrazovce
   Channel Settings:
     Channel Settings: Nastavení kanálů
     Channel Settings Description: Zapamatuje nastavení zvolená při sledování pro každý kanál zvlášť a znovu je použije při příštím sledování některého z jeho videí.

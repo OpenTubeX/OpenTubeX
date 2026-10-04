@@ -611,6 +611,7 @@ Settings:
     Upcoming Videos to Preload: "Upcoming Videos to Preload"
     Concurrent Preloads: "Concurrent Preloads"
     Ignore System Rotation Lock for Fullscreen: Ignore system rotation lock for fullscreen
+    Swipe Left or Right to Seek in Fullscreen: Swipe left or right to seek in fullscreen
   Channel Settings:
     Channel Settings: Channel Settings
     Channel Settings Description: Remember the settings you pick while watching for each channel individually, so they are applied again the next time you watch one of its videos.

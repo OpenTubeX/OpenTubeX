@@ -637,6 +637,7 @@ Settings:
     Upcoming Videos to Preload: "מספר הסרטונים לטעינה מראש"
     Concurrent Preloads: "טעינות מראש במקביל"
     Ignore System Rotation Lock for Fullscreen: התעלמות מנעילת סיבוב המערכת עבור מסך מלא
+    Swipe Left or Right to Seek in Fullscreen: החלקה שמאלה או ימינה כדי לדלג במסך מלא
   Channel Settings:
     Channel Settings: הגדרות ערוץ
     Channel Settings Description: שמירת ההגדרות שנבחרו בזמן צפייה לכל ערוץ בנפרד, כדי שיוחלו שוב בצפייה הבאה באחד מסרטוניו.

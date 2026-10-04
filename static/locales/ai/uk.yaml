@@ -632,6 +632,7 @@ Settings:
     Upcoming Videos to Preload: "Кількість відео для попереднього завантаження"
     Concurrent Preloads: "Одночасне попереднє завантаження"
     Ignore System Rotation Lock for Fullscreen: Ігнорувати системне блокування повороту для повноекранного режиму
+    Swipe Left or Right to Seek in Fullscreen: Проводьте ліворуч або праворуч для перемотування в повноекранному режимі
   Channel Settings:
     Channel Settings: Налаштування каналів
     Channel Settings Description: Запам’ятовувати вибрані під час перегляду налаштування окремо для кожного каналу й застосовувати їх під час наступного перегляду його відео.

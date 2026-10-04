@@ -626,6 +626,7 @@ Settings:
     Upcoming Videos to Preload: "Broj videozapisa za predučitavanje"
     Concurrent Preloads: "Istodobna predučitavanja"
     Ignore System Rotation Lock for Fullscreen: Zanemari zaključavanje rotacije sustava za cijeli zaslon
+    Swipe Left or Right to Seek in Fullscreen: Povucite ulijevo ili udesno za premotavanje na cijelom zaslonu
   Channel Settings:
     Channel Settings: Postavke kanala
     Channel Settings Description: Postavke koje odaberete tijekom gledanja pamte se zasebno za svaki kanal kako bi se ponovno primijenile kada sljedeći put gledate neki njegov videozapis.

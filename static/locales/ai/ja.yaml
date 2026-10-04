@@ -624,6 +624,7 @@ Settings:
     Upcoming Videos to Preload: "先読みする動画数"
     Concurrent Preloads: "同時先読み数"
     Ignore System Rotation Lock for Fullscreen: 全画面表示ではシステムの回転ロックを無視する
+    Swipe Left or Right to Seek in Fullscreen: 全画面で左右にスワイプしてシーク
   Channel Settings:
     Channel Settings: チャンネル設定
     Channel Settings Description: 視聴中に選んだ設定をチャンネルごとに記憶し、次回そのチャンネルの動画を見るときに再度適用します。

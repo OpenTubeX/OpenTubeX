@@ -653,6 +653,7 @@ Settings:
     Upcoming Videos to Preload: "تعداد ویدیوها برای پیش‌بارگیری"
     Concurrent Preloads: "پیش‌بارگذاری‌های هم‌زمان"
     Ignore System Rotation Lock for Fullscreen: نادیده گرفتن قفل چرخش سیستم برای تمام‌صفحه
+    Swipe Left or Right to Seek in Fullscreen: برای جلو یا عقب بردن در حالت تمام‌صفحه، به چپ یا راست بکشید
   Channel Settings:
     Channel Settings: تنظیمات کانال
     Channel Settings Description: تنظیمات انتخابی هنگام تماشای هر کانال را جداگانه به‌خاطر بسپار تا دفعهٔ بعد برای ویدیوهای آن دوباره اعمال شوند.

@@ -628,6 +628,7 @@ Settings:
     Upcoming Videos to Preload: "Fjöldi myndskeiða til að forhlaða"
     Concurrent Preloads: "Samtímis forhleðslur"
     Ignore System Rotation Lock for Fullscreen: Hunsa snúningslæsingu kerfisins fyrir allan skjáinn
+    Swipe Left or Right to Seek in Fullscreen: Strjúktu til vinstri eða hægri til að spóla á öllum skjánum
   Channel Settings:
     Channel Settings: Rásarstillingar
     Channel Settings Description: Muna stillingarnar sem þú velur við áhorf fyrir hverja rás, svo þær verði notaðar aftur næst þegar þú horfir á myndband frá henni.

@@ -948,9 +948,28 @@
         <span class="videoFillZoomEdge videoFillZoomEdgeBottom" />
         <span class="videoFillZoomEdge videoFillZoomEdgeLeft" />
       </div>
+      <div
+        v-if="mobileSeekPreview"
+        class="valueChangePopup mobileSeekPreview"
+        role="status"
+      >
+        <div
+          v-if="mobileSeekThumbnailStyle"
+          class="mobileSeekThumbnail"
+          :style="mobileSeekThumbnailStyle"
+          aria-hidden="true"
+        />
+        <div class="mobileSeekPreviewTime">
+          <ft-icon
+            :icon="['fas', mobileSeekPreview.seconds < 0 ? 'arrow-left' : 'arrow-right']"
+            aria-hidden="true"
+          />
+          <span class="valueChangeText">{{ mobileSeekPreviewMessage }}</span>
+        </div>
+      </div>
       <Transition name="fade">
         <div
-          v-if="videoZoomPinching || showTemporaryPlaybackRateIndicator || showValueChangePopup"
+          v-if="!mobileSeekPreview && (videoZoomPinching || showTemporaryPlaybackRateIndicator || showValueChangePopup)"
           class="valueChangePopup"
           :class="{
             'invert-content-order':

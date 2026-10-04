@@ -823,6 +823,7 @@ Settings:
     Upcoming Videos to Preload: "Iš anksto įkeliamų vaizdo įrašų skaičius"
     Concurrent Preloads: "Vienalaikiai išankstiniai įkėlimai"
     Ignore System Rotation Lock for Fullscreen: Nepaisyti sistemos sukimo užrakto visam ekranui
+    Swipe Left or Right to Seek in Fullscreen: Perbraukite į kairę arba dešinę, kad persuktumėte viso ekrano režimu
   Channel Settings:
     Channel Settings: Kanalo nustatymai
     Channel Settings Description: Atskirai įsiminti kiekvienam kanalui žiūrint pasirinktus nustatymus, kad jie vėl būtų pritaikyti kitą kartą žiūrint vieną iš jo vaizdo įrašų.

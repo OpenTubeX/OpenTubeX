@@ -632,6 +632,7 @@ Settings:
     Upcoming Videos to Preload: "Số video cần tải trước"
     Concurrent Preloads: "Số lượt tải trước đồng thời"
     Ignore System Rotation Lock for Fullscreen: Bỏ qua khóa xoay của hệ thống cho toàn màn hình
+    Swipe Left or Right to Seek in Fullscreen: Vuốt sang trái hoặc phải để tua khi toàn màn hình
   Channel Settings:
     Channel Settings: Cài đặt kênh
     Channel Settings Description: Ghi nhớ riêng các cài đặt bạn chọn khi xem từng kênh để áp dụng lại vào lần sau khi bạn xem video của kênh đó.

@@ -624,6 +624,7 @@ Settings:
     Upcoming Videos to Preload: "Önceden yüklenecek video sayısı"
     Concurrent Preloads: "Eş Zamanlı Ön Yüklemeler"
     Ignore System Rotation Lock for Fullscreen: Tam ekran için sistem döndürme kilidini yok say
+    Swipe Left or Right to Seek in Fullscreen: Tam ekranda ileri veya geri sarmak için sola veya sağa kaydırın
   Channel Settings:
     Channel Settings: Kanal Ayarları
     Channel Settings Description: İzlerken seçtiğiniz ayarları her kanal için ayrı ayrı hatırlayarak kanalın bir sonraki videosunda yeniden uygular.

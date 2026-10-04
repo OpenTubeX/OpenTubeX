@@ -285,6 +285,7 @@ const state = {
   fullscreenRotationIgnoresSystemLock: false,
   rotateFullscreenToLandscape: true,
   enableMobileFullscreenSwipe: true,
+  enableMobileFullscreenSeek: true,
   mobileLeftSwipeAction: 'disabled',
   mobileRightSwipeAction: 'disabled',
   mobileFullscreenBrightness: false,
