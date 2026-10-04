@@ -852,6 +852,14 @@ public class MobileTabSelectionTest {
                             (layout.equals("phone") ? "Phone" : "Tablet") + "Layout')");
                         assertEquals("No empty tab-strip space", "false", evaluate(view,
                             "document.querySelector('.app').classList.contains('topTabs')"));
+                        assertEquals("Content clears the fixed header in " + layout + " layout at scale " + scale,
+                            "true", evaluate(view, """
+                                (() => {
+                                    const header = document.querySelector('.topNav').getBoundingClientRect();
+                                    const content = document.querySelector('.app > .routerView').getBoundingClientRect();
+                                    return content.top >= header.bottom - 1 && content.top <= header.bottom + 19;
+                                })()
+                                """));
                     }
                 }
                 evaluate(view, "document.querySelector('#disable-tabs-link').dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }))");
