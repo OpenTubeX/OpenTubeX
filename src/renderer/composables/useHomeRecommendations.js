@@ -19,6 +19,7 @@ export function useHomeRecommendations(visible) {
   let rankingGeneration = 0
   let requestController = null
   let initialized = false
+  let restoringCachedFeed = false
   let round = 0
   let limit = 24
   let feedId = crypto.randomUUID()
@@ -176,6 +177,7 @@ export function useHomeRecommendations(visible) {
         return
       }
     }
+    restoringCachedFeed = Boolean(cache)
     isLoading.value = true
     // Vue's nextTick alone only flushes the DOM; let Chromium paint it before
     // preparing the learning inputs and starting the cooperative batches.
@@ -188,6 +190,7 @@ export function useHomeRecommendations(visible) {
       await rerank()
       if (requestGeneration !== generation) return
       cachedCandidates = { ...cache, ranked: ranked.value, rankingContext: requestRankingContext }
+      restoringCachedFeed = false
       isLoading.value = false
       initialized = true
       return
@@ -255,6 +258,7 @@ export function useHomeRecommendations(visible) {
     rankingGeneration++
     requestController?.abort()
     requestController = null
+    restoringCachedFeed = false
     isLoading.value = false
   }
   function clearFeed() {
@@ -302,7 +306,7 @@ export function useHomeRecommendations(visible) {
   function updateRanking() {
     // Supersede the entire cached restore so a cancelled ranking cannot publish
     // an empty feed while the replacement ranking is still running.
-    if (isLoading.value && cachedCandidates?.videos === candidates) refresh(true)
+    if (restoringCachedFeed) refresh(true)
     else rerank()
   }
   watch(exploration, updateRanking)

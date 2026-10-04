@@ -163,49 +163,78 @@ for (const [setting, value] of [['getRecommendationExploration', 0.5], ['getEnab
   })
 }
 
-test('a preference change during a cached rerank waits for the replacement ranking before caching it', async () => {
-  const profile = { channels: [], channelWeights: new Map(), evidence: new Map() }
-  const releases = new Map()
-  let profileCalls = 0
-  const first = createFeed({
-    candidates: [{ videoId: 'candidate' }],
-    buildProfile: async () => {
-      const call = ++profileCalls
-      if (call === 2 || call === 3) await new Promise(resolve => releases.set(call, resolve))
-      return profile
-    },
-  })
-  async function waitForProfile(call) {
-    for (let index = 0; index < 1000 && !releases.has(call); index++) {
-      await new Promise(resolve => setTimeout(resolve, 1))
+for (const refreshOtherHome of [false, true]) {
+  test(`a preference change during a cached rerank waits for its replacement (other Home refresh: ${refreshOtherHome})`, async () => {
+    const profile = { channels: [], channelWeights: new Map(), evidence: new Map() }
+    const releases = new Map()
+    let profileCalls = 0
+    const first = createFeed({
+      candidates: [{ videoId: 'candidate' }],
+      buildProfile: async () => {
+        const call = ++profileCalls
+        if (call >= 2) await new Promise(resolve => releases.set(call, resolve))
+        return profile
+      },
+    })
+    async function waitForProfile(call) {
+      for (let index = 0; index < 1000 && !releases.has(call); index++) {
+        await new Promise(resolve => setTimeout(resolve, 1))
+      }
+      assert.ok(releases.has(call), `profile ${call} did not start`)
     }
-    assert.ok(releases.has(call), `profile ${call} did not start`)
-  }
-  await waitForFeed(first.feed)
-  first.stop()
-  first.getters.getRecommendationExploration = 0.3
-  const second = first.mount()
+    await waitForFeed(first.feed)
+    first.stop()
+    first.getters.getRecommendationExploration = 0.3
+    const second = first.mount()
+    let other = null
+    try {
+      await waitForProfile(2)
+      if (refreshOtherHome) {
+        other = first.mount()
+        await waitForProfile(3)
+        const refreshed = other.feed.refresh()
+        await waitForProfile(4)
+        releases.get(4)()
+        await refreshed
+      }
+      second.getters.getRecommendationExploration = 0.4
+      await waitForProfile(refreshOtherHome ? 6 : 3)
+      releases.get(2)()
+      await new Promise(resolve => setTimeout(resolve, 0))
+      assert.equal(second.feed.isLoading.value, true)
+      if (refreshOtherHome) { releases.get(5)(); releases.get(6)() }
+      else releases.get(3)()
+      await waitForFeed(second.feed)
+      assert.equal(second.feed.recommendations.value.length, 1)
+      assert.equal(second.work.requests, refreshOtherHome ? 2 : 1)
+    } finally {
+      for (const release of releases.values()) release()
+      second.stop()
+      other?.stop()
+    }
+    const third = first.mount()
+    try {
+      assert.equal(third.feed.isLoading.value, false)
+      assert.equal(third.feed.recommendations.value.length, 1)
+    } finally {
+      third.stop()
+    }
+  })
+}
+
+test('changing exploration during Load more preserves the appended feed', async () => {
+  const { feed, getters, work, stop } = createFeed({
+    candidates: Array.from({ length: 60 }, (_, index) => ({ videoId: `candidate-${index}` })),
+  })
   try {
-    await waitForProfile(2)
-    second.getters.getRecommendationExploration = 0.4
-    await waitForProfile(3)
-    releases.get(2)()
-    await new Promise(resolve => setTimeout(resolve, 0))
-    assert.equal(second.feed.isLoading.value, true)
-    releases.get(3)()
-    await waitForFeed(second.feed)
-    assert.equal(second.feed.recommendations.value.length, 1)
-    assert.equal(second.work.requests, 1)
+    await waitForFeed(feed)
+    const appended = feed.loadMore()
+    getters.getRecommendationExploration = 0.4
+    await appended
+    assert.equal(feed.recommendations.value.length, 48)
+    assert.equal(work.requests, 2)
   } finally {
-    for (const release of releases.values()) release()
-    second.stop()
-  }
-  const third = first.mount()
-  try {
-    assert.equal(third.feed.isLoading.value, false)
-    assert.equal(third.feed.recommendations.value.length, 1)
-  } finally {
-    third.stop()
+    stop()
   }
 })
 
