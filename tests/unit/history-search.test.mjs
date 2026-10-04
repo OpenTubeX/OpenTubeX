@@ -45,7 +45,6 @@ test('batched search preserves matches and order for a large library', async () 
       filterVideosWithQuery(library, query, caseSensitive, locale),
     )
   }
-  let cancelled = false
-  setTimeout(() => { cancelled = true }, 0)
-  assert.equal(await filterVideosWithQueryAsync(library, 'exmaple', false, 'en-US', () => cancelled), null)
+  let cancellationChecks = 0
+  assert.equal(await filterVideosWithQueryAsync(library, 'exmaple', false, 'en-US', () => ++cancellationChecks > 1), null)
 })
