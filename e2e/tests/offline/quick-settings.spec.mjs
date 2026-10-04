@@ -1300,6 +1300,8 @@ test.describe('customizable quick settings', () => {
     await expect(settingPopover).toBeVisible()
     await expect(settingPopover).toHaveCSS('position', 'absolute')
     await expect(settingPicker).toHaveAttribute('type', 'search')
+    await expect(settingPicker).toHaveAttribute('placeholder', 'Search settings')
+    await expect(settingPopover.locator('.selectLabel')).toHaveCount(0)
     await expect(settingPopover.locator('.clearInputTextButton')).toHaveCount(0)
     await expect(page.locator('.settingPicker .optionWrapper').first()).toHaveCSS('cursor', 'pointer')
     await expect(page.locator('.settingPicker .optionWrapper').first()).toHaveCSS('user-select', 'none')

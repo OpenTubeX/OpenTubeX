@@ -1968,6 +1968,15 @@ Tray Icon:
   Follow App Theme: "Ακολούθηση θέματος εφαρμογής"
 
 Form Inputs:
+  Enter Password Hint: "Εισαγάγετε τον κωδικό σας"
+  Choose Password Hint: "Επιλέξτε έναν κωδικό"
+  Confirm Password Hint: "Επαναλάβετε τον νέο κωδικό σας"
+  Encryption Passphrase Hint: "Εισαγάγετε τη φράση κρυπτογράφησής σας"
+  Show Password: "Εμφάνιση κωδικού πρόσβασης"
+  Hide Password: "Απόκρυψη κωδικού πρόσβασης"
+  Search Text Hint: "Εισαγάγετε όρους αναζήτησης"
+  Playlist Description Hint: "Περιγράψτε αυτήν τη λίστα αναπαραγωγής"
+  Filename Preview: "Προεπισκόπηση ονόματος αρχείου"
   Enter Channels: "Εισαγάγετε κανάλια"
   Enter Text: "Εισαγάγετε κείμενο"
   Video URL: URL βίντεο ή λίστας αναπαραγωγής

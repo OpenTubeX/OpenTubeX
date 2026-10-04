@@ -1939,6 +1939,15 @@ Tray Icon:
   Follow App Theme: "Följ appens tema"
 
 Form Inputs:
+  Enter Password Hint: "Ange ditt lösenord"
+  Choose Password Hint: "Välj ett lösenord"
+  Confirm Password Hint: "Upprepa ditt nya lösenord"
+  Encryption Passphrase Hint: "Ange din krypteringslösenfras"
+  Show Password: "Visa lösenord"
+  Hide Password: "Dölj lösenord"
+  Search Text Hint: "Ange sökord"
+  Playlist Description Hint: "Beskriv den här spellistan"
+  Filename Preview: "Förhandsvisning av filnamn"
   Enter Channels: "Ange kanaler"
   Enter Text: "Ange text"
   Video URL: Video- eller spelliste-URL

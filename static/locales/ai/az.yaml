@@ -1929,6 +1929,15 @@ Tray Icon:
   Follow App Theme: "Tətbiqin mövzusunu izlə"
 
 Form Inputs:
+  Enter Password Hint: "Şifrənizi daxil edin"
+  Choose Password Hint: "Şifrə seçin"
+  Confirm Password Hint: "Yeni şifrənizi təkrarlayın"
+  Encryption Passphrase Hint: "Şifrələmə parol ifadənizi daxil edin"
+  Show Password: "Şifrəni göstər"
+  Hide Password: "Şifrəni gizlət"
+  Search Text Hint: "Axtarış sözlərini daxil edin"
+  Playlist Description Hint: "Bu pleylisti təsvir edin"
+  Filename Preview: "Fayl adının önizləməsi"
   Enter Channels: "Kanalları daxil edin"
   Enter Text: "Mətn daxil edin"
   Video URL: Video və ya pleylist URL-si

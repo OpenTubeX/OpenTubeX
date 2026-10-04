@@ -24,6 +24,97 @@ test.use({
   }
 })
 
+for (const uiScale of [100, 95]) {
+  test.describe(`native number arrows at ${uiScale}%`, () => {
+    test.use({ seed: { settings: { currentLocale: 'en-US', uiScale, baseTheme: uiScale === 100 ? 'dark' : 'light', historyRetentionDays: '30' } } })
+    test(`number input arrows highlight independently and retain native stepping at ${uiScale}%`, async ({ app, page }, testInfo) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      const section = await goToSettingsSection(page, 'storage')
+      const input = section.getByRole('spinbutton', { name: 'Automatic History Retention (Days)' })
+      for (const direction of ['ltr', 'rtl']) {
+        await page.evaluate(direction => { document.body.dir = direction }, direction)
+        await input.scrollIntoViewIfNeeded()
+        await input.fill('30')
+        await input.evaluate(element => element.scrollIntoView({ block: 'center' }))
+        const bounds = await input.boundingBox()
+        const padding = await input.evaluate(element => parseFloat(getComputedStyle(element)[document.body.dir === 'rtl' ? 'paddingLeft' : 'paddingRight']))
+        const x = direction === 'rtl' ? padding + 4 : bounds.width - padding - 4
+        const upper = { x, y: bounds.height / 2 - 7 }
+        const lower = { x, y: bounds.height / 2 + 7 }
+        const primary = await input.evaluate(element => {
+          const probe = document.createElement('span')
+          probe.style.color = 'var(--primary-color)'
+          element.parentElement.append(probe)
+          const color = getComputedStyle(probe).color.match(/\d+/g).slice(0, 3).map(Number)
+          probe.remove()
+          return color
+        })
+        // capturePage preserves the hovered pointer; Playwright's screenshot
+        // capture can move Electron's pointer back to the X server position.
+        const highlightedPixels = async (name) => {
+          const box = await input.boundingBox()
+          const result = await app.electronApp.evaluate(async ({ BrowserWindow }, { box, primary, start, end }) => {
+            const webContents = BrowserWindow.getAllWindows()[0].webContents
+            const zoom = webContents.getZoomFactor()
+            const image = await webContents.capturePage({ x: Math.round(box.x * zoom), y: Math.round(box.y * zoom), width: Math.round(box.width * zoom), height: Math.round(box.height * zoom) })
+            const { width, height } = image.getSize()
+            const pixels = image.toBitmap()
+            const counts = [0, 0]
+            for (let y = 5; y < height - 5; y++) {
+              for (let x = Math.floor(start * width); x < Math.ceil(end * width); x++) {
+                const i = (y * width + x) * 4
+                if (pixels[i + 2] === primary[0] && pixels[i + 1] === primary[1] && pixels[i] === primary[2]) counts[y < height / 2 ? 0 : 1]++
+              }
+            }
+            return { counts, png: image.toPNG().toString('base64') }
+          }, { box, primary, start: (x - 9) / bounds.width, end: (x + 9) / bounds.width })
+          if (name) await writeFile(testInfo.outputPath(name), Buffer.from(result.png, 'base64'))
+          return result.counts
+        }
+        for (const [position, selected] of [[upper, 0], [lower, 1]]) {
+          await input.hover({ position })
+          const counts = await highlightedPixels(`number-arrow-${direction}-${selected}.png`)
+          expect.soft(counts[selected], 'hovered arrow uses the theme highlight').toBeGreaterThan(5)
+          expect.soft(counts[1 - selected], 'other arrow keeps its normal color').toBe(0)
+        }
+        await input.hover({ position: { x: bounds.width / 2, y: bounds.height / 2 } })
+        expect(await highlightedPixels()).toEqual([0, 0])
+        await input.hover({ position: upper })
+        await page.locator('.settingsBreadcrumb').hover()
+        expect(await highlightedPixels()).toEqual([0, 0])
+        await input.click({ position: upper })
+        await expect(input).toHaveValue('31')
+        await input.click({ position: lower })
+        await expect(input).toHaveValue('30')
+        await input.press('ArrowUp')
+        await expect(input).toHaveValue('31')
+      }
+    })
+  })
+}
+
+test('number arrow pressed paint reaches controls inside dialog overlays', async ({ page }) => {
+  const section = await goToSettingsSection(page, 'storage')
+  const input = section.getByRole('spinbutton', { name: 'Automatic History Retention (Days)', exact: true })
+  await input.scrollIntoViewIfNeeded()
+  const position = await input.evaluate(element => {
+    const rect = element.getBoundingClientRect()
+    return { x: rect.width - parseFloat(getComputedStyle(element).paddingRight) - 4, y: rect.height / 2 - 7 }
+  })
+  // Settings is already a dialog. Model FtPrompt/FtMobileSheet's propagation
+  // boundary without replacing the input or its native stepping behavior.
+  await input.evaluate(element => element.closest('[role="dialog"]').addEventListener('pointerdown', event => event.stopPropagation()))
+  await input.hover({ position })
+  await page.mouse.down()
+  try {
+    await expect.poll(() => input.evaluate(element => element.style.getPropertyValue('--number-step-up-color'))).toBe('var(--primary-color-active)')
+    await expect.poll(() => input.evaluate(element => element.style.getPropertyValue('--number-step-down-color'))).toBe('')
+  } finally {
+    await page.mouse.up()
+  }
+  await expect.poll(() => input.evaluate(element => element.style.getPropertyValue('--number-step-up-color'))).toBe('var(--primary-color)')
+})
+
 test('calculates storage usage only after the Storage tab opens', async ({ app, page }) => {
   await app.electronApp.evaluate(({ ipcMain }, channel) => {
     globalThis.__storageUsageReadCount = 0

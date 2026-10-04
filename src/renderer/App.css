@@ -559,12 +559,8 @@
   font-size: 14px;
 }
 
-.findbarField {
-  flex: 1 1 auto;
-  min-inline-size: 90px;
-}
-
 .findbarInput {
+  flex: 1 1 auto;
   box-sizing: border-box;
   inline-size: 100%;
   min-inline-size: 90px;

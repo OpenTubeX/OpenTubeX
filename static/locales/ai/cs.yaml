@@ -1919,6 +1919,15 @@ Tray Icon:
   Follow App Theme: "Použít motiv aplikace"
 
 Form Inputs:
+  Enter Password Hint: "Zadejte své heslo"
+  Choose Password Hint: "Zvolte heslo"
+  Confirm Password Hint: "Zopakujte nové heslo"
+  Encryption Passphrase Hint: "Zadejte svou šifrovací přístupovou frázi"
+  Show Password: "Zobrazit heslo"
+  Hide Password: "Skrýt heslo"
+  Search Text Hint: "Zadejte hledané výrazy"
+  Playlist Description Hint: "Popište tento seznam videí"
+  Filename Preview: "Náhled názvu souboru"
   Enter Channels: "Zadejte kanály"
   Enter Text: "Zadejte text"
   Video URL: URL videa nebo playlistu

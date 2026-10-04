@@ -3121,6 +3121,15 @@ SponsorBlock Disabled on Channel: SponsorBlock auf {channel} deaktiviert
 SponsorBlock Enabled on Channel: SponsorBlock auf {channel} aktiviert
 
 Form Inputs:
+  Enter Password Hint: "Gib dein Passwort ein"
+  Choose Password Hint: "Wähle ein Passwort"
+  Confirm Password Hint: "Wiederhole dein neues Passwort"
+  Encryption Passphrase Hint: "Gib deine Verschlüsselungspassphrase ein"
+  Show Password: "Passwort anzeigen"
+  Hide Password: "Passwort verbergen"
+  Search Text Hint: "Suchbegriffe eingeben"
+  Playlist Description Hint: "Beschreibe diese Playlist"
+  Filename Preview: "Vorschau des Dateinamens"
   Enter Channels: "Kanäle eingeben"
   Enter Text: "Text eingeben"
   Video URL: Video- oder Playlist-URL

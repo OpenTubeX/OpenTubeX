@@ -1,4 +1,4 @@
-import { test, expect, goTo, goToSettingsSection, sel, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, expectScrollAtRenderedEnd, goTo, goToSettingsSection, sel, setWindowSize } from '../../helpers/app.mjs'
 
 const DOWNLOAD_FOLDER_DESCRIPTION = "Videos are saved to this folder. Leave blank to use your system's Downloads folder. Leave blank to use your Downloads folder"
 
@@ -1037,8 +1037,25 @@ for (const scale of [100, 95]) {
       const quick = section.locator('.quickPlaybackSpeedToggle')
       await quick.locator('input').press('Space')
       await expect(quick.locator('.changedSettingIndicator')).toBeVisible()
-      for (const width of [1200, 480]) {
-        await setWindowSize(app, page, { width, height: width === 1200 ? 900 : 850 })
+      for (const width of [1200, 480, 1201]) {
+        const scroller = page.locator('.settingsContent')
+        await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+        await setWindowSize(app, page, { width, height: width === 480 ? 850 : width === 1200 ? 900 : 901 })
+        if (width === 1201) {
+          await expect.poll(() => scroller.evaluate(element => {
+            const content = element.querySelector(':scope > .section')
+            const viewport = element.getBoundingClientRect()
+            const remaining = content.getBoundingClientRect().bottom + parseFloat(getComputedStyle(content).marginBottom) + parseFloat(getComputedStyle(element).paddingBottom) - viewport.bottom
+            return Math.max(-element.scrollTop, -remaining) * devicePixelRatio
+          })).toBeLessThanOrEqual(2)
+          await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+          await expectScrollAtRenderedEnd(scroller)
+          await expect.poll(() => scroller.evaluate(element => {
+            const track = element.querySelector('.os-scrollbar-vertical .os-scrollbar-track').getBoundingClientRect()
+            const thumb = element.querySelector('.os-scrollbar-vertical .os-scrollbar-handle').getBoundingClientRect()
+            return Math.abs(thumb.bottom - track.bottom) * devicePixelRatio
+          })).toBeLessThanOrEqual(2)
+        }
         for (const direction of ['ltr', 'rtl']) {
           await page.evaluate(value => { document.body.dir = value }, direction)
           for (const toggle of [quick, section.locator('[data-setting-key="enableCaptionTranslations"]')]) {
@@ -1059,6 +1076,20 @@ for (const scale of [100, 95]) {
               gap: toggle.top - select.bottom
             }
           })
+          const rows = await section.locator('.captionControls').evaluate(element => {
+            const columns = getComputedStyle(element).gridTemplateColumns.split(' ').length
+            const controls = [...element.querySelectorAll(':scope > .captionControl')]
+            const boxes = controls.map(control => control.getBoundingClientRect())
+            const formHeight = parseFloat(getComputedStyle(element).getPropertyValue('--form-control-height'))
+            const extraSpace = []
+            for (let index = 0; index < controls.length; index += columns) {
+              const contentHeight = Math.max(...controls.slice(index, index + columns).flatMap(control => [...control.children].map(child => child.getBoundingClientRect().height)))
+              extraSpace.push(boxes[index].height - Math.max(formHeight, contentHeight))
+            }
+            return { extraSpace, gaps: boxes.slice(columns).map((box, index) => box.top - boxes[index].bottom) }
+          })
+          expect.soft(Math.max(...rows.extraSpace), 'caption rows fit their controls').toBeLessThanOrEqual(1)
+          expect.soft(Math.max(...rows.gaps.map(gap => Math.abs(gap - 20))), 'shared caption row gap').toBeLessThanOrEqual(0.1)
           if (paired.columns > 1) {
             expect.soft(paired.offset, `${direction} caption control centers`).toBeLessThanOrEqual(0.1)
           } else {
@@ -1088,6 +1119,11 @@ for (const scale of [100, 95]) {
             return Math.abs(field.left + field.width / 2 - card.left - card.width / 2)
           })
           expect.soft(offset, `${direction} modal field center at ${width}px`).toBeLessThanOrEqual(1)
+          expect.soft(await field.evaluate(element => {
+            const label = element.closest('.ft-input-component').querySelector('.selectLabel').getBoundingClientRect()
+            const viewport = element.closest('.promptContentScroller, .promptCard').getBoundingClientRect()
+            return viewport.top - label.top
+          }), `${direction} modal label clipping at ${width}px`).toBeLessThanOrEqual(0.1)
           if (direction === 'ltr') await prompt.screenshot({ path: testInfo.outputPath(`centered-download-input-${width}.png`) })
           await prompt.getByRole('button', { name: 'Cancel', exact: true }).click()
         }
@@ -1103,6 +1139,11 @@ for (const scale of [100, 95]) {
         return Math.abs(field.left + field.width / 2 - card.left - card.width / 2)
       })
       expect(offset).toBeLessThanOrEqual(1)
+      expect(await playlist.evaluate(element => {
+        const label = element.closest('.ft-input-component').querySelector('.selectLabel').getBoundingClientRect()
+        return element.closest('.promptContentScroller').getBoundingClientRect().top - label.top
+      })).toBeLessThanOrEqual(0.1)
+      await page.locator('.promptCard:has(.playlistNameInput)').screenshot({ path: testInfo.outputPath('new-playlist-label.png') })
     })
 
     test('shows the complete password guidance without truncating the field label', async ({ page }) => {

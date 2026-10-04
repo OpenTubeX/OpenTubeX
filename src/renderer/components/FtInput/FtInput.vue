@@ -188,6 +188,10 @@ const props = defineProps({
     type: String,
     default: 'text'
   },
+  inputFilter: {
+    type: Function,
+    default: null
+  },
   placeholder: {
     type: String,
     required: true
@@ -405,7 +409,19 @@ function handleClick(event, dataListIndex = searchState.keyboardSelectedOptionIn
  * @param {string | InputEvent} data
  */
 function handleInput(data) {
-  const text = typeof data === 'string' ? data : inputRef.value.value
+  const rawText = typeof data === 'string' ? data : inputRef.value.value
+  const text = props.inputFilter ? props.inputFilter(rawText) : rawText
+  if (text !== rawText && inputRef.value) {
+    const input = inputRef.value
+    const { selectionStart, selectionEnd } = input
+    input.value = text
+    if (selectionStart !== null && selectionEnd !== null) {
+      input.setSelectionRange(
+        props.inputFilter(rawText.slice(0, selectionStart)).length,
+        props.inputFilter(rawText.slice(0, selectionEnd)).length
+      )
+    }
+  }
   inputData.value = text
 
   // Native cancel can clear a keyboard preview while inputData is already empty.

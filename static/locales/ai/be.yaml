@@ -2016,6 +2016,15 @@ Tray Icon:
   Follow App Theme: "Выкарыстоўваць тэму праграмы"
 
 Form Inputs:
+  Enter Password Hint: "Увядзіце свой пароль"
+  Choose Password Hint: "Выберыце пароль"
+  Confirm Password Hint: "Паўтарыце новы пароль"
+  Encryption Passphrase Hint: "Увядзіце сваю парольную фразу шыфравання"
+  Show Password: "Паказаць пароль"
+  Hide Password: "Схаваць пароль"
+  Search Text Hint: "Увядзіце пошукавыя словы"
+  Playlist Description Hint: "Апішыце гэты плэйліст"
+  Filename Preview: "Папярэдні прагляд назвы файла"
   Enter Channels: "Увядзіце каналы"
   Enter Text: "Увядзіце тэкст"
   Video URL: URL відэа або плэйліста

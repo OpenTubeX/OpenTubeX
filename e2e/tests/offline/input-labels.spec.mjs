@@ -3,7 +3,7 @@ import { test, expect, goTo, goToSettingsSection, setWindowSize } from '../../he
 
 async function expectVisibleLabels(scope) {
   const missing = await scope.locator('input, textarea').evaluateAll(elements => elements
-    .filter(element => ['text', 'search', 'url', 'number', 'password', 'email', 'tel', 'textarea'].includes(element.type) && element.checkVisibility() && !element.matches('.topNav .searchInput input, .settingsSearch input, .commandPalette input, .playlistSearch, .tabOrganizerSearch input, .groupRenameInput'))
+    .filter(element => ['text', 'search', 'url', 'number', 'password', 'email', 'tel', 'textarea'].includes(element.type) && element.checkVisibility() && !element.matches('.topNav .searchInput input, .settingsSearch input, .commandPalette input, .playlistSearch, .tabOrganizerSearch input, .groupRenameInput, .findbarInput, .settingPicker input'))
     .filter(element => !Array.from(element.labels ?? []).some(label => label.checkVisibility() && label.textContent.trim()))
     .map(element => ({ id: element.id, placeholder: element.placeholder, className: element.className })))
   expect(missing).toEqual([])
@@ -60,7 +60,7 @@ test('the main search keeps its familiar placeholder without a visible label', a
     }, width)
     await expect.poll(() => page.evaluate(({ width, zoom }) => Math.abs(innerWidth - width / zoom), { width, zoom })).toBeLessThanOrEqual(1)
     for (const [locale, placeholder] of [['en-US', 'Search / Go to URL'], ['de-DE', 'Suchen / URL öffnen']]) {
-      await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+      await page.evaluate(locale => { document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale) }, locale)
       const field = page.locator('.topNav .searchInput')
       if (!await field.isVisible()) await page.locator('.navSearchButton').click()
       const input = field.locator('input')
@@ -79,7 +79,7 @@ test('settings header search keeps its icon and original placeholder without vis
   for (const width of [1500, 480]) {
     await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setBounds({ width, height: 1000 }), width)
     for (const [locale, placeholder] of [['en-US', 'Search settings'], ['de-DE', 'Einstellungen durchsuchen']]) {
-      await page.evaluate(locale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale), locale)
+      await page.evaluate(locale => { document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateCurrentLocale', locale) }, locale)
       const search = page.locator('.settingsSearch')
       const input = search.locator('input')
       await expect(input).toHaveAttribute('placeholder', placeholder)
@@ -97,7 +97,7 @@ test('settings header search keeps its icon and original placeholder without vis
   }
 })
 
-test('settings, page searches, and compact search overlays have visible associated labels', async ({ page }) => {
+test('settings fields retain labels and compact search overlays retain their placeholders', async ({ page }) => {
   for (const section of ['general', 'appearance', 'playback', 'download', 'add-ons', 'subscriptions', 'focus', 'privacy', 'data', 'storage', 'sync', 'advanced']) {
     await goToSettingsSection(page, section)
     await expectVisibleLabels(page.locator('.settingsWindow'))
@@ -109,9 +109,11 @@ test('settings, page searches, and compact search overlays have visible associat
   await expectVisibleLabels(page.locator('#app'))
   await page.keyboard.press('Control+f')
   await expect(page.locator('.findbar')).toBeVisible()
-  await expectVisibleLabels(page.locator('.findbar'))
+  await expect(page.locator('.findbarInput')).toHaveAttribute('placeholder', 'Find in page')
+  await expect(page.locator('.findbar .textInputLabelText')).toHaveCount(0)
   await page.locator('.findbarInput').fill('Playlist')
-  await expectVisibleLabels(page.locator('.findbar'))
+  await expect(page.locator('.findbarInput')).toHaveAttribute('placeholder', 'Find in page')
+  await expect(page.locator('.findbar .textInputLabelText')).toHaveCount(0)
   await page.locator('.findbarInput').press('Escape')
   await page.keyboard.press('Control+k')
   await expect(page.locator('.commandPalette')).toBeVisible()

@@ -37,20 +37,21 @@
           />
           <FtIconButton
             v-if="isDirty"
-            class="saveTemplateButton"
+            class="templateActionButton"
             :title="t('Downloads.Save Template')"
             :icon="['fas', 'save']"
             theme="secondary"
             @click="openSaveTemplatePrompt"
           />
+          <FtIconButton
+            v-if="!isDirty && selectedCustomTemplate !== undefined"
+            class="templateActionButton"
+            :title="t('Downloads.Delete Template')"
+            :icon="['fas', 'trash']"
+            theme="destructive"
+            @click="deleteTemplate"
+          />
         </div>
-        <FtButton
-          v-if="!isDirty && selectedCustomTemplate !== undefined"
-          :label="t('Downloads.Delete Template')"
-          :icon="['fas', 'trash']"
-          theme="destructive"
-          @click="deleteTemplate"
-        />
       </section>
     </template>
     <div class="downloadPromptContent">
@@ -123,6 +124,7 @@
                 <FtInput
                   :icon="['fas', 'clock']"
                   :label="t('Downloads.Start Time')"
+                  :input-filter="filterDownloadTimeInput"
                   placeholder="HH:MM:SS"
                   :disabled="subtitlesOnly"
                   :show-action-button="false"
@@ -137,6 +139,7 @@
                 <FtInput
                   :icon="['fas', 'clock']"
                   :label="t('Downloads.End Time')"
+                  :input-filter="filterDownloadTimeInput"
                   placeholder="HH:MM:SS"
                   :disabled="subtitlesOnly"
                   :show-action-button="false"
@@ -387,7 +390,7 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store/index'
-import { DEFAULT_DOWNLOAD_TEMPLATES, replaceAutomaticDownloadTemplateReferences } from '../../helpers/downloadTemplates'
+import { DEFAULT_DOWNLOAD_TEMPLATES, filterDownloadTimeInput, replaceAutomaticDownloadTemplateReferences } from '../../helpers/downloadTemplates'
 import { showToast } from '../../helpers/utils'
 import { downloadErrorMessage } from '../../helpers/downloadErrors'
 

@@ -164,6 +164,8 @@ test('transfers focus to Find in Page', async ({ page }) => {
   await input.press('Enter')
 
   await expect(page.locator('.findbarInput')).toBeFocused()
+  await expect(page.locator('.findbarInput')).toHaveAttribute('placeholder', 'Find in page')
+  await expect(page.locator('.findbar .textInputLabelText')).toHaveCount(0)
 })
 
 test('restores prior focus when dismissed', async ({ page }) => {
