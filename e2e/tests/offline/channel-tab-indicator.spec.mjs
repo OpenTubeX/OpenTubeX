@@ -117,6 +117,24 @@ test('keeps channel header rows evenly spaced below the banner', async ({ app, p
   })).toBe(20)
 })
 
+test('centers channel tab titles vertically at every layout size', async ({ app, page }) => {
+  for (const [width, height, scale] of [[500, 1000, 100], [375, 812, 95], [812, 375, 125], [1600, 900, 95]]) {
+    await app.electronApp.evaluate(({ BrowserWindow }, { width, height }) => {
+      BrowserWindow.getAllWindows()[0].setSize(width, height)
+    }, { width, height })
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    await expect.poll(() => page.locator('.channelDetails:visible [role="tab"]').evaluateAll(tabs => {
+      return Math.max(...tabs.map(tab => {
+        const bounds = tab.getBoundingClientRect()
+        const label = tab.querySelector('.tabLabel').getBoundingClientRect()
+        const border = Number.parseFloat(getComputedStyle(tab).borderBottomWidth)
+        return Math.abs((label.top + label.bottom) / 2 - (bounds.top + bounds.bottom - border) / 2)
+      }))
+    }), { message: `Centered tab titles at ${width}x${height}, ${scale}% UI scale` }).toBeLessThan(0.5)
+    await expectAligned(page)
+  }
+})
+
 test('slides the active channel line with the feed timing and configured animation speed', async ({ page }) => {
   for (const [speed, tabId, duration] of [[100, 'aboutTab', 200], [200, 'videosTab', 100], [50, 'shortsTab', 400]]) {
     await page.evaluate(value => {
