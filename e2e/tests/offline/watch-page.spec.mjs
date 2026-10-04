@@ -366,43 +366,52 @@ test.describe('desktop quick playback speed bar', () => {
     })
   }
 
-  test('keeps speed changes while a legacy quality waits for availability', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    const video = await openMockedVideo(page)
-    await video.evaluate(element => element.pause())
-    const view = await watchViewHandle(page)
-    const player = page.locator(`${activeTab} .ftVideoPlayer`)
-    const bar = player.locator('.ft-quick-playback-rate-bar')
-    await view.evaluate(async view => {
-      view.legacyFormats = [...view.legacyFormats, {
-        ...view.legacyFormats[0],
-        width: 426,
-        height: 240,
-        qualityLabel: '240p',
-        availableAt: Math.floor(Date.now() / 1000) + 8
-      }]
-      await view.$nextTick()
+  for (const control of ['quick bar', 'menu']) {
+    test(`keeps ${control} speed changes while a legacy quality waits for availability`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      const video = await openMockedVideo(page)
+      await video.evaluate(element => element.pause())
+      const view = await watchViewHandle(page)
+      const player = page.locator(`${activeTab} .ftVideoPlayer`)
+      const bar = player.locator('.ft-quick-playback-rate-bar')
+      await view.evaluate(async view => {
+        view.legacyFormats = [...view.legacyFormats, {
+          ...view.legacyFormats[0],
+          width: 426,
+          height: 240,
+          qualityLabel: '240p',
+          availableAt: Math.floor(Date.now() / 1000) + 8
+        }]
+        await view.$nextTick()
+      })
+      await player.evaluate(element => {
+        element.ui.configure({ enableTooltips: false })
+        window.speedQualityLoaded = false
+        element.ui.getControls().getPlayer().addEventListener('loaded', () => {
+          window.speedQualityLoaded = true
+        }, { once: true })
+      })
+      await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
+      await player.getByRole('button', { name: 'More settings', exact: true }).click()
+      await player.locator('.legacy-quality-button').click()
+      await player.locator('.legacy-qualities').getByRole('button', { name: '240p', exact: true }).click()
+      expect(await view.evaluate(view => view.$refs.player.hasLoaded)).toBe(true)
+      expect(await page.evaluate(() => window.speedQualityLoaded)).toBe(false)
+      await player.evaluate(element => element.ui.getControls().hideSettingsMenus())
+      if (control === 'quick bar') {
+        await bar.locator('[data-rate="1.5"]').click()
+      } else {
+        await player.getByRole('button', { name: 'More settings', exact: true }).click()
+        await player.locator('.shaka-playbackrate-button').click()
+        await player.locator('.shaka-playback-rates').getByRole('button', { name: '1.5x', exact: true }).click()
+      }
+      await expect(bar.locator('[data-rate="1.5"]')).toHaveClass(/is-current-rate/)
+      await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.5)
+      await expect.poll(() => page.evaluate(() => window.speedQualityLoaded), { timeout: 15_000 }).toBe(true)
+      await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.5)
+      await expect(bar.locator('[data-rate="1.5"]')).toHaveClass(/is-current-rate/)
     })
-    await player.evaluate(element => {
-      element.ui.configure({ enableTooltips: false })
-      window.speedQualityLoaded = false
-      element.ui.getControls().getPlayer().addEventListener('loaded', () => {
-        window.speedQualityLoaded = true
-      }, { once: true })
-    })
-    await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
-    await player.getByRole('button', { name: 'More settings', exact: true }).click()
-    await player.locator('.legacy-quality-button').click()
-    await player.locator('.legacy-qualities').getByRole('button', { name: '240p', exact: true }).click()
-    expect(await view.evaluate(view => view.$refs.player.hasLoaded)).toBe(true)
-    expect(await page.evaluate(() => window.speedQualityLoaded)).toBe(false)
-    await bar.locator('[data-rate="1.5"]').click()
-    await expect(bar.locator('[data-rate="1.5"]')).toHaveClass(/is-current-rate/)
-    await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.5)
-    await expect.poll(() => page.evaluate(() => window.speedQualityLoaded), { timeout: 15_000 }).toBe(true)
-    await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.5)
-    await expect(bar.locator('[data-rate="1.5"]')).toHaveClass(/is-current-rate/)
-  })
+  }
 
   test('keeps custom speeds outside the native playback range', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)

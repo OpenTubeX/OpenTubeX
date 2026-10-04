@@ -11166,7 +11166,7 @@ export default defineComponent({
         const button = target.closest('button')
 
         if (button && !button.classList.contains('shaka-back-to-overflow-button')) {
-          if (!hasLoaded.value) {
+          if (!hasLoaded.value || pendingPlaybackRateRestore !== null) {
             const rate = normalizePlaybackRate(Number.parseFloat(button.querySelector('span')?.textContent ?? ''))
             if (rate !== null) {
               event.preventDefault()
