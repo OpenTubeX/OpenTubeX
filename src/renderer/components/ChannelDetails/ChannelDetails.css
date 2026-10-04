@@ -15,14 +15,18 @@
 }
 
 .infoContainer {
+  --channel-header-gap: 20px;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--channel-header-gap);
   position: relative;
   background-color: var(--card-bg-color);
   background-image: var(--card-bg-image);
   background-attachment: fixed;
   backdrop-filter: var(--card-bg-blur, none);
   border-radius: 0 0 calc(8px * var(--ui-roundness)) calc(8px * var(--ui-roundness));
-  margin-block-start: 10px;
-  padding-block: 0;
+  padding-block: var(--channel-header-gap);
   padding-inline: 16px;
 }
 
@@ -31,10 +35,7 @@
   flex-flow: row wrap;
   inline-size: 100%;
   justify-content: space-between;
-}
-
-.infoHasError {
-  padding-block-end: 10px;
+  gap: var(--channel-header-gap);
 }
 
 .thumbnail {
@@ -73,17 +74,28 @@
   align-items: center;
 }
 
+.infoActionsContainer:empty {
+  display: none;
+}
+
 .shareIcon {
   align-self: center;
 }
 
+.infoActionsContainer :deep(.buttonList) {
+  margin-block: 0;
+}
+
 .channelSearch {
-  margin-block-start: 10px;
   max-inline-size: 250px;
   inline-size: 220px;
   margin-inline-start: auto;
   align-self: flex-end;
   flex: 1 1 0%;
+}
+
+.channelSearch :deep(.inputWrapper) {
+  margin-block-end: 0;
 }
 
 .infoTabs {
@@ -92,7 +104,7 @@
   block-size: auto;
   justify-content: unset;
   gap: 32px;
-  padding-block: 0.3em;
+  padding-block: 0;
   padding-inline: 0;
   flex-wrap: nowrap;
 }
@@ -127,6 +139,9 @@
 }
 
 .tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
   box-sizing: border-box;
   flex: 1 1 0%;
@@ -209,7 +224,7 @@
   .infoTabs {
     block-size: auto;
     flex-flow: column-reverse;
-    gap: 0;
+    gap: var(--channel-header-gap);
   }
 
   .channelSearch {
@@ -233,21 +248,18 @@
 @media only screen and (width <=680px) {
   .info {
     flex-direction: column;
-    margin-block: 20px 10px;
   }
 
   .infoActionsContainer {
     flex-direction: row-reverse;
     justify-content: left;
     gap: 10px;
-    margin-block-start: 5px;
   }
 }
 
 @media only screen and (width <=400px) {
   .info {
     justify-content: center;
-    gap: 10px;
   }
 
   .infoActionsContainer {
