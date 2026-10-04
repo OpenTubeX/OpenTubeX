@@ -4,6 +4,10 @@
   max-inline-size: 85dvw;
 }
 
+.shelfContainer:first-child {
+  margin-block-start: 0;
+}
+
 .shelfTitle {
   font-size: 24px;
   cursor: pointer;

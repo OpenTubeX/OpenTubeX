@@ -12,7 +12,7 @@ const GLITCH_CHANNEL_URL = 'https://www.youtube.com/channel/UCn_FAXem2-e3HQvmK-m
 test.describe('channel page', () => {
   test.use({ seed: { settings: { uiRoundness: 200, externalPlayer: 'mpv' } } })
 
-  test('loads the GLITCH channel home and playlists tabs', async ({ page }) => {
+  test('loads the GLITCH channel home and playlists tabs', async ({ app, page }) => {
     await page.locator(sel.searchInput).fill(GLITCH_CHANNEL_URL)
     await page.locator(sel.searchInput).press('Enter')
 
@@ -20,6 +20,16 @@ test.describe('channel page', () => {
     await page.getByRole('tab', { name: 'Home' }).click()
     await expect(page.locator('#homePanel .ft-list-video').first()).toBeVisible({ timeout: 30_000 })
     await expect(page.locator('.channelDetails .tabsIndicator')).toBeVisible()
+
+    for (const [width, height, scale] of [[500, 1000, 100], [375, 812, 95], [812, 375, 125], [1600, 900, 95]]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, { width, height }) => {
+        BrowserWindow.getAllWindows()[0].setSize(width, height)
+      }, { width, height })
+      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+      await expect.poll(() => page.locator('#homePanel .shelfTitle').first().evaluate(title => {
+        return Math.round(title.getBoundingClientRect().top - document.querySelector('.channelDetails .tabs').getBoundingClientRect().bottom)
+      }), { message: `20px gap to Home content at ${width}px and ${scale}% UI scale` }).toBe(20)
+    }
 
     await page.getByRole('tab', { name: 'Playlists' }).click()
     await expect(page.locator('.channelDetails .tabsIndicator')).toHaveCSS('transition-property', 'transform')

@@ -4,9 +4,15 @@
   background-attachment: fixed;
   backdrop-filter: var(--card-bg-blur, none);
   margin-block-start: 0;
-  padding: 10px;
+  padding-block: 0 10px;
+  padding-inline: 10px;
   position: relative;
   z-index: 1;
+}
+
+.about > :first-child,
+.about > section:first-child > :first-child {
+  margin-block-start: 0;
 }
 
 .aboutInfo {

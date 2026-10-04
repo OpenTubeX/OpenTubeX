@@ -135,6 +135,63 @@ test('centers channel tab titles vertically at every layout size', async ({ app,
   }
 })
 
+test('keeps the visible channel content 20px below the tabs', async ({ app, page }) => {
+  const videos = [0, 1].map(index => ({ videoId: `video${index}aaaaa`, title: 'Video', author: 'Channel', lengthSeconds: 60, videoThumbnails: [] }))
+  let description = 'Channel description'
+  await page.route('https://invidious.test/api/v1/channels/**', route => route.fulfill({
+    json: {
+      author: 'Channel',
+      authorId: CHANNEL_ID,
+      authorThumbnails: [],
+      authorBanners: [],
+      description,
+      subCount: 0,
+      totalViews: 0,
+      joined: 0,
+      tabs: ['videos', 'shorts', 'streams', 'playlists', 'posts'],
+      relatedChannels: [],
+      videos,
+      latestVideos: videos,
+      playlists: [],
+      comments: []
+    }
+  }))
+  await page.reload()
+  await expect(page.locator('.channel-view-all:visible')).toBeVisible()
+  for (const [width, height, scale] of [[500, 1000, 100], [375, 812, 95], [812, 375, 125], [1600, 900, 95]]) {
+    await app.electronApp.evaluate(({ BrowserWindow }, { width, height }) => {
+      BrowserWindow.getAllWindows()[0].setSize(width, height)
+    }, { width, height })
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), scale)
+    for (const [tabId, contentSelector] of [
+      ['videosTab', '.select-container'],
+      ['shortsTab', '.select-container'],
+      ['liveTab', '.select-container'],
+      ['playlistsTab', '.elementList .message:visible'],
+      ['communityTab', '.elementList .message:visible'],
+      ['aboutTab', '#aboutPanel h2:first-child']
+    ]) {
+      await page.locator(`#${tabId}`).click()
+      await expect(page.locator(contentSelector)).toBeVisible()
+      await expect.poll(() => page.locator(contentSelector).evaluate(content => {
+        const tabs = document.querySelector('.channelDetails .tabs').getBoundingClientRect()
+        const controls = [...content.querySelectorAll('.channel-view-all, .select-text, .select-label')]
+          .map(element => element.getBoundingClientRect()).filter(bounds => bounds.width > 0 && bounds.height > 0)
+        const top = controls.length > 0 ? Math.min(...controls.map(bounds => bounds.top)) : content.getBoundingClientRect().top
+        return Math.round(top - tabs.bottom)
+      }), { message: `20px gap to ${tabId} content at ${width}px and ${scale}% UI scale` }).toBe(20)
+    }
+  }
+  description = ''
+  await page.reload()
+  await page.locator('#aboutTab').click()
+  const firstHeading = page.locator('#aboutPanel h2:first-child')
+  await expect(firstHeading).toHaveText('Details')
+  await expect.poll(() => firstHeading.evaluate(heading => {
+    return Math.round(heading.getBoundingClientRect().top - document.querySelector('.channelDetails .tabs').getBoundingClientRect().bottom)
+  })).toBe(20)
+})
+
 test('slides the active channel line with the feed timing and configured animation speed', async ({ page }) => {
   for (const [speed, tabId, duration] of [[100, 'aboutTab', 200], [200, 'videosTab', 100], [50, 'shortsTab', 400]]) {
     await page.evaluate(value => {
