@@ -667,7 +667,8 @@ test('video keeps its shape while dragging into a shorter player', async ({ app,
   await page.evaluate(() => window.ftElectron.setZoomFactor(1.25))
   await player.evaluate(element => { element.style.height = '480px' })
   await page.evaluate(() => {
-    document.querySelector('.sideNav').classList.add('scrollHidden')
+    // Hide through the scroll handler so Vue retains the state during navigation.
+    window.scrollTo(0, 100)
     document.body.style.setProperty('--connection-status-height', '38px')
     const player = document.querySelector('.ftVideoPlayer')
     window.lastMiniMorphTop = null
@@ -680,6 +681,9 @@ test('video keeps its shape while dragging into a shorter player', async ({ app,
       }
     }).observe(player, { attributes: true, attributeFilter: ['style'] })
   })
+  const nav = page.locator('.sideNav')
+  await expect(nav).toHaveClass(/scrollHidden/)
+  await nav.evaluate(element => Promise.all(element.getAnimations().map(animation => animation.finished)))
   const video = player.locator('video').first()
   const distortion = () => video.evaluate(element => {
     const rect = element.getBoundingClientRect()
@@ -708,6 +712,7 @@ test('video keeps its shape while dragging into a shorter player', async ({ app,
     const morphTop = await page.evaluate(() => window.lastMiniMorphTop)
     expect(morphTop).toBeLessThan(await page.evaluate(() => window.innerHeight))
     const barVideo = await video.boundingBox()
+    await expect(nav).toHaveClass(/scrollHidden/)
     expect(Math.abs(barVideo.y - morphTop)).toBeLessThan(2)
     await player.evaluate(element => element.classList.add('mobileMiniBar'))
     await expect(player).toHaveCSS('touch-action', 'none')
