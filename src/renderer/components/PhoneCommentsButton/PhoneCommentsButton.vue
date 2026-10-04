@@ -12,6 +12,7 @@
       aria-haspopup="dialog"
       :aria-expanded="panelOpen"
       :aria-label="$t('Comments.Comments')"
+      :aria-describedby="currentComment ? previewId : null"
       @click="emit('open')"
     >
       <span class="phoneCommentsHeading">
@@ -27,15 +28,18 @@
       </span>
       <span
         v-if="currentComment"
+        :id="previewId"
         class="phoneCommentPreview"
-        aria-hidden="true"
       >
         <Transition name="commentPreview">
           <span
             :key="currentComment.id"
             class="phoneCommentRow"
           >
-            <span class="phoneCommentAvatar">
+            <span
+              class="phoneCommentAvatar"
+              aria-hidden="true"
+            >
               <FtRetryImage
                 v-if="currentComment.authorThumb && (!hideCommentPhotos || currentComment.isOwner)"
                 :src="currentComment.authorThumb"
@@ -76,7 +80,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, useId, watch } from 'vue'
 import store from '../../store'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { useTabContext } from '../../tabs/TabContext'
@@ -87,6 +91,7 @@ const props = defineProps({
   panelOpen: { type: Boolean, default: false }
 })
 const emit = defineEmits(['open'])
+const previewId = useId()
 const previews = computed(() => props.comments.slice(0, 5))
 const currentIndex = ref(0)
 const currentComment = computed(() => previews.value[currentIndex.value])

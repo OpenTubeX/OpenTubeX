@@ -29,6 +29,7 @@ test('phone comment preview rotates the first five comments and opens the commen
 
   await expect(excerpt).toContainText(comments[0].author)
   const open = button.getByRole('button', { name: 'Comments', exact: true })
+  await expect(open).toHaveAccessibleDescription(`${comments[0].author} ${comments[0].text.replaceAll(/\s+/g, ' ').trim()}`)
   await open.focus()
   await open.blur()
   await page.clock.fastForward(4000)
@@ -39,6 +40,7 @@ test('phone comment preview rotates the first five comments and opens the commen
     await expect(excerpt).toHaveCount(1)
     await expect(excerpt).toContainText(comments[index].author)
     await expect(excerpt).toContainText(comments[index].text.replaceAll(/\s+/g, ' ').trim())
+    await expect(open).toHaveAccessibleDescription(`${comments[index].author} ${comments[index].text.replaceAll(/\s+/g, ' ').trim()}`)
     await expect(button.locator('img.phoneCommentAvatarImage')).toHaveAttribute('src', comments[index].authorThumb)
     await expect(button.locator('img.phoneCommentAvatarImage')).toBeVisible()
     expect(await button.evaluate(element => element.getBoundingClientRect().height)).toBeCloseTo(originalHeight, 1)
@@ -59,6 +61,9 @@ test('phone comment preview rotates the first five comments and opens the commen
   await expect(page.locator('.mobileSheet[open] .comment').first()).toBeVisible()
 
   await page.locator('.mobileSheet[open]').getByRole('button', { name: 'Close', exact: true }).click()
+  await button.click({ position: { x: 1, y: (await button.boundingBox()).height / 2 } })
+  await expect(page.locator('.mobileSheet[open] .comment').first()).toBeVisible()
+  await page.locator('.mobileSheet[open]').getByRole('button', { name: 'Close', exact: true }).click()
   await page.clock.fastForward(1000)
   await page.mouse.move(0, 0)
   for (const { width, height, zoom } of [
@@ -72,6 +77,8 @@ test('phone comment preview rotates the first five comments and opens the commen
     await expect.poll(() => button.evaluate(element => {
       const bounds = element.getBoundingClientRect()
       const heading = element.querySelector('.phoneCommentsHeading').getBoundingClientRect()
+      const control = element.querySelector('button').getBoundingClientRect()
+      const cardStyle = getComputedStyle(element)
       const icon = element.querySelector('.phoneCommentsHeading').firstElementChild.getBoundingClientRect()
       const title = element.querySelector('.phoneCommentsTitle').getBoundingClientRect()
       const chevron = element.querySelector('.phoneCommentsHeading').lastElementChild.getBoundingClientRect()
@@ -81,7 +88,11 @@ test('phone comment preview rotates the first five comments and opens the commen
       const dots = element.querySelector('.phoneCommentDots').getBoundingClientRect()
       const circles = [...element.querySelectorAll('.phoneCommentDot')].map(dot => dot.getBoundingClientRect())
       const dotCenter = (circles[0].left + circles.at(-1).right) / 2
-      return bounds.left >= 0 && bounds.right <= window.innerWidth + 1 &&
+      return cardStyle.paddingTop === '0px' && cardStyle.paddingRight === '0px' &&
+        cardStyle.paddingBottom === '0px' && cardStyle.paddingLeft === '0px' &&
+        Math.abs(bounds.left - control.left) < 1 && Math.abs(bounds.right - control.right) < 1 &&
+        Math.abs(bounds.top - control.top) < 1 && Math.abs(bounds.bottom - control.bottom) < 1 &&
+        bounds.left >= 0 && bounds.right <= window.innerWidth + 1 &&
         element.scrollWidth <= element.clientWidth + 1 && preview.top >= heading.bottom &&
         Math.abs(icon.left - heading.left) < 1 && title.left > icon.right &&
         Math.abs(chevron.right - heading.right) < 1 &&
@@ -144,4 +155,5 @@ test('phone comment preview respects reduced motion and resets when comments rel
   await view.evaluate(component => { component.commentPreviews = [] })
   await expect(button.locator('.phoneCommentPreview')).toHaveCount(0)
   await expect(button.getByRole('button', { name: 'Comments', exact: true })).toBeVisible()
+  await expect(button.getByRole('button', { name: 'Comments', exact: true })).toHaveAccessibleDescription('')
 })
