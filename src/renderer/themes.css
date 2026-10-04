@@ -2893,7 +2893,7 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
 }
 
 .tokyoNightDay {
-  --primary-text-color: #3359b2;
+  --primary-text-color: #2b4b96;
   --secondary-text-color: #4e5b8d;
   --bg-color: #e1e2e7;
   --card-bg-color: #ebecf0;
@@ -3082,7 +3082,7 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
 }
 
 .ayuLight {
-  --primary-text-color: #5c6166;
+  --primary-text-color: #53575c;
   --secondary-text-color: #5e6672;
   --bg-color: #f8f9fa;
   --card-bg-color: #fcfcfc;
