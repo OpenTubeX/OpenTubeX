@@ -183,6 +183,15 @@ test('ending an inline scroll mini player still hides it', t => {
   assert.equal(player.scrollMiniPlayerActive.value, false)
 })
 
+test('a manually minimized mobile video remains available after ending without keep-playing enabled', t => {
+  const { player, video, minimized } = mountMiniPlayer(t, { android: true, keepPlaying: false, detached: true })
+  minimized.value = true
+  video.value.ended = true
+  video.value.paused = true
+  player.updateScrollMiniPlayer()
+  assert.equal(player.scrollMiniPlayerActive.value, true)
+})
+
 test('leaving an already ended video does not open a mini player', t => {
   const { player, video, isActiveTab } = mountMiniPlayer(t)
   player.scrollMiniPlayerActive.value = false

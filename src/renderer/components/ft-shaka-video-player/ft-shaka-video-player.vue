@@ -172,7 +172,8 @@
       <div
         v-if="!audioPlayerMode && thumbnail"
         v-show="showPoster || showCountdownOverlay || showEndedScreen"
-        :class="showEndedScreen ? 'endedPoster' : 'countdownPoster'"
+        class="countdownPoster"
+        :class="{ endedPoster: showEndedScreen }"
         aria-hidden="true"
       >
         <FtRetryImage
