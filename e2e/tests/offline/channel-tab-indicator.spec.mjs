@@ -84,6 +84,41 @@ test('realigns the active channel line when the locale direction changes without
   }
 })
 
+test('places the channel line immediately after layout changes without animating', async ({ app, page }) => {
+  await page.evaluate(() => {
+    document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setAnimationSpeed', 25)
+  })
+  async function expectImmediateAlignment() {
+    await expect.poll(() => page.locator(indicatorSelector).evaluate(indicator => {
+      const line = indicator.getBoundingClientRect()
+      const tab = indicator.parentElement.querySelector('.selectedTab').getBoundingClientRect()
+      return {
+        aligned: Math.abs(line.left - tab.left) < 2 && Math.abs(line.width - tab.width) < 2,
+        animations: indicator.getAnimations().length,
+        transition: getComputedStyle(indicator).transitionProperty
+      }
+    }), { timeout: 1000 }).toEqual({ aligned: true, animations: 0, transition: 'none' })
+  }
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0].setSize(812, 900)
+  })
+  await expectImmediateAlignment()
+  await page.evaluate(() => {
+    return document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', 125)
+  })
+  await expectImmediateAlignment()
+  await page.evaluate(() => {
+    document.querySelector('#app').__vue_app__.config.globalProperties.$i18n.locale = 'ar'
+  })
+  await expect(page.locator('body')).toHaveAttribute('dir', 'rtl')
+  await expectImmediateAlignment()
+  await page.evaluate(() => {
+    return document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHideChannelShorts', true)
+  })
+  await expect(page.locator('#shortsTab')).toHaveCount(0)
+  await expectImmediateAlignment()
+})
+
 test('keeps every channel tab in one row across zoom, RTL, and changing labels', async ({ app, page }, testInfo) => {
   for (const [width, height, scale] of [[1600, 900, 95], [375, 812, 95], [812, 375, 125]]) {
     await app.electronApp.evaluate(({ BrowserWindow }, { width, height }) => {

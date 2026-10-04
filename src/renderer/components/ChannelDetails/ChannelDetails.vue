@@ -374,7 +374,8 @@ const tabsIndicatorTransitionDuration = computed(() => (
 let tabsResizeObserver = null
 let indicatorWasHidden = true
 
-function updateTabIndicator() {
+/** @param {boolean} [animate] slide only when the selected tab changes */
+function updateTabIndicator(animate = false) {
   const selected = tabsContainer.value?.querySelector('.selectedTab')
   if ((isTabPresented && !isTabPresented.value) ||
     !(selected instanceof HTMLElement) || selected.getClientRects().length === 0) {
@@ -392,7 +393,11 @@ function updateTabIndicator() {
     '--tab-indicator-scale': String(selectedRect.width / 100),
     transform: `translate(${selectedRect.left - containerRect.left}px, ${selectedRect.bottom - containerRect.top - 3}px) scaleX(${selectedRect.width / 100})`
   }
-  if (indicatorWasHidden) {
+  // Repeated resize notifications must not cancel an ongoing tab switch.
+  if (!indicatorWasHidden && tabsIndicatorStyle.value?.transform === style.transform) {
+    return
+  }
+  if (!animate || indicatorWasHidden) {
     style.transition = 'none'
   }
   tabsIndicatorStyle.value = style
@@ -409,7 +414,8 @@ function observeTabs() {
   updateTabIndicator()
 }
 
-watch([() => props.currentTab, () => props.visibleTabs, tabsContainer, locale,
+watch(() => props.currentTab, () => updateTabIndicator(true), { flush: 'post' })
+watch([() => props.visibleTabs, tabsContainer, locale,
   () => isTabPresented?.value], observeTabs, { flush: 'post' })
 
 onActivated(() => nextTick(observeTabs))
@@ -529,7 +535,7 @@ function keyboardShortcutHandler(event) {
 }
 
 onMounted(() => {
-  tabsResizeObserver = new ResizeObserver(updateTabIndicator)
+  tabsResizeObserver = new ResizeObserver(() => updateTabIndicator())
   observeTabs()
   document.addEventListener('keydown', keyboardShortcutHandler)
 })
