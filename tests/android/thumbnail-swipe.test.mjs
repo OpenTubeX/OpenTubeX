@@ -2,7 +2,7 @@ import { mkdir } from 'node:fs/promises'
 import { test } from 'node:test'
 import { chromium, expect } from '@playwright/test'
 import { goTo } from '../../e2e/helpers/app.mjs'
-import { SWIPE_VIDEO, verifyThumbnailSwipes, verifyPlaylistSwipeRemoval, verifyCopySwipe } from '../../e2e/helpers/thumbnail-swipe.mjs'
+import { SWIPE_VIDEO, verifyThumbnailSwipes, verifyPlaylistSwipeRemoval, verifyCopySwipe, verifySwipeDownloadAvailability } from '../../e2e/helpers/thumbnail-swipe.mjs'
 
 // Acquire the emulator's lab lock, install a current debug APK, forward its
 // WebView socket, and set ANDROID_CDP_URL to run this acceptance test.
@@ -57,6 +57,7 @@ test('Android thumbnail swipes use video actions and preserve mobile navigation'
     if (!await left.isVisible()) await page.locator('.settingsMenu [data-section="general"]').click()
     await left.scrollIntoViewIfNeeded()
     await expect(left).toBeVisible()
+    await verifySwipeDownloadAvailability(page)
     await left.click()
     await expect(page.getByRole('option', { name: 'Share Link', exact: true })).toBeVisible()
     await expect(page.getByRole('option', { name: 'Download Video', exact: true })).toBeVisible()

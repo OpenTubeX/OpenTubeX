@@ -261,7 +261,7 @@
       <FtSelect
         v-if="mode === 'general' && (IS_CAPACITOR || phoneLayout)"
         :placeholder="t('Settings.General Settings.Thumbnail Swipe Gestures.Left')"
-        :value="store.getters.getThumbnailLeftSwipeAction"
+        :value="getThumbnailSwipeValue(store.getters.getThumbnailLeftSwipeAction)"
         setting-key="thumbnailLeftSwipeAction"
         :select-names="thumbnailSwipeActionNames"
         :select-values="thumbnailSwipeActionValues"
@@ -272,7 +272,7 @@
       <FtSelect
         v-if="mode === 'general' && (IS_CAPACITOR || phoneLayout)"
         :placeholder="t('Settings.General Settings.Thumbnail Swipe Gestures.Right')"
-        :value="store.getters.getThumbnailRightSwipeAction"
+        :value="getThumbnailSwipeValue(store.getters.getThumbnailRightSwipeAction)"
         setting-key="thumbnailRightSwipeAction"
         :select-names="thumbnailSwipeActionNames"
         :select-values="thumbnailSwipeActionValues"
@@ -904,11 +904,15 @@ function getThumbnailSwipeIcon(action) {
     copyYoutube: ['fas', 'link'],
     share: ['fas', 'share-alt'],
     download: ['fas', 'download'],
-  }[action] ?? ['fas', 'xmark']
+  }[getThumbnailSwipeValue(action)] ?? ['fas', 'xmark']
 }
 
 const thumbnailSwipeActionValues = computed(() => thumbnailSwipeActions.value.map(([value]) => value))
 const thumbnailSwipeActionNames = computed(() => thumbnailSwipeActions.value.map(([, name]) => name))
+
+function getThumbnailSwipeValue(action) {
+  return thumbnailSwipeActionValues.value.includes(action) ? action : 'disabled'
+}
 
 const LOCALE_VALUES = ['system', ...allLocales]
 

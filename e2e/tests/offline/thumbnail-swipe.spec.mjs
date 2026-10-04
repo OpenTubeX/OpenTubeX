@@ -1,7 +1,13 @@
 import { test, expect, goTo, goToSettingsSection } from '../../helpers/app.mjs'
-import { SWIPE_VIDEO, verifyThumbnailSwipes, verifyPlaylistSwipeRemoval, verifyCopySwipe } from '../../helpers/thumbnail-swipe.mjs'
+import { SWIPE_VIDEO, verifyThumbnailSwipes, verifyPlaylistSwipeRemoval, verifyCopySwipe, verifySwipeDownloadAvailability } from '../../helpers/thumbnail-swipe.mjs'
 
 test.use({ seed: { history: [SWIPE_VIDEO] } })
+
+test('download swipe settings stay readable when downloads are disabled', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await goToSettingsSection(page, 'general')
+  await verifySwipeDownloadAvailability(page)
+})
 
 for (const iconPack of ['material', 'remix']) {
   test.describe(`thumbnail swipe gestures with ${iconPack} icons`, () => {

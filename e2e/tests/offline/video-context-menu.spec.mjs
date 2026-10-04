@@ -1,4 +1,5 @@
 import { test, expect, goTo, goToSettingsSection, sel } from '../../helpers/app.mjs'
+import { fulfillVisualFixture, expectImagesLoaded } from '../../helpers/visual-fixtures.mjs'
 
 const VIDEO_ID = 'jNQXAC9IVRw'
 
@@ -455,16 +456,19 @@ for (const playlistType of ['youtube', 'user']) {
 }
 
 test('retains image and selected-text actions alongside video actions', async ({ page, app }) => {
+  await page.route(/https:\/\/i\.ytimg\.com\//, route => fulfillVisualFixture(route, 'video-thumbnail'))
   await goTo(page, 'history')
   const card = page.locator('.ft-list-video').first()
+  const thumbnail = card.locator('.thumbnailImage:not(.retryImagePlaceholder)')
+  await expectImagesLoaded(thumbnail)
   const menu = page.locator('.contextMenu')
-  await card.locator('.thumbnailImage').click({ button: 'right' })
+  await thumbnail.click({ button: 'right' })
   for (const name of ['Copy Image', 'Copy Image Address']) {
     await expect(menu.getByRole('menuitem', { name, exact: true })).toBeVisible()
   }
   await expect(menu.getByRole('menuitem', { name: /^Save Image As/ })).toBeVisible()
   await expect(menu.getByRole('menuitem', { name: 'Add to Queue', exact: true })).toBeVisible()
-  const imageUrl = await card.locator('.thumbnailImage').evaluate(image => image.currentSrc || image.src)
+  const imageUrl = await thumbnail.evaluate(image => image.currentSrc || image.src)
   await menu.getByRole('menuitem', { name: 'Copy Image Address', exact: true }).click()
   await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toBe(imageUrl)
   await card.locator('.h3Title').evaluate(element => {

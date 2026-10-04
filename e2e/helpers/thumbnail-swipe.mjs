@@ -17,6 +17,42 @@ export const SWIPE_VIDEO = {
   type: 'video',
 }
 
+export async function verifySwipeDownloadAvailability(page) {
+  const saved = await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const saved = [store.getters.getThumbnailLeftSwipeAction, store.getters.getThumbnailRightSwipeAction, store.getters.getEnableDownloads]
+    store.commit('setEnableDownloads', true)
+    store.commit('setThumbnailLeftSwipeAction', 'download')
+    store.commit('setThumbnailRightSwipeAction', 'download')
+    return saved
+  })
+  const selects = ['Swipe left on thumbnails', 'Swipe right on thumbnails'].map(name => page.getByRole('combobox', { name, exact: true }))
+  const expectSelection = async (value, name) => {
+    for (const select of selects) {
+      await expect(select.locator('.selectedValue')).toHaveText(name)
+      await expect(select.locator('..').locator('select')).toHaveValue(value)
+    }
+  }
+  try {
+    await expectSelection('download', 'Download Video')
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setEnableDownloads', false))
+    await expectSelection('disabled', 'Disabled')
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return [store.getters.getThumbnailLeftSwipeAction, store.getters.getThumbnailRightSwipeAction]
+    })).toEqual(['download', 'download'])
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setEnableDownloads', true))
+    await expectSelection('download', 'Download Video')
+  } finally {
+    await page.evaluate(([left, right, downloads]) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setThumbnailLeftSwipeAction', left)
+      store.commit('setThumbnailRightSwipeAction', right)
+      store.commit('setEnableDownloads', downloads)
+    }, saved)
+  }
+}
+
 export async function verifyCopySwipe(page, session, readClipboard, expectedUrl = `https://youtu.be/${SWIPE_VIDEO.videoId}`) {
   await page.evaluate(() => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
