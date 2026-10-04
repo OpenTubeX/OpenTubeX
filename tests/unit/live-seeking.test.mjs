@@ -59,13 +59,16 @@ function absoluteSeekFixture(props) {
     hasLoaded: { value: true },
     pendingMetadataSeek: null,
     seekBarMouseDown: false,
+    resumeAutoplayAfterSeek: false,
+    initialAutoplayCanceled: false,
+    playCalls: 0,
     videoLayoutReady: { value: true },
     applyPendingPresentationModes() {},
     updateAutoPip() {},
     handleVideoResize() {},
     canSeek: () => seekingAllowed,
     accumulatedSeekSeconds: 5,
-    video: { value: { currentTime: 10, duration: 30, paused: true, pause() {}, fastSeek(time) { this.currentTime = time } } },
+    video: { value: { currentTime: 10, duration: 30, paused: true, autoplay: false, pause() {}, play() { state.playCalls++; return Promise.resolve() }, fastSeek(time) { this.currentTime = time } } },
     mediaTabId: 'live-test',
     mediaSessionStopped: false,
     tabMediaCoordinator: {
@@ -73,12 +76,12 @@ function absoluteSeekFixture(props) {
       setPlaybackState() {}
     },
   }
-  const functions = ['setCurrentTime', 'rememberSeekPosition', 'registerMediaSessionHandlers', 'handleSeekBarInput', 'handleSeekBarMouseChange', 'handleCanPlay'].map(name => {
+  const functions = ['pause', 'setCurrentTime', 'rememberSeekPosition', 'registerMediaSessionHandlers', 'handleSeekBarInput', 'handleSeekBarMouseChange', 'restoreSeekAutoplay', 'handleCanPlay'].map(name => {
     const match = source.match(new RegExp(`    function ${name}\\([^]*?\\n    }`))
     assert.ok(match, `missing ${name}`)
     return match[0]
   }).join('\n')
-  const api = vm.runInNewContext(`${functions}\nregisterMediaSessionHandlers();\n({ setCurrentTime, handleSeekBarInput, handleSeekBarMouseChange, handleCanPlay })`, state)
+  const api = vm.runInNewContext(`${functions}\nregisterMediaSessionHandlers();\n({ pause, setCurrentTime, handleSeekBarInput, handleSeekBarMouseChange, handleCanPlay })`, state)
   return { state, ...api }
 }
 
@@ -198,6 +201,54 @@ test('a mouse drag retains the latest timeline value and consumes its release', 
   assert.equal(state.pendingMetadataSeek, 15)
   assert.equal(state.seekBarMouseDown, false)
 })
+
+for (const endEvent of ['mouseup', 'touchend', 'touchcancel', 'blur']) {
+  test(`a startup timeline seek restores pending autoplay on ${endEvent}`, () => {
+    const { state, handleSeekBarInput, handleSeekBarMouseChange } = absoluteSeekFixture({ isLive: false })
+    state.video.value.autoplay = true
+    state.videoLayoutReady.value = false
+    state.ui = { getControls: () => ({ getDisplayTime: () => 5 }) }
+    const target = { matches: () => true, value: '5' }
+    handleSeekBarInput({ type: endEvent.startsWith('touch') ? 'touchstart' : 'mousedown', target })
+    // The first frame may become ready while the pointer is still held down.
+    state.videoLayoutReady.value = true
+    if (endEvent === 'mouseup') handleSeekBarMouseChange({ type: endEvent })
+    else handleSeekBarInput({ type: endEvent, target })
+    assert.equal(state.playCalls, 1)
+    // A second release must not override a later pause.
+    handleSeekBarInput({ type: 'blur', target })
+    assert.equal(state.playCalls, 1)
+  })
+}
+
+for (const [autoplay, ready] of [[false, false], [true, true]]) {
+  test(`timeline seeking preserves paused playback with autoplay=${autoplay}, ready=${ready}`, () => {
+    const { state, handleSeekBarInput, handleSeekBarMouseChange } = absoluteSeekFixture({ isLive: false })
+    state.video.value.autoplay = autoplay
+    state.videoLayoutReady.value = ready
+    state.ui = { getControls: () => ({ getDisplayTime: () => 5 }) }
+    handleSeekBarInput({ type: 'mousedown', target: { matches: () => true, value: '5' } })
+    handleSeekBarMouseChange({ type: 'mouseup' })
+    assert.equal(state.playCalls, 0)
+  })
+}
+
+for (const action of ['pause', 'stop', 'exposed pause']) {
+  for (const duringSeek of [false, true]) {
+    test(`${action === 'exposed pause' ? 'An exposed pause' : `A Media Session ${action}`} ${duringSeek ? 'during' : 'before'} startup seeking cancels pending autoplay`, () => {
+      const { state, pause, handleSeekBarInput, handleSeekBarMouseChange } = absoluteSeekFixture({ isLive: false })
+      const requestPause = action === 'exposed pause' ? pause : state.handlers[action]
+      state.video.value.autoplay = true
+      state.videoLayoutReady.value = false
+      state.ui = { getControls: () => ({ getDisplayTime: () => 5 }) }
+      if (!duringSeek) requestPause()
+      handleSeekBarInput({ type: 'mousedown', target: { matches: () => true, value: '5' } })
+      if (duringSeek) requestPause()
+      handleSeekBarMouseChange({ type: 'mouseup' })
+      assert.equal(state.playCalls, 0)
+    })
+  }
+}
 
 for (const action of ['chapter', 'media session', 'timeline']) {
   test(`a newer ${action} seek replaces a seek queued before metadata`, () => {
