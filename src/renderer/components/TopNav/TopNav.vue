@@ -100,7 +100,7 @@
             @click="closePhoneSearch"
           >
             <FtIcon
-              :icon="['fas', 'times']"
+              :icon="['fas', 'arrow-left']"
               aria-hidden="true"
             />
           </button>
