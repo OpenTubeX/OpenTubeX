@@ -1275,6 +1275,7 @@ export default defineComponent({
     /** @type {number|null} */
     let pendingMetadataSeek = null
     let seekBarMouseDown = false
+    let resumeAutoplayAfterSeek = false
     const videoLayoutReady = ref(false)
     const annotationCurrentTime = ref(0)
     const annotationVideoAspectRatio = ref(null)
@@ -5570,16 +5571,36 @@ export default defineComponent({
       accumulatedSeekSeconds = 0
       if (event.type === 'pointerdown' || event.type === 'keydown') return
       if (!event.target.matches('.shaka-seek-bar') || event.target.disabled) return
+      if (event.type === 'blur' && !seekBarMouseDown && !resumeAutoplayAfterSeek) return
       // Shaka's range control writes currentTime directly. A newer timeline
       // action must supersede a chapter seek queued before metadata was ready.
       if (event.type === 'mousedown') seekBarMouseDown = true
+      if (event.type === 'mousedown' || event.type === 'touchstart') {
+        // Shaka pauses while scrubbing, which cancels native autoplay before
+        // the first frame. Remember that intent until the interaction ends.
+        resumeAutoplayAfterSeek = video.value.autoplay && !videoLayoutReady.value
+      }
       rememberSeekPosition(Number(event.target.value))
+      if (event.type === 'touchend' || event.type === 'touchcancel' || event.type === 'blur') {
+        seekBarMouseDown = false
+        restoreSeekAutoplay()
+      }
     }
 
     function handleSeekBarMouseChange(event) {
       if (!seekBarMouseDown) return
       if (event.type === 'mouseup') seekBarMouseDown = false
       rememberSeekPosition(ui.getControls().getDisplayTime())
+      if (event.type === 'mouseup') restoreSeekAutoplay()
+    }
+
+    function restoreSeekAutoplay() {
+      const shouldResume = resumeAutoplayAfterSeek
+      resumeAutoplayAfterSeek = false
+      const mediaElement = video.value
+      if (shouldResume && mediaElement?.autoplay && mediaElement.paused) {
+        mediaElement.play().catch(() => {})
+      }
     }
 
     function setupChapterPreview() {
@@ -5595,7 +5616,7 @@ export default defineComponent({
       const seekBar = seekBarContainer.querySelector('.shaka-seek-bar')
       if (seekBar) {
         // Run after Shaka updates its value; it stops propagation for these events.
-        for (const event of ['mousedown', 'touchstart', 'touchmove', 'touchend', 'touchcancel']) {
+        for (const event of ['mousedown', 'touchstart', 'touchmove', 'touchend', 'touchcancel', 'blur']) {
           seekBar.removeEventListener(event, handleSeekBarInput)
           seekBar.addEventListener(event, handleSeekBarInput)
         }
@@ -12008,6 +12029,7 @@ export default defineComponent({
       hasPlaybackPosition.value = false
       pendingMetadataSeek = null
       seekBarMouseDown = false
+      resumeAutoplayAfterSeek = false
       if (!shortsNavigationSuspended.value) {
         closeFullscreenMetadata()
         closeFullscreenTranscript()

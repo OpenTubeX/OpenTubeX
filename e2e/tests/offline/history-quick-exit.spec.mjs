@@ -222,8 +222,13 @@ for (const position of [0, 5, 15]) {
   })
 }
 
-for (const action of ['chapter', 'timeline', 'first timeline', 'mouse timeline']) {
-  test(action === 'first timeline' ? 'a first timeline seek during buffering takes precedence over saved progress' : `a newer ${action} seek during buffering replaces a chapter seek before metadata`, async ({ app, page }) => {
+for (const action of ['chapter', 'timeline', 'first timeline', 'mouse timeline', 'first mouse timeline before data']) {
+  const title = action === 'first mouse timeline before data'
+    ? 'autoplays at a timeline seek made before the first frame'
+    : action === 'first timeline'
+      ? 'a first timeline seek during buffering takes precedence over saved progress'
+      : `a newer ${action} seek during buffering replaces a chapter seek before metadata`
+  test(title, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     let release
     const pending = new Promise(resolve => { release = resolve })
@@ -243,7 +248,7 @@ for (const action of ['chapter', 'timeline', 'first timeline', 'mouse timeline']
         const video = component.proxy.$el.querySelector('video')
         window.firstPlaybackPosition = null
         video.addEventListener('playing', () => { window.firstPlaybackPosition = video.currentTime }, { once: true })
-        video.addEventListener('loadeddata', () => {
+        video.addEventListener(action === 'first mouse timeline before data' ? 'loadedmetadata' : 'loadeddata', () => {
           if (action === 'chapter') {
             component.refs.player.setCurrentTime(5)
           } else {
@@ -252,7 +257,7 @@ for (const action of ['chapter', 'timeline', 'first timeline', 'mouse timeline']
             range.min = '0'
             range.max = '30'
             range.value = '5'
-            if (action === 'mouse timeline') {
+            if (action.includes('mouse timeline')) {
               const rect = range.getBoundingClientRect()
               const point = seconds => rect.left + 6 + (rect.width - 12) * seconds / 30
               range.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, clientX: point(15) }))
@@ -263,12 +268,12 @@ for (const action of ['chapter', 'timeline', 'first timeline', 'mouse timeline']
             }
           }
         }, { once: true })
-        if (action !== 'first timeline') component.refs.player.setCurrentTime(15)
+        if (!action.startsWith('first ')) component.refs.player.setCurrentTime(15)
       }, action)
       release()
       await expect.poll(() => page.evaluate(() => window.firstPlaybackPosition)).not.toBeNull()
       const firstPosition = await page.evaluate(() => window.firstPlaybackPosition)
-      const target = action === 'mouse timeline' ? await page.evaluate(() => window.mouseTimelineTarget) : 5
+      const target = action.includes('mouse timeline') ? await page.evaluate(() => window.mouseTimelineTarget) : 5
       expect(target).toBeCloseTo(5, 0)
       // Media timestamps can round a fractional pointer target down slightly.
       expect(firstPosition).toBeGreaterThanOrEqual(target - 0.001)
