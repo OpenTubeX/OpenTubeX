@@ -13,7 +13,6 @@
     >
       <div
         class="info"
-        :class="{ infoHasError: hasErrorMessage }"
       >
         <div
           class="thumbnailContainer"

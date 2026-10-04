@@ -55,6 +55,68 @@ async function expectAligned(page) {
   })).toBeLessThan(2)
 }
 
+test('keeps channel header rows evenly spaced below the banner', async ({ app, page }, testInfo) => {
+  for (const [width, height, scale] of [[500, 1000, 100], [375, 812, 95], [812, 375, 125], [750, 900, 100], [1600, 900, 95]]) {
+    await app.electronApp.evaluate(({ BrowserWindow }, { width, height }) => {
+      BrowserWindow.getAllWindows()[0].setSize(width, height)
+    }, { width, height })
+    await page.evaluate(value => {
+      return document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value)
+    }, scale)
+    await expectAligned(page)
+    await expect.poll(() => page.locator('.channelDetails:visible').evaluate(header => {
+      const bounds = selector => header.querySelector(selector).getBoundingClientRect()
+      const banner = bounds('.bannerContainer')
+      const avatar = bounds('.thumbnailContainer')
+      const actions = bounds('.infoActionsContainer')
+      const subscribe = bounds('.buttonList')
+      const info = bounds('.info')
+      const controls = bounds('.infoTabs')
+      const search = bounds('.channelSearch input')
+      const tabs = bounds('.tabs')
+      const container = bounds('.infoContainer')
+      const gaps = {
+        bannerToAvatar: avatar.top - banner.bottom,
+        infoToControls: controls.top - info.bottom,
+        belowTabs: container.bottom - tabs.bottom
+      }
+      if (actions.top >= avatar.bottom) {
+        gaps.avatarToActions = subscribe.top - avatar.bottom
+        gaps.actionsToSearch = search.top - subscribe.bottom
+      }
+      if (search.bottom <= tabs.top) {
+        gaps.searchToTabs = tabs.top - search.bottom
+      }
+      return Object.fromEntries(Object.entries(gaps).map(([name, gap]) => [name, Math.round(gap)]))
+    }), { message: `20px header gaps at ${width}x${height}, ${scale}% UI scale` }).toEqual({
+      bannerToAvatar: 20,
+      infoToControls: 20,
+      belowTabs: 20,
+      ...(width < 680 || scale === 125 ? { avatarToActions: 20, actionsToSearch: 20 } : {}),
+      ...(width <= 800 || scale === 125 ? { searchToTabs: 20 } : {})
+    })
+  }
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0].setSize(500, 1000)
+  })
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', 100))
+  await testInfo.attach('even channel header spacing', {
+    body: await page.locator('.channelDetails:visible').screenshot(),
+    contentType: 'image/png'
+  })
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateHideSharingActions', true)
+    await store.dispatch('updateHideUnsubscribeButton', true)
+  })
+  await expect(page.locator('.channelDetails:visible .infoActionsContainer')).toBeHidden()
+  await expect.poll(() => page.locator('.channelDetails:visible').evaluate(header => {
+    const info = header.querySelector('.thumbnailContainer').getBoundingClientRect()
+    const search = header.querySelector('.channelSearch input').getBoundingClientRect()
+    return Math.round(search.top - info.bottom)
+  })).toBe(20)
+})
+
 test('slides the active channel line with the feed timing and configured animation speed', async ({ page }) => {
   for (const [speed, tabId, duration] of [[100, 'aboutTab', 200], [200, 'videosTab', 100], [50, 'shortsTab', 400]]) {
     await page.evaluate(value => {
