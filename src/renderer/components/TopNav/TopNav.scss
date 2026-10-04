@@ -528,7 +528,7 @@
 
   .logoText {
     display: block;
-    flex: 0 1 100px;
+    flex: 0 0 100px;
     min-inline-size: 0;
     background-position: left center;
     background-size: contain;
@@ -577,11 +577,15 @@
   }
 }
 
-@container top-nav (width < 560px) {
-  // Follow the preference so moving shortcuts into overflow cannot reveal the
-  // logo text and prevent them from returning when the header gets wider.
-  .app.capacitorTabs .phoneLayout .topNavInner.headerShortcutsEnabled .logoText,
-  .app.capacitorTabs .phoneLayout .topNavInner:has(.minimizedUtilityButton, .syncIndicator) .logoText {
+.app.capacitorTabs:not(.capacitorTabletLayout) .phoneLayout:not(.phoneSearchPinned) .side:first-child {
+  container: phone-logo / inline-size;
+  // Together with the header's 4px gap, leave 8px before the next control.
+  padding-inline-end: 4px;
+}
+
+@container phone-logo (width < 138px) {
+  // The full logo needs its 25px icon, 100px name, 5px internal gap and 8px padding.
+  .app.capacitorTabs .phoneLayout .logoText {
     display: none;
   }
 }
@@ -626,6 +630,10 @@
     &.phoneSearchOpen .topNavInner {
       padding-inline: 0;
     }
+  }
+
+  .app.capacitorTabs:not(.capacitorTabletLayout) .phoneLayout:not(.phoneSearchPinned) .side:first-child {
+    padding-inline-end: 8px;
   }
 }
 

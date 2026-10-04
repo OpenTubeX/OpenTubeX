@@ -6,10 +6,7 @@
     :style="{ '--header-side-space': `${headerSideSpace}px` }"
     @keydown.esc="closePhoneSearch"
   >
-    <div
-      class="topNavInner"
-      :class="{ headerShortcutsEnabled: showDownloadsButton || showSettingsButton }"
-    >
+    <div class="topNavInner">
       <div
         ref="navigationActions"
         class="side"
@@ -334,6 +331,7 @@ function measureHeader() {
     headerMetrics.value = { ...headerMetrics.value, width }
     return
   }
+  const headerStyle = getComputedStyle(header.value.firstElementChild)
   const measureActions = (element, outerMargin, excludeShortcuts = false) => {
     const children = [...element.children].filter(child =>
       !child.classList.contains('navSearchButton') &&
@@ -345,7 +343,8 @@ function measureHeader() {
       return total + child.getBoundingClientRect().width +
         (parseFloat(childStyle.marginInlineStart) || 0) + (parseFloat(childStyle.marginInlineEnd) || 0)
     }, 0) + Math.max(0, children.length - 1) * (parseFloat(style.columnGap) || 0) +
-      (parseFloat(style[outerMargin]) || 0) + 12
+      (parseFloat(style.paddingInlineStart) || 0) + (parseFloat(style.paddingInlineEnd) || 0) +
+      (parseFloat(style[outerMargin]) || 0) + (parseFloat(headerStyle.paddingInlineStart) || 12)
   }
   const text = navigationActions.value.querySelector('.logoText')
   const textStyle = text && getComputedStyle(text)
@@ -353,14 +352,16 @@ function measureHeader() {
   const navigationWidth = measureActions(navigationActions.value, 'marginInlineStart')
   const navigationSpace = navigationWidth -
     (text?.getBoundingClientRect().width > 0 ? logoText : 0)
-  const sectionGap = parseFloat(getComputedStyle(header.value.firstElementChild).columnGap) || 0
+  const sectionGap = parseFloat(headerStyle.columnGap) || 0
   headerMetrics.value = {
     width,
     navigation: navigationSpace,
     actions: measureActions(headerActions.value, 'marginInlineEnd'),
     logoText,
     // Reserve a 48px touch target plus the 4px gap for search and each shortcut.
-    shortcutSpace: width - navigationWidth - sectionGap - measureActions(headerActions.value, 'marginInlineEnd', true) -
+    // Budget phone shortcuts against the icon so hiding the name cannot make
+    // shortcuts appear again and repeatedly toggle the layout.
+    shortcutSpace: width - (phoneLayout.value ? navigationSpace : navigationWidth) - sectionGap - measureActions(headerActions.value, 'marginInlineEnd', true) -
       (hideSearchBar.value ? 0 : 52)
   }
 }
