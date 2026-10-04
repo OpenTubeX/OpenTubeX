@@ -1,7 +1,7 @@
 import { test, expect, setWindowSize } from '../../helpers/app.mjs'
 import { mobileMiniPlayerRegions, mobileMiniPlayerReturnPoint, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchHistoryEntry, watchViewHandle } from '../../helpers/watch.mjs'
-import { resetMiniPlayerWork, stopTrackingMiniPlayerWork, trackMiniPlayerWork } from '../../helpers/mini-player-performance.mjs'
+import { mobileMiniPlayerBackdrop, resetMiniPlayerWork, stopTrackingMiniPlayerWork, trackMiniPlayerWork } from '../../helpers/mini-player-performance.mjs'
 
 test.use({
   seed: {
@@ -54,7 +54,7 @@ async function openMobilePlayer(app, page, phone = true) {
   return page.locator('.ftVideoPlayer')
 }
 
-test('mobile swipes suspend ambient sampling and hidden control layout in both directions', async ({ app, page }) => {
+test('mobile swipes suspend ambient sampling and hidden control layout in both directions', async ({ app, page }, testInfo) => {
   const player = await openMobilePlayer(app, page)
   await page.evaluate(async () => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -82,8 +82,25 @@ test('mobile swipes suspend ambient sampling and hidden control layout in both d
       }
       await page.waitForTimeout(350)
       const work = await page.evaluate(() => window.__miniPlayerWork)
+      const backdrop = await mobileMiniPlayerBackdrop(page)
+      expect.soft(backdrop.left).toBe('0px')
+      expect.soft(backdrop.right).toBe('0px')
+      expect.soft(backdrop.image).toBe('none')
+      expect.soft(backdrop.color).toBe(backdrop.cardColor)
       console.log(`${restoring ? 'Restoring' : 'Minimizing'} mobile swipe work:`, work)
       expect.soft(work).toEqual({ ambientDraws: 0, controlClones: 0 })
+      const endpoint = await page.locator(restoring ? '.scrollMiniPlaceholder' : '.mobileMiniBarMorphOverlay').boundingBox()
+      await touch('touchMove', { ...start, y: start.y + direction * Math.abs(endpoint.y - bounds.y) * 0.8 })
+      const overlay = page.locator('.mobileMiniBarMorphOverlay')
+      await expect(overlay).toHaveCSS('opacity', restoring ? '0' : '1')
+      expect(await overlay.evaluate(element => Number(getComputedStyle(element).zIndex)))
+        .toBeLessThan(await player.evaluate(element => Number(getComputedStyle(element).zIndex)))
+      const screenshotPath = testInfo.outputPath(`${restoring ? 'restoring' : 'minimizing'}.png`)
+      await page.screenshot({ path: screenshotPath })
+      await testInfo.attach(`${restoring ? 'restoring' : 'minimizing'} mobile player`, {
+        path: screenshotPath,
+        contentType: 'image/png'
+      })
       await touch('touchEnd')
       if (restoring) {
         await expect(player).not.toHaveClass(/scrollMiniPlayer/)
@@ -406,7 +423,7 @@ test('mobile bar details fade at the destination during both swipe directions', 
     await expect(player.locator('video').first()).toHaveCSS('object-fit', 'cover')
     const details = page.locator('.mobileMiniBarDetails')
     await expect(details).toHaveCount(1)
-    await expect.poll(() => details.evaluate(element => Number(getComputedStyle(element).opacity))).toBeGreaterThan(0.5)
+    await expect.poll(() => details.evaluate(element => Number(getComputedStyle(element.closest('.mobileMiniBarOverlay')).opacity))).toBeGreaterThan(0.5)
     await touch('touchEnd')
     await expect(player).toHaveClass(/scrollMiniPlayer/)
     await expect(player.locator('video').first()).toHaveCSS('object-fit', 'cover')
@@ -428,7 +445,7 @@ test('mobile bar details fade at the destination during both swipe directions', 
     await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
     await expect(player).toHaveCSS('border-top-width', '0px')
     await expect(player).toHaveCSS('box-shadow', 'none')
-    await expect.poll(() => details.evaluate(element => Number(getComputedStyle(element).opacity))).toBeLessThan(0.5)
+    await expect.poll(() => details.evaluate(element => Number(getComputedStyle(element.closest('.mobileMiniBarOverlay')).opacity))).toBeLessThan(0.5)
     expect(Math.abs((await details.boundingBox()).y - barTop)).toBeLessThan(2)
     await page.evaluate(() => {
       const element = document.querySelector('.ftVideoPlayer')
@@ -468,12 +485,12 @@ test('scroll docking fades the details at the bottom bar position', async ({ app
     window.mobileBarMorphSamples = []
     new MutationObserver(() => {
       if (!element.hasAttribute('data-mobile-mini-morph')) return
-      const overlay = document.querySelector('.mobileMiniBarOverlay')
+      const overlay = document.querySelector('.mobileMiniBarMorphOverlay')
       if (!overlay) return
       window.mobileBarMorphSamples.push({
         playerTop: element.getBoundingClientRect().top,
         barTop: overlay.getBoundingClientRect().top,
-        opacity: Number(getComputedStyle(overlay.querySelector('.mobileMiniBarDetails')).opacity)
+        opacity: Number(getComputedStyle(overlay).opacity)
       })
     }).observe(element, { attributes: true, attributeFilter: ['style'] })
     const spacer = document.createElement('div')
@@ -804,7 +821,7 @@ test('waiting poster follows the video into and out of the bottom bar', async ({
   const player = page.locator('.ftVideoPlayer')
   const poster = player.locator('.countdownPoster')
   await expect(poster).toBeVisible()
-  await expect.poll(() => poster.locator('img').evaluate(image => image.naturalWidth)).toBe(480)
+  await expect.poll(() => poster.locator('img:not(.retryImagePlaceholder)').evaluate(image => image.naturalWidth)).toBe(480)
   const expectPosterOverVideo = async () => {
     await expect(poster).toBeVisible()
     const [videoBox, posterBox] = await Promise.all([video.boundingBox(), poster.boundingBox()])

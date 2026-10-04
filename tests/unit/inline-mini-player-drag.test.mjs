@@ -13,17 +13,23 @@ test('mobile morph keeps player and video layout fixed between animation frames'
     setProperty(name, value) { writes.push([name, value]) },
     removeProperty() {},
   }
-  const videoStyle = { setProperty(name, value) { writes.push([name, value]) } }
+  const videoStyle = { removeProperty() { delete this.clipPath } }
+  const posterStyle = { removeProperty() { delete this.clipPath } }
+  const overlayStyle = { removeProperty() { delete this.opacity } }
+  const surfaces = [{ style: videoStyle }]
   const attributes = new Set()
-  const render = vm.runInNewContext(`${source.slice(source.indexOf('  function renderMobileMiniMorph('), source.indexOf('  function clearMobileMiniMorph('))}\nrenderMobileMiniMorph`, {
+  const methods = vm.runInNewContext(`${source.slice(source.indexOf('  function renderMobileMiniMorph('), source.indexOf('  function releaseMobileMiniBarTransition('))}\n({ renderMobileMiniMorph, clearMobileMiniMorph })`, {
     container: { value: {
       style,
       hasAttribute: name => attributes.has(name),
       setAttribute: name => attributes.add(name),
+      removeAttribute: name => attributes.delete(name),
+      querySelectorAll: () => surfaces,
     } },
     video: { value: { style: videoStyle } },
-    mobileMiniBarOverlay: { value: { style: { setProperty() {} } } },
+    mobileMiniBarOverlay: { value: { style: overlayStyle } },
   })
+  const render = methods.renderMobileMiniMorph
   const from = { left: 8, top: 80, width: 400, height: 225 }
   const to = { left: 0, top: 700, width: 400, height: 76 }
   const videoFrom = { left: 0, top: 0, width: 400, height: 225 }
@@ -32,8 +38,20 @@ test('mobile morph keeps player and video layout fixed between animation frames'
   writes.length = 0
   render(from, to, videoFrom, videoTo, 0.5, false)
   assert.deepEqual(writes.map(([name]) => name).sort(), [
-    '--mobile-mini-video-clip', 'transform'
+    'transform'
   ])
+  assert.equal(videoStyle.clipPath, 'none', 'matching aspect ratios do not need a clipping layer')
+  assert.ok(Math.abs(Number(overlayStyle.opacity) - 0.75) < 0.001)
+  // Nonmatching aspect ratios still crop both playback and countdown surfaces.
+  surfaces.push({ style: posterStyle })
+  render(from, to, videoFrom, { ...videoTo, height: 112 }, 0.5, false)
+  assert.match(videoStyle.clipPath, /^inset\(0px [\d.]+px\)$/)
+  assert.notEqual(videoStyle.clipPath, 'inset(0px 0px)')
+  assert.equal(posterStyle.clipPath, videoStyle.clipPath)
+  methods.clearMobileMiniMorph()
+  assert.equal(videoStyle.clipPath, undefined)
+  assert.equal(posterStyle.clipPath, undefined)
+  assert.equal(overlayStyle.opacity, undefined)
 })
 
 function fixture({ reducedMotion = false, available = true, phonePanel = false, restoring = false, finishRejects = false, activationSucceeds = true } = {}) {
@@ -58,6 +76,7 @@ function fixture({ reducedMotion = false, available = true, phonePanel = false, 
     style, offsetHeight: 219.65625,
     hasAttribute: name => phonePanel && name === 'data-phone-panel-video',
     setAttribute() {}, removeAttribute() {},
+    querySelectorAll: () => [],
     getBoundingClientRect() { reads++; return from },
   } }
   const eligibility = source.slice(source.indexOf('  function canUseScrollMiniPlayerBase('), source.indexOf('  function canShowCrossTabMiniPlayer('))
@@ -87,6 +106,7 @@ function fixture({ reducedMotion = false, available = true, phonePanel = false, 
     scrollMiniPlaceholderHeight: { value: 0 },
     scrollMiniPlayerDragStyle: { value: null },
     mobileMiniBarOverlayStyle: { value: null },
+    mobileMiniBarOverlay: { value: null },
     scrollMiniPlayerActive,
     scrollMiniVideoAspectRatio: { value: 16 / 9 },
     playerSuspended: { value: !available },
