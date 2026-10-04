@@ -15,6 +15,11 @@
       :aria-describedby="currentComment ? previewId : null"
       @click="emit('open')"
     >
+      <span
+        v-if="currentComment"
+        :id="previewId"
+        hidden
+      >{{ currentComment.author }} {{ currentComment.text }}</span>
       <span class="phoneCommentsHeading">
         <FtIcon
           :icon="['fas', 'comment']"
@@ -28,8 +33,8 @@
       </span>
       <span
         v-if="currentComment"
-        :id="previewId"
         class="phoneCommentPreview"
+        aria-hidden="true"
       >
         <Transition name="commentPreview">
           <span

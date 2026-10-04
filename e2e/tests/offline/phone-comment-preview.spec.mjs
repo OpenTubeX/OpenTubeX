@@ -106,6 +106,23 @@ test('phone comment preview rotates the first five comments and opens the commen
   await testInfo.attach('comment-preview-dark', { body: await button.screenshot(), contentType: 'image/png' })
 })
 
+test('phone comment description stays current during the rotation transition', async ({ app, page }) => {
+  await page.clock.install()
+  const button = await openPhoneVideo(app, page)
+  const view = await watchViewHandle(page)
+  const comments = await view.evaluate(component => component.commentPreviews)
+  const open = button.getByRole('button', { name: 'Comments', exact: true })
+  await open.focus()
+  await open.blur()
+  await page.addStyleTag({ content: '.commentPreview-enter-active, .commentPreview-leave-active { transition-duration: 60s !important; }' })
+  await page.clock.fastForward(5000)
+  await expect(button.locator('.phoneCommentRow')).toHaveCount(2)
+  await expect(open).toHaveAccessibleDescription(`${comments[1].author} ${comments[1].text.replaceAll(/\s+/g, ' ').trim()}`, { timeout: 1000 })
+  await open.focus()
+  await page.clock.fastForward(10_000)
+  await expect(open).toHaveAccessibleDescription(`${comments[1].author} ${comments[1].text.replaceAll(/\s+/g, ' ').trim()}`)
+})
+
 test('phone comment avatars respect photo privacy, creator photos and missing or failed images', async ({ app, page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   const button = await openPhoneVideo(app, page)
