@@ -31,6 +31,71 @@ const ADDITIONAL_QUICK_SETTINGS = [
 ]
 
 for (const uiScale of [100, 125]) {
+  test.describe(`quick settings select interactions at ${uiScale}% UI scale`, () => {
+    test.use({ seed: { settings: { uiScale, baseTheme: 'dark', alwaysShowScrollbars: true } } })
+
+    test('keeps the select and quick settings open while dragging the dropdown scrollbar', async ({ page }) => {
+      await page.locator('.profileTrigger').click()
+      const menu = page.getByRole('dialog', { name: 'Quick settings' })
+      const select = menu.getByRole('combobox', { name: 'Language preference' })
+      await select.click()
+      const dropdown = page.locator('.selectDropdown')
+      const scrollbar = dropdown.locator('.os-scrollbar-vertical')
+      await expect(scrollbar).toHaveClass(/os-scrollbar-visible/)
+      const thumb = scrollbar.locator('.os-scrollbar-handle')
+      const bounds = await thumb.boundingBox()
+      expect(bounds).not.toBeNull()
+      const initialScrollTop = await dropdown.evaluate(element => element.scrollTop)
+      await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
+      await page.mouse.down()
+      try {
+        await expect(dropdown).toBeVisible()
+        await expect(menu).toBeVisible()
+        await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2 + 80, { steps: 8 })
+        await expect.poll(() => dropdown.evaluate(element => element.scrollTop)).toBeGreaterThan(initialScrollTop)
+      } finally {
+        await page.mouse.up()
+      }
+      await expect(dropdown).toBeVisible()
+      await expect(menu).toBeVisible()
+      await expect(select).toBeFocused()
+      await dropdown.locator('[aria-selected="true"]').click()
+      await expect(dropdown).toBeHidden()
+      await expect(menu).toBeVisible()
+    })
+
+    test('shows the selected option accent consistently before and after hovering other options', async ({ page, attachScreenshot }) => {
+      await page.locator('.profileTrigger').click()
+      const menu = page.getByRole('dialog', { name: 'Quick settings' })
+      await menu.getByRole('combobox', { name: 'Base Theme' }).click()
+      await page.mouse.move(0, 0)
+      const dropdown = page.locator('.selectDropdown')
+      const selected = dropdown.locator('[aria-selected="true"]')
+      const selectedColors = () => selected.evaluate(element => ({
+        background: getComputedStyle(element).backgroundColor,
+        overlay: getComputedStyle(element, '::before').backgroundColor,
+      }))
+      const initialColors = await selectedColors()
+      expect(initialColors.overlay).toBe('rgba(0, 0, 0, 0)')
+      const expectedAccent = await dropdown.evaluate(menu => {
+        const sample = document.createElement('span')
+        sample.style.backgroundColor = 'color-mix(in srgb, var(--primary-color) 20%, var(--select-menu-surface))'
+        menu.append(sample)
+        const color = getComputedStyle(sample).backgroundColor
+        sample.remove()
+        return color
+      })
+      expect(initialColors.background).toBe(expectedAccent)
+      await attachScreenshot('selected option accent immediately after opening')
+      await dropdown.locator('[aria-selected="false"]').first().hover()
+      expect(await selectedColors()).toEqual(initialColors)
+      await selected.hover()
+      expect(await selectedColors()).toEqual(initialColors)
+    })
+  })
+}
+
+for (const uiScale of [100, 125]) {
   test.describe(`compact quick settings at ${uiScale}% UI scale`, () => {
     test.use({ seed: { settings: { uiScale } } })
 
