@@ -321,6 +321,128 @@ test.describe('desktop quick playback speed bar', () => {
 
   const overflowingPresets = Array.from({ length: 24 }, (_, index) => ({ speed: 0.5 + index * 0.25 }))
 
+  test('keeps custom speeds outside the native playback range', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch(
+      'updateQuickPlaybackSpeedBarOptions', JSON.stringify([0.05, 20, 1].map(speed => ({ speed })))
+    ))
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    const bar = player.locator('.ft-quick-playback-rate-bar')
+    for (const rate of [0.05, 20, 1]) {
+      await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
+      const button = bar.locator(`[data-rate="${rate}"]`)
+      await button.click()
+      await expect(button).toHaveClass(/is-current-rate/)
+      await expect.poll(() => player.evaluate(element => element.ui.getControls().getPlayer().getPlaybackRate())).toBe(rate)
+    }
+  })
+
+  for (const control of ['quick bar', 'menu']) {
+    test(`keeps ${control} speed selections while the DASH manifest is still loading`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      const video = await openMockedVideo(page)
+      await video.evaluate(element => element.pause())
+      const manifestUrl = 'https://media.test/pending-speed.mpd'
+      const mediaUrl = DEMO_MEDIA_URL.replaceAll('&', '&amp;')
+      const manifest = `<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" type="static" mediaPresentationDuration="PT30S" minBufferTime="PT0.1S">
+        <Period>
+          <AdaptationSet mimeType="video/webm" codecs="vp9,opus">
+            <Representation id="demo" bandwidth="200000" width="640" height="360">
+              <SegmentList duration="30">
+                <Initialization sourceURL="${mediaUrl}"/>
+                <SegmentURL media="${mediaUrl}"/>
+              </SegmentList>
+            </Representation>
+          </AdaptationSet>
+        </Period>
+      </MPD>`
+      let releaseManifest
+      const manifestReady = new Promise(resolve => { releaseManifest = resolve })
+      let manifestRequested
+      const requested = new Promise(resolve => { manifestRequested = resolve })
+      await page.route(manifestUrl, async route => {
+        manifestRequested()
+        await manifestReady
+        await route.fulfill({ contentType: 'application/dash+xml', body: manifest })
+      })
+
+      try {
+        const watch = await page.evaluateHandle(findWatchComponent)
+        await watch.evaluate((component, url) => {
+          component.proxy.manifestMimeType = 'application/dash+xml'
+          component.proxy.manifestSrc = url
+          component.proxy.activeFormat = 'dash'
+          component.proxy.playerLoadGeneration++
+        }, manifestUrl)
+        await requested
+        const bar = page.locator(`${activeTab} .ft-quick-playback-rate-bar`)
+        await expect.poll(() => video.evaluate(element => element.readyState)).toBe(0)
+        await page.locator(`${activeTab} .shaka-controls-container`).evaluate(element => element.setAttribute('shown', 'true'))
+        if (control === 'quick bar') {
+          await bar.locator('[data-rate="1.5"]').click()
+          await expect(bar.locator('[data-rate="1.5"]')).toHaveClass(/is-current-rate/)
+        } else {
+          const player = page.locator(`${activeTab} .ftVideoPlayer`)
+          await player.getByRole('button', { name: 'More settings', exact: true }).click()
+          await player.locator('.shaka-playbackrate-button').click()
+          const menu = player.locator('.shaka-playback-rates')
+          await menu.getByRole('button', { name: '1.5x', exact: true }).click()
+          await player.getByRole('button', { name: 'More settings', exact: true }).click()
+          await player.locator('.shaka-playbackrate-button').click()
+          await expect(menu.getByRole('button', { name: '1.5x', exact: true })).toHaveAttribute('aria-selected', 'true')
+          await menu.locator('.shaka-back-to-overflow-button').click()
+          await player.getByRole('button', { name: 'More settings', exact: true }).click()
+        }
+        await page.locator('body').press('p')
+        await expect(bar.locator('[data-rate="1.75"]')).toHaveClass(/is-current-rate/)
+
+        releaseManifest()
+        await waitForPlayback(page)
+        await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.75)
+        await expect(bar.locator('[data-rate="1.75"]')).toHaveClass(/is-current-rate/)
+      } finally {
+        releaseManifest()
+      }
+    })
+  }
+
+  for (const music of [false, true]) {
+    test(`keeps quick speed selections made before the ${music ? 'music ' : ''}video loads`, async ({ app, page }) => {
+      if (music) await mockMusicMediaType(app, page, 'MUSIC_VIDEO_TYPE_OMV')
+      else await mockPlayableWatchPage(app, page)
+      let releaseMedia
+      const mediaReady = new Promise(resolve => { releaseMedia = resolve })
+      await page.route(`${DEMO_MEDIA_URL}*`, async route => {
+        await mediaReady
+        await route.fallback()
+      })
+
+      try {
+        await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+        await page.locator(sel.searchInput).press('Enter')
+        const video = page.locator(`${activeTab} video`)
+        const bar = page.locator(`${activeTab} .ft-quick-playback-rate-bar`)
+        await expect(bar).toBeVisible()
+        await expect.poll(() => video.evaluate(element => element.readyState)).toBe(0)
+
+        for (const rate of [1.25, 1.5]) {
+          const button = bar.locator(`[data-rate="${rate}"]`)
+          await page.locator(`${activeTab} .shaka-controls-container`).evaluate(element => element.setAttribute('shown', 'true'))
+          await button.click()
+          await expect(button).toHaveClass(/is-current-rate/)
+        }
+
+        releaseMedia()
+        await waitForPlayback(page)
+        await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.5)
+        await expect(bar.locator('[data-rate="1.5"]')).toHaveClass(/is-current-rate/)
+      } finally {
+        releaseMedia()
+      }
+    })
+  }
+
   for (const scale of [100, 125]) {
     test(`smoothly scrolls clipped quick speeds without dropping wheel ticks at ${scale}% scale`, async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
