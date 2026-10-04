@@ -94,10 +94,10 @@ export function recommendationSubscriptionIds(subscriptions) {
     .filter(channel => typeof channel === 'string' && channel.length > 0)
 }
 
-/** History is already sorted by recency in the store. Stop once learning is full. */
-export function getRecentRecommendationHistory(history, isVisible, limit = 1000) {
+/** Select only the learning budget; history is already sorted by recency. */
+export function getRecommendationLearningEntries(videos, isVisible, limit = 1000) {
   const recent = []
-  for (const video of history) {
+  for (const video of videos) {
     if (!valid(video) || !isVisible(video)) continue
     recent.push(video)
     if (recent.length >= limit) break
@@ -113,13 +113,29 @@ export function getRecentRecommendationHistory(history, isVisible, limit = 1000)
 function * buildRecommendationProfileSteps(history, {
   now = Date.now(), records = [], favorites = [], saved = [], subscriptions = [], round = 0,
 } = {}) {
-  const entries = Array.isArray(history) ? history.filter(valid) : []
-  const evidence = new Map((Array.isArray(records) ? records : []).filter(valid).map(record => [record.videoId, record]))
-  const seenVideoIds = new Set((Array.isArray(history) ? history : []).map(video => id(video?.videoId)).filter(Boolean))
-  const blockedChannels = new Set([...evidence.values()].filter(record => record.feedback === 'blockChannel').map(record => record.authorId).filter(Boolean))
-  const rejectedIds = new Set([...evidence.values()].filter(record => ['dismiss', 'blockChannel'].includes(record.feedback)).map(record => record.videoId))
+  const entries = []
+  const seenVideoIds = new Set()
+  for (const video of (Array.isArray(history) ? history : [])) {
+    if (valid(video)) entries.push(video)
+    const videoId = id(video?.videoId)
+    if (videoId) seenVideoIds.add(videoId)
+    yield
+  }
+  const evidence = new Map()
+  for (const record of (Array.isArray(records) ? records : [])) {
+    if (valid(record)) evidence.set(record.videoId, record)
+    yield
+  }
+  const blockedChannels = new Set()
+  const rejectedIds = new Set()
+  for (const record of evidence.values()) {
+    if (record.feedback === 'blockChannel' && record.authorId) blockedChannels.add(record.authorId)
+    if (['dismiss', 'blockChannel'].includes(record.feedback)) rejectedIds.add(record.videoId)
+    yield
+  }
   const sources = new Map()
   for (const record of entries.toSorted((a, b) => number(b.timeWatched) - number(a.timeWatched)).slice(0, 1000)) {
+    yield
     if (sources.has(record.videoId)) continue
     const learned = evidence.get(record.videoId)
     const actual = learned?.lastWatchSeconds
@@ -131,12 +147,17 @@ function * buildRecommendationProfileSteps(history, {
     sources.set(record.videoId, { video: { ...record, ...learned }, weight, at: number(learned?.watchedAt ?? record.timeWatched), strong: completion >= 0.7 || (completion >= 0.35 && progress >= 180) })
   }
   for (const [videos, weight] of [[saved, 0.8], [favorites, 1.5]]) {
-    for (const video of (Array.isArray(videos) ? videos : []).filter(valid).slice(0, 500)) {
+    let count = 0
+    for (const video of (Array.isArray(videos) ? videos : [])) {
+      yield
+      if (!valid(video)) continue
       const existing = sources.get(video.videoId)
       sources.set(video.videoId, { video: { ...video, ...evidence.get(video.videoId) }, weight: Math.max(weight, existing?.weight ?? 0), at: existing?.at || now, strong: true })
+      if (++count >= 500) break
     }
   }
   for (const record of evidence.values()) {
+    yield
     if (record.feedback === 'positive') {
       const existing = sources.get(record.videoId)
       sources.set(record.videoId, { video: { ...existing?.video, ...record }, weight: Math.max(1.8, existing?.weight ?? 0), at: Math.max(number(existing?.at), number(record.feedbackAt)), strong: true })
@@ -149,7 +170,10 @@ function * buildRecommendationProfileSteps(history, {
     yield
   }
   const frequency = new Map()
-  for (const features of documents) for (const term of features.keys()) frequency.set(term, (frequency.get(term) ?? 0) + 1)
+  for (const features of documents) {
+    for (const term of features.keys()) frequency.set(term, (frequency.get(term) ?? 0) + 1)
+    yield
+  }
   const idf = new Map([...frequency].map(([term, count]) => [term, 1 + Math.log(1 + documents.length / count)]))
   const vectorForFeatures = features => normalize(new Map([...features].map(([term, value]) => [term, value * (idf.get(term) ?? 1)])))
   const vectorFor = video => vectorForFeatures(recommendationFeatures(video))

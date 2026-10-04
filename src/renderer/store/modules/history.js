@@ -18,9 +18,17 @@ function getRetentionCutoff(days) {
 }
 
 const continueWatchingCache = new WeakMap()
+const CONTINUE_WATCHING_MUTATIONS = new Set([
+  'setHistoryCacheSorted',
+  'upsertToHistoryCache',
+  'updateRecordWatchProgressInHistoryCache',
+  'removeFromHistoryCacheById',
+  'removeMultipleFromHistoryCache',
+  'applyHistorySyncChanges',
+])
 
 const state = {
-  historyRevision: 0,
+  continueWatchingRevision: 0,
   historyCacheSorted: [],
 
   // Vuex doesn't support Maps, so we have to use an object here instead
@@ -34,8 +42,8 @@ const getters = {
   getContinueWatchingHistory: state => () => {
     const history = toRaw(state.historyCacheSorted)
     let cached = continueWatchingCache.get(history)
-    if (!cached || cached.revision !== state.historyRevision) {
-      cached = { revision: state.historyRevision, candidates: getContinueWatchingCandidates(history), entries: [] }
+    if (!cached || cached.revision !== state.continueWatchingRevision) {
+      cached = { revision: state.continueWatchingRevision, candidates: getContinueWatchingCandidates(history), entries: [] }
       continueWatchingCache.set(history, cached)
     }
     // Reopening Home must recheck premieres that started without a history
@@ -361,10 +369,10 @@ export default {
   state,
   getters,
   actions,
-  // All history writes pass through these mutations, including progress and
-  // metadata edits that retain the array and record identities.
+  // Only changes to shelf records invalidate selection. Playlist-only metadata
+  // edits cannot affect membership or any details displayed by Home.
   mutations: Object.fromEntries(Object.entries(mutations).map(([name, mutation]) => [name, (state, payload) => {
     mutation(state, payload)
-    state.historyRevision++
+    if (CONTINUE_WATCHING_MUTATIONS.has(name)) state.continueWatchingRevision++
   }]))
 }

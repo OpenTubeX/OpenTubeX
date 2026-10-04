@@ -50,3 +50,20 @@ test('reopening Home rechecks premiere eligibility after the clock advances with
   now = 21000
   assert.deepEqual(store.getters.getContinueWatchingHistory().map(entry => entry.videoId), ['premiere'])
 })
+
+test('playlist metadata updates retain the cached Continue watching selection', () => {
+  const store = fixture()
+  const entry = video('partial')
+  store.commit('setHistoryCacheSorted', [entry])
+  store.commit('setHistoryCacheById', { partial: entry })
+  const selected = store.getters.getContinueWatchingHistory()
+  store.commit('updateRecordLastViewedPlaylistIdInHistoryCache', {
+    videoId: 'partial', lastViewedPlaylistId: 'playlist', lastViewedPlaylistType: 'user', lastViewedPlaylistItemId: 'item',
+  })
+  assert.equal(store.getters.getContinueWatchingHistory(), selected)
+  store.commit('unsetRecordsLastViewedPlaylistIdInHistoryCache', { videoIds: ['partial'], lastViewedPlaylistId: 'playlist' })
+  assert.equal(store.getters.getContinueWatchingHistory(), selected)
+  store.commit('updateRecordLastViewedPlaylistIdInHistoryCache', { videoId: 'partial', lastViewedPlaylistId: 'playlist' })
+  store.commit('unsetRecordsLastViewedPlaylistIdsInHistoryCache', ['playlist'])
+  assert.equal(store.getters.getContinueWatchingHistory(), selected)
+})

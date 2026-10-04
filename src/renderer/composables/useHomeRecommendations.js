@@ -1,6 +1,7 @@
 import { computed, onBeforeUnmount, ref, shallowRef, toRaw, watch } from 'vue'
 import store from '../store/index'
-import { buildRecommendationProfileAsync, rankRecommendationCandidatesAsync, recommendationSubscriptionIds, getRecentRecommendationHistory } from '../helpers/recommendations'
+import { buildRecommendationProfileAsync, rankRecommendationCandidatesAsync, recommendationSubscriptionIds, getRecommendationLearningEntries } from '../helpers/recommendations'
+import { runCooperatively } from '../helpers/cooperativeTask'
 import { collectRecommendationCandidates, fetchRecommendationSource, mergeRecommendationCandidates } from '../helpers/recommendationCandidates'
 import { getLocalChannelVideos, getLocalSearchResults, getLocalRelatedVideos } from '../helpers/api/local'
 import { getInvidiousChannelVideos, getInvidiousSearchResults, getInvidiousRelatedVideos } from '../helpers/api/invidious'
@@ -29,9 +30,14 @@ export function useHomeRecommendations(visible) {
   const presented = computed(() => isTabPresented?.value ?? true)
   const enabled = computed(() => store.getters.getEnableHomeRecommendations)
   const history = computed(() => store.getters.getHistoryCacheSorted)
-  const eligibleHistory = computed(() => getRecentRecommendationHistory(history.value, isVisible))
-  const favorites = computed(() => store.getters.getPlaylist('favorites')?.videos.filter(isVisible) ?? [])
-  const saved = computed(() => store.getters.getAllPlaylists.filter(playlist => playlist._id !== 'favorites').flatMap(playlist => playlist.videos).filter(isVisible))
+  const eligibleHistory = computed(() => getRecommendationLearningEntries(history.value, isVisible))
+  const favorites = computed(() => getRecommendationLearningEntries(store.getters.getPlaylist('favorites')?.videos ?? [], isVisible, 500))
+  const saved = computed(() => getRecommendationLearningEntries(savedPlaylistVideos(), isVisible, 500))
+  function * savedPlaylistVideos() {
+    for (const playlist of store.getters.getAllPlaylists) {
+      if (playlist._id !== 'favorites') yield * playlist.videos
+    }
+  }
   const subscriptions = computed(() => recommendationSubscriptionIds(store.getters.getActiveProfile?.subscriptions))
   const exploration = computed(() => Math.max(0, Math.min(0.5, Number(store.getters.getRecommendationExploration) || 0)))
   const records = computed(() => store.getters.getRecommendationRecords.filter(isVisible))
@@ -68,12 +74,25 @@ export function useHomeRecommendations(visible) {
         forbiddenTitles: store.getters.getActiveForbiddenTitles,
       })
   }
-  function makeProfile(isCancelled) {
+  async function makeProfile(isCancelled) {
     // Snapshot only the bounded learning inputs. Do not track every field of
     // every history record while Home mounts or serialize the entire library.
-    const snapshot = videos => videos.map(video => ({ ...toRaw(video) }))
-    return buildRecommendationProfileAsync(snapshot(eligibleHistory.value), {
-      records: snapshot(records.value), favorites: snapshot(favorites.value), saved: snapshot(saved.value), subscriptions: subscriptions.value, round,
+    const inputGroups = { history: eligibleHistory.value, records: records.value, favorites: favorites.value, saved: saved.value }
+    function * snapshotInputs() {
+      const inputs = {}
+      for (const [name, videos] of Object.entries(inputGroups)) {
+        inputs[name] = []
+        for (const video of videos) {
+          inputs[name].push({ ...toRaw(video) })
+          yield
+        }
+      }
+      return inputs
+    }
+    const snapshots = await runCooperatively(snapshotInputs(), isCancelled)
+    if (!snapshots) return null
+    return buildRecommendationProfileAsync(snapshots.history, {
+      records: snapshots.records, favorites: snapshots.favorites, saved: snapshots.saved, subscriptions: subscriptions.value, round,
     }, isCancelled)
   }
   async function rerank(profile = null) {
