@@ -72,6 +72,18 @@ test('slides the active channel line with the feed timing and configured animati
   }
 })
 
+test('realigns the active channel line when the locale direction changes without switching tabs', async ({ page }) => {
+  await expectAligned(page)
+  for (const [locale, direction] of [['ar', 'rtl'], ['en-US', 'ltr']]) {
+    await page.evaluate(value => {
+      document.querySelector('#app').__vue_app__.config.globalProperties.$i18n.locale = value
+    }, locale)
+    await expect(page.locator('body')).toHaveAttribute('dir', direction)
+    await expect(page.locator('#videosTab')).toHaveAttribute('aria-selected', 'true')
+    await expectAligned(page)
+  }
+})
+
 test('keeps every channel tab in one row across zoom, RTL, and changing labels', async ({ app, page }, testInfo) => {
   for (const [width, height, scale] of [[1600, 900, 95], [375, 812, 95], [812, 375, 125]]) {
     await app.electronApp.evaluate(({ BrowserWindow }, { width, height }) => {

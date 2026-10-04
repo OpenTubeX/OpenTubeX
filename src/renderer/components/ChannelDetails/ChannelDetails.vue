@@ -295,6 +295,7 @@
 <script setup>
 import FtRetryImage from '../FtRetryImage.vue'
 import { computed, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import { FtIcon } from '@opentubex/icons'
 import FtCard from '../ft-card/ft-card.vue'
@@ -362,6 +363,7 @@ const props = defineProps({
 
 const emit = defineEmits(['change-tab', 'search', 'subscribed'])
 
+const { locale } = useI18n()
 const { isTabPresented } = useTabContext()
 const tabsContainer = useTemplateRef('tabsContainer')
 /** @type {import('vue').Ref<Record<string, string> | null>} */
@@ -407,7 +409,7 @@ function observeTabs() {
   updateTabIndicator()
 }
 
-watch([() => props.currentTab, () => props.visibleTabs, tabsContainer,
+watch([() => props.currentTab, () => props.visibleTabs, tabsContainer, locale,
   () => isTabPresented?.value], observeTabs, { flush: 'post' })
 
 onActivated(() => nextTick(observeTabs))
