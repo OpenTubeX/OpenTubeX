@@ -373,6 +373,11 @@
   z-index: 4;
 }
 
+.app.capacitorPhoneLayout .crossTabMiniPlayerLayer {
+  /* A dismissing bottom bar slides behind the navigation (z-index: 3). */
+  z-index: 2;
+}
+
 .flexBox {
   display: block;
   user-select: unset;

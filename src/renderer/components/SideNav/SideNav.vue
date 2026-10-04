@@ -120,7 +120,7 @@ import { filterAvailableNavigationItems } from '../../../navigationAvailability'
 import { deepCopy, localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
 import { getConfiguredKeyboardShortcuts } from '../../../constants'
 import { NAVIGATION_ITEM_DEFINITIONS } from '../../../navigationItems'
-import { createMobileNavigationScroll } from '../../helpers/mobileNavigationScroll'
+import { createMobileNavigationScroll, mobileNavigationMinimizePreview } from '../../helpers/mobileNavigationScroll'
 
 const { locale, t } = useI18n()
 const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
@@ -279,6 +279,7 @@ const alwaysShowNavigationBar = computed(() => store.getters.getAlwaysShowNaviga
 const compactNavigationLabels = computed(() => store.getters.getCompactNavigationLabels)
 const navigationScroll = createMobileNavigationScroll()
 let hideOnScroll = false
+let scrollResumeFrame = null
 
 function resetScrollVisibility() {
   navigationScroll.reset(window.scrollY)
@@ -289,11 +290,16 @@ function updateScrollLayout() {
   const nav = innerRef.value?.closest('.sideNav')
   // Resolve the CSS layout on mount/resize, not on every page scroll.
   hideOnScroll = nav != null && getComputedStyle(nav).getPropertyValue('--hide-on-scroll').trim() === '1'
-  resetScrollVisibility()
+  if (hideOnScroll && !alwaysShowNavigationBar.value &&
+    (mobileNavigationMinimizePreview.value !== null || scrollResumeFrame !== null)) {
+    navigationScroll.reset(window.scrollY, scrollHidden.value)
+  } else {
+    resetScrollVisibility()
+  }
 }
 
 function updateScrollVisibility() {
-  if (!hideOnScroll || alwaysShowNavigationBar.value) return
+  if (!hideOnScroll || alwaysShowNavigationBar.value || mobileNavigationMinimizePreview.value !== null || scrollResumeFrame !== null) return
   const nav = innerRef.value?.closest('.sideNav')
   if (!nav || nav.querySelector(':focus-visible, [aria-expanded="true"]')) {
     resetScrollVisibility()
@@ -362,9 +368,21 @@ function updateIndicatorAfterResize() {
 }
 
 watch(() => route.fullPath, () => {
-  resetScrollVisibility()
+  if (mobileNavigationMinimizePreview.value === null) resetScrollVisibility()
   nextTick(updateIndicator)
 })
+watch(mobileNavigationMinimizePreview, tabId => {
+  if (scrollResumeFrame !== null) cancelAnimationFrame(scrollResumeFrame)
+  scrollResumeFrame = null
+  if (tabId === null) {
+    // History restoration and the settled bar's scroll anchoring are not user
+    // scrolls. Resume after the new layout, at its actual viewport offset.
+    scrollResumeFrame = requestAnimationFrame(() => {
+      navigationScroll.reset(window.scrollY, scrollHidden.value)
+      scrollResumeFrame = null
+    })
+  }
+}, { flush: 'post' })
 watch(alwaysShowNavigationBar, resetScrollVisibility)
 watch([
   () => activeProfile.value._id,
@@ -389,6 +407,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  if (scrollResumeFrame !== null) cancelAnimationFrame(scrollResumeFrame)
   window.removeEventListener('scroll', updateScrollVisibility)
   window.removeEventListener('resize', updateScrollLayout)
   clearTimeout(remeasureTimeoutId)
