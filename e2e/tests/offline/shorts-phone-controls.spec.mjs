@@ -736,7 +736,7 @@ test('Shorts fullscreen control opens fullscreen and only the top control shows 
   await expect(player.locator('.shortsTopControls .shortsReplayIcon')).toBeVisible()
 })
 
-for (const durationBackoff of [0, 0.5]) {
+for (const durationBackoff of [0, 0.5, 60]) {
   test(`End on a paused Short reaches replay with ${durationBackoff}s seek backoff`, async ({ app, page }) => {
     await openShort({ app, page })
     const watch = await page.evaluateHandle(findWatchComponent)
@@ -764,7 +764,9 @@ for (const durationBackoff of [0, 0.5]) {
     await page.locator('body').press('End')
     await expect(player.locator('.shortsTopControls .shortsReplayIcon')).toBeVisible()
     await expect.poll(() => video.evaluate(video => video.paused && !video.seeking)).toBe(true)
-    expect(await video.evaluate(video => video.duration - video.currentTime)).toBeCloseTo(durationBackoff, 3)
+    const remaining = await video.evaluate(video => video.duration - video.currentTime)
+    const duration = await video.evaluate(video => video.duration)
+    expect(remaining).toBeCloseTo(Math.min(durationBackoff, duration), 3)
     if (durationBackoff) {
       await player.locator('.shortsTopControl').first().click()
     } else {
@@ -818,4 +820,30 @@ test('a timeline seek superseding End on a paused Short cancels replay', async (
   await page.locator('body').press('k')
   await expect.poll(() => video.evaluate(video => !video.paused)).toBe(true)
   expect(await video.evaluate(video => video.currentTime)).toBeGreaterThan(14)
+})
+
+test('End on a playing Short keeps playing through Shaka backoff to its ended event', async ({ app, page }) => {
+  await openShort({ app, page })
+  const watch = await page.evaluateHandle(findWatchComponent)
+  await watch.evaluate(async component => {
+    await component.proxy.$store.dispatch('updateLoopShorts', false)
+  })
+  await watch.dispose()
+  const player = page.locator('.ftVideoPlayer.shortsPlayer')
+  const video = player.locator('video')
+  await video.evaluate(async video => {
+    video.currentTime = video.duration / 2
+    await video.play()
+  })
+  await expect.poll(() => video.evaluate(video => !video.seeking)).toBe(true)
+  await video.evaluate(video => {
+    video.ui.getControls().getPlayer().configure('streaming.durationBackoff', 1)
+    video.addEventListener('seeking', () => {
+      video.currentTime = video.duration - 1
+    }, { once: true })
+    video.addEventListener('ended', () => { video.dataset.naturallyEnded = 'true' }, { once: true })
+  })
+  await page.locator('body').press('End')
+  await expect(video).toHaveAttribute('data-naturally-ended', 'true', { timeout: 5_000 })
+  await expect(player.locator('.shortsReplayIcon')).toBeVisible()
 })

@@ -6781,10 +6781,11 @@ export default defineComponent({
       if (shortsEndSeekTarget === null || !video.value) return false
       const currentTime = video.value.currentTime
       const backoff = player.getConfiguration().streaming.durationBackoff
+      const backedOffTarget = Math.max(player.seekRange().start, shortsEndSeekTarget - backoff)
       // Accept Shaka's duration clamp, but discard a superseding timeline or
       // Media Session seek. Media timestamps can be rounded to milliseconds.
       return Math.abs(currentTime - shortsEndSeekTarget) < 0.001 ||
-        Math.abs(currentTime - (shortsEndSeekTarget - backoff)) < 0.001
+        Math.abs(currentTime - backedOffTarget) < 0.001
     }
 
     function handleSeeking() {
@@ -10718,12 +10719,12 @@ export default defineComponent({
             event.preventDefault()
             // use seek range instead of duration so that it works for live streams too
             const seekRange = player.seekRange()
+            const wasPaused = video_.paused
             setCurrentTime(seekRange.end)
-            if (props.shortsPlayer && !isLive.value && !video_.loop) {
+            if (props.shortsPlayer && wasPaused && !isLive.value && !video_.loop) {
               // Paused seeks need not fire ended, and Shaka can back off from
               // the duration. End still means replay, without counting a seek
               // as a naturally completed Short.
-              video_.pause()
               shortsEndSeekTarget = seekRange.end
               playbackEnded.value = !video_.seeking
               syncPlayPauseControlIcons()
