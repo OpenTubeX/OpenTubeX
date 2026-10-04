@@ -183,13 +183,16 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     element.classList.remove('scrollMiniPlayer', 'mobileMiniBar', 'scrollMiniPlayerAnimating')
     element.style.removeProperty('transform')
     element.removeAttribute('data-mobile-mini-morph')
-    Object.assign(element.style, { position: 'absolute', inset: '0 auto auto 0', width: '100%' })
+    Object.assign(element.style, { position: 'absolute', inset: '0 auto auto 0', width: '100%', height: 'auto' })
     element.removeAttribute('id')
     videoElement.removeAttribute('id')
     videoElement.removeAttribute('src')
     videoElement.removeAttribute('poster')
     videoElement.width = video.value.videoWidth
     videoElement.height = video.value.videoHeight
+    if (videoElement.width > 0 && videoElement.height > 0) {
+      videoElement.style.aspectRatio = `${videoElement.width} / ${videoElement.height}`
+    }
     videoElement.style.height = 'auto'
     videoElement.style.setProperty('transition', 'none', 'important')
     element.append(videoElement)
@@ -257,10 +260,11 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   // most once per frame.
   const scrollMiniPlayerDragStyle = ref(null)
   const mobileMiniBarOverlayStyle = ref(null)
+  let mobileMiniMorphBase = null
   const mobileMiniBar = computed(() => Boolean(process.env.IS_CAPACITOR ||
     ((scrollMiniPlayerActive.value || scrollMiniPlayerAnimating.value || scrollMiniPlayerDragStyle.value) && usesMobileMiniBar())))
-  const mobileMiniBarCanDismiss = computed(() => scrollMiniPlayerActive.value &&
-    (scrollMiniPlayerDetached.value || Boolean(watchNavigation?.detached.value)))
+  const mobileMiniBarCanDismiss = computed(() => Boolean(scrollMiniPlayerDragStyle.value) ||
+    (scrollMiniPlayerActive.value && (scrollMiniPlayerDetached.value || Boolean(watchNavigation?.detached.value))))
   let inlineDrag = null
   let inlineDragFrame = null
   let scrollRestoreDrag = false
@@ -334,7 +338,16 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       drag.ready = nextTick(() => {
         if (inlineDrag !== drag) return
         const bounds = scrollMiniPlaceholder.value.getBoundingClientRect()
-        drag.to = { left: bounds.left, top: bounds.top, width: bounds.width, height: bounds.height }
+        const layout = usesMobileMiniBar() ? measureInlinePlayer() : null
+        drag.to = layout?.rect ?? { left: bounds.left, top: bounds.top, width: bounds.width, height: bounds.height }
+        if (layout) {
+          drag.videoTo = {
+            left: layout.videoRect.left - drag.to.left,
+            top: layout.videoRect.top - drag.to.top,
+            width: layout.videoRect.width,
+            height: layout.videoRect.height
+          }
+        }
         renderScrollMiniPlayerDrag()
       })
     } else {
@@ -343,45 +356,54 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     element.style.transformOrigin = 'top left'
     element.style.willChange = 'transform'
     element.setAttribute('data-inline-mini-drag', '')
-    if (usesMobileMiniBar()) renderInlineDragProgress(0)
+    if (usesMobileMiniBar() && !restoring) renderInlineDragProgress(0)
     return true
   }
 
   function renderMobileMiniMorph(from, to, videoFrom, videoTo, progress, restoring) {
     const element = container.value
     if (!element) return
+    // Use the inline surface in both directions, so expanding a cropped 16:9
+    // thumbnail does not carry its shape all the way to the restored player.
     const interpolate = (start, end) => start + (end - start) * progress
     const style = element.style
     if (!element.hasAttribute('data-mobile-mini-morph')) {
+      const baseRect = restoring ? to : from
+      mobileMiniMorphBase = {
+        rect: { left: baseRect.left, top: baseRect.top, width: baseRect.width, height: baseRect.height },
+        video: { ...(restoring ? videoTo : videoFrom) }
+      }
+      const { rect: base, video: baseVideo } = mobileMiniMorphBase
       // Fix both layout boxes before the first frame. Android WebView otherwise
       // resizes the video surface and lays out the player on every frame.
-      style.setProperty('--mobile-mini-left', `${from.left}px`)
-      style.setProperty('--mobile-mini-top', `${from.top}px`)
-      style.setProperty('--mobile-mini-width', `${from.width}px`)
-      style.setProperty('--mobile-mini-height', `${from.height}px`)
-      style.setProperty('--mobile-mini-video-base-left', `${videoFrom.left}px`)
-      style.setProperty('--mobile-mini-video-base-top', `${videoFrom.top}px`)
-      style.setProperty('--mobile-mini-video-base-width', `${videoFrom.width}px`)
-      style.setProperty('--mobile-mini-video-base-height', `${videoFrom.height}px`)
+      style.setProperty('--mobile-mini-left', `${base.left}px`)
+      style.setProperty('--mobile-mini-top', `${base.top}px`)
+      style.setProperty('--mobile-mini-width', `${base.width}px`)
+      style.setProperty('--mobile-mini-height', `${base.height}px`)
+      style.setProperty('--mobile-mini-video-base-left', `${baseVideo.left}px`)
+      style.setProperty('--mobile-mini-video-base-top', `${baseVideo.top}px`)
+      style.setProperty('--mobile-mini-video-base-width', `${baseVideo.width}px`)
+      style.setProperty('--mobile-mini-video-base-height', `${baseVideo.height}px`)
       element.setAttribute('data-mobile-mini-morph', '')
     }
+    const { rect: base, video: baseVideo } = mobileMiniMorphBase
     const videoWidth = interpolate(videoFrom.width, videoTo.width)
     const videoHeight = interpolate(videoFrom.height, videoTo.height)
-    const videoScale = Math.max(videoWidth / videoFrom.width, videoHeight / videoFrom.height)
+    const videoScale = Math.max(videoWidth / baseVideo.width, videoHeight / baseVideo.height)
     const videoLeft = interpolate(from.left + videoFrom.left, to.left + videoTo.left) +
-      (videoWidth - videoFrom.width * videoScale) / 2
+      (videoWidth - baseVideo.width * videoScale) / 2
     const videoTop = interpolate(from.top + videoFrom.top, to.top + videoTo.top) +
-      (videoHeight - videoFrom.height * videoScale) / 2
-    const x = videoLeft - from.left - videoFrom.left * videoScale
-    const y = videoTop - from.top - videoFrom.top * videoScale
+      (videoHeight - baseVideo.height * videoScale) / 2
+    const x = videoLeft - base.left - baseVideo.left * videoScale
+    const y = videoTop - base.top - baseVideo.top * videoScale
     style.setProperty('transform', `translate(${x}px, ${y}px) scale(${videoScale})`, 'important')
-    const cropX = Math.max(0, (videoFrom.width * videoScale - videoWidth) / (2 * videoScale))
-    const cropY = Math.max(0, (videoFrom.height * videoScale - videoHeight) / (2 * videoScale))
+    const cropX = Math.max(0, (baseVideo.width * videoScale - videoWidth) / (2 * videoScale))
+    const cropY = Math.max(0, (baseVideo.height * videoScale - videoHeight) / (2 * videoScale))
     // Keep animated properties local to their surfaces. Inherited custom
     // properties invalidate styles throughout Shaka's hidden control tree.
     const clip = cropX < 0.001 && cropY < 0.001 ? 'none' : `inset(${cropY}px ${cropX}px)`
-    // A countdown poster can appear while playback finishes during the drag.
-    for (const surface of element.querySelectorAll(':scope > .player, :scope > .countdownPoster')) surface.style.clipPath = clip
+    // The same poster surface covers loading, countdown and ended playback.
+    for (const surface of element.querySelectorAll(':scope > .player, :scope > .countdownPoster, :scope > .musicAudioSurface')) surface.style.clipPath = clip
     const opacity = restoring
       ? Math.max(0, 1 - progress / 0.5)
       : Math.min(1, Math.max(0, (progress - 0.2) / 0.4))
@@ -391,9 +413,10 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   function clearMobileMiniMorph() {
     const element = container.value
     if (!element) return
+    mobileMiniMorphBase = null
     element.removeAttribute('data-mobile-mini-morph')
     element.style.removeProperty('transform')
-    for (const surface of element.querySelectorAll(':scope > .player, :scope > .countdownPoster')) surface.style.removeProperty('clip-path')
+    for (const surface of element.querySelectorAll(':scope > .player, :scope > .countdownPoster, :scope > .musicAudioSurface')) surface.style.removeProperty('clip-path')
     mobileMiniBarOverlay.value?.style.removeProperty('opacity')
     for (const name of [
       '--mobile-mini-left', '--mobile-mini-top', '--mobile-mini-width', '--mobile-mini-height',
@@ -416,9 +439,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     const fade = Math.min(1, progress * getInlineDragDistance(inlineDrag) / 96)
     watchNavigation.updateMinimizePreview(restoring ? 1 - progress : fade)
     if (usesMobileMiniBar()) {
-      const videoTo = restoring
-        ? { left: 0, top: 0, width: to.width, height: to.height }
-        : inlineDrag.videoTo
+      const videoTo = inlineDrag.videoTo ?? { left: 0, top: 0, width: to.width, height: to.height }
       renderMobileMiniMorph(from, to, inlineDrag.videoFrom, videoTo, progress, restoring)
     } else {
       const x = (to.left - from.x) * progress
@@ -826,18 +847,19 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     togglePlayerFullScreen()
   }
 
-  function canUseScrollMiniPlayerBase(allowPhonePanel = false) {
+  function canUseScrollMiniPlayerBase(explicitGesture = false) {
     if (playerSuspended.value) return false
-    // Panels prevent automatic docking, but an explicit swipe can minimize.
-    if (!allowPhonePanel && container.value?.hasAttribute('data-phone-panel-video')) return false
+    // An explicit swipe can minimize through panels and after playback ends.
+    if (!explicitGesture && container.value?.hasAttribute('data-phone-panel-video')) return false
     if (props.format === 'audio') return false
     if (fullWindowEnabled.value) return false
     if (isNativeFullscreenActive()) return false
     if (isNativePipActive()) return false
     const videoElement = video.value
     if (!videoElement) return false
-    if (videoElement.ended && !(scrollMiniPlayerDetached.value &&
-      store.getters.getKeepPlayingOnNavigation && watchNavigation?.detached.value)) return false
+    if (videoElement.ended &&
+      !(usesMobileMiniBar() && (explicitGesture || watchNavigation?.minimized?.value)) &&
+      !(scrollMiniPlayerDetached.value && store.getters.getKeepPlayingOnNavigation && watchNavigation?.detached.value)) return false
     return true
   }
 

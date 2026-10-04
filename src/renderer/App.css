@@ -227,7 +227,10 @@
 }
 
 :global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target]),
-:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .player) {
+:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .player),
+:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .musicAudioSurface),
+/* stylelint-disable-next-line selector-max-compound-selectors */
+:global(body.androidPictureInPicture .ftVideoPlayer[data-android-picture-in-picture-target] .musicAudioSurface *) {
   visibility: visible !important;
 }
 
@@ -256,6 +259,7 @@
    the video crop. Keep the original object fit and video element dimensions. */
 /* stylelint-disable selector-max-compound-selectors */
 :global(body.androidPictureInPicture .app.capacitorTabs .ftVideoPlayer[data-android-picture-in-picture-target] > .player),
+:global(body.androidPictureInPicture .app.capacitorTabs .ftVideoPlayer[data-android-picture-in-picture-target] > .musicAudioSurface),
 :global(body.androidPictureInPicture .app.capacitorTabs .ftVideoPlayer[data-android-picture-in-picture-target] > .vrCanvas) {
   position: absolute !important;
   inset: 0 !important;

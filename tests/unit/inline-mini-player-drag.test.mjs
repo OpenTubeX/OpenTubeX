@@ -28,13 +28,19 @@ test('mobile morph keeps player and video layout fixed between animation frames'
     } },
     video: { value: { style: videoStyle } },
     mobileMiniBarOverlay: { value: { style: overlayStyle } },
+    mobileMiniMorphBase: null,
   })
   const render = methods.renderMobileMiniMorph
   const from = { left: 8, top: 80, width: 400, height: 225 }
   const to = { left: 0, top: 700, width: 400, height: 76 }
   const videoFrom = { left: 0, top: 0, width: 400, height: 225 }
   const videoTo = { left: 8, top: 6, width: 112, height: 63 }
-  render(from, to, videoFrom, videoTo, 0, false)
+  // Like DOMRect, these coordinates are inherited rather than own fields.
+  const domRect = Object.create(from)
+  render(domRect, to, videoFrom, videoTo, 0, false)
+  assert.ok(writes.some(([name, value]) => name === '--mobile-mini-left' && value === '8px'))
+  assert.ok(writes.some(([name, value]) => name === '--mobile-mini-height' && value === '225px'))
+  assert.ok(writes.every(([, value]) => !/undefined|NaN/.test(value)))
   writes.length = 0
   render(from, to, videoFrom, videoTo, 0.5, false)
   assert.deepEqual(writes.map(([name]) => name).sort(), [
@@ -52,6 +58,18 @@ test('mobile morph keeps player and video layout fixed between animation frames'
   assert.equal(videoStyle.clipPath, undefined)
   assert.equal(posterStyle.clipPath, undefined)
   assert.equal(overlayStyle.opacity, undefined)
+  writes.length = 0
+  render(to, { ...from, height: 300 }, videoTo, { ...videoFrom, height: 300 }, 0.5, true)
+  assert.ok(writes.some(([name, value]) => name === '--mobile-mini-video-base-width' && value === '400px'))
+  assert.ok(writes.some(([name, value]) => name === '--mobile-mini-video-base-height' && value === '300px'),
+    'restoration uses the 4:3 inline surface instead of the 16:9 thumbnail')
+  assert.equal(posterStyle.clipPath, videoStyle.clipPath)
+  writes.length = 0
+  render(to, { ...from, width: 500, height: 375 }, videoTo, { ...videoFrom, width: 500, height: 375 }, 1, true)
+  assert.deepEqual(writes.map(([name]) => name), ['transform'], 'resizing keeps the decode surface fixed')
+  assert.match(writes[0][1], /scale\(1\.25\)/)
+  assert.equal(videoStyle.clipPath, 'none')
+  methods.clearMobileMiniMorph()
 })
 
 function fixture({ reducedMotion = false, available = true, phonePanel = false, restoring = false, finishRejects = false, activationSucceeds = true } = {}) {
