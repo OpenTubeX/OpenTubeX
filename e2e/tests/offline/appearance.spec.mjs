@@ -645,6 +645,8 @@ test.describe('custom theme editor', () => {
     await button.hover()
     await expect(button).not.toHaveCSS('background-color', 'rgb(17, 17, 17)')
     await expect(button).toHaveCSS('color', 'rgb(255, 255, 255)')
+    await page.mouse.move(0, 0)
+    await expect(button).toHaveCSS('background-color', 'rgb(0, 100, 0)')
   })
 
   test('imports clipboard themes as new drafts and saves only on confirmation', async ({ app, page }) => {
@@ -989,7 +991,9 @@ test.describe('custom theme editor', () => {
       optionsRow.boundingBox(),
       editor.locator('.colorGrid').boundingBox()
     ])
-    expect(colorGridBox.y - optionsBox.y - optionsBox.height).toBeLessThanOrEqual(24)
+    const gap = colorGridBox.y - optionsBox.y - optionsBox.height
+    expect(gap).toBeGreaterThanOrEqual(0)
+    expect(gap).toBeLessThanOrEqual(24)
     await expect(optionsRow.getByRole('checkbox', { name: 'Dark theme' })).toBeVisible()
     await expect(optionsRow.getByRole('combobox', { name: 'Based on' })).toBeVisible()
     const sourceMainColor = optionsRow.getByRole('combobox', { name: /Main colou?r theme/i })
