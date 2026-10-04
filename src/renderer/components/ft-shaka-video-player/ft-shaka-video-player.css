@@ -4865,21 +4865,22 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 .mobileMiniBarMorphOverlay {
   position: fixed;
   inset: auto;
-  z-index: 151;
-  pointer-events: none;
 
-  --mobile-mini-bar-opacity: 0;
+  /* Keep the full-width backdrop behind the moving video (z-index: 150). */
+  z-index: 149;
+  pointer-events: none;
+  opacity: 0;
+  will-change: opacity;
 }
 
 .mobileMiniBarRestoring {
-  --mobile-mini-bar-opacity: 1;
+  opacity: 1;
 }
 
 .mobileMiniBarMorphOverlay::before {
   position: absolute;
-  inset: 0 0 0 90px;
-  background: linear-gradient(to right, transparent, var(--card-bg-color) 8px);
-  opacity: var(--mobile-mini-bar-opacity);
+  inset: 0;
+  background: var(--card-bg-color);
   content: '';
 }
 
@@ -4989,13 +4990,6 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 .mobileMiniBarPlayback > button:disabled {
   opacity: 0.4;
   cursor: default;
-}
-
-.mobileMiniBarMorphOverlay > .mobileMiniBarDetails,
-.mobileMiniBarMorphOverlay > .mobileMiniBarProgress,
-.mobileMiniBarMorphOverlay > .mobileMiniBarDismiss,
-.mobileMiniBarMorphOverlay > .mobileMiniBarPlayback {
-  opacity: var(--mobile-mini-bar-opacity);
 }
 
 .mobileMiniBarMorphOverlay > .mobileMiniBarReturn,
@@ -5471,7 +5465,6 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   margin: 0 !important;
   object-fit: cover !important;
   transform: none !important;
-  clip-path: var(--mobile-mini-video-clip);
   transition: none !important;
 }
 /* stylelint-enable no-descending-specificity */

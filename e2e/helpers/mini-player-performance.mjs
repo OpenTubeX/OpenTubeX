@@ -1,3 +1,22 @@
+/** Inspect the background below the moving video while the bar is appearing. */
+export async function mobileMiniPlayerBackdrop(page) {
+  return page.locator('.mobileMiniBarMorphOverlay').evaluate(element => {
+    const background = getComputedStyle(element, '::before')
+    const probe = document.createElement('div')
+    probe.style.backgroundColor = 'var(--card-bg-color)'
+    element.append(probe)
+    const cardColor = getComputedStyle(probe).backgroundColor
+    probe.remove()
+    return {
+      left: background.left,
+      right: background.right,
+      color: background.backgroundColor,
+      image: background.backgroundImage,
+      cardColor,
+    }
+  })
+}
+
 /** Count background video readbacks and hidden control-layout work during a swipe. */
 export async function trackMiniPlayerWork(page) {
   await page.evaluate(() => {

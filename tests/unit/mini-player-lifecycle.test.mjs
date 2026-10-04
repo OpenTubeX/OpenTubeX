@@ -51,10 +51,10 @@ function mountMiniPlayer(t, { detached = false, navigatedAway = detached, keepPl
     performance: { now: () => 0 }
   })
   const player = scope.run(() => create({
-    container: ref(inlineVisible ? { style: { removeProperty() {} }, removeAttribute() {}, hasAttribute: () => false, getBoundingClientRect: () => ({ ...rect }) } : null),
+    container: ref(inlineVisible ? { style: { removeProperty() {} }, removeAttribute() {}, hasAttribute: () => false, querySelectorAll: () => [], getBoundingClientRect: () => ({ ...rect }) } : null),
     fullWindowEnabled: ref(false), getUi: () => seekRange ? { getControls: () => ({ getPlayer: () => ({ seekRange: () => seekRange }) }) } : null,
     isActiveTab, isPlayerSuspended, pictureInPictureActive: ref(false), props: reactive({ format: 'video', videoId: 'video' }),
-    video
+    video, mobileMiniBarOverlay: ref(null)
   }))
   for (const callback of mounted) callback()
   player.scrollMiniPlayerActive.value = true

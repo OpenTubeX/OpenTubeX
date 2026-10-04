@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
 import { chromium, expect } from '@playwright/test'
 import { findWatchComponent, mobileMiniPlayerRegions, mobileMiniPlayerReturnPoint } from '../../e2e/helpers/player.mjs'
-import { resetMiniPlayerWork, stopTrackingMiniPlayerWork, trackMiniPlayerWork } from '../../e2e/helpers/mini-player-performance.mjs'
+import { mobileMiniPlayerBackdrop, resetMiniPlayerWork, stopTrackingMiniPlayerWork, trackMiniPlayerWork } from '../../e2e/helpers/mini-player-performance.mjs'
 
 // Run against a current debug APK on a locked emulator, forwarding its WebView
 // socket and setting ANDROID_CDP_URL=http://127.0.0.1:<forwarded-port>.
@@ -15,7 +15,11 @@ for (const navigationOnly of [true, false]) {
   }, t => testMobileMiniPlayer(t, navigationOnly))
 }
 
-async function testMobileMiniPlayer(t, navigationOnly) {
+test('mobile mini-player animates an opaque backdrop in both directions without background work', {
+  skip: !process.env.ANDROID_CDP_URL,
+}, t => testMobileMiniPlayer(t, false, true))
+
+async function testMobileMiniPlayer(t, navigationOnly, animationOnly = false) {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const context = browser.contexts()[0]
   const page = context.pages()[0]
@@ -246,10 +250,23 @@ async function testMobileMiniPlayer(t, navigationOnly) {
         }
         await page.waitForTimeout(350)
         const work = await page.evaluate(() => window.__miniPlayerWork)
+        const backdrop = await mobileMiniPlayerBackdrop(page)
         console.log(`Android ${restoring ? 'restore' : 'minimize'} swipe work:`, work)
+        if (animationOnly) {
+          const endpoint = await page.locator(restoring ? '.scrollMiniPlaceholder' : '.mobileMiniBarMorphOverlay').boundingBox()
+          await touch('touchMove', { ...point, y: point.y + direction * Math.abs(endpoint.y - box.y) * 0.8 })
+          const overlay = page.locator('.mobileMiniBarMorphOverlay')
+          await expect(overlay).toHaveCSS('opacity', restoring ? '0' : '1')
+          assert.ok(await overlay.evaluate(element => Number(getComputedStyle(element).zIndex)) <
+            await player.evaluate(element => Number(getComputedStyle(element).zIndex)), 'the moving video must paint above the backdrop')
+        }
         await touch('touchEnd')
         await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
         assert.deepEqual(work, { ambientDraws: 0, controlClones: 0 })
+        assert.equal(backdrop.left, '0px', 'the backdrop must cover the thumbnail side during the morph')
+        assert.equal(backdrop.right, '0px')
+        assert.equal(backdrop.image, 'none')
+        assert.equal(backdrop.color, backdrop.cardColor)
         assert.equal(await originalVideo.evaluate(element => element === document.querySelector('.ftVideoPlayer video') && !element.paused), true)
       }
       await resetMiniPlayerWork(page)
@@ -257,6 +274,7 @@ async function testMobileMiniPlayer(t, navigationOnly) {
     } finally {
       await stopTrackingMiniPlayerWork(page)
     }
+    if (animationOnly) return
     for (const scale of [100, 125]) {
       await page.evaluate(scale => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
