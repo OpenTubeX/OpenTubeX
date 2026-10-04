@@ -243,7 +243,7 @@
             :initial-visible-state="index < (currentVideoIndexZeroBased + 4) && index > (currentVideoIndexZeroBased - 4)"
             @drag-video="setDraggedVideo"
             @drag-video-end="onDragVideoEnd"
-            @move-dragged-video="moveDraggedVideoTemporarilyThrottled"
+            @move-dragged-video="onMoveDraggedVideo"
             @move-video-up="moveVideoUp"
             @move-video-down="moveVideoDown"
             @remove-from-playlist="removeVideoFromPlaylist"
@@ -938,6 +938,16 @@ function moveDraggedVideoTemporarily(draggedOverVideo, draggedVideo_) {
 }
 
 const moveDraggedVideoTemporarilyThrottled = throttle(moveDraggedVideoTemporarily, 100)
+
+/**
+ * @param {VideoData} video
+ * @param {VideoData} source
+ */
+function onMoveDraggedVideo(video, source) {
+  // Pointer drags already wait for transitions and flush their final target.
+  if (source.pointerDragging) moveDraggedVideoTemporarily(video, source)
+  else moveDraggedVideoTemporarilyThrottled(video, source)
+}
 
 function playNextVideo() {
   const videoIndex = videoIndexInPlaylistItems.value

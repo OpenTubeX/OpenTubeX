@@ -48,9 +48,10 @@ watch(() => props.hotZoneEnabled, hotZoneEnabled => {
   }
 
   // Show zone later to prevent `dragend` event
-  setTimeout(() => {
+  const timeout = setTimeout(() => {
     hotZoneShown.value = true
   }, 0)
+  onWatcherCleanup(() => clearTimeout(timeout))
 })
 
 /** @import { Ref } from 'vue' */
