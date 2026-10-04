@@ -381,7 +381,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     // properties invalidate styles throughout Shaka's hidden control tree.
     const clip = cropX < 0.001 && cropY < 0.001 ? 'none' : `inset(${cropY}px ${cropX}px)`
     // A countdown poster can appear while playback finishes during the drag.
-    for (const surface of element.querySelectorAll(':scope > .player, :scope > .countdownPoster')) surface.style.clipPath = clip
+    for (const surface of element.querySelectorAll(':scope > .player, :scope > .countdownPoster, :scope > .musicAudioSurface')) surface.style.clipPath = clip
     const opacity = restoring
       ? Math.max(0, 1 - progress / 0.5)
       : Math.min(1, Math.max(0, (progress - 0.2) / 0.4))
@@ -393,7 +393,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     if (!element) return
     element.removeAttribute('data-mobile-mini-morph')
     element.style.removeProperty('transform')
-    for (const surface of element.querySelectorAll(':scope > .player, :scope > .countdownPoster')) surface.style.removeProperty('clip-path')
+    for (const surface of element.querySelectorAll(':scope > .player, :scope > .countdownPoster, :scope > .musicAudioSurface')) surface.style.removeProperty('clip-path')
     mobileMiniBarOverlay.value?.style.removeProperty('opacity')
     for (const name of [
       '--mobile-mini-left', '--mobile-mini-top', '--mobile-mini-width', '--mobile-mini-height',

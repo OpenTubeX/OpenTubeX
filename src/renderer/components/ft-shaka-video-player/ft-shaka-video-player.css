@@ -4827,7 +4827,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   padding-block-end: 108px;
 }
 
-.ftVideoPlayer.mobileMiniBar > :not(.player, .countdownPoster, .mobileMiniBarOverlay) {
+.ftVideoPlayer.mobileMiniBar > :not(.player, .countdownPoster, .musicAudioSurface, .mobileMiniBarOverlay) {
   display: none !important;
 }
 
@@ -5402,7 +5402,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   object-fit: cover;
 }
 
-.ftVideoPlayer.scrollMiniPlayer.mobileMiniBar > :is(.player, .countdownPoster) {
+.ftVideoPlayer.scrollMiniPlayer.mobileMiniBar > :is(.player, .countdownPoster, .musicAudioSurface) {
   position: absolute !important;
   inset: 7.5px auto auto 10px !important;
   box-sizing: border-box;
@@ -5453,7 +5453,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 /* stylelint-disable no-descending-specificity */
 .ftVideoPlayer[data-mobile-mini-morph] > .player,
 .ftVideoPlayer[data-mobile-mini-morph] > .countdownPoster,
-:global(.app .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar[data-mobile-mini-morph] > :is(.player, .countdownPoster)) {
+.ftVideoPlayer[data-mobile-mini-morph] > .musicAudioSurface,
+:global(.app .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar[data-mobile-mini-morph] > :is(.player, .countdownPoster, .musicAudioSurface)) {
   position: absolute !important;
   inset: var(--mobile-mini-video-base-top) auto auto var(--mobile-mini-video-base-left) !important;
   width: var(--mobile-mini-video-base-width) !important;
