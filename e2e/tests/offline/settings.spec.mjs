@@ -1193,8 +1193,9 @@ test.describe('settings', () => {
     const addOns = await goToSettingsSection(page, 'add-ons')
     const channels = addOns.locator('.ft-input-tags-component').filter({ hasText: 'Excluded Channels' })
     await expect(channels.locator('.name')).toHaveText('Example Channel')
-    await expect(channels.locator('.tag-icon')).toHaveAttribute('src', avatar)
-    await expect.poll(() => channels.locator('.tag-icon').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
+    const avatarImage = channels.locator('img.tag-icon')
+    await expect(avatarImage).toHaveAttribute('src', avatar)
+    await expect.poll(() => avatarImage.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
 
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
