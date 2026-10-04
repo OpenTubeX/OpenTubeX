@@ -639,6 +639,41 @@ test('player controls share pill surfaces and the time display toggles together'
   }).toBeLessThan(1)
 })
 
+test('right control highlights respond immediately while retaining the row fade', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  const button = page.locator('.shaka-controls-button-panel > .shaka-overflow-menu-button')
+  const glass = button.locator('.ft-control-glass')
+  await page.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+  await button.hover()
+  // Hover/focus opacity must switch immediately; only row visibility fades.
+  const transition = await glass.evaluate(element => getComputedStyle(element).transitionProperty)
+  expect(transition.split(',').map(property => property.trim())).not.toContain('opacity')
+  await expect(glass).toHaveCSS('opacity', '1')
+  await expect(glass).toHaveCSS('filter', 'opacity(1)')
+  const fade = await page.locator('.shaka-controls-container').evaluate(element => {
+    element.removeAttribute('casting')
+    element.removeAttribute('shown')
+    for (const animation of element.getAnimations({ subtree: true })) {
+      if (!(animation instanceof CSSTransition)) continue
+      animation.pause()
+      animation.currentTime = 300
+    }
+    const panel = element.querySelector('.shaka-controls-button-panel')
+    const highlight = panel.querySelector('.shaka-overflow-menu-button > .ft-control-glass')
+    return {
+      highlightOpacity: Number(getComputedStyle(highlight).filter.match(/opacity\(([^)]+)\)/)[1]),
+      rowOpacity: Number(getComputedStyle(panel.querySelector('.ft-right-control-glass')).opacity),
+    }
+  })
+  expect(fade.highlightOpacity).toBeGreaterThan(0)
+  expect(fade.highlightOpacity).toBeLessThan(1)
+  expect(fade.highlightOpacity).toBeCloseTo(fade.rowOpacity, 2)
+  await page.mouse.move(1, 1)
+  await expect(glass).toHaveCSS('opacity', '0')
+})
+
 test('control glass stays blurred throughout the row fade', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
@@ -735,7 +770,10 @@ for (const scale of [1, 1.25]) {
 
     const setWidth = width => panel.evaluate(async (element, width) => {
       element.style.width = `${width}px`
-      await new Promise(resolve => setTimeout(resolve, 100))
+      // Let resize observation and the scheduled layout finish even under load.
+      for (let frame = 0; frame < 3; frame++) {
+        await new Promise(resolve => requestAnimationFrame(resolve))
+      }
       return element.classList.contains('ft-controls-stack-times')
     }, width)
     let compactWidth = 100
@@ -745,11 +783,12 @@ for (const scale of [1, 1.25]) {
       if (await setWidth(width)) compactWidth = width
       else fullWidth = width
     }
-    await setWidth(compactWidth)
+    // Avoid landing on the fractional-pixel boundary found by the search.
+    await setWidth(compactWidth - 4)
     await expect(panel).toHaveClass(/ft-controls-stack-times/)
     await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateShowPlaybackRateAdjustedTimestamp', false))
     await expect(panel.locator('.ft-playback-adjusted-time')).toHaveClass(/shaka-hidden/)
-    await expect(panel).not.toHaveClass(/ft-controls-stack-times/, { timeout: 2000 })
+    await expect(panel).not.toHaveClass(/ft-controls-stack-times/)
   })
 }
 

@@ -1893,7 +1893,9 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   inset-block: 50% auto;
   block-size: var(--ft-control-pill-size);
   opacity: 0;
+  filter: opacity(var(--ft-controls-fade));
   transform: translateY(-50%);
+  transition: filter var(--ft-control-fade-duration) cubic-bezier(0.4, 0, 0.6, 1);
 }
 
 :deep(.shaka-controls-button-panel > .shaka-spacer ~ button:is(:active, :focus-visible)) {
@@ -1901,7 +1903,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 :deep(.shaka-spacer ~ button:is(:active, :focus-visible) > .ft-control-glass) {
-  opacity: var(--ft-controls-fade);
+  opacity: 1;
 }
 
 @media (hover: hover) {
@@ -1910,7 +1912,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   }
 
   :deep(.shaka-spacer ~ button:hover > .ft-control-glass) {
-    opacity: var(--ft-controls-fade);
+    opacity: 1;
   }
 }
 
