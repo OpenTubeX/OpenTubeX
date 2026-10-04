@@ -12,6 +12,8 @@ async function commentsSort({ app, page }) {
 }
 
 async function expectScrollTether(select, scroll) {
+  const dropdown = select.page().locator('.selectDropdown')
+  const openingStyle = await dropdown.getAttribute('style')
   for (const delta of [24, -16, 32]) {
     const movement = await select.evaluate(async (button, { delta, scroll }) => {
       const menu = document.getElementById(button.getAttribute('aria-controls'))
@@ -27,6 +29,7 @@ async function expectScrollTether(select, scroll) {
     }, { delta, scroll })
     expect(Math.abs(movement.button)).toBeGreaterThan(1)
     expect(Math.abs(movement.menu - movement.button)).toBeLessThanOrEqual(1)
+    await expect(dropdown).toHaveAttribute('style', openingStyle)
   }
 }
 
@@ -36,9 +39,6 @@ for (const uiScale of [100, 125]) {
 
     test('keeps the comments sort dropdown attached without scroll handler updates', async ({ app, page }) => {
       const select = await commentsSort({ app, page })
-      // Reproduce scrolling while the renderer cannot deliver position updates.
-      // Install before opening so it precedes the dropdown's capture listener.
-      await page.evaluate(() => window.addEventListener('scroll', event => event.stopImmediatePropagation(), true))
       await select.click()
       await expect(page.locator('.selectDropdown')).toBeVisible()
 
@@ -48,15 +48,13 @@ for (const uiScale of [100, 125]) {
     test('keeps the dropdown attached while its quick settings scroller moves', async ({ page }) => {
       await page.locator('.profileTrigger').click()
       const select = page.getByRole('dialog', { name: 'Quick settings' }).getByRole('combobox', { name: 'Base Theme' })
-      await page.evaluate(() => window.addEventListener('scroll', event => event.stopImmediatePropagation(), true))
       await select.click()
       await expect(page.locator('.selectDropdown')).toBeVisible()
       await expectScrollTether(select, 'quickSettings')
     })
 
-    test('keeps the comments dropdown inside the viewport when scrolling', async ({ app, page }) => {
+    test('fits the comments dropdown on opening and lets it scroll out of view', async ({ app, page }) => {
       const select = await commentsSort({ app, page })
-      await select.click()
       const dropdown = page.locator('.selectDropdown')
       for (const edge of ['bottom', 'top']) {
         await select.evaluate((button, edge) => {
@@ -65,22 +63,31 @@ for (const uiScale of [100, 125]) {
           const target = edge === 'bottom' ? innerHeight - bounds.height - 24 : chromeBottom + 24
           window.scrollBy({ top: bounds.top - target, behavior: 'instant' })
         }, edge)
+        await select.click()
         await expect.poll(() => dropdown.evaluate(menu => {
           const bounds = menu.getBoundingClientRect()
           const chromeBottom = Math.max(...Array.from(document.querySelectorAll('.topNav, .tabBar.position-top')).map(element => element.getBoundingClientRect().bottom))
-          return bounds.top >= chromeBottom + 3 && bounds.bottom <= innerHeight - 7
+          return bounds.top >= chromeBottom + 3 && bounds.bottom <= innerHeight - 7 && menu.scrollHeight <= menu.clientHeight + 1
         })).toBe(true)
         await expect.poll(() => select.evaluate((button, edge) => {
           const menu = document.getElementById(button.getAttribute('aria-controls')).getBoundingClientRect()
           const bounds = button.getBoundingClientRect()
           return Math.abs((edge === 'bottom' ? bounds.top - menu.bottom : menu.top - bounds.bottom) - 4)
         }, edge)).toBeLessThanOrEqual(1)
+
+        const openingStyle = await dropdown.getAttribute('style')
+        await select.evaluate((button, edge) => {
+          const bounds = button.getBoundingClientRect()
+          const target = edge === 'bottom' ? 8 : innerHeight - bounds.height - 8
+          window.scrollBy({ top: bounds.top - target, behavior: 'instant' })
+        }, edge)
+        await expect.poll(() => dropdown.evaluate((menu, edge) => {
+          const bounds = menu.getBoundingClientRect()
+          return edge === 'bottom' ? bounds.top < 0 : bounds.bottom > innerHeight
+        }, edge)).toBe(true)
+        await expect(dropdown).toHaveAttribute('style', openingStyle)
+        await select.press('Escape')
       }
-      await app.electronApp.evaluate(({ BrowserWindow }, height) => {
-        const window = BrowserWindow.getAllWindows()[0]
-        window.setBounds({ ...window.getBounds(), height })
-      }, Math.round(700 * uiScale / 100))
-      await expect.poll(() => dropdown.evaluate(menu => menu.getBoundingClientRect().bottom - innerHeight + 8)).toBeLessThanOrEqual(1)
     })
 
     test('clamps a long dropdown at its rendered end when resizing reduces its scroll range', async ({ app, page }) => {
@@ -116,7 +123,7 @@ for (const uiScale of [100, 125]) {
       }
     })
 
-    test('retains scroll positioning when CSS anchors are unavailable', async ({ app, page }) => {
+    test('fits the opening dropdown when CSS anchors are unavailable', async ({ app, page }) => {
       await page.evaluate(() => {
         const supports = CSS.supports.bind(CSS)
         CSS.supports = (...args) => args[0] === 'position-anchor' ? false : supports(...args)
@@ -124,9 +131,16 @@ for (const uiScale of [100, 125]) {
       const select = await commentsSort({ app, page })
       await select.click()
       const dropdown = page.locator('.selectDropdown')
-      const initialGap = await select.evaluate(button => document.getElementById(button.getAttribute('aria-controls')).getBoundingClientRect().top - button.getBoundingClientRect().bottom)
-      await page.evaluate(() => window.scrollBy({ top: 24, behavior: 'instant' }))
-      await expect.poll(() => select.evaluate(button => document.getElementById(button.getAttribute('aria-controls')).getBoundingClientRect().top - button.getBoundingClientRect().bottom)).toBeCloseTo(initialGap, 0)
+      await expect.poll(() => dropdown.evaluate(menu => {
+        const bounds = menu.getBoundingClientRect()
+        return bounds.top >= 8 && bounds.bottom <= innerHeight - 7
+      })).toBe(true)
+      const openingStyle = await dropdown.getAttribute('style')
+      await page.evaluate(async () => {
+        window.scrollBy({ top: 24, behavior: 'instant' })
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+      })
+      await expect(dropdown).toHaveAttribute('style', openingStyle)
       await expect(dropdown).toBeVisible()
     })
   })

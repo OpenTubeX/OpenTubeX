@@ -360,7 +360,6 @@ watch(dropdownShown, (shown) => {
     dropdownRendered.value = true
     document.addEventListener('pointerdown', handleOutsidePointerDown, true)
     window.addEventListener('resize', refreshDropdownLayout)
-    window.addEventListener('scroll', updateDropdownPosition, true)
   } else {
     if (!phoneLayout.value) dropdownRendered.value = false
     removeDropdownListeners()
@@ -464,8 +463,8 @@ function updateDropdownPosition() {
   dropdownPlacement.value = openAbove ? 'above' : 'below'
   dropdownStyle.value = {
     inlineSize: `${menuWidth}px`,
-    // CSS anchors follow compositor scrolling before JavaScript receives its
-    // scroll event. Keep our measured offsets for viewport edges and rounding.
+    // CSS anchors follow scrolling without JavaScript updates. Keep our
+    // measured offsets for viewport edges and rounding.
     positionAnchor: supportsAnchorPositioning ? dropdownAnchor : null,
     left: supportsAnchorPositioning
       ? `calc(anchor(left) + ${snapToDevicePixels(left) - buttonRect.left}px)`
@@ -710,7 +709,6 @@ function handleDropdownMouseDown(event) {
 function removeDropdownListeners() {
   document.removeEventListener('pointerdown', handleOutsidePointerDown, true)
   window.removeEventListener('resize', refreshDropdownLayout)
-  window.removeEventListener('scroll', updateDropdownPosition, true)
 }
 
 /**
