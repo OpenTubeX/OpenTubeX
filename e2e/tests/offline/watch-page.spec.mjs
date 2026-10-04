@@ -321,6 +321,51 @@ test.describe('desktop quick playback speed bar', () => {
 
   const overflowingPresets = Array.from({ length: 24 }, (_, index) => ({ speed: 0.5 + index * 0.25 }))
 
+  for (const format of ['audio', 'legacy']) {
+    test(`keeps speed changes during ${format} format unload`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+      const video = await openMockedVideo(page)
+      const view = await watchViewHandle(page)
+      const player = page.locator(`${activeTab} .ftVideoPlayer`)
+      const bar = player.locator('.ft-quick-playback-rate-bar')
+      await view.evaluate((view, url) => {
+        view.manifestSrc = url
+        view.manifestMimeType = 'video/webm'
+      }, DEMO_MEDIA_URL)
+      await expect.poll(() => view.evaluate(view => view.$refs.player.hasLoaded)).toBe(true)
+      if (format === 'legacy') {
+        await view.evaluate(view => { view.activeFormat = 'audio' })
+        await expect.poll(() => view.evaluate(view => view.$refs.player.hasLoaded)).toBe(true)
+      }
+
+      await player.evaluate(element => {
+        const player = element.ui.getControls().getPlayer()
+        const unload = player.unload.bind(player)
+        const pending = new Promise(resolve => { window.finishSpeedUnload = resolve })
+        window.speedUnloadStarted = false
+        player.unload = async (...args) => {
+          window.speedUnloadStarted = true
+          await pending
+          return unload(...args)
+        }
+      })
+      try {
+        await view.evaluate((view, format) => { view.activeFormat = format }, format)
+        await expect.poll(() => page.evaluate(() => window.speedUnloadStarted)).toBe(true)
+        await expect.poll(() => view.evaluate(view => view.$refs.player.hasLoaded)).toBe(false)
+        await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('shown', 'true'))
+        await bar.locator('[data-rate="1.5"]').click()
+        await expect(bar.locator('[data-rate="1.5"]')).toHaveClass(/is-current-rate/)
+        await page.evaluate(() => window.finishSpeedUnload())
+        await expect.poll(() => view.evaluate(view => view.$refs.player.hasLoaded)).toBe(true)
+        await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.5)
+        await expect(bar.locator('[data-rate="1.5"]')).toHaveClass(/is-current-rate/)
+      } finally {
+        await page.evaluate(() => window.finishSpeedUnload())
+      }
+    })
+  }
+
   test('keeps custom speeds outside the native playback range', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)

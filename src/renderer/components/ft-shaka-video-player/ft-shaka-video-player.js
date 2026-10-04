@@ -11754,7 +11754,6 @@ export default defineComponent({
      * @type {{
      *   oldFormat: 'dash'|'audio'|'legacy',
      *   wasPaused: boolean,
-     *   playbackRate: number|null,
      *   playbackPosition: number,
      *   useAutoQuality: boolean,
      *   audioBandwidth: number|undefined,
@@ -11813,10 +11812,12 @@ export default defineComponent({
             : player.getVariantTracks().find(track => track.active)
           const activeCaptionIndex = player.getTextTracks().findIndex(caption => caption.active)
 
+          // Queue the current speed before unloading so later user choices
+          // replace it instead of being overwritten by a pre-switch snapshot.
+          queuePlaybackRateRestore()
           pendingFormatSwitchState = {
             oldFormat,
             wasPaused: video_.paused,
-            playbackRate: getCurrentPlaybackRate(),
             playbackPosition: video_.currentTime,
             // The legacy formats don't have an ABR configuration to carry over,
             // so fall back to the user's preference when switching away from them.
@@ -11856,7 +11857,6 @@ export default defineComponent({
         const {
           oldFormat: sourceFormat,
           wasPaused,
-          playbackRate,
           playbackPosition,
           useAutoQuality,
           audioBandwidth,
@@ -11889,7 +11889,6 @@ export default defineComponent({
           }
 
           ignoreErrors = false
-          queuePlaybackRateRestore(playbackRate)
 
           player.configure(getPlayerConfig(newFormat, useAutoQuality))
 
@@ -11946,7 +11945,7 @@ export default defineComponent({
 
           ignoreErrors = false
 
-          await setLegacyQuality(playbackPosition, previousQuality, playbackRate)
+          await setLegacyQuality(playbackPosition, previousQuality)
           if (!isCurrentFormatSwitch()) return
         }
 
