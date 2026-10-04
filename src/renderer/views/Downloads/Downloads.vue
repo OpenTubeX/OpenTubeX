@@ -149,6 +149,7 @@
         @clear="clearDownload(download.id)"
         @open="openDownload(download.id)"
         @play="playDownload(download)"
+        @queue="queueDownload(download)"
         @remove="pendingRemoval = download"
         @retry="retryDownload(download)"
       />
@@ -249,7 +250,7 @@ import WatchVideoDownloadPrompt from '../../components/WatchVideoDownloadPrompt/
 import { isYtDlpMediaUrl } from '../../../ytDlpArguments'
 import store from '../../store/index'
 import { formatBytes } from '../../helpers/fileSize'
-import { downloadWatchRoute, isPlayableDownloadFile } from '../../helpers/downloadPlayback'
+import { downloadQueueVideos, downloadWatchRoute, isPlayableDownloadFile } from '../../helpers/downloadPlayback'
 import { downloadFormats, filterCompletedDownloads } from '../../helpers/downloadFilters'
 import { showToast } from '../../helpers/utils'
 
@@ -369,6 +370,17 @@ async function openDownload(id) {
     await refreshDownloads()
     showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
   }
+}
+async function queueDownload(download) {
+  const refreshedDownload = (await refreshDownloads()).find(record => record.id === download.id)
+  const videos = refreshedDownload ? downloadQueueVideos(refreshedDownload) : []
+  if (videos.length === 0) {
+    showToast({ message: t('Downloads.File Not Found'), icon: ['fas', 'circle-exclamation'] })
+    return
+  }
+
+  for (const video of videos) store.commit('addVideoToWatchQueue', { video })
+  showToast({ message: t('Video.Added to Queue'), icon: ['fas', 'list'] })
 }
 async function playDownload(download) {
   const refreshedDownload = (await refreshDownloads()).find(record => record.id === download.id)
