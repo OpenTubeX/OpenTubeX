@@ -5604,6 +5604,12 @@ export default defineComponent({
       }
     }
 
+    function handleSeekBarWindowBlur() {
+      if (!seekBarMouseDown) return
+      // End Shaka's drag even when the mouse release happens outside the window.
+      container.value?.querySelector('.shaka-seek-bar')?.blur()
+    }
+
     function setupChapterPreview() {
       if (!container.value) return
 
@@ -11468,6 +11474,7 @@ export default defineComponent({
       window.addEventListener('scroll', handleScrollMiniWindowScroll, { passive: true })
       window.addEventListener('resize', handleScrollMiniWindowResize)
       window.addEventListener('blur', handleTemporaryPlaybackRateFocusLoss)
+      window.addEventListener('blur', handleSeekBarWindowBlur)
 
       player.addEventListener('loading', () => {
         silenceSkipping.reset()
@@ -12068,6 +12075,7 @@ export default defineComponent({
       document.removeEventListener('click', handlePlaybackRateMenuClick, true)
       document.removeEventListener('click', handleQualityMenuClick, true)
       window.removeEventListener('blur', handleTemporaryPlaybackRateFocusLoss)
+      window.removeEventListener('blur', handleSeekBarWindowBlur)
       player?.removeEventListener('textchanged', syncShortsCaptionsEnabled)
 
       cancelTemporaryPlaybackRateHolds()
