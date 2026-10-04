@@ -136,6 +136,11 @@
   text-align: center;
 }
 
+.channelListContent {
+  /* Include child margins in the wrapper used to measure the scroll boundary. */
+  display: flow-root;
+}
+
 .channelList {
   display: flex;
   flex-wrap: wrap;

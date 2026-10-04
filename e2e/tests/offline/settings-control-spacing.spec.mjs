@@ -90,7 +90,7 @@ for (const uiScale of [100, 95]) {
 
     test('API and private ID fields center their outlines and tag labels blend into their panel', async ({ app, page }, testInfo) => {
       const section = await goToSettingsSection(page, 'add-ons')
-      for (const width of [1000, 450]) {
+      for (const width of [1000, 450, 360]) {
         await resize(app, page, width === 1000 ? 1600 : 480, uiScale)
         await section.evaluate((element, width) => { element.parentElement.style.inlineSize = `${width}px` }, width)
         for (const highlightChangedSettings of [false, true]) {
@@ -105,6 +105,8 @@ for (const uiScale of [100, 95]) {
                 return field.left + field.width / 2 - row.left - row.width / 2
               })
               expect.soft(Math.abs(offset), `${width}px ${direction} ${name}`).toBeLessThanOrEqual(1)
+              const label = input.locator('../..').locator('.selectLabelText')
+              expect.soft(await label.evaluate(element => element.scrollWidth - element.clientWidth), `${width}px ${direction} ${name} label`).toBeLessThanOrEqual(1)
             }
           }
         }

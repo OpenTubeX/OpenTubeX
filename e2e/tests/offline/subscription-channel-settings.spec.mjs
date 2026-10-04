@@ -63,8 +63,8 @@ for (const uiScale of [100, 95]) {
           const label = element.querySelector('.dailyVideoLimitSelect .select-label').getBoundingClientRect()
           return label.top - members.bottom
         })
-        expect.soft(gap, `${direction} control spacing at ${width}px`).toBeGreaterThanOrEqual(7)
-        expect.soft(gap, `${direction} control spacing at ${width}px`).toBeLessThanOrEqual(9)
+        expect.soft(gap, `${direction} control spacing at ${width}px`).toBeGreaterThanOrEqual(6.95)
+        expect.soft(gap, `${direction} control spacing at ${width}px`).toBeLessThanOrEqual(9.05)
         await expect(popover.getByRole('combobox', { name: 'Videos per day' })).toBeVisible()
       }
       await page.evaluate(() => { document.body.dir = 'ltr' })

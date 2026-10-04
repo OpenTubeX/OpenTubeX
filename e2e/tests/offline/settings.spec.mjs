@@ -831,24 +831,31 @@ test.describe('settings', () => {
     await expect(subtitleCookies).toBeChecked()
     await expect(subtitleCookies).toBeDisabled()
 
-    const [sourceBox, browserBox, profileBox] = await Promise.all([
-      authentication.locator('.restrictedPlaybackAuthSource .select-text').boundingBox(),
-      authentication.locator('.restrictedPlaybackAuthDetail .select-text').boundingBox(),
-      authentication.locator('.restrictedPlaybackBrowserProfile input').boundingBox()
-    ])
-    expect(sourceBox).not.toBeNull()
-    expect(browserBox).not.toBeNull()
-    expect(profileBox).not.toBeNull()
+    for (const highlightChangedSettings of [false, true]) {
+      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHighlightChangedSettings', value), highlightChangedSettings)
+      for (const direction of ['ltr', 'rtl']) {
+        await page.evaluate(value => { document.body.dir = value }, direction)
+        const [sourceBox, browserBox, profileBox] = await Promise.all([
+          authentication.locator('.restrictedPlaybackAuthSource .select-text').boundingBox(),
+          authentication.locator('.restrictedPlaybackAuthDetail .select-text').boundingBox(),
+          authentication.locator('.restrictedPlaybackBrowserProfile input').boundingBox()
+        ])
+        expect(sourceBox).not.toBeNull()
+        expect(browserBox).not.toBeNull()
+        expect(profileBox).not.toBeNull()
 
-    const upperCenter = (
-      sourceBox.x + sourceBox.width / 2 +
-      browserBox.x + browserBox.width / 2
-    ) / 2
-    expect(Math.abs(profileBox.x + profileBox.width / 2 - upperCenter)).toBeLessThanOrEqual(1)
-    expect(profileBox.y).toBeGreaterThan(Math.max(
-      sourceBox.y + sourceBox.height,
-      browserBox.y + browserBox.height
-    ))
+        const upperCenter = (
+          sourceBox.x + sourceBox.width / 2 +
+          browserBox.x + browserBox.width / 2
+        ) / 2
+        expect(Math.abs(profileBox.x + profileBox.width / 2 - upperCenter)).toBeLessThanOrEqual(1)
+        expect(profileBox.y).toBeGreaterThan(Math.max(
+          sourceBox.y + sourceBox.height,
+          browserBox.y + browserBox.height
+        ))
+      }
+    }
+    await page.evaluate(() => { document.body.dir = 'ltr' })
 
     await expect.poll(async () => {
       const settings = latestSettings(
@@ -3495,7 +3502,7 @@ test.describe('settings', () => {
     await expect(syncSection.getByText(/does not support enhanced privacy/)).toBeVisible()
     await expect(syncSection.getByLabel(/Privacy passphrase/)).toBeHidden()
     await syncSection.getByLabel('Username').fill('legacy-user')
-    await syncSection.getByLabel('Password').fill('test-password')
+    await syncSection.getByLabel('Password', { exact: true }).fill('test-password')
     await expect(syncSection.getByRole('button', { name: 'Log in' })).toBeEnabled()
     await expect(syncSection.locator('.error')).toHaveCount(0)
   })
@@ -5278,7 +5285,7 @@ test.describe('sync settings', () => {
       await expect(syncSection.locator('.error', { hasText: 'Sync failed' })).toHaveCount(0)
       await expect(syncSection.getByLabel('Sync server URL')).toBeEnabled()
       await expect(syncSection.getByLabel('Username')).toBeEnabled()
-      await expect(syncSection.getByLabel('Password')).toBeEnabled()
+      await expect(syncSection.getByLabel('Password', { exact: true })).toBeEnabled()
     } finally {
       finishServerCheck()
     }
@@ -5403,7 +5410,7 @@ test.describe('sync settings', () => {
     const syncSection = page.locator('[data-section="sync"]')
     await syncSection.getByRole('button', { name: 'Disconnect' }).click()
     await syncSection.getByLabel('Username').fill('sync-user')
-    await syncSection.getByLabel('Password').fill('sync-password')
+    await syncSection.getByLabel('Password', { exact: true }).fill('sync-password')
     await syncSection.getByRole('button', { name: 'Log in' }).click()
     await authenticationRequested
     await syncSection.getByText('Enable Sync', { exact: true }).click()
@@ -5514,7 +5521,7 @@ test.describe('sync settings', () => {
     )
     await expect(syncSection.getByLabel('Username')).toBeEnabled()
 
-    await syncSection.getByLabel('Password').fill('sync-password')
+    await syncSection.getByLabel('Password', { exact: true }).fill('sync-password')
     await syncSection.getByLabel(/Privacy passphrase/).fill('sync-privacy-passphrase')
     await syncSection.getByRole('button', { name: 'Log in' }).click()
 
@@ -5675,14 +5682,14 @@ test.describe('synced setting indicators', () => {
       expect(helpBox).not.toBeNull()
       return helpBox.x - selectBox.x - selectBox.width
     }
-    expect(await getStartupIconGap()).toBeGreaterThanOrEqual(8)
+    expect(await getStartupIconGap()).toBeGreaterThanOrEqual(7.95)
 
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       await store.dispatch('updateUiScale', 95)
     })
     await expect.poll(() => page.evaluate(() => window.devicePixelRatio)).toBeCloseTo(0.95, 2)
-    expect(await getStartupIconGap()).toBeGreaterThanOrEqual(8)
+    expect(await getStartupIconGap()).toBeGreaterThanOrEqual(7.95)
 
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store

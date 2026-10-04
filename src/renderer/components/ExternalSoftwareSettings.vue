@@ -979,6 +979,12 @@ async function chooseBrowserProfilePath() {
   max-inline-size: calc(100% - 70px);
 }
 
+.restrictedPlaybackBrowserProfile > :deep(.ft-input-component:only-child:has(.inputIndicators > *)) {
+  margin-inline: 0 70px;
+  min-inline-size: 0;
+  max-inline-size: calc(100% - 70px);
+}
+
 @container settings-content (width <= 860px) {
   .restrictedPlaybackAuthControl {
     flex-basis: 340px;

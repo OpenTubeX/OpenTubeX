@@ -82,7 +82,10 @@
         v-overlay-scrollbars
         class="channelListContainer"
       >
-        <div ref="channelListContent">
+        <div
+          ref="channelListContent"
+          class="channelListContent"
+        >
           <p
             v-if="visibleChannelEntries.length === 0"
             class="emptyState"

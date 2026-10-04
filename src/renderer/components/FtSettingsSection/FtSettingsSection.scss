@@ -97,6 +97,32 @@
 }
 
 @container settings-content (width <= 460px) {
+  :deep(.ft-flex-box > .ft-input-component:only-child:has(.inputIndicators > *)) {
+    margin-inline: 32px;
+    min-inline-size: min(340px, calc(100% - 64px));
+    max-inline-size: calc(100% - 64px);
+  }
+
+  :deep(.centeredSettingsInput:has(.inputIndicators > *)) {
+    margin-inline: 0;
+    min-inline-size: min(340px, 100%);
+    max-inline-size: 100%;
+  }
+
+  :deep(.centeredSettingsInput .inputWrapper) {
+    padding-block-end: 32px;
+  }
+
+  :deep(.centeredSettingsInput .inputIndicators) {
+    inset-inline: auto 0;
+    inset-block: auto 0;
+    transform: none;
+  }
+
+  :deep(.centeredSettingsInput .passwordVisibilityToggle) {
+    inset-block-start: calc(var(--form-control-height) / 2);
+  }
+
   :deep(.settingsFlexStart460px) {
     justify-content: flex-start;
   }

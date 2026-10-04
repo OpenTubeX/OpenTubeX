@@ -454,11 +454,11 @@
 /* Keep tag and password fields centered when reserving the marker gutter. */
 .settingsContent.highlightChangedSettings :deep(.ft-input-tags-component .ft-input-component),
 .settingsContent.highlightChangedSettings :deep(.passwordForm .ft-input-component),
-.settingsContent.highlightChangedSettings :deep(.ft-flex-box > .ft-input-component:only-child),
+.settingsContent.highlightChangedSettings :deep(.ft-flex-box:not(.restrictedPlaybackBrowserProfile) > .ft-input-component:only-child),
 .settingsContent.highlightChangedSettings :deep(.centeredSettingsInput),
 :deep(.ft-input-tags-component .ft-input-component:has(.changedSettingIndicator)),
 :deep(.passwordForm .ft-input-component:has(.changedSettingIndicator)),
-:deep(.ft-flex-box > .ft-input-component:only-child:has(.changedSettingIndicator)),
+:deep(.ft-flex-box:not(.restrictedPlaybackBrowserProfile) > .ft-input-component:only-child:has(.changedSettingIndicator)),
 :deep(.centeredSettingsInput:has(.changedSettingIndicator)) {
   padding-inline-end: 12px;
 }
