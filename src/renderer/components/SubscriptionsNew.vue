@@ -89,6 +89,7 @@ import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
 import store from '../store/index'
 
 import { useKeepAliveEffectScope } from '../composables/useKeepAliveEffectScope'
+import { useSubscriptionChannelUpdates } from '../composables/useSubscriptionChannelUpdates'
 import { useRefreshAllSubscriptionFeeds } from '../composables/useRefreshAllSubscriptionFeeds'
 import { getNewSubscriptionFeedEntries } from '../helpers/newSubscriptionFeed'
 import { hasConfiguredRestrictedPlaybackAuthentication } from '../helpers/restricted-playback'
@@ -121,7 +122,8 @@ const sortBy = computed(() => {
   return store.getters.getNewSubscriptionFeedSortBy === 'oldest' ? 'oldest' : 'newest'
 })
 const activeSubscriptions = computed(() => store.getters.getActiveProfile.subscriptions)
-const cachedContentDuringLargeRefresh = shallowRef(null)
+const cachedContentDuringRefresh = shallowRef(null)
+let deferChannelUpdates = false
 const contentOptions = computed(() => ({
   activeSubscriptions: activeSubscriptions.value,
   historyCacheById: store.getters.getHistoryCacheById,
@@ -137,16 +139,17 @@ const getCurrentContentByCategory = () => getNewSubscriptionFeedEntries({
   feeds: enabledFeeds.value,
   ...contentOptions.value
 })
-const newContentByCategory = computed(() => cachedContentDuringLargeRefresh.value ?? getCurrentContentByCategory())
+const newContentByCategory = computed(() => cachedContentDuringRefresh.value ?? getCurrentContentByCategory())
 const watchedHistoryState = computed(() => {
-  if (cachedContentDuringLargeRefresh.value === null) return null
+  if (cachedContentDuringRefresh.value === null) return null
   return store.getters.getHistoryCacheSorted
     .map(({ videoId, isWatched }) => `${videoId}:${isWatched === true}`).join(',')
 })
 
 watch(() => store.getters.getSubscriptionFeedRefreshInProgress, refreshing => {
   if (!refreshing) {
-    cachedContentDuringLargeRefresh.value = null
+    cachedContentDuringRefresh.value = null
+    deferChannelUpdates = false
     return
   }
 
@@ -158,12 +161,18 @@ watch(() => store.getters.getSubscriptionFeedRefreshInProgress, refreshing => {
     }
     if (cachedEntryCount > MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES) break
   }
-  if (cachedEntryCount > MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES) {
-    // Keep the current cached entries on screen instead of processing the
-    // entire feed after each channel response. Recompute once at completion.
-    cachedContentDuringLargeRefresh.value = newContentByCategory.value
-  }
+  deferChannelUpdates = cachedEntryCount > MAX_INCREMENTAL_SUBSCRIPTION_FEED_ENTRIES
+  // Snapshot every refresh so incoming responses cannot each rebuild the DOM.
+  // Small feeds publish coalesced updates; large feeds publish at completion.
+  cachedContentDuringRefresh.value = newContentByCategory.value
 }, { immediate: true, flush: 'sync' })
+
+for (const feedType of ['videos', 'shorts', 'live', 'posts']) {
+  useSubscriptionChannelUpdates(feedType, () => {
+    if (cachedContentDuringRefresh.value === null || deferChannelUpdates) return
+    cachedContentDuringRefresh.value = getCurrentContentByCategory()
+  })
+}
 
 // Cache updates can wait until the refresh ends, but local filtering and sort
 // choices should still affect the list while a large refresh is running.
@@ -179,14 +188,14 @@ watch([
     store.getters.getUseRssFeeds
   ].join(',')
 ], () => {
-  if (cachedContentDuringLargeRefresh.value !== null) {
-    cachedContentDuringLargeRefresh.value = getCurrentContentByCategory()
+  if (cachedContentDuringRefresh.value !== null) {
+    cachedContentDuringRefresh.value = getCurrentContentByCategory()
   }
 })
 
 watch(watchedHistoryState, (current, previous) => {
   if (current !== null && previous !== null) {
-    cachedContentDuringLargeRefresh.value = getCurrentContentByCategory()
+    cachedContentDuringRefresh.value = getCurrentContentByCategory()
   }
 })
 

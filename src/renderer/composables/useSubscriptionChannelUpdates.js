@@ -1,11 +1,14 @@
-import { onActivated, onBeforeUnmount, onDeactivated, reactive, watch } from 'vue'
+import { computed, onActivated, onBeforeUnmount, onDeactivated, reactive, watch } from 'vue'
 
 import { SUBSCRIPTION_REFRESH_CHANNEL_EVENT } from '../helpers/subscriptions'
 import { useTabContext } from '../tabs/TabContext'
+import store from '../store/index'
+import { getSubscriptionsForFeed } from '../helpers/subscription-channels'
 
 // Rebuilding and sorting the whole feed for every channel would be wasteful
 // with hundreds of subscriptions, so updates are coalesced.
 const FEED_UPDATE_INTERVAL_MS = 100
+const MAX_INCREMENTAL_CHANNELS = 20
 const updateVersions = reactive({
   videos: 0,
   shorts: 0,
@@ -20,13 +23,15 @@ window.addEventListener(SUBSCRIPTION_REFRESH_CHANNEL_EVENT, (event) => {
 })
 
 /**
- * Runs the callback while a refresh of the given feed is in progress, whenever
- * newly fetched channels have been added to its cache.
+ * Publishes cached channel updates incrementally for small refreshes and at
+ * completion or cancellation for large refreshes.
  * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
  * @param {() => void} onChannelsRefreshed
  */
 export function useSubscriptionChannelUpdates(tab, onChannelsRefreshed) {
   const { isTabPresented } = useTabContext()
+  const deferDuringRefresh = computed(() => store.getters.getSubscriptionFeedRefreshInProgress &&
+    getSubscriptionsForFeed(store.getters.getActiveProfile.subscriptions, tab).length > MAX_INCREMENTAL_CHANNELS)
   let timeout = null
   let lastRun = 0
   let updatePending = false
@@ -39,7 +44,7 @@ export function useSubscriptionChannelUpdates(tab, onChannelsRefreshed) {
   function run() {
     timeout = null
 
-    if (!isActive || !isPresented()) {
+    if (!isActive || !isPresented() || deferDuringRefresh.value) {
       return
     }
 
@@ -49,7 +54,7 @@ export function useSubscriptionChannelUpdates(tab, onChannelsRefreshed) {
   }
 
   function schedule() {
-    if (!isActive || !isPresented() || timeout !== null) {
+    if (!isActive || !isPresented() || deferDuringRefresh.value || timeout !== null) {
       return
     }
 
@@ -60,6 +65,13 @@ export function useSubscriptionChannelUpdates(tab, onChannelsRefreshed) {
   watch(() => updateVersions[tab], () => {
     updatePending = true
     schedule()
+  })
+
+  // Large refreshes still persist every response and report progress, but
+  // rebuilding/animating the visible list repeatedly can dominate their CPU
+  // cost. Publish its pending cache changes when finished or cancelled.
+  watch(deferDuringRefresh, deferred => {
+    if (!deferred && updatePending) schedule()
   })
 
   if (isTabPresented !== null) {
