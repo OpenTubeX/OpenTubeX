@@ -254,6 +254,7 @@
       >
         <FtInput
           :placeholder="t('Settings.Privacy Settings.Automatic History Retention Placeholder')"
+          :icon="['fas', 'clock']"
           :label="t('Settings.Privacy Settings.Automatic History Retention')"
           input-type="number"
           :value="historyRetentionDaysInput"

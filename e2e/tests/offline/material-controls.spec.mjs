@@ -445,7 +445,8 @@ for (const scale of [100, 95]) {
             const overflow = await panel.evaluate(element => {
               const input = element.querySelector('.ft-input').getBoundingClientRect()
               const label = element.querySelector('.selectLabelText').getBoundingClientRect()
-              return Math.max(input.left - label.left, label.right - input.right, input.top - label.top, label.bottom - input.bottom)
+              return Math.max(input.left - label.left, label.right - input.right,
+                Math.abs(label.top + label.height / 2 - input.top))
             })
             expect.soft(overflow, `label overflow with focused=${focused}`).toBeLessThanOrEqual(1)
           }
@@ -574,23 +575,24 @@ for (const scale of [100, 95]) {
         }
       })
 
-      test('floats field labels without moving values and keeps selects compact', async ({ page }, testInfo) => {
+      test('keeps outlined labels in the top border without moving values and keeps selects compact', async ({ page }, testInfo) => {
         await page.emulateMedia({ reducedMotion: 'reduce' })
         const section = await goToSettingsSection(page, 'download')
         const field = section.getByRole('textbox', { name: 'Download Folder', exact: true })
         const label = field.locator('..').locator('.selectLabel')
         const select = section.getByRole('combobox', { name: 'Concurrent downloads' })
         await field.evaluate(element => element.blur())
-        await expect(label).toHaveCSS('font-size', '16px')
+        await expect(field.locator('../..')).toHaveClass(/outlined/)
+        const labelBounds = await label.boundingBox()
         await field.focus()
-        await expect(field).toHaveAttribute('placeholder', '')
+        await expect(field).toHaveAttribute('placeholder', '/path/to/downloads')
         await expect(field).toHaveAccessibleDescription(DOWNLOAD_FOLDER_DESCRIPTION)
         await expect(field).toHaveAccessibleName('Download Folder')
-        await expect(label).toHaveCSS('transform', 'matrix(0.75, 0, 0, 0.75, 0, 0)')
+        expect((await label.boundingBox()).y).toBeCloseTo(labelBounds.y, 1)
         await field.fill('/tmp/material-downloads')
         const focusedBounds = await field.boundingBox()
         await field.evaluate(element => element.blur())
-        await expect(label).toHaveCSS('transform', 'matrix(0.75, 0, 0, 0.75, 0, 0)')
+        expect((await label.boundingBox()).y).toBeCloseTo(labelBounds.y, 1)
         expect((await field.boundingBox()).y).toBeCloseTo(focusedBounds.y, 1)
 
         for (const direction of ['ltr', 'rtl']) {
@@ -614,11 +616,117 @@ for (const scale of [100, 95]) {
         }
         if (scale === 100) {
           await page.evaluate(() => { document.body.dir = 'ltr' })
-          await updateControlProps(field, { variant: 'filled' })
-          await updateControlProps(select, { variant: 'filled' })
-          const screenshot = testInfo.outputPath('material-floating-fields.png')
-          await section.locator('.downloadPathInputs').screenshot({ path: screenshot })
-          await testInfo.attach('material-floating-fields', { path: screenshot, contentType: 'image/png' })
+          const screenshot = testInfo.outputPath('material-outlined-fields.png')
+          await page.locator('.settingsWindow').screenshot({ path: screenshot })
+          await testInfo.attach('material-outlined-fields', { path: screenshot, contentType: 'image/png' })
+        }
+      })
+
+      test('text fields keep Material filled and outlined focus treatments separate', async ({ page }, testInfo) => {
+        await page.emulateMedia({ reducedMotion: 'reduce' })
+        const section = await goToSettingsSection(page, 'download')
+        const field = section.getByRole('textbox', { name: 'Download Folder', exact: true })
+        const component = field.locator('../..')
+        const label = component.locator('.selectLabel')
+        await expect(label.locator('.selectLabelIcon')).toHaveAttribute('data-icon', 'folder-open')
+        for (const direction of ['ltr', 'rtl']) {
+          await page.evaluate(value => { document.body.dir = value }, direction)
+          for (const variant of ['filled', 'outlined']) {
+            await updateControlProps(field, { variant })
+            await field.fill('')
+            await field.blur()
+            await page.mouse.move(0, 0)
+            const resting = await field.evaluate(element => {
+              const style = getComputedStyle(element)
+              return { background: style.backgroundColor, shadow: style.boxShadow, radius: style.borderBottomLeftRadius }
+            })
+            expect(resting.shadow).toBe('none')
+            expect(resting.radius).toBe(variant === 'filled' ? '0px' : '4px')
+            if (variant === 'outlined') {
+              const offset = await field.evaluate(element => {
+                const field = element.getBoundingClientRect()
+                return ['.selectLabel', '.selectLabelIcon'].map(selector => {
+                  const bounds = element.parentElement.querySelector(selector).getBoundingClientRect()
+                  return bounds.top + bounds.height / 2 - field.top
+                })
+              })
+              for (const center of offset) expect(center).toBeCloseTo(0, 1)
+            }
+            await field.hover()
+            const hovered = await field.evaluate(element => getComputedStyle(element).backgroundColor)
+            if (variant === 'filled') expect(hovered).not.toBe(resting.background)
+            else expect(hovered).toBe(resting.background)
+            // focus() exercises the same focus-visible rule as keyboard entry.
+            await field.focus()
+            expect(await field.evaluate(element => element.matches(':focus-visible'))).toBe(true)
+            await expect(field).toHaveCSS('outline-style', 'none')
+            const focused = await field.evaluate(element => {
+              const style = getComputedStyle(element)
+              return { shadow: style.boxShadow, caret: style.caretColor, border: style.borderBottomColor }
+            })
+            expect(focused.shadow).toContain(variant === 'filled' ? '0px -2px' : '0px 0px 0px 2px')
+            expect(focused.caret).toBe(focused.border)
+            await field.fill('/tmp/material-downloads')
+            await field.blur()
+            await expect(label).toBeVisible()
+            const geometry = await field.evaluate(element => {
+              const style = getComputedStyle(element)
+              const bounds = element.getBoundingClientRect()
+              const label = element.parentElement.querySelector('.selectLabel').getBoundingClientRect()
+              return {
+                valueCenterOffset: (parseFloat(style.paddingTop) - parseFloat(style.paddingBottom)) / 2,
+                labelTop: label.top - bounds.top,
+                labelBottom: label.bottom - bounds.top,
+                valueTop: parseFloat(style.borderTopWidth) + parseFloat(style.paddingTop),
+                height: bounds.height
+              }
+            })
+            expect(geometry.height).toBeCloseTo(45, 1)
+            if (variant === 'outlined') {
+              expect(geometry.valueCenterOffset).toBeCloseTo(0, 1)
+              expect(geometry.labelTop).toBeLessThan(0)
+            } else {
+              expect(geometry.labelBottom).toBeLessThanOrEqual(geometry.valueTop + 1)
+            }
+            await updateControlProps(field, { disabled: true })
+            await expect(field).toBeDisabled()
+            await expect(field).toHaveCSS('opacity', '0.38')
+            await updateControlProps(field, { disabled: false })
+            if (scale === 100 && direction === 'ltr') {
+              await field.focus()
+              const screenshot = testInfo.outputPath(`material-text-field-${variant}.png`)
+              await page.locator('.settingsWindow').screenshot({ path: screenshot })
+              await testInfo.attach(`material-text-field-${variant}`, { path: screenshot, contentType: 'image/png' })
+            }
+          }
+        }
+        await page.evaluate(() => { document.body.dir = 'ltr' })
+        await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('showDownloadsFromSettings'))
+        await expect(page.getByRole('dialog', { name: 'Downloads', exact: true })).toBeVisible()
+        await page.getByRole('button', { name: 'Add download', exact: true }).click()
+        const url = page.getByRole('textbox', { name: 'Video or playlist URL', exact: true })
+        await url.focus()
+        await expect(url).toHaveCSS('outline-style', 'none')
+        await expect(url).toHaveCSS('border-bottom-left-radius', '4px')
+        await expect(url.locator('../..')).toHaveClass(/outlined/)
+        const urlLabel = url.locator('..').locator('.selectLabel')
+        await expect(urlLabel.locator('.selectLabelIcon')).toHaveAttribute('data-icon', 'link')
+        for (const pack of ['material', 'remix']) {
+          await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', value), pack)
+          await expect(urlLabel.locator('.selectLabelIcon')).toHaveAttribute('data-icon-pack', pack)
+          await url.blur()
+          await page.mouse.move(0, 0)
+          const containment = await urlLabel.evaluate(element => {
+            const label = element.getBoundingClientRect()
+            const card = element.closest('.promptCard').getBoundingClientRect()
+            return Math.max(card.top - label.top, label.bottom - card.bottom, card.left - label.left, label.right - card.right)
+          })
+          expect(containment).toBeLessThanOrEqual(0)
+          if (scale === 100) {
+            const screenshot = testInfo.outputPath(`outlined-download-url-${pack}.png`)
+            await page.locator('.promptCard').screenshot({ path: screenshot })
+            await testInfo.attach(`outlined-download-url-${pack}`, { path: screenshot, contentType: 'image/png' })
+          }
         }
       })
 
@@ -1002,7 +1110,7 @@ for (const scale of [100, 95]) {
       const input = section.locator('input[type="password"]')
       await expect(input).toHaveAccessibleName('Password')
       await input.focus()
-      await expect(input).toHaveAttribute('placeholder', '')
+      await expect(input).toHaveAttribute('placeholder', 'Choose a password')
       const field = input.locator('../..')
       await expect(field).toContainText('Set a password to prevent access to settings')
       const label = field.locator('.selectLabelText')
@@ -1014,8 +1122,13 @@ for (const scale of [100, 95]) {
       await updateControlProps(input, { label: 'Set a password to prevent access to settings' })
       await input.evaluate(element => element.blur())
       const before = await input.boundingBox()
+      const labelOffset = () => input.evaluate(element => {
+        const label = element.parentElement.querySelector('.selectLabel').getBoundingClientRect()
+        return label.top - element.getBoundingClientRect().top
+      })
+      const offsetBefore = await labelOffset()
       await input.focus()
-      await expect(field.locator('.selectLabel')).toHaveCSS('transform', 'matrix(0.75, 0, 0, 0.75, 0, 0)')
+      expect(await labelOffset()).toBeCloseTo(offsetBefore, 1)
       expect((await input.boundingBox()).width).toBeCloseTo(before.width, 1)
     })
 
@@ -1412,12 +1525,13 @@ test('filled fields and slider progress retain their input behavior', async ({ p
     'showCreatePlaylistPrompt', { title: '', description: '', sourcePlaylistId: null }
   ))
   const field = page.locator('.playlistNameInput input')
+  await updateControlProps(field, { variant: 'filled' })
   await field.fill('Material controls')
   await field.hover()
   await expect(field).toHaveValue('Material controls')
   await expect(field).toHaveCSS('height', '45px')
   await expect(field).toHaveCSS('border-bottom-width', '1px')
-  expect(await field.evaluate(element => getComputedStyle(element).boxShadow)).toContain('0px -1px')
+  expect(await field.evaluate(element => getComputedStyle(element).boxShadow)).toContain('0px -2px')
   const screenshot = testInfo.outputPath('material-fields.png')
   await page.locator('.promptCard').screenshot({ path: screenshot })
   await testInfo.attach('material-fields', { path: screenshot, contentType: 'image/png' })

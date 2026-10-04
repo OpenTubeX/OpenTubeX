@@ -13,6 +13,7 @@
           <span>{{ t('Settings.Theme Settings.Custom Theme.Theme Name') }}</span>
           <input
             v-model="draft.name"
+            :placeholder="t('Form Inputs.Example', { example: t('Settings.Theme Settings.Base Theme.Dark') })"
             type="text"
             maxlength="80"
           >

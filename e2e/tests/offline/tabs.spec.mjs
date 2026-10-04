@@ -2875,6 +2875,7 @@ test.describe('tab organizer', () => {
     const openRows = organizer.locator('.tabGroup .tabOrganizerRow')
     await expect(organizer).toBeVisible()
     await expect(search).toHaveAttribute('placeholder', 'Search tabs')
+    await expect(organizer.locator('.tabOrganizerSearch .textInputLabelText')).toHaveCount(0)
 
     await search.fill('/history')
     await expect(openRows).toHaveCount(1)
@@ -2932,10 +2933,10 @@ test.describe('tab organizer', () => {
     await selectNoneButton.click()
     await alphaRow.locator('.tabSelection label').click()
 
-    const groupSelect = bulkActions.getByRole('combobox', { name: 'Move selected tabs to group' })
+    const groupSelect = organizer.locator('.selectionControls').getByRole('combobox', { name: 'Move selected tabs to group' })
     await expect(groupSelect).toBeVisible()
     await expect(bulkActions.locator(':scope > :last-child')).toHaveClass(/tabOrganizerSearch/)
-    const groupSelectLabel = bulkActions.locator('.select-label')
+    const groupSelectLabel = organizer.locator('.bulkActionSelect .select-label')
     await expect(groupSelectLabel).toHaveText('Move selected tabs to group')
     await expect(groupSelectLabel).toBeVisible()
     const [
@@ -2957,8 +2958,11 @@ test.describe('tab organizer', () => {
     ])
     expect(actionsBox.y - (selectionBox.y + selectionBox.height)).toBeLessThanOrEqual(10)
     expect(groupSelectLabelBox.y + groupSelectLabelBox.height / 2).toBeCloseTo(groupSelectBox.y, 0)
-    expect(Math.abs(searchContainerBox.y - groupSelectBox.y)).toBeLessThanOrEqual(1)
-    expect(searchContainerBox.x).toBeGreaterThanOrEqual(groupSelectBox.x + groupSelectBox.width + 7)
+    expect(groupSelectBox.y + groupSelectBox.height).toBeLessThanOrEqual(selectionBox.y + selectionBox.height + 1)
+    const pinBox = await pinButton.boundingBox()
+    const closeBox = await bulkActions.getByRole('button', { name: 'Close', exact: true }).boundingBox()
+    expect(Math.abs(searchInputBox.y + searchInputBox.height - pinBox.y - pinBox.height)).toBeLessThanOrEqual(1)
+    expect(searchContainerBox.x).toBeGreaterThanOrEqual(closeBox.x + closeBox.width + 7)
     expect(actionsBox.x + actionsBox.width - (searchContainerBox.x + searchContainerBox.width)).toBeLessThanOrEqual(1)
     expect(searchIconBox.x).toBeGreaterThan(searchInputBox.x)
     expect(searchIconBox.x + searchIconBox.width).toBeLessThan(searchInputBox.x + searchInputBox.width)
@@ -2998,6 +3002,8 @@ test.describe('tab organizer', () => {
 
     await researchGroup.getByRole('button', { name: 'Rename Research' }).click()
     const renameInput = organizer.locator('.groupRenameInput')
+    await expect(renameInput).toHaveAccessibleName('Group name')
+    expect(await renameInput.evaluate(element => element.labels.length)).toBe(0)
     await renameInput.fill('Reading')
     await renameInput.press('Enter')
     researchGroup = organizer.locator('.tabGroup').filter({ hasText: 'Reading' })
@@ -3047,7 +3053,8 @@ test.describe('tab organizer', () => {
       groupSelect.boundingBox(),
       organizer.locator('.tabOrganizerSearch').boundingBox()
     ])
-    expect(responsiveLabelBox.y).toBeGreaterThanOrEqual(responsiveSelectionBox.y + responsiveSelectionBox.height)
+    expect(responsiveLabelBox.y).toBeGreaterThanOrEqual(responsiveSelectionBox.y - 1)
+    expect(responsiveLabelBox.y + responsiveLabelBox.height).toBeLessThanOrEqual(responsiveSelectionBox.y + responsiveSelectionBox.height + 1)
     expect(responsiveSearchBox.y).toBeGreaterThanOrEqual(responsiveGroupSelectBox.y + responsiveGroupSelectBox.height)
     expect(Math.abs(responsiveSearchBox.x - responsiveBulkActionsBox.x)).toBeLessThanOrEqual(1)
     expect(Math.abs(

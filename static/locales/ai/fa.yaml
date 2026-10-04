@@ -2007,6 +2007,15 @@ Tray Icon:
   Follow App Theme: "پیروی از زمینهٔ برنامه"
 
 Form Inputs:
+  Enter Password Hint: "گذرواژهٔ خود را وارد کنید"
+  Choose Password Hint: "یک گذرواژه انتخاب کنید"
+  Confirm Password Hint: "گذرواژهٔ جدید خود را تکرار کنید"
+  Encryption Passphrase Hint: "عبارت عبور رمزگذاری خود را وارد کنید"
+  Show Password: "نمایش گذرواژه"
+  Hide Password: "پنهان کردن گذرواژه"
+  Search Text Hint: "عبارت‌های جستجو را وارد کنید"
+  Playlist Description Hint: "این فهرست پخش را توصیف کنید"
+  Filename Preview: "پیش‌نمایش نام فایل"
   Enter Channels: "کانال‌ها را وارد کنید"
   Enter Text: "متن را وارد کنید"
   Video URL: نشانی ویدیو یا فهرست پخش

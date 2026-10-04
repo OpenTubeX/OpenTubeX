@@ -19,7 +19,9 @@
     <div class="channelSettingsHeader">
       <FtInput
         input-type="search"
-        :placeholder="t('Settings.Channel Settings.Search Channels')"
+        :label="t('Settings.Channel Settings.Search Channels')"
+        :icon="['fas', 'search']"
+        :placeholder="t('Form Inputs.Search Text Hint')"
         :show-action-button="false"
         :value="searchQuery"
         @input="searchQuery = $event"

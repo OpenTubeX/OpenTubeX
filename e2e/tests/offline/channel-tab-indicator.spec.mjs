@@ -1,3 +1,4 @@
+import { captureAppFramebuffer } from '../../helpers/screenshots.mjs'
 import { test, expect, sel } from '../../helpers/app.mjs'
 
 const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
@@ -390,4 +391,22 @@ test('handles quick switches, search, background tabs, and reduced motion', asyn
   await expectAligned(page)
   await expect(page.locator(indicatorSelector)).toHaveCSS('transition-property', 'none')
   expect(await page.locator(indicatorSelector).evaluate(element => element.getAnimations().length)).toBe(0)
+})
+
+test('desktop channel tabs size to their content and show icons in both packs', async ({ app, page }, testInfo) => {
+  for (const pack of ['material', 'remix']) {
+    await page.evaluate(pack => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateIconPack', pack), pack)
+    const tabs = page.locator('.channelDetails:visible [role="tab"]')
+    for (const tab of await tabs.all()) {
+      await expect(tab.locator('.ft-icon__glyph')).toBeVisible()
+      const spacing = await tab.evaluate(element => {
+        const label = element.querySelector('.tabLabel').getBoundingClientRect()
+        const icon = element.querySelector('.ft-icon').getBoundingClientRect()
+        return element.getBoundingClientRect().width - label.width - icon.width
+      })
+      expect(spacing).toBeCloseTo(36, 0)
+    }
+    await expectAligned(page)
+    await captureAppFramebuffer(app, testInfo, `channel-tab-icons-${pack}`)
+  }
 })

@@ -30,6 +30,7 @@ test('opens with the configured shortcut and supports accessible fuzzy keyboard 
   await expect(dialog).toBeVisible()
   await expect(input).toBeFocused()
   await expect(input).toHaveAttribute('placeholder', 'Search commands and settings…')
+  await expect(dialog.locator('.textInputLabelText')).toHaveCount(0)
   await expect(dialog.locator('.commandPaletteTitle')).toHaveCount(0)
   const [searchBounds, closeBounds] = await Promise.all([
     dialog.locator('.commandPaletteSearch').boundingBox(),

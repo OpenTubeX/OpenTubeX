@@ -416,7 +416,6 @@
         @change="updateMaxVideoPlaybackRate"
       />
     </FtSliderGrid>
-    <br>
     <FtFlexBox>
       <FtToggleSwitch
         class="quickPlaybackSpeedToggle"
@@ -438,7 +437,6 @@
         <FtSyncedSettingIndicator setting-key="quickPlaybackSpeedBarOptions" />
       </div>
     </FtFlexBox>
-    <br>
     <FtFlexBox>
       <FtToggleSwitch
         :label="t('Settings.Player Settings.Screenshot.Enable')"
@@ -485,14 +483,13 @@
         v-if="(USING_ELECTRON || IS_CAPACITOR) && screenshotMode === 'default_folder'"
         class="screenshotFolderContainer"
       >
-        <p class="screenshotFolderLabel">
-          {{ t('Settings.Player Settings.Screenshot.Folder Label') }}
-        </p>
         <FtInput
           class="screenshotFolderPath"
-          :placeholder="displayAndroidPath(screenshotFolder)"
+          :label="t('Settings.Player Settings.Screenshot.Folder Label')"
+          :icon="['fas', 'folder-open']"
+          placeholder="/path/to/screenshots"
+          :value="displayAndroidPath(screenshotFolder)"
           :show-action-button="false"
-          :show-label="false"
           :disabled="true"
         />
         <FtButton
@@ -506,31 +503,26 @@
         v-if="screenshotMode !== 'clipboard'"
         class="screenshotFolderContainer"
       >
-        <p class="screenshotFilenamePatternTitle labelRow">
-          {{ t('Settings.Player Settings.Screenshot.File Name Label') }}
-          <FtTooltip
-            class="selectTooltip"
-            position="bottom"
-            :tooltip="t('Settings.Player Settings.Screenshot.File Name Tooltip')"
-          />
-        </p>
         <FtInput
           class="screenshotFilenamePatternInput"
-          placeholder=""
+          :tooltip="t('Settings.Player Settings.Screenshot.File Name Tooltip')"
+          :label="t('Settings.Player Settings.Screenshot.File Name Label')"
+          :icon="['fas', 'file-lines']"
+          placeholder="%Y-%M-%D_%H-%N-%S"
           :value="screenshotFilenamePattern"
           :show-action-button="false"
-          :show-label="false"
           @input="handleScreenshotFilenamePatternChanged"
         />
         <FtInput
           class="screenshotFilenamePatternExample"
-          :placeholder="screenshotFilenameExample"
+          :label="t('Form Inputs.Filename Preview')"
+          :icon="['fas', 'file-image']"
+          placeholder="2026-10-04_12-30-00.png"
+          :value="screenshotFilenameExample"
           :show-action-button="false"
-          :show-label="false"
           :disabled="true"
         />
       </FtFlexBox>
-      <br>
     </div>
     <FtSettingsSubpage
       :open="showQuickPlaybackSpeedBarManager"
@@ -602,10 +594,11 @@
             >
               <FtInput
                 class="quickPlaybackSpeedNameInput"
+                :label="t('Settings.Player Settings.Playback Speed Name')"
+                :icon="['fas', 'font']"
                 :placeholder="getAutomaticQuickPlaybackSpeedName(option.speed)"
                 :value="option.name"
                 :show-action-button="false"
-                :show-label="false"
                 @input="(value) => updateQuickPlaybackSpeedName(option.id, value)"
               />
               <button
@@ -619,15 +612,19 @@
               </button>
             </div>
           </div>
-          <input
-            class="quickPlaybackSpeedInput"
-            type="number"
-            min="0.01"
-            step="0.01"
-            :aria-label="t('Settings.Player Settings.Playback Speed')"
-            :value="option.speed"
-            @change="(event) => updateQuickPlaybackSpeed(option.id, event.target.value)"
-          >
+          <label class="textInputLabel quickPlaybackSpeedValueField">
+            <span class="textInputLabelText">{{ t('Settings.Player Settings.Playback Speed') }}</span>
+            <input
+              class="quickPlaybackSpeedInput"
+              type="number"
+              :placeholder="t('Form Inputs.Example', { example: '1.25' })"
+              min="0.01"
+              step="0.01"
+              :aria-label="t('Settings.Player Settings.Playback Speed')"
+              :value="option.speed"
+              @change="(event) => updateQuickPlaybackSpeed(option.id, event.target.value)"
+            >
+          </label>
           <button
             class="quickPlaybackSpeedIconButton delete"
             type="button"
@@ -660,7 +657,6 @@ import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtButton from '../FtButton/FtButton.vue'
 import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 import FtInput from '../FtInput/FtInput.vue'
-import FtTooltip from '../FtTooltip/FtTooltip.vue'
 import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
 
 import store from '../../store/index'

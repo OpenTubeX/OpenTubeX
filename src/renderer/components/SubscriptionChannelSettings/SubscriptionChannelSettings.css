@@ -23,6 +23,10 @@
 
 
 
+.channelSettingsHeader :deep(.ft-input-component) {
+  inline-size: 100%;
+}
+
 .channelSelectionToolbar {
   border: 1px solid var(--border-color);
   border-radius: calc(6px * var(--ui-roundness));

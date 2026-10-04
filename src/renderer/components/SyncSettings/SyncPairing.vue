@@ -29,6 +29,7 @@
       <template v-if="receiveStage === 'name'">
         <p>{{ t('Settings.Sync Settings.Pairing Device Name Hint') }}</p>
         <FtInput
+          :icon="['fas', 'devices']"
           :label="t('Settings.Sync Settings.Device Name')"
           :placeholder="t('Form Inputs.Example', { example: t('Settings.Sync Settings.Desktop Device') })"
           :show-action-button="false"
@@ -58,6 +59,7 @@
             <span>{{ t('Settings.Sync Settings.Pairing Code') }}</span>
             <input
               :value="pairingCode"
+              :placeholder="t('Form Inputs.Example', { example: 'opentubex-pairing:…' })"
               readonly
               spellcheck="false"
               @focus="$event.target.select()"
@@ -189,6 +191,7 @@
           <textarea
             ref="manualPairingCodeInput"
             v-model="manualPairingCode"
+            :placeholder="t('Form Inputs.Example', { example: 'opentubex-pairing:…' })"
             maxlength="2048"
             rows="8"
             spellcheck="false"

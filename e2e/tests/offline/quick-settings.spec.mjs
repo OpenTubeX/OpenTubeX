@@ -565,7 +565,7 @@ test.describe('quick system themes', () => {
     const appearance = await goToSettingsSection(page, 'appearance')
     await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
     await page.getByRole('button', { name: 'Add setting' }).click()
-    const search = page.getByPlaceholder('Search settings')
+    const search = page.getByLabel('Search settings')
     for (const label of ['Light theme', 'Dark theme']) {
       await search.fill(label)
       await page.locator('.settingPicker .optionWrapper').getByText(label, { exact: true }).click()
@@ -681,7 +681,7 @@ test.describe('additional quick settings', () => {
     const appearance = await goToSettingsSection(page, 'appearance')
     await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
     await page.getByRole('button', { name: 'Add setting' }).click()
-    const search = page.getByPlaceholder('Search settings')
+    const search = page.getByLabel('Search settings')
     for (const [, label] of ADDITIONAL_QUICK_SETTINGS) {
       await search.fill(label)
       await page.locator('.settingPicker .optionWrapper').getByText(new RegExp(`^${label}$`, 'i')).click()
@@ -1295,7 +1295,7 @@ test.describe('customizable quick settings', () => {
     await expect(selectedSettings).not.toContainText('Hide Comments')
 
     await page.getByRole('button', { name: 'Add setting' }).click()
-    const settingPicker = page.getByPlaceholder('Search settings')
+    const settingPicker = page.getByLabel('Search settings')
     const settingPopover = page.getByRole('dialog', { name: 'Add setting' })
     await expect(settingPopover).toBeVisible()
     await expect(settingPopover).toHaveCSS('position', 'absolute')
@@ -1392,7 +1392,7 @@ test.describe('quick settings customization at fractional UI scale', () => {
     await appearance.getByRole('button', { name: 'Customize quick settings' }).click()
     await page.getByRole('button', { name: 'Add setting' }).click()
 
-    const settingPicker = page.getByPlaceholder('Search settings')
+    const settingPicker = page.getByLabel('Search settings')
     const settingPopover = page.getByRole('dialog', { name: 'Add setting' })
     const options = page.locator('.settingPicker .list')
     const scrollbar = options.locator('.os-scrollbar-vertical')

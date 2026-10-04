@@ -20,6 +20,7 @@
       ref="tagNameInput"
       :disabled="disabled || isUpdating"
       :placeholder="tagNamePlaceholder"
+      :icon="areChannelTags ? ['fas', 'users'] : ['fas', 'hashtag']"
       :label="entryLabel || (areChannelTags ? t('Form Inputs.Enter Channels') : t('Form Inputs.Enter Text'))"
       :setting-key="settingKey"
       :min-input-length="minInputLength"

@@ -3209,3 +3209,17 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
     outline-color: currentcolor;
   }
 }
+
+.textInputLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.textInputLabelText {
+  color: var(--secondary-text-color);
+  font-size: 12px;
+  font-weight: normal;
+  line-height: 16px;
+}

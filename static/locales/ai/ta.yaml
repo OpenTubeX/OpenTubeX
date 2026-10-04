@@ -1973,6 +1973,15 @@ Tray Icon:
   Follow App Theme: "செயலியின் கருப்பொருளைப் பின்பற்று"
 
 Form Inputs:
+  Enter Password Hint: "உங்கள் கடவுச்சொல்லை உள்ளிடவும்"
+  Choose Password Hint: "ஒரு கடவுச்சொல்லைத் தேர்வு செய்யவும்"
+  Confirm Password Hint: "புதிய கடவுச்சொல்லை மீண்டும் உள்ளிடவும்"
+  Encryption Passphrase Hint: "உங்கள் குறியாக்கக் கடவுச்சொற்றொடரை உள்ளிடவும்"
+  Show Password: "கடவுச்சொல்லைக் காட்டு"
+  Hide Password: "கடவுச்சொல்லை மறை"
+  Search Text Hint: "தேடல் சொற்களை உள்ளிடவும்"
+  Playlist Description Hint: "இந்த இயக்கப்பட்டியலை விவரிக்கவும்"
+  Filename Preview: "கோப்புப் பெயர் முன்னோட்டம்"
   Enter Channels: "சேனல்களை உள்ளிடவும்"
   Enter Text: "உரையை உள்ளிடவும்"
   Video URL: வீடியோ அல்லது இயக்கப்பட்டியல் URL

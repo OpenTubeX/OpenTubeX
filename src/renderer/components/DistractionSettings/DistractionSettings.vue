@@ -100,7 +100,6 @@
         />
       </div>
     </div>
-    <br class="hide-on-mobile">
     <FtFlexBox>
       <FtToggleSwitch
         :label="t('Settings.Distraction Free Settings.Enable Block Lists')"

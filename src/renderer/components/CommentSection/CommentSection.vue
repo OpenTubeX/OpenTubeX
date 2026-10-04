@@ -160,7 +160,9 @@
     >
       <FtInput
         input-type="search"
-        :placeholder="$t('Comments.Search loaded comments')"
+        :label="$t('Comments.Search loaded comments')"
+        :icon="['fas', 'search']"
+        :placeholder="$t('Form Inputs.Search Text Hint')"
         :show-action-button="false"
         :value="commentSearchQuery"
         @input="updateCommentSearchQuery"

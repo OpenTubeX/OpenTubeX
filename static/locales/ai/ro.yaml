@@ -1970,6 +1970,15 @@ Tray Icon:
   Follow App Theme: "Urmează tema aplicației"
 
 Form Inputs:
+  Enter Password Hint: "Introdu parola ta"
+  Choose Password Hint: "Alege o parolă"
+  Confirm Password Hint: "Repetă noua parolă"
+  Encryption Passphrase Hint: "Introdu fraza ta de criptare"
+  Show Password: "Afișează parola"
+  Hide Password: "Ascunde parola"
+  Search Text Hint: "Introduceți termeni de căutare"
+  Playlist Description Hint: "Descrieți această listă de redare"
+  Filename Preview: "Previzualizarea numelui fișierului"
   Enter Channels: "Introdu canale"
   Enter Text: "Introdu text"
   Video URL: URL video sau listă de redare

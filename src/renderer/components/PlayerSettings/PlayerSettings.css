@@ -69,16 +69,8 @@
   inline-size: 95%;
 }
 
-.screenshotFolderLabel,
-.screenshotFolderButton,
-.screenshotFilenamePatternTitle {
+.screenshotFolderButton {
   flex-grow: 0;
-}
-
-.screenshotFilenamePatternTitle {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
 }
 
 .screenshotFolderPath,
@@ -86,6 +78,10 @@
 .screenshotFilenamePatternExample {
   flex-grow: 1;
   margin-block-start: 10px;
+}
+
+.screenshotFilenamePatternInput {
+  min-inline-size: 0;
 }
 
 .emptyState {
@@ -196,17 +192,11 @@
   min-block-size: 45px;
 }
 
-.quickPlaybackSpeedNameEditRow {
-  align-items: flex-start;
-}
-
 .quickPlaybackSpeedNameInput {
+  --input-bottom-spacing: 0;
+
   flex: 1;
   min-inline-size: 0;
-}
-
-.quickPlaybackSpeedNameInput :deep(.ft-input) {
-  margin-block-end: 0;
 }
 
 .quickPlaybackSpeedName {
@@ -273,7 +263,7 @@
     grid-template-columns: 40px minmax(0, 1fr) 40px;
   }
 
-  .quickPlaybackSpeedInput {
+  .quickPlaybackSpeedValueField {
     grid-column: 1 / -1;
     grid-row: 2;
   }

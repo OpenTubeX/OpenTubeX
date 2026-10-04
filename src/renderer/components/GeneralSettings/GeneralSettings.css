@@ -1,20 +1,20 @@
 .generalSelectGrid.generalSelectGrid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  justify-content: stretch;
+  grid-template-columns: repeat(2, minmax(0, max-content));
+  justify-content: space-evenly;
   column-gap: 40px;
-  inline-size: min(100%, 700px);
+  inline-size: min(100%, 1000px);
   margin-inline: auto;
 }
 
 .generalSelectGrid :deep(.select) {
   min-inline-size: 0;
-  inline-size: 100%;
+  max-inline-size: 100%;
+  justify-self: center;
   box-sizing: border-box;
 }
 
 .switchGrid {
-  gap: 10px;
-  margin-block-end: 12px;
+  row-gap: 0;
 }
 
 .appearanceSwitchGrid.appearanceSwitchGrid {
@@ -22,10 +22,11 @@
   justify-content: center;
 }
 
-@container settings-content (width <= 680px) {
+@container settings-content (width <= 800px) {
   .generalSelectGrid.generalSelectGrid {
-    grid-template-columns: minmax(0, 1fr);
-    inline-size: min(100%, 330px);
+    grid-template-columns: minmax(0, max-content);
+    justify-content: center;
+    inline-size: min(100%, 500px);
   }
 }
 

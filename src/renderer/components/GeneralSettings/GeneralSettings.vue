@@ -144,6 +144,7 @@
     <div class="switchGrid generalSelectGrid">
       <FtSelect
         v-if="mode === 'general'"
+        size-to-content
         :placeholder="t('Settings.Privacy Settings.Week Starts On')"
         :value="statsWeekStartsOn"
         setting-key="statsWeekStartsOn"
@@ -155,6 +156,7 @@
       />
       <FtSelect
         v-if="mode === 'providers' && supportsYtDlp"
+        size-to-content
         :placeholder="t('Settings.General Settings.Stream Extraction Method.Stream Extraction Method')"
         :value="videoPlaybackEngine"
         setting-key="videoPlaybackEngine"
@@ -166,6 +168,7 @@
       />
       <FtSelect
         v-if="mode === 'providers'"
+        size-to-content
         :placeholder="t('Settings.General Settings.Preferred API Backend.Preferred API Backend')"
         :value="backendPreference"
         :select-names="backendNames"
@@ -176,6 +179,7 @@
       />
       <FtSelect
         v-if="mode === 'general'"
+        size-to-content
         :placeholder="t('Settings.General Settings.Default Landing Page')"
         :value="landingPage"
         setting-key="landingPage"
@@ -186,6 +190,7 @@
       />
       <FtSelect
         v-if="mode === 'general' && (USING_ELECTRON || IS_CAPACITOR)"
+        size-to-content
         :placeholder="t('Settings.General Settings.New Tab Position.New Tab Position')"
         :value="newTabPosition"
         setting-key="newTabPosition"
@@ -196,6 +201,7 @@
       />
       <FtSelect
         v-if="mode === 'general' && (USING_ELECTRON || IS_CAPACITOR)"
+        size-to-content
         :placeholder="t('Settings.General Settings.Tab Close Focus.Tab Close Focus')"
         :value="tabCloseFocus"
         setting-key="tabCloseFocus"
@@ -206,6 +212,7 @@
       />
       <FtSelect
         v-if="mode === 'general' && (USING_ELECTRON || IS_CAPACITOR)"
+        size-to-content
         :placeholder="t('Settings.General Settings.Startup Behavior.Startup Behavior')"
         :value="startupBehavior"
         setting-key="startupBehavior"
@@ -217,6 +224,7 @@
       />
       <FtSelect
         v-if="mode === 'appearance'"
+        size-to-content
         :placeholder="t('Settings.General Settings.Video View Type.Video View Type')"
         :value="listType"
         setting-key="listType"
@@ -227,6 +235,7 @@
       />
       <FtSelect
         v-if="mode === 'appearance'"
+        size-to-content
         :placeholder="t('Settings.General Settings.Playlist View Type.Playlist View Type')"
         :value="playlistViewType"
         setting-key="playlistViewType"
@@ -237,6 +246,7 @@
       />
       <FtSelect
         v-if="mode === 'appearance'"
+        size-to-content
         :placeholder="t('Settings.General Settings.Thumbnail Preference.Thumbnail Preference')"
         :value="thumbnailPreference"
         setting-key="thumbnailPreference"
@@ -250,6 +260,7 @@
       />
       <FtSelect
         v-if="mode === 'general' && !IS_CAPACITOR && !phoneLayout"
+        size-to-content
         :placeholder="t('Settings.General Settings.Extra Thumbnail Action Button.Extra Thumbnail Action Button')"
         :value="effectiveExtraThumbnailAction"
         setting-key="extraThumbnailAction"
@@ -260,6 +271,7 @@
       />
       <FtSelect
         v-if="mode === 'general'"
+        size-to-content
         :placeholder="t('Settings.General Settings.Locale Preference')"
         :value="currentLocale"
         setting-key="currentLocale"
@@ -271,6 +283,7 @@
       />
       <FtSelect
         v-if="mode === 'general'"
+        size-to-content
         :placeholder="t('Settings.General Settings.Date Format')"
         :value="dateFormat"
         setting-key="dateFormat"
@@ -281,6 +294,7 @@
       />
       <FtSelect
         v-if="mode === 'general'"
+        size-to-content
         :placeholder="t('Settings.General Settings.Time Format')"
         :value="timeFormat"
         setting-key="timeFormat"
@@ -291,6 +305,7 @@
       />
       <FtSelect
         v-if="mode === 'general'"
+        size-to-content
         :placeholder="t('Settings.General Settings.Reduced Motion.Reduced Motion')"
         :value="reducedMotion"
         setting-key="reducedMotion"
@@ -301,6 +316,7 @@
       />
       <FtSelect
         v-if="mode === 'general' && SUPPORTS_LOCAL_API && (backendPreference === 'local' || backendFallback)"
+        size-to-content
         :placeholder="t('Settings.General Settings.Avoid translation.Avoid translation')"
         :value="avoidTranslation"
         setting-key="avoidTranslation"
@@ -312,6 +328,7 @@
       />
       <FtSelect
         v-if="mode === 'general' && regionDataLoaded"
+        size-to-content
         :placeholder="t('Settings.General Settings.Region for Trending')"
         :value="region"
         setting-key="region"
@@ -327,6 +344,7 @@
     >
       <FtFlexBox class="settingsFlexStart460px">
         <FtInput
+          :icon="['fas', 'link']"
           :label="t('Settings.General Settings.Current Invidious Instance')"
           placeholder="https://your-instance.example"
           :show-action-button="false"

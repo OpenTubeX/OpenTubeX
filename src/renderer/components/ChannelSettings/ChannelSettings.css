@@ -113,6 +113,7 @@
 }
 
 .channelSearch {
+  inline-size: 100%;
   margin-block-end: 1em;
 }
 

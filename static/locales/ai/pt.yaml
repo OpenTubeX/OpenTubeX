@@ -1973,6 +1973,15 @@ Tray Icon:
   Follow App Theme: "Seguir o tema da aplicação"
 
 Form Inputs:
+  Enter Password Hint: "Introduza a sua palavra-passe"
+  Choose Password Hint: "Escolha uma palavra-passe"
+  Confirm Password Hint: "Repita a sua nova palavra-passe"
+  Encryption Passphrase Hint: "Introduza a sua frase de encriptação"
+  Show Password: "Mostrar palavra-passe"
+  Hide Password: "Ocultar palavra-passe"
+  Search Text Hint: "Introduza termos de pesquisa"
+  Playlist Description Hint: "Descreva esta lista de reprodução"
+  Filename Preview: "Pré-visualização do nome do ficheiro"
   Enter Channels: "Insira canais"
   Enter Text: "Insira texto"
   Video URL: URL do vídeo ou da lista

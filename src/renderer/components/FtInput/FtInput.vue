@@ -6,7 +6,8 @@
       search: isSearch,
       forceTextColor,
       showActionButton,
-      floatingLabel: showLabel && !isSearch,
+      showPasswordToggle: inputType === 'password',
+      floatingLabel: showLabel,
       hasValue: inputDataPresent,
       hasSupportingText: supportingText !== '',
       outlined: variant === 'outlined' && !isSearch
@@ -21,7 +22,7 @@
         :class="{ disabled }"
         :style="inputTextStyle"
         :maxlength="maxlength"
-        :type="inputType"
+        :type="inputType === 'password' && passwordVisible ? 'text' : inputType"
         :placeholder="placeholder"
         :disabled="disabled"
         :readonly="readonly"
@@ -51,6 +52,24 @@
         >{{ label || placeholder }}</span>
       </label>
       <slot name="extraAction" />
+      <button
+        v-if="inputType === 'password'"
+        type="button"
+        class="inputAction passwordVisibilityToggle"
+        :class="{ enabled: !disabled }"
+        :disabled="disabled"
+        :aria-label="passwordVisibilityLabel"
+        :title="passwordVisibilityLabel"
+        :aria-controls="id"
+        @pointerdown.prevent
+        @click="togglePasswordVisibility"
+      >
+        <FtIcon
+          class="buttonIcon"
+          :icon="['fas', passwordVisible ? 'eye-slash' : 'eye']"
+          aria-hidden="true"
+        />
+      </button>
       <button
         v-if="showActionButton"
         class="inputAction"
@@ -162,7 +181,7 @@ const { t } = useI18n()
 const props = defineProps({
   variant: {
     type: String,
-    default: 'filled',
+    default: 'outlined',
     validator: value => ['filled', 'outlined'].includes(value)
   },
   inputType: {
@@ -207,7 +226,7 @@ const props = defineProps({
   },
   showLabel: {
     type: Boolean,
-    default: false
+    default: true
   },
   isSearch: {
     type: Boolean,
@@ -260,6 +279,27 @@ const emit = defineEmits(['blur', 'clear', 'click', 'input', 'keydown', 'remove'
 const id = useId()
 
 const inputRef = useTemplateRef('inputRef')
+const passwordVisible = ref(false)
+const passwordVisibilityLabel = computed(() => passwordVisible.value
+  ? t('Form Inputs.Hide Password')
+  : t('Form Inputs.Show Password'))
+
+watch([() => props.inputType, () => props.disabled], () => {
+  passwordVisible.value = false
+})
+
+async function togglePasswordVisibility() {
+  const input = inputRef.value
+  if (!input || props.disabled) return
+
+  const { selectionStart, selectionEnd, selectionDirection } = input
+  passwordVisible.value = !passwordVisible.value
+  await nextTick()
+  if (selectionStart !== null && selectionEnd !== null) {
+    input.setSelectionRange(selectionStart, selectionEnd, selectionDirection)
+  }
+}
+
 const tooltipRef = useTemplateRef('tooltipRef')
 const descriptionIds = computed(() => [
   tooltipRef.value?.id,
@@ -321,11 +361,12 @@ const inputTextStyle = computed(() => {
   if (!props.isSearch) return null
 
   const offset = getInputTextAscentOffset(inputDataDisplayed.value)
-  const centeredPadding = (45 - 20) / 2
+  const paddingStart = props.showLabel ? 20 : (45 - 20) / 2
+  const paddingEnd = props.showLabel ? 5 : (45 - 20) / 2
 
   return {
-    '--search-input-padding-block-start': `${centeredPadding - offset}px`,
-    '--search-input-padding-block-end': `${centeredPadding + offset}px`
+    '--search-input-padding-block-start': `${paddingStart - offset}px`,
+    '--search-input-padding-block-end': `${paddingEnd + offset}px`
   }
 })
 

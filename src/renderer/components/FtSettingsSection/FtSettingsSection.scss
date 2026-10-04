@@ -13,6 +13,10 @@
 }
 
 .sectionBody {
+  /* Each regular control contributes half of the shared 20px row gap. */
+  --settings-control-margin: 10px;
+  --input-bottom-spacing: 0;
+
   background-color: var(--settings-section-bg-color, var(--card-bg-color));
   backdrop-filter: var(--card-bg-blur, none);
   border-radius: calc(8px * var(--ui-roundness));
@@ -23,12 +27,6 @@
     padding-block: 0;
     padding-inline: 20px;
     inline-size: 100%;
-  }
-
-  > :deep(div:not(:last-child, .ft-flex-box)) {
-    @container settings-content (width <= 800px) {
-      margin-block-end: 20px;
-    }
   }
 }
 
@@ -76,17 +74,26 @@
   max-inline-size: 100%;
 }
 
+.sectionBody :deep(.sliderGrid) {
+  row-gap: 0;
+}
+
 :deep(.switchColumn .pure-material-slider) {
   box-sizing: border-box;
   inline-size: min(380px, calc(100% - 16px));
 }
 
-:deep(.switchColumn > .select) {
-  margin-block: 8px;
-}
-
 :deep(.center) {
   text-align: center;
+}
+
+/* Balance the indicator gutter so a standalone field's outline is centered. */
+:deep(.ft-flex-box > .ft-input-component:only-child:has(.inputIndicators > *)),
+:deep(.centeredSettingsInput:has(.inputIndicators > *)) {
+  box-sizing: border-box;
+  margin-inline: 70px;
+  min-inline-size: min(340px, calc(100% - 140px));
+  max-inline-size: calc(100% - 140px);
 }
 
 @container settings-content (width <= 460px) {
@@ -165,8 +172,11 @@
       box-sizing: border-box;
       min-inline-size: 0;
       max-inline-size: calc(100% - 14px);
-      margin-block: 10px;
       margin-inline: 7px;
+    }
+
+    :deep(.switch-ctn.compact) {
+      margin-block: 0;
     }
   }
 }

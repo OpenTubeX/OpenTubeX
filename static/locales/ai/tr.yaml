@@ -1920,6 +1920,15 @@ Tray Icon:
   Follow App Theme: "Uygulama temasını izle"
 
 Form Inputs:
+  Enter Password Hint: "Parolanızı girin"
+  Choose Password Hint: "Bir parola seçin"
+  Confirm Password Hint: "Yeni parolanızı tekrarlayın"
+  Encryption Passphrase Hint: "Şifreleme parola ifadenizi girin"
+  Show Password: "Parolayı göster"
+  Hide Password: "Parolayı gizle"
+  Search Text Hint: "Arama terimlerini girin"
+  Playlist Description Hint: "Bu oynatma listesini açıklayın"
+  Filename Preview: "Dosya adı önizlemesi"
   Enter Channels: "Kanalları girin"
   Enter Text: "Metin girin"
   Video URL: Video veya oynatma listesi URL'si

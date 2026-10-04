@@ -1,8 +1,19 @@
-import { copyFile, mkdir } from 'node:fs/promises'
+import { copyFile, mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { expect, goTo, goToSettingsSection, sel } from './app.mjs'
 import { expectImagesLoaded } from './visual-fixtures.mjs'
+
+/** Capture the complete Electron framebuffer after pending layout has rendered. */
+export async function captureAppFramebuffer(app, testInfo, name) {
+  await app.page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  const framebuffer = await app.electronApp.evaluate(async ({ BrowserWindow }) =>
+    (await BrowserWindow.getAllWindows()[0].webContents.capturePage()).toPNG().toString('base64'))
+  const destination = testInfo.outputPath(`${name}.png`)
+  await writeFile(destination, Buffer.from(framebuffer, 'base64'))
+  await testInfo.attach(name, { path: destination, contentType: 'image/png' })
+  return destination
+}
 
 const SIZE = { width: 1710, height: 1026 }
 const VIDEO_ID = 'AY5qcIq5u2g'

@@ -20,6 +20,7 @@
         @change="loadTemplateSource"
       />
       <FtInput
+        :icon="['fas', 'hashtag']"
         :label="t('Downloads.Template Name')"
         :placeholder="t('Form Inputs.Template Name Example')"
         :show-label="true"
@@ -68,6 +69,7 @@
 
       <section class="optionSection">
         <FtInput
+          :icon="['fas', 'file-lines']"
           :label="t('Downloads.File Name Template')"
           placeholder="{title}.{ext}"
           :tooltip="fileNameTemplateHelp"
@@ -82,6 +84,7 @@
         <h3>{{ t('Downloads.Time Range and Chapters') }}</h3>
         <div class="segmentGrid">
           <FtInput
+            :icon="['fas', 'clock']"
             :label="t('Downloads.Start Time')"
             placeholder="HH:MM:SS"
             :disabled="subtitlesOnly"
@@ -95,6 +98,7 @@
             aria-hidden="true"
           />
           <FtInput
+            :icon="['fas', 'clock']"
             :label="t('Downloads.End Time')"
             placeholder="HH:MM:SS"
             :disabled="subtitlesOnly"
@@ -174,6 +178,7 @@
         </div>
         <FtInput
           class="subtitleLanguages"
+          :icon="['fas', 'language']"
           :label="t('Downloads.Subtitle Languages')"
           placeholder="en.*,de.*"
           :tooltip="t('Downloads.Subtitle Languages Help')"
@@ -187,6 +192,7 @@
 
       <section class="optionSection">
         <FtInput
+          :icon="['fas', 'terminal']"
           :label="t('Downloads.Additional yt-dlp Arguments')"
           :placeholder="t('Form Inputs.Download Arguments Hint')"
           :show-action-button="false"

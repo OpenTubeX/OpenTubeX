@@ -39,6 +39,7 @@
           <FtInput
             v-else-if="!IS_IOS"
             class="externalSoftwarePath"
+            :icon="['fas', 'folder-open']"
             :label="t('Settings.External Software Settings.yt-dlp Executable Path')"
             placeholder="/path/to/yt-dlp"
             :show-action-button="true"
@@ -118,6 +119,7 @@
           <FtInput
             v-if="ytDlpFfmpegSource === 'system'"
             class="externalSoftwarePath"
+            :icon="['fas', 'folder-open']"
             :label="t('Settings.External Software Settings.FFmpeg Executable Path')"
             placeholder="/path/to/ffmpeg"
             :show-action-button="true"
@@ -956,7 +958,6 @@ async function chooseBrowserProfilePath() {
   min-inline-size: 0;
   max-inline-size: calc(100% - 70px);
   margin-inline-end: 70px;
-  margin-block-start: 30px;
 }
 
 .restrictedPlaybackAuthControl > :deep(.select) {
@@ -965,10 +966,6 @@ async function chooseBrowserProfilePath() {
   min-inline-size: 0;
   max-inline-size: calc(100% - 70px + var(--select-indicator-space));
   margin-inline-end: calc(70px - var(--select-indicator-space));
-}
-
-.restrictedPlaybackAuthDetail :deep(.inputWrapper) {
-  margin-block-end: 0;
 }
 
 .restrictedPlaybackBrowserProfile {

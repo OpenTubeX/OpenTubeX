@@ -478,7 +478,7 @@ test('clamps the channel list after searching', async ({ page }) => {
   await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
   await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
 
-  await page.getByPlaceholder('Search channels').fill('Alpha Channel')
+  await page.getByLabel('Search channels').fill('Alpha Channel')
   await expect(page.locator('.channelSettings')).toHaveCount(1)
   await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
   await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)

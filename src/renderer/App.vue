@@ -366,17 +366,20 @@
         class="findbarIcon"
         aria-hidden="true"
       />
-      <input
-        ref="findbarInputRef"
-        v-model="findbarQuery"
-        class="findbarInput"
-        type="search"
-        :placeholder="t('Find in page')"
-        :aria-label="t('Find in page')"
-        @input="findInPage"
-        @keydown.enter.prevent="findInPage($event.shiftKey)"
-        @keydown.esc.prevent="closeFindbar"
-      >
+      <label class="textInputLabel findbarField">
+        <span class="textInputLabelText">{{ t('Find in page') }}</span>
+        <input
+          ref="findbarInputRef"
+          v-model="findbarQuery"
+          class="findbarInput"
+          type="search"
+          :placeholder="t('Form Inputs.Search Text Hint')"
+          :aria-label="t('Find in page')"
+          @input="findInPage"
+          @keydown.enter.prevent="findInPage($event.shiftKey)"
+          @keydown.esc.prevent="closeFindbar"
+        >
+      </label>
       <span
         class="findbarStatus"
         aria-live="polite"
