@@ -256,9 +256,14 @@ test('fullscreen horizontal swipes preview, seek, and cancel without triggering 
     const startingPlaybackTime = await video.evaluate(video => video.currentTime)
     await expect.poll(() => video.evaluate(video => video.currentTime)).toBeGreaterThan(startingPlaybackTime + 0.5)
     assert.equal(await seekBarTime(), previewTime)
+    // Capture the committed position when seeking starts. Playback can advance
+    // between releasing the touch and the next CDP round trip on slow emulators.
+    await video.evaluate(video => {
+      video.addEventListener('seeking', () => { video.fullscreenSeekCommittedTime = video.currentTime }, { once: true })
+    })
     await touch('touchEnd')
     await expect(preview).toHaveCount(0)
-    await expect.poll(() => video.evaluate((video, time) => Math.abs(video.currentTime - time), previewTime)).toBeLessThan(0.5)
+    await expect.poll(() => video.evaluate((video, time) => Math.abs(video.fullscreenSeekCommittedTime - time), previewTime)).toBeLessThan(0.5)
     assert.equal(await video.evaluate(video => video.paused), false, 'Playing video continues after seeking')
     await expect(controls).not.toHaveAttribute('shown', { timeout: 10000 })
     assert.equal(await page.evaluate(() => document.fullscreenElement !== null), true)
