@@ -31,6 +31,35 @@ test('autoplay keeps its original compact switch geometry', async ({ app, page }
   }
 })
 
+test('autoplay track and thumb keep their synchronized transitions', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  const player = page.locator('.ftVideoPlayer')
+  await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+  const button = player.locator('.shaka-controls-button-panel > .autoplay-toggle')
+  for (const frosted of [true, false]) {
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+    await expect(player).toHaveClass(frosted ? /^(?!.*classicPlayerControls)/ : /classicPlayerControls/)
+    const transitions = await button.evaluate(element => {
+      const duration = (selector, property) => {
+        const style = getComputedStyle(element.querySelector(selector))
+        const index = style.transitionProperty.split(',').map(value => value.trim()).indexOf(property)
+        return index < 0 ? 0 : Number.parseFloat(style.transitionDuration.split(',')[index])
+      }
+      return {
+        track: duration('.ft-autoplay-switch', 'background-color'),
+        thumb: duration('.ft-autoplay-switch-thumb', 'transform'),
+      }
+    })
+    expect(transitions.track).toBeGreaterThan(0)
+    expect(transitions.track).toBe(transitions.thumb)
+    const checked = await button.getAttribute('aria-pressed') === 'true'
+    await button.click()
+    await expect(button).toHaveAttribute('aria-pressed', String(!checked))
+  }
+})
+
 test('download options fit horizontally and its Cancel button retains a border', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
   await openMockedVideo(page)
