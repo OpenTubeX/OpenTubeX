@@ -22,3 +22,28 @@ export function initializePageScrollbar(
 
   return createOverlayScrollbar(pageDocument.body)
 }
+
+/**
+ * Android draws its page scrollbar outside CSS, even when fullscreen hides
+ * document overflow. Keep it hidden for native fullscreen and full-window mode.
+ * @param {Document} pageDocument
+ * @param {(hidden: boolean) => void} setHidden
+ * @returns {() => void}
+ */
+export function observePageScrollbarVisibility(pageDocument, setHidden) {
+  let previousHidden
+  const update = () => {
+    const hidden = pageDocument.fullscreenElement !== null || pageDocument.body.classList.contains('playerFullWindow')
+    if (hidden === previousHidden) return
+    previousHidden = hidden
+    setHidden(hidden)
+  }
+  const observer = new pageDocument.defaultView.MutationObserver(update)
+  observer.observe(pageDocument.body, { attributes: true, attributeFilter: ['class'] })
+  pageDocument.addEventListener('fullscreenchange', update)
+  update()
+  return () => {
+    observer.disconnect()
+    pageDocument.removeEventListener('fullscreenchange', update)
+  }
+}
