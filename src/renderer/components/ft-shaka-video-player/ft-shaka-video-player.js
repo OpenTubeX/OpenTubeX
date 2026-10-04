@@ -11067,14 +11067,14 @@ export default defineComponent({
       nextTick(showOverlayControls)
     }
 
-    function exitFullscreenHandler() {
-      if (!process.env.IS_ELECTRON || !ui) return
+    async function exitPresentationModes() {
+      if (!ui) return
 
       try {
         const controls = ui.getControls()
         // Exit fullscreen if enabled
         if (controls && controls.isFullScreenEnabled && controls.isFullScreenEnabled()) {
-          controls.toggleFullScreen()
+          await controls.toggleFullScreen()
         }
 
         // Exit fullwindow if enabled
@@ -11085,7 +11085,7 @@ export default defineComponent({
         }
       } catch (error) {
         // Silently ignore errors if component is not fully initialized
-        console.error('Error exiting fullscreen on tab switch:', error)
+        console.error('Error exiting player presentation modes:', error)
       }
     }
 
@@ -11337,7 +11337,7 @@ export default defineComponent({
       // Only set up after UI is fully initialized
       if (process.env.IS_ELECTRON && ui && window.ftElectron?.tabs?.onExitFullscreen) {
         try {
-          exitFullscreenCleanup = window.ftElectron.tabs.onExitFullscreen(exitFullscreenHandler, tabId)
+          exitFullscreenCleanup = window.ftElectron.tabs.onExitFullscreen(exitPresentationModes, tabId)
         } catch (error) {
           console.error('Failed to set up exit fullscreen listener:', error)
         }
@@ -12283,6 +12283,7 @@ export default defineComponent({
       hasLoaded,
       hasPlaybackPosition,
       scrollMiniPlayerActive,
+      exitPresentationModes,
 
       isPaused,
       play,

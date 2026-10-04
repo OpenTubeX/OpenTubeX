@@ -219,9 +219,10 @@ export function getViewportWidth() {
 }
 
 /**
+ * @param {{ includeSideNav?: boolean }} [options]
  * @returns {{ top: number, left: number, right: number, bottom: number }}
  */
-export function getViewportInsets() {
+export function getViewportInsets({ includeSideNav = false } = {}) {
   let topInset = MARGIN
   let leftInset = MARGIN
   let rightInset = MARGIN
@@ -255,11 +256,19 @@ export function getViewportInsets() {
   // would otherwise change the saved bottom-relative player position.
   if (sideNav) {
     const rect = sideNav.getBoundingClientRect()
-    const isBottomBar = rect.width > rect.height &&
-      rect.top >= window.innerHeight - rect.bottom
+    // Match SideNav's responsive breakpoint: an expanded sidebar can be wider
+    // than it is tall in short landscape viewports.
+    const isBottomBar = window.innerWidth <= 680
     if (isBottomBar) {
       // In narrow Electron windows this bar sits above any bottom tabs.
       bottomInset += rect.height
+    } else if (includeSideNav) {
+      const viewportWidth = getViewportWidth()
+      if (rect.left <= viewportWidth - rect.right) {
+        leftInset = Math.max(leftInset, rect.right + MARGIN)
+      } else {
+        rightInset = Math.max(rightInset, viewportWidth - rect.left + MARGIN)
+      }
     }
   }
 

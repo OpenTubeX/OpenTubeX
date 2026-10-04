@@ -92,6 +92,9 @@ const unregister = tabLifecycleService.register(props.tabId, {
     retained.value = Boolean(player) && !context.to.path.startsWith('/watch/') &&
       (minimized.value || enabled.value)
     if (retained.value) {
+      // Finish leaving fullscreen while Watch is still presented, so its
+      // docked panels close before the mini-player takes ownership.
+      await player.exitPresentationModes()
       const tab = store.getters.getTabById(props.tabId)
       const entry = tab?.history[tab.historyIndex]
       watchTitle = entry?.title || ''
