@@ -44,6 +44,7 @@ for (const uiScale of [100, 125]) {
       await expect(scrollbar).toHaveClass(/os-scrollbar-visible/)
       const thumb = scrollbar.locator('.os-scrollbar-handle')
       const bounds = await thumb.boundingBox()
+      expect(bounds).not.toBeNull()
       const initialScrollTop = await dropdown.evaluate(element => element.scrollTop)
       await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
       await page.mouse.down()
