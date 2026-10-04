@@ -11083,6 +11083,11 @@ export default defineComponent({
             detail: false
           }))
         }
+        // The full-window listener creates its exit animation after rendering.
+        // Cancel it before navigation relocates the container into the mini-player.
+        await nextTick()
+        fullWindowAnimation?.cancel()
+        fullWindowAnimation = null
       } catch (error) {
         // Silently ignore errors if component is not fully initialized
         console.error('Error exiting player presentation modes:', error)

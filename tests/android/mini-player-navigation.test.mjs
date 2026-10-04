@@ -16,6 +16,7 @@ async function withMobileVideo(run) {
   const session = await page.context().newCDPSession(page)
   const tap = async (locator, position = null) => {
     const box = await locator.boundingBox()
+    assert.ok(box, 'Touch target must have a visible bounding box')
     const point = { x: box.x + (position?.x ?? box.width / 2), y: box.y + (position?.y ?? box.height / 2) }
     await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] })
     await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
@@ -86,22 +87,34 @@ async function withMobileVideo(run) {
     await player.locator('video').evaluate(video => { video.loop = true; return video.play() })
     await run({ page, player, watch, tap })
   } finally {
-    await page.evaluate(async ({ settings, originalRoute }) => {
-      if (document.fullscreenElement) await document.exitFullscreen()
-      document.querySelector('.ftVideoPlayer video')?.pause()
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      store.commit('setKeepPlayingOnNavigation', false)
-      location.hash = originalRoute
-      for (const [key, value] of Object.entries(settings ?? {})) store.commit('set' + key, value)
-      if (window.__miniNavigationFetch) window.fetch = window.__miniNavigationFetch
-      delete window.__miniNavigationFetch
-      document.querySelector('#mini-navigation-test-style')?.remove()
-    }, { settings, originalRoute })
-    adb('settings', 'put', 'system', 'user_rotation', rotation)
-    adb('settings', 'put', 'system', 'accelerometer_rotation', automaticRotation)
-    await watch?.dispose()
-    await session.detach()
-    await browser.close()
+    try {
+      await page.evaluate(async ({ settings, originalRoute }) => {
+        if (document.fullscreenElement) await document.exitFullscreen()
+        document.querySelector('.ftVideoPlayer video')?.pause()
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setKeepPlayingOnNavigation', false)
+        location.hash = originalRoute
+        for (const [key, value] of Object.entries(settings ?? {})) store.commit('set' + key, value)
+        if (window.__miniNavigationFetch) window.fetch = window.__miniNavigationFetch
+        delete window.__miniNavigationFetch
+        document.querySelector('#mini-navigation-test-style')?.remove()
+      }, { settings, originalRoute })
+    } finally {
+      try {
+        adb('settings', 'put', 'system', 'user_rotation', rotation)
+        adb('settings', 'put', 'system', 'accelerometer_rotation', automaticRotation)
+      } finally {
+        try {
+          await watch?.dispose()
+        } finally {
+          try {
+            await session.detach()
+          } finally {
+            await browser.close()
+          }
+        }
+      }
+    }
   }
 }
 
