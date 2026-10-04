@@ -7,12 +7,17 @@ import { getRecommendationLearningEntries, recommendationSubscriptionIds } from 
 import { runCooperatively } from '../../src/renderer/helpers/cooperativeTask.js'
 import { mergeRecommendationCandidates } from '../../src/renderer/helpers/recommendationCandidates.js'
 import { shouldHideMembersOnlyContent } from '../../src/renderer/helpers/restricted-playback.js'
+import { getUpcomingPremiereTimestamp } from '../../src/renderer/helpers/subscription-entries.js'
 
 const subscriptionsSource = await readFile(new URL('../../src/renderer/helpers/subscriptions.js', import.meta.url), 'utf8')
+const premiereStart = subscriptionsSource.indexOf('export function isUpcomingPremiere(')
+const premiereSource = subscriptionsSource.slice(premiereStart, subscriptionsSource.indexOf('\n}\n', premiereStart) + 2)
+const isUpcomingPremiere = compileFunction(`${premiereSource.replace('export ', '')}\nreturn isUpcomingPremiere`,
+  ['getUpcomingPremiereTimestamp', 'isRssUpcomingPremiere'])(getUpcomingPremiereTimestamp, () => false)
 const visibilityStart = subscriptionsSource.indexOf('export function isVideoHiddenByPreferences(')
 const visibilitySource = subscriptionsSource.slice(visibilityStart, subscriptionsSource.indexOf('\n}\n', visibilityStart) + 2)
 const isVideoHiddenByPreferences = compileFunction(`${visibilitySource.replace('export ', '')}\nreturn isVideoHiddenByPreferences`,
-  ['isUpcomingPremiere'])(() => false)
+  ['isUpcomingPremiere'])(isUpcomingPremiere)
 
 const source = (await readFile(new URL('../../src/renderer/composables/useHomeRecommendations.js', import.meta.url), 'utf8'))
   .replace(/^import[\s\S]*? from ['"][^'"]+['"]\n/gm, '')
@@ -47,7 +52,7 @@ function createFeed({ records = [], candidates = [], playlists = [], settings = 
     computed, ref, shallowRef, toRaw, watch, store, runCooperatively,
     onBeforeUnmount: callback => cleanups.push(callback),
     useTabContext: () => ({}),
-    getRecommendationLearningEntries, recommendationSubscriptionIds, mergeRecommendationCandidates,
+    getRecommendationLearningEntries, recommendationSubscriptionIds, mergeRecommendationCandidates, getUpcomingPremiereTimestamp,
     isVideoHiddenByPreferences,
     shouldHideMembersOnlyContent: (membersOnly, getters) => shouldHideMembersOnlyContent(membersOnly, getters, true),
     buildRecommendationProfileAsync: async (...args) => { work.profiles++; return buildProfile(...args) },
@@ -237,6 +242,48 @@ test('changing exploration during Load more preserves the appended feed', async 
     stop()
   }
 })
+
+for (const field of ['premiereTimestamp', 'premiereDate']) {
+  test(`revisiting Home reranks at the scheduled premiere time from ${field}`, async t => {
+    let now = Date.now()
+    t.mock.method(Date, 'now', () => now)
+    const startsAt = now + 60000
+    const first = createFeed({
+      settings: { getHideUpcomingPremieres: true },
+      candidates: [{ videoId: 'normal' }, {
+        videoId: 'premiere',
+        [field]: field === 'premiereTimestamp' ? startsAt / 1000 : new Date(startsAt).toISOString(),
+      }],
+    })
+    await waitForFeed(first.feed)
+    assert.equal(first.feed.recommendations.value.length, 1)
+    first.stop()
+    now += 30000
+    const beforeStart = first.mount()
+    assert.equal(beforeStart.feed.isLoading.value, false)
+    assert.equal(beforeStart.work.rankings, 1)
+    beforeStart.stop()
+
+    now = startsAt
+    const afterStart = first.mount()
+    try {
+      await waitForFeed(afterStart.feed)
+      assert.deepEqual(afterStart.feed.recommendations.value.map(video => video.videoId), ['normal', 'premiere'])
+      assert.equal(afterStart.work.requests, 1)
+      assert.equal(afterStart.work.rankings, 2)
+    } finally {
+      afterStart.stop()
+    }
+    const reopened = first.mount()
+    try {
+      assert.equal(reopened.feed.isLoading.value, false)
+      assert.equal(reopened.feed.recommendations.value.length, 2)
+      assert.equal(reopened.work.rankings, 2)
+    } finally {
+      reopened.stop()
+    }
+  })
+}
 
 test('revisiting Home refreshes expired feeds', async t => {
   const first = createFeed({ candidates: [{ videoId: 'candidate' }] })

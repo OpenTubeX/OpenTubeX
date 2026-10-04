@@ -7,6 +7,7 @@ import { getLocalChannelVideos, getLocalSearchResults, getLocalRelatedVideos } f
 import { getInvidiousChannelVideos, getInvidiousSearchResults, getInvidiousRelatedVideos } from '../helpers/api/invidious'
 import { isVideoHiddenByPreferences } from '../helpers/subscriptions'
 import { shouldHideMembersOnlyContent } from '../helpers/restricted-playback'
+import { getUpcomingPremiereTimestamp } from '../helpers/subscription-entries'
 import { useTabContext } from '../tabs/TabContext'
 
 let cachedCandidates = null
@@ -144,6 +145,16 @@ export function useHomeRecommendations(visible) {
     forbiddenTitles: store.getters.getActiveForbiddenTitles,
     hideMembersOnly: shouldHideMembersOnlyContent(true, store.getters),
   }))
+  function nextVisibilityChange() {
+    if (!store.getters.getHideUpcomingPremieres) return Infinity
+    const now = Date.now()
+    let next = Infinity
+    for (const video of candidates) {
+      const timestamp = getUpcomingPremiereTimestamp(video)
+      if (timestamp != null && timestamp > now) next = Math.min(next, timestamp)
+    }
+    return next
+  }
 
   async function refresh(useCache = false, append = false) {
     cancelRequest()
@@ -171,7 +182,7 @@ export function useHomeRecommendations(visible) {
       : null
     if (cache) {
       candidates = cache.videos; feedId = cache.feedId; round = cache.round; limit = cache.limit
-      if (cache.rankingContext === rankingContext.value) {
+      if (cache.rankingContext === rankingContext.value && Date.now() < cache.nextVisibilityChange) {
         ranked.value = cache.ranked
         initialized = true
         return
@@ -187,9 +198,10 @@ export function useHomeRecommendations(visible) {
     const requestRankingContext = rankingContext.value
     if (cache) {
       // Candidate-only preference changes need a new ranking, not new requests.
+      const visibilityChange = nextVisibilityChange()
       await rerank()
       if (requestGeneration !== generation) return
-      cachedCandidates = { ...cache, ranked: ranked.value, rankingContext: requestRankingContext }
+      cachedCandidates = { ...cache, ranked: ranked.value, rankingContext: requestRankingContext, nextVisibilityChange: visibilityChange }
       restoringCachedFeed = false
       isLoading.value = false
       initialized = true
@@ -233,12 +245,25 @@ export function useHomeRecommendations(visible) {
     // Publish one completed ranking so each source response cannot reshuffle
     // cards while the user is choosing a video.
     candidates = mergeRecommendationCandidates([...candidates, ...result.videos]).slice(0, 1600)
+    const visibilityChange = nextVisibilityChange()
     await rerank(learned)
     if (generation !== requestGeneration) return
     initialized = true
     hasError.value = result.failedSources > 0
     isLoading.value = false
-    if (!hasError.value) cachedCandidates = { context: requestContext, rankingContext: requestRankingContext, videos: candidates, ranked: ranked.value, feedId, round, limit, at: Date.now() }
+    if (!hasError.value) {
+      cachedCandidates = {
+        context: requestContext,
+        rankingContext: requestRankingContext,
+        videos: candidates,
+        ranked: ranked.value,
+        feedId,
+        round,
+        limit,
+        at: Date.now(),
+        nextVisibilityChange: visibilityChange,
+      }
+    }
     function withFallback(local, invidious, signal) {
       return fetchRecommendationSource(backend === 'local' ? local : invidious,
         fallback ? (backend === 'local' ? invidious : local) : null, signal)
