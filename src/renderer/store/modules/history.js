@@ -1,3 +1,5 @@
+import { toRaw } from 'vue'
+import { getContinueWatchingCandidates } from '../../helpers/homeSections'
 import { DBHistoryHandlers } from '../../../datastores/handlers/index'
 import {
   canMarkHistoryEntryAsWatched,
@@ -15,7 +17,10 @@ function getRetentionCutoff(days) {
   return Date.now() - parsedDays * MILLISECONDS_PER_DAY
 }
 
+const continueWatchingCache = new WeakMap()
+
 const state = {
+  historyRevision: 0,
   historyCacheSorted: [],
 
   // Vuex doesn't support Maps, so we have to use an object here instead
@@ -24,6 +29,24 @@ const state = {
 }
 
 const getters = {
+  // Invalidate through mutations instead of collecting reactive dependencies
+  // on tens of thousands of records. Share the result across Home tabs/mounts.
+  getContinueWatchingHistory: state => () => {
+    const history = toRaw(state.historyCacheSorted)
+    let cached = continueWatchingCache.get(history)
+    if (!cached || cached.revision !== state.historyRevision) {
+      cached = { revision: state.historyRevision, candidates: getContinueWatchingCandidates(history), entries: [] }
+      continueWatchingCache.set(history, cached)
+    }
+    // Reopening Home must recheck premieres that started without a history
+    // mutation. Keep the unchanged shelf identity for ordinary visits.
+    const entries = cached.candidates.filter(canMarkHistoryEntryAsWatched)
+    if (entries.length !== cached.entries.length || entries.some((entry, index) => entry !== cached.entries[index])) {
+      cached.entries = entries
+    }
+    return cached.entries
+  },
+
   getHistoryCacheSorted(state) {
     return state.historyCacheSorted
   },
@@ -338,5 +361,10 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  // All history writes pass through these mutations, including progress and
+  // metadata edits that retain the array and record identities.
+  mutations: Object.fromEntries(Object.entries(mutations).map(([name, mutation]) => [name, (state, payload) => {
+    mutation(state, payload)
+    state.historyRevision++
+  }]))
 }

@@ -1,6 +1,6 @@
-import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, shallowRef, toRaw, watch } from 'vue'
 import store from '../store/index'
-import { buildRecommendationProfile, scoreRecommendationCandidates, diversifyRecommendations, recommendationSubscriptionIds } from '../helpers/recommendations'
+import { buildRecommendationProfileAsync, rankRecommendationCandidatesAsync, recommendationSubscriptionIds, getRecentRecommendationHistory } from '../helpers/recommendations'
 import { collectRecommendationCandidates, fetchRecommendationSource, mergeRecommendationCandidates } from '../helpers/recommendationCandidates'
 import { getLocalChannelVideos, getLocalSearchResults, getLocalRelatedVideos } from '../helpers/api/local'
 import { getInvidiousChannelVideos, getInvidiousSearchResults, getInvidiousRelatedVideos } from '../helpers/api/invidious'
@@ -15,6 +15,7 @@ const CACHE_LIFETIME = 15 * 60 * 1000
 export function useHomeRecommendations(visible) {
   let candidates = []
   let generation = 0
+  let rankingGeneration = 0
   let requestController = null
   let initialized = false
   let round = 0
@@ -28,22 +29,30 @@ export function useHomeRecommendations(visible) {
   const presented = computed(() => isTabPresented?.value ?? true)
   const enabled = computed(() => store.getters.getEnableHomeRecommendations)
   const history = computed(() => store.getters.getHistoryCacheSorted)
-  const eligibleHistory = computed(() => history.value.filter(isVisible))
+  const eligibleHistory = computed(() => getRecentRecommendationHistory(history.value, isVisible))
   const favorites = computed(() => store.getters.getPlaylist('favorites')?.videos.filter(isVisible) ?? [])
   const saved = computed(() => store.getters.getAllPlaylists.filter(playlist => playlist._id !== 'favorites').flatMap(playlist => playlist.videos).filter(isVisible))
   const subscriptions = computed(() => recommendationSubscriptionIds(store.getters.getActiveProfile?.subscriptions))
   const exploration = computed(() => Math.max(0, Math.min(0.5, Number(store.getters.getRecommendationExploration) || 0)))
   const records = computed(() => store.getters.getRecommendationRecords.filter(isVisible))
   const hasSeeds = computed(() => store.getters.getRememberHistory && (
-    eligibleHistory.value.length > 0 || favorites.value.length > 0 || saved.value.length > 0 ||
+    history.value.some(isVisible) || favorites.value.length > 0 || saved.value.length > 0 ||
     records.value.some(record => record.feedback === 'positive') || subscriptions.value.length > 0
   ))
   // Dismissals affect the next ranking; channel blocks still hide cards immediately.
-  const visibleRanked = computed(() => ranked.value.filter(video => {
-    const record = store.state.recommendations.recommendationRecords[video.videoId]
-    return isVisible(video) && record?.feedback !== 'blockChannel' &&
-      !records.value.some(record => record.feedback === 'blockChannel' && record.authorId === video.authorId)
-  }))
+  const blockedChannelIds = computed(() => new Set(records.value
+    .filter(record => record.feedback === 'blockChannel').map(record => record.authorId)))
+  const visibleRanked = computed(previous => {
+    const videos = ranked.value.filter(video => {
+      const record = store.state.recommendations.recommendationRecords[video.videoId]
+      return isVisible(video) && record?.feedback !== 'blockChannel' && !blockedChannelIds.value.has(video.authorId)
+    })
+    // Impression updates replace feedback records without changing the feed.
+    // Retain its identity so they cannot rerender every card and shelf.
+    return previous && videos.length === previous.length && videos.every((video, index) => video === previous[index])
+      ? previous
+      : videos
+  })
   // Keep an existing feed usable when feedback removes its last positive seed.
   const hasHistory = computed(() => store.getters.getRememberHistory &&
     (hasSeeds.value || visibleRanked.value.length > 0))
@@ -59,12 +68,20 @@ export function useHomeRecommendations(visible) {
         forbiddenTitles: store.getters.getActiveForbiddenTitles,
       })
   }
-  function makeProfile() {
-    return buildRecommendationProfile(eligibleHistory.value, {
-      records: records.value, favorites: favorites.value, saved: saved.value, subscriptions: subscriptions.value, round,
-    })
+  function makeProfile(isCancelled) {
+    // Snapshot only the bounded learning inputs. Do not track every field of
+    // every history record while Home mounts or serialize the entire library.
+    const snapshot = videos => videos.map(video => ({ ...toRaw(video) }))
+    return buildRecommendationProfileAsync(snapshot(eligibleHistory.value), {
+      records: snapshot(records.value), favorites: snapshot(favorites.value), saved: snapshot(saved.value), subscriptions: subscriptions.value, round,
+    }, isCancelled)
   }
-  function rerank(profile = makeProfile()) {
+  async function rerank(profile = null) {
+    if (!visible.value || !enabled.value) return
+    const currentRanking = ++rankingGeneration
+    const isCancelled = () => currentRanking !== rankingGeneration
+    profile ??= await makeProfile(isCancelled)
+    if (!profile || isCancelled()) return
     // An impression must affect the next feed, not remove a card under the pointer.
     const learned = {
       ...profile,
@@ -72,8 +89,11 @@ export function useHomeRecommendations(visible) {
         ? { ...record, impressions: record.impressions?.slice(0, -1) }
         : record]))
     }
-    ranked.value = diversifyRecommendations(scoreRecommendationCandidates(candidates.filter(video => isVisible(video) &&
-      !store.getters.getHistoryCacheById[video.videoId]), learned, { exploration: exploration.value }), { limit, exploration: exploration.value })
+    const result = await rankRecommendationCandidatesAsync(candidates.filter(video => isVisible(video) &&
+      !store.getters.getHistoryCacheById[video.videoId]), learned, { limit, exploration: exploration.value }, isCancelled)
+    if (!result || isCancelled()) return
+    // History can change while ranking yields to the event loop.
+    ranked.value = result.filter(item => !store.getters.getHistoryCacheById[item.video.videoId])
       .map(item => ({ ...item.video, recommendationReason: item.reason }))
   }
   const sourceIdentity = videos => videos.map(video => [video.videoId, video.timeWatched, video.title])
@@ -114,12 +134,19 @@ export function useHomeRecommendations(visible) {
       if (!append) clearFeed()
       return
     }
+    isLoading.value = true
+    // Vue's nextTick alone only flushes the DOM; let Chromium paint it before
+    // preparing the learning inputs and starting the cooperative batches.
+    await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)))
+    if (requestGeneration !== generation) return
     const requestContext = context.value
     if (!append) {
       limit = 24
       if (useCache && cachedCandidates?.context === requestContext && Date.now() - cachedCandidates.at < CACHE_LIFETIME) {
         candidates = cachedCandidates.videos; feedId = cachedCandidates.feedId; round = cachedCandidates.round
-        rerank()
+        await rerank()
+        if (requestGeneration !== generation) return
+        isLoading.value = false
         initialized = true
         return
       }
@@ -127,7 +154,8 @@ export function useHomeRecommendations(visible) {
     } else limit = Math.min(96, limit + 24)
     if (!useCache) round++
     cachedCandidates = null
-    const learned = makeProfile()
+    const learned = await makeProfile(() => generation !== requestGeneration)
+    if (!learned || generation !== requestGeneration) return
     if (!learned.channels.length) learned.channels = subscriptions.value.slice(0, 3)
     const subscriptionIds = new Set(subscriptions.value)
     candidates = mergeRecommendationCandidates([...candidates, ...Object.entries(store.getters.getVideoCache)
@@ -135,7 +163,6 @@ export function useHomeRecommendations(visible) {
       .toSorted(([a], [b]) => (learned.channelWeights.get(b) ?? 0) - (learned.channelWeights.get(a) ?? 0))
       .slice(0, 12).flatMap(([id, entry]) => (entry.videos ?? []).slice(0, 30)
         .map(video => ({ ...video, recommendationSources: [{ type: 'subscription', id }] })))])
-    isLoading.value = true
     requestController = new AbortController()
     const signal = requestController.signal
     const backend = process.env.SUPPORTS_LOCAL_API ? store.getters.getBackendPreference : 'invidious'
@@ -159,7 +186,8 @@ export function useHomeRecommendations(visible) {
     // Publish one completed ranking so each source response cannot reshuffle
     // cards while the user is choosing a video.
     candidates = mergeRecommendationCandidates([...candidates, ...result.videos]).slice(0, 1600)
-    rerank(learned)
+    await rerank(learned)
+    if (generation !== requestGeneration) return
     initialized = true
     hasError.value = result.failedSources > 0
     isLoading.value = false
@@ -180,6 +208,7 @@ export function useHomeRecommendations(visible) {
   }
   function cancelRequest() {
     generation++
+    rankingGeneration++
     requestController?.abort()
     requestController = null
     isLoading.value = false

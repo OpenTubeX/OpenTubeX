@@ -442,9 +442,10 @@ test.describe('new subscriptions feed', () => {
     await expect(short).toBeVisible()
     await expect(short.locator('.videoDuration')).toHaveText('2:00')
     await expect(short.locator('.uploadedTime')).not.toBeEmpty()
-    await expect(short.locator('.thumbnailImage')).toHaveAttribute('src', newShort.thumbnailUrl)
+    const thumbnail = short.locator('.thumbnailImage:not([aria-hidden="true"])')
+    await expect(thumbnail).toHaveAttribute('src', newShort.thumbnailUrl)
 
-    const aspectRatio = await short.locator('.thumbnailImage').evaluate(element => {
+    const aspectRatio = await thumbnail.evaluate(element => {
       return getComputedStyle(element).aspectRatio
     })
     expect(aspectRatio).toBe('2 / 3')
@@ -1067,7 +1068,7 @@ test.describe('new feed settings and seen state', () => {
     await expect(short).toContainClass('grid')
     await expect(short).not.toContainClass('list')
 
-    const aspectRatio = await short.locator('.thumbnailImage').evaluate(element => {
+    const aspectRatio = await short.locator('.thumbnailImage:not([aria-hidden="true"])').evaluate(element => {
       return getComputedStyle(element).aspectRatio
     })
     expect(aspectRatio).toBe('2 / 3')
