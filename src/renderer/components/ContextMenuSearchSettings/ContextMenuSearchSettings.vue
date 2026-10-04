@@ -62,6 +62,7 @@
             :label="t('Delete')"
             theme="destructive"
             :icon="['fas', 'trash']"
+            :aria-label="t('Settings.Context Menu Search Settings.Remove Engine', { engine: engine.name })"
             :title="t('Settings.Context Menu Search Settings.Remove Engine', { engine: engine.name })"
             @click="removeEngine(engine.id)"
           />
