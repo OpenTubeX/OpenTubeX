@@ -134,6 +134,15 @@ export function useHomeRecommendations(visible) {
     authorization: store.getters.getCurrentInvidiousInstanceAuthorization,
     familyFriendly: store.getters.getShowFamilyFriendlyOnly,
   }))
+  const rankingContext = computed(() => JSON.stringify({
+    exploration: exploration.value,
+    blockLists: store.getters.getEnableBlockLists,
+    hideLiveStreams: store.getters.getHideLiveStreams,
+    hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
+    hiddenChannels: [...(store.getters.getActiveChannelsHiddenNames ?? [])],
+    forbiddenTitles: store.getters.getActiveForbiddenTitles,
+    hideMembersOnly: shouldHideMembersOnlyContent(true, store.getters),
+  }))
 
   async function refresh(useCache = false, append = false) {
     cancelRequest()
@@ -153,22 +162,38 @@ export function useHomeRecommendations(visible) {
       if (!append) clearFeed()
       return
     }
+    // Restore the completed feed before showing a loader. Reopening Home must
+    // not rebuild the learning profile or rank the same candidates again.
+    const cache = useCache && !append && cachedCandidates && Date.now() - cachedCandidates.at < CACHE_LIFETIME &&
+      cachedCandidates.context === context.value
+      ? cachedCandidates
+      : null
+    if (cache) {
+      candidates = cache.videos; feedId = cache.feedId; round = cache.round; limit = cache.limit
+      if (cache.rankingContext === rankingContext.value) {
+        ranked.value = cache.ranked
+        initialized = true
+        return
+      }
+    }
     isLoading.value = true
     // Vue's nextTick alone only flushes the DOM; let Chromium paint it before
     // preparing the learning inputs and starting the cooperative batches.
     await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)))
     if (requestGeneration !== generation) return
     const requestContext = context.value
+    const requestRankingContext = rankingContext.value
+    if (cache) {
+      // Candidate-only preference changes need a new ranking, not new requests.
+      await rerank()
+      if (requestGeneration !== generation) return
+      cachedCandidates = { ...cache, ranked: ranked.value, rankingContext: requestRankingContext }
+      isLoading.value = false
+      initialized = true
+      return
+    }
     if (!append) {
       limit = 24
-      if (useCache && cachedCandidates?.context === requestContext && Date.now() - cachedCandidates.at < CACHE_LIFETIME) {
-        candidates = cachedCandidates.videos; feedId = cachedCandidates.feedId; round = cachedCandidates.round
-        await rerank()
-        if (requestGeneration !== generation) return
-        isLoading.value = false
-        initialized = true
-        return
-      }
       candidates = []; ranked.value = []; feedId = crypto.randomUUID(); feedVersion.value++
     } else limit = Math.min(96, limit + 24)
     if (!useCache) round++
@@ -210,7 +235,7 @@ export function useHomeRecommendations(visible) {
     initialized = true
     hasError.value = result.failedSources > 0
     isLoading.value = false
-    if (!hasError.value) cachedCandidates = { context: requestContext, videos: candidates, feedId, round, at: Date.now() }
+    if (!hasError.value) cachedCandidates = { context: requestContext, rankingContext: requestRankingContext, videos: candidates, ranked: ranked.value, feedId, round, limit, at: Date.now() }
     function withFallback(local, invidious, signal) {
       return fetchRecommendationSource(backend === 'local' ? local : invidious,
         fallback ? (backend === 'local' ? invidious : local) : null, signal)
