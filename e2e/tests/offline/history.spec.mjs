@@ -425,6 +425,32 @@ test.describe('history search pagination', () => {
     }
   })
 
+  test('keeps unfiltered history visible when toggling case sensitivity', async ({ page }) => {
+    await goTo(page, 'history')
+    const input = page.getByRole('searchbox', { name: 'Search in History' })
+    const videos = page.locator('.tabContent[aria-hidden="false"] .autoGrid > *')
+    const caseSensitive = page.getByRole('checkbox', { name: 'Case Sensitive Search' })
+    await expect(videos).toHaveCount(100)
+    await page.getByRole('button', { name: 'Load More Videos' }).click()
+    await expect(videos).toHaveCount(200)
+    await page.clock.install()
+    await page.clock.pauseAt(new Date(Date.now() + 1000))
+
+    for (const query of ['', '   ']) {
+      await input.fill(query)
+      await page.clock.runFor(600)
+      await expect(videos).toHaveCount(200)
+      for (const enabled of [true, false]) {
+        await caseSensitive.evaluate(element => element.click())
+        await expect(caseSensitive).toBeChecked({ checked: enabled })
+        await expect(page.locator('.historySearchLoader')).toHaveCount(0)
+        await expect(videos).toHaveCount(200)
+        await page.clock.runFor(600)
+        await expect(videos).toHaveCount(200)
+      }
+    }
+  })
+
   test('treats whitespace-only queries as cleared history when loading more', async ({ page }) => {
     await goTo(page, 'history')
     const input = page.getByRole('searchbox', { name: 'Search in History' })
