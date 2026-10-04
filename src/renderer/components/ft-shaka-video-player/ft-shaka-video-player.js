@@ -19,7 +19,7 @@ import { getSubtitleRequestUrl } from '../../helpers/player/subtitleCookies'
 import { enableTwitchTsVideoGap } from '../../helpers/player/twitchTsVideoGap'
 import LightsOffOverlay from './LightsOffOverlay.vue'
 import { BooleanSettingButton } from './player-components/BooleanSettingButton'
-import { KeyboardShortcuts } from '../../../constants'
+import { KeyboardShortcuts, PlayerIcons } from '../../../constants'
 import { useTabContext, useTabLifecycle } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { AmbientModeButton } from './player-components/AmbientModeButton'
@@ -5056,7 +5056,7 @@ export default defineComponent({
         // stop shaka-player's click handler firing
         event.stopPropagation()
 
-        player.cancelTrickPlay()
+        setPlaybackRate(getDefaultPlaybackRateForVideo())
 
         showValueChange(`${getDefaultPlaybackRateForVideo()}x`, 'gauge')
       }
@@ -9572,10 +9572,7 @@ export default defineComponent({
           return
         }
 
-        playbackRateUserSet = true
-        queuePlaybackRateRestore(playbackRate)
-        emit('playback-rate-updated', playbackRate)
-        emit('playback-rate-user-set', playbackRate)
+        setPlaybackRate(playbackRate)
       })
 
       events.addEventListener('removeChannelPlaybackSpeed', () => {
@@ -9591,9 +9588,7 @@ export default defineComponent({
         removeQuickPlaybackRateBarContext?.()
         removeQuickPlaybackRateBarContext = setQuickPlaybackRateBarContext(controls, {
           getPlaybackRateOptions: () => quickPlaybackSpeedBarOptions.value,
-          getDisplayedPlaybackRate: () => hasLoaded.value
-            ? getCurrentPlaybackRate()
-            : pendingPlaybackRateRestore ?? getInitialPlaybackRate(),
+          getDisplayedPlaybackRate: getCurrentPlaybackRate,
           getSavedChannelPlaybackRate: () => savedChannelPlaybackRate.value,
           getCanSaveChannelPlaybackSpeed: () => canManuallySaveChannelPlaybackRate.value,
           events
@@ -9773,7 +9768,7 @@ export default defineComponent({
      */
     function normalizePlaybackRate(rate) {
       const parsedRate = typeof rate === 'number' ? rate : Number(rate)
-      return Number.isFinite(parsedRate) && parsedRate > 0.07 ? parsedRate : null
+      return Number.isFinite(parsedRate) && parsedRate > 0 ? parsedRate : null
     }
 
     const isMusicVideoDetected = computed(() => {
@@ -9794,12 +9789,16 @@ export default defineComponent({
      * @returns {number}
      */
     function getInitialPlaybackRate() {
+      if (playbackRateUserSet && pendingPlaybackRateRestore !== null) {
+        return pendingPlaybackRateRestore
+      }
+
       const sabrReloadPlaybackRate = normalizePlaybackRate(props.sabrReloadState?.playbackRate)
       if (sabrReloadPlaybackRate !== null) {
         return sabrReloadPlaybackRate
       }
 
-      if (shouldUseNormalPlaybackRateByDefault.value) {
+      if (!playbackRateUserSet && shouldUseNormalPlaybackRateByDefault.value) {
         return NORMAL_PLAYBACK_RATE
       }
 
@@ -9855,6 +9854,10 @@ export default defineComponent({
      * @returns {number | null}
      */
     function getCurrentPlaybackRate() {
+      if (!hasLoaded.value) {
+        return pendingPlaybackRateRestore ?? getInitialPlaybackRate()
+      }
+
       if (temporaryPlaybackRateActive && playbackRateBeforeTemporaryPlayback !== null) {
         return playbackRateBeforeTemporaryPlayback
       }
@@ -10033,9 +10036,7 @@ export default defineComponent({
 
         queuePlaybackRateRestore(getInitialPlaybackRate())
 
-        if (video.value) {
-          video.value.playbackRate = getInitialPlaybackRate()
-        }
+        setVideoPlaybackRate(getInitialPlaybackRate())
       }
     )
 
@@ -10070,6 +10071,46 @@ export default defineComponent({
     /**
      * @param {number} rate
      */
+    function setVideoPlaybackRate(rate) {
+      if (!video.value) return
+      try {
+        video.value.playbackRate = rate
+      } catch (error) {
+        // Shaka can emulate speeds outside the browser's native range once loaded.
+        if (!(error instanceof DOMException) || error.name !== 'NotSupportedError') throw error
+      }
+    }
+
+    /**
+     * @param {number} rate
+     */
+    function setPlaybackRate(rate) {
+      playbackRateUserSet = true
+
+      // A replacement source may be waiting for availability while the current
+      // one is still loaded. Keep its queued restore synced with newer choices.
+      if (!hasLoaded.value || pendingPlaybackRateRestore !== null) {
+        queuePlaybackRateRestore(rate)
+      }
+
+      if (!hasLoaded.value) {
+        // Shaka's rate controller may not exist yet. Preserve the choice for
+        // handleLoaded and update the media element and quick bar immediately.
+        setVideoPlaybackRate(rate)
+        updatePendingPlaybackRateMenu()
+      } else if (Math.abs(rate - getDefaultPlaybackRateForVideo()) < 0.01) {
+        player.cancelTrickPlay()
+      } else {
+        player.trickPlay(rate, false)
+      }
+
+      emit('playback-rate-updated', rate)
+      emit('playback-rate-user-set', rate)
+    }
+
+    /**
+     * @param {number} rate
+     */
     function applyPlaybackRate(rate) {
       const newPlaybackRateString = rate.toFixed(2)
       const newPlaybackRate = parseFloat(newPlaybackRateString)
@@ -10077,14 +10118,7 @@ export default defineComponent({
       // The following error is thrown if you go below 0.07:
       // The provided playback rate (0.05) is not in the supported playback range.
       if (newPlaybackRate > 0.07 && newPlaybackRate <= maxVideoPlaybackRate.value) {
-        playbackRateUserSet = true
-
-        if (Math.abs(newPlaybackRate - getDefaultPlaybackRateForVideo()) < 0.01) {
-          player.cancelTrickPlay()
-        } else {
-          player.trickPlay(newPlaybackRate, false)
-        }
-
+        setPlaybackRate(newPlaybackRate)
         showValueChange(`${newPlaybackRateString}x`, 'gauge')
       }
     }
@@ -10485,6 +10519,23 @@ export default defineComponent({
           }
           blurTooltipButtons()
           break
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.DECREASE_VIDEO_SPEED):
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.DECREASE_VIDEO_SPEED_ALT):
+          // Decrease playback rate by user configured interval
+          event.preventDefault()
+          changePlayBackRate(-videoPlaybackRateInterval.value)
+          break
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.INCREASE_VIDEO_SPEED):
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.INCREASE_VIDEO_SPEED_ALT):
+          // Increase playback rate by user configured interval
+          event.preventDefault()
+          changePlayBackRate(videoPlaybackRateInterval.value)
+          break
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.TOGGLE_NORMAL_PLAYBACK_SPEED):
+          // Toggle between 1x and the previous playback speed
+          event.preventDefault()
+          toggleNormalPlaybackRate()
+          break
         case matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.MUTE): {
           event.preventDefault()
           const isMuted = !video_.muted
@@ -10571,23 +10622,6 @@ export default defineComponent({
           seekBySeconds(defaultSkipInterval.value * largeFastForwardMultiplier * 2, false, true)
           break
         }
-        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.DECREASE_VIDEO_SPEED):
-        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.DECREASE_VIDEO_SPEED_ALT):
-          // Decrease playback rate by user configured interval
-          event.preventDefault()
-          changePlayBackRate(-videoPlaybackRateInterval.value)
-          break
-        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.INCREASE_VIDEO_SPEED):
-        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.INCREASE_VIDEO_SPEED_ALT):
-          // Increase playback rate by user configured interval
-          event.preventDefault()
-          changePlayBackRate(videoPlaybackRateInterval.value)
-          break
-        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.TOGGLE_NORMAL_PLAYBACK_SPEED):
-          // Toggle between 1x and the previous playback speed
-          event.preventDefault()
-          toggleNormalPlaybackRate()
-          break
         case matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.CAPTIONS): {
           // Toggle caption/subtitles
           if (toggleCaptions()) {
@@ -11090,6 +11124,35 @@ export default defineComponent({
     }
 
     /**
+     * Keep Shaka's menu selection in sync while its playback controller is unavailable.
+     */
+    function updatePendingPlaybackRateMenu() {
+      if (hasLoaded.value || !container.value) return
+      const rate = getCurrentPlaybackRate()
+      for (const menu of container.value.querySelectorAll('.shaka-playback-rates')) {
+        menu.querySelector('.shaka-ui-icon.shaka-chosen-item')?.remove()
+        for (const button of menu.querySelectorAll('button:not(.shaka-back-to-overflow-button)')) {
+          const label = button.querySelector('span')
+          const selected = Math.abs(Number.parseFloat(label.textContent) - rate) < 0.01
+          button.ariaSelected = String(selected)
+          label.classList.toggle('shaka-chosen-item', selected)
+          if (selected) {
+            const icon = new shaka.ui.Icon(null, PlayerIcons.DONE_FILLED).getSvgElement()
+            icon.classList.add('shaka-chosen-item')
+            icon.ariaHidden = 'true'
+            button.appendChild(icon)
+          }
+        }
+      }
+      for (const button of container.value.querySelectorAll('.shaka-playbackrate-button')) {
+        button.setAttribute('shaka-status', `${rate}x`)
+        for (const label of button.querySelectorAll('.shaka-current-selection-span, .shaka-overflow-playback-rate-mark')) {
+          label.textContent = `${rate}x`
+        }
+      }
+    }
+
+    /**
      * @param {MouseEvent} event
      */
     function handlePlaybackRateMenuClick(event) {
@@ -11103,6 +11166,16 @@ export default defineComponent({
         const button = target.closest('button')
 
         if (button && !button.classList.contains('shaka-back-to-overflow-button')) {
+          if (!hasLoaded.value || pendingPlaybackRateRestore !== null) {
+            const rate = normalizePlaybackRate(Number.parseFloat(button.querySelector('span')?.textContent ?? ''))
+            if (rate !== null) {
+              event.preventDefault()
+              event.stopPropagation()
+              setPlaybackRate(rate)
+              ui.getControls().hideSettingsMenus()
+            }
+            return
+          }
           playbackRateUserSet = true
           setTimeout(() => {
             if (!player) {
@@ -11197,7 +11270,7 @@ export default defineComponent({
 
       const initialPlaybackRate = getInitialPlaybackRate()
       queuePlaybackRateRestore(initialPlaybackRate)
-      videoElement.playbackRate = initialPlaybackRate
+      setVideoPlaybackRate(initialPlaybackRate)
       videoElement.defaultPlaybackRate = getDefaultPlaybackRateForVideo()
 
       // check if the component is already getting destroyed
@@ -11533,7 +11606,6 @@ export default defineComponent({
      * if this was triggered by a format change and the user had the captions enabled.
      */
     async function handleLoaded() {
-      togglePlaybackRate = null
       hasLoaded.value = true
       // Ideally we would set this in the `streaming` event handler, but for HLS this is only set to true after the loaded event fires.
       isLive.value = player.isLive()
@@ -11687,7 +11759,6 @@ export default defineComponent({
      * @type {{
      *   oldFormat: 'dash'|'audio'|'legacy',
      *   wasPaused: boolean,
-     *   playbackRate: number|null,
      *   playbackPosition: number,
      *   useAutoQuality: boolean,
      *   audioBandwidth: number|undefined,
@@ -11746,10 +11817,12 @@ export default defineComponent({
             : player.getVariantTracks().find(track => track.active)
           const activeCaptionIndex = player.getTextTracks().findIndex(caption => caption.active)
 
+          // Queue the current speed before unloading so later user choices
+          // replace it instead of being overwritten by a pre-switch snapshot.
+          queuePlaybackRateRestore()
           pendingFormatSwitchState = {
             oldFormat,
             wasPaused: video_.paused,
-            playbackRate: getCurrentPlaybackRate(),
             playbackPosition: video_.currentTime,
             // The legacy formats don't have an ABR configuration to carry over,
             // so fall back to the user's preference when switching away from them.
@@ -11789,7 +11862,6 @@ export default defineComponent({
         const {
           oldFormat: sourceFormat,
           wasPaused,
-          playbackRate,
           playbackPosition,
           useAutoQuality,
           audioBandwidth,
@@ -11822,7 +11894,6 @@ export default defineComponent({
           }
 
           ignoreErrors = false
-          queuePlaybackRateRestore(playbackRate)
 
           player.configure(getPlayerConfig(newFormat, useAutoQuality))
 
@@ -11879,7 +11950,7 @@ export default defineComponent({
 
           ignoreErrors = false
 
-          await setLegacyQuality(playbackPosition, previousQuality, playbackRate)
+          await setLegacyQuality(playbackPosition, previousQuality)
           if (!isCurrentFormatSwitch()) return
         }
 

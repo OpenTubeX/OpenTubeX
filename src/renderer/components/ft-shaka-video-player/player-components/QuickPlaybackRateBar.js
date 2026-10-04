@@ -238,7 +238,6 @@ export class QuickPlaybackRateBar extends shaka.ui.Element {
    * @param {number} rate
    */
   setPlaybackRate_(rate) {
-    this.player.trickPlay(rate, false)
     quickPlaybackRateBarContexts.get(this.controls)?.events.dispatchEvent(new CustomEvent('quickPlaybackRateUserSet', {
       detail: rate
     }))
