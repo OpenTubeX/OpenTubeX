@@ -20,6 +20,7 @@ function fixture() {
     maxVideoPlaybackRate: { value: 4 },
     playbackRateUserSet: false,
     hasLoaded: { value: true },
+    pendingPlaybackRateRestore: null,
     emit() {},
     player: { cancelTrickPlay() {}, trickPlay() {} },
     getDefaultPlaybackRateForVideo: () => 1,

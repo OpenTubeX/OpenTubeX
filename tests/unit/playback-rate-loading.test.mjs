@@ -159,3 +159,18 @@ for (const music of [false, true]) {
     })
   }
 }
+
+for (const control of ['quick bar', 'shortcut']) {
+  test(`${control} replaces a queued restore while the current source is still loaded`, async () => {
+    const { state, api, select, video } = fixture(false)
+    state.hasLoaded.value = true
+    state.pendingPlaybackRateRestore = 1
+    if (control === 'quick bar') select(1.5)
+    else api.changePlayBackRate(0.5)
+    await nextTick()
+    assert.equal(video.playbackRate, 1.5)
+    assert.equal(state.pendingPlaybackRateRestore, 1.5)
+    api.restorePendingPlaybackRate()
+    assert.equal(video.playbackRate, 1.5)
+  })
+}

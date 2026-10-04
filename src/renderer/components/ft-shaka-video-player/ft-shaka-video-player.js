@@ -10087,10 +10087,15 @@ export default defineComponent({
     function setPlaybackRate(rate) {
       playbackRateUserSet = true
 
+      // A replacement source may be waiting for availability while the current
+      // one is still loaded. Keep its queued restore synced with newer choices.
+      if (!hasLoaded.value || pendingPlaybackRateRestore !== null) {
+        queuePlaybackRateRestore(rate)
+      }
+
       if (!hasLoaded.value) {
         // Shaka's rate controller may not exist yet. Preserve the choice for
         // handleLoaded and update the media element and quick bar immediately.
-        queuePlaybackRateRestore(rate)
         setVideoPlaybackRate(rate)
         updatePendingPlaybackRateMenu()
       } else if (Math.abs(rate - getDefaultPlaybackRateForVideo()) < 0.01) {
