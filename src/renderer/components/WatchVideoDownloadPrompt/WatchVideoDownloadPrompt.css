@@ -303,7 +303,6 @@
 
 @media (width <= 600px), (height <= 600px) {
   :deep(.downloadPromptCard) {
-    block-size: 100%;
     min-block-size: 0;
   }
 
@@ -340,6 +339,54 @@
   }
 }
 
-:global(.promptCard.downloadPromptCard.activeDownloadCard) {
+:global(.promptCard.downloadPromptCard.fixedLayout) {
   block-size: auto;
+}
+
+@media (height <= 400px) {
+  :global(.promptCard.downloadPromptCard.fixedLayout) {
+    padding-block: 0;
+  }
+
+  .downloadHeader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding-block: 4px;
+  }
+
+  .downloadKind {
+    flex: none;
+    margin-block: 0;
+  }
+
+  .downloadVideoTitle {
+    min-inline-size: 0;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+  }
+
+  .fixedTemplateSection :deep(.select) {
+    margin-block-start: 12px;
+  }
+
+  .downloadFooter:has(.downloadFolderRow) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .downloadFolderRow {
+    flex-wrap: nowrap;
+    margin-block: 0;
+  }
+
+  .downloadFolderRow > span {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
