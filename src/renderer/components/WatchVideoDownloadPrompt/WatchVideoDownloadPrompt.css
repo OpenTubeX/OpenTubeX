@@ -1,4 +1,7 @@
 .downloadPromptContent {
+  --settings-control-margin: 7px 0;
+  --input-bottom-spacing: 0;
+
   display: flex;
   flex-direction: column;
   inline-size: 100%;
@@ -48,12 +51,12 @@
 }
 
 .optionSection {
-  border-block-start: 1px solid var(--side-nav-color);
   padding-block: 10px;
 }
 
 .fixedTemplateSection {
-  border-block-start: 0;
+  --settings-control-margin: 7px 0;
+
   flex: none;
   padding-block: 2px 10px;
   padding-inline: 12px;
@@ -66,21 +69,18 @@
 }
 
 .templateControls {
-  align-items: flex-end;
+  --settings-control-margin: 7px;
+
+  align-items: center;
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   inline-size: 100%;
 }
 
-.saveTemplateButton {
+.templateActionButton {
   flex: none;
-  margin-block-end: 3px;
-}
-
-.templateSection {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
+  margin-block: 0;
 }
 
 .fullWidth {
@@ -99,7 +99,7 @@
 .toggleGrid {
   align-items: start;
   display: grid;
-  gap: 10px 16px;
+  gap: 16px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -123,7 +123,7 @@
 }
 
 .timeRangeSeparator {
-  margin-block-end: 10px;
+  margin-block-start: 7px;
 }
 
 .timeRangeSeparator::before {
@@ -133,7 +133,7 @@
 .centeredToggle {
   display: flex;
   justify-content: center;
-  margin-block-start: 8px;
+  margin-block-start: 16px;
 }
 
 .centeredToggle > :deep(.switch-ctn) {
@@ -164,12 +164,8 @@
   padding-inline: 10px;
 }
 
-.toggleGrid {
-  margin-block-start: 8px;
-}
-
 .subtitleLanguages {
-  margin-block-start: 8px;
+  margin-block-start: 23px;
 }
 
 .downloadProgress {
@@ -182,7 +178,6 @@
 .downloadFooter {
   background: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
-  border-block-start: 1px solid var(--side-nav-color);
   flex: none;
   padding-block: 8px 10px;
   padding-inline: 12px;
@@ -365,10 +360,6 @@
     min-inline-size: 0;
     -webkit-line-clamp: 1;
     line-clamp: 1;
-  }
-
-  .fixedTemplateSection :deep(.select) {
-    margin-block-start: 12px;
   }
 
   .downloadFooter:has(.downloadFolderRow) {

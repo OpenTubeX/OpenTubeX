@@ -144,10 +144,11 @@
   justify-content: center;
   position: relative;
   box-sizing: border-box;
-  flex: 1 1 0%;
+  flex: 0 1 auto;
   min-inline-size: 0;
+  gap: 6px;
   padding-block: 15px;
-  padding-inline: 8px;
+  padding-inline: 15px;
   font-size: 15px;
   cursor: pointer;
   align-self: flex-end;
@@ -155,6 +156,11 @@
   white-space: nowrap;
   color: var(--tertiary-text-color);
   border-block-end: 3px solid transparent;
+}
+
+.channelTabIcon {
+  flex: none;
+  font-size: 16px;
 }
 
 .tab::before {
@@ -238,6 +244,7 @@
   }
 
   .tab {
+    flex: 1 1 0%;
     min-block-size: 48px;
     padding-block: 4px;
     padding-inline: 4px;

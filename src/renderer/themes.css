@@ -110,6 +110,7 @@ input[type='number']::-webkit-inner-spin-button {
   align-self: center;
   margin-inline: 8px -8px;
   background-color: var(--secondary-text-color);
+  background-image: linear-gradient(to bottom, var(--number-step-up-color, var(--secondary-text-color)) 50%, var(--number-step-down-color, var(--secondary-text-color)) 50%);
   mask-image:
     conic-gradient(from 135deg at 50% 0, #000 90deg, transparent 0),
     conic-gradient(from -45deg at 50% 100%, #000 90deg, transparent 0);
@@ -122,16 +123,9 @@ input[type='number']::-webkit-inner-spin-button {
 
 input[type='number']:disabled::-webkit-inner-spin-button,
 input[type='number']:read-only::-webkit-inner-spin-button {
+  background-image: none;
   opacity: 0.4;
   cursor: default;
-}
-
-input[type='number']:enabled:read-write::-webkit-inner-spin-button:hover {
-  background-color: var(--primary-color);
-}
-
-input[type='number']:enabled:read-write::-webkit-inner-spin-button:active {
-  background-color: var(--primary-color-active);
 }
 
 input[type='search']::-webkit-search-cancel-button {
@@ -3208,4 +3202,18 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
   .btn:focus-visible {
     outline-color: currentcolor;
   }
+}
+
+.textInputLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.textInputLabelText {
+  color: var(--secondary-text-color);
+  font-size: 12px;
+  font-weight: normal;
+  line-height: 16px;
 }

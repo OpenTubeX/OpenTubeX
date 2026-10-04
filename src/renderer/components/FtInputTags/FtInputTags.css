@@ -1,4 +1,6 @@
 .ft-input-tags-component {
+  --input-label-surface: var(--bg-color);
+
   box-sizing: border-box;
   position: relative;
   background-color: var(--bg-color);

@@ -59,7 +59,7 @@
 .captionControls {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 20px 16px;
   margin-block-end: 1rem;
 }
 
@@ -68,8 +68,9 @@
   display: flex;
   align-items: center;
   min-inline-size: 0;
-  min-block-size: 76px;
-  padding: 0.75rem;
+  min-block-size: var(--form-control-height);
+  padding-block: 0;
+  padding-inline: 0.75rem;
   border-radius: calc(5px * var(--ui-roundness));
   background-color: var(--card-bg-color);
   backdrop-filter: var(--card-bg-blur, none);
@@ -83,7 +84,7 @@
 
 .captionControl :deep(.select) {
   inline-size: 100%;
-  margin-block-start: 0;
+  margin-block: 0;
 }
 
 .captionColorControl {
@@ -94,7 +95,7 @@
 .captionColorControl :deep(.colorFieldTrigger) {
   inline-size: 100%;
   block-size: 100%;
-  min-block-size: 76px;
+  min-block-size: var(--form-control-height);
   border-radius: inherit;
 }
 

@@ -1920,6 +1920,15 @@ Tray Icon:
   Follow App Theme: "Alkalmazástéma követése"
 
 Form Inputs:
+  Enter Password Hint: "Add meg a jelszavad"
+  Choose Password Hint: "Válassz jelszót"
+  Confirm Password Hint: "Ismételd meg az új jelszavad"
+  Encryption Passphrase Hint: "Add meg a titkosítási jelmondatod"
+  Show Password: "Jelszó megjelenítése"
+  Hide Password: "Jelszó elrejtése"
+  Search Text Hint: "Adjon meg keresési kifejezéseket"
+  Playlist Description Hint: "Írja le ezt a lejátszási listát"
+  Filename Preview: "Fájlnév előnézete"
   Enter Channels: "Csatornák megadása"
   Enter Text: "Szöveg megadása"
   Video URL: Videó vagy lejátszási lista URL-je

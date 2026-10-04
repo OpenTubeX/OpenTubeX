@@ -1946,6 +1946,15 @@ Tray Icon:
   Follow App Theme: "Prati temu aplikacije"
 
 Form Inputs:
+  Enter Password Hint: "Unesite svoju lozinku"
+  Choose Password Hint: "Odaberite lozinku"
+  Confirm Password Hint: "Ponovite novu lozinku"
+  Encryption Passphrase Hint: "Unesite svoju zaporku za šifriranje"
+  Show Password: "Prikaži lozinku"
+  Hide Password: "Sakrij lozinku"
+  Search Text Hint: "Unesite pojmove za pretraživanje"
+  Playlist Description Hint: "Opišite ovaj popis za reprodukciju"
+  Filename Preview: "Pregled naziva datoteke"
   Enter Channels: "Unesite kanale"
   Enter Text: "Unesite tekst"
   Video URL: URL videozapisa ili popisa

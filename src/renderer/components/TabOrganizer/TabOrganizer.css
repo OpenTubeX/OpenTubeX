@@ -154,11 +154,7 @@
 
 .compactSelect {
   inline-size: 190px;
-  margin-block-start: 22px;
-}
-
-.compactSelect.bulkActionSelect {
-  margin-block-start: 0;
+  margin-block: 8px 0;
 }
 
 .compactSelect :deep(.select-text) {
@@ -805,8 +801,8 @@
     grid-template-columns: 24px minmax(0, 1fr) auto;
   }
 
-  .compactSelect.bulkActionSelect {
-    margin-block-start: 22px;
+  .tabOrganizerSearch {
+    flex-basis: 100%;
   }
 
   .tabGroupHeader {

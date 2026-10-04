@@ -2677,6 +2677,10 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   cursor: pointer;
 }
 
+.sponsorBlockDraftTimeField .textInputLabelText {
+  color: inherit;
+}
+
 .sponsorBlockDraftTimeInput {
   width: 78px;
   min-width: 78px;

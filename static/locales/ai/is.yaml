@@ -1945,6 +1945,15 @@ Tray Icon:
   Follow App Theme: "Fylgja þema forritsins"
 
 Form Inputs:
+  Enter Password Hint: "Sláðu inn lykilorðið þitt"
+  Choose Password Hint: "Veldu lykilorð"
+  Confirm Password Hint: "Endurtaktu nýja lykilorðið þitt"
+  Encryption Passphrase Hint: "Sláðu inn dulkóðunarlykilsetninguna þína"
+  Show Password: "Sýna lykilorð"
+  Hide Password: "Fela lykilorð"
+  Search Text Hint: "Sláðu inn leitarorð"
+  Playlist Description Hint: "Lýstu þessum spilunarlista"
+  Filename Preview: "Forskoðun skráarheitis"
   Enter Channels: "Sláðu inn rásir"
   Enter Text: "Sláðu inn texta"
   Video URL: Slóð myndskeiðs eða spilunarlista

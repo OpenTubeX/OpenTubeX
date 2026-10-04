@@ -53,6 +53,19 @@
               {{ hasSelectedTabs ? t('Tab Organizer.Select None') : t('Tab Organizer.Select All') }}
             </button>
             <FtSelect
+              variant="outlined"
+              class="compactSelect bulkActionSelect"
+              :placeholder="t('Tab Organizer.Move To Group')"
+              :value="selectedGroupTarget"
+              :select-names="groupSelectNames"
+              :select-values="groupSelectValues"
+              :option-colors="groupSelectColors"
+              :option-icons="groupSelectIcons"
+              :disabled="selectedTabs.length === 0"
+              :show-icon="false"
+              @change="moveSelectedTabsToGroup"
+            />
+            <FtSelect
               v-if="moveTargets.length > 0"
               variant="outlined"
               class="compactSelect"
@@ -122,19 +135,6 @@
               />
               {{ t('Close') }}
             </button>
-            <FtSelect
-              variant="outlined"
-              class="compactSelect bulkActionSelect"
-              :placeholder="t('Tab Organizer.Move To Group')"
-              :value="selectedGroupTarget"
-              :select-names="groupSelectNames"
-              :select-values="groupSelectValues"
-              :option-colors="groupSelectColors"
-              :option-icons="groupSelectIcons"
-              :disabled="selectedTabs.length === 0"
-              :show-icon="false"
-              @change="moveSelectedTabsToGroup"
-            />
             <label class="tabOrganizerSearch">
               <FtIcon
                 class="searchIcon"
@@ -291,6 +291,7 @@
                 <template v-if="section.id && editingNameGroupId === section.id">
                   <input
                     v-model="editingGroupName"
+                    :placeholder="t('Form Inputs.Example', { example: t('Tab Organizer.Icon Labels.Favorites') })"
                     class="groupRenameInput"
                     type="text"
                     maxlength="80"

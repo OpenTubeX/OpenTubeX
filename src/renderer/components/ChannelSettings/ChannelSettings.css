@@ -113,6 +113,7 @@
 }
 
 .channelSearch {
+  inline-size: 100%;
   margin-block-end: 1em;
 }
 
@@ -133,6 +134,11 @@
 .emptyState {
   padding: 2rem;
   text-align: center;
+}
+
+.channelListContent {
+  /* Include child margins in the wrapper used to measure the scroll boundary. */
+  display: flow-root;
 }
 
 .channelList {

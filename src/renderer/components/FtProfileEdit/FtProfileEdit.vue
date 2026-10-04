@@ -66,7 +66,9 @@
             <h3>{{ editOrCreateProfileNameLabel }}</h3>
             <FtInput
               class="profileName"
-              :placeholder="$t('Profile.Profile Name')"
+              :label="$t('Profile.Profile Name')"
+              :icon="['fas', 'circle-user']"
+              :placeholder="$t('Form Inputs.Example', { example: $t('Tab Organizer.Icon Labels.Music') })"
               :disabled="isMainProfile"
               :value="translatedProfileName"
               :show-action-button="false"

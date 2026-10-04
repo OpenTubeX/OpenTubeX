@@ -98,6 +98,11 @@
             @keydown.left.right="focusTab('home', $event)"
             @keydown.enter.space.prevent="changeTab('home')"
           >
+            <FtIcon
+              :icon="['fas', 'house']"
+              class="channelTabIcon"
+              aria-hidden="true"
+            />
             <span
               class="tabLabel"
               :data-label="$t('Channel.Home.Home')"
@@ -117,6 +122,11 @@
             @keydown.left.right="focusTab('videos', $event)"
             @keydown.enter.space.prevent="changeTab('videos')"
           >
+            <FtIcon
+              :icon="['fas', 'video']"
+              class="channelTabIcon"
+              aria-hidden="true"
+            />
             <span
               class="tabLabel"
               :data-label="$t('Channel.Videos.Videos')"
@@ -136,6 +146,11 @@
             @keydown.left.right="focusTab('shorts', $event)"
             @keydown.enter.space.prevent="changeTab('shorts')"
           >
+            <FtIcon
+              :icon="['fas', 'play']"
+              class="channelTabIcon"
+              aria-hidden="true"
+            />
             <span
               class="tabLabel"
               :data-label="$t('Global.Shorts')"
@@ -155,6 +170,11 @@
             @keydown.left.right="focusTab('live', $event)"
             @keydown.enter.space.prevent="changeTab('live')"
           >
+            <FtIcon
+              :icon="['fas', 'tower-broadcast']"
+              class="channelTabIcon"
+              aria-hidden="true"
+            />
             <span
               class="tabLabel"
               :data-label="$t('Channel.Live.Live')"
@@ -174,6 +194,11 @@
             @keydown.left.right="focusTab('releases', $event)"
             @keydown.enter.space.prevent="changeTab('releases')"
           >
+            <FtIcon
+              :icon="['fas', 'headphones']"
+              class="channelTabIcon"
+              aria-hidden="true"
+            />
             <span
               class="tabLabel"
               :data-label="$t('Channel.Releases.Releases')"
@@ -193,6 +218,11 @@
             @keydown.left.right="focusTab('podcasts', $event)"
             @keydown.enter.space.prevent="changeTab('podcasts')"
           >
+            <FtIcon
+              :icon="['fas', 'podcast']"
+              class="channelTabIcon"
+              aria-hidden="true"
+            />
             <span
               class="tabLabel"
               :data-label="$t('Channel.Podcasts.Podcasts')"
@@ -212,6 +242,11 @@
             @keydown.left.right="focusTab('courses', $event)"
             @keydown.enter.space.prevent="changeTab('courses')"
           >
+            <FtIcon
+              :icon="['fas', 'book-open']"
+              class="channelTabIcon"
+              aria-hidden="true"
+            />
             <span
               class="tabLabel"
               :data-label="$t('Channel.Courses.Courses')"
@@ -231,6 +266,11 @@
             @keydown.left.right="focusTab('playlists', $event)"
             @keydown.enter.space.prevent="changeTab('playlists')"
           >
+            <FtIcon
+              :icon="['fas', 'list']"
+              class="channelTabIcon"
+              aria-hidden="true"
+            />
             <span
               class="tabLabel"
               :data-label="$t('Channel.Playlists.Playlists')"
@@ -250,6 +290,11 @@
             @keydown.left.right="focusTab('community', $event)"
             @keydown.enter.space.prevent="changeTab('community')"
           >
+            <FtIcon
+              :icon="['fas', 'rss']"
+              class="channelTabIcon"
+              aria-hidden="true"
+            />
             <span
               class="tabLabel"
               :data-label="$t('Global.Posts')"
@@ -268,6 +313,11 @@
             @keydown.left.right="focusTab('about', $event)"
             @keydown.enter.space.prevent="changeTab('about')"
           >
+            <FtIcon
+              :icon="['fas', 'circle-info']"
+              class="channelTabIcon"
+              aria-hidden="true"
+            />
             <span
               class="tabLabel"
               :data-label="$t('Channel.About.About')"
@@ -279,7 +329,9 @@
           v-if="showSearchBar"
           ref="searchBar"
           input-type="search"
-          :placeholder="$t('Channel.Search Channel')"
+          :label="$t('Channel.Search Channel')"
+          :icon="['fas', 'search']"
+          :placeholder="$t('Form Inputs.Search Text Hint')"
           :action-button-label="$t('Search Bar.Search')"
           :value="query"
           class="channelSearch"

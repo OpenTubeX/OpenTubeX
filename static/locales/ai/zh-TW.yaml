@@ -1921,6 +1921,15 @@ Tray Icon:
   Follow App Theme: "跟隨應用程式主題"
 
 Form Inputs:
+  Enter Password Hint: "輸入你的密碼"
+  Choose Password Hint: "設定密碼"
+  Confirm Password Hint: "再次輸入新密碼"
+  Encryption Passphrase Hint: "輸入你的加密通關密語"
+  Show Password: "顯示密碼"
+  Hide Password: "隱藏密碼"
+  Search Text Hint: "輸入搜尋詞"
+  Playlist Description Hint: "描述此播放清單"
+  Filename Preview: "檔案名稱預覽"
   Enter Channels: "輸入頻道"
   Enter Text: "輸入文字"
   Video URL: 影片或播放清單 URL

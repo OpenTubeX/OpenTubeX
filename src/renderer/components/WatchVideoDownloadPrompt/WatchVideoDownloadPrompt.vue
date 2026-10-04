@@ -37,20 +37,21 @@
           />
           <FtIconButton
             v-if="isDirty"
-            class="saveTemplateButton"
+            class="templateActionButton"
             :title="t('Downloads.Save Template')"
             :icon="['fas', 'save']"
             theme="secondary"
             @click="openSaveTemplatePrompt"
           />
+          <FtIconButton
+            v-if="!isDirty && selectedCustomTemplate !== undefined"
+            class="templateActionButton"
+            :title="t('Downloads.Delete Template')"
+            :icon="['fas', 'trash']"
+            theme="destructive"
+            @click="deleteTemplate"
+          />
         </div>
-        <FtButton
-          v-if="!isDirty && selectedCustomTemplate !== undefined"
-          :label="t('Downloads.Delete Template')"
-          :icon="['fas', 'trash']"
-          theme="destructive"
-          @click="deleteTemplate"
-        />
       </section>
     </template>
     <div class="downloadPromptContent">
@@ -106,6 +107,7 @@
             <section class="optionSection">
               <FtInput
                 class="fullWidth"
+                :icon="['fas', 'file-lines']"
                 :label="t('Downloads.File Name Template')"
                 placeholder="{title}.{ext}"
                 :tooltip="fileNameTemplateHelp"
@@ -120,7 +122,9 @@
               <h3>{{ t('Downloads.Time Range and Chapters') }}</h3>
               <div class="segmentGrid">
                 <FtInput
+                  :icon="['fas', 'clock']"
                   :label="t('Downloads.Start Time')"
+                  :input-filter="filterDownloadTimeInput"
                   placeholder="HH:MM:SS"
                   :disabled="subtitlesOnly"
                   :show-action-button="false"
@@ -133,7 +137,9 @@
                   aria-hidden="true"
                 />
                 <FtInput
+                  :icon="['fas', 'clock']"
                   :label="t('Downloads.End Time')"
+                  :input-filter="filterDownloadTimeInput"
                   placeholder="HH:MM:SS"
                   :disabled="subtitlesOnly"
                   :show-action-button="false"
@@ -212,6 +218,7 @@
               </div>
               <FtInput
                 class="fullWidth subtitleLanguages"
+                :icon="['fas', 'language']"
                 :label="t('Downloads.Subtitle Languages')"
                 placeholder="en.*,de.*"
                 :tooltip="t('Downloads.Subtitle Languages Help')"
@@ -226,6 +233,7 @@
             <section class="optionSection">
               <FtInput
                 class="fullWidth"
+                :icon="['fas', 'terminal']"
                 :label="t('Downloads.Additional yt-dlp Arguments')"
                 :placeholder="t('Form Inputs.Download Arguments Hint')"
                 :show-action-button="false"
@@ -335,6 +343,7 @@
     <div class="saveTemplatePrompt">
       <FtInput
         ref="templateNameInput"
+        :icon="['fas', 'hashtag']"
         :label="t('Downloads.Template Name')"
         :placeholder="t('Form Inputs.Template Name Example')"
         :show-action-button="false"
@@ -381,7 +390,7 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store/index'
-import { DEFAULT_DOWNLOAD_TEMPLATES, replaceAutomaticDownloadTemplateReferences } from '../../helpers/downloadTemplates'
+import { DEFAULT_DOWNLOAD_TEMPLATES, filterDownloadTimeInput, replaceAutomaticDownloadTemplateReferences } from '../../helpers/downloadTemplates'
 import { showToast } from '../../helpers/utils'
 import { downloadErrorMessage } from '../../helpers/downloadErrors'
 

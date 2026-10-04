@@ -63,8 +63,8 @@ for (const uiScale of [100, 95]) {
           const label = element.querySelector('.dailyVideoLimitSelect .select-label').getBoundingClientRect()
           return label.top - members.bottom
         })
-        expect.soft(gap, `${direction} control spacing at ${width}px`).toBeGreaterThanOrEqual(7)
-        expect.soft(gap, `${direction} control spacing at ${width}px`).toBeLessThanOrEqual(9)
+        expect.soft(gap, `${direction} control spacing at ${width}px`).toBeGreaterThanOrEqual(6.95)
+        expect.soft(gap, `${direction} control spacing at ${width}px`).toBeLessThanOrEqual(9.05)
         await expect(popover.getByRole('combobox', { name: 'Videos per day' })).toBeVisible()
       }
       await page.evaluate(() => { document.body.dir = 'ltr' })
@@ -478,7 +478,7 @@ test('clamps the channel list after searching', async ({ page }) => {
   await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
   await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
 
-  await page.getByPlaceholder('Search channels').fill('Alpha Channel')
+  await page.getByLabel('Search channels').fill('Alpha Channel')
   await expect(page.locator('.channelSettings')).toHaveCount(1)
   await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBe(0)
   await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)

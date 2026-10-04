@@ -61,7 +61,7 @@ for (const uiScale of [100, 125]) {
       await setWindowSize(app, page, { width: 850, height: 900 })
       await expectValidScrollRange(content)
       await scrollToBottom()
-      await updateInputWithoutScrolling(page.getByPlaceholder('Search settings'), 'Screenshot')
+      await updateInputWithoutScrolling(page.getByLabel('Search settings'), 'Screenshot')
       await expect(content.locator('.settingsSearchResults')).toBeVisible()
       await expectValidScrollRange(content)
     })

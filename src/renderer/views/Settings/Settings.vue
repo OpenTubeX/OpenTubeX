@@ -127,7 +127,10 @@
         v-if="unlocked && !isProfileManagerOpen && !isKeyboardShortcutPromptOpen && !isStandaloneViewOpen && !subpageTitle"
         class="settingsSearch"
       >
-        <FtIcon :icon="['fas', 'magnifying-glass']" />
+        <FtIcon
+          :icon="['fas', 'magnifying-glass']"
+          aria-hidden="true"
+        />
         <input
           ref="settingsSearchInputRef"
           v-model="settingsSearchQuery"

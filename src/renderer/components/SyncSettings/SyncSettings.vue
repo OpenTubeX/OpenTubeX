@@ -14,6 +14,7 @@
     <template v-if="syncEnabled">
       <FtFlexBox class="fields">
         <FtInput
+          :icon="['fas', 'link']"
           :label="t('Settings.Sync Settings.Server URL')"
           placeholder="https://sync.example.com"
           :show-action-button="false"
@@ -25,8 +26,9 @@
           @blur="saveServerUrl"
         />
         <FtInput
+          :icon="['fas', 'circle-user']"
           :label="t('Settings.Sync Settings.Username')"
-          placeholder=""
+          :placeholder="t('Form Inputs.Example', { example: 'alex' })"
           :show-action-button="false"
           :value="connected ? savedUsername : username"
           :disabled="connected || serverCredentialsDisabled"
@@ -35,8 +37,9 @@
         />
         <FtInput
           v-if="!connected"
+          :icon="['fas', 'lock']"
           :label="t('Settings.Password Dialog.Password')"
-          placeholder=""
+          :placeholder="t('Form Inputs.Enter Password Hint')"
           :show-action-button="false"
           :value="password"
           :disabled="serverCredentialsDisabled"
@@ -47,8 +50,9 @@
         />
         <FtInput
           v-if="!connected && serverPrivacySupported !== false && serverCheckStatus !== 'error'"
+          :icon="['fas', 'key']"
           :label="t('Settings.Sync Settings.Privacy Passphrase')"
-          placeholder=""
+          :placeholder="t('Form Inputs.Encryption Passphrase Hint')"
           :show-action-button="false"
           :value="privacyPassphrase"
           :disabled="serverCredentialsDisabled"
@@ -140,7 +144,7 @@
         >
           {{ t('Settings.Sync Settings.Enhanced Privacy Unsupported') }}
         </p>
-        <FtFlexBox class="toggles">
+        <FtFlexBox class="toggles syncOptions">
           <FtToggleSwitch
             :label="t('Settings.Sync Settings.Sync Automatically')"
             :default-value="autoSync"
@@ -380,8 +384,9 @@
         <div class="deleteAccountContent passwordForm">
           <p>{{ t('Settings.Sync Settings.Change Password Warning') }}</p>
           <FtInput
+            :icon="['fas', 'lock']"
             :label="t('Settings.Sync Settings.Current Password')"
-            placeholder=""
+            :placeholder="t('Form Inputs.Enter Password Hint')"
             :show-action-button="false"
             :value="currentPassword"
             :disabled="accountActionBusy"
@@ -390,8 +395,9 @@
             @input="currentPassword = $event"
           />
           <FtInput
+            :icon="['fas', 'lock']"
             :label="t('Settings.Sync Settings.New Password')"
-            placeholder=""
+            :placeholder="t('Form Inputs.Choose Password Hint')"
             :show-action-button="false"
             :value="newPassword"
             :disabled="accountActionBusy"
@@ -400,8 +406,9 @@
             @input="newPassword = $event"
           />
           <FtInput
+            :icon="['fas', 'lock']"
             :label="t('Settings.Sync Settings.Confirm New Password')"
-            placeholder=""
+            :placeholder="t('Form Inputs.Confirm Password Hint')"
             :show-action-button="false"
             :value="confirmedPassword"
             :disabled="accountActionBusy"
@@ -444,8 +451,9 @@
             {{ t('Settings.Sync Settings.Delete Account Warning') }}
           </p>
           <FtInput
+            :icon="['fas', 'lock']"
             :label="t('Settings.Password Dialog.Password')"
-            placeholder=""
+            :placeholder="t('Form Inputs.Enter Password Hint')"
             :show-action-button="false"
             :value="deleteAccountPassword"
             input-type="password"

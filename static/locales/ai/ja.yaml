@@ -1919,6 +1919,15 @@ Tray Icon:
   Follow App Theme: "アプリのテーマに合わせる"
 
 Form Inputs:
+  Enter Password Hint: "パスワードを入力"
+  Choose Password Hint: "パスワードを設定"
+  Confirm Password Hint: "新しいパスワードをもう一度入力"
+  Encryption Passphrase Hint: "暗号化パスフレーズを入力"
+  Show Password: "パスワードを表示"
+  Hide Password: "パスワードを非表示"
+  Search Text Hint: "検索語句を入力"
+  Playlist Description Hint: "このプレイリストの説明を入力"
+  Filename Preview: "ファイル名のプレビュー"
   Enter Channels: "チャンネルを入力"
   Enter Text: "テキストを入力"
   Video URL: 動画またはプレイリストのURL

@@ -148,6 +148,7 @@
     >
       <div class="promptContent renameForm">
         <FtInput
+          :icon="['fas', 'devices']"
           :label="t('Settings.Sync Settings.Device Name')"
           :placeholder="t('Form Inputs.Example', { example: t('Settings.Sync Settings.Desktop Device') })"
           :show-action-button="false"

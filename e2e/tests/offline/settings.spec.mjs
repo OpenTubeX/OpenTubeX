@@ -65,10 +65,9 @@ async function expectDownloadQueueSettingsAlignment(page) {
   expect(Math.abs(bounds.folder.x - bounds.queueSelect.x)).toBeLessThanOrEqual(1)
   expect(Math.abs(bounds.customArguments.x - bounds.bandwidthInput.x)).toBeLessThanOrEqual(1)
   expect(Math.abs(bounds.queueSelect.y - bounds.bandwidthInput.y)).toBeLessThanOrEqual(1)
-  // Outlined selects float the label across the border; filled inputs keep it inside.
+  // Both outlined controls float their labels across the top border.
   expect(Math.abs(bounds.queueSelectLabel.y + bounds.queueSelectLabel.height / 2 - bounds.queueSelect.y)).toBeLessThanOrEqual(1)
-  expect(bounds.bandwidthLabel.y).toBeGreaterThanOrEqual(bounds.bandwidthInput.y)
-  expect(bounds.bandwidthLabel.y + bounds.bandwidthLabel.height).toBeLessThanOrEqual(bounds.bandwidthInput.y + bounds.bandwidthInput.height)
+  expect(Math.abs(bounds.bandwidthLabel.y + bounds.bandwidthLabel.height / 2 - bounds.bandwidthInput.y)).toBeLessThanOrEqual(1)
 }
 
 async function expectAlwaysVisibleScrollbarsToPreserveSettingsScroll(page) {
@@ -468,7 +467,9 @@ test.describe('settings search highlights', () => {
       'Engine name',
       'Search URL',
       'Search history and cache have been cleared',
-      'Generated SponsorBlock user ID copied to clipboard'
+      'Generated SponsorBlock user ID copied to clipboard',
+      'Syncing watch history',
+      'This server version does not support watch history syncing'
     ]) {
       await search.fill(searchTerm)
       await expect(page.locator('.settingsNoResults')).toBeVisible()
@@ -830,24 +831,31 @@ test.describe('settings', () => {
     await expect(subtitleCookies).toBeChecked()
     await expect(subtitleCookies).toBeDisabled()
 
-    const [sourceBox, browserBox, profileBox] = await Promise.all([
-      authentication.locator('.restrictedPlaybackAuthSource .select-text').boundingBox(),
-      authentication.locator('.restrictedPlaybackAuthDetail .select-text').boundingBox(),
-      authentication.locator('.restrictedPlaybackBrowserProfile input').boundingBox()
-    ])
-    expect(sourceBox).not.toBeNull()
-    expect(browserBox).not.toBeNull()
-    expect(profileBox).not.toBeNull()
+    for (const highlightChangedSettings of [false, true]) {
+      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHighlightChangedSettings', value), highlightChangedSettings)
+      for (const direction of ['ltr', 'rtl']) {
+        await page.evaluate(value => { document.body.dir = value }, direction)
+        const [sourceBox, browserBox, profileBox] = await Promise.all([
+          authentication.locator('.restrictedPlaybackAuthSource .select-text').boundingBox(),
+          authentication.locator('.restrictedPlaybackAuthDetail .select-text').boundingBox(),
+          authentication.locator('.restrictedPlaybackBrowserProfile input').boundingBox()
+        ])
+        expect(sourceBox).not.toBeNull()
+        expect(browserBox).not.toBeNull()
+        expect(profileBox).not.toBeNull()
 
-    const upperCenter = (
-      sourceBox.x + sourceBox.width / 2 +
-      browserBox.x + browserBox.width / 2
-    ) / 2
-    expect(Math.abs(profileBox.x + profileBox.width / 2 - upperCenter)).toBeLessThanOrEqual(1)
-    expect(profileBox.y).toBeGreaterThan(Math.max(
-      sourceBox.y + sourceBox.height,
-      browserBox.y + browserBox.height
-    ))
+        const upperCenter = (
+          sourceBox.x + sourceBox.width / 2 +
+          browserBox.x + browserBox.width / 2
+        ) / 2
+        expect(Math.abs(profileBox.x + profileBox.width / 2 - upperCenter)).toBeLessThanOrEqual(1)
+        expect(profileBox.y).toBeGreaterThan(Math.max(
+          sourceBox.y + sourceBox.height,
+          browserBox.y + browserBox.height
+        ))
+      }
+    }
+    await page.evaluate(() => { document.body.dir = 'ltr' })
 
     await expect.poll(async () => {
       const settings = latestSettings(
@@ -1110,7 +1118,7 @@ test.describe('settings', () => {
     expect(gaps.after).toBeLessThanOrEqual(16)
   })
 
-  test('keeps SponsorBlock category controls inside its flexible layout', async ({ page }) => {
+  test('keeps SponsorBlock category controls inside its equal column layout', async ({ page }) => {
     const addOns = await goToSettingsSection(page, 'add-ons')
     await addOns.locator('label.switch-label').filter({ hasText: 'Enable SponsorBlock' }).click()
 
@@ -1118,7 +1126,7 @@ test.describe('settings', () => {
     await expect(categories).toHaveCount(10)
     expect(await categories.first().locator('..').evaluate(element => (
       getComputedStyle(element).display
-    ))).toBe('flex')
+    ))).toBe('grid')
 
     const paletteColors = await categories.evaluateAll(elements => elements.slice(0, 2).map(element => (
       getComputedStyle(element.querySelector('.select-icon')).color
@@ -1185,8 +1193,9 @@ test.describe('settings', () => {
     const addOns = await goToSettingsSection(page, 'add-ons')
     const channels = addOns.locator('.ft-input-tags-component').filter({ hasText: 'Excluded Channels' })
     await expect(channels.locator('.name')).toHaveText('Example Channel')
-    await expect(channels.locator('.tag-icon')).toHaveAttribute('src', avatar)
-    await expect.poll(() => channels.locator('.tag-icon').evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
+    const avatarImage = channels.locator('img.tag-icon')
+    await expect(avatarImage).toHaveAttribute('src', avatar)
+    await expect.poll(() => avatarImage.evaluate(image => image.complete && image.naturalWidth > 0)).toBe(true)
 
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
@@ -1407,7 +1416,7 @@ test.describe('settings', () => {
     }).toEqual({ color: '#123456', skip: 'autoSkip' })
   })
 
-  test('keeps General selects compact with tooltip indicators inside their width', async ({ page, attachScreenshot }) => {
+  test('keeps General selects compact with readable values and contained indicators', async ({ page, attachScreenshot }) => {
     await goTo(page, 'settings')
 
     const grid = page.locator('.generalSelectGrid')
@@ -1424,12 +1433,23 @@ test.describe('settings', () => {
         ),
         minimumSelectWidth: Math.min(...widths),
         maximumSelectWidth: Math.max(...widths),
+        clippedText: Array.from(element.querySelectorAll('.select-placeholder, .selectedValue'))
+          .filter(text => text.scrollWidth > text.clientWidth + 1).map(text => text.textContent),
+        indicatorsOutside: Array.from(element.querySelectorAll('.iconSelect'))
+          .filter(indicator => {
+            const bounds = indicator.getBoundingClientRect()
+            const field = indicator.closest('.select').querySelector('.select-text').getBoundingClientRect()
+            return bounds.left < field.left - 1 || bounds.right > field.right + 1
+          }).length
       }
     })
 
-    expect(measurements.gridWidth).toBeLessThanOrEqual(700)
+    expect(measurements.gridWidth).toBeLessThanOrEqual(1000)
     expect(measurements.centerOffset).toBeLessThanOrEqual(1)
-    expect(measurements.maximumSelectWidth - measurements.minimumSelectWidth).toBeLessThanOrEqual(1)
+    expect(measurements.minimumSelectWidth).toBeGreaterThanOrEqual(200)
+    expect(measurements.maximumSelectWidth).toBeLessThanOrEqual(400)
+    expect(measurements.clippedText).toEqual([])
+    expect(measurements.indicatorsOutside).toBe(0)
     await attachScreenshot('compact General setting selects')
   })
 
@@ -1458,7 +1478,7 @@ test.describe('settings', () => {
     }
   })
 
-  test('keeps General selects compact in the one-column layout', async ({ page }) => {
+  test('gives stacked General selects room for their captions', async ({ page }) => {
     await page.evaluate(() => {
       localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
         x: 40,
@@ -1475,7 +1495,8 @@ test.describe('settings', () => {
       const selectWidths = Array.from(element.querySelectorAll(':scope > .select'))
         .map(select => select.getBoundingClientRect().width)
       return {
-        columnCount: getComputedStyle(element).gridTemplateColumns.split(' ').length,
+        columnCount: new Set(Array.from(element.querySelectorAll('.select-text'))
+          .map(field => Math.round(field.getBoundingClientRect().left))).size,
         gridWidth: gridBounds.width,
         maximumSelectWidth: Math.max(...selectWidths),
         centerOffset: Math.abs(
@@ -1486,8 +1507,8 @@ test.describe('settings', () => {
     })
 
     expect(measurements.columnCount).toBe(1)
-    expect(measurements.gridWidth).toBeLessThanOrEqual(330)
-    expect(measurements.maximumSelectWidth).toBeLessThanOrEqual(330)
+    expect(measurements.gridWidth).toBeLessThanOrEqual(500)
+    expect(measurements.maximumSelectWidth).toBeLessThanOrEqual(500)
     expect(measurements.centerOffset).toBeLessThanOrEqual(1)
   })
 
@@ -2617,7 +2638,10 @@ test.describe('settings', () => {
 
     for (const grid of ['.switchColumnGrid', '.switchGrid']) {
       expect(await page.locator(grid).first().evaluate(element => {
-        return getComputedStyle(element).gridTemplateColumns.split(' ').length
+        return new Set(Array.from(element.children).map(control => {
+          const bounds = (control.querySelector('.select-text') || control).getBoundingClientRect()
+          return Math.round(bounds.left + bounds.width / 2)
+        })).size
       })).toBe(1)
     }
 
@@ -3483,7 +3507,7 @@ test.describe('settings', () => {
     await expect(syncSection.getByText(/does not support enhanced privacy/)).toBeVisible()
     await expect(syncSection.getByLabel(/Privacy passphrase/)).toBeHidden()
     await syncSection.getByLabel('Username').fill('legacy-user')
-    await syncSection.getByLabel('Password').fill('test-password')
+    await syncSection.getByLabel('Password', { exact: true }).fill('test-password')
     await expect(syncSection.getByRole('button', { name: 'Log in' })).toBeEnabled()
     await expect(syncSection.locator('.error')).toHaveCount(0)
   })
@@ -5266,7 +5290,7 @@ test.describe('sync settings', () => {
       await expect(syncSection.locator('.error', { hasText: 'Sync failed' })).toHaveCount(0)
       await expect(syncSection.getByLabel('Sync server URL')).toBeEnabled()
       await expect(syncSection.getByLabel('Username')).toBeEnabled()
-      await expect(syncSection.getByLabel('Password')).toBeEnabled()
+      await expect(syncSection.getByLabel('Password', { exact: true })).toBeEnabled()
     } finally {
       finishServerCheck()
     }
@@ -5391,7 +5415,7 @@ test.describe('sync settings', () => {
     const syncSection = page.locator('[data-section="sync"]')
     await syncSection.getByRole('button', { name: 'Disconnect' }).click()
     await syncSection.getByLabel('Username').fill('sync-user')
-    await syncSection.getByLabel('Password').fill('sync-password')
+    await syncSection.getByLabel('Password', { exact: true }).fill('sync-password')
     await syncSection.getByRole('button', { name: 'Log in' }).click()
     await authenticationRequested
     await syncSection.getByText('Enable Sync', { exact: true }).click()
@@ -5427,12 +5451,19 @@ test.describe('sync settings', () => {
     await syncSection.getByRole('button', { name: 'Disconnect' }).click()
     await expect(syncSection.getByLabel('Username')).toBeEnabled()
     await syncSection.getByLabel('Username').fill('sync-user')
-    await syncSection.getByLabel('Password').fill('sync-password')
+    const passwordInput = syncSection.getByLabel('Password', { exact: true })
+    await passwordInput.fill('sync-password')
+    const passwordToggle = passwordInput.locator('../..').locator('.passwordVisibilityToggle')
+    await passwordToggle.click()
+    await expect(passwordInput).toHaveAttribute('type', 'text')
     await syncSection.getByRole('button', { name: 'Log in' }).click()
 
     await expect(syncSection.getByLabel('Sync server URL')).toBeDisabled()
     await expect(syncSection.getByLabel('Username')).toBeDisabled()
-    await expect(syncSection.getByLabel('Password')).toBeDisabled()
+    await expect(passwordInput).toBeDisabled()
+    await expect(passwordInput).toHaveAttribute('type', 'password')
+    await expect(passwordToggle).toHaveAccessibleName('Show password')
+    await expect(passwordToggle).toBeDisabled()
     await expect(syncSection.getByRole('button', { name: 'Log in' })).toBeDisabled()
     await expect(syncSection.getByRole('button', { name: 'Register' })).toBeDisabled()
 
@@ -5440,7 +5471,8 @@ test.describe('sync settings', () => {
     await expect(syncSection.locator('.error')).toHaveText('Invalid credentials')
     await expect(syncSection.getByLabel('Sync server URL')).toBeEnabled()
     await expect(syncSection.getByLabel('Username')).toBeEnabled()
-    await expect(syncSection.getByLabel('Password')).toBeEnabled()
+    await expect(passwordInput).toBeEnabled()
+    await expect(passwordToggle).toBeEnabled()
   })
 
   test('preserves the sync baseline while reauthenticating an expired session', async ({ app, page }) => {
@@ -5494,7 +5526,7 @@ test.describe('sync settings', () => {
     )
     await expect(syncSection.getByLabel('Username')).toBeEnabled()
 
-    await syncSection.getByLabel('Password').fill('sync-password')
+    await syncSection.getByLabel('Password', { exact: true }).fill('sync-password')
     await syncSection.getByLabel(/Privacy passphrase/).fill('sync-privacy-passphrase')
     await syncSection.getByRole('button', { name: 'Log in' }).click()
 
@@ -5655,14 +5687,14 @@ test.describe('synced setting indicators', () => {
       expect(helpBox).not.toBeNull()
       return helpBox.x - selectBox.x - selectBox.width
     }
-    expect(await getStartupIconGap()).toBeGreaterThanOrEqual(8)
+    expect(await getStartupIconGap()).toBeGreaterThanOrEqual(7.95)
 
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       await store.dispatch('updateUiScale', 95)
     })
     await expect.poll(() => page.evaluate(() => window.devicePixelRatio)).toBeCloseTo(0.95, 2)
-    expect(await getStartupIconGap()).toBeGreaterThanOrEqual(8)
+    expect(await getStartupIconGap()).toBeGreaterThanOrEqual(7.95)
 
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store

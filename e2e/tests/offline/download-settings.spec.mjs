@@ -5,6 +5,7 @@ import {
   test,
   expect,
   expectScrollAtRenderedEnd,
+  goTo,
   goToSettingsSection,
   setWindowSize
 } from '../../helpers/app.mjs'
@@ -54,6 +55,130 @@ test.use({
     settings: { currentLocale: 'en-US' }
   }
 })
+
+test.describe('download editor spacing', () => {
+  test.use({
+    seed: {
+      settings: {
+        currentLocale: 'en-US',
+        baseTheme: 'system',
+        systemDarkTheme: 'dark',
+        systemLightTheme: 'light',
+        mainColor: 'Red',
+        secColor: 'Blue',
+        ytDlpDownloadTemplates: JSON.stringify([{ name: 'Layout template', options: { mode: 'video' } }])
+      },
+      playlists: [{
+        _id: 'download-editor-spacing',
+        playlistName: 'Download editor spacing',
+        description: '',
+        protected: false,
+        createdAt: 1700000000000,
+        lastUpdatedAt: 1700000000000,
+        videos: [{ videoId: 'jNQXAC9IVRw', title: 'Video', author: 'Channel', lengthSeconds: 120 }]
+      }]
+    }
+  })
+
+  for (const uiScale of [100, 95]) {
+    test(`download editors keep compact rows without divider lines at ${uiScale}%`, async ({ app, page }, testInfo) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), uiScale)
+      await goToSettingsSection(page, 'download')
+      await page.getByRole('button', { name: 'Manage Download Templates (1)' }).click()
+      const templates = page.locator('.settingsSubpageContent')
+      await expectTimeCharacters(templates)
+      await templates.locator('.templateOptions').evaluate(element => { element.scrollTop = 0 })
+      await expectCompactEditor(templates)
+      const headerSpace = await templates.evaluate(element => {
+        const header = element.querySelector('.templateManagerHeader')
+        const field = header.querySelector('.select-text').getBoundingClientRect()
+        return field.top - header.getBoundingClientRect().top
+      })
+      expect(headerSpace).toBeLessThanOrEqual(24)
+      if (uiScale === 100) await templates.screenshot({ path: testInfo.outputPath('compact-download-templates.png') })
+      await page.locator('.settingsCloseButton').click()
+      await goTo(page, 'userplaylists')
+      await page.getByRole('link', { name: 'Download editor spacing', exact: true }).click()
+      await page.getByTitle('Download Playlist').click()
+      const prompt = page.locator('.downloadPromptCard')
+      await prompt.getByRole('combobox', { name: 'Template', exact: true }).click()
+      await page.getByRole('option', { name: 'Layout template', exact: true }).click()
+      await prompt.locator('.advancedDownloadOptions').evaluate(element => { element.open = true })
+      await expectTimeCharacters(prompt)
+      await prompt.locator('.downloadOptions').evaluate(element => { element.scrollTop = 0 })
+      for (const colorScheme of ['dark', 'light']) {
+        await page.emulateMedia({ colorScheme })
+        await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${colorScheme}\\b`))
+        for (const width of [1400, 480]) {
+          await setWindowSize(app, page, { width, height: width === 1400 ? 901 : 902 })
+          await prompt.locator('.advancedDownloadOptions').evaluate(element => { element.open = true })
+          await expectCompactEditor(prompt)
+          if (width === 1400) {
+            const removeButton = prompt.getByRole('button', { name: 'Delete Template', exact: true })
+            await expect(removeButton).toHaveAttribute('title', 'Delete Template')
+            await expect(removeButton).toHaveText('')
+            const [select, remove] = await Promise.all([
+              prompt.getByRole('combobox', { name: 'Template', exact: true }).boundingBox(),
+              prompt.getByRole('button', { name: 'Delete Template', exact: true }).boundingBox()
+            ])
+            expect.soft(remove.x, 'delete template is after the selector').toBeGreaterThanOrEqual(select.x + select.width)
+            expect.soft(Math.abs(remove.y + remove.height / 2 - select.y - select.height / 2), 'template action is centered').toBeLessThanOrEqual(1)
+          }
+          if (uiScale === 100 && width === 1400) await prompt.screenshot({ path: testInfo.outputPath(`compact-download-editor-${colorScheme}-top.png`) })
+          await prompt.locator('.downloadOptions').evaluate(element => { element.scrollTop = element.scrollHeight })
+          await expectScrollAtRenderedEnd(prompt.locator('.downloadOptions'))
+          expect(await prompt.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+          if (uiScale === 100 && width === 1400) await prompt.screenshot({ path: testInfo.outputPath(`compact-download-editor-${colorScheme}.png`) })
+        }
+      }
+    })
+  }
+})
+
+async function expectTimeCharacters(editor) {
+  for (const name of ['Start time', 'End time']) {
+    const input = editor.getByRole('textbox', { name, exact: true })
+    await input.fill('abc01:23:45!')
+    await expect.soft(input).toHaveValue('01:23:45', { timeout: 1000 })
+    await input.press('End')
+    await input.pressSequentially('letters')
+    await expect.soft(input).toHaveValue('01:23:45', { timeout: 1000 })
+    await input.press('Home')
+    await input.press('ArrowRight')
+    await input.pressSequentially('x')
+    await expect.soft(input).toHaveValue('01:23:45')
+    expect(await input.evaluate(element => element.selectionStart)).toBe(1)
+    await input.clear()
+  }
+}
+
+async function expectCompactEditor(editor) {
+  const argumentsField = editor.getByRole('textbox', { name: 'Additional yt-dlp Arguments', exact: true })
+  expect.soft(await argumentsField.evaluate(element => element.closest('.optionSection').getBoundingClientRect().width - element.getBoundingClientRect().width), 'arguments fill the section').toBeLessThanOrEqual(1)
+  if (await editor.locator('.templateManagerHeader').count()) {
+    expect.soft(await editor.getByRole('textbox', { name: 'Template Name', exact: true }).evaluate(element => {
+      const header = element.closest('.templateManagerHeader')
+      return header.getBoundingClientRect().right - parseFloat(getComputedStyle(header).paddingRight) - element.getBoundingClientRect().right
+    }), 'template name fills the remaining header width').toBeLessThanOrEqual(1)
+  }
+  const geometry = await editor.evaluate(element => {
+    const grid = element.querySelector('.optionGrid')
+    const fields = [...grid.querySelectorAll('.select-text')].map(field => field.getBoundingClientRect())
+    const columns = getComputedStyle(grid).gridTemplateColumns.split(' ').length
+    const gaps = fields.slice(columns).map((field, index) => field.top - fields[index].bottom)
+    const sections = [...element.querySelectorAll('.optionSection')]
+    const borders = [...sections, element.querySelector('.templateManagerFooter, .downloadFooter')]
+      .map(section => parseFloat(getComputedStyle(section).borderTopWidth))
+    const inputMargins = [...element.querySelectorAll('.optionSection .inputWrapper')]
+      .map(wrapper => parseFloat(getComputedStyle(wrapper).marginBottom))
+    return { gaps, borders, inputMargins }
+  })
+  for (const gap of geometry.gaps) expect.soft(gap, 'space between select outlines').toBeGreaterThanOrEqual(16)
+  for (const gap of geometry.gaps) expect.soft(gap, 'space between select outlines').toBeLessThanOrEqual(32)
+  expect.soft(geometry.borders, 'section and footer divider lines').toEqual(geometry.borders.map(() => 0))
+  expect.soft(geometry.inputMargins, 'extra input wrapper spacing').toEqual(geometry.inputMargins.map(() => 0))
+}
 
 test.describe('download settings', () => {
   for (const uiScale of [100, 95]) {
@@ -182,82 +307,85 @@ test.describe('download settings', () => {
     })).toEqual(['Podcast', 'Podcast Copy'])
   })
 
-  test('clamps the automatic download manager after dynamic content changes', async ({ app, page }) => {
-    await goToSettingsSection(page, 'download')
-    await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
+  for (const uiScale of [100, 95]) {
+    test(`clamps the automatic download manager after dynamic content changes at ${uiScale}%`, async ({ app, page }) => {
+      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), uiScale)
+      await goToSettingsSection(page, 'download')
+      await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
 
-    const manager = page.locator('.settingsSubpageContent')
-    for (const roundness of [0, 50, 100, 200, 100]) {
-      await page.evaluate(value => {
-        document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
-      }, roundness)
-      await expect(manager.locator('.channelRule').first()).toHaveCSS('border-radius', `${10 * roundness / 100}px`)
-    }
-    const search = manager.getByRole('searchbox', { name: 'Search channels' })
-    const scroller = manager.locator('.automaticDownloadsScroller')
-    const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
-    await scrollToBottom(scroller)
-    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
-
-    await search.fill('beta')
-    await expect(manager.getByText('Beta Channel', { exact: true })).toBeVisible()
-    await expect(manager.getByText('Alpha Channel', { exact: true })).toHaveCount(0)
-    await expectScrollAtRenderedEnd(scroller)
-    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
-
-    await manager.getByText('Beta Channel', { exact: true }).click()
-    await expect.poll(() => page.evaluate((channelId) => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      return JSON.parse(store.getters.getYtDlpAutomaticDownloadRules)[channelId]
-    }, BETA_CHANNEL_ID)).toEqual(expect.objectContaining({
-      template: 'video:best',
-      includeVideos: true,
-      includeShorts: false,
-      includeLivestreams: false,
-      enabledAt: expect.any(Number)
-    }))
-
-    const options = manager.locator('.templateAndTypes')
-    const geometry = await options.evaluate((row) => {
-      const controls = [
-        row.querySelector('.select-text'),
-        ...row.querySelectorAll('.switch-label')
-      ].map(element => element.getBoundingClientRect())
-      return {
-        centers: controls.map(box => box.y + box.height / 2),
-        widths: controls.map(box => box.width)
+      const manager = page.locator('.settingsSubpageContent')
+      for (const roundness of [0, 50, 100, 200, 100]) {
+        await page.evaluate(value => {
+          document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
+        }, roundness)
+        await expect(manager.locator('.channelRule').first()).toHaveCSS('border-radius', `${10 * roundness / 100}px`)
       }
+      const search = manager.getByRole('searchbox', { name: 'Search channels' })
+      const scroller = manager.locator('.automaticDownloadsScroller')
+      const scrollbar = scroller.locator(':scope > .os-scrollbar-vertical')
+      await scrollToBottom(scroller)
+      await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+
+      await search.fill('beta')
+      await expect(manager.getByText('Beta Channel', { exact: true })).toBeVisible()
+      await expect(manager.getByText('Alpha Channel', { exact: true })).toHaveCount(0)
+      await expectScrollAtRenderedEnd(scroller)
+      await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+
+      await manager.getByText('Beta Channel', { exact: true }).click()
+      await expect.poll(() => page.evaluate((channelId) => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        return JSON.parse(store.getters.getYtDlpAutomaticDownloadRules)[channelId]
+      }, BETA_CHANNEL_ID)).toEqual(expect.objectContaining({
+        template: 'video:best',
+        includeVideos: true,
+        includeShorts: false,
+        includeLivestreams: false,
+        enabledAt: expect.any(Number)
+      }))
+
+      const options = manager.locator('.templateAndTypes')
+      const geometry = await options.evaluate((row) => {
+        const controls = [
+          row.querySelector('.select-text'),
+          ...row.querySelectorAll('.switch-label')
+        ].map(element => element.getBoundingClientRect())
+        return {
+          centers: controls.map(box => box.y + box.height / 2),
+          widths: controls.map(box => box.width)
+        }
+      })
+      for (const center of geometry.centers.slice(1)) {
+        expect(center).toBeCloseTo(geometry.centers[0], 0)
+      }
+      expect(geometry.widths[0]).toBeGreaterThan(geometry.widths[1])
+
+      await page.getByRole('button', { name: 'Maximize' }).click()
+      await setWindowSize(app, page, { width: 560, height: 800 })
+      await expect.poll(() => manager.evaluate(element => element.clientWidth)).toBeLessThanOrEqual(600)
+      await scrollToBottom(scroller)
+      await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+
+      await manager.getByText('Beta Channel', { exact: true }).click()
+      await expect(options).toHaveCount(0)
+      await expectScrollAtRenderedEnd(scroller)
+      await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+
+      await manager.getByText('Beta Channel', { exact: true }).click()
+      await expect(options).toBeVisible()
+      await scrollToBottom(scroller)
+      await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
+
+      await setWindowSize(app, page, { width: 1200, height: 900 })
+      await expect.poll(() => manager.evaluate(element => element.clientWidth)).toBeGreaterThan(760)
+      await expectScrollAtRenderedEnd(scroller)
+      await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
+
+      const { page: relaunchedPage } = await app.relaunch()
+      await goToSettingsSection(relaunchedPage, 'download')
+      await expect(relaunchedPage.getByRole('button', { name: 'Manage Automatic Downloads (1)' })).toBeVisible()
     })
-    for (const center of geometry.centers.slice(1)) {
-      expect(center).toBeCloseTo(geometry.centers[0], 0)
-    }
-    expect(geometry.widths[0]).toBeGreaterThan(geometry.widths[1])
-
-    await page.getByRole('button', { name: 'Maximize' }).click()
-    await setWindowSize(app, page, { width: 560, height: 800 })
-    await expect.poll(() => manager.evaluate(element => element.clientWidth)).toBeLessThanOrEqual(600)
-    await scrollToBottom(scroller)
-    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
-
-    await manager.getByText('Beta Channel', { exact: true }).click()
-    await expect(options).toHaveCount(0)
-    await expectScrollAtRenderedEnd(scroller)
-    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
-
-    await manager.getByText('Beta Channel', { exact: true }).click()
-    await expect(options).toBeVisible()
-    await scrollToBottom(scroller)
-    await expect(scrollbar).not.toHaveClass(/os-scrollbar-unusable/)
-
-    await setWindowSize(app, page, { width: 1200, height: 900 })
-    await expect.poll(() => manager.evaluate(element => element.clientWidth)).toBeGreaterThan(760)
-    await expectScrollAtRenderedEnd(scroller)
-    await expect(scrollbar).toHaveClass(/os-scrollbar-unusable/)
-
-    const { page: relaunchedPage } = await app.relaunch()
-    await goToSettingsSection(relaunchedPage, 'download')
-    await expect(relaunchedPage.getByRole('button', { name: 'Manage Automatic Downloads (1)' })).toBeVisible()
-  })
+  }
 })
 
 test.describe('automatic download authorization', () => {

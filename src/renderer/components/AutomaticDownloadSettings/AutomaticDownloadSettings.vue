@@ -17,7 +17,9 @@
       </p>
       <FtInput
         input-type="search"
-        :placeholder="t('Settings.Channel Settings.Search Channels')"
+        :label="t('Settings.Channel Settings.Search Channels')"
+        :icon="['fas', 'search']"
+        :placeholder="t('Form Inputs.Search Text Hint')"
         :show-action-button="false"
         :value="searchQuery"
         @input="searchQuery = $event"
@@ -108,6 +110,7 @@
               <div class="filterGrid">
                 <FtInput
                   input-type="number"
+                  :icon="['fas', 'clock']"
                   :label="t('Settings.Download Settings.Minimum Duration Seconds')"
                   :placeholder="t('Form Inputs.No Minimum')"
                   :show-label="true"
@@ -118,6 +121,7 @@
                 />
                 <FtInput
                   input-type="number"
+                  :icon="['fas', 'clock']"
                   :label="t('Settings.Download Settings.Maximum Duration Seconds')"
                   :placeholder="t('Form Inputs.No Maximum')"
                   :show-label="true"
@@ -128,6 +132,7 @@
                 />
                 <FtInput
                   input-type="number"
+                  :icon="['fas', 'file-lines']"
                   :label="t('Settings.Download Settings.Minimum File Size MB')"
                   :placeholder="t('Form Inputs.No Minimum')"
                   :show-label="true"
@@ -138,6 +143,7 @@
                 />
                 <FtInput
                   input-type="number"
+                  :icon="['fas', 'file-lines']"
                   :label="t('Settings.Download Settings.Maximum File Size MB')"
                   :placeholder="t('Form Inputs.No Maximum')"
                   :show-label="true"
@@ -148,6 +154,7 @@
                 />
                 <FtInput
                   input-type="number"
+                  :icon="['fas', 'clock']"
                   :label="t('Settings.Download Settings.Maximum Age Days')"
                   :placeholder="t('Form Inputs.Any Age')"
                   :show-label="true"
@@ -159,6 +166,7 @@
               </div>
               <div class="titleFilters">
                 <FtInput
+                  :icon="['fas', 'filter']"
                   :label="t('Settings.Download Settings.Title Includes')"
                   :placeholder="t('Form Inputs.Included Terms Example')"
                   :show-label="true"
@@ -168,6 +176,7 @@
                   @input="value => updateRule(channel.id, 'titleIncludes', value)"
                 />
                 <FtInput
+                  :icon="['fas', 'filter']"
                   :label="t('Settings.Download Settings.Title Excludes')"
                   :placeholder="t('Form Inputs.Excluded Terms Example')"
                   :show-label="true"
@@ -391,7 +400,9 @@ function displayNumber(value) {
 }
 
 .templateAndTypes {
-  align-items: end;
+  --settings-control-margin: 7px;
+
+  align-items: center;
   grid-template-columns: minmax(260px, 2fr) repeat(3, minmax(max-content, 1fr));
 }
 

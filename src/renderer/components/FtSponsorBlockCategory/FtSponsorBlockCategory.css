@@ -2,14 +2,16 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  min-inline-size: 200px;
-  margin-block-start: 30px;
+  box-sizing: border-box;
+  min-inline-size: 0;
   padding-block: 0;
   padding-inline: 10px;
 }
 
 .sponsorTitle {
   font-size: x-large;
+  min-block-size: 2lh;
+  overflow-wrap: anywhere;
 }
 
 .sponsorBlockCategory :deep(.select) {
@@ -17,12 +19,16 @@
   inline-size: 100%;
 }
 
-.sponsorBlockColorPicker {
-  margin-block-start: 12px;
+.sponsorBlockCategory :deep(.select-text) {
+  block-size: auto;
+  min-block-size: var(--form-control-height);
 }
 
-@media only screen and (width <= 680px) {
-  .sponsorBlockCategory {
-    inline-size: 100%;
-  }
+.sponsorBlockCategory :deep(.selectedValue) {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.sponsorBlockColorPicker {
+  margin-block-start: 12px;
 }

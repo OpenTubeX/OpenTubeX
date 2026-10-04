@@ -1218,12 +1218,16 @@
                   >
                     {{ $t('Video.Player.SponsorBlock.NowAction') }}
                   </button>
-                  <input
-                    class="sponsorBlockDraftTimeInput"
-                    :value="sponsorBlockDraftEditValues[segment.id]?.startTime ?? ''"
-                    :aria-label="$t('Video.Player.SponsorBlock.StartTimeLabel')"
-                    @input="updateSponsorBlockDraftEditField(segment.id, 'startTime', $event.target.value)"
-                  >
+                  <label class="textInputLabel sponsorBlockDraftTimeField">
+                    <span class="textInputLabelText">{{ $t('Video.Player.SponsorBlock.StartTimeLabel') }}</span>
+                    <input
+                      class="sponsorBlockDraftTimeInput"
+                      :placeholder="$t('Form Inputs.Example', { example: '0:00' })"
+                      :value="sponsorBlockDraftEditValues[segment.id]?.startTime ?? ''"
+                      :aria-label="$t('Video.Player.SponsorBlock.StartTimeLabel')"
+                      @input="updateSponsorBlockDraftEditField(segment.id, 'startTime', $event.target.value)"
+                    >
+                  </label>
                 </template>
                 <span
                   v-else
@@ -1236,12 +1240,16 @@
                   class="sponsorBlockDraftTimeDivider"
                 >{{ $t('Video.Player.SponsorBlock.TimeDivider') }}</span>
                 <template v-if="isSponsorBlockDraftEditing(segment.id) && !isSponsorBlockPointSegment(segment) && !isSponsorBlockFullVideoSegment(segment)">
-                  <input
-                    class="sponsorBlockDraftTimeInput"
-                    :value="sponsorBlockDraftEditValues[segment.id]?.endTime ?? ''"
-                    :aria-label="$t('Video.Player.SponsorBlock.EndTimeLabel')"
-                    @input="updateSponsorBlockDraftEditField(segment.id, 'endTime', $event.target.value)"
-                  >
+                  <label class="textInputLabel sponsorBlockDraftTimeField">
+                    <span class="textInputLabelText">{{ $t('Video.Player.SponsorBlock.EndTimeLabel') }}</span>
+                    <input
+                      class="sponsorBlockDraftTimeInput"
+                      :placeholder="$t('Form Inputs.Example', { example: '0:30' })"
+                      :value="sponsorBlockDraftEditValues[segment.id]?.endTime ?? ''"
+                      :aria-label="$t('Video.Player.SponsorBlock.EndTimeLabel')"
+                      @input="updateSponsorBlockDraftEditField(segment.id, 'endTime', $event.target.value)"
+                    >
+                  </label>
                   <button
                     class="sponsorBlockDraftTimeAction"
                     @click="setSponsorBlockDraftTime(segment.id, 'endTime', video?.currentTime ?? 0)"

@@ -102,7 +102,9 @@
         ref="searchBar"
         class="historySearch"
         input-type="search"
-        :placeholder="t('History.Search bar placeholder')"
+        :label="t('History.Search bar placeholder')"
+        :icon="['fas', 'search']"
+        :placeholder="t('Form Inputs.Search Text Hint')"
         :show-action-button="false"
         :value="query"
         @input="handleQueryChange"
@@ -122,6 +124,7 @@
           />
         </div>
         <FtSelect
+          size-to-content
           class="sortSelect"
           :placeholder="t('Global.Sort By')"
           :value="sortBy"
@@ -276,7 +279,9 @@
           />
           <FtInput
             v-if="historyCleanupPeriod === 'custom'"
-            :placeholder="t('History.Number of Days')"
+            :label="t('History.Number of Days')"
+            :icon="['fas', 'calendar-days']"
+            placeholder="30"
             input-type="number"
             :value="customHistoryCleanupDays"
             :show-action-button="false"

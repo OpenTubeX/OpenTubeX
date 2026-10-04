@@ -20,6 +20,7 @@
         @change="loadTemplateSource"
       />
       <FtInput
+        :icon="['fas', 'hashtag']"
         :label="t('Downloads.Template Name')"
         :placeholder="t('Form Inputs.Template Name Example')"
         :show-label="true"
@@ -68,6 +69,7 @@
 
       <section class="optionSection">
         <FtInput
+          :icon="['fas', 'file-lines']"
           :label="t('Downloads.File Name Template')"
           placeholder="{title}.{ext}"
           :tooltip="fileNameTemplateHelp"
@@ -82,7 +84,9 @@
         <h3>{{ t('Downloads.Time Range and Chapters') }}</h3>
         <div class="segmentGrid">
           <FtInput
+            :icon="['fas', 'clock']"
             :label="t('Downloads.Start Time')"
+            :input-filter="filterDownloadTimeInput"
             placeholder="HH:MM:SS"
             :disabled="subtitlesOnly"
             :show-action-button="false"
@@ -95,7 +99,9 @@
             aria-hidden="true"
           />
           <FtInput
+            :icon="['fas', 'clock']"
             :label="t('Downloads.End Time')"
+            :input-filter="filterDownloadTimeInput"
             placeholder="HH:MM:SS"
             :disabled="subtitlesOnly"
             :show-action-button="false"
@@ -174,6 +180,7 @@
         </div>
         <FtInput
           class="subtitleLanguages"
+          :icon="['fas', 'language']"
           :label="t('Downloads.Subtitle Languages')"
           placeholder="en.*,de.*"
           :tooltip="t('Downloads.Subtitle Languages Help')"
@@ -187,6 +194,7 @@
 
       <section class="optionSection">
         <FtInput
+          :icon="['fas', 'terminal']"
           :label="t('Downloads.Additional yt-dlp Arguments')"
           :placeholder="t('Form Inputs.Download Arguments Hint')"
           :show-action-button="false"
@@ -246,6 +254,7 @@ import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store/index'
 import {
   DEFAULT_DOWNLOAD_TEMPLATES,
+  filterDownloadTimeInput,
   getDownloadTemplateOptions,
   replaceAutomaticDownloadTemplateReferences
 } from '../../helpers/downloadTemplates'
@@ -469,13 +478,19 @@ function deleteTemplate() {
 </script>
 
 <style scoped>
+.templateManagerHeader,
+.templateOptions {
+  --settings-control-margin: 7px 0;
+  --input-bottom-spacing: 0;
+}
+
 .templateManagerHeader {
   flex: none;
   display: grid;
   align-items: start;
   grid-template-columns: minmax(240px, 1fr) minmax(280px, 2fr);
   gap: 16px;
-  padding: 16px 20px;
+  padding: 8px 20px 16px;
 }
 
 .templateOptions {
@@ -485,12 +500,7 @@ function deleteTemplate() {
 }
 
 .optionSection {
-  border-block-start: 1px solid var(--side-nav-color);
-  padding-block: 16px;
-}
-
-.optionSection:first-child {
-  border-block-start: 0;
+  padding-block: 10px;
 }
 
 .optionSection h3 {
@@ -503,7 +513,7 @@ function deleteTemplate() {
   display: grid;
   align-items: start;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px 16px;
+  gap: 16px;
 }
 
 .optionGrid > :deep(.select),
@@ -511,7 +521,8 @@ function deleteTemplate() {
   inline-size: 100%;
 }
 
-.optionGrid > :deep(.ft-input-component) {
+.templateManagerHeader > :deep(.ft-input-component),
+.optionSection > :deep(.ft-input-component) {
   min-inline-size: 0;
   inline-size: 100%;
 }
@@ -521,22 +532,6 @@ function deleteTemplate() {
   min-inline-size: 0;
   inline-size: calc(100% - 40px);
   margin-inline-end: 40px;
-}
-
-.templateManagerHeader > :deep(.ft-input-component) {
-  margin-block-start: 30px;
-}
-
-.templateManagerHeader :deep(.inputWrapper) {
-  margin-block-end: 0;
-}
-
-.templateManagerHeader :deep(.ft-input) {
-  margin-block-end: 0;
-}
-
-.toggleGrid {
-  margin-block-start: 10px;
 }
 
 .segmentGrid {
@@ -555,7 +550,7 @@ function deleteTemplate() {
 }
 
 .timeRangeSeparator {
-  margin-block-end: 10px;
+  margin-block-start: 7px;
 }
 
 .timeRangeSeparator::before {
@@ -565,7 +560,7 @@ function deleteTemplate() {
 .centeredToggle {
   display: flex;
   justify-content: center;
-  margin-block-start: 8px;
+  margin-block-start: 16px;
 }
 
 .centeredToggle > :deep(.switch-ctn) {
@@ -586,12 +581,11 @@ function deleteTemplate() {
 }
 
 .subtitleLanguages {
-  margin-block-start: 12px;
+  margin-block-start: 23px;
 }
 
 .templateManagerFooter {
   flex: none;
-  border-block-start: 1px solid var(--side-nav-color);
   padding: 10px 20px;
 }
 

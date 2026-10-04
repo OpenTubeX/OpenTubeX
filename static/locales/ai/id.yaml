@@ -1930,6 +1930,15 @@ Tray Icon:
   Follow App Theme: "Ikuti tema aplikasi"
 
 Form Inputs:
+  Enter Password Hint: "Masukkan kata sandi Anda"
+  Choose Password Hint: "Pilih kata sandi"
+  Confirm Password Hint: "Ulangi kata sandi baru Anda"
+  Encryption Passphrase Hint: "Masukkan frasa sandi enkripsi Anda"
+  Show Password: "Tampilkan kata sandi"
+  Hide Password: "Sembunyikan kata sandi"
+  Search Text Hint: "Masukkan kata pencarian"
+  Playlist Description Hint: "Jelaskan daftar putar ini"
+  Filename Preview: "Pratinjau nama berkas"
   Enter Channels: "Masukkan channel"
   Enter Text: "Masukkan teks"
   Video URL: URL video atau playlist
