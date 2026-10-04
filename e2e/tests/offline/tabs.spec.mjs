@@ -436,13 +436,13 @@ test.describe('tab bar', () => {
           window.__watchTabIconStates.push({
             id: tab.dataset.tabId,
             loading: tab.querySelector('.tabLoadingDot') != null,
-            avatar: tab.querySelector('.tabAvatar') != null
+            avatar: tab.querySelector('.tabAvatar')?.checkVisibility({ visibilityProperty: true }) === true
           })
         }
       }
       new MutationObserver(recordIconStates).observe(
         document.querySelector('.tabsContainer'),
-        { childList: true, subtree: true }
+        { childList: true, attributes: true, attributeFilter: ['style'], subtree: true }
       )
     }, { videoId })
 

@@ -1,11 +1,16 @@
 <template>
+  <!-- Keep a small box for lazy loading without expanding scroll overflow. -->
   <img
     v-bind="{ ...$attrs, ...parentScope }"
     :src="imageUrl"
     :alt="$attrs.alt ?? ''"
-    :style="hasLoaded ? null : { position: 'absolute', visibility: 'hidden', pointerEvents: 'none' }"
+    :style="hasLoaded ? null : {
+      position: 'absolute', visibility: 'hidden', pointerEvents: 'none', inlineSize: '1px', blockSize: '1px'
+    }"
     @error="retryImageLoad"
     @load="handleImageLoad"
+    @vue:mounted="checkCachedImage"
+    @vue:updated="checkCachedImage"
   >
   <FtIcon
     v-if="!hasLoaded && fallbackIcon"
@@ -62,6 +67,12 @@ let retryTimeoutId
 let sourceVersion = 0
 
 watch(preferredSource, resetSource)
+// Element hooks run after patching, before paint, without a separate watcher.
+function checkCachedImage({ el: image }) {
+  if (!hasLoaded.value && image.complete && image.naturalWidth) {
+    image.dispatchEvent(new Event('load'))
+  }
+}
 
 function resetSource(src) {
   clearTimeout(retryTimeoutId)
@@ -83,6 +94,7 @@ function useSmallerThumbnail() {
 }
 
 function handleImageLoad(event) {
+  if (hasLoaded.value) return
   // YouTube can return a decodable 120x90 placeholder for missing resolutions.
   const image = event.target
   if (image.naturalWidth === 120 && image.naturalHeight === 90) {

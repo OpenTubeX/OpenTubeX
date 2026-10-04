@@ -50,17 +50,22 @@
             class="playingIcon"
             aria-hidden="true"
           />
-          <FtRetryImage
-            v-else-if="showIcon && usableTabAvatarUrl"
-            :fallback-icon="tabPageIcon || ['fas', 'display']"
-            :src="tabAvatarUrl"
-            class="tabAvatar"
-            alt=""
-            draggable="false"
-            @error="handleAvatarError"
-          />
+          <span
+            v-if="showIcon && usableTabAvatarUrl"
+            v-show="!tab.isLoading && !tab.isPlaying"
+            class="tabAvatarContainer"
+          >
+            <FtRetryImage
+              :fallback-icon="tabPageIcon || ['fas', 'display']"
+              :src="tabAvatarUrl"
+              class="tabAvatar"
+              alt=""
+              draggable="false"
+              @error="handleAvatarError"
+            />
+          </span>
           <FtIcon
-            v-else-if="showIcon && tabPageIcon"
+            v-if="!tab.isLoading && !tab.isPlaying && showIcon && !usableTabAvatarUrl && tabPageIcon"
             :icon="tabPageIcon"
             class="tabPageIcon"
             aria-hidden="true"
@@ -369,6 +374,11 @@ watch(tabAvatarUrl, (avatarUrl) => {
   color: var(--tab-group-color);
   flex: 0 0 auto;
   font-size: 10px;
+}
+
+.tabAvatarContainer {
+  display: flex;
+  flex-shrink: 0;
 }
 
 .tabAvatar {

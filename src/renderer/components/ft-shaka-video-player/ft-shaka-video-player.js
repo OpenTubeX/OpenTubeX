@@ -704,7 +704,6 @@ export default defineComponent({
       thumbnail: getRecommendationThumbnail(video.videoId)
     })))
     const showPoster = ref(true)
-    const showAndroidPoster = computed(() => process.env.IS_CAPACITOR && showPoster.value)
     const showPaidPromotion = ref(false)
     let paidPromotionTimer = null
 
@@ -6674,10 +6673,7 @@ export default defineComponent({
     function handlePlaying() {
       if (shortsNavigationSuspended.value) return
       hasPlaybackPosition.value = true
-      // Chromium can briefly paint a video's poster across the compositor
-      // surface while detaching it into native PiP on Windows. Once a real
-      // frame is available the poster is no longer needed, so remove it before
-      // a later blur-triggered PiP transition.
+      // A decoded video frame replaces the retained startup/format-switch poster.
       showPoster.value = false
       startPaidPromotionTimer()
 
@@ -11675,6 +11671,7 @@ export default defineComponent({
       // player dimensions filled with the thumbnail until the new format has
       // produced a frame of its own.
       showPoster.value = true
+      video.value?.removeAttribute('poster')
 
       try {
         await player.unload()
@@ -12378,7 +12375,6 @@ export default defineComponent({
       closedCaptionsOutlinedIcon: CLOSED_CAPTIONS_OUTLINED,
       closedCaptionsFilledIcon: shaka.ui.Enums.MaterialDesignSVGIcons.CLOSED_CAPTIONS,
       showPoster,
-      showAndroidPoster,
       showEndedScreen,
       useFrostedGlassPlayerUi,
       endedRecommendations,

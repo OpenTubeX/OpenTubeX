@@ -407,7 +407,7 @@ test.describe('watch page', () => {
     await page.evaluate(() => { window.__blockNextFormatUnload = true })
     await watchComponent.evaluate((component, format) => component.proxy.handleFormatChange(format), formats.oldFormat)
     await expect.poll(() => page.evaluate(() => window.__formatUnloadBlocked)).toBe(true)
-    await expect(player.locator('video')).toHaveAttribute('poster', /\S+/)
+    await expect(player.locator('.countdownPoster, .musicAudioSurface')).toBeVisible()
     await watchComponent.evaluate((component, format) => component.proxy.handleFormatChange(format), formats.newFormat)
     await page.evaluate(() => window.__finishFormatUnload())
     await expect.poll(() => watchComponent.evaluate((component) => ({
@@ -1743,7 +1743,7 @@ test.describe('custom Shorts player', () => {
     await expect(page.locator('.infoArea')).toBeHidden()
     const video = player.locator('video')
     await expect(video).toHaveAttribute('loop', '')
-    await expect(video).toHaveAttribute('poster', FIRST_SHORT_THUMBNAIL)
+    await expect(player.locator('.countdownPoster img:not(.retryImagePlaceholder)')).toHaveAttribute('src', FIRST_SHORT_THUMBNAIL)
     await expect(video).toHaveCSS('object-fit', 'cover')
     await expect(player.locator('.shortsTopControl').first()).toHaveCSS(
       'backdrop-filter',

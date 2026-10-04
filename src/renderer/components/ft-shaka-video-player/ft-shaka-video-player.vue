@@ -151,7 +151,6 @@
         playsinline
         :autoplay="autoplayVideos || (!suppressInitialAutoplay && shortsPlayer && isActiveTab) ? true : null"
         :loop="shortsPlayer && loopShorts && !autoplayEnabled"
-        :poster="!audioPlayerMode && showPoster ? thumbnail : null"
         @play="handlePlay"
         @playing="handlePlaying"
         @waiting="handleWaiting"
@@ -169,16 +168,19 @@
         @enterpictureinpicture="handleEnterPictureInPicture"
         @leavepictureinpicture="handleLeavePictureInPicture"
       />
+      <!-- Keep the decoded poster and its resolution fallback through playback. -->
+      <div
+        v-if="!audioPlayerMode && thumbnail"
+        v-show="showPoster || showCountdownOverlay || showEndedScreen"
+        :class="showEndedScreen ? 'endedPoster' : 'countdownPoster'"
+        aria-hidden="true"
+      >
+        <FtRetryImage
+          :src="thumbnail"
+          alt=""
+        />
+      </div>
       <template v-if="showEndedScreen">
-        <div
-          class="endedPoster"
-          aria-hidden="true"
-        >
-          <FtRetryImage
-            :src="thumbnail"
-            alt=""
-          />
-        </div>
         <div
           v-if="endedRecommendations.length > 0"
           class="endedScreen"
@@ -213,16 +215,6 @@
           </nav>
         </div>
       </template>
-      <div
-        v-if="(showCountdownOverlay || showAndroidPoster) && !audioPlayerMode && thumbnail"
-        class="countdownPoster"
-        aria-hidden="true"
-      >
-        <FtRetryImage
-          :src="thumbnail"
-          alt=""
-        />
-      </div>
       <div
         v-if="audioPlayerMode"
         class="musicAudioSurface"
