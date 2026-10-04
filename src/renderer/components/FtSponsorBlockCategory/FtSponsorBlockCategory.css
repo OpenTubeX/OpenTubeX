@@ -30,5 +30,5 @@
 }
 
 .sponsorBlockColorPicker {
-  margin-block-start: 12px;
+  margin-block: var(--settings-control-margin, 10px);
 }

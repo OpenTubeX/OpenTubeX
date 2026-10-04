@@ -11,10 +11,12 @@
     @close="showManager = false"
   >
     <div class="automaticDownloadsHeader">
-      <p>{{ t('Settings.Download Settings.Automatic Downloads Description') }}</p>
-      <p class="automaticDownloadsHint">
-        {{ t('Settings.Download Settings.Automatic Downloads New Only') }}
-      </p>
+      <div class="automaticDownloadsDescription">
+        <p>{{ t('Settings.Download Settings.Automatic Downloads Description') }}</p>
+        <p class="automaticDownloadsHint">
+          {{ t('Settings.Download Settings.Automatic Downloads New Only') }}
+        </p>
+      </div>
       <FtInput
         input-type="search"
         :label="t('Settings.Channel Settings.Search Channels')"
@@ -328,12 +330,22 @@ function displayNumber(value) {
 
 <style scoped>
 .automaticDownloadsHeader {
+  --input-bottom-spacing: 0;
+
+  display: grid;
+  gap: 20px;
   flex: none;
-  padding: 16px 20px 8px;
+  padding-block: 0 20px;
+  padding-inline: 20px;
+}
+
+.automaticDownloadsDescription {
+  display: grid;
+  gap: 8px;
 }
 
 .automaticDownloadsHeader p {
-  margin-block: 0 8px;
+  margin: 0;
 }
 
 .automaticDownloadsHint,
@@ -387,23 +399,24 @@ function displayNumber(value) {
 }
 
 .channelRuleOptions {
+  --settings-control-margin: 0;
+  --input-bottom-spacing: 0;
+
   display: grid;
-  gap: 18px;
-  padding-block-start: 18px;
+  gap: 20px;
+  padding-block-start: 20px;
 }
 
 .templateAndTypes,
 .filterGrid,
 .titleFilters {
   display: grid;
-  gap: 16px;
+  gap: 20px;
 }
 
 .templateAndTypes {
-  --settings-control-margin: 7px;
-
   align-items: center;
-  grid-template-columns: minmax(260px, 2fr) repeat(3, minmax(max-content, 1fr));
+  grid-template-columns: minmax(260px, 500px) repeat(3, minmax(0, max-content));
 }
 
 .templateSelect {
@@ -419,17 +432,17 @@ function displayNumber(value) {
 
 .filterGrid,
 .titleFilters {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 340px));
 }
 
 .filterHint {
-  margin: -8px 0 0;
+  margin: 0;
   font-size: 0.9rem;
 }
 
 @container (width <= 760px) {
   .templateAndTypes {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, max-content));
   }
 
   .templateSelect {
