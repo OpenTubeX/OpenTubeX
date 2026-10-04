@@ -1,6 +1,7 @@
 import { parseLocalVideoSummary } from '../../helpers/video-summary.js'
 import WatchVideoSummary from '../../components/WatchVideoSummary/WatchVideoSummary.vue'
 import FtPhonePanel from '../../components/FtPhonePanel/FtPhonePanel.vue'
+import PhoneCommentsButton from '../../components/PhoneCommentsButton/PhoneCommentsButton.vue'
 import { usePhoneLayout } from '../../composables/usePhoneLayout'
 import { connectionEvents, initializeNetworkRecovery, getConnectionState } from '../../helpers/networkRecovery'
 import { ytDlp } from '../../helpers/ytDlp'
@@ -168,6 +169,7 @@ export default defineComponent({
   components: {
     FtRetryImage,
     FtPhonePanel,
+    PhoneCommentsButton,
     'ft-shaka-video-player': FtShakaVideoPlayer,
     WatchDlnaCast,
     'watch-video-info': WatchVideoInfo,
@@ -268,6 +270,7 @@ export default defineComponent({
       isFamilyFriendly: null,
       commentsDisabled: false,
       commentsLoaded: false,
+      commentPreviews: [],
       liveChatLoaded: false,
       transcriptLoaded: false,
       isLive: false,
@@ -2277,6 +2280,7 @@ export default defineComponent({
       this.isLiveDvrEnabled = null
       this.isPremiere = false
       this.commentsLoaded = false
+      this.commentPreviews = []
       this.liveChatLoaded = false
       this.transcriptLoaded = false
       this.sponsorBlockInfoSegments = []
