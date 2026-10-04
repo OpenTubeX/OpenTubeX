@@ -27,7 +27,7 @@ function fixture() {
     scrollMiniPlayerActive: { value: false }, updateScrollMiniPlayer: noop, emit: noop,
   }
   const methods = vm.runInNewContext(['clearSabrBackoffTimer', 'startSabrBackoffTimer', 'handleEnded'].map(extract).join('\n') + '\n({ startSabrBackoffTimer, handleEnded })', context)
-  return { ...methods, video, remaining, duration, intervals }
+  return { ...methods, props: context.props, video, remaining, duration, intervals }
 }
 
 test('ending playback clears an active SABR countdown and its interval', () => {
@@ -75,4 +75,33 @@ test('destroying the player aborts SABR backoff before waiting for Shaka', async
   const destroyPlayer = vm.runInNewContext(`${destroySource}\ndestroyPlayer`, context)
   await destroyPlayer()
   assert.deepEqual(calls, ['sabr', 'abort', 'shaka'])
+})
+
+for (const format of ['legacy', 'audio']) {
+  for (const localFilePlayback of [false, true]) {
+    test(`${localFilePlayback ? 'downloaded' : 'online'} ${format} ${localFilePlayback ? 'skips' : 'honors'} the metadata preroll delay`, async () => {
+      const delays = []
+      const loads = []
+      const loadSource = source.slice(source.indexOf('    async function performFirstLoad('), source.indexOf('    /**', source.indexOf('    async function performFirstLoad(')))
+      const load = vm.runInNewContext(`${loadSource}\nperformFirstLoad`, {
+        props: { format, localFilePlayback, delayLoadUntilUnix: Date.now() + 10000, manifestMimeType: 'audio/mp4', manifestSrc: 'local-file', startTime: 0 },
+        MANIFEST_TYPE_SABR: 'sabr', process: { env: { SUPPORTS_LOCAL_API: true } }, sabrStream: null,
+        clearSabrBackoffTimer() {}, startPreRollTimer: delay => delays.push(delay), clearPreRollTimer() {},
+        setTimeout: resolve => resolve(), ui: {}, player: { configure() {}, getVariantTracks: () => [] },
+        hasMultipleAudioTracks: { value: false }, loadPlaybackSource: url => loads.push(url),
+        setLegacyQuality: () => loads.push('local-file'),
+      })
+      await load()
+      assert.equal(loads.length, 1)
+      assert.equal(delays.length, localFilePlayback ? 0 : 1, 'a downloaded file must not display or wait for an online preroll countdown')
+    })
+  }
+}
+
+test('downloaded playback rejects late SABR backoff callbacks', () => {
+  const f = fixture()
+  f.props.localFilePlayback = true
+  f.startSabrBackoffTimer(10000)
+  assert.equal(f.remaining.value, 0)
+  assert.equal(f.intervals.size, 0)
 })

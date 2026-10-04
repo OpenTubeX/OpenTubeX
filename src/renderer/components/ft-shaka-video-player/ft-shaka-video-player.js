@@ -11467,7 +11467,7 @@ export default defineComponent({
 
       setupAutoPictureInPicture()
 
-      if (container.value && props.format !== 'audio' && typeof IntersectionObserver !== 'undefined') {
+      if (container.value) {
         setupScrollMiniIntersectionObserver()
       }
 
@@ -11605,8 +11605,9 @@ export default defineComponent({
         })
       }
 
+      // Online metadata may include a preroll deadline even when playing a download.
       const initialLoadDelayMs = props.delayLoadUntilUnix - Date.now()
-      if (initialLoadDelayMs > 0 && (props.format === 'legacy' || props.manifestMimeType !== MANIFEST_TYPE_SABR)) {
+      if (!props.localFilePlayback && initialLoadDelayMs > 0 && (props.format === 'legacy' || props.manifestMimeType !== MANIFEST_TYPE_SABR)) {
         startPreRollTimer(initialLoadDelayMs)
         await new Promise((resolve) => setTimeout(resolve, initialLoadDelayMs))
         clearPreRollTimer()

@@ -851,7 +851,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     if (playerSuspended.value) return false
     // An explicit swipe can minimize through panels and after playback ends.
     if (!explicitGesture && container.value?.hasAttribute('data-phone-panel-video')) return false
-    if (props.format === 'audio') return false
+    if (props.format === 'audio' && !usesMobileMiniBar()) return false
     if (fullWindowEnabled.value) return false
     if (isNativeFullscreenActive()) return false
     if (isNativePipActive()) return false
@@ -1165,7 +1165,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       scrollMiniIntersectionObserver = null
     }
 
-    if (props.format === 'audio' || typeof IntersectionObserver === 'undefined') {
+    if ((props.format === 'audio' && !usesMobileMiniBar()) || typeof IntersectionObserver === 'undefined') {
       return
     }
 
