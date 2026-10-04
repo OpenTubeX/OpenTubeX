@@ -98,18 +98,46 @@
 }
 
 .tabs {
+  position: relative;
   display: flex;
+  flex-wrap: nowrap;
   flex: 0 1 66%;
-  flex-wrap: wrap;
+  min-inline-size: 0;
+  overflow-inline: clip;
+}
+
+.tabsIndicator {
+  position: absolute;
+
+  /* stylelint-disable-next-line liberty/use-logical-spec -- matches the physical transform set inline */
+  top: 0;
+
+  /* stylelint-disable-next-line liberty/use-logical-spec -- matches the physical transform set inline */
+  left: 0;
+  block-size: 3px;
+
+  /* A wider base avoids magnifying subpixel rounding at fractional UI scales. */
+  inline-size: 100px;
+  border-radius: calc(1.5px * var(--ui-roundness) / var(--tab-indicator-scale)) / calc(1.5px * var(--ui-roundness));
+  background-color: var(--primary-color);
+  pointer-events: none;
+  transform-origin: left top;
+  transition: transform 0.2s ease;
+  will-change: transform;
 }
 
 .tab {
   position: relative;
-  padding: 15px;
+  box-sizing: border-box;
+  flex: 1 1 0%;
+  min-inline-size: 0;
+  padding-block: 15px;
+  padding-inline: 8px;
   font-size: 15px;
   cursor: pointer;
   align-self: flex-end;
   text-align: center;
+  white-space: nowrap;
   color: var(--tertiary-text-color);
   border-block-end: 3px solid transparent;
 }
@@ -136,6 +164,11 @@
 
 .tabLabel {
   display: inline-grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .tabLabel::after {
@@ -147,16 +180,13 @@
 
 .tabLabel > span {
   grid-area: 1 / 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .selectedTab {
   color: var(--primary-text-color);
   font-weight: bold;
-  box-sizing: border-box;
-}
-
-.selectedTab::before {
-  background-color: var(--primary-color);
 }
 
 .thumbnailContainer {
@@ -188,11 +218,15 @@
   }
 
   .tabs {
-    flex: 1 1 0;
+    flex: 1 1 auto;
+    inline-size: 100%;
   }
 
   .tab {
-    flex: 1 1 0%;
+    min-block-size: 48px;
+    padding-block: 4px;
+    padding-inline: 4px;
+    font-size: 0.9em;
   }
 }
 

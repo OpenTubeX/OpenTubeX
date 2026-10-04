@@ -19,8 +19,10 @@ test.describe('channel page', () => {
     await expect(page.getByText('GLITCH').first()).toBeVisible({ timeout: 30_000 })
     await page.getByRole('tab', { name: 'Home' }).click()
     await expect(page.locator('#homePanel .ft-list-video').first()).toBeVisible({ timeout: 30_000 })
+    await expect(page.locator('.channelDetails .tabsIndicator')).toBeVisible()
 
     await page.getByRole('tab', { name: 'Playlists' }).click()
+    await expect(page.locator('.channelDetails .tabsIndicator')).toHaveCSS('transition-property', 'transform')
     await expect(page.locator('#playlistPanel .ft-list-video').first()).toBeVisible({ timeout: 30_000 })
     const show = page.locator('#playlistPanel .ft-list-video')
       .filter({ has: page.getByRole('heading', { name: 'Meta Runner', exact: true }) })
@@ -83,8 +85,14 @@ test.describe('channel page', () => {
       await page.evaluate(value => {
         document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiRoundness', value)
       }, roundness)
-      await expect.poll(() => page.locator('.channelDetails .selectedTab').evaluate(element =>
-        getComputedStyle(element, '::before').borderRadius)).toBe(`${1.5 * roundness / 100}px`)
+      await expect.poll(() => page.locator('.channelDetails .tabsIndicator').evaluate(element => {
+        const style = getComputedStyle(element)
+        const [horizontal, vertical = horizontal] = style.borderTopLeftRadius.split(' ').map(Number.parseFloat)
+        return {
+          horizontal: Math.round(horizontal * new DOMMatrixReadOnly(style.transform).a * 100) / 100,
+          vertical
+        }
+      })).toEqual({ horizontal: 1.5 * roundness / 100, vertical: 1.5 * roundness / 100 })
     }
 
     await page.locator('body').evaluate(element => {
@@ -98,13 +106,14 @@ test.describe('channel page', () => {
     expect((await aboutTab.boundingBox()).width).toBe(widthBeforeHover)
 
     const selectedTab = page.locator('.channelDetails .selectedTab')
-    const selectedIndicatorColor = await selectedTab.evaluate(element => getComputedStyle(element, '::before').backgroundColor)
+    const selectedIndicator = page.locator('.channelDetails .tabsIndicator')
+    const selectedIndicatorColor = await selectedIndicator.evaluate(element => getComputedStyle(element).backgroundColor)
     const unselectedIndicatorColor = await aboutTab.evaluate(element => getComputedStyle(element, '::before').backgroundColor)
     expect(selectedIndicatorColor).not.toBe(unselectedIndicatorColor)
     await page.keyboard.press('Tab')
     await selectedTab.focus()
     await expect.poll(() => selectedTab.evaluate(element => element.matches(':focus-visible'))).toBe(true)
-    await expect.poll(() => selectedTab.evaluate(element => getComputedStyle(element, '::before').backgroundColor)).toBe(selectedIndicatorColor)
+    await expect(selectedIndicator).toHaveCSS('background-color', selectedIndicatorColor)
     await page.mouse.move(0, 0)
     await aboutTab.focus()
     await expect.poll(() => aboutTab.evaluate(element => element.matches(':focus-visible'))).toBe(true)

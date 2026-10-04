@@ -73,10 +73,18 @@
         class="infoTabs"
       >
         <div
+          ref="tabsContainer"
           class="tabs"
           role="tablist"
           :aria-label="$t('Channel.Channel Tabs')"
         >
+          <div
+            v-if="tabsIndicatorStyle"
+            class="tabsIndicator"
+            data-animation-speed-managed
+            :style="[tabsIndicatorStyle, { transitionDuration: tabsIndicatorTransitionDuration }]"
+            aria-hidden="true"
+          />
           <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
           <div
             v-if="visibleTabs.includes('home')"
@@ -287,7 +295,8 @@
 
 <script setup>
 import FtRetryImage from '../FtRetryImage.vue'
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import { FtIcon } from '@opentubex/icons'
 import FtCard from '../ft-card/ft-card.vue'
@@ -299,6 +308,8 @@ import FtInput from '../FtInput/FtInput.vue'
 import store from '../../store/index'
 
 import { ctrlFHandler, formatNumber } from '../../helpers/utils'
+import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
+import { useTabContext } from '../../tabs/TabContext'
 
 const props = defineProps({
   id: {
@@ -352,6 +363,67 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['change-tab', 'search', 'subscribed'])
+
+const { locale } = useI18n()
+const { isTabPresented } = useTabContext()
+const tabsContainer = useTemplateRef('tabsContainer')
+/** @type {import('vue').Ref<Record<string, string> | null>} */
+const tabsIndicatorStyle = ref(null)
+const tabsIndicatorTransitionDuration = computed(() => (
+  `${200 / getAnimationSpeedMultiplier(store.getters.getAnimationSpeed)}ms`
+))
+let tabsResizeObserver = null
+let indicatorWasHidden = true
+
+/** @param {boolean} [animate] slide only when the selected tab changes */
+function updateTabIndicator(animate = false) {
+  const selected = tabsContainer.value?.querySelector('.selectedTab')
+  if ((isTabPresented && !isTabPresented.value) ||
+    !(selected instanceof HTMLElement) || selected.getClientRects().length === 0) {
+    tabsIndicatorStyle.value = null
+    indicatorWasHidden = true
+    return
+  }
+
+  // Match the subscriptions indicator: animate only the transform and
+  // compensate for scaled end caps.
+  // Keep fractional geometry at non-100% UI scales.
+  const containerRect = tabsContainer.value.getBoundingClientRect()
+  const selectedRect = selected.getBoundingClientRect()
+  const style = {
+    '--tab-indicator-scale': String(selectedRect.width / 100),
+    transform: `translate(${selectedRect.left - containerRect.left}px, ${selectedRect.bottom - containerRect.top - 3}px) scaleX(${selectedRect.width / 100})`
+  }
+  // Repeated resize notifications must not cancel an ongoing tab switch.
+  if (!indicatorWasHidden && tabsIndicatorStyle.value?.transform === style.transform) {
+    return
+  }
+  if (!animate || indicatorWasHidden) {
+    style.transition = 'none'
+  }
+  tabsIndicatorStyle.value = style
+  indicatorWasHidden = false
+}
+
+function observeTabs() {
+  tabsResizeObserver?.disconnect()
+  if (tabsContainer.value) {
+    tabsResizeObserver?.observe(tabsContainer.value)
+    // Labels can change width without resizing the wrapping container.
+    tabsContainer.value.querySelectorAll('.tab').forEach(tab => tabsResizeObserver?.observe(tab))
+  }
+  updateTabIndicator()
+}
+
+watch(() => props.currentTab, () => updateTabIndicator(true), { flush: 'post' })
+watch([() => props.visibleTabs, tabsContainer, locale,
+  () => isTabPresented?.value], observeTabs, { flush: 'post' })
+
+onActivated(() => nextTick(observeTabs))
+onDeactivated(() => {
+  tabsResizeObserver?.disconnect()
+  indicatorWasHidden = true
+})
 
 const thumbnailLoadFailed = ref(false)
 
@@ -464,10 +536,13 @@ function keyboardShortcutHandler(event) {
 }
 
 onMounted(() => {
+  tabsResizeObserver = new ResizeObserver(() => updateTabIndicator())
+  observeTabs()
   document.addEventListener('keydown', keyboardShortcutHandler)
 })
 
 onBeforeUnmount(() => {
+  tabsResizeObserver?.disconnect()
   document.removeEventListener('keydown', keyboardShortcutHandler)
 })
 </script>
