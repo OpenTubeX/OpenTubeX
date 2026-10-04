@@ -1,11 +1,11 @@
 .sideNav {
   display: block;
-  block-size: calc(100vh - 60px);
+  block-size: calc(100dvh - var(--top-nav-sticky-offset, 60px));
   inline-size: 80px;
   overflow-x: hidden;
   position: sticky;
   inset-inline-start: 0;
-  inset-block-start: 60px;
+  inset-block-start: var(--top-nav-sticky-offset, 60px);
   z-index: 3;
   box-shadow: 1px -1px 1px -1px var(--primary-shadow-color);
   background-color: var(--side-nav-color);
