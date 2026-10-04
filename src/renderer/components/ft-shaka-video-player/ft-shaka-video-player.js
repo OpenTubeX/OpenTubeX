@@ -11074,7 +11074,14 @@ export default defineComponent({
         const controls = ui.getControls()
         // Exit fullscreen if enabled
         if (controls && controls.isFullScreenEnabled && controls.isFullScreenEnabled()) {
+          const documentFullscreen = document.fullscreenElement !== null
           await controls.toggleFullScreen()
+          // The exit promise can resolve before fullscreenchange closes the docks.
+          if (documentFullscreen && isFullscreen.value) {
+            await new Promise(resolve => {
+              document.addEventListener('fullscreenchange', resolve, { once: true })
+            })
+          }
         }
 
         // Exit fullwindow if enabled
