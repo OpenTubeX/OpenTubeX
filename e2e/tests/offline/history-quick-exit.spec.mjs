@@ -222,14 +222,25 @@ for (const position of [0, 5, 15]) {
   })
 }
 
-for (const action of ['chapter', 'timeline', 'first timeline', 'mouse timeline', 'first mouse timeline before data']) {
-  const title = action === 'first mouse timeline before data'
-    ? 'autoplays at a timeline seek made before the first frame'
+for (const action of ['chapter', 'timeline', 'first timeline', 'mouse timeline', 'first mouse timeline before data', 'paused mouse timeline before data']) {
+  const title = action.endsWith('before data')
+    ? action.startsWith('paused')
+      ? 'preserves a Media Session pause before seeking during startup'
+      : 'autoplays at a timeline seek made before the first frame'
     : action === 'first timeline'
       ? 'a first timeline seek during buffering takes precedence over saved progress'
       : `a newer ${action} seek during buffering replaces a chapter seek before metadata`
   test(title, async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
+    if (action.startsWith('paused')) {
+      await page.evaluate(() => {
+        const register = navigator.mediaSession.setActionHandler.bind(navigator.mediaSession)
+        navigator.mediaSession.setActionHandler = (name, handler) => {
+          if (name === 'pause' && handler) window.startupMediaPause = handler
+          register(name, handler)
+        }
+      })
+    }
     let release
     const pending = new Promise(resolve => { release = resolve })
     let reached
@@ -247,8 +258,12 @@ for (const action of ['chapter', 'timeline', 'first timeline', 'mouse timeline',
       await watch.evaluate((component, action) => {
         const video = component.proxy.$el.querySelector('video')
         window.firstPlaybackPosition = null
-        video.addEventListener('playing', () => { window.firstPlaybackPosition = video.currentTime }, { once: true })
-        video.addEventListener(action === 'first mouse timeline before data' ? 'loadedmetadata' : 'loadeddata', () => {
+        window.mouseTimelineTarget = null
+        video.addEventListener('playing', () => {
+          if (!video.paused) window.firstPlaybackPosition = video.currentTime
+        }, { once: true })
+        video.addEventListener(action.endsWith('before data') ? 'loadedmetadata' : 'loadeddata', () => {
+          if (action.startsWith('paused')) window.startupMediaPause()
           if (action === 'chapter') {
             component.refs.player.setCurrentTime(5)
           } else {
@@ -268,9 +283,19 @@ for (const action of ['chapter', 'timeline', 'first timeline', 'mouse timeline',
             }
           }
         }, { once: true })
-        if (!action.startsWith('first ')) component.refs.player.setCurrentTime(15)
+        if (!action.startsWith('first ') && !action.startsWith('paused')) component.refs.player.setCurrentTime(15)
       }, action)
       release()
+      if (action.startsWith('paused')) {
+        const video = page.locator('.ftVideoPlayer video')
+        await expect.poll(() => page.evaluate(() => window.mouseTimelineTarget)).not.toBeNull()
+        await expect.poll(() => video.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(3)
+        await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(5, 0)
+        await page.waitForTimeout(200)
+        expect(await video.evaluate(element => element.paused)).toBe(true)
+        expect(await page.evaluate(() => window.firstPlaybackPosition)).toBeNull()
+        return
+      }
       await expect.poll(() => page.evaluate(() => window.firstPlaybackPosition)).not.toBeNull()
       const firstPosition = await page.evaluate(() => window.firstPlaybackPosition)
       const target = action.includes('mouse timeline') ? await page.evaluate(() => window.mouseTimelineTarget) : 5

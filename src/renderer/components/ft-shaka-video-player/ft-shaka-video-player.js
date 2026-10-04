@@ -1276,6 +1276,7 @@ export default defineComponent({
     let pendingMetadataSeek = null
     let seekBarMouseDown = false
     let resumeAutoplayAfterSeek = false
+    let initialAutoplayCanceled = false
     const videoLayoutReady = ref(false)
     const annotationCurrentTime = ref(0)
     const annotationVideoAspectRatio = ref(null)
@@ -5578,7 +5579,7 @@ export default defineComponent({
       if (event.type === 'mousedown' || event.type === 'touchstart') {
         // Shaka pauses while scrubbing, which cancels native autoplay before
         // the first frame. Remember that intent until the interaction ends.
-        resumeAutoplayAfterSeek = video.value.autoplay && !videoLayoutReady.value
+        resumeAutoplayAfterSeek = video.value.autoplay && !videoLayoutReady.value && !initialAutoplayCanceled
       }
       rememberSeekPosition(Number(event.target.value))
       if (event.type === 'touchend' || event.type === 'touchcancel' || event.type === 'blur') {
@@ -5598,7 +5599,7 @@ export default defineComponent({
       const shouldResume = resumeAutoplayAfterSeek
       resumeAutoplayAfterSeek = false
       const mediaElement = video.value
-      if (shouldResume && mediaElement?.autoplay && mediaElement.paused) {
+      if (shouldResume && !initialAutoplayCanceled && mediaElement?.autoplay && mediaElement.paused) {
         mediaElement.play().catch(() => {})
       }
     }
@@ -6530,12 +6531,17 @@ export default defineComponent({
     function registerMediaSessionHandlers() {
       tabMediaCoordinator.setActionHandlers(mediaTabId, 'player', {
         play: () => video.value?.play(),
-        pause: () => video.value?.pause(),
+        pause: () => {
+          // pause() need not emit an event while native autoplay is pending.
+          initialAutoplayCanceled = true
+          video.value?.pause()
+        },
         stop: () => {
           const videoElement = video.value
           if (!videoElement) return
           const wasPaused = videoElement.paused
           mediaSessionStopped = true
+          initialAutoplayCanceled = true
           videoElement.pause()
           if (seekingIsPossible.value && Number.isFinite(videoElement.duration)) {
             setCurrentTime(0)
@@ -6653,6 +6659,7 @@ export default defineComponent({
         video.value.pause()
         return
       }
+      if (!video.value.paused) initialAutoplayCanceled = false
       if (!temporaryPlaybackRateActive) setShowUiOnPaused(true)
       playerPaused.value = false
       clearPausedInterfaceReveal()
@@ -6714,6 +6721,9 @@ export default defineComponent({
 
     function handlePause() {
       if (shortsNavigationSuspended.value) return
+      if (video.value?.paused && !ui?.getControls().isSeeking() && !resumeAutoplayAfterSeek) {
+        initialAutoplayCanceled = true
+      }
       if (!preserveControlsOnTemporaryPause) setShowUiOnPaused(true)
       preserveControlsOnTemporaryPause = false
       playerPaused.value = true
@@ -12030,6 +12040,7 @@ export default defineComponent({
       pendingMetadataSeek = null
       seekBarMouseDown = false
       resumeAutoplayAfterSeek = false
+      initialAutoplayCanceled = false
       if (!shortsNavigationSuspended.value) {
         closeFullscreenMetadata()
         closeFullscreenTranscript()

@@ -60,6 +60,7 @@ function absoluteSeekFixture(props) {
     pendingMetadataSeek: null,
     seekBarMouseDown: false,
     resumeAutoplayAfterSeek: false,
+    initialAutoplayCanceled: false,
     playCalls: 0,
     videoLayoutReady: { value: true },
     applyPendingPresentationModes() {},
@@ -230,6 +231,22 @@ for (const [autoplay, ready] of [[false, false], [true, true]]) {
     handleSeekBarMouseChange({ type: 'mouseup' })
     assert.equal(state.playCalls, 0)
   })
+}
+
+for (const action of ['pause', 'stop']) {
+  for (const duringSeek of [false, true]) {
+    test(`a Media Session ${action} ${duringSeek ? 'during' : 'before'} startup seeking cancels pending autoplay`, () => {
+      const { state, handleSeekBarInput, handleSeekBarMouseChange } = absoluteSeekFixture({ isLive: false })
+      state.video.value.autoplay = true
+      state.videoLayoutReady.value = false
+      state.ui = { getControls: () => ({ getDisplayTime: () => 5 }) }
+      if (!duringSeek) state.handlers[action]()
+      handleSeekBarInput({ type: 'mousedown', target: { matches: () => true, value: '5' } })
+      if (duringSeek) state.handlers[action]()
+      handleSeekBarMouseChange({ type: 'mouseup' })
+      assert.equal(state.playCalls, 0)
+    })
+  }
 }
 
 for (const action of ['chapter', 'media session', 'timeline']) {
