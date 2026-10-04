@@ -33,3 +33,18 @@ test('history normalizes case and accents for the default search', () => {
   assert.deepEqual(filterVideosWithQuery(records, 'VIDEO resume'), records)
   assert.deepEqual(filterVideosWithQuery(records, 'resume', true), [])
 })
+
+test('batched search preserves matches and order for a large library', async () => {
+  const { filterVideosWithQueryAsync } = await import('../../src/renderer/helpers/historySearch.js')
+  const library = Array.from({ length: 5000 }, (_, index) => ({
+    title: `Night city tour ${index}`, author: index % 2 ? 'Example Channel' : 'Other Channel',
+  }))
+  for (const [query, caseSensitive, locale] of [['night exmaple', false, 'en-US'], ['Night', true, 'en-US'], ['tour', false, 'de-DE']]) {
+    assert.deepEqual(
+      await filterVideosWithQueryAsync(library, query, caseSensitive, locale),
+      filterVideosWithQuery(library, query, caseSensitive, locale),
+    )
+  }
+  let cancellationChecks = 0
+  assert.equal(await filterVideosWithQueryAsync(library, 'exmaple', false, 'en-US', () => ++cancellationChecks > 1), null)
+})

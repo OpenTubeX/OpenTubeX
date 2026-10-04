@@ -86,14 +86,20 @@ export function moveHomeSection(layout, sectionId, offset) {
  * @returns {object[]}
  */
 export function getContinueWatchingEntries(history, limit = Number.POSITIVE_INFINITY) {
+  return getContinueWatchingCandidates(history).filter(canMarkHistoryEntryAsWatched).slice(0, limit)
+}
+
+/**
+ * Cache the stable progress/duration checks separately from premiere timing.
+ * @param {object[]} history
+ * @returns {object[]}
+ */
+export function getContinueWatchingCandidates(history) {
   return history.filter(entry => {
     const progress = Number(entry.watchProgress)
+    if (!Number.isFinite(progress) || progress <= 0 || entry.isWatched === true) return false
     const duration = Number(entry.lengthSeconds)
 
-    return entry.isWatched !== true &&
-      canMarkHistoryEntryAsWatched(entry) &&
-      Number.isFinite(progress) &&
-      progress > 0 &&
-      (!Number.isFinite(duration) || duration <= 0 || progress < duration)
-  }).slice(0, limit)
+    return !Number.isFinite(duration) || duration <= 0 || progress < duration
+  })
 }

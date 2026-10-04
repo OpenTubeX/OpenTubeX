@@ -2,6 +2,7 @@
   <div
     ref="homePage"
     class="homePage"
+    :aria-busy="!activityReady"
   >
     <FtCard class="homeIntro">
       <div class="homeHeading">
@@ -74,7 +75,7 @@
     </FtCard>
 
     <FtCard
-      v-if="allSectionsHidden || !hasVisibleActivity"
+      v-if="allSectionsHidden || (activityReady && !hasVisibleActivity)"
       class="emptyState"
     >
       <FtIcon :icon="['fas', 'clapperboard']" />
@@ -251,8 +252,8 @@
                     v-for="action in recommendationActions"
                     :key="action.type"
                     :title="t('Display Label', { label: action.label, value: action.type === 'blockChannel' ? video.author : (recommendationDisplayTitles.get(video.videoId) ?? video.title) })"
-                    :icon="recommendationFeedbackById.get(video.videoId) === action.type ? (action.selectedIcon ?? action.icon) : action.icon"
-                    :aria-pressed="action.selectedIcon ? recommendationFeedbackById.get(video.videoId) === action.type : null"
+                    :icon="recommendationFeedbackFor(video.videoId) === action.type ? (action.selectedIcon ?? action.icon) : action.icon"
+                    :aria-pressed="action.selectedIcon ? recommendationFeedbackFor(video.videoId) === action.type : null"
                     :use-shadow="false"
                     theme="base-no-default"
                     @click="recommendationFeedback(video, action.type)"
@@ -553,7 +554,6 @@ import HomeRecommendationOptions from './HomeRecommendationOptions.vue'
 
 import store from '../../store/index'
 import {
-  getContinueWatchingEntries,
   getRecentDownloads,
   normalizeHomeSectionLayout,
 } from '../../helpers/homeSections'
@@ -570,6 +570,9 @@ import { useHomeRecommendations } from '../../composables/useHomeRecommendations
 const { locale, t } = useI18n()
 const IS_ELECTRON = process.env.IS_ELECTRON
 const customizing = ref(false)
+const activityReady = ref(false)
+const revealedSectionCount = ref(0)
+let activityFrame = null
 const homePage = useTemplateRef('homePage')
 const recommendationListType = computed(() => store.getters.getListType)
 const recommendationDescription = computed(() => `${t('Home Page.Recommendations description')} ${t('Home Page.Related discovery privacy')}`)
@@ -609,8 +612,9 @@ const {
   feedVersion: recommendationFeedVersion,
 } = useHomeRecommendations(computed(() => visibleSections.value.some(section => section.id === 'recommendations')))
 
-const recommendationFeedbackById = computed(() => new Map(store.getters.getRecommendationRecords
-  .map(record => [record.videoId, record.feedback])))
+function recommendationFeedbackFor(videoId) {
+  return store.state.recommendations.recommendationRecords[videoId]?.feedback
+}
 
 const recommendationActions = computed(() => [
   { type: 'positive', label: t('Home Page.More like this'), icon: ['fas', 'thumbs-up'], selectedIcon: ['fas', 'thumbs-up-filled'] },
@@ -635,9 +639,7 @@ function recommendationReason(video) {
   return t('Subscriptions.Subscriptions')
 }
 
-const continueWatching = computed(() => getContinueWatchingEntries(
-  store.getters.getHistoryCacheSorted
-))
+const continueWatching = computed(() => store.getters.getContinueWatchingHistory())
 const watchQueue = computed(() => store.getters.getWatchQueue)
 const recentPlaylists = computed(() => store.getters.getAllPlaylists
   .filter(playlist => playlist.videos.length > 0 || !['favorites', 'watchLater'].includes(playlist._id))
@@ -702,37 +704,40 @@ const sectionDefinitions = computed(() => ({
   },
   continueWatching: {
     label: t('Home Page.Continue watching'),
-    hasContent: continueWatching.value.length > 0,
+    get hasContent() { return continueWatching.value.length > 0 },
   },
   newSinceLastVisit: {
     label: t('Home Page.New since last visit'),
-    hasContent: store.getters.getShowNewSubscriptionFeed && newSubscriptionEntries.value.length > 0,
+    get hasContent() { return store.getters.getShowNewSubscriptionFeed && newSubscriptionEntries.value.length > 0 },
   },
   watchQueue: {
     label: t('Home Page.Watch queue'),
-    hasContent: watchQueue.value.length > 0,
+    get hasContent() { return watchQueue.value.length > 0 },
   },
   playlists: {
     label: t('Home Page.Recent playlists'),
-    hasContent: recentPlaylists.value.length > 0,
+    get hasContent() { return recentPlaylists.value.length > 0 },
   },
   recentDownloads: {
     label: t('Home Page.Recent downloads'),
-    hasContent: recentDownloads.value.length > 0,
+    get hasContent() { return recentDownloads.value.length > 0 },
   },
   reminders: {
     label: t('Home Page.Upcoming reminders'),
-    hasContent: reminders.value.length > 0,
+    get hasContent() { return reminders.value.length > 0 },
   },
   watchStats: {
     label: t('Home Page.Watch statistics'),
-    hasContent: watchStatsAvailable.value && hasWatchStats.value,
+    get hasContent() { return watchStatsAvailable.value && hasWatchStats.value },
   },
 }))
 
-const renderedSections = computed(() => visibleSections.value.filter(
-  section => sectionDefinitions.value[section.id].hasContent
-))
+const renderedSections = computed(() => {
+  const sections = activityReady.value
+    ? visibleSections.value
+    : visibleSections.value.slice(0, revealedSectionCount.value)
+  return sections.filter(section => sectionDefinitions.value[section.id].hasContent)
+})
 const hasVisibleActivity = computed(() => renderedSections.value.some(section => (
   section.id !== 'recommendations' || recommendations.value.length > 0
 )))
@@ -975,6 +980,20 @@ function recordRecommendationClick(video, event) {
 }
 
 onMounted(() => {
+  // Paint the heading first, then mount one shelf per frame. Gathering data
+  // and laying out every shelf together stalls slower renderers even when the
+  // recommendation work yields. Completed pages update normally afterward.
+  const revealSection = () => {
+    revealedSectionCount.value++
+    if (revealedSectionCount.value < visibleSections.value.length) {
+      activityFrame = requestAnimationFrame(revealSection)
+    } else {
+      activityReady.value = true
+    }
+  }
+  activityFrame = requestAnimationFrame(() => {
+    activityFrame = requestAnimationFrame(revealSection)
+  })
   // Grid/list switches, feedback and refresh can all shorten the page.
   homeResizeObserver = new ResizeObserver(() => {
     if (!homePage.value?.getClientRects().length) return
@@ -985,6 +1004,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  cancelAnimationFrame(activityFrame)
   homeResizeObserver?.disconnect()
   reminderLoadGeneration++
   removeReminderListener?.()

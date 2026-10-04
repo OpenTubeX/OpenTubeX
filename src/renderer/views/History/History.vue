@@ -328,7 +328,7 @@ import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store'
 
 import { needsHistoryRepair } from '../../../historyRepair'
-import { filterVideosWithQuery } from '../../helpers/historySearch'
+import { filterVideosWithQueryAsync } from '../../helpers/historySearch'
 import { canMarkHistoryEntryAsWatched } from '../../helpers/history'
 import { historyRepairState, startHistoryRepair, cancelHistoryRepair } from '../../helpers/historyRepair'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
@@ -559,17 +559,25 @@ function increaseLimit() {
   }
 }
 
-function filterHistory() {
+let searchGeneration = 0
+async function filterHistory() {
   filterHistoryAsync.cancel()
-  isSearching.value = false
+  const generation = ++searchGeneration
   if (query.value.trim().length === 0) {
+    isSearching.value = false
     activeData.value = fullData.value
     showLoadMoreButton.value = activeData.value.length < historyCacheSorted.value.length
     clampHistoryScroll()
     return
   }
 
-  const filteredQuery = filterVideosWithQuery(historyCacheSorted.value, query.value, doCaseSensitiveSearch.value, locale.value)
+  isSearching.value = true
+  const filteredQuery = await filterVideosWithQueryAsync(
+    historyCacheSorted.value, query.value, doCaseSensitiveSearch.value, locale.value,
+    () => generation !== searchGeneration,
+  )
+  if (!filteredQuery || generation !== searchGeneration) return
+  isSearching.value = false
 
   const filteredResultCount = filteredQuery.length
 
@@ -590,6 +598,7 @@ function clampHistoryScroll() {
 const filterHistoryAsync = debounce(filterHistory, 250)
 
 function scheduleHistorySearch() {
+  searchGeneration++
   isSearching.value = true
   clampHistoryScroll()
   filterHistoryAsync()
@@ -653,6 +662,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  searchGeneration++
   filterHistoryAsync.cancel()
   document.removeEventListener('keydown', keyboardShortcutHandler)
 })
