@@ -43,6 +43,7 @@
       :disabled="disabled"
       :dir="isLocaleSelector ? 'auto' : null"
       :lang="selectedLocale"
+      :style="{ anchorName: dropdownAnchor }"
       @click="toggleDropdown"
       @keydown="handleButtonKeydown"
     >
@@ -314,6 +315,8 @@ const props = defineProps({
 const emit = defineEmits(['change', 'open', 'reset'])
 
 const id = useId()
+const dropdownAnchor = `--select-${id}`
+const supportsAnchorPositioning = CSS.supports('position-anchor', dropdownAnchor)
 const selectRoot = useTemplateRef('selectRoot')
 const selectButton = useTemplateRef('selectButton')
 const dropdown = useTemplateRef('dropdown')
@@ -461,8 +464,15 @@ function updateDropdownPosition() {
   dropdownPlacement.value = openAbove ? 'above' : 'below'
   dropdownStyle.value = {
     inlineSize: `${menuWidth}px`,
-    left: `${snapToDevicePixels(left)}px`,
-    top: `${snapToDevicePixels(top)}px`,
+    // CSS anchors follow compositor scrolling before JavaScript receives its
+    // scroll event. Keep our measured offsets for viewport edges and rounding.
+    positionAnchor: supportsAnchorPositioning ? dropdownAnchor : null,
+    left: supportsAnchorPositioning
+      ? `calc(anchor(left) + ${snapToDevicePixels(left) - buttonRect.left}px)`
+      : `${snapToDevicePixels(left)}px`,
+    top: supportsAnchorPositioning
+      ? `calc(anchor(top) + ${snapToDevicePixels(top) - buttonRect.top}px)`
+      : `${snapToDevicePixels(top)}px`,
     maxBlockSize: naturalHeight > menuHeight ? `${menuHeight}px` : null,
     zIndex: props.dropdownZIndex
   }

@@ -75,6 +75,16 @@ for (const uiScale of [100, 125]) {
         overlay: getComputedStyle(element, '::before').backgroundColor,
       }))
       const initialColors = await selectedColors()
+      expect(initialColors.overlay).toBe('rgba(0, 0, 0, 0)')
+      const expectedAccent = await dropdown.evaluate(menu => {
+        const sample = document.createElement('span')
+        sample.style.backgroundColor = 'color-mix(in srgb, var(--primary-color) 20%, var(--select-menu-surface))'
+        menu.append(sample)
+        const color = getComputedStyle(sample).backgroundColor
+        sample.remove()
+        return color
+      })
+      expect(initialColors.background).toBe(expectedAccent)
       await attachScreenshot('selected option accent immediately after opening')
       await dropdown.locator('[aria-selected="false"]').first().hover()
       expect(await selectedColors()).toEqual(initialColors)
