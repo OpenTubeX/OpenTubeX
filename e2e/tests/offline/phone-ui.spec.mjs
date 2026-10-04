@@ -197,6 +197,7 @@ for (const uiScale of [100, 95]) {
       await trigger.click()
       const transcript = page.locator('dialog[open] .transcriptCard')
       await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Search transcript', exact: true }).click()
+      await expect(transcript.locator('.transcriptControls input')).toBeFocused()
       await transcript.locator('.transcriptControls input').fill('elephant')
       await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Close', exact: true }).click()
       await expect(page.locator('dialog[open]')).toHaveCount(0)
@@ -204,6 +205,7 @@ for (const uiScale of [100, 95]) {
       await trigger.click()
       await expect(transcript).toBeVisible()
       await page.locator('.mobileSheetHeader').getByRole('button', { name: 'Search transcript', exact: true }).click()
+      await expect(transcript.locator('.transcriptControls input')).toBeFocused()
       await expect(transcript.locator('.transcriptControls input')).toHaveValue('')
     })
 
