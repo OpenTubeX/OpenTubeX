@@ -53,6 +53,7 @@
 }
 
 .removeEngine {
+  min-block-size: max(var(--form-control-height), var(--button-height));
   justify-self: center;
   margin: 0;
 }

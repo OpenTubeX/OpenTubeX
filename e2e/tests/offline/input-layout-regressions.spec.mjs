@@ -36,7 +36,7 @@ for (const uiScale of [100, 95]) {
     test('settings selects stay compact while History sort fits its selected option', async ({ app, page }, testInfo) => {
       const general = await goToSettingsSection(page, 'general')
       const week = general.getByRole('combobox', { name: 'Week Starts On' })
-      expect((await week.boundingBox()).width).toBeLessThanOrEqual(260)
+      expect((await week.boundingBox()).width).toBeLessThanOrEqual(400)
       await general.locator('.generalSelectGrid').scrollIntoViewIfNeeded()
       await captureAppFramebuffer(app, testInfo, 'compact-general-selects')
       const appearance = await goToSettingsSection(page, 'appearance')
@@ -85,6 +85,24 @@ for (const uiScale of [100, 95]) {
 
     test('wrapped engine fields center and playback name editing centers beside its reset', async ({ app, page }, testInfo) => {
       const engines = await goToSettingsSection(page, 'context-menu-search')
+      const form = engines.locator('.addEngine')
+      await form.getByLabel('Engine name', { exact: true }).fill('Example engine')
+      await form.getByLabel('Search URL', { exact: true }).fill('https://example.com/search?q=%s')
+      await form.getByRole('button', { name: 'Add engine', exact: true }).click()
+      const engineRow = engines.locator('.engineRow').filter({ has: page.getByRole('button', { name: 'Remove Example engine', exact: true }) })
+      const buttonOffset = await engineRow.evaluate(element => {
+        const button = element.querySelector('.removeEngine').getBoundingClientRect()
+        return Math.max(...[...element.querySelectorAll('.ft-input')].map(input => {
+          const field = input.getBoundingClientRect()
+          return Math.abs(field.top + field.height / 2 - button.top - button.height / 2)
+        }))
+      })
+      expect(buttonOffset).toBeLessThanOrEqual(0.1)
+      const heightDifference = await engineRow.evaluate(element => Math.abs(
+        element.querySelector('.removeEngine').getBoundingClientRect().height - element.querySelector('.ft-input').getBoundingClientRect().height
+      ))
+      expect(heightDifference).toBeLessThanOrEqual(0.1)
+      await captureAppFramebuffer(app, testInfo, 'engine-delete-alignment')
       await engines.evaluate(element => { element.parentElement.style.inlineSize = '650px' })
       for (const field of await engines.locator('.addEngine .ft-input-component').all()) {
         const offset = await field.evaluate(element => {

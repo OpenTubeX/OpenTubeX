@@ -1495,7 +1495,8 @@ test.describe('settings', () => {
       const selectWidths = Array.from(element.querySelectorAll(':scope > .select'))
         .map(select => select.getBoundingClientRect().width)
       return {
-        columnCount: getComputedStyle(element).gridTemplateColumns.split(' ').length,
+        columnCount: new Set(Array.from(element.querySelectorAll('.select-text'))
+          .map(field => Math.round(field.getBoundingClientRect().left))).size,
         gridWidth: gridBounds.width,
         maximumSelectWidth: Math.max(...selectWidths),
         centerOffset: Math.abs(

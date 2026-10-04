@@ -183,12 +183,31 @@ for (const uiScale of [100, 95]) {
           await content.evaluate(element => { element.scrollTop = element.scrollHeight })
           await resize(app, page, width === 450 ? 480 : 1600, uiScale)
           await content.evaluate((element, width) => { element.style.inlineSize = `${width}px` }, width)
-          const captions = await general.locator('.generalSelectGrid .select-placeholder').evaluateAll(elements => elements.map(element => ({
-            text: element.textContent,
-            clipped: element.scrollWidth - element.clientWidth,
-            rootWidth: element.closest('.select').getBoundingClientRect().width
-          })))
-          for (const caption of captions) expect.soft(caption.clipped, `${locale} ${width}px ${caption.text}`).toBeLessThanOrEqual(1)
+          for (const highlight of [false, true]) {
+            await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateHighlightChangedSettings', value), highlight)
+            for (const direction of ['ltr', 'rtl']) {
+              await page.evaluate(value => { document.body.dir = value }, direction)
+              const captions = await general.locator('.generalSelectGrid .select-placeholder').evaluateAll(elements => elements.map(element => {
+                const field = element.closest('.select').querySelector('.select-text').getBoundingClientRect()
+                const caption = element.getBoundingClientRect()
+                const arrow = element.closest('.select').querySelector('.iconSelect').getBoundingClientRect()
+                return {
+                  text: element.textContent,
+                  clipped: element.scrollWidth - element.clientWidth,
+                  outsideField: Math.max(field.left - caption.left, caption.right - field.right, field.left - arrow.left, arrow.right - field.right)
+                }
+              }))
+              const widths = await general.locator('.generalSelectGrid .select-text').evaluateAll((elements, columns) => {
+                const groups = Array.from({ length: columns }, () => [])
+                elements.forEach((element, index) => groups[index % columns].push(element.getBoundingClientRect().width))
+                return groups.map(group => Math.max(...group) - Math.min(...group))
+              }, width > 800 ? 2 : 1)
+              for (const difference of widths) expect.soft(difference, `${locale} ${width}px column field widths`).toBeLessThanOrEqual(0.1)
+              for (const caption of captions) expect.soft(caption.clipped, `${locale} ${width}px ${caption.text}`).toBeLessThanOrEqual(1)
+              for (const caption of captions) expect.soft(caption.outsideField, `${locale} ${width}px ${direction} ${caption.text} caption and arrow`).toBeLessThanOrEqual(1)
+            }
+          }
+          await page.evaluate(() => { document.body.dir = 'ltr' })
           expect(await content.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
           await expect.poll(() => content.evaluate(element => {
             const section = element.querySelector(':scope > .section:not([style*="display: none"])')
