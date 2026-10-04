@@ -338,7 +338,7 @@ test.describe('desktop quick playback speed bar', () => {
     }
   })
 
-  for (const control of ['quick bar', 'menu']) {
+  for (const control of ['quick bar', 'menu', 'normal-speed toggle']) {
     test(`keeps ${control} speed selections while the DASH manifest is still loading`, async ({ app, page }) => {
       await mockPlayableWatchPage(app, page)
       const video = await openMockedVideo(page)
@@ -379,7 +379,7 @@ test.describe('desktop quick playback speed bar', () => {
         const bar = page.locator(`${activeTab} .ft-quick-playback-rate-bar`)
         await expect.poll(() => video.evaluate(element => element.readyState)).toBe(0)
         await page.locator(`${activeTab} .shaka-controls-container`).evaluate(element => element.setAttribute('shown', 'true'))
-        if (control === 'quick bar') {
+        if (control !== 'menu') {
           await bar.locator('[data-rate="1.5"]').click()
           await expect(bar.locator('[data-rate="1.5"]')).toHaveClass(/is-current-rate/)
         } else {
@@ -394,13 +394,19 @@ test.describe('desktop quick playback speed bar', () => {
           await menu.locator('.shaka-back-to-overflow-button').click()
           await player.getByRole('button', { name: 'More settings', exact: true }).click()
         }
-        await page.locator('body').press('p')
-        await expect(bar.locator('[data-rate="1.75"]')).toHaveClass(/is-current-rate/)
+        const rate = control === 'normal-speed toggle' ? 1 : 1.75
+        await page.locator('body').press(control === 'normal-speed toggle' ? 'g' : 'p')
+        await expect(bar.locator(`[data-rate="${rate}"]`)).toHaveClass(/is-current-rate/)
 
         releaseManifest()
         await waitForPlayback(page)
-        await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.75)
-        await expect(bar.locator('[data-rate="1.75"]')).toHaveClass(/is-current-rate/)
+        await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(rate)
+        await expect(bar.locator(`[data-rate="${rate}"]`)).toHaveClass(/is-current-rate/)
+        if (control === 'normal-speed toggle') {
+          await page.locator('body').press('g')
+          await expect.poll(() => video.evaluate(element => element.playbackRate)).toBe(1.5)
+          await expect(bar.locator('[data-rate="1.5"]')).toHaveClass(/is-current-rate/)
+        }
       } finally {
         releaseManifest()
       }
