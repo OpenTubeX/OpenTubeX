@@ -154,6 +154,20 @@
 }
 
 @media only screen and (width <= 850px) {
+  .playlistItems {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .playlistItem :deep(.ft-list-video) {
+    padding-block: 4px;
+  }
+
+  .playlistItem :deep(.restArea) {
+    display: none;
+  }
+
   .routerView {
     flex-direction: column;
 

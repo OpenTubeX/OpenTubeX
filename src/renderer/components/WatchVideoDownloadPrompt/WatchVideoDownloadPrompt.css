@@ -303,7 +303,6 @@
 
 @media (width <= 600px), (height <= 600px) {
   :deep(.downloadPromptCard) {
-    block-size: 100%;
     min-block-size: 0;
   }
 
@@ -340,6 +339,27 @@
   }
 }
 
-:global(.promptCard.downloadPromptCard.activeDownloadCard) {
+:global(.promptCard.downloadPromptCard.fixedLayout) {
   block-size: auto;
+}
+
+@media (height <= 400px) and (width > 600px) {
+  .downloadHeader {
+    padding-block: 4px;
+  }
+
+  .fixedTemplateSection :deep(.select) {
+    margin-block-start: 12px;
+  }
+
+  .downloadFooter:has(.downloadFolderRow) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .downloadFolderRow {
+    margin-block: 0;
+  }
 }
