@@ -47,6 +47,33 @@ test.use({
 })
 
 for (const uiScale of [100, 95]) {
+  test(`subscription cards keep equal spacing and readable feed buttons at ${uiScale}%`, async ({ app, page }, testInfo) => {
+    await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), uiScale)
+    await page.evaluate(() => localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({ x: 40, y: 40, width: 1400, height: 900 })))
+    const settings = await goToSettingsSection(page, 'subscription')
+    await settings.getByRole('button', { name: 'Subscription settings', exact: true }).click()
+    for (const width of [1600, 480]) {
+      await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setBounds({ width, height: 1000 }), width)
+      await expect.poll(() => page.evaluate(() => innerWidth)).toBeCloseTo(width * 100 / uiScale, 0)
+      const card = page.locator('.channelSettings').first()
+      await card.scrollIntoViewIfNeeded()
+      const gaps = await card.evaluate(element => {
+        const feed = element.querySelector('.feedTypeOptions').getBoundingClientRect()
+        const members = element.querySelector('.membersOnlySetting').getBoundingClientRect()
+        const toggle = element.querySelector('.switch-ctn').getBoundingClientRect()
+        const daily = element.querySelector('.dailyLimitSetting').getBoundingClientRect()
+        const select = element.querySelector('.select-text').getBoundingClientRect()
+        return [members.top - feed.bottom, toggle.top - members.top - 1, daily.top - toggle.bottom, select.top - daily.top - 1]
+      })
+      for (const gap of gaps) expect.soft(gap).toBeCloseTo(gaps[1], 0)
+      for (const label of await card.locator('.feedTypeOption > span').all()) {
+        expect.soft(await label.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+      }
+      expect(await card.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+      await card.screenshot({ path: testInfo.outputPath(`subscription-card-${width}.png`) })
+    }
+  })
+
   test(`keeps subscription popover controls compact at ${uiScale}%`, async ({ app, page }, testInfo) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), uiScale)

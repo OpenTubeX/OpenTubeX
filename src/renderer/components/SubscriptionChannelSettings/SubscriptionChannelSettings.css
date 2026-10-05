@@ -150,8 +150,9 @@
 .channelSettings {
   border: 1px solid var(--border-color);
   border-radius: calc(4px * var(--ui-roundness));
+  container-type: inline-size;
   display: grid;
-  gap: 16px;
+  gap: 12px;
   min-inline-size: 0;
   padding: 16px;
 }
@@ -296,9 +297,7 @@
 
 .feedTypeOption > span {
   min-inline-size: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .feedTypeCheck {
@@ -320,7 +319,7 @@
 
 .dailyLimitSelect {
   inline-size: 100%;
-  margin-block-start: 27px;
+  margin-block: 0;
 }
 
 @container (width <= 560px) {

@@ -60,9 +60,21 @@
 
 .addEngine {
   display: grid;
-  grid-template-columns: minmax(140px, 1fr) minmax(240px, 2fr) auto;
+  grid-template-columns: repeat(2, minmax(0, 340px)) auto;
   gap: 12px;
   align-items: center;
+  justify-content: center;
+}
+
+.addEngine :deep(.btn) {
+  justify-self: center;
+  margin: 0;
+}
+
+/* New values have no saved-setting markers to reserve a gutter for. */
+.addEngine :deep(.ft-input-component.floatingLabel) {
+  border-inline-start: 0;
+  padding-inline-start: 0;
 }
 
 h3 {

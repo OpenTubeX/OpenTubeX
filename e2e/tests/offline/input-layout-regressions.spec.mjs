@@ -83,9 +83,73 @@ for (const uiScale of [100, 95]) {
       await captureAppFramebuffer(app, testInfo, 'tab-organizer-narrow')
     })
 
+    test('Storage section headings use the shared vertical spacing', async ({ app, page }, testInfo) => {
+      const storage = await goToSettingsSection(page, 'storage')
+      for (const width of [1100, 360]) {
+        await storage.evaluate((element, width) => { element.parentElement.style.inlineSize = `${width}px` }, width)
+        const gaps = await storage.evaluate(element => [...element.querySelectorAll('.storageSettings > .settingsSection')].slice(2).map(section => {
+          const previous = section.previousElementSibling
+          const cards = [...previous.querySelectorAll('.storageItem')]
+          return section.querySelector('.sectionTitle').getBoundingClientRect().top -
+            Math.max(...cards.map(card => card.getBoundingClientRect().bottom))
+        }))
+        expect(gaps.length).toBeGreaterThan(0)
+        for (const gap of gaps) expect.soft(gap).toBeCloseTo(20, 0)
+      }
+      await storage.getByRole('heading', { name: 'Replaceable caches' }).scrollIntoViewIfNeeded()
+      await captureAppFramebuffer(app, testInfo, 'storage-section-spacing')
+    })
+
+    test('SponsorBlock custom colors match the spacing between settings switches', async ({ app, page }, testInfo) => {
+      const addOns = await goToSettingsSection(page, 'add-ons')
+      await addOns.locator('label.switch-label').filter({ hasText: 'Enable SponsorBlock' }).click()
+      const switchSpacing = await addOns.locator('.switch-ctn').first().evaluate(element => {
+        const style = getComputedStyle(element)
+        return parseFloat(style.marginBlockStart) + parseFloat(style.marginBlockEnd)
+      })
+      for (const name of ['Sponsor', 'Highlight']) {
+        const category = addOns.locator('.sponsorBlockCategory').filter({
+          has: page.locator('.sponsorTitle').getByText(name, { exact: true })
+        })
+        await category.getByRole('combobox', { name: 'Category Color', exact: true }).click()
+        await page.getByRole('option', { name: 'Custom color', exact: true }).click()
+        for (const width of [1100, 650, 360]) {
+          await addOns.evaluate((element, width) => { element.parentElement.style.inlineSize = `${width}px` }, width)
+          await category.locator('.ftColorPicker').scrollIntoViewIfNeeded()
+          const gaps = await category.evaluate(element => {
+            const selects = [...element.querySelectorAll('.select-text')].map(select => select.getBoundingClientRect())
+            const picker = element.querySelector('.colorFieldTrigger').getBoundingClientRect()
+            return [picker.top - selects[0].bottom, selects[1].top - picker.bottom]
+          })
+          for (const gap of gaps) {
+            expect(gap).toBeCloseTo(switchSpacing, 0)
+          }
+          await captureAppFramebuffer(app, testInfo, `sponsorblock-${name.toLowerCase()}-spacing-${width}`)
+        }
+      }
+    })
+
     test('wrapped engine fields center and playback name editing centers beside its reset', async ({ app, page }, testInfo) => {
       const engines = await goToSettingsSection(page, 'context-menu-search')
       const form = engines.locator('.addEngine')
+      await form.scrollIntoViewIfNeeded()
+      const layout = await form.evaluate(element => {
+        const fields = [...element.querySelectorAll('.ft-input')].map(input => input.getBoundingClientRect())
+        const button = element.querySelector('button').getBoundingClientRect()
+        const bounds = element.getBoundingClientRect()
+        return {
+          centerOffset: Math.abs((fields[0].left + button.right) / 2 - bounds.left - bounds.width / 2),
+          gaps: [fields[1].left - fields[0].right, button.left - fields[1].right],
+          verticalOffset: Math.max(...fields.map(field => Math.abs(field.top + field.height / 2 - button.top - button.height / 2)))
+        }
+      })
+      expect(layout.centerOffset, JSON.stringify(layout)).toBeLessThanOrEqual(1)
+      for (const gap of layout.gaps) {
+        expect(gap).toBeGreaterThanOrEqual(8)
+        expect(gap).toBeLessThanOrEqual(20)
+      }
+      expect(layout.verticalOffset).toBeLessThanOrEqual(1)
+      await captureAppFramebuffer(app, testInfo, 'centered-engine-form-desktop')
       await form.getByLabel('Engine name', { exact: true }).fill('Example engine')
       await form.getByLabel('Search URL', { exact: true }).fill('https://example.com/search?q=%s')
       await form.getByRole('button', { name: 'Add engine', exact: true }).click()
@@ -103,17 +167,19 @@ for (const uiScale of [100, 95]) {
       ))
       expect(heightDifference).toBeLessThanOrEqual(0.1)
       await captureAppFramebuffer(app, testInfo, 'engine-delete-alignment')
-      await engines.evaluate(element => { element.parentElement.style.inlineSize = '650px' })
-      for (const field of await engines.locator('.addEngine .ft-input-component').all()) {
-        const offset = await field.evaluate(element => {
-          const bounds = element.getBoundingClientRect()
-          const parent = element.parentElement.getBoundingClientRect()
-          return Math.abs(bounds.left + bounds.width / 2 - parent.left - parent.width / 2)
-        })
-        expect.soft(offset).toBeLessThanOrEqual(1)
+      for (const width of [650, 360]) {
+        await engines.evaluate((element, width) => { element.parentElement.style.inlineSize = `${width}px` }, width)
+        await expect.poll(() => form.evaluate(element => {
+          const parent = element.getBoundingClientRect()
+          return Math.max(...[...element.children].map(child => {
+            const bounds = child.getBoundingClientRect()
+            return Math.abs(bounds.left + bounds.width / 2 - parent.left - parent.width / 2)
+          }))
+        })).toBeLessThanOrEqual(1)
+        expect(await form.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+        await form.scrollIntoViewIfNeeded()
+        await captureAppFramebuffer(app, testInfo, `centered-engine-form-${width}`)
       }
-      await engines.locator('.addEngine').scrollIntoViewIfNeeded()
-      await captureAppFramebuffer(app, testInfo, 'centered-engine-inputs')
       await page.locator('.settingsCloseButton').click()
       await expect(page.locator('.settingsWindow')).toHaveCount(0)
       const playback = await goToSettingsSection(page, 'playback')

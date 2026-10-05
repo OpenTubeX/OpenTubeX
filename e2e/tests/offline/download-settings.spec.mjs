@@ -308,6 +308,82 @@ test.describe('download settings', () => {
   })
 
   for (const uiScale of [100, 95]) {
+    test(`automatic download descriptions and channel filters use shared spacing at ${uiScale}%`, async ({ app, page }, testInfo) => {
+      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), uiScale)
+      await goToSettingsSection(page, 'download')
+      await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
+      const manager = page.locator('.settingsSubpageContent')
+      const headerGaps = await manager.evaluate(element => {
+        const header = element.querySelector('.automaticDownloadsHeader')
+        const description = header.querySelector('p').getBoundingClientRect()
+        const hint = header.querySelector('.automaticDownloadsHint').getBoundingClientRect()
+        const search = header.querySelector('input').getBoundingClientRect()
+        return [description.top - element.closest('.settingsSubpageScroll').getBoundingClientRect().top, search.top - hint.bottom]
+      })
+      for (const gap of headerGaps) expect.soft(gap).toBeCloseTo(20, 0)
+      const channel = manager.locator('.channelRule').first()
+      await channel.locator('.channelToggle .switch-label').click()
+      for (const width of [1100, 650, 360]) {
+        await manager.evaluate((element, width) => { element.style.inlineSize = `${width}px` }, width)
+        const gaps = await channel.evaluate(element => {
+          const controls = [...element.querySelectorAll('.channelRuleHeader, .select-text, .templateAndTypes .switch-label, .ft-input, .filterHint')]
+          const rows = []
+          for (const bounds of controls.map(control => control.getBoundingClientRect()).sort((a, b) => a.top - b.top)) {
+            const row = rows.find(row => Math.abs(row.top - bounds.top) < 1)
+            if (row) row.bottom = Math.max(row.bottom, bounds.bottom)
+            else rows.push({ top: bounds.top, bottom: bounds.bottom })
+          }
+          return rows.slice(1).map((row, index) => row.top - rows[index].bottom)
+        })
+        for (const gap of gaps) expect.soft(gap, `${width}px vertical spacing`).toBeCloseTo(20, 0)
+        if (width === 1100) {
+          const switchGaps = await channel.locator('.templateAndTypes').evaluate(element => {
+            const switches = [...element.querySelectorAll('.switch-label')].map(toggle => toggle.getBoundingClientRect())
+            return switches.slice(1).map((toggle, index) => toggle.left - switches[index].right)
+          })
+          for (const gap of switchGaps) expect.soft(gap).toBeLessThanOrEqual(24)
+        }
+        if (width > 600) {
+          for (const grid of ['.filterGrid', '.titleFilters']) {
+            const columnGap = await channel.locator(grid).evaluate(element => {
+              const inputs = [...element.querySelectorAll('.ft-input')].map(input => input.getBoundingClientRect())
+              return inputs[1].left - inputs[0].right
+            })
+            expect.soft(columnGap, `${width}px ${grid} column spacing`).toBeCloseTo(20, 0)
+          }
+        }
+        expect(await channel.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
+        await channel.scrollIntoViewIfNeeded()
+        await channel.screenshot({ path: testInfo.outputPath(`automatic-download-spacing-${width}.png`) })
+      }
+    })
+
+    test(`automatic download types wrap translated labels across breakpoints at ${uiScale}%`, async ({ page }) => {
+      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), uiScale)
+      await goToSettingsSection(page, 'download')
+      await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
+      const manager = page.locator('.settingsSubpageContent')
+      const channel = manager.locator('.channelRule').first()
+      await channel.locator('.channelToggle .switch-label').click()
+      await page.evaluate(async () => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        await store.dispatch('updateUseAITranslationCompletions', true)
+        await store.dispatch('updateCurrentLocale', 'el')
+      })
+      await expect(channel.locator('.templateAndTypes')).toContainText('Ζωντανές μεταδόσεις')
+      for (const width of [1100, 800, 761, 760, 650, 610, 601, 600]) {
+        await manager.evaluate((element, width) => { element.style.inlineSize = `${width}px` }, width)
+        const overflow = await channel.evaluate(element => {
+          const card = element.getBoundingClientRect()
+          const parent = element.parentElement.getBoundingClientRect()
+          const labels = [...element.querySelectorAll('.templateAndTypes .switch-label-text')]
+          return Math.max(card.right - parent.right, parent.left - card.left,
+            ...labels.map(label => label.scrollWidth - label.clientWidth))
+        })
+        expect(overflow, `${width}px translated controls`).toBeLessThanOrEqual(1)
+      }
+    })
+
     test(`clamps the automatic download manager after dynamic content changes at ${uiScale}%`, async ({ app, page }) => {
       await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiScale', value), uiScale)
       await goToSettingsSection(page, 'download')
