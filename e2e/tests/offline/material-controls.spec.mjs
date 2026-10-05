@@ -291,7 +291,7 @@ for (const scale of [100, 95]) {
       await page.emulateMedia({ reducedMotion: 'reduce' })
       await page.locator(sel.tabOrganizerButton).click()
       const organizer = page.getByRole('dialog', { name: 'Tab Organizer' })
-      await expect(organizer.locator('.newGroupForm .select')).toHaveCount(0)
+      await expect(organizer.getByRole('textbox', { name: 'Group name', exact: true })).toHaveCount(0)
       const move = organizer.locator('.bulkActionSelect')
       await expect(move.getByRole('combobox')).toBeDisabled()
       await expect.soft(move.locator('.select-label')).toHaveCSS('opacity', '1', { timeout: 1000 })
@@ -323,9 +323,10 @@ for (const scale of [100, 95]) {
       await page.emulateMedia({ reducedMotion: 'reduce' })
       await page.locator(sel.tabOrganizerButton).click()
       const organizer = page.getByRole('dialog', { name: 'Tab Organizer' })
-      const form = organizer.locator('.newGroupForm')
-      const input = form.getByRole('textbox')
-      const create = form.getByRole('button', { name: 'Create Group' })
+      await organizer.getByRole('button', { name: 'Create Group', exact: true }).click()
+      const form = page.getByRole('dialog', { name: 'Create Group', exact: true })
+      const input = form.getByRole('textbox', { name: 'Group name', exact: true })
+      const create = form.getByRole('button', { name: 'Create Group', exact: true })
       await input.fill('Appearance')
       await create.click()
       const group = organizer.locator('.tabGroup').filter({ hasText: 'Appearance' })
@@ -363,7 +364,7 @@ for (const scale of [100, 95]) {
           const viewport = await page.evaluate(() => innerWidth)
           expect(pickerBox.x).toBeGreaterThanOrEqual(0)
           expect(pickerBox.x + pickerBox.width).toBeLessThanOrEqual(viewport)
-          await input.focus()
+          await organizer.getByRole('searchbox', { name: 'Search tabs', exact: true }).focus()
           await expect(icons).toBeHidden()
         }
       }
@@ -1636,7 +1637,7 @@ test('filled fields and slider progress retain their input behavior', async ({ p
   await testInfo.attach('material-fields', { path: screenshot, contentType: 'image/png' })
 })
 
-test('shared Material controls follow UI Roundness while switches keep their shape', async ({ page }) => {
+test('shared Material controls follow UI Roundness while switch focus keeps its shape', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   const section = await goToSettingsSection(page, 'privacy')
   const select = section.locator('.privacyExternalLinkSelect .select-text')
@@ -1644,7 +1645,7 @@ test('shared Material controls follow UI Roundness while switches keep their sha
   for (const roundness of [0, 50, 100, 200]) {
     await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
     expect(await select.evaluate(element => parseFloat(getComputedStyle(element).borderTopLeftRadius))).toBeCloseTo(4 * roundness / 100, 1)
-    expect(await switchLabel.evaluate(element => parseFloat(getComputedStyle(element, '::before').borderTopLeftRadius))).toBeCloseTo(12, 1)
+    expect(await switchLabel.evaluate(element => parseFloat(getComputedStyle(element, '::before').borderTopLeftRadius))).toBeCloseTo(12 * roundness / 100, 1)
     await switchLabel.locator('..').locator('.switch-input').press('Space')
     await expect(switchLabel).toHaveCSS('border-radius', '4px')
   }

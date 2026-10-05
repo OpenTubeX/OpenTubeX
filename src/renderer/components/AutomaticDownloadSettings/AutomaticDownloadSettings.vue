@@ -257,7 +257,9 @@ function stopObservingContent() {
   contentResizeObserver = null
 }
 
-const rules = computed(() => parseAutomaticDownloadRules(store.getters.getYtDlpAutomaticDownloadRules))
+const pendingRules = ref(null)
+let ruleUpdateSequence = 0
+const rules = computed(() => parseAutomaticDownloadRules(pendingRules.value ?? store.getters.getYtDlpAutomaticDownloadRules))
 const channels = computed(() => {
   const allChannelsProfile = store.getters.getProfileList[0]
   const collator = new Intl.Collator([locale.value, 'en'], { sensitivity: 'base' })
@@ -294,26 +296,38 @@ function ruleFor(channelId) {
   return normalizeAutomaticDownloadRule(rules.value[channelId])
 }
 
-function saveRules(nextRules) {
-  store.dispatch('updateYtDlpAutomaticDownloadRules', JSON.stringify(nextRules))
+function saveRules(updateRules) {
+  const sequence = ++ruleUpdateSequence
+  // Keep unsaved edits in the editor so background downloads use saved rules.
+  pendingRules.value = JSON.stringify(updateRules(rules.value))
+  store.dispatch('updateYtDlpAutomaticDownloadRules', value => JSON.stringify(updateRules(parseAutomaticDownloadRules(value)))).finally(() => {
+    if (sequence === ruleUpdateSequence) pendingRules.value = null
+  }).catch(error => console.error(error))
 }
 
 function setChannelEnabled(channelId, enabled) {
-  const nextRules = { ...rules.value }
-  if (enabled) {
-    nextRules[channelId] = { ...DEFAULT_AUTOMATIC_DOWNLOAD_RULE, enabledAt: Date.now() }
-  } else {
-    delete nextRules[channelId]
-  }
-  saveRules(nextRules)
+  const enabledAt = Date.now()
+  saveRules(currentRules => {
+    const nextRules = { ...currentRules }
+    if (enabled) {
+      nextRules[channelId] = { ...DEFAULT_AUTOMATIC_DOWNLOAD_RULE, enabledAt }
+    } else {
+      delete nextRules[channelId]
+    }
+    return nextRules
+  })
 }
 
 function updateRule(channelId, key, value) {
-  saveRules({
-    ...rules.value,
-    [channelId]: {
-      ...ruleFor(channelId),
-      [key]: value
+  saveRules(currentRules => {
+    // A field edit must not re-enable a rule removed by another writer.
+    if (currentRules[channelId] === undefined) return currentRules
+    return {
+      ...currentRules,
+      [channelId]: {
+        ...normalizeAutomaticDownloadRule(currentRules[channelId]),
+        [key]: value
+      }
     }
   })
 }

@@ -433,8 +433,8 @@ function updateReferences(oldValue, replacementValue) {
   if (store.getters.getYtDlpSelectedTemplate === oldValue) {
     store.dispatch('updateYtDlpSelectedTemplate', replacementValue)
   }
-  store.dispatch('updateYtDlpAutomaticDownloadRules', replaceAutomaticDownloadTemplateReferences(
-    store.getters.getYtDlpAutomaticDownloadRules,
+  store.dispatch('updateYtDlpAutomaticDownloadRules', rules => replaceAutomaticDownloadTemplateReferences(
+    rules,
     oldValue,
     replacementValue
   ))

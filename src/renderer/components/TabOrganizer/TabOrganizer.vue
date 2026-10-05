@@ -12,7 +12,7 @@
         role="dialog"
         aria-modal="true"
         :aria-labelledby="titleId"
-        :inert="sessionToDelete !== null || sessionToOpen !== null"
+        :inert="showCreateGroupPrompt || sessionToDelete !== null || sessionToOpen !== null"
         @keydown="handleDialogKeydown"
       >
         <header class="tabOrganizerHeader">
@@ -36,146 +36,127 @@
           </button>
         </header>
 
-        <div class="tabOrganizerControls">
-          <div class="selectionControls">
-            <span aria-live="polite">
-              {{ t('Tab Organizer.Selected Count', { count: selectedTabs.length }, selectedTabs.length) }}
-            </span>
-            <button
-              type="button"
-              :disabled="tabs.length === 0"
-              @click="toggleAllTabsSelection"
-            >
-              <FtIcon
-                :icon="['fas', hasSelectedTabs ? 'xmark' : 'check']"
-                aria-hidden="true"
-              />
-              {{ hasSelectedTabs ? t('Tab Organizer.Select None') : t('Tab Organizer.Select All') }}
-            </button>
-            <FtSelect
-              variant="outlined"
-              class="compactSelect bulkActionSelect"
-              :placeholder="t('Tab Organizer.Move To Group')"
-              :value="selectedGroupTarget"
-              :select-names="groupSelectNames"
-              :select-values="groupSelectValues"
-              :option-colors="groupSelectColors"
-              :option-icons="groupSelectIcons"
-              :disabled="selectedTabs.length === 0"
-              :show-icon="false"
-              @change="moveSelectedTabsToGroup"
-            />
-            <FtSelect
-              v-if="moveTargets.length > 0"
-              variant="outlined"
-              class="compactSelect"
-              :placeholder="t('Tab Organizer.Move To Window')"
-              :value="selectedWindowTarget"
-              :select-names="windowSelectNames"
-              :select-values="windowSelectValues"
-              :disabled="selectedTabs.length === 0"
-              :show-icon="false"
-              @change="moveSelectedTabsToWindow"
-            />
-          </div>
-          <div class="bulkActions">
-            <button
-              type="button"
-              :disabled="!canPinSelectedTabs"
-              @click="setSelectedPinned(true)"
-            >
-              <FtIcon
-                :icon="['fas', 'thumbtack']"
-                aria-hidden="true"
-              />
-              {{ t('Tab Organizer.Pin') }}
-            </button>
-            <button
-              type="button"
-              :disabled="!canUnpinSelectedTabs"
-              @click="setSelectedPinned(false)"
-            >
-              <FtIcon
-                :icon="['fas', 'thumbtack-slash']"
-                aria-hidden="true"
-              />
-              {{ t('Tab Organizer.Unpin') }}
-            </button>
-            <button
-              type="button"
-              :disabled="!canLoadSelectedTabs"
-              @click="runAction('load', selectedTabIdsArray)"
-            >
-              <FtIcon
-                :icon="['fas', 'download']"
-                aria-hidden="true"
-              />
-              {{ t('Tab Organizer.Load') }}
-            </button>
-            <button
-              type="button"
-              :disabled="!canUnloadSelectedTabs"
-              @click="runAction('unload', selectedTabIdsArray)"
-            >
-              <FtIcon
-                :icon="['fas', 'right-from-bracket']"
-                aria-hidden="true"
-              />
-              {{ t('Tab Organizer.Unload') }}
-            </button>
-            <button
-              type="button"
-              class="dangerButton"
-              :disabled="selectedTabs.length === 0"
-              @click="runAction('close', selectedTabIdsArray)"
-            >
-              <FtIcon
-                :icon="['fas', 'rectangle-xmark']"
-                aria-hidden="true"
-              />
-              {{ t('Close') }}
-            </button>
-            <label class="tabOrganizerSearch">
-              <FtIcon
-                class="searchIcon"
-                :icon="['fas', 'magnifying-glass']"
-                aria-hidden="true"
-              />
-              <input
-                ref="searchRef"
-                v-model="query"
-                type="search"
-                autocomplete="off"
-                :placeholder="t('Tab Organizer.Search Label')"
-                :aria-label="t('Tab Organizer.Search Label')"
-              >
-            </label>
-          </div>
-          <form
-            class="newGroupForm"
-            @submit.prevent="createGroup"
+        <div class="tabOrganizerControls selectionControls bulkActions">
+          <span aria-live="polite">
+            {{ t('Tab Organizer.Selected Count', { count: selectedTabs.length }, selectedTabs.length) }}
+          </span>
+          <button
+            type="button"
+            :disabled="tabs.length === 0"
+            @click="toggleAllTabsSelection"
           >
-            <label>
-              <span class="controlLabel">{{ t('Tab Organizer.Group Name') }}</span>
-              <input
-                v-model="newGroupName"
-                class="groupNameInput"
-                type="text"
-                maxlength="80"
-                :placeholder="t('Form Inputs.Example', { example: t('Tab Organizer.Icon Labels.Music') })"
-              >
-            </label>
-            <button
-              type="submit"
-              :disabled="newGroupName.trim().length === 0"
+            <FtIcon
+              :icon="['fas', hasSelectedTabs ? 'xmark' : 'check']"
+              aria-hidden="true"
+            />
+            {{ hasSelectedTabs ? t('Tab Organizer.Select None') : t('Tab Organizer.Select All') }}
+          </button>
+          <FtSelect
+            variant="outlined"
+            class="compactSelect bulkActionSelect"
+            :placeholder="t('Tab Organizer.Move To Group')"
+            :value="selectedGroupTarget"
+            :select-names="groupSelectNames"
+            :select-values="groupSelectValues"
+            :option-colors="groupSelectColors"
+            :option-icons="groupSelectIcons"
+            :disabled="selectedTabs.length === 0"
+            :show-icon="false"
+            @change="moveSelectedTabsToGroup"
+          />
+          <FtSelect
+            v-if="moveTargets.length > 0"
+            variant="outlined"
+            class="compactSelect"
+            :placeholder="t('Tab Organizer.Move To Window')"
+            :value="selectedWindowTarget"
+            :select-names="windowSelectNames"
+            :select-values="windowSelectValues"
+            :disabled="selectedTabs.length === 0"
+            :show-icon="false"
+            @change="moveSelectedTabsToWindow"
+          />
+          <button
+            type="button"
+            :disabled="!canPinSelectedTabs"
+            @click="setSelectedPinned(true)"
+          >
+            <FtIcon
+              :icon="['fas', 'thumbtack']"
+              aria-hidden="true"
+            />
+            {{ t('Tab Organizer.Pin') }}
+          </button>
+          <button
+            type="button"
+            :disabled="!canUnpinSelectedTabs"
+            @click="setSelectedPinned(false)"
+          >
+            <FtIcon
+              :icon="['fas', 'thumbtack-slash']"
+              aria-hidden="true"
+            />
+            {{ t('Tab Organizer.Unpin') }}
+          </button>
+          <button
+            type="button"
+            :disabled="!canLoadSelectedTabs"
+            @click="runAction('load', selectedTabIdsArray)"
+          >
+            <FtIcon
+              :icon="['fas', 'download']"
+              aria-hidden="true"
+            />
+            {{ t('Tab Organizer.Load') }}
+          </button>
+          <button
+            type="button"
+            :disabled="!canUnloadSelectedTabs"
+            @click="runAction('unload', selectedTabIdsArray)"
+          >
+            <FtIcon
+              :icon="['fas', 'right-from-bracket']"
+              aria-hidden="true"
+            />
+            {{ t('Tab Organizer.Unload') }}
+          </button>
+          <button
+            type="button"
+            class="dangerButton"
+            :disabled="selectedTabs.length === 0"
+            @click="runAction('close', selectedTabIdsArray)"
+          >
+            <FtIcon
+              :icon="['fas', 'rectangle-xmark']"
+              aria-hidden="true"
+            />
+            {{ t('Close') }}
+          </button>
+          <button
+            type="button"
+            @click="openCreateGroupPrompt"
+          >
+            <FtIcon
+              :icon="['fas', 'plus']"
+              aria-hidden="true"
+            />
+            {{ t('Tab Organizer.Create Group') }}
+          </button>
+          <label class="tabOrganizerSearch">
+            <FtIcon
+              class="searchIcon"
+              :icon="['fas', 'magnifying-glass']"
+              aria-hidden="true"
+            />
+            <input
+              ref="searchRef"
+              v-model="query"
+              type="search"
+              autocomplete="off"
+              :placeholder="t('Tab Organizer.Search Label')"
+              :aria-label="t('Tab Organizer.Search Label')"
             >
-              <FtIcon
-                :icon="['fas', 'plus']"
-                aria-hidden="true"
-              />
-              {{ t('Tab Organizer.Create Group') }}
-            </button>
-          </form>
+          </label>
         </div>
 
         <div
@@ -633,6 +614,42 @@
     </div>
   </Teleport>
   <FtPrompt
+    v-if="showCreateGroupPrompt"
+    :label="t('Tab Organizer.Create Group')"
+    :busy="isCreatingGroup"
+    autosize
+    fixed-layout
+    @click="closeCreateGroupPrompt"
+  >
+    <FtInput
+      ref="newGroupNameInput"
+      class="newGroupNameInput"
+      :label="t('Tab Organizer.Group Name')"
+      :placeholder="t('Form Inputs.Example', { example: t('Tab Organizer.Icon Labels.Music') })"
+      :value="newGroupName"
+      :maxlength="80"
+      :show-action-button="false"
+      @input="newGroupName = $event"
+      @click="createGroup"
+      @keydown.tab="handleCreateGroupKeydown"
+    />
+    <template #footer>
+      <FtFlexBox @keydown.tab="handleCreateGroupKeydown">
+        <FtButton
+          :label="t('Tab Organizer.Create Group')"
+          :icon="['fas', 'plus']"
+          :disabled="newGroupName.trim().length === 0 || isCreatingGroup"
+          @click="createGroup"
+        />
+        <FtButton
+          :label="t('Cancel')"
+          :icon="['fas', 'xmark']"
+          @click="closeCreateGroupPrompt"
+        />
+      </FtFlexBox>
+    </template>
+  </FtPrompt>
+  <FtPrompt
     v-if="sessionToOpen"
     :busy="isOpeningSession"
     :label="t('Settings.Sync Settings.Open All Tabs Confirmation')"
@@ -670,6 +687,9 @@ import { showToast } from '../../helpers/utils'
 import store from '../../store/index'
 import { getSyncedTabPreview as syncedTabPreview, getTabAvatarUrl, getTabPageIcon } from '../../tabs/tabPreview'
 import { formatTabTitle } from '../../tabs/tabTitle'
+import FtButton from '../FtButton/FtButton.vue'
+import FtInput from '../FtInput/FtInput.vue'
+import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtCheckboxList from '../FtCheckboxList/FtCheckboxList.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import { lockBodyScroll, unlockBodyScroll } from '../FtPrompt/scrollLock'
@@ -704,6 +724,10 @@ const syncedSessionPanelId = `${syncedSessionIdPrefix}-panel`
 const teleportTarget = document.fullscreenElement ?? '.app'
 const query = ref('')
 const newGroupName = ref('')
+const showCreateGroupPrompt = ref(false)
+const isCreatingGroup = ref(false)
+const newGroupNameInput = useTemplateRef('newGroupNameInput')
+let pendingGroup = null
 const selectedGroupTarget = ref('')
 const selectedWindowTarget = ref('')
 const moveTargets = ref([])
@@ -1035,20 +1059,53 @@ async function runAction(action, tabIds) {
   await store.dispatch('runTabOrganizerAction', { action, tabIds })
 }
 
-async function createGroup() {
-  const group = await store.dispatch('createTabGroup', {
-    name: newGroupName.value,
-    color: null
-  })
-  if (!group) return
-
-  if (selectedTabIdsArray.value.length > 0) {
-    await store.dispatch('setTabsGroup', {
-      tabIds: selectedTabIdsArray.value,
-      groupId: group.id
-    })
-  }
+async function openCreateGroupPrompt() {
+  pendingGroup = null
   newGroupName.value = ''
+  showCreateGroupPrompt.value = true
+  await nextTick()
+  await nextTick()
+  newGroupNameInput.value?.focus()
+}
+
+function closeCreateGroupPrompt() {
+  if (isCreatingGroup.value) return
+  pendingGroup = null
+  showCreateGroupPrompt.value = false
+}
+
+async function createGroup() {
+  if (newGroupName.value.trim().length === 0 || isCreatingGroup.value) return
+  isCreatingGroup.value = true
+  try {
+    const groupName = newGroupName.value.trim()
+    let group = pendingGroup?.name === groupName ? pendingGroup.group : null
+    if (!group) {
+      group = await store.dispatch('createTabGroup', {
+        name: groupName,
+        color: null
+      })
+      if (!group) return
+      pendingGroup = { name: groupName, group }
+    }
+
+    if (selectedTabIdsArray.value.length > 0) {
+      await store.dispatch('setTabsGroup', {
+        tabIds: selectedTabIdsArray.value,
+        groupId: group.id
+      })
+    }
+    pendingGroup = null
+    newGroupName.value = ''
+    showCreateGroupPrompt.value = false
+  } catch (error) {
+    showToast({
+      message: error.message ?? String(error),
+      icon: ['fas', 'circle-exclamation']
+    })
+  } finally {
+    isCreatingGroup.value = false
+  }
 }
 
 async function moveSelectedTabsToGroup(groupId) {
@@ -1191,9 +1248,17 @@ function handleDialogKeydown(event) {
     close()
     return
   }
+  trapDialogFocus(event, dialogRef.value)
+}
+
+function handleCreateGroupKeydown(event) {
+  trapDialogFocus(event, newGroupNameInput.value?.$el.closest('[role="dialog"]'))
+}
+
+function trapDialogFocus(event, dialog) {
   if (event.key !== 'Tab') return
 
-  const focusTargets = Array.from(dialogRef.value?.querySelectorAll(
+  const focusTargets = Array.from(dialog?.querySelectorAll(
     'button:not(:disabled), input:not(:disabled), select:not(:disabled), [tabindex]:not([tabindex="-1"])'
   ) ?? []).filter(element => element.offsetParent !== null)
   if (focusTargets.length === 0) return
