@@ -123,7 +123,7 @@ test.describe('distraction and appearance settings', () => {
 })
 
 test.describe('default appearance', () => {
-  test('vertical tabs have a soft edge without a divider line', async ({ page, attachScreenshot }) => {
+  test('vertical tabs match the header shadow without a divider line', async ({ page, attachScreenshot }) => {
     for (const theme of ['light', 'dark']) {
       for (const position of ['left', 'right']) {
         await page.evaluate(({ theme, position }) => {
@@ -136,12 +136,11 @@ test.describe('default appearance', () => {
         const tabBar = page.locator(`.tabBar.vertical.position-${position}`)
         await expect(tabBar).toBeVisible()
         await expect(page.locator(`.tabBarResizeHandle.position-${position}`)).toHaveCSS('background-image', 'none')
-        await expect(tabBar).toHaveCSS('box-shadow', position === 'left' ? /3px 0px 8px/ : /-3px 0px 8px/)
+        await expect(tabBar).toHaveCSS('box-shadow', position === 'left' ? / 2px 0px 1px 0px$/ : / -2px 0px 1px 0px$/)
+        const tabBarShadow = await tabBar.evaluate(element => getComputedStyle(element).boxShadow)
         const headerShadow = await page.locator('.topNav').evaluate(element => getComputedStyle(element).boxShadow)
-        expect(headerShadow).toContain(position === 'left'
-          ? '3px 0px 8px -3px inset'
-          : '-3px 0px 8px -3px inset')
-        await attachScreenshot(`${theme} vertical tabs on ${position} with soft edge`)
+        expect(headerShadow).toContain(`${tabBarShadow} inset`)
+        await attachScreenshot(`${theme} vertical tabs on ${position} with matching header shadow`)
       }
     }
   })
