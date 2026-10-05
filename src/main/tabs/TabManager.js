@@ -2283,7 +2283,9 @@ export class TabManager {
       }
 
       try {
-        if (!await this._setTabPreviewCaptureMode(true)) {
+        const captureStarted = await this._setTabPreviewCaptureMode(true)
+        if (!captureStarted) {
+          if (captureStarted === false) this._scheduleTabPreviewRefresh(tab)
           return await this._getCachedTabPreviewDataUrl(tab)
         }
         // Entering capture mode awaits an IPC round-trip, during which the main
