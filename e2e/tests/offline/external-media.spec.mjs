@@ -295,6 +295,30 @@ test('external media does not overwrite saved positions from a never-presented t
   expect(await savedExternalPosition(page, mediaUrl)).toBe(12)
 })
 
+for (const newerPosition of [18, 0]) {
+  test(`external media keeps newer same-URL progress at ${newerPosition} when a stale paused tab closes`, async ({ app, page }) => {
+    test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
+    const mediaUrl = 'https://www.twitch.tv/videos/123456789'
+    await prepareTwitchYtDlp(app, page, mediaUrl, false)
+    await page.locator(sel.searchInput).fill(mediaUrl)
+    await page.locator(sel.searchInput).press('Enter')
+    const olderVideo = await waitForPlayback(page)
+    await olderVideo.evaluate(element => { element.pause(); element.currentTime = 12 })
+    await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBeCloseTo(12, 0)
+    const olderTabId = await page.evaluate(async () => (await window.ftElectron.tabs.getState()).activeTabId)
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.searchInput).fill(mediaUrl)
+    await page.locator(sel.searchInput).press('Enter')
+    const newerVideo = await waitForPlayback(page)
+    await newerVideo.evaluate((element, seconds) => { element.pause(); element.currentTime = seconds }, newerPosition)
+    const expected = newerPosition || null
+    await expect.poll(() => savedExternalPosition(page, mediaUrl)).toBe(expected)
+    await page.evaluate(id => window.ftElectron.tabs.close(id), olderTabId)
+    await expect(page.locator('.externalMediaPlayer video')).toHaveCount(1)
+    expect(await savedExternalPosition(page, mediaUrl)).toBe(expected)
+  })
+}
+
 test('external media honors the hide sidebar on watch pages setting', async ({ app, page }) => {
   test.skip(process.platform === 'win32', 'The fake yt-dlp executable uses a POSIX shell')
   const mediaUrl = 'https://www.twitch.tv/videos/123456789'

@@ -367,6 +367,7 @@ const mediaUrl = ref('')
 const currentTime = ref(0)
 const startTime = ref(null)
 let lastPositionSave = 0
+let lastSavedPosition = 0
 let hasBeenPresented = isTabPresented?.value ?? true
 watch(() => isTabPresented?.value, presented => { if (presented) hasBeenPresented = true })
 const showChapters = ref(false)
@@ -647,6 +648,7 @@ function restoreCompanionPosition() {
   // deciding whether the soundtrack or the video supplies the resume timeline.
   const media = getPositionMedia()
   const position = getExternalMediaPosition(mediaUrl.value, media.duration)
+  lastSavedPosition = position ?? 0
   startTime.value = null
   if (position === null) return
   if (media === audio) {
@@ -728,7 +730,11 @@ function savePosition() {
     !hasBeenPresented || (source.value.separateAudioUrl && startTime.value !== null)) return
   const media = getPositionMedia()
   const duration = Number.isFinite(media?.duration) ? media.duration : info.value?.duration
-  saveExternalMediaPosition(mediaUrl.value, media?.currentTime ?? player.value.getCurrentTime(), duration)
+  const seconds = media?.currentTime ?? player.value.getCurrentTime()
+  // Pausing or disposing an unchanged tab must not overwrite another tab's progress.
+  if (seconds === lastSavedPosition) return
+  saveExternalMediaPosition(mediaUrl.value, seconds, duration)
+  lastSavedPosition = seconds
   lastPositionSave = Date.now()
 }
 
@@ -773,6 +779,7 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
   currentTime.value = 0
   startTime.value = null
   lastPositionSave = 0
+  lastSavedPosition = 0
   hasBeenPresented = isTabPresented?.value ?? true
   showChapters.value = false
   seekCount.value = 0
@@ -798,6 +805,7 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
     info.value = result.info
     if (store.getters.getRememberHistory && store.getters.getWatchedProgressSavingMode !== 'never' && !result.source?.isLive) {
       startTime.value = getExternalMediaPosition(mediaUrl.value, result.source?.separateAudioUrl ? null : result.info.duration)
+      lastSavedPosition = startTime.value ?? 0
     }
     source.value = result.source
     setTabTitle(result.info.title || hostname.value)
