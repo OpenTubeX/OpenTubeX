@@ -59,6 +59,7 @@ import { formatTabTitle } from '../../tabs/tabTitle'
 
 const props = defineProps({
   tab: { type: Object, required: true },
+  captureLive: { type: Boolean, default: true },
   showTitle: { type: Boolean, default: false },
   showIcon: { type: Boolean, default: true }
 })
@@ -73,7 +74,11 @@ watch(() => props.tab.id, async tabId => {
   previewUrl.value = null
   if (!process.env.IS_ELECTRON || typeof window.ftElectron?.tabs?.capturePreview !== 'function') return
   try {
-    const dataUrl = await window.ftElectron.tabs.capturePreview(tabId)
+    // A live capture hides overlays while taking the screenshot. During a
+    // hover handoff use the stored preview so the shared tooltip stays visible.
+    const dataUrl = props.captureLive
+      ? await window.ftElectron.tabs.capturePreview(tabId)
+      : (await window.ftElectron.tabs.getCachedPreviews([tabId]))[tabId]
     if (currentRequestId === requestId) {
       previewUrl.value = typeof dataUrl === 'string' && dataUrl.length > 0 ? dataUrl : null
     }

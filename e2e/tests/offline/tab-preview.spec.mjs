@@ -47,6 +47,63 @@ async function hoverTabForPreview(page, index) {
 }
 
 test.describe('tab previews', () => {
+  for (const position of ['left', 'right', 'top', 'bottom']) {
+    test(`slides one persistent tooltip between ${position} tabs`, async ({ page }) => {
+      await page.evaluate(async position => {
+        await window.ftElectron.setZoomFactor(0.95)
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setTabBarPosition', position)
+        for (const title of ['First preview', 'Second preview']) {
+          await window.ftElectron.tabs.create({ title, route: '/watch/preview', makeActive: false, lazyLoad: true })
+        }
+      }, position)
+      const tabs = page.locator(sel.tabs)
+      await expect(tabs).toHaveCount(3)
+      await hoverTabForPreview(page, 0)
+      await tabs.nth(1).hover()
+      const tooltip = page.locator('.tabTooltip')
+      await expect(tooltip).toHaveCSS('opacity', '1')
+      const original = await tooltip.elementHandle()
+      await original.evaluate(element => {
+        window.tooltipHoverSamples = { hidden: false, moving: false, stop: false }
+        const sample = () => {
+          const state = window.tooltipHoverSamples
+          if (state.stop) return
+          const style = getComputedStyle(element)
+          state.hidden ||= !element.isConnected || style.opacity !== '1' || style.visibility !== 'visible'
+          state.moving ||= element.getAnimations().some(animation =>
+            ['top', 'left'].includes(animation.transitionProperty))
+          requestAnimationFrame(sample)
+        }
+        sample()
+      })
+      for (const index of [2, 1, 0, 2]) {
+        await tabs.nth(index).hover()
+        if (index > 0) {
+          await expect(tooltip.locator('.tabTooltipTitle')).toHaveText(index === 1 ? 'First preview' : 'Second preview')
+        } else {
+          await expect(tooltip.locator('.tabTooltipPreview img')).toHaveAttribute('src', /^data:image\/jpeg/)
+        }
+        expect(await original.evaluate(element => element.isConnected && getComputedStyle(element).opacity === '1')).toBe(true)
+        await expect(tooltip).toHaveCount(1)
+        await expect(tabs.nth(index)).toHaveAttribute('aria-describedby', await tooltip.getAttribute('id'))
+      }
+      expect(await page.evaluate(() => {
+        window.tooltipHoverSamples.stop = true
+        return window.tooltipHoverSamples
+      })).toEqual({ hidden: false, moving: true, stop: true })
+      await page.emulateMedia({ reducedMotion: 'reduce' })
+      await tabs.nth(1).hover()
+      await expect(tooltip).toHaveCSS('transition-duration', '0s')
+      await page.keyboard.press('Escape')
+      await expect(tooltip).toHaveCount(0)
+      await tabs.nth(2).hover()
+      await expect(tooltip).toBeVisible()
+      await page.mouse.move(700, 500)
+      await expect(tooltip).toHaveCount(0)
+    })
+  }
+
   test('captures the page content without the tab bar and header', async ({ page, attachScreenshot }) => {
     const dataUrl = await hoverTabForPreview(page, 0)
     await attachScreenshot('tab preview tooltip')
@@ -302,6 +359,44 @@ async function createCollapsedPreviewGroup(page, count = 4) {
 }
 
 test.describe('tab group previews', () => {
+  for (const showPreview of [true, false]) {
+    test(`keeps the tooltip across tab and group gaps with previews ${showPreview}`, async ({ page }) => {
+      await page.evaluate(showPreview => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setTabBarPosition', 'left')
+        store.commit('setShowTabPreviews', showPreview)
+      }, showPreview)
+      await createCollapsedPreviewGroup(page)
+      await page.evaluate(() => window.ftElectron.tabs.create({
+        title: 'Outside group', makeActive: false, lazyLoad: true
+      }))
+      const group = page.locator('.collapsedTabGroup')
+      await group.hover()
+      const tooltip = page.locator('.tabTooltip')
+      await expect(tooltip).toHaveCSS('opacity', '1')
+      await expect(tooltip).toHaveCSS('visibility', 'visible')
+      const original = await tooltip.elementHandle()
+      const groupBox = await group.boundingBox()
+      // Pause in the gap long enough to cross a rendered frame.
+      await page.mouse.move(groupBox.x + groupBox.width / 2, groupBox.y + groupBox.height + 1)
+      await page.waitForTimeout(40)
+      await expect(tooltip).toHaveCSS('opacity', '1')
+      const tab = page.locator(sel.tabs).last()
+      await tab.hover()
+      await expect(tooltip.locator('.tabTooltipTitle')).toHaveText('Outside group')
+      await group.hover()
+      await expect(tooltip.locator('.tabTooltipTitle')).toHaveText('Research')
+      expect(await original.evaluate(element => element.isConnected)).toBe(true)
+      await expect(tooltip.locator('.tabTooltipGridItem')).toHaveCount(showPreview ? 4 : 0)
+      await page.mouse.down()
+      await expect(tooltip).toHaveCount(0)
+      await page.mouse.move(700, 500)
+      await page.mouse.up()
+      await page.waitForTimeout(150)
+      await expect(tooltip).toHaveCount(0)
+    })
+  }
+
   test('shows captured pages and unloaded fallbacks in a titled grid', async ({ page, attachScreenshot }) => {
     const { tabIds } = await createCollapsedPreviewGroup(page)
     const trigger = page.locator('.collapsedTabGroup')
