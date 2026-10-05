@@ -7,11 +7,15 @@ async function delayNextRuleWrite(app) {
   await app.electronApp.evaluate(({ ipcMain }) => {
     const original = ipcMain._invokeHandlers.get('db-settings')
     let firstWrite = true
+    globalThis.automaticRuleWriteCount = 0
     ipcMain.removeHandler('db-settings')
     ipcMain.handle('db-settings', async (event, request) => {
-      if (request.action === 2 && request.data._id === 'ytDlpAutomaticDownloadRules' && firstWrite) {
-        firstWrite = false
-        await new Promise(resolve => { globalThis.releaseAutomaticDownloadWrite = resolve })
+      if (request.action === 2 && request.data._id === 'ytDlpAutomaticDownloadRules') {
+        globalThis.automaticRuleWriteCount++
+        if (firstWrite) {
+          firstWrite = false
+          await new Promise(resolve => { globalThis.releaseAutomaticDownloadWrite = resolve })
+        }
       }
       return original(event, request)
     })
@@ -72,6 +76,40 @@ for (const uiScale of [100, 95, 125]) {
     await expect(alpha.getByRole('textbox', { name: 'Title includes', exact: true })).toHaveValue('Keep this edit')
   })
 }
+
+test('persists queued edits after the user activation window expires', async ({ app, page }) => {
+  await goToSettingsSection(page, 'download')
+  await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
+  await delayNextRuleWrite(app)
+  const alpha = page.locator('.channelRule').filter({ hasText: 'Alpha Channel' })
+  const beta = page.locator('.channelRule').filter({ hasText: 'Beta Channel' })
+  await alpha.getByText('Alpha Channel', { exact: true }).click()
+  await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.releaseAutomaticDownloadWrite)).toBe('function')
+  await beta.getByText('Beta Channel', { exact: true }).click()
+  const active = await app.electronApp.evaluate(async ({ BrowserWindow }) => {
+    // Renderer evaluation can itself activate the page; wait and sample from main.
+    await new Promise(resolve => setTimeout(resolve, 6500))
+    const active = await BrowserWindow.getAllWindows()[0].webContents.executeJavaScript('navigator.userActivation.isActive', false)
+    globalThis.releaseAutomaticDownloadWrite()
+    return active
+  })
+  expect(active).toBe(false)
+  await expect.poll(() => app.electronApp.evaluate(() => globalThis.automaticRuleWriteCount)).toBe(2)
+  const afterDeniedWrite = await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].webContents.executeJavaScript(`
+    (async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpAutomaticDownloadRules', '{}')
+      return { active: navigator.userActivation.isActive, rules: JSON.parse(store.getters.getYtDlpAutomaticDownloadRules) }
+    })()
+  `, false))
+  expect(afterDeniedWrite.active).toBe(false)
+  expect(Object.keys(afterDeniedWrite.rules).sort()).toEqual([ALPHA_CHANNEL_ID, BETA_CHANNEL_ID])
+  expect(await app.electronApp.evaluate(() => globalThis.automaticRuleWriteCount)).toBe(2)
+  await expect.poll(() => page.evaluate(async () => {
+    const settings = await window.ftElectron.dbSettings(1)
+    return Object.keys(JSON.parse(settings.find(setting => setting._id === 'ytDlpAutomaticDownloadRules').value)).sort()
+  })).toEqual([ALPHA_CHANNEL_ID, BETA_CHANNEL_ID])
+})
 
 test('honors a newer rules update from another settings writer', async ({ app, page }) => {
   await goToSettingsSection(page, 'download')

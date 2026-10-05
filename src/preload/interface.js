@@ -641,6 +641,24 @@ export default {
   },
 
   /**
+   * Authorizes one queued rule write while its initiating user action is active.
+   * @returns {((value: string) => Promise<null>) | null}
+   */
+  prepareAutomaticDownloadRulesWrite: () => {
+    if (!navigator.userActivation.isActive) return null
+    let used = false
+    return value => {
+      if (used) return Promise.reject(new Error('Automatic download rule writer already used'))
+      used = true
+      if (typeof value !== 'string') return Promise.reject(new Error('Automatic download rules must be a string'))
+      return ipcRenderer.invoke(IpcChannels.DB_SETTINGS, {
+        action: DBActions.GENERAL.UPSERT,
+        data: { _id: 'ytDlpAutomaticDownloadRules', value }
+      })
+    }
+  },
+
+  /**
    * @param {number} action
    * @param {any} [data]
    */
