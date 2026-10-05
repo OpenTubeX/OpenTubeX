@@ -87,7 +87,7 @@
               :channel-thumbnail="creatorAvatarUrl"
               :thumbnail="thumbnail"
               :is-live="source.isLive"
-              :start-time="startTime"
+              :start-time="source.separateAudioUrl ? null : startTime"
               :current-playback-rate="defaultPlaybackRate"
               :storyboard-src="source.storyboardSrc"
               :chapters="chapters"
@@ -100,6 +100,7 @@
               :use-theatre-mode="useTheatreMode"
               playback-engine="yt-dlp"
               @error="playerErrorHandler"
+              @loaded="handleMediaLoaded"
               @legacy-format-selected="setCompanionFormat"
               @play="playCompanionAudio"
               @playing="playCompanionAudio"
@@ -124,7 +125,7 @@
               preload="auto"
               hidden
               aria-hidden="true"
-              @loadedmetadata="updateCompanionLoop"
+              @loadedmetadata="handleMediaLoaded"
               @ended="handleCompanionAudioEnded"
             />
           </template>
@@ -608,6 +609,36 @@ function getCompanionVideo() {
   return videoLayout.value?.querySelector('.externalMediaPlayer video')
 }
 
+function getPositionMedia() {
+  const video = getCompanionVideo()
+  return companionAudioNeeded.value && video?.loop ? companionAudio.value : video
+}
+
+function restoreCompanionPosition() {
+  if (!source.value?.separateAudioUrl || startTime.value === null || !player.value?.hasLoaded) return
+  const video = getCompanionVideo()
+  const audio = companionAudio.value
+  if (!Number.isFinite(video?.duration) || (companionAudioNeeded.value && !Number.isFinite(audio?.duration))) return
+  // Separate tracks can have different lengths. Wait for metadata before
+  // deciding whether the soundtrack or the video supplies the resume timeline.
+  const media = getPositionMedia()
+  const position = getExternalMediaPosition(mediaUrl.value, media.duration)
+  startTime.value = null
+  if (position === null) return
+  if (media === audio) {
+    audio.currentTime = position
+    player.value.setCurrentTime(position % video.duration)
+  } else {
+    player.value.setCurrentTime(position)
+    syncCompanionAudio(position)
+  }
+}
+
+function handleMediaLoaded() {
+  updateCompanionLoop()
+  restoreCompanionPosition()
+}
+
 function updateCompanionLoop() {
   const video = getCompanionVideo()
   const audio = companionAudio.value
@@ -621,10 +652,12 @@ function setCompanionFormat(format) {
   companionAudioNeeded.value = Boolean(source.value?.separateAudioUrl && format.requiresSeparateAudio)
   if (!companionAudioNeeded.value) pauseCompanionAudio()
   updateCompanionLoop()
+  restoreCompanionPosition()
 }
 
 function handleCompanionAudioEnded() {
   if (!companionAudioNeeded.value) return
+  savePosition()
   if (!isCoub.value) {
     pauseCompanionVideo()
     return
@@ -668,10 +701,10 @@ function updateCurrentTime(seconds) {
 function savePosition() {
   if (!store.getters.getRememberHistory || store.getters.getWatchedProgressSavingMode === 'never' ||
     loading.value || !source.value || source.value.isLive || !player.value?.hasPlaybackPosition ||
-    !hasBeenPresented) return
-  const video = getCompanionVideo()
-  const duration = Number.isFinite(video?.duration) ? video.duration : source.value.duration
-  saveExternalMediaPosition(mediaUrl.value, player.value.getCurrentTime(), duration)
+    !hasBeenPresented || (source.value.separateAudioUrl && startTime.value !== null)) return
+  const media = getPositionMedia()
+  const duration = Number.isFinite(media?.duration) ? media.duration : info.value?.duration
+  saveExternalMediaPosition(mediaUrl.value, media?.currentTime ?? player.value.getCurrentTime(), duration)
   lastPositionSave = Date.now()
 }
 
@@ -740,7 +773,7 @@ async function loadMedia(url, useCookies = store.getters.getYtDlpPlaybackAlwaysU
     }
     info.value = result.info
     if (store.getters.getRememberHistory && store.getters.getWatchedProgressSavingMode !== 'never' && !result.source?.isLive) {
-      startTime.value = getExternalMediaPosition(mediaUrl.value, result.source?.duration)
+      startTime.value = getExternalMediaPosition(mediaUrl.value, result.source?.separateAudioUrl ? null : result.info.duration)
     }
     source.value = result.source
     setTabTitle(result.info.title || hostname.value)

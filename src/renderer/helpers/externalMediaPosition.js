@@ -1,24 +1,26 @@
-const STORAGE_KEY = 'externalMediaPositions'
+const STORAGE_PREFIX = 'externalMediaPosition:'
 
-function readPositions() {
+function readPosition(key) {
   try {
-    const entries = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')
-    if (!Array.isArray(entries)) return new Map()
-    return new Map(entries.filter(entry => Array.isArray(entry) && entry.length === 2 &&
-      typeof entry[0] === 'string' && Number.isFinite(entry[1]?.seconds) && entry[1].seconds >= 0 &&
-      Number.isFinite(entry[1]?.updatedAt)))
+    const position = JSON.parse(localStorage.getItem(key) ?? 'null')
+    return Number.isFinite(position?.seconds) && position.seconds >= 0 && Number.isFinite(position?.updatedAt)
+      ? position
+      : null
   } catch {
-    return new Map()
+    return null
   }
 }
 
-function writePositions(positions) {
+function removePositions(shouldRemove) {
   try {
     if (typeof localStorage === 'undefined') return
-    if (positions.size === 0) localStorage.removeItem(STORAGE_KEY)
-    else localStorage.setItem(STORAGE_KEY, JSON.stringify([...positions]))
+    const keys = Array.from({ length: localStorage.length }, (_, index) => localStorage.key(index))
+      .filter(key => key?.startsWith(STORAGE_PREFIX))
+    for (const key of keys) {
+      if (shouldRemove(readPosition(key))) localStorage.removeItem(key)
+    }
   } catch (error) {
-    console.error('Failed to save external media positions:', error)
+    console.error('Failed to remove external media positions:', error)
   }
 }
 
@@ -26,14 +28,16 @@ function positionKey(url) {
   try {
     const parsed = new URL(url)
     if (!['http:', 'https:'].includes(parsed.protocol) || parsed.username || parsed.password) return null
-    return parsed.href
+    return STORAGE_PREFIX + parsed.href
   } catch {
     return null
   }
 }
 
 export function getExternalMediaPosition(url, duration) {
-  const position = readPositions().get(positionKey(url))?.seconds
+  const key = positionKey(url)
+  if (key === null) return null
+  const position = readPosition(key)?.seconds
   if (!(position > 0)) return null
   // Match normal video playback: a video within two seconds of its end restarts.
   if (Number.isFinite(duration) && position >= duration - 2) return null
@@ -43,22 +47,21 @@ export function getExternalMediaPosition(url, duration) {
 export function saveExternalMediaPosition(url, seconds, duration) {
   const key = positionKey(url)
   if (key === null || !Number.isFinite(seconds) || seconds < 0) return
-  const positions = readPositions()
-  positions.delete(key)
-  if (seconds > 0 && !(Number.isFinite(duration) && seconds >= duration - 2)) {
-    positions.set(key, { seconds, updatedAt: Date.now() })
+  try {
+    if (seconds > 0 && !(Number.isFinite(duration) && seconds >= duration - 2)) {
+      localStorage.setItem(key, JSON.stringify({ seconds, updatedAt: Date.now() }))
+    } else {
+      localStorage.removeItem(key)
+    }
+  } catch (error) {
+    console.error('Failed to save external media position:', error)
   }
-  writePositions(positions)
 }
 
 export function removeExternalMediaPositionsBefore(cutoff) {
-  const positions = readPositions()
-  for (const [key, position] of positions) {
-    if (position.updatedAt < cutoff) positions.delete(key)
-  }
-  writePositions(positions)
+  removePositions(position => position === null || position.updatedAt < cutoff)
 }
 
 export function clearExternalMediaPositions() {
-  writePositions(new Map())
+  removePositions(() => true)
 }
