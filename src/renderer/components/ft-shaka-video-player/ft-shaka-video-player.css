@@ -1726,6 +1726,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   --ft-control-pill-color: rgb(0 0 0 / 28%);
   --ft-control-pill-size: 34px;
   --ft-control-pill-radius: 17px;
+  --ft-volume-bar-expanded-width: 100px;
 
   /* Keep the first controls anchored when even the compact layout cannot fit. */
   justify-content: flex-start;
@@ -1834,8 +1835,6 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 :deep(.shaka-controls-button-panel > .ft-volume-control-group) {
-  --ft-volume-bar-expanded-width: 100px;
-
   display: flex;
   flex: 0 0 auto;
   align-items: center;
@@ -1868,22 +1867,64 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 :deep(.ft-volume-control-group > .shaka-volume-bar-container-allow-hiding) {
-  --ft-control-content-transition: inline-size 0s, opacity 0s;
+  --ft-control-content-transition: opacity 0s;
 
   margin-inline: 0;
-  transition-duration: 0ms;
+  transition: none;
 }
 
 :deep(.ft-volume-control-group:is(:hover, :has(:focus-visible)) > .shaka-volume-bar-container-allow-hiding) {
-  --ft-control-content-transition: inline-size 250ms cubic-bezier(0.4, 0, 0.6, 1), opacity 250ms cubic-bezier(0.4, 0, 0.6, 1);
-
   inline-size: var(--ft-volume-bar-expanded-width);
   opacity: 1;
-  transition-duration: 250ms;
+  animation: ft-volume-slider-expand 250ms cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+/* Allocate the expanded row once, then reveal the bar and move its neighbours
+   with transforms and clipping instead of resizing layout each frame. */
+:deep(.ft-volume-control-group:is(:hover, :has(:focus-visible)) > .ft-control-glass) {
+  animation: ft-volume-glass-expand 250ms cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+:deep(.ft-volume-control-group:is(:hover, :has(:focus-visible)) ~ :is(.ft-time-display-group, .ft-chapters-button, .ft-shaka-highlight-button, .ft-quick-playback-rate-bar)) {
+  animation: ft-volume-neighbour-slide 250ms cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+@keyframes ft-volume-slider-expand {
+  from {
+    clip-path: inset(-24px 0 -24px 100%);
+    opacity: 0;
+    transform: translateX(calc(0px - var(--ft-volume-bar-expanded-width)));
+  }
+
+  to {
+    clip-path: inset(-24px 0);
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes ft-volume-glass-expand {
+  from {
+    clip-path: inset(0 var(--ft-volume-bar-expanded-width) 0 0 round var(--ft-control-pill-radius));
+  }
+
+  to {
+    clip-path: inset(0 round var(--ft-control-pill-radius));
+  }
+}
+
+@keyframes ft-volume-neighbour-slide {
+  from {
+    transform: translateX(calc(0px - var(--ft-volume-bar-expanded-width)));
+  }
+
+  to {
+    transform: translateX(0);
+  }
 }
 
 @media (width <= 474px) {
-  :deep(.ft-volume-control-group) {
+  :deep(.shaka-controls-button-panel) {
     --ft-volume-bar-expanded-width: 50px;
   }
 }
