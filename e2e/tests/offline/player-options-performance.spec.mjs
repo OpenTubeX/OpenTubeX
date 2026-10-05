@@ -1,5 +1,5 @@
 import { test, expect } from '../../helpers/app.mjs'
-import { openMockedVideo } from '../../helpers/player.mjs'
+import { findWatchComponent, openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 test.use({ trace: 'off' })
@@ -13,6 +13,50 @@ for (const usePlayerMenuGrid of [true, false]) {
           ytDlpPlaybackEngineDefaultMigration: true,
           usePlayerMenuGrid
         }
+      }
+    })
+
+    test('refreshes translation actions without rebuilding caption tracks', async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page, { captionTranslations: true })
+      const video = await openMockedVideo(page)
+      await video.evaluate(element => element.pause())
+      await expect.poll(() => video.evaluate(element => element.ui.getControls().getPlayer().getTextTracks().length)).toBeGreaterThan(0)
+      await page.waitForTimeout(1000)
+      const player = page.locator('.ftVideoPlayer')
+      await player.hover()
+      await page.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+      const watch = await page.evaluateHandle(findWatchComponent)
+      const translations = await watch.evaluate(component => component.proxy.captionTranslations.slice(0, 2))
+      expect(translations).toHaveLength(2)
+      const captionsMenu = player.locator('.shaka-text-languages')
+      const rows = await captionsMenu.evaluateHandle(element => [...element.querySelectorAll(':scope > button:not(.ft-caption-auto-translate-button)')])
+      const overflowMenu = player.locator('.shaka-overflow-menu')
+      try {
+        await player.getByRole('button', { name: 'More settings' }).click()
+        for (const choices of [[], translations.slice(0, 1), translations.slice(1)]) {
+          // Change only the reactive props, without a Shaka caption event.
+          await watch.evaluate(async (component, value) => {
+            component.proxy.captionTranslations = value
+            await component.proxy.$nextTick()
+          }, choices)
+          await overflowMenu.locator(':scope > .shaka-caption-button').click()
+          await expect(captionsMenu).toBeVisible()
+          const autoTranslate = captionsMenu.getByRole('button', { name: 'Auto-translate', exact: true })
+          await expect(autoTranslate).toHaveCount(choices.length === 0 ? 0 : 1)
+          if (choices.length > 0) {
+            await autoTranslate.click()
+            const translationMenu = player.locator('.ft-caption-translation-menu')
+            await expect(translationMenu).toBeVisible()
+            await expect(translationMenu.locator('.ft-caption-translation-options button')).toHaveText(choices.map(choice => choice.translationName))
+            await translationMenu.locator(':scope > .shaka-back-to-overflow-button').click()
+          }
+          // The appearance and track controls survive each translation refresh.
+          expect(await rows.evaluate(elements => elements.every(element => element.isConnected))).toBe(true)
+          await captionsMenu.locator(':scope > .shaka-back-to-overflow-button').click()
+        }
+      } finally {
+        await rows.dispose()
+        await watch.dispose()
       }
     })
 
