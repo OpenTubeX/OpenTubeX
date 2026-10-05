@@ -1332,7 +1332,7 @@ function normalizeQuickPlaybackSpeed(speed) {
     return 1
   }
 
-  return Number.parseFloat(parsedSpeed.toFixed(2))
+  return Number.parseFloat(parsedSpeed.toFixed(2)) || 1
 }
 
 /**

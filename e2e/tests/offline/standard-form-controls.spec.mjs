@@ -15,7 +15,7 @@ for (const uiScale of [100, 95]) {
       await expect(speed).toHaveValue('1.25')
       await speed.fill('1')
       await speed.press('Tab')
-      for (const value of ['0', '', '1.001']) {
+      for (const value of ['0', '', '1.001', '0.004']) {
         await speed.fill(value)
         await speed.press('Tab')
         await expect(speed).toHaveValue('1')
@@ -109,7 +109,7 @@ test.describe('standard pairing fields', () => {
 
 for (const uiScale of [100, 95]) {
   test.describe(`inline field alignment at ${uiScale}%`, () => {
-    test.use({ seed: { settings: { uiScale, useQuickPlaybackSpeedBar: true, videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true } } })
+    test.use({ seed: { settings: { uiScale, useQuickPlaybackSpeedBar: true, videoPlaybackEngine: 'built-in', ytDlpPlaybackEngineDefaultMigration: true }, playlists: [{ _id: 'layout-test', playlistName: 'Layout test', videos: [] }] } })
     test('centers settings, theme and playback fields without stacked-form spacing', async ({ page }) => {
       await goToSettingsSection(page, 'general')
       const centerOffset = async (selector, other) => page.evaluate(({ selector, other }) => {
