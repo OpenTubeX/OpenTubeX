@@ -180,6 +180,7 @@
   min-inline-size: 150px;
 }
 
+.settingsHeaderTools,
 .settingsHeaderActions {
   flex: 0 0 auto;
   display: flex;
@@ -616,6 +617,10 @@
     gap: 3px;
   }
 
+  .settingsHeaderTools {
+    order: 2;
+  }
+
   .settingsSearch {
     order: 3;
     flex-basis: 100%;
@@ -636,6 +641,7 @@
 
 @media (any-pointer: coarse), (width <= 680px) {
   .settingsWindowHeader,
+  .settingsHeaderTools,
   .settingsHeaderActions {
     gap: 8px;
   }

@@ -134,7 +134,10 @@
         :show-action-button="false"
         @input="settingsSearchQuery = $event; handleSettingsSearch()"
       />
-      <div class="settingsHeaderActions">
+      <div
+        v-if="!isStandaloneViewOpen"
+        class="settingsHeaderTools"
+      >
         <button
           v-if="showKeyboardShortcutAction && !isStandaloneViewOpen"
           type="button"
@@ -169,6 +172,8 @@
         >
           <FtIcon :icon="['fas', 'gauge-high']" />
         </button>
+      </div>
+      <div class="settingsHeaderActions">
         <button
           v-if="showMinimizeButton"
           type="button"

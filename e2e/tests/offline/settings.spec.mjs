@@ -402,6 +402,33 @@ test.describe('settings search highlights', () => {
     })
   }
 
+  for (const zoom of [1, 0.95]) {
+    test(`keeps settings window actions beside the title at ${zoom} scale`, async ({ page }, testInfo) => {
+      await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
+      await goTo(page, 'settings')
+      const header = page.locator('.settingsWindowHeader')
+      for (const width of [390, 340, 680, 1200, 390]) {
+        await page.setViewportSize({ width, height: 800 })
+        await expect.poll(() => header.evaluate(element => {
+          const title = element.querySelector('.settingsHeaderNavigation').getBoundingClientRect()
+          const actions = element.querySelector('.settingsHeaderActions').getBoundingClientRect()
+          return Math.abs(title.y + title.height / 2 - actions.y - actions.height / 2)
+        })).toBeLessThanOrEqual(1)
+        expect(await header.evaluate(element => {
+          const headerBounds = element.getBoundingClientRect()
+          const buttons = [...element.querySelectorAll('button')]
+          return buttons.every(button => {
+            const bounds = button.getBoundingClientRect()
+            return bounds.left >= headerBounds.left && bounds.right <= headerBounds.right
+          })
+        })).toBe(true)
+      }
+      if (zoom === 1) {
+        await page.screenshot({ path: testInfo.outputPath('settings-header-actions.png') })
+      }
+    })
+  }
+
   test('uses the shared search field focus indicator without a second outline', async ({ page }) => {
     await goTo(page, 'settings')
     const search = page.getByRole('searchbox', { name: 'Search settings' })
