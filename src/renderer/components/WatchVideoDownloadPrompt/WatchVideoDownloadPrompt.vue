@@ -292,13 +292,17 @@
         <p class="downloadFolderRow">
           <FtIcon :icon="['fas', 'folder-open']" />
           <span :title="downloadFolderDisplay">{{ downloadFolderDisplay }}</span>
-          <button
+          <FtButton
             type="button"
             class="chooseFolderButton"
             @click="chooseDownloadFolder"
           >
+            <FtIcon
+              :icon="['fas', 'folder-open']"
+              aria-hidden="true"
+            />
             {{ downloadFolderRequired ? t('Downloads.Select Folder') : t('Downloads.Choose Folder') }}
-          </button>
+          </FtButton>
         </p>
         <FtFlexBox>
           <FtButton

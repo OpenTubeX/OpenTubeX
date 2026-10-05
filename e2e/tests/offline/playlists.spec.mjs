@@ -421,7 +421,10 @@ test.describe('seeded playlists', () => {
     await page.getByText('Favorites').click()
 
     await page.getByTitle('Edit Playlist Info').click()
+    expect((await page.getByLabel('Custom emoji').boundingBox()).width).toBeLessThanOrEqual(64)
+    await expect(page.locator('.customEmojiPlaceholder')).toHaveCSS('filter', 'grayscale(1)')
     await page.getByLabel('Custom emoji').fill('❤️‍🔥')
+    await expect(page.locator('.customEmojiPlaceholder')).toHaveCount(0)
     await page.getByTitle('Save Changes').click()
 
     const quickBookmarkButton = page.getByTitle('Quick Bookmark Enabled')

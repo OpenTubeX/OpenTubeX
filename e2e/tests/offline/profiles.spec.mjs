@@ -163,16 +163,16 @@ for (const iconPack of ['material', 'remix']) {
       await page.locator('.emojiOptions').getByRole('button', { name: '🌈', exact: true }).click()
       await name.fill('Dave')
       await expect(preview).toHaveText('🌈')
-      await page.locator('#profileEmoji').fill('🐶')
+      await page.getByRole('textbox', { name: 'Custom Emoji', exact: true }).fill('🐶')
       await name.fill('Eve')
       await expect(preview).toHaveText('🐶')
-      await page.locator('#profileEmoji').fill('')
+      await page.getByRole('textbox', { name: 'Custom Emoji', exact: true }).fill('')
       await expect(preview).toHaveText('E')
       await name.fill('')
       await expect(person).toBeVisible()
       await name.fill('Eve')
       await expect(preview).toHaveText('E')
-      await page.locator('#profileEmoji').fill('🐶')
+      await page.getByRole('textbox', { name: 'Custom Emoji', exact: true }).fill('🐶')
       await page.locator('.imageInput').setInputFiles({
         name: 'globe.svg',
         mimeType: 'image/svg+xml',
@@ -1160,7 +1160,10 @@ test.describe('profile manager', () => {
       return profile?.icon?.type === 'image' && profile.bgColor === 'transparent'
     }).toBe(true)
 
-    const customEmoji = page.locator('#profileEmoji')
+    const customEmoji = page.getByRole('textbox', { name: 'Custom Emoji', exact: true })
+    expect((await customEmoji.boundingBox()).width).toBeLessThanOrEqual(64)
+    await expect(page.locator('.customEmojiPlaceholder')).toBeVisible()
+    await expect(page.locator('.customEmojiPlaceholder')).toHaveCSS('filter', 'grayscale(1)')
     await customEmoji.fill('A')
     await expect(customEmoji).toHaveValue('')
     await expect(preview.locator('img')).toBeVisible()
@@ -1174,6 +1177,7 @@ test.describe('profile manager', () => {
     await expect(preview).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
 
     await customEmoji.fill('🌍')
+    await expect(page.locator('.customEmojiPlaceholder')).toHaveCount(0)
     await expect(preview.locator('img')).toHaveCount(0)
     await expect(preview).toContainText('🌍')
     await expect(preview).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')

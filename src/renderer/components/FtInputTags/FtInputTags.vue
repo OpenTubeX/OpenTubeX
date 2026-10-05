@@ -32,20 +32,13 @@
       :force-action-button-icon-name="['fas', 'arrow-right']"
       @click="updateTags"
     />
-    <div
+    <FtCheckboxList
       v-if="tagList.length >= 1"
-      class="checkbox-container"
-    >
-      <input
-        :id="id"
-        type="checkbox"
-        :checked="showTags"
-        @change="toggleShowTags"
-      >
-      <label :for="id">
-        {{ t('Settings.Distraction Free Settings.Show Added Items') }}
-      </label>
-    </div>
+      :labels="[t('Settings.Distraction Free Settings.Show Added Items')]"
+      :values="['show']"
+      :model-value="showTags ? ['show'] : []"
+      @update:model-value="toggleShowTags"
+    />
     <div
       v-if="showTags"
       class="ft-tag-box"
@@ -101,6 +94,7 @@
 </template>
 
 <script setup>
+import FtCheckboxList from '../FtCheckboxList/FtCheckboxList.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import { FtIcon } from '@opentubex/icons'
 import { useId, useTemplateRef, ref } from 'vue'

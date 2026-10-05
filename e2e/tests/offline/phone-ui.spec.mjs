@@ -275,8 +275,14 @@ for (const uiScale of [100, 95]) {
       await page.locator('.videoOptions').getByRole('button', { name: /^Add to playlist$/i }).click()
       const picker = page.locator('.phonePlaylistPicker')
       await expect(picker).toBeVisible()
+      const insets = await picker.locator('.playlistSearch input').evaluate(input => {
+        const field = input.getBoundingClientRect()
+        const picker = input.closest('.phonePlaylistPicker').getBoundingClientRect()
+        return [field.left - picker.left, picker.right - field.right]
+      })
+      for (const inset of insets) expect(inset).toBeGreaterThanOrEqual(9)
       await picker.locator('.playlistList').evaluate(element => { element.scrollTop = 100000 })
-      await picker.locator('.playlistSearch').fill('Phone playlist 23')
+      await picker.locator('.playlistSearch input').fill('Phone playlist 23')
       await expect(picker.locator('li')).toHaveCount(1)
       await expectNoScrollbarOverflow(picker.locator('.playlistList'))
       await picker.locator('li').click()

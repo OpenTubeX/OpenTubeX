@@ -85,6 +85,10 @@
   transition: border-color 150ms ease, background-color 150ms ease;
 }
 
+.ft-input-component:not(.floatingLabel, .search) .ft-input:not(.multiline) {
+  padding-block: 0;
+}
+
 .ft-input:not(:disabled):hover {
   border-block-end-color: var(--primary-text-color);
 }
@@ -381,7 +385,6 @@
   cursor: pointer;
 }
 
-
 .search ::-webkit-calendar-picker-indicator {
   display: none;
 }
@@ -554,4 +557,13 @@
 .hover {
   background-color: var(--dropdown-item-hover-color);
   color: var(--dropdown-item-hover-text-color);
+}
+
+.ft-input-component .ft-input.multiline {
+  padding-block: 16px;
+  block-size: auto;
+  min-block-size: 8rem;
+  field-sizing: content;
+  overflow: hidden;
+  resize: none;
 }

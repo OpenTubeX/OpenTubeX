@@ -206,21 +206,14 @@
   white-space: nowrap;
 }
 
-.quickPlaybackSpeedInput {
-  box-sizing: border-box;
+.quickPlaybackSpeedValueField {
+  --input-bottom-spacing: 0;
+
   inline-size: 100%;
-  block-size: 45px;
-  padding: 1rem;
-  border: 0;
-  border-radius: calc(5px * var(--ui-roundness));
-  background-color: var(--search-bar-color);
-  backdrop-filter: var(--search-bar-blur, none);
-  color: var(--secondary-text-color);
-  font-size: 16px;
+  min-inline-size: 0;
 }
 
-.quickPlaybackSpeedDragHandle,
-.quickPlaybackSpeedIconButton {
+.quickPlaybackSpeedDragHandle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -229,11 +222,6 @@
   border: 0;
   border-radius: calc(4px * var(--ui-roundness));
   background: transparent;
-  color: var(--primary-text-color);
-  cursor: pointer;
-}
-
-.quickPlaybackSpeedDragHandle {
   color: var(--tertiary-text-color);
   cursor: grab;
   touch-action: none;
@@ -243,19 +231,13 @@
   cursor: grabbing;
 }
 
-.quickPlaybackSpeedIconButton:hover,
 .quickPlaybackSpeedDragHandle:hover {
   background-color: var(--side-nav-hover-color);
   color: var(--side-nav-hover-text-color);
 }
 
-.quickPlaybackSpeedIconButton.delete {
+.quickPlaybackSpeedIconButton.delete :deep(.iconButton) {
   color: var(--destructive-color);
-}
-
-.quickPlaybackSpeedIconButton:disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
 }
 
 @media only screen and (width <= 680px) {

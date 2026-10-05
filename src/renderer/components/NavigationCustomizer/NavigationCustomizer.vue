@@ -123,44 +123,32 @@
         />
         <span>{{ item.label }}</span>
         <div class="itemActions">
-          <button
-            type="button"
+          <FtIconButton
             class="itemAction"
-            :aria-label="t('Home Page.Move section up', { section: item.label })"
             :title="t('Home Page.Move section up', { section: item.label })"
             :disabled="index === 0"
+            :icon="['fas', 'arrow-up']"
+            :use-shadow="false"
+            theme="base"
             @click="moveItem(item.id, -1)"
-          >
-            <FtIcon
-              :icon="['fas', 'arrow-up']"
-              aria-hidden="true"
-            />
-          </button>
-          <button
-            type="button"
+          />
+          <FtIconButton
             class="itemAction"
-            :aria-label="t('Home Page.Move section down', { section: item.label })"
             :title="t('Home Page.Move section down', { section: item.label })"
             :disabled="index === selectedItems.length - 1"
+            :icon="['fas', 'arrow-down']"
+            :use-shadow="false"
+            theme="base"
             @click="moveItem(item.id, 1)"
-          >
-            <FtIcon
-              :icon="['fas', 'arrow-down']"
-              aria-hidden="true"
-            />
-          </button>
-          <button
-            type="button"
+          />
+          <FtIconButton
             class="itemAction"
-            :aria-label="`${t('Search Bar.Remove')} ${item.label}`"
             :title="`${t('Search Bar.Remove')} ${item.label}`"
+            :icon="['fas', 'xmark']"
+            :use-shadow="false"
+            theme="base"
             @click="removeItem(item.id)"
-          >
-            <FtIcon
-              :icon="['fas', 'xmark']"
-              aria-hidden="true"
-            />
-          </button>
+          />
         </div>
       </li>
     </ul>
@@ -201,6 +189,7 @@
 </template>
 
 <script setup>
+import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -585,29 +574,6 @@ function resetItems() {
 .itemActions {
   align-self: stretch;
   display: flex;
-}
-
-.itemAction {
-  align-items: center;
-  background: transparent;
-  border: 0;
-  border-radius: calc(6px * var(--ui-roundness));
-  color: var(--secondary-text-color);
-  cursor: pointer;
-  display: flex;
-  inline-size: 44px;
-  justify-content: center;
-}
-
-.itemAction:hover:not(:disabled),
-.itemAction:focus-visible {
-  background: var(--side-nav-hover-color);
-  color: var(--side-nav-hover-text-color);
-}
-
-.itemAction:disabled {
-  cursor: default;
-  opacity: 0.35;
 }
 
 .reorderStatus {

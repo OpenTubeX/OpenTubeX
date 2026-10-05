@@ -578,15 +578,14 @@
               <span class="quickPlaybackSpeedName">
                 {{ getQuickPlaybackSpeedDisplayName(option) }}
               </span>
-              <button
+              <FtIconButton
                 class="quickPlaybackSpeedIconButton"
-                type="button"
                 :title="t('Settings.Player Settings.Edit Playback Speed Name')"
-                :aria-label="t('Settings.Player Settings.Edit Playback Speed Name')"
+                :icon="['fas', 'edit']"
+                :use-shadow="false"
+                theme="base"
                 @click="editingQuickPlaybackSpeedNameId = option.id"
-              >
-                <FtIcon :icon="['fas', 'edit']" />
-              </button>
+              />
             </div>
             <div
               v-else
@@ -601,40 +600,38 @@
                 :show-action-button="false"
                 @input="(value) => updateQuickPlaybackSpeedName(option.id, value)"
               />
-              <button
+              <FtIconButton
                 class="quickPlaybackSpeedIconButton"
-                type="button"
                 :title="t('Settings.Player Settings.Use Automatic Playback Speed Name')"
-                :aria-label="t('Settings.Player Settings.Use Automatic Playback Speed Name')"
+                :icon="['fas', 'undo']"
+                :use-shadow="false"
+                theme="base"
                 @click="resetQuickPlaybackSpeedName(option.id)"
-              >
-                <FtIcon :icon="['fas', 'undo']" />
-              </button>
+              />
             </div>
           </div>
-          <label class="textInputLabel quickPlaybackSpeedValueField">
-            <span class="textInputLabelText">{{ t('Settings.Player Settings.Playback Speed') }}</span>
-            <input
-              class="quickPlaybackSpeedInput"
-              type="number"
-              :placeholder="t('Form Inputs.Example', { example: '1.25' })"
-              min="0.01"
-              step="0.01"
-              :aria-label="t('Settings.Player Settings.Playback Speed')"
-              :value="option.speed"
-              @change="(event) => updateQuickPlaybackSpeed(option.id, event.target.value)"
-            >
-          </label>
-          <button
+          <FtInput
+            class="quickPlaybackSpeedValueField"
+            :change-filter="normalizeQuickPlaybackSpeed"
+            :icon="['fas', 'gauge-high']"
+            input-type="number"
+            :label="t('Settings.Player Settings.Playback Speed')"
+            :placeholder="t('Form Inputs.Example', { example: '1.25' })"
+            min="0.01"
+            step="0.01"
+            :value="String(option.speed)"
+            :show-action-button="false"
+            @change="updateQuickPlaybackSpeed(option.id, $event)"
+          />
+          <FtIconButton
             class="quickPlaybackSpeedIconButton delete"
-            type="button"
             :disabled="quickPlaybackSpeedBarEntries.length <= 1"
             :title="t('Delete')"
-            :aria-label="t('Delete')"
+            :icon="['fas', 'trash']"
+            :use-shadow="false"
+            theme="base"
             @click="deleteQuickPlaybackSpeed(option.id)"
-          >
-            <FtIcon :icon="['fas', 'trash']" />
-          </button>
+          />
         </div>
       </div>
     </FtSettingsSubpage>
@@ -642,6 +639,7 @@
 </template>
 
 <script setup>
+import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import { displayAndroidPath, chooseAndroidDirectory } from '../../helpers/androidStorage'
 import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
@@ -1334,7 +1332,7 @@ function normalizeQuickPlaybackSpeed(speed) {
     return 1
   }
 
-  return Number.parseFloat(parsedSpeed.toFixed(2))
+  return Number.parseFloat(parsedSpeed.toFixed(2)) || 1
 }
 
 /**

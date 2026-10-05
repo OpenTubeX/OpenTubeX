@@ -199,15 +199,7 @@
 }
 
 .chooseFolderButton {
-  background: none;
-  border: 0;
-  color: var(--accent-color);
-  cursor: pointer;
   flex: none;
-  font-size: inherit;
-  padding-block: 0;
-  padding-inline: 0;
-  text-decoration: underline;
 }
 
 .downloadProgressBarTrack {

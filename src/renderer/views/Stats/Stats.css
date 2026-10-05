@@ -417,21 +417,6 @@
   font-size: 0.78rem;
 }
 
-.adjustEstimateButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px;
-  border: 0;
-  color: var(--primary-color);
-  background: transparent;
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.75rem;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
 .historicalAdjustment {
   inline-size: min(440px, 80vw);
 }
@@ -453,28 +438,8 @@
 }
 
 .resetStatsButton {
-  display: flex;
   grid-column: 3;
-  align-items: center;
   justify-self: end;
-  gap: 7px;
-  padding-block: 6px;
-  padding-inline: 9px;
-  border: 1px solid transparent;
-  border-radius: calc(7px * var(--ui-roundness));
-  color: var(--tertiary-text-color);
-  background-color: transparent;
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.75rem;
-  transition: color 120ms ease, background-color 120ms ease, border-color 120ms ease;
-}
-
-.resetStatsButton:hover,
-.resetStatsButton:focus-visible {
-  border-color: color-mix(in srgb, var(--destructive-color) 45%, transparent);
-  color: var(--destructive-color);
-  background-color: color-mix(in srgb, var(--destructive-color) 8%, transparent);
 }
 
 @media only screen and (width <= 980px) {
