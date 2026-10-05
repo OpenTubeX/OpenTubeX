@@ -422,9 +422,14 @@ test.describe('settings search highlights', () => {
             return bounds.left >= headerBounds.left && bounds.right <= headerBounds.right
           })
         })).toBe(true)
+        await expect.poll(() => header.evaluate(element => {
+          const tools = element.querySelector('.settingsHeaderTools').getBoundingClientRect()
+          const search = element.querySelector('.settingsSearch').getBoundingClientRect()
+          return Math.abs(tools.y + tools.height / 2 - search.y - search.height / 2)
+        })).toBeLessThanOrEqual(1)
       }
       if (zoom === 1) {
-        await page.screenshot({ path: testInfo.outputPath('settings-header-actions.png') })
+        await page.screenshot({ path: testInfo.outputPath('settings-header-inline-search.png') })
       }
     })
   }

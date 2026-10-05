@@ -170,6 +170,10 @@
   color: var(--primary-text-color);
 }
 
+.settingsHeaderControls {
+  display: contents;
+}
+
 .settingsSearch {
   --input-bottom-spacing: 0;
   --form-control-height: 36px;
@@ -617,14 +621,18 @@
     gap: 3px;
   }
 
-  .settingsHeaderTools {
+  .settingsHeaderControls {
+    display: flex;
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: inherit;
     order: 2;
   }
 
   .settingsSearch {
-    order: 3;
-    flex-basis: 100%;
-    min-inline-size: 100%;
+    order: 1;
+    flex: 1 1 150px;
   }
 }
 
