@@ -111,8 +111,8 @@ importers:
         specifier: ^4.1.2
         version: 4.1.2
       '@vot.js/core':
-        specifier: ^3.1.2
-        version: 3.1.2(typescript@6.0.3)
+        specifier: ^3.1.4
+        version: 3.1.4(typescript@6.0.3)
       autolinker:
         specifier: ^4.1.5
         version: 4.1.5
@@ -120,8 +120,8 @@ importers:
         specifier: ^4.0.3
         version: 4.0.3
       dbus-native:
-        specifier: ^0.15.2
-        version: 0.15.2
+        specifier: ^0.16.0
+        version: 0.16.0
       dompurify:
         specifier: ^3.4.16
         version: 3.4.16
@@ -202,8 +202,8 @@ importers:
         specifier: ^1.2.10
         version: 1.2.10
       '@iconify-json/simple-icons':
-        specifier: ^1.2.97
-        version: 1.2.97
+        specifier: ^1.2.98
+        version: 1.2.98
       '@iconify/utils':
         specifier: ^3.1.5
         version: 3.1.7
@@ -292,8 +292,8 @@ importers:
         specifier: ^5.11.0
         version: 5.12.0(clean-css@5.3.3)(cssnano@9.1.1)(csso@5.0.5)(html-minifier-terser@6.1.0)(postcss@8.5.28)(svgo@4.1.0)(webpack@5.111.1)
       node-gyp:
-        specifier: ^13.0.2
-        version: 13.0.2
+        specifier: ^13.1.0
+        version: 13.1.0
       postcss:
         specifier: ^8.5.28
         version: 8.5.28
@@ -715,8 +715,8 @@ packages:
   '@iconify-json/ri@1.2.10':
     resolution: {integrity: sha512-WWMhoncVVM+Xmu9T5fgu2lhYRrKTEWhKk3Com0KiM111EeEsRLiASjpsFKnC/SrB6covhUp95r2mH8tGxhgd5Q==}
 
-  '@iconify-json/simple-icons@1.2.97':
-    resolution: {integrity: sha512-Z6PmM6jvWVU7rmLzqbxCLJA7SeqCnK6lMHXtjyzHPLZebwuoojBEcHHycppahDzEeN9xujRkrV5J8QpOhMyNrg==}
+  '@iconify-json/simple-icons@1.2.98':
+    resolution: {integrity: sha512-35CEBG1H/3nsohVgJaRWtOZ/P5syRTL++ZXTISdQSC76o1mAFXngFoSm9EOnnBiDApKPu8WN/DY+z69yCycL9A==}
 
   '@iconify/types@2.0.0':
     resolution: {integrity: sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==}
@@ -1458,14 +1458,14 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@vot.js/core@3.1.2':
-    resolution: {integrity: sha512-Hi+csDJA4+E268lsbOQBBLgWYwjOeMH7p0kg5Atwk6ZnmMYwPZIozvKtqGaRFcVj5zg1VzrJZ8cDC6QThQ0Gpg==}
+  '@vot.js/core@3.1.4':
+    resolution: {integrity: sha512-cKesSg2OPsW5zTY3CxvzvCC2LOqJYZw7cJt7jtxUvJY4uq+W/hnfp36eB0cw/4tW62S/iJqyZIlYFFx5t7NxIw==}
     engines: {node: '>=18'}
     peerDependencies:
       typescript: ^6.0.0
 
-  '@vot.js/shared@3.1.2':
-    resolution: {integrity: sha512-iqVesnzQ6kSU8VZUaRUHygeU7g0nuSQMtlKktkqI+p72j2LgQRxhx7ZPs2/S4m0KOVrq9xuvagKJovZZFJsexQ==}
+  '@vot.js/shared@3.1.4':
+    resolution: {integrity: sha512-1+28EZedjsP2ySWH99FuVrjKWfy+P6HADIINzlpsmQt02I2tnKmzldGGz8C2Q8ZOTyjgQTcwg4Q51lZkJBIRaA==}
     engines: {node: '>=18'}
     peerDependencies:
       typescript: ^6.0.0
@@ -1619,9 +1619,19 @@ packages:
 
   ajv-formats@2.1.1:
     resolution: {integrity: sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==}
+    peerDependencies:
+      ajv: ^8.0.0
+    peerDependenciesMeta:
+      ajv:
+        optional: true
 
   ajv-formats@3.0.1:
     resolution: {integrity: sha512-8iUql50EUR+uUcdRQ3HDqa6EVyo3docL8g5WJ3FNcWmu62IbkGUue/pEyLBW8VGKKucTPgqeks4fIU1DA4yowQ==}
+    peerDependencies:
+      ajv: ^8.0.0
+    peerDependenciesMeta:
+      ajv:
+        optional: true
 
   ajv-keywords@5.1.0:
     resolution: {integrity: sha512-YCS/JNFAUyr5vAuhk1DWm1CBxRHW9LbJ2ozWeemrIqpbsqKjHVxYPyi5GC0rjZIT5JxJ3virVTS8wk4i/Z+krw==}
@@ -2111,9 +2121,10 @@ packages:
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
 
-  dbus-native@0.15.2:
-    resolution: {integrity: sha512-J1IBi4LmbqrFhroN66Dj1tCCTP6TVbZgUKhWQZf3uS6t93yRWEcRRDjOZV9N6boGRhOp/BOjLliFm9vWu1QZOA==}
+  dbus-native@0.16.0:
+    resolution: {integrity: sha512-+KyWeUqKQsXOi6oCZiOpzQKeMhdInA2mI1hpvnG8Wg1mIJ4PMEn7F0jqJsrZZFaUf2LccSLyp9WGukCK5Oks3A==}
     engines: {node: '>=22.12.0'}
+    hasBin: true
 
   debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
@@ -3560,9 +3571,10 @@ packages:
     engines: {node: ^20.17.0 || >=22.9.0}
     hasBin: true
 
-  node-gyp@13.0.2:
-    resolution: {integrity: sha512-SXTvw3PxznpowYhJSOD9mVQBgDaCTWXffX+wQZsQ7PbcTV86TsXCUcSZhHnskFQvrvn/OdSzJPMsptT2pIj9ww==}
+  node-gyp@13.1.0:
+    resolution: {integrity: sha512-FpNzOLFACKG0oRBYbZ5WOeWD1EqRTIWX90MaRIWTO18lVYPx8fqIjrdS3pihjnCkSmgop6zVGkSqg1vXZLksuw==}
     engines: {node: ^22.22.2 || ^24.15.0 || >=26.0.0}
+    hasBin: true
 
   node-int64@0.4.0:
     resolution: {integrity: sha512-O5lz91xSOeoXP6DulyHfllpq+Eg00MWitZIbtPfoSEvqIHdl5gfcY6hYzDWnj0qD5tz52PI08u9qUvSVeUBeHw==}
@@ -3578,6 +3590,7 @@ packages:
   nopt@10.0.1:
     resolution: {integrity: sha512-df3sBr/6ax9hSGuC3CspvLlbnX8cP5L5nZwXF8cGN8l0zSWR6BvzmQ6jPUKjvo6+/xdpkNvEcucBNUdBeeV13g==}
     engines: {node: ^22.22.2 || ^24.15.0 || >=26.0.0}
+    hasBin: true
 
   nopt@9.0.0:
     resolution: {integrity: sha512-Zhq3a+yFKrYwSBluL4H9XP3m3y5uvQkB/09CwDruCiRmR/UJYnn9W4R48ry0uGC70aeTPKLynBtscP9efFFcPw==}
@@ -4958,6 +4971,7 @@ packages:
 
   which@1.3.1:
     resolution: {integrity: sha512-HxJdYWq1MTIQbJ3nw0cqssHoTNU267KlrDuGZ1WYlxDStUtKUhOaJmh112/TZmHxxUfuJqPXSOm7tDyas0OSIQ==}
+    hasBin: true
 
   which@2.0.2:
     resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==}
@@ -4977,6 +4991,7 @@ packages:
   which@7.0.0:
     resolution: {integrity: sha512-RancgH2dmbLdHl6LRhEqvklWMgl/Hdnun0Y90KhBOLkMefg8Qa7/Zel8Sm+8HEcP6DEjzsWzpkuBQEZok58isA==}
     engines: {node: ^22.22.2 || ^24.15.0 || >=26.0.0}
+    hasBin: true
 
   wildcard@2.0.1:
     resolution: {integrity: sha512-CC1bOL87PIWSBhDcTrdeLo6eGT7mCFtrg0uIJtqJUFyK+eJnzl8A1niH56uu7KMa5XFrtiV+AQuHO3n7DsHnLQ==}
@@ -5499,7 +5514,7 @@ snapshots:
     dependencies:
       '@iconify/types': 2.0.0
 
-  '@iconify-json/simple-icons@1.2.97':
+  '@iconify-json/simple-icons@1.2.98':
     dependencies:
       '@iconify/types': 2.0.0
 
@@ -6345,12 +6360,12 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.12.2':
     optional: true
 
-  '@vot.js/core@3.1.2(typescript@6.0.3)':
+  '@vot.js/core@3.1.4(typescript@6.0.3)':
     dependencies:
-      '@vot.js/shared': 3.1.2(typescript@6.0.3)
+      '@vot.js/shared': 3.1.4(typescript@6.0.3)
       typescript: 6.0.3
 
-  '@vot.js/shared@3.1.2(typescript@6.0.3)':
+  '@vot.js/shared@3.1.4(typescript@6.0.3)':
     dependencies:
       '@bufbuild/protobuf': 2.14.1
       typescript: 6.0.3
@@ -6570,12 +6585,12 @@ snapshots:
 
   agent-base@7.1.4: {}
 
-  ajv-formats@2.1.1:
-    dependencies:
+  ajv-formats@2.1.1(ajv@8.20.0):
+    optionalDependencies:
       ajv: 8.20.0
 
-  ajv-formats@3.0.1:
-    dependencies:
+  ajv-formats@3.0.1(ajv@8.20.0):
+    optionalDependencies:
       ajv: 8.20.0
 
   ajv-keywords@5.1.0(ajv@8.20.0):
@@ -7127,7 +7142,7 @@ snapshots:
 
   csstype@3.2.3: {}
 
-  dbus-native@0.15.2:
+  dbus-native@0.16.0:
     dependencies:
       xml2js: 0.6.2
 
@@ -8607,7 +8622,7 @@ snapshots:
       undici: 6.28.0
       which: 6.0.1
 
-  node-gyp@13.0.2:
+  node-gyp@13.1.0:
     dependencies:
       env-paths: 2.2.1
       exponential-backoff: 3.1.3
@@ -9282,14 +9297,14 @@ snapshots:
     dependencies:
       '@types/json-schema': 7.0.15
       ajv: 8.20.0
-      ajv-formats: 2.1.1
+      ajv-formats: 2.1.1(ajv@8.20.0)
       ajv-keywords: 5.1.0(ajv@8.20.0)
 
   schema-utils@4.5.0:
     dependencies:
       '@types/json-schema': 7.0.15
       ajv: 8.20.0
-      ajv-formats: 3.0.1
+      ajv-formats: 3.0.1(ajv@8.20.0)
       ajv-keywords: 5.1.0(ajv@8.20.0)
 
   scule@1.3.0: {}
