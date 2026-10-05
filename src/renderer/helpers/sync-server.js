@@ -312,7 +312,9 @@ export class SyncServerClient {
   }
 
   getSyncEvents(since = '') {
-    return this.request(`/v1/encrypted_sync/events?since=${encodeURIComponent(since)}`)
+    // Activity is encrypted and padded too; accumulated events can be several
+    // megabytes even when the library collections need no further changes.
+    return this.request(`/v1/encrypted_sync/events?since=${encodeURIComponent(since)}`, { timeoutMs: MAX_ENCRYPTED_SYNC_TIMEOUT_MS })
   }
 
   sendDeviceRequest(recipient, payload) {
