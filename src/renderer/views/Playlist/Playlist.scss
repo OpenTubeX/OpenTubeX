@@ -141,23 +141,38 @@
     object-fit: cover;
   }
 
-  // Fit up to seven desktop actions between stacked top badges and bottom overlays.
-  :deep(.ft-list-item.list .videoThumbnail:has(.playlistIcons:not(.mobileThumbnailActions))) {
-    min-inline-size: 248px;
-
-    .thumbnailLink,
-    .thumbnailImage {
-      min-inline-size: 248px;
-    }
-  }
-
+  // Small thumbnails fit two rows of desktop actions without changing their size.
   :deep(.ft-list-item.list .videoThumbnail .playlistIcons:not(.mobileThumbnailActions)) {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
     max-inline-size: calc(100% - 8px);
-    margin-inline: 4px;
-    margin-block-start: 56px;
+    margin: 4px;
+    opacity: 0;
+    pointer-events: none;
+
+    .iconButton {
+      // Override the shared button's inline padding for this compact toolbar.
+      padding: 3px !important;
+    }
+  }
+
+  :deep(.ft-list-item.list:has(.playlistIcons:not(.mobileThumbnailActions))) {
+    &:hover,
+    &:focus-within,
+    &:has(.playlistIcons .iconDropdown, .playlistIcons .iconButton[aria-expanded='true']) {
+      .playlistIcons {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      // Show controls in place of passive badges during interaction.
+      .videoWatched,
+      .sponsorBlockVideoLabel,
+      .videoDuration {
+        visibility: hidden;
+      }
+    }
   }
 
   :deep(.ft-list-item .info) {

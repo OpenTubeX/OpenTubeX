@@ -21,7 +21,7 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
   test.describe(`playlist rows at ${uiScale}% UI scale with ${userPlaylistSortOrder} sorting`, () => {
     test.use({
       seed: {
-        settings: { uiScale, userPlaylistSortOrder, playlistViewType: 'list', quickBookmarkTargetPlaylistId: 'bookmarks', baseTheme: 'system', systemDarkTheme: 'dark', systemLightTheme: 'light' },
+        settings: { uiScale, userPlaylistSortOrder, playlistViewType: 'list', quickBookmarkTargetPlaylistId: 'bookmarks', extraThumbnailAction: 'copyYoutube', externalPlayer: 'mpv', baseTheme: 'system', systemDarkTheme: 'dark', systemLightTheme: 'light' },
         history: [{
           _id: 'layout00001',
           videoId: 'layout00001',
@@ -42,6 +42,8 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
             author: 'A channel with a very long name that should not crowd the video title',
             authorId: 'UC-test-channel-id',
             lengthSeconds: 120,
+            isUpcoming: index === 1,
+            premiereTimestamp: index === 1 ? Math.floor(Date.now() / 1000) + 3600 : 0,
             viewCount: 12000,
             published: Date.now() - 86_400_000,
             playlistItemId: `layout-item-${index}`,
@@ -111,9 +113,12 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
       }
 
       const thumbnail = rows.first().locator('.videoThumbnail')
-      const originalWidth = (await thumbnail.boundingBox()).width
-      await setThumbnailSize(page, 130)
-      await expect.poll(async () => (await thumbnail.boundingBox()).width).toBeGreaterThan(originalWidth)
+      let previousWidth = 0
+      for (const size of [60, 70, 80, 90, 100, 110, 120, 130]) {
+        await setThumbnailSize(page, size)
+        await expect.poll(async () => (await thumbnail.boundingBox()).width).toBeGreaterThan(previousWidth)
+        previousWidth = (await thumbnail.boundingBox()).width
+      }
     })
 
     if (userPlaylistSortOrder === 'custom') {
@@ -149,30 +154,41 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
               await expect(actions).toBeHidden()
               continue
             }
+            await page.locator('.sortSelect').hover()
+            for (const badge of await badges.all()) await expect(badge).toBeVisible()
+            await expect(actions).toHaveCSS('opacity', '0')
             await thumbnail.hover()
-            await expect(buttons).toHaveCount(5)
+            await expect(buttons).toHaveCount(7)
+            for (const badge of await badges.all()) await expect(badge).toBeHidden()
             await expect(async () => {
+              await thumbnail.hover()
+              await expect(actions).toHaveCSS('opacity', '1')
+              for (const badge of await badges.all()) await expect(badge).toBeHidden()
               const bounds = await thumbnail.boundingBox()
               for (const button of await buttons.all()) {
                 await expect(button).toBeVisible()
                 const action = await button.boundingBox()
-                expect(action.width).toBeGreaterThanOrEqual(24)
-                expect(action.height).toBeGreaterThanOrEqual(24)
+                // Electron zoom can produce fractional CSS-pixel bounds.
+                expect(action.width).toBeGreaterThanOrEqual(24 - 0.01)
+                expect(action.height).toBeGreaterThanOrEqual(24 - 0.01)
                 expect(action.x).toBeGreaterThanOrEqual(bounds.x - 1)
                 expect(action.y).toBeGreaterThanOrEqual(bounds.y - 1)
                 expect(action.x + action.width).toBeLessThanOrEqual(bounds.x + bounds.width + 1)
                 expect(action.y + action.height).toBeLessThanOrEqual(bounds.y + bounds.height + 1)
-                for (const badge of await badges.all()) {
-                  await expect(badge).toBeVisible()
-                  const overlay = await badge.boundingBox()
-                  const separateFromBadge = action.x + action.width <= overlay.x + 1 ||
-                    overlay.x + overlay.width <= action.x + 1 ||
-                    action.y + action.height <= overlay.y + 1 ||
-                    overlay.y + overlay.height <= action.y + 1
-                  expect(separateFromBadge).toBe(true)
-                }
+                const externalPlayer = await thumbnail.locator('.externalPlayerIcon').boundingBox()
+                const separateFromExternalPlayer = action.x + action.width <= externalPlayer.x + 1 ||
+                  externalPlayer.x + externalPlayer.width <= action.x + 1 ||
+                  action.y + action.height <= externalPlayer.y + 1 ||
+                  externalPlayer.y + externalPlayer.height <= action.y + 1
+                expect(separateFromExternalPlayer).toBe(true)
               }
             }).toPass({ timeout: 15_000 })
+            await page.locator('.playlistItem .ft-list-video').nth(1).locator('.title').focus()
+            await page.locator('.sortSelect').hover()
+            await expect(actions).toHaveCSS('opacity', '1')
+            for (const badge of await badges.all()) await expect(badge).toBeHidden()
+            await page.locator('.profileTrigger').focus()
+            for (const badge of await badges.all()) await expect(badge).toBeVisible()
           }
         }
       })
