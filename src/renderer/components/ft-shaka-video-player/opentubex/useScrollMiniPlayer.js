@@ -65,6 +65,7 @@ const SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS = 300
  *   container: import('vue').Ref<HTMLDivElement | null>,
  *   mobileMiniBarOverlay: import('vue').Ref<HTMLDivElement | null>,
  *   fullWindowEnabled: import('vue').Ref<boolean>,
+ *   inlineSixteenByNine: import('vue').ComputedRef<boolean>,
  *   getUi: () => import('shaka-player').ui.Overlay | null,
  *   isActiveTab: import('vue').ComputedRef<boolean>,
  *   isPlayerSuspended?: import('vue').Ref<boolean> | null,
@@ -74,7 +75,7 @@ const SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS = 300
  *   video: import('vue').Ref<HTMLVideoElement | null>
  * }} options
  */
-export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindowEnabled, getUi, isActiveTab, isPlayerSuspended = null, pictureInPictureActive, props, tabId = null, video }) {
+export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindowEnabled, inlineSixteenByNine, getUi, isActiveTab, isPlayerSuspended = null, pictureInPictureActive, props, tabId = null, video }) {
   const watchNavigation = inject(watchNavigationKey, null)
   const playerSuspended = computed(() => isPlayerSuspended?.value === true)
   const scrollMiniVideoAspectRatio = ref(DEFAULT_ASPECT_RATIO)
@@ -118,8 +119,8 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     return Boolean(process.env.IS_CAPACITOR || document.querySelector('.app.capacitorTabs'))
   }
 
-  function getMobileMiniBarRect() {
-    const insets = getViewportInsets({ includeSideNav: true })
+  function getMobileMiniBarRect(revealSideNav = false) {
+    const insets = getViewportInsets({ includeSideNav: true, revealSideNav })
     const height = 108
     const left = Math.max(0, insets.left - MARGIN)
     const right = Math.max(0, insets.right - MARGIN)
@@ -139,7 +140,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     // block for fixed children. Measure in the same layer as the settled bar.
     const element = container.value.cloneNode(false)
     const videoElement = video.value.cloneNode(false)
-    const { left, top, width, height } = getMobileMiniBarRect()
+    const { left, top, width, height } = getMobileMiniBarRect(true)
     element.classList.add('scrollMiniPlayer', 'mobileMiniBar')
     element.removeAttribute('id')
     element.removeAttribute('style')
@@ -181,6 +182,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     const element = container.value.cloneNode(false)
     const videoElement = video.value.cloneNode(false)
     element.classList.remove('scrollMiniPlayer', 'mobileMiniBar', 'scrollMiniPlayerAnimating')
+    element.classList.toggle('sixteenByNine', inlineSixteenByNine.value)
     element.style.removeProperty('transform')
     element.removeAttribute('data-mobile-mini-morph')
     Object.assign(element.style, { position: 'absolute', inset: '0 auto auto 0', width: '100%', height: 'auto' })
@@ -190,10 +192,10 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     videoElement.removeAttribute('poster')
     videoElement.width = video.value.videoWidth
     videoElement.height = video.value.videoHeight
-    if (videoElement.width > 0 && videoElement.height > 0) {
+    if (!inlineSixteenByNine.value && videoElement.width > 0 && videoElement.height > 0) {
       videoElement.style.aspectRatio = `${videoElement.width} / ${videoElement.height}`
     }
-    videoElement.style.height = 'auto'
+    videoElement.style.height = inlineSixteenByNine.value ? '100%' : 'auto'
     videoElement.style.setProperty('transition', 'none', 'important')
     element.append(videoElement)
     placeholder.append(element)
@@ -363,6 +365,7 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   function renderMobileMiniMorph(from, to, videoFrom, videoTo, progress, restoring) {
     const element = container.value
     if (!element) return
+    const visibleArtwork = element.querySelector('.musicAudioArtwork.retryImagePlaceholder') ?? element.querySelector('.musicAudioArtwork')
     // Use the inline surface in both directions, so expanding a cropped 16:9
     // thumbnail does not carry its shape all the way to the restored player.
     const interpolate = (start, end) => start + (end - start) * progress
@@ -385,7 +388,32 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
       style.setProperty('--mobile-mini-video-base-width', `${baseVideo.width}px`)
       style.setProperty('--mobile-mini-video-base-height', `${baseVideo.height}px`)
       element.setAttribute('data-mobile-mini-morph', '')
+      const artwork = visibleArtwork
+      if (artwork && !artwork.hidden) {
+        const bounds = artwork.getBoundingClientRect()
+        const surface = artwork.closest('.musicAudioSurface').getBoundingClientRect()
+        mobileMiniMorphBase.artwork = {
+          element: artwork,
+          left: bounds.left - surface.left,
+          top: bounds.top - surface.top,
+          width: bounds.width,
+          height: bounds.height,
+          radius: Number.parseFloat(getComputedStyle(artwork).borderTopLeftRadius) || 0
+        }
+        const morph = mobileMiniMorphBase
+        // Capture runs before FtRetryImage handles load. Redraw next frame,
+        // after Vue replaces the fallback, even when the finger is held still.
+        morph.onImageLoad = () => {
+          if (morph.imageLoadFrame != null) cancelAnimationFrame(morph.imageLoadFrame)
+          morph.imageLoadFrame = requestAnimationFrame(() => {
+            morph.imageLoadFrame = null
+            if (mobileMiniMorphBase === morph) morph.redraw()
+          })
+        }
+        element.addEventListener('load', morph.onImageLoad, true)
+      }
     }
+    mobileMiniMorphBase.redraw = () => renderMobileMiniMorph(from, to, videoFrom, videoTo, progress, restoring)
     const { rect: base, video: baseVideo } = mobileMiniMorphBase
     const videoWidth = interpolate(videoFrom.width, videoTo.width)
     const videoHeight = interpolate(videoFrom.height, videoTo.height)
@@ -397,13 +425,43 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
     const x = videoLeft - base.left - baseVideo.left * videoScale
     const y = videoTop - base.top - baseVideo.top * videoScale
     style.setProperty('transform', `translate(${x}px, ${y}px) scale(${videoScale})`, 'important')
-    const cropX = Math.max(0, (baseVideo.width * videoScale - videoWidth) / (2 * videoScale))
-    const cropY = Math.max(0, (baseVideo.height * videoScale - videoHeight) / (2 * videoScale))
+    const minimized = restoring ? 1 - progress : progress
+    const mediaAspect = video.value.videoWidth / video.value.videoHeight || baseVideo.width / baseVideo.height
     // Keep animated properties local to their surfaces. Inherited custom
     // properties invalidate styles throughout Shaka's hidden control tree.
-    const clip = cropX < 0.001 && cropY < 0.001 ? 'none' : `inset(${cropY}px ${cropX}px)`
     // The same poster surface covers loading, countdown and ended playback.
-    for (const surface of element.querySelectorAll(':scope > .player, :scope > .countdownPoster, :scope > .musicAudioSurface')) surface.style.clipPath = clip
+    for (const surface of element.querySelectorAll(':scope > .player, :scope > .countdownPoster, :scope > .musicAudioSurface')) {
+      const poster = surface.classList.contains('countdownPoster')
+        ? surface.querySelector('.retryImagePlaceholder') ?? surface.querySelector('img')
+        : null
+      const aspect = poster?.naturalWidth / poster?.naturalHeight || mediaAspect
+      const pictureWidth = Math.min(baseVideo.width, baseVideo.height * aspect)
+      const pictureHeight = pictureWidth / aspect
+      const coverScale = Math.max(videoWidth / pictureWidth, videoHeight / pictureHeight) / videoScale
+      const scale = surface.classList.contains('musicAudioSurface') ? 1 : 1 + (coverScale - 1) * minimized
+      const cropX = Math.max(0, (baseVideo.width - videoWidth / (videoScale * scale)) / 2)
+      const cropY = Math.max(0, (baseVideo.height - videoHeight / (videoScale * scale)) / 2)
+      surface.style.setProperty('--mobile-mini-media-scale', String(scale))
+      surface.style.clipPath = cropX < 0.001 && cropY < 0.001 ? 'none' : `inset(${cropY}px ${cropX}px)`
+    }
+    const artwork = mobileMiniMorphBase.artwork
+    if (artwork && visibleArtwork && !visibleArtwork.hidden) {
+      if (artwork.element !== visibleArtwork) {
+        artwork.element.style.removeProperty('transform')
+        artwork.element.style.removeProperty('border-radius')
+        artwork.element = visibleArtwork
+      }
+      const aspect = visibleArtwork.naturalWidth / visibleArtwork.naturalHeight || 1
+      const width = Math.min(artwork.width, artwork.height * aspect)
+      const height = width / aspect
+      const cover = Math.max(videoWidth / width, videoHeight / height) / videoScale
+      const scale = 1 + (cover - 1) * minimized
+      const x = (baseVideo.width / 2 - artwork.left - artwork.width / 2) * minimized
+      const y = (baseVideo.height / 2 - artwork.top - artwork.height / 2) * minimized
+      artwork.element.style.transform = `translate(${x}px, ${y}px) scale(${scale})`
+      artwork.element.style.borderRadius = `${artwork.radius * (1 - minimized)}px`
+      for (const metadata of element.querySelectorAll('.musicAudioMetadata')) metadata.style.opacity = String(1 - minimized)
+    }
     const opacity = restoring
       ? Math.max(0, 1 - progress / 0.5)
       : Math.min(1, Math.max(0, (progress - 0.2) / 0.4))
@@ -413,10 +471,19 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
   function clearMobileMiniMorph() {
     const element = container.value
     if (!element) return
+    const artwork = mobileMiniMorphBase?.artwork?.element
+    if (mobileMiniMorphBase?.onImageLoad) element.removeEventListener('load', mobileMiniMorphBase.onImageLoad, true)
+    if (mobileMiniMorphBase?.imageLoadFrame != null) cancelAnimationFrame(mobileMiniMorphBase.imageLoadFrame)
+    artwork?.style.removeProperty('transform')
+    artwork?.style.removeProperty('border-radius')
+    for (const metadata of element.querySelectorAll('.musicAudioMetadata')) metadata.style.removeProperty('opacity')
     mobileMiniMorphBase = null
     element.removeAttribute('data-mobile-mini-morph')
     element.style.removeProperty('transform')
-    for (const surface of element.querySelectorAll(':scope > .player, :scope > .countdownPoster, :scope > .musicAudioSurface')) surface.style.removeProperty('clip-path')
+    for (const surface of element.querySelectorAll(':scope > .player, :scope > .countdownPoster, :scope > .musicAudioSurface')) {
+      surface.style.removeProperty('clip-path')
+      surface.style.removeProperty('--mobile-mini-media-scale')
+    }
     mobileMiniBarOverlay.value?.style.removeProperty('opacity')
     for (const name of [
       '--mobile-mini-left', '--mobile-mini-top', '--mobile-mini-width', '--mobile-mini-height',

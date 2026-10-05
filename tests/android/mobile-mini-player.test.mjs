@@ -55,13 +55,28 @@ test('ended mobile posters stay visible and 4:3 video restores without changing 
   skip: !process.env.ANDROID_CDP_URL,
 }, t => testMobileMiniPlayer(t, false, { posterOnly: true }))
 
-async function testMobileMiniPlayer(t, navigationOnly, { animationOnly = false, audioOnly = false, posterOnly = false } = {}) {
+for (const audioOnly of [false, true]) {
+  for (const landscape of [false, true]) {
+    test(`mobile ${audioOnly ? 'music artwork' : '4:3 video'} fills the mini thumbnail and restores its inline layout in ${landscape ? 'landscape' : 'portrait'}`, {
+      skip: !process.env.ANDROID_CDP_URL || (landscape && !process.env.ANDROID_SERIAL),
+    }, t => testMobileMiniPlayer(t, false, { audioOnly, posterOnly: !audioOnly, geometryOnly: true, landscape }))
+  }
+}
+
+test('mobile music artwork placeholder fills the thumbnail and restores its inline layout', {
+  skip: !process.env.ANDROID_CDP_URL,
+}, t => testMobileMiniPlayer(t, false, { audioOnly: true, geometryOnly: true, artworkUnavailable: true }))
+
+async function testMobileMiniPlayer(t, navigationOnly, { animationOnly = false, audioOnly = false, posterOnly = false, geometryOnly = false, landscape = false, artworkUnavailable = false } = {}) {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const context = browser.contexts()[0]
   const page = context.pages()[0]
   const session = await context.newCDPSession(page)
   let settings
   let watch
+  const adb = (...args) => execFileSync('adb', ['-s', process.env.ANDROID_SERIAL, 'shell', ...args], { encoding: 'utf8' }).trim()
+  const rotation = landscape ? adb('settings', 'get', 'system', 'user_rotation') : null
+  const automaticRotation = landscape ? adb('settings', 'get', 'system', 'accelerometer_rotation') : null
   const originalRoute = await page.evaluate(() => location.hash)
   try {
     await page.locator('.profileTrigger').waitFor()
@@ -110,7 +125,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { animationOnly = false, 
       }).toBe(true)
       await watch?.dispose()
       watch = await page.evaluateHandle(findWatchComponent)
-      await watch.evaluate((component, { media, audioOnly, posterOnly }) => {
+      await watch.evaluate((component, { media, audioOnly, posterOnly, artworkUnavailable }) => {
         const watch = component.proxy
         watch.videoLoadGeneration++
         Object.assign(watch, {
@@ -118,13 +133,13 @@ async function testMobileMiniPlayer(t, navigationOnly, { animationOnly = false, 
           isUpcoming: false, isLive: false, localFilePlayback: true, activeFormat: 'legacy',
           videoTitle: 'A long mini-player title with more room after removing the expand arrow', videoLengthSeconds: 60,
           musicMediaType: audioOnly ? 'audioTrack' : 'unknown',
-          thumbnail: audioOnly
-            ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpath fill='lime' d='M0 0h80v80H0z'/%3E%3C/svg%3E"
-            : 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="320" height="240"><rect width="320" height="240" fill="#326b8a"/></svg>'),
+          thumbnail: artworkUnavailable ? 'data:image/png;base64,broken' : audioOnly
+            ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='180'%3E%3Cpath fill='lime' d='M0 0h320v180H0z'/%3E%3C/svg%3E"
+            : 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180"><rect width="320" height="180" fill="#326b8a"/></svg>'),
           legacyFormats: [{ itag: 0, qualityLabel: 'Test', mimeType: 'video/webm',
             width: 320, height: posterOnly ? 240 : 180, bitrate: 0, localFile: true, url: `data:video/webm;base64,${media}` }],
         })
-      }, { media, audioOnly, posterOnly })
+      }, { media, audioOnly, posterOnly, artworkUnavailable })
       await expect(player).toBeVisible()
       await page.evaluate(() => window.scrollTo(0, 0))
       await expect(player).not.toHaveClass(/scrollMiniPlayer/)
@@ -133,10 +148,106 @@ async function testMobileMiniPlayer(t, navigationOnly, { animationOnly = false, 
       await video.evaluate(video => { video.loop = true; return video.play() })
     }
     await loadTestVideo()
+    if (landscape) {
+      adb('settings', 'put', 'system', 'accelerometer_rotation', '0')
+      adb('settings', 'put', 'system', 'user_rotation', '1')
+      await expect.poll(() => page.evaluate(() => innerWidth > innerHeight)).toBe(true)
+    }
     const originalVideo = await video.elementHandle()
     const touch = (type, point) => session.send('Input.dispatchTouchEvent', {
       type, touchPoints: point ? [point] : [],
     })
+    if (geometryOnly) {
+      const media = audioOnly ? player.locator(artworkUnavailable
+        ? 'img.musicAudioArtwork.retryImagePlaceholder' : 'img.musicAudioArtwork:not(.retryImagePlaceholder)') : video
+      const capture = async name => {
+        if (process.env.ANDROID_ARTIFACT_DIR) {
+          await page.screenshot({ path: `${process.env.ANDROID_ARTIFACT_DIR}/${audioOnly ? 'music' : 'video'}-${landscape ? 'landscape' : 'portrait'}-${name}.png` })
+        }
+      }
+      const settle = async () => {
+        await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+        await expect.poll(() => player.evaluate(element => element.getAnimations()
+          .every(animation => animation.effect.getTiming().iterations === Infinity || animation.playState !== 'running'))).toBe(true)
+      }
+      for (const scale of [100, 125]) {
+        await page.evaluate(scale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiScale', scale), scale)
+        await settle()
+        const inline = await media.boundingBox()
+        const full = await player.boundingBox()
+        await capture(`inline-${scale}`)
+        const down = { x: full.x + 12, y: full.y + 12 }
+        await touch('touchStart', down)
+        for (const distance of [30, 80, 140]) await touch('touchMove', { ...down, y: down.y + distance })
+        await touch('touchEnd')
+        await expect(player).toHaveClass(/mobileMiniBar/)
+        await settle()
+        await capture(`mini-${scale}`)
+        await t.test(`thumbnail fills its slot at ${scale}%`, async () => {
+          const slot = await (audioOnly ? player.locator('.musicAudioSurface') : video).boundingBox()
+          const thumbnail = await media.boundingBox()
+          for (const side of ['x', 'y', 'width', 'height']) {
+            assert.ok(Math.abs(thumbnail[side] - slot[side]) < 1, `thumbnail ${side}: ${thumbnail[side]} must match slot ${slot[side]}`)
+          }
+          await expect(media).toHaveCSS('object-fit', 'cover')
+        })
+        const bar = await player.locator('.mobileMiniBarReturn').boundingBox()
+        const up = { x: bar.x + bar.width / 2, y: bar.y + 15 }
+        await touch('touchStart', up)
+        await touch('touchMove', { ...up, y: up.y - 30 })
+        await touch('touchMove', { ...up, y: up.y - Math.abs(bar.y - full.y) })
+        await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
+        await capture(`restoring-${scale}`)
+        await t.test(`restore reaches the inline media layout before release at ${scale}%`, async () => {
+          const moving = await media.boundingBox()
+          const movingPlayer = await player.boundingBox()
+          for (const side of ['x', 'y', 'width', 'height']) {
+            assert.ok(Math.abs(movingPlayer[side] - full[side]) < 1,
+              `restore endpoint ${side}: ${JSON.stringify({ movingPlayer, full })}`)
+          }
+          for (const side of ['width', 'height']) {
+            assert.ok(Math.abs(moving[side] / movingPlayer.width - inline[side] / full.width) < 0.02,
+              `restoring ${side} must follow the inline media layout: ${JSON.stringify({ moving, movingPlayer, inline, full })}`)
+          }
+          for (const side of ['x', 'y']) {
+            assert.ok(Math.abs((moving[side] - movingPlayer[side]) / movingPlayer.width -
+              (inline[side] - full[side]) / full.width) < 0.02, `restoring ${side} must match the inline media position`)
+          }
+        })
+        await touch('touchEnd')
+        await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+        await settle()
+        const restored = await media.boundingBox()
+        for (const side of ['x', 'y', 'width', 'height']) {
+          assert.ok(Math.abs(restored[side] - inline[side]) < 1, `restored ${side}: ${JSON.stringify({ restored, inline })}`)
+        }
+      }
+      if (artworkUnavailable) {
+        await t.test('artwork loading during a held swipe keeps the animated geometry', async () => {
+          const full = await player.boundingBox()
+          const down = { x: full.x + 12, y: full.y + 12 }
+          await touch('touchStart', down)
+          try {
+            await touch('touchMove', { ...down, y: down.y + 80 })
+            await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
+            const fallback = await media.boundingBox()
+            await watch.evaluate(component => {
+              component.proxy.thumbnail = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="480" height="270"><rect width="480" height="270" fill="lime"/></svg>')
+            })
+            const loaded = player.locator('img.musicAudioArtwork:not(.retryImagePlaceholder)')
+            await expect(media).toHaveCount(0)
+            // No additional touch event: loading itself must repaint the morph.
+            await expect.poll(() => loaded.evaluate(image => image.style.transform)).not.toBe('')
+            const bounds = await loaded.boundingBox()
+            for (const side of ['x', 'y', 'width', 'height']) {
+              assert.ok(Math.abs(bounds[side] - fallback[side]) < 1, `loaded artwork preserves ${side} during the held swipe`)
+            }
+          } finally { await touch('touchEnd') }
+          await settle()
+        })
+      }
+      return
+    }
     if (posterOnly) {
       const endVideo = async () => {
         await video.evaluate(element => { element.loop = false; element.currentTime = element.duration - 0.1; return element.play() })
@@ -151,7 +262,12 @@ async function testMobileMiniPlayer(t, navigationOnly, { animationOnly = false, 
         await touch('touchStart', down)
         await touch('touchMove', { ...down, y: down.y + 100 })
         await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
-        if (endBeforeMinimize) await expect(poster).toBeVisible()
+        if (endBeforeMinimize) {
+          await expect(poster).toBeVisible()
+          // This 16:9 poster already fills the inline player and thumbnail;
+          // inheriting the 4:3 video's cover scale would crop it on release.
+          await expect(poster).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)')
+        }
         await touch('touchEnd')
         await expect(player).toHaveClass(/mobileMiniBar/)
         await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
@@ -169,7 +285,9 @@ async function testMobileMiniPlayer(t, navigationOnly, { animationOnly = false, 
         const expandedVideo = await video.boundingBox()
         assert.ok(Math.abs(expandedVideo.width / expandedVideo.height - inlineVideo.width / inlineVideo.height) < 0.02)
         const posterBox = await poster.boundingBox()
-        for (const side of ['x', 'y', 'width', 'height']) assert.ok(Math.abs(posterBox[side] - expandedVideo[side]) < 2)
+        await expect(poster).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)')
+        assert.ok(Math.abs(posterBox.x + posterBox.width / 2 - expandedVideo.x - expandedVideo.width / 2) < 2)
+        assert.ok(Math.abs(posterBox.y + posterBox.height / 2 - expandedVideo.y - expandedVideo.height / 2) < 2)
         await touch('touchEnd')
         await expect(player).not.toHaveAttribute('data-mobile-mini-morph')
         await expect(player).not.toHaveClass(/scrollMiniPlayer/)
@@ -562,6 +680,12 @@ async function testMobileMiniPlayer(t, navigationOnly, { animationOnly = false, 
     await expect(page.locator('.mobileMiniBarOverlay')).toHaveCount(0)
     await expect(page).toHaveURL(/#\/subscriptions/)
   } finally {
+    if (landscape) {
+      for (const [key, value] of [['user_rotation', rotation], ['accelerometer_rotation', automaticRotation]]) {
+        if (value === 'null') adb('settings', 'delete', 'system', key)
+        else adb('settings', 'put', 'system', key, value)
+      }
+    }
     await session.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] }).catch(() => {})
     await page.evaluate(({ settings, originalRoute }) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
