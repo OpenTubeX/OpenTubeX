@@ -141,6 +141,16 @@
     object-fit: cover;
   }
 
+  // Leave room for desktop actions above the thumbnail's bottom badges.
+  :deep(.ft-list-item.list .videoThumbnail:has(.playlistIcons:not(.mobileThumbnailActions))) {
+    min-inline-size: 176px;
+
+    .thumbnailLink,
+    .thumbnailImage {
+      min-inline-size: 176px;
+    }
+  }
+
   :deep(.ft-list-item.list .videoThumbnail .playlistIcons:not(.mobileThumbnailActions)) {
     display: flex;
     flex-wrap: wrap;

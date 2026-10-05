@@ -7,11 +7,12 @@ async function setThumbnailSize(page, size) {
   await page.locator('.profileTrigger').click()
   const slider = page.locator('.thumbnailSizeSlider .input')
   await expect(slider).toBeVisible()
-  await slider.evaluate((element, value) => {
-    element.value = String(value)
-    element.dispatchEvent(new Event('input', { bubbles: true }))
-    element.dispatchEvent(new Event('change', { bubbles: true }))
-  }, size)
+  await slider.press('Home')
+  const step = Number(await slider.getAttribute('step'))
+  for (let value = Number(await slider.getAttribute('min')); value < size; value += step) {
+    await slider.press('ArrowRight')
+  }
+  await expect(slider).toHaveValue(String(size))
   await page.locator('.profileTrigger').click()
   await expect(slider).toBeHidden()
 }
@@ -20,7 +21,7 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
   test.describe(`playlist rows at ${uiScale}% UI scale with ${userPlaylistSortOrder} sorting`, () => {
     test.use({
       seed: {
-        settings: { uiScale, userPlaylistSortOrder, playlistViewType: 'list', quickBookmarkTargetPlaylistId: 'bookmarks', baseTheme: uiScale === 100 ? 'dark' : 'light' },
+        settings: { uiScale, userPlaylistSortOrder, playlistViewType: 'list', quickBookmarkTargetPlaylistId: 'bookmarks', baseTheme: 'system', systemDarkTheme: 'dark', systemLightTheme: 'light' },
         playlists: [{
           _id: 'row-layout',
           playlistName: 'Playlist row layout',
@@ -107,25 +108,50 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
 
     if (userPlaylistSortOrder === 'custom') {
       test('keeps all thumbnail actions inside small thumbnails', async ({ app, page }) => {
-        await setWindowSize(app, page, { width: 1440, height: 812 })
         await goTo(page, 'userplaylists')
         await page.getByRole('link', { name: 'Playlist row layout', exact: true }).click()
         await setThumbnailSize(page, 60)
         const thumbnail = page.locator('.playlistItem .videoThumbnail').nth(1)
-        await thumbnail.hover()
-        const buttons = thumbnail.locator('.playlistIcons button')
-        await expect(buttons).toHaveCount(5)
-        await expect(async () => {
-          const bounds = await thumbnail.boundingBox()
-          for (const button of await buttons.all()) {
-            await expect(button).toBeVisible()
-            const action = await button.boundingBox()
-            expect(action.x).toBeGreaterThanOrEqual(bounds.x - 1)
-            expect(action.y).toBeGreaterThanOrEqual(bounds.y - 1)
-            expect(action.x + action.width).toBeLessThanOrEqual(bounds.x + bounds.width + 1)
-            expect(action.y + action.height).toBeLessThanOrEqual(bounds.y + bounds.height + 1)
+        const actions = thumbnail.locator('.playlistIcons')
+        const buttons = actions.locator('button')
+        for (const theme of ['dark', 'light']) {
+          await page.emulateMedia({ colorScheme: theme })
+          await expect(page.locator('body')).toHaveClass(new RegExp(`\\b${theme}\\b`))
+          for (const { width, height, mobile } of [
+            { width: 1440, height: 950, mobile: false },
+            { width: 1000, height: 850, mobile: false },
+            { width: 812, height: 375, mobile: true },
+            { width: 375, height: 812, mobile: true }
+          ]) {
+            await setWindowSize(app, page, { width, height })
+            if (mobile) {
+              await expect(actions).toHaveClass(/mobileThumbnailActions/)
+              await expect(actions).toBeHidden()
+              continue
+            }
+            await thumbnail.hover()
+            await expect(buttons).toHaveCount(5)
+            await expect(async () => {
+              const bounds = await thumbnail.boundingBox()
+              const duration = await thumbnail.locator('.videoDuration').boundingBox()
+              for (const button of await buttons.all()) {
+                await expect(button).toBeVisible()
+                const action = await button.boundingBox()
+                expect(action.width).toBeGreaterThanOrEqual(24)
+                expect(action.height).toBeGreaterThanOrEqual(24)
+                expect(action.x).toBeGreaterThanOrEqual(bounds.x - 1)
+                expect(action.y).toBeGreaterThanOrEqual(bounds.y - 1)
+                expect(action.x + action.width).toBeLessThanOrEqual(bounds.x + bounds.width + 1)
+                expect(action.y + action.height).toBeLessThanOrEqual(bounds.y + bounds.height + 1)
+                const separateFromDuration = action.x + action.width <= duration.x + 1 ||
+                  duration.x + duration.width <= action.x + 1 ||
+                  action.y + action.height <= duration.y + 1 ||
+                  duration.y + duration.height <= action.y + 1
+                expect(separateFromDuration).toBe(true)
+              }
+            }).toPass({ timeout: 15_000 })
           }
-        }).toPass({ timeout: 15_000 })
+        }
       })
     }
   })
