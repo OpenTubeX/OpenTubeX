@@ -39,7 +39,7 @@ function imageSize(dataUrl) {
  */
 async function hoverTabForPreview(page, index) {
   await page.locator(sel.tabs).nth(index).hover()
-  const preview = page.locator('.tabTooltip .tabTooltipPreview img')
+  const preview = page.locator('.tabTooltip .tabTooltipPreview img:not(.retryImagePlaceholder)')
   await expect(preview).toBeVisible()
   await expect.poll(async () => (await preview.getAttribute('src'))?.startsWith('data:image/jpeg'))
     .toBe(true)
