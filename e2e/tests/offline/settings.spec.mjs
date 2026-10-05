@@ -370,7 +370,7 @@ test.describe('settings search highlights', () => {
           await expect(target).toBeVisible()
           await expect(target).toHaveCSS('animation-name', /settings-search-highlight/)
           if (label === 'Playback Speed') {
-            await expect(target).toHaveAttribute('aria-label', label)
+            await expect(target).toHaveAccessibleName(label)
           } else {
             await expect(target).toContainText(label)
           }
@@ -379,13 +379,14 @@ test.describe('settings search highlights', () => {
     })
   }
 
-  test('does not draw a separate focus frame inside the search field', async ({ page }) => {
+  test('uses the shared search field focus indicator without a second outline', async ({ page }) => {
     await goTo(page, 'settings')
     const search = page.getByRole('searchbox', { name: 'Search settings' })
 
     await expect(search).toBeFocused()
     await expect(search).toHaveCSS('outline-style', 'none')
-    await expect(search).toHaveCSS('box-shadow', 'none')
+    await expect(search).toHaveCSS('box-shadow', /inset/)
+    await expect(search).toHaveCSS('border-style', 'solid')
   })
 
   test('finds and highlights specific subscription refresh interval selects', async ({ page }) => {
@@ -1271,8 +1272,12 @@ test.describe('settings', () => {
     await firstLookupFailed
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)))
     await expect(channels.locator('.name')).toHaveText(channelId)
-    await channels.getByRole('checkbox', { name: 'Show Added Items' }).uncheck()
-    await channels.getByRole('checkbox', { name: 'Show Added Items' }).check()
+    const showItems = channels.getByRole('checkbox', { name: 'Show Added Items' })
+    await expect(showItems).toBeChecked()
+    await channels.locator('.pure-checkbox label').click()
+    await expect(showItems).not.toBeChecked()
+    await channels.locator('.pure-checkbox label').click()
+    await expect(showItems).toBeChecked()
     await expect(channels.locator('.name')).toHaveText('Example Channel')
     expect(lookups).toBe(2)
   })
@@ -1302,8 +1307,12 @@ test.describe('settings', () => {
     const addOns = await goToSettingsSection(page, 'add-ons')
     const channels = addOns.locator('.ft-input-tags-component').filter({ hasText: 'Excluded Channels' })
     await expect.poll(() => lookups).toBe(1)
-    await channels.getByRole('checkbox', { name: 'Show Added Items' }).uncheck()
-    await channels.getByRole('checkbox', { name: 'Show Added Items' }).check()
+    const showItems = channels.getByRole('checkbox', { name: 'Show Added Items' })
+    await expect(showItems).toBeChecked()
+    await channels.locator('.pure-checkbox label').click()
+    await expect(showItems).not.toBeChecked()
+    await channels.locator('.pure-checkbox label').click()
+    await expect(showItems).toBeChecked()
     expect(lookups).toBe(1)
     finishFirstLookup()
     await expect(channels.locator('.name')).toHaveText('Example Channel')
@@ -4872,8 +4881,13 @@ test.describe('dark theme settings', () => {
 
     await expect(page.locator('.settingsWindowHeader'))
       .toHaveCSS('background-color', 'rgb(18, 18, 18)')
-    await expect(page.locator('.settingsSearch'))
-      .toHaveCSS('background-color', 'rgb(31, 31, 31)')
+    const search = page.getByRole('searchbox', { name: 'Search settings' })
+    await expect(search).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    await expect(search).toHaveCSS('border-style', 'solid')
+    await expect(search).toHaveCSS('border-width', '1px')
+    const borderColor = await search.evaluate(input => getComputedStyle(input).borderColor)
+    expect(borderColor).not.toBe('rgb(18, 18, 18)')
+    expect(borderColor).not.toBe('rgba(0, 0, 0, 0)')
   })
 })
 
