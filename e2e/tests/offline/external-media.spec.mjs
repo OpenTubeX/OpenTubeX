@@ -349,7 +349,8 @@ for (const withChat of [false, true]) {
     const player = externalMedia.locator('.externalMediaPlayer')
     const chaptersButton = player.locator('.shaka-controls-button-panel .ft-chapters-button')
     const panel = externalMedia.locator('.externalMediaSidebar .externalMediaChapters')
-    await chaptersButton.click({ force: true })
+    await player.hover()
+    await chaptersButton.click()
     await expect(panel).toBeVisible()
     for (const scale of [1, 1.25]) {
       await page.evaluate(value => window.ftElectron.setZoomFactor(value), scale)
@@ -395,13 +396,15 @@ for (const withChat of [false, true]) {
         }
       }
       await attachScreenshot(`External chapters in the sidebar at ${scale * 100}%${withChat ? ' with chat' : ''}`)
-      await player.locator('.theatre-button').click({ force: true })
+      await player.hover()
+      await player.locator('.theatre-button').click()
       await expect.poll(async () => {
         const playerBox = await player.boundingBox()
         const panelBox = await panel.boundingBox()
         return panelBox.y >= playerBox.y + playerBox.height - 2
       }).toBe(true)
-      await player.locator('.theatre-button').click({ force: true })
+      await player.hover()
+      await player.locator('.theatre-button').click()
     }
     await panel.getByRole('button', { name: /Main segment/ }).click()
     await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThanOrEqual(10)
@@ -429,7 +432,8 @@ test('external chapters use a phone sheet and keep valid scrolling after resizin
   await video.evaluate(element => element.pause())
   await setWindowSize(app, page, { width: 375, height: 850 })
   const player = page.locator(`${activeTab} .externalMediaPlayer`)
-  await player.locator('.shaka-overflow-menu-button').click({ force: true })
+  await player.hover()
+  await player.locator('.shaka-overflow-menu-button').click()
   await player.locator('.phonePlayerOptions[open] .ft-chapters-button').click()
   const sheet = page.locator('dialog[open]').filter({ has: page.locator('.externalMediaChapters') })
   await expect(sheet).toBeVisible()
@@ -474,7 +478,8 @@ test('external chapters use a phone sheet and keep valid scrolling after resizin
   await expect(sheet).toHaveCount(0)
   // Leaving phone mode closes the sheet, as on the YouTube watch page.
   await expect(page.locator('.externalMediaChapters')).toHaveCount(0)
-  await player.locator('.shaka-controls-button-panel .ft-chapters-button').click({ force: true })
+  await player.hover()
+  await player.locator('.shaka-controls-button-panel .ft-chapters-button').click()
   const panel = page.locator(`${activeTab} .externalMediaSidebar .externalMediaChapters`)
   await expect(panel).toBeVisible()
   await expect.poll(scrollMaximum).not.toBe(phoneMaximum)
