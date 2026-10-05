@@ -35,6 +35,12 @@ export function provideTabTooltip() {
           await Promise.all(tabs.map(tab => window.ftElectron.tabs.capturePreview(tab.id)))
         }).catch(() => {})
         await capturePromise
+        // A background capture of another tab can outlive these cache reads.
+        // Start the entry fade only after it stops hiding preview overlays.
+        while (document.documentElement.classList.contains('opentubex-tab-preview-capturing')) {
+          if (pending !== tooltip) return
+          await new Promise(resolve => requestAnimationFrame(resolve))
+        }
         if (pending !== tooltip) return
         active.value = tooltip
         pending = null
