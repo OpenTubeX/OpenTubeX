@@ -1518,11 +1518,11 @@ export function useScrollMiniPlayer({ container, mobileMiniBarOverlay, fullWindo
 
     if (!scrollMiniPlayerDetached.value && !(usesMobileMiniBar() && watchNavigation?.detached.value)) return
 
+    // Disposal awaits playback cleanup; keep the player hidden while it runs.
+    scrollMiniPlayerDismissed.value = true
     if (watchNavigation?.detached.value) {
       watchNavigation.dismiss()
-      return
     }
-    scrollMiniPlayerDismissed.value = true
   }
 
   async function scrollMiniTogglePlayPause(event) {

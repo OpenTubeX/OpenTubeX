@@ -557,10 +557,16 @@ for (const navigatedAway of [false, true]) {
     vm.runInNewContext(`${handler}\ndismissCrossTabMiniPlayer()`, {
       scrollMiniPlayerDetached: { value: true },
       scrollMiniPlayerDismissed: dismissed,
-      watchNavigation: { detached: { value: navigatedAway }, dismiss: () => { disposals++ } }
+      watchNavigation: {
+        detached: { value: navigatedAway },
+        dismiss: () => {
+          assert.equal(dismissed.value, true, 'Hide the player before asynchronous disposal can paint it again')
+          disposals++
+        }
+      }
     })
     assert.equal(disposals, navigatedAway ? 1 : 0)
-    assert.equal(dismissed.value, !navigatedAway)
+    assert.equal(dismissed.value, true)
   })
 }
 

@@ -16,6 +16,10 @@ for (const navigationOnly of [true, false]) {
   }, t => testMobileMiniPlayer(t, navigationOnly))
 }
 
+test('mobile mini-player dismissal animates swipes and the close button without reappearing', {
+  skip: !process.env.ANDROID_CDP_URL,
+}, t => testMobileMiniPlayer(t, false, { dismissalOnly: true }))
+
 test('mobile mini-player animates an opaque backdrop in both directions without background work', {
   skip: !process.env.ANDROID_CDP_URL,
 }, t => testMobileMiniPlayer(t, false, { animationOnly: true }))
@@ -67,7 +71,7 @@ test('mobile music artwork placeholder fills the thumbnail and restores its inli
   skip: !process.env.ANDROID_CDP_URL,
 }, t => testMobileMiniPlayer(t, false, { audioOnly: true, geometryOnly: true, artworkUnavailable: true }))
 
-async function testMobileMiniPlayer(t, navigationOnly, { animationOnly = false, audioOnly = false, posterOnly = false, geometryOnly = false, landscape = false, artworkUnavailable = false } = {}) {
+async function testMobileMiniPlayer(t, navigationOnly, { dismissalOnly = false, animationOnly = false, audioOnly = false, posterOnly = false, geometryOnly = false, landscape = false, artworkUnavailable = false } = {}) {
   const browser = await chromium.connectOverCDP(process.env.ANDROID_CDP_URL, { noDefaults: true })
   const context = browser.contexts()[0]
   const page = context.pages()[0]
@@ -80,13 +84,13 @@ async function testMobileMiniPlayer(t, navigationOnly, { animationOnly = false, 
   const originalRoute = await page.evaluate(() => location.hash)
   try {
     await page.locator('.profileTrigger').waitFor()
-    settings = await page.evaluate(() => {
+    settings = await page.evaluate(dismissalOnly => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const values = {
         VideoPlaybackEngine: 'built-in', AutoplayVideos: false, PlayNextVideo: false,
         UseSponsorBlock: false, UseReturnYouTubeDislikes: false,
         KeepPlayingOnNavigation: true, ScrollMiniPlayerEnabled: true, CapacitorLayoutMode: 'phone',
-        UiScale: 100, ReducedMotion: 'off', AnimationSpeed: 100, EnableMobileFullscreenSwipe: false, RotateFullscreenToLandscape: false,
+        UiScale: dismissalOnly ? 125 : 100, ReducedMotion: 'off', AnimationSpeed: 100, EnableMobileFullscreenSwipe: false, RotateFullscreenToLandscape: false,
         EnterFullscreenOnDisplayRotate: false, PlayingInterfaceHideDelay: 5,
         MobileLeftSwipeAction: 'disabled', MobileRightSwipeAction: 'disabled',
         AmbientMode: true, AlwaysShowNavigationBar: false,
@@ -103,7 +107,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { animationOnly = false, 
       document.head.append(style)
       location.hash = '#/watch/jNQXAC9IVRw'
       return saved
-    })
+    }, dismissalOnly)
     const media = (await readFile(new URL(posterOnly
       ? '../../e2e/fixtures/media/aspect-ratio-demo.webm'
       : '../../e2e/fixtures/media/demo.webm', import.meta.url))).toString('base64')
@@ -117,7 +121,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { animationOnly = false, 
       await expect.poll(async () => {
         const handle = await page.evaluateHandle(findWatchComponent)
         try {
-          return await handle.evaluate((component, previous) => !!component && component.proxy.onMountedRun &&
+          return await handle.evaluate((component, previous) => !!component && component.proxy.onMountedRun && !component.proxy.isLoading &&
             component.proxy.preparingVideoLoadGeneration === null && component.proxy.isCurrentlyPresented() &&
             (!previous || component.uid !== previous.uid || component.proxy.videoLoadGeneration > previous.generation), previous)
         }
@@ -536,7 +540,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { animationOnly = false, 
       await stopTrackingMiniPlayerWork(page)
     }
     if (animationOnly) return
-    for (const scale of [100, 125]) {
+    for (const scale of dismissalOnly ? [] : [100, 125]) {
       await page.evaluate(scale => {
         const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
         store.commit('setUiScale', scale)
@@ -631,6 +635,36 @@ async function testMobileMiniPlayer(t, navigationOnly, { animationOnly = false, 
       await store.dispatch('updateReducedMotion', 'off')
       await store.dispatch('updateAnimationSpeed', 25)
     })
+    // The app's explicit Off preference must override the OS motion setting.
+    if (dismissalOnly) await page.emulateMedia({ reducedMotion: 'reduce' })
+    const trackDismissal = async () => {
+      // Make the asynchronous teardown long enough to expose a one-frame
+      // return to the dock after the swipe transform is cleared.
+      await watch.evaluate(component => {
+        const original = component.proxy.handleRouteChange
+        component.proxy.handleRouteChange = async (...args) => {
+          await new Promise(resolve => setTimeout(resolve, 200))
+          return original(...args)
+        }
+      })
+      await player.evaluate(element => {
+        const initialTop = element.getBoundingClientRect().top
+        let furthestTop = initialTop
+        const result = window.__miniDismissFrames = { movedDown: false, reappeared: false }
+        const sample = () => {
+          if (!element.isConnected) return
+          const top = element.getBoundingClientRect().top
+          if (Number.parseFloat(getComputedStyle(element).opacity) > 0) {
+            if (top > initialTop + 1) result.movedDown = true
+            if (top < furthestTop - 1) result.reappeared = true
+            furthestTop = Math.max(furthestTop, top)
+          }
+          requestAnimationFrame(sample)
+        }
+        requestAnimationFrame(sample)
+      })
+    }
+    await trackDismissal()
     // Cover closing by a downward swipe after verifying the close control.
     const returnBox = await player.locator('.mobileMiniBarReturn').boundingBox()
     const down = { x: returnBox.x + returnBox.width / 2, y: returnBox.y + 8 }
@@ -667,6 +701,9 @@ async function testMobileMiniPlayer(t, navigationOnly, { animationOnly = false, 
     assert.deepEqual(await page.evaluate(() => window.__miniDismissRegression), {
       transition: { duration: 140, rate: 0.25 }, controlsDisabled: true,
     })
+    await expect(player).toHaveCount(0)
+    await expect.poll(() => watch.evaluate(component => component.isUnmounted)).toBe(true)
+    assert.deepEqual(await page.evaluate(() => window.__miniDismissFrames), { movedDown: true, reappeared: false })
     await expect(page).toHaveURL(/#\/subscriptions/)
     assert.equal(await originalVideo.evaluate(video => video.paused && !video.isConnected), true)
     await originalVideo.dispose()
@@ -674,10 +711,14 @@ async function testMobileMiniPlayer(t, navigationOnly, { animationOnly = false, 
     await loadTestVideo()
     await page.evaluate(() => { location.hash = '#/subscriptions' })
     await expect(close).toBeEnabled()
+    await trackDismissal()
     const closeBox = await close.boundingBox()
     await touch('touchStart', { x: closeBox.x + closeBox.width / 2, y: closeBox.y + closeBox.height / 2 })
     await touch('touchEnd')
     await expect(page.locator('.mobileMiniBarOverlay')).toHaveCount(0)
+    await expect(player).toHaveCount(0)
+    await expect.poll(() => watch.evaluate(component => component.isUnmounted)).toBe(true)
+    assert.deepEqual(await page.evaluate(() => window.__miniDismissFrames), { movedDown: true, reappeared: false })
     await expect(page).toHaveURL(/#\/subscriptions/)
   } finally {
     if (landscape) {
@@ -700,11 +741,13 @@ async function testMobileMiniPlayer(t, navigationOnly, { animationOnly = false, 
       window.removeEventListener('pointerup', window.__miniDismissPointerUp, true)
       delete window.__miniDismissPointerUp
       delete window.__miniDismissRegression
+      delete window.__miniDismissFrames
       document.querySelector('#mini-player-test-style')?.remove()
       document.querySelector('#mini-player-test-spacer')?.remove()
     }, { settings, originalRoute })
     await watch?.dispose()
     await session.detach()
+    if (dismissalOnly) await page.emulateMedia({ reducedMotion: null })
     await browser.close()
   }
 }
