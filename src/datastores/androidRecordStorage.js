@@ -1,7 +1,8 @@
 // NeDB keeps its query/index implementation; only its Android persistence
 // adapter changes. Store each serialized document separately, including dates
 // in NeDB's own format, rather than copying an ever-growing append log.
-export function createAndroidRecordStorage(factory = indexedDB) {
+export function createAndroidRecordStorage(factory = indexedDB, native = null) {
+  if (native) return createNativeRecordStorage(native, filename => readShippedRecords(factory, filename))
   const databases = new Map()
 
   function transaction(database, stores, mode, operation) {
@@ -132,6 +133,87 @@ export function createAndroidRecordStorage(factory = indexedDB) {
     },
     // Records are already compacted on every update. Startup compaction must
     // not rewrite them or overwrite a concurrent transaction's newer records.
+    async crashSafeWriteFileLinesAsync() {},
+    async existsAsync() { return true },
+    async ensureDatafileIntegrityAsync() {},
+    async ensureParentDirectoryExistsAsync() {},
+  }
+}
+
+async function readShippedRecords(factory, filename) {
+  // Read migration sources without creating an empty IndexedDB or writing an
+  // import marker: WebView may already be refusing writes under storage pressure.
+  const names = new Set((await factory.databases()).map(database => database.name))
+  async function read(name, operation) {
+    const database = await new Promise((resolve, reject) => {
+      const request = factory.open(name)
+      request.onsuccess = () => resolve(request.result)
+      request.onerror = () => reject(request.error)
+    })
+    try { return await operation(database) } finally { database.close() }
+  }
+  function get(database, store, key) {
+    return new Promise((resolve, reject) => {
+      const tx = database.transaction(store)
+      const request = key == null ? tx.objectStore(store).getAll() : tx.objectStore(store).get(key)
+      tx.oncomplete = () => resolve(request.result)
+      tx.onabort = () => reject(tx.error)
+    })
+  }
+  const name = `opentubex-records-${filename}`
+  if (names.has(name)) {
+    const contents = await read(name, async database => {
+      if (!database.objectStoreNames.contains('metadata') || !database.objectStoreNames.contains('records')) return null
+      if (!await get(database, 'metadata', 'imported')) return null
+      return (await get(database, 'records')).join('\n')
+    })
+    if (contents !== null) return contents
+  }
+  if (!names.has('NeDB')) return ''
+  const raw = await read('NeDB', database => database.objectStoreNames.contains('nedbdata')
+    ? get(database, 'nedbdata', filename)
+    : '')
+  return (raw || '').split('\n').filter(line => {
+    try {
+      const record = JSON.parse(line)
+      return record !== null && typeof record === 'object' && !Array.isArray(record)
+    } catch { return false }
+  }).join('\n')
+}
+
+function createNativeRecordStorage(native, readLegacy) {
+  const initialized = new Map()
+  async function initialize(filename) {
+    if (!initialized.has(filename)) {
+      initialized.set(filename, (async () => {
+        const result = await native.readRecords({ filename, metadataOnly: true })
+        if (!result.initialized) {
+          const contents = await readLegacy(filename)
+          // Native records and the import marker commit together. Keep the
+          // shipped IndexedDB copy until this succeeds; never fall back to
+          // empty WebView storage when a native disk write fails.
+          await native.importRecords({ filename, contents })
+        }
+      })().catch(error => {
+        initialized.delete(filename)
+        throw error
+      }))
+    }
+    await initialized.get(filename)
+  }
+  return {
+    async readFileAsync(filename) {
+      await initialize(filename)
+      return (await native.readRecords({ filename })).contents
+    },
+    async appendFileAsync(filename, contents) {
+      await initialize(filename)
+      await native.appendRecords({ filename, contents })
+    },
+    async unlinkAsync(filename) {
+      await initialize(filename)
+      await native.clearRecords({ filename })
+    },
     async crashSafeWriteFileLinesAsync() {},
     async existsAsync() { return true },
     async ensureDatafileIntegrityAsync() {},

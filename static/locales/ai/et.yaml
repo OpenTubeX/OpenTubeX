@@ -1952,3 +1952,8 @@ Form Inputs:
 
 Search Filters:
   Cookie Search Failed: "Otsing seadistatud küpsistega ebaõnnestus."
+
+Storage Startup Error:
+  Title: "Rakenduse andmeid ei saanud laadida"
+  Message: "Vabasta seadmes salvestusruumi ja proovi uuesti. Sünkroonimine on peatatud, kuni andmed on laaditud."
+  Retry: "Proovi uuesti"

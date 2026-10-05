@@ -2448,3 +2448,8 @@ Form Inputs:
   Download Arguments Hint: Pasirinktiniai argumentai šiam atsisiuntimui
   Generated ID Hint: Palikite tuščią, kad būtų sukurtas ID
   Default Value: "Numatyta: {value}"
+
+Storage Startup Error:
+  Title: "Nepavyko įkelti programėlės duomenų"
+  Message: "Atlaisvinkite vietos įrenginyje ir bandykite dar kartą. Sinchronizavimas pristabdytas, kol bus įkelti jūsų duomenys."
+  Retry: "Bandyti dar kartą"

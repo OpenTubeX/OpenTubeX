@@ -1958,3 +1958,8 @@ Form Inputs:
 
 Search Filters:
   Cookie Search Failed: "Cʼhwitet eo ar cʼhlask gant an toupinoù kefluniet."
+
+Storage Startup Error:
+  Title: "N'eus ket bet gallet kargañ roadennoù an arload"
+  Message: "Dieubit plas war an trevnad ha klaskit en-dro. Ehanet eo ar goubredañ betek ma vo karget ho roadennoù."
+  Retry: "Klask en-dro"

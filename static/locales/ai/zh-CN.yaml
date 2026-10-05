@@ -1949,3 +1949,8 @@ Form Inputs:
 
 Search Filters:
   Cookie Search Failed: "使用已配置的 Cookie 搜索失败。"
+
+Storage Startup Error:
+  Title: "无法加载应用数据"
+  Message: "请释放设备存储空间后重试。在数据加载完成前，同步将暂停。"
+  Retry: "重试"

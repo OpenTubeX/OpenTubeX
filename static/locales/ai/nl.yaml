@@ -2009,3 +2009,8 @@ Form Inputs:
 
 Search Filters:
   Cookie Search Failed: "Zoeken met de ingestelde cookies is mislukt."
+
+Storage Startup Error:
+  Title: "Appgegevens konden niet worden geladen"
+  Message: "Maak opslagruimte vrij op het apparaat en probeer het opnieuw. Synchronisatie is gepauzeerd totdat je gegevens zijn geladen."
+  Retry: "Opnieuw proberen"

@@ -1950,3 +1950,8 @@ Form Inputs:
 
 Search Filters:
   Cookie Search Failed: "Yapılandırılan çerezlerle arama başarısız oldu."
+
+Storage Startup Error:
+  Title: "Uygulama verileri yüklenemedi"
+  Message: "Cihazda depolama alanı açıp tekrar deneyin. Verileriniz yüklenene kadar eşitleme duraklatılır."
+  Retry: "Tekrar dene"

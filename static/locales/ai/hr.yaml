@@ -1976,3 +1976,8 @@ Form Inputs:
 
 Search Filters:
   Cookie Search Failed: "Pretraživanje s konfiguriranim kolačićima nije uspjelo."
+
+Storage Startup Error:
+  Title: "Nije moguće učitati podatke aplikacije"
+  Message: "Oslobodite prostor na uređaju i pokušajte ponovno. Sinkronizacija je pauzirana dok se vaši podaci ne učitaju."
+  Retry: "Pokušaj ponovno"

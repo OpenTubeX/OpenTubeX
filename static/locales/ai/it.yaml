@@ -1949,3 +1949,8 @@ Form Inputs:
 
 Search Filters:
   Cookie Search Failed: "La ricerca con i cookie configurati non è riuscita."
+
+Storage Startup Error:
+  Title: "Impossibile caricare i dati dell’app"
+  Message: "Libera spazio sul dispositivo e riprova. La sincronizzazione è sospesa finché i dati non vengono caricati."
+  Retry: "Riprova"

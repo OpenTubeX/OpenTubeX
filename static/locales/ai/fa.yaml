@@ -2035,3 +2035,8 @@ Form Inputs:
   Download Arguments Hint: آرگومان‌های اختیاری برای این بارگیری
   Generated ID Hint: برای ایجاد شناسه خالی بگذارید
   Default Value: "پیش‌فرض: {value}"
+
+Storage Startup Error:
+  Title: "داده‌های برنامه بارگیری نشد"
+  Message: "فضای ذخیره‌سازی دستگاه را آزاد کنید و دوباره تلاش کنید. همگام‌سازی تا بارگیری داده‌های شما متوقف است."
+  Retry: "تلاش دوباره"

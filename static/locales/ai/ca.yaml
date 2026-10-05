@@ -2594,3 +2594,8 @@ Form Inputs:
   Download Arguments Hint: Arguments opcionals per a aquesta baixada
   Generated ID Hint: Deixeu-ho buit per generar un ID
   Default Value: "Per defecte: {value}"
+
+Storage Startup Error:
+  Title: "No s'han pogut carregar les dades de l'aplicació"
+  Message: "Allibereu espai al dispositiu i torneu-ho a provar. La sincronització està en pausa fins que es carreguin les dades."
+  Retry: "Torna-ho a provar"

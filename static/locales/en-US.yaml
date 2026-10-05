@@ -3166,3 +3166,8 @@ Form Inputs:
   Download Arguments Hint: Optional arguments for this download
   Generated ID Hint: Leave blank to generate an ID
   Default Value: "Default: {value}"
+
+Storage Startup Error:
+  Title: "Could not load app data"
+  Message: "Free up device storage and try again. Sync is paused until your data is loaded."
+  Retry: "Retry"

@@ -2035,3 +2035,8 @@ Form Inputs:
 
 Search Filters:
   Cookie Search Failed: "Søgning med de konfigurerede cookies mislykkedes."
+
+Storage Startup Error:
+  Title: "Appdata kunne ikke indlæses"
+  Message: "Frigør lagerplads på enheden, og prøv igen. Synkronisering er sat på pause, indtil dine data er indlæst."
+  Retry: "Prøv igen"

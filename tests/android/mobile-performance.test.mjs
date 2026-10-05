@@ -199,3 +199,104 @@ test('a failed import retains legacy data and retries after a storage failure', 
     assert.deepEqual(JSON.parse(result.repaired), { _id: 'retained', value: 1 })
   } finally { await context.close() }
 })
+
+test('Android user records survive WebView storage eviction and are not reimported after deletion', async () => {
+  const { page, context } = await pageWithModule('../../src/datastores/androidRecordStorage.js')
+  try {
+    const result = await page.evaluate(async () => {
+      // The native store is outside WebView's quota manager. Native SQLite
+      // transactions are covered by MobileStorageTest on the Android emulator.
+      const files = new Map()
+      const native = {
+        async readRecords({ filename }) {
+          return { initialized: files.has(filename), contents: files.get(filename) ?? '' }
+        },
+        async importRecords({ filename, contents }) {
+          if (!files.has(filename)) files.set(filename, contents)
+        },
+        async clearRecords({ filename }) { files.set(filename, '') },
+      }
+      const shipped = window.module.createAndroidRecordStorage()
+      const record = '{"_id":"watched","videoId":"retained-video","watchProgress":42}'
+      await shipped.appendFileAsync('history.db', record)
+      localStorage.setItem('opentubex-capacitor-tabs', '[{"id":"existing-tab"}]')
+      const originalPut = IDBObjectStore.prototype.put
+      IDBObjectStore.prototype.put = () => { throw new DOMException('Disk under storage pressure', 'QuotaExceededError') }
+      const storage = window.module.createAndroidRecordStorage(indexedDB, native)
+      const imported = await storage.readFileAsync('history.db')
+      IDBObjectStore.prototype.put = originalPut
+      for (const { name } of await indexedDB.databases()) {
+        await new Promise((resolve, reject) => {
+          const request = indexedDB.deleteDatabase(name)
+          request.onsuccess = resolve
+          request.onerror = () => reject(request.error)
+        })
+      }
+      const restarted = window.module.createAndroidRecordStorage(indexedDB, native)
+      const retained = await restarted.readFileAsync('history.db')
+      await restarted.unlinkAsync('history.db')
+      await window.module.createAndroidRecordStorage().appendFileAsync('history.db', record)
+      const deleted = await window.module.createAndroidRecordStorage(indexedDB, native).readFileAsync('history.db')
+      return { imported, retained, deleted, tabs: localStorage.getItem('opentubex-capacitor-tabs') }
+    })
+    assert.equal(result.retained, result.imported, 'History must survive eviction even when tabs remain')
+    assert.equal(JSON.parse(result.retained).watchProgress, 42)
+    assert.equal(result.deleted, '', 'Explicit deletion must not resurrect old IndexedDB records')
+    assert.equal(JSON.parse(result.tabs)[0].id, 'existing-tab')
+  } finally { await context.close() }
+})
+
+test('a failed native migration rejects and retries without discarding shipped records', async () => {
+  const { page, context } = await pageWithModule('../../src/datastores/androidRecordStorage.js')
+  try {
+    const result = await page.evaluate(async () => {
+      const record = '{"_id":"retained","value":42}'
+      await window.module.createAndroidRecordStorage().appendFileAsync('settings.db', record)
+      let contents
+      let attempts = 0
+      const native = {
+        async readRecords() { return { initialized: contents !== undefined, contents: contents ?? '' } },
+        async importRecords(options) {
+          if (++attempts === 1) throw new Error('Native disk full')
+          contents = options.contents
+        },
+      }
+      const storage = window.module.createAndroidRecordStorage(indexedDB, native)
+      let rejected = false
+      try { await storage.readFileAsync('settings.db') } catch { rejected = true }
+      const shipped = await window.module.createAndroidRecordStorage().readFileAsync('settings.db')
+      const retried = await storage.readFileAsync('settings.db')
+      return { rejected, shipped, retried, attempts }
+    })
+    assert.equal(result.rejected, true)
+    assert.equal(result.retried, result.shipped)
+    assert.equal(JSON.parse(result.retried).value, 42)
+    assert.equal(result.attempts, 2)
+  } finally { await context.close() }
+})
+
+test('native migration skips corrupt and non-document legacy lines', async () => {
+  const { page, context } = await pageWithModule('../../src/datastores/androidRecordStorage.js')
+  try {
+    const result = await page.evaluate(async () => {
+      const legacy = await new Promise(resolve => {
+        const request = indexedDB.open('NeDB', 3)
+        request.onupgradeneeded = () => request.result.createObjectStore('nedbdata')
+        request.onsuccess = () => resolve(request.result)
+      })
+      await new Promise(resolve => {
+        const tx = legacy.transaction('nedbdata', 'readwrite')
+        tx.objectStore('nedbdata').put('null\n42\n[]\n"stray text"\nbroken\n{"_id":"retained","value":42}', 'history.db')
+        tx.oncomplete = resolve
+      })
+      legacy.close()
+      let imported
+      const native = {
+        async readRecords() { return { initialized: imported !== undefined, contents: imported } },
+        async importRecords({ contents }) { imported = contents },
+      }
+      return window.module.createAndroidRecordStorage(indexedDB, native).readFileAsync('history.db')
+    })
+    assert.deepEqual(result.split('\n').map(JSON.parse), [{ _id: 'retained', value: 42 }])
+  } finally { await context.close() }
+})

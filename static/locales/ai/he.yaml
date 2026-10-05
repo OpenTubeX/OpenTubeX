@@ -2000,3 +2000,8 @@ Form Inputs:
 
 Search Filters:
   Cookie Search Failed: "החיפוש באמצעות קובצי העוגיות שהוגדרו נכשל."
+
+Storage Startup Error:
+  Title: "לא ניתן לטעון את נתוני האפליקציה"
+  Message: "יש לפנות שטח אחסון במכשיר ולנסות שוב. הסנכרון מושהה עד לטעינת הנתונים שלך."
+  Retry: "ניסיון חוזר"

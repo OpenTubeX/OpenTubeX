@@ -2000,3 +2000,8 @@ Form Inputs:
 
 Search Filters:
   Cookie Search Failed: "Căutarea cu modulele cookie configurate a eșuat."
+
+Storage Startup Error:
+  Title: "Datele aplicației nu au putut fi încărcate"
+  Message: "Eliberează spațiu pe dispozitiv și încearcă din nou. Sincronizarea este suspendată până la încărcarea datelor."
+  Retry: "Încearcă din nou"
