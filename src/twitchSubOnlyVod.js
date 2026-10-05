@@ -1,4 +1,5 @@
 import { TWITCH_CHAT_CLIENT_ID } from './twitchChatReplayRequest.js'
+import { buildYtDlpStoryboardVtt } from './main/ytDlpStoryboard.js'
 
 const QUALITIES = [
   ['chunked', null, 60],
@@ -133,6 +134,36 @@ async function probeQuality(url, fetcher) {
   return null
 }
 
+async function fetchStoryboard(preview, duration, fetcher) {
+  if (!Number.isFinite(duration) || duration <= 0) return null
+  try {
+    const response = await fetcher(preview.href, { signal: AbortSignal.timeout(10_000) })
+    if (!response.ok) return null
+    const metadata = await response.json()
+    if (!Array.isArray(metadata)) return null
+    const formats = metadata.flatMap(spec => {
+      if (!spec || ![spec.width, spec.height, spec.rows, spec.cols, spec.count].every(value => Number.isInteger(value) && value > 0) ||
+        !Array.isArray(spec.images) || spec.images.length === 0 ||
+        !spec.images.every(image => typeof image === 'string' && image !== '')) return []
+      const urls = spec.images.map(image => new URL(image, preview))
+      if (urls.some(url => url.origin !== preview.origin || url.username || url.password)) return []
+      return [{
+        protocol: 'mhtml',
+        width: spec.width,
+        height: spec.height,
+        rows: spec.rows,
+        columns: spec.cols,
+        fps: spec.count / duration,
+        fragments: urls.map(url => ({ url: url.href }))
+      }]
+    })
+    return buildYtDlpStoryboardVtt(formats, duration)
+  } catch {
+    // Thumbnails are optional; missing previews must not prevent playback.
+    return null
+  }
+}
+
 export async function fetchTwitchSubOnlyVod(videoId, fetcher) {
   if (!/^\d{1,20}$/.test(videoId)) return null
   const response = await fetcher('https://gql.twitch.tv/gql', {
@@ -146,6 +177,7 @@ export async function fetchTwitchSubOnlyVod(videoId, fetcher) {
   if (!video?.seekPreviewsURL) throw new Error('Twitch VOD preview is unavailable')
   const preview = new URL(video.seekPreviewsURL)
   const path = getVodPath(video, videoId)
+  const storyboard = fetchStoryboard(preview, video.lengthSeconds, fetcher)
   const variants = await Promise.all(QUALITIES.map(async ([quality, resolution, frameRate]) => {
     const url = new URL(path(quality), preview).href
     const codec = await probeQuality(url, fetcher)
@@ -163,6 +195,7 @@ export async function fetchTwitchSubOnlyVod(videoId, fetcher) {
 
   return {
     playlist: `#EXTM3U\n${available.join('\n')}\n`,
+    storyboardVtt: await storyboard,
     video: {
       title: video.title ?? null,
       description: video.description ?? null,

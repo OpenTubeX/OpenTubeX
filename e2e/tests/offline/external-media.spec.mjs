@@ -5,7 +5,7 @@ import path from 'node:path'
 import { expect, goTo, repoRoot, sel, setWindowSize, test } from '../../helpers/app.mjs'
 import { activeTab, waitForPlayback } from '../../helpers/player.mjs'
 import { DEMO_MEDIA_PATH, DEMO_MEDIA_URL, routeDemoMedia } from '../../helpers/media.mjs'
-import { fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
+import { expectImagesLoaded, fulfillVisualFixture } from '../../helpers/visual-fixtures.mjs'
 import { mapExternalPlaybackMetadata } from '../../../src/ytDlpMetadata.js'
 
 async function prepareTwitchYtDlp(app, page, mediaUrl, live, description = '', chapters = []) {
@@ -396,6 +396,7 @@ test('plays a Twitch VOD when yt-dlp reports subscriber-only access', async ({ a
   const variantUrl = 'https://vod.example.test/720p60/index-dvr.m3u8'
   const initUrl = 'https://vod.example.test/720p60/init.mp4'
   const mutedUrl = 'https://vod.example.test/720p60/segment-muted.mp4'
+  const storyboardUrl = 'https://vod.example.test/storyboards/0.jpg'
   const fixture = await readFile(path.join(repoRoot, 'e2e/fixtures/media/hls-1080.mp4'))
   const fragmentStart = fixture.indexOf(Buffer.from('moof')) - 4
   expect(fragmentStart).toBeGreaterThan(0)
@@ -404,10 +405,12 @@ test('plays a Twitch VOD when yt-dlp reports subscriber-only access', async ({ a
     ipcMain.removeHandler('twitch-sub-only-vod')
     ipcMain.handle('twitch-sub-only-vod', (_event, id) => ({
       playlist: '#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=5040000,CODECS="avc1.64001f",RESOLUTION=1920x1080,FRAME-RATE=30\nhttps://vod.example.test/720p60/index-dvr.m3u8\n',
+      storyboardVtt: 'WEBVTT\n\n00:00:00.000 --> 00:00:02.000\nhttps://vod.example.test/storyboards/0.jpg#xywh=0,0,320,180\n\n',
       video: { title: 'Subscriber archive', duration: 2, owner: { login: 'example' } },
       id
     }))
   })
+  await page.route(storyboardUrl, route => fulfillVisualFixture(route, 'video-thumbnail'))
   await page.route(variantUrl, route => route.fulfill({
     contentType: 'application/vnd.apple.mpegurl',
     headers: { 'Access-Control-Allow-Origin': '*' },
@@ -450,6 +453,13 @@ https://vod.example.test/720p60/segment-unmuted.mp4
     if (await diagnostic.count()) return await diagnostic.textContent()
     return await page.locator(`${activeTab} .externalMediaPlayer video`).evaluate(video => video.currentTime > 0.2 ? 'playing' : 'pending')
   }, { timeout: 10_000 }).toBe('playing')
+  const player = page.locator(`${activeTab} .externalMediaPlayer`)
+  await player.locator('video').evaluate(video => video.pause())
+  await player.hover()
+  await player.locator('.shaka-seek-bar-container').hover({ position: { x: 120, y: 4 } })
+  await expect(player.locator('.shaka-player-ui-thumbnail-image-container')).toBeVisible()
+  await expectImagesLoaded(player.locator('.shaka-player-ui-thumbnail-image'))
+  await expect(player.locator('.shaka-player-ui-thumbnail-image')).toHaveAttribute('src', storyboardUrl)
 })
 
 test('Twitch livestream omits playback speed from player options', async ({ app, page }) => {
