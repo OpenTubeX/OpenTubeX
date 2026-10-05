@@ -136,6 +136,7 @@ import {
   getConfiguredKeyboardShortcuts,
   isKeyboardShortcutEditable,
 } from '../../../constants'
+import { getKeyboardShortcutLabelMappings } from '../../helpers/keyboardShortcutLabels'
 import { getLocalizedShortcut } from '../../helpers/utils'
 import {
   keyboardShortcutFromEvent,
@@ -324,88 +325,9 @@ const hasModifiedKeyboardShortcuts = computed(() => shortcutColumns.value.some(c
   ))
 ))
 
-const localizedShortcutNameToShortcutsMappings = computed(() => {
-  return [
-    [t('CommandPalette.Open'), ['OPEN_COMMAND_PALETTE']],
-    [t('KeyboardShortcutPrompt.Show Keyboard Shortcuts'), ['SHOW_SHORTCUTS']],
-    [t('KeyboardShortcutPrompt.History Backward'), [
-      'HISTORY_BACKWARD',
-      'HISTORY_BACKWARD_ALT_MAC',
-    ]],
-    [t('KeyboardShortcutPrompt.History Forward'), [
-      'HISTORY_FORWARD',
-      'HISTORY_FORWARD_ALT_MAC',
-    ]],
-    [t('KeyboardShortcutPrompt.Navigate to Settings'), ['NAVIGATE_TO_SETTINGS']],
-    [t('Downloads.Open Downloads'), ['NAVIGATE_TO_DOWNLOADS']],
-    [t('KeyboardShortcutPrompt.Navigate to History'), ['NAVIGATE_TO_HISTORY', 'NAVIGATE_TO_HISTORY_MAC']],
-    [t('KeyboardShortcutPrompt.New Window'), ['NEW_WINDOW']],
-    [t('KeyboardShortcutPrompt.Reopen Closed Window'), ['RESTORE_CLOSED_WINDOW']],
-    [t('KeyboardShortcutPrompt.New Tab'), ['NEW_TAB']],
-    [t('KeyboardShortcutPrompt.Close Tab'), ['CLOSE_TAB']],
-    [t('KeyboardShortcutPrompt.Reload Tab'), ['RELOAD_TAB', 'RELOAD_TAB_ALT']],
-    [t('KeyboardShortcutPrompt.Reopen Closed Tab'), ['RESTORE_CLOSED_TAB']],
-    [t('KeyboardShortcutPrompt.Next Tab'), ['NEXT_TAB']],
-    [t('KeyboardShortcutPrompt.Previous Tab'), ['PREV_TAB']],
-    [t('KeyboardShortcutPrompt.Switch to Tab'), ['SWITCH_TO_TAB']],
-    [t('Tab Organizer.Title'), ['OPEN_TAB_ORGANIZER']],
-    [t('KeyboardShortcutPrompt.Toggle Tab Orientation'), ['TOGGLE_TAB_ORIENTATION']],
-    [t('KeyboardShortcutPrompt.Minimize Window'), ['MINIMIZE_WINDOW']],
-    [t('KeyboardShortcutPrompt.Close Window'), ['CLOSE_WINDOW']],
-    [t('KeyboardShortcutPrompt.Toggle Developer Tools'), ['TOGGLE_DEVTOOLS']],
-    [t('KeyboardShortcutPrompt.Reset Zoom'), ['RESET_ZOOM']],
-    [t('KeyboardShortcutPrompt.Zoom In'), ['ZOOM_IN']],
-    [t('KeyboardShortcutPrompt.Zoom Out'), ['ZOOM_OUT']],
-    [t('KeyboardShortcutPrompt.Focus Search'), [
-      'FOCUS_SEARCH',
-      'FOCUS_SEARCH_ALT',
-      'FOCUS_SEARCH_ALT_MAC',
-      'FOCUS_SEARCH_ALT_SLASH',
-    ]],
-    [t('KeyboardShortcutPrompt.Search in New Window'), ['SEARCH_IN_NEW_WINDOW']],
-    [t('KeyboardShortcutPrompt.Find in Page'), ['FIND_IN_PAGE']],
-    [t('KeyboardShortcutPrompt.Find Next Match'), ['FIND_NEXT', 'FIND_NEXT_ALT', 'FIND_NEXT_ALT_ENTER']],
-    [t('KeyboardShortcutPrompt.Find Previous Match'), ['FIND_PREVIOUS', 'FIND_PREVIOUS_ALT', 'FIND_PREVIOUS_ALT_ENTER']],
-    [t('Share.Copy Link'), ['COPY_CURRENT_URL']],
-
-    [t('KeyboardShortcutPrompt.Refresh'), ['REFRESH']],
-
-    [t('KeyboardShortcutPrompt.Captions'), ['CAPTIONS']],
-    [t('KeyboardShortcutPrompt.Theatre Mode'), ['THEATRE_MODE']],
-    [t('KeyboardShortcutPrompt.Fullscreen'), ['FULLSCREEN']],
-    ...(!process.env.IS_CAPACITOR ? [[t('KeyboardShortcutPrompt.Full Window'), ['FULLWINDOW']]] : []),
-    [t('KeyboardShortcutPrompt.Picture in Picture'), ['PICTURE_IN_PICTURE']],
-    [t('KeyboardShortcutPrompt.Mute'), ['MUTE']],
-    [t('KeyboardShortcutPrompt.Volume Up'), ['VOLUME_UP']],
-    [t('KeyboardShortcutPrompt.Volume Down'), ['VOLUME_DOWN']],
-    [t('KeyboardShortcutPrompt.Take Screenshot'), ['TAKE_SCREENSHOT']],
-    [t('KeyboardShortcutPrompt.Video Zoom In'), ['VIDEO_ZOOM_IN']],
-    [t('KeyboardShortcutPrompt.Video Zoom Out'), ['VIDEO_ZOOM_OUT']],
-    [t('KeyboardShortcutPrompt.Stats'), ['STATS']],
-
-    [t('KeyboardShortcutPrompt.Play'), ['PLAY']],
-    [t('KeyboardShortcutPrompt.Large Rewind'), ['LARGE_REWIND']],
-    [t('KeyboardShortcutPrompt.Large Fast Forward'), ['LARGE_FAST_FORWARD']],
-    [t('KeyboardShortcutPrompt.Small Rewind'), ['SMALL_REWIND']],
-    [t('KeyboardShortcutPrompt.Small Fast Forward'), ['SMALL_FAST_FORWARD']],
-    [t('KeyboardShortcutPrompt.Decrease Video Speed'), ['DECREASE_VIDEO_SPEED', 'DECREASE_VIDEO_SPEED_ALT']],
-    [t('KeyboardShortcutPrompt.Increase Video Speed'), ['INCREASE_VIDEO_SPEED', 'INCREASE_VIDEO_SPEED_ALT']],
-    [t('KeyboardShortcutPrompt.Toggle Normal Playback Speed'), ['TOGGLE_NORMAL_PLAYBACK_SPEED']],
-    [t('KeyboardShortcutPrompt.Toggle Skip Silence'), ['TOGGLE_SKIP_SILENCE']],
-    [t('KeyboardShortcutPrompt.Set A-B Repeat Point A'), ['SET_AB_REPEAT_START']],
-    [t('KeyboardShortcutPrompt.Set A-B Repeat Point B'), ['SET_AB_REPEAT_END']],
-    [t('KeyboardShortcutPrompt.Clear A-B Repeat'), ['CLEAR_AB_REPEAT']],
-    [t('KeyboardShortcutPrompt.Home'), ['HOME']],
-    [t('KeyboardShortcutPrompt.End'), ['END']],
-    [t('KeyboardShortcutPrompt.Skip by Tenths'), ['SKIP_N_TENTHS']],
-    [t('KeyboardShortcutPrompt.Last Chapter'), ['LAST_CHAPTER']],
-    [t('KeyboardShortcutPrompt.Next Chapter'), ['NEXT_CHAPTER']],
-    [t('KeyboardShortcutPrompt.Last Frame'), ['LAST_FRAME']],
-    [t('KeyboardShortcutPrompt.Next Frame'), ['NEXT_FRAME']],
-    [t('KeyboardShortcutPrompt.Skip to Next Video'), ['SKIP_TO_NEXT']],
-    [t('KeyboardShortcutPrompt.Skip to Previous Video'), ['SKIP_TO_PREV']],
-  ]
-})
+const localizedShortcutNameToShortcutsMappings = computed(() =>
+  getKeyboardShortcutLabelMappings(t, process.env.IS_CAPACITOR)
+)
 
 function hideKeyboardShortcutPrompt() {
   store.dispatch('hideKeyboardShortcutPrompt')
