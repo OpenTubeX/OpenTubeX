@@ -702,3 +702,31 @@ for (const action of ['select', 'close', 'navigate', 'unload queued']) {
     assert.equal(manager.tabs.get('tab-0').mountDeferred, false)
   })
 }
+
+test('retries a scheduled preview refresh after the hover tooltip closes', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const manager = createManager(t)
+  const tab = manager.createTab({ route: '/history', makeActive: false })
+  manager.presentedTabId = tab.id
+  manager._tabPreviewsEnabled = true
+  t.mock.method(manager, '_getTabLoadingState', () => false)
+  t.mock.method(manager, '_getCachedTabPreviewDataUrl', async () => 'cached-preview')
+  let tooltipOpen = true
+  t.mock.method(manager, '_setTabPreviewCaptureMode', async enabled => !enabled || !tooltipOpen)
+  let captures = 0
+  manager.browserWindow.webContents.capturePage = async () => {
+    captures++
+    return { isEmpty: () => true }
+  }
+
+  manager._scheduleTabPreviewRefresh(tab, 0)
+  await tick(t, 0)
+  assert.equal(captures, 0)
+  assert.notEqual(tab.previewCaptureTimeoutId, null, 'deferred capture retains a retry')
+  await tick(t, 700)
+  assert.equal(captures, 0, 'never captures while the tooltip is open')
+  tooltipOpen = false
+  await tick(t, 700)
+  assert.equal(captures, 1, 'refreshes without another navigation or activation')
+  assert.equal(tab.previewCaptureTimeoutId, null)
+})
