@@ -316,3 +316,20 @@ test('activity bounds large imports and omits long item names', () => {
   ], 'device', 'Laptop')
   assert.deepEqual(long.changes, [{ collection: 'subscriptions' }])
 })
+
+
+test('shortcut activity ignores JSON formatting and explicit default bindings', () => {
+  const before = [{ key: 'keyboardShortcuts', value: '{}' }]
+  const after = [{ key: 'keyboardShortcuts', value: JSON.stringify({ VIDEO_PLAYER: { PLAYBACK: { TOGGLE_SKIP_SILENCE: '' } } }) }]
+  assert.equal(createSyncActivity('settings', before, after, 'device', 'Laptop'), null)
+  const equivalent = [{ key: 'keyboardShortcuts', value: '{ "VIDEO_PLAYER": { "PLAYBACK": { "TOGGLE_SKIP_SILENCE": "" } } }' }]
+  assert.equal(createSyncActivity('settings', after, equivalent, 'device', 'Laptop'), null)
+})
+
+test('shortcut activity describes changed bindings without serialized configuration', () => {
+  const activity = createSyncActivity('settings',
+    [{ key: 'keyboardShortcuts', value: '{}' }],
+    [{ key: 'keyboardShortcuts', value: JSON.stringify({ VIDEO_PLAYER: { PLAYBACK: { TOGGLE_SKIP_SILENCE: 'h' } } }) }],
+    'device', 'Laptop')
+  assert.deepEqual(activity.changes, [{ key: 'keyboardShortcuts', detail: 'TOGGLE_SKIP_SILENCE', value: 'h' }])
+})

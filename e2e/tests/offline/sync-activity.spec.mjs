@@ -50,6 +50,43 @@ for (const uiScale of [100, 125]) {
       await expect(activity.nth(2)).toContainText(/Laptop changed Screenshot [Ff]ormat to JPEG/)
     })
 
+    test('shows shortcut bindings as shortcuts and summarizes older JSON entries', async ({ page }) => {
+      const sync = await goToSettingsSection(page, 'sync')
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setSyncServerToken', 'test-token')
+        store.commit('setSyncServerActivity', [
+          { id: 'shortcut', deviceName: 'Laptop', key: 'keyboardShortcuts', detail: 'TOGGLE_SKIP_SILENCE', value: 'h', createdAt: Date.now() },
+          { id: 'legacy-shortcut', deviceName: 'Laptop', key: 'keyboardShortcuts', value: '{"VIDEO_PLAYER":{"PLAYBACK":{"TOGGLE_SKIP_SILENCE":"h"}}}', createdAt: Date.now() - 1 },
+          { id: 'unassigned', deviceName: 'Laptop', key: 'keyboardShortcuts', detail: 'TOGGLE_SKIP_SILENCE', value: '', createdAt: Date.now() - 2 },
+        ])
+        store.commit('setSyncServerLiveSupported', true)
+        store.commit('setSyncServerEnabled', true)
+      })
+      const activity = sync.locator('.syncActivity .activityList li p')
+      await expect(activity.nth(0)).toHaveText('Laptop changed Keyboard Shortcuts · Toggle skip silence to h')
+      await expect(activity.nth(1)).toHaveText('Laptop updated Keyboard Shortcuts')
+      await expect(activity.nth(2)).toHaveText('Laptop changed Keyboard Shortcuts · Toggle skip silence to Unassigned')
+      await expect(sync.locator('.syncActivity')).not.toContainText('VIDEO_PLAYER')
+    })
+
+    test('uses the shortcut editor labels for action codes with nontrivial names', async ({ page }) => {
+      const sync = await goToSettingsSection(page, 'sync')
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setSyncServerToken', 'test-token')
+        store.commit('setSyncServerActivity', ['RESTORE_CLOSED_TAB', 'NAVIGATE_TO_SETTINGS', 'PICTURE_IN_PICTURE'].map((detail, index) => ({
+          id: String(index), deviceName: 'Laptop', key: 'keyboardShortcuts', detail, value: 'ctrl+h', createdAt: Date.now() - index,
+        })))
+        store.commit('setSyncServerLiveSupported', true)
+        store.commit('setSyncServerEnabled', true)
+      })
+      const activity = sync.locator('.syncActivity .activityList li p')
+      await expect(activity.nth(0)).toContainText(/Keyboard Shortcuts · Reopen.*tab/i)
+      await expect(activity.nth(1)).toContainText(/Keyboard Shortcuts · Navigate to the Settings page/i)
+      await expect(activity.nth(2)).toContainText(/Keyboard Shortcuts · Toggle Picture-in-Picture mode/i)
+    })
+
     test('keeps malformed caption anchors readable', async ({ page }) => {
       const sync = await goToSettingsSection(page, 'sync')
       await page.evaluate(() => {
