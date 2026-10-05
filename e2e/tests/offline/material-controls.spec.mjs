@@ -888,9 +888,9 @@ for (const scale of [100, 95]) {
           await expect(label).toHaveCSS('outline-style', 'solid')
           const clearance = await label.evaluate(element => {
             const style = getComputedStyle(element)
-            const track = getComputedStyle(element, '::before')
+            const track = getComputedStyle(element.querySelector('.switch-label-text'), '::before')
             return {
-              start: parseFloat(track.insetInlineStart),
+              start: parseFloat(style.paddingInlineStart) + parseFloat(track.insetInlineStart),
               end: parseFloat(style.paddingInlineEnd),
               ring: -parseFloat(style.outlineOffset) + parseFloat(style.outlineWidth)
             }
@@ -910,7 +910,7 @@ for (const scale of [100, 95]) {
         }
         const toggle = section.locator('[data-setting-key="enableDownloads"] .switch-label')
         const track = await toggle.evaluate(element => {
-          const style = getComputedStyle(element, '::before')
+          const style = getComputedStyle(element.querySelector('.switch-label-text'), '::before')
           return { width: parseFloat(style.width), height: parseFloat(style.height) }
         })
         expect.soft(track.width).toBeCloseTo(52, 1)
@@ -1382,12 +1382,12 @@ for (const scale of [100, 95]) {
               const label = toggle.querySelector('.switch-label')
               const bounds = label.getBoundingClientRect()
               const text = label.querySelector('.switch-label-text').getBoundingClientRect()
-              const track = getComputedStyle(label, '::before')
+              const track = getComputedStyle(label.querySelector('.switch-label-text'), '::before')
               return {
                 labelCenter: bounds.top + bounds.height / 2,
                 textCenter: text.top + text.height / 2,
                 textHeight: text.height,
-                trackCenter: bounds.top + parseFloat(track.top) + new DOMMatrix(track.transform).m42 + parseFloat(track.height) / 2
+                trackCenter: text.top + parseFloat(track.top) + new DOMMatrix(track.transform).m42 + parseFloat(track.height) / 2
               }
             })
           return { columns: getComputedStyle(element).gridTemplateColumns.split(' ').length, controls }
@@ -1499,8 +1499,8 @@ for (const { name, theme, width, height, scale, rtl } of [
       const touch = await page.evaluate(() => matchMedia('(any-pointer: coarse), (width <= 680px)').matches)
       await expect(label).toHaveCSS('min-height', touch ? '48px' : '36px')
       const geometry = await label.evaluate(element => {
-        const track = getComputedStyle(element, '::before')
-        const thumb = getComputedStyle(element, '::after')
+        const track = getComputedStyle(element.querySelector('.switch-label-text'), '::before')
+        const thumb = getComputedStyle(element.querySelector('.switch-label-text'), '::after')
         const text = element.querySelector('.switch-label-text').getBoundingClientRect()
         const bounds = element.getBoundingClientRect()
         return {
@@ -1522,12 +1522,12 @@ for (const { name, theme, width, height, scale, rtl } of [
       await input.press('Space')
       await expect(input).toBeChecked()
       await expect(dependent).toBeEnabled()
-      await expect.poll(() => label.evaluate(element => parseFloat(getComputedStyle(element, '::after').width))).toBeCloseTo(18, 1)
+      await expect.poll(() => label.evaluate(element => parseFloat(getComputedStyle(element.querySelector('.switch-label-text'), '::after').width))).toBeCloseTo(18, 1)
       expect(await label.evaluate(element => getComputedStyle(element).outlineStyle)).toBe('solid')
       await label.hover()
       await page.mouse.down()
-      expect(await label.evaluate(element => parseFloat(getComputedStyle(element, '::after').width))).toBeCloseTo(20, 1)
-      expect(await label.evaluate(element => parseFloat(getComputedStyle(element, '::after').insetInlineStart))).toBeCloseTo(24, 1)
+      expect(await label.evaluate(element => parseFloat(getComputedStyle(element.querySelector('.switch-label-text'), '::after').width))).toBeCloseTo(20, 1)
+      expect(await label.evaluate(element => parseFloat(getComputedStyle(element).paddingInlineStart) + parseFloat(getComputedStyle(element.querySelector('.switch-label-text'), '::after').insetInlineStart))).toBeCloseTo(24, 1)
       await page.mouse.up()
       await expect(input).not.toBeChecked()
       await expect(dependent).toBeDisabled()
@@ -1645,7 +1645,7 @@ test('shared Material controls follow UI Roundness while switch focus keeps its 
   for (const roundness of [0, 50, 100, 200]) {
     await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUiRoundness', value), roundness)
     expect(await select.evaluate(element => parseFloat(getComputedStyle(element).borderTopLeftRadius))).toBeCloseTo(4 * roundness / 100, 1)
-    expect(await switchLabel.evaluate(element => parseFloat(getComputedStyle(element, '::before').borderTopLeftRadius))).toBeCloseTo(12 * roundness / 100, 1)
+    expect(await switchLabel.evaluate(element => parseFloat(getComputedStyle(element.querySelector('.switch-label-text'), '::before').borderTopLeftRadius))).toBeCloseTo(12 * roundness / 100, 1)
     await switchLabel.locator('..').locator('.switch-input').press('Space')
     await expect(switchLabel).toHaveCSS('border-radius', '4px')
   }

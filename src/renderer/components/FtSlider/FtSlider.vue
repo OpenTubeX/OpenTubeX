@@ -4,25 +4,27 @@
     :for="id"
   >
     <span class="labelRow">
-      <I18nT
-        keypath="Display Label"
-        tag="span"
-        class="label"
-        scope="global"
-      >
-        <template #label>{{ label }}</template>
-        <template #value>
-          <span
-            class="value"
-            :data-width-value="widestValue"
-          >
-            <span class="valueText">
-              <span class="valueNumber">{{ displayValue }}</span>{{ valueExtension }}
+      <span class="labelContent">
+        <I18nT
+          keypath="Display Label"
+          tag="span"
+          class="label"
+          scope="global"
+        >
+          <template #label>{{ label }}</template>
+          <template #value>
+            <span
+              class="value"
+              :data-width-value="widestValue"
+            >
+              <span class="valueText">
+                <span class="valueNumber">{{ displayValue }}</span>{{ valueExtension }}
+              </span>
             </span>
-          </span>
-        </template>
-      </I18nT>
-      <FtPerformanceImpact :setting-key="settingKey" />
+          </template>
+        </I18nT>
+        <FtPerformanceImpact :setting-key="settingKey" />
+      </span>
       <FtTooltip
         v-if="tooltip !== ''"
         class="selectTooltip"

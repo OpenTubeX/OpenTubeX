@@ -289,7 +289,7 @@ for (const uiScale of [100, 95]) {
             return [...section.querySelectorAll('.quickSettingControl')].map(control => {
               const caption = control.querySelector('.labelRow')
               const track = control.querySelector('.sliderControl')
-              const switchLabel = control.querySelector('.switch-label')
+              const switchLabel = control.querySelector('.switch-label-text')
               return {
                 setting: control.dataset.settingId,
                 left,
@@ -419,7 +419,7 @@ for (const uiScale of [100, 95]) {
           }))
           expect.soft(bounds.input.top, `${width}×${height}: input does not overlap caption`).toBeGreaterThanOrEqual(bounds.caption.bottom - 0.1)
         }
-        const tracks = await menu.locator('.switch-label').evaluateAll(labels => labels.map(label => {
+        const tracks = await menu.locator('.switch-label-text').evaluateAll(labels => labels.map(label => {
           const bounds = label.getBoundingClientRect()
           const height = Number.parseFloat(getComputedStyle(label, '::before').blockSize)
           return { top: bounds.top + (bounds.height - height) / 2, bottom: bounds.top + (bounds.height + height) / 2 }

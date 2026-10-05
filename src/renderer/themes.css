@@ -2766,7 +2766,7 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
 
   /* The thumb extends beyond its track, so its edge also needs contrast
      against the surrounding surface in both switch positions. */
-  .switch-input:not(:disabled) + .switch-label::after {
+  .switch-input:not(:disabled) + .switch-label .switch-label-text::after {
     outline: 2px solid var(--secondary-text-color);
     outline-offset: -2px;
   }
@@ -3166,7 +3166,7 @@ body .os-scrollbar.app-scrollbar-idle:not(:hover) {
   --toggle-checked-thumb-color: var(--bg-color);
   --settings-changed-color: var(--accent-color);
 
-  .switch-input:not(:disabled) + .switch-label::after {
+  .switch-input:not(:disabled) + .switch-label .switch-label-text::after {
     outline: 2px solid var(--secondary-text-color);
     outline-offset: -2px;
   }

@@ -22,18 +22,20 @@
       :for="id"
       class="switch-label"
     >
-      <span class="switch-label-text">
-        {{ label }}
+      <span class="switch-label-main">
+        <span class="switch-label-text">
+          {{ label }}
+        </span>
+        <FtTooltip
+          v-if="tooltip !== ''"
+          class="selectTooltip"
+          :position="tooltipPosition"
+          :tooltip="tooltip"
+          :allow-newlines="tooltipAllowNewlines"
+        />
+        <FtSyncedSettingIndicator :setting-key="settingKey" />
       </span>
       <FtPerformanceImpact :setting-key="settingKey" />
-      <FtTooltip
-        v-if="tooltip !== ''"
-        class="selectTooltip"
-        :position="tooltipPosition"
-        :tooltip="tooltip"
-        :allow-newlines="tooltipAllowNewlines"
-      />
-      <FtSyncedSettingIndicator :setting-key="settingKey" />
     </label>
   </div>
 </template>
