@@ -635,6 +635,8 @@ async function testMobileMiniPlayer(t, navigationOnly, { dismissalOnly = false, 
       await store.dispatch('updateReducedMotion', 'off')
       await store.dispatch('updateAnimationSpeed', 25)
     })
+    // The app's explicit Off preference must override the OS motion setting.
+    if (dismissalOnly) await page.emulateMedia({ reducedMotion: 'reduce' })
     const trackDismissal = async () => {
       // Make the asynchronous teardown long enough to expose a one-frame
       // return to the dock after the swipe transform is cleared.
@@ -745,6 +747,7 @@ async function testMobileMiniPlayer(t, navigationOnly, { dismissalOnly = false, 
     }, { settings, originalRoute })
     await watch?.dispose()
     await session.detach()
+    if (dismissalOnly) await page.emulateMedia({ reducedMotion: null })
     await browser.close()
   }
 }

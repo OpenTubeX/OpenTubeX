@@ -4777,12 +4777,6 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  :global(.app.capacitorPhoneLayout .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar) {
-    transition: none;
-  }
-}
-
 :global(.app.capacitorTabs:has(.mobileMiniBar) > .routerView) {
   padding-block-end: 108px;
 }
