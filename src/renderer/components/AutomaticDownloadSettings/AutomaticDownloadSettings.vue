@@ -219,7 +219,6 @@ import {
 } from '../../helpers/automaticDownloadRules'
 import { DEFAULT_DOWNLOAD_TEMPLATES } from '../../helpers/downloadTemplates'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
-import { createSettingUpdateQueue } from '../../helpers/settingUpdateQueue'
 
 const { locale, t } = useI18n()
 const showManager = ref(false)
@@ -259,7 +258,7 @@ function stopObservingContent() {
 }
 
 const pendingRules = ref(null)
-const queueRuleUpdate = createSettingUpdateQueue()
+let ruleUpdateSequence = 0
 const rules = computed(() => parseAutomaticDownloadRules(pendingRules.value ?? store.getters.getYtDlpAutomaticDownloadRules))
 const channels = computed(() => {
   const allChannelsProfile = store.getters.getProfileList[0]
@@ -299,14 +298,11 @@ function ruleFor(channelId) {
 
 function saveRules(nextRules) {
   const value = JSON.stringify(nextRules)
+  const sequence = ++ruleUpdateSequence
   // Keep unsaved edits in the editor so background downloads use saved rules.
   pendingRules.value = value
-  queueRuleUpdate('ytDlpAutomaticDownloadRules', async isLatest => {
-    try {
-      await store.dispatch('updateYtDlpAutomaticDownloadRules', value)
-    } finally {
-      if (isLatest()) pendingRules.value = null
-    }
+  store.dispatch('updateYtDlpAutomaticDownloadRules', value).finally(() => {
+    if (sequence === ruleUpdateSequence) pendingRules.value = null
   }).catch(error => console.error(error))
 }
 

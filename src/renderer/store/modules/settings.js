@@ -1095,6 +1095,13 @@ const customActions = {
     normalizeNavigationItems(value)
   ),
 
+  updateYtDlpAutomaticDownloadRules: ({ commit, state }, value) => runSettingUpdate('ytDlpAutomaticDownloadRules', async () => {
+    await DBSettingHandlers.upsert('ytDlpAutomaticDownloadRules', value)
+    // Publish successful writes even if a later edit is queued and could fail.
+    commit('setYtDlpAutomaticDownloadRules', value)
+    await recordSettingSyncTimestamp(commit, state, 'ytDlpAutomaticDownloadRules')
+  }).catch(error => console.error(error)),
+
   savePlaylistBookmark: async ({ commit, getters }, bookmark) => {
     const bookmarks = getters.getPlaylistBookmarks
       .filter(entry => entry?.playlist?.id !== bookmark.playlist.id)

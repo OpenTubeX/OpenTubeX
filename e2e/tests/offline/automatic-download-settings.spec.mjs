@@ -3,6 +3,21 @@ import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
 const ALPHA_CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
 const BETA_CHANNEL_ID = 'UCbbbbbbbbbbbbbbbbbbbbbb'
 
+async function delayNextRuleWrite(app) {
+  await app.electronApp.evaluate(({ ipcMain }) => {
+    const original = ipcMain._invokeHandlers.get('db-settings')
+    let firstWrite = true
+    ipcMain.removeHandler('db-settings')
+    ipcMain.handle('db-settings', async (event, request) => {
+      if (request.action === 2 && request.data._id === 'ytDlpAutomaticDownloadRules' && firstWrite) {
+        firstWrite = false
+        await new Promise(resolve => { globalThis.releaseAutomaticDownloadWrite = resolve })
+      }
+      return original(event, request)
+    })
+  })
+}
+
 test.use({
   seed: {
     settings: { currentLocale: 'en-US', fetchSubscriptionsAutomatically: false },
@@ -22,18 +37,7 @@ for (const uiScale of [100, 95, 125]) {
     await page.evaluate(value => window.ftElectron.setZoomFactor(value / 100), uiScale)
     await goToSettingsSection(page, 'download')
     await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
-    await app.electronApp.evaluate(({ ipcMain }) => {
-      const original = ipcMain._invokeHandlers.get('db-settings')
-      let firstWrite = true
-      ipcMain.removeHandler('db-settings')
-      ipcMain.handle('db-settings', async (event, request) => {
-        if (request.action === 2 && request.data._id === 'ytDlpAutomaticDownloadRules' && firstWrite) {
-          firstWrite = false
-          await new Promise(resolve => { globalThis.releaseAutomaticDownloadWrite = resolve })
-        }
-        return original(event, request)
-      })
-    })
+    await delayNextRuleWrite(app)
 
     const alpha = page.locator('.channelRule', { has: page.getByRole('checkbox', { name: 'Alpha Channel', exact: true }) })
     const beta = page.locator('.channelRule', { has: page.getByRole('checkbox', { name: 'Beta Channel', exact: true }) })
@@ -68,6 +72,33 @@ for (const uiScale of [100, 95, 125]) {
     await expect(alpha.getByRole('textbox', { name: 'Title includes', exact: true })).toHaveValue('Keep this edit')
   })
 }
+
+test('honors a newer rules update from another settings writer', async ({ app, page }) => {
+  await goToSettingsSection(page, 'download')
+  await page.getByRole('button', { name: 'Manage Automatic Downloads (0)' }).click()
+  await delayNextRuleWrite(app)
+  const alpha = page.locator('.channelRule').filter({ hasText: 'Alpha Channel' })
+  const beta = page.locator('.channelRule').filter({ hasText: 'Beta Channel' })
+  await alpha.getByText('Alpha Channel', { exact: true }).click()
+  try {
+    await expect.poll(() => app.electronApp.evaluate(() => typeof globalThis.releaseAutomaticDownloadWrite)).toBe('function')
+    await beta.getByText('Beta Channel', { exact: true }).click()
+    await expect(beta.locator('.channelRuleOptions')).toBeVisible({ timeout: 1000 })
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      window.externalRuleUpdate = store.dispatch('updateYtDlpAutomaticDownloadRules', '{}')
+    })
+  } finally {
+    await app.electronApp.evaluate(() => globalThis.releaseAutomaticDownloadWrite?.())
+  }
+  await page.evaluate(() => window.externalRuleUpdate)
+  await expect(alpha.locator('.channelRuleOptions')).toHaveCount(0)
+  await expect(beta.locator('.channelRuleOptions')).toHaveCount(0)
+  await expect.poll(() => page.evaluate(async () => {
+    const settings = await window.ftElectron.dbSettings(1)
+    return JSON.parse(settings.find(setting => setting._id === 'ytDlpAutomaticDownloadRules').value)
+  })).toEqual({})
+})
 
 test('restores the last saved channel rules when a later edit fails', async ({ app, page }) => {
   await goToSettingsSection(page, 'download')
