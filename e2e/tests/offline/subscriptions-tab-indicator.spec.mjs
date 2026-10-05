@@ -1,4 +1,5 @@
 import { test, expect, goTo, sel } from '../../helpers/app.mjs'
+import { sampleColors } from '../../helpers/colors.mjs'
 
 const now = Date.now()
 const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
@@ -59,6 +60,44 @@ test.use({
 })
 
 test.describe('subscriptions feed tab indicator', () => {
+  test.describe('fractional device pixel ratio', () => {
+    test.use({ launchArgs: ['--force-device-scale-factor=2.625'] })
+
+    test('paints both underlines within the selected tab edges', async ({ app, page }) => {
+      await goTo(page, 'subscriptions')
+      await page.locator('[data-subscription-feed-tab="all"]').click()
+      await page.getByRole('button', { name: 'Show tabbed view' }).click()
+      await app.electronApp.evaluate(({ BrowserWindow }) => {
+        BrowserWindow.getAllWindows()[0].setSize(375, 900)
+      })
+      await page.evaluate(() => {
+        document.querySelector('.subscriptionsHeader').style.setProperty('--primary-color', '#ff0000')
+      })
+
+      for (const selector of ['.newFeedTab.selectedTab', '[data-subscription-feed-tab="videos"]']) {
+        const tab = page.locator(selector)
+        await tab.click()
+        const { width } = await tab.boundingBox()
+        const underlineY = await tab.evaluate(element => {
+          const indicator = element.parentElement.querySelector('.tabsIndicator').getBoundingClientRect()
+          return (indicator.top + indicator.bottom) / 2 - element.getBoundingClientRect().top
+        })
+        const colors = await sampleColors(app, tab, [
+          [2, underlineY],
+          [width - 2, underlineY],
+          [width + 2, underlineY]
+        ])
+        // DOM bounds can be correct while a scaled strip paints too short.
+        // Allow slight antialiasing at the rounded ends of the actual pixels.
+        for (const color of colors.slice(0, 2)) {
+          expect(color[0]).toBeGreaterThan(247)
+          expect(Math.max(...color.slice(1))).toBeLessThan(8)
+        }
+        expect(Math.max(...colors[2].slice(1))).toBeGreaterThan(8)
+      }
+    })
+  })
+
   test('rounds both feed indicators without stretching their end caps', async ({ app, page }) => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
