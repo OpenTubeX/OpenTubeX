@@ -3,7 +3,7 @@ import { test, expect, goTo, goToSettingsSection, setWindowSize } from '../../he
 
 async function expectVisibleLabels(scope) {
   const missing = await scope.locator('input, textarea').evaluateAll(elements => elements
-    .filter(element => ['text', 'search', 'url', 'number', 'password', 'email', 'tel', 'textarea'].includes(element.type) && element.checkVisibility() && !element.matches('.topNav .searchInput input, .settingsSearch input, .commandPalette input, .playlistSearch, .tabOrganizerSearch input, .groupRenameInput, .findbarInput, .settingPicker input'))
+    .filter(element => ['text', 'search', 'url', 'number', 'password', 'email', 'tel', 'textarea'].includes(element.type) && element.checkVisibility() && !element.matches('.topNav .searchInput input, .settingsSearch input, .commandPalette input, .playlistSearch input, .tabOrganizerSearch input, .groupRenameInput, .findbarInput, .settingPicker input'))
     .filter(element => !Array.from(element.labels ?? []).some(label => label.checkVisibility() && label.textContent.trim()))
     .map(element => ({ id: element.id, placeholder: element.placeholder, className: element.className })))
   expect(missing).toEqual([])
@@ -74,7 +74,7 @@ test('the main search keeps its familiar placeholder without a visible label', a
   }
 })
 
-test('settings header search keeps its icon and original placeholder without visible label text', async ({ app, page }) => {
+test('settings header search uses the shared field with its original placeholder and accessible name', async ({ app, page }) => {
   await goToSettingsSection(page, 'general')
   for (const width of [1500, 480]) {
     await app.electronApp.evaluate(({ BrowserWindow }, width) => BrowserWindow.getAllWindows()[0].setBounds({ width, height: 1000 }), width)
@@ -85,14 +85,10 @@ test('settings header search keeps its icon and original placeholder without vis
       await expect(input).toHaveAttribute('placeholder', placeholder)
       await expect(input).toHaveAccessibleName(placeholder)
       await expect(search.locator('.textInputLabelText')).toHaveCount(0)
-      await expect(search.locator('.ft-icon')).toBeVisible()
-      const geometry = await search.evaluate(element => {
-        const input = element.querySelector('input').getBoundingClientRect()
-        const icon = element.querySelector('.ft-icon').getBoundingClientRect()
-        return { before: icon.right < input.left, centerOffset: Math.abs(input.top + input.height / 2 - icon.top - icon.height / 2) }
-      })
-      expect(geometry.before).toBe(true)
-      expect(geometry.centerOffset).toBeLessThanOrEqual(1)
+      await expect(input).toHaveClass(/ft-input/)
+      await input.click()
+      await expect(input).toBeFocused()
+      expect(await search.evaluate(element => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1)
     }
   }
 })

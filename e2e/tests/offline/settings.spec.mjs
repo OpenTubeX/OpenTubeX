@@ -22,7 +22,7 @@ async function expectCompactCustomThemeEditor(page) {
   await appearance.getByRole('button', { name: 'Create custom theme' }).click()
 
   const editor = page.locator('.customThemeEditor')
-  await expect(editor.locator('.themeNameField > input')).toBeVisible()
+  await expect(editor.locator('.themeNameField input')).toBeVisible()
 
   const spacing = await editor.evaluate(element => {
     const contentBounds = element.closest('.settingsSubpageScroll').getBoundingClientRect()
@@ -1973,7 +1973,7 @@ test.describe('settings', () => {
     const search = page.getByRole('searchbox', { name: 'Search settings' })
     await expect(search).toBeFocused()
     await search.evaluate(element => element.blur())
-    await page.locator('.settingsSearch svg').click()
+    await search.click()
     await expect(search).toBeFocused()
 
     await page.keyboard.press('Escape')

@@ -9,15 +9,16 @@
   >
     <div class="customThemeEditor">
       <div class="editorHeader">
-        <label class="themeNameField">
-          <span>{{ t('Settings.Theme Settings.Custom Theme.Theme Name') }}</span>
-          <input
-            v-model="draft.name"
-            :placeholder="t('Form Inputs.Example', { example: t('Settings.Theme Settings.Base Theme.Dark') })"
-            type="text"
-            maxlength="80"
-          >
-        </label>
+        <FtInput
+          class="themeNameField"
+          :icon="['fas', 'font']"
+          :label="t('Settings.Theme Settings.Custom Theme.Theme Name')"
+          :value="draft.name"
+          :placeholder="t('Form Inputs.Example', { example: t('Settings.Theme Settings.Base Theme.Dark') })"
+          :maxlength="80"
+          :show-action-button="false"
+          @input="draft.name = $event"
+        />
         <div class="fileActions">
           <FtIconButton
             :title="t('Settings.Theme Settings.Custom Theme.Import Theme')"
@@ -140,6 +141,7 @@
 </template>
 
 <script setup>
+import FtInput from '../FtInput/FtInput.vue'
 import { computed, onBeforeUnmount, ref, shallowReactive, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -686,7 +688,7 @@ onBeforeUnmount(() => {
 .editorHeader {
   flex: none;
   display: flex;
-  align-items: end;
+  align-items: center;
   gap: 12px;
 }
 
@@ -701,20 +703,20 @@ onBeforeUnmount(() => {
 }
 
 .themeNameField {
+  --input-bottom-spacing: 0;
+
   flex: 1;
   min-inline-size: 0;
-  display: grid;
-  gap: 8px;
-  color: var(--secondary-text-color);
 }
 
 .themeSources {
+  --settings-control-margin: 0;
+
   flex: none;
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
   gap: 12px;
-  min-block-size: 75px;
 }
 
 .themeSources :deep(.select) {
@@ -727,20 +729,7 @@ onBeforeUnmount(() => {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  block-size: 45px;
-  padding-block-start: 30px;
-}
-
-.themeNameField input {
-  box-sizing: border-box;
-  inline-size: 100%;
-  min-block-size: 42px;
-  border: 1px solid var(--divider-color);
-  border-radius: calc(8px * var(--ui-roundness));
-  padding-inline: 12px;
-  color: var(--primary-text-color);
-  background: var(--search-bar-color);
-  backdrop-filter: var(--search-bar-blur, none);
+  block-size: var(--form-control-height);
 }
 
 .editorFooter :deep(.btn) {
@@ -763,17 +752,9 @@ onBeforeUnmount(() => {
     padding: 16px;
   }
 
-  .editorHeader {
-    align-items: end;
-  }
-
   .themeSources {
     flex-direction: column;
-    gap: 0;
-  }
-
-  .darkThemeControl {
-    padding-block-start: 0;
+    gap: 12px;
   }
 
   .themeSources :deep(.select) {

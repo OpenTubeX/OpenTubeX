@@ -14,26 +14,32 @@
     }"
   >
     <span class="inputWrapper">
-      <input
+      <component
+        :is="multiline ? 'textarea' : 'input'"
         :id="id"
         ref="inputRef"
         :value="inputDataDisplayed"
         class="ft-input"
-        :class="{ disabled }"
+        :class="{ disabled, multiline }"
         :style="inputTextStyle"
         :maxlength="maxlength"
+        :min="min"
+        :step="step"
         :type="inputType === 'password' && passwordVisible ? 'text' : inputType"
         :placeholder="placeholder"
         :disabled="disabled"
         :readonly="readonly"
         :spellcheck="false"
         :aria-describedby="descriptionIds"
-        :aria-label="showLabel ? null : placeholder"
+        :aria-label="showLabel ? null : (label || placeholder)"
+        @change="handleChange"
+        @mousedown="selectOnClick && $event.button === 0 && $event.preventDefault()"
+        @click="handleNativeClick"
         @input="handleInput"
         @focus="handleFocus"
         @blur="handleInputBlur"
         @keydown="handleKeyDown"
-      >
+      />
       <label
         v-if="showLabel"
         :for="id"
@@ -179,6 +185,11 @@ import { supportsYtDlp } from '../../helpers/ytDlpCapabilities'
 const { t } = useI18n()
 
 const props = defineProps({
+  multiline: { type: Boolean, default: false },
+  selectOnClick: { type: Boolean, default: false },
+  changeFilter: { type: Function, default: null },
+  min: { type: [String, Number], default: null },
+  step: { type: [String, Number], default: null },
   variant: {
     type: String,
     default: 'outlined',
@@ -278,7 +289,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['blur', 'clear', 'click', 'input', 'keydown', 'remove'])
+const emit = defineEmits(['blur', 'change', 'clear', 'click', 'focus', 'input', 'keydown', 'remove'])
 
 const id = useId()
 
@@ -403,6 +414,23 @@ function handleClick(event, dataListIndex = searchState.keyboardSelectedOptionIn
 
   emit('input', query)
   emit('click', query, { event, dataListIndex })
+}
+
+function handleNativeClick() {
+  if (props.selectOnClick) {
+    inputRef.value?.focus()
+    inputRef.value?.select()
+  }
+}
+
+/**
+ * @param {Event} event
+ */
+function handleChange(event) {
+  const value = props.changeFilter ? String(props.changeFilter(event.target.value)) : event.target.value
+  inputData.value = value
+  event.target.value = value
+  emit('change', value)
 }
 
 /**
@@ -605,7 +633,7 @@ function handleKeyDown(event) {
   }
 
   // Update Input box value if enter key was pressed and option selected
-  if (event.key === 'Enter' && !event.isComposing) {
+  if (!props.multiline && event.key === 'Enter' && !event.isComposing) {
     if (removeButtonSelectedIndex.value !== -1) {
       handleRemoveClick(removeButtonSelectedIndex.value)
     } else if (searchState.selectedOption !== -1) {
@@ -693,6 +721,7 @@ function handleInputBlur() {
 }
 
 function handleFocus() {
+  emit('focus')
   searchState.showOptions = true
 }
 

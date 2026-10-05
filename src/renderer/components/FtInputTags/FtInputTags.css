@@ -49,13 +49,6 @@
   user-select: text;
 }
 
-.checkbox-container {
-  display: flex;
-  align-items: center;
-  font-size: 12px;
-  accent-color: var(--accent-color);
-}
-
 .tag-icon {
   block-size: 24px;
   inline-size: 24px;

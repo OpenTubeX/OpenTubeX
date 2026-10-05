@@ -171,40 +171,13 @@
 }
 
 .settingsSearch {
+  --input-bottom-spacing: 0;
+  --form-control-height: 36px;
+  --search-bar-color: var(--settings-search-bar-color);
+  --search-bar-blur: var(--settings-search-bar-blur, none);
+
   flex: 0 1 300px;
   min-inline-size: 150px;
-  block-size: 36px;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding-inline: 12px;
-  border-radius: calc(6px * var(--ui-roundness));
-  color: var(--tertiary-text-color);
-  background: var(--settings-search-bar-color);
-  box-shadow: inset 0 0 0 1px var(--input-border-color, transparent);
-  backdrop-filter: var(--settings-search-bar-blur, none);
-  cursor: text;
-}
-
-.settingsSearch > .ft-icon {
-  flex: none;
-}
-
-.settingsSearch input {
-  min-inline-size: 0;
-  inline-size: 100%;
-  padding: 0;
-  border: 0;
-  outline: 0;
-  box-shadow: none;
-  color: var(--primary-text-color);
-  background: transparent;
-  font: inherit;
-}
-
-.settingsSearch input::placeholder {
-  color: var(--tertiary-text-color);
 }
 
 .settingsHeaderActions {

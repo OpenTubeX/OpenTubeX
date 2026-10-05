@@ -1,7 +1,7 @@
 .addToPlaylistDropdown {
   display: flex;
   flex-direction: column;
-  min-inline-size: 200px;
+  min-inline-size: 220px;
 }
 
 .dropdownHeader {
@@ -88,16 +88,12 @@
 }
 
 .playlistSearch {
+  --input-bottom-spacing: 0;
+
   box-sizing: border-box;
-  min-block-size: 32px;
-  margin: 8px;
-  padding-block: 6px;
+  flex: none;
+  margin-block: 8px 0;
   padding-inline: 10px;
-  min-inline-size: 0;
-  border: 1px solid var(--divider-color);
-  background: var(--search-bar-color);
-  color: inherit;
-  font: inherit;
 }
 
 .playlistListContent {
