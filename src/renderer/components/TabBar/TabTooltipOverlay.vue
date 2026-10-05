@@ -251,7 +251,7 @@ function updateTooltipPosition() {
 
 .tab-tooltip-enter-active,
 .tab-tooltip-leave-active {
-  transition: opacity 0.14s ease, transform 0.14s ease;
+  transition: opacity 0.14s ease, transform 0.14s ease, top 0.14s ease, left 0.14s ease;
 }
 
 .tab-tooltip-enter-from,

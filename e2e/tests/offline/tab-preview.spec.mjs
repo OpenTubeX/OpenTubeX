@@ -104,6 +104,45 @@ test.describe('tab previews', () => {
     })
   }
 
+  for (const position of ['left', 'top']) {
+    test(`slides during the initial ${position} tooltip fade`, async ({ page }) => {
+      await page.evaluate(async position => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setTabBarPosition', position)
+        for (const title of ['First preview', 'Second preview']) {
+          await window.ftElectron.tabs.create({ title, makeActive: false, lazyLoad: true })
+        }
+      }, position)
+      await expect(page.locator(sel.tabs)).toHaveCount(3)
+      // Keep the handoff inside the renderer so automation round trips cannot
+      // miss the short entry fade. Dispatch the same pointer events as hovering.
+      const handoff = await page.evaluate(selector => new Promise(resolve => {
+        const [, first, second] = document.querySelectorAll(selector)
+        const observer = new MutationObserver(() => {
+          const tooltip = document.querySelector('.tabTooltip')
+          if (!tooltip) return
+          observer.disconnect()
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            tooltip.getBoundingClientRect()
+            first.dispatchEvent(new PointerEvent('pointerleave'))
+            second.dispatchEvent(new PointerEvent('pointerenter'))
+            requestAnimationFrame(() => {
+              resolve({
+                entering: tooltip.classList.contains('tab-tooltip-enter-active'),
+                title: tooltip.querySelector('.tabTooltipTitle').textContent.trim(),
+                sliding: tooltip.getAnimations().some(animation =>
+                  ['top', 'left'].includes(animation.transitionProperty))
+              })
+            })
+          }))
+        })
+        observer.observe(document.body, { childList: true })
+        first.dispatchEvent(new PointerEvent('pointerenter'))
+      }), sel.tabs)
+      expect(handoff).toEqual({ entering: true, title: 'Second preview', sliding: true })
+    })
+  }
+
   test('captures the page content without the tab bar and header', async ({ page, attachScreenshot }) => {
     const dataUrl = await hoverTabForPreview(page, 0)
     await attachScreenshot('tab preview tooltip')
