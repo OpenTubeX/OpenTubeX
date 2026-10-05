@@ -21,6 +21,7 @@ for (const locale of ['en-US', 'de-DE']) {
       ['PICTURE_IN_PICTURE', 'KeyboardShortcutPrompt.Picture in Picture'],
       ['SET_AB_REPEAT_START', 'KeyboardShortcutPrompt.Set A-B Repeat Point A'],
       ['TOGGLE_SKIP_SILENCE', 'KeyboardShortcutPrompt.Toggle Skip Silence'],
+      ['FULLWINDOW', 'KeyboardShortcutPrompt.Full Window'],
     ]) assert.equal(labels.get(code), translate(key))
     assert.equal(labels.get('RELOAD_TAB'), labels.get('RELOAD_TAB_ALT'))
     assert.equal(getKeyboardShortcutLabelMappings(translate, true).some(([, codes]) => codes.includes('FULLWINDOW')), false)

@@ -115,7 +115,7 @@ const relativeTimeNow = useRelativeTimeClock()
 const { t, te, locale } = useI18n()
 const entries = computed(() => store.getters.getSyncServerActivity)
 const shortcutLabels = computed(() => new Map(
-  getKeyboardShortcutLabelMappings(t, process.env.IS_CAPACITOR)
+  getKeyboardShortcutLabelMappings(t)
     .flatMap(([label, codes]) => codes.map(code => [code, label]))
 ))
 const activityListId = useId()

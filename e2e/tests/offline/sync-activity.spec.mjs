@@ -87,6 +87,20 @@ for (const uiScale of [100, 125]) {
       await expect(activity.nth(2)).toContainText(/Keyboard Shortcuts · Toggle Picture-in-Picture mode/i)
     })
 
+    test('labels desktop-only shortcuts in cross-device activity', async ({ page }) => {
+      const sync = await goToSettingsSection(page, 'sync')
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        store.commit('setSyncServerToken', 'test-token')
+        store.commit('setSyncServerActivity', [
+          { id: 'desktop-shortcut', deviceName: 'Desktop', key: 'keyboardShortcuts', detail: 'FULLWINDOW', value: 's', createdAt: Date.now() },
+        ])
+        store.commit('setSyncServerLiveSupported', true)
+        store.commit('setSyncServerEnabled', true)
+      })
+      await expect(sync.locator('.syncActivity .activityList li p')).toHaveText('Desktop changed Keyboard Shortcuts · Toggle full window to s')
+    })
+
     test('keeps malformed caption anchors readable', async ({ page }) => {
       const sync = await goToSettingsSection(page, 'sync')
       await page.evaluate(() => {

@@ -1,4 +1,5 @@
 import { getConfiguredKeyboardShortcuts } from '../../constants.js'
+import { keyboardShortcutsEqual } from './keyboardShortcuts.js'
 import { areJsonValuesEqual } from './jsonValues.js'
 import { normalizeSubscriptionChannelSettings } from './subscription-channels.js'
 import { parseCaptionSettings } from './player/caption-settings.js'
@@ -214,7 +215,7 @@ function describeKeyboardShortcuts(before, after, changes) {
   for (const [group, sections] of Object.entries(current)) {
     for (const [section, shortcuts] of Object.entries(sections)) {
       for (const [detail, value] of Object.entries(shortcuts)) {
-        if (value.toLowerCase() === previous[group][section][detail].toLowerCase()) continue
+        if (keyboardShortcutsEqual(value, previous[group][section][detail])) continue
         // Never put an entire shortcut configuration in the activity log.
         changes.push({ key: 'keyboardShortcuts', detail, value: value === '' ? '' : activityText(value) })
       }

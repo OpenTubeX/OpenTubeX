@@ -333,3 +333,20 @@ test('shortcut activity describes changed bindings without serialized configurat
     'device', 'Laptop')
   assert.deepEqual(activity.changes, [{ key: 'keyboardShortcuts', detail: 'TOGGLE_SKIP_SILENCE', value: 'h' }])
 })
+
+
+test('shortcut activity ignores equivalent modifier aliases, ordering, and key spelling', () => {
+  const setting = binding => [{ key: 'keyboardShortcuts', value: JSON.stringify({ VIDEO_PLAYER: { PLAYBACK: { TOGGLE_SKIP_SILENCE: binding } } }) }]
+  for (const [before, after] of [
+    ['alt+h', 'option+h'],
+    ['ctrl+alt+h', 'option+ctrl+H'],
+    ['shift+alt+h', 'option+shift+h'],
+    [' ', 'space'],
+    ['shift+plus', 'plus'],
+    ['1-9', '1..9'],
+  ]) assert.equal(createSyncActivity('settings', setting(before), setting(after), 'device', 'Laptop'), null, `${before} -> ${after}`)
+  for (const [before, after] of [['alt+h', 'alt+j'], ['alt+h', 'h'], ['h', ''], ['', 'h'], ['1-9', '1'], ['1-9', '2-8']]) {
+    assert.deepEqual(createSyncActivity('settings', setting(before), setting(after), 'device', 'Laptop').changes,
+      [{ key: 'keyboardShortcuts', detail: 'TOGGLE_SKIP_SILENCE', value: after }])
+  }
+})
