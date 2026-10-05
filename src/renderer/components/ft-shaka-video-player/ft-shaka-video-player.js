@@ -4810,7 +4810,7 @@ export default defineComponent({
       }
 
       // Keep the control mounted when a panel can make theatre mode available.
-      if (!props.liveChatAvailable && (props.externalUrl || (!props.theatrePossible && props.chapters.length === 0 && !useSponsorBlock.value))) {
+      if (!props.liveChatAvailable && !props.theatrePossible && props.chapters.length === 0 && (props.externalUrl || !useSponsorBlock.value)) {
         removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_theatre_mode')
       }
 
@@ -5228,6 +5228,7 @@ export default defineComponent({
     const {
       cancelMobileFullscreenGesture,
       consumeMobileTitleClickSuppression,
+      dismissMobileMiniPlayer,
       finishMobileFullscreenGesture,
       handleMobilePlayerSurfaceClick,
       handleMobilePlayerTouchEnd,
@@ -5869,7 +5870,7 @@ export default defineComponent({
      * @param {HTMLElement} menu
      */
     function scheduleOverflowMenuLabelTitles(menu) {
-      if (overflowMenuTitleFrame !== null) {
+      if (!isActiveTab.value || menu.classList.contains('shaka-hidden') || overflowMenuTitleFrame !== null) {
         return
       }
 
@@ -5885,6 +5886,9 @@ export default defineComponent({
      * @param {HTMLElement} menu
      */
     function updateOverflowMenuLabelTitles(menu) {
+      if (!menu.isConnected || !isActiveTab.value || menu.classList.contains('shaka-hidden')) {
+        return
+      }
       for (const label of menu.querySelectorAll('.ft-menu-grid button span')) {
         const isVisible = label.clientWidth > 0 && label.clientHeight > 0
         const isClipped = isVisible && (
@@ -6389,8 +6393,9 @@ export default defineComponent({
         spacer.after(rightGlass)
       }
 
+      const timeDisplayGroup = controlPanel.querySelector('.ft-time-display-group')
       controlPanelResizeObserver = new ResizeObserver(entries => {
-        if (entries.some(entry => entry.target === controlPanel)) {
+        if (entries.some(entry => entry.target === controlPanel || entry.target === timeDisplayGroup)) {
           scheduleControlPanelLayout(controlPanel)
         }
         // Chapter width transitions can move these buttons without resizing
@@ -6402,15 +6407,30 @@ export default defineComponent({
       if (chaptersButton) {
         controlPanelResizeObserver.observe(chaptersButton)
       }
+      if (timeDisplayGroup) {
+        // Tabular timestamps usually change text without changing width.
+        // Measure only when the rendered group actually changes size.
+        controlPanelResizeObserver.observe(timeDisplayGroup)
+      }
 
       controlPanelMutationObserver = new MutationObserver(mutations => {
-        if (mutations.some(mutation => mutation.target !== controlPanel)) {
+        if (mutations.some(mutation => {
+          const target = mutation.target
+          if (target === controlPanel || target instanceof SVGElement ||
+            (mutation.type !== 'attributes' && timeDisplayGroup?.contains(target))) {
+            return false
+          }
+          // Shaka replaces icon paths and reapplies classes on media events.
+          // Neither an icon update nor an unchanged class affects geometry.
+          return mutation.type !== 'attributes' || mutation.oldValue !== target.getAttribute('class')
+        })) {
           scheduleControlPanelLayout(controlPanel)
         }
       })
       controlPanelMutationObserver.observe(controlPanel, {
         attributeFilter: ['class'],
         attributes: true,
+        attributeOldValue: true,
         characterData: true,
         childList: true,
         subtree: true
@@ -7242,6 +7262,7 @@ export default defineComponent({
       container,
       mobileMiniBarOverlay,
       fullWindowEnabled,
+      inlineSixteenByNine: computed(() => audioPlayerMode.value || forceAspectRatio.value || (!props.shortsPlayer && !videoLayoutReady.value)),
       getUi: () => ui,
       isActiveTab,
       isPlayerSuspended: shortsNavigationSuspended,
@@ -12805,6 +12826,7 @@ export default defineComponent({
       handleScrollMiniControlsPointerMove,
       suppressScrollMiniPlayPausePointerReveal,
       dismissCrossTabMiniPlayer,
+      dismissMobileMiniPlayer,
       scrollMiniTogglePlayPause,
       scrollMiniScrollToTop,
       restoreInlinePlayer,

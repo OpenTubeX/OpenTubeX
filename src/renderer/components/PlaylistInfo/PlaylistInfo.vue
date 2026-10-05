@@ -39,9 +39,10 @@
         <FtInput
           ref="playlistTitleInput"
           class="inputElement"
-          :placeholder="$t('User Playlists.Playlist Name')"
+          :label="$t('User Playlists.Playlist Name')"
+          :icon="['fas', 'list']"
+          :placeholder="$t('Form Inputs.Example', { example: $t('Tab Organizer.Icon Labels.Music') })"
           :show-action-button="false"
-          :show-label="false"
           :value="newTitle"
           :maxlength="255"
           @input="handlePlaylistNameInput"
@@ -95,9 +96,10 @@
     <FtInput
       v-if="editMode"
       class="inputElement descriptionInput"
-      :placeholder="$t('User Playlists.Playlist Description')"
+      :label="$t('User Playlists.Playlist Description')"
+      :icon="['fas', 'file-lines']"
+      :placeholder="$t('Form Inputs.Playlist Description Hint')"
       :show-action-button="false"
-      :show-label="false"
       :value="newDescription"
       @input="(input) => newDescription = input"
       @keydown.enter="savePlaylistInfo"
@@ -280,7 +282,9 @@
             ref="searchInput"
             class="inputElement"
             input-type="search"
-            :placeholder="$t('User Playlists.SinglePlaylistView.Search for Videos')"
+            :label="$t('User Playlists.SinglePlaylistView.Search for Videos')"
+            :icon="['fas', 'search']"
+            :placeholder="$t('Form Inputs.Search Text Hint')"
             :show-action-button="false"
             :value="query"
             :maxlength="255"
@@ -801,7 +805,6 @@ async function savePlaylistInfo() {
     protected: selectedUserPlaylist.value.protected,
     description: newDescription.value,
     quickBookmarkIcon: newQuickBookmarkIcon.value,
-    videos: deepCopy(selectedUserPlaylist.value.videos),
     _id: props.id,
   }
   try {

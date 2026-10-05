@@ -441,8 +441,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Sáng"
-      OpenTubeX Dark: "OpenTubeX Tối"
+      Ocean Light: "Ocean Sáng"
+      Ocean Dark: "Ocean Tối"
       Custom: Tùy chỉnh
     Light Theme: Chủ đề sáng
     Dark Theme: Chủ đề tối
@@ -1959,6 +1959,15 @@ Tray Icon:
   Follow App Theme: "Theo chủ đề ứng dụng"
 
 Form Inputs:
+  Enter Password Hint: "Nhập mật khẩu của bạn"
+  Choose Password Hint: "Chọn mật khẩu"
+  Confirm Password Hint: "Nhập lại mật khẩu mới"
+  Encryption Passphrase Hint: "Nhập cụm mật khẩu mã hóa của bạn"
+  Show Password: "Hiện mật khẩu"
+  Hide Password: "Ẩn mật khẩu"
+  Search Text Hint: "Nhập từ khóa tìm kiếm"
+  Playlist Description Hint: "Mô tả danh sách phát này"
+  Filename Preview: "Xem trước tên tệp"
   Enter Channels: "Nhập kênh"
   Enter Text: "Nhập văn bản"
   Video URL: URL video hoặc danh sách phát
@@ -1977,3 +1986,6 @@ Form Inputs:
   Download Arguments Hint: Đối số tùy chọn cho lượt tải này
   Generated ID Hint: Để trống để tạo ID
   Default Value: "Mặc định: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Tìm kiếm bằng cookie đã cấu hình thất bại."

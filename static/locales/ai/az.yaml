@@ -424,8 +424,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: OpenTubeX Açıq
-      OpenTubeX Dark: OpenTubeX Tünd
+      Ocean Light: Ocean Açıq
+      Ocean Dark: Ocean Tünd
       Custom: Fərdi
     Main Color Theme:
       Catppuccin Macchiato Rosewater: Catppuccin Macchiato Rosewater
@@ -1930,6 +1930,15 @@ Tray Icon:
   Follow App Theme: "Tətbiqin mövzusunu izlə"
 
 Form Inputs:
+  Enter Password Hint: "Şifrənizi daxil edin"
+  Choose Password Hint: "Şifrə seçin"
+  Confirm Password Hint: "Yeni şifrənizi təkrarlayın"
+  Encryption Passphrase Hint: "Şifrələmə parol ifadənizi daxil edin"
+  Show Password: "Şifrəni göstər"
+  Hide Password: "Şifrəni gizlət"
+  Search Text Hint: "Axtarış sözlərini daxil edin"
+  Playlist Description Hint: "Bu pleylisti təsvir edin"
+  Filename Preview: "Fayl adının önizləməsi"
   Enter Channels: "Kanalları daxil edin"
   Enter Text: "Mətn daxil edin"
   Video URL: Video və ya pleylist URL-si
@@ -1948,3 +1957,6 @@ Form Inputs:
   Download Arguments Hint: Bu yükləmə üçün əlavə arqumentlər
   Generated ID Hint: ID yaratmaq üçün boş saxlayın
   Default Value: "Standart: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Konfiqurasiya edilmiş kukilərlə axtarış alınmadı."

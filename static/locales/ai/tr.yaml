@@ -437,8 +437,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Açık"
-      OpenTubeX Dark: "OpenTubeX Koyu"
+      Ocean Light: "Ocean Açık"
+      Ocean Dark: "Ocean Koyu"
       Custom: Özel
     Light Theme: Açık tema
     Dark Theme: Koyu tema
@@ -1921,6 +1921,15 @@ Tray Icon:
   Follow App Theme: "Uygulama temasını izle"
 
 Form Inputs:
+  Enter Password Hint: "Parolanızı girin"
+  Choose Password Hint: "Bir parola seçin"
+  Confirm Password Hint: "Yeni parolanızı tekrarlayın"
+  Encryption Passphrase Hint: "Şifreleme parola ifadenizi girin"
+  Show Password: "Parolayı göster"
+  Hide Password: "Parolayı gizle"
+  Search Text Hint: "Arama terimlerini girin"
+  Playlist Description Hint: "Bu oynatma listesini açıklayın"
+  Filename Preview: "Dosya adı önizlemesi"
   Enter Channels: "Kanalları girin"
   Enter Text: "Metin girin"
   Video URL: Video veya oynatma listesi URL'si
@@ -1939,3 +1948,6 @@ Form Inputs:
   Download Arguments Hint: Bu indirme için isteğe bağlı argümanlar
   Generated ID Hint: Kimlik oluşturmak için boş bırakın
   Default Value: "Varsayılan: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Yapılandırılan çerezlerle arama başarısız oldu."

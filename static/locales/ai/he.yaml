@@ -441,8 +441,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX בהירה"
-      OpenTubeX Dark: "OpenTubeX כהה"
+      Ocean Light: "Ocean בהירה"
+      Ocean Dark: "Ocean כהה"
       Custom: מותאמת אישית
     Light Theme: ערכת נושא בהירה
     Dark Theme: ערכת נושא כהה
@@ -1971,6 +1971,15 @@ Tray Icon:
   Follow App Theme: "התאמה לערכת הנושא של היישום"
 
 Form Inputs:
+  Enter Password Hint: "הזן את הסיסמה שלך"
+  Choose Password Hint: "בחר סיסמה"
+  Confirm Password Hint: "הזן שוב את הסיסמה החדשה שלך"
+  Encryption Passphrase Hint: "הזן את ביטוי הסיסמה להצפנה שלך"
+  Show Password: "הצג סיסמה"
+  Hide Password: "הסתר סיסמה"
+  Search Text Hint: "הזן מונחי חיפוש"
+  Playlist Description Hint: "תאר את רשימת ההשמעה הזו"
+  Filename Preview: "תצוגה מקדימה של שם הקובץ"
   Enter Channels: "הזנת ערוצים"
   Enter Text: "הזנת טקסט"
   Video URL: כתובת סרטון או רשימת השמעה
@@ -1989,3 +1998,6 @@ Form Inputs:
   Download Arguments Hint: ארגומנטים אופציונליים להורדה זו
   Generated ID Hint: השאר ריק כדי ליצור מזהה
   Default Value: "ברירת מחדל: {value}"
+
+Search Filters:
+  Cookie Search Failed: "החיפוש באמצעות קובצי העוגיות שהוגדרו נכשל."

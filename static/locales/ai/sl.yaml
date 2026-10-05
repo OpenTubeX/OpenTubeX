@@ -87,6 +87,7 @@ Search Listing:
     3D: 3D
     Closed Captions: Podnapisi za gluhe in naglušne
 Search Filters:
+  Cookie Search Failed: "Iskanje z nastavljenimi piškotki ni uspelo."
   Features:
     360 Video: 360-stopinjski videoposnetek
   Clear Filters: Počisti filtre
@@ -552,8 +553,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX svetla"
-      OpenTubeX Dark: "OpenTubeX temna"
+      Ocean Light: "Ocean svetla"
+      Ocean Dark: "Ocean temna"
       Custom: Po meri
       Catppuccin Frappe: Catppuccin Frappe
       Catppuccin Latte: Catppuccin Latte
@@ -2517,6 +2518,15 @@ Tray Icon:
   Follow App Theme: "Sledi temi aplikacije"
 
 Form Inputs:
+  Enter Password Hint: "Vnesite svoje geslo"
+  Choose Password Hint: "Izberite geslo"
+  Confirm Password Hint: "Ponovite novo geslo"
+  Encryption Passphrase Hint: "Vnesite svoje šifrirno geslo"
+  Show Password: "Prikaži geslo"
+  Hide Password: "Skrij geslo"
+  Search Text Hint: "Vnesite iskalne izraze"
+  Playlist Description Hint: "Opišite ta seznam predvajanja"
+  Filename Preview: "Predogled imena datoteke"
   Enter Channels: "Vnesite kanale"
   Enter Text: "Vnesite besedilo"
   Video URL: URL videa ali seznama predvajanja

@@ -17,8 +17,9 @@
       class="passwordForm"
     >
       <FtInput
+        :icon="['fas', 'lock']"
         :label="$t('Settings.Password Dialog.Password')"
-        placeholder=""
+        :placeholder="$t('Form Inputs.Choose Password Hint')"
         :supporting-text="$t('Settings.Password Settings.Set Password To Prevent Access')"
         :show-action-button="false"
         show-label

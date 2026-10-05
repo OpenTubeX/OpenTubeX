@@ -8,6 +8,7 @@
      the scrollport clip (overflow-y cannot stay visible while overflow-x scrolls). */
   align-items: flex-end;
   background-color: var(--side-nav-color);
+  box-shadow: 0 2px 1px 0 var(--primary-shadow-color);
   block-size: var(--top-tab-bar-height, 32px);
   min-block-size: var(--top-tab-bar-height, 32px);
 
@@ -203,6 +204,7 @@
 
 .tabBar.position-bottom {
   align-items: flex-start;
+  box-shadow: 0 -2px 1px 0 var(--primary-shadow-color);
   block-size: 34px;
   min-block-size: 34px;
   position: fixed;
@@ -250,13 +252,13 @@
 .tabBar.vertical.position-left {
   left: 0;
   right: auto;
-  box-shadow: 3px 0 8px rgb(0 0 0 / 12%);
+  box-shadow: 2px 0 1px 0 var(--primary-shadow-color);
 }
 
 .tabBar.vertical.position-right {
   left: auto;
   right: 0;
-  box-shadow: -3px 0 8px rgb(0 0 0 / 12%);
+  box-shadow: -2px 0 1px 0 var(--primary-shadow-color);
 }
 
 /* Keep the scrollbar against the window edge, leaving tab content and the

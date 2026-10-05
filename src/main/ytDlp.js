@@ -21,6 +21,7 @@ import { getMatchingDownloadValidators, getYtDlpAssetName } from './ytDlpAsset'
 import { buildYtDlpStoryboardVtt } from './ytDlpStoryboard'
 import { downloadYtDlpSubtitle } from './ytDlpSubtitle'
 import { isYouTubeSubtitleUrl } from '../youtubeSubtitle'
+import { buildYtDlpSearchArguments, normalizeYtDlpSearchResults } from '../ytDlpSearch'
 import { shouldUseGioTrash } from './trashPlatform'
 import {
   compareQueuedDownloads,
@@ -1904,6 +1905,32 @@ export async function handleYtDlpGetHistoryMetadata(event, videoId) {
   } finally {
     requests.delete(controller)
     if (requests.size === 0) historyMetadataRequests.delete(senderId)
+  }
+}
+
+export async function handleYtDlpSearch(event, query, params, page) {
+  if (!isOpenTubeXUrl(event.senderFrame.url)) return null
+  try {
+    const args = buildYtDlpSearchArguments(query, params, page)
+    const target = args.splice(-2)
+    const authenticationError = await pushYtDlpPlaybackAuthenticationArguments(args)
+    if (authenticationError !== null) return { error: authenticationError }
+    const { source, executable } = await resolveExecutable('ytDlpSource', 'ytDlpPath', 'yt-dlp')
+    if (source === 'managed' && !existsSync(executable)) {
+      const result = await downloadManagedYtDlp()
+      if ('error' in result) return { error: result.error }
+    }
+    await pushProxyArgument(args)
+    args.push(...target)
+    const { stdout } = await execFileAsync(executable, args, {
+      timeout: PLAYBACK_INFO_TIMEOUT,
+      maxBuffer: PLAYBACK_INFO_MAX_BUFFER,
+      windowsHide: true
+    })
+    return normalizeYtDlpSearchResults(JSON.parse(stdout), page)
+  } catch {
+    // Process errors can contain account information or cookie paths.
+    return { error: 'Unable to search with configured cookies' }
   }
 }
 

@@ -439,8 +439,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Golau"
-      OpenTubeX Dark: "OpenTubeX Tywyll"
+      Ocean Light: "Ocean Golau"
+      Ocean Dark: "Ocean Tywyll"
       Custom: Personol
     Light Theme: Thema olau
     Dark Theme: Thema dywyll
@@ -1952,6 +1952,15 @@ Tray Icon:
   Follow App Theme: "Dilyn thema’r ap"
 
 Form Inputs:
+  Enter Password Hint: "Rhowch eich cyfrinair"
+  Choose Password Hint: "Dewiswch gyfrinair"
+  Confirm Password Hint: "Ailadroddwch eich cyfrinair newydd"
+  Encryption Passphrase Hint: "Rhowch eich ymadrodd cyfrinachol amgryptio"
+  Show Password: "Dangos cyfrinair"
+  Hide Password: "Cuddio cyfrinair"
+  Search Text Hint: "Rhowch dermau chwilio"
+  Playlist Description Hint: "Disgrifiwch y rhestr chwarae hon"
+  Filename Preview: "Rhagolwg o enw'r ffeil"
   Enter Channels: "Rhowch sianeli"
   Enter Text: "Rhowch destun"
   Video URL: URL fideo neu restr chwarae
@@ -1970,3 +1979,6 @@ Form Inputs:
   Download Arguments Hint: Ymresymiadau dewisol ar gyfer y lawrlwythiad hwn
   Generated ID Hint: Gadewch yn wag i gynhyrchu ID
   Default Value: "Diofyn: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Methodd y chwiliad gyda’r cwcis wedi’u ffurfweddu."

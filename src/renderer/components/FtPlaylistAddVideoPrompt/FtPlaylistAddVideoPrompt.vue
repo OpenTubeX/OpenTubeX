@@ -25,7 +25,9 @@
         <FtInput
           ref="searchBar"
           input-type="search"
-          :placeholder="t('User Playlists.AddVideoPrompt.Search in Playlists')"
+          :label="t('User Playlists.AddVideoPrompt.Search in Playlists')"
+          :icon="['fas', 'search']"
+          :placeholder="t('Form Inputs.Search Text Hint')"
           :show-action-button="false"
           :maxlength="255"
           @input="updateQueryDebounce"

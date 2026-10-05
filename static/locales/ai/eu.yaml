@@ -437,8 +437,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Argia"
-      OpenTubeX Dark: "OpenTubeX Iluna"
+      Ocean Light: "Ocean Argia"
+      Ocean Dark: "Ocean Iluna"
       Custom: Pertsonalizatua
     Light Theme: Gai argia
     Dark Theme: Gai iluna
@@ -1938,6 +1938,15 @@ Tray Icon:
   Follow App Theme: "Jarraitu aplikazioaren gaiari"
 
 Form Inputs:
+  Enter Password Hint: "Sartu zure pasahitza"
+  Choose Password Hint: "Aukeratu pasahitz bat"
+  Confirm Password Hint: "Errepikatu zure pasahitz berria"
+  Encryption Passphrase Hint: "Sartu zure zifratze-pasaesaldia"
+  Show Password: "Erakutsi pasahitza"
+  Hide Password: "Ezkutatu pasahitza"
+  Search Text Hint: "Sartu bilaketa-hitzak"
+  Playlist Description Hint: "Deskribatu erreprodukzio-zerrenda hau"
+  Filename Preview: "Fitxategi-izenaren aurrebista"
   Enter Channels: "Sartu kanalak"
   Enter Text: "Sartu testua"
   Video URL: Bideoaren edo erreprodukzio-zerrendaren URLa
@@ -1956,3 +1965,6 @@ Form Inputs:
   Download Arguments Hint: Aukerako argumentuak deskarga honetarako
   Generated ID Hint: Utzi hutsik ID bat sortzeko
   Default Value: "Lehenetsia: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Konfiguratutako cookieekin egindako bilaketak huts egin du."

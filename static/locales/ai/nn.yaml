@@ -444,8 +444,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Lys"
-      OpenTubeX Dark: "OpenTubeX Mørk"
+      Ocean Light: "Ocean Lys"
+      Ocean Dark: "Ocean Mørk"
       Custom: Eige
       Catppuccin Frappe: Catppuccin Frappe
       Catppuccin Latte: Catppuccin Latte
@@ -2309,6 +2309,15 @@ Tray Icon:
   Follow App Theme: "Følg temaet til appen"
 
 Form Inputs:
+  Enter Password Hint: "Skriv inn passordet ditt"
+  Choose Password Hint: "Vel eit passord"
+  Confirm Password Hint: "Gjenta det nye passordet ditt"
+  Encryption Passphrase Hint: "Skriv inn krypteringspassfrasen din"
+  Show Password: "Vis passord"
+  Hide Password: "Gøym passord"
+  Search Text Hint: "Skriv inn søkjeord"
+  Playlist Description Hint: "Skildre denne spelelista"
+  Filename Preview: "Førehandsvising av filnamn"
   Enter Channels: "Skriv inn kanalar"
   Enter Text: "Skriv inn tekst"
   Video URL: Video- eller speleliste-URL
@@ -2327,3 +2336,6 @@ Form Inputs:
   Download Arguments Hint: Valfrie argument for denne nedlastinga
   Generated ID Hint: Lat stå tomt for å generere ein ID
   Default Value: "Standard: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Søk med dei konfigurerte informasjonskapslane mislukkast."

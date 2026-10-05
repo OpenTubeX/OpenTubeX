@@ -437,8 +437,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX 淺色"
-      OpenTubeX Dark: "OpenTubeX 深色"
+      Ocean Light: "Ocean 淺色"
+      Ocean Dark: "Ocean 深色"
       Custom: 自訂
     Light Theme: 淺色主題
     Dark Theme: 深色主題
@@ -1922,6 +1922,15 @@ Tray Icon:
   Follow App Theme: "跟隨應用程式主題"
 
 Form Inputs:
+  Enter Password Hint: "輸入你的密碼"
+  Choose Password Hint: "設定密碼"
+  Confirm Password Hint: "再次輸入新密碼"
+  Encryption Passphrase Hint: "輸入你的加密通關密語"
+  Show Password: "顯示密碼"
+  Hide Password: "隱藏密碼"
+  Search Text Hint: "輸入搜尋詞"
+  Playlist Description Hint: "描述此播放清單"
+  Filename Preview: "檔案名稱預覽"
   Enter Channels: "輸入頻道"
   Enter Text: "輸入文字"
   Video URL: 影片或播放清單 URL
@@ -1940,3 +1949,6 @@ Form Inputs:
   Download Arguments Hint: 此次下載的選用參數
   Generated ID Hint: 留空以產生 ID
   Default Value: 預設值：{value}
+
+Search Filters:
+  Cookie Search Failed: "使用已設定的 Cookie 搜尋失敗。"

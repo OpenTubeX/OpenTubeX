@@ -6,7 +6,9 @@
 
     <FtInput
       ref="password"
-      :placeholder="$t('Settings.Password Dialog.Password')"
+      :label="$t('Settings.Password Dialog.Password')"
+      :icon="['fas', 'lock']"
+      :placeholder="$t('Settings.Password Dialog.Enter Password To Unlock')"
       :show-action-button="false"
       input-type="password"
       class="passwordInput"

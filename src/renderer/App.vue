@@ -40,6 +40,7 @@
     <SideNav
       :inert="isAnyPromptOpen"
       :force-expanded="useWatchSideNavOverlay"
+      :data-watch-return-expanded="sideNavOpenBeforeWatchOverlay"
     />
     <Transition name="fade">
       <button
@@ -872,26 +873,26 @@ const useWatchSideNavOverlay = computed(() => {
   return store.getters.getHideSideBarOnWatchPages && (route.path.startsWith('/watch/') || route.path === '/external-media')
 })
 
-let sideNavOpenBeforeWatchOverlay = null
+const sideNavOpenBeforeWatchOverlay = ref(null)
 const watchSideNavTransitionDisabled = ref(false)
 let watchSideNavTransitionFrame = null
 
 watch(useWatchSideNavOverlay, (enabled) => {
   if (enabled) {
     disableWatchSideNavTransitionForNextFrame()
-    sideNavOpenBeforeWatchOverlay = isSideNavOpen.value
+    sideNavOpenBeforeWatchOverlay.value = isSideNavOpen.value
     closeSideNav()
-  } else if (sideNavOpenBeforeWatchOverlay !== null) {
+  } else if (sideNavOpenBeforeWatchOverlay.value !== null) {
     // Leaving the overlay brings the sidebar back into normal flow and may
     // reopen it. Suppress its inline-size transition for the reflow so the
     // content snaps to its final position instead of sliding in from the right.
     disableWatchSideNavTransitionForNextFrame()
 
-    if (isSideNavOpen.value !== sideNavOpenBeforeWatchOverlay) {
+    if (isSideNavOpen.value !== sideNavOpenBeforeWatchOverlay.value) {
       store.commit('toggleSideNav')
     }
 
-    sideNavOpenBeforeWatchOverlay = null
+    sideNavOpenBeforeWatchOverlay.value = null
   }
 }, { immediate: true })
 
@@ -1751,6 +1752,10 @@ onMounted(async () => {
   }
   document.addEventListener('keyup', handleKeyboardShortcutKeyup)
   document.addEventListener('mousedown', handleMouseDown)
+  document.addEventListener('pointermove', handleNumberInputPointer, { passive: true })
+  document.addEventListener('pointerdown', handleNumberInputPointer, { capture: true, passive: true })
+  document.addEventListener('pointerup', handleNumberInputPointer, { capture: true, passive: true })
+  document.addEventListener('pointerout', handleNumberInputPointer, { passive: true })
   document.addEventListener('dragstart', handleDragStart)
   window.addEventListener('blur', cancelTabSwitcher)
   window.addEventListener('online', refreshOverdueSubscriptionFeeds)
@@ -1818,6 +1823,10 @@ onBeforeUnmount(() => {
   document.removeEventListener('contextmenu', handleMobileLinkContextMenu, true)
   document.removeEventListener('keyup', handleKeyboardShortcutKeyup)
   document.removeEventListener('mousedown', handleMouseDown)
+  document.removeEventListener('pointermove', handleNumberInputPointer)
+  document.removeEventListener('pointerdown', handleNumberInputPointer, true)
+  document.removeEventListener('pointerup', handleNumberInputPointer, true)
+  document.removeEventListener('pointerout', handleNumberInputPointer)
   document.removeEventListener('dragstart', handleDragStart)
   document.removeEventListener('click', handleClick)
   document.removeEventListener('auxclick', handleAuxClick)
@@ -4313,6 +4322,41 @@ async function closeShortcutTabs() {
 
 function handleMouseDown() {
   store.dispatch('hideOutlines')
+}
+
+/** @param {PointerEvent} event */
+function handleNumberInputPointer(event) {
+  const input = event.target
+  if (!(input instanceof HTMLInputElement) || input.type !== 'number') return
+  if (event.type === 'pointerout') {
+    if (event.relatedTarget !== input) {
+      input.style.removeProperty('--number-step-up-color')
+      input.style.removeProperty('--number-step-down-color')
+    }
+    return
+  }
+  if (input.disabled || input.readOnly) return
+
+  // Chromium exposes both native step arrows as one pseudo-element. Split its
+  // paint at the content's center while keeping native stepping and key repeat.
+  const bounds = input.getBoundingClientRect()
+  const style = getComputedStyle(input)
+  const rtl = style.direction === 'rtl'
+  const edge = rtl ? bounds.left + parseFloat(style.paddingLeft) + 4 : bounds.right - parseFloat(style.paddingRight) - 4
+  const middle = bounds.top + (bounds.height + parseFloat(style.paddingTop) - parseFloat(style.paddingBottom)) / 2
+  let hoveredStep = ''
+  if (Math.abs(event.clientX - edge) <= 12 && Math.abs(event.clientY - middle) <= 14) {
+    hoveredStep = event.clientY < middle ? 'up' : 'down'
+  }
+  const highlight = event.buttons & 1 ? 'var(--primary-color-active)' : 'var(--primary-color)'
+  for (const step of ['up', 'down']) {
+    const property = `--number-step-${step}-color`
+    const color = hoveredStep === step ? highlight : ''
+    if (input.style.getPropertyValue(property) !== color) {
+      if (color) input.style.setProperty(property, color)
+      else input.style.removeProperty(property)
+    }
+  }
 }
 
 const lastExternalLinkToBeOpened = ref('')

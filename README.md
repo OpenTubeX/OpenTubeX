@@ -212,20 +212,6 @@ The first build with a green check mark is the latest build.
 * Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/opentubex-git/) (`opentubex-git`)
 * Android: [OpenTubeX Nightly on F-Droid](https://fdroid.opentubex.org/#release-channels), [OpenTubeX Nightly through Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22org.opentubex.app.nightly%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FOpenTubeX%2FOpenTubeX%22%2C%22author%22%3A%22OpenTubeX%22%2C%22name%22%3A%22OpenTubeX%20Nightly%22%2C%22preferredApkIndex%22%3A0%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Atrue%2C%5C%22fallbackToOlderReleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22nightly%5C%22%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22android-%28arm64-v8a%7Carmeabi-v7a%7Cx86_64%7Cx86%7Cuniversal%29%5B.%5Dapk%24%5C%22%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%7D%22%2C%22overrideSource%22%3A%22GitHub%22%7D), or an APK for your device’s architecture from the build artifacts
 
-
-<a id="project-activity"></a>
-## 📈 Project activity
-
-![Repobeats analytics image](https://repobeats.axiom.co/api/embed/7abf4173ece7177b69cfb890c44de4385c4a45f1.svg "Repobeats analytics image")
-
-<a href="https://www.star-history.com/?repos=OpenTubeX%2FOpenTubeX&type=date&legend=bottom-right">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=OpenTubeX/OpenTubeX&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=OpenTubeX/OpenTubeX&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=OpenTubeX/OpenTubeX&type=date&legend=top-left" />
- </picture>
-</a>
-
 <a id="contributing"></a>
 ## 🤝 Contributing
 Thank you very much to the people and projects that make OpenTubeX possible!
@@ -271,4 +257,17 @@ OpenTubeX is Free Software: You can use, study share and improve it at your
 will. Specifically you can redistribute and/or modify it under the terms of the
 [GNU Affero General Public License](https://www.gnu.org/licenses/agpl-3.0.html) as
 published by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.  
+(at your option) any later version.
+
+<a id="project-activity"></a>
+## 📈 Project activity
+
+![Repobeats analytics image](https://repobeats.axiom.co/api/embed/7abf4173ece7177b69cfb890c44de4385c4a45f1.svg "Repobeats analytics image")
+
+<a href="https://www.star-history.com/?repos=OpenTubeX%2FOpenTubeX&type=date&legend=bottom-right">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=OpenTubeX/OpenTubeX&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=OpenTubeX/OpenTubeX&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=OpenTubeX/OpenTubeX&type=date&legend=top-left" />
+ </picture>
+</a>

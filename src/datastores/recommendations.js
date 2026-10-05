@@ -1,4 +1,5 @@
 import { RECOMMENDATION_RECORD_LIMIT, RECOMMENDATION_RETENTION_MS, updateRecommendationRecord } from '../recommendation-learning.js'
+import { createIdQuery } from './idQuery.js'
 
 /** Local evidence store, shared by Electron windows through its main process. */
 export function createRecommendationStore(db, createEpoch = () => crypto.randomUUID()) {
@@ -52,7 +53,7 @@ export function createRecommendationStore(db, createEpoch = () => crypto.randomU
             }
             const excess = await db.findAsync({ _id: { $ne: 'meta' } }, { _id: 1 }).sort({ updatedAt: -1 }).skip(RECOMMENDATION_RECORD_LIMIT)
             removed = excess.map(entry => entry._id)
-            if (removed.length) await db.removeAsync({ _id: { $in: removed } }, { multi: true })
+            if (removed.length) await db.removeAsync(createIdQuery('_id', removed), { multi: true })
             await db.updateAsync({ _id: 'meta' }, { $set: { revision: revision + 1 } })
           }
           return batch.events.map(entry => entry?.epoch !== epoch
@@ -67,7 +68,7 @@ export function createRecommendationStore(db, createEpoch = () => crypto.randomU
     },
     remove: videoIds => queue(async () => {
       const { revision } = await meta()
-      await db.removeAsync({ _id: { $in: videoIds } }, { multi: true })
+      await db.removeAsync(createIdQuery('_id', videoIds), { multi: true })
       await db.updateAsync({ _id: 'meta' }, { _id: 'meta', version: 1, epoch: createEpoch(), revision: revision + 1 }, { upsert: true })
       return snapshot()
     }),

@@ -29,6 +29,7 @@
       <template v-if="receiveStage === 'name'">
         <p>{{ t('Settings.Sync Settings.Pairing Device Name Hint') }}</p>
         <FtInput
+          :icon="['fas', 'devices']"
           :label="t('Settings.Sync Settings.Device Name')"
           :placeholder="t('Form Inputs.Example', { example: t('Settings.Sync Settings.Desktop Device') })"
           :show-action-button="false"
@@ -54,16 +55,17 @@
       </template>
       <template v-else-if="receiveStage === 'waiting'">
         <template v-if="showTextCode">
-          <label class="pairingCodeField">
-            <span>{{ t('Settings.Sync Settings.Pairing Code') }}</span>
-            <input
-              :value="pairingCode"
-              readonly
-              spellcheck="false"
-              @focus="$event.target.select()"
-              @click="$event.target.select()"
-            >
-          </label>
+          <FtInput
+            ref="pairingCodeInput"
+            :label="t('Settings.Sync Settings.Pairing Code')"
+            :icon="['fas', 'key']"
+            :value="pairingCode"
+            :placeholder="t('Form Inputs.Example', { example: 'opentubex-pairing:…' })"
+            :show-action-button="false"
+            readonly
+            select-on-click
+            @focus="pairingCodeInput?.select()"
+          />
           <p>{{ t('Settings.Sync Settings.Text Pairing Code Hint') }}</p>
         </template>
         <template v-else>
@@ -184,16 +186,17 @@
       </template>
       <template v-else-if="approveStage === 'manual'">
         <p>{{ t('Settings.Sync Settings.Pairing Code Entry Hint') }}</p>
-        <label class="pairingCodeField">
-          <span>{{ t('Settings.Sync Settings.Pairing Code') }}</span>
-          <textarea
-            ref="manualPairingCodeInput"
-            v-model="manualPairingCode"
-            maxlength="2048"
-            rows="8"
-            spellcheck="false"
-          />
-        </label>
+        <FtInput
+          ref="manualPairingCodeInput"
+          :label="t('Settings.Sync Settings.Pairing Code')"
+          :icon="['fas', 'key']"
+          :value="manualPairingCode"
+          :placeholder="t('Form Inputs.Example', { example: 'opentubex-pairing:…' })"
+          :maxlength="2048"
+          :show-action-button="false"
+          multiline
+          @input="manualPairingCode = $event"
+        />
         <p
           v-if="approveError"
           class="pairingError"
@@ -377,6 +380,7 @@ const manualPairingCode = ref('')
 const pairingRequest = ref(null)
 const approvalVerificationCode = ref('')
 const scannerVideo = useTemplateRef('scannerVideo')
+const pairingCodeInput = useTemplateRef('pairingCodeInput')
 const manualPairingCodeInput = useTemplateRef('manualPairingCodeInput')
 
 const receiveExpiryLabel = computed(() => formatTime(

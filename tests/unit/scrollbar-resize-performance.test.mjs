@@ -121,3 +121,31 @@ test('clamping tolerates fractional range differences without resetting the orig
   assert.deepEqual(fixture.writes, [])
   assert.equal(fixture.element.scrollTop, 215.4)
 })
+
+const optionsFunctions = source.slice(source.indexOf('function scrollbarOptions('), source.indexOf('/**\n * @param {HTMLElement | object}'))
+
+test('page scrollbar ignores clipped tab-bar mutations while nested scrollbars still observe them', () => {
+  class Element {
+    constructor(inTabBar = false) { this.inTabBar = inTabBar }
+    closest(selector) { return selector === '.tabBar' && this.inTabBar ? this : null }
+  }
+  const body = new Element()
+  const context = vm.createContext({
+    Element,
+    document: { body, documentElement: { dir: 'ltr' } },
+    process: { env: { IS_CAPACITOR: false } }
+  })
+  const options = vm.runInContext(`${optionsFunctions}; scrollbarOptions(document.body)`, context)
+  const ignore = options.update.ignoreMutation
+  const tab = new Element(true)
+  assert.equal(ignore({ target: tab }), true)
+  assert.equal(ignore({ target: { parentElement: tab } }), true, 'tab title text does not change page overflow')
+  assert.equal(ignore({ target: new Element() }), false, 'page content still triggers measurements')
+  assert.equal(ignore({ target: { parentElement: new Element() } }), false)
+  assert.equal(ignore({ target: { parentElement: null } }), false)
+  assert.deepEqual(Array.from(options.update.debounce.resize), [0, 33])
+  context.nested = { elements: { viewport: tab } }
+  assert.equal(vm.runInContext('scrollbarOptions(nested).update', context), undefined, 'nested tab-bar scrolling keeps its own observers')
+  context.document.documentElement.dir = 'rtl'
+  assert.equal(options.update.flowDirectionStyles().direction, 'rtl')
+})

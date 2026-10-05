@@ -529,3 +529,18 @@ test('subscription activity resolves to its control even with a partially transl
     section: 'subscriptions', match: { label: 'Subscription settings', settingKey: 'subscriptionChannelSettings' },
   })
 })
+
+test('sync search indexes controls and actions without progress or server feedback', () => {
+  const values = ['', 'test-token'].flatMap(token => createSettingsSearchIndex({
+    sections: [{ type: 'sync', title: 'Sync', description: '' }],
+    tm: path => getAtPath(locale, path),
+    store: { getters: { getSyncServerEnabled: true, getSyncServerToken: token } },
+    usingElectron: true,
+  }).get('sync').map(match => match.label))
+  for (const key of ['Syncing history', 'Syncing subscriptions', 'Uploading encrypted data', 'Finishing sync', 'History not supported', 'Settings not supported', 'Enhanced Privacy Enabled', 'Previous Auto Sync Notice', 'Video Sent']) {
+    assert.equal(values.includes(locale.Settings['Sync Settings'][key]), false, key)
+  }
+  for (const key of ['Enable Sync', 'Sync Now', 'Privacy Passphrase', 'Change Password', 'Pair Another Device', 'Privacy Policy', 'Confirm Data Loss', 'Open All Tabs', 'Open On Device', 'Turn Flashlight On', 'Turn Flashlight Off']) {
+    assert.equal(values.includes(locale.Settings['Sync Settings'][key]), true, key)
+  }
+})

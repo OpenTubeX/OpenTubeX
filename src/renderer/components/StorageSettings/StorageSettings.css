@@ -152,8 +152,12 @@
   text-align: end;
 }
 
-.storageSettings :deep(.sectionBody) {
-  padding-block-end: 16px;
+.storageSettings :deep(.settingsSection > .sectionBody) {
+  padding-block: 0;
+}
+
+.storageSettings :deep(.sectionTitle) {
+  margin-block: 0;
 }
 
 .storageSettings :deep(.sectionBody:has(> .storageItem)) {

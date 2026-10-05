@@ -437,8 +437,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX ライト"
-      OpenTubeX Dark: "OpenTubeX ダーク"
+      Ocean Light: "Ocean ライト"
+      Ocean Dark: "Ocean ダーク"
       Custom: カスタム
     Light Theme: ライトテーマ
     Dark Theme: ダークテーマ
@@ -1920,6 +1920,15 @@ Tray Icon:
   Follow App Theme: "アプリのテーマに合わせる"
 
 Form Inputs:
+  Enter Password Hint: "パスワードを入力"
+  Choose Password Hint: "パスワードを設定"
+  Confirm Password Hint: "新しいパスワードをもう一度入力"
+  Encryption Passphrase Hint: "暗号化パスフレーズを入力"
+  Show Password: "パスワードを表示"
+  Hide Password: "パスワードを非表示"
+  Search Text Hint: "検索語句を入力"
+  Playlist Description Hint: "このプレイリストの説明を入力"
+  Filename Preview: "ファイル名のプレビュー"
   Enter Channels: "チャンネルを入力"
   Enter Text: "テキストを入力"
   Video URL: 動画またはプレイリストのURL
@@ -1938,3 +1947,6 @@ Form Inputs:
   Download Arguments Hint: このダウンロードに追加する任意の引数
   Generated ID Hint: 空欄にするとIDを生成
   Default Value: "既定: {value}"
+
+Search Filters:
+  Cookie Search Failed: "設定済みの Cookie を使用した検索に失敗しました。"

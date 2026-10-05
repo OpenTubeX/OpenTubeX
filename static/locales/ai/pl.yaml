@@ -178,8 +178,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Jasny"
-      OpenTubeX Dark: "OpenTubeX Ciemny"
+      Ocean Light: "Ocean Jasny"
+      Ocean Dark: "Ocean Ciemny"
     Toast Position:
       Test Toast: Powiadomienie testowe
     Scroll Speed: Szybkość przewijania
@@ -1146,6 +1146,15 @@ Stats:
   All devices: Wszystkie urządzenia
 
 Form Inputs:
+  Enter Password Hint: "Wpisz swoje hasło"
+  Choose Password Hint: "Wybierz hasło"
+  Confirm Password Hint: "Powtórz nowe hasło"
+  Encryption Passphrase Hint: "Wpisz swoją frazę szyfrującą"
+  Show Password: "Pokaż hasło"
+  Hide Password: "Ukryj hasło"
+  Search Text Hint: "Wpisz wyszukiwane hasła"
+  Playlist Description Hint: "Opisz tę playlistę"
+  Filename Preview: "Podgląd nazwy pliku"
   Enter Channels: "Wprowadź kanały"
   Enter Text: "Wprowadź tekst"
   Video URL: URL filmu lub playlisty
@@ -1164,3 +1173,6 @@ Form Inputs:
   Download Arguments Hint: Opcjonalne argumenty dla tego pobierania
   Generated ID Hint: Pozostaw puste, aby wygenerować ID
   Default Value: "Domyślnie: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Wyszukiwanie z użyciem skonfigurowanych plików cookie nie powiodło się."

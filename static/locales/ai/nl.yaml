@@ -441,8 +441,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Licht"
-      OpenTubeX Dark: "OpenTubeX Donker"
+      Ocean Light: "Ocean Licht"
+      Ocean Dark: "Ocean Donker"
       Custom: Aangepast
     Light Theme: Licht thema
     Dark Theme: Donker thema
@@ -1980,6 +1980,15 @@ Tray Icon:
   Follow App Theme: "Appthema volgen"
 
 Form Inputs:
+  Enter Password Hint: "Voer je wachtwoord in"
+  Choose Password Hint: "Kies een wachtwoord"
+  Confirm Password Hint: "Herhaal je nieuwe wachtwoord"
+  Encryption Passphrase Hint: "Voer je versleutelingswachtzin in"
+  Show Password: "Wachtwoord tonen"
+  Hide Password: "Wachtwoord verbergen"
+  Search Text Hint: "Voer zoektermen in"
+  Playlist Description Hint: "Beschrijf deze afspeellijst"
+  Filename Preview: "Voorbeeld van bestandsnaam"
   Enter Channels: "Voer kanalen in"
   Enter Text: "Voer tekst in"
   Video URL: Video- of afspeellijst-URL
@@ -1998,3 +2007,6 @@ Form Inputs:
   Download Arguments Hint: Optionele argumenten voor deze download
   Generated ID Hint: Laat leeg om een ID te genereren
   Default Value: "Standaard: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Zoeken met de ingestelde cookies is mislukt."

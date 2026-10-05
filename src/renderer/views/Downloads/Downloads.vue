@@ -104,6 +104,7 @@
           class="downloadSearch"
           input-type="search"
           :placeholder="t('Search Bar.Search')"
+          :icon="['fas', 'search']"
           :label="t('Downloads.Search Completed')"
           :show-label="true"
           :show-action-button="false"
@@ -187,6 +188,7 @@
       <div class="addDownloadPrompt">
         <FtInput
           input-type="url"
+          :icon="['fas', 'link']"
           :label="t('Form Inputs.Video URL')"
           :placeholder="t('Form Inputs.Paste Link')"
           :show-label="true"

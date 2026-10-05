@@ -441,8 +441,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Claro"
-      OpenTubeX Dark: "OpenTubeX Escuro"
+      Ocean Light: "Ocean Claro"
+      Ocean Dark: "Ocean Escuro"
       Custom: Personalizado
     Light Theme: Tema claro
     Dark Theme: Tema escuro
@@ -1971,6 +1971,15 @@ Tray Icon:
   Follow App Theme: "Seguir o tema da aplicación"
 
 Form Inputs:
+  Enter Password Hint: "Introduce o teu contrasinal"
+  Choose Password Hint: "Escolle un contrasinal"
+  Confirm Password Hint: "Repite o teu novo contrasinal"
+  Encryption Passphrase Hint: "Introduce a túa frase de cifrado"
+  Show Password: "Amosar contrasinal"
+  Hide Password: "Agochar contrasinal"
+  Search Text Hint: "Introduce termos de busca"
+  Playlist Description Hint: "Describe esta lista de reprodución"
+  Filename Preview: "Vista previa do nome do ficheiro"
   Enter Channels: "Introduce canles"
   Enter Text: "Introduce texto"
   Video URL: URL do vídeo ou da lista
@@ -1989,3 +1998,6 @@ Form Inputs:
   Download Arguments Hint: Argumentos opcionais para esta descarga
   Generated ID Hint: Déixao baleiro para xerar un ID
   Default Value: "Predeterminado: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Fallou a busca coas cookies configuradas."

@@ -76,6 +76,7 @@ Search Listing:
     3D: 3D
     Closed Captions: Subtítols
 Search Filters:
+  Cookie Search Failed: "La cerca amb les galetes configurades ha fallat."
   Prioritize:
     Prioritize: Prioritza
     Popularity: Popularitat
@@ -561,8 +562,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Clar"
-      OpenTubeX Dark: "OpenTubeX Fosc"
+      Ocean Light: "Ocean Clar"
+      Ocean Dark: "Ocean Fosc"
       Custom: Personalitzat
       Catppuccin Frappe: Catppuccin Frappe
       Catppuccin Latte: Catppuccin Latte
@@ -2567,6 +2568,15 @@ Tray Icon:
   Follow App Theme: "Segueix el tema de l’aplicació"
 
 Form Inputs:
+  Enter Password Hint: "Introduïu la vostra contrasenya"
+  Choose Password Hint: "Trieu una contrasenya"
+  Confirm Password Hint: "Repetiu la vostra contrasenya nova"
+  Encryption Passphrase Hint: "Introduïu la vostra frase de pas de xifratge"
+  Show Password: "Mostra la contrasenya"
+  Hide Password: "Amaga la contrasenya"
+  Search Text Hint: "Introduïu termes de cerca"
+  Playlist Description Hint: "Descriviu aquesta llista de reproducció"
+  Filename Preview: "Previsualització del nom del fitxer"
   Enter Channels: "Introdueix canals"
   Enter Text: "Introdueix text"
   Video URL: URL del vídeo o de la llista

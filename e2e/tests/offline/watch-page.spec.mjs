@@ -800,26 +800,33 @@ test.describe('desktop quick playback speed bar', () => {
       const controls = document.querySelector('.shaka-controls-container')
       const panel = controls.querySelector('.shaka-controls-button-panel')
       const bar = panel.querySelector('.ft-quick-playback-rate-bar')
+      const glass = panel.querySelector('.ft-right-control-glass')
+      const layers = [glass, bar]
       controls.setAttribute('shown', 'true')
-      await new Promise(resolve => setTimeout(resolve, 750))
+      layers.forEach(element => element.getAnimations().forEach(animation => animation.finish()))
       controls.removeAttribute('shown')
-      await new Promise(resolve => setTimeout(resolve, 180))
+      for (const element of layers) {
+        const fade = element.getAnimations().find(animation => animation.transitionProperty === 'opacity')
+        if (!fade) throw new Error('Controls fade transition not found')
+        fade.pause()
+        fade.currentTime = 300
+      }
       return {
-        panelFade: Number(getComputedStyle(panel).getPropertyValue('--ft-controls-fade')),
+        glassOpacity: Number(getComputedStyle(glass).opacity),
         barOpacity: Number(getComputedStyle(bar).opacity)
       }
     })
-    expect(result.panelFade).toBeGreaterThan(0.1)
-    expect(result.panelFade).toBeLessThan(0.9)
-    expect(result.barOpacity - result.panelFade).toBeLessThan(0.05)
+    expect(result.glassOpacity).toBeGreaterThan(0.1)
+    expect(result.glassOpacity).toBeLessThan(0.9)
+    expect(Math.abs(result.barOpacity - result.glassOpacity)).toBeLessThan(0.05)
   })
 
   test('uses the shaded glass surface', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
     const bar = page.locator('.ft-quick-playback-rate-bar')
-    await expect(bar).toBeVisible()
     await page.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+    await expect(bar).toBeVisible()
     await expect(bar).toHaveCSS('backdrop-filter', /blur\(10px\)/)
     const surface = await bar.evaluate(element => {
       const style = getComputedStyle(element)
@@ -863,31 +870,30 @@ test.describe('desktop quick playback speed bar', () => {
 
 test('right control pill fades with its icons in both directions', async ({ app, page }) => {
   await mockPlayableWatchPage(app, page)
-  await openMockedVideo(page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
   const result = await page.evaluate(async () => {
     const controls = document.querySelector('.shaka-controls-container')
     const panel = controls.querySelector('.shaka-controls-button-panel')
     const pill = panel.querySelector('.ft-right-control-glass')
     const snapshot = () => ({
-      panelFade: Number(getComputedStyle(panel).getPropertyValue('--ft-controls-fade')),
+      iconOpacity: Number(getComputedStyle(panel.querySelector('.shaka-overflow-menu-button > .shaka-ui-icon')).filter.match(/opacity\(([^)]+)\)/)[1]),
       pillOpacity: Number(getComputedStyle(pill).opacity)
     })
-    controls.setAttribute('casting', 'true')
-    panel.style.transition = 'none'
-    panel.style.setProperty('--ft-controls-fade', '0')
+    controls.setAttribute('shown', 'true')
+    await new Promise(resolve => setTimeout(resolve, 750))
+    controls.removeAttribute('shown')
     await new Promise(resolve => setTimeout(resolve, 150))
-    panel.style.setProperty('--ft-controls-fade', '0.5')
-    await new Promise(resolve => setTimeout(resolve, 30))
-    const appearing = snapshot()
-    panel.style.setProperty('--ft-controls-fade', '1')
+    const disappearing = snapshot()
+    await new Promise(resolve => setTimeout(resolve, 750))
+    controls.setAttribute('shown', 'true')
     await new Promise(resolve => setTimeout(resolve, 150))
-    panel.style.setProperty('--ft-controls-fade', '0.5')
-    await new Promise(resolve => setTimeout(resolve, 30))
-    return { appearing, disappearing: snapshot() }
+    return { appearing: snapshot(), disappearing }
   })
   for (const state of [result.appearing, result.disappearing]) {
-    expect(state.panelFade).toBe(0.5)
-    expect(Math.abs(state.pillOpacity - state.panelFade)).toBeLessThan(0.05)
+    expect(state.iconOpacity).toBeGreaterThan(0)
+    expect(state.iconOpacity).toBeLessThan(1)
+    expect(Math.abs(state.pillOpacity - state.iconOpacity)).toBeLessThan(0.05)
   }
 })
 
@@ -1598,7 +1604,8 @@ test('updates boolean settings from the player options', async ({ app, page }) =
   await openMockedVideo(page)
 
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
-  await player.getByRole('button', { name: 'More settings' }).click({ force: true })
+  await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+  await player.getByRole('button', { name: 'More settings' }).click()
   const ambientMode = player.getByRole('button', { name: 'Ambient Mode', exact: true })
   const skipSilence = player.getByRole('button', { name: 'Skip Silence', exact: true })
 
@@ -7433,6 +7440,11 @@ test.describe('manual comment loading', () => {
     await expect(commentSearchInput).toBeFocused()
     await expect(page.locator('.commentTools .clearInputTextButton')).toHaveCount(0)
     await expectCommentHeaderToolsAligned(page)
+    await expect.poll(() => page.locator('.commentTools .ft-input-component').evaluate(element => {
+      const parent = element.parentElement
+      const style = getComputedStyle(parent)
+      return Math.abs(parent.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) - element.getBoundingClientRect().width)
+    })).toBeLessThanOrEqual(1)
     await commentSearchInput.fill('honored')
 
     const searchCancelButtonStyles = await page.evaluate(() => {

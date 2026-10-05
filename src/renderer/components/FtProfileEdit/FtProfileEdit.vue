@@ -66,7 +66,9 @@
             <h3>{{ editOrCreateProfileNameLabel }}</h3>
             <FtInput
               class="profileName"
-              :placeholder="$t('Profile.Profile Name')"
+              :label="$t('Profile.Profile Name')"
+              :icon="['fas', 'circle-user']"
+              :placeholder="$t('Form Inputs.Example', { example: $t('Tab Organizer.Icon Labels.Music') })"
               :disabled="isMainProfile"
               :value="translatedProfileName"
               :show-action-button="false"
@@ -114,21 +116,28 @@
                   {{ emoji }}
                 </button>
               </div>
-              <label
-                class="customEmojiLabel"
-                for="profileEmoji"
-              >
-                {{ $t("Profile.Custom Emoji") }}
+              <!-- eslint-disable-next-line vuejs-accessibility/label-has-for -- FtInput renders the nested input control. -->
+              <label class="customEmojiLabel">
+                <span>{{ $t('Profile.Custom Emoji') }}</span>
+                <FtInput
+                  class="customEmojiInput"
+                  :placeholder="CUSTOM_EMOJI_PLACEHOLDER"
+                  :label="$t('Profile.Custom Emoji')"
+                  :show-label="false"
+                  :value="profileIcon?.type === 'emoji' ? profileIcon.value : ''"
+                  :show-action-button="false"
+                  :input-filter="filterCustomEmoji"
+                  @input="selectCustomEmoji"
+                >
+                  <template #extraAction>
+                    <span
+                      v-if="profileIcon?.type !== 'emoji' || !profileIcon.value"
+                      class="customEmojiPlaceholder"
+                      aria-hidden="true"
+                    >{{ CUSTOM_EMOJI_PLACEHOLDER }}</span>
+                  </template>
+                </FtInput>
               </label>
-              <input
-                id="profileEmoji"
-                class="customEmojiInput"
-                type="text"
-                inputmode="text"
-                :placeholder="$t('Profile.Emoji')"
-                :value="profileIcon?.type === 'emoji' ? profileIcon.value : ''"
-                @input="selectCustomEmoji"
-              >
               <input
                 ref="imageInput"
                 class="imageInput"
@@ -368,6 +377,7 @@ watch(() => props.isActive, (isActive) => {
   closeCropEditor()
 })
 
+const CUSTOM_EMOJI_PLACEHOLDER = '🙂'
 const EMOJI_OPTIONS = ['😀', '😎', '🤓', '🥳', '🤠', '👻', '🐱', '🐶', '🌈', '⭐']
 
 const iconLabels = computed(() => ({
@@ -516,24 +526,19 @@ function selectEmoji(emoji) {
   restoreOpaqueProfileColor()
 }
 
-function selectCustomEmoji(event) {
-  const value = event.target.value
+function filterCustomEmoji(value) {
   const candidate = value ? getFirstCharacter(value, locale.value) : ''
   const currentEmoji = profileIcon.value?.type === 'emoji' ? profileIcon.value.value : ''
+  return candidate && !isEmoji(candidate) ? currentEmoji : candidate
+}
 
-  if (candidate && !isEmoji(candidate)) {
-    event.target.value = currentEmoji
-    return
-  }
-
-  event.target.value = candidate
+function selectCustomEmoji(candidate) {
+  if (candidate === (profileIcon.value?.type === 'emoji' ? profileIcon.value.value : '')) return
   if (!candidate) {
     clearProfileIcon()
     return
   }
-  automaticProfileIcon = false
-  profileIcon.value = { type: 'emoji', value: candidate }
-  restoreOpaqueProfileColor()
+  selectEmoji(candidate)
 }
 
 function isEmoji(value) {

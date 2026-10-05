@@ -64,6 +64,7 @@ Search Listing:
   Label:
     Members Only: Толькі для ўдзельнікаў
 Search Filters:
+  Cookie Search Failed: "Пошук з наладжанымі кукі не ўдаўся."
   Prioritize:
     Prioritize: Аддаваць перавагу
     Popularity: Папулярнасць
@@ -439,8 +440,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Светлая"
-      OpenTubeX Dark: "OpenTubeX Цёмная"
+      Ocean Light: "Ocean Светлая"
+      Ocean Dark: "Ocean Цёмная"
       Custom: Карыстальніцкая
       Catppuccin Latte: Catppuccin Latte
     Light Theme: Светлая тэма
@@ -2017,6 +2018,15 @@ Tray Icon:
   Follow App Theme: "Выкарыстоўваць тэму праграмы"
 
 Form Inputs:
+  Enter Password Hint: "Увядзіце свой пароль"
+  Choose Password Hint: "Выберыце пароль"
+  Confirm Password Hint: "Паўтарыце новы пароль"
+  Encryption Passphrase Hint: "Увядзіце сваю парольную фразу шыфравання"
+  Show Password: "Паказаць пароль"
+  Hide Password: "Схаваць пароль"
+  Search Text Hint: "Увядзіце пошукавыя словы"
+  Playlist Description Hint: "Апішыце гэты плэйліст"
+  Filename Preview: "Папярэдні прагляд назвы файла"
   Enter Channels: "Увядзіце каналы"
   Enter Text: "Увядзіце тэкст"
   Video URL: URL відэа або плэйліста

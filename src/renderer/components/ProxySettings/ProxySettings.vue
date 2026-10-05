@@ -35,6 +35,7 @@
       </FtFlexBox>
       <FtFlexBox>
         <FtInput
+          :icon="['fas', 'network-wired']"
           :label="$t('Settings.Proxy Settings.Proxy Host')"
           placeholder="127.0.0.1"
           :show-action-button="false"
@@ -44,6 +45,7 @@
           @keydown.enter="testProxy"
         />
         <FtInput
+          :icon="['fas', 'network-wired']"
           :label="$t('Settings.Proxy Settings.Proxy Port Number')"
           :placeholder="t('Form Inputs.Example', { example: '1080' })"
           :show-action-button="false"
@@ -58,8 +60,9 @@
         v-if="areCredentialsSupported"
       >
         <FtInput
+          :icon="['fas', 'circle-user']"
           :label="$t('Settings.Proxy Settings.Proxy Username')"
-          placeholder=""
+          :placeholder="t('Form Inputs.Example', { example: 'alex' })"
           :show-action-button="false"
           show-label
           :value="proxyUsername"
@@ -67,8 +70,9 @@
           @keydown.enter="testProxy"
         />
         <FtInput
+          :icon="['fas', 'lock']"
           :label="$t('Settings.Proxy Settings.Proxy Password')"
-          placeholder=""
+          :placeholder="t('Form Inputs.Enter Password Hint')"
           :show-action-button="false"
           show-label
           :value="proxyPassword"
@@ -118,6 +122,7 @@
       class="settingsFlexStart500px"
     >
       <FtInput
+        :icon="['fas', 'folder-open']"
         :label="$t('Settings.Proxy Settings.IP Block Recovery Script Path')"
         placeholder="/path/to/script"
         :show-action-button="true"

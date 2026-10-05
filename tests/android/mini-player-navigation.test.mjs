@@ -85,7 +85,7 @@ async function withMobileVideo(run) {
     const player = page.locator('.ftVideoPlayer')
     await expect.poll(() => player.locator('video').evaluate(video => video.readyState)).toBe(4)
     await player.locator('video').evaluate(video => { video.loop = true; return video.play() })
-    await run({ page, player, watch, tap })
+    await run({ page, player, watch, tap, session })
   } finally {
     try {
       await page.evaluate(async ({ settings, originalRoute }) => {
@@ -101,8 +101,10 @@ async function withMobileVideo(run) {
       }, { settings, originalRoute })
     } finally {
       try {
-        adb('settings', 'put', 'system', 'user_rotation', rotation)
-        adb('settings', 'put', 'system', 'accelerometer_rotation', automaticRotation)
+        for (const [key, value] of [['user_rotation', rotation], ['accelerometer_rotation', automaticRotation]]) {
+          if (value === 'null') adb('settings', 'delete', 'system', key)
+          else adb('settings', 'put', 'system', key, value)
+        }
       } finally {
         try {
           await watch?.dispose()
@@ -122,10 +124,14 @@ test('fullscreen comment avatar navigation opens the channel and docks the same 
   const original = await player.locator('video').elementHandle()
   await player.evaluate(element => element.requestFullscreen())
   await watch.evaluate(component => component.proxy.$refs.player.$.setupState.setFullscreenComments(true))
-  const avatar = player.locator('.fullscreenCommentCard a[tabindex="-1"]').first().locator('.commentThumbnail, .commentThumbnailHidden').first()
+  const link = player.locator('.fullscreenCommentCard a[tabindex="-1"]').first()
+  const avatar = link.locator('.commentThumbnail, .commentThumbnailHidden').first()
   await expect(avatar).toBeVisible()
+  // A reused emulator may already have cached comments for the fixture video.
+  const destination = await link.getAttribute('href')
+  assert.match(destination, /^#\/channel\//)
   await tap(avatar)
-  await expect(page).toHaveURL(/#\/channel\/UC-test-commenter/)
+  await expect(page).toHaveURL(`https://localhost/${destination}`)
   await expect.poll(() => page.evaluate(() => document.fullscreenElement === null)).toBe(true)
   await expect(player).not.toHaveClass(/fullWindow/)
   await expect(player).toHaveClass(/mobileMiniBar/)
@@ -153,5 +159,50 @@ test('landscape mini-player clears the sidebar after rotation and UI scaling', {
         return window.innerWidth <= 680 ? bar.bottom <= nav.top + tolerance : bar.left >= nav.right - tolerance
       })).toBe(true)
     }
+  }
+}))
+
+test('landscape swipe targets the revealed sidebar inset before release', { skip }, () => withMobileVideo(async ({ page, player, session }) => {
+  adb('settings', 'put', 'system', 'user_rotation', '1')
+  await expect.poll(() => page.evaluate(() => innerWidth > innerHeight)).toBe(true)
+  const sidebar = page.locator('.app > .sideNav')
+  const touch = (type, point) => session.send('Input.dispatchTouchEvent', { type, touchPoints: point ? [point] : [] })
+  const settle = () => expect(player).not.toHaveAttribute('data-mobile-mini-morph')
+  const originalHideSidebar = await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const original = store.getters.getHideSideBarOnWatchPages
+    store.commit('setHideSideBarOnWatchPages', true)
+    return original
+  })
+  try {
+    for (const scale of [100, 125]) {
+      await page.evaluate(scale => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setUiScale', scale), scale)
+      // Smaller emulators switch to bottom navigation at larger UI scales.
+      if (await page.evaluate(() => innerWidth <= 680)) continue
+      await expect.poll(() => sidebar.evaluate(element => element.getBoundingClientRect().right)).toBeLessThanOrEqual(1)
+      const full = await player.boundingBox()
+      const point = { x: full.x + full.width / 2, y: full.y + 30 }
+      await touch('touchStart', point)
+      await touch('touchMove', { ...point, y: point.y + 30 })
+      await expect(player).toHaveAttribute('data-mobile-mini-morph', '')
+      const endpoint = await page.locator('#cross-tab-mini-player-layer > .mobileMiniBarOverlay').boundingBox()
+      await touch('touchMove', { ...point, y: point.y + 110 })
+      await touch('touchEnd')
+      await expect(player).toHaveClass(/mobileMiniBar/)
+      await settle()
+      await expect.poll(() => sidebar.evaluate(element => element.getAnimations().length)).toBe(0)
+      const settled = await player.boundingBox()
+      const nav = await sidebar.boundingBox()
+      assert.ok(endpoint.x >= nav.x + nav.width - 1, `animation endpoint ${endpoint.x} must clear sidebar ${nav.x + nav.width}`)
+      for (const side of ['x', 'y', 'width', 'height']) {
+        assert.ok(Math.abs(endpoint[side] - settled[side]) < 1, `no ${side} correction after release: ${JSON.stringify({ endpoint, settled })}`)
+      }
+      await player.locator('.mobileMiniBarReturn').click()
+      await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+      await settle()
+    }
+  } finally {
+    await touch('touchCancel').catch(() => {})
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setHideSideBarOnWatchPages', value), originalHideSidebar)
   }
 }))

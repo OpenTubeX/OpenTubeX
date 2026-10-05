@@ -437,8 +437,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Světlý"
-      OpenTubeX Dark: "OpenTubeX Tmavý"
+      Ocean Light: "Ocean Světlý"
+      Ocean Dark: "Ocean Tmavý"
       Custom: Vlastní
     Light Theme: Světlý motiv
     Dark Theme: Tmavý motiv
@@ -1920,6 +1920,15 @@ Tray Icon:
   Follow App Theme: "Použít motiv aplikace"
 
 Form Inputs:
+  Enter Password Hint: "Zadejte své heslo"
+  Choose Password Hint: "Zvolte heslo"
+  Confirm Password Hint: "Zopakujte nové heslo"
+  Encryption Passphrase Hint: "Zadejte svou šifrovací přístupovou frázi"
+  Show Password: "Zobrazit heslo"
+  Hide Password: "Skrýt heslo"
+  Search Text Hint: "Zadejte hledané výrazy"
+  Playlist Description Hint: "Popište tento seznam videí"
+  Filename Preview: "Náhled názvu souboru"
   Enter Channels: "Zadejte kanály"
   Enter Text: "Zadejte text"
   Video URL: URL videa nebo playlistu
@@ -1938,3 +1947,6 @@ Form Inputs:
   Download Arguments Hint: Volitelné argumenty pro toto stahování
   Generated ID Hint: Ponechte prázdné pro vygenerování ID
   Default Value: "Výchozí: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Vyhledávání s nastavenými cookies selhalo."

@@ -562,6 +562,8 @@
 
 .findbarInput {
   flex: 1 1 auto;
+  box-sizing: border-box;
+  inline-size: 100%;
   min-inline-size: 90px;
   block-size: 32px;
   padding-block: 0;

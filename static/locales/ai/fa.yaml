@@ -64,6 +64,7 @@ Search Listing:
   Label:
     Members Only: فقط اعضا
 Search Filters:
+  Cookie Search Failed: "جستجو با کوکی‌های تنظیم‌شده ناموفق بود."
   Prioritize:
     Prioritize: اولویت‌بندی
     Popularity: محبوبیت
@@ -439,8 +440,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX روشن"
-      OpenTubeX Dark: "OpenTubeX تاریک"
+      Ocean Light: "Ocean روشن"
+      Ocean Dark: "Ocean تاریک"
       Custom: سفارشی
       Catppuccin Latte: Catppuccin Latte
     Light Theme: زمینهٔ روشن
@@ -2008,6 +2009,15 @@ Tray Icon:
   Follow App Theme: "پیروی از زمینهٔ برنامه"
 
 Form Inputs:
+  Enter Password Hint: "گذرواژهٔ خود را وارد کنید"
+  Choose Password Hint: "یک گذرواژه انتخاب کنید"
+  Confirm Password Hint: "گذرواژهٔ جدید خود را تکرار کنید"
+  Encryption Passphrase Hint: "عبارت عبور رمزگذاری خود را وارد کنید"
+  Show Password: "نمایش گذرواژه"
+  Hide Password: "پنهان کردن گذرواژه"
+  Search Text Hint: "عبارت‌های جستجو را وارد کنید"
+  Playlist Description Hint: "این فهرست پخش را توصیف کنید"
+  Filename Preview: "پیش‌نمایش نام فایل"
   Enter Channels: "کانال‌ها را وارد کنید"
   Enter Text: "متن را وارد کنید"
   Video URL: نشانی ویدیو یا فهرست پخش

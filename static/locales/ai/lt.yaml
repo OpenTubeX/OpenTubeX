@@ -68,6 +68,7 @@ Search Listing:
     3D: 3D
     Closed Captions: Subtitrai kurtiesiems ir neprigirdintiesiems
 Search Filters:
+  Cookie Search Failed: "Paieška su sukonfigūruotais slapukais nepavyko."
   Prioritize:
     Prioritize: Teikti pirmenybę
     Popularity: Populiarumui
@@ -543,8 +544,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Šviesi"
-      OpenTubeX Dark: "OpenTubeX Tamsi"
+      Ocean Light: "Ocean Šviesi"
+      Ocean Dark: "Ocean Tamsi"
       Custom: Pasirinktinė
       Catppuccin Frappe: Catppuccin Frappe
       Catppuccin Latte: Catppuccin Latte
@@ -2421,6 +2422,15 @@ Tray Icon:
   Follow App Theme: "Naudoti programos apipavidalinimą"
 
 Form Inputs:
+  Enter Password Hint: "Įveskite savo slaptažodį"
+  Choose Password Hint: "Pasirinkite slaptažodį"
+  Confirm Password Hint: "Pakartokite naują slaptažodį"
+  Encryption Passphrase Hint: "Įveskite savo šifravimo slaptafrazę"
+  Show Password: "Rodyti slaptažodį"
+  Hide Password: "Slėpti slaptažodį"
+  Search Text Hint: "Įveskite paieškos žodžius"
+  Playlist Description Hint: "Aprašykite šį grojaraštį"
+  Filename Preview: "Failo pavadinimo peržiūra"
   Enter Channels: "Įveskite kanalus"
   Enter Text: "Įveskite tekstą"
   Video URL: Vaizdo įrašo arba grojaraščio URL

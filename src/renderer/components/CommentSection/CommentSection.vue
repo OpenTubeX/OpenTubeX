@@ -160,7 +160,9 @@
     >
       <FtInput
         input-type="search"
-        :placeholder="$t('Comments.Search loaded comments')"
+        :label="$t('Comments.Search loaded comments')"
+        :icon="['fas', 'search']"
+        :placeholder="$t('Form Inputs.Search Text Hint')"
         :show-action-button="false"
         :value="commentSearchQuery"
         @input="updateCommentSearchQuery"
@@ -1464,7 +1466,15 @@ function handleFullscreenActionsFocusout(event) {
   }
 }
 
-const emit = defineEmits(['timestamp-event', 'close-comments', 'loaded'])
+const emit = defineEmits(['timestamp-event', 'close-comments', 'loaded', 'preview-comments'])
+
+watch(() => commentData.value.slice(0, 5).map(comment => ({
+  id: comment.id,
+  author: comment.author,
+  authorThumb: comment.authorThumb,
+  isOwner: comment.isOwner,
+  text: comment.translationText
+})), comments => emit('preview-comments', comments), { immediate: true })
 
 watch(() => commentData.value.length > 0, loaded => emit('loaded', loaded))
 onBeforeUnmount(() => emit('loaded', false))

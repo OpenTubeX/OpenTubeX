@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
-import { createRenderer } from 'vue'
+import { createRenderer, nextTick } from 'vue'
 import { useMobileFullscreenGestures } from '../../src/renderer/components/ft-shaka-video-player/opentubex/useMobileFullscreenGestures.js'
 
 const playerSource = readFileSync(new URL('../../src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.js', import.meta.url), 'utf8')
@@ -468,7 +468,7 @@ test('a rejected scroll-mini-player restore never enters fullscreen or retains c
 })
 
 for (const distance of [24, 64, 100]) {
-  test(`downward mini-player swipe ${distance}px closes only after the threshold`, t => {
+  test(`downward mini-player swipe ${distance}px closes only after the threshold`, async t => {
     const { gestures: g, event, calls, captures } = fixture(t, { mini: true, dismissible: () => true, fullscreenSwipe: false })
     t.mock.timers.enable({ apis: ['setTimeout'] })
     const target = new ElementStub('.mobileMiniBarReturn')
@@ -478,6 +478,7 @@ for (const distance of [24, 64, 100]) {
     assert.equal(g.finishMobileFullscreenGesture(event(212, 400 + distance, { target })), true)
     assert.equal(captures.size, 0)
     assert.equal(g.handleMobilePlayerSurfaceClick(event(212, 400 + distance, { target })), true)
+    await nextTick()
     t.mock.timers.tick(0)
     assert.deepEqual(calls, distance >= 64 ? ['dismiss'] : [])
     assert.equal(g.mobileFullscreenSwipeStyle.value, undefined)
@@ -493,7 +494,7 @@ test('downward swipe leaves a same-page scroll mini-player open', t => {
 })
 
 for (const reason of ['reversed', 'pointer cancel', 'second finger', 'unavailable']) {
-  test(`dismissal cancels when ${reason}`, t => {
+  test(`dismissal cancels when ${reason}`, async t => {
     let available = true
     const { gestures: g, event, calls, captures } = fixture(t, { mini: true, dismissible: () => available })
     t.mock.timers.enable({ apis: ['setTimeout'] })
@@ -508,6 +509,7 @@ for (const reason of ['reversed', 'pointer cancel', 'second finger', 'unavailabl
       g.finishMobileFullscreenGesture(event(210, 500))
       available = false
     }
+    await nextTick()
     t.mock.timers.tick(0)
     assert.deepEqual(calls, [])
     assert.equal(captures.size, 0)
@@ -516,13 +518,14 @@ for (const reason of ['reversed', 'pointer cancel', 'second finger', 'unavailabl
 }
 
 for (const unmounted of [false, true]) {
-  test(`dismissal waits for its release animation${unmounted ? ' and is canceled on unmount' : ''}`, t => {
+  test(`dismissal waits for its release animation${unmounted ? ' and is canceled on unmount' : ''}`, async t => {
     const { gestures: g, event, calls, unmount } = fixture(t, { mini: true, dismissible: () => true, reducedMotion: false })
     t.mock.timers.enable({ apis: ['setTimeout'] })
     g.startMobileFullscreenGesture(event(210, 400))
     g.moveMobileFullscreenGesture(event(210, 500))
     g.finishMobileFullscreenGesture(event(210, 500))
     assert.equal(g.mobileFullscreenSwipeStyle.value['--mobile-mini-dismiss-duration'], '140ms')
+    await nextTick()
     t.mock.timers.tick(139)
     assert.deepEqual(calls, [])
     if (unmounted) unmount()
@@ -533,12 +536,13 @@ for (const unmounted of [false, true]) {
 }
 
 for (const primary of [false, true]) {
-  test(`committed dismissal ignores a new ${primary ? 'primary' : 'secondary'} touch during settling`, t => {
+  test(`committed dismissal ignores a new ${primary ? 'primary' : 'secondary'} touch during settling`, async t => {
     const { gestures: g, event, calls } = fixture(t, { mini: true, dismissible: () => true, reducedMotion: false })
     t.mock.timers.enable({ apis: ['setTimeout'] })
     g.startMobileFullscreenGesture(event(210, 400))
     g.moveMobileFullscreenGesture(event(210, 500))
     g.finishMobileFullscreenGesture(event(210, 500))
+    await nextTick()
     t.mock.timers.tick(70)
     g.startMobileFullscreenGesture(event(220, 480, { pointerId: 2, isPrimary: primary }))
     assert.equal(g.mobileFullscreenSwipeStyle.value?.['--mobile-mini-dismiss-offset'], '296.5px')
@@ -548,12 +552,13 @@ for (const primary of [false, true]) {
   })
 }
 
-test('a video-change cancellation stops a committed dismissal before replacement playback', t => {
+test('a video-change cancellation stops a committed dismissal before replacement playback', async t => {
   const { gestures: g, event, calls } = fixture(t, { mini: true, dismissible: () => true, reducedMotion: false })
   t.mock.timers.enable({ apis: ['setTimeout'] })
   g.startMobileFullscreenGesture(event(210, 400))
   g.moveMobileFullscreenGesture(event(210, 500))
   g.finishMobileFullscreenGesture(event(210, 500))
+  await nextTick()
   t.mock.timers.tick(70)
   g.cancelMobileFullscreenGesture()
   t.mock.timers.tick(70)
@@ -751,3 +756,23 @@ test('cancelled seeking suppresses late touch releases until both fingers are li
   g.finishMobileFullscreenGesture(event(210, 150))
   assert.ok(calls.includes('show'), 'The next unrelated tap remains available')
 })
+
+for (const reducedMotion of [false, true]) {
+  test(`close button shares swipe dismissal timing (reduced motion: ${reducedMotion})`, async t => {
+    const { gestures: g, calls } = fixture(t, { mini: true, dismissible: () => true, reducedMotion })
+    t.mock.timers.enable({ apis: ['setTimeout'] })
+    g.dismissMobileMiniPlayer()
+    assert.equal(g.mobileMiniPlayerDismissSettling.value, true)
+    assert.equal(g.mobileFullscreenSwipeStyle.value['--mobile-mini-dismiss-offset'], '296.5px')
+    g.dismissMobileMiniPlayer()
+    t.mock.timers.tick(140)
+    assert.deepEqual(calls, [], 'Dismissal waits for the rendered style update')
+    await nextTick()
+    if (!reducedMotion) {
+      t.mock.timers.tick(139)
+      assert.deepEqual(calls, [])
+    }
+    t.mock.timers.tick(reducedMotion ? 0 : 1)
+    assert.deepEqual(calls, ['dismiss'])
+  })
+}

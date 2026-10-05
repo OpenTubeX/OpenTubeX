@@ -1387,7 +1387,7 @@ function updateTabIndicator(containerRef, selectedTabSelector, indicatorStyle, s
   // keeping movement on the compositor while a large feed renders.
   const style = {
     '--tab-indicator-width': String(selected.offsetWidth),
-    transform: `translate(${selected.offsetLeft}px, ${selected.offsetTop + selected.offsetHeight}px) scaleX(${selected.offsetWidth})`
+    transform: `translate(${selected.offsetLeft}px, ${selected.offsetTop + selected.offsetHeight}px) scaleX(${selected.offsetWidth / 100})`
   }
 
   if (state.wasHidden) {

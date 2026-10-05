@@ -79,11 +79,11 @@
 
 // The header sits above the tab bar, so continue its edge shadow here.
 .app.verticalTabsLeft .topNav {
-  box-shadow: 0 2px 1px 0 var(--primary-shadow-color), inset 3px 0 8px -3px rgb(0 0 0 / 12%);
+  box-shadow: 0 2px 1px 0 var(--primary-shadow-color), inset 2px 0 1px 0 var(--primary-shadow-color);
 }
 
 .app.verticalTabsRight .topNav {
-  box-shadow: 0 2px 1px 0 var(--primary-shadow-color), inset -3px 0 8px -3px rgb(0 0 0 / 12%);
+  box-shadow: 0 2px 1px 0 var(--primary-shadow-color), inset -2px 0 1px 0 var(--primary-shadow-color);
 }
 
 /* These settings name physical window edges, independent of text direction. */

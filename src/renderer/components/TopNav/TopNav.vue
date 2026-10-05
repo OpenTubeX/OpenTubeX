@@ -104,6 +104,7 @@
           <FtInput
             ref="searchInput"
             :placeholder="t('Search / Go to URL')"
+            :show-label="false"
             class="searchInput"
             input-type="search"
             is-search

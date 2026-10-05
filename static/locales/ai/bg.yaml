@@ -439,8 +439,8 @@ Settings:
       One Dark: One Dark
       Carbonfox: Carbonfox
       Catppuccin Macchiato: Catppuccin Macchiato
-      OpenTubeX Light: "OpenTubeX Светла"
-      OpenTubeX Dark: "OpenTubeX Тъмна"
+      Ocean Light: "Ocean Светла"
+      Ocean Dark: "Ocean Тъмна"
       Custom: Персонализирана
     Light Theme: Светла тема
     Dark Theme: Тъмна тема
@@ -1943,6 +1943,15 @@ Tray Icon:
   Follow App Theme: "Следване на темата на приложението"
 
 Form Inputs:
+  Enter Password Hint: "Въведете паролата си"
+  Choose Password Hint: "Изберете парола"
+  Confirm Password Hint: "Повторете новата си парола"
+  Encryption Passphrase Hint: "Въведете фразата си за шифроване"
+  Show Password: "Показване на паролата"
+  Hide Password: "Скриване на паролата"
+  Search Text Hint: "Въведете думи за търсене"
+  Playlist Description Hint: "Опишете този плейлист"
+  Filename Preview: "Преглед на името на файла"
   Enter Channels: "Въведете канали"
   Enter Text: "Въведете текст"
   Video URL: URL на видео или плейлист
@@ -1961,3 +1970,6 @@ Form Inputs:
   Download Arguments Hint: Незадължителни аргументи за това изтегляне
   Generated ID Hint: Оставете празно, за да се генерира ID
   Default Value: "По подразбиране: {value}"
+
+Search Filters:
+  Cookie Search Failed: "Търсенето с настроените бисквитки е неуспешно."
