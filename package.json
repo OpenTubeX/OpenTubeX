@@ -160,7 +160,7 @@
     "lefthook": "^2.1.15",
     "mini-css-extract-plugin": "^2.10.2",
     "minimizer-webpack-plugin": "^5.11.0",
-    "node-gyp": "^13.0.2",
+    "node-gyp": "^13.1.0",
     "postcss": "^8.5.28",
     "postcss-scss": "^4.0.9",
     "sass": "^1.105.1",
