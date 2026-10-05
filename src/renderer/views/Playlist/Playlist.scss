@@ -141,6 +141,15 @@
     object-fit: cover;
   }
 
+  :deep(.ft-list-item.list .videoThumbnail .playlistIcons:not(.mobileThumbnailActions)) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    max-inline-size: calc(100% - 8px);
+    margin-inline: 4px;
+    margin-block-start: 4px;
+  }
+
   :deep(.ft-list-item .info) {
     block-size: auto;
 
