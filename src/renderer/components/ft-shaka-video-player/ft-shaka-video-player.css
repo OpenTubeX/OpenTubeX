@@ -1237,6 +1237,8 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 :deep(.shaka-controls-button-panel > .ft-chapters-button) {
+  --ft-chapters-active-color: var(--seekbar-played-color, var(--primary-color));
+
   display: flex;
   position: relative;
   align-items: center;
@@ -1290,6 +1292,12 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   transition: opacity 200ms ease, transform 200ms ease;
 }
 
+:deep(.shaka-controls-button-panel > .ft-chapters-button .ft-chapters-chevron) {
+  --ft-control-content-transition: opacity 200ms ease, transform 200ms ease, rotate 200ms ease;
+
+  transition: var(--ft-control-content-transition);
+}
+
 :deep(.shaka-controls-button-panel.ft-controls-measuring > .ft-chapters-button),
 :deep(.shaka-controls-button-panel.ft-controls-measuring > .ft-chapters-button > *) {
   transition: none;
@@ -1311,7 +1319,11 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 }
 
 :deep(.shaka-controls-button-panel > .ft-chapters-button.open .ft-chapters-icon) {
-  color: var(--seekbar-played-color, var(--primary-color));
+  color: var(--ft-chapters-active-color);
+}
+
+:deep(.shaka-controls-button-panel > .ft-chapters-button.open .ft-chapters-chevron) {
+  rotate: 90deg;
 }
 
 :deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button .ft-chapters-current-title),
@@ -1878,6 +1890,11 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
 
 :deep(.shaka-controls-button-panel > :is(.ft-chapters-button, .ft-shaka-highlight-button) > .ft-control-glass) {
   inset-inline: 0;
+}
+
+:deep(.shaka-controls-button-panel > .ft-chapters-button.open > .ft-control-glass) {
+  background-color: color-mix(in srgb, var(--ft-chapters-active-color) 18%, var(--ft-control-pill-color));
+  box-shadow: inset 0 1px rgb(255 255 255 / 14%), inset 0 0 0 1px color-mix(in srgb, var(--ft-chapters-active-color) 60%, transparent);
 }
 
 :deep(.shaka-controls-button-panel > .shaka-spacer ~ button) {
@@ -5724,7 +5741,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   opacity: 1;
 }
 
-.ftVideoPlayer.classicPlayerControls :deep(.shaka-controls-button-panel:not(.ft-controls-compact-chapters) > .ft-chapters-button)::before {
+.ftVideoPlayer.classicPlayerControls :deep(.shaka-controls-button-panel > .ft-chapters-button)::before {
   position: absolute;
   inset-block: 8px;
   inset-inline: 0;
@@ -5734,7 +5751,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   pointer-events: none;
 }
 
-.ftVideoPlayer.classicPlayerControls :deep(.shaka-controls-button-panel > .ft-chapters-button:is(:hover, :focus-visible, .open))::before {
+.ftVideoPlayer.classicPlayerControls :deep(.shaka-controls-button-panel > .ft-chapters-button:is(:hover, :focus-visible))::before {
   background-color: rgb(255 255 255 / 10%);
 }
 
@@ -5744,8 +5761,9 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   background-color: transparent;
 }
 
-.ftVideoPlayer.classicPlayerControls :deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button.open)::before {
-  background-color: rgb(255 255 255 / 20%);
+.ftVideoPlayer.classicPlayerControls :deep(.shaka-controls-button-panel > .ft-chapters-button.open)::before {
+  background-color: color-mix(in srgb, var(--ft-chapters-active-color) 18%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ft-chapters-active-color) 60%, transparent);
 }
 
 .ftVideoPlayer.classicPlayerControls :deep(.ft-time-display-group) {
