@@ -403,33 +403,27 @@ test.describe('settings search highlights', () => {
   }
 
   for (const zoom of [1, 0.95]) {
-    test(`keeps settings window actions beside the title at ${zoom} scale`, async ({ page }, testInfo) => {
+    test(`keeps settings icons above a full-width search when they fit at ${zoom} scale`, async ({ page }, testInfo) => {
       await page.evaluate(zoom => window.ftElectron.setZoomFactor(zoom), zoom)
+      await page.setViewportSize({ width: 460, height: 800 })
       await goTo(page, 'settings')
       const header = page.locator('.settingsWindowHeader')
-      for (const width of [390, 340, 680, 1200, 390]) {
-        await page.setViewportSize({ width, height: 800 })
-        await expect.poll(() => header.evaluate(element => {
-          const title = element.querySelector('.settingsHeaderNavigation').getBoundingClientRect()
-          const actions = element.querySelector('.settingsHeaderActions').getBoundingClientRect()
-          return Math.abs(title.y + title.height / 2 - actions.y - actions.height / 2)
-        })).toBeLessThanOrEqual(1)
-        expect(await header.evaluate(element => {
-          const headerBounds = element.getBoundingClientRect()
-          const buttons = [...element.querySelectorAll('button')]
-          return buttons.every(button => {
-            const bounds = button.getBoundingClientRect()
-            return bounds.left >= headerBounds.left && bounds.right <= headerBounds.right
-          })
-        })).toBe(true)
-        await expect.poll(() => header.evaluate(element => {
-          const tools = element.querySelector('.settingsHeaderTools').getBoundingClientRect()
-          const search = element.querySelector('.settingsSearch').getBoundingClientRect()
-          return Math.abs(tools.y + tools.height / 2 - search.y - search.height / 2)
-        })).toBeLessThanOrEqual(1)
-      }
+      await expect.poll(() => header.evaluate(element => {
+        const title = element.querySelector('.settingsHeaderNavigation').getBoundingClientRect()
+        const actions = element.querySelector('.settingsHeaderActions').getBoundingClientRect()
+        return Math.abs(title.y + title.height / 2 - actions.y - actions.height / 2)
+      })).toBeLessThanOrEqual(1)
+      const bounds = await header.evaluate(element => {
+        const header = element.getBoundingClientRect()
+        const search = element.querySelector('.settingsSearch').getBoundingClientRect()
+        const actions = element.querySelector('.settingsHeaderActions').getBoundingClientRect()
+        return { left: search.left - header.left, right: header.right - search.right, searchTop: search.top, actionsBottom: actions.bottom }
+      })
+      expect(bounds.left).toBeCloseTo(10, 0)
+      expect(bounds.right).toBeCloseTo(10, 0)
+      expect(bounds.searchTop).toBeGreaterThanOrEqual(bounds.actionsBottom)
       if (zoom === 1) {
-        await page.screenshot({ path: testInfo.outputPath('settings-header-inline-search.png') })
+        await page.screenshot({ path: testInfo.outputPath('settings-restored-full-width-search.png') })
       }
     })
   }

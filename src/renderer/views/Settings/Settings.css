@@ -170,10 +170,6 @@
   color: var(--primary-text-color);
 }
 
-.settingsHeaderControls {
-  display: contents;
-}
-
 .settingsSearch {
   --input-bottom-spacing: 0;
   --form-control-height: 36px;
@@ -184,7 +180,6 @@
   min-inline-size: 150px;
 }
 
-.settingsHeaderTools,
 .settingsHeaderActions {
   flex: 0 0 auto;
   display: flex;
@@ -621,18 +616,10 @@
     gap: 3px;
   }
 
-  .settingsHeaderControls {
-    display: flex;
-    flex: 1 1 100%;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: inherit;
-    order: 2;
-  }
-
   .settingsSearch {
-    order: 1;
-    flex: 1 1 150px;
+    order: 3;
+    flex-basis: 100%;
+    min-inline-size: 100%;
   }
 }
 
@@ -649,7 +636,6 @@
 
 @media (any-pointer: coarse), (width <= 680px) {
   .settingsWindowHeader,
-  .settingsHeaderTools,
   .settingsHeaderActions {
     gap: 8px;
   }

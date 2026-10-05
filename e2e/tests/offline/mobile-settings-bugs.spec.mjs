@@ -157,9 +157,8 @@ test.describe('German playback settings on a narrow screen', () => {
       back.boundingBox(),
       header.locator('.settingsHeaderActions').boundingBox()
     ])
-    expect(narrowActionsBounds.y + narrowActionsBounds.height / 2)
-      .toBeCloseTo(narrowBackBounds.y + narrowBackBounds.height / 2, 0)
-    expect(narrowActionsBounds.x).toBeGreaterThan(narrowBackBounds.x + narrowBackBounds.width)
+    expect(narrowActionsBounds.y).toBeGreaterThanOrEqual(narrowBackBounds.y + narrowBackBounds.height - 1)
+    expect(narrowActionsBounds.x).toBeLessThanOrEqual(narrowBackBounds.x + 1)
   })
 
   test('keeps playback controls inside the content gutter', async ({ page }) => {

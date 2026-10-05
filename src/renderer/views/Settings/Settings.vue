@@ -123,57 +123,52 @@
           />
         </div>
       </div>
-      <div
-        v-if="!isStandaloneViewOpen"
-        class="settingsHeaderControls"
-      >
-        <FtInput
-          v-if="unlocked && !isProfileManagerOpen && !isKeyboardShortcutPromptOpen && !subpageTitle"
-          ref="settingsSearchInputRef"
-          class="settingsSearch"
-          input-type="search"
-          :value="settingsSearchQuery"
-          :placeholder="t('Settings.Search Settings')"
-          :show-label="false"
-          :show-action-button="false"
-          @input="settingsSearchQuery = $event; handleSettingsSearch()"
-        />
-        <div class="settingsHeaderTools">
-          <button
-            v-if="showKeyboardShortcutAction"
-            type="button"
-            class="settingsHeaderButton"
-            :aria-label="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
-            :title="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
-            @click="showKeyboardShortcutPrompt"
-          >
-            <FtIcon :icon="['fas', 'keyboard']" />
-          </button>
-          <button
-            type="button"
-            class="settingsHeaderButton"
-            :class="{ active: highlightChangedSettings }"
-            :aria-label="t('Settings.Highlight Changed Settings')"
-            :title="t('Settings.Highlight Changed Settings')"
-            :aria-pressed="highlightChangedSettings"
-            @click="updateHighlightChangedSettings(!highlightChangedSettings)"
-          >
-            <FtIcon :icon="['fas', 'pen']" />
-          </button>
-          <button
-            type="button"
-            class="settingsHeaderButton"
-            :class="{ active: showPerformanceImpactIndicators }"
-            :aria-label="t('Settings.Performance Impact.Show Performance Impact')"
-            :title="t('Settings.Performance Impact.Show Performance Impact')"
-            :aria-pressed="showPerformanceImpactIndicators"
-            @click="updateShowPerformanceImpactIndicators(!showPerformanceImpactIndicators)"
-          >
-            <FtIcon :icon="['fas', 'gauge-high']" />
-          </button>
-        </div>
-      </div>
+      <FtInput
+        v-if="unlocked && !isProfileManagerOpen && !isKeyboardShortcutPromptOpen && !isStandaloneViewOpen && !subpageTitle"
+        ref="settingsSearchInputRef"
+        class="settingsSearch"
+        input-type="search"
+        :value="settingsSearchQuery"
+        :placeholder="t('Settings.Search Settings')"
+        :show-label="false"
+        :show-action-button="false"
+        @input="settingsSearchQuery = $event; handleSettingsSearch()"
+      />
       <div class="settingsHeaderActions">
+        <button
+          v-if="showKeyboardShortcutAction && !isStandaloneViewOpen"
+          type="button"
+          class="settingsHeaderButton"
+          :aria-label="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
+          :title="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
+          @click="showKeyboardShortcutPrompt"
+        >
+          <FtIcon :icon="['fas', 'keyboard']" />
+        </button>
+        <button
+          v-if="!isStandaloneViewOpen"
+          type="button"
+          class="settingsHeaderButton"
+          :class="{ active: highlightChangedSettings }"
+          :aria-label="t('Settings.Highlight Changed Settings')"
+          :title="t('Settings.Highlight Changed Settings')"
+          :aria-pressed="highlightChangedSettings"
+          @click="updateHighlightChangedSettings(!highlightChangedSettings)"
+        >
+          <FtIcon :icon="['fas', 'pen']" />
+        </button>
+        <button
+          v-if="!isStandaloneViewOpen"
+          type="button"
+          class="settingsHeaderButton"
+          :class="{ active: showPerformanceImpactIndicators }"
+          :aria-label="t('Settings.Performance Impact.Show Performance Impact')"
+          :title="t('Settings.Performance Impact.Show Performance Impact')"
+          :aria-pressed="showPerformanceImpactIndicators"
+          @click="updateShowPerformanceImpactIndicators(!showPerformanceImpactIndicators)"
+        >
+          <FtIcon :icon="['fas', 'gauge-high']" />
+        </button>
         <button
           v-if="showMinimizeButton"
           type="button"
