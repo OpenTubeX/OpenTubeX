@@ -21,17 +21,23 @@ async function rendererCacheEntries(userDataDir) {
 }
 
 test('persists packaged renderer code across launches and recreates it after clearing', async ({ app }, testInfo) => {
+  let entries
+  let checkpoints = 0
+  const inspectStoppedCache = async (oldProcess) => {
+    expect(oldProcess.exitCode, 'the previous process has exited').toBe(0)
+    entries = await rendererCacheEntries(app.userDataDir)
+    expect(entries.length, 'compiled renderer code persists before a replacement process starts').toBeGreaterThan(0)
+    checkpoints++
+  }
+
   // The default V8 policy waits for repeated loads before storing bytecode.
   for (let launch = 0; launch < 2; launch++) {
     const { page } = await app.relaunch()
     await expect(page.getByRole('heading', { name: 'History', exact: true })).toBeVisible()
   }
 
-  let entries
-  await expect.poll(async () => {
-    entries = await rendererCacheEntries(app.userDataDir)
-    return entries.length
-  }, { message: 'app://bundle/renderer.js has a persisted V8 code cache' }).toBeGreaterThan(0)
+  await app.relaunch(inspectStoppedCache)
+  expect(checkpoints).toBe(1)
   await testInfo.attach('renderer-code-cache', {
     body: JSON.stringify(entries.map(({ name, contents }) => ({ name, bytes: contents.length }))),
     contentType: 'application/json'
@@ -46,5 +52,6 @@ test('persists packaged renderer code across launches and recreates it after cle
     const { page } = await app.relaunch()
     await expect(page.getByRole('heading', { name: 'History', exact: true })).toBeVisible()
   }
-  await expect.poll(async () => (await rendererCacheEntries(app.userDataDir)).length).toBeGreaterThan(0)
+  await app.relaunch(inspectStoppedCache)
+  expect(checkpoints).toBe(2)
 })

@@ -390,7 +390,8 @@ export const test = base.extend({
       await expect(tutorial).toBeHidden()
     }
 
-    const relaunch = async () => {
+    /** Runs an optional checkpoint with the exited process before launching again. */
+    const relaunch = async (beforeLaunch) => {
       // Wait until the old process has fully exited, otherwise it still owns
       // the single-instance lock for this userData dir and the new instance
       // immediately exits again.
@@ -398,6 +399,7 @@ export const test = base.extend({
       const exited = new Promise((resolve) => oldProcess.once('exit', resolve))
       await appHandle.electronApp.close()
       await exited
+      await beforeLaunch?.(oldProcess)
       const next = await launchApp(userDataDir, launchArgs, { appRoot })
       appHandle.electronApp = next.electronApp
       appHandle.page = next.page
