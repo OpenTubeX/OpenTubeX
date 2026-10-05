@@ -1,4 +1,4 @@
-import { test, expect, setWindowSize } from '../../helpers/app.mjs'
+import { test, expect, setPlayerFullscreen, setWindowSize } from '../../helpers/app.mjs'
 import { openMockedVideo } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
@@ -8,6 +8,7 @@ test.use({
     settings: {
       videoPlaybackEngine: 'built-in',
       ytDlpPlaybackEngineDefaultMigration: true,
+      useQuickPlaybackSpeedBar: true,
       reducedMotion: 'off'
     }
   }
@@ -39,10 +40,13 @@ test('volume hover keeps its slide without animating layout under CPU load in bo
   await mockPlayableWatchPage(app, page)
   const video = await openMockedVideo(page)
   await video.evaluate(element => element.pause())
+  await setWindowSize(app, page, { width: 1920, height: 1080 })
+  await setPlayerFullscreen(page, true)
   await page.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
   const group = page.locator('.ft-volume-control-group')
   const slider = group.locator('.shaka-volume-bar-container')
   const timeGroup = page.locator('.ft-time-display-group')
+  const speedBar = page.locator('.shaka-controls-button-panel > .shaka-spacer ~ .ft-quick-playback-rate-bar')
   const cdp = await page.context().newCDPSession(page)
   await cdp.send('Performance.enable')
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: 6 })
@@ -57,18 +61,22 @@ test('volume hover keeps its slide without animating layout under CPU load in bo
         await expect.poll(() => slider.evaluate(element => element.getBoundingClientRect().width)).toBeLessThan(1)
         const muteBounds = await group.locator('.shaka-mute-button').boundingBox()
         const timeBefore = (await timeGroup.boundingBox()).x
+        // With spare width, the flex spacer absorbs expansion and keeps right controls fixed.
+        await expect.poll(() => page.locator('.shaka-controls-button-panel > .shaka-spacer').evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThan(100)
+        const speedBefore = (await speedBar.boundingBox()).x
         await group.evaluate(element => {
           delete element.dataset.hoverMotion
           element.addEventListener('pointerenter', () => {
             const started = performance.now()
             const time = element.parentElement.querySelector('.ft-time-display-group')
             const bar = element.querySelector('.shaka-volume-bar-container')
+            const speeds = element.parentElement.querySelector('.ft-quick-playback-rate-bar')
             const frames = []
             let animatedProperties
             function sample(now) {
               animatedProperties ??= bar.getAnimations().flatMap(animation =>
                 animation.effect.getKeyframes().flatMap(frame => Object.keys(frame)))
-              frames.push({ elapsedMs: now - started, timeLeft: time.getBoundingClientRect().left })
+              frames.push({ elapsedMs: now - started, timeLeft: time.getBoundingClientRect().left, speedLeft: speeds.getBoundingClientRect().left })
               if (now - started < 350) {
                 requestAnimationFrame(sample)
               } else {
@@ -96,6 +104,7 @@ test('volume hover keeps its slide without animating layout under CPU load in bo
         measurements.push(measurement)
         const timeAfter = (await timeGroup.boundingBox()).x
         expect(motion.frames.some(frame => frame.timeLeft > timeBefore + 0.5 && frame.timeLeft < timeAfter - 0.5), JSON.stringify(measurement)).toBe(true)
+        expect(Math.max(...motion.frames.map(frame => Math.abs(frame.speedLeft - speedBefore))), JSON.stringify(measurement)).toBeLessThan(1)
         expect(motion.animatedProperties).toContain('transform')
         expect(motion.animatedProperties).toContain('clipPath')
         expect(motion.animatedProperties).not.toContain('width')

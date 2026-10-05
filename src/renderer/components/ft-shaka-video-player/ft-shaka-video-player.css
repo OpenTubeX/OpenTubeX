@@ -1885,7 +1885,7 @@ html[data-reduced-motion='reduce'] .musicVisualizerCanvas {
   animation: ft-volume-glass-expand 250ms cubic-bezier(0.4, 0, 0.6, 1);
 }
 
-:deep(.ft-volume-control-group:is(:hover, :has(:focus-visible)) ~ :is(.ft-time-display-group, .ft-chapters-button, .ft-shaka-highlight-button, .ft-quick-playback-rate-bar)) {
+:deep(.ft-volume-control-group:is(:hover, :has(:focus-visible)) ~ :is(.ft-time-display-group, .ft-chapters-button, .ft-shaka-highlight-button, .ft-quick-playback-rate-bar):not(.shaka-spacer ~ *)) {
   animation: ft-volume-neighbour-slide 250ms cubic-bezier(0.4, 0, 0.6, 1);
 }
 
