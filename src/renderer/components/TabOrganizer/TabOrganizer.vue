@@ -727,6 +727,7 @@ const newGroupName = ref('')
 const showCreateGroupPrompt = ref(false)
 const isCreatingGroup = ref(false)
 const newGroupNameInput = useTemplateRef('newGroupNameInput')
+let pendingGroup = null
 const selectedGroupTarget = ref('')
 const selectedWindowTarget = ref('')
 const moveTargets = ref([])
@@ -1059,6 +1060,7 @@ async function runAction(action, tabIds) {
 }
 
 async function openCreateGroupPrompt() {
+  pendingGroup = null
   newGroupName.value = ''
   showCreateGroupPrompt.value = true
   await nextTick()
@@ -1068,6 +1070,7 @@ async function openCreateGroupPrompt() {
 
 function closeCreateGroupPrompt() {
   if (isCreatingGroup.value) return
+  pendingGroup = null
   showCreateGroupPrompt.value = false
 }
 
@@ -1075,11 +1078,16 @@ async function createGroup() {
   if (newGroupName.value.trim().length === 0 || isCreatingGroup.value) return
   isCreatingGroup.value = true
   try {
-    const group = await store.dispatch('createTabGroup', {
-      name: newGroupName.value.trim(),
-      color: null
-    })
-    if (!group) return
+    const groupName = newGroupName.value.trim()
+    let group = pendingGroup?.name === groupName ? pendingGroup.group : null
+    if (!group) {
+      group = await store.dispatch('createTabGroup', {
+        name: groupName,
+        color: null
+      })
+      if (!group) return
+      pendingGroup = { name: groupName, group }
+    }
 
     if (selectedTabIdsArray.value.length > 0) {
       await store.dispatch('setTabsGroup', {
@@ -1087,8 +1095,14 @@ async function createGroup() {
         groupId: group.id
       })
     }
+    pendingGroup = null
     newGroupName.value = ''
     showCreateGroupPrompt.value = false
+  } catch (error) {
+    showToast({
+      message: error.message ?? String(error),
+      icon: ['fas', 'circle-exclamation']
+    })
   } finally {
     isCreatingGroup.value = false
   }
