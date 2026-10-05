@@ -198,7 +198,7 @@ for (const zoom of [1, 0.95]) {
     })
     const player = page.locator('.ftVideoPlayer')
     await expect(player).toHaveClass(/(?:^|\s)scrollMiniPlayer(?:\s|$)/)
-    await page.locator('.phoneCommentsButton').evaluate(button => button.click())
+    await page.locator('.phoneCommentsOpen').evaluate(button => button.click())
     const sheet = page.locator('.dockedSheet[open]')
     await expect(sheet).toBeVisible()
     await expect(player).toHaveClass(/(?:^|\s)scrollMiniPlayer(?:\s|$)/)
