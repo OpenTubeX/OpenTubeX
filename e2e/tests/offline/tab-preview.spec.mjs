@@ -88,7 +88,7 @@ test.describe('tab previews', () => {
         if (index > 0) {
           await expect(tooltip.locator('.tabTooltipTitle')).toHaveText(index === 1 ? 'First preview' : 'Second preview')
         } else {
-          await expect(tooltip.locator('.tabTooltipPreview img')).toHaveAttribute('src', /^data:image\/jpeg/)
+          await expect(tooltip.locator('.tabTooltipPreview img:not(.retryImagePlaceholder)')).toHaveAttribute('src', /^data:image\/jpeg/)
         }
         expect(await original.evaluate(element => element.isConnected && getComputedStyle(element).opacity === '1')).toBe(true)
         await expect(tooltip).toHaveCount(1)
