@@ -1402,7 +1402,7 @@
             class="mobileMiniBarDismiss"
             :disabled="mobileMiniBarControlsDisabled"
             :aria-label="$t('Video.Player.Scroll Mini Player.Hide')"
-            @click.stop.prevent="dismissCrossTabMiniPlayer"
+            @click.stop.prevent="dismissMobileMiniPlayer"
           >
             <ft-icon
               :icon="['fas', 'times']"

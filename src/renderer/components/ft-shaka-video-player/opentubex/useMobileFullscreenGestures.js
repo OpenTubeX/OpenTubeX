@@ -1,4 +1,4 @@
-import { computed, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onUnmounted, ref } from 'vue'
 import { lightHaptic } from '../../../helpers/mobileHaptics.js'
 
 export function isCapacitorMobilePlayer() {
@@ -43,6 +43,7 @@ export function useMobileFullscreenGestures({
   })
   /** @type {number | null} */
   let mobileMiniPlayerDismissTimer = null
+  let mobileMiniPlayerDismissSequence = 0
   /** @type {{ pointerId: number, startX: number, startY: number, startTime: number, fullscreen: boolean, restoring: boolean, minimizing?: boolean, dismissing?: boolean, shorts: boolean, distance: number, tapDirection: number, controlsShownAtStart: boolean, fullscreenSwipeEnabled: boolean, surfaceTap: boolean, action: string, adjusting: boolean, height: number } | null} */
   let mobileFullscreenGesture = null
   /** @type {number | null} */
@@ -353,21 +354,36 @@ export function useMobileFullscreenGestures({
   }
 
   function clearMobileMiniPlayerDismiss() {
+    mobileMiniPlayerDismissSequence++
     clearTimeout(mobileMiniPlayerDismissTimer)
     mobileMiniPlayerDismissTimer = null
     mobileMiniPlayerDismissOffset.value = null
     mobileMiniPlayerDismissSettling.value = false
   }
 
+  function dismissMobileMiniPlayer() {
+    if (mobileMiniPlayerDismissSettling.value || !isScrollMiniPlayerActive() || !miniPlayerDrag?.canDismiss()) return
+    const container = getContainer()
+    if (!container) return
+    settleMobileMiniPlayerDismiss(true, container.getBoundingClientRect().height)
+  }
+
   function settleMobileMiniPlayerDismiss(commit, height) {
+    const sequence = ++mobileMiniPlayerDismissSequence
     mobileMiniPlayerDismissSettling.value = true
     mobileMiniPlayerDismissOffset.value = commit ? height + 96 : 0
     const duration = miniPlayerDrag.dismissDuration?.() ??
       (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 140)
-    mobileMiniPlayerDismissTimer = window.setTimeout(() => {
-      clearMobileMiniPlayerDismiss()
-      if (commit && isScrollMiniPlayerActive() && miniPlayerDrag.canDismiss()) miniPlayerDrag.dismiss()
-    }, duration)
+    nextTick(() => {
+      if (sequence !== mobileMiniPlayerDismissSequence) return
+      // Start the timeout after Vue applies the transform and the browser
+      // starts its transition, including a close-button dismissal from rest.
+      getContainer()?.getBoundingClientRect()
+      mobileMiniPlayerDismissTimer = window.setTimeout(() => {
+        clearMobileMiniPlayerDismiss()
+        if (commit && isScrollMiniPlayerActive() && miniPlayerDrag.canDismiss()) miniPlayerDrag.dismiss()
+      }, duration)
+    })
   }
 
   function cancelMobileFullscreenGesture(event) {
@@ -545,6 +561,7 @@ export function useMobileFullscreenGestures({
   return {
     cancelMobileFullscreenGesture,
     consumeMobileTitleClickSuppression,
+    dismissMobileMiniPlayer,
     finishMobileFullscreenGesture,
     handleMobilePlayerSurfaceClick,
     handleMobilePlayerTouchEnd,

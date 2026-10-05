@@ -5226,6 +5226,7 @@ export default defineComponent({
     const {
       cancelMobileFullscreenGesture,
       consumeMobileTitleClickSuppression,
+      dismissMobileMiniPlayer,
       finishMobileFullscreenGesture,
       handleMobilePlayerSurfaceClick,
       handleMobilePlayerTouchEnd,
@@ -12789,6 +12790,7 @@ export default defineComponent({
       handleScrollMiniControlsPointerMove,
       suppressScrollMiniPlayPausePointerReveal,
       dismissCrossTabMiniPlayer,
+      dismissMobileMiniPlayer,
       scrollMiniTogglePlayPause,
       scrollMiniScrollToTop,
       restoreInlinePlayer,
