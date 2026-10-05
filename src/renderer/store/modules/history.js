@@ -1,6 +1,7 @@
 import { toRaw } from 'vue'
 import { getContinueWatchingCandidates } from '../../helpers/homeSections'
 import { DBHistoryHandlers } from '../../../datastores/handlers/index'
+import { clearExternalMediaPositions, removeExternalMediaPositionsBefore } from '../../helpers/externalMediaPosition'
 import {
   canMarkHistoryEntryAsWatched,
   migrateLegacyHistoryRecord,
@@ -70,6 +71,7 @@ const actions = {
       const cutoff = getRetentionCutoff(rootGetters.getHistoryRetentionDays)
       if (cutoff !== null) {
         await DBHistoryHandlers.deleteOlderThan(cutoff)
+        removeExternalMediaPositionsBefore(cutoff)
       }
 
       const results = await DBHistoryHandlers.find()
@@ -177,6 +179,7 @@ const actions = {
 
     try {
       const videoIds = await DBHistoryHandlers.deleteOlderThan(cutoff)
+      removeExternalMediaPositionsBefore(cutoff)
       commit('removeMultipleFromHistoryCache', videoIds)
       return videoIds.length
     } catch (errMessage) {
@@ -188,6 +191,7 @@ const actions = {
   async removeAllHistory({ commit }) {
     try {
       await DBHistoryHandlers.deleteAll()
+      clearExternalMediaPositions()
       commit('setHistoryCacheSorted', [])
       commit('setHistoryCacheById', {})
       return true
