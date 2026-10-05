@@ -141,6 +141,114 @@ test('chapters animate between title and icon in both player themes', async ({ a
   await expect(button).toHaveCSS('transition-property', 'none')
 })
 
+test('chapter pill indicates open state in both layouts and player themes', async ({ app, page }, testInfo) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  await setPlayerFullscreen(page, true)
+  const player = page.locator('.ftVideoPlayer')
+  const panel = player.locator('.shaka-controls-button-panel')
+  const button = panel.locator('.ft-chapters-button')
+  const chevron = button.locator('.ft-chapters-chevron')
+  const surfaceAppearance = () => button.evaluate(element => {
+    const style = element.closest('.classicPlayerControls')
+      ? getComputedStyle(element, '::before')
+      : getComputedStyle(element.querySelector('.ft-control-glass'))
+    return { background: style.backgroundColor, border: style.boxShadow }
+  })
+  await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+
+  for (const scale of [1, 1.25]) {
+    await app.electronApp.evaluate(({ BrowserWindow }, scale) => BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(scale), scale)
+    for (const frosted of [true, false]) {
+      await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+      for (const width of [1300, 500]) {
+        await panel.evaluate((element, width) => { element.style.width = `${width}px` }, width)
+        await expect(panel).toHaveClass(width === 500 ? /ft-controls-compact-chapters/ : /^(?!.*ft-controls-compact-chapters)/)
+        await expect.poll(() => button.evaluate(element => element.getAnimations().length)).toBe(0)
+        await page.mouse.move(0, 0)
+        await expect(button).toHaveAttribute('aria-expanded', 'false')
+        const closedAppearance = await surfaceAppearance()
+        const closedBounds = await button.boundingBox()
+        const title = await button.locator('.ft-chapters-current-title').textContent()
+        if (scale === 1 && frosted && width === 1300) {
+          await panel.screenshot({ path: testInfo.outputPath('chapters-closed.png') })
+        }
+
+        await button.click()
+        await expect(button).toHaveAttribute('aria-expanded', 'true')
+        await expect(player.locator('.chapterOverlay')).toBeVisible()
+        await expect(chevron).toHaveCSS('rotate', '90deg')
+        await expect.poll(surfaceAppearance).not.toEqual(closedAppearance)
+        await page.mouse.move(0, 0)
+        const openAppearance = await surfaceAppearance()
+        expect(openAppearance.background).not.toBe(closedAppearance.background)
+        expect(openAppearance.border).not.toBe(closedAppearance.border)
+        await expect(button.locator('.ft-chapters-current-title')).toHaveText(title)
+        const openBounds = await button.boundingBox()
+        expect(openBounds.width).toBeCloseTo(closedBounds.width, 0)
+        expect(openBounds.height).toBeCloseTo(closedBounds.height, 0)
+        if (scale === 1 && frosted && width === 1300) {
+          await panel.screenshot({ path: testInfo.outputPath('chapters-open.png') })
+        }
+
+        await button.hover()
+        expect((await surfaceAppearance()).border).toBe(openAppearance.border)
+        await player.locator('.chapterOverlay .chapterOverlayClose').click()
+        await page.mouse.move(0, 0)
+        await expect(button).toHaveAttribute('aria-expanded', 'false')
+        await expect(chevron).toHaveCSS('rotate', 'none')
+        await expect.poll(surfaceAppearance).toEqual(closedAppearance)
+      }
+    }
+  }
+})
+
+test('chapter chevron animates opening and closing unless motion is reduced', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+  const video = await openMockedVideo(page)
+  await video.evaluate(element => element.pause())
+  await setPlayerFullscreen(page, true)
+  const player = page.locator('.ftVideoPlayer')
+  const panel = player.locator('.shaka-controls-button-panel')
+  const button = panel.locator('.ft-chapters-button')
+  const chevron = button.locator('.ft-chapters-chevron')
+  await player.locator('.shaka-controls-container').evaluate(element => element.setAttribute('casting', 'true'))
+  await panel.evaluate(element => { element.style.width = '1300px' })
+  await expect(panel).not.toHaveClass(/ft-controls-compact-chapters/)
+
+  for (const frosted of [true, false]) {
+    await page.evaluate(value => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseFrostedGlassPlayerUi', value), frosted)
+    for (const open of [true, false]) {
+      const motion = await button.evaluate(async element => {
+        const chevron = element.querySelector('.ft-chapters-chevron')
+        getComputedStyle(chevron).getPropertyValue('rotate')
+        element.click()
+        const rotation = chevron.getAnimations().find(animation => animation.transitionProperty === 'rotate')
+        if (!rotation) return null
+        // Seek the actual CSS transition to its midpoint without relying on
+        // wall-clock timing or the private X server's rendering cadence.
+        rotation.pause()
+        await rotation.ready
+        rotation.currentTime = Number(rotation.effect.getTiming().duration) / 2
+        const angle = Number.parseFloat(getComputedStyle(chevron).rotate)
+        rotation.finish()
+        return angle
+      })
+      expect(motion).toBeGreaterThan(0)
+      expect(motion).toBeLessThan(90)
+      await expect(button).toHaveAttribute('aria-expanded', String(open))
+      await expect(chevron).toHaveCSS('rotate', open ? '90deg' : 'none')
+    }
+  }
+
+  await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateReducedMotion', 'on'))
+  await expect(chevron).toHaveCSS('transition-property', 'none')
+  await button.click()
+  await expect(chevron).toHaveCSS('rotate', '90deg')
+  expect(await chevron.evaluate(element => element.getAnimations().length)).toBe(0)
+})
+
 test('chapter animation keeps the right control glass aligned without quick speeds', async ({ app, page }) => {
   await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.dispatch('updateUseQuickPlaybackSpeedBar', false))
   await mockPlayableWatchPage(app, page)
