@@ -267,6 +267,10 @@ Settings:
       Network: רשת
       Disk: כונן
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: החלקה שמאלה על תמונות ממוזערות
+      Right: החלקה ימינה על תמונות ממוזערות
+      Description: החליקו אופקית על תמונה ממוזערת של סרטון ושחררו לביצוע הפעולה שנבחרה.
     Data Saver Thumbnails: "תמונות ממוזערות לחיסכון בנתונים"
     Use tray icon: "שימוש בסמל במגש המערכת"
     Close to system tray: "סגירה למגש המערכת"

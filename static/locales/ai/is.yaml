@@ -265,6 +265,10 @@ Settings:
       Network: nets
       Disk: disks
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Strjúka til vinstri á smámyndum
+      Right: Strjúka til hægri á smámyndum
+      Description: Strjúktu lárétt yfir smámynd myndskeiðs og slepptu til að framkvæma valda aðgerð.
     Data Saver Thumbnails: "Gagnasparandi smámyndir"
     Use tray icon: "Nota tákn í kerfisbakka"
     Close to system tray: "Loka í kerfisbakka"

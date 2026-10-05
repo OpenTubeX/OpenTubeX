@@ -273,6 +273,10 @@ Settings:
       Network: мрежа
       Disk: диск
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Превлачење улево по сличицама
+      Right: Превлачење удесно по сличицама
+      Description: Превуците водоравно преко сличице видеа и отпустите да бисте извршили изабрану радњу.
     Data Saver Thumbnails: "Сличице за уштеду података"
     Use tray icon: "Користи икону у системској палети"
     Close to system tray: "Затвори у системску палету"

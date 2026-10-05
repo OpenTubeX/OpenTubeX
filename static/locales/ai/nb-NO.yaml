@@ -263,6 +263,10 @@ Settings:
       Network: nettverk
       Disk: disk
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Sveip til venstre på miniatyrbilder
+      Right: Sveip til høyre på miniatyrbilder
+      Description: Sveip vannrett på et videominiatyrbilde og slipp for å utføre den valgte handlingen.
     Data Saver Thumbnails: "Databesparende miniatyrbilder"
     Use tray icon: "Bruk ikon i systemstatusfeltet"
     Close to system tray: "Lukk til systemstatusfeltet"

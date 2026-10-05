@@ -103,6 +103,10 @@ Settings:
     Advanced Description: Dostawcy, aplikacje zewnętrzne i sieć
     Alternative providers: Dostawcy filmów i metadanych
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Przesunięcie w lewo na miniaturach
+      Right: Przesunięcie w prawo na miniaturach
+      Description: Przesuń poziomo po miniaturze filmu i puść, aby wykonać wybraną czynność.
     Data Saver Thumbnails: "Miniatury oszczędzające dane"
     Tab Close Focus:
       Last active tab: "Ostatnio aktywna karta"

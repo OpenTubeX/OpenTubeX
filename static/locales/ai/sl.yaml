@@ -386,6 +386,10 @@ Settings:
       Disk: disk
   Return to Settings Menu: Nazaj v meni z nastavitvami
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Podrsanje levo po sličicah
+      Right: Podrsanje desno po sličicah
+      Description: Podrsajte vodoravno po sličici videoposnetka in spustite za izvedbo izbranega dejanja.
     Data Saver Thumbnails: "Sličice za varčevanje s podatki"
     Use tray icon: "Uporabi ikono v sistemski vrstici"
     Close to system tray: "Zapri v sistemsko vrstico"

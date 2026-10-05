@@ -348,6 +348,10 @@ Settings:
     Advanced Description: Anbieter, externe Anwendungen und Netzwerk
     Alternative providers: Video- und Metadatenanbieter
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Auf Vorschaubildern nach links wischen
+      Right: Auf Vorschaubildern nach rechts wischen
+      Description: Wische horizontal über ein Video-Vorschaubild und lasse los, um die ausgewählte Aktion auszuführen.
     Data Saver Thumbnails: "Datensparende Vorschaubilder"
     Use tray icon: "Symbol im Infobereich verwenden"
     Close to system tray: "Beim Schließen in den Infobereich minimieren"

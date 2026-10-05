@@ -267,6 +267,10 @@ Settings:
       Network: mạng
       Disk: ổ đĩa
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Vuốt sang trái trên hình thu nhỏ
+      Right: Vuốt sang phải trên hình thu nhỏ
+      Description: Vuốt ngang trên hình thu nhỏ của video rồi thả tay để thực hiện thao tác đã chọn.
     Data Saver Thumbnails: "Ảnh thu nhỏ tiết kiệm dữ liệu"
     Use tray icon: "Sử dụng biểu tượng khay hệ thống"
     Close to system tray: "Đóng vào khay hệ thống"

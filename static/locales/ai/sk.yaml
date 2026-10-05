@@ -263,6 +263,10 @@ Settings:
       Network: sieť
       Disk: disk
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Potiahnutie doľava po náhľadoch
+      Right: Potiahnutie doprava po náhľadoch
+      Description: Potiahnite vodorovne po náhľade videa a uvoľnením vykonajte vybranú akciu.
     Data Saver Thumbnails: "Úsporné náhľady"
     Use tray icon: "Používať ikonu v systémovej lište"
     Close to system tray: "Pri zatvorení skryť do systémovej lišty"

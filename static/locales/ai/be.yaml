@@ -280,6 +280,10 @@ Settings:
       Network: сетка
       Disk: дыск
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Правесці ўлева па мініяцюрах
+      Right: Правесці ўправа па мініяцюрах
+      Description: Правядзіце гарызантальна па мініяцюры відэа і адпусціце, каб выканаць выбраную дзею.
     Data Saver Thumbnails: "Эканомныя мініяцюры"
     Use tray icon: "Выкарыстоўваць значок у трэі"
     Close to system tray: "Згортваць у трэй пры закрыцці"

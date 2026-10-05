@@ -263,6 +263,10 @@ Settings:
       Network: rete
       Disk: disco
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Scorri a sinistra sulle miniature
+      Right: Scorri a destra sulle miniature
+      Description: Scorri orizzontalmente sulla miniatura di un video e rilascia per eseguire l'azione selezionata.
     Data Saver Thumbnails: "Miniature per il risparmio dati"
     Use tray icon: "Usa l’icona nell’area di notifica"
     Close to system tray: "Chiudi nell’area di notifica"

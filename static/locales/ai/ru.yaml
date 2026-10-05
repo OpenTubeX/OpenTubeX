@@ -240,6 +240,10 @@ Settings:
       Network: сеть
       Disk: диск
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Смахивание влево по миниатюрам
+      Right: Смахивание вправо по миниатюрам
+      Description: Проведите горизонтально по миниатюре видео и отпустите, чтобы выполнить выбранное действие.
     Data Saver Thumbnails: "Миниатюры для экономии трафика"
     Use tray icon: "Использовать значок в трее"
     Close to system tray: "Сворачивать в трей при закрытии"

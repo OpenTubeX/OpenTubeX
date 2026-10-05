@@ -263,6 +263,10 @@ Settings:
       Network: ネットワーク
       Disk: ディスク
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: サムネイルを左にスワイプ
+      Right: サムネイルを右にスワイプ
+      Description: 動画のサムネイルを横にスワイプして指を離すと、選択した操作を実行します。
     Data Saver Thumbnails: "データ節約用サムネイル"
     Use tray icon: "トレイアイコンを使用"
     Close to system tray: "閉じるときにトレイに格納"

@@ -267,6 +267,10 @@ Settings:
       Network: verkko
       Disk: levytila
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Pyyhkäisy vasemmalle pikkukuvissa
+      Right: Pyyhkäisy oikealle pikkukuvissa
+      Description: Pyyhkäise videon pikkukuvaa vaakasuunnassa ja vapauta suorittaaksesi valitun toiminnon.
     Data Saver Thumbnails: "Dataa säästävät pikkukuvat"
     Use tray icon: "Käytä ilmoitusalueen kuvaketta"
     Close to system tray: "Sulje ilmoitusalueelle"

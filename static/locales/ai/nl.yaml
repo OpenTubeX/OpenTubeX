@@ -267,6 +267,10 @@ Settings:
       Network: netwerk
       Disk: schijf
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Naar links vegen op miniaturen
+      Right: Naar rechts vegen op miniaturen
+      Description: Veeg horizontaal over een videominiatuur en laat los om de geselecteerde actie uit te voeren.
     Data Saver Thumbnails: "Databesparende miniaturen"
     Use tray icon: "Systeemvakpictogram gebruiken"
     Close to system tray: "Sluiten naar systeemvak"

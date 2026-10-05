@@ -265,6 +265,10 @@ Settings:
       Network: rețea
       Disk: disc
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Glisare la stânga pe miniaturi
+      Right: Glisare la dreapta pe miniaturi
+      Description: Glisați orizontal pe miniatura unui videoclip și eliberați pentru a efectua acțiunea selectată.
     Data Saver Thumbnails: "Miniaturi pentru economisirea datelor"
     Use tray icon: "Folosește pictograma din zona de notificare"
     Close to system tray: "Închide în zona de notificare"

@@ -352,6 +352,10 @@ Settings:
       Disk: 디스크
   Return to Settings Menu: 설정 메뉴로 돌아가기
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: 썸네일에서 왼쪽으로 스와이프
+      Right: 썸네일에서 오른쪽으로 스와이프
+      Description: 동영상 썸네일을 가로로 스와이프한 후 손을 떼면 선택한 작업이 실행됩니다.
     Data Saver Thumbnails: "데이터 절약 썸네일"
     Use tray icon: "트레이 아이콘 사용"
     Close to system tray: "닫을 때 시스템 트레이로 보내기"

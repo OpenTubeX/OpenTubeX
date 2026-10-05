@@ -277,6 +277,10 @@ Settings:
       Disk: disk
   Return to Settings Menu: Tilbake til innstillingsmenyen
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Sveip til venstre på miniatyrbilete
+      Right: Sveip til høgre på miniatyrbilete
+      Description: Sveip vassrett på eit videominiatyrbilete og slepp for å utføre den valde handlinga.
     Data Saver Thumbnails: "Datasparande miniatyrbilete"
     Use tray icon: "Bruk ikon i systemtrauet"
     Close to system tray: "Lukk til systemtrauet"

@@ -394,6 +394,10 @@ Settings:
       Disk: disc
   Return to Settings Menu: Torna al menú de configuració
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Lliscar cap a l'esquerra a les miniatures
+      Right: Lliscar cap a la dreta a les miniatures
+      Description: Llisca horitzontalment sobre una miniatura de vídeo i deixa anar per executar l'acció seleccionada.
     Data Saver Thumbnails: "Miniatures amb estalvi de dades"
     Use tray icon: "Utilitza la icona de la safata"
     Close to system tray: "Tanca a la safata del sistema"

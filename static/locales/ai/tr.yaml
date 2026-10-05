@@ -263,6 +263,10 @@ Settings:
       Network: ağ
       Disk: disk
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Küçük resimlerde sola kaydırma
+      Right: Küçük resimlerde sağa kaydırma
+      Description: Seçilen işlemi gerçekleştirmek için video küçük resmini yatay olarak kaydırıp bırakın.
     Data Saver Thumbnails: "Veri tasarruflu küçük resimler"
     Use tray icon: "Tepsi simgesini kullan"
     Close to system tray: "Sistem tepsisine kapat"

@@ -263,6 +263,10 @@ Settings:
       Network: sítě
       Disk: disku
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: Přejetí doleva po náhledech
+      Right: Přejetí doprava po náhledech
+      Description: Přejeďte vodorovně po náhledu videa a uvolněním proveďte vybranou akci.
     Data Saver Thumbnails: "Úsporné náhledy"
     Use tray icon: "Používat ikonu v oznamovací oblasti"
     Close to system tray: "Při zavření skrýt do oznamovací oblasti"

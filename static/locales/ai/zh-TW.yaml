@@ -263,6 +263,10 @@ Settings:
       Network: 網路
       Disk: 磁碟
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: 在縮圖上向左滑動
+      Right: 在縮圖上向右滑動
+      Description: 在影片縮圖上水平滑動並放開，即可執行所選操作。
     Data Saver Thumbnails: "節省流量的縮圖"
     Use tray icon: "使用系統匣圖示"
     Close to system tray: "關閉時縮小至系統匣"

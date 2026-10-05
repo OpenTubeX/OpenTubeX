@@ -269,6 +269,10 @@ Settings:
       Network: பிணையம்
       Disk: வட்டு
   General Settings:
+    Thumbnail Swipe Gestures:
+      Left: சிறுபடங்களில் இடதுபுறம் ஸ்வைப் செய்
+      Right: சிறுபடங்களில் வலதுபுறம் ஸ்வைப் செய்
+      Description: தேர்ந்தெடுத்த செயலைச் செய்ய காணொளியின் சிறுபடத்தில் கிடைமட்டமாக ஸ்வைப் செய்து விடவும்.
     Data Saver Thumbnails: "தரவைச் சேமிக்கும் சிறுபடங்கள்"
     Use tray icon: "கணினித் தட்டு சின்னத்தைப் பயன்படுத்து"
     Close to system tray: "கணினித் தட்டிற்கு மூடு"

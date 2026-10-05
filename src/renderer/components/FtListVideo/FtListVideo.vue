@@ -1,202 +1,425 @@
 <template>
   <div
-    class="ft-list-video ft-list-item"
+    class="videoSwipeFrame"
     :class="{
-      list: effectiveListTypeIsList,
-      grid: !effectiveListTypeIsList,
-      [appearance]: true,
-      watched: addWatchedStyle
+      thumbnailSwipeEnabled,
+      videoSwipeActive: thumbnailSwipe,
+      videoSwipeDragging: thumbnailSwipe && !thumbnailSwipe.settling,
     }"
-    @contextmenu="openVideoContextMenu"
-    @pointerdown="startMenuHold"
-    @pointermove="moveMenuHold"
-    @pointerup="cancelMenuHold"
-    @pointercancel="cancelMenuHold"
-    @dragstart="cancelMenuHold"
-    @keydown="handleContextMenuKeydown"
+    :style="{
+      '--video-swipe-offset': `${thumbnailSwipe?.offset ?? 0}px`,
+      '--video-swipe-progress': thumbnailSwipe?.progress ?? 0,
+    }"
+    @pointerdown="startThumbnailSwipe"
+    @pointermove="moveThumbnailSwipe"
+    @pointerup="finishThumbnailSwipe"
+    @pointercancel="abortThumbnailSwipe"
+    @lostpointercapture.self="abortThumbnailSwipe"
   >
     <div
-      v-if="showGrabBar"
-      class="grabBar"
+      v-if="thumbnailSwipe"
+      :key="thumbnailSwipe.direction"
+      class="thumbnailSwipeFeedback"
       :class="{
-        grabBarDisabled: !grabBarEnabled,
+        thumbnailSwipeReady: thumbnailSwipe.progress === 1,
+        thumbnailSwipeLeft: thumbnailSwipe.direction === 'left',
       }"
+      :title="thumbnailSwipe.action.label"
+      aria-hidden="true"
     >
-      <FtIcon
-        :icon="['fas', 'bars']"
-      />
+      <FtIcon :icon="thumbnailSwipe.action.icon" />
     </div>
     <div
-      class="videoThumbnail"
-      draggable="true"
-      @dragstart="onDragStart"
+      class="ft-list-video ft-list-item"
+      :class="{
+        list: effectiveListTypeIsList,
+        grid: !effectiveListTypeIsList,
+        [appearance]: true,
+        watched: addWatchedStyle
+      }"
+      @contextmenu="openVideoContextMenu"
+      @pointerdown="startMenuHold"
+      @pointermove="moveMenuHold"
+      @pointerup="cancelMenuHold"
+      @pointercancel="cancelMenuHold"
+      @dragstart="cancelMenuHold"
+      @keydown="handleContextMenuKeydown"
     >
-      <RouterLink
-        class="thumbnailLink"
-        tabindex="-1"
-        :to="watchVideoRouterLink"
-        :aria-label="title"
-        @click="handleWatchPageLinkClick"
-        @auxclick="handleWatchPageLinkClick"
-        @pointerenter="startThumbnailPreview"
-        @pointerleave="stopThumbnailPreview"
-      >
-        <FtRetryImage
-          :src="thumbnail"
-          class="thumbnailImage"
-          :class="{
-            blur: blurThumbnails,
-            deArrowThumbnail: appearance !== 'youtubeShort' && showDeArrowThumbnail && deArrowCache?.thumbnail != null
-          }"
-          alt=""
-        />
-        <img
-          v-if="thumbnailPreviewActive && thumbnailPreviewLoaded"
-          :src="thumbnailPreviewUrl"
-          class="thumbnailImage thumbnailPreview active loaded"
-          :class="{ blur: blurThumbnails }"
-          alt=""
-          aria-hidden="true"
-          @error="resetThumbnailPreview"
-        >
-        <FtEmbeddedProgress
-          v-if="historyEntryExists && progressPercentage > 0"
-          class="watchedProgressBar"
-          :progress="progressPercentage"
-          :corner-radius="thumbnailProgressRadius"
-          :end-arc-fraction="0.5"
-          :line-width="3"
-          :start-arc-fraction="0.5"
-        />
-      </RouterLink>
       <div
-        v-if="isLive || isUpcoming || isStation || (displayDuration !== '' && displayDuration !== '0:00')"
-        class="videoDuration"
+        v-if="showGrabBar"
+        class="grabBar"
         :class="{
-          live: isLive || isStation,
-          upcoming: isUpcoming
+          grabBarDisabled: !grabBarEnabled,
         }"
       >
         <FtIcon
-          v-if="isStation"
-          :icon="['fa', 'tower-broadcast']"
-          class="subscriptionIcon"
+          :icon="['fas', 'bars']"
         />
-        {{ displayDurationLabel }}
       </div>
       <div
-        v-if="useSponsorBlock && sponsorBlockFullVideoCategory"
-        class="sponsorBlockVideoLabel"
-        :title="t('Video.Player.SponsorBlock.FullVideoLabel', {
-          segmentCategory: sponsorBlockFullVideoLabel
-        })"
-      >
-        <FtIcon :icon="sponsorBlockFullVideoIcon" />
-        <span>{{ sponsorBlockFullVideoLabel }}</span>
-      </div>
-      <FtIconButton
-        v-if="externalPlayer !== '' && !externalPlayerIsDefaultViewingMode"
-        :title="t('Video.External Player.OpenInTemplate', { externalPlayer })"
-        :icon="['fas', 'external-link-alt']"
-        class="externalPlayerIcon"
-        theme="base"
-        :padding="appearance === 'watchPlaylistItem' ? 6 : 7"
-        :size="appearance === 'watchPlaylistItem' ? 12 : 16"
-        draggable="true"
-        @click="handleExternalPlayer"
-        @dragstart="onDragStart"
-      />
-      <span
-        class="playlistIcons"
-        :class="{ mobileThumbnailActions: useMobileThumbnailActions }"
+        class="videoThumbnail"
         draggable="true"
         @dragstart="onDragStart"
       >
-        <FtIconButton
-          v-if="!useMobileThumbnailActions && extraThumbnailActionButton"
-          :title="extraThumbnailActionButton.title"
-          :icon="extraThumbnailActionButton.icon"
-          class="extraThumbnailActionIcon"
-          theme="base"
-          :padding="appearance === 'watchPlaylistItem' ? 5 : 6"
-          :size="appearance === 'watchPlaylistItem' ? 14 : 18"
-          @click="handleExtraThumbnailAction"
-        />
-        <FtIconButton
-          v-if="showPlaylists"
-          :title="t('User Playlists.Add to Playlist')"
-          :icon="isInAnyPlaylist ? ['fac', 'playlist-check'] : ['fac', 'playlist-add']"
-          class="addToPlaylistIcon"
-          :class="alwaysShowAddToPlaylistButton ? 'alwaysVisible' : ''"
-          :padding="playlistIconPadding"
-          :size="playlistIconSize"
-          force-dropdown
-          mobile-sheet
-          dropdown-position-x="left"
-          :dropdown-portal="appearance === 'watchPlaylistItem'"
-          :dropdown-position-y="appearance === 'watchPlaylistItem' ? 'top' : 'bottom'"
+        <RouterLink
+          class="thumbnailLink"
+          tabindex="-1"
+          :to="watchVideoRouterLink"
+          :aria-label="title"
+          @click="handleWatchPageLinkClick"
+          @auxclick="handleWatchPageLinkClick"
+          @pointerenter="startThumbnailPreview"
+          @pointerleave="stopThumbnailPreview"
         >
-          <FtAddToPlaylistDropdown :video-data="addToPlaylistVideoData" />
-        </FtIconButton>
-        <FtIconButton
-          v-if="isQuickBookmarkEnabled && quickBookmarkButtonEnabled"
-          :title="quickBookmarkIconText"
-          :icon="quickBookmarkIcon"
-          class="quickBookmarkVideoIcon"
+          <FtRetryImage
+            :src="thumbnail"
+            class="thumbnailImage"
+            :class="{
+              blur: blurThumbnails,
+              deArrowThumbnail: appearance !== 'youtubeShort' && showDeArrowThumbnail && deArrowCache?.thumbnail != null
+            }"
+            alt=""
+          />
+          <img
+            v-if="thumbnailPreviewActive && thumbnailPreviewLoaded"
+            :src="thumbnailPreviewUrl"
+            class="thumbnailImage thumbnailPreview active loaded"
+            :class="{ blur: blurThumbnails }"
+            alt=""
+            aria-hidden="true"
+            @error="resetThumbnailPreview"
+          >
+          <FtEmbeddedProgress
+            v-if="historyEntryExists && progressPercentage > 0"
+            class="watchedProgressBar"
+            :progress="progressPercentage"
+            :corner-radius="thumbnailProgressRadius"
+            :end-arc-fraction="0.5"
+            :line-width="3"
+            :start-arc-fraction="0.5"
+          />
+        </RouterLink>
+        <div
+          v-if="isLive || isUpcoming || isStation || (displayDuration !== '' && displayDuration !== '0:00')"
+          class="videoDuration"
           :class="{
-            bookmarked: isInQuickBookmarkPlaylist,
-            alwaysVisible: alwaysShowAddToPlaylistButton,
+            live: isLive || isStation,
+            upcoming: isUpcoming
           }"
-          :theme="quickBookmarkIconTheme"
-          :padding="playlistIconPadding"
-          :size="playlistIconSize"
-          @click="toggleQuickBookmarked"
-        />
+        >
+          <FtIcon
+            v-if="isStation"
+            :icon="['fa', 'tower-broadcast']"
+            class="subscriptionIcon"
+          />
+          {{ displayDurationLabel }}
+        </div>
+        <div
+          v-if="useSponsorBlock && sponsorBlockFullVideoCategory"
+          class="sponsorBlockVideoLabel"
+          :title="t('Video.Player.SponsorBlock.FullVideoLabel', {
+            segmentCategory: sponsorBlockFullVideoLabel
+          })"
+        >
+          <FtIcon :icon="sponsorBlockFullVideoIcon" />
+          <span>{{ sponsorBlockFullVideoLabel }}</span>
+        </div>
         <FtIconButton
-          v-if="inUserPlaylist && canMoveVideoUp"
-          :title="t('User Playlists.Move Video Up')"
-          :icon="effectiveListTypeIsList ? ['fas', 'arrow-up'] : ['fas', 'arrow-left']"
-          class="upArrowIcon"
-          :padding="playlistIconPadding"
-          :size="playlistIconSize"
-          @click="moveVideoUp"
+          v-if="externalPlayer !== '' && !externalPlayerIsDefaultViewingMode"
+          :title="t('Video.External Player.OpenInTemplate', { externalPlayer })"
+          :icon="['fas', 'external-link-alt']"
+          class="externalPlayerIcon"
+          theme="base"
+          :padding="appearance === 'watchPlaylistItem' ? 6 : 7"
+          :size="appearance === 'watchPlaylistItem' ? 12 : 16"
+          draggable="true"
+          @click="handleExternalPlayer"
+          @dragstart="onDragStart"
         />
-        <FtIconButton
-          v-if="inUserPlaylist && canMoveVideoDown"
-          :title="t('User Playlists.Move Video Down')"
-          :icon="effectiveListTypeIsList ? ['fas', 'arrow-down'] : ['fas', 'arrow-right']"
-          class="downArrowIcon"
-          :padding="playlistIconPadding"
-          :size="playlistIconSize"
-          @click="moveVideoDown"
-        />
-        <FtIconButton
-          v-if="inUserPlaylist && canRemoveFromPlaylist"
-          :title="t('User Playlists.Remove from Playlist')"
-          :icon="['fas', 'trash']"
-          class="trashIcon"
-          :padding="playlistIconPadding"
-          :size="playlistIconSize"
-          @click="removeFromPlaylist"
-        />
-        <FtIconButton
-          v-if="canToggleLiveReminder"
-          :title="liveReminderActive ? t('Video.Notification on') : t('Video.Notify me')"
-          :icon="['fas', 'calendar-days']"
-          :aria-pressed="liveReminderActive"
-          :disabled="liveReminderLoading"
-          class="liveReminderIcon"
-          :theme="liveReminderActive ? 'secondary' : 'base'"
-          :padding="playlistIconPadding"
-          :size="playlistIconSize"
-          @click="toggleLiveReminder"
-        />
-      </span>
+        <span
+          class="playlistIcons"
+          :class="{ mobileThumbnailActions: useMobileThumbnailActions }"
+          draggable="true"
+          @dragstart="onDragStart"
+        >
+          <FtIconButton
+            v-if="!useMobileThumbnailActions && extraThumbnailActionButton"
+            :title="extraThumbnailActionButton.title"
+            :icon="extraThumbnailActionButton.icon"
+            class="extraThumbnailActionIcon"
+            theme="base"
+            :padding="appearance === 'watchPlaylistItem' ? 5 : 6"
+            :size="appearance === 'watchPlaylistItem' ? 14 : 18"
+            @click="handleExtraThumbnailAction"
+          />
+          <FtIconButton
+            v-if="showPlaylists"
+            :title="t('User Playlists.Add to Playlist')"
+            :icon="isInAnyPlaylist ? ['fac', 'playlist-check'] : ['fac', 'playlist-add']"
+            class="addToPlaylistIcon"
+            :class="alwaysShowAddToPlaylistButton ? 'alwaysVisible' : ''"
+            :padding="playlistIconPadding"
+            :size="playlistIconSize"
+            force-dropdown
+            mobile-sheet
+            dropdown-position-x="left"
+            :dropdown-portal="appearance === 'watchPlaylistItem'"
+            :dropdown-position-y="appearance === 'watchPlaylistItem' ? 'top' : 'bottom'"
+          >
+            <FtAddToPlaylistDropdown :video-data="addToPlaylistVideoData" />
+          </FtIconButton>
+          <FtIconButton
+            v-if="isQuickBookmarkEnabled && quickBookmarkButtonEnabled"
+            :title="quickBookmarkIconText"
+            :icon="quickBookmarkIcon"
+            class="quickBookmarkVideoIcon"
+            :class="{
+              bookmarked: isInQuickBookmarkPlaylist,
+              alwaysVisible: alwaysShowAddToPlaylistButton,
+            }"
+            :theme="quickBookmarkIconTheme"
+            :padding="playlistIconPadding"
+            :size="playlistIconSize"
+            @click="toggleQuickBookmarked"
+          />
+          <FtIconButton
+            v-if="inUserPlaylist && canMoveVideoUp"
+            :title="t('User Playlists.Move Video Up')"
+            :icon="effectiveListTypeIsList ? ['fas', 'arrow-up'] : ['fas', 'arrow-left']"
+            class="upArrowIcon"
+            :padding="playlistIconPadding"
+            :size="playlistIconSize"
+            @click="moveVideoUp"
+          />
+          <FtIconButton
+            v-if="inUserPlaylist && canMoveVideoDown"
+            :title="t('User Playlists.Move Video Down')"
+            :icon="effectiveListTypeIsList ? ['fas', 'arrow-down'] : ['fas', 'arrow-right']"
+            class="downArrowIcon"
+            :padding="playlistIconPadding"
+            :size="playlistIconSize"
+            @click="moveVideoDown"
+          />
+          <FtIconButton
+            v-if="inUserPlaylist && canRemoveFromPlaylist"
+            :title="t('User Playlists.Remove from Playlist')"
+            :icon="['fas', 'trash']"
+            class="trashIcon"
+            :padding="playlistIconPadding"
+            :size="playlistIconSize"
+            @click="removeFromPlaylist"
+          />
+          <FtIconButton
+            v-if="canToggleLiveReminder"
+            :title="liveReminderActive ? t('Video.Notification on') : t('Video.Notify me')"
+            :icon="['fas', 'calendar-days']"
+            :aria-pressed="liveReminderActive"
+            :disabled="liveReminderLoading"
+            class="liveReminderIcon"
+            :theme="liveReminderActive ? 'secondary' : 'base'"
+            :padding="playlistIconPadding"
+            :size="playlistIconSize"
+            @click="toggleLiveReminder"
+          />
+        </span>
+        <div
+          v-if="addWatchedStyle"
+          class="videoWatched"
+        >
+          {{ t("Video.Watched") }}
+        </div>
+      </div>
+
       <div
-        v-if="addWatchedStyle"
-        class="videoWatched"
+        class="info"
+        draggable="true"
+        @dragstart="onDragStart"
       >
-        {{ t("Video.Watched") }}
+        <RouterLink
+          class="title"
+          :to="watchVideoRouterLink"
+          @click="handleWatchPageLinkClick"
+          @auxclick="handleWatchPageLinkClick"
+        >
+          <h3
+            class="h3Title"
+            dir="auto"
+          >
+            <FtNewContentDot v-if="showNewSubscriptionFeedIndicator" />
+            {{ displayTitle }}
+          </h3>
+        </RouterLink>
+        <div class="infoLine">
+          <button
+            v-if="shouldShowChannelResolverButton"
+            type="button"
+            class="channelName channelResolverButton"
+            dir="auto"
+            :disabled="isFetchingCollaborators"
+            @click.stop.prevent="openChannelByline"
+          >
+            <FtChannelAvatarStack
+              v-if="showChannelAvatar"
+              :thumbnails="channelThumbnails"
+            />
+            <span class="channelNameText">{{ channelName }}</span>
+          </button>
+          <component
+            :is="disableChannelLinks ? 'span' : 'router-link'"
+            v-else-if="channelId !== null"
+            class="channelName"
+            dir="auto"
+            :to="`/channel/${channelId}`"
+            @auxclick="handleChannelLinkClick"
+          >
+            <FtChannelAvatarStack
+              v-if="showChannelAvatar"
+              :thumbnails="channelThumbnails"
+            />
+            <span class="channelNameText">{{ channelName }}</span>
+          </component>
+          <bdi
+            v-else-if="channelName !== null"
+            class="channelName"
+          >
+            <FtChannelAvatarStack
+              v-if="showChannelAvatar"
+              :thumbnails="channelThumbnails"
+            />
+            <span class="channelNameText">{{ channelName }}</span>
+          </bdi>
+          <FtInlineMetadata class="videoInfo">
+            <span
+              v-if="!isLive && !isUpcoming && !isPremium && !isStation && !hideViews && viewCount != null"
+              class="viewCount"
+            >{{ t('Global.Counts.View Count', { count: parsedViewCount }, viewCount) }}</span>
+            <span
+              v-if="displayedUploadedTime !== '' && !isLive && !isStation"
+              class="uploadedTime"
+            >{{ displayedUploadedTime }}</span>
+            <span
+              v-if="subscriptionHiddenVideoCount > 0"
+              class="subscriptionHiddenVideoCount"
+            >{{ t('Channel.More videos hidden', { count: subscriptionHiddenVideoCount }, subscriptionHiddenVideoCount) }}</span>
+            <span
+              v-if="(isLive || isStation) && !hideViews"
+              class="viewCount"
+            >{{ t('Global.Counts.Watching Count', { count: parsedViewCount }, viewCount) }}</span>
+          </FtInlineMetadata>
+        </div>
+        <FtCollaboratorsPrompt
+          v-if="showCollaboratorsPrompt"
+          :collaborators="channelCollaborators"
+          @close="showCollaboratorsPrompt = false"
+        />
+        <div
+          v-if="isMembersOnly || is4k || hasCaptions || is8k || isNew || isVr180 || isVr360 || is3D"
+          class="videoTagLine"
+        >
+          <div
+            v-if="isMembersOnly"
+            class="videoTag membersOnlyTag"
+          >
+            <FtIcon
+              :icon="['fas', 'users']"
+              aria-hidden="true"
+            />
+            {{ t('Search Listing.Label.Members Only') }}
+          </div>
+          <div
+            v-if="isNew"
+            class="videoTag"
+            :aria-label="t('Search Listing.Label.New')"
+            role="img"
+          >
+            {{ t('Search Listing.Label.New') }}
+          </div>
+          <div
+            v-if="is4k"
+            class="videoTag"
+            :aria-label="t('Search Listing.Label.4K')"
+            role="img"
+          >
+            {{ t('Search Listing.Label.4K') }}
+          </div>
+          <div
+            v-if="is8k"
+            class="videoTag"
+            :aria-label="t('Search Listing.Label.8K')"
+            role="img"
+          >
+            {{ t('Search Listing.Label.8K') }}
+          </div>
+          <div
+            v-if="isVr180"
+            class="videoTag"
+            :aria-label="t('Search Listing.Label.VR180')"
+            role="img"
+          >
+            {{ t('Search Listing.Label.VR180') }}
+          </div>
+          <div
+            v-if="isVr360"
+            class="videoTag"
+            :aria-label="t('Search Listing.Label.360 Video')"
+            role="img"
+          >
+            {{ t('Search Listing.Label.360 Video') }}
+          </div>
+          <div
+            v-if="is3D"
+            class="videoTag"
+            :aria-label="t('Search Listing.Label.3D')"
+            role="img"
+          >
+            {{ t('Search Listing.Label.3D') }}
+          </div>
+          <div
+            v-if="hasCaptions"
+            class="videoTag"
+            :aria-label="t('Search Listing.Label.Closed Captions')"
+            role="img"
+          >
+            {{ t('Search Listing.Label.Subtitles') }}
+          </div>
+        </div>
+        <div class="buttonStack">
+          <FtIconButton
+            v-if="showVideoMenuButton"
+            ref="videoMenuButton"
+            class="optionsButton"
+            :icon="['fas', 'ellipsis-v']"
+            :title="t('Video.More Options')"
+            theme="base-no-default"
+            :size="16"
+            :use-shadow="false"
+            @click="openVideoOptionsMenu"
+          />
+          <button
+            v-if="deArrowChangedContent || deArrowTogglePinned"
+            :title="deArrowToggleTitle"
+            class="optionsButton deArrowToggleButton"
+            :class="{ alwaysVisible: deArrowTogglePinned }"
+            @click="toggleDeArrow"
+          >
+            <FtIcon
+              class="deArrowToggleIcon"
+              :icon="['far', 'dot-circle']"
+            />
+          </button>
+        </div>
+        <p
+          v-if="description && effectiveListTypeIsList && appearance === 'result'"
+          v-safer-html="description"
+          class="description"
+          dir="auto"
+        />
+        <div
+          v-if="effectiveListTypeIsList"
+          class="restArea"
+        >
+        &nbsp;
+        </div>
       </div>
     </div>
     <FtAddToPlaylistDropdown
@@ -205,197 +428,6 @@
       force-sheet
       @closed="mobilePlaylistPickerOpen = false"
     />
-    <div
-      class="info"
-      draggable="true"
-      @dragstart="onDragStart"
-    >
-      <RouterLink
-        class="title"
-        :to="watchVideoRouterLink"
-        @click="handleWatchPageLinkClick"
-        @auxclick="handleWatchPageLinkClick"
-      >
-        <h3
-          class="h3Title"
-          dir="auto"
-        >
-          <FtNewContentDot v-if="showNewSubscriptionFeedIndicator" />
-          {{ displayTitle }}
-        </h3>
-      </RouterLink>
-      <div class="infoLine">
-        <button
-          v-if="shouldShowChannelResolverButton"
-          type="button"
-          class="channelName channelResolverButton"
-          dir="auto"
-          :disabled="isFetchingCollaborators"
-          @click.stop.prevent="openChannelByline"
-        >
-          <FtChannelAvatarStack
-            v-if="showChannelAvatar"
-            :thumbnails="channelThumbnails"
-          />
-          <span class="channelNameText">{{ channelName }}</span>
-        </button>
-        <component
-          :is="disableChannelLinks ? 'span' : 'router-link'"
-          v-else-if="channelId !== null"
-          class="channelName"
-          dir="auto"
-          :to="`/channel/${channelId}`"
-          @auxclick="handleChannelLinkClick"
-        >
-          <FtChannelAvatarStack
-            v-if="showChannelAvatar"
-            :thumbnails="channelThumbnails"
-          />
-          <span class="channelNameText">{{ channelName }}</span>
-        </component>
-        <bdi
-          v-else-if="channelName !== null"
-          class="channelName"
-        >
-          <FtChannelAvatarStack
-            v-if="showChannelAvatar"
-            :thumbnails="channelThumbnails"
-          />
-          <span class="channelNameText">{{ channelName }}</span>
-        </bdi>
-        <FtInlineMetadata class="videoInfo">
-          <span
-            v-if="!isLive && !isUpcoming && !isPremium && !isStation && !hideViews && viewCount != null"
-            class="viewCount"
-          >{{ t('Global.Counts.View Count', { count: parsedViewCount }, viewCount) }}</span>
-          <span
-            v-if="displayedUploadedTime !== '' && !isLive && !isStation"
-            class="uploadedTime"
-          >{{ displayedUploadedTime }}</span>
-          <span
-            v-if="subscriptionHiddenVideoCount > 0"
-            class="subscriptionHiddenVideoCount"
-          >{{ t('Channel.More videos hidden', { count: subscriptionHiddenVideoCount }, subscriptionHiddenVideoCount) }}</span>
-          <span
-            v-if="(isLive || isStation) && !hideViews"
-            class="viewCount"
-          >{{ t('Global.Counts.Watching Count', { count: parsedViewCount }, viewCount) }}</span>
-        </FtInlineMetadata>
-      </div>
-      <FtCollaboratorsPrompt
-        v-if="showCollaboratorsPrompt"
-        :collaborators="channelCollaborators"
-        @close="showCollaboratorsPrompt = false"
-      />
-      <div
-        v-if="isMembersOnly || is4k || hasCaptions || is8k || isNew || isVr180 || isVr360 || is3D"
-        class="videoTagLine"
-      >
-        <div
-          v-if="isMembersOnly"
-          class="videoTag membersOnlyTag"
-        >
-          <FtIcon
-            :icon="['fas', 'users']"
-            aria-hidden="true"
-          />
-          {{ t('Search Listing.Label.Members Only') }}
-        </div>
-        <div
-          v-if="isNew"
-          class="videoTag"
-          :aria-label="t('Search Listing.Label.New')"
-          role="img"
-        >
-          {{ t('Search Listing.Label.New') }}
-        </div>
-        <div
-          v-if="is4k"
-          class="videoTag"
-          :aria-label="t('Search Listing.Label.4K')"
-          role="img"
-        >
-          {{ t('Search Listing.Label.4K') }}
-        </div>
-        <div
-          v-if="is8k"
-          class="videoTag"
-          :aria-label="t('Search Listing.Label.8K')"
-          role="img"
-        >
-          {{ t('Search Listing.Label.8K') }}
-        </div>
-        <div
-          v-if="isVr180"
-          class="videoTag"
-          :aria-label="t('Search Listing.Label.VR180')"
-          role="img"
-        >
-          {{ t('Search Listing.Label.VR180') }}
-        </div>
-        <div
-          v-if="isVr360"
-          class="videoTag"
-          :aria-label="t('Search Listing.Label.360 Video')"
-          role="img"
-        >
-          {{ t('Search Listing.Label.360 Video') }}
-        </div>
-        <div
-          v-if="is3D"
-          class="videoTag"
-          :aria-label="t('Search Listing.Label.3D')"
-          role="img"
-        >
-          {{ t('Search Listing.Label.3D') }}
-        </div>
-        <div
-          v-if="hasCaptions"
-          class="videoTag"
-          :aria-label="t('Search Listing.Label.Closed Captions')"
-          role="img"
-        >
-          {{ t('Search Listing.Label.Subtitles') }}
-        </div>
-      </div>
-      <div class="buttonStack">
-        <FtIconButton
-          v-if="showVideoMenuButton"
-          ref="videoMenuButton"
-          class="optionsButton"
-          :icon="['fas', 'ellipsis-v']"
-          :title="t('Video.More Options')"
-          theme="base-no-default"
-          :size="16"
-          :use-shadow="false"
-          @click="openVideoOptionsMenu"
-        />
-        <button
-          v-if="deArrowChangedContent || deArrowTogglePinned"
-          :title="deArrowToggleTitle"
-          class="optionsButton deArrowToggleButton"
-          :class="{ alwaysVisible: deArrowTogglePinned }"
-          @click="toggleDeArrow"
-        >
-          <FtIcon
-            class="deArrowToggleIcon"
-            :icon="['far', 'dot-circle']"
-          />
-        </button>
-      </div>
-      <p
-        v-if="description && effectiveListTypeIsList && appearance === 'result'"
-        v-safer-html="description"
-        class="description"
-        dir="auto"
-      />
-      <div
-        v-if="effectiveListTypeIsList"
-        class="restArea"
-      >
-        &nbsp;
-      </div>
-    </div>
     <WatchVideoDownloadPrompt
       v-if="enableDownloads && showDownloadPrompt"
       :video-id="id"
@@ -409,6 +441,9 @@
 <script setup>
 import { getSyncServerDeviceIcon } from '../../helpers/sync-server-sessions'
 import FtInlineMetadata from '../FtInlineMetadata/FtInlineMetadata.vue'
+import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
+import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
+import { useThumbnailSwipe } from '../../composables/useThumbnailSwipe'
 import { useContextMenuHold } from '../../composables/useContextMenuHold'
 import { lightHaptic } from '../../helpers/mobileHaptics'
 import { PHONE_LAYOUT_QUERY, usePhoneLayout } from '../../composables/usePhoneLayout'
@@ -1281,6 +1316,7 @@ const videoContextMenuItems = computed(() => {
   if (process.env.IS_CAPACITOR) {
     rows.push({
       label: t('Share.Share Link'),
+      actionId: 'share',
       icon: ['fas', 'share-alt'],
       enabled: true,
       run: () => shareLink(getYoutubeVideoShareUrl(id.value, playlistSharable.value ? playlistIdFinal.value : ''))
@@ -1313,6 +1349,7 @@ const mobileThumbnailActions = computed(() => {
   if (showPlaylists.value) {
     actions.push({
       label: t('User Playlists.Add to Playlist'),
+      actionId: 'addToPlaylist',
       icon: isInAnyPlaylist.value ? ['fac', 'playlist-check'] : ['fac', 'playlist-add'],
       run: () => { mobilePlaylistPickerOpen.value = true }
     })
@@ -1320,6 +1357,7 @@ const mobileThumbnailActions = computed(() => {
   if (isQuickBookmarkEnabled.value && props.quickBookmarkButtonEnabled) {
     actions.push({
       label: quickBookmarkIconText.value,
+      actionId: 'quickBookmark',
       icon: quickBookmarkIcon.value,
       pressed: isInQuickBookmarkPlaylist.value,
       run: toggleQuickBookmarked
@@ -1340,7 +1378,7 @@ const mobileThumbnailActions = computed(() => {
     })
   }
   if (inUserPlaylist.value && props.canRemoveFromPlaylist) {
-    actions.push({ label: t('User Playlists.Remove from Playlist'), icon: ['fas', 'trash'], run: removeFromPlaylist })
+    actions.push({ label: t('User Playlists.Remove from Playlist'), actionId: 'removeFromPlaylist', icon: ['fas', 'trash'], run: removeFromPlaylist })
   }
   if (canToggleLiveReminder.value) {
     actions.push({
@@ -1357,6 +1395,37 @@ const mobileThumbnailActions = computed(() => {
 const openMobileContextActions = inject('openMobileContextActions')
 
 const { startMenuHold, moveMenuHold, cancelMenuHold, suppressMenuHoldClick } = useContextMenuHold(openVideoContextMenu)
+
+function getThumbnailSwipeAction(direction) {
+  let actionId = direction === 'left'
+    ? store.getters.getThumbnailLeftSwipeAction
+    : store.getters.getThumbnailRightSwipeAction
+  if (actionId === 'disabled') return null
+  if (actionId === 'addToPlaylist' && inUserPlaylist.value && props.canRemoveFromPlaylist) {
+    actionId = 'removeFromPlaylist'
+  }
+  const action = [...mobileThumbnailActions.value, ...videoContextMenuItems.value]
+    .flatMap(item => item.submenu ?? item)
+    .find(item => item.actionId === actionId)
+  return action?.enabled !== false && action?.run ? action : null
+}
+
+const {
+  enabled: thumbnailSwipeEnabled, swipe: thumbnailSwipe,
+  startSwipe: startThumbnailSwipe, moveSwipe: moveThumbnailSwipe,
+  finishSwipe: finishThumbnailSwipe, abortSwipe: abortThumbnailSwipe, cancelSwipe: cancelThumbnailSwipe,
+} = useThumbnailSwipe({
+  getAction: getThumbnailSwipeAction,
+  cancelHold: cancelMenuHold,
+  suppressClick: suppressMenuHoldClick,
+  getSettleDuration: () => isReducedMotionEnabled() ? 0 : 200 / getAnimationSpeedMultiplier(store.getters.getAnimationSpeed),
+  onCommit: action => {
+    lightHaptic()
+    action.run()
+  },
+})
+
+watch([id, () => store.getters.getThumbnailLeftSwipeAction, () => store.getters.getThumbnailRightSwipeAction], cancelThumbnailSwipe)
 
 onBeforeUnmount(() => {
   window.dispatchEvent(new CustomEvent('opentubex:close-context-menu', { detail: videoContextMenuItems }))
@@ -1385,6 +1454,7 @@ function openVideoOptionsMenu() {
 }
 
 function openVideoContextMenu(event) {
+  cancelThumbnailSwipe()
   const target = event.target
   // Channel names, dialogs, and dropdowns keep their own context menus.
   if (target.closest('.channelName, [role="dialog"], [role="menu"], .iconDropdown')) return
