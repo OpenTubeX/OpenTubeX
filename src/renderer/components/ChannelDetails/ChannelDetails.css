@@ -113,9 +113,17 @@
   position: relative;
   display: flex;
   flex-wrap: nowrap;
-  flex: 0 1 66%;
+  flex: 1 1 66%;
   min-inline-size: 0;
-  overflow-inline: clip;
+  overflow: auto hidden;
+}
+
+.tabsContent {
+  position: relative;
+  display: flex;
+  flex: none;
+  inline-size: max-content;
+  min-inline-size: 100%;
 }
 
 .tabsIndicator {
@@ -144,8 +152,7 @@
   justify-content: center;
   position: relative;
   box-sizing: border-box;
-  flex: 0 1 auto;
-  min-inline-size: 0;
+  flex: none;
   gap: 6px;
   padding-block: 15px;
   padding-inline: 15px;
@@ -161,6 +168,10 @@
 .channelTabIcon {
   flex: none;
   font-size: 16px;
+}
+
+.hideTabIcons .channelTabIcon {
+  display: none;
 }
 
 .tab::before {
@@ -185,10 +196,6 @@
 
 .tabLabel {
   display: inline-grid;
-  grid-template-columns: minmax(0, 1fr);
-  min-inline-size: 0;
-  max-inline-size: 100%;
-  overflow: hidden;
   white-space: nowrap;
 }
 
@@ -201,8 +208,6 @@
 
 .tabLabel > span {
   grid-area: 1 / 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .selectedTab {
@@ -244,7 +249,7 @@
   }
 
   .tab {
-    flex: 1 1 0%;
+    flex: 1 0 auto;
     min-block-size: 48px;
     padding-block: 4px;
     padding-inline: 4px;
