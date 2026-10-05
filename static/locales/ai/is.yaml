@@ -361,6 +361,7 @@ Settings:
     Invalid Engine: Sláðu inn heiti og gilda HTTP- eða HTTPS-leitarslóð sem inniheldur %s.
     Engine Limit: Þú getur bætt við allt að {count} sérsniðnum leitarvélum.
   Theme Settings:
+    Compact Mobile Mini Player: "Þéttur smáspilari í farsíma"
     Always Show Mobile Search Bar: "Sýna alltaf leitarstikuna í síma"
     Frosted Glass Player UI: "Viðmót spilara með mattgleráhrifum"
     Main Color Theme:
@@ -1340,6 +1341,8 @@ Video:
     Hide: Fela
     Show: Sýna
     Scroll Mini Player:
+      Collapse Controls: "Fella saman stýringar"
+      Expand Controls: "Stækka stýringar"
       Back to Top: Efst á síðu
       Return to Video Tab: Til baka á myndbandsflipa
       Hide: Fela smáspilara

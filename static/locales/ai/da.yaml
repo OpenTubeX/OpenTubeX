@@ -371,6 +371,7 @@ Settings:
     Invalid Engine: Angiv et navn og en gyldig HTTP- eller HTTPS-søge-URL, der indeholder %s.
     Engine Limit: Du kan tilføje op til {count} brugerdefinerede søgemaskiner.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompakt mobil miniafspiller"
     Always Show Mobile Search Bar: "Vis altid søgefeltet på mobilen"
     Frosted Glass Player UI: "Afspillergrænseflade med matteret glas"
     Move Downloads to App Header: Flyt Downloads til appens toplinje
@@ -1386,6 +1387,8 @@ Video:
     Hide: Skjul
     Show: Vis
     Scroll Mini Player:
+      Collapse Controls: "Skjul betjening"
+      Expand Controls: "Udvid betjening"
       Back to Top: Tilbage til toppen
       Return to Video Tab: Gå tilbage til videofanen
       Hide: Skjul miniafspilleren

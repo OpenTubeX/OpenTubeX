@@ -22,7 +22,7 @@ export function mobileMiniPlayerReturnPoint(element, region) {
           ? bar.left + (region === 'bottom padding' ? 8 : 1)
           : region === 'right edge' ? bar.right - 1 : details.left + details.width / 2,
     y: region === 'top padding'
-      ? bar.top + 2
+      ? bar.top + 20
       : region === 'bottom padding'
         ? bar.bottom - 8
         : ['title', 'uploader'].includes(region) ? label.top + label.height / 2 : bar.top + bar.height / 2

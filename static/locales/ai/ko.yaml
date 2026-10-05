@@ -456,6 +456,7 @@ Settings:
     Invalid Engine: 이름과 %s을(를) 포함하는 올바른 HTTP 또는 HTTPS 검색 URL을 입력하세요.
     Engine Limit: 사용자 지정 검색 엔진은 최대 {count}개까지 추가할 수 있습니다.
   Theme Settings:
+    Compact Mobile Mini Player: "간결한 모바일 미니 플레이어"
     Always Show Mobile Search Bar: "모바일 검색창 항상 표시"
     Frosted Glass Player UI: "반투명 유리 효과 플레이어 UI"
     Move Downloads to App Header: 다운로드를 앱 헤더로 이동
@@ -1664,6 +1665,8 @@ Video:
     You appear to be offline: 오프라인 상태인 것 같습니다.
     Playback will resume automatically when your connection comes back: 연결이 복구되면 자동으로 재생을 계속합니다.
     Scroll Mini Player:
+      Collapse Controls: "컨트롤 접기"
+      Expand Controls: "컨트롤 펼치기"
       Back to Top: 맨 위로
       Return to Video Tab: 동영상 탭으로 돌아가기
       Hide: 미니 플레이어 숨기기

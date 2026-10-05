@@ -359,6 +359,7 @@ Settings:
     Invalid Engine: Adjon meg egy nevet és egy érvényes, %s elemet tartalmazó HTTP vagy HTTPS keresési URL-t.
     Engine Limit: Legfeljebb {count} egyéni keresőmotort adhat hozzá.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompakt mobil minilejátszó"
     Always Show Mobile Search Bar: "A mobilos keresősáv mindig látható"
     Frosted Glass Player UI: "Deres üveg hatású lejátszófelület"
     Main Color Theme:
@@ -1322,6 +1323,8 @@ Video:
     Hide: Elrejtés
     Show: Megjelenítés
     Scroll Mini Player:
+      Collapse Controls: "Vezérlők összecsukása"
+      Expand Controls: "Vezérlők kibontása"
       Back to Top: Vissza a tetejére
       Return to Video Tab: Vissza a videó lapjára
       Hide: Mini lejátszó elrejtése

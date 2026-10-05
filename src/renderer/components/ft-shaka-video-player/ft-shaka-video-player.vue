@@ -80,6 +80,8 @@
         musicAudioPlayer: audioPlayerMode,
         scrollMiniPlayer: scrollMiniPlayerActive,
         mobileMiniBar: mobileMiniBar && (scrollMiniPlayerActive || scrollMiniPlayerAnimating),
+        mobileMiniBarCollapsed,
+        mobileMiniBarCompact: compactMobileMiniPlayer,
         scrollMiniPlayerStashed,
         scrollMiniPlayerStashedRight: scrollMiniPlayerStashedSide === 'right',
         scrollMiniPlayerAnimating,
@@ -1384,6 +1386,8 @@
           :class="{
             mobileMiniBarMorphOverlay: scrollMiniPlayerDragStyle || scrollMiniPlayerAnimating,
             mobileMiniBarDismissible: mobileMiniBarCanDismiss,
+            mobileMiniBarCompact: compactMobileMiniPlayer,
+            mobileMiniBarCollapsed,
             mobileMiniBarRestoring: scrollMiniPlayerDragStyle
               ? scrollMiniPlayerActive
               : scrollMiniPlayerAnimating && !scrollMiniPlayerActive
@@ -1392,9 +1396,32 @@
         >
           <div
             class="mobileMiniBarProgress"
-            aria-hidden="true"
           >
-            <div :style="{ transform: `scaleX(${mobileMiniBarProgress})` }" />
+            <div
+              aria-hidden="true"
+              :style="{ transform: `scaleX(${mobileMiniBarProgress})` }"
+            />
+            <input
+              v-if="scrollMiniPlayerActive"
+              class="mobileMiniBarSeek"
+              :class="{ mobileMiniBarSeeking }"
+              type="range"
+              min="0"
+              max="100"
+              step="0.1"
+              :value="mobileMiniBarProgress * 100"
+              :disabled="mobileMiniBarSeekDisabled"
+              :aria-label="mobileMiniBarSeekLabel"
+              :aria-valuetext="mobileMiniBarSeekValueText"
+              @input="handleMobileMiniBarSeekInput"
+              @pointerdown.stop="startMobileMiniBarSeek"
+              @pointerup="mobileMiniBarSeeking = false"
+              @pointercancel="mobileMiniBarSeeking = false"
+              @lostpointercapture="mobileMiniBarSeeking = false"
+              @blur="mobileMiniBarSeeking = false"
+              @keydown.stop
+              @click.stop
+            >
           </div>
           <button
             v-if="scrollMiniPlayerActive"
@@ -1416,6 +1443,23 @@
             </span>
           </div>
           <button
+            v-if="compactMobileMiniPlayer"
+            type="button"
+            class="mobileMiniBarExpand"
+            :disabled="mobileMiniBarControlsDisabled"
+            :aria-label="mobileMiniBarExpanded ? $t('Video.Player.Scroll Mini Player.Collapse Controls') : $t('Video.Player.Scroll Mini Player.Expand Controls')"
+            :aria-expanded="mobileMiniBarExpanded"
+            @pointerdown.stop
+            @keydown.stop
+            @click.stop.prevent="mobileMiniBarExpanded = !mobileMiniBarExpanded"
+          >
+            <ft-icon
+              :icon="['fas', 'angle-up']"
+              class="mobileMiniBarChevron"
+              aria-hidden="true"
+            />
+          </button>
+          <button
             v-if="mobileMiniBarCanDismiss"
             type="button"
             class="mobileMiniBarDismiss"
@@ -1434,7 +1478,7 @@
             @keydown.stop
           >
             <button
-              v-if="canSkipPrevious"
+              v-if="!mobileMiniBarCollapsed && canSkipPrevious"
               type="button"
               :disabled="mobileMiniBarControlsDisabled"
               :aria-label="$t('Video.Previous')"
@@ -1446,6 +1490,7 @@
               />
             </button>
             <button
+              v-if="!mobileMiniBarCollapsed"
               type="button"
               :disabled="mobileMiniBarSeekDisabled"
               :aria-label="$t('Video.Player.Scroll Mini Player.Rewind 10 seconds')"
@@ -1469,6 +1514,7 @@
               />
             </button>
             <button
+              v-if="!mobileMiniBarCollapsed"
               type="button"
               :disabled="mobileMiniBarSeekDisabled"
               :aria-label="$t('Video.Player.Scroll Mini Player.Forward 10 seconds')"
@@ -1480,7 +1526,7 @@
               />
             </button>
             <button
-              v-if="canSkipNext"
+              v-if="!mobileMiniBarCollapsed && canSkipNext"
               type="button"
               :disabled="mobileMiniBarControlsDisabled"
               :aria-label="$t('Video.Next')"

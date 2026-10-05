@@ -147,6 +147,7 @@ Settings:
     Startup Behavior:
       Load landing page, keep other tabs unloaded: Wczytaj stronę startową, pozostaw inne karty niewczytane
   Theme Settings:
+    Compact Mobile Mini Player: "Kompaktowy mobilny miniodtwarzacz"
     Always Show Mobile Search Bar: "Zawsze pokazuj pasek wyszukiwania na telefonie"
     Frosted Glass Player UI: "Interfejs odtwarzacza z efektem matowego szkła"
     Main Color Theme:
@@ -733,6 +734,8 @@ Video:
       'Off': 'Wyłączone'
     Auto-generated Caption Template: '{language} (wygenerowane automatycznie)'
     Scroll Mini Player:
+      Collapse Controls: "Zwiń sterowanie"
+      Expand Controls: "Rozwiń sterowanie"
       Return to Video Tab: Wróć do karty filmu
       Hide: Ukryj miniodtwarzacz
       Rewind 10 seconds: Przewiń o 10 sekund do tyłu

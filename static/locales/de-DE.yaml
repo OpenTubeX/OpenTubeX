@@ -480,6 +480,7 @@ Settings:
       Previous tab in tab order: "Vorheriger Tab in der Tab-Reihenfolge"
       Tab Close Focus: Nach dem Schließen des aktiven Tabs
   Theme Settings:
+    Compact Mobile Mini Player: "Kompakter mobiler Mini-Player"
     Always Show Mobile Search Bar: "Mobile Suchleiste immer anzeigen"
     Theme Settings: Farbschema
     Match Top Bar with Main Color: Obere Leiste an Hauptfarbe anpassen
@@ -2057,6 +2058,8 @@ Video:
     Autoplay is off: Automatische Wiedergabe ist ausgeschaltet
     Autoplay is on: Automatische Wiedergabe ist eingeschaltet
     Scroll Mini Player:
+      Collapse Controls: "Steuerung einklappen"
+      Expand Controls: "Steuerung ausklappen"
       Back to Top: Zurück nach oben
       Return to Video Tab: Zum Video-Tab zurückkehren
       Hide: Mini-Player ausblenden

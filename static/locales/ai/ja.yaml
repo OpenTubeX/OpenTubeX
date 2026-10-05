@@ -359,6 +359,7 @@ Settings:
     Invalid Engine: 名前と、%sを含む有効なHTTPまたはHTTPSの検索URLを入力してください。
     Engine Limit: カスタム検索エンジンは{count}件まで追加できます。
   Theme Settings:
+    Compact Mobile Mini Player: "モバイルのミニプレーヤーをコンパクトに表示"
     Always Show Mobile Search Bar: "モバイルの検索バーを常に表示"
     Frosted Glass Player UI: "すりガラス風のプレーヤー UI"
     Main Color Theme:
@@ -1322,6 +1323,8 @@ Video:
     Hide: 非表示
     Show: 表示
     Scroll Mini Player:
+      Collapse Controls: "操作ボタンを折りたたむ"
+      Expand Controls: "操作ボタンを展開"
       Back to Top: 先頭へ戻る
       Return to Video Tab: 動画タブに戻る
       Hide: ミニプレーヤーを非表示

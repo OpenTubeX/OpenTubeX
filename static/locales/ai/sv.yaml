@@ -361,6 +361,7 @@ Settings:
     Invalid Engine: Ange ett namn och en giltig HTTP- eller HTTPS-söknings-URL som innehåller %s.
     Engine Limit: Du kan lägga till högst {count} egna sökmotorer.
   Theme Settings:
+    Compact Mobile Mini Player: "Kompakt mobil minispelare"
     Always Show Mobile Search Bar: "Visa alltid sökfältet på mobilen"
     Frosted Glass Player UI: "Spelargränssnitt med frostat glas"
     Main Color Theme:
@@ -1332,6 +1333,8 @@ Video:
     Hide: Dölj
     Show: Visa
     Scroll Mini Player:
+      Collapse Controls: "Dölj kontroller"
+      Expand Controls: "Visa kontroller"
       Back to Top: Tillbaka högst upp
       Return to Video Tab: Gå tillbaka till videofliken
       Hide: Dölj minispelare

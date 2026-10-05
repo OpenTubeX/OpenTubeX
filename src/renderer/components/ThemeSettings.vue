@@ -161,6 +161,14 @@
       <div class="switchColumn">
         <FtToggleSwitch
           v-if="IS_CAPACITOR"
+          :label="t('Settings.Theme Settings.Compact Mobile Mini Player')"
+          compact
+          :default-value="compactMobileMiniPlayer"
+          setting-key="compactMobileMiniPlayer"
+          @change="store.dispatch('updateCompactMobileMiniPlayer', $event)"
+        />
+        <FtToggleSwitch
+          v-if="IS_CAPACITOR"
           :label="$t('Settings.Theme Settings.Always Show Mobile Search Bar')"
           compact
           :default-value="alwaysShowMobileSearchBar"
@@ -477,6 +485,7 @@ const { locale, t } = useI18n()
 const IS_IOS = !!process.env.IS_IOS
 const IS_CAPACITOR = !!process.env.IS_CAPACITOR
 const CAPACITOR_LAYOUT_MODE_VALUES = ['auto', 'phone', 'tablet']
+const compactMobileMiniPlayer = computed(() => store.getters.getCompactMobileMiniPlayer)
 const capacitorLayoutMode = computed(() => store.getters.getCapacitorLayoutMode)
 const useFrostedGlassPlayerUi = computed(() => store.getters.getUseFrostedGlassPlayerUi)
 const capacitorLayoutModeNames = computed(() => [

@@ -381,6 +381,7 @@ Settings:
     Invalid Engine: Ingresá un nombre y una URL de búsqueda HTTP o HTTPS válida que contenga %s.
     Engine Limit: Podés agregar hasta {count} motores de búsqueda personalizados.
   Theme Settings:
+    Compact Mobile Mini Player: "Minirreproductor móvil compacto"
     Always Show Mobile Search Bar: "Mostrar siempre la barra de búsqueda en el móvil"
     Frosted Glass Player UI: "Interfaz del reproductor con efecto de vidrio esmerilado"
     Move Downloads to App Header: Mover Descargas al encabezado de la aplicación
@@ -1686,6 +1687,8 @@ Video:
     You appear to be offline: Parece que no tenés conexión.
     Playback will resume automatically when your connection comes back: La reproducción se reanudará automáticamente cuando se restablezca la conexión.
     Scroll Mini Player:
+      Collapse Controls: "Contraer controles"
+      Expand Controls: "Expandir controles"
       Back to Top: Volver arriba
       Return to Video Tab: Volver a la pestaña del video
       Hide: Ocultar minirreproductor

@@ -377,6 +377,7 @@ Settings:
     Invalid Engine: نام و یک نشانی معتبر جست‌وجوی HTTP یا HTTPS حاوی %s وارد کنید.
     Engine Limit: می‌توانید حداکثر {count} موتور جست‌وجوی سفارشی بیفزایید.
   Theme Settings:
+    Compact Mobile Mini Player: "پخش‌کننده کوچک و فشرده موبایل"
     Always Show Mobile Search Bar: "نوار جستجوی موبایل همیشه نمایش داده شود"
     Frosted Glass Player UI: "رابط پخش‌کننده با جلوه شیشه مات"
     Move Downloads to App Header: انتقال بارگیری‌ها به سربرگ برنامه
@@ -1392,6 +1393,8 @@ Video:
     Hide: پنهان کردن
     Show: نمایش
     Scroll Mini Player:
+      Collapse Controls: "جمع کردن کنترل‌ها"
+      Expand Controls: "باز کردن کنترل‌ها"
       Back to Top: بازگشت به بالا
       Return to Video Tab: بازگشت به زبانهٔ ویدیو
       Hide: پنهان‌کردن پخش‌کنندهٔ کوچک

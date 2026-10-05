@@ -3,6 +3,8 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { test, expect, setPlayerFullscreen, setWindowSize } from '../../helpers/app.mjs'
 import { findWatchComponent, mobileMiniPlayerRegions, mobileMiniPlayerReturnPoint, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage, watchHistoryEntry, watchViewHandle } from '../../helpers/watch.mjs'
+import { checkCompactMiniPlayer } from '../../helpers/compact-mini-player.mjs'
+import { checkMiniPlayerSeeking } from '../../helpers/mini-player-seeking.mjs'
 import { routeDemoMedia } from '../../helpers/media.mjs'
 import { mobileMiniPlayerBackdrop, resetMiniPlayerWork, stopTrackingMiniPlayerWork, trackMiniPlayerWork } from '../../helpers/mini-player-performance.mjs'
 
@@ -1365,5 +1367,97 @@ for (const uiScale of [100, 125, 150]) {
     await player.locator('.mobileMiniBarReturn').click({ position: { x: 60, y: 30 } })
     await expect(player).not.toHaveClass(/scrollMiniPlayer/)
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
+  })
+}
+
+for (const { uiScale, size } of [
+  { uiScale: 100, size: { width: 375, height: 800 } },
+  { uiScale: 125, size: { width: 375, height: 800 } },
+  { uiScale: 150, size: { width: 375, height: 800 } },
+  { uiScale: 100, size: { width: 850, height: 480 } },
+]) {
+  test(`compact mobile strip expands controls and restores playback at ${uiScale}% in ${size.width}px`, async ({ app, page }, testInfo) => {
+    const player = await openMobilePlayer(app, page)
+    await page.evaluate(scale => {
+      window.ftElectron.setZoomFactor(scale / 100)
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setCompactMobileMiniPlayer', true)
+      store.commit('setKeepPlayingOnNavigation', true)
+      const spacer = document.createElement('div')
+      spacer.style.height = '2000px'
+      document.body.append(spacer)
+    }, uiScale)
+    const watch = await watchViewHandle(page)
+    await setWindowSize(app, page, size)
+    await page.evaluate(async width => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateIconPack', width === 375 ? 'material' : 'remix')
+      await store.dispatch('updateReducedMotion', width === 375 ? 'off' : 'on')
+    }, size.width)
+    await page.evaluate(() => window.scrollTo(0, 1200))
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+    await checkCompactMiniPlayer(page, player, async state => {
+      await testInfo.attach(`${state}-${size.width}`, { body: await player.screenshot(), contentType: 'image/png' })
+    }, async () => {
+      // The desktop build can retain its desktop docking rectangle when the
+      // simulated mobile classes change during navigation. Android tests
+      // cover the real docking geometry; provide that geometry for CSS here.
+      await player.evaluate(() => {
+        const nav = document.querySelector('.app > .sideNav').getBoundingClientRect()
+        const left = window.innerWidth > 680 ? Math.max(0, nav.right) : 0
+        let style = document.querySelector('#compact-mini-player-test-layout')
+        if (!style) {
+          style = document.createElement('style')
+          style.id = 'compact-mini-player-test-layout'
+          document.head.append(style)
+        }
+        style.textContent = `
+          .ftVideoPlayer.scrollMiniPlayer.mobileMiniBar {
+            left: ${left}px !important;
+            width: ${window.innerWidth - left}px !important;
+            height: 112px !important;
+          }
+          .ftVideoPlayer.scrollMiniPlayer.mobileMiniBarCollapsed { height: 64px !important; }
+        `
+      })
+    })
+    await page.evaluate(() => window.scrollTo(0, 1200))
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect(player).not.toHaveClass(/scrollMiniPlayerAnimating/)
+    const seekSession = await page.context().newCDPSession(page)
+    try {
+      await checkMiniPlayerSeeking(page, player, (type, point) => seekSession.send('Input.dispatchTouchEvent', {
+        type, touchPoints: point ? [point] : []
+      }))
+    } finally {
+      await seekSession.detach()
+    }
+    await player.locator('.mobileMiniBarExpand').click()
+    await expect(player.locator('.mobileMiniBarExpand')).toHaveAttribute('aria-expanded', 'true')
+    await watch.evaluate(async vm => {
+      vm.playlistId = 'mini-bar-playlist'
+      vm.playlistType = 'user'
+      vm.watchingPlaylist = true
+      window.compactMiniBarSkips = []
+      vm.handleSkipToPrev = () => window.compactMiniBarSkips.push('previous')
+      vm.handleSkipToNext = () => window.compactMiniBarSkips.push('next')
+      await vm.$nextTick()
+    })
+    const controls = player.locator('.mobileMiniBarPlayback')
+    await expect(controls.getByRole('button')).toHaveCount(5)
+    await controls.getByRole('button', { name: 'Previous', exact: true }).click()
+    await controls.getByRole('button', { name: 'Next', exact: true }).click()
+    expect(await page.evaluate(() => window.compactMiniBarSkips)).toEqual(['previous', 'next'])
+    await player.locator('.mobileMiniBarExpand').click()
+    await expect(controls.getByRole('button')).toHaveCount(1)
+    await player.locator('.mobileMiniBarExpand').click()
+    await page.evaluate(() => document.querySelector('#app').__vue_app__.config.globalProperties.$store.commit('setCompactMobileMiniPlayer', false))
+    await expect(player.locator('.mobileMiniBarExpand')).toHaveCount(0)
+    await expect(player.locator('.mobileMiniBarUploader')).toBeVisible()
+    await player.locator('.mobileMiniBarReturn').click({ position: { x: 60, y: 30 } })
+    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
+    await watch.dispose()
   })
 }
