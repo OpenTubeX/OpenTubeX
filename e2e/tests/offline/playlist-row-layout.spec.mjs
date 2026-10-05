@@ -22,6 +22,16 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
     test.use({
       seed: {
         settings: { uiScale, userPlaylistSortOrder, playlistViewType: 'list', quickBookmarkTargetPlaylistId: 'bookmarks', baseTheme: 'system', systemDarkTheme: 'dark', systemLightTheme: 'light' },
+        history: [{
+          _id: 'layout00001',
+          videoId: 'layout00001',
+          title: fixtureTitles[1],
+          author: 'Test channel',
+          authorId: 'UC-test-channel-id',
+          isWatched: true,
+          watchProgress: 120,
+          timeWatched: Date.now()
+        }],
         playlists: [{
           _id: 'row-layout',
           playlistName: 'Playlist row layout',
@@ -102,7 +112,7 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
 
       const thumbnail = rows.first().locator('.videoThumbnail')
       const originalWidth = (await thumbnail.boundingBox()).width
-      await setThumbnailSize(page, 110)
+      await setThumbnailSize(page, 130)
       await expect.poll(async () => (await thumbnail.boundingBox()).width).toBeGreaterThan(originalWidth)
     })
 
@@ -112,6 +122,16 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
         await page.getByRole('link', { name: 'Playlist row layout', exact: true }).click()
         await setThumbnailSize(page, 60)
         const thumbnail = page.locator('.playlistItem .videoThumbnail').nth(1)
+        await expect(thumbnail.locator('.videoWatched')).toBeVisible()
+        // Reuse the scoped badge fixture pattern from the watch-playlist tests.
+        await thumbnail.evaluate(element => {
+          const label = element.querySelector('.videoDuration').cloneNode(false)
+          label.className = 'sponsorBlockVideoLabel'
+          label.textContent = 'Self-Promotion'
+          element.append(label)
+        })
+        const badges = thumbnail.locator('.videoDuration, .videoWatched, .sponsorBlockVideoLabel')
+        await expect(badges).toHaveCount(3)
         const actions = thumbnail.locator('.playlistIcons')
         const buttons = actions.locator('button')
         for (const theme of ['dark', 'light']) {
@@ -133,7 +153,6 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
             await expect(buttons).toHaveCount(5)
             await expect(async () => {
               const bounds = await thumbnail.boundingBox()
-              const duration = await thumbnail.locator('.videoDuration').boundingBox()
               for (const button of await buttons.all()) {
                 await expect(button).toBeVisible()
                 const action = await button.boundingBox()
@@ -143,11 +162,15 @@ for (const [uiScale, userPlaylistSortOrder] of [[100, 'date_added_descending'], 
                 expect(action.y).toBeGreaterThanOrEqual(bounds.y - 1)
                 expect(action.x + action.width).toBeLessThanOrEqual(bounds.x + bounds.width + 1)
                 expect(action.y + action.height).toBeLessThanOrEqual(bounds.y + bounds.height + 1)
-                const separateFromDuration = action.x + action.width <= duration.x + 1 ||
-                  duration.x + duration.width <= action.x + 1 ||
-                  action.y + action.height <= duration.y + 1 ||
-                  duration.y + duration.height <= action.y + 1
-                expect(separateFromDuration).toBe(true)
+                for (const badge of await badges.all()) {
+                  await expect(badge).toBeVisible()
+                  const overlay = await badge.boundingBox()
+                  const separateFromBadge = action.x + action.width <= overlay.x + 1 ||
+                    overlay.x + overlay.width <= action.x + 1 ||
+                    action.y + action.height <= overlay.y + 1 ||
+                    overlay.y + overlay.height <= action.y + 1
+                  expect(separateFromBadge).toBe(true)
+                }
               }
             }).toPass({ timeout: 15_000 })
           }

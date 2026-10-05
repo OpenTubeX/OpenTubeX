@@ -141,13 +141,13 @@
     object-fit: cover;
   }
 
-  // Leave room for desktop actions above the thumbnail's bottom badges.
+  // Fit up to seven desktop actions between stacked top badges and bottom overlays.
   :deep(.ft-list-item.list .videoThumbnail:has(.playlistIcons:not(.mobileThumbnailActions))) {
-    min-inline-size: 176px;
+    min-inline-size: 248px;
 
     .thumbnailLink,
     .thumbnailImage {
-      min-inline-size: 176px;
+      min-inline-size: 248px;
     }
   }
 
@@ -157,7 +157,7 @@
     gap: 4px;
     max-inline-size: calc(100% - 8px);
     margin-inline: 4px;
-    margin-block-start: 4px;
+    margin-block-start: 56px;
   }
 
   :deep(.ft-list-item .info) {
